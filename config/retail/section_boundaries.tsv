@@ -1,0 +1,4 @@
+# Inferred retail load-image section transitions, not EXE section metadata.
+# A boundary lies between last_left_end and first_right_start (inclusive).
+# Equal addresses pin it exactly; a gap may be alignment or unclassified bytes.
+image	left_section	right_section	last_left_end	first_right_start	evidence	status

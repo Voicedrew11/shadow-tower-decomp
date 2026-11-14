@@ -1,0 +1,90 @@
+#ifndef KF_ADDRESS_H
+#define KF_ADDRESS_H
+
+/*
+ * Retail claim for a reconstructed function: its start address and its retail
+ * body size in bytes. The macro expands to nothing for the compiler;
+ * scripts/kf/model.py reads the source text and binds the function that
+ * follows it to that address in the unit's image, and the loader checks the
+ * size against the admitted census so a claim cannot drift from the body it
+ * names:
+ *
+ *     ADDRESS(0x8001499c, 0x38)
+ *     void game_shutdown(void)
+ *
+ * Claims in one source must ascend, and a unit owns every admitted function
+ * between its first and last claim, so a source file mirrors the linked order.
+ */
+#define ADDRESS(va, size)
+
+/*
+ * Per-image retail claim for a function that one source reconstructs into more
+ * than one linked program. A shared source (under src/lib/) precedes each
+ * definition with one ADDRESS_AT() per image it appears in, spelling that
+ * image's start address and retail body size:
+ *
+ *     ADDRESS_AT("GAME", 0x800202fc, 0x68)
+ *     ADDRESS_AT("OPEN", 0x80019598, 0x68)
+ *     void matrix_interpolate(...)
+ *
+ * The source is listed as one unit per image in config/units.toml; model.py
+ * binds each unit's functions to the ADDRESS_AT() addresses whose image matches
+ * that unit, so the C text is written once while the addresses stay
+ * image-qualified. A source may not mix ADDRESS_AT() with the name-rebinding
+ * bind mode. Claims for a given image still ascend and cover a contiguous run.
+ */
+#define ADDRESS_AT(image, va, size)
+
+/*
+ * Retail claim for a global a unit owns: the datum's address and its curated
+ * size. It precedes the DEFINITION (never an extern) and binds the declarator
+ * to the matching data_identities.tsv row. The section is an explicit retail
+ * placement hypothesis: .data/.sdata for initialized storage, .bss/.sbss for
+ * uninitialized storage. Tentative globals may be emitted as COMMON requests
+ * and linked into BSS; COMMON placement does not follow a TU append rule.
+ * Initialized-section claims are checked by the data-order audit:
+ *
+ *     DATA(0x80057b0c, 0x4, ".data")
+ *     static u32 frame_pacer_vsync_count = 0;
+ *
+ * Data claims ascend inside a source and a datum belongs to one unit; every
+ * other unit declares it extern. Load-image data must be explicitly
+ * initialized in source: GCC 2.5.7 prints an uninitialized global as `.comm`,
+ * which maspsx turns into `.bss`, so `= 0` is what places a zero word in .data
+ * the way the retail image has it.
+ */
+#define DATA(va, size, section)
+
+/* Per-image address for one global defined by a shared source. Stack one
+ * DATA_AT() per image immediately before the single C definition, as with
+ * ADDRESS_AT() for shared functions. */
+#define DATA_AT(image, va, size, section)
+
+/*
+ * Read-only contribution claim, at most one per translation unit: the retail
+ * address range that holds this unit's switch jump tables and string
+ * literals, in the order the compiler emitted them. The delinker carves it
+ * into the module object's .rodata, turns entries that point into the unit's
+ * own code into .text-relative words, and resolves the code's references to
+ * .rodata offsets, so objdiff compares the tables and literals as well:
+ *
+ *     RODATA(0x8001235c, 0x148)
+ */
+#define RODATA(va, size)
+
+/*
+ * Small-data literal claim, at most one per translation unit: the retail
+ * range of anonymous constants that a -G8 compile emits into .sdata instead
+ * of .rdata. GCC 2.5.7's MIPS SELECT_SECTION sends any constant whose type
+ * is at most -G bytes there, so a short string literal (and a local
+ * `char buf[2] = " "` initializer) lands in .sdata, while the same text
+ * initializing a larger array keeps the array's type and stays in .rdata.
+ * The delinker packs the range into the module object's .sdata in address
+ * order with the unit's .sdata DATA() claims and resolves code references to
+ * it as .sdata offsets, as the assembler does for its local labels:
+ *
+ *     SDATA(0x8006d6a4, 0xb)
+ */
+#define SDATA(va, size)
+
+#endif

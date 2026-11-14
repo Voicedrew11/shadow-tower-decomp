@@ -1,0 +1,4 @@
+# Hand-owned WIP Sony/Psy-Q ownership layered over config/retail/functions.tsv.
+# Psy-Q 3.0 exact objects and project-built FIDs outrank Ghidra Psy-Q 3.00 signatures.
+# Regenerated seeds are review candidates; edit and admit changes here manually.
+image	va	size	name	aliases	provider	library	module	member_offset	source_version	evidence	confidence	provenance	note

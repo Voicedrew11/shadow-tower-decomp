@@ -1,0 +1,44 @@
+# Tooling-control image table: the King's Field II (SLPS-00069) layout the
+# linker, delinker and report controls were written against. Tests load it
+# through tests/kf2_images.py; it never describes this repository's disc.
+
+[disc]
+serial = "SLPS-00069"
+title = "King's Field II (Japan)"
+sha256 = "ca7d6d616d125c2d7bd7be131e8362eddb0b71cd15a2902dae73453dbe043a31"
+
+[[image]]
+name = "PSX.EXE"
+disc_file = "PSX.EXE"
+sha256 = "8a94d391291c413bed1aa0ed1ac0adae4328a4841058346b8af1fd41ea3e45a6"
+file_size = 0x1000
+entry = 0x80010128
+load_address = 0x80010000
+load_size = 0x800
+
+[[image]]
+name = "GAME.EXE"
+disc_file = "GAME.EXE"
+sha256 = "3ca696397ace8b062bce71d390a79f5b5ca6e941ed23c0cc7adb8b261553b10a"
+file_size = 0x5E800
+entry = 0x8004A628
+load_address = 0x80011000
+load_size = 0x5E000
+
+[[image]]
+name = "OPEN.EXE"
+disc_file = "OPEN.EXE"
+sha256 = "8f73f299ce1335bb23c9e438047f470dde37600ac38b558663333438a5b7b324"
+file_size = 0x2E800
+entry = 0x80013DB8
+load_address = 0x80011000
+load_size = 0x2E000
+
+[[image]]
+name = "END.EXE"
+disc_file = "END.EXE"
+sha256 = "602b87f70d87f7decbb9d934b7c29c567c811632b1d4f59f88e4ce6b0a263da3"
+file_size = 0x29800
+entry = 0x80011CB4
+load_address = 0x80011000
+load_size = 0x29000

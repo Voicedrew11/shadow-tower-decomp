@@ -1,0 +1,19 @@
+# MANUALLY MANAGED - admitted WIP retail data census, including unclassified gaps.
+# Seed/audit tooling writes build/retail-seed only; review and edit this file by hand.
+# Each address is qualified by image because GAME.EXE, OPEN.EXE and END.EXE are separate overlays sharing one load window.
+# Defined rows plus unclassified gaps account for every byte of every loaded payload.
+image	va	file_offset	size	kind	confidence	name	datatype	provenance	note
+PSX.EXE	0x80010000	0x800	0x1c0	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
+PSX.EXE	0x80010268	0xa68	0x598	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
+STR.EXE	0x80011000	0x800	0x9dc	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
+STR.EXE	0x80011a10	0x1210	0x215f0	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
+ST.EXE	0x80011000	0x800	0x3320	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
+ST.EXE	0x80014354	0x3b54	0x744ac	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
+TITLE.EXE	0x80012000	0x800	0xa04	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
+TITLE.EXE	0x80012a38	0x1238	0x165c8	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
+OPTXT.EXE	0x80011000	0x800	0x944	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
+OPTXT.EXE	0x80011978	0x1178	0xde88	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
+VS.EXE	0x80011000	0x800	0x1980	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
+VS.EXE	0x800129b4	0x21b4	0x50e4c	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
+END.EXE	0x80011000	0x800	0x960	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
+END.EXE	0x80011994	0x1194	0x1e66c	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data

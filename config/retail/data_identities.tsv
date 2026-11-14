@@ -1,0 +1,5 @@
+# MANUALLY MANAGED - semantic WIP identities for defined/pointer/global data rows.
+# Strings retain their decoded content in data.tsv; unclassified coverage gaps are excluded.
+# Address-only DAT_ names and unknown scope are unresolved, not semantic claims.
+# Future analysis writes build/function-inventory proposals and never overwrites this file.
+image	va	size	name	scope	storage	datatype	owner	confidence	evidence	note

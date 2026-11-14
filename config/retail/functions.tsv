@@ -1,0 +1,12 @@
+# MANUALLY MANAGED - admitted WIP retail function census; one row per current start.
+# Seed/audit tooling writes build/retail-seed only; review and edit this file by hand.
+# Each address is qualified by image because GAME.EXE, OPEN.EXE and END.EXE are separate overlays sharing one load window.
+# Function extents are WIP and may include owned jump tables/padding or miss indirect-only code.
+image	va	file_offset	size	body_size	fragments	kind	confidence	name	labels	provenance	note
+PSX.EXE	0x800101c0	0x9c0	0xa8	0xa8	1	function	entry	start		PS-X EXE header pc0	WIP boundary read from asm: clears .bss, sets the stack and gp, calls two routines, then break
+STR.EXE	0x800119dc	0x11dc	0x34	0x34	1	function	entry	start		PS-X EXE header pc0	WIP boundary read from asm: clears .bss, sets gp, then jumps to the program body
+ST.EXE	0x80014320	0x3b20	0x34	0x34	1	function	entry	start		PS-X EXE header pc0	WIP boundary read from asm: clears .bss, sets gp, then jumps to the program body
+TITLE.EXE	0x80012a04	0x1204	0x34	0x34	1	function	entry	start		PS-X EXE header pc0	WIP boundary read from asm: clears .bss, sets gp, then jumps to the program body
+OPTXT.EXE	0x80011944	0x1144	0x34	0x34	1	function	entry	start		PS-X EXE header pc0	WIP boundary read from asm: clears .bss, sets gp, then jumps to the program body
+VS.EXE	0x80012980	0x2180	0x34	0x34	1	function	entry	start		PS-X EXE header pc0	WIP boundary read from asm: clears .bss, sets gp, then jumps to the program body
+END.EXE	0x80011960	0x1160	0x34	0x34	1	function	entry	start		PS-X EXE header pc0	WIP boundary read from asm: clears .bss, sets gp, then jumps to the program body

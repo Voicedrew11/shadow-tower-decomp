@@ -1,0 +1,12 @@
+# MANUALLY MANAGED - semantic WIP identities for all carveable non-vendored functions.
+# Address-only func_ names are unresolved; candidate signatures require caller/callee review.
+# Methods use name=owner_action with the owner and action columns populated.
+# Future analysis writes build/function-inventory proposals and never overwrites this file.
+image	va	name	owner	action	return_type	parameters	name_confidence	signature_confidence	evidence	note
+PSX.EXE	0x800101c0	start			void		candidate	candidate	asm;PS-X EXE header pc0	startup code; likely Psy-Q startup but not yet matched to an SDK object
+STR.EXE	0x800119dc	start			void		candidate	candidate	asm;PS-X EXE header pc0	startup code; likely Psy-Q startup but not yet matched to an SDK object
+ST.EXE	0x80014320	start			void		candidate	candidate	asm;PS-X EXE header pc0	startup code; likely Psy-Q startup but not yet matched to an SDK object
+TITLE.EXE	0x80012a04	start			void		candidate	candidate	asm;PS-X EXE header pc0	startup code; likely Psy-Q startup but not yet matched to an SDK object
+OPTXT.EXE	0x80011944	start			void		candidate	candidate	asm;PS-X EXE header pc0	startup code; likely Psy-Q startup but not yet matched to an SDK object
+VS.EXE	0x80012980	start			void		candidate	candidate	asm;PS-X EXE header pc0	startup code; likely Psy-Q startup but not yet matched to an SDK object
+END.EXE	0x80011960	start			void		candidate	candidate	asm;PS-X EXE header pc0	startup code; likely Psy-Q startup but not yet matched to an SDK object
