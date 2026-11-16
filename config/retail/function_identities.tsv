@@ -420,7 +420,7 @@ ST.EXE	0x800456f8	func_800456f8			unknown		address-only	candidate	mips-live-in-h
 ST.EXE	0x80045f90	func_80045f90			void	unknown arg0;unknown arg1;unknown arg2	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
 ST.EXE	0x80045fb8	func_80045fb8			unknown	unknown *object	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
 ST.EXE	0x80045ffc	func_80045ffc			unknown	unknown arg0;unknown arg1;unknown arg2	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-ST.EXE	0x80046270	vis_collect_sources			void	u8 *arg;int a1;int a2	candidate	candidate	asm;callers;src/st band C	fills vis_lists.sources (vis_build_visible clears n_sources, calls it, then reads the list); body unreviewed
+ST.EXE	0x80046270	vis_collect_sources			void	VECTOR *a;VECTOR *b;VECTOR *c	candidate	candidate	asm;callers;src/st band C	fills vis_lists.sources (vis_build_visible clears n_sources, calls it, then reads the list); body unreviewed
 ST.EXE	0x8004656c	func_8004656c			unknown	unknown *object	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
 ST.EXE	0x80046604	func_80046604			unknown	unknown *object;unknown *pointer1;unknown arg2	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
 ST.EXE	0x800468c0	func_800468c0			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
