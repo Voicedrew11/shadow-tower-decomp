@@ -150,7 +150,7 @@ void func_8004b058(Vis212 *e, u8 *p)
 {
     e->unk19 = e->unk0F;
     if (p != NULL) {
-        e->unkA8 = p;
+        e->unkA8 = (VisScript *)p;
         e->unk0F = *p;
         e->unk1A = 0;
     } else {
@@ -182,7 +182,7 @@ void func_8004b098(int arg)
 
     if (e->unk1A == 240 || e->unk1A == 0)
         return;
-    list = r->unk60;
+    list = (u8 **)r->unk60;
     max = -2;
     best = NULL;
     n = 24;
@@ -196,7 +196,7 @@ void func_8004b098(int arg)
             best = p;
         }
     }
-    if (best != NULL && (best != e->unkA8 || e->unk1A == 255))
+    if (best != NULL && (best != (u8 *)e->unkA8 || e->unk1A == 255))
         func_8004b058(e, best);
 }
 
@@ -211,7 +211,7 @@ void func_8004b19c(void)
 ADDRESS(0x8004b1e8, 0x48)
 u8 *func_8004b1e8(Vis192 *r, u8 id)
 {
-    u8 **list = r->unk60;
+    u8 **list = (u8 **)r->unk60;
     u8 *p;
     int n = 24;
 

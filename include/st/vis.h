@@ -20,12 +20,12 @@ typedef struct {
     s32 unk0;            /* 0x00: the kind of the request func_80049544 takes */
     VECTOR unk4;         /* 0x04: its position */
     SVECTOR unk14;       /* 0x14: its velocity */
-    u16 unk1C;           /* 0x1c: reach */
+    u16 unk1C;           /* 0x1c: reach; added to a table B record radius (func_8004f53c) */
     u16 unk1E;           /* 0x1e: height added while resolving */
     s16 unk20;           /* 0x20: the velocity's heading */
     s16 unk22;           /* 0x22: its horizontal length */
     u8 unk24[0x2c - 0x24];
-    s32 unk2C;           /* 0x2c: floor height found */
+    s32 unk2C;           /* 0x2c: floor height found; func_80048ad0 resolves it (func_80053aa4) */
     s32 unk30;           /* 0x30: a height func_8003bdb0 tests */
     u8 unk34[0x3c - 0x34];
     s32 unk3C;
@@ -79,11 +79,13 @@ typedef struct {
 /* 0x8017bed0: 12-byte records indexed by visible id. */
 typedef struct {
     u8 part;             /* 0x00: the model part drawn for this record */
-    u8 unk01;
+    u8 unk01;            /* 0x01: copied to a table A entry's unk06 (func_8004e960) */
     u8 unk02;
     u8 unk03;            /* 0x03: bits 0-1 select the light set */
     u8 unk04;            /* bit 1: flagged by vis_cull_by_range */
-    u8 unk05[3];
+    u8 unk05;
+    u8 unk06;
+    u8 unk07;            /* 0x07: area id; 0xff none (func_8004e324) */
     u8 unk08;
     u8 unk09;
     u8 unk0a;
@@ -108,27 +110,35 @@ typedef union {
     u8 bytes[4];
 } VisFlags;
 
+/* A table A record's script: a command stream (WIP). */
+typedef struct {
+    u8 unk00;            /* 0x00: kind; 'P' and '@' are picked by func_8004def8 */
+    u8 unk01[0xb];
+    u16 unk0C;           /* 0x0c */
+} VisScript;
+
 typedef struct {
     u8 unk00;            /* 0x00: 0xff when free (func_8004afdc) */
     u8 unk01;
     u8 unk02;            /* 0x02: index of its 192-byte VisTableA record */
     u8 unk03;
     u8 unk04;
-    u8 unk05;            /* 0x05: state (func_8004b2dc) */
+    u8 unk05;            /* 0x05: state (func_8004b2dc); 1 active, 5 dying (func_8004def8) */
     u8 unk06;
-    u8 unk07;
+    u8 unk07;            /* 0x07: area id, 0xfd: the previous area (func_8004e2d8) */
     u8 unk08;            /* 0x08 */
-    u8 unk09[2];
+    u8 unk09;
+    u8 unk0A;
     u8 unk0B;            /* 0x0b: model slot - 128 */
     u8 unk0C;            /* 0x0c: block tag */
     u8 unk0D;            /* 0x0d: added to vis_table_a.unk6128 while live */
     u8 unk0E;
     u8 unk0F;
-    u16 unk10;           /* 0x10..0x14: the three items it drops */
+    u16 unk10;           /* 0x10..0x14: the three items it drops: table C ids (func_8004e960) */
     u16 unk12;
     u16 unk14;
     s16 unk16;           /* 0x16: vertical speed */
-    u8 unk18;
+    u8 unk18;            /* 0x18: index of the running script in its record */
     u8 unk19;
     u8 unk1A;
     u8 unk1B;
@@ -141,7 +151,7 @@ typedef struct {
     u16 unk26;
     u16 unk28;           /* 0x28: record index (func_8004ac38) */
     u16 unk2A;           /* 0x2a */
-    u16 unk2C;
+    u16 unk2C;           /* 0x2c: hit points (func_8004def8) */
     u16 unk2E;           /* 0x2e */
     u16 unk30;           /* 0x30: height */
     u16 unk32;           /* 0x32: shadow size */
@@ -151,17 +161,19 @@ typedef struct {
     u8 unk39;
     u8 unk3A[2];
     u32 unk3C;           /* 0x3c: squared distance */
-    s32 unk40;
+    s32 unk40;           /* 0x40: horizontal distance */
     s32 unk44;
     u8 unk48[4];
     s32 unk4C;           /* 0x4c: height above the floor */
     s32 unk50;           /* 0x50: request kind bits */
     u16 unk54;
-    u16 unk56;           /* 0x56: facing the viewer is compared with */
-    u8 unk58[6];
+    u16 unk56;           /* 0x56: facing the viewer is compared with; heading to the viewer */
+    u16 unk58;           /* 0x58: its difference from the facing */
+    u8 unk5A[0x5e - 0x5a];
     u16 unk5E;           /* 0x5e: heading of the wall slid along */
     u16 unk60;
-    u8 unk62[3];
+    u8 unk62[2];
+    u8 unk64;            /* 0x64: set when hit */
     u8 unk65;            /* 0x65..0x67: percent chances of unk10..unk14 */
     u8 unk66;
     u8 unk67;
@@ -171,27 +183,33 @@ typedef struct {
     s16 unk6E;
     u32 unk70;           /* 0x70: bit 11 set by effect_emit */
     VECTOR unk74;        /* 0x74: position */
-    u8 unk84[8];
+    s32 unk84;
+    u8 unk88[4];
     u16 unk8C;           /* 0x8c: rotation */
     s16 unk8E;           /* 0x8e: facing */
     u16 unk90;
     u8 unk92[2];
     SVECTOR unk94;       /* 0x94: scale */
-    SVECTOR unk9C;       /* 0x9c: velocity */
+    SVECTOR unk9C;       /* 0x9c: velocity: this frame's movement */
     u32 unkA4;           /* 0xa4: from here the anim block objects.c hands model_draw (&unkA4) */
-    u8 *unkA8;           /* 0xa8: an entry of its record's unk60 list */
-    u8 unkAC[4];
-    s16 unkB0;           /* 0xb0: magnitude of the last unk2A step */
+    VisScript *unkA8;    /* 0xa8: the running script, an entry of its record's unk60 list */
+    s32 unkAC;
+    s16 unkB0;           /* 0xb0: magnitude of the last unk2A step; set from the script's unk0C */
     u16 unkB2;
     u8 unkB4[0x20];
 } Vis212;
 
 /* 0x3500 of VisTableA: 192-byte records. */
 typedef struct {
-    u8 unk00;
-    u8 unk01[4];
+    u8 unk00;            /* 0x00: 0xff ends the records (func_8004e8ec) */
+    u8 unk01;
+    u8 unk02;
+    u8 unk03;
+    u8 unk04;
     u8 unk05;
-    u8 unk06[8];
+    u8 unk06[2];
+    u8 unk08;
+    u8 unk09[5];
     s16 unk0E;           /* 0x0e: gravity */
     u16 unk10;           /* 0x10: map bit, 0xffff none */
     u16 unk12;           /* 0x12: added to vis_table_a.unk612C while live */
@@ -206,7 +224,7 @@ typedef struct {
     u8 unk34[0x16];
     u16 unk4A[9];        /* 0x4a: level weights (func_8004de24) */
     u8 unk5C[4];
-    u8 *unk60[24];       /* 0x60: null-terminated (func_8004b1e8) */
+    VisScript *unk60[24]; /* 0x60: null-terminated (func_8004b1e8); offsets from unk3500[16] until func_8004e8ec */
 } Vis192;
 
 typedef struct {
@@ -216,7 +234,7 @@ typedef struct {
     u8 count;            /* 0x6100 */
     u8 unk6101;
     u8 unk6102;
-    u8 unk6103;
+    u8 unk6103;          /* 0x6103: the previous area id */
     u16 list[12];        /* 0x6104 */
     u8 unk611C[0xc];
     s32 unk6128;         /* 0x6128: sum of the live entries' unk0D */
@@ -228,15 +246,15 @@ typedef struct {
     Vis212 *unk6140;     /* 0x6140: the entry the current one follows */
     s32 unk6144;         /* 0x6144: loop index func_800402ac keeps in memory */
     s32 unk6148;         /* 0x6148: the current entry's record index */
-    u8 unk614C[4];
-    s32 unk6150;
+    s32 unk614C;         /* 0x614c: active entries counted this frame */
+    s32 unk6150;         /* 0x6150: frame counter */
     u8 unk6154[4];
-    u16 unk6158[4];
+    u16 unk6158[4];      /* 0x6158: the last four area ids */
     s16 unk6160;         /* 0x6160..0x6164: cleared by player_update_status */
     s16 unk6162;
     s16 unk6164;
     u8 unk6166[2];
-    u8 unk6168;
+    u8 unk6168;          /* 0x6168: the current area id */
     u8 unk6169;          /* 0x6169: cleared by func_8004567c */
     u8 unk616A[0x61d8 - 0x616a];
 } VisTableA;
@@ -253,17 +271,19 @@ typedef struct {
     u8 unk07;
     u16 unk08;
     u16 unk0a;           /* 0x0a: index of its 24-byte VisTableB record */
-    u8 unk0c[4];
+    u16 unk0C;           /* 0x0c: state of a moving entry (func_8004fdd0) */
+    u8 unk0E[2];
     u16 unk10;           /* 0x10 */
-    u8 unk12[2];
+    u16 unk12;           /* 0x12: height */
     s16 unk14;           /* 0x14: OT depth bias */
     s16 unk16;           /* 0x16 */
     u32 unk18;           /* 0x18: squared distance */
     s32 unk1C;           /* 0x1c: distance (sound type 236) */
-    u8 unk20[4];
+    u16 unk20;           /* 0x20: facing */
+    u8 unk22[2];
     VECTOR unk24;        /* 0x24: position */
     u16 unk34;           /* 0x34: rotation */
-    u16 unk36;
+    s16 unk36;           /* 0x36: yaw */
     u16 unk38;
     u8 unk3A[2];
     SVECTOR unk3C;       /* 0x3c: scale */
@@ -275,9 +295,9 @@ typedef struct {
     u8 unk4C;            /* 0x4c: fade range */
     u8 unk4D;            /* 0x4d: sound flags */
     u16 unk4E;           /* 0x4e: repeat period */
-    s32 unk50;           /* 0x50: next tick to play */
+    s32 unk50;           /* 0x50: next tick to play; other kinds keep halfwords here */
     s16 unk54;           /* 0x54: playing voice, -1 none */
-    u8 unk56[2];
+    s16 unk56;
 } Vis88;
 
 /* VisTableB+0: 24-byte records. */
@@ -285,7 +305,7 @@ typedef struct {
     u8 unk00[3];
     u8 unk03;            /* 0x03 */
     u16 unk04;           /* 0x04 */
-    u8 unk06[2];
+    u16 unk06;           /* 0x06: trigger radius (func_8004f718) */
     u16 unk08;           /* 0x08 */
     u8 unk0A[2];
     u16 unk0C;           /* 0x0c */
@@ -301,9 +321,14 @@ typedef struct {
     s16 unk71A4;         /* 0x71a4..0x71a8: cleared by player_update_status */
     s16 unk71A6;
     s16 unk71A8;
-    u8 unk71AA[0xa];
+    u8 unk71AA[6];
+    Vis88 *unk71B0;      /* 0x71b0: an entry func_8004f53c skips */
     u16 list[96];        /* 0x71b4 */
     u8 count;            /* 0x7274 */
+    u8 unk7275;
+    s16 unk7276;         /* 0x7276..0x727a: cleared by func_8004eda8 */
+    s16 unk7278;
+    s16 unk727A;
 } VisTableB;
 
 /*
@@ -342,12 +367,12 @@ typedef struct {
     s16 unk1A;
     s16 unk1C;
     u8 unk1E[2];
-    u16 unk20;
+    u16 unk20;           /* 0x20 */
     u8 unk22;            /* 0x22: kind; 0 and 4 are not drawn */
     u8 unk23;
     u8 unk24;            /* 0x24 */
-    u8 unk25;
-    u16 unk26;
+    s8 unk25;            /* 0x25: bounces (func_80053aa4) */
+    s16 unk26;           /* 0x26: fall speed */
     s32 unk28;           /* 0x28: distance */
     u8 unk2c;
     s8 unk2D;            /* 0x2d: OT depth bias */
@@ -359,9 +384,10 @@ typedef struct {
     u8 count;            /* 0x0006 */
     u8 list[64];         /* 0x0007 */
     u8 unk0047;
-    u32 unk0048[10];     /* 0x0048: one bit per dropped id */
-    u32 unk0070[10];     /* 0x0070: one bit per id */
-    u8 unk0098[0x118 - 0x98];
+    u32 unk0048[10];     /* 0x0048: one bit per loaded id (func_80052f30) */
+    u32 unk0070[9];      /* 0x0070: one bit per id (266 ids) */
+    u8 unk0094[0x80];    /* 0x0094: a slot per Vis44 unk04, 0xff unassigned (func_80052d10) */
+    s32 unk0114;         /* 0x0114: the next slot to assign */
     Vis44 unk0118[314];  /* 0x0118 */
     Vis48 entries[64];   /* 0x3710 */
 } VisTableC;
@@ -431,5 +457,61 @@ void func_8004da2c(Vis212 *e);
 void func_8004db0c(Vis212 *e);
 int func_8004db9c(Vis212 *e, short reach);
 int func_8004de24(Vis212 *e, int arg, u16 *levels);
+
+/* One 24-byte table A entry of an area file (func_8004e960). */
+typedef struct {
+    u8 unk00;            /* 0x00: 0xff: unused */
+    u8 unk01;            /* 0x01: record index */
+    u16 unk02;           /* 0x02: VisRecord index */
+    u16 unk04[3];        /* 0x04: table C ids, 0xffff none */
+    u8 unk0A;
+    u8 unk0B;
+    u8 unk0C;
+    u8 unk0D;
+    u8 unk0E[2];
+    u16 unk10;           /* 0x10: facing */
+    s16 unk12;           /* 0x12..0x16: offset in its cell */
+    s16 unk14;
+    s16 unk16;
+} VisAFileEntry;
+
+/* src/st/vis_a.c */
+int func_8004def8(Vis212 *e, int kind, int power, u16 *levels, int crit);
+void func_8004e2d8(void);
+void func_8004e8ec(void);
+void func_8004e960(VisAFileEntry *src);
+
+/* src/st/vis_b_init.c (func_8004eda8: st/funcs.h) */
+void func_8004ee00(Vis88 *e);
+void func_8004ee48(int index, int mode);
+
+/* src/st/vis_b.c (func_8004fc94, func_8004fd28, func_800500ac: st/funcs.h) */
+int func_8004f718(int i, VisLists *req);
+void func_8004f974(Vis88 *e, int kind);
+Vis88 *func_8004f994(int start, int n, int now);
+void func_8004fa38(int key);
+int func_8004fb88(Vis88 *e, int id);
+void func_8004fc0c(int key);
+void func_8004fc84(void);
+int func_8004fdd0(Vis88 *src, Vis88 *e, SVECTOR *from, SVECTOR *to, int fade, int steps);
+void func_80050170(int dx, int dy, int dz);
+Vis88 *func_80050288(Vis88 *src, int kind, int state, int arg3, int size, int angle, int ox,
+                     int oy, int oz);
+void func_80050468(Vis88 *e, int arg);
+void func_80050564(Vis88 *e, int arg);
+void func_8005066c(Vis88 *e, int arg);
+
+/* src/st/vis_c.c (func_80052ca4: st/funcs.h; func_80052d10: st/area.h) */
+void func_80052894(StWarp *to, int keep);
+void func_80052c24(void);
+void func_80052c5c(void);
+int func_80052d40(int id);
+void func_80052d98(u16 *id);
+void func_80052e50(Vis48 *c);
+int func_80053174(VisLists *req);
+
+/* 0x8005335c: no source yet. */
+void func_8005335c(Vis48 *c, int arg1);
+
 
 #endif

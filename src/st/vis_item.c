@@ -21,7 +21,7 @@ int func_8004d75c(Vis212 *e)
 ADDRESS(0x8004d764, 0x98)
 void func_8004d764(Vis212 *e)
 {
-    u8 *p = e->unkA8;
+    u8 *p = (u8 *)e->unkA8;
 
     if (e->unk70 & 0x800000)
         func_80058254(p[5] + 48, &e->unk74, 127, 24576, 30720, func_8004d75c(e));

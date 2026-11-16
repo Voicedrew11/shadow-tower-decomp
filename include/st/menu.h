@@ -188,6 +188,11 @@ typedef struct {
 } Data801cba08;
 extern Data801cba08 DAT_801cba08;
 
+/* Nonzero runs the warp func_80052c5c after the table A pass. It lies inside
+ * DAT_801cba08's WIP view (+0x16dc); whether it is a field of that object or
+ * its own global is unresolved. */
+extern u8 DAT_801cd0e4;
+
 /* .sbss words the map page reads with lui; their owner is unknown. */
 extern s32 DAT_8008818c;
 extern u16 DAT_800881a8;
