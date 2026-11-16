@@ -17,10 +17,6 @@ void func_80016508(void);
 void func_8001618c(void *buf, char *name, int size);
 void func_80016fb8(void);
 int func_80015b78(u8 *buf, s32 sectors);
-void func_800210f4(void);
-void func_80021158(void);
-void func_800214a4(void);
-void func_800214cc(void);
 void func_80026afc(VECTOR *a, SVECTOR *b);
 void func_80032058(void);
 void func_8003216c(void);
@@ -63,5 +59,16 @@ void func_80058dc4(int arg0, int arg1);
 void func_80058ed4(void);
 int func_80062c28(int arg0);
 void func_800633d4(void);
+
+/* Band D's callees. */
+void func_800173a8(void);
+void func_800174c4(void);
+void func_80017680(void);
+void func_80031efc(u_long *buf, u_long size);
+int func_80015d54(int archive, int index, void *dest, void (*callback)(void *));
+u32 func_80015ec8(u16 archive, u16 index);
+void func_800177a0(u8 *data, DVECTOR *a, DVECTOR *b, u8 count);
+void func_8003ec5c(void *data, DVECTOR *a, DVECTOR *b, int arg3);
+void func_80058a0c(int archive, int index, int slot);
 
 #endif

@@ -58,6 +58,8 @@ typedef struct {
     StCdRequest *unk9D4;
     StCdRequest *unk9D8;
     StArchive archives[ST_ARCHIVES];
+    u8 unkA00[0xa6c - 0xa00]; /* band D */
+    CdlFILE unkA6C; /* band D: \LOAD02.TIM;1, read by func_80021158 */
 } State80088200;
 
 extern State80088200 DAT_80088200;

@@ -16,6 +16,7 @@
 #include <st/memory.h>
 #include <st/data.h>
 #include <st/main.h>
+#include <st/gfx.h>
 #include <st/funcs.h>
 
 /* PSX.EXE program table indices. */

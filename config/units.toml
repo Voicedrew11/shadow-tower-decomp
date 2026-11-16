@@ -91,3 +91,27 @@ unit = "st.cdpos"
 image = "ST.EXE"
 source = "src/st/cdpos.c"
 profile = "probe-gcc272cdk-o2-g0"
+
+[[unit]]
+unit = "st.gfx"
+image = "ST.EXE"
+source = "src/st/gfx.c"
+profile = "probe-gcc272cdk-o2-g8"
+
+[[unit]]
+unit = "st.fade"
+image = "ST.EXE"
+source = "src/st/fade.c"
+profile = "probe-gcc272cdk-o2-g0"
+
+[[unit]]
+unit = "st.bank"
+image = "ST.EXE"
+source = "src/st/bank.c"
+profile = "probe-gcc272cdk-o2-g0"
+
+[[unit]]
+unit = "st.bankload"
+image = "ST.EXE"
+source = "src/st/bankload.c"
+profile = "probe-gcc272cdk-o2-g0"

@@ -15,6 +15,7 @@
 #include <st/state.h>
 #include <st/data.h>
 #include <st/cdreq.h>
+#include <st/gfx.h>
 #include <st/funcs.h>
 
 /* unk1 of the current request: the step its read is at. */

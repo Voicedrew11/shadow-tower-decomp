@@ -52,14 +52,21 @@ typedef struct {
 extern Data80198f28 DAT_80198f28;
 
 typedef struct {
-    u16 unk0;
-    u16 unk2;
+    s16 unk0; /* band D: read signed (lh) */
+    volatile u16 unk2; /* band D: func_80021654 reads it zero-extended, then as a short */
     u8 unk4;
     u8 unk5;
     u8 unk6;
     u8 unk7;
     u8 unk8;
     u8 unk9;
+    u8 unkA[0x10 - 0xa]; /* band D */
+    u8 unk10; /* band D: 0xff when unset */
+    u8 unk11[0x18 - 0x11]; /* band D */
+    s32 unk18; /* band D: tick count func_80021654 measures from, -1 when idle */
+    u8 unk1C[0x1e - 0x1c]; /* band D */
+    u8 unk1E; /* band D */
+    u8 unk1F[0x28 - 0x1f]; /* band D: WIP extent up to DAT_801b5948 */
 } Data801b5920;
 extern Data801b5920 DAT_801b5920;
 
@@ -90,5 +97,17 @@ typedef struct {
     u8 unk10;
 } Data801cd180;
 extern Data801cd180 DAT_801cd180;
+
+/*
+ * band D: one sound bank slot, the loaded bank's data (its state halfword
+ * at +4) and the VAB id SsVabClose takes. func_800237a8 uses slots 8..23 as
+ * four rows of four.
+ */
+typedef struct {
+    s16 *block;
+    s16 vab;
+    s16 unk6;
+} StVabSlot;
+extern StVabSlot DAT_801dd1e8[24];
 
 #endif
