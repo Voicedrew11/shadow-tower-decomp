@@ -309,7 +309,9 @@ typedef struct {
     u8 unk0[2];
     u16 unk2;            /* 0x02: held bits */
     u16 unk4;            /* 0x04: page bits func_8002fc4c consumes; request bits func_8003f4ec clears */
-    u8 unk6[0x10 - 0x6];
+    u8 unk6[0xc - 0x6];
+    u16 unkC;            /* 0x0c: the memory card screens' port-select bits (src/st/card.c) */
+    u8 unkE[0x10 - 0xe];
     u8 unk10;
     u8 unk11;
     u8 unk12;            /* 0x12 */

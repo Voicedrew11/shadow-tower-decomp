@@ -392,6 +392,12 @@ source = "src/st/vis_c_run.c"
 profile = "probe-gcc272cdk-o2-g0"
 
 [[unit]]
+unit = "st.card"
+image = "ST.EXE"
+source = "src/st/card.c"
+profile = "probe-gcc272cdk-o2-g8"
+
+[[unit]]
 unit = "title.main"
 image = "TITLE.EXE"
 source = "src/title/main.c"

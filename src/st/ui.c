@@ -1620,16 +1620,16 @@ void func_8002c2b8(void)
             DAT_800881bc = 280;
             DAT_800881c4 = 0;
             DAT_800881ba = 0;
-            if (titles[sp->unk1F4[i + sp->unk200].kind] != -1)
-                func_8002732c(MESSAGE(610 + titles[sp->unk1F4[i + sp->unk200].kind]), 64,
+            if (titles[sp->unk1F4->files[i + sp->unk200].kind] != -1)
+                func_8002732c(MESSAGE(610 + titles[sp->unk1F4->files[i + sp->unk200].kind]), 64,
                               sp->unk330.y + 6, &sp->style[0]);
-            if (titles[sp->unk1F4[i + sp->unk200].kind] != -1)
-                func_8002732c(MESSAGE(700 + sp->unk1F4[i + sp->unk200].kind), 64,
+            if (titles[sp->unk1F4->files[i + sp->unk200].kind] != -1)
+                func_8002732c(MESSAGE(700 + sp->unk1F4->files[i + sp->unk200].kind), 64,
                               sp->unk330.y + 22, &sp->style[0]);
             else
-                func_8002732c(MESSAGE(700 + sp->unk1F4[i + sp->unk200].kind), 64,
+                func_8002732c(MESSAGE(700 + sp->unk1F4->files[i + sp->unk200].kind), 64,
                               sp->unk330.y + 6, &sp->style[0]);
-            func_800276bc(sp->unk1F4[i + sp->unk200].unk1A | DIGITS(4), 248, sp->unk330.y + 6,
+            func_800276bc(sp->unk1F4->files[i + sp->unk200].unk1A | DIGITS(4), 248, sp->unk330.y + 6,
                           &sp->style[0]);
         }
         DAT_8017beb0[i + sp->unk200] = DAT_800881c8;

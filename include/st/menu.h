@@ -115,29 +115,64 @@ typedef union {
     } levels;            /* func_8002b84c */
 } MenuState;
 
-/* A 32-byte list record func_8002c2b8 lists. */
+/*
+ * A 32-byte list record func_8002c2b8 lists: one memory card save file
+ * (src/st/card.c): its directory name, the number in its name and bytes
+ * from its header.
+ */
 typedef struct {
-    u8 unk0[0x19];
+    char name[0x14];     /* 0x00: the file name firstfile/nextfile found */
+    s32 unk14;           /* 0x14: the two digits at name[17..18] */
+    u8 unk18;
     u8 kind;             /* 0x19: indexes the record title table */
     u16 unk1A;           /* 0x1a */
-    u8 unk1C[4];
+    u16 unk1C;           /* 0x1c */
+    u8 unk1E;            /* 0x1e */
+    u8 unk1F;
 } MenuRecord;
+
+/* One memory card port's directory as the save screens keep it. */
+typedef struct {
+    MenuRecord files[7]; /* 0x00 */
+    u16 status;          /* 0xe0: 0 ready, 1 new card, 2 error, 3 unformatted;
+                          * 4/5 are set by func_8006103c */
+    s16 count;           /* 0xe2: files found */
+    s16 unkE4;           /* 0xe4: 1 when at least two blocks are free */
+    u8 unkE6[2];
+} MenuCard;
+
+/*
+ * The memory card screens' view of the menu scratchpad block's first 0x1f4
+ * bytes (src/st/card.c): the screen state halfwords (MenuState.half), the
+ * SwCARD and HwCARD event descriptors (EvSpIOE, EvSpERROR, EvSpTIMOUT,
+ * EvSpNEW each) and both ports' directories. Later fields are MenuScratch's.
+ */
+typedef struct {
+    s16 unk0;            /* 0x00: message id */
+    s16 unk2;            /* 0x02 */
+    long sw_events[4];   /* 0x04 */
+    long hw_events[4];   /* 0x14 */
+    MenuCard cards[2];   /* 0x24 */
+} MenuCardScratch;
+
+#define MENU_CARD_SCRATCH ((MenuCardScratch *)0x1f800000)
 
 typedef struct {
     MenuState unk0;      /* 0x000 */
     u8 unk5C[0x158];     /* 0x05c */
     s16 unk1B4[14];      /* 0x1b4: attribute values */
     u8 unk1D0[0x24];     /* 0x1d0 */
-    MenuRecord *unk1F4;  /* 0x1f4: the listed records */
-    u16 unk1F8;          /* 0x1f8 */
+    MenuCard *unk1F4;    /* 0x1f4: the listed records: the current port's directory */
+    s16 unk1F8;          /* 0x1f8: the memory card port (src/st/card.c) */
     s16 unk1FA;          /* 0x1fa: list length */
     s16 unk1FC;          /* 0x1fc */
     s16 unk1FE;          /* 0x1fe: cursor row */
     s16 unk200;          /* 0x200: first visible list entry */
-    u16 unk202;          /* 0x202 */
-    u8 unk204[2];        /* 0x204 */
+    s16 unk202;          /* 0x202: dialog choice (func_800615d8 returns it) */
+    s16 unk204;          /* 0x204: lowest unused save file number (func_8006103c) */
     s16 unk206;          /* 0x206 */
-    u8 unk208[0x54];     /* 0x208 */
+    s32 unk208;          /* 0x208: func_80062c28 hands it to func_800562d4 */
+    u8 unk20C[0x50];     /* 0x20c */
     s16 unk25C[14];      /* 0x25c: attribute changes */
     u8 unk278[0x46];     /* 0x278 */
     s16 unk2BE;          /* 0x2be */

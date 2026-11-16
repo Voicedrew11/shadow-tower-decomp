@@ -17,6 +17,9 @@ extern void exit(int status);
 extern char *strcpy(char *destination, const char *source);
 extern char *strcat(char *destination, const char *source);
 extern int strncmp(const char *left, const char *right, unsigned long count);
+/* LIBC ITOA: formats value with sprintf into its own static buffer and
+ * returns it (ST.EXE 0x80078ae4). */
+extern char *itoa(int value);
 /* LIBC exports abs, but Psy-Q 3.0 comments its CONVERT.H declaration out and
  * ABS.H's macro is unparenthesized. GCC expands this prototype as its builtin. */
 extern int abs(int value);

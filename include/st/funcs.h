@@ -76,7 +76,13 @@ void func_8005735c(void);
 void func_80057684(void);
 void func_80057744(void);
 void func_80057a28(void);
+void func_800562d4(u8 *buf, s32 arg); /* band P: fills the save data (src/st/card.c) */
+void func_80056aa0(u8 *buf); /* band P: applies loaded save data */
 void func_80057a3c(void);
+void func_80057cc8(void); /* band P: the menu screens' confirm sound */
+void func_80057cec(void); /* band P: cancel sound */
+void func_80057d10(void); /* band P: cursor sound */
+void func_80057d34(void);
 void func_80057c54(void);
 void func_80057b10(void);
 void func_80057da0(void);
