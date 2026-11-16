@@ -77,7 +77,7 @@ void func_80055374(long *pos, SVECTOR *rot)
     p.vx = pos[0];
     p.vy = pos[1] + 1600;
     p.vz = pos[2];
-    DAT_801cba08.unk16D8 = 0;
+    DAT_801cd0e0 = 0;
     req.unk0 = 0;
     req.unk4 = p;
     req.unk1C = 1056;
@@ -129,7 +129,7 @@ void func_80055374(long *pos, SVECTOR *rot)
     for (; (i = func_8004f718(i, &vis_lists)) != -1; i++) {
         b = &vis_table_b.entries[i];
         kind = vis_table_b.unk0000[b->unk0a].unk00[0];
-        DAT_801cba08.unk16D8 = 1;
+        DAT_801cd0e0 = 1;
         b->unk0E = 1;
         switch (kind) {
         case 0:

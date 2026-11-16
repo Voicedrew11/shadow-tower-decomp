@@ -172,14 +172,16 @@ typedef struct {
     u8 unk1478[48];
     u32 unk14A8[0x5c];   /* 0x14a8: one bit per map id (func_800241d0) */
     CdlLOC unk1618[40];  /* 0x1618: the XA stream positions func_80044674 searches */
-    u8 unk16B8[0x16d8 - 0x16b8];
-    s32 unk16D8;         /* 0x16d8: item use result (src/st/item.c) */
+    u8 unk16B8[0x16dc - 0x16b8];
     u8 unk16DC;
     u8 unk16DD[3];
     s32 unk16E0;         /* 0x16e0: save id, -1 until the first save (src/st/save.c) */
     u8 unk16E4[48];      /* by area */
 } Data801cba08;
 extern Data801cba08 DAT_801cba08;
+/* 0x801cd0e0: the examine/item-use result (0 none, 1 done, 2 nothing to use;
+ * src/st/item.c). Retail addresses it only as its own scalar. */
+extern s32 DAT_801cd0e0;
 
 /* .sbss words the map page reads with lui; their owner is unknown. */
 extern s32 DAT_8008818c;
