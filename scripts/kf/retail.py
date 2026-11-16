@@ -206,8 +206,10 @@ VENDORED_FUNCTION_FIELDS = (
 )
 
 # Confidence names carry the SDK release they were proven against: `sdk42`
-# for the supplied archives, `psyq420` for a ghidra_psx_ldr signature set;
-# `relink-map-sdk42` places a member by a byte-identical native relink map.
+# for the supplied archives, `psyq420` for a ghidra_psx_ldr signature set.
+# `relink-map-sdk42` marks a member the byte-identical native relink's PSYLINK
+# map places: too short or too static for a function ID (END.EXE StSetMask,
+# STR.EXE's and TITLE.EXE's relink-placed LIBSND/LIBSPU/LIBPAD members).
 VENDORED_CONFIDENCE = re.compile(
     r"fid-sdk\d+(?:-ambiguous)?"
     r"|exact-sdk\d+(?:-short|-ambiguous|-complete)?"

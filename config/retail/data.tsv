@@ -325,7 +325,14 @@ TITLE.EXE	0x80024e28	0x13628	0x4	unclassified	coverage-gap			payload-complement	
 TITLE.EXE	0x80025780	0x13f80	0xc	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 TITLE.EXE	0x800263c8	0x14bc8	0x4	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 TITLE.EXE	0x80026840	0x15040	0xc	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
-TITLE.EXE	0x8002690c	0x1510c	0x26f4	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
+TITLE.EXE	0x8002690c	0x1510c	0x21b0	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
+TITLE.EXE	0x80028abc	0x172bc	0x4	pointer	proven	next_program	u8 *	asm;src/title/main.c title.main	$gp+0; points at PSX.EXE next-program byte 0x800103f0
+TITLE.EXE	0x80028ac0	0x172c0	0x4	pointer	proven	PTR_80028ac0	u8 *	asm;src/title/main.c title.main	$gp+4; points at 0x800103f1; main stores 2 there for Continue
+TITLE.EXE	0x80028ac4	0x172c4	0x28	unclassified	coverage-gap			payload-complement	title.main SDATA literals: clear_vram RECT, "\ST\\", ";1", title_menu RECT, RECT, CVECTOR
+TITLE.EXE	0x80028aec	0x172ec	0x24	unclassified	coverage-gap			payload-complement	.sbss alignment and MALLOC.OBJ .sbss
+TITLE.EXE	0x80028b10	0x17310	0x6	bss	proven	pad_align	u_char[6]	asm;src/title/main.c title.main	.sbss; $gp+84; PadSetActAlign table
+TITLE.EXE	0x80028b16	0x17316	0x12	unclassified	coverage-gap			payload-complement	.sbss alignment and MALLOC.OBJ .bss
+TITLE.EXE	0x80028b28	0x17328	0x4d8	bss	proven	sound_bank	SoundBank	asm;src/title/main.c title.main	VAB id and VAB header copy; continues past the load image
 OPTXT.EXE	0x80011000	0x800	0x944	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 OPTXT.EXE	0x800131ec	0x29ec	0x4	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 OPTXT.EXE	0x80015a44	0x5244	0xc	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data

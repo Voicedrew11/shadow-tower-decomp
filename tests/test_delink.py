@@ -225,6 +225,50 @@ class MipsElfTests(unittest.TestCase):
         )
         self.assertEqual(used["action"], "paired-symbol")
 
+    def test_hi_lo_pair_through_a_copied_lui_register(self) -> None:
+        # lui v0,0x801c; move s3,v0; nop; sw v0,-21400(s3): GCC copies the high
+        # half before the low uses it, and the pair stays one HI16/LO16.
+        function = Function(
+            "GAME.EXE", 0x80010000, 16, 16, 1, "test", "test", "test"
+        )
+        catalog = Catalog(
+            functions={"GAME.EXE": (function,)},
+            function_starts={"GAME.EXE": {function.va: function}},
+            data={"GAME.EXE": ()},
+        )
+        lui, move, store = 0x3C02801C, 0x00409821, 0xAE62AC68
+        self.assertEqual(decode_hi_lo_target(lui, store, move), 0x801BAC68)
+        with self.assertRaisesRegex(ValueError, "does not consume"):
+            decode_hi_lo_target(lui, store)
+        with self.assertRaisesRegex(ValueError, "does not consume"):
+            decode_hi_lo_target(lui, store, 0x00409021)  # move s2,v0
+        row = {
+            "image": "GAME.EXE",
+            "site_va": f"{function.va:#x}",
+            "paired_site_va": f"{function.va + 12:#x}",
+            "kind": "mips_hi16_lo16",
+            "channel": "reachable-code",
+            "target_va": "0x801bac68",
+            "target_region": "bss",
+            "target_name": "DAT_801bac68",
+            "opcode": "lui+sw",
+            "confidence": "manual-decoded",
+            "status": "reviewed",
+        }
+        blob = bytearray(struct.pack("<4I", lui, move, 0, store))
+        relocations, used = _apply_relocation(blob, function, row, catalog, "safe")
+        self.assertEqual(
+            relocations,
+            [
+                MipsRelocation(0, "R_MIPS_HI16", "DAT_801bac68"),
+                MipsRelocation(12, "R_MIPS_LO16", "DAT_801bac68"),
+            ],
+        )
+        self.assertEqual(used["action"], "paired-symbol")
+        other = bytearray(struct.pack("<4I", lui, 0x00409021, 0, store))
+        with self.assertRaisesRegex(ValueError, "does not consume"):
+            _apply_relocation(other, function, row, catalog, "safe")
+
     def test_reviewed_instruction_word_pair_is_safe(self) -> None:
         function = Function(
             "GAME.EXE", 0x80010000, 8, 8, 1, "test", "test", "test"

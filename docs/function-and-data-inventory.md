@@ -25,17 +25,17 @@ symbols or pretending that WIP names are original symbols:
 | `PSX.EXE` | 11 | 10 | 1 |
 | `STR.EXE` | 322 | 302 | 20 |
 | `ST.EXE` | 1,139 | 457 | 682 |
-| `TITLE.EXE` | 387 | 353 | 34 |
+| `TITLE.EXE` | 387 | 369 | 18 |
 | `OPTXT.EXE` | 283 | 254 | 29 |
 | `VS.EXE` | 660 | 401 | 259 |
 | `END.EXE` | 276 | 261 | 15 |
 | 36 `FDAT_nnn.BIN` | 943 (23–37 each) | 0 | 943 |
-| **Total** | **4,021** | **2,038** | **1,983** |
+| **Total** | **4,021** | **2,054** | **1,967** |
 
 PSX.EXE `main` is reconstructed (`src/psx/main.c`) with its six data
-identities and reviewed relocations, END.EXE's fifteen game functions
-(`src/end/main.c`) and STR.EXE's twenty (`src/str/main.c`) with their data;
-every other game identity is
+identities and reviewed relocations, STR.EXE's twenty game functions
+(`src/str/main.c`), TITLE.EXE's eighteen (`src/title/main.c`) and END.EXE's
+fifteen (`src/end/main.c`) with their data; every other game identity is
 address-only with a candidate signature from the static MIPS live-in
 heuristic (`kf inventory seed`). The tables are WIP, and the rules below
 say how they grew.
@@ -88,7 +88,11 @@ its row's confidence is `relink-map-sdk42`. The same holds for STR.EXE
 as game code: `PADMAIN`'s exported `_padSetVsyncParam`, `_padInitSioMode` and
 `_padWaitRXready` and three static functions, and all five static functions
 of `PADIF` (whose only export is the `padIntFunc` data table); the
-byte-identical STR.EXE relink places each at its member offset.
+byte-identical STR.EXE relink places each at its member offset. The
+byte-identical TITLE.EXE relink places sixteen more the census had left as
+game candidates: `SpuInit` (LIBSPU `S_I`), `SsQuit`, `_SsSndPlay`,
+`SsUtReverbOn`, `_SsVmDamperOff` (LIBSND), three exports and three statics of
+LIBPAD `PADMAIN`, and the five `PADIF` statics that `padIntFunc` points at.
 
 Not admitted: the overlays' two-instruction default handler (`jr ra; nop`),
 matched only by an old LIBSND `VM_VIB` signature, since the overlays link no
@@ -186,4 +190,4 @@ and hardware references are not auto-admitted.
 
 The inventories are intentionally iterative. Missing functions, relocations,
 data extents, and xrefs can invalidate earlier candidates without invalidating
-the workflow. Only PSX.EXE `main`'s, STR.EXE's and END.EXE's relocations are admitted so far.
+the workflow. Only PSX.EXE `main`'s, STR.EXE's, TITLE.EXE's and END.EXE's relocations are admitted so far.
