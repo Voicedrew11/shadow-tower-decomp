@@ -27,10 +27,10 @@ symbols or pretending that WIP names are original symbols:
 | `ST.EXE` | 1,139 | 457 | 682 |
 | `TITLE.EXE` | 387 | 369 | 18 |
 | `OPTXT.EXE` | 283 | 265 | 18 |
-| `VS.EXE` | 660 | 401 | 259 |
+| `VS.EXE` | 660 | 406 | 254 |
 | `END.EXE` | 276 | 261 | 15 |
 | 36 `FDAT_nnn.BIN` | 943 (23–37 each) | 0 | 943 |
-| **Total** | **4,021** | **2,065** | **1,956** |
+| **Total** | **4,021** | **2,070** | **1,951** |
 
 PSX.EXE `main` is reconstructed (`src/psx/main.c`) with its six data
 identities and reviewed relocations, STR.EXE's twenty game functions
