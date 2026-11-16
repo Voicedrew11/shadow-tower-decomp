@@ -476,6 +476,42 @@ source = "src/st/menu_attr.c"
 profile = "probe-gcc272cdk-o2-g0"
 
 [[unit]]
+unit = "st.stats"
+image = "ST.EXE"
+source = "src/st/stats.c"
+profile = "probe-gcc272cdk-o2-g0"
+
+[[unit]]
+unit = "st.points"
+image = "ST.EXE"
+source = "src/st/points.c"
+profile = "probe-gcc272cdk-o2-g8"
+
+[[unit]]
+unit = "st.menu_open"
+image = "ST.EXE"
+source = "src/st/menu_open.c"
+profile = "probe-gcc272cdk-o2-g8"
+
+[[unit]]
+unit = "st.options"
+image = "ST.EXE"
+source = "src/st/options.c"
+profile = "probe-gcc272cdk-o2-g8"
+
+[[unit]]
+unit = "st.card"
+image = "ST.EXE"
+source = "src/st/card.c"
+profile = "probe-gcc272cdk-o2-g8"
+
+[[unit]]
+unit = "st.menu_vram"
+image = "ST.EXE"
+source = "src/st/menu_vram.c"
+profile = "probe-gcc272cdk-o2-g8"
+
+[[unit]]
 unit = "title.main"
 image = "TITLE.EXE"
 source = "src/title/main.c"

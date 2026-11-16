@@ -84,6 +84,7 @@ typedef struct {
 /* The screen state at the start of the scratchpad, per screen. */
 typedef union {
     s32 word;
+    u32 *block;          /* func_800637c0's 21504-byte message copy */
     s16 half[2];
     MenuGrid grid;
     MenuList list;
@@ -115,29 +116,64 @@ typedef union {
     } levels;            /* func_8002b84c */
 } MenuState;
 
-/* A 32-byte list record func_8002c2b8 lists. */
+/*
+ * A 32-byte list record func_8002c2b8 lists: one memory card save file
+ * (src/st/card.c): its directory name, the number in its name and bytes
+ * from its header.
+ */
 typedef struct {
-    u8 unk0[0x19];
+    char name[0x14];     /* 0x00: the file name firstfile/nextfile found */
+    s32 unk14;           /* 0x14: the two digits at name[17..18] */
+    u8 unk18;
     u8 kind;             /* 0x19: indexes the record title table */
     u16 unk1A;           /* 0x1a */
-    u8 unk1C[4];
+    u16 unk1C;           /* 0x1c */
+    u8 unk1E;            /* 0x1e */
+    u8 unk1F;
 } MenuRecord;
+
+/* One memory card port's directory as the save screens keep it. */
+typedef struct {
+    MenuRecord files[7]; /* 0x00 */
+    u16 status;          /* 0xe0: 0 ready, 1 new card, 2 error, 3 unformatted;
+                          * 4/5 are set by func_8006103c */
+    s16 count;           /* 0xe2: files found */
+    s16 unkE4;           /* 0xe4: 1 when at least two blocks are free */
+    u8 unkE6[2];
+} MenuCard;
+
+/*
+ * The memory card screens' view of the menu scratchpad block's first 0x1f4
+ * bytes (src/st/card.c): the screen state halfwords (MenuState.half), the
+ * SwCARD and HwCARD event descriptors (EvSpIOE, EvSpERROR, EvSpTIMOUT,
+ * EvSpNEW each) and both ports' directories. Later fields are MenuScratch's.
+ */
+typedef struct {
+    s16 unk0;            /* 0x00: message id */
+    s16 unk2;            /* 0x02 */
+    long sw_events[4];   /* 0x04 */
+    long hw_events[4];   /* 0x14 */
+    MenuCard cards[2];   /* 0x24 */
+} MenuCardScratch;
+
+#define MENU_CARD_SCRATCH ((MenuCardScratch *)0x1f800000)
 
 typedef struct {
     MenuState unk0;      /* 0x000 */
     u8 unk5C[0x158];     /* 0x05c */
     s16 unk1B4[14];      /* 0x1b4: attribute values */
     u8 unk1D0[0x24];     /* 0x1d0 */
-    MenuRecord *unk1F4;  /* 0x1f4: the listed records */
-    u16 unk1F8;          /* 0x1f8 */
+    MenuCard *unk1F4;    /* 0x1f4: the listed records: the current port's directory */
+    s16 unk1F8;          /* 0x1f8: the memory card port (src/st/card.c) */
     s16 unk1FA;          /* 0x1fa: list length */
     s16 unk1FC;          /* 0x1fc */
     s16 unk1FE;          /* 0x1fe: cursor row */
     s16 unk200;          /* 0x200: first visible list entry */
-    u16 unk202;          /* 0x202 */
-    u8 unk204[2];        /* 0x204 */
+    s16 unk202;          /* 0x202: dialog choice (func_800615d8 returns it) */
+    s16 unk204;          /* 0x204: lowest unused save file number (func_8006103c) */
     s16 unk206;          /* 0x206 */
-    u8 unk208[0x54];     /* 0x208 */
+    s32 unk208;          /* 0x208: func_80062c28 hands it to func_800562d4 */
+    u8 unk20C[0x50];     /* 0x20c */
     s16 unk25C[14];      /* 0x25c: attribute changes */
     u8 unk278[0x292 - 0x278]; /* 0x278 */
     u16 unk292[21];      /* 0x292: copy of viewer.unk38 (func_8005975c, func_80059cec) */
@@ -159,7 +195,8 @@ typedef struct {
     s16 unk2E2;          /* 0x2e2 */
     u8 unk2E4;           /* 0x2e4: cursor blink phase */
     u8 unk2E5;           /* 0x2e5: text font mode (0: 6x12 half-width cells) */
-    DVECTOR unk2E6[5];   /* 0x2e6: VRAM positions func_80058dc4 sets (image, CLUT pairs) */
+    DVECTOR unk2E6[5];   /* 0x2e6: VRAM positions func_80058dc4 sets (image, CLUT pairs);
+                          * [0]/[1] func_80063260's texture and CLUT, [2]/[3] func_800637c0's */
     u8 unk2FA[6];        /* 0x2fa */
     CVECTOR style[8];    /* 0x300: text colours; .cd carries the glyph size */
     CVECTOR *unk320;     /* 0x320: figure colours of the status pages */
@@ -348,5 +385,18 @@ void func_800319a8(void);
 void func_80031aec(void);
 void func_80031cfc(void);
 void func_80031d50(void);
+
+/*
+ * The option screens' block below menu_messages (src/st/menu_vram.c):
+ * func_800637c0 allocates it and func_80063954 frees it. WIP extent.
+ */
+typedef struct {
+    u32 *unk0;           /* 0x00: 144 bytes from CD archive 3 member 1 */
+    u8 unk4[0x1c];
+} Data801e0d08;
+extern Data801e0d08 DAT_801e0d08;
+/* The equipment ids func_800637c0 records (viewer.unk38[3], [4], [16],
+ * [17], [6], [12]) for func_80063954 to compare. */
+extern u16 DAT_801e0d28[6];
 
 #endif

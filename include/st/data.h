@@ -324,7 +324,8 @@ typedef struct {
     u16 unk6;            /* 0x06..0x0c: src/st/pad.c's repeat and combination words */
     u16 unk8;
     u16 unkA;
-    u16 unkC;            /* 0x0c: bits the menu loop func_80058ef4 consumes */
+    u16 unkC;            /* 0x0c: bits the menu loop func_80058ef4 consumes; the memory card
+                          * screens' port-select bits (src/st/card.c) */
     u8 unkE;             /* 0x0e: 1 while the controller is disconnected */
     u8 unkF;
     u8 unk10;
@@ -384,7 +385,7 @@ typedef struct {
  * rotation, the 322 VAB bank slots, the SPU key status bytes and the sound
  * playing on each voice, the 1232-entry sound table (loaded from an area
  * pack, src/st/area_a.c) and the 16 bank buffers. WIP extent up to
- * menu_messages.
+ * DAT_801e0d08 (band P).
  */
 typedef struct {
     u8 unk0;
@@ -398,7 +399,7 @@ typedef struct {
     u8 unkA80[4];
     StSound sounds[1232]; /* 0xa84 */
     StSoundBuf bufs[16]; /* 0x3aa4 */
-    u8 unk3B24[0x3b90 - 0x3b24];
+    u8 unk3B24[0x3b48 - 0x3b24];
 } Data801dd1c0;
 extern Data801dd1c0 DAT_801dd1c0;
 
