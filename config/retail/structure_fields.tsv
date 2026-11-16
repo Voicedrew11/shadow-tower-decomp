@@ -1,3 +1,11 @@
 # MANUALLY MANAGED - exact target offsets/extents for every field in structures.tsv.
 # opaque means the byte range is modeled for layout but has no supported semantic meaning yet.
 structure	offset	size	name	datatype	meaning_confidence	evidence	note
+StAnimSlot	0	2	unk0	s16	opaque	asm;src/st/anim.c st.anim	state: anim_slots_init sets 4, anim_pose 6, anim_slots_retire 5; bits other than 4 mean in use
+StAnimSlot	2	2	unk2	u16	candidate	asm;src/st/anim.c st.anim	model file id, 0xffff when unset
+StAnimSlot	4	2	unk4	u16	candidate	asm;src/st/anim.c st.anim	clip, 255 when unset
+StAnimSlot	6	2	unk6	u16	candidate	asm;src/st/anim.c st.anim	key index inside the clip
+StAnimSlot	8	4	unk8	SVECTOR *	candidate	asm;src/st/anim.c st.anim	the key's start keyframe
+StAnimSlot	12	4	unkC	SVECTOR *	candidate	asm;src/st/anim.c st.anim	the key's end keyframe
+StAnimSlot	16	4	unk10	SVECTOR *	candidate	asm;src/st/anim.c st.anim	end minus start per vertex, from func_800152d0, freed by anim_slot_free
+StAnimSlot	20	4	unk14	StAnimSlot **	candidate	asm;src/st/anim.c st.anim	the owner's slot pointer, cleared by anim_slot_free

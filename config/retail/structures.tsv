@@ -1,3 +1,4 @@
 # MANUALLY MANAGED - target C layouts used by semantic function/data identities.
 # A supported layout proves current size/offset modeling, not an original typedef spelling.
 name	size	layout_confidence	evidence	note
+StAnimSlot	0x18	candidate	asm;src/st/anim.c st.anim	vertex-animation slot; world_state.anim_slots[16] at +0xa5fc

@@ -91,7 +91,7 @@ typedef struct {
 } Model;
 
 /* One vertex-animation slot (src/st/anim.c): the clip key it blends and
- * the per-vertex deltas it allocated. */
+ * the per-vertex deltas it allocated. Tagged for its owner back-pointer. */
 typedef struct StAnimSlot {
     s16 unk0;            /* 0x00: state; bit 2 is set on every slot */
     u16 unk2;            /* 0x02: model file id, 0xffff when unset */
