@@ -91,9 +91,18 @@ typedef struct {
  * of 48 bytes at +0x3710.
  */
 typedef struct {
-    u8 unk0[4];
+    u8 unk0[2];
+    u8 unk2;             /* 0x02: carry limit or price base (src/st/menu_shop.c) */
+    u8 unk3;             /* 0x03 */
     u8 unk4;             /* 0xff: none (func_80014544) */
-    u8 unk5[0x27];
+    u8 unk5[0xb];
+    u8 unk10[14];        /* 0x10: counts func_80031674 lists */
+    u8 unk1E[6];
+    u16 unk24;           /* 0x24: func_80031378 shows it / 4.54 */
+    u8 unk26;
+    u8 unk27;            /* 0x27 */
+    u8 unk28;            /* 0x28 */
+    u8 unk29[3];
 } Vis44;
 
 typedef struct {

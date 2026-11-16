@@ -182,6 +182,66 @@ source = "src/st/bankload.c"
 profile = "probe-gcc272cdk-o2-g0"
 
 [[unit]]
+unit = "st.menu_pages"
+image = "ST.EXE"
+source = "src/st/menu_pages.c"
+profile = "probe-gcc272cdk-o2-g8"
+
+[[unit]]
+unit = "st.menu_dialogs"
+image = "ST.EXE"
+source = "src/st/menu_dialogs.c"
+profile = "probe-gcc272cdk-o2-g8"
+
+[[unit]]
+unit = "st.menu_shop"
+image = "ST.EXE"
+source = "src/st/menu_shop.c"
+profile = "probe-gcc272cdk-o2-g8"
+
+[[unit]]
+unit = "st.menu_status"
+image = "ST.EXE"
+source = "src/st/menu_status.c"
+profile = "probe-gcc272cdk-o2-g8"
+
+[[unit]]
+unit = "st.menu_status_pages"
+image = "ST.EXE"
+source = "src/st/menu_status_pages.c"
+profile = "probe-gcc272cdk-o2-g8"
+
+[[unit]]
+unit = "st.menu_status_frame"
+image = "ST.EXE"
+source = "src/st/menu_status_frame.c"
+profile = "probe-gcc272cdk-o2-g8"
+
+[[unit]]
+unit = "st.menu_store"
+image = "ST.EXE"
+source = "src/st/menu_store.c"
+profile = "probe-gcc272cdk-o2-g8"
+
+[[unit]]
+unit = "st.menu_store_frame"
+image = "ST.EXE"
+source = "src/st/menu_store_frame.c"
+profile = "probe-gcc272cdk-o2-g8"
+
+[[unit]]
+unit = "st.menu_grid"
+image = "ST.EXE"
+source = "src/st/menu_grid.c"
+profile = "probe-gcc272cdk-o2-g8"
+
+[[unit]]
+unit = "st.menu_misc"
+image = "ST.EXE"
+source = "src/st/menu_misc.c"
+profile = "probe-gcc272cdk-o2-g8"
+
+[[unit]]
 unit = "title.main"
 image = "TITLE.EXE"
 source = "src/title/main.c"
