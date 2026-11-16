@@ -45,6 +45,7 @@ program shares one command-file layout:
 	org	$<load address>
 text	group
 bss	group	bss
+	section	.rodata,text
 	section	.rdata,text
 	section	.text,text
 	section	.ctors,text
@@ -62,8 +63,13 @@ bss	group	bss
 
 - **Load address.** From `config/images.toml`: `0x80010000` for PSX,
   `0x80012000` for TITLE, `0x80011000` for the others.
-- **`.rdata` before `.text`.** Every program begins with its read-only data;
-  the overlays' text starts at the entry point.
+- **Read-only data before `.text`.** Every program begins with its game
+  units' constant pools (`.rodata`), then `.rdata`: the units' switch tables
+  followed by the SDK libraries' read-only data. The compiler writes both
+  kinds of game data to `.rdata`; the build moves the constants (see
+  [the build system](build-system.md#unit-manifest-and-address-claims)).
+  `ST.EXE` is the evidence: every unit's constants precede every unit's
+  tables, each in link order. The overlays' text starts at the entry point.
 - **`.ctors`/`.dtors`.** LIBSN `SNMAIN` declares them. Placed after
   `.text`, both are empty at `.data`'s start, which is where retail
   `PSX.EXE`'s `__main` walks the constructor list (`0x80010350`). Left
@@ -160,9 +166,10 @@ PSYLINK 2.73D:
 movie player (24-bit only, with a global end frame) and CD helpers, plus a
 LIBPAD controller module. The link confirmed END's rules and adds:
 
-- GCC writes a unit's constants (strings, initializers) before its code, so
-  the one switch table (`pad_update_state`) closes `.rdata` after `main`'s
-  program-path table; the `.rdata` claim is `0x80011000`-`0x8001112b`.
+- GCC writes a unit's constants (strings, initializers) before its code. The
+  unit's constant pool is `0x80011000`-`0x8001110f`, its last four bytes the
+  zero tail that ends a pool on an eight-byte boundary; the one switch table
+  (`pad_update_state`) follows at `0x80011110`, before LIBCD's `.rdata`.
 - `.sdata` ends at `0x800328d4`; `.sbss` starts 8-aligned at `0x800328d8`
   with MALLOC.OBJ's 32 bytes, then the unit's statics from `0x800328f8`.
 - The ten exported COMMON buffers follow the 56-byte `dec` static in
@@ -190,9 +197,8 @@ link confirmed END's placement rules again:
 - The unit's six buffers are COMMON, allocated from `0x80028b28` in
   hash-bucket order (`sound_bank`, `file_buffer`, `display`, `pad_data`,
   `menu`, `pad_state`); the spellings are WIP names inside that order.
-- The switch table of `pad_update_state` follows `main`'s literals at the
-  end of the unit's `.rdata`: GCC writes jump tables after the unit's
-  other read-only data.
+- The switch table of `pad_update_state` follows `main`'s literals, the
+  first of the image's `.rdata`.
 
 The relink also places sixteen library functions the FID census left as
 game candidates (LIBSND, LIBSPU and LIBPAD members; see
@@ -255,7 +261,8 @@ ASPSX 2.79D and PSYLINK 2.73D chain:
   unreferenced identity rather than padding.
 - A jump table is emitted after `.align 3`, which ASPSX applies relative to
   the object's `.rdata` start; table offsets therefore show which object an
-  unexplained word belongs to.
+  unexplained word belongs to. Constant pools link separately, before every
+  table (`.rodata`), each ending eight-byte aligned.
 - Under `-G8`, initialized data of at most eight bytes goes to `.sdata` and
   private tentative data of at most eight bytes to `.sbss`. Unlike ASPSX
   1.07, ASPSX 2.79 also addresses that data `$gp`-relative, so `-G` changes
@@ -379,7 +386,7 @@ hash-verified retail disc remains the runtime reference.
 
 `NativeBuildControls` in `tests/test_executable.py` link synthetic programs
 for PSX and for overlays with and without the allocator. They check the
-object and `inclib` order, the startup at the entry point, `.rdata` before
+object and `inclib` order, the startup at the entry point, read-only data before
 `.text`, `$gp` at the first `.sdata` byte, bss exclusion, the CPE2X 1.5
 header, unchanged archives, and rejection of unresolved references, an
 unknown image, or stale output. They read no retail file.

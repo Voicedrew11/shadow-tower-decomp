@@ -24,7 +24,7 @@
 /* The semi-transparency argument that leaves a quad opaque. */
 #define OPAQUE 255
 
-RODATA(0x80011000, 0xe)
+RODATA(0x80011000, 0x10)
 SDATA(0x80087ef4, 0x10)
 
 /* Builds a textured quad in the current frame's work area and draws it at once. */

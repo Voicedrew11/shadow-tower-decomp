@@ -123,7 +123,8 @@ static void load_tims(u_long *addr, VramOffset *pixel_offset, VramOffset *clut_o
                       int absolute);
 static void show_logo(void);
 
-RODATA(0x80011000, 0x12c)
+RODATA(0x80011000, 0x110)
+JUMPTABLES(0x80011110, 0x1c)
 SDATA(0x800328a0, 0x34)
 
 DATA(0x8003288c, 0x4, ".sdata")

@@ -138,7 +138,8 @@ def _source_data_sizes(preprocessed: Path, names: tuple[str, ...],
     symbol = symbols[0]
     section = obj.sections[symbol.section]
     start, size = symbol.value, 4 * (len(names) + 2)
-    if section.name not in ('.rdata', '.data', '.sdata') or start + size > len(section.data):
+    if (section.name not in ('.rodata', '.rdata', '.data', '.sdata')
+            or start + size > len(section.data)):
         raise RuntimeError('source-size probe table is not initialized')
     if any(start <= offset < start + size for offset, _, _ in section.patches):
         raise RuntimeError('source-size probe table is not constant')

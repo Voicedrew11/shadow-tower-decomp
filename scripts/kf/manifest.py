@@ -7,13 +7,14 @@ import tomllib
 from dataclasses import dataclass, replace
 from pathlib import Path
 
-from scripts.kf.delink import Datum, Function, Module, load_catalog
+from scripts.kf.delink import Datum, Function, Module, _ranges, load_catalog
 from scripts.kf.model import (
     Claim,
     DataClaim,
     DataIdentity,
     data_identities,
     identity_names,
+    scan_jumptable_claims,
     scan_rodata_claims,
     scan_sdata_claims,
     scan_source,
@@ -65,7 +66,18 @@ class Unit:
     rodata: tuple[int, int] | None = None
     defines: tuple[str, ...] = ()
     scope: str = "decomp"
-    sdata: tuple[int, int] | None = None
+    # SDATA() literal ranges in ascending order.
+    sdata: tuple[tuple[int, int], ...] = ()
+    jumptables: tuple[int, int] | None = None
+
+    def __post_init__(self) -> None:
+        object.__setattr__(self, "sdata", _ranges(self.sdata))
+
+    def owned_ranges(self) -> tuple[tuple[str, int, int], ...]:
+        """The anonymous load ranges the unit claims: (kind, va, size)."""
+        return (*((("RODATA", *self.rodata),) if self.rodata else ()),
+                *((("JUMPTABLES", *self.jumptables),) if self.jumptables else ()),
+                *(("SDATA", va, size) for va, size in self.sdata))
 
     @property
     def va(self) -> int:
@@ -111,6 +123,7 @@ class Manifest:
                 unit.data,
                 unit.rodata,
                 unit.sdata,
+                unit.jumptables,
             )
             for unit in self.units
         )
@@ -347,52 +360,86 @@ def _bind_data_claims(
     return tuple(data)
 
 
-def _sdata_range(
+def _overlaps_other_unit(image: str, va: int, size: int, units: list[Unit]) -> str | None:
+    """The unit whose anonymous RODATA/JUMPTABLES/SDATA range meets [va, va+size)."""
+    for other in units:
+        if other.image == image and any(
+            va < start + extent and start < va + size
+            for _kind, start, extent in other.owned_ranges()
+        ):
+            return other.unit
+    return None
+
+
+def _range_claim(source: Path, image: str, kind: str, claims, units: list[Unit],
+                 own: tuple[tuple[str, int, int], ...]) -> tuple[int, int] | None:
+    """Validate a unit's single RODATA() or JUMPTABLES() range."""
+    if not claims:
+        return None
+    if len(claims) > 1:
+        raise ValueError(f"{source}: a unit claims at most one {kind}() range")
+    claim = claims[0]
+    layout = IMAGE_LAYOUTS[image]
+    if claim.size <= 0 or claim.va & 3 or not layout.contains(claim.va, claim.size):
+        raise ValueError(
+            f"{source}:{claim.line}: {kind}({claim.va:#x}, {claim.size:#x}) must be a "
+            f"word-aligned range inside the {image} load image"
+        )
+    other = _overlaps_other_unit(image, claim.va, claim.size, units)
+    if other is not None:
+        raise ValueError(f"{source}:{claim.line}: {kind} range overlaps unit {other!r}")
+    for owned_kind, start, extent in own:
+        if claim.va < start + extent and start < claim.va + claim.size:
+            raise ValueError(f"{source}:{claim.line}: {kind} range overlaps the unit's "
+                             f"{owned_kind} range")
+    return claim.va, claim.size
+
+
+def _sdata_ranges(
     source: Path,
     image: str,
     profile: Profile,
     claims,
     data_claims: tuple[DataClaim, ...],
     units: list[Unit],
-    rodata: tuple[int, int] | None,
-) -> tuple[int, int] | None:
-    """Validate a unit's SDATA() small-data literal range.
+    own: tuple[tuple[str, int, int], ...],
+) -> tuple[tuple[int, int], ...]:
+    """Validate a unit's SDATA() small-data literal ranges.
 
     Only a -G compile emits anonymous constants into .sdata, so the claim
-    requires a small-data profile. The range is word-aligned (the compiler
+    requires a small-data profile. Each range is word-aligned (the compiler
     aligns each constant), lies in the load image, and may not overlap a
-    named claim of this unit or another unit's literal ranges.
+    named claim of this unit or another unit's ranges. A unit whose literals
+    interleave with its named .sdata claims one range per run, ascending.
     """
-    if not claims:
-        return None
-    if len(claims) > 1:
-        raise ValueError(f"{source}: a unit claims at most one SDATA() range")
-    claim = claims[0]
-    where = f"{source}:{claim.line}"
-    if profile.small_data <= 0:
-        raise ValueError(
-            f"{where}: SDATA() needs a small-data profile; profile {profile.name!r} "
-            "compiles with -G0"
-        )
-    layout = IMAGE_LAYOUTS[image]
-    if claim.size <= 0 or claim.va & 3 or not layout.contains(claim.va, claim.size):
-        raise ValueError(
-            f"{where}: SDATA({claim.va:#x}, {claim.size:#x}) must be a word-aligned "
-            f"range inside the {image} load image"
-        )
-    end = claim.va + claim.size
-    if rodata is not None and claim.va < rodata[0] + rodata[1] and rodata[0] < end:
-        raise ValueError(f"{where}: SDATA range overlaps the unit's RODATA range")
-    for datum in data_claims:
-        if datum.va < end and claim.va < datum.va + datum.size:
-            raise ValueError(f"{where}: SDATA range overlaps DATA claim {datum.name}")
-    for other in units:
-        for owned in (other.rodata, other.sdata):
-            if other.image == image and owned is not None and (
-                claim.va < owned[0] + owned[1] and owned[0] < end
-            ):
-                raise ValueError(f"{where}: SDATA range overlaps unit {other.unit!r}")
-    return claim.va, claim.size
+    ranges: list[tuple[int, int]] = []
+    for claim in claims:
+        where = f"{source}:{claim.line}"
+        if profile.small_data <= 0:
+            raise ValueError(
+                f"{where}: SDATA() needs a small-data profile; profile {profile.name!r} "
+                "compiles with -G0"
+            )
+        layout = IMAGE_LAYOUTS[image]
+        if claim.size <= 0 or claim.va & 3 or not layout.contains(claim.va, claim.size):
+            raise ValueError(
+                f"{where}: SDATA({claim.va:#x}, {claim.size:#x}) must be a word-aligned "
+                f"range inside the {image} load image"
+            )
+        end = claim.va + claim.size
+        if ranges and claim.va < ranges[-1][0] + ranges[-1][1]:
+            raise ValueError(f"{where}: SDATA ranges must ascend without overlapping")
+        for owned_kind, start, extent in own:
+            if claim.va < start + extent and start < end:
+                raise ValueError(f"{where}: SDATA range overlaps the unit's {owned_kind} range")
+        for datum in data_claims:
+            if datum.va < end and claim.va < datum.va + datum.size:
+                raise ValueError(f"{where}: SDATA range overlaps DATA claim {datum.name}")
+        other = _overlaps_other_unit(image, claim.va, claim.size, units)
+        if other is not None:
+            raise ValueError(f"{where}: SDATA range overlaps unit {other!r}")
+        ranges.append((claim.va, claim.size))
+    return tuple(ranges)
 
 
 def load(
@@ -501,6 +548,7 @@ def load(
         defines = tuple(raw_defines)
         claims, data_claims = scan_source(source_path)
         rodata_claims = scan_rodata_claims(source_path)
+        jumptable_claims = scan_jumptable_claims(source_path)
         sdata_claims = scan_sdata_claims(source_path)
         image_token = image_key(image).upper()
         data_claims = tuple(
@@ -525,38 +573,22 @@ def load(
             # image reuses it by resolving every claimed definition through
             # that image's own identity tables, so the addresses stay
             # image-qualified while the C text is written once.
-            if rodata_claims or sdata_claims:
+            if rodata_claims or jumptable_claims or sdata_claims:
                 raise ValueError(
-                    f"{source}: RODATA()/SDATA() ranges are image-specific; unit {name!r} "
-                    "cannot bind them by name"
+                    f"{source}: RODATA()/JUMPTABLES()/SDATA() ranges are image-specific; "
+                    f"unit {name!r} cannot bind them by name"
                 )
             claims = _rebind_claims_by_name(source, image, claims, identities)
             data_claims = _rebind_data_claims_by_name(source, image, data_claims, curated_data)
-        rodata: tuple[int, int] | None = None
-        if len(rodata_claims) > 1:
-            raise ValueError(f"{source}: a unit claims at most one RODATA() range")
-        if rodata_claims:
-            claim = rodata_claims[0]
-            layout = IMAGE_LAYOUTS[image]
-            if claim.size <= 0 or claim.va & 3 or not layout.contains(claim.va, claim.size):
-                raise ValueError(
-                    f"{source}:{claim.line}: RODATA({claim.va:#x}, {claim.size:#x}) must be a "
-                    f"word-aligned range inside the {image} load image"
-                )
-            for other in units:
-                if other.image == image and other.rodata is not None and (
-                    claim.va < other.rodata[0] + other.rodata[1]
-                    and other.rodata[0] < claim.va + claim.size
-                ):
-                    raise ValueError(
-                        f"{source}:{claim.line}: RODATA range overlaps unit {other.unit!r}"
-                    )
-            rodata = (claim.va, claim.size)
-        sdata = _sdata_range(source, image, profile, sdata_claims, data_claims, units, rodata)
-        if not claims and (not data_claims or rodata is not None or sdata is not None):
+        rodata = _range_claim(source, image, "RODATA", rodata_claims, units, ())
+        own = (("RODATA", *rodata),) if rodata else ()
+        jumptables = _range_claim(source, image, "JUMPTABLES", jumptable_claims, units, own)
+        own += (("JUMPTABLES", *jumptables),) if jumptables else ()
+        sdata = _sdata_ranges(source, image, profile, sdata_claims, data_claims, units, own)
+        if not claims and (not data_claims or own or sdata):
             raise ValueError(
                 f"{path}: unit {name!r} needs ADDRESS() claims or DATA() claims "
-                f"without RODATA(): {source}"
+                f"without RODATA()/JUMPTABLES()/SDATA(): {source}"
             )
         functions = _bind_claims(
             path, name, image, source, claims, catalog, identities, claimed, scope,
@@ -580,6 +612,7 @@ def load(
                 defines,
                 scope,
                 sdata,
+                jumptables,
             )
         )
         for ordinal, (claim, function) in enumerate(zip(claims, functions)):

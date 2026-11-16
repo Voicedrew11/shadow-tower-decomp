@@ -15,7 +15,7 @@
 #include <st/text.h>
 #include <st/funcs.h>
 
-RODATA(0x80011490, 0x18)
+JUMPTABLES(0x80011490, 0x18)
 SDATA(0x80087f1c, 0x18)
 
 /* The text clip window. */

@@ -49,7 +49,7 @@ class DataExtent:
 
     @property
     def claimed(self) -> bool:
-        return self.source in {"DATA", "RODATA", "SDATA"}
+        return self.source in {"DATA", "RODATA", "JUMPTABLES", "SDATA"}
 
     @property
     def key(self) -> str:
@@ -65,16 +65,9 @@ def data_extents(
             unit.image, datum.va, datum.size, datum.symbol, datum.storage,
             "DATA", unit.unit, "source-claim", unit.source,
         ) for datum in unit.data)
-        if unit.rodata:
-            va, size = unit.rodata
+        for kind, va, size in unit.owned_ranges():
             out.append(DataExtent(
-                unit.image, va, size, f"{unit.unit}.rodata", "load", "RODATA",
-                unit.unit, "source-claim", unit.source,
-            ))
-        if unit.sdata:
-            va, size = unit.sdata
-            out.append(DataExtent(
-                unit.image, va, size, f"{unit.unit}.sdata", "load", "SDATA",
+                unit.image, va, size, f"{unit.unit}.{kind.lower()}", "load", kind,
                 unit.unit, "source-claim", unit.source,
             ))
     for filename in ("data_identities.tsv", "data.tsv"):

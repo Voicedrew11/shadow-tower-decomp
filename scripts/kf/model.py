@@ -78,6 +78,12 @@ RODATA_RE = re.compile(
     r"^\s*RODATA\(\s*(0x[0-9A-Fa-f]+)\s*,\s*(0x[0-9A-Fa-f]+|[0-9]+)\s*\)\s*"
     r"(?:/\*.*\*/\s*)?$"
 )
+# A unit's switch tables: the same shape as RODATA, for the `.rdata` run the
+# link lays out after every unit's constants.
+JUMPTABLES_RE = re.compile(
+    r"^\s*JUMPTABLES\(\s*(0x[0-9A-Fa-f]+)\s*,\s*(0x[0-9A-Fa-f]+|[0-9]+)\s*\)\s*"
+    r"(?:/\*.*\*/\s*)?$"
+)
 # Anonymous small-data literals: the same shape as RODATA, for the constants a
 # -G compile places in .sdata.
 SDATA_RE = re.compile(
@@ -118,6 +124,11 @@ def _scan_range_claims(source: Path, pattern: re.Pattern[str]) -> tuple[RodataCl
 def scan_rodata_claims(source: Path) -> tuple[RodataClaim, ...]:
     """Return the RODATA() claims of one source in file order."""
     return _scan_range_claims(source, RODATA_RE)
+
+
+def scan_jumptable_claims(source: Path) -> tuple[RodataClaim, ...]:
+    """Return the JUMPTABLES() claims of one source in file order."""
+    return _scan_range_claims(source, JUMPTABLES_RE)
 
 
 def scan_sdata_claims(source: Path) -> tuple[RodataClaim, ...]:
@@ -196,9 +207,10 @@ def scan_source(source: Path) -> tuple[tuple[Claim, ...], tuple[DataClaim, ...]]
     total = len(lines)
     while index < total:
         text = lines[index]
-        if (RODATA_RE.match(text) or SDATA_RE.match(text)) and located[index][1] != source:
-            raise ValueError(f'{located[index][1]}:{located[index][2]}: '
-                             'shared fragments must not own rodata or sdata literals')
+        if ((RODATA_RE.match(text) or SDATA_RE.match(text) or JUMPTABLES_RE.match(text))
+                and located[index][1] != source):
+            raise ValueError(f'{located[index][1]}:{located[index][2]}: shared fragments '
+                             'must not own rodata, jump tables or sdata literals')
         plain = CLAIM_RE.match(text)
         at = ADDRESS_AT_RE.match(text)
         if at is None and (DATA_AT_RE.match(text) is not None

@@ -61,6 +61,9 @@ SECTION_SYMBOL = ".text"
 DATA_SECTION_SYMBOL = ".data"
 BSS_SECTION_SYMBOL = ".bss"
 RODATA_SECTION_SYMBOL = ".rodata"
+# A unit's switch tables: the compiler's `.rdata` once its constants moved to
+# `.rodata` (scripts/psxbuild/sdk.py separate_read_only).
+JUMPTABLE_SECTION_SYMBOL = ".rdata"
 
 
 @dataclass(frozen=True)
@@ -228,6 +231,8 @@ def write_mips_elf(
     rodata: bytes = b"",
     rodata_relocations: Iterable[MipsRelocation] = (),
     rodata_symbols: Iterable[DefinedSymbol] = (),
+    rdata: bytes = b"",
+    rdata_relocations: Iterable[MipsRelocation] = (),
     common_symbols: Iterable[DefinedSymbol] = (),
 ) -> bytes:
     """Build a deterministic MIPS-I/O32 relocatable object.
@@ -267,6 +272,7 @@ def write_mips_elf(
     sbss_symbols = _check_symbols(sbss_symbols, sbss_size, ".sbss")
     rodata_relocations = _check_relocations(rodata_relocations, rodata, ".rodata")
     rodata_symbols = _check_symbols(rodata_symbols, len(rodata), ".rodata")
+    rdata_relocations = _check_relocations(rdata_relocations, rdata, ".rdata")
     sdata_relocations = _check_relocations(sdata_relocations, sdata, ".sdata")
     sdata_symbols = _check_symbols(sdata_symbols, len(sdata), ".sdata")
     has_sdata = bool(sdata) or bool(sdata_symbols) or bool(sdata_relocations)
@@ -274,7 +280,9 @@ def write_mips_elf(
     has_bss = bss_size > 0 or bool(bss_symbols)
     has_sbss = sbss_size > 0 or bool(sbss_symbols)
     has_rodata = bool(rodata) or bool(rodata_symbols)
-    if function_name is None and not (text or has_data or has_sdata or has_bss or has_sbss or has_rodata or common_symbols):
+    has_rdata = bool(rdata)
+    if function_name is None and not (text or has_data or has_sdata or has_bss or has_sbss
+                                      or has_rodata or has_rdata or common_symbols):
         raise ValueError("empty objects require data, code, or COMMON requests")
 
     # Section order: .text, .rel.text, [.data, [.rel.data]], [.bss], .symtab,
@@ -306,6 +314,14 @@ def write_mips_elf(
             sections.append(
                 _Section(".rel.rodata", SHT_REL, 0, b"", alignment=4, entry_size=REL_SIZE)
             )
+    rdata_index = 0
+    if has_rdata:
+        sections.append(_Section(".rdata", SHT_PROGBITS, SHF_ALLOC, rdata, alignment=4))
+        rdata_index = len(sections)
+        if rdata_relocations:
+            sections.append(
+                _Section(".rel.rdata", SHT_REL, 0, b"", alignment=4, entry_size=REL_SIZE)
+            )
     sdata_index = 0
     if has_sdata:
         sections.append(_Section(".sdata", SHT_PROGBITS,
@@ -333,6 +349,8 @@ def write_mips_elf(
         section_symbols.append((BSS_SECTION_SYMBOL, bss_index))
     if has_rodata:
         section_symbols.append((RODATA_SECTION_SYMBOL, rodata_index))
+    if has_rdata:
+        section_symbols.append((JUMPTABLE_SECTION_SYMBOL, rdata_index))
     if has_sdata:
         section_symbols.append((".sdata", sdata_index))
     if has_sbss:
@@ -356,7 +374,8 @@ def write_mips_elf(
     if len(set(defined_names)) != len(defined_names):
         raise ValueError("defined symbol names must be unique")
     undefined_names = sorted(
-        {item.symbol for item in (*relocations, *data_relocations, *sdata_relocations, *rodata_relocations)}
+        {item.symbol for item in (*relocations, *data_relocations, *sdata_relocations,
+                                  *rodata_relocations, *rdata_relocations)}
         - set(defined_names)
         - section_symbol_names
     )
@@ -411,6 +430,7 @@ def write_mips_elf(
                 ".rel.data": (data_relocations, data_index),
                 ".rel.sdata": (sdata_relocations, sdata_index),
                 ".rel.rodata": (rodata_relocations, rodata_index),
+                ".rel.rdata": (rdata_relocations, rdata_index),
             }[section.name]
             section = _Section(
                 section.name,

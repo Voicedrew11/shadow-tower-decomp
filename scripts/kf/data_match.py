@@ -51,7 +51,7 @@ from scripts.kf.paths import BUILD, RETAIL_CONFIG
 from scripts.kf.retail import IMAGE_LAYOUTS, read_tsv
 
 
-INIT_SECTIONS = (".data", ".rodata", ".sdata")
+INIT_SECTIONS = (".data", ".rodata", ".rdata", ".sdata")
 BSS_SECTIONS = (".bss", ".sbss")
 
 
@@ -536,10 +536,7 @@ def coverage(
         if unit.image != image:
             continue
         claims.extend((d.va, d.va + d.size) for d in unit.data if d.storage == "load")
-        for owned in (unit.rodata, unit.sdata):
-            if owned:
-                start, size = owned
-                claims.append((start, start + size))
+        claims.extend((start, start + size) for _kind, start, size in unit.owned_ranges())
     owners = _union(claims)
     total = sum(end - start for start, end in census)
     unowned = sum(

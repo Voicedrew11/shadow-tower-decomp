@@ -179,7 +179,7 @@ Every image directory contains:
 | `relocations_withheld.tsv` | every in-scope candidate not used, with reason |
 | `functions_withheld.tsv` | functions that could not be represented safely |
 | `objects/*.o` | synthetic target MIPS ELF objects, one per function |
-| `modules/*.o` | one object per manifested unit: its contiguous run of functions carved as a single `.text` with per-function symbols and rebased section-relative addends, plus `.data`/`.bss` for the globals the unit claims with `DATA()` |
+| `modules/*.o` | one object per manifested unit: its contiguous run of functions carved as a single `.text` with per-function symbols and rebased section-relative addends, plus `.data`/`.bss` for the globals the unit claims with `DATA()` and `.rodata`/`.rdata`/`.sdata` for its `RODATA()`/`JUMPTABLES()`/`SDATA()` ranges |
 
 Candidates in data rather than a current function extent are also retained in
 the withheld audit. They will move into data/translation-unit objects once
@@ -310,7 +310,7 @@ COMMON only when no object defines the symbol, so the request owns no
 storage and resolves as a reference (`roundtrip.merged_common`; listed as
 `merged_commons` in the relink audit). A `-G8` unit keeps such a tentative
 definition when ASPSX needs the size for a `$gp`-relative access. A unit whose `.sdata` holds
-only its `SDATA()` literal range places that section at the range's start. Synthetic tails imitating the probe assembler
+only its `SDATA()` literal ranges places that section at the first range's start. Synthetic tails imitating the probe assembler
 are not appended to retail claims: source alignment/extent differences remain
 real comparison failures. This is not yet a linked reconstruction or a check
 of all config-only reachable storage.

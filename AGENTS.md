@@ -79,10 +79,12 @@
 - `config/units.toml` lists units in linked (ascending address) order per
   image and carries no addresses; a function's address lives only in its
   claim.
-- A unit's switch tables and string literals are its `RODATA(va, size)`
-  claim (one per unit): jump-table pointer rows and literal strings inside
-  that range are not separate identities, and the source spells the literals
-  the original used.
+- A unit's constant pool (string literals, initializers) is its
+  `RODATA(va, size)` claim and its switch tables are its
+  `JUMPTABLES(va, size)` claim (one of each per unit; all pools link before
+  all tables): jump-table pointer rows and literal strings inside those
+  ranges are not separate identities, and the source spells the literals the
+  original used.
 - A global lives in the module that owns it, defined under
   `DATA(0xVA, size)` with its curated identity name; every other unit declares
   it `extern`. Load-image data is explicitly initialized in source, and data

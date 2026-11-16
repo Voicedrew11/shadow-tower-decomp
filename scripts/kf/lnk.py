@@ -230,9 +230,10 @@ def elf_view(data: bytes, *, functions: tuple[str, ...] = (),
             del obj.sections[number]
     sizes = sizes or {}
     functions = set(functions) | set(obj.functions) | obj.declared_functions
-    names = {number: '.rodata' if section.name == '.rdata' else section.name
-             for number, section in obj.sections.items()}
-    allowed = {'.text', '.rodata', '.data', '.sdata', '.bss', '.sbss'}
+    # Native and ELF names agree: `.rodata` holds the constants and `.rdata`
+    # the switch tables (scripts/psxbuild/sdk.py separate_read_only).
+    names = {number: section.name for number, section in obj.sections.items()}
+    allowed = {'.text', '.rodata', '.rdata', '.data', '.sdata', '.bss', '.sbss'}
     if set(names.values()) - allowed or len(set(names.values())) != len(names):
         raise ValueError('unsupported native section family')
     sections = {names[number]: section for number, section in obj.sections.items()}
@@ -334,4 +335,6 @@ def elf_view(data: bytes, *, functions: tuple[str, ...] = (),
     return write_mips_elf(
         payloads.get('.text', b''), None, 0, relocations.get('.text', []), symbols['.text'],
         rodata=payloads.get('.rodata', b''), rodata_symbols=symbols['.rodata'],
-        rodata_relocations=relocations.get('.rodata', []), common_symbols=common, **arguments)
+        rodata_relocations=relocations.get('.rodata', []),
+        rdata=payloads.get('.rdata', b''), rdata_relocations=relocations.get('.rdata', []),
+        common_symbols=common, **arguments)

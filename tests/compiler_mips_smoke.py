@@ -82,7 +82,8 @@ def main() -> int:
             assert elf.get_section(symbols['private_word']['st_shndx']).name == '.bss'
             assert symbols['public_word']['st_shndx'] == 'SHN_COMMON'
             assert symbols['public_word']['st_size'] == (8 if compiler == '257' else 4)
-            for native_name, elf_name in (('.data', '.data'), ('.rdata', '.rodata')):
+            # Constants leave .rdata for .rodata (scripts/psxbuild/sdk.py separate_read_only).
+            for native_name, elf_name in (('.data', '.data'), ('.rodata', '.rodata')):
                 section = next(s for s in native.sections.values() if s.name == native_name)
                 assert elf.get_section_by_name(elf_name).data() == section.data
                 assert elf.get_section_by_name(elf_name)['sh_addralign'] == section.alignment

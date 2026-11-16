@@ -31,7 +31,7 @@ from scripts.kf.retail import IMAGE_GP, IMAGE_KEYS, IMAGE_LAYOUTS, IMAGE_NAMES, 
 from scripts.kf.sema.image import RetailImage
 
 
-SECTIONS = {".text": "SHT_PROGBITS", ".rodata": "SHT_PROGBITS",
+SECTIONS = {".text": "SHT_PROGBITS", ".rodata": "SHT_PROGBITS", ".rdata": "SHT_PROGBITS",
             ".data": "SHT_PROGBITS", ".sdata": "SHT_PROGBITS", ".bss": "SHT_NOBITS",
             ".sbss": "SHT_NOBITS"}
 LINKER = "mipsel-linux-gnu-ld"
@@ -295,14 +295,15 @@ def plan(elf: ELFFile, unit: Unit, result: UnitResult,
     text_extent = unit.functions[-1].end - unit.functions[0].va if unit.functions else 0
     if unit.functions:
         sizes[".text"] = text_extent
-    if unit.rodata:
-        bases[".rodata"].add(unit.rodata[0])
-        sizes[".rodata"] = unit.rodata[1]
+    for name, extent in ((".rodata", unit.rodata), (".rdata", unit.jumptables)):
+        if extent:
+            bases[name].add(extent[0])
+            sizes[name] = extent[1]
     if unit.sdata and not witnesses[".sdata"]:
         # A unit whose .sdata holds only its SDATA() literals: the target
-        # module packs that range alone, so it starts the section.
-        bases[".sdata"].add(unit.sdata[0])
-        sizes[".sdata"] = unit.sdata[1]
+        # module packs those ranges alone, so the first starts the section.
+        bases[".sdata"].add(unit.sdata[0][0])
+        sizes[".sdata"] = unit.sdata[-1][0] + unit.sdata[-1][1] - unit.sdata[0][0]
     placed = {}
     seen = set()
     for section in elf.iter_sections():

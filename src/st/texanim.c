@@ -16,7 +16,7 @@
 /* Slot area that is active everywhere. */
 #define TEXANIM_ANY_AREA 255
 
-RODATA(0x800113b0, 0xc4)
+JUMPTABLES(0x800113b0, 0xc4)
 
 ADDRESS(0x80016878, 0x2c)
 void func_80016878(void)
