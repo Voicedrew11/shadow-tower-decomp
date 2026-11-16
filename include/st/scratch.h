@@ -48,11 +48,16 @@ typedef struct {
     int prim_count;      /* 0x90: primitives emitted */
     u8 unk94[4];         /* 0x94 */
     u_short clut_base;   /* 0x98: added to subdivided faces' CLUT */
-    u8 unk9A[0x46];      /* 0x9a */
+    u8 unk9A[0x2e];      /* 0x9a */
+    u8 unkC8[16];        /* 0xc8: block tag per slot (low four bits) */
+    SVECTOR unkD8;       /* 0xd8: rotation func_800241d0 hands func_80022678 */
     s32 unkE0;           /* 0xe0: a position func_80016554 tests (x, y, z) */
     s32 unkE4;           /* 0xe4 */
     s32 unkE8;           /* 0xe8 */
-    u8 unkEC[0x3c];      /* 0xec */
+    u8 unkEC[4];         /* 0xec */
+    u8 *unkF0;           /* 0xf0: cursor into unkF8 */
+    u32 *unkF4;          /* 0xf4: &unk244 */
+    u8 unkF8[0x30];      /* 0xf8: 128 flag bytes cleared per frame; overlaps x..z, used in another phase */
     long x;              /* 0x128: the position vis_measure_position measures */
     long y;              /* 0x12c */
     long z;              /* 0x130 */

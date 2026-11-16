@@ -70,7 +70,8 @@ typedef struct {
     s32 unk8330;
     s32 unk8334;
     s32 unk8338[5];
-    u8 unk834C[0x1eb40 - 0x834c];
+    void *unk834C[8];    /* 0x834c: heap block owners by slot; WIP count (indexed past it) */
+    u8 unk836C[0x1eb40 - 0x836c];
     StTexAnim texanim[ST_TEXANIM_SLOTS];
     u8 unk1ECC0;
     u8 unk1ECC1;

@@ -61,4 +61,11 @@ void func_80058ed4(void);
 int func_80062c28(int arg0);
 void func_800633d4(void);
 
+/* band D (src/st/bank.c, bankload.c); band E calls them */
+void func_80023788(void *data);
+void func_800237a8(int archive, int index, int slot, int tag);
+void func_800239ec(int archive, int index, int slot, int tag);
+void func_80023abc(int archive, int index, int slot, int tag);
+void func_80058a0c(int archive, int member, int slot);
+
 #endif

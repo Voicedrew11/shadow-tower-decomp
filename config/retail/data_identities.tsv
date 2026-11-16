@@ -49,6 +49,7 @@ ST.EXE	0x801c7590	0x168	DAT_801c7590	global	bss	Count801c7590[360]	func_80014544
 ST.EXE	0x801c76f8	0x4310	vis_table_c	global	bss	VisTableC		candidate	asm;src/st/main.c st.main;src/st/vis_lists.c st.vis_lists	a count byte and 64-entry index list (+6), an id bit set (+0x70), 314 44-byte records from +0x118, then 64 entries of 48 bytes at +0x3710; WIP
 ST.EXE	0x801cceb0	0x28	DAT_801cceb0	global	bss	u32[2][5]	func_80014544	address-only	asm;band A relocs	two 5-word rows, cleared to -1 by FN. marker 996; func_80014544 addresses row 0 from row 1's base
 ST.EXE	0x801cd180	0x18	DAT_801cd180	global	bss	Data801cd180	func_80014a30	address-only	asm;band A relocs	WIP extent of the 0x18-byte record whose byte +0x10 func_80014a30 sets on Continue
+ST.EXE	0x801dd1e8	0x100	DAT_801dd1e8	global	bss	StVabSlot[]	func_80058a0c	address-only	asm;band D relocs;src/st/slots.c st.slots	8-byte sound bank slots (block pointer, VAB id); func_800237a8 uses slots 8..23, func_80023c6c addresses slots 8.. and func_80024004 slots 24.. from folded bases, func_80058a0c indexes from 0x801dd1e8; WIP extent
 TITLE.EXE	0x80028abc	0x4	next_program	global	load	u8 *	main	supported	asm;src/title/main.c title.main	$gp+0; points at PSX.EXE next-program byte 0x800103f0
 TITLE.EXE	0x80028ac0	0x4	PTR_80028ac0	global	load	u8 *	main	supported	asm;src/title/main.c title.main	$gp+4; points at 0x800103f1; main stores 2 there for Continue
 TITLE.EXE	0x80028b10	0x6	pad_align	static	bss	u_char[6]	pad_set_act_align	supported	asm;src/title/main.c title.main	.sbss; $gp+84; PadSetActAlign table

@@ -96,4 +96,16 @@ typedef struct {
 } Data801cd180;
 extern Data801cd180 DAT_801cd180;
 
+/*
+ * band D: one sound bank slot, the loaded bank's data (its state halfword
+ * at +4) and the VAB id SsVabClose takes. Slots 8.. and 24.. follow the
+ * world_state.unk834C slots (band E); WIP extent.
+ */
+typedef struct {
+    s16 *block;
+    s16 vab;
+    s16 unk6;
+} StVabSlot;
+extern StVabSlot DAT_801dd1e8[];
+
 #endif

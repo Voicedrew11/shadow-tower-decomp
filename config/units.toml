@@ -146,6 +146,12 @@ source = "src/st/vis_lists.c"
 profile = "probe-gcc272cdk-o2-g0"
 
 [[unit]]
+unit = "st.slots"
+image = "ST.EXE"
+source = "src/st/slots.c"
+profile = "probe-gcc272cdk-o2-g0"
+
+[[unit]]
 unit = "title.main"
 image = "TITLE.EXE"
 source = "src/title/main.c"
