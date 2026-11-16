@@ -71,7 +71,7 @@ int effect_attack(int arg0, u_long height, int drop)
 
 /*
  * Emits effect output for an effect of kind `kind` with definition `def`:
- * func_8003dbe0 when `flags` has 0x80, and when it has 0x10 (and the
+ * player_hit when `flags` has 0x80, and when it has 0x10 (and the
  * target entry faces `pos`, when given) func_8004def8 on the target entry
  * with channel levels from `def` and the viewer. Bits 16-19 of `flags`
  * are options: 0x10000 marks the target, 0x20000 picks the second channel.
@@ -96,7 +96,7 @@ void effect_emit(u_long flags, int kind, StEffectDef *def, int arg, VECTOR *pos)
     options = flags & 0x000f0000;
     flags &= ~0x000f0000;
     if (flags & 0x80)
-        func_8003dbe0(def->unk4, 4096, def->unk16, pos);
+        player_hit(def->unk4, 4096, def->unk16, (long *)pos);
     if (!(flags & 0x10))
         return;
     target = &vis_table_a.entries[vis_lists.unk5C];
@@ -118,7 +118,7 @@ void effect_emit(u_long flags, int kind, StEffectDef *def, int arg, VECTOR *pos)
     level = value / 6;
     if (level < 6) {
         /* As retail: levels 3-5 write past the six bias entries. */
-        bias[level * 2] = bias[level * 2 + 1] = viewer.unk78[level];
+        bias[level * 2] = bias[level * 2 + 1] = (u16)viewer.unk62[level + 11];
         base = viewer.unkB8;
     } else {
         base = 0;

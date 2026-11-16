@@ -463,7 +463,7 @@ void func_8002b2e8(void)
     sp->unk33C.y = 83;
     sp->unk33C.w = 5;
     sp->unk33C.h = 5;
-    sp->unk33C.x = DAT_801cd121 * 83 / 63 + 180;
+    sp->unk33C.x = DAT_801cd120.unk1 * 83 / 63 + 180;
     i = 0;
     func_80028364(&sp->unk33C, &sp->unk358, &sp->unk35C, NULL, 0);
     sp->unk358.vx = 576;
@@ -475,7 +475,7 @@ void func_8002b2e8(void)
     func_80028364(&sp->unk33C, &sp->unk358, &sp->unk35C, NULL, 1);
     for (; i < 6; i++, y += 20)
         func_8002732c(MESSAGE(0xc9 + i), label_x[i] + 32, y, &sp->style[2]);
-    for (on = DAT_801cd122, i = 1; i < 5; on++, i++) {
+    for (on = &DAT_801cd120.unk2, i = 1; i < 5; on++, i++) {
         if (*on == 1) {
             func_8002732c(MESSAGE(0xcf), 193, i * 20 + 80, &sp->style[2]);
             func_8002732c(MESSAGE(0xd0), 241, i * 20 + 80, &sp->style[3]);
@@ -485,7 +485,7 @@ void func_8002b2e8(void)
         }
     }
     i = 0;
-    func_800276bc(DAT_801cd121 | DIGITS(2), 280, 80, &sp->style[0]);
+    func_800276bc(DAT_801cd120.unk1 | DIGITS(2), 280, 80, &sp->style[0]);
     func_8002732c(MESSAGE(0xe0 + sp->unk2E0), 64, 208, &sp->style[0]);
     sp->unk358.vx = 596;
     sp->unk358.vy = 448;

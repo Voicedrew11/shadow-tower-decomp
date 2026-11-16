@@ -24,7 +24,6 @@ extern s32 DAT_800881c8;
 
 /* Read by the title-card overlay; owners unknown. */
 extern u16 DAT_80088190;
-extern u8 DAT_801cd124;
 
 void func_80026ecc(u16 c, u16 x, u16 y, CVECTOR *color);
 void func_8002732c(u16 *s, u16 x, u16 y, CVECTOR *color);

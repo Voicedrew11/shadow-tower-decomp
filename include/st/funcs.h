@@ -14,15 +14,15 @@
 void func_800385b0(void); /* the effect script interpreter: runs effects.cur for one frame */
 int func_8003beb4(void *request);
 void func_8003c0e0(void);
-void func_8003c24c(int arg);
+void player_update_status(int apply);
 void func_8003cedc(void);
-void func_8003dbe0(u16 *levels, int scale, int arg2, VECTOR *pos);
+void player_hit(u16 *damage, u16 scale, u16 effect, long *from);
 void func_8003e734(VECTOR *a, SVECTOR *b);
 void func_8003eaf8(void);
 int func_8003eb34(VECTOR *pos, int yaw, int range, int arg3);
 void func_8003ec5c(void *data, DVECTOR *a, DVECTOR *b, int arg3);
-void func_8003ee38(u16 id, int slot);
-void func_8003f12c(u16 id, int slot, int arg2);
+void func_8003ee38(u16 id, u8 slot);
+void func_8003f12c(u16 id, u8 slot, u8 reload);
 void func_80042d74(void);
 void func_80044674(void);
 void func_80044ee8(void);

@@ -18,7 +18,7 @@ from collections import Counter, defaultdict
 from dataclasses import dataclass
 from pathlib import Path
 from dataclasses import replace
-from typing import Callable, Iterable
+from typing import Callable, Iterable, Sequence
 
 from scripts.kf.mips_elf import (
     BSS_SECTION_SYMBOL,
@@ -851,20 +851,27 @@ class ModuleImage:
 
 
 def _module_rodata(
-    module: Module, blob: bytes, text_size: int
+    module: Module, blob: bytes, text_size: int,
+    reviewed: Sequence[MipsRelocation] = (),
 ) -> tuple[bytes, list[MipsRelocation]]:
     """Rebase a module's carved read-only range: in-module code pointers become
     .text-relative words and pointers into the range itself (a table of the
     unit's own string literals) .rodata-relative words, each with an R_MIPS_32
-    relocation; everything else (string literals, foreign pointers) keeps its
-    retail bytes."""
+    relocation. ``reviewed`` holds relocations already applied to ``blob`` from
+    reviewed rows sited in the range (foreign pointers, such as an automatic
+    aggregate initializer holding a global's field addresses); those words are
+    kept as applied. Everything else (string literals, unreviewed foreign
+    pointers) keeps its retail bytes."""
     start = module.text_start
     end = start + text_size
     assert module.rodata is not None
     rodata_start, rodata_size = module.rodata
     data = bytearray(blob)
-    relocations: list[MipsRelocation] = []
+    relocations: list[MipsRelocation] = list(reviewed)
+    applied = {relocation.offset for relocation in reviewed}
     for offset in range(0, len(data) - 3, 4):
+        if offset in applied:
+            continue
         word = _get_word(data, offset)
         if start <= word < end:
             _put_word(data, offset, word - start)
@@ -872,6 +879,7 @@ def _module_rodata(
         elif rodata_start <= word < rodata_start + rodata_size:
             _put_word(data, offset, word - rodata_start)
             relocations.append(MipsRelocation(offset, "R_MIPS_32", RODATA_SECTION_SYMBOL))
+    relocations.sort(key=lambda relocation: relocation.offset)
     return bytes(data), relocations
 
 
@@ -936,6 +944,7 @@ def _module_object(
     rodata_blob: bytes | None = None,
     *,
     load_padding: Callable[[int, int], bytes] | None = None,
+    rodata_relocations: Sequence[MipsRelocation] = (),
 ) -> ModuleImage:
     """Concatenate a module's carved functions into one .text section.
 
@@ -1035,11 +1044,14 @@ def _module_object(
             relocations = _module_load_relocations(
                 text, relocations, module_load, section_symbol
             )
-    rodata, rodata_relocations = b"", []
-    if module.rodata is not None:
+    rodata = b""
+    if module.rodata is None:
+        rodata_relocations = []
+    else:
         if rodata_blob is None:
             raise ValueError(f"module {module.unit}: RODATA range was not carved")
-        rodata, rodata_relocations = _module_rodata(module, rodata_blob, len(text))
+        rodata, rodata_relocations = _module_rodata(
+            module, rodata_blob, len(text), rodata_relocations)
     # The section must carry the strongest constraint used to pack its members,
     # not an unrelated four-byte default. Relink validation still requires one
     # consistent base for every member; changing ELF alignment cannot fix gaps.
@@ -1143,6 +1155,7 @@ def delink(
         }
         rows_by_owner: dict[int, list[dict[str, str]]] = defaultdict(list)
         rows_by_datum: dict[int, list[dict[str, str]]] = defaultdict(list)
+        rows_by_rodata: dict[str, list[dict[str, str]]] = defaultdict(list)
         withheld_rows: list[dict[str, object]] = []
         for row in rows_by_image[image]:
             site = parse_int(row["site_va"])
@@ -1151,8 +1164,13 @@ def delink(
                 datum = next(
                     (item for item in claimed_load_data if item.va <= site < item.end), None
                 )
+                rodata_module = next(
+                    (module for module in selected_modules if module.owns_rodata(site)), None
+                )
                 if datum is not None:
                     rows_by_datum[datum.va].append(row)
+                elif rodata_module is not None:
+                    rows_by_rodata[rodata_module.unit].append(row)
                 elif not selected_vas:
                     withheld_rows.append(_withheld(row, None, "site-outside-function"))
                 continue
@@ -1326,15 +1344,33 @@ def delink(
             module_carved = dict(carved)
             module_carved.update({va: carved_rodata[va] for va in module.vas if va in carved_rodata})
             rodata_blob = None
+            rodata_reviewed: list[MipsRelocation] = []
             if module.rodata is not None:
                 rodata_start = expected.file_offset(module.rodata[0])
                 rodata_blob = executable[rodata_start:rodata_start + module.rodata[1]]
                 if len(rodata_blob) != module.rodata[1]:
                     raise ValueError(f"{exe_path}: truncated RODATA range for {module.unit}")
+                # Reviewed pointer words inside the range (an automatic
+                # aggregate initializer's global addresses) validate and
+                # resolve like a claimed datum's.
+                patched = bytearray(rodata_blob)
+                range_owner = _DataOwner(image, Datum(
+                    module.rodata[0], module.rodata[1], "", "load"))
+                for row in rows_by_rodata[module.unit]:
+                    try:
+                        relocations, used = _apply_relocation(
+                            patched, range_owner, row, catalog, policy)
+                    except ValueError as error:
+                        withheld_rows.append(_withheld(row, None, f"rodata:{error}"))
+                        continue
+                    rodata_reviewed.extend(relocations)
+                    used_rows.append(used)
+                rodata_blob = bytes(patched)
             built = _module_object(
                 module, catalog.function_starts[image], module_carved, data_blobs, rodata_blob,
                 load_padding=lambda va, size: executable[
                     expected.file_offset(va):expected.file_offset(va) + size],
+                rodata_relocations=rodata_reviewed,
             )
             _write_bytes_if_changed(module_output / module.object_name, built.data)
             live_modules.add(module.object_name)

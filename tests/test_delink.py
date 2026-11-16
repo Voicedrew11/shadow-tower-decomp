@@ -1066,6 +1066,27 @@ class ModuleRodataTests(unittest.TestCase):
             [MipsRelocation(8, "R_MIPS_32", ".rodata"), MipsRelocation(12, "R_MIPS_32", ".rodata")],
         )
 
+    def test_module_rodata_keeps_reviewed_foreign_pointer_relocations(self) -> None:
+        function = Function("GAME.EXE", 0x80010000, 8, 8, 1, "only", "test", "test")
+        carved = {function.va: (struct.pack("<2I", 0x03E00008, 0), [])}
+        module = Module("GAME.EXE", "game.init", "init", (function.va,), (), (0x80012000, 0xC))
+        # an automatic aggregate initializer: two field addresses of a global
+        # (already rebased by their reviewed rows), a null word
+        blob = struct.pack("<3I", 0x38, 0x3C, 0)
+        reviewed = [
+            MipsRelocation(0, "R_MIPS_32", "viewer"),
+            MipsRelocation(4, "R_MIPS_32", "viewer"),
+        ]
+        built = _module_object(
+            module, {function.va: function}, carved, {}, blob, rodata_relocations=reviewed
+        )
+        sections = elf_sections(built.data)
+        rodata = built.data[sections[".rodata"][4]:sections[".rodata"][4] + sections[".rodata"][5]]
+        self.assertEqual(struct.unpack_from("<3I", rodata), (0x38, 0x3C, 0))
+        self.assertEqual(
+            [item for item in built.relocations if item.symbol == "viewer"], reviewed
+        )
+
     def test_module_switch_table_rodata_ends_at_the_retail_claim(self) -> None:
         function = Function("GAME.EXE", 0x80010000, 8, 8, 1, "first", "test", "test")
         carved = {0x80010000: (struct.pack("<2I", 0x03E00008, 0), [])}

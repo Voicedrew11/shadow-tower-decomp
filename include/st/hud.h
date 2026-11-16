@@ -33,7 +33,6 @@ typedef struct {
 extern StHudSprite hud_sprites[];
 
 /* Nonzero while the HUD is shown. */
-extern u8 DAT_801cd123;
 
 /* src/st/hud.c */
 void func_80025c24();

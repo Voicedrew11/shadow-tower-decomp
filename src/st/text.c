@@ -523,7 +523,7 @@ void func_80028784(void)
         func_800286a8(2, 0, 0);
         break;
     case CARD_SHOW_IN:
-        if (DAT_801cd124 == 1 || world_state.unk1EE17 == 2) {
+        if (DAT_801cd120.unk4 == 1 || world_state.unk1EE17 == 2) {
             tint.r = tint.g = tint.b = world_state.unk1EE19 << 3;
             func_80028364(&card, &tex, &clut, &tint, 3);
             if (world_state.unk1EE19 >= 16)
@@ -533,14 +533,14 @@ void func_80028784(void)
         }
         break;
     case CARD_SHOW:
-        if (DAT_801cd124 == 1 || world_state.unk1EE17 == 2) {
+        if (DAT_801cd120.unk4 == 1 || world_state.unk1EE17 == 2) {
             tint.r = tint.g = tint.b = 128;
             func_80028364(&card, &tex, &clut, &tint,
                           DAT_80088190 == 25 || DAT_80088190 == 30 || DAT_80088190 == 5 ? 2 : 3);
         }
         break;
     case CARD_SHOW_OUT:
-        if (DAT_801cd124 == 1 || world_state.unk1EE17 == 2) {
+        if (DAT_801cd120.unk4 == 1 || world_state.unk1EE17 == 2) {
             tint.r = tint.g = tint.b = (16 - world_state.unk1EE19) << 3;
             func_80028364(&card, &tex, &clut, &tint, 3);
             if (world_state.unk1EE19 >= 16)

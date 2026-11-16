@@ -169,8 +169,6 @@ extern s32 DAT_8008818c;
 extern u16 DAT_800881a8;
 
 /* Option page state bytes; owner unknown. */
-extern u8 DAT_801cd121;
-extern u8 DAT_801cd122[]; /* four bytes; 0x801cd123 and 0x801cd124 have their own identities */
 
 
 extern MenuMessages menu_messages;

@@ -268,31 +268,31 @@ void func_80026508(void)
         hud_sprites[12].flags |= 1;
     else
         hud_sprites[12].flags = 0;
-    if (viewer.unk1A4[0] == 0)
+    if (*(s32 *)viewer.unk190[5] == 0)
         hud_sprites[37].flags = 0;
     else
         hud_sprites[37].flags |= 1;
-    if (viewer.unk1A4[7] == 0)
+    if (*(s32 *)viewer.unk190[12] == 0)
         hud_sprites[38].flags = 0;
     else
         hud_sprites[38].flags |= 1;
-    if (viewer.unk1A4[2] == 0)
+    if (*(s32 *)viewer.unk190[7] == 0)
         hud_sprites[39].flags = 0;
     else
         hud_sprites[39].flags |= 1;
-    if (viewer.unk1A4[3] == 0)
+    if (*(s32 *)viewer.unk190[8] == 0)
         hud_sprites[40].flags = 0;
     else
         hud_sprites[40].flags |= 1;
-    if (viewer.unk1A4[4] == 0)
+    if (*(s32 *)viewer.unk190[9] == 0)
         hud_sprites[41].flags = 0;
     else
         hud_sprites[41].flags |= 1;
-    if (viewer.unk1A4[5] == 0)
+    if (*(s32 *)viewer.unk190[10] == 0)
         hud_sprites[42].flags = 0;
     else
         hud_sprites[42].flags |= 1;
-    if (viewer.unk1A4[6] == 0)
+    if (*(s32 *)viewer.unk190[11] == 0)
         hud_sprites[43].flags = 0;
     else
         hud_sprites[43].flags |= 1;
@@ -332,14 +332,14 @@ void func_80026964(u8 first)
 
 /* Queues `value` in a free one of the five HUD number slots for 60 frames. */
 /* Not exact: retail keeps value in $a3 and -1 in $a2 and fills the first
- * beq delay slot with the lui of DAT_801cd123; this build swaps the two
+ * beq delay slot with the lui of DAT_801cd120.unk3; this build swaps the two
  * registers and leaves a nop. */
 ADDRESS(0x80026a88, 0x74)
 void func_80026a88(short value)
 {
     int i;
 
-    if (value != -1 && DAT_801cd123 != 0) {
+    if (value != -1 && DAT_801cd120.unk3 != 0) {
         for (i = 4; i != -1; i--) {
             if (viewer.unk1EC[i] == 0) {
                 viewer.unk1EC[i] = 60;
@@ -355,7 +355,7 @@ DATA(0x80087f18, 0x4, ".sdata")
 static s32 DAT_80087f18 = 0;
 
 /* Not exact: retail fills the delay slot of the unk218 == 1 test with the
- * lui of DAT_801cd123 from the branch target; this build leaves a nop. */
+ * lui of DAT_801cd120.unk3 from the branch target; this build leaves a nop. */
 ADDRESS(0x80026afc, 0x2d8)
 void func_80026afc(VECTOR *pos, SVECTOR *rot)
 {
@@ -385,7 +385,7 @@ void func_80026afc(VECTOR *pos, SVECTOR *rot)
         func_80027d18(&frame->r, &color, 257, 1);
         func_80026964(26);
     }
-    if (DAT_801cd123 != 0 && area_state.area < 44) {
+    if (DAT_801cd120.unk3 != 0 && area_state.area < 44) {
         func_80026508();
         func_80026964(0);
         for (i = 4; i != -1; i--) {
@@ -425,7 +425,7 @@ ADDRESS(0x80026dd4, 0x30)
 void func_80026dd4(VECTOR *pos, SVECTOR *rot, int arg)
 {
     func_80026afc(pos, rot);
-    func_8003c24c(arg);
+    player_update_status(arg);
 }
 
 /*
