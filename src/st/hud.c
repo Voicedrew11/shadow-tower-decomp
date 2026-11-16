@@ -17,6 +17,7 @@
 #include <st/vis.h>
 #include <st/mesh.h>
 #include <st/text.h>
+#include <st/cd.h>
 #include <st/light.h>
 #include <st/anim.h>
 #include <st/funcs.h>
@@ -371,7 +372,7 @@ void func_80026afc(VECTOR *pos, SVECTOR *rot)
         lighting_update();
     func_800174c4();
     anim_slots_retire();
-    func_80034fc4();
+    anim_sets_retire();
     world_state.unk831C[1] = 0;
     if (viewer.unk218 == 1) {
         frame = &hud_sprites[26 + viewer.unk15E];

@@ -68,15 +68,16 @@ typedef struct {
     u8 unk33; /* incremented every vsync, wraps at 60 */
     s32 unk34; /* incremented when unk33 wraps */
     u16 unk38[21]; /* set from FN. ids 970..990 */
-    s16 unk62[14];       /* 0x62: figures func_8002e94c lists */
-    u8 unk7E[0xba - 0x7e];
-    u16 unkBA;           /* 0xba: shown by the stats menu */
-    u16 unkBC;           /* 0xbc */
-    u16 unkBE;           /* 0xbe */
+    s16 unk62[11];       /* 0x62: figures func_8002e94c lists (14 of them, through unk78) */
+    u16 unk78[6];        /* 0x78: picked by effect_play's level (src/st/effect.c) */
+    u8 unk84[0xb8 - 0x84];
+    u16 unkB8;           /* 0xb8 */
+    u16 unkBA[3];        /* 0xba: shown by the stats menu; effect_play reads them as a row */
     u8 unkC0[0xe8 - 0xc0];
     ViewerModel *unkE8[4]; /* 0xe8: func_80021ac4's slot positions and rotations */
     void *unkF8[4];      /* 0xf8: its slot model blocks (ModelFile, st/mesh.h) */
-    StAnimSlot *unk108[4]; /* 0x108: its slot animation slots (anim_prepare) */
+    void *unk108[4];     /* 0x108: its slot animation state: a StAnimSlot (anim_prepare) or
+                          * a node set (anim_prepare_any), by the model file's halfword +6 */
     u8 unk118[0x130 - 0x118];
     s16 unk130[4];       /* 0x130: -1: slot empty */
     u8 unk138[0x150 - 0x138];

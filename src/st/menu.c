@@ -100,9 +100,9 @@ void func_80029b74(void)
     func_800276bc(DAT_801c7590.counts[0x10a].count | DIGITS(3), 127, 96, &sp->style[0]);
     func_800276bc(viewer.unk10 | DIGITS(3), 127, 128, &sp->style[0]);
     func_800276bc(viewer.unkE | DIGITS(3), 127, 144, &sp->style[0]);
-    func_800276bc(viewer.unkBA | DIGITS(3), 127, 160, &sp->style[0]);
-    func_800276bc(viewer.unkBC | DIGITS(3), 127, 176, &sp->style[0]);
-    func_800276bc(viewer.unkBE | DIGITS(3), 127, 192, &sp->style[0]);
+    func_800276bc(viewer.unkBA[0] | DIGITS(3), 127, 160, &sp->style[0]);
+    func_800276bc(viewer.unkBA[1] | DIGITS(3), 127, 176, &sp->style[0]);
+    func_800276bc(viewer.unkBA[2] | DIGITS(3), 127, 192, &sp->style[0]);
     sp->unk358.vx = 622;
     sp->unk358.vy = 416;
     sp->unk35C.vx = 544;

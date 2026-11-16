@@ -104,6 +104,29 @@ typedef struct StAnimSlot {
     struct StAnimSlot **unk14; /* 0x14: the owner's slot pointer */
 } StAnimSlot;
 
+/* One skeletal-animation slot (src/st/anim_set.c): its model file, the
+ * clip block it has run up to and the node buffer it allocated (node,
+ * record and sub-record arrays and the node list, types in st/anim.h). */
+typedef struct StAnimSet {
+    s16 unk0;            /* 0x00: state; bit 3 is set on every slot */
+    u16 unk2;            /* 0x02: model file id, 0xffff when unset */
+    u16 unk4;            /* 0x04: clip, 255 when unset */
+    u16 unk6;
+    u_long *unk8;        /* 0x08: the file's id table */
+    u8 *unkC;            /* 0x0c: the file's 4-byte record table */
+    struct StAnimBlock *unk10; /* 0x10: the clip's first block */
+    u_long unk14;        /* 0x14: blocks run */
+    u_long unk18;        /* 0x18: the clip's block count */
+    u_long unk1C;        /* 0x1c: the clip's length in frames */
+    u_long unk20;        /* 0x20: the frame last posed, -1 when unset */
+    struct StAnimBlock *unk24; /* 0x24: the next block to run */
+    struct StAnimNode *unk28; /* 0x28: the node buffer, from func_800152d0 */
+    struct StAnimRecord *unk2C;
+    struct StAnimSubRecord *unk30;
+    struct StAnimList *unk34;
+    struct StAnimSet **unk38; /* 0x38: the owner's slot pointer */
+} StAnimSet;
+
 typedef struct {
     DRAWENV draw[2];
     DISPENV disp[2];
@@ -131,7 +154,7 @@ typedef struct {
     void *unk834C[144];
     u8 unk858C[0xa5fc - 0x858c];
     StAnimSlot anim_slots[16]; /* 0xa5fc */
-    u8 unkA77C[0xab3c - 0xa77c];
+    StAnimSet anim_sets[16]; /* 0xa77c */
     u8 world_vertices[0xeb40 - 0xab3c]; /* 0xab3c: the world parts' transformed vertices (MeshVertex); WIP extent */
     SVECTOR unkEB40[0x2000]; /* 0xeb40: the vertices anim_pose interpolates */
     StTexAnim texanim[ST_TEXANIM_SLOTS];

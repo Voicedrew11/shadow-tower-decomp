@@ -23,6 +23,7 @@
 #include <st/menu.h>
 #include <st/mesh.h>
 #include <st/objects.h>
+#include <st/effect.h>
 #include <st/anim.h>
 #include <st/funcs.h>
 
@@ -106,7 +107,7 @@ ADDRESS(0x800255f0, 0x634)
 void func_800255f0(void)
 {
     ScratchPad *sp = SCRATCHPAD;
-    StObject88 *o;
+    StEffect *o;
     StObject24 *f;
     StAnimFile *model;
     VECTOR *at;
@@ -114,7 +115,7 @@ void func_800255f0(void)
     int kind;
     int i;
 
-    for (o = DAT_8018e318, i = 127; i != -1; o++, i--) {
+    for (o = effects.slots, i = 127; i != -1; o++, i--) {
         if (o->unk0 == 0xff)
             continue;
         mode = o->unk6 & 3;

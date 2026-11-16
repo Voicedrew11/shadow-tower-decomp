@@ -51,9 +51,9 @@ void func_80015024(StBlock *heap)
                     *to++ = *from++;
                 } while (--words);
                 anim_slots_free_idle();
-                func_8003509c();
+                anim_sets_free_idle();
                 anim_slots_free_all();
-                func_80035120();
+                anim_sets_free_all();
                 *dst->owner = dst + 1;
                 dst = (StBlock *)to;
             } else {

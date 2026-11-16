@@ -54,11 +54,17 @@ typedef struct {
     int prim_count;      /* 0x90: primitives emitted */
     s32 unk94;           /* 0x94: the model renderers' fourth per-frame counter (world_state.unk8328) */
     u_short clut_base;   /* 0x98: added to subdivided faces' CLUT */
-    u8 unk9A[0xa];       /* 0x9a */
-    ModelList *model_list; /* 0xa4: the entries model_draw_list draws */
-    VECTOR part_pos;     /* 0xa8: a record's camera-space position (RTV0TR result) */
+    u8 unk9A[2];         /* 0x9a */
+    SVECTOR unk9C;       /* 0x9c: a node translation anim_record_compose transforms */
+    union {
+        ModelList *models;       /* the entries model_draw_list draws */
+        struct StAnimList *anims; /* the node list anim_list_compose composes */
+    } list;              /* 0xa4 */
+    VECTOR part_pos;     /* 0xa8: a record's camera-space position (RTV0TR result);
+                          * model_draw and the anim sets use 0xa8..0xc8 as a MATRIX
+                          * (SCRATCH_MATRIX) */
     u8 unkB8[4];         /* 0xb8 */
-    long model_t[3];     /* 0xbc: st.model_draw's model translation (part_pos starts its MATRIX) */
+    long model_t[3];     /* 0xbc: st.model_draw's model translation (the MATRIX's t) */
     u8 unkC8[16];        /* 0xc8: block tag per slot (low four bits) */
     SVECTOR unkD8;       /* 0xd8: rotation func_800241d0 hands model_draw */
     s32 unkE0;           /* 0xe0: a position func_80016554 tests (x, y, z) */
@@ -107,5 +113,7 @@ typedef struct {
 } ScratchPad;
 
 #define SCRATCHPAD ((ScratchPad *)0x1f800000)
+/* The MATRIX model_draw and the anim sets build at 0xa8..0xc8. */
+#define SCRATCH_MATRIX(sp) ((MATRIX *)&(sp)->part_pos)
 
 #endif

@@ -22,6 +22,7 @@
 #include <st/mesh.h>
 #include <st/objects.h>
 #include <st/anim.h>
+#include <st/bank.h>
 #include <st/funcs.h>
 
 SDATA(0x80087f04, 0x8)

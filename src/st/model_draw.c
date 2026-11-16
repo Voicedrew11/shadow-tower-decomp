@@ -28,7 +28,6 @@
 RODATA(0x80011010, 0x20)
 
 /* The model matrix (rotation and translation) the part renderers draw with. */
-#define MODEL_MATRIX(sp) ((MATRIX *)&(sp)->part_pos)
 /* A camera-space vertex (RT result). */
 #define MODEL_POS(sp) ((VECTOR *)&(sp)->unk50)
 
@@ -122,9 +121,9 @@ void func_80021ac4(u8 slot)
         rot.vx = viewer.unkE8[slot]->unk14.vx + viewer.unk2DE;
         rot.vy = viewer.unkE8[slot]->unk14.vy + viewer.unk2E0;
         rot.vz = viewer.unkE8[slot]->unk14.vz + viewer.unk2E2;
-        RotMatrix(&rot, MODEL_MATRIX(sp));
+        RotMatrix(&rot, SCRATCH_MATRIX(sp));
     } else {
-        RotMatrix(&viewer.unkE8[slot]->unk14, MODEL_MATRIX(sp));
+        RotMatrix(&viewer.unkE8[slot]->unk14, SCRATCH_MATRIX(sp));
     }
     sp->far_z = 64;
     sp->near_z = 4;
@@ -139,11 +138,11 @@ void func_80021ac4(u8 slot)
     sp->clut_base = 0;
     *(u_long *)&sp->rgb = DAT_80087ee8;
     if (((ModelFile *)viewer.unkF8[slot])->unk6 == 0) {
-        gte_SetRotMatrix(MODEL_MATRIX(sp));
-        gte_SetTransMatrix(MODEL_MATRIX(sp));
+        gte_SetRotMatrix(SCRATCH_MATRIX(sp));
+        gte_SetTransMatrix(SCRATCH_MATRIX(sp));
         sp->model = MODEL_DATA(world_state.unk834C[slot + 32]);
         sp->header = (MeshHeader *)(sp->model + 12);
-        if (anim_prepare(&viewer.unk108[slot], slot + 32, viewer.unk150[slot],
+        if (anim_prepare((StAnimSlot **)&viewer.unk108[slot], slot + 32, viewer.unk150[slot],
                           viewer.unk130[slot])) {
             sp->z_ot += sp->header->n_vertices;
             out = (MeshVertex *)sp->vertices;
@@ -154,7 +153,7 @@ void func_80021ac4(u8 slot)
         }
     } else {
         sp->model = MODEL_DATA(world_state.unk834C[slot + 32]);
-        if (func_80035aa8(&viewer.unk108[slot], slot + 32, viewer.unk150[slot],
+        if (anim_prepare_any(&viewer.unk108[slot], slot + 32, viewer.unk150[slot],
                           viewer.unk130[slot])) {
             model_draw_list(0x80, 0);
         }
@@ -176,8 +175,8 @@ ADDRESS(0x80022010, 0x668)
 void model_draw_list(u8 flags, SVECTOR *rot)
 {
     ScratchPad *sp = SCRATCHPAD;
-    ModelEntry *e = sp->model_list->entries;
-    int i = sp->model_list->count;
+    ModelEntry *e = sp->list.models->entries;
+    int i = sp->list.models->count;
     MATRIX work;         /* unused: retail reserves its frame slot */
     MATRIX scale = {{{ONE, 0, 0}, {0, ONE, 0}, {0, 0, ONE}}, {0, 0, 0}};
     MeshVertex *out;
@@ -188,8 +187,8 @@ void model_draw_list(u8 flags, SVECTOR *rot)
         e->obj->unk0 = 0;
         e++;
     }
-    e = sp->model_list->entries;
-    i = sp->model_list->count;
+    e = sp->list.models->entries;
+    i = sp->list.models->count;
     while (i--) {
         e->obj->unk0 = 0;
         if (e->unk0C == -1 || e->part == 0xffff) {
@@ -207,32 +206,32 @@ void model_draw_list(u8 flags, SVECTOR *rot)
             RotMatrixY(angle.vy + rot->vy, &face);
             RotMatrixZ(angle.vz, &face);
             if (e->obj->unk48->unk2 == 0) {
-                RotMatrix(&e->obj->unk48->unk44->unk10, &e->obj->unk48->m);
+                RotMatrix(&e->obj->unk48->unk44->rot, &e->obj->unk48->unk4);
             }
-            gte_MulMatrix0(&e->obj->unk48->m, &face, &e->obj->unk48->m);
+            gte_MulMatrix0(&e->obj->unk48->unk4, &face, &e->obj->unk48->unk4);
             e->obj->unk48->unk2 = 0;
         }
-        func_80035260(e->obj);
+        anim_record_compose(e->obj);
         if (e->kind == 1) {
             if (i % 6 != world_state.unk1ECC0 % 6) {
                 e++;
                 continue;
             }
-            ScaleMatrix(&scale, e->obj->unk44);
+            ScaleMatrix(&scale, &e->obj->unk44->scale);
             gte_SetRotMatrix(&scale);
         } else if (e->kind == 3) {
             if (i % 4 != world_state.unk1ECC0 % 4) {
                 e++;
                 continue;
             }
-            ScaleMatrix(&scale, e->obj->unk44);
+            ScaleMatrix(&scale, &e->obj->unk44->scale);
             gte_SetRotMatrix(&scale);
         } else if (e->kind == 4) {
             if (i % 8 != world_state.unk1ECC0 % 8) {
                 e++;
                 continue;
             }
-            ScaleMatrix(&scale, e->obj->unk44);
+            ScaleMatrix(&scale, &e->obj->unk44->scale);
             gte_SetRotMatrix(&scale);
         }
         sp->header = (MeshHeader *)(sp->model + 12) + e->part;
@@ -310,21 +309,21 @@ void model_draw(int unused0, u16 model, VECTOR *pos, SVECTOR *rot, SVECTOR *scal
         sp->model_t[1] = pos->vy;
         sp->model_t[2] = pos->vz;
     }
-    func_80049e30(rot, MODEL_MATRIX(sp));
+    func_80049e30(rot, SCRATCH_MATRIX(sp));
     func_80017d28(light, flags);
-    gte_MulMatrix0((MATRIX *)sp->unk394, MODEL_MATRIX(sp), &lm);
+    gte_MulMatrix0((MATRIX *)sp->unk394, SCRATCH_MATRIX(sp), &lm);
     gte_SetLightMatrix(&lm);
     if (scale) {
         s.vx = scale->vx;
         s.vy = scale->vy;
         s.vz = scale->vz;
-        ScaleMatrix(MODEL_MATRIX(sp), &s);
+        ScaleMatrix(SCRATCH_MATRIX(sp), &s);
     }
     if (view) {
-        gte_MulMatrix0(view, MODEL_MATRIX(sp), MODEL_MATRIX(sp));
+        gte_MulMatrix0(view, SCRATCH_MATRIX(sp), SCRATCH_MATRIX(sp));
     }
-    gte_SetRotMatrix(MODEL_MATRIX(sp));
-    gte_SetTransMatrix(MODEL_MATRIX(sp));
+    gte_SetRotMatrix(SCRATCH_MATRIX(sp));
+    gte_SetTransMatrix(SCRATCH_MATRIX(sp));
     if (((ModelFile *)world_state.unk834C[model])->unk6 == 0) {
         sp->model = MODEL_DATA(world_state.unk834C[model]);
         if (part < 128) {
@@ -342,7 +341,7 @@ void model_draw(int unused0, u16 model, VECTOR *pos, SVECTOR *rot, SVECTOR *scal
     } else {
         sp->model = MODEL_DATA(world_state.unk834C[model]);
         if (part < 128) {
-            if (func_80035aa8(anim, model, part, arg8) == 0) {
+            if (anim_prepare_any(anim, model, part, arg8) == 0) {
                 sp->header = (MeshHeader *)(sp->model + 12);
                 sp->local_vertices = sp->model + 12 + sp->header->vertices;
             } else {
