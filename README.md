@@ -135,7 +135,7 @@ _Derived from ignored outputs made by the native Psy-Q executable chain. `kf bui
 | `ST.EXE` | — | — | — | 22 / 24 |
 | `TITLE.EXE` | — | — | — | 1 / 1 |
 | `OPTXT.EXE` | — | — | — | 0 / 1 |
-| `VS.EXE` | — | — | — | 5 / 6 |
+| `VS.EXE` | — | — | — | 6 / 6 |
 | `END.EXE` | — | — | — | 1 / 1 |
 
 The three byte columns show similarity, not differences. Island scores allow moved regions and

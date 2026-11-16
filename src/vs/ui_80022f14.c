@@ -15,16 +15,16 @@
 
 /* func_80023114's box widths. */
 RODATA(0x80011290, 0x18)
-/* The dim and light text colours: 4-byte initializers, so .sdata under
+/* The red and light text colours: 4-byte initializers, so .sdata under
  * -G8 (the light one is merged across the three dialogs). */
 SDATA(0x800632c8, 0x8)
 
-/* A two-choice dialog: its caption and the two choices, the chosen one lit
+/* A two-choice dialog: its caption and the two choices, the chosen one red
  * (page 5, or page 1 when DAT_80063228 is 1). */
 ADDRESS(0x80022f14, 0x200)
 void func_80022f14(int page)
 {
-    CVECTOR dim = {48, 48, 48, 73};
+    CVECTOR red = {200, 50, 50, 73};
     CVECTOR light = {96, 96, 96, 73};
     int msg[3];
     VsMenuScratch *sp = VS_MENU_SCRATCH;
@@ -47,11 +47,11 @@ void func_80022f14(int page)
     sp->style[0].b = sp->style[3].b = 60;
     func_8001d8b8(VS_MESSAGE(msg[0]), 128, 104, &light);
     if (page == 5 || (page == 1 && DAT_80063228 == page)) {
-        func_8001d8b8(VS_MESSAGE(msg[1]), 200, 122, &dim);
+        func_8001d8b8(VS_MESSAGE(msg[1]), 200, 122, &red);
         func_8001d8b8(VS_MESSAGE(msg[2]), 320, 122, &light);
     } else {
         func_8001d8b8(VS_MESSAGE(msg[1]), 200, 122, &light);
-        func_8001d8b8(VS_MESSAGE(msg[2]), 320, 122, &dim);
+        func_8001d8b8(VS_MESSAGE(msg[2]), 320, 122, &red);
     }
     func_8001f23c(120, 100, 346, 40);
     func_8001e890(1, 0, 0);

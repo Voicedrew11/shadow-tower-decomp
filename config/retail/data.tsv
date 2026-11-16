@@ -570,7 +570,9 @@ VS.EXE	0x8004a198	0x39998	0xc	unclassified	coverage-gap			payload-complement	may
 VS.EXE	0x8004a1b8	0x399b8	0xc	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 VS.EXE	0x8004a1d8	0x399d8	0xc	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 VS.EXE	0x8004a1f8	0x399f8	0xc	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
-VS.EXE	0x8004a218	0x39a18	0x195e8	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
+VS.EXE	0x8004a218	0x39a18	0x19010	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
+VS.EXE	0x80063228	0x52a28	0x4	defined	candidate	DAT_80063228	s32	asm;src/vs/ui_80022f14.c vs.ui_80022f14	.sdata word (1), read $gp-relative by func_80015020/func_80015e50/func_8001683c and through lui by func_80022f14
+VS.EXE	0x8006322c	0x52a2c	0x5d4	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 END.EXE	0x80011000	0x800	0x960	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 END.EXE	0x80013138	0x2938	0x4	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 END.EXE	0x80013238	0x2a38	0x4	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
