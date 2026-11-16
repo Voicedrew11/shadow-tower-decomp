@@ -392,6 +392,24 @@ source = "src/st/vis_c_run.c"
 profile = "probe-gcc272cdk-o2-g0"
 
 [[unit]]
+unit = "st.stats"
+image = "ST.EXE"
+source = "src/st/stats.c"
+profile = "probe-gcc272cdk-o2-g0"
+
+[[unit]]
+unit = "st.points"
+image = "ST.EXE"
+source = "src/st/points.c"
+profile = "probe-gcc272cdk-o2-g8"
+
+[[unit]]
+unit = "st.menu_open"
+image = "ST.EXE"
+source = "src/st/menu_open.c"
+profile = "probe-gcc272cdk-o2-g8"
+
+[[unit]]
 unit = "st.card"
 image = "ST.EXE"
 source = "src/st/card.c"

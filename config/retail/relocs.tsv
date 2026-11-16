@@ -3945,6 +3945,42 @@ ST.EXE	0x80053cb0	0x434b0		mips26	reachable-code	0x80052e50	load		jal		manual-de
 ST.EXE	0x80053ccc	0x434cc		mips26	reachable-code	0x80053cf8	load		j		manual-decoded	reviewed	st.vis_c_run asm review
 ST.EXE	0x80053ce0	0x434e0		mips26	reachable-code	0x80053cf8	load		j		manual-decoded	reviewed	st.vis_c_run asm review
 ST.EXE	0x80053cec	0x434ec		mips26	reachable-code	0x8005335c	load		jal		manual-decoded	reviewed	st.vis_c_run asm review
+ST.EXE	0x8005a374	0x49b74	0x8005a378	mips_hi16_lo16	reachable-code	0x80198f28	bss	viewer	lui+addiu		manual-decoded	reviewed	st.stats asm review
+ST.EXE	0x8005e92c	0x4e12c	0x8005e930	mips_hi16_lo16	reachable-code	0x80198f28	bss	viewer	lui+addiu		manual-decoded	reviewed	st.points asm review
+ST.EXE	0x8005e974	0x4e174		mips26	reachable-code	0x80057a3c	load		jal		manual-decoded	reviewed	st.points asm review
+ST.EXE	0x8005e97c	0x4e17c	0x8005e980	mips_hi16_lo16	reachable-code	0x801cd180	bss	DAT_801cd180	lui+addiu		manual-decoded	reviewed	st.points asm review
+ST.EXE	0x8005e998	0x4e198		mips26	reachable-code	0x80057cec	load		jal		manual-decoded	reviewed	st.points asm review
+ST.EXE	0x8005e9a0	0x4e1a0		mips26	reachable-code	0x8005ebec	load		j		manual-decoded	reviewed	st.points asm review
+ST.EXE	0x8005e9bc	0x4e1bc		mips26	reachable-code	0x80057d10	load		jal		manual-decoded	reviewed	st.points asm review
+ST.EXE	0x8005ea24	0x4e224		mips26	reachable-code	0x80057d10	load		jal		manual-decoded	reviewed	st.points asm review
+ST.EXE	0x8005ea94	0x4e294		mips26	reachable-code	0x80057d10	load		jal		manual-decoded	reviewed	st.points asm review
+ST.EXE	0x8005eb28	0x4e328		mips26	reachable-code	0x80057cc8	load		jal		manual-decoded	reviewed	st.points asm review
+ST.EXE	0x8005eb60	0x4e360		mips26	reachable-code	0x8005eb70	load		j		manual-decoded	reviewed	st.points asm review
+ST.EXE	0x8005eb68	0x4e368		mips26	reachable-code	0x80057d34	load		jal		manual-decoded	reviewed	st.points asm review
+ST.EXE	0x8005eb70	0x4e370		mips26	reachable-code	0x800164b4	load		jal		manual-decoded	reviewed	st.points asm review
+ST.EXE	0x8005eb78	0x4e378		mips26	reachable-code	0x8002a5a4	load		jal		manual-decoded	reviewed	st.points asm review
+ST.EXE	0x8005eb94	0x4e394		mips26	reachable-code	0x8002a5a4	load		jal		manual-decoded	reviewed	st.points asm review
+ST.EXE	0x8005eba4	0x4e3a4	0x8005eba8	mips_hi16_lo16	reachable-code	0x80198f28	bss	viewer	lui+addiu		manual-decoded	reviewed	st.points asm review
+ST.EXE	0x8005ebec	0x4e3ec		mips26	reachable-code	0x80057a3c	load		jal		manual-decoded	reviewed	st.points asm review
+ST.EXE	0x8005f390	0x4eb90	0x8005f3a8	mips_hi16_lo16	reachable-code	0x800880bc	load		lui+addiu		manual-decoded	reviewed	st.menu_open asm review
+ST.EXE	0x8005f408	0x4ec08		mips26	reachable-code	0x800152d0	load		jal		manual-decoded	reviewed	st.menu_open asm review
+ST.EXE	0x8005f41c	0x4ec1c		mips26	reachable-code	0x80079dcc	load		jal		manual-decoded	reviewed	st.menu_open asm review
+ST.EXE	0x8005f424	0x4ec24		mips26	reachable-code	0x80015ad4	load		jal		manual-decoded	reviewed	st.menu_open asm review
+ST.EXE	0x8005f428	0x4ec28	0x8005f42c	mips_hi16_lo16	reachable-code	0x80088c88	bss	DAT_80088c88	lui+addiu		manual-decoded	reviewed	st.menu_open asm review
+ST.EXE	0x8005f428	0x4ec28	0x8005f468	mips_hi16_lo16	reachable-code	0x80088c88	bss	DAT_80088c88	lui+lw		manual-decoded	reviewed	st.menu_open asm review
+ST.EXE	0x8005f428	0x4ec28	0x8005f480	mips_hi16_lo16	reachable-code	0x80088c88	bss	DAT_80088c88	lui+addiu		manual-decoded	reviewed	st.menu_open asm review
+ST.EXE	0x8005f428	0x4ec28	0x8005f4b4	mips_hi16_lo16	reachable-code	0x80088c88	bss	DAT_80088c88	lui+lw		manual-decoded	reviewed	st.menu_open asm review
+ST.EXE	0x8005f438	0x4ec38		mips26	reachable-code	0x80016030	load		jal		manual-decoded	reviewed	st.menu_open asm review
+ST.EXE	0x8005f440	0x4ec40	0x8005f444	mips_hi16_lo16	reachable-code	0x801e0d50	bss	menu_messages	lui+addiu		manual-decoded	reviewed	st.menu_open asm review
+ST.EXE	0x8005f450	0x4ec50		mips26	reachable-code	0x80014cfc	load		jal		manual-decoded	reviewed	st.menu_open asm review
+ST.EXE	0x8005f478	0x4ec78		mips26	reachable-code	0x8003ec5c	load		jal		manual-decoded	reviewed	st.menu_open asm review
+ST.EXE	0x8005f48c	0x4ec8c		mips26	reachable-code	0x80016030	load		jal		manual-decoded	reviewed	st.menu_open asm review
+ST.EXE	0x8005f49c	0x4ec9c		mips26	reachable-code	0x80014cfc	load		jal		manual-decoded	reviewed	st.menu_open asm review
+ST.EXE	0x8005f4c4	0x4ecc4		mips26	reachable-code	0x8003ec5c	load		jal		manual-decoded	reviewed	st.menu_open asm review
+ST.EXE	0x8005f4cc	0x4eccc		mips26	reachable-code	0x80058c04	load		jal		manual-decoded	reviewed	st.menu_open asm review
+ST.EXE	0x8005f4d4	0x4ecd4		mips26	reachable-code	0x80057a3c	load		jal		manual-decoded	reviewed	st.menu_open asm review
+ST.EXE	0x8005f504	0x4ed04	0x8005f508	mips_hi16_lo16	reachable-code	0x800880c4	load		lui+addiu		manual-decoded	reviewed	st.menu_open asm review
+ST.EXE	0x8005f534	0x4ed34		mips26	reachable-code	0x80079dcc	load		jal		manual-decoded	reviewed	st.menu_open asm review
 ST.EXE	0x80060bc0	0x503c0		mips26	reachable-code	0x80077e34	load		jal		manual-decoded	reviewed	st.card asm review
 ST.EXE	0x80060bcc	0x503cc		mips26	reachable-code	0x80077e34	load		jal		manual-decoded	reviewed	st.card asm review
 ST.EXE	0x80060bd8	0x503d8		mips26	reachable-code	0x80077e34	load		jal		manual-decoded	reviewed	st.card asm review
