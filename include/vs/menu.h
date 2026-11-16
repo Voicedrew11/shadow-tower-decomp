@@ -7,6 +7,7 @@
 #define VS_MENU_H
 
 #include <kf/lib/types.h>
+#include <kf/lib/offsetof.h>
 #include <sys/types.h>
 #include <LIBGTE.H>
 #include <LIBGPU.H>
@@ -30,6 +31,10 @@ typedef struct {
     DVECTOR unk240;      /* 0x240: texture position in VRAM (ST unk358) */
     DVECTOR unk244;      /* 0x244: CLUT position in VRAM (ST unk35C) */
 } VsMenuScratch;
+
+/* Layout check: the offset the code proves. */
+typedef char VsMenuScratchStyleAt0x1F0[offsetof(VsMenuScratch, style) == 0x1f0 ? 1 : -1];
+typedef char VsMenuScratchUnk244At0x244[offsetof(VsMenuScratch, unk244) == 0x244 ? 1 : -1];
 
 #define VS_MENU_SCRATCH ((VsMenuScratch *)0x1f800000)
 

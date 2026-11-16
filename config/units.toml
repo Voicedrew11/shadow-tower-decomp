@@ -487,7 +487,7 @@ image = "OPTXT.EXE"
 source = "src/optxt/main.c"
 profile = "probe-gcc272cdk-o2-g8"
 
-# VS.EXE: VS's own copies of ST.EXE functions (src/vs/).
+# VS.EXE: VS's own copies of ST.EXE functions (src/vs/); shared fragments in src/lib/.
 
 [[unit]]
 unit = "vs.gfx_80016ca8"
@@ -496,9 +496,21 @@ source = "src/vs/gfx_80016ca8.c"
 profile = "probe-gcc272cdk-o2-g8"
 
 [[unit]]
+unit = "vs.stub_8001ca10"
+image = "VS.EXE"
+source = "src/vs/stub_8001ca10.c"
+profile = "probe-gcc272cdk-o2-g0"
+
+[[unit]]
 unit = "vs.cd_8001cb34"
 image = "VS.EXE"
 source = "src/vs/cd_8001cb34.c"
+profile = "probe-gcc272cdk-o2-g8"
+
+[[unit]]
+unit = "vs.ui_8001e3d8"
+image = "VS.EXE"
+source = "src/vs/ui_8001e3d8.c"
 profile = "probe-gcc272cdk-o2-g8"
 
 [[unit]]
@@ -526,9 +538,87 @@ source = "src/vs/ui_80020384.c"
 profile = "probe-gcc272cdk-o2-g8"
 
 [[unit]]
+unit = "vs.anim_80023764"
+image = "VS.EXE"
+source = "src/vs/anim_80023764.c"
+profile = "probe-gcc272cdk-o2-g0"
+
+[[unit]]
+unit = "vs.anim_8002429c"
+image = "VS.EXE"
+source = "src/vs/anim_8002429c.c"
+profile = "probe-gcc272cdk-o2-g0"
+
+[[unit]]
+unit = "vs.anim_80025670"
+image = "VS.EXE"
+source = "src/vs/anim_80025670.c"
+profile = "probe-gcc272cdk-o2-g0"
+
+[[unit]]
+unit = "vs.prim_80025878"
+image = "VS.EXE"
+source = "src/vs/prim_80025878.c"
+profile = "probe-gcc272cdk-o2-g0"
+
+[[unit]]
+unit = "vs.anim_80027c64"
+image = "VS.EXE"
+source = "src/vs/anim_80027c64.c"
+profile = "probe-gcc272cdk-o2-g0"
+
+[[unit]]
+unit = "vs.anim_80027f30"
+image = "VS.EXE"
+source = "src/vs/anim_80027f30.c"
+profile = "probe-gcc272cdk-o2-g0"
+
+[[unit]]
 unit = "vs.cd_8002e5e4"
 image = "VS.EXE"
 source = "src/vs/cd_8002e5e4.c"
+profile = "probe-gcc272cdk-o2-g0"
+
+[[unit]]
+unit = "vs.cd_8002efcc"
+image = "VS.EXE"
+source = "src/vs/cd_8002efcc.c"
+profile = "probe-gcc272cdk-o2-g8"
+
+[[unit]]
+unit = "vs.vis_8002f264"
+image = "VS.EXE"
+source = "src/vs/vis_8002f264.c"
+profile = "probe-gcc272cdk-o2-g0"
+
+[[unit]]
+unit = "vs.stub_80032108"
+image = "VS.EXE"
+source = "src/vs/stub_80032108.c"
+profile = "probe-gcc272cdk-o2-g0"
+
+[[unit]]
+unit = "vs.effect_80032200"
+image = "VS.EXE"
+source = "src/vs/effect_80032200.c"
+profile = "probe-gcc272cdk-o2-g0"
+
+[[unit]]
+unit = "vs.effect_80032228"
+image = "VS.EXE"
+source = "src/vs/effect_80032228.c"
+profile = "probe-gcc272cdk-o2-g0"
+
+[[unit]]
+unit = "vs.effect_move_8003333c"
+image = "VS.EXE"
+source = "src/vs/effect_move_8003333c.c"
+profile = "probe-gcc272cdk-o2-g0"
+
+[[unit]]
+unit = "vs.effect_run_800352cc"
+image = "VS.EXE"
+source = "src/vs/effect_run_800352cc.c"
 profile = "probe-gcc272cdk-o2-g0"
 
 [[unit]]

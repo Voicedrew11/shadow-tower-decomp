@@ -10,6 +10,7 @@
 #define VS_DATA_H
 
 #include <kf/lib/types.h>
+#include <kf/lib/offsetof.h>
 #include <sys/types.h>
 #include <LIBGTE.H>
 #include <LIBGPU.H>
@@ -45,6 +46,9 @@ typedef struct {
     VsArchive archives[ST_ARCHIVES]; /* 0xe0: count as in ST.EXE (WIP) */
 } VsCdState;
 
+/* Layout check: the offset the code proves. */
+typedef char VsCdStateArchivesAt0xE0[offsetof(VsCdState, archives) == 0xe0 ? 1 : -1];
+
 extern VsCdState DAT_801a4590;
 
 /*
@@ -71,11 +75,19 @@ typedef struct {
     s32 unk8330;
     s32 unk8334;
     s32 unk8338[5];
-    u8 unk834C[0x2c972 - 0x834c];
+    void *unk834C[144];  /* 0x834c: model files by id, as in ST.EXE */
+    u8 unk858C[0xa3fc - 0x858c];
+    StAnimSlot anim_slots[12]; /* 0xa3fc: 12 vertex-animation slots (ST: 16 at 0xa5fc) */
+    StAnimSet anim_sets[12]; /* 0xa51c: 12 skeletal-animation slots (ST: 16 at 0xa77c) */
+    u8 unkA7EC[0x2c972 - 0xa7ec];
     u8 frame;            /* 0x2c972: index of the current DRAWENV and buffers (ST: 0x1ecc2) */
     u8 unk2C973;
     u8 unk2C974;         /* 0x2c974: set while the loading display runs (ST: unk1ECC4) */
 } VsWorldState;
+
+/* Layout checks: the offsets the code proves. */
+typedef char VsWorldStateAnimSlotsAt0xA3FC[offsetof(VsWorldState, anim_slots) == 0xa3fc ? 1 : -1];
+typedef char VsWorldStateFrameAt0x2C972[offsetof(VsWorldState, frame) == 0x2c972 ? 1 : -1];
 
 extern VsWorldState DAT_801624d0;
 
