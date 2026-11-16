@@ -508,15 +508,39 @@ source = "src/vs/pad_800136e0.c"
 profile = "probe-gcc272cdk-o2-g8"
 
 [[unit]]
+unit = "vs.snd_80013aec"
+image = "VS.EXE"
+source = "src/vs/snd_80013aec.c"
+profile = "probe-gcc272cdk-o2-g8"
+
+[[unit]]
 unit = "vs.gfx_80016ca8"
 image = "VS.EXE"
 source = "src/vs/gfx_80016ca8.c"
 profile = "probe-gcc272cdk-o2-g8"
 
 [[unit]]
+unit = "vs.gfx_80017bc4"
+image = "VS.EXE"
+source = "src/vs/gfx_80017bc4.c"
+profile = "probe-gcc272cdk-o2-g8"
+
+[[unit]]
+unit = "vs.tim_80018240"
+image = "VS.EXE"
+source = "src/vs/tim_80018240.c"
+profile = "probe-gcc272cdk-o2-g8"
+
+[[unit]]
 unit = "vs.card_8001a124"
 image = "VS.EXE"
 source = "src/vs/card_8001a124.c"
+profile = "probe-gcc272cdk-o2-g8"
+
+[[unit]]
+unit = "vs.card_8001c530"
+image = "VS.EXE"
+source = "src/vs/card_8001c530.c"
 profile = "probe-gcc272cdk-o2-g8"
 
 [[unit]]
@@ -529,7 +553,7 @@ profile = "probe-gcc272cdk-o2-g8"
 unit = "vs.stub_8001ca10"
 image = "VS.EXE"
 source = "src/vs/stub_8001ca10.c"
-profile = "probe-gcc272cdk-o2-g0"
+profile = "probe-gcc272cdk-o2-g8"
 
 [[unit]]
 unit = "vs.cd_8001cb34"

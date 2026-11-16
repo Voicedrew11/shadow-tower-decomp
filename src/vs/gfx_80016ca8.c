@@ -11,9 +11,20 @@
 #include <LIBETC.H>
 #include <INLINE_C.H>
 #include <vs/data.h>
+#include <LIBSN.H>
 
 /* The graphics reset's RECT initializer: 8 bytes, so .sdata under -G8. */
 SDATA(0x80063234, 0x8)
+
+/* Reads `size` bytes of host file `name` into `buf` (PC file server). */
+ADDRESS(0x80016c48, 0x60)
+void func_80016c48(char *name, void *buf, int size)
+{
+    int fd = PCopen(name, 0, 0);
+
+    PCread(fd, buf, size);
+    PCclose(fd);
+}
 
 ADDRESS(0x80016ca8, 0xec)
 void func_80016ca8(void)

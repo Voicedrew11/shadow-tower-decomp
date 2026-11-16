@@ -27,6 +27,11 @@ typedef char VsSoundBankSize[sizeof(VsSoundBank) == 0x1004 ? 1 : -1];
 /* The two sound banks (0x801604b0, bss). */
 extern VsSoundBank DAT_801604b0[2];
 
+/* libsnd's SEQ attribute table (0x801175a8, bss) and SpuGetAllKeysStatus's
+ * 24 voice states (0x80117580, bss). */
+extern char DAT_801175a8[];
+extern char DAT_80117580[24];
+
 /* src/vs/card_8001c8b8.c: the menu sound effects (SsUtKeyOn tones 11-14). */
 void func_8001c8b8(void);
 void func_8001c8f8(void);

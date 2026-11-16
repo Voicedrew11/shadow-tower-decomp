@@ -8,12 +8,15 @@
 #include <kf/lib/types.h>
 #include <sys/types.h>
 #include <LIBCD.H>
+#include <LIBGTE.H>
 #include <st/cd.h>
 
 /* src/vs/cd_8001cb34.c */
 void func_8001cb34(void);                 /* ST func_8001531c */
 void func_8001d1b8(void);                 /* ST func_800174c4 */
 void func_8001d374(void);                 /* ST func_80017680 */
+StCdRequest *func_8001d030(int kind, CdlLOC *loc, u32 size, u8 *dest, void (*done)()); /* ST func_80015bcc */
+int func_8001d134(int archive, int member, CdlLOC *loc); /* ST func_80015cd0 */
 void func_8001d298(void);                 /* ST func_800175a4 */
 void func_8001d328(void);                 /* ST func_80017634 */
 
@@ -28,6 +31,9 @@ void func_8002ea94(StCdRequest *request); /* ST func_80015848 */
 u32 func_8002eb9c(CdlLOC *pos);           /* ST func_80015950 */
 void func_8002ece0(CdlLOC *pos, int offset, CdlLOC *out); /* ST func_80015a94 */
 int func_8002ed20(u32 *data, int sectors); /* ST func_80015b78 */
+
+/* src/vs/snd_80012a70.c */
+void func_80012c2c(u_long *data, DVECTOR *pos, DVECTOR *clut_pos);
 
 /* src/vs/anim_80023764.c */
 void *func_8002398c(u32 size);            /* malloc, NULL outside main RAM */
