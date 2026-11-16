@@ -44,7 +44,7 @@ void func_80016fb8(void)
     PutDispEnv(&world_state.disp[0]);
     PutDrawEnv(&world_state.draw[0]);
     gte_SetBackColor(80, 80, 80);
-    world_state.id = 255;
+    world_state.frame = 255;
     world_state.unkE0 = DAT_8011c488;
     world_state.packets[0].start = world_state.unkE0;
     world_state.packets[0].end = world_state.packets[0].start + PACKET_WORDS;
@@ -136,15 +136,15 @@ void func_800173a8(void)
 ADDRESS(0x800174c4, 0xe0)
 void func_800174c4(void)
 {
-    world_state.id = !world_state.id;
-    world_state.packet = &world_state.packets[world_state.id];
+    world_state.frame = !world_state.frame;
+    world_state.packet = &world_state.packets[world_state.frame];
     world_state.packet->cur = world_state.packet->start;
-    world_state.ot_cur = world_state.ot[world_state.id];
+    world_state.ot_cur = world_state.ot[world_state.frame];
     ClearOTagR(world_state.ot_cur, OT_LENGTH);
-    world_state.ot2_cur = world_state.ot2[world_state.id];
+    world_state.ot2_cur = world_state.ot2[world_state.frame];
     ClearOTagR(world_state.ot2_cur, OT2_LENGTH);
     world_state.unk831C[0] = world_state.unk831C[1] =
-        world_state.unk831C[2] = world_state.unk831C[3] = 0;
+        world_state.unk8324 = world_state.unk8328 = 0;
     world_state.unk832C = 0;
     world_state.unk8330 = 0;
     world_state.unk8338[0] = 0;
@@ -159,8 +159,8 @@ void func_800175a4(void)
 {
     DrawSync(0);
     VSync(3);
-    PutDispEnv(&world_state.disp[world_state.id]);
-    PutDrawEnv(&world_state.draw[world_state.id]);
+    PutDispEnv(&world_state.disp[world_state.frame]);
+    PutDrawEnv(&world_state.draw[world_state.frame]);
 }
 
 ADDRESS(0x80017634, 0x4c)

@@ -14,6 +14,7 @@
 #include <LIBCD.H>
 #include <st/data.h>
 #include <st/cd.h>
+#include <st/gfx.h>
 #include <st/funcs.h>
 
 /* unk1 of the current request: the step its read is at. */

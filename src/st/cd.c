@@ -308,11 +308,11 @@ void func_800164b4(void)
 ADDRESS(0x80016508, 0x4c)
 void func_80016508(void)
 {
-    world_state.unk1ECD8[0] = 1;
-    world_state.unk1ECD8[1] = 1;
-    world_state.unk1ECD6[0] = world_state.unk1ECDA[0] =
-        world_state.unk1ECDE[0] = world_state.unk1ECE2[0] = 0;
-    world_state.unk1ECD6[1] = world_state.unk1ECDA[1] =
-        world_state.unk1ECDE[1] = world_state.unk1ECE2[1] = 0;
+    world_state.fade.mode[0] = 1;
+    world_state.fade.mode[1] = 1;
+    world_state.fade.active[0] = world_state.fade.r[0] =
+        world_state.fade.g[0] = world_state.fade.b[0] = 0;
+    world_state.fade.active[1] = world_state.fade.r[1] =
+        world_state.fade.g[1] = world_state.fade.b[1] = 0;
     world_state.unk1ECD2 = 255;
 }

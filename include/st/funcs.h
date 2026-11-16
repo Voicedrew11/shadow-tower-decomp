@@ -9,13 +9,11 @@
 #include <kf/lib/types.h>
 #include <sys/types.h>
 #include <LIBGTE.H>
+#include <LIBGPU.H>
 
-void func_800210f4(void);
-void func_80021158(void);
-void func_800214a4(void);
-void func_800214cc(void);
 void func_80026afc(VECTOR *a, SVECTOR *b);
 void func_80032058(void);
+void func_80031efc(u_long *buf, u_long size);
 void func_8003216c(void);
 void func_8003306c(void);
 void func_800340c4(void);
@@ -30,6 +28,7 @@ void func_8003c0e0(void);
 void func_8003cedc(void);
 void func_8003e734(VECTOR *a, SVECTOR *b);
 void func_8003eaf8(void);
+void func_8003ec5c(void *data, DVECTOR *a, DVECTOR *b, int arg3);
 void func_8003ee38(u16 id, int slot);
 void func_8003f12c(u16 id, int slot, int arg2);
 void func_80042d74(void);
@@ -56,6 +55,7 @@ void func_80057da0(void);
 void func_80057f3c(void);
 void func_80058288(VECTOR *a, SVECTOR *b);
 void func_80058620(void);
+void func_80058a0c(int archive, int index, int slot);
 void func_80058dc4(int arg0, int arg1);
 void func_80058ed4(void);
 int func_80062c28(int arg0);

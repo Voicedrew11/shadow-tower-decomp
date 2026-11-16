@@ -12,23 +12,6 @@
 #include <st/mesh.h>
 #include <st/scratch.h>
 
-/* One 40-byte model part: its primitive offset and per-kind counts (the
- * records st/mesh.h's MeshHeader views from 12 bytes earlier). */
-typedef struct {
-    u32 unk0;
-    u32 offset;
-    u32 unk8;
-    u16 counts[8];
-    u8 unk1C[0xc];
-} ModelPart;
-
-typedef struct {
-    u8 unk0[8];
-    u32 parts_count;
-    u8 unkC[0xc];
-    ModelPart parts[1];
-} Model;
-
 /* Texture fields shared by the textured primitive kinds. */
 typedef struct {
     u8 u0, v0;

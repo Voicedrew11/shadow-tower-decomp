@@ -53,7 +53,7 @@ typedef struct {
 /*
  * The CD state block: the root counter 3 event (+0), vsync tick words
  * (+0x4..+0x10), the request ring and its two pointers, and the archive
- * tables. WIP extent ends with them.
+ * tables, and the loading screen file at +0xa6c. WIP extent ends with it.
  */
 typedef struct {
     s32 unk0;
@@ -65,6 +65,8 @@ typedef struct {
     StCdRequest *unk9D4;
     StCdRequest *unk9D8;
     StArchive archives[ST_ARCHIVES];
+    u8 unkA00[0xa6c - 0xa00];
+    CdlFILE unkA6C; /* \LOAD02.TIM;1, searched by func_800210f4, read by func_80021158 */
 } StCdState;
 
 extern StCdState cd_state;

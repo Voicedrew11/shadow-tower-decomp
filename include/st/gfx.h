@@ -1,6 +1,6 @@
 /*
  * ST.EXE graphics state at 0x8015d090 (world_state) and the functions of
- * src/st/view.c, texanim.c, gfx.c and prim.c. Unmodeled ranges stay opaque;
+ * src/st/view.c, texanim.c, gfx.c, prim.c, quad.c and fade.c. Unmodeled ranges stay opaque;
  * address-derived names stay until behaviour is proven.
  */
 #ifndef ST_GFX_H
@@ -40,7 +40,8 @@ typedef struct {
     s16 unk6A; /* also vis_cull_by_range's far range (/ 2048) */
 } StLight;
 
-/* One packet buffer: its start, its end and the next free byte. */
+/* One packet buffer: its start, its end and the next free word (primitives
+ * are allocated from `cur` up to `end`). */
 typedef struct {
     u_long *start;
     u_long *end;
@@ -53,30 +54,63 @@ typedef struct {
  * camera matrices, the mesh renderers' render mode and the current
  * lighting environment.
  */
+/*
+ * The screen fade channels func_80021994 accumulates and func_8002181c /
+ * func_800218d8 draw and clear once per frame: index 0 for modes 1 and 3,
+ * index 1 for mode 2. `mode` selects the semi-transparency rate.
+ */
+typedef struct {
+    u8 active[2];
+    u8 mode[2];
+    u16 r[2];
+    u16 g[2];
+    u16 b[2];
+} StFade;
+
+/* One 40-byte model part: its primitive offset and per-kind counts (the
+ * records st/mesh.h's MeshHeader views from 12 bytes earlier). */
+typedef struct {
+    u32 unk0;
+    u32 offset;
+    u32 unk8;
+    u16 counts[8];
+    u8 unk1C[0xc];
+} ModelPart;
+
+typedef struct {
+    u8 unk0[8];
+    u32 parts_count;
+    u8 unkC[0xc];
+    ModelPart parts[1];
+} Model;
+
 typedef struct {
     DRAWENV draw[2];
     DISPENV disp[2];
-    u_long *unkE0;
+    u_long *unkE0;       /* 0xe0: CD load buffer, also a primitive work area */
     u_long ot[2][4096];
-    u_long *ot_cur;
+    u_long *ot_cur;      /* 0x80e4 */
     u_long ot2[2][64];
     u_long *ot2_cur;
     StPacketBuffer packets[2];
-    StPacketBuffer *packet;
-    void *unk8308[4];
+    StPacketBuffer *packet; /* 0x8304 */
+    void *unk8308[4];    /* 0x8308: block owner slots (func_80017c5c; func_800239ec indexes slot + 1) */
     void *unk8318;
-    s32 unk831C[4];
+    s32 unk831C[2];
+    s32 unk8324;         /* 0x8324: primitives added by func_80021518 */
+    s32 unk8328;         /* 0x8328: primitives allocated by func_80021518 */
     s32 unk832C;
     s32 unk8330;
     s32 unk8334;
     s32 unk8338[5];
-    u8 unk834C[0x1eb40 - 0x834c];
+    void *unk834C[8];    /* 0x834c: heap block owners (func_800237a8); WIP count */
+    u8 unk836C[0x1eb40 - 0x836c];
     StTexAnim texanim[ST_TEXANIM_SLOTS];
     u8 unk1ECC0;
     u8 unk1ECC1;
-    u8 id;
+    u8 frame;            /* 0x1ecc2: index of the current DRAWENV and buffers */
     u8 unk1ECC3;
-    u8 unk1ECC4;
+    u8 unk1ECC4;         /* 0x1ecc4: set while the loading display runs */
     u8 unk1ECC5[8];
     u8 unk1ECCD;
     u8 unk1ECCE;
@@ -84,11 +118,7 @@ typedef struct {
     u8 unk1ECD0[2];
     u8 unk1ECD2;
     u8 unk1ECD3[3];
-    u8 unk1ECD6[2];
-    u8 unk1ECD8[2];
-    s16 unk1ECDA[2];
-    s16 unk1ECDE[2];
-    s16 unk1ECE2[2];
+    StFade fade;         /* 0x1ecd6 */
     u8 unk1ECE6[2];
     MATRIX unk1ECE8;
     u8 unk1ED08[0x20];
@@ -144,12 +174,32 @@ void func_80017634(void);
 void func_80017680(void);
 void func_800176a8(VECTOR *pos, SVECTOR *rot);
 
-/* src/st/prim.c (func_800177a0 takes its local Model view; the FT3 tint
- * pair is declared with the other renderers' in st/mesh.h) */
+/* src/st/prim.c (the FT3 tint pair is declared with the other renderers'
+ * in st/mesh.h) */
+void func_800177a0(Model *model, DVECTOR *uv, DVECTOR *clut, u8 count);
 void func_80017c5c(u16 index, void *p);
 void func_80017c8c(u16 index, void *p);
 u_char *func_80017cb0(u16 offset);
 void func_80017cc4(u16 i0, u16 i1, u16 i2);
 void func_80017d28(u32 t, int flags);
+
+/* src/st/quad.c */
+void func_80020ea8(int x0, int y0, int x1, int y1, u8 u, u8 v, u8 w, u8 h, u8 semi,
+                   u16 tpage, u16 clut, u8 r, u8 g, u8 b);
+void func_80020fcc(int x0, int y0, int x1, int y1, int u, int v, int w, int h, u8 semi,
+                   int tpage, int clut, int r, int g, int b);
+void func_800210f4(void);
+void func_80021158(void);
+void func_800214a4(void);
+void func_800214cc(void);
+/* An old-style definition; this is its promoted prototype. */
+void func_80021518(int x0, int y0, int x1, int y1, int u, int v, int w, int h, int semi,
+                   int tpage, int clut, int r, int g, int b, int depth);
+void func_80021654(void);
+
+/* src/st/fade.c */
+void func_8002181c(void);
+void func_800218d8(void);
+void func_80021994(int r, int g, int b, int scale, int mode);
 
 #endif

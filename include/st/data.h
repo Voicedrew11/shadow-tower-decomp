@@ -62,21 +62,27 @@ extern Viewer viewer;
 
 /*
  * The state block at 0x801b5920: func_80014544 sets bytes 4..9 from FN.;
+ * func_80021654 times the screen fade from the tick word at +0x18;
  * byte 9 is the current area the texture slots and table C entries are
  * compared with.
  */
 typedef struct {
     s16 unk0;
-    u16 unk2;
+    volatile u16 unk2; /* func_80021654 reads it zero-extended, then as a short */
     u8 unk4;
     u8 unk5;
     u8 unk6;
     u8 unk7;
     u8 unk8;
     u8 area;             /* 0x09 */
-    u8 unkA[0x13];
+    u8 unkA[0x10 - 0xa];
+    u8 unk10;            /* 0x10: 0xff when unset */
+    u8 unk11[0x18 - 0x11];
+    s32 unk18;           /* 0x18: tick func_80021654 times its fade from, -1 when idle */
+    u8 unk1C;
     u8 unk1D;
-    u8 unk1E[0xa];
+    u8 unk1E;
+    u8 unk1F[0x28 - 0x1f];
 } AreaState;
 
 extern AreaState area_state;
@@ -95,5 +101,17 @@ typedef struct {
     u8 unk10;
 } Data801cd180;
 extern Data801cd180 DAT_801cd180;
+
+/*
+ * One sound bank slot: the loaded bank's data (its state halfword at +4)
+ * and the VAB id SsVabClose takes. func_800237a8 uses slots 8..23 as four
+ * rows of four.
+ */
+typedef struct {
+    s16 *block;
+    s16 vab;
+    s16 unk6;
+} StVabSlot;
+extern StVabSlot DAT_801dd1e8[24];
 
 #endif
