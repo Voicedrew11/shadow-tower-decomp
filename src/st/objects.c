@@ -2,7 +2,7 @@
  * ST.EXE: the world object passes (WIP module). Each pass walks the visible
  * entries of one object table, marks the model slots it uses in the
  * scratchpad flag table (which st.slots then loads or releases), places
- * ambient sounds, and draws each model with func_80022678.
+ * ambient sounds, and draws each model with model_draw.
  */
 #include <kf/lib/address.h>
 #include <kf/lib/null.h>
@@ -19,6 +19,7 @@
 #include <st/scratch.h>
 #include <st/vis.h>
 #include <st/menu.h>
+#include <st/mesh.h>
 #include <st/objects.h>
 #include <st/funcs.h>
 
@@ -78,7 +79,7 @@ void func_800241d0(void)
             sp->ot = world_state.ot_cur + e->unk21;
             sp->near_z = 4 - e->unk21;
             sp->far_z = 4096 - e->unk21;
-            func_80022678(0, e->unk0B + SLOT_A, at, &sp->unkD8, &e->unk94, e->unkA4,
+            model_draw(0, e->unk0B + SLOT_A, at, &sp->unkD8, &e->unk94, e->unkA4,
                           &DAT_8008040c, e->unk08, e->unk2A, 4096 - depth, e->unk24,
                           e->unk1C.bytes[2], 0);
         } else {
@@ -93,7 +94,7 @@ void func_800241d0(void)
                 sp->ot = world_state.ot_cur + e->unk21;
                 sp->near_z = 4 - e->unk21;
                 sp->far_z = 4096 - e->unk21;
-                func_80022678(0, e->unk0B + SLOT_A, at, &sp->unkD8, &e->unk94, e->unkA4,
+                model_draw(0, e->unk0B + SLOT_A, at, &sp->unkD8, &e->unk94, e->unkA4,
                               &world_state.unk1ECE8, e->unk08, e->unk2A, 4096 - depth, e->unk24,
                               e->unk1C.bytes[2], 0);
             }
@@ -104,7 +105,7 @@ void func_800241d0(void)
                 sp->ot = world_state.ot_cur + e->unk21 - 4;
                 sp->near_z = 8 - e->unk21;
                 sp->far_z = 4100 - e->unk21;
-                func_80022678(0, 44, &pos, &sp->unkD8, &scale, NULL, &world_state.unk1ECE8, 128, 0,
+                model_draw(0, 44, &pos, &sp->unkD8, &scale, NULL, &world_state.unk1ECE8, 128, 0,
                               0, 0, 4, 0);
             }
         }
@@ -274,7 +275,7 @@ void func_800246e4(void)
             sp->ot = world_state.ot_cur + e->unk14;
             sp->near_z = 4 - e->unk14;
             sp->far_z = 4096 - e->unk14;
-            func_80022678(0, id, &e->unk24, &sp->unkD8, size, e->unk44,
+            model_draw(0, id, &e->unk24, &sp->unkD8, size, e->unk44,
                           &world_state.unk1ECE8, e->unk02, e->unk10, 0, e->unk16, e->unk03, 0);
             break;
         default:
@@ -295,7 +296,7 @@ void func_800246e4(void)
                 sp->ot = world_state.ot_cur + e->unk14;
                 sp->near_z = 4 - e->unk14;
                 sp->far_z = 4096 - e->unk14;
-                func_80022678(0, id, &e->unk24, &sp->unkD8, size, e->unk44,
+                model_draw(0, id, &e->unk24, &sp->unkD8, size, e->unk44,
                               &world_state.unk1EDA8, e->unk02, e->unk10, e->unk16, e->unk16,
                               e->unk03, 0);
                 break;
@@ -308,7 +309,7 @@ void func_800246e4(void)
                 sp->ot = world_state.ot_cur + e->unk14;
                 sp->near_z = 4 - e->unk14;
                 sp->far_z = 4096 - e->unk14;
-                func_80022678(0, id, &e->unk24, &sp->unkD8, size, e->unk44,
+                model_draw(0, id, &e->unk24, &sp->unkD8, size, e->unk44,
                               &world_state.unk1ECE8, e->unk02, e->unk10, e->unk16, e->unk16, e->unk03, 0);
                 if (e->unk04 & 1)
                     continue;
@@ -323,7 +324,7 @@ void func_800246e4(void)
                 sp->ot = world_state.ot_cur + e->unk14 - 5;
                 sp->near_z = 9 - e->unk14;
                 sp->far_z = 4101 - e->unk14;
-                func_80022678(0, (r->unk03 >> 2 & 1) | 44, &pos, &sp->unkD8, &scale, e->unk44,
+                model_draw(0, (r->unk03 >> 2 & 1) | 44, &pos, &sp->unkD8, &scale, e->unk44,
                               &world_state.unk1ECE8, 128, 0, e->unk16, 4096, 4, 0);
             }
             break;

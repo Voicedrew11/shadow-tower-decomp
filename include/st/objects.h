@@ -2,7 +2,7 @@
  * ST.EXE world object passes (src/st/objects.c): each frame they walk the
  * visible entries of the three object tables (st/vis.h) and two free-standing
  * object arrays, flag the model slots they need, and draw the models through
- * func_80022678.
+ * model_draw.
  */
 #ifndef ST_OBJECTS_H
 #define ST_OBJECTS_H

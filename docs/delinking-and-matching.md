@@ -68,7 +68,14 @@ independently validate the TSV claim:
   decode to the recorded address, and use a sign-extending low instruction;
   rows may share a site only as one HI/LO family (same target: one `lui`
   feeding several lows, or `lui`s on converging paths feeding one low), which
-  is emitted once per site in ELF REL order;
+  is emitted once per site in ELF REL order. That order is by site,
+  except where another pair against the same symbol (with a different low
+  half) sits between a HI16 and its own LO16: GNU ld completes a HI16 with
+  the next same-symbol LO16, so that HI16 moves to just before its own
+  (`mips_elf.rel_order`). The native object view applies the same rule,
+  pairing each HI16 patch with the first later LO16 carrying its
+  expression, because objdiff reports a HI16's addend from an immediately
+  following LO16 only;
 - an out-of-load HI/LO pair remains withheld unless a human has promoted that
   exact decoded pair to `status=reviewed`; this is the path for RAM/BSS symbols
   whose addresses are real but whose storage is absent from the PS-X EXE payload;
@@ -294,7 +301,15 @@ symbols; the linker may not scatter it or override defined symbols to hide a
 layout conflict. Relinked initialized bytes are compared in full, and BSS is
 checked as uninitialized storage. A unit's single global COMMON request whose exact `DATA()` claim
 is the only one in its section is placed at that claim: in `.bss`, or in
-`.sbss` for a small request of a `-G8` unit. A unit whose `.sdata` holds
+`.sbss` for a small request of a `-G8` unit. A COMMON request the unit does
+not claim is a tentative definition merging into an initialized definition
+elsewhere when the image has a global `load` datum of that name (a curated
+identity or another unit's `DATA()` claim) inside the PS-X EXE payload, at
+least as large as the request and aligned for it: the linker allocates
+COMMON only when no object defines the symbol, so the request owns no
+storage and resolves as a reference (`roundtrip.merged_common`; listed as
+`merged_commons` in the relink audit). A `-G8` unit keeps such a tentative
+definition when ASPSX needs the size for a `$gp`-relative access. A unit whose `.sdata` holds
 only its `SDATA()` literal range places that section at the range's start. Synthetic tails imitating the probe assembler
 are not appended to retail claims: source alignment/extent differences remain
 real comparison failures. This is not yet a linked reconstruction or a check

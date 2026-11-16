@@ -18,7 +18,9 @@ from scripts.kf.data_match import diff_image, run
 from scripts.kf.delink import Datum, Function
 from scripts.kf.manifest import Manifest, Unit
 from scripts.kf.mips_elf import STT_OBJECT, DefinedSymbol, write_mips_elf
-from scripts.kf.roundtrip import LINKER, UnitResult, plan, verify_unit
+from scripts.kf.inventory import DATA_IDENTITY_FIELDS
+from scripts.kf.roundtrip import (LINKER, Definition, UnitResult, initialized_definitions,
+                                  plan, verify_unit)
 from scripts.kf.sema.image import RetailImage
 
 
@@ -162,6 +164,71 @@ class SmallDataPlacementTests(unittest.TestCase):
         result = UnitResult('GAME.EXE', 'game.control', 'synthetic')
         plan(ELFFile(io.BytesIO(blob)), unit(with_data=False), result)
         self.assertEqual([i['kind'] for i in result.issues], ['unclaimed-section'])
+
+
+class MergedCommonTests(unittest.TestCase):
+    """A tentative definition that merges into another unit's initialized datum."""
+
+    def plan(self, definition, sample=None, size=4, alignment=4):
+        result = UnitResult('GAME.EXE', 'game.control', 'synthetic')
+        elf = ELFFile(io.BytesIO(object_bytes(common=True, size=size, alignment=alignment)))
+        plan(elf, sample or unit(), result,
+             None if definition is None else {'unclaimed': definition})
+        return result
+
+    def test_common_merging_into_an_initialized_definition_is_a_reference(self):
+        result = self.plan(Definition('unclaimed', BASE + 0x180, 4, 'game.other'))
+        self.assertEqual(result.issues, [])
+        self.assertEqual(result.merged_commons, [{
+            'symbol': 'unclaimed', 'requested_size': 4, 'alignment': 4,
+            'definition_va': BASE + 0x180, 'definition_size': 4,
+            'definition_owner': 'game.other',
+        }])
+
+    def test_unmergeable_common_stays_an_unsupported_allocation(self):
+        cases = {
+            'no definitions': (None, {}),
+            'smaller definition': (Definition('unclaimed', BASE + 0x180, 2, 'config'), {}),
+            'misaligned definition': (Definition('unclaimed', BASE + 0x182, 4, 'config'), {}),
+            'own unit': (Definition('unclaimed', BASE + 0x180, 4, 'game.control'), {}),
+            'empty request': (Definition('unclaimed', BASE + 0x180, 4, 'config'), {'size': 0}),
+        }
+        for name, (definition, options) in cases.items():
+            with self.subTest(name):
+                result = self.plan(definition, **options)
+                self.assertEqual([i['kind'] for i in result.issues],
+                                 ['unsupported-common-allocation'])
+                self.assertEqual(result.merged_commons, [])
+
+    def test_a_unit_claim_of_the_name_is_not_a_merge(self):
+        sample = replace(unit(), data=unit().data + (Datum(BASE + 0x200, 4, 'unclaimed', 'bss'),))
+        result = self.plan(Definition('unclaimed', BASE + 0x180, 4, 'game.other'), sample)
+        self.assertEqual(result.merged_commons, [])
+        self.assertIn('unsupported-common-allocation', {i['kind'] for i in result.issues})
+
+    def test_definitions_are_global_initialized_payload_data(self):
+        rows = [
+            ('ST.EXE', '0x80087ee8', '0x4', 'DAT_80087ee8', 'global', 'load'),
+            ('ST.EXE', '0x80087eec', '0x4', 'local_word', 'static', 'load'),
+            ('ST.EXE', '0x8015d090', '0x10', 'storage', 'global', 'bss'),
+            ('ST.EXE', '0x80300000', '0x4', 'outside', 'global', 'load'),
+            ('STR.EXE', '0x80087ef0', '0x4', 'elsewhere', 'global', 'load'),
+        ]
+        with tempfile.TemporaryDirectory() as directory:
+            config = Path(directory)
+            lines = ['\t'.join(DATA_IDENTITY_FIELDS)]
+            lines += ['\t'.join(row + ('',) * (len(DATA_IDENTITY_FIELDS) - len(row)))
+                      for row in rows]
+            (config / 'data_identities.tsv').write_text('\n'.join(lines) + '\n')
+            claimed = replace(unit(), unit='st.owner', image='ST.EXE', data=(
+                Datum(0x80087ef4, 4, 'owned_word', 'load', 'global', '.sdata'),
+                Datum(0x80087ef8, 4, 'owned_static', 'load', 'static', '.sdata'),))
+            found = initialized_definitions('ST.EXE', (claimed,), config)
+        self.assertEqual(found, {
+            'DAT_80087ee8': Definition('DAT_80087ee8', 0x80087ee8, 4, 'config'),
+            'owned_word': Definition('owned_word', 0x80087ef4, 4, 'st.owner'),
+        })
+        self.assertEqual(initialized_definitions('GAME.EXE'), {})
 
 
 @unittest.skipUnless(shutil.which(ASSEMBLER) and shutil.which(LINKER), 'pinned GNU MIPS tools required')

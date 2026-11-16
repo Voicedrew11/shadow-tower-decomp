@@ -237,8 +237,10 @@ ST.EXE	0x8007f318	0x6eb18	0xc	unclassified	coverage-gap			payload-complement	may
 ST.EXE	0x8007f3e4	0x6ebe4	0x10	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 ST.EXE	0x8007f3f4	0x6ebf4	0x398	defined	candidate	hud_sprites	StHudSprite[46]	asm;src/st/hud.c st.hud	46 HUD sprite records of 20 bytes in runs ended by flags 0xff; extern only, owner unknown
 ST.EXE	0x8007f78c	0x6ef8c	0xc80	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
-ST.EXE	0x8008040c	0x6fc0c	0x20	defined	candidate	DAT_8008040c	MATRIX	asm;src/st/objects.c st.objects	identity MATRIX handed to func_80022678 by func_800241d0 and func_800255f0; extern only
-ST.EXE	0x8008042c	0x6fc2c	0x7aec	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
+ST.EXE	0x8008040c	0x6fc0c	0x20	defined	candidate	DAT_8008040c	MATRIX	asm;src/st/objects.c st.objects	identity MATRIX handed to model_draw by func_800241d0 and func_800255f0; extern only
+ST.EXE	0x8008042c	0x6fc2c	0x7abc	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
+ST.EXE	0x80087ee8	0x776e8	0x4	defined	proven	DAT_80087ee8	u_long	asm;src/st/model_draw.c st.model_draw	$gp+0x28; initialized word 0x00808080 (colour 128, 128, 128) func_80021ac4 loads; owning unit unknown
+ST.EXE	0x80087eec	0x776ec	0x2c	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 ST.EXE	0x80087f18	0x77718	0x4	defined	candidate	DAT_80087f18	s32	asm;src/st/hud.c st.hud	$gp+0x58 .sdata word; blink phase of func_80026afc's selection frame
 ST.EXE	0x80087f1c	0x7771c	0x18	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 ST.EXE	0x80087f34	0x77734	0x4	defined	candidate	DAT_80087f34	s32	asm;src/st/menu.c st.menu	$gp+0x74 .sdata word; blink phase of the map page arrows (func_8002a954)

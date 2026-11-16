@@ -11,9 +11,6 @@
 #include <LIBGTE.H>
 #include <LIBGPU.H>
 
-void func_80021ac4(int index);
-void func_80022678(int mode, u16 id, VECTOR *pos, SVECTOR *rot, SVECTOR *scale, void *arg5,
-                   MATRIX *m, int arg7, int arg8, short arg9, short arg10, int arg11, int arg12);
 void func_80031efc(u_long *buf, u_long size);
 void func_80032058(void);
 void func_8003216c(void);
@@ -24,10 +21,13 @@ void func_800340c4(void);
 void func_800340f8(void);
 void func_800341a0(void);
 void func_80034224(void);
+int func_80034604(void *anim, int model, int part, int arg3);
 void func_80034f48(void);
 void func_80034fc4(void);
 void func_8003509c(void);
 void func_80035120(void);
+void func_80035260(void *obj);
+int func_80035aa8(void *anim, int model, int part, int arg3);
 void func_8003bc10(void);
 void func_8003bc40(void);
 void func_8003c0e0(void);
@@ -45,6 +45,7 @@ void func_800456f8(void);
 void func_80045ffc(void);
 void func_800498cc(MATRIX *m, MATRIX *out);
 void func_80049cd4(int angle, MATRIX *out);
+void func_80049e30(SVECTOR *rot, MATRIX *out);
 void func_8004afdc(void);
 void func_8004e324(void);
 void func_8004eda8(void);

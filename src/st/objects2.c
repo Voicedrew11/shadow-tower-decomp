@@ -4,7 +4,7 @@
  * jump table here addresses this code). Each pass walks the visible
  * entries of one object table, marks the model slots it uses in the
  * scratchpad flag table (which st.slots then loads or releases), places
- * ambient sounds, and draws each model with func_80022678.
+ * ambient sounds, and draws each model with model_draw.
  */
 #include <kf/lib/address.h>
 #include <kf/lib/null.h>
@@ -21,6 +21,7 @@
 #include <st/scratch.h>
 #include <st/vis.h>
 #include <st/menu.h>
+#include <st/mesh.h>
 #include <st/objects.h>
 #include <st/funcs.h>
 
@@ -75,7 +76,7 @@ void func_800251c8(void)
                 sp->ot = world_state.ot_cur + e->unk2D;
                 sp->near_z = 4 - e->unk2D;
                 sp->far_z = 4096 - e->unk2D;
-                func_80022678(0, r->unk4 + SLOT_C, &e->unk08, &sp->unkD8, &scale, e->unk04,
+                model_draw(0, r->unk4 + SLOT_C, &e->unk08, &sp->unkD8, &scale, e->unk04,
                               &world_state.unk1ECE8, 128, 0, 0, 4096, e->unk24, 0);
                 sp->unkD8.vx = sp->unkD8.vy = sp->unkD8.vz = 0;
                 sp->ot = world_state.ot_cur + e->unk2D;
@@ -84,13 +85,13 @@ void func_800251c8(void)
                 m = world_state.unk1EDA8;
                 if (e->unk22 != 2)
                     RotMatrixX(e->unk18, &m);
-                func_80022678(0, r->unk4 + SLOT_C, &e->unk08, &sp->unkD8, &scale, e->unk04, &m, 129,
+                model_draw(0, r->unk4 + SLOT_C, &e->unk08, &sp->unkD8, &scale, e->unk04, &m, 129,
                               0, 0, 4096, e->unk24, 0);
             } else {
                 sp->ot = world_state.ot_cur + e->unk2D;
                 sp->near_z = 4 - e->unk2D;
                 sp->far_z = 4096 - e->unk2D;
-                func_80022678(0, r->unk4 + SLOT_C, &e->unk08, &sp->unkD8, &scale, e->unk04,
+                model_draw(0, r->unk4 + SLOT_C, &e->unk08, &sp->unkD8, &scale, e->unk04,
                               &world_state.unk1ECE8, 128, 0, 0, 4096, e->unk24, 0);
             }
         }
@@ -134,28 +135,28 @@ void func_800255f0(void)
             sp->ot = world_state.ot_cur - 7;
             sp->near_z = 11;
             sp->far_z = 4103;
-            func_80022678(0, o->unkA + 96, at, &sp->unkD8, &o->unk38, o->unk48,
+            model_draw(0, o->unkA + 96, at, &sp->unkD8, &o->unk38, o->unk48,
                           &world_state.unk1ECE8, o->unk2, o->unk14, o->unk12, o->unk12, o->unk7, 0);
             break;
         case 4:
             sp->near_z = 11;
             sp->far_z = 4103;
             sp->ot = world_state.ot_cur - 7;
-            func_80022678(0, o->unkA + 96, at, &o->unk30, &o->unk38, o->unk48,
+            model_draw(0, o->unkA + 96, at, &o->unk30, &o->unk38, o->unk48,
                           &DAT_8008040c, o->unk2, o->unk14, o->unk12, o->unk12, o->unk7, 0);
             break;
         case 8:
             sp->near_z = 11;
             sp->far_z = 4103;
             sp->ot = world_state.ot_cur - 7;
-            func_80022678(0, o->unkA + 96, at, &o->unk30, &o->unk38, o->unk48,
+            model_draw(0, o->unkA + 96, at, &o->unk30, &o->unk38, o->unk48,
                           &world_state.unk1EDA8, o->unk2, o->unk14, o->unk12, o->unk12, o->unk7, 0);
             break;
         case 12:
             sp->near_z = -16;
             sp->far_z = 4076;
             sp->ot = world_state.ot_cur + 20;
-            func_80022678(0, o->unkA + 96, at, &o->unk30, &o->unk38, o->unk48,
+            model_draw(0, o->unkA + 96, at, &o->unk30, &o->unk38, o->unk48,
                           NULL, o->unk2, o->unk14, o->unk12, o->unk12, o->unk7, 0);
             break;
         }
@@ -179,28 +180,28 @@ void func_800255f0(void)
                     sp->near_z = 24;
                     sp->far_z = 4116;
                     sp->ot = world_state.ot_cur - 20;
-                    func_80022678(3, f->unk0 + 40, at, &sp->unkD8, NULL, NULL,
+                    model_draw(3, f->unk0 + 40, at, &sp->unkD8, NULL, NULL,
                                   &world_state.unk1ECE8, f->unk5 + 128, 0, 0, 4096, 7, 0);
                     sp->unkD8.vy = 0;
-                    func_80022678(3, f->unk0 + 40, at, &sp->unkD8, NULL, NULL,
+                    model_draw(3, f->unk0 + 40, at, &sp->unkD8, NULL, NULL,
                                   &world_state.unk1EDA8, f->unk5 + 128, 0, 0, 4096, 7, 0);
                 } else if (kind == 2) {
                     sp->near_z = 24;
                     sp->far_z = 4116;
                     sp->ot = world_state.ot_cur - 20;
-                    func_80022678(3, f->unk0 + 40, at, &sp->unkD8, NULL, NULL,
+                    model_draw(3, f->unk0 + 40, at, &sp->unkD8, NULL, NULL,
                                   &world_state.unk1EDA8, f->unk5 + 128, 0, 0, 4096, 7, 0);
                 } else if (kind == 3) {
                     sp->near_z = 24;
                     sp->far_z = 4116;
                     sp->ot = world_state.ot_cur - 20;
-                    func_80022678(3, f->unk0 + 40, at, &sp->unkD8, NULL, NULL,
+                    model_draw(3, f->unk0 + 40, at, &sp->unkD8, NULL, NULL,
                                   &world_state.unk1ECE8, f->unk5 + 128, 0, 0, 4096, 7, 0);
                 } else {
                     sp->near_z = 4;
                     sp->far_z = 4096;
                     sp->ot = world_state.ot_cur;
-                    func_80022678(3, f->unk0 + 40, at, &sp->unkD8, NULL, NULL,
+                    model_draw(3, f->unk0 + 40, at, &sp->unkD8, NULL, NULL,
                                   &world_state.unk1EDA8, f->unk5 + 128, 0, 0, 4096, 5, 0);
                 }
             }

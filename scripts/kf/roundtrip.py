@@ -61,6 +61,7 @@ class UnitResult:
     relocation_rows: int = 0
     linker_ran: bool = False
     linker_diagnostics: str = ""
+    merged_commons: list[dict] = field(default_factory=list)
 
     def issue(self, kind: str, **details: object) -> None:
         self.issues.append({"kind": kind, **details})
@@ -95,6 +96,72 @@ def link_labels(image: str, config_dir: Path = RETAIL_CONFIG) -> dict[str, int]:
             raise ValueError(f"{path}: invalid or duplicate label {row['name']!r}")
         labels[row["name"]] = int(row["va"], 0)
     return labels
+
+
+@dataclass(frozen=True)
+class Definition:
+    """An initialized global datum in an image's load payload, and its owner."""
+
+    symbol: str
+    va: int
+    size: int
+    owner: str  # the claiming unit, or "config" for a curated identity only
+
+
+def initialized_definitions(image: str, units: tuple[Unit, ...] = (),
+                            config_dir: Path = RETAIL_CONFIG) -> dict[str, Definition]:
+    """Global initialized definitions a COMMON request of `image` can merge into.
+
+    A curated `load`-storage identity, or a unit's `load` DATA() claim, whose
+    extent lies inside the PS-X EXE payload: initialized storage that the
+    linker cannot have allocated for a COMMON request (that goes to BSS).
+    """
+    from scripts.kf.inventory import load_data_identities
+    from scripts.kf.retail import IMAGE_LAYOUTS
+
+    layout = IMAGE_LAYOUTS.get(image)
+    if layout is None:
+        return {}
+    found: dict[str, Definition] = {}
+    for identity in load_data_identities(config_dir).values():
+        if identity.image == image and identity.storage == "load" and identity.scope == "global":
+            symbol = sanitize_symbol(identity.name, f"DAT_{identity.va:08x}")
+            found[symbol] = Definition(symbol, identity.va, identity.size, "config")
+    for unit in units:
+        if unit.image != image:
+            continue
+        for datum in unit.data:
+            if datum.storage == "load" and datum.scope == "global":
+                found[datum.symbol] = Definition(datum.symbol, datum.va, datum.size, unit.unit)
+    return {symbol: item for symbol, item in found.items()
+            if item.size > 0 and layout.contains(item.va, item.size)}
+
+
+def merged_common(symbol, unit: Unit,
+                  definitions: dict[str, Definition] | None) -> Definition | None:
+    """The initialized definition elsewhere that a COMMON request merges into.
+
+    A tentative definition (`u_long x;`) is emitted as COMMON. PSYLINK, like
+    GNU ld, allocates COMMON storage only when no object defines the symbol;
+    otherwise the request merges into that definition and contributes no
+    storage of its own. A unit may therefore keep a tentative definition of a
+    global another unit initializes (ASPSX needs its size to emit the -G8
+    $gp-relative access an `extern` would not get). Admitted only when this
+    unit claims no datum of that name and the definition is a global,
+    initialized datum of the image, at least as large as the request and
+    aligned for it; anything else stays an unsupported COMMON allocation.
+    """
+    if definitions is None or any(datum.symbol == symbol.name for datum in unit.data):
+        return None
+    definition = definitions.get(symbol.name)
+    alignment = symbol['st_value']
+    if (definition is None or definition.owner == unit.unit
+            or symbol['st_info']['bind'] != 'STB_GLOBAL'
+            or not 0 < symbol['st_size'] <= definition.size
+            or alignment <= 0 or alignment & (alignment - 1)
+            or definition.va % alignment):
+        return None
+    return definition
 
 
 def named_common_bss_claim(elf: ELFFile, unit: Unit):
@@ -136,8 +203,13 @@ def named_common_bss_claim(elf: ELFFile, unit: Unit):
     return claim
 
 
-def plan(elf: ELFFile, unit: Unit, result: UnitResult) -> dict[str, int]:
-    """Derive one section base from every claim and actual ELF symbol offset."""
+def plan(elf: ELFFile, unit: Unit, result: UnitResult,
+         definitions: dict[str, Definition] | None = None) -> dict[str, int]:
+    """Derive one section base from every claim and actual ELF symbol offset.
+
+    `definitions` (initialized_definitions) lets a COMMON request that merges
+    into another unit's initialized datum resolve as a reference.
+    """
     if (elf.elfclass != 32 or not elf.little_endian
             or elf['e_machine'] != 'EM_MIPS' or elf['e_type'] != 'ET_REL'):
         result.issue("unsupported-object-format")
@@ -166,7 +238,13 @@ def plan(elf: ELFFile, unit: Unit, result: UnitResult) -> dict[str, int]:
         if (symbol['st_shndx'] == 'SHN_COMMON'
                 and (common_claim is None or symbol.name != common_claim.symbol)):
             claim = named_bss.get(symbol.name)
-            if claim is None:
+            merged = merged_common(symbol, unit, definitions)
+            if merged is not None:
+                result.merged_commons.append({
+                    "symbol": symbol.name, "requested_size": symbol['st_size'],
+                    "alignment": symbol['st_value'], "definition_va": merged.va,
+                    "definition_size": merged.size, "definition_owner": merged.owner})
+            elif claim is None:
                 result.issue("unsupported-common-allocation", symbol=symbol.name,
                              size=symbol['st_size'], alignment=symbol['st_value'])
             else:

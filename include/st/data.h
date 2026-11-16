@@ -7,6 +7,8 @@
 #define ST_DATA_H
 
 #include <kf/lib/types.h>
+#include <sys/types.h>
+#include <LIBGTE.H>
 #include <st/memory.h>
 
 /* PSX.EXE's next-program byte and the two mailbox bytes after it. */
@@ -36,6 +38,16 @@ extern StBlock DAT_8009c888[];
  * the FN. slots at +0x38, the position at +0x248 and two angles (pitch,
  * yaw) at +0x268.
  */
+/* A viewer model slot's position (+0xc) and rotation (+0x14). */
+typedef struct {
+    u8 unk0[0xc];
+    short unkC;
+    short unkE;
+    short unk10;
+    short unk12;
+    SVECTOR unk14;
+} ViewerModel;
+
 typedef struct {
     u16 unk0;
     u16 unk2;
@@ -60,7 +72,15 @@ typedef struct {
     u16 unkBA;           /* 0xba: shown by the stats menu */
     u16 unkBC;           /* 0xbc */
     u16 unkBE;           /* 0xbe */
-    u8 unkC0[0x15e - 0xc0];
+    u8 unkC0[0xe8 - 0xc0];
+    ViewerModel *unkE8[4]; /* 0xe8: func_80021ac4's slot positions and rotations */
+    void *unkF8[4];      /* 0xf8: its slot model blocks (ModelFile, st/mesh.h) */
+    u32 unk108[4];       /* 0x108: its slot animation states */
+    u8 unk118[0x130 - 0x118];
+    s16 unk130[4];       /* 0x130: -1: slot empty */
+    u8 unk138[0x150 - 0x138];
+    u8 unk150[4];        /* 0x150 */
+    u8 unk154[0x15e - 0x154];
     s8 unk15E;           /* 0x15e */
     u8 unk15F[0x17e - 0x15f];
     u16 unk17E;          /* 0x17e: HUD bar 0 value */
@@ -88,10 +108,15 @@ typedef struct {
     u8 unk254[0x14];
     short unk268;        /* 0x268: pitch in func_80016554 */
     short unk26A;        /* 0x26a: yaw in func_80016554 */
-    u8 unk26C[0x2ce - 0x26c];
+    short unk26C;        /* 0x26c: roll; model_draw_list turns kind-2 parts by all three */
+    u8 unk26E[0x2ce - 0x26e];
     short unk2CE;        /* 0x2ce: added to y by world_transform_parts */
     u8 unk2D0[2];
     short unk2D2;        /* 0x2d2: added to y by world_transform_parts */
+    u8 unk2D4[0x2de - 0x2d4];
+    short unk2DE;        /* 0x2de..0x2e2: added to func_80021ac4's slot rotations */
+    short unk2E0;
+    short unk2E2;
 } Viewer;
 
 extern Viewer viewer;

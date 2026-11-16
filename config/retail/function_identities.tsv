@@ -172,9 +172,9 @@ ST.EXE	0x80021654	func_80021654			unknown		address-only	candidate	mips-live-in-h
 ST.EXE	0x8002181c	func_8002181c			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
 ST.EXE	0x800218d8	func_800218d8			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
 ST.EXE	0x80021994	func_80021994			unknown	unknown arg0;unknown arg1;unknown arg2;unknown arg3	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-ST.EXE	0x80021ac4	func_80021ac4			unknown	unknown *object;unknown *pointer1;unknown arg2	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-ST.EXE	0x80022010	func_80022010			unknown	unknown *object;unknown *pointer1	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-ST.EXE	0x80022678	func_80022678			unknown	unknown *object;unknown *pointer1;unknown arg2;unknown arg3	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+ST.EXE	0x80021ac4	func_80021ac4			void	u8 slot	supported	proven	asm;callers;src/st leftovers	draws a viewer model slot: its matrix from viewer.unkE8[slot], the model block world_state.unk834C[slot + 32]
+ST.EXE	0x80022010	model_draw_list			void	u8 flags;SVECTOR *rot	supported	proven	asm;callers;src/st leftovers	draws each entry of the scratchpad model list (+0xa4) with the band C part renderers
+ST.EXE	0x80022678	model_draw			void	int unused0;u16 model;VECTOR *pos;SVECTOR *rot;SVECTOR *scale;void *anim;MATRIX *view;u16 part;u16 arg8;short light;short unused10;u8 flags;int z	supported	proven	asm;callers;src/st leftovers	places one part of a model block with its own matrix and draws it with the band C part renderers
 ST.EXE	0x80023208	func_80023208			unknown	unknown arg0	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
 ST.EXE	0x80023288	func_80023288			unknown	unknown arg0	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
 ST.EXE	0x80023388	func_80023388			unknown	unknown arg0	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review

@@ -312,14 +312,15 @@ def _diff_bss(retail: Elf, recon: Elf, name: str = ".bss",
     return SectionDiff(name, rt_size, rc_size, "match")
 
 
-def _data_placement_issues(path: Path, unit: Unit) -> list[tuple[str, dict]]:
+def _data_placement_issues(path: Path, unit: Unit,
+                           definitions=None) -> list[tuple[str, dict]]:
     from scripts.kf.roundtrip import UnitResult, plan
 
     result = UnitResult(unit.image, unit.unit, str(path))
     # This is a data gate: non-exact function sizes must not masquerade as
     # data-placement failures. All DATA/RODATA claims and ELF sections remain.
     with path.open("rb") as stream:
-        plan(ELFFile(stream), replace(unit, functions=()), result)
+        plan(ELFFile(stream), replace(unit, functions=()), result, definitions)
     owned = {d.symbol: d.section_name for d in unit.data}
     return [(issue.get("section", owned.get(issue.get("symbol"), "object")), issue)
             for issue in result.issues if issue.get("section") != ".text"]
@@ -394,7 +395,8 @@ def _proven_issue(label: str, issue: dict, proven: frozenset[str]) -> bool:
 
 
 def diff_unit(unit: Unit, delink_dir: Path, objdiff_dir: Path,
-              linked: dict[str, int] | None = None) -> UnitDataDiff | None:
+              linked: dict[str, int] | None = None,
+              definitions=None) -> UnitDataDiff | None:
     key, object_name = image_key(unit.image), unit.object_name
     target = delink_dir / key / "modules" / object_name
     base = objdiff_dir / key / "base" / object_name
@@ -437,7 +439,7 @@ def diff_unit(unit: Unit, delink_dir: Path, objdiff_dir: Path,
             result.diffs.append(bss)
     by_section = {diff.name: diff for diff in result.diffs}
     for label, path in (("target", target), ("reconstruction", base)):
-        for name, issue in _data_placement_issues(path, unit):
+        for name, issue in _data_placement_issues(path, unit, definitions):
             if _proven_issue(label, issue, proven):
                 continue
             diff = by_section.get(name)
@@ -462,6 +464,8 @@ def diff_image(
     results: list[UnitDataDiff] = []
     failures: list[ArtifactFailure] = []
     linked = linked_addresses(image)
+    from scripts.kf.roundtrip import initialized_definitions
+    definitions = initialized_definitions(image, manifest.units)
     for unit in manifest.units:
         if unit.image != image:
             continue
@@ -474,7 +478,7 @@ def diff_image(
                 image, unit.unit, "missing " + ", ".join(missing)
             ))
             continue
-        diff = diff_unit(unit, delink_dir, objdiff_dir, linked)
+        diff = diff_unit(unit, delink_dir, objdiff_dir, linked, definitions)
         if diff is not None:
             results.append(diff)
     return results, failures
