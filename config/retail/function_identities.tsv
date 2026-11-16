@@ -134,7 +134,7 @@ ST.EXE	0x8001b598	mesh_div_gt4_tint_b			void	CVECTOR *rgb	supported	proven	asm;c
 ST.EXE	0x8001b5dc	mesh_div_draw_gt4			void	int count;MeshFaceGT4 *face;u_long *ot;int flags	supported	proven	asm;callers;src/st band C	GT4 renderer with RCpolyGT4 subdivision
 ST.EXE	0x8001bf10	mesh_div_draw_part			void	u_short part;u_int flags	supported	proven	asm;callers;src/st band C	sets up a model part and runs the subdividing renderers
 ST.EXE	0x8001c100	vis_build_visible			void	u8 *arg	supported	proven	asm;callers;src/st band C	builds the visible id list from the source ids masks
-ST.EXE	0x8001c264	func_8001c264			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+ST.EXE	0x8001c264	vis_build_planes			void		supported	proven	asm;callers;src/st leftovers	builds the viewer side planes vis_measure_position tests
 ST.EXE	0x8001c4c8	vis_measure_position			int		supported	proven	asm;callers;src/st band C	squared distance of the scratchpad position from the viewer, or 256 when a side plane rejects it
 ST.EXE	0x8001c60c	vis_cull_by_range			void		supported	proven	asm;callers;src/st band C	drops far visible ids and flags near ones
 ST.EXE	0x8001c800	vis_record_is_visible			int	int a;int b;int c	supported	proven	asm;callers;src/st band C	whether a visible id record has the three byte keys
@@ -142,25 +142,25 @@ ST.EXE	0x8001c88c	vis_id_is_visible			int	u16 id	supported	proven	asm;callers;sr
 ST.EXE	0x8001c8e0	vis_collect_table_a			void		supported	proven	asm;callers;src/st band C	collects visible entries of vis_table_a
 ST.EXE	0x8001c9c8	vis_collect_table_b			void		supported	proven	asm;callers;src/st band C	collects visible entries of vis_table_b
 ST.EXE	0x8001cab8	vis_collect_table_c			void		supported	proven	asm;callers;src/st band C	collects visible entries of vis_table_c
-ST.EXE	0x8001cb88	func_8001cb88			unknown	unknown *object	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-ST.EXE	0x8001cdf8	func_8001cdf8			unknown	unknown *object;unknown *pointer1;unknown arg2	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-ST.EXE	0x8001d224	func_8001d224			unknown	unknown arg0	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-ST.EXE	0x8001d264	func_8001d264			unknown	unknown arg0	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-ST.EXE	0x8001d2a8	func_8001d2a8			unknown	unknown *object;unknown *pointer1;unknown arg2	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-ST.EXE	0x8001dae0	func_8001dae0			unknown	unknown arg0	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-ST.EXE	0x8001db20	func_8001db20			unknown	unknown arg0	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-ST.EXE	0x8001db64	func_8001db64			unknown	unknown *object;unknown *pointer1;unknown arg2	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-ST.EXE	0x8001e51c	func_8001e51c			unknown	unknown arg0	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-ST.EXE	0x8001e55c	func_8001e55c			unknown	unknown arg0	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-ST.EXE	0x8001e5a0	func_8001e5a0			unknown	unknown *object;unknown *pointer1;unknown arg2	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-ST.EXE	0x8001ee28	func_8001ee28			unknown	unknown arg0	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-ST.EXE	0x8001ee68	func_8001ee68			unknown	unknown arg0	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-ST.EXE	0x8001eeac	func_8001eeac			unknown	unknown *object;unknown *pointer1;unknown arg2	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-ST.EXE	0x8001f954	func_8001f954			unknown	unknown *object;unknown *pointer1;unknown *pointer2	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-ST.EXE	0x8001fd00	func_8001fd00			unknown	unknown *object;unknown *pointer1;unknown *pointer2	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-ST.EXE	0x80020164	func_80020164			unknown	unknown *object;unknown *pointer1;unknown *pointer2	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-ST.EXE	0x80020588	func_80020588			unknown	unknown *object;unknown *pointer1;unknown *pointer2	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-ST.EXE	0x80020a80	func_80020a80			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+ST.EXE	0x8001cb88	world_transform_parts			void	VECTOR *trans	supported	proven	asm;callers;src/st leftovers	writes each visible record camera-space translation (RTV0TR, scaled to fit 16 bits)
+ST.EXE	0x8001cdf8	world_project_parts			void	VECTOR *trans	supported	proven	asm;callers;src/st leftovers	projects each visible record part vertices (RTPT/RTPS) with depth-cue values
+ST.EXE	0x8001d224	world_ft3_tint_a			void	CVECTOR *rgb	supported	proven	asm;callers;src/st leftovers	tint callback of world_draw_ft3_near
+ST.EXE	0x8001d264	world_ft3_tint_b			void	CVECTOR *rgb	supported	proven	asm;callers;src/st leftovers	tint callback of world_draw_ft3_near
+ST.EXE	0x8001d2a8	world_draw_ft3_near			void	VECTOR *trans	supported	proven	asm;callers;src/st leftovers	draws the near visible records FT3 faces as depth-cued GT3, subdivided by area (RCpolyGT3)
+ST.EXE	0x8001dae0	world_ft4_tint_a			void	CVECTOR *rgb	supported	proven	asm;callers;src/st leftovers	tint callback of world_draw_ft4_near
+ST.EXE	0x8001db20	world_ft4_tint_b			void	CVECTOR *rgb	supported	proven	asm;callers;src/st leftovers	tint callback of world_draw_ft4_near
+ST.EXE	0x8001db64	world_draw_ft4_near			void	VECTOR *trans	supported	proven	asm;callers;src/st leftovers	draws the near visible records FT4 faces as depth-cued GT4, subdivided by area (RCpolyGT4)
+ST.EXE	0x8001e51c	world_gt3_tint_a			void	CVECTOR *rgb	supported	proven	asm;callers;src/st leftovers	tint callback of world_draw_gt3_near
+ST.EXE	0x8001e55c	world_gt3_tint_b			void	CVECTOR *rgb	supported	proven	asm;callers;src/st leftovers	tint callback of world_draw_gt3_near
+ST.EXE	0x8001e5a0	world_draw_gt3_near			void	VECTOR *trans	supported	proven	asm;callers;src/st leftovers	draws the near visible records GT3 faces depth-cued (NCDS per vertex), subdivided by area (RCpolyGT3)
+ST.EXE	0x8001ee28	world_gt4_tint_a			void	CVECTOR *rgb	supported	proven	asm;callers;src/st leftovers	tint callback of world_draw_gt4_near
+ST.EXE	0x8001ee68	world_gt4_tint_b			void	CVECTOR *rgb	supported	proven	asm;callers;src/st leftovers	tint callback of world_draw_gt4_near
+ST.EXE	0x8001eeac	world_draw_gt4_near			void	VECTOR *trans	supported	proven	asm;callers;src/st leftovers	draws the near visible records GT4 faces depth-cued (NCDS per vertex), subdivided by area (RCpolyGT4)
+ST.EXE	0x8001f954	world_draw_ft3_far			void	VECTOR *trans	supported	proven	asm;callers;src/st leftovers	draws the far visible records FT3 faces flat (NCCS); trans unused
+ST.EXE	0x8001fd00	world_draw_ft4_far			void	VECTOR *trans	supported	proven	asm;callers;src/st leftovers	draws the far visible records FT4 faces flat (NCCS); trans unused
+ST.EXE	0x80020164	world_draw_gt3_far			void	VECTOR *trans	supported	proven	asm;callers;src/st leftovers	draws the far visible records GT3 faces (NCCT, no depth cue); trans unused
+ST.EXE	0x80020588	world_draw_gt4_far			void	VECTOR *trans	supported	proven	asm;callers;src/st leftovers	draws the far visible records GT4 faces (NCCT/NCCS, no depth cue); trans unused
+ST.EXE	0x80020a80	world_draw			void		supported	proven	asm;callers;src/st leftovers	draws the world: visible list, part transforms, far and near renderers
 ST.EXE	0x80020ea8	func_80020ea8			unknown	unknown *object;unknown arg1;unknown arg2;unknown arg3	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
 ST.EXE	0x80020fcc	func_80020fcc			unknown	unknown arg0;unknown arg1;unknown arg2;unknown arg3	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
 ST.EXE	0x800210f4	func_800210f4			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review

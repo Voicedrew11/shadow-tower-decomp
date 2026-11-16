@@ -85,7 +85,8 @@ typedef struct {
  * ModelPart views the same 40-byte records from 12 bytes later (its
  * retail code addresses them that way). */
 typedef struct {
-    u8 unk00[8];
+    u_long vertices;     /* 0x00: model-space vertex array offset */
+    u_long n_vertices;   /* 0x04: its vertex count (8 bytes each once transformed) */
     u_long normals;      /* 0x08 */
     u8 unk0c[4];
     u_long faces;        /* 0x10 */
@@ -139,5 +140,10 @@ void mesh_div_draw_ft4(int count, MeshFaceFT4 *face, u_long *ot, int flags);
 void mesh_div_draw_gt3(int count, MeshFaceGT3 *face, u_long *ot, int flags);
 void mesh_div_draw_gt4(int count, MeshFaceGT4 *face, u_long *ot, int flags);
 void mesh_div_draw_part(u_short part, u_int flags);
+
+/* The world renderers (src/st/world_transform.c, src/st/world_draw.c). */
+void world_transform_parts(VECTOR *trans);
+void world_project_parts(VECTOR *trans);
+void world_draw(void);
 
 #endif

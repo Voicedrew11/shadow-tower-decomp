@@ -26,7 +26,9 @@ typedef struct {
 
 /* 0x8017bed0: 12-byte records indexed by visible id. */
 typedef struct {
-    u8 unk00[4];
+    u8 part;             /* 0x00: the model part drawn for this record */
+    u8 unk01[2];
+    u8 unk03;            /* 0x03: bits 0-1 select the light set */
     u8 unk04;            /* bit 1: flagged by vis_cull_by_range */
     u8 unk05[3];
     u8 unk08;
@@ -119,6 +121,7 @@ extern VisTableC vis_table_c;
 
 void vis_collect_sources(u8 *arg, int a1, int a2);
 void vis_build_visible(u8 *arg);
+void vis_build_planes(void);
 int vis_measure_position(void);
 void vis_cull_by_range(void);
 int vis_record_is_visible(int a, int b, int c);

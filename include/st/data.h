@@ -56,6 +56,10 @@ typedef struct {
     u8 unk254[0x14];
     short unk268;        /* 0x268: pitch in func_80016554 */
     short unk26A;        /* 0x26a: yaw in func_80016554 */
+    u8 unk26C[0x2ce - 0x26c];
+    short unk2CE;        /* 0x2ce: added to y by world_transform_parts */
+    u8 unk2D0[2];
+    short unk2D2;        /* 0x2d2: added to y by world_transform_parts */
 } Viewer;
 
 extern Viewer viewer;

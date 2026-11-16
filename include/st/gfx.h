@@ -30,8 +30,14 @@ typedef struct {
  * bytes of a MATRIX, which gte_SetColorMatrix loads), the back colour and
  * two halfwords copied to the scratchpad.
  */
+/* A light direction matrix as gte_SetLightMatrix loads it (five words). */
 typedef struct {
-    u8 unk0[0x50];
+    short m[3][3];
+    short pad;
+} StLightMatrix;
+
+typedef struct {
+    StLightMatrix light[4]; /* 0x00: the world renderers pick one per part */
     short color[3][3];
     u8 unk62[2];
     u8 back[3];
@@ -104,7 +110,8 @@ typedef struct {
     s32 unk8334;
     s32 unk8338[5];
     void *unk834C[8];    /* 0x834c: heap block owners (func_800237a8); WIP count */
-    u8 unk836C[0x1eb40 - 0x836c];
+    u8 unk836C[0xab3c - 0x836c];
+    u8 world_vertices[0x1eb40 - 0xab3c]; /* 0xab3c: the world parts' transformed vertices (MeshVertex); WIP extent */
     StTexAnim texanim[ST_TEXANIM_SLOTS];
     u8 unk1ECC0;
     u8 unk1ECC1;
@@ -122,8 +129,7 @@ typedef struct {
     u8 unk1ECE6[2];
     MATRIX unk1ECE8;
     u8 unk1ED08[0x20];
-    MATRIX unk1ED28;
-    u8 unk1ED48[0x60];
+    MATRIX unk1ED28[4];  /* 0x1ed28: one per light set (ScratchPad.light_index) */
     MATRIX unk1EDA8;
     VECTOR unk1EDC8;
     SVECTOR unk1EDD8;

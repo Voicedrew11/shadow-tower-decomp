@@ -192,5 +192,5 @@ void func_800176a8(VECTOR *pos, SVECTOR *rot)
     angle.vy = world_state.unk1EDD8.vy;
     RotMatrix(&angle, &world_state.unk1ECE8);
     func_80049cd4(angle.vx, &world_state.unk1EDA8);
-    func_800498cc(&world_state.unk1ECE8, &world_state.unk1ED28);
+    func_800498cc(&world_state.unk1ECE8, world_state.unk1ED28);
 }

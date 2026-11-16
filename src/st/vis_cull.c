@@ -13,6 +13,71 @@
 #include <st/vis.h>
 
 /*
+ * Builds the viewer's two side planes for vis_measure_position: the view
+ * apex sits behind the viewer along its yaw, and the half-angle widens with
+ * the pitch (folded to 0..2048).
+ */
+ADDRESS(0x8001c264, 0x264)
+void vis_build_planes(void)
+{
+    ScratchPad *sp = SCRATCHPAD;
+    Viewer *cam = &viewer;
+    int yaw;
+    int pitch;
+    int half;
+    int c;
+    int s;
+    int cl;
+    int sl;
+    int cr;
+    int sr;
+    int cp;
+    int back;
+    int len;
+    int near;
+    short ox;
+    short oz;
+    short lx;
+    short lz;
+    short rx;
+    short rz;
+
+    yaw = cam->unk26A + 1024;
+    pitch = cam->unk268;
+    if (pitch > 2048) {
+        half = 4096 - pitch;
+    } else {
+        half = pitch;
+    }
+    half = half * 584 / 1024 + 512;
+    c = rcos(yaw);
+    s = rsin(yaw);
+    cl = rcos(yaw - half);
+    sl = rsin(yaw - half);
+    cr = rcos(yaw + half);
+    sr = rsin(yaw + half);
+    cp = rcos(pitch);
+    sp->unk208 = rsin(pitch);
+    back = cp * -11 >> 12;
+    len = cp * 16 >> 12;
+    near = cp * -8 >> 12;
+    ox = back * c >> 12;
+    oz = back * s >> 12;
+    lx = (len * cl + back * c) >> 12;
+    lz = (len * sl + back * s) >> 12;
+    rx = (len * cr + back * c) >> 12;
+    rz = (len * sr + back * s) >> 12;
+    sp->plane[0] = lz - oz;
+    sp->plane[2] = lx - ox;
+    sp->plane[1] = rz - oz;
+    sp->plane[3] = rx - ox;
+    sp->offset_x = near * c >> 12;
+    sp->offset_z = near * s >> 12;
+    sp->plane[4] = -sp->plane[0] * ox + sp->plane[2] * oz;
+    sp->plane[5] = -sp->plane[1] * ox + sp->plane[3] * oz;
+}
+
+/*
  * Not exact: same instructions and size; GCC allocates the viewer pointer
  * and the two offsets to t1/t3/t2 where retail has t3/t2/t1, and orders
  * the final squares' temporaries differently.

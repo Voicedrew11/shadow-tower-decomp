@@ -146,6 +146,18 @@ source = "src/st/vis_lists.c"
 profile = "probe-gcc272cdk-o2-g0"
 
 [[unit]]
+unit = "st.world_transform"
+image = "ST.EXE"
+source = "src/st/world_transform.c"
+profile = "probe-gcc272cdk-o2-g0"
+
+[[unit]]
+unit = "st.world_draw"
+image = "ST.EXE"
+source = "src/st/world_draw.c"
+profile = "probe-gcc272cdk-o2-g0"
+
+[[unit]]
 unit = "st.quad"
 image = "ST.EXE"
 source = "src/st/quad.c"
