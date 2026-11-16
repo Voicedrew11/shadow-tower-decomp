@@ -104,9 +104,20 @@ def encode_hi_lo_addend(hi_word: int, lo_word: int, addend: int) -> tuple[int, i
     return (hi_word & 0xFFFF0000) | high, (lo_word & 0xFFFF0000) | low
 
 
-# addiu, lb, lh, lwl, lw, lbu, lhu, lwr, sb, sh, swl, sw, swr
+# addiu, lb, lh, lwl, lw, lbu, lhu, lwr, sb, sh, swl, sw, swr, lwc2, swc2
 GP_RELATIVE_OPCODES = {0x09, 0x20, 0x21, 0x22, 0x23, 0x24, 0x25, 0x26, 0x28, 0x29, 0x2A, 0x2B,
-                       0x2E}
+                       0x2E, 0x32, 0x3A}
+
+
+def decode_gprel16_target(image: str, word: int) -> int:
+    """Decode a `$gp`-relative access against the image's startup `$gp`."""
+    gp = IMAGE_GP.get(image)
+    if gp is None:
+        raise ValueError("image-gp-unknown")
+    if (word >> 21) & 0x1F != 28 or word >> 26 not in GP_RELATIVE_OPCODES:
+        raise ValueError("instruction-opcode-mismatch")
+    low = word & 0xFFFF
+    return (gp + (low - 0x10000 if low & 0x8000 else low)) & 0xFFFFFFFF
 
 
 def policy_reason(row: dict[str, str], policy: str) -> str | None:
@@ -197,13 +208,7 @@ def validate_relocation(
 
     if row["kind"] == "mips_gprel16":
         # $gp-relative access to small data: a load, store or addiu off $gp.
-        gp = IMAGE_GP.get(function.image)
-        if gp is None:
-            raise ValueError("image-gp-unknown")
-        if (word >> 21) & 0x1F != 28 or word >> 26 not in GP_RELATIVE_OPCODES:
-            raise ValueError("instruction-opcode-mismatch")
-        low = word & 0xFFFF
-        if (gp + (low - 0x10000 if low & 0x8000 else low)) & 0xFFFFFFFF != target:
+        if decode_gprel16_target(function.image, word) != target:
             raise ValueError("decoded-target-mismatch")
         return RelocationValidation(site, target, offset, word=word)
 

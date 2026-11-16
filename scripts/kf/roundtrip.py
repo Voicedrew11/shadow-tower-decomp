@@ -341,6 +341,18 @@ def compare_linked(elf: ELFFile, image: RetailImage, result: UnitResult) -> None
                          differing_bytes=sum(a != b for a, b in zip(expected, actual)))
 
 
+def link_command(linker: str, image: str, entry: int, script: Path, linked: Path,
+                 object_path: Path, symbols: dict[str, int]) -> list[str]:
+    """GNU ld arguments that place one target object at its retail addresses."""
+    command = [linker, "-EL", "-G", "0", "--entry", hex(entry), "-T", str(script),
+               "-o", str(linked), str(object_path.resolve())]
+    command += [f"--defsym={name}={address:#x}" for name, address in sorted(symbols.items())]
+    if image in IMAGE_GP:
+        # R_MIPS_GPREL16 resolves against the program's startup $gp.
+        command.append(f"--defsym=_gp={IMAGE_GP[image]:#x}")
+    return command
+
+
 def verify_unit(unit: Unit, image: RetailImage, book: dict[str, set[int]],
                 object_path: Path, scratch: Path, *, linker: str = LINKER) -> UnitResult:
     result = UnitResult(unit.image, unit.unit, str(object_path))
@@ -368,12 +380,8 @@ def verify_unit(unit: Unit, image: RetailImage, book: dict[str, set[int]],
             entry = unit.functions[0].va if unit.functions else min(placed.values())
             # GNU MIPS ld otherwise moves SHN_COMMON requests of up to 8 bytes
             # into .scommon, which this script discards; only claimed BSS is placed.
-            command = [linker, "-EL", "-G", "0", "--entry", hex(entry), "-T", str(script),
-                       "-o", str(linked), str(object_path.resolve())]
-            command += [f"--defsym={name}={address:#x}" for name, address in sorted(symbols.items())]
-            if unit.image in IMAGE_GP:
-                # R_MIPS_GPREL16 resolves against the program's startup $gp.
-                command.append(f"--defsym=_gp={IMAGE_GP[unit.image]:#x}")
+            command = link_command(linker, unit.image, entry, script, linked,
+                                   object_path, symbols)
             process = subprocess.run(command, capture_output=True, text=True, timeout=30)
             result.linker_ran = True
             result.linker_diagnostics = process.stderr.strip()

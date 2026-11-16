@@ -182,6 +182,22 @@ def affine(expression: tuple) -> tuple[tuple[str, int] | None, int]:
     raise ValueError('LNK expression cannot be represented by one ELF relocation')
 
 
+def convert_patch(kind: int, word: int, addend: int) -> tuple[str, int]:
+    """Map one native PSYQ patch to its ELF relocation and implicit-addend word."""
+    if kind == 16:
+        return 'R_MIPS_32', addend & 0xffffffff
+    if kind == 74:
+        return 'R_MIPS_26', (word & 0xfc000000) | ((addend >> 2) & 0x3ffffff)
+    if kind == 82:
+        return 'R_MIPS_HI16', (word & 0xffff0000) | (((addend + 0x8000) >> 16) & 0xffff)
+    if kind == 84:
+        return 'R_MIPS_LO16', (word & 0xffff0000) | (addend & 0xffff)
+    if kind == 100:
+        # ASPSX 2.x emits single $gp-relative accesses to small data.
+        return 'R_MIPS_GPREL16', (word & 0xffff0000) | (addend & 0xffff)
+    raise ValueError(f'unsupported native MIPS patch {kind}')
+
+
 def elf_view(data: bytes, *, functions: tuple[str, ...] = (),
              sizes: dict[str, int] | None = None,
              referents: tuple[NativeReferent, ...] = ()) -> bytes:
@@ -282,19 +298,7 @@ def elf_view(data: bytes, *, functions: tuple[str, ...] = (),
             if name == '.text' and offset in overrides:
                 symbol, addend = overrides[offset]
             word = struct.unpack_from('<I', payload, offset)[0]
-            if kind == 16:
-                relocation, value = 'R_MIPS_32', addend & 0xffffffff
-            elif kind == 74:
-                relocation, value = 'R_MIPS_26', (word & 0xfc000000) | ((addend >> 2) & 0x3ffffff)
-            elif kind == 82:
-                relocation, value = 'R_MIPS_HI16', (word & 0xffff0000) | (((addend + 0x8000) >> 16) & 0xffff)
-            elif kind == 84:
-                relocation, value = 'R_MIPS_LO16', (word & 0xffff0000) | (addend & 0xffff)
-            elif kind == 100:
-                # ASPSX 2.x emits single $gp-relative accesses to small data.
-                relocation, value = 'R_MIPS_GPREL16', (word & 0xffff0000) | (addend & 0xffff)
-            else:
-                raise ValueError(f'unsupported native MIPS patch {kind}')
+            relocation, value = convert_patch(kind, word, addend)
             struct.pack_into('<I', payload, offset, value)
             relocations[name].append(MipsRelocation(offset, relocation, symbol))
         payloads[name] = bytes(payload)
