@@ -21,12 +21,22 @@ typedef struct {
     VECTOR unk4;         /* 0x04: its position */
     SVECTOR unk14;       /* 0x14: its velocity */
     s16 unk1C;           /* 0x1c */
-    s16 unk1E;           /* 0x1e */
+    u16 unk1E;           /* 0x1e: height added while resolving */
     s16 unk20;           /* 0x20: the velocity's heading */
     s16 unk22;           /* 0x22: its horizontal length */
     u8 unk24[0x5c - 0x24];
     s32 unk5C;           /* 0x5c: an index into vis_table_a.entries */
-    u8 unk60[0x44ca - 0x60];
+    s32 unk60;           /* 0x60: func_8004be80's result */
+    s32 unk64;           /* 0x64: an index into vis_table_b.entries */
+    u8 unk68[0xc];
+    s32 unk74;           /* 0x74: the kind bits func_80049544 resolved */
+    u8 unk78[0x34];
+    VECTOR unkAC;        /* 0xac: the resolved source's position */
+    s32 unkBC;           /* 0xbc: its horizontal distance */
+    u8 unkC0[0x44c0 - 0xc0];
+    u16 unk44C0;         /* 0x44c0 */
+    u16 unk44C2;         /* 0x44c2 */
+    u8 unk44C4[6];
     u16 n_sources;       /* 0x44ca */
     u16 n_visible;       /* 0x44cc */
     u16 sources[0x80];   /* 0x44ce */
@@ -81,16 +91,21 @@ typedef struct {
     u8 unk23;
     s16 unk24;           /* 0x24 */
     u16 unk26;
-    u8 unk28[2];
+    u16 unk28;           /* 0x28: record index (func_8004ac38) */
     u16 unk2A;           /* 0x2a */
-    u8 unk2C[4];
+    u8 unk2C[2];
+    u16 unk2E;           /* 0x2e */
     u16 unk30;           /* 0x30: height */
     u16 unk32;           /* 0x32: shadow size */
     s16 unk34;           /* 0x34 */
     s16 unk36;           /* 0x36 */
     u8 unk38[4];
     u32 unk3C;           /* 0x3c: squared distance */
-    u8 unk40[0x30];
+    u8 unk40[0x28];
+    u16 unk68;           /* 0x68: facing, 0xffff random (func_8004ac9c) */
+    s16 unk6A;           /* 0x6a..0x6e: offset in its cell (func_8004ac38) */
+    s16 unk6C;
+    s16 unk6E;
     u32 unk70;           /* 0x70: bit 11 set by effect_emit */
     VECTOR unk74;        /* 0x74: position */
     u8 unk84[8];
@@ -163,7 +178,9 @@ typedef struct {
     u8 unk00[3];
     u8 unk03;            /* 0x03 */
     u16 unk04;           /* 0x04 */
-    u8 unk06[6];
+    u8 unk06[2];
+    u16 unk08;           /* 0x08 */
+    u8 unk0A[2];
     u16 unk0C;           /* 0x0c */
     u16 unk0E;           /* 0x0e */
     u8 unk10[8];
@@ -243,5 +260,17 @@ int vis_id_is_visible(u16 id);
 void vis_collect_table_a(void);
 void vis_collect_table_b(void);
 void vis_collect_table_c(void);
+
+/* src/st/vis_request.c */
+void func_800492f4(VECTOR *pos);
+int func_80049544(VisLists *req);
+int func_80048ad0(VisLists *req);
+int func_8004bb88(VisLists *req, int arg1);
+int func_8004be80(VisLists *req);
+int func_8004f53c(VisLists *req);
+
+/* src/st/vis_entry.c */
+void func_8004ac38(Vis212 *e);
+void func_8004ac9c(Vis212 *e);
 
 #endif

@@ -248,7 +248,9 @@ ST.EXE	0x80087f38	0x77738	0x30	unclassified	coverage-gap			payload-complement	ma
 ST.EXE	0x80087f68	0x77768	0x8	defined	proven	DAT_80087f68	s32[2]	src/st/menu_status_pages.c st.menu_status_pages	unreferenced zero words in .sdata between func_8002e94c and func_8002f498 constants
 ST.EXE	0x80087f70	0x77770	0x14	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 ST.EXE	0x80087f84	0x77784	0x4	defined	proven	DAT_80087f84	s32	src/st/menu_status_frame.c st.menu_status_frame	unreferenced zero word in .sdata between func_8002f97c and func_8002fc4c constants
-ST.EXE	0x80087f88	0x77788	0x878	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
+ST.EXE	0x80087f88	0x77788	0x114	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
+ST.EXE	0x8008809c	0x7789c	0x8	defined	candidate	DAT_8008809c	SVECTOR	asm;src/st/math.c st.math	unit z vector {0, 0, 4096, 0} func_80049fe4 turns; extern only
+ST.EXE	0x800880a4	0x778a4	0x75c	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 TITLE.EXE	0x80012000	0x800	0xa04	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 TITLE.EXE	0x80014528	0x2d28	0x4	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 TITLE.EXE	0x80016d80	0x5580	0xc	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
