@@ -24,3 +24,9 @@ aspsx_version = "2.79"
 cc1_flags = []
 
 # Add one [[unit]] per reconstructed source, in linked (ascending address) order per image.
+
+[[unit]]
+unit = "psx.main"
+image = "PSX.EXE"
+source = "src/psx/main.c"
+profile = "probe-gcc272cdk-o2-g8"

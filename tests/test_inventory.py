@@ -252,8 +252,8 @@ class InventoryTests(unittest.TestCase):
         # Every carveable non-vendored function in the four images has a
         # (candidate) identity row; update these counts with each admission.
         counts = validate(RETAIL_CONFIG)
-        self.assertEqual(counts["functions"], 7)
-        self.assertEqual(counts["signatures_started"], 7)
+        self.assertEqual(counts["functions"], 8)
+        self.assertEqual(counts["signatures_started"], 8)
         self.assertEqual(counts["data"], 0)
         self.assertGreaterEqual(counts["functions_named"], 0)
         self.assertEqual(counts["structures"], 0)

@@ -3,7 +3,8 @@
 # Each address is qualified by image because GAME.EXE, OPEN.EXE and END.EXE are separate overlays sharing one load window.
 # Defined rows plus unclassified gaps account for every byte of every loaded payload.
 image	va	file_offset	size	kind	confidence	name	datatype	provenance	note
-PSX.EXE	0x80010000	0x800	0x1c0	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
+PSX.EXE	0x80010000	0x800	0x68	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
+PSX.EXE	0x80010150	0x950	0x70	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 PSX.EXE	0x80010268	0xa68	0x598	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 STR.EXE	0x80011000	0x800	0x9dc	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 STR.EXE	0x80011a10	0x1210	0x215f0	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
