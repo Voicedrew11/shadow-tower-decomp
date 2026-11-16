@@ -35,7 +35,8 @@ typedef struct {
     s16 row1;            /* 0x02: first row shown of ids1 */
     s16 *ids0;           /* 0x04 */
     s16 *ids1;           /* 0x08 */
-    u8 unkC[4];          /* 0x0c */
+    s16 count0;          /* 0x0c: ids in ids0 (src/st/idgrid.c) */
+    s16 count1;          /* 0x0e: ids in ids1 */
     DVECTOR *tex;        /* 0x10: cell images, twenty per block (func_80030be4) */
     MenuMessages *messages; /* 0x14 */
 } MenuGrid;
@@ -188,7 +189,8 @@ typedef struct {
     MenuMessages *unk2CC; /* 0x2cc */
     u8 unk2D0[4];        /* 0x2d0 */
     u32 *unk2D4;         /* 0x2d4: one bit per grid cell */
-    u8 unk2D8[4];        /* 0x2d8 */
+    s16 unk2D8;          /* 0x2d8: viewer.unk2 as src/st/equip_menu.c saved it */
+    s16 unk2DA;          /* 0x2da: viewer.unk6 as saved */
     u16 unk2DC;          /* 0x2dc */
     u16 unk2DE;          /* 0x2de: selected row of the item and stats menus */
     s16 unk2E0;          /* 0x2e0 */
@@ -196,7 +198,8 @@ typedef struct {
     u8 unk2E4;           /* 0x2e4: cursor blink phase */
     u8 unk2E5;           /* 0x2e5: text font mode (0: 6x12 half-width cells) */
     DVECTOR unk2E6[5];   /* 0x2e6: VRAM positions func_80058dc4 sets (image, CLUT pairs);
-                          * [0]/[1] func_80063260's texture and CLUT, [2]/[3] func_800637c0's */
+                          * [0]/[1] func_80063260's texture and CLUT, [2]/[3] func_800637c0's;
+                          * src/st/idgrid.c uploads its images to all five */
     u8 unk2FA[6];        /* 0x2fa */
     CVECTOR style[8];    /* 0x300: text colours; .cd carries the glyph size */
     CVECTOR *unk320;     /* 0x320: figure colours of the status pages */
@@ -386,17 +389,5 @@ void func_80031aec(void);
 void func_80031cfc(void);
 void func_80031d50(void);
 
-/*
- * The option screens' block below menu_messages (src/st/menu_vram.c):
- * func_800637c0 allocates it and func_80063954 frees it. WIP extent.
- */
-typedef struct {
-    u32 *unk0;           /* 0x00: 144 bytes from CD archive 3 member 1 */
-    u8 unk4[0x1c];
-} Data801e0d08;
-extern Data801e0d08 DAT_801e0d08;
-/* The equipment ids func_800637c0 records (viewer.unk38[3], [4], [16],
- * [17], [6], [12]) for func_80063954 to compare. */
-extern u16 DAT_801e0d28[6];
 
 #endif

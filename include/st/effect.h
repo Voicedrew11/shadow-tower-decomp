@@ -15,7 +15,8 @@
 /* One 24-byte effect definition. */
 typedef struct {
     u8 unk0;
-    u8 unk1[3];
+    u8 unk1;
+    u16 unk2;            /* 0x02: shown by the equipment screen (src/st/equip_menu.c) */
     u16 unk4[3];         /* 0x04 */
     u16 unkA[6];         /* 0x0a */
     u16 unk16;           /* 0x16 */

@@ -69,7 +69,8 @@ typedef struct {
     u8 unk1A[0x1e - 0x1a];
     u16 unk1E;           /* 0x1e: divides player_take_damage's shake time */
     u16 unk20;           /* 0x20: scales player_hit's status-time limits */
-    u8 unk22[0x26 - 0x22];
+    u16 unk22;           /* 0x22: compared with unk24 by the equipment screen */
+    u16 unk24;           /* 0x24 */
     u8 unk26;
     u8 unk27;            /* 0x27: shown by the map menu */
     u16 unk28;
@@ -325,7 +326,8 @@ typedef struct {
     u16 unk8;
     u16 unkA;
     u16 unkC;            /* 0x0c: bits the menu loop func_80058ef4 consumes; the memory card
-                          * screens' port-select bits (src/st/card.c) */
+                          * screens' port-select bits (src/st/card.c); the id grid screen's
+                          * pressed bits (src/st/idgrid.c) */
     u8 unkE;             /* 0x0e: 1 while the controller is disconnected */
     u8 unkF;
     u8 unk10;
@@ -385,7 +387,7 @@ typedef struct {
  * rotation, the 322 VAB bank slots, the SPU key status bytes and the sound
  * playing on each voice, the 1232-entry sound table (loaded from an area
  * pack, src/st/area_a.c) and the 16 bank buffers. WIP extent up to
- * DAT_801e0d08 (band P).
+ * DAT_801e0ce8 (band Q).
  */
 typedef struct {
     u8 unk0;
@@ -399,7 +401,7 @@ typedef struct {
     u8 unkA80[4];
     StSound sounds[1232]; /* 0xa84 */
     StSoundBuf bufs[16]; /* 0x3aa4 */
-    u8 unk3B24[0x3b48 - 0x3b24];
+    u8 unk3B24[0x3b28 - 0x3b24];
 } Data801dd1c0;
 extern Data801dd1c0 DAT_801dd1c0;
 

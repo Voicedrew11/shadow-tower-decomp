@@ -127,12 +127,12 @@ void func_80057da0(void)
     s16 *voice;
     int i;
 
-    func_8006ca24();
+    SsInit();
     SsSetMVol(0, 0);
     SsSetTickMode(1);
     SsStart2();
     SsUtSetReverbType(4);
-    func_800703f4();
+    SsUtReverbOn();
     SsUtSetReverbDepth(20, 20);
     SsSetSerialAttr(0, 0, 1);
     DAT_801dd1c0.unk0 = 0;
@@ -196,7 +196,7 @@ void func_80057f3c(void)
         slot++;
     }
     SsEnd();
-    func_8006cb64();
+    SsQuit();
 }
 
 /*

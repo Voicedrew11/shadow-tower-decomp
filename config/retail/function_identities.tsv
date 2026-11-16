@@ -689,23 +689,6 @@ ST.EXE	0x80067624	func_80067624			unknown		address-only	candidate	mips-live-in-h
 ST.EXE	0x80067bec	func_80067bec			unknown	unknown arg0	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
 ST.EXE	0x80068258	func_80068258			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
 ST.EXE	0x80068440	func_80068440			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-ST.EXE	0x8006ca24	func_8006ca24			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-ST.EXE	0x8006ca54	func_8006ca54			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-ST.EXE	0x8006cb64	func_8006cb64			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-ST.EXE	0x8006dd64	func_8006dd64			void	unknown arg0;unknown arg1	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-ST.EXE	0x800703f4	func_800703f4			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-ST.EXE	0x80070884	func_80070884			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-ST.EXE	0x8007ce2c	func_8007ce2c			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-ST.EXE	0x8007ce58	func_8007ce58			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-ST.EXE	0x8007cec0	func_8007cec0			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-ST.EXE	0x8007d150	func_8007d150			unknown	unknown *object	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-ST.EXE	0x8007d364	func_8007d364			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-ST.EXE	0x8007d8c8	func_8007d8c8			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-ST.EXE	0x8007e254	func_8007e254			unknown	unknown arg0	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-ST.EXE	0x8007e294	func_8007e294			unknown	unknown arg0	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-ST.EXE	0x8007e36c	func_8007e36c			unknown	unknown arg0	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-ST.EXE	0x8007e42c	func_8007e42c			unknown	unknown arg0	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-ST.EXE	0x8007e4b8	func_8007e4b8			unknown	unknown arg0	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
 TITLE.EXE	0x8001304c	copy_words			u_long *	u_long *dst;u_long *src;int count	supported	proven	asm;callers;src/title/main.c title.main	copies count words; returns the advanced source pointer
 TITLE.EXE	0x8001307c	clear_vram			void		supported	proven	asm;callers;src/title/main.c title.main	clears all of VRAM to black
 TITLE.EXE	0x800130d0	load_tims			void	u_long *addr;VramOffset *pixel_offset;VramOffset *clut_offset;int absolute	supported	proven	asm;callers;src/title/main.c title.main	LoadImage of each TIM CLUT and pixel block in a run of TIM files

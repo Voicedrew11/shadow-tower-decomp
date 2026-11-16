@@ -24,13 +24,13 @@ symbols or pretending that WIP names are original symbols:
 | :---- | --------: | ----: | ---: |
 | `PSX.EXE` | 11 | 10 | 1 |
 | `STR.EXE` | 322 | 302 | 20 |
-| `ST.EXE` | 1,139 | 457 | 682 |
+| `ST.EXE` | 1,139 | 474 | 665 |
 | `TITLE.EXE` | 387 | 369 | 18 |
 | `OPTXT.EXE` | 283 | 265 | 18 |
 | `VS.EXE` | 660 | 401 | 259 |
 | `END.EXE` | 276 | 261 | 15 |
 | 36 `FDAT_nnn.BIN` | 943 (23–37 each) | 0 | 943 |
-| **Total** | **4,021** | **2,065** | **1,956** |
+| **Total** | **4,021** | **2,082** | **1,939** |
 
 PSX.EXE `main` is reconstructed (`src/psx/main.c`) with its six data
 identities and reviewed relocations, STR.EXE's twenty game functions
@@ -73,7 +73,7 @@ candidates, mostly jump-table cases, are not admitted.
 `kf-vendored-seed` layers two channels over the structural rows. First,
 relocation-masked function IDs built from the libraries the build links
 (Runtime Library 4.2 with the 4.2.1 LIBPAD, the 4.5 kit's `NONE3.OBJ` and
-Release 2.5 `MALLOC.OBJ`; `kf-fid-census` builds the same corpus): 743 admitted
+Release 2.5 `MALLOC.OBJ`; `kf-fid-census` builds the same corpus): 760 admitted
 rows are `fid-sdk42`, of which 28 are `MALLOC.OBJ` and 6 `NONE3.OBJ` (their
 `source_version` names the standalone object). Then `ghidra_psx_ldr`
 signature sets fill starts the IDs leave open, preferred set first
@@ -97,6 +97,17 @@ LIBPAD `PADMAIN`, and the five `PADIF` statics that `padIntFunc` points at.
 OPTXT.EXE's same eleven LIBPAD functions (0x5e0 bytes of text between
 `PADCMD` and `PADPORTD`) are placed by the native relink whose bytes outside
 `play_opening_text` all equal retail.
+
+ST.EXE cannot be relinked byte-identical yet, so its seventeen equivalents
+are proven per object instead (evidence `relocation-masked-object-match`,
+confidence `fid-sdk42`): the whole `.text` of the library member, patch-owned
+bits masked, equals retail at one base. `PADMAIN` (0xbe0 bytes, base
+`0x8007cd14`) places `_padSetVsyncParam`, `_padInitSioMode`,
+`_padWaitRXready` and three statics; `PADIF` (0x5e0 bytes, base `0x8007e254`)
+its five statics. Five one-call LIBSND/LIBSPU wrappers (`SsInit`, `SpuInit`,
+`SsQuit`, `SsUtReverbOn`) fit several members' masked bytes, so each row
+names the member whose external reference matches the decoded `jal` target;
+`_SsSndPlay` and `_SsVmDamperOff` fit one member each.
 
 Not admitted: the overlays' two-instruction default handler (`jr ra; nop`),
 matched only by an old LIBSND `VM_VIB` signature, since the overlays link no

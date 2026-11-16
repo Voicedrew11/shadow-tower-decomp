@@ -11,6 +11,7 @@
 #include <st/gfx.h>
 #include <st/data.h>
 #include <st/menu.h>
+#include <st/equip_menu.h>
 #include <st/memory.h>
 #include <st/cd.h>
 #include <st/funcs.h>
@@ -73,12 +74,12 @@ void func_800637c0(void)
     sp->unk2E6[3].vx = 560;
     sp->unk2E6[3].vy = 497;
     sp->unk0.block = func_800152d0(21504);
-    DAT_801e0d08.unk0 = func_800152d0(144);
+    DAT_801e0d08.bits = func_800152d0(144);
     p = (u8 *)DAT_80088c88;
     func_80016030(3, 1, (u_long *)p);
     p += *(u32 *)p + 4;
     p += *(u32 *)p + 4;
-    func_80014cfc(DAT_801e0d08.unk0, (u32 *)(p + 4), 36);
+    func_80014cfc(DAT_801e0d08.bits, (u32 *)(p + 4), 36);
     p = (u8 *)DAT_80088c88;
     func_80016030(3, 3, (u_long *)p);
     func_80014cfc(sp->unk0.block, (u32 *)(p + 4), 5376);
@@ -107,7 +108,7 @@ void func_80063954(void)
 
     func_800636f8();
     func_800152f8(MENU_SCRATCH->unk0.block);
-    func_800152f8(DAT_801e0d08.unk0);
+    func_800152f8(DAT_801e0d08.bits);
     if ((DAT_801e0d28[0] != viewer.unk38[3] && viewer.unk38[3] != 0xffff)
         || (DAT_801e0d28[2] != viewer.unk38[16] && viewer.unk38[16] != 0xffff)
         || (DAT_801e0d28[1] != viewer.unk38[4] && viewer.unk38[4] != 0xffff)

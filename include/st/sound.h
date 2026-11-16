@@ -14,11 +14,6 @@
 #include <st/data.h>
 #include <st/cd.h>
 
-/* Vendored LIBSND members the census has not named yet. */
-void func_8006ca24(void);
-void func_8006cb64(void);
-void func_800703f4(void);
-
 /* src/st/sound.c */
 void func_80057b48(int damage);
 void func_80057bac(int volume);

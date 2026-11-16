@@ -1095,10 +1095,10 @@ ST.EXE	0x8006c7e4	0x5bfe4	0xe8	0xe8	1	function	mips-frame-carve			scripts/kf/aud
 ST.EXE	0x8006c8cc	0x5c0cc	0x70	0x70	1	function	mips-return-carve			scripts/kf/audit_functions.py	anonymous WIP start; previous-return+return-delimited-valid-code
 ST.EXE	0x8006c944	0x5c144	0x24	0x24	1	function	mips-frame-carve			scripts/kf/audit_functions.py	anonymous WIP start; stack-frame+ra-save+matching-stack-return
 ST.EXE	0x8006c974	0x5c174	0xac	0xac	1	function	mips-frame-carve			scripts/kf/audit_functions.py	anonymous WIP start; stack-frame+ra-save+matching-stack-return
-ST.EXE	0x8006ca24	0x5c224	0x30	0x30	1	function	mips-frame-carve			scripts/kf/audit_functions.py	anonymous WIP start; stack-frame+ra-save+matching-stack-return
-ST.EXE	0x8006ca54	0x5c254	0x20	0x20	1	function	mips-frame-carve			scripts/kf/audit_functions.py	anonymous WIP start; stack-frame+ra-save+matching-stack-return
+ST.EXE	0x8006ca24	0x5c224	0x30	0x30	1	function	mips-frame-carve	SsInit		scripts/kf/audit_functions.py	anonymous WIP start; stack-frame+ra-save+matching-stack-return
+ST.EXE	0x8006ca54	0x5c254	0x20	0x20	1	function	mips-frame-carve	SpuInit		scripts/kf/audit_functions.py	anonymous WIP start; stack-frame+ra-save+matching-stack-return
 ST.EXE	0x8006ca74	0x5c274	0xe8	0xe8	1	function	mips-frame-carve			scripts/kf/audit_functions.py	anonymous WIP start; stack-frame+ra-save+matching-stack-return
-ST.EXE	0x8006cb64	0x5c364	0x20	0x20	1	function	mips-frame-carve			scripts/kf/audit_functions.py	anonymous WIP start; stack-frame+ra-save+matching-stack-return
+ST.EXE	0x8006cb64	0x5c364	0x20	0x20	1	function	mips-frame-carve	SsQuit		scripts/kf/audit_functions.py	anonymous WIP start; stack-frame+ra-save+matching-stack-return
 ST.EXE	0x8006cb84	0x5c384	0x74	0x74	1	function	mips-return-carve			scripts/kf/audit_functions.py	anonymous WIP start; previous-return+return-delimited-valid-code
 ST.EXE	0x8006cc04	0x5c404	0xc0	0xc0	1	function	mips-frame-carve			scripts/kf/audit_functions.py	anonymous WIP start; stack-frame+ra-save+matching-stack-return
 ST.EXE	0x8006ccc4	0x5c4c4	0x37c	0x37c	1	function	mips-return-carve			scripts/kf/audit_functions.py	anonymous WIP start; previous-return+return-delimited-valid-code
@@ -1112,7 +1112,7 @@ ST.EXE	0x8006d3a4	0x5cba4	0x270	0x270	1	function	mips-frame-carve			scripts/kf/a
 ST.EXE	0x8006d614	0x5ce14	0x310	0x310	1	function	mips-return-carve			scripts/kf/audit_functions.py	anonymous WIP start; previous-return+return-delimited-valid-code
 ST.EXE	0x8006d924	0x5d124	0x3a0	0x3a0	1	function	mips-return-carve			scripts/kf/audit_functions.py	anonymous WIP start; previous-return+return-delimited-valid-code
 ST.EXE	0x8006dcc4	0x5d4c4	0x98	0x98	1	function	mips-return-carve			scripts/kf/audit_functions.py	anonymous WIP start; previous-return+return-delimited-valid-code
-ST.EXE	0x8006dd64	0x5d564	0x2c	0x2c	1	function	mips-frame-carve			scripts/kf/audit_functions.py	anonymous WIP start; stack-frame+ra-save+matching-stack-return
+ST.EXE	0x8006dd64	0x5d564	0x2c	0x2c	1	function	mips-frame-carve	_SsSndPlay		scripts/kf/audit_functions.py	anonymous WIP start; stack-frame+ra-save+matching-stack-return
 ST.EXE	0x8006dd94	0x5d594	0xfc	0xfc	1	function	mips-frame-carve			scripts/kf/audit_functions.py	anonymous WIP start; stack-frame+ra-save+matching-stack-return
 ST.EXE	0x8006de90	0x5d690	0x244	0x244	1	function	mips-return-carve			scripts/kf/audit_functions.py	anonymous WIP start; previous-return+return-delimited-valid-code
 ST.EXE	0x8006e0d4	0x5d8d4	0x3ac	0x3ac	1	function	mips-return-carve			scripts/kf/audit_functions.py	anonymous WIP start; previous-return+return-delimited-valid-code
@@ -1138,10 +1138,10 @@ ST.EXE	0x800700d4	0x5f8d4	0x194	0x194	1	function	mips-frame-carve			scripts/kf/a
 ST.EXE	0x80070274	0x5fa74	0x9c	0x9c	1	function	mips-frame-carve			scripts/kf/audit_functions.py	anonymous WIP start; stack-frame+ra-save+matching-stack-return
 ST.EXE	0x80070310	0x5fb10	0x10	0x10	1	function	mips-return-carve			scripts/kf/audit_functions.py	anonymous WIP start; previous-return+return-delimited-valid-code
 ST.EXE	0x80070324	0x5fb24	0xcc	0xcc	1	function	mips-return-carve			scripts/kf/audit_functions.py	anonymous WIP start; previous-return+return-delimited-valid-code+skipped-1-padding-nop
-ST.EXE	0x800703f4	0x5fbf4	0x20	0x20	1	function	mips-frame-carve			scripts/kf/audit_functions.py	anonymous WIP start; stack-frame+ra-save+matching-stack-return
+ST.EXE	0x800703f4	0x5fbf4	0x20	0x20	1	function	mips-frame-carve	SsUtReverbOn		scripts/kf/audit_functions.py	anonymous WIP start; stack-frame+ra-save+matching-stack-return
 ST.EXE	0x80070414	0x5fc14	0x290	0x290	1	function	mips-return-carve			scripts/kf/audit_functions.py	anonymous WIP start; previous-return+return-delimited-valid-code
 ST.EXE	0x800706a4	0x5fea4	0x1e0	0x1e0	1	function	mips-return-carve			scripts/kf/audit_functions.py	anonymous WIP start; previous-return+return-delimited-valid-code
-ST.EXE	0x80070884	0x60084	0xc	0xc	1	function	mips-return-carve			scripts/kf/audit_functions.py	anonymous WIP start; previous-return+return-delimited-valid-code
+ST.EXE	0x80070884	0x60084	0xc	0xc	1	function	mips-return-carve	_SsVmDamperOff		scripts/kf/audit_functions.py	anonymous WIP start; previous-return+return-delimited-valid-code
 ST.EXE	0x80070894	0x60094	0x484	0x484	1	function	mips-frame-carve			scripts/kf/audit_functions.py	anonymous WIP start; stack-frame+ra-save+matching-stack-return; start moved to jal target (jal-target x2+hoisted-above-admitted-start)
 ST.EXE	0x80070d24	0x60524	0x24	0x24	1	function	mips-frame-carve			scripts/kf/audit_functions.py	anonymous WIP start; stack-frame+ra-save+matching-stack-return
 ST.EXE	0x80070d54	0x60554	0x2bc	0x2bc	1	function	mips-return-carve			scripts/kf/audit_functions.py	anonymous WIP start; previous-return+return-delimited-valid-code+skipped-3-padding-nop
@@ -1422,18 +1422,18 @@ ST.EXE	0x8007cc44	0x6c444	0x38	0x38	1	function	mips-frame-carve			scripts/kf/aud
 ST.EXE	0x8007cc7c	0x6c47c	0x48	0x48	1	function	mips-frame-carve			scripts/kf/audit_functions.py	anonymous WIP start; stack-frame+ra-save+hoisted-prologue+matching-stack-return
 ST.EXE	0x8007ccc4	0x6c4c4	0x48	0x48	1	function	mips-frame-carve			scripts/kf/audit_functions.py	anonymous WIP start; stack-frame+ra-save+hoisted-prologue+matching-stack-return
 ST.EXE	0x8007cd14	0x6c514	0x118	0x118	1	function	mips-frame-carve			scripts/kf/audit_functions.py	anonymous WIP start; stack-frame+ra-save+hoisted-prologue+matching-stack-return
-ST.EXE	0x8007ce2c	0x6c62c	0x2c	0x2c	1	function	mips-return-carve			scripts/kf/audit_functions.py	anonymous WIP start; previous-return+return-delimited-valid-code
+ST.EXE	0x8007ce2c	0x6c62c	0x2c	0x2c	1	function	mips-return-carve	_padSetVsyncParam		scripts/kf/audit_functions.py	anonymous WIP start; previous-return+return-delimited-valid-code
 ST.EXE	0x8007ce58	0x6c658	0x68	0x68	1	function	mips-frame-carve			scripts/kf/audit_functions.py	anonymous WIP start; stack-frame+ra-save+hoisted-prologue+matching-stack-return
 ST.EXE	0x8007cec0	0x6c6c0	0x16c	0x16c	1	function	mips-frame-carve			scripts/kf/audit_functions.py	anonymous WIP start; stack-frame+ra-save+matching-stack-return
 ST.EXE	0x8007d02c	0x6c82c	0x14	0x14	1	function	mips-return-carve			scripts/kf/audit_functions.py	anonymous WIP start; previous-return+return-delimited-valid-code
 ST.EXE	0x8007d040	0x6c840	0xcc	0xcc	1	function	mips-frame-carve			scripts/kf/audit_functions.py	anonymous WIP start; stack-frame+ra-save+matching-stack-return
 ST.EXE	0x8007d10c	0x6c90c	0x44	0x44	1	function	mips-frame-carve			scripts/kf/audit_functions.py	anonymous WIP start; stack-frame+ra-save+matching-stack-return
-ST.EXE	0x8007d150	0x6c950	0x214	0x214	1	function	mips-frame-carve			scripts/kf/audit_functions.py	anonymous WIP start; stack-frame+ra-save+matching-stack-return
+ST.EXE	0x8007d150	0x6c950	0x214	0x214	1	function	mips-frame-carve	_padInitSioMode		scripts/kf/audit_functions.py	anonymous WIP start; stack-frame+ra-save+matching-stack-return
 ST.EXE	0x8007d364	0x6cb64	0xc8	0xc8	1	function	mips-frame-carve			scripts/kf/audit_functions.py	anonymous WIP start; stack-frame+ra-save+matching-stack-return
 ST.EXE	0x8007d42c	0x6cc2c	0x1d8	0x1d8	1	function	mips-frame-carve			scripts/kf/audit_functions.py	anonymous WIP start; stack-frame+ra-save+matching-stack-return
 ST.EXE	0x8007d604	0x6ce04	0x234	0x234	1	function	mips-frame-carve			scripts/kf/audit_functions.py	anonymous WIP start; stack-frame+ra-save+matching-stack-return
 ST.EXE	0x8007d838	0x6d038	0x90	0x90	1	function	mips-frame-carve			scripts/kf/audit_functions.py	anonymous WIP start; stack-frame+ra-save+matching-stack-return
-ST.EXE	0x8007d8c8	0x6d0c8	0x28	0x28	1	function	mips-return-carve			scripts/kf/audit_functions.py	anonymous WIP start; previous-return+return-delimited-valid-code
+ST.EXE	0x8007d8c8	0x6d0c8	0x28	0x28	1	function	mips-return-carve	_padWaitRXready		scripts/kf/audit_functions.py	anonymous WIP start; previous-return+return-delimited-valid-code
 ST.EXE	0x8007d8f4	0x6d0f4	0xc	0xc	1	function	mips-return-carve			scripts/kf/audit_functions.py	anonymous WIP start; previous-return+return-delimited-valid-code+skipped-1-padding-nop
 ST.EXE	0x8007d900	0x6d100	0x10	0x10	1	function	mips-return-carve			scripts/kf/audit_functions.py	anonymous WIP start; previous-return+return-delimited-valid-code
 ST.EXE	0x8007d910	0x6d110	0x84	0x84	1	function	mips-frame-carve			scripts/kf/audit_functions.py	anonymous WIP start; stack-frame+ra-save+matching-stack-return
