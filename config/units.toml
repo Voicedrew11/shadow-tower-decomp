@@ -574,6 +574,12 @@ source = "src/vs/anim_80027f30.c"
 profile = "probe-gcc272cdk-o2-g0"
 
 [[unit]]
+unit = "vs.texanim_8002d710"
+image = "VS.EXE"
+source = "src/vs/texanim_8002d710.c"
+profile = "probe-gcc272cdk-o2-g0"
+
+[[unit]]
 unit = "vs.cd_8002e5e4"
 image = "VS.EXE"
 source = "src/vs/cd_8002e5e4.c"

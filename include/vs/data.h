@@ -91,4 +91,14 @@ typedef char VsWorldStateFrameAt0x2C972[offsetof(VsWorldState, frame) == 0x2c972
 
 extern VsWorldState DAT_801624d0;
 
+/* 2000 20-byte records at 0x801c4a58 (bss) whose halfword +0x10
+ * func_8002d710 clears; only that field is proven. */
+typedef struct {
+    u8 unk0[0x10];
+    u16 unk10;
+    u8 unk12[2];
+} VsRecord20;
+
+extern VsRecord20 DAT_801c4a58[2000];
+
 #endif

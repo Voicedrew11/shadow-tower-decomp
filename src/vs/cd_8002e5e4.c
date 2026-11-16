@@ -305,3 +305,22 @@ void func_8002ee54(u_long *buf, StFileExtent *file, u32 size)
         size = file->size;
     func_8002ed74(&file->pos, buf, (size + 2047) >> 11);
 }
+
+/* Reads an archive member whole, rereading until its checksum holds;
+ * returns its sector count (0 for an empty member, which VS skips). */
+ADDRESS(0x8002ee90, 0xac)
+int func_8002ee90(u16 archive, u16 member, u_long *buf)
+{
+    VsArchive *a = &DAT_801a4590.archives[archive];
+    u16 start = a->sectors[member];
+    CdlLOC loc;
+    int sectors = -start + a->sectors[member + 1];
+
+    if (sectors == 0)
+        return 0;
+    func_8002ece0(&a->file.pos, start, &loc);
+    do
+        func_8002ed74(&loc, buf, sectors);
+    while (func_8002ed20(buf, sectors));
+    return sectors;
+}
