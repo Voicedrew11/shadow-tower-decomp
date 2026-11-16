@@ -19,6 +19,7 @@
 #include <st/funcs.h>
 #include <st/cd.h>
 #include <st/gfx.h>
+#include <st/hud.h>
 
 /* PSX.EXE program table indices. */
 #define PROGRAM_TITLE 1

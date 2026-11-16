@@ -152,6 +152,12 @@ source = "src/st/slots.c"
 profile = "probe-gcc272cdk-o2-g0"
 
 [[unit]]
+unit = "st.hud"
+image = "ST.EXE"
+source = "src/st/hud.c"
+profile = "probe-gcc272cdk-o2-g8"
+
+[[unit]]
 unit = "st.text"
 image = "ST.EXE"
 source = "src/st/text.c"

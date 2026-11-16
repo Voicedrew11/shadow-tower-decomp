@@ -14,7 +14,6 @@ void func_800210f4(void);
 void func_80021158(void);
 void func_800214a4(void);
 void func_800214cc(void);
-void func_80026afc(VECTOR *a, SVECTOR *b);
 void func_80032058(void);
 void func_8003216c(void);
 void func_8003306c(void);
@@ -67,5 +66,17 @@ void func_800237a8(int archive, int index, int slot, int tag);
 void func_800239ec(int archive, int index, int slot, int tag);
 void func_80023abc(int archive, int index, int slot, int tag);
 void func_80058a0c(int archive, int member, int slot);
+void func_80020a80(void);
+void func_80021654(void);
+void func_8002181c(void);
+void func_800218d8(void);
+void func_80021ac4(int index);
+
+/* band E callees outside the band */
+void func_80033110(void);
+void func_800340f8(void);
+void func_80034fc4(void);
+void func_8003c24c(int arg);
+void func_80057b10(void);
 
 #endif
