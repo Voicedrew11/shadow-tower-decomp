@@ -138,7 +138,9 @@ static u32 frame_pacer_vsync_count = 0;
 
 The claim binds the declarator to the `data_identities.tsv` row at that
 address: the name and size must match, the storage must be `load` or `bss`, a
-datum is claimed by one unit only, and data claims ascend inside a source.
+datum is claimed by one unit only, and the claims of each section ascend
+inside a source (GCC writes a section's data in source order; a unit's
+`.sbss` statics may precede its later `.sdata` words).
 Data need not be contiguous with the unit's code. The bindings file records
 data claims with `kind=data`.
 

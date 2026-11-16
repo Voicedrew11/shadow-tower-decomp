@@ -87,8 +87,8 @@
   original used.
 - A global lives in the module that owns it, defined under
   `DATA(0xVA, size)` with its curated identity name; every other unit declares
-  it `extern`. Load-image data is explicitly initialized in source, and data
-  claims ascend inside a source like function claims.
+  it `extern`. Load-image data is explicitly initialized in source, and the data
+  claims of each section ascend inside a source like function claims.
 
 ## Game code versus vendored code
 

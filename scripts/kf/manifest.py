@@ -349,10 +349,15 @@ def _bind_data_claims(
         owner = claimed.get((image, claim.va))
         if owner is not None:
             raise ValueError(f"{where}: {identity.name} is already claimed by unit {owner!r}")
-        if data and claim.va <= data[-1].va:
+        # GCC emits each output section's data in source order, but the
+        # sections are independent: a unit may define its .sbss statics before
+        # its later .sdata words, as the functions that use them require.
+        previous = next((datum for datum in reversed(data)
+                         if datum.section_name == claim.section), None)
+        if previous is not None and claim.va <= previous.va:
             raise ValueError(
-                f"{where}: DATA({claim.va:#x}) does not ascend after {data[-1].va:#x}; "
-                "data claims follow the linked order"
+                f"{where}: DATA({claim.va:#x}) does not ascend after {previous.va:#x}; "
+                f"a unit's {claim.section} claims follow the linked order"
             )
         claimed[(image, claim.va)] = unit
         data.append(Datum(claim.va, claim.size, identity.name, identity.storage, identity.scope,
