@@ -15,10 +15,13 @@ all. `PSX.EXE` (the boot file `SLUS_008.63`; the disc also holds an
 identical `PSX.EXE`) is a program sequencer: its table names, by index,
 `STR.EXE`, `TITLE.EXE`, `OPTXT.EXE`, `ST.EXE`, `END.EXE` and `VS.EXE`. It
 runs index 0 (`STR.EXE`) first, then after each program returns it loads
-the index that program left in the byte at `0x800103F0`. `ST.EXE` stores 4
-(`END.EXE`) and `VS.EXE` stores 1 (`TITLE.EXE`); how the other programs pick
-their successor is not yet traced. All programs but `TITLE.EXE`
-(`0x80012000`) load at `0x80011000`.
+the index that program left in the byte at `0x800103F0`. `STR.EXE` (the
+boot movies) hands over to `TITLE.EXE`. `TITLE.EXE` picks `OPTXT.EXE` (the
+opening text) for a new game, `ST.EXE` for Continue (also writing 2 to the
+mailbox byte `0x800103F1`), `VS.EXE` for versus, and `STR.EXE` again when the
+title screen times out. `OPTXT.EXE` hands over to `ST.EXE`, `ST.EXE` to
+`END.EXE`, and `END.EXE` and `VS.EXE` back to `TITLE.EXE`. All programs but
+`TITLE.EXE` (`0x80012000`) load at `0x80011000`.
 
 | Image | Disc file | Load address | Load size |
 | :---- | :-------- | -----------: | --------: |
