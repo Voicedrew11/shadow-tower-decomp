@@ -43,7 +43,9 @@ typedef struct {
     SVECTOR unk30;       /* 0x30: rotation */
     SVECTOR unk38;       /* 0x38: scale */
     SVECTOR unk40;       /* 0x40: velocity */
-    u8 unk48[0xa];
+    u8 unk48[4];
+    u8 unk4C;            /* 0x4c: VS.EXE: the owner fighter's number */
+    u8 unk4D[5];
     s16 unk52;           /* 0x52 */
     u8 unk54[4];
 } StEffect;

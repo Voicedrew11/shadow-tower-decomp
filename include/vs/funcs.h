@@ -7,9 +7,11 @@
 
 #include <kf/lib/types.h>
 #include <sys/types.h>
+#include <LIBGTE.H>
 #include <LIBCD.H>
 #include <LIBGTE.H>
 #include <st/cd.h>
+#include <st/mesh.h>
 
 /* src/vs/cd_8001cb34.c */
 void func_8001cb34(void);                 /* ST func_8001531c */
@@ -20,9 +22,25 @@ int func_8001d134(int archive, int member, CdlLOC *loc); /* ST func_80015cd0 */
 void func_8001d298(void);                 /* ST func_800175a4 */
 void func_8001d328(void);                 /* ST func_80017634 */
 
+/* src/vs/anim_80023764.c */
+void func_80023820(struct StAnimSet *set);
+void func_8002392c(void);
+void *func_8002398c(u32 size);           /* ST func_8001528c */
+void func_800241b4(struct StAnimSet **out);
+
+/* src/vs/anim_80027c64.c */
+void func_80027c64(SVECTOR *dst, SVECTOR *from, SVECTOR *to, int count); /* ST vertices_sub */
+
+/* The second renderer set src/vs/mesh_80027ba4.c runs (not reconstructed). */
+void func_80027198(int count, MeshFaceFT3 *face, u_long *ot);
+void func_80027400(int count, MeshFaceFT4 *face, u_long *ot);
+void func_80027698(int count, MeshFaceGT3 *face, u_long *ot);
+void func_800278f8(int count, MeshFaceGT4 *face, u_long *ot);
+
 /* src/vs/cd_8002e5e4.c */
 void func_8002e5e4(void);                 /* ST func_800214cc */
 void *func_8002e690(u32 size);            /* ST func_8001528c */
+u16 *func_8002e660(u16 *dst, u16 *src, int count); /* ST func_80014d2c */
 void *func_8002e6d4(u32 size);            /* ST func_800152d0 */
 void func_8002e6fc(void *p);              /* ST func_800152f8 */
 void func_8002e720(u_char status, u_char *result); /* ST func_800154e8 */
@@ -31,6 +49,11 @@ void func_8002ea94(StCdRequest *request); /* ST func_80015848 */
 u32 func_8002eb9c(CdlLOC *pos);           /* ST func_80015950 */
 void func_8002ece0(CdlLOC *pos, int offset, CdlLOC *out); /* ST func_80015a94 */
 int func_8002ed20(u32 *data, int sectors); /* ST func_80015b78 */
+void func_8002ed74(CdlLOC *loc, u_long *buf, int sectors); /* ST func_80015f0c */
+void func_8002ee54(u_long *buf, StFileExtent *file, u32 size); /* ST func_80015ff4 */
+
+/* src/vs/cd_8002efcc.c */
+void func_8002efcc(void);                 /* ST func_8001624c */
 
 /* src/vs/snd_80012a70.c */
 void func_80012c2c(u_long *data, DVECTOR *pos, DVECTOR *clut_pos);
