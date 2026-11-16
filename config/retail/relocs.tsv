@@ -354,6 +354,13 @@ ST.EXE	0x8001c1a0	0xb9a0	0x8001c1a4	mips_hi16_lo16	reachable-code	0x801b9e14	bss
 ST.EXE	0x8001c1b0	0xb9b0	0x8001c1b4	mips_hi16_lo16	reachable-code	0x801b5920	bss	DAT_801b5920	lui+addiu		manual-decoded	reviewed	st.vis_build asm review
 ST.EXE	0x8001c1b0	0xb9b0	0x8001c1e0	mips_hi16_lo16	reachable-code	0x801b5920	bss	DAT_801b5920	lui+lh		manual-decoded	reviewed	st.vis_build asm review
 ST.EXE	0x8001c1c4	0xb9c4	0x8001c1c8	mips_hi16_lo16	reachable-code	0x801b5948	bss	DAT_801b5948	lui+addiu		manual-decoded	reviewed	st.vis_build asm review
+ST.EXE	0x8001c4cc	0xbccc	0x8001c4d0	mips_hi16_lo16	reachable-code	0x80198f28	bss	DAT_80198f28	lui+addiu		manual-decoded	reviewed	st.vis_cull asm review
+ST.EXE	0x8001c5a0	0xbda0		mips26	reachable-code	0x8001c604	load		j		manual-decoded	reviewed	st.vis_cull asm review
+ST.EXE	0x8001c618	0xbe18	0x8001c61c	mips_hi16_lo16	reachable-code	0x8015d090	bss	DAT_8015d090	lui+addiu		manual-decoded	reviewed	st.vis_cull asm review
+ST.EXE	0x8001c65c	0xbe5c	0x8001c660	mips_hi16_lo16	reachable-code	0x801b5948	bss	DAT_801b5948	lui+addiu		manual-decoded	reviewed	st.vis_cull asm review
+ST.EXE	0x8001c6c8	0xbec8	0x8001c6cc	mips_hi16_lo16	reachable-code	0x8017bed0	bss	DAT_8017bed0	lui+addiu		manual-decoded	reviewed	st.vis_cull asm review
+ST.EXE	0x8001c734	0xbf34		mips26	reachable-code	0x8001c4c8	load		jal		manual-decoded	reviewed	st.vis_cull asm review
+ST.EXE	0x8001c794	0xbf94		mips26	reachable-code	0x8001c7c0	load		j		manual-decoded	reviewed	st.vis_cull asm review
 ST.EXE	0x8001c800	0xc000	0x8001c804	mips_hi16_lo16	reachable-code	0x801b5948	bss	DAT_801b5948	lui+addiu		manual-decoded	reviewed	st.vis_lists asm review
 ST.EXE	0x8001c818	0xc018	0x8001c81c	mips_hi16_lo16	reachable-code	0x8017bed0	bss	DAT_8017bed0	lui+addiu		manual-decoded	reviewed	st.vis_lists asm review
 ST.EXE	0x8001c88c	0xc08c	0x8001c890	mips_hi16_lo16	reachable-code	0x801b5948	bss	DAT_801b5948	lui+addiu		manual-decoded	reviewed	st.vis_lists asm review

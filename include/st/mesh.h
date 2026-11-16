@@ -132,11 +132,18 @@ typedef struct {
 #define mesh_add_prim(ot, p, len) (mesh_set_tag(ot, p, len), mesh_set_ot(ot, p))
 
 /* Unresolved ST.EXE global at 0x8015d090, a large .bss object of which the
- * renderers read only a word and the render-mode byte at its end (WIP view). */
+ * renderers and func_8001c60c read only fields near its end (WIP view). */
 typedef struct {
     u8 unk0[0x1edf8];
     int tint_level;      /* 0x1edf8 */
     u8 render_mode;      /* 0x1edfc */
+    u8 unk1edfd[3];
+    u_long unk1ee00;     /* 0x1ee00: func_8001c60c's near range (<< 11) */
+    u_long unk1ee04;     /* 0x1ee04: its middle range (<< 11) */
+    u8 *unk1ee08;        /* 0x1ee08: halfword at +0x6a read */
+    u8 unk1ee0c[9];
+    u8 unk1ee15;         /* 0x1ee15 */
+    u8 unk1ee16[2];
 } Dat8015d090;
 
 extern Dat8015d090 DAT_8015d090;

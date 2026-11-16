@@ -68,6 +68,12 @@ source = "src/st/vis_build.c"
 profile = "probe-gcc272cdk-o2-g0"
 
 [[unit]]
+unit = "st.vis_cull"
+image = "ST.EXE"
+source = "src/st/vis_cull.c"
+profile = "probe-gcc272cdk-o2-g0"
+
+[[unit]]
 unit = "st.vis_lists"
 image = "ST.EXE"
 source = "src/st/vis_lists.c"
