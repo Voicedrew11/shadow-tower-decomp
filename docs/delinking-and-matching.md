@@ -68,7 +68,14 @@ independently validate the TSV claim:
   decode to the recorded address, and use a sign-extending low instruction;
   rows may share a site only as one HI/LO family (same target: one `lui`
   feeding several lows, or `lui`s on converging paths feeding one low), which
-  is emitted once per site in ELF REL order;
+  is emitted once per site in ELF REL order. That order is by site,
+  except where another pair against the same symbol (with a different low
+  half) sits between a HI16 and its own LO16: GNU ld completes a HI16 with
+  the next same-symbol LO16, so that HI16 moves to just before its own
+  (`mips_elf.rel_order`). The native object view applies the same rule,
+  pairing each HI16 patch with the first later LO16 carrying its
+  expression, because objdiff reports a HI16's addend from an immediately
+  following LO16 only;
 - an out-of-load HI/LO pair remains withheld unless a human has promoted that
   exact decoded pair to `status=reviewed`; this is the path for RAM/BSS symbols
   whose addresses are real but whose storage is absent from the PS-X EXE payload;

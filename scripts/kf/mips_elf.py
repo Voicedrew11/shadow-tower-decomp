@@ -10,7 +10,7 @@ quirks. Native source objects remain Psy-Q LNK files; ELF views never link.
 from __future__ import annotations
 
 import struct
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Iterable
 
 
@@ -68,6 +68,58 @@ class MipsRelocation:
     offset: int
     kind: str
     symbol: str
+    # An R_MIPS_HI16's own (earliest) R_MIPS_LO16 offset, when known; see
+    # rel_order. Provenance only: equality and the ELF bytes ignore it.
+    pair: int | None = field(default=None, compare=False)
+
+    def moved(self, delta: int) -> MipsRelocation:
+        pair = None if self.pair is None else self.pair + delta
+        return MipsRelocation(self.offset + delta, self.kind, self.symbol, pair)
+
+
+def rel_order(relocations: Iterable[MipsRelocation], data: bytes) -> list[MipsRelocation]:
+    """ELF REL order for one section: by site, except an interleaved HI16.
+
+    GNU ld completes an R_MIPS_HI16 with the next R_MIPS_LO16 *against the
+    same symbol* in REL order (elfxx-mips.c mips_elf_next_relocation), whose
+    signed low half decides the HI16's carry. Site order is therefore
+    faithful unless another pair against that symbol sits between a HI16 and
+    its own LO16 (`pair`: `lui A; lui B; ... lo B; ... lo A`) and that LO16's
+    low half differs from its own; only then does the HI16 move to just
+    before its own LO16, as GNU as orders such pairs.
+
+    Every other relocation keeps its site position. objdiff pairs a HI16
+    only with an immediately following LO16 when it reports addends, so a
+    move the linker does not need (past an R_MIPS_26, or to a LO16 with the
+    same low half) would change one side of a comparison. The delinker and
+    the native object view both write through this rule.
+    """
+    def low_half(offset: int) -> int:
+        return int.from_bytes(data[offset:offset + 2], "little")
+
+    ordered = sorted(relocations, key=lambda item: (item.offset, item.kind))
+    lows = {(item.offset, item.symbol) for item in ordered if item.kind == "R_MIPS_LO16"}
+    moved: dict[tuple[int, str], list[MipsRelocation]] = {}
+    kept: list[MipsRelocation] = []
+    for index, item in enumerate(ordered):
+        if item.kind == "R_MIPS_HI16" and item.pair is not None:
+            if (item.pair, item.symbol) not in lows:
+                raise ValueError(
+                    f"R_MIPS_HI16 at {item.offset:#x}: own LO16 {item.pair:#x} is missing")
+            following = next((other for other in ordered[index + 1:]
+                              if other.kind == "R_MIPS_LO16" and other.symbol == item.symbol),
+                             None)
+            if (following is not None and following.offset != item.pair
+                    and low_half(following.offset) != low_half(item.pair)):
+                moved.setdefault((item.pair, item.symbol), []).append(item)
+                continue
+        kept.append(item)
+    result: list[MipsRelocation] = []
+    for item in kept:
+        if item.kind == "R_MIPS_LO16":
+            result.extend(moved.pop((item.offset, item.symbol), ()))
+        result.append(item)
+    return result
 
 
 @dataclass(frozen=True)
@@ -127,15 +179,15 @@ def _symbol(
 
 
 def _check_relocations(
-    relocations: Iterable[MipsRelocation], section_size: int, section: str
+    relocations: Iterable[MipsRelocation], data: bytes, section: str
 ) -> tuple[MipsRelocation, ...]:
-    ordered = tuple(sorted(relocations, key=lambda item: (item.offset, item.kind)))
-    for relocation in ordered:
+    relocations = tuple(relocations)
+    for relocation in relocations:
         if relocation.kind not in RELOCATION_TYPES:
             raise ValueError(f"unsupported relocation {relocation.kind!r}")
-        if not 0 <= relocation.offset <= section_size - 4 or relocation.offset & 3:
+        if not 0 <= relocation.offset <= len(data) - 4 or relocation.offset & 3:
             raise ValueError(f"invalid {section} relocation offset {relocation.offset:#x}")
-    return ordered
+    return tuple(rel_order(relocations, data))
 
 
 def _check_symbols(
@@ -207,15 +259,15 @@ def write_mips_elf(
         if not 0 < alignment <= 0x80000000 or alignment & (alignment - 1):
             raise ValueError(f"{name} alignment must be a positive ELF32 power of two")
 
-    relocations = _check_relocations(relocations, len(text), ".text")
+    relocations = _check_relocations(relocations, text, ".text")
     defined_symbols = _check_symbols(defined_symbols, len(text), ".text")
-    data_relocations = _check_relocations(data_relocations, len(data), ".data")
+    data_relocations = _check_relocations(data_relocations, data, ".data")
     data_symbols = _check_symbols(data_symbols, len(data), ".data")
     bss_symbols = _check_symbols(bss_symbols, bss_size, ".bss")
     sbss_symbols = _check_symbols(sbss_symbols, sbss_size, ".sbss")
-    rodata_relocations = _check_relocations(rodata_relocations, len(rodata), ".rodata")
+    rodata_relocations = _check_relocations(rodata_relocations, rodata, ".rodata")
     rodata_symbols = _check_symbols(rodata_symbols, len(rodata), ".rodata")
-    sdata_relocations = _check_relocations(sdata_relocations, len(sdata), ".sdata")
+    sdata_relocations = _check_relocations(sdata_relocations, sdata, ".sdata")
     sdata_symbols = _check_symbols(sdata_symbols, len(sdata), ".sdata")
     has_sdata = bool(sdata) or bool(sdata_symbols) or bool(sdata_relocations)
     has_data = bool(data) or bool(data_symbols) or bool(data_relocations)

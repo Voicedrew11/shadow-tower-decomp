@@ -510,6 +510,25 @@ def _competes_for_site(row: dict[str, str], policy: str) -> bool:
     return row["target_region"] == "load" or row["status"] == "reviewed"
 
 
+def _merge_relocations(
+    target: list[MipsRelocation], relocations: Iterable[MipsRelocation]
+) -> None:
+    """Add relocations, emitting a shared HI/LO half once.
+
+    A `lui` that feeds several LO16s is one HI16; it is anchored at its
+    earliest LO16 (its `pair`), the one ELF REL order must keep it ahead of.
+    """
+    for item in relocations:
+        try:
+            index = target.index(item)
+        except ValueError:
+            target.append(item)
+            continue
+        known = target[index]
+        if item.pair is not None and (known.pair is None or item.pair < known.pair):
+            target[index] = replace(known, pair=item.pair)
+
+
 def _apply_relocation(
     blob: bytearray,
     function: Function,
@@ -552,7 +571,7 @@ def _apply_relocation(
         _put_word(blob, offset, hi_word)
         _put_word(blob, paired_offset, lo_word)
         relocations = [
-            MipsRelocation(offset, "R_MIPS_HI16", symbol),
+            MipsRelocation(offset, "R_MIPS_HI16", symbol, paired_offset),
             MipsRelocation(paired_offset, "R_MIPS_LO16", symbol),
         ]
         action = "paired-symbol"
@@ -707,9 +726,9 @@ def _rebase_hi_lo(
             new_hi, new_lo = encode_hi_lo_addend(hi_word, lo_word, addend)
             _put_word(blob, high.offset, new_hi)
             _put_word(blob, low.offset, new_lo)
-            result[low_index] = MipsRelocation(low.offset, low.kind, section_symbol)
+            result[low_index] = replace(low, symbol=section_symbol)
             paired_lows.add(low_index)
-        result[index] = MipsRelocation(high.offset, high.kind, section_symbol)
+        result[index] = replace(high, symbol=section_symbol)
     for index, low in enumerate(relocations):
         if low.kind == "R_MIPS_LO16" and low.symbol in offsets and index not in paired_lows:
             raise ValueError(f"unpaired {what} LO16: {low.symbol}")
@@ -734,7 +753,7 @@ def _module_function_address_relocations(
             _put_word(blob, high.offset, encode_mips26_addend(
                 word, addend + function_offsets[high.symbol]
             ))
-            result[index] = MipsRelocation(high.offset, high.kind, SECTION_SYMBOL)
+            result[index] = replace(high, symbol=SECTION_SYMBOL)
             continue
     return _rebase_hi_lo(blob, result, function_offsets, SECTION_SYMBOL, "function-address")
 
@@ -751,7 +770,7 @@ def _module_function_data_relocations(
             continue
         _put_word(blob, relocation.offset,
                   _get_word(blob, relocation.offset) + function_offsets[relocation.symbol])
-        result[index] = MipsRelocation(relocation.offset, relocation.kind, SECTION_SYMBOL)
+        result[index] = replace(relocation, symbol=SECTION_SYMBOL)
     return result
 
 
@@ -775,14 +794,14 @@ def _module_static_bss_relocations(
         offset = offsets[high.symbol]
         if high.kind == "R_MIPS_32":
             _put_word(blob, high.offset, _get_word(blob, high.offset) + offset)
-            result[index] = MipsRelocation(high.offset, high.kind, section_symbol)
+            result[index] = replace(high, symbol=section_symbol)
         elif high.kind == "R_MIPS_GPREL16":
             word = _get_word(blob, high.offset)
             addend = (((word & 0xFFFF) ^ 0x8000) - 0x8000) + offset
             if not -0x8000 <= addend < 0x8000:
                 raise ValueError(f"static small-data GPREL16 addend out of range: {high.symbol}")
             _put_word(blob, high.offset, (word & 0xFFFF0000) | (addend & 0xFFFF))
-            result[index] = MipsRelocation(high.offset, high.kind, section_symbol)
+            result[index] = replace(high, symbol=section_symbol)
     return _rebase_hi_lo(blob, result, offsets, section_symbol, "static BSS")
 
 
@@ -805,7 +824,7 @@ def _module_load_relocations(
         offset = offsets[high.symbol]
         if high.kind == "R_MIPS_32":
             _put_word(blob, high.offset, _get_word(blob, high.offset) + offset)
-            result[index] = MipsRelocation(high.offset, high.kind, section_symbol)
+            result[index] = replace(high, symbol=section_symbol)
         elif high.kind == "R_MIPS_GPREL16":
             # The implicit 16-bit addend becomes the datum's section offset.
             word = _get_word(blob, high.offset)
@@ -814,7 +833,7 @@ def _module_load_relocations(
             if not -0x8000 <= addend < 0x8000:
                 raise ValueError(f"GPREL16 addend out of range: {high.symbol}")
             _put_word(blob, high.offset, (word & 0xFFFF0000) | (addend & 0xFFFF))
-            result[index] = MipsRelocation(high.offset, high.kind, section_symbol)
+            result[index] = replace(high, symbol=section_symbol)
     return _rebase_hi_lo(blob, result, offsets, section_symbol, "static load-data")
 
 
@@ -892,7 +911,7 @@ def _module_data(
                     raise ValueError(f"module {module.unit}: truncated initialized padding")
                 data.extend(padding)
             data_relocations.extend(
-                MipsRelocation(item.offset + offset, item.kind, item.symbol)
+                item.moved(offset)
                 for item in relocations
             )
             data_symbols.append(
@@ -950,7 +969,7 @@ def _module_object(
             rebased, function_relocations, function_offsets
         )
         relocations.extend(
-            MipsRelocation(item.offset + offset, item.kind, item.symbol)
+            item.moved(offset)
             for item in function_relocations
         )
         symbols.append(DefinedSymbol(function.symbol, offset, function.body_size, STT_FUNC))
@@ -1198,11 +1217,10 @@ def delink(
                 except ValueError as error:
                     withheld_rows.append(_withheld(row, function, str(error)))
                     continue
-                function_relocations.extend(
-                    item for item in relocations if item not in function_relocations)
+                _merge_relocations(function_relocations, relocations)
                 used_rows.append(used)
-            # Shared HI/LO halves are emitted once; keep ELF REL order (each
-            # HI16 before the LO16s it pairs with) by sorting on the site.
+            # Shared HI/LO halves are emitted once; the ELF writer decides
+            # REL order (mips_elf.rel_order) from the site and each HI16's pair.
             function_relocations.sort(key=lambda item: item.offset)
             if function.va in rodata_by_function or function.va in sdata_by_function:
                 module_blob = bytearray(executable[start:start + function.size])
@@ -1222,8 +1240,7 @@ def delink(
                         )
                     except ValueError:
                         continue
-                    module_relocations.extend(
-                        item for item in relocations if item not in module_relocations)
+                    _merge_relocations(module_relocations, relocations)
                 module_relocations.sort(key=lambda item: item.offset)
                 carved_rodata[function.va] = (bytes(module_blob), module_relocations)
 
