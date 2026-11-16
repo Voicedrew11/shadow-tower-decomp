@@ -35,7 +35,8 @@ typedef struct {
     s16 row1;            /* 0x02: first row shown of ids1 */
     s16 *ids0;           /* 0x04 */
     s16 *ids1;           /* 0x08 */
-    u8 unkC[4];          /* 0x0c */
+    s16 count0;          /* 0x0c: ids in ids0 (src/st/idgrid.c) */
+    s16 count1;          /* 0x0e: ids in ids1 */
     DVECTOR *tex;        /* 0x10: cell images, twenty per block (func_80030be4) */
     MenuMessages *messages; /* 0x14 */
 } MenuGrid;
@@ -150,14 +151,20 @@ typedef struct {
     MenuMessages *unk2CC; /* 0x2cc */
     u8 unk2D0[4];        /* 0x2d0 */
     u32 *unk2D4;         /* 0x2d4: one bit per grid cell */
-    u8 unk2D8[4];        /* 0x2d8 */
+    s16 unk2D8;          /* 0x2d8: viewer.unk2 as src/st/equip_menu.c saved it */
+    s16 unk2DA;          /* 0x2da: viewer.unk6 as saved */
     u16 unk2DC;          /* 0x2dc */
     u16 unk2DE;          /* 0x2de: selected row of the item and stats menus */
     s16 unk2E0;          /* 0x2e0 */
     s16 unk2E2;          /* 0x2e2 */
     u8 unk2E4;           /* 0x2e4: cursor blink phase */
     u8 unk2E5;           /* 0x2e5: text font mode (0: 6x12 half-width cells) */
-    u8 unk2E6[0x1a];     /* 0x2e6 */
+    DVECTOR unk2E6;      /* 0x2e6: VRAM positions src/st/idgrid.c uploads images to */
+    DVECTOR unk2EA;      /* 0x2ea */
+    DVECTOR unk2EE;      /* 0x2ee */
+    DVECTOR unk2F2;      /* 0x2f2 */
+    DVECTOR unk2F6;      /* 0x2f6 */
+    u8 unk2FA[6];        /* 0x2fa */
     CVECTOR style[8];    /* 0x300: text colours; .cd carries the glyph size */
     CVECTOR *unk320;     /* 0x320: figure colours of the status pages */
     CVECTOR *unk324;     /* 0x324 */

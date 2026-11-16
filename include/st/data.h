@@ -68,7 +68,8 @@ typedef struct {
     u8 unk1A[0x1e - 0x1a];
     u16 unk1E;           /* 0x1e: divides player_take_damage's shake time */
     u16 unk20;           /* 0x20: scales player_hit's status-time limits */
-    u8 unk22[0x26 - 0x22];
+    u16 unk22;           /* 0x22: compared with unk24 by the equipment screen */
+    u16 unk24;           /* 0x24 */
     u8 unk26;
     u8 unk27;            /* 0x27: shown by the map menu */
     u16 unk28;
@@ -309,7 +310,9 @@ typedef struct {
     u8 unk0[2];
     u16 unk2;            /* 0x02: held bits */
     u16 unk4;            /* 0x04: page bits func_8002fc4c consumes; request bits func_8003f4ec clears */
-    u8 unk6[0x10 - 0x6];
+    u8 unk6[0xc - 0x6];
+    u16 unkC;            /* 0x0c: pressed bits the id grid screen consumes (src/st/idgrid.c) */
+    u8 unkE[2];
     u8 unk10;
     u8 unk11;
     u8 unk12;            /* 0x12 */

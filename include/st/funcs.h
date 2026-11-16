@@ -95,6 +95,17 @@ void func_80058ed4(void);
 int func_80062c28(int arg0);
 void func_800633d4(void);
 
+/* Called by the band Q screens (src/st/equip_menu.c, src/st/idgrid.c). */
+void func_80057cc8(void);
+void func_80057cec(void);
+void func_80057d10(void);
+void func_80057d34(void);
+void func_80058c4c(void);
+void func_80058cc8(void);
+void func_80058d30(void);
+void func_800637c0(void);
+void func_80063954(void);
+
 /* 0x8008809c: the unit z vector func_80049fe4 turns (load data, owner unknown). */
 extern SVECTOR DAT_8008809c;
 
