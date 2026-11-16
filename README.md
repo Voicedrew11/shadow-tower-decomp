@@ -60,9 +60,9 @@ overlay files from `retail/FDAT.T`).
 The tooling and matching workflow come from the King's Field II
 (`SLPS-00069`) project, which builds on the King's Field (`SLPS-00017`)
 project. The toolchain and link model are Shadow Tower's own: the SN Systems
-GCC 2.7.2 compiler (a rebuild), the DOS builds ASPSX 2.79D, PSYLINK 2.73D and
-CPE2X 1.5, and Runtime Library 4.2, which rebuild `PSX.EXE` byte-identical. See
-[AGENTS.md](AGENTS.md) for the reconstruction rules.
+GCC 2.7.2 compiler (a rebuild), the DOS builds ASPSX 2.79D, DMPSX 3.0,
+PSYLINK 2.73D and CPE2X 1.5, and Runtime Library 4.2, which rebuild `PSX.EXE`
+byte-identical. See [AGENTS.md](AGENTS.md) for the reconstruction rules.
 
 <!-- match-score:start -->
 ## Match status

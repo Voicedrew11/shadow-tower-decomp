@@ -8,7 +8,8 @@ from pathlib import Path
 import shutil
 import subprocess
 
-from .sdk import dos_run, tool_succeeded
+from .dmpsx import DMPSX_SHA256
+from .sdk import dos_run, rewrite_gte, tool_succeeded
 from .sdk_compat import library_input
 
 
@@ -113,6 +114,7 @@ def build_image(name, root, units, compile_one, *, repo, load_address) -> dict:
     try:
         layout = image_link(name)
         tools = {'ASPSX.EXE': Path(os.environ['PSYQ_ASPSX']),
+                 'DMPSX.EXE': Path(os.environ['PSYQ_DMPSX']),
                  'PSYLINK.EXE': Path(os.environ['PSYQ_PSYLINK']),
                  'CPE2X.EXE': Path(os.environ['PSYQ_CPE2X'])}
         for tool, source in tools.items():
@@ -120,6 +122,8 @@ def build_image(name, root, units, compile_one, *, repo, load_address) -> dict:
             report['tools'][tool] = {'path': str(source), 'sha256': file_hash(source)}
         if report['tools']['PSYLINK.EXE']['sha256'] != LINKER_SHA256:
             raise ValueError(f'{tools["PSYLINK.EXE"]}: expected the pinned PSYLINK 2.73D')
+        if report['tools']['DMPSX.EXE']['sha256'] != DMPSX_SHA256:
+            raise ValueError(f'{tools["DMPSX.EXE"]}: expected the pinned DMPSX 3.0')
         if report['tools']['CPE2X.EXE']['sha256'] != CONVERTER_SHA256:
             raise ValueError(f'{tools["CPE2X.EXE"]}: expected the pinned CPE2X 1.5')
         if not units:
@@ -138,13 +142,16 @@ def build_image(name, root, units, compile_one, *, repo, load_address) -> dict:
                 'Psy-Q Release 2.5 object; retail text follows NONE3.OBJ, relocations masked')
             explicit.append('MALLOC.OBJ')
         report['phase'] = 'assemble'
-        assembler_commands = [u['assembler_command'] for u in report['units']
-                              if 'assembler_command' in u]
-        if assembler_commands:
-            dos_run(root, assembler_commands, 'asm')
+        assembled = [u for u in report['units'] if 'assembler_command' in u]
+        if assembled:
+            dos_run(root, [u['assembler_command'] for u in assembled], 'asm')
+        for unit in assembled:
+            tool_succeeded(root, unit['log'], unit['object'], b'LNK\x02')
+        # Every assembled object then goes through DMPSX (sdk.rewrite_gte).
+        rewritten = rewrite_gte(root, tuple(u['object'].removesuffix('.OBJ') for u in assembled))
         for unit in report['units']:
             if 'assembler_command' in unit:
-                tool_succeeded(root, unit['log'], unit['object'], b'LNK\x02')
+                unit['gte_words_rewritten'] = rewritten[unit['object'].removesuffix('.OBJ')]
             elif not (root / unit['object']).read_bytes().startswith(b'LNK\x02'):
                 raise ValueError('compiler produced no native object')
             unit['object_sha256'] = file_hash(root / unit['object'])

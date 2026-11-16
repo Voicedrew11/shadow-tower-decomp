@@ -10,7 +10,7 @@ kf build
 artifact chain:
 
 ```text
-C source -> CPPPSX/CC1PSX (gcc-2.7.2-cdk) -> assembly -> ASPSX 2.79D -> Psy-Q OBJ
+C source -> CPPPSX/CC1PSX (gcc-2.7.2-cdk) -> assembly -> ASPSX 2.79D -> DMPSX 3.0 -> Psy-Q OBJ
 Psy-Q OBJ + SDK OBJ/LIB -> PSYLINK 2.73D -> CPE -> CPE2X 1.5 /CA -> PS-X EXE
 ```
 
@@ -24,7 +24,7 @@ DOSBox-X runs every tool at a fixed emulated rate (`DOS_CYCLES` in
 `scripts/psxbuild/sdk.py`), so a DOS tool's uninitialized stack bytes cannot
 vary with host load; `nix flake check` (`executable-determinism`) builds
 every linked program in two trees and requires identical CPE and EXE bytes.
-ASPSX, PSYLINK and CPE2X are all DOS programs; DOSBox-X starts each one
+ASPSX, DMPSX, PSYLINK and CPE2X are all DOS programs; DOSBox-X starts each one
 directly from a batch file, with no extender or loader staged.
 
 A partial image, one whose source units claim some but not all of its

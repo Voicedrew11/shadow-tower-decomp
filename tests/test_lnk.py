@@ -31,6 +31,7 @@ class RecordTests(unittest.TestCase):
 
 
 @unittest.skipUnless(shutil.which('dosbox-x') and os.environ.get('PSYQ_ASPSX')
+                     and os.environ.get('PSYQ_DMPSX')
                      and os.environ.get('PSYQ_PSYLINK'), 'native SDK tools required')
 class NativeRelocationTests(unittest.TestCase):
     def test_negative_addends_match_psylink_and_native_bytes_stay_unchanged(self):

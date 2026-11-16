@@ -9,7 +9,8 @@
   never an identity without its image. `config/images.toml` is the authority.
 - The toolchain is Shadow Tower's own (`docs/toolchain.md`): a native rebuild
   of the SN Systems GCC 2.7.2 compiler (`gcc272cdk-native`), the DOS tools
-  ASPSX 2.79D, PSYLINK 2.73D and CPE2X 1.5 (run in DOSBox-X, no extender
+  ASPSX 2.79D, DMPSX 3.0 (rewrites `INLINE_C.H` GTE placeholders in each
+  object), PSYLINK 2.73D and CPE2X 1.5 (run in DOSBox-X, no extender
   staged), Sony Runtime Library 4.2 (LIBPAD from 4.2.1),
   the 4.5 kit's `NONE3.OBJ` and Release 2.5 `MALLOC.OBJ`; it rebuilds `PSX.EXE`
   byte-identical. Profile `probe-gcc272cdk-o2-g0` is the default; units whose

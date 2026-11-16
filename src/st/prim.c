@@ -144,9 +144,6 @@ void func_80017cc4(u16 i0, u16 i1, u16 i2)
     sp->unk30 = (u_long *)(base + i1);
     sp->unk34 = (u_long *)(base + i2);
     gte_ldsxy3(*sp->unk2C, *sp->unk30, *sp->unk34);
-    /* Not exact: INLINE_C.H's gte_nclip emits the DMPSX placeholder word
-     * 0x0000117f, which retail has as NCLIP (0x4b400006); the build has no
-     * DMPSX step. */
     gte_nclip();
     gte_stopz(&SCRATCHPAD->unk70);
 }

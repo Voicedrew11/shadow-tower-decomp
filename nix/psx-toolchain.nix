@@ -132,7 +132,9 @@ let
       # (`ps1_sdks`, a 1999 floppy-set release of the 1998 tools). Only the
       # files the executable chain needs are taken, all DOS programs:
       # BIN/DOS/ASPSXD.EXE, the DOS build of SDevTC ASPSX 2.79 (1998-05-22,
-      # Watcom C with the FlashTek X-32VM DOS extender bound in); CPE2X 1.5
+      # Watcom C with the FlashTek X-32VM DOS extender bound in);
+      # BIN/DOS/DMPSX.EXE, Sony's DMPSX 3.0 (Borland C++, real mode), which
+      # rewrites INLINE_C.H's GTE placeholder words in an object; CPE2X 1.5
       # (1998-01-23, 16-bit real mode), whose /CA option writes the "North
       # America area" title that every retail header carries; and the
       # NONE3.OBJ overlay startup that begins the text of STR, ST, TITLE,
@@ -154,11 +156,13 @@ let
         for volume in mfdpsx0*.zip; do unzip -qo "$volume"; done
         unar -quiet -force-overwrite -output-directory "$TMPDIR/tree" mfdpsx.rar
         root="$TMPDIR/tree/mfdpsx"
-        install -m 0644 "$root/BIN/DOS/ASPSXD.EXE" "$root/BIN/CPE2X.EXE" "$root/LIB/NONE3.OBJ" "$out/"
+        install -m 0644 "$root/BIN/DOS/ASPSXD.EXE" "$root/BIN/DOS/DMPSX.EXE" "$root/BIN/CPE2X.EXE" \
+          "$root/LIB/NONE3.OBJ" "$out/"
         check() {
           test "$(sha256sum "$out/$1" | cut -d' ' -f1)" = "$2" || { echo "$1: unexpected hash" >&2; exit 1; }
         }
         check ASPSXD.EXE 29018ea7ef45e29d4de598f23b998f3431eacd2f0c5e9c32043212d7f9ba6dcf
+        check DMPSX.EXE d2e4febf99665a4f867d0dc44db4e0e37e1dadb6e0a2256f41d4e7f3cae41ee0
         check CPE2X.EXE 777caca88327cd18d4f92b43439575c1759381690d49f14177805a94b8ecbef6
         check NONE3.OBJ 063efc868877ca84fcbe1fdc3afe9656e6c7933cb68156e08d04d35b76166899
       '';

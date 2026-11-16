@@ -10,6 +10,9 @@ import shutil
 import struct
 import subprocess
 
+from .dmpsx import (dmpsx_command, merge as merge_dmpsx, stage as stage_dmpsx,
+                    verify as verify_dmpsx, view as dmpsx_view)
+
 C_COMPILERS = {
     # Decompals rebuild of the SN Systems GCC 2.7.2 ("cygnus-2.7.2-970404
     # SN32") PSX compiler: the Shadow Tower default.
@@ -78,6 +81,34 @@ def aspsx_command(stem: str, small_data: int) -> str:
     return f'ASPSX.EXE -g -G{small_data} -o {stem}.OBJ {stem}.S > {stem}.TXT'
 
 
+def rewrite_gte(root: Path, stems: tuple[str, ...]) -> dict[str, int]:
+    """Run DMPSX 3.0 on each assembled object; return the GTE words rewritten.
+
+    Psy-Q builds ran DMPSX on the object after `ccpsx -c`. It rewrites
+    INLINE_C.H's placeholder words and must leave an object without them
+    byte-identical; dmpsx.py explains the view it is given and the checks.
+    """
+    if not stems:
+        return {}
+    stage_dmpsx(Path(os.environ['PSYQ_DMPSX']), root)
+    objects = {stem: (root / (stem + '.OBJ')).read_bytes() for stem in stems}
+    for stem, data in objects.items():
+        (root / (stem + '.GTE')).write_bytes(dmpsx_view(data))
+        (root / (stem + '.GTO')).unlink(missing_ok=True)
+    dos_run(root, [dmpsx_command(stem) for stem in stems], 'gte')
+    rewritten = {}
+    for stem, data in objects.items():
+        output = root / (stem + '.GTO')
+        if not output.is_file():
+            raise RuntimeError(f'{stem}.OBJ: DMPSX wrote no {output.name}')
+        result = merge_dmpsx(data, output.read_bytes(), stem + '.OBJ')
+        rewritten[stem] = verify_dmpsx(data, result, stem + '.OBJ')
+        (root / (stem + '.OBJ')).write_bytes(result)
+        for suffix in ('.GTE', '.GTO'):
+            (root / (stem + suffix)).unlink()
+    return rewritten
+
+
 def dos_text(path: Path) -> None:
     # The DOS reader needs CRLF. No directives, instructions or literals change.
     path.write_bytes(path.read_bytes().replace(b'\r\n', b'\n').replace(b'\n', b'\r\n'))
@@ -119,6 +150,7 @@ def compile_c(source: Path, root: Path, stem: str, *, compiler: str,
     return {'object': stem + '.OBJ', 'assembly': stem + '.S', 'log': stem + '.TXT',
             'preprocessor_command': cpp_command, 'compiler_command': cc1_command, **probe,
             'assembler_command': aspsx_command(stem, small_data),
+            'dmpsx_command': dmpsx_command(stem),
             'assembly_sha256': hashlib.sha256(assembly.read_bytes()).hexdigest()}
 
 
@@ -168,4 +200,5 @@ def assemble_many(root: Path, stems: tuple[str, ...], small_data: int) -> dict[s
     dos_run(root, [aspsx_command(stem, small_data) for stem in stems], 'asm')
     for stem in stems:
         tool_succeeded(root, stem + '.TXT', stem + '.OBJ', b'LNK\x02')
+    rewrite_gte(root, stems)
     return {stem: (root / (stem + '.OBJ')).read_bytes() for stem in stems}

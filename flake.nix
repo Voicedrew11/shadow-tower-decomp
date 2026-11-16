@@ -41,6 +41,7 @@
       # The executable chain's SDK inputs, shared by every wrapper and check.
       buildEnvironment = {
         PSYQ_ASPSX = "${psyq45Tools}/ASPSXD.EXE";
+        PSYQ_DMPSX = "${psyq45Tools}/DMPSX.EXE";
         PSYQ_PSYLINK = "${sdevtc24Linker}/PSYLINKD.EXE";
         PSYQ_CPE2X = "${psyq45Tools}/CPE2X.EXE";
         PSYQ_STARTUP_OBJ = "${psyq45Tools}/NONE3.OBJ";
@@ -477,12 +478,12 @@
           ${kfCli}/bin/kf clangd >&2 || echo "[shadow-tower] clangd setup failed; run kf clangd after fixing the reported error" >&2
 
           echo "[shadow-tower] SDK             : Runtime Library 4.2 (LIBPAD from its 4.2.1 patch); NONE3, CPE2X 1.5 from the 4.5 kit" >&2
-          echo "[shadow-tower] SDK tools       : ASPSX 2.79D (4.5 kit), PSYLINK 2.73D (SDevTC 2.4), CPE2X 1.5; all DOS, run in DOSBox-X" >&2
+          echo "[shadow-tower] SDK tools       : ASPSX 2.79D, DMPSX 3.0 (4.5 kit), PSYLINK 2.73D (SDevTC 2.4), CPE2X 1.5; all DOS, run in DOSBox-X" >&2
           echo "[shadow-tower] compiler        : cc1psx-272cdk/cpppsx-272cdk (gcc 2.7.2 SN32 rebuild); probes cc1psx-257, cc1psx-260" >&2
           echo "[shadow-tower] analysis        : ghidra + PSX loader, pyghidra, psy-k, radare2, mipsel binutils" >&2
           echo "[shadow-tower] PSX emulator    : pcsx-redux ${pcsxRedux.version}" >&2
           echo "[shadow-tower] runtime checks  : kf-run-retail / kf-run-candidate" >&2
-          echo "[shadow-tower] executable chain: source -> ASPSX -> PSYLINK -> CPE2X /CA; run kf build" >&2
+          echo "[shadow-tower] executable chain: source -> ASPSX -> DMPSX -> PSYLINK -> CPE2X /CA; run kf build" >&2
           echo "[shadow-tower] objdiff views   : native Psy-Q objects -> ELF reader" >&2
           echo "[shadow-tower] Python RE stack : run 'kf-python-sync' once, then 'splat ...'" >&2
           echo "[shadow-tower] retail census   : kf-retail-validate; kf-function-audit/propose; kf-fid-census; kf-vendored-seed" >&2
@@ -499,7 +500,7 @@
         ];
         GHIDRA_PSX_LOADER = "${ghidraPsxLoader}/lib/ghidra/Ghidra/Extensions/ghidra_psx_ldr";
         PSYQ_SDK = "${psyqSdk}/psyq-3.0";
-        inherit (buildEnvironment) PSYQ_ASPSX PSYQ_PSYLINK PSYQ_CPE2X PSYQ_STARTUP_OBJ
+        inherit (buildEnvironment) PSYQ_ASPSX PSYQ_DMPSX PSYQ_PSYLINK PSYQ_CPE2X PSYQ_STARTUP_OBJ
           PSYQ_MALLOC_OBJ PSYQ_LIB PSYQ_INCLUDE PSYQ_C_INCLUDE;
       } ''
         mkdir project
@@ -517,7 +518,7 @@
       executableDeterminismTests = pkgs.runCommand "kings-field-executable-determinism" {
         nativeBuildInputs = [ analysisPython pkgs.dosbox-x cc1psx272cdk cpppsx272cdk cc1psx257 cpppsx257 ];
         PSYQ_SDK = "${psyqSdk}/psyq-3.0";
-        inherit (buildEnvironment) PSYQ_ASPSX PSYQ_PSYLINK PSYQ_CPE2X PSYQ_STARTUP_OBJ
+        inherit (buildEnvironment) PSYQ_ASPSX PSYQ_DMPSX PSYQ_PSYLINK PSYQ_CPE2X PSYQ_STARTUP_OBJ
           PSYQ_MALLOC_OBJ PSYQ_LIB PSYQ_INCLUDE PSYQ_C_INCLUDE;
       } ''
         export HOME="$TMPDIR/home"
@@ -539,7 +540,7 @@
           analysisPython cc1psx257 cpppsx257 mipsBinutilsAliases
         ];
 
-        inherit (buildEnvironment) PSYQ_ASPSX;
+        inherit (buildEnvironment) PSYQ_ASPSX PSYQ_DMPSX;
       } ''
         mkdir -p project/tests/fixtures project/config
         cp -r ${./scripts} project/scripts
@@ -592,7 +593,7 @@
           cpppsx257
         ];
 
-        inherit (buildEnvironment) PSYQ_ASPSX;
+        inherit (buildEnvironment) PSYQ_ASPSX PSYQ_DMPSX;
       } ''
         mkdir project
         cp -r ${./scripts} project/scripts
