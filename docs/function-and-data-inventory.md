@@ -26,15 +26,17 @@ symbols or pretending that WIP names are original symbols:
 | `STR.EXE` | 322 | 290 | 32 |
 | `ST.EXE` | 1,139 | 457 | 682 |
 | `TITLE.EXE` | 387 | 353 | 34 |
-| `OPTXT.EXE` | 283 | 254 | 29 |
+| `OPTXT.EXE` | 283 | 265 | 18 |
 | `VS.EXE` | 660 | 401 | 259 |
 | `END.EXE` | 276 | 261 | 15 |
 | 36 `FDAT_nnn.BIN` | 943 (23–37 each) | 0 | 943 |
-| **Total** | **4,021** | **2,026** | **1,995** |
+| **Total** | **4,021** | **2,037** | **1,984** |
 
 PSX.EXE `main` is reconstructed (`src/psx/main.c`) with its six data
-identities and reviewed relocations, and END.EXE's fifteen game functions
-(`src/end/main.c`) with its data; every other game identity is
+identities and reviewed relocations, END.EXE's fifteen game functions
+(`src/end/main.c`) with its data, and OPTXT.EXE's eighteen
+(`src/optxt/main.c`, seventeen exact) with its data; every other game
+identity is
 address-only with a candidate signature from the static MIPS live-in
 heuristic (`kf inventory seed`). The tables are WIP, and the rules below
 say how they grew.
@@ -82,7 +84,12 @@ names its evidence and release.
 
 END.EXE `0x8001670c` (`StSetMask`, LIBCD member `C_010`) is too short for a
 function ID or signature; the byte-identical native relink maps it there, so
-its row's confidence is `relink-map-sdk42`.
+its row's confidence is `relink-map-sdk42`. So are eleven OPTXT.EXE LIBPAD
+functions no ID or signature covered: `_padSetVsyncParam`, `_padInitSioMode`,
+`_padWaitRXready` and three local functions of member `PADMAIN`, and the five
+local functions of `PADIF` (0x5e0 bytes of text between `PADCMD` and
+`PADPORTD`), placed by the native relink whose bytes outside
+`play_opening_text` all equal retail.
 
 Not admitted: the overlays' two-instruction default handler (`jr ra; nop`),
 matched only by an old LIBSND `VM_VIB` signature, since the overlays link no
@@ -180,4 +187,4 @@ and hardware references are not auto-admitted.
 
 The inventories are intentionally iterative. Missing functions, relocations,
 data extents, and xrefs can invalidate earlier candidates without invalidating
-the workflow. Only PSX.EXE `main`'s and END.EXE's relocations are admitted so far.
+the workflow. Only PSX.EXE `main`'s, END.EXE's and OPTXT.EXE's relocations are admitted so far.

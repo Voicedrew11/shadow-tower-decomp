@@ -752,35 +752,24 @@ TITLE.EXE	0x800257cc	func_800257cc			unknown	unknown arg0	address-only	candidate
 TITLE.EXE	0x800258a4	func_800258a4			unknown	unknown arg0	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
 TITLE.EXE	0x80025964	func_80025964			unknown	unknown arg0	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
 TITLE.EXE	0x800259f0	func_800259f0			unknown	unknown arg0	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-OPTXT.EXE	0x80011f8c	func_80011f8c			unknown	unknown arg0;unknown arg1;unknown arg2;unknown arg3	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-OPTXT.EXE	0x80012168	func_80012168			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-OPTXT.EXE	0x800121bc	func_800121bc			unknown	unknown arg0;unknown arg1;unknown arg2	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-OPTXT.EXE	0x80012290	func_80012290			unknown	unknown arg0;unknown arg1;unknown arg2	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-OPTXT.EXE	0x80012348	func_80012348			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-OPTXT.EXE	0x800123e4	func_800123e4			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-OPTXT.EXE	0x80012460	func_80012460			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-OPTXT.EXE	0x800124c8	func_800124c8			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-OPTXT.EXE	0x80012528	func_80012528			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-OPTXT.EXE	0x80012608	func_80012608			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-OPTXT.EXE	0x800126a0	func_800126a0			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-OPTXT.EXE	0x80012710	func_80012710			unknown	unknown arg0	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-OPTXT.EXE	0x800127e8	func_800127e8			unknown	unknown arg0;unknown arg1;unknown arg2	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-OPTXT.EXE	0x80012918	func_80012918			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-OPTXT.EXE	0x80012a08	func_80012a08			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-OPTXT.EXE	0x80012b78	func_80012b78			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-OPTXT.EXE	0x80012d04	func_80012d04			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-OPTXT.EXE	0x80012f10	func_80012f10			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-OPTXT.EXE	0x8001b988	func_8001b988			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-OPTXT.EXE	0x8001b9b4	func_8001b9b4			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-OPTXT.EXE	0x8001ba1c	func_8001ba1c			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-OPTXT.EXE	0x8001bcac	func_8001bcac			unknown	unknown *object	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-OPTXT.EXE	0x8001bec0	func_8001bec0			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-OPTXT.EXE	0x8001c424	func_8001c424			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-OPTXT.EXE	0x8001cdd0	func_8001cdd0			unknown	unknown arg0	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-OPTXT.EXE	0x8001ce10	func_8001ce10			unknown	unknown arg0	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-OPTXT.EXE	0x8001cee8	func_8001cee8			unknown	unknown arg0	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-OPTXT.EXE	0x8001cfa8	func_8001cfa8			unknown	unknown arg0	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-OPTXT.EXE	0x8001d034	func_8001d034			unknown	unknown arg0	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+OPTXT.EXE	0x80011f8c	load_tims			void	u_long *addr;VramOffset *pixel_offset;VramOffset *clut_offset;int absolute	supported	proven	asm;callers;src/optxt/main.c optxt.main	LoadImage of the CLUT and pixel blocks of each TIM in a run of TIM files
+OPTXT.EXE	0x80012168	clear_vram			void		supported	proven	asm;callers;src/optxt/main.c optxt.main	clears all of VRAM to black
+OPTXT.EXE	0x800121bc	cd_read_sectors			void	CdlLOC *loc;u_long *buf;int sectors	supported	proven	asm;callers;src/optxt/main.c optxt.main	double-speed CdRead of a sector count, retried until complete
+OPTXT.EXE	0x80012290	load_st_file			int	u_long *buf;char *name;int size	supported	proven	asm;callers;src/optxt/main.c optxt.main	reads \ST\<name>;1 into buf (whole file when size is 0)
+OPTXT.EXE	0x80012348	play_opening_xa			void		supported	proven	asm;callers;src/optxt/main.c optxt.main	starts \ST\OPTXT\OPTXT.XA file 1 channel 0 as XA audio (CdlReadS)
+OPTXT.EXE	0x800123e4	pad_wait_stable			void		supported	proven	asm;callers;src/optxt/main.c optxt.main	polls PadGetState(0) up to 61 times until stable or a plain pad
+OPTXT.EXE	0x80012460	pad_set_act_align			void		supported	proven	asm;callers;src/optxt/main.c optxt.main	PadSetActAlign of port 1 from the actuator count
+OPTXT.EXE	0x800124c8	pad_check_actuators			void		supported	proven	asm;callers;src/optxt/main.c optxt.main	reads the actuator count of a stable pad and aligns its actuators
+OPTXT.EXE	0x80012528	pad_update_state			void		supported	proven	asm;callers;src/optxt/main.c optxt.main	tracks PadGetState(0): disconnection, reconnection and actuator realignment
+OPTXT.EXE	0x80012608	pad_init			void		supported	proven	asm;callers;src/optxt/main.c optxt.main	PadInitDirect, PadSetAct, PadStartCom and the first state poll
+OPTXT.EXE	0x800126a0	pad_read			void		supported	proven	asm;callers;src/optxt/main.c optxt.main	updates the pad state and the held/new raw button words
+OPTXT.EXE	0x80012710	draw_fade			void	int level	supported	proven	asm;callers;src/optxt/main.c optxt.main	subtractive full-screen POLY_F4 darkening by level
+OPTXT.EXE	0x800127e8	draw_text_page			void	int page;int y;int level	supported	proven	asm;callers;src/optxt/main.c optxt.main	draws one 256x240 text page at screen y with brightness level
+OPTXT.EXE	0x80012918	scroll_pages_1			void		supported	proven	asm;callers;src/optxt/main.c optxt.main	opening part 1: text pages 0 and 1 scroll over 720 frames
+OPTXT.EXE	0x80012a08	scroll_pages_2			void		supported	proven	asm;callers;src/optxt/main.c optxt.main	opening part 2: pages 2 and 3 over the picture at (640, 256), 920 frames
+OPTXT.EXE	0x80012b78	scroll_pages_3			void		supported	proven	asm;callers;src/optxt/main.c optxt.main	opening part 3: the picture fades, pages 4 and 5 scroll, 900 frames
+OPTXT.EXE	0x80012d04	play_opening_text			void		supported	proven	asm;callers;src/optxt/main.c optxt.main	loads OPTXT.MIC, starts the XA and runs the opening text until its end or START
+OPTXT.EXE	0x80012f10	main			int		supported	proven	asm;callers;src/optxt/main.c optxt.main	called by NONE3 startup; opening text, then next program ST.EXE
 VS.EXE	0x800129bc	func_800129bc			void	unknown arg0	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
 VS.EXE	0x800129e8	func_800129e8			unknown	unknown arg0	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
 VS.EXE	0x80012a70	func_80012a70			unknown	unknown arg0	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
