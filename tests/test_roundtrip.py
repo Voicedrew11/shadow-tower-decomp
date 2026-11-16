@@ -269,6 +269,22 @@ if __name__ == '__main__':
     unittest.main()
 
 
+class OverlayAddressBookTests(unittest.TestCase):
+    def test_overlay_externals_resolve_to_host_identities_outside_its_window(self):
+        from scripts.kf.retail import IMAGE_LAYOUTS
+        from scripts.kf.roundtrip import address_book
+
+        book = address_book("FDAT_002.BIN")
+        self.assertEqual(book["func_801eb7ac"], {0x801EB7AC})
+        # LIBGTE rcos is linked in ST.EXE; the overlay calls it there.
+        self.assertEqual(book["rcos"], {0x800744C4})
+        layout = IMAGE_LAYOUTS["FDAT_002.BIN"]
+        host = address_book("ST.EXE")
+        for name, addresses in book.items():
+            if name in host and name != "func_801eb7ac":
+                self.assertFalse(any(layout.contains(va) for va in addresses), name)
+
+
 class LinkLabelTests(unittest.TestCase):
     def test_labels_are_image_local_and_unique(self):
         with tempfile.TemporaryDirectory() as directory:

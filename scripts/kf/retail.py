@@ -141,6 +141,21 @@ def _load_gp(path: Path) -> dict[str, int]:
 
 
 IMAGE_GP = _load_gp(IMAGES_CONFIG)
+
+
+def referent_image(image: str, va: int) -> str:
+    """The image whose inventories own an address that `image`'s code references.
+
+    An overlay extends its host program at run time: its calls and data
+    references outside its own load window reach the host's functions, data
+    and BSS (an FDAT overlay calls into ST.EXE). Those referents keep the
+    host's identities. Every other address, and every address seen from a
+    root program, belongs to the referencing image itself.
+    """
+    source = OVERLAY_SOURCES.get(image)
+    if source is None or IMAGE_LAYOUTS[image].contains(va):
+        return image
+    return source.host
 IMAGE_ORDER = {image: index for index, image in enumerate(IMAGE_LAYOUTS)}
 IMAGE_KEYS = tuple(image_key(image) for image in IMAGE_LAYOUTS)
 IMAGE_NAMES = {image_key(image): image for image in IMAGE_LAYOUTS}

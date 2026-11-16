@@ -27,7 +27,9 @@ from scripts.kf.allocation_notes import read_requests
 from scripts.kf.delink import load_catalog, sanitize_symbol
 from scripts.kf.manifest import Unit, load as load_manifest
 from scripts.kf.paths import BUILD, RETAIL_CONFIG
-from scripts.kf.retail import IMAGE_GP, IMAGE_KEYS, IMAGE_LAYOUTS, IMAGE_NAMES, read_tsv
+from scripts.kf.retail import (
+    IMAGE_GP, IMAGE_KEYS, IMAGE_LAYOUTS, IMAGE_NAMES, OVERLAY_SOURCES, read_tsv,
+)
 from scripts.kf.sema.image import RetailImage
 
 
@@ -68,7 +70,10 @@ class UnitResult:
 
 
 def address_book(image: str, config_dir: Path = RETAIL_CONFIG) -> dict[str, set[int]]:
-    """Image-local input identities only; never infer S from delinker output."""
+    """Input identities only; never infer S from delinker output.
+
+    An overlay also sees its host's identities outside its own load window.
+    """
     book: dict[str, set[int]] = defaultdict(set)
     catalog = load_catalog(config_dir)
     for item in (*catalog.functions[image], *catalog.data[image]):
@@ -80,6 +85,14 @@ def address_book(image: str, config_dir: Path = RETAIL_CONFIG) -> dict[str, set[
             book[sanitize_symbol(row["name"], f"DAT_{va:08x}")].add(va)
     for name, va in link_labels(image, config_dir).items():
         book[name].add(va)
+    source = OVERLAY_SOURCES.get(image)
+    if source is not None:
+        # An overlay's external references outside its own window resolve to
+        # its host's identities (retail.referent_image); its own names win.
+        layout = IMAGE_LAYOUTS[image]
+        for name, addresses in address_book(source.host, config_dir).items():
+            if name not in book and not any(layout.contains(va) for va in addresses):
+                book[name] = set(addresses)
     return dict(book)
 
 

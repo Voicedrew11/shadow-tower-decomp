@@ -11,7 +11,7 @@ import re
 import struct
 from dataclasses import dataclass
 
-from scripts.kf.retail import IMAGE_GP, parse_int
+from scripts.kf.retail import IMAGE_GP, parse_int, referent_image
 
 
 SIGNED_LOW_OPCODES = {
@@ -238,7 +238,8 @@ def validate_relocation(
             raise ValueError("instruction-opcode-mismatch")
         if decode_mips26_target(site, word) != target:
             raise ValueError("decoded-target-mismatch")
-        target_function = catalog.function_starts[function.image].get(target)
+        target_function = catalog.function_starts[
+            referent_image(function.image, target)].get(target)
         if not function.contains(target) and target_function is None and policy != "all":
             raise ValueError("target-is-not-a-function-start")
         return RelocationValidation(site, target, offset, word=word)

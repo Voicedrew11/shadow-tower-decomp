@@ -156,6 +156,29 @@ class MipsElfTests(unittest.TestCase):
         self.assertEqual(rewritten_hi & 0xFFFF, 1)
         self.assertEqual(rewritten_lo & 0xFFFF, 0x9234)
 
+    def test_overlay_call_into_its_host_validates_against_host_starts(self) -> None:
+        from types import SimpleNamespace
+
+        from scripts.kf.relocations import validate_relocation
+
+        overlay = Function("FDAT_002.BIN", 0x801EB880, 8, 8, 1, "func_801eb880",
+                           "test", "test")
+        host_callee = Function("ST.EXE", 0x800744C4, 0xA0, 0xA0, 1, "rcos", "test", "test")
+        word = 0x0C000000 | (0x800744C4 & 0x0FFFFFFF) >> 2
+        blob = struct.pack("<2I", word, 0)
+        row = {"image": "FDAT_002.BIN", "site_va": "0x801eb880", "paired_site_va": "",
+               "kind": "mips26", "channel": "reachable-code", "target_va": "0x800744c4",
+               "target_region": "load", "target_name": "", "opcode": "jal",
+               "status": "reviewed", "confidence": "test", "provenance": "test"}
+        hosted = SimpleNamespace(function_starts={"FDAT_002.BIN": {},
+                                                  "ST.EXE": {0x800744C4: host_callee}})
+        self.assertEqual(validate_relocation(blob, overlay, row, hosted, "safe").target,
+                         0x800744C4)
+        # The same address is not a function start of the overlay itself.
+        alone = SimpleNamespace(function_starts={"FDAT_002.BIN": {}, "ST.EXE": {}})
+        with self.assertRaisesRegex(ValueError, "target-is-not-a-function-start"):
+            validate_relocation(blob, overlay, row, alone, "safe")
+
     def test_local_jump_uses_text_section_relocation(self) -> None:
         function = Function(
             "GAME.EXE", 0x80010000, 16, 16, 1, "test", "test", "test"
