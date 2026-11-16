@@ -101,7 +101,7 @@ typedef struct {
     u_long *prim;        /* 0x10: next free primitive word */
     u_long *prim_end;    /* 0x14: end of the primitive buffer */
     u8 unk18[4];         /* 0x18 */
-    void *faces;         /* 0x1c: face cursor the renderers hand back */
+    u8 *faces;           /* 0x1c: face cursor the renderers hand back */
     MeshHeader *header;  /* 0x20 */
     u8 *normals;         /* 0x24 */
     u8 unk28[0x18];      /* 0x28 */
@@ -132,28 +132,28 @@ typedef struct {
 #define mesh_add_prim(ot, p, len) (mesh_set_tag(ot, p, len), mesh_set_ot(ot, p))
 
 /* Unresolved ST.EXE global at 0x8015d090, a large .bss object of which the
- * renderers and func_8001c60c read only fields near its end (WIP view). */
+ * renderers and vis_cull_by_range read only fields near its end (WIP view). */
 typedef struct {
     u8 unk0[0x1edf8];
     int tint_level;      /* 0x1edf8 */
     u8 render_mode;      /* 0x1edfc */
     u8 unk1edfd[3];
-    u_long unk1ee00;     /* 0x1ee00: func_8001c60c's near range (<< 11) */
+    u_long unk1ee00;     /* 0x1ee00: vis_cull_by_range's near range (<< 11) */
     u_long unk1ee04;     /* 0x1ee04: its middle range (<< 11) */
     u8 *unk1ee08;        /* 0x1ee08: halfword at +0x6a read */
     u8 unk1ee0c[9];
     u8 unk1ee15;         /* 0x1ee15 */
     u8 unk1ee16[2];
-} Dat8015d090;
+} WorldState;
 
-extern Dat8015d090 DAT_8015d090;
+extern WorldState world_state;
 
 /* Render-mode byte bits: a tint (and its callback), and its strength scale. */
-#define MESH_MODE (DAT_8015d090.render_mode)
+#define MESH_MODE (world_state.render_mode)
 #define MESH_TINT_A 2
 #define MESH_TINT_B 4
 #define MESH_TINT_SLOW 0x10
-#define MESH_TINT_LEVEL (DAT_8015d090.tint_level)
+#define MESH_TINT_LEVEL (world_state.tint_level)
 
 /* Render-mode bit: light with NCCS (no depth cueing). */
 #define MESH_NO_DEPTH_CUE 0x10
@@ -163,5 +163,25 @@ typedef union {
     DIVPOLYGON3 d3;
     DIVPOLYGON4 d4;
 } MeshDiv;
+
+/* Tint callbacks (each renderer has its own pair; the FT3 pair is band B's). */
+void mesh_ft3_tint_a(CVECTOR *rgb);
+void mesh_ft3_tint_b(CVECTOR *rgb);
+
+void mesh_draw_ft3(int count, MeshFaceFT3 *face, u_long *ot, int flags);
+void mesh_draw_ft4(int count, MeshFaceFT4 *face, u_long *ot, int flags);
+void mesh_draw_gt3(int count, MeshFaceGT3 *face, u_long *ot, int flags);
+void mesh_draw_gt4(int count, MeshFaceGT4 *face, u_long *ot, int flags);
+void mesh_draw_part(u_short part, u_int flags);
+void mesh_draw_ft3_nccs(int count, MeshFaceFT3 *face, u_long *ot, int flags);
+void mesh_draw_ft4_nccs(int count, MeshFaceFT4 *face, u_long *ot, int flags);
+void mesh_draw_gt3_nccs(int count, MeshFaceGT3 *face, u_long *ot, int flags);
+void mesh_draw_gt4_nccs(int count, MeshFaceGT4 *face, u_long *ot, int flags);
+void mesh_draw_part_nccs(u_short part, u_int flags);
+void mesh_div_draw_ft3(int count, MeshFaceFT3 *face, u_long *ot, int flags);
+void mesh_div_draw_ft4(int count, MeshFaceFT4 *face, u_long *ot, int flags);
+void mesh_div_draw_gt3(int count, MeshFaceGT3 *face, u_long *ot, int flags);
+void mesh_div_draw_gt4(int count, MeshFaceGT4 *face, u_long *ot, int flags);
+void mesh_div_draw_part(u_short part, u_int flags);
 
 #endif

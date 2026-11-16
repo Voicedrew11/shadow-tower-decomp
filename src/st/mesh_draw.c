@@ -4,7 +4,7 @@
  * averaged OT depth clipped to the scratchpad's near/far range, and NCDS/NCDT
  * lighting with depth cueing. When the render-mode byte asks for a tint, the
  * lit colours go through one of the two tint callbacks linked before each
- * renderer. func_800192d4 sets up a part and runs the four renderers.
+ * renderer. mesh_draw_part sets up a part and runs the four renderers.
  */
 #include <kf/lib/address.h>
 #include <kf/lib/types.h>
@@ -14,12 +14,8 @@
 #include <INLINE_C.H>
 #include <st/mesh.h>
 
-/* The FT3 renderer's tint callbacks (band B, 0x80018440 and 0x80018480). */
-extern void func_80018440(CVECTOR *rgb);
-extern void func_80018480(CVECTOR *rgb);
-
 ADDRESS(0x800184c4, 0x2e0)
-void func_800184c4(int count, MeshFaceFT3 *face, u_long *ot, int flags)
+void mesh_draw_ft3(int count, MeshFaceFT3 *face, u_long *ot, int flags)
 {
     MeshScratch *sp = MESH_SCRATCH;
     u_long *start;
@@ -36,9 +32,9 @@ void func_800184c4(int count, MeshFaceFT3 *face, u_long *ot, int flags)
     start = sp->prim;
     sp->face_count += count;
     if (MESH_MODE & MESH_TINT_A) {
-        tint = func_80018440;
+        tint = mesh_ft3_tint_a;
     } else if (MESH_MODE & MESH_TINT_B) {
-        tint = func_80018480;
+        tint = mesh_ft3_tint_b;
     }
     while ((t = count, count = count - 1, t)) {
         v0 = (MeshVertex *)(sp->vertices + face->i0);
@@ -71,12 +67,12 @@ void func_800184c4(int count, MeshFaceFT3 *face, u_long *ot, int flags)
         }
         face = next;
     }
-    sp->faces = face;
+    sp->faces = (u8 *)face;
     sp->prim_count += (sp->prim - start) / 8;
 }
 
 ADDRESS(0x800187a4, 0x40)
-void func_800187a4(CVECTOR *rgb)
+void mesh_ft4_tint_a(CVECTOR *rgb)
 {
     if (rgb->b > 85) {
         rgb->b = 85;
@@ -86,7 +82,7 @@ void func_800187a4(CVECTOR *rgb)
 }
 
 ADDRESS(0x800187e4, 0x44)
-void func_800187e4(CVECTOR *rgb)
+void mesh_ft4_tint_b(CVECTOR *rgb)
 {
     if (rgb->r > 85) {
         rgb->r = 85;
@@ -96,7 +92,7 @@ void func_800187e4(CVECTOR *rgb)
 }
 
 ADDRESS(0x80018828, 0x2f4)
-void func_80018828(int count, MeshFaceFT4 *face, u_long *ot, int flags)
+void mesh_draw_ft4(int count, MeshFaceFT4 *face, u_long *ot, int flags)
 {
     MeshScratch *sp = MESH_SCRATCH;
     u_long *start;
@@ -114,9 +110,9 @@ void func_80018828(int count, MeshFaceFT4 *face, u_long *ot, int flags)
     start = sp->prim;
     sp->face_count += count;
     if (MESH_MODE & MESH_TINT_A) {
-        tint = func_800187a4;
+        tint = mesh_ft4_tint_a;
     } else if (MESH_MODE & MESH_TINT_B) {
-        tint = func_800187e4;
+        tint = mesh_ft4_tint_b;
     }
     while ((t = count, count = count - 1, t)) {
         v0 = (MeshVertex *)(sp->vertices + face->i0);
@@ -152,12 +148,12 @@ void func_80018828(int count, MeshFaceFT4 *face, u_long *ot, int flags)
         }
         face = next;
     }
-    sp->faces = face;
+    sp->faces = (u8 *)face;
     sp->prim_count += (sp->prim - start) / 10;
 }
 
 ADDRESS(0x80018b1c, 0x40)
-void func_80018b1c(CVECTOR *rgb)
+void mesh_gt3_tint_a(CVECTOR *rgb)
 {
     if (rgb->b > 85) {
         rgb->b = 85;
@@ -167,7 +163,7 @@ void func_80018b1c(CVECTOR *rgb)
 }
 
 ADDRESS(0x80018b5c, 0x44)
-void func_80018b5c(CVECTOR *rgb)
+void mesh_gt3_tint_b(CVECTOR *rgb)
 {
     if (rgb->r > 85) {
         rgb->r = 85;
@@ -177,7 +173,7 @@ void func_80018b5c(CVECTOR *rgb)
 }
 
 ADDRESS(0x80018ba0, 0x324)
-void func_80018ba0(int count, MeshFaceGT3 *face, u_long *ot, int flags)
+void mesh_draw_gt3(int count, MeshFaceGT3 *face, u_long *ot, int flags)
 {
     MeshScratch *sp = MESH_SCRATCH;
     u_long *start;
@@ -194,9 +190,9 @@ void func_80018ba0(int count, MeshFaceGT3 *face, u_long *ot, int flags)
     start = sp->prim;
     sp->face_count += count;
     if (MESH_MODE & MESH_TINT_A) {
-        tint = func_80018b1c;
+        tint = mesh_gt3_tint_a;
     } else if (MESH_MODE & MESH_TINT_B) {
-        tint = func_80018b5c;
+        tint = mesh_gt3_tint_b;
     }
     while ((t = count, count = count - 1, t)) {
         v0 = (MeshVertex *)(sp->vertices + face->i0);
@@ -231,12 +227,12 @@ void func_80018ba0(int count, MeshFaceGT3 *face, u_long *ot, int flags)
         }
         face = next;
     }
-    sp->faces = face;
+    sp->faces = (u8 *)face;
     sp->prim_count += (sp->prim - start) / 10;
 }
 
 ADDRESS(0x80018ec4, 0x40)
-void func_80018ec4(CVECTOR *rgb)
+void mesh_gt4_tint_a(CVECTOR *rgb)
 {
     if (rgb->b > 85) {
         rgb->b = 85;
@@ -246,7 +242,7 @@ void func_80018ec4(CVECTOR *rgb)
 }
 
 ADDRESS(0x80018f04, 0x44)
-void func_80018f04(CVECTOR *rgb)
+void mesh_gt4_tint_b(CVECTOR *rgb)
 {
     if (rgb->r > 85) {
         rgb->r = 85;
@@ -256,7 +252,7 @@ void func_80018f04(CVECTOR *rgb)
 }
 
 ADDRESS(0x80018f48, 0x38c)
-void func_80018f48(int count, MeshFaceGT4 *face, u_long *ot, int flags)
+void mesh_draw_gt4(int count, MeshFaceGT4 *face, u_long *ot, int flags)
 {
     MeshScratch *sp = MESH_SCRATCH;
     u_long *start;
@@ -274,9 +270,9 @@ void func_80018f48(int count, MeshFaceGT4 *face, u_long *ot, int flags)
     start = sp->prim;
     sp->face_count += count;
     if (MESH_MODE & MESH_TINT_A) {
-        tint = func_80018ec4;
+        tint = mesh_gt4_tint_a;
     } else if (MESH_MODE & MESH_TINT_B) {
-        tint = func_80018f04;
+        tint = mesh_gt4_tint_b;
     }
     while ((t = count, count = count - 1, t)) {
         v0 = (MeshVertex *)(sp->vertices + face->i0);
@@ -320,13 +316,13 @@ void func_80018f48(int count, MeshFaceGT4 *face, u_long *ot, int flags)
         }
         face = next;
     }
-    sp->faces = face;
+    sp->faces = (u8 *)face;
     /* 12 words per primitive, although a POLY_GT4 is 13. */
     sp->prim_count += (sp->prim - start) / 12;
 }
 
 ADDRESS(0x800192d4, 0x1f0)
-void func_800192d4(u_short part, u_int flags)
+void mesh_draw_part(u_short part, u_int flags)
 {
     MeshScratch *sp = MESH_SCRATCH;
     int mode;
@@ -352,8 +348,8 @@ void func_800192d4(u_short part, u_int flags)
         gte_SetFarColor(5, 5, 5);
     }
     sp->faces = sp->model + 12 + sp->header->faces;
-    func_800184c4(sp->header->n_ft3, sp->faces, sp->ot, mode);
-    func_80018828(sp->header->n_ft4, sp->faces, sp->ot, mode);
-    func_80018ba0(sp->header->n_gt3, sp->faces, sp->ot, mode);
-    func_80018f48(sp->header->n_gt4, sp->faces, sp->ot, mode);
+    mesh_draw_ft3(sp->header->n_ft3, (MeshFaceFT3 *)sp->faces, sp->ot, mode);
+    mesh_draw_ft4(sp->header->n_ft4, (MeshFaceFT4 *)sp->faces, sp->ot, mode);
+    mesh_draw_gt3(sp->header->n_gt3, (MeshFaceGT3 *)sp->faces, sp->ot, mode);
+    mesh_draw_gt4(sp->header->n_gt4, (MeshFaceGT4 *)sp->faces, sp->ot, mode);
 }

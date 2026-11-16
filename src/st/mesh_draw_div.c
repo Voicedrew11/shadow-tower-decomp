@@ -4,7 +4,7 @@
  * subdivision (one to three levels by area), and the lighting is NCDS with
  * depth cueing or, when the render mode asks for it, plain NCCS. Each
  * renderer has its own pair of tint callbacks linked before it.
- * func_8001bf10 (st.mesh_draw_div_setup) runs them.
+ * mesh_div_draw_part (st.mesh_draw_div_setup) runs them.
  */
 #include <kf/lib/address.h>
 #include <kf/lib/types.h>
@@ -15,7 +15,7 @@
 #include <st/mesh.h>
 
 ADDRESS(0x80019fb4, 0x40)
-void func_80019fb4(CVECTOR *rgb)
+void mesh_div_ft3_tint_a(CVECTOR *rgb)
 {
     if (rgb->b > 85) {
         rgb->b = 85;
@@ -25,7 +25,7 @@ void func_80019fb4(CVECTOR *rgb)
 }
 
 ADDRESS(0x80019ff4, 0x44)
-void func_80019ff4(CVECTOR *rgb)
+void mesh_div_ft3_tint_b(CVECTOR *rgb)
 {
     if (rgb->r > 85) {
         rgb->r = 85;
@@ -35,7 +35,7 @@ void func_80019ff4(CVECTOR *rgb)
 }
 
 ADDRESS(0x8001a038, 0x630)
-void func_8001a038(int count, MeshFaceFT3 *face, u_long *ot, int flags)
+void mesh_div_draw_ft3(int count, MeshFaceFT3 *face, u_long *ot, int flags)
 {
     MeshScratch *sp = MESH_SCRATCH;
     MeshDiv div;
@@ -53,9 +53,9 @@ void func_8001a038(int count, MeshFaceFT3 *face, u_long *ot, int flags)
     start = sp->prim;
     sp->face_count += count;
     if (MESH_MODE & MESH_TINT_A) {
-        tint = func_80019fb4;
+        tint = mesh_div_ft3_tint_a;
     } else if (MESH_MODE & MESH_TINT_B) {
-        tint = func_80019ff4;
+        tint = mesh_div_ft3_tint_b;
     }
     while ((t = count, count = count - 1, t)) {
         v0 = (MeshVertex *)(sp->vertices + face->i0);
@@ -144,12 +144,12 @@ void func_8001a038(int count, MeshFaceFT3 *face, u_long *ot, int flags)
         }
         face = next;
     }
-    sp->faces = face;
+    sp->faces = (u8 *)face;
     sp->prim_count += (sp->prim - start) / 8;
 }
 
 ADDRESS(0x8001a668, 0x40)
-void func_8001a668(CVECTOR *rgb)
+void mesh_div_ft4_tint_a(CVECTOR *rgb)
 {
     if (rgb->b > 85) {
         rgb->b = 85;
@@ -159,7 +159,7 @@ void func_8001a668(CVECTOR *rgb)
 }
 
 ADDRESS(0x8001a6a8, 0x44)
-void func_8001a6a8(CVECTOR *rgb)
+void mesh_div_ft4_tint_b(CVECTOR *rgb)
 {
     if (rgb->r > 85) {
         rgb->r = 85;
@@ -169,7 +169,7 @@ void func_8001a6a8(CVECTOR *rgb)
 }
 
 ADDRESS(0x8001a6ec, 0x70c)
-void func_8001a6ec(int count, MeshFaceFT4 *face, u_long *ot, int flags)
+void mesh_div_draw_ft4(int count, MeshFaceFT4 *face, u_long *ot, int flags)
 {
     MeshScratch *sp = MESH_SCRATCH;
     MeshDiv div;
@@ -188,9 +188,9 @@ void func_8001a6ec(int count, MeshFaceFT4 *face, u_long *ot, int flags)
     start = sp->prim;
     sp->face_count += count;
     if (MESH_MODE & MESH_TINT_A) {
-        tint = func_8001a668;
+        tint = mesh_div_ft4_tint_a;
     } else if (MESH_MODE & MESH_TINT_B) {
-        tint = func_8001a6a8;
+        tint = mesh_div_ft4_tint_b;
     }
     while ((t = count, count = count - 1, t)) {
         v0 = (MeshVertex *)(sp->vertices + face->i0);
@@ -290,12 +290,12 @@ void func_8001a6ec(int count, MeshFaceFT4 *face, u_long *ot, int flags)
         }
         face = next;
     }
-    sp->faces = face;
+    sp->faces = (u8 *)face;
     sp->prim_count += (sp->prim - start) / 10;
 }
 
 ADDRESS(0x8001adf8, 0x40)
-void func_8001adf8(CVECTOR *rgb)
+void mesh_div_gt3_tint_a(CVECTOR *rgb)
 {
     if (rgb->b > 85) {
         rgb->b = 85;
@@ -305,7 +305,7 @@ void func_8001adf8(CVECTOR *rgb)
 }
 
 ADDRESS(0x8001ae38, 0x44)
-void func_8001ae38(CVECTOR *rgb)
+void mesh_div_gt3_tint_b(CVECTOR *rgb)
 {
     if (rgb->r > 85) {
         rgb->r = 85;
@@ -315,7 +315,7 @@ void func_8001ae38(CVECTOR *rgb)
 }
 
 ADDRESS(0x8001ae7c, 0x6dc)
-void func_8001ae7c(int count, MeshFaceGT3 *face, u_long *ot, int flags)
+void mesh_div_draw_gt3(int count, MeshFaceGT3 *face, u_long *ot, int flags)
 {
     POLY_GT3 *p;
     int t;
@@ -333,9 +333,9 @@ void func_8001ae7c(int count, MeshFaceGT3 *face, u_long *ot, int flags)
     start = sp->prim;
     sp->face_count += count;
     if (MESH_MODE & MESH_TINT_A) {
-        tint = func_8001adf8;
+        tint = mesh_div_gt3_tint_a;
     } else if (MESH_MODE & MESH_TINT_B) {
-        tint = func_8001ae38;
+        tint = mesh_div_gt3_tint_b;
     }
     while ((t = count, count = count - 1, t)) {
         v0 = (MeshVertex *)(sp->vertices + face->i0);
@@ -429,12 +429,12 @@ void func_8001ae7c(int count, MeshFaceGT3 *face, u_long *ot, int flags)
         }
         face = next;
     }
-    sp->faces = face;
+    sp->faces = (u8 *)face;
     sp->prim_count += (sp->prim - start) / 10;
 }
 
 ADDRESS(0x8001b558, 0x40)
-void func_8001b558(CVECTOR *rgb)
+void mesh_div_gt4_tint_a(CVECTOR *rgb)
 {
     if (rgb->b > 85) {
         rgb->b = 85;
@@ -444,7 +444,7 @@ void func_8001b558(CVECTOR *rgb)
 }
 
 ADDRESS(0x8001b598, 0x44)
-void func_8001b598(CVECTOR *rgb)
+void mesh_div_gt4_tint_b(CVECTOR *rgb)
 {
     if (rgb->r > 85) {
         rgb->r = 85;
@@ -461,7 +461,7 @@ void func_8001b598(CVECTOR *rgb)
  * round. Same size; every other instruction agrees.
  */
 ADDRESS(0x8001b5dc, 0x934)
-void func_8001b5dc(int count, MeshFaceGT4 *face, u_long *ot, int flags)
+void mesh_div_draw_gt4(int count, MeshFaceGT4 *face, u_long *ot, int flags)
 {
     MeshScratch *sp = MESH_SCRATCH;
     MeshDiv div;
@@ -480,9 +480,9 @@ void func_8001b5dc(int count, MeshFaceGT4 *face, u_long *ot, int flags)
     start = sp->prim;
     sp->face_count += count;
     if (MESH_MODE & MESH_TINT_A) {
-        tint = func_8001b558;
+        tint = mesh_div_gt4_tint_a;
     } else if (MESH_MODE & MESH_TINT_B) {
-        tint = func_8001b598;
+        tint = mesh_div_gt4_tint_b;
     }
     while ((t = count, count = count - 1, t)) {
         v0 = (MeshVertex *)(sp->vertices + face->i0);
@@ -605,7 +605,7 @@ void func_8001b5dc(int count, MeshFaceGT4 *face, u_long *ot, int flags)
         }
         face = next;
     }
-    sp->faces = face;
+    sp->faces = (u8 *)face;
     /* 12 words per primitive, although a POLY_GT4 is 13. */
     sp->prim_count += (sp->prim - start) / 12;
 }

@@ -1,7 +1,7 @@
 /*
- * ST.EXE visible-id culling (WIP module): func_8001c4c8 measures one
+ * ST.EXE visible-id culling (WIP module): vis_measure_position measures one
  * position (in the scratchpad) against the viewer, with an optional
- * side-plane rejection; func_8001c60c drops visible ids that are out of
+ * side-plane rejection; vis_cull_by_range drops visible ids that are out of
  * range and flags the near ones.
  */
 #include <kf/lib/address.h>
@@ -18,10 +18,10 @@
  * the final squares' temporaries differently.
  */
 ADDRESS(0x8001c4c8, 0x144)
-int func_8001c4c8(void)
+int vis_measure_position(void)
 {
     VisScratch *sp = VIS_SCRATCH;
-    Dat80198f28 *cam = &DAT_80198f28;
+    Viewer *cam = &viewer;
     int x;
     int z;
     int y;
@@ -50,10 +50,10 @@ int func_8001c4c8(void)
  * agrees.
  */
 ADDRESS(0x8001c60c, 0x1f4)
-void func_8001c60c(void)
+void vis_cull_by_range(void)
 {
     VisScratch *sp = VIS_SCRATCH;
-    Dat8017bed0 *rec;
+    VisRecord *rec;
     int range_near;
     int range_mid;
     int range_far;
@@ -61,23 +61,23 @@ void func_8001c60c(void)
     int i;
     int k;
 
-    range_near = (DAT_8015d090.unk1ee00 >> 11) * (DAT_8015d090.unk1ee00 >> 11);
-    range_mid = (DAT_8015d090.unk1ee04 >> 11) * (DAT_8015d090.unk1ee04 >> 11);
-    i = DAT_801b5948.n_visible;
-    range_far = *(short *)(DAT_8015d090.unk1ee08 + 0x6a) / 2048 + 2;
+    range_near = (world_state.unk1ee00 >> 11) * (world_state.unk1ee00 >> 11);
+    range_mid = (world_state.unk1ee04 >> 11) * (world_state.unk1ee04 >> 11);
+    i = vis_lists.n_visible;
+    range_far = *(short *)(world_state.unk1ee08 + 0x6a) / 2048 + 2;
     range_far = range_far * range_far;
     while (i--) {
-        rec = &DAT_8017bed0[DAT_801b5948.visible[i]];
+        rec = &vis_records[vis_lists.visible[i]];
         sp->x = rec->unk08 << 12;
         sp->y = (rec->unk09 << 12) + ((rec->unk0b - 128) << 7);
         sp->z = rec->unk0a << 12;
-        sp->no_plane_test = DAT_8015d090.unk1ee15;
+        sp->no_plane_test = world_state.unk1ee15;
         rec->unk04 &= 1;
-        d = func_8001c4c8();
+        d = vis_measure_position();
         if (d > range_far) {
-            DAT_801b5948.n_visible--;
-            for (k = i; k < DAT_801b5948.n_visible; k++) {
-                DAT_801b5948.visible[k] = DAT_801b5948.visible[k + 1];
+            vis_lists.n_visible--;
+            for (k = i; k < vis_lists.n_visible; k++) {
+                vis_lists.visible[k] = vis_lists.visible[k + 1];
             }
         } else if (d < range_near || d <= range_mid) {
             rec->unk04 |= 2;

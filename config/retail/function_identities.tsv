@@ -31,7 +31,7 @@ ST.EXE	0x80014544	func_80014544			unknown		address-only	candidate	mips-live-in-h
 ST.EXE	0x80014a30	func_80014a30			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
 ST.EXE	0x80014cfc	func_80014cfc			unknown	unknown *object;unknown *pointer1;unknown arg2	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
 ST.EXE	0x80014d2c	func_80014d2c			unknown	unknown *object;unknown *pointer1;unknown arg2	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-ST.EXE	0x80014d5c	func_80014d5c			unknown	unknown *object;unknown arg1;unknown arg2	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+ST.EXE	0x80014d5c	fill_words			u_long *	u_long *dst;u_long value;int count	candidate	candidate	asm;callers;src/st band C	stores value into count words from dst; returns the end (compiler-probe pf.c match); called by vis_build_visible
 ST.EXE	0x80014d80	func_80014d80			unknown	unknown *object;unknown arg1;unknown arg2	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
 ST.EXE	0x80014da4	func_80014da4			unknown	unknown *object	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
 ST.EXE	0x80014e20	func_80014e20			unknown	unknown *object	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
@@ -102,46 +102,46 @@ ST.EXE	0x80017c8c	func_80017c8c			unknown	unknown *object;unknown arg1	address-o
 ST.EXE	0x80017cb0	func_80017cb0			unknown	unknown arg0	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
 ST.EXE	0x80017cc4	func_80017cc4			unknown	unknown *object;unknown *pointer1;unknown arg2	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
 ST.EXE	0x80017d28	func_80017d28			unknown	unknown *object;unknown arg1	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-ST.EXE	0x80018440	func_80018440			unknown	unknown arg0	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-ST.EXE	0x80018480	func_80018480			unknown	unknown arg0	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-ST.EXE	0x800184c4	func_800184c4			unknown	unknown *object;unknown *pointer1;unknown *pointer2;unknown arg3	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-ST.EXE	0x800187a4	func_800187a4			unknown	unknown arg0	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-ST.EXE	0x800187e4	func_800187e4			unknown	unknown arg0	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-ST.EXE	0x80018828	func_80018828			unknown	unknown *object;unknown arg1;unknown *pointer2;unknown *pointer3	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-ST.EXE	0x80018b1c	func_80018b1c			unknown	unknown arg0	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-ST.EXE	0x80018b5c	func_80018b5c			unknown	unknown arg0	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-ST.EXE	0x80018ba0	func_80018ba0			unknown	unknown *object;unknown arg1;unknown *pointer2;unknown arg3	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-ST.EXE	0x80018ec4	func_80018ec4			unknown	unknown arg0	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-ST.EXE	0x80018f04	func_80018f04			unknown	unknown arg0	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-ST.EXE	0x80018f48	func_80018f48			unknown	unknown *object;unknown arg1;unknown *pointer2;unknown *pointer3	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-ST.EXE	0x800192d4	func_800192d4			unknown	unknown arg0;unknown arg1	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-ST.EXE	0x800194c4	func_800194c4			unknown	unknown *object;unknown *pointer1;unknown arg2;unknown arg3	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-ST.EXE	0x800196c0	func_800196c0			unknown	unknown *object;unknown *pointer1;unknown *pointer2;unknown arg3	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-ST.EXE	0x800198f4	func_800198f4			unknown	unknown *object;unknown *pointer1;unknown arg2;unknown arg3	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-ST.EXE	0x80019b34	func_80019b34			unknown	unknown *object;unknown *pointer1;unknown arg2;unknown arg3	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-ST.EXE	0x80019dc8	func_80019dc8			unknown	unknown arg0;unknown arg1	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-ST.EXE	0x80019fb4	func_80019fb4			unknown	unknown arg0	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-ST.EXE	0x80019ff4	func_80019ff4			unknown	unknown arg0	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-ST.EXE	0x8001a038	func_8001a038			unknown	unknown *object;unknown arg1;unknown arg2;unknown arg3	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-ST.EXE	0x8001a668	func_8001a668			unknown	unknown arg0	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-ST.EXE	0x8001a6a8	func_8001a6a8			unknown	unknown arg0	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-ST.EXE	0x8001a6ec	func_8001a6ec			unknown	unknown *object;unknown arg1;unknown arg2;unknown arg3	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-ST.EXE	0x8001adf8	func_8001adf8			unknown	unknown arg0	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-ST.EXE	0x8001ae38	func_8001ae38			unknown	unknown arg0	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-ST.EXE	0x8001ae7c	func_8001ae7c			unknown	unknown *object;unknown arg1;unknown arg2;unknown arg3	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-ST.EXE	0x8001b558	func_8001b558			unknown	unknown arg0	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-ST.EXE	0x8001b598	func_8001b598			unknown	unknown arg0	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-ST.EXE	0x8001b5dc	func_8001b5dc			unknown	unknown *object;unknown arg1;unknown *pointer2;unknown arg3	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-ST.EXE	0x8001bf10	func_8001bf10			unknown	unknown arg0;unknown arg1	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-ST.EXE	0x8001c100	func_8001c100			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+ST.EXE	0x80018440	mesh_ft3_tint_a			void	CVECTOR *rgb	candidate	candidate	asm;callers;src/st band C	mesh_draw_ft3 tint callback (band B body): clamps blue to 85, r = 3b, g = 2b
+ST.EXE	0x80018480	mesh_ft3_tint_b			void	CVECTOR *rgb	candidate	candidate	asm;callers;src/st band C	mesh_draw_ft3 tint callback (band B body): clamps red to 85, b = g = 3r
+ST.EXE	0x800184c4	mesh_draw_ft3			void	int count;MeshFaceFT3 *face;u_long *ot;int flags	supported	proven	asm;callers;src/st band C	depth-cued FT3 face renderer
+ST.EXE	0x800187a4	mesh_ft4_tint_a			void	CVECTOR *rgb	supported	proven	asm;callers;src/st band C	tint callback: clamps blue to 85, r = 3b, g = 2b
+ST.EXE	0x800187e4	mesh_ft4_tint_b			void	CVECTOR *rgb	supported	proven	asm;callers;src/st band C	tint callback: clamps red to 85, b = g = 3r
+ST.EXE	0x80018828	mesh_draw_ft4			void	int count;MeshFaceFT4 *face;u_long *ot;int flags	supported	proven	asm;callers;src/st band C	depth-cued FT4 face renderer
+ST.EXE	0x80018b1c	mesh_gt3_tint_a			void	CVECTOR *rgb	supported	proven	asm;callers;src/st band C	tint callback
+ST.EXE	0x80018b5c	mesh_gt3_tint_b			void	CVECTOR *rgb	supported	proven	asm;callers;src/st band C	tint callback
+ST.EXE	0x80018ba0	mesh_draw_gt3			void	int count;MeshFaceGT3 *face;u_long *ot;int flags	supported	proven	asm;callers;src/st band C	depth-cued GT3 face renderer
+ST.EXE	0x80018ec4	mesh_gt4_tint_a			void	CVECTOR *rgb	supported	proven	asm;callers;src/st band C	tint callback
+ST.EXE	0x80018f04	mesh_gt4_tint_b			void	CVECTOR *rgb	supported	proven	asm;callers;src/st band C	tint callback
+ST.EXE	0x80018f48	mesh_draw_gt4			void	int count;MeshFaceGT4 *face;u_long *ot;int flags	supported	proven	asm;callers;src/st band C	depth-cued GT4 face renderer
+ST.EXE	0x800192d4	mesh_draw_part			void	u_short part;u_int flags	supported	proven	asm;callers;src/st band C	sets up a model part and runs the depth-cued renderers
+ST.EXE	0x800194c4	mesh_draw_ft3_nccs			void	int count;MeshFaceFT3 *face;u_long *ot;int flags	supported	proven	asm;callers;src/st band C	NCCS FT3 face renderer
+ST.EXE	0x800196c0	mesh_draw_ft4_nccs			void	int count;MeshFaceFT4 *face;u_long *ot;int flags	supported	proven	asm;callers;src/st band C	NCCS FT4 face renderer
+ST.EXE	0x800198f4	mesh_draw_gt3_nccs			void	int count;MeshFaceGT3 *face;u_long *ot;int flags	supported	proven	asm;callers;src/st band C	NCCT GT3 face renderer
+ST.EXE	0x80019b34	mesh_draw_gt4_nccs			void	int count;MeshFaceGT4 *face;u_long *ot;int flags	supported	proven	asm;callers;src/st band C	NCCT/NCCS GT4 face renderer
+ST.EXE	0x80019dc8	mesh_draw_part_nccs			void	u_short part;u_int flags	supported	proven	asm;callers;src/st band C	sets up a model part and runs the NCCS renderers
+ST.EXE	0x80019fb4	mesh_div_ft3_tint_a			void	CVECTOR *rgb	supported	proven	asm;callers;src/st band C	tint callback
+ST.EXE	0x80019ff4	mesh_div_ft3_tint_b			void	CVECTOR *rgb	supported	proven	asm;callers;src/st band C	tint callback
+ST.EXE	0x8001a038	mesh_div_draw_ft3			void	int count;MeshFaceFT3 *face;u_long *ot;int flags	supported	proven	asm;callers;src/st band C	FT3 renderer with RCpolyFT3 subdivision
+ST.EXE	0x8001a668	mesh_div_ft4_tint_a			void	CVECTOR *rgb	supported	proven	asm;callers;src/st band C	tint callback
+ST.EXE	0x8001a6a8	mesh_div_ft4_tint_b			void	CVECTOR *rgb	supported	proven	asm;callers;src/st band C	tint callback
+ST.EXE	0x8001a6ec	mesh_div_draw_ft4			void	int count;MeshFaceFT4 *face;u_long *ot;int flags	supported	proven	asm;callers;src/st band C	FT4 renderer with RCpolyFT4 subdivision
+ST.EXE	0x8001adf8	mesh_div_gt3_tint_a			void	CVECTOR *rgb	supported	proven	asm;callers;src/st band C	tint callback
+ST.EXE	0x8001ae38	mesh_div_gt3_tint_b			void	CVECTOR *rgb	supported	proven	asm;callers;src/st band C	tint callback
+ST.EXE	0x8001ae7c	mesh_div_draw_gt3			void	int count;MeshFaceGT3 *face;u_long *ot;int flags	supported	proven	asm;callers;src/st band C	GT3 renderer with RCpolyGT3 subdivision
+ST.EXE	0x8001b558	mesh_div_gt4_tint_a			void	CVECTOR *rgb	supported	proven	asm;callers;src/st band C	tint callback
+ST.EXE	0x8001b598	mesh_div_gt4_tint_b			void	CVECTOR *rgb	supported	proven	asm;callers;src/st band C	tint callback
+ST.EXE	0x8001b5dc	mesh_div_draw_gt4			void	int count;MeshFaceGT4 *face;u_long *ot;int flags	supported	proven	asm;callers;src/st band C	GT4 renderer with RCpolyGT4 subdivision
+ST.EXE	0x8001bf10	mesh_div_draw_part			void	u_short part;u_int flags	supported	proven	asm;callers;src/st band C	sets up a model part and runs the subdividing renderers
+ST.EXE	0x8001c100	vis_build_visible			void	u8 *arg	supported	proven	asm;callers;src/st band C	builds the visible id list from the source ids masks
 ST.EXE	0x8001c264	func_8001c264			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-ST.EXE	0x8001c4c8	func_8001c4c8			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-ST.EXE	0x8001c60c	func_8001c60c			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-ST.EXE	0x8001c800	func_8001c800			unknown	unknown arg0;unknown arg1;unknown arg2	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-ST.EXE	0x8001c88c	func_8001c88c			unknown	unknown arg0	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-ST.EXE	0x8001c8e0	func_8001c8e0			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-ST.EXE	0x8001c9c8	func_8001c9c8			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-ST.EXE	0x8001cab8	func_8001cab8			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+ST.EXE	0x8001c4c8	vis_measure_position			int		supported	proven	asm;callers;src/st band C	squared distance of the scratchpad position from the viewer, or 256 when a side plane rejects it
+ST.EXE	0x8001c60c	vis_cull_by_range			void		supported	proven	asm;callers;src/st band C	drops far visible ids and flags near ones
+ST.EXE	0x8001c800	vis_record_is_visible			int	int a;int b;int c	supported	proven	asm;callers;src/st band C	whether a visible id record has the three byte keys
+ST.EXE	0x8001c88c	vis_id_is_visible			int	u16 id	supported	proven	asm;callers;src/st band C	whether id is in the visible id list
+ST.EXE	0x8001c8e0	vis_collect_table_a			void		supported	proven	asm;callers;src/st band C	collects visible entries of vis_table_a
+ST.EXE	0x8001c9c8	vis_collect_table_b			void		supported	proven	asm;callers;src/st band C	collects visible entries of vis_table_b
+ST.EXE	0x8001cab8	vis_collect_table_c			void		supported	proven	asm;callers;src/st band C	collects visible entries of vis_table_c
 ST.EXE	0x8001cb88	func_8001cb88			unknown	unknown *object	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
 ST.EXE	0x8001cdf8	func_8001cdf8			unknown	unknown *object;unknown *pointer1;unknown arg2	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
 ST.EXE	0x8001d224	func_8001d224			unknown	unknown arg0	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
@@ -420,7 +420,7 @@ ST.EXE	0x800456f8	func_800456f8			unknown		address-only	candidate	mips-live-in-h
 ST.EXE	0x80045f90	func_80045f90			void	unknown arg0;unknown arg1;unknown arg2	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
 ST.EXE	0x80045fb8	func_80045fb8			unknown	unknown *object	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
 ST.EXE	0x80045ffc	func_80045ffc			unknown	unknown arg0;unknown arg1;unknown arg2	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-ST.EXE	0x80046270	func_80046270			unknown	unknown *object;unknown *pointer1;unknown *pointer2	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+ST.EXE	0x80046270	vis_collect_sources			void	u8 *arg;int a1;int a2	candidate	candidate	asm;callers;src/st band C	fills vis_lists.sources (vis_build_visible clears n_sources, calls it, then reads the list); body unreviewed
 ST.EXE	0x8004656c	func_8004656c			unknown	unknown *object	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
 ST.EXE	0x80046604	func_80046604			unknown	unknown *object;unknown *pointer1;unknown arg2	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
 ST.EXE	0x800468c0	func_800468c0			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review

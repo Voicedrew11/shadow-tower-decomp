@@ -1,7 +1,7 @@
 /*
  * ST.EXE mesh renderers without depth cueing (WIP module): the NCCS/NCCT-lit
  * counterparts of the st.mesh_draw renderers, with no tint callbacks.
- * func_80019dc8 sets up a model part and runs them.
+ * mesh_draw_part_nccs sets up a model part and runs them.
  */
 #include <kf/lib/address.h>
 #include <kf/lib/types.h>
@@ -12,7 +12,7 @@
 #include <st/mesh.h>
 
 ADDRESS(0x800194c4, 0x1fc)
-void func_800194c4(int count, MeshFaceFT3 *face, u_long *ot, int flags)
+void mesh_draw_ft3_nccs(int count, MeshFaceFT3 *face, u_long *ot, int flags)
 {
     MeshScratch *sp = MESH_SCRATCH;
     u_long *start;
@@ -53,12 +53,12 @@ void func_800194c4(int count, MeshFaceFT3 *face, u_long *ot, int flags)
         }
         face = next;
     }
-    sp->faces = face;
+    sp->faces = (u8 *)face;
     sp->prim_count += (sp->prim - start) / 8;
 }
 
 ADDRESS(0x800196c0, 0x234)
-void func_800196c0(int count, MeshFaceFT4 *face, u_long *ot, int flags)
+void mesh_draw_ft4_nccs(int count, MeshFaceFT4 *face, u_long *ot, int flags)
 {
     MeshScratch *sp = MESH_SCRATCH;
     u_long *start;
@@ -103,12 +103,12 @@ void func_800196c0(int count, MeshFaceFT4 *face, u_long *ot, int flags)
         }
         face = next;
     }
-    sp->faces = face;
+    sp->faces = (u8 *)face;
     sp->prim_count += (sp->prim - start) / 10;
 }
 
 ADDRESS(0x800198f4, 0x240)
-void func_800198f4(int count, MeshFaceGT3 *face, u_long *ot, int flags)
+void mesh_draw_gt3_nccs(int count, MeshFaceGT3 *face, u_long *ot, int flags)
 {
     MeshScratch *sp = MESH_SCRATCH;
     u_long *start;
@@ -149,12 +149,12 @@ void func_800198f4(int count, MeshFaceGT3 *face, u_long *ot, int flags)
         }
         face = next;
     }
-    sp->faces = face;
+    sp->faces = (u8 *)face;
     sp->prim_count += (sp->prim - start) / 10;
 }
 
 ADDRESS(0x80019b34, 0x294)
-void func_80019b34(int count, MeshFaceGT4 *face, u_long *ot, int flags)
+void mesh_draw_gt4_nccs(int count, MeshFaceGT4 *face, u_long *ot, int flags)
 {
     MeshScratch *sp = MESH_SCRATCH;
     u_long *start;
@@ -204,13 +204,13 @@ void func_80019b34(int count, MeshFaceGT4 *face, u_long *ot, int flags)
         }
         face = next;
     }
-    sp->faces = face;
+    sp->faces = (u8 *)face;
     /* 12 words per primitive, although a POLY_GT4 is 13. */
     sp->prim_count += (sp->prim - start) / 12;
 }
 
 ADDRESS(0x80019dc8, 0x1ec)
-void func_80019dc8(u_short part, u_int flags)
+void mesh_draw_part_nccs(u_short part, u_int flags)
 {
     MeshScratch *sp = MESH_SCRATCH;
     int mode;
@@ -236,8 +236,8 @@ void func_80019dc8(u_short part, u_int flags)
     } else {
         gte_SetFarColor(5, 5, 5);
     }
-    func_800194c4(sp->header->n_ft3, sp->faces, sp->ot, mode);
-    func_800196c0(sp->header->n_ft4, sp->faces, sp->ot, mode);
-    func_800198f4(sp->header->n_gt3, sp->faces, sp->ot, mode);
-    func_80019b34(sp->header->n_gt4, sp->faces, sp->ot, mode);
+    mesh_draw_ft3_nccs(sp->header->n_ft3, (MeshFaceFT3 *)sp->faces, sp->ot, mode);
+    mesh_draw_ft4_nccs(sp->header->n_ft4, (MeshFaceFT4 *)sp->faces, sp->ot, mode);
+    mesh_draw_gt3_nccs(sp->header->n_gt3, (MeshFaceGT3 *)sp->faces, sp->ot, mode);
+    mesh_draw_gt4_nccs(sp->header->n_gt4, (MeshFaceGT4 *)sp->faces, sp->ot, mode);
 }
