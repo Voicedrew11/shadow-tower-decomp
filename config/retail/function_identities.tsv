@@ -854,21 +854,21 @@ VS.EXE	0x80023820	func_80023820			unknown	unknown arg0	address-only	candidate	mi
 VS.EXE	0x800238c0	func_800238c0			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
 VS.EXE	0x8002392c	func_8002392c			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
 VS.EXE	0x8002398c	func_8002398c			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-VS.EXE	0x800239d0	func_800239d0			unknown	unknown *object;unknown arg1	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-VS.EXE	0x80023a54	func_80023a54			unknown	unknown *object;unknown arg1	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-VS.EXE	0x80023aa0	func_80023aa0			unknown	unknown *object;unknown arg1	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-VS.EXE	0x80023bd0	func_80023bd0			unknown	unknown *object;unknown arg1	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-VS.EXE	0x80023c34	func_80023c34			unknown	unknown *object;unknown *pointer1;unknown arg2	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-VS.EXE	0x80023c78	func_80023c78			unknown	unknown *object;unknown arg1;unknown arg2;unknown arg3	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-VS.EXE	0x80024110	func_80024110			unknown	unknown arg0;unknown *pointer1;unknown arg2;unknown arg3	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+VS.EXE	0x800239d0	anim_list_init			void	StAnimSet *set;int count	candidate	candidate	byte-identical twin of ST.EXE 0x800346dc (shared source src/lib/anim_list_init.inc)	VS copy of ST.EXE anim_list_init; identity follows the ST twin
+VS.EXE	0x80023a54	anim_list_find_key			StAnimNode *	StAnimList *list;int key	candidate	candidate	byte-identical twin of ST.EXE 0x800347ac (shared source src/lib/anim_list.inc)	VS copy of ST.EXE anim_list_find_key; identity follows the ST twin
+VS.EXE	0x80023aa0	anim_list_add			StAnimNode *	StAnimList *list;int key	candidate	candidate	byte-identical twin of ST.EXE 0x800347f8 (shared source src/lib/anim_list.inc)	VS copy of ST.EXE anim_list_add; identity follows the ST twin
+VS.EXE	0x80023bd0	anim_list_remove			StAnimNode *	StAnimList *list;int key	candidate	candidate	byte-identical twin of ST.EXE 0x80034928 (shared source src/lib/anim_list.inc)	VS copy of ST.EXE anim_list_remove; identity follows the ST twin
+VS.EXE	0x80023c34	anim_id_index			u16	u_long *set;u_long *ids;u_long id	candidate	candidate	byte-identical twin of ST.EXE 0x8003498c (shared source src/lib/anim_list.inc)	VS copy of ST.EXE anim_id_index; identity follows the ST twin
+VS.EXE	0x80023c78	anim_node_command			u_long *	u_long *cmd;StAnimList *list;u_long *ids;u8 *table;u_long *set	candidate	candidate	byte-identical twin of ST.EXE 0x800349d0 (shared source src/lib/anim_list.inc)	VS copy of ST.EXE anim_node_command; identity follows the ST twin
+VS.EXE	0x80024110	anim_block_run			StAnimBlock *	u_long frame;StAnimBlock *block;StAnimList *list;u_long *ids;u8 *table;u_long *set	candidate	candidate	byte-identical twin of ST.EXE 0x80034e68 (shared source src/lib/anim_list.inc)	VS copy of ST.EXE anim_block_run; identity follows the ST twin
 VS.EXE	0x800241b4	func_800241b4			unknown	unknown *object	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
 VS.EXE	0x8002420c	func_8002420c			void	unknown arg0	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-VS.EXE	0x8002429c	func_8002429c			unknown	unknown arg0;unknown *pointer1;unknown arg2	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-VS.EXE	0x80024640	func_80024640			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+VS.EXE	0x8002429c	anim_record_compose			void	StAnimRecord *rec	candidate	candidate	byte-identical twin of ST.EXE 0x80035260 (shared source src/lib/anim_compose.inc)	VS copy of ST.EXE anim_record_compose; identity follows the ST twin
+VS.EXE	0x80024640	anim_list_compose			void		candidate	candidate	byte-identical twin of ST.EXE 0x80035604 (shared source src/lib/anim_compose.inc)	VS copy of ST.EXE anim_list_compose; identity follows the ST twin
 VS.EXE	0x800246d8	func_800246d8			unknown	unknown *object;unknown *pointer1;unknown *pointer2;unknown arg3	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
 VS.EXE	0x80024b5c	func_80024b5c			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
 VS.EXE	0x80025204	func_80025204			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-VS.EXE	0x80025670	func_80025670			unknown	unknown *object;unknown arg1	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+VS.EXE	0x80025670	anim_list_find_id			StAnimNode *	StAnimList *list;int id	candidate	candidate	byte-identical twin of ST.EXE 0x80034760 (shared source src/lib/anim_list_find_id.inc)	VS copy of ST.EXE anim_list_find_id; identity follows the ST twin
 VS.EXE	0x800256bc	func_800256bc			unknown	unknown arg0;unknown *pointer1;unknown *pointer2;unknown *pointer3	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
 VS.EXE	0x80025878	func_80025878			unknown	unknown arg0	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
 VS.EXE	0x8002588c	func_8002588c			unknown	unknown *object;unknown *pointer1;unknown arg2	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
@@ -890,12 +890,12 @@ VS.EXE	0x80027698	func_80027698			unknown	unknown *object;unknown *pointer1	addr
 VS.EXE	0x800278f8	func_800278f8			unknown	unknown *object;unknown *pointer1;unknown arg2	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
 VS.EXE	0x80027ba4	func_80027ba4			unknown	unknown arg0	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
 VS.EXE	0x80027c64	func_80027c64			unknown	unknown *object;unknown *pointer1;unknown *pointer2;unknown arg3	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-VS.EXE	0x80027ce0	func_80027ce0			unknown	unknown *object;unknown *pointer1;unknown *pointer2;unknown arg3	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-VS.EXE	0x80027d5c	func_80027d5c			unknown	unknown *object;unknown *pointer1	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+VS.EXE	0x80027ce0	vertices_add			void	SVECTOR *dst;SVECTOR *a;SVECTOR *b;int count	candidate	candidate	byte-identical twin of ST.EXE 0x80033b00 (shared source src/lib/anim_vertices.inc)	VS copy of ST.EXE vertices_add; identity follows the ST twin
+VS.EXE	0x80027d5c	vertex_list_copy			void	short *dst;short *src	candidate	candidate	byte-identical twin of ST.EXE 0x80033b7c (shared source src/lib/anim_vertices.inc)	VS copy of ST.EXE vertex_list_copy; identity follows the ST twin
 VS.EXE	0x80027dbc	func_80027dbc			unknown	unknown *object;unknown *pointer1;unknown *pointer2	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
 VS.EXE	0x80027e40	func_80027e40			unknown	unknown *object;unknown *pointer1	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
 VS.EXE	0x80027eb4	func_80027eb4			unknown	unknown *object;unknown arg1	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-VS.EXE	0x80027f30	func_80027f30			unknown	unknown *object;unknown *pointer1;unknown arg2;unknown *pointer3	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+VS.EXE	0x80027f30	anim_find_key			StAnimKey *	StAnimFile *file;int clip;int frame;int *key;int *frac	candidate	candidate	byte-identical twin of ST.EXE 0x80033cfc (shared source src/lib/anim_find_key.inc)	VS copy of ST.EXE anim_find_key; identity follows the ST twin
 VS.EXE	0x80027fec	func_80027fec			unknown	unknown *object;unknown *pointer1	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
 VS.EXE	0x80028028	func_80028028			unknown	unknown arg0	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
 VS.EXE	0x80028074	func_80028074			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
@@ -972,18 +972,13 @@ VS.EXE	0x80032404	func_80032404			unknown	unknown arg0;unknown arg1;unknown *poi
 VS.EXE	0x8003333c	func_8003333c			unknown	unknown arg0;unknown arg1;unknown arg2	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
 VS.EXE	0x800333b4	func_800333b4			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
 VS.EXE	0x800333f4	func_800333f4			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-VS.EXE	0x80033470	func_80033470			unknown	unknown arg0;unknown arg1	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-VS.EXE	0x8003349c	func_8003349c			unknown	unknown arg0;unknown arg1;unknown *pointer2;unknown *pointer3	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+VS.EXE	0x80033470	vram_move_to			void	RECT *rect;DVECTOR *pos	candidate	candidate	byte-identical twin of ST.EXE 0x80038438 (shared source src/lib/vram.inc)	VS copy of ST.EXE vram_move_to; identity follows the ST twin
+VS.EXE	0x8003349c	vram_roll			void	u8 right;u8 *step;RECT *src;DVECTOR *dst	candidate	candidate	byte-identical twin of ST.EXE 0x80038464 (shared source src/lib/vram.inc)	VS copy of ST.EXE vram_roll; identity follows the ST twin
 VS.EXE	0x800335e8	func_800335e8			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
 VS.EXE	0x800352cc	func_800352cc			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
 VS.EXE	0x800352fc	func_800352fc			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
 VS.EXE	0x800353d0	func_800353d0			unknown	unknown *object;unknown arg1;unknown *pointer2;unknown *pointer3	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
 VS.EXE	0x80035b68	func_80035b68			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-VS.EXE	0x8003955c	func_8003955c			void	unknown arg0;unknown arg1;unknown arg2	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-VS.EXE	0x8003af7c	func_8003af7c			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-VS.EXE	0x8003c1ec	func_8003c1ec			void	unknown arg0;unknown arg1	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-VS.EXE	0x8003e6bc	func_8003e6bc			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-VS.EXE	0x8003eb4c	func_8003eb4c			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
 END.EXE	0x80011fa8	clear_vram			void		supported	proven	asm;callers;src/end/main.c end.main	clears all of VRAM to black
 END.EXE	0x80011ffc	cd_read_sectors			void	CdlLOC *loc;u_long *buf;int sectors	supported	proven	asm;callers;src/end/main.c end.main	double-speed CdRead of a sector count, retried until complete
 END.EXE	0x800120d0	load_st_file			int	u_long *buf;char *name;int size	supported	proven	asm;callers;src/end/main.c end.main	reads \ST\<name>;1 into buf (whole file when size is 0)

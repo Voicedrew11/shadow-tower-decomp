@@ -273,3 +273,17 @@ defines = ["ST_FDAT_012"]
 - `defines` adds `-DNAME` (or `-DNAME=value`) to the preprocessor run for
   that unit only. Use it for constants that provably differ between the
   images, not to fork whole bodies silently.
+
+When the shared functions are only part of each image's unit, or sit in a
+different order around image-specific code, the shared run goes into a
+`src/lib/*.inc` fragment instead: its definitions stack one
+`ADDRESS_AT("ST", ...)` / `ADDRESS_AT("VS", ...)` claim per image, and each
+image's unit source includes it (`#include "../lib/name.inc"`) at its place
+in that image's contiguous run. The fragment must be contiguous and in the
+same order in every image; it may not own `RODATA()`, `JUMPTABLES()` or
+`SDATA()` (the including unit claims its image's ranges), and its text is
+shared verbatim, so every name it spells must be the same identity in both
+images. VS.EXE's copies of ST.EXE's animation node-list and VRAM helpers
+are the first users (`src/lib/anim_*.inc`, `src/lib/vram.inc`); VS copies
+whose callees or globals carry address-derived (image-specific) names, or
+whose structures have VS layouts, stay separate sources under `src/vs/`.
