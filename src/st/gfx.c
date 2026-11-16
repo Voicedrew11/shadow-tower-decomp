@@ -63,7 +63,7 @@ void func_80016fb8(void)
     world_state.unk1EE15 = 0;
     world_state.unk1EDF0 = 0;
     world_state.unk1EDF4 = 0;
-    DAT_8015c488 = 0;
+    DAT_8015c488.frame = 0;
     func_800340c4();
     func_80034f48();
     world_state.render_mode = 17;

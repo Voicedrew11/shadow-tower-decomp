@@ -100,7 +100,7 @@ typedef struct {
     u_long *ot2_cur;
     StPacketBuffer packets[2];
     StPacketBuffer *packet; /* 0x8304 */
-    void *unk8308[4];    /* 0x8308: block owner slots (func_80017c5c; func_800239ec indexes slot + 1) */
+    void *unk8308[4];    /* 0x8308: primitive-pointer slots (func_80017c5c) */
     void *unk8318;
     s32 unk831C[2];
     s32 unk8324;         /* 0x8324: primitives added by func_80021518 */
@@ -109,7 +109,8 @@ typedef struct {
     s32 unk8330;
     s32 unk8334;
     s32 unk8338[5];
-    void *unk834C[8];    /* 0x834c: heap block owners (func_800237a8); WIP count */
+    void *unk834C[8];    /* 0x834c: heap block owners: func_800237a8 indexes them by slot,
+                          * func_800239ec and src/st/slots.c by slot - 16; WIP count */
     u8 unk836C[0xab3c - 0x836c];
     u8 world_vertices[0x1eb40 - 0xab3c]; /* 0xab3c: the world parts' transformed vertices (MeshVertex); WIP extent */
     StTexAnim texanim[ST_TEXANIM_SLOTS];
@@ -147,14 +148,37 @@ typedef struct {
     u8 unk1EE0C[9];
     u8 unk1EE15;
     u8 unk1EE16;
+    /* 0x1ee16..0x1ee19 (src/st/text.c): title-card state, mode, fade length, frame counter */
+    u8 unk1EE17;
+    u8 unk1EE18;
+    u8 unk1EE19;
 } WorldState;
 
 extern WorldState world_state;
 
 /* The two 0x20000-byte GPU packet buffers. */
 extern u_long DAT_8011c488[];
-/* Word cleared by func_80016fb8. */
-extern s32 DAT_8015c488;
+/* 128 animated objects of 24 bytes; id 0xffff marks a free one. */
+typedef struct {
+    u16 unk0;            /* 0x00: model id - 40; bit 15 hides it */
+    u8 unk2;             /* 0x02: bits 0-5 kind, bits 6-7 a rotation */
+    u8 unk3;             /* 0x03: frame count */
+    u8 unk4;             /* 0x04: frame period, 0 still */
+    u8 unk5;             /* 0x05: frame */
+    u8 unk6[2];
+    VECTOR unk8;         /* 0x08: position */
+} StObject24;
+
+/*
+ * The frame counter func_80016fb8 clears and func_800255f0 advances, then
+ * the animated objects it steps. -G8 code reads the counter with lui, so it
+ * is not a small object of its own.
+ */
+typedef struct {
+    s32 frame;
+    StObject24 objects[128];
+} StAnimObjects;
+extern StAnimObjects DAT_8015c488;
 /* The CLUT a type-49 texture slot cycles (entries 1-14 rotate). */
 extern u16 DAT_8009ac88[16];
 /* The three lighting blend targets of func_80017d28. */

@@ -54,11 +54,17 @@ typedef struct {
     u_short clut_base;   /* 0x98: added to subdivided faces' CLUT */
     u8 unk9A[0xe];       /* 0x9a */
     VECTOR part_pos;     /* 0xa8: a record's camera-space position (RTV0TR result) */
-    u8 unkB8[0x28];      /* 0xb8 */
+    u8 unkB8[0x10];      /* 0xb8 */
+    u8 unkC8[16];        /* 0xc8: block tag per slot (low four bits) */
+    SVECTOR unkD8;       /* 0xd8: rotation func_800241d0 hands func_80022678 */
     s32 unkE0;           /* 0xe0: a position func_80016554 tests (x, y, z) */
     s32 unkE4;           /* 0xe4 */
     s32 unkE8;           /* 0xe8 */
-    u8 unkEC[0x34];      /* 0xec */
+    u8 unkEC[4];         /* 0xec */
+    u8 *unkF0;           /* 0xf0: cursor into unkF8 */
+    u32 *unkF4;          /* 0xf4: &unk244 */
+    u8 unkF8[0x28];      /* 0xf8: slot flag bytes cleared per frame (up to 332, over the
+                          * following fields: the object passes run in another phase) */
     SVECTOR part_offset; /* 0x120: a record's viewer-relative position, scaled to 16 bits */
     long x;              /* 0x128: the position vis_measure_position measures */
     long y;              /* 0x12c */
@@ -88,7 +94,9 @@ typedef struct {
     long plane[6];       /* 0x1f0 */
     long unk208;         /* 0x208 */
     s32 part_shift;      /* 0x20c: halvings part_offset needed to fit 16 bits */
-    u8 unk210[0x184];    /* 0x210 */
+    u8 unk210[0x34];     /* 0x210 */
+    u32 unk244[0x26];    /* 0x244: object passes clear 4..75 words (another phase) */
+    u8 unk2DC[0xb8];     /* 0x2dc: the menu screens' fields in their phase (MenuScratch, st/menu.h) */
     StLight *unk394;     /* 0x394: lighting environment func_80017d28 blends toward */
     u8 unk398[0x2c];     /* 0x398 */
     StLight *light;      /* 0x3c4: the world renderers' lighting environment */

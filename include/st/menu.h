@@ -1,6 +1,6 @@
 /*
- * ST.EXE menu screens (src/st/menu_*.c): the scratchpad layout they use,
- * the message table they draw from and their functions. The screens share
+ * ST.EXE menu screens (src/st/menu.c, src/st/menu_*.c): the scratchpad
+ * layout they use, the message table they draw from and their functions. The screens share
  * one scratchpad block at 0x1f800000 that differs from the renderer's
  * (st/scratch.h): screen state words at the start, the list fields around
  * +0x1f4, the input and layout fields at +0x2dc and the drawing records
@@ -13,6 +13,7 @@
 #include <sys/types.h>
 #include <LIBGTE.H>
 #include <LIBGPU.H>
+#include <st/text.h>
 
 /*
  * The message table: byte offsets of each message from text, then the
@@ -72,6 +73,26 @@ typedef union {
     MenuList list;
     DVECTOR vram[2];     /* func_8002f1f8's texture and CLUT positions */
     MenuStore store;
+    DVECTOR icons[6];    /* the pause list page's icon texture positions, used from [1] */
+    struct {
+        MenuMessages *messages; /* 0x00: the list's message table */
+        u8 unk04[0x14];
+        s16 count;       /* 0x18: entries in the list */
+        u8 unk1A[2];
+        s16 *entries;    /* 0x1c: entry ids */
+    } page_list;         /* the pause menu list page (func_8002a1d0) */
+    struct {
+        u8 unk00[0x20];
+        s16 value;       /* 0x20 */
+        s16 selected;    /* 0x22 */
+        s16 base[2][7];  /* 0x24: left and right column base values */
+        s16 bonus[2][7]; /* 0x40: and their bonuses */
+    } stats;
+    struct {
+        s32 unk00;
+        s32 current;     /* 0x04: the entry marked current, -1 for none */
+        s32 ids[10];     /* 0x08 */
+    } map;
 } MenuState;
 
 /* A 32-byte list record func_8002c2b8 lists. */
@@ -84,7 +105,7 @@ typedef struct {
 
 typedef struct {
     MenuState unk0;      /* 0x000 */
-    u8 unk50[0x164];     /* 0x050 */
+    u8 unk5C[0x158];     /* 0x05c */
     s16 unk1B4[14];      /* 0x1b4: attribute values */
     u8 unk1D0[0x24];     /* 0x1d0 */
     MenuRecord *unk1F4;  /* 0x1f4: the listed records */
@@ -111,11 +132,11 @@ typedef struct {
     u32 *unk2D4;         /* 0x2d4: one bit per grid cell */
     u8 unk2D8[4];        /* 0x2d8 */
     u16 unk2DC;          /* 0x2dc */
-    u16 unk2DE;          /* 0x2de */
+    u16 unk2DE;          /* 0x2de: selected row of the item and stats menus */
     s16 unk2E0;          /* 0x2e0 */
     s16 unk2E2;          /* 0x2e2 */
     u8 unk2E4;           /* 0x2e4: cursor blink phase */
-    u8 unk2E5;           /* 0x2e5 */
+    u8 unk2E5;           /* 0x2e5: text font mode (0: 6x12 half-width cells) */
     u8 unk2E6[0x1a];     /* 0x2e6 */
     CVECTOR style[8];    /* 0x300: text colours; .cd carries the glyph size */
     CVECTOR *unk320;     /* 0x320: figure colours of the status pages */
@@ -135,16 +156,32 @@ typedef struct {
 
 #define MENU_SCRATCH ((MenuScratch *)0x1f800000)
 
+/* Per-area counts read by the map page (byte +0x16e4 onwards); WIP extent. */
+typedef struct {
+    u8 unk0[0x14a8];
+    u32 unk14A8[0x8f];   /* 0x14a8: one bit per map id (func_800241d0) */
+    u8 unk16E4[44];      /* by area */
+} Data801cba08;
+extern Data801cba08 DAT_801cba08;
+
+/* .sbss words the map page reads with lui; their owner is unknown. */
+extern s32 DAT_8008818c;
+extern u16 DAT_800881a8;
+
+/* Option page state bytes; owner unknown. */
+extern u8 DAT_801cd121;
+extern u8 DAT_801cd122[]; /* four bytes; 0x801cd123 and 0x801cd124 have their own identities */
+
 
 extern MenuMessages menu_messages;
 
 #define MESSAGE(i) ((u16 *)(menu_messages.text + menu_messages.offsets[i]))
+/* A message of another table (a list's own). */
+#define MESSAGE_IN(table, i) ((u16 *)((table)->text + (table)->offsets[i]))
 
 /* Item stat figures that func_80031378 formats (whole and tenths). */
 extern u16 DAT_8008819e;
 extern u16 DAT_80088188;
-/* Set while func_80031aec draws the grid columns. */
-extern s16 DAT_800881ae;
 
 /* The status pages' toggle between the attribute and the figure page. */
 extern u16 DAT_800881aa;
@@ -153,6 +190,13 @@ extern u16 DAT_80088192;
 /* Seven list slots cleared together by func_8002c090. */
 extern s32 DAT_8017beb0[7];
 extern s16 DAT_800881f0[7];
+
+/* src/st/menu.c */
+void func_80029b74(void);
+void func_8002a1d0(void);
+void func_8002a5a4(void);
+void func_8002a954(void);
+void func_8002b2e8(void);
 
 /* src/st/menu_pages.c */
 void func_8002c050(void);

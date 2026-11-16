@@ -18,7 +18,7 @@
 
 /*
  * Loads member `index + 4` of `archive` into a heap block owned by
- * world_state.unk8308[slot + 1].
+ * world_state.unk834C[slot - 16].
  *
  * Not exact (size-exact): retail allocates index + 4 to $s2 and slot to $s1;
  * this source swaps the two.
@@ -37,7 +37,7 @@ u8 tag;
     size = func_80015ec8(archive, index);
     if (size == 0)
         return;
-    data = func_80015164(DAT_8009c888, size, &world_state.unk8308[slot + 1]);
+    data = func_80015164(DAT_8009c888, size, &world_state.unk834C[slot - 16]);
     if (data == NULL)
         return;
     func_80015250(data, ST_BLOCK_LOADING);

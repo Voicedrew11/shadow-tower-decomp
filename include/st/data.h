@@ -41,14 +41,45 @@ typedef struct {
     u16 unk2;
     u16 unk4;
     u16 unk6;
-    u8 unk8[0x28 - 0x8];
+    u16 unk8;            /* 0x8: shown by the status menu */
+    u8 unkA[4];
+    u16 unkE;            /* 0xe: shown by the stats menu */
+    u16 unk10;           /* 0x10 */
+    u8 unk12[0x15];
+    u8 unk27;            /* 0x27: shown by the map menu */
     u16 unk28;
-    u8 unk2A[0x33 - 0x2a];
+    u8 unk2A[2];
+    u32 unk2C;           /* 0x2c: flag bits the HUD shows (func_80026508) */
+    u16 unk30;           /* 0x30 */
+    u8 unk32;
     u8 unk33; /* incremented every vsync, wraps at 60 */
     s32 unk34; /* incremented when unk33 wraps */
     u16 unk38[21]; /* set from FN. ids 970..990 */
     s16 unk62[14];       /* 0x62: figures func_8002e94c lists */
-    u8 unk7E[0x21c - 0x7e];
+    u8 unk7E[0xba - 0x7e];
+    u16 unkBA;           /* 0xba: shown by the stats menu */
+    u16 unkBC;           /* 0xbc */
+    u16 unkBE;           /* 0xbe */
+    u8 unkC0[0x15e - 0xc0];
+    s8 unk15E;           /* 0x15e */
+    u8 unk15F[0x17e - 0x15f];
+    u16 unk17E;          /* 0x17e: HUD bar 0 value */
+    u8 unk180[2];
+    u16 unk182;          /* 0x182: HUD bar 1 value */
+    u8 unk184[2];
+    u8 unk186;           /* 0x186: 2 when the HUD numbers need redrawing */
+    u8 unk187[3];
+    u16 unk18A;          /* 0x18a: unk2 as last shown */
+    u16 unk18C;          /* 0x18c: unk6 as last shown */
+    u8 unk18E[0x1a4 - 0x18e];
+    s32 unk1A4[8];       /* 0x1a4: nonzero shows a HUD icon */
+    u8 unk1C4[0x1ec - 0x1c4];
+    s32 unk1EC[5];       /* 0x1ec: frames left to show unk20C[i] */
+    u8 unk200[0xc];
+    s16 unk20C[5];       /* 0x20c: numbers func_80026a88 queues */
+    u8 unk216[2];
+    u8 unk218;           /* 0x218 */
+    u8 unk219[3];
     u8 unk21C;
     u8 unk21D[0x248 - 0x21d];
     long x;              /* 0x248 */
@@ -87,7 +118,8 @@ typedef struct {
     u8 unk1C;
     u8 unk1D;
     u8 unk1E;
-    u8 unk1F[0x28 - 0x1f];
+    u8 unk1F;            /* 0x1f: nonzero skips the block refresh (band E object passes) */
+    u8 unk20[8];
 } AreaState;
 
 extern AreaState area_state;
@@ -118,13 +150,14 @@ extern Data801cd180 DAT_801cd180;
 /*
  * One sound bank slot: the loaded bank's data (its state halfword at +4)
  * and the VAB id SsVabClose takes. func_800237a8 uses slots 8..23 as four
- * rows of four.
+ * rows of four; func_80023c6c addresses slots 8.. and func_80024004 slots
+ * 24.. (src/st/slots.c). WIP extent.
  */
 typedef struct {
     s16 *block;
     s16 vab;
     s16 unk6;
 } StVabSlot;
-extern StVabSlot DAT_801dd1e8[24];
+extern StVabSlot DAT_801dd1e8[32];
 
 #endif

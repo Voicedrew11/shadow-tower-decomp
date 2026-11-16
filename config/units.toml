@@ -182,6 +182,42 @@ source = "src/st/bankload.c"
 profile = "probe-gcc272cdk-o2-g0"
 
 [[unit]]
+unit = "st.slots"
+image = "ST.EXE"
+source = "src/st/slots.c"
+profile = "probe-gcc272cdk-o2-g0"
+
+[[unit]]
+unit = "st.objects"
+image = "ST.EXE"
+source = "src/st/objects.c"
+profile = "probe-gcc272cdk-o2-g8"
+
+[[unit]]
+unit = "st.objects2"
+image = "ST.EXE"
+source = "src/st/objects2.c"
+profile = "probe-gcc272cdk-o2-g8"
+
+[[unit]]
+unit = "st.hud"
+image = "ST.EXE"
+source = "src/st/hud.c"
+profile = "probe-gcc272cdk-o2-g8"
+
+[[unit]]
+unit = "st.text"
+image = "ST.EXE"
+source = "src/st/text.c"
+profile = "probe-gcc272cdk-o2-g8"
+
+[[unit]]
+unit = "st.menu"
+image = "ST.EXE"
+source = "src/st/menu.c"
+profile = "probe-gcc272cdk-o2-g8"
+
+[[unit]]
 unit = "st.menu_pages"
 image = "ST.EXE"
 source = "src/st/menu_pages.c"
