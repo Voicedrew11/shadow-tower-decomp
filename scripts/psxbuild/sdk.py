@@ -82,15 +82,24 @@ def aspsx_command(stem: str, small_data: int) -> str:
 # program) is Runtime Library 4.2's GTE post-processor: the INLINE_C.H
 # ("DMPSX version 3") macros emit placeholder words such as `.word 0x0000117f`
 # (gte_nclip), and DMPSX rewrites each one in the assembled object into its
-# COP2 instruction (0x4b400006). Only those SPECIAL-funct-0x3f words change; an
-# object without GTE macros is left byte-identical. It runs on every object,
-# directly after ASPSX, as a GTE-using build would have run it.
+# COP2 instruction (0x4b400006). It runs directly after ASPSX, and only on an
+# object whose assembly carries such a placeholder: DMPSX 3.0 corrupts some
+# objects it has nothing to do in (it drops two bytes of a large debug
+# record), so a GTE-free object never goes through it.
+_GTE_PLACEHOLDER = re.compile(r'\.word\s+0x([0-9a-fA-F]+)')
+
+
+def needs_dmpsx(assembly: str) -> bool:
+    return any((int(word, 16) & 0xfc00003f) == 0x3f and int(word, 16) >> 16 == 0
+               for word in _GTE_PLACEHOLDER.findall(assembly))
+
+
 def dmpsx_command(stem: str) -> str:
     return f'DMPSX.EXE {stem}.OBJ > {stem}.DMP'
 
 
-def assembler_commands(stem: str, small_data: int) -> list[str]:
-    return [aspsx_command(stem, small_data), dmpsx_command(stem)]
+def assembler_commands(stem: str, small_data: int, gte: bool = True) -> list[str]:
+    return [aspsx_command(stem, small_data), *([dmpsx_command(stem)] if gte else [])]
 
 
 def stage_assembler(root: Path) -> None:
@@ -139,7 +148,7 @@ def compile_c(source: Path, root: Path, stem: str, *, compiler: str,
     return {'object': stem + '.OBJ', 'assembly': stem + '.S', 'log': stem + '.TXT',
             'preprocessor_command': cpp_command, 'compiler_command': cc1_command, **probe,
             'assembler_command': aspsx_command(stem, small_data),
-            'gte_command': dmpsx_command(stem),
+            'gte_command': dmpsx_command(stem) if needs_dmpsx(assembly.read_text(errors='replace')) else None,
             'assembly_sha256': hashlib.sha256(assembly.read_bytes()).hexdigest()}
 
 
@@ -186,8 +195,9 @@ def assemble_many(root: Path, stems: tuple[str, ...], small_data: int) -> dict[s
     for stem in stems:
         dos_text(root / (stem + '.S'))
         (root / (stem + '.OBJ')).unlink(missing_ok=True)
-    dos_run(root, [command for stem in stems for command in assembler_commands(stem, small_data)],
-            'asm')
+    gte = {stem: needs_dmpsx((root / (stem + '.S')).read_text(errors='replace')) for stem in stems}
+    dos_run(root, [command for stem in stems
+                   for command in assembler_commands(stem, small_data, gte[stem])], 'asm')
     for stem in stems:
         tool_succeeded(root, stem + '.TXT', stem + '.OBJ', b'LNK\x02')
     return {stem: (root / (stem + '.OBJ')).read_bytes() for stem in stems}

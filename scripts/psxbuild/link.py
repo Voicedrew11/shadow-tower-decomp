@@ -140,7 +140,8 @@ def build_image(name, root, units, compile_one, *, repo, load_address) -> dict:
             explicit.append('MALLOC.OBJ')
         report['phase'] = 'assemble'
         assembler_commands = [command for u in report['units'] if 'assembler_command' in u
-                              for command in (u['assembler_command'], u['gte_command'])]
+                              for command in (u['assembler_command'], u.get('gte_command'))
+                              if command]
         if assembler_commands:
             dos_run(root, assembler_commands, 'asm')
         for unit in report['units']:

@@ -13,7 +13,7 @@ from elftools.elf.elffile import ELFFile
 from tests.psylink_helpers import symbol_address
 from scripts.kf.lnk import Reader, affine, elf_view, read
 from scripts.kf.sdk import assemble_many, dos_run, tool_succeeded
-from scripts.psxbuild.sdk import aspsx_command
+from scripts.psxbuild.sdk import aspsx_command, needs_dmpsx
 
 
 class RecordTests(unittest.TestCase):
@@ -54,6 +54,8 @@ class NativeRelocationTests(unittest.TestCase):
             dos_run(root, [aspsx_command('PLAIN', 0)], 'asm-only')
             tool_succeeded(root, 'PLAIN.TXT', 'PLAIN.OBJ', b'LNK\x02')
             self.assertEqual((root / 'PLAIN.OBJ').read_bytes(), native['PLAIN'])
+            self.assertTrue(needs_dmpsx(body))
+            self.assertFalse(needs_dmpsx(plain + '\t.word 0x00001234\n\t.word 0x0001117f\n'))
 
     def test_negative_addends_match_psylink_and_native_bytes_stay_unchanged(self):
         # Synthetic assembler control: branch/call, high/low carry, and pointer
