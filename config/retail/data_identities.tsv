@@ -122,6 +122,7 @@ OPTXT.EXE	0x8001f800	0x190000	text_buffer	global	bss	u_long[0x64000]	play_openin
 OPTXT.EXE	0x801af800	0xe4	display	global	bss	DisplayBuffers	main	supported	asm;src/optxt/main.c optxt.main	two DISPENVs, two DRAWENVs and an id; COMMON in hash-bucket order (WIP spelling fits it)
 OPTXT.EXE	0x801af8e8	0x4c	pad_data	global	bss	PadBuffers	pad_init	supported	asm;src/optxt/main.c optxt.main	PadInitDirect buffers and PadSetAct data; COMMON in hash-bucket order (WIP spelling fits it)
 OPTXT.EXE	0x801af938	0x14	pad	global	bss	PadStatus	pad_read	supported	asm;src/optxt/main.c optxt.main	pad state, flags and button words; COMMON in hash-bucket order (WIP spelling fits it)
+VS.EXE	0x80063228	0x4	DAT_80063228	global	load	s32		candidate	asm;src/vs/ui_80022f14.c vs.ui_80022f14	initialized word (1) read gp-relative by func_80015020/func_80015e50/func_8001683c and through lui by func_80022f14, which lights its second choice when it equals the page
 VS.EXE	0x80063304	0x4	DAT_80063304	global	bss	s32		candidate	asm;src/vs/stub_8001ca10.c vs.stub_8001ca10	picture x func_8001cac0 saves for its CD read callback func_8001ca74 (read back as a halfword)
 VS.EXE	0x80063308	0x4	DAT_80063308	global	bss	s32		candidate	asm;src/vs/stub_8001ca10.c vs.stub_8001ca10	picture y, as DAT_80063304
 VS.EXE	0x8006335a	0x2	DAT_8006335a	global	bss	s16		candidate	asm;src/vs/card_8001c8b8.c vs.card_8001c8b8	the menu sound bank's VAB id: func_8001c9b8 stores SsVabOpenHead's result, the menu sound effects pass it to SsUtKeyOn
