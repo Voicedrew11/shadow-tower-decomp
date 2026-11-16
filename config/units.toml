@@ -634,6 +634,18 @@ source = "src/vs/anim_80028d94.c"
 profile = "probe-gcc272cdk-o2-g0"
 
 [[unit]]
+unit = "vs.fade_80028fcc"
+image = "VS.EXE"
+source = "src/vs/fade_80028fcc.c"
+profile = "probe-gcc272cdk-o2-g8"
+
+[[unit]]
+unit = "vs.hud_80029f28"
+image = "VS.EXE"
+source = "src/vs/hud_80029f28.c"
+profile = "probe-gcc272cdk-o2-g0"
+
+[[unit]]
 unit = "vs.texanim_8002d710"
 image = "VS.EXE"
 source = "src/vs/texanim_8002d710.c"

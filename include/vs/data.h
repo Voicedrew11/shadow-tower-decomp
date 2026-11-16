@@ -132,4 +132,7 @@ extern s32 DAT_80063224;
 extern s32 DAT_80063350;
 extern s32 DAT_80063360;
 
+/* Rounds won per fighter (bss, unowned). */
+extern s32 DAT_80063370[2];
+
 #endif
