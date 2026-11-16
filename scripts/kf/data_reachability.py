@@ -144,6 +144,76 @@ def proven_vendored_dispatch(
     return None
 
 
+def proven_switch_dispatch(
+    img: RetailImage, function: Binding, site: int
+) -> tuple[str, int, int] | None:
+    """Prove a GCC switch `jr` from its bounded jump-table value chain.
+
+    The accepted chain is the MIPS tablejump GCC emits, every instruction
+    inside the function:
+
+        sltiu rb, ri, N; beqz rb, default; lui rt, %hi(T); addiu rt, rt, %lo(T)
+        sll rs, ri, 2; addu ra, rs, rt (either order); lw rj, 0(ra); ...; jr rj
+
+    and all N words of the linked table T must point into the same function's
+    body, so the transfer never leaves it. Returns ("switch-table", T, N).
+    Anything else stays unresolved, as AGENTS.md requires for `jr`.
+    """
+    word = img.u32(site)
+    if word is None or word & 0xFC1FFFFF != 0x00000008:  # jr rs
+        return None
+    target = (word >> 21) & 0x1F
+
+    def at(address: int) -> int | None:
+        return img.u32(address) if function.va <= address < site else None
+
+    def find(start: int, test, limit: int = 4) -> tuple[int, int] | None:
+        for address in range(start, start - 4 * limit, -4):
+            current = at(address)
+            if current is not None and test(current):
+                return address, current
+        return None
+
+    load = find(site - 4, lambda w: w >> 26 == 0x23 and (w >> 16) & 0x1F == target
+                and w & 0xFFFF == 0, 2)
+    if load is None:
+        return None
+    entry = (load[1] >> 21) & 0x1F
+    add = find(load[0] - 4, lambda w: w & 0xFC0007FF == 0x21 and (w >> 11) & 0x1F == entry)
+    if add is None:
+        return None
+    operands = {(add[1] >> 21) & 0x1F, (add[1] >> 16) & 0x1F}
+    shift = find(add[0] - 4, lambda w: w & 0xFFE007FF == 0x80
+                 and (w >> 11) & 0x1F in operands, 2)  # sll rd, rt, 2
+    if shift is None:
+        return None
+    index = (shift[1] >> 16) & 0x1F
+    base = (operands - {(shift[1] >> 11) & 0x1F}).pop() if len(operands) == 2 else None
+    if base is None:
+        return None
+    low = find(shift[0] - 4, lambda w: w >> 26 == 0x09 and (w >> 21) & 0x1F == base
+               and (w >> 16) & 0x1F == base, 2)
+    if low is None:
+        return None
+    high = at(low[0] - 4)
+    branch = at(low[0] - 8)
+    bound = at(low[0] - 12)
+    if high is None or branch is None or bound is None:
+        return None
+    flag = (bound >> 16) & 0x1F
+    if (high & 0xFFE00000 != 0x3C000000 or (high >> 16) & 0x1F != base  # lui base
+            or bound >> 26 != 0x0B or (bound >> 21) & 0x1F != index  # sltiu flag, index, N
+            or branch & 0xFFFF0000 != (0x10000000 | flag << 21)):  # beqz flag
+        return None
+    count = bound & 0xFFFF
+    offset = low[1] & 0xFFFF
+    table = (((high & 0xFFFF) << 16) + (offset - 0x10000 if offset & 0x8000 else offset)) & 0xFFFFFFFF
+    entries = [img.u32(table + 4 * n) for n in range(count)]
+    if not count or any(e is None or not function.contains_body(e) for e in entries):
+        return None
+    return "switch-table", table, count
+
+
 def access_span(reference: Reference, img: RetailImage) -> tuple[int, int]:
     """Minimum directly observed memory span, or one anchor byte for an address.
 
@@ -208,6 +278,7 @@ def audit(
     destinations: dict[int, list[str]] = {}
     issues: dict[tuple, dict] = {}
     dispatch_witnesses: dict[int, dict] = {}
+    switch_witnesses: dict[int, dict] = {}
     queue: deque[str] = deque()
 
     def issue(code: str, key: str, ref: int | None = None, **detail) -> None:
@@ -280,6 +351,16 @@ def audit(
                     dispatch_witnesses[number] = {
                         "owner": key, "site": reference.site, "pattern": pattern[0],
                         "target": pattern[1],
+                    }
+                    continue
+                switch = (proven_switch_dispatch(img, node, reference.site)
+                          if isinstance(node, Binding) and not node.vendored else None)
+                if switch is not None:
+                    # A game switch: every table word lands in this function's
+                    # body, so the transfer adds no edge; the table is a witness.
+                    switch_witnesses[number] = {
+                        "owner": key, "site": reference.site, "pattern": switch[0],
+                        "table": switch[1], "entries": switch[2],
                     }
                     continue
                 issue("unresolved-indirect-control", key, number)
@@ -391,10 +472,12 @@ def audit(
                                               for r in range_rows),
             "reference_occurrences": len(reference_rows),
             "proven_vendored_dispatch": len(dispatch_witnesses),
+            "proven_switch_dispatch": len(switch_witnesses),
             "issues": dict(sorted(Counter(r["code"] for r in issue_rows).items())),
         },
         "ranges": range_rows, "references": reference_rows, "issues": issue_rows,
         "vendored_dispatch": [dispatch_witnesses[n] for n in sorted(dispatch_witnesses)],
+        "switch_dispatch": [switch_witnesses[n] for n in sorted(switch_witnesses)],
         "config_comparisons": [asdict(c) for c in config_comparisons if c.image == image],
     }
 
