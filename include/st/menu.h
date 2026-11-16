@@ -35,7 +35,7 @@ typedef struct {
     s16 row1;            /* 0x02: first row shown of ids1 */
     s16 *ids0;           /* 0x04 */
     s16 *ids1;           /* 0x08 */
-    s16 count0;          /* 0x0c: ids in ids0 (src/st/idgrid.c) */
+    s16 count0;          /* 0x0c: ids in ids0 (src/st/idgrid.c, func_8005d25c) */
     s16 count1;          /* 0x0e: ids in ids1 */
     DVECTOR *tex;        /* 0x10: cell images, twenty per block (func_80030be4) */
     MenuMessages *messages; /* 0x14 */
@@ -94,7 +94,7 @@ typedef union {
     DVECTOR icons[6];    /* the pause list page's icon texture positions, used from [1] */
     struct {
         MenuMessages *messages; /* 0x00: the list's message table */
-        u8 unk04[0x14];
+        DVECTOR icons[5]; /* 0x04: the rows' icon texture positions (MenuState.icons[1..5]) */
         s16 count;       /* 0x18: entries in the list */
         u8 unk1A[2];
         s16 *entries;    /* 0x1c: entry ids */
@@ -119,7 +119,7 @@ typedef union {
 
 /*
  * A 32-byte list record func_8002c2b8 lists: one memory card save file
- * (src/st/card.c): its directory name, the number in its name and bytes
+ * (src/st/menu.c): its directory name, the number in its name and bytes
  * from its header.
  */
 typedef struct {
@@ -145,7 +145,7 @@ typedef struct {
 
 /*
  * The memory card screens' view of the menu scratchpad block's first 0x1f4
- * bytes (src/st/card.c): the screen state halfwords (MenuState.half), the
+ * bytes (src/st/menu.c): the screen state halfwords (MenuState.half), the
  * SwCARD and HwCARD event descriptors (EvSpIOE, EvSpERROR, EvSpTIMOUT,
  * EvSpNEW each) and both ports' directories. Later fields are MenuScratch's.
  */
@@ -161,11 +161,14 @@ typedef struct {
 
 typedef struct {
     MenuState unk0;      /* 0x000 */
-    u8 unk5C[0x158];     /* 0x05c */
+    u8 unk5C[0x174 - 0x5c]; /* 0x05c */
+    s16 *unk174[10];     /* 0x174: the equipment page's id lists, by kind (func_8005ad00) */
+    s16 unk19C[10];      /* 0x19c: and their lengths */
+    s16 *unk1B0;         /* 0x1b0: the ids the open list shows */
     s16 unk1B4[14];      /* 0x1b4: attribute values */
     u8 unk1D0[0x24];     /* 0x1d0 */
     MenuCard *unk1F4;    /* 0x1f4: the listed records: the current port's directory */
-    s16 unk1F8;          /* 0x1f8: the memory card port (src/st/card.c) */
+    s16 unk1F8;          /* 0x1f8: the memory card port (src/st/menu.c) */
     s16 unk1FA;          /* 0x1fa: list length */
     s16 unk1FC;          /* 0x1fc */
     s16 unk1FE;          /* 0x1fe: cursor row */
@@ -181,16 +184,16 @@ typedef struct {
     s16 unk2BC;          /* 0x2bc */
     s16 unk2BE;          /* 0x2be */
     s16 unk2C0;          /* 0x2c0 */
-    u8 unk2C2[2];        /* 0x2c2 */
+    u16 unk2C2;          /* 0x2c2: unk1B0's length */
     s16 unk2C4;          /* 0x2c4: attribute bar scale */
     u8 unk2C6;           /* 0x2c6 */
     u8 unk2C7;           /* 0x2c7 */
     u8 unk2C8[4];        /* 0x2c8 */
     MenuMessages *unk2CC; /* 0x2cc */
-    u8 unk2D0[4];        /* 0x2d0 */
+    u32 *unk2D0;         /* 0x2d0: 36 words of grid cell bits (func_8005ad00) */
     u32 *unk2D4;         /* 0x2d4: one bit per grid cell */
-    s16 unk2D8;          /* 0x2d8: viewer.unk2 as src/st/equip_menu.c saved it */
-    s16 unk2DA;          /* 0x2da: viewer.unk6 as saved */
+    s16 unk2D8;          /* 0x2d8: viewer.unk2 when the equipment page opened (src/st/equip_menu.c, src/st/menu.c) */
+    s16 unk2DA;          /* 0x2da: viewer.unk6 */
     u16 unk2DC;          /* 0x2dc */
     u16 unk2DE;          /* 0x2de: selected row of the item and stats menus */
     s16 unk2E0;          /* 0x2e0 */
@@ -222,7 +225,7 @@ typedef struct {
 typedef struct {
     u8 unk0;
     u8 unk1;             /* 0x1: kind - 9, indexes unk27A/unk286 */
-    s16 unk2;            /* 0x2 */
+    u16 unk2;            /* 0x2 */
     s16 unk4[14];        /* 0x4 */
 } MenuAttrRecord;
 
@@ -248,8 +251,8 @@ typedef struct {
     s16 unk240[14];      /* 0x240: viewer.unk9A */
     s16 unk25C[14];      /* 0x25c: unk208 - unk224 */
     u8 unk278[2];
-    s16 unk27A[6];       /* 0x27a: per kind sums of the records' unk2 */
-    s16 unk286[6];       /* 0x286 */
+    u16 unk27A[6];       /* 0x27a: per kind sums of the records' unk2 */
+    u16 unk286[6];       /* 0x286 */
     u16 unk292[21];      /* 0x292: MenuScratch.unk292 */
     s16 unk2BC;          /* 0x2bc: sum of the shown records' unk24 */
 } MenuAttrScratch;
@@ -281,7 +284,9 @@ typedef struct {
     u8 unk1478[48];
     u32 unk14A8[0x5c];   /* 0x14a8: one bit per map id (func_800241d0) */
     CdlLOC unk1618[40];  /* 0x1618: the XA stream positions func_80044674 searches */
-    u8 unk16B8[0x16dc - 0x16b8];
+    u8 unk16B8[0x16d8 - 0x16b8];
+    s32 unk16D8;         /* 0x16d8: the word DAT_801cd0e0 names; the item use page
+                          * (func_8005ec10) reaches it through this object's base */
     u8 unk16DC;          /* 0x16dc: the byte DAT_801cd0e4 names; the new-game reset
                           * (func_800559bc) clears it through this object's base */
     u8 unk16DD[3];

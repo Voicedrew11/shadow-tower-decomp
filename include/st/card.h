@@ -1,5 +1,5 @@
 /*
- * ST.EXE memory card access (src/st/card.c). The save screens keep their
+ * ST.EXE memory card access (src/st/menu.c). The save screens keep their
  * card state in the menu scratchpad block (MenuCardScratch, st/menu.h).
  */
 #ifndef ST_CARD_H
@@ -58,14 +58,14 @@ int func_80063078(void);
 void func_800631ac(void);
 int func_80063260(void);
 
-/* src/st/points.c */
+/* src/st/menu.c */
 int func_8005e924(int points);
 
-/* src/st/menu_open.c */
+/* src/st/menu.c */
 void func_8005f38c(void);
 void func_8005f4fc(void);
 
-/* src/st/options.c */
+/* src/st/menu.c */
 void func_80060334(void);
 
 /* src/st/menu_vram.c */
