@@ -72,7 +72,8 @@ typedef struct {
     u8 unk26;
     u8 unk27;            /* 0x27: shown by the map menu */
     u16 unk28;
-    u8 unk2A[0x2c - 0x2a];
+    u8 unk2A;
+    u8 unk2B;            /* 0x2b: cleared after the warp func_80052c24 runs */
     u32 unk2C;           /* 0x2c: flag bits the HUD shows (func_80026508); status flags (src/st/player.c) */
     u16 unk30;           /* 0x30 */
     u8 unk32;
@@ -116,7 +117,8 @@ typedef struct {
     s8 unk15E;           /* 0x15e: HUD frame offset (func_80026afc) */
     u8 unk15F;
     SVECTOR unk160[2];   /* 0x160: func_8003f704's offsets per slot */
-    u8 unk170[0x178 - 0x170];
+    u8 unk170[4];
+    void *unk174;        /* 0x174: the VisRecord the viewer stands in (st/vis.h) */
     s16 unk178;
     s16 unk17A;
     s16 unk17C;
@@ -160,7 +162,8 @@ typedef struct {
     u8 unk21C;
     u8 unk21D;
     u8 unk21E;
-    u8 unk21F[0x22c - 0x21f];
+    u8 unk21F;
+    u8 unk220[0xc];      /* 0x220: a StWarp (func_80052c5c) */
     u8 unk22C;
     u8 unk22D;
     u8 unk22E;
@@ -222,12 +225,36 @@ typedef struct {
 
 extern Viewer viewer;
 
+/* A warp destination (viewer.unk220, viewer.unk22C): area, cell and offset,
+ * yaw (func_80052894). */
+typedef struct {
+    u8 area;
+    u8 x;
+    u8 y;
+    u8 z;
+    s16 dx;
+    s16 dy;
+    s16 dz;
+    u16 yaw;
+} StWarp;
+
 /*
  * The state block at 0x801b5920: func_80014544 sets bytes 4..9 from FN.;
  * func_80021654 times the screen fade from the tick word at +0x18;
  * byte 9 is the current area the texture slots and table C entries are
  * compared with.
  */
+/* The current area's handlers (area_state.unkC); called without arguments
+ * unless noted. WIP extent. */
+typedef struct {
+    u8 unk00[0x20];
+    void (*unk20)(void *entry, void *record); /* 0x20: a table B entry kind func_8004eebc does not know */
+    void (*unk24)(void);
+    u8 unk28[0x40 - 0x28];
+    void (*unk40)(void); /* 0x40: per table A entry, every fourth frame (func_8004e324) */
+    void (*unk44)(void); /* 0x44: per table A entry, every frame */
+} AreaHooks;
+
 typedef struct {
     s16 unk0;
     volatile u16 unk2; /* func_80021654 reads it zero-extended, then as a short */
@@ -237,7 +264,8 @@ typedef struct {
     u8 unk7;
     u8 unk8;
     u8 area;             /* 0x09 */
-    u8 unkA[0x10 - 0xa];
+    u8 unkA[2];
+    AreaHooks *unkC;     /* 0x0c: the area's handlers */
     u8 unk10;            /* 0x10: 0xff when unset */
     u8 unk11;
     u8 unk12;            /* 0x12 */

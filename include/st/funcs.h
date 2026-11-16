@@ -23,6 +23,7 @@ int func_8003eb34(VECTOR *pos, int yaw, int range, int arg3);
 void func_8003ec5c(void *data, DVECTOR *a, DVECTOR *b, int arg3);
 void func_8003ee38(u16 id, u8 slot);
 void func_8003f12c(u16 id, u8 slot, u8 reload);
+void func_80042c10(void); /* src/st/equip.c */
 void func_80042d74(void);
 void func_80044674(void);
 void func_80044ee8(void);
@@ -62,7 +63,6 @@ int func_8004aabc(VECTOR *p, VECTOR *a, VECTOR *b);
 void func_8004afdc(void);
 void *func_8004b658(VECTOR *pos, int yaw, int pitch, int range, int arg4, int arg5, int *dist,
                    int arg7);
-int func_8004def8(void *target, int arg1, int arg2, u16 *levels, int arg4);
 void func_8004e324(void);
 void func_8004eda8(void);
 int func_8004fc94(int x, int z, int w, int d, int arg4);
@@ -77,6 +77,7 @@ void func_80057684(void);
 void func_80057744(void);
 void func_80057a28(void);
 void func_80057a3c(void);
+void func_80057c54(void);
 void func_80057b10(void);
 void func_80057da0(void);
 void func_80057f3c(void);
