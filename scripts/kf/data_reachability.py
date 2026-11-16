@@ -96,6 +96,54 @@ def _function_key(function: Binding) -> str:
     return f"function:{function.va:08x}"
 
 
+BIOS_VECTORS = {0xA0, 0xB0, 0xC0}
+JR_T2 = 0x01400008
+
+
+def proven_vendored_dispatch(
+    img: RetailImage, function: Binding, site: int
+) -> tuple[str, int | None] | None:
+    """Prove an SDK member's indirect transfer from its own instruction values.
+
+    Two value chains are accepted, both ending inside the same function:
+
+    * a BIOS table stub, `li $t2, 0xA0|0xB0|0xC0` then `jr $t2` (the target is
+      the fixed BIOS vector); and
+    * an SN startup table loop whose count register is the link-time constant
+      zero (`lui r,0; addiu r,r,0` then `beqz r` before the `jalr`), so the
+      call cannot execute.
+
+    Anything else stays unresolved, as AGENTS.md requires for `jr`/`jalr`.
+    """
+    word = img.u32(site)
+    if word is None:
+        return None
+    if word == JR_T2:
+        for back in (4, 8):
+            prior = img.u32(site - back) if site - back >= function.va else None
+            if prior is not None and prior >> 16 == 0x240A and prior & 0xFFFF in BIOS_VECTORS:
+                return "bios-vector-stub", prior & 0xFFFF
+        return None
+    if word & 0xFC1FFFFF != 0x0000F809:  # jalr $ra, rs
+        return None
+    zero_registers: set[int] = set()
+    for address in range(function.va, site, 4):
+        current = img.u32(address)
+        following = img.u32(address + 4)
+        if current is None or following is None:
+            return None
+        register = (current >> 16) & 0x1F
+        if (
+            current & 0xFFE0FFFF == 0x3C000000  # lui r, 0
+            and following == (0x24000000 | register << 21 | register << 16)  # addiu r, r, 0
+        ):
+            zero_registers.add(register)
+        if current >> 26 == 0x04 and (current >> 16) & 0x1F == 0:  # beqz rs
+            if (current >> 21) & 0x1F in zero_registers:
+                return "empty-link-time-table", None
+    return None
+
+
 def access_span(reference: Reference, img: RetailImage) -> tuple[int, int]:
     """Minimum directly observed memory span, or one anchor byte for an address.
 
@@ -159,7 +207,7 @@ def audit(
     outgoing: dict[str, list[int]] = {}
     destinations: dict[int, list[str]] = {}
     issues: dict[tuple, dict] = {}
-    vendored_indirect: set[int] = set()
+    dispatch_witnesses: dict[int, dict] = {}
     queue: deque[str] = deque()
 
     def issue(code: str, key: str, ref: int | None = None, **detail) -> None:
@@ -222,11 +270,17 @@ def audit(
                     issue("invalid-live-reference", key, number)
                 continue
             if reference.target is None:
-                if isinstance(node, Binding) and node.vendored:
-                    # An SDK member's own dispatch (BIOS `jr $t2` stubs,
-                    # constructor-table loops) is placed and relocated by
-                    # that archive member, not by game-owned data.
-                    vendored_indirect.add(number)
+                pattern = (
+                    proven_vendored_dispatch(img, node, reference.site)
+                    if isinstance(node, Binding) and node.vendored else None
+                )
+                if pattern is not None:
+                    # Proven by the member's own instruction values, not by
+                    # vendored ownership alone; kept as a witness row.
+                    dispatch_witnesses[number] = {
+                        "owner": key, "site": reference.site, "pattern": pattern[0],
+                        "target": pattern[1],
+                    }
                     continue
                 issue("unresolved-indirect-control", key, number)
                 continue
@@ -336,10 +390,11 @@ def audit(
             "config_matched_data_ranges": sum(r.get("comparison") == "config-provider-matched"
                                               for r in range_rows),
             "reference_occurrences": len(reference_rows),
-            "vendored_indirect_control": len(vendored_indirect),
+            "proven_vendored_dispatch": len(dispatch_witnesses),
             "issues": dict(sorted(Counter(r["code"] for r in issue_rows).items())),
         },
         "ranges": range_rows, "references": reference_rows, "issues": issue_rows,
+        "vendored_dispatch": [dispatch_witnesses[n] for n in sorted(dispatch_witnesses)],
         "config_comparisons": [asdict(c) for c in config_comparisons if c.image == image],
     }
 
