@@ -110,7 +110,9 @@ extern VsRecord20 DAT_801c4a58[2000];
  * start; only the state fields the code proves are spelled.
  */
 typedef struct {
-    u8 file[0x4def0];        /* 0x00000: the model file, then unmodeled */
+    u8 file[0x4dee0];        /* 0x00000: the model file, then unmodeled */
+    StAnimSet *unk4DEE0;     /* 0x4dee0: the fighter's skeletal-animation slot */
+    u8 unk4DEE4[0x4def0 - 0x4dee4];
     VECTOR unk4DEF0;         /* 0x4def0: position */
     u8 unk4DF00[0x4df0e - 0x4df00];
     u16 unk4DF0E;            /* 0x4df0e: state; 3 and 4 cannot be hit */
@@ -123,5 +125,11 @@ typedef struct {
 typedef char VsFighterSize[sizeof(VsFighter) == 0x4e0e8 ? 1 : -1];
 
 extern VsFighter DAT_800633b0[2];
+
+/* Renderer switches (unowned): a fixed OT depth for every face (.sdata),
+ * semi-transparent faces and mirrored winding (bss). */
+extern s32 DAT_80063224;
+extern s32 DAT_80063350;
+extern s32 DAT_80063360;
 
 #endif

@@ -10,6 +10,7 @@
 #include <LIBGTE.H>
 #include <LIBCD.H>
 #include <st/cd.h>
+#include <st/mesh.h>
 
 /* src/vs/cd_8001cb34.c */
 void func_8001cb34(void);                 /* ST func_8001531c */
@@ -24,6 +25,12 @@ void func_800241b4(struct StAnimSet **out);
 
 /* src/vs/anim_80027c64.c */
 void func_80027c64(SVECTOR *dst, SVECTOR *from, SVECTOR *to, int count); /* ST vertices_sub */
+
+/* The second renderer set src/vs/mesh_80027ba4.c runs (not reconstructed). */
+void func_80027198(int count, MeshFaceFT3 *face, u_long *ot);
+void func_80027400(int count, MeshFaceFT4 *face, u_long *ot);
+void func_80027698(int count, MeshFaceGT3 *face, u_long *ot);
+void func_800278f8(int count, MeshFaceGT4 *face, u_long *ot);
 
 /* src/vs/cd_8002e5e4.c */
 void func_8002e5e4(void);                 /* ST func_800214cc */

@@ -610,6 +610,12 @@ source = "src/vs/prim_80025878.c"
 profile = "probe-gcc272cdk-o2-g0"
 
 [[unit]]
+unit = "vs.mesh_800258f0"
+image = "VS.EXE"
+source = "src/vs/mesh_800258f0.c"
+profile = "probe-gcc272cdk-o2-g8"
+
+[[unit]]
 unit = "vs.anim_80027c64"
 image = "VS.EXE"
 source = "src/vs/anim_80027c64.c"
@@ -619,6 +625,12 @@ profile = "probe-gcc272cdk-o2-g0"
 unit = "vs.anim_80027f30"
 image = "VS.EXE"
 source = "src/vs/anim_80027f30.c"
+profile = "probe-gcc272cdk-o2-g0"
+
+[[unit]]
+unit = "vs.anim_80028d94"
+image = "VS.EXE"
+source = "src/vs/anim_80028d94.c"
 profile = "probe-gcc272cdk-o2-g0"
 
 [[unit]]
