@@ -69,17 +69,32 @@ typedef struct {
     short offset_z;      /* 0x1ee */
     long plane[6];       /* 0x1f0 */
     long unk208;         /* 0x208 */
-    u8 unk20C[0xd9];     /* 0x20c */
+    u8 unk20C[0xd2];     /* 0x20c */
+    s16 unk2DE;          /* 0x2de: selected row of the item and stats menus */
+    s16 unk2E0;          /* 0x2e0: cursor row of a list menu */
+    s16 unk2E2;          /* 0x2e2: first list entry shown */
+    u8 unk2E4;           /* 0x2e4: blink phase of a list menu cursor */
     u8 unk2E5;           /* 0x2e5: text font mode (0: 6x12 half-width cells) */
-    u8 unk2E6[0x52];     /* 0x2e6 */
+    u8 unk2E6[0x1a];     /* 0x2e6 */
+    CVECTOR unk300;      /* 0x300: menu text colours (src/st/menu.c) */
+    u8 unk304[4];
+    CVECTOR unk308;      /* 0x308 */
+    CVECTOR unk30C;      /* 0x30c */
+    CVECTOR unk310;      /* 0x310 */
+    u8 unk314[4];
+    CVECTOR unk318;      /* 0x318 */
+    u8 unk31C[0x10];
+    CVECTOR unk32C;      /* 0x32c: menu cursor colour */
+    RECT unk330;         /* 0x330: menu cursor rectangle */
     CVECTOR unk338;      /* 0x338: menu panel colours and rectangles (src/st/text.c) */
     RECT unk33C;         /* 0x33c */
     CVECTOR unk344;      /* 0x344 */
     RECT unk348;         /* 0x348 */
-    u8 unk350[8];        /* 0x350 */
+    RECT unk350;         /* 0x350: list menu icon rectangle */
     DVECTOR unk358;      /* 0x358: texture position for func_80028364 */
     DVECTOR unk35C;      /* 0x35c: CLUT position for func_80028364 */
-    u8 unk360[0x34];     /* 0x360 */
+    u16 unk360;          /* 0x360: menu cursor brightness */
+    u8 unk362[0x32];
     StLight *unk394;     /* 0x394: lighting environment func_80017d28 blends toward */
 } ScratchPad;
 

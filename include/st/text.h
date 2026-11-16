@@ -27,9 +27,9 @@ extern u16 DAT_80088190;
 extern u8 DAT_801cd124;
 
 void func_80026ecc(u16 c, u16 x, u16 y, CVECTOR *color);
-void func_8002732c(u16 *s, int x, int y, CVECTOR *color);
-void func_80027440(u32 num, int x, int y, CVECTOR *color);
-void func_800276bc(u32 num, int x, int y, CVECTOR *color);
+void func_8002732c(u16 *s, u16 x, u16 y, CVECTOR *color);
+void func_80027440(u32 num, u16 x, u16 y, CVECTOR *color);
+void func_800276bc(u32 num, u16 x, u16 y, CVECTOR *color);
 void func_80027900(DVECTOR *pos, CVECTOR *color, u16 dir);
 void func_80027d18(RECT *r, CVECTOR *color, u16 border, u16 semi);
 void func_80028220(RECT *r, CVECTOR *color, u16 semi);

@@ -132,7 +132,7 @@ void func_80026ecc(u16 c, u16 x, u16 y, CVECTOR *color)
 /* Not exact: retail copies the line start from $a1 (the incoming x), this build
  * from its $s1 copy; the loop-end 0xffff lands in $t0 here. */
 ADDRESS(0x8002732c, 0x114)
-void func_8002732c(u16 *s, int x, int y, CVECTOR *color)
+void func_8002732c(u16 *s, u16 x, u16 y, CVECTOR *color)
 {
     int left = x;
     u_int space = (color->cd & 0x7c) >> 2;
@@ -178,7 +178,7 @@ void func_8002732c(u16 *s, int x, int y, CVECTOR *color)
 /* Not exact: retail tests the power-of-ten loop on n - 1 against -1 (no fold to
  * n == 0) and allocates the parameters to other saved registers. */
 ADDRESS(0x80027440, 0x27c)
-void func_80027440(u32 num, int x, int y, CVECTOR *color)
+void func_80027440(u32 num, u16 x, u16 y, CVECTOR *color)
 {
     u16 digit[8];
     u8 leading = 1;
@@ -241,7 +241,7 @@ void func_80027440(u32 num, int x, int y, CVECTOR *color)
 /* Draws a number with the fixed 7-pixel digit glyphs (codes 2-11). */
 /* Not exact: as func_80027440: the power-of-ten loop test and parameter registers. */
 ADDRESS(0x800276bc, 0x244)
-void func_800276bc(u32 num, int x, int y, CVECTOR *color)
+void func_800276bc(u32 num, u16 x, u16 y, CVECTOR *color)
 {
     u16 digit[8];
     u8 leading = 1;

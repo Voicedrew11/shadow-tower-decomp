@@ -41,15 +41,25 @@ typedef struct {
     u16 unk2;
     u16 unk4;
     u16 unk6;
-    u8 unk8[0x28 - 0x8];
+    u16 unk8;            /* 0x8: shown by the status menu */
+    u8 unkA[4];
+    u16 unkE;            /* 0xe: shown by the stats menu */
+    u16 unk10;           /* 0x10 */
+    u8 unk12[0x15];
+    u8 unk27;            /* 0x27: shown by the map menu */
     u16 unk28;
     u8 unk2A[2];
     u32 unk2C;           /* 0x2c: flag bits the HUD shows (func_80026508) */
-    u8 unk30[3];
+    u16 unk30;           /* 0x30 */
+    u8 unk32;
     u8 unk33; /* incremented every vsync, wraps at 60 */
     s32 unk34; /* incremented when unk33 wraps */
     u16 unk38[21]; /* set from FN. ids 970..990 */
-    u8 unk62[0x15e - 0x62];
+    u8 unk62[0x58];
+    u16 unkBA;           /* 0xba: shown by the stats menu */
+    u16 unkBC;           /* 0xbc */
+    u16 unkBE;           /* 0xbe */
+    u8 unkC0[0x15e - 0xc0];
     s8 unk15E;           /* 0x15e */
     u8 unk15F[0x17e - 0x15f];
     u16 unk17E;          /* 0x17e: HUD bar 0 value */

@@ -238,7 +238,9 @@ ST.EXE	0x8007f3e4	0x6ebe4	0x10	unclassified	coverage-gap			payload-complement	ma
 ST.EXE	0x8007f3f4	0x6ebf4	0x398	defined	candidate	hud_sprites	StHudSprite[46]	asm;src/st/hud.c st.hud	46 HUD sprite records of 20 bytes in runs ended by flags 0xff; extern only, owner unknown
 ST.EXE	0x8007f78c	0x6ef8c	0x878c	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 ST.EXE	0x80087f18	0x77718	0x4	defined	candidate	DAT_80087f18	s32	asm;src/st/hud.c st.hud	$gp+0x58 .sdata word; blink phase of func_80026afc's selection frame
-ST.EXE	0x80087f1c	0x7771c	0x8e4	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
+ST.EXE	0x80087f1c	0x7771c	0x18	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
+ST.EXE	0x80087f34	0x77734	0x4	defined	candidate	DAT_80087f34	s32	asm;src/st/menu.c st.menu	$gp+0x74 .sdata word; blink phase of the map page arrows (func_8002a954)
+ST.EXE	0x80087f38	0x77738	0x8c8	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 TITLE.EXE	0x80012000	0x800	0xa04	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 TITLE.EXE	0x80014528	0x2d28	0x4	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 TITLE.EXE	0x80016d80	0x5580	0xc	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
