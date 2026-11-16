@@ -60,7 +60,7 @@ void func_8004a8e8(VECTOR *p, SVECTOR *v, int s, VECTOR *out);
 int func_8004a940(SVECTOR *p, SVECTOR *a, SVECTOR *b);
 int func_8004aabc(VECTOR *p, VECTOR *a, VECTOR *b);
 void func_8004afdc(void);
-void *func_8004b658(VECTOR *pos, int yaw, int pitch, int range, int arg4, int arg5, int *dist,
+void *func_8004b658(VECTOR *pos, short yaw, short pitch, int range, int arg4, int arg5, int *dist,
                    int arg7);
 int func_8004def8(void *target, int arg1, int arg2, u16 *levels, int arg4);
 void func_8004e324(void);
@@ -81,6 +81,9 @@ void func_80057b10(void);
 void func_80057da0(void);
 void func_80057f3c(void);
 void func_80058254(int id, VECTOR *pos, int arg2, int arg3, int arg4, int arg5);
+void func_80058220(int id, VECTOR *pos, int arg2, int arg3);
+int func_80052d40(int id);
+void func_8005a3a8(int arg);
 void func_80058288(VECTOR *a, SVECTOR *b);
 s16 func_800582f0(int sound, int volume);
 void func_8005850c(s16 voice, int sound);

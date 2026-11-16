@@ -81,7 +81,7 @@ void func_800241d0(void)
             sp->ot = world_state.ot_cur + e->unk21;
             sp->near_z = 4 - e->unk21;
             sp->far_z = 4096 - e->unk21;
-            model_draw(0, e->unk0B + SLOT_A, at, &sp->unkD8, &e->unk94, e->unkA4,
+            model_draw(0, e->unk0B + SLOT_A, at, &sp->unkD8, &e->unk94, &e->unkA4,
                           &DAT_8008040c, e->unk08, e->unk2A, 4096 - depth, e->unk24,
                           e->unk1C.bytes[2], 0);
         } else {
@@ -96,7 +96,7 @@ void func_800241d0(void)
                 sp->ot = world_state.ot_cur + e->unk21;
                 sp->near_z = 4 - e->unk21;
                 sp->far_z = 4096 - e->unk21;
-                model_draw(0, e->unk0B + SLOT_A, at, &sp->unkD8, &e->unk94, e->unkA4,
+                model_draw(0, e->unk0B + SLOT_A, at, &sp->unkD8, &e->unk94, &e->unkA4,
                               &world_state.unk1ECE8, e->unk08, e->unk2A, 4096 - depth, e->unk24,
                               e->unk1C.bytes[2], 0);
             }

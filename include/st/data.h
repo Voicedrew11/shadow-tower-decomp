@@ -84,7 +84,7 @@ typedef struct {
      * reads six u16s from 0x78 (unk62[11]..unk7E[2]) by its level. */
     s16 unk62[14];       /* 0x62 */
     s16 unk7E[14];       /* 0x7e */
-    u16 unk9A[14];       /* 0x9a */
+    u16 unk9A[14];       /* 0x9a: figures func_8004db0c adds bonuses to */
     u16 unkB6;           /* 0xb6: player_hit's resistance terms */
     u16 unkB8;           /* 0xb8 */
     u16 unkBA[3];        /* 0xba: shown by the stats menu; effect_play reads them as a row */
@@ -178,13 +178,15 @@ typedef struct {
     long x;              /* 0x248 */
     long y;              /* 0x24c */
     long z;              /* 0x250 */
-    u8 unk254[0x14];
+    u8 unk254[0xc];
+    SVECTOR unk260;      /* 0x260: motion (func_8004cc70 leads targets by it) */
     short unk268;        /* 0x268: pitch in func_80016554 */
     short unk26A;        /* 0x26a: yaw in func_80016554 */
     short unk26C;        /* 0x26c: roll; model_draw_list turns kind-2 parts by all three */
     short unk26E;
     SVECTOR unk270;      /* 0x270 */
-    SVECTOR unk278;      /* 0x278: func_8003c054 copies it to 0x268; view pitch (vx) and yaw (vy) func_80041d4c turns */
+    SVECTOR unk278;      /* 0x278: func_8003c054 copies it to 0x268; view pitch (vx) and yaw (vy) func_80041d4c turns
+                          * (band L reads the yaw, unk278.vy) */
     s16 unk280;
     s16 unk282;
     s16 unk284;
@@ -222,6 +224,12 @@ typedef struct {
 
 extern Viewer viewer;
 
+/* What area_state.unkC points at: a function table (WIP extent). */
+typedef struct {
+    u8 unk00[0x40];
+    void (*unk40)(void); /* 0x40 */
+} AreaProcs;
+
 /*
  * The state block at 0x801b5920: func_80014544 sets bytes 4..9 from FN.;
  * func_80021654 times the screen fade from the tick word at +0x18;
@@ -237,7 +245,8 @@ typedef struct {
     u8 unk7;
     u8 unk8;
     u8 area;             /* 0x09 */
-    u8 unkA[0x10 - 0xa];
+    u8 unkA[2];
+    AreaProcs *unkC;     /* 0x0c */
     u8 unk10;            /* 0x10: 0xff when unset */
     u8 unk11;
     u8 unk12;            /* 0x12 */

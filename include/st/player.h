@@ -44,7 +44,6 @@ typedef struct {
 
 /* Not reconstructed yet. */
 void func_80057c0c(void);
-void func_8005a3a8(int arg0);
 void func_80057a68(int arg0);
 void func_80055990(void);
 void func_800595d4(void);
