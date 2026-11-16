@@ -16,6 +16,7 @@ REPO = Path(__file__).resolve().parents[1]
 
 class ClassicVarargsControls(unittest.TestCase):
     @unittest.skipUnless(os.environ.get('PSYQ_C_INCLUDE') and os.environ.get('PSYQ_PSYLINK')
+                         and os.environ.get('PSYQ_DMPSX')
                          and shutil.which('cpppsx-257') and shutil.which('cc1psx-257')
                          and shutil.which('dosbox-x') and importlib.util.find_spec('unicorn'),
                          'original compiler headers and native PS1 build tools required')

@@ -260,7 +260,7 @@ report; progress continues to exclude vendored functions.
 The executable and matching commands share this compilation path:
 
 ```text
-C source -> CPPPSX/CC1PSX -> ASPSX -> native Psy-Q OBJ
+C source -> CPPPSX/CC1PSX -> ASPSX -> DMPSX -> native Psy-Q OBJ
 ```
 
 `kf build` passes the native objects and original SDK inputs to PSYLINK and

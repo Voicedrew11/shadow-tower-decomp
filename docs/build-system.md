@@ -6,7 +6,8 @@
 > programs are kept where they illustrate a mechanism.
 
 `kf build` is the source-to-EXE build: the gcc-2.7.2-cdk compiler emits
-assembly, ASPSX 2.79D emits native Psy-Q objects, PSYLINK 2.73D links those
+assembly, ASPSX 2.79D emits native Psy-Q objects, DMPSX 3.0 rewrites the GTE
+placeholder words of `INLINE_C.H` in them, PSYLINK 2.73D links those
 objects with the Runtime Library 4.2 inputs, and CPE2X 1.5 writes each
 executable. See [the linking guide](executable-linking.md) for outputs and
 provenance.
@@ -16,7 +17,7 @@ the README. Tool failures stop the build; reconstruction checks are separate.
 At the command level, the build is a compiler, an assembler, and a linker:
 
 ```text
-source files -> compiler -> assembler -> object files
+source files -> compiler -> assembler -> DMPSX -> object files
 object files + SDK objects/libraries -> linker -> executable
 ```
 
@@ -26,9 +27,15 @@ inputs and their order, the executable load origin and entry point, and the
 uninitialized sections. PSYLINK chooses individual symbol addresses and applies
 relocations. `ADDRESS()` and `DATA()` annotations do not control placement.
 
-The build uses ASPSX's native objects for PSYLINK; the comparison tools
-translate that same format to ELF only because objdiff needs it. No maspsx or
-GNU assembler output enters either path.
+The build uses ASPSX's native objects, after DMPSX, for PSYLINK; the
+comparison tools translate that same format to ELF only because objdiff
+needs it. Every assembled object goes through DMPSX (`rewrite_gte` in
+`scripts/psxbuild/sdk.py`; DMPSX 3.0 is given only the object's `.text` code,
+see [the toolchain page](toolchain.md#dmpsx)), and the result is checked
+against ASPSX's object: one without GTE placeholders must come back
+byte-identical, and in one with them only those `.text` words may change,
+each into a COP2 command. No maspsx or GNU assembler output enters either
+path.
 
 `kf analyze` drives the incremental Ninja graph for inspection. Source
 compilation uses the same native SDK path; ELF objects are read-only views
