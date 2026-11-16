@@ -3,8 +3,10 @@
 - Reconstruct the Shadow Tower (`SLUS-00863`) sources so the pinned PlayStation
   toolchain can emit objects matching the retail programs.
 - This repository contains seven independent linked programs: `PSX.EXE`, `STR.EXE`, `ST.EXE`, `TITLE.EXE`, `OPTXT.EXE`, `VS.EXE`, and `END.EXE`
-  (the boot loader plus six programs sharing the 0x80011000 load region). Overlays share load windows, so an address is never an
-  identity without its image. `config/images.toml` is the authority.
+  (the boot loader plus six programs sharing the 0x80011000 load region), and
+  36 headerless code overlays `FDAT_nnn.BIN` that `ST.EXE` loads from
+  `ST\COM\FDAT.T` at 0x801EB560. Images share load windows, so an address is
+  never an identity without its image. `config/images.toml` is the authority.
 - The toolchain, compiler probes and linker model are inherited from the
   King's Field II (`SLPS-00069`) project. Re-prove each against this game's
   retail bytes before relying on it.
@@ -25,7 +27,7 @@
 - Extract and initialize hash-identical retail files with
   `kf extract --disc PATH.cue && kf init --retail-dir retail` before binary queries.
 - Select one image explicitly for every semantic query:
-  `kf sema --image psx|str|st|title|optxt|vs|end ...`.
+  `kf sema --image psx|str|st|title|optxt|vs|end|fdat_nnn ...`.
 - Before editing a function, inspect its retail disassembly/CFG, callers,
   callees, strings, data references, relocation evidence, adjacent functions,
   source history, and current match state.

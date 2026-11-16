@@ -10,7 +10,15 @@ No game data is included: supply your own disc image. The Nix environment
 downloads the historical Psy-Q 3.0 SDK separately; see
 [the toolchain documentation](docs/toolchain.md).
 
-The disc carries seven linked programs: the boot loader (`SLUS_008.63`, called `PSX.EXE` here; the disc also holds an identical `PSX.EXE`) and six programs that it or each other load: `STR.EXE`, `ST.EXE`, `TITLE.EXE`, `OPTXT.EXE`, `VS.EXE` and `END.EXE`. All but `TITLE.EXE` (`0x80012000`) load at `0x80011000`. Which program loads which is not yet mapped.
+The disc carries seven linked programs and 36 code overlays, 43 images in
+all. `PSX.EXE` (the boot file `SLUS_008.63`; the disc also holds an
+identical `PSX.EXE`) is a program sequencer: its table names, by index,
+`STR.EXE`, `TITLE.EXE`, `OPTXT.EXE`, `ST.EXE`, `END.EXE` and `VS.EXE`. It
+runs index 0 (`STR.EXE`) first, then after each program returns it loads
+the index that program left in the byte at `0x800103F0`. `ST.EXE` stores 4
+(`END.EXE`) and `VS.EXE` stores 1 (`TITLE.EXE`); how the other programs pick
+their successor is not yet traced. All programs but `TITLE.EXE`
+(`0x80012000`) load at `0x80011000`.
 
 | Image | Disc file | Load address | Load size |
 | :---- | :-------- | -----------: | --------: |
@@ -21,6 +29,15 @@ The disc carries seven linked programs: the boot loader (`SLUS_008.63`, called `
 | `OPTXT.EXE` | `OPTXT.EXE` | `0x80011000` | `0xe800` |
 | `VS.EXE` | `VS.EXE` | `0x80011000` | `0x52800` |
 | `END.EXE` | `END.EXE` | `0x80011000` | `0x1f000` |
+| `FDAT_nnn.BIN` (36) | `ST\COM\FDAT.T` entry *nnn* | `0x801EB560` | `0x2800`–`0x4800` |
+
+`ST.EXE` loads one headerless code overlay at a time from `ST\COM\FDAT.T`
+(entries 2, 12, ..., 472; the other entries are data) at `0x801EB560`, the
+end of its own `.bss`. The overlays share `ST.EXE`'s address space and call
+straight into its code, and each starts with an id word and 32 handler
+pointers. They are named by archive entry (`--image fdat_012`) because the
+map each one belongs to is not yet proven; entries 2, 322 and 402 are
+byte-identical. `config/images.toml` records every hash and layout.
 
 ## Getting started
 
@@ -32,8 +49,10 @@ kf build
 kf status
 ```
 
-`config/images.toml` records the disc and executable hashes. `kf extract`
-refuses any other dump.
+`config/images.toml` records the disc, executable, archive and overlay
+hashes. `kf extract` refuses any other dump; it copies the programs and
+`FDAT.T` and slices the overlays out of it (`kf init` re-derives missing
+overlay files from `retail/FDAT.T`).
 
 The tooling and matching workflow come from the King's Field II
 (`SLPS-00069`) project, which builds on the King's Field (`SLPS-00017`)
