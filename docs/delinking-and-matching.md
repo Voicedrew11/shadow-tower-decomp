@@ -319,16 +319,23 @@ of all config-only reachable storage.
 images that at least one source unit claims; an image without units has
 nothing to relink, and its census-wide closure is the curation worklist
 (`kf verify reachability --image KEY`). The OK line says how many images were
-gated. Inside reached Sony functions, only indirect transfers proved from the
-member's own instructions (BIOS `li $t2, 0xA0/0xB0/0xC0; jr $t2` stubs and
-startup table loops with a link-time zero count) are exempt; they are listed
-as `vendored_dispatch` witness rows in the reachability report. In a game
+gated. Inside reached vendored Sony (Psy-Q) functions, every indirect
+`jr`/`jalr` is exempt from the closure gate by project decision (2026-11-17;
+revisit if a vendored site turns out to matter). The exemption is witnessed,
+not silent: each site is a `vendored_dispatch` row (`owner`, `site`,
+`pattern: "vendored-indirect"`) in the reachability report, and the summary
+counts them as `vendored_indirect_exempt`. A site also proved from the
+member's own instructions names that proof in `proof` (`bios-vector-stub`
+for `li $t2, 0xA0/0xB0/0xC0; jr $t2`, with the vector in `target`;
+`empty-link-time-table` for a startup table loop with a link-time zero
+count), counted as `proven_vendored_dispatch`. Game-code indirect transfers
+get no such exemption. In a game
 function, a compiled `switch` jump is proved from its own bounded value
 chain (`sltiu`/`beqz` bound, `lui`/`addiu` table address, `sll`/`addu`/`lw`,
 `jr`) when every table word is an instruction start inside that function;
 the CFG's `switch_table` rule (`scripts/kf/sema/cfg.py`) is the one prover,
 and each such jump is a `switch_dispatch` witness row. A Sony member's
-switch jump gets no exemption from it.
+switch jump is not proved by it; it is covered by the vendored exemption.
 
 Both objdiff front ends are built from the same pinned 3.7.3 source with
 `patches/objdiff-strict-data.patch`. Native section scores include anonymous

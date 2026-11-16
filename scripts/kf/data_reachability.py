@@ -114,7 +114,10 @@ def proven_vendored_dispatch(
       zero (`lui r,0; addiu r,r,0` then `beqz r` before the `jalr`), so the
       call cannot execute.
 
-    Anything else stays unresolved, as AGENTS.md requires for `jr`/`jalr`.
+    These specific proofs are recorded on the witness row; every other
+    indirect transfer inside a Sony member is exempted as `vendored-indirect`
+    by `audit` (a project decision, not a proof). Game-code `jr`/`jalr` stays
+    unresolved, as AGENTS.md requires, unless it is a proven switch.
     """
     word = img.u32(site)
     if word is None:
@@ -152,7 +155,8 @@ def proven_switch_dispatch(img: RetailImage, function: Binding) -> dict[int, dic
     bounded `sltiu`/`beqz` index, a `lui`/`addiu` table base (the `lui` may
     sit in the bound's delay slot), `sll`/`addu`/`lw`/`jr`, no branch into
     the scanned run, the index unchanged, and every table word an instruction
-    start inside this function. Vendored members get no exemption from it.
+    start inside this function. Vendored members are not proved by it (their
+    indirect sites are exempted wholesale as `vendored-indirect`).
     Returns the witness detail per `jr` site.
     """
     if function.vendored or function.fragments != 1:
@@ -301,16 +305,18 @@ def audit(
                     issue("invalid-live-reference", key, number)
                 continue
             if reference.target is None:
-                pattern = (
-                    proven_vendored_dispatch(img, node, reference.site)
-                    if isinstance(node, Binding) and node.vendored else None
-                )
-                if pattern is not None:
-                    # Proven by the member's own instruction values, not by
-                    # vendored ownership alone; kept as a witness row.
+                if isinstance(node, Binding) and node.vendored:
+                    # Project decision (2026-11-17): every indirect transfer
+                    # inside a vendored Sony member is exempt from the gate.
+                    # It stays auditable as a witness row; a transfer proved
+                    # from the member's own instruction values also names
+                    # that proof (BIOS vector stub, empty link-time table).
+                    proven = proven_vendored_dispatch(img, node, reference.site)
                     dispatch_witnesses[number] = {
-                        "owner": key, "site": reference.site, "pattern": pattern[0],
-                        "target": pattern[1],
+                        "owner": key, "site": reference.site,
+                        "pattern": "vendored-indirect",
+                        "proof": proven[0] if proven else None,
+                        "target": proven[1] if proven else None,
                     }
                     continue
                 if reference.site in switches.get(key, {}):
@@ -425,7 +431,10 @@ def audit(
             "config_matched_data_ranges": sum(r.get("comparison") == "config-provider-matched"
                                               for r in range_rows),
             "reference_occurrences": len(reference_rows),
-            "proven_vendored_dispatch": len(dispatch_witnesses),
+            "vendored_indirect_exempt": len(dispatch_witnesses),
+            "proven_vendored_dispatch": sum(
+                w["proof"] is not None for w in dispatch_witnesses.values()
+            ),
             "proven_switch_dispatch": len(switch_witnesses),
             "issues": dict(sorted(Counter(r["code"] for r in issue_rows).items())),
         },
@@ -455,6 +464,10 @@ def run(images: tuple[str, ...], *, output: Path | None = None) -> int:
               f"{summary['reached_vendor_functions']} reached vendor functions, "
               f"{summary['source_owned_data_ranges']} source-owned / "
               f"{summary['config_only_data_ranges']} config-only data ranges")
+        if summary["vendored_indirect_exempt"]:
+            print(f"  vendored Sony indirect sites exempt (witnessed): "
+                  f"{summary['vendored_indirect_exempt']} "
+                  f"({summary['proven_vendored_dispatch']} with a value-chain proof)")
         if summary['config_matched_data_ranges']:
             print(f"  independent provider/retail matches: {summary['config_matched_data_ranges']} config ranges")
         for code, count in summary["issues"].items():
