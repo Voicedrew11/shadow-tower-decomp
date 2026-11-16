@@ -20,7 +20,7 @@
 #include <st/player.h>
 #include <st/area.h>
 
-RODATA(0x80011f18, 0x38f)
+RODATA(0x80011f18, 0x390)
 SDATA(0x80088064, 0x38)
 
 DATA(0x800881d8, 0x4, ".sbss")
