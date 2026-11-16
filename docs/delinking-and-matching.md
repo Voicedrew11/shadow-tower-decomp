@@ -301,7 +301,15 @@ symbols; the linker may not scatter it or override defined symbols to hide a
 layout conflict. Relinked initialized bytes are compared in full, and BSS is
 checked as uninitialized storage. A unit's single global COMMON request whose exact `DATA()` claim
 is the only one in its section is placed at that claim: in `.bss`, or in
-`.sbss` for a small request of a `-G8` unit. A unit whose `.sdata` holds
+`.sbss` for a small request of a `-G8` unit. A COMMON request the unit does
+not claim is a tentative definition merging into an initialized definition
+elsewhere when the image has a global `load` datum of that name (a curated
+identity or another unit's `DATA()` claim) inside the PS-X EXE payload, at
+least as large as the request and aligned for it: the linker allocates
+COMMON only when no object defines the symbol, so the request owns no
+storage and resolves as a reference (`roundtrip.merged_common`; listed as
+`merged_commons` in the relink audit). A `-G8` unit keeps such a tentative
+definition when ASPSX needs the size for a `$gp`-relative access. A unit whose `.sdata` holds
 only its `SDATA()` literal range places that section at the range's start. Synthetic tails imitating the probe assembler
 are not appended to retail claims: source alignment/extent differences remain
 real comparison failures. This is not yet a linked reconstruction or a check
