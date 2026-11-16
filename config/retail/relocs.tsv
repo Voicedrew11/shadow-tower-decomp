@@ -282,6 +282,16 @@ ST.EXE	0x8001945c	0x8c5c		mips26	reachable-code	0x800184c4	load		jal		manual-dec
 ST.EXE	0x80019474	0x8c74		mips26	reachable-code	0x80018828	load		jal		manual-decoded	reviewed	st.mesh_draw asm review
 ST.EXE	0x8001948c	0x8c8c		mips26	reachable-code	0x80018ba0	load		jal		manual-decoded	reviewed	st.mesh_draw asm review
 ST.EXE	0x800194a4	0x8ca4		mips26	reachable-code	0x80018f48	load		jal		manual-decoded	reviewed	st.mesh_draw asm review
+ST.EXE	0x80019e2c	0x962c	0x80019e30	mips_hi16_lo16	reachable-code	0x8015d090	bss	DAT_8015d090	lui+addiu		manual-decoded	reviewed	st.mesh_draw_nccs asm review
+ST.EXE	0x80019e68	0x9668		mips26	reachable-code	0x80019e88	load		j		manual-decoded	reviewed	st.mesh_draw_nccs asm review
+ST.EXE	0x80019e7c	0x967c		mips26	reachable-code	0x80019e88	load		j		manual-decoded	reviewed	st.mesh_draw_nccs asm review
+ST.EXE	0x80019e9c	0x969c	0x80019ea0	mips_hi16_lo16	reachable-code	0x8015d090	bss	DAT_8015d090	lui+addiu		manual-decoded	reviewed	st.mesh_draw_nccs asm review
+ST.EXE	0x80019edc	0x96dc		mips26	reachable-code	0x80019f3c	load		j		manual-decoded	reviewed	st.mesh_draw_nccs asm review
+ST.EXE	0x80019f10	0x9710		mips26	reachable-code	0x80019f3c	load		j		manual-decoded	reviewed	st.mesh_draw_nccs asm review
+ST.EXE	0x80019f4c	0x974c		mips26	reachable-code	0x800194c4	load		jal		manual-decoded	reviewed	st.mesh_draw_nccs asm review
+ST.EXE	0x80019f64	0x9764		mips26	reachable-code	0x800196c0	load		jal		manual-decoded	reviewed	st.mesh_draw_nccs asm review
+ST.EXE	0x80019f7c	0x977c		mips26	reachable-code	0x800198f4	load		jal		manual-decoded	reviewed	st.mesh_draw_nccs asm review
+ST.EXE	0x80019f94	0x9794		mips26	reachable-code	0x80019b34	load		jal		manual-decoded	reviewed	st.mesh_draw_nccs asm review
 TITLE.EXE	0x80013084	0x1884	0x80013088	mips_hi16_lo16	reachable-code	0x80028ac4	load		lui+addiu		manual-decoded	reviewed	title.main asm review
 TITLE.EXE	0x800130b8	0x18b8		mips26	reachable-code	0x8002118c	load		jal		manual-decoded	reviewed	title.main asm review
 TITLE.EXE	0x80013110	0x1910		mips26	reachable-code	0x800209cc	load		jal		manual-decoded	reviewed	title.main asm review

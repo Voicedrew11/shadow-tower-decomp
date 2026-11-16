@@ -113,10 +113,12 @@ typedef struct {
 
 #define MESH_SCRATCH ((MeshScratch *)0x1f800000)
 
-/* Links a primitive of `len` words into an OT entry, writing both words whole. */
-#define mesh_add_prim(ot, p, len)                                              \
-    (*(u_long *)(p) = (*(ot) & 0xffffff) | ((len) << 24),                      \
-     *(ot) = (u_long)(p) & 0xffffff)
+/* Links a primitive of `len` words into an OT entry, writing both words
+ * whole. The halves are also used apart, with a GTE command between them to
+ * cover its input delay. */
+#define mesh_set_tag(ot, p, len) (*(u_long *)(p) = (*(ot) & 0xffffff) | ((len) << 24))
+#define mesh_set_ot(ot, p) (*(ot) = (u_long)(p) & 0xffffff)
+#define mesh_add_prim(ot, p, len) (mesh_set_tag(ot, p, len), mesh_set_ot(ot, p))
 
 /* Unresolved ST.EXE global at 0x8015d090, a large .bss object of which the
  * renderers read only a word and the render-mode byte at its end (WIP view). */
@@ -127,5 +129,12 @@ typedef struct {
 } Dat8015d090;
 
 extern Dat8015d090 DAT_8015d090;
+
+/* Render-mode byte bits: a tint (and its callback), and its strength scale. */
+#define MESH_MODE (DAT_8015d090.render_mode)
+#define MESH_TINT_A 2
+#define MESH_TINT_B 4
+#define MESH_TINT_SLOW 0x10
+#define MESH_TINT_LEVEL (DAT_8015d090.tint_level)
 
 #endif

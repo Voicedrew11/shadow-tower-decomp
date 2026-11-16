@@ -14,13 +14,6 @@
 #include <INLINE_C.H>
 #include <st/mesh.h>
 
-/* Render-mode byte bits: a tint (and its callback), and its strength scale. */
-#define MESH_MODE (DAT_8015d090.render_mode)
-#define MESH_TINT_A 2
-#define MESH_TINT_B 4
-#define MESH_TINT_SLOW 0x10
-#define MESH_TINT_LEVEL (DAT_8015d090.tint_level)
-
 /* The FT3 renderer's tint callbacks (band B, 0x80018440 and 0x80018480). */
 extern void func_80018440(CVECTOR *rgb);
 extern void func_80018480(CVECTOR *rgb);
