@@ -146,4 +146,57 @@ void world_transform_parts(VECTOR *trans);
 void world_project_parts(VECTOR *trans);
 void world_draw(void);
 
+/*
+ * The model renderers (src/st/model_draw.c). A model block (a
+ * world_state.unk834C slot) holds its part data at the offset in word +8;
+ * halfword +6 selects which of func_80034604 / func_80035aa8 prepares it.
+ */
+typedef struct {
+    u8 unk0[6];
+    u16 unk6;
+    u32 unk8;
+} ModelFile;
+
+typedef struct {
+    u8 unk0[0x10];
+    SVECTOR unk10;       /* 0x10: rotation of the joint's matrix */
+} ModelJointSrc;
+
+typedef struct {
+    u16 unk0;
+    u16 unk2;            /* 0: rebuild m from unk44's rotation */
+    MATRIX m;            /* 0x04 */
+    u8 unk24[0x20];
+    ModelJointSrc *unk44;
+} ModelJoint;
+
+typedef struct {
+    s16 unk0;            /* cleared by model_draw_list every frame */
+    u8 unk2[0x42];
+    VECTOR *unk44;       /* 0x44: scale of kinds 1, 3 and 4 */
+    ModelJoint *unk48;   /* 0x48: the matrix kind 2 turns to face the viewer */
+} ModelObj;
+
+/* One entry of the scratchpad's model list: a part of the current model
+ * drawn for an object. */
+typedef struct {
+    u32 unk0;
+    ModelObj *obj;       /* 0x04 */
+    u16 part;            /* 0x08: 0xffff: none */
+    u8 kind;             /* 0x0a: 1, 3, 4: scaled, every 6th, 4th, 8th entry per frame */
+    u8 unk0B;
+    s32 unk0C;           /* -1: skipped */
+} ModelEntry;
+
+typedef struct {
+    ModelEntry *entries;
+    s32 count;
+} ModelList;
+
+void func_80021ac4(u8 slot);
+void model_draw_list(u8 flags, SVECTOR *rot);
+void model_draw(int unused0, u16 model, VECTOR *pos, SVECTOR *rot, SVECTOR *scale, void *anim,
+                MATRIX *view, u16 part, u16 arg8, short light, short unused10, u8 flags,
+                int z);
+
 #endif

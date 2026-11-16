@@ -170,6 +170,12 @@ source = "src/st/fade.c"
 profile = "probe-gcc272cdk-o2-g0"
 
 [[unit]]
+unit = "st.model_draw"
+image = "ST.EXE"
+source = "src/st/model_draw.c"
+profile = "probe-gcc272cdk-o2-g8"
+
+[[unit]]
 unit = "st.bank"
 image = "ST.EXE"
 source = "src/st/bank.c"

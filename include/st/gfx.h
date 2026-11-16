@@ -109,8 +109,11 @@ typedef struct {
     s32 unk8330;
     s32 unk8334;
     s32 unk8338[5];
-    void *unk834C[8];    /* 0x834c: heap block owners (func_800237a8); WIP count */
-    u8 unk836C[0xab3c - 0x836c];
+    /* 0x834c: heap block owners: func_800237a8's bank slots, the viewer
+     * models at 32.. (func_80021ac4), model_draw's model blocks; func_800456f8
+     * frees 128..143, the highest index evidenced (WIP extent). */
+    void *unk834C[144];
+    u8 unk858C[0xab3c - 0x858c];
     u8 world_vertices[0x1eb40 - 0xab3c]; /* 0xab3c: the world parts' transformed vertices (MeshVertex); WIP extent */
     StTexAnim texanim[ST_TEXANIM_SLOTS];
     u8 unk1ECC0;

@@ -35,7 +35,9 @@ typedef struct {
     u8 *vertices;        /* 0x40: transformed vertices (MeshVertex), by byte offset */
     CVECTOR part_rgb;    /* 0x44: the world renderers' NCCS input colour; .cd carries the GPU code */
     u8 *local_vertices;  /* 0x48: SVECTOR model-space vertices, same indices */
-    u8 unk4C[0xc];       /* 0x4c */
+    u8 unk4C[4];         /* 0x4c */
+    long unk50;          /* 0x50: model_draw's camera-space vertex (a VECTOR over 0x50..0x5c) */
+    long unk54;          /* 0x54 */
     long flag;           /* 0x58: GTE FLAG after world_transform_parts' RTV0TR */
     u8 unk5C[4];         /* 0x5c */
     CVECTOR rgb;         /* 0x60: NCDS input colour; .cd carries the GPU code */
@@ -50,11 +52,14 @@ typedef struct {
     int z_ot;            /* 0x88: its OT depth */
     int face_count;      /* 0x8c: faces submitted */
     int prim_count;      /* 0x90: primitives emitted */
-    u8 unk94[4];         /* 0x94 */
+    s32 unk94;           /* 0x94: the model renderers' fourth per-frame counter (world_state.unk8328) */
     u_short clut_base;   /* 0x98: added to subdivided faces' CLUT */
-    u8 unk9A[0xe];       /* 0x9a */
+    u8 unk9A[0xa];       /* 0x9a */
+    ModelList *model_list; /* 0xa4: the entries model_draw_list draws */
     VECTOR part_pos;     /* 0xa8: a record's camera-space position (RTV0TR result) */
-    u8 unkB8[0x28];      /* 0xb8 */
+    u8 unkB8[4];         /* 0xb8 */
+    long model_t[3];     /* 0xbc: st.model_draw's model translation (part_pos starts its MATRIX) */
+    u8 unkC8[0x18];      /* 0xc8 */
     s32 unkE0;           /* 0xe0: a position func_80016554 tests (x, y, z) */
     s32 unkE4;           /* 0xe4 */
     s32 unkE8;           /* 0xe8 */
