@@ -26,7 +26,8 @@ typedef struct {
     s16 unkC;
     s16 unkE;
     volatile u8 unk10; /* completion state the callbacks set; stores keep their own slot */
-    u8 unk11[3];
+    volatile u8 unk11; /* bank requests (src/st/sound.c): load step; stores keep their own slot */
+    u8 unk12[2];
     CdlLOC unk14; /* copied from unk18 as a read starts */
     CdlLOC unk18;
     u8 *unk1C; /* CdGetSector destination, advanced 2048 per sector */
@@ -69,6 +70,7 @@ typedef struct {
     StArchive archives[ST_ARCHIVES];
     u8 unkA00[0xa6c - 0xa00];
     CdlFILE unkA6C; /* \LOAD02.TIM;1, searched by func_800210f4, read by func_80021158 */
+    u_long *unkA84;      /* 0xa84: load cursor into DAT_80088c88, which follows this block (src/st/menu_pics.c) */
 } StCdState;
 
 extern StCdState cd_state;

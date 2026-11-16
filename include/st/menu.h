@@ -139,7 +139,9 @@ typedef struct {
     s16 unk206;          /* 0x206 */
     u8 unk208[0x54];     /* 0x208 */
     s16 unk25C[14];      /* 0x25c: attribute changes */
-    u8 unk278[0x46];     /* 0x278 */
+    u8 unk278[0x292 - 0x278]; /* 0x278 */
+    u16 unk292[21];      /* 0x292: copy of viewer.unk38 (func_8005975c, func_80059cec) */
+    s16 unk2BC;          /* 0x2bc */
     s16 unk2BE;          /* 0x2be */
     s16 unk2C0;          /* 0x2c0 */
     u8 unk2C2[2];        /* 0x2c2 */
@@ -157,7 +159,8 @@ typedef struct {
     s16 unk2E2;          /* 0x2e2 */
     u8 unk2E4;           /* 0x2e4: cursor blink phase */
     u8 unk2E5;           /* 0x2e5: text font mode (0: 6x12 half-width cells) */
-    u8 unk2E6[0x1a];     /* 0x2e6 */
+    DVECTOR unk2E6[5];   /* 0x2e6: VRAM positions func_80058dc4 sets (image, CLUT pairs) */
+    u8 unk2FA[6];        /* 0x2fa */
     CVECTOR style[8];    /* 0x300: text colours; .cd carries the glyph size */
     CVECTOR *unk320;     /* 0x320: figure colours of the status pages */
     CVECTOR *unk324;     /* 0x324 */
@@ -173,6 +176,53 @@ typedef struct {
     DVECTOR unk35C;      /* 0x35c: CLUT position in VRAM */
     u16 unk360;          /* 0x360: blink offset */
 } MenuScratch;
+
+/* One 32-byte record func_80059dc0 writes from scratch +0x8 per shown
+ * equipment slot (MenuAttrScratch.recs). */
+typedef struct {
+    u8 unk0;
+    u8 unk1;             /* 0x1: kind - 9, indexes unk27A/unk286 */
+    s16 unk2;            /* 0x2 */
+    s16 unk4[14];        /* 0x4 */
+} MenuAttrRecord;
+
+/*
+ * The status screens' phase of the same block: seven attribute rows of 14
+ * from +0x1b4 (MenuScratch's unk1B4 and unk25C are the first and last),
+ * over the list fields the other screens keep there (func_80059dc0).
+ */
+typedef struct {
+    u8 unk0[8];
+    MenuAttrRecord recs[11]; /* 0x008: one per shown equipment slot */
+    MenuAttrRecord *unk168; /* 0x168: next record func_80059dc0 fills */
+    u16 unk16C;          /* 0x16c: viewer.unk38[6] / 3, 0xffff: none */
+    u16 unk16E;          /* 0x16e */
+    u16 unk170;          /* 0x170: viewer.unk38[12] / 3, 0xffff: none */
+    u16 unk172;          /* 0x172 */
+    u8 unk174[0x1b4 - 0x174];
+    s16 unk1B4[14];      /* 0x1b4: shown values, clamped at 0 */
+    s16 unk1D0[14];      /* 0x1d0: equipment sums, clamped at 0 */
+    s16 unk1EC[14];      /* 0x1ec: totals, at most 999 */
+    s16 unk208[14];      /* 0x208: equipment sums */
+    s16 unk224[14];      /* 0x224: viewer.unk7E */
+    s16 unk240[14];      /* 0x240: viewer.unk9A */
+    s16 unk25C[14];      /* 0x25c: unk208 - unk224 */
+    u8 unk278[2];
+    s16 unk27A[6];       /* 0x27a: per kind sums of the records' unk2 */
+    s16 unk286[6];       /* 0x286 */
+    u16 unk292[21];      /* 0x292: MenuScratch.unk292 */
+    s16 unk2BC;          /* 0x2bc: sum of the shown records' unk24 */
+} MenuAttrScratch;
+
+#define MENU_ATTR ((MenuAttrScratch *)0x1f800000)
+
+/* The viewer's 21 equipment slots (viewer.unk38, st/data.h) as one block:
+ * the status screens copy it whole and index it through this view. */
+typedef struct {
+    u16 ids[21];
+} MenuSlots;
+
+#define MENU_SLOTS ((MenuSlots *)viewer.unk38)
 
 #define MENU_SCRATCH ((MenuScratch *)0x1f800000)
 

@@ -33,7 +33,7 @@ void func_80023bc4(int archive, int index, int slot)
 }
 
 /*
- * Not exact: retail forms the sound-slot address as (i << 3) + &DAT_801dd1e8[8]
+ * Not exact: retail forms the sound-slot address as (i << 3) + &DAT_801dd1c0.slots[8]
  * with the shift first (its copy fills the beqz delay slot); this build
  * loads the constant base first.
  */
@@ -79,7 +79,7 @@ void func_80023c6c(int archive, int first, int slot, int count)
                 func_80015250(a, ST_BLOCK_RELEASABLE);
             if (b != NULL && func_80015258(b) != ST_BLOCK_LOADING)
                 func_80015250(b, ST_BLOCK_RELEASABLE);
-            vab = (&DAT_801dd1e8[8])[i].block;
+            vab = (&DAT_801dd1c0.slots[8])[i].block;
             if (vab != NULL && vab[2] == 1)
                 vab[2] = 2;
         }
@@ -109,7 +109,7 @@ void func_80023ed8(int archive, int first, int slot, int count)
 
 /*
  * Not exact: retail keeps i << 3 as the induction value and rematerializes
- * &DAT_801dd1e8[24] at each use; this build folds the base into the
+ * &DAT_801dd1c0.slots[24] at each use; this build folds the base into the
  * induction pointer.
  */
 ADDRESS(0x80024004, 0x1cc)
@@ -129,7 +129,7 @@ void func_80024004(int archive, int first, int slot, int count)
             else if (func_80015258(p) == ST_BLOCK_RELEASABLE)
                 func_80015250(p, ST_BLOCK_USED);
             if (func_80015ec8(archive, i * 3 + 1)) {
-                vab = (&DAT_801dd1e8[24])[i].block;
+                vab = (&DAT_801dd1c0.slots[24])[i].block;
                 if (vab == NULL)
                     func_80058a0c(archive, i * 3 + 1, i + 24);
                 else if (vab[2] == 2)
@@ -138,7 +138,7 @@ void func_80024004(int archive, int first, int slot, int count)
         } else {
             if (p != NULL && func_80015258(p) != ST_BLOCK_LOADING)
                 func_80015250(p, ST_BLOCK_RELEASABLE);
-            vab = (&DAT_801dd1e8[24])[i].block;
+            vab = (&DAT_801dd1c0.slots[24])[i].block;
             if (vab != NULL && vab[2] == 1)
                 vab[2] = 2;
         }

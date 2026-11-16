@@ -14,7 +14,6 @@
  * unit addresses it as an extern with lui, not $gp. */
 extern u8 *DAT_800881dc;
 /* Tables func_80044674 fills from its pack; WIP extents. */
-extern u32 DAT_801ddc44[];
 extern u8 DAT_8009b088[];
 
 /* src/st/area_a.c */
@@ -25,9 +24,6 @@ void func_80044404(void);
 void func_80044674(void);
 void func_8003ea20(void);
 void func_80052d10(void);
-
-/* 0x801dd1cc: word the area loader clears; owner unknown. */
-extern s32 DAT_801dd1cc[];
 
 /* 0x800f2c88 (after the block heap) and 0x800fc488: the buffers
  * func_80044ee8 puts in world_state.unk8308[1] and [0]; WIP extents. */

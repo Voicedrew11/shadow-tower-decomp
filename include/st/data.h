@@ -324,7 +324,7 @@ typedef struct {
     u16 unk6;            /* 0x06..0x0c: src/st/pad.c's repeat and combination words */
     u16 unk8;
     u16 unkA;
-    u16 unkC;
+    u16 unkC;            /* 0x0c: bits the menu loop func_80058ef4 consumes */
     u8 unkE;             /* 0x0e: 1 while the controller is disconnected */
     u8 unkF;
     u8 unk10;
@@ -361,7 +361,55 @@ typedef struct {
     s16 vab;
     s16 unk6;
 } StVabSlot;
-extern StVabSlot DAT_801dd1e8[32];
+
+/* One 0x1000-byte sound bank buffer: its data and load state (3: loaded). */
+typedef struct {
+    u8 *data;
+    s16 state;
+    s16 unk6;
+} StSoundBuf;
+
+/* One 10-byte sound table entry: the bank slot, program, tone and a note
+ * offset. */
+typedef struct {
+    s16 slot;            /* 0x0: index into the bank slots, -1: none */
+    s16 prog;            /* 0x2 */
+    s16 tone;            /* 0x4 */
+    s16 note;            /* 0x6: added to the requested note */
+    s16 unk8;
+} StSound;
+
+/*
+ * The sound state block at 0x801dd1c0 (bss): the listener's position and
+ * rotation, the 322 VAB bank slots, the SPU key status bytes and the sound
+ * playing on each voice, the 1232-entry sound table (loaded from an area
+ * pack, src/st/area_a.c) and the 16 bank buffers. WIP extent up to
+ * menu_messages.
+ */
+typedef struct {
+    u8 unk0;
+    u8 unk1[0xc - 0x1];
+    s32 unkC;            /* 0x00c: cleared when the area loader's read completes */
+    VECTOR listener;     /* 0x010 */
+    SVECTOR listener_rot; /* 0x020: vy is the listener's yaw */
+    StVabSlot slots[322]; /* 0x028 */
+    char keys[24];       /* 0xa38: SpuGetAllKeysStatus buffer */
+    s16 voices[24];      /* 0xa50: the sound id keyed on per voice, -1: none */
+    u8 unkA80[4];
+    StSound sounds[1232]; /* 0xa84 */
+    StSoundBuf bufs[16]; /* 0x3aa4 */
+    u8 unk3B24[0x3b90 - 0x3b24];
+} Data801dd1c0;
+extern Data801dd1c0 DAT_801dd1c0;
+
+/* The 16 sound bank buffers (StSoundBuf.data): two, one, four, four, one
+ * and four 0x1000-byte blocks below the sound state block. */
+extern u8 DAT_801cd1c0[2][0x1000];
+extern u8 DAT_801cf1c0[0x1000];
+extern u8 DAT_801d01c0[4][0x1000];
+extern u8 DAT_801d41c0[4][0x1000];
+extern u8 DAT_801d81c0[0x1000];
+extern u8 DAT_801d91c0[4][0x1000];
 
 /* The CD file buffer func_80016030 loads TIMs and models into (WIP extent:
  * up to DAT_8009ac88). */
