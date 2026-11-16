@@ -70,7 +70,9 @@ typedef struct {
     u16 unk38[21]; /* set from FN. ids 970..990 */
     s16 unk62[11];       /* 0x62: figures func_8002e94c lists (14 of them, through unk78) */
     u16 unk78[6];        /* 0x78: picked by effect_play's level (src/st/effect.c) */
-    u8 unk84[0xb8 - 0x84];
+    u8 unk84[0x16];
+    u16 unk9A[14];       /* 0x9a: figures func_8004db0c adds bonuses to */
+    u8 unkB6[2];
     u16 unkB8;           /* 0xb8 */
     u16 unkBA[3];        /* 0xba: shown by the stats menu; effect_play reads them as a row */
     u8 unkC0[0xe8 - 0xc0];
@@ -109,11 +111,14 @@ typedef struct {
     long x;              /* 0x248 */
     long y;              /* 0x24c */
     long z;              /* 0x250 */
-    u8 unk254[0x14];
+    u8 unk254[0xc];
+    SVECTOR unk260;      /* 0x260: motion (func_8004cc70 leads targets by it) */
     short unk268;        /* 0x268: pitch in func_80016554 */
     short unk26A;        /* 0x26a: yaw in func_80016554 */
     short unk26C;        /* 0x26c: roll; model_draw_list turns kind-2 parts by all three */
-    u8 unk26E[0x2ce - 0x26e];
+    u8 unk26E[0x27a - 0x26e];
+    short unk27A;        /* 0x27a */
+    u8 unk27C[0x2ce - 0x27c];
     short unk2CE;        /* 0x2ce: added to y by world_transform_parts */
     u8 unk2D0[2];
     short unk2D2;        /* 0x2d2: added to y by world_transform_parts */
@@ -124,6 +129,12 @@ typedef struct {
 } Viewer;
 
 extern Viewer viewer;
+
+/* What area_state.unkC points at: a function table (WIP extent). */
+typedef struct {
+    u8 unk00[0x40];
+    void (*unk40)(void); /* 0x40 */
+} AreaProcs;
 
 /*
  * The state block at 0x801b5920: func_80014544 sets bytes 4..9 from FN.;
@@ -140,7 +151,8 @@ typedef struct {
     u8 unk7;
     u8 unk8;
     u8 area;             /* 0x09 */
-    u8 unkA[0x10 - 0xa];
+    u8 unkA[2];
+    AreaProcs *unkC;     /* 0x0c */
     u8 unk10;            /* 0x10: 0xff when unset */
     u8 unk11[0x18 - 0x11];
     s32 unk18;           /* 0x18: tick func_80021654 times its fade from, -1 when idle */
