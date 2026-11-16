@@ -79,8 +79,8 @@ bss	group	bss
 
 PSYLINK, not the build script, places SDK library members. These rules were
 established for PSYLINK 1.29 in the King's Field II project; the Shadow
-Tower retail member groups follow the same pattern; `PSX.EXE` and `END.EXE`
-have been relinked with 2.73D byte-identical:
+Tower retail member groups follow the same pattern; `PSX.EXE`, `STR.EXE` and
+`END.EXE` have been relinked with 2.73D byte-identical:
 
 - Archives are visited in `inclib` order. The groups of members from each
   archive follow one another in the linked text in that order.
@@ -143,6 +143,26 @@ PSYLINK 2.73D:
 - GCC writes all of a unit's data directives before its text, so every
   small symbol the unit defines is `$gp`-relative; the one absolute store to
   END's own `.sbss` slot `0x8002fd7c` is spelled as a fixed address.
+
+## STR.EXE
+
+`src/str/main.c` reconstructs STR.EXE's twenty game functions as one unit
+(`probe-gcc272cdk-o2-g8`); with the `IMAGE_LINKS` entry above the whole
+141,312-byte file equals retail. It is END.EXE's closest relative: the same
+movie player (24-bit only, with a global end frame) and CD helpers, plus a
+LIBPAD controller module. The link confirmed END's rules and adds:
+
+- GCC writes a unit's constants (strings, initializers) before its code, so
+  the one switch table (`pad_update_state`) closes `.rdata` after `main`'s
+  program-path table; the `.rdata` claim is `0x80011000`-`0x8001112b`.
+- `.sdata` ends at `0x800328d4`; `.sbss` starts 8-aligned at `0x800328d8`
+  with MALLOC.OBJ's 32 bytes, then the unit's statics from `0x800328f8`.
+- The ten exported COMMON buffers follow the 56-byte `dec` static in
+  hash-bucket order, each 8-aligned; their spellings are WIP names chosen
+  inside that order (`vlc_buffer` 40, `ring_buffer` 148, `blend_buffer` 234,
+  `tim_buf` 237, `display` 253, `poison_image` 262, `pad_data` 310,
+  `cdl_file` 314, `pad_info` 328, `image_rgb` 422), and LIBCD's
+  `StCdIntrFlag` follows them.
 
 ## PS-X EXE header
 
@@ -291,7 +311,7 @@ under `build/link/<image>/` and are not committed.
 | --- | --- |
 | PSYLINK emits each program | Wired through `kf build` for all seven; an image links once it has a source unit |
 | Candidate artifact path | Direct source-to-EXE with no output rewriting |
-| Byte-identical retail images | `PSX.EXE` and `END.EXE` (whole files, headers included) |
+| Byte-identical retail images | `PSX.EXE`, `STR.EXE` and `END.EXE` (whole files, headers included) |
 | Library half of the overlays | Object-by-object attribution only (see the toolchain page); not yet relinked |
 | Historical toolchain identity | Open: the compiler is a rebuild and the exact ASPSX, PSYLINK and CPE2X builds are the earliest available ones that reproduce retail |
 | Boot | Not yet attempted |

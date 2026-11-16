@@ -257,7 +257,7 @@ class Evidence:
             payload = self.img.read(function.va, function.body_size)
             if payload is None:
                 continue
-            graph = build_graph(function, payload, self.idx)
+            graph = build_graph(function, payload, self.idx, self.img.u32)
             for edge in graph.edges:
                 if edge.kind not in {
                     "call",

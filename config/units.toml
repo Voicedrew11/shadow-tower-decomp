@@ -36,3 +36,9 @@ unit = "end.main"
 image = "END.EXE"
 source = "src/end/main.c"
 profile = "probe-gcc272cdk-o2-g8"
+
+[[unit]]
+unit = "str.main"
+image = "STR.EXE"
+source = "src/str/main.c"
+profile = "probe-gcc272cdk-o2-g8"
