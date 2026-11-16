@@ -69,7 +69,17 @@ typedef struct {
     short offset_z;      /* 0x1ee */
     long plane[6];       /* 0x1f0 */
     long unk208;         /* 0x208 */
-    u8 unk20C[0x188];    /* 0x20c */
+    u8 unk20C[0xd9];     /* 0x20c */
+    u8 unk2E5;           /* 0x2e5: text font mode (0: 6x12 half-width cells) */
+    u8 unk2E6[0x52];     /* 0x2e6 */
+    CVECTOR unk338;      /* 0x338: menu panel colours and rectangles (src/st/text.c) */
+    RECT unk33C;         /* 0x33c */
+    CVECTOR unk344;      /* 0x344 */
+    RECT unk348;         /* 0x348 */
+    u8 unk350[8];        /* 0x350 */
+    DVECTOR unk358;      /* 0x358: texture position for func_80028364 */
+    DVECTOR unk35C;      /* 0x35c: CLUT position for func_80028364 */
+    u8 unk360[0x34];     /* 0x360 */
     StLight *unk394;     /* 0x394: lighting environment func_80017d28 blends toward */
 } ScratchPad;
 

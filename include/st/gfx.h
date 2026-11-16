@@ -112,6 +112,10 @@ typedef struct {
     u8 unk1EE0C[9];
     u8 unk1EE15;
     u8 unk1EE16;
+    /* 0x1ee16..0x1ee19 (src/st/text.c): title-card state, mode, fade length, frame counter */
+    u8 unk1EE17;
+    u8 unk1EE18;
+    u8 unk1EE19;
 } WorldState;
 
 extern WorldState world_state;
