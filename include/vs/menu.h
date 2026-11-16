@@ -31,10 +31,12 @@ typedef struct {
     u8 unk1CA[2];
     u16 unk1CC;          /* 0x1cc (ST unk2DC) */
     u8 unk1CE[0x1d4 - 0x1ce];
-    u8 unk1D4;           /* 0x1d4: the card screens' blink counter */
+    u8 unk1D4;           /* 0x1d4: cursor blink phase (ST unk2E4) */
     u8 unk1D5[0x1f0 - 0x1d5];
     CVECTOR style[8];    /* 0x1f0: text colours (ST 0x300) */
-    u8 unk210[0x10];
+    u8 unk210[4];
+    CVECTOR unk214;      /* 0x214: highlight colour (ST unk32C) */
+    RECT unk218;         /* 0x218: highlight bar (ST unk330) */
     CVECTOR unk220;      /* 0x220 (ST unk338) */
     RECT unk224;         /* 0x224 (ST unk33C) */
     CVECTOR unk22C;      /* 0x22c (ST unk344) */
@@ -42,6 +44,7 @@ typedef struct {
     RECT unk238;         /* 0x238 (ST unk350) */
     DVECTOR unk240;      /* 0x240: texture position in VRAM (ST unk358) */
     DVECTOR unk244;      /* 0x244: CLUT position in VRAM (ST unk35C) */
+    u16 unk248;          /* 0x248: blink offset (ST unk360) */
 } VsMenuScratch;
 
 /* Layout check: the offset the code proves. */
@@ -64,5 +67,24 @@ void func_8001e3d8(RECT *r, CVECTOR *color, u16 semi);   /* ST func_80028220 */
 void func_8001e530(RECT *r, DVECTOR *tex, DVECTOR *clut, CVECTOR *color, int mode); /* ST func_80028364 */
 void func_8001e890(int abr, int x, int y);               /* ST func_800286a8 */
 void func_8001f23c(int x, int y, int w, int h);          /* ST func_80029548 */
+void func_8001f30c(int x, int y, int w, int h);
+void func_8001f828(void);                                /* ST func_8002c9e8 */
+void func_8001f8c4(void);
+void func_8001f960(void);                                /* ST func_8002c050 */
+void func_8001f9a0(void);
+void func_8001fb98(void);                                /* ST func_8002c1a4 */
+void func_8001fcac(void);
+void func_80020384(void);                                /* ST func_8002c8bc */
+void func_80020420(void);                                /* ST func_8002c958 */
+void func_80020460(void);                                /* ST func_8002c998 */
+void func_80020aa4(int page);
+void func_80021140(int page);                            /* ST func_8003025c */
+void func_80021cfc(void);
+void func_800222d8(int page);
+void func_80022794(void);                                /* ST func_800319a8 */
+void func_80022a00(void);
+void func_80022f14(int page);
+void func_80023114(int page);
+void func_8002326c(void);
 
 #endif

@@ -490,6 +490,24 @@ profile = "probe-gcc272cdk-o2-g8"
 # VS.EXE: VS's own copies of ST.EXE functions (src/vs/); shared fragments in src/lib/.
 
 [[unit]]
+unit = "vs.snd_800129bc"
+image = "VS.EXE"
+source = "src/vs/snd_800129bc.c"
+profile = "probe-gcc272cdk-o2-g8"
+
+[[unit]]
+unit = "vs.snd_80012a70"
+image = "VS.EXE"
+source = "src/vs/snd_80012a70.c"
+profile = "probe-gcc272cdk-o2-g8"
+
+[[unit]]
+unit = "vs.pad_800136e0"
+image = "VS.EXE"
+source = "src/vs/pad_800136e0.c"
+profile = "probe-gcc272cdk-o2-g8"
+
+[[unit]]
 unit = "vs.gfx_80016ca8"
 image = "VS.EXE"
 source = "src/vs/gfx_80016ca8.c"
@@ -547,6 +565,24 @@ profile = "probe-gcc272cdk-o2-g8"
 unit = "vs.ui_80020384"
 image = "VS.EXE"
 source = "src/vs/ui_80020384.c"
+profile = "probe-gcc272cdk-o2-g8"
+
+[[unit]]
+unit = "vs.ui_80021c14"
+image = "VS.EXE"
+source = "src/vs/ui_80021c14.c"
+profile = "probe-gcc272cdk-o2-g8"
+
+[[unit]]
+unit = "vs.ui_800228d8"
+image = "VS.EXE"
+source = "src/vs/ui_800228d8.c"
+profile = "probe-gcc272cdk-o2-g8"
+
+[[unit]]
+unit = "vs.ui_80023308"
+image = "VS.EXE"
+source = "src/vs/ui_80023308.c"
 profile = "probe-gcc272cdk-o2-g8"
 
 [[unit]]

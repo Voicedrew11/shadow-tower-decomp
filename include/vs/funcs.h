@@ -14,6 +14,8 @@
 void func_8001cb34(void);                 /* ST func_8001531c */
 void func_8001d1b8(void);                 /* ST func_800174c4 */
 void func_8001d374(void);                 /* ST func_80017680 */
+void func_8001d298(void);                 /* ST func_800175a4 */
+void func_8001d328(void);                 /* ST func_80017634 */
 
 /* src/vs/cd_8002e5e4.c */
 void func_8002e5e4(void);                 /* ST func_800214cc */
@@ -27,7 +29,7 @@ u32 func_8002eb9c(CdlLOC *pos);           /* ST func_80015950 */
 void func_8002ece0(CdlLOC *pos, int offset, CdlLOC *out); /* ST func_80015a94 */
 int func_8002ed20(u32 *data, int sectors); /* ST func_80015b78 */
 
-/* Second-half VS functions called from the first half. */
-void *func_8002398c(int size);            /* returns a buffer the caller passes to free() */
+/* src/vs/anim_80023764.c */
+void *func_8002398c(u32 size);            /* malloc, NULL outside main RAM */
 
 #endif

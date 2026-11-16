@@ -15,6 +15,18 @@ extern s16 DAT_8006335a;
 extern u_char DAT_800ff580[];
 extern u_char DAT_80116580[];
 
+/* A sound bank record: its VAB header, VAB id and body transfer result. */
+typedef struct {
+    u_char head[4096];   /* 0x0000: the VAB header */
+    s16 vab;             /* 0x1000: SsVabOpenHeadSticky's id, -1 on failure */
+    s16 unk1002;         /* 0x1002: SsVabTransBodyPartly's result */
+} VsSoundBank;
+
+typedef char VsSoundBankSize[sizeof(VsSoundBank) == 0x1004 ? 1 : -1];
+
+/* The two sound banks (0x801604b0, bss). */
+extern VsSoundBank DAT_801604b0[2];
+
 /* src/vs/card_8001c8b8.c: the menu sound effects (SsUtKeyOn tones 11-14). */
 void func_8001c8b8(void);
 void func_8001c8f8(void);

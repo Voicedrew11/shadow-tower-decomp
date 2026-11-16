@@ -32,6 +32,8 @@ void func_8001c978(void)
 }
 
 /* Opens the menu sound bank and transfers its body to SPU memory. */
+/* Not exact: retail computes the body address before SsVabOpenHead and
+ * keeps it in $s0 across the call. */
 ADDRESS(0x8001c9b8, 0x58)
 void func_8001c9b8(void)
 {

@@ -11,6 +11,7 @@
 #include <vs/menu.h>
 #include <vs/pad.h>
 #include <vs/card.h>
+#include <vs/buffer.h>
 #include <vs/sound.h>
 #include <vs/funcs.h>
 
@@ -304,15 +305,15 @@ s16 func_8001abfc(int first)
     sp->unk1C6 = 0;
     for (;;) {
         if (first) {
-            DAT_801603c0[0].unk8 = 0;
-            DAT_801603c0[0].unkC = 0;
-            DAT_801603c0[0].unk0 = 0;
+            DAT_801603c0.pads[0].unk8 = 0;
+            DAT_801603c0.pads[0].unkC = 0;
+            DAT_801603c0.pads[0].unk0 = 0;
         } else {
-            DAT_801603c0[1].unk8 = 0;
-            DAT_801603c0[1].unkC = 0;
-            DAT_801603c0[1].unk0 = 0;
+            DAT_801603c0.pads[1].unk8 = 0;
+            DAT_801603c0.pads[1].unkC = 0;
+            DAT_801603c0.pads[1].unk0 = 0;
         }
-        buttons = DAT_801603c0[0].unk8 | DAT_801603c0[1].unk8;
+        buttons = DAT_801603c0.pads[0].unk8 | DAT_801603c0.pads[1].unk8;
         if (buttons & 0x4000) {
             func_8001c978();
             break;
@@ -326,12 +327,12 @@ s16 func_8001abfc(int first)
             func_8001c8b8();
             sp->unk1C6 = 1;
         }
-        if ((DAT_801603c0[0].unk8 | DAT_801603c0[1].unk8) & 0x20) {
+        if ((DAT_801603c0.pads[0].unk8 | DAT_801603c0.pads[1].unk8) & 0x20) {
             func_8001c8b8();
             sp->unk1C6 = 0;
         }
-        DAT_801603c0[0].unk8 = 0;
-        DAT_801603c0[1].unk8 = 0;
+        DAT_801603c0.pads[0].unk8 = 0;
+        DAT_801603c0.pads[1].unk8 = 0;
         func_800204b0();
     }
     return sp->unk1C6;
@@ -347,15 +348,15 @@ int func_8001ad18(int first)
     sp->unk1D4 = 0;
     for (;;) {
         if (first) {
-            DAT_801603c0[0].unk8 = 0;
-            DAT_801603c0[0].unkC = 0;
-            DAT_801603c0[0].unk0 = 0;
+            DAT_801603c0.pads[0].unk8 = 0;
+            DAT_801603c0.pads[0].unkC = 0;
+            DAT_801603c0.pads[0].unk0 = 0;
         } else {
-            DAT_801603c0[1].unk8 = 0;
-            DAT_801603c0[1].unkC = 0;
-            DAT_801603c0[1].unk0 = 0;
+            DAT_801603c0.pads[1].unk8 = 0;
+            DAT_801603c0.pads[1].unkC = 0;
+            DAT_801603c0.pads[1].unk0 = 0;
         }
-        buttons = DAT_801603c0[0].unk8 | DAT_801603c0[1].unk8;
+        buttons = DAT_801603c0.pads[0].unk8 | DAT_801603c0.pads[1].unk8;
         if (buttons & 0x4000) {
             func_8001c978();
             sp->unk1CC <<= 1;
@@ -366,18 +367,18 @@ int func_8001ad18(int first)
             sp->unk1CC = 0;
             break;
         }
-        if ((DAT_801603c0[0].unkC | DAT_801603c0[1].unkC) & 0x10) {
+        if ((DAT_801603c0.pads[0].unkC | DAT_801603c0.pads[1].unkC) & 0x10) {
             func_8001c8b8();
             sp->unk1CC = 2;
         }
-        if ((DAT_801603c0[0].unkC | DAT_801603c0[1].unkC) & 0x40) {
+        if ((DAT_801603c0.pads[0].unkC | DAT_801603c0.pads[1].unkC) & 0x40) {
             func_8001c8b8();
             sp->unk1CC = 512;
         }
-        DAT_801603c0[0].unk8 = 0;
-        DAT_801603c0[1].unk8 = 0;
-        DAT_801603c0[0].unkC = 0;
-        DAT_801603c0[1].unkC = 0;
+        DAT_801603c0.pads[0].unk8 = 0;
+        DAT_801603c0.pads[1].unk8 = 0;
+        DAT_801603c0.pads[0].unkC = 0;
+        DAT_801603c0.pads[1].unkC = 0;
         func_800204b0();
         sp->unk1D4 = (sp->unk1D4 + 1) % 32;
     }
@@ -386,6 +387,8 @@ int func_8001ad18(int first)
 
 /* Reads the three header values of each listed save file; -1 on a read
  * error. */
+/* Not exact (3 words): retail adds the files[i] offset as addu $v0,$s1,$v0;
+ * this build emits addu $v0,$v0,$s1. */
 ADDRESS(0x8001ae78, 0x154)
 int func_8001ae78(void)
 {
@@ -427,18 +430,18 @@ int func_8001afcc(int first)
     sp->unk1D4 = 0;
     for (;;) {
         if (first) {
-            DAT_801603c0[0].unk8 = 0;
-            DAT_801603c0[0].unkC = 0;
-            DAT_801603c0[0].unk0 = 0;
+            DAT_801603c0.pads[0].unk8 = 0;
+            DAT_801603c0.pads[0].unkC = 0;
+            DAT_801603c0.pads[0].unk0 = 0;
         } else {
-            DAT_801603c0[1].unk8 = 0;
-            DAT_801603c0[1].unkC = 0;
-            DAT_801603c0[1].unk0 = 0;
+            DAT_801603c0.pads[1].unk8 = 0;
+            DAT_801603c0.pads[1].unkC = 0;
+            DAT_801603c0.pads[1].unk0 = 0;
         }
-        if ((sp->unk1CC & 0xff00) || ((DAT_801603c0[0].unk8 | DAT_801603c0[1].unk8) & 0x4000)) {
+        if ((sp->unk1CC & 0xff00) || ((DAT_801603c0.pads[0].unk8 | DAT_801603c0.pads[1].unk8) & 0x4000)) {
             func_8001c978();
-            DAT_801603c0[0].unk8 = 0;
-            DAT_801603c0[1].unk8 = 0;
+            DAT_801603c0.pads[0].unk8 = 0;
+            DAT_801603c0.pads[1].unk8 = 0;
             sp->unk0.menu.half[1] = 1;
             sp->unk1D4 = 32;
             sp->unk1C6 = 1;
@@ -446,15 +449,15 @@ int func_8001afcc(int first)
                 u32 buttons;
 
                 if (first) {
-                    DAT_801603c0[0].unk8 = 0;
-                    DAT_801603c0[0].unkC = 0;
-                    DAT_801603c0[0].unk0 = 0;
+                    DAT_801603c0.pads[0].unk8 = 0;
+                    DAT_801603c0.pads[0].unkC = 0;
+                    DAT_801603c0.pads[0].unk0 = 0;
                 } else {
-                    DAT_801603c0[1].unk8 = 0;
-                    DAT_801603c0[1].unkC = 0;
-                    DAT_801603c0[1].unk0 = 0;
+                    DAT_801603c0.pads[1].unk8 = 0;
+                    DAT_801603c0.pads[1].unkC = 0;
+                    DAT_801603c0.pads[1].unk0 = 0;
                 }
-                buttons = DAT_801603c0[0].unk8 | DAT_801603c0[1].unk8;
+                buttons = DAT_801603c0.pads[0].unk8 | DAT_801603c0.pads[1].unk8;
                 if (buttons & 0x4000) {
                     func_8001c978();
                     break;
@@ -468,16 +471,16 @@ int func_8001afcc(int first)
                     func_8001c8b8();
                     sp->unk1C6 = 1;
                 }
-                if ((DAT_801603c0[0].unk8 | DAT_801603c0[1].unk8) & 0x20) {
+                if ((DAT_801603c0.pads[0].unk8 | DAT_801603c0.pads[1].unk8) & 0x20) {
                     func_8001c8b8();
                     sp->unk1C6 = 0;
                 }
-                DAT_801603c0[0].unk8 = 0;
-                DAT_801603c0[1].unk8 = 0;
+                DAT_801603c0.pads[0].unk8 = 0;
+                DAT_801603c0.pads[1].unk8 = 0;
                 func_800204b0();
             }
-            DAT_801603c0[0].unk8 = 0;
-            DAT_801603c0[1].unk8 = 0;
+            DAT_801603c0.pads[0].unk8 = 0;
+            DAT_801603c0.pads[1].unk8 = 0;
             if (sp->unk1C6)
                 goto done;
             if (sp->unk1CC & 0xff00) {
@@ -487,12 +490,12 @@ int func_8001afcc(int first)
             sp->unk0.menu.half[1] = 0;
             continue;
         }
-        if ((DAT_801603c0[0].unk8 | DAT_801603c0[1].unk8) & 0x2000) {
+        if ((DAT_801603c0.pads[0].unk8 | DAT_801603c0.pads[1].unk8) & 0x2000) {
             func_8001c8f8();
             sp->unk1C2 = -1;
             goto done;
         }
-        if ((DAT_801603c0[0].unkC | DAT_801603c0[1].unkC) & 0x10) {
+        if ((DAT_801603c0.pads[0].unkC | DAT_801603c0.pads[1].unkC) & 0x10) {
             func_8001c8b8();
             if (sp->unk1C2 == 0) {
                 if (sp->unk1C4 > 0)
@@ -501,7 +504,7 @@ int func_8001afcc(int first)
                 sp->unk1C2--;
             }
         }
-        if ((DAT_801603c0[0].unkC | DAT_801603c0[1].unkC) & 0x40) {
+        if ((DAT_801603c0.pads[0].unkC | DAT_801603c0.pads[1].unkC) & 0x40) {
             func_8001c8b8();
             if (sp->unk1C2 == 2) {
                 if (sp->unk1C4 < sp->unk1BE - 3)
@@ -510,10 +513,10 @@ int func_8001afcc(int first)
                 sp->unk1C2++;
             }
         }
-        DAT_801603c0[0].unk8 = 0;
-        DAT_801603c0[1].unk8 = 0;
-        DAT_801603c0[0].unkC = 0;
-        DAT_801603c0[1].unkC = 0;
+        DAT_801603c0.pads[0].unk8 = 0;
+        DAT_801603c0.pads[1].unk8 = 0;
+        DAT_801603c0.pads[0].unkC = 0;
+        DAT_801603c0.pads[1].unkC = 0;
         func_800204b0();
         sp->unk1D4 = (sp->unk1D4 + 1) % 32;
         }
@@ -552,6 +555,8 @@ int func_8001b314(int fd, int offset, u8 *buf, int size)
 
 /* Reads blocks written by func_8001b314, rereading a bad block up to three
  * times; returns the sum of the check bytes, or -1. */
+/* Not exact: retail keeps the running block sum in a second register (addu
+ * $a1,$a0,$v0; move $a0,$a1) and is one instruction longer. */
 ADDRESS(0x8001b3f8, 0x10c)
 int func_8001b3f8(int fd, int offset, u8 *buf, int size)
 {
@@ -627,7 +632,7 @@ read:
         tries--;
         goto read;
     }
-    loaded = &DAT_800633b0;
+    loaded = &DAT_800633b0.save;
     sum = func_8001b3f8(fd, 512, (u8 *)loaded, 7560);
     if (sum == -1) {
         if (!tries) {

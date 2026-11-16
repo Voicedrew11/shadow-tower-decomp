@@ -67,10 +67,6 @@ extern VsSave DAT_801a0a80[2];
 /* The card file headers of the two players' saves (0x8015ffc0, bss). */
 extern VsCardHeader DAT_8015ffc0[2];
 
-/* The save record a card read lands in before it is accepted (0x800633b0,
- * bss). */
-extern VsSave DAT_800633b0;
-
 /* LIBC's itoa (Psy-Q's headers do not declare it): the decimal text of
  * value in a static buffer. */
 extern char *itoa(int value);
