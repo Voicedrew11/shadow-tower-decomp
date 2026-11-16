@@ -101,4 +101,13 @@ typedef struct {
 
 extern VsRecord20 DAT_801c4a58[2000];
 
+/* A flag the two-choice dialog func_80022f14 compares with its page
+ * (0x80063228, .sdata, initially 1). */
+extern s32 DAT_80063228;
+
+/* The VRAM position func_8001cac0 saves for its read's completion
+ * callback func_8001ca74 (bss). */
+extern s32 DAT_80063304;
+extern s32 DAT_80063308;
+
 #endif
