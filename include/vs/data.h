@@ -79,7 +79,9 @@ typedef struct {
     u8 unk858C[0xa3fc - 0x858c];
     StAnimSlot anim_slots[12]; /* 0xa3fc: 12 vertex-animation slots (ST: 16 at 0xa5fc) */
     StAnimSet anim_sets[12]; /* 0xa51c: 12 skeletal-animation slots (ST: 16 at 0xa77c) */
-    u8 unkA7EC[0x2c972 - 0xa7ec];
+    u8 unkA7EC[0xc7f0 - 0xa7ec];
+    SVECTOR unkC7F0[0x2000]; /* 0xc7f0: the vertices func_800281d4 interpolates (ST: unkEB40) */
+    u8 unk1C7F0[0x2c972 - 0x1c7f0];
     u8 frame;            /* 0x2c972: index of the current DRAWENV and buffers (ST: 0x1ecc2) */
     u8 unk2C973;
     u8 unk2C974;         /* 0x2c974: set while the loading display runs (ST: unk1ECC4) */

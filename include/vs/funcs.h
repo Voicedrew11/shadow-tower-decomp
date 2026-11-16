@@ -7,6 +7,7 @@
 
 #include <kf/lib/types.h>
 #include <sys/types.h>
+#include <LIBGTE.H>
 #include <LIBCD.H>
 #include <st/cd.h>
 
@@ -14,6 +15,15 @@
 void func_8001cb34(void);                 /* ST func_8001531c */
 void func_8001d1b8(void);                 /* ST func_800174c4 */
 void func_8001d374(void);                 /* ST func_80017680 */
+
+/* src/vs/anim_80023764.c */
+void func_80023820(struct StAnimSet *set);
+void func_8002392c(void);
+void *func_8002398c(u32 size);           /* ST func_8001528c */
+void func_800241b4(struct StAnimSet **out);
+
+/* src/vs/anim_80027c64.c */
+void func_80027c64(SVECTOR *dst, SVECTOR *from, SVECTOR *to, int count); /* ST vertices_sub */
 
 /* src/vs/cd_8002e5e4.c */
 void func_8002e5e4(void);                 /* ST func_800214cc */

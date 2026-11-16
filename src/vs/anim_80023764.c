@@ -23,7 +23,8 @@
 #include <vs/data.h>
 #include <vs/funcs.h>
 
-/* anim_node_command's switch table. */
+/* func_8002420c's strings and anim_node_command's switch table. */
+RODATA(0x800112a8, 0x28)
 JUMPTABLES(0x800113b8, 0x24)
 
 /* The file's mesh model. */
@@ -140,3 +141,33 @@ void *func_8002398c(u32 size)
 #include "../lib/anim_list_init.inc"
 
 #include "../lib/anim_list.inc"
+
+/* Finds a free slot, or NULL (ST.EXE's anim_set_alloc frees the state-1
+ * slots and searches again; VS gives up). */
+ADDRESS(0x800241b4, 0x58)
+void func_800241b4(StAnimSet **out)
+{
+    u16 i;
+
+    *out = DAT_801624d0.anim_sets;
+    i = 12;
+    do {
+        if (!(*out)->unk0) {
+            (*out)->unk4 = 255;
+            return;
+        }
+        (*out)++;
+    } while (--i);
+    *out = NULL;
+}
+
+/* Debug print of a matrix (unused). */
+ADDRESS(0x8002420c, 0x90)
+void func_8002420c(MATRIX *m)
+{
+    FntPrint("==== Matrixprint ====\n");
+    FntPrint("%5d %5d %5d\n", m->m[0][0], m->m[0][1], m->m[0][2]);
+    FntPrint("%5d %5d %5d\n", m->m[1][0], m->m[1][1], m->m[1][2]);
+    FntPrint("%5d %5d %5d\n", m->m[2][0], m->m[2][1], m->m[2][2]);
+    FntPrint("%5d %5d %5d\n", m->t[0], m->t[1], m->t[2]);
+}
