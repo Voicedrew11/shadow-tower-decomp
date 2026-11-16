@@ -100,17 +100,19 @@ typedef struct {
     s32 unk128[2];
     s16 unk130[4];       /* 0x130: -1: slot empty */
     s16 unk138[2];       /* 0x138 */
-    s16 unk13C[2];       /* 0x13c: -1 when idle */
+    s16 unk13C[2];       /* 0x13c: per hand, -1 when idle */
     u8 unk140[0x148 - 0x140];
-    u8 unk148[4];        /* 0x148: func_8003f12c's item model per slot (255: none) */
-    u8 unk14C[2];        /* 0x14c: func_8003ee38's item per slot (255: none) */
+    u8 unk148[4];        /* 0x148: func_8003f12c's item model per slot (255: none); per hand: held item kind */
+    u8 unk14C[2];        /* 0x14c: func_8003ee38's item per slot (255: none); per hand: magic id */
     u8 unk14E;
     u8 unk14F;
     u8 unk150[4];        /* 0x150 */
     u8 unk154;
-    u8 unk155[2];        /* 0x155: func_8003f910's kind per slot (255: none) */
+    u8 unk155[2];        /* 0x155: func_8003f910's kind per slot (255: none): the magic cast */
     u8 unk157[2];
-    u8 unk159[0x15e - 0x159];
+    u8 unk159[2];        /* 0x159: per hand: reload for unk15B */
+    u8 unk15B[2];        /* 0x15b: per hand: countdown to the next func_8003f910 */
+    u8 unk15D;
     s8 unk15E;           /* 0x15e: HUD frame offset (func_80026afc) */
     u8 unk15F;
     SVECTOR unk160[2];   /* 0x160: func_8003f704's offsets per slot */
@@ -143,7 +145,7 @@ typedef struct {
     s16 unk1CE;
     s16 unk1D0;
     u8 unk1D2[2];
-    u8 unk1D4[4];
+    u8 unk1D4[4];        /* 0x1d4: per slot/hand: sound id */
     u8 unk1D8[0x1e4 - 0x1d8];
     u8 unk1E4;
     u8 unk1E5[0x1ec - 0x1e5];
@@ -182,7 +184,7 @@ typedef struct {
     short unk26C;        /* 0x26c: roll; model_draw_list turns kind-2 parts by all three */
     short unk26E;
     SVECTOR unk270;      /* 0x270 */
-    SVECTOR unk278;      /* 0x278: func_8003c054 copies it to 0x268 */
+    SVECTOR unk278;      /* 0x278: func_8003c054 copies it to 0x268; view pitch (vx) and yaw (vy) func_80041d4c turns */
     s16 unk280;
     s16 unk282;
     s16 unk284;
@@ -198,8 +200,8 @@ typedef struct {
     MATRIX unk298;       /* 0x298: func_8003f704's rotation */
     u8 unk2B8[0x2c8 - 0x2b8];
     s16 unk2C8;
-    s16 unk2CA;
-    s16 unk2CC;
+    s16 unk2CA;          /* 0x2ca: yaw speed */
+    s16 unk2CC;          /* 0x2cc: pitch speed */
     short unk2CE;        /* 0x2ce: added to y by world_transform_parts */
     short unk2D0;
     short unk2D2;        /* 0x2d2: added to y by world_transform_parts */
@@ -212,7 +214,7 @@ typedef struct {
     short unk2E0;
     short unk2E2;
     s32 unk2E4;
-    s32 unk2E8;
+    s32 unk2E8;          /* 0x2e8: top yaw speed */
     s32 unk2EC;
     s32 unk2F0;
     s32 unk2F4;          /* 0x2f4: player_update_shake's countdown, -1 when idle */
@@ -237,13 +239,23 @@ typedef struct {
     u8 area;             /* 0x09 */
     u8 unkA[0x10 - 0xa];
     u8 unk10;            /* 0x10: 0xff when unset */
-    u8 unk11[0x18 - 0x11];
+    u8 unk11;
+    u8 unk12;            /* 0x12 */
+    u8 unk13;            /* 0x13 */
+    u8 unk14;            /* 0x14 */
+    u8 unk15[3];
     s32 unk18;           /* 0x18: tick func_80021654 times its fade from, -1 when idle */
     u8 unk1C;
     u8 unk1D;
     u8 unk1E;
     u8 unk1F;            /* 0x1f: nonzero skips the block refresh (band E object passes) */
-    u8 unk20[8];
+    u8 unk20;            /* 0x20 */
+    u8 unk21;
+    u8 unk22;
+    u8 unk23;
+    u8 unk24;
+    u8 unk25;
+    u16 unk26;           /* 0x26 */
 } AreaState;
 
 extern AreaState area_state;
@@ -264,13 +276,24 @@ extern Data801c7590 DAT_801c7590;
 extern u32 DAT_801cceb0[2][5];
 
 typedef struct {
-    u8 unk0[4];
+    u8 unk0[2];
+    u16 unk2;            /* 0x02: held bits */
     u16 unk4;            /* 0x04: page bits func_8002fc4c consumes; request bits func_8003f4ec clears */
     u8 unk6[0x10 - 0x6];
     u8 unk10;
-    u8 unk11[0x32 - 0x11];
-    u16 unk32;           /* 0x32: slot 0's request bit */
+    u8 unk11;
+    u8 unk12;            /* 0x12 */
+    u8 unk13;
+    u8 unk14;            /* 0x14: request func_80042900 consumes */
+    u8 unk15[0x26 - 0x15];
+    u16 unk26;           /* 0x26 */
+    u16 unk28;           /* 0x28 */
+    u8 unk2A[4];
+    u16 unk2E;           /* 0x2e */
+    u16 unk30;           /* 0x30 */
+    u16 unk32;           /* 0x32: slot 0's request bit; bit masks tested against unk2/unk4 */
     u16 unk34;           /* 0x34: the other slots' request bit */
+    u16 unk36;           /* 0x36 */
 } Data801cd180;
 extern Data801cd180 DAT_801cd180;
 

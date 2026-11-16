@@ -11,6 +11,7 @@
 
 #include <kf/lib/types.h>
 #include <sys/types.h>
+#include <LIBCD.H>
 #include <LIBGTE.H>
 #include <LIBGPU.H>
 #include <st/text.h>
@@ -158,8 +159,12 @@ typedef struct {
 
 /* Per-area counts read by the map page (byte +0x16e4 onwards); WIP extent. */
 typedef struct {
-    u8 unk0[0x14a8];
-    u32 unk14A8[0x8f];   /* 0x14a8: one bit per map id (func_800241d0) */
+    u8 unk0[0x1440];
+    u32 unk1440;         /* 0x1440: flag bits; 13 and 17 gate func_80044404's images */
+    u8 unk1444[0x14a8 - 0x1444];
+    u32 unk14A8[0x5c];   /* 0x14a8: one bit per map id (func_800241d0) */
+    CdlLOC unk1618[40];  /* 0x1618: the XA stream positions func_80044674 searches */
+    u8 unk16B8[0x16e4 - 0x16b8];
     u8 unk16E4[44];      /* by area */
 } Data801cba08;
 extern Data801cba08 DAT_801cba08;

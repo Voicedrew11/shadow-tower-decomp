@@ -20,7 +20,7 @@ void vis_build_visible(u8 *arg)
     u16 id;
 
     vis_lists.n_sources = 0;
-    vis_collect_sources(arg, 0, 0);
+    vis_collect_sources((VECTOR *)arg, 0, 0);
     fill_words(mask, 0, 16);
     i = vis_lists.n_sources;
     while (i--) {

@@ -8,7 +8,8 @@
  * prototypes (func_8003beb4, player_update_status, player_hit,
  * func_8003eb34, func_8003ee38, func_8003f12c),
  * as do st.math's (st/funcs.h), st.light's (st/light.h) and st.anim's
- * (st/anim.h).
+ * (st/anim.h). The held items and magic (player_hands.c, look.c,
+ * equip.c) follow.
  */
 #ifndef ST_PLAYER_H
 #define ST_PLAYER_H
@@ -47,7 +48,6 @@ void func_8005a3a8(int arg0);
 void func_80057a68(int arg0);
 void func_80055990(void);
 void func_800595d4(void);
-void func_80042c44(SVECTOR *a, SVECTOR *b, int c, int d);
 void func_80036484(int type, u8 flags, u8 kind, VECTOR *pos, SVECTOR *dir, ...);
 void func_80045044(u8 r, u8 g, u8 b, u8 arg3, u8 arg4, int arg5, int arg6, int arg7,
                    int arg8, int arg9, int arg10);
@@ -84,5 +84,22 @@ int func_8003f704(int length, VECTOR *pos, SVECTOR *dir, SVECTOR *rot, int slot)
 
 /* Not reconstructed exactly yet (0x8003f910); called with two arguments. */
 void func_8003f910(int kind, int slot, ...);
+
+/* A view of one 24-byte effects.defs record (StEffectDef, st/effect.h) as
+ * a magic record: viewer.unk118 holds the one each hand casts. */
+typedef struct {
+    u8 unk0[2];
+    u16 unk2;            /* 0x02: cost, taken from viewer.unk6 */
+    u8 unk4[0x14];
+} StMagic;
+
+/* src/st/player_hands.c .. equip.c */
+void func_80040024(u8 hand);
+void func_80040f04(u8 magic, u8 hand);
+void func_80042620(u8 a, u8 b);
+void func_80042c44(SVECTOR *a, SVECTOR *b, s16 c, int d);
+
+/* Not reconstructed yet. */
+void func_80055374(long *pos, SVECTOR *rot);
 
 #endif

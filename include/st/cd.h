@@ -10,6 +10,8 @@
 
 #include <kf/lib/types.h>
 #include <sys/types.h>
+#include <LIBGTE.H>
+#include <LIBGPU.H>
 #include <LIBCD.H>
 
 #define ST_CD_REQUESTS 48
@@ -19,11 +21,11 @@
 typedef struct {
     volatile u8 unk0; /* request kind, 0 when free; switch reads keep a separate zero-extension */
     volatile u8 unk1;
-    u8 unk2[8];
-    s16 unkA;
+    u8 unk2[2];
+    RECT unk4; /* 0x04: image block func_80045ffc loads; h counts rows still to load */
     s16 unkC;
     s16 unkE;
-    u8 unk10;
+    volatile u8 unk10; /* completion state the callbacks set; stores keep their own slot */
     u8 unk11[3];
     CdlLOC unk14; /* copied from unk18 as a read starts */
     CdlLOC unk18;

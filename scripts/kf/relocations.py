@@ -78,30 +78,53 @@ def encode_mips26_addend(word: int, addend: int) -> int:
     return (word & 0xFC000000) | ((addend >> 2) & 0x03FFFFFF)
 
 
-def lui_copy_register(hi_word: int, next_word: int) -> int | None:
-    """The register a `move` directly after a LUI copies its value into.
+STORE_OPCODES = frozenset({0x28, 0x29, 0x2B})  # sb, sh, sw: write no register
+
+
+def lui_copy_register(
+    hi_word: int, next_word: int, after_word: int | None = None
+) -> int | None:
+    """The register a `move` right after a LUI copies its value into.
 
     GCC can take the high half into a temporary and copy it to the register
     the signed lows use (`lui v0,%hi(x)` then `move s3,v0`); the LUI and each
-    low still form one HI16/LO16 family.
+    low still form one HI16/LO16 family. The scheduler may put one store,
+    which writes no register, between the two (`lui v0,%hi(x)`;
+    `sw s1,20(sp)`; `move s1,v0`); `after_word` is the instruction after
+    `next_word`.
     """
     if hi_word >> 26 != 0x0F:
         return None
-    # addu rd, rs, $zero (move) whose source is the LUI register
-    if next_word & 0xFC1F07FF != 0x21 or (next_word >> 21) & 0x1F != (hi_word >> 16) & 0x1F:
-        return None
-    return ((next_word >> 11) & 0x1F) or None
+    hi_register = (hi_word >> 16) & 0x1F
+
+    def move_destination(word: int) -> int | None:
+        # addu rd, rs, $zero (move) whose source is the LUI register
+        if word & 0xFC1F07FF != 0x21 or (word >> 21) & 0x1F != hi_register:
+            return None
+        return ((word >> 11) & 0x1F) or None
+
+    copy = move_destination(next_word)
+    if copy is None and after_word is not None and next_word >> 26 in STORE_OPCODES:
+        copy = move_destination(after_word)
+    return copy
 
 
-def decode_hi_lo_target(hi_word: int, lo_word: int, copy_word: int | None = None) -> int:
-    """Decode a HI/LO address; `copy_word` is the instruction after the LUI."""
+def decode_hi_lo_target(
+    hi_word: int,
+    lo_word: int,
+    copy_word: int | None = None,
+    after_word: int | None = None,
+) -> int:
+    """Decode a HI/LO address; `copy_word` and `after_word` are the two
+    instructions after the LUI."""
     if hi_word >> 26 != 0x0F:
         raise ValueError("HI site is not LUI")
     hi_register = (hi_word >> 16) & 0x1F
     low_opcode = lo_word >> 26
     base = (lo_word >> 21) & 0x1F
     if base != hi_register and (
-            copy_word is None or lui_copy_register(hi_word, copy_word) != base):
+            copy_word is None
+            or lui_copy_register(hi_word, copy_word, after_word) != base):
         raise ValueError("LO instruction does not consume the LUI register")
     low = lo_word & 0xFFFF
     if low_opcode == 0x0D:  # ori
@@ -235,8 +258,9 @@ def validate_relocation(
         paired_offset = paired - function.va
         paired_word = _word(blob, paired_offset)
         copy_word = _word(blob, offset + 4) if offset + 8 <= len(blob) else None
+        after_word = _word(blob, offset + 8) if offset + 12 <= len(blob) else None
         try:
-            decoded = decode_hi_lo_target(word, paired_word, copy_word)
+            decoded = decode_hi_lo_target(word, paired_word, copy_word, after_word)
         except ValueError as error:
             raise ValueError(f"instruction-pair-mismatch:{error}") from error
         if decoded != target:

@@ -52,6 +52,8 @@ typedef struct {
     s16 unk47D2;
     u8 unk47D4[0x47dc - 0x47d4];
     s32 unk47DC;         /* 0x47dc: cleared by func_8003c054 */
+    u32 unk47E0;         /* 0x47e0: flag bits func_80044404 tests */
+    u8 unk47E4[0xc];
 } VisLists;
 
 /* 0x8017bed0: 12-byte records indexed by visible id. */
@@ -75,6 +77,8 @@ typedef struct {
 extern VisLists vis_lists;
 extern VisRecord vis_records[];
 extern VisSourceMask vis_source_masks[];
+/* 0x801856d0: per axis (x, y, z) and 4096-unit cell, the sources that cover it. */
+extern VisSourceMask DAT_801856d0[3][128];
 
 /* 0x801ba138: 64 entries of 212 bytes, then the collected index list. */
 /* A flags word whose byte +2 is also updated on its own (func_800241d0). */
@@ -143,10 +147,15 @@ typedef struct {
     u8 count;            /* 0x6100 */
     u8 unk6101[3];
     u16 list[12];        /* 0x6104 */
-    u8 unk611C[0x6160 - 0x611c];
+    u8 unk611C[0x6144 - 0x611c];
+    s32 unk6144;         /* 0x6144: loop index func_800402ac keeps in memory */
+    u8 unk6148[0x6160 - 0x6148];
     s16 unk6160;         /* 0x6160..0x6164: cleared by player_update_status */
     s16 unk6162;
     s16 unk6164;
+    u8 unk6166[0x6169 - 0x6166];
+    u8 unk6169;          /* 0x6169: cleared by func_8004567c */
+    u8 unk616A[0x61d8 - 0x616a];
 } VisTableA;
 
 /* 0x801c0310: 240 entries of 88 bytes at +0x1f20, then the index list. */
@@ -275,7 +284,8 @@ extern VisTableA vis_table_a;
 extern VisTableB vis_table_b;
 extern VisTableC vis_table_c;
 
-void vis_collect_sources(u8 *arg, int a1, int a2);
+void vis_collect_sources(VECTOR *a, VECTOR *b, VECTOR *c);
+void func_8004656c(VECTOR *out);
 void vis_build_visible(u8 *arg);
 void vis_build_planes(void);
 int vis_measure_position(void);

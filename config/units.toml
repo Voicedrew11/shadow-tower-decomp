@@ -356,6 +356,54 @@ source = "src/st/player_model.c"
 profile = "probe-gcc272cdk-o2-g8"
 
 [[unit]]
+unit = "st.player_hands"
+image = "ST.EXE"
+source = "src/st/player_hands.c"
+profile = "probe-gcc272cdk-o2-g8"
+
+[[unit]]
+unit = "st.look"
+image = "ST.EXE"
+source = "src/st/look.c"
+profile = "probe-gcc272cdk-o2-g8"
+
+[[unit]]
+unit = "st.equip"
+image = "ST.EXE"
+source = "src/st/equip.c"
+profile = "probe-gcc272cdk-o2-g8"
+
+[[unit]]
+unit = "st.area_a"
+image = "ST.EXE"
+source = "src/st/area_a.c"
+profile = "probe-gcc272cdk-o2-g8"
+
+[[unit]]
+unit = "st.area_wait"
+image = "ST.EXE"
+source = "src/st/area_wait.c"
+profile = "probe-gcc272cdk-o2-g8"
+
+[[unit]]
+unit = "st.area_cb"
+image = "ST.EXE"
+source = "src/st/area_cb.c"
+profile = "probe-gcc272cdk-o2-g8"
+
+[[unit]]
+unit = "st.area_cd"
+image = "ST.EXE"
+source = "src/st/area_cd.c"
+profile = "probe-gcc272cdk-o2-g8"
+
+[[unit]]
+unit = "st.vis_src"
+image = "ST.EXE"
+source = "src/st/vis_src.c"
+profile = "probe-gcc272cdk-o2-g0"
+
+[[unit]]
 unit = "st.vis_request"
 image = "ST.EXE"
 source = "src/st/vis_request.c"
