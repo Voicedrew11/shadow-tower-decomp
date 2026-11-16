@@ -209,6 +209,11 @@ def plan(elf: ELFFile, unit: Unit, result: UnitResult) -> dict[str, int]:
     if unit.rodata:
         bases[".rodata"].add(unit.rodata[0])
         sizes[".rodata"] = unit.rodata[1]
+    if unit.sdata and not bases.get(".sdata"):
+        # A literal-only .sdata (no DATA claim in it) starts with the unit's
+        # first small-data literal, so its SDATA claim is the section base.
+        bases[".sdata"].add(unit.sdata[0])
+        sizes[".sdata"] = unit.sdata[1]
     placed = {}
     seen = set()
     for section in elf.iter_sections():
