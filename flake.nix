@@ -259,7 +259,9 @@
           cd "$repo"
           exec python3 -m scripts.kf.seed_vendored_functions \
             --psyk ${psy-k}/bin/psyk \
-            --sdk-lib-dir "${psyqSdk}/psyq-3.0/LIB" \
+            --sdk-lib-dir "${psyq42Sdk}/lib" \
+            --sdk-object "${psyq45Tools}/NONE3.OBJ" \
+            --sdk-object "${psyqMallocObj}/MALLOC.OBJ" \
             --signature-root ${ghidraPsxLoader}/lib/ghidra/Ghidra/Extensions/ghidra_psx_ldr/data/psyq \
             "$@"
         '';
@@ -273,7 +275,9 @@
           cd "$repo"
           exec python3 -m scripts.kf.fid_census \
             --psyk ${psy-k}/bin/psyk \
-            --sdk-lib-dir "${psyqSdk}/psyq-3.0/LIB" \
+            --sdk-lib-dir "${psyq42Sdk}/lib" \
+            --sdk-object "${psyq45Tools}/NONE3.OBJ" \
+            --sdk-object "${psyqMallocObj}/MALLOC.OBJ" \
             "$@"
         '';
       };

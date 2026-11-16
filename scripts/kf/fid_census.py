@@ -287,8 +287,14 @@ def _object_signatures(
     )
 
 
-def build_corpus(psyk: Path, sdk_lib_dir: Path) -> list[FidSignature]:
-    """Extract every supplied SDK archive and build the function corpus."""
+def build_corpus(
+    psyk: Path, sdk_lib_dir: Path, objects: Sequence[Path] = ()
+) -> list[FidSignature]:
+    """Extract every supplied SDK archive and build the function corpus.
+
+    `objects` adds standalone objects linked from outside the library
+    directory (startup and allocator objects from other kits).
+    """
     result: list[FidSignature] = []
     for archive in sorted(sdk_lib_dir.glob("*.LIB")):
         archive_hash = sha256_path(archive)
@@ -299,7 +305,7 @@ def build_corpus(psyk: Path, sdk_lib_dir: Path) -> list[FidSignature]:
                 result.extend(_object_signatures(
                     psyk, obj, archive.name.upper(), archive_hash
                 ))
-    for obj in sorted(sdk_lib_dir.glob("*.OBJ")):
+    for obj in [*sorted(sdk_lib_dir.glob("*.OBJ")), *objects]:
         object_hash = sha256_path(obj)
         result.extend(_object_signatures(
             psyk, obj, obj.name.upper(), object_hash
@@ -451,6 +457,10 @@ def parse_args(arguments: Sequence[str] | None = None) -> argparse.Namespace:
         type=Path,
         default=Path(os.environ["PSYQ_LIB"]) if "PSYQ_LIB" in os.environ else None,
     )
+    parser.add_argument(
+        "--sdk-object", action="append", type=Path, default=[],
+        help="standalone object outside --sdk-lib-dir to include (repeatable)",
+    )
     parser.add_argument("--exe-dir", required=True, type=Path)
     parser.add_argument(
         "--output", type=Path, default=Path("build/fid-census/matches.tsv")
@@ -477,7 +487,7 @@ def main(arguments: Sequence[str] | None = None) -> int:
     _refuse_retail_output(args.corpus_output)
 
     psyk = resolve_tool(args.psyk, "psyk")
-    corpus = build_corpus(psyk, args.sdk_lib_dir)
+    corpus = build_corpus(psyk, args.sdk_lib_dir, args.sdk_object)
     images = load_retail_payloads(args.exe_dir)
     functions = load_retail_functions(args.functions)
     rows = classify_hits(find_hits(corpus, functions, images))

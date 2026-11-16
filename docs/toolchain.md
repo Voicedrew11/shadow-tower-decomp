@@ -34,7 +34,7 @@ Wine runtime is involved.
 | `PSYQ_PSYLINK`, `PSYQ_CPE2X`, `PSYQ_STARTUP_OBJ` | PSYLINK 2.74, CPE2X 1.5, NONE3.OBJ |
 | `PSYQ_MALLOC_OBJ` | Release 2.5 MALLOC.OBJ |
 | `PSYQ_HX` | the five HX files above |
-| `PSYQ_SDK` | the Psy-Q 3.0 kit inherited from King's Field II, kept only as the analysis corpus of `kf-vendored-seed`, `kf-fid-census` and the `gcc241-kit` probe |
+| `PSYQ_SDK` | the Psy-Q 3.0 kit inherited from King's Field II, kept only for the `gcc241-kit` probe; `kf-vendored-seed` and `kf-fid-census` read the Runtime Library 4.2 archives plus `NONE3.OBJ` and `MALLOC.OBJ` |
 | `PSYQ_C_INCLUDE` | GCC 2.5.7's `stdarg.h`/`va-mips.h`, used by `compile_classic` |
 
 ## Library attribution

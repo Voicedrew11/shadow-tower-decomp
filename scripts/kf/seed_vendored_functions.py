@@ -791,6 +791,12 @@ def apply_signature_rows(
         }
 
 
+def _fid_source_version(fid: dict[str, str], sdk: SdkLabel) -> str:
+    """A standalone `--sdk-object` names itself, not the library release."""
+    library = fid["library"]
+    return f"standalone {library}" if library.endswith(".OBJ") else sdk.source_version
+
+
 def apply_fid_rows(
     fid_rows: Sequence[dict[str, str]],
     rows: dict[tuple[str, int], dict[str, object]],
@@ -839,7 +845,7 @@ def apply_fid_rows(
             "library": fid["library"],
             "module": fid["module"],
             "member_offset": fid["member_offset"],
-            "source_version": sdk.source_version,
+            "source_version": _fid_source_version(fid, sdk),
             "evidence": "relocation-masked-function-id",
             "confidence": f"fid-{sdk.token}",
             "provenance": witness,
@@ -910,7 +916,7 @@ def apply_fid_rows(
             "library": "|".join(sorted({item[0] for item in identities})),
             "module": "|".join(sorted({item[1] for item in identities})),
             "member_offset": next(iter(offsets)) if len(offsets) == 1 else "0x0",
-            "source_version": sdk.source_version,
+            "source_version": _fid_source_version(candidates[0], sdk),
             "evidence": "exact-function-id-multiobject",
             "confidence": f"fid-{sdk.token}-ambiguous",
             "provenance": ";".join(witnesses),
@@ -953,6 +959,10 @@ def parse_args(arguments: Sequence[str] | None = None) -> argparse.Namespace:
     parser.add_argument(
         "--complete-object-evidence", type=Path,
         help="reviewed complete small-object matches against --sdk-lib-dir (optional)",
+    )
+    parser.add_argument(
+        "--sdk-object", action="append", type=Path, default=[],
+        help="standalone object outside --sdk-lib-dir for the FID corpus (repeatable)",
     )
     parser.add_argument(
         "--sdk-version",
@@ -1046,7 +1056,9 @@ def main(arguments: Sequence[str] | None = None) -> int:
             load_retail_functions,
         )
 
-        corpus = build_corpus(resolve_tool(args.psyk, "psyk"), args.sdk_lib_dir)
+        corpus = build_corpus(
+            resolve_tool(args.psyk, "psyk"), args.sdk_lib_dir, args.sdk_object
+        )
         fid_rows = classify_hits(find_hits(
             corpus, load_retail_functions(args.functions), images
         ))
