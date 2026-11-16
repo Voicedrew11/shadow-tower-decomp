@@ -6,7 +6,7 @@
 > programs are kept where they illustrate a mechanism.
 
 `kf build` is the source-to-EXE build: the gcc-2.7.2-cdk compiler emits
-assembly, ASPSX 2.79 emits native Psy-Q objects, PSYLINK 2.74 links those
+assembly, ASPSX 2.79D emits native Psy-Q objects, PSYLINK 2.73D links those
 objects with the Runtime Library 4.2 inputs, and CPE2X 1.5 writes each
 executable. See [the linking guide](executable-linking.md) for outputs and
 provenance.

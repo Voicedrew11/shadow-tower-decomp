@@ -67,26 +67,15 @@ def tool_succeeded(root: Path, log: str, product: str, magic: bytes) -> None:
         raise RuntimeError(f'{log}: native tool produced no valid {product}')
 
 
-# The SDevTC ASPSX 2.79 and PSYLINK 2.74 are Win32 console programs. Inside the
-# same DOSBox-X session, the HX DOS extender's DPMI host (HDPMI32, made
-# resident once per batch) and PE loader (DPMILD32) run them unchanged.
+# ASPSX 2.79D is the DOS build of SDevTC ASPSX 2.79 (the 4.5 kit's
+# BIN/DOS/ASPSXD.EXE). Like PSYLINK 2.73D and CPE2X 1.5 it is a plain DOS
+# program whose FlashTek X-32VM extender is bound into the executable, so
+# DOSBox-X runs it directly and no extender files are staged.
 ASPSX_VERSION = '2.79'
-WIN32_HOST = 'HDPMI32 -r'
-HX_FILES = ('HDPMI32.EXE', 'DPMILD32.EXE', 'DKRNL32.DLL', 'DUSER32.DLL', 'DGDI32.DLL')
-
-
-def stage_win32(root: Path) -> None:
-    """Copy the pinned HX runtime beside the Win32 tools in a DOS root."""
-    for name in HX_FILES:
-        shutil.copyfile(Path(os.environ['PSYQ_HX']) / name, root / name)
-
-
-def win32(command: str) -> str:
-    return 'DPMILD32 ' + command
 
 
 def aspsx_command(stem: str, small_data: int) -> str:
-    return win32(f'ASPSX.EXE -g -G{small_data} -o {stem}.OBJ {stem}.S > {stem}.TXT')
+    return f'ASPSX.EXE -g -G{small_data} -o {stem}.OBJ {stem}.S > {stem}.TXT'
 
 
 def dos_text(path: Path) -> None:
@@ -173,11 +162,10 @@ def assemble(root: Path, stem: str, small_data: int) -> bytes:
 
 def assemble_many(root: Path, stems: tuple[str, ...], small_data: int) -> dict[str, bytes]:
     shutil.copyfile(os.environ['PSYQ_ASPSX'], root / 'ASPSX.EXE')
-    stage_win32(root)
     for stem in stems:
         dos_text(root / (stem + '.S'))
         (root / (stem + '.OBJ')).unlink(missing_ok=True)
-    dos_run(root, [WIN32_HOST, *(aspsx_command(stem, small_data) for stem in stems)], 'asm')
+    dos_run(root, [aspsx_command(stem, small_data) for stem in stems], 'asm')
     for stem in stems:
         tool_succeeded(root, stem + '.TXT', stem + '.OBJ', b'LNK\x02')
     return {stem: (root / (stem + '.OBJ')).read_bytes() for stem in stems}

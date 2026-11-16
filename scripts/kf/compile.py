@@ -230,7 +230,7 @@ def compile_source(
         'language': 'c' if source.suffix.lower() == '.c' else 'assembly',
         'compiler': C_COMPILERS[compiler][2], 'compiler_probe': compiler,
         'optimization': optimization, 'small_data': small_data, 'cc1_flags': list(cc1_flags),
-        'assembler_model': 'native ASPSX 2.79 (HX DOS extender); LNK object -> ELF inspection view',
+        'assembler_model': 'native ASPSX 2.79D (DOS, in DOSBox-X); LNK object -> ELF inspection view',
         'native_object': str(output.with_suffix('.OBJ')),
         'native_object_sha256': hashlib.sha256(native).hexdigest(),
         'native_referents': [

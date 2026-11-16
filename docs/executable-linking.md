@@ -10,8 +10,8 @@ kf build
 artifact chain:
 
 ```text
-C source -> CPPPSX/CC1PSX (gcc-2.7.2-cdk) -> assembly -> ASPSX 2.79 -> Psy-Q OBJ
-Psy-Q OBJ + SDK OBJ/LIB -> PSYLINK 2.74 -> CPE -> CPE2X 1.5 /CA -> PS-X EXE
+C source -> CPPPSX/CC1PSX (gcc-2.7.2-cdk) -> assembly -> ASPSX 2.79D -> Psy-Q OBJ
+Psy-Q OBJ + SDK OBJ/LIB -> PSYLINK 2.73D -> CPE -> CPE2X 1.5 /CA -> PS-X EXE
 ```
 
 The EXE is the unchanged output of CPE2X. Retail bytes are comparison inputs
@@ -24,8 +24,8 @@ DOSBox-X runs every tool at a fixed emulated rate (`DOS_CYCLES` in
 `scripts/psxbuild/sdk.py`), so a DOS tool's uninitialized stack bytes cannot
 vary with host load; `nix flake check` (`executable-determinism`) builds
 every linked program in two trees and requires identical CPE and EXE bytes.
-ASPSX and PSYLINK are Win32 programs started through the HX DOS extender in
-the same session (`HDPMI32 -r`, then `DPMILD32 PROGRAM.EXE ...`).
+ASPSX, PSYLINK and CPE2X are all DOS programs; DOSBox-X starts each one
+directly from a batch file, with no extender or loader staged.
 
 ## Link model
 
@@ -80,7 +80,7 @@ bss	group	bss
 PSYLINK, not the build script, places SDK library members. These rules were
 established for PSYLINK 1.29 in the King's Field II project; the Shadow
 Tower retail member groups follow the same pattern, but only `PSX.EXE` has
-been relinked with 2.74 so far:
+been relinked with 2.73D so far:
 
 - Archives are visited in `inclib` order. The groups of members from each
   archive follow one another in the linked text in that order.
@@ -150,7 +150,7 @@ Each object contributes one run per output section in link order, so a
 datum's section and its unit's link position fix its address. The facts
 below were established in the King's Field projects (GCC 2.5.7, ASPSX 1.07,
 PSYLINK 1.17/1.29); they are starting hypotheses for the gcc-2.7.2-cdk,
-ASPSX 2.79 and PSYLINK 2.74 chain:
+ASPSX 2.79D and PSYLINK 2.73D chain:
 
 - GCC 2.5.7's C front end emits every initialized file-scope or local static,
   const or not, at its declaration even when nothing reads it, and keeps

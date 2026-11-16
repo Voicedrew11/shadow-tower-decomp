@@ -94,13 +94,6 @@ let
         cp "$malloc_obj" "$out/MALLOC.OBJ"
       '';
 
-      # mkst/maspsx's archive of historical ASPSX builds; only 2.79 is used.
-      aspsxArchive = pkgs.fetchurl {
-        name = "aspsx-binaries.tar.gz";
-        url = "https://github.com/mkst/maspsx/releases/download/aspsx/aspsx-binaries.tar.gz";
-        hash = "sha256-fHU4wq+SMzjdxaevXFfSgLGTBmDpj5xDDm6iq3XlLno=";
-      };
-
       # Sony's Programmer Tool Runtime Library 4.2: the LIB and INCLUDE trees
       # and the two bundled 4.2.1 patch archives, unchanged. Every SDK object
       # linked into the seven SLUS-00863 programs matches an object of these
@@ -137,17 +130,21 @@ let
 
       # The Psy-Q/SDevTC 4.5 developer kit as preserved on Archive.org
       # (`ps1_sdks`, a 1999 floppy-set release of the 1998 tools). Only the
-      # files the executable chain needs are taken: PSYLINK 2.74 (1998-05-14),
-      # CPE2X 1.5 (1998-01-23), whose /CA option writes the "North America
-      # area" title that every retail header carries, and the NONE3.OBJ
-      # overlay startup that begins the text of STR, ST, TITLE, OPTXT, VS and
-      # END. The kit's own ASPSX.EXE is byte-identical to the ASPSX 2.79 below.
+      # files the executable chain needs are taken, all DOS programs:
+      # BIN/DOS/ASPSXD.EXE, the DOS build of SDevTC ASPSX 2.79 (1998-05-22,
+      # Watcom C with the FlashTek X-32VM DOS extender bound in); CPE2X 1.5
+      # (1998-01-23, 16-bit real mode), whose /CA option writes the "North
+      # America area" title that every retail header carries; and the
+      # NONE3.OBJ overlay startup that begins the text of STR, ST, TITLE,
+      # OPTXT, VS and END. The kit's DOS PSYLINK 2.74D (BIN/DOS/PSYLINKD.EXE)
+      # is an LX image left without its X-32 loader, so no DOS extender
+      # starts it; the linker comes from SDevTC 2.4 below.
       psyq45KitArchive = pkgs.fetchurl {
         name = "psyq-sdevtc-4.5-mfd.zip";
         url = "https://archive.org/download/ps1_sdks/PSYQ.SDevTC.Developers.Toolkit.For.PSX.v4.5-MFD.zip";
         hash = "sha256-5+Qmnvz1SC2cTFtkYQ3U5Nr0v8AOvgYAWXEAl1dI5Ss=";
       };
-      psyq45Tools = pkgs.runCommand "shadow-tower-psyq-4.5-link-tools" {
+      psyq45Tools = pkgs.runCommand "shadow-tower-psyq-4.5-dos-tools" {
         nativeBuildInputs = with pkgs; [ coreutils findutils unar unzip ];
       } ''
         mkdir -p "$TMPDIR/kit" "$out"
@@ -157,41 +154,38 @@ let
         for volume in mfdpsx0*.zip; do unzip -qo "$volume"; done
         unar -quiet -force-overwrite -output-directory "$TMPDIR/tree" mfdpsx.rar
         root="$TMPDIR/tree/mfdpsx"
-        install -m 0644 "$root/BIN/PSYLINK.EXE" "$root/BIN/CPE2X.EXE" "$root/LIB/NONE3.OBJ" "$out/"
+        install -m 0644 "$root/BIN/DOS/ASPSXD.EXE" "$root/BIN/CPE2X.EXE" "$root/LIB/NONE3.OBJ" "$out/"
         check() {
           test "$(sha256sum "$out/$1" | cut -d' ' -f1)" = "$2" || { echo "$1: unexpected hash" >&2; exit 1; }
         }
-        check PSYLINK.EXE 734a1278d2052d8a1ef882bfd68d5f6fc91e75965821854f531cfb204cfe8b72
+        check ASPSXD.EXE 29018ea7ef45e29d4de598f23b998f3431eacd2f0c5e9c32043212d7f9ba6dcf
         check CPE2X.EXE 777caca88327cd18d4f92b43439575c1759381690d49f14177805a94b8ecbef6
         check NONE3.OBJ 063efc868877ca84fcbe1fdc3afe9656e6c7933cb68156e08d04d35b76166899
       '';
 
-      # ASPSX 2.79 and PSYLINK 2.74 are Win32 console programs. The HX DOS
-      # extender's DPMI host (HDPMI32) and PE loader (DPMILD32) run them under
-      # the same pinned DOSBox-X as the DOS tools; only the Win32 API layer
-      # (DKRNL32, DUSER32, DGDI32) is needed.
-      hxRuntimeArchive = pkgs.fetchurl {
-        name = "hxrt-2.23.zip";
-        url = "https://github.com/Baron-von-Riedesel/HX/releases/download/v2.23/HXRT223.zip";
-        hash = "sha256-IFEM9m1shwT2b5CPj7+XgxmBlcHgQ6bKn7at6t+Hhck=";
+      # SN Systems' SDevTC 2.4 CD (Japan, files dated 1998-06-11; redump
+      # image in Archive.org `ps1_sdks`). Only DOS/PSYLINKD.EXE is taken:
+      # PSYLINK 2.73D, the DOS build of the linker (Watcom C, FlashTek X-32VM
+      # bound in). It links PSX.EXE byte-identically, and its CPE, SYM and MAP
+      # output equals the Win32 PSYLINK 2.74 of the 4.5 kit on test links that
+      # take every member of each program's libraries.
+      sdevtc24Archive = pkgs.fetchurl {
+        name = "sdevtc-2.4-japan-redump.zip";
+        url = "https://archive.org/download/ps1_sdks/SDevTC%20-%20Version%202.4%20%28Japan%29_redump.zip";
+        hash = "sha256-BMRsMU2HuXRVX4rG0VZKnMKrl7GKvIT75mAZi88cfcU=";
       };
-      hxRuntime = pkgs.runCommand "shadow-tower-hx-runtime-2.23" {
-        nativeBuildInputs = with pkgs; [ coreutils unzip ];
+      sdevtc24Linker = pkgs.runCommand "shadow-tower-sdevtc-2.4-psylinkd" {
+        nativeBuildInputs = with pkgs; [ bchunk coreutils p7zip unzip ];
       } ''
-        mkdir -p "$out"
-        unzip -q -j ${hxRuntimeArchive} BIN/HDPMI32.EXE BIN/DPMILD32.EXE BIN/DKRNL32.DLL BIN/DUSER32.DLL BIN/DGDI32.DLL -d "$out"
-      '';
-
-      # ASPSX 2.79 (SDevTC, 1998-05-22) from the pinned maspsx archive.
-      # It accepts the %hi/%lo operands of the gcc-2.7.2 SN32 compiler, which
-      # ASPSX 2.56 and older reject.
-      aspsx279 = pkgs.runCommand "shadow-tower-aspsx-2.79" {
-        nativeBuildInputs = [ pkgs.gnutar pkgs.gzip ];
-      } ''
-        mkdir -p "$out"
-        tar -xzf ${aspsxArchive} -C "$out" ./2.79/ASPSX.EXE
-        test "$(sha256sum "$out/2.79/ASPSX.EXE" | cut -d' ' -f1)" = \
-          "fcb987495ba18f9d8b5dc29696f7e6650091d3d86471c60b2a8aa00396888992"
+        mkdir -p "$TMPDIR/cd" "$out"
+        cd "$TMPDIR/cd"
+        unzip -q ${sdevtc24Archive}
+        bchunk "SDevTC - Version 2.4 (Japan).bin" "SDevTC - Version 2.4 (Japan).cue" track >/dev/null
+        7z x -bd -oiso track01.iso DOS/PSYLINKD.EXE >/dev/null
+        install -m 0644 iso/DOS/PSYLINKD.EXE "$out/"
+        test "$(sha256sum "$out/PSYLINKD.EXE" | cut -d' ' -f1)" = \
+          "2014db126ceaea6d287067ea3f829eea1745836fca570f22ef379eaff7832dd2" \
+          || { echo "PSYLINKD.EXE: unexpected hash" >&2; exit 1; }
       '';
 
       # Decompals rebuild of the SN Systems GCC 2.7.2 PSX compiler
@@ -242,7 +236,7 @@ let
       };
 
 in {
-  inherit psyqSdk psyq42Sdk psyq45Tools psyqMallocObj hxRuntime aspsx279
+  inherit psyqSdk psyq42Sdk psyq45Tools sdevtc24Linker psyqMallocObj
     gcc272CdkNative cc1psx272cdk cpppsx272cdk
     gcc257Native gcc257Headers gcc260Native cc1psx257 cpppsx257 cc1psx260 cpppsx260;
 }

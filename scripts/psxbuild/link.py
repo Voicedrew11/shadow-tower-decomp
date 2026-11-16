@@ -8,7 +8,7 @@ from pathlib import Path
 import shutil
 import subprocess
 
-from .sdk import WIN32_HOST, dos_run, stage_win32, tool_succeeded, win32
+from .sdk import dos_run, tool_succeeded
 from .sdk_compat import library_input
 
 
@@ -67,7 +67,8 @@ ENTRY = '__SN_ENTRY_POINT'
 STARTUP = 'NONE3.OBJ'
 STARTUP_SHA256 = '063efc868877ca84fcbe1fdc3afe9656e6c7933cb68156e08d04d35b76166899'
 MALLOC_OBJECT_SHA256 = '628e405fd0e3acfff2ce9d4a15d481f0aa36398c14e9eae0a82b7ff0a86a74c9'
-LINKER_SHA256 = '734a1278d2052d8a1ef882bfd68d5f6fc91e75965821854f531cfb204cfe8b72'
+# PSYLINK 2.73D, the DOS build of the linker from the SDevTC 2.4 CD.
+LINKER_SHA256 = '2014db126ceaea6d287067ea3f829eea1745836fca570f22ef379eaff7832dd2'
 # CPE2X 1.5 writes every header field; /CA selects the "North America area"
 # title of the retail SLUS-00863 headers.
 CONVERTER_SHA256 = '777caca88327cd18d4f92b43439575c1759381690d49f14177805a94b8ecbef6'
@@ -117,9 +118,8 @@ def build_image(name, root, units, compile_one, *, repo, load_address) -> dict:
         for tool, source in tools.items():
             shutil.copyfile(source, root / tool)
             report['tools'][tool] = {'path': str(source), 'sha256': file_hash(source)}
-        stage_win32(root)
         if report['tools']['PSYLINK.EXE']['sha256'] != LINKER_SHA256:
-            raise ValueError(f'{tools["PSYLINK.EXE"]}: expected the pinned PSYLINK 2.74')
+            raise ValueError(f'{tools["PSYLINK.EXE"]}: expected the pinned PSYLINK 2.73D')
         if report['tools']['CPE2X.EXE']['sha256'] != CONVERTER_SHA256:
             raise ValueError(f'{tools["CPE2X.EXE"]}: expected the pinned CPE2X 1.5')
         if not units:
@@ -141,7 +141,7 @@ def build_image(name, root, units, compile_one, *, repo, load_address) -> dict:
         assembler_commands = [u['assembler_command'] for u in report['units']
                               if 'assembler_command' in u]
         if assembler_commands:
-            dos_run(root, [WIN32_HOST, *assembler_commands], 'asm')
+            dos_run(root, assembler_commands, 'asm')
         for unit in report['units']:
             if 'assembler_command' in unit:
                 tool_succeeded(root, unit['log'], unit['object'], b'LNK\x02')
@@ -166,9 +166,9 @@ def build_image(name, root, units, compile_one, *, repo, load_address) -> dict:
                     *(f'\tinclib\t"{library["file"]}"' for library in report['libraries']),
                     f'\tregs\tpc={ENTRY}']
         (root / 'LINK.LNK').write_bytes(('\r\n'.join(commands) + '\r\n').encode('ascii'))
-        report['linker_command'] = win32(
+        report['linker_command'] = (
             f'PSYLINK.EXE /c /m @LINK.LNK,{stem}.CPE,{stem}.SYM,{stem}.MAP > LINK.TXT')
-        dos_run(root, [WIN32_HOST, report['linker_command']], 'link')
+        dos_run(root, [report['linker_command']], 'link')
         tool_succeeded(root, 'LINK.TXT', stem + '.CPE', b'CPE\x01')
         report['phase'] = 'convert'
         report['converter_command'] = f'CPE2X {CONVERTER_REGION} {stem}.CPE > CONVERT.TXT'

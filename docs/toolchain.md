@@ -11,29 +11,50 @@ FromSoftware ran. Where a fact is only a probe, it says so.
 | Step | Tool | Source | Status |
 | --- | --- | --- | --- |
 | Preprocess, compile | `cpppsx-272cdk`, `cc1psx-272cdk`: Decompals old-gcc 0.17 `gcc-2.7.2-cdk`, a native rebuild of the SN Systems GCC "cygnus-2.7.2-970404 SN32" | GitHub release, SHA-256 pinned | `-O2 -G0` reproduces 14 sampled `ST.EXE` game functions and `-O2 -G8` reproduces `PSX.EXE`'s `main`; the original Win32 `CC1PSX.EXE` is not used |
-| Assemble | SDevTC ASPSX 2.79 (1998-05-22, Win32) | mkst/maspsx `aspsx-binaries.tar.gz` | Reproduces the retail expansions; see below |
-| Link | PSYLINK 2.74 (1998-05-14, Win32) | Psy-Q/SDevTC 4.5 kit, Archive.org `ps1_sdks` | Links `PSX.EXE` byte-identically |
-| Convert | CPE2X 1.5 (1998-01-23, DOS) with `/CA` | same kit | Writes the whole retail header, including the "North America area" title |
+| Assemble | SDevTC ASPSX 2.79D (1998-05-22, DOS): `BIN/DOS/ASPSXD.EXE` | Psy-Q/SDevTC 4.5 kit, Archive.org `ps1_sdks` | Reproduces the retail expansions; see below |
+| Link | PSYLINK 2.73D (DOS): `DOS/PSYLINKD.EXE` | SDevTC 2.4 CD (Japan, files dated 1998-06-11), redump in Archive.org `ps1_sdks` | Links `PSX.EXE` byte-identically |
+| Convert | CPE2X 1.5 (1998-01-23, DOS) with `/CA` | 4.5 kit | Writes the whole retail header, including the "North America area" title |
 | Libraries | Sony Runtime Library 4.2 `LIB/`, with `LIBPAD.LIB` from its bundled 4.2.1 pad patch | Archive.org, SHA-256 pinned | Every SDK object in all seven programs matches (below) |
 | Overlay startup | `NONE3.OBJ` | Psy-Q 4.5 kit (identical in the 4.6 kit) | First object of STR, ST, TITLE, OPTXT, VS and END |
 | Allocator | `MALLOC.OBJ` | Psy-Q Release 2.5 floppies | Linked after `NONE3.OBJ` in STR, TITLE, OPTXT and END |
 | Headers | Runtime Library 4.2 `INCLUDE/`, staged as `include-lf/` (CRLF converted to LF) | as the libraries | `PSYQ_INCLUDE` |
 
-ASPSX 2.79 and PSYLINK 2.74 are Win32 console programs. Every DOS and
-Win32 tool runs in the same pinned DOSBox-X; the Win32 ones are started
-through the HX DOS extender (HXRT 2.23 from its GitHub release: `HDPMI32`
-as the resident DPMI host, `DPMILD32` as the PE loader, and the `DKRNL32`,
-`DUSER32` and `DGDI32` API layers). No program is patched and no Windows or
-Wine runtime is involved.
+All three SDK programs are DOS executables and run unchanged in the pinned
+DOSBox-X. ASPSX 2.79D and PSYLINK 2.73D are Watcom C programs with the
+FlashTek X-32VM DOS extender bound into the executable; CPE2X 1.5 is a 16-bit
+real-mode program. No extender, Windows, Wine or Win32 layer is staged, and no
+program is patched. They are staged in the DOS root as `ASPSX.EXE`,
+`PSYLINK.EXE` and `CPE2X.EXE`.
+
+The SN tool kits ship each tool as a Win32 program and as a DOS build (the
+`D` suffix). Before this all-DOS chain, the Win32 ASPSX 2.79 and PSYLINK 2.74
+ran under the HX DOS extender. The DOS builds give the same output:
+
+- ASPSX 2.79D and the Win32 ASPSX 2.79 (`BIN/ASPSX.EXE` of the 4.5 kit,
+  byte-identical to the 2.79 in mkst/maspsx's `aspsx-binaries`) write
+  byte-identical objects for the 14 sampled functions below and for
+  `PSX.EXE`'s unit.
+- PSYLINK 2.73D links `PSX.EXE` byte-identically. For each of the seven
+  link layouts, a test unit referencing every external of the layout's
+  libraries was linked with `NONE3.OBJ`/`MALLOC.OBJ` as the layout says
+  (958-1732 references each); STR, ST, TITLE, OPTXT and END linked with both
+  linkers to identical CPE, SYM and MAP files and identical PS-X EXEs, and
+  PSX and VS failed with the same diagnostics.
+- The 4.5 kit's own DOS linker, `BIN/DOS/PSYLINKD.EXE` (2.74D, 1998-05-14),
+  is an LX image whose MZ stub only prints "this is a FlashTek (register
+  calling convention) executable": X-32VM's binder was never applied, and
+  DOS/4GW refuses it. The kit's `BIN/DOS/PSYLINK.EXE` (2.37, 1996) faults on
+  the 2.79 objects and Psy-Q 3.0's PSYLINK 1.29 cannot read the link
+  script, so 2.73D from SDevTC 2.4 is used.
 
 | Environment variable | Contents |
 | --- | --- |
 | `PSYQ_LIB` | Runtime Library 4.2 archives (LIBPAD from the 4.2.1 patch) |
 | `PSYQ_INCLUDE` | Runtime Library 4.2 headers with LF line endings |
-| `PSYQ_ASPSX` | ASPSX 2.79 |
-| `PSYQ_PSYLINK`, `PSYQ_CPE2X`, `PSYQ_STARTUP_OBJ` | PSYLINK 2.74, CPE2X 1.5, NONE3.OBJ |
+| `PSYQ_ASPSX` | ASPSX 2.79D |
+| `PSYQ_PSYLINK` | PSYLINK 2.73D |
+| `PSYQ_CPE2X`, `PSYQ_STARTUP_OBJ` | CPE2X 1.5, NONE3.OBJ |
 | `PSYQ_MALLOC_OBJ` | Release 2.5 MALLOC.OBJ |
-| `PSYQ_HX` | the five HX files above |
 | `PSYQ_SDK` | the Psy-Q 3.0 kit inherited from King's Field II, kept only for the `gcc241-kit` probe; `kf-vendored-seed` and `kf-fid-census` read the Runtime Library 4.2 archives plus `NONE3.OBJ` and `MALLOC.OBJ` |
 | `PSYQ_C_INCLUDE` | GCC 2.5.7's `stdarg.h`/`va-mips.h`, used by `compile_classic` |
 
@@ -110,10 +131,10 @@ masked:
 
 | ASPSX | Result |
 | --- | --- |
-| 1.07, 2.08 (Psy-Q 3.0), 2.30, 2.34, 2.56 (Psy-Q 4.0, DOS) | reject the `%hi`/`%lo` operands |
-| 2.79 (Win32 under HX, and the 4.5 kit's DOS-extended 2.79D) | 14/14 exact |
+| 1.07, 2.08 (Psy-Q 3.0), 2.30, 2.34, 2.56 (Psy-Q 4.0) | reject the `%hi`/`%lo` operands |
+| 2.79D (DOS, used) and 2.79 (Win32 under HX) | 14/14 exact, byte-identical objects |
 
-2.67, 2.77, 2.81 and 2.86 (Win32) were not tried, so the exact retail
+2.67, 2.77, 2.81 and 2.86 were not tried, so the exact retail
 version between 2.56 and 2.86 remains open. ASPSX 2.79 assembles `-G8`
 small-data accesses as single `$gp`-relative instructions (patch type 100);
 the ELF view translates them to `R_MIPS_GPREL16`.

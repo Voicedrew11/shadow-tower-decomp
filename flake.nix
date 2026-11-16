@@ -34,18 +34,17 @@
         inherit pkgs;
         sdkBuilder = ./scripts/create-toolchain.py;
       };
-      inherit (toolchain) psyqSdk psyq42Sdk psyq45Tools psyqMallocObj hxRuntime aspsx279
+      inherit (toolchain) psyqSdk psyq42Sdk psyq45Tools sdevtc24Linker psyqMallocObj
         gcc272CdkNative cc1psx272cdk cpppsx272cdk
         gcc257Native gcc257Headers gcc260Native cc1psx257 cpppsx257 cc1psx260 cpppsx260;
 
       # The executable chain's SDK inputs, shared by every wrapper and check.
       buildEnvironment = {
-        PSYQ_ASPSX = "${aspsx279}/2.79/ASPSX.EXE";
-        PSYQ_PSYLINK = "${psyq45Tools}/PSYLINK.EXE";
+        PSYQ_ASPSX = "${psyq45Tools}/ASPSXD.EXE";
+        PSYQ_PSYLINK = "${sdevtc24Linker}/PSYLINKD.EXE";
         PSYQ_CPE2X = "${psyq45Tools}/CPE2X.EXE";
         PSYQ_STARTUP_OBJ = "${psyq45Tools}/NONE3.OBJ";
         PSYQ_MALLOC_OBJ = "${psyqMallocObj}/MALLOC.OBJ";
-        PSYQ_HX = "${hxRuntime}";
         PSYQ_LIB = "${psyq42Sdk}/lib";
         PSYQ_INCLUDE = "${psyq42Sdk}/include-lf";
         PSYQ_C_INCLUDE = "${gcc257Headers}/include";
@@ -477,8 +476,8 @@
 
           ${kfCli}/bin/kf clangd >&2 || echo "[shadow-tower] clangd setup failed; run kf clangd after fixing the reported error" >&2
 
-          echo "[shadow-tower] SDK             : Runtime Library 4.2 (LIBPAD from its 4.2.1 patch); NONE3, PSYLINK 2.74, CPE2X 1.5 from the 4.5 kit" >&2
-          echo "[shadow-tower] SDK assembler   : ASPSX 2.79 (Win32, run by the HX DOS extender in DOSBox-X)" >&2
+          echo "[shadow-tower] SDK             : Runtime Library 4.2 (LIBPAD from its 4.2.1 patch); NONE3, CPE2X 1.5 from the 4.5 kit" >&2
+          echo "[shadow-tower] SDK tools       : ASPSX 2.79D (4.5 kit), PSYLINK 2.73D (SDevTC 2.4), CPE2X 1.5; all DOS, run in DOSBox-X" >&2
           echo "[shadow-tower] compiler        : cc1psx-272cdk/cpppsx-272cdk (gcc 2.7.2 SN32 rebuild); probes cc1psx-257, cc1psx-260" >&2
           echo "[shadow-tower] analysis        : ghidra + PSX loader, pyghidra, psy-k, radare2, mipsel binutils" >&2
           echo "[shadow-tower] PSX emulator    : pcsx-redux ${pcsxRedux.version}" >&2
@@ -501,7 +500,7 @@
         GHIDRA_PSX_LOADER = "${ghidraPsxLoader}/lib/ghidra/Ghidra/Extensions/ghidra_psx_ldr";
         PSYQ_SDK = "${psyqSdk}/psyq-3.0";
         inherit (buildEnvironment) PSYQ_ASPSX PSYQ_PSYLINK PSYQ_CPE2X PSYQ_STARTUP_OBJ
-          PSYQ_MALLOC_OBJ PSYQ_HX PSYQ_LIB PSYQ_INCLUDE PSYQ_C_INCLUDE;
+          PSYQ_MALLOC_OBJ PSYQ_LIB PSYQ_INCLUDE PSYQ_C_INCLUDE;
       } ''
         mkdir project
         cp -r ${./scripts} project/scripts
@@ -519,7 +518,7 @@
         nativeBuildInputs = [ analysisPython pkgs.dosbox-x cc1psx272cdk cpppsx272cdk cc1psx257 cpppsx257 ];
         PSYQ_SDK = "${psyqSdk}/psyq-3.0";
         inherit (buildEnvironment) PSYQ_ASPSX PSYQ_PSYLINK PSYQ_CPE2X PSYQ_STARTUP_OBJ
-          PSYQ_MALLOC_OBJ PSYQ_HX PSYQ_LIB PSYQ_INCLUDE PSYQ_C_INCLUDE;
+          PSYQ_MALLOC_OBJ PSYQ_LIB PSYQ_INCLUDE PSYQ_C_INCLUDE;
       } ''
         export HOME="$TMPDIR/home"
         mkdir -p "$HOME" project
@@ -540,7 +539,7 @@
           analysisPython cc1psx257 cpppsx257 mipsBinutilsAliases
         ];
 
-        inherit (buildEnvironment) PSYQ_ASPSX PSYQ_HX;
+        inherit (buildEnvironment) PSYQ_ASPSX;
       } ''
         mkdir -p project/tests/fixtures project/config
         cp -r ${./scripts} project/scripts
@@ -593,7 +592,7 @@
           cpppsx257
         ];
 
-        inherit (buildEnvironment) PSYQ_ASPSX PSYQ_HX;
+        inherit (buildEnvironment) PSYQ_ASPSX;
       } ''
         mkdir project
         cp -r ${./scripts} project/scripts
@@ -618,7 +617,7 @@
         gcc257Instrumented = gcc257Probe.instrumented;
         gcc257Source = gcc257Probe.source;
         inherit psyqSdk psy-k gcc260Native cc1psx260 cpppsx260 gcc257Native cc1psx257 cpppsx257 mipsBinutilsAliases ghidraPsxLoader ghidraWithPlugins objdiff-cli objdiff retailValidate retailSeed functionAudit functionPropose vendoredSeed fidCensus retailDelink objdiffProject objdiffReport sourceCompile runRetail runCandidate kfCli;
-        inherit psyq42Sdk psyq45Tools hxRuntime aspsx279 gcc272CdkNative cc1psx272cdk cpppsx272cdk;
+        inherit psyq42Sdk psyq45Tools sdevtc24Linker gcc272CdkNative cc1psx272cdk cpppsx272cdk;
         pcsx-redux = pcsxRedux;
         default = psyqSdk;
       };

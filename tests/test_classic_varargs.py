@@ -8,7 +8,7 @@ import tempfile
 import unittest
 
 from scripts.kf.executable import cpe_loads
-from scripts.psxbuild.sdk import assemble, compile_classic, dos_run, tool_succeeded, WIN32_HOST, stage_win32, win32
+from scripts.psxbuild.sdk import assemble, compile_classic, dos_run, tool_succeeded
 
 
 REPO = Path(__file__).resolve().parents[1]
@@ -40,10 +40,9 @@ class ClassicVarargsControls(unittest.TestCase):
                 self.assertIn(name, report['compiler_headers'])
             assemble(root, 'CONTROL', 0)
             shutil.copyfile(os.environ['PSYQ_PSYLINK'], root / 'PSYLINK.EXE')
-            stage_win32(root)
             (root / 'CONTROL.LNK').write_bytes(
                 b'\torg $80010000\r\n\tinclude "CONTROL.OBJ"\r\n\tregs pc=control_entry\r\n')
-            dos_run(root, [WIN32_HOST, win32('PSYLINK.EXE /c @CONTROL.LNK,CONTROL.CPE > LINK.TXT')], 'link')
+            dos_run(root, ['PSYLINK.EXE /c @CONTROL.LNK,CONTROL.CPE > LINK.TXT'], 'link')
             tool_succeeded(root, 'LINK.TXT', 'CONTROL.CPE', b'CPE\x01')
             entry, loads = cpe_loads((root / 'CONTROL.CPE').read_bytes())
             self.assertIsNotNone(entry)
