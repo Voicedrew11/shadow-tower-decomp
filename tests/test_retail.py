@@ -130,7 +130,8 @@ class RetailTests(unittest.TestCase):
         self.assertEqual(signature_set_version("300"), "3.0")
         self.assertEqual(signature_set_version("3610"), "3.61")
         for confidence in ("fid-sdk42", "exact-sdk42-complete", "psyq420-signature",
-                           "psyq3610-signature-ambiguous", "sdk-lineage-supported"):
+                           "psyq3610-signature-ambiguous", "relink-map-sdk42",
+                           "sdk-lineage-supported"):
             self.assertIsNotNone(retail.VENDORED_CONFIDENCE.fullmatch(confidence))
         self.assertIsNone(retail.VENDORED_CONFIDENCE.fullmatch("psyq-signature"))
 
