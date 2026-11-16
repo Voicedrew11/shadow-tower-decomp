@@ -57,4 +57,3 @@ void func_80040024(u8 hand)
             viewer.unk182 = 0;
     }
 }
-
