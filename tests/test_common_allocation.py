@@ -131,6 +131,39 @@ class CommonAllocationTests(unittest.TestCase):
             self.assertEqual([i['kind'] for i in result.issues], ['unsupported-common-allocation'])
 
 
+class SmallDataPlacementTests(unittest.TestCase):
+    def test_single_claimed_small_common_is_placed_as_sbss(self):
+        sample = replace(unit(with_data=False), data=(
+            Datum(BASE + 0x200, 8, 'unclaimed', 'bss', 'global', '.sbss'),))
+        result = UnitResult('GAME.EXE', 'game.control', 'synthetic')
+        placed = plan(ELFFile(io.BytesIO(object_bytes(common=True, with_data=False))),
+                      sample, result)
+        self.assertEqual(result.issues, [])
+        self.assertEqual(placed, {'.text': BASE, '.sbss': BASE + 0x200})
+
+    def test_small_common_beside_another_sbss_claim_stays_unresolved(self):
+        sample = replace(unit(with_data=False), data=(
+            Datum(BASE + 0x200, 8, 'unclaimed', 'bss', 'global', '.sbss'),
+            Datum(BASE + 0x208, 4, 'other', 'bss', 'static', '.sbss'),))
+        result = UnitResult('GAME.EXE', 'game.control', 'synthetic')
+        plan(ELFFile(io.BytesIO(object_bytes(common=True, with_data=False))), sample, result)
+        self.assertIn('unsupported-common-allocation', {i['kind'] for i in result.issues})
+
+    def test_sdata_literal_range_alone_places_the_section(self):
+        sample = replace(unit(with_data=False), sdata=(BASE + 0x100, 4))
+        blob = write_mips_elf(TEXT, 'control', 8, sdata=WORD)
+        result = UnitResult('GAME.EXE', 'game.control', 'synthetic')
+        placed = plan(ELFFile(io.BytesIO(blob)), sample, result)
+        self.assertEqual(result.issues, [])
+        self.assertEqual(placed, {'.text': BASE, '.sdata': BASE + 0x100})
+
+    def test_sdata_without_a_claim_is_still_unclaimed(self):
+        blob = write_mips_elf(TEXT, 'control', 8, sdata=WORD)
+        result = UnitResult('GAME.EXE', 'game.control', 'synthetic')
+        plan(ELFFile(io.BytesIO(blob)), unit(with_data=False), result)
+        self.assertEqual([i['kind'] for i in result.issues], ['unclaimed-section'])
+
+
 @unittest.skipUnless(shutil.which(ASSEMBLER) and shutil.which(LINKER), 'pinned GNU MIPS tools required')
 class NativeCommonAllocationTests(unittest.TestCase):
     def test_exact_named_common_claim_links_as_bss_and_matches_data(self):
@@ -156,6 +189,30 @@ class NativeCommonAllocationTests(unittest.TestCase):
             self.assertEqual(failures, [])
             self.assertEqual(len(diffs), 1)
             self.assertTrue(diffs[0].matches)
+
+    def test_exact_named_small_common_claim_links_as_sbss_and_matches_data(self):
+        sample = replace(unit(with_data=False), data=(
+            Datum(BASE + 0x200, 8, 'unclaimed', 'bss', 'global', '.sbss'),))
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            target = root / 'delink/game/modules' / sample.object_name
+            source = root / 'objdiff/game/base' / sample.object_name
+            target.parent.mkdir(parents=True)
+            source.parent.mkdir(parents=True)
+            target.write_bytes(write_mips_elf(
+                TEXT, 'control', 8, sbss_size=8,
+                sbss_symbols=(DefinedSymbol('unclaimed', 0, 8, STT_OBJECT),)))
+            source.write_bytes(object_bytes(common=True, with_data=False))
+            result = verify_unit(sample, retail(), {}, source, root)
+            self.assertTrue(result.linker_ran)
+            self.assertEqual(result.issues, [])
+            self.assertEqual([(s.name, s.address, s.size) for s in result.sections],
+                             [('.text', BASE, 8), ('.sbss', BASE + 0x200, 8)])
+            diffs, failures = diff_image(
+                'GAME.EXE', Manifest({}, (sample,)), root / 'delink', root / 'objdiff')
+            self.assertEqual(failures, [])
+            self.assertEqual(len(diffs), 1)
+            self.assertTrue(diffs[0].matches, [d.detail for d in diffs[0].divergent])
 
     def test_real_gas_common_survives_input_but_old_discard_script_loses_it(self):
         assembly = '''.set noreorder

@@ -27,6 +27,14 @@ every linked program in two trees and requires identical CPE and EXE bytes.
 ASPSX, PSYLINK and CPE2X are all DOS programs; DOSBox-X starts each one
 directly from a batch file, with no extender or loader staged.
 
+A partial image, one whose source units claim some but not all of its
+admitted game functions, is not linked: its code still calls and reads game
+code no source provides, which PSYLINK cannot resolve. `kf build` reports it
+as `partial` with the number of unclaimed game functions and does not fail;
+its units are verified by the target relink and data gates of `kf check`
+(`ST.EXE` is the first such image). Sources that claim no retail function,
+such as the synthetic link controls, are always linked.
+
 ## Link model
 
 `scripts/psxbuild/link.py` holds one `ImageLink` per program in

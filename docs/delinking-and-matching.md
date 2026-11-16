@@ -292,7 +292,10 @@ The default build also checks target-object roundtrips through the independent
 GNU MIPS linker. A packed section must admit one retail base for all its owned
 symbols; the linker may not scatter it or override defined symbols to hide a
 layout conflict. Relinked initialized bytes are compared in full, and BSS is
-checked as uninitialized storage. Synthetic tails imitating the probe assembler
+checked as uninitialized storage. A unit's single global COMMON request whose exact `DATA()` claim
+is the only one in its section is placed at that claim: in `.bss`, or in
+`.sbss` for a small request of a `-G8` unit. A unit whose `.sdata` holds
+only its `SDATA()` literal range places that section at the range's start. Synthetic tails imitating the probe assembler
 are not appended to retail claims: source alignment/extent differences remain
 real comparison failures. This is not yet a linked reconstruction or a check
 of all config-only reachable storage.

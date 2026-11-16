@@ -44,6 +44,7 @@ from elftools.elf.elffile import ELFFile
 
 from scripts.kf.delink import image_key
 from scripts.kf.linked_symbols import linked_addresses
+from scripts.kf.mips_elf import SHF_MIPS_GPREL
 from scripts.kf.manifest import Manifest, Unit, load as load_manifest
 from scripts.kf.mips_elf import R_MIPS_32
 from scripts.kf.paths import BUILD, RETAIL_CONFIG
@@ -409,8 +410,12 @@ def diff_unit(unit: Unit, delink_dir: Path, objdiff_dir: Path,
     with base.open('rb') as stream:
         common_claim = named_common_bss_claim(ELFFile(stream), unit)
     if common_claim is not None:
-        recon.sections['.bss'] = Section('.bss', 8, common_claim.size, b'', 3)
-        recon.allocations['.bss'] = [Allocation(
+        common_section = common_claim.section_name
+        # SHF_WRITE|SHF_ALLOC, plus SHF_MIPS_GPREL for small data.
+        flags = 3 | (SHF_MIPS_GPREL if common_section == '.sbss' else 0)
+        recon.sections[common_section] = Section(common_section, 8, common_claim.size, b'',
+                                                 flags)
+        recon.allocations[common_section] = [Allocation(
             common_claim.symbol, 0, common_claim.size, 1, 0)]
     result = UnitDataDiff(unit.image, unit.unit)
     for name in INIT_SECTIONS:
