@@ -22,6 +22,7 @@ from scripts.kf.manifest import Manifest, load as load_manifest
 from scripts.kf.paths import BUILD, RETAIL_CONFIG
 from scripts.kf.retail import IMAGE_LAYOUTS, IMAGE_NAMES, read_tsv
 from scripts.kf.sema import Context
+from scripts.kf.sema.cfg import switch_tables
 from scripts.kf.sema.evidence import Reference, TIER_RANK
 from scripts.kf.sema.image import RetailImage
 from scripts.kf.sema.index import Binding
@@ -144,74 +145,26 @@ def proven_vendored_dispatch(
     return None
 
 
-def proven_switch_dispatch(
-    img: RetailImage, function: Binding, site: int
-) -> tuple[str, int, int] | None:
-    """Prove a GCC switch `jr` from its bounded jump-table value chain.
+def proven_switch_dispatch(img: RetailImage, function: Binding) -> dict[int, dict]:
+    """Switch `jr` sites of a game function, proved by the shared CFG rule.
 
-    The accepted chain is the MIPS tablejump GCC emits, every instruction
-    inside the function:
-
-        sltiu rb, ri, N; beqz rb, default; lui rt, %hi(T); addiu rt, rt, %lo(T)
-        sll rs, ri, 2; addu ra, rs, rt (either order); lw rj, 0(ra); ...; jr rj
-
-    and all N words of the linked table T must point into the same function's
-    body, so the transfer never leaves it. Returns ("switch-table", T, N).
-    Anything else stays unresolved, as AGENTS.md requires for `jr`.
+    `scripts.kf.sema.cfg.switch_table` is the only switch-table prover: a
+    bounded `sltiu`/`beqz` index, a `lui`/`addiu` table base (the `lui` may
+    sit in the bound's delay slot), `sll`/`addu`/`lw`/`jr`, no branch into
+    the scanned run, the index unchanged, and every table word an instruction
+    start inside this function. Vendored members get no exemption from it.
+    Returns the witness detail per `jr` site.
     """
-    word = img.u32(site)
-    if word is None or word & 0xFC1FFFFF != 0x00000008:  # jr rs
-        return None
-    target = (word >> 21) & 0x1F
-
-    def at(address: int) -> int | None:
-        return img.u32(address) if function.va <= address < site else None
-
-    def find(start: int, test, limit: int = 4) -> tuple[int, int] | None:
-        for address in range(start, start - 4 * limit, -4):
-            current = at(address)
-            if current is not None and test(current):
-                return address, current
-        return None
-
-    load = find(site - 4, lambda w: w >> 26 == 0x23 and (w >> 16) & 0x1F == target
-                and w & 0xFFFF == 0, 2)
-    if load is None:
-        return None
-    entry = (load[1] >> 21) & 0x1F
-    add = find(load[0] - 4, lambda w: w & 0xFC0007FF == 0x21 and (w >> 11) & 0x1F == entry)
-    if add is None:
-        return None
-    operands = {(add[1] >> 21) & 0x1F, (add[1] >> 16) & 0x1F}
-    shift = find(add[0] - 4, lambda w: w & 0xFFE007FF == 0x80
-                 and (w >> 11) & 0x1F in operands, 2)  # sll rd, rt, 2
-    if shift is None:
-        return None
-    index = (shift[1] >> 16) & 0x1F
-    base = (operands - {(shift[1] >> 11) & 0x1F}).pop() if len(operands) == 2 else None
-    if base is None:
-        return None
-    low = find(shift[0] - 4, lambda w: w >> 26 == 0x09 and (w >> 21) & 0x1F == base
-               and (w >> 16) & 0x1F == base, 2)
-    if low is None:
-        return None
-    high = at(low[0] - 4)
-    branch = at(low[0] - 8)
-    bound = at(low[0] - 12)
-    if high is None or branch is None or bound is None:
-        return None
-    flag = (bound >> 16) & 0x1F
-    if (high & 0xFFE00000 != 0x3C000000 or (high >> 16) & 0x1F != base  # lui base
-            or bound >> 26 != 0x0B or (bound >> 21) & 0x1F != index  # sltiu flag, index, N
-            or branch & 0xFFFF0000 != (0x10000000 | flag << 21)):  # beqz flag
-        return None
-    count = bound & 0xFFFF
-    offset = low[1] & 0xFFFF
-    table = (((high & 0xFFFF) << 16) + (offset - 0x10000 if offset & 0x8000 else offset)) & 0xFFFFFFFF
-    entries = [img.u32(table + 4 * n) for n in range(count)]
-    if not count or any(e is None or not function.contains_body(e) for e in entries):
-        return None
-    return "switch-table", table, count
+    if function.vendored or function.fragments != 1:
+        return {}
+    payload = img.read(function.va, function.body_size)
+    if payload is None:
+        return {}
+    return {
+        site: {"site": site, "pattern": "switch-table", "table": proven.table,
+               "entries": len(proven.targets)}
+        for site, proven in switch_tables(function, payload, img.u32).items()
+    }
 
 
 def access_span(reference: Reference, img: RetailImage) -> tuple[int, int]:
@@ -279,6 +232,7 @@ def audit(
     issues: dict[tuple, dict] = {}
     dispatch_witnesses: dict[int, dict] = {}
     switch_witnesses: dict[int, dict] = {}
+    switches: dict[str, dict[int, dict]] = {}
     queue: deque[str] = deque()
 
     def issue(code: str, key: str, ref: int | None = None, **detail) -> None:
@@ -326,6 +280,12 @@ def audit(
         if key not in outgoing:
             lo, hi = bisect.bisect_left(sites, node.va), bisect.bisect_left(sites, end)
             outgoing[key] = list(range(lo, hi))
+            if isinstance(node, Binding):
+                # The semantic evidence already folds these into the CFG; the
+                # audit re-proves them so each reached switch keeps a witness.
+                switches[key] = proven_switch_dispatch(img, node)
+                for site, witness in switches[key].items():
+                    switch_witnesses[site] = {"owner": key, **witness}
         for number in outgoing[key]:
             reference = references[number]
             if reference.site + 4 > end:
@@ -353,15 +313,9 @@ def audit(
                         "target": pattern[1],
                     }
                     continue
-                switch = (proven_switch_dispatch(img, node, reference.site)
-                          if isinstance(node, Binding) and not node.vendored else None)
-                if switch is not None:
-                    # A game switch: every table word lands in this function's
-                    # body, so the transfer adds no edge; the table is a witness.
-                    switch_witnesses[number] = {
-                        "owner": key, "site": reference.site, "pattern": switch[0],
-                        "table": switch[1], "entries": switch[2],
-                    }
+                if reference.site in switches.get(key, {}):
+                    # A game switch whose every case lands in this function's
+                    # body: the transfer adds no edge; its witness row is kept.
                     continue
                 issue("unresolved-indirect-control", key, number)
                 continue

@@ -3,6 +3,7 @@ from __future__ import annotations
 import io
 import unittest
 from contextlib import redirect_stdout
+from dataclasses import replace
 
 from scripts.kf.cli import main as cli_main
 from scripts.kf.sema import Context
@@ -238,6 +239,38 @@ class SemanticToolTests(unittest.TestCase):
                 self.assertEqual(
                     [(e.kind, e.target) for e in unresolved.edges if e.site == 0x1020],
                     [("indirect-jump", None)],
+                )
+
+    def test_evidence_resolves_switch_tables_of_game_functions_only(self) -> None:
+        payload = words(
+            0x2C620002,  # sltiu v0,v1,2
+            0x10400007,  # beqz v0,0x1024
+            0x3C020000,  # delay slot: lui v0,0
+            0x24422000,  # addiu v0,v0,0x2000
+            0x00031880,  # sll v1,v1,2
+            0x00621821,  # addu v1,v1,v0
+            0x8C620000,  # lw v0,0(v1)
+            0,
+            0x00400008,  # jr v0
+            0,
+            0x03E00008, 0,
+        )
+        image = payload + b"\0" * (0x1000 - len(payload)) + words(0x1028, 0x1028)
+
+        class Functions(FakeIndex):
+            def __init__(self, functions):
+                self.functions = functions
+
+        for provider, expected in (("", []), ("psyq", [(0x1020, None, "indirect-jump")])):
+            with self.subTest(provider=provider):
+                game = replace(function(0x1000, len(payload)), provider=provider)
+                evidence = object.__new__(Evidence)
+                evidence.image = "GAME.EXE"
+                evidence.idx = Functions([game])
+                evidence.img = RetailImage.synthetic("GAME.EXE", 0x1000, image)
+                self.assertEqual(
+                    [(r.site, r.target, r.kind) for r in evidence._control_references()],
+                    expected,
                 )
 
     def test_dead_indirect_jump_does_not_invalidate_known_reachability(self) -> None:

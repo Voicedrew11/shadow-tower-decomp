@@ -87,9 +87,12 @@ tablejump whose value chain is straight-line from its bound check
 (`sltiu rc,ri,N; beqz rc,default`; a `lui`/`addiu` table base; `sll rs,ri,2;
 addu; lw rt,off(...); jr rt`, index unchanged in between) gets one `switch`
 edge per table word, read from the image, when all N words are instruction
-starts inside the same function (`switch_table_targets` in
-`scripts/kf/sema/cfg.py`). General indirect target recovery is deliberately
-deferred; the tool does not invent edges from unproven pointer tables.
+starts inside the same function (`switch_table` in
+`scripts/kf/sema/cfg.py`, the one switch prover; the reachability audit's
+`switch_dispatch` witnesses use it too). The semantic evidence applies it to
+game functions only, so a Sony member's switch `jr` stays unresolved there.
+General indirect target recovery is deliberately deferred; the tool does not
+invent edges from unproven pointer tables.
 
 CFG JSON includes `reachability_complete`. A reachable unresolved indirect jump
 or an unsupported/missing control-flow detail makes this false. Blocks not

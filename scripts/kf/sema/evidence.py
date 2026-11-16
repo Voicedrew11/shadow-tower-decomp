@@ -257,7 +257,12 @@ class Evidence:
             payload = self.img.read(function.va, function.body_size)
             if payload is None:
                 continue
-            graph = build_graph(function, payload, self.idx, self.img.u32)
+            # A proven switch table resolves a game function's `jr` into
+            # in-function cases. A Sony member's `jr` stays unresolved: only
+            # its own member patterns (data_reachability) may exempt it.
+            graph = build_graph(
+                function, payload, self.idx, None if function.vendored else self.img.u32
+            )
             for edge in graph.edges:
                 if edge.kind not in {
                     "call",

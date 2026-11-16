@@ -304,11 +304,13 @@ nothing to relink, and its census-wide closure is the curation worklist
 gated. Inside reached Sony functions, only indirect transfers proved from the
 member's own instructions (BIOS `li $t2, 0xA0/0xB0/0xC0; jr $t2` stubs and
 startup table loops with a link-time zero count) are exempt; they are listed
-as `vendored_dispatch` witness rows in the reachability report. In any
-function, game or Sony, a compiled `switch` jump is proved from its own
-bounded value chain (`sltiu`/`beqz` bound, `lui`/`addiu` table address,
-`sll`/`addu`/`lw`, `jr`) when every table word is a label inside that
-function; those are `switch_dispatch` witness rows.
+as `vendored_dispatch` witness rows in the reachability report. In a game
+function, a compiled `switch` jump is proved from its own bounded value
+chain (`sltiu`/`beqz` bound, `lui`/`addiu` table address, `sll`/`addu`/`lw`,
+`jr`) when every table word is an instruction start inside that function;
+the CFG's `switch_table` rule (`scripts/kf/sema/cfg.py`) is the one prover,
+and each such jump is a `switch_dispatch` witness row. A Sony member's
+switch jump gets no exemption from it.
 
 Both objdiff front ends are built from the same pinned 3.7.3 source with
 `patches/objdiff-strict-data.patch`. Native section scores include anonymous

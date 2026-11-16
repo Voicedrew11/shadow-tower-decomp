@@ -106,13 +106,24 @@ def _gpr_written(word: int) -> int | None:
     return rt or None
 
 
-def switch_table_targets(
+@dataclass(frozen=True)
+class SwitchTable:
+    """A proven GCC tablejump: the linked table and its case targets."""
+
+    table: int
+    targets: tuple[int, ...]
+
+
+def switch_table(
     instructions: list[Instruction],
     terminal: Instruction,
     function: Binding,
     read_word: Callable[[int], int | None],
-) -> tuple[int, ...] | None:
-    """Prove a GCC MIPS tablejump and return its case targets, else None.
+) -> SwitchTable | None:
+    """Prove a GCC MIPS tablejump and return its table, else None.
+
+    This is the one switch-table rule: the CFG, the semantic evidence and the
+    reachability audit's `switch_dispatch` witnesses all use it.
 
     Accepted value chain, straight-line from the bound check to the jump:
 
@@ -202,7 +213,23 @@ def switch_table_targets(
         if target is None or target not in addresses or not function.contains_body(target):
             return None
         targets.append(target)
-    return tuple(targets)
+    return SwitchTable(table, tuple(targets))
+
+
+def switch_tables(
+    function: Binding,
+    payload: bytes,
+    read_word: Callable[[int], int | None],
+) -> dict[int, SwitchTable]:
+    """Every proven tablejump of one function body, keyed by its `jr` site."""
+    instructions = with_controls(decode_words(function.va, payload[:function.body_size]))
+    found: dict[int, SwitchTable] = {}
+    for row in instructions:
+        if row.control is not None and row.control.kind == "indirect-jump":
+            proven = switch_table(instructions, row, function, read_word)
+            if proven is not None:
+                found[row.va] = proven
+    return found
 
 
 def build_graph(
@@ -252,10 +279,10 @@ def build_graph(
     if read_word is not None:
         for row in instructions:
             if row.control is not None and row.control.kind == "indirect-jump":
-                cases = switch_table_targets(instructions, row, function, read_word)
-                if cases is not None:
-                    switch_cases[row.va] = cases
-                    leaders.update(cases)
+                proven = switch_table(instructions, row, function, read_word)
+                if proven is not None:
+                    switch_cases[row.va] = proven.targets
+                    leaders.update(proven.targets)
 
     for slot in delay_slots:
         if instruction_by_va[slot].control is not None:

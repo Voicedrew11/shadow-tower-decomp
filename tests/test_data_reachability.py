@@ -97,7 +97,7 @@ class ReachabilityTest(unittest.TestCase):
         self.assertEqual(report["summary"]["issues"]["unresolved-indirect-control"], 1)
         self.assertEqual(report["switch_dispatch"], [])
 
-    def switch_table(self, last_entry):
+    def switch_table(self, last_entry, *, vendor=False, unresolved=True):
         # sltiu $v0,$v1,2; beqz $v0,+7; lui $v0,0; addiu $v0,$v0,0x1100;
         # sll $v1,$v1,2; addu $v1,$v1,$v0; lw $v0,0($v1); nop; jr $v0; nop
         code = words(0x2C620002, 0x10400007, 0x3C020000, 0x24421100, 0x00031880,
@@ -105,9 +105,12 @@ class ReachabilityTest(unittest.TestCase):
         table = words(0x1028, last_entry)
         img = RetailImage.synthetic(IMAGE, 0x1000, code + b"\0" * (0x100 - len(code)) + table
                                     + b"\0" * 0x100)
-        game = replace(function(0x1000), size=0x30, body_size=0x30)
-        return audit(IMAGE, (game,), (), (ref(0x1020, None, tier="proven", kind="indirect-jump"),),
-                     img)
+        switch = replace(function(0x1000, vendor=vendor), size=0x30, body_size=0x30)
+        functions = (switch, function(0x1400)) if vendor else (switch,)
+        refs = (ref(0x1400, 0x1000, tier="proven", kind="call"),) if vendor else ()
+        if unresolved:
+            refs += (ref(0x1020, None, tier="proven", kind="indirect-jump"),)
+        return audit(IMAGE, functions, (), refs, img)
 
     def test_bounded_switch_table_inside_the_function_is_proven(self):
         report = self.switch_table(0x102C)
@@ -119,6 +122,18 @@ class ReachabilityTest(unittest.TestCase):
 
     def test_switch_table_leaving_the_function_stays_unresolved(self):
         report = self.switch_table(0x1200)
+        self.assertEqual(report["summary"]["issues"]["unresolved-indirect-control"], 1)
+        self.assertEqual(report["switch_dispatch"], [])
+
+    def test_switch_witness_needs_no_unresolved_reference(self):
+        # The semantic evidence folds a proven game switch into the CFG, so
+        # the audit sees no reference at the `jr`; the witness row remains.
+        report = self.switch_table(0x102C, unresolved=False)
+        self.assertEqual(report["issues"], [])
+        self.assertEqual([row["site"] for row in report["switch_dispatch"]], [0x1020])
+
+    def test_vendored_switch_table_is_not_exempt(self):
+        report = self.switch_table(0x102C, vendor=True)
         self.assertEqual(report["summary"]["issues"]["unresolved-indirect-control"], 1)
         self.assertEqual(report["switch_dispatch"], [])
 
