@@ -42,7 +42,9 @@ extern StBlock DAT_8009c888[];
  */
 /* A viewer model slot's position (+0xc) and rotation (+0x14). */
 typedef struct {
-    u8 unk0[6];
+    u8 unk0[2];
+    u16 unk2;            /* 0x02: reach (func_800402ac) */
+    u16 unk4;            /* 0x04: swing cost, scaled by viewer.unk62[1] (func_800402ac) */
     u16 unk6;            /* 0x06: func_8003f4ec copies it to viewer.unk134 */
     u16 unk8;            /* 0x08: and this one to viewer.unk138 */
     u8 unkA[2];
@@ -123,7 +125,7 @@ typedef struct {
     s8 unk15E;           /* 0x15e: HUD frame offset (func_80026afc) */
     u8 unk15F;
     SVECTOR unk160[2];   /* 0x160: func_8003f704's offsets per slot */
-    u8 unk170[4];
+    void *unk170;        /* 0x170: unk174 before the last move (func_8004162c) */
     void *unk174;        /* 0x174: the VisRecord the viewer stands in (st/vis.h) */
     s16 unk178;
     s16 unk17A;
@@ -190,7 +192,8 @@ typedef struct {
     long x;              /* 0x248 */
     long y;              /* 0x24c */
     long z;              /* 0x250 */
-    u8 unk254[0xc];
+    s32 unk254;          /* 0x254: copied with x, y, z as a VECTOR's pad (func_80041150) */
+    u8 unk258[8];
     SVECTOR unk260;      /* 0x260: motion (func_8004cc70 leads targets by it) */
     short unk268;        /* 0x268: pitch in func_80016554 */
     short unk26A;        /* 0x26a: yaw in func_80016554 */
@@ -212,7 +215,7 @@ typedef struct {
     s16 unk294;
     u8 unk296[2];
     MATRIX unk298;       /* 0x298: func_8003f704's rotation */
-    u8 unk2B8[0x2c8 - 0x2b8];
+    VECTOR unk2B8;       /* 0x2b8: walk velocity: vx strafes, vz moves ahead (func_800420a0) */
     s16 unk2C8;
     s16 unk2CA;          /* 0x2ca: yaw speed */
     s16 unk2CC;          /* 0x2cc: pitch speed */
@@ -267,7 +270,8 @@ typedef struct {
     void (*unk24)(void);
     u8 unk28[0x30 - 0x28];
     void (*unk30)();     /* 0x30: item use hook */
-    u8 unk34[0x40 - 0x34];
+    void (*unk34)(void); /* 0x34: the player died (func_80042d74) */
+    u8 unk38[0x40 - 0x38];
     void (*unk40)(void); /* 0x40: per table A entry, every fourth frame (func_8004e324) */
     void (*unk44)(void); /* 0x44: per table A entry, every frame */
 } AreaHooks;
@@ -351,7 +355,7 @@ typedef struct {
      * set by func_800573bc: the settings page lists them in two columns of
      * six (func_8002b84c). [2]/[3] and [6]/[7] turn the view (func_80041d4c);
      * [8] is slot 0's request bit, [9] the other slots' (func_8003f4ec);
-     * [10] equip.c. */
+     * [10] the hand swap (src/st/player.c). */
     u16 unk22[12];
     u16 unk3A;           /* 0x3a: unk22[8] | unk22[9] | unk22[10] | unk22[11] */
 } Data801cd180;

@@ -23,7 +23,7 @@ int func_8003eb34(VECTOR *pos, int yaw, int range, int arg3);
 void func_8003ec5c(void *data, DVECTOR *a, DVECTOR *b, int arg3);
 void func_8003ee38(u16 id, u8 slot);
 void func_8003f12c(u16 id, u8 slot, u8 reload);
-void func_80042c10(void); /* src/st/equip.c */
+void func_80042c10(void); /* src/st/player.c */
 void func_80042d74(void);
 void func_80044674(void);
 void func_80044ee8(void);

@@ -39,6 +39,7 @@ ST.EXE	0x80087f18	0x4	DAT_80087f18	static	load	s32	func_80026afc	address-only	as
 ST.EXE	0x80087f34	0x4	DAT_80087f34	static	load	s32	func_8002a954	address-only	asm;src/st/ui.c st.ui	$gp+0x74 .sdata word; blink phase 0..31 of the map page arrows
 ST.EXE	0x80087f68	0x8	DAT_80087f68	static	load	s32[2]		address-only	src/st/ui.c st.ui	unreferenced .sdata zeros between func_8002e94c and func_8002f498 constants; kept as an unused initialized static
 ST.EXE	0x80087f84	0x4	DAT_80087f84	static	load	s32		address-only	src/st/ui.c st.ui	unreferenced .sdata zero word between func_8002f97c and func_8002fc4c constants; kept as an unused initialized static
+ST.EXE	0x8008803c	0x2	DAT_8008803c	static	load	s16	func_8004162c	address-only	asm;src/st/player.c st.player	$gp+0x17c .sdata halfword; func_8004162c halves it each frame (or sets it from the vertical speed past +-128) and copies it to viewer.unk290
 ST.EXE	0x80088050	0x4	DAT_80088050	static	load	s32	func_80042c44	address-only	asm;band J	small-data word func_80042c44 compares with viewer+0x23c; .sdata after func_80042620 constants
 ST.EXE	0x8008809c	0x8	DAT_8008809c	global	load	SVECTOR		candidate	asm;src/st/math.c st.math	SVECTOR {0, 0, 4096, 0}: the unit z vector func_80049fe4 turns; inside the small-data window ($gp+0x1dc) but read by absolute address; extern only
 ST.EXE	0x80088188	0x2	DAT_80088188	global	bss	u16	func_80031378	address-only	asm;src/st/ui.c st.ui	.sbss halfword addressed absolutely; the menu screens store a figure * 10 / 4.54 here and read it back for the tenths digit
