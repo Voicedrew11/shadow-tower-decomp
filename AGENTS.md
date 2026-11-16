@@ -7,9 +7,14 @@
   36 headerless code overlays `FDAT_nnn.BIN` that `ST.EXE` loads from
   `ST\COM\FDAT.T` at 0x801EB560. Images share load windows, so an address is
   never an identity without its image. `config/images.toml` is the authority.
-- The toolchain, compiler probes and linker model are inherited from the
-  King's Field II (`SLPS-00069`) project. Re-prove each against this game's
-  retail bytes before relying on it.
+- The toolchain is Shadow Tower's own (`docs/toolchain.md`): a native rebuild
+  of the SN Systems GCC 2.7.2 compiler (`gcc272cdk-native`), ASPSX 2.79,
+  PSYLINK 2.74 and CPE2X 1.5, Sony Runtime Library 4.2 (LIBPAD from 4.2.1),
+  the 4.5 kit's `NONE3.OBJ` and Release 2.5 `MALLOC.OBJ`; it rebuilds `PSX.EXE`
+  byte-identical. Profile `probe-gcc272cdk-o2-g0` is the default; units whose
+  retail code reads small data `$gp`-relative (PSX.EXE `main`, END.EXE) need
+  `probe-gcc272cdk-o2-g8`. The analysis tooling comes from the King's Field II
+  project; re-prove any inherited assumption against this game's bytes.
 - The PS-X EXEs retain linked bytes, not symbols or relocation tables.
   Functions, data, labels, relocations, and TU ownership under `config/retail/`
   are curated working models, not recovered ground truth.
@@ -18,8 +23,9 @@
   not be distorted to protect a metric.
 - Exact means objdiff `100%`. `--loose` is display-only and is never a closure
   or banking criterion.
-- Exact compiler, assembler, linker, and optimization attribution remain open.
-  `probe-gcc260-o2-g0` is a productive probe, not historical proof.
+- The chain reproduces retail bytes; that does not prove these are the
+  binaries or flags FromSoftware ran. Profiles stay named probes, and the
+  per-unit `-G` value is evidence from the code, not a known build setting.
 
 ## Environment and evidence discipline
 
@@ -172,6 +178,11 @@
   remove the real source reference to accommodate an incomplete target object.
 - BSS, overlay RAM, pointer tables, and GP-relative data require explicit
   ownership work. Do not infer initialized storage from aggregate objdiff data.
+  A `$gp`-relative access is a `mips_gprel16` row decoded against the image's
+  `gp` in `config/images.toml` (an FDAT overlay uses `ST.EXE`'s).
+- `kf check` gates known-reference closure and target relink only for images
+  that at least one source unit claims; for the others,
+  `kf verify reachability --image KEY` is the curation worklist.
 - Generated build products, reports, and local retail paths are not committed.
 
 ## Verification and change discipline
@@ -187,5 +198,5 @@
   full `kf build`. Run `nix flake check -L` for tooling/flake changes.
 - Bank only verified 100% results with `kf bank`; never bank generated or
   unrelated dirty inputs.
-- Prefer focused commits such as `match: reconstruct GAME math leaf family` or
+- Prefer focused commits such as `match: reconstruct ST math leaf family` or
   `tools: classify MIPS relocation walls`.
