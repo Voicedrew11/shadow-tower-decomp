@@ -47,9 +47,6 @@
         gte_SetRotMatrix(&(rec)->unk24);                          \
     } while (0)
 
-/* The identity transform the composed nodes start from. */
-extern MATRIX DAT_8008040c;
-
 ADDRESS(0x80034f0c, 0x3c)
 void anim_set_register(u16 id, StAnimFile *file)
 {
