@@ -8,14 +8,14 @@ import tempfile
 import unittest
 
 from scripts.kf.executable import cpe_loads
-from scripts.psxbuild.sdk import assemble, compile_classic, dos_run, tool_succeeded
+from scripts.psxbuild.sdk import assemble, compile_classic, dos_run, tool_succeeded, WIN32_HOST, stage_win32, win32
 
 
 REPO = Path(__file__).resolve().parents[1]
 
 
 class ClassicVarargsControls(unittest.TestCase):
-    @unittest.skipUnless(os.environ.get('PSYQ_C_INCLUDE') and os.environ.get('PSYQ_BIN')
+    @unittest.skipUnless(os.environ.get('PSYQ_C_INCLUDE') and os.environ.get('PSYQ_PSYLINK')
                          and shutil.which('cpppsx-257') and shutil.which('cc1psx-257')
                          and shutil.which('dosbox-x') and importlib.util.find_spec('unicorn'),
                          'original compiler headers and native PS1 build tools required')
@@ -39,10 +39,11 @@ class ClassicVarargsControls(unittest.TestCase):
                 self.assertIn(str(headers / name), text)
                 self.assertIn(name, report['compiler_headers'])
             assemble(root, 'CONTROL', 0)
-            shutil.copyfile(Path(os.environ['PSYQ_BIN']) / 'PSYLINK.EXE', root / 'PSYLINK.EXE')
+            shutil.copyfile(os.environ['PSYQ_PSYLINK'], root / 'PSYLINK.EXE')
+            stage_win32(root)
             (root / 'CONTROL.LNK').write_bytes(
                 b'\torg $80010000\r\n\tinclude "CONTROL.OBJ"\r\n\tregs pc=control_entry\r\n')
-            dos_run(root, ['psylink /c @CONTROL.LNK,CONTROL.CPE > LINK.TXT'], 'link')
+            dos_run(root, [WIN32_HOST, win32('PSYLINK.EXE /c @CONTROL.LNK,CONTROL.CPE > LINK.TXT')], 'link')
             tool_succeeded(root, 'LINK.TXT', 'CONTROL.CPE', b'CPE\x01')
             entry, loads = cpe_loads((root / 'CONTROL.CPE').read_bytes())
             self.assertIsNotNone(entry)

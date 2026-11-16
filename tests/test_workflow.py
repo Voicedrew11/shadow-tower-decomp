@@ -36,7 +36,7 @@ def sample_current(percent: float | None) -> Current:
         "game_sample",
         "GAME.EXE",
         "src/game/sample.c",
-        "probe-gcc260-o2-g0",
+        "probe-gcc272cdk-o2-g0",
         (function,),
     )
     return Current(
@@ -69,10 +69,10 @@ class ManifestTests(unittest.TestCase):
 
     def test_repository_manifest_has_valid_reconstruction_units(self) -> None:
         manifest = load_manifest()
-        self.assertIn("probe-gcc260-o2-g0", manifest.profiles)
-        self.assertIn("probe-gcc257-o2-g0", manifest.profiles)
-        probe_257 = manifest.profiles["probe-gcc257-o2-g0"]
-        self.assertEqual(probe_257.compiler, "gcc257-native")
+        self.assertIn("probe-gcc272cdk-o2-g0", manifest.profiles)
+        default = manifest.profiles["probe-gcc272cdk-o2-g0"]
+        self.assertEqual((default.compiler, default.optimization, default.small_data,
+                          default.aspsx_version), ("gcc272cdk-native", "O2", 0, "2.79"))
         self.assertEqual(
             len({unit.unit for unit in manifest.units}),
             len(manifest.units),

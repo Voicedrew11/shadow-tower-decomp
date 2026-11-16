@@ -34,8 +34,24 @@
         inherit pkgs;
         sdkBuilder = ./scripts/create-toolchain.py;
       };
-      inherit (toolchain) psyqSdk psyqMallocObj psyqRuntime30Cpe2x gcc257Native gcc257Headers gcc260Native cc1psx257 cpppsx257
-        cc1psx260 cpppsx260 aspsxNative asmpsxNative;
+      inherit (toolchain) psyqSdk psyq42Sdk psyq45Tools psyqMallocObj hxRuntime aspsx279
+        gcc272CdkNative cc1psx272cdk cpppsx272cdk
+        gcc257Native gcc257Headers gcc260Native cc1psx257 cpppsx257 cc1psx260 cpppsx260;
+
+      # The executable chain's SDK inputs, shared by every wrapper and check.
+      buildEnvironment = {
+        PSYQ_ASPSX = "${aspsx279}/2.79/ASPSX.EXE";
+        PSYQ_PSYLINK = "${psyq45Tools}/PSYLINK.EXE";
+        PSYQ_CPE2X = "${psyq45Tools}/CPE2X.EXE";
+        PSYQ_STARTUP_OBJ = "${psyq45Tools}/NONE3.OBJ";
+        PSYQ_MALLOC_OBJ = "${psyqMallocObj}/MALLOC.OBJ";
+        PSYQ_HX = "${hxRuntime}";
+        PSYQ_LIB = "${psyq42Sdk}/lib";
+        PSYQ_INCLUDE = "${psyq42Sdk}/include-lf";
+        PSYQ_C_INCLUDE = "${gcc257Headers}/include";
+      };
+      exportBuildEnvironment = pkgs.lib.concatStringsSep "\n" (pkgs.lib.mapAttrsToList
+        (name: value: "export ${name}=\"${value}\"") buildEnvironment);
 
       psy-k = pkgs.rustPlatform.buildRustPackage {
         pname = "psy-k";
@@ -296,6 +312,8 @@
         name = "kf-compile";
         runtimeInputs = [
           analysisPython
+          cc1psx272cdk
+          cpppsx272cdk
           cc1psx260
           cpppsx260
           cc1psx257
@@ -306,9 +324,7 @@
         ];
         text = ''
           repo="$(git rev-parse --show-toplevel 2>/dev/null || pwd)"
-          export PSYQ_ASPSX="${aspsxNative}/1.07/ASPSX.EXE"
-          export PSYQ_INCLUDE="${psyqSdk}/include-lf"
-          export PSYQ_C_INCLUDE="${gcc257Headers}/include"
+          ${exportBuildEnvironment}
           cd "$repo"
           exec python3 -m scripts.kf.compile "$@"
         '';
@@ -333,6 +349,8 @@
         name = "kf";
         runtimeInputs = [
           analysisPython
+          cc1psx272cdk
+          cpppsx272cdk
           cc1psx260
           cpppsx260
           cc1psx257
@@ -346,15 +364,8 @@
         ];
         text = ''
           repo="$(git rev-parse --show-toplevel 2>/dev/null || pwd)"
-          export PSYQ_ASPSX="${aspsxNative}/1.07/ASPSX.EXE"
           export PSYQ_SDK="${psyqSdk}/psyq-3.0"
-          export PSYQ_ASMPSX="${asmpsxNative}"
-          export PSYQ_BIN="$PSYQ_SDK/BIN"
-          export PSYQ_INCLUDE="${psyqSdk}/include-lf"
-          export PSYQ_C_INCLUDE="${gcc257Headers}/include"
-          export PSYQ_LIB="$PSYQ_SDK/LIB"
-          export PSYQ_MALLOC_OBJ="${psyqMallocObj}/MALLOC.OBJ"
-          export PSYQ_CPE2X="${psyqRuntime30Cpe2x}/CPE2X.EXE"
+          ${exportBuildEnvironment}
           cd "$repo"
           exec python3 -m scripts.kf.cli "$@"
         '';
@@ -364,10 +375,13 @@
         name = "kings-field";
         packages = [
           psyqSdk
+          psyq42Sdk
+          psyq45Tools
           psyqMallocObj
-          psyqRuntime30Cpe2x
           psy-k
           pkgs.dosbox-x
+          cc1psx272cdk
+          cpppsx272cdk
           cc1psx260
           cpppsx260
           cc1psx257
@@ -442,17 +456,12 @@
           export KINGS_FIELD_DIR="$(git rev-parse --show-toplevel 2>/dev/null || echo "$PWD")"
           unset PSYQ_DIR PSYQ_GCC241_DIR PSYQ_GCC260_RELEASE25_DIR
           unset PSYQ_GCC260_DISK_DIR PSYQ_GCC260_IMG
+          # The Psy-Q 3.0 kit remains only as an analysis corpus.
           export PSYQ_SDK="${psyqSdk}/psyq-3.0"
-          export PSYQ_BIN="$PSYQ_SDK/BIN"
-          export PSYQ_INCLUDE="${psyqSdk}/include-lf"
-          export PSYQ_C_INCLUDE="${gcc257Headers}/include"
-          export PSYQ_LIB="$PSYQ_SDK/LIB"
-          export PSYQ_MALLOC_OBJ="${psyqMallocObj}/MALLOC.OBJ"
-          export PSYQ_CPE2X="${psyqRuntime30Cpe2x}/CPE2X.EXE"
           export PSYQ_COMPILER="$PSYQ_SDK/COMPILER"
-          export PSYQ_ASPSX="${aspsxNative}/1.07/ASPSX.EXE"
+          ${exportBuildEnvironment}
+          export KF_GCC272CDK_NATIVE="${gcc272CdkNative}"
           export KF_GCC260_NATIVE="${gcc260Native}"
-          export PSYQ_ASMPSX="${asmpsxNative}"
           export KF_GCC257_NATIVE="${gcc257Native}"
           export GHIDRA_INSTALL_DIR="${pkgs.ghidra}/lib/ghidra"
           export NIX_GHIDRAHOME="${ghidraWithPlugins}/lib/ghidra/Ghidra"
@@ -464,13 +473,13 @@
 
           ${kfCli}/bin/kf clangd >&2 || echo "[shadow-tower] clangd setup failed; run kf clangd after fixing the reported error" >&2
 
-          echo "[shadow-tower] SDK             : Psy-Q 3.0 (1995-04-08 kit); one complete pinned media tree" >&2
-          echo "[shadow-tower] SDK assembler   : ASPSX 1.07 hash-pinned; kit ASPSX 2.08 not yet wired in" >&2
-          echo "[shadow-tower] compiler probes : cc1psx-260/cpppsx-260 and cc1psx-257/cpppsx-257" >&2
+          echo "[shadow-tower] SDK             : Runtime Library 4.2 (LIBPAD from its 4.2.1 patch); NONE3, PSYLINK 2.74, CPE2X 1.5 from the 4.5 kit" >&2
+          echo "[shadow-tower] SDK assembler   : ASPSX 2.79 (Win32, run by the HX DOS extender in DOSBox-X)" >&2
+          echo "[shadow-tower] compiler        : cc1psx-272cdk/cpppsx-272cdk (gcc 2.7.2 SN32 rebuild); probes cc1psx-257, cc1psx-260" >&2
           echo "[shadow-tower] analysis        : ghidra + PSX loader, pyghidra, psy-k, radare2, mipsel binutils" >&2
           echo "[shadow-tower] PSX emulator    : pcsx-redux ${pcsxRedux.version}" >&2
           echo "[shadow-tower] runtime checks  : kf-run-retail / kf-run-candidate" >&2
-          echo "[shadow-tower] executable chain: source -> ASPSX -> PSYLINK -> CPE2X; run kf build" >&2
+          echo "[shadow-tower] executable chain: source -> ASPSX -> PSYLINK -> CPE2X /CA; run kf build" >&2
           echo "[shadow-tower] objdiff views   : native Psy-Q objects -> ELF reader" >&2
           echo "[shadow-tower] Python RE stack : run 'kf-python-sync' once, then 'splat ...'" >&2
           echo "[shadow-tower] retail census   : kf-retail-validate; kf-function-audit/propose; kf-fid-census; kf-vendored-seed" >&2
@@ -482,17 +491,13 @@
       sdkBuilderTests = pkgs.runCommand "kings-field-sdk-builder-tests" {
         nativeBuildInputs = [
           analysisPython mipsBinutilsAliases psy-k objdiff-cli pkgs.dosbox-x pkgs.git
-          cc1psx257 cpppsx257
+          cc1psx272cdk cpppsx272cdk cc1psx257 cpppsx257
           pkgs.llvmPackages.clang-unwrapped
         ];
         GHIDRA_PSX_LOADER = "${ghidraPsxLoader}/lib/ghidra/Ghidra/Extensions/ghidra_psx_ldr";
         PSYQ_SDK = "${psyqSdk}/psyq-3.0";
-        PSYQ_LIB = "${psyqSdk}/psyq-3.0/LIB";
-        PSYQ_INCLUDE = "${psyqSdk}/include-lf";
-        PSYQ_C_INCLUDE = "${gcc257Headers}/include";
-        PSYQ_BIN = "${psyqSdk}/psyq-3.0/BIN";
-        PSYQ_ASPSX = "${aspsxNative}/1.07/ASPSX.EXE";
-        PSYQ_ASMPSX = "${asmpsxNative}";
+        inherit (buildEnvironment) PSYQ_ASPSX PSYQ_PSYLINK PSYQ_CPE2X PSYQ_STARTUP_OBJ
+          PSYQ_MALLOC_OBJ PSYQ_HX PSYQ_LIB PSYQ_INCLUDE PSYQ_C_INCLUDE;
       } ''
         mkdir project
         cp -r ${./scripts} project/scripts
@@ -507,16 +512,10 @@
       '';
 
       executableDeterminismTests = pkgs.runCommand "kings-field-executable-determinism" {
-        nativeBuildInputs = [ analysisPython pkgs.dosbox-x cc1psx257 cpppsx257 ];
+        nativeBuildInputs = [ analysisPython pkgs.dosbox-x cc1psx272cdk cpppsx272cdk cc1psx257 cpppsx257 ];
         PSYQ_SDK = "${psyqSdk}/psyq-3.0";
-        PSYQ_LIB = "${psyqSdk}/psyq-3.0/LIB";
-        PSYQ_BIN = "${psyqSdk}/psyq-3.0/BIN";
-        PSYQ_INCLUDE = "${psyqSdk}/include-lf";
-        PSYQ_C_INCLUDE = "${gcc257Headers}/include";
-        PSYQ_MALLOC_OBJ = "${psyqMallocObj}/MALLOC.OBJ";
-        PSYQ_CPE2X = "${psyqRuntime30Cpe2x}/CPE2X.EXE";
-        PSYQ_ASPSX = "${aspsxNative}/1.07/ASPSX.EXE";
-        PSYQ_ASMPSX = "${asmpsxNative}";
+        inherit (buildEnvironment) PSYQ_ASPSX PSYQ_PSYLINK PSYQ_CPE2X PSYQ_STARTUP_OBJ
+          PSYQ_MALLOC_OBJ PSYQ_HX PSYQ_LIB PSYQ_INCLUDE PSYQ_C_INCLUDE;
       } ''
         export HOME="$TMPDIR/home"
         mkdir -p "$HOME" project
@@ -537,7 +536,7 @@
           analysisPython cc1psx257 cpppsx257 mipsBinutilsAliases
         ];
 
-        PSYQ_ASPSX = "${aspsxNative}/1.07/ASPSX.EXE";
+        inherit (buildEnvironment) PSYQ_ASPSX PSYQ_HX;
       } ''
         mkdir -p project/tests/fixtures project/config
         cp -r ${./scripts} project/scripts
@@ -590,7 +589,7 @@
           cpppsx257
         ];
 
-        PSYQ_ASPSX = "${aspsxNative}/1.07/ASPSX.EXE";
+        inherit (buildEnvironment) PSYQ_ASPSX PSYQ_HX;
       } ''
         mkdir project
         cp -r ${./scripts} project/scripts
@@ -615,7 +614,7 @@
         gcc257Instrumented = gcc257Probe.instrumented;
         gcc257Source = gcc257Probe.source;
         inherit psyqSdk psy-k gcc260Native cc1psx260 cpppsx260 gcc257Native cc1psx257 cpppsx257 mipsBinutilsAliases ghidraPsxLoader ghidraWithPlugins objdiff-cli objdiff retailValidate retailSeed functionAudit functionPropose vendoredSeed fidCensus retailDelink objdiffProject objdiffReport sourceCompile runRetail runCandidate kfCli;
-        aspsx107 = aspsxNative;
+        inherit psyq42Sdk psyq45Tools hxRuntime aspsx279 gcc272CdkNative cc1psx272cdk cpppsx272cdk;
         pcsx-redux = pcsxRedux;
         default = psyqSdk;
       };
@@ -632,6 +631,8 @@
 
       checks.${system} = {
         sdk = psyqSdk;
+        sdk-4_2 = psyq42Sdk;
+        link-tools = psyq45Tools;
         sdk-builder-tests = sdkBuilderTests;
         executable-determinism = executableDeterminismTests;
         gcc257-trace = gcc257TraceTests;

@@ -48,6 +48,10 @@ def read_sym(data: bytes) -> dict[str, int]:
         if kind in (1, 2):
             name, pos = string(pos)
             symbols[name] = address
+        elif kind == 6:
+            # PSYLINK 2.74 also lists file-local (static) symbols; their names
+            # are not unique across units, so they are not returned.
+            _, pos = string(pos)
         elif kind in _FIXED:
             pos += _FIXED[kind]
         elif kind in _FIXED_THEN_NAMES:
