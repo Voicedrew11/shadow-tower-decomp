@@ -111,7 +111,7 @@ class ComparisonTests(unittest.TestCase):
 
 @unittest.skipUnless(all(shutil.which(tool) for tool in ('cpppsx-272cdk', 'cc1psx-272cdk', 'dosbox-x'))
                      and all(os.environ.get(key) for key in (
-                         'PSYQ_ASPSX', 'PSYQ_PSYLINK', 'PSYQ_CPE2X', 'PSYQ_LIB',
+                         'PSYQ_ASPSX', 'PSYQ_DMPSX', 'PSYQ_PSYLINK', 'PSYQ_CPE2X', 'PSYQ_LIB',
                          'PSYQ_INCLUDE', 'PSYQ_MALLOC_OBJ', 'PSYQ_STARTUP_OBJ')),
                      'requires the pinned compiler, original SDK tools and libraries')
 class NativeBuildControls(unittest.TestCase):

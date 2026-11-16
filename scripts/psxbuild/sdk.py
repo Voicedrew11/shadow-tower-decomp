@@ -78,6 +78,26 @@ def aspsx_command(stem: str, small_data: int) -> str:
     return f'ASPSX.EXE -g -G{small_data} -o {stem}.OBJ {stem}.S > {stem}.TXT'
 
 
+# DMPSX 3.0 (the 4.5 kit's BIN/DOS/DMPSX.EXE, a real-mode Borland C++ DOS
+# program) is Runtime Library 4.2's GTE post-processor: the INLINE_C.H
+# ("DMPSX version 3") macros emit placeholder words such as `.word 0x0000117f`
+# (gte_nclip), and DMPSX rewrites each one in the assembled object into its
+# COP2 instruction (0x4b400006). Only those SPECIAL-funct-0x3f words change; an
+# object without GTE macros is left byte-identical. It runs on every object,
+# directly after ASPSX, as a GTE-using build would have run it.
+def dmpsx_command(stem: str) -> str:
+    return f'DMPSX.EXE {stem}.OBJ > {stem}.DMP'
+
+
+def assembler_commands(stem: str, small_data: int) -> list[str]:
+    return [aspsx_command(stem, small_data), dmpsx_command(stem)]
+
+
+def stage_assembler(root: Path) -> None:
+    shutil.copyfile(os.environ['PSYQ_ASPSX'], root / 'ASPSX.EXE')
+    shutil.copyfile(os.environ['PSYQ_DMPSX'], root / 'DMPSX.EXE')
+
+
 def dos_text(path: Path) -> None:
     # The DOS reader needs CRLF. No directives, instructions or literals change.
     path.write_bytes(path.read_bytes().replace(b'\r\n', b'\n').replace(b'\n', b'\r\n'))
@@ -119,6 +139,7 @@ def compile_c(source: Path, root: Path, stem: str, *, compiler: str,
     return {'object': stem + '.OBJ', 'assembly': stem + '.S', 'log': stem + '.TXT',
             'preprocessor_command': cpp_command, 'compiler_command': cc1_command, **probe,
             'assembler_command': aspsx_command(stem, small_data),
+            'gte_command': dmpsx_command(stem),
             'assembly_sha256': hashlib.sha256(assembly.read_bytes()).hexdigest()}
 
 
@@ -161,11 +182,12 @@ def assemble(root: Path, stem: str, small_data: int) -> bytes:
 
 
 def assemble_many(root: Path, stems: tuple[str, ...], small_data: int) -> dict[str, bytes]:
-    shutil.copyfile(os.environ['PSYQ_ASPSX'], root / 'ASPSX.EXE')
+    stage_assembler(root)
     for stem in stems:
         dos_text(root / (stem + '.S'))
         (root / (stem + '.OBJ')).unlink(missing_ok=True)
-    dos_run(root, [aspsx_command(stem, small_data) for stem in stems], 'asm')
+    dos_run(root, [command for stem in stems for command in assembler_commands(stem, small_data)],
+            'asm')
     for stem in stems:
         tool_succeeded(root, stem + '.TXT', stem + '.OBJ', b'LNK\x02')
     return {stem: (root / (stem + '.OBJ')).read_bytes() for stem in stems}

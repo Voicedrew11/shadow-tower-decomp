@@ -130,13 +130,13 @@ _Derived from ignored outputs made by the native Psy-Q executable chain. `kf bui
 
 | Image | Same-offset file bytes | Island-aligned load bytes | Nonzero load bytes | Data modules exact |
 | :---- | --------------------: | -----------------------: | -----------------: | -----------------: |
-| `PSX.EXE` | 100.00% | 100.00% | 100.00% | 1 / 1 |
-| `STR.EXE` | 100.00% | 100.00% | 100.00% | 1 / 1 |
-| `ST.EXE` | — | — | — | 0 / 0 |
-| `TITLE.EXE` | 100.00% | 100.00% | 100.00% | 1 / 1 |
-| `OPTXT.EXE` | 36.20% | 93.00% | 90.81% | 0 / 1 |
-| `VS.EXE` | — | — | — | 0 / 0 |
-| `END.EXE` | 100.00% | 100.00% | 100.00% | 1 / 1 |
+| `PSX.EXE` | 100.00% | 100.00% | 100.00% | — |
+| `STR.EXE` | 100.00% | 100.00% | 100.00% | — |
+| `ST.EXE` | — | — | — | — |
+| `TITLE.EXE` | 100.00% | 100.00% | 100.00% | — |
+| `OPTXT.EXE` | 36.20% | 93.00% | 90.81% | — |
+| `VS.EXE` | — | — | — | — |
+| `END.EXE` | 100.00% | 100.00% | 100.00% | — |
 
 The three byte columns show similarity, not differences. Island scores allow moved regions and
 small internal edits; unmatched bytes lower the score and no addresses are masked.

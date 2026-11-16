@@ -64,7 +64,8 @@ class ManifestTests(unittest.TestCase):
             self.assertEqual(int(site['target_va'], 0), owners[0].va + row.addend)
 
 
-@unittest.skipUnless(shutil.which('dosbox-x') and os.environ.get('PSYQ_ASPSX'),
+@unittest.skipUnless(shutil.which('dosbox-x') and os.environ.get('PSYQ_ASPSX')
+                     and os.environ.get('PSYQ_DMPSX'),
                      'native SDK tools required')
 class NativeTests(unittest.TestCase):
     def test_explicit_pair_preserves_address_without_renaming_equal_neighbours(self):

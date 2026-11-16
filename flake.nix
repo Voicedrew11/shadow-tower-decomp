@@ -41,6 +41,7 @@
       # The executable chain's SDK inputs, shared by every wrapper and check.
       buildEnvironment = {
         PSYQ_ASPSX = "${psyq45Tools}/ASPSXD.EXE";
+        PSYQ_DMPSX = "${psyq45Tools}/DMPSX.EXE";
         PSYQ_PSYLINK = "${sdevtc24Linker}/PSYLINKD.EXE";
         PSYQ_CPE2X = "${psyq45Tools}/CPE2X.EXE";
         PSYQ_STARTUP_OBJ = "${psyq45Tools}/NONE3.OBJ";
@@ -499,7 +500,7 @@
         ];
         GHIDRA_PSX_LOADER = "${ghidraPsxLoader}/lib/ghidra/Ghidra/Extensions/ghidra_psx_ldr";
         PSYQ_SDK = "${psyqSdk}/psyq-3.0";
-        inherit (buildEnvironment) PSYQ_ASPSX PSYQ_PSYLINK PSYQ_CPE2X PSYQ_STARTUP_OBJ
+        inherit (buildEnvironment) PSYQ_ASPSX PSYQ_DMPSX PSYQ_PSYLINK PSYQ_CPE2X PSYQ_STARTUP_OBJ
           PSYQ_MALLOC_OBJ PSYQ_LIB PSYQ_INCLUDE PSYQ_C_INCLUDE;
       } ''
         mkdir project
@@ -517,7 +518,7 @@
       executableDeterminismTests = pkgs.runCommand "kings-field-executable-determinism" {
         nativeBuildInputs = [ analysisPython pkgs.dosbox-x cc1psx272cdk cpppsx272cdk cc1psx257 cpppsx257 ];
         PSYQ_SDK = "${psyqSdk}/psyq-3.0";
-        inherit (buildEnvironment) PSYQ_ASPSX PSYQ_PSYLINK PSYQ_CPE2X PSYQ_STARTUP_OBJ
+        inherit (buildEnvironment) PSYQ_ASPSX PSYQ_DMPSX PSYQ_PSYLINK PSYQ_CPE2X PSYQ_STARTUP_OBJ
           PSYQ_MALLOC_OBJ PSYQ_LIB PSYQ_INCLUDE PSYQ_C_INCLUDE;
       } ''
         export HOME="$TMPDIR/home"
@@ -539,7 +540,7 @@
           analysisPython cc1psx257 cpppsx257 mipsBinutilsAliases
         ];
 
-        inherit (buildEnvironment) PSYQ_ASPSX;
+        inherit (buildEnvironment) PSYQ_ASPSX PSYQ_DMPSX;
       } ''
         mkdir -p project/tests/fixtures project/config
         cp -r ${./scripts} project/scripts
@@ -592,7 +593,7 @@
           cpppsx257
         ];
 
-        inherit (buildEnvironment) PSYQ_ASPSX;
+        inherit (buildEnvironment) PSYQ_ASPSX PSYQ_DMPSX;
       } ''
         mkdir project
         cp -r ${./scripts} project/scripts

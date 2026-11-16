@@ -16,6 +16,7 @@
         PSYQ_MALLOC_OBJ = "${sdk.psyqMallocObj}/MALLOC.OBJ";
         PSYQ_STARTUP_OBJ = "${sdk.psyq45Tools}/NONE3.OBJ";
         PSYQ_ASPSX = "${sdk.psyq45Tools}/ASPSXD.EXE";
+        PSYQ_DMPSX = "${sdk.psyq45Tools}/DMPSX.EXE";
         PSYQ_PSYLINK = "${sdk.sdevtc24Linker}/PSYLINKD.EXE";
         PSYQ_CPE2X = "${sdk.psyq45Tools}/CPE2X.EXE";
         MIPS_LD = "${binutils}/bin/mipsel-unknown-linux-gnu-ld";
