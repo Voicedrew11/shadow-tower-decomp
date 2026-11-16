@@ -62,6 +62,18 @@ source = "src/st/mesh_draw_div_setup.c"
 profile = "probe-gcc272cdk-o2-g0"
 
 [[unit]]
+unit = "st.vis_build"
+image = "ST.EXE"
+source = "src/st/vis_build.c"
+profile = "probe-gcc272cdk-o2-g0"
+
+[[unit]]
+unit = "st.vis_lists"
+image = "ST.EXE"
+source = "src/st/vis_lists.c"
+profile = "probe-gcc272cdk-o2-g0"
+
+[[unit]]
 unit = "title.main"
 image = "TITLE.EXE"
 source = "src/title/main.c"
