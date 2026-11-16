@@ -23,6 +23,10 @@ title = "Shadow Tower (USA)"
 # Single-track MODE2/2352 image.
 sha256 = "420420cee70eec9d6b4c81dcf6e16494f72fc3976a93fcbe4076a7336c659adb"
 
+# `gp` is the $gp value each program's startup loads (lui/addiu gp before the
+# jump to main); gp-relative relocations decode against it. Overlays use
+# their host's.
+
 # Boot loader named by SYSTEM.CNF (`BOOT = cdrom:\SLUS_008.63;1`). The disc
 # also carries a byte-identical copy as PSX.EXE.
 [[image]]
@@ -31,6 +35,7 @@ disc_file = "SLUS_008.63"
 sha256 = "dd01da6ae1c9de87ae0f818b60da2cd59d13031c039e2c0013c3657f8654821e"
 file_size = 0x1000
 entry = 0x800101C0
+gp = 0x80010394
 load_address = 0x80010000
 load_size = 0x800
 
@@ -41,6 +46,7 @@ disc_file = "STR.EXE"
 sha256 = "391c6184b5a68d21db908be029acf050f766e90bcb1eafbcef1c1c1676d47765"
 file_size = 0x22800
 entry = 0x800119DC
+gp = 0x8003288C
 load_address = 0x80011000
 load_size = 0x22000
 
@@ -50,6 +56,7 @@ disc_file = "ST.EXE"
 sha256 = "272b1168a246751c8448eaf9e390cdc230b66d401ef7c5d1cde34d35e900ce43"
 file_size = 0x78000
 entry = 0x80014320
+gp = 0x80087EC0
 load_address = 0x80011000
 load_size = 0x77800
 
@@ -59,6 +66,7 @@ disc_file = "TITLE.EXE"
 sha256 = "ff4caed64727535bd9533f1d6a6e63e70cfc392a9eafdbbfeb6d26961cfcab52"
 file_size = 0x17800
 entry = 0x80012A04
+gp = 0x80028ABC
 load_address = 0x80012000
 load_size = 0x17000
 
@@ -68,6 +76,7 @@ disc_file = "OPTXT.EXE"
 sha256 = "793f698ecf7d770c68de41d82ff87c72fe70902be31ee8f79d8cfaee11d94226"
 file_size = 0xF000
 entry = 0x80011944
+gp = 0x8001F798
 load_address = 0x80011000
 load_size = 0xE800
 
@@ -77,6 +86,7 @@ disc_file = "VS.EXE"
 sha256 = "051bed231a93b6d5d6a100b98fcb08ee5f262978808be067e79c208603e053d9"
 file_size = 0x53000
 entry = 0x80012980
+gp = 0x80063218
 load_address = 0x80011000
 load_size = 0x52800
 
@@ -86,6 +96,7 @@ disc_file = "END.EXE"
 sha256 = "c7166c7cea67c1feed6efd6e831f78535d5c8e6584af0fc7fee880ab092e1069"
 file_size = 0x1F800
 entry = 0x80011960
+gp = 0x8002FD04
 load_address = 0x80011000
 load_size = 0x1F000
 

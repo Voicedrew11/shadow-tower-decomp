@@ -9,12 +9,13 @@ from functools import lru_cache
 from scripts.kf.delink import load_catalog, sanitize_symbol
 from scripts.kf.relocations import (
     DataReferent,
+    GP_RELATIVE_OPCODES,
     decode_hi_lo_target,
     decode_mips26_target,
     named_data_referent,
     validate_relocation,
 )
-from scripts.kf.retail import parse_int, read_tsv
+from scripts.kf.retail import IMAGE_GP, parse_int, read_tsv
 from scripts.kf.sema.cfg import build_graph
 from scripts.kf.sema.image import RetailImage, retail
 from scripts.kf.sema.index import Binding, Index, index
@@ -140,6 +141,15 @@ class Evidence:
                 if decode_mips26_target(site, word) == target
                 else "decoded-target-mismatch"
             )
+        if row["kind"] == "mips_gprel16":
+            gp = IMAGE_GP.get(self.img.image)
+            if gp is None:
+                return "image-gp-unknown"
+            if (word >> 21) & 0x1F != 28 or word >> 26 not in GP_RELATIVE_OPCODES:
+                return "instruction-opcode-mismatch"
+            low = word & 0xFFFF
+            decoded = (gp + (low - 0x10000 if low & 0x8000 else low)) & 0xFFFFFFFF
+            return None if decoded == target else "decoded-target-mismatch"
         if row["kind"] != "mips_hi16_lo16":
             return "unsupported-relocation-kind"
         if not row["paired_site_va"]:

@@ -127,6 +127,20 @@ def _load_overlays(path: Path) -> tuple[dict[str, RetailArchive], dict[str, Over
 IMAGES_CONFIG = Path(__file__).resolve().parents[2] / "config" / "images.toml"
 RETAIL_DISC, IMAGE_LAYOUTS, IMAGE_DISC_FILES = _load_images(IMAGES_CONFIG)
 RETAIL_ARCHIVES, OVERLAY_SOURCES = _load_overlays(IMAGES_CONFIG)
+
+
+def _load_gp(path: Path) -> dict[str, int]:
+    """Each image's startup $gp; an overlay runs with its host's."""
+    with path.open("rb") as stream:
+        table = tomllib.load(stream)
+    result = {row["name"]: row["gp"] for row in table["image"] if "gp" in row}
+    for row in table.get("overlay", ()):
+        if row["host"] in result:
+            result[row["name"]] = result[row["host"]]
+    return result
+
+
+IMAGE_GP = _load_gp(IMAGES_CONFIG)
 IMAGE_ORDER = {image: index for index, image in enumerate(IMAGE_LAYOUTS)}
 IMAGE_KEYS = tuple(image_key(image) for image in IMAGE_LAYOUTS)
 IMAGE_NAMES = {image_key(image): image for image in IMAGE_LAYOUTS}

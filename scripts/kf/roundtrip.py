@@ -27,7 +27,7 @@ from scripts.kf.allocation_notes import read_requests
 from scripts.kf.delink import load_catalog, sanitize_symbol
 from scripts.kf.manifest import Unit, load as load_manifest
 from scripts.kf.paths import BUILD, RETAIL_CONFIG
-from scripts.kf.retail import IMAGE_KEYS, IMAGE_LAYOUTS, IMAGE_NAMES, read_tsv
+from scripts.kf.retail import IMAGE_GP, IMAGE_KEYS, IMAGE_LAYOUTS, IMAGE_NAMES, read_tsv
 from scripts.kf.sema.image import RetailImage
 
 
@@ -285,7 +285,7 @@ def externals(elf: ELFFile, book: dict[str, set[int]], result: UnitResult) -> di
         symtab = elf.get_section(section['sh_link'])
         for row in section.iter_relocations():
             result.relocation_rows += 1
-            if row['r_info_type'] not in {2, 4, 5, 6}:
+            if row['r_info_type'] not in {2, 4, 5, 6, 7}:
                 result.issue("unsupported-relocation", section=target_section.name,
                              offset=row['r_offset'], type=row['r_info_type'])
             if row['r_offset'] & 3 or row['r_offset'] + 4 > target_section['sh_size']:
@@ -371,6 +371,9 @@ def verify_unit(unit: Unit, image: RetailImage, book: dict[str, set[int]],
             command = [linker, "-EL", "-G", "0", "--entry", hex(entry), "-T", str(script),
                        "-o", str(linked), str(object_path.resolve())]
             command += [f"--defsym={name}={address:#x}" for name, address in sorted(symbols.items())]
+            if unit.image in IMAGE_GP:
+                # R_MIPS_GPREL16 resolves against the program's startup $gp.
+                command.append(f"--defsym=_gp={IMAGE_GP[unit.image]:#x}")
             process = subprocess.run(command, capture_output=True, text=True, timeout=30)
             result.linker_ran = True
             result.linker_diagnostics = process.stderr.strip()
