@@ -20,6 +20,7 @@
 #include <st/funcs.h>
 #include <st/cd.h>
 #include <st/light.h>
+#include <st/effect.h>
 
 /* PSX.EXE program table indices. */
 #define PROGRAM_TITLE 1
@@ -51,7 +52,7 @@ void func_80014a30(void)
     func_8004eda8();
     func_8004afdc();
     func_80052ca4();
-    func_8003bc10();
+    effects_clear();
     func_80044674();
     func_800559bc();
     lighting_load_defaults();
@@ -98,7 +99,7 @@ void func_80014a30(void)
         func_80050768();
         func_8004e324();
         func_80053aa4();
-        func_8003bc40();
+        effects_run();
         viewer.unk21C = 0;
         func_8005735c();
         func_800456f8();

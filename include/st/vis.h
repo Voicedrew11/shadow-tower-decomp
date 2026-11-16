@@ -17,7 +17,16 @@
  * list vis_build_visible builds from it; vis_record_is_visible/vis_id_is_visible search the
  * visible list. */
 typedef struct {
-    u8 unk0000[0x44ca];
+    s32 unk0;            /* 0x00: the kind of the request func_80049544 takes */
+    VECTOR unk4;         /* 0x04: its position */
+    SVECTOR unk14;       /* 0x14: its velocity */
+    s16 unk1C;           /* 0x1c */
+    s16 unk1E;           /* 0x1e */
+    s16 unk20;           /* 0x20: the velocity's heading */
+    s16 unk22;           /* 0x22: its horizontal length */
+    u8 unk24[0x5c - 0x24];
+    s32 unk5C;           /* 0x5c: an index into vis_table_a.entries */
+    u8 unk60[0x44ca - 0x60];
     u16 n_sources;       /* 0x44ca */
     u16 n_visible;       /* 0x44cc */
     u16 sources[0x80];   /* 0x44ce */
@@ -52,7 +61,16 @@ typedef struct {
     u8 unk05;
     u8 unk06[0x20];
     u16 unk26;
-    u8 unk28[0xac];
+    u8 unk28[0x30 - 0x28];
+    u16 unk30;           /* 0x30: height */
+    u8 unk32[0x70 - 0x32];
+    u32 unk70;           /* 0x70: bit 11 set by effect_emit */
+    s32 unk74;           /* 0x74: x */
+    s32 unk78;           /* 0x78: y */
+    s32 unk7C;           /* 0x7c: z */
+    u8 unk80[0x8e - 0x80];
+    s16 unk8E;           /* 0x8e: facing */
+    u8 unk90[0xd4 - 0x90];
 } Vis212;
 
 typedef struct {

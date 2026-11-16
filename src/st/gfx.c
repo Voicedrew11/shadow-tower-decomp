@@ -66,7 +66,7 @@ void func_80016fb8(void)
     world_state.unk1EDF4 = 0;
     DAT_8015c488 = 0;
     anim_slots_init();
-    func_80034f48();
+    anim_sets_init();
     world_state.render_mode = 17;
     world_state.unk1EDFD = 0;
     world_state.unk1EDFE = 0;

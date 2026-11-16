@@ -48,7 +48,11 @@ typedef struct {
     int prim_count;      /* 0x90: primitives emitted */
     u8 unk94[4];         /* 0x94 */
     u_short clut_base;   /* 0x98: added to subdivided faces' CLUT */
-    u8 unk9A[0x46];      /* 0x9a */
+    u8 unk9A[2];         /* 0x9a */
+    SVECTOR unk9C;       /* 0x9c: a node translation anim_record_compose transforms */
+    struct StAnimList *unkA4; /* 0xa4: the node list anim_list_compose composes */
+    MATRIX unkA8;        /* 0xa8: the root transform of the composed nodes */
+    u8 unkC8[0x18];      /* 0xc8 */
     s32 unkE0;           /* 0xe0: a position func_80016554 tests (x, y, z) */
     s32 unkE4;           /* 0xe4 */
     s32 unkE8;           /* 0xe8 */

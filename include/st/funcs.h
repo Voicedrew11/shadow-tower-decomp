@@ -11,16 +11,17 @@
 #include <LIBGTE.H>
 #include <LIBGPU.H>
 
+void func_80026a88(short value);
 void func_80026afc(VECTOR *a, SVECTOR *b);
-void func_80034f48(void);
-void func_8003509c(void);
-void func_80035120(void);
-void func_8003bc10(void);
-void func_8003bc40(void);
 void func_8003c0e0(void);
+/* The effect script interpreter (runs effects.cur for one frame). */
+void func_800385b0(void);
+int func_8003beb4(void *request);
 void func_8003cedc(void);
+void func_8003dbe0(u16 *levels, int scale, int arg2, VECTOR *pos);
 void func_8003e734(VECTOR *a, SVECTOR *b);
 void func_8003eaf8(void);
+int func_8003eb34(VECTOR *pos, int yaw, int range, int arg3);
 void func_8003ec5c(void *data, DVECTOR *a, DVECTOR *b, int arg3);
 void func_8003ee38(u16 id, int slot);
 void func_8003f12c(u16 id, int slot, int arg2);
@@ -29,9 +30,21 @@ void func_80044674(void);
 void func_80044ee8(void);
 void func_800456f8(void);
 void func_80045ffc(void);
+int func_80049544(void *request);
+int func_800496c8(int angle, int to, int step);
 void func_800498cc(MATRIX *m, MATRIX *out);
 void func_80049cd4(int angle, MATRIX *out);
+void func_8004a078(SVECTOR *rot, SVECTOR *v, VECTOR *out);
+void func_8004a0f8(int scale, SVECTOR *v);
+int func_8004a148(int angle, int heading, int range);
+int func_8004a1b4(int dx, int dz);
+int func_8004a340(int x, int y, int z);
+void func_8004a390(int dx, int dy, int dz, SVECTOR *out);
+void func_80049f08(SVECTOR *rot, SVECTOR *out);
+void *func_8004b658(VECTOR *pos, int yaw, int pitch, int range, int arg4, int arg5, int *dist,
+                    int arg7);
 void func_8004afdc(void);
+int func_8004def8(void *target, int arg1, int arg2, u16 *levels, int arg4);
 void func_8004e324(void);
 void func_8004eda8(void);
 void func_800500ac(int arg0, int arg1, int arg2, int arg3);
@@ -46,6 +59,7 @@ void func_80057a28(void);
 void func_80057a3c(void);
 void func_80057da0(void);
 void func_80057f3c(void);
+void func_80058254(int id, VECTOR *pos, int arg2, int arg3, int arg4, int arg5);
 void func_80058288(VECTOR *a, SVECTOR *b);
 void func_80058620(void);
 void func_80058a0c(int archive, int index, int slot);

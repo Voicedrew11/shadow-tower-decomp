@@ -47,7 +47,12 @@ typedef struct {
     u8 unk33; /* incremented every vsync, wraps at 60 */
     s32 unk34; /* incremented when unk33 wraps */
     u16 unk38[21]; /* set from FN. ids 970..990 */
-    u8 unk62[0x1c7 - 0x62];
+    u8 unk62[0x78 - 0x62];
+    u16 unk78[6];        /* 0x78: picked by effect_play's level (src/st/effect.c) */
+    u8 unk84[0xb8 - 0x84];
+    u16 unkB8;           /* 0xb8 */
+    u16 unkBA[3];        /* 0xba */
+    u8 unkC0[0x1c7 - 0xc0];
     s8 unk1C7;           /* 0x1c7: lighting_update picks lighting rows by its sign */
     u8 unk1C8[0x218 - 0x1c8];
     u8 unk218;           /* 0x218 */
