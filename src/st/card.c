@@ -8,9 +8,12 @@
 #include <sys/types.h>
 #include <psyq/kernel.h>
 #include <psyq/libc.h>
+#include <LIBGTE.H>
+#include <LIBGPU.H>
 #include <st/data.h>
 #include <st/menu.h>
 #include <st/funcs.h>
+#include <st/cd.h>
 #include <st/memory.h>
 #include <st/card.h>
 
@@ -1088,7 +1091,7 @@ open:
         strcat(path, "BASLUS-00863FS_ST");
         num[0] = sp->unk204 / 10 + '0';
         num[1] = sp->unk204 % 10 + '0';
-        num[2] = ' ';
+        num[2] = '\0';
         strcat(path, num);
         fd = open(path, O_CREAT | (2 << 16));
         if (fd == -1) {
@@ -1173,6 +1176,9 @@ long func_80062bc0(int port)
 }
 
 /*
+ * Not exact (91.8%): this build keeps the button word's address in s0
+ * across the result waits; retail forms it again for each load and store.
+ *
  * The memory card save/load screen (unk2DC's high byte set: save). Steps
  * through port choice, probe, format offer, directory, file headers, file
  * choice and the transfer, shifting unk2DC's step bit as it goes; returns
@@ -1326,4 +1332,124 @@ done:
     viewer.unk2A = 1;
     func_80057a3c();
     return 1;
+}
+
+/*
+ * The quit dialog: returns 1 after setting DAT_800881a4 to 2 (leave for
+ * TITLE.EXE) when the first choice is confirmed, else 0.
+ */
+ADDRESS(0x80063078, 0x134)
+int func_80063078(void)
+{
+    MenuScratch *sp = MENU_SCRATCH;
+
+    sp->unk2E0 = 1;
+    func_80057a3c();
+    while (1) {
+        if (DAT_801cd180.unk4 & 0x2000) {
+            func_80057cec();
+            DAT_801cd180.unk4 = 0;
+            break;
+        }
+        if (DAT_801cd180.unkC & 0x80) {
+            func_80057d10();
+            DAT_801cd180.unkC = 0;
+            sp->unk2E0 = 0;
+        }
+        if (DAT_801cd180.unkC & 0x20) {
+            func_80057d10();
+            DAT_801cd180.unkC = 0;
+            sp->unk2E0 = 1;
+        }
+        if (DAT_801cd180.unk4 & 0x4000) {
+            func_80057cc8();
+            DAT_801cd180.unk4 = 0;
+            if (sp->unk2E0 != 0)
+                break;
+            DAT_800881a4 = 2;
+            return 1;
+        }
+        func_800164b4();
+        func_8002ce84();
+        sp->unk2E4 = (sp->unk2E4 + 1) % 32;
+    }
+    func_80057a3c();
+    return 0;
+}
+
+/*
+ * The pause screen: runs func_80031d50 until button 8, keeping the play
+ * clock (viewer.unk33/unk34) still.
+ * Not exact (89.4%, 16 bytes long): this build rotates the wait loop
+ * (its test duplicated at the bottom); retail tests at the top and jumps
+ * back, with the button word's address in s0.
+ */
+ADDRESS(0x800631ac, 0xb4)
+void func_800631ac(void)
+{
+    s32 seconds = viewer.unk34;
+    u8 frames = viewer.unk33;
+
+    func_80015ad4();
+    func_80058c04();
+    func_80057a3c();
+    DrawSync(0);
+    while (!(DAT_801cd180.unk4 & 8)) {
+        func_800164b4();
+        func_80031d50();
+    }
+    func_80057a3c();
+    func_80058c24();
+    viewer.unk34 = seconds;
+    viewer.unk33 = frames;
+}
+
+/*
+ * A two-choice page over the menu font (CD archive 3 member 0): returns
+ * the choice.
+ * Not exact (93.8%): retail keeps the file buffer's base in s0 and forms
+ * the image address as (size + 4) + base + 4; this build reuses base + 4.
+ */
+ADDRESS(0x80063260, 0x174)
+int func_80063260(void)
+{
+    MenuScratch *sp = MENU_SCRATCH;
+    u8 *p;
+
+    sp->unk2E6.vx = 960;
+    sp->unk2E6.vy = 256;
+    sp->unk2EA.vx = 560;
+    sp->unk2EA.vy = 495;
+    func_80015ad4();
+    p = (u8 *)DAT_80088c88;
+    func_80016030(3, 0, (u_long *)p);
+    func_80014cfc((u32 *)&menu_messages, (u32 *)(p + 4), 5376);
+    p += *(u32 *)p + 4;
+    func_8003ec5c(p + 4, &sp->unk2E6, &sp->unk2EA, 1);
+    sp->unk0.word = 0;
+    sp->unk2E4 = 0;
+    func_80057a3c();
+    while (1) {
+        if (DAT_801cd180.unk4 & 0x4000) {
+            func_80057cc8();
+            DAT_801cd180.unk4 = 0;
+            break;
+        }
+        if (DAT_801cd180.unkC & 0x40) {
+            func_80057d10();
+            DAT_801cd180.unkC = 0;
+            sp->unk0.word = 1;
+        }
+        if (DAT_801cd180.unkC & 0x10) {
+            func_80057d10();
+            DAT_801cd180.unkC = 0;
+            sp->unk0.word = 0;
+        }
+        sp->unk2E5 = 0;
+        func_800164b4();
+        func_8002cef8();
+        sp->unk2E4 = (sp->unk2E4 + 1) % 32;
+    }
+    func_80057a3c();
+    return sp->unk0.word;
 }

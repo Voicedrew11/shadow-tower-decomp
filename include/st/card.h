@@ -54,5 +54,14 @@ int func_8006205c(u8 *data);
 int func_80062228(u8 *data);
 long func_80062bc0(int port);
 int func_80062c28(int arg);
+int func_80063078(void);
+void func_800631ac(void);
+int func_80063260(void);
+
+/* src/st/menu_vram.c */
+void func_80063638(void);
+void func_800636f8(void);
+void func_800637c0(void);
+void func_80063954(void);
 
 #endif

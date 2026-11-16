@@ -84,6 +84,7 @@ typedef struct {
 /* The screen state at the start of the scratchpad, per screen. */
 typedef union {
     s32 word;
+    u32 *block;          /* func_800637c0's 21504-byte message copy */
     s16 half[2];
     MenuGrid grid;
     MenuList list;
@@ -192,7 +193,11 @@ typedef struct {
     s16 unk2E2;          /* 0x2e2 */
     u8 unk2E4;           /* 0x2e4: cursor blink phase */
     u8 unk2E5;           /* 0x2e5: text font mode (0: 6x12 half-width cells) */
-    u8 unk2E6[0x1a];     /* 0x2e6 */
+    DVECTOR unk2E6;      /* 0x2e6: func_80063260's texture position */
+    DVECTOR unk2EA;      /* 0x2ea: and its CLUT position */
+    DVECTOR unk2EE;      /* 0x2ee: func_800637c0's texture position */
+    DVECTOR unk2F2;      /* 0x2f2: and its CLUT position */
+    u8 unk2F6[0xa];      /* 0x2f6 */
     CVECTOR style[8];    /* 0x300: text colours; .cd carries the glyph size */
     CVECTOR *unk320;     /* 0x320: figure colours of the status pages */
     CVECTOR *unk324;     /* 0x324 */
@@ -314,5 +319,18 @@ void func_800319a8(void);
 void func_80031aec(void);
 void func_80031cfc(void);
 void func_80031d50(void);
+
+/*
+ * The option screens' block below menu_messages (src/st/menu_vram.c):
+ * func_800637c0 allocates it and func_80063954 frees it. WIP extent.
+ */
+typedef struct {
+    u32 *unk0;           /* 0x00: 144 bytes from CD archive 3 member 1 */
+    u8 unk4[0x1c];
+} Data801e0d08;
+extern Data801e0d08 DAT_801e0d08;
+/* The equipment ids func_800637c0 records (viewer.unk38[3], [4], [16],
+ * [17], [6], [12]) for func_80063954 to compare. */
+extern u16 DAT_801e0d28[6];
 
 #endif
