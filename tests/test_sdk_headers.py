@@ -46,3 +46,37 @@ unsigned long base_address(struct EXEC *header) { return header->base; }
                             '-o', str(assembly)], check=True, capture_output=True)
             for offset in (8, 32, 56):
                 self.assertRegex(assembly.read_text(), rf'lw\s+\$2,{offset}\(\$4\)')
+
+    @unittest.skipUnless(os.environ.get('PSYQ_INCLUDE') and shutil.which('cpppsx-272cdk')
+                         and shutil.which('cc1psx-272cdk'), 'pinned SDK and compiler required')
+    def test_kernel_declarations_agree_with_libapi_libetc_and_malloc(self):
+        sdk = Path(os.environ['PSYQ_INCLUDE'])
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            source = root / 'kernel.c'
+            # Every order: a conflicting redeclaration is a hard compiler error.
+            source.write_text('''#include <sys/types.h>
+#include <LIBETC.H>
+#include <MALLOC.H>
+#include <psyq/kernel.h>
+#include <LIBAPI.H>
+#include <psyq/kernel.h>
+void start(unsigned long *heap)
+{
+    InitHeap3(heap, 0x1000);
+    InitHeap(heap, 0x1000);
+    ResetCallback();
+    StopCallback();
+    EnterCriticalSection();
+    ExitCriticalSection();
+}
+''')
+            preprocessed = root / 'kernel.i'
+            preprocessed.write_text(subprocess.check_output([
+                'cpppsx-272cdk', '-lang-c', '-undef', '-nostdinc',
+                '-I', str(REPO / 'include'), '-I', str(REPO / 'vendor/include'),
+                '-I', str(sdk), str(source)], text=True))
+            result = subprocess.run(['cc1psx-272cdk', '-quiet', '-O2', '-G0', str(preprocessed),
+                                     '-o', str(root / 'kernel.s')], capture_output=True, text=True)
+            self.assertEqual(result.returncode, 0, result.stderr)
+            self.assertNotIn('conflicting types', result.stderr)

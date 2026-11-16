@@ -9,8 +9,9 @@
  *
  * LIBSND and LIBCD stay in psyq/audio.h so their declarations are limited
  * to audio/CD users. KERNEL and the BIOS file interfaces stay in
- * psyq/kernel.h, which also supplies the release's missing LIBAPI
- * declarations and case-sensitive include shim. C runtime declarations stay
+ * psyq/kernel.h, which includes LIBAPI.H (through the case-sensitive
+ * vendor/include/kernel.h shim) and declares the few entry points LIBAPI.H
+ * omits. C runtime declarations stay
  * in psyq/libc.h so only their callers include MEMORY.H and MALLOC.H.
  */
 #include <sys/types.h>
