@@ -1,7 +1,8 @@
 /*
- * VS.EXE: keyframe vertex arithmetic (WIP module). The sum and the vertex
- * list copy are ST.EXE's (src/lib/anim_vertices.inc, shared with
- * src/st/anim.c); the difference is VS's copy of ST's vertices_sub.
+ * VS.EXE: keyframe vertex arithmetic (WIP module). The sum, the vertex
+ * list copy and the list additions are ST.EXE's (src/lib/anim_vertices.inc
+ * and anim_vertex_list.inc, shared with src/st/anim.c); the difference is
+ * VS's copy of ST's vertices_sub, the indexed list lookup VS's own.
  */
 #include <kf/lib/address.h>
 #include <kf/lib/null.h>
@@ -33,38 +34,7 @@ void func_80027c64(SVECTOR *dst, SVECTOR *from, SVECTOR *to, int count)
 
 #include "../lib/anim_vertices.inc"
 
-/* dst = a + the vertices of the count-prefixed list b. */
-ADDRESS(0x80027dbc, 0x84)
-void func_80027dbc(SVECTOR *dst, SVECTOR *a, short *b)
-{
-    int count = *b;
-
-    b += 2;
-    while (count--) {
-        dst->vx = a->vx + b[0];
-        dst->vy = a->vy + b[1];
-        dst->vz = a->vz + b[2];
-        b += 4;
-        dst++;
-        a++;
-    }
-}
-
-/* dst += the vertices of the count-prefixed list src. */
-ADDRESS(0x80027e40, 0x74)
-void func_80027e40(SVECTOR *dst, short *src)
-{
-    int count = *src;
-
-    src += 2;
-    while (count--) {
-        dst->vx += src[0];
-        dst->vy += src[1];
-        dst->vz += src[2];
-        src += 4;
-        dst++;
-    }
-}
+#include "../lib/anim_vertex_list.inc"
 
 /*
  * The entry `index` of a count-prefixed list of three-halfword entries,

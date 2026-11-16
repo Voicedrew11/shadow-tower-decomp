@@ -70,49 +70,7 @@ void vertices_sub(SVECTOR *dst, SVECTOR *from, SVECTOR *to, int count)
 
 #include "../lib/anim_vertices.inc"
 
-/*
- * dst = a + the vertices of the count-prefixed list b.
- *
- * Not exact (96.7%, size-exact): retail sets up b's second pointer after
- * dst's and loads b's halfword before a's in each sum; this build sets it
- * up first and loads a's first.
- */
-ADDRESS(0x80033bdc, 0x84)
-void vertex_list_add(SVECTOR *dst, SVECTOR *a, short *b)
-{
-    int count = *b;
-
-    b += 2;
-    while (count--) {
-        dst->vx = a->vx + b[0];
-        dst->vy = a->vy + b[1];
-        dst->vz = a->vz + b[2];
-        dst++;
-        a++;
-        b += 4;
-    }
-}
-
-/*
- * dst += the vertices of the count-prefixed list src.
- *
- * Not exact (99.3%, size-exact): retail sets up dst's second pointer
- * before src's; this build the other way round.
- */
-ADDRESS(0x80033c60, 0x74)
-void vertex_list_accumulate(SVECTOR *dst, short *src)
-{
-    int count = *src;
-
-    src += 2;
-    while (count--) {
-        dst->vx += src[0];
-        dst->vy += src[1];
-        dst->vz += src[2];
-        dst++;
-        src += 4;
-    }
-}
+#include "../lib/anim_vertex_list.inc"
 
 /* dst += the list's vertices scaled by p / 4096 (LIBGTE gteMIMefunc). */
 ADDRESS(0x80033cd4, 0x28)
