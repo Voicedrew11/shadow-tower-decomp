@@ -53,8 +53,8 @@ extern StLightInit DAT_8007f78c[64];
 
 /* Not reconstructed yet (0x80049aac..0x8004a888). */
 void func_80049aac(StLight *light, StLightMatrix *out, int index);
-int func_8004a830(int from, int to, short t);
-void func_8004a888(StLightMatrix *out, StLightMatrix *to, StLightMatrix *from, short t);
+int func_8004a830(int from, int to, int t);
+void func_8004a888(StLightMatrix *a, StLightMatrix *b, StLightMatrix *out, short t);
 
 /* src/st/light.c */
 void lighting_load_defaults(void);
