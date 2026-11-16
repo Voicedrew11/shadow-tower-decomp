@@ -996,11 +996,6 @@ VS.EXE	0x800352cc	func_800352cc			unknown		address-only	candidate	mips-live-in-h
 VS.EXE	0x800352fc	func_800352fc			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
 VS.EXE	0x800353d0	func_800353d0			unknown	unknown *object;unknown arg1;unknown *pointer2;unknown *pointer3	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
 VS.EXE	0x80035b68	func_80035b68			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-VS.EXE	0x8003955c	func_8003955c			void	unknown arg0;unknown arg1;unknown arg2	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-VS.EXE	0x8003af7c	func_8003af7c			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-VS.EXE	0x8003c1ec	func_8003c1ec			void	unknown arg0;unknown arg1	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-VS.EXE	0x8003e6bc	func_8003e6bc			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-VS.EXE	0x8003eb4c	func_8003eb4c			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
 END.EXE	0x80011fa8	clear_vram			void		supported	proven	asm;callers;src/end/main.c end.main	clears all of VRAM to black
 END.EXE	0x80011ffc	cd_read_sectors			void	CdlLOC *loc;u_long *buf;int sectors	supported	proven	asm;callers;src/end/main.c end.main	double-speed CdRead of a sector count, retried until complete
 END.EXE	0x800120d0	load_st_file			int	u_long *buf;char *name;int size	supported	proven	asm;callers;src/end/main.c end.main	reads \ST\<name>;1 into buf (whole file when size is 0)
