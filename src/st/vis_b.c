@@ -133,7 +133,7 @@ Vis88 *func_8004f994(int start, int n, int now)
         if (e->unk0a == 0xffff)
             return e;
         if (now != -1) {
-            age = now - *(u16 *)&e->unk4C;
+            age = now - *(u16 *)&e->unk4A.snd.unk4C;
             if (age < 0)
                 age += 0x10000;
             if (oldest < age)
@@ -167,7 +167,7 @@ void func_8004fa38(key)
         case '_':
             if (e->unk48 == key) {
                 e->unk0C = 1;
-                ((u8 *)&e->unk4E)[1] = ((u8 *)&e->unk4E)[1] == 0;
+                ((u8 *)&e->unk4A.snd.unk4E)[1] = ((u8 *)&e->unk4A.snd.unk4E)[1] == 0;
             }
             break;
         case 'X':
@@ -177,13 +177,13 @@ void func_8004fa38(key)
             }
             break;
         case 'Q':
-            if (e->unk4D == key)
+            if (e->unk4A.snd.unk4D == key)
                 e->unk48 = e->unk48 ? 0 : 0xff;
             break;
         case 'R':
         case 'U':
         case 'Z':
-            if (((u8 *)&e->unk4E)[1] == key)
+            if (((u8 *)&e->unk4A.snd.unk4E)[1] == key)
                 e->unk48 = e->unk48 ? 0 : 0xff;
             break;
         case 'Y':
@@ -191,7 +191,7 @@ void func_8004fa38(key)
                 e->unk0C = 1;
             break;
         case 'V':
-            if (e->unk4A == key)
+            if (e->unk4A.snd.unk4A == key)
                 e->unk49 = e->unk49 ? 0 : 0xff;
             break;
         }
@@ -212,10 +212,10 @@ int func_8004fb88(Vis88 *e, int id)
     case 52:
         if (e->unk0C != 0)
             return 0;
-        if (((u8 *)&e->unk4E)[1] >= 0xfe)
+        if (((u8 *)&e->unk4A.snd.unk4E)[1] >= 0xfe)
             return 2;
-        if (((u8 *)&e->unk4E)[1] == id - 272) {
-            ((u8 *)&e->unk4E)[1] = 0xff;
+        if (((u8 *)&e->unk4A.snd.unk4E)[1] == id - 272) {
+            ((u8 *)&e->unk4A.snd.unk4E)[1] = 0xff;
             return 1;
         }
         return 3;

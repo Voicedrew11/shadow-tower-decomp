@@ -16,6 +16,18 @@
 /* 0x801b5948: the source id list vis_collect_sources fills and the visible id
  * list vis_build_visible builds from it; vis_record_is_visible/vis_id_is_visible search the
  * visible list. */
+/* The request fields VisLists starts with, as a stack request (src/st/item.c,
+ * func_80053aa4 in src/st/vis_c_run.c). */
+typedef struct {
+    s32 unk0;
+    VECTOR unk4;
+    SVECTOR unk14;
+    u16 unk1C;
+    u16 unk1E;
+    s16 unk20;
+    s16 unk22;
+} VisRequest;
+
 typedef struct {
     s32 unk0;            /* 0x00: the kind of the request func_80049544 takes */
     VECTOR unk4;         /* 0x04: its position */
@@ -163,7 +175,9 @@ typedef struct {
     u32 unk3C;           /* 0x3c: squared distance */
     s32 unk40;           /* 0x40: horizontal distance */
     s32 unk44;
-    u8 unk48[4];
+    u8 unk48;
+    u8 unk49;            /* 0x49: 106 + the table B entry func_800549c8 spawned */
+    u8 unk4A[2];
     s32 unk4C;           /* 0x4c: height above the floor */
     s32 unk50;           /* 0x50: request kind bits */
     u16 unk54;
@@ -199,6 +213,16 @@ typedef struct {
     u8 unkB4[0x20];
 } Vis212;
 
+/* An entry of a Vis192 record's unk60 list (func_8004b1e8). */
+typedef struct {
+    u8 unk0;             /* 0x0: id */
+    u8 unk1;             /* 0x1: animation (Vis212.unk08) */
+    u8 unk2[3];
+    u8 unk5;             /* 0x5: sound */
+    u8 unk6[6];
+    s16 unkC;            /* 0xc: step of Vis212.unk2A per frame */
+} VisAnim;
+
 /* 0x3500 of VisTableA: 192-byte records. */
 typedef struct {
     u8 unk00;            /* 0x00: 0xff ends the records (func_8004e8ec) */
@@ -209,7 +233,8 @@ typedef struct {
     u8 unk05;
     u8 unk06[2];
     u8 unk08;
-    u8 unk09[5];
+    u8 unk09;            /* 0x09: its XA stream file (src/st/xa.c) */
+    u8 unk0A[4];
     s16 unk0E;           /* 0x0e: gravity */
     u16 unk10;           /* 0x10: map bit, 0xffff none */
     u16 unk12;           /* 0x12: added to vis_table_a.unk612C while live */
@@ -271,8 +296,8 @@ typedef struct {
     u8 unk07;
     u16 unk08;
     u16 unk0a;           /* 0x0a: index of its 24-byte VisTableB record */
-    u16 unk0C;           /* 0x0c: state of a moving entry (func_8004fdd0) */
-    u8 unk0E[2];
+    u16 unk0C;           /* 0x0c: state of a moving entry (func_8004fdd0); 0xff once opened (src/st/save.c) */
+    u16 unk0E;
     u16 unk10;           /* 0x10 */
     u16 unk12;           /* 0x12: height */
     s16 unk14;           /* 0x14: OT depth bias */
@@ -280,7 +305,7 @@ typedef struct {
     u32 unk18;           /* 0x18: squared distance */
     s32 unk1C;           /* 0x1c: distance (sound type 236) */
     u16 unk20;           /* 0x20: facing */
-    u8 unk22[2];
+    u16 unk22;           /* 0x22: a door's opening angle (src/st/item.c) */
     VECTOR unk24;        /* 0x24: position */
     u16 unk34;           /* 0x34: rotation */
     s16 unk36;           /* 0x36: yaw */
@@ -290,11 +315,23 @@ typedef struct {
     u8 unk44[4];         /* 0x44 */
     u8 unk48;            /* 0x48: sound area width (2048 units) */
     u8 unk49;            /* 0x49: sound area depth */
-    u8 unk4A;            /* 0x4a: sound id */
-    u8 unk4B;            /* 0x4b: volume */
-    u8 unk4C;            /* 0x4c: fade range */
-    u8 unk4D;            /* 0x4d: sound flags */
-    u16 unk4E;           /* 0x4e: repeat period */
+    /* 0x4a: by kind: a sound source's sound (src/st/objects.c) or the record
+     * swap and open state of a door (src/st/save.c) */
+    union {
+        struct {
+            u8 unk4A;    /* 0x4a: sound id */
+            u8 unk4B;    /* 0x4b: volume */
+            u8 unk4C;    /* 0x4c: fade range */
+            u8 unk4D;    /* 0x4d: sound flags */
+            u16 unk4E;   /* 0x4e: repeat period */
+        } snd;
+        struct {
+            u16 unk4A;   /* 0x4a: first record of one swap range */
+            u16 unk4C;   /* 0x4c: first record of the other */
+            u8 unk4E;    /* 0x4e: records to swap */
+            u8 unk4F;    /* 0x4f: state, 0xff idle */
+        } door;
+    } unk4A;
     s32 unk50;           /* 0x50: next tick to play; other kinds keep halfwords here */
     s16 unk54;           /* 0x54: playing voice, -1 none */
     s16 unk56;
@@ -508,7 +545,7 @@ void func_80052c5c(void);
 int func_80052d40(int id);
 void func_80052d98(u16 *id);
 void func_80052e50(Vis48 *c);
-int func_80053174(VisLists *req);
+int func_80053174(VisLists *req, int unused);
 
 /* 0x8005335c: no source yet. */
 void func_8005335c(Vis48 *c, int arg1);

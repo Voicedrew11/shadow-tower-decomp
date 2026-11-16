@@ -178,20 +178,39 @@ typedef struct {
 
 /* Per-area counts read by the map page (byte +0x16e4 onwards); WIP extent. */
 typedef struct {
-    u8 unk0[0x1440];
+    /* 0x0..0x1440: per area (48), one bit per table A entry, table C slot 32..63
+     * and three bits per table B entry (src/st/save.c) */
+    u32 unk0[48][2];
+    u32 unk180[48][1];
+    u32 unk240[48][8];
+    u32 unk840[48][8];
+    u32 unkE40[48][8];
     u32 unk1440;         /* 0x1440: flag bits; 13 and 17 gate func_80044404's images */
-    u8 unk1444[0x14a8 - 0x1444];
+    u32 unk1444;
+    u8 unk1448[48];      /* 0x1448: per XA stream file, the next channel to play */
+    u8 unk1478[48];
     u32 unk14A8[0x5c];   /* 0x14a8: one bit per map id (func_800241d0) */
     CdlLOC unk1618[40];  /* 0x1618: the XA stream positions func_80044674 searches */
-    u8 unk16B8[0x16e4 - 0x16b8];
-    u8 unk16E4[44];      /* by area */
+    u8 unk16B8[0x16dc - 0x16b8];
+    u8 unk16DC;          /* 0x16dc: the byte DAT_801cd0e4 names; the new-game reset
+                          * (func_800559bc) clears it through this object's base */
+    u8 unk16DD[3];
+    s32 unk16E0;         /* 0x16e0: save id, -1 until the first save (src/st/save.c) */
+    u8 unk16E4[48];      /* by area */
 } Data801cba08;
 extern Data801cba08 DAT_801cba08;
+/* 0x801cd0e0: the examine/item-use result (0 none, 1 done, 2 nothing to use;
+ * src/st/item.c). Retail addresses it only as its own scalar. */
+extern s32 DAT_801cd0e0;
 
-/* Nonzero runs the warp func_80052c5c after the table A pass. It lies inside
- * DAT_801cba08's WIP view (+0x16dc); whether it is a field of that object or
- * its own global is unresolved. */
+/* Nonzero runs the warp func_80052c5c after the table A pass (func_8004e324;
+ * func_80052c5c clears it). It is DAT_801cba08.unk16DC: band M's code
+ * addresses it directly, the new-game reset (func_800559bc) through the
+ * DAT_801cba08 base, which only the field spelling reproduces. Whether it
+ * belongs to that object is unresolved; the identity stays separate because
+ * DAT_801cba08's WIP extent stops at DAT_801cceb0. */
 extern u8 DAT_801cd0e4;
+
 
 /* .sbss words the map page reads with lui; their owner is unknown. */
 extern s32 DAT_8008818c;

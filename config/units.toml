@@ -392,6 +392,60 @@ source = "src/st/vis_c_run.c"
 profile = "probe-gcc272cdk-o2-g0"
 
 [[unit]]
+unit = "st.vis_move"
+image = "ST.EXE"
+source = "src/st/vis_move.c"
+profile = "probe-gcc272cdk-o2-g0"
+
+[[unit]]
+unit = "st.xa"
+image = "ST.EXE"
+source = "src/st/xa.c"
+profile = "probe-gcc272cdk-o2-g0"
+
+[[unit]]
+unit = "st.xa_play"
+image = "ST.EXE"
+source = "src/st/xa_play.c"
+profile = "probe-gcc272cdk-o2-g8"
+
+[[unit]]
+unit = "st.item_spawn"
+image = "ST.EXE"
+source = "src/st/item_spawn.c"
+profile = "probe-gcc272cdk-o2-g0"
+
+[[unit]]
+unit = "st.item"
+image = "ST.EXE"
+source = "src/st/item.c"
+profile = "probe-gcc272cdk-o2-g0"
+
+[[unit]]
+unit = "st.save_counts"
+image = "ST.EXE"
+source = "src/st/save_counts.c"
+profile = "probe-gcc272cdk-o2-g0"
+
+[[unit]]
+unit = "st.save"
+image = "ST.EXE"
+source = "src/st/save.c"
+profile = "probe-gcc272cdk-o2-g0"
+
+[[unit]]
+unit = "st.save_io"
+image = "ST.EXE"
+source = "src/st/save_io.c"
+profile = "probe-gcc272cdk-o2-g0"
+
+[[unit]]
+unit = "st.pad"
+image = "ST.EXE"
+source = "src/st/pad.c"
+profile = "probe-gcc272cdk-o2-g0"
+
+[[unit]]
 unit = "title.main"
 image = "TITLE.EXE"
 source = "src/title/main.c"

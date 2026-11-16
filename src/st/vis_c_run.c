@@ -13,17 +13,6 @@
 
 JUMPTABLES(0x80012738, 0x14)
 
-/* The leading fields of a VisLists request (func_80048ad0). */
-typedef struct {
-    s32 unk0;
-    VECTOR unk4;
-    SVECTOR unk14;
-    u16 unk1C;
-    u16 unk1E;
-    s16 unk20;
-    s16 unk22;
-} VisRequest;
-
 /* The per-frame table C pass: drops fall and bounce, a pick-up runs.
  * Not exact: retail keeps the entry pointer in s1 and the record/height in
  * s2; this build swaps them (16 words). */

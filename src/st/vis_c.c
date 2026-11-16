@@ -285,7 +285,7 @@ void func_80052f30(VisCFileEntry *src)
 /* The nearest lying item in view of the viewer within the request's reach
  * (its record's radius plus req->unk1C); -1 when none. */
 ADDRESS(0x80053174, 0x1e8)
-int func_80053174(VisLists *req)
+int func_80053174(VisLists *req, int unused)
 {
     Vis48 *c;
     Vis44 *rec;

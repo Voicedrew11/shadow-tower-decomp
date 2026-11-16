@@ -176,12 +176,12 @@ void func_800246e4(void)
             if (func_8004fc94(e->unk24.vx >> 12, e->unk24.vz >> 12, e->unk48, e->unk49, 0x8000)) {
                 if ((s32)(e->unk50 - now) >= 0)
                     continue;
-                if (e->unk4D & 2)
-                    e->unk50 = now + (e->unk4E * 6 + (rand() >> 8));
-                if (e->unk4D & 4)
-                    e->unk50 = now + (e->unk4E * 6 + (rand() >> 6));
+                if (e->unk4A.snd.unk4D & 2)
+                    e->unk50 = now + (e->unk4A.snd.unk4E * 6 + (rand() >> 8));
+                if (e->unk4A.snd.unk4D & 4)
+                    e->unk50 = now + (e->unk4A.snd.unk4E * 6 + (rand() >> 6));
                 else
-                    e->unk50 = now + e->unk4E * 6;
+                    e->unk50 = now + e->unk4A.snd.unk4E * 6;
                 range = e->unk48 << 11;
                 d = viewer.x - (e->unk24.vx + range);
                 if (d < 0)
@@ -194,34 +194,34 @@ void func_800246e4(void)
                 dz = range - dz;
                 if (dz < d)
                     d = dz;
-                volume = e->unk4C << 12;
+                volume = e->unk4A.snd.unk4C << 12;
                 if (d >= volume) {
-                    volume = e->unk4B;
+                    volume = e->unk4A.snd.unk4B;
                 } else {
                     if (volume == 0)
                         continue;
-                    volume = e->unk4B * d / volume;
+                    volume = e->unk4A.snd.unk4B * d / volume;
                 }
-                if (e->unk4D & 1) {
+                if (e->unk4A.snd.unk4D & 1) {
                     int dy = viewer.y - e->unk24.vy;
 
                     if (dy < 0)
                         dy = -dy;
-                    dy = e->unk4B * dy >> 13;
+                    dy = e->unk4A.snd.unk4B * dy >> 13;
                     volume -= dy;
                 }
                 if (volume < 20)
                     continue;
                 if (e->unk54 != -1) {
-                    func_8005850c(e->unk54, e->unk4A + 208);
+                    func_8005850c(e->unk54, e->unk4A.snd.unk4A + 208);
                     e->unk54 = -1;
                 }
-                e->unk54 = func_800582f0(e->unk4A + 208, volume);
+                e->unk54 = func_800582f0(e->unk4A.snd.unk4A + 208, volume);
             } else {
-                e->unk50 = now + e->unk4E * 6;
+                e->unk50 = now + e->unk4A.snd.unk4E * 6;
                 if (e->unk54 == -1)
                     continue;
-                func_8005850c(e->unk54, e->unk4A + 208);
+                func_8005850c(e->unk54, e->unk4A.snd.unk4A + 208);
                 e->unk54 = -1;
             }
             break;
@@ -230,37 +230,37 @@ void func_800246e4(void)
             if (func_8004fd28(e->unk24.vx, e->unk24.vz, e->unk48 << 8, e->unk49 << 8, 0x8000)) {
                 if ((s32)(e->unk50 - now) >= 0)
                     continue;
-                if (e->unk4D & 2)
-                    e->unk50 = now + (e->unk4E * 60 + (rand() >> 11));
-                if (e->unk4D & 4)
-                    e->unk50 = now + (e->unk4E * 60 + (rand() >> 9));
+                if (e->unk4A.snd.unk4D & 2)
+                    e->unk50 = now + (e->unk4A.snd.unk4E * 60 + (rand() >> 11));
+                if (e->unk4A.snd.unk4D & 4)
+                    e->unk50 = now + (e->unk4A.snd.unk4E * 60 + (rand() >> 9));
                 else
-                    e->unk50 = now + e->unk4E * 60;
-                inner = (outer = e->unk48 << 7) - (e->unk4C << 7);
+                    e->unk50 = now + e->unk4A.snd.unk4E * 60;
+                inner = (outer = e->unk48 << 7) - (e->unk4A.snd.unk4C << 7);
                 if (e->unk1C >= inner && outer != inner)
-                    volume = e->unk4B * (outer - e->unk1C) / (outer - inner);
+                    volume = e->unk4A.snd.unk4B * (outer - e->unk1C) / (outer - inner);
                 else
-                    volume = e->unk4B;
-                if (e->unk4D & 1) {
+                    volume = e->unk4A.snd.unk4B;
+                if (e->unk4A.snd.unk4D & 1) {
                     int dy = viewer.y - e->unk24.vy;
 
                     if (dy < 0)
                         dy = -dy;
-                    dy = e->unk4B * dy >> 13;
+                    dy = e->unk4A.snd.unk4B * dy >> 13;
                     volume -= dy;
                 }
                 if (volume < 20)
                     continue;
                 if (e->unk54 != -1) {
-                    func_8005850c(e->unk54, e->unk4A + 1108);
+                    func_8005850c(e->unk54, e->unk4A.snd.unk4A + 1108);
                     e->unk54 = -1;
                 }
-                e->unk54 = func_800582f0(e->unk4A + 1108, volume);
+                e->unk54 = func_800582f0(e->unk4A.snd.unk4A + 1108, volume);
             } else {
-                e->unk50 = now + e->unk4E * 60;
+                e->unk50 = now + e->unk4A.snd.unk4E * 60;
                 if (e->unk54 == -1)
                     continue;
-                func_8005850c(e->unk54, e->unk4A + 1108);
+                func_8005850c(e->unk54, e->unk4A.snd.unk4A + 1108);
                 e->unk54 = -1;
             }
             break;

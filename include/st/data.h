@@ -9,6 +9,7 @@
 #include <kf/lib/types.h>
 #include <sys/types.h>
 #include <LIBGTE.H>
+#include <LIBCD.H>
 #include <st/memory.h>
 #include <st/gfx.h>
 
@@ -148,9 +149,12 @@ typedef struct {
     s16 unk1D0;
     u8 unk1D2[2];
     u8 unk1D4[4];        /* 0x1d4: per slot/hand: sound id */
-    u8 unk1D8[0x1e4 - 0x1d8];
+    CdlLOC unk1D8;       /* 0x1d8: XA stream start position (src/st/xa.c) */
+    CdlLOC unk1DC;       /* 0x1dc: its current position */
+    s32 unk1E0;          /* 0x1e0: its length in sectors */
     u8 unk1E4;
-    u8 unk1E5[0x1ec - 0x1e5];
+    u8 unk1E5[3];
+    u32 unk1E8;          /* 0x1e8: cd_state.unk4 when the stream started */
     s32 unk1EC[5];       /* 0x1ec: frames left to show unk20C[i] */
     u8 unk200[0x20c - 0x200];
     s16 unk20C[5];       /* 0x20c: numbers func_80026a88 queues */
@@ -249,10 +253,16 @@ typedef struct {
 /* The current area's handlers (area_state.unkC); called without arguments
  * unless noted. WIP extent. */
 typedef struct {
-    u8 unk00[0x20];
+    void (*unk0)();      /* 0x00: called by func_80055374 with (position, facing) */
+    void (*unk4)(void);  /* 0x04: per frame (func_8005735c) */
+    u8 unk08[0x18 - 0x08];
+    void (*unk18)(int);  /* 0x18: item id rose by one (func_80055300) */
+    u8 unk1C[0x20 - 0x1c];
     void (*unk20)(void *entry, void *record); /* 0x20: a table B entry kind func_8004eebc does not know */
     void (*unk24)(void);
-    u8 unk28[0x40 - 0x28];
+    u8 unk28[0x30 - 0x28];
+    void (*unk30)();     /* 0x30: item use hook */
+    u8 unk34[0x40 - 0x34];
     void (*unk40)(void); /* 0x40: per table A entry, every fourth frame (func_8004e324) */
     void (*unk44)(void); /* 0x44: per table A entry, every frame */
 } AreaHooks;
@@ -299,28 +309,44 @@ typedef struct {
 /* The counts of the 314 table C ids, then a halfword id table. */
 typedef struct {
     Count801c7590 counts[314];
-    u16 unk13A[23];      /* 0x13a: ids the item list screens show */
+    u16 unk13A[14];      /* 0x13a: ids the item list screens show */
+    u8 unk156[14];       /* 0x156: their stock (src/st/save.c) */
+    u8 unk164[4];
 } Data801c7590;
 extern Data801c7590 DAT_801c7590;
 
 extern u32 DAT_801cceb0[2][5];
 
 typedef struct {
-    u8 unk0[2];
+    u16 unk0;            /* 0x00: unk2 of the previous frame (src/st/pad.c) */
     u16 unk2;            /* 0x02: held bits */
     u16 unk4;            /* 0x04: page bits func_8002fc4c consumes; request bits func_8003f4ec clears */
-    u8 unk6[0x10 - 0x6];
+    u16 unk6;            /* 0x06..0x0c: src/st/pad.c's repeat and combination words */
+    u16 unk8;
+    u16 unkA;
+    u16 unkC;
+    u8 unkE;             /* 0x0e: 1 while the controller is disconnected */
+    u8 unkF;
     u8 unk10;
     u8 unk11;
     u8 unk12;            /* 0x12 */
     u8 unk13;
     u8 unk14;            /* 0x14: request func_80042900 consumes */
-    u8 unk15[0x22 - 0x15];
-    /* 0x22: twelve button masks tested against unk2 (held) / unk4 (pressed):
-     * the settings page lists them in two columns of six (func_8002b84c).
-     * [2]/[3] and [6]/[7] turn the view (func_80041d4c); [8] is slot 0's
-     * request bit, [9] the other slots' (func_8003f4ec); [10] equip.c. */
+    /* 0x15..0x17: written by the vsync-time pad update; every access reloads them */
+    volatile u8 unk15;   /* 0x15: last PadGetState(0) */
+    volatile u8 unk16;   /* 0x16: disconnected since the last stable state */
+    volatile u8 unk17;   /* 0x17: PadStateFindPad seen; actuator alignment pending */
+    u8 unk18;            /* 0x18: PadInfoAct(0, -1, 0) */
+    u8 unk19;            /* 0x19: frames of vibration left */
+    u8 unk1A[6];         /* 0x1a: PadSetActAlign data */
+    u8 unk20[2];
+    /* 0x22: twelve button masks tested against unk2 (held) / unk4 (pressed),
+     * set by func_800573bc: the settings page lists them in two columns of
+     * six (func_8002b84c). [2]/[3] and [6]/[7] turn the view (func_80041d4c);
+     * [8] is slot 0's request bit, [9] the other slots' (func_8003f4ec);
+     * [10] equip.c. */
     u16 unk22[12];
+    u16 unk3A;           /* 0x3a: unk22[8] | unk22[9] | unk22[10] | unk22[11] */
 } Data801cd180;
 extern Data801cd180 DAT_801cd180;
 
