@@ -529,8 +529,15 @@ def check(
             reasons.append("target relink or section placement is not faithful to retail")
         print("check FAILED: " + ", ".join(reasons), file=sys.stderr)
         return 1
-    print("check OK: exact claimed data, verified target relink, no known-reference ownership gaps, "
-          "and no unchanged-input regressions or lost banked functions")
+    skipped = len(selected) - len(gated)
+    if gated:
+        verified = (f"verified target relink and no known-reference ownership gaps in "
+                    f"{len(gated)} gated image(s)")
+    else:
+        verified = "no image gated for target relink or ownership closure"
+    print(f"check OK: exact claimed data, {verified}"
+          + (f" ({skipped} image(s) without source units not gated)" if skipped else "")
+          + ", and no unchanged-input regressions or lost banked functions")
     return 0
 
 
