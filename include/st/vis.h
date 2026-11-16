@@ -153,7 +153,9 @@ typedef struct {
     u32 unk3C;           /* 0x3c: squared distance */
     s32 unk40;
     s32 unk44;
-    u8 unk48[4];
+    u8 unk48;
+    u8 unk49;            /* 0x49: 106 + the table B entry func_800549c8 spawned */
+    u8 unk4A[2];
     s32 unk4C;           /* 0x4c: height above the floor */
     s32 unk50;           /* 0x50: request kind bits */
     u16 unk54;
@@ -186,12 +188,24 @@ typedef struct {
     u8 unkB4[0x20];
 } Vis212;
 
+/* An entry of a Vis192 record's unk60 list (func_8004b1e8). */
+typedef struct {
+    u8 unk0;             /* 0x0: id */
+    u8 unk1;             /* 0x1: animation (Vis212.unk08) */
+    u8 unk2[3];
+    u8 unk5;             /* 0x5: sound */
+    u8 unk6[6];
+    s16 unkC;            /* 0xc: step of Vis212.unk2A per frame */
+} VisAnim;
+
 /* 0x3500 of VisTableA: 192-byte records. */
 typedef struct {
     u8 unk00;
     u8 unk01[4];
     u8 unk05;
-    u8 unk06[8];
+    u8 unk06[3];
+    u8 unk09;            /* 0x09: its XA stream file (src/st/xa.c) */
+    u8 unk0A[4];
     s16 unk0E;           /* 0x0e: gravity */
     u16 unk10;           /* 0x10: map bit, 0xffff none */
     u16 unk12;           /* 0x12: added to vis_table_a.unk612C while live */

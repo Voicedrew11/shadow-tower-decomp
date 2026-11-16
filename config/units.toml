@@ -428,6 +428,30 @@ source = "src/st/vis_item.c"
 profile = "probe-gcc272cdk-o2-g0"
 
 [[unit]]
+unit = "st.vis_move"
+image = "ST.EXE"
+source = "src/st/vis_move.c"
+profile = "probe-gcc272cdk-o2-g0"
+
+[[unit]]
+unit = "st.xa"
+image = "ST.EXE"
+source = "src/st/xa.c"
+profile = "probe-gcc272cdk-o2-g0"
+
+[[unit]]
+unit = "st.xa_play"
+image = "ST.EXE"
+source = "src/st/xa_play.c"
+profile = "probe-gcc272cdk-o2-g8"
+
+[[unit]]
+unit = "st.pad"
+image = "ST.EXE"
+source = "src/st/pad.c"
+profile = "probe-gcc272cdk-o2-g0"
+
+[[unit]]
 unit = "title.main"
 image = "TITLE.EXE"
 source = "src/title/main.c"

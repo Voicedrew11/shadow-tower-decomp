@@ -159,9 +159,17 @@ typedef struct {
 
 /* Per-area counts read by the map page (byte +0x16e4 onwards); WIP extent. */
 typedef struct {
-    u8 unk0[0x1440];
+    /* 0x0..0x1440: per area (48), one bit per table A entry, table C slot 32..63
+     * and three bits per table B entry (src/st/save.c) */
+    u32 unk0[48][2];
+    u32 unk180[48][1];
+    u32 unk240[48][8];
+    u32 unk840[48][8];
+    u32 unkE40[48][8];
     u32 unk1440;         /* 0x1440: flag bits; 13 and 17 gate func_80044404's images */
-    u8 unk1444[0x14a8 - 0x1444];
+    u32 unk1444;
+    u8 unk1448[48];      /* 0x1448: per XA stream file, the next channel to play */
+    u8 unk1478[48];
     u32 unk14A8[0x5c];   /* 0x14a8: one bit per map id (func_800241d0) */
     CdlLOC unk1618[40];  /* 0x1618: the XA stream positions func_80044674 searches */
     u8 unk16B8[0x16e4 - 0x16b8];
