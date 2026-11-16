@@ -9,6 +9,27 @@ PSX.EXE	0x80010398	0x4	next_program	global	load	u8 *	main	supported	asm;src/psx/
 PSX.EXE	0x8001039c	0x4	PTR_8001039c	global	load	u8 *	main	supported	asm;src/psx/main.c psx.main exact	$gp+8; points at 0x800103f1, cleared at start
 PSX.EXE	0x800103a0	0x4	PTR_800103a0	global	load	u8 *	main	supported	asm;src/psx/main.c psx.main exact	$gp+12; points at 0x800103f2, cleared at start
 PSX.EXE	0x800103b0	0x3c	program_header	global	bss	struct EXEC	main	supported	asm;src/psx/main.c psx.main exact	Load()/Exec() header; inside the cleared .bss 0x800103a8..0x800103f0
+STR.EXE	0x8003288c	0x4	next_program	global	load	u8 *	main	supported	asm;src/str/main.c str.main	$gp+0; points at PSX.EXE next-program byte 0x800103f0
+STR.EXE	0x80032890	0x4	PTR_80032890	global	load	u8 *	main	supported	asm;src/str/main.c str.main	$gp+4; points at 0x800103f1, set to 1 by main
+STR.EXE	0x80032894	0x4	demo_flag	global	load	u8 *	main	supported	asm;src/str/main.c str.main	$gp+8; points at 0x800103f2: clear plays the intro movies and sets it, set plays DEMO.STR and clears it
+STR.EXE	0x80032898	0x4	movie_width	global	load	int	strNext	supported	asm;src/str/main.c str.main	$gp+12; current STR frame width
+STR.EXE	0x8003289c	0x4	movie_height	global	load	int	strNext	supported	asm;src/str/main.c str.main	$gp+16; current STR frame height
+STR.EXE	0x800328f8	0x6	pad_align	static	bss	u_char[6]	pad_set_align	supported	asm;src/str/main.c str.main	.sbss; $gp+108; PadSetActAlign data
+STR.EXE	0x80032900	0x4	movie_ended	static	bss	int	strNext	supported	asm;src/str/main.c str.main	.sbss; $gp+116; end frame reached or START pressed
+STR.EXE	0x80032904	0x2	agetec_mode	static	bss	u_short	play_movie	supported	asm;src/str/main.c str.main	.sbss; $gp+120; set by main while AGETEC.STR plays (no START skip)
+STR.EXE	0x80032906	0x2	end_frame	static	bss	u_short	strNext	supported	asm;src/str/main.c str.main	.sbss; $gp+122; stream frame that ends the current movie
+STR.EXE	0x80032918	0x38	dec	static	bss	DECENV	strCallback	supported	asm;src/str/main.c str.main	movie decode environment; the only fixed .bss of the unit
+STR.EXE	0x80032950	0x50000	vlc_buffer	global	bss	u_long[2][40960]	strSetDefDecEnv	supported	asm;src/str/main.c str.main	DecDCTvlc output buffers; COMMON in hash-bucket order (WIP spelling fits it)
+STR.EXE	0x80082950	0x20000	ring_buffer	global	bss	u_long[0x8000]	strInit	supported	asm;src/str/main.c str.main	StSetRing buffer (32 sectors); WIP extent up to blend_buffer; COMMON in hash-bucket order (WIP spelling fits it)
+STR.EXE	0x800a2950	0x1e00	blend_buffer	global	bss	u_long[0x780]	play_movie	supported	asm;src/str/main.c str.main	StoreImage2 copy of the DEMO.STR title area, blended with D_TITLE.TIM; WIP extent up to tim_buf; COMMON in hash-bucket order (WIP spelling fits it)
+STR.EXE	0x800a4750	0x20000	tim_buf	global	bss	u_long[0x8000]	play_movie	supported	asm;src/str/main.c str.main	D_TITLE.TIM and FLOGO320.TIM load buffer; WIP extent up to display; COMMON in hash-bucket order (WIP spelling fits it)
+STR.EXE	0x800c4750	0xe4	display	global	bss	DisplayBuffers	main	supported	asm;src/str/main.c str.main	two DISPENVs, two DRAWENVs and an id; COMMON in hash-bucket order (WIP spelling fits it)
+STR.EXE	0x800c4838	0x2000	poison_image	global	bss	u_long[0x800]	play_movie	supported	asm;src/str/main.c str.main	POISON.TIM load buffer; WIP extent up to pad_data; COMMON in hash-bucket order (WIP spelling fits it)
+STR.EXE	0x800c6838	0x4c	pad_data	global	bss	PadData	pad_init	supported	asm;src/str/main.c str.main	LIBPAD receive buffers and actuator data; COMMON in hash-bucket order (WIP spelling fits it)
+STR.EXE	0x800c6888	0x18	cdl_file	global	bss	CdlFILE	play_movie	supported	asm;src/str/main.c str.main	CdSearchFile result of the current movie; COMMON in hash-bucket order (WIP spelling fits it)
+STR.EXE	0x800c68a0	0x14	pad_info	global	bss	PadInfo	pad_read	supported	asm;src/str/main.c str.main	controller state and button words; COMMON in hash-bucket order (WIP spelling fits it)
+STR.EXE	0x800c68b8	0xb400	image_rgb	global	bss	u_long[2][5760]	strSetDefDecEnv	supported	asm;src/str/main.c str.main	24-bit DecDCTout slice buffers; COMMON in hash-bucket order (WIP spelling fits it)
+STR.EXE	0x800d1cc4	0x4	StCdIntrFlag	global	bss	int		supported	asm;PSYLINK map of the native STR link;LIBCD StCdInterrupt users	LIBCD streaming flag; strCallback clears it after StCdInterrupt
 END.EXE	0x8001d28c	0x28	staff_poly_left	global	load	POLY_FT4	play_staff_roll	supported	asm;src/end/main.c end.main	left half of a staff roll page
 END.EXE	0x8001d2b4	0x28	staff_poly_right	global	load	POLY_FT4	play_staff_roll	supported	asm;src/end/main.c end.main	right half of a staff roll page
 END.EXE	0x8001d2dc	0x38	staff_page_frames	global	load	int[7][2]	play_staff_roll	supported	asm;src/end/main.c end.main	frame after which each staff page fades in, then out

@@ -23,18 +23,19 @@ symbols or pretending that WIP names are original symbols:
 | Image | Functions | Psy-Q | Game |
 | :---- | --------: | ----: | ---: |
 | `PSX.EXE` | 11 | 10 | 1 |
-| `STR.EXE` | 322 | 290 | 32 |
+| `STR.EXE` | 322 | 302 | 20 |
 | `ST.EXE` | 1,139 | 457 | 682 |
 | `TITLE.EXE` | 387 | 353 | 34 |
 | `OPTXT.EXE` | 283 | 254 | 29 |
 | `VS.EXE` | 660 | 401 | 259 |
 | `END.EXE` | 276 | 261 | 15 |
 | 36 `FDAT_nnn.BIN` | 943 (23–37 each) | 0 | 943 |
-| **Total** | **4,021** | **2,026** | **1,995** |
+| **Total** | **4,021** | **2,038** | **1,983** |
 
 PSX.EXE `main` is reconstructed (`src/psx/main.c`) with its six data
-identities and reviewed relocations, and END.EXE's fifteen game functions
-(`src/end/main.c`) with its data; every other game identity is
+identities and reviewed relocations, END.EXE's fifteen game functions
+(`src/end/main.c`) and STR.EXE's twenty (`src/str/main.c`) with their data;
+every other game identity is
 address-only with a candidate signature from the static MIPS live-in
 heuristic (`kf inventory seed`). The tables are WIP, and the rules below
 say how they grew.
@@ -82,7 +83,12 @@ names its evidence and release.
 
 END.EXE `0x8001670c` (`StSetMask`, LIBCD member `C_010`) is too short for a
 function ID or signature; the byte-identical native relink maps it there, so
-its row's confidence is `relink-map-sdk42`.
+its row's confidence is `relink-map-sdk42`. The same holds for STR.EXE
+`0x80016c3c` (`StSetMask`) and for eleven LIBPAD starts the census had left
+as game code: `PADMAIN`'s exported `_padSetVsyncParam`, `_padInitSioMode` and
+`_padWaitRXready` and three static functions, and all five static functions
+of `PADIF` (whose only export is the `padIntFunc` data table); the
+byte-identical STR.EXE relink places each at its member offset.
 
 Not admitted: the overlays' two-instruction default handler (`jr ra; nop`),
 matched only by an old LIBSND `VM_VIB` signature, since the overlays link no
@@ -180,4 +186,4 @@ and hardware references are not auto-admitted.
 
 The inventories are intentionally iterative. Missing functions, relocations,
 data extents, and xrefs can invalidate earlier candidates without invalidating
-the workflow. Only PSX.EXE `main`'s and END.EXE's relocations are admitted so far.
+the workflow. Only PSX.EXE `main`'s, STR.EXE's and END.EXE's relocations are admitted so far.

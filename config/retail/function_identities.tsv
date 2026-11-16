@@ -4,38 +4,26 @@
 # Future analysis writes build/function-inventory proposals and never overwrites this file.
 image	va	name	owner	action	return_type	parameters	name_confidence	signature_confidence	evidence	note
 PSX.EXE	0x80010068	main			int		proven	proven	asm;called by LIBSN SNMAIN __SN_ENTRY_POINT;calls LIBSN __main	loads and executes the six programs in turn
-STR.EXE	0x80012024	func_80012024			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-STR.EXE	0x800120a0	func_800120a0			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-STR.EXE	0x80012108	func_80012108			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-STR.EXE	0x80012168	func_80012168			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-STR.EXE	0x80012248	func_80012248			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-STR.EXE	0x800122e0	func_800122e0			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-STR.EXE	0x80012350	func_80012350			unknown	unknown arg0;unknown arg1;unknown arg2	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-STR.EXE	0x80012424	func_80012424			unknown	unknown arg0;unknown arg1;unknown arg2	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-STR.EXE	0x800124dc	func_800124dc			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-STR.EXE	0x80012b1c	func_80012b1c			unknown	unknown *object;unknown arg1;unknown arg2;unknown arg3	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-STR.EXE	0x80012b80	func_80012b80			void	unknown arg0;unknown arg1	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-STR.EXE	0x80012bf0	func_80012bf0			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-STR.EXE	0x80012d20	func_80012d20			unknown	unknown arg0	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-STR.EXE	0x80012da8	func_80012da8			unknown	unknown *object	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-STR.EXE	0x80012ec0	func_80012ec0			unknown	unknown *object	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-STR.EXE	0x80012f58	func_80012f58			unknown	unknown arg0	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-STR.EXE	0x80012fc0	func_80012fc0			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-STR.EXE	0x80013014	func_80013014			unknown	unknown arg0;unknown arg1;unknown arg2;unknown arg3	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-STR.EXE	0x800131f0	func_800131f0			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-STR.EXE	0x800133f4	func_800133f4			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-STR.EXE	0x80016c3c	func_80016c3c			void	unknown arg0;unknown arg1;unknown arg2	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-STR.EXE	0x8001d834	func_8001d834			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-STR.EXE	0x8001d860	func_8001d860			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-STR.EXE	0x8001d8c8	func_8001d8c8			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-STR.EXE	0x8001db58	func_8001db58			unknown	unknown *object	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-STR.EXE	0x8001dd6c	func_8001dd6c			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-STR.EXE	0x8001e2d0	func_8001e2d0			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-STR.EXE	0x8001ec7c	func_8001ec7c			unknown	unknown arg0	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-STR.EXE	0x8001ecbc	func_8001ecbc			unknown	unknown arg0	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-STR.EXE	0x8001ed94	func_8001ed94			unknown	unknown arg0	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-STR.EXE	0x8001ee54	func_8001ee54			unknown	unknown arg0	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-STR.EXE	0x8001eee0	func_8001eee0			unknown	unknown arg0	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+STR.EXE	0x80012024	pad_wait_stable			void		supported	proven	asm;callers;src/str/main.c str.main	polls PadGetState(0) up to 60 times until stable or FindCTP1
+STR.EXE	0x800120a0	pad_set_align			void		supported	proven	asm;callers;src/str/main.c str.main	LIBPAD actuator alignment for the port 1 controller when it has actuators
+STR.EXE	0x80012108	pad_init_actuators			void		supported	proven	asm;callers;src/str/main.c str.main	reads the actuator count of a stable controller and aligns them
+STR.EXE	0x80012168	pad_update_state			void		supported	proven	asm;callers;src/str/main.c str.main	tracks PadGetState(0) transitions: disconnect, search, reconnect
+STR.EXE	0x80012248	pad_init			void		supported	proven	asm;callers;src/str/main.c str.main	PadInitDirect, actuator data, PadStartCom and the first state wait
+STR.EXE	0x800122e0	pad_read			void		supported	proven	asm;callers;src/str/main.c str.main	updates the controller state and the current/previous/new button words
+STR.EXE	0x80012350	cd_read_sectors			void	CdlLOC *loc;u_long *buf;int sectors	supported	proven	asm;callers;src/str/main.c str.main	double-speed CdRead of a sector count, retried until complete (END.EXE shape)
+STR.EXE	0x80012424	load_st_file			int	u_long *buf;char *name;int size	supported	proven	asm;callers;src/str/main.c str.main	reads \ST\<name>;1 into buf (whole file when size is 0)
+STR.EXE	0x800124dc	play_movie			int		supported	proven	asm;callers;src/str/main.c str.main	plays AGETEC.STR, OPEN.STR or DEMO.STR (with the D_TITLE.TIM and POISON.TIM overlays) as a 24-bit movie
+STR.EXE	0x80012b1c	strSetDefDecEnv			void	DECENV *dec;int x0;int y0;int x1;int y1	supported	proven	asm;callers;src/str/main.c str.main	Sony movie sample shape: default decode environment
+STR.EXE	0x80012b80	strInit			void	CdlLOC *loc;void (*)() callback	supported	proven	asm;callers;src/str/main.c str.main	Sony movie sample shape: MDEC reset, ring and stream setup, CD kick
+STR.EXE	0x80012bf0	strCallback			void		supported	proven	asm;callers;src/str/main.c str.main	Sony movie sample shape: DecDCTout callback that loads each decoded slice
+STR.EXE	0x80012d20	strNextVlc			void	DECENV *dec	supported	proven	asm;callers;src/str/main.c str.main	Sony movie sample shape: VLC-decodes the next frame
+STR.EXE	0x80012da8	strNext			u_long *	DECENV *dec	supported	proven	asm;callers;src/str/main.c str.main	Sony movie sample shape: next frame from the stream ring
+STR.EXE	0x80012ec0	strSync			void	DECENV *dec;int mode	supported	proven	asm;callers;src/str/main.c str.main	Sony movie sample shape: waits for a frame decode
+STR.EXE	0x80012f58	strKickCD			void	CdlLOC *loc	supported	proven	asm;callers;src/str/main.c str.main	Sony movie sample shape: seeks and starts CdRead2 streaming
+STR.EXE	0x80012fc0	clear_vram			void		supported	proven	asm;callers;src/str/main.c str.main	clears all of VRAM to black (ClearImage2)
+STR.EXE	0x80013014	load_tims			void	u_long *addr;VramOffset *pixel_offset;VramOffset *clut_offset;int absolute	supported	proven	asm;callers;src/str/main.c str.main	LoadImage of each TIM CLUT and pixel block in a run of TIM files
+STR.EXE	0x800131f0	show_logo			void		supported	proven	asm;callers;src/str/main.c str.main	fades the STR\FLOGO320.TIM logo in and out
+STR.EXE	0x800133f4	main			int		supported	proven	asm;callers;src/str/main.c str.main	called by NONE3 startup; boot movie sequence
 ST.EXE	0x8001435c	func_8001435c			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
 ST.EXE	0x80014410	func_80014410			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
 ST.EXE	0x80014450	func_80014450			unknown	unknown *object;unknown arg1	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review

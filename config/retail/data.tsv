@@ -67,7 +67,22 @@ STR.EXE	0x8001e318	0xdb18	0x4	unclassified	coverage-gap			payload-complement	may
 STR.EXE	0x8001ec70	0xe470	0xc	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 STR.EXE	0x8001f8b8	0xf0b8	0x4	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 STR.EXE	0x8001fd30	0xf530	0xc	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
-STR.EXE	0x8001fdfc	0xf5fc	0x13204	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
+STR.EXE	0x8001fdfc	0xf5fc	0x12a90	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
+STR.EXE	0x8003288c	0x2208c	0x4	pointer	proven	next_program	u8 *	asm;src/str/main.c str.main	$gp+0; points at PSX.EXE next-program byte 0x800103f0
+STR.EXE	0x80032890	0x22090	0x4	pointer	proven	PTR_80032890	u8 *	asm;src/str/main.c str.main	$gp+4; points at 0x800103f1, set to 1 by main
+STR.EXE	0x80032894	0x22094	0x4	pointer	proven	demo_flag	u8 *	asm;src/str/main.c str.main	$gp+8; points at 0x800103f2: clear plays the intro movies and sets it, set plays DEMO.STR and clears it
+STR.EXE	0x80032898	0x22098	0x4	defined	proven	movie_width	int	asm;src/str/main.c str.main	$gp+12; current STR frame width
+STR.EXE	0x8003289c	0x2209c	0x4	defined	proven	movie_height	int	asm;src/str/main.c str.main	$gp+16; current STR frame height
+STR.EXE	0x800328a0	0x220a0	0x34	unclassified	coverage-gap			payload-complement	str.main SDATA literals: "\ST\\", ";1", play_movie RECTs, clear_vram RECT, show_logo RECT
+STR.EXE	0x800328d4	0x220d4	0x24	unclassified	coverage-gap			payload-complement	.sdata alignment and MALLOC.OBJ .sbss
+STR.EXE	0x800328f8	0x220f8	0x6	bss	proven	pad_align	u_char[6]	asm;src/str/main.c str.main	.sbss; $gp+108; PadSetActAlign data
+STR.EXE	0x800328fe	0x220fe	0x2	unclassified	coverage-gap			payload-complement	.sbss alignment
+STR.EXE	0x80032900	0x22100	0x4	bss	proven	movie_ended	int	asm;src/str/main.c str.main	.sbss; $gp+116; end frame reached or START pressed
+STR.EXE	0x80032904	0x22104	0x2	bss	proven	agetec_mode	u_short	asm;src/str/main.c str.main	.sbss; $gp+120; set by main while AGETEC.STR plays (no START skip)
+STR.EXE	0x80032906	0x22106	0x2	bss	proven	end_frame	u_short	asm;src/str/main.c str.main	.sbss; $gp+122; stream frame that ends the current movie
+STR.EXE	0x80032908	0x22108	0x10	unclassified	coverage-gap			payload-complement	.sbss alignment and MALLOC.OBJ .bss
+STR.EXE	0x80032918	0x22118	0x38	bss	proven	dec	DECENV	asm;src/str/main.c str.main	str.main fixed .bss
+STR.EXE	0x80032950	0x22150	0x6b0	bss	proven	vlc_buffer	u_long[2][40960]	asm;src/str/main.c str.main	COMMON; continues past the load image
 ST.EXE	0x80011000	0x800	0x3320	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 ST.EXE	0x80036538	0x25d38	0x18d8	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 ST.EXE	0x800486ac	0x37eac	0x424	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
