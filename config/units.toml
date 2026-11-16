@@ -496,6 +496,18 @@ source = "src/vs/gfx_80016ca8.c"
 profile = "probe-gcc272cdk-o2-g8"
 
 [[unit]]
+unit = "vs.card_8001a124"
+image = "VS.EXE"
+source = "src/vs/card_8001a124.c"
+profile = "probe-gcc272cdk-o2-g8"
+
+[[unit]]
+unit = "vs.card_8001c8b8"
+image = "VS.EXE"
+source = "src/vs/card_8001c8b8.c"
+profile = "probe-gcc272cdk-o2-g8"
+
+[[unit]]
 unit = "vs.stub_8001ca10"
 image = "VS.EXE"
 source = "src/vs/stub_8001ca10.c"

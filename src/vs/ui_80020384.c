@@ -35,5 +35,5 @@ void func_80020460(void)
 {
     VsMenuScratch *sp = VS_MENU_SCRATCH;
 
-    func_8001d8b8(VS_MESSAGE(sp->unk0.half[0]), 60, 114, &sp->style[0]);
+    func_8001d8b8(VS_MESSAGE(sp->unk0.menu.half[0]), 60, 114, &sp->style[0]);
 }

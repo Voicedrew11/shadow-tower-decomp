@@ -15,7 +15,7 @@ void func_8001fb98(void)
 {
     VsMenuScratch *sp = VS_MENU_SCRATCH;
 
-    if (sp->unk0.half[1] == 0) {
+    if (sp->unk0.menu.half[1] == 0) {
         func_8001d8b8(VS_MESSAGE(311), 32, 74, &sp->style[0]);
         if (sp->unk1C6) {
             func_8001d8b8(VS_MESSAGE(325), 100, 160, &sp->style[1]);
