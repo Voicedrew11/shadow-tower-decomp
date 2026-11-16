@@ -1,13 +1,15 @@
 # Build and progress system
 
-> **Inherited from the King's Field II (`SLPS-00069`) project.** Statements here
-> about retail bytes, linker order, SDK versions or compiler probes describe that
-> game. For Shadow Tower (`SLUS-00863`) they are hypotheses until re-proven.
+> The build and progress tooling comes from the King's Field II (`SLPS-00069`)
+> project. Its toolchain and link model are Shadow Tower's own (see
+> [the toolchain page](toolchain.md)); examples that name King's Field
+> programs are kept where they illustrate a mechanism.
 
-`kf build` is the source-to-EXE build: the pinned compiler emits assembly,
-ASPSX emits native Psy-Q objects, PSYLINK links those objects with original
-SDK inputs, and CPE2X writes each executable. See
-[the linking guide](executable-linking.md) for outputs and provenance.
+`kf build` is the source-to-EXE build: the gcc-2.7.2-cdk compiler emits
+assembly, ASPSX 2.79 emits native Psy-Q objects, PSYLINK 2.74 links those
+objects with the Runtime Library 4.2 inputs, and CPE2X 1.5 writes each
+executable. See [the linking guide](executable-linking.md) for outputs and
+provenance.
 It does not read retail executable bytes, calculate match scores, or update
 the README. Tool failures stop the build; reconstruction checks are separate.
 
@@ -24,11 +26,9 @@ inputs and their order, the executable load origin and entry point, and the
 uninitialized sections. PSYLINK chooses individual symbol addresses and applies
 relocations. `ADDRESS()` and `DATA()` annotations do not control placement.
 
-Before this change, `kf build` drove the matching graph: compiler output passed
-through maspsx and GNU as to ELF, then objdiff compared it with retail-derived
-objects. Executable linking was separate. The active build now uses ASPSX's
-native objects for PSYLINK; the comparison tools translate that same format to
-ELF only because objdiff needs it.
+The build uses ASPSX's native objects for PSYLINK; the comparison tools
+translate that same format to ELF only because objdiff needs it. No maspsx or
+GNU assembler output enters either path.
 
 `kf analyze` drives the incremental Ninja graph for inspection. Source
 compilation uses the same native SDK path; ELF objects are read-only views
@@ -38,7 +38,7 @@ tools and supply no bytes or layout to the executable build.
 ## Unit manifest and ADDRESS() claims
 
 `config/units.toml` is the only source-enrolment mechanism. A unit has a stable
-ID, one of the four canonical executable names, a repo-relative source, and a
+ID, one of the seven executable names in `config/images.toml`, a repo-relative source, and a
 named complete profile. It carries no address: every function a source
 reconstructs claims its retail address in the source itself,
 
@@ -92,19 +92,18 @@ its anonymous `.sdata` constants once:
 SDATA(0x8006d6a4, 0xb)
 ```
 
-GCC 2.5.7's MIPS `SELECT_SECTION` sends every constant of at most `-G` bytes
+GCC's MIPS `SELECT_SECTION` (2.5.7 and 2.7.2 alike) sends every constant of at most `-G` bytes
 to `.sdata`, so a short literal (or a local `char buf[2] = " "` initializer)
 is an `.sdata` member, while the same text initializing a larger array keeps
-the array's type and stays in `.rdata`. ASPSX 1.07 still expands every access
-to `lui` plus a low instruction, so `-G8` changes placement, not code. The
-delinker packs the claimed range among the unit's `.sdata` `DATA()` claims in
-address order and resolves code references to it as `.sdata` offsets; the
-range never becomes a symbol. Small statics (`.lcomm`, rounded to eight
-bytes) land in `.sbss` and resolve through that section symbol; declare their
-eight-byte request in `data_reservations.tsv`. Exported COMMON requests stay
-`.bss` COMMON under ASPSX `-G8`. The GAME evidence is the game `.sdata` run
-between the LIBGPU `.data` tail and the first LIBCD `.sdata` export
-(0x8006d680-0x8006d714) and the zero-filled small BSS before the SDK `.sbss`.
+the array's type and stays in `.rdata`. ASPSX 2.79 addresses such data with
+one `$gp`-relative instruction (native patch type 100, `R_MIPS_GPREL16` in the
+ELF view), so `-G8` changes code as well as placement. The delinker packs the
+claimed range among the unit's `.sdata` `DATA()` claims in address order and
+resolves code references to it as `.sdata` offsets; the range never becomes a
+symbol. Small statics land in `.sbss` and resolve through that section symbol;
+declare their request in `data_reservations.tsv`. `PSX.EXE`'s `main` is the
+first `-G8` unit: its program index and three byte pointers are the
+`.sdata` run at `0x80010394`, the address `SNMAIN` loads into `$gp`.
 
 A unit with several claims is a module: a translation-unit hypothesis whose
 target object is the whole run carved as one section. Address proximity alone
@@ -163,9 +162,9 @@ never appends `.size`, `.type`, or allocation directives to game assembly.
 `kf configure` writes `build/build.ninja`. Each image has `base-IMAGE`,
 `target-IMAGE`, `compare-IMAGE`, `verify-IMAGE`, and `all-IMAGE` aliases.
 Compilation and delinking keep separate image outputs. Comparison synchronizes
-all four images into `build/objdiff/objdiff.json` and one native `report.json`;
+all seven images into `build/objdiff/objdiff.json` and one native `report.json`;
 `--image` scopes verification and status to the selected image. Objdiff groups
-units under `psx/`, `game/`, and `open/`, while inventories, relocations, and
+units under one directory per image (`psx/`, `st/`, ...), while inventories, relocations, and
 progress identities remain keyed by image.
 
 The graph tracks retail executables, curated TSVs, source files, transitive
@@ -185,7 +184,7 @@ absent, as in graphs written before it).
 ## Status and banking
 
 The status universe is every contiguous, non-vendored function: currently
-1 PSX, 488 GAME, 28 OPEN, and 18 END functions. Progress is counted per function even
+the admitted rows of `config/retail/functions.tsv` (`kf status` prints them). Progress is counted per function even
 when several functions share a module unit; the objdiff report lists each
 function inside its unit. Only manifested units with real base objects enter
 objdiff. This keeps an absent reconstruction distinct from a
