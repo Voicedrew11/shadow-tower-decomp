@@ -150,6 +150,29 @@ def separate_read_only(assembly: str) -> str:
     return '\n'.join(lines)
 
 
+def keep_read_only_together(assembly: str) -> str:
+    """Name every `.rdata` block of cc1 output `.rodata`, keeping cc1's order.
+
+    A headerless FDAT overlay is one program of its own whose read-only data
+    is laid out exactly as the compiler emitted it: each function's aggregate
+    initializers, then its switch tables after their `.align 3`, then the
+    next function's constants (FDAT_242.BIN interleaves two constant runs
+    around a table), with no padding after the last constant (FDAT_442.BIN's
+    code follows its 0x1cc-byte handler tables directly). The blocks keep
+    their order and alignment directives; only the section name changes, so
+    the unit's RODATA() claim covers its whole read-only run.
+    """
+    return '\n'.join(line.replace('.rdata', f'.section\t{CONSTANT_SECTION}')
+                     if line.strip() == '.rdata' else line
+                     for line in assembly.split('\n'))
+
+
+# How a unit's read-only data is sectioned: `separate` (constants to .rodata,
+# switch tables in .rdata, the pool padded to eight bytes) for the PS-X EXE
+# programs; `together` (cc1 order, unpadded) for the FDAT overlays.
+READ_ONLY_MODES = {'separate': separate_read_only, 'together': keep_read_only_together}
+
+
 def dos_text(path: Path) -> None:
     # The DOS reader needs CRLF. No directives, instructions or literals change.
     path.write_bytes(path.read_bytes().replace(b'\r\n', b'\n').replace(b'\n', b'\r\n'))
@@ -159,8 +182,10 @@ def compile_c(source: Path, root: Path, stem: str, *, compiler: str,
               optimization: str, small_data: int, include_dirs: tuple[Path, ...],
               cc1_flags: tuple[str, ...] = (), defines: tuple[str, ...] = (),
               cc1_override: Path | None = None,
-              environment: dict[str, str] | None = None, run=run_command) -> dict:
+              environment: dict[str, str] | None = None, run=run_command,
+              read_only: str = 'separate') -> dict:
     cpp, cc1 = C_COMPILERS[compiler]
+    section_read_only = READ_ONLY_MODES[read_only]
     preprocessed, assembly = root / (stem + '.I'), root / (stem + '.S')
     includes = [argument for path in include_dirs for argument in ('-I', str(path.resolve()))]
     # The name becomes the assembly's `.file`; older ASPSX builds hang on long
@@ -188,7 +213,7 @@ def compile_c(source: Path, root: Path, stem: str, *, compiler: str,
     else:
         run(cc1_command, environment=environment)
     text = assembly.read_bytes().decode('latin-1')
-    assembly.write_bytes(separate_read_only(text).encode('latin-1'))
+    assembly.write_bytes(section_read_only(text).encode('latin-1'))
     dos_text(assembly)
     return {'object': stem + '.OBJ', 'assembly': stem + '.S', 'log': stem + '.TXT',
             'preprocessor_command': cpp_command, 'compiler_command': cc1_command, **probe,

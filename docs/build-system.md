@@ -99,6 +99,15 @@ retail order, which the address-ordered functions give for free; a string
 that lives inside the range is spelled as the literal the original used, not
 as a named extern.
 
+An FDAT overlay unit is the exception: its read-only data stays in cc1 order
+under one section (`keep_read_only_together`, selected by
+`compile.read_only_mode` for every overlay image), without the pool padding,
+and its single `RODATA()` claim covers constants and switch tables together
+(see [the linking guide](executable-linking.md#fdat-overlays) for the retail
+evidence). Pointers in that run into the unit's own code are rewritten like
+jump-table rows; a pointer into another unit's code needs a reviewed
+`mips32_candidate` relocation row.
+
 A unit compiled with a small-data profile (`small_data = 8`) may also claim
 its anonymous `.sdata` constants, one ascending range per run between its
 named small data:

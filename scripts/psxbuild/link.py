@@ -6,6 +6,7 @@ import json
 import os
 from pathlib import Path
 import shutil
+import struct
 import subprocess
 
 from .dmpsx import DMPSX_SHA256
@@ -62,6 +63,17 @@ IMAGE_LINKS = {
                           'LIBDS', 'LIBGPU'), allocator=True,
                          evidence='retail member groups CD SND/SPU PRESS ETC API C DS GPU'),
 }
+# A headerless FDAT overlay is linked on its own at the address ST.EXE loads
+# it to: no startup object, allocator or library (the overlays call ST.EXE's
+# copies), its references into ST.EXE defined as absolute symbols, PSYLINK's
+# pure binary output (`/p`) instead of a CPE, framed as an FDAT.T entry.
+OVERLAY_LINK = ImageLink((), startup=False,
+                         evidence='FDAT overlays: own code only, jal into ST.EXE text')
+# FDAT.T frames each entry: the linked bytes, zeros up to the sector multiple
+# that leaves room for one trailing word, and that word, 0x12345678 plus the
+# 32-bit sum of every preceding word (all 36 retail entries agree).
+ARCHIVE_SECTOR = 0x800
+ARCHIVE_CHECKSUM_SEED = 0x12345678
 ENTRY = '__SN_ENTRY_POINT'
 # Psy-Q 4.x overlay startup (identical in the 4.5 and 4.6 kits): clears the
 # bss group, sets $gp and calls main. Retail text starts with it at the entry.
@@ -99,6 +111,25 @@ def file_hash(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
+def pack_archive_entry(payload: bytes) -> bytes:
+    """Frame one linked overlay as its FDAT.T entry (see ARCHIVE_CHECKSUM_SEED)."""
+    if len(payload) % 4:
+        raise ValueError('an archive entry payload must be whole words')
+    size = -(-(len(payload) + 4) // ARCHIVE_SECTOR) * ARCHIVE_SECTOR
+    body = payload + bytes(size - 4 - len(payload))
+    total = sum(struct.unpack(f'<{len(body) // 4}I', body)) + ARCHIVE_CHECKSUM_SEED
+    return body + struct.pack('<I', total & 0xFFFFFFFF)
+
+
+def equ_lines(symbols: dict[str, int]) -> list[str]:
+    """PSYLINK command-file definitions of absolute host symbols."""
+    for name in symbols:
+        if not name or not (name[0].isalpha() or name[0] in '_$') or not all(
+                c.isalnum() or c in '_$' for c in name):
+            raise ValueError(f'invalid absolute symbol name {name!r}')
+    return [f'{name}\tequ\t${address:08x}' for name, address in sorted(symbols.items())]
+
+
 def _pinned_object(source: Path, expected: str, root: Path, name: str, provenance: str) -> dict:
     if file_hash(source) != expected:
         raise ValueError(f'{source}: expected the pinned {name} (sha256 {expected[:12]}...)')
@@ -106,16 +137,23 @@ def _pinned_object(source: Path, expected: str, root: Path, name: str, provenanc
     return {'file': name, 'path': str(source), 'sha256': expected, 'provenance': provenance}
 
 
-def build_image(name, root, units, compile_one, *, repo, load_address) -> dict:
-    """Compile and link a program using its source units and SDK libraries."""
+def build_image(name, root, units, compile_one, *, repo, load_address,
+                host_symbols=None) -> dict:
+    """Compile and link a program using its source units and SDK libraries.
+
+    `host_symbols` selects the headerless overlay link (OVERLAY_LINK): it is
+    called with the native objects and returns the absolute addresses of the
+    host-program symbols they reference but do not define.
+    """
     root = root.resolve()
     if root.exists():
         shutil.rmtree(root)
     root.mkdir(parents=True)
     report = {'image': name, 'linked': False, 'phase': 'compile', 'units': [],
               'libraries': [], 'startup': None, 'allocator': None, 'tools': {}}
+    overlay = host_symbols is not None
     try:
-        layout = image_link(name)
+        layout = OVERLAY_LINK if overlay else image_link(name)
         tools = {'ASPSX.EXE': Path(os.environ['PSYQ_ASPSX']),
                  'DMPSX.EXE': Path(os.environ['PSYQ_DMPSX']),
                  'PSYLINK.EXE': Path(os.environ['PSYQ_PSYLINK']),
@@ -169,13 +207,32 @@ def build_image(name, root, units, compile_one, *, repo, load_address) -> dict:
                 'corrections': corrections,
             })
         report['phase'] = 'link'
-        stem = name.removesuffix('.EXE')
+        stem = name.rsplit('.', 1)[0]
         objects = [*explicit, *(u['object'] for u in report['units'])]
+        if overlay:
+            absolute = host_symbols([root / u['object'] for u in report['units']])
+            report['host_symbols'] = {key: f'{value:#010x}'
+                                      for key, value in sorted(absolute.items())}
+            tail = equ_lines(absolute)
+        else:
+            tail = [f'\tregs\tpc={ENTRY}']
         commands = [f'\torg\t${load_address:08x}', *SECTIONS,
                     *(f'\tinclude\t"{obj}"' for obj in objects),
                     *(f'\tinclib\t"{library["file"]}"' for library in report['libraries']),
-                    f'\tregs\tpc={ENTRY}']
+                    *tail]
         (root / 'LINK.LNK').write_bytes(('\r\n'.join(commands) + '\r\n').encode('ascii'))
+        if overlay:
+            report['linker_command'] = (
+                f'PSYLINK.EXE /c /m /p @LINK.LNK,{stem}.RAW,{stem}.SYM,{stem}.MAP > LINK.TXT')
+            dos_run(root, [report['linker_command']], 'link')
+            tool_succeeded(root, 'LINK.TXT', stem + '.RAW', b'')
+            report['phase'] = 'pack'
+            raw = (root / (stem + '.RAW')).read_bytes()
+            (root / name).write_bytes(pack_archive_entry(raw))
+            report.update(linked=True, phase='complete', executable=str(root / name),
+                          raw=str(root / (stem + '.RAW')), raw_size=len(raw))
+            (root / 'build.json').write_text(json.dumps(report, indent=2) + '\n')
+            return report
         report['linker_command'] = (
             f'PSYLINK.EXE /c /m @LINK.LNK,{stem}.CPE,{stem}.SYM,{stem}.MAP > LINK.TXT')
         dos_run(root, [report['linker_command']], 'link')

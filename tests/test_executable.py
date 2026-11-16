@@ -109,6 +109,30 @@ class ComparisonTests(unittest.TestCase):
             self.assertIn('id="minimum"', html)
 
 
+class OverlayHostSymbolTests(unittest.TestCase):
+    @staticmethod
+    def resolve(*symbols):
+        from scripts.kf.lnk import Object
+
+        native = Object({}, dict(enumerate(symbols)), [])
+        with mock.patch('scripts.kf.lnk.read', return_value=native):
+            return executable.host_symbols('FDAT_002.BIN', [Path(__file__)])
+
+    def test_references_resolve_through_the_host_address_book(self):
+        from scripts.kf.lnk import Symbol
+
+        self.assertEqual(self.resolve(Symbol('rcos', None), Symbol('handler', 1, 0x10),
+                                      Symbol('DAT_801c0270', None)),
+                         {'rcos': 0x800744C4, 'DAT_801c0270': 0x801C0270})
+
+    def test_overlay_addresses_and_unknown_names_are_not_host_symbols(self):
+        from scripts.kf.lnk import Symbol
+
+        for name in ('func_801eb7ac', 'no_such_symbol'):
+            with self.subTest(name=name), self.assertRaisesRegex(ValueError, name):
+                self.resolve(Symbol(name, None))
+
+
 @unittest.skipUnless(all(shutil.which(tool) for tool in ('cpppsx-272cdk', 'cc1psx-272cdk', 'dosbox-x'))
                      and all(os.environ.get(key) for key in (
                          'PSYQ_ASPSX', 'PSYQ_DMPSX', 'PSYQ_PSYLINK', 'PSYQ_CPE2X', 'PSYQ_LIB',
@@ -308,6 +332,80 @@ class NativeBuildControls(unittest.TestCase):
             low = next(word for word in words if word & 0xffff0000 == 0x279c0000)
             signed_low = (low & 0xffff) - (0x10000 if low & 0x8000 else 0)
             self.assertEqual(((high & 0xffff) << 16) + signed_low, gp_base)
+
+    def test_fdat_overlay_links_raw_at_its_origin_against_host_symbols(self):
+        from scripts.psxbuild.link import pack_archive_entry
+
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            # Handler table first, a constant and a switch table in cc1 order,
+            # a call into ST.EXE's LIBGTE rcos and a store to an ST.EXE word.
+            manifest = self.manifest(root, (
+                'typedef struct { short x, y, w, h; } Box;\n'
+                'extern int rcos(int); extern int DAT_801c0270;\n'
+                'extern int MoveBox(Box *);\n'
+                'void handler(int);\n'
+                'struct { int id; void (*run[2])(int); } const table = {0x37, {handler, handler}};\n'
+                'void handler(int a) {\n'
+                '    Box box = {768, 0, 64, 64};\n'
+                '    MoveBox(&box);\n'
+                '    switch (a) {\n'
+                '    case 0: DAT_801c0270 = rcos(5); break;\n'
+                '    case 1: DAT_801c0270 = 7; break;\n'
+                '    case 2: DAT_801c0270 = 9; break;\n'
+                '    case 3: DAT_801c0270 = 11; break;\n'
+                '    case 4: DAT_801c0270 = 13; break;\n'
+                '    }\n'
+                '}\n',), 'FDAT_002.BIN')
+            output = root / 'output'
+            with mock.patch.object(executable, 'host_symbols',
+                                   return_value={'rcos': 0x800744C4, 'DAT_801c0270': 0x801C0270,
+                                                 'MoveBox': 0x80070000}):
+                report = build_image('FDAT_002.BIN', manifest, output)
+            self.assertTrue(report['linked'], report.get('error'))
+            self.assertIsNone(report['startup'])
+            self.assertEqual(report['libraries'], [])
+            commands = (output / 'LINK.LNK').read_text().splitlines()
+            self.assertIn('rcos\tequ\t$800744c4', commands)
+            self.assertFalse(any('regs' in line for line in commands))
+            raw = (output / 'FDAT_002.RAW').read_bytes()
+            origin = 0x801EB560
+            # cc1 order, no padding after the last constant: table (0xc),
+            # box (8), then the switch table at the next eight-byte boundary.
+            words = struct.unpack_from('<3I', raw, 0)
+            self.assertEqual(words[0], 0x37)
+            self.assertEqual(raw[0xc:0x14], struct.pack('<4h', 768, 0, 64, 64))
+            sections = self.sections((output / 'FDAT_002.MAP').read_text())
+            self.assertEqual(sections['.rodata'][0], origin)
+            text = sections['.text'][0]
+            self.assertEqual(words[1], text)
+            self.assertEqual(text, origin + 0x18 + 5 * 4)
+            self.assertNotIn('.rdata', sections)
+            code = struct.unpack_from(f'<{(len(raw) - (text - origin)) // 4}I', raw, text - origin)
+            self.assertIn(0x0C000000 | (0x800744C4 & 0x0FFFFFFF) >> 2, code)
+            entry = (output / 'FDAT_002.BIN').read_bytes()
+            self.assertEqual(entry, pack_archive_entry(raw))
+            self.assertEqual(len(entry), 0x800)
+
+    def test_archive_entry_frame_matches_the_retail_checksum_rule(self):
+        from scripts.psxbuild.link import equ_lines, pack_archive_entry
+
+        payload = struct.pack('<3I', 0x37, 0x801EB56C, 0x03E00008)
+        entry = pack_archive_entry(payload)
+        self.assertEqual(len(entry), 0x800)
+        self.assertEqual(entry[:12], payload)
+        self.assertEqual(entry[12:-4], bytes(0x800 - 16))
+        self.assertEqual(struct.unpack_from('<I', entry, 0x7FC)[0],
+                         (0x37 + 0x801EB56C + 0x03E00008 + 0x12345678) & 0xFFFFFFFF)
+        # A payload that fills the sector up to the checksum word still fits;
+        # one more word starts the next sector.
+        self.assertEqual(len(pack_archive_entry(bytes(0x7FC))), 0x800)
+        self.assertEqual(len(pack_archive_entry(bytes(0x800))), 0x1000)
+        with self.assertRaises(ValueError):
+            pack_archive_entry(b'\0\0')
+        self.assertEqual(equ_lines({'rcos': 0x800744C4}), ['rcos\tequ\t$800744c4'])
+        with self.assertRaises(ValueError):
+            equ_lines({'bad name': 1})
 
     def test_image_without_a_link_model_fails_readably(self):
         with tempfile.TemporaryDirectory() as directory:

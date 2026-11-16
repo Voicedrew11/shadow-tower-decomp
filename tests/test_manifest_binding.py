@@ -4,8 +4,10 @@ from __future__ import annotations
 
 import unittest
 
-from scripts.kf.manifest import _rebind_claims_by_name, _rebind_data_claims_by_name
-from scripts.kf.model import Claim, DataClaim, DataIdentity
+from scripts.kf.manifest import (
+    _check_overlay_read_only, _rebind_claims_by_name, _rebind_data_claims_by_name,
+)
+from scripts.kf.model import Claim, DataClaim, DataIdentity, RodataClaim
 
 
 def _datum(image: str, va: int, name: str) -> DataIdentity:
@@ -56,6 +58,15 @@ class NameBindingTests(unittest.TestCase):
         claims = (DataClaim(0x800A01FC, 0x44, "memory_allocation_stack", 3, ".bss"),)
         rebound = _rebind_data_claims_by_name(None, "OPEN.EXE", claims, identities)
         self.assertEqual(rebound[0].va, 0x80075854)
+
+
+class OverlayReadOnlyTests(unittest.TestCase):
+    def test_overlay_units_claim_switch_tables_inside_rodata(self) -> None:
+        tables = (RodataClaim(0x801EB730, 0x7C, 9),)
+        with self.assertRaisesRegex(ValueError, "RODATA"):
+            _check_overlay_read_only("map.c", "FDAT_002.BIN", tables)
+        _check_overlay_read_only("map.c", "FDAT_002.BIN", ())
+        _check_overlay_read_only("menu.c", "ST.EXE", tables)
 
 
 if __name__ == "__main__":
