@@ -264,46 +264,46 @@ ST.EXE	0x800319a8	func_800319a8			unknown		address-only	candidate	mips-live-in-h
 ST.EXE	0x80031aec	func_80031aec			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
 ST.EXE	0x80031cfc	func_80031cfc			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
 ST.EXE	0x80031d50	func_80031d50			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-ST.EXE	0x80031de4	func_80031de4			unknown	unknown arg0	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-ST.EXE	0x80031efc	func_80031efc			unknown	unknown arg0;unknown arg1	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-ST.EXE	0x80032058	func_80032058			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-ST.EXE	0x8003216c	func_8003216c			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-ST.EXE	0x80032210	func_80032210			unknown	unknown arg0;unknown arg1;unknown arg2	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-ST.EXE	0x80032244	func_80032244			unknown	unknown arg0;unknown arg1;unknown arg2	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-ST.EXE	0x8003227c	func_8003227c			void	unknown arg0;unknown arg1;unknown arg2	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-ST.EXE	0x800322f8	func_800322f8			unknown	unknown *object;unknown arg1;unknown arg2	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-ST.EXE	0x80032358	func_80032358			unknown	unknown *object;unknown arg1;unknown arg2	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-ST.EXE	0x800323b8	func_800323b8			unknown	unknown arg0;unknown arg1;unknown arg2	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-ST.EXE	0x80032530	func_80032530			unknown	unknown arg0;unknown arg1;unknown arg2;unknown arg3	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-ST.EXE	0x800325c4	func_800325c4			unknown	unknown arg0;unknown arg1;unknown arg2;unknown arg3	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-ST.EXE	0x80032774	func_80032774			unknown	unknown arg0	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-ST.EXE	0x80032800	func_80032800			unknown	unknown arg0;unknown *pointer1;unknown *pointer2	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-ST.EXE	0x8003306c	func_8003306c			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-ST.EXE	0x800330f0	func_800330f0			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-ST.EXE	0x80033110	func_80033110			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-ST.EXE	0x800339c4	func_800339c4			unknown	unknown arg0;unknown *pointer1	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-ST.EXE	0x80033a48	func_80033a48			unknown	unknown *object;unknown *pointer1	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-ST.EXE	0x80033a84	func_80033a84			unknown	unknown *object;unknown *pointer1;unknown *pointer2;unknown arg3	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-ST.EXE	0x80033b00	func_80033b00			unknown	unknown *object;unknown *pointer1;unknown *pointer2;unknown arg3	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-ST.EXE	0x80033b7c	func_80033b7c			unknown	unknown *object;unknown *pointer1	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-ST.EXE	0x80033bdc	func_80033bdc			unknown	unknown *object;unknown *pointer1;unknown *pointer2	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-ST.EXE	0x80033c60	func_80033c60			unknown	unknown *object;unknown *pointer1	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-ST.EXE	0x80033cd4	func_80033cd4			void	unknown arg0;unknown *pointer1;unknown arg2	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-ST.EXE	0x80033cfc	func_80033cfc			unknown	unknown *object;unknown *pointer1;unknown arg2;unknown *pointer3	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-ST.EXE	0x80033db8	func_80033db8			unknown	unknown arg0;unknown arg1	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-ST.EXE	0x80033e30	func_80033e30			unknown	unknown *object;unknown *pointer1;unknown *pointer2;unknown arg3	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-ST.EXE	0x8003405c	func_8003405c			unknown	unknown *object;unknown arg1	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-ST.EXE	0x800340c4	func_800340c4			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-ST.EXE	0x800340f8	func_800340f8			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-ST.EXE	0x8003413c	func_8003413c			unknown	unknown arg0	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-ST.EXE	0x800341a0	func_800341a0			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-ST.EXE	0x80034224	func_80034224			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-ST.EXE	0x80034294	func_80034294			unknown	unknown arg0	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-ST.EXE	0x80034364	func_80034364			unknown	unknown *object;unknown *pointer1;unknown arg2;unknown arg3	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-ST.EXE	0x80034604	func_80034604			unknown	unknown *object;unknown arg1	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-ST.EXE	0x800346dc	func_800346dc			unknown	unknown *object;unknown arg1	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-ST.EXE	0x80034760	func_80034760			unknown	unknown *object;unknown arg1	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-ST.EXE	0x800347ac	func_800347ac			unknown	unknown *object;unknown arg1	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+ST.EXE	0x80031de4	placements_expand			void	StPlacement *src	candidate	candidate	asm;callers;src/st/tim.c st.tim	expands 128 16-byte placement records into DAT_8015c48c (block * 4096 + offset coordinates, rand() start below unk3)
+ST.EXE	0x80031efc	tim_load_images			int	u_long *buf;u_long size	candidate	candidate	asm;callers;src/st/tim.c st.tim	LoadImage()s the CLUT and pixel blocks of the TIMs packed in buf and returns the bytes of the complete ones
+ST.EXE	0x80032058	lighting_load_defaults			void		candidate	candidate	asm;callers;src/st/light.c st.light	fills the 64 lighting environments from the load-image defaults and requests a matrix rebuild
+ST.EXE	0x8003216c	lighting_build_matrices			void		candidate	candidate	asm;callers;src/st/light.c st.light	when requested, derives light matrices 0..3 of every environment (func_80049aac)
+ST.EXE	0x80032210	lighting_blend_matrix			void	StLightInit *init;StLight *light;short t	candidate	candidate	asm;callers;src/st/light.c st.light	blends an environment's light matrix 0 toward a default part (func_8004a888)
+ST.EXE	0x80032244	lighting_blend_color			void	StLightInit *init;StLight *light;short t	candidate	candidate	asm;callers;src/st/light.c st.light	blends an environment's colour matrix toward a default part (func_8004a888)
+ST.EXE	0x8003227c	lighting_blend_back			void	StLightInit *init;StLight *light;short t	candidate	candidate	asm;callers;src/st/light.c st.light	blends an environment's back colour toward a default part (func_8004a830)
+ST.EXE	0x800322f8	lighting_blend_near			void	StLightInit *init;StLight *light;short t	candidate	candidate	asm;callers;src/st/light.c st.light	blends unk68 (the near range source) and keeps unk6A 4096 beyond it
+ST.EXE	0x80032358	lighting_blend_far			void	StLightInit *init;StLight *light;short t	candidate	candidate	asm;callers;src/st/light.c st.light	blends unk6A (the far range) and keeps unk68 4096 below it
+ST.EXE	0x800323b8	lighting_blend			void	int flags;StLightInit *init;short t	candidate	candidate	asm;callers;src/st/light.c st.light	blends the flagged parts of a default into the first 48 environments
+ST.EXE	0x80032530	lighting_blend_back_ranges			void	u8 r;u8 g;u8 b;int unk68;int unk6A;short t	candidate	candidate	asm;callers;src/st/light.c st.light	old-style; blends a back colour (unless a component is 255) and the ranges (unless 0xffff); no callers
+ST.EXE	0x800325c4	lighting_blend_matrices			void	StLightMatrix color;StLightMatrix matrix;short t	candidate	candidate	asm;callers;src/st/light.c st.light	blends a colour and a light matrix passed by value (unless an element is 0x7fff); no callers
+ST.EXE	0x80032774	lighting_grid_index			int	u8 flags	candidate	candidate	asm;callers;src/st/light.c st.light	old-style; row (0x10..0x80) * 3 + column (1..4) of the lowest flags
+ST.EXE	0x80032800	lighting_select			void	u8 rows;u8 columns;int blend	candidate	candidate	asm;callers;src/st/light.c st.light	old-style; selects the environment of the row/column flags, starting a blend into it when blend is set
+ST.EXE	0x8003306c	lighting_start			void		candidate	candidate	asm;callers;src/st/light.c st.light	points the current and blend-start environments at slots 43/44 and selects the area's environment
+ST.EXE	0x800330f0	lighting_clear_requests			void		candidate	candidate	asm;callers;src/st/light.c st.light	clears the lighting request bytes 3..6 and 9
+ST.EXE	0x80033110	lighting_update			void		candidate	candidate	asm;callers;src/st/light.c st.light	per frame: picks the row/column flags for the area and state and advances the 64-step blend
+ST.EXE	0x800339c4	anim_register_pack			void	u16 id;u8 *pack	candidate	candidate	asm;callers;src/st/anim.c st.anim	registers the model files of a pack under consecutive ids
+ST.EXE	0x80033a48	anim_register			void	u16 id;StAnimFile *file	candidate	candidate	asm;callers;src/st/anim.c st.anim	registers one model file and sets the scratchpad model
+ST.EXE	0x80033a84	vertices_sub			void	SVECTOR *dst;SVECTOR *from;SVECTOR *to;int count	candidate	candidate	asm;callers;src/st/anim.c st.anim	dst = to - from per vertex
+ST.EXE	0x80033b00	vertices_add			void	SVECTOR *dst;SVECTOR *a;SVECTOR *b;int count	candidate	candidate	asm;callers;src/st/anim.c st.anim	dst = a + b per vertex
+ST.EXE	0x80033b7c	vertex_list_copy			void	short *dst;short *src	candidate	candidate	asm;callers;src/st/anim.c st.anim	copies a count-prefixed vertex list; no callers
+ST.EXE	0x80033bdc	vertex_list_add			void	SVECTOR *dst;SVECTOR *a;short *b	candidate	candidate	asm;callers;src/st/anim.c st.anim	dst = a + a count-prefixed list; no callers
+ST.EXE	0x80033c60	vertex_list_accumulate			void	SVECTOR *dst;short *src	candidate	candidate	asm;callers;src/st/anim.c st.anim	dst += a count-prefixed list; no callers
+ST.EXE	0x80033cd4	vertex_list_scale_add			void	SVECTOR *dst;short *src;long p	candidate	candidate	asm;callers;src/st/anim.c st.anim	gteMIMefunc over a count-prefixed list; no callers
+ST.EXE	0x80033cfc	anim_find_key			StAnimKey *	StAnimFile *file;int clip;int frame;int *key;int *frac	candidate	candidate	asm;callers;src/st/anim.c st.anim	the clip key a frame falls in, its index and the position in it (4096ths)
+ST.EXE	0x80033db8	anim_get_file			void	u16 id;StAnimFile **out	candidate	candidate	asm;callers;src/st/anim.c st.anim	the registered model file; ids 112 and up only while their heap block is releasable or used
+ST.EXE	0x80033e30	anim_get_vertex			int	u16 id;int part;int frame;int index;SVECTOR *out	candidate	candidate	asm;callers;src/st/anim.c st.anim	a part vertex, or part 0's vertex posed at a clip frame; 1 when the model is missing
+ST.EXE	0x8003405c	anim_vertex_count			u_long	int id;int part	candidate	candidate	asm;callers;src/st/anim.c st.anim	vertex count of part 0 (or of part & 0x7f for part >= 128); no callers
+ST.EXE	0x800340c4	anim_slots_init			void		candidate	candidate	asm;callers;src/st/anim.c st.anim	resets the 16 vertex-animation slots
+ST.EXE	0x800340f8	anim_slots_retire			void		candidate	candidate	asm;callers;src/st/anim.c st.anim	sets every slot in use to state 5
+ST.EXE	0x8003413c	anim_slot_free			void	StAnimSlot *slot	candidate	candidate	asm;callers;src/st/anim.c st.anim	frees a slot: clears its owner pointer and frees its delta buffer
+ST.EXE	0x800341a0	anim_slots_free_idle			void		candidate	candidate	asm;callers;src/st/anim.c st.anim	frees the slots in state 1
+ST.EXE	0x80034224	anim_slots_free_all			void		candidate	candidate	asm;callers;src/st/anim.c st.anim	frees every slot in use
+ST.EXE	0x80034294	anim_slot_alloc			void	StAnimSlot **out	candidate	candidate	asm;callers;src/st/anim.c st.anim	a free slot (freeing the state-1 slots when none is), or NULL
+ST.EXE	0x80034364	anim_pose			int	StAnimSlot **slotp;int id;int clip;int frame	candidate	candidate	asm;callers;src/st/anim.c st.anim	poses part 0 at a clip frame into world_state.unkEB40 through a slot; returns the slot, 0 on failure
+ST.EXE	0x80034604	anim_prepare			int	StAnimSlot **slotp;int id;int clip;int frame	candidate	candidate	asm;callers;src/st/anim.c st.anim	sets up a model for drawing: directly when unanimated, else through func_8003569c or anim_pose
+ST.EXE	0x800346dc	anim_list_init			void	StAnimSet *set;int count	candidate	candidate	asm;callers;src/st/anim.c st.anim	links a set's nodes to their records and empties its list
+ST.EXE	0x80034760	anim_list_find_id			StAnimNode *	StAnimList *list;int id	candidate	candidate	asm;callers;src/st/anim.c st.anim	the node whose unk8 is id, or NULL
+ST.EXE	0x800347ac	anim_list_find_key			StAnimNode *	StAnimList *list;int key	candidate	candidate	asm;callers;src/st/anim.c st.anim	the node whose unkC is key, or NULL
 ST.EXE	0x800347f8	func_800347f8			unknown	unknown *object;unknown arg1	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
 ST.EXE	0x80034928	func_80034928			unknown	unknown *object;unknown arg1	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
 ST.EXE	0x8003498c	func_8003498c			unknown	unknown *object;unknown *pointer1;unknown arg2	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review

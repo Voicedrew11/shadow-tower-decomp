@@ -47,7 +47,11 @@ typedef struct {
     u8 unk33; /* incremented every vsync, wraps at 60 */
     s32 unk34; /* incremented when unk33 wraps */
     u16 unk38[21]; /* set from FN. ids 970..990 */
-    u8 unk62[0x21c - 0x62];
+    u8 unk62[0x1c7 - 0x62];
+    s8 unk1C7;           /* 0x1c7: lighting_update picks lighting rows by its sign */
+    u8 unk1C8[0x218 - 0x1c8];
+    u8 unk218;           /* 0x218 */
+    u8 unk219[0x21c - 0x219];
     u8 unk21C;
     u8 unk21D[0x248 - 0x21d];
     long x;              /* 0x248 */

@@ -85,7 +85,8 @@ typedef struct {
  * ModelPart views the same 40-byte records from 12 bytes later (its
  * retail code addresses them that way). */
 typedef struct {
-    u8 unk00[8];
+    u_long vertices;     /* 0x00: offset of its SVECTOR vertex array */
+    u_long n_vertices;   /* 0x04 */
     u_long normals;      /* 0x08 */
     u8 unk0c[4];
     u_long faces;        /* 0x10 */

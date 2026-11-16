@@ -19,6 +19,7 @@
 #include <st/gfx.h>
 #include <st/funcs.h>
 #include <st/cd.h>
+#include <st/light.h>
 
 /* PSX.EXE program table indices. */
 #define PROGRAM_TITLE 1
@@ -53,9 +54,9 @@ void func_80014a30(void)
     func_8003bc10();
     func_80044674();
     func_800559bc();
-    func_80032058();
+    lighting_load_defaults();
     func_80016508();
-    func_8003216c();
+    lighting_build_matrices();
     SsSetMVol(127, 127);
     if (*MAILBOX_BYTE_1 == MAILBOX_CONTINUE) {
         RECT rect = {0, 0, 320, 480};
@@ -79,7 +80,7 @@ void func_80014a30(void)
     } else {
         func_80014544();
     }
-    func_8003306c();
+    lighting_start();
     func_80044ee8();
     func_8003eaf8();
     func_80015144(DAT_8009c888, 0x56400);

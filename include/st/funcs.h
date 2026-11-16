@@ -12,13 +12,6 @@
 #include <LIBGPU.H>
 
 void func_80026afc(VECTOR *a, SVECTOR *b);
-void func_80032058(void);
-void func_80031efc(u_long *buf, u_long size);
-void func_8003216c(void);
-void func_8003306c(void);
-void func_800340c4(void);
-void func_800341a0(void);
-void func_80034224(void);
 void func_80034f48(void);
 void func_8003509c(void);
 void func_80035120(void);

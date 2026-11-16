@@ -11,6 +11,7 @@
 #include <st/gfx.h>
 #include <st/mesh.h>
 #include <st/scratch.h>
+#include <st/light.h>
 
 /* Texture fields shared by the textured primitive kinds. */
 typedef struct {
@@ -153,67 +154,67 @@ void func_80017d28(u32 t, int flags)
 
     sp->unk394 = cur;
     if (flags & 0x20) {
-        to = &DAT_8018ca38[2];
+        to = &lighting.light[47];
         s = 4096 - t;
         sp->unk64 = cur->unk68;
         sp->unk394 = to;
         sp->unk68 = cur->unk6A;
-        m[0][0] = (to->color[0][0] * s + cur->color[0][0] * t) >> 12;
-        m[0][1] = (to->color[0][1] * s + cur->color[0][1] * t) >> 12;
-        m[0][2] = (to->color[0][2] * s + cur->color[0][2] * t) >> 12;
-        m[1][0] = (to->color[1][0] * s + cur->color[1][0] * t) >> 12;
-        m[1][1] = (to->color[1][1] * s + cur->color[1][1] * t) >> 12;
-        m[1][2] = (to->color[1][2] * s + cur->color[1][2] * t) >> 12;
-        m[2][0] = (to->color[2][0] * s + cur->color[2][0] * t) >> 12;
-        m[2][1] = (to->color[2][1] * s + cur->color[2][1] * t) >> 12;
-        m[2][2] = (to->color[2][2] * s + cur->color[2][2] * t) >> 12;
-        back1.r = (to->back[0] * s + cur->back[0] * t) >> 12;
-        back1.g = (to->back[1] * s + cur->back[1] * t) >> 12;
-        back1.b = (to->back[2] * s + cur->back[2] * t) >> 12;
+        m[0][0] = (to->color.m[0][0] * s + cur->color.m[0][0] * t) >> 12;
+        m[0][1] = (to->color.m[0][1] * s + cur->color.m[0][1] * t) >> 12;
+        m[0][2] = (to->color.m[0][2] * s + cur->color.m[0][2] * t) >> 12;
+        m[1][0] = (to->color.m[1][0] * s + cur->color.m[1][0] * t) >> 12;
+        m[1][1] = (to->color.m[1][1] * s + cur->color.m[1][1] * t) >> 12;
+        m[1][2] = (to->color.m[1][2] * s + cur->color.m[1][2] * t) >> 12;
+        m[2][0] = (to->color.m[2][0] * s + cur->color.m[2][0] * t) >> 12;
+        m[2][1] = (to->color.m[2][1] * s + cur->color.m[2][1] * t) >> 12;
+        m[2][2] = (to->color.m[2][2] * s + cur->color.m[2][2] * t) >> 12;
+        back1.r = (to->back.r * s + cur->back.r * t) >> 12;
+        back1.g = (to->back.g * s + cur->back.g * t) >> 12;
+        back1.b = (to->back.b * s + cur->back.b * t) >> 12;
         gte_SetColorMatrix(m);
         gte_SetBackColor(back1.r, back1.g, back1.b);
     } else if (flags & 0x10) {
-        to = &DAT_8018ca38[1];
+        to = &lighting.light[46];
         sp->unk64 = cur->unk68;
         s = 4096 - t;
         sp->unk394 = to;
         sp->unk68 = cur->unk6A;
-        m[0][0] = ((to->color[0][0] + cur->color[0][0]) * s) >> 13;
-        m[0][1] = ((to->color[0][1] + cur->color[0][1]) * s) >> 13;
-        m[0][2] = ((to->color[0][2] + cur->color[0][2]) * s) >> 13;
-        m[1][0] = ((to->color[1][0] + cur->color[1][0]) * s) >> 13;
-        m[1][1] = ((to->color[1][1] + cur->color[1][1]) * s) >> 13;
-        m[1][2] = ((to->color[1][2] + cur->color[1][2]) * s) >> 13;
-        m[2][0] = ((to->color[2][0] + cur->color[2][0]) * s) >> 13;
-        m[2][1] = ((to->color[2][1] + cur->color[2][1]) * s) >> 13;
-        m[2][2] = ((to->color[2][2] + cur->color[2][2]) * s) >> 13;
-        back2.r = ((to->back[0] + cur->back[0]) * s) >> 13;
-        back2.g = ((to->back[1] + cur->back[1]) * s) >> 13;
-        back2.b = ((to->back[2] + cur->back[2]) * s) >> 13;
+        m[0][0] = ((to->color.m[0][0] + cur->color.m[0][0]) * s) >> 13;
+        m[0][1] = ((to->color.m[0][1] + cur->color.m[0][1]) * s) >> 13;
+        m[0][2] = ((to->color.m[0][2] + cur->color.m[0][2]) * s) >> 13;
+        m[1][0] = ((to->color.m[1][0] + cur->color.m[1][0]) * s) >> 13;
+        m[1][1] = ((to->color.m[1][1] + cur->color.m[1][1]) * s) >> 13;
+        m[1][2] = ((to->color.m[1][2] + cur->color.m[1][2]) * s) >> 13;
+        m[2][0] = ((to->color.m[2][0] + cur->color.m[2][0]) * s) >> 13;
+        m[2][1] = ((to->color.m[2][1] + cur->color.m[2][1]) * s) >> 13;
+        m[2][2] = ((to->color.m[2][2] + cur->color.m[2][2]) * s) >> 13;
+        back2.r = ((to->back.r + cur->back.r) * s) >> 13;
+        back2.g = ((to->back.g + cur->back.g) * s) >> 13;
+        back2.b = ((to->back.b + cur->back.b) * s) >> 13;
         gte_SetColorMatrix(m);
         gte_SetBackColor(back2.r, back2.g, back2.b);
     } else if (flags & 0x8) {
-        to = &DAT_8018ca38[0];
+        to = &lighting.light[45];
         sp->unk64 = cur->unk68;
         sp->unk394 = to;
         sp->unk68 = cur->unk6A;
-        m[0][0] = ((to->color[0][0] + cur->color[0][0]) * t) >> 13;
-        m[0][1] = ((to->color[0][1] + cur->color[0][1]) * t) >> 13;
-        m[0][2] = ((to->color[0][2] + cur->color[0][2]) * t) >> 13;
-        m[1][0] = ((to->color[1][0] + cur->color[1][0]) * t) >> 13;
-        m[1][1] = ((to->color[1][1] + cur->color[1][1]) * t) >> 13;
-        m[1][2] = ((to->color[1][2] + cur->color[1][2]) * t) >> 13;
-        m[2][0] = ((to->color[2][0] + cur->color[2][0]) * t) >> 13;
-        m[2][1] = ((to->color[2][1] + cur->color[2][1]) * t) >> 13;
-        m[2][2] = ((to->color[2][2] + cur->color[2][2]) * t) >> 13;
-        back3.r = ((to->back[0] + cur->back[0]) * t) >> 13;
-        back3.g = ((to->back[1] + cur->back[1]) * t) >> 13;
-        back3.b = ((to->back[2] + cur->back[2]) * t) >> 13;
+        m[0][0] = ((to->color.m[0][0] + cur->color.m[0][0]) * t) >> 13;
+        m[0][1] = ((to->color.m[0][1] + cur->color.m[0][1]) * t) >> 13;
+        m[0][2] = ((to->color.m[0][2] + cur->color.m[0][2]) * t) >> 13;
+        m[1][0] = ((to->color.m[1][0] + cur->color.m[1][0]) * t) >> 13;
+        m[1][1] = ((to->color.m[1][1] + cur->color.m[1][1]) * t) >> 13;
+        m[1][2] = ((to->color.m[1][2] + cur->color.m[1][2]) * t) >> 13;
+        m[2][0] = ((to->color.m[2][0] + cur->color.m[2][0]) * t) >> 13;
+        m[2][1] = ((to->color.m[2][1] + cur->color.m[2][1]) * t) >> 13;
+        m[2][2] = ((to->color.m[2][2] + cur->color.m[2][2]) * t) >> 13;
+        back3.r = ((to->back.r + cur->back.r) * t) >> 13;
+        back3.g = ((to->back.g + cur->back.g) * t) >> 13;
+        back3.b = ((to->back.b + cur->back.b) * t) >> 13;
         gte_SetColorMatrix(m);
         gte_SetBackColor(back3.r, back3.g, back3.b);
     } else {
-        gte_SetBackColor(cur->back[0], cur->back[1], cur->back[2]);
-        gte_SetColorMatrix(cur->color);
+        gte_SetBackColor(cur->back.r, cur->back.g, cur->back.b);
+        gte_SetColorMatrix(cur->color.m);
         sp->unk64 = cur->unk68;
         sp->unk68 = cur->unk6A;
     }
