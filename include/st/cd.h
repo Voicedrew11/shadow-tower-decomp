@@ -68,9 +68,10 @@ typedef struct {
     StCdRequest *unk9D4;
     StCdRequest *unk9D8;
     StArchive archives[ST_ARCHIVES];
-    u8 unkA00[0xa6c - 0xa00];
+    StArchive unkA00;    /* 0xa00: a fourth archive table (func_8005ad00 seeks to member 1) */
+    u8 unkA0C[0xa6c - 0xa0c];
     CdlFILE unkA6C; /* \LOAD02.TIM;1, searched by func_800210f4, read by func_80021158 */
-    u_long *unkA84;      /* 0xa84: load cursor into DAT_80088c88, which follows this block (src/st/menu_pics.c) */
+    u_long *unkA84;      /* 0xa84: load cursor into DAT_80088c88, which follows this block (src/st/menu.c) */
 } StCdState;
 
 extern StCdState cd_state;

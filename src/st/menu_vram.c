@@ -1,7 +1,8 @@
 /*
  * ST.EXE: saving and restoring the VRAM the memory card and option screens
- * draw over (WIP module; one translation unit with src/st/card.c and the
- * screens before it: GCC merged their small RECT constants).
+ * draw over (WIP module). Its own translation unit: its RECT literals
+ * (.sdata 0x800880e4..0x8008810c) repeat src/st/menu.c's {896, 256, 64, 256}
+ * and {896, 0, 64, 256} instead of merging with them.
  */
 #include <kf/lib/address.h>
 #include <kf/lib/types.h>

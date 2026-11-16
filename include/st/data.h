@@ -59,17 +59,20 @@ typedef struct {
     u16 unk4;
     u16 unk6;
     u16 unk8;            /* 0x8: shown by the status menu */
-    u8 unkA[4];
+    u16 unkA;            /* 0xa: least of unkBA[0..2] (func_8005a3a8) */
+    u16 unkC;            /* 0xc: greatest of unkBA[0..2] */
     u16 unkE;            /* 0xe: shown by the stats menu */
     u16 unk10;           /* 0x10 */
     u16 unk12;           /* 0x12..0x18: player_hit's defence terms */
     u16 unk14;
     u16 unk16;
     u16 unk18;
-    u8 unk1A[0x1e - 0x1a];
+    u16 unk1A;           /* 0x1a: func_8005a3a8 */
+    u16 unk1C;
     u16 unk1E;           /* 0x1e: divides player_take_damage's shake time */
     u16 unk20;           /* 0x20: scales player_hit's status-time limits */
-    u8 unk22[0x26 - 0x22];
+    u16 unk22;           /* 0x22: func_8005a3a8 */
+    u16 unk24;
     u8 unk26;
     u8 unk27;            /* 0x27: shown by the map menu */
     u16 unk28;
@@ -90,9 +93,11 @@ typedef struct {
     u16 unkB6;           /* 0xb6: player_hit's resistance terms */
     u16 unkB8;           /* 0xb8 */
     u16 unkBA[3];        /* 0xba: shown by the stats menu; effect_play reads them as a row */
-    u8 unkC0[0xd8 - 0xc0];
+    u16 unkC0[6];        /* 0xc0: func_8005a3a8 writes [0] only */
+    u16 unkCC[6];        /* 0xcc: func_8005a3a8 */
     u16 unkD8[6];        /* 0xd8: player_hit's per-kind defence */
-    u8 unkE4[0xe8 - 0xe4];
+    u16 unkE4;           /* 0xe4: func_8005a3a8 */
+    u8 unkE6[2];
     ViewerModel *unkE8[4]; /* 0xe8: func_80021ac4's slot positions and rotations */
     void *unkF8[4];      /* 0xf8: its slot model blocks (ModelFile, st/mesh.h) */
     void *unk108[4];     /* 0x108: its slot animation state: a StAnimSlot (anim_prepare) or
@@ -325,7 +330,7 @@ typedef struct {
     u16 unk8;
     u16 unkA;
     u16 unkC;            /* 0x0c: bits the menu loop func_80058ef4 consumes; the memory card
-                          * screens' port-select bits (src/st/card.c) */
+                          * screens' port-select bits (src/st/menu.c) */
     u8 unkE;             /* 0x0e: 1 while the controller is disconnected */
     u8 unkF;
     u8 unk10;

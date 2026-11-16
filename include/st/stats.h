@@ -1,6 +1,6 @@
 /*
  * ST.EXE player figure recomputation (func_80059dc0 .. func_8005a3a8; the
- * band P side is src/st/stats.c). It works in the scratchpad block at
+ * band P side is src/st/menu.c). It works in the scratchpad block at
  * 0x1f800000 in a layout of its own: rows of fourteen figures. Only the
  * rows the reconstructed code reads are named. WIP.
  */
