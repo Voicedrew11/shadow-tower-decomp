@@ -235,6 +235,7 @@ ST.EXE	0x8007ee90	0x6e690	0x4	unclassified	coverage-gap			payload-complement	may
 ST.EXE	0x8007eea0	0x6e6a0	0x4	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 ST.EXE	0x8007f318	0x6eb18	0xc	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 ST.EXE	0x8007f3e4	0x6ebe4	0x941c	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
+ST.EXE	0x8015d090	0x14c890	0x1ee00	bss	proven	DAT_8015d090	u8[]	asm;src/st/mesh_draw.c st.mesh_draw	WIP extent covers the offsets read so far (+0x1ecc0 .. +0x1edfc); the mesh renderers read a render-mode byte at +0x1edfc
 TITLE.EXE	0x80012000	0x800	0xa04	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 TITLE.EXE	0x80014528	0x2d28	0x4	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 TITLE.EXE	0x80016d80	0x5580	0xc	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data

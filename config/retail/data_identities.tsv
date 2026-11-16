@@ -30,6 +30,7 @@ STR.EXE	0x800c6888	0x18	cdl_file	global	bss	CdlFILE	play_movie	supported	asm;src
 STR.EXE	0x800c68a0	0x14	pad_info	global	bss	PadInfo	pad_read	supported	asm;src/str/main.c str.main	controller state and button words; COMMON in hash-bucket order (WIP spelling fits it)
 STR.EXE	0x800c68b8	0xb400	image_rgb	global	bss	u_long[2][5760]	strSetDefDecEnv	supported	asm;src/str/main.c str.main	24-bit DecDCTout slice buffers; COMMON in hash-bucket order (WIP spelling fits it)
 STR.EXE	0x800d1cc4	0x4	StCdIntrFlag	global	bss	int		supported	asm;PSYLINK map of the native STR link;LIBCD StCdInterrupt users	LIBCD streaming flag; strCallback clears it after StCdInterrupt
+ST.EXE	0x8015d090	0x1ee00	DAT_8015d090	global	bss	u8[]		candidate	asm;src/st/mesh_draw.c st.mesh_draw	unresolved large .bss object; WIP extent; mesh renderers read its render-mode byte at +0x1edfc and a word at +0x1edf8
 TITLE.EXE	0x80028abc	0x4	next_program	global	load	u8 *	main	supported	asm;src/title/main.c title.main	$gp+0; points at PSX.EXE next-program byte 0x800103f0
 TITLE.EXE	0x80028ac0	0x4	PTR_80028ac0	global	load	u8 *	main	supported	asm;src/title/main.c title.main	$gp+4; points at 0x800103f1; main stores 2 there for Continue
 TITLE.EXE	0x80028b10	0x6	pad_align	static	bss	u_char[6]	pad_set_act_align	supported	asm;src/title/main.c title.main	.sbss; $gp+84; PadSetActAlign table

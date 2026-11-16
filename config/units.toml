@@ -38,6 +38,18 @@ source = "src/str/main.c"
 profile = "probe-gcc272cdk-o2-g8"
 
 [[unit]]
+unit = "st.mesh_draw"
+image = "ST.EXE"
+source = "src/st/mesh_draw.c"
+profile = "probe-gcc272cdk-o2-g0"
+
+[[unit]]
+unit = "st.mesh_draw_nccs"
+image = "ST.EXE"
+source = "src/st/mesh_draw_nccs.c"
+profile = "probe-gcc272cdk-o2-g0"
+
+[[unit]]
 unit = "title.main"
 image = "TITLE.EXE"
 source = "src/title/main.c"
