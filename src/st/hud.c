@@ -158,6 +158,8 @@ u8 *color;
  * leading zeros are hidden and each digit picks its glyph `width` texels
  * apart from u = 96.
  */
+/* Not exact: retail forms the third digit record's index (first + 2) in $a0
+ * before the tens subtraction; this build forms it in $v1 after it. */
 ADDRESS(0x80026228, 0x2e0)
 void func_80026228(int value, int first, u8 width)
 {
@@ -200,6 +202,11 @@ void func_80026228(int value, int first, u8 width)
     hud_sprites[first + 3].u = n * width + 96;
 }
 
+/*
+ * Not exact: after the redraw block retail rematerializes &viewer in $a3 and
+ * branches to the lui in the delay slot; this build keeps $s0 and reloads
+ * the base piecewise.
+ */
 ADDRESS(0x80026508, 0x45c)
 void func_80026508(void)
 {
@@ -320,6 +327,9 @@ void func_80026964(u8 first)
 }
 
 /* Queues `value` in a free one of the five HUD number slots for 60 frames. */
+/* Not exact: retail keeps value in $a3 and -1 in $a2 and fills the first
+ * beq delay slot with the lui of DAT_801cd123; this build swaps the two
+ * registers and leaves a nop. */
 ADDRESS(0x80026a88, 0x74)
 void func_80026a88(short value)
 {
@@ -340,13 +350,15 @@ void func_80026a88(short value)
 DATA(0x80087f18, 0x4, ".sdata")
 static s32 DAT_80087f18 = 0;
 
+/* Not exact: retail fills the delay slot of the unk218 == 1 test with the
+ * lui of DAT_801cd123 from the branch target; this build leaves a nop. */
 ADDRESS(0x80026afc, 0x2d8)
 void func_80026afc(VECTOR *pos, SVECTOR *rot)
 {
     RECT unused;
     CVECTOR color;
     StHudSprite *frame;
-    short level;
+    int level;
     int i;
 
     func_80057b10();
@@ -362,10 +374,10 @@ void func_80026afc(VECTOR *pos, SVECTOR *rot)
         frame = &hud_sprites[26 + viewer.unk15E];
         DAT_80087f18 = (DAT_80087f18 + 1) % 32;
         if (DAT_80087f18 < 16)
-            level = 8 - DAT_80087f18;
+            level = 8 - (u16)DAT_80087f18;
         else
-            level = DAT_80087f18 - 24;
-        color.b = color.g = color.r = (u8)level * 4 + 96;
+            level = (u16)DAT_80087f18 - 24;
+        color.b = color.g = color.r = level * 4 + 96;
         func_80027d18(&frame->r, &color, 257, 1);
         func_80026964(26);
     }
