@@ -23,6 +23,7 @@ from typing import Callable, Iterable, Sequence
 from scripts.kf.mips_elf import (
     BSS_SECTION_SYMBOL,
     DATA_SECTION_SYMBOL,
+    JUMPTABLE_SECTION_SYMBOL,
     RODATA_SECTION_SYMBOL,
     STB_GLOBAL,
     STB_LOCAL,
@@ -54,13 +55,55 @@ from scripts.kf.retail import (
 )
 
 
-# Working name for a module's anonymous small-data literal range. It never
-# reaches an object's symbol table: module packing rewrites every reference to
-# the .sdata section symbol plus the range's packed offset, as ASPSX does for
-# the compiler's local `$LC` labels.
+# Working name for a module's anonymous small-data literal range (the first;
+# later ranges add `_<index>`). It never reaches an object's symbol table:
+# module packing rewrites every reference to the .sdata section symbol plus
+# the range's packed offset, as ASPSX does for the compiler's local `$LC`
+# labels.
 SDATA_LITERAL_SYMBOL = "$sdata_literals"
 SDATA_SECTION_SYMBOL = ".sdata"
 SBSS_SECTION_SYMBOL = ".sbss"
+
+
+def literal_symbol(index: int) -> str:
+    return SDATA_LITERAL_SYMBOL if index == 0 else f"{SDATA_LITERAL_SYMBOL}_{index}"
+
+
+def _ranges(value) -> tuple[tuple[int, int], ...]:
+    """One (va, size) range or a sequence of them, as a tuple of ranges."""
+    if not value:
+        return ()
+    if isinstance(value[0], int):
+        return (tuple(value),)
+    return tuple(tuple(item) for item in value)
+
+
+@dataclass(frozen=True)
+class Owned:
+    """The anonymous ranges a module claims, and the symbol each resolves to.
+
+    ``.rodata`` holds the unit's constants (RODATA), ``.rdata`` its switch
+    tables (JUMPTABLES); each SDATA literal range has a working symbol that
+    module packing turns into a ``.sdata`` offset.
+    """
+
+    rodata: tuple[int, int] | None = None
+    sdata: tuple[tuple[int, int], ...] = ()
+    jumptables: tuple[int, int] | None = None
+
+    def resolve(self, address: int) -> tuple[str, int] | None:
+        """(symbol, range start) of the range holding ``address``."""
+        for symbol, extent in ((RODATA_SECTION_SYMBOL, self.rodata),
+                               (JUMPTABLE_SECTION_SYMBOL, self.jumptables)):
+            if extent is not None and extent[0] <= address < extent[0] + extent[1]:
+                return symbol, extent[0]
+        for index, (start, size) in enumerate(self.sdata):
+            if start <= address < start + size:
+                return literal_symbol(index), start
+        return None
+
+    def __bool__(self) -> bool:
+        return bool(self.rodata or self.sdata or self.jumptables)
 
 
 __all__ = (
@@ -432,10 +475,9 @@ def _resolve_symbol(
     function: Function,
     target: int,
     target_name: str,
-    rodata: tuple[int, int] | None = None,
+    owned: Owned | None = None,
     *,
     data_reference: bool = False,
-    sdata: tuple[int, int] | None = None,
 ) -> tuple[str, int]:
     named = named_data_referent(
         catalog, function.image, sanitize_symbol(target_name, "")
@@ -444,21 +486,18 @@ def _resolve_symbol(
         # A biased data base can coincide with unrelated code or RODATA. Use
         # the reviewed allocation, then express unit-owned literals/tables
         # through their actual read-only section contribution.
-        if rodata is not None and rodata[0] <= named.va < rodata[0] + rodata[1]:
-            return RODATA_SECTION_SYMBOL, target - rodata[0]
-        if sdata is not None and sdata[0] <= named.va < sdata[0] + sdata[1]:
-            return SDATA_LITERAL_SYMBOL, target - sdata[0]
+        hit = owned.resolve(named.va) if owned else None
+        if hit is not None:
+            return hit[0], target - hit[1]
         return named.name, target - named.va
     if function.contains(target):
         return SECTION_SYMBOL, target - function.va
-    if rodata is not None and rodata[0] <= target < rodata[0] + rodata[1]:
-        # The owning module's read-only contribution: jump tables and string
-        # literals compare as .rodata offsets, the way the compiler emits them.
-        return RODATA_SECTION_SYMBOL, target - rodata[0]
-    if sdata is not None and sdata[0] <= target < sdata[0] + sdata[1]:
-        # The owning module's small-data literals; module packing turns the
-        # working symbol into a .sdata offset.
-        return SDATA_LITERAL_SYMBOL, target - sdata[0]
+    hit = owned.resolve(target) if owned else None
+    if hit is not None:
+        # The owning module's constants, switch tables or small-data literals
+        # compare as offsets into the section the compiler emitted them to;
+        # module packing turns a literal's working symbol into a .sdata offset.
+        return hit[0], target - hit[1]
     target_function = catalog.function_starts[function.image].get(target)
     if target_function is not None:
         return target_function.symbol, 0
@@ -536,8 +575,10 @@ def _apply_relocation(
     catalog: Catalog,
     policy: str,
     rodata: tuple[int, int] | None = None,
-    sdata: tuple[int, int] | None = None,
+    sdata=None,
     original: bytes | None = None,
+    *,
+    jumptables: tuple[int, int] | None = None,
 ) -> tuple[list[MipsRelocation], dict[str, object]]:
     # Rows of one shared HI/LO family validate against the linked bytes, not
     # the addend an earlier member of the family already wrote.
@@ -546,11 +587,11 @@ def _apply_relocation(
     target = validation.target
     offset = validation.offset
     symbol, addend = _resolve_symbol(
-        catalog, function, target, row["target_name"], rodata,
+        catalog, function, target, row["target_name"],
+        Owned(rodata, _ranges(sdata), jumptables),
         data_reference=(row["status"] == "reviewed"
                         and row["kind"] in {"mips_hi16_lo16", "mips32_candidate",
                                             "mips_gprel16"}),
-        sdata=sdata,
     )
 
     if row["kind"] == "mips26":
@@ -637,7 +678,16 @@ class Module:
     vas: tuple[int, ...]
     data: tuple[Datum, ...] = ()
     rodata: tuple[int, int] | None = None
-    sdata: tuple[int, int] | None = None
+    # SDATA literal ranges, ascending; one (va, size) pair is accepted too.
+    sdata: tuple[tuple[int, int], ...] = ()
+    jumptables: tuple[int, int] | None = None
+
+    def __post_init__(self) -> None:
+        object.__setattr__(self, "sdata", _ranges(self.sdata))
+
+    @property
+    def owned(self) -> Owned:
+        return Owned(self.rodata, self.sdata, self.jumptables)
 
     @property
     def object_name(self) -> str:
@@ -650,6 +700,10 @@ class Module:
 
     def owns_rodata(self, address: int) -> bool:
         return self.rodata is not None and self.rodata[0] <= address < self.rodata[0] + self.rodata[1]
+
+    def owns_jumptables(self, address: int) -> bool:
+        return (self.jumptables is not None
+                and self.jumptables[0] <= address < self.jumptables[0] + self.jumptables[1])
 
 
 def _get_word(blob: bytes | bytearray, offset: int) -> int:
@@ -854,9 +908,10 @@ def _module_rodata(
     module: Module, blob: bytes, text_size: int,
     reviewed: Sequence[MipsRelocation] = (),
 ) -> tuple[bytes, list[MipsRelocation]]:
-    """Rebase a module's carved read-only range: in-module code pointers become
-    .text-relative words and pointers into the range itself (a table of the
-    unit's own string literals) .rodata-relative words, each with an R_MIPS_32
+    """Rebase a module's carved read-only range (its RODATA constants or its
+    JUMPTABLES): in-module code pointers become .text-relative words and
+    pointers into the module's own read-only ranges (a table of the unit's own
+    string literals) section-relative words, each with an R_MIPS_32
     relocation. ``reviewed`` holds relocations already applied to ``blob`` from
     reviewed rows sited in the range (foreign pointers, such as an automatic
     aggregate initializer holding a global's field addresses); those words are
@@ -864,8 +919,7 @@ def _module_rodata(
     pointers) keeps its retail bytes."""
     start = module.text_start
     end = start + text_size
-    assert module.rodata is not None
-    rodata_start, rodata_size = module.rodata
+    read_only = Owned(module.rodata, (), module.jumptables)
     data = bytearray(blob)
     relocations: list[MipsRelocation] = list(reviewed)
     applied = {relocation.offset for relocation in reviewed}
@@ -873,12 +927,13 @@ def _module_rodata(
         if offset in applied:
             continue
         word = _get_word(data, offset)
+        hit = read_only.resolve(word)
         if start <= word < end:
             _put_word(data, offset, word - start)
             relocations.append(MipsRelocation(offset, "R_MIPS_32", SECTION_SYMBOL))
-        elif rodata_start <= word < rodata_start + rodata_size:
-            _put_word(data, offset, word - rodata_start)
-            relocations.append(MipsRelocation(offset, "R_MIPS_32", RODATA_SECTION_SYMBOL))
+        elif hit is not None:
+            _put_word(data, offset, word - hit[1])
+            relocations.append(MipsRelocation(offset, "R_MIPS_32", hit[0]))
     relocations.sort(key=lambda relocation: relocation.offset)
     return bytes(data), relocations
 
@@ -945,6 +1000,7 @@ def _module_object(
     *,
     load_padding: Callable[[int, int], bytes] | None = None,
     rodata_relocations: Sequence[MipsRelocation] = (),
+    jumptable_blob: bytes | None = None,
 ) -> ModuleImage:
     """Concatenate a module's carved functions into one .text section.
 
@@ -988,21 +1044,22 @@ def _module_object(
     data, data_symbols, data_relocations, bss_size, bss_symbols = _module_data(
         module, data_blobs or {}, load_padding
     )
-    # The SDATA literal range packs among the unit's named .sdata claims in
-    # address order; only its packed offset survives into the object.
+    # The SDATA literal ranges pack among the unit's named .sdata claims in
+    # address order; only their packed offsets survive into the object.
     sdata_module = module
-    if module.sdata is not None:
-        literal = Datum(module.sdata[0], module.sdata[1], SDATA_LITERAL_SYMBOL,
-                        "load", "static", ".sdata")
+    literal_names = {literal_symbol(index) for index in range(len(module.sdata))}
+    if module.sdata:
+        literals = tuple(Datum(va, size, literal_symbol(index), "load", "static", ".sdata")
+                         for index, (va, size) in enumerate(module.sdata))
         sdata_module = replace(module, data=tuple(sorted(
-            (*module.data, literal), key=lambda datum: datum.va)))
+            (*module.data, *literals), key=lambda datum: datum.va)))
     sdata, sdata_symbols, sdata_relocations, _, _ = _module_data(
         sdata_module, data_blobs or {}, load_padding, section=".sdata"
     )
     literal_offsets = {symbol.name: symbol.value for symbol in sdata_symbols
-                       if symbol.name == SDATA_LITERAL_SYMBOL}
+                       if symbol.name in literal_names}
     sdata_symbols = [symbol for symbol in sdata_symbols
-                     if symbol.name != SDATA_LITERAL_SYMBOL]
+                     if symbol.name not in literal_names]
     data_blob = bytearray(data)
     data_relocations = _module_function_data_relocations(
         data_blob, data_relocations, function_offsets
@@ -1052,6 +1109,11 @@ def _module_object(
             raise ValueError(f"module {module.unit}: RODATA range was not carved")
         rodata, rodata_relocations = _module_rodata(
             module, rodata_blob, len(text), rodata_relocations)
+    rdata, rdata_relocations = b"", []
+    if module.jumptables is not None:
+        if jumptable_blob is None:
+            raise ValueError(f"module {module.unit}: JUMPTABLES range was not carved")
+        rdata, rdata_relocations = _module_rodata(module, jumptable_blob, len(text))
     # The section must carry the strongest constraint used to pack its members,
     # not an unrelated four-byte default. Relink validation still requires one
     # consistent base for every member; changing ELF alignment cannot fix gaps.
@@ -1072,7 +1134,7 @@ def _module_object(
             sdata_relocations=sdata_relocations,
             sdata_alignment=max((*(d.alignment for d in module.data
                                    if d.section_name == ".sdata"),
-                                 *((4,) if module.sdata is not None else ())), default=1),
+                                 *((4,) if module.sdata else ())), default=1),
             bss_size=bss_size,
             bss_symbols=bss_symbols,
             bss_alignment=max((4 if d.reservation_size else d.alignment
@@ -1082,13 +1144,16 @@ def _module_object(
             sbss_alignment=4,
             rodata=rodata,
             rodata_relocations=rodata_relocations,
+            rdata=rdata,
+            rdata_relocations=rdata_relocations,
         ),
-        [*relocations, *data_relocations, *sdata_relocations, *rodata_relocations],
+        [*relocations, *data_relocations, *sdata_relocations, *rodata_relocations,
+         *rdata_relocations],
         len(text),
         body_total,
         len(data) + len(sdata),
         bss_size + sbss_size,
-        len(rodata),
+        len(rodata) + len(rdata),
     )
 
 
@@ -1142,15 +1207,10 @@ def delink(
             key=lambda item: item.va,
         )
         # An initialized pointer table may address a literal owned by the
-        # same unit; its reloc must use that unit's .rodata section.
-        rodata_by_datum = {
-            datum.va: module.rodata
-            for module in selected_modules if module.rodata is not None
-            for datum in module.data if datum.storage == "load"
-        }
-        sdata_by_datum = {
-            datum.va: module.sdata
-            for module in selected_modules if module.sdata is not None
+        # same unit; its reloc must use that unit's read-only section.
+        owned_by_datum = {
+            datum.va: module.owned
+            for module in selected_modules if module.owned
             for datum in module.data if datum.storage == "load"
         }
         rows_by_owner: dict[int, list[dict[str, str]]] = defaultdict(list)
@@ -1181,16 +1241,11 @@ def delink(
         used_rows: list[dict[str, object]] = []
         withheld_functions: list[dict[str, object]] = []
         carved: dict[int, tuple[bytes, list[MipsRelocation]]] = {}
-        # Members of a module that claims a RODATA range are carved a second
-        # time with that range resolving to .rodata offsets.
-        rodata_by_function = {
-            va: module.rodata
-            for module in selected_modules if module.rodata is not None
-            for va in module.vas
-        }
-        sdata_by_function = {
-            va: module.sdata
-            for module in selected_modules if module.sdata is not None
+        # Members of a module that claims RODATA/JUMPTABLES/SDATA ranges are
+        # carved a second time with those ranges resolving to section offsets.
+        owned_by_function = {
+            va: module.owned
+            for module in selected_modules if module.owned
             for va in module.vas
         }
         carved_rodata: dict[int, tuple[bytes, list[MipsRelocation]]] = {}
@@ -1240,7 +1295,7 @@ def delink(
             # Shared HI/LO halves are emitted once; the ELF writer decides
             # REL order (mips_elf.rel_order) from the site and each HI16's pair.
             function_relocations.sort(key=lambda item: item.offset)
-            if function.va in rodata_by_function or function.va in sdata_by_function:
+            if function.va in owned_by_function:
                 module_blob = bytearray(executable[start:start + function.size])
                 module_relocations: list[MipsRelocation] = []
                 for row in rows_by_owner[function.va]:
@@ -1250,11 +1305,11 @@ def delink(
                     if any(site in ambiguous for site in sites):
                         continue
                     try:
+                        owned = owned_by_function[function.va]
                         relocations, _used = _apply_relocation(
                             module_blob, function, row, catalog, policy,
-                            rodata_by_function.get(function.va),
-                            sdata_by_function.get(function.va),
-                            original=linked,
+                            owned.rodata, owned.sdata, original=linked,
+                            jumptables=owned.jumptables,
                         )
                     except ValueError:
                         continue
@@ -1303,11 +1358,11 @@ def delink(
             owner = _DataOwner(image, datum)
             datum_relocations: list[MipsRelocation] = []
             for row in rows_by_datum[datum.va]:
+                owned = owned_by_datum.get(datum.va, Owned())
                 try:
                     relocations, used = _apply_relocation(
                         blob, owner, row, catalog, policy,
-                        rodata_by_datum.get(datum.va),
-                        sdata_by_datum.get(datum.va),
+                        owned.rodata, owned.sdata, jumptables=owned.jumptables,
                     )
                 except ValueError as error:
                     withheld_rows.append(_withheld(row, None, f"data:{error}"))
@@ -1318,8 +1373,7 @@ def delink(
         # Anonymous small-data literals are carved as bytes; a pointer word
         # inside one would need a reviewed row like any claimed datum.
         for module in selected_modules:
-            if module.sdata is not None:
-                va, size = module.sdata
+            for va, size in module.sdata:
                 start = expected.file_offset(va)
                 blob = executable[start:start + size]
                 if len(blob) != size:
@@ -1343,17 +1397,19 @@ def delink(
                 raise ValueError(f"module {module.unit}: functions not carved: {missing}")
             module_carved = dict(carved)
             module_carved.update({va: carved_rodata[va] for va in module.vas if va in carved_rodata})
-            rodata_blob = None
+            blobs = {}
+            for kind, extent in (("RODATA", module.rodata), ("JUMPTABLES", module.jumptables)):
+                if extent is not None:
+                    blob_start = expected.file_offset(extent[0])
+                    blobs[kind] = executable[blob_start:blob_start + extent[1]]
+                    if len(blobs[kind]) != extent[1]:
+                        raise ValueError(f"{exe_path}: truncated {kind} range for {module.unit}")
             rodata_reviewed: list[MipsRelocation] = []
-            if module.rodata is not None:
-                rodata_start = expected.file_offset(module.rodata[0])
-                rodata_blob = executable[rodata_start:rodata_start + module.rodata[1]]
-                if len(rodata_blob) != module.rodata[1]:
-                    raise ValueError(f"{exe_path}: truncated RODATA range for {module.unit}")
-                # Reviewed pointer words inside the range (an automatic
+            if "RODATA" in blobs:
+                # Reviewed pointer words inside the constant pool (an automatic
                 # aggregate initializer's global addresses) validate and
                 # resolve like a claimed datum's.
-                patched = bytearray(rodata_blob)
+                patched = bytearray(blobs["RODATA"])
                 range_owner = _DataOwner(image, Datum(
                     module.rodata[0], module.rodata[1], "", "load"))
                 for row in rows_by_rodata[module.unit]:
@@ -1365,12 +1421,14 @@ def delink(
                         continue
                     rodata_reviewed.extend(relocations)
                     used_rows.append(used)
-                rodata_blob = bytes(patched)
+                blobs["RODATA"] = bytes(patched)
             built = _module_object(
-                module, catalog.function_starts[image], module_carved, data_blobs, rodata_blob,
+                module, catalog.function_starts[image], module_carved, data_blobs,
+                blobs.get("RODATA"),
                 load_padding=lambda va, size: executable[
                     expected.file_offset(va):expected.file_offset(va) + size],
                 rodata_relocations=rodata_reviewed,
+                jumptable_blob=blobs.get("JUMPTABLES"),
             )
             _write_bytes_if_changed(module_output / module.object_name, built.data)
             live_modules.add(module.object_name)

@@ -22,7 +22,7 @@
 #include <st/scratch.h>
 #include <st/vis.h>
 
-RODATA(0x80011d1c, 0x20)
+JUMPTABLES(0x80011d1c, 0x20)
 SDATA(0x8008802c, 0x10)
 
 /* Takes `damage` hit points, pushes the viewer away from `from` and starts

@@ -75,25 +75,33 @@ binding rules are structural, in the spirit of Gruntz's `RVA()`:
   manifest itself reads as the recovered link order; and
 - an address is claimed by at most one unit.
 
-A unit may also claim its read-only contribution once:
+A unit may also claim its read-only contributions, each once:
 
 ```c
 RODATA(0x8001235c, 0x178)
+JUMPTABLES(0x80011490, 0x18)
 ```
 
-A compiled object keeps its switch jump tables and string literals in
-`.rodata`, in emission order; the retail linker laid each object's `.rdata`
-into the data region in link order, so that range is a contiguous slice of
-the image. The delinker carves the claimed bytes into the module object's
-`.rodata`, rewrites entries that point into the unit's own code into
-`.text`-relative words, and resolves the code's references to `.rodata`
-offsets, so objdiff compares tables and literals too. Source literals must
-therefore appear in retail order, which the address-ordered functions give
-for free; a string that lives inside the range is spelled as the literal the
-original used, not as a named extern.
+The compiler writes a unit's constants (string literals, aggregate
+initializers, const data) and its switch jump tables to `.rdata`. Retail
+`ST.EXE` lays out every unit's constants before any unit's tables, each group
+in link order, with the SDK libraries' read-only data after the tables; the
+build therefore moves each constant block to `.rodata`
+(`separate_read_only` in `scripts/psxbuild/sdk.py`) and the link script
+places `.rodata` before `.rdata`. A unit's constant pool ends on an eight-byte
+boundary (its zero tail is part of the claim). `RODATA()` claims the
+constants, `JUMPTABLES()` the tables; each is a contiguous slice of the image.
+The delinker carves them into the module object's `.rodata` and `.rdata`,
+rewrites entries that point into the unit's own code into `.text`-relative
+words, and resolves the code's references to section offsets, so objdiff
+compares tables and literals too. Source literals must therefore appear in
+retail order, which the address-ordered functions give for free; a string
+that lives inside the range is spelled as the literal the original used, not
+as a named extern.
 
 A unit compiled with a small-data profile (`small_data = 8`) may also claim
-its anonymous `.sdata` constants once:
+its anonymous `.sdata` constants, one ascending range per run between its
+named small data:
 
 ```c
 SDATA(0x8006d6a4, 0xb)
@@ -105,8 +113,8 @@ is an `.sdata` member, while the same text initializing a larger array keeps
 the array's type and stays in `.rdata`. ASPSX 2.79 addresses such data with
 one `$gp`-relative instruction (native patch type 100, `R_MIPS_GPREL16` in the
 ELF view), so `-G8` changes code as well as placement. The delinker packs the
-claimed range among the unit's `.sdata` `DATA()` claims in address order and
-resolves code references to it as `.sdata` offsets; the range never becomes a
+claimed ranges among the unit's `.sdata` `DATA()` claims in address order and
+resolves code references to them as `.sdata` offsets; a range never becomes a
 symbol. Small statics land in `.sbss` and resolve through that section symbol;
 declare their request in `data_reservations.tsv`. `PSX.EXE`'s `main` is the
 first `-G8` unit: its program index and three byte pointers are the
@@ -130,7 +138,9 @@ static u32 frame_pacer_vsync_count = 0;
 
 The claim binds the declarator to the `data_identities.tsv` row at that
 address: the name and size must match, the storage must be `load` or `bss`, a
-datum is claimed by one unit only, and data claims ascend inside a source.
+datum is claimed by one unit only, and the claims of each section ascend
+inside a source (GCC writes a section's data in source order; a unit's
+`.sbss` statics may precede its later `.sdata` words).
 Data need not be contiguous with the unit's code. The bindings file records
 data claims with `kind=data`.
 
@@ -226,7 +236,7 @@ strict-100% snapshot as `kf status` and replaces only the text between
 
 `kf check` refreshes the block, and `kf analyze` ends in that check. The check
 also requires every vendored source-verification function to remain 100% and
-compares every owned `.data`, `.rodata`, and `.bss` contribution against the
+compares every owned `.data`, `.rodata`, `.rdata`, and `.bss` contribution against the
 retail-delinked object by default. It fails on any byte, exact object-section
 extent (including assembler-owned writable/switch-table zero tails materialized
 by the delinker),
@@ -258,7 +268,8 @@ defines = ["ST_FDAT_012"]
   the definition name, so addresses stay image-qualified. The claimed size
   must still equal that image's body size; a size mismatch means the images
   do not share the body and the difference has to be expressed in source.
-  `RODATA()` ranges are image-specific and cannot be name-bound.
+  `RODATA()`, `JUMPTABLES()` and `SDATA()` ranges are image-specific and
+  cannot be name-bound.
 - `defines` adds `-DNAME` (or `-DNAME=value`) to the preprocessor run for
   that unit only. Use it for constants that provably differ between the
   images, not to fork whole bodies silently.

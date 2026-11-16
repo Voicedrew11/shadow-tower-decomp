@@ -135,9 +135,9 @@ void func_80042900(void)
             viewer.unk15B[1] = viewer.unk159[1];
     }
     if (viewer.unk218 != 1) {
-        if (viewer.unk187 == 0 && (DAT_801cd180.unk4 & DAT_801cd180.unk32))
+        if (viewer.unk187 == 0 && (DAT_801cd180.unk4 & DAT_801cd180.unk22[8]))
             func_8003f4ec(0, 0);
-        if (DAT_801cd180.unk4 & DAT_801cd180.unk34)
+        if (DAT_801cd180.unk4 & DAT_801cd180.unk22[9])
             func_8003f4ec(0, 1);
     }
 }
@@ -147,8 +147,8 @@ void func_80042b9c(void)
 {
     u8 mode = viewer.unk218;
 
-    if (mode != 4 && (DAT_801cd180.unk4 & DAT_801cd180.unk36) && !DAT_801cd180.unk12) {
-        DAT_801cd180.unk4 &= ~DAT_801cd180.unk36;
+    if (mode != 4 && (DAT_801cd180.unk4 & DAT_801cd180.unk22[10]) && !DAT_801cd180.unk12) {
+        DAT_801cd180.unk4 &= ~DAT_801cd180.unk22[10];
         if (mode == 0)
             func_80055374(&viewer.x, &viewer.unk278);
     }

@@ -21,7 +21,7 @@
 #include <st/scratch.h>
 #include <st/vis.h>
 
-RODATA(0x80011cfc, 0x20)
+JUMPTABLES(0x80011cfc, 0x20)
 
 ADDRESS(0x8003c95c, 0x188)
 void func_8003c95c(int r, int g, int b, int arg3, int arg4)

@@ -125,7 +125,8 @@ static void pad_read(void);
 static void load_title_data(void);
 static void title_menu(void);
 
-RODATA(0x80012000, 0x164)
+RODATA(0x80012000, 0x148)
+JUMPTABLES(0x80012148, 0x1c)
 SDATA(0x80028ac4, 0x28)
 
 DATA(0x80028abc, 0x4, ".sdata")

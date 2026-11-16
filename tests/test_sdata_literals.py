@@ -23,7 +23,7 @@ from scripts.kf.delink import (
     _module_object,
     decode_hi_lo_target,
 )
-from scripts.kf.manifest import Profile, _sdata_range
+from scripts.kf.manifest import Profile, _sdata_ranges
 from scripts.kf.model import DataClaim, RodataClaim
 from scripts.kf.mips_elf import MipsRelocation
 from tests.test_delink import elf_sections, elf_symbols
@@ -38,14 +38,22 @@ class SdataRangeValidationTests(unittest.TestCase):
     source = Path('src/game/unit.c')
 
     def validate(self, claims, small_data=8, data=(), rodata=None):
-        return _sdata_range(self.source, 'GAME.EXE', profile(small_data), claims,
-                            data, [], rodata)
+        own = (('RODATA', *rodata),) if rodata else ()
+        return _sdata_ranges(self.source, 'GAME.EXE', profile(small_data), claims,
+                             data, [], own)
 
     @kf2_images
     def test_one_word_aligned_range_under_a_small_data_profile(self):
         claim = RodataClaim(0x8006D6A4, 0xB, 3)
-        self.assertEqual(self.validate((claim,)), (0x8006D6A4, 0xB))
-        self.assertIsNone(self.validate(()))
+        self.assertEqual(self.validate((claim,)), ((0x8006D6A4, 0xB),))
+        self.assertEqual(self.validate(()), ())
+
+    @kf2_images
+    def test_ranges_interleaved_with_named_small_data_ascend(self):
+        first, second = RodataClaim(0x8006D6A4, 0x8, 3), RodataClaim(0x8006D6B0, 4, 4)
+        named = (DataClaim(0x8006D6AC, 4, 'named', 5, '.sdata'),)
+        self.assertEqual(self.validate((first, second), data=named),
+                         ((0x8006D6A4, 0x8), (0x8006D6B0, 4)))
 
     @kf2_images
     def test_rejects_g0_misalignment_overlap_and_duplicates(self):
@@ -53,7 +61,8 @@ class SdataRangeValidationTests(unittest.TestCase):
         cases = {
             'g0': dict(claims=(claim,), small_data=0),
             'unaligned': dict(claims=(RodataClaim(0x8006D6A6, 2, 3),)),
-            'two': dict(claims=(claim, RodataClaim(0x8006D6B0, 4, 4))),
+            'descending': dict(claims=(RodataClaim(0x8006D6B0, 4, 4), claim)),
+            'overlapping': dict(claims=(claim, RodataClaim(0x8006D6AC, 4, 4))),
             'named': dict(claims=(claim,),
                           data=(DataClaim(0x8006D6A8, 4, 'named', 5, '.sdata'),)),
             'rodata': dict(claims=(claim,), rodata=(0x8006D6A0, 8)),

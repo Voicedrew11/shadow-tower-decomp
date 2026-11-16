@@ -115,7 +115,7 @@ void func_8003f4ec(u8 value, u8 slot)
         viewer.unk150[0] = value;
         viewer.unk130[0] = 0;
         viewer.unk154 = 1;
-        DAT_801cd180.unk4 &= ~DAT_801cd180.unk32;
+        DAT_801cd180.unk4 &= ~DAT_801cd180.unk22[8];
         viewer.unk130[2] = viewer.unkE8[0]->unk6;
         viewer.unk138[0] = viewer.unkE8[0]->unk8;
         viewer.unk187 = 15;
@@ -132,7 +132,7 @@ void func_8003f4ec(u8 value, u8 slot)
         if (viewer.unk190[1][0] != 0) {
             return;
         }
-        DAT_801cd180.unk4 &= ~DAT_801cd180.unk34;
+        DAT_801cd180.unk4 &= ~DAT_801cd180.unk22[9];
         viewer.unk150[slot] = value;
         viewer.unk130[slot] = 0;
         viewer.unk154 = 1;

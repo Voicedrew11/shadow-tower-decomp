@@ -101,7 +101,8 @@ static void scroll_pages_2(void);
 static void scroll_pages_3(void);
 static void play_opening_text(void);
 
-RODATA(0x80011000, 0x104)
+RODATA(0x80011000, 0xe8)
+JUMPTABLES(0x800110e8, 0x1c)
 SDATA(0x8001f7a4, 0x1c)
 
 /* VRAM x of each text page's texture page (the CLUTs sit at (0, 480)). */

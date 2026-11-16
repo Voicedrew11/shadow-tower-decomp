@@ -1,5 +1,5 @@
 /*
- * ST.EXE font glyphs, text and 2D menu primitives (src/st/text.c, WIP).
+ * ST.EXE font glyphs, text and 2D menu primitives (src/st/ui.c, WIP).
  */
 #ifndef ST_TEXT_H
 #define ST_TEXT_H
@@ -14,13 +14,6 @@ extern u16 DAT_800881a0;
 extern u16 DAT_800881a2;
 extern u16 DAT_800881ac;
 extern u16 DAT_800881ae; /* set by func_80031aec around the grid columns */
-
-/* src/st/text.c: the text clip window (.sbss, $gp-relative; also read at 0x8002c6d0) */
-extern s16 DAT_800881ba;
-extern s16 DAT_800881bc;
-extern s32 DAT_800881c0;
-extern s32 DAT_800881c4;
-extern s32 DAT_800881c8;
 
 /* Read by the title-card overlay; owners unknown. */
 extern u16 DAT_80088190;

@@ -15,7 +15,7 @@
 #include <st/funcs.h>
 #include <st/anim.h>
 
-RODATA(0x800114a8, 0x24)
+JUMPTABLES(0x800114a8, 0x24)
 
 /* The file's mesh model, part headers and part vertex arrays. */
 #define ANIM_MODEL(file) ((u8 *)(file) + (file)->model)

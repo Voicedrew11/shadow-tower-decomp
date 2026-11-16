@@ -243,16 +243,24 @@ ST.EXE	0x80087ee8	0x776e8	0x4	defined	proven	DAT_80087ee8	u_long	asm;src/st/mode
 ST.EXE	0x80087eec	0x776ec	0x2c	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 ST.EXE	0x80087f18	0x77718	0x4	defined	candidate	DAT_80087f18	s32	asm;src/st/hud.c st.hud	$gp+0x58 .sdata word; blink phase of func_80026afc's selection frame
 ST.EXE	0x80087f1c	0x7771c	0x18	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
-ST.EXE	0x80087f34	0x77734	0x4	defined	candidate	DAT_80087f34	s32	asm;src/st/menu.c st.menu	$gp+0x74 .sdata word; blink phase of the map page arrows (func_8002a954)
+ST.EXE	0x80087f34	0x77734	0x4	defined	candidate	DAT_80087f34	s32	asm;src/st/ui.c st.ui	$gp+0x74 .sdata word; blink phase of the map page arrows (func_8002a954)
 ST.EXE	0x80087f38	0x77738	0x30	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
-ST.EXE	0x80087f68	0x77768	0x8	defined	proven	DAT_80087f68	s32[2]	src/st/menu_status_pages.c st.menu_status_pages	unreferenced zero words in .sdata between func_8002e94c and func_8002f498 constants
+ST.EXE	0x80087f68	0x77768	0x8	defined	proven	DAT_80087f68	s32[2]	src/st/ui.c st.ui	unreferenced zero words in .sdata between func_8002e94c and func_8002f498 constants
 ST.EXE	0x80087f70	0x77770	0x14	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
-ST.EXE	0x80087f84	0x77784	0x4	defined	proven	DAT_80087f84	s32	src/st/menu_status_frame.c st.menu_status_frame	unreferenced zero word in .sdata between func_8002f97c and func_8002fc4c constants
+ST.EXE	0x80087f84	0x77784	0x4	defined	proven	DAT_80087f84	s32	src/st/ui.c st.ui	unreferenced zero word in .sdata between func_8002f97c and func_8002fc4c constants
 ST.EXE	0x80087f88	0x77788	0xc8	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 ST.EXE	0x80088050	0x77850	0x4	defined	proven	DAT_80088050	s32	asm;band J	small-data word func_80042c44 compares with viewer+0x23c; .sdata after func_80042620 constants
 ST.EXE	0x80088054	0x77854	0x48	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 ST.EXE	0x8008809c	0x7789c	0x8	defined	candidate	DAT_8008809c	SVECTOR	asm;src/st/math.c st.math	unit z vector {0, 0, 4096, 0} func_80049fe4 turns; extern only
-ST.EXE	0x800880a4	0x778a4	0x75c	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
+ST.EXE	0x800880a4	0x778a4	0x114	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
+ST.EXE	0x800881b8	0x779b8	0x2	bss	proven	DAT_800881b8	s16	layout;src/st/ui.c st.ui	.sbss; unreferenced halfword at the start of st.ui's .sbss: the clip window statics after it sit at +2, +4 and from +8
+ST.EXE	0x800881ba	0x779ba	0x2	bss	proven	DAT_800881ba	s16	asm;src/st/ui.c st.ui	.sbss static; text clip window left bound
+ST.EXE	0x800881bc	0x779bc	0x2	bss	proven	DAT_800881bc	s16	asm;src/st/ui.c st.ui	.sbss static; text clip window right bound
+ST.EXE	0x800881be	0x779be	0x2	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
+ST.EXE	0x800881c0	0x779c0	0x4	bss	proven	DAT_800881c0	s32	asm;src/st/ui.c st.ui	.sbss static; clip window advance
+ST.EXE	0x800881c4	0x779c4	0x4	bss	proven	DAT_800881c4	s32	asm;src/st/ui.c st.ui	.sbss static; clip window enable
+ST.EXE	0x800881c8	0x779c8	0x4	bss	proven	DAT_800881c8	s32	asm;src/st/ui.c st.ui	.sbss static; glyphs dropped past the right bound
+ST.EXE	0x800881cc	0x779cc	0x634	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 TITLE.EXE	0x80012000	0x800	0xa04	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 TITLE.EXE	0x80014528	0x2d28	0x4	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 TITLE.EXE	0x80016d80	0x5580	0xc	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data

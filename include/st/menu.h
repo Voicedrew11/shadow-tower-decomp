@@ -1,5 +1,5 @@
 /*
- * ST.EXE menu screens (src/st/menu.c, src/st/menu_*.c): the scratchpad
+ * ST.EXE menu screens (src/st/ui.c): the scratchpad
  * layout they use, the message table they draw from and their functions. The screens share
  * one scratchpad block at 0x1f800000 that differs from the renderer's
  * (st/scratch.h): screen state words at the start, the list fields around
@@ -35,7 +35,8 @@ typedef struct {
     s16 row1;            /* 0x02: first row shown of ids1 */
     s16 *ids0;           /* 0x04 */
     s16 *ids1;           /* 0x08 */
-    u8 unkC[8];          /* 0x0c */
+    u8 unkC[4];          /* 0x0c */
+    DVECTOR *tex;        /* 0x10: cell images, twenty per block (func_80030be4) */
     MenuMessages *messages; /* 0x14 */
 } MenuGrid;
 
@@ -50,13 +51,26 @@ typedef struct {
     u16 unkA;            /* 0x0a */
 } MenuList;
 
+/* A 44-byte stored-item kind record func_8003025c details. */
+typedef struct {
+    u8 kind;             /* 0x00: indexes its name table */
+    u8 unk1;             /* 0x01 */
+    u16 unk2;            /* 0x02 */
+    s16 unk4;            /* 0x04: shown as unk4 * 10 / 3048 and its remainder / 254 */
+    s16 unk6;            /* 0x06: shown as unk6 * 100 / 454 with tenths */
+    s16 pairs[4][2];     /* 0x08: value, then the optional value before it */
+    u32 traits;          /* 0x18: message nibbles at bits 0, 8 and 16 */
+    s8 figures[14];      /* 0x1c */
+    u8 unk2A[2];
+} MenuStoredItem;
+
 /*
- * The stored-item grid (func_8002fe4c): the message table, one kind per
- * entry, the entry count, the last row and its length, and the VRAM image
- * of each of the fifteen visible cells.
+ * The stored-item grid (func_8002fe4c): the kind records, the message
+ * table, one kind per entry, the entry count, the last row and its length,
+ * the VRAM image of each of the fifteen visible cells and the detail page's.
  */
 typedef struct {
-    u8 unk0[4];
+    MenuStoredItem *items; /* 0x00 */
     MenuMessages *messages; /* 0x04 */
     u8 *kinds;           /* 0x08 */
     s16 count;           /* 0x0c */
@@ -64,6 +78,7 @@ typedef struct {
     s16 last;            /* 0x10: cells on the last row */
     u8 unk12[2];
     DVECTOR tex[15];     /* 0x14 */
+    DVECTOR image;       /* 0x50: func_8003025c's image */
 } MenuStore;
 
 /* The screen state at the start of the scratchpad, per screen. */
@@ -94,6 +109,10 @@ typedef union {
         s32 current;     /* 0x04: the entry marked current, -1 for none */
         s32 ids[10];     /* 0x08 */
     } map;
+    struct {
+        s16 flags;       /* 0x00: tested against DAT_801cd180.unk22 */
+        u8 level[12];    /* 0x02 */
+    } levels;            /* func_8002b84c */
 } MenuState;
 
 /* A 32-byte list record func_8002c2b8 lists. */
@@ -190,23 +209,26 @@ extern u16 DAT_80088188;
 extern u16 DAT_800881aa;
 extern u16 DAT_80088192;
 
+
 /* Seven list slots cleared together by func_8002c090. */
 extern s32 DAT_8017beb0[7];
 extern s16 DAT_800881f0[7];
 
-/* src/st/menu.c */
+/* src/st/ui.c: the pause menu pages */
 void func_80029b74(void);
 void func_8002a1d0(void);
 void func_8002a5a4(void);
 void func_8002a954(void);
 void func_8002b2e8(void);
+void func_8002b84c(void);
 
-/* src/st/menu_pages.c */
+/* the first menu page bodies */
 void func_8002c050(void);
 void func_8002c090(void);
 void func_8002c1a4(void);
+void func_8002c2b8(void);
 
-/* src/st/menu_dialogs.c */
+/* the page frame and dialogs */
 void func_8002c8bc(void);
 void func_8002c958(void);
 void func_8002c998(void);
@@ -216,8 +238,9 @@ void func_8002cd98(void);
 void func_8002ce84(void);
 void func_8002cef8(void);
 void func_8002d0b0(void);
+void func_8002d1dc(void);
 
-/* src/st/menu_shop.c */
+/* the item list screens */
 void func_8002d574(void);
 void func_8002d60c(void);
 void func_8002d8e8(void);
@@ -225,45 +248,31 @@ void func_8002daa0(void);
 void func_8002dd70(void);
 void func_8002e310(void);
 
-/* src/st/menu_status.c */
+/* the status screens */
 void func_8002e490(void);
 void func_8002e4d0(void);
 void func_8002e94c(void);
 
-/* src/st/menu_status_pages.c */
 void func_8002ed98(void);
 void func_8002f1f8(DVECTOR *pos, DVECTOR *tex, DVECTOR *clut, CVECTOR *color, int arg4);
 void func_8002f498(void);
 void func_8002f97c(void);
 
-/* src/st/menu_status_frame.c */
 void func_8002fc4c(void);
 
-/* src/st/menu_store.c */
+/* the stored-item screens */
 void func_8002fe4c(void);
+void func_8003025c(void);
 
-/* src/st/menu_store_frame.c */
 void func_80030ab8(void);
-
-/* src/st/menu_grid.c */
+void func_80030be4(void);
+void func_80030fa0(void);
+/* the id grid screens */
 void func_80031378(void);
 void func_80031674(void);
-
-/* src/st/menu_misc.c */
+void func_800319a8(void);
 void func_80031aec(void);
 void func_80031cfc(void);
 void func_80031d50(void);
-
-/*
- * Not reconstructed yet: they share merged constants or $gp-relative
- * .sbss with band E functions of the same translation unit.
- */
-void func_8002c2b8(void);
-void func_8002d1dc(void);
-void func_80030be4(void);
-void func_80030fa0(void);
-void func_800319a8(void);
-/* Not reconstructed yet (the stored-item detail page). */
-void func_8003025c(void);
 
 #endif

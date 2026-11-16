@@ -74,10 +74,13 @@ LINKER_SHA256 = '2014db126ceaea6d287067ea3f829eea1745836fca570f22ef379eaff7832dd
 # title of the retail SLUS-00863 headers.
 CONVERTER_SHA256 = '777caca88327cd18d4f92b43439575c1759381690d49f14177805a94b8ecbef6'
 CONVERTER_REGION = '/CA'
-# All programs lay out .rdata before .text, and the empty .ctors/.dtors that
-# LIBSN SNMAIN declares between .text and .data: SNMAIN's __main walks the
-# constructor list from .data's start in retail PSX.EXE.
+# All programs lay out read-only data before .text, and the empty .ctors/.dtors
+# that LIBSN SNMAIN declares between .text and .data: SNMAIN's __main walks the
+# constructor list from .data's start in retail PSX.EXE. The game units'
+# constants (`.rodata`, see sdk.separate_read_only) precede `.rdata`, which
+# holds their switch tables and then the SDK libraries' read-only data.
 SECTIONS = ('text\tgroup', 'bss\tgroup\tbss',
+            '\tsection\t.rodata,text',
             '\tsection\t.rdata,text', '\tsection\t.text,text',
             '\tsection\t.ctors,text', '\tsection\t.dtors,text',
             '\tsection\t.data,text', '\tsection\t.sdata,text',

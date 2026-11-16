@@ -109,6 +109,47 @@ def rewrite_gte(root: Path, stems: tuple[str, ...]) -> dict[str, int]:
     return rewritten
 
 
+# Retail ST.EXE lays out every game unit's constant pool (string literals,
+# aggregate initializers, const data) before any unit's switch tables, each
+# group in link order, and the SDK libraries' read-only data after the tables
+# (STR.EXE and TITLE.EXE show their unit's table directly before LIBSND's
+# `.rdata`). The compiler writes both groups to `.rdata`, so a unit's tables
+# would sit beside its own constants. The constants therefore move to their own
+# `.rodata` section, which the link script places before `.rdata`; the tables,
+# like the SDK's read-only data, stay in `.rdata`. Which mechanism separated
+# them in the original build is unknown; this models the observed layout.
+CONSTANT_SECTION = '.rodata'
+JUMP_TABLE_LABEL = re.compile(r'\$L\d+:')
+JUMP_TABLE_ROW = re.compile(r'\.(?:gp)?word\s+\$L\d+')
+
+
+def separate_read_only(assembly: str) -> str:
+    """Move every non-switch-table `.rdata` block of cc1 output to `.rodata`.
+
+    GCC emits a switch table as `.rdata`, `.align 3`, a `$Ln:` label and one
+    `.word $Lm` row per case; any other `.rdata` block is a constant.
+    """
+    lines = assembly.split('\n')
+    moved = False
+    for index, line in enumerate(lines):
+        if line.strip() != '.rdata':
+            continue
+        following = [item.strip() for item in lines[index + 1:index + 4]]
+        if (len(following) == 3 and following[0] in ('.align\t3', '.align 3')
+                and JUMP_TABLE_LABEL.fullmatch(following[1])
+                and JUMP_TABLE_ROW.fullmatch(following[2])):
+            continue
+        lines[index] = line.replace('.rdata', f'.section\t{CONSTANT_SECTION}')
+        moved = True
+    if moved:
+        # A unit's constant pool ends on an eight-byte boundary: STR.EXE's
+        # switch table follows its 0x10c-byte pool after four zero bytes, and
+        # every ST.EXE pool boundary is eight-aligned. The trailing directive
+        # makes ASPSX pad the section; nothing follows it.
+        lines[-1:] = [lines[-1], f'\t.section\t{CONSTANT_SECTION}', '\t.align\t3', '']
+    return '\n'.join(lines)
+
+
 def dos_text(path: Path) -> None:
     # The DOS reader needs CRLF. No directives, instructions or literals change.
     path.write_bytes(path.read_bytes().replace(b'\r\n', b'\n').replace(b'\n', b'\r\n'))
@@ -146,6 +187,8 @@ def compile_c(source: Path, root: Path, stem: str, *, compiler: str,
         cc1_command = dos_command
     else:
         run(cc1_command, environment=environment)
+    text = assembly.read_bytes().decode('latin-1')
+    assembly.write_bytes(separate_read_only(text).encode('latin-1'))
     dos_text(assembly)
     return {'object': stem + '.OBJ', 'assembly': stem + '.S', 'log': stem + '.TXT',
             'preprocessor_command': cpp_command, 'compiler_command': cc1_command, **probe,

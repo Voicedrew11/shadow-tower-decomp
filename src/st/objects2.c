@@ -27,7 +27,7 @@
 #include <st/anim.h>
 #include <st/funcs.h>
 
-RODATA(0x80011478, 0x18)
+JUMPTABLES(0x80011478, 0x18)
 SDATA(0x80087f0c, 0x8)
 
 #define SLOT_C 588

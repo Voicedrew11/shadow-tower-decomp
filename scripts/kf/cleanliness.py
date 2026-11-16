@@ -240,11 +240,9 @@ def data_ownership_rows() -> list[tuple[DataIdentity, DataOwner | None]]:
     """Use curated identities and validated source claims; no binary heuristics."""
     owners = []
     for unit in load_manifest().units:
-        for kind, owned in (("RODATA", unit.rodata), ("SDATA", unit.sdata)):
-            if owned is not None:
-                va, size = owned
-                owners.append(DataOwner(unit.image, va, size, "load", unit.unit,
-                                        f"{unit.source}:{kind}"))
+        for kind, va, size in unit.owned_ranges():
+            owners.append(DataOwner(unit.image, va, size, "load", unit.unit,
+                                    f"{unit.source}:{kind}"))
         for datum in unit.data:
             owners.append(DataOwner(unit.image, datum.va, datum.size, datum.storage,
                                     unit.unit, f"{unit.source}:DATA({datum.symbol})"))

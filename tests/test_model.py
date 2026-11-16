@@ -278,6 +278,7 @@ class DataClaimBindingTests(unittest.TestCase):
         self.identities = {
             ("GAME.EXE", 0x80057b0c): DataIdentity("counter", 4, "load", "static"),
             ("GAME.EXE", 0x800A0000): DataIdentity("buffer", 0x10, "bss", ""),
+            ("GAME.EXE", 0x800A0010): DataIdentity("later", 4, "bss", ""),
             ("GAME.EXE", 0x80012000): DataIdentity("table", 8, "text", ""),
         }
 
@@ -318,12 +319,19 @@ class DataClaimBindingTests(unittest.TestCase):
             self._bind((DataClaim(0x80057b0c, 4, "counter", 1, ".data"),),
                        {("GAME.EXE", 0x80057b0c): "game.other"})
 
-    def test_descending_data_claims_are_rejected(self) -> None:
+    def test_descending_data_claims_of_one_section_are_rejected(self) -> None:
         with self.assertRaisesRegex(ValueError, "does not ascend"):
             self._bind((
-                DataClaim(0x800A0000, 0x10, "buffer", 1, ".bss"),
-                DataClaim(0x80057b0c, 4, "counter", 4, ".data"),
+                DataClaim(0x800A0010, 4, "later", 1, ".bss"),
+                DataClaim(0x800A0000, 0x10, "buffer", 4, ".bss"),
             ))
+
+    def test_sections_order_their_claims_independently(self) -> None:
+        data = self._bind((
+            DataClaim(0x800A0000, 0x10, "buffer", 1, ".bss"),
+            DataClaim(0x80057b0c, 4, "counter", 4, ".data"),
+        ))
+        self.assertEqual([d.symbol for d in data], ["buffer", "counter"])
 
 
 

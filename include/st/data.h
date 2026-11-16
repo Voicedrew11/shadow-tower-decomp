@@ -294,15 +294,12 @@ typedef struct {
     u8 unk12;            /* 0x12 */
     u8 unk13;
     u8 unk14;            /* 0x14: request func_80042900 consumes */
-    u8 unk15[0x26 - 0x15];
-    u16 unk26;           /* 0x26 */
-    u16 unk28;           /* 0x28 */
-    u8 unk2A[4];
-    u16 unk2E;           /* 0x2e */
-    u16 unk30;           /* 0x30 */
-    u16 unk32;           /* 0x32: slot 0's request bit; bit masks tested against unk2/unk4 */
-    u16 unk34;           /* 0x34: the other slots' request bit */
-    u16 unk36;           /* 0x36 */
+    u8 unk15[0x22 - 0x15];
+    /* 0x22: twelve button masks tested against unk2 (held) / unk4 (pressed):
+     * the settings page lists them in two columns of six (func_8002b84c).
+     * [2]/[3] and [6]/[7] turn the view (func_80041d4c); [8] is slot 0's
+     * request bit, [9] the other slots' (func_8003f4ec); [10] equip.c. */
+    u16 unk22[12];
 } Data801cd180;
 extern Data801cd180 DAT_801cd180;
 

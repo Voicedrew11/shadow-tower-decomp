@@ -61,27 +61,41 @@
 #define DATA_AT(image, va, size, section)
 
 /*
- * Read-only contribution claim, at most one per translation unit: the retail
- * address range that holds this unit's switch jump tables and string
- * literals, in the order the compiler emitted them. The delinker carves it
- * into the module object's .rodata, turns entries that point into the unit's
- * own code into .text-relative words, and resolves the code's references to
- * .rodata offsets, so objdiff compares the tables and literals as well:
+ * Constant-pool claim, at most one per translation unit: the retail address
+ * range that holds this unit's string literals, aggregate initializers and
+ * const data, in the order the compiler emitted them, through the zero bytes
+ * that end the pool on an eight-byte boundary. The build keeps these in the
+ * unit's .rodata, which the link lays out before every unit's switch tables
+ * (see JUMPTABLES). The delinker carves the range into the module object's
+ * .rodata, turns entries that point into the unit's own code into
+ * .text-relative words, and resolves the code's references to .rodata
+ * offsets, so objdiff compares the constants as well:
  *
  *     RODATA(0x8001235c, 0x148)
  */
 #define RODATA(va, size)
 
 /*
- * Small-data literal claim, at most one per translation unit: the retail
- * range of anonymous constants that a -G8 compile emits into .sdata instead
+ * Switch-table claim, at most one per translation unit: the retail range of
+ * this unit's jump tables, which stay in the compiler's .rdata and follow
+ * every unit's constant pool in the linked image. Carved into the module
+ * object's .rdata like a RODATA range:
+ *
+ *     JUMPTABLES(0x80011490, 0x18)
+ */
+#define JUMPTABLES(va, size)
+
+/*
+ * Small-data literal claim: a retail range of anonymous constants that a -G8 compile emits into .sdata instead
  * of .rdata. GCC 2.5.7's MIPS SELECT_SECTION sends any constant whose type
  * is at most -G bytes there, so a short string literal (and a local
  * `char buf[2] = " "` initializer) lands in .sdata, while the same text
  * initializing a larger array keeps the array's type and stays in .rdata.
  * The delinker packs the range into the module object's .sdata in address
  * order with the unit's .sdata DATA() claims and resolves code references to
- * it as .sdata offsets, as the assembler does for its local labels:
+ * it as .sdata offsets, as the assembler does for its local labels. A unit
+ * whose literals interleave with its named small data claims one range per
+ * run, in ascending order:
  *
  *     SDATA(0x8006d6a4, 0xb)
  */
