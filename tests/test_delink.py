@@ -269,6 +269,48 @@ class MipsElfTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "does not consume"):
             _apply_relocation(other, function, row, catalog, "safe")
 
+    def test_hi_lo_pair_through_a_copy_after_a_store(self) -> None:
+        # lui v0,0x801b; sw s1,20(sp); move s1,v0; addiu v0,s1,22816 (ST.EXE
+        # 0x80044ee8): one store between the LUI and its copy.
+        function = Function(
+            "GAME.EXE", 0x80010000, 16, 16, 1, "test", "test", "test"
+        )
+        catalog = Catalog(
+            functions={"GAME.EXE": (function,)},
+            function_starts={"GAME.EXE": {function.va: function}},
+            data={"GAME.EXE": ()},
+        )
+        lui, store, move, low = 0x3C02801B, 0xAFB10014, 0x00408821, 0x26225920
+        self.assertEqual(decode_hi_lo_target(lui, low, store, move), 0x801B5920)
+        with self.assertRaisesRegex(ValueError, "does not consume"):
+            decode_hi_lo_target(lui, low, store)
+        with self.assertRaisesRegex(ValueError, "does not consume"):
+            # a non-store in between may write the LUI register
+            decode_hi_lo_target(lui, low, 0x24020001, move)  # li v0,1
+        row = {
+            "image": "GAME.EXE",
+            "site_va": f"{function.va:#x}",
+            "paired_site_va": f"{function.va + 12:#x}",
+            "kind": "mips_hi16_lo16",
+            "channel": "reachable-code",
+            "target_va": "0x801b5920",
+            "target_region": "bss",
+            "target_name": "DAT_801b5920",
+            "opcode": "lui+addiu",
+            "confidence": "manual-decoded",
+            "status": "reviewed",
+        }
+        blob = bytearray(struct.pack("<4I", lui, store, move, low))
+        relocations, used = _apply_relocation(blob, function, row, catalog, "safe")
+        self.assertEqual(
+            relocations,
+            [
+                MipsRelocation(0, "R_MIPS_HI16", "DAT_801b5920"),
+                MipsRelocation(12, "R_MIPS_LO16", "DAT_801b5920"),
+            ],
+        )
+        self.assertEqual(used["action"], "paired-symbol")
+
     def test_reviewed_instruction_word_pair_is_safe(self) -> None:
         function = Function(
             "GAME.EXE", 0x80010000, 8, 8, 1, "test", "test", "test"
