@@ -564,7 +564,35 @@ END.EXE	0x8001d1f8	0xc9f8	0x4	unclassified	coverage-gap			payload-complement	may
 END.EXE	0x8001d214	0xca14	0x8	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 END.EXE	0x8001d244	0xca44	0x8	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 END.EXE	0x8001d260	0xca60	0xc	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
-END.EXE	0x8001d280	0xca80	0x12d80	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
+END.EXE	0x8001d280	0xca80	0xc	unclassified	coverage-gap			payload-complement	zero tail of the last LIBGPU text contribution before .data (the native relink reproduces it)
+END.EXE	0x8001d28c	0xca8c	0x28	defined	proven	staff_poly_left	POLY_FT4	asm;src/end/main.c end.main	left half of a staff roll page
+END.EXE	0x8001d2b4	0xcab4	0x28	defined	proven	staff_poly_right	POLY_FT4	asm;src/end/main.c end.main	right half of a staff roll page
+END.EXE	0x8001d2dc	0xcadc	0x38	defined	proven	staff_page_frames	int[7][2]	asm;src/end/main.c end.main	frame after which each staff page fades in, then out
+END.EXE	0x8001d314	0xcb14	0x129f0	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
+END.EXE	0x8002fd04	0x1f504	0x4	pointer	proven	next_program	u8 *	asm;src/end/main.c end.main	$gp+0; points at PSX.EXE next-program byte 0x800103f0
+END.EXE	0x8002fd08	0x1f508	0x4	pointer	proven	PTR_8002fd08	u8 *	asm;src/end/main.c end.main	$gp+4; points at 0x800103f1
+END.EXE	0x8002fd0c	0x1f50c	0x4	defined	proven	movie_width	int	asm;src/end/main.c end.main	$gp+8
+END.EXE	0x8002fd10	0x1f510	0x4	defined	proven	movie_height	int	asm;src/end/main.c end.main	$gp+12
+END.EXE	0x8002fd14	0x1f514	0x4	defined	proven	scratchpad	u_long *	asm;src/end/main.c end.main	$gp+16; holds the scratchpad base 0x1f800000; never referenced
+END.EXE	0x8002fd18	0x1f518	0x14	unclassified	coverage-gap			payload-complement	end.main SDATA literals: clear_vram RECT, "\ST\\", ";1"
+END.EXE	0x8002fd2c	0x1f52c	0x4	defined	proven	staff_page	int	asm;src/end/main.c end.main	$gp+40
+END.EXE	0x8002fd30	0x1f530	0x4	defined	proven	staff_unused_1	int	asm;src/end/main.c end.main	$gp+44; zero word among the staff roll small data; never referenced
+END.EXE	0x8002fd34	0x1f534	0x4	defined	proven	staff_unused_2	int	asm;src/end/main.c end.main	$gp+48; zero word among the staff roll small data; never referenced
+END.EXE	0x8002fd38	0x1f538	0x4	defined	proven	staff_faded_in	int	asm;src/end/main.c end.main	$gp+52
+END.EXE	0x8002fd3c	0x1f53c	0x4	defined	proven	staff_faded_out	int	asm;src/end/main.c end.main	$gp+56
+END.EXE	0x8002fd40	0x1f540	0x4	defined	proven	staff_frame	int	asm;src/end/main.c end.main	$gp+60
+END.EXE	0x8002fd44	0x1f544	0x4	defined	proven	staff_unused_3	int	asm;src/end/main.c end.main	$gp+64; zero word after the staff roll small data; never referenced
+END.EXE	0x8002fd48	0x1f548	0x20	unclassified	coverage-gap			payload-complement	MALLOC.OBJ .sbss
+END.EXE	0x8002fd68	0x1f568	0x4	bss	proven	movie_ended	int	asm;src/end/main.c end.main	.sbss; $gp+100
+END.EXE	0x8002fd6c	0x1f56c	0x4	bss	proven	rgb24_mode	int	asm;src/end/main.c end.main	.sbss; $gp+104
+END.EXE	0x8002fd70	0x1f570	0x4	bss	proven	movie_unused	int	asm;src/end/main.c end.main	$gp+108; .sbss static between the movie flags; never referenced
+END.EXE	0x8002fd74	0x1f574	0x4	bss	proven	end_movie_flag	int	asm;src/end/main.c end.main	$gp+112; set to 1 as play_end_movie starts; never read
+END.EXE	0x8002fd78	0x1f578	0x4	bss	proven	staff_roll_flag	int	asm;src/end/main.c end.main	$gp+116; cleared as play_staff_roll starts; never read
+END.EXE	0x8002fd7c	0x1f57c	0x4	bss	proven	staff_roll_word	int	asm;src/end/main.c end.main	$gp+120; cleared as play_staff_roll starts, by its fixed address 0x8002fd7c (absolute lui $at store, no relocation); never read
+END.EXE	0x8002fd80	0x1f580	0x4	bss	proven	rgb16_mode	int	asm;src/end/main.c end.main	.sbss; $gp+124
+END.EXE	0x8002fd84	0x1f584	0x14	unclassified	coverage-gap			payload-complement	.sbss alignment and MALLOC.OBJ .bss
+END.EXE	0x8002fd98	0x1f598	0x38	bss	proven	dec	DECENV	asm;src/end/main.c end.main	end.main fixed .bss
+END.EXE	0x8002fdd0	0x1f5d0	0x230	bss	proven	image_rgb24	u_long[2][5760]	asm;src/end/main.c end.main	COMMON; continues past the load image
 FDAT_002.BIN	0x801eb560	0x0	0x24c	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 FDAT_002.BIN	0x801ed794	0x2234	0x5cc	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 FDAT_012.BIN	0x801eb560	0x0	0x24c	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data

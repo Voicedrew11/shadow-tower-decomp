@@ -1040,22 +1040,21 @@ VS.EXE	0x8003af7c	func_8003af7c			void		address-only	candidate	mips-live-in-heur
 VS.EXE	0x8003c1ec	func_8003c1ec			void	unknown arg0;unknown arg1	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
 VS.EXE	0x8003e6bc	func_8003e6bc			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
 VS.EXE	0x8003eb4c	func_8003eb4c			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-END.EXE	0x80011fa8	func_80011fa8			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-END.EXE	0x80011ffc	func_80011ffc			unknown	unknown arg0;unknown arg1;unknown arg2	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-END.EXE	0x800120d0	func_800120d0			unknown	unknown arg0;unknown arg1;unknown arg2	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-END.EXE	0x80012188	func_80012188			unknown	unknown arg0;unknown arg1;unknown arg2;unknown arg3	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-END.EXE	0x800122a4	func_800122a4			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-END.EXE	0x800124c0	func_800124c0			unknown	unknown arg0	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-END.EXE	0x80012598	func_80012598			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-END.EXE	0x80012988	func_80012988			unknown	unknown *object;unknown arg1;unknown arg2;unknown arg3	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-END.EXE	0x80012a1c	func_80012a1c			unknown	unknown arg0;unknown arg1	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-END.EXE	0x80012aa8	func_80012aa8			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-END.EXE	0x80012be8	func_80012be8			unknown	unknown arg0;unknown arg1	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-END.EXE	0x80012c80	func_80012c80			unknown	unknown *object;unknown arg1	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-END.EXE	0x80012df0	func_80012df0			unknown	unknown *object	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-END.EXE	0x80012e88	func_80012e88			unknown	unknown arg0	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-END.EXE	0x80012ef0	func_80012ef0			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-END.EXE	0x8001670c	func_8001670c			void	unknown arg0;unknown arg1;unknown arg2	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+END.EXE	0x80011fa8	clear_vram			void		supported	proven	asm;callers;src/end/main.c end.main	clears all of VRAM to black
+END.EXE	0x80011ffc	cd_read_sectors			void	CdlLOC *loc;u_long *buf;int sectors	supported	proven	asm;callers;src/end/main.c end.main	double-speed CdRead of a sector count, retried until complete
+END.EXE	0x800120d0	load_st_file			int	u_long *buf;char *name;int size	supported	proven	asm;callers;src/end/main.c end.main	reads \ST\<name>;1 into buf (whole file when size is 0)
+END.EXE	0x80012188	load_tims			void	u_long *addr;VramOffset *pixel_offset;VramOffset *clut_offset;int absolute	supported	proven	asm;callers;src/end/main.c end.main	LoadImage of each TIM pixel block in a run of TIM files
+END.EXE	0x800122a4	play_end_movie			int		supported	proven	asm;callers;src/end/main.c end.main	plays \ST\STR\END.STR as a 24-bit movie
+END.EXE	0x800124c0	draw_fade			void	int level	supported	proven	asm;callers;src/end/main.c end.main	subtractive full-screen POLY_F4 darkening by level
+END.EXE	0x80012598	play_staff_roll			int		supported	proven	asm;callers;src/end/main.c end.main	plays \ST\STR\STAFF.STR with the STAFF.MIC staff roll pages faded over it
+END.EXE	0x80012988	strSetDefDecEnv			void	DECENV *dec;int x0;int y0;int x1;int y1	supported	proven	asm;callers;src/end/main.c end.main	Sony movie sample shape: default decode environment
+END.EXE	0x80012a1c	strInit			void	CdlLOC *loc;void (*)() callback	supported	proven	asm;callers;src/end/main.c end.main	Sony movie sample shape: MDEC reset, ring and stream setup, CD kick
+END.EXE	0x80012aa8	strCallback			void		supported	proven	asm;callers;src/end/main.c end.main	Sony movie sample shape: DecDCTout callback that loads each decoded slice
+END.EXE	0x80012be8	strNextVlc			void	DECENV *dec;u_long end_frame	supported	proven	asm;callers;src/end/main.c end.main	Sony movie sample shape: VLC-decodes the next frame
+END.EXE	0x80012c80	strNext			u_long *	DECENV *dec;u_long end_frame	supported	proven	asm;callers;src/end/main.c end.main	Sony movie sample shape: next frame from the stream ring
+END.EXE	0x80012df0	strSync			void	DECENV *dec;int mode	supported	proven	asm;callers;src/end/main.c end.main	Sony movie sample shape: waits for a frame decode
+END.EXE	0x80012e88	strKickCD			void	CdlLOC *loc	supported	proven	asm;callers;src/end/main.c end.main	Sony movie sample shape: seeks and starts CdRead2 streaming
+END.EXE	0x80012ef0	main			int		supported	proven	asm;callers;src/end/main.c end.main	called by NONE3 startup; ending sequence
 FDAT_002.BIN	0x801eb7ac	func_801eb7ac			void	unknown *object	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
 FDAT_002.BIN	0x801eb7b4	func_801eb7b4			unknown	unknown *object;unknown *pointer1	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
 FDAT_002.BIN	0x801eb814	func_801eb814			unknown	unknown arg0;unknown arg1	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review

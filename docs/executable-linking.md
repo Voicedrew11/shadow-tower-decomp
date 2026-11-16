@@ -79,8 +79,8 @@ bss	group	bss
 
 PSYLINK, not the build script, places SDK library members. These rules were
 established for PSYLINK 1.29 in the King's Field II project; the Shadow
-Tower retail member groups follow the same pattern, but only `PSX.EXE` has
-been relinked with 2.73D so far:
+Tower retail member groups follow the same pattern; `PSX.EXE` and `END.EXE`
+have been relinked with 2.73D byte-identical:
 
 - Archives are visited in `inclib` order. The groups of members from each
   archive follow one another in the linked text in that order.
@@ -125,6 +125,24 @@ curated relocations or data claims yet, so its references compare as raw
 words. `kf check` reports the unit's `.rodata`, `.data` and `.sdata` as
 unclaimed and its EXEC header as an unplaced COMMON request until the data
 identities are admitted.
+
+## END.EXE
+
+`src/end/main.c` reconstructs END.EXE's fifteen game functions as one unit
+(`probe-gcc272cdk-o2-g8`); with the `IMAGE_LINKS` entry above the whole
+129,024-byte file equals retail. The link confirmed these placement rules for
+PSYLINK 2.73D:
+
+- The 12 zero bytes at `0x8001d280` are the tail of the last LIBGPU text
+  contribution, not game `.data`; the unit's `.data` starts at `0x8001d28c`.
+- `.sbss` and `.bss` are allocated object by object in link order: each
+  object's fixed reservations (its `.lcomm` statics, 16-byte aligned in
+  `.bss` by ASPSX), then its exported COMMON in symbol-hash bucket order.
+  END's movie buffers follow the 56-byte `dec` static directly, which only
+  COMMON allows; their spellings are chosen inside the bucket order.
+- GCC writes all of a unit's data directives before its text, so every
+  small symbol the unit defines is `$gp`-relative; the one absolute store to
+  END's own `.sbss` slot `0x8002fd7c` is spelled as a fixed address.
 
 ## PS-X EXE header
 
@@ -273,7 +291,7 @@ under `build/link/<image>/` and are not committed.
 | --- | --- |
 | PSYLINK emits each program | Wired through `kf build` for all seven; an image links once it has a source unit |
 | Candidate artifact path | Direct source-to-EXE with no output rewriting |
-| Byte-identical retail images | `PSX.EXE` (whole file, header included) |
+| Byte-identical retail images | `PSX.EXE` and `END.EXE` (whole files, headers included) |
 | Library half of the overlays | Object-by-object attribution only (see the toolchain page); not yet relinked |
 | Historical toolchain identity | Open: the compiler is a rebuild and the exact ASPSX, PSYLINK and CPE2X builds are the earliest available ones that reproduce retail |
 | Boot | Not yet attempted |
