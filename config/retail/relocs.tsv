@@ -5053,6 +5053,7 @@ VS.EXE	0x80013b9c	0x339c		mips26	reachable-code	0x80013c00	load		j		manual-decod
 VS.EXE	0x80013ba4	0x33a4	0x80013ba8	mips_hi16_lo16	reachable-code	0x801604b0	bss	DAT_801604b0	lui+addiu		manual-decoded	reviewed	vs.snd_80013aec asm review
 VS.EXE	0x80013bdc	0x33dc		mips26	reachable-code	0x8003d39c	load		jal		manual-decoded	reviewed	vs.snd_80013aec asm review
 VS.EXE	0x80013be8	0x33e8		mips26	reachable-code	0x80013c3c	load		j		manual-decoded	reviewed	vs.snd_80013aec asm review
+VS.EXE	0x80013bf8	0x33f8	0x80013c04	mips_hi16_lo16	reachable-code	0x80117580	bss	DAT_80117580	lui+addiu		manual-decoded	reviewed	vs.snd_80013aec asm review (branch delay-slot copy of the join block lui)
 VS.EXE	0x80013c00	0x3400	0x80013c04	mips_hi16_lo16	reachable-code	0x80117580	bss	DAT_80117580	lui+addiu		manual-decoded	reviewed	vs.snd_80013aec asm review
 VS.EXE	0x80013c08	0x3408		mips26	reachable-code	0x8003a140	load		jal		manual-decoded	reviewed	vs.snd_80013aec asm review
 VS.EXE	0x80016c68	0x6468		mips26	reachable-code	0x800427dc	load		jal		manual-decoded	reviewed	vs.gfx_80016ca8 asm review
