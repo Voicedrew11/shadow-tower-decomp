@@ -227,7 +227,7 @@ def _graph_document(
     va, _size, binding = function_extent(ctx, target, None)
     assert binding is not None
     payload = ctx.img.require(va, binding.body_size)
-    graph = build_graph(binding, payload, ctx.idx)
+    graph = build_graph(binding, payload, ctx.idx, ctx.img.u32)
     display = {row.va: row for row in decode_display(payload, va)}
     document = graph.as_dict()
     for block in document["blocks"]:
@@ -323,7 +323,9 @@ def main(ctx: Context, argv: list[str]) -> int:
     if args.blocks:
         if binding is None:
             die("--blocks requires an admitted function")
-        graph = build_graph(binding, ctx.img.require(binding.va, binding.body_size), ctx.idx)
+        graph = build_graph(
+            binding, ctx.img.require(binding.va, binding.body_size), ctx.idx, ctx.img.u32
+        )
     document = _listing_document(
         ctx,
         va,

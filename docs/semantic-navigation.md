@@ -82,9 +82,14 @@ Operand-proven MIPS-I branches have only their feasible successor: for example,
 execute their delay slot. Unknown register values are not guessed.
 
 Direct J/JAL and conditional branch targets are decoded. JALR/JR targets are
-reported as unresolved indirect calls/jumps. Switch-table and general indirect
-target recovery are deliberately deferred; the tool does not invent edges from
-unproven pointer tables.
+reported as unresolved indirect calls/jumps, with one proven exception: a GCC
+tablejump whose value chain is straight-line from its bound check
+(`sltiu rc,ri,N; beqz rc,default`; a `lui`/`addiu` table base; `sll rs,ri,2;
+addu; lw rt,off(...); jr rt`, index unchanged in between) gets one `switch`
+edge per table word, read from the image, when all N words are instruction
+starts inside the same function (`switch_table_targets` in
+`scripts/kf/sema/cfg.py`). General indirect target recovery is deliberately
+deferred; the tool does not invent edges from unproven pointer tables.
 
 CFG JSON includes `reachability_complete`. A reachable unresolved indirect jump
 or an unsupported/missing control-flow detail makes this false. Blocks not

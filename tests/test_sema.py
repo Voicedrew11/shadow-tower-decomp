@@ -196,6 +196,50 @@ class SemanticToolTests(unittest.TestCase):
             [("indirect-jump", None), ("return", None)],
         )
 
+    def test_bounded_switch_table_resolves_cases(self) -> None:
+        def switch(shift: int, table: dict[int, int] | None):
+            payload = words(
+                0x2C620003,  # sltiu v0,v1,3
+                0x1040000B,  # beqz v0,0x1034 (default)
+                0x3C020000,  # delay slot: lui v0,0
+                0x24422000,  # addiu v0,v0,0x2000
+                shift,       # sll v1,<index>,2
+                0x00621821,  # addu v1,v1,v0
+                0x8C620000,  # lw v0,0(v1)
+                0,
+                0x00400008,  # jr v0
+                0,
+                0x0800040D, 0,  # case 0: j 0x1034
+                0,              # case 1: falls into the return
+                0x03E00008, 0,
+            )
+            reader = table.get if table is not None else None
+            return build_graph(function(0x1000, len(payload)), payload, FakeIndex(), reader)
+
+        cases = {0x2000: 0x1028, 0x2004: 0x1030, 0x2008: 0x1034}
+        graph = switch(0x00031880, cases)
+        self.assertTrue(graph.reachability_complete)
+        self.assertEqual(
+            [(edge.kind, edge.target) for edge in graph.edges if edge.site == 0x1020],
+            [("switch", 0x1028), ("switch", 0x1030), ("switch", 0x1034)],
+        )
+        self.assertIn(0x1030, [block.start for block in graph.blocks])
+        # Without image words, with a table word outside the function, or
+        # with a shifted register other than the bounded index, the jump
+        # stays unresolved.
+        for shift, table in (
+            (0x00031880, None),
+            (0x00031880, {**cases, 0x2004: 0x3000}),
+            (0x00041880, cases),  # sll v1,a0,2
+        ):
+            with self.subTest(shift=hex(shift), table=table):
+                unresolved = switch(shift, table)
+                self.assertFalse(unresolved.reachability_complete)
+                self.assertEqual(
+                    [(e.kind, e.target) for e in unresolved.edges if e.site == 0x1020],
+                    [("indirect-jump", None)],
+                )
+
     def test_dead_indirect_jump_does_not_invalidate_known_reachability(self) -> None:
         payload = words(0x03E00008, 0, 0x00400008, 0)
         graph = build_graph(function(0x1000, len(payload)), payload, FakeIndex())
