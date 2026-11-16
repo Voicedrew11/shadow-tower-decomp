@@ -18,14 +18,22 @@
 #define MAILBOX_BYTE_2 ((u8 *)0x800103f2)
 #define MAILBOX_BYTE_8 ((u8 *)0x800103f8)
 
+RODATA(0x80010000, 0x68)
+
+DATA(0x80010350, 0x18, ".data")
 static char *program_paths[] = {
     "cdrom:STR.EXE;1", "cdrom:TITLE.EXE;1", "cdrom:OPTXT.EXE;1",
     "cdrom:ST.EXE;1", "cdrom:END.EXE;1", "cdrom:VS.EXE;1",
 };
+DATA(0x80010394, 0x4, ".sdata")
 int program_index = 0;
+DATA(0x80010398, 0x4, ".sdata")
 u8 *next_program = NEXT_PROGRAM_BYTE;
+DATA(0x8001039c, 0x4, ".sdata")
 u8 *PTR_8001039c = MAILBOX_BYTE_1;
+DATA(0x800103a0, 0x4, ".sdata")
 u8 *PTR_800103a0 = MAILBOX_BYTE_2;
+DATA(0x800103b0, 0x3c, ".bss")
 struct EXEC program_header;
 
 ADDRESS(0x80010068, 0xe8)

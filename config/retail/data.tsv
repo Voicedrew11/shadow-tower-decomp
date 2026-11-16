@@ -8,7 +8,16 @@ PSX.EXE	0x8001015c	0x95c	0x4	unclassified	coverage-gap			payload-complement	may 
 PSX.EXE	0x8001016c	0x96c	0x4	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 PSX.EXE	0x8001017c	0x97c	0xc	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 PSX.EXE	0x80010194	0x994	0xc	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
-PSX.EXE	0x8001034c	0xb4c	0x4b4	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
+PSX.EXE	0x8001034c	0xb4c	0x4	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
+PSX.EXE	0x80010350	0xb50	0x18	pointer-table	proven	program_paths	char *[6]	asm;src/psx/main.c psx.main	Load() path per program index; PSX main indexes it by program_index
+PSX.EXE	0x80010368	0xb68	0x2c	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
+PSX.EXE	0x80010394	0xb94	0x4	defined	proven	program_index	int	asm;src/psx/main.c psx.main	$gp+0; next program index, read back from the next-program byte
+PSX.EXE	0x80010398	0xb98	0x4	pointer	proven	next_program	u8 *	asm;src/psx/main.c psx.main	$gp+4; points at the next-program byte 0x800103f0
+PSX.EXE	0x8001039c	0xb9c	0x4	pointer	proven	PTR_8001039c	u8 *	asm;src/psx/main.c psx.main	$gp+8; points at 0x800103f1, cleared at start
+PSX.EXE	0x800103a0	0xba0	0x4	pointer	proven	PTR_800103a0	u8 *	asm;src/psx/main.c psx.main	$gp+12; points at 0x800103f2, cleared at start
+PSX.EXE	0x800103a4	0xba4	0xc	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
+PSX.EXE	0x800103b0	0xbb0	0x3c	bss	proven	program_header	struct EXEC	asm;src/psx/main.c psx.main	Load()/Exec() header; inside the cleared .bss 0x800103a8..0x800103f0
+PSX.EXE	0x800103ec	0xbec	0x414	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 STR.EXE	0x80011000	0x800	0x9dc	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 STR.EXE	0x80013668	0x2e68	0x4	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 STR.EXE	0x80013768	0x2f68	0x4	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
