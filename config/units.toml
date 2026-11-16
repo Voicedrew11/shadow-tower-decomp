@@ -410,6 +410,12 @@ source = "src/st/menu_open.c"
 profile = "probe-gcc272cdk-o2-g8"
 
 [[unit]]
+unit = "st.options"
+image = "ST.EXE"
+source = "src/st/options.c"
+profile = "probe-gcc272cdk-o2-g8"
+
+[[unit]]
 unit = "st.card"
 image = "ST.EXE"
 source = "src/st/card.c"

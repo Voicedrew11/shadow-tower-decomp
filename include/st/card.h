@@ -65,6 +65,9 @@ int func_8005e924(int points);
 void func_8005f38c(void);
 void func_8005f4fc(void);
 
+/* src/st/options.c */
+void func_80060334(void);
+
 /* src/st/menu_vram.c */
 void func_80063638(void);
 void func_800636f8(void);
