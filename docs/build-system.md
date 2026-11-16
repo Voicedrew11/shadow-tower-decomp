@@ -231,19 +231,19 @@ written atomically and only when it changes. README generation never changes
 
 ## Shared sources across images
 
-In SLPS-00017, `GAME.EXE` and `OPEN.EXE` linked the same allocator, display,
-and TMD code; the same mechanism serves code shared by SLPS-00069's overlays.
-A source is written once with the claims of its primary image; another
-image reuses it with a unit that binds by name:
+Shadow Tower's FDAT overlays repeat a common set of functions in every entry,
+and the programs may share game code. A source is written once with the
+claims of its primary image; another image reuses it with a unit that binds
+by name (the names below are illustrative):
 
 ```toml
 [[unit]]
-unit = "open.memory"
-image = "OPEN.EXE"
-source = "src/lib/memory.c"
-profile = "probe-gcc257-o2-g0"
+unit = "fdat_012.common"
+image = "FDAT_012.BIN"
+source = "src/lib/fdat_common.c"
+profile = "probe-gcc272cdk-o2-g0"
 bind = "name"
-defines = ["KF_OPEN"]
+defines = ["ST_FDAT_012"]
 ```
 
 - `bind = "name"` resolves every `ADDRESS()` and `DATA()` claim through the
@@ -254,5 +254,4 @@ defines = ["KF_OPEN"]
   `RODATA()` ranges are image-specific and cannot be name-bound.
 - `defines` adds `-DNAME` (or `-DNAME=value`) to the preprocessor run for
   that unit only. Use it for constants that provably differ between the
-  images (in SLPS-00017 the mode-1 arena limit was `0xfefff` in `GAME.EXE`
-  and `0x112fff` in `OPEN.EXE`), not to fork whole bodies silently.
+  images, not to fork whole bodies silently.

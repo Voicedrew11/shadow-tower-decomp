@@ -1,7 +1,8 @@
 /*
  * PSX.EXE: the boot program. It loads and executes the six other programs
- * from the disc in turn; each one leaves the index of its successor in the
- * byte at 0x800103f0 before it returns.
+ * from the disc in turn, starting with index 0, and after each one returns
+ * reads the next index from the byte at 0x800103f0. ST.EXE (4) and VS.EXE (1)
+ * are traced writing it; how the other programs choose is not yet traced.
  */
 #include <kf/lib/address.h>
 #include <kf/lib/types.h>

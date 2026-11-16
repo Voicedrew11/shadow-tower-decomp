@@ -1,7 +1,7 @@
 """kf verify - cleanliness, data matching, ownership and target relink checks.
 
 The board/data gates adapt the sibling gruntz workflow; ownership and target
-relink checks extend it for Shadow TowerI's PS-X ELF / objdiff flow:
+relink checks extend it for Shadow Tower's PS-X ELF / objdiff flow:
 
     kf verify board [--gate|--update|--externs]        source cleanliness ratchet
     kf verify board --data [all]                    data ownership inventory
