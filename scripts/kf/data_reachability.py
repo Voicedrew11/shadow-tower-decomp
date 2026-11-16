@@ -20,7 +20,7 @@ from pathlib import Path
 
 from scripts.kf.manifest import Manifest, load as load_manifest
 from scripts.kf.paths import BUILD, RETAIL_CONFIG
-from scripts.kf.retail import IMAGE_LAYOUTS, read_tsv
+from scripts.kf.retail import IMAGE_LAYOUTS, IMAGE_NAMES, read_tsv
 from scripts.kf.sema import Context
 from scripts.kf.sema.evidence import Reference, TIER_RANK
 from scripts.kf.sema.image import RetailImage
@@ -186,7 +186,9 @@ def audit(
 
     for root in roots:
         visit(root, TIER_RANK["proven"], None, None)
-    entry_roots = tuple(f for f in functions if include_entry and f.contains_body(img.layout.entry))
+    entry = img.layout.entry
+    include_entry = include_entry and entry is not None
+    entry_roots = tuple(f for f in functions if include_entry and f.contains_body(entry))
     for root in entry_roots:
         visit(root, TIER_RANK["proven" if len(entry_roots) == 1 else "candidate"], None, None)
     if include_entry and len(entry_roots) != 1:
@@ -370,7 +372,7 @@ def run(images: tuple[str, ...], *, output: Path | None = None) -> int:
 
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(prog="kf verify reachability", description=__doc__)
-    aliases = {image.removesuffix(".EXE").lower(): image for image in IMAGE_LAYOUTS}
+    aliases = dict(IMAGE_NAMES)
     parser.add_argument("--image", action="append", choices=tuple(aliases))
     parser.add_argument("--output", type=Path,
                         help="write full witness/evidence JSON under build/")

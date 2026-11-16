@@ -15,7 +15,7 @@ from collections import Counter, defaultdict
 from dataclasses import dataclass
 from pathlib import Path
 
-from scripts.kf.retail import IMAGE_LAYOUTS, IMAGE_ORDER, parse_int, read_tsv
+from scripts.kf.retail import IMAGE_LAYOUTS, IMAGE_ORDER, load_payload, parse_int, read_tsv
 
 
 FIELDS = (
@@ -157,8 +157,7 @@ def valid_instruction(word: int) -> bool:
 class ImageWords:
     def __init__(self, path: Path, image: str):
         self.layout = IMAGE_LAYOUTS[image]
-        raw = path.read_bytes()
-        self.payload = raw[0x800 : 0x800 + self.layout.load_size]
+        _load_address, self.payload = load_payload(path, image)
 
     def contains_word(self, address: int) -> bool:
         return self.layout.contains(address, 4) and not (address & 3)

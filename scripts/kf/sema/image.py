@@ -1,4 +1,4 @@
-"""Verified random access to one selected retail PS-X executable."""
+"""Verified random access to one selected retail image (PS-X EXE or overlay)."""
 
 from __future__ import annotations
 
@@ -8,7 +8,7 @@ from functools import lru_cache
 from pathlib import Path
 
 from scripts.kf.local_config import configured_retail_dir
-from scripts.kf.retail import IMAGE_LAYOUTS, ImageLayout, parse_psx_exe
+from scripts.kf.retail import IMAGE_LAYOUTS, ImageLayout, verify_retail_image
 
 
 @dataclass(frozen=True)
@@ -22,9 +22,7 @@ class RetailImage:
     def load(cls, image: str) -> "RetailImage":
         layout = IMAGE_LAYOUTS[image]
         path = configured_retail_dir() / image
-        if parse_psx_exe(path) != layout:
-            raise ValueError(f"{path}: retail identity/layout mismatch")
-        return cls(image, layout, path.read_bytes(), path)
+        return cls(image, layout, verify_retail_image(path, image), path)
 
     @classmethod
     def synthetic(

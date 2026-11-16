@@ -21,7 +21,7 @@ from scripts.kf.model import (
     write_bindings,
 )
 from scripts.kf.paths import REPO, RETAIL_CONFIG, UNITS_MANIFEST
-from scripts.kf.retail import IMAGE_LAYOUTS
+from scripts.kf.retail import IMAGE_LAYOUTS, image_key
 
 
 DEFINE_RE = re.compile(r"[A-Za-z_][A-Za-z0-9_]*(=[A-Za-z0-9_x]+)?")
@@ -77,7 +77,7 @@ class Unit:
 
     @property
     def image_key(self) -> str:
-        return self.image.removesuffix(".EXE").lower()
+        return image_key(self.image)
 
     @property
     def stem(self) -> str:
@@ -502,7 +502,7 @@ def load(
         claims, data_claims = scan_source(source_path)
         rodata_claims = scan_rodata_claims(source_path)
         sdata_claims = scan_sdata_claims(source_path)
-        image_token = image.removesuffix(".EXE")
+        image_token = image_key(image).upper()
         data_claims = tuple(
             claim for claim in data_claims
             if claim.image is None or claim.image == image_token

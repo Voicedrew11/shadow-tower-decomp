@@ -9,7 +9,7 @@ import re
 from pathlib import Path
 
 from scripts.kf.local_config import configured_retail_dir, validate_retail_dir
-from scripts.kf.retail import IMAGE_DISC_FILES, RETAIL_DISC
+from scripts.kf.retail import IMAGE_DISC_FILES, RETAIL_DISC, image_key
 from scripts.psxbuild.disc import (
     _tables as _tables,
     _edc as _edc,
@@ -35,7 +35,7 @@ def _patches(raw: bytes) -> tuple[tuple[str, str, int, Path], ...]:
     for image, disc_file in IMAGE_DISC_FILES.items():
         if disc_file not in files:
             raise ValueError(f"{disc_file}: missing from the disc root")
-        key = image.removesuffix(".EXE").lower()
+        key = image_key(image)
         patches.append((image, disc_file, files[disc_file][0], Path(key) / image))
     return tuple(patches)
 

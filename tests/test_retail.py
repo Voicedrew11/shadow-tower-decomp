@@ -7,7 +7,18 @@ import unittest
 from pathlib import Path
 from unittest import mock
 
-from scripts.kf.retail import ImageLayout, _merged_coverage, parse_psx_exe
+from scripts.kf import retail
+from scripts.kf.retail import (
+    IMAGE_LAYOUTS,
+    IMAGE_NAMES,
+    OVERLAY_SOURCES,
+    ImageLayout,
+    _merged_coverage,
+    archive_entry,
+    image_key,
+    parse_psx_exe,
+    verify_retail_image,
+)
 from scripts.kf.propose_function_admission import subtract_interval
 from scripts.kf.seed_retail import escape_trailing_spaces
 from scripts.kf.seed_vendored_functions import (
@@ -56,6 +67,57 @@ class RetailTests(unittest.TestCase):
                 0x20,
             ),
         )
+
+    def test_image_keys_strip_any_extension(self) -> None:
+        self.assertEqual(image_key("ST.EXE"), "st")
+        self.assertEqual(image_key("FDAT_012.BIN"), "fdat_012")
+        self.assertEqual(IMAGE_NAMES["fdat_012"], "FDAT_012.BIN")
+
+    def test_fdat_overlays_share_st_address_space_after_its_bss(self) -> None:
+        self.assertEqual(len(OVERLAY_SOURCES), 36)
+        for image, source in OVERLAY_SOURCES.items():
+            layout = IMAGE_LAYOUTS[image]
+            with self.subTest(image=image):
+                self.assertEqual(image, f"FDAT_{source.index:03d}.BIN")
+                self.assertEqual((source.archive, source.host), ("FDAT.T", "ST.EXE"))
+                self.assertEqual(source.index % 10, 2)
+                self.assertIsNone(layout.entry)
+                self.assertEqual(layout.header_size, 0)
+                self.assertEqual(layout.file_size, layout.load_size)
+                self.assertEqual(layout.load_size % retail.ARCHIVE_SECTOR_SIZE, 0)
+                self.assertEqual(layout.load_address, 0x801EB560)
+                self.assertEqual(layout.file_offset(0x801EB564), 4)
+
+    def test_archive_entry_slices_sector_offsets(self) -> None:
+        archive = bytearray(0x1800)
+        struct.pack_into("<4H", archive, 0, 2, 1, 2, 3)
+        archive[0x800:0x1000] = b"A" * 0x800
+        archive[0x1000:0x1800] = b"B" * 0x800
+        self.assertEqual(archive_entry(bytes(archive), 1), b"B" * 0x800)
+        with self.assertRaises(ValueError):
+            archive_entry(bytes(archive), 2)
+
+    def test_verify_overlay_checks_size_and_hash(self) -> None:
+        payload = struct.pack("<I", 0x03E00008) * 0x200
+        layout = ImageLayout(
+            "OVL_001.BIN", hashlib.sha256(payload).hexdigest(), len(payload), None,
+            0x801EB560, len(payload), 0,
+        )
+        source = retail.OverlaySource("OVL.T", 1, "ST.EXE")
+        with (
+            tempfile.TemporaryDirectory() as directory,
+            mock.patch.dict(IMAGE_LAYOUTS, {"OVL_001.BIN": layout}),
+            mock.patch.dict(OVERLAY_SOURCES, {"OVL_001.BIN": source}),
+        ):
+            path = Path(directory) / "OVL_001.BIN"
+            path.write_bytes(payload)
+            self.assertEqual(verify_retail_image(path, "OVL_001.BIN"), payload)
+            self.assertEqual(
+                retail.load_payload(path, "OVL_001.BIN"), (0x801EB560, payload)
+            )
+            path.write_bytes(payload[:-4] + bytes(4))
+            with self.assertRaises(ValueError):
+                verify_retail_image(path, "OVL_001.BIN")
 
     def test_parse_interleaved_object_symbols(self) -> None:
         parsed = parse_object_symbols(

@@ -17,7 +17,7 @@ from scripts.kf.graph import IncludeScanner
 from scripts.kf.manifest import Manifest, Profile, Unit, load as load_manifest
 from scripts.kf.paths import BUILD, REPO
 from scripts.kf.readme import refresh_executable
-from scripts.kf.retail import IMAGE_KEYS, IMAGE_LAYOUTS
+from scripts.kf.retail import IMAGE_KEYS, IMAGE_LAYOUTS, IMAGE_NAMES, OVERLAY_SOURCES, image_key
 from scripts.kf.sema.image import RetailImage
 
 
@@ -83,6 +83,8 @@ def build_image(name: str, manifest: Manifest, root: Path) -> dict:
         report = {'image': name, 'linked': False, 'phase': 'not-started', 'units': []}
         (root / 'build.json').write_text(json.dumps(report, indent=2) + '\n')
         return report
+    if name in OVERLAY_SOURCES:
+        raise ValueError(f'{name}: linking a headerless archive overlay is not modeled yet')
     report = link_image(
         name, root, units,
         lambda unit, output, index: compile_unit(unit, manifest.profiles[unit.profile], output, index),
@@ -124,14 +126,14 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument('--compare-only', action='store_true',
                         help='compare existing native EXEs without rebuilding or changing them')
     args = parser.parse_args(argv)
-    names = [key.upper() + '.EXE' for key in args.image] if args.image else list(IMAGE_LAYOUTS)
+    names = [IMAGE_NAMES[key] for key in args.image] if args.image else list(IMAGE_LAYOUTS)
     try:
         manifest = None if args.compare_only else load_manifest()
         verified = {name: RetailImage.load(name) for name in names} if args.compare_only else {}
         reports = []
         filename = 'fuzzy-comparison.json' if args.compare_only else 'build.json'
         for name in names:
-            root = BUILD / 'link' / name[:-4].lower()
+            root = BUILD / 'link' / image_key(name)
             report = ({'image': name, 'mode': 'compare-existing', 'executable': str(root / name)}
                       if args.compare_only else build_image(name, manifest, root))
             if args.compare_only:

@@ -16,6 +16,7 @@ import struct
 from pathlib import Path
 
 from scripts.kf.paths import BUILD, REPO
+from scripts.kf.retail import image_key
 
 LINK_DIR = BUILD / "link"
 
@@ -77,7 +78,7 @@ def _file_sha256(path: Path) -> str | None:
 
 def linked_addresses(image: str, link_dir: Path = LINK_DIR) -> dict[str, int] | None:
     """Symbol addresses of IMAGE's current link, or None if absent or stale."""
-    key = image.removesuffix(".EXE").lower()
+    key = image_key(image)
     report_path = link_dir / key / "build.json"
     sym_path = link_dir / key / f"{key.upper()}.SYM"
     try:

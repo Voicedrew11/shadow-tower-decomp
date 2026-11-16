@@ -20,7 +20,7 @@ from scripts.kf.check_types import select_units
 from scripts.kf.clangd import environment, unit_arguments
 from scripts.kf.manifest import load as load_manifest
 from scripts.kf.paths import REPO
-from scripts.kf.retail import IMAGE_KEYS
+from scripts.kf.retail import IMAGE_KEYS, IMAGE_NAMES
 
 
 @dataclass(frozen=True, order=True)
@@ -91,7 +91,7 @@ def add_arguments(parser: argparse.ArgumentParser) -> None:
 def run(args: argparse.Namespace) -> int:
     try:
         units = select_units(load_manifest(),
-                             images=tuple(f"{image.upper()}.EXE" for image in args.image),
+                             images=tuple(IMAGE_NAMES[image] for image in args.image),
                              names=tuple(args.unit))
         compiler, sdk = environment()
         rows = collect(units, compiler, sdk)

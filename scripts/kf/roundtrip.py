@@ -27,7 +27,7 @@ from scripts.kf.allocation_notes import read_requests
 from scripts.kf.delink import load_catalog, sanitize_symbol
 from scripts.kf.manifest import Unit, load as load_manifest
 from scripts.kf.paths import BUILD, RETAIL_CONFIG
-from scripts.kf.retail import IMAGE_KEYS, IMAGE_LAYOUTS, read_tsv
+from scripts.kf.retail import IMAGE_KEYS, IMAGE_LAYOUTS, IMAGE_NAMES, read_tsv
 from scripts.kf.sema.image import RetailImage
 
 
@@ -459,7 +459,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--unit")
     parser.add_argument("--output", type=Path)
     args = parser.parse_args(argv)
-    images = tuple(name.upper() + ".EXE" for name in args.image) if args.image else tuple(IMAGE_LAYOUTS)
+    images = tuple(IMAGE_NAMES[name] for name in args.image) if args.image else tuple(IMAGE_LAYOUTS)
     try:
         return run(images, output=args.output, unit=args.unit)
     except (OSError, ValueError) as error:

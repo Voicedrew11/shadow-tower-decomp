@@ -21,8 +21,9 @@ from scripts.kf.retail import (
     RELOC_FIELDS,
     format_hex,
     format_size,
+    OVERLAY_SOURCES,
     parse_int,
-    parse_psx_exe,
+    verify_retail_image,
     write_tsv,
 )
 
@@ -342,10 +343,8 @@ def main() -> int:
     parser.add_argument("--output-dir", type=Path, default=Path("build/retail-seed"))
     args = parser.parse_args()
 
-    for image, expected in IMAGE_LAYOUTS.items():
-        actual = parse_psx_exe(args.exe_dir / image)
-        if actual != expected:
-            raise ValueError(f"{args.exe_dir / image}: retail identity/layout mismatch")
+    for image in IMAGE_LAYOUTS:
+        verify_retail_image(args.exe_dir / image, image)
 
     import pyghidra
 
@@ -355,15 +354,29 @@ def main() -> int:
     all_data: list[dict[str, object]] = []
     with tempfile.TemporaryDirectory(prefix="kf-retail-ghidra-") as project_root:
         for image in IMAGE_LAYOUTS:
+            overlay = image in OVERLAY_SOURCES
             with pyghidra.open_program(
                 args.exe_dir / image,
                 project_location=Path(project_root) / image.lower(),
                 project_name="analysis",
-                analyze=True,
+                analyze=not overlay,
+                # A headerless overlay is raw bytes: import it as a binary in
+                # the PSX language and rebase it to its load address.
+                language="PSX:LE:32:default" if overlay else None,
+                loader="ghidra.app.util.opinion.BinaryLoader" if overlay else None,
             ) as api:
                 program = api.getCurrentProgram()
                 if str(program.getLanguageID()) != "PSX:LE:32:default":
                     raise ValueError(f"{image}: PSX loader selected {program.getLanguageID()}")
+                if overlay:
+                    transaction = program.startTransaction("rebase overlay")
+                    try:
+                        program.setImageBase(
+                            api.toAddr(IMAGE_LAYOUTS[image].load_address), True
+                        )
+                    finally:
+                        program.endTransaction(transaction, True)
+                    api.analyzeAll(program)
                 functions = function_rows(program, image, symbols)
                 data = data_rows(program, image, symbols, strings, functions)
                 all_functions.extend(functions)

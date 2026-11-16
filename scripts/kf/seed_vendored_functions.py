@@ -30,8 +30,8 @@ from typing import Iterable, Sequence
 from scripts.kf.retail import (
     IMAGE_LAYOUTS,
     IMAGE_ORDER,
+    load_payload,
     parse_int,
-    parse_psx_exe,
     read_tsv,
     write_tsv,
 )
@@ -622,25 +622,8 @@ def find_masked_bytes(data: bytes, mask: bytes, payload: bytes) -> list[int]:
         cursor = found + 1
 
 
-def read_payload(path: Path) -> tuple[int, bytes]:
-    data = path.read_bytes()
-    if len(data) < 0x800 or data[:8] != b"PS-X EXE":
-        raise ValueError(f"{path}: not a PS-X EXE")
-    load_address = int.from_bytes(data[0x18:0x1c], "little")
-    load_size = int.from_bytes(data[0x1c:0x20], "little")
-    if len(data) < 0x800 + load_size:
-        raise ValueError(f"{path}: truncated load image")
-    return load_address, data[0x800:0x800 + load_size]
-
-
 def load_retail_payloads(exe_dir: Path) -> dict[str, tuple[int, bytes]]:
-    images: dict[str, tuple[int, bytes]] = {}
-    for image, expected in IMAGE_LAYOUTS.items():
-        path = exe_dir / image
-        if parse_psx_exe(path) != expected:
-            raise ValueError(f"{path}: retail identity/layout mismatch")
-        images[image] = read_payload(path)
-    return images
+    return {image: load_payload(exe_dir / image, image) for image in IMAGE_LAYOUTS}
 
 
 def signature_hits(

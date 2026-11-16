@@ -1,6 +1,6 @@
 # MANUALLY MANAGED - admitted WIP relocation candidate census.
 # Seed/audit tooling writes build proposals only; review and edit this file by hand.
-# Each address is qualified by image because GAME.EXE, OPEN.EXE and END.EXE are separate overlays sharing one load window.
+# Each address is qualified by image: the programs share load windows and the FDAT overlays share one window inside ST.EXE's address space.
 # PS-X EXE retains no relocation directory: candidate does not mean linker truth.
 # BSS pair-scan rows remain withheld by safe delinking until individually reviewed.
 image	site_va	site_file_offset	paired_site_va	kind	channel	target_va	target_region	target_name	opcode	register	confidence	status	provenance

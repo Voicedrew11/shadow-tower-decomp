@@ -1055,7 +1055,8 @@ class ParserMachine:
         # CPU accesses KSEG0 virtual addresses.  This Unicorn build aliases
         # them to physical RAM, while its host mapping/read/write API does not.
         self._uc.mem_map(0, MAPPED_SIZE)
-        load_image = self.retail.data[0x800:0x800 + self.retail.layout.load_size]
+        layout = self.retail.layout
+        load_image = self.retail.data[layout.header_size:layout.header_size + layout.load_size]
         self._write(self.retail.layout.load_address, load_image)
         for patch in self.program.patches:
             self._write(patch.address, patch.data)

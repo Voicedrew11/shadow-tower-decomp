@@ -41,13 +41,14 @@ from scripts.kf.relocations import (
     named_data_referent,
     validate_relocation,
 )
+from scripts.kf.retail import image_key as retail_image_key
 from scripts.kf.retail import (
     IMAGE_LAYOUTS,
     format_hex,
     format_size,
     parse_int,
-    parse_psx_exe,
     read_tsv,
+    verify_retail_image,
     write_tsv,
 )
 
@@ -238,7 +239,7 @@ def sanitize_symbol(value: str, fallback: str) -> str:
 
 
 def image_key(image: str) -> str:
-    return image.removesuffix(".EXE").lower()
+    return retail_image_key(image)
 
 
 def _put_word(data: bytearray, offset: int, word: int) -> None:
@@ -1041,10 +1042,7 @@ def delink(
     for image in selected_images:
         expected = IMAGE_LAYOUTS[image]
         exe_path = exe_dir / image
-        actual = parse_psx_exe(exe_path)
-        if actual != expected:
-            raise ValueError(f"{exe_path}: retail identity/layout mismatch")
-        executable = exe_path.read_bytes()
+        executable = verify_retail_image(exe_path, image)
         image_output = output_dir / image_key(image)
         object_output = image_output / "objects"
         object_output.mkdir(parents=True, exist_ok=True)

@@ -10,7 +10,7 @@ import tempfile
 
 from scripts.kf.manifest import Manifest, Unit, load as load_manifest
 from scripts.kf.paths import REPO
-from scripts.kf.retail import IMAGE_KEYS, IMAGE_LAYOUTS
+from scripts.kf.retail import IMAGE_KEYS, IMAGE_LAYOUTS, image_key
 
 
 IMAGES = IMAGE_KEYS
@@ -19,7 +19,7 @@ IMAGES = IMAGE_KEYS
 def default_image() -> str:
     """The largest program is the default shared-source context."""
     largest = max(IMAGE_LAYOUTS, key=lambda name: IMAGE_LAYOUTS[name].load_size)
-    return largest.removesuffix(".EXE").lower()
+    return image_key(largest)
 
 
 MODES = {
