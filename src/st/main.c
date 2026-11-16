@@ -154,7 +154,7 @@ void func_80014544(void)
             if (value == FN_END)
                 continue;
             viewer.unk38[slot] = value;
-            DAT_801c7590[value].count++;
+            DAT_801c7590.counts[value].count++;
             if (value < 266 && !(vis_table_c.unk0070[value / 32] & (1 << (value % 32))))
                 viewer.unk28++;
             vis_table_c.unk0070[value / 32] |= 1 << (value % 32);
@@ -163,7 +163,7 @@ void func_80014544(void)
                 continue;
             if (value <= 0)
                 continue;
-            DAT_801c7590[id].count = value;
+            DAT_801c7590.counts[id].count = value;
             if (id < 266 && !(vis_table_c.unk0070[id / 32] & (1 << (id % 32))))
                 viewer.unk28++;
             vis_table_c.unk0070[id / 32] |= 1 << (id % 32);
@@ -178,7 +178,7 @@ void func_80014544(void)
     if (all_items) {
         for (i = 0; i < 314; i++) {
             if (vis_table_c.unk0118[i].unk4 != 0xff)
-                DAT_801c7590[i].count++;
+                DAT_801c7590.counts[i].count++;
             if (i < 266 && !(vis_table_c.unk0070[i / 32] & (1 << (i % 32))))
                 viewer.unk28++;
             vis_table_c.unk0070[i / 32] |= 1 << (i % 32);

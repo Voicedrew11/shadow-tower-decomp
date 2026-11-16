@@ -9,12 +9,26 @@
 #include <kf/lib/types.h>
 #include <sys/types.h>
 #include <LIBGTE.H>
+#include <LIBGPU.H>
 
 void func_800210f4(void);
 void func_80021158(void);
 void func_800214a4(void);
 void func_800214cc(void);
 void func_80026afc(VECTOR *a, SVECTOR *b);
+void func_80026ecc(u16 ch, u16 x, u16 y, CVECTOR *style);
+void func_8002732c(u16 *text, u16 x, u16 y, CVECTOR *style);
+void func_80027440(u32 value, u16 x, u16 y, CVECTOR *style);
+void func_800276bc(u32 value, u16 x, u16 y, CVECTOR *style);
+void func_80027d18(RECT *rect, CVECTOR *color, int arg2, int arg3);
+void func_80028220(RECT *rect, CVECTOR *color, int semi);
+void func_80028364(RECT *rect, DVECTOR *tex, DVECTOR *clut, CVECTOR *color, int mode);
+void func_800286a8(int abr, int x, int y);
+void func_80028db8(RECT *rect, CVECTOR *c0, CVECTOR *c1, int semi);
+void func_8002916c(RECT *rect, CVECTOR *color, int arg2);
+void func_8002948c(void);
+void func_80029548(int x, int y, int w, int h);
+void func_80029618(int x, int y, int w, int h);
 void func_80032058(void);
 void func_8003216c(void);
 void func_8003306c(void);

@@ -47,7 +47,8 @@ typedef struct {
     u8 unk33; /* incremented every vsync, wraps at 60 */
     s32 unk34; /* incremented when unk33 wraps */
     u16 unk38[21]; /* set from FN. ids 970..990 */
-    u8 unk62[0x21c - 0x62];
+    s16 unk62[14];       /* 0x62: figures func_8002e94c lists */
+    u8 unk7E[0x21c - 0x7e];
     u8 unk21C;
     u8 unk21D[0x248 - 0x21d];
     long x;              /* 0x248 */
@@ -86,12 +87,20 @@ typedef struct {
     u8 count : 7;
     u8 flag : 1;
 } Count801c7590;
-extern Count801c7590 DAT_801c7590[360];
+
+/* The counts of the 314 table C ids, then a halfword id table. */
+typedef struct {
+    Count801c7590 counts[314];
+    u16 unk13A[23];      /* 0x13a: ids the item list screens show */
+} Data801c7590;
+extern Data801c7590 DAT_801c7590;
 
 extern u32 DAT_801cceb0[2][5];
 
 typedef struct {
-    u8 unk0[0x10];
+    u8 unk0[4];
+    u16 unk4;            /* 0x04: page bits func_8002fc4c consumes */
+    u8 unk6[0xa];
     u8 unk10;
 } Data801cd180;
 extern Data801cd180 DAT_801cd180;
