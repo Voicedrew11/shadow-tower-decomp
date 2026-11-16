@@ -103,6 +103,21 @@ typedef struct {
 
 extern VsRecord20 DAT_801c4a58[2000];
 
+/* A fighter's attack record: its damage per kind (32 bytes, the stride
+ * func_8002e314 indexes). */
+typedef struct {
+    u8 unk0[14];
+    u16 damage[9];           /* 0x0e */
+} VsAttack;
+
+/* A hit func_8002e114 applies: three base damage amounts and an amount of
+ * one further kind (3 + kind). */
+typedef struct {
+    u16 damage[3];
+    s16 kind;
+    u16 amount;
+} VsHit;
+
 /*
  * The two fighters at 0x800633b0 (bss), 0x4e0e8 bytes each (the code
  * indexes them by fighter number and takes the opponent as 1 - number).
@@ -112,13 +127,23 @@ extern VsRecord20 DAT_801c4a58[2000];
 typedef struct {
     u8 file[0x4dee0];        /* 0x00000: the model file, then unmodeled */
     StAnimSet *unk4DEE0;     /* 0x4dee0: the fighter's skeletal-animation slot */
-    u8 unk4DEE4[0x4def0 - 0x4dee4];
+    u8 unk4DEE4[0x4deea - 0x4dee4];
+    s16 unk4DEEA;            /* 0x4deea: animation frame */
+    s16 unk4DEEC;            /* 0x4deec */
+    u8 unk4DEEE[0x4def0 - 0x4deee];
     VECTOR unk4DEF0;         /* 0x4def0: position */
-    u8 unk4DF00[0x4df0e - 0x4df00];
-    u16 unk4DF0E;            /* 0x4df0e: state; 3 and 4 cannot be hit */
-    u8 unk4DF10[0x4e0cc - 0x4df10];
+    u8 unk4DF00[0x4df08 - 0x4df00];
+    s16 unk4DF08;            /* 0x4df08: hit points */
+    u8 unk4DF0A[2];
+    s16 unk4DF0C;            /* 0x4df0c: hit points left by the last hit */
+    s16 unk4DF0E;            /* 0x4df0e: state; 3 hit, 4 down; 3 and 4 cannot be hit */
+    u8 unk4DF10[0x4e062 - 0x4df10];
+    VsAttack unk4E062[3];    /* 0x4e062: attacks (count WIP) */
+    u8 unk4E0C2[0x4e0cc - 0x4e0c2];
     s16 unk4E0CC;            /* 0x4e0cc: hit radius */
-    u8 unk4E0CE[0x4e0e8 - 0x4e0ce];
+    u8 unk4E0CE[0x4e0d4 - 0x4e0ce];
+    u16 unk4E0D4[9];         /* 0x4e0d4: resistance per damage kind */
+    u8 unk4E0E6[0x4e0e8 - 0x4e0e6];
 } VsFighter;
 
 /* Layout check: the record size the index arithmetic proves. */

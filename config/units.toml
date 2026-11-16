@@ -652,9 +652,15 @@ source = "src/vs/texanim_8002d710.c"
 profile = "probe-gcc272cdk-o2-g0"
 
 [[unit]]
-unit = "vs.fighter_8002e510"
+unit = "vs.fighter_8002dcd8"
 image = "VS.EXE"
-source = "src/vs/fighter_8002e510.c"
+source = "src/vs/fighter_8002dcd8.c"
+profile = "probe-gcc272cdk-o2-g0"
+
+[[unit]]
+unit = "vs.fighter_8002e114"
+image = "VS.EXE"
+source = "src/vs/fighter_8002e114.c"
 profile = "probe-gcc272cdk-o2-g0"
 
 [[unit]]
