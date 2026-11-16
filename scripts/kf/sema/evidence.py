@@ -158,7 +158,7 @@ class Evidence:
         if owner is not None and not owner.contains(paired, 4):
             return "pair-crosses-function-extent"
         try:
-            decoded = decode_hi_lo_target(word, paired_word)
+            decoded = decode_hi_lo_target(word, paired_word, self.img.u32(site + 4))
         except ValueError as error:
             return f"instruction-pair-mismatch:{error}"
         return None if decoded == target else "decoded-target-mismatch"
