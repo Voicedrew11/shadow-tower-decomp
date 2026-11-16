@@ -25,16 +25,11 @@ STR.EXE	0x80013014	func_80013014			unknown	unknown arg0;unknown arg1;unknown arg
 STR.EXE	0x800131f0	func_800131f0			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
 STR.EXE	0x800133f4	func_800133f4			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
 STR.EXE	0x80016c3c	func_80016c3c			void	unknown arg0;unknown arg1;unknown arg2	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-STR.EXE	0x8001d71c	func_8001d71c			unknown	unknown *object	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
 STR.EXE	0x8001d834	func_8001d834			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
 STR.EXE	0x8001d860	func_8001d860			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
 STR.EXE	0x8001d8c8	func_8001d8c8			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-STR.EXE	0x8001da34	func_8001da34			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
 STR.EXE	0x8001db58	func_8001db58			unknown	unknown *object	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
 STR.EXE	0x8001dd6c	func_8001dd6c			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-STR.EXE	0x8001de34	func_8001de34			unknown	unknown arg0;unknown *pointer1	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-STR.EXE	0x8001e00c	func_8001e00c			unknown	unknown *object;unknown *pointer1	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-STR.EXE	0x8001e240	func_8001e240			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
 STR.EXE	0x8001e2d0	func_8001e2d0			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
 STR.EXE	0x8001ec7c	func_8001ec7c			unknown	unknown arg0	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
 STR.EXE	0x8001ecbc	func_8001ecbc			unknown	unknown arg0	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
@@ -712,16 +707,11 @@ ST.EXE	0x8006cb64	func_8006cb64			void		address-only	candidate	mips-live-in-heur
 ST.EXE	0x8006dd64	func_8006dd64			void	unknown arg0;unknown arg1	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
 ST.EXE	0x800703f4	func_800703f4			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
 ST.EXE	0x80070884	func_80070884			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-ST.EXE	0x8007cd14	func_8007cd14			unknown	unknown *object	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
 ST.EXE	0x8007ce2c	func_8007ce2c			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
 ST.EXE	0x8007ce58	func_8007ce58			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
 ST.EXE	0x8007cec0	func_8007cec0			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-ST.EXE	0x8007d02c	func_8007d02c			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
 ST.EXE	0x8007d150	func_8007d150			unknown	unknown *object	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
 ST.EXE	0x8007d364	func_8007d364			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-ST.EXE	0x8007d42c	func_8007d42c			unknown	unknown arg0;unknown *pointer1	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-ST.EXE	0x8007d604	func_8007d604			unknown	unknown *object;unknown *pointer1	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-ST.EXE	0x8007d838	func_8007d838			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
 ST.EXE	0x8007d8c8	func_8007d8c8			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
 ST.EXE	0x8007e254	func_8007e254			unknown	unknown arg0	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
 ST.EXE	0x8007e294	func_8007e294			unknown	unknown arg0	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
@@ -751,16 +741,11 @@ TITLE.EXE	0x800183fc	func_800183fc			void		address-only	candidate	mips-live-in-h
 TITLE.EXE	0x800195fc	func_800195fc			void	unknown arg0;unknown arg1	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
 TITLE.EXE	0x8001b8ac	func_8001b8ac			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
 TITLE.EXE	0x8001bf6c	func_8001bf6c			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-TITLE.EXE	0x8002422c	func_8002422c			unknown	unknown *object	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
 TITLE.EXE	0x80024344	func_80024344			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
 TITLE.EXE	0x80024370	func_80024370			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
 TITLE.EXE	0x800243d8	func_800243d8			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-TITLE.EXE	0x80024544	func_80024544			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
 TITLE.EXE	0x80024668	func_80024668			unknown	unknown *object	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
 TITLE.EXE	0x8002487c	func_8002487c			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-TITLE.EXE	0x80024944	func_80024944			unknown	unknown arg0;unknown *pointer1	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-TITLE.EXE	0x80024b1c	func_80024b1c			unknown	unknown *object;unknown *pointer1	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-TITLE.EXE	0x80024d50	func_80024d50			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
 TITLE.EXE	0x80024de0	func_80024de0			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
 TITLE.EXE	0x8002578c	func_8002578c			unknown	unknown arg0	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
 TITLE.EXE	0x800257cc	func_800257cc			unknown	unknown arg0	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
@@ -785,16 +770,11 @@ OPTXT.EXE	0x80012a08	func_80012a08			unknown		address-only	candidate	mips-live-i
 OPTXT.EXE	0x80012b78	func_80012b78			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
 OPTXT.EXE	0x80012d04	func_80012d04			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
 OPTXT.EXE	0x80012f10	func_80012f10			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-OPTXT.EXE	0x8001b870	func_8001b870			unknown	unknown *object	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
 OPTXT.EXE	0x8001b988	func_8001b988			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
 OPTXT.EXE	0x8001b9b4	func_8001b9b4			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
 OPTXT.EXE	0x8001ba1c	func_8001ba1c			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-OPTXT.EXE	0x8001bb88	func_8001bb88			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
 OPTXT.EXE	0x8001bcac	func_8001bcac			unknown	unknown *object	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
 OPTXT.EXE	0x8001bec0	func_8001bec0			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-OPTXT.EXE	0x8001bf88	func_8001bf88			unknown	unknown arg0;unknown *pointer1	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-OPTXT.EXE	0x8001c160	func_8001c160			unknown	unknown *object;unknown *pointer1	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-OPTXT.EXE	0x8001c394	func_8001c394			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
 OPTXT.EXE	0x8001c424	func_8001c424			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
 OPTXT.EXE	0x8001cdd0	func_8001cdd0			unknown	unknown arg0	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
 OPTXT.EXE	0x8001ce10	func_8001ce10			unknown	unknown arg0	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review

@@ -23,18 +23,20 @@ symbols or pretending that WIP names are original symbols:
 | Image | Functions | Psy-Q | Game |
 | :---- | --------: | ----: | ---: |
 | `PSX.EXE` | 11 | 10 | 1 |
-| `STR.EXE` | 322 | 285 | 37 |
-| `ST.EXE` | 1,139 | 452 | 687 |
-| `TITLE.EXE` | 387 | 348 | 39 |
-| `OPTXT.EXE` | 283 | 249 | 34 |
+| `STR.EXE` | 322 | 290 | 32 |
+| `ST.EXE` | 1,139 | 457 | 682 |
+| `TITLE.EXE` | 387 | 353 | 34 |
+| `OPTXT.EXE` | 283 | 254 | 29 |
 | `VS.EXE` | 660 | 401 | 259 |
 | `END.EXE` | 276 | 260 | 16 |
 | 36 `FDAT_nnn.BIN` | 943 (23–37 each) | 0 | 943 |
-| **Total** | **4,021** | **2,005** | **2,016** |
+| **Total** | **4,021** | **2,025** | **1,996** |
 
-All game identities are address-only with candidate signatures from the
-static MIPS live-in heuristic (`kf inventory seed`); no data identities are
-admitted yet. The tables are WIP, and the rules below say how they grew.
+PSX.EXE `main` is reconstructed (`src/psx/main.c`) with its six data
+identities and reviewed relocations; every other game identity is
+address-only with a candidate signature from the static MIPS live-in
+heuristic (`kf inventory seed`). The tables are WIP, and the rules below
+say how they grew.
 
 ### Function starts
 
@@ -65,24 +67,23 @@ candidates, mostly jump-table cases, are not admitted.
 
 ### Psy-Q ownership
 
-Shadow Tower links Psy-Q 4.2 libraries: `ghidra_psx_ldr` signature set 420
-matches in every program. `kf-vendored-seed` applies signature sets in
-order (`--signature-set`, default 420); a later set only fills starts an
-earlier one left open, and each row's confidence names its set
-(`psyq420-signature`). The admitted rows are 1,936 `psyq420-signature`,
-13 `psyq420-signature-ambiguous`, and the release-skewed objects that 420
-does not cover: the `NONE3` startup (`psyq410`, every program), an older
-`MALLOC.OBJ` after the startup in STR, TITLE, OPTXT and END (`psyq340`),
-and LIBPAD `PDMAIINI` (`psyq460`) and `WAITRC2` (`psyq430`).
+`kf-vendored-seed` layers two channels over the structural rows. First,
+relocation-masked function IDs built from the libraries the build links
+(Runtime Library 4.2 with the 4.2.1 LIBPAD, the 4.5 kit's `NONE3.OBJ` and
+Release 2.5 `MALLOC.OBJ`; `kf-fid-census` builds the same corpus): 743 admitted
+rows are `fid-sdk42`, of which 28 are `MALLOC.OBJ` and 6 `NONE3.OBJ` (their
+`source_version` names the standalone object). Then `ghidra_psx_ldr`
+signature sets fill starts the IDs leave open, preferred set first
+(`--signature-set`, default 420): 1,263 `psyq420-signature`, 13
+`psyq420-signature-ambiguous`, and 6 `psyq410-signature` rows for the
+eight-byte `NONE3` `__main`, too short for a function ID. Each confidence
+names its evidence and release.
 
 Not admitted: the overlays' two-instruction default handler (`jr ra; nop`),
 matched only by an old LIBSND `VM_VIB` signature, since the overlays link no
-SDK code; and `__builtin_delete` (LIBSN `_OP_DELE`) inside ST and VS game
-code, which stays game until proven. The project FID channel
-(`kf-fid-census`) builds from the SDK archives the flake pins; while those
-are Psy-Q 3.0 its hits are corroboration only (they agree with the
-signature rows on identity, but 3.0 and 4.x split some libraries into
-different members).
+SDK code; and `__builtin_delete` (LIBSN `_OP_DELE`) at ST `0x800152f8` and
+VS `0x8002e6fc`, an exact 4.2 function ID that sits inside game code; it
+stays game until its placement is explained.
 
 ## Ownership board
 
@@ -174,4 +175,4 @@ and hardware references are not auto-admitted.
 
 The inventories are intentionally iterative. Missing functions, relocations,
 data extents, and xrefs can invalidate earlier candidates without invalidating
-the workflow. No relocation rows are admitted yet.
+the workflow. Only PSX.EXE `main`'s relocations are admitted so far.

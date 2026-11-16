@@ -8,10 +8,10 @@ layout.
 | Target | Retail role | Load window | Functions (game / Psy-Q) |
 | --- | --- | --- | ---: |
 | `PSX.EXE` | boot file; program sequencer | `0x80010000..0x80010800` | 1 / 10 |
-| `STR.EXE` | program index 0, run first | `0x80011000..0x80033000` | 37 / 285 |
-| `ST.EXE` | main game program (index 3) | `0x80011000..0x80088800` | 687 / 452 |
-| `TITLE.EXE` | program index 1 | `0x80012000..0x80029000` | 39 / 348 |
-| `OPTXT.EXE` | program index 2 | `0x80011000..0x8001f800` | 34 / 249 |
+| `STR.EXE` | program index 0, run first | `0x80011000..0x80033000` | 32 / 290 |
+| `ST.EXE` | main game program (index 3) | `0x80011000..0x80088800` | 682 / 457 |
+| `TITLE.EXE` | program index 1 | `0x80012000..0x80029000` | 34 / 353 |
+| `OPTXT.EXE` | program index 2 | `0x80011000..0x8001f800` | 29 / 254 |
 | `VS.EXE` | program index 5 | `0x80011000..0x80063800` | 259 / 401 |
 | `END.EXE` | program index 4 | `0x80011000..0x80030000` | 16 / 260 |
 | `FDAT_nnn.BIN` (36) | `ST.EXE` code overlays | `0x801EB560` + `0x2800`–`0x4800` | 943 / 0 (23–37 each) |
