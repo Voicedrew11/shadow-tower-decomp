@@ -120,6 +120,36 @@ def decode_gprel16_target(image: str, word: int) -> int:
     return (gp + (low - 0x10000 if low & 0x8000 else low)) & 0xFFFFFFFF
 
 
+def ambiguous_sites(rows) -> set[int]:
+    """Sites claimed by more than one row that do not form one HI/LO family.
+
+    GCC shares address halves: one `lui` can feed several signed-low
+    instructions, and two `lui`s on converging paths can feed one. Rows that
+    share a site and decode the same target through `mips_hi16_lo16` describe
+    one relocation family, as ELF REL represents it (HI16 entries precede the
+    LO16 entries they pair with). Any other shared site, including a repeated
+    row for the same pair, stays ambiguous.
+    """
+    claims: dict[int, list[dict[str, str]]] = {}
+    for row in rows:
+        sites = [parse_int(row["site_va"])]
+        if row["paired_site_va"]:
+            sites.append(parse_int(row["paired_site_va"]))
+        for site in sites:
+            claims.setdefault(site, []).append(row)
+    ambiguous = set()
+    for site, members in claims.items():
+        if len(members) < 2:
+            continue
+        family = {(row["kind"], parse_int(row["target_va"]), row.get("target_name", ""))
+                  for row in members}
+        pairs = {(row["site_va"], row["paired_site_va"]) for row in members}
+        if (len(family) != 1 or next(iter(family))[0] != "mips_hi16_lo16"
+                or len(pairs) != len(members)):
+            ambiguous.add(site)
+    return ambiguous
+
+
 def policy_reason(row: dict[str, str], policy: str) -> str | None:
     if row["status"] == "rejected":
         return "candidate-rejected"

@@ -81,6 +81,23 @@ class MipsElfTests(unittest.TestCase):
                 with self.subTest(name=name, alignment=alignment), self.assertRaises(ValueError):
                     write_mips_elf(bytes(8), 'control', 8, **{name: alignment})
 
+    def test_shared_hi_lo_family_is_not_ambiguous(self) -> None:
+        from scripts.kf.relocations import ambiguous_sites
+
+        def row(site, paired, target, kind="mips_hi16_lo16", name=""):
+            return {"site_va": site, "paired_site_va": paired, "kind": kind,
+                    "target_va": target, "target_name": name}
+
+        family = [row("0x10", "0x18", "0x80020000"), row("0x14", "0x18", "0x80020000"),
+                  row("0x10", "0x20", "0x80020000")]
+        self.assertEqual(ambiguous_sites(family), set())
+        conflict = family + [row("0x14", "0x24", "0x80030000")]
+        self.assertEqual(ambiguous_sites(conflict), {0x14})
+        mixed = [row("0x10", "", "0x80020000", kind="mips26"), row("0x10", "0x18", "0x80020000")]
+        self.assertEqual(ambiguous_sites(mixed), {0x10})
+        repeated = [row("0x10", "0x18", "0x80020000"), row("0x10", "0x18", "0x80020000")]
+        self.assertEqual(ambiguous_sites(repeated), {0x10, 0x18})
+
     def test_unreviewed_bss_candidate_does_not_compete_in_safe_policy(self) -> None:
         candidate = {"status": "candidate", "target_region": "bss"}
         reviewed = {"status": "reviewed", "target_region": "bss"}
@@ -855,6 +872,37 @@ class ModuleObjectTests(unittest.TestCase):
         self.assertEqual(struct.unpack_from("<I", text, 8)[0], 20)
         self.assertEqual(decode_hi_lo_target(*struct.unpack_from("<2I", text, 12)), 0)
 
+    def test_static_small_data_gprel_and_shared_hi_lo_use_section_offsets(self) -> None:
+        # One lui feeding two lows, two luis on converging paths feeding one
+        # low, and a $gp-relative store, all against .sbss/.bss statics.
+        function = Function("GAME.EXE", 0x80010000, 28, 28, 1, "only", "test", "test")
+        words = (0x3c020000, 0x24420000, 0x8c430000,
+                 0x3c040000, 0x3c040000, 0x24840000, 0xaf800000)
+        carved = {function.va: (struct.pack("<7I", *words), [
+            MipsRelocation(0, "R_MIPS_HI16", "big"),
+            MipsRelocation(4, "R_MIPS_LO16", "big"),
+            MipsRelocation(8, "R_MIPS_LO16", "big"),
+            MipsRelocation(12, "R_MIPS_HI16", "big"),
+            MipsRelocation(16, "R_MIPS_HI16", "big"),
+            MipsRelocation(20, "R_MIPS_LO16", "big"),
+            MipsRelocation(24, "R_MIPS_GPREL16", "second"),
+        ])}
+        module = Module("GAME.EXE", "game.unit", "unit", (function.va,), (
+            Datum(0x80058020, 4, "first", "bss", "static", ".sbss"),
+            Datum(0x80058024, 4, "second", "bss", "static", ".sbss"),
+            Datum(0x80058030, 0x20, "pad", "bss", "static"),
+            Datum(0x80058050, 0x10, "big", "bss", "static"),
+        ))
+        built = _module_object(module, {function.va: function}, carved)
+        self.assertEqual([item.symbol for item in built.relocations],
+                         [".bss"] * 6 + [".sbss"])
+        section = elf_sections(built.data)[".text"]
+        text = built.data[section[4]:section[4] + section[5]]
+        words = struct.unpack_from("<7I", text)
+        for high, low in ((0, 1), (0, 2), (3, 5), (4, 5)):
+            self.assertEqual(decode_hi_lo_target(words[high], words[low]), 0x20)
+        self.assertEqual(words[6] & 0xFFFF, 4)
+
     def test_same_module_initialized_data_uses_section_offsets(self) -> None:
         function = Function("GAME.EXE", 0x80010000, 32, 32, 1, "only", "test", "test")
         words = (0x3c020000, 0x24420004, 12, 0x3c030000, 0x24630000,
@@ -958,6 +1006,21 @@ class ModuleRodataTests(unittest.TestCase):
             [MipsRelocation(0, "R_MIPS_32", ".text"), MipsRelocation(4, "R_MIPS_32", ".text")],
         )
         self.assertIn(".rel.rodata", sections)
+
+    def test_module_rodata_rebases_pointers_to_its_own_literals(self) -> None:
+        function = Function("GAME.EXE", 0x80010000, 8, 8, 1, "only", "test", "test")
+        carved = {function.va: (struct.pack("<2I", 0x03E00008, 0), [])}
+        module = Module("GAME.EXE", "game.table", "table", (function.va,), (), (0x80012000, 0x10))
+        # two literals followed by a table of pointers to them
+        blob = b"AB\0\0CD\0\0" + struct.pack("<2I", 0x80012000, 0x80012004)
+        built = _module_object(module, {function.va: function}, carved, {}, blob)
+        sections = elf_sections(built.data)
+        rodata = built.data[sections[".rodata"][4]:sections[".rodata"][4] + sections[".rodata"][5]]
+        self.assertEqual(struct.unpack_from("<2I", rodata, 8), (0, 4))
+        self.assertEqual(
+            [item for item in built.relocations if item.symbol == ".rodata"],
+            [MipsRelocation(8, "R_MIPS_32", ".rodata"), MipsRelocation(12, "R_MIPS_32", ".rodata")],
+        )
 
     def test_module_switch_table_rodata_ends_at_the_retail_claim(self) -> None:
         function = Function("GAME.EXE", 0x80010000, 8, 8, 1, "first", "test", "test")

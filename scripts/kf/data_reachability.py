@@ -48,7 +48,7 @@ class DataExtent:
 
     @property
     def claimed(self) -> bool:
-        return self.source in {"DATA", "RODATA"}
+        return self.source in {"DATA", "RODATA", "SDATA"}
 
     @property
     def key(self) -> str:

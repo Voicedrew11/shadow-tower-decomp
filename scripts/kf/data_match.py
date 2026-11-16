@@ -346,6 +346,35 @@ def linked_common_proof(unit: Unit, recon: Elf,
     return frozenset(request.name for request in recon.common_requests)
 
 
+def _place_proven_commons(unit: Unit, recon: Elf, proven: frozenset[str]) -> None:
+    """Add linked COMMON beside a unit's fixed .bss when the link proved them.
+
+    A unit may own fixed .bss (statics) and COMMON requests whose linked
+    addresses follow it. Once the current link placed every request at its
+    claim, compare the section as the link laid it out: the fixed allocations
+    keep their object offsets and each COMMON sits at its claim's distance
+    from the one base the fixed allocations imply.
+    """
+    section = recon.sections.get(".bss")
+    if not proven or section is None:
+        return
+    claims = {datum.symbol: datum for datum in unit.data if datum.section_name == ".bss"}
+    fixed = recon.allocations.get(".bss", [])
+    bases = {claims[item.name].va - item.offset for item in fixed if item.name in claims}
+    if len(bases) != 1 or any(item.name not in claims for item in fixed):
+        return
+    base = bases.pop()
+    placed = list(fixed)
+    present = {item.name for item in fixed}
+    for request in recon.common_requests:
+        if request.name in proven and request.name not in present:
+            placed.append(Allocation(request.name, claims[request.name].va - base,
+                                     request.size, 1, 0))  # STB_GLOBAL, STV_DEFAULT
+    size = max(section.size, *(item.offset + item.size for item in placed))
+    recon.sections[".bss"] = Section(".bss", section.type, size, b"", section.flags)
+    recon.allocations[".bss"] = placed
+
+
 def _proven_issue(label: str, issue: dict, proven: frozenset[str]) -> bool:
     """Whether a placement issue only restates COMMON placement the link proved."""
     kind = issue.get("kind")
@@ -393,6 +422,7 @@ def diff_unit(unit: Unit, delink_dir: Path, objdiff_dir: Path,
         if section.type == 8 and section.flags & 2  # allocated NOBITS, including custom names
     }
     proven = linked_common_proof(unit, recon, linked)
+    _place_proven_commons(unit, recon, proven)
     for name in sorted(bss_names):
         bss = _diff_bss(retail, recon, name, unit)
         if bss is not None and bss.status == "unresolved-common-placement" and proven:

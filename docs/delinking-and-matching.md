@@ -66,6 +66,9 @@ independently validate the TSV claim:
 - an external J/JAL target must be an admitted function start;
 - a HI/LO pair must remain inside one function extent, consume the LUI register,
   decode to the recorded address, and use a sign-extending low instruction;
+  rows may share a site only as one HI/LO family (same target: one `lui`
+  feeding several lows, or `lui`s on converging paths feeding one low), which
+  is emitted once per site in ELF REL order;
 - an out-of-load HI/LO pair remains withheld unless a human has promoted that
   exact decoded pair to `status=reviewed`; this is the path for RAM/BSS symbols
   whose addresses are real but whose storage is absent from the PS-X EXE payload;

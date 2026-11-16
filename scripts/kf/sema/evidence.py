@@ -2,12 +2,12 @@
 
 from __future__ import annotations
 
-from collections import Counter
 from dataclasses import dataclass, replace
 from functools import lru_cache
 
 from scripts.kf.delink import load_catalog, sanitize_symbol
 from scripts.kf.relocations import (
+    ambiguous_sites,
     DataReferent,
     decode_gprel16_target,
     decode_hi_lo_target,
@@ -164,18 +164,9 @@ class Evidence:
         return None if decoded == target else "decoded-target-mismatch"
 
     def _relocation_references(self) -> list[Reference]:
-        occupied = Counter()
-        reviewed = Counter()
-        for row in self.rows:
-            if row["status"] == "rejected":
-                continue
-            sites = [parse_int(row["site_va"])]
-            if row["paired_site_va"]:
-                sites.append(parse_int(row["paired_site_va"]))
-            for site in sites:
-                occupied[site] += 1
-                if row["status"] == "reviewed":
-                    reviewed[site] += 1
+        live = [row for row in self.rows if row["status"] != "rejected"]
+        occupied = ambiguous_sites(live)
+        reviewed = ambiguous_sites(row for row in live if row["status"] == "reviewed")
 
         out: list[Reference] = []
         for row in self.rows:
@@ -188,10 +179,7 @@ class Evidence:
             tier = "candidate"
             byte_reason = self._byte_reason(row, owner)
             overlap_counts = reviewed if row["status"] == "reviewed" else occupied
-            overlaps = (
-                overlap_counts[site] > 1
-                or paired is not None and overlap_counts[paired] > 1
-            )
+            overlaps = site in overlap_counts or paired is not None and paired in overlap_counts
             if row["status"] == "rejected":
                 tier, reason = "rejected", "candidate-rejected"
             elif byte_reason:
