@@ -249,11 +249,11 @@ class InventoryTests(unittest.TestCase):
                          [(0, 1), (4, 8), (12, 1)])
 
     def test_curated_inventories_cover_the_wip_universe(self) -> None:
-        # Every carveable non-vendored function in the four images has a
+        # Every carveable non-vendored function in every image has a
         # (candidate) identity row; update these counts with each admission.
         counts = validate(RETAIL_CONFIG)
-        self.assertEqual(counts["functions"], 7)
-        self.assertEqual(counts["signatures_started"], 7)
+        self.assertEqual(counts["functions"], 2016)
+        self.assertEqual(counts["signatures_started"], 2016)
         self.assertEqual(counts["data"], 0)
         self.assertGreaterEqual(counts["functions_named"], 0)
         self.assertEqual(counts["structures"], 0)
