@@ -16,6 +16,17 @@
 /* 0x801b5948: the source id list vis_collect_sources fills and the visible id
  * list vis_build_visible builds from it; vis_record_is_visible/vis_id_is_visible search the
  * visible list. */
+/* The request fields VisLists starts with, as a stack request (src/st/item.c). */
+typedef struct {
+    s32 unk0;
+    VECTOR unk4;
+    SVECTOR unk14;
+    u16 unk1C;
+    u16 unk1E;
+    s16 unk20;
+    s16 unk22;
+} VisRequest;
+
 typedef struct {
     s32 unk0;            /* 0x00: the kind of the request func_80049544 takes */
     VECTOR unk4;         /* 0x04: its position */
@@ -276,7 +287,7 @@ typedef struct {
     u32 unk18;           /* 0x18: squared distance */
     s32 unk1C;           /* 0x1c: distance (sound type 236) */
     u16 unk20;
-    s16 unk22;
+    u16 unk22;           /* 0x22: a door's opening angle (src/st/item.c) */
     VECTOR unk24;        /* 0x24: position */
     u16 unk34;           /* 0x34: rotation */
     u16 unk36;
@@ -434,6 +445,10 @@ int func_8004b090(u8 *p, int arg);
 void func_8004b098(int arg);
 void func_8004b19c(void);
 u8 *func_8004b1e8(Vis192 *r, u8 id);
+/* Band M functions band N calls (WIP signatures from their call sites). */
+int func_8004f718(int start, VisLists *req);
+Vis88 *func_8004f994(int kind, int arg1, int arg2);
+int func_80053174(VisRequest *req, int arg1);
 void func_8004b230(Vis212 *e, u8 id);
 void func_8004b270(void);
 void func_8004b2b4(u8 v);

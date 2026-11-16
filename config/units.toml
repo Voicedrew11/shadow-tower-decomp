@@ -446,6 +446,18 @@ source = "src/st/xa_play.c"
 profile = "probe-gcc272cdk-o2-g8"
 
 [[unit]]
+unit = "st.item_spawn"
+image = "ST.EXE"
+source = "src/st/item_spawn.c"
+profile = "probe-gcc272cdk-o2-g0"
+
+[[unit]]
+unit = "st.item"
+image = "ST.EXE"
+source = "src/st/item.c"
+profile = "probe-gcc272cdk-o2-g0"
+
+[[unit]]
 unit = "st.save_counts"
 image = "ST.EXE"
 source = "src/st/save_counts.c"

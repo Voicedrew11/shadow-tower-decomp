@@ -93,6 +93,10 @@ void func_80058dc4(int arg0, int arg1);
 void func_80058ed4(void);
 int func_80062c28(int arg0);
 void func_800633d4(void);
+void func_80042cfc(void);
+void func_80057cc8(void);
+void func_80057d58(void);
+void func_80057d7c(void);
 
 /* 0x8008809c: the unit z vector func_80049fe4 turns (load data, owner unknown). */
 extern SVECTOR DAT_8008809c;

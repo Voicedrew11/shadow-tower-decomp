@@ -23,6 +23,10 @@
 #include <st/pad.h>
 #include <st/xa.h>
 
+/* LIBC memcpy as the game declared it: retail calls it even for 4 bytes, so
+ * this prototype is not GCC's builtin one. */
+void *memcpy(void *dst, void *src, int size);
+
 /*
  * Not exact: retail stores loc[0] before loc[1]; this source schedules the
  * loc[1] store first (same size).
