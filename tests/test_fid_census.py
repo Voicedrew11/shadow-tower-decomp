@@ -10,9 +10,12 @@ from scripts.kf.fid_census import (
     signatures_from_listing,
 )
 from scripts.kf.seed_vendored_functions import parse_object_symbols
-from scripts.kf.seed_vendored_functions import apply_fid_rows
+from scripts.kf.seed_vendored_functions import SdkLabel, apply_fid_rows
 
 from kf2_images import kf2_images
+
+
+SDK = SdkLabel("4.2")
 
 
 LISTING = """
@@ -124,11 +127,11 @@ class FidCorpusTest(unittest.TestCase):
         apply_fid_rows([
             {**base, "confidence": "AMBIG"},
             {**base, "va": "0x80010010", "confidence": "HIGH"},
-        ], providers)
+        ], providers, SDK)
         self.assertEqual(list(providers), [("GAME.EXE", 0x80010010)])
         self.assertEqual(
             providers[("GAME.EXE", 0x80010010)]["confidence"],
-            "fid-sdk30",
+            "fid-sdk42",
         )
 
     def test_full_byte_same_name_ambiguity_preserves_all_candidates(self):
@@ -163,11 +166,11 @@ class FidCorpusTest(unittest.TestCase):
                 "module": "TWO",
                 "object_sha256": "2" * 64,
             },
-        ], providers)
+        ], providers, SDK)
         row = providers[("GAME.EXE", 0x80010000)]
         self.assertEqual(row["name"], "memcpy")
         self.assertEqual(row["aliases"], "_memcpy")
-        self.assertEqual(row["confidence"], "fid-sdk30-ambiguous")
+        self.assertEqual(row["confidence"], "fid-sdk42-ambiguous")
         self.assertEqual(row["library"], "FIRST.LIB|SECOND.LIB")
 
     def test_fid_only_corroborates_the_same_archive_identity(self):
@@ -193,7 +196,7 @@ class FidCorpusTest(unittest.TestCase):
             "object_sha256": "b" * 64,
             "fid_sha256": "c" * 64,
             "confidence": "HIGH",
-        }], existing)
+        }], existing, SDK)
         self.assertEqual(
             existing[("GAME.EXE", 0x80010000)]["provenance"],
             "exact-object",

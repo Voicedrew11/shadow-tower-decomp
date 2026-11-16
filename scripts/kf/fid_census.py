@@ -8,9 +8,9 @@ manually admitted retail function start.
 
 The output is evidence, not an automatic edit to ``config/retail``.  HIGH
 requires a substantial function, one corpus identity at the retail address,
-and no more than one match for that identity in each linked image.  GAME.EXE
-and OPEN.EXE are separate programs, so the same SDK function may legitimately
-match once in each overlay.
+and no more than one match for that identity in each linked image.  Every
+image in config/images.toml is a separate program or overlay, so the same SDK
+function may legitimately match once in each of them.
 """
 
 from __future__ import annotations
@@ -486,7 +486,8 @@ def main(arguments: Sequence[str] | None = None) -> int:
         {item.library_sha256 for item in corpus}
     )).encode()).hexdigest()
     banner = (
-        "Generated Psy-Q 3.0 masked function-ID evidence; review before promotion.",
+        f"Generated masked function-ID evidence from {args.sdk_lib_dir}; "
+        "review before promotion.",
         f"archive_set_sha256={archive_set}",
         f"signatures={len(corpus)} admitted_functions={len(functions)} "
         f"min_size={MIN_SIZE} min_fixed_bits={MIN_FIXED_BITS} "

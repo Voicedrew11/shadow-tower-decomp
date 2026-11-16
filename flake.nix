@@ -244,7 +244,7 @@
           exec python3 -m scripts.kf.seed_vendored_functions \
             --psyk ${psy-k}/bin/psyk \
             --sdk-lib-dir "${psyqSdk}/psyq-3.0/LIB" \
-            --signature-dir ${ghidraPsxLoader}/lib/ghidra/Ghidra/Extensions/ghidra_psx_ldr/data/psyq/300 \
+            --signature-root ${ghidraPsxLoader}/lib/ghidra/Ghidra/Extensions/ghidra_psx_ldr/data/psyq \
             "$@"
         '';
       };

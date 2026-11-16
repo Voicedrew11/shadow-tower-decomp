@@ -1,7 +1,7 @@
-"""Bounded GAME parser execution for retail and reconstructed MIPS code.
+"""Bounded parser execution for retail and reconstructed MIPS code.
 
-The runner deliberately is not a PlayStation boot harness.  It maps the
-verified GAME.EXE load image into the R3000 KSEG0 alias, relocates an explicit
+The runner deliberately is not a PlayStation boot harness.  It maps one
+verified retail load image into the R3000 KSEG0 alias, relocates an explicit
 closure of reconstructed functions to private code slots, and executes one
 O32 call.  Any attempted candidate-code fetch outside the declared closure is
 an error.  Calls into unchanged retail providers and Python service hooks must
@@ -35,8 +35,8 @@ from scripts.kf.sema.image import RetailImage
 
 RAM_BASE = 0x80000000
 RAM_SIZE = 0x200000
-# King's Field II GAME uses all 2 MiB: .bss ends at 0x801da018 and InitHeap
-# gives the heap everything up to 0x801f8000 below the stack. Candidate code,
+# Programs may use all 2 MiB: ST.EXE's .bss ends at 0x801EB560, its FDAT map
+# overlays load there, and the stack starts at 0x801FFFF0. Candidate code,
 # relocated rodata, hook stubs and the return sentinel therefore live in a
 # harness-only window above RAM, where hardware would mirror RAM instead.
 HARNESS_BASE = 0x80200000
@@ -151,7 +151,7 @@ class ExternalHook:
 
     ``retail_va`` is intercepted when retail code or an admitted retail
     provider calls the service.  Candidate relocations use a private hook slot
-    so an unresolved candidate call can never fall through into GAME.EXE.
+    so an unresolved candidate call can never fall through into retail code.
     """
 
     name: str
@@ -169,7 +169,7 @@ class CandidateFunction:
 
 @dataclass(frozen=True)
 class RetailProvider:
-    """Explicit unchanged GAME function admitted to a candidate closure."""
+    """Explicit unchanged retail function admitted to a candidate closure."""
 
     name: str
     address: int | None = None
@@ -222,20 +222,20 @@ class LinkedProgram:
 
 
 @dataclass(frozen=True)
-class GameSymbols:
-    """Curated GAME function and data identities used by candidate objects."""
+class ImageSymbols:
+    """Curated function and data identities of one image, used by candidate objects."""
 
     functions: Mapping[str, tuple[int, int]]
     data: Mapping[str, tuple[int, int]]
 
     @classmethod
-    def load(cls, config_dir: Path = RETAIL_CONFIG) -> "GameSymbols":
+    def load(cls, image: str, config_dir: Path = RETAIL_CONFIG) -> "ImageSymbols":
         catalog = load_catalog(config_dir)
         functions: dict[str, tuple[int, int]] = {}
         data: dict[str, tuple[int, int]] = {}
-        for item in catalog.functions["GAME.EXE"]:
+        for item in catalog.functions[image]:
             _insert_unique(functions, item.symbol, (item.va, item.size), "function")
-        for item in catalog.data["GAME.EXE"]:
+        for item in catalog.data[image]:
             _insert_unique(data, item.symbol, (item.va, item.size), "data")
         return cls(functions, data)
 
@@ -243,13 +243,13 @@ class GameSymbols:
         try:
             return self.functions[name]
         except KeyError as error:
-            raise CandidateLinkError(f"unknown curated GAME function {name!r}") from error
+            raise CandidateLinkError(f"unknown curated function {name!r}") from error
 
     def datum(self, name: str) -> tuple[int, int]:
         try:
             return self.data[name]
         except KeyError as error:
-            raise CandidateLinkError(f"unknown curated GAME datum {name!r}") from error
+            raise CandidateLinkError(f"unknown curated datum {name!r}") from error
 
 
 def _insert_unique(
@@ -261,7 +261,7 @@ def _insert_unique(
     previous = result.setdefault(name, value)
     if previous != value:
         raise CandidateLinkError(
-            f"ambiguous curated GAME {kind} identity {name!r}: {previous} and {value}"
+            f"ambiguous curated {kind} identity {name!r}: {previous} and {value}"
         )
 
 
@@ -417,7 +417,7 @@ class CandidateProgram:
     @classmethod
     def link(
         cls,
-        symbols: GameSymbols,
+        symbols: ImageSymbols,
         functions: Sequence[CandidateFunction],
         *,
         hooks: Sequence[ExternalHook] = (),
@@ -468,7 +468,7 @@ class CandidateProgram:
             if address != curated_address:
                 raise CandidateLinkError(
                     f"provider {provider.name!r} address {address:#x} disagrees with "
-                    f"curated GAME address {curated_address:#x}"
+                    f"curated retail address {curated_address:#x}"
                 )
             if size <= 0 or size > curated_size:
                 raise CandidateLinkError(
@@ -596,7 +596,7 @@ class CandidateProgram:
                     return (known_data[name] + addend) & 0xFFFFFFFF
                 if name in symbols.functions:
                     raise CandidateLinkError(
-                        f"{owner.obj.path}: candidate call/reference to GAME function {name!r} "
+                        f"{owner.obj.path}: candidate call/reference to retail function {name!r} "
                         "is not in the candidate closure, providers, or hooks"
                     )
                 raise CandidateLinkError(
@@ -828,7 +828,7 @@ class RetailProgram:
     @classmethod
     def link(
         cls,
-        symbols: GameSymbols,
+        symbols: ImageSymbols,
         functions: Sequence[str],
         *,
         hooks: Sequence[ExternalHook] = (),
@@ -1012,7 +1012,7 @@ def _store_record(
 
 
 class ParserMachine:
-    """Execute one linked retail or candidate GAME parser call at a time."""
+    """Execute one linked retail or candidate parser call at a time."""
 
     def __init__(
         self,
@@ -1022,8 +1022,6 @@ class ParserMachine:
         stack_va: int = DEFAULT_STACK_VA,
         audit_load_delays: bool = True,
     ) -> None:
-        if retail.image != "GAME.EXE":
-            raise ValueError(f"parser machine requires GAME.EXE, got {retail.image}")
         self.retail = retail
         self.program = program
         self.stack_va = stack_va
@@ -1252,7 +1250,7 @@ class ParserMachine:
         """Keep caller data from replacing the declared executable closure.
 
         Addresses are compared after KSEG translation because Unicorn maps
-        GAME's high virtual addresses and low physical aliases to the same PSX
+        the image's high virtual addresses and low physical aliases to the same PSX
         RAM. Only this program's functions, relocation patches, and hook stubs
         are protected; unrelated bytes in the retail image remain valid parser
         inputs.

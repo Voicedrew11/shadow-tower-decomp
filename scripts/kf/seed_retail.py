@@ -338,8 +338,14 @@ def relocation_rows(
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--exe-dir", type=Path, required=True)
-    parser.add_argument("--evidence-dir", type=Path, required=True)
-    parser.add_argument("--reviewed-symbols", type=Path, required=True)
+    parser.add_argument(
+        "--evidence-dir", type=Path,
+        help="directory with investigation strings.tsv/relocs.tsv (optional)",
+    )
+    parser.add_argument(
+        "--reviewed-symbols", type=Path,
+        help="reviewed symbol TSV whose names and extents outrank Ghidra (optional)",
+    )
     parser.add_argument("--output-dir", type=Path, default=Path("build/retail-seed"))
     args = parser.parse_args()
 
@@ -348,8 +354,11 @@ def main() -> int:
 
     import pyghidra
 
-    symbols = reviewed_symbols(args.reviewed_symbols)
-    strings = read_rows(args.evidence_dir / "strings.tsv")
+    symbols = (
+        reviewed_symbols(args.reviewed_symbols) if args.reviewed_symbols
+        else {image: [] for image in IMAGE_LAYOUTS}
+    )
+    strings = read_rows(args.evidence_dir / "strings.tsv") if args.evidence_dir else []
     all_functions: list[dict[str, object]] = []
     all_data: list[dict[str, object]] = []
     with tempfile.TemporaryDirectory(prefix="kf-retail-ghidra-") as project_root:
@@ -387,11 +396,13 @@ def main() -> int:
         (str(row["image"]), parse_int(str(row["va"]))): str(row["name"])
         for row in [*all_functions, *all_data] if row["name"]
     }
-    all_relocs = relocation_rows(args.evidence_dir / "relocs.tsv", names)
+    all_relocs = (
+        relocation_rows(args.evidence_dir / "relocs.tsv", names) if args.evidence_dir else []
+    )
     comments = (
         "INITIAL MACHINE-ASSISTED SEED; after admission this file is MANUALLY MANAGED.",
         "Never overwrite config/retail from this tool; diff build/retail-seed and review rows.",
-        "Each address is qualified by image because GAME.EXE and OPEN.EXE are separate overlays.",
+        "Each address is qualified by image: programs and overlays share load windows.",
     )
     write_tsv(args.output_dir / "functions.tsv", FUNCTION_FIELDS, all_functions, comments + (
         "Function extents are WIP and may include owned jump tables/padding or miss indirect-only code.",

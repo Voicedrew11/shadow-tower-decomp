@@ -7,6 +7,7 @@ import csv
 import hashlib
 import io
 import os
+import re
 import struct
 import tomllib
 from dataclasses import dataclass
@@ -190,17 +191,14 @@ VENDORED_FUNCTION_FIELDS = (
     "note",
 )
 
-VENDORED_CONFIDENCE = {
-    "fid-sdk30",
-    "fid-sdk30-ambiguous",
-    "exact-sdk30",
-    "exact-sdk30-short",
-    "exact-sdk30-ambiguous",
-    "exact-sdk30-complete",
-    "psyq300-signature",
-    "psyq300-signature-ambiguous",
-    "sdk-lineage-supported",
-}
+# Confidence names carry the SDK release they were proven against: `sdk42`
+# for the supplied archives, `psyq420` for a ghidra_psx_ldr signature set.
+VENDORED_CONFIDENCE = re.compile(
+    r"fid-sdk\d+(?:-ambiguous)?"
+    r"|exact-sdk\d+(?:-short|-ambiguous|-complete)?"
+    r"|psyq\d{3,4}-signature(?:-ambiguous)?"
+    r"|sdk-lineage-supported"
+)
 
 
 def parse_int(value: str) -> int:
@@ -535,7 +533,7 @@ def validate_config(config_dir: Path, exe_dir: Path | None = None) -> dict[str, 
             ):
                 if not row[field]:
                     raise ValueError(f"{vendored_path}: empty {field} in {row!r}")
-            if row["confidence"] not in VENDORED_CONFIDENCE:
+            if VENDORED_CONFIDENCE.fullmatch(row["confidence"]) is None:
                 raise ValueError(
                     f"{vendored_path}: invalid confidence {row['confidence']!r}"
                 )

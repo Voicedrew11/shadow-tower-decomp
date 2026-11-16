@@ -22,12 +22,14 @@ from scripts.kf.retail import (
 from scripts.kf.propose_function_admission import subtract_interval
 from scripts.kf.seed_retail import escape_trailing_spaces
 from scripts.kf.seed_vendored_functions import (
+    SdkLabel,
     SignaturePattern,
     find_masked_bytes,
     find_signature,
     load_sdk_symbols,
     parse_object_symbols,
     parse_signature,
+    signature_set_version,
 )
 
 
@@ -118,6 +120,19 @@ class RetailTests(unittest.TestCase):
             path.write_bytes(payload[:-4] + bytes(4))
             with self.assertRaises(ValueError):
                 verify_retail_image(path, "OVL_001.BIN")
+
+    def test_vendored_labels_carry_their_sdk_release(self) -> None:
+        sdk = SdkLabel.from_directory(Path("/nix/store/x-sdk/psyq-4.2/LIB"))
+        self.assertEqual((sdk.token, sdk.source_version), ("sdk42", "Psy-Q 4.2"))
+        with self.assertRaises(ValueError):
+            SdkLabel.from_directory(Path("/opt/sdk/LIB"))
+        self.assertEqual(signature_set_version("420"), "4.2")
+        self.assertEqual(signature_set_version("300"), "3.0")
+        self.assertEqual(signature_set_version("3610"), "3.61")
+        for confidence in ("fid-sdk42", "exact-sdk42-complete", "psyq420-signature",
+                           "psyq3610-signature-ambiguous", "sdk-lineage-supported"):
+            self.assertIsNotNone(retail.VENDORED_CONFIDENCE.fullmatch(confidence))
+        self.assertIsNone(retail.VENDORED_CONFIDENCE.fullmatch("psyq-signature"))
 
     def test_parse_interleaved_object_symbols(self) -> None:
         parsed = parse_object_symbols(
