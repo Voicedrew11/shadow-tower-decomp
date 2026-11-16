@@ -416,8 +416,6 @@ OPTXT.EXE	0x8001f7e6	0xefe6	0x2	unclassified	coverage-gap			payload-complement	.
 OPTXT.EXE	0x8001f7e8	0xefe8	0x4	bss	proven	frame	int	asm;src/optxt/main.c optxt.main	.sbss; $gp+80
 OPTXT.EXE	0x8001f7ec	0xefec	0x14	unclassified	coverage-gap			payload-complement	the opening state word 0x8001f7ec (read and written by its fixed address, absolute lui pairs, no relocation), .sbss alignment and MALLOC.OBJ .bss
 VS.EXE	0x80011000	0x800	0x1980	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
-VS.EXE	0x8002c380	0x1bb80	0x1390	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
-VS.EXE	0x8002f3e0	0x1ebe0	0x1240	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 VS.EXE	0x80035d78	0x25578	0x4	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 VS.EXE	0x80035d88	0x25588	0x4	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 VS.EXE	0x80035d98	0x25598	0x4	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data

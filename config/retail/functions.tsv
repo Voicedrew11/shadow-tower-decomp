@@ -2340,7 +2340,7 @@ VS.EXE	0x8002ab58	0x1a358	0x1e8	0x1e8	1	function	mips-frame-carve			scripts/kf/a
 VS.EXE	0x8002ad40	0x1a540	0x338	0x338	1	function	mips-frame-carve			scripts/kf/audit_functions.py	anonymous WIP start; stack-frame+ra-save+matching-stack-return
 VS.EXE	0x8002b078	0x1a878	0xf70	0xf70	1	function	mips-frame-carve			scripts/kf/audit_functions.py	anonymous WIP start; stack-frame+ra-save+matching-stack-return
 VS.EXE	0x8002bfe8	0x1b7e8	0x2dc	0x2dc	1	function	mips-return-carve			scripts/kf/audit_functions.py	anonymous WIP start; previous-return+return-delimited-valid-code
-VS.EXE	0x8002c2c4	0x1bac4	0xbc	0xbc	1	function	mips-call-carve			scripts/kf/audit_functions.py	anonymous WIP start; jal-target x1+first-unconditional-transfer
+VS.EXE	0x8002c2c4	0x1bac4	0x144c	0x144c	1	function	mips-call-carve			scripts/kf/audit_functions.py	anonymous WIP start; jal-target x1+first-unconditional-transfer; extended over its switch cases (owner-ends-at-proven-switch-dispatch+cases-up-to-next-start)
 VS.EXE	0x8002d710	0x1cf10	0x28	0x28	1	function	mips-return-carve			scripts/kf/audit_functions.py	anonymous WIP start; previous-return+return-delimited-valid-code
 VS.EXE	0x8002d738	0x1cf38	0x260	0x260	1	function	mips-return-carve			scripts/kf/audit_functions.py	anonymous WIP start; previous-return+return-delimited-valid-code
 VS.EXE	0x8002d998	0x1d198	0x340	0x340	1	function	mips-frame-carve			scripts/kf/audit_functions.py	anonymous WIP start; stack-frame+ra-save+matching-stack-return
@@ -2373,7 +2373,7 @@ VS.EXE	0x8002f014	0x1e814	0xe0	0xe0	1	function	mips-frame-carve			scripts/kf/aud
 VS.EXE	0x8002f0f4	0x1e8f4	0x80	0x80	1	function	mips-frame-carve			scripts/kf/audit_functions.py	anonymous WIP start; stack-frame+ra-save+matching-stack-return
 VS.EXE	0x8002f174	0x1e974	0xf0	0xf0	1	function	mips-frame-carve			scripts/kf/audit_functions.py	anonymous WIP start; stack-frame+ra-save+matching-stack-return
 VS.EXE	0x8002f264	0x1ea64	0xd0	0xd0	1	function	mips-frame-carve			scripts/kf/audit_functions.py	anonymous WIP start; stack-frame+ra-save+matching-stack-return
-VS.EXE	0x8002f334	0x1eb34	0xac	0xac	1	function	mips-call-carve			scripts/kf/audit_functions.py	anonymous WIP start; jal-target x1+first-unconditional-transfer
+VS.EXE	0x8002f334	0x1eb34	0x12ec	0x12ec	1	function	mips-call-carve			scripts/kf/audit_functions.py	anonymous WIP start; jal-target x1+first-unconditional-transfer; extended over its switch cases (owner-ends-at-proven-switch-dispatch+cases-up-to-next-start)
 VS.EXE	0x80030620	0x1fe20	0x29c	0x29c	1	function	mips-frame-carve			scripts/kf/audit_functions.py	anonymous WIP start; stack-frame+ra-save+matching-stack-return
 VS.EXE	0x800308bc	0x200bc	0x280	0x280	1	function	mips-frame-carve			scripts/kf/audit_functions.py	anonymous WIP start; stack-frame+ra-save+matching-stack-return
 VS.EXE	0x80030b3c	0x2033c	0x1ac	0x1ac	1	function	mips-frame-carve			scripts/kf/audit_functions.py	anonymous WIP start; stack-frame+ra-save+matching-stack-return
