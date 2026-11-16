@@ -215,4 +215,6 @@ int card(char *name)
                     else:
                         self.assertNotIn('.sdata', sections)
                         self.assertIn(b' \0', sections['.rodata'].data())
-            self.assertEqual(len(texts[0]), len(texts[8]))
+            # ASPSX 2.79 turns -G8 small-data accesses into one $gp-relative
+            # instruction instead of a lui/low pair.
+            self.assertLess(len(texts[8]), len(texts[0]))

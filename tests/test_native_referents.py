@@ -65,7 +65,7 @@ class ManifestTests(unittest.TestCase):
 
 
 @unittest.skipUnless(shutil.which('dosbox-x') and os.environ.get('PSYQ_ASPSX')
-                     and os.environ.get('PSYQ_BIN'), 'native SDK tools required')
+                     and os.environ.get('PSYQ_HX'), 'native SDK tools required')
 class NativeTests(unittest.TestCase):
     def test_explicit_pair_preserves_address_without_renaming_equal_neighbours(self):
         with tempfile.TemporaryDirectory() as directory:

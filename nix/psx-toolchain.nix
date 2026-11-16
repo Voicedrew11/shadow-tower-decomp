@@ -1,8 +1,10 @@
 { pkgs, sdkBuilder }:
 let
       # Psy-Q PS-X Development System Release 3.0 kit; files dated 1995-04-08
-      # despite the Archive.org item title. Its libraries carry the exact Sony
-      # RCS revisions embedded in the retail JP/US executables.
+      # despite the Archive.org item title. Inherited from King's Field II,
+      # whose retail executables carry its RCS revisions. Shadow Tower links
+      # Runtime Library 4.2 instead; this kit stays only as the analysis
+      # corpus of the vendored-function seed and FID census.
       psyqKit = pkgs.fetchurl {
         name = "psyq-3.0-psx.zip";
         url = "https://archive.org/download/psyq_psx_toolchain_april_08_1994/psx.zip";
@@ -54,8 +56,7 @@ let
         mv "$out/include/gstdarg.h" "$out/include/stdarg.h"
       '';
 
-      # The one active historical SDK is the complete pinned Psy-Q 3.0 kit
-      # tree. Analysis programs below do not enter this derivation.
+      # The complete pinned Psy-Q 3.0 kit tree (analysis corpus only).
       psyqSdk = pkgs.runCommand "shadow-tower-psyq-3.0-sdk" {
         nativeBuildInputs = with pkgs; [
           binutils
@@ -72,9 +73,10 @@ let
           --stage-dir "$out"
       '';
 
-      # This Release 2.5 standalone allocator is absent from the active 3.0
-      # kit. Its 0x60c text and all 1172 fixed bytes match the linked allocator
-      # in OPEN and END; the original distribution version remains unproved.
+      # Standalone allocator from the Psy-Q Release 2.5 floppies; Runtime
+      # Library 4.2 ships no MALLOC.OBJ. Its 0x60c text matches, relocation
+      # fields masked, the allocator that STR, TITLE, OPTXT and END link
+      # directly after NONE3.OBJ; the original distribution remains unproved.
       psyq25Floppies = pkgs.fetchurl {
         name = "psyq-release-2.5-floppies.rar";
         url = "https://archive.org/download/ps1_sdks/Floppies.rar";
@@ -92,78 +94,131 @@ let
         cp "$malloc_obj" "$out/MALLOC.OBJ"
       '';
 
-      # Sony's Programmer Tool Runtime Library 3.0 CD (DTL-S2180, March 1995).
-      # Its PSXGRAPH CPE2X 1.3 is a later build than the kit's: it zeroes the
-      # EXEC save area and reserved words and sets s_addr to 801ffff0, as the
-      # retail PSX, OPEN and END headers record. Only this file is extracted.
-      psyqRuntime30Cd = pkgs.fetchurl {
-        name = "psx-runtime-library-3.0-dtl-s2180.zip";
-        url = "https://archive.org/download/ps1_sdks/Programmer%20Tool%20-%20Runtime%20Library%20Version%203.0%20%28Japan%29%20%28En%2CJa%29_DTL-S2180_redump.zip";
-        hash = "sha256-BxeoIBl9M35TaWy6uuShJS9eIDOWhtMMWSm+N/r07zc=";
-      };
-      psyqRuntime30Cpe2x = pkgs.runCommand "shadow-tower-runtime-3.0-cpe2x" {
-        nativeBuildInputs = with pkgs; [ coreutils python3 ];
-      } ''
-        mkdir -p "$out"
-        # Read PSXGRAPH/BIN/CPE2X.EXE from the MODE1/2352 track's ISO 9660 tree.
-        python3 - ${psyqRuntime30Cd} "$out/CPE2X.EXE" <<'PY'
-        import struct, sys, zipfile
-        with zipfile.ZipFile(sys.argv[1]) as archive:
-            name = next(n for n in archive.namelist() if n.endswith('.bin'))
-            raw = archive.read(name)
-        assert len(raw) % 2352 == 0
-        def sector(lba):
-            return raw[lba * 2352 + 16:lba * 2352 + 2064]
-        def read(lba, size):
-            return bytes().join(sector(lba + i) for i in range((size + 2047) // 2048))[:size]
-        def entries(lba, size):
-            data = read(lba, size)
-            position = 0
-            while position < len(data):
-                length = data[position]
-                if not length:
-                    position = (position // 2048 + 1) * 2048
-                    continue
-                record = data[position:position + length]
-                extent, extent_size = struct.unpack_from('<I', record, 2)[0], struct.unpack_from('<I', record, 10)[0]
-                identifier = record[33:33 + record[32]].decode('ascii').split(';')[0]
-                yield identifier, extent, extent_size
-                position += length
-        descriptor = sector(16)
-        assert descriptor[1:6] == b'CD001'
-        root = descriptor[156:156 + 34]
-        lba, size = struct.unpack_from('<I', root, 2)[0], struct.unpack_from('<I', root, 10)[0]
-        for part in ('PSXGRAPH', 'BIN', 'CPE2X.EXE'):
-            lba, size = next((e, n) for i, e, n in entries(lba, size) if i == part)
-        open(sys.argv[2], 'wb').write(read(lba, size))
-        PY
-        test "$(sha256sum "$out/CPE2X.EXE" | cut -d' ' -f1)" = \
-          "641d95ebe8131c3503407518cb6110ed311cb5f87943d866296660ab98938af2"
-      '';
-
-      # Inherited from the King's Field (SLPS-00017) setup, where the Release
-      # 2.5 ASPSX was software-key protected. This hash-pinned ASPSX 1.07
-      # assembles all compiler output; its distinct provenance remains explicit
-      # in every build report. The 3.0 kit's own ASPSX 2.08 is not yet wired in.
+      # mkst/maspsx's archive of historical ASPSX builds; only 2.79 is used.
       aspsxArchive = pkgs.fetchurl {
         name = "aspsx-binaries.tar.gz";
         url = "https://github.com/mkst/maspsx/releases/download/aspsx/aspsx-binaries.tar.gz";
         hash = "sha256-fHU4wq+SMzjdxaevXFfSgLGTBmDpj5xDDm6iq3XlLno=";
       };
-      aspsxNative = pkgs.runCommand "kings-field-aspsx-1.07" {
+
+      # Sony's Programmer Tool Runtime Library 4.2: the LIB and INCLUDE trees
+      # and the two bundled 4.2.1 patch archives, unchanged. Every SDK object
+      # linked into the seven SLUS-00863 programs matches an object of these
+      # archives with relocation fields masked, and their RCS strings
+      # (sys.c 1.140 1998/01/12, bios.c 1.86, intr.c 1.76) are the retail ones.
+      psyq42Archive = pkgs.fetchurl {
+        name = "psx-runtime-library-4.2.7z";
+        url = "https://archive.org/download/play-station-programmer-tool-runtime-library-version-4.2.7z/PlayStation_Programmer_Tool_-_Runtime_Library_Version_4.2.7z";
+        hash = "sha256-5PWmeF6YEFHZEMNTSg8F6h1PbvT7z7HQnbk+ymIj5f4=";
+      };
+      # `psyq-4.2/` keeps the extracted tree byte-identical. `lib/` is the
+      # linker's archive directory: the 4.2 archives with LIBPAD.LIB taken from
+      # the bundled 4.2.1 pad patch (LIB/42PATCH/J421PD.ZIP), whose PADMAIN,
+      # PADIF and WAITRC2 members are the ones the retail programs link.
+      # `include-lf/` is INCLUDE with CRLF line endings converted to LF.
+      psyq42Sdk = pkgs.runCommand "shadow-tower-psyq-4.2-runtime" {
+        nativeBuildInputs = with pkgs; [ coreutils findutils p7zip unzip ];
+      } ''
+        mkdir -p "$out/psyq-4.2" "$out/lib" "$out/include-lf"
+        7z x -bd -o"$out/psyq-4.2" ${psyq42Archive} >/dev/null
+        check() {
+          test "$(sha256sum "$1" | cut -d' ' -f1)" = "$2" || { echo "$1: unexpected hash" >&2; exit 1; }
+        }
+        check "$out/psyq-4.2/LIB/LIBPAD.LIB" 91b29e9cfa082b0d4981d7cd15935e9096cb4442a09358a367bc05e29f066369
+        check "$out/psyq-4.2/LIB/42PATCH/J421PD.ZIP" c3d2a9b3c2d077bef76397f36945207febbed71b4416729dc533d5be215d5bd3
+        cp "$out/psyq-4.2/LIB/"*.LIB "$out/lib/"
+        unzip -p "$out/psyq-4.2/LIB/42PATCH/J421PD.ZIP" LIBPAD.LIB > "$out/lib/LIBPAD.LIB"
+        check "$out/lib/LIBPAD.LIB" eb41454b3678fdeee1065ff2c892882cdeadd1d04c9d8ad0c7a7c8ba41012fc4
+        (cd "$out/psyq-4.2/INCLUDE" && find . -type f) | while read -r header; do
+          mkdir -p "$out/include-lf/$(dirname "$header")"
+          tr -d '\r' < "$out/psyq-4.2/INCLUDE/$header" > "$out/include-lf/$header"
+        done
+      '';
+
+      # The Psy-Q/SDevTC 4.5 developer kit as preserved on Archive.org
+      # (`ps1_sdks`, a 1999 floppy-set release of the 1998 tools). Only the
+      # files the executable chain needs are taken: PSYLINK 2.74 (1998-05-14),
+      # CPE2X 1.5 (1998-01-23), whose /CA option writes the "North America
+      # area" title that every retail header carries, and the NONE3.OBJ
+      # overlay startup that begins the text of STR, ST, TITLE, OPTXT, VS and
+      # END. The kit's own ASPSX.EXE is byte-identical to the ASPSX 2.79 below.
+      psyq45KitArchive = pkgs.fetchurl {
+        name = "psyq-sdevtc-4.5-mfd.zip";
+        url = "https://archive.org/download/ps1_sdks/PSYQ.SDevTC.Developers.Toolkit.For.PSX.v4.5-MFD.zip";
+        hash = "sha256-5+Qmnvz1SC2cTFtkYQ3U5Nr0v8AOvgYAWXEAl1dI5Ss=";
+      };
+      psyq45Tools = pkgs.runCommand "shadow-tower-psyq-4.5-link-tools" {
+        nativeBuildInputs = with pkgs; [ coreutils findutils unar unzip ];
+      } ''
+        mkdir -p "$TMPDIR/kit" "$out"
+        cd "$TMPDIR/kit"
+        unzip -q ${psyq45KitArchive}
+        cd PSYQ.SDevTC.Developers.Toolkit.For.PSX.v4.5-MFD
+        for volume in mfdpsx0*.zip; do unzip -qo "$volume"; done
+        unar -quiet -force-overwrite -output-directory "$TMPDIR/tree" mfdpsx.rar
+        root="$TMPDIR/tree/mfdpsx"
+        install -m 0644 "$root/BIN/PSYLINK.EXE" "$root/BIN/CPE2X.EXE" "$root/LIB/NONE3.OBJ" "$out/"
+        check() {
+          test "$(sha256sum "$out/$1" | cut -d' ' -f1)" = "$2" || { echo "$1: unexpected hash" >&2; exit 1; }
+        }
+        check PSYLINK.EXE 734a1278d2052d8a1ef882bfd68d5f6fc91e75965821854f531cfb204cfe8b72
+        check CPE2X.EXE 777caca88327cd18d4f92b43439575c1759381690d49f14177805a94b8ecbef6
+        check NONE3.OBJ 063efc868877ca84fcbe1fdc3afe9656e6c7933cb68156e08d04d35b76166899
+      '';
+
+      # ASPSX 2.79 and PSYLINK 2.74 are Win32 console programs. The HX DOS
+      # extender's DPMI host (HDPMI32) and PE loader (DPMILD32) run them under
+      # the same pinned DOSBox-X as the DOS tools; only the Win32 API layer
+      # (DKRNL32, DUSER32, DGDI32) is needed.
+      hxRuntimeArchive = pkgs.fetchurl {
+        name = "hxrt-2.23.zip";
+        url = "https://github.com/Baron-von-Riedesel/HX/releases/download/v2.23/HXRT223.zip";
+        hash = "sha256-IFEM9m1shwT2b5CPj7+XgxmBlcHgQ6bKn7at6t+Hhck=";
+      };
+      hxRuntime = pkgs.runCommand "shadow-tower-hx-runtime-2.23" {
+        nativeBuildInputs = with pkgs; [ coreutils unzip ];
+      } ''
+        mkdir -p "$out"
+        unzip -q -j ${hxRuntimeArchive} BIN/HDPMI32.EXE BIN/DPMILD32.EXE BIN/DKRNL32.DLL BIN/DUSER32.DLL BIN/DGDI32.DLL -d "$out"
+      '';
+
+      # ASPSX 2.79 (SDevTC, 1998-05-22) from the pinned maspsx archive.
+      # It accepts the %hi/%lo operands of the gcc-2.7.2 SN32 compiler, which
+      # ASPSX 2.56 and older reject.
+      aspsx279 = pkgs.runCommand "shadow-tower-aspsx-2.79" {
         nativeBuildInputs = [ pkgs.gnutar pkgs.gzip ];
       } ''
         mkdir -p "$out"
-        tar -xzf ${aspsxArchive} -C "$out" ./1.07/ASPSX.EXE
+        tar -xzf ${aspsxArchive} -C "$out" ./2.79/ASPSX.EXE
+        test "$(sha256sum "$out/2.79/ASPSX.EXE" | cut -d' ' -f1)" = \
+          "fcb987495ba18f9d8b5dc29696f7e6650091d3d86471c60b2a8aa00396888992"
       '';
 
-      # The C assembler lacks named sections, while the kit's macro assembler
-      # is not yet validated under DOSBox. Use this preserved native ASMPSX
-      # solely for zero-byte linker boundary declarations, not game bodies.
-      asmpsxNative = pkgs.fetchurl {
-        name = "kings-field-asmpsx-2.34.exe";
-        url = "https://raw.githubusercontent.com/HighwayFrogs/frogger-psx/fa2d5185b19ae89aaceeb47b2828369e06566edf/sdk/bin/SDK4.0/DOS/ASMPSX.EXE";
-        sha256 = "c27e07db59f29282c837e06204a3a5efe69183dbfd2570c8b0d46f1cb5f760bb";
+      # Decompals rebuild of the SN Systems GCC 2.7.2 PSX compiler
+      # ("cygnus-2.7.2-970404 SN32"). With -O2 it reproduces sampled Shadow
+      # Tower game functions exactly; it is still a rebuild, not the original
+      # Win32 CC1PSX.EXE.
+      gcc272CdkNativeArchive = pkgs.fetchurl {
+        name = "decompals-old-gcc-0.17-gcc-2.7.2-cdk.tar.gz";
+        url = "https://github.com/decompals/old-gcc/releases/download/0.17/gcc-2.7.2-cdk.tar.gz";
+        hash = "sha256-QrsN+W2xGptdLiPXi9yWJ5H0AEYoDT02Dak/5e728Ls=";
+      };
+      gcc272CdkNative = pkgs.runCommand "decompals-gcc-2.7.2-cdk-0.17" {
+        nativeBuildInputs = [ pkgs.gnutar pkgs.gzip ];
+      } ''
+        mkdir -p "$out/bin"
+        tar -xzf ${gcc272CdkNativeArchive} -C "$out/bin" cc1 cpp
+        chmod +x "$out/bin"/*
+      '';
+
+      cc1psx272cdk = pkgs.writeShellApplication {
+        name = "cc1psx-272cdk";
+        text = ''exec ${gcc272CdkNative}/bin/cc1 "$@"'';
+      };
+
+      cpppsx272cdk = pkgs.writeShellApplication {
+        name = "cpppsx-272cdk";
+        text = ''exec ${gcc272CdkNative}/bin/cpp "$@"'';
       };
 
       cc1psx260 = pkgs.writeShellApplication {
@@ -187,6 +242,7 @@ let
       };
 
 in {
-  inherit psyqSdk psyqMallocObj psyqRuntime30Cpe2x gcc257Native gcc257Headers gcc260Native cc1psx257 cpppsx257 cc1psx260 cpppsx260
-    aspsxNative asmpsxNative;
+  inherit psyqSdk psyq42Sdk psyq45Tools psyqMallocObj hxRuntime aspsx279
+    gcc272CdkNative cc1psx272cdk cpppsx272cdk
+    gcc257Native gcc257Headers gcc260Native cc1psx257 cpppsx257 cc1psx260 cpppsx260;
 }

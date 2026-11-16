@@ -3,7 +3,7 @@
 # Each address is qualified by image: the programs share load windows and the FDAT overlays share one window inside ST.EXE's address space.
 # Function extents are WIP and may include owned jump tables/padding or miss indirect-only code.
 image	va	file_offset	size	body_size	fragments	kind	confidence	name	labels	provenance	note
-PSX.EXE	0x80010068	0x868	0xe8	0xe8	1	function	mips-frame-carve			scripts/kf/audit_functions.py	anonymous WIP start; stack-frame+ra-save+matching-stack-return+stored-pointer
+PSX.EXE	0x80010068	0x868	0xe8	0xe8	1	function	proven	main		jal from __SN_ENTRY_POINT (LIBSN SNMAIN)	ends at the first LIBAPI stub; rebuilt byte-identical from src/psx/main.c
 PSX.EXE	0x80010150	0x950	0xc	0xc	1	function	mips-call-carve			scripts/kf/audit_functions.py	anonymous WIP start; jal-target x1+first-unconditional-transfer
 PSX.EXE	0x80010160	0x960	0xc	0xc	1	function	mips-call-carve			scripts/kf/audit_functions.py	anonymous WIP start; jal-target x1+first-unconditional-transfer
 PSX.EXE	0x80010170	0x970	0xc	0xc	1	function	mips-call-carve			scripts/kf/audit_functions.py	anonymous WIP start; jal-target x2+first-unconditional-transfer

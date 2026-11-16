@@ -192,6 +192,11 @@ def elf_view(data: bytes, *, functions: tuple[str, ...] = (),
     )
 
     obj = read(data)
+    # ASPSX 2.79 declares .ctors and .dtors in every object; C units leave
+    # them empty, and an empty section has nothing to compare.
+    for number, section in list(obj.sections.items()):
+        if section.name in ('.ctors', '.dtors') and not section.data and not section.patches:
+            del obj.sections[number]
     sizes = sizes or {}
     functions = set(functions) | set(obj.functions) | obj.declared_functions
     names = {number: '.rodata' if section.name == '.rdata' else section.name
@@ -285,6 +290,9 @@ def elf_view(data: bytes, *, functions: tuple[str, ...] = (),
                 relocation, value = 'R_MIPS_HI16', (word & 0xffff0000) | (((addend + 0x8000) >> 16) & 0xffff)
             elif kind == 84:
                 relocation, value = 'R_MIPS_LO16', (word & 0xffff0000) | (addend & 0xffff)
+            elif kind == 100:
+                # ASPSX 2.x emits single $gp-relative accesses to small data.
+                relocation, value = 'R_MIPS_GPREL16', (word & 0xffff0000) | (addend & 0xffff)
             else:
                 raise ValueError(f'unsupported native MIPS patch {kind}')
             struct.pack_into('<I', payload, offset, value)

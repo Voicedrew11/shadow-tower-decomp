@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Build all four PlayStation executables using the pinned SDK."""
+"""Build the PlayStation executables using the pinned SDK."""
 
 import json
 import os
@@ -25,8 +25,7 @@ def main():
     for image in manifest['images']:
         report = build_image(
             image['name'], repo / 'build' / image['name'][:-4].lower(), image['units'],
-            compile_one, repo=repo, load_address=image['load_address'],
-            bounds_source='link/overlay_bounds.asm')
+            compile_one, repo=repo, load_address=image['load_address'])
         if report['linked']:
             print(report['executable'], flush=True)
         else:

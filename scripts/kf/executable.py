@@ -10,8 +10,8 @@ from pathlib import Path
 import struct
 
 from scripts.kf.sdk import compile_c
+from scripts.psxbuild.sdk import ASPSX_VERSION
 from scripts.psxbuild.link import build_image as link_image
-from scripts.psxbuild.link import OVERLAY_STARTUP as OVERLAY_STARTUP
 from scripts.kf.executable_diff import compare_executables, render_html
 from scripts.kf.graph import IncludeScanner
 from scripts.kf.manifest import Manifest, Profile, Unit, load as load_manifest
@@ -26,8 +26,8 @@ def file_hash(path: Path) -> str:
 
 
 def compile_unit(unit: Unit, profile: Profile, root: Path, index: int) -> dict:
-    if profile.language != 'c' or profile.aspsx_version != '1.07':
-        raise ValueError(f'{unit.unit}: executable build requires C and ASPSX 1.07')
+    if profile.language != 'c' or profile.aspsx_version != ASPSX_VERSION:
+        raise ValueError(f'{unit.unit}: executable build requires C and ASPSX {ASPSX_VERSION}')
     if profile.optimization is None:
         raise ValueError(f'{unit.unit}: missing compiler optimization profile')
     result = compile_c(
@@ -88,8 +88,7 @@ def build_image(name: str, manifest: Manifest, root: Path) -> dict:
     report = link_image(
         name, root, units,
         lambda unit, output, index: compile_unit(unit, manifest.profiles[unit.profile], output, index),
-        repo=REPO, load_address=IMAGE_LAYOUTS[name].load_address,
-        bounds_source='config/link/overlay_bounds.asm')
+        repo=REPO, load_address=IMAGE_LAYOUTS[name].load_address)
     report.update(output_rewritten=False, retail_payload_inputs=[],
                   game_execution_tested=False, historical_toolchain_proven=False)
     (root / 'build.json').write_text(json.dumps(report, indent=2) + '\n')

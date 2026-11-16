@@ -147,8 +147,6 @@ def generate(files: dict[str, bytes], *, modern: bool = False) -> dict[str, byte
         output[name] = re.sub(rb'(?m)^\s*#[^\n]*\n', b'', files[name])
     output['scripts/create-toolchain.py'] = without_python_comments(
         files['scripts/create-toolchain.py'].decode()).encode()
-    output['link/overlay_bounds.asm'] = re.sub(rb'(?m)^;[^\n]*\n', b'',
-                                             files['config/link/overlay_bounds.asm'])
     images = []
     for image, origin in ORIGINS.items():
         rows = []
@@ -156,7 +154,7 @@ def generate(files: dict[str, bytes], *, modern: bool = False) -> dict[str, byte
             if unit['image'] != image:
                 continue
             profile = manifest['profiles'][unit['profile']]
-            if profile['language'] != 'c' or profile['aspsx_version'] != '1.07':
+            if profile['language'] != 'c' or profile['aspsx_version'] != '2.79':
                 raise ValueError(f'{unit["unit"]}: unsupported standalone compiler profile')
             options = {key: profile[key] for key in ('compiler', 'optimization', 'small_data', 'cc1_flags')}
             options['defines'] = unit.get('defines', [])
@@ -259,7 +257,7 @@ def classic_reference(repo: Path) -> Path:
         units = [unit for unit in manifest['unit']
                  if unit['image'] == name and unit.get('scope') != 'vendored']
         report = build_image(name, reference / name[:-4].lower(), units, compile_one,
-                             repo=repo, load_address=origin, bounds_source='config/link/overlay_bounds.asm')
+                             repo=repo, load_address=origin)
         if not report['linked']:
             raise ValueError(f'{name}: classic reference build failed: {report["error"]}')
     return reference

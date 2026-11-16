@@ -7,7 +7,7 @@ Original project contributions are dedicated to the public domain under
 [CC0 1.0 Universal](LICENSE), to the extent of the contributors' rights.
 This does not grant rights to FromSoftware's game or Sony/Psy-Q material.
 No game data is included: supply your own disc image. The Nix environment
-downloads the historical Psy-Q 3.0 SDK separately; see
+downloads Sony's Runtime Library 4.2 and the Psy-Q 4.x tools separately; see
 [the toolchain documentation](docs/toolchain.md).
 
 The disc carries seven linked programs and 36 code overlays, 43 images in
@@ -56,8 +56,9 @@ overlay files from `retail/FDAT.T`).
 
 The tooling and matching workflow come from the King's Field II
 (`SLPS-00069`) project, which builds on the King's Field (`SLPS-00017`)
-project. Its compiler probes, linker library order and SDK attribution were
-proven for King's Field II, so here they are starting hypotheses. See
+project. The toolchain and link model are Shadow Tower's own: the SN Systems
+GCC 2.7.2 compiler (a rebuild), ASPSX 2.79, PSYLINK 2.74, CPE2X 1.5 and
+Runtime Library 4.2, which rebuild `PSX.EXE` byte-identical. See
 [AGENTS.md](AGENTS.md) for the reconstruction rules.
 
 <!-- match-score:start -->

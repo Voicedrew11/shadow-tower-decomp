@@ -155,7 +155,7 @@ class PointerPolicyTests(unittest.TestCase):
             with self.subTest(source=source), TemporaryDirectory() as directory:
                 repo, sdk, unit = self.setup_source(directory, source)
                 manifest = Manifest({"c": Profile("c", "c", "gcc257-native", "O2", 0,
-                                                   "1.07", ())}, (unit,))
+                                                   "2.79", ())}, (unit,))
                 with (mock.patch("scripts.kf.check_types.environment", return_value=("clang", sdk)),
                       redirect_stdout(StringIO()) as output):
                     self.assertEqual(check(repo=repo, manifest=manifest, jobs=1), status)

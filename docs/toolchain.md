@@ -1,97 +1,131 @@
 # SDK and source-to-EXE toolchain
 
-> **Inherited from the King's Field II (`SLPS-00069`) project.** Statements here
-> about retail bytes, linker order, SDK versions or compiler probes describe that
-> game. For Shadow Tower (`SLUS-00863`) they are hypotheses until re-proven.
+The tools below were chosen by reproducing Shadow Tower's (`SLUS-00863`)
+retail bytes. `PSX.EXE` is rebuilt byte-identical from `src/psx/main.c`
+(see [executable linking](executable-linking.md)). That proves this chain
+can produce the retail program; it does not prove these are the binaries
+FromSoftware ran. Where a fact is only a probe, it says so.
 
-The repository has one active historical SDK: the complete hash-pinned Psy-Q
-PS-X Development System Release 3.0 kit (Archive.org
-`psyq_psx_toolchain_april_08_1994/psx.zip`; files dated 1995-04-08 despite the
-item title). It is staged without files from another SDK, compiler disk, or
-assembler archive. Its libraries contain exactly the five Sony RCS revisions
-embedded in the retail SLPS-00069 executables (`intr.c` 1.52, `pad.c` 1.33,
-`vsync.c` 1.7, `sys.c` 1.67, `s_crwa.c` 1.8). That proves the runtime-library
-snapshot, not the compiler, assembler, or linker FromSoftware used. See the
-attribution survey (`docs/kf2-toolchain-and-lineage.md` in the King's Field II project).
+## What each step uses
 
-The kit contains CCPSX 1.10, PSYLINK 1.29, PSYLIB 1.04, ASMPSX 1.21, ASPSX 2.08,
-CPE2X 1.3, the general `LIB/` archives and startup objects, and its
-`INCLUDE/` headers. `NONE2.OBJ`, `2MBYTE.OBJ` and `8MBYTE.OBJ` are
-byte-identical to the Release 2.5 H2000 copies used by the SLPS-00017 project.
-`LIB/LIBSN.LIB` is the startup archive; `BIN/LIBSN.LIB` is the larger fileserver
-variant.
+| Step | Tool | Source | Status |
+| --- | --- | --- | --- |
+| Preprocess, compile | `cpppsx-272cdk`, `cc1psx-272cdk`: Decompals old-gcc 0.17 `gcc-2.7.2-cdk`, a native rebuild of the SN Systems GCC "cygnus-2.7.2-970404 SN32" | GitHub release, SHA-256 pinned | `-O2 -G0` reproduces 14 sampled `ST.EXE` game functions and `-O2 -G8` reproduces `PSX.EXE`'s `main`; the original Win32 `CC1PSX.EXE` is not used |
+| Assemble | SDevTC ASPSX 2.79 (1998-05-22, Win32) | mkst/maspsx `aspsx-binaries.tar.gz` | Reproduces the retail expansions; see below |
+| Link | PSYLINK 2.74 (1998-05-14, Win32) | Psy-Q/SDevTC 4.5 kit, Archive.org `ps1_sdks` | Links `PSX.EXE` byte-identically |
+| Convert | CPE2X 1.5 (1998-01-23, DOS) with `/CA` | same kit | Writes the whole retail header, including the "North America area" title |
+| Libraries | Sony Runtime Library 4.2 `LIB/`, with `LIBPAD.LIB` from its bundled 4.2.1 pad patch | Archive.org, SHA-256 pinned | Every SDK object in all seven programs matches (below) |
+| Overlay startup | `NONE3.OBJ` | Psy-Q 4.5 kit (identical in the 4.6 kit) | First object of STR, ST, TITLE, OPTXT, VS and END |
+| Allocator | `MALLOC.OBJ` | Psy-Q Release 2.5 floppies | Linked after `NONE3.OBJ` in STR, TITLE, OPTXT and END |
+| Headers | Runtime Library 4.2 `INCLUDE/`, staged as `include-lf/` (CRLF converted to LF) | as the libraries | `PSYQ_INCLUDE` |
 
-The kit's `COMPILER/` holds an extensionless GCC 2.4.1 frontend pair and a
-`.EXE` GCC 2.6.0 pair, byte-identical to the Release 2.5 pair. Preserving both
-is part of preserving this one distribution; neither pair is staged as a second
-SDK.
+ASPSX 2.79 and PSYLINK 2.74 are Win32 console programs. Every DOS and
+Win32 tool runs in the same pinned DOSBox-X; the Win32 ones are started
+through the HX DOS extender (HXRT 2.23 from its GitHub release: `HDPMI32`
+as the resident DPMI host, `DPMILD32` as the PE loader, and the `DKRNL32`,
+`DUSER32` and `DGDI32` API layers). No program is patched and no Windows or
+Wine runtime is involved.
 
-| Environment variable | Psy-Q 3.0 path |
+| Environment variable | Contents |
 | --- | --- |
-| `PSYQ_SDK` | Root of the complete kit tree (`psyq-3.0/`) |
-| `PSYQ_BIN` | `BIN` |
-| `PSYQ_INCLUDE` | `include-lf/` beside the kit: `INCLUDE` with CRLF converted to LF |
-| `PSYQ_LIB` | `LIB` |
-| `PSYQ_COMPILER` | `COMPILER` |
+| `PSYQ_LIB` | Runtime Library 4.2 archives (LIBPAD from the 4.2.1 patch) |
+| `PSYQ_INCLUDE` | Runtime Library 4.2 headers with LF line endings |
+| `PSYQ_ASPSX` | ASPSX 2.79 |
+| `PSYQ_PSYLINK`, `PSYQ_CPE2X`, `PSYQ_STARTUP_OBJ` | PSYLINK 2.74, CPE2X 1.5, NONE3.OBJ |
+| `PSYQ_MALLOC_OBJ` | Release 2.5 MALLOC.OBJ |
+| `PSYQ_HX` | the five HX files above |
+| `PSYQ_SDK` | the Psy-Q 3.0 kit inherited from King's Field II, kept only as the analysis corpus of `kf-vendored-seed`, `kf-fid-census` and the `gcc241-kit` probe |
+| `PSYQ_C_INCLUDE` | GCC 2.5.7's `stdarg.h`/`va-mips.h`, used by `compile_classic` |
 
-The 3.0 headers use DOS CRLF line endings, which the Linux-hosted GCC 2.5.7
-preprocessor does not accept inside backslash-continued macros. The stager
-therefore derives `include-lf/`, identical except for line endings, and
-`PSYQ_INCLUDE` points there; the original `INCLUDE/` stays byte-identical.
+## Library attribution
 
-The executable chain still uses the separately hash-pinned ASPSX 1.07
-(`PSYQ_ASPSX`) inherited from the SLPS-00017 setup, alongside the native GCC
-probe selected by each unit's profile. The kit's ASPSX 2.08 carries no
-software-key strings but is not yet wired in. PSYLINK, CPE2X, headers,
-libraries, and overlay startup come from the preserved kit. Build reports
-distinguish those provenances; none of this proves the exact historical tool
-versions.
+The evidence is a whole-object comparison: each object's `.text` from a
+candidate archive, with the bits its relocation records patch wildcarded, is
+searched for in every image. Compared were the Psy-Q 3.0 kit, Runtime
+Library 4.2 with its two 4.2.1 patches, the Psy-Q 4.5 and 4.6 kit libraries,
+and the Release 2.5 MALLOC.OBJ. The SDK region of each program (from the
+first SDK object after the game code to the end of `.text`) is covered
+without gaps by objects of these inputs:
 
-The Psy-Q 3.0 archives are linked unchanged. The SLPS-00017 project's LIBETC
-interrupt-return correction is bound to the Release 2.5 archive and to a
-runtime failure not reproduced here, so it is not applied.
+- Runtime Library 4.2 archives. Many objects match 4.2 and none of the other
+  kits compared: LIBCD `EVENT`, `SYS`, `BIOS` and `CDREAD`, LIBGPU `SYS` and
+  `EXT`, LIBETC `INTR_VB`, LIBAPI `C114`, LIBC `A63`, LIBPRESS `LIBPRESS`
+  and `VLC`, LIBCARD `INIT` and `PATCH`, and several LIBSND members. The
+  retail RCS strings are those of 4.2: `sys.c` 1.140 (1998-01-12), `bios.c`
+  1.86, `intr.c` 1.76.
+- LIBPAD from 4.2.1 (`LIB/42PATCH/J421PD.ZIP`): `PADMAIN`, `PADIF` and
+  `WAITRC2` match only the patched archive.
+- `NONE3.OBJ` and `MALLOC.OBJ` as above. Runtime Library 4.2 ships neither.
 
-Classic additionally uses the original GNU GCC 2.5.7 `stdarg.h` and `va-mips.h`,
-packaged separately from the Sony SDK. `PSYQ_C_INCLUDE` points to their Nix
-store directory. `compile_classic` supplies `__GNUC__=2`, `__GNUC_MINOR__=5`,
-`__mips__` and `__MIPSEL__`, which the standalone preprocessor does not define.
-The ordinary matching compiler path keeps its existing preprocessing contract.
+Ghidra's Psy-Q signature sets had suggested older LIBSND/LIBSPU members
+(`SSINIT`, `S_M_UTIL`, `S_M_INIT`, `VS_VTC`, `PLAY`), a 4.3+ `WAITRC2` and an
+older MALLOC; the whole-object search finds the 4.2, 4.2.1 and Release 2.5
+objects in all of those places. The short signatures matched by chance.
+Runtime Libraries 4.0, 4.1 and 4.3 were not compared.
 
-There is one source compilation path: CPPPSX -> CC1PSX -> ASPSX -> native
-Psy-Q OBJ. `kf build` passes those objects and the SDK libraries to PSYLINK,
-then runs CPE2X without rewriting its output. `kf analyze` and `kf try` use
-the same compiler and assembler, and read the resulting native objects into
-ELF views for objdiff. No maspsx or GNU assembler processes game source.
-Debug metadata is enabled in the compiler and assembler so private symbols
-remain inspectable. It is part of the shared probe flags, not a second
-comparison build configuration.
+| Image | SDK groups in linked order (`inclib` order in `scripts/psxbuild/link.py`) |
+| --- | --- |
+| `PSX.EXE` | LIBAPI stubs, LIBSN `SNMAIN` (the entry point), LIBAPI `InitHeap` |
+| `STR.EXE` | CD, SND/SPU, PRESS, ETC, API, C, DS, GPU, PAD |
+| `ST.EXE` | CARD, CD, SPU/SND, GTE, ETC, API, C, GPU, PAD |
+| `TITLE.EXE`, `OPTXT.EXE` | CD, SND/SPU, ETC, API, C, GPU, PAD |
+| `VS.EXE` | CARD, CD, SPU/SND, SN, GTE, ETC, API, C, GPU |
+| `END.EXE` | CD, SND/SPU, PRESS, ETC, API, C, DS, GPU |
 
-GNU MIPS binutils, psy-k and objdiff are inspection tools. They neither lay
-out nor emit the candidate executables. SLPS-00069 JP/US game code shows the
-same return-slot epilogue class observed in the KF1 reconstruction.
+Only `PSX.EXE` is linked from source so far, so the other orders are read
+from retail, not yet reproduced by PSYLINK.
 
-The Ghidra extension's Psy-Q 3.00 signatures are also an analysis corpus.
-Vendored-function inventory code may use them to propose a name after the
-Psy-Q 3.0 object search. Those JSON signatures cannot override exact object
-evidence and are not SDK inputs.
+## Compiler
 
-The initializer verifies and stages the SDK directly:
+The old-gcc `gcc-2.7.2-cdk` cc1 identifies itself as `cygnus-2.7.2-970404
+SN32.3.7.0004 (SonyPSX)` and defaults to `-msoft-float -mcpu=3000 -mgas
+-fgnu-linker`; the profiles pass only `-O2` and `-G`. It fills delay slots
+itself (`.set noreorder` around each filled branch) and spells relocated
+operands as `%hi()`/`%lo()`.
 
-1. `flake.nix` fetches the one Psy-Q 3.0 kit by immutable SHA-256.
-2. `scripts/create-toolchain.py` verifies its tools, compilers and every
-   linker-input `.LIB`/`.OBJ`, then copies the complete extracted tree under
-   `psyq-3.0/`.
-3. A deterministic manifest records every staged file.
+The sampled `ST.EXE` game code is `-G0`. `PSX.EXE` reads its words
+`$gp`-relative, so its unit uses `-G8` (`-G4` gives the same bytes).
+`END.EXE` game code also addresses `$gp`. Its first three functions
+(`0x80011fa8`, `0x80011ffc`, `0x800120d0`: a `ClearImage` of the 1024x512
+frame, a CD sector read with retries, and a `\ST\` file load) compile
+exactly, relocation fields masked, at `-O2 -G8` or `-G0`; only `-G8` puts
+their `RECT` initializer template and the `"\\ST\\"` and `";1"` literals in
+`.sdata`, which is where retail has them (`0x8002fd18`-`0x8002fd2b`, after
+the text). These are scratch results, not yet units.
 
-No generated SDK binary, retail game image, or executable belongs in Git.
+GCC 2.5.7 and 2.6.0 rebuilds (`cc1psx-257`, `cc1psx-260`) and the 3.0
+kit's GCC 2.4.1 (`gcc241-kit`) remain selectable as probes; no unit uses
+them, and the King's Field II profiles that encoded their per-unit flags are
+removed. `compile_classic` (the standalone source export) still requires
+GCC 2.5.7.
+
+## Assembler
+
+The retail code shows a Psy-Q 4.x-era ASPSX in `.set reorder` mode: `li` as
+`addiu rd,$0,imm`, `move` as `addu rd,rs,$0`, the checked `div` expansion
+with `break 7`/`break 6`, a `nop` between `mflo` and a dependent
+instruction, and no delay-slot filling of its own. Tested against 14 sampled
+`ST.EXE` functions compiled by the cdk compiler, with relocation fields
+masked:
+
+| ASPSX | Result |
+| --- | --- |
+| 1.07, 2.08 (Psy-Q 3.0), 2.30, 2.34, 2.56 (Psy-Q 4.0, DOS) | reject the `%hi`/`%lo` operands |
+| 2.79 (Win32 under HX, and the 4.5 kit's DOS-extended 2.79D) | 14/14 exact |
+
+2.67, 2.77, 2.81 and 2.86 (Win32) were not tried, so the exact retail
+version between 2.56 and 2.86 remains open. ASPSX 2.79 assembles `-G8`
+small-data accesses as single `$gp`-relative instructions (patch type 100);
+the ELF view translates them to `R_MIPS_GPREL16`.
+
+No maspsx or GNU assembler processes game source.
 
 ## Analysis tools
 
-`nix develop` provides the single historical SDK and the separate analysis
-programs above, plus Ghidra/PyGhidra, DOSBox, little-endian MIPS GNU
-binutils, psy-k, disc-image utilities, objdiff, and the normal
-C/C++/Python build tools. Ghidra plugin packaging is documented separately in
-[`ghidra.md`](ghidra.md).
+`nix develop` also provides Ghidra/PyGhidra with the PSX loader, little-endian
+MIPS GNU binutils, psy-k, objdiff, DOSBox-X, disc-image utilities and the
+normal C/C++/Python build tools. Ghidra plugin packaging is documented
+separately in [`ghidra.md`](ghidra.md).
 
 Splat, Rabbitizer, and spimdisasm use the separately locked Python environment
 because the latter two are not available in the pinned Nixpkgs revision. The
@@ -104,3 +138,5 @@ splat --help
 
 The first command is the one-time `uv sync --frozen --no-install-project`
 step; `splat` delegates to `uv run --frozen` thereafter.
+
+No generated SDK binary, retail game image, or executable belongs in Git.

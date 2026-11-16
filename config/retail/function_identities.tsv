@@ -3,7 +3,7 @@
 # Methods use name=owner_action with the owner and action columns populated.
 # Future analysis writes build/function-inventory proposals and never overwrites this file.
 image	va	name	owner	action	return_type	parameters	name_confidence	signature_confidence	evidence	note
-PSX.EXE	0x80010068	func_80010068			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+PSX.EXE	0x80010068	main			int		proven	proven	asm;called by LIBSN SNMAIN __SN_ENTRY_POINT;calls LIBSN __main	loads and executes the six programs in turn
 STR.EXE	0x80012024	func_80012024			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
 STR.EXE	0x800120a0	func_800120a0			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
 STR.EXE	0x80012108	func_80012108			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review

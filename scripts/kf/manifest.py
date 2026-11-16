@@ -43,9 +43,9 @@ class Profile:
     cc1_flags: tuple[str, ...]
 
 
-# Native probe compilers. Each is a Decompals old-gcc rebuild of a PSX GCC
-# target; neither is proven to be the historical Shadow Tower compiler.
-C_COMPILERS = ("gcc260-native", "gcc257-native", "gcc241-kit")
+# Native compilers. Each is a Decompals old-gcc rebuild of a PSX GCC target
+# (gcc241-kit runs the Psy-Q 3.0 kit binary); none is the original Win32 CC1PSX.
+C_COMPILERS = ("gcc272cdk-native", "gcc260-native", "gcc257-native", "gcc241-kit")
 
 
 @dataclass(frozen=True)
@@ -163,7 +163,7 @@ def _profile(name: str, row: object) -> Profile:
         compiler=compiler,
         optimization=str(optimization) if optimization is not None else None,
         small_data=small_data,
-        aspsx_version=str(row.get("aspsx_version", "1.07")),
+        aspsx_version=str(row.get("aspsx_version", "2.79")),
         cc1_flags=tuple(flags),
     )
 

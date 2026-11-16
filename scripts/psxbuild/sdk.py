@@ -11,6 +11,9 @@ import struct
 import subprocess
 
 C_COMPILERS = {
+    # Decompals rebuild of the SN Systems GCC 2.7.2 ("cygnus-2.7.2-970404
+    # SN32") PSX compiler: the Shadow Tower default.
+    "gcc272cdk-native": ("cpppsx-272cdk", "cc1psx-272cdk"),
     "gcc257-native": ("cpppsx-257", "cc1psx-257"),
     "gcc260-native": ("cpppsx-260", "cc1psx-260"),
     # The kit's extensionless CC1PSX (GCC 2.4.1) runs under DOSBox. Its
@@ -64,6 +67,28 @@ def tool_succeeded(root: Path, log: str, product: str, magic: bytes) -> None:
         raise RuntimeError(f'{log}: native tool produced no valid {product}')
 
 
+# The SDevTC ASPSX 2.79 and PSYLINK 2.74 are Win32 console programs. Inside the
+# same DOSBox-X session, the HX DOS extender's DPMI host (HDPMI32, made
+# resident once per batch) and PE loader (DPMILD32) run them unchanged.
+ASPSX_VERSION = '2.79'
+WIN32_HOST = 'HDPMI32 -r'
+HX_FILES = ('HDPMI32.EXE', 'DPMILD32.EXE', 'DKRNL32.DLL', 'DUSER32.DLL', 'DGDI32.DLL')
+
+
+def stage_win32(root: Path) -> None:
+    """Copy the pinned HX runtime beside the Win32 tools in a DOS root."""
+    for name in HX_FILES:
+        shutil.copyfile(Path(os.environ['PSYQ_HX']) / name, root / name)
+
+
+def win32(command: str) -> str:
+    return 'DPMILD32 ' + command
+
+
+def aspsx_command(stem: str, small_data: int) -> str:
+    return win32(f'ASPSX.EXE -g -G{small_data} -o {stem}.OBJ {stem}.S > {stem}.TXT')
+
+
 def dos_text(path: Path) -> None:
     # The DOS reader needs CRLF. No directives, instructions or literals change.
     path.write_bytes(path.read_bytes().replace(b'\r\n', b'\n').replace(b'\n', b'\r\n'))
@@ -77,8 +102,8 @@ def compile_c(source: Path, root: Path, stem: str, *, compiler: str,
     cpp, cc1 = C_COMPILERS[compiler]
     preprocessed, assembly = root / (stem + '.I'), root / (stem + '.S')
     includes = [argument for path in include_dirs for argument in ('-I', str(path.resolve()))]
-    # The name becomes the assembly's `.file`; ASPSX 1.07 hangs on long ones,
-    # so a checkout-relative spelling keeps deep worktrees buildable.
+    # The name becomes the assembly's `.file`; older ASPSX builds hang on long
+    # ones, so a checkout-relative spelling keeps deep worktrees buildable.
     cpp_command = [cpp, '-lang-c', '-undef', '-nostdinc', *includes,
                    *(f'-D{value}' for value in defines), os.path.relpath(source.resolve())]
     preprocessed.write_bytes(run(cpp_command))
@@ -104,7 +129,7 @@ def compile_c(source: Path, root: Path, stem: str, *, compiler: str,
     dos_text(assembly)
     return {'object': stem + '.OBJ', 'assembly': stem + '.S', 'log': stem + '.TXT',
             'preprocessor_command': cpp_command, 'compiler_command': cc1_command, **probe,
-            'assembler_command': f'aspsx -g -G{small_data} -o {stem}.OBJ {stem}.S > {stem}.TXT',
+            'assembler_command': aspsx_command(stem, small_data),
             'assembly_sha256': hashlib.sha256(assembly.read_bytes()).hexdigest()}
 
 
@@ -148,11 +173,11 @@ def assemble(root: Path, stem: str, small_data: int) -> bytes:
 
 def assemble_many(root: Path, stems: tuple[str, ...], small_data: int) -> dict[str, bytes]:
     shutil.copyfile(os.environ['PSYQ_ASPSX'], root / 'ASPSX.EXE')
+    stage_win32(root)
     for stem in stems:
         dos_text(root / (stem + '.S'))
         (root / (stem + '.OBJ')).unlink(missing_ok=True)
-    dos_run(root, [f'aspsx -g -G{small_data} -o {stem}.OBJ {stem}.S > {stem}.TXT'
-                   for stem in stems], 'asm')
+    dos_run(root, [WIN32_HOST, *(aspsx_command(stem, small_data) for stem in stems)], 'asm')
     for stem in stems:
         tool_succeeded(root, stem + '.TXT', stem + '.OBJ', b'LNK\x02')
     return {stem: (root / (stem + '.OBJ')).read_bytes() for stem in stems}
