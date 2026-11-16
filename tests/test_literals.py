@@ -29,7 +29,7 @@ def census(sources: dict[str, str], *, kf1: dict[str, str] | None = None,
                 path.parent.mkdir(parents=True, exist_ok=True)
                 path.write_text(source)
             (kf1_root / "src").mkdir(exist_ok=True)
-        profile = Profile("c", "c", "gcc257-native", "O2", 0, "1.07", ())
+        profile = Profile("c", "c", "gcc257-native", "O2", 0, "2.79", ())
         units = tuple(Unit(f"game.{Path(name).stem}", "GAME.EXE", name, "c", ())
                       for name in sources if name.endswith(".c"))
         return collect(repo=repo, sdk=sdk, manifest=Manifest({"c": profile}, units), jobs=1,
@@ -162,7 +162,7 @@ void tick(Object *object) {
                 (repo / name).parent.mkdir(parents=True, exist_ok=True)
                 (repo / name).write_text(source)
             (repo / "sdk").mkdir()
-            profile = Profile("c", "c", "gcc257-native", "O2", 0, "1.07", ())
+            profile = Profile("c", "c", "gcc257-native", "O2", 0, "2.79", ())
             unit = Unit("game.probe", "GAME.EXE", "src/probe.c", "c", ())
             sites = typed_enum_literals(repo=repo, sdk=repo / "sdk", jobs=1,
                                         manifest=Manifest({"c": profile}, (unit,)))

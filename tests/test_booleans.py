@@ -22,7 +22,7 @@ def audit_sources(sources: dict[str, str], *, variants: bool = False, jobs: int 
             path = repo / name
             path.parent.mkdir(parents=True, exist_ok=True)
             path.write_text(source)
-        profile = Profile('c', 'c', 'gcc257-native', 'O2', 0, '1.07', ())
+        profile = Profile('c', 'c', 'gcc257-native', 'O2', 0, '2.79', ())
         units = tuple(Unit(f'game.{Path(name).stem}', 'GAME.EXE', name, 'c', ())
                       for name in sources if name.endswith('.c'))
         if variants:

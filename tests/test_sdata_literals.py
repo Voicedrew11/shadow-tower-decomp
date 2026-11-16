@@ -32,7 +32,7 @@ from kf2_images import kf2_images
 
 
 def profile(small_data: int) -> Profile:
-    return Profile('probe', 'c', 'gcc257-native', 'O2', small_data, '1.07', ())
+    return Profile('probe', 'c', 'gcc257-native', 'O2', small_data, '2.79', ())
 
 class SdataRangeValidationTests(unittest.TestCase):
     source = Path('src/game/unit.c')
