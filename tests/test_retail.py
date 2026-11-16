@@ -150,6 +150,23 @@ class RetailTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             validate_relocation(struct.pack("<I", 0x8C820004), function, row, None, "safe")
 
+    def test_vendored_seed_explains_missing_inputs(self) -> None:
+        from scripts.kf import seed_vendored_functions as seed
+
+        with mock.patch.dict("os.environ", {}, clear=False) as environ:
+            environ.pop("PSYQ_LIB", None)
+            with self.assertRaisesRegex(SystemExit, "PSYQ_LIB is unset"):
+                seed.main(["--exe-dir", "retail"])
+        with tempfile.TemporaryDirectory() as directory:
+            with self.assertRaisesRegex(SystemExit, "--exe-dir is required"):
+                seed.main(["--sdk-lib-dir", directory])
+
+    def test_clean_export_is_refused_until_ported(self) -> None:
+        from scripts.kf import clean
+
+        with mock.patch("sys.stderr"):
+            self.assertEqual(clean.main([]), 2)
+
     def test_parse_interleaved_object_symbols(self) -> None:
         parsed = parse_object_symbols(
             "\n".join((

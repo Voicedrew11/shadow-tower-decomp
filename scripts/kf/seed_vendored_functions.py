@@ -1001,9 +1001,20 @@ def parse_args(arguments: Sequence[str] | None = None) -> argparse.Namespace:
 def main(arguments: Sequence[str] | None = None) -> int:
     args = parse_args(arguments)
     if args.sdk_lib_dir is None:
-        raise SystemExit("Psy-Q library directory missing; enter nix develop or pass --sdk-lib-dir")
+        raise SystemExit(
+            "kf-vendored-seed: no Psy-Q library directory; PSYQ_LIB is unset. Enter "
+            "nix develop (kf-vendored-seed passes the Runtime Library 4.2 LIB) or pass "
+            "--sdk-lib-dir"
+        )
+    if not args.sdk_lib_dir.is_dir():
+        raise SystemExit(f"kf-vendored-seed: --sdk-lib-dir {args.sdk_lib_dir} is not a directory")
     if args.exe_dir is None:
-        raise SystemExit("--exe-dir is required to verify object and signature matches")
+        raise SystemExit(
+            "kf-vendored-seed: --exe-dir is required (the retail directory from "
+            "`kf init`, e.g. --exe-dir retail) to verify object and signature matches"
+        )
+    if not args.exe_dir.is_dir():
+        raise SystemExit(f"kf-vendored-seed: --exe-dir {args.exe_dir} is not a directory")
     try:
         args.output.resolve().relative_to(Path("config/retail").resolve())
     except ValueError:
