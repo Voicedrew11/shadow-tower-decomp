@@ -103,4 +103,25 @@ typedef struct {
 
 extern VsRecord20 DAT_801c4a58[2000];
 
+/*
+ * The two fighters at 0x800633b0 (bss), 0x4e0e8 bytes each (the code
+ * indexes them by fighter number and takes the opponent as 1 - number).
+ * A fighter's animated model file (st/anim.h StAnimFile) is loaded at its
+ * start; only the state fields the code proves are spelled.
+ */
+typedef struct {
+    u8 file[0x4def0];        /* 0x00000: the model file, then unmodeled */
+    VECTOR unk4DEF0;         /* 0x4def0: position */
+    u8 unk4DF00[0x4df0e - 0x4df00];
+    u16 unk4DF0E;            /* 0x4df0e: state; 3 and 4 cannot be hit */
+    u8 unk4DF10[0x4e0cc - 0x4df10];
+    s16 unk4E0CC;            /* 0x4e0cc: hit radius */
+    u8 unk4E0CE[0x4e0e8 - 0x4e0ce];
+} VsFighter;
+
+/* Layout check: the record size the index arithmetic proves. */
+typedef char VsFighterSize[sizeof(VsFighter) == 0x4e0e8 ? 1 : -1];
+
+extern VsFighter DAT_800633b0[2];
+
 #endif

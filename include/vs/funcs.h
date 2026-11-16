@@ -28,6 +28,7 @@ void func_80027c64(SVECTOR *dst, SVECTOR *from, SVECTOR *to, int count); /* ST v
 /* src/vs/cd_8002e5e4.c */
 void func_8002e5e4(void);                 /* ST func_800214cc */
 void *func_8002e690(u32 size);            /* ST func_8001528c */
+u16 *func_8002e660(u16 *dst, u16 *src, int count); /* ST func_80014d2c */
 void *func_8002e6d4(u32 size);            /* ST func_800152d0 */
 void func_8002e6fc(void *p);              /* ST func_800152f8 */
 void func_8002e720(u_char status, u_char *result); /* ST func_800154e8 */
@@ -36,5 +37,10 @@ void func_8002ea94(StCdRequest *request); /* ST func_80015848 */
 u32 func_8002eb9c(CdlLOC *pos);           /* ST func_80015950 */
 void func_8002ece0(CdlLOC *pos, int offset, CdlLOC *out); /* ST func_80015a94 */
 int func_8002ed20(u32 *data, int sectors); /* ST func_80015b78 */
+void func_8002ed74(CdlLOC *loc, u_long *buf, int sectors); /* ST func_80015f0c */
+void func_8002ee54(u_long *buf, StFileExtent *file, u32 size); /* ST func_80015ff4 */
+
+/* src/vs/cd_8002efcc.c */
+void func_8002efcc(void);                 /* ST func_8001624c */
 
 #endif

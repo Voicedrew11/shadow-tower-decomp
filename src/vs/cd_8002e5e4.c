@@ -1,9 +1,9 @@
 /*
  * VS.EXE: the loading-display frame step, word/halfword copies, the
  * malloc wrappers, the CD read-request ring callbacks, BCD/CD position
- * helpers and the plain CD reader (WIP module). VS's copies of ST.EXE
- * functions from src/st/quad.c, memory.c, heap.c, cdreq.c, cdpos.c and
- * cd.c; VS keeps a 4-entry request ring.
+ * helpers, the plain CD reader and a whole-file reader (WIP module).
+ * VS's copies of ST.EXE functions from src/st/quad.c, memory.c, heap.c,
+ * cdreq.c, cdpos.c and cd.c; VS keeps a 4-entry request ring.
  */
 #include <kf/lib/address.h>
 #include <kf/lib/null.h>
@@ -323,4 +323,30 @@ int func_8002ee90(u16 archive, u16 member, u_long *buf)
         func_8002ed74(&loc, buf, sectors);
     while (func_8002ed20(buf, sectors));
     return sectors;
+}
+
+/*
+ * Reads file `name` whole (or its first `size` bytes) into buf, pausing
+ * the drive until the search succeeds; returns 0.
+ *
+ * Not exact (size-exact): retail saves $s1 before $ra and its retry jumps
+ * back to the call with &file still in $s1; this build saves $ra first and
+ * rematerialises &file on the back edge (a while loop swaps $s0/$s1).
+ */
+ADDRESS(0x8002ef3c, 0x90)
+int func_8002ef3c(u_long *buf, char *name, u32 size)
+{
+    char path[64]; /* unused */
+    CdlFILE file;
+    u_char param[8]; /* unused */
+
+retry:
+    if (!CdSearchFile(&file, name)) {
+        CdControl(CdlPause, 0, 0);
+        goto retry;
+    }
+    if (size == 0)
+        size = file.size;
+    func_8002ed74(&file.pos, buf, (size + 2047) >> 11);
+    return 0;
 }
