@@ -1,3 +1,4 @@
 # Manually updated only by `kf bank`; (image, va) is the stable identity.
 # Scores retain full precision; --loose affects display classification only.
 image	va	unit	name	input_sha256	best_pct	hist_pct	banked_pct	code_size
+PSX.EXE	0x80010068	psx.main	main	762ef66baad4cda5a194722089eda20e90afeabd092dca98d05f19a6ee04b862	100.000000000	100.000000000	100.000000000	232

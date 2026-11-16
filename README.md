@@ -123,53 +123,17 @@ _Exact requires 100%. The denominator excludes identified Sony/Psy-Q library fun
 
 _Derived from ignored outputs made by the native Psy-Q executable chain. `kf build` rebuilds them; `kf link --compare-only` refreshes only this comparison._
 
-**No current EXE comparison reports are available.**
+**Overall (1/7 images): 100.00% island-aligned byte similarity &middot; 100.00% nonzero-byte similarity.**
 
 | Image | Same-offset file bytes | Island-aligned load bytes | Nonzero load bytes | Data modules exact |
 | :---- | --------------------: | -----------------------: | -----------------: | -----------------: |
-| `PSX.EXE` | — | — | — | — |
-| `STR.EXE` | — | — | — | — |
-| `ST.EXE` | — | — | — | — |
-| `TITLE.EXE` | — | — | — | — |
-| `OPTXT.EXE` | — | — | — | — |
-| `VS.EXE` | — | — | — | — |
-| `END.EXE` | — | — | — | — |
-| `FDAT_002.BIN` | — | — | — | — |
-| `FDAT_012.BIN` | — | — | — | — |
-| `FDAT_022.BIN` | — | — | — | — |
-| `FDAT_032.BIN` | — | — | — | — |
-| `FDAT_042.BIN` | — | — | — | — |
-| `FDAT_052.BIN` | — | — | — | — |
-| `FDAT_062.BIN` | — | — | — | — |
-| `FDAT_082.BIN` | — | — | — | — |
-| `FDAT_092.BIN` | — | — | — | — |
-| `FDAT_102.BIN` | — | — | — | — |
-| `FDAT_112.BIN` | — | — | — | — |
-| `FDAT_122.BIN` | — | — | — | — |
-| `FDAT_132.BIN` | — | — | — | — |
-| `FDAT_142.BIN` | — | — | — | — |
-| `FDAT_152.BIN` | — | — | — | — |
-| `FDAT_172.BIN` | — | — | — | — |
-| `FDAT_182.BIN` | — | — | — | — |
-| `FDAT_202.BIN` | — | — | — | — |
-| `FDAT_212.BIN` | — | — | — | — |
-| `FDAT_232.BIN` | — | — | — | — |
-| `FDAT_242.BIN` | — | — | — | — |
-| `FDAT_252.BIN` | — | — | — | — |
-| `FDAT_262.BIN` | — | — | — | — |
-| `FDAT_272.BIN` | — | — | — | — |
-| `FDAT_282.BIN` | — | — | — | — |
-| `FDAT_302.BIN` | — | — | — | — |
-| `FDAT_322.BIN` | — | — | — | — |
-| `FDAT_332.BIN` | — | — | — | — |
-| `FDAT_372.BIN` | — | — | — | — |
-| `FDAT_382.BIN` | — | — | — | — |
-| `FDAT_402.BIN` | — | — | — | — |
-| `FDAT_412.BIN` | — | — | — | — |
-| `FDAT_442.BIN` | — | — | — | — |
-| `FDAT_452.BIN` | — | — | — | — |
-| `FDAT_462.BIN` | — | — | — | — |
-| `FDAT_472.BIN` | — | — | — | — |
+| `PSX.EXE` | 100.00% | 100.00% | 100.00% | 1 / 1 |
+| `STR.EXE` | — | — | — | 0 / 0 |
+| `ST.EXE` | — | — | — | 0 / 0 |
+| `TITLE.EXE` | — | — | — | 0 / 0 |
+| `OPTXT.EXE` | — | — | — | 0 / 0 |
+| `VS.EXE` | — | — | — | 0 / 0 |
+| `END.EXE` | — | — | — | 0 / 0 |
 
 The three byte columns show similarity, not differences. Island scores allow moved regions and
 small internal edits; unmatched bytes lower the score and no addresses are masked.
