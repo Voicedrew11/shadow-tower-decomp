@@ -41,10 +41,10 @@ void func_800184c4(int count, MeshFaceFT3 *face, u_long *ot, int flags)
         tint = func_80018480;
     }
     while ((t = count, count = count - 1, t)) {
-        v0 = (MeshVertex *)(sp->vertices + face->v0);
-        v1 = (MeshVertex *)(sp->vertices + face->v1);
-        v2 = (MeshVertex *)(sp->vertices + face->v2);
-        gte_ldsxy3(v0->sxy, v1->sxy, v2->sxy);
+        v0 = (MeshVertex *)(sp->vertices + face->i0);
+        v1 = (MeshVertex *)(sp->vertices + face->i1);
+        v2 = (MeshVertex *)(sp->vertices + face->i2);
+        gte_ldsxy3(*(u_long *)&v0->sxy, *(u_long *)&v1->sxy, *(u_long *)&v2->sxy);
         next = face + 1;
         gte_nclip();
         sp->rgb.cd = face->code | ((flags & 2) | 0x24);
@@ -119,23 +119,23 @@ void func_80018828(int count, MeshFaceFT4 *face, u_long *ot, int flags)
         tint = func_800187e4;
     }
     while ((t = count, count = count - 1, t)) {
-        v0 = (MeshVertex *)(sp->vertices + face->v0);
-        v1 = (MeshVertex *)(sp->vertices + face->v1);
-        v2 = (MeshVertex *)(sp->vertices + face->v2);
-        gte_ldsxy3(v0->sxy, v1->sxy, v2->sxy);
+        v0 = (MeshVertex *)(sp->vertices + face->i0);
+        v1 = (MeshVertex *)(sp->vertices + face->i1);
+        v2 = (MeshVertex *)(sp->vertices + face->i2);
+        gte_ldsxy3(*(u_long *)&v0->sxy, *(u_long *)&v1->sxy, *(u_long *)&v2->sxy);
         next = face + 1;
         gte_nclip();
         sp->rgb.cd = face->code | ((flags & 2) | 0x2c);
         gte_stopz(&sp->opz);
         if (sp->opz > 0) {
-            v3 = (MeshVertex *)(sp->vertices + face->v3);
+            v3 = (MeshVertex *)(sp->vertices + face->i3);
             z = ((v0->z + v1->z + v2->z + v3->z) >> 7) + face->depth_bias;
             if (z < sp->far_z && z > sp->near_z) {
                 p = (POLY_FT4 *)sp->prim;
                 sp->prim = (u_long *)(p + 1);
                 gte_stsxy3_ft4(p);
                 gte_ldv0(sp->normals + face->normal);
-                *(u_long *)&p->x3 = v3->sxy;
+                *(u_long *)&p->x3 = *(u_long *)&v3->sxy;
                 gte_ldrgb(&sp->rgb);
                 *(u_long *)&p->u0 = face->uv0_clut;
                 gte_lddp((v0->p + v1->p + v2->p + v3->p) >> 2);
@@ -199,10 +199,10 @@ void func_80018ba0(int count, MeshFaceGT3 *face, u_long *ot, int flags)
         tint = func_80018b5c;
     }
     while ((t = count, count = count - 1, t)) {
-        v0 = (MeshVertex *)(sp->vertices + face->v0);
-        v1 = (MeshVertex *)(sp->vertices + face->v1);
-        v2 = (MeshVertex *)(sp->vertices + face->v2);
-        gte_ldsxy3(v0->sxy, v1->sxy, v2->sxy);
+        v0 = (MeshVertex *)(sp->vertices + face->i0);
+        v1 = (MeshVertex *)(sp->vertices + face->i1);
+        v2 = (MeshVertex *)(sp->vertices + face->i2);
+        gte_ldsxy3(*(u_long *)&v0->sxy, *(u_long *)&v1->sxy, *(u_long *)&v2->sxy);
         next = face + 1;
         gte_nclip();
         sp->rgb.cd = face->code | ((flags & 2) | 0x34);
@@ -279,23 +279,23 @@ void func_80018f48(int count, MeshFaceGT4 *face, u_long *ot, int flags)
         tint = func_80018f04;
     }
     while ((t = count, count = count - 1, t)) {
-        v0 = (MeshVertex *)(sp->vertices + face->v0);
-        v1 = (MeshVertex *)(sp->vertices + face->v1);
-        v2 = (MeshVertex *)(sp->vertices + face->v2);
-        gte_ldsxy3(v0->sxy, v1->sxy, v2->sxy);
+        v0 = (MeshVertex *)(sp->vertices + face->i0);
+        v1 = (MeshVertex *)(sp->vertices + face->i1);
+        v2 = (MeshVertex *)(sp->vertices + face->i2);
+        gte_ldsxy3(*(u_long *)&v0->sxy, *(u_long *)&v1->sxy, *(u_long *)&v2->sxy);
         next = face + 1;
         gte_nclip();
         sp->rgb.cd = face->code | ((flags & 2) | 0x3c);
         gte_stopz(&sp->opz);
         if (sp->opz > 0) {
-            v3 = (MeshVertex *)(sp->vertices + face->v3);
+            v3 = (MeshVertex *)(sp->vertices + face->i3);
             z = ((v0->z + v1->z + v2->z + v3->z) >> 7) + face->depth_bias;
             if (z < sp->far_z && z > sp->near_z) {
                 p = (POLY_GT4 *)sp->prim;
                 sp->prim = (u_long *)(p + 1);
                 gte_stsxy3_gt4(p);
                 gte_ldv3(sp->normals + face->n0, sp->normals + face->n1, sp->normals + face->n2);
-                *(u_long *)&p->x3 = v3->sxy;
+                *(u_long *)&p->x3 = *(u_long *)&v3->sxy;
                 gte_ldrgb(&sp->rgb);
                 *(u_long *)&p->u0 = face->uv0_clut;
                 gte_lddp((v0->p + v1->p + v2->p + v3->p) >> 2);
