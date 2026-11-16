@@ -113,6 +113,7 @@ def build_image(name, root, units, compile_one, *, repo, load_address) -> dict:
     try:
         layout = image_link(name)
         tools = {'ASPSX.EXE': Path(os.environ['PSYQ_ASPSX']),
+                 'DMPSX.EXE': Path(os.environ['PSYQ_DMPSX']),
                  'PSYLINK.EXE': Path(os.environ['PSYQ_PSYLINK']),
                  'CPE2X.EXE': Path(os.environ['PSYQ_CPE2X'])}
         for tool, source in tools.items():
@@ -138,8 +139,9 @@ def build_image(name, root, units, compile_one, *, repo, load_address) -> dict:
                 'Psy-Q Release 2.5 object; retail text follows NONE3.OBJ, relocations masked')
             explicit.append('MALLOC.OBJ')
         report['phase'] = 'assemble'
-        assembler_commands = [u['assembler_command'] for u in report['units']
-                              if 'assembler_command' in u]
+        assembler_commands = [command for u in report['units'] if 'assembler_command' in u
+                              for command in (u['assembler_command'], u.get('gte_command'))
+                              if command]
         if assembler_commands:
             dos_run(root, assembler_commands, 'asm')
         for unit in report['units']:
