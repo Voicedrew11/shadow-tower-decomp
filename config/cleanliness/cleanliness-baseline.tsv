@@ -3,8 +3,8 @@
 # a higher one is a regression and fails `kf verify board --gate`.
 # Data inventory counts are informational and have no floors.
 # Never hand-edit to raise a floor - reconstruct/name the symbol instead.
-src func_ refs	1104
-src DAT_ refs	212
+src func_ refs	1228
+src DAT_ refs	232
 GAME extern decls	0
 source-local extern decls	0
 void* views	34
