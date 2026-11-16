@@ -21,6 +21,7 @@
 #include <st/menu.h>
 #include <st/mesh.h>
 #include <st/objects.h>
+#include <st/anim.h>
 #include <st/funcs.h>
 
 SDATA(0x80087f04, 0x8)
@@ -40,7 +41,7 @@ void func_800241d0(void)
     Vis212 *e;
     Vis192 *t;
     VECTOR unused;
-    void *model;
+    StAnimFile *model;
     VECTOR *at;
     u8 flags;
     int depth;
@@ -56,7 +57,7 @@ void func_800241d0(void)
     while (--i != -1) {
         e = &vis_table_a.entries[vis_table_a.list[i]];
         t = &vis_table_a.unk3500[e->unk02];
-        func_80033db8(e->unk0B + SLOT_A, &model);
+        anim_get_file(e->unk0B + SLOT_A, &model);
         e->unk04 = 0;
         flags = e->unk1C.bytes[2] & 0x3f;
         e->unk1C.bytes[2] = flags;
@@ -136,7 +137,7 @@ void func_800246e4(void)
     Vis88 *e;
     Vis24 *r;
     VECTOR unused;
-    void *model;
+    StAnimFile *model;
     SVECTOR *size;
     u32 now;
     u8 flags;
@@ -266,7 +267,7 @@ void func_800246e4(void)
             sp->unkF8[e->unk0a] = 1;
             size = &e->unk3C;
             id = func_80023208(e->unk0a);
-            func_80033db8(id, &model);
+            anim_get_file(id, &model);
             if (model == NULL)
                 continue;
             sp->unkD8.vx = e->unk34;
@@ -282,7 +283,7 @@ void func_800246e4(void)
             r = &vis_table_b.unk0000[e->unk0a];
             sp->unkF8[e->unk0a] = 1;
             id = func_80023208(e->unk0a);
-            func_80033db8(id, &model);
+            anim_get_file(id, &model);
             size = &e->unk3C;
             if (model == NULL)
                 continue;

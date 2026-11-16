@@ -23,6 +23,7 @@
 #include <st/gfx.h>
 #include <st/mesh.h>
 #include <st/scratch.h>
+#include <st/anim.h>
 
 RODATA(0x80011010, 0x20)
 
@@ -142,7 +143,7 @@ void func_80021ac4(u8 slot)
         gte_SetTransMatrix(MODEL_MATRIX(sp));
         sp->model = MODEL_DATA(world_state.unk834C[slot + 32]);
         sp->header = (MeshHeader *)(sp->model + 12);
-        if (func_80034604(&viewer.unk108[slot], slot + 32, viewer.unk150[slot],
+        if (anim_prepare(&viewer.unk108[slot], slot + 32, viewer.unk150[slot],
                           viewer.unk130[slot])) {
             sp->z_ot += sp->header->n_vertices;
             out = (MeshVertex *)sp->vertices;
@@ -329,7 +330,7 @@ void model_draw(int unused0, u16 model, VECTOR *pos, SVECTOR *rot, SVECTOR *scal
         if (part < 128) {
             i = 0;
             sp->header = (MeshHeader *)(sp->model + 12);
-            if (func_80034604(anim, model, part, arg8) == 0) {
+            if (anim_prepare(anim, model, part, arg8) == 0) {
                 sp->header = (MeshHeader *)(sp->model + 12);
                 sp->local_vertices = sp->model + 12 + sp->header->vertices;
             }

@@ -25,23 +25,24 @@ typedef struct {
 
 #define ST_TEXANIM_SLOTS 16
 
-/*
- * A 0x6c-byte lighting environment: a light colour matrix (the first 18
- * bytes of a MATRIX, which gte_SetColorMatrix loads), the back colour and
- * two halfwords copied to the scratchpad.
- */
-/* A light direction matrix as gte_SetLightMatrix loads it (five words). */
+/* A 3x3 matrix as gte_SetLightMatrix / gte_SetColorMatrix load it (the
+ * first 18 bytes of a MATRIX) and its padding; the lighting code assigns
+ * it whole. */
 typedef struct {
     short m[3][3];
     short pad;
 } StLightMatrix;
 
+/*
+ * A 0x6c-byte lighting environment: four light matrices
+ * (lighting_build_matrices derives 1..3 from 0), a light colour matrix
+ * (which gte_SetColorMatrix loads), the back colour and two halfwords
+ * copied to the scratchpad.
+ */
 typedef struct {
     StLightMatrix light[4]; /* 0x00: the world renderers pick one per part */
-    short color[3][3];
-    u8 unk62[2];
-    u8 back[3];
-    u8 unk67;
+    StLightMatrix color;
+    CVECTOR back;
     s16 unk68;
     s16 unk6A; /* also vis_cull_by_range's far range (/ 2048) */
 } StLight;
@@ -90,6 +91,19 @@ typedef struct {
     ModelPart parts[1];
 } Model;
 
+/* One vertex-animation slot (src/st/anim.c): the clip key it blends and
+ * the per-vertex deltas it allocated. Tagged for its owner back-pointer. */
+typedef struct StAnimSlot {
+    s16 unk0;            /* 0x00: state; bit 2 is set on every slot */
+    u16 unk2;            /* 0x02: model file id, 0xffff when unset */
+    u16 unk4;            /* 0x04: clip, 255 when unset */
+    u16 unk6;            /* 0x06: key */
+    SVECTOR *unk8;       /* 0x08: the key's start keyframe */
+    SVECTOR *unkC;       /* 0x0c: its end keyframe */
+    SVECTOR *unk10;      /* 0x10: end minus start, from func_800152d0 */
+    struct StAnimSlot **unk14; /* 0x14: the owner's slot pointer */
+} StAnimSlot;
+
 typedef struct {
     DRAWENV draw[2];
     DISPENV disp[2];
@@ -109,13 +123,17 @@ typedef struct {
     s32 unk8330;
     s32 unk8334;
     s32 unk8338[5];
-    /* 0x834c: heap block owners: func_800237a8's bank slots (by slot),
-     * func_800239ec and src/st/slots.c (by slot - 16), the viewer models at
-     * 32.. (func_80021ac4), model_draw's model blocks; func_800456f8 frees
-     * 128..143, the highest index evidenced (WIP extent). */
+    /* 0x834c: heap block owners and model files by id: func_800237a8's bank
+     * slots (by slot), func_800239ec and src/st/slots.c (by slot - 16), the
+     * viewer models at 32.. (func_80021ac4), model_draw's model blocks, the
+     * animation model files (src/st/anim.c); func_800456f8 frees 128..143,
+     * the highest index evidenced (WIP extent). */
     void *unk834C[144];
-    u8 unk858C[0xab3c - 0x858c];
-    u8 world_vertices[0x1eb40 - 0xab3c]; /* 0xab3c: the world parts' transformed vertices (MeshVertex); WIP extent */
+    u8 unk858C[0xa5fc - 0x858c];
+    StAnimSlot anim_slots[16]; /* 0xa5fc */
+    u8 unkA77C[0xab3c - 0xa77c];
+    u8 world_vertices[0xeb40 - 0xab3c]; /* 0xab3c: the world parts' transformed vertices (MeshVertex); WIP extent */
+    SVECTOR unkEB40[0x2000]; /* 0xeb40: the vertices anim_pose interpolates */
     StTexAnim texanim[ST_TEXANIM_SLOTS];
     u8 unk1ECC0;
     u8 unk1ECC1;
@@ -148,7 +166,9 @@ typedef struct {
     u_long unk1EE00;     /* 0x1ee00: vis_cull_by_range's near range (<< 11) */
     u_long unk1EE04;     /* 0x1ee04: its middle range (<< 11) */
     StLight *light;      /* 0x1ee08: the current lighting environment */
-    u8 unk1EE0C[9];
+    StLight *unk1EE0C;   /* 0x1ee0c: the environment a blend starts from */
+    StLight *unk1EE10;   /* 0x1ee10: the environment a blend ends at */
+    u8 unk1EE14;         /* 0x1ee14: the light-select flags last requested */
     u8 unk1EE15;
     u8 unk1EE16;
     /* 0x1ee16..0x1ee19 (src/st/text.c): title-card state, mode, fade length, frame counter */
@@ -167,7 +187,7 @@ typedef struct {
     u8 unk2;             /* 0x02: bits 0-5 kind, bits 6-7 a rotation */
     u8 unk3;             /* 0x03: frame count */
     u8 unk4;             /* 0x04: frame period, 0 still */
-    u8 unk5;             /* 0x05: frame */
+    u8 unk5;             /* 0x05: frame (placements_expand starts it at random below unk3) */
     u8 unk6[2];
     VECTOR unk8;         /* 0x08: position */
 } StObject24;
@@ -184,8 +204,6 @@ typedef struct {
 extern StAnimObjects DAT_8015c488;
 /* The CLUT a type-49 texture slot cycles (entries 1-14 rotate). */
 extern u16 DAT_8009ac88[16];
-/* The three lighting blend targets of func_80017d28. */
-extern StLight DAT_8018ca38[3];
 
 /* src/st/view.c */
 int func_80016554(void);

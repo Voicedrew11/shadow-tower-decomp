@@ -17,6 +17,8 @@
 #include <st/vis.h>
 #include <st/mesh.h>
 #include <st/text.h>
+#include <st/light.h>
+#include <st/anim.h>
 #include <st/funcs.h>
 
 SDATA(0x80087f14, 0x4)
@@ -366,9 +368,9 @@ void func_80026afc(VECTOR *pos, SVECTOR *rot)
     func_800176a8(pos, rot);
     func_80016a14();
     if (viewer.unk218 == 0 || viewer.unk218 == 5 || viewer.unk218 == 6 || viewer.unk218 == 1)
-        func_80033110();
+        lighting_update();
     func_800174c4();
-    func_800340f8();
+    anim_slots_retire();
     func_80034fc4();
     world_state.unk831C[1] = 0;
     if (viewer.unk218 == 1) {

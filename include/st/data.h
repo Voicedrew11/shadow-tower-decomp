@@ -10,6 +10,7 @@
 #include <sys/types.h>
 #include <LIBGTE.H>
 #include <st/memory.h>
+#include <st/gfx.h>
 
 /* PSX.EXE's next-program byte and the two mailbox bytes after it. */
 #define NEXT_PROGRAM_BYTE ((u8 *)0x800103f0)
@@ -75,7 +76,7 @@ typedef struct {
     u8 unkC0[0xe8 - 0xc0];
     ViewerModel *unkE8[4]; /* 0xe8: func_80021ac4's slot positions and rotations */
     void *unkF8[4];      /* 0xf8: its slot model blocks (ModelFile, st/mesh.h) */
-    u32 unk108[4];       /* 0x108: its slot animation states */
+    StAnimSlot *unk108[4]; /* 0x108: its slot animation slots (anim_prepare) */
     u8 unk118[0x130 - 0x118];
     s16 unk130[4];       /* 0x130: -1: slot empty */
     u8 unk138[0x150 - 0x138];
@@ -93,7 +94,9 @@ typedef struct {
     u16 unk18C;          /* 0x18c: unk6 as last shown */
     u8 unk18E[0x1a4 - 0x18e];
     s32 unk1A4[8];       /* 0x1a4: nonzero shows a HUD icon */
-    u8 unk1C4[0x1ec - 0x1c4];
+    u8 unk1C4[0x1c7 - 0x1c4];
+    s8 unk1C7;           /* 0x1c7: lighting_update picks lighting rows by its sign */
+    u8 unk1C8[0x1ec - 0x1c8];
     s32 unk1EC[5];       /* 0x1ec: frames left to show unk20C[i] */
     u8 unk200[0xc];
     s16 unk20C[5];       /* 0x20c: numbers func_80026a88 queues */

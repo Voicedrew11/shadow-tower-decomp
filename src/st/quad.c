@@ -19,6 +19,7 @@
 #include <st/gfx.h>
 #include <st/mesh.h>
 #include <st/funcs.h>
+#include <st/tim.h>
 
 /* The semi-transparency argument that leaves a quad opaque. */
 #define OPAQUE 255
@@ -87,7 +88,7 @@ void func_800210f4(void)
 /*
  * Shows the loading screen: reads \LOAD02.TIM;1 (up to 50 attempts) while a
  * dark translucent quad covers the display, then hands the image to
- * func_80031efc and copies the lower half of VRAM to the upper.
+ * tim_load_images and copies the lower half of VRAM to the upper.
  *
  * Not exact (size-exact): retail sets up the 0x18000 field offset in $s1
  * before the RECT copy and builds the POLY_F4 tag before its XY stores; this
@@ -137,7 +138,7 @@ void func_80021158(void)
     ClearImage(&clear, 0, 0, 0);
     DrawSync(0);
     func_800173a8();
-    func_80031efc(world_state.unkE0, cd_state.unkA6C.size);
+    tim_load_images(world_state.unkE0, cd_state.unkA6C.size);
     {
         RECT lower = {0, 240, 320, 240};
 

@@ -11,17 +11,6 @@
 #include <LIBGTE.H>
 #include <LIBGPU.H>
 
-void func_80031efc(u_long *buf, u_long size);
-void func_80032058(void);
-void func_8003216c(void);
-void func_8003306c(void);
-void func_80033110(void);
-void func_80033db8(u16 slot, void **model);
-void func_800340c4(void);
-void func_800340f8(void);
-void func_800341a0(void);
-void func_80034224(void);
-int func_80034604(void *anim, int model, int part, int arg3);
 void func_80034f48(void);
 void func_80034fc4(void);
 void func_8003509c(void);

@@ -23,6 +23,7 @@
 #include <st/menu.h>
 #include <st/mesh.h>
 #include <st/objects.h>
+#include <st/anim.h>
 #include <st/funcs.h>
 
 RODATA(0x80011478, 0x18)
@@ -37,7 +38,7 @@ void func_800251c8(void)
     Vis48 *e;
     Vis44 *r;
     VECTOR unused;
-    void *model;
+    StAnimFile *model;
     int i;
 
     sp->unkF0 = sp->unkF8;
@@ -64,7 +65,7 @@ void func_800251c8(void)
             SVECTOR scale = {4096, 4096, 4096};
 
             sp->unkF8[r->unk4] = 1;
-            func_80033db8(r->unk4 + SLOT_C, &model);
+            anim_get_file(r->unk4 + SLOT_C, &model);
             if (model == NULL)
                 continue;
             sp->unkD8.vx = e->unk18;
@@ -107,7 +108,7 @@ void func_800255f0(void)
     ScratchPad *sp = SCRATCHPAD;
     StObject88 *o;
     StObject24 *f;
-    void *model;
+    StAnimFile *model;
     VECTOR *at;
     int mode;
     int kind;
@@ -124,7 +125,7 @@ void func_800255f0(void)
         if (mode != 2 && !func_80016554())
             continue;
         sp->clut_base = o->unkE;
-        func_80033db8(o->unkA + 96, &model);
+        anim_get_file(o->unkA + 96, &model);
         if (model == NULL)
             continue;
         switch (o->unk6 & 0xc) {

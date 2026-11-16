@@ -11,6 +11,7 @@
 #include <st/memory.h>
 #include <st/cd.h>
 #include <st/funcs.h>
+#include <st/anim.h>
 
 ADDRESS(0x80014f90, 0x94)
 void func_80014f90(StBlock *heap)
@@ -49,9 +50,9 @@ void func_80015024(StBlock *heap)
                 do {
                     *to++ = *from++;
                 } while (--words);
-                func_800341a0();
+                anim_slots_free_idle();
                 func_8003509c();
-                func_80034224();
+                anim_slots_free_all();
                 func_80035120();
                 *dst->owner = dst + 1;
                 dst = (StBlock *)to;

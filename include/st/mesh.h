@@ -149,7 +149,7 @@ void world_draw(void);
 /*
  * The model renderers (src/st/model_draw.c). A model block (a
  * world_state.unk834C slot) holds its part data at the offset in word +8;
- * halfword +6 selects which of func_80034604 / func_80035aa8 prepares it.
+ * halfword +6 selects which of anim_prepare / func_80035aa8 prepares it.
  */
 typedef struct {
     u8 unk0[6];

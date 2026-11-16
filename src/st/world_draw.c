@@ -1314,8 +1314,8 @@ void world_draw(void)
     gte_SetTransMatrix(&world_state.unk1ECE8);
     world_transform_parts(trans);
     sp->light = world_state.light;
-    gte_SetBackColor(sp->light->back[0], sp->light->back[1], sp->light->back[2]);
-    gte_SetColorMatrix(sp->light->color);
+    gte_SetBackColor(sp->light->back.r, sp->light->back.g, sp->light->back.b);
+    gte_SetColorMatrix(sp->light->color.m);
     sp->unk64 = sp->light->unk68;
     sp->unk68 = sp->light->unk6A;
     sp->unk34 = (u_long *)world_state.world_vertices;
