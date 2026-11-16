@@ -144,6 +144,86 @@ def proven_vendored_dispatch(
     return None
 
 
+def _last_definition(img: RetailImage, start: int, before: int, register: int) -> tuple[int, int] | None:
+    """The nearest preceding instruction in [start, before) that writes `register`."""
+    for address in range(before - 4, start - 4, -4):
+        word = img.u32(address)
+        if word is None:
+            return None
+        opcode = word >> 26
+        if opcode == 0:
+            funct = word & 0x3F
+            written = None if funct in (0x08, 0x18, 0x19, 0x1A, 0x1B, 0x11, 0x13) else (word >> 11) & 0x1F
+        elif opcode == 3:
+            written = 31
+        elif opcode in (0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F) or 0x20 <= opcode <= 0x26:
+            written = (word >> 16) & 0x1F
+        else:
+            written = None
+        if written == register:
+            return address, word
+    return None
+
+
+def proven_switch_dispatch(
+    img: RetailImage, function: Binding, site: int
+) -> tuple[str, int] | None:
+    """Prove a compiled `switch` table jump from its own bounded value chain.
+
+    GCC's MIPS tablejump, all inside one function: `sltiu c, i, N` and
+    `beqz c` bound the index, `lui h, %hi(T)`; `addiu b, h, %lo(T)` form the
+    table address, `sll s, i, 2`; `addu a, s, b`; `lw t, 0(a)`; `jr t`. Each
+    of the N table words must be a label inside the same function body, so
+    the transfer cannot leave it. Returns the table address; anything else
+    stays unresolved, as AGENTS.md requires for `jr`.
+    """
+    jump = img.u32(site)
+    if jump is None or jump & 0xFC1FFFFF != 0x00000008 or (jump >> 21) & 0x1F == 31:
+        return None
+    start = function.va
+    load = _last_definition(img, start, site, (jump >> 21) & 0x1F)
+    if load is None or load[1] >> 26 != 0x23 or load[1] & 0xFFFF:
+        return None
+    total = _last_definition(img, start, load[0], (load[1] >> 21) & 0x1F)
+    if total is None or total[1] >> 26 or total[1] & 0x7FF != 0x21:
+        return None
+    index = base = None
+    for operand in ((total[1] >> 21) & 0x1F, (total[1] >> 16) & 0x1F):
+        definition = _last_definition(img, start, total[0], operand)
+        if definition is None:
+            return None
+        address, word = definition
+        if word & 0xFFE007FF == 0x00000080:  # sll d, t, 2
+            index = address, (word >> 16) & 0x1F
+        elif word >> 26 == 0x09:  # addiu d, s, lo
+            high = _last_definition(img, start, address, (word >> 21) & 0x1F)
+            if high is None or high[1] >> 26 != 0x0F:
+                return None
+            low = word & 0xFFFF
+            base = ((high[1] & 0xFFFF) << 16) + (low - 0x10000 if low & 0x8000 else low)
+    if index is None or base is None:
+        return None
+    count = None
+    for address in range(index[0] - 4, start - 4, -4):
+        word = img.u32(address)
+        if word is None:
+            return None
+        if word >> 26 == 0x04 and (word >> 16) & 0x1F == 0:  # beqz c
+            bound = _last_definition(img, start, address, (word >> 21) & 0x1F)
+            if (bound is not None and bound[1] >> 26 == 0x0B
+                    and (bound[1] >> 21) & 0x1F == index[1]
+                    and _last_definition(img, bound[0] + 4, index[0], index[1]) is None):
+                count = bound[1] & 0xFFFF
+            break
+    if not count:
+        return None
+    for entry in range(count):
+        target = img.u32(base + 4 * entry)
+        if target is None or target & 3 or not function.contains_body(target):
+            return None
+    return "bounded-jump-table", base
+
+
 def access_span(reference: Reference, img: RetailImage) -> tuple[int, int]:
     """Minimum directly observed memory span, or one anchor byte for an address.
 
@@ -208,6 +288,7 @@ def audit(
     destinations: dict[int, list[str]] = {}
     issues: dict[tuple, dict] = {}
     dispatch_witnesses: dict[int, dict] = {}
+    switch_witnesses: dict[int, dict] = {}
     queue: deque[str] = deque()
 
     def issue(code: str, key: str, ref: int | None = None, **detail) -> None:
@@ -270,6 +351,15 @@ def audit(
                     issue("invalid-live-reference", key, number)
                 continue
             if reference.target is None:
+                switch = (proven_switch_dispatch(img, node, reference.site)
+                          if isinstance(node, Binding) else None)
+                if switch is not None:
+                    # A bounded table of labels inside the function itself.
+                    switch_witnesses[number] = {
+                        "owner": key, "site": reference.site, "pattern": switch[0],
+                        "table": switch[1],
+                    }
+                    continue
                 pattern = (
                     proven_vendored_dispatch(img, node, reference.site)
                     if isinstance(node, Binding) and node.vendored else None
@@ -391,10 +481,12 @@ def audit(
                                               for r in range_rows),
             "reference_occurrences": len(reference_rows),
             "proven_vendored_dispatch": len(dispatch_witnesses),
+            "proven_switch_dispatch": len(switch_witnesses),
             "issues": dict(sorted(Counter(r["code"] for r in issue_rows).items())),
         },
         "ranges": range_rows, "references": reference_rows, "issues": issue_rows,
         "vendored_dispatch": [dispatch_witnesses[n] for n in sorted(dispatch_witnesses)],
+        "switch_dispatch": [switch_witnesses[n] for n in sorted(switch_witnesses)],
         "config_comparisons": [asdict(c) for c in config_comparisons if c.image == image],
     }
 

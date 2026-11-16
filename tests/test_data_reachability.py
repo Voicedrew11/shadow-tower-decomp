@@ -73,6 +73,31 @@ class ReachabilityTest(unittest.TestCase):
         self.assertEqual(report["summary"]["issues"]["unresolved-indirect-control"], 1)
         self.assertEqual(report["vendored_dispatch"], [])
 
+    def switch_table(self, last_entry):
+        # sltiu $v0,$v1,2; beqz $v0,+7; lui $v0,0; addiu $v0,$v0,0x1100;
+        # sll $v1,$v1,2; addu $v1,$v1,$v0; lw $v0,0($v1); nop; jr $v0; nop
+        code = words(0x2C620002, 0x10400007, 0x3C020000, 0x24421100, 0x00031880,
+                     0x00621821, 0x8C620000, 0, 0x00400008, 0)
+        table = words(0x1028, last_entry)
+        img = RetailImage.synthetic(IMAGE, 0x1000, code + b"\0" * (0x100 - len(code)) + table
+                                    + b"\0" * 0x100)
+        game = replace(function(0x1000), size=0x30, body_size=0x30)
+        return audit(IMAGE, (game,), (), (ref(0x1020, None, tier="proven", kind="indirect-jump"),),
+                     img)
+
+    def test_bounded_switch_table_inside_the_function_is_proven(self):
+        report = self.switch_table(0x102C)
+        self.assertEqual(report["issues"], [])
+        self.assertEqual(report["switch_dispatch"], [{
+            "owner": "function:00001000", "site": 0x1020,
+            "pattern": "bounded-jump-table", "table": 0x1100,
+        }])
+
+    def test_switch_table_leaving_the_function_stays_unresolved(self):
+        report = self.switch_table(0x1200)
+        self.assertEqual(report["summary"]["issues"]["unresolved-indirect-control"], 1)
+        self.assertEqual(report["switch_dispatch"], [])
+
     def audit(self, functions, data=(), refs=(), img=None):
         img = img or RetailImage.synthetic(IMAGE, 0x1000, b"\0" * 0x1000)
         return audit(IMAGE, tuple(functions), tuple(data), tuple(refs), img)
