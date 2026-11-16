@@ -17,11 +17,23 @@
  * list vis_build_visible builds from it; vis_record_is_visible/vis_id_is_visible search the
  * visible list. */
 typedef struct {
-    u8 unk0000[0x44ca];
+    u8 unk0000[0x30];
+    s32 unk30;           /* 0x30: a height func_8003bdb0 tests */
+    u8 unk34[0x4c - 0x34];
+    s32 unk4C;           /* 0x4c: 0x80000 when unset (func_8003be10) */
+    u8 unk50[0x58 - 0x50];
+    s32 unk58;           /* 0x58: 0x80000 when unset */
+    u8 unk5C[0x44ca - 0x5c];
     u16 n_sources;       /* 0x44ca */
     u16 n_visible;       /* 0x44cc */
     u16 sources[0x80];   /* 0x44ce */
     u16 visible[0x80];   /* 0x45ce */
+    u8 unk46CE[0x47ce - 0x46ce];
+    s16 unk47CE;         /* 0x47ce..0x47d2: cleared by player_update_status */
+    s16 unk47D0;
+    s16 unk47D2;
+    u8 unk47D4[0x47dc - 0x47d4];
+    s32 unk47DC;         /* 0x47dc: cleared by func_8003c054 */
 } VisLists;
 
 /* 0x8017bed0: 12-byte records indexed by visible id. */
@@ -63,6 +75,10 @@ typedef struct {
     u8 count;            /* 0x6100 */
     u8 unk6101[3];
     u16 list[12];        /* 0x6104 */
+    u8 unk611C[0x6160 - 0x611c];
+    s16 unk6160;         /* 0x6160..0x6164: cleared by player_update_status */
+    s16 unk6162;
+    s16 unk6164;
 } VisTableA;
 
 /* 0x801c0310: 240 entries of 88 bytes at +0x1f20, then the index list. */
@@ -80,7 +96,11 @@ typedef struct {
 typedef struct {
     u8 unk0000[0x1f20];
     Vis88 entries[240];
-    u8 unk71a0[0x14];
+    u8 unk71a0[4];
+    s16 unk71A4;         /* 0x71a4..0x71a8: cleared by player_update_status */
+    s16 unk71A6;
+    s16 unk71A8;
+    u8 unk71AA[0xa];
     u16 list[96];        /* 0x71b4 */
     u8 count;            /* 0x7274 */
 } VisTableB;
@@ -92,8 +112,18 @@ typedef struct {
  */
 typedef struct {
     u8 unk0[4];
-    u8 unk4;             /* 0xff: none (func_80014544) */
-    u8 unk5[0x27];
+    u8 unk4;             /* 0xff: none (func_80014544); func_8003f12c's model */
+    u8 unk5[0x20 - 0x5];
+    /* 0x20: three bonuses (kind, amount) player_equipment_bonuses sums */
+    u32 kind0 : 4;
+    u32 amount0 : 4;
+    u32 kind1 : 4;
+    u32 amount1 : 4;
+    u32 kind2 : 8;
+    u32 amount2 : 8;
+    u8 unk24[4];
+    u8 unk28;            /* 0x28: durability, 0 when broken (func_8003d104) */
+    u8 unk29[3];
 } Vis44;
 
 typedef struct {

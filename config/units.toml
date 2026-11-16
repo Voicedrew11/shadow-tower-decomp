@@ -188,6 +188,36 @@ source = "src/st/bankload.c"
 profile = "probe-gcc272cdk-o2-g0"
 
 [[unit]]
+unit = "st.player"
+image = "ST.EXE"
+source = "src/st/player.c"
+profile = "probe-gcc272cdk-o2-g8"
+
+[[unit]]
+unit = "st.player_stats"
+image = "ST.EXE"
+source = "src/st/player_stats.c"
+profile = "probe-gcc272cdk-o2-g8"
+
+[[unit]]
+unit = "st.player_wear"
+image = "ST.EXE"
+source = "src/st/player_wear.c"
+profile = "probe-gcc272cdk-o2-g8"
+
+[[unit]]
+unit = "st.player_damage"
+image = "ST.EXE"
+source = "src/st/player_damage.c"
+profile = "probe-gcc272cdk-o2-g8"
+
+[[unit]]
+unit = "st.player_model"
+image = "ST.EXE"
+source = "src/st/player_model.c"
+profile = "probe-gcc272cdk-o2-g8"
+
+[[unit]]
 unit = "title.main"
 image = "TITLE.EXE"
 source = "src/title/main.c"
