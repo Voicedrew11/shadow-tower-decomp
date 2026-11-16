@@ -25,16 +25,17 @@ symbols or pretending that WIP names are original symbols:
 | `PSX.EXE` | 11 | 10 | 1 |
 | `STR.EXE` | 322 | 290 | 32 |
 | `ST.EXE` | 1,139 | 457 | 682 |
-| `TITLE.EXE` | 387 | 353 | 34 |
+| `TITLE.EXE` | 387 | 369 | 18 |
 | `OPTXT.EXE` | 283 | 254 | 29 |
 | `VS.EXE` | 660 | 401 | 259 |
 | `END.EXE` | 276 | 261 | 15 |
 | 36 `FDAT_nnn.BIN` | 943 (23–37 each) | 0 | 943 |
-| **Total** | **4,021** | **2,026** | **1,995** |
+| **Total** | **4,021** | **2,042** | **1,979** |
 
 PSX.EXE `main` is reconstructed (`src/psx/main.c`) with its six data
-identities and reviewed relocations, and END.EXE's fifteen game functions
-(`src/end/main.c`) with its data; every other game identity is
+identities and reviewed relocations, TITLE.EXE's eighteen game functions
+(`src/title/main.c`) and END.EXE's fifteen (`src/end/main.c`) with their
+data; every other game identity is
 address-only with a candidate signature from the static MIPS live-in
 heuristic (`kf inventory seed`). The tables are WIP, and the rules below
 say how they grew.
@@ -82,7 +83,11 @@ names its evidence and release.
 
 END.EXE `0x8001670c` (`StSetMask`, LIBCD member `C_010`) is too short for a
 function ID or signature; the byte-identical native relink maps it there, so
-its row's confidence is `relink-map-sdk42`.
+its row's confidence is `relink-map-sdk42`. The byte-identical TITLE.EXE
+relink places sixteen more the census had left as game candidates:
+`SpuInit` (LIBSPU `S_I`), `SsQuit`, `_SsSndPlay`, `SsUtReverbOn`,
+`_SsVmDamperOff` (LIBSND), three exports and three statics of LIBPAD
+`PADMAIN`, and the five `PADIF` statics that `padIntFunc` points at.
 
 Not admitted: the overlays' two-instruction default handler (`jr ra; nop`),
 matched only by an old LIBSND `VM_VIB` signature, since the overlays link no
@@ -180,4 +185,4 @@ and hardware references are not auto-admitted.
 
 The inventories are intentionally iterative. Missing functions, relocations,
 data extents, and xrefs can invalidate earlier candidates without invalidating
-the workflow. Only PSX.EXE `main`'s and END.EXE's relocations are admitted so far.
+the workflow. Only PSX.EXE `main`'s, TITLE.EXE's and END.EXE's relocations are admitted so far.

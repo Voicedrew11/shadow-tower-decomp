@@ -79,8 +79,8 @@ bss	group	bss
 
 PSYLINK, not the build script, places SDK library members. These rules were
 established for PSYLINK 1.29 in the King's Field II project; the Shadow
-Tower retail member groups follow the same pattern; `PSX.EXE` and `END.EXE`
-have been relinked with 2.73D byte-identical:
+Tower retail member groups follow the same pattern; `PSX.EXE`, `TITLE.EXE`
+and `END.EXE` have been relinked with 2.73D byte-identical:
 
 - Archives are visited in `inclib` order. The groups of members from each
   archive follow one another in the linked text in that order.
@@ -143,6 +143,32 @@ PSYLINK 2.73D:
 - GCC writes all of a unit's data directives before its text, so every
   small symbol the unit defines is `$gp`-relative; the one absolute store to
   END's own `.sbss` slot `0x8002fd7c` is spelled as a fixed address.
+
+## TITLE.EXE
+
+`src/title/main.c` reconstructs TITLE.EXE's eighteen game functions as one
+unit (`probe-gcc272cdk-o2-g8`); with its `IMAGE_LINKS` entry the whole
+96,256-byte file equals retail. TITLE.EXE alone loads at `0x80012000`.
+`main` loads `\ST\TITLE\TITLE.MIC`, streams `\ST\TITLE\TITLE.XA` and runs
+the menu, then writes the next program: 2 (`OPTXT.EXE`) for a new game,
+3 (`ST.EXE`) with 2 in the mailbox byte `0x800103f1` for Continue, 5
+(`VS.EXE`) for versus, and 0 (`STR.EXE`) when the title times out. The
+link confirmed END's placement rules again:
+
+- `.sdata` holds the two byte pointers and the unit's literals
+  (`0x80028abc`-`0x80028aeb`); `.sbss` starts at `0x80028af0`, after four
+  alignment bytes, with MALLOC.OBJ's 32 bytes, then the unit's `pad_align`; `.bss` starts
+  at `0x80028b18` with MALLOC.OBJ's `SearchPoint` and `TopAllocArea`.
+- The unit's six buffers are COMMON, allocated from `0x80028b28` in
+  hash-bucket order (`sound_bank`, `file_buffer`, `display`, `pad_data`,
+  `menu`, `pad_state`); the spellings are WIP names inside that order.
+- The switch table of `pad_update_state` follows `main`'s literals at the
+  end of the unit's `.rdata`: GCC writes jump tables after the unit's
+  other read-only data.
+
+The relink also places sixteen library functions the FID census left as
+game candidates (LIBSND, LIBSPU and LIBPAD members; see
+`functions_vendored.tsv`, confidence `relink-map-sdk42`).
 
 ## PS-X EXE header
 
@@ -291,7 +317,7 @@ under `build/link/<image>/` and are not committed.
 | --- | --- |
 | PSYLINK emits each program | Wired through `kf build` for all seven; an image links once it has a source unit |
 | Candidate artifact path | Direct source-to-EXE with no output rewriting |
-| Byte-identical retail images | `PSX.EXE` and `END.EXE` (whole files, headers included) |
+| Byte-identical retail images | `PSX.EXE`, `TITLE.EXE` and `END.EXE` (whole files, headers included) |
 | Library half of the overlays | Object-by-object attribution only (see the toolchain page); not yet relinked |
 | Historical toolchain identity | Open: the compiler is a rebuild and the exact ASPSX, PSYLINK and CPE2X builds are the earliest available ones that reproduce retail |
 | Boot | Not yet attempted |

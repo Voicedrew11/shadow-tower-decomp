@@ -9,6 +9,15 @@ PSX.EXE	0x80010398	0x4	next_program	global	load	u8 *	main	supported	asm;src/psx/
 PSX.EXE	0x8001039c	0x4	PTR_8001039c	global	load	u8 *	main	supported	asm;src/psx/main.c psx.main exact	$gp+8; points at 0x800103f1, cleared at start
 PSX.EXE	0x800103a0	0x4	PTR_800103a0	global	load	u8 *	main	supported	asm;src/psx/main.c psx.main exact	$gp+12; points at 0x800103f2, cleared at start
 PSX.EXE	0x800103b0	0x3c	program_header	global	bss	struct EXEC	main	supported	asm;src/psx/main.c psx.main exact	Load()/Exec() header; inside the cleared .bss 0x800103a8..0x800103f0
+TITLE.EXE	0x80028abc	0x4	next_program	global	load	u8 *	main	supported	asm;src/title/main.c title.main	$gp+0; points at PSX.EXE next-program byte 0x800103f0
+TITLE.EXE	0x80028ac0	0x4	PTR_80028ac0	global	load	u8 *	main	supported	asm;src/title/main.c title.main	$gp+4; points at 0x800103f1; main stores 2 there for Continue
+TITLE.EXE	0x80028b10	0x6	pad_align	static	bss	u_char[6]	pad_set_act_align	supported	asm;src/title/main.c title.main	.sbss; $gp+84; PadSetActAlign table
+TITLE.EXE	0x80028b28	0x2004	sound_bank	global	bss	SoundBank	load_title_data	supported	asm;src/title/main.c title.main	VAB id and VAB header copy; COMMON in hash-bucket order (WIP spelling fits it)
+TITLE.EXE	0x8002ab30	0x190000	file_buffer	global	bss	u_long[0x64000]	load_title_data	supported	asm;src/title/main.c title.main	TITLE.MIC load buffer; WIP extent up to display; COMMON in hash-bucket order (WIP spelling fits it)
+TITLE.EXE	0x801bab30	0xe4	display	global	bss	DisplayBuffers	main	supported	asm;src/title/main.c title.main	two DISPENVs, two DRAWENVs and an id; COMMON in hash-bucket order (WIP spelling fits it)
+TITLE.EXE	0x801bac18	0x4c	pad_data	global	bss	PadBuffers	pad_init	supported	asm;src/title/main.c title.main	PadInitDirect receive buffers and PadSetAct data; COMMON in hash-bucket order (WIP spelling fits it)
+TITLE.EXE	0x801bac68	0x1c	menu	global	bss	TitleState	title_menu	supported	asm;src/title/main.c title.main	title menu state; COMMON in hash-bucket order (WIP spelling fits it)
+TITLE.EXE	0x801bac88	0x14	pad_state	global	bss	PadState	pad_read	supported	asm;src/title/main.c title.main	port 1 state and buttons; COMMON in hash-bucket order (WIP spelling fits it)
 END.EXE	0x8001d28c	0x28	staff_poly_left	global	load	POLY_FT4	play_staff_roll	supported	asm;src/end/main.c end.main	left half of a staff roll page
 END.EXE	0x8001d2b4	0x28	staff_poly_right	global	load	POLY_FT4	play_staff_roll	supported	asm;src/end/main.c end.main	right half of a staff roll page
 END.EXE	0x8001d2dc	0x38	staff_page_frames	global	load	int[7][2]	play_staff_roll	supported	asm;src/end/main.c end.main	frame after which each staff page fades in, then out

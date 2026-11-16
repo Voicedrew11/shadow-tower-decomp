@@ -718,40 +718,24 @@ ST.EXE	0x8007e294	func_8007e294			unknown	unknown arg0	address-only	candidate	mi
 ST.EXE	0x8007e36c	func_8007e36c			unknown	unknown arg0	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
 ST.EXE	0x8007e42c	func_8007e42c			unknown	unknown arg0	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
 ST.EXE	0x8007e4b8	func_8007e4b8			unknown	unknown arg0	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-TITLE.EXE	0x8001304c	func_8001304c			unknown	unknown *object;unknown *pointer1;unknown arg2	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-TITLE.EXE	0x8001307c	func_8001307c			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-TITLE.EXE	0x800130d0	func_800130d0			unknown	unknown arg0;unknown arg1;unknown arg2;unknown arg3	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-TITLE.EXE	0x800132ac	func_800132ac			unknown	unknown arg0;unknown arg1;unknown arg2	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-TITLE.EXE	0x80013380	func_80013380			unknown	unknown arg0;unknown arg1;unknown arg2	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-TITLE.EXE	0x80013438	func_80013438			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-TITLE.EXE	0x8001348c	func_8001348c			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-TITLE.EXE	0x800134e0	func_800134e0			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-TITLE.EXE	0x8001357c	func_8001357c			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-TITLE.EXE	0x800135cc	func_800135cc			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-TITLE.EXE	0x80013648	func_80013648			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-TITLE.EXE	0x800136b0	func_800136b0			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-TITLE.EXE	0x80013710	func_80013710			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-TITLE.EXE	0x800137f0	func_800137f0			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-TITLE.EXE	0x80013888	func_80013888			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-TITLE.EXE	0x800138f8	func_800138f8			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-TITLE.EXE	0x80013a10	func_80013a10			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-TITLE.EXE	0x80014144	func_80014144			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-TITLE.EXE	0x8001761c	func_8001761c			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-TITLE.EXE	0x800183fc	func_800183fc			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-TITLE.EXE	0x800195fc	func_800195fc			void	unknown arg0;unknown arg1	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-TITLE.EXE	0x8001b8ac	func_8001b8ac			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-TITLE.EXE	0x8001bf6c	func_8001bf6c			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-TITLE.EXE	0x80024344	func_80024344			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-TITLE.EXE	0x80024370	func_80024370			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-TITLE.EXE	0x800243d8	func_800243d8			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-TITLE.EXE	0x80024668	func_80024668			unknown	unknown *object	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-TITLE.EXE	0x8002487c	func_8002487c			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-TITLE.EXE	0x80024de0	func_80024de0			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-TITLE.EXE	0x8002578c	func_8002578c			unknown	unknown arg0	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-TITLE.EXE	0x800257cc	func_800257cc			unknown	unknown arg0	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-TITLE.EXE	0x800258a4	func_800258a4			unknown	unknown arg0	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-TITLE.EXE	0x80025964	func_80025964			unknown	unknown arg0	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-TITLE.EXE	0x800259f0	func_800259f0			unknown	unknown arg0	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+TITLE.EXE	0x8001304c	copy_words			u_long *	u_long *dst;u_long *src;int count	supported	proven	asm;callers;src/title/main.c title.main	copies count words; returns the advanced source pointer
+TITLE.EXE	0x8001307c	clear_vram			void		supported	proven	asm;callers;src/title/main.c title.main	clears all of VRAM to black
+TITLE.EXE	0x800130d0	load_tims			void	u_long *addr;VramOffset *pixel_offset;VramOffset *clut_offset;int absolute	supported	proven	asm;callers;src/title/main.c title.main	LoadImage of each TIM CLUT and pixel block in a run of TIM files
+TITLE.EXE	0x800132ac	cd_read_sectors			void	CdlLOC *loc;u_long *buf;int sectors	supported	proven	asm;callers;src/title/main.c title.main	double-speed CdRead of a sector count, retried until complete
+TITLE.EXE	0x80013380	load_st_file			int	u_long *buf;char *name;int size	supported	proven	asm;callers;src/title/main.c title.main	reads \ST\<name>;1 into buf (whole file when size is 0)
+TITLE.EXE	0x80013438	play_confirm_sound			void		supported	proven	asm;callers;src/title/main.c title.main	keys on menu sound bank tone 12 (START / item chosen)
+TITLE.EXE	0x8001348c	play_cursor_sound			void		supported	proven	asm;callers;src/title/main.c title.main	keys on menu sound bank tone 11 (cursor up/down)
+TITLE.EXE	0x800134e0	play_title_xa			void		supported	proven	asm;callers;src/title/main.c title.main	streams \ST\TITLE\TITLE.XA (file 1, channel 0)
+TITLE.EXE	0x8001357c	stop_title_xa			void		supported	proven	asm;callers;src/title/main.c title.main	ends the XA stream and mutes CD audio
+TITLE.EXE	0x800135cc	pad_wait_stable			void		supported	proven	asm;callers;src/title/main.c title.main	polls PadGetState(0) until stable or searching, at most 61 times
+TITLE.EXE	0x80013648	pad_set_act_align			void		supported	proven	asm;callers;src/title/main.c title.main	sends the actuator alignment for the pad in port 1
+TITLE.EXE	0x800136b0	pad_setup_actuators			void		supported	proven	asm;callers;src/title/main.c title.main	reads the actuator count of a stable pad and aligns it
+TITLE.EXE	0x80013710	pad_update_state			void		supported	proven	asm;callers;src/title/main.c title.main	tracks PadGetState(0) disconnects and reconnects
+TITLE.EXE	0x800137f0	pad_init			void		supported	proven	asm;callers;src/title/main.c title.main	PadInitDirect setup, actuator data and first state
+TITLE.EXE	0x80013888	pad_read			void		supported	proven	asm;callers;src/title/main.c title.main	held/previous/trigger buttons from the port 1 buffer
+TITLE.EXE	0x800138f8	load_title_data			void		supported	proven	asm;callers;src/title/main.c title.main	loads TITLE.MIC: three TIM runs, then the VAB header and body
+TITLE.EXE	0x80013a10	title_menu			void		supported	proven	asm;callers;src/title/main.c title.main	title picture, PRESS START and the three-item menu loop
+TITLE.EXE	0x80014144	main			int		supported	proven	asm;callers;src/title/main.c title.main	called by NONE3 startup; title screen, then the next program
 OPTXT.EXE	0x80011f8c	func_80011f8c			unknown	unknown arg0;unknown arg1;unknown arg2;unknown arg3	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
 OPTXT.EXE	0x80012168	func_80012168			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
 OPTXT.EXE	0x800121bc	func_800121bc			unknown	unknown arg0;unknown arg1;unknown arg2	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
