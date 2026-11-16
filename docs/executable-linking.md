@@ -10,7 +10,7 @@ kf build
 artifact chain:
 
 ```text
-C source -> CPPPSX/CC1PSX (gcc-2.7.2-cdk) -> assembly -> ASPSX 2.79D -> DMPSX 3.0 -> Psy-Q OBJ
+C source -> CPPPSX/CC1PSX (gcc-2.7.2-cdk) -> assembly -> ASPSX 2.79D -> Psy-Q OBJ
 Psy-Q OBJ + SDK OBJ/LIB -> PSYLINK 2.73D -> CPE -> CPE2X 1.5 /CA -> PS-X EXE
 ```
 

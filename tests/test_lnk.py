@@ -13,7 +13,6 @@ from elftools.elf.elffile import ELFFile
 from tests.psylink_helpers import symbol_address
 from scripts.kf.lnk import Reader, affine, elf_view, read
 from scripts.kf.sdk import assemble_many, dos_run, tool_succeeded
-from scripts.psxbuild.sdk import aspsx_command, needs_dmpsx
 
 
 class RecordTests(unittest.TestCase):
@@ -32,31 +31,8 @@ class RecordTests(unittest.TestCase):
 
 
 @unittest.skipUnless(shutil.which('dosbox-x') and os.environ.get('PSYQ_ASPSX')
-                     and os.environ.get('PSYQ_DMPSX')
                      and os.environ.get('PSYQ_PSYLINK'), 'native SDK tools required')
 class NativeRelocationTests(unittest.TestCase):
-    def test_dmpsx_rewrites_inline_gte_words_and_nothing_else(self):
-        # INLINE_C.H gte_nclip() and gte_ncds_b() placeholders become NCLIP and
-        # NCDS; the surrounding instructions and a GTE-free object are unchanged.
-        with tempfile.TemporaryDirectory() as directory:
-            root = Path(directory)
-            body = ('\t.text\n\t.globl witness\n\t.ent witness\nwitness:\n\t.set noreorder\n'
-                    '\tmtc2 $4,$12\n\tnop\n\tnop\n\t.word 0x0000117f\n\tsw $2,4($5)\n'
-                    '\tnop\n\t.word 0x00000fff\n\tjr $31\n\tnop\n\t.end witness\n')
-            plain = body.replace('\t.word 0x0000117f\n', '').replace('\t.word 0x00000fff\n', '')
-            (root / 'GTE.S').write_text(body)
-            (root / 'PLAIN.S').write_text(plain)
-            native = assemble_many(root, ('GTE', 'PLAIN'), 0)
-            gte = ELFFile(io.BytesIO(elf_view(native['GTE']))).get_section_by_name('.text').data()
-            self.assertEqual(struct.unpack('<9I', gte),
-                             (0x48846000, 0, 0, 0x4b400006, 0xaca20004, 0, 0x4ae80413,
-                              0x03e00008, 0))
-            dos_run(root, [aspsx_command('PLAIN', 0)], 'asm-only')
-            tool_succeeded(root, 'PLAIN.TXT', 'PLAIN.OBJ', b'LNK\x02')
-            self.assertEqual((root / 'PLAIN.OBJ').read_bytes(), native['PLAIN'])
-            self.assertTrue(needs_dmpsx(body))
-            self.assertFalse(needs_dmpsx(plain + '\t.word 0x00001234\n\t.word 0x0001117f\n'))
-
     def test_negative_addends_match_psylink_and_native_bytes_stay_unchanged(self):
         # Synthetic assembler control: branch/call, high/low carry, and pointer
         # expressions are checked against the real linker, with no retail input.

@@ -12,7 +12,6 @@ FromSoftware ran. Where a fact is only a probe, it says so.
 | --- | --- | --- | --- |
 | Preprocess, compile | `cpppsx-272cdk`, `cc1psx-272cdk`: Decompals old-gcc 0.17 `gcc-2.7.2-cdk`, a native rebuild of the SN Systems GCC "cygnus-2.7.2-970404 SN32" | GitHub release, SHA-256 pinned | `-O2 -G0` reproduces 14 sampled `ST.EXE` game functions and `-O2 -G8` reproduces `PSX.EXE`'s `main`; the original Win32 `CC1PSX.EXE` is not used |
 | Assemble | SDevTC ASPSX 2.79D (1998-05-22, DOS): `BIN/DOS/ASPSXD.EXE` | Psy-Q/SDevTC 4.5 kit, Archive.org `ps1_sdks` | Reproduces the retail expansions; see below |
-| GTE post-process | DMPSX 3.0 (1999-01-30, DOS): `BIN/DOS/DMPSX.EXE`, run after ASPSX on each object whose assembly carries such a placeholder (DMPSX 3.0 can corrupt objects it has nothing to rewrite) | 4.5 kit | Rewrites Runtime Library 4.2 `INLINE_C.H` placeholder words (`gte_nclip()` emits `.word 0x0000117f`) into COP2 instructions (`0x4b400006`); objects without them are unchanged, and `PSX`/`STR`/`TITLE`/`END` stay byte-identical. `ST.EXE`'s renderers carry its output: `nop; nop; nclip` and `ldsxy3`'s `mtc2 $12, $14, $13` order |
 | Link | PSYLINK 2.73D (DOS): `DOS/PSYLINKD.EXE` | SDevTC 2.4 CD (Japan, files dated 1998-06-11), redump in Archive.org `ps1_sdks` | Links `PSX.EXE` byte-identically |
 | Convert | CPE2X 1.5 (1998-01-23, DOS) with `/CA` | 4.5 kit | Writes the whole retail header, including the "North America area" title |
 | Libraries | Sony Runtime Library 4.2 `LIB/`, with `LIBPAD.LIB` from its bundled 4.2.1 pad patch | Archive.org, SHA-256 pinned | Every SDK object in all seven programs matches (below) |
@@ -20,12 +19,12 @@ FromSoftware ran. Where a fact is only a probe, it says so.
 | Allocator | `MALLOC.OBJ` | Psy-Q Release 2.5 floppies | Linked after `NONE3.OBJ` in STR, TITLE, OPTXT and END |
 | Headers | Runtime Library 4.2 `INCLUDE/`, staged as `include-lf/` (CRLF converted to LF) | as the libraries | `PSYQ_INCLUDE` |
 
-All four SDK programs are DOS executables and run unchanged in the pinned
+All three SDK programs are DOS executables and run unchanged in the pinned
 DOSBox-X. ASPSX 2.79D and PSYLINK 2.73D are Watcom C programs with the
 FlashTek X-32VM DOS extender bound into the executable; CPE2X 1.5 is a 16-bit
-real-mode program, as is DMPSX 3.0 (Borland C++). No extender, Windows, Wine or Win32 layer is staged, and no
+real-mode program. No extender, Windows, Wine or Win32 layer is staged, and no
 program is patched. They are staged in the DOS root as `ASPSX.EXE`,
-`DMPSX.EXE`, `PSYLINK.EXE` and `CPE2X.EXE`.
+`PSYLINK.EXE` and `CPE2X.EXE`.
 
 The SN tool kits ship each tool as a Win32 program and as a DOS build (the
 `D` suffix). Before this all-DOS chain, the Win32 ASPSX 2.79 and PSYLINK 2.74
@@ -53,7 +52,6 @@ ran under the HX DOS extender. The DOS builds give the same output:
 | `PSYQ_LIB` | Runtime Library 4.2 archives (LIBPAD from the 4.2.1 patch) |
 | `PSYQ_INCLUDE` | Runtime Library 4.2 headers with LF line endings |
 | `PSYQ_ASPSX` | ASPSX 2.79D |
-| `PSYQ_DMPSX` | DMPSX 3.0 |
 | `PSYQ_PSYLINK` | PSYLINK 2.73D |
 | `PSYQ_CPE2X`, `PSYQ_STARTUP_OBJ` | CPE2X 1.5, NONE3.OBJ |
 | `PSYQ_MALLOC_OBJ` | Release 2.5 MALLOC.OBJ |

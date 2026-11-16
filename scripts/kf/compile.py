@@ -230,8 +230,7 @@ def compile_source(
         'language': 'c' if source.suffix.lower() == '.c' else 'assembly',
         'compiler': C_COMPILERS[compiler][2], 'compiler_probe': compiler,
         'optimization': optimization, 'small_data': small_data, 'cc1_flags': list(cc1_flags),
-        'assembler_model': ('native ASPSX 2.79D + DMPSX 3.0 (DOS, in DOSBox-X); '
-                            'LNK object -> ELF inspection view'),
+        'assembler_model': 'native ASPSX 2.79D (DOS, in DOSBox-X); LNK object -> ELF inspection view',
         'native_object': str(output.with_suffix('.OBJ')),
         'native_object_sha256': hashlib.sha256(native).hexdigest(),
         'native_referents': [
@@ -240,8 +239,6 @@ def compile_source(
              'addend': row.addend, 'provenance': row.provenance}
             for row in referents],
         'assembler_sha256': hashlib.sha256(Path(os.environ['PSYQ_ASPSX']).read_bytes()).hexdigest(),
-        'gte_postprocessor_sha256': hashlib.sha256(
-            Path(os.environ['PSYQ_DMPSX']).read_bytes()).hexdigest(),
         'attribution': 'candidate probe; exact retail compiler/profile unproven',
         'data_claims': [{'name': claim.name, 'va': f'{claim.va:#x}', 'size': claim.size}
                         for claim in data_claims],
