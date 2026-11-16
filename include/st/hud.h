@@ -9,6 +9,7 @@
 #include <sys/types.h>
 #include <LIBGTE.H>
 #include <LIBGPU.H>
+#include <st/objects.h>
 
 /*
  * One 20-byte HUD sprite record: flags (bit 0 textured, bit 1 flat, bits 2
@@ -46,11 +47,5 @@ void func_80026afc(VECTOR *pos, SVECTOR *rot);
 void func_80026dd4(VECTOR *pos, SVECTOR *rot, int arg);
 void func_80026e04(void);
 void func_80026e90(void);
-
-/* The world object passes (src/st/objects.c). */
-void func_800241d0(void);
-void func_800246e4(void);
-void func_800251c8(void);
-void func_800255f0(void);
 
 #endif

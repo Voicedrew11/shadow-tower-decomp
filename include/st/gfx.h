@@ -122,8 +122,27 @@ extern WorldState world_state;
 
 /* The two 0x20000-byte GPU packet buffers. */
 extern u_long DAT_8011c488[];
-/* Word cleared by func_80016fb8. */
-extern s32 DAT_8015c488;
+/* 128 animated objects of 24 bytes; id 0xffff marks a free one. */
+typedef struct {
+    u16 unk0;            /* 0x00: model id - 40; bit 15 hides it */
+    u8 unk2;             /* 0x02: bits 0-5 kind, bits 6-7 a rotation */
+    u8 unk3;             /* 0x03: frame count */
+    u8 unk4;             /* 0x04: frame period, 0 still */
+    u8 unk5;             /* 0x05: frame */
+    u8 unk6[2];
+    VECTOR unk8;         /* 0x08: position */
+} StObject24;
+
+/*
+ * The frame counter func_80016fb8 clears and func_800255f0 advances, then
+ * the animated objects it steps. -G8 code reads the counter with lui, so it
+ * is not a small object of its own.
+ */
+typedef struct {
+    s32 frame;
+    StObject24 objects[128];
+} StAnimObjects;
+extern StAnimObjects DAT_8015c488;
 /* The CLUT a type-49 texture slot cycles (entries 1-14 rotate). */
 extern u16 DAT_8009ac88[16];
 /* The three lighting blend targets of func_80017d28. */

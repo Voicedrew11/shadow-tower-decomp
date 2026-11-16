@@ -57,7 +57,7 @@ typedef struct {
     u8 unkEC[4];         /* 0xec */
     u8 *unkF0;           /* 0xf0: cursor into unkF8 */
     u32 *unkF4;          /* 0xf4: &unk244 */
-    u8 unkF8[0x30];      /* 0xf8: 128 flag bytes cleared per frame; overlaps x..z, used in another phase */
+    u8 unkF8[0x30];      /* 0xf8: up to 332 slot flag bytes cleared per frame; overlaps x..z, used in another phase */
     long x;              /* 0x128: the position vis_measure_position measures */
     long y;              /* 0x12c */
     long z;              /* 0x130 */
@@ -69,7 +69,9 @@ typedef struct {
     short offset_z;      /* 0x1ee */
     long plane[6];       /* 0x1f0 */
     long unk208;         /* 0x208 */
-    u8 unk20C[0xd2];     /* 0x20c */
+    u8 unk20C[0x38];     /* 0x20c */
+    u32 unk244[0x26];    /* 0x244: object passes clear 4..75 words (another phase) */
+    u8 unk2DC[2];
     s16 unk2DE;          /* 0x2de: selected row of the item and stats menus */
     s16 unk2E0;          /* 0x2e0: cursor row of a list menu */
     s16 unk2E2;          /* 0x2e2: first list entry shown */

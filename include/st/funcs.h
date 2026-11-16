@@ -79,4 +79,14 @@ void func_80034fc4(void);
 void func_8003c24c(int arg);
 void func_80057b10(void);
 
+/* band E object-pass callees (src/st/objects.c) */
+u16 func_80023208(u16 id);
+void func_80022678(int mode, u16 id, VECTOR *pos, SVECTOR *rot, SVECTOR *scale, void *arg5, MATRIX *m,
+                   int arg7, int arg8, short arg9, short arg10, int arg11, int arg12);
+void func_80033db8(u16 slot, void **model);
+int func_8004fc94(int x, int z, int w, int d, int arg4);
+int func_8004fd28(int x, int z, int w, int d, int arg4);
+s16 func_800582f0(int sound, int volume);
+void func_8005850c(s16 voice, int sound);
+
 #endif

@@ -107,7 +107,9 @@ typedef struct {
     u8 area;             /* 0x09 */
     u8 unkA[0x13];
     u8 unk1D;
-    u8 unk1E[0xa];
+    u8 unk1E;
+    u8 unk1F;            /* 0x1f: nonzero skips the block refresh (band E object passes) */
+    u8 unk20[8];
 } AreaState;
 
 extern AreaState area_state;

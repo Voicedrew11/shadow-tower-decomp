@@ -57,7 +57,8 @@ typedef union {
 
 /* Per-area counts read by the map page (byte +0x16e4 onwards); WIP extent. */
 typedef struct {
-    u8 unk0[0x16e4];
+    u8 unk0[0x14a8];
+    u32 unk14A8[0x8f];   /* 0x14a8: one bit per map id (func_800241d0) */
     u8 unk16E4[44];      /* by area */
 } Data801cba08;
 extern Data801cba08 DAT_801cba08;
