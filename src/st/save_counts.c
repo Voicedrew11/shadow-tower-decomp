@@ -30,4 +30,3 @@ void func_80055990(void)
         *(u8 *)&DAT_801c7590.counts[i] = 0;
     viewer.unk27 = 0;
 }
-

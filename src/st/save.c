@@ -249,4 +249,3 @@ void func_80055f9c(int area)
     vis_lists.unk47E0 &= ~0x2;
     vis_lists.unk47E0 &= ~0x1;
 }
-
