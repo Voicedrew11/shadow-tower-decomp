@@ -24,7 +24,7 @@ STR.EXE	0x80012fc0	clear_vram			void		supported	proven	asm;callers;src/str/main.
 STR.EXE	0x80013014	load_tims			void	u_long *addr;VramOffset *pixel_offset;VramOffset *clut_offset;int absolute	supported	proven	asm;callers;src/str/main.c str.main	LoadImage of each TIM CLUT and pixel block in a run of TIM files
 STR.EXE	0x800131f0	show_logo			void		supported	proven	asm;callers;src/str/main.c str.main	fades the STR\FLOGO320.TIM logo in and out
 STR.EXE	0x800133f4	main			int		supported	proven	asm;callers;src/str/main.c str.main	called by NONE3 startup; boot movie sequence
-ST.EXE	0x8001435c	func_8001435c			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+ST.EXE	0x8001435c	main			int		supported	proven	asm;callers;src/st/main.c st.main	called by NONE3 startup; sets up the heap, CD and memory card, runs the game loop
 ST.EXE	0x80014410	func_80014410			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
 ST.EXE	0x80014450	func_80014450			unknown	unknown *object;unknown arg1	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
 ST.EXE	0x80014544	func_80014544			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review

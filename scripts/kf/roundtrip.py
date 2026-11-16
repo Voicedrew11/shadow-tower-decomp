@@ -35,6 +35,8 @@ SECTIONS = {".text": "SHT_PROGBITS", ".rodata": "SHT_PROGBITS",
             ".data": "SHT_PROGBITS", ".sdata": "SHT_PROGBITS", ".bss": "SHT_NOBITS",
             ".sbss": "SHT_NOBITS"}
 LINKER = "mipsel-linux-gnu-ld"
+# Sections a claimed COMMON request may be placed in (see named_common_bss_claim).
+COMMON_SECTIONS = (".bss", ".sbss")
 SYMBOL_NAME = re.compile(r"[A-Za-z_$][A-Za-z0-9_$]*\Z")
 ADDRESS_NAME = re.compile(r"DAT_([0-9a-fA-F]{8})\Z")
 
@@ -101,18 +103,27 @@ def named_common_bss_claim(elf: ELFFile, unit: Unit):
     COMMON carries no input section. Only a single, exact, globally named
     reservation is admissible here; the claimed address supplies its placement
     and must satisfy the request's alignment. Other COMMON remains unresolved.
+    The claim's section is `.bss`, or `.sbss` for a small request a -G8 unit
+    leaves to the linker; it must be the only claim there, and the object's
+    section of that name must be empty.
     """
     symtab = elf.get_section_by_name(".symtab")
     if symtab is None:
         return None
     common = [symbol for symbol in symtab.iter_symbols()
               if symbol['st_shndx'] == 'SHN_COMMON']
-    claims = [datum for datum in unit.data if datum.section_name == '.bss']
-    bss = elf.get_section_by_name('.bss')
-    if (len(common) != 1 or len(claims) != 1
-            or (bss is not None and bss['sh_size'])):
+    if len(common) != 1:
         return None
-    symbol, claim = common[0], claims[0]
+    symbol = common[0]
+    named = [datum for datum in unit.data
+             if datum.symbol == symbol.name and datum.section_name in COMMON_SECTIONS]
+    if len(named) != 1:
+        return None
+    claim = named[0]
+    claims = [datum for datum in unit.data if datum.section_name == claim.section_name]
+    section = elf.get_section_by_name(claim.section_name)
+    if len(claims) != 1 or (section is not None and section['sh_size']):
+        return None
     alignment = symbol['st_value']
     if (not symbol.name or symbol.name != claim.symbol
             or symbol['st_info']['bind'] != 'STB_GLOBAL'
@@ -183,7 +194,7 @@ def plan(elf: ELFFile, unit: Unit, result: UnitResult) -> dict[str, int]:
         index = symbol['st_shndx']
         is_claimed_common = (common_claim is not None and name == common_claim.symbol
                              and index == 'SHN_COMMON')
-        actual_section = ('.bss' if is_claimed_common else
+        actual_section = (common_claim.section_name if is_claimed_common else
                           elf.get_section(index).name if isinstance(index, int) else index)
         if actual_section != section_name or symbol['st_size'] != size:
             result.issue("owned-symbol-layout", symbol=name, expected_section=section_name,
@@ -209,6 +220,11 @@ def plan(elf: ELFFile, unit: Unit, result: UnitResult) -> dict[str, int]:
     if unit.rodata:
         bases[".rodata"].add(unit.rodata[0])
         sizes[".rodata"] = unit.rodata[1]
+    if unit.sdata and not witnesses[".sdata"]:
+        # A unit whose .sdata holds only its SDATA() literals: the target
+        # module packs that range alone, so it starts the section.
+        bases[".sdata"].add(unit.sdata[0])
+        sizes[".sdata"] = unit.sdata[1]
     placed = {}
     seen = set()
     for section in elf.iter_sections():
@@ -227,7 +243,7 @@ def plan(elf: ELFFile, unit: Unit, result: UnitResult) -> dict[str, int]:
             result.issue("unsupported-allocated-section", section=name, size=size)
             continue
         if not size:
-            if name == '.bss' and common_claim is not None:
+            if common_claim is not None and name == common_claim.section_name:
                 continue
             if sizes[name]:
                 result.issue("owned-section-extent", section=name, size=0, claimed=sizes[name])
@@ -256,7 +272,7 @@ def plan(elf: ELFFile, unit: Unit, result: UnitResult) -> dict[str, int]:
             name, base, size, sizes[name], "bss" if name in {".bss", ".sbss"} else "load",
         ))
     if common_claim is not None:
-        name, size, base = '.bss', common_claim.size, common_claim.va
+        name, size, base = common_claim.section_name, common_claim.size, common_claim.va
         if (name in seen and elf.get_section_by_name(name)['sh_size']
                 or sizes[name] != size or bases[name] != {base}):
             result.issue('owned-section-extent', section=name, size=size,
@@ -371,9 +387,11 @@ def verify_unit(unit: Unit, image: RetailImage, book: dict[str, set[int]],
         with tempfile.TemporaryDirectory(prefix="link-", dir=scratch) as temporary:
             root = Path(temporary)
             script = root / "retail.ld"
+            common = named_common_bss_claim(elf, unit)
+            common_section = common.section_name if common is not None else '.bss'
             script.write_text("SECTIONS {\n" + "\n".join(
                 f"  {name} {address:#x} : {{ *({name})"
-                + (" *(COMMON)" if name == '.bss' else "") + " }"
+                + (" *(COMMON)" if name == common_section else "") + " }"
                 for name, address in sorted(placed.items(), key=lambda item: item[1])
             ) + "\n  /DISCARD/ : { *(*) }\n}\n")
             linked = root / "linked.elf"

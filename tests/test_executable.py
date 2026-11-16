@@ -114,6 +114,59 @@ class ComparisonTests(unittest.TestCase):
                          'PSYQ_ASPSX', 'PSYQ_PSYLINK', 'PSYQ_CPE2X', 'PSYQ_LIB',
                          'PSYQ_INCLUDE', 'PSYQ_MALLOC_OBJ', 'PSYQ_STARTUP_OBJ')),
                      'requires the pinned compiler, original SDK tools and libraries')
+class PartialImageTests(unittest.TestCase):
+    @staticmethod
+    def catalog(*addresses, vendored=()):
+        from types import SimpleNamespace
+        from scripts.kf.delink import Function
+        functions = [Function('ST.EXE', va, 8, 8, 1, f'func_{va:08x}', 'test', 'test',
+                              provider='Sony' if va in vendored else '')
+                     for va in addresses]
+        return SimpleNamespace(functions={'ST.EXE': functions})
+
+    @staticmethod
+    def manifest(*claimed):
+        from scripts.kf.delink import Function
+        profile = Profile('control', 'c', 'gcc272cdk-native', 'O2', 0, '2.79', ())
+        functions = tuple(Function('ST.EXE', va, 8, 8, 1, f'func_{va:08x}', 'test', 'test')
+                          for va in claimed)
+        return Manifest({profile.name: profile},
+                        (Unit('st.control', 'ST.EXE', 'src/st/control.c', profile.name, functions),))
+
+    def test_unclaimed_game_function_skips_the_native_link(self):
+        catalog = self.catalog(0x80014000, 0x80014008, 0x80014010, vendored=(0x80014010,))
+        with (tempfile.TemporaryDirectory() as directory,
+              mock.patch.object(executable, 'load_catalog', return_value=catalog),
+              mock.patch.object(executable, 'link_image',
+                                side_effect=AssertionError('partial image linked'))):
+            report = build_image('ST.EXE', self.manifest(0x80014000), Path(directory))
+            self.assertEqual((report['linked'], report['phase']), (False, 'partial'))
+            self.assertEqual(report['unclaimed_game_functions'], 1)
+            self.assertEqual(json.loads((Path(directory) / 'build.json').read_text()), report)
+
+    def test_every_game_function_claimed_links_natively(self):
+        linked = {'image': 'ST.EXE', 'linked': True, 'executable': 'ST.EXE'}
+        catalog = self.catalog(0x80014000, 0x80014010, vendored=(0x80014010,))
+        with (tempfile.TemporaryDirectory() as directory,
+              mock.patch.object(executable, 'load_catalog', return_value=catalog),
+              mock.patch.object(executable, 'link_image', return_value=dict(linked)) as link):
+            report = build_image('ST.EXE', self.manifest(0x80014000), Path(directory))
+            link.assert_called_once()
+            self.assertTrue(report['linked'])
+
+    def test_partial_image_is_not_a_build_failure(self):
+        partial = {'image': 'ST.EXE', 'linked': False, 'phase': 'partial',
+                   'units': ['st.control'], 'unclaimed_game_functions': 3}
+        with (tempfile.TemporaryDirectory() as directory,
+              mock.patch.object(executable, 'BUILD', Path(directory)),
+              mock.patch.object(executable, 'load_manifest', return_value=self.manifest()),
+              mock.patch.object(executable, 'build_image', return_value=partial),
+              contextlib.redirect_stdout(io.StringIO()) as output):
+            (Path(directory) / 'link/st').mkdir(parents=True)
+            self.assertEqual(executable.main(['--image', 'st']), 0)
+        self.assertIn('partial reconstruction (3 game functions unclaimed)', output.getvalue())
+
+
 class NativeBuildControls(unittest.TestCase):
     MAP_SECTION = re.compile(
         r'(?m)^ ([0-9A-F]{8}) [0-9A-F]{8} ([0-9A-F]{8}) [0-9A-F]{8} \w+ +(\.[a-z]+)\s*$')

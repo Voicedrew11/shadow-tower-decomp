@@ -54,3 +54,40 @@ unit = "end.main"
 image = "END.EXE"
 source = "src/end/main.c"
 profile = "probe-gcc272cdk-o2-g8"
+
+# ST.EXE units; WIP module boundaries (see each source's header comment).
+[[unit]]
+unit = "st.main"
+image = "ST.EXE"
+source = "src/st/main.c"
+profile = "probe-gcc272cdk-o2-g8"
+
+[[unit]]
+unit = "st.loop"
+image = "ST.EXE"
+source = "src/st/loop.c"
+profile = "probe-gcc272cdk-o2-g8"
+
+[[unit]]
+unit = "st.memory"
+image = "ST.EXE"
+source = "src/st/memory.c"
+profile = "probe-gcc272cdk-o2-g0"
+
+[[unit]]
+unit = "st.heap"
+image = "ST.EXE"
+source = "src/st/heap.c"
+profile = "probe-gcc272cdk-o2-g0"
+
+[[unit]]
+unit = "st.cdreq"
+image = "ST.EXE"
+source = "src/st/cdreq.c"
+profile = "probe-gcc272cdk-o2-g0"
+
+[[unit]]
+unit = "st.cdpos"
+image = "ST.EXE"
+source = "src/st/cdpos.c"
+profile = "probe-gcc272cdk-o2-g0"
