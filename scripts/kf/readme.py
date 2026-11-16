@@ -13,7 +13,12 @@ import subprocess
 from elftools.common.exceptions import ELFError
 
 from scripts.kf.paths import BUILD, REPO
-from scripts.kf.retail import IMAGE_KEYS, IMAGE_LAYOUTS, IMAGE_NAMES, image_key
+from scripts.kf.retail import IMAGE_KEYS, IMAGE_LAYOUTS, IMAGE_NAMES, OVERLAY_SOURCES, image_key
+
+
+def _linked_keys() -> tuple[str, ...]:
+    """Images the executable chain links: the PS-X EXE programs, not overlays."""
+    return tuple(image_key(name) for name in IMAGE_LAYOUTS if name not in OVERLAY_SOURCES)
 
 
 README = REPO / "README.md"
@@ -149,7 +154,7 @@ def data_snapshot() -> dict[str, tuple[int, int]]:
 def executable_snapshot(link_root: Path) -> dict[str, dict]:
     """Use reports only when their EXE hashes match outputs still on disk."""
     result = {}
-    for key in IMAGE_KEYS:
+    for key in _linked_keys():
         image = IMAGE_NAMES[key]
         root = link_root / key
         try:
@@ -202,7 +207,8 @@ def render_executable_block(
     """Keep complete-file equality and heuristic load-area similarity distinct."""
     rows = []
     total_equal = total_bytes = total_nonzero_equal = total_nonzero = 0
-    for key in IMAGE_KEYS:
+    linked = _linked_keys()
+    for key in linked:
         counts = (data_models or {}).get(key)
         data_cell = f'{counts[0]:,} / {counts[1]:,}' if counts is not None else '—'
         if key not in images:
@@ -221,7 +227,7 @@ def render_executable_block(
     similarity = _percent(2 * total_equal, total_bytes) if total_bytes else 100.0
     nonzero_similarity = _percent(2 * total_nonzero_equal, total_nonzero) if total_nonzero else 100.0
     overall = (
-        f"**Overall ({len(images)}/{len(IMAGE_LAYOUTS)} images): {similarity:.2f}% "
+        f"**Overall ({len(images)}/{len(linked)} images): {similarity:.2f}% "
         f"island-aligned byte similarity &middot; "
         f"{nonzero_similarity:.2f}% nonzero-byte similarity.**"
         if images else "**No current EXE comparison reports are available.**")

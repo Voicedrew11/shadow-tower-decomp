@@ -159,6 +159,7 @@ def audit(
     outgoing: dict[str, list[int]] = {}
     destinations: dict[int, list[str]] = {}
     issues: dict[tuple, dict] = {}
+    vendored_indirect: set[int] = set()
     queue: deque[str] = deque()
 
     def issue(code: str, key: str, ref: int | None = None, **detail) -> None:
@@ -221,6 +222,12 @@ def audit(
                     issue("invalid-live-reference", key, number)
                 continue
             if reference.target is None:
+                if isinstance(node, Binding) and node.vendored:
+                    # An SDK member's own dispatch (BIOS `jr $t2` stubs,
+                    # constructor-table loops) is placed and relocated by
+                    # that archive member, not by game-owned data.
+                    vendored_indirect.add(number)
+                    continue
                 issue("unresolved-indirect-control", key, number)
                 continue
             path_rank = min(rank, TIER_RANK[reference.tier])
@@ -329,6 +336,7 @@ def audit(
             "config_matched_data_ranges": sum(r.get("comparison") == "config-provider-matched"
                                               for r in range_rows),
             "reference_occurrences": len(reference_rows),
+            "vendored_indirect_control": len(vendored_indirect),
             "issues": dict(sorted(Counter(r["code"] for r in issue_rows).items())),
         },
         "ranges": range_rows, "references": reference_rows, "issues": issue_rows,
