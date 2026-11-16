@@ -230,7 +230,13 @@ extern Viewer viewer;
 
 /* What area_state.unkC points at: a function table (WIP extent). */
 typedef struct {
-    u8 unk00[0x40];
+    void (*unk0)();      /* 0x00: called by func_80055374 with (position, facing) */
+    void (*unk4)(void);  /* 0x04: per frame (func_8005735c) */
+    u8 unk08[0x18 - 0x08];
+    void (*unk18)(void); /* 0x18: an item count rose (func_80055300) */
+    u8 unk1C[0x30 - 0x1c];
+    void (*unk30)();     /* 0x30: item use hook */
+    u8 unk34[0x40 - 0x34];
     void (*unk40)(void); /* 0x40 */
 } AreaProcs;
 
@@ -282,7 +288,9 @@ typedef struct {
 /* The counts of the 314 table C ids, then a halfword id table. */
 typedef struct {
     Count801c7590 counts[314];
-    u16 unk13A[23];      /* 0x13a: ids the item list screens show */
+    u16 unk13A[14];      /* 0x13a: ids the item list screens show */
+    u8 unk156[14];       /* 0x156: their stock (src/st/save.c) */
+    u8 unk164[4];
 } Data801c7590;
 extern Data801c7590 DAT_801c7590;
 

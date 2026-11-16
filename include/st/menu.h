@@ -172,8 +172,12 @@ typedef struct {
     u8 unk1478[48];
     u32 unk14A8[0x5c];   /* 0x14a8: one bit per map id (func_800241d0) */
     CdlLOC unk1618[40];  /* 0x1618: the XA stream positions func_80044674 searches */
-    u8 unk16B8[0x16e4 - 0x16b8];
-    u8 unk16E4[44];      /* by area */
+    u8 unk16B8[0x16d8 - 0x16b8];
+    s32 unk16D8;         /* 0x16d8: item use result (src/st/item.c) */
+    u8 unk16DC;
+    u8 unk16DD[3];
+    s32 unk16E0;         /* 0x16e0: save id, -1 until the first save (src/st/save.c) */
+    u8 unk16E4[48];      /* by area */
 } Data801cba08;
 extern Data801cba08 DAT_801cba08;
 

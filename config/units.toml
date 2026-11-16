@@ -446,6 +446,24 @@ source = "src/st/xa_play.c"
 profile = "probe-gcc272cdk-o2-g8"
 
 [[unit]]
+unit = "st.save_counts"
+image = "ST.EXE"
+source = "src/st/save_counts.c"
+profile = "probe-gcc272cdk-o2-g0"
+
+[[unit]]
+unit = "st.save"
+image = "ST.EXE"
+source = "src/st/save.c"
+profile = "probe-gcc272cdk-o2-g0"
+
+[[unit]]
+unit = "st.save_io"
+image = "ST.EXE"
+source = "src/st/save_io.c"
+profile = "probe-gcc272cdk-o2-g0"
+
+[[unit]]
 unit = "st.pad"
 image = "ST.EXE"
 source = "src/st/pad.c"

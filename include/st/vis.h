@@ -267,14 +267,16 @@ typedef struct {
     u8 unk07;
     u16 unk08;
     u16 unk0a;           /* 0x0a: index of its 24-byte VisTableB record */
-    u8 unk0c[4];
+    u16 unk0C;           /* 0x0c: 0xff once opened (src/st/save.c) */
+    u16 unk0E;
     u16 unk10;           /* 0x10 */
     u8 unk12[2];
     s16 unk14;           /* 0x14: OT depth bias */
     s16 unk16;           /* 0x16 */
     u32 unk18;           /* 0x18: squared distance */
     s32 unk1C;           /* 0x1c: distance (sound type 236) */
-    u8 unk20[4];
+    u16 unk20;
+    s16 unk22;
     VECTOR unk24;        /* 0x24: position */
     u16 unk34;           /* 0x34: rotation */
     u16 unk36;
@@ -284,11 +286,23 @@ typedef struct {
     u8 unk44[4];         /* 0x44 */
     u8 unk48;            /* 0x48: sound area width (2048 units) */
     u8 unk49;            /* 0x49: sound area depth */
-    u8 unk4A;            /* 0x4a: sound id */
-    u8 unk4B;            /* 0x4b: volume */
-    u8 unk4C;            /* 0x4c: fade range */
-    u8 unk4D;            /* 0x4d: sound flags */
-    u16 unk4E;           /* 0x4e: repeat period */
+    /* 0x4a: by kind: a sound source's sound (src/st/objects.c) or the record
+     * swap and open state of a door (src/st/save.c) */
+    union {
+        struct {
+            u8 unk4A;    /* 0x4a: sound id */
+            u8 unk4B;    /* 0x4b: volume */
+            u8 unk4C;    /* 0x4c: fade range */
+            u8 unk4D;    /* 0x4d: sound flags */
+            u16 unk4E;   /* 0x4e: repeat period */
+        } snd;
+        struct {
+            u16 unk4A;   /* 0x4a: first record of one swap range */
+            u16 unk4C;   /* 0x4c: first record of the other */
+            u8 unk4E;    /* 0x4e: records to swap */
+            u8 unk4F;    /* 0x4f: state, 0xff idle */
+        } door;
+    } unk4A;
     s32 unk50;           /* 0x50: next tick to play */
     s16 unk54;           /* 0x54: playing voice, -1 none */
     u8 unk56[2];

@@ -1,0 +1,100 @@
+/*
+ * ST.EXE progress state: new-game defaults, the per-area snapshots of the
+ * entry tables and the save-data image (src/st/save.c). Field names stay
+ * address-derived.
+ */
+#ifndef ST_SAVE_H
+#define ST_SAVE_H
+
+#include <kf/lib/types.h>
+#include <sys/types.h>
+#include <LIBGTE.H>
+
+/* One table C slot (entries[32..63]) as saved. */
+typedef struct {
+    u16 unk00;
+    u16 unk02;
+    s32 unk04[3];        /* 0x04: position */
+    u16 unk10[3];        /* 0x10: rotation */
+    u8 unk16;
+    u8 unk17;
+} StSaveSlot;
+
+/* Five bytes copied as one block (area_state.unk4..unk8). */
+typedef struct {
+    u8 unk[5];
+} StBytes5;
+
+/* area_state as the save code addresses it: bytes 4..8 as one block. */
+typedef struct {
+    u8 unk0[4];
+    StBytes5 unk4;
+} StAreaBytes;
+
+/* Fourteen bytes copied as one halfword-aligned block. */
+typedef struct {
+    u16 unk[7];
+} StHalves7;
+
+/* The save-data image func_800562d4 fills and func_80056aa0 reads. */
+typedef struct {
+    u32 unk0;            /* 0x0000: DAT_801cba08.unk16E0 */
+    u8 unk4[5];          /* 0x0004: area_state.unk4..unk8 */
+    u8 unk9[3];
+    u32 unkC[0x60];      /* 0x000c: DAT_801cba08.unk0 */
+    u32 unk18C[0x30];
+    u32 unk24C[0x180];
+    u32 unk84C[0x180];
+    u32 unkE4C[0x180];
+    u32 unk144C[2];
+    u32 unk1454[12];
+    u32 unk1484[12];
+    u32 unk14B4[5];
+    u8 unk14C8[4];       /* 0x14c8: vis_table_c.unk0000[2..5] */
+    u32 unk14CC[9];      /* 0x14cc: vis_table_c.unk0070 */
+    StSaveSlot unk14F0[32]; /* 0x14f0: table C entries 32..63 */
+    u32 unk17F0;         /* 0x17f0: viewer fields */
+    s32 unk17F4;
+    u16 unk17F8;
+    u16 unk17FA;
+    u16 unk17FC;
+    u16 unk17FE;
+    u8 unk1800;
+    u8 unk1801;
+    u8 unk1802;
+    u8 unk1803;
+    s16 unk1804[14];
+    s16 unk1820[14];
+    u16 unk183C[14];
+    VECTOR unk1858;      /* 0x1858: viewer position */
+    SVECTOR unk1868;     /* 0x1868: viewer rotation (viewer.unk278) */
+    u32 unk1870[3];
+    s16 unk187C[13][2];
+    u8 unk18B0[3];
+    u8 unk18B3;
+    u8 unk18B4[6];       /* 0x18b4: settings (DAT_801cd120) */
+    u8 unk18BA[2];
+    u32 unk18BC[5];
+    u32 unk18D0[0x4f];
+    u32 unk1A0C[0x4f];   /* 0x1a0c: DAT_801c7590 */
+    u32 unk1B48[10];
+    u16 unk1B70[21];
+    u8 unk1B9A[2];
+    u32 unk1B9C[3];
+    u8 unk1BA8[314];     /* 0x1ba8: each Vis44's unk28 */
+    u8 unk1CE2[2];
+    u32 unk1CE4[24];     /* 0x1ce4: lighting.area_mode */
+    u16 unk1D44[14];
+    u8 unk1D60[14];
+    u16 unk1D6E[12];     /* 0x1d6e: the button masks (DAT_801cd180.unk22) */
+} StSaveData;
+
+void func_80055990(void);
+void func_800559bc(void);
+void func_80055cf4(int area);
+void func_80055f9c(int area);
+void func_800562d4(StSaveData *save, int fresh);
+void func_80056aa0(StSaveData *save);
+void func_8005735c(void);
+
+#endif
