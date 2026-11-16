@@ -130,8 +130,8 @@ u8 tag;
     if (func_80015ec8(archive, index + 2) == 0)
         return;
     bank = index / 5;
-    self = &DAT_801dd1e8[8 + bank];
-    p = &DAT_801dd1e8[8 + bank % 4];
+    self = &DAT_801dd1c0.slots[8 + bank];
+    p = &DAT_801dd1c0.slots[8 + bank % 4];
     for (i = 4; i--; p += 4) {
         if (p == self)
             continue;

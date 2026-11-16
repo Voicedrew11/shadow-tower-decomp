@@ -53,7 +53,7 @@ void func_800455f4(StCdRequest *request)
         request->unk10 = 1;
     } else if (request->unk10 == 2) {
         area_state.unk2 = 6;
-        DAT_801dd1cc[0] = 0;
+        DAT_801dd1c0.unkC = 0;
         area_state.unk26 = DAT_801cd120.unk0;
     }
 }

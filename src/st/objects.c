@@ -30,11 +30,6 @@ SDATA(0x80087f04, 0x8)
 /* Table A model slots start at 128 (table B: 256, table C: 588). */
 #define SLOT_A 128
 
-/*
- * Not exact: retail addresses the key-status bytes from a base 0xa38 below
- * DAT_801ddbf8 (a structure that also holds DAT_801dd1e8), which this source
- * cannot spell without an overlapping identity.
- */
 ADDRESS(0x800241d0, 0x514)
 void func_800241d0(void)
 {
@@ -115,8 +110,8 @@ void func_800241d0(void)
             e->unk04 = 2;
         }
         if (e->unk22 != -1) {
-            SpuGetAllKeysStatus(DAT_801ddbf8);
-            if (DAT_801ddbf8[e->unk22] == 0)
+            SpuGetAllKeysStatus(DAT_801dd1c0.keys);
+            if (DAT_801dd1c0.keys[e->unk22] == 0)
                 e->unk22 = -1;
         }
         sp->unkF8[e->unk0B] = 1;

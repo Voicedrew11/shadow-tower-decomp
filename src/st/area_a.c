@@ -218,7 +218,7 @@ void func_80044674(void)
     p = (u32 *)((u8 *)p + (*p + 4));
     func_80014cfc((u32 *)DAT_8007f78c, p + 1, *p >> 2);
     p = (u32 *)((u8 *)p + (*p + 4));
-    func_80014cfc((u32 *)DAT_801ddc44, p + 1, *p >> 2);
+    func_80014cfc((u32 *)DAT_801dd1c0.sounds, p + 1, *p >> 2);
     p = (u32 *)((u8 *)p + (*p + 4));
     func_80014cfc((u32 *)&menu_messages, p + 1, *p >> 2);
     p = (u32 *)((u8 *)p + (*p + 4));

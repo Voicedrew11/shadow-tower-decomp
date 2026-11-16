@@ -12,8 +12,6 @@
 #include <LIBGTE.H>
 
 /* func_800255f0 also draws the effects (effects.slots, st/effect.h). */
-/* The SpuGetAllKeysStatus buffer. */
-extern char DAT_801ddbf8[24];
 
 /* src/st/objects.c */
 void func_800241d0(void);
