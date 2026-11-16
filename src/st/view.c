@@ -5,20 +5,22 @@
 #include <kf/lib/types.h>
 #include <sys/types.h>
 #include <LIBGTE.H>
-#include <st/state.h>
+#include <st/data.h>
+#include <st/gfx.h>
+#include <st/scratch.h>
 
 
 /*
  * Returns nonzero when the scratchpad position lies inside the wedge in
- * front of DAT_80198f28's position (opening with its pitch, facing its yaw)
+ * front of the viewer's position (opening with its pitch, facing its yaw)
  * and closer than 12 units (of 2048).
  */
 ADDRESS(0x80016554, 0x324)
 int func_80016554(void)
 {
     ScratchPad *sp = SCRATCHPAD;
-    int pitch = DAT_80198f28.unk268;
-    int yaw = DAT_80198f28.unk26A + 1024;
+    int pitch = viewer.unk268;
+    int yaw = viewer.unk26A + 1024;
     int half;
     int cos0, sin0, cos1, sin1, cos2, sin2, cosp;
     int back, side, front;
@@ -56,13 +58,13 @@ int func_80016554(void)
     a2 = z2 - z0;
     b2 = x2 - x0;
     c2 = -a2 * x0 + b2 * z0;
-    px = (sp->unkE0 - DAT_80198f28.unk248) / 2048 + cx;
-    pz = (sp->unkE8 - DAT_80198f28.unk250) / 2048 + cz;
+    px = (sp->unkE0 - viewer.x) / 2048 + cx;
+    pz = (sp->unkE8 - viewer.z) / 2048 + cz;
     e1 = a1 * px - b1 * pz + c1;
     e2 = a2 * px - b2 * pz + c2;
     if (e1 > 0 || e2 < 0)
         return 0;
     rsin(pitch);
-    py = (sp->unkE4 - DAT_80198f28.unk24C) / 2048;
+    py = (sp->unkE4 - viewer.y) / 2048;
     return (px - cx) * (px - cx) + (pz - cz) * (pz - cz) + py * py < 145;
 }

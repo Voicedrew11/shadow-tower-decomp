@@ -9,7 +9,7 @@
 #include <sys/types.h>
 #include <LIBGTE.H>
 #include <LIBGPU.H>
-#include <st/mesh.h>
+#include <st/gfx.h>
 #include <st/vis.h>
 
 /*
@@ -20,7 +20,7 @@
 ADDRESS(0x8001c4c8, 0x144)
 int vis_measure_position(void)
 {
-    VisScratch *sp = VIS_SCRATCH;
+    ScratchPad *sp = SCRATCHPAD;
     Viewer *cam = &viewer;
     int x;
     int z;
@@ -39,7 +39,7 @@ int vis_measure_position(void)
             return 256;
         }
     }
-    sp->unk1ec = -(sp->unk208 * 8) >> 12;
+    sp->unk1EC = -(sp->unk208 * 8) >> 12;
     y = (sp->y - cam->y) / 2048;
     return (x - ox) * (x - ox) + (z - oz) * (z - oz) + y * y;
 }
@@ -52,7 +52,7 @@ int vis_measure_position(void)
 ADDRESS(0x8001c60c, 0x1f4)
 void vis_cull_by_range(void)
 {
-    VisScratch *sp = VIS_SCRATCH;
+    ScratchPad *sp = SCRATCHPAD;
     VisRecord *rec;
     int range_near;
     int range_mid;
@@ -61,17 +61,17 @@ void vis_cull_by_range(void)
     int i;
     int k;
 
-    range_near = (world_state.unk1ee00 >> 11) * (world_state.unk1ee00 >> 11);
-    range_mid = (world_state.unk1ee04 >> 11) * (world_state.unk1ee04 >> 11);
+    range_near = (world_state.unk1EE00 >> 11) * (world_state.unk1EE00 >> 11);
+    range_mid = (world_state.unk1EE04 >> 11) * (world_state.unk1EE04 >> 11);
     i = vis_lists.n_visible;
-    range_far = *(short *)(world_state.unk1ee08 + 0x6a) / 2048 + 2;
+    range_far = world_state.light->unk6A / 2048 + 2;
     range_far = range_far * range_far;
     while (i--) {
         rec = &vis_records[vis_lists.visible[i]];
         sp->x = rec->unk08 << 12;
         sp->y = (rec->unk09 << 12) + ((rec->unk0b - 128) << 7);
         sp->z = rec->unk0a << 12;
-        sp->no_plane_test = world_state.unk1ee15;
+        sp->no_plane_test = world_state.unk1EE15;
         rec->unk04 &= 1;
         d = vis_measure_position();
         if (d > range_far) {

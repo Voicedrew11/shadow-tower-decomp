@@ -12,9 +12,8 @@
 #include <LIBGPU.H>
 #include <LIBETC.H>
 #include <LIBCD.H>
-#include <st/state.h>
 #include <st/data.h>
-#include <st/cdreq.h>
+#include <st/cd.h>
 #include <st/funcs.h>
 
 /* unk1 of the current request: the step its read is at. */
@@ -36,19 +35,19 @@ void func_8001531c(void)
 ADDRESS(0x8001535c, 0x58)
 void func_8001535c(void)
 {
-    while (DAT_80088200.unkC == 0)
+    while (cd_state.unkC == 0)
         VSync(0);
-    DAT_80088200.unkC = 0;
+    cd_state.unkC = 0;
 }
 
 ADDRESS(0x800153b4, 0x78)
 void func_800153b4(void)
 {
-    DAT_80088200.unk4++;
-    DAT_80088200.unkC++;
-    if (++DAT_80198f28.unk33 == 60) {
-        DAT_80198f28.unk33 = 0;
-        DAT_80198f28.unk34++;
+    cd_state.unk4++;
+    cd_state.unkC++;
+    if (++viewer.unk33 == 60) {
+        viewer.unk33 = 0;
+        viewer.unk34++;
     }
     func_80057744();
 }
@@ -56,7 +55,7 @@ void func_800153b4(void)
 ADDRESS(0x8001542c, 0xbc)
 void func_8001542c(u_char status, u_char *result)
 {
-    StCdRequest *request = DAT_80088200.unk9D8;
+    StCdRequest *request = cd_state.unk9D8;
     u_char param[8]; /* unused */
 
     if (status == CdlComplete) {
@@ -90,7 +89,7 @@ void func_8001542c(u_char status, u_char *result)
 ADDRESS(0x800154e8, 0x134)
 void func_800154e8(u_char status, u_char *result)
 {
-    StCdRequest *request = DAT_80088200.unk9D8;
+    StCdRequest *request = cd_state.unk9D8;
     u_char param[8]; /* unused */
     u_long rest[70];
 
@@ -135,7 +134,7 @@ void func_800154e8(u_char status, u_char *result)
 ADDRESS(0x8001561c, 0x22c)
 void func_8001561c(u_char status, u_char *result)
 {
-    StCdRequest *request = DAT_80088200.unk9D8;
+    StCdRequest *request = cd_state.unk9D8;
 
     if (status == CdlComplete) {
         switch (request->unk0) {
@@ -163,7 +162,7 @@ void func_8001561c(u_char status, u_char *result)
                         request->unk1 = STEP_SEEK;
                         while (CdControl(CdlSeekL, (u_char *)&request->unk18, 0) == 0)
                             ;
-                    } else if (func_80015b78(request->unk20, request->unk28) != 0) {
+                    } else if (func_80015b78((u32 *)request->unk20, request->unk28) != 0) {
                         request->unk1 = STEP_SEEK;
                         while (CdControl(CdlSeekL, (u_char *)&request->unk18, 0) == 0)
                             ;
@@ -204,9 +203,9 @@ void func_80015848(StCdRequest *request)
 {
     request->unk0 = 0;
     request->unk1 = STEP_SEEK;
-    if (++request == &DAT_80088200.unk14[ST_CD_REQUESTS])
+    if (++request == &cd_state.unk14[ST_CD_REQUESTS])
         request -= ST_CD_REQUESTS;
-    DAT_80088200.unk9D8 = request;
+    cd_state.unk9D8 = request;
     if (request->unk0 != 0) {
         CdReadyCallback(0);
         CdSyncCallback(func_8001561c);

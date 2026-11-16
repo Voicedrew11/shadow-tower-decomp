@@ -9,7 +9,7 @@
 #include <kf/lib/types.h>
 #include <sys/types.h>
 #include <st/memory.h>
-#include <st/cdreq.h>
+#include <st/cd.h>
 #include <st/funcs.h>
 
 /* Returns the end of the source. */
@@ -34,7 +34,7 @@ u16 *func_80014d2c(u16 *dst, u16 *src, int count)
 }
 
 ADDRESS(0x80014d5c, 0x24)
-u32 *func_80014d5c(u32 *dst, u32 value, int count)
+u32 *fill_words(u32 *dst, u32 value, int count)
 {
     int left;
 

@@ -33,7 +33,7 @@ enum {
 
 u32 *func_80014cfc(u32 *dst, u32 *src, int count);
 u16 *func_80014d2c(u16 *dst, u16 *src, int count);
-u32 *func_80014d5c(u32 *dst, u32 value, int count);
+u32 *fill_words(u32 *dst, u32 value, int count);
 u16 *func_80014d80(u16 *dst, u16 value, int count);
 void func_80014da4(StBlock *block);
 void func_80014e20(StBlock *block);

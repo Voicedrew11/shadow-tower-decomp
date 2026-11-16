@@ -8,9 +8,12 @@
 #include <LIBGTE.H>
 #include <LIBGPU.H>
 #include <INLINE_C.H>
-#include <st/state.h>
+#include <st/gfx.h>
+#include <st/mesh.h>
+#include <st/scratch.h>
 
-/* One 40-byte model part: its primitive offset and per-kind counts. */
+/* One 40-byte model part: its primitive offset and per-kind counts (the
+ * records st/mesh.h's MeshHeader views from 12 bytes earlier). */
 typedef struct {
     u32 unk0;
     u32 offset;
@@ -117,20 +120,20 @@ void func_800177a0(Model *model, DVECTOR *uv, DVECTOR *clut, u8 count)
 ADDRESS(0x80017c5c, 0x30)
 void func_80017c5c(u16 index, void *p)
 {
-    DAT_8015d090.unk8308[index] = p;
-    DAT_8015d090.unk8318 = p;
+    world_state.unk8308[index] = p;
+    world_state.unk8318 = p;
 }
 
 ADDRESS(0x80017c8c, 0x24)
 void func_80017c8c(u16 index, void *p)
 {
-    DAT_8015d090.unk8308[index] = p;
+    world_state.unk8308[index] = p;
 }
 
 ADDRESS(0x80017cb0, 0x14)
 u_char *func_80017cb0(u16 offset)
 {
-    return SCRATCHPAD->unk40 + offset;
+    return SCRATCHPAD->vertices + offset;
 }
 
 /* Loads three screen points from the scratchpad buffer and stores NCLIP. */
@@ -138,14 +141,14 @@ ADDRESS(0x80017cc4, 0x64)
 void func_80017cc4(u16 i0, u16 i1, u16 i2)
 {
     ScratchPad *sp = SCRATCHPAD;
-    u_char *base = sp->unk40;
+    u_char *base = sp->vertices;
 
     sp->unk2C = (u_long *)(base + i0);
     sp->unk30 = (u_long *)(base + i1);
     sp->unk34 = (u_long *)(base + i2);
     gte_ldsxy3(*sp->unk2C, *sp->unk30, *sp->unk34);
     gte_nclip();
-    gte_stopz(&SCRATCHPAD->unk70);
+    gte_stopz(&SCRATCHPAD->opz);
 }
 
 /*
@@ -159,7 +162,7 @@ ADDRESS(0x80017d28, 0x718)
 void func_80017d28(u32 t, int flags)
 {
     ScratchPad *sp = SCRATCHPAD;
-    StLight *cur = DAT_8015d090.unk1EE08;
+    StLight *cur = world_state.light;
     StLight *to;
     short m[3][3];
     CVECTOR back1, back2, back3;
@@ -234,7 +237,7 @@ void func_80017d28(u32 t, int flags)
 }
 
 ADDRESS(0x80018440, 0x40)
-void func_80018440(CVECTOR *c)
+void mesh_ft3_tint_a(CVECTOR *c)
 {
     if (c->b > 85)
         c->b = 85;
@@ -243,7 +246,7 @@ void func_80018440(CVECTOR *c)
 }
 
 ADDRESS(0x80018480, 0x44)
-void func_80018480(CVECTOR *c)
+void mesh_ft3_tint_b(CVECTOR *c)
 {
     if (c->r > 85)
         c->r = 85;

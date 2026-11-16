@@ -235,7 +235,7 @@ ST.EXE	0x8007ee90	0x6e690	0x4	unclassified	coverage-gap			payload-complement	may
 ST.EXE	0x8007eea0	0x6e6a0	0x4	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 ST.EXE	0x8007f318	0x6eb18	0xc	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 ST.EXE	0x8007f3e4	0x6ebe4	0x941c	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
-ST.EXE	0x8015d090	0x14c890	0x1ee18	bss	proven	world_state	u8[]	asm;src/st/mesh_draw.c st.mesh_draw	WIP extent covers the offsets read so far (up to +0x1ee15); the mesh renderers read a render-mode byte at +0x1edfc
+ST.EXE	0x8015d090	0x14c890	0x1ee18	bss	proven	world_state	WorldState	asm;src/st/mesh_draw.c st.mesh_draw	WIP extent covers the offsets read so far (up to +0x1ee15); the mesh renderers read a render-mode byte at +0x1edfc
 ST.EXE	0x8017bed0	0x16b6d0	0xc	bss	proven	vis_records	VisRecord[]	asm;src/st/vis_lists.c st.vis_lists	12-byte records indexed by visible id; WIP extent is one record (count unknown)
 ST.EXE	0x8017d6d0	0x16ced0	0x40	bss	proven	vis_source_masks	VisSourceMask[]	asm;src/st/vis_build.c st.vis_build	64-byte (512-bit) masks indexed by source id; WIP extent is one record (count unknown)
 ST.EXE	0x80198f28	0x188728	0x26c	bss	proven	viewer	Viewer	asm;src/st/vis_cull.c st.vis_cull	viewer block: position words at +0x248..+0x250, halfwords at +0x268/+0x26a; WIP extent

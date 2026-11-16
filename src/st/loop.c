@@ -17,6 +17,8 @@
 #include <st/data.h>
 #include <st/main.h>
 #include <st/funcs.h>
+#include <st/cd.h>
+#include <st/gfx.h>
 
 /* PSX.EXE program table indices. */
 #define PROGRAM_TITLE 1
@@ -96,7 +98,7 @@ void func_80014a30(void)
         func_8004e324();
         func_80053aa4();
         func_8003bc40();
-        DAT_80198f28.unk21C = 0;
+        viewer.unk21C = 0;
         func_8005735c();
         func_800456f8();
         func_8003e734(&a, &b);

@@ -9,20 +9,19 @@
 #include <LIBGTE.H>
 #include <LIBGPU.H>
 #include <psyq/libc.h>
-#include <st/state.h>
+#include <st/data.h>
+#include <st/gfx.h>
 
 #define TEXANIM_FREE 255
 /* Slot area that is active everywhere. */
 #define TEXANIM_ANY_AREA 255
-
-typedef StTexAnim TexAnim;
 
 RODATA(0x800113b0, 0xc4)
 
 ADDRESS(0x80016878, 0x2c)
 void func_80016878(void)
 {
-    TexAnim *slot = DAT_8015d090.texanim;
+    StTexAnim *slot = world_state.texanim;
     int i = ST_TEXANIM_SLOTS;
 
     while (i--) {
@@ -32,9 +31,9 @@ void func_80016878(void)
 }
 
 ADDRESS(0x800168a4, 0x3c)
-TexAnim *func_800168a4(void)
+StTexAnim *func_800168a4(void)
 {
-    TexAnim *slot = DAT_8015d090.texanim;
+    StTexAnim *slot = world_state.texanim;
     int i;
 
     for (i = ST_TEXANIM_SLOTS; i != 0; i--, slot++) {
@@ -54,7 +53,7 @@ found:
 ADDRESS(0x800168e0, 0x134)
 void func_800168e0(RECT *rect, int period, int step, int type, short area)
 {
-    TexAnim *slot = func_800168a4();
+    StTexAnim *slot = func_800168a4();
     RECT unused;
 
     if (slot == 0)
@@ -85,15 +84,15 @@ void func_800168e0(RECT *rect, int period, int step, int type, short area)
 ADDRESS(0x80016a14, 0x5a4)
 void func_80016a14(void)
 {
-    TexAnim *slot;
+    StTexAnim *slot;
     RECT r;
     int i;
     int x, y, offset;
     short pos, n;
     u16 first;
 
-    for (slot = DAT_8015d090.texanim, i = ST_TEXANIM_SLOTS; i--; slot++) {
-        if (slot->area != DAT_801b5929 && slot->area != TEXANIM_ANY_AREA)
+    for (slot = world_state.texanim, i = ST_TEXANIM_SLOTS; i--; slot++) {
+        if (slot->area != area_state.area && slot->area != TEXANIM_ANY_AREA)
             continue;
         if (slot->countdown == 0) {
             r = slot->src;

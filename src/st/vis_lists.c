@@ -99,7 +99,7 @@ void vis_collect_table_c(void)
     vis_table_c.count = 0;
     i = 64;
     while (i--) {
-        if (e->unk00 != 0xffff && e->unk2c == area_state.unk09 && vis_id_is_visible(e->unk02)) {
+        if (e->unk00 != 0xffff && e->unk2c == area_state.area && vis_id_is_visible(e->unk02)) {
             vis_table_c.list[vis_table_c.count] = 63 - i;
             vis_table_c.count++;
         }

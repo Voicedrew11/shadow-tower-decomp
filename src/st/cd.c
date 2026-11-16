@@ -7,12 +7,15 @@
 #include <kf/lib/address.h>
 #include <kf/lib/types.h>
 #include <sys/types.h>
-#include <LIBAPI.H>
+#include <psyq/kernel.h>
 #include <LIBETC.H>
 #include <LIBCD.H>
 #include <psyq/libc.h>
-#include <st/state.h>
-#include <st/game.h>
+#include <st/memory.h>
+#include <st/cd.h>
+#include <st/gfx.h>
+#include <st/scratch.h>
+#include <st/funcs.h>
 
 /* CD request kinds queued by func_80015bcc. */
 #define CD_REQUEST_READ 2
@@ -38,9 +41,9 @@ int func_80015b78(u32 *data, int sectors)
 }
 
 ADDRESS(0x80015bcc, 0x104)
-StCdRequest *func_80015bcc(int kind, CdlLOC *loc, u32 size, int dest, int arg4)
+StCdRequest *func_80015bcc(int kind, CdlLOC *loc, u32 size, u8 *dest, void (*done)())
 {
-    StCdRequest *req = DAT_80088200.unk9D4;
+    StCdRequest *req = cd_state.unk9D4;
 
     func_80015b2c(req);
     req->unk0 = kind;
@@ -48,10 +51,10 @@ StCdRequest *func_80015bcc(int kind, CdlLOC *loc, u32 size, int dest, int arg4)
     req->unk18 = *loc;
     req->unk20 = dest;
     req->unk28 = (size + 2047) >> 11;
-    req->unk2C = arg4;
-    if (++DAT_80088200.unk9D4 == &DAT_80088200.unk14[ST_CD_REQUESTS])
-        DAT_80088200.unk9D4 = DAT_80088200.unk14;
-    if (DAT_80088200.unk9D8 == req) {
+    req->unk2C = done;
+    if (++cd_state.unk9D4 == &cd_state.unk14[ST_CD_REQUESTS])
+        cd_state.unk9D4 = cd_state.unk14;
+    if (cd_state.unk9D8 == req) {
         CdReadyCallback(0);
         CdSyncCallback(func_8001561c);
         while (!CdControl(CdlSeekL, (u_char *)loc, 0))
@@ -63,7 +66,7 @@ StCdRequest *func_80015bcc(int kind, CdlLOC *loc, u32 size, int dest, int arg4)
 ADDRESS(0x80015cd0, 0x84)
 int func_80015cd0(int archive, int member, CdlLOC *loc)
 {
-    StArchive *a = &DAT_80088200.archives[archive];
+    StArchive *a = &cd_state.archives[archive];
     u16 start = a->sectors[member];
 
     if (loc)
@@ -72,23 +75,23 @@ int func_80015cd0(int archive, int member, CdlLOC *loc)
 }
 
 ADDRESS(0x80015d54, 0x54)
-void func_80015d54(int archive, int member, int dest, int arg3)
+void func_80015d54(int archive, int member, u8 *dest, void (*done)())
 {
     CdlLOC loc;
     int size = func_80015cd0(archive, member, &loc);
 
     if (size)
-        func_80015bcc(CD_REQUEST_READ, &loc, size, dest, arg3);
+        func_80015bcc(CD_REQUEST_READ, &loc, size, dest, done);
 }
 
 ADDRESS(0x80015da8, 0x54)
-void func_80015da8(int archive, int member, int dest, int arg3)
+void func_80015da8(int archive, int member, u8 *dest, void (*done)())
 {
     CdlLOC loc;
     int size = func_80015cd0(archive, member, &loc);
 
     if (size)
-        func_80015bcc(CD_REQUEST_READ_4, &loc, size, dest, arg3);
+        func_80015bcc(CD_REQUEST_READ_4, &loc, size, dest, done);
 }
 
 /*
@@ -97,9 +100,9 @@ void func_80015da8(int archive, int member, int dest, int arg3)
  * delay slot).
  */
 ADDRESS(0x80015dfc, 0xcc)
-void func_80015dfc(int archive, int member, int dest, int arg3)
+void func_80015dfc(int archive, int member, u8 *dest, void (*done)())
 {
-    StCdRequest *req = DAT_80088200.unk9D4;
+    StCdRequest *req = cd_state.unk9D4;
     CdlLOC loc;
     u32 size;
 
@@ -110,10 +113,10 @@ void func_80015dfc(int archive, int member, int dest, int arg3)
     req->unkC = req->unkE = size >> 11;
     if (req->unkE > 16) {
         req->unkE -= 16;
-        func_80015bcc(CD_REQUEST_STREAM, &loc, 0x8000, dest, arg3);
+        func_80015bcc(CD_REQUEST_STREAM, &loc, 0x8000, dest, done);
     } else {
         req->unkE = 0;
-        func_80015bcc(CD_REQUEST_STREAM, &loc, size, dest, arg3);
+        func_80015bcc(CD_REQUEST_STREAM, &loc, size, dest, done);
     }
 }
 
@@ -121,7 +124,7 @@ void func_80015dfc(int archive, int member, int dest, int arg3)
 ADDRESS(0x80015ec8, 0x44)
 int func_80015ec8(u16 archive, u16 member)
 {
-    StArchive *a = &DAT_80088200.archives[archive];
+    StArchive *a = &cd_state.archives[archive];
 
     return (a->sectors[member + 1] - a->sectors[member]) << 11;
 }
@@ -162,7 +165,7 @@ void func_80015ff4(u_long *buf, StFileExtent *file, u32 size)
 ADDRESS(0x80016030, 0x98)
 int func_80016030(u16 archive, u16 member, u_long *buf)
 {
-    StArchive *a = &DAT_80088200.archives[archive];
+    StArchive *a = &cd_state.archives[archive];
     CdlLOC loc;
     int sectors = a->sectors[member + 1] - a->sectors[member];
 
@@ -194,7 +197,7 @@ void *func_800160c8(char *name)
 }
 
 ADDRESS(0x8001618c, 0xc0)
-int func_8001618c(u_long *buf, char *name, u32 size)
+int func_8001618c(void *buf, char *name, u32 size)
 {
     char path[64];
     CdlFILE file;
@@ -236,7 +239,7 @@ void func_80016294(u16 archive, char *name)
     } header;
     CdlFILE file;
     char path[64];
-    StArchive *a = &DAT_80088200.archives[archive];
+    StArchive *a = &cd_state.archives[archive];
 
     strcpy(path, "\\ST\\");
     strcat(path, name);
@@ -257,20 +260,20 @@ void func_80016374(void)
     StCdRequest *req;
 
     EnterCriticalSection();
-    DAT_80088200.unk0 = OpenEvent(RCntCNT3, EvSpINT, EvMdINTR, func_800153b4);
-    EnableEvent(DAT_80088200.unk0);
+    cd_state.unk0 = OpenEvent(RCntCNT3, EvSpINT, EvMdINTR, func_800153b4);
+    EnableEvent(cd_state.unk0);
     SetRCnt(RCntCNT3, TICK_TARGET, RCntMdINTR);
     StartRCnt(RCntCNT3);
-    DAT_80088200.unk10 = 0;
-    DAT_80088200.unkC = 0;
-    DAT_80088200.unk8 = 0;
-    DAT_80088200.unk4 = 0;
-    req = DAT_80088200.unk14;
+    cd_state.unk10 = 0;
+    cd_state.unkC = 0;
+    cd_state.unk8 = 0;
+    cd_state.unk4 = 0;
+    req = cd_state.unk14;
     for (i = 0; i < ST_CD_REQUESTS; i++, req++) {
         req->unk0 = 0;
         req->unk1 = 0;
     }
-    DAT_80088200.unk9D8 = DAT_80088200.unk9D4 = DAT_80088200.unk14;
+    cd_state.unk9D8 = cd_state.unk9D4 = cd_state.unk14;
     CdSyncCallback(0);
     CdReadyCallback(0);
     CdReadCallback(0);
@@ -282,34 +285,34 @@ ADDRESS(0x80016454, 0x60)
 void func_80016454(void)
 {
     EnterCriticalSection();
-    CloseEvent(DAT_80088200.unk0);
+    CloseEvent(cd_state.unk0);
     ExitCriticalSection();
-    func_800152f8(DAT_80088200.archives[2].sectors);
-    func_800152f8(DAT_80088200.archives[1].sectors);
-    func_800152f8(DAT_80088200.archives[0].sectors);
+    func_800152f8(cd_state.archives[2].sectors);
+    func_800152f8(cd_state.archives[1].sectors);
+    func_800152f8(cd_state.archives[0].sectors);
 }
 
 ADDRESS(0x800164b4, 0x54)
 void func_800164b4(void)
 {
-    if (DAT_80088200.unk8 + 59 < DAT_80088200.unk4) {
-        u8 value = DAT_8015d090.unk1ECC0;
+    if (cd_state.unk8 + 59 < cd_state.unk4) {
+        u8 value = world_state.unk1ECC0;
 
-        DAT_8015d090.unk1ECC0 = 0;
-        DAT_80088200.unk8 = DAT_80088200.unk4;
-        DAT_8015d090.unk1ECC1 = value;
-        DAT_80088200.unk10++;
+        world_state.unk1ECC0 = 0;
+        cd_state.unk8 = cd_state.unk4;
+        world_state.unk1ECC1 = value;
+        cd_state.unk10++;
     }
 }
 
 ADDRESS(0x80016508, 0x4c)
 void func_80016508(void)
 {
-    DAT_8015d090.unk1ECD8[0] = 1;
-    DAT_8015d090.unk1ECD8[1] = 1;
-    DAT_8015d090.unk1ECD6[0] = DAT_8015d090.unk1ECDA[0] =
-        DAT_8015d090.unk1ECDE[0] = DAT_8015d090.unk1ECE2[0] = 0;
-    DAT_8015d090.unk1ECD6[1] = DAT_8015d090.unk1ECDA[1] =
-        DAT_8015d090.unk1ECDE[1] = DAT_8015d090.unk1ECE2[1] = 0;
-    DAT_8015d090.unk1ECD2 = 255;
+    world_state.unk1ECD8[0] = 1;
+    world_state.unk1ECD8[1] = 1;
+    world_state.unk1ECD6[0] = world_state.unk1ECDA[0] =
+        world_state.unk1ECDE[0] = world_state.unk1ECE2[0] = 0;
+    world_state.unk1ECD6[1] = world_state.unk1ECDA[1] =
+        world_state.unk1ECDE[1] = world_state.unk1ECE2[1] = 0;
+    world_state.unk1ECD2 = 255;
 }

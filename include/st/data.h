@@ -1,7 +1,7 @@
 /*
- * ST.EXE globals that no reconstructed source owns yet. Names stay
- * address-derived; each declaration spells only the fields band A's code
- * proves, at the offsets its instructions use.
+ * ST.EXE globals that no reconstructed source owns yet and that several
+ * modules share. Each declaration spells only the fields the reconstructed
+ * code proves, at the offsets its instructions use.
  */
 #ifndef ST_DATA_H
 #define ST_DATA_H
@@ -31,6 +31,11 @@ extern s32 DAT_800881a4;
 /* Block heap arena (0x56400 bytes). */
 extern StBlock DAT_8009c888[];
 
+/*
+ * The viewer block at 0x80198f28: the vsync seconds clock at +0x33/+0x34,
+ * the FN. slots at +0x38, the position at +0x248 and two angles (pitch,
+ * yaw) at +0x268.
+ */
 typedef struct {
     u16 unk0;
     u16 unk2;
@@ -45,23 +50,36 @@ typedef struct {
     u8 unk62[0x21c - 0x62];
     u8 unk21C;
     u8 unk21D[0x248 - 0x21d];
-    s32 unk248;
-    s32 unk24C;
-    s32 unk250;
-} Data80198f28;
-extern Data80198f28 DAT_80198f28;
+    long x;              /* 0x248 */
+    long y;              /* 0x24c */
+    long z;              /* 0x250 */
+    u8 unk254[0x14];
+    short unk268;        /* 0x268: pitch in func_80016554 */
+    short unk26A;        /* 0x26a: yaw in func_80016554 */
+} Viewer;
 
+extern Viewer viewer;
+
+/*
+ * The state block at 0x801b5920: func_80014544 sets bytes 4..9 from FN.;
+ * byte 9 is the current area the texture slots and table C entries are
+ * compared with.
+ */
 typedef struct {
-    u16 unk0;
+    s16 unk0;
     u16 unk2;
     u8 unk4;
     u8 unk5;
     u8 unk6;
     u8 unk7;
     u8 unk8;
-    u8 unk9;
-} Data801b5920;
-extern Data801b5920 DAT_801b5920;
+    u8 area;             /* 0x09 */
+    u8 unkA[0x13];
+    u8 unk1D;
+    u8 unk1E[0xa];
+} AreaState;
+
+extern AreaState area_state;
 
 /* One count per id: a 7-bit count under a flag bit. */
 typedef struct {
@@ -69,19 +87,6 @@ typedef struct {
     u8 flag : 1;
 } Count801c7590;
 extern Count801c7590 DAT_801c7590[360];
-
-typedef struct {
-    u8 unk0;
-    u8 unk1[43];
-} Item801c7814;
-
-typedef struct {
-    u8 unk0[0x70];
-    u32 unk70[10]; /* one bit per id */
-    u8 unk98[0x11c - 0x98];
-    Item801c7814 unk11C[314];
-} Data801c76f8;
-extern Data801c76f8 DAT_801c76f8;
 
 extern u32 DAT_801cceb0[2][5];
 

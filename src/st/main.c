@@ -20,6 +20,8 @@
 #include <st/data.h>
 #include <st/main.h>
 #include <st/funcs.h>
+#include <st/cd.h>
+#include <st/vis.h>
 
 /* Top of the heap: main RAM below the 8 KB stack. */
 #define HEAP_TOP ((u8 *)0x801fdff8)
@@ -98,10 +100,10 @@ int func_80014450(u8 **cursor, int digits)
 }
 
 /*
- * Loads the start-up table file FN.: six bytes of DAT_801b5920, three
- * DAT_80198f28 positions and two optional values, then id/value rows until
- * 999. Rows 970..990 fill DAT_80198f28.unk38; other ids set an id's count.
- * Not exact: GCC keeps &DAT_80198f28 in $s2 across the row loop where retail
+ * Loads the start-up table file FN.: six bytes of area_state, three
+ * viewer positions and two optional values, then id/value rows until
+ * 999. Rows 970..990 fill viewer.unk38; other ids set an id's count.
+ * Not exact: GCC keeps &viewer in $s2 across the row loop where retail
  * keeps the constant 1 of the bit masks there and rematerializes the address
  * (first divergence at +0x130, `li s2,1`); the clear_flags block also
  * addresses DAT_801cceb0[0] from a new base. Retail is 0x4ec bytes.
@@ -124,11 +126,11 @@ void func_80014544(void)
     buf = func_800152d0(0x4000);
     func_8001618c(buf, "FN.", 0x4000);
     cursor = buf;
-    DAT_801b5920.unk4 = DAT_801b5920.unk5 = DAT_801b5920.unk6 = DAT_801b5920.unk7 =
-        DAT_801b5920.unk8 = DAT_801b5920.unk9 = func_80014450(&cursor, 3);
-    DAT_80198f28.unk248 = (func_80014450(&cursor, 7) + 64) << 12;
-    DAT_80198f28.unk24C = ((func_80014450(&cursor, 7) + 64) << 12) - 1600;
-    DAT_80198f28.unk250 = (func_80014450(&cursor, 7) + 64) << 12;
+    area_state.unk4 = area_state.unk5 = area_state.unk6 = area_state.unk7 =
+        area_state.unk8 = area_state.area = func_80014450(&cursor, 3);
+    viewer.x = (func_80014450(&cursor, 7) + 64) << 12;
+    viewer.y = ((func_80014450(&cursor, 7) + 64) << 12) - 1600;
+    viewer.z = (func_80014450(&cursor, 7) + 64) << 12;
     x = func_80014450(&cursor, 5);
     y = func_80014450(&cursor, 5);
     for (;;) {
@@ -151,47 +153,47 @@ void func_80014544(void)
         if (slot < FN_SLOTS) {
             if (value == FN_END)
                 continue;
-            DAT_80198f28.unk38[slot] = value;
+            viewer.unk38[slot] = value;
             DAT_801c7590[value].count++;
-            if (value < 266 && !(DAT_801c76f8.unk70[value / 32] & (1 << (value % 32))))
-                DAT_80198f28.unk28++;
-            DAT_801c76f8.unk70[value / 32] |= 1 << (value % 32);
+            if (value < 266 && !(vis_table_c.unk0070[value / 32] & (1 << (value % 32))))
+                viewer.unk28++;
+            vis_table_c.unk0070[value / 32] |= 1 << (value % 32);
         } else {
             if (value == FN_END)
                 continue;
             if (value <= 0)
                 continue;
             DAT_801c7590[id].count = value;
-            if (id < 266 && !(DAT_801c76f8.unk70[id / 32] & (1 << (id % 32))))
-                DAT_80198f28.unk28++;
-            DAT_801c76f8.unk70[id / 32] |= 1 << (id % 32);
+            if (id < 266 && !(vis_table_c.unk0070[id / 32] & (1 << (id % 32))))
+                viewer.unk28++;
+            vis_table_c.unk0070[id / 32] |= 1 << (id % 32);
         }
     }
     func_8003cedc();
     if (x != 0)
-        DAT_80198f28.unk0 = DAT_80198f28.unk2 = x;
+        viewer.unk0 = viewer.unk2 = x;
     if (y != 0)
-        DAT_80198f28.unk4 = DAT_80198f28.unk6 = y;
+        viewer.unk4 = viewer.unk6 = y;
     func_800152f8(buf);
     if (all_items) {
         for (i = 0; i < 314; i++) {
-            if (DAT_801c76f8.unk11C[i].unk0 != 0xff)
+            if (vis_table_c.unk0118[i].unk4 != 0xff)
                 DAT_801c7590[i].count++;
-            if (i < 266 && !(DAT_801c76f8.unk70[i / 32] & (1 << (i % 32))))
-                DAT_80198f28.unk28++;
-            DAT_801c76f8.unk70[i / 32] |= 1 << (i % 32);
+            if (i < 266 && !(vis_table_c.unk0070[i / 32] & (1 << (i % 32))))
+                viewer.unk28++;
+            vis_table_c.unk0070[i / 32] |= 1 << (i % 32);
         }
     }
     if (clear_flags) {
-        func_80014d5c(DAT_801cceb0[1], -1, 5);
-        func_80014d5c(DAT_801cceb0[0], -1, 5);
+        fill_words(DAT_801cceb0[1], -1, 5);
+        fill_words(DAT_801cceb0[0], -1, 5);
         DAT_801cceb0[1][4] &= ~0x4000;
         DAT_801cceb0[0][4] &= ~0x4000;
     }
-    func_8003f12c(DAT_80198f28.unk38[3], 0, 0);
-    func_8003f12c(DAT_80198f28.unk38[16], 1, 0);
-    func_8003f12c(DAT_80198f28.unk38[4], 2, 0);
-    func_8003f12c(DAT_80198f28.unk38[17], 3, 0);
-    func_8003ee38(DAT_80198f28.unk38[6], 0);
-    func_8003ee38(DAT_80198f28.unk38[12], 1);
+    func_8003f12c(viewer.unk38[3], 0, 0);
+    func_8003f12c(viewer.unk38[16], 1, 0);
+    func_8003f12c(viewer.unk38[4], 2, 0);
+    func_8003f12c(viewer.unk38[17], 3, 0);
+    func_8003ee38(viewer.unk38[6], 0);
+    func_8003ee38(viewer.unk38[12], 1);
 }

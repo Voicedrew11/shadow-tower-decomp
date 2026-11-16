@@ -13,11 +13,12 @@
 #include <LIBGPU.H>
 #include <INLINE_C.H>
 #include <st/mesh.h>
+#include <st/scratch.h>
 
 ADDRESS(0x800184c4, 0x2e0)
 void mesh_draw_ft3(int count, MeshFaceFT3 *face, u_long *ot, int flags)
 {
-    MeshScratch *sp = MESH_SCRATCH;
+    ScratchPad *sp = SCRATCHPAD;
     u_long *start;
     void (*tint)(CVECTOR *);
     MeshVertex *v0;
@@ -94,7 +95,7 @@ void mesh_ft4_tint_b(CVECTOR *rgb)
 ADDRESS(0x80018828, 0x2f4)
 void mesh_draw_ft4(int count, MeshFaceFT4 *face, u_long *ot, int flags)
 {
-    MeshScratch *sp = MESH_SCRATCH;
+    ScratchPad *sp = SCRATCHPAD;
     u_long *start;
     void (*tint)(CVECTOR *);
     MeshVertex *v0;
@@ -175,7 +176,7 @@ void mesh_gt3_tint_b(CVECTOR *rgb)
 ADDRESS(0x80018ba0, 0x324)
 void mesh_draw_gt3(int count, MeshFaceGT3 *face, u_long *ot, int flags)
 {
-    MeshScratch *sp = MESH_SCRATCH;
+    ScratchPad *sp = SCRATCHPAD;
     u_long *start;
     void (*tint)(CVECTOR *);
     MeshVertex *v0;
@@ -254,7 +255,7 @@ void mesh_gt4_tint_b(CVECTOR *rgb)
 ADDRESS(0x80018f48, 0x38c)
 void mesh_draw_gt4(int count, MeshFaceGT4 *face, u_long *ot, int flags)
 {
-    MeshScratch *sp = MESH_SCRATCH;
+    ScratchPad *sp = SCRATCHPAD;
     u_long *start;
     void (*tint)(CVECTOR *);
     MeshVertex *v0;
@@ -324,7 +325,7 @@ void mesh_draw_gt4(int count, MeshFaceGT4 *face, u_long *ot, int flags)
 ADDRESS(0x800192d4, 0x1f0)
 void mesh_draw_part(u_short part, u_int flags)
 {
-    MeshScratch *sp = MESH_SCRATCH;
+    ScratchPad *sp = SCRATCHPAD;
     int mode;
 
     mode = (flags >> 1) & 2;

@@ -38,67 +38,6 @@ source = "src/str/main.c"
 profile = "probe-gcc272cdk-o2-g8"
 
 [[unit]]
-unit = "st.mesh_draw"
-image = "ST.EXE"
-source = "src/st/mesh_draw.c"
-profile = "probe-gcc272cdk-o2-g0"
-
-[[unit]]
-unit = "st.mesh_draw_nccs"
-image = "ST.EXE"
-source = "src/st/mesh_draw_nccs.c"
-profile = "probe-gcc272cdk-o2-g0"
-
-[[unit]]
-unit = "st.mesh_draw_div"
-image = "ST.EXE"
-source = "src/st/mesh_draw_div.c"
-profile = "probe-gcc272cdk-o2-g0"
-
-[[unit]]
-unit = "st.mesh_draw_div_setup"
-image = "ST.EXE"
-source = "src/st/mesh_draw_div_setup.c"
-profile = "probe-gcc272cdk-o2-g0"
-
-[[unit]]
-unit = "st.vis_build"
-image = "ST.EXE"
-source = "src/st/vis_build.c"
-profile = "probe-gcc272cdk-o2-g0"
-
-[[unit]]
-unit = "st.vis_cull"
-image = "ST.EXE"
-source = "src/st/vis_cull.c"
-profile = "probe-gcc272cdk-o2-g0"
-
-[[unit]]
-unit = "st.vis_lists"
-image = "ST.EXE"
-source = "src/st/vis_lists.c"
-profile = "probe-gcc272cdk-o2-g0"
-
-[[unit]]
-unit = "title.main"
-image = "TITLE.EXE"
-source = "src/title/main.c"
-profile = "probe-gcc272cdk-o2-g8"
-
-[[unit]]
-unit = "optxt.main"
-image = "OPTXT.EXE"
-source = "src/optxt/main.c"
-profile = "probe-gcc272cdk-o2-g8"
-
-[[unit]]
-unit = "end.main"
-image = "END.EXE"
-source = "src/end/main.c"
-profile = "probe-gcc272cdk-o2-g8"
-
-# ST.EXE units; WIP module boundaries (see each source's header comment).
-[[unit]]
 unit = "st.main"
 image = "ST.EXE"
 source = "src/st/main.c"
@@ -163,3 +102,63 @@ unit = "st.prim"
 image = "ST.EXE"
 source = "src/st/prim.c"
 profile = "probe-gcc272cdk-o2-g0"
+
+[[unit]]
+unit = "st.mesh_draw"
+image = "ST.EXE"
+source = "src/st/mesh_draw.c"
+profile = "probe-gcc272cdk-o2-g0"
+
+[[unit]]
+unit = "st.mesh_draw_nccs"
+image = "ST.EXE"
+source = "src/st/mesh_draw_nccs.c"
+profile = "probe-gcc272cdk-o2-g0"
+
+[[unit]]
+unit = "st.mesh_draw_div"
+image = "ST.EXE"
+source = "src/st/mesh_draw_div.c"
+profile = "probe-gcc272cdk-o2-g0"
+
+[[unit]]
+unit = "st.mesh_draw_div_setup"
+image = "ST.EXE"
+source = "src/st/mesh_draw_div_setup.c"
+profile = "probe-gcc272cdk-o2-g0"
+
+[[unit]]
+unit = "st.vis_build"
+image = "ST.EXE"
+source = "src/st/vis_build.c"
+profile = "probe-gcc272cdk-o2-g0"
+
+[[unit]]
+unit = "st.vis_cull"
+image = "ST.EXE"
+source = "src/st/vis_cull.c"
+profile = "probe-gcc272cdk-o2-g0"
+
+[[unit]]
+unit = "st.vis_lists"
+image = "ST.EXE"
+source = "src/st/vis_lists.c"
+profile = "probe-gcc272cdk-o2-g0"
+
+[[unit]]
+unit = "title.main"
+image = "TITLE.EXE"
+source = "src/title/main.c"
+profile = "probe-gcc272cdk-o2-g8"
+
+[[unit]]
+unit = "optxt.main"
+image = "OPTXT.EXE"
+source = "src/optxt/main.c"
+profile = "probe-gcc272cdk-o2-g8"
+
+[[unit]]
+unit = "end.main"
+image = "END.EXE"
+source = "src/end/main.c"
+profile = "probe-gcc272cdk-o2-g8"

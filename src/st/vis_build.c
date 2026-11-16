@@ -33,7 +33,7 @@ void vis_build_visible(u8 *arg)
     for (id = j = 0; j < 16; j++) {
         for (k = 0; k < 32; k++) {
             if (mask[j] & 1) {
-                if (area_state.unk00 != 1 || area_state.unk1d == 0) {
+                if (area_state.unk0 != 1 || area_state.unk1D == 0) {
                     vis_lists.visible[vis_lists.n_visible] = id;
                     vis_lists.n_visible++;
                 }

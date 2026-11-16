@@ -11,12 +11,13 @@
 #include <LIBGPU.H>
 #include <INLINE_C.H>
 #include <st/mesh.h>
+#include <st/scratch.h>
 
 
 ADDRESS(0x8001bf10, 0x1f0)
 void mesh_div_draw_part(u_short part, u_int flags)
 {
-    MeshScratch *sp = MESH_SCRATCH;
+    ScratchPad *sp = SCRATCHPAD;
     int mode;
 
     mode = (flags >> 1) & 2;

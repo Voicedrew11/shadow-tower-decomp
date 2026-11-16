@@ -10,11 +10,12 @@
 #include <LIBGPU.H>
 #include <INLINE_C.H>
 #include <st/mesh.h>
+#include <st/scratch.h>
 
 ADDRESS(0x800194c4, 0x1fc)
 void mesh_draw_ft3_nccs(int count, MeshFaceFT3 *face, u_long *ot, int flags)
 {
-    MeshScratch *sp = MESH_SCRATCH;
+    ScratchPad *sp = SCRATCHPAD;
     u_long *start;
     MeshVertex *v0;
     MeshVertex *v1;
@@ -60,7 +61,7 @@ void mesh_draw_ft3_nccs(int count, MeshFaceFT3 *face, u_long *ot, int flags)
 ADDRESS(0x800196c0, 0x234)
 void mesh_draw_ft4_nccs(int count, MeshFaceFT4 *face, u_long *ot, int flags)
 {
-    MeshScratch *sp = MESH_SCRATCH;
+    ScratchPad *sp = SCRATCHPAD;
     u_long *start;
     MeshVertex *v0;
     MeshVertex *v1;
@@ -110,7 +111,7 @@ void mesh_draw_ft4_nccs(int count, MeshFaceFT4 *face, u_long *ot, int flags)
 ADDRESS(0x800198f4, 0x240)
 void mesh_draw_gt3_nccs(int count, MeshFaceGT3 *face, u_long *ot, int flags)
 {
-    MeshScratch *sp = MESH_SCRATCH;
+    ScratchPad *sp = SCRATCHPAD;
     u_long *start;
     MeshVertex *v0;
     MeshVertex *v1;
@@ -156,7 +157,7 @@ void mesh_draw_gt3_nccs(int count, MeshFaceGT3 *face, u_long *ot, int flags)
 ADDRESS(0x80019b34, 0x294)
 void mesh_draw_gt4_nccs(int count, MeshFaceGT4 *face, u_long *ot, int flags)
 {
-    MeshScratch *sp = MESH_SCRATCH;
+    ScratchPad *sp = SCRATCHPAD;
     u_long *start;
     MeshVertex *v0;
     MeshVertex *v1;
@@ -212,7 +213,7 @@ void mesh_draw_gt4_nccs(int count, MeshFaceGT4 *face, u_long *ot, int flags)
 ADDRESS(0x80019dc8, 0x1ec)
 void mesh_draw_part_nccs(u_short part, u_int flags)
 {
-    MeshScratch *sp = MESH_SCRATCH;
+    ScratchPad *sp = SCRATCHPAD;
     int mode;
 
     mode = (flags >> 1) & 2;

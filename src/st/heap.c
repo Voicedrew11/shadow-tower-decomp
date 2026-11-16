@@ -9,7 +9,7 @@
 #include <sys/types.h>
 #include <MALLOC.H>
 #include <st/memory.h>
-#include <st/cdreq.h>
+#include <st/cd.h>
 #include <st/funcs.h>
 
 ADDRESS(0x80014f90, 0x94)

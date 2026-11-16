@@ -10,13 +10,6 @@
 #include <sys/types.h>
 #include <LIBGTE.H>
 
-void func_80016374(void);
-void func_80016454(void);
-void func_800164b4(void);
-void func_80016508(void);
-void func_8001618c(void *buf, char *name, int size);
-void func_80016fb8(void);
-int func_80015b78(u8 *buf, s32 sectors);
 void func_800210f4(void);
 void func_80021158(void);
 void func_800214a4(void);
@@ -25,8 +18,10 @@ void func_80026afc(VECTOR *a, SVECTOR *b);
 void func_80032058(void);
 void func_8003216c(void);
 void func_8003306c(void);
+void func_800340c4(void);
 void func_800341a0(void);
 void func_80034224(void);
+void func_80034f48(void);
 void func_8003509c(void);
 void func_80035120(void);
 void func_8003bc10(void);
@@ -42,6 +37,8 @@ void func_80044674(void);
 void func_80044ee8(void);
 void func_800456f8(void);
 void func_80045ffc(void);
+void func_800498cc(MATRIX *m, MATRIX *out);
+void func_80049cd4(int angle, MATRIX *out);
 void func_8004afdc(void);
 void func_8004e324(void);
 void func_8004eda8(void);
