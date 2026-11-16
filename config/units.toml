@@ -91,3 +91,33 @@ unit = "st.cdpos"
 image = "ST.EXE"
 source = "src/st/cdpos.c"
 profile = "probe-gcc272cdk-o2-g0"
+
+[[unit]]
+unit = "st.cd"
+image = "ST.EXE"
+source = "src/st/cd.c"
+profile = "probe-gcc272cdk-o2-g8"
+
+[[unit]]
+unit = "st.view"
+image = "ST.EXE"
+source = "src/st/view.c"
+profile = "probe-gcc272cdk-o2-g8"
+
+[[unit]]
+unit = "st.texanim"
+image = "ST.EXE"
+source = "src/st/texanim.c"
+profile = "probe-gcc272cdk-o2-g0"
+
+[[unit]]
+unit = "st.gfx"
+image = "ST.EXE"
+source = "src/st/gfx.c"
+profile = "probe-gcc272cdk-o2-g0"
+
+[[unit]]
+unit = "st.prim"
+image = "ST.EXE"
+source = "src/st/prim.c"
+profile = "probe-gcc272cdk-o2-g0"

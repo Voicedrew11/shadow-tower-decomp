@@ -30,15 +30,6 @@ STR.EXE	0x800c6888	0x18	cdl_file	global	bss	CdlFILE	play_movie	supported	asm;src
 STR.EXE	0x800c68a0	0x14	pad_info	global	bss	PadInfo	pad_read	supported	asm;src/str/main.c str.main	controller state and button words; COMMON in hash-bucket order (WIP spelling fits it)
 STR.EXE	0x800c68b8	0xb400	image_rgb	global	bss	u_long[2][5760]	strSetDefDecEnv	supported	asm;src/str/main.c str.main	24-bit DecDCTout slice buffers; COMMON in hash-bucket order (WIP spelling fits it)
 STR.EXE	0x800d1cc4	0x4	StCdIntrFlag	global	bss	int		supported	asm;PSYLINK map of the native STR link;LIBCD StCdInterrupt users	LIBCD streaming flag; strCallback clears it after StCdInterrupt
-ST.EXE	0x800881a4	0x4	DAT_800881a4	global	bss	s32	func_80014a30	address-only	asm;src/st/loop.c st.loop	.sbss word ($gp+0x2e4); the game loop runs while it is 0, 2 returns to TITLE.EXE, 3 goes to END.EXE; also used by 0x80042d74 and 0x80063078
-ST.EXE	0x80088200	0xa00	DAT_80088200	global	bss	State80088200	func_8001535c	address-only	asm;band A relocs	CD state block: vsync tick words at +0x4/+0xc, the 48-entry CD read-request ring at +0x14, ring pointers at +0x9d4/+0x9d8, three archive tables at +0x9dc; WIP extent ends with them
-ST.EXE	0x8009c888	0x56400	DAT_8009c888	global	bss	StBlock[]	func_80014a30	address-only	asm;band A relocs	block heap arena; func_80014a30 initialises it with func_80015144 at 0x56400 bytes
-ST.EXE	0x80198f28	0x254	DAT_80198f28	global	bss	Data80198f28	func_80014544	address-only	asm;band A relocs	WIP extent up to the last field band A uses (+0x250); vsync seconds clock at +0x33/+0x34, FN. slots at +0x38
-ST.EXE	0x801b5920	0xa	DAT_801b5920	global	bss	Data801b5920	func_80014544	address-only	asm;band A relocs	WIP extent up to the last byte band A uses; func_80014544 sets bytes 4..9 from FN.
-ST.EXE	0x801c7590	0x168	DAT_801c7590	global	bss	Count801c7590[360]	func_80014544	address-only	asm;band A relocs	one 7-bit count and flag bit per id; extent up to DAT_801c76f8
-ST.EXE	0x801c76f8	0x3714	DAT_801c76f8	global	bss	Data801c76f8	func_80014544	address-only	asm;band A relocs	id bit set at +0x70 and 314 44-byte records from +0x11c; WIP extent ends with them
-ST.EXE	0x801cceb0	0x28	DAT_801cceb0	global	bss	u32[2][5]	func_80014544	address-only	asm;band A relocs	two 5-word rows, cleared to -1 by FN. marker 996; func_80014544 addresses row 0 from row 1's base
-ST.EXE	0x801cd180	0x18	DAT_801cd180	global	bss	Data801cd180	func_80014a30	address-only	asm;band A relocs	WIP extent of the 0x18-byte record whose byte +0x10 func_80014a30 sets on Continue
 TITLE.EXE	0x80028abc	0x4	next_program	global	load	u8 *	main	supported	asm;src/title/main.c title.main	$gp+0; points at PSX.EXE next-program byte 0x800103f0
 TITLE.EXE	0x80028ac0	0x4	PTR_80028ac0	global	load	u8 *	main	supported	asm;src/title/main.c title.main	$gp+4; points at 0x800103f1; main stores 2 there for Continue
 TITLE.EXE	0x80028b10	0x6	pad_align	static	bss	u_char[6]	pad_set_act_align	supported	asm;src/title/main.c title.main	.sbss; $gp+84; PadSetActAlign table
@@ -88,3 +79,20 @@ END.EXE	0x800929d0	0x20000	ring_buffer	global	bss	u_long[0x8000]	strInit	support
 END.EXE	0x800b29d0	0x107ac0	staff_buffer	global	bss	u_long[0x41eb0]	play_staff_roll	supported	asm;src/end/main.c end.main	STAFF.MIC load buffer; WIP extent up to display; COMMON in hash-bucket order (WIP spelling fits it)
 END.EXE	0x801ba490	0xe4	display	global	bss	DisplayBuffers	main	supported	asm;src/end/main.c end.main	two DISPENVs, two DRAWENVs and an id; COMMON in hash-bucket order (WIP spelling fits it)
 END.EXE	0x801ba584	0x4	StCdIntrFlag	global	bss	int		supported	asm;PSYLINK map of the native END link;LIBCD StCdInterrupt users	LIBCD streaming flag; strCallback clears it after StCdInterrupt
+ST.EXE	0x800881a4	0x4	DAT_800881a4	global	bss	s32	func_80014a30	address-only	asm;src/st/loop.c st.loop	.sbss word ($gp+0x2e4); the game loop runs while it is 0, 2 returns to TITLE.EXE, 3 goes to END.EXE; also used by 0x80042d74 and 0x80063078
+ST.EXE	0x80088200	0xa00	DAT_80088200	global	bss	State80088200	func_8001535c	address-only	asm;band A relocs	CD state block: vsync tick words at +0x4/+0xc, the 48-entry CD read-request ring at +0x14, ring pointers at +0x9d4/+0x9d8, three archive tables at +0x9dc; WIP extent ends with them
+ST.EXE	0x80088200	0xa00	DAT_80088200	unknown	bss	State80088200		candidate	asm;src/st/cd.c st.cd	CD state block: request ring (+0x14, 48 x 0x34), ring pointers (+0x9d4/+0x9d8), three archive tables (+0x9dc, 3 x 12); extent WIP
+ST.EXE	0x8009ac88	0x20	DAT_8009ac88	unknown	bss	u16[16]		candidate	asm;src/st/texanim.c st.texanim	CLUT image buffer for StoreImage/LoadImage; entries 1-14 rotate
+ST.EXE	0x8009c888	0x56400	DAT_8009c888	global	bss	StBlock[]	func_80014a30	address-only	asm;band A relocs	block heap arena; func_80014a30 initialises it with func_80015144 at 0x56400 bytes
+ST.EXE	0x8011c488	0x40000	DAT_8011c488	unknown	bss	u_long[0x10000]		candidate	asm;src/st/gfx.c st.gfx	the two 0x20000-byte GPU packet buffers
+ST.EXE	0x8015c488	0x4	DAT_8015c488	unknown	bss	s32		candidate	asm;src/st/gfx.c st.gfx	word cleared by func_80016fb8; extent WIP
+ST.EXE	0x8015d090	0x1ee18	DAT_8015d090	unknown	bss	Dat8015d090		candidate	asm;src/st/cd.c st.cd;src/st/texanim.c st.texanim	graphics state: draw/display environments, ordering tables, packet buffers, animated-texture slots (+0x1eb40), camera; extent is the last modeled field
+ST.EXE	0x8018ca38	0x144	DAT_8018ca38	unknown	bss	StLight[3]		candidate	asm;src/st/prim.c st.prim	three 0x6c-byte lighting targets blended by func_80017d28
+ST.EXE	0x80198f28	0x254	DAT_80198f28	global	bss	Data80198f28	func_80014544	address-only	asm;band A relocs	WIP extent up to the last field band A uses (+0x250); vsync seconds clock at +0x33/+0x34, FN. slots at +0x38
+ST.EXE	0x80198f28	0x26c	DAT_80198f28	unknown	bss	Dat80198f28		candidate	asm;src/st/view.c st.view	bss object; func_80016554 reads a position (+0x248) and two angles (+0x268); extent WIP (last modeled field)
+ST.EXE	0x801b5920	0xa	DAT_801b5920	global	bss	Data801b5920	func_80014544	address-only	asm;band A relocs	WIP extent up to the last byte band A uses; func_80014544 sets bytes 4..9 from FN.
+ST.EXE	0x801b5929	0x1	DAT_801b5929	unknown	bss	u8		candidate	asm;src/st/texanim.c st.texanim	current area compared with each texture slot area; extent WIP
+ST.EXE	0x801c7590	0x168	DAT_801c7590	global	bss	Count801c7590[360]	func_80014544	address-only	asm;band A relocs	one 7-bit count and flag bit per id; extent up to DAT_801c76f8
+ST.EXE	0x801c76f8	0x3714	DAT_801c76f8	global	bss	Data801c76f8	func_80014544	address-only	asm;band A relocs	id bit set at +0x70 and 314 44-byte records from +0x11c; WIP extent ends with them
+ST.EXE	0x801cceb0	0x28	DAT_801cceb0	global	bss	u32[2][5]	func_80014544	address-only	asm;band A relocs	two 5-word rows, cleared to -1 by FN. marker 996; func_80014544 addresses row 0 from row 1's base
+ST.EXE	0x801cd180	0x18	DAT_801cd180	global	bss	Data801cd180	func_80014a30	address-only	asm;band A relocs	WIP extent of the 0x18-byte record whose byte +0x10 func_80014a30 sets on Continue
