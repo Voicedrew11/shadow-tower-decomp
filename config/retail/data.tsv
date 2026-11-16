@@ -572,9 +572,11 @@ VS.EXE	0x8004a198	0x39998	0xc	unclassified	coverage-gap			payload-complement	may
 VS.EXE	0x8004a1b8	0x399b8	0xc	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 VS.EXE	0x8004a1d8	0x399d8	0xc	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 VS.EXE	0x8004a1f8	0x399f8	0xc	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
-VS.EXE	0x8004a218	0x39a18	0x195e8	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
+VS.EXE	0x8004a218	0x39a18	0x1900c	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 VS.EXE	0x80063224	0x52a24	0x4	defined	candidate	DAT_80063224	s32	asm;src/vs/mesh_800258f0.c vs.mesh_800258f0	.sdata word read absolutely by the -G8 renderers; fixed-OT-depth switch (0 in the image)
+VS.EXE	0x80063228	0x52a28	0xb8	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 VS.EXE	0x800632e0	0x52ae0	0x4	defined	candidate	DAT_800632e0	s32	asm;src/vs/fade_80028fcc.c vs.fade_80028fcc	$gp+0xc8 .sdata word; func_80028fcc's texture-window step
+VS.EXE	0x800632e4	0x52ae4	0x51c	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 END.EXE	0x80011000	0x800	0x960	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 END.EXE	0x80013138	0x2938	0x4	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 END.EXE	0x80013238	0x2a38	0x4	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
