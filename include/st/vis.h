@@ -49,7 +49,7 @@ extern VisLists vis_lists;
 extern VisRecord vis_records[];
 extern VisSourceMask vis_source_masks[];
 /* 0x801856d0: per axis (x, y, z) and 4096-unit cell, the sources that cover it. */
-extern VisSourceMask vis_axis_masks[3][128];
+extern VisSourceMask DAT_801856d0[3][128];
 
 /* 0x801ba138: 64 entries of 212 bytes, then the collected index list. */
 /* A flags word whose byte +2 is also updated on its own (func_800241d0). */
