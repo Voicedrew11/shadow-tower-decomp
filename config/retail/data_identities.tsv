@@ -39,6 +39,16 @@ TITLE.EXE	0x801bab30	0xe4	display	global	bss	DisplayBuffers	main	supported	asm;s
 TITLE.EXE	0x801bac18	0x4c	pad_data	global	bss	PadBuffers	pad_init	supported	asm;src/title/main.c title.main	PadInitDirect receive buffers and PadSetAct data; COMMON in hash-bucket order (WIP spelling fits it)
 TITLE.EXE	0x801bac68	0x1c	menu	global	bss	TitleState	title_menu	supported	asm;src/title/main.c title.main	title menu state; COMMON in hash-bucket order (WIP spelling fits it)
 TITLE.EXE	0x801bac88	0x14	pad_state	global	bss	PadState	pad_read	supported	asm;src/title/main.c title.main	port 1 state and buttons; COMMON in hash-bucket order (WIP spelling fits it)
+OPTXT.EXE	0x8001df50	0x18	page_tpage	global	load	VramOffset[6]	draw_text_page	supported	asm;src/optxt/main.c optxt.main	texture page VRAM position of each text page
+OPTXT.EXE	0x8001f798	0x4	next_program	global	load	u8 *	main	supported	asm;src/optxt/main.c optxt.main	$gp+0; points at PSX.EXE next-program byte 0x800103f0
+OPTXT.EXE	0x8001f79c	0x4	PTR_8001f79c	global	load	u8 *	main	supported	asm;src/optxt/main.c optxt.main	$gp+4; points at 0x800103f1, set to 1 by main
+OPTXT.EXE	0x8001f7a0	0x4	clut_origin	global	load	VramOffset		supported	asm;src/optxt/main.c optxt.main	$gp+8; holds (0, 480), the CLUT row; never referenced
+OPTXT.EXE	0x8001f7e0	0x6	act_align	static	bss	u_char[6]	pad_set_act_align	supported	asm;src/optxt/main.c optxt.main	$gp+72; PadSetActAlign data
+OPTXT.EXE	0x8001f7e8	0x4	frame	static	bss	int	scroll_pages_1	supported	asm;src/optxt/main.c optxt.main	$gp+80; frame counter of the current opening part
+OPTXT.EXE	0x8001f800	0x190000	text_buffer	global	bss	u_long[0x64000]	play_opening_text	supported	asm;src/optxt/main.c optxt.main	OPTXT.MIC load buffer; WIP extent up to display; COMMON in hash-bucket order (WIP spelling fits it)
+OPTXT.EXE	0x801af800	0xe4	display	global	bss	DisplayBuffers	main	supported	asm;src/optxt/main.c optxt.main	two DISPENVs, two DRAWENVs and an id; COMMON in hash-bucket order (WIP spelling fits it)
+OPTXT.EXE	0x801af8e8	0x4c	pad_data	global	bss	PadBuffers	pad_init	supported	asm;src/optxt/main.c optxt.main	PadInitDirect buffers and PadSetAct data; COMMON in hash-bucket order (WIP spelling fits it)
+OPTXT.EXE	0x801af938	0x14	pad	global	bss	PadStatus	pad_read	supported	asm;src/optxt/main.c optxt.main	pad state, flags and button words; COMMON in hash-bucket order (WIP spelling fits it)
 END.EXE	0x8001d28c	0x28	staff_poly_left	global	load	POLY_FT4	play_staff_roll	supported	asm;src/end/main.c end.main	left half of a staff roll page
 END.EXE	0x8001d2b4	0x28	staff_poly_right	global	load	POLY_FT4	play_staff_roll	supported	asm;src/end/main.c end.main	right half of a staff roll page
 END.EXE	0x8001d2dc	0x38	staff_page_frames	global	load	int[7][2]	play_staff_roll	supported	asm;src/end/main.c end.main	frame after which each staff page fades in, then out

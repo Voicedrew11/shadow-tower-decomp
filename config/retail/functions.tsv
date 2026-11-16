@@ -1871,24 +1871,24 @@ OPTXT.EXE	0x80011c5c	0x145c	0x234	0x234	1	function	mips-frame-carve			scripts/kf
 OPTXT.EXE	0x80011e90	0x1690	0x14	0x14	1	function	mips-return-carve			scripts/kf/audit_functions.py	anonymous WIP start; previous-return+return-delimited-valid-code
 OPTXT.EXE	0x80011ea4	0x16a4	0x90	0x90	1	function	mips-frame-carve			scripts/kf/audit_functions.py	anonymous WIP start; stack-frame+ra-save+matching-stack-return
 OPTXT.EXE	0x80011f34	0x1734	0x58	0x58	1	function	mips-frame-carve			scripts/kf/audit_functions.py	anonymous WIP start; stack-frame+ra-save+hoisted-prologue+matching-stack-return
-OPTXT.EXE	0x80011f8c	0x178c	0x1dc	0x1dc	1	function	mips-return-carve			scripts/kf/audit_functions.py	anonymous WIP start; previous-return+return-delimited-valid-code
-OPTXT.EXE	0x80012168	0x1968	0x54	0x54	1	function	mips-frame-carve			scripts/kf/audit_functions.py	anonymous WIP start; stack-frame+ra-save+matching-stack-return
-OPTXT.EXE	0x800121bc	0x19bc	0xd4	0xd4	1	function	mips-frame-carve			scripts/kf/audit_functions.py	anonymous WIP start; stack-frame+ra-save+matching-stack-return
-OPTXT.EXE	0x80012290	0x1a90	0xb8	0xb8	1	function	mips-frame-carve			scripts/kf/audit_functions.py	anonymous WIP start; stack-frame+ra-save+matching-stack-return
-OPTXT.EXE	0x80012348	0x1b48	0x9c	0x9c	1	function	mips-frame-carve			scripts/kf/audit_functions.py	anonymous WIP start; stack-frame+ra-save+matching-stack-return
-OPTXT.EXE	0x800123e4	0x1be4	0x7c	0x7c	1	function	mips-frame-carve			scripts/kf/audit_functions.py	anonymous WIP start; stack-frame+ra-save+matching-stack-return
-OPTXT.EXE	0x80012460	0x1c60	0x68	0x68	1	function	mips-return-carve			scripts/kf/audit_functions.py	anonymous WIP start; previous-return+return-delimited-valid-code
-OPTXT.EXE	0x800124c8	0x1cc8	0x60	0x60	1	function	mips-return-carve			scripts/kf/audit_functions.py	anonymous WIP start; previous-return+return-delimited-valid-code
-OPTXT.EXE	0x80012528	0x1d28	0xe0	0xe0	1	function	mips-frame-carve			scripts/kf/audit_functions.py	anonymous WIP start; stack-frame+ra-save+matching-stack-return
-OPTXT.EXE	0x80012608	0x1e08	0x98	0x98	1	function	mips-frame-carve			scripts/kf/audit_functions.py	anonymous WIP start; stack-frame+ra-save+matching-stack-return
-OPTXT.EXE	0x800126a0	0x1ea0	0x70	0x70	1	function	mips-frame-carve			scripts/kf/audit_functions.py	anonymous WIP start; stack-frame+ra-save+matching-stack-return
-OPTXT.EXE	0x80012710	0x1f10	0xd8	0xd8	1	function	mips-frame-carve			scripts/kf/audit_functions.py	anonymous WIP start; stack-frame+ra-save+matching-stack-return
-OPTXT.EXE	0x800127e8	0x1fe8	0x130	0x130	1	function	mips-frame-carve			scripts/kf/audit_functions.py	anonymous WIP start; stack-frame+ra-save+matching-stack-return
-OPTXT.EXE	0x80012918	0x2118	0xf0	0xf0	1	function	mips-frame-carve			scripts/kf/audit_functions.py	anonymous WIP start; stack-frame+ra-save+hoisted-prologue+matching-stack-return
-OPTXT.EXE	0x80012a08	0x2208	0x170	0x170	1	function	mips-frame-carve			scripts/kf/audit_functions.py	anonymous WIP start; stack-frame+ra-save+matching-stack-return
-OPTXT.EXE	0x80012b78	0x2378	0x18c	0x18c	1	function	mips-frame-carve			scripts/kf/audit_functions.py	anonymous WIP start; stack-frame+ra-save+matching-stack-return
-OPTXT.EXE	0x80012d04	0x2504	0x20c	0x20c	1	function	mips-frame-carve			scripts/kf/audit_functions.py	anonymous WIP start; stack-frame+ra-save+matching-stack-return
-OPTXT.EXE	0x80012f10	0x2710	0x1e0	0x1e0	1	function	mips-frame-carve			scripts/kf/audit_functions.py	anonymous WIP start; stack-frame+ra-save+matching-stack-return+cross-extent-jump
+OPTXT.EXE	0x80011f8c	0x178c	0x1dc	0x1dc	1	function	mips-return-carve	load_tims		scripts/kf/audit_functions.py	anonymous WIP start; previous-return+return-delimited-valid-code
+OPTXT.EXE	0x80012168	0x1968	0x54	0x54	1	function	mips-frame-carve	clear_vram		scripts/kf/audit_functions.py	anonymous WIP start; stack-frame+ra-save+matching-stack-return
+OPTXT.EXE	0x800121bc	0x19bc	0xd4	0xd4	1	function	mips-frame-carve	cd_read_sectors		scripts/kf/audit_functions.py	anonymous WIP start; stack-frame+ra-save+matching-stack-return
+OPTXT.EXE	0x80012290	0x1a90	0xb8	0xb8	1	function	mips-frame-carve	load_st_file		scripts/kf/audit_functions.py	anonymous WIP start; stack-frame+ra-save+matching-stack-return
+OPTXT.EXE	0x80012348	0x1b48	0x9c	0x9c	1	function	mips-frame-carve	play_opening_xa		scripts/kf/audit_functions.py	anonymous WIP start; stack-frame+ra-save+matching-stack-return
+OPTXT.EXE	0x800123e4	0x1be4	0x7c	0x7c	1	function	mips-frame-carve	pad_wait_stable		scripts/kf/audit_functions.py	anonymous WIP start; stack-frame+ra-save+matching-stack-return
+OPTXT.EXE	0x80012460	0x1c60	0x68	0x68	1	function	mips-return-carve	pad_set_act_align		scripts/kf/audit_functions.py	anonymous WIP start; previous-return+return-delimited-valid-code
+OPTXT.EXE	0x800124c8	0x1cc8	0x60	0x60	1	function	mips-return-carve	pad_check_actuators		scripts/kf/audit_functions.py	anonymous WIP start; previous-return+return-delimited-valid-code
+OPTXT.EXE	0x80012528	0x1d28	0xe0	0xe0	1	function	mips-frame-carve	pad_update_state		scripts/kf/audit_functions.py	anonymous WIP start; stack-frame+ra-save+matching-stack-return
+OPTXT.EXE	0x80012608	0x1e08	0x98	0x98	1	function	mips-frame-carve	pad_init		scripts/kf/audit_functions.py	anonymous WIP start; stack-frame+ra-save+matching-stack-return
+OPTXT.EXE	0x800126a0	0x1ea0	0x70	0x70	1	function	mips-frame-carve	pad_read		scripts/kf/audit_functions.py	anonymous WIP start; stack-frame+ra-save+matching-stack-return
+OPTXT.EXE	0x80012710	0x1f10	0xd8	0xd8	1	function	mips-frame-carve	draw_fade		scripts/kf/audit_functions.py	anonymous WIP start; stack-frame+ra-save+matching-stack-return
+OPTXT.EXE	0x800127e8	0x1fe8	0x130	0x130	1	function	mips-frame-carve	draw_text_page		scripts/kf/audit_functions.py	anonymous WIP start; stack-frame+ra-save+matching-stack-return
+OPTXT.EXE	0x80012918	0x2118	0xf0	0xf0	1	function	mips-frame-carve	scroll_pages_1		scripts/kf/audit_functions.py	anonymous WIP start; stack-frame+ra-save+hoisted-prologue+matching-stack-return
+OPTXT.EXE	0x80012a08	0x2208	0x170	0x170	1	function	mips-frame-carve	scroll_pages_2		scripts/kf/audit_functions.py	anonymous WIP start; stack-frame+ra-save+matching-stack-return
+OPTXT.EXE	0x80012b78	0x2378	0x18c	0x18c	1	function	mips-frame-carve	scroll_pages_3		scripts/kf/audit_functions.py	anonymous WIP start; stack-frame+ra-save+matching-stack-return
+OPTXT.EXE	0x80012d04	0x2504	0x20c	0x20c	1	function	mips-frame-carve	play_opening_text		scripts/kf/audit_functions.py	anonymous WIP start; stack-frame+ra-save+matching-stack-return
+OPTXT.EXE	0x80012f10	0x2710	0x1e0	0x1e0	1	function	mips-frame-carve	main		scripts/kf/audit_functions.py	anonymous WIP start; stack-frame+ra-save+matching-stack-return+cross-extent-jump
 OPTXT.EXE	0x800130f0	0x28f0	0x84	0x84	1	function	mips-frame-carve			scripts/kf/audit_functions.py	anonymous WIP start; stack-frame+ra-save+matching-stack-return
 OPTXT.EXE	0x80013174	0x2974	0x28	0x28	1	function	mips-frame-carve			scripts/kf/audit_functions.py	anonymous WIP start; stack-frame+ra-save+matching-stack-return
 OPTXT.EXE	0x8001319c	0x299c	0x28	0x28	1	function	mips-frame-carve			scripts/kf/audit_functions.py	anonymous WIP start; stack-frame+ra-save+matching-stack-return
@@ -2091,18 +2091,18 @@ OPTXT.EXE	0x8001b7a0	0xafa0	0x38	0x38	1	function	mips-frame-carve			scripts/kf/a
 OPTXT.EXE	0x8001b7d8	0xafd8	0x48	0x48	1	function	mips-frame-carve			scripts/kf/audit_functions.py	anonymous WIP start; stack-frame+ra-save+hoisted-prologue+matching-stack-return
 OPTXT.EXE	0x8001b820	0xb020	0x48	0x48	1	function	mips-frame-carve			scripts/kf/audit_functions.py	anonymous WIP start; stack-frame+ra-save+hoisted-prologue+matching-stack-return
 OPTXT.EXE	0x8001b870	0xb070	0x118	0x118	1	function	mips-frame-carve			scripts/kf/audit_functions.py	anonymous WIP start; stack-frame+ra-save+hoisted-prologue+matching-stack-return
-OPTXT.EXE	0x8001b988	0xb188	0x2c	0x2c	1	function	mips-return-carve			scripts/kf/audit_functions.py	anonymous WIP start; previous-return+return-delimited-valid-code
+OPTXT.EXE	0x8001b988	0xb188	0x2c	0x2c	1	function	mips-return-carve	_padSetVsyncParam		scripts/kf/audit_functions.py	anonymous WIP start; previous-return+return-delimited-valid-code
 OPTXT.EXE	0x8001b9b4	0xb1b4	0x68	0x68	1	function	mips-frame-carve			scripts/kf/audit_functions.py	anonymous WIP start; stack-frame+ra-save+hoisted-prologue+matching-stack-return
 OPTXT.EXE	0x8001ba1c	0xb21c	0x16c	0x16c	1	function	mips-frame-carve			scripts/kf/audit_functions.py	anonymous WIP start; stack-frame+ra-save+matching-stack-return
 OPTXT.EXE	0x8001bb88	0xb388	0x14	0x14	1	function	mips-return-carve			scripts/kf/audit_functions.py	anonymous WIP start; previous-return+return-delimited-valid-code
 OPTXT.EXE	0x8001bb9c	0xb39c	0xcc	0xcc	1	function	mips-frame-carve			scripts/kf/audit_functions.py	anonymous WIP start; stack-frame+ra-save+matching-stack-return
 OPTXT.EXE	0x8001bc68	0xb468	0x44	0x44	1	function	mips-frame-carve			scripts/kf/audit_functions.py	anonymous WIP start; stack-frame+ra-save+matching-stack-return
-OPTXT.EXE	0x8001bcac	0xb4ac	0x214	0x214	1	function	mips-frame-carve			scripts/kf/audit_functions.py	anonymous WIP start; stack-frame+ra-save+matching-stack-return
+OPTXT.EXE	0x8001bcac	0xb4ac	0x214	0x214	1	function	mips-frame-carve	_padInitSioMode		scripts/kf/audit_functions.py	anonymous WIP start; stack-frame+ra-save+matching-stack-return
 OPTXT.EXE	0x8001bec0	0xb6c0	0xc8	0xc8	1	function	mips-frame-carve			scripts/kf/audit_functions.py	anonymous WIP start; stack-frame+ra-save+matching-stack-return
 OPTXT.EXE	0x8001bf88	0xb788	0x1d8	0x1d8	1	function	mips-frame-carve			scripts/kf/audit_functions.py	anonymous WIP start; stack-frame+ra-save+matching-stack-return
 OPTXT.EXE	0x8001c160	0xb960	0x234	0x234	1	function	mips-frame-carve			scripts/kf/audit_functions.py	anonymous WIP start; stack-frame+ra-save+matching-stack-return
 OPTXT.EXE	0x8001c394	0xbb94	0x90	0x90	1	function	mips-frame-carve			scripts/kf/audit_functions.py	anonymous WIP start; stack-frame+ra-save+matching-stack-return
-OPTXT.EXE	0x8001c424	0xbc24	0x28	0x28	1	function	mips-return-carve			scripts/kf/audit_functions.py	anonymous WIP start; previous-return+return-delimited-valid-code
+OPTXT.EXE	0x8001c424	0xbc24	0x28	0x28	1	function	mips-return-carve	_padWaitRXready		scripts/kf/audit_functions.py	anonymous WIP start; previous-return+return-delimited-valid-code
 OPTXT.EXE	0x8001c450	0xbc50	0xc	0xc	1	function	mips-return-carve			scripts/kf/audit_functions.py	anonymous WIP start; previous-return+return-delimited-valid-code+skipped-1-padding-nop
 OPTXT.EXE	0x8001c460	0xbc60	0xc	0xc	1	function	mips-call-split			scripts/kf/audit_functions.py	anonymous WIP start; jal-target x2+owner-cannot-fall-through
 OPTXT.EXE	0x8001c470	0xbc70	0xc	0xc	1	function	mips-call-split			scripts/kf/audit_functions.py	anonymous WIP start; jal-target x1+owner-cannot-fall-through

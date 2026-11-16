@@ -374,7 +374,17 @@ OPTXT.EXE	0x8001c46c	0xbc6c	0x4	unclassified	coverage-gap			payload-complement	m
 OPTXT.EXE	0x8001cdc4	0xc5c4	0xc	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 OPTXT.EXE	0x8001da0c	0xd20c	0x4	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 OPTXT.EXE	0x8001de84	0xd684	0xc	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
-OPTXT.EXE	0x8001df50	0xd750	0x18b0	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
+OPTXT.EXE	0x8001df50	0xd750	0x18	defined	proven	page_tpage	VramOffset[6]	asm;src/optxt/main.c optxt.main	texture page VRAM position of each text page
+OPTXT.EXE	0x8001df68	0xd768	0x1830	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
+OPTXT.EXE	0x8001f798	0xef98	0x4	pointer	proven	next_program	u8 *	asm;src/optxt/main.c optxt.main	$gp+0; points at PSX.EXE next-program byte 0x800103f0
+OPTXT.EXE	0x8001f79c	0xef9c	0x4	pointer	proven	PTR_8001f79c	u8 *	asm;src/optxt/main.c optxt.main	$gp+4; points at 0x800103f1
+OPTXT.EXE	0x8001f7a0	0xefa0	0x4	defined	proven	clut_origin	VramOffset	asm;src/optxt/main.c optxt.main	$gp+8; holds (0, 480); never referenced
+OPTXT.EXE	0x8001f7a4	0xefa4	0x1c	unclassified	coverage-gap			payload-complement	optxt.main SDATA literals: clear_vram RECT, "\ST\\", ";1", the shared MoveImage RECT
+OPTXT.EXE	0x8001f7c0	0xefc0	0x20	unclassified	coverage-gap			payload-complement	MALLOC.OBJ .sbss
+OPTXT.EXE	0x8001f7e0	0xefe0	0x6	bss	proven	act_align	u_char[6]	asm;src/optxt/main.c optxt.main	.sbss; $gp+72
+OPTXT.EXE	0x8001f7e6	0xefe6	0x2	unclassified	coverage-gap			payload-complement	.sbss alignment
+OPTXT.EXE	0x8001f7e8	0xefe8	0x4	bss	proven	frame	int	asm;src/optxt/main.c optxt.main	.sbss; $gp+80
+OPTXT.EXE	0x8001f7ec	0xefec	0x14	unclassified	coverage-gap			payload-complement	the opening state word 0x8001f7ec (read and written by its fixed address, absolute lui pairs, no relocation), .sbss alignment and MALLOC.OBJ .bss
 VS.EXE	0x80011000	0x800	0x1980	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 VS.EXE	0x8002c380	0x1bb80	0x1390	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 VS.EXE	0x8002f3e0	0x1ebe0	0x1240	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data

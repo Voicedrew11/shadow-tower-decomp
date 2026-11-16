@@ -190,6 +190,28 @@ The relink also places sixteen library functions the FID census left as
 game candidates (LIBSND, LIBSPU and LIBPAD members; see
 `functions_vendored.tsv`, confidence `relink-map-sdk42`).
 
+## OPTXT.EXE
+
+`src/optxt/main.c` reconstructs OPTXT.EXE's eighteen game functions as one
+unit (`probe-gcc272cdk-o2-g8`); seventeen are exact. `play_opening_text`
+comes out four bytes longer than retail (an extra saved register for the
+hoisted address of the opening's state word), so the link puts everything
+after it four bytes late.
+With that function's retail size, every byte outside it equals retail, which
+confirmed the END.EXE rules above and these:
+
+- The unit's `.data` (the text-page table) starts right after the last LIBPAD
+  text at `0x8001df50`; its `.sbss` statics follow `MALLOC.OBJ`'s 32-byte
+  `.sbss`, and `.bss` starts with `MALLOC.OBJ`'s 16 bytes.
+- Exported COMMON objects are 8-byte aligned in bucket order: the text
+  buffer, `display`, the 0x4c-byte pad buffers (`pad_data`) and the pad
+  status.
+- The opening's state word `0x8001f7ec`, the word after the unit's `.sbss`,
+  is read and written only with absolute `lui` pairs, which no symbol of the
+  unit gets; the source spells the fixed address. An `extern int` defined
+  outside the unit reproduces the same access form and is never hoisted by
+  the loop pass, so the original may have named a symbol from another object.
+
 ## PS-X EXE header
 
 `KERNEL.H` defines the 0x88-byte header as follows:

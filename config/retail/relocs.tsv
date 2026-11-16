@@ -463,6 +463,193 @@ TITLE.EXE	0x800143ec	0x2bec		mips26	reachable-code	0x800183fc	load		jal		manual-
 TITLE.EXE	0x800143f4	0x2bf4		mips26	reachable-code	0x80023dbc	load		jal		manual-decoded	reviewed	title.main asm review
 TITLE.EXE	0x800143fc	0x2bfc		mips26	reachable-code	0x80020c8c	load		jal		manual-decoded	reviewed	title.main asm review
 TITLE.EXE	0x80014404	0x2c04		mips26	reachable-code	0x8001fd10	load		jal		manual-decoded	reviewed	title.main asm review
+OPTXT.EXE	0x80011fcc	0x17cc		mips26	reachable-code	0x80017fe0	load		jal		manual-decoded	reviewed	optxt.main asm review
+OPTXT.EXE	0x80011fe0	0x17e0		mips26	reachable-code	0x80017fe0	load		jal		manual-decoded	reviewed	optxt.main asm review
+OPTXT.EXE	0x80012064	0x1864		mips26	reachable-code	0x8001207c	load		j		manual-decoded	reviewed	optxt.main asm review
+OPTXT.EXE	0x80012098	0x1898		mips26	reachable-code	0x800188f8	load		jal		manual-decoded	reviewed	optxt.main asm review
+OPTXT.EXE	0x800120ec	0x18ec		mips26	reachable-code	0x80012104	load		j		manual-decoded	reviewed	optxt.main asm review
+OPTXT.EXE	0x80012120	0x1920		mips26	reachable-code	0x800188f8	load		jal		manual-decoded	reviewed	optxt.main asm review
+OPTXT.EXE	0x80012134	0x1934		mips26	reachable-code	0x80012004	load		j		manual-decoded	reviewed	optxt.main asm review
+OPTXT.EXE	0x80012170	0x1970	0x80012174	mips_hi16_lo16	reachable-code	0x8001f7a4	load		lui+addiu		manual-decoded	reviewed	optxt.main asm review
+OPTXT.EXE	0x800121a4	0x19a4		mips26	reachable-code	0x800187d0	load		jal		manual-decoded	reviewed	optxt.main asm review
+OPTXT.EXE	0x800121f0	0x19f0		mips26	reachable-code	0x8001360c	load		jal		manual-decoded	reviewed	optxt.main asm review
+OPTXT.EXE	0x800121f8	0x19f8		mips26	reachable-code	0x80017220	load		jal		manual-decoded	reviewed	optxt.main asm review
+OPTXT.EXE	0x80012208	0x1a08		mips26	reachable-code	0x8001339c	load		jal		manual-decoded	reviewed	optxt.main asm review
+OPTXT.EXE	0x80012220	0x1a20		mips26	reachable-code	0x80016000	load		jal		manual-decoded	reviewed	optxt.main asm review
+OPTXT.EXE	0x80012234	0x1a34		mips26	reachable-code	0x80013334	load		jal		manual-decoded	reviewed	optxt.main asm review
+OPTXT.EXE	0x8001223c	0x1a3c		mips26	reachable-code	0x80012204	load		j		manual-decoded	reviewed	optxt.main asm review
+OPTXT.EXE	0x80012244	0x1a44		mips26	reachable-code	0x80016100	load		jal		manual-decoded	reviewed	optxt.main asm review
+OPTXT.EXE	0x80012260	0x1a60		mips26	reachable-code	0x8001339c	load		jal		manual-decoded	reviewed	optxt.main asm review
+OPTXT.EXE	0x800122a4	0x1aa4	0x800122b0	mips_hi16_lo16	reachable-code	0x8001f7ac	load		lui+addiu		manual-decoded	reviewed	optxt.main asm review
+OPTXT.EXE	0x800122c8	0x1ac8		mips26	reachable-code	0x80017f80	load		jal		manual-decoded	reviewed	optxt.main asm review
+OPTXT.EXE	0x800122d4	0x1ad4	0x800122dc	mips_hi16_lo16	reachable-code	0x8001f7b4	load		lui+addiu		manual-decoded	reviewed	optxt.main asm review
+OPTXT.EXE	0x800122d8	0x1ad8		mips26	reachable-code	0x80017f80	load		jal		manual-decoded	reviewed	optxt.main asm review
+OPTXT.EXE	0x800122e8	0x1ae8		mips26	reachable-code	0x800150e0	load		jal		manual-decoded	reviewed	optxt.main asm review
+OPTXT.EXE	0x800122fc	0x1afc		mips26	reachable-code	0x8001339c	load		jal		manual-decoded	reviewed	optxt.main asm review
+OPTXT.EXE	0x80012304	0x1b04		mips26	reachable-code	0x800122e8	load		j		manual-decoded	reviewed	optxt.main asm review
+OPTXT.EXE	0x80012320	0x1b20		mips26	reachable-code	0x800121bc	load		jal		manual-decoded	reviewed	optxt.main asm review
+OPTXT.EXE	0x80012350	0x1b50	0x8001235c	mips_hi16_lo16	reachable-code	0x80011000	load		lui+addiu		manual-decoded	reviewed	optxt.main asm review
+OPTXT.EXE	0x80012358	0x1b58		mips26	reachable-code	0x800150e0	load		jal		manual-decoded	reviewed	optxt.main asm review
+OPTXT.EXE	0x80012370	0x1b70		mips26	reachable-code	0x8001360c	load		jal		manual-decoded	reviewed	optxt.main asm review
+OPTXT.EXE	0x80012378	0x1b78		mips26	reachable-code	0x80017220	load		jal		manual-decoded	reviewed	optxt.main asm review
+OPTXT.EXE	0x80012388	0x1b88		mips26	reachable-code	0x8001339c	load		jal		manual-decoded	reviewed	optxt.main asm review
+OPTXT.EXE	0x800123ac	0x1bac		mips26	reachable-code	0x8001339c	load		jal		manual-decoded	reviewed	optxt.main asm review
+OPTXT.EXE	0x800123c4	0x1bc4		mips26	reachable-code	0x8001360c	load		jal		manual-decoded	reviewed	optxt.main asm review
+OPTXT.EXE	0x800123f4	0x1bf4	0x80012414	mips_hi16_lo16	reachable-code	0x801af938	bss	pad	lui+sb		manual-decoded	reviewed	optxt.main asm review
+OPTXT.EXE	0x800123f4	0x1bf4	0x80012418	mips_hi16_lo16	reachable-code	0x801af938	bss	pad	lui+lbu		manual-decoded	reviewed	optxt.main asm review
+OPTXT.EXE	0x800123f4	0x1bf4	0x80012428	mips_hi16_lo16	reachable-code	0x801af938	bss	pad	lui+lbu		manual-decoded	reviewed	optxt.main asm review
+OPTXT.EXE	0x8001240c	0x1c0c		mips26	reachable-code	0x8001b46c	load		jal		manual-decoded	reviewed	optxt.main asm review
+OPTXT.EXE	0x80012460	0x1c60	0x80012464	mips_hi16_lo16	reachable-code	0x801af93b	bss	pad	lui+lbu		manual-decoded	reviewed	optxt.main asm review
+OPTXT.EXE	0x80012478	0x1c78		mips_gprel16	reachable-code	0x8001f7e0	bss	act_align	sb	gp	manual-decoded	reviewed	optxt.main asm review
+OPTXT.EXE	0x8001247c	0x1c7c		mips_gprel16	reachable-code	0x8001f7e1	bss	act_align	sb	gp	manual-decoded	reviewed	optxt.main asm review
+OPTXT.EXE	0x8001248c	0x1c8c		mips_gprel16	reachable-code	0x8001f7e2	bss	act_align	sb	gp	manual-decoded	reviewed	optxt.main asm review
+OPTXT.EXE	0x80012490	0x1c90		mips_gprel16	reachable-code	0x8001f7e3	bss	act_align	sb	gp	manual-decoded	reviewed	optxt.main asm review
+OPTXT.EXE	0x80012498	0x1c98		mips_gprel16	reachable-code	0x8001f7e5	bss	act_align	sb	gp	manual-decoded	reviewed	optxt.main asm review
+OPTXT.EXE	0x8001249c	0x1c9c		mips_gprel16	reachable-code	0x8001f7e4	bss	act_align	sb	gp	manual-decoded	reviewed	optxt.main asm review
+OPTXT.EXE	0x800124a0	0x1ca0	0x800124a4	mips_hi16_lo16	reachable-code	0x8001f7e0	bss	act_align	lui+addiu		manual-decoded	reviewed	optxt.main asm review
+OPTXT.EXE	0x800124a8	0x1ca8		mips26	reachable-code	0x8001b7a0	load		jal		manual-decoded	reviewed	optxt.main asm review
+OPTXT.EXE	0x800124cc	0x1ccc	0x800124d4	mips_hi16_lo16	reachable-code	0x801af938	bss	pad	lui+addiu		manual-decoded	reviewed	optxt.main asm review
+OPTXT.EXE	0x800124cc	0x1ccc	0x800124d8	mips_hi16_lo16	reachable-code	0x801af938	bss	pad	lui+lbu		manual-decoded	reviewed	optxt.main asm review
+OPTXT.EXE	0x800124f0	0x1cf0		mips26	reachable-code	0x8001b624	load		jal		manual-decoded	reviewed	optxt.main asm review
+OPTXT.EXE	0x800124f8	0x1cf8		mips26	reachable-code	0x800123e4	load		jal		manual-decoded	reviewed	optxt.main asm review
+OPTXT.EXE	0x80012500	0x1d00		mips26	reachable-code	0x80012460	load		jal		manual-decoded	reviewed	optxt.main asm review
+OPTXT.EXE	0x80012508	0x1d08		mips26	reachable-code	0x80012514	load		j		manual-decoded	reviewed	optxt.main asm review
+OPTXT.EXE	0x80012530	0x1d30		mips26	reachable-code	0x8001b46c	load		jal		manual-decoded	reviewed	optxt.main asm review
+OPTXT.EXE	0x80012538	0x1d38	0x8001253c	mips_hi16_lo16	reachable-code	0x801af938	bss	pad	lui+sb		manual-decoded	reviewed	optxt.main asm review
+OPTXT.EXE	0x80012538	0x1d38	0x80012540	mips_hi16_lo16	reachable-code	0x801af938	bss	pad	lui+lbu		manual-decoded	reviewed	optxt.main asm review
+OPTXT.EXE	0x80012554	0x1d54	0x80012558	mips_hi16_lo16	reachable-code	0x800110e8	load		lui+addiu		manual-decoded	reviewed	optxt.main asm review
+OPTXT.EXE	0x80012574	0x1d74	0x80012578	mips_hi16_lo16	reachable-code	0x801af938	bss	pad	lui+addiu		manual-decoded	reviewed	optxt.main asm review
+OPTXT.EXE	0x80012584	0x1d84		mips26	reachable-code	0x800125f8	load		j		manual-decoded	reviewed	optxt.main asm review
+OPTXT.EXE	0x8001258c	0x1d8c	0x80012590	mips_hi16_lo16	reachable-code	0x801af938	bss	pad	lui+addiu		manual-decoded	reviewed	optxt.main asm review
+OPTXT.EXE	0x8001259c	0x1d9c		mips26	reachable-code	0x800125f8	load		j		manual-decoded	reviewed	optxt.main asm review
+OPTXT.EXE	0x800125a4	0x1da4	0x800125a8	mips_hi16_lo16	reachable-code	0x801af938	bss	pad	lui+addiu		manual-decoded	reviewed	optxt.main asm review
+OPTXT.EXE	0x800125b8	0x1db8	0x800125dc	mips_hi16_lo16	reachable-code	0x801af938	bss	pad	lui+addiu		manual-decoded	reviewed	optxt.main asm review
+OPTXT.EXE	0x800125c8	0x1dc8	0x800125dc	mips_hi16_lo16	reachable-code	0x801af938	bss	pad	lui+addiu		manual-decoded	reviewed	optxt.main asm review
+OPTXT.EXE	0x800125d0	0x1dd0		mips26	reachable-code	0x80012460	load		jal		manual-decoded	reviewed	optxt.main asm review
+OPTXT.EXE	0x800125d8	0x1dd8	0x800125dc	mips_hi16_lo16	reachable-code	0x801af938	bss	pad	lui+addiu		manual-decoded	reviewed	optxt.main asm review
+OPTXT.EXE	0x80012610	0x1e10	0x80012614	mips_hi16_lo16	reachable-code	0x801af8e8	bss	pad_data	lui+addiu		manual-decoded	reviewed	optxt.main asm review
+OPTXT.EXE	0x80012644	0x1e44		mips26	reachable-code	0x8001d3b0	load		jal		manual-decoded	reviewed	optxt.main asm review
+OPTXT.EXE	0x80012654	0x1e54		mips26	reachable-code	0x8001b820	load		jal		manual-decoded	reviewed	optxt.main asm review
+OPTXT.EXE	0x8001265c	0x1e5c		mips26	reachable-code	0x8001b3e0	load		jal		manual-decoded	reviewed	optxt.main asm review
+OPTXT.EXE	0x80012664	0x1e64		mips26	reachable-code	0x800123e4	load		jal		manual-decoded	reviewed	optxt.main asm review
+OPTXT.EXE	0x8001266c	0x1e6c		mips26	reachable-code	0x800124c8	load		jal		manual-decoded	reviewed	optxt.main asm review
+OPTXT.EXE	0x80012674	0x1e74	0x80012678	mips_hi16_lo16	reachable-code	0x801af938	bss	pad	lui+addiu		manual-decoded	reviewed	optxt.main asm review
+OPTXT.EXE	0x800126a8	0x1ea8		mips26	reachable-code	0x80012528	load		jal		manual-decoded	reviewed	optxt.main asm review
+OPTXT.EXE	0x800126b0	0x1eb0	0x800126b4	mips_hi16_lo16	reachable-code	0x801af938	bss	pad	lui+addiu		manual-decoded	reviewed	optxt.main asm review
+OPTXT.EXE	0x800126c4	0x1ec4	0x800126c8	mips_hi16_lo16	reachable-code	0x801af8e8	bss	pad_data	lui+lbu		manual-decoded	reviewed	optxt.main asm review
+OPTXT.EXE	0x800126c4	0x1ec4	0x800126d4	mips_hi16_lo16	reachable-code	0x801af8e8	bss	pad_data	lui+addiu		manual-decoded	reviewed	optxt.main asm review
+OPTXT.EXE	0x80012718	0x1f18	0x80012724	mips_hi16_lo16	reachable-code	0x80011018	load		lui+addiu		manual-decoded	reviewed	optxt.main asm review
+OPTXT.EXE	0x8001278c	0x1f8c		mips26	reachable-code	0x8001b2f0	load		jal		manual-decoded	reviewed	optxt.main asm review
+OPTXT.EXE	0x800127a8	0x1fa8		mips26	reachable-code	0x80019520	load		jal		manual-decoded	reviewed	optxt.main asm review
+OPTXT.EXE	0x800127b0	0x1fb0		mips26	reachable-code	0x80018be4	load		jal		manual-decoded	reviewed	optxt.main asm review
+OPTXT.EXE	0x800127b8	0x1fb8		mips26	reachable-code	0x8001b380	load		jal		manual-decoded	reviewed	optxt.main asm review
+OPTXT.EXE	0x800127c4	0x1fc4		mips26	reachable-code	0x8001b350	load		jal		manual-decoded	reviewed	optxt.main asm review
+OPTXT.EXE	0x800127cc	0x1fcc		mips26	reachable-code	0x80018be4	load		jal		manual-decoded	reviewed	optxt.main asm review
+OPTXT.EXE	0x800127fc	0x1ffc	0x80012800	mips_hi16_lo16	reachable-code	0x80011030	load		lui+addiu		manual-decoded	reviewed	optxt.main asm review
+OPTXT.EXE	0x80012854	0x2054		mips26	reachable-code	0x8001286c	load		j		manual-decoded	reviewed	optxt.main asm review
+OPTXT.EXE	0x80012874	0x2074		mips26	reachable-code	0x80012888	load		j		manual-decoded	reviewed	optxt.main asm review
+OPTXT.EXE	0x80012894	0x2094	0x80012898	mips_hi16_lo16	reachable-code	0x8001df50	load	page_tpage	lui+addiu		manual-decoded	reviewed	optxt.main asm review
+OPTXT.EXE	0x800128d0	0x20d0		mips26	reachable-code	0x8001b2f0	load		jal		manual-decoded	reviewed	optxt.main asm review
+OPTXT.EXE	0x800128e0	0x20e0		mips26	reachable-code	0x8001b330	load		jal		manual-decoded	reviewed	optxt.main asm review
+OPTXT.EXE	0x800128ec	0x20ec		mips26	reachable-code	0x8001b3a0	load		jal		manual-decoded	reviewed	optxt.main asm review
+OPTXT.EXE	0x800128f8	0x20f8		mips26	reachable-code	0x8001b350	load		jal		manual-decoded	reviewed	optxt.main asm review
+OPTXT.EXE	0x80012900	0x2100		mips26	reachable-code	0x80018be4	load		jal		manual-decoded	reviewed	optxt.main asm review
+OPTXT.EXE	0x80012918	0x2118		mips_gprel16	reachable-code	0x8001f7e8	bss	frame	lw	gp	manual-decoded	reviewed	optxt.main asm review
+OPTXT.EXE	0x80012960	0x2160		mips26	reachable-code	0x8001298c	load		j		manual-decoded	reviewed	optxt.main asm review
+OPTXT.EXE	0x80012978	0x2178		mips26	reachable-code	0x8001298c	load		j		manual-decoded	reviewed	optxt.main asm review
+OPTXT.EXE	0x800129a0	0x21a0		mips26	reachable-code	0x800127e8	load		jal		manual-decoded	reviewed	optxt.main asm review
+OPTXT.EXE	0x800129bc	0x21bc		mips26	reachable-code	0x800127e8	load		jal		manual-decoded	reviewed	optxt.main asm review
+OPTXT.EXE	0x800129c4	0x21c4		mips_gprel16	reachable-code	0x8001f7e8	bss	frame	lw	gp	manual-decoded	reviewed	optxt.main asm review
+OPTXT.EXE	0x800129e0	0x21e0		mips_gprel16	reachable-code	0x8001f7e8	bss	frame	sw	gp	manual-decoded	reviewed	optxt.main asm review
+OPTXT.EXE	0x800129e4	0x21e4		mips26	reachable-code	0x800129f0	load		j		manual-decoded	reviewed	optxt.main asm review
+OPTXT.EXE	0x800129ec	0x21ec		mips_gprel16	reachable-code	0x8001f7e8	bss	frame	sw	gp	manual-decoded	reviewed	optxt.main asm review
+OPTXT.EXE	0x80012a0c	0x220c	0x80012a28	mips_hi16_lo16	reachable-code	0x8001f7b8	load		lui+addiu		manual-decoded	reviewed	optxt.main asm review
+OPTXT.EXE	0x80012a10	0x2210	0x80012a14	mips_hi16_lo16	reachable-code	0x801af800	bss	display	lui+addiu		manual-decoded	reviewed	optxt.main asm review
+OPTXT.EXE	0x80012a6c	0x226c		mips26	reachable-code	0x800189b8	load		jal		manual-decoded	reviewed	optxt.main asm review
+OPTXT.EXE	0x80012a74	0x2274		mips_gprel16	reachable-code	0x8001f7e8	bss	frame	lw	gp	manual-decoded	reviewed	optxt.main asm review
+OPTXT.EXE	0x80012a8c	0x228c		mips26	reachable-code	0x80012710	load		jal		manual-decoded	reviewed	optxt.main asm review
+OPTXT.EXE	0x80012a94	0x2294		mips_gprel16	reachable-code	0x8001f7e8	bss	frame	lw	gp	manual-decoded	reviewed	optxt.main asm review
+OPTXT.EXE	0x80012ad0	0x22d0		mips26	reachable-code	0x80012afc	load		j		manual-decoded	reviewed	optxt.main asm review
+OPTXT.EXE	0x80012ae8	0x22e8		mips26	reachable-code	0x80012afc	load		j		manual-decoded	reviewed	optxt.main asm review
+OPTXT.EXE	0x80012b10	0x2310		mips26	reachable-code	0x800127e8	load		jal		manual-decoded	reviewed	optxt.main asm review
+OPTXT.EXE	0x80012b2c	0x232c		mips26	reachable-code	0x800127e8	load		jal		manual-decoded	reviewed	optxt.main asm review
+OPTXT.EXE	0x80012b34	0x2334		mips_gprel16	reachable-code	0x8001f7e8	bss	frame	lw	gp	manual-decoded	reviewed	optxt.main asm review
+OPTXT.EXE	0x80012b50	0x2350		mips_gprel16	reachable-code	0x8001f7e8	bss	frame	sw	gp	manual-decoded	reviewed	optxt.main asm review
+OPTXT.EXE	0x80012b54	0x2354		mips26	reachable-code	0x80012b60	load		j		manual-decoded	reviewed	optxt.main asm review
+OPTXT.EXE	0x80012b5c	0x235c		mips_gprel16	reachable-code	0x8001f7e8	bss	frame	sw	gp	manual-decoded	reviewed	optxt.main asm review
+OPTXT.EXE	0x80012b7c	0x237c	0x80012b8c	mips_hi16_lo16	reachable-code	0x8001f7b8	load		lui+addiu		manual-decoded	reviewed	optxt.main asm review
+OPTXT.EXE	0x80012bb4	0x23b4		mips_gprel16	reachable-code	0x8001f7e8	bss	frame	lw	gp	manual-decoded	reviewed	optxt.main asm review
+OPTXT.EXE	0x80012bc8	0x23c8	0x80012bcc	mips_hi16_lo16	reachable-code	0x801af800	bss	display	lui+addiu		manual-decoded	reviewed	optxt.main asm review
+OPTXT.EXE	0x80012bf8	0x23f8		mips26	reachable-code	0x800189b8	load		jal		manual-decoded	reviewed	optxt.main asm review
+OPTXT.EXE	0x80012c00	0x2400		mips_gprel16	reachable-code	0x8001f7e8	bss	frame	lw	gp	manual-decoded	reviewed	optxt.main asm review
+OPTXT.EXE	0x80012c1c	0x241c		mips26	reachable-code	0x80012710	load		jal		manual-decoded	reviewed	optxt.main asm review
+OPTXT.EXE	0x80012c24	0x2424		mips_gprel16	reachable-code	0x8001f7e8	bss	frame	lw	gp	manual-decoded	reviewed	optxt.main asm review
+OPTXT.EXE	0x80012c5c	0x245c		mips26	reachable-code	0x80012c88	load		j		manual-decoded	reviewed	optxt.main asm review
+OPTXT.EXE	0x80012c74	0x2474		mips26	reachable-code	0x80012c88	load		j		manual-decoded	reviewed	optxt.main asm review
+OPTXT.EXE	0x80012c9c	0x249c		mips26	reachable-code	0x800127e8	load		jal		manual-decoded	reviewed	optxt.main asm review
+OPTXT.EXE	0x80012cb8	0x24b8		mips26	reachable-code	0x800127e8	load		jal		manual-decoded	reviewed	optxt.main asm review
+OPTXT.EXE	0x80012cc0	0x24c0		mips_gprel16	reachable-code	0x8001f7e8	bss	frame	lw	gp	manual-decoded	reviewed	optxt.main asm review
+OPTXT.EXE	0x80012cdc	0x24dc		mips_gprel16	reachable-code	0x8001f7e8	bss	frame	sw	gp	manual-decoded	reviewed	optxt.main asm review
+OPTXT.EXE	0x80012ce0	0x24e0		mips26	reachable-code	0x80012cec	load		j		manual-decoded	reviewed	optxt.main asm review
+OPTXT.EXE	0x80012ce8	0x24e8		mips_gprel16	reachable-code	0x8001f7e8	bss	frame	sw	gp	manual-decoded	reviewed	optxt.main asm review
+OPTXT.EXE	0x80012d0c	0x250c	0x80012d10	mips_hi16_lo16	reachable-code	0x8001f800	bss	text_buffer	lui+addiu		manual-decoded	reviewed	optxt.main asm review
+OPTXT.EXE	0x80012d18	0x2518	0x80012d1c	mips_hi16_lo16	reachable-code	0x80011058	load		lui+addiu		manual-decoded	reviewed	optxt.main asm review
+OPTXT.EXE	0x80012d2c	0x252c		mips26	reachable-code	0x80012290	load		jal		manual-decoded	reviewed	optxt.main asm review
+OPTXT.EXE	0x80012d48	0x2548		mips26	reachable-code	0x80011f8c	load		jal		manual-decoded	reviewed	optxt.main asm review
+OPTXT.EXE	0x80012d64	0x2564		mips26	reachable-code	0x8001864c	load		jal		manual-decoded	reviewed	optxt.main asm review
+OPTXT.EXE	0x80012d6c	0x256c	0x80012d70	mips_hi16_lo16	reachable-code	0x801af800	bss	display	lui+addiu		manual-decoded	reviewed	optxt.main asm review
+OPTXT.EXE	0x80012d84	0x2584		mips_gprel16	reachable-code	0x8001f7e8	bss	frame	sw	gp	manual-decoded	reviewed	optxt.main asm review
+OPTXT.EXE	0x80012d88	0x2588		mips26	reachable-code	0x800126a0	load		jal		manual-decoded	reviewed	optxt.main asm review
+OPTXT.EXE	0x80012d9c	0x259c		mips26	reachable-code	0x8001864c	load		jal		manual-decoded	reviewed	optxt.main asm review
+OPTXT.EXE	0x80012da4	0x25a4		mips26	reachable-code	0x80017220	load		jal		manual-decoded	reviewed	optxt.main asm review
+OPTXT.EXE	0x80012dcc	0x25cc		mips26	reachable-code	0x80018cb0	load		jal		manual-decoded	reviewed	optxt.main asm review
+OPTXT.EXE	0x80012de8	0x25e8		mips26	reachable-code	0x80018e7c	load		jal		manual-decoded	reviewed	optxt.main asm review
+OPTXT.EXE	0x80012e04	0x2604		mips26	reachable-code	0x80012348	load		jal		manual-decoded	reviewed	optxt.main asm review
+OPTXT.EXE	0x80012e14	0x2614		mips26	reachable-code	0x80017110	load		jal		manual-decoded	reviewed	optxt.main asm review
+OPTXT.EXE	0x80012e20	0x2620		mips26	reachable-code	0x80016200	load		jal		manual-decoded	reviewed	optxt.main asm review
+OPTXT.EXE	0x80012e30	0x2630		mips26	reachable-code	0x80012e90	load		j		manual-decoded	reviewed	optxt.main asm review
+OPTXT.EXE	0x80012e34	0x2634	0x80012e90	mips_hi16_lo16	reachable-code	0x801af948	bss	pad	lui+lw		manual-decoded	reviewed	optxt.main asm review
+OPTXT.EXE	0x80012e40	0x2640		mips26	reachable-code	0x80012918	load		jal		manual-decoded	reviewed	optxt.main asm review
+OPTXT.EXE	0x80012e48	0x2648		mips26	reachable-code	0x80012e90	load		j		manual-decoded	reviewed	optxt.main asm review
+OPTXT.EXE	0x80012e4c	0x264c	0x80012e90	mips_hi16_lo16	reachable-code	0x801af948	bss	pad	lui+lw		manual-decoded	reviewed	optxt.main asm review
+OPTXT.EXE	0x80012e58	0x2658		mips26	reachable-code	0x80012a08	load		jal		manual-decoded	reviewed	optxt.main asm review
+OPTXT.EXE	0x80012e60	0x2660		mips26	reachable-code	0x80012e90	load		j		manual-decoded	reviewed	optxt.main asm review
+OPTXT.EXE	0x80012e64	0x2664	0x80012e90	mips_hi16_lo16	reachable-code	0x801af948	bss	pad	lui+lw		manual-decoded	reviewed	optxt.main asm review
+OPTXT.EXE	0x80012e70	0x2670		mips26	reachable-code	0x80012b78	load		jal		manual-decoded	reviewed	optxt.main asm review
+OPTXT.EXE	0x80012e78	0x2678		mips26	reachable-code	0x80012e90	load		j		manual-decoded	reviewed	optxt.main asm review
+OPTXT.EXE	0x80012e7c	0x267c	0x80012e90	mips_hi16_lo16	reachable-code	0x801af948	bss	pad	lui+lw		manual-decoded	reviewed	optxt.main asm review
+OPTXT.EXE	0x80012e84	0x2684	0x80012e90	mips_hi16_lo16	reachable-code	0x801af948	bss	pad	lui+lw		manual-decoded	reviewed	optxt.main asm review
+OPTXT.EXE	0x80012ecc	0x26cc		mips26	reachable-code	0x8001360c	load		jal		manual-decoded	reviewed	optxt.main asm review
+OPTXT.EXE	0x80012edc	0x26dc		mips26	reachable-code	0x80017110	load		jal		manual-decoded	reviewed	optxt.main asm review
+OPTXT.EXE	0x80012eec	0x26ec		mips26	reachable-code	0x8001339c	load		jal		manual-decoded	reviewed	optxt.main asm review
+OPTXT.EXE	0x80012f24	0x2724		mips26	reachable-code	0x80011978	load		jal		manual-decoded	reviewed	optxt.main asm review
+OPTXT.EXE	0x80012f2c	0x272c	0x80012f30	mips_hi16_lo16	reachable-code	0x800110d0	load		lui+addiu		manual-decoded	reviewed	optxt.main asm review
+OPTXT.EXE	0x80012f64	0x2764		mips26	reachable-code	0x80017430	load		jal		manual-decoded	reviewed	optxt.main asm review
+OPTXT.EXE	0x80012f68	0x2768	0x80012f88	mips_hi16_lo16	reachable-code	0x801af828	bss	display	lui+addiu		manual-decoded	reviewed	optxt.main asm review
+OPTXT.EXE	0x80012f6c	0x276c		mips26	reachable-code	0x800182d0	load		jal		manual-decoded	reviewed	optxt.main asm review
+OPTXT.EXE	0x80012f74	0x2774		mips26	reachable-code	0x80018444	load		jal		manual-decoded	reviewed	optxt.main asm review
+OPTXT.EXE	0x80012f7c	0x277c		mips26	reachable-code	0x800185b4	load		jal		manual-decoded	reviewed	optxt.main asm review
+OPTXT.EXE	0x80012f84	0x2784		mips26	reachable-code	0x80012608	load		jal		manual-decoded	reviewed	optxt.main asm review
+OPTXT.EXE	0x80012f8c	0x278c		mips26	reachable-code	0x80012168	load		jal		manual-decoded	reviewed	optxt.main asm review
+OPTXT.EXE	0x80012fa4	0x27a4		mips26	reachable-code	0x800181b0	load		jal		manual-decoded	reviewed	optxt.main asm review
+OPTXT.EXE	0x80012fc0	0x27c0		mips26	reachable-code	0x80018264	load		jal		manual-decoded	reviewed	optxt.main asm review
+OPTXT.EXE	0x80012fdc	0x27dc		mips26	reachable-code	0x800181b0	load		jal		manual-decoded	reviewed	optxt.main asm review
+OPTXT.EXE	0x80012ff4	0x27f4		mips26	reachable-code	0x80018264	load		jal		manual-decoded	reviewed	optxt.main asm review
+OPTXT.EXE	0x80013028	0x2828		mips26	reachable-code	0x800130f0	load		jal		manual-decoded	reviewed	optxt.main asm review
+OPTXT.EXE	0x8001303c	0x283c		mips26	reachable-code	0x80013334	load		jal		manual-decoded	reviewed	optxt.main asm review
+OPTXT.EXE	0x80013044	0x2844		mips26	reachable-code	0x80013028	load		j		manual-decoded	reviewed	optxt.main asm review
+OPTXT.EXE	0x8001304c	0x284c		mips26	reachable-code	0x800132b8	load		jal		manual-decoded	reviewed	optxt.main asm review
+OPTXT.EXE	0x80013054	0x2854	0x80013058	mips_hi16_lo16	reachable-code	0x801af800	bss	display	lui+addiu		manual-decoded	reviewed	optxt.main asm review
+OPTXT.EXE	0x80013060	0x2860		mips26	reachable-code	0x80018e7c	load		jal		manual-decoded	reviewed	optxt.main asm review
+OPTXT.EXE	0x80013084	0x2884		mips26	reachable-code	0x80018cb0	load		jal		manual-decoded	reviewed	optxt.main asm review
+OPTXT.EXE	0x8001308c	0x288c		mips26	reachable-code	0x800185b4	load		jal		manual-decoded	reviewed	optxt.main asm review
+OPTXT.EXE	0x80013094	0x2894		mips26	reachable-code	0x80012d04	load		jal		manual-decoded	reviewed	optxt.main asm review
+OPTXT.EXE	0x8001309c	0x289c		mips_gprel16	reachable-code	0x8001f798	load	next_program	lw	gp	manual-decoded	reviewed	optxt.main asm review
+OPTXT.EXE	0x800130a8	0x28a8		mips_gprel16	reachable-code	0x8001f79c	load	PTR_8001f79c	lw	gp	manual-decoded	reviewed	optxt.main asm review
+OPTXT.EXE	0x800130b0	0x28b0		mips26	reachable-code	0x80012168	load		jal		manual-decoded	reviewed	optxt.main asm review
+OPTXT.EXE	0x800130b8	0x28b8		mips26	reachable-code	0x8001b400	load		jal		manual-decoded	reviewed	optxt.main asm review
+OPTXT.EXE	0x800130c0	0x28c0		mips26	reachable-code	0x800182d0	load		jal		manual-decoded	reviewed	optxt.main asm review
+OPTXT.EXE	0x800130c8	0x28c8		mips26	reachable-code	0x80017524	load		jal		manual-decoded	reviewed	optxt.main asm review
 END.EXE	0x80011fb0	0x17b0	0x80011fb4	mips_hi16_lo16	reachable-code	0x8002fd18	load		lui+addiu		manual-decoded	reviewed	end.main asm review
 END.EXE	0x80011fe4	0x17e4		mips26	reachable-code	0x8001a69c	load		jal		manual-decoded	reviewed	end.main asm review
 END.EXE	0x80012030	0x1830		mips26	reachable-code	0x80013658	load		jal		manual-decoded	reviewed	end.main asm review

@@ -26,16 +26,17 @@ symbols or pretending that WIP names are original symbols:
 | `STR.EXE` | 322 | 302 | 20 |
 | `ST.EXE` | 1,139 | 457 | 682 |
 | `TITLE.EXE` | 387 | 369 | 18 |
-| `OPTXT.EXE` | 283 | 254 | 29 |
+| `OPTXT.EXE` | 283 | 265 | 18 |
 | `VS.EXE` | 660 | 401 | 259 |
 | `END.EXE` | 276 | 261 | 15 |
 | 36 `FDAT_nnn.BIN` | 943 (23–37 each) | 0 | 943 |
-| **Total** | **4,021** | **2,054** | **1,967** |
+| **Total** | **4,021** | **2,065** | **1,956** |
 
 PSX.EXE `main` is reconstructed (`src/psx/main.c`) with its six data
 identities and reviewed relocations, STR.EXE's twenty game functions
-(`src/str/main.c`), TITLE.EXE's eighteen (`src/title/main.c`) and END.EXE's
-fifteen (`src/end/main.c`) with their data; every other game identity is
+(`src/str/main.c`), TITLE.EXE's eighteen (`src/title/main.c`), OPTXT.EXE's
+eighteen (`src/optxt/main.c`, seventeen exact) and END.EXE's fifteen
+(`src/end/main.c`) with their data; every other game identity is
 address-only with a candidate signature from the static MIPS live-in
 heuristic (`kf inventory seed`). The tables are WIP, and the rules below
 say how they grew.
@@ -93,6 +94,9 @@ byte-identical TITLE.EXE relink places sixteen more the census had left as
 game candidates: `SpuInit` (LIBSPU `S_I`), `SsQuit`, `_SsSndPlay`,
 `SsUtReverbOn`, `_SsVmDamperOff` (LIBSND), three exports and three statics of
 LIBPAD `PADMAIN`, and the five `PADIF` statics that `padIntFunc` points at.
+OPTXT.EXE's same eleven LIBPAD functions (0x5e0 bytes of text between
+`PADCMD` and `PADPORTD`) are placed by the native relink whose bytes outside
+`play_opening_text` all equal retail.
 
 Not admitted: the overlays' two-instruction default handler (`jr ra; nop`),
 matched only by an old LIBSND `VM_VIB` signature, since the overlays link no
@@ -190,4 +194,4 @@ and hardware references are not auto-admitted.
 
 The inventories are intentionally iterative. Missing functions, relocations,
 data extents, and xrefs can invalidate earlier candidates without invalidating
-the workflow. Only PSX.EXE `main`'s, STR.EXE's, TITLE.EXE's and END.EXE's relocations are admitted so far.
+the workflow. Only PSX.EXE `main`'s, STR.EXE's, TITLE.EXE's, OPTXT.EXE's and END.EXE's relocations are admitted so far.
