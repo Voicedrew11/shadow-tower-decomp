@@ -17,7 +17,6 @@
 #include <st/xa.h>
 #include <st/fdat.h>
 
-/* Not exact (one attempt, retries off; 57.1%): first divergence retail `sw s2,40(sp)`, this source `sw s1,36(sp)`. */
 /*
  * The falling entry's stages (Vis212.unk1C byte 0): 1 falls and pushes the
  * viewer away while near, 2 lands (animation 6), 3 walks off (animation
@@ -54,9 +53,10 @@ void func_801edbec(Vis212 *e)
         pos.vz = e->unk74.vz + e->unk9C.vz;
         d = e->unk40;
         if (d < e->unk2E + 0x420) {
-            d = e->unk2E - (d - 0x420);
-            viewer.position.vx += d * rcos(e->unk56 - 0x400) >> 12;
-            viewer.position.vz += d * rsin(e->unk56 - 0x400) >> 12;
+            d -= 0x420;
+            d = e->unk2E - d;
+            viewer.position.vx += d * rcos((short)e->unk56 - 0x400) >> 12;
+            viewer.position.vz += d * rsin((short)e->unk56 - 0x400) >> 12;
         }
         break;
     case 2:
@@ -70,20 +70,24 @@ void func_801edbec(Vis212 *e)
             e->unk50 &= ~2;
         }
         break;
-    case 3:
-        if (e->unk74.vx < 0x3c800) {
+    case 3: {
+        int target_x = 0x3c800;
+        int target_z = 0x47000;
+
+        if (e->unk74.vx < target_x) {
             func_8004ae38(e);
             break;
         }
-        fdat_801eb814(ratan2(e->unk74.vz - 0x47000, e->unk74.vx - 0x3c800) + 0xc00, 0x20);
+        fdat_801eb814(ratan2(e->unk74.vz - target_z, e->unk74.vx - target_x) + 0xc00, 0x20);
         fdat_801eb880(e->unk8E - 0x400, 0x40);
         e->unk2A += e->unkB0;
         if ((short)e->unk2A >= 0x1000)
             e->unk2A = 0;
         break;
     }
+    }
     if (e->unk34 >= 0) {
-        e->unk34 -= e->unkB0 < 0 ? -e->unkB0 : e->unkB0;
+        e->unk34 -= abs(e->unkB0);
         if (e->unk34 >= 0)
             return;
     }
