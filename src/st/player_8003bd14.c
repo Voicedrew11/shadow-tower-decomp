@@ -77,8 +77,6 @@ void func_8003be10(void)
 }
 
 /* The viewer's distance to `t` when it is within t's reach, else -1. */
-/* Not exact: the height tests compile to another block order (retail
- * shares one "return dist" block after both branches). */
 ADDRESS(0x8003beb4, 0x14c)
 int func_8003beb4(void *request)
 {
@@ -94,12 +92,10 @@ int func_8003beb4(void *request)
             dist = SquareRoot0(dx * dx + dz * dz);
             if (dist - t->unk22 * rcos(t->unk20 - (short)ratan2(dz, dx)) / 4096 < t->unk1C + 256) {
                 if (viewer.position.vy + 1600 < t->pos.vy) {
-                    if (viewer.position.vy + 1600 >= t->pos.vy - t->unk1E) {
-                        return dist;
+                    if (viewer.position.vy + 1600 < t->pos.vy - t->unk1E) {
+                        return -1;
                     }
-                    return -1;
-                }
-                if (t->pos.vy < viewer.position.vy) {
+                } else if (t->pos.vy < viewer.position.vy) {
                     return -1;
                 }
                 return dist;
