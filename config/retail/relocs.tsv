@@ -10402,8 +10402,13 @@ VS.EXE	0x800283d8	0x17bd8		mips26	reachable-code	0x80027c64	load		jal		manual-de
 VS.EXE	0x800283dc	0x17bdc	0x800283f0	mips_hi16_lo16	reachable-code	0x8016ecc0	bss	DAT_801624d0	lui+addiu		manual-decoded	reviewed	vs.anim_80027f30 asm review
 VS.EXE	0x80028414	0x17c14		mips26	reachable-code	0x80027ce0	load		jal		manual-decoded	reviewed	vs.anim_80027f30 asm review
 VS.EXE	0x80028430	0x17c30		mips26	reachable-code	0x80042b74	load		jal		manual-decoded	reviewed	vs.anim_80027f30 asm review
+VS.EXE	0x80028474	0x17c74	0x80028478	mips_hi16_lo16	reachable-code	0x80063360	bss	DAT_80063360	lui+lw		manual-decoded	reviewed	vs.mirror_80028474 directly decoded renderer switch
 VS.EXE	0x800284ec	0x17cec		mips26	reachable-code	0x8002851c	load		j		manual-decoded	reviewed	vs.mirror_80028474 asm review
+VS.EXE	0x800285c0	0x17dc0	0x800285c4	mips_hi16_lo16	reachable-code	0x80063360	bss	DAT_80063360	lui+sw		manual-decoded	reviewed	vs.mirror_80028474 directly decoded renderer switch
+VS.EXE	0x800285c8	0x17dc8	0x800285cc	mips_hi16_lo16	reachable-code	0x80063350	bss	DAT_80063350	lui+sw		manual-decoded	reviewed	vs.mirror_80028474 directly decoded renderer switch
 VS.EXE	0x800285d0	0x17dd0		mips26	reachable-code	0x80027ba4	load		jal		manual-decoded	reviewed	vs.mirror_80028474 asm review
+VS.EXE	0x800287ac	0x17fac	0x800287b0	mips_hi16_lo16	reachable-code	0x80063360	bss	DAT_80063360	lui+sw		manual-decoded	reviewed	vs.mirror_80028474 directly decoded renderer switch
+VS.EXE	0x800287b4	0x17fb4	0x800287b8	mips_hi16_lo16	reachable-code	0x80063350	bss	DAT_80063350	lui+sw		manual-decoded	reviewed	vs.mirror_80028474 directly decoded renderer switch
 VS.EXE	0x800287bc	0x17fbc		mips26	reachable-code	0x800288f8	load		j		manual-decoded	reviewed	vs.mirror_80028474 asm review
 VS.EXE	0x80028820	0x18020		mips26	reachable-code	0x80028850	load		j		manual-decoded	reviewed	vs.mirror_80028474 asm review
 VS.EXE	0x800288f8	0x180f8		mips26	reachable-code	0x80027ba4	load		jal		manual-decoded	reviewed	vs.mirror_80028474 asm review
