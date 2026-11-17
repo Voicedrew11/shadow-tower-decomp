@@ -97,8 +97,8 @@ int func_80016f10(void)
         DrawSync(0);
     }
     pos.vy += 28;
-    if (DAT_80063330[1] != -1) {
-        func_8002ee90(11, DAT_80191d00.unk0118[DAT_80063330[1]].unk5[0], buf);
+    if (DAT_80063334 != -1) {
+        func_8002ee90(11, DAT_80191d00.unk0118[DAT_80063334].unk5[0], buf);
         func_80012c2c(buf, &pos, NULL);
         DrawSync(1);
     }
@@ -112,11 +112,11 @@ int func_80016f10(void)
                 switch (sp->unk1CE) {
                 case 0:
                     if (DAT_80063330[0] == -1) {
-                        if (DAT_80063330[1] == -1)
+                        if (DAT_80063334 == -1)
                             goto start;
                         sp->unk1CC = 3;
                     } else {
-                        if (DAT_80063330[1] != -1) {
+                        if (DAT_80063334 != -1) {
                         start:
                             func_8001c978();
                             sp->unk1CC = 1;
@@ -222,11 +222,11 @@ int func_80016f10(void)
             if (PRESSED & 8) {
                 sp->unk1CE = 0;
                 if (DAT_80063330[0] == -1) {
-                    if (DAT_80063330[1] == -1)
+                    if (DAT_80063334 == -1)
                         goto ready;
                     sp->unk1CC = 3;
                 } else {
-                    if (DAT_80063330[1] != -1) {
+                    if (DAT_80063334 != -1) {
                     ready:
                         func_8001c978();
                         sp->unk1CC = 1;
@@ -245,7 +245,7 @@ int func_80016f10(void)
                     sp->unk1CC = 2;
                 }
                 if (sp->unk1CC == 1) {
-                    if (DAT_80063330[0] != -1 && DAT_80063330[1] != -1) {
+                    if (DAT_80063330[0] != -1 && DAT_80063334 != -1) {
                         func_80023308(11);
                         func_80023308(11);
                         if (func_8001c530()) {

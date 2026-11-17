@@ -16,6 +16,7 @@
 #define VS_PICKED_PAIR
 #include <vs/data.h>
 #include <vs/menu.h>
+#include <vs/main.h>
 #include <vs/card.h>
 #include <vs/pad.h>
 #include <vs/sound.h>
@@ -247,8 +248,8 @@ void func_8001960c(int player)
         DrawSync(0);
     }
     pos.vy += 28;
-    if (DAT_80063330[1] != -1) {
-        func_8002ee90(11, DAT_80191d00.unk0118[DAT_80063330[1]].unk5[0], DAT_801a4590.unk4A4);
+    if (DAT_80063334 != -1) {
+        func_8002ee90(11, DAT_80191d00.unk0118[DAT_80063334].unk5[0], DAT_801a4590.unk4A4);
         func_80012c2c(DAT_801a4590.unk4A4, &pos, NULL);
         DrawSync(1);
     }

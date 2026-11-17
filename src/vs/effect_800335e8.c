@@ -102,7 +102,7 @@ void func_800335e8(void)
   int local_38;
   undefined4 local_34;
   int local_30;
-  
+
   pcVar5 = D_801d1b9c;
   cVar6 = D_801d1b9c[1];
   switch(cVar6) {

@@ -133,7 +133,7 @@ undefined4 func_8002b078(int param_1)
   uint local_34;
   undefined *local_30;
   undefined *local_2c;
-  
+
   puVar1 = local_110 + 3;
   /* unaligned copy (decompile noise dropped) */
   *(u32 *)local_110 = (u32)(DAT_8001147c);

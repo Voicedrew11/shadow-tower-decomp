@@ -66,7 +66,7 @@ undefined1 * func_80032404(uint param_1, uint param_2, undefined1 param_3, undef
   uint uVar16;
   uint uVar17;
   undefined4 uVar18;
-  
+
   uVar16 = param_1;
   uVar17 = param_2;
   uVar18 = func_800322f0();

@@ -104,9 +104,9 @@ void func_80022a00(void)
     func_8001d8b8(VS_MESSAGE(9), 296, 144, &sp->style[0]);
     sp->unk238.y = 164;
     tex.vy += 28;
-    if (DAT_80063330[1] != -1) {
+    if (DAT_80063334 != -1) {
         sp->style[0].cd |= 0x80;
-        func_8001d8b8(VS_ITEM_NAME(DAT_80063330[1]), 294, 196, &sp->style[0]);
+        func_8001d8b8(VS_ITEM_NAME(DAT_80063334), 294, 196, &sp->style[0]);
         sp->style[0].cd &= 0x7f;
         func_8001e530(&sp->unk238, &tex, NULL, NULL, 16);
     }
