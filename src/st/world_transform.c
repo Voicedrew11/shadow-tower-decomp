@@ -22,10 +22,10 @@
  * an SVECTOR, rotated with RTV0TR, and the result scaled back up.
  */
 /*
- * Not exact: retail copies only the x and y range tests ahead of the
- * rotated halving loop (the z test jumps into the loop's own), and
- * allocates i/sp/trans to a3/a1/a2; this build copies all three tests
- * (4 bytes longer) and uses t1/a3/t0.
+ * Not exact: the first scratch x reload follows the y store and the cell-z
+ * load instead of preceding them. The initial z range test is duplicated
+ * instead of sharing the halving loop's test, leaving this build 4 bytes
+ * longer than retail.
  */
 ADDRESS(0x8001cb88, 0x270)
 void world_transform_parts(VECTOR *trans)
@@ -33,15 +33,19 @@ void world_transform_parts(VECTOR *trans)
     ScratchPad *sp = SCRATCHPAD;
     VisRecord *rec;
     int i;
+    u8 cell_z;
+    long camera_x;
 
     i = vis_lists.n_visible;
     while (i--) {
         rec = &vis_records[vis_lists.visible[i]];
         sp->x = rec->unk08 << 12;
         sp->y = (rec->unk09 << 12) + ((rec->unk0b - 128) << 7);
+        camera_x = viewer.position.vx;
+        cell_z = rec->unk0a;
         sp->part_shift = 0;
-        sp->x = sp->x - viewer.position.vx;
-        sp->z = rec->unk0a << 12;
+        sp->x = sp->x - camera_x;
+        sp->z = cell_z << 12;
         sp->y = sp->y - (viewer.position.vy + viewer.unk2CE + viewer.unk2D2);
         sp->z = sp->z - viewer.position.vz;
         while (sp->x > 32767 || sp->x < -32768 || sp->y > 32767 || sp->y < -32768
