@@ -56,8 +56,6 @@ void func_801ed4a0(void)
 }
 
 /*
- * Not exact: the instructions agree, but equivalent .bss+8 HI16 pairs
- * order differently in the two ELF views (module offsets 0x160/0x19c/0x1b0).
  * Runs the area: the viewer standing on record 0x1f2 or 0x63 picks the
  * scene words; entry 48 asleep until it wakes (scene word 3 armed), then
  * leaves once the area fade is done, keeping the viewer's status 0x188 at

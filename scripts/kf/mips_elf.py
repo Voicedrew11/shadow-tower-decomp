@@ -89,7 +89,9 @@ def rel_order(relocations: Iterable[MipsRelocation], data: bytes) -> list[MipsRe
     faithful unless another pair against that symbol sits between a HI16 and
     its own LO16 (`pair`: `lui A; lui B; ... lo B; ... lo A`) and that LO16's
     low half differs from its own; only then does the HI16 move to just
-    before its own LO16, as GNU as orders such pairs.
+    before the first following LO16 with its own low half. Repeated lows
+    with that half require the same carry, independently of which one a
+    producer identifies as the high's pair.
 
     Every other relocation keeps its site position. objdiff pairs a HI16
     only with an immediately following LO16 when it reports addends, so a
@@ -109,12 +111,14 @@ def rel_order(relocations: Iterable[MipsRelocation], data: bytes) -> list[MipsRe
             if (item.pair, item.symbol) not in lows:
                 raise ValueError(
                     f"R_MIPS_HI16 at {item.offset:#x}: own LO16 {item.pair:#x} is missing")
-            following = next((other for other in ordered[index + 1:]
-                              if other.kind == "R_MIPS_LO16" and other.symbol == item.symbol),
-                             None)
+            following_lows = [other for other in ordered[index + 1:]
+                              if other.kind == "R_MIPS_LO16" and other.symbol == item.symbol]
+            following = next(iter(following_lows), None)
             if (following is not None and following.offset != item.pair
                     and low_half(following.offset) != low_half(item.pair)):
-                moved.setdefault((item.pair, item.symbol), []).append(item)
+                destination = next((other.offset for other in following_lows
+                                    if low_half(other.offset) == low_half(item.pair)), item.pair)
+                moved.setdefault((destination, item.symbol), []).append(item)
                 continue
         kept.append(item)
     result: list[MipsRelocation] = []

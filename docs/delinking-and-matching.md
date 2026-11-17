@@ -77,8 +77,10 @@ independently validate the TSV claim:
   is emitted once per site in ELF REL order. That order is by site,
   except where another pair against the same symbol (with a different low
   half) sits between a HI16 and its own LO16: GNU ld completes a HI16 with
-  the next same-symbol LO16, so that HI16 moves to just before its own
-  (`mips_elf.rel_order`). The native object view applies the same rule,
+  the next same-symbol LO16, so that HI16 moves to just before the first
+  following LO16 with its own low half (`mips_elf.rel_order`). Repeated
+  equivalent lows use the same carry regardless of pair provenance. The
+  native object view applies the same rule,
   pairing each HI16 patch with the first later LO16 carrying its
   expression, because objdiff reports a HI16's addend from an immediately
   following LO16 only;

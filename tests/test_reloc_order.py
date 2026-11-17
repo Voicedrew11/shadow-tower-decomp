@@ -79,6 +79,34 @@ class RelocationOrderTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, 'own LO16'):
             rel_order([MipsRelocation(0, 'R_MIPS_HI16', 'a', 8)], bytes(12))
 
+    @unittest.skipUnless(shutil.which(LINKER), 'pinned GNU MIPS ld required')
+    def test_repeated_equivalent_lows_do_not_depend_on_pair_provenance(self) -> None:
+        # A store and a later address calculation use the same outer base.
+        # A native expression can identify either LO16 as the high's pair;
+        # decoded register flow can select the other. Both require the same
+        # carry, so the inspection objects and their linked words must agree.
+        text = struct.pack('<5I', 0x3C040000, 0x3C050001, 0x24A5834C,
+                           0xAC820010, 0x24860010)
+        expected = struct.pack('<5I', 0x3C048011, 0x3C058011, 0x24A50344,
+                               0xAC828008, 0x24868008)
+        objects = []
+        for pair in (0xC, 0x10):
+            relocations = interleaved()
+            relocations[0] = MipsRelocation(0, 'R_MIPS_HI16', 'world', pair)
+            relocations.append(MipsRelocation(0x10, 'R_MIPS_LO16', 'world'))
+            blob = write_mips_elf(text, 'control', len(text), relocations)
+            objects.append(blob)
+            with self.subTest(pair=pair), tempfile.TemporaryDirectory() as directory:
+                root = Path(directory)
+                (root / 'in.o').write_bytes(blob)
+                subprocess.run([LINKER, '-EL', '-G', '0', '-Ttext', '0x80010000',
+                                '-e', '0x80010000', '--defsym=world=0x80107ff8',
+                                '-o', str(root / 'out.elf'), str(root / 'in.o')],
+                               check=True, capture_output=True)
+                linked = ELFFile(io.BytesIO((root / 'out.elf').read_bytes()))
+                self.assertEqual(linked.get_section_by_name('.text').data()[:20], expected)
+        self.assertEqual(objects[0], objects[1])
+
     def test_moved_shifts_the_pair_and_equality_ignores_it(self) -> None:
         high = MipsRelocation(0x04, 'R_MIPS_HI16', 'a', 0x10)
         self.assertEqual(high.moved(0x100).pair, 0x110)
