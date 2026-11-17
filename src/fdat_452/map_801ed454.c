@@ -85,7 +85,6 @@ void func_801ed454(void)
     }
 }
 
-/* Not exact (one attempt, retries off; 69.0%): first divergence retail `lw s3,24884(v0)`, this source `lw s4,24884(v0)`. */
 /*
  * The ending entry's handler: steps the ending stages in fdat_801ed8c4
  * (1 waiting for half the animation, 2 streaming, 3 stream done, 4 menu,
@@ -96,24 +95,22 @@ void func_801ed740(void)
 {
     Vis212 *e = vis_table_a.unk6138;
     Vis192 *r = vis_table_a.unk6134;
-    u8 *xa;
+    MenuScratch *menu = MENU_SCRATCH;
 
     e->unk1C.bytes[2] &= 0xf2;
     e->unk36 = -1;
     if (e->unkA4 == 0)
         return;
     if (fdat_801ed8c4 == 2 && func_800541f4()) {
-        xa = (u8 *)&world_state + 0x18000;
-        if (xa[0x6e16] == 3) {
+        if (world_state.unk1EE16 == 3) {
             func_80054278();
-            xa[0x6e19] = 0;
-            xa[0x6e16] = 4;
+            world_state.unk1EE19 = 0;
+            world_state.unk1EE16 = 4;
         }
     }
-    xa = (u8 *)&world_state + 0x18000;
-    if (xa[0x6e16] == 5) {
+    if (world_state.unk1EE16 == 5) {
         fdat_801ed8c4 = 3;
-        xa[0x6e16] = 0;
+        world_state.unk1EE16 = 0;
     }
     e->unk2A += e->unkB0;
     if ((short)e->unk2A >= 0x1000) {
@@ -122,14 +119,14 @@ void func_801ed740(void)
             fdat_801eb7b4(e, 3);
     }
     if (fdat_801ed8c4 == 1) {
-        if (fdat_801ed988 != 0 || (short)e->unk2A >= 0x800) {
+        int ending = fdat_801ed988;
+        if (ending != 0 || (short)e->unk2A >= 0x800) {
             viewer.unk1E4 = 0;
-            func_8005408c(r->unk09, fdat_801ed988);
+            func_8005408c(r->unk09, ending);
             SsSetSerialVol(0, 0x40, 0x40);
-            xa = (u8 *)&world_state + 0x18000;
-            xa[0x6e16] = 2;
-            xa[0x6e17] = 1;
-            xa[0x6e19] = 0;
+            world_state.unk1EE16 = 2;
+            world_state.unk1EE17 = 1;
+            world_state.unk1EE19 = 0;
             fdat_801ed8c4 = 2;
             func_80042cec();
         }
@@ -140,8 +137,8 @@ void func_801ed740(void)
             fdat_801ed8c4 = 4;
     } else if (fdat_801ed8c4 == 4) {
         DAT_801cd180.unk4 = 0;
-        *(s16 *)0x1f8002dc = 2;
-        *(u8 *)0x1f8002e5 = 0;
+        menu->unk2DC = 2;
+        menu->unk2E5 = 0;
         func_8005f54c();
         fdat_801ed8c4 = 5;
     } else if (fdat_801ed8c4 == 5) {
