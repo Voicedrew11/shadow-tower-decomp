@@ -458,8 +458,9 @@ void mesh_div_gt4_tint_b(CVECTOR *rgb)
  * vertex's depth, through an unprototyped pointer. */
 /*
  * Not exact: at the loop latch retail reloads the spilled face cursor
- * (next) before the spilled count; this build reloads them the other way
- * round. Same size; every other instruction agrees.
+ * (next) before the spilled count and leaves a load-delay nop. This build
+ * fills the count's load delay with the face reload, making it four bytes
+ * short; every other instruction agrees.
  */
 ADDRESS(0x8001b5dc, 0x934)
 void mesh_div_draw_gt4(int count, MeshFaceGT4 *face, u_long *ot, int flags)
