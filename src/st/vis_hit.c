@@ -64,17 +64,17 @@ void func_80046604(VECTOR *pos)
             o0->vx = o->vx - sp->pos[0].vx;
             o0->vy = o->vy - sp->pos[0].vy;
             o0->vz = o->vz - sp->pos[0].vz;
+            o0++;
             o1->vx = o->vx - sp->pos[1].vx;
             o1->vy = o->vy - sp->pos[1].vy;
             o1->vz = o->vz - sp->pos[1].vz;
+            o1++;
             o2->vx = o->vx - sp->pos[2].vx;
             o2->vy = o->vy - sp->pos[2].vy;
             o2->vz = o->vz - sp->pos[2].vz;
+            o2++;
             v++;
             o++;
-            o0++;
-            o1++;
-            o2++;
         }
         sp->world += sp->part->n_vertices;
         sp->rel[0] += sp->part->n_vertices;
