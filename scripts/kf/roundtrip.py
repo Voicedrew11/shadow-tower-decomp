@@ -119,6 +119,7 @@ class Definition:
     va: int
     size: int
     owner: str  # the claiming unit, or "config" for a curated identity only
+    storage: str = "load"  # "bss": COMMON storage an earlier object allocated
 
 
 def initialized_definitions(image: str, units: tuple[Unit, ...] = (),
@@ -150,24 +151,88 @@ def initialized_definitions(image: str, units: tuple[Unit, ...] = (),
             if item.size > 0 and layout.contains(item.va, item.size)}
 
 
+def psylink_common_alignment(size: int) -> int:
+    """PSYLINK 2.73D's alignment of a COMMON request of `size` bytes.
+
+    The largest power of two not above the size, capped at 8 (sizes 1, 2,
+    3, 4, 6, 8 align to 1, 2, 2, 4, 4, 8; docs/executable-linking.md).
+    """
+    alignment = 1
+    while alignment < 8 and alignment * 2 <= size:
+        alignment *= 2
+    return alignment
+
+
+def allocated_definitions(image: str, units: tuple[Unit, ...] = (),
+                          config_dir: Path = RETAIL_CONFIG) -> dict[str, Definition]:
+    """Global BSS storage a later COMMON request of `image` can merge into.
+
+    PSYLINK allocates a COMMON name once, in the batch of the first object
+    that requests it (that object's fixed .sbss/.bss, then its new COMMON
+    names in symbol-hash bucket order, contiguous apart from size alignment);
+    a later object's request of the same name contributes no storage. A
+    curated global `bss` identity, or a unit's global .bss/.sbss DATA()
+    claim, is such storage. `usable_definitions` keeps a unit-owned one only
+    for units linked after its owner.
+    """
+    from scripts.kf.inventory import load_data_identities
+
+    if image not in IMAGE_LAYOUTS:
+        return {}
+    found: dict[str, Definition] = {}
+    for identity in load_data_identities(config_dir).values():
+        if identity.image == image and identity.storage == "bss" and identity.scope == "global":
+            symbol = sanitize_symbol(identity.name, f"DAT_{identity.va:08x}")
+            found[symbol] = Definition(symbol, identity.va, identity.size, "config", "bss")
+    for unit in units:
+        if unit.image != image:
+            continue
+        for datum in unit.data:
+            if (datum.storage == "bss" and datum.scope == "global"
+                    and datum.section_name in COMMON_SECTIONS):
+                found[datum.symbol] = Definition(datum.symbol, datum.va, datum.size,
+                                                 unit.unit, "bss")
+    return {symbol: item for symbol, item in found.items() if item.size > 0}
+
+
+def usable_definitions(definitions: dict[str, Definition], unit: Unit,
+                       units: tuple[Unit, ...]) -> dict[str, Definition]:
+    """The definitions a COMMON request of `unit` may merge into.
+
+    Initialized data and curated BSS identities always qualify; a unit's BSS
+    claim only when that unit links (manifest order) before `unit`, since an
+    earlier request of the name would itself be the allocation.
+    """
+    order = {item.unit: index for index, item in enumerate(units) if item.image == unit.image}
+    position = order.get(unit.unit, len(order))
+    return {symbol: item for symbol, item in definitions.items()
+            if item.storage != "bss" or item.owner == "config"
+            or order.get(item.owner, len(order)) < position}
+
+
 def merged_common(symbol, unit: Unit,
                   definitions: dict[str, Definition] | None) -> Definition | None:
-    """The initialized definition elsewhere that a COMMON request merges into.
+    """The definition elsewhere that a COMMON request merges into.
 
     A tentative definition (`u_long x;`) is emitted as COMMON. PSYLINK, like
-    GNU ld, allocates COMMON storage only when no object defines the symbol;
-    otherwise the request merges into that definition and contributes no
-    storage of its own. A unit may therefore keep a tentative definition of a
-    global another unit initializes (ASPSX needs its size to emit the -G8
+    GNU ld, allocates COMMON storage only when no object defines the symbol
+    and no earlier object requested it; otherwise the request merges into
+    that storage and contributes none of its own. A unit may therefore keep
+    a tentative definition of a global another unit initializes, or that an
+    earlier object allocated (ASPSX needs its size to emit the -G8
     $gp-relative access an `extern` would not get). Admitted only when this
-    unit claims no datum of that name and the definition is a global,
-    initialized datum of the image, at least as large as the request and
-    aligned for it; anything else stays an unsupported COMMON allocation.
+    unit claims no datum of that name and the definition is a global datum
+    of the image (initialized_definitions, allocated_definitions), at least
+    as large as the request and aligned for it; anything else stays an
+    unsupported COMMON allocation.
     """
     if definitions is None or any(datum.symbol == symbol.name for datum in unit.data):
         return None
     definition = definitions.get(symbol.name)
     alignment = symbol['st_value']
+    if definition is not None and definition.storage == "bss":
+        # The object's COMMON value is its section alignment, not PSYLINK's.
+        alignment = psylink_common_alignment(symbol['st_size'])
     if (definition is None or definition.owner == unit.unit
             or symbol['st_info']['bind'] != 'STB_GLOBAL'
             or not 0 < symbol['st_size'] <= definition.size
@@ -256,7 +321,8 @@ def plan(elf: ELFFile, unit: Unit, result: UnitResult,
                 result.merged_commons.append({
                     "symbol": symbol.name, "requested_size": symbol['st_size'],
                     "alignment": symbol['st_value'], "definition_va": merged.va,
-                    "definition_size": merged.size, "definition_owner": merged.owner})
+                    "definition_size": merged.size, "definition_owner": merged.owner,
+                    "definition_storage": merged.storage})
             elif claim is None:
                 result.issue("unsupported-common-allocation", symbol=symbol.name,
                              size=symbol['st_size'], alignment=symbol['st_value'])

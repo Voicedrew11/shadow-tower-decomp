@@ -19,8 +19,9 @@ from scripts.kf.delink import Datum, Function
 from scripts.kf.manifest import Manifest, Unit
 from scripts.kf.mips_elf import STT_OBJECT, DefinedSymbol, write_mips_elf
 from scripts.kf.inventory import DATA_IDENTITY_FIELDS
-from scripts.kf.roundtrip import (LINKER, Definition, UnitResult, initialized_definitions,
-                                  plan, verify_unit)
+from scripts.kf.roundtrip import (LINKER, Definition, UnitResult, allocated_definitions,
+                                  initialized_definitions, plan, psylink_common_alignment,
+                                  usable_definitions, verify_unit)
 from scripts.kf.sema.image import RetailImage
 
 
@@ -182,7 +183,7 @@ class MergedCommonTests(unittest.TestCase):
         self.assertEqual(result.merged_commons, [{
             'symbol': 'unclaimed', 'requested_size': 4, 'alignment': 4,
             'definition_va': BASE + 0x180, 'definition_size': 4,
-            'definition_owner': 'game.other',
+            'definition_owner': 'game.other', 'definition_storage': 'load',
         }])
 
     def test_unmergeable_common_stays_an_unsupported_allocation(self):
@@ -205,6 +206,59 @@ class MergedCommonTests(unittest.TestCase):
         result = self.plan(Definition('unclaimed', BASE + 0x180, 4, 'game.other'), sample)
         self.assertEqual(result.merged_commons, [])
         self.assertIn('unsupported-common-allocation', {i['kind'] for i in result.issues})
+
+    def test_common_merging_into_an_earlier_bss_allocation_is_a_reference(self):
+        result = self.plan(Definition('unclaimed', BASE + 0x300, 4, 'config', 'bss'))
+        self.assertEqual(result.issues, [])
+        self.assertEqual(result.merged_commons[0]['definition_storage'], 'bss')
+        result = self.plan(Definition('unclaimed', BASE + 0x302, 4, 'config', 'bss'))
+        self.assertEqual([i['kind'] for i in result.issues], ['unsupported-common-allocation'])
+
+    def test_bss_merge_uses_psylink_alignment_not_the_section_alignment(self):
+        self.assertEqual([psylink_common_alignment(n) for n in (1, 2, 3, 4, 6, 8, 12, 64)],
+                         [1, 2, 2, 4, 4, 8, 8, 8])
+        # A halfword request carries its section's alignment 4 in the object.
+        result = self.plan(Definition('unclaimed', BASE + 0x302, 2, 'config', 'bss'),
+                           size=2, alignment=4)
+        self.assertEqual(result.issues, [])
+        result = self.plan(Definition('unclaimed', BASE + 0x301, 2, 'config', 'bss'),
+                           size=2, alignment=4)
+        self.assertEqual([i['kind'] for i in result.issues], ['unsupported-common-allocation'])
+
+    def test_allocated_definitions_are_global_bss_identities_and_claims(self):
+        rows = [
+            ('VS.EXE', '0x80063338', '0x4', 'DAT_80063338', 'global', 'bss'),
+            ('VS.EXE', '0x80063390', '0x2', 'DAT_80063390', 'static', 'bss'),
+            ('VS.EXE', '0x80063220', '0x4', 'DAT_80063220', 'global', 'load'),
+            ('ST.EXE', '0x80088200', '0x4', 'elsewhere', 'global', 'bss'),
+        ]
+        with tempfile.TemporaryDirectory() as directory:
+            config = Path(directory)
+            lines = ['\t'.join(DATA_IDENTITY_FIELDS)]
+            lines += ['\t'.join(row + ('',) * (len(DATA_IDENTITY_FIELDS) - len(row)))
+                      for row in rows]
+            (config / 'data_identities.tsv').write_text('\n'.join(lines) + '\n')
+            earlier = replace(unit(), unit='vs.early', image='VS.EXE', data=(
+                Datum(0x80063300, 4, 'owned_common', 'bss', 'global', '.sbss'),
+                Datum(0x80063304, 4, 'owned_static', 'bss', 'static', '.sbss'),
+                Datum(0x80063220, 4, 'owned_word', 'load', 'global', '.sdata'),))
+            later = replace(unit(), unit='vs.late', image='VS.EXE', data=(
+                Datum(0x80063308, 4, 'late_common', 'bss', 'global', '.sbss'),))
+            middle = replace(unit(), unit='vs.middle', image='VS.EXE', data=())
+            units = (earlier, middle, later)
+            found = allocated_definitions('VS.EXE', units, config)
+        self.assertEqual(found, {
+            'DAT_80063338': Definition('DAT_80063338', 0x80063338, 4, 'config', 'bss'),
+            'owned_common': Definition('owned_common', 0x80063300, 4, 'vs.early', 'bss'),
+            'late_common': Definition('late_common', 0x80063308, 4, 'vs.late', 'bss'),
+        })
+        # A request merges only into storage an earlier-linked object allocated.
+        self.assertEqual(set(usable_definitions(found, middle, units)),
+                         {'DAT_80063338', 'owned_common'})
+        self.assertEqual(set(usable_definitions(found, earlier, units)), {'DAT_80063338'})
+        self.assertEqual(set(usable_definitions(found, later, units)),
+                         {'DAT_80063338', 'owned_common'})
+        self.assertEqual(allocated_definitions('GAME.EXE'), {})
 
     def test_definitions_are_global_initialized_payload_data(self):
         rows = [

@@ -314,7 +314,14 @@ identity or another unit's `DATA()` claim) inside the PS-X EXE payload, at
 least as large as the request and aligned for it: the linker allocates
 COMMON only when no object defines the symbol, so the request owns no
 storage and resolves as a reference (`roundtrip.merged_common`; listed as
-`merged_commons` in the relink audit). A `-G8` unit keeps such a tentative
+`merged_commons` in the relink audit). Such a request also merges into BSS
+storage an earlier object allocated (`roundtrip.allocated_definitions`): a
+curated global `bss` identity, or a global `.bss`/`.sbss` `DATA()` claim of a
+unit linked before this one. PSYLINK allocates each COMMON name once, in the
+batch of the first object that requests it (see `executable-linking.md`),
+so a later request of the name owns no storage; the definition must be
+aligned as PSYLINK aligns the request's size (`psylink_common_alignment`),
+since the converted object's COMMON value is only its section alignment. A `-G8` unit keeps such a tentative
 definition when ASPSX needs the size for a `$gp`-relative access. A unit whose `.sdata` holds
 only its `SDATA()` literal ranges places that section at the first range's start. Synthetic tails imitating the probe assembler
 are not appended to retail claims: source alignment/extent differences remain

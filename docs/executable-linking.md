@@ -317,6 +317,18 @@ ASPSX 2.79D and PSYLINK 2.73D chain:
   retail may hold game COMMON nothing references. Names chosen to fit are WIP spellings,
   not recovered ones; a source shared by two programs spells per-image
   names under a define where the two intervals do not overlap.
+- A controlled PSYLINK 2.73D link of two `-G8` ASPSX objects (`.lcomm` and
+  `.comm` only) showed the per-object order: object A's `.sbss` static, then
+  A's small COMMON in bucket order (later-interned first within a bucket),
+  then B's static and B's new COMMON; a name both request is allocated once,
+  in A's batch. Each request is aligned to the largest power of two not
+  above its size, capped at 8 (sizes 1, 2, 3, 4, 6, 8 at 1, 2, 2, 4, 4, 8);
+  requests over 8 bytes go to `.bss` the same way. One object's batch is
+  therefore contiguous. VS.EXE's `.sbss` run `0x800632e8`-`0x80063381`
+  interleaves words the start-up module (`vs.main`) reads `$gp`-relative
+  (so it requests them as COMMON) with words it reads only absolutely
+  (`0x80063334`, `0x80063374`, so it does not request them), so an earlier
+  object allocated that run and `vs.main`'s requests merge into it.
 - `kf verify data` accepts a unit's COMMON placement only when the current
   link's `.SYM` (`scripts/kf/linked_symbols.py`) puts every request at its
   claim, and the link report's input hashes all match the working tree.
