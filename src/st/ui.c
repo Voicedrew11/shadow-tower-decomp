@@ -148,12 +148,11 @@ void func_80026ecc(u16 c, u16 x, u16 y, CVECTOR *color)
 }
 
 /* Draws a 0xffff-terminated glyph string; code 0 starts a new line. */
-/* Not exact: retail copies the line start from $a1 (the incoming x), this build
- * from its $s1 copy; the loop-end 0xffff lands in $t0 here. */
+/* Not exact: the loop-end 0xffff lands in $t0 here, $v0 in retail. */
 ADDRESS(0x8002732c, 0x114)
 void func_8002732c(u16 *s, u16 x, u16 y, CVECTOR *color)
 {
-    int left = x;
+    u16 left = x;
     u_int space = (color->cd & 0x7c) >> 2;
     int line;
     u_int split;
@@ -194,12 +193,13 @@ void func_8002732c(u16 *s, u16 x, u16 y, CVECTOR *color)
 
 /* Draws a number with the proportional font: digit glyphs follow the
  * half-width codes. */
-/* Not exact: retail tests the power-of-ten loop on n - 1 against -1 (no fold to
- * n == 0) and allocates the parameters to other saved registers. */
+/* Not exact: the num-to-value copy precedes the digit-count shift here;
+ * retail schedules it after the shift and mask. */
 ADDRESS(0x80027440, 0x27c)
 void func_80027440(u32 num, u16 x, u16 y, CVECTOR *color)
 {
     u16 digit[8];
+    int end;
     u8 leading = 1;
     u8 neg = 0;
     u16 width = color->cd >> 2;
@@ -220,6 +220,7 @@ void func_80027440(u32 num, u16 x, u16 y, CVECTOR *color)
     n = NUMBER_DIGITS(num);
     value = num;
     sign = num & NUMBER_SIGNED;
+    end = -1;
     if ((s16)num < 0) {
         value = -num;
         neg = 1;
@@ -229,8 +230,12 @@ void func_80027440(u32 num, u16 x, u16 y, CVECTOR *color)
         return;
     }
     pow = 1;
-    for (i = 0; i < n; i++)
-        pow *= 10;
+    i = n - 1;
+    if (i != end) {
+        do {
+            pow *= 10;
+        } while (--i != -1);
+    }
     if (value < pow) {
         div = pow;
         i = n;
