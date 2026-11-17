@@ -263,7 +263,8 @@ typedef struct {
 typedef struct {
     void (*unk0)();      /* 0x00: called by func_80055374 with (position, facing) */
     void (*unk4)(void);  /* 0x04: per frame (func_8005735c) */
-    u8 unk08[0x18 - 0x08];
+    u8 unk08[0x14 - 0x08];
+    void (*unk14)(void); /* 0x14: called once the area is loaded (func_800456f8) */
     void (*unk18)(int);  /* 0x18: item id rose by one (func_80055300) */
     u8 unk1C[0x20 - 0x1c];
     void (*unk20)(void *entry, void *record); /* 0x20: a table B entry kind func_8004eebc does not know */

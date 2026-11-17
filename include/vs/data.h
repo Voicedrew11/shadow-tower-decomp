@@ -36,8 +36,8 @@ typedef struct {
 
 /*
  * The CD state block at 0x801a4590 (bss): ST.EXE's StCdState without the
- * root counter and vsync words, with a 4-entry ring. WIP extent ends with
- * the archive tables.
+ * root counter and vsync words, with a 4-entry ring, then the load cursor
+ * and the load buffer.
  */
 typedef struct {
     u8 unk0[8];
@@ -46,12 +46,13 @@ typedef struct {
     StCdRequest *unkDC; /* 0xdc: the entry being read (ST: unk9D8) */
     VsArchive archives[ST_ARCHIVES]; /* 0xe0: count as in ST.EXE (WIP) */
     u8 unk1D0[0x4a0 - 0x1d0];
-    u_long *unk4A0;      /* 0x4a0: the menu file buffer below (func_8001bb48) */
-    u_long unk4A4[1];    /* 0x4a4: a menu file load buffer (WIP extent) */
+    u_long *unk4A0;      /* 0x4a0: load cursor in unk4A4 (func_8001789c); the menu file buffer (func_8001bb48) */
+    u_long unk4A4[0x8000]; /* 0x4a4: the 0x20000-byte load buffer */
 } VsCdState;
 
 /* Layout check: the offset the code proves. */
 typedef char VsCdStateArchivesAt0xE0[offsetof(VsCdState, archives) == 0xe0 ? 1 : -1];
+typedef char VsCdStateUnk4A4At0x4A4[offsetof(VsCdState, unk4A4) == 0x4a4 ? 1 : -1];
 
 extern VsCdState DAT_801a4590;
 
@@ -128,7 +129,11 @@ extern s32 DAT_80063308;
 /* A fighter's attack record: its damage per kind (32 bytes, the stride
  * func_8002e314 indexes). */
 typedef struct {
-    u8 unk0[10];
+    u16 unk0;                /* 0x00: effect kind (func_8002f334) */
+    s16 unk2;                /* 0x02..0x06: the effect's offset from the fighter, turned by its facing */
+    s16 unk4;
+    s16 unk6;
+    u8 unk8[2];
     s16 unkA;                /* 0x0a: the frame it strikes on (func_80031478) */
     u16 unkC;                /* 0x0c: its cost to the second gauge */
     u16 damage[9];           /* 0x0e */
@@ -274,9 +279,8 @@ extern s32 DAT_80063224;
 extern s32 DAT_80063350;
 extern s32 DAT_80063360;
 
-/* The animation step the sound triggers scale a fighter's frame step by
- * (.sdata, 0 in the image; unowned). */
-extern s32 DAT_80063220;
+/* DAT_80063220 (declared above) is also the animation step the sound
+ * triggers scale a fighter's frame step by. */
 
 
 /* VS's copy of ST.EXE's vis_table_c (bss, 0x80191d00): the 44-byte item
@@ -340,6 +344,29 @@ extern u_long DAT_8011c528[];
  * two players' picked fighters, -1 for none (bss, unowned). */
 extern s32 DAT_801c4a38[7];
 extern u16 DAT_80117598[7];
-extern s32 DAT_80063330[]; /* the second player's is DAT_80063334 (vs/main.h) */
+/* The two players' picked fighters, -1 for none. Retail's translation units
+ * see two sizes: the team, pick and setup screens read both words
+ * $gp-relative through an 8-byte array (define VS_PICKED_PAIR before
+ * including this header), while the main module and the card screen see
+ * only the first word here and the second as DAT_80063334 (vs/main.h). */
+#ifdef VS_PICKED_PAIR
+extern s32 DAT_80063330[2];
+#else
+extern s32 DAT_80063330[];
+#endif
 
+/* Read-only words the first-pass round sequence and effect code read
+ * directly (WIP; 0x80011934 is the start of vs.effect_80032404's
+ * JUMPTABLES claim, 0x8001150c of vs.fade_80028fcc's). */
+extern s32 DAT_80011934;
+extern s32 DAT_8001147c;
+extern s32 DAT_80011480;
+extern s32 DAT_80011484;
+extern s32 DAT_80011488;
+extern s32 DAT_8001148c;
+extern s32 DAT_800114cc;
+extern s32 DAT_8001150c;
+
+/* A halfword the team screen and the setup page read (bss, unowned). */
+extern u16 DAT_8006335c;
 #endif

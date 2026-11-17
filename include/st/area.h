@@ -50,6 +50,14 @@ void func_8004567c(void);
 void func_80045fb8(StCdRequest *request);
 void func_80045ffc(void);
 
+/* 0x8008038c: the handlers an area uses until its own are loaded (load
+ * data, WIP owner; src/st/area_load.c). */
+extern AreaHooks DAT_8008038c;
+
+/* src/st/area_request.c (also declared in st/player.h) */
+void func_80045044(u8 a0, u8 a1, u8 a2, u8 a3, u8 a4, s8 f0, s8 f1, s8 f2, u8 f3, u8 f4,
+                   u8 f5);
+
 /* WIP prototypes of the rest of the area code */
 void func_800456f8(void);
 void func_80045f90(int archive, int member, void (*done)());

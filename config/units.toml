@@ -278,9 +278,21 @@ source = "src/st/area_wait.c"
 profile = "probe-gcc272cdk-o2-g8"
 
 [[unit]]
+unit = "st.area_request"
+image = "ST.EXE"
+source = "src/st/area_request.c"
+profile = "probe-gcc272cdk-o2-g8"
+
+[[unit]]
 unit = "st.area_cb"
 image = "ST.EXE"
 source = "src/st/area_cb.c"
+profile = "probe-gcc272cdk-o2-g8"
+
+[[unit]]
+unit = "st.area_load"
+image = "ST.EXE"
+source = "src/st/area_load.c"
 profile = "probe-gcc272cdk-o2-g8"
 
 [[unit]]
@@ -293,6 +305,12 @@ profile = "probe-gcc272cdk-o2-g8"
 unit = "st.vis_src"
 image = "ST.EXE"
 source = "src/st/vis_src.c"
+profile = "probe-gcc272cdk-o2-g0"
+
+[[unit]]
+unit = "st.vis_hit"
+image = "ST.EXE"
+source = "src/st/vis_hit.c"
 profile = "probe-gcc272cdk-o2-g0"
 
 [[unit]]
@@ -314,6 +332,12 @@ source = "src/st/vis_entry.c"
 profile = "probe-gcc272cdk-o2-g0"
 
 [[unit]]
+unit = "st.vis_attack"
+image = "ST.EXE"
+source = "src/st/vis_attack.c"
+profile = "probe-gcc272cdk-o2-g0"
+
+[[unit]]
 unit = "st.vis_item"
 image = "ST.EXE"
 source = "src/st/vis_item.c"
@@ -332,6 +356,12 @@ source = "src/st/vis_b_init.c"
 profile = "probe-gcc272cdk-o2-g0"
 
 [[unit]]
+unit = "st.vis_b_load"
+image = "ST.EXE"
+source = "src/st/vis_b_load.c"
+profile = "probe-gcc272cdk-o2-g0"
+
+[[unit]]
 unit = "st.vis_b"
 image = "ST.EXE"
 source = "src/st/vis_b.c"
@@ -341,6 +371,12 @@ profile = "probe-gcc272cdk-o2-g0"
 unit = "st.vis_c"
 image = "ST.EXE"
 source = "src/st/vis_c.c"
+profile = "probe-gcc272cdk-o2-g0"
+
+[[unit]]
+unit = "st.vis_pickup"
+image = "ST.EXE"
+source = "src/st/vis_pickup.c"
 profile = "probe-gcc272cdk-o2-g0"
 
 [[unit]]
@@ -371,6 +407,12 @@ profile = "probe-gcc272cdk-o2-g8"
 unit = "st.item_spawn"
 image = "ST.EXE"
 source = "src/st/item_spawn.c"
+profile = "probe-gcc272cdk-o2-g0"
+
+[[unit]]
+unit = "st.item_use"
+image = "ST.EXE"
+source = "src/st/item_use.c"
 profile = "probe-gcc272cdk-o2-g0"
 
 [[unit]]
@@ -490,6 +532,18 @@ source = "src/vs/gfx_80016ca8.c"
 profile = "probe-gcc272cdk-o2-g8"
 
 [[unit]]
+unit = "vs.menu_80016f10"
+image = "VS.EXE"
+source = "src/vs/menu_80016f10.c"
+profile = "probe-gcc272cdk-o2-g8"
+
+[[unit]]
+unit = "vs.team_8001789c"
+image = "VS.EXE"
+source = "src/vs/team_8001789c.c"
+profile = "probe-gcc272cdk-o2-g8"
+
+[[unit]]
 unit = "vs.gfx_80017bc4"
 image = "VS.EXE"
 source = "src/vs/gfx_80017bc4.c"
@@ -508,9 +562,27 @@ source = "src/vs/tim_80018240.c"
 profile = "probe-gcc272cdk-o2-g8"
 
 [[unit]]
+unit = "vs.team_800182ec"
+image = "VS.EXE"
+source = "src/vs/team_800182ec.c"
+profile = "probe-gcc272cdk-o2-g8"
+
+[[unit]]
+unit = "vs.team_80018c84"
+image = "VS.EXE"
+source = "src/vs/team_80018c84.c"
+profile = "probe-gcc272cdk-o2-g8"
+
+[[unit]]
 unit = "vs.save_800193e8"
 image = "VS.EXE"
 source = "src/vs/save_800193e8.c"
+profile = "probe-gcc272cdk-o2-g8"
+
+[[unit]]
+unit = "vs.pick_8001960c"
+image = "VS.EXE"
+source = "src/vs/pick_8001960c.c"
 profile = "probe-gcc272cdk-o2-g8"
 
 [[unit]]
@@ -556,6 +628,18 @@ source = "src/vs/ui_800207d4.c"
 profile = "probe-gcc272cdk-o2-g8"
 
 [[unit]]
+unit = "vs.ui_80020aa4"
+image = "VS.EXE"
+source = "src/vs/ui_80020aa4.c"
+profile = "probe-gcc272cdk-o2-g8"
+
+[[unit]]
+unit = "vs.ui_80021140"
+image = "VS.EXE"
+source = "src/vs/ui_80021140.c"
+profile = "probe-gcc272cdk-o2-g8"
+
+[[unit]]
 unit = "vs.ui_80021984"
 image = "VS.EXE"
 source = "src/vs/ui_80021984.c"
@@ -577,6 +661,12 @@ profile = "probe-gcc272cdk-o2-g8"
 unit = "vs.ui_800228d8"
 image = "VS.EXE"
 source = "src/vs/ui_800228d8.c"
+profile = "probe-gcc272cdk-o2-g8"
+
+[[unit]]
+unit = "vs.ui_80022a00"
+image = "VS.EXE"
+source = "src/vs/ui_80022a00.c"
 profile = "probe-gcc272cdk-o2-g8"
 
 [[unit]]
@@ -754,6 +844,12 @@ source = "src/vs/vis_8002f264.c"
 profile = "probe-gcc272cdk-o2-g0"
 
 [[unit]]
+unit = "vs.attack_8002f334"
+image = "VS.EXE"
+source = "src/vs/attack_8002f334.c"
+profile = "probe-gcc272cdk-o2-g0"
+
+[[unit]]
 unit = "vs.move_80030620"
 image = "VS.EXE"
 source = "src/vs/move_80030620.c"
@@ -778,9 +874,21 @@ source = "src/vs/effect_80032228.c"
 profile = "probe-gcc272cdk-o2-g0"
 
 [[unit]]
+unit = "vs.effect_80032404"
+image = "VS.EXE"
+source = "src/vs/effect_80032404.c"
+profile = "probe-gcc272cdk-o2-g0"
+
+[[unit]]
 unit = "vs.effect_move_8003333c"
 image = "VS.EXE"
 source = "src/vs/effect_move_8003333c.c"
+profile = "probe-gcc272cdk-o2-g0"
+
+[[unit]]
+unit = "vs.effect_800335e8"
+image = "VS.EXE"
+source = "src/vs/effect_800335e8.c"
 profile = "probe-gcc272cdk-o2-g0"
 
 [[unit]]

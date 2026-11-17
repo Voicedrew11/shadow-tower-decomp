@@ -84,8 +84,6 @@ STR.EXE	0x80032908	0x22108	0x10	unclassified	coverage-gap			payload-complement	.
 STR.EXE	0x80032918	0x22118	0x38	bss	proven	dec	DECENV	asm;src/str/main.c str.main	str.main fixed .bss
 STR.EXE	0x80032950	0x22150	0x6b0	bss	proven	vlc_buffer	u_long[2][40960]	asm;src/str/main.c str.main	COMMON; continues past the load image
 ST.EXE	0x80011000	0x800	0x3320	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
-ST.EXE	0x80036538	0x25d38	0x18d8	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
-ST.EXE	0x800486ac	0x37eac	0x424	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 ST.EXE	0x80068660	0x57e60	0x4	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 ST.EXE	0x80068670	0x57e70	0x4	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 ST.EXE	0x80068680	0x57e80	0x4	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
@@ -236,9 +234,10 @@ ST.EXE	0x8007eea0	0x6e6a0	0x4	unclassified	coverage-gap			payload-complement	may
 ST.EXE	0x8007f318	0x6eb18	0xc	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 ST.EXE	0x8007f3e4	0x6ebe4	0x10	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 ST.EXE	0x8007f3f4	0x6ebf4	0x398	defined	candidate	hud_sprites	StHudSprite[46]	asm;src/st/hud.c st.hud	46 HUD sprite records of 20 bytes in runs ended by flags 0xff; extern only, owner unknown
-ST.EXE	0x8007f78c	0x6ef8c	0xc80	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
+ST.EXE	0x8007f78c	0x6ef8c	0xc00	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
+ST.EXE	0x8008038c	0x6fb8c	0x80	defined	candidate	DAT_8008038c	AreaHooks	asm;src/st/area_load.c st.area_load	the handler table an area uses until its own is loaded: 32 slots, each func_800443ec; extern only
 ST.EXE	0x8008040c	0x6fc0c	0x20	defined	candidate	DAT_8008040c	MATRIX	asm;src/st/objects.c st.objects;src/st/anim_set.c st.anim_set	identity MATRIX handed to model_draw by func_800241d0 and func_800255f0 and copied to the scratchpad MATRIX by anim_set_node_vertex; extern only
-ST.EXE	0x8008042c	0x6fc2c	0x80	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
+ST.EXE	0x8008042c	0x6fc2c	0x80	defined	candidate	DAT_8008042c	MATRIX[4]	asm;src/st/vis_hit.c st.vis_hit	the four light-set rotations of the collision test; extern only
 ST.EXE	0x800804ac	0x6fcac	0x3c0	defined	candidate	DAT_800804ac	u32[40][6]	asm;src/st/xa.c st.xa	XA stream lengths in sectors per stream file and channel (func_8005408c); WIP extent of 40 rows (DAT_801cba08.unk1618 holds 40 positions); extern only
 ST.EXE	0x8008086c	0x7006c	0xc0	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 ST.EXE	0x8008092c	0x7012c	0x12	defined	candidate	DAT_8008092c	u8[18]	asm;src/st/equip_menu.c st.equip_menu	byte table: message offset from 916 per ring sub-list entry

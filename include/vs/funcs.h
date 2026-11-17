@@ -124,5 +124,9 @@ int func_8002e510(int id);                               /* src/vs/fighter_8002e
 void func_800352cc(void);                                /* src/vs/effect_run_800352cc.c */
 void func_800352fc(void);                                /* src/vs/effect_run_800352cc.c */
 void func_80031478(int id);                              /* not reconstructed */
+int func_8003333c(int arg0, u_long height, int spin);    /* src/vs/effect_move_8003333c.c */
+void func_8002e314(u8 id, u8 attack);                    /* src/vs/fighter_8002e114.c */
+void func_800256bc(int id, int node, int index, VECTOR *out); /* src/vs/anim_80025670.c */
+int func_80028d94(int id, int part, int frame, int index, SVECTOR *out); /* src/vs/anim_80028d94.c */
 
 #endif

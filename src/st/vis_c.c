@@ -215,24 +215,6 @@ void func_80052e50(Vis48 *c)
     c->unk22 = 0;
 }
 
-/* One 24-byte table C entry of an area file. */
-typedef struct {
-    u16 unk00;           /* 0x00: Vis44 index, 0xffff none */
-    u16 unk02;
-    u8 unk04;            /* 0x04..0x06: cell */
-    u8 unk05;
-    u8 unk06;
-    u8 unk07;
-    s16 unk08;           /* 0x08..0x0c: offset in the cell */
-    s16 unk0A;
-    s16 unk0C;
-    u16 unk0E;           /* 0x0e..0x12: rotation */
-    u16 unk10;
-    u16 unk12;
-    u8 unk14[2];
-    u16 unk16;
-} VisCFileEntry;
-
 /* Loads the first 32 entries from an area file, then drops the collected
  * ones of the 16 from entry 32.
  * Not exact: this build hoists &area_state into s7 out of the first loop;

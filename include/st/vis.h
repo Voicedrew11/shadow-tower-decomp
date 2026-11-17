@@ -39,13 +39,15 @@ typedef struct {
     u8 unk24[0x2c - 0x24];
     s32 unk2C;           /* 0x2c: floor height found; func_80048ad0 resolves it (func_80053aa4) */
     s32 unk30;           /* 0x30: a height func_8003bdb0 tests */
-    u8 unk34[0x3c - 0x34];
+    s32 unk34;           /* 0x34: func_80048ad0's heights (unk2C..unk58) */
+    s32 unk38;
     s32 unk3C;
-    u8 unk40[4];
+    s32 unk40;
     s32 unk44;
-    u8 unk48[0x4c - 0x48];
+    s32 unk48;
     s32 unk4C;           /* 0x4c: 0x80000 when unset (func_8003be10) */
-    u8 unk50[0x58 - 0x50];
+    s32 unk50;
+    s32 unk54;
     s32 unk58;           /* 0x58: 0x80000 when unset */
     s32 unk5C;           /* 0x5c: an index into vis_table_a.entries */
     s32 unk60;           /* 0x60: func_8004be80's result */
@@ -53,18 +55,24 @@ typedef struct {
     u8 unk68[0xc];
     s32 unk74;           /* 0x74: the kind bits func_80049544 resolved */
     s32 unk78;           /* 0x78: heading of the wall slid along */
-    u8 unk7C[0x10];
+    SVECTOR unk7C;       /* 0x7c: func_80048ad0's normals (unk7C..unkA4) */
+    SVECTOR unk84;
     s16 unk8C;           /* 0x8c..0x90: wall normal (bit 1 hits) */
     u8 unk8E[2];
     s16 unk90;
-    u8 unk92[0xa];
+    u8 unk92[2];
+    SVECTOR unk94;
     s16 unk9C;           /* 0x9c..0xa0: wall normal (bit 3 hits) */
     u8 unk9E[2];
     s16 unkA0;
-    u8 unkA2[0xa];
+    u8 unkA2[2];
+    SVECTOR unkA4;
     VECTOR unkAC;        /* 0xac: the resolved source's position */
     s32 unkBC;           /* 0xbc: its horizontal distance */
-    u8 unkC0[0x44c0 - 0xc0];
+    VECTOR unkC0[272];   /* 0xc0: collision vertices in world space (src/st/vis_hit.c) */
+    VECTOR unk11C0[272]; /* 0x11c0..: the same relative to the three test points */
+    VECTOR unk22C0[272];
+    VECTOR unk33C0[272];
     u16 unk44C0;         /* 0x44c0 */
     u16 unk44C2;         /* 0x44c2 */
     u8 unk44C4[2];
@@ -108,6 +116,87 @@ typedef struct {
 typedef struct {
     u_long bits[16];
 } VisSourceMask;
+
+/* One 40-byte collision part header in the area's collision file
+ * (world_state.unk8308[1]); offsets are from the file start + 12. */
+typedef struct {
+    s32 vertices;        /* 0x00: SVECTOR vertices */
+    s32 n_vertices;      /* 0x04 */
+    s32 normals;         /* 0x08: SVECTOR normals, by byte offset */
+    s32 unkC;
+    s32 faces;           /* 0x10: face blocks */
+    s32 unk14;
+    u16 n18;             /* 0x18: 20-byte records before the faces */
+    u16 n1a;             /* 0x1a: 24-byte records */
+    u16 n1c;             /* 0x1c: 28-byte records */
+    u16 n1e;             /* 0x1e: 32-byte records */
+    u16 n_tris;          /* 0x20: VisHitTri faces */
+    u16 unk22;
+    u16 n_quads;         /* 0x24: VisHitQuad faces after the triangles */
+    u16 unk26;
+} VisHitPart;
+
+/* A collision triangle: a push direction, the face flags, its normal and
+ * vertices (SVECTOR byte offsets). */
+typedef struct {
+    u8 x;
+    u8 z;
+    u16 flags;           /* 1 floor, 2 wall, 4 ceiling, 0x10..0x800 floor kinds */
+    u16 normal;
+    u16 v[3];
+} VisHitTri;
+
+typedef struct {
+    u8 x;
+    u8 z;
+    u16 flags;
+    u16 normal;
+    u16 v[4];
+    u16 pad;
+} VisHitQuad;
+
+/* The scratchpad while a request is tested (src/st/vis_hit.c). */
+typedef struct {
+    u8 *base;            /* 0x000: the collision file */
+    VisHitPart *part;    /* 0x004 */
+    u8 *normals;         /* 0x008 */
+    u8 *vertices;        /* 0x00c */
+    VECTOR *world;       /* 0x010: vis_lists.unkC0 cursor */
+    VECTOR *rel[3];      /* 0x014: unk11C0..unk33C0 cursors */
+    u16 unk20;           /* 0x020: the record's light set */
+    s16 hit;             /* 0x022: the record hit, -1 none */
+    VECTOR e[3][4];      /* 0x024: per point, the face edges' outer products */
+    VECTOR pos[3];       /* 0x0e4: the test points */
+    s32 h114;            /* 0x114: nearest floor */
+    s32 h118;
+    s32 h11c;
+    s32 h120;            /* 0x120: nearest ceiling */
+    s32 h124;
+    s32 h128;            /* 0x128: nearest wall */
+    s32 h12c;
+    s32 h130;
+    s32 h134;
+    s32 h138;
+    s32 h13c;
+    s32 h140;
+    s32 h144;
+    SVECTOR dir;         /* 0x148: the request's reach */
+    SVECTOR n150;
+    SVECTOR n158;
+    SVECTOR n160;
+    SVECTOR n168;
+    SVECTOR n170;
+    SVECTOR n178;
+    SVECTOR n180;
+    SVECTOR n188;
+    SVECTOR v190;
+    u32 flags;           /* 0x198: floor kind bits */
+} VisHitScratch;
+
+#define VIS_HIT_SCRATCH ((VisHitScratch *)0x1f800000)
+
+/* 0x8008042c: the four light-set rotations (load data, WIP owner). */
+extern MATRIX DAT_8008042c[4];
 
 extern VisLists vis_lists;
 extern VisRecord vis_records[];
@@ -370,7 +459,7 @@ typedef struct {
     u16 unk04;           /* 0x04 */
     u16 unk06;           /* 0x06: trigger radius (func_8004f718) */
     u16 unk08;           /* 0x08 */
-    u8 unk0A[2];
+    u16 unk0A;           /* 0x0a: the entry's OT depth bias (func_8004eebc) */
     u16 unk0C;           /* 0x0c */
     u16 unk0E;           /* 0x0e */
     u8 unk10[8];
@@ -474,6 +563,10 @@ void vis_collect_table_c(void);
 /* src/st/vis_request.c */
 void func_800492f4(VECTOR *pos);
 int func_80049544(VisLists *req);
+/* src/st/vis_hit.c */
+void func_80046604(VECTOR *pos);
+void func_800468c0(VECTOR *pos, int kind);
+void func_80047884(VECTOR *pos, int kind);
 int func_80048ad0(VisLists *req);
 int func_8004bb88(VisLists *req, int arg1);
 int func_8004be80(VisLists *req);
@@ -548,6 +641,9 @@ void func_8004e960(VisAFileEntry *src);
 void func_8004ee00(Vis88 *e);
 void func_8004ee48(int index, int mode);
 
+/* src/st/vis_b_load.c */
+void func_8004eebc(u8 *src);
+
 /* src/st/vis_b.c (func_8004fc94, func_8004fd28, func_800500ac: st/funcs.h) */
 int func_8004f718(int i, VisLists *req);
 void func_8004f974(Vis88 *e, int kind);
@@ -564,7 +660,26 @@ void func_80050468(Vis88 *e, int arg);
 void func_80050564(Vis88 *e, int arg);
 void func_8005066c(Vis88 *e, int arg);
 
+/* One 24-byte table C entry of an area file. */
+typedef struct {
+    u16 unk00;           /* 0x00: Vis44 index, 0xffff none */
+    u16 unk02;
+    u8 unk04;            /* 0x04..0x06: cell */
+    u8 unk05;
+    u8 unk06;
+    u8 unk07;
+    s16 unk08;           /* 0x08..0x0c: offset in the cell */
+    s16 unk0A;
+    s16 unk0C;
+    u16 unk0E;           /* 0x0e..0x12: rotation */
+    u16 unk10;
+    u16 unk12;
+    u8 unk14[2];
+    u16 unk16;
+} VisCFileEntry;
+
 /* src/st/vis_c.c (func_80052ca4: st/funcs.h; func_80052d10: st/area.h) */
+void func_80052f30(VisCFileEntry *src);
 void func_80052894(StWarp *to, int keep);
 void func_80052c24(void);
 void func_80052c5c(void);
