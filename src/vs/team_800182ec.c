@@ -30,10 +30,8 @@ void func_80021c14(int page);
 #define REPEAT (DAT_801603c0.pads[0].unkC | DAT_801603c0.pads[1].unkC)
 #define HELD (DAT_801603c0.pads[0].unk0 | DAT_801603c0.pads[1].unk0)
 
-/* Not exact (one attempt; 45.8%): first divergence at +0x4, retail keeps
- * the pad state's address in $s6 and `player` and `shown` on the stack
- * (here `player` in $s7); the button branches then allocate differently
- * and some tails cross-jump in another order. */
+/* Not exact: player/pad/index lifetimes and some button-tail edges differ;
+ * retail spills player to the stack instead of keeping it in s7. */
 ADDRESS(0x800182ec, 0x998)
 void func_800182ec(VsMenuScratch *sp, int player)
 {
@@ -63,12 +61,14 @@ void func_800182ec(VsMenuScratch *sp, int player)
         }
         top = sp->unk1D2;
         if (sp->unk1CC == 1) {
-            if (sp->unk1D0 < 0) {
+            int cursor = sp->unk1D0;
+
+            if (cursor < 0) {
                 col = -1;
-                row = ~sp->unk1D0;
+                row = ~cursor;
             } else {
-                row = sp->unk1D0 >> 2;
-                col = (s16)(sp->unk1D0 - row * 4);
+                row = cursor >> 2;
+                col = (s16)(cursor - row * 4);
             }
             if (PRESSED & 0x2000) {
                 if (!edit.unk0) {
@@ -151,10 +151,15 @@ void func_800182ec(VsMenuScratch *sp, int player)
                         sp->unk1D2 = sp->unk0.team.rows - 2;
                 }
             } else if (PRESSED & 0x4000) {
-                if (!edit.unk0) {
+                if (edit.unk0) {
+                    func_8001c978();
+                    edit.unk0 = 0;
+                    sp->unk1D6 = 0;
+                    func_80017bc4();
+                } else {
+                    idx = sp->unk1D2 * 4 + sp->unk1D0;
                     edit.unk0 = 1;
                     sp->unk1D6 = 1;
-                    idx = sp->unk1D2 * 4 + sp->unk1D0;
                     if (sp->unk1D0 < 0) {
                         edit.unk4 = ~sp->unk1D0;
                         if (team[edit.unk4] != -1) {
@@ -196,11 +201,6 @@ void func_800182ec(VsMenuScratch *sp, int player)
                     func_8001c938();
                     edit.unk0 = 0;
                     sp->unk1D6 = 0;
-                } else {
-                    func_8001c978();
-                    edit.unk0 = 0;
-                    sp->unk1D6 = 0;
-                    func_80017bc4();
                 }
             } else if ((PRESSED & 0x1000) && !edit.unk0) {
                 DAT_8006335c = 0;
@@ -210,6 +210,7 @@ void func_800182ec(VsMenuScratch *sp, int player)
                     if (id == -1) {
                         idx = -1;
                     } else {
+                        /* Retail only updates idx when a kind matches. */
                         for (i = 0; i < sp->unk0.team.count; i++) {
                             if (id == sp->unk0.team.kinds[i]) {
                                 idx = i;
@@ -239,7 +240,8 @@ void func_800182ec(VsMenuScratch *sp, int player)
                         tex.vy = 446;
                         clut.vx = 560;
                         clut.vy = 497;
-                        func_80018240((u_long *)((u8 *)buf + buf[0] + 8), &tex, &clut);
+                        buf = (u_long *)((buf[0] + sizeof(*buf)) + (u8 *)buf);
+                        func_80018240(buf + 1, &tex, &clut);
                     }
                     sp->unk1CC = 2;
                 }
@@ -257,9 +259,9 @@ void func_800182ec(VsMenuScratch *sp, int player)
                 for (i = 0; i < n * 4; i++, idx++) {
                     if (idx < sp->unk0.team.count) {
                         size = func_8002ee90(10, sp->unk0.team.kinds[idx],
-                                             DAT_801a4590.unk4A0) * 512;
+                                             DAT_801a4590.unk4A0) * 2048;
                         func_80012c2c(DAT_801a4590.unk4A0, &sp->unk0.team.pos[idx % 12], NULL);
-                        DAT_801a4590.unk4A0 += size;
+                        DAT_801a4590.unk4A0 = (u_long *)((u8 *)DAT_801a4590.unk4A0 + size);
                     }
                 }
                 DrawSync(0);
