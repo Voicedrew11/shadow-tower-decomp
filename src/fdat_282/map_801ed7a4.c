@@ -91,13 +91,11 @@ void func_801eda18(void)
 
 /*
  * Opens door 26 of table B: raises it to 0xfff, dropping item 2 on the way.
- * Not exact (same size): retail sets up the &pos/&rot arguments before
- * saving s4 and loading the step 28 into it; this build does it after.
  */
 ADDRESS(0x801eda20, 0x184)
 void func_801eda20(void)
 {
-    int step = 28;
+    int step;
     VECTOR pos;
     SVECTOR rot;
     Vis88 *door = &vis_table_b.entries[26];
@@ -109,6 +107,7 @@ void func_801eda20(void)
     pos.vx = door->unk24.vx - 3072;
     pos.vz = door->unk24.vz;
     fdat_801ecfc4(&pos, &rot);
+    step = 28;
     do {
         if (door->unk10 < 0xf00 && door->unk10 + step >= 0xf00)
             func_8004ed54(door, door->unk0a * 3 + 208);
