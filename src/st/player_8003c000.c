@@ -119,8 +119,9 @@ short func_8003c17c(short *level, short *peak, int ramp, int max, int apply)
 }
 
 /* Steps the status timers and the damage fades once per frame. */
-/* Not exact (4 bytes long): each timer word test is addressed from a kept
- * %hi(viewer) instead of the timer pointer minus its offset. */
+/* Not exact: timer-word tests retain %hi(viewer) across callbacks, where
+ * retail derives the viewer base from the current timer address (first
+ * divergence +0xf0). This build is 20 bytes longer than retail. */
 ADDRESS(0x8003c24c, 0x710)
 void player_update_status(int apply)
 {
@@ -211,7 +212,8 @@ void player_update_status(int apply)
         lighting.unk4 |= 0x10;
         lighting.unk3 |= 2;
         if (*(s32 *)viewer.unk190[5] == 0) {
-            viewer.unk2C = viewer.unk2C & ~0x20000 & ~0x10000;
+            viewer.unk2C &= ~0x20000;
+            viewer.unk2C &= ~0x10000;
         }
     }
     level = func_8003c17c(&viewer.unk190[6][0], &viewer.unk190[6][1], 0, 4096, apply);
