@@ -68,11 +68,12 @@ extern u8 DAT_8015ec38[];
         p3->y1 = VTX(sp, vb).sxy.vy;                                           \
         p3->x2 = VTX(sp, vc).sxy.vx;                                           \
         p3->y2 = VTX(sp, vc).sxy.vy;                                           \
-        z = Z3(sp, va, vb, vc);                                                \
+        z = VTX(sp, va).z + VTX(sp, vb).z;                                     \
+        z += VTX(sp, vc).z;                                                    \
         setRGB0(p3, ca.r, ca.g, ca.b);                                         \
         setRGB1(p3, cb.r, cb.g, cb.b);                                         \
         setRGB2(p3, cb.r, cb.g, cb.b);                                         \
-        addPrim(DAT_801624d0.ot_cur + (z >> 7), p3);                                  \
+        addPrim(DAT_801624d0.ot_cur + (z >> 7), p3);                           \
     }
 
 /* A semi-transparent Gouraud quad over vertices a, b, c, d in colours
@@ -92,12 +93,14 @@ extern u8 DAT_8015ec38[];
         p4->y2 = VTX(sp, vc).sxy.vy;                                           \
         p4->x3 = VTX(sp, vd).sxy.vx;                                           \
         p4->y3 = VTX(sp, vd).sxy.vy;                                           \
-        z = Z4(sp, i);                                                         \
+        z = VTX(sp, 0).z + VTX(sp, i + 16).z;                                  \
+        z += VTX(sp, i + 17).z;                                                \
+        z += VTX(sp, i + 1).z;                                                 \
         setRGB0(p4, ca.r, ca.g, ca.b);                                         \
         setRGB1(p4, ca.r, ca.g, ca.b);                                         \
         setRGB2(p4, cc.r, cc.g, cc.b);                                         \
         setRGB3(p4, cc.r, cc.g, cc.b);                                         \
-        addPrim(DAT_801624d0.ot_cur + (z >> 7), p4);                                  \
+        addPrim(DAT_801624d0.ot_cur + (z >> 7), p4);                           \
     }
 
 /* An empty textured triangle that sets the semi-transparency mode (tpage
@@ -112,7 +115,7 @@ extern u8 DAT_8015ec38[];
         t->clut = 32641;                                                       \
         t->tpage = 56;                                                         \
         setRGB0(t, 0, 0, 0);                                                   \
-        addPrim(DAT_801624d0.ot_cur + (z >> 7), t);                                   \
+        addPrim(DAT_801624d0.ot_cur + (z >> 7), t);                            \
     }
 
 /* The scratchpad's projected vertex n. */
@@ -129,7 +132,7 @@ extern u8 DAT_8015ec38[];
  * of it, scaled by its hit radius and height.
  */
 /* Not exact (size-exact): retail sums each OT depth in $s0 itself; this
- * build sums in temporaries and shifts into $s0 (45 words). */
+ * build picks other temporaries for the vertex loads (37 words). */
 ADDRESS(0x8002c2c4, 0x144c)
 void func_8002c2c4(int id)
 {
