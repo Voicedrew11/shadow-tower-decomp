@@ -266,6 +266,12 @@ source = "src/st/player.c"
 profile = "probe-gcc272cdk-o2-g8"
 
 [[unit]]
+unit = "st.player_8003e5e8"
+image = "ST.EXE"
+source = "src/st/player_8003e5e8.c"
+profile = "probe-gcc272cdk-o2-g8"
+
+[[unit]]
 unit = "st.area_a"
 image = "ST.EXE"
 source = "src/st/area_a.c"
