@@ -762,12 +762,12 @@ void func_80040024(u8 hand)
 /* Steps hand `hand`'s swing or cast for its held item kind: the swing
  * timer viewer.unk130.halves[hand] against its hit window (unk130[hand + 2]) and
  * its end (unk138[hand]), the stamina bar viewer.unk17E, the hit search
- * over vis_table_a's entries and the item wear. The unused aggregates
- * keep retail's frame layout (sv at 24, v at 56, req at 104, p at 144).
- * Not exact (12 bytes long): register allocation differs from the start
- * (hand reaches $s6 through a copy in $t1, the hit search keeps one more
- * pointer copy, the 0..30 case's cost and limit swap $s1/$s2); the CFG,
- * calls and constants match. */
+ * over vis_table_a's entries and the item wear. Retail accesses sv at
+ * sp+24, v at +56, req at +104 and p at +144; this draft accesses those
+ * aggregates eight bytes higher within the same frame.
+ * Not exact: the hand argument and hit search retain extra pointer/copy
+ * temporaries, stamina multiplication forms differ, and case-local cost
+ * and limit loads still have different schedules. */
 ADDRESS(0x800402ac, 0xc58)
 void func_800402ac(u8 hand)
 {
@@ -782,8 +782,6 @@ void func_800402ac(u8 hand)
     VECTOR p;
     Vis212 *e;
     Vis212 *hit;
-    int cost;
-    int max;
     int d;
     int i;
     int r;
@@ -797,7 +795,8 @@ void func_800402ac(u8 hand)
 
     rec = viewer.unkE8[hand];
     switch (viewer.unk148[hand]) {
-    case 36 ... 54:
+    case 36 ... 54: {
+        int cost;
         if (viewer.unk2DE != 0) {
             viewer.unk2DE >>= 1;
         }
@@ -870,7 +869,9 @@ void func_800402ac(u8 hand)
             viewer.unk2E2 = 0;
         }
         break;
-    case 31 ... 34:
+    }
+    case 31 ... 34: {
+        int cost;
         if (viewer.unk130.halves[hand] != -1) {
             cost = rec->unk4 + rec->unk4 * viewer.unk62[1] / 1600;
             if (viewer.unk21F) {
@@ -923,7 +924,10 @@ void func_800402ac(u8 hand)
             viewer.unk187 = 0;
         }
         break;
-    case 0 ... 30:
+    }
+    case 0 ... 30: {
+        int cost;
+        int max;
         if (viewer.unk130.halves[hand] != -1) {
             cost = rec->unk4 + rec->unk4 * viewer.unk62[1] / 1600;
             max = rec->unk8;
@@ -1012,6 +1016,7 @@ void func_800402ac(u8 hand)
             }
         }
         break;
+    }
     case 255: /* no item: an empty out-of-range label; with it GCC dispatches
                * by the compare tree retail has instead of a jump table */
         break;
