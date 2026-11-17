@@ -22,7 +22,8 @@ typedef struct {
 /* The team screen's edit record (a local of func_800182ec): the slot picked
  * (unk4) and a copy of the team being edited. */
 typedef struct {
-    s32 unk0;
+    u8 unk0;             /* 0x00: a slot is held (func_800182ec) */
+    u8 unk1[3];
     s32 unk4;            /* 0x04: the picked slot */
     VsTeam team;         /* 0x08 */
 } VsTeamEdit;
@@ -36,8 +37,14 @@ typedef struct {
         MenuState menu;  /* the menu screens' state */
         VsCardState card; /* the memory card screens' state (vs/card.h) */
         struct {
-            u8 unk00[0x10];
-            DVECTOR pos[15]; /* 0x10: VRAM positions; [12..14] the team slot pictures */
+            u8 unk00[4];
+            u8 *kinds;   /* 0x04: the item grid, four per row (func_80021140) */
+            s16 count;   /* 0x08: items in the grid (func_80020aa4) */
+            s16 rows;    /* 0x0a: its last row */
+            s16 last;    /* 0x0c: items on the last row */
+            u8 unk0E[2];
+            DVECTOR pos[16]; /* 0x10: VRAM positions; [12..14] the team slot pictures, [15] the detail image */
+            MenuStoredItem *items; /* 0x50: item records by kind (func_80021140) */
         } team;          /* the team screen (func_80017c84) */
     } unk0;              /* 0x000 */
     VsCardPort *unk1B8;  /* 0x1b8: the card slot being scanned */
@@ -50,12 +57,18 @@ typedef struct {
     s16 unk1C8;          /* 0x1c8: the first free save number */
     u8 unk1CA[2];
     u16 unk1CC;          /* 0x1cc (ST unk2DC) */
-    u8 unk1CE[2];
+    s16 unk1CE;          /* 0x1ce: the versus setup cursor line (func_80022a00) */
     s16 unk1D0;          /* 0x1d0: the list cursor row (ST unk2E0) */
-    u8 unk1D2[2];
+    s16 unk1D2;          /* 0x1d2: the item grid row (func_80021140) */
     u8 unk1D4;           /* 0x1d4: cursor blink phase (ST unk2E4) */
     u8 unk1D5;           /* 0x1d5: font mode (ST unk2E5) */
-    u8 unk1D6[0x1f0 - 0x1d6];
+    u8 unk1D6;           /* 0x1d6: a team slot is picked up (func_80020aa4) */
+    u8 unk1D7;
+    DVECTOR unk1D8;      /* 0x1d8: the menu font's VRAM position (func_80018c84) */
+    DVECTOR unk1DC;      /* 0x1dc: and its CLUT's */
+    DVECTOR unk1E0;      /* 0x1e0: the item name font's VRAM position */
+    DVECTOR unk1E4;      /* 0x1e4: and its CLUT's */
+    u8 unk1E8[0x1f0 - 0x1e8];
     CVECTOR style[8];    /* 0x1f0: text colours (ST 0x300) */
     u8 unk210[4];
     CVECTOR unk214;      /* 0x214: highlight colour (ST unk32C) */

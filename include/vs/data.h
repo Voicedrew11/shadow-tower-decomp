@@ -36,8 +36,8 @@ typedef struct {
 
 /*
  * The CD state block at 0x801a4590 (bss): ST.EXE's StCdState without the
- * root counter and vsync words, with a 4-entry ring. WIP extent ends with
- * the archive tables.
+ * root counter and vsync words, with a 4-entry ring, then the load cursor
+ * and the load buffer.
  */
 typedef struct {
     u8 unk0[8];
@@ -45,10 +45,14 @@ typedef struct {
     StCdRequest *unkD8; /* 0xd8: the next free entry (ST: unk9D4) */
     StCdRequest *unkDC; /* 0xdc: the entry being read (ST: unk9D8) */
     VsArchive archives[ST_ARCHIVES]; /* 0xe0: count as in ST.EXE (WIP) */
+    u8 unk1D0[0x4a0 - 0x1d0];
+    u_long *unk4A0;      /* 0x4a0: load cursor in unk4A4 (func_8001789c) */
+    u_long unk4A4[0x8000]; /* 0x4a4: the 0x20000-byte load buffer */
 } VsCdState;
 
 /* Layout check: the offset the code proves. */
 typedef char VsCdStateArchivesAt0xE0[offsetof(VsCdState, archives) == 0xe0 ? 1 : -1];
+typedef char VsCdStateUnk4A4At0x4A4[offsetof(VsCdState, unk4A4) == 0x4a4 ? 1 : -1];
 
 extern VsCdState DAT_801a4590;
 

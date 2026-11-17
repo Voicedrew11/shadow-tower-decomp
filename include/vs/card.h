@@ -54,7 +54,7 @@ typedef struct {
 /* Per-item marks func_800193e8 compares between the two saves (VS band 6):
  * item ids 0..265 index the byte arrays. */
 typedef struct {
-    u8 unk0[0x14];
+    u32 unk0[5];         /* 0x000: one bit per fighter id owned (func_80018c84) */
     u8 unk14[266];       /* 0x014: a second mark, needed when the item's flag bit is set */
     u8 unk11E[0x150 - 0x11e];
     u8 unk150[266];      /* 0x150: the item is held */

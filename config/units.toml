@@ -514,6 +514,12 @@ source = "src/vs/gfx_80016ca8.c"
 profile = "probe-gcc272cdk-o2-g8"
 
 [[unit]]
+unit = "vs.team_8001789c"
+image = "VS.EXE"
+source = "src/vs/team_8001789c.c"
+profile = "probe-gcc272cdk-o2-g8"
+
+[[unit]]
 unit = "vs.gfx_80017bc4"
 image = "VS.EXE"
 source = "src/vs/gfx_80017bc4.c"
@@ -529,6 +535,18 @@ profile = "probe-gcc272cdk-o2-g8"
 unit = "vs.tim_80018240"
 image = "VS.EXE"
 source = "src/vs/tim_80018240.c"
+profile = "probe-gcc272cdk-o2-g8"
+
+[[unit]]
+unit = "vs.team_800182ec"
+image = "VS.EXE"
+source = "src/vs/team_800182ec.c"
+profile = "probe-gcc272cdk-o2-g8"
+
+[[unit]]
+unit = "vs.team_80018c84"
+image = "VS.EXE"
+source = "src/vs/team_80018c84.c"
 profile = "probe-gcc272cdk-o2-g8"
 
 [[unit]]
@@ -628,6 +646,18 @@ source = "src/vs/ui_800207d4.c"
 profile = "probe-gcc272cdk-o2-g8"
 
 [[unit]]
+unit = "vs.ui_80020aa4"
+image = "VS.EXE"
+source = "src/vs/ui_80020aa4.c"
+profile = "probe-gcc272cdk-o2-g8"
+
+[[unit]]
+unit = "vs.ui_80021140"
+image = "VS.EXE"
+source = "src/vs/ui_80021140.c"
+profile = "probe-gcc272cdk-o2-g8"
+
+[[unit]]
 unit = "vs.ui_80021984"
 image = "VS.EXE"
 source = "src/vs/ui_80021984.c"
@@ -649,6 +679,12 @@ profile = "probe-gcc272cdk-o2-g8"
 unit = "vs.ui_800228d8"
 image = "VS.EXE"
 source = "src/vs/ui_800228d8.c"
+profile = "probe-gcc272cdk-o2-g8"
+
+[[unit]]
+unit = "vs.ui_80022a00"
+image = "VS.EXE"
+source = "src/vs/ui_80022a00.c"
 profile = "probe-gcc272cdk-o2-g8"
 
 [[unit]]
