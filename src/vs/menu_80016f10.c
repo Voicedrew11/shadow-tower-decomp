@@ -40,16 +40,25 @@ int func_800193e8(int player);
 void func_8001381c(void);
 void func_80023308(int page);
 
-/* The picture after a loaded message file: its byte size, then the file. */
-#define TIM_AFTER(buf) ((u_long *)((u8 *)&(buf)[1] + (buf)[0]) + 1)
+/* The CD state's reusable menu-file buffer. */
+#define LOAD_BUFFER (DAT_801a4590.unk4A4)
 
-#define PRESSED (DAT_801603c0.pads[0].unk8 | DAT_801603c0.pads[1].unk8)
-#define REPEAT (DAT_801603c0.pads[0].unkC | DAT_801603c0.pads[1].unkC)
+#define PAD(n) (DAT_801603c0.pads[(n)])
+#define PRESSED (PAD(0).unk8 | PAD(1).unk8)
+#define REPEAT (PAD(0).unkC | PAD(1).unkC)
 
-/* Not exact (one attempt; 61.3%): first divergence at +0x50, retail keeps
- * the CD state base in $s1 and the buffer in $s4 (here $s2/$s1); the page
- * loop's branch layout differs from +0x2ac on, and it reads DAT_80063380/81
- * absolutely where retail uses $gp. */
+/* Both card entries run the same page transition with a literal port. */
+#define CARD_PAGE(port)                     \
+    sp->unk1CC = 2;                        \
+    sp->unk1D5 = 0;                        \
+    sp->unk1CA = 0;                        \
+    func_8001bb48(0, port);                 \
+    sp->unk1D5 = 1;                        \
+    sp->unk1CC = 0
+
+/* Not exact: shared player choices extend their lifetime across calls;
+ * page-loop registers/edges differ, and the usable-save flags still use
+ * absolute references where retail uses gp. */
 ADDRESS(0x80016f10, 0x98c)
 int func_80016f10(void)
 {
@@ -76,15 +85,22 @@ int func_80016f10(void)
     sp->unk1E8.vy = 256;
     pos.vx = 640;
     pos.vy = 124;
-    buf = DAT_801a4590.unk4A4;
-    func_8002ee90(8, 4, buf);
-    func_8002e630((u32 *)&DAT_80196230[1], (u32 *)&buf[1], 0x1500);
-    func_80012c2c(TIM_AFTER(buf), &sp->unk1E0, &sp->unk1E4);
-    DrawSync(0);
-    func_8002ee90(8, 8, buf);
-    func_8002e630((u32 *)&DAT_80196230[0], (u32 *)&buf[1], 0x1500);
-    func_80012c2c(TIM_AFTER(buf), &sp->unk1D8, &sp->unk1DC);
-    DrawSync(0);
+    {
+        u_long *message = LOAD_BUFFER;
+
+        func_8002ee90(8, 4, message);
+        func_8002e630((u32 *)&DAT_80196230[1], (u32 *)&message[1], 0x1500);
+        message = (u_long *)((message[0] + sizeof(*message)) + (u8 *)message);
+        func_80012c2c(message + 1, &sp->unk1E0, &sp->unk1E4);
+        DrawSync(0);
+        message = LOAD_BUFFER;
+        func_8002ee90(8, 8, message);
+        func_8002e630((u32 *)&DAT_80196230[0], (u32 *)&message[1], 0x1500);
+        message = (u_long *)((message[0] + sizeof(*message)) + (u8 *)message);
+        func_80012c2c(message + 1, &sp->unk1D8, &sp->unk1DC);
+        DrawSync(0);
+    }
+    buf = LOAD_BUFFER;
     func_8002ee90(8, 5, buf);
     func_80012c2c(buf, &sp->unk1E8, NULL);
     DrawSync(0);
@@ -111,40 +127,33 @@ int func_80016f10(void)
             if (PRESSED & 0x4000) {
                 switch (sp->unk1CE) {
                 case 0:
-                    if (DAT_80063330[0] == -1) {
+                    if (DAT_80063330[0] != -1) {
+                        if (DAT_80063334 != -1)
+                            goto start;
+                        sp->unk1CC = 4;
+                    } else {
                         if (DAT_80063334 == -1)
                             goto start;
                         sp->unk1CC = 3;
-                    } else {
-                        if (DAT_80063334 != -1) {
-                        start:
-                            func_8001c978();
-                            sp->unk1CC = 1;
-                            break;
-                        }
-                        sp->unk1CC = 4;
                     }
                     goto buzz;
+                start:
+                    func_8001c978();
+                    sp->unk1CC = 1;
+                    break;
                 case 1:
                     if (!(DAT_801603c0.pads[0].unk8 & 0x4000))
                         goto buzz;
                     func_8001c978();
-                    player = 0;
                     DAT_801603c0.pads[0].unk8 = 0;
-                card:
-                    sp->unk1CC = 2;
-                    sp->unk1D5 = 0;
-                    sp->unk1CA = 0;
-                    func_8001bb48(0, player);
-                    sp->unk1D5 = 1;
-                    sp->unk1CC = 0;
+                    CARD_PAGE(0);
                     break;
                 case 2:
                     if (DAT_801603c0.pads[1].unk8 & 0x4000) {
                         func_8001c978();
-                        player = 1;
                         DAT_801603c0.pads[1].unk8 = 0;
-                        goto card;
+                        CARD_PAGE(1);
+                        break;
                     }
                     goto buzz;
                 case 3:
@@ -221,20 +230,24 @@ int func_80016f10(void)
             }
             if (PRESSED & 8) {
                 sp->unk1CE = 0;
-                if (DAT_80063330[0] == -1) {
+                if (DAT_80063330[0] != -1) {
+                    if (DAT_80063334 != -1)
+                        goto ready;
+                    sp->unk1CC = 4;
+                } else {
                     if (DAT_80063334 == -1)
                         goto ready;
                     sp->unk1CC = 3;
-                } else {
-                    if (DAT_80063334 != -1) {
-                    ready:
-                        func_8001c978();
-                        sp->unk1CC = 1;
-                        goto next;
-                    }
-                    sp->unk1CC = 4;
                 }
                 func_8001c938();
+                goto ready_done;
+            ready:
+                func_8001c978();
+                sp->unk1CC = 1;
+            ready_done:
+                PAD(0).unk8 = 0;
+                PAD(1).unk8 = 0;
+                goto next;
             }
         } else if (sp->unk1CC == 1) {
             if (PRESSED & 0x4000) {
