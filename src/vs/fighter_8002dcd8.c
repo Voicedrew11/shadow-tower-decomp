@@ -22,7 +22,7 @@ int func_8002dcd8(void)
     d.vx = a->unk4DEF0.vx - b->unk4DEF0.vx;
     d.vz = a->unk4DEF0.vz - b->unk4DEF0.vz;
     dist = d.vx * d.vx + d.vz * d.vz;
-    reach = (a->unk4E0CC + b->unk4E0CC) * (a->unk4E0CC + b->unk4E0CC);
+    reach = (a->unk4DF18.unk1B4 + b->unk4DF18.unk1B4) * (a->unk4DF18.unk1B4 + b->unk4DF18.unk1B4);
     if (dist < reach) {
         dist = SquareRoot0(dist);
         reach = SquareRoot0(reach);
@@ -41,3 +41,4 @@ int func_8002dcd8(void)
     }
     return 0;
 }
+

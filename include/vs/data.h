@@ -85,19 +85,25 @@ typedef struct {
     u8 frame;            /* 0x2c972: index of the current DRAWENV and buffers (ST: 0x1ecc2) */
     u8 unk2C973;
     u8 unk2C974;         /* 0x2c974: set while the loading display runs (ST: unk1ECC4) */
+    u8 unk2C975[0x2c998 - 0x2c975];
+    MATRIX unk2C998;     /* 0x2c998: the camera matrix */
+    u8 unk2C9B8[0x2ca78 - 0x2c9b8];
+    VECTOR unk2CA78;     /* 0x2ca78: the camera position */
 } VsWorldState;
 
 /* Layout checks: the offsets the code proves. */
 typedef char VsWorldStateAnimSlotsAt0xA3FC[offsetof(VsWorldState, anim_slots) == 0xa3fc ? 1 : -1];
 typedef char VsWorldStateFrameAt0x2C972[offsetof(VsWorldState, frame) == 0x2c972 ? 1 : -1];
+typedef char VsWorldStateCameraAt0x2CA78[offsetof(VsWorldState, unk2CA78) == 0x2ca78 ? 1 : -1];
 
 extern VsWorldState DAT_801624d0;
 
-/* 2000 20-byte records at 0x801c4a58 (bss) whose halfword +0x10
- * func_8002d710 clears; only that field is proven. */
+/* 2000 20-byte particle records at 0x801c4a58 (bss): func_8002d738
+ * starts them, func_8002d710 clears their lives. */
 typedef struct {
-    u8 unk0[0x10];
-    u16 unk10;
+    SVECTOR unk0;            /* 0x00: position */
+    SVECTOR unk8;            /* 0x08: velocity */
+    u16 unk10;               /* 0x10: life, 0 when free */
     u8 unk12[2];
 } VsRecord20;
 
@@ -127,6 +133,33 @@ typedef struct {
     u16 amount;
 } VsHit;
 
+/* An animation a fighter plays: its id and its frame step (negated to
+ * play it backwards). */
+typedef struct {
+    u8 unk0;                 /* animation id */
+    u8 unk1;
+    u16 unk2;                /* frame step */
+} VsAnimRef;
+
+/*
+ * A fighter's data block at +0x4df18 to the record's end: the movement
+ * code addresses its animations and walking speed through one pointer to
+ * it, so it is one object. Offsets in the field names are block-relative.
+ */
+typedef struct {
+    VsAnimRef unk0[13];      /* 0x000: animations (count WIP) */
+    u8 unk34[0x14a - 0x34];
+    VsAttack unk14A[3];      /* 0x14a: attacks (count WIP) */
+    s16 unk1AA;              /* 0x1aa: movement kind */
+    s16 unk1AC;              /* 0x1ac: walking speed */
+    u8 unk1AE[0x1b4 - 0x1ae];
+    s16 unk1B4;              /* 0x1b4: hit radius */
+    s16 unk1B6;              /* 0x1b6: height */
+    u8 unk1B8[0x1bc - 0x1b8];
+    u16 unk1BC[9];           /* 0x1bc: resistance per damage kind */
+    u8 unk1CE[0x1d0 - 0x1ce];
+} VsFighterData;
+
 /*
  * The two fighters at 0x800633b0 (bss), 0x4e0e8 bytes each (the code
  * indexes them by fighter number and takes the opponent as 1 - number).
@@ -136,29 +169,38 @@ typedef struct {
 typedef struct {
     u8 file[0x4dee0];        /* 0x00000: the model file, then unmodeled */
     StAnimSet *unk4DEE0;     /* 0x4dee0: the fighter's skeletal-animation slot */
-    u8 unk4DEE4[0x4deea - 0x4dee4];
+    u8 unk4DEE4[0x4dee8 - 0x4dee4];
+    u8 unk4DEE8;             /* 0x4dee8: animation playing (VsAnimRef.unk0) */
+    u8 unk4DEE9;
     s16 unk4DEEA;            /* 0x4deea: animation frame */
     s16 unk4DEEC;            /* 0x4deec */
     u8 unk4DEEE[0x4def0 - 0x4deee];
     VECTOR unk4DEF0;         /* 0x4def0: position */
-    u8 unk4DF00[0x4df08 - 0x4df00];
+    u8 unk4DF00[0x4df02 - 0x4df00];
+    s16 unk4DF02;            /* 0x4df02: facing angle */
+    u8 unk4DF04[0x4df08 - 0x4df04];
     s16 unk4DF08;            /* 0x4df08: hit points */
     u8 unk4DF0A[2];
     s16 unk4DF0C;            /* 0x4df0c: hit points left by the last hit */
     s16 unk4DF0E;            /* 0x4df0e: state; 3 hit, 4 down; 3 and 4 cannot be hit */
-    u8 unk4DF10[0x4e062 - 0x4df10];
-    VsAttack unk4E062[3];    /* 0x4e062: attacks (count WIP) */
-    u8 unk4E0C2[0x4e0cc - 0x4e0c2];
-    s16 unk4E0CC;            /* 0x4e0cc: hit radius */
-    u8 unk4E0CE[0x4e0d4 - 0x4e0ce];
-    u16 unk4E0D4[9];         /* 0x4e0d4: resistance per damage kind */
-    u8 unk4E0E6[0x4e0e8 - 0x4e0e6];
+    u8 unk4DF10[0x4df14 - 0x4df10];
+    s16 unk4DF14;            /* 0x4df14: state when an attack was blocked */
+    u8 unk4DF16[0x4df18 - 0x4df16];
+    VsFighterData unk4DF18;  /* 0x4df18: the fighter's data block */
 } VsFighter;
 
 /* Layout check: the record size the index arithmetic proves. */
 typedef char VsFighterSize[sizeof(VsFighter) == 0x4e0e8 ? 1 : -1];
+typedef char VsFighterDataAt0x4DF18[offsetof(VsFighter, unk4DF18) == 0x4df18 ? 1 : -1];
 
 /* The fighters live in DAT_800633b0 (vs/buffer.h VsBuffer.fighter). */
+
+/* A movement scale the fighters' walking steps multiply by (.sdata,
+ * unowned; read absolutely by the -G8 moves). */
+extern s32 DAT_80063220;
+
+/* Nonzero (1) while the fighters may hit each other (bss, unowned). */
+extern s32 DAT_80063324;
 
 /* Renderer switches (unowned): a fixed OT depth for every face (.sdata),
  * semi-transparent faces and mirrored winding (bss). */

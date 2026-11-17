@@ -670,9 +670,21 @@ source = "src/vs/fade_80028fcc.c"
 profile = "probe-gcc272cdk-o2-g8"
 
 [[unit]]
+unit = "vs.timer_800297fc"
+image = "VS.EXE"
+source = "src/vs/timer_800297fc.c"
+profile = "probe-gcc272cdk-o2-g0"
+
+[[unit]]
 unit = "vs.hud_80029f28"
 image = "VS.EXE"
 source = "src/vs/hud_80029f28.c"
+profile = "probe-gcc272cdk-o2-g0"
+
+[[unit]]
+unit = "vs.shadow_8002bfe8"
+image = "VS.EXE"
+source = "src/vs/shadow_8002bfe8.c"
 profile = "probe-gcc272cdk-o2-g0"
 
 [[unit]]
@@ -682,9 +694,21 @@ source = "src/vs/texanim_8002d710.c"
 profile = "probe-gcc272cdk-o2-g0"
 
 [[unit]]
+unit = "vs.spark_8002d738"
+image = "VS.EXE"
+source = "src/vs/spark_8002d738.c"
+profile = "probe-gcc272cdk-o2-g0"
+
+[[unit]]
 unit = "vs.fighter_8002dcd8"
 image = "VS.EXE"
 source = "src/vs/fighter_8002dcd8.c"
+profile = "probe-gcc272cdk-o2-g0"
+
+[[unit]]
+unit = "vs.fighter_8002dec4"
+image = "VS.EXE"
+source = "src/vs/fighter_8002dec4.c"
 profile = "probe-gcc272cdk-o2-g0"
 
 [[unit]]
@@ -710,6 +734,12 @@ unit = "vs.vis_8002f264"
 image = "VS.EXE"
 source = "src/vs/vis_8002f264.c"
 profile = "probe-gcc272cdk-o2-g0"
+
+[[unit]]
+unit = "vs.move_80030620"
+image = "VS.EXE"
+source = "src/vs/move_80030620.c"
+profile = "probe-gcc272cdk-o2-g8"
 
 [[unit]]
 unit = "vs.stub_80032108"

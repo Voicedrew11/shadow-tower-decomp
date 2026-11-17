@@ -24,7 +24,7 @@ void func_8002e114(int id, VsHit *hit)
 {
     u16 damage[9];
     VsFighter *f = &DAT_800633b0.fighter[1 - id];
-    u16 *resist = f->unk4E0D4;
+    u16 *resist = f->unk4DF18.unk1BC;
     int total = 0;
     int i;
 
@@ -59,9 +59,9 @@ ADDRESS(0x8002e314, 0x1fc)
 void func_8002e314(u8 id, u8 attack)
 {
     VsFighter *self = &DAT_800633b0.fighter[id];
-    u16 *damage = self->unk4E062[attack].damage;
+    u16 *damage = self->unk4DF18.unk14A[attack].damage;
     VsFighter *f = &DAT_800633b0.fighter[1 - id];
-    u16 *resist = f->unk4E0D4;
+    u16 *resist = f->unk4DF18.unk1BC;
     int total = 0;
     int i;
 
@@ -95,7 +95,7 @@ int func_8002e510(int id)
 
     if (f->unk4DEF0.vx < -10000 || f->unk4DEF0.vx > 10000 || f->unk4DEF0.vz < -10000 ||
         f->unk4DEF0.vz > 10000) {
-        if (f->unk4DEF0.vx * f->unk4DEF0.vx + f->unk4DEF0.vz * f->unk4DEF0.vz + f->unk4E0CC >
+        if (f->unk4DEF0.vx * f->unk4DEF0.vx + f->unk4DEF0.vz * f->unk4DEF0.vz + f->unk4DF18.unk1B4 >
             15500 * 15500)
             return 1;
     }
