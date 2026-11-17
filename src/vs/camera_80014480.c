@@ -76,9 +76,8 @@ void func_80014480(void)
  * separation, sweeping in during the round start. The camera eases toward
  * its target at DAT_80063354 units per frame, keeps within +-32767 on x
  * and z, and faces the target.
- * Not exact: retail saves $s0-$s2 (first divergence at +0x8, the $ra
- * slot) and allocates the winner camera's registers differently; retail is
- * 0x9ec bytes, this build 0x9f0.
+ * Not exact: midpoint/easing temporaries and regular-camera block edges
+ * differ; the winner-record lifetime and component write order agree.
  */
 ADDRESS(0x80014634, 0x9ec)
 void func_80014634(void)
@@ -99,46 +98,48 @@ void func_80014634(void)
         height = f->unk4DF18.unk1B6 + f->unk4DF18.unk1B2;
         if (height > 3000) {
             look.vx = f->unk4DEF0.vx;
-            look.vy = -1800;
             look.vz = f->unk4DEF0.vz;
-            eye.vy = -800;
+            look.vy = -1800;
             eye.vx = f->unk4DEF0.vx + rsin(f->unk4DF02 + 1536) * 3 / 2;
+            eye.vy = -800;
             eye.vz = f->unk4DEF0.vz + rcos(f->unk4DF02 + 1536) * 3 / 2;
         } else if (height > 2000) {
             look.vx = f->unk4DEF0.vx;
-            look.vy = -1500;
             look.vz = f->unk4DEF0.vz;
-            eye.vy = -500;
+            look.vy = -1500;
             eye.vx = f->unk4DEF0.vx + rsin(f->unk4DF02 + 1536);
+            eye.vy = -500;
             eye.vz = f->unk4DEF0.vz + rcos(f->unk4DF02 + 1536);
         } else if (height < 1000) {
             look.vx = f->unk4DEF0.vx;
-            look.vy = -1000;
             look.vz = f->unk4DEF0.vz;
-            eye.vy = -1000;
+            look.vy = -1000;
             eye.vx = f->unk4DEF0.vx + rsin(f->unk4DF02 + 1536);
+            eye.vy = -1000;
             eye.vz = f->unk4DEF0.vz + rcos(f->unk4DF02 + 1536);
         } else {
             look.vx = f->unk4DEF0.vx;
-            look.vy = -1200;
             look.vz = f->unk4DEF0.vz;
-            eye.vy = -500;
+            look.vy = -1200;
             eye.vx = f->unk4DEF0.vx + rsin(f->unk4DF02 + 1536) * 3 / 4;
+            eye.vy = -500;
             eye.vz = f->unk4DEF0.vz + rcos(f->unk4DF02 + 1536) * 3 / 4;
         }
         if (DAT_801603c0.unk3C < DAT_80063314 + 5) {
-            f = &DAT_800633b0.fighter[DAT_80063324 & 1];
-            DAT_801624d0.unk2CA78.vy = -7000;
             DAT_801624d0.unk2CA78.vx = f->unk4DEF0.vx + rsin(f->unk4DF02 + 3072) * 2;
+            DAT_801624d0.unk2CA78.vy = -7000;
             DAT_801624d0.unk2CA78.vz = f->unk4DEF0.vz + rcos(f->unk4DF02 + 3072) * 2;
         }
     } else {
+        int delta_x;
+        int delta_z;
+
         look.vz = (DAT_800633b0.fighter[0].unk4DEF0.vz + DAT_800633b0.fighter[1].unk4DEF0.vz) / 2;
-        z = DAT_800633b0.fighter[1].unk4DEF0.vz - look.vz;
+        delta_z = DAT_800633b0.fighter[1].unk4DEF0.vz - look.vz;
         look.vx = (DAT_800633b0.fighter[0].unk4DEF0.vx + DAT_800633b0.fighter[1].unk4DEF0.vx) / 2;
-        x = DAT_800633b0.fighter[1].unk4DEF0.vx - look.vx;
+        delta_x = DAT_800633b0.fighter[1].unk4DEF0.vx - look.vx;
         look.vy = (DAT_800633b0.fighter[0].unk4DEF0.vy + DAT_800633b0.fighter[1].unk4DEF0.vy) / 2;
-        dist = SquareRoot0(z * z + x * x) + 1;
+        dist = SquareRoot0(delta_z * delta_z + delta_x * delta_x) + 1;
         near = CAMERA_NEAR;
         if (DAT_800633b0.fighter[0].unk4DF18.unk1B6 > 2500
             || DAT_800633b0.fighter[1].unk4DF18.unk1B6 > 2500)
