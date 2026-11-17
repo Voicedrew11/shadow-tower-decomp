@@ -46,9 +46,9 @@ void func_801eec74(void)
         if ((short)e->unk2A >= 0x1000)
             e->unk2A = 0xfff;
         viewer.unk278.vx = (from.vx * n + to.vx * (total - n)) / total;
-        viewer.unk268 = viewer.unk278.vx + viewer.unk280 + viewer.unk288 + viewer.unk290;
+        viewer.unk268 = viewer.unk278.vx + viewer.unk280.halves[0] + viewer.unk288 + viewer.unk290;
         viewer.unk278.vy = (from.vy * n + to.vy * (total - n)) / total;
-        viewer.unk26A = viewer.unk278.vy + viewer.unk282 + viewer.unk28A + viewer.unk292;
+        viewer.unk26A = viewer.unk278.vy + viewer.unk280.halves[1] + viewer.unk28A + viewer.unk292;
         func_80026dd4(NULL, (SVECTOR *)&viewer.unk268, 0);
         n--;
     } while ((short)e->unk2A != 0xfff);

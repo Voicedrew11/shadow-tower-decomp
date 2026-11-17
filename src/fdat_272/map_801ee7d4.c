@@ -53,7 +53,7 @@ void func_801ee7d4(void)
     n = 16;
     while (n--) {
         viewer.unk278.vx += 16;
-        viewer.unk268 = viewer.unk278.vx + viewer.unk280 + viewer.unk288 + viewer.unk290;
+        viewer.unk268 = viewer.unk278.vx + viewer.unk280.halves[0] + viewer.unk288 + viewer.unk290;
         func_80026dd4(NULL, (SVECTOR *)&viewer.unk268, 0);
     }
 }

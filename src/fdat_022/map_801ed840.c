@@ -52,8 +52,8 @@ void func_801ed8f0(void)
         func_80026dd4(NULL, &viewer.unk278, 0);
     } while ((s16)e->unk2A != 0xfff);
     c->unk22 = 2;
-    viewer.unk268 = viewer.unk278.vx + viewer.unk280 + viewer.unk288 + viewer.unk290;
-    viewer.unk26A = viewer.unk278.vy + viewer.unk282 + viewer.unk28A + viewer.unk292;
+    viewer.unk268 = viewer.unk278.vx + viewer.unk280.halves[0] + viewer.unk288 + viewer.unk290;
+    viewer.unk26A = viewer.unk278.vy + viewer.unk280.halves[1] + viewer.unk28A + viewer.unk292;
     viewer.unk26C = viewer.unk278.vz + viewer.unk284 + viewer.unk28C + viewer.unk294;
     viewer.unk270.vx = 4096 - viewer.unk268;
     viewer.unk270.vy = 4096 - viewer.unk26A;

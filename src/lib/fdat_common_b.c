@@ -161,8 +161,8 @@ void fdat_801ecfc4(VECTOR *pos, SVECTOR *rot)
         viewer.position.vz = (from.vz * n + to.vz * (16 - n)) >> 4;
         viewer.unk278.vx = (a.vx * n + b.vx * (16 - n)) >> 4;
         viewer.unk278.vy = (a.vy * n + b.vy * (16 - n)) >> 4;
-        viewer.unk268 = viewer.unk278.vx + viewer.unk280 + viewer.unk288 + viewer.unk290;
-        viewer.unk26A = viewer.unk278.vy + viewer.unk282 + viewer.unk28A + viewer.unk292;
+        viewer.unk268 = viewer.unk278.vx + viewer.unk280.halves[0] + viewer.unk288 + viewer.unk290;
+        viewer.unk26A = viewer.unk278.vy + viewer.unk280.halves[1] + viewer.unk28A + viewer.unk292;
         func_80026dd4(NULL, (SVECTOR *)&viewer.unk268, 0);
     }
 }
@@ -195,7 +195,7 @@ void fdat_801ed1e4(Vis212 *e)
     step = turn / n;
     while (n--) {
         viewer.unk278.vy += step;
-        viewer.unk26A = viewer.unk278.vy + viewer.unk282 + viewer.unk28A + viewer.unk292;
+        viewer.unk26A = viewer.unk278.vy + viewer.unk280.halves[1] + viewer.unk28A + viewer.unk292;
         func_80026dd4(NULL, (SVECTOR *)&viewer.unk268, 0);
     }
 }

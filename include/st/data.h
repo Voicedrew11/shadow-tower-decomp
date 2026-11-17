@@ -68,6 +68,18 @@ typedef char ViewerHandStateWordWidth[sizeof(((ViewerHandState *)0)->word) == 4 
 typedef char ViewerHandStateWordAt0[offsetof(ViewerHandState, word) == 0 ? 1 : -1];
 typedef char ViewerHandStateHalvesAt0[offsetof(ViewerHandState, halves) == 0 ? 1 : -1];
 
+/* Pitch and yaw offsets also tested together by the per-frame update. */
+typedef union {
+    s32 word;
+    s16 halves[2];
+} ViewerAnglePair;
+
+typedef char ViewerAnglePairSize[sizeof(ViewerAnglePair) == 4 ? 1 : -1];
+typedef char ViewerAnglePairWordWidth[sizeof(((ViewerAnglePair *)0)->word) == 4 ? 1 : -1];
+typedef char ViewerAnglePairHalfWidth[sizeof(((ViewerAnglePair *)0)->halves[0]) == 2 ? 1 : -1];
+typedef char ViewerAnglePairWordAt0[offsetof(ViewerAnglePair, word) == 0 ? 1 : -1];
+typedef char ViewerAnglePairHalvesAt0[offsetof(ViewerAnglePair, halves) == 0 ? 1 : -1];
+
 typedef struct {
     u16 unk0;
     u16 unk2;
@@ -212,8 +224,7 @@ typedef struct {
     SVECTOR unk270;      /* 0x270 */
     SVECTOR unk278;      /* 0x278: func_8003c054 copies it to 0x268; view pitch (vx) and yaw (vy) func_80041d4c turns
                           * (band L reads the yaw, unk278.vy) */
-    s16 unk280;
-    s16 unk282;
+    ViewerAnglePair unk280; /* 0x280: view pitch/yaw offsets */
     s16 unk284;
     s16 unk286;
     u16 unk288;          /* 0x288, 0x28c: player_update_shake adds its offsets */
@@ -249,6 +260,10 @@ typedef struct {
 
 typedef char ViewerHandStateAt0x130[offsetof(Viewer, unk130) == 0x130 ? 1 : -1];
 typedef char ViewerHandStateEndsAt0x138[offsetof(Viewer, unk138) == 0x138 ? 1 : -1];
+
+typedef char ViewerAnglePairAt0x280[offsetof(Viewer, unk280) == 0x280 ? 1 : -1];
+typedef char ViewerAnglePairSecondAt0x282[offsetof(Viewer, unk280) + sizeof(s16) == 0x282 ? 1 : -1];
+typedef char ViewerAnglePairEndsAt0x284[offsetof(Viewer, unk284) == 0x284 ? 1 : -1];
 
 typedef char ViewerPositionAt0x248[offsetof(Viewer, position) == 0x248 ? 1 : -1];
 typedef char ViewerPositionEndsAt0x258[offsetof(Viewer, unk258) == 0x258 ? 1 : -1];

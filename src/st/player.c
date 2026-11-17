@@ -145,8 +145,8 @@ void func_8003c054(void)
     viewer.unk28A = 0;
     viewer.unk288 = 0;
     viewer.unk284 = 0;
-    viewer.unk282 = 0;
-    viewer.unk280 = 0;
+    viewer.unk280.halves[1] = 0;
+    viewer.unk280.halves[0] = 0;
     *(SVECTOR *)&viewer.unk268 = viewer.unk278;
     viewer.unk155[0] = 255;
     viewer.unk155[1] = 255;
@@ -2827,7 +2827,7 @@ ADDRESS(0x80042c10, 0x34)
 void func_80042c10(void)
 {
     viewer.unk218 = 0;
-    viewer.unk280 = viewer.unk282 = viewer.unk284 = 0;
+    viewer.unk280.halves[0] = viewer.unk280.halves[1] = viewer.unk284 = 0;
     viewer.unk288 = viewer.unk28A = viewer.unk28C = 0;
     viewer.unk290 = viewer.unk292 = viewer.unk294 = 0;
 }
@@ -2878,14 +2878,13 @@ void func_80042cfc(void)
  * viewer.unk218 (walking, using an item, dying, falling into a pit), the
  * floor damage and the status damage over time, the view angles, the
  * swings and the hit/magic point recovery.
- * Not exact: the menu path's two loop counters swap $s1/$s2, with further
- * register and scheduling differences in that path. */
+ * Not exact: input-owner and masked-button scheduling, a status scalar's
+ * address temporary, and the later damage/wear loop temporaries differ. */
 ADDRESS(0x80042d74, 0x1678)
 void func_80042d74(void)
 {
     RECT r;
     StAnimFile *file;
-    Vis88 *b;
     StEffect *fx;
     int n;
     int i;
@@ -2897,20 +2896,23 @@ void func_80042d74(void)
         if (((DAT_801cd180.unk4 & 1) || DAT_801cd180.unk14 == 1) && viewer.unk130.word == -1 &&
             viewer.unk218 != 1 && viewer.unk218 != 4 && !(viewer.unk2C & 0x10) &&
             area_state.unk0 == 0 && vis_table_a.unk6169 == 0 && area_state.unk18 == -1) {
+            Vis88 *entry;
+            int left;
+
             i = 16;
             lighting.unkA = 1;
             func_80057cc8();
             func_80042cfc();
             func_80057a3c();
             func_80057a68(0);
-            b = vis_table_b.entries;
-            n = 240;
-            while (n--) {
-                if (b->unk05 == 236 && b->unk54 != -1) {
-                    func_8005850c(b->unk54, b->unk4A.snd.unk4A + 1108);
-                    b->unk54 = -1;
+            entry = vis_table_b.entries;
+            left = 240;
+            while (left--) {
+                if (entry->unk05 == 236 && entry->unk54 != -1) {
+                    func_8005850c(entry->unk54, entry->unk4A.snd.unk4A + 1108);
+                    entry->unk54 = -1;
                 }
-                b++;
+                entry++;
             }
             viewer.unk21D = 0;
             viewer.unk2B = 0;
@@ -3017,11 +3019,12 @@ void func_80042d74(void)
             }
         }
         if (viewer.unk22 > viewer.unk24) {
-            d = viewer.unk2E4 - (viewer.unk22 - viewer.unk24) / 5;
-            if (d < 0) {
+            int limit = viewer.unk2E4 - (viewer.unk22 - viewer.unk24) / 5;
+
+            if (limit < 0) {
                 viewer.unk2E4 = 0;
             } else {
-                viewer.unk2E4 = d;
+                viewer.unk2E4 = limit;
             }
         }
         switch (viewer.unk218) {
@@ -3128,7 +3131,7 @@ void func_80042d74(void)
         case 4:
             if (viewer.unk286 < 17) {
                 func_80021994(255, 255, 255, viewer.unk286 << 8, 2);
-                viewer.unk280 += viewer.unk17A;
+                viewer.unk280.halves[0] += viewer.unk17A;
                 if (viewer.unk286 == 16) {
                     area_state.unkC->unk34();
                     func_80021994(255, 255, 255, viewer.unk286 << 8, 2);
@@ -3150,6 +3153,8 @@ void func_80042d74(void)
                     }
                     for (;;) {
                         if (func_80063260() == 0) {
+                            Vis88 *b;
+
                             b = vis_table_b.entries;
                             func_80016508();
                             viewer.unk2D6 = viewer.unk2D8 = viewer.unk2DA = viewer.unk2DC = 0;
@@ -3171,6 +3176,8 @@ void func_80042d74(void)
                         DrawSync(0);
                         func_80058dc4(0, 1);
                         if (func_80062c28(1) == 1) {
+                            Vis88 *b;
+
                             b = vis_table_b.entries;
                             n = 240;
                             while (n--) {
@@ -3210,7 +3217,7 @@ void func_80042d74(void)
             func_80042900();
             func_80041d4c();
             func_800420a0();
-            if (*(s32 *)&viewer.unk280 == 0 && viewer.unk284 == 0) {
+            if (viewer.unk280.word == 0 && viewer.unk284 == 0) {
                 func_80042c10();
             }
             func_8004162c();
@@ -3310,8 +3317,8 @@ void func_80042d74(void)
                 viewer.unk2C &= ~0x400;
             }
             player_update_shake();
-            viewer.unk268 = viewer.unk278.vx + viewer.unk280 + viewer.unk288 + viewer.unk290;
-            viewer.unk26A = viewer.unk278.vy + viewer.unk282 + viewer.unk28A + viewer.unk292;
+            viewer.unk268 = viewer.unk278.vx + viewer.unk280.halves[0] + viewer.unk288 + viewer.unk290;
+            viewer.unk26A = viewer.unk278.vy + viewer.unk280.halves[1] + viewer.unk28A + viewer.unk292;
             viewer.unk26C = viewer.unk278.vz + viewer.unk284 + viewer.unk28C + viewer.unk294;
             viewer.unk288 = viewer.unk28A = viewer.unk28C = 0;
             viewer.unk270.vx = 4096 - viewer.unk268;
