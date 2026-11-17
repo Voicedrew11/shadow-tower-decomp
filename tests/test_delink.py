@@ -1109,6 +1109,29 @@ class ModuleObjectTests(unittest.TestCase):
         for high, low in ((0, 3), (1, 2)):
             self.assertEqual(decode_hi_lo_target(words[high], words[low]), 0x20)
 
+    def test_low_after_another_paths_lui_pairs_with_its_registers_lui(self) -> None:
+        # lui a1 feeds a load, then a delay-slot lui s2 (another path) comes
+        # before a second a1-based store: the store still belongs to lui a1.
+        function = Function("GAME.EXE", 0x80010000, 20, 20, 1, "only", "test", "test")
+        words = (0x3c050000, 0x8ca20000, 0x3c120000, 0x8e420000, 0xaca20000)
+        carved = {function.va: (struct.pack("<5I", *words), [
+            MipsRelocation(0, "R_MIPS_HI16", "big"),
+            MipsRelocation(4, "R_MIPS_LO16", "big"),
+            MipsRelocation(8, "R_MIPS_HI16", "big"),
+            MipsRelocation(12, "R_MIPS_LO16", "big"),
+            MipsRelocation(16, "R_MIPS_LO16", "big"),
+        ])}
+        module = Module("GAME.EXE", "game.unit", "unit", (function.va,), (
+            Datum(0x80058020, 0x20, "pad", "bss", "static"),
+            Datum(0x80058040, 0x10, "big", "bss", "static"),
+        ))
+        built = _module_object(module, {function.va: function}, carved)
+        section = elf_sections(built.data)[".text"]
+        text = built.data[section[4]:section[4] + section[5]]
+        words = struct.unpack_from("<5I", text)
+        for high, low in ((0, 1), (2, 3), (0, 4)):
+            self.assertEqual(decode_hi_lo_target(words[high], words[low]), 0x20)
+
     def test_same_module_initialized_data_uses_section_offsets(self) -> None:
         function = Function("GAME.EXE", 0x80010000, 32, 32, 1, "only", "test", "test")
         words = (0x3c020000, 0x24420004, 12, 0x3c030000, 0x24630000,

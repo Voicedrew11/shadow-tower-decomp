@@ -753,7 +753,9 @@ def _rebase_hi_lo(
     A low based on another `lui` register of the symbol (and not on this
     `lui`'s register) belongs to that `lui`: a dead `lui` in a delay slot
     pairs with the first low that uses its own register, and a `lui` on one
-    branch path does not take the low of the other path's `lui`.
+    branch path does not take the low of the other path's `lui`. A low left
+    over by that walk (its `lui`'s run cut short by another path's `lui` of
+    the symbol) pairs with the nearest preceding `lui` of its base register.
     A HI16 with no following LO16 shares the nearest preceding one. Each pair
     is re-encoded from the original words, so a shared half is written once
     with the same value.
@@ -799,8 +801,25 @@ def _rebase_hi_lo(
             paired_lows.add(low_index)
         result[index] = replace(high, symbol=section_symbol)
     for index, low in enumerate(relocations):
-        if low.kind == "R_MIPS_LO16" and low.symbol in offsets and index not in paired_lows:
+        if low.kind != "R_MIPS_LO16" or low.symbol not in offsets or index in paired_lows:
+            continue
+        # A low the walk above left over (its lui's run was cut short by a
+        # later lui of the symbol on another path) belongs to the nearest
+        # preceding lui of the symbol that loads its base register.
+        lo_word = original[low.offset]
+        base = (lo_word >> 21) & 0x1F
+        owner = next((earlier for earlier in range(index - 1, -1, -1)
+                      if relocations[earlier].kind == "R_MIPS_HI16"
+                      and relocations[earlier].symbol == low.symbol
+                      and (original[relocations[earlier].offset] >> 16) & 0x1F == base), None)
+        if owner is None:
             raise ValueError(f"unpaired {what} LO16: {low.symbol}")
+        hi_word = original[relocations[owner].offset]
+        addend = decode_hi_lo_target(hi_word, lo_word) + offsets[low.symbol]
+        new_hi, new_lo = encode_hi_lo_addend(hi_word, lo_word, addend)
+        _put_word(blob, relocations[owner].offset, new_hi)
+        _put_word(blob, low.offset, new_lo)
+        result[index] = replace(low, symbol=section_symbol)
     return result
 
 
