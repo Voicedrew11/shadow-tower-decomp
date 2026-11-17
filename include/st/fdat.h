@@ -21,6 +21,11 @@ typedef struct {
 
 /* ST.EXE, no source yet. */
 void func_8004cee8(Vis212 *e, int arg, VECTOR *pos);
+void func_8004ed54(Vis88 *e, int sound);
+
+/* ST.EXE functions declared in st/funcs.h, which the overlay units do not
+ * include (see below). */
+void func_80053aa4(void);
 
 /*
  * ST.EXE's positional sound starters and player_hit (src/st/sound.c,
