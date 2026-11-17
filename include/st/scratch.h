@@ -9,11 +9,25 @@
 #define ST_SCRATCH_H
 
 #include <kf/lib/types.h>
+#include <kf/lib/offsetof.h>
 #include <sys/types.h>
 #include <LIBGTE.H>
 #include <LIBGPU.H>
 #include <st/gfx.h>
 #include <st/mesh.h>
+
+/* A word counter in the mesh phase, or two halfword parameters in the
+ * world phase (240 at 0x90 and 320 at 0x92). */
+typedef union {
+    int count;
+    short halves[2];
+} ScratchPrimitiveCount;
+
+typedef char ScratchPrimitiveCountSize[sizeof(ScratchPrimitiveCount) == 4 ? 1 : -1];
+typedef char ScratchPrimitiveCountWordWidth[sizeof(((ScratchPrimitiveCount *)0)->count) == 4 ? 1 : -1];
+typedef char ScratchPrimitiveCountHalvesWidth[sizeof(((ScratchPrimitiveCount *)0)->halves) == 4 ? 1 : -1];
+typedef char ScratchPrimitiveCountWordAt0[offsetof(ScratchPrimitiveCount, count) == 0 ? 1 : -1];
+typedef char ScratchPrimitiveCountHalvesAt0[offsetof(ScratchPrimitiveCount, halves) == 0 ? 1 : -1];
 
 typedef struct {
     u_long *ot;          /* 0x00 */
@@ -51,7 +65,7 @@ typedef struct {
     int z_max;           /* 0x84: the world renderers' farthest vertex depth of a face */
     int z_ot;            /* 0x88: its OT depth */
     int face_count;      /* 0x8c: faces submitted */
-    int prim_count;      /* 0x90: primitives emitted */
+    ScratchPrimitiveCount prim_count; /* 0x90..0x93: phase word/halfword views */
     s32 unk94;           /* 0x94: the model renderers' fourth per-frame counter (world_state.unk8328) */
     u_short clut_base;   /* 0x98: added to subdivided faces' CLUT */
     u8 unk9A[2];         /* 0x9a */
@@ -111,6 +125,9 @@ typedef struct {
     u8 unk398[0x2c];     /* 0x398 */
     StLight *light;      /* 0x3c4: the world renderers' lighting environment */
 } ScratchPad;
+
+typedef char ScratchPrimitiveCountAt0x90[offsetof(ScratchPad, prim_count) == 0x90 ? 1 : -1];
+typedef char ScratchPrimitiveCountEndsAt0x94[offsetof(ScratchPad, unk94) == 0x94 ? 1 : -1];
 
 #define SCRATCHPAD ((ScratchPad *)0x1f800000)
 /* The MATRIX model_draw and the anim sets build at 0xa8..0xc8. */

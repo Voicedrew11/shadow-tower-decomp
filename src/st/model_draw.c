@@ -130,7 +130,7 @@ void func_80021ac4(u8 slot)
     sp->ot = world_state.ot2_cur;
     sp->z_ot = world_state.unk831C[0];
     sp->face_count = world_state.unk831C[1];
-    sp->prim_count = world_state.unk8324;
+    sp->prim_count.count = world_state.unk8324;
     sp->unk94 = world_state.unk8328;
     sp->prim = world_state.packet->cur;
     sp->prim_end = world_state.packet->end;
@@ -163,7 +163,7 @@ void func_80021ac4(u8 slot)
     world_state.unk831C[0] = sp->z_ot;
     world_state.unk831C[1] = sp->face_count;
     world_state.unk8328 = sp->unk94;
-    world_state.unk8324 = sp->prim_count;
+    world_state.unk8324 = sp->prim_count.count;
 }
 
 /*
@@ -283,7 +283,7 @@ void model_draw(int unused0, u16 model, VECTOR *pos, SVECTOR *rot, SVECTOR *scal
     (&sp->vertices)[1] = world_state.world_vertices;
     sp->z_ot = world_state.unk831C[0];
     sp->face_count = world_state.unk831C[1];
-    sp->prim_count = world_state.unk8324;
+    sp->prim_count.count = world_state.unk8324;
     sp->unk94 = world_state.unk8328;
     sp->prim = world_state.packet->cur;
     sp->prim_end = world_state.packet->end;
@@ -394,6 +394,6 @@ done:
     world_state.packet->end = sp->prim_end;
     world_state.unk831C[0] = sp->z_ot;
     world_state.unk831C[1] = sp->face_count;
-    world_state.unk8324 = sp->prim_count;
+    world_state.unk8324 = sp->prim_count.count;
     world_state.unk8328 = sp->unk94;
 }

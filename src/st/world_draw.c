@@ -1275,9 +1275,9 @@ void world_draw(void)
     sp->far_z = 4096;
     sp->ot = world_state.ot_cur;
     sp->prim = world_state.packet->cur;
-    ((short *)&sp->prim_count)[1] = 320;
+    sp->prim_count.halves[1] = 320;
     sp->prim_end = world_state.packet->end;
-    ((short *)&sp->prim_count)[0] = 240;
+    sp->prim_count.halves[0] = 240;
     sp->part_vertex_count = world_state.unk831C[0];
     sp->part_faces = world_state.unk831C[1];
     sp->unk1B8 = world_state.unk8324;

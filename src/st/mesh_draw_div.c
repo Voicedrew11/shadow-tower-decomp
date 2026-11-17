@@ -146,7 +146,7 @@ void mesh_div_draw_ft3(int count, MeshFaceFT3 *face, u_long *ot, int flags)
         face = next;
     }
     sp->faces = (u8 *)face;
-    sp->prim_count += (sp->prim - start) / 8;
+    sp->prim_count.count += (sp->prim - start) / 8;
 }
 
 ADDRESS(0x8001a668, 0x40)
@@ -292,7 +292,7 @@ void mesh_div_draw_ft4(int count, MeshFaceFT4 *face, u_long *ot, int flags)
         face = next;
     }
     sp->faces = (u8 *)face;
-    sp->prim_count += (sp->prim - start) / 10;
+    sp->prim_count.count += (sp->prim - start) / 10;
 }
 
 ADDRESS(0x8001adf8, 0x40)
@@ -431,7 +431,7 @@ void mesh_div_draw_gt3(int count, MeshFaceGT3 *face, u_long *ot, int flags)
         face = next;
     }
     sp->faces = (u8 *)face;
-    sp->prim_count += (sp->prim - start) / 10;
+    sp->prim_count.count += (sp->prim - start) / 10;
 }
 
 ADDRESS(0x8001b558, 0x40)
@@ -609,5 +609,5 @@ void mesh_div_draw_gt4(int count, MeshFaceGT4 *face, u_long *ot, int flags)
     }
     sp->faces = (u8 *)face;
     /* 12 words per primitive, although a POLY_GT4 is 13. */
-    sp->prim_count += (sp->prim - start) / 12;
+    sp->prim_count.count += (sp->prim - start) / 12;
 }
