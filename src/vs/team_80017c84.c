@@ -42,14 +42,13 @@ void func_80017c84(VsMenuScratch *sp, int player, VsTeamEdit *edit)
 
 /* Stores the edit record as `player`'s team with the picked slot and the
  * cursor's slot swapped, and puts the pictures back swapped too. */
-/* Not exact: retail stores the fourth rectangle's size after loading the
- * call's destination (here before its position loads). */
 ADDRESS(0x80017da4, 0x244)
 void func_80017da4(VsMenuScratch *sp, int player, VsTeamEdit *edit)
 {
     RECT r;
     int picked = edit->unk4;
     int cursor = ~sp->unk1D0;
+    int dest_x, dest_y;
 
     DAT_801624b8[player].slot[0] = edit->team.slot[0];
     DAT_801624b8[player].slot[1] = edit->team.slot[1];
@@ -74,11 +73,13 @@ void func_80017da4(VsMenuScratch *sp, int player, VsTeamEdit *edit)
     r.h = 48;
     MoveImage2(&r, sp->unk0.team.pos[14].vx, sp->unk0.team.pos[14].vy);
     DrawSync(0);
-    r.w = 96;
-    r.h = 48;
     r.x = sp->unk0.team.pos[-sp->unk1D0 + 11].vx;
     r.y = sp->unk0.team.pos[-sp->unk1D0 + 11].vy;
-    MoveImage2(&r, sp->unk0.team.pos[edit->unk4 + 12].vx, sp->unk0.team.pos[edit->unk4 + 12].vy);
+    dest_x = sp->unk0.team.pos[edit->unk4 + 12].vx;
+    dest_y = sp->unk0.team.pos[edit->unk4 + 12].vy;
+    r.w = 96;
+    r.h = 48;
+    MoveImage2(&r, dest_x, dest_y);
     DrawSync(0);
     switch (edit->unk4) {
     case 0:

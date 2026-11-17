@@ -26,10 +26,8 @@ void func_800182ec(VsMenuScratch *sp, int player);
 /* The picture after a loaded message file: its byte size, then the file. */
 #define TIM_AFTER(buf) ((u_long *)((u8 *)&(buf)[1] + (buf)[0]) + 1)
 
-/* Not exact (one attempt; 83.5%): first divergence at +0x15c, the owned-bit
- * test (retail keeps the 1 in $a0 and i / 32 in $v0); retail also forms
- * the first two pictures' address as (size + 4) + buffer, then + 4, and
- * rematerializes the buffer address afterwards. */
+/* Not exact: the load-buffer and message-table bases use different saved
+ * registers, and the buffer's reload before the font picture differs. */
 ADDRESS(0x80018c84, 0x764)
 void func_80018c84(int player)
 {
@@ -43,6 +41,8 @@ void func_80018c84(int player)
     int size;
     int n;
     int i;
+    u32 mask;
+    u32 word;
 
     sp->unk1D6 = 0;
     sp->unk0.team.pos[0].vx = 640;
@@ -83,7 +83,10 @@ void func_80018c84(int player)
         sp->unk0.team.kinds[i] = 0xff;
     owned = DAT_801a0a80[player].unk18BC.unk0;
     for (i = 0; i < 151; i++) {
-        if ((owned[i / 32] & (1 << (i % 32))) && i != 3 &&
+        mask = 1;
+        word = owned[i / 32];
+        mask <<= i % 32;
+        if ((word & mask) && i != 3 &&
             i != 5 && i != 6 && i != 7 && i != 9 && i != 10 && i != 11 && i != 19 &&
             i != 25 && i != 26 && i != 33 && i != 38 && i != 42 && i != 54 && i != 55 &&
             i != 67 && i != 70 && i != 73 && i != 83 && i != 84 && i != 85 && i != 86 &&
@@ -103,12 +106,16 @@ void func_80018c84(int player)
     buf = DAT_801a4590.unk4A4;
     func_8002ee90(8, 2, buf);
     func_8002e630((u32 *)&DAT_80196230[1], (u32 *)&buf[1], 0x1500);
-    func_80012c2c(TIM_AFTER(buf), &sp->unk1E0, &sp->unk1E4);
+    buf = (u_long *)((buf[0] + sizeof(*buf)) + (u8 *)buf);
+    func_80012c2c(buf + 1, &sp->unk1E0, &sp->unk1E4);
     DrawSync(0);
+    buf = DAT_801a4590.unk4A4;
     func_8002ee90(8, 1, buf);
     func_8002e630((u32 *)&DAT_80196230[0], (u32 *)&buf[1], 0x1500);
-    func_80012c2c(TIM_AFTER(buf), &sp->unk1D8, &sp->unk1DC);
+    buf = (u_long *)((buf[0] + sizeof(*buf)) + (u8 *)buf);
+    func_80012c2c(buf + 1, &sp->unk1D8, &sp->unk1DC);
     DrawSync(0);
+    buf = DAT_801a4590.unk4A4;
     func_8002ee90(8, 7, buf);
     func_80012c2c(buf, &tex, &clut);
     DrawSync(0);
