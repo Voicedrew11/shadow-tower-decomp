@@ -22,12 +22,11 @@
 /*
  * Picks one of the current record's scripts allowed in the entry's state
  * by weight and starts it; 0 when none is allowed.
- * Not exact: retail compares the list index with 24 held in t0 (`slt`,
- * loaded first in the prologue); this build compares with `slti`.
  */
 ADDRESS(0x801ecbcc, 0x2b0)
 int fdat_801ecbcc(void)
 {
+    int limit = 24;
     VisScript *list[24];
     int index[24];
     Vis192 *r = vis_table_a.unk6134;
@@ -40,7 +39,7 @@ int fdat_801ecbcc(void)
     int pick;
     int i;
 
-    for (i = 0; i < 24; i++) {
+    for (i = 0; i < limit; i++) {
         s = *p++;
         if (s == NULL)
             break;
