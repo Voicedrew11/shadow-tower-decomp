@@ -262,4 +262,3 @@ void player_update_status(int apply)
         }
     }
 }
-
