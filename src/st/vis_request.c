@@ -64,7 +64,8 @@ void func_800492f4(VECTOR *pos)
  * bits that hit.
  *
  * Not exact: retail keeps `req` in s1 and `hits` in s0, this source the
- * reverse; instructions and order otherwise agree.
+ * reverse. Retail also copies req to a0 before the optional unk1C update;
+ * this source places that copy in func_8003beb4's call delay slot.
  */
 ADDRESS(0x80049544, 0x184)
 int func_80049544(VisLists *req)
