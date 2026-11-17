@@ -69,7 +69,7 @@ typedef struct {
     u16 unk44C2;         /* 0x44c2 */
     u8 unk44C4[2];
     s16 unk44C6;         /* 0x44c6: push along the wall */
-    u8 unk44C8[2];
+    s16 unk44C8;         /* 0x44c8: the visible record the viewer stands in, -1: none (func_8004162c) */
     u16 n_sources;       /* 0x44ca */
     u16 n_visible;       /* 0x44cc */
     u16 sources[0x80];   /* 0x44ce */

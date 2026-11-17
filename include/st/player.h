@@ -1,5 +1,5 @@
 /*
- * ST.EXE player state functions (src/st/player*.c, WIP modules): the
+ * ST.EXE player state functions (src/st/player.c, WIP module): the
  * viewer block's hit points, status timers, equipment bonuses and
  * durability, damage and its screen shake, the equipment model and item
  * slots, and the equipment effects. The viewer block itself is st/data.h's
@@ -8,8 +8,7 @@
  * prototypes (func_8003beb4, player_update_status, player_hit,
  * func_8003eb34, func_8003ee38, func_8003f12c),
  * as do st.math's (st/funcs.h), st.light's (st/light.h) and st.anim's
- * (st/anim.h). The held items and magic (player_hands.c, look.c,
- * equip.c) follow.
+ * (st/anim.h). The held items and magic follow in the same unit.
  */
 #ifndef ST_PLAYER_H
 #define ST_PLAYER_H
@@ -51,14 +50,14 @@ void func_80036484(int type, u8 flags, u8 kind, VECTOR *pos, SVECTOR *dir, ...);
 void func_80045044(u8 r, u8 g, u8 b, u8 arg3, u8 arg4, int arg5, int arg6, int arg7,
                    int arg8, int arg9, int arg10);
 
-/* src/st/player.c .. player_model.c */
+/* src/st/player.c: state, stats, wear, damage, models */
 void player_kill(int unused);
 void func_8003bdb0(void);
 void func_8003be10(void);
 int func_8003c000(int x, int y, int z, int range, int kind);
 void func_8003c054(void);
 short func_8003c17c(short *level, short *peak, int ramp, int max, int apply);
-void func_8003c95c(int r, int g, int b, int arg3, int arg4);
+void func_8003c95c(int r, int g, int b, int arg3, int arg4, int arg5);
 void func_8003cae4(void);
 void player_equipment_bonuses(void);
 void player_add_hp(int delta);
@@ -92,7 +91,7 @@ typedef struct {
     u8 unk4[0x14];
 } StMagic;
 
-/* src/st/player_hands.c .. equip.c */
+/* src/st/player.c: held items, magic, view, hand swaps */
 void func_80040024(u8 hand);
 void func_80040f04(u8 magic, u8 hand);
 void func_80042620(u8 a, u8 b);

@@ -266,48 +266,6 @@ source = "src/st/player.c"
 profile = "probe-gcc272cdk-o2-g8"
 
 [[unit]]
-unit = "st.player_stats"
-image = "ST.EXE"
-source = "src/st/player_stats.c"
-profile = "probe-gcc272cdk-o2-g8"
-
-[[unit]]
-unit = "st.player_wear"
-image = "ST.EXE"
-source = "src/st/player_wear.c"
-profile = "probe-gcc272cdk-o2-g8"
-
-[[unit]]
-unit = "st.player_damage"
-image = "ST.EXE"
-source = "src/st/player_damage.c"
-profile = "probe-gcc272cdk-o2-g8"
-
-[[unit]]
-unit = "st.player_model"
-image = "ST.EXE"
-source = "src/st/player_model.c"
-profile = "probe-gcc272cdk-o2-g8"
-
-[[unit]]
-unit = "st.player_hands"
-image = "ST.EXE"
-source = "src/st/player_hands.c"
-profile = "probe-gcc272cdk-o2-g8"
-
-[[unit]]
-unit = "st.look"
-image = "ST.EXE"
-source = "src/st/look.c"
-profile = "probe-gcc272cdk-o2-g8"
-
-[[unit]]
-unit = "st.equip"
-image = "ST.EXE"
-source = "src/st/equip.c"
-profile = "probe-gcc272cdk-o2-g8"
-
-[[unit]]
 unit = "st.area_a"
 image = "ST.EXE"
 source = "src/st/area_a.c"
