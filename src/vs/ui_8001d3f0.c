@@ -600,8 +600,8 @@ void func_8001f23c(int x, int y, int w, int h)
  * Draws a window frame from 16x16 tiles of the menu texture page: corners,
  * edges, an inner bevel and the filled middle.
  */
-/* Not exact: register allocation, as ST.EXE's copy: retail keeps h in $s6
- * and spills only w; this build spills both. */
+/* Not exact: height normalizes at entry; saved-register and width/right
+ * lifetimes differ (88-byte frame, retail 96). */
 ADDRESS(0x8001f30c, 0x51c)
 void func_8001f30c(short x, short y, short w, short h)
 {
@@ -609,6 +609,7 @@ void func_8001f30c(short x, short y, short w, short h)
     short right;
     short bottom;
     int i, j;
+    int height = h;
 
     sp->unk224.w = 16;
     sp->unk224.h = 16;
@@ -619,32 +620,32 @@ void func_8001f30c(short x, short y, short w, short h)
     sp->unk224.y = y;
     sp->unk240.vy = 400;
     func_8001e530(&sp->unk224, &sp->unk240, &sp->unk244, NULL, TILE);
-    sp->unk224.y = y + h - 16;
+    sp->unk224.y = y + height - 16;
     func_8001e530(&sp->unk224, &sp->unk240, &sp->unk244, NULL, TILE_VFLIP);
     right = x + w - 16;
     sp->unk224.y = y;
     sp->unk240.vx = 620;
     sp->unk224.x = right;
     func_8001e530(&sp->unk224, &sp->unk240, &sp->unk244, NULL, TILE);
-    sp->unk224.y = y + h - 16;
+    sp->unk224.y = y + height - 16;
     func_8001e530(&sp->unk224, &sp->unk240, &sp->unk244, NULL, TILE_VFLIP);
     sp->unk224.x = x;
     sp->unk224.y = y + 16;
     sp->unk240.vx = 604;
     func_8001e530(&sp->unk224, &sp->unk240, &sp->unk244, NULL, TILE);
-    sp->unk224.y = y + h - 32;
+    sp->unk224.y = y + height - 32;
     func_8001e530(&sp->unk224, &sp->unk240, &sp->unk244, NULL, TILE_VFLIP);
     sp->unk224.y = y + 16;
     sp->unk240.vx = 596;
     sp->unk224.x = right;
     func_8001e530(&sp->unk224, &sp->unk240, &sp->unk244, NULL, TILE);
-    sp->unk224.y = y + h - 32;
+    sp->unk224.y = y + height - 32;
     func_8001e530(&sp->unk224, &sp->unk240, &sp->unk244, NULL, TILE_VFLIP);
 
     sp->unk224.y = y + 32;
     sp->unk224.x = x;
     sp->unk240.vx = 624;
-    i = h / 16 - 4;
+    i = height / 16 - 4;
     while (i--) {
         sp->unk224.x = x;
         func_8001e530(&sp->unk224, &sp->unk240, &sp->unk244, NULL, TILE_HFLIP);
@@ -658,7 +659,7 @@ void func_8001f30c(short x, short y, short w, short h)
     while (i--) {
         sp->unk224.y = y;
         func_8001e530(&sp->unk224, &sp->unk240, &sp->unk244, NULL, TILE);
-        sp->unk224.y = y + h - 16;
+        sp->unk224.y = y + height - 16;
         func_8001e530(&sp->unk224, &sp->unk240, &sp->unk244, NULL, TILE_VFLIP);
         sp->unk224.x += 16;
     }
@@ -668,13 +669,13 @@ void func_8001f30c(short x, short y, short w, short h)
     while (i--) {
         sp->unk224.y = y + 16;
         func_8001e530(&sp->unk224, &sp->unk240, &sp->unk244, NULL, TILE);
-        sp->unk224.y = y + h - 32;
+        sp->unk224.y = y + height - 32;
         func_8001e530(&sp->unk224, &sp->unk240, &sp->unk244, NULL, TILE_VFLIP);
         sp->unk224.x += 16;
     }
     sp->unk224.y = y + 32;
     sp->unk240.vx = 600;
-    j = h / 16 - 4;
+    j = height / 16 - 4;
     while (j--) {
         sp->unk224.x = x + 16;
         i = w / 16 - 2;
