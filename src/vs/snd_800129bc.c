@@ -415,10 +415,9 @@ short func_80013b74(u_char tone, int note, int bank)
  * then at random), or every `period` / 20 frames (kind 4). The tone is
  * keyed on at a random note from 58 to 62.
  */
-/* Not exact (0x3e8 of 0x414 bytes): retail allocates $s4/$s2 where this
- * build uses $s2/$s1, copies the trigger's low 12 bits into a fresh
- * register in each kind's case, and keeps the kind 8 random test once per
- * direction where this build shares one. */
+/* Not exact: fighter/entry/tone registers differ, the payload promotion
+ * adds a halfword mask, and the direction-specific kind 8 random tests
+ * share one call here. */
 ADDRESS(0x80013c5c, 0x414)
 void func_80013c5c(void)
 {
@@ -428,8 +427,8 @@ void func_80013c5c(void)
     VsFighterSfx *sfx;
     u16 trigger;
     u16 tone;
+    u16 operand;
     int frame;
-    int at;
 
     for (i = 0; i < 2; i++) {
         f = &DAT_800633b0.fighter[i];
@@ -467,9 +466,11 @@ void func_80013c5c(void)
         }
         trigger = sfx->sounds[entry].trigger;
         tone = sfx->sounds[entry].tone;
-        at = trigger & 0xfff;
+        operand = trigger & 0xfff;
         switch (trigger & 0xf000) {
-        case 0x1000:
+        case 0x1000: {
+            int at = operand;
+
             if (f->unk4DEEC > 0) {
                 frame = f->unk4DEEA;
                 if (at < frame - f->unk4DEEC * DAT_80063220 || at >= frame)
@@ -480,6 +481,7 @@ void func_80013c5c(void)
                     continue;
             }
             break;
+        }
         case 0x2000:
             if (f->unk4DEEC > 0) {
                 frame = f->unk4DEEA & 0x7ff;
@@ -491,7 +493,9 @@ void func_80013c5c(void)
                     continue;
             }
             break;
-        case 0x8000:
+        case 0x8000: {
+            int at = operand;
+
             if (f->unk4DEEC > 0) {
                 frame = f->unk4DEEA;
                 if (at < frame - f->unk4DEEC * DAT_80063220 || at >= frame)
@@ -506,10 +510,14 @@ void func_80013c5c(void)
                     continue;
             }
             break;
-        case 0x4000:
+        }
+        case 0x4000: {
+            int at = operand;
+
             if (at == 0 || DAT_801603c0.unk40 / 20 % at != 0)
                 continue;
             break;
+        }
         default:
             continue;
         }
