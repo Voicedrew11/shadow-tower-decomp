@@ -47,10 +47,9 @@ void placements_expand(StPlacement *src)
  * optional CLUT block and the pixel block) and returns the bytes of the
  * complete images; it stops at the first truncated or inconsistent one.
  *
- * Not exact (96.9%, size-exact, same control flow):
- * retail keeps start/p/block/data in s3/s1/s2/s0 and reads each block
- * header through `block`; this build allocates s2/s0/s3/s1 and reads it
- * through `p`.
+ * Not exact: the block-header loads agree, but the cursor and payload
+ * pointers occupy s0/s1 instead of retail's s1/s0. Initial save order
+ * also differs; the function is size-exact with the same control flow.
  */
 ADDRESS(0x80031efc, 0x15c)
 int tim_load_images(u_long *buf, u_long size)
@@ -62,7 +61,7 @@ int tim_load_images(u_long *buf, u_long size)
     for (;;) {
         TimHeader *tim;
         TimBlock *block;
-        u_char *data;
+        u_long *data;
         int bytes;
 
         if (size < p - start + sizeof(TimHeader))
@@ -73,30 +72,30 @@ int tim_load_images(u_long *buf, u_long size)
             block = (TimBlock *)p;
             if (size < p - start + sizeof(TimBlock))
                 break;
+            p += sizeof(TimBlock);
             bytes = block->w * block->h * 2;
             if (block->bnum != bytes + sizeof(TimBlock))
                 break;
-            p = (u_char *)(block + 1);
             if (size < p - start + bytes)
                 break;
-            data = p;
+            data = (u_long *)p;
             p += bytes;
             VSync(0);
-            LoadImage((RECT *)&block->x, (u_long *)data);
+            LoadImage((RECT *)&block->x, data);
         }
         block = (TimBlock *)p;
         if (size < p - start + sizeof(TimBlock))
             break;
+        p += sizeof(TimBlock);
         bytes = block->w * block->h * 2;
         if (block->bnum != bytes + sizeof(TimBlock))
             break;
-        p = (u_char *)(block + 1);
         if (size < p - start + bytes)
             break;
-        data = p;
+        data = (u_long *)p;
         p += bytes;
         VSync(0);
-        LoadImage((RECT *)&block->x, (u_long *)data);
+        LoadImage((RECT *)&block->x, data);
         done = p;
     }
     return done - start;
