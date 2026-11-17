@@ -31,11 +31,12 @@ void func_8002f334();
 JUMPTABLES(0x800118a8, 0x1c)
 
 /* Moves the fighter a step along its facing, forward or back. */
-#define VS_WALK(f, d, op)                                                       \
+#define VS_WALK_ANGLE(f, d, op, angle)                                         \
     do {                                                                        \
-        (f)->unk4DEF0.vx op rsin((f)->unk4DF02 + 2048) * (d)->unk1AC * DAT_80063220 / 4096; \
+        (f)->unk4DEF0.vx op rsin((angle) + 2048) * (d)->unk1AC * DAT_80063220 / 4096; \
         (f)->unk4DEF0.vz op rcos((f)->unk4DF02 + 2048) * (d)->unk1AC * DAT_80063220 / 4096; \
     } while (0)
+#define VS_WALK(f, d, op) VS_WALK_ANGLE(f, d, op, (f)->unk4DF02)
 
 /* Nonzero when from is 0 or the animation frame lies in [from, to]. */
 #define VS_IN_FRAMES(f, from, to)     ((from) == 0 || ((f)->unk4DEEA >= (from) && (to) >= (f)->unk4DEEA))
@@ -116,8 +117,6 @@ void func_800308bc(VsFighter *f, s16 from, s16 to)
 }
 
 /* Slides along the facing without changing the animation. */
-/* Not exact: retail loads the facing angle before the state store in
- * each branch (lh, li, sh); same size. */
 ADDRESS(0x80030b3c, 0x1ac)
 void func_80030b3c(VsFighter *f)
 {
@@ -125,11 +124,15 @@ void func_80030b3c(VsFighter *f)
 
     f->unk4DEEA &= 0xfff;
     if (DAT_800633a8 & 0x10) {
+        int angle = f->unk4DF02;
+
         f->unk4DF0E = 1;
-        VS_WALK(f, d, +=);
+        VS_WALK_ANGLE(f, d, +=, angle);
     } else if (DAT_800633a8 & 0x40) {
+        int angle = f->unk4DF02;
+
         f->unk4DF0E = 1;
-        VS_WALK(f, d, -=);
+        VS_WALK_ANGLE(f, d, -=, angle);
     } else {
         f->unk4DF0E = 0;
     }
