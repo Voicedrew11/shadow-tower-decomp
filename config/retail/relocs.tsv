@@ -8422,6 +8422,7 @@ VS.EXE	0x800151a4	0x49a4		mips_gprel16	reachable-code	0x80063314	bss	DAT_8006331
 VS.EXE	0x800151c0	0x49c0		mips_gprel16	reachable-code	0x8006331c	bss	DAT_8006331c	lw	gp	manual-decoded	reviewed	vs.main asm review
 VS.EXE	0x800151c4	0x49c4		mips26	reachable-code	0x8002a360	load		jal		manual-decoded	reviewed	vs.main asm review
 VS.EXE	0x800151cc	0x49cc		mips_gprel16	reachable-code	0x8006331c	bss	DAT_8006331c	lw	gp	manual-decoded	reviewed	vs.main asm review
+VS.EXE	0x800151d8	0x49d8	0x80015240	mips_hi16_lo16	reachable-code	0x801603c0	bss	DAT_801603c0	lui+addiu		manual-decoded	reviewed	vs.frame_80015020 alternate delay-slot high; taken 0x800151d4 reaches existing low without clobber
 VS.EXE	0x800151e4	0x49e4		mips_gprel16	reachable-code	0x80063314	bss	DAT_80063314	lw	gp	manual-decoded	reviewed	vs.main asm review
 VS.EXE	0x800151f0	0x49f0		mips_gprel16	reachable-code	0x8006336c	bss	DAT_8006336c	lw	gp	manual-decoded	reviewed	vs.main asm review
 VS.EXE	0x800151fc	0x49fc		mips26	reachable-code	0x8002a360	load		jal		manual-decoded	reviewed	vs.main asm review
@@ -8469,11 +8470,13 @@ VS.EXE	0x800154c4	0x4cc4		mips_gprel16	reachable-code	0x80063364	bss	DAT_8006336
 VS.EXE	0x800154c8	0x4cc8		mips_gprel16	reachable-code	0x80063314	bss	DAT_80063314	sw	gp	manual-decoded	reviewed	vs.main asm review
 VS.EXE	0x800154e8	0x4ce8		mips_gprel16	reachable-code	0x80063324	bss	DAT_80063324	sw	gp	manual-decoded	reviewed	vs.main asm review
 VS.EXE	0x800154ec	0x4cec		mips26	reachable-code	0x80015338	load		j		manual-decoded	reviewed	vs.main asm review
+VS.EXE	0x800154f0	0x4cf0	0x80015338	mips_hi16_lo16	reachable-code	0x801603c0	bss	DAT_801603c0	lui+addiu		manual-decoded	reviewed	vs.frame_80015020 alternate delay-slot high; jump 0x800154ec reaches existing low without clobber
 VS.EXE	0x800154fc	0x4cfc		mips_gprel16	reachable-code	0x80063324	bss	DAT_80063324	sw	gp	manual-decoded	reviewed	vs.main asm review
 VS.EXE	0x80015500	0x4d00		mips26	reachable-code	0x80015514	load		j		manual-decoded	reviewed	vs.main asm review
 VS.EXE	0x8001550c	0x4d0c		mips_gprel16	reachable-code	0x80063324	bss	DAT_80063324	sw	gp	manual-decoded	reviewed	vs.main asm review
 VS.EXE	0x80015514	0x4d14		mips26	reachable-code	0x8001336c	load		jal		manual-decoded	reviewed	vs.main asm review
 VS.EXE	0x8001551c	0x4d1c		mips26	reachable-code	0x800155e8	load		j		manual-decoded	reviewed	vs.main asm review
+VS.EXE	0x80015520	0x4d20	0x800155e8	mips_hi16_lo16	reachable-code	0x801603c0	bss	DAT_801603c0	lui+addiu		manual-decoded	reviewed	vs.frame_80015020 alternate delay-slot high; jump 0x8001551c reaches existing low without clobber
 VS.EXE	0x80015524	0x4d24	0x80015528	mips_hi16_lo16	reachable-code	0x801603c0	bss	DAT_801603c0	lui+addiu		manual-decoded	reviewed	vs.main asm review
 VS.EXE	0x80015530	0x4d30		mips_gprel16	reachable-code	0x80063314	bss	DAT_80063314	lw	gp	manual-decoded	reviewed	vs.main asm review
 VS.EXE	0x80015550	0x4d50		mips26	reachable-code	0x8002a360	load		jal		manual-decoded	reviewed	vs.main asm review
@@ -8484,17 +8487,21 @@ VS.EXE	0x80015598	0x4d98		mips_gprel16	reachable-code	0x80063314	bss	DAT_8006331
 VS.EXE	0x8001559c	0x4d9c		mips_gprel16	reachable-code	0x80063324	bss	DAT_80063324	sw	gp	manual-decoded	reviewed	vs.main asm review
 VS.EXE	0x800155a0	0x4da0		mips26	reachable-code	0x8001336c	load		jal		manual-decoded	reviewed	vs.main asm review
 VS.EXE	0x800155a8	0x4da8		mips26	reachable-code	0x800155e8	load		j		manual-decoded	reviewed	vs.main asm review
+VS.EXE	0x800155ac	0x4dac	0x800155e8	mips_hi16_lo16	reachable-code	0x801603c0	bss	DAT_801603c0	lui+addiu		manual-decoded	reviewed	vs.frame_80015020 alternate delay-slot high; jump 0x800155a8 reaches existing low without clobber
 VS.EXE	0x800155b8	0x4db8		mips26	reachable-code	0x8002a360	load		jal		manual-decoded	reviewed	vs.main asm review
 VS.EXE	0x800155c4	0x4dc4		mips_gprel16	reachable-code	0x80063314	bss	DAT_80063314	lw	gp	manual-decoded	reviewed	vs.main asm review
 VS.EXE	0x800155d4	0x4dd4		mips26	reachable-code	0x8002a360	load		jal		manual-decoded	reviewed	vs.main asm review
 VS.EXE	0x800155dc	0x4ddc		mips26	reachable-code	0x80015af0	load		j		manual-decoded	reviewed	vs.main asm review
 VS.EXE	0x800155e4	0x4de4	0x800155e8	mips_hi16_lo16	reachable-code	0x801603c0	bss	DAT_801603c0	lui+addiu		manual-decoded	reviewed	vs.main asm review
 VS.EXE	0x800155f0	0x4df0		mips_gprel16	reachable-code	0x80063314	bss	DAT_80063314	lw	gp	manual-decoded	reviewed	vs.main asm review
+VS.EXE	0x80015604	0x4e04	0x80015684	mips_hi16_lo16	reachable-code	0x801603c0	bss	DAT_801603c0	lui+addiu		manual-decoded	reviewed	vs.frame_80015020 alternate delay-slot high; taken 0x80015600 reaches existing low without clobber
 VS.EXE	0x80015624	0x4e24	0x8001562c	mips_hi16_lo16	reachable-code	0x800633b0	bss	DAT_800633b0	lui+addiu		manual-decoded	reviewed	vs.main asm review
 VS.EXE	0x80015628	0x4e28		mips_gprel16	reachable-code	0x80063324	bss	DAT_80063324	lw	gp	manual-decoded	reviewed	vs.main asm review
 VS.EXE	0x80015670	0x4e70		mips_gprel16	reachable-code	0x80063314	bss	DAT_80063314	lhu	gp	manual-decoded	reviewed	vs.main asm review
 VS.EXE	0x80015680	0x4e80	0x80015684	mips_hi16_lo16	reachable-code	0x801603c0	bss	DAT_801603c0	lui+addiu		manual-decoded	reviewed	vs.main asm review
 VS.EXE	0x8001568c	0x4e8c		mips_gprel16	reachable-code	0x80063314	bss	DAT_80063314	lw	gp	manual-decoded	reviewed	vs.main asm review
+VS.EXE	0x800156a0	0x4ea0	0x800156d4	mips_hi16_lo16	reachable-code	0x801603c0	bss	DAT_801603c0	lui+addiu		manual-decoded	reviewed	vs.frame_80015020 alternate delay-slot high; taken 0x8001569c reaches existing low without clobber
+VS.EXE	0x800156b8	0x4eb8	0x800156d4	mips_hi16_lo16	reachable-code	0x801603c0	bss	DAT_801603c0	lui+addiu		manual-decoded	reviewed	vs.frame_80015020 alternate delay-slot high; taken 0x800156b4 reaches existing low without clobber
 VS.EXE	0x800156c8	0x4ec8		mips26	reachable-code	0x8002a360	load		jal		manual-decoded	reviewed	vs.main asm review
 VS.EXE	0x800156d0	0x4ed0	0x800156d4	mips_hi16_lo16	reachable-code	0x801603c0	bss	DAT_801603c0	lui+addiu		manual-decoded	reviewed	vs.main asm review
 VS.EXE	0x800156dc	0x4edc		mips_gprel16	reachable-code	0x80063314	bss	DAT_80063314	lw	gp	manual-decoded	reviewed	vs.main asm review

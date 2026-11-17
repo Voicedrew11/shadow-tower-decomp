@@ -37,8 +37,10 @@ void func_8002c2c4(int n);
 void func_80035b68(void);
 void func_800291d4(u_long *model, int flags, SVECTOR *a, SVECTOR *b, SVECTOR *c);
 
-/* Elapsed frames of the current screen. */
-#define ELAPSED() (DAT_801603c0.unk3C - DAT_80063314)
+/* The callback's frame clock and the current screen's starting frame. */
+#define FRAME_CLOCK() (DAT_801603c0.unk3C)
+#define SCREEN_START() (DAT_80063314)
+#define ELAPSED() (FRAME_CLOCK() - SCREEN_START())
 
 /* Arena pieces beyond this distance from the centre are hidden. */
 #define ARENA_EDGE 12000
@@ -65,9 +67,8 @@ s32 DAT_8006336c;
  * menus func_8002a360 fades by level), the clock, both fighters, their
  * gauges and the arena (the pieces past the camera hidden), then shows the
  * frame and measures its length in fields (DAT_80063220, at most 5).
- * Not exact: the switch body differs from case 1 on (first divergence
- * at +0x154, the default branch target; retail rereads DAT_80063314 into
- * $a1 for 16 - elapsed). Retail is 0xe30 bytes, this build 0xe44.
+ * Not exact: caption 17's fade orders its elapsed/scroll arithmetic
+ * differently, and cases 6/7 share a different caption tail (8 bytes short).
  */
 ADDRESS(0x80015020, 0xe30)
 void func_80015020(void)
@@ -111,20 +112,32 @@ void func_80015020(void)
     if (DAT_80063324 != 0)
         func_8002ad40(32);
     switch (DAT_80063324) {
-    case 1:
+    case 1: {
+        u32 end;
+
         if (ELAPSED() < 16) {
-            func_8002a360(DAT_8006331c, 16 - ELAPSED());
+            u32 fade = SCREEN_START();
+
+            fade += 16;
+            func_8002a360(DAT_8006331c, fade - FRAME_CLOCK());
             if (DAT_8006331c == 12) {
-                func_8002a360(17, 16 - ELAPSED() - DAT_8006336c + 2);
+                u32 left;
+                u32 elapsed = ELAPSED();
+
+                func_8002a360(17, 16 - elapsed - DAT_8006336c + 2);
                 func_8002a360(18, DAT_8006336c - ELAPSED() + 6);
-                func_8002ab58(16 - ELAPSED(), 0);
+                left = SCREEN_START();
+                left += 16;
+                func_8002ab58(left - FRAME_CLOCK(), 0);
             }
         }
-        if (DAT_801603c0.unk3C < DAT_80063364)
-            func_800297fc(DAT_80063364 - DAT_801603c0.unk3C);
+        end = DAT_80063364;
+        if (FRAME_CLOCK() < end)
+            func_800297fc(end - FRAME_CLOCK());
         else
             func_800297fc(0);
         break;
+    }
     case 2:
         if (ELAPSED() < 16) {
             func_8002a360(12, ELAPSED());
@@ -158,7 +171,10 @@ void func_80015020(void)
             break;
         }
         if (ELAPSED() < 46) {
-            func_8002a360(5, 46 - ELAPSED());
+            u32 left = SCREEN_START();
+
+            left += 46;
+            func_8002a360(5, left - FRAME_CLOCK());
             func_800297fc(0);
             break;
         }
@@ -184,8 +200,13 @@ void func_80015020(void)
             func_8002a360(1, ELAPSED());
             func_8002a360(4, ELAPSED());
         } else if (ELAPSED() < 46) {
-            func_8002a360(1, 46 - ELAPSED());
-            func_8002a360(4, 46 - ELAPSED());
+            u32 left = SCREEN_START();
+
+            left += 46;
+            func_8002a360(1, left - FRAME_CLOCK());
+            left = SCREEN_START();
+            left += 46;
+            func_8002a360(4, left - FRAME_CLOCK());
         } else {
             DAT_80063314 = DAT_801603c0.unk3C;
             DAT_80063324 += 2;
