@@ -3060,10 +3060,10 @@ void func_80031378(void)
 }
 
 /*
- * Not exact: the same calls, branches and loop shape, but retail spills the
- * row counter, the column x and the scratchpad pointer to a 104-byte frame
- * (this build: 96) and allocates the saved registers in another order;
- * first divergence is the frame size.
+ * Not exact: the 104-byte frame and cached column coordinates agree, but
+ * the initial panel setup is merged and the selected ID test is extended
+ * before the sentinel branch rather than loaded separately. The saved
+ * column register also differs; this build remains 12 bytes short.
  */
 ADDRESS(0x80031674, 0x334)
 void func_80031674(void)
@@ -3119,13 +3119,15 @@ void func_80031674(void)
         func_80028364(&sp->unk350, &sp->unk358, 0, 0, 16);
         count = vis_table_c.unk0118[id].unk10;
         for (i = 0; i < 4; i++) {
+            int label_x = name_x;
+            int value_x = name_x + 42;
             for (j = 0; j < 4; j++) {
                 if (n == 14)
                     goto done;
                 n++;
                 if (*count) {
-                    func_8002732c(MESSAGE(200 + k), name_x, text_y + j * 15, &sp->style[0]);
-                    func_80027440(*count | 0x13000000, name_x + 42, text_y + j * 15, &sp->style[4]);
+                    func_8002732c(MESSAGE(200 + k), label_x, text_y + j * 15, &sp->style[0]);
+                    func_80027440(*count | 0x13000000, value_x, text_y + j * 15, &sp->style[4]);
                 }
                 count++;
                 k++;
