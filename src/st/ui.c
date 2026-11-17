@@ -1358,9 +1358,10 @@ void func_8002b2e8(void)
  * The masks are indexed through &DAT_801cd180.unk22[0] so the base register
  * holds the array address (retail's lui/addiu of DAT_801cd180+0x22).
  *
- * Not exact (4 bytes long): retail picks each label colour before loading
- * the message and x, with strength-reduced label pointers, and forms the
- * level byte's address before the row divide.
+ * Not exact (12 bytes long): conditional draw paths now pick each label
+ * colour before its message and x. The y normalization is duplicated and
+ * label positions are indexed rather than walked as in retail. The level
+ * byte's address still follows the row divide.
  */
 ADDRESS(0x8002b84c, 0x804)
 void func_8002b84c(void)
@@ -1396,13 +1397,18 @@ void func_8002b84c(void)
     } else {
         sp->unk32C = sp->style[2];
     }
-    for (i = 0; i < 6; i++)
-        func_8002732c(MESSAGE(209 + i), label_x[i] + 32, i * 18 + 80,
-                      (&DAT_801cd180.unk22[0])[i] & sp->unk0.levels.flags ? &sp->style[3] : &sp->style[2]);
-    for (i = 0; i < 6; i++)
-        func_8002732c(MESSAGE(215 + i), label_x[i + 6] + 168, i * 18 + 80,
-                      (&DAT_801cd180.unk22[0])[i + 6] & sp->unk0.levels.flags ? &sp->style[3]
-                                                                   : &sp->style[2]);
+    for (i = 0; i < 6; i++) {
+        if ((&DAT_801cd180.unk22[0])[i] & sp->unk0.levels.flags)
+            func_8002732c(MESSAGE(209 + i), label_x[i] + 32, i * 18 + 80, &sp->style[3]);
+        else
+            func_8002732c(MESSAGE(209 + i), label_x[i] + 32, i * 18 + 80, &sp->style[2]);
+    }
+    for (i = 0; i < 6; i++) {
+        if ((&DAT_801cd180.unk22[0])[i + 6] & sp->unk0.levels.flags)
+            func_8002732c(MESSAGE(215 + i), label_x[i + 6] + 168, i * 18 + 80, &sp->style[3]);
+        else
+            func_8002732c(MESSAGE(215 + i), label_x[i + 6] + 168, i * 18 + 80, &sp->style[2]);
+    }
     sp->unk358.vy = 384;
     sp->unk35C.vx = 544;
     for (i = 0; i < 12; i++) {
