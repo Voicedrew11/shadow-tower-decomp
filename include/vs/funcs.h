@@ -28,6 +28,15 @@ void func_8002392c(void);
 void *func_8002398c(u32 size);           /* ST func_8001528c */
 void func_800241b4(struct StAnimSet **out);
 
+/* src/vs/anim_8002429c.c */
+int func_800246d8(struct StAnimSet **setp, int id, int clip, u_long frame); /* ST anim_prepare_any + anim_set_pose */
+
+/* src/vs/anim_80027f30.c */
+int func_800281d4(struct StAnimSlot **slotp, int id, int clip, int frame); /* ST anim_prepare + anim_pose */
+
+/* src/vs/mirror_80028474.c */
+void func_80028474(void);
+
 /* src/vs/anim_80027c64.c */
 void func_80027c64(SVECTOR *dst, SVECTOR *from, SVECTOR *to, int count); /* ST vertices_sub */
 

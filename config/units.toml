@@ -574,6 +574,12 @@ source = "src/vs/anim_8002429c.c"
 profile = "probe-gcc272cdk-o2-g0"
 
 [[unit]]
+unit = "vs.model_80024b5c"
+image = "VS.EXE"
+source = "src/vs/model_80024b5c.c"
+profile = "probe-gcc272cdk-o2-g8"
+
+[[unit]]
 unit = "vs.anim_80025670"
 image = "VS.EXE"
 source = "src/vs/anim_80025670.c"
@@ -610,6 +616,12 @@ source = "src/vs/mirror_80028474.c"
 profile = "probe-gcc272cdk-o2-g8"
 
 [[unit]]
+unit = "vs.model_80028914"
+image = "VS.EXE"
+source = "src/vs/model_80028914.c"
+profile = "probe-gcc272cdk-o2-g8"
+
+[[unit]]
 unit = "vs.anim_80028d94"
 image = "VS.EXE"
 source = "src/vs/anim_80028d94.c"
@@ -637,6 +649,12 @@ profile = "probe-gcc272cdk-o2-g8"
 unit = "vs.hud_80029f28"
 image = "VS.EXE"
 source = "src/vs/hud_80029f28.c"
+profile = "probe-gcc272cdk-o2-g0"
+
+[[unit]]
+unit = "vs.name_8002ad40"
+image = "VS.EXE"
+source = "src/vs/name_8002ad40.c"
 profile = "probe-gcc272cdk-o2-g0"
 
 [[unit]]
@@ -733,6 +751,12 @@ profile = "probe-gcc272cdk-o2-g0"
 unit = "vs.effect_run_800352cc"
 image = "VS.EXE"
 source = "src/vs/effect_run_800352cc.c"
+profile = "probe-gcc272cdk-o2-g0"
+
+[[unit]]
+unit = "vs.model_800353d0"
+image = "VS.EXE"
+source = "src/vs/model_800353d0.c"
 profile = "probe-gcc272cdk-o2-g0"
 
 [[unit]]

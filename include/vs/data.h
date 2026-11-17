@@ -90,6 +90,7 @@ typedef struct {
     MATRIX unk2C998;     /* 0x2c998: the camera matrix */
     u8 unk2C9B8[0x2ca78 - 0x2c9b8];
     VECTOR unk2CA78;     /* 0x2ca78: the camera position */
+    SVECTOR unk2CA88;    /* 0x2ca88: the camera angles (func_80024b5c) */
 } VsWorldState;
 
 /* Layout checks: the offsets the code proves. */
@@ -188,26 +189,27 @@ typedef struct {
  * A fighter's animated model file (st/anim.h StAnimFile) is loaded at its
  * start; only the state fields the code proves are spelled.
  */
-typedef struct {
+typedef struct VsFighter {
     u8 file[0x4b000];        /* 0x00000: the model file, then unmodeled */
     u_long unk4B000[(0x4dee0 - 0x4b000) / 4]; /* 0x4b000: a second mesh model, absent when its first word is 0 */
     StAnimSet *unk4DEE0;     /* 0x4dee0: the fighter's skeletal-animation slot */
-    u8 unk4DEE4[0x4dee8 - 0x4dee4];
+    StAnimSlot *unk4DEE4;    /* 0x4dee4: the fighter's vertex-animation slot (func_80028914) */
     u8 unk4DEE8;             /* 0x4dee8: animation playing (VsAnimRef.unk0); func_80013c5c matches it against the sound keys */
     u8 unk4DEE9;
     s16 unk4DEEA;            /* 0x4deea: animation frame */
     s16 unk4DEEC;            /* 0x4deec */
     u8 unk4DEEE[0x4def0 - 0x4deee];
     VECTOR unk4DEF0;         /* 0x4def0: position */
-    u8 unk4DF00[0x4df02 - 0x4df00];
+    s16 unk4DF00;            /* 0x4df00: rotation (an SVECTOR over 0x4df00..0x4df06): x */
     s16 unk4DF02;            /* 0x4df02: facing angle */
-    u8 unk4DF04[0x4df08 - 0x4df04];
+    s16 unk4DF04;            /* 0x4df04: z */
+    u8 unk4DF06[0x4df08 - 0x4df06];
     s16 unk4DF08;            /* 0x4df08: hit points */
     s16 unk4DF0A;            /* 0x4df0a: second gauge */
     s16 unk4DF0C;            /* 0x4df0c: hit points left by the last hit */
     s16 unk4DF0E;            /* 0x4df0e: state; 3 hit, 4 down; 3 and 4 cannot be hit */
     s16 unk4DF10;            /* 0x4df10: model kind: 1 several parts, 2 one part */
-    u8 unk4DF12[0x4df14 - 0x4df12];
+    s16 unk4DF12;            /* 0x4df12: model brightness; 128 and up: the default colour (func_80025204) */
     s16 unk4DF14;            /* 0x4df14: state when an attack was blocked */
     u8 unk4DF16[0x4df18 - 0x4df16];
     VsFighterData unk4DF18;  /* 0x4df18: the fighter's data block (its first 0x64 bytes: VsFighterSfx) */
@@ -246,6 +248,30 @@ extern VisTableC DAT_80191d00;
 /* A switch func_800222d8 sets around its count list and func_8001d9cc
  * reads (bss). */
 extern u16 DAT_8006337a;
+
+/* A light matrix, a light colour matrix, a back colour and the depth-cue
+ * near and far depths, as the model renderers load them (func_80025204,
+ * func_800353d0). Halfword-aligned: retail copies its initializers with
+ * an alignment test. */
+typedef struct {
+    short l[3][3];
+    short pad0;
+    short lc[3][3];
+    short pad1;
+    CVECTOR bk;
+    short dq[2];
+} VsLights;
+
+/* The fighter being drawn (bss, unowned). */
+extern struct VsFighter *DAT_80063300;
+
+/* Rotation offsets added to the drawn fighter's x and y angles (.sdata,
+ * unowned; read absolutely). */
+extern s32 DAT_80063218;
+extern s32 DAT_8006321c;
+
+/* The model renderers' scale (4096, 4096, 4096; .data, unowned). */
+extern VECTOR DAT_8005b2a8;
 
 /* Rounds won per fighter (bss, unowned). */
 extern s32 DAT_80063370[2];
