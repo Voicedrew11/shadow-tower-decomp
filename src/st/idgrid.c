@@ -67,12 +67,10 @@ void func_8006620c(u16 archive, u16 member)
 
 /*
  * Opens the screen: loads its message tables and images, then lists every
- * held table C id (except 266 and the ids in viewer.unk38) into the grid of
- * its flag bit.
+ * held table C id (except 266 and the selected viewer.unk38 slots) into
+ * the grid of its flag bit. Slots 6 and 12 are not filtered. Message files
+ * use a length-prefixed cursor; raw TIM files use the load buffer directly.
  */
-/* Not exact: retail re-forms &DAT_80088c88 from its kept %hi register and
- * builds each image pointer in that register; this build keeps a copy (one
- * more saved register, 96-byte frame vs 88). */
 ADDRESS(0x80066240, 0x470)
 void func_80066240(void)
 {
@@ -80,7 +78,8 @@ void func_80066240(void)
     DVECTOR clut = {544, 502};
     RECT unused;
     char name[] = "\\st\\itemcg\\icon1\\0000.tim";
-    u8 *tim;
+    u_long *tim;
+    MenuScratch *sp;
     int i;
 
     DAT_801e0d38.unk0 = 104;
@@ -88,49 +87,52 @@ void func_80066240(void)
     DAT_801e0d38.unk10 = DAT_801e0d38.unkC = DAT_801e0d38.unk8 = -1;
     func_80058cc8();
     MENU_SCRATCH->unk0.grid.messages = func_800152d0(21504);
-    func_80016030(3, 1, DAT_80088c88);
-    func_80014cfc((u32 *)&menu_messages, (u32 *)DAT_80088c88 + 1, 5376);
-    tim = (u8 *)DAT_80088c88 + (DAT_80088c88[0] + 4);
-    func_8003ec5c(tim + 4, &MENU_SCRATCH->unk2E6[0], &MENU_SCRATCH->unk2E6[1], 1);
-    func_80016030(3, 4, DAT_80088c88);
-    func_80014cfc((u32 *)MENU_SCRATCH->unk0.grid.messages, (u32 *)DAT_80088c88 + 1, 5376);
-    tim = (u8 *)DAT_80088c88 + (DAT_80088c88[0] + 4);
-    func_8003ec5c(tim + 4, &MENU_SCRATCH->unk2E6[2], &MENU_SCRATCH->unk2E6[3], 1);
+    tim = DAT_80088c88;
+    func_80016030(3, 1, tim);
+    func_80014cfc((u32 *)&menu_messages, (u32 *)(tim + 1), 5376);
+    tim = (u_long *)((u8 *)tim + (*tim + sizeof(*tim)));
+    func_8003ec5c(tim + 1, &MENU_SCRATCH->unk2E6[0], &MENU_SCRATCH->unk2E6[1], 1);
+    tim = DAT_80088c88;
+    func_80016030(3, 4, tim);
+    sp = MENU_SCRATCH;
+    func_80014cfc((u32 *)sp->unk0.grid.messages, (u32 *)(tim + 1), 5376);
+    tim = (u_long *)((u8 *)tim + (*tim + sizeof(*tim)));
+    func_8003ec5c(tim + 1, &sp->unk2E6[2], &sp->unk2E6[3], 1);
     func_80016030(3, 5, DAT_80088c88);
-    func_8003ec5c(DAT_80088c88, &MENU_SCRATCH->unk2E6[4], NULL, 1);
+    func_8003ec5c(DAT_80088c88, &sp->unk2E6[4], NULL, 1);
     DrawSync(0);
     func_80016030(3, 7, DAT_80088c88);
     func_8003ec5c(DAT_80088c88, &tex, &clut, 1);
     DrawSync(0);
-    MENU_SCRATCH->unk0.grid.count0 = 0;
-    MENU_SCRATCH->unk0.grid.count1 = 0;
-    MENU_SCRATCH->unk0.grid.ids0 = func_800152d0(628);
-    MENU_SCRATCH->unk0.grid.ids1 = func_800152d0(628);
-    if (MENU_SCRATCH->unk0.grid.ids0 == NULL || MENU_SCRATCH->unk0.grid.ids1 == NULL)
+    sp->unk0.grid.count0 = 0;
+    sp->unk0.grid.count1 = 0;
+    sp->unk0.grid.ids0 = func_800152d0(628);
+    sp->unk0.grid.ids1 = func_800152d0(628);
+    if (sp->unk0.grid.ids0 == NULL || sp->unk0.grid.ids1 == NULL)
         exit(1);
-    fill_words((u32 *)MENU_SCRATCH->unk0.grid.ids0, -1, 157);
-    fill_words((u32 *)MENU_SCRATCH->unk0.grid.ids1, -1, 157);
-    MENU_SCRATCH->unk0.grid.count0 = 0;
-    MENU_SCRATCH->unk0.grid.count1 = 0;
+    fill_words((u32 *)sp->unk0.grid.ids0, -1, 157);
+    fill_words((u32 *)sp->unk0.grid.ids1, -1, 157);
+    sp->unk0.grid.count0 = 0;
+    sp->unk0.grid.count1 = 0;
     for (i = 0; i < 314; i++) {
         if (vis_table_c.unk0118[i].unk5[0] != 255 && i < 314 && i != 266 &&
             DAT_801c7590.counts[i].count && i != viewer.unk38[0] && i != viewer.unk38[1] &&
             i != viewer.unk38[2] && i != viewer.unk38[3] && i != viewer.unk38[4] &&
             i != viewer.unk38[5] && i != viewer.unk38[7] && i != viewer.unk38[8] &&
             i != viewer.unk38[9] && i != viewer.unk38[10] && i != viewer.unk38[11] &&
-            i != viewer.unk38[12] && i != viewer.unk38[13] && i != viewer.unk38[14] &&
+            i != viewer.unk38[13] && i != viewer.unk38[14] &&
             i != viewer.unk38[15] && i != viewer.unk38[16] && i != viewer.unk38[17] &&
             i != viewer.unk38[18] && i != viewer.unk38[19] && i != viewer.unk38[20]) {
             if (!DAT_801c7590.counts[i].flag)
-                MENU_SCRATCH->unk0.grid.ids0[MENU_SCRATCH->unk0.grid.count0++] = i;
+                sp->unk0.grid.ids0[sp->unk0.grid.count0++] = i;
             else
-                MENU_SCRATCH->unk0.grid.ids1[MENU_SCRATCH->unk0.grid.count1++] = i;
+                sp->unk0.grid.ids1[sp->unk0.grid.count1++] = i;
         }
     }
-    MENU_SCRATCH->unk2DC = 1;
-    MENU_SCRATCH->unk2E0 = 0;
-    MENU_SCRATCH->unk0.grid.row0 = 0;
-    MENU_SCRATCH->unk0.grid.row1 = 0;
+    sp->unk2DC = 1;
+    sp->unk2E0 = 0;
+    sp->unk0.grid.row0 = 0;
+    sp->unk0.grid.row1 = 0;
     DAT_801e0d38.unk2 = -1;
     func_80031cfc();
     DrawSync(0);
