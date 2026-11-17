@@ -2406,8 +2406,10 @@ static s32 DAT_80087f68[2] = {0, 0};
  * The figure page: two current/maximum pairs coloured by how low the
  * current value is, the other figures and two weights in tenths.
  *
- * Not exact: another saved-register assignment from the first loop on
- * (retail: s1 y, s2 row, s3 message text).
+ * Not exact: the final scalar rows have their own y lifetime, matching
+ * retail's saved registers. Weight conversions still reload after the first
+ * shared result store, and the comparison evaluates the other operand
+ * first. Initialization schedules differ; the body is four bytes long.
  */
 ADDRESS(0x8002ed98, 0x460)
 void func_8002ed98(void)
@@ -2442,8 +2444,11 @@ void func_8002ed98(void)
     func_80027440((u16)*p++ | 0x3000000, 542, 46, &sp->style[4]);
     func_80026ecc(15, 578, 46, &sp->style[4]);
     func_80027440((u16)*p++ | 0x3000000, 590, 46, &sp->style[4]);
-    for (i = 3, y = 61; i < 13; y += 15, i++)
-        func_80027440((u16)*p++ | 0x3000000, 590, y, &sp->style[4]);
+    {
+        int figure_y;
+        for (i = 3, figure_y = 61; i < 13; figure_y += 15, i++)
+            func_80027440((u16)*p++ | 0x3000000, 590, figure_y, &sp->style[4]);
+    }
     if ((short)(p[1] / 10) < (short)(p[0] / 10))
         sp->unk320 = &sp->style[6];
     else
