@@ -63,7 +63,10 @@ static s32 DAT_800881c8;
 /* Not exact: retail assigns the layout constants other registers (cell height
  * in $t5, full width in $t3) and zero-extends the half width before the u multiply.
  * It is also 8 bytes shorter (retail reloads rgb.r before setRGB0), which moves
- * every func_80028784 switch label in the unit's JUMPTABLES. */
+ * every func_80028784 switch label in the unit's JUMPTABLES. The r/b/g update
+ * order now follows retail. A remaining untested family lead is keeping
+ * identical RGB work inside both glyph branches as VS does; the eight-pass
+ * cap was reached before that source shape was considered. */
 ADDRESS(0x80026ecc, 0x460)
 void func_80026ecc(u16 c, u16 x, u16 y, CVECTOR *color)
 {
@@ -132,8 +135,8 @@ void func_80026ecc(u16 c, u16 x, u16 y, CVECTOR *color)
     }
     rgb = *color;
     rgb.r += 8;
-    rgb.g += 8;
     rgb.b += 8;
+    rgb.g += 8;
     setRGB0(p, rgb.r, rgb.g, rgb.b);
     if (color->cd & 0x80) {
         p->tpage = GetTPage(0, color->cd & 3, 896, 256);
