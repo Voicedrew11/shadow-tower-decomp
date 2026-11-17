@@ -60,23 +60,24 @@ void func_80054000(u8 intr, u8 *result)
  */
 /* Starts channel `channel` of XA stream file `file`. */
 ADDRESS(0x8005408c, 0x168)
-void func_8005408c(u8 file, u8 channel)
+void func_8005408c(u8 file, int channel)
 {
     u8 param[8];
     CdlFILTER filter;
+    u8 byte_channel = channel;
 
     func_80015ad4();
     CdReadyCallback(func_80054000);
     param[0] = CdlModeSpeed | CdlModeRT | CdlModeSF | CdlModeRept;
     CdControlB(CdlSetmode, param, NULL);
     VSync(4);
-    viewer.unk1E0 = DAT_800804ac[file][channel];
+    viewer.unk1E0 = DAT_800804ac[file][byte_channel];
     memcpy(&viewer.unk1DC, &DAT_801cba08.unk1618[file], 4);
     memcpy(&viewer.unk1D8, &viewer.unk1DC, 4);
     while (CdControl(CdlSetloc, (u8 *)&DAT_801cba08.unk1618[file], NULL) == 0)
         ;
     filter.file = 1;
-    filter.chan = channel;
+    filter.chan = byte_channel;
     while (CdControl(CdlSetfilter, (u8 *)&filter, NULL) == 0)
         ;
     viewer.unk1E8 = cd_state.unk4;

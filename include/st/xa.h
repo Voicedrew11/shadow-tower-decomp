@@ -16,7 +16,8 @@
 extern u32 DAT_800804ac[40][6];
 
 void func_80054000(u8 intr, u8 *result);
-void func_8005408c(u8 file, u8 channel);
+/* The channel travels as a word; playback uses its low byte. */
+void func_8005408c(u8 file, int channel);
 int func_800541f4(void);
 void func_80054278(void);
 void func_800542d0(int id, int full);

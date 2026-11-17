@@ -84,8 +84,6 @@ void func_801ed454(void)
     }
 }
 
-/* Not exact: the XA call narrows the captured ending to u8 in its
- * delay slot; retail passes the full word with a nop there. */
 /*
  * The ending entry's handler: steps the ending stages in fdat_801ed8c4
  * (1 waiting for half the animation, 2 streaming, 3 stream done, 4 menu,
