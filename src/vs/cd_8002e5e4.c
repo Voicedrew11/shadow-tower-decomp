@@ -328,10 +328,6 @@ int func_8002ee90(u16 archive, u16 member, u_long *buf)
 /*
  * Reads file `name` whole (or its first `size` bytes) into buf, pausing
  * the drive until the search succeeds; returns 0.
- *
- * Not exact (size-exact): retail saves $s1 before $ra and its retry jumps
- * back to the call with &file still in $s1; this build saves $ra first and
- * rematerialises &file on the back edge (a while loop swaps $s0/$s1).
  */
 ADDRESS(0x8002ef3c, 0x90)
 int func_8002ef3c(u_long *buf, char *name, u32 size)
@@ -339,14 +335,15 @@ int func_8002ef3c(u_long *buf, char *name, u32 size)
     char path[64]; /* unused */
     CdlFILE file;
     u_char param[8]; /* unused */
+    CdlFILE *entry = &file;
 
 retry:
-    if (!CdSearchFile(&file, name)) {
+    if (!CdSearchFile(entry, name)) {
         CdControl(CdlPause, 0, 0);
         goto retry;
     }
     if (size == 0)
         size = file.size;
-    func_8002ed74(&file.pos, buf, (size + 2047) >> 11);
+    func_8002ed74(&entry->pos, buf, (size + 2047) >> 11);
     return 0;
 }
