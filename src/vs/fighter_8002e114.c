@@ -14,16 +14,13 @@
  * plus `amount` of kind `kind`, each reduced by the opponent's resistance
  * to that kind. State 3 leaves the remaining hit points, state 4 ends the
  * fight.
- *
- * Not exact (size-exact): retail materialises DAT_800633b0 in $a2 and the
- * resistance offset in $a3 before computing 1 - id; this build uses $v1
- * and $a2.
  */
 ADDRESS(0x8002e114, 0x200)
 void func_8002e114(int id, VsHit *hit)
 {
     u16 damage[9];
-    VsFighter *f = &DAT_800633b0.fighter[1 - id];
+    VsFighter *base = DAT_800633b0.fighter;
+    VsFighter *f = base + (1 - id);
     u16 *resist = f->unk4DF18.unk1BC;
     int total = 0;
     int i;
