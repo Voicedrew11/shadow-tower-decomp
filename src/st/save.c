@@ -1,7 +1,7 @@
 /*
  * ST.EXE: new-game defaults and the per-area snapshots of the entry tables
  * in DAT_801cba08 (WIP module, 0x800559bc..0x800562d4; ends at
- * func_80055f9c, which is not exact and 16 bytes long, so that the save
+ * func_80055f9c, which is not exact and 20 bytes long, so that the save
  * image code keeps its offsets in src/st/save_io.c).
  */
 #include <kf/lib/address.h>
@@ -175,8 +175,10 @@ void func_80055cf4(int area)
 }
 
 /*
- * Not exact (16 bytes long): retail keeps 0xffff in a delay slot and needs
- * no saved register; this source hoists it into $s0.
+ * Not exact (20 bytes long): retail keeps 0xffff in a delay slot and needs
+ * no saved register; this source hoists it into $s0. Sentinel spelling and
+ * scoped swap temporaries emit the same code; explicit mask-row pointers
+ * add another saved base and diverge further.
  */
 /* Restores what func_80055cf4 recorded for area `area`. */
 ADDRESS(0x80055f9c, 0x338)
