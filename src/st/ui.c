@@ -263,24 +263,27 @@ void func_80027440(u32 num, u16 x, u16 y, CVECTOR *color)
 }
 
 /* Draws a number with the fixed 7-pixel digit glyphs (codes 2-11). */
-/* Not exact: as func_80027440: the power-of-ten loop test and parameter registers. */
+/* Not exact: as func_80027440, the value/parameter copies precede the
+ * digit-count extraction; retail extracts it first. The guarded power loop
+ * now agrees. */
 ADDRESS(0x800276bc, 0x244)
 void func_800276bc(u32 num, u16 x, u16 y, CVECTOR *color)
 {
     u16 digit[8];
     u8 leading = 1;
     u8 neg = 0;
+    int n = NUMBER_DIGITS(num);
     u16 width = 7;
-    int n;
+    int end;
     u32 sign;
     s16 value;
     u32 pow;
     u32 div;
     int i;
 
-    n = NUMBER_DIGITS(num);
     value = num;
     sign = num & NUMBER_SIGNED;
+    end = -1;
     if ((s16)num < 0) {
         value = -num;
         neg = 1;
@@ -290,8 +293,12 @@ void func_800276bc(u32 num, u16 x, u16 y, CVECTOR *color)
         return;
     }
     pow = 1;
-    for (i = 0; i < n; i++)
-        pow *= 10;
+    i = n - 1;
+    if (i != end) {
+        do {
+            pow *= 10;
+        } while (--i != -1);
+    }
     if (value < pow) {
         div = pow;
         i = n;
