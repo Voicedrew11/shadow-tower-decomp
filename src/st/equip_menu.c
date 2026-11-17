@@ -767,25 +767,29 @@ void func_80065770(void)
 }
 
 /* The ring sub-list: five entries with their names and effect figures. */
-/* Not exact: retail keeps &sp->style[0] in $s4 and the message table bases
- * in $s6/$s7 across the loop; this build re-forms them (saved register order
- * differs from the prologue). */
+/* Not exact: the selected-entry and name-map addresses use different
+ * temporaries, and the message-address additions have reversed operands. */
 ADDRESS(0x80065de0, 0x160)
 void func_80065de0(void)
 {
     MenuScratch *sp = MENU_SCRATCH;
+    int i = 0;
     EquipSubList *list = &DAT_801e0d08;
-    int i;
+    CVECTOR *label = &sp->style[0];
+    u16 *offsets = menu_messages.offsets;
+    u8 *strings = menu_messages.text;
     int y, y2;
     u8 entry;
+    u8 *entry_slot;
 
     y2 = 64;
     y = 48;
-    for (i = 0; i < 5; i++) {
-        entry = list->entries[sp->unk2E2 + i];
+    for (; i < 5; i++) {
+        entry_slot = &list->entries[sp->unk2E2 + i];
+        entry = *entry_slot;
         if (entry != 255) {
-            func_8002732c(MESSAGE(916 + DAT_8008092c[entry]), 28, y, &sp->style[0]);
-            func_8002732c(MESSAGE(936), 140, y2, &sp->style[0]);
+            func_8002732c((u16 *)(strings + offsets[916 + DAT_8008092c[entry]]), 28, y, label);
+            func_8002732c((u16 *)(strings + offsets[936]), 140, y2, label);
             func_80027440(effects.defs[list->entries[sp->unk2E2 + i]].unk2 | 0x3000000, 204, y2,
                           &sp->style[4]);
             y2 += 36;
