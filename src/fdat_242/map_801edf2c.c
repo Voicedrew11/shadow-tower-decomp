@@ -23,7 +23,6 @@ RODATA(0x801eb7bc, 0x30)
 DATA(0x801ee0b4, 0x4, ".bss")
 int fdat_801ee0b4;
 
-/* Not exact (one attempt, retries off; 98.3%): first divergence retail `lui a1,0x0`, this source `lui a1,0x0`. */
 /* Moves the finished texture animation's pages and palette rows into
  * place and ends the exit scene. */
 ADDRESS(0x801edf2c, 0x184)
@@ -35,6 +34,7 @@ void func_801edf2c(void)
     RECT d = {512, 485, 16, 1};
     RECT e = {512, 486, 16, 1};
     RECT f = {0, 490, 256, 1};
+    u32 flags;
 
     MoveImage(&a, 480, 0);
     MoveImage(&b, 480, 64);
@@ -42,6 +42,7 @@ void func_801edf2c(void)
     MoveImage(&d, 512, 483);
     MoveImage(&e, 512, 484);
     MoveImage(&f, 0, 490);
+    flags = vis_lists.unk47E0;
     fdat_801ee0b4 = 4;
-    vis_lists.unk47E0 |= 8;
+    vis_lists.unk47E0 = flags | 8;
 }
