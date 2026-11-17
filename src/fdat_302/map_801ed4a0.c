@@ -78,7 +78,6 @@ void func_801ed4a0(void)
     fdat_801ee480 = 0;
 }
 
-/* Not exact (one attempt, retries off; 99.4%): first divergence retail `addiu v1,v1,13568`, this source `addiu v1,v1,0`. */
 /*
  * Runs the area: with all doors open, table B entry 9's square starts the
  * hall scene; the viewer crossing z 0x46800 / 0x40800 moves the hall
@@ -137,7 +136,7 @@ void func_801ed5b0(void)
         fdat_801ed388(e3, 1, 0);
         fdat_801ee478 = 0xff;
     }
-    if (fdat_801ee480 == 0 && e5->unk2C != vis_table_a.unk3500[e5->unk02].unk32)
+    if (fdat_801ee480 == 0 && e5->unk2C != (e5->unk02 + vis_table_a.unk3500)->unk32)
         fdat_801ee480 = 1;
     if (fdat_801ee480 == 2 && e5->unk2C == 0)
         fdat_801ee480 = 3;
