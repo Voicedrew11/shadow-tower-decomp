@@ -12,9 +12,9 @@
  * its second heading (unk5C, unk5A) from its state, then bends both by the
  * offset of its visible record.
  * The first heading uses a -1024 phase; the second passes unk5A directly.
- * Not exact (size-exact): retail keeps e in s1 and the cosine in s0
- * (this build: s0, s1) and adds the record's bytes as z + unk06 after
- * loading unk05 first; this build loads unk06 first and adds it in front.
+ * Not exact (size-exact): retail adds the record's bytes as z + unk06
+ * after loading unk05 first; this build loads unk06 first and adds it
+ * in front.
  */
 ADDRESS(0x801ed4a0, 0x244)
 void fdat_801ed4a0(void)
@@ -23,6 +23,7 @@ void fdat_801ed4a0(void)
     u16 wall;
     int d;
     int x;
+    int second_x;
     int z;
     short dx;
     short dz;
@@ -62,10 +63,10 @@ void fdat_801ed4a0(void)
         dz = z + vis_records[e->unk26].unk06;
         dx = x + vis_records[e->unk26].unk05;
         e->unk5C = (ratan2(dz, dx) + 1024) & 0xfff;
-        x = rcos(e->unk5A) >> 5;
+        second_x = rcos(e->unk5A) >> 5;
         z = rsin(e->unk5A) >> 5;
         dz = z + vis_records[e->unk26].unk06;
-        dx = x + vis_records[e->unk26].unk05;
+        dx = second_x + vis_records[e->unk26].unk05;
         e->unk5A = ratan2(dz, dx);
     }
 }
