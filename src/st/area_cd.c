@@ -60,31 +60,31 @@ void func_80045ffc(void)
     request->unk10 = 0;
     for (;;) {
         left = 0x8000 - used;
-        h = request->unk4.h;
-        if (request->unk4.h != 0) {
-            n = request->unk4.h * request->unk4.w;
+        h = request->unk4.image.h;
+        if (request->unk4.image.h != 0) {
+            n = request->unk4.image.h * request->unk4.image.w;
             if (left < n * 2) {
-                rows = left / request->unk4.w >> 1;
+                rows = left / request->unk4.image.w >> 1;
                 if (rows != 0) {
-                    request->unk4.h = rows;
-                    LoadImage(&request->unk4, (u_long *)p);
-                    request->unk4.h = h - rows;
-                    request->unk4.y += rows;
+                    request->unk4.image.h = rows;
+                    LoadImage(&request->unk4.image, (u_long *)p);
+                    request->unk4.image.h = h - rows;
+                    request->unk4.image.y += rows;
                 }
                 break;
             }
-            request->unk4.h = h;
-            LoadImage(&request->unk4, (u_long *)p);
+            request->unk4.image.h = h;
+            LoadImage(&request->unk4.image, (u_long *)p);
             used += n * 2;
             p += n;
-            request->unk4.h = 0;
+            request->unk4.image.h = 0;
             continue;
         }
         if (left < 16)
             break;
         if (p[0] != p[4] || p[1] != p[5] || p[2] != p[6] || p[3] != p[7] || p[2] == 0 ||
             p[3] == 0) {
-            request->unk4.h = 0;
+            request->unk4.image.h = 0;
             request->unk10 = 0;
             request->unkE = request->unkC;
             func_80045fb8(request);
@@ -102,10 +102,10 @@ void func_80045ffc(void)
             func_80015848(request);
             return;
         }
-        request->unk4.x = p[0];
-        request->unk4.y = p[1];
-        request->unk4.w = p[2];
-        request->unk4.h = p[3];
+        request->unk4.image.x = p[0];
+        request->unk4.image.y = p[1];
+        request->unk4.image.w = p[2];
+        request->unk4.image.h = p[3];
         p += 8;
     }
     func_80015a94(&request->unk18, request->unk28, &request->unk18);

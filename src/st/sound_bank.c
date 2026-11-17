@@ -75,14 +75,14 @@ void func_80058620(void)
         return;
     if (request->unk11 != 2)
         return;
-    slot = &DAT_801dd1c0.slots[request->unk4.x];
+    slot = &DAT_801dd1c0.slots[request->unk4.bank.slot];
     for (;;) {
         r = SsVabTransBodyPartly(request->unk20, 0xa000, slot->vab);
         if (r == -1) {
             SsVabClose(slot->vab);
             slot->vab = r;
             func_80015848(request);
-            func_80058a0c(request->unk10, request->unk4.y, request->unk4.x);
+            func_80058a0c(request->unk10, request->unk4.bank.member, request->unk4.bank.slot);
         } else if (r == -2) {
             request->unk1 = 0;
             request->unk11 = 1;
@@ -95,8 +95,8 @@ void func_80058620(void)
             if (r == slot->vab) {
                 SsVabTransCompleted(1);
                 func_80015848(request);
-                /* A bank request keeps its buffer in unk4.w..unk4.h. */
-                (*(StSoundBuf **)&request->unk4.w)->state = 1;
+                /* The bank payload holds its typed buffer pointer at +8. */
+                request->unk4.bank.buffer->state = 1;
                 request->unk24 = 0;
             }
             return;
@@ -164,8 +164,8 @@ void func_800588b4(StCdRequest *request)
 
     switch (request->unk11) {
     case 0:
-        slot = &DAT_801dd1c0.slots[request->unk4.x];
-        if (func_80015b78((u32 *)(*(StSoundBuf **)&request->unk4.w)->data, request->unk28)) {
+        slot = &DAT_801dd1c0.slots[request->unk4.bank.slot];
+        if (func_80015b78((u32 *)request->unk4.bank.buffer->data, request->unk28)) {
             request->unk1 = 0;
             while (CdControl(CdlSeekL, (u_char *)&request->unk18, NULL) == 0)
                 ;
@@ -175,7 +175,7 @@ void func_800588b4(StCdRequest *request)
             SsVabClose(slot->vab);
             slot->vab = -1;
         }
-        if ((slot->vab = SsVabOpenHeadSticky((*(StSoundBuf **)&request->unk4.w)->data, -1,
+        if ((slot->vab = SsVabOpenHeadSticky(request->unk4.bank.buffer->data, -1,
                                              *(u32 *)&request->unkC)) == -1) {
             func_80015848(request);
             return;
@@ -265,10 +265,10 @@ void func_80058a0c(int archive, int index, int slot)
     request = cd_state.unk9D4;
     func_80015b2c(request);
     request->unk11 = 0;
-    *(StSoundBuf **)&request->unk4.w = buf;
-    request->unk4.x = slot;
+    request->unk4.bank.buffer = buf;
+    request->unk4.bank.slot = slot;
     *(u32 *)&request->unkC = spu;
     request->unk10 = archive;
-    request->unk4.y = index;
+    request->unk4.bank.member = index;
     func_80015da8(archive, index, buf->data, func_800588b4);
 }

@@ -406,11 +406,17 @@ typedef struct {
 } StVabSlot;
 
 /* One 0x1000-byte sound bank buffer: its data and load state (3: loaded). */
-typedef struct {
+typedef struct StSoundBuf {
     u8 *data;
     s16 state;
     s16 unk6;
 } StSoundBuf;
+
+typedef char StSoundBufSize[(sizeof(StSoundBuf) == 8) ? 1 : -1];
+typedef char StSoundBufDataAt0[(offsetof(StSoundBuf, data) == 0) ? 1 : -1];
+typedef char StSoundBufStateAt4[(offsetof(StSoundBuf, state) == 4) ? 1 : -1];
+typedef char StSoundBufUnk6At6[(offsetof(StSoundBuf, unk6) == 6) ? 1 : -1];
+
 
 /* One 10-byte sound table entry: the bank slot, program, tone and a note
  * offset. */

@@ -107,7 +107,7 @@ void func_80015dfc(int archive, int member, u8 *dest, void (*done)())
     u32 size;
 
     func_80015b2c(req);
-    req->unk4.h = 0;
+    req->unk4.image.h = 0;
     req->unk10 = 0;
     size = func_80015cd0(archive, member, &loc);
     req->unkC = req->unkE = size >> 11;

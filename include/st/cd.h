@@ -9,6 +9,7 @@
 #define ST_CD_H
 
 #include <kf/lib/types.h>
+#include <kf/lib/offsetof.h>
 #include <sys/types.h>
 #include <LIBGTE.H>
 #include <LIBGPU.H>
@@ -17,12 +18,37 @@
 #define ST_CD_REQUESTS 48
 #define ST_ARCHIVES 3
 
+/* The request's eight-byte image/bank payload. */
+struct StSoundBuf;
+typedef struct StCdBankPayload {
+    s16 slot;
+    s16 member;
+    struct StSoundBuf *buffer;
+} StCdBankPayload;
+
+typedef union StCdPayload {
+    RECT image;
+    StCdBankPayload bank;
+} StCdPayload;
+
+typedef char StCdRectSize[(sizeof(RECT) == 8) ? 1 : -1];
+typedef char StCdBankPayloadSize[(sizeof(StCdBankPayload) == 8) ? 1 : -1];
+typedef char StCdPayloadSize[(sizeof(StCdPayload) == 8) ? 1 : -1];
+typedef char StCdPayloadImageAt0[(offsetof(StCdPayload, image) == 0) ? 1 : -1];
+typedef char StCdPayloadBankAt0[(offsetof(StCdPayload, bank) == 0) ? 1 : -1];
+typedef char StCdBankSlotAt0[(offsetof(StCdBankPayload, slot) == 0) ? 1 : -1];
+typedef char StCdBankMemberAt2[(offsetof(StCdBankPayload, member) == 2) ? 1 : -1];
+typedef char StCdBankBufferAt4[(offsetof(StCdBankPayload, buffer) == 4) ? 1 : -1];
+typedef char StCdBankSlotWidth[(sizeof(((StCdBankPayload *)0)->slot) == 2) ? 1 : -1];
+typedef char StCdBankMemberWidth[(sizeof(((StCdBankPayload *)0)->member) == 2) ? 1 : -1];
+typedef char StCdBankBufferWidth[(sizeof(((StCdBankPayload *)0)->buffer) == 4) ? 1 : -1];
+
 /* One 0x34-byte entry of the CD read-request ring. */
 typedef struct {
     volatile u8 unk0; /* request kind, 0 when free; switch reads keep a separate zero-extension */
     volatile u8 unk1;
     u8 unk2[2];
-    RECT unk4; /* 0x04: image block func_80045ffc loads; h counts rows still to load */
+    StCdPayload unk4; /* 0x04..0x0b: image rectangle or bank arguments */
     s16 unkC;
     s16 unkE;
     volatile u8 unk10; /* completion state the callbacks set; stores keep their own slot */
@@ -37,6 +63,26 @@ typedef struct {
     void (*unk2C)(); /* completion callback, called unprototyped */
     s32 unk30;
 } StCdRequest;
+
+typedef char StCdRequestSize[(sizeof(StCdRequest) == 0x34) ? 1 : -1];
+typedef char StCdRequestunk0Offset[(offsetof(StCdRequest, unk0) == 0x0) ? 1 : -1];
+typedef char StCdRequestunk1Offset[(offsetof(StCdRequest, unk1) == 0x1) ? 1 : -1];
+typedef char StCdRequestunk2Offset[(offsetof(StCdRequest, unk2) == 0x2) ? 1 : -1];
+typedef char StCdRequestunk4Offset[(offsetof(StCdRequest, unk4) == 0x4) ? 1 : -1];
+typedef char StCdRequestunkCOffset[(offsetof(StCdRequest, unkC) == 0xc) ? 1 : -1];
+typedef char StCdRequestunkEOffset[(offsetof(StCdRequest, unkE) == 0xe) ? 1 : -1];
+typedef char StCdRequestunk10Offset[(offsetof(StCdRequest, unk10) == 0x10) ? 1 : -1];
+typedef char StCdRequestunk11Offset[(offsetof(StCdRequest, unk11) == 0x11) ? 1 : -1];
+typedef char StCdRequestunk12Offset[(offsetof(StCdRequest, unk12) == 0x12) ? 1 : -1];
+typedef char StCdRequestunk14Offset[(offsetof(StCdRequest, unk14) == 0x14) ? 1 : -1];
+typedef char StCdRequestunk18Offset[(offsetof(StCdRequest, unk18) == 0x18) ? 1 : -1];
+typedef char StCdRequestunk1COffset[(offsetof(StCdRequest, unk1C) == 0x1c) ? 1 : -1];
+typedef char StCdRequestunk20Offset[(offsetof(StCdRequest, unk20) == 0x20) ? 1 : -1];
+typedef char StCdRequestunk24Offset[(offsetof(StCdRequest, unk24) == 0x24) ? 1 : -1];
+typedef char StCdRequestunk28Offset[(offsetof(StCdRequest, unk28) == 0x28) ? 1 : -1];
+typedef char StCdRequestunk2COffset[(offsetof(StCdRequest, unk2C) == 0x2c) ? 1 : -1];
+typedef char StCdRequestunk30Offset[(offsetof(StCdRequest, unk30) == 0x30) ? 1 : -1];
+
 
 /* A file's CD position and byte size (CdlFILE's first two fields). */
 typedef struct {
@@ -73,6 +119,14 @@ typedef struct {
     CdlFILE unkA6C; /* \LOAD02.TIM;1, searched by func_800210f4, read by func_80021158 */
     u_long *unkA84;      /* 0xa84: load cursor into DAT_80088c88, which follows this block (src/st/menu.c) */
 } StCdState;
+
+typedef char StCdRequestRingStride[(sizeof(((StCdState *)0)->unk14[0]) == 0x34) ? 1 : -1];
+typedef char StCdRequestRingCount[(sizeof(((StCdState *)0)->unk14) == 48 * 0x34) ? 1 : -1];
+typedef char StCdRequestRingAt0x14[(offsetof(StCdState, unk14) == 0x14) ? 1 : -1];
+typedef char StCdFreeAt0x9d4[(offsetof(StCdState, unk9D4) == 0x9d4) ? 1 : -1];
+typedef char StCdCurrentAt0x9d8[(offsetof(StCdState, unk9D8) == 0x9d8) ? 1 : -1];
+typedef char StCdArchivesAt0x9dc[(offsetof(StCdState, archives) == 0x9dc) ? 1 : -1];
+
 
 extern StCdState cd_state;
 

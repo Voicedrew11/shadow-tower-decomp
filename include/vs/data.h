@@ -50,6 +50,13 @@ typedef struct {
     u_long unk4A4[0x8000]; /* 0x4a4: the 0x20000-byte load buffer */
 } VsCdState;
 
+typedef char VsCdRequestRingStride[(sizeof(((VsCdState *)0)->unk8[0]) == 0x34) ? 1 : -1];
+typedef char VsCdRequestRingCount[(sizeof(((VsCdState *)0)->unk8) == 4 * 0x34) ? 1 : -1];
+typedef char VsCdRequestRingAt8[(offsetof(VsCdState, unk8) == 8) ? 1 : -1];
+typedef char VsCdFreeAt0xd8[(offsetof(VsCdState, unkD8) == 0xd8) ? 1 : -1];
+typedef char VsCdCurrentAt0xdc[(offsetof(VsCdState, unkDC) == 0xdc) ? 1 : -1];
+
+
 /* Layout check: the offset the code proves. */
 typedef char VsCdStateArchivesAt0xE0[offsetof(VsCdState, archives) == 0xe0 ? 1 : -1];
 typedef char VsCdStateUnk4A4At0x4A4[offsetof(VsCdState, unk4A4) == 0x4a4 ? 1 : -1];

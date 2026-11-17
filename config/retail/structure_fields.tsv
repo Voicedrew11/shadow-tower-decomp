@@ -49,3 +49,11 @@ StAnimSlot	20	4	unk14	StAnimSlot **	candidate	asm;src/st/anim.c st.anim	the owne
 StAnimSubRecord	0	16	scale	VECTOR	candidate	asm;src/st/anim.c st.anim	ScaleMatrix input (4096ths)
 StAnimSubRecord	16	8	rot	SVECTOR	candidate	asm;src/st/anim.c st.anim	RotMatrix input
 StAnimSubRecord	24	16	trans	VECTOR	candidate	asm;src/st/anim.c st.anim	TransMatrix input
+StCdBankPayload	0	2	slot	s16	candidate	asm;ST.EXE 0x80058bc0/0x80058664/0x800586c0	Bank slot stored as a halfword and read with LH at request +4.
+StCdBankPayload	2	2	member	s16	candidate	asm;ST.EXE 0x80058bcc/0x800586bc	Archive member stored as a halfword and read with LH at request +6.
+StCdBankPayload	4	4	buffer	StSoundBuf *	candidate	asm;ST.EXE 0x80058bbc/0x8005873c/0x800588f8	Buffer pointer stored/loaded as one word at request +8; its data/state fields are consumed.
+StCdPayload	0	8	image	RECT	candidate	asm;ST.EXE 0x800460c0/0x800460e4/0x800461e0/0x80046208	Image stream interpretation passed to SDK LoadImage; x/y/w/h occupy request +4/+6/+8/+0xa.
+StCdPayload	0	8	bank	StCdBankPayload	candidate	asm;ST.EXE 0x80058bbc/0x80058bc0/0x80058bcc	Bank interpretation of the same eight bytes; signed slot/member then buffer pointer.
+StSoundBuf	0	4	data	u8 *	candidate	asm;ST.EXE 0x80058bd0/0x800588f8;src/st/sound_bank.c st.sound_bank	Bank buffer data pointer at +0, passed to the CD/bank transfer paths.
+StSoundBuf	4	2	state	s16	candidate	asm;ST.EXE 0x80058744;src/st/sound_bank.c st.sound_bank	Buffer state halfword written by the load/transfer paths.
+StSoundBuf	6	2	unk6	s16	opaque	include/st/data.h;src/st/sound_bank.c st.sound_bank;target size/offset guards	Unmodeled trailing halfword retained from the existing record; no semantic interpretation.
