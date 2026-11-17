@@ -184,12 +184,13 @@ void func_8001d8b8(u16 *s, u16 x, u16 y, CVECTOR *color)
 
 /* Draws a number with the proportional font: digit glyphs follow the
  * half-width codes. */
-/* Not exact: retail tests the power-of-ten loop's entry on n - 1 against
- * a -1 loaded at entry (this build folds it to n == 0). */
+/* Not exact: the num-to-value copy precedes the digit-count shift here;
+ * retail schedules it after the shift and mask. */
 ADDRESS(0x8001d9cc, 0x27c)
 void func_8001d9cc(u32 num, u16 x, u16 y, CVECTOR *color)
 {
     u16 digit[8];
+    int end;
     u8 leading = 1;
     u8 neg = 0;
     u16 width = color->cd >> 2;
@@ -210,6 +211,7 @@ void func_8001d9cc(u32 num, u16 x, u16 y, CVECTOR *color)
     n = NUMBER_DIGITS(num);
     value = num;
     sign = num & NUMBER_SIGNED;
+    end = -1;
     if ((s16)num < 0) {
         value = -num;
         neg = 1;
@@ -219,9 +221,12 @@ void func_8001d9cc(u32 num, u16 x, u16 y, CVECTOR *color)
         return;
     }
     pow = 1;
-    i = n;
-    while (i--)
-        pow *= 10;
+    i = n - 1;
+    if (i != end) {
+        do {
+            pow *= 10;
+        } while (--i != -1);
+    }
     if (value < pow) {
         div = pow;
         i = n;
