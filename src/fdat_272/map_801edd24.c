@@ -30,7 +30,6 @@ void func_801eeeb4(void);
 void func_801eea14(void);
 void func_801ef07c(void);
 
-/* Not exact (one attempt, retries off; 90.9%): first divergence retail `addiu v0,v0,0`, this source `addiu a2,v0,10176`. */
 /*
  * The current entry's handler: kind 4 runs the item 0x12f scene once,
  * kind 0 steps the gate stages (story flag bits 10-12), kind 10 the scene
@@ -40,12 +39,14 @@ void func_801ef07c(void);
 ADDRESS(0x801edd24, 0x718)
 void func_801edd24(void)
 {
-    Vis212 *e48 = &vis_table_a.entries[48];
-    Vis212 *e50 = &vis_table_a.entries[50];
-    Vis212 *e = vis_table_a.unk6138;
-    Vis192 *r = vis_table_a.unk6134;
+    VisTableA *a = &vis_table_a;
+    Vis212 *e48 = &a->entries[48];
+    Vis212 *e50 = &a->entries[50];
+    Vis212 *e = a->unk6138;
+    Vis192 *r = a->unk6134;
     VECTOR pos;
     SVECTOR rot;
+    u8 part;
 
     if (e->unk02 == 4 && fdat_801ef93c == 1) {
         rot.vx = 0;
@@ -80,11 +81,12 @@ void func_801edd24(void)
             e->unk28 = 0x31;
             e->unk74.vx = 0x40800;
             e->unk74.vy = 0x41000;
-            e->unk74.vz = 0x28800;
+            e->unk74.vz = 0x38800;
+            part = vis_records[49].unk01;
             e->unk6A = 0x800;
             e->unk6C = 0;
             e->unk6E = -0x800;
-            e->unk06 = vis_records[49].unk01;
+            e->unk06 = part;
             DAT_801cba08.unk1440.word = (DAT_801cba08.unk1440.word & ~0x1c00) | 0xc00;
             break;
         case 3:
@@ -193,9 +195,12 @@ void func_801edd24(void)
                 func_801edad8();
             }
         } else if (e->unk02 == 10) {
-            if (fdat_801ef924 < 2 && fdat_801ef924 >= 0) {
+            if (fdat_801ef924 < 2) {
+                if (fdat_801ef924 < 0)
+                    goto repeat_current_script;
                 fdat_801eb7b4(e, 0);
             } else {
+repeat_current_script:
                 fdat_801eb7b4(e, e->unk18);
                 return;
             }
