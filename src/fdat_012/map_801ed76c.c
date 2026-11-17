@@ -21,7 +21,8 @@ void func_801eda38(Vis212 *e);
 void func_801edbec(Vis212 *e);
 void func_801edf0c(Vis212 *e);
 
-/* Not exact (one attempt, retries off; 80.4%): first divergence retail `j <func_801ed76c+0x25c>`, this source `j <func_801ed76c+0x260>`. */
+/* Not exact: retail reads the signed phase with LH; this build reads an
+ * unsigned halfword and extends it before the bobbing arithmetic. */
 /*
  * The current entry's handler: kind 4 drops once record's stream counter
  * reaches 4 (or when hit) and then runs func_801edbec; kind 10 plays the
@@ -34,6 +35,7 @@ void func_801ed76c(void)
     Vis212 *e = vis_table_a.unk6138;
     Vis192 *r = vis_table_a.unk6134;
     int a;
+    int offset;
 
     if (e->unk02 == 4) {
         if (DAT_801cba08.unk1448[r->unk09] == 4 && e->unk1C.bytes[0] == 0)
@@ -64,12 +66,18 @@ void func_801ed76c(void)
     } else if (e->unk02 == 1 || e->unk02 == 9) {
         if (e->unk0F == 0x20) {
             a = (short)e->unk2A;
-            if (a < 0x400)
-                e->unk74.vy = e->unk84 - (a >> 1);
-            else if (a < 0x800)
-                e->unk74.vy = e->unk84 + (((a - 0x400) * 5 >> 2) - 0x200);
-            else
-                e->unk74.vy = e->unk84 - (((a - 0x800) * 3 >> 3) - 0x300);
+            if (a < 0x400) {
+                a >>= 1;
+                e->unk74.vy = e->unk84 - a;
+            } else if (a < 0x800) {
+                offset = (a - 0x400) * 5 >> 2;
+                offset -= 0x200;
+                e->unk74.vy = e->unk84 + offset;
+            } else {
+                offset = (a - 0x800) * 3 >> 3;
+                offset -= 0x300;
+                e->unk74.vy = e->unk84 - offset;
+            }
         } else {
             e->unk74.vy = e->unk84;
         }
