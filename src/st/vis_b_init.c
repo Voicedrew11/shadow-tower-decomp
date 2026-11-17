@@ -1,13 +1,23 @@
 /*
- * ST.EXE: clearing table B (vis_table_b.entries) and resetting one entry,
- * and a table C entry's state switch (WIP module; func_8004ed54 before it
- * and the area-file loader func_8004eebc after it are not reconstructed).
+ * ST.EXE: playing a sound at a table B entry, clearing table B
+ * (vis_table_b.entries) and resetting one entry, and a table C entry's
+ * state switch (WIP module; the area-file loader func_8004eebc after it is
+ * not reconstructed).
  */
 #include <kf/lib/address.h>
 #include <kf/lib/types.h>
 #include <sys/types.h>
 #include <LIBGTE.H>
 #include <st/vis.h>
+#include <st/funcs.h>
+
+/* Plays sound `sound` at the entry's position when the area has it. */
+ADDRESS(0x8004ed54, 0x54)
+void func_8004ed54(Vis88 *e, int sound)
+{
+    if (DAT_801dd1c0.sounds[sound].slot != -1)
+        func_80058220(sound, &e->unk24, 127, 0);
+}
 
 /* Frees every table B entry. */
 ADDRESS(0x8004eda8, 0x58)

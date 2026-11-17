@@ -123,7 +123,11 @@ extern s32 DAT_80063308;
 /* A fighter's attack record: its damage per kind (32 bytes, the stride
  * func_8002e314 indexes). */
 typedef struct {
-    u8 unk0[10];
+    u16 unk0;                /* 0x00: effect kind (func_8002f334) */
+    s16 unk2;                /* 0x02..0x06: the effect's offset from the fighter, turned by its facing */
+    s16 unk4;
+    s16 unk6;
+    u8 unk8[2];
     s16 unkA;                /* 0x0a: the frame it strikes on (func_80031478) */
     u16 unkC;                /* 0x0c: its cost to the second gauge */
     u16 damage[9];           /* 0x0e */

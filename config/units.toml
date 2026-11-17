@@ -278,9 +278,21 @@ source = "src/st/area_wait.c"
 profile = "probe-gcc272cdk-o2-g8"
 
 [[unit]]
+unit = "st.area_request"
+image = "ST.EXE"
+source = "src/st/area_request.c"
+profile = "probe-gcc272cdk-o2-g8"
+
+[[unit]]
 unit = "st.area_cb"
 image = "ST.EXE"
 source = "src/st/area_cb.c"
+profile = "probe-gcc272cdk-o2-g8"
+
+[[unit]]
+unit = "st.area_load"
+image = "ST.EXE"
+source = "src/st/area_load.c"
 profile = "probe-gcc272cdk-o2-g8"
 
 [[unit]]
@@ -293,6 +305,12 @@ profile = "probe-gcc272cdk-o2-g8"
 unit = "st.vis_src"
 image = "ST.EXE"
 source = "src/st/vis_src.c"
+profile = "probe-gcc272cdk-o2-g0"
+
+[[unit]]
+unit = "st.vis_hit"
+image = "ST.EXE"
+source = "src/st/vis_hit.c"
 profile = "probe-gcc272cdk-o2-g0"
 
 [[unit]]
@@ -314,6 +332,12 @@ source = "src/st/vis_entry.c"
 profile = "probe-gcc272cdk-o2-g0"
 
 [[unit]]
+unit = "st.vis_attack"
+image = "ST.EXE"
+source = "src/st/vis_attack.c"
+profile = "probe-gcc272cdk-o2-g0"
+
+[[unit]]
 unit = "st.vis_item"
 image = "ST.EXE"
 source = "src/st/vis_item.c"
@@ -332,6 +356,12 @@ source = "src/st/vis_b_init.c"
 profile = "probe-gcc272cdk-o2-g0"
 
 [[unit]]
+unit = "st.vis_b_load"
+image = "ST.EXE"
+source = "src/st/vis_b_load.c"
+profile = "probe-gcc272cdk-o2-g0"
+
+[[unit]]
 unit = "st.vis_b"
 image = "ST.EXE"
 source = "src/st/vis_b.c"
@@ -341,6 +371,12 @@ profile = "probe-gcc272cdk-o2-g0"
 unit = "st.vis_c"
 image = "ST.EXE"
 source = "src/st/vis_c.c"
+profile = "probe-gcc272cdk-o2-g0"
+
+[[unit]]
+unit = "st.vis_pickup"
+image = "ST.EXE"
+source = "src/st/vis_pickup.c"
 profile = "probe-gcc272cdk-o2-g0"
 
 [[unit]]
@@ -371,6 +407,12 @@ profile = "probe-gcc272cdk-o2-g8"
 unit = "st.item_spawn"
 image = "ST.EXE"
 source = "src/st/item_spawn.c"
+profile = "probe-gcc272cdk-o2-g0"
+
+[[unit]]
+unit = "st.item_use"
+image = "ST.EXE"
+source = "src/st/item_use.c"
 profile = "probe-gcc272cdk-o2-g0"
 
 [[unit]]
@@ -781,6 +823,12 @@ profile = "probe-gcc272cdk-o2-g8"
 unit = "vs.vis_8002f264"
 image = "VS.EXE"
 source = "src/vs/vis_8002f264.c"
+profile = "probe-gcc272cdk-o2-g0"
+
+[[unit]]
+unit = "vs.attack_8002f334"
+image = "VS.EXE"
+source = "src/vs/attack_8002f334.c"
 profile = "probe-gcc272cdk-o2-g0"
 
 [[unit]]

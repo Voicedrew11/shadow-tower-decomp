@@ -152,7 +152,9 @@ typedef struct {
      * animation model files (src/st/anim.c); func_800456f8 frees 128..143,
      * the highest index evidenced (WIP extent). */
     void *unk834C[144];
-    u8 unk858C[0xa5fc - 0x858c];
+    u8 unk858C[0x8c7c - 0x858c];
+    void *unk8C7C[128];  /* 0x8c7c: heap blocks func_800456f8 frees on an area change */
+    u8 unk8E7C[0xa5fc - 0x8e7c];
     StAnimSlot anim_slots[16]; /* 0xa5fc */
     StAnimSet anim_sets[16]; /* 0xa77c */
     u8 world_vertices[0xeb40 - 0xab3c]; /* 0xab3c: the world parts' transformed vertices (MeshVertex); WIP extent */
