@@ -609,9 +609,8 @@ void func_80067624(void)
  * Draws one grid (104 or 98): the cursor bar, the scroll arrows and bar, the
  * header image and eleven rows of names, the held range highlighted.
  */
-/* Not exact: retail loads unk2E0 in both arms of the cursor bar x choice and
- * allocates the row loop (grid byte reloaded from its stack slot)
- * differently. */
+/* Not exact: header-call argument setup, row-loop grid reloads and
+ * temporary lifetimes, and text lookup order still differ. */
 ADDRESS(0x80067bec, 0x66c)
 void func_80067bec(u8 grid)
 {
@@ -637,11 +636,13 @@ void func_80067bec(u8 grid)
     CVECTOR *color;
     int x, y;
 
-    if (ST.unk0 == 104)
+    if (ST.unk0 == 104) {
         sp->unk330.x = 26;
-    else
+        sp->unk330.y = sp->unk2E0 * 16 + 33;
+    } else {
         sp->unk330.x = 340;
-    sp->unk330.y = sp->unk2E0 * 16 + 33;
+        sp->unk330.y = sp->unk2E0 * 16 + 33;
+    }
     sp->unk330.w = 270;
     sp->unk330.h = 15;
     func_80027d18(&sp->unk330, &sp->unk32C, 513, 1);
