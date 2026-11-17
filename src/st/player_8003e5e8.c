@@ -303,14 +303,12 @@ next:
 
 /* Loads item `id`'s parts and textures into item slot `slot` (0xffff:
  * empty), freeing the slot's old effects. */
-/* Not exact: the slot-bit test compiles to srl/andi instead of
- * andi/sltu, and $s5 is saved later. */
 ADDRESS(0x8003ee38, 0x2f4)
 void func_8003ee38(u16 id, u8 slot)
 {
+    u8 item = 255;
     DVECTOR pix[2] = {{0, 0}, {64, 0}};
     DVECTOR clut[2] = {{0, 0}, {0, 6}};
-    u8 item;
     StEffect *rec;
     int i;
     u8 *p;
@@ -318,7 +316,6 @@ void func_8003ee38(u16 id, u8 slot)
     u16 part;
     u_long size;
 
-    item = 255;
     if (id != 0xffff) {
         item = id;
     }
@@ -326,12 +323,17 @@ void func_8003ee38(u16 id, u8 slot)
         rec = effects.slots;
         i = 128;
         while (i--) {
-            if (rec->unk0 != 255 && ((u8)(rec->unk0 & 0x20) != 0) == slot) {
-                if (rec->unk1 < 44) {
-                    rec->unk0 = 255;
-                }
-                if (rec->unk1 >= 170 && rec->unk1 < 180) {
-                    rec->unk0 = 255;
+            int side = rec->unk0;
+
+            if (side != 255) {
+                side &= 0x20;
+                if ((side != 0) == slot) {
+                    if (rec->unk1 < 44) {
+                        rec->unk0 = 255;
+                    }
+                    if (rec->unk1 >= 170 && rec->unk1 < 180) {
+                        rec->unk0 = 255;
+                    }
                 }
             }
             rec++;
@@ -1241,9 +1243,7 @@ static s16 DAT_8008803c = 0;
  * along walls as func_80041150 does), then steps the vertical speed
  * against the floor, the head bob and the stamina, and records the
  * visible record the viewer stands in.
- * Not exact: as in func_80041150, the setup block schedules the viewer
- * position copy after the unk1C/unk1E stores (retail copies first); the
- * rest matches. */
+ */
 ADDRESS(0x8004162c, 0x720)
 void func_8004162c(void)
 {
@@ -1262,17 +1262,16 @@ void func_8004162c(void)
     slid_b = 0;
     slid_a = 0;
     if (viewer.unk2C8 == 0 || viewer.unk21E != 0) {
-        vel.vx = viewer.unk1CC;
-        vel.vz = viewer.unk1D0;
-        vis_lists.unk4.vx = viewer.position.vx;
-        vis_lists.unk4.vy = viewer.position.vy;
-        vis_lists.unk4.vz = viewer.position.vz;
-        vis_lists.unk4.pad = viewer.position.pad;
+        int initial_x = viewer.unk1CC;
+        int initial_z = viewer.unk1D0;
+        vis_lists.unk4 = viewer.position;
         vis_lists.unk1C = 256;
         vis_lists.unk1E = 1600;
-        vel.vy = viewer.unk2D4;
         vis_lists.unk0 = 1074;
-        speed = SquareRoot0(vel.vx * vel.vx + vel.vz * vel.vz);
+        vel.vx = initial_x;
+        vel.vy = viewer.unk2D4;
+        vel.vz = initial_z;
+        speed = SquareRoot0(initial_x * initial_x + initial_z * initial_z);
         heading = ratan2(vel.vz, vel.vx);
     loop:
         vis_lists.unk20 = 9999;
