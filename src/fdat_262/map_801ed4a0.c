@@ -122,7 +122,8 @@ void func_801ed4a0(void)
     }
 }
 
-/* Not exact (one attempt, retries off; 89.0%): first divergence retail `sw s1,20(sp)`, this source `sw s1,20(sp)`. */
+/* Not exact: the dead prologue LUI for vis_table_b has no curated retail
+ * relocation. The remaining instruction and relocation listings agree. */
 /*
  * Runs the area: entry 48 wakes when hit or once record 1's counter is 2
  * (func_801edfb4's scene) and changes its scripts after its flash; entry
@@ -139,6 +140,7 @@ void func_801ed740(void)
     Vis212 *e33 = &vis_table_a.entries[33];
     Vis192 *r4 = &vis_table_a.unk3500[4];
     Vis212 *e49 = &vis_table_a.entries[49];
+    Vis88 *d0 = &vis_table_b.entries[0];
 
     if (fdat_801ee370 == 0) {
         if (DAT_801cba08.unk1448[r1->unk09] == 2) {
@@ -194,7 +196,7 @@ void func_801ed740(void)
         fdat_801ee37c = 0xff;
         DAT_801cba08.unk1448[r4->unk09] = 1;
         fdat_801ee378 = 0xff;
-        vis_table_b.entries[0].unk0C = 0;
+        d0->unk0C = 0;
     } else if (fdat_801ee37c != 0xff) {
         e33->unk1C.bytes[3] = 3;
     }
