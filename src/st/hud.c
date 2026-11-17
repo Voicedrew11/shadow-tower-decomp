@@ -162,13 +162,12 @@ u8 *color;
  * leading zeros are hidden and each digit picks its glyph `width` texels
  * apart from u = 96.
  */
-/* Not exact: retail forms the third digit record's index (first + 2) in $a0
- * before the tens subtraction; this build forms it in $v1 after it. */
 ADDRESS(0x80026228, 0x2e0)
 void func_80026228(int value, int first, u8 width)
 {
     short n;
     short d;
+    int third;
 
     n = 9999;
     if (value < 10000)
@@ -201,16 +200,12 @@ void func_80026228(int value, int first, u8 width)
     n -= d * 100;
     hud_sprites[first + 1].u = d * width + 96;
     d = n / 10;
+    third = first + 2;
     n -= d * 10;
-    hud_sprites[first + 2].u = d * width + 96;
+    hud_sprites[third].u = d * width + 96;
     hud_sprites[first + 3].u = n * width + 96;
 }
 
-/*
- * Not exact: after the redraw block retail rematerializes &viewer in $a3 and
- * branches to the lui in the delay slot; this build keeps $s0 and reloads
- * the base piecewise.
- */
 ADDRESS(0x80026508, 0x45c)
 void func_80026508(void)
 {
@@ -232,19 +227,23 @@ void func_80026508(void)
             viewer.unk186 = 0;
         }
     }
-    if (viewer.unk186 == 0) {
-        hud_sprites[0].r.w = viewer.unk17E * 112 / 5120;
-        hud_sprites[1].r.w = viewer.unk182 * 112 / 5120;
-        hud_sprites[1].r.x = 307 - hud_sprites[1].r.w;
-    }
-    if (viewer.unk2C & 7) {
-        hud_sprites[4].flags = 1;
-        if (viewer.unk2C & 4)
-            hud_sprites[4].flags = 9;
-        else if (viewer.unk2C & 2)
-            hud_sprites[4].flags = 5;
-    } else {
-        hud_sprites[4].flags = 0;
+    {
+        Viewer *v = &viewer;
+
+        if (v->unk186 == 0) {
+            hud_sprites[0].r.w = v->unk17E * 112 / 5120;
+            hud_sprites[1].r.w = v->unk182 * 112 / 5120;
+            hud_sprites[1].r.x = 307 - hud_sprites[1].r.w;
+        }
+        if (v->unk2C & 7) {
+            hud_sprites[4].flags = 1;
+            if (v->unk2C & 4)
+                hud_sprites[4].flags = 9;
+            else if (v->unk2C & 2)
+                hud_sprites[4].flags = 5;
+        } else {
+            hud_sprites[4].flags = 0;
+        }
     }
     if (viewer.unk2C & 0x18) {
         hud_sprites[7].flags = 1;
