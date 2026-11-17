@@ -3507,8 +3507,10 @@ int func_80061d34(int fd, int offset, u8 *data, int size)
 
 /*
  * Reads size bytes back the same way, verifying each frame's sum.
- * Not exact (81.8%): the offset, data pointer, frame buffer and probe
- * countdown take other s-registers.
+ * Not exact (size-exact): the working offset now starts after the positive-
+ * size guard. The data, offset, frame base and probe countdown still use
+ * different saved registers, and the checksum counters are zeroed in a
+ * different order. A wide checksum or explicit frame pointer diverges more.
  */
 ADDRESS(0x80061ee8, 0x174)
 int func_80061ee8(int fd, int offset, u8 *data, int size)
@@ -3521,36 +3523,40 @@ int func_80061ee8(int fd, int offset, u8 *data, int size)
     u8 sum;
     int i;
 
-    while (size > 0) {
-    again:
-        if (n == 0) {
-            if (func_80061578(sp->unk1F8) == 0)
+    if (size > 0) {
+        int frame_offset = offset;
+
+        do {
+        again:
+            if (n == 0) {
+                if (func_80061578(sp->unk1F8) == 0)
+                    return -1;
+                n = 3;
+            }
+            if (retry >= 3)
                 return -1;
-            n = 3;
-        }
-        if (retry >= 3)
-            return -1;
-        retry++;
-        lseek(fd, offset, SEEK_SET);
-        if (read(fd, frame, 128) == -1) {
-            sp->unk0.half[0] = 354;
-            goto again;
-        }
-        sum = 0;
-        for (i = 0; i < 127; i++)
-            sum += frame[i];
-        sum = ~sum;
-        if (sum != frame[127]) {
-            sp->unk0.half[0] = 349;
-            goto again;
-        }
-        for (i = 0; i < 127; i++)
-            *data++ = frame[i];
-        size -= 127;
-        offset += 128;
-        retry = 0;
-        n--;
-        total += frame[127];
+            retry++;
+            lseek(fd, frame_offset, SEEK_SET);
+            if (read(fd, frame, 128) == -1) {
+                sp->unk0.half[0] = 354;
+                goto again;
+            }
+            sum = 0;
+            for (i = 0; i < 127; i++)
+                sum += frame[i];
+            sum = ~sum;
+            if (sum != frame[127]) {
+                sp->unk0.half[0] = 349;
+                goto again;
+            }
+            for (i = 0; i < 127; i++)
+                *data++ = frame[i];
+            size -= 127;
+            frame_offset += 128;
+            retry = 0;
+            n--;
+            total += frame[127];
+        } while (size > 0);
     }
     return total;
 }
