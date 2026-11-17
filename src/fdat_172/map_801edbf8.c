@@ -52,7 +52,6 @@ void func_801edbf8(void)
     }
 }
 
-/* Not exact (one attempt, retries off; 98.3%): first divergence retail `sh v0,62(sp)`, this source `sh v0,62(sp)`. */
 /* Item 0x12a used in front of table B entry 12 sets fdat_801edfd0; the
  * result is 1 then, else 2. */
 ADDRESS(0x801edd38, 0xc8)
@@ -68,11 +67,11 @@ void func_801edd38(short id)
         req.unk0 = 0;
         req.unk4 = p;
         req.unk1C = 1056;
-        req.unk1E = 1600;
         req.unk14.vx = 0;
         req.unk14.vy = 0;
         req.unk14.vz = 0;
         req.unk22 = 0;
+        req.unk1E = 1600;
         req.unk20 = 0;
         if (func_8004f53c((VisLists *)&req) == 12) {
             DAT_801cd0e0 = 1;
