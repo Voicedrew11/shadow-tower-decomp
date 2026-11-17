@@ -13,19 +13,21 @@
  * cross-fading from the previous second's digits over the first 16 frames
  * of each second, reddening over the last 14 seconds.
  */
-/* Not exact: secs and warn swap registers (retail t1/t3) and the
- * prologue schedules differently; 4 bytes short. */
+/* Not exact: retail keeps seconds/frame/warning in t1/t2/t3;
+ * this build cycles them through t3/t1/t2. */
 ADDRESS(0x800297fc, 0x314)
 void func_800297fc(int time)
 {
-    int secs = (time + 59) / 60;
-    int frame = (time + 59) - secs * 60;
-    int warn = (14 - secs) * 2;
+    int secs = time + 59;
+    int frame = secs % 60;
+    int warn;
     int i;
     int digit;
     StPacketBuffer *packet;
     POLY_FT4 *p;
 
+    secs /= 60;
+    warn = (14 - secs) * 2;
     if (warn < 0)
         warn = 0;
     if (warn > 8)

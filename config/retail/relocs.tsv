@@ -10478,6 +10478,7 @@ VS.EXE	0x80029770	0x18f70	0x80029774	mips_hi16_lo16	reachable-code	0x80063360	bs
 VS.EXE	0x80029780	0x18f80	0x80029784	mips_hi16_lo16	reachable-code	0x80063350	bss	DAT_80063350	lui+sw		manual-decoded	reviewed	vs.fade_80028fcc asm review
 VS.EXE	0x80029788	0x18f88		mips26	reachable-code	0x80027ba4	load		jal		manual-decoded	reviewed	vs.fade_80028fcc asm review
 VS.EXE	0x80029790	0x18f90	0x80029794	mips_hi16_lo16	reachable-code	0x801624d0	bss	DAT_801624d0	lui+addiu		manual-decoded	reviewed	vs.fade_80028fcc asm review
+VS.EXE	0x800298a0	0x190a0	0x800298a4	mips_hi16_lo16	reachable-code	0x8016a4d0	bss	DAT_801624d0	lui+addiu		manual-decoded	reviewed	vs.timer_800297fc decoded state anchor at owner+0x8000
 VS.EXE	0x80029944	0x19144		mips26	reachable-code	0x800299ac	load		j		manual-decoded	reviewed	vs.timer_800297fc asm review
 VS.EXE	0x8002995c	0x1915c		mips26	reachable-code	0x800299ac	load		j		manual-decoded	reviewed	vs.timer_800297fc asm review
 VS.EXE	0x80029968	0x19168		mips26	reachable-code	0x800299a8	load		j		manual-decoded	reviewed	vs.timer_800297fc asm review
