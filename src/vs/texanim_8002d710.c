@@ -19,4 +19,3 @@ void func_8002d710(void)
         rec++;
     }
 }
-
