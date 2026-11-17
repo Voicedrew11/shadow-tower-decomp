@@ -1611,20 +1611,25 @@ void func_800420a0(void)
 
 /*
  * Swaps hand `a`'s item with slot `b`, twice for a two-handed item.
- * Not exact: the per-slot base registers are assigned in another order
- * (retail loads x[b] before x[a] in each swap).
+ * Not exact: the b-slot address forms before the a-slot address, and
+ * saved per-slot bases differ. The swap load/store widths and order agree.
  */
 ADDRESS(0x80042620, 0x2e0)
 void func_80042620(u8 a, u8 b)
 {
+    int n = 1;
     SVECTOR unused0 = {0, 128, 0, -128};
     SVECTOR unused1 = {0, 4, 0, -4};
-    int n;
     u16 id;
-    void *p;
-    u8 c;
+    ViewerModel *model_b;
+    ViewerModel *model_a;
+    StAnimFile *block_b;
+    StAnimFile *block_a;
+    u8 model_id_b;
+    u8 model_id_a;
+    u8 sound_b;
+    u8 sound_a;
 
-    n = 1;
     if ((viewer.unk38[3] != 0xffff && vis_table_c.unk0118[viewer.unk38[3]].unk26 == 9) ||
         (viewer.unk38[4] != 0xffff && vis_table_c.unk0118[viewer.unk38[4]].unk26 == 9))
         n = 2;
@@ -1638,15 +1643,18 @@ void func_80042620(u8 a, u8 b)
             viewer.unk38[16] = viewer.unk38[17];
             viewer.unk38[17] = id;
         }
-        p = viewer.unkE8[a];
-        viewer.unkE8[a] = viewer.unkE8[b];
-        viewer.unkE8[b] = p;
-        p = viewer.unkF8[a];
-        viewer.unkF8[a] = viewer.unkF8[b];
-        viewer.unkF8[b] = p;
-        c = viewer.unk148[a];
-        viewer.unk148[a] = viewer.unk148[b];
-        viewer.unk148[b] = c;
+        model_b = viewer.unkE8[b];
+        model_a = viewer.unkE8[a];
+        viewer.unkE8[a] = model_b;
+        viewer.unkE8[b] = model_a;
+        block_b = viewer.unkF8[b];
+        block_a = viewer.unkF8[a];
+        viewer.unkF8[a] = block_b;
+        viewer.unkF8[b] = block_a;
+        model_id_b = viewer.unk148[b];
+        model_id_a = viewer.unk148[a];
+        viewer.unk148[a] = model_id_b;
+        viewer.unk148[b] = model_id_a;
         if (viewer.unk148[a] != 0xff)
             anim_register(a + 32, viewer.unkF8[a]);
         if (viewer.unk148[b] != 0xff)
@@ -1655,9 +1663,10 @@ void func_80042620(u8 a, u8 b)
             ((StAnimSlot *)viewer.unk108[a])->unk2 = 0xffff;
         if (viewer.unk108[b])
             ((StAnimSlot *)viewer.unk108[b])->unk2 = 0xffff;
-        c = viewer.unk1D4[a];
-        viewer.unk1D4[a] = viewer.unk1D4[b];
-        viewer.unk1D4[b] = c;
+        sound_b = viewer.unk1D4[b];
+        sound_a = viewer.unk1D4[a];
+        viewer.unk1D4[a] = sound_b;
+        viewer.unk1D4[b] = sound_a;
         if (a == 0) {
             viewer.unk17E = 0;
             a = 1;
