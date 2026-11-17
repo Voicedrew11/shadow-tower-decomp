@@ -52,7 +52,7 @@ typedef struct {
     u8 unk43[0x200 - 0x43];
 } VsCardHeader;
 
-/* A player's 7560-byte save record; only the fields the code proves. */
+/* Inventory portion of a player's save record; only proven fields. */
 /* Per-item marks func_800193e8 compares between the two saves (VS band 6):
  * item ids 0..265 index the byte arrays. */
 typedef struct {
@@ -64,9 +64,10 @@ typedef struct {
     u16 unk2B4[21];      /* 0x2b4: listed item ids */
     u8 unk2DE[0x2e0 - 0x2de];
     s32 unk2E0[3];       /* 0x2e0: the player's team (VsTeam.slot, func_8001bb48) */
+    u8 unk2EC[314];      /* 0x2ec: per-item counts, shared with ST's save format */
 } VsSaveSub;
 
-typedef char VsSaveSubSize[sizeof(VsSaveSub) == 0x2ec ? 1 : -1];
+typedef char VsSaveSubSize[sizeof(VsSaveSub) == 0x428 ? 1 : -1];
 
 typedef struct {
     s32 unk0;            /* 0x0000: compared with the card file's first word */
@@ -76,11 +77,18 @@ typedef struct {
     u8 unk1802;          /* 0x1802: the count of items won (func_8001c5e0) */
     u8 unk1803[0x18bc - 0x1803];
     VsSaveSub unk18BC;   /* 0x18bc (VS band 6) */
-    u8 unk1BA8[0x1d88 - 0x1ba8]; /* 0x1ba8: a count per item id (func_800222d8) */
+    u8 unk1CE4[0x1d88 - 0x1ce4]; /* remaining save payload */
 } VsSave;
 
 typedef char VsSaveSize[sizeof(VsSave) == 0x1d88 ? 1 : -1];
 typedef char VsSaveUnk18BCAt0x18BC[offsetof(VsSave, unk18BC) == 0x18bc ? 1 : -1];
+typedef char VsSaveSubCountsAt0x2EC[offsetof(VsSaveSub, unk2EC) == 0x2ec ? 1 : -1];
+typedef char VsSaveCountsAt0x1BA8[offsetof(VsSave, unk18BC) + offsetof(VsSaveSub, unk2EC) == 0x1ba8 ? 1 : -1];
+typedef char VsSaveSuffixAt0x1CE4[offsetof(VsSave, unk1CE4) == 0x1ce4 ? 1 : -1];
+typedef char VsSaveSubCountsEndAt0x426[offsetof(VsSaveSub, unk2EC) + sizeof(((VsSaveSub *)0)->unk2EC) == 0x426 ? 1 : -1];
+typedef char VsSaveCountEndAt0x1CE2[offsetof(VsSave, unk18BC) + offsetof(VsSaveSub, unk2EC) + sizeof(((VsSaveSub *)0)->unk2EC) == 0x1ce2 ? 1 : -1];
+typedef char VsSaveInventoryBoundary[offsetof(VsSave, unk18BC) + sizeof(VsSaveSub) == offsetof(VsSave, unk1CE4) ? 1 : -1];
+typedef char VsSavePairSize[sizeof(VsSave[2]) == 0x3b10 ? 1 : -1];
 
 /* The two players' card file names (0x801a0a30, bss). */
 extern char DAT_801a0a30[2][40];

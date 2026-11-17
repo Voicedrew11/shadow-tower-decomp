@@ -208,7 +208,7 @@ void func_800222d8(int page)
         DAT_8006337a = 0;
         y += 60;
         func_8001d8b8(VS_MESSAGE(501), pos.vx, y, &sp->style[0]);
-        func_8001d9cc(DAT_801a0a80[1 - page].unk1BA8[id] | 0x3000000, left + 70, y, &sp->style[3]);
+        func_8001d9cc(DAT_801a0a80[1 - page].unk18BC.unk2EC[id] | 0x3000000, left + 70, y, &sp->style[3]);
         func_8001d8b8(VS_MESSAGE(502), left + 114, y, &sp->style[0]);
         item = &DAT_80191d00.unk0118[id];
         func_8001d9cc(item->unk27 | 0x3000000, left + 138, y, &sp->style[3]);

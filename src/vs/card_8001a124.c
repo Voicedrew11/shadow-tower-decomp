@@ -1112,25 +1112,28 @@ int func_8001c530(void)
  * count of it over; then writes both records back. Returns a bit per
  * player whose write failed.
  * Not exact: retail's frame is 56 bytes, this build's 48 (first
- * divergence at +0x0); retail is 0x2d8 bytes, this build 0x314.
+ * divergence at +0x0). The save/header roots still have different
+ * lifetimes; this build is eight bytes short.
  */
 ADDRESS(0x8001c5e0, 0x2d8)
 int func_8001c5e0(int side, int again)
 {
     VsMenuScratch *sp = VS_MENU_SCRATCH;
-    char zero[2] = "\x82\x4f";
-    u16 id = DAT_80063330[side];
-    VsSaveSub *win = &DAT_801a0a80[side].unk18BC;
-    VsSaveSub *lose = &DAT_801a0a80[1 - side].unk18BC;
     int failed = 0;
     int started = failed;
+    char zero[2] = "\x82\x4f";
+    u16 id = DAT_80063330[side];
+    VsSave *winner = &DAT_801a0a80[side];
+    VsSave *loser = &DAT_801a0a80[1 - side];
+    VsSaveSub *win = &winner->unk18BC;
+    VsSaveSub *lose = &loser->unk18BC;
     u16 count;
     int i;
 
     if (!again) {
-        if (!(DAT_801a0a80[side].unk14CC[id / 32] & (1 << (id % 32)))) {
+        if (!(winner->unk14CC[id / 32] & (1 << (id % 32)))) {
             count = DAT_8015ffc0[side].unk40 + 1;
-            DAT_801a0a80[side].unk1802 = count;
+            winner->unk1802 = count;
             if (count >= 100) {
                 DAT_8015ffc0[side].unk34[0] = zero[0];
                 DAT_8015ffc0[side].unk34[1] = zero[1] + count / 100 % 10;
@@ -1142,14 +1145,14 @@ int func_8001c5e0(int side, int again)
             DAT_8015ffc0[side].unk34[4] = zero[0];
             DAT_8015ffc0[side].unk34[5] = zero[1] + count % 10;
             DAT_8015ffc0[side].unk40 = count;
-            DAT_801a0a80[side].unk14CC[id / 32] |= 1 << (id % 32);
+            winner->unk14CC[id / 32] |= 1 << (id % 32);
         }
         win->unk150[id] = 1;
         win->unk14[id] = 0;
-        DAT_801a0a80[side].unk1BA8[id] = DAT_801a0a80[1 - side].unk1BA8[id];
+        win->unk2EC[id] = lose->unk2EC[id];
         lose->unk14[id] = 1;
         lose->unk150[id] = 0;
-        DAT_801a0a80[1 - side].unk1BA8[id] = 0;
+        lose->unk2EC[id] = 0;
     }
     if (!started) {
         StartCARD();
