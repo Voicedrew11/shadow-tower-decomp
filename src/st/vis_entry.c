@@ -203,8 +203,8 @@ void func_8004b098(int arg)
 ADDRESS(0x8004b19c, 0x4c)
 void func_8004b19c(void)
 {
-    func_8004b098(func_8004a304(vis_table_a.unk6138->unk74.vx - viewer.x,
-                                vis_table_a.unk6138->unk74.vz - viewer.z));
+    func_8004b098(func_8004a304(vis_table_a.unk6138->unk74.vx - viewer.position.vx,
+                                vis_table_a.unk6138->unk74.vz - viewer.position.vz));
 }
 
 /* Finds the entry of r's list whose first byte is id. */
@@ -483,12 +483,12 @@ int func_8004bb88(VisLists *req, int arg1)
         r = &vis_table_a.unk3500[e->unk02];
         if (mode == 1 &&
             !func_8004a148(viewer.unk278.vy,
-                           (short)func_8004a1b4(e->unk74.vx - viewer.x, e->unk74.vz - viewer.z),
+                           (short)func_8004a1b4(e->unk74.vx - viewer.position.vx, e->unk74.vz - viewer.position.vz),
                            256))
             continue;
         if (mode == 4 &&
             !func_8004a148(viewer.unk278.vy,
-                           (short)func_8004a1b4(e->unk74.vx - viewer.x, e->unk74.vz - viewer.z),
+                           (short)func_8004a1b4(e->unk74.vx - viewer.position.vx, e->unk74.vz - viewer.position.vz),
                            384))
             continue;
         if (r->unk16 == 0)

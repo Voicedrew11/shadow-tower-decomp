@@ -29,8 +29,8 @@ void func_80053aa4(void)
         if (c->unk00 != 0xffff && c->unk2c == area_state.unk4) {
             rec = &vis_table_c.unk0118[c->unk00];
             c->unk24 = 0;
-            c->unk28 = SquareRoot0((c->unk08.vx - viewer.x) * (c->unk08.vx - viewer.x)
-                                   + (c->unk08.vz - viewer.z) * (c->unk08.vz - viewer.z));
+            c->unk28 = SquareRoot0((c->unk08.vx - viewer.position.vx) * (c->unk08.vx - viewer.position.vx)
+                                   + (c->unk08.vz - viewer.position.vz) * (c->unk08.vz - viewer.position.vz));
             switch (c->unk22) {
             case 0:
             case 2:
@@ -60,7 +60,7 @@ void func_80053aa4(void)
                         c->unk08.vy -= 0x200 - vis_lists.unk2C;
                         c->unk26 = -(c->unk26 >> 1);
                     }
-                    if (viewer.y + 0x8000 < c->unk08.vy)
+                    if (viewer.position.vy + 0x8000 < c->unk08.vy)
                         func_80052e50(c);
                     if (c->unk00 < 71)
                         c->unk18 = h;

@@ -133,9 +133,6 @@ void fdat_801ecf44(Vis212 *e)
 
 /*
  * Moves the view to `pos`, turned to `rot`, over 16 frames.
- * Not exact: retail copies the viewer position as one VECTOR member of the
- * viewer block (offsets 0x248.. from &viewer); st/data.h spells it as the
- * longs x, y, z, so this build copies through a cast (&viewer.x + 0..).
  */
 ADDRESS(0x801ecfc4, 0x220)
 void fdat_801ecfc4(VECTOR *pos, SVECTOR *rot)
@@ -148,7 +145,7 @@ void fdat_801ecfc4(VECTOR *pos, SVECTOR *rot)
 
     to = *pos;
     b = *rot;
-    from = *(VECTOR *)&viewer.x;
+    from = viewer.position;
     a = viewer.unk278;
     if (a.vx > 2048)
         a.vx -= 4096;
@@ -160,8 +157,8 @@ void fdat_801ecfc4(VECTOR *pos, SVECTOR *rot)
         b.vy -= 4096;
     n = 16;
     while (n--) {
-        viewer.x = (from.vx * n + to.vx * (16 - n)) >> 4;
-        viewer.z = (from.vz * n + to.vz * (16 - n)) >> 4;
+        viewer.position.vx = (from.vx * n + to.vx * (16 - n)) >> 4;
+        viewer.position.vz = (from.vz * n + to.vz * (16 - n)) >> 4;
         viewer.unk278.vx = (a.vx * n + b.vx * (16 - n)) >> 4;
         viewer.unk278.vy = (a.vy * n + b.vy * (16 - n)) >> 4;
         viewer.unk268 = viewer.unk278.vx + viewer.unk280 + viewer.unk288 + viewer.unk290;
@@ -185,8 +182,8 @@ void fdat_801ed1e4(Vis212 *e)
     short step;
     int n = 16;
 
-    dx = e->unk74.vx - viewer.x;
-    dz = e->unk74.vz - viewer.z;
+    dx = e->unk74.vx - viewer.position.vx;
+    dz = e->unk74.vz - viewer.position.vz;
     angle = ratan2(dz, dx) - 1024;
     to.vy = angle;
     yaw = viewer.unk278.vy;

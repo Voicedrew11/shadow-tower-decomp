@@ -55,8 +55,8 @@ void func_801edbec(Vis212 *e)
         d = e->unk40;
         if (d < e->unk2E + 0x420) {
             d = e->unk2E - (d - 0x420);
-            viewer.x += d * rcos(e->unk56 - 0x400) >> 12;
-            viewer.z += d * rsin(e->unk56 - 0x400) >> 12;
+            viewer.position.vx += d * rcos(e->unk56 - 0x400) >> 12;
+            viewer.position.vz += d * rsin(e->unk56 - 0x400) >> 12;
         }
         break;
     case 2:

@@ -30,7 +30,7 @@ void func_80054a54(int id)
     int r;
     int points;
 
-    pos = *(VECTOR *)&viewer.x;
+    pos = *(VECTOR *)&viewer.position.vx;
     DAT_801cd0e0 = 2;
     pos.vy += 1600;
     switch (id) {

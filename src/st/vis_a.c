@@ -203,9 +203,9 @@ void func_8004e324(void)
          vis_table_a.unk6144++, e++) {
         if (e->unk00 != 0xff) {
             func_8004c03c(e);
-            dx = e->unk74.vx - viewer.x;
-            dy = e->unk74.vy - viewer.y;
-            dz = e->unk74.vz - viewer.z;
+            dx = e->unk74.vx - viewer.position.vx;
+            dy = e->unk74.vy - viewer.position.vy;
+            dz = e->unk74.vz - viewer.position.vz;
             if (dx < -0x8000 || dx > 0x8000 || dy > 0x8000 || dy < -0x8000 || dz > 0x8000
                 || dz < -0x8000) {
                 e->unk3C = 0x40000000;

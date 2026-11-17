@@ -35,9 +35,9 @@ void func_8005335c(Vis48 *c, int forced)
     gte_ldv0((SVECTOR *)&info->unk5[3]);
     gte_rtv0();
     gte_stlvnl(&a);
-    a.vx += viewer.x;
-    a.vy += viewer.y;
-    a.vz += viewer.z;
+    a.vx += viewer.position.vx;
+    a.vy += viewer.position.vy;
+    a.vz += viewer.position.vz;
     switch (info->unk5[2]) {
     case 0:
         r.vx = -viewer.unk268;
@@ -103,10 +103,10 @@ void func_8005335c(Vis48 *c, int forced)
     }
     take = 1;
     a = c->unk08;
-    b.vx = viewer.x;
-    b.vy = viewer.y;
-    b.vz = viewer.z;
-    b.pad = viewer.unk254;
+    b.vx = viewer.position.vx;
+    b.vy = viewer.position.vy;
+    b.vz = viewer.position.vz;
+    b.pad = viewer.position.pad;
     b.vy += 800;
     r = *(SVECTOR *)&c->unk18;
     r2 = r;

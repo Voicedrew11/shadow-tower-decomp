@@ -4063,12 +4063,12 @@ write:
         goto write;
     }
     viewer.unk22C = area_state.unk4;
-    viewer.unk22D = viewer.x >> 12;
-    viewer.unk22E = viewer.y >> 12;
-    viewer.unk22F = viewer.z >> 12;
-    viewer.unk230 = viewer.x - (viewer.unk22D << 12);
-    viewer.unk232 = viewer.y - (viewer.unk22E << 12);
-    viewer.unk234 = viewer.z - (viewer.unk22F << 12);
+    viewer.unk22D = viewer.position.vx >> 12;
+    viewer.unk22E = viewer.position.vy >> 12;
+    viewer.unk22F = viewer.position.vz >> 12;
+    viewer.unk230 = viewer.position.vx - (viewer.unk22D << 12);
+    viewer.unk232 = viewer.position.vy - (viewer.unk22E << 12);
+    viewer.unk234 = viewer.position.vz - (viewer.unk22F << 12);
     viewer.unk236 = viewer.unk278.vy + 2048;
     close(fd);
     func_80057a3c();

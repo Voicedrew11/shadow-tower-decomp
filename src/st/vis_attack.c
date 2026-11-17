@@ -44,7 +44,7 @@ void func_8004cee8(Vis212 *e, int kind, VECTOR *pos)
     case 0x7d:
     case 0xa1:
         for (i = 0, speed = 256; i < 3; i++, speed += 64) {
-            func_8004cc70(e, (VECTOR *)&viewer.x, speed, &p, &dir, &rot, -1, 16, 1);
+            func_8004cc70(e, (VECTOR *)&viewer.position.vx, speed, &p, &dir, &rot, -1, 16, 1);
             rot.vx = 0;
             rot.vz = 0;
             fx = func_80036484(r->unk08, 0x81, kind, &p, &dir, 256, &rot, e->unk0B);
@@ -91,7 +91,7 @@ void func_8004cee8(Vis212 *e, int kind, VECTOR *pos)
     case 0x9f:
     case 0xa5:
         for (i = 0; i < 4; i++) {
-            func_8004cc70(e, (VECTOR *)&viewer.x, 32, &p, &dir, &rot, -1, 16, 1);
+            func_8004cc70(e, (VECTOR *)&viewer.position.vx, 32, &p, &dir, &rot, -1, 16, 1);
             func_8004cba0(&dir, &p, pos);
             fx = func_80036484(r->unk08, 0x81, kind, &p, &dir, 0x400, e->unk0B);
             if (fx)
@@ -100,7 +100,7 @@ void func_8004cee8(Vis212 *e, int kind, VECTOR *pos)
         break;
     case 0x3a:
         for (i = 0, speed = 512; i < 3; i++, speed += 128) {
-            func_8004cc70(e, (VECTOR *)&viewer.x, speed, &p, &dir, &rot, -1, 16, 1);
+            func_8004cc70(e, (VECTOR *)&viewer.position.vx, speed, &p, &dir, &rot, -1, 16, 1);
             func_8004cba0(&dir, &p, pos);
             fx = func_80036484(r->unk08, 0x81, kind, &p, &dir, 0x1000, &rot, e->unk0B);
             if (fx)
@@ -121,7 +121,7 @@ void func_8004cee8(Vis212 *e, int kind, VECTOR *pos)
     case 0x89:
     case 0x93:
         for (i = 0; i < 1; i++) {
-            func_8004cc70(e, (VECTOR *)&viewer.x, 256, &p, &dir, &rot, -1, 16, 1);
+            func_8004cc70(e, (VECTOR *)&viewer.position.vx, 256, &p, &dir, &rot, -1, 16, 1);
             func_8004cba0(&dir, &p, pos);
             fx = func_80036484(r->unk08, 0x81, kind, &p, &dir, 0x200, &rot, e->unk0B);
             if (fx)
@@ -144,7 +144,7 @@ void func_8004cee8(Vis212 *e, int kind, VECTOR *pos)
     case 0xa4:
     case 0xa6:
     case 0xa8:
-        func_8004cc70(e, (VECTOR *)&viewer.x, 384, &p, &dir, &rot, -1, 16, 1);
+        func_8004cc70(e, (VECTOR *)&viewer.position.vx, 384, &p, &dir, &rot, -1, 16, 1);
         scale = 0x1000;
         goto aimed;
     case 0x41:
@@ -175,7 +175,7 @@ void func_8004cee8(Vis212 *e, int kind, VECTOR *pos)
     case 0x55:
     case 0x59:
     case 0x97:
-        func_8004cc70(e, (VECTOR *)&viewer.x, 256, &p, &dir, &rot, -1, 16, 1);
+        func_8004cc70(e, (VECTOR *)&viewer.position.vx, 256, &p, &dir, &rot, -1, 16, 1);
         fx = func_80036484(r->unk08, 0x81, kind, &p, &dir, 0x200, e->unk0B);
         if (fx)
             fx->unk40.vy = 0;
@@ -184,7 +184,7 @@ void func_8004cee8(Vis212 *e, int kind, VECTOR *pos)
     case 0x5f:
     case 0x70:
         for (i = 0; i < 4; i++) {
-            func_8004cc70(e, (VECTOR *)&viewer.x, 512, &p, &dir, &rot, -1, 16, 1);
+            func_8004cc70(e, (VECTOR *)&viewer.position.vx, 512, &p, &dir, &rot, -1, 16, 1);
             func_8004cba0(&dir, &p, pos);
             fx = func_80036484(r->unk08, 0x81, kind, &p, &dir, 0x400, e->unk0B);
             if (fx)
@@ -195,7 +195,7 @@ void func_8004cee8(Vis212 *e, int kind, VECTOR *pos)
     case 0x61:
     case 0x68:
     case 0x74:
-        func_8004cc70(e, (VECTOR *)&viewer.x, 384, &p, &dir, &rot, -1, 16, 1);
+        func_8004cc70(e, (VECTOR *)&viewer.position.vx, 384, &p, &dir, &rot, -1, 16, 1);
         fx = func_80036484(r->unk08, 0x81, kind, &p, &dir, 0x400, e->unk0B, 16);
         goto fast;
     case 0x58:
@@ -207,7 +207,7 @@ void func_8004cee8(Vis212 *e, int kind, VECTOR *pos)
     case 0x95:
     case 0x9c:
     case 0x9e:
-        func_8004cc70(e, (VECTOR *)&viewer.x, 512, &p, &dir, &rot, -1, 16, 1);
+        func_8004cc70(e, (VECTOR *)&viewer.position.vx, 512, &p, &dir, &rot, -1, 16, 1);
         fx = func_80036484(r->unk08, 0x81, kind, &p, &dir, 0x200, e->unk0B, 16);
         goto fast;
     case 0x7c:
@@ -219,7 +219,7 @@ void func_8004cee8(Vis212 *e, int kind, VECTOR *pos)
     case 0xa0:
     case 0xa7:
     case 0xa9:
-        func_8004cc70(e, (VECTOR *)&viewer.x, 384, &p, &dir, &rot, -1, 16, 1);
+        func_8004cc70(e, (VECTOR *)&viewer.position.vx, 384, &p, &dir, &rot, -1, 16, 1);
         scale = 0x200;
     aimed:
         fx = func_80036484(r->unk08, 0x81, kind, &p, &dir, scale, &rot, e->unk0B);
@@ -249,7 +249,7 @@ void func_8004cee8(Vis212 *e, int kind, VECTOR *pos)
     case 0xe6:
     case 0xeb:
     case 0xee:
-        func_8004cc70(e, (VECTOR *)&viewer.x, 768, &p, &dir, &rot, -1, 16, 1);
+        func_8004cc70(e, (VECTOR *)&viewer.position.vx, 768, &p, &dir, &rot, -1, 16, 1);
         fx = func_80036484(r->unk08, 0x81, kind, &p, &dir, 0x800, &rot, e->unk0B, e);
     slow:
         if (fx)

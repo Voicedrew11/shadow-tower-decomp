@@ -68,7 +68,7 @@ void func_801ed588(void)
     Vis212 *e32 = &vis_table_a.entries[32];
     Vis192 *r1 = &vis_table_a.unk3500[1];
 
-    if (fdat_801edb00 == 0 && viewer.z < 0x3a800) {
+    if (fdat_801edb00 == 0 && viewer.position.vz < 0x3a800) {
         if (fdat_801edafc == 0) {
             DAT_801cba08.unk1448[r1->unk09] = 0;
             fdat_801ed388(e32, 1, 0);

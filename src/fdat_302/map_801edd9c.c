@@ -30,7 +30,7 @@ void func_801edd9c(int up)
 
     if (up == 0)
         dz = -0x6000;
-    viewer.z += dz;
+    viewer.position.vz += dz;
     i = 64;
     while (i--) {
         if (e->unk00 != 0xff) {

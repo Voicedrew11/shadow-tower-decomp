@@ -97,11 +97,11 @@ void func_801ed5b0(void)
         func_801edea0();
         fdat_801ee470 = 1;
     }
-    if (viewer.z > 0x46800) {
+    if (viewer.position.vz > 0x46800) {
         func_801edd9c(0);
         fdat_801ee470++;
     }
-    if (viewer.z < 0x40800) {
+    if (viewer.position.vz < 0x40800) {
         func_801edd9c(1);
         fdat_801ee470--;
     }
@@ -153,7 +153,7 @@ void func_801ed5b0(void)
         DAT_800881a4 = 3;
         DAT_801cba08.unk1444.word |= 0x80;
     }
-    if (fdat_801ee47c == 1 && viewer.z > 0x41000) {
+    if (fdat_801ee47c == 1 && viewer.position.vz > 0x41000) {
         viewer.unk218 = 5;
         fdat_801ed388(e5, 0, 0);
         e5->unk1C.bytes[3] = 0;

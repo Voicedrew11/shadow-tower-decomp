@@ -48,9 +48,9 @@ void func_80053d58(int x, int y, int z, int pitch, int yaw, int dy, int dz, VECT
     rot.vy = yaw;
     rot.vz = 0;
     func_8004a078(&rot, &v, out);
-    out->vx += viewer.x;
-    out->vy += viewer.y + dy - 1600;
-    out->vz += viewer.z;
+    out->vx += viewer.position.vx;
+    out->vy += viewer.position.vy + dy - 1600;
+    out->vz += viewer.position.vz;
 }
 
 /* Moves the entry's position and rotation a fraction t / 4096 of the way

@@ -67,9 +67,9 @@ void func_80052894(to, keep)
     viewer.unk28A = 0;
     viewer.unk288 = 0;
     *(SVECTOR *)&viewer.unk268 = viewer.unk278;
-    viewer.x = (x << 12) + to->dx;
-    viewer.z = (z << 12) + to->dz;
-    viewer.y = (y << 12) + to->dy;
+    viewer.position.vx = (x << 12) + to->dx;
+    viewer.position.vz = (z << 12) + to->dz;
+    viewer.position.vy = (y << 12) + to->dy;
     func_8003ead0();
     f = effects.slots;
     vis_table_b.unk71A8 = 0;
@@ -95,7 +95,7 @@ void func_80052894(to, keep)
     } while (area_state.unk0 != 0);
     if (!keep) {
         vis_lists.n_sources = 0;
-        vis_collect_sources((VECTOR *)&viewer.x, NULL, NULL);
+        vis_collect_sources((VECTOR *)&viewer.position.vx, NULL, NULL);
         if (vis_lists.n_sources)
             viewer.unk174 = &vis_records[vis_lists.sources[0]];
         func_8004e324();
@@ -287,10 +287,10 @@ int func_80053174(VisLists *req, int unused)
         rec = &vis_table_c.unk0118[c->unk00];
         if (rec->unk0[1] == 0)
             continue;
-        if (c->unk08.vy < viewer.y - 0x400 || c->unk08.vy > viewer.y + 0xa40)
+        if (c->unk08.vy < viewer.position.vy - 0x400 || c->unk08.vy > viewer.position.vy + 0xa40)
             continue;
         if (!func_8004a148(viewer.unk278.vy,
-                           func_8004a1b4(c->unk08.vx - viewer.x, c->unk08.vz - viewer.z), 300))
+                           func_8004a1b4(c->unk08.vx - viewer.position.vx, c->unk08.vz - viewer.position.vz), 300))
             continue;
         dx = c->unk08.vx - req->unk4.vx;
         if (dx < -0x2800 || dx > 0x2800)

@@ -99,8 +99,8 @@ void func_80055374(long *pos, SVECTOR *rot)
     i = func_8004bb88((VisLists *)&req, 1);
     if (i != -1) {
         a = &vis_table_a.entries[i];
-        up = ratan2(a->unk74.vy - a->unk30 - viewer.y, a->unk40);
-        down = ratan2(a->unk74.vy - (a->unk30 >> 1) - viewer.y, a->unk40);
+        up = ratan2(a->unk74.vy - a->unk30 - viewer.position.vy, a->unk40);
+        down = ratan2(a->unk74.vy - (a->unk30 >> 1) - viewer.position.vy, a->unk40);
         if (up > 2048)
             up -= 2048;
         if (down > 2048)

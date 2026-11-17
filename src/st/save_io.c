@@ -126,7 +126,7 @@ void func_800562d4(StSaveData *save, int fresh)
         save->unk1868.vy = 3072;
         save->unk1868.vz = 0;
     } else {
-        save->unk1858 = *(VECTOR *)&viewer.x;
+        save->unk1858 = *(VECTOR *)&viewer.position.vx;
         save->unk1868 = viewer.unk278;
     }
     save->unk18B4[0] = DAT_801cd120.unk0;
@@ -313,7 +313,7 @@ void func_80056aa0(StSaveData *save)
     viewer.unk219 = save->unk18B0[0];
     viewer.unk21A = save->unk18B0[1];
     viewer.unk21B = save->unk18B0[2];
-    *(VECTOR *)&viewer.x = save->unk1858;
+    *(VECTOR *)&viewer.position.vx = save->unk1858;
     viewer.unk278 = save->unk1868;
     DAT_801cd120.unk0 = save->unk18B4[0];
     DAT_801cd120.unk1 = save->unk18B4[1];

@@ -297,12 +297,12 @@ void model_draw(int unused0, u16 model, VECTOR *pos, SVECTOR *rot, SVECTOR *scal
     gte_SetRotMatrix(&world_state.unk1ECE8);
     gte_SetTransMatrix(&world_state.unk1ECE8);
     if (view) {
-        rel_l.vx = pos->vx - viewer.x;
-        rel_l.vy = pos->vy - (viewer.y + viewer.unk2CE + viewer.unk2D2);
-        rel_l.vz = pos->vz - viewer.z;
-        rel.vx = pos->vx - viewer.x;
-        rel.vy = pos->vy - (viewer.y + viewer.unk2CE + viewer.unk2D2);
-        rel.vz = pos->vz - viewer.z;
+        rel_l.vx = pos->vx - viewer.position.vx;
+        rel_l.vy = pos->vy - (viewer.position.vy + viewer.unk2CE + viewer.unk2D2);
+        rel_l.vz = pos->vz - viewer.position.vz;
+        rel.vx = pos->vx - viewer.position.vx;
+        rel.vy = pos->vy - (viewer.position.vy + viewer.unk2CE + viewer.unk2D2);
+        rel.vz = pos->vz - viewer.position.vz;
         gte_RotTrans(&rel, sp->model_t, &flag);
     } else {
         sp->model_t[0] = pos->vx;

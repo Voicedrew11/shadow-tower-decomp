@@ -135,8 +135,8 @@ int func_8004db9c(Vis212 *e, short reach)
     pitch = viewer.unk268 & 0xfff;
     if (reach + e->unk2E < e->unk40)
         return 0;
-    dy = e->unk74.vy - viewer.y;
-    dy2 = e->unk74.vy - e->unk30 - viewer.y;
+    dy = e->unk74.vy - viewer.position.vy;
+    dy2 = e->unk74.vy - e->unk30 - viewer.position.vy;
     if (dy > 0 && dy2 > 0) {
         lo = ratan2(dy, e->unk40 - e->unk2E);
         hi = ratan2(dy2, e->unk40 + e->unk2E);

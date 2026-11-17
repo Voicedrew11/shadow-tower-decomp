@@ -72,14 +72,14 @@ ADDRESS(0x8003be10, 0xa4)
 void func_8003be10(void)
 {
     if (vis_lists.unk4C != 0x80000) {
-        if (vis_lists.unk4C < viewer.y) {
+        if (vis_lists.unk4C < viewer.position.vy) {
             viewer.unk2EC = 1;
         } else {
             viewer.unk2EC = 0;
         }
     }
     if (vis_lists.unk58 != 0x80000) {
-        if (vis_lists.unk58 < viewer.y) {
+        if (vis_lists.unk58 < viewer.position.vy) {
             viewer.unk2F0 = 1;
         } else {
             viewer.unk2F0 = 0;
@@ -101,19 +101,19 @@ int func_8003beb4(void *request)
     int dz;
     int dist;
 
-    dx = viewer.x - t->pos.vx;
+    dx = viewer.position.vx - t->pos.vx;
     if (dx >= -10240 && dx <= 10240) {
-        dz = viewer.z - t->pos.vz;
+        dz = viewer.position.vz - t->pos.vz;
         if (dz >= -10240 && dz <= 10240) {
             dist = SquareRoot0(dx * dx + dz * dz);
             if (dist - t->unk22 * rcos(t->unk20 - (short)ratan2(dz, dx)) / 4096 < t->unk1C + 256) {
-                if (viewer.y + 1600 < t->pos.vy) {
-                    if (viewer.y + 1600 >= t->pos.vy - t->unk1E) {
+                if (viewer.position.vy + 1600 < t->pos.vy) {
+                    if (viewer.position.vy + 1600 >= t->pos.vy - t->unk1E) {
                         return dist;
                     }
                     return -1;
                 }
-                if (t->pos.vy < viewer.y) {
+                if (t->pos.vy < viewer.position.vy) {
                     return -1;
                 }
                 return dist;
@@ -126,7 +126,7 @@ int func_8003beb4(void *request)
 ADDRESS(0x8003c000, 0x54)
 int func_8003c000(int x, int y, int z, int range, int kind)
 {
-    return func_8004a580((VECTOR *)&viewer.x, x, y, z, range + 256, 1000, kind);
+    return func_8004a580((VECTOR *)&viewer.position.vx, x, y, z, range + 256, 1000, kind);
 }
 
 ADDRESS(0x8003c054, 0x8c)
@@ -812,7 +812,7 @@ void player_take_damage(int damage, int flags, long *from)
     }
     reach = scaled >> 2;
     if (from) {
-        func_8004a390(viewer.x - from[0], viewer.y - from[1], viewer.z - from[2], &dir);
+        func_8004a390(viewer.position.vx - from[0], viewer.position.vy - from[1], viewer.position.vz - from[2], &dir);
         if (reach < 80) {
             reach = 80;
         }
@@ -1128,12 +1128,12 @@ void func_8003e5e8(u16 *damage, u16 effect, long *pos, int min, int range, int k
     int d;
 
     if (kind == 0x8000) {
-        d = func_8004a67c((VECTOR *)pos, range, (VECTOR *)&viewer.x, 256, 1000);
+        d = func_8004a67c((VECTOR *)pos, range, (VECTOR *)&viewer.position.vx, 256, 1000);
     } else if (kind == 0x8001) {
-        if (viewer.y > pos[1]) {
+        if (viewer.position.vy > pos[1]) {
             d = -9999999;
         } else {
-            d = func_8004a67c((VECTOR *)pos, range, (VECTOR *)&viewer.x, 256, 1000);
+            d = func_8004a67c((VECTOR *)pos, range, (VECTOR *)&viewer.position.vx, 256, 1000);
         }
     } else {
         d = func_8003ebfc(pos[0], pos[1], pos[2], range, kind);
@@ -1150,9 +1150,9 @@ void func_8003e5e8(u16 *damage, u16 effect, long *pos, int min, int range, int k
 ADDRESS(0x8003e734, 0x60)
 void func_8003e734(VECTOR *pos, SVECTOR *rot)
 {
-    pos->vx = viewer.x;
-    pos->vz = viewer.z;
-    pos->vy = viewer.y + viewer.unk2CE + viewer.unk2D2 - 1600;
+    pos->vx = viewer.position.vx;
+    pos->vz = viewer.position.vz;
+    pos->vy = viewer.position.vy + viewer.unk2CE + viewer.unk2D2 - 1600;
     rot->vx = viewer.unk268;
     rot->vy = viewer.unk26A;
     rot->vz = viewer.unk26C;
@@ -1225,9 +1225,9 @@ void func_8003e874(void)
     viewer.unk278.vx = 0;
     viewer.unk278.vy = 3072;
     viewer.unk278.vz = 0;
-    viewer.x = 0x3d000;
-    viewer.y = 0x405c0;
-    viewer.z = 0x3f000;
+    viewer.position.vx = 0x3d000;
+    viewer.position.vy = 0x405c0;
+    viewer.position.vz = 0x3f000;
     viewer.unk1CC = viewer.unk1CE = viewer.unk1D0 = 0;
     func_8003e794();
     func_800595d4();
@@ -1296,7 +1296,7 @@ int func_8003eb34(VECTOR *pos, int angle, int range, int limit)
 
     d = func_8003ebfc(pos->vx, 0xffff, pos->vz, range, 0);
     if (d != -1) {
-        a = (func_8004a1b4(viewer.x - pos->vx, viewer.z - pos->vz) - angle) & 0xfff;
+        a = (func_8004a1b4(viewer.position.vx - pos->vx, viewer.position.vz - pos->vz) - angle) & 0xfff;
         if (a > 2048) {
             a = 4096 - a;
         }
@@ -1310,7 +1310,7 @@ int func_8003eb34(VECTOR *pos, int angle, int range, int limit)
 ADDRESS(0x8003ebfc, 0x50)
 int func_8003ebfc(int x, int y, int z, int range, int kind)
 {
-    return func_8004a580((VECTOR *)&viewer.x, x, y, z, range, 1000, kind);
+    return func_8004a580((VECTOR *)&viewer.position.vx, x, y, z, range, 1000, kind);
 }
 
 ADDRESS(0x8003ec4c, 0x10)
@@ -1594,9 +1594,9 @@ int func_8003f704(int length, VECTOR *pos, SVECTOR *dir, SVECTOR *rot, int slot)
         gte_ldv0(&viewer.unk160[slot]);
         gte_rtv0();
         gte_stlvnl(pos);
-        pos->vx += viewer.x;
-        pos->vy += viewer.y;
-        pos->vz += viewer.z;
+        pos->vx += viewer.position.vx;
+        pos->vy += viewer.position.vy;
+        pos->vz += viewer.position.vz;
     }
     if (rot) {
         if (dir) {
@@ -1752,9 +1752,9 @@ void func_8003f910(int kind, int slot, ...)
         dir.vy = pos.vy;
         dir.vz = pos.vz;
         rot = viewer.unk270;
-        sp->model_t[0] = viewer.x;
-        sp->model_t[1] = viewer.y;
-        sp->model_t[2] = viewer.z;
+        sp->model_t[0] = viewer.position.vx;
+        sp->model_t[1] = viewer.position.vy;
+        sp->model_t[2] = viewer.position.vz;
         RotMatrixZYX(&rot, PLAYER_MATRIX(sp));
         gte_SetRotMatrix(PLAYER_MATRIX(sp));
         gte_SetTransMatrix(PLAYER_MATRIX(sp));
@@ -1775,9 +1775,9 @@ void func_8003f910(int kind, int slot, ...)
         dir.vy = pos2.vy;
         dir.vz = pos2.vz;
         rot = viewer.unk270;
-        sp->model_t[0] = viewer.x;
-        sp->model_t[1] = viewer.y;
-        sp->model_t[2] = viewer.z;
+        sp->model_t[0] = viewer.position.vx;
+        sp->model_t[1] = viewer.position.vy;
+        sp->model_t[2] = viewer.position.vz;
         RotMatrixZYX(&rot, PLAYER_MATRIX(sp));
         gte_SetRotMatrix(PLAYER_MATRIX(sp));
         gte_SetTransMatrix(PLAYER_MATRIX(sp));
@@ -1915,9 +1915,9 @@ void func_800402ac(u8 hand)
             v.vz /= 4;
             d = 0xffff;
             i = 4;
-            p.vx = viewer.x;
-            p.vy = viewer.y;
-            p.vz = viewer.z;
+            p.vx = viewer.position.vx;
+            p.vy = viewer.position.vy;
+            p.vz = viewer.position.vz;
             while (i--) {
                 p.vx += v.vx;
                 p.vy += v.vy;
@@ -2224,10 +2224,10 @@ void func_80041150(int angle, int speed)
     tries = 0;
     vel.vx = rcos(angle) * speed / 4096;
     vel.vz = rsin(angle) * speed / 4096;
-    vis_lists.unk4.vx = viewer.x;
-    vis_lists.unk4.vy = viewer.y;
-    vis_lists.unk4.vz = viewer.z;
-    vis_lists.unk4.pad = viewer.unk254;
+    vis_lists.unk4.vx = viewer.position.vx;
+    vis_lists.unk4.vy = viewer.position.vy;
+    vis_lists.unk4.vz = viewer.position.vz;
+    vis_lists.unk4.pad = viewer.position.pad;
     vis_lists.unk1C = 256;
     vis_lists.unk1E = 1600;
     vel.vy = viewer.unk2D4;
@@ -2245,9 +2245,9 @@ loop:
     hits = func_80049544(&vis_lists);
     if (hits == 0) {
     move:
-        viewer.x += vel.vx;
-        viewer.y += vel.vy;
-        viewer.z += vel.vz;
+        viewer.position.vx += vel.vx;
+        viewer.position.vy += vel.vy;
+        viewer.position.vz += vel.vz;
         goto done;
     }
     if (tries++ >= 3) {
@@ -2281,10 +2281,10 @@ loop:
         hits = speed * rcos(angle - (ang + 1024)) / 4096;
         vis_lists.unk44C6 = hits;
     } else if (hits & 0x50) {
-        func_800492f4((VECTOR *)&viewer.x);
-        d.vx = viewer.x - vis_lists.unkAC.vx;
+        func_800492f4((VECTOR *)&viewer.position.vx);
+        d.vx = viewer.position.vx - vis_lists.unkAC.vx;
         d.vy = 0;
-        d.vz = viewer.z - vis_lists.unkAC.vz;
+        d.vz = viewer.position.vz - vis_lists.unkAC.vz;
         VectorNormalS(&d, &n);
         dy = vis_lists.unkBC - vis_lists.unk44C0 - 256;
         if (hits & 0x10) {
@@ -2348,10 +2348,10 @@ void func_8004162c(void)
     if (viewer.unk2C8 == 0 || viewer.unk21E != 0) {
         vel.vx = viewer.unk1CC;
         vel.vz = viewer.unk1D0;
-        vis_lists.unk4.vx = viewer.x;
-        vis_lists.unk4.vy = viewer.y;
-        vis_lists.unk4.vz = viewer.z;
-        vis_lists.unk4.pad = viewer.unk254;
+        vis_lists.unk4.vx = viewer.position.vx;
+        vis_lists.unk4.vy = viewer.position.vy;
+        vis_lists.unk4.vz = viewer.position.vz;
+        vis_lists.unk4.pad = viewer.position.pad;
         vis_lists.unk1C = 256;
         vis_lists.unk1E = 1600;
         vel.vy = viewer.unk2D4;
@@ -2370,15 +2370,15 @@ void func_8004162c(void)
         hits = func_80049544(&vis_lists);
         if (hits == 0) {
         move:
-            viewer.x += vel.vx;
-            viewer.y += vel.vy;
-            viewer.z += vel.vz;
+            viewer.position.vx += vel.vx;
+            viewer.position.vy += vel.vy;
+            viewer.position.vz += vel.vz;
             goto done;
         }
         if (hits & 1) {
-            viewer.x += vel.vx;
-            viewer.y += vel.vy;
-            viewer.z += vel.vz;
+            viewer.position.vx += vel.vx;
+            viewer.position.vy += vel.vy;
+            viewer.position.vz += vel.vz;
         }
         if (hits & 2) {
             vel.vx = (1 - (vis_lists.unk3C - 256)) * vis_lists.unk8C / 4096;
@@ -2823,7 +2823,7 @@ void func_80042b9c(void)
     if (mode != 4 && (DAT_801cd180.unk4 & DAT_801cd180.unk22[10]) && !DAT_801cd180.unk12) {
         DAT_801cd180.unk4 &= ~DAT_801cd180.unk22[10];
         if (mode == 0)
-            func_80055374(&viewer.x, &viewer.unk278);
+            func_80055374(&viewer.position.vx, &viewer.unk278);
     }
 }
 

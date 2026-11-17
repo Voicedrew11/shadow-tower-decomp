@@ -27,7 +27,7 @@ void func_801ed510(void)
     Vis212 *e = &vis_table_a.entries[32];
     Vis192 *r = &vis_table_a.unk3500[5];
 
-    if (DAT_801cba08.unk1448[r->unk09] == 0 && viewer.z > 0x4c000) {
+    if (DAT_801cba08.unk1448[r->unk09] == 0 && viewer.position.vz > 0x4c000) {
         viewer.unk218 = 5;
         fdat_801ed388(e, 0, 0);
         e->unk64 = 1;

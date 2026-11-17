@@ -58,13 +58,13 @@ int func_80016554(void)
     a2 = z2 - z0;
     b2 = x2 - x0;
     c2 = -a2 * x0 + b2 * z0;
-    px = (sp->unkE0 - viewer.x) / 2048 + cx;
-    pz = (sp->unkE8 - viewer.z) / 2048 + cz;
+    px = (sp->unkE0 - viewer.position.vx) / 2048 + cx;
+    pz = (sp->unkE8 - viewer.position.vz) / 2048 + cz;
     e1 = a1 * px - b1 * pz + c1;
     e2 = a2 * px - b2 * pz + c2;
     if (e1 > 0 || e2 < 0)
         return 0;
     rsin(pitch);
-    py = (sp->unkE4 - viewer.y) / 2048;
+    py = (sp->unkE4 - viewer.position.vy) / 2048;
     return (px - cx) * (px - cx) + (pz - cz) * (pz - cz) + py * py < 145;
 }

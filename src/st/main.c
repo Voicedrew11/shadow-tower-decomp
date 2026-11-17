@@ -128,9 +128,9 @@ void func_80014544(void)
     cursor = buf;
     area_state.unk4 = area_state.unk5 = area_state.unk6 = area_state.unk7 =
         area_state.unk8 = area_state.area = func_80014450(&cursor, 3);
-    viewer.x = (func_80014450(&cursor, 7) + 64) << 12;
-    viewer.y = ((func_80014450(&cursor, 7) + 64) << 12) - 1600;
-    viewer.z = (func_80014450(&cursor, 7) + 64) << 12;
+    viewer.position.vx = (func_80014450(&cursor, 7) + 64) << 12;
+    viewer.position.vy = ((func_80014450(&cursor, 7) + 64) << 12) - 1600;
+    viewer.position.vz = (func_80014450(&cursor, 7) + 64) << 12;
     x = func_80014450(&cursor, 5);
     y = func_80014450(&cursor, 5);
     for (;;) {

@@ -78,9 +78,9 @@ int effect_home(int limit, int scale, int turn, int attack, int height, int near
         dist = func_8003eb34(&e->unk20, e->unk30.vy, 24000, 4096);
         if (dist == -1)
             goto move;
-        target.vx = viewer.x;
-        target.vy = viewer.y;
-        target.vz = viewer.z;
+        target.vx = viewer.position.vx;
+        target.vy = viewer.position.vy;
+        target.vz = viewer.position.vz;
         goto aim;
     }
 move:

@@ -61,9 +61,9 @@ void func_801edd38(short id)
     VisRequest req;
 
     if (id == 0x12a) {
-        p.vx = viewer.x;
-        p.vy = viewer.y + 1600;
-        p.vz = viewer.z;
+        p.vx = viewer.position.vx;
+        p.vy = viewer.position.vy + 1600;
+        p.vz = viewer.position.vz;
         req.unk0 = 0;
         req.unk4 = p;
         req.unk1C = 1056;

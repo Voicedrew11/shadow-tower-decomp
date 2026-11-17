@@ -51,14 +51,14 @@ void func_801ed9cc(int gate)
     func_800500ac(2, 0, 0x1000, 0x100);
     func_8004e2d8();
     if (gate == 0) {
-        viewer.x = 0x50800;
-        viewer.y = 0x425c0;
-        viewer.z = 0x3bc00;
+        viewer.position.vx = 0x50800;
+        viewer.position.vy = 0x425c0;
+        viewer.position.vz = 0x3bc00;
         viewer.unk278.vy = 0x800;
     } else {
-        viewer.x = 0x41800;
-        viewer.y = 0x401c0;
-        viewer.z = 0x37000;
+        viewer.position.vx = 0x41800;
+        viewer.position.vy = 0x401c0;
+        viewer.position.vz = 0x37000;
         viewer.unk278.vy = 0;
     }
     viewer.unk218 = 0;

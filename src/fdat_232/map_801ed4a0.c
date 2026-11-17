@@ -80,7 +80,7 @@ void func_801ed59c(void)
         viewer.unk182 = 0;
     }
     n = DAT_801cba08.unk1448[r->unk09];
-    if (n == 1 && viewer.x > 0x4c000 && viewer.z > 0x55000) {
+    if (n == 1 && viewer.position.vx > 0x4c000 && viewer.position.vz > 0x55000) {
         viewer.unk218 = 5;
         fdat_801ed388(e, 0, 0);
         e->unk64 = n;

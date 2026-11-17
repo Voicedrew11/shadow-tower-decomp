@@ -1307,7 +1307,7 @@ void world_draw(void)
     } else {
         gte_SetFarColor(5, 5, 5);
     }
-    vis_build_visible((u8 *)&viewer.x);
+    vis_build_visible((u8 *)&viewer.position.vx);
     vis_build_planes();
     vis_cull_by_range();
     gte_SetRotMatrix(&world_state.unk1ECE8);

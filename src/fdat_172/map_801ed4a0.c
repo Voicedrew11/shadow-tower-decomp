@@ -114,7 +114,7 @@ void func_801ed614(void)
     }
     if (e48->unk2C == 0)
         DAT_801cba08.unk1440.word |= 0x20000000;
-    if (DAT_801cba08.unk1448[r14->unk09] == 0 && viewer.z > 0x4a000) {
+    if (DAT_801cba08.unk1448[r14->unk09] == 0 && viewer.position.vz > 0x4a000) {
         viewer.unk218 = 5;
         fdat_801ed388(e33, 0, 0);
         e33->unk64 = 1;

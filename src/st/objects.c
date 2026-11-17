@@ -178,12 +178,12 @@ void func_800246e4(void)
                 else
                     e->unk50 = now + e->unk4A.snd.unk4E * 6;
                 range = e->unk48 << 11;
-                d = viewer.x - (e->unk24.vx + range);
+                d = viewer.position.vx - (e->unk24.vx + range);
                 if (d < 0)
                     d = -d;
                 d = range - d;
                 range = e->unk49 << 11;
-                dz = viewer.z - (e->unk24.vz + range);
+                dz = viewer.position.vz - (e->unk24.vz + range);
                 if (dz < 0)
                     dz = -dz;
                 dz = range - dz;
@@ -198,7 +198,7 @@ void func_800246e4(void)
                     volume = e->unk4A.snd.unk4B * d / volume;
                 }
                 if (e->unk4A.snd.unk4D & 1) {
-                    int dy = viewer.y - e->unk24.vy;
+                    int dy = viewer.position.vy - e->unk24.vy;
 
                     if (dy < 0)
                         dy = -dy;
@@ -237,7 +237,7 @@ void func_800246e4(void)
                 else
                     volume = e->unk4A.snd.unk4B;
                 if (e->unk4A.snd.unk4D & 1) {
-                    int dy = viewer.y - e->unk24.vy;
+                    int dy = viewer.position.vy - e->unk24.vy;
 
                     if (dy < 0)
                         dy = -dy;

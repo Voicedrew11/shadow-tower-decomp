@@ -40,10 +40,10 @@ void world_transform_parts(VECTOR *trans)
         sp->x = rec->unk08 << 12;
         sp->y = (rec->unk09 << 12) + ((rec->unk0b - 128) << 7);
         sp->part_shift = 0;
-        sp->x = sp->x - viewer.x;
+        sp->x = sp->x - viewer.position.vx;
         sp->z = rec->unk0a << 12;
-        sp->y = sp->y - (viewer.y + viewer.unk2CE + viewer.unk2D2);
-        sp->z = sp->z - viewer.z;
+        sp->y = sp->y - (viewer.position.vy + viewer.unk2CE + viewer.unk2D2);
+        sp->z = sp->z - viewer.position.vz;
         while (sp->x > 32767 || sp->x < -32768 || sp->y > 32767 || sp->y < -32768
                || sp->z > 32767 || sp->z < -32768) {
             sp->x >>= 1;

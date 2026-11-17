@@ -47,7 +47,7 @@ void func_80044ee8(void)
 ADDRESS(0x80045010, 0x34)
 void func_80045010(int dx, int dy, int dz)
 {
-    viewer.x += dx;
-    viewer.z += dz;
-    viewer.y += dy;
+    viewer.position.vx += dx;
+    viewer.position.vz += dz;
+    viewer.position.vy += dy;
 }

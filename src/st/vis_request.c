@@ -28,10 +28,10 @@ void func_800492f4(VECTOR *pos)
     int dx, dz;
 
     if (v->unk74 & 0x80) {
-        dx = pos->vx - viewer.x;
-        dz = pos->vz - viewer.z;
+        dx = pos->vx - viewer.position.vx;
+        dz = pos->vz - viewer.position.vz;
         v->unkBC = SquareRoot0(dx * dx + dz * dz);
-        v->unkAC = *(VECTOR *)&viewer.x;
+        v->unkAC = *(VECTOR *)&viewer.position.vx;
         v->unk44C0 = 256;
         v->unk44C2 = 1000;
     } else if (v->unk5C != -1) {

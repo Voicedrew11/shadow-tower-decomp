@@ -7,6 +7,7 @@
 #define ST_DATA_H
 
 #include <kf/lib/types.h>
+#include <kf/lib/offsetof.h>
 #include <sys/types.h>
 #include <LIBGTE.H>
 #include <LIBCD.H>
@@ -189,10 +190,7 @@ typedef struct {
     u32 unk23C;
     u8 unk240[4];
     s32 unk244;
-    long x;              /* 0x248 */
-    long y;              /* 0x24c */
-    long z;              /* 0x250 */
-    s32 unk254;          /* 0x254: copied with x, y, z as a VECTOR's pad (func_80041150) */
+    VECTOR position;     /* 0x248..0x257: includes the copied pad word */
     u8 unk258[8];
     SVECTOR unk260;      /* 0x260: motion (func_8004cc70 leads targets by it) */
     short unk268;        /* 0x268: pitch in func_80016554 */
@@ -236,6 +234,9 @@ typedef struct {
     s32 unk2F0;
     s32 unk2F4;          /* 0x2f4: player_update_shake's countdown, -1 when idle */
 } Viewer;
+
+typedef char ViewerPositionAt0x248[offsetof(Viewer, position) == 0x248 ? 1 : -1];
+typedef char ViewerPositionEndsAt0x258[offsetof(Viewer, unk258) == 0x258 ? 1 : -1];
 
 extern Viewer viewer;
 

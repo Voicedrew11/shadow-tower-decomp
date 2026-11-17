@@ -251,8 +251,8 @@ void func_8004fc84(void)
 ADDRESS(0x8004fc94, 0x94)
 int func_8004fc94(int x, int z, int w, int d, int y)
 {
-    int cx = (viewer.x + 0x800) >> 12;
-    int cz = (viewer.z + 0x800) >> 12;
+    int cx = (viewer.position.vx + 0x800) >> 12;
+    int cz = (viewer.position.vz + 0x800) >> 12;
 
     if (cx < x || cx >= x + w)
         return 0;
@@ -260,7 +260,7 @@ int func_8004fc94(int x, int z, int w, int d, int y)
         return 0;
     if (cz >= z + d)
         return 0;
-    if (y == 0x8000 || (y >= viewer.y && viewer.y >= y - 0x1000))
+    if (y == 0x8000 || (y >= viewer.position.vy && viewer.position.vy >= y - 0x1000))
         return 1;
     return 0;
 }
@@ -269,8 +269,8 @@ int func_8004fc94(int x, int z, int w, int d, int y)
 ADDRESS(0x8004fd28, 0xa8)
 int func_8004fd28(int x, int z, int w, int d, int y)
 {
-    int px = viewer.x + w / 2;
-    int pz = viewer.z + d / 2;
+    int px = viewer.position.vx + w / 2;
+    int pz = viewer.position.vz + d / 2;
 
     if (px < x)
         return 0;
@@ -280,7 +280,7 @@ int func_8004fd28(int x, int z, int w, int d, int y)
         return 0;
     if (pz >= z + d)
         return 0;
-    if (y == 0x8000 || (y >= viewer.y && viewer.y >= y - 0x1000))
+    if (y == 0x8000 || (y >= viewer.position.vy && viewer.position.vy >= y - 0x1000))
         return 1;
     return 0;
 }
@@ -390,9 +390,9 @@ void func_80050170(int dx, int dy, int dz)
     u16 i;
     u16 j;
 
-    viewer.x += dx;
-    viewer.z += dz;
-    viewer.y += dy;
+    viewer.position.vx += dx;
+    viewer.position.vz += dz;
+    viewer.position.vy += dy;
     i = 128;
     while (i--) {
         if (f->unk0 != ST_EFFECT_FREE && (f->unk6 & 0xc) != 0xc) {

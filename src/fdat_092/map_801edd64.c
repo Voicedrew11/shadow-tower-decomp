@@ -35,7 +35,7 @@ void func_801ede14(void)
  * Drops table C item 5 (kind 48) at the viewer once its model is loaded.
  * Not exact: retail copies the viewer position as a VECTOR member of the
  * viewer (offsets 0x248.. from &viewer), the fdat_801ecfc4 residue; this
- * build copies through a cast (&viewer.x + 0..).
+ * build copies through a cast (&viewer.position.vx + 0..).
  */
 ADDRESS(0x801edea4, 0xb0)
 void func_801edea4(void)
@@ -44,7 +44,7 @@ void func_801edea4(void)
     Vis48 *item = &vis_table_c.entries[5];
     Vis44 *kind = &vis_table_c.unk0118[48];
 
-    item->unk08 = *(VECTOR *)&viewer.x;
+    item->unk08 = *(VECTOR *)&viewer.position.vx;
     item->unk22 = 2;
     item->unk2D -= 3;
     for (;;) {

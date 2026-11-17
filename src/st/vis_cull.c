@@ -95,8 +95,8 @@ int vis_measure_position(void)
     int ox;
     int oz;
 
-    x = (sp->x - cam->x) / 2048 + (ox = sp->offset_x);
-    z = (sp->z - cam->z) / 2048 + (oz = sp->offset_z);
+    x = (sp->x - cam->position.vx) / 2048 + (ox = sp->offset_x);
+    z = (sp->z - cam->position.vz) / 2048 + (oz = sp->offset_z);
     if (!sp->no_plane_test) {
         a = sp->plane[0] * x - sp->plane[2] * z + sp->plane[4];
         c = sp->plane[1] * x - sp->plane[3] * z + sp->plane[5];
@@ -105,7 +105,7 @@ int vis_measure_position(void)
         }
     }
     sp->unk1EC = -(sp->unk208 * 8) >> 12;
-    y = (sp->y - cam->y) / 2048;
+    y = (sp->y - cam->position.vy) / 2048;
     return (x - ox) * (x - ox) + (z - oz) * (z - oz) + y * y;
 }
 

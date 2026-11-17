@@ -47,9 +47,9 @@ void func_801edea0(void)
     func_80057c54();
     func_800500ac(2, 0, 0x1000, 0x100);
     func_8004e2d8();
-    viewer.y = 0x3f9c0;
-    viewer.x = 0x45800;
-    viewer.z = 0x40000;
+    viewer.position.vy = 0x3f9c0;
+    viewer.position.vx = 0x45800;
+    viewer.position.vz = 0x40000;
     viewer.unk278.vy = 0;
     viewer.unk278.vx = 0;
     viewer.unk218 = 0;

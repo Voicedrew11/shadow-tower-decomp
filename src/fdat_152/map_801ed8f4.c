@@ -43,12 +43,12 @@ void func_801ed8f4(void)
         return;
     speed = e->unkB0 < 0 ? -e->unkB0 : e->unkB0;
     if (e->unk0F == 0x17)
-        *(s32 *)&e->unk48 = viewer.y - 0x640;
+        *(s32 *)&e->unk48 = viewer.position.vy - 0x640;
     if (e->unk0F == 0x17) {
         e->unk08 = s->unk01;
         fdat_801eb814(e->unk5C, s->arg.s[1] * speed >> 12);
         fdat_801eb880(e->unk8E + s->arg.u[2] - 0x400, s->arg.s[0] * speed >> 12);
-        fdat_801eb8f4(viewer.y + s->arg.s[4], s->arg.s[3] * speed >> 12);
+        fdat_801eb8f4(viewer.position.vy + s->arg.s[4], s->arg.s[3] * speed >> 12);
         e->unk1A = 0xf0;
     } else {
         fdat_801ebec4(e);

@@ -90,7 +90,7 @@ void fdat_801ebec4(Vis212 *e)
         } else if (FDAT_PASSES(e, s->arg.u[2]) || FDAT_PASSES(e, s->arg.u[3])
                    || FDAT_PASSES(e, s->arg.u[4])) {
             if (e->unk40 >= e->unk2E + s->arg.u[0] + 768
-                || e->unk74.vy - e->unk30 >= viewer.y + 1600 || viewer.y >= e->unk74.vy)
+                || e->unk74.vy - e->unk30 >= viewer.position.vy + 1600 || viewer.position.vy >= e->unk74.vy)
                 e->unk62 = 1;
             else if ((short)e->unk58 > s->arg.u[1] || (short)e->unk58 < -s->arg.u[1])
                 e->unk62 = 2;
@@ -123,7 +123,7 @@ void fdat_801ebec4(Vis212 *e)
         break;
     }
     if (e->unk0E == 4)
-        fdat_801eb8f4(viewer.y, 16);
+        fdat_801eb8f4(viewer.position.vy, 16);
 }
 
 /*
