@@ -32,10 +32,6 @@ void func_8002efcc(void)
 /*
  * Opens archive `archive` from the \ST\ directory: records its extent and
  * loads its start-sector table.
- *
- * Not exact (size-exact): retail stores a->sectors after loading
- * func_8002e660's count and source arguments; this build stores it first
- * (the residue ST.EXE's func_80016294 shows too).
  */
 ADDRESS(0x8002f014, 0xe0)
 void func_8002f014(u16 archive, char *name)
@@ -47,6 +43,9 @@ void func_8002f014(u16 archive, char *name)
     CdlFILE file;
     char path[64];
     VsArchive *a = &DAT_801a4590.archives[archive];
+    u16 *sectors;
+    int count;
+    u16 *source;
 
     strcpy(path, "\\ST\\");
     strcat(path, name);
@@ -56,8 +55,11 @@ void func_8002f014(u16 archive, char *name)
     a->file.pos = file.pos;
     a->file.size = file.size;
     func_8002ee54((u_long *)&header, &a->file, 2048);
-    func_8002e660(a->sectors = func_8002e6d4((header.count + 1) * 2), header.sectors,
-                  header.count + 1);
+    sectors = func_8002e6d4((header.count + 1) * 2);
+    count = header.count + 1;
+    source = header.sectors;
+    a->sectors = sectors;
+    func_8002e660(sectors, source, count);
 }
 
 /* Resets the CD request ring and callbacks, then stops the drive. */
