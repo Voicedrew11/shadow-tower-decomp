@@ -48,8 +48,9 @@ SDATA(0x80063260, 0x10)
 
 /* Draws glyph `c` at (x, y): half-width codes below the split, full-width
  * codes after it. */
-/* Not exact: retail keeps c and x in $t1/$t0 from entry, zero-extends the
- * half width before the u multiply and only masks x at the clip compare. */
+/* Not exact: entry copies and layout constants use different registers;
+ * the drawing x coordinate is normalized at entry, and the packet-base
+ * setup follows the multiply rather than the glyph-split branch. */
 ADDRESS(0x8001d3f0, 0x4c8)
 void func_8001d3f0(u16 c, u16 x, u16 y, CVECTOR *color)
 {
@@ -61,6 +62,7 @@ void func_8001d3f0(u16 c, u16 x, u16 y, CVECTOR *color)
     u16 split;
     u16 u, v, q, r;
     int n;
+    int draw_x = x;
 
     if (VS_MENU_SCRATCH->unk1D5 == 0) {
         ch = 12;
@@ -80,23 +82,24 @@ void func_8001d3f0(u16 c, u16 x, u16 y, CVECTOR *color)
         ch = qh;
     }
     if (c < split) {
-        r = c % (cols * 2);
+        int remainder = c % (cols * 2);
+
         q = c / (cols * 2);
-        u = r * half;
+        u = remainder * half;
         v = ch * q;
         NEW_PRIM(buf, p, POLY_FT4);
         setUV4(p, u, v, half + u, v, u, ch + v, half + u, ch + v);
         if (DAT_80063398) {
-            x -= (DAT_80063378 == 1 ? DAT_8006333e : DAT_80063340) * (half + 1);
+            draw_x -= (DAT_80063378 == 1 ? DAT_8006333e : DAT_80063340) * (half + 1);
             DAT_80063394 += half + 1;
-            if (DAT_80063392 < x) {
+            if (DAT_80063392 < (u16)draw_x) {
                 DAT_800633a0++;
                 return;
             }
-            if (x < DAT_80063390)
+            if ((u16)draw_x < DAT_80063390)
                 return;
         }
-        setXY4(p, x, y, x + half, y, x, y + qh, x + half, y + qh);
+        setXY4(p, draw_x, y, draw_x + half, y, draw_x, y + qh, draw_x + half, y + qh);
         rgb = *color;
         rgb.r += 8;
         rgb.g += 8;
@@ -110,16 +113,16 @@ void func_8001d3f0(u16 c, u16 x, u16 y, CVECTOR *color)
         NEW_PRIM(buf, p, POLY_FT4);
         setUV4(p, u, v, fw + u, v, u, ch + v, fw + u, ch + v);
         if (DAT_80063398) {
-            x -= (DAT_80063378 == 1 ? DAT_8006333e : DAT_80063340) * (half + 1);
+            draw_x -= (DAT_80063378 == 1 ? DAT_8006333e : DAT_80063340) * (half + 1);
             DAT_80063394 += fw;
-            if (DAT_80063392 < x) {
+            if (DAT_80063392 < (u16)draw_x) {
                 DAT_800633a0++;
                 return;
             }
-            if (x < DAT_80063390)
+            if ((u16)draw_x < DAT_80063390)
                 return;
         }
-        setXY4(p, x, y, x + qw, y, x, y + qh, x + qw, y + qh);
+        setXY4(p, draw_x, y, draw_x + qw, y, draw_x, y + qh, draw_x + qw, y + qh);
         rgb = *color;
         rgb.r -= 12;
         rgb.g -= 6;
@@ -327,15 +330,16 @@ void func_8001dc48(u32 num, u16 x, u16 y, CVECTOR *color)
 
 /* Draws a rectangle outline: bars `border & 0xff` high at the top and
  * bottom and `border >> 8` wide at the sides. */
-/* Not exact: retail keeps `color` in $t4 and `border >> 8` in $t3 (swapped
- * here) and computes the latter before the overflow test. */
+/* Not exact: color and the border width use different registers; the
+ * width shift follows the packet-buffer load, and the bottom bar loads
+ * height before y. */
 ADDRESS(0x8001de8c, 0x54c)
 void func_8001de8c(RECT *r, CVECTOR *color, u16 border, u16 semi)
 {
     POLY_F4 *p;
     StPacketBuffer *buf;
-    int h = border & 0xff;
     int w = border >> 8;
+    int h = border & 0xff;
 
     NEW_PRIM(buf, p, POLY_F4);
     FILL_F4(p, semi, r->x, r->y, r->x + r->w, r->y, r->x, r->y + h, r->x + r->w, r->y + h,
