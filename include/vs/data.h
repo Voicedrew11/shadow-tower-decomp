@@ -123,7 +123,9 @@ extern s32 DAT_80063308;
 /* A fighter's attack record: its damage per kind (32 bytes, the stride
  * func_8002e314 indexes). */
 typedef struct {
-    u8 unk0[14];
+    u8 unk0[10];
+    s16 unkA;                /* 0x0a: the frame it strikes on (func_80031478) */
+    u16 unkC;                /* 0x0c: its cost to the second gauge */
     u16 damage[9];           /* 0x0e */
 } VsAttack;
 
@@ -134,6 +136,30 @@ typedef struct {
     s16 kind;
     u16 amount;
 } VsHit;
+
+/* A fighter's 70-byte hit record for one attack animation
+ * (func_80031478): up to three hits, each landing on its frame within its
+ * reach and arc, and up to three lunges that move the fighter between two
+ * frames. */
+typedef struct {
+    u8 count;
+    u8 unk1;
+    struct {
+        s16 frame;
+        s16 range;           /* added to the fighter's hit radius */
+        s16 arc;
+        VsHit hit;
+    } hits[3];               /* 0x02 */
+    u8 count2;               /* 0x32 */
+    u8 unk33;
+    struct {
+        s16 from;
+        s16 to;
+        s16 speed;
+    } moves[3];              /* 0x34 */
+} VsHitRecord;
+
+typedef char VsHitRecordSize[sizeof(VsHitRecord) == 70 ? 1 : -1];
 
 /* A fighter's animation sound effects (func_80013c5c), a view of the first
  * 0x64 bytes of its VsFighterData block: keys[i].frame is the animation id
@@ -170,11 +196,13 @@ typedef struct {
  */
 typedef struct {
     VsAnimRef unk0[13];      /* 0x000: animations (count WIP) */
-    u8 unk34[0x14a - 0x34];
+    u8 unk34[0x78 - 0x34];
+    VsHitRecord unk78[3];    /* 0x078: hit records of the three combo animations (func_80031478) */
     VsAttack unk14A[3];      /* 0x14a: attacks (count WIP) */
     s16 unk1AA;              /* 0x1aa: movement kind */
     s16 unk1AC;              /* 0x1ac: walking speed */
-    u8 unk1AE[0x1b4 - 0x1ae];
+    s16 unk1AE;              /* 0x1ae: turning speed */
+    u8 unk1B0[0x1b4 - 0x1b0];
     s16 unk1B4;              /* 0x1b4: hit radius */
     s16 unk1B6;              /* 0x1b6: height */
     s16 unk1B8;              /* 0x1b8: full hit points */
@@ -211,7 +239,7 @@ typedef struct VsFighter {
     s16 unk4DF10;            /* 0x4df10: model kind: 1 several parts, 2 one part */
     s16 unk4DF12;            /* 0x4df12: model brightness; 128 and up: the default colour (func_80025204) */
     s16 unk4DF14;            /* 0x4df14: state when an attack was blocked */
-    u8 unk4DF16[0x4df18 - 0x4df16];
+    s16 unk4DF16;            /* 0x4df16: hits left in the current attack (func_80031478) */
     VsFighterData unk4DF18;  /* 0x4df18: the fighter's data block (its first 0x64 bytes: VsFighterSfx) */
 } VsFighter;
 

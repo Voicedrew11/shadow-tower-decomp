@@ -34,14 +34,20 @@ void func_8002ad40(int bright)
 
     for (n = 0; n < 2; n++) {
         s = VS_ITEM_NAME(DAT_801624b8[n][DAT_80063338]);
+        if (*s == 0xffff || *s == 0) {
+            line = 0;
+            continue;
+        }
         x3 = 212;
         x2 = 201;
         x1 = 31;
         x0 = 20;
-        while (*s != 0xffff && *s != 0 && *s != 1) {
+        do {
             POLY_FT4 *p;
             int c;
 
+            if (*s == 1)
+                break;
             c = *s - 2;
             if (c == 47) {
                 line = 1;
@@ -76,7 +82,7 @@ void func_8002ad40(int bright)
             x2 += 11;
             x1 += 11;
             x0 += 11;
-        }
+        } while (*s != 0xffff && *s != 0);
         line = 0;
     }
 }
