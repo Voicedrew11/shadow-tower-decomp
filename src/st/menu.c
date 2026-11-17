@@ -827,10 +827,10 @@ void func_8005aa80(void)
  * and an item for it from its list (unk2C7: the list kind; 10 is the
  * magic grid), recomputing the figures as the choice changes.
  *
- * Not exact: the initial archive/buffer address lifetimes and several
- * switch-arm load orders differ. Retail also saves a signed full-width row
- * in the magic-grid arm; the unsigned snapshot here remains unresolved.
- * The three switch tables consequently retain differing .rdata addends.
+ * Not exact (0x38 bytes short): archive/buffer lifetimes and several case
+ * joins/load orders differ. The saved magic-page row can be -1 and must
+ * stay signed across frame callbacks; file arithmetic stays promoted until
+ * the call boundary. The switch-table addends still differ from retail.
  */
 ADDRESS(0x8005ad00, 0x1afc)
 void func_8005ad00(void)
@@ -849,7 +849,7 @@ void func_8005ad00(void)
     int file;
     int debounce;
     int prev;
-    u16 row;
+    int row;
     u16 cur;
     u8 kind;
     int n;
