@@ -4333,24 +4333,28 @@ int func_80063078(void)
 /*
  * The pause screen: runs func_80031d50 until button 8, keeping the play
  * clock (viewer.unk33/unk34) still.
- * Not exact (89.4%, 16 bytes long): this build rotates the wait loop
- * (its test duplicated at the bottom); retail tests at the top and jumps
- * back, with the button word's address in s0.
+ * The controller owner becomes live after the draw setup. The explicit
+ * top-tested wait keeps the button read before each pair of frame calls.
  */
 ADDRESS(0x800631ac, 0xb4)
 void func_800631ac(void)
 {
     s32 seconds = viewer.unk34;
     u8 frames = viewer.unk33;
+    Data801cd180 *pad;
 
     func_80015ad4();
     func_80058c04();
     func_80057a3c();
     DrawSync(0);
-    while (!(DAT_801cd180.unk4 & 8)) {
-        func_800164b4();
-        func_80031d50();
-    }
+    pad = &DAT_801cd180;
+pause_wait:
+    if (pad->unk4 & 8)
+        goto pause_done;
+    func_800164b4();
+    func_80031d50();
+    goto pause_wait;
+pause_done:
     func_80057a3c();
     func_80058c24();
     viewer.unk34 = seconds;
