@@ -4,8 +4,7 @@
  * reader follow (WIP module). The unit is -G8: the "FN." file name is an
  * .sdata literal, and the heap words, defined elsewhere, get the absolute
  * lui pairs ASPSX gives small data it does not own. It ends at
- * func_80014544, which is not exact, so that the game loop after it keeps
- * its retail offsets in its own unit (src/st/loop.c).
+ * func_80014544; the game loop follows in its own unit (src/st/loop.c).
  */
 #include <kf/lib/address.h>
 #include <kf/lib/types.h>
@@ -103,10 +102,6 @@ int func_80014450(u8 **cursor, int digits)
  * Loads the start-up table file FN.: six bytes of area_state, three
  * viewer positions and two optional values, then id/value rows until
  * 999. Rows 970..990 fill viewer.unk38; other ids set an id's count.
- * Not exact: GCC keeps &viewer in $s2 across the row loop where retail
- * keeps the constant 1 of the bit masks there and rematerializes the address
- * (first divergence at +0x130, `li s2,1`); the clear_flags block also
- * addresses DAT_801cceb0[0] from a new base. Retail is 0x4ec bytes.
  */
 ADDRESS(0x80014544, 0x4ec)
 void func_80014544(void)
@@ -151,9 +146,11 @@ void func_80014544(void)
         }
         slot = id - FN_SLOT_FIRST;
         if (slot < FN_SLOTS) {
+            u16 *equipment = viewer.unk38;
+
             if (value == FN_END)
                 continue;
-            viewer.unk38[slot] = value;
+            equipment[slot] = value;
             DAT_801c7590.counts[value].count++;
             if (value < 266 && !(vis_table_c.unk0070[value / 32] & (1 << (value % 32))))
                 viewer.unk28++;
@@ -185,10 +182,12 @@ void func_80014544(void)
         }
     }
     if (clear_flags) {
-        fill_words(DAT_801cceb0[1], -1, 5);
-        fill_words(DAT_801cceb0[0], -1, 5);
-        DAT_801cceb0[1][4] &= ~0x4000;
-        DAT_801cceb0[0][4] &= ~0x4000;
+        u32 (*row)[5] = &DAT_801cceb0[1];
+
+        fill_words(row[0], -1, 5);
+        fill_words(row[-1], -1, 5);
+        row[0][4] &= ~0x4000;
+        row[-1][4] &= ~0x4000;
     }
     func_8003f12c(viewer.unk38[3], 0, 0);
     func_8003f12c(viewer.unk38[16], 1, 0);
