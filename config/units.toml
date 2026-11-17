@@ -260,6 +260,18 @@ source = "src/st/effect_run.c"
 profile = "probe-gcc272cdk-o2-g0"
 
 [[unit]]
+unit = "st.player_8003bd14"
+image = "ST.EXE"
+source = "src/st/player_8003bd14.c"
+profile = "probe-gcc272cdk-o2-g8"
+
+[[unit]]
+unit = "st.player_8003c000"
+image = "ST.EXE"
+source = "src/st/player_8003c000.c"
+profile = "probe-gcc272cdk-o2-g8"
+
+[[unit]]
 unit = "st.player"
 image = "ST.EXE"
 source = "src/st/player.c"
