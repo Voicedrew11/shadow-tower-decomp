@@ -2500,8 +2500,6 @@ void func_8004162c(void)
 ADDRESS(0x80041d4c, 0x354)
 void func_80041d4c(void)
 {
-    int limit;
-
     if (DAT_801cd180.unk2 & DAT_801cd180.unk22[2]) {
         viewer.unk2CA += viewer.unk2E8 >> 2;
         if (viewer.unk2E8 < viewer.unk2CA)
@@ -2523,7 +2521,8 @@ void func_80041d4c(void)
     if (DAT_801cd180.unk2 & DAT_801cd180.unk22[6]) {
         if (DAT_801cd180.unk2 & DAT_801cd180.unk22[7]) {
             if (viewer.unk278.vx > 2048) {
-                limit = (4224 - viewer.unk278.vx) >> 2;
+                int limit = (4224 - viewer.unk278.vx) >> 2;
+
                 viewer.unk2CC += 8;
                 if (limit < viewer.unk2CC) {
                     viewer.unk2CC = limit;
@@ -2531,12 +2530,16 @@ void func_80041d4c(void)
                         viewer.unk2CC = 4224 - viewer.unk278.vx;
                 }
             } else if (viewer.unk278.vx < 2048) {
-                limit = -((viewer.unk278.vx - 128) >> 2);
+                int limit = -((viewer.unk278.vx - 128) >> 2);
+
                 viewer.unk2CC -= 8;
                 if (viewer.unk2CC < limit) {
                     viewer.unk2CC = limit;
-                    if (limit == 0)
-                        viewer.unk2CC = -(viewer.unk278.vx - 128);
+                    if (limit == 0) {
+                        s16 offset = viewer.unk278.vx - 128;
+
+                        viewer.unk2CC = -offset;
+                    }
                 }
             }
         } else {
