@@ -21,8 +21,8 @@
 #define BIT(i) (1 << ((i) % 32))
 
 /*
- * Not exact (same size): register choice for the hoisted masks
- * (0x7fffffff in t1, not t4) and one constant-1 load placed later.
+ * Not exact: retail hoists the 0x7fffffff mask into t4; this source uses
+ * t1 and rotates the other mask registers. The item-quantity 1 load is late.
  */
 /* New-game defaults. */
 ADDRESS(0x800559bc, 0x338)
