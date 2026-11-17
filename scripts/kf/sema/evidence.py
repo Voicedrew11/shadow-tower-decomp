@@ -15,7 +15,7 @@ from scripts.kf.relocations import (
     named_data_referent,
     validate_relocation,
 )
-from scripts.kf.retail import parse_int, read_tsv
+from scripts.kf.retail import parse_int, read_tsv, referent_image
 from scripts.kf.sema.cfg import build_graph
 from scripts.kf.sema.image import RetailImage, retail
 from scripts.kf.sema.index import Binding, Index, index
@@ -230,7 +230,8 @@ class Evidence:
                     and row.get("target_name")):
                 try:
                     referent = named_data_referent(
-                        self.catalog, self.image, sanitize_symbol(row["target_name"], ""))
+                        self.catalog, referent_image(self.image, target),
+                        sanitize_symbol(row["target_name"], ""))
                 except ValueError as error:
                     tier, reason = "candidate", str(error)
 

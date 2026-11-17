@@ -109,6 +109,46 @@ Tower retail member groups follow the same pattern; `PSX.EXE`, `STR.EXE`,
 So the SND members that call SPU interleave with the SPU group when LIBSPU
 is listed first, which is the shape of every retail program here.
 
+## FDAT overlays
+
+The 36 `FDAT_nnn.BIN` images are raw entries of `ST\COM\FDAT.T`, not PS-X
+EXEs. `ST.EXE` loads one at `0x801EB560`, the end of its bss, and calls into
+it through the handler table at its first byte; the overlay calls `ST.EXE`'s
+functions (its own libraries included) and reads `ST.EXE`'s data in place.
+`kf build` links a fully claimed overlay with `OVERLAY_LINK`:
+
+- the same command file at origin `0x801EB560`, with no startup object,
+  allocator, library or `regs` line;
+- every symbol the overlay's objects reference without defining becomes a
+  command-file `name equ $address` line. `executable.host_symbols` takes the
+  addresses from the host's identities (the target relink's address book,
+  `roundtrip.address_book`, with an unresolved `DAT_xxxxxxxx` spelling its
+  literal address) and refuses a name that is not a unique `ST.EXE` identity
+  outside the overlay's window;
+- PSYLINK's pure binary output (`/p`, written as `<NAME>.RAW`) replaces the
+  CPE and CPE2X; and
+- `pack_archive_entry` frames those bytes as the archive does: zeros up to
+  the sector multiple that leaves room for one trailing word, and that word,
+  `0x12345678` plus the 32-bit sum of every preceding word. All 36 retail
+  entries satisfy that rule; the packing step only appends the frame and
+  never rewrites linked bytes.
+
+An overlay's read-only data is not separated: its compiler output keeps
+every `.rdata` block in cc1 order under one section name
+(`sdk.keep_read_only_together`), and the unit's `RODATA()` claim covers that
+whole run, switch tables included (an overlay unit may not claim
+`JUMPTABLES()`). The retail evidence is the overlays themselves:
+`FDAT_032.BIN` puts a `RECT` initializer right after its 0x1cc-byte handler
+tables and its switch table after four alignment bytes, `FDAT_242.BIN` has a
+second run of `RECT` initializers after its switch table, and the code of
+`FDAT_442.BIN`, which has neither, starts directly after the tables at
+`0x801EB72C` with no pool padding.
+
+A partially claimed overlay is reported `partial` like `ST.EXE`; its units
+are verified by the target relink and data gates. `kf link --compare-only`
+compares an overlay's file bytes strictly (header size 0) and keeps it out of
+the island report and the README executable block.
+
 ## PSX.EXE
 
 `src/psx/main.c` reconstructs `main` (`0x80010068`, `0xe8` bytes): it
@@ -372,7 +412,7 @@ under `build/link/<image>/` and are not committed.
 
 | Property | Current status |
 | --- | --- |
-| PSYLINK emits each program | Wired through `kf build` for all seven; an image links once it has a source unit |
+| PSYLINK emits each program | Wired through `kf build` for all seven and the 36 FDAT overlays (raw `/p` output, archive frame); an image links once its units claim every game function |
 | Candidate artifact path | Direct source-to-EXE with no output rewriting |
 | Byte-identical retail images | `PSX.EXE`, `STR.EXE`, `TITLE.EXE` and `END.EXE` (whole files, headers included) |
 | Library half of the overlays | Object-by-object attribution only (see the toolchain page); not yet relinked |

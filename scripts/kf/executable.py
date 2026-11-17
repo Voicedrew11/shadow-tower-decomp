@@ -9,6 +9,7 @@ import os
 from pathlib import Path
 import struct
 
+from scripts.kf.compile import read_only_mode
 from scripts.kf.delink import load_catalog
 from scripts.kf.sdk import compile_c
 from scripts.psxbuild.sdk import ASPSX_VERSION
@@ -35,7 +36,8 @@ def compile_unit(unit: Unit, profile: Profile, root: Path, index: int) -> dict:
         unit.source_path, root, f'U{index:04d}', compiler=profile.compiler,
         optimization=profile.optimization, small_data=profile.small_data,
         include_dirs=(REPO / 'include', REPO / 'vendor/include', Path(os.environ['PSYQ_INCLUDE'])),
-        cc1_flags=profile.cc1_flags, defines=unit.defines)
+        cc1_flags=profile.cc1_flags, defines=unit.defines,
+        read_only=read_only_mode(unit.image))
     dependencies = [unit.source, *IncludeScanner().headers(unit.source)]
     return {**result, 'unit': unit.unit, 'source': unit.source,
             'source_sha256': {name: file_hash(REPO / name) for name in dependencies}}
@@ -89,6 +91,43 @@ def unclaimed_game_functions(name: str, units: list[Unit]) -> list[int]:
             if not function.provider and function.va not in claimed]
 
 
+def host_symbols(name: str, objects: list[Path]) -> dict[str, int]:
+    """Absolute addresses of the host symbols an overlay's objects reference.
+
+    Every name the objects reference without defining must be one identity of
+    the overlay's host program outside the overlay's own window (the same
+    address book the target relink uses); anything else fails the link.
+    """
+    from scripts.kf.lnk import read as read_object
+    from scripts.kf.roundtrip import ADDRESS_NAME, address_book
+
+    defined, referenced = set(), set()
+    for path in objects:
+        native = read_object(path.read_bytes())
+        for symbol in native.symbols.values():
+            (referenced if symbol.section is None and not symbol.common else defined).add(
+                symbol.name)
+    host = OVERLAY_SOURCES[name].host
+    book = address_book(host)
+    layout = IMAGE_LAYOUTS[name]
+    result, missing = {}, []
+    for symbol in sorted(referenced - defined):
+        addresses = book.get(symbol, set())
+        address_name = ADDRESS_NAME.fullmatch(symbol)
+        if not addresses and address_name:
+            # An unresolved DAT_ identity spells its literal address, as in
+            # the target relink (roundtrip.externals).
+            addresses = {int(address_name.group(1), 16)}
+        if len(addresses) != 1 or layout.contains(next(iter(addresses))):
+            missing.append(symbol)
+            continue
+        result[symbol] = next(iter(addresses))
+    if missing:
+        raise ValueError(f'{name}: references with no unique {host} identity: '
+                         + ', '.join(missing))
+    return result
+
+
 def build_image(name: str, manifest: Manifest, root: Path) -> dict:
     units = [u for u in manifest.units if u.image == name and u.scope != 'vendored']
     if not units:
@@ -97,8 +136,6 @@ def build_image(name: str, manifest: Manifest, root: Path) -> dict:
         report = {'image': name, 'linked': False, 'phase': 'not-started', 'units': []}
         (root / 'build.json').write_text(json.dumps(report, indent=2) + '\n')
         return report
-    if name in OVERLAY_SOURCES:
-        raise ValueError(f'{name}: linking a headerless archive overlay is not modeled yet')
     unclaimed = unclaimed_game_functions(name, units)
     if unclaimed:
         # A partial reconstruction still calls and reads game code no source
@@ -113,7 +150,9 @@ def build_image(name: str, manifest: Manifest, root: Path) -> dict:
     report = link_image(
         name, root, units,
         lambda unit, output, index: compile_unit(unit, manifest.profiles[unit.profile], output, index),
-        repo=REPO, load_address=IMAGE_LAYOUTS[name].load_address)
+        repo=REPO, load_address=IMAGE_LAYOUTS[name].load_address,
+        host_symbols=((lambda objects: host_symbols(name, objects))
+                      if name in OVERLAY_SOURCES else None))
     report.update(output_rewritten=False, retail_payload_inputs=[],
                   game_execution_tested=False, historical_toolchain_proven=False)
     (root / 'build.json').write_text(json.dumps(report, indent=2) + '\n')
@@ -122,26 +161,28 @@ def build_image(name: str, manifest: Manifest, root: Path) -> dict:
 
 def compare(actual: bytes, image: RetailImage) -> dict:
     expected = image.data
+    # A PS-X EXE carries a 2048-byte header; a headerless overlay is all load.
+    header = image.layout.header_size
     common = min(len(actual), len(expected))
     differences = [i for i in range(common) if actual[i] != expected[i]]
     differences.extend(range(common, max(len(actual), len(expected))))
     first = differences[0] if differences else None
-    first_load = next((i for i in differences if i >= 0x800), None)
+    first_load = next((i for i in differences if i >= header), None)
     return {'file_equal': actual == expected, 'retail_size': len(expected), 'linked_size': len(actual),
             'retail_sha256': hashlib.sha256(expected).hexdigest(),
             'linked_sha256': hashlib.sha256(actual).hexdigest(),
             'differing_bytes': len(differences), 'first_difference_file_offset': first,
-            'first_difference_va': image.load_start + first - 0x800
-            if first is not None and first >= 0x800 else None,
+            'first_difference_va': image.load_start + first - header
+            if first is not None and first >= header else None,
             'first_load_difference_file_offset': first_load,
-            'first_load_difference_va': image.load_start + first_load - 0x800
+            'first_load_difference_va': image.load_start + first_load - header
             if first_load is not None else None,
             'first_load_difference_retail': expected[first_load:first_load+16].hex()
             if first_load is not None else None,
             'first_load_difference_linked': actual[first_load:first_load+16].hex()
             if first_load is not None else None,
-            'header_differing_bytes': sum(i < 0x800 for i in differences),
-            'load_differing_bytes': sum(i >= 0x800 for i in differences)}
+            'header_differing_bytes': sum(i < header for i in differences),
+            'load_differing_bytes': sum(i >= header for i in differences)}
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -163,10 +204,17 @@ def main(argv: list[str] | None = None) -> int:
             if args.compare_only:
                 actual = (root / name).read_bytes()
                 report['comparison'] = compare(actual, verified[name])
-                report['layout_tolerant'] = compare_executables(verified[name].data, actual)
                 diff = report['comparison']
                 print(f'{name}: existing EXE has {diff["linked_size"]} bytes; '
                       f'{diff["differing_bytes"]} file bytes differ from retail')
+                if name in OVERLAY_SOURCES:
+                    # The island report models PS-X EXE load areas; an
+                    # overlay keeps only the strict file comparison.
+                    report['layout_tolerant'] = None
+                    (root / filename).write_text(json.dumps(report, indent=2) + '\n')
+                    reports.append(report)
+                    continue
+                report['layout_tolerant'] = compare_executables(verified[name].data, actual)
                 fuzzy = report['layout_tolerant']
                 print(f'  island-aligned byte similarity: {fuzzy["byte_similarity_percent"]:.2f}%; '
                       f'nonzero bytes: {fuzzy["nonzero_byte_similarity_percent"]:.2f}%; '

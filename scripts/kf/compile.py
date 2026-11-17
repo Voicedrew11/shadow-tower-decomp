@@ -14,7 +14,7 @@ from pathlib import Path
 
 from scripts.kf.delink import image_key
 from scripts.kf.model import scan_data_claims
-from scripts.kf.retail import IMAGE_LAYOUTS, read_tsv
+from scripts.kf.retail import IMAGE_LAYOUTS, OVERLAY_SOURCES, read_tsv
 
 
 # Native probe compilers: tool basenames and provenance labels. The labels are
@@ -149,6 +149,11 @@ def _source_data_sizes(preprocessed: Path, names: tuple[str, ...],
     return dict(zip(names, values[2:], strict=True))
 
 
+def read_only_mode(image: str) -> str:
+    """An FDAT overlay keeps cc1's read-only order (sdk.keep_read_only_together)."""
+    return 'together' if image in OVERLAY_SOURCES else 'separate'
+
+
 def compile_source(
     source: Path, image: str, output: Path,
     delink_dir: Path = Path("build/delink"), optimization: str | None = None,
@@ -201,7 +206,8 @@ def compile_source(
         result = compile_c(source, scratch, 'UNIT', compiler=compiler, optimization=optimization,
                            small_data=small_data, include_dirs=include_dirs, cc1_flags=cc1_flags,
                            defines=defines, cc1_override=cc1_override,
-                           trace_environment=trace_environment)
+                           trace_environment=trace_environment,
+                           read_only=read_only_mode(image))
         if trace_path is not None and (not trace_path.is_file() or not trace_path.stat().st_size):
             raise RuntimeError('instrumented compiler produced no trace')
         if data_claims:

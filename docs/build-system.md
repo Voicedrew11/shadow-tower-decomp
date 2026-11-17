@@ -99,6 +99,15 @@ retail order, which the address-ordered functions give for free; a string
 that lives inside the range is spelled as the literal the original used, not
 as a named extern.
 
+An FDAT overlay unit is the exception: its read-only data stays in cc1 order
+under one section (`keep_read_only_together`, selected by
+`compile.read_only_mode` for every overlay image), without the pool padding,
+and its single `RODATA()` claim covers constants and switch tables together
+(see [the linking guide](executable-linking.md#fdat-overlays) for the retail
+evidence). Pointers in that run into the unit's own code are rewritten like
+jump-table rows; a pointer into another unit's code needs a reviewed
+`mips32_candidate` relocation row.
+
 A unit compiled with a small-data profile (`small_data = 8`) may also claim
 its anonymous `.sdata` constants, one ascending range per run between its
 named small data:
@@ -287,3 +296,20 @@ images. VS.EXE's copies of ST.EXE's animation node-list and VRAM helpers
 are the first users (`src/lib/anim_*.inc`, `src/lib/vram.inc`); VS copies
 whose callees or globals carry address-derived (image-specific) names, or
 whose structures have VS layouts, stay separate sources under `src/vs/`.
+
+A fragment may instead carry plain `ADDRESS()` claims and be included by
+sources that each bind by name. A unit's own source, one that no other unit
+lists, may bind by name and still claim its image's `RODATA()`,
+`JUMPTABLES()` and `SDATA()` ranges: the ranges belong to that one image,
+while the fragment's functions resolve through the image's identities. The
+FDAT overlays use this: the 21 functions every overlay starts with sit at
+different addresses in seven of the 36 overlays and carry one shared
+identity name (`fdat_<FDAT_002.BIN address>`) in all of them. Each overlay
+has three units: the shared source `src/lib/fdat_common_a.c` (the first ten
+functions), its own `src/fdat_nnn/main.c` (the handler table and
+`fdat_801ebec4`'s switch table as one `RODATA()` run, and the fragment
+`src/lib/fdat_common.inc` with `fdat_801ebec4` and `fdat_801ec6a4`), and the
+shared `src/lib/fdat_common_b.c` (the last nine). The boundaries are WIP:
+they keep the two not-yet-exact functions `fdat_801eba4c` and
+`fdat_801ec6a4` from moving the switch-table and handler-table pointers
+(a non-exact function ends its unit).

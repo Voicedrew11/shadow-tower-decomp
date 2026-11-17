@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import re
 import tomllib
+from collections import Counter
 from dataclasses import dataclass, replace
 from pathlib import Path
 
@@ -22,7 +23,7 @@ from scripts.kf.model import (
     write_bindings,
 )
 from scripts.kf.paths import REPO, RETAIL_CONFIG, UNITS_MANIFEST
-from scripts.kf.retail import IMAGE_LAYOUTS, image_key
+from scripts.kf.retail import IMAGE_LAYOUTS, OVERLAY_SOURCES, image_key
 
 
 DEFINE_RE = re.compile(r"[A-Za-z_][A-Za-z0-9_]*(=[A-Za-z0-9_x]+)?")
@@ -447,6 +448,14 @@ def _sdata_ranges(
     return tuple(ranges)
 
 
+def _check_overlay_read_only(source: Path, image: str, jumptable_claims) -> None:
+    """An FDAT overlay keeps cc1's read-only order (sdk.keep_read_only_together):
+    its constants and switch tables are one run, claimed with RODATA() alone."""
+    if image in OVERLAY_SOURCES and jumptable_claims:
+        raise ValueError(f"{source}:{jumptable_claims[0].line}: an overlay unit claims its "
+                         "switch tables inside its RODATA() run, not with JUMPTABLES()")
+
+
 def load(
     path: Path = UNITS_MANIFEST,
     *,
@@ -469,6 +478,8 @@ def load(
     if not isinstance(raw_units, list):
         raise ValueError(f"{path}: [[unit]] entries must be an array of tables")
 
+    source_users = Counter(Path(str(row.get("source", ""))) for row in raw_units
+                           if isinstance(row, dict))
     catalog = load_catalog(config_dir)
     identities = identity_names(config_dir)
     vendored_names = {
@@ -555,6 +566,7 @@ def load(
         rodata_claims = scan_rodata_claims(source_path)
         jumptable_claims = scan_jumptable_claims(source_path)
         sdata_claims = scan_sdata_claims(source_path)
+        _check_overlay_read_only(source, image, jumptable_claims)
         image_token = image_key(image).upper()
         data_claims = tuple(
             claim for claim in data_claims
@@ -578,7 +590,11 @@ def load(
             # image reuses it by resolving every claimed definition through
             # that image's own identity tables, so the addresses stay
             # image-qualified while the C text is written once.
-            if rodata_claims or jumptable_claims or sdata_claims:
+            # A source only this unit lists may also bind by name: an image's
+            # own source that includes a shared fragment (src/lib/*.inc)
+            # whose functions sit at other addresses in other images. Its
+            # ranges then belong to that one image.
+            if (rodata_claims or jumptable_claims or sdata_claims) and source_users[source] > 1:
                 raise ValueError(
                     f"{source}: RODATA()/JUMPTABLES()/SDATA() ranges are image-specific; "
                     f"unit {name!r} cannot bind them by name"

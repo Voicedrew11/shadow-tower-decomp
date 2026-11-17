@@ -125,8 +125,30 @@ typedef union {
 /* A table A record's script: a command stream (WIP). */
 typedef struct {
     u8 unk00;            /* 0x00: kind; 'P' and '@' are picked by func_8004def8 */
-    u8 unk01[0xb];
+    u8 unk01;            /* 0x01: the FDAT overlays copy it to Vis212.unk08 */
+    u8 unk02;
+    u8 unk03;            /* 0x03: an FDAT overlay squares it into a range */
+    u8 unk04;            /* 0x04: an FDAT overlay's pick weight */
+    u8 unk05;            /* 0x05: FDAT sound bank offset; 0xff none */
+    u8 unk06[2];
+    u32 unk08;           /* 0x08: FDAT: the Vis212.unk44 states it may run in */
     u16 unk0C;           /* 0x0c */
+    u16 unk0E;           /* 0x0e: FDAT sound trigger: kind (0xf000) and frame/period */
+    /* 0x10: FDAT command arguments; signed or unsigned by command (WIP) */
+    union {
+        s16 s[16];
+        u16 u[16];
+        u8 b[32];
+        s32 w[8];
+        struct {             /* FDAT attack commands (fdat_801ebc88) */
+            u16 unk10[2];
+            u16 frame[3];    /* 0x14: frame of each hit, 0xffff none */
+            s16 unk1A;       /* 0x1a: passed to func_8004cee8 */
+            u16 vertex[3];   /* 0x1c: model vertex of each hit, 0xffff the origin */
+            u16 node[3];     /* 0x22: skeleton node of each hit */
+            s16 offset[3];   /* 0x28: offset added after the turn */
+        } hit;
+    } arg;
 } VisScript;
 
 typedef struct {
@@ -171,7 +193,7 @@ typedef struct {
     s16 unk36;           /* 0x36 */
     u8 unk38;
     u8 unk39;
-    u8 unk3A[2];
+    u16 unk3A;           /* 0x3a: the FDAT overlays' last sound id */
     u32 unk3C;           /* 0x3c: squared distance */
     s32 unk40;           /* 0x40: horizontal distance */
     s32 unk44;
@@ -183,10 +205,11 @@ typedef struct {
     u16 unk54;
     u16 unk56;           /* 0x56: facing the viewer is compared with; heading to the viewer */
     u16 unk58;           /* 0x58: its difference from the facing */
-    u8 unk5A[0x5e - 0x5a];
+    u8 unk5A[2];
+    s16 unk5C;           /* 0x5c: FDAT: the heading an entry turns to */
     u16 unk5E;           /* 0x5e: heading of the wall slid along */
     u16 unk60;
-    u8 unk62[2];
+    u16 unk62;           /* 0x62: FDAT: 1 or 2 masks a range bit of unk60 for a frame */
     u8 unk64;            /* 0x64: set when hit */
     u8 unk65;            /* 0x65..0x67: percent chances of unk10..unk14 */
     u8 unk66;
@@ -207,10 +230,13 @@ typedef struct {
     SVECTOR unk9C;       /* 0x9c: velocity: this frame's movement */
     u32 unkA4;           /* 0xa4: from here the anim block objects.c hands model_draw (&unkA4) */
     VisScript *unkA8;    /* 0xa8: the running script, an entry of its record's unk60 list */
-    s32 unkAC;
+    VisScript *unkAC;    /* 0xac: FDAT: the script a 17/20 command returns to */
     s16 unkB0;           /* 0xb0: magnitude of the last unk2A step; set from the script's unk0C */
     u16 unkB2;
-    u8 unkB4[0x20];
+    u8 unkB4[8];
+    s16 unkBC;           /* 0xbc: cleared by the FDAT overlays */
+    s16 unkBE;
+    u8 unkC0[0x14];
 } Vis212;
 
 /* An entry of a Vis192 record's unk60 list (func_8004b1e8). */
@@ -238,7 +264,7 @@ typedef struct {
     s16 unk0E;           /* 0x0e: gravity */
     u16 unk10;           /* 0x10: map bit, 0xffff none */
     u16 unk12;           /* 0x12: added to vis_table_a.unk612C while live */
-    u8 unk14[2];
+    u16 unk14;           /* 0x14: FDAT: near range (squared << 16 against Vis212.unk3C) */
     u16 unk16;
     u16 unk18;
     u16 unk1A;
