@@ -313,3 +313,15 @@ shared `src/lib/fdat_common_b.c` (the last nine). The boundaries are WIP:
 they keep the two not-yet-exact functions `fdat_801eba4c` and
 `fdat_801ec6a4` from moving the switch-table and handler-table pointers
 (a non-exact function ends its unit).
+
+The overlays' own handlers after those 21 functions are units named by
+their first function, `fdat_nnn.map_<address>` in
+`src/fdat_nnn/map_<address>.c`, each a contiguous run of exact handlers.
+Handlers that several overlays share are fragments named like the common
+functions: `src/lib/fdat_801ed6e4.inc` (19 overlays) calls the overlay's
+move picker, which is the shared `fdat_801ed4a0` in 14 of them and an
+overlay's own variant in five; a source names the variant by defining
+`FDAT_PICK_MOVE` before the include. `src/lib/fdat_801ed4a0.inc` (21
+overlays) is not yet exact, and no unit includes it until it is, because
+its switch table sits in the overlay's read-only run and its entries would
+move with the code.

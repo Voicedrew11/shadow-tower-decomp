@@ -45,6 +45,20 @@ void fdat_801eba4c(Vis212 *e);
 void fdat_801ebbc8(Vis212 *e, VisScript *s);
 void fdat_801ebc88(Vis212 *e, VisScript *s);
 void fdat_801ebec4(Vis212 *e);
+void fdat_801ec6a4(void);
+int fdat_801ecbcc(void);
+int fdat_801ece7c(Vis212 *e);
+void fdat_801ecf44(Vis212 *e);
+void fdat_801ecfc4(VECTOR *pos, SVECTOR *rot);
+void fdat_801ed1e4(Vis212 *e);
+void fdat_801ed2f0(Vis212 *e);
+void fdat_801ed388(Vis212 *e, int fixed, int arg2);
+void fdat_801ed410(Vis212 *e);
 void fdat_801ed498(void);
+
+/* The map handlers several overlays share (src/lib/fdat_801ed4a0.inc,
+ * src/lib/fdat_801ed6e4.inc), spelled with their FDAT_002.BIN addresses. */
+void fdat_801ed4a0(void);
+void fdat_801ed6e4(void);
 
 #endif

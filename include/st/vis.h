@@ -95,8 +95,8 @@ typedef struct {
     u8 unk02;
     u8 unk03;            /* 0x03: bits 0-1 select the light set */
     u8 unk04;            /* bit 1: flagged by vis_cull_by_range */
-    u8 unk05;
-    u8 unk06;
+    s8 unk05;            /* 0x05, 0x06: FDAT: an offset (x, z) its entries' headings bend by */
+    s8 unk06;
     u8 unk07;            /* 0x07: area id; 0xff none (func_8004e324) */
     u8 unk08;
     u8 unk09;
@@ -205,7 +205,7 @@ typedef struct {
     u16 unk54;
     u16 unk56;           /* 0x56: facing the viewer is compared with; heading to the viewer */
     u16 unk58;           /* 0x58: its difference from the facing */
-    u8 unk5A[2];
+    s16 unk5A;           /* 0x5a: FDAT: a second heading, set with unk5C */
     s16 unk5C;           /* 0x5c: FDAT: the heading an entry turns to */
     u16 unk5E;           /* 0x5e: heading of the wall slid along */
     u16 unk60;
