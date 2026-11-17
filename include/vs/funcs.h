@@ -54,6 +54,7 @@ void func_8002ee54(u_long *buf, StFileExtent *file, u32 size); /* ST func_80015f
 
 /* src/vs/cd_8002efcc.c */
 void func_8002efcc(void);                 /* ST func_8001624c */
+void func_8002f014(u16 archive, char *name); /* ST func_80016294 */
 
 /* src/vs/snd_80012a70.c */
 void func_80012c2c(u_long *data, DVECTOR *pos, DVECTOR *clut_pos);

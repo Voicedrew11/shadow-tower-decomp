@@ -158,8 +158,12 @@ class Evidence:
         if owner is not None and not owner.contains(paired, 4):
             return "pair-crosses-function-extent"
         try:
+            between = ([self.img.u32(at) for at in range(site + 4, paired, 4)]
+                       if paired > site else None)
+            if between is not None and None in between:
+                between = None
             decoded = decode_hi_lo_target(
-                word, paired_word, self.img.u32(site + 4), self.img.u32(site + 8)
+                word, paired_word, self.img.u32(site + 4), self.img.u32(site + 8), between
             )
         except ValueError as error:
             return f"instruction-pair-mismatch:{error}"

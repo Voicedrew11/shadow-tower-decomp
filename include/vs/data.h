@@ -17,6 +17,7 @@
 #include <LIBCD.H>
 #include <st/cd.h>
 #include <st/gfx.h>
+#include <st/vis.h>
 
 /* Ordering-table lengths, as in ST.EXE (src/st/gfx.c). */
 #define VS_OT_LENGTH 4096
@@ -127,6 +128,24 @@ typedef struct {
     u16 amount;
 } VsHit;
 
+/* A fighter's animation sound effects (func_80013c5c): the frames that
+ * pick them in states 2 and 6, and per entry a tone and a trigger word
+ * (kind in the top nibble, a frame or period below). */
+typedef struct {
+    u8 unk0[8];
+    struct {
+        u8 frame;
+        u8 unk1[3];
+    } keys[6];               /* 0x08 */
+    u8 unk20[0x3c - 0x20];
+    struct {
+        u16 tone;
+        u16 trigger;
+    } sounds[10];            /* 0x3c */
+} VsFighterSfx;
+
+typedef char VsFighterSfxSize[sizeof(VsFighterSfx) == 0x64 ? 1 : -1];
+
 /*
  * The two fighters at 0x800633b0 (bss), 0x4e0e8 bytes each (the code
  * indexes them by fighter number and takes the opponent as 1 - number).
@@ -134,9 +153,12 @@ typedef struct {
  * start; only the state fields the code proves are spelled.
  */
 typedef struct {
-    u8 file[0x4dee0];        /* 0x00000: the model file, then unmodeled */
+    u8 file[0x4b000];        /* 0x00000: the model file, then unmodeled */
+    u_long unk4B000[(0x4dee0 - 0x4b000) / 4]; /* 0x4b000: a second mesh model, absent when its first word is 0 */
     StAnimSet *unk4DEE0;     /* 0x4dee0: the fighter's skeletal-animation slot */
-    u8 unk4DEE4[0x4deea - 0x4dee4];
+    u8 unk4DEE4[0x4dee8 - 0x4dee4];
+    u8 unk4DEE8;             /* 0x4dee8: the frame func_80013c5c matches against the sound keys */
+    u8 unk4DEE9;
     s16 unk4DEEA;            /* 0x4deea: animation frame */
     s16 unk4DEEC;            /* 0x4deec */
     u8 unk4DEEE[0x4def0 - 0x4deee];
@@ -146,7 +168,10 @@ typedef struct {
     u8 unk4DF0A[2];
     s16 unk4DF0C;            /* 0x4df0c: hit points left by the last hit */
     s16 unk4DF0E;            /* 0x4df0e: state; 3 hit, 4 down; 3 and 4 cannot be hit */
-    u8 unk4DF10[0x4e062 - 0x4df10];
+    s16 unk4DF10;            /* 0x4df10: model kind: 1 several parts, 2 one part */
+    u8 unk4DF12[0x4df18 - 0x4df12];
+    VsFighterSfx unk4DF18;   /* 0x4df18: animation sound effects */
+    u8 unk4DF7C[0x4e062 - 0x4df7c];
     VsAttack unk4E062[3];    /* 0x4e062: attacks (count WIP) */
     u8 unk4E0C2[0x4e0cc - 0x4e0c2];
     s16 unk4E0CC;            /* 0x4e0cc: hit radius */
@@ -165,6 +190,21 @@ typedef char VsFighterSize[sizeof(VsFighter) == 0x4e0e8 ? 1 : -1];
 extern s32 DAT_80063224;
 extern s32 DAT_80063350;
 extern s32 DAT_80063360;
+
+/* The animation step the sound triggers scale a fighter's frame step by
+ * (.sdata, 0 in the image; unowned). */
+extern s32 DAT_80063220;
+
+/* A frame count the periodic sound triggers divide (bss, unowned). */
+extern u32 DAT_80160400;
+
+/* VS's copy of ST.EXE's vis_table_c (bss, 0x80191d00): the 44-byte item
+ * records from +0x118; only those are used so far. */
+extern VisTableC DAT_80191d00;
+
+/* A switch func_800222d8 sets around its count list and func_8001d9cc
+ * reads (bss). */
+extern u16 DAT_8006337a;
 
 /* Rounds won per fighter (bss, unowned). */
 extern s32 DAT_80063370[2];

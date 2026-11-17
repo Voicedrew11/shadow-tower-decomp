@@ -574,7 +574,8 @@ VS.EXE	0x8004a198	0x39998	0xc	unclassified	coverage-gap			payload-complement	may
 VS.EXE	0x8004a1b8	0x399b8	0xc	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 VS.EXE	0x8004a1d8	0x399d8	0xc	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 VS.EXE	0x8004a1f8	0x399f8	0xc	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
-VS.EXE	0x8004a218	0x39a18	0x1900c	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
+VS.EXE	0x8004a218	0x39a18	0x19008	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
+VS.EXE	0x80063220	0x52a20	0x4	defined	candidate	DAT_80063220	s32	asm;src/vs/snd_800129bc.c vs.snd_800129bc	.sdata word (0), read $gp-relative by func_80013c5c, func_80015020, func_80015e50 and others
 VS.EXE	0x80063224	0x52a24	0x4	defined	candidate	DAT_80063224	s32	asm;src/vs/mesh_800258f0.c vs.mesh_800258f0	.sdata word read absolutely by the -G8 renderers; fixed-OT-depth switch (0 in the image)
 VS.EXE	0x80063228	0x52a28	0x4	defined	candidate	DAT_80063228	s32	asm;src/vs/ui_80022f14.c vs.ui_80022f14	.sdata word (1), read $gp-relative by func_80015020/func_80015e50/func_8001683c and through lui by func_80022f14
 VS.EXE	0x8006322c	0x52a2c	0xb4	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data

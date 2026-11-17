@@ -30,7 +30,9 @@ typedef struct {
     s16 unk1C8;          /* 0x1c8: the first free save number */
     u8 unk1CA[2];
     u16 unk1CC;          /* 0x1cc (ST unk2DC) */
-    u8 unk1CE[0x1d4 - 0x1ce];
+    u8 unk1CE[2];
+    s16 unk1D0;          /* 0x1d0: the list cursor row (ST unk2E0) */
+    u8 unk1D2[2];
     u8 unk1D4;           /* 0x1d4: cursor blink phase (ST unk2E4) */
     u8 unk1D5[0x1f0 - 0x1d5];
     CVECTOR style[8];    /* 0x1f0: text colours (ST 0x300) */
@@ -54,10 +56,21 @@ typedef char VsMenuScratchUnk244At0x244[offsetof(VsMenuScratch, unk244) == 0x244
 
 #define VS_MENU_SCRATCH ((VsMenuScratch *)0x1f800000)
 
-/* The message table at 0x80196230 (bss), as ST.EXE's menu_messages. */
-extern MenuMessages DAT_80196230;
+/* A 21504-byte message table: byte offsets of each message from text,
+ * then the messages (ST.EXE's MenuMessages layout). */
+typedef struct {
+    u16 offsets[0x600];
+    u8 text[0x5400 - 0xc00];
+} VsMessages;
 
-#define VS_MESSAGE(i) ((u16 *)(DAT_80196230.text + DAT_80196230.offsets[i]))
+typedef char VsMessagesSize[sizeof(VsMessages) == 0x5400 ? 1 : -1];
+
+/* The two message tables at 0x80196230 (bss): the menus' and the item
+ * names'. */
+extern VsMessages DAT_80196230[2];
+
+#define VS_MESSAGE(i) ((u16 *)(DAT_80196230[0].text + DAT_80196230[0].offsets[i]))
+#define VS_ITEM_NAME(i) ((u16 *)(DAT_80196230[1].text + DAT_80196230[1].offsets[i]))
 
 /* VS's copies of ST.EXE's text and primitive helpers (src/st/ui.c,
  * src/st/text.c), not reconstructed yet. */
@@ -67,6 +80,10 @@ void func_8001e3d8(RECT *r, CVECTOR *color, u16 semi);   /* ST func_80028220 */
 void func_8001e530(RECT *r, DVECTOR *tex, DVECTOR *clut, CVECTOR *color, int mode); /* ST func_80028364 */
 void func_8001e890(int abr, int x, int y);               /* ST func_800286a8 */
 void func_8001f23c(int x, int y, int w, int h);          /* ST func_80029548 */
+void func_8001de8c(RECT *r, CVECTOR *color, u16 border, u16 semi); /* ST func_80027d18 */
+void func_8001eef4(RECT *r, CVECTOR *color, u16 dir);    /* ST func_8002916c */
+void func_8001d3f0(u16 c, u16 x, u16 y, CVECTOR *color);  /* ST func_80026ecc */
+void func_8001d9cc(u32 num, u16 x, u16 y, CVECTOR *color); /* ST func_80027440 */
 void func_8001f30c(int x, int y, int w, int h);
 void func_8001f828(void);                                /* ST func_8002c9e8 */
 void func_8001f8c4(void);
@@ -80,6 +97,7 @@ void func_80020460(void);                                /* ST func_8002c998 */
 void func_80020aa4(int page);
 void func_80021140(int page);                            /* ST func_8003025c */
 void func_80021cfc(void);
+void func_80022228(void);
 void func_800222d8(int page);
 void func_80022794(void);                                /* ST func_800319a8 */
 void func_80022a00(void);

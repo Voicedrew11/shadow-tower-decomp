@@ -311,6 +311,55 @@ class MipsElfTests(unittest.TestCase):
         )
         self.assertEqual(used["action"], "paired-symbol")
 
+    def test_hi_lo_pair_through_a_later_copy_of_a_hoisted_lui(self) -> None:
+        # VS.EXE 0x80013978: lui a0,0x8019; lhu v1,0x61e2(a0); nop;
+        # andi v1,v1,8; bnez v1,..; addu s2,v0,s1; move v1,a0; then the loop's
+        # lhu v0,0x61e2(v1): a hoisted high half copied before its loop.
+        function = Function(
+            "GAME.EXE", 0x80010000, 32, 32, 1, "test", "test", "test"
+        )
+        catalog = Catalog(
+            functions={"GAME.EXE": (function,)},
+            function_starts={"GAME.EXE": {function.va: function}},
+            data={"GAME.EXE": ()},
+        )
+        lui, first, nop, andi, bnez, addu, move, low = (
+            0x3C048019, 0x948361E2, 0, 0x30630008, 0x14600007, 0x02519021,
+            0x00801821, 0x946261E2)
+        between = [first, nop, andi, bnez, addu, move]
+        self.assertEqual(decode_hi_lo_target(lui, low, first, nop, between), 0x801961E2)
+        with self.assertRaisesRegex(ValueError, "does not consume"):
+            decode_hi_lo_target(lui, low, first, nop)
+        with self.assertRaisesRegex(ValueError, "does not consume"):
+            # the copy's register written again before the low
+            decode_hi_lo_target(lui, low, first, nop, between + [0x24030001])  # li v1,1
+        with self.assertRaisesRegex(ValueError, "does not consume"):
+            # the LUI register written before the copy
+            decode_hi_lo_target(lui, low, first, nop,
+                                [first, 0x24040001, move])  # li a0,1
+        row = {
+            "image": "GAME.EXE",
+            "site_va": f"{function.va:#x}",
+            "paired_site_va": f"{function.va + 28:#x}",
+            "kind": "mips_hi16_lo16",
+            "channel": "reachable-code",
+            "target_va": "0x801961e2",
+            "target_region": "bss",
+            "target_name": "DAT_801961e0",
+            "opcode": "lui+lhu",
+            "confidence": "manual-decoded",
+            "status": "reviewed",
+        }
+        blob = bytearray(struct.pack("<8I", lui, *between, low))
+        relocations, used = _apply_relocation(blob, function, row, catalog, "safe")
+        self.assertEqual(
+            relocations,
+            [
+                MipsRelocation(0, "R_MIPS_HI16", "DAT_801961e0"),
+                MipsRelocation(28, "R_MIPS_LO16", "DAT_801961e0"),
+            ],
+        )
+
     def test_reviewed_instruction_word_pair_is_safe(self) -> None:
         function = Function(
             "GAME.EXE", 0x80010000, 8, 8, 1, "test", "test", "test"
