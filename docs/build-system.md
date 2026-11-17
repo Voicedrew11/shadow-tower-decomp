@@ -296,3 +296,13 @@ images. VS.EXE's copies of ST.EXE's animation node-list and VRAM helpers
 are the first users (`src/lib/anim_*.inc`, `src/lib/vram.inc`); VS copies
 whose callees or globals carry address-derived (image-specific) names, or
 whose structures have VS layouts, stay separate sources under `src/vs/`.
+
+A fragment may instead carry plain `ADDRESS()` claims and be included by
+sources that each bind by name. A unit's own source, one that no other unit
+lists, may bind by name and still claim its image's `RODATA()`,
+`JUMPTABLES()` and `SDATA()` ranges: the ranges belong to that one image,
+while the fragment's functions resolve through the image's identities. The
+FDAT overlays use this: every `src/fdat_nnn/main.c` owns its overlay's
+handler table and includes `src/lib/fdat_common.inc`, whose 21 functions
+sit at different addresses in seven of the 36 overlays and carry one shared
+identity name (`fdat_<FDAT_002.BIN address>`) in all of them.
