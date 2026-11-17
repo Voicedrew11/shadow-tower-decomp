@@ -79,6 +79,14 @@ extern int fdat_801edb3c; /* FDAT_332.BIN: src/fdat_332/map_801ed614.c */
 extern int fdat_801ed96c; /* FDAT_042.BIN: src/fdat_042/map_801ed4a0.c */
 extern int fdat_801ed970; /* FDAT_042.BIN: src/fdat_042/map_801ed7b4.c */
 extern int fdat_801ed938; /* FDAT_122.BIN: src/fdat_122/map_801ed4a0.c */
+extern int fdat_801edfd0; /* FDAT_172.BIN: src/fdat_172/map_801edbf8.c */
+extern int fdat_801edfd4; /* FDAT_172.BIN: src/fdat_172/map_801ede00.c */
+extern int fdat_801edc50; /* FDAT_182.BIN: src/fdat_182/map_801ed4a0.c */
+extern int fdat_801edc54; /* FDAT_182.BIN: src/fdat_182/map_801ed9cc.c */
+extern int fdat_801eda08; /* FDAT_202.BIN: src/fdat_202/map_801ed4a0.c */
+extern int fdat_801ee0b4; /* FDAT_242.BIN: src/fdat_242/map_801edf2c.c */
+extern int fdat_801ee0b8; /* FDAT_242.BIN: src/fdat_242/map_801edaa4.c */
+extern int fdat_801ee0bc; /* FDAT_242.BIN: src/fdat_242/map_801ed4e0.c */
 extern int fdat_801eda7c; /* FDAT_102.BIN: src/fdat_102/map_801ed6b8.c */
 /* FDAT_272.BIN: each word is defined by one of its map units (one COMMON
  * word per unit; see the DATA() claims in src/fdat_272/). */

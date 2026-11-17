@@ -17,10 +17,6 @@
 DATA(0x801ee0b0, 0x4, ".bss")
 static int fdat_801ee0b0;
 
-/* The exit scene state: 3 once the animation ends, 4 played. */
-DATA(0x801ee0b4, 0x4, ".bss")
-static int fdat_801ee0b4;
-
 void func_801edb10(void);
 
 /*

@@ -9069,6 +9069,8 @@ FDAT_022.BIN	0x801ed51c	0x1fbc	0x801ed52c	mips_hi16_lo16	reachable-code	0x801bc8
 FDAT_022.BIN	0x801ed51c	0x1fbc	0x801ed584	mips_hi16_lo16	reachable-code	0x801bc8f8	bss	vis_table_a	lui+sb		manual-decoded	reviewed	fdat.map asm review
 FDAT_022.BIN	0x801ed524	0x1fc4	0x801ed528	mips_hi16_lo16	reachable-code	0x801edad0	bss	fdat_801edad0	lui+lw		manual-decoded	reviewed	fdat.map asm review
 FDAT_022.BIN	0x801ed524	0x1fc4	0x801ed58c	mips_hi16_lo16	reachable-code	0x801edad0	bss	fdat_801edad0	lui+sw		manual-decoded	reviewed	fdat.map asm review
+FDAT_022.BIN	0x801ed524	0x1fc4	0x801ed594	mips_hi16_lo16	reachable-code	0x801edad0	bss	fdat_801edad0	lui+lw		manual-decoded	reviewed	fdat.map asm review
+FDAT_022.BIN	0x801ed524	0x1fc4	0x801ed5d4	mips_hi16_lo16	reachable-code	0x801edad0	bss	fdat_801edad0	lui+sw		manual-decoded	reviewed	fdat.map asm review
 FDAT_022.BIN	0x801ed548	0x1fe8	0x801ed54c	mips_hi16_lo16	reachable-code	0x801990a0	bss	viewer	lui+lh		manual-decoded	reviewed	fdat.map asm review
 FDAT_022.BIN	0x801ed560	0x2000		mips26	reachable-code	0x801ed388	load		jal		manual-decoded	reviewed	fdat.map asm review
 FDAT_022.BIN	0x801ed570	0x2010		mips26	reachable-code	0x801ed388	load		jal		manual-decoded	reviewed	fdat.map asm review
@@ -10094,6 +10096,7 @@ FDAT_092.BIN	0x801ed590	0x2030	0x801ed594	mips_hi16_lo16	reachable-code	0x801edf
 FDAT_092.BIN	0x801ed5a0	0x2040	0x801ed5c0	mips_hi16_lo16	reachable-code	0x801edf60	bss	fdat_801edf60	lui+sw		manual-decoded	reviewed	fdat.map asm review
 FDAT_092.BIN	0x801ed5a4	0x2044	0x801ed5a8	mips_hi16_lo16	reachable-code	0x801edf5c	bss	fdat_801edf5c	lui+lw		manual-decoded	reviewed	fdat.map asm review
 FDAT_092.BIN	0x801ed5b4	0x2054	0x801ed5bc	mips_hi16_lo16	reachable-code	0x801edf60	bss	fdat_801edf60	lui+sw		manual-decoded	reviewed	fdat.map asm review
+FDAT_092.BIN	0x801ed5b4	0x2054	0x801ed5c0	mips_hi16_lo16	reachable-code	0x801edf60	bss	fdat_801edf60	lui+sw		manual-decoded	reviewed	fdat.map asm review
 FDAT_092.BIN	0x801ed5b8	0x2058		mips26	reachable-code	0x801ed5c4	load		j		manual-decoded	reviewed	fdat.map asm review
 FDAT_092.BIN	0x801ed5d0	0x2070	0x801ed5d4	mips_hi16_lo16	reachable-code	0x801cce4e	bss	DAT_801cba08	lui+lhu		manual-decoded	reviewed	fdat.map asm review
 FDAT_092.BIN	0x801ed5e4	0x2084	0x801ed608	mips_hi16_lo16	reachable-code	0x801edf64	bss	fdat_801edf64	lui+sw		manual-decoded	reviewed	fdat.map asm review
@@ -10111,6 +10114,7 @@ FDAT_092.BIN	0x801ed6a0	0x2140	0x801ed6a4	mips_hi16_lo16	reachable-code	0x801edf
 FDAT_092.BIN	0x801ed6a0	0x2140	0x801ed7a4	mips_hi16_lo16	reachable-code	0x801edf54	bss	fdat_801edf54	lui+sw		manual-decoded	reviewed	fdat.map asm review
 FDAT_092.BIN	0x801ed6d8	0x2178	0x801ed6e0	mips_hi16_lo16	reachable-code	0x801cba08	bss	DAT_801cba08	lui+addiu		manual-decoded	reviewed	fdat.map asm review
 FDAT_092.BIN	0x801ed6f4	0x2194	0x801ed7c4	mips_hi16_lo16	reachable-code	0x801edf5c	bss	fdat_801edf5c	lui+lw		manual-decoded	reviewed	fdat.map asm review
+FDAT_092.BIN	0x801ed6f4	0x2194	0x801ed804	mips_hi16_lo16	reachable-code	0x801edf5c	bss	fdat_801edf5c	lui+sw		manual-decoded	reviewed	fdat.map asm review
 FDAT_092.BIN	0x801ed6f8	0x2198	0x801ed6fc	mips_hi16_lo16	reachable-code	0x80198f28	bss	viewer	lui+addiu		manual-decoded	reviewed	fdat.map asm review
 FDAT_092.BIN	0x801ed704	0x21a4		mips26	reachable-code	0x801ede14	load		jal		manual-decoded	reviewed	fdat.map asm review
 FDAT_092.BIN	0x801ed70c	0x21ac	0x801ed710	mips_hi16_lo16	reachable-code	0x801c776c	bss	vis_table_c	lui+lw		manual-decoded	reviewed	fdat.map asm review
@@ -10130,7 +10134,8 @@ FDAT_092.BIN	0x801ed810	0x22b0	0x801ed818	mips_hi16_lo16	reachable-code	0x801edf
 FDAT_092.BIN	0x801ed828	0x22c8	0x801ed830	mips_hi16_lo16	reachable-code	0x801edf60	bss	fdat_801edf60	lui+sw		manual-decoded	reviewed	fdat.map asm review
 FDAT_092.BIN	0x801ed834	0x22d4	0x801ed838	mips_hi16_lo16	reachable-code	0x801edf58	bss	fdat_801edf58	lui+lw		manual-decoded	reviewed	fdat.map asm review
 FDAT_092.BIN	0x801ed834	0x22d4	0x801ed874	mips_hi16_lo16	reachable-code	0x801edf58	bss	fdat_801edf58	lui+sw		manual-decoded	reviewed	fdat.map asm review
-FDAT_092.BIN	0x801ed844	0x22e4	0x801ed888	mips_hi16_lo16	reachable-code	0x801edf5c	bss	fdat_801edf5c	lui+lw		manual-decoded	reviewed	fdat.map asm review
+FDAT_092.BIN	0x801ed844	0x22e4	0x801ed8a8	mips_hi16_lo16	reachable-code	0x801edf60	bss	fdat_801edf60	lui+lw		manual-decoded	reviewed	fdat.map asm review
+FDAT_092.BIN	0x801ed844	0x22e4	0x801ed8e0	mips_hi16_lo16	reachable-code	0x801edf60	bss	fdat_801edf60	lui+sw		manual-decoded	reviewed	fdat.map asm review
 FDAT_092.BIN	0x801ed848	0x22e8	0x801ed84c	mips_hi16_lo16	reachable-code	0x801bbe34	bss	vis_table_a	lui+addiu		manual-decoded	reviewed	fdat.map asm review
 FDAT_092.BIN	0x801ed860	0x2300	0x801ed864	mips_hi16_lo16	reachable-code	0x801c2440	bss	vis_table_b	lui+addiu		manual-decoded	reviewed	fdat.map asm review
 FDAT_092.BIN	0x801ed878	0x2318	0x801ed87c	mips_hi16_lo16	reachable-code	0x801cba08	bss	DAT_801cba08	lui+addiu		manual-decoded	reviewed	fdat.map asm review
@@ -10139,6 +10144,7 @@ FDAT_092.BIN	0x801ed898	0x2338	0x801ed8a0	mips_hi16_lo16	reachable-code	0x801edf
 FDAT_092.BIN	0x801ed8a4	0x2344	0x801ed8a8	mips_hi16_lo16	reachable-code	0x801edf60	bss	fdat_801edf60	lui+lw		manual-decoded	reviewed	fdat.map asm review
 FDAT_092.BIN	0x801ed8a4	0x2344	0x801ed8e0	mips_hi16_lo16	reachable-code	0x801edf60	bss	fdat_801edf60	lui+sw		manual-decoded	reviewed	fdat.map asm review
 FDAT_092.BIN	0x801ed8b4	0x2354	0x801ed8e8	mips_hi16_lo16	reachable-code	0x801edf64	bss	fdat_801edf64	lui+lw		manual-decoded	reviewed	fdat.map asm review
+FDAT_092.BIN	0x801ed8b4	0x2354	0x801ed94c	mips_hi16_lo16	reachable-code	0x801edf64	bss	fdat_801edf64	lui+sw		manual-decoded	reviewed	fdat.map asm review
 FDAT_092.BIN	0x801ed8b8	0x2358	0x801ed8bc	mips_hi16_lo16	reachable-code	0x801cce4b	bss	DAT_801cba08	lui+lbu		manual-decoded	reviewed	fdat.map asm review
 FDAT_092.BIN	0x801ed8d0	0x2370	0x801ed8d8	mips_hi16_lo16	reachable-code	0x8018b6ee	bss	lighting	lui+sh		manual-decoded	reviewed	fdat.map asm review
 FDAT_092.BIN	0x801ed8e4	0x2384	0x801ed8e8	mips_hi16_lo16	reachable-code	0x801edf64	bss	fdat_801edf64	lui+lw		manual-decoded	reviewed	fdat.map asm review
@@ -10151,6 +10157,7 @@ FDAT_092.BIN	0x801ed958	0x23f8	0x801ed95c	mips_hi16_lo16	reachable-code	0x801cba
 FDAT_092.BIN	0x801ed974	0x2414	0x801ed978	mips_hi16_lo16	reachable-code	0x801edf68	bss	fdat_801edf68	lui+lw		manual-decoded	reviewed	fdat.map asm review
 FDAT_092.BIN	0x801ed974	0x2414	0x801ed9e0	mips_hi16_lo16	reachable-code	0x801edf68	bss	fdat_801edf68	lui+sw		manual-decoded	reviewed	fdat.map asm review
 FDAT_092.BIN	0x801ed984	0x2424	0x801eda0c	mips_hi16_lo16	reachable-code	0x801edf64	bss	fdat_801edf64	lui+lw		manual-decoded	reviewed	fdat.map asm review
+FDAT_092.BIN	0x801ed984	0x2424	0x801eda34	mips_hi16_lo16	reachable-code	0x801edf64	bss	fdat_801edf64	lui+sw		manual-decoded	reviewed	fdat.map asm review
 FDAT_092.BIN	0x801ed988	0x2428	0x801ed98c	mips_hi16_lo16	reachable-code	0x801c2808	bss	vis_table_b	lui+addiu		manual-decoded	reviewed	fdat.map asm review
 FDAT_092.BIN	0x801ed9a0	0x2440		mips26	reachable-code	0x801ed410	load		jal		manual-decoded	reviewed	fdat.map asm review
 FDAT_092.BIN	0x801ed9c0	0x2460		mips26	reachable-code	0x801eb7b4	load		jal		manual-decoded	reviewed	fdat.map asm review
@@ -10533,7 +10540,7 @@ FDAT_112.BIN	0x801ed77c	0x221c	0x801ed784	mips_hi16_lo16	reachable-code	0x801caf
 FDAT_112.BIN	0x801ed7ac	0x224c	0x801ed7b0	mips_hi16_lo16	reachable-code	0x801cba08	bss	DAT_801cba08	lui+addiu		manual-decoded	reviewed	fdat.map asm review
 FDAT_112.BIN	0x801ed7e4	0x2284	0x801ed83c	mips_hi16_lo16	reachable-code	0x801cba08	bss	DAT_801cba08	lui+addiu		manual-decoded	reviewed	fdat.map asm review
 FDAT_112.BIN	0x801ed814	0x22b4		mips26	reachable-code	0x801ed8cc	load		j		manual-decoded	reviewed	fdat.map asm review
-FDAT_112.BIN	0x801ed828	0x22c8	0x801ed8b8	mips_hi16_lo16	reachable-code	0x801cba08	bss	DAT_801cba08	lui+addiu		manual-decoded	reviewed	fdat.map asm review
+FDAT_112.BIN	0x801ed828	0x22c8	0x801ed83c	mips_hi16_lo16	reachable-code	0x801cba08	bss	DAT_801cba08	lui+addiu		manual-decoded	reviewed	fdat.map asm review
 FDAT_112.BIN	0x801ed82c	0x22cc		mips26	reachable-code	0x8004ae38	load		jal		manual-decoded	reviewed	fdat.map asm review
 FDAT_112.BIN	0x801ed834	0x22d4		mips26	reachable-code	0x801ed8cc	load		j		manual-decoded	reviewed	fdat.map asm review
 FDAT_112.BIN	0x801ed868	0x2308	0x801ed86c	mips_hi16_lo16	reachable-code	0x80198f28	bss	viewer	lui+addiu		manual-decoded	reviewed	fdat.map asm review
@@ -11095,6 +11102,53 @@ FDAT_142.BIN	0x801ed500	0x1fa0	0x801ed508	mips_hi16_lo16	reachable-code	0x801cba
 FDAT_142.BIN	0x801ed51c	0x1fbc	0x801ed540	mips_hi16_lo16	reachable-code	0x801edb00	bss	fdat_801edb00	lui+sw		manual-decoded	reviewed	fdat.map asm review
 FDAT_142.BIN	0x801ed520	0x1fc0	0x801ed52c	mips_hi16_lo16	reachable-code	0x801edb00	bss	fdat_801edb00	lui+sw		manual-decoded	reviewed	fdat.map asm review
 FDAT_142.BIN	0x801ed528	0x1fc8		mips26	reachable-code	0x801ed544	load		j		manual-decoded	reviewed	fdat.map asm review
+FDAT_142.BIN	0x801ed550	0x1ff0	0x801ed558	mips_hi16_lo16	reachable-code	0x801bc8f8	bss	vis_table_a	lui+addiu		manual-decoded	reviewed	fdat.map asm review
+FDAT_142.BIN	0x801ed55c	0x1ffc	0x801ed560	mips_hi16_lo16	reachable-code	0x801edaf8	bss	fdat_801edaf8	lui+lw		manual-decoded	reviewed	fdat.map asm review
+FDAT_142.BIN	0x801ed55c	0x1ffc	0x801ed5c4	mips_hi16_lo16	reachable-code	0x801edaf8	bss	fdat_801edaf8	lui+sw		manual-decoded	reviewed	fdat.map asm review
+FDAT_142.BIN	0x801ed590	0x2030	0x801ed594	mips_hi16_lo16	reachable-code	0x801990a0	bss	viewer	lui+lh		manual-decoded	reviewed	fdat.map asm review
+FDAT_142.BIN	0x801ed5a4	0x2044	0x801ed5b0	mips_hi16_lo16	reachable-code	0x801edaf4	bss	fdat_801edaf4	lui+sw		manual-decoded	reviewed	fdat.map asm review
+FDAT_142.BIN	0x801ed5ac	0x204c		mips26	reachable-code	0x801ed5c4	load		j		manual-decoded	reviewed	fdat.map asm review
+FDAT_142.BIN	0x801ed5b8	0x2058	0x801ed5bc	mips_hi16_lo16	reachable-code	0x801edaf4	bss	fdat_801edaf4	lui+sw		manual-decoded	reviewed	fdat.map asm review
+FDAT_142.BIN	0x801ed5b8	0x2058	0x801ed5cc	mips_hi16_lo16	reachable-code	0x801edaf4	bss	fdat_801edaf4	lui+lw		manual-decoded	reviewed	fdat.map asm review
+FDAT_142.BIN	0x801ed5c8	0x2068	0x801ed5cc	mips_hi16_lo16	reachable-code	0x801edaf4	bss	fdat_801edaf4	lui+lw		manual-decoded	reviewed	fdat.map asm review
+FDAT_142.BIN	0x801ed5d8	0x2078	0x801ed5dc	mips_hi16_lo16	reachable-code	0x801edaf8	bss	fdat_801edaf8	lui+lw		manual-decoded	reviewed	fdat.map asm review
+FDAT_142.BIN	0x801ed5e8	0x2088	0x801ed5f4	mips_hi16_lo16	reachable-code	0x801edaf4	bss	fdat_801edaf4	lui+lw		manual-decoded	reviewed	fdat.map asm review
+FDAT_142.BIN	0x801ed5e8	0x2088	0x801ed61c	mips_hi16_lo16	reachable-code	0x801edaf4	bss	fdat_801edaf4	lui+lw		manual-decoded	reviewed	fdat.map asm review
+FDAT_142.BIN	0x801ed5f0	0x2090	0x801ed5f4	mips_hi16_lo16	reachable-code	0x801edaf4	bss	fdat_801edaf4	lui+lw		manual-decoded	reviewed	fdat.map asm review
+FDAT_142.BIN	0x801ed5f0	0x2090	0x801ed61c	mips_hi16_lo16	reachable-code	0x801edaf4	bss	fdat_801edaf4	lui+lw		manual-decoded	reviewed	fdat.map asm review
+FDAT_142.BIN	0x801ed600	0x20a0	0x801ed650	mips_hi16_lo16	reachable-code	0x801edafc	bss	fdat_801edafc	lui+lw		manual-decoded	reviewed	fdat.map asm review
+FDAT_142.BIN	0x801ed600	0x20a0	0x801ed694	mips_hi16_lo16	reachable-code	0x801edafc	bss	fdat_801edafc	lui+sw		manual-decoded	reviewed	fdat.map asm review
+FDAT_142.BIN	0x801ed604	0x20a4	0x801ed608	mips_hi16_lo16	reachable-code	0x801edaf8	bss	fdat_801edaf8	lui+lw		manual-decoded	reviewed	fdat.map asm review
+FDAT_142.BIN	0x801ed628	0x20c8	0x801ed650	mips_hi16_lo16	reachable-code	0x801edafc	bss	fdat_801edafc	lui+lw		manual-decoded	reviewed	fdat.map asm review
+FDAT_142.BIN	0x801ed628	0x20c8	0x801ed694	mips_hi16_lo16	reachable-code	0x801edafc	bss	fdat_801edafc	lui+sw		manual-decoded	reviewed	fdat.map asm review
+FDAT_142.BIN	0x801ed638	0x20d8	0x801ed63c	mips_hi16_lo16	reachable-code	0x801edafc	bss	fdat_801edafc	lui+sw		manual-decoded	reviewed	fdat.map asm review
+FDAT_142.BIN	0x801ed640	0x20e0	0x801ed648	mips_hi16_lo16	reachable-code	0x80199140	bss	viewer	lui+sb		manual-decoded	reviewed	fdat.map asm review
+FDAT_142.BIN	0x801ed64c	0x20ec	0x801ed650	mips_hi16_lo16	reachable-code	0x801edafc	bss	fdat_801edafc	lui+lw		manual-decoded	reviewed	fdat.map asm review
+FDAT_142.BIN	0x801ed64c	0x20ec	0x801ed694	mips_hi16_lo16	reachable-code	0x801edafc	bss	fdat_801edafc	lui+sw		manual-decoded	reviewed	fdat.map asm review
+FDAT_142.BIN	0x801ed65c	0x20fc	0x801ed69c	mips_hi16_lo16	reachable-code	0x801edafc	bss	fdat_801edafc	lui+lw		manual-decoded	reviewed	fdat.map asm review
+FDAT_142.BIN	0x801ed65c	0x20fc	0x801ed6c8	mips_hi16_lo16	reachable-code	0x801edafc	bss	fdat_801edafc	lui+sw		manual-decoded	reviewed	fdat.map asm review
+FDAT_142.BIN	0x801ed65c	0x20fc	0x801ed6d4	mips_hi16_lo16	reachable-code	0x801edafc	bss	fdat_801edafc	lui+lw		manual-decoded	reviewed	fdat.map asm review
+FDAT_142.BIN	0x801ed660	0x2100	0x801ed664	mips_hi16_lo16	reachable-code	0x801b5920	bss	area_state	lui+addiu		manual-decoded	reviewed	fdat.map asm review
+FDAT_142.BIN	0x801ed698	0x2138	0x801ed69c	mips_hi16_lo16	reachable-code	0x801edafc	bss	fdat_801edafc	lui+lw		manual-decoded	reviewed	fdat.map asm review
+FDAT_142.BIN	0x801ed698	0x2138	0x801ed6c8	mips_hi16_lo16	reachable-code	0x801edafc	bss	fdat_801edafc	lui+sw		manual-decoded	reviewed	fdat.map asm review
+FDAT_142.BIN	0x801ed698	0x2138	0x801ed6d4	mips_hi16_lo16	reachable-code	0x801edafc	bss	fdat_801edafc	lui+lw		manual-decoded	reviewed	fdat.map asm review
+FDAT_142.BIN	0x801ed6b4	0x2154		mips26	reachable-code	0x801ed388	load		jal		manual-decoded	reviewed	fdat.map asm review
+FDAT_142.BIN	0x801ed6bc	0x215c		mips26	reachable-code	0x801ecf44	load		jal		manual-decoded	reviewed	fdat.map asm review
+FDAT_142.BIN	0x801ed6cc	0x216c	0x801ed6d0	mips_hi16_lo16	reachable-code	0x80199140	bss	viewer	lui+sb		manual-decoded	reviewed	fdat.map asm review
+FDAT_142.BIN	0x801ed6e0	0x2180	0x801ed70c	mips_hi16_lo16	reachable-code	0x801edb00	bss	fdat_801edb00	lui+lw		manual-decoded	reviewed	fdat.map asm review
+FDAT_142.BIN	0x801ed6e0	0x2180	0x801ed78c	mips_hi16_lo16	reachable-code	0x801edb00	bss	fdat_801edb00	lui+sw		manual-decoded	reviewed	fdat.map asm review
+FDAT_142.BIN	0x801ed6e4	0x2184	0x801ed6e8	mips_hi16_lo16	reachable-code	0x80198f28	bss	viewer	lui+addiu		manual-decoded	reviewed	fdat.map asm review
+FDAT_142.BIN	0x801ed708	0x21a8	0x801ed70c	mips_hi16_lo16	reachable-code	0x801edb00	bss	fdat_801edb00	lui+lw		manual-decoded	reviewed	fdat.map asm review
+FDAT_142.BIN	0x801ed708	0x21a8	0x801ed78c	mips_hi16_lo16	reachable-code	0x801edb00	bss	fdat_801edb00	lui+sw		manual-decoded	reviewed	fdat.map asm review
+FDAT_142.BIN	0x801ed718	0x21b8	0x801ed71c	mips_hi16_lo16	reachable-code	0x801990a0	bss	viewer	lui+lh		manual-decoded	reviewed	fdat.map asm review
+FDAT_142.BIN	0x801ed728	0x21c8	0x801ed72c	mips_hi16_lo16	reachable-code	0x801edaf4	bss	fdat_801edaf4	lui+lw		manual-decoded	reviewed	fdat.map asm review
+FDAT_142.BIN	0x801ed738	0x21d8	0x801ed73c	mips_hi16_lo16	reachable-code	0x801edaf8	bss	fdat_801edaf8	lui+lw		manual-decoded	reviewed	fdat.map asm review
+FDAT_142.BIN	0x801ed750	0x21f0		mips26	reachable-code	0x801ed388	load		jal		manual-decoded	reviewed	fdat.map asm review
+FDAT_142.BIN	0x801ed760	0x2200		mips26	reachable-code	0x801ed388	load		jal		manual-decoded	reviewed	fdat.map asm review
+FDAT_142.BIN	0x801ed768	0x2208		mips26	reachable-code	0x801ecf44	load		jal		manual-decoded	reviewed	fdat.map asm review
+FDAT_142.BIN	0x801ed770	0x2210		mips26	reachable-code	0x801ed410	load		jal		manual-decoded	reviewed	fdat.map asm review
+FDAT_142.BIN	0x801ed778	0x2218		mips26	reachable-code	0x801ed410	load		jal		manual-decoded	reviewed	fdat.map asm review
+FDAT_142.BIN	0x801ed780	0x2220		mips26	reachable-code	0x801ed410	load		jal		manual-decoded	reviewed	fdat.map asm review
 FDAT_142.BIN	0x801eda48	0x24e8	0x801eda50	mips_hi16_lo16	reachable-code	0x801c0270	bss	vis_table_a	lui+lw		manual-decoded	reviewed	fdat.map asm review
 FDAT_142.BIN	0x801eda68	0x2508		mips26	reachable-code	0x801ece7c	load		jal		manual-decoded	reviewed	fdat.map asm review
 FDAT_142.BIN	0x801edaa0	0x2540		mips26	reachable-code	0x801edac0	load		j		manual-decoded	reviewed	fdat.map asm review
@@ -11439,6 +11493,75 @@ FDAT_172.BIN	0x801ed3dc	0x1e7c		mips26	reachable-code	0x801ed3ec	load		j		manual
 FDAT_172.BIN	0x801ed3ec	0x1e8c		mips26	reachable-code	0x80054368	load		jal		manual-decoded	reviewed	fdat.common asm review
 FDAT_172.BIN	0x801ed41c	0x1ebc	0x801ed428	mips_hi16_lo16	reachable-code	0x801bd638	bss	vis_table_a	lui+addiu		manual-decoded	reviewed	fdat.common asm review
 FDAT_172.BIN	0x801ed468	0x1f08		mips26	reachable-code	0x8004af24	load		jal		manual-decoded	reviewed	fdat.common asm review
+FDAT_172.BIN	0x801ed4a0	0x1f40	0x801ed4a4	mips_hi16_lo16	reachable-code	0x801bc8f8	bss	vis_table_a	lui+addiu		manual-decoded	reviewed	fdat.map asm review
+FDAT_172.BIN	0x801ed4ac	0x1f4c	0x801ed4b0	mips_hi16_lo16	reachable-code	0x801cb348	bss	vis_table_c	lui+addiu		manual-decoded	reviewed	fdat.map asm review
+FDAT_172.BIN	0x801ed4b4	0x1f54	0x801ed4c0	mips_hi16_lo16	reachable-code	0x801c2440	bss	vis_table_b	lui+addiu		manual-decoded	reviewed	fdat.map asm review
+FDAT_172.BIN	0x801ed4b8	0x1f58	0x801ed4bc	mips_hi16_lo16	reachable-code	0x801cce48	bss	DAT_801cba08	lui+lw		manual-decoded	reviewed	fdat.map asm review
+FDAT_172.BIN	0x801ed4dc	0x1f7c	0x801ed4ec	mips_hi16_lo16	reachable-code	0x801edfd0	bss	fdat_801edfd0	lui+sw		manual-decoded	reviewed	fdat.map asm review
+FDAT_172.BIN	0x801ed4f4	0x1f94		mips26	reachable-code	0x801ed50c	load		j		manual-decoded	reviewed	fdat.map asm review
+FDAT_172.BIN	0x801ed504	0x1fa4	0x801ed508	mips_hi16_lo16	reachable-code	0x801edfd0	bss	fdat_801edfd0	lui+sw		manual-decoded	reviewed	fdat.map asm review
+FDAT_172.BIN	0x801ed518	0x1fb8	0x801ed51c	mips_hi16_lo16	reachable-code	0x801cce48	bss	DAT_801cba08	lui+lw		manual-decoded	reviewed	fdat.map asm review
+FDAT_172.BIN	0x801ed548	0x1fe8	0x801ed570	mips_hi16_lo16	reachable-code	0x801edfd4	bss	fdat_801edfd4	lui+sw		manual-decoded	reviewed	fdat.map asm review
+FDAT_172.BIN	0x801ed554	0x1ff4	0x801ed560	mips_hi16_lo16	reachable-code	0x801edfd4	bss	fdat_801edfd4	lui+sw		manual-decoded	reviewed	fdat.map asm review
+FDAT_172.BIN	0x801ed568	0x2008		mips26	reachable-code	0x801ed5a4	load		j		manual-decoded	reviewed	fdat.map asm review
+FDAT_172.BIN	0x801ed58c	0x202c		mips26	reachable-code	0x801ed5a4	load		j		manual-decoded	reviewed	fdat.map asm review
+FDAT_172.BIN	0x801ed594	0x2034	0x801ed5a0	mips_hi16_lo16	reachable-code	0x801edfd4	bss	fdat_801edfd4	lui+sw		manual-decoded	reviewed	fdat.map asm review
+FDAT_172.BIN	0x801ed5a4	0x2044	0x801ed5a8	mips_hi16_lo16	reachable-code	0x801cce48	bss	DAT_801cba08	lui+lw		manual-decoded	reviewed	fdat.map asm review
+FDAT_172.BIN	0x801ed5bc	0x205c	0x801ed5d8	mips_hi16_lo16	reachable-code	0x801edfd8	bss	fdat_801edfd8	lui+sw		manual-decoded	reviewed	fdat.map asm review
+FDAT_172.BIN	0x801ed5c0	0x2060	0x801ed5c4	mips_hi16_lo16	reachable-code	0x801edfd8	bss	fdat_801edfd8	lui+sw		manual-decoded	reviewed	fdat.map asm review
+FDAT_172.BIN	0x801ed5cc	0x206c		mips26	reachable-code	0x801ed5dc	load		j		manual-decoded	reviewed	fdat.map asm review
+FDAT_172.BIN	0x801ed5dc	0x207c	0x801ed5e4	mips_hi16_lo16	reachable-code	0x801cba08	bss	DAT_801cba08	lui+addiu		manual-decoded	reviewed	fdat.map asm review
+FDAT_172.BIN	0x801ed618	0x20b8	0x801ed620	mips_hi16_lo16	reachable-code	0x801bc8f8	bss	vis_table_a	lui+addiu		manual-decoded	reviewed	fdat.map asm review
+FDAT_172.BIN	0x801ed624	0x20c4	0x801ed62c	mips_hi16_lo16	reachable-code	0x801c2440	bss	vis_table_b	lui+addiu		manual-decoded	reviewed	fdat.map asm review
+FDAT_172.BIN	0x801ed634	0x20d4	0x801ed638	mips_hi16_lo16	reachable-code	0x801edfd0	bss	fdat_801edfd0	lui+lw		manual-decoded	reviewed	fdat.map asm review
+FDAT_172.BIN	0x801ed634	0x20d4	0x801ed684	mips_hi16_lo16	reachable-code	0x801edfd0	bss	fdat_801edfd0	lui+sw		manual-decoded	reviewed	fdat.map asm review
+FDAT_172.BIN	0x801ed668	0x2108		mips26	reachable-code	0x801ede00	load		jal		manual-decoded	reviewed	fdat.map asm review
+FDAT_172.BIN	0x801ed670	0x2110		mips26	reachable-code	0x801edef8	load		jal		manual-decoded	reviewed	fdat.map asm review
+FDAT_172.BIN	0x801ed67c	0x211c	0x801ed680	mips_hi16_lo16	reachable-code	0x801cba08	bss	DAT_801cba08	lui+addiu		manual-decoded	reviewed	fdat.map asm review
+FDAT_172.BIN	0x801ed698	0x2138	0x801ed69c	mips_hi16_lo16	reachable-code	0x801edfd4	bss	fdat_801edfd4	lui+lw		manual-decoded	reviewed	fdat.map asm review
+FDAT_172.BIN	0x801ed698	0x2138	0x801ed6d4	mips_hi16_lo16	reachable-code	0x801edfd4	bss	fdat_801edfd4	lui+sw		manual-decoded	reviewed	fdat.map asm review
+FDAT_172.BIN	0x801ed698	0x2138	0x801ed6f0	mips_hi16_lo16	reachable-code	0x801edfd4	bss	fdat_801edfd4	lui+sw		manual-decoded	reviewed	fdat.map asm review
+FDAT_172.BIN	0x801ed698	0x2138	0x801ed720	mips_hi16_lo16	reachable-code	0x801edfd4	bss	fdat_801edfd4	lui+lw		manual-decoded	reviewed	fdat.map asm review
+FDAT_172.BIN	0x801ed698	0x2138	0x801ed79c	mips_hi16_lo16	reachable-code	0x801edfd4	bss	fdat_801edfd4	lui+sw		manual-decoded	reviewed	fdat.map asm review
+FDAT_172.BIN	0x801ed6a8	0x2148	0x801ed6b0	mips_hi16_lo16	reachable-code	0x801cba08	bss	DAT_801cba08	lui+addiu		manual-decoded	reviewed	fdat.map asm review
+FDAT_172.BIN	0x801ed6c8	0x2168		mips26	reachable-code	0x801ecf44	load		jal		manual-decoded	reviewed	fdat.map asm review
+FDAT_172.BIN	0x801ed71c	0x21bc	0x801ed720	mips_hi16_lo16	reachable-code	0x801edfd4	bss	fdat_801edfd4	lui+lw		manual-decoded	reviewed	fdat.map asm review
+FDAT_172.BIN	0x801ed71c	0x21bc	0x801ed79c	mips_hi16_lo16	reachable-code	0x801edfd4	bss	fdat_801edfd4	lui+sw		manual-decoded	reviewed	fdat.map asm review
+FDAT_172.BIN	0x801ed748	0x21e8	0x801ed750	mips_hi16_lo16	reachable-code	0x801cba08	bss	DAT_801cba08	lui+addiu		manual-decoded	reviewed	fdat.map asm review
+FDAT_172.BIN	0x801ed784	0x2224		mips26	reachable-code	0x801ed388	load		jal		manual-decoded	reviewed	fdat.map asm review
+FDAT_172.BIN	0x801ed7b8	0x2258	0x801ed7bc	mips_hi16_lo16	reachable-code	0x801cba08	bss	DAT_801cba08	lui+addiu		manual-decoded	reviewed	fdat.map asm review
+FDAT_172.BIN	0x801ed7b8	0x2258	0x801ed7d8	mips_hi16_lo16	reachable-code	0x801cba08	bss	DAT_801cba08	lui+addiu		manual-decoded	reviewed	fdat.map asm review
+FDAT_172.BIN	0x801ed7d0	0x2270	0x801ed7d8	mips_hi16_lo16	reachable-code	0x801cba08	bss	DAT_801cba08	lui+addiu		manual-decoded	reviewed	fdat.map asm review
+FDAT_172.BIN	0x801ed7ec	0x228c	0x801ed858	mips_hi16_lo16	reachable-code	0x801edfd8	bss	fdat_801edfd8	lui+lw		manual-decoded	reviewed	fdat.map asm review
+FDAT_172.BIN	0x801ed7ec	0x228c	0x801ed878	mips_hi16_lo16	reachable-code	0x801edfd8	bss	fdat_801edfd8	lui+sw		manual-decoded	reviewed	fdat.map asm review
+FDAT_172.BIN	0x801ed7f4	0x2294	0x801ed7f8	mips_hi16_lo16	reachable-code	0x80198f28	bss	viewer	lui+addiu		manual-decoded	reviewed	fdat.map asm review
+FDAT_172.BIN	0x801ed81c	0x22bc		mips26	reachable-code	0x801ed388	load		jal		manual-decoded	reviewed	fdat.map asm review
+FDAT_172.BIN	0x801ed854	0x22f4	0x801ed858	mips_hi16_lo16	reachable-code	0x801edfd8	bss	fdat_801edfd8	lui+lw		manual-decoded	reviewed	fdat.map asm review
+FDAT_172.BIN	0x801ed854	0x22f4	0x801ed878	mips_hi16_lo16	reachable-code	0x801edfd8	bss	fdat_801edfd8	lui+sw		manual-decoded	reviewed	fdat.map asm review
+FDAT_172.BIN	0x801ed864	0x2304	0x801ed8ac	mips_hi16_lo16	reachable-code	0x801edfd8	bss	fdat_801edfd8	lui+lw		manual-decoded	reviewed	fdat.map asm review
+FDAT_172.BIN	0x801ed864	0x2304	0x801ed8fc	mips_hi16_lo16	reachable-code	0x801edfd8	bss	fdat_801edfd8	lui+sw		manual-decoded	reviewed	fdat.map asm review
+FDAT_172.BIN	0x801ed87c	0x231c	0x801ed880	mips_hi16_lo16	reachable-code	0x8018b6d0	bss	lighting	lui+addiu		manual-decoded	reviewed	fdat.map asm review
+FDAT_172.BIN	0x801ed890	0x2330	0x801ed894	mips_hi16_lo16	reachable-code	0x801cba08	bss	DAT_801cba08	lui+addiu		manual-decoded	reviewed	fdat.map asm review
+FDAT_172.BIN	0x801ed8a8	0x2348	0x801ed8ac	mips_hi16_lo16	reachable-code	0x801edfd8	bss	fdat_801edfd8	lui+lw		manual-decoded	reviewed	fdat.map asm review
+FDAT_172.BIN	0x801ed8a8	0x2348	0x801ed8fc	mips_hi16_lo16	reachable-code	0x801edfd8	bss	fdat_801edfd8	lui+sw		manual-decoded	reviewed	fdat.map asm review
+FDAT_172.BIN	0x801ed8d4	0x2374	0x801ed8d8	mips_hi16_lo16	reachable-code	0x80198f28	bss	viewer	lui+addiu		manual-decoded	reviewed	fdat.map asm review
+FDAT_172.BIN	0x801ed8f0	0x2390		mips26	reachable-code	0x801ed388	load		jal		manual-decoded	reviewed	fdat.map asm review
+FDAT_172.BIN	0x801edbfc	0x269c	0x801edc00	mips_hi16_lo16	reachable-code	0x801ba138	bss	vis_table_a	lui+addiu		manual-decoded	reviewed	fdat.map asm review
+FDAT_172.BIN	0x801edc04	0x26a4	0x801edc08	mips_hi16_lo16	reachable-code	0x801edfd0	bss	fdat_801edfd0	lui+lw		manual-decoded	reviewed	fdat.map asm review
+FDAT_172.BIN	0x801edc50	0x26f0		mips26	reachable-code	0x801edc5c	load		j		manual-decoded	reviewed	fdat.map asm review
+FDAT_172.BIN	0x801edc6c	0x270c		mips26	reachable-code	0x801ece7c	load		jal		manual-decoded	reviewed	fdat.map asm review
+FDAT_172.BIN	0x801edca4	0x2744		mips26	reachable-code	0x801edd04	load		j		manual-decoded	reviewed	fdat.map asm review
+FDAT_172.BIN	0x801edccc	0x276c	0x801edcd0	mips_hi16_lo16	reachable-code	0x801edfd4	bss	fdat_801edfd4	lui+lw		manual-decoded	reviewed	fdat.map asm review
+FDAT_172.BIN	0x801edcec	0x278c		mips26	reachable-code	0x801eb7b4	load		jal		manual-decoded	reviewed	fdat.map asm review
+FDAT_172.BIN	0x801edcf4	0x2794		mips26	reachable-code	0x801edd04	load		j		manual-decoded	reviewed	fdat.map asm review
+FDAT_172.BIN	0x801edcfc	0x279c		mips26	reachable-code	0x801ed93c	load		jal		manual-decoded	reviewed	fdat.map asm review
+FDAT_172.BIN	0x801edd14	0x27b4		mips26	reachable-code	0x801ebec4	load		jal		manual-decoded	reviewed	fdat.map asm review
+FDAT_172.BIN	0x801edd50	0x27f0	0x801edd54	mips_hi16_lo16	reachable-code	0x80198f28	bss	viewer	lui+addiu		manual-decoded	reviewed	fdat.map asm review
+FDAT_172.BIN	0x801eddbc	0x285c		mips26	reachable-code	0x8004f53c	load		jal		manual-decoded	reviewed	fdat.map asm review
+FDAT_172.BIN	0x801eddcc	0x286c	0x801eddec	mips_hi16_lo16	reachable-code	0x801cd0e0	bss	DAT_801cd0e0	lui+sw		manual-decoded	reviewed	fdat.map asm review
+FDAT_172.BIN	0x801eddd0	0x2870	0x801eddd8	mips_hi16_lo16	reachable-code	0x801cd0e0	bss	DAT_801cd0e0	lui+sw		manual-decoded	reviewed	fdat.map asm review
+FDAT_172.BIN	0x801edddc	0x287c	0x801edde4	mips_hi16_lo16	reachable-code	0x801edfd0	bss	fdat_801edfd0	lui+sw		manual-decoded	reviewed	fdat.map asm review
+FDAT_172.BIN	0x801edde0	0x2880		mips26	reachable-code	0x801eddf0	load		j		manual-decoded	reviewed	fdat.map asm review
 FDAT_172.BIN	0x801ede0c	0x28ac	0x801ede14	mips_hi16_lo16	reachable-code	0x801cb348	bss	vis_table_c	lui+addiu		manual-decoded	reviewed	fdat.map asm review
 FDAT_172.BIN	0x801ede0c	0x28ac	0x801ede18	mips_hi16_lo16	reachable-code	0x801cb348	bss	vis_table_c	lui+lhu		manual-decoded	reviewed	fdat.map asm review
 FDAT_172.BIN	0x801ede74	0x2914		mips26	reachable-code	0x80033db8	load		jal		manual-decoded	reviewed	fdat.map asm review
@@ -11630,6 +11753,32 @@ FDAT_182.BIN	0x801ed92c	0x23cc		mips26	reachable-code	0x801ebec4	load		jal		manu
 FDAT_182.BIN	0x801ed954	0x23f4	0x801ed958	mips_hi16_lo16	reachable-code	0x801bbbb8	bss	vis_table_a	lui+addiu		manual-decoded	reviewed	fdat.map asm review
 FDAT_182.BIN	0x801ed95c	0x23fc	0x801ed960	mips_hi16_lo16	reachable-code	0x801cba08	bss	DAT_801cba08	lui+addiu		manual-decoded	reviewed	fdat.map asm review
 FDAT_182.BIN	0x801ed9b4	0x2454		mips26	reachable-code	0x801ed388	load		jal		manual-decoded	reviewed	fdat.map asm review
+FDAT_182.BIN	0x801ed9d8	0x2478	0x801ed9e0	mips_hi16_lo16	reachable-code	0x801bbbb8	bss	vis_table_a	lui+addiu		manual-decoded	reviewed	fdat.map asm review
+FDAT_182.BIN	0x801ed9f4	0x2494		mips26	reachable-code	0x80057c54	load		jal		manual-decoded	reviewed	fdat.map asm review
+FDAT_182.BIN	0x801eda0c	0x24ac		mips26	reachable-code	0x800500ac	load		jal		manual-decoded	reviewed	fdat.map asm review
+FDAT_182.BIN	0x801eda14	0x24b4		mips26	reachable-code	0x8004e2d8	load		jal		manual-decoded	reviewed	fdat.map asm review
+FDAT_182.BIN	0x801eda3c	0x24dc	0x801eda40	mips_hi16_lo16	reachable-code	0x80198f28	bss	viewer	lui+addiu		manual-decoded	reviewed	fdat.map asm review
+FDAT_182.BIN	0x801eda54	0x24f4		mips26	reachable-code	0x801eda88	load		j		manual-decoded	reviewed	fdat.map asm review
+FDAT_182.BIN	0x801eda70	0x2510	0x801eda74	mips_hi16_lo16	reachable-code	0x80198f28	bss	viewer	lui+addiu		manual-decoded	reviewed	fdat.map asm review
+FDAT_182.BIN	0x801eda88	0x2528	0x801eda8c	mips_hi16_lo16	reachable-code	0x80198f28	bss	viewer	lui+addiu		manual-decoded	reviewed	fdat.map asm review
+FDAT_182.BIN	0x801edad8	0x2578		mips26	reachable-code	0x800500ac	load		jal		manual-decoded	reviewed	fdat.map asm review
+FDAT_182.BIN	0x801edae0	0x2580		mips26	reachable-code	0x8004e324	load		jal		manual-decoded	reviewed	fdat.map asm review
+FDAT_182.BIN	0x801edb10	0x25b0		mips26	reachable-code	0x801ed410	load		jal		manual-decoded	reviewed	fdat.map asm review
+FDAT_182.BIN	0x801edb18	0x25b8	0x801edb1c	mips_hi16_lo16	reachable-code	0x8015d090	bss	world_state	lui+addiu		manual-decoded	reviewed	fdat.map asm review
+FDAT_182.BIN	0x801edb54	0x25f4		mips26	reachable-code	0x800237a8	load		jal		manual-decoded	reviewed	fdat.map asm review
+FDAT_182.BIN	0x801edb74	0x2614		mips26	reachable-code	0x801eb7b4	load		jal		manual-decoded	reviewed	fdat.map asm review
+FDAT_182.BIN	0x801edb7c	0x261c	0x801edb80	mips_hi16_lo16	reachable-code	0x801c02a0	bss	vis_table_a	lui+sb		manual-decoded	reviewed	fdat.map asm review
+FDAT_182.BIN	0x801edb84	0x2624		mips26	reachable-code	0x80015ad4	load		jal		manual-decoded	reviewed	fdat.map asm review
+FDAT_182.BIN	0x801edb8c	0x262c		mips26	reachable-code	0x80057c54	load		jal		manual-decoded	reviewed	fdat.map asm review
+FDAT_182.BIN	0x801edba0	0x2640		mips26	reachable-code	0x800500ac	load		jal		manual-decoded	reviewed	fdat.map asm review
+FDAT_182.BIN	0x801edba8	0x2648		mips26	reachable-code	0x80057a3c	load		jal		manual-decoded	reviewed	fdat.map asm review
+FDAT_182.BIN	0x801edbb8	0x2658	0x801edbc0	mips_hi16_lo16	reachable-code	0x801cba08	bss	DAT_801cba08	lui+addiu		manual-decoded	reviewed	fdat.map asm review
+FDAT_182.BIN	0x801edbe0	0x2680		mips26	reachable-code	0x801ed388	load		jal		manual-decoded	reviewed	fdat.map asm review
+FDAT_182.BIN	0x801edbf8	0x2698		mips26	reachable-code	0x801edc04	load		j		manual-decoded	reviewed	fdat.map asm review
+FDAT_182.BIN	0x801edc04	0x26a4	0x801edc08	mips_hi16_lo16	reachable-code	0x801ba138	bss	vis_table_a	lui+addiu		manual-decoded	reviewed	fdat.map asm review
+FDAT_182.BIN	0x801edc10	0x26b0		mips26	reachable-code	0x801ed65c	load		jal		manual-decoded	reviewed	fdat.map asm review
+FDAT_182.BIN	0x801edc18	0x26b8		mips26	reachable-code	0x80042c10	load		jal		manual-decoded	reviewed	fdat.map asm review
+FDAT_182.BIN	0x801edc20	0x26c0	0x801edc24	mips_hi16_lo16	reachable-code	0x801edc50	bss	fdat_801edc50	lui+sw		manual-decoded	reviewed	fdat.map asm review
 FDAT_202.BIN	0x801eb564	0x4		mips32_candidate	data-word	0x801ed498	load	fdat_801ed498	word		manual-decoded	reviewed	fdat.header rodata review
 FDAT_202.BIN	0x801eb568	0x8		mips32_candidate	data-word	0x801ed560	load	func_801ed560	word		manual-decoded	reviewed	fdat.header rodata review
 FDAT_202.BIN	0x801eb56c	0xc		mips32_candidate	data-word	0x801ed498	load	fdat_801ed498	word		manual-decoded	reviewed	fdat.header rodata review
@@ -11789,6 +11938,18 @@ FDAT_202.BIN	0x801ed524	0x1fc4	0x801ed554	mips_hi16_lo16	reachable-code	0x8018b7
 FDAT_202.BIN	0x801ed528	0x1fc8		mips26	reachable-code	0x801ed554	load		j		manual-decoded	reviewed	fdat.map asm review
 FDAT_202.BIN	0x801ed530	0x1fd0	0x801ed534	mips_hi16_lo16	reachable-code	0x801cce48	bss	DAT_801cba08	lui+lw		manual-decoded	reviewed	fdat.map asm review
 FDAT_202.BIN	0x801ed54c	0x1fec	0x801ed554	mips_hi16_lo16	reachable-code	0x8018b704	bss	lighting	lui+sh		manual-decoded	reviewed	fdat.map asm review
+FDAT_202.BIN	0x801ed560	0x2000	0x801ed574	mips_hi16_lo16	reachable-code	0x801c2d88	bss	vis_table_b	lui+addiu		manual-decoded	reviewed	fdat.map asm review
+FDAT_202.BIN	0x801ed564	0x2004	0x801ed568	mips_hi16_lo16	reachable-code	0x801eda08	bss	fdat_801eda08	lui+lw		manual-decoded	reviewed	fdat.map asm review
+FDAT_202.BIN	0x801ed5d8	0x2078		mips26	reachable-code	0x801ed5f0	load		j		manual-decoded	reviewed	fdat.map asm review
+FDAT_202.BIN	0x801ed5fc	0x209c	0x801ed618	mips_hi16_lo16	reachable-code	0x801eda08	bss	fdat_801eda08	lui+sw		manual-decoded	reviewed	fdat.map asm review
+FDAT_202.BIN	0x801ed600	0x20a0	0x801ed604	mips_hi16_lo16	reachable-code	0x801cce48	bss	DAT_801cba08	lui+lw		manual-decoded	reviewed	fdat.map asm review
+FDAT_202.BIN	0x801ed61c	0x20bc	0x801ed704	mips_hi16_lo16	reachable-code	0x8018b704	bss	lighting	lui+sh		manual-decoded	reviewed	fdat.map asm review
+FDAT_202.BIN	0x801ed620	0x20c0		mips26	reachable-code	0x801ed704	load		j		manual-decoded	reviewed	fdat.map asm review
+FDAT_202.BIN	0x801ed628	0x20c8	0x801ed62c	mips_hi16_lo16	reachable-code	0x801eda08	bss	fdat_801eda08	lui+lw		manual-decoded	reviewed	fdat.map asm review
+FDAT_202.BIN	0x801ed648	0x20e8	0x801ed66c	mips_hi16_lo16	reachable-code	0x801c2230	bss	vis_table_b	lui+addiu		manual-decoded	reviewed	fdat.map asm review
+FDAT_202.BIN	0x801ed6e0	0x2180	0x801ed6e4	mips_hi16_lo16	reachable-code	0x801cce48	bss	DAT_801cba08	lui+lw		manual-decoded	reviewed	fdat.map asm review
+FDAT_202.BIN	0x801ed6e8	0x2188	0x801ed6f8	mips_hi16_lo16	reachable-code	0x801eda08	bss	fdat_801eda08	lui+sw		manual-decoded	reviewed	fdat.map asm review
+FDAT_202.BIN	0x801ed6fc	0x219c	0x801ed704	mips_hi16_lo16	reachable-code	0x8018b704	bss	lighting	lui+sh		manual-decoded	reviewed	fdat.map asm review
 FDAT_202.BIN	0x801ed958	0x23f8	0x801ed960	mips_hi16_lo16	reachable-code	0x801c0270	bss	vis_table_a	lui+lw		manual-decoded	reviewed	fdat.map asm review
 FDAT_202.BIN	0x801ed978	0x2418		mips26	reachable-code	0x801ece7c	load		jal		manual-decoded	reviewed	fdat.map asm review
 FDAT_202.BIN	0x801ed9b0	0x2450		mips26	reachable-code	0x801ed9d0	load		j		manual-decoded	reviewed	fdat.map asm review
@@ -11945,6 +12106,58 @@ FDAT_212.BIN	0x801ed3dc	0x1e7c		mips26	reachable-code	0x801ed3ec	load		j		manual
 FDAT_212.BIN	0x801ed3ec	0x1e8c		mips26	reachable-code	0x80054368	load		jal		manual-decoded	reviewed	fdat.common asm review
 FDAT_212.BIN	0x801ed41c	0x1ebc	0x801ed428	mips_hi16_lo16	reachable-code	0x801bd638	bss	vis_table_a	lui+addiu		manual-decoded	reviewed	fdat.common asm review
 FDAT_212.BIN	0x801ed468	0x1f08		mips26	reachable-code	0x8004af24	load		jal		manual-decoded	reviewed	fdat.common asm review
+FDAT_212.BIN	0x801ed4a0	0x1f40	0x801ed4a4	mips_hi16_lo16	reachable-code	0x801cb348	bss	vis_table_c	lui+addiu		manual-decoded	reviewed	fdat.map asm review
+FDAT_212.BIN	0x801ed4a8	0x1f48	0x801ed4ac	mips_hi16_lo16	reachable-code	0x801cce4c	bss	DAT_801cba08	lui+lw		manual-decoded	reviewed	fdat.map asm review
+FDAT_212.BIN	0x801ed4cc	0x1f6c	0x801ed4e0	mips_hi16_lo16	reachable-code	0x801edcd4	bss	fdat_801edcd4	lui+sw		manual-decoded	reviewed	fdat.map asm review
+FDAT_212.BIN	0x801ed4d0	0x1f70	0x801ed4dc	mips_hi16_lo16	reachable-code	0x801edcd4	bss	fdat_801edcd4	lui+sw		manual-decoded	reviewed	fdat.map asm review
+FDAT_212.BIN	0x801ed4d8	0x1f78		mips26	reachable-code	0x801ed4e4	load		j		manual-decoded	reviewed	fdat.map asm review
+FDAT_212.BIN	0x801ed4e4	0x1f84	0x801ed4e8	mips_hi16_lo16	reachable-code	0x801cce4c	bss	DAT_801cba08	lui+lw		manual-decoded	reviewed	fdat.map asm review
+FDAT_212.BIN	0x801ed4fc	0x1f9c	0x801ed568	mips_hi16_lo16	reachable-code	0x801edcd8	bss	fdat_801edcd8	lui+sw		manual-decoded	reviewed	fdat.map asm review
+FDAT_212.BIN	0x801ed500	0x1fa0	0x801ed504	mips_hi16_lo16	reachable-code	0x801c2230	bss	vis_table_b	lui+addiu		manual-decoded	reviewed	fdat.map asm review
+FDAT_212.BIN	0x801ed508	0x1fa8	0x801ed510	mips_hi16_lo16	reachable-code	0x801edcd8	bss	fdat_801edcd8	lui+sw		manual-decoded	reviewed	fdat.map asm review
+FDAT_212.BIN	0x801ed544	0x1fe4	0x801ed558	mips_hi16_lo16	reachable-code	0x801edcdc	bss	fdat_801edcdc	lui+sw		manual-decoded	reviewed	fdat.map asm review
+FDAT_212.BIN	0x801ed548	0x1fe8	0x801ed54c	mips_hi16_lo16	reachable-code	0x801b5948	bss	vis_lists	lui+addiu		manual-decoded	reviewed	fdat.map asm review
+FDAT_212.BIN	0x801ed560	0x2000		mips26	reachable-code	0x801ed58c	load		j		manual-decoded	reviewed	fdat.map asm review
+FDAT_212.BIN	0x801ed56c	0x200c	0x801ed578	mips_hi16_lo16	reachable-code	0x801edcdc	bss	fdat_801edcdc	lui+sw		manual-decoded	reviewed	fdat.map asm review
+FDAT_212.BIN	0x801ed570	0x2010	0x801ed574	mips_hi16_lo16	reachable-code	0x801b5948	bss	vis_lists	lui+addiu		manual-decoded	reviewed	fdat.map asm review
+FDAT_212.BIN	0x801ed598	0x2038	0x801ed5a0	mips_hi16_lo16	reachable-code	0x801cb348	bss	vis_table_c	lui+addiu		manual-decoded	reviewed	fdat.map asm review
+FDAT_212.BIN	0x801ed5ac	0x204c	0x801ed5b4	mips_hi16_lo16	reachable-code	0x801c3200	bss	vis_table_b	lui+addiu		manual-decoded	reviewed	fdat.map asm review
+FDAT_212.BIN	0x801ed5cc	0x206c	0x801ed5d4	mips_hi16_lo16	reachable-code	0x801edcd4	bss	fdat_801edcd4	lui+lw		manual-decoded	reviewed	fdat.map asm review
+FDAT_212.BIN	0x801ed5cc	0x206c	0x801ed5fc	mips_hi16_lo16	reachable-code	0x801edcd4	bss	fdat_801edcd4	lui+sw		manual-decoded	reviewed	fdat.map asm review
+FDAT_212.BIN	0x801ed5cc	0x206c	0x801ed690	mips_hi16_lo16	reachable-code	0x801edcd4	bss	fdat_801edcd4	lui+sw		manual-decoded	reviewed	fdat.map asm review
+FDAT_212.BIN	0x801ed5e4	0x2084		mips26	reachable-code	0x801edbd0	load		jal		manual-decoded	reviewed	fdat.map asm review
+FDAT_212.BIN	0x801ed5ec	0x208c	0x801ed5f0	mips_hi16_lo16	reachable-code	0x801cba08	bss	DAT_801cba08	lui+addiu		manual-decoded	reviewed	fdat.map asm review
+FDAT_212.BIN	0x801ed60c	0x20ac		mips26	reachable-code	0x801ed694	load		j		manual-decoded	reviewed	fdat.map asm review
+FDAT_212.BIN	0x801ed624	0x20c4		mips26	reachable-code	0x80023208	load		jal		manual-decoded	reviewed	fdat.map asm review
+FDAT_212.BIN	0x801ed640	0x20e0		mips26	reachable-code	0x80035b80	load		jal		manual-decoded	reviewed	fdat.map asm review
+FDAT_212.BIN	0x801ed68c	0x212c	0x801ed698	mips_hi16_lo16	reachable-code	0x801edcd8	bss	fdat_801edcd8	lui+lw		manual-decoded	reviewed	fdat.map asm review
+FDAT_212.BIN	0x801ed68c	0x212c	0x801ed6c0	mips_hi16_lo16	reachable-code	0x801edcd8	bss	fdat_801edcd8	lui+sw		manual-decoded	reviewed	fdat.map asm review
+FDAT_212.BIN	0x801ed68c	0x212c	0x801ed758	mips_hi16_lo16	reachable-code	0x801edcd8	bss	fdat_801edcd8	lui+sw		manual-decoded	reviewed	fdat.map asm review
+FDAT_212.BIN	0x801ed68c	0x212c	0x801ed780	mips_hi16_lo16	reachable-code	0x801edcd8	bss	fdat_801edcd8	lui+sw		manual-decoded	reviewed	fdat.map asm review
+FDAT_212.BIN	0x801ed694	0x2134	0x801ed698	mips_hi16_lo16	reachable-code	0x801edcd8	bss	fdat_801edcd8	lui+lw		manual-decoded	reviewed	fdat.map asm review
+FDAT_212.BIN	0x801ed694	0x2134	0x801ed6c0	mips_hi16_lo16	reachable-code	0x801edcd8	bss	fdat_801edcd8	lui+sw		manual-decoded	reviewed	fdat.map asm review
+FDAT_212.BIN	0x801ed694	0x2134	0x801ed758	mips_hi16_lo16	reachable-code	0x801edcd8	bss	fdat_801edcd8	lui+sw		manual-decoded	reviewed	fdat.map asm review
+FDAT_212.BIN	0x801ed694	0x2134	0x801ed780	mips_hi16_lo16	reachable-code	0x801edcd8	bss	fdat_801edcd8	lui+sw		manual-decoded	reviewed	fdat.map asm review
+FDAT_212.BIN	0x801ed6a8	0x2148		mips26	reachable-code	0x801edbd0	load		jal		manual-decoded	reviewed	fdat.map asm review
+FDAT_212.BIN	0x801ed6b0	0x2150	0x801ed6b4	mips_hi16_lo16	reachable-code	0x801cba08	bss	DAT_801cba08	lui+addiu		manual-decoded	reviewed	fdat.map asm review
+FDAT_212.BIN	0x801ed6d0	0x2170		mips26	reachable-code	0x801ed784	load		j		manual-decoded	reviewed	fdat.map asm review
+FDAT_212.BIN	0x801ed6e4	0x2184		mips26	reachable-code	0x80023208	load		jal		manual-decoded	reviewed	fdat.map asm review
+FDAT_212.BIN	0x801ed700	0x21a0		mips26	reachable-code	0x80035b80	load		jal		manual-decoded	reviewed	fdat.map asm review
+FDAT_212.BIN	0x801ed74c	0x21ec	0x801ed788	mips_hi16_lo16	reachable-code	0x801edcdc	bss	fdat_801edcdc	lui+lw		manual-decoded	reviewed	fdat.map asm review
+FDAT_212.BIN	0x801ed754	0x21f4		mips26	reachable-code	0x801ed784	load		j		manual-decoded	reviewed	fdat.map asm review
+FDAT_212.BIN	0x801ed760	0x2200	0x801ed788	mips_hi16_lo16	reachable-code	0x801edcdc	bss	fdat_801edcdc	lui+lw		manual-decoded	reviewed	fdat.map asm review
+FDAT_212.BIN	0x801ed770	0x2210	0x801ed774	mips_hi16_lo16	reachable-code	0x801edcdc	bss	fdat_801edcdc	lui+sw		manual-decoded	reviewed	fdat.map asm review
+FDAT_212.BIN	0x801ed770	0x2210	0x801ed788	mips_hi16_lo16	reachable-code	0x801edcdc	bss	fdat_801edcdc	lui+lw		manual-decoded	reviewed	fdat.map asm review
+FDAT_212.BIN	0x801ed778	0x2218	0x801ed77c	mips_hi16_lo16	reachable-code	0x801edce0	bss	fdat_801edce0	lui+sw		manual-decoded	reviewed	fdat.map asm review
+FDAT_212.BIN	0x801ed784	0x2224	0x801ed788	mips_hi16_lo16	reachable-code	0x801edcdc	bss	fdat_801edcdc	lui+lw		manual-decoded	reviewed	fdat.map asm review
+FDAT_212.BIN	0x801ed7a4	0x2244	0x801ed7a8	mips_hi16_lo16	reachable-code	0x801c2230	bss	vis_table_b	lui+addiu		manual-decoded	reviewed	fdat.map asm review
+FDAT_212.BIN	0x801ed7dc	0x227c	0x801ed7e0	mips_hi16_lo16	reachable-code	0x801edce0	bss	fdat_801edce0	lui+lw		manual-decoded	reviewed	fdat.map asm review
+FDAT_212.BIN	0x801ed7dc	0x227c	0x801ed7ec	mips_hi16_lo16	reachable-code	0x801edce0	bss	fdat_801edce0	lui+sw		manual-decoded	reviewed	fdat.map asm review
+FDAT_212.BIN	0x801ed7f8	0x2298	0x801ed804	mips_hi16_lo16	reachable-code	0x801edcdc	bss	fdat_801edcdc	lui+sw		manual-decoded	reviewed	fdat.map asm review
+FDAT_212.BIN	0x801ed800	0x22a0		mips26	reachable-code	0x801ed864	load		j		manual-decoded	reviewed	fdat.map asm review
+FDAT_212.BIN	0x801ed80c	0x22ac	0x801ed810	mips_hi16_lo16	reachable-code	0x801c2230	bss	vis_table_b	lui+addiu		manual-decoded	reviewed	fdat.map asm review
+FDAT_212.BIN	0x801ed844	0x22e4	0x801ed858	mips_hi16_lo16	reachable-code	0x801edcdc	bss	fdat_801edcdc	lui+sw		manual-decoded	reviewed	fdat.map asm review
+FDAT_212.BIN	0x801ed848	0x22e8	0x801ed84c	mips_hi16_lo16	reachable-code	0x801b5948	bss	vis_lists	lui+addiu		manual-decoded	reviewed	fdat.map asm review
 FDAT_212.BIN	0x801ed8b4	0x2354	0x801ed8c0	mips_hi16_lo16	reachable-code	0x801edcd4	bss	fdat_801edcd4	lui+sw		manual-decoded	reviewed	fdat.map asm review
 FDAT_212.BIN	0x801ed8bc	0x235c		mips26	reachable-code	0x801ed8d4	load		j		manual-decoded	reviewed	fdat.map asm review
 FDAT_212.BIN	0x801ed8c8	0x2368	0x801ed8d0	mips_hi16_lo16	reachable-code	0x801edcd8	bss	fdat_801edcd8	lui+sw		manual-decoded	reviewed	fdat.map asm review
@@ -12112,6 +12325,52 @@ FDAT_232.BIN	0x801ed3dc	0x1e7c		mips26	reachable-code	0x801ed3ec	load		j		manual
 FDAT_232.BIN	0x801ed3ec	0x1e8c		mips26	reachable-code	0x80054368	load		jal		manual-decoded	reviewed	fdat.common asm review
 FDAT_232.BIN	0x801ed41c	0x1ebc	0x801ed428	mips_hi16_lo16	reachable-code	0x801bd638	bss	vis_table_a	lui+addiu		manual-decoded	reviewed	fdat.common asm review
 FDAT_232.BIN	0x801ed468	0x1f08		mips26	reachable-code	0x8004af24	load		jal		manual-decoded	reviewed	fdat.common asm review
+FDAT_232.BIN	0x801ed4a0	0x1f40	0x801ed4bc	mips_hi16_lo16	reachable-code	0x801bdf38	bss	vis_table_a	lui+addiu		manual-decoded	reviewed	fdat.map asm review
+FDAT_232.BIN	0x801ed4a4	0x1f44	0x801ed4a8	mips_hi16_lo16	reachable-code	0x801cce48	bss	DAT_801cba08	lui+lw		manual-decoded	reviewed	fdat.map asm review
+FDAT_232.BIN	0x801ed4c0	0x1f60	0x801ed4c8	mips_hi16_lo16	reachable-code	0x801edb94	bss	fdat_801edb94	lui+sw		manual-decoded	reviewed	fdat.map asm review
+FDAT_232.BIN	0x801ed4c4	0x1f64		mips26	reachable-code	0x801ed4d8	load		j		manual-decoded	reviewed	fdat.map asm review
+FDAT_232.BIN	0x801ed4cc	0x1f6c	0x801ed4d4	mips_hi16_lo16	reachable-code	0x801edb94	bss	fdat_801edb94	lui+sw		manual-decoded	reviewed	fdat.map asm review
+FDAT_232.BIN	0x801ed4d8	0x1f78	0x801ed4e0	mips_hi16_lo16	reachable-code	0x801cba08	bss	DAT_801cba08	lui+addiu		manual-decoded	reviewed	fdat.map asm review
+FDAT_232.BIN	0x801ed524	0x1fc4	0x801ed544	mips_hi16_lo16	reachable-code	0x801edb9c	bss	fdat_801edb9c	lui+sw		manual-decoded	reviewed	fdat.map asm review
+FDAT_232.BIN	0x801ed528	0x1fc8	0x801ed530	mips_hi16_lo16	reachable-code	0x80199140	bss	viewer	lui+sb		manual-decoded	reviewed	fdat.map asm review
+FDAT_232.BIN	0x801ed534	0x1fd4	0x801ed53c	mips_hi16_lo16	reachable-code	0x801edb9c	bss	fdat_801edb9c	lui+sw		manual-decoded	reviewed	fdat.map asm review
+FDAT_232.BIN	0x801ed538	0x1fd8		mips26	reachable-code	0x801ed548	load		j		manual-decoded	reviewed	fdat.map asm review
+FDAT_232.BIN	0x801ed548	0x1fe8	0x801ed550	mips_hi16_lo16	reachable-code	0x801cba08	bss	DAT_801cba08	lui+addiu		manual-decoded	reviewed	fdat.map asm review
+FDAT_232.BIN	0x801ed564	0x2004	0x801ed590	mips_hi16_lo16	reachable-code	0x801edb98	bss	fdat_801edb98	lui+sw		manual-decoded	reviewed	fdat.map asm review
+FDAT_232.BIN	0x801ed57c	0x201c	0x801ed590	mips_hi16_lo16	reachable-code	0x801edb98	bss	fdat_801edb98	lui+sw		manual-decoded	reviewed	fdat.map asm review
+FDAT_232.BIN	0x801ed580	0x2020	0x801ed58c	mips_hi16_lo16	reachable-code	0x801edb98	bss	fdat_801edb98	lui+sw		manual-decoded	reviewed	fdat.map asm review
+FDAT_232.BIN	0x801ed588	0x2028		mips26	reachable-code	0x801ed594	load		j		manual-decoded	reviewed	fdat.map asm review
+FDAT_232.BIN	0x801ed5a0	0x2040	0x801ed5a8	mips_hi16_lo16	reachable-code	0x801bbbb8	bss	vis_table_a	lui+addiu		manual-decoded	reviewed	fdat.map asm review
+FDAT_232.BIN	0x801ed5ac	0x204c	0x801ed5b0	mips_hi16_lo16	reachable-code	0x801edb9c	bss	fdat_801edb9c	lui+lw		manual-decoded	reviewed	fdat.map asm review
+FDAT_232.BIN	0x801ed5ac	0x204c	0x801ed5f4	mips_hi16_lo16	reachable-code	0x801edb9c	bss	fdat_801edb9c	lui+sw		manual-decoded	reviewed	fdat.map asm review
+FDAT_232.BIN	0x801ed5cc	0x206c	0x801ed5d0	mips_hi16_lo16	reachable-code	0x801b5920	bss	area_state	lui+addiu		manual-decoded	reviewed	fdat.map asm review
+FDAT_232.BIN	0x801ed5e0	0x2080	0x801ed5fc	mips_hi16_lo16	reachable-code	0x801edb9c	bss	fdat_801edb9c	lui+lw		manual-decoded	reviewed	fdat.map asm review
+FDAT_232.BIN	0x801ed5e0	0x2080	0x801ed638	mips_hi16_lo16	reachable-code	0x801edb9c	bss	fdat_801edb9c	lui+sw		manual-decoded	reviewed	fdat.map asm review
+FDAT_232.BIN	0x801ed5f8	0x2098	0x801ed5fc	mips_hi16_lo16	reachable-code	0x801edb9c	bss	fdat_801edb9c	lui+lw		manual-decoded	reviewed	fdat.map asm review
+FDAT_232.BIN	0x801ed5f8	0x2098	0x801ed638	mips_hi16_lo16	reachable-code	0x801edb9c	bss	fdat_801edb9c	lui+sw		manual-decoded	reviewed	fdat.map asm review
+FDAT_232.BIN	0x801ed608	0x20a8	0x801ed648	mips_hi16_lo16	reachable-code	0x801edb98	bss	fdat_801edb98	lui+lw		manual-decoded	reviewed	fdat.map asm review
+FDAT_232.BIN	0x801ed624	0x20c4		mips26	reachable-code	0x801ed388	load		jal		manual-decoded	reviewed	fdat.map asm review
+FDAT_232.BIN	0x801ed62c	0x20cc	0x801ed630	mips_hi16_lo16	reachable-code	0x801edb98	bss	fdat_801edb98	lui+sw		manual-decoded	reviewed	fdat.map asm review
+FDAT_232.BIN	0x801ed63c	0x20dc	0x801ed640	mips_hi16_lo16	reachable-code	0x80199140	bss	viewer	lui+sb		manual-decoded	reviewed	fdat.map asm review
+FDAT_232.BIN	0x801ed644	0x20e4	0x801ed648	mips_hi16_lo16	reachable-code	0x801edb98	bss	fdat_801edb98	lui+lw		manual-decoded	reviewed	fdat.map asm review
+FDAT_232.BIN	0x801ed654	0x20f4	0x801ed688	mips_hi16_lo16	reachable-code	0x801cba08	bss	DAT_801cba08	lui+addiu		manual-decoded	reviewed	fdat.map asm review
+FDAT_232.BIN	0x801ed658	0x20f8	0x801ed65c	mips_hi16_lo16	reachable-code	0x80198f28	bss	viewer	lui+addiu		manual-decoded	reviewed	fdat.map asm review
+FDAT_232.BIN	0x801ed670	0x2110	0x801ed688	mips_hi16_lo16	reachable-code	0x801cba08	bss	DAT_801cba08	lui+addiu		manual-decoded	reviewed	fdat.map asm review
+FDAT_232.BIN	0x801ed680	0x2120	0x801ed688	mips_hi16_lo16	reachable-code	0x801cba08	bss	DAT_801cba08	lui+addiu		manual-decoded	reviewed	fdat.map asm review
+FDAT_232.BIN	0x801ed69c	0x213c	0x801ed718	mips_hi16_lo16	reachable-code	0x801edb94	bss	fdat_801edb94	lui+lw		manual-decoded	reviewed	fdat.map asm review
+FDAT_232.BIN	0x801ed69c	0x213c	0x801ed738	mips_hi16_lo16	reachable-code	0x801edb94	bss	fdat_801edb94	lui+sw		manual-decoded	reviewed	fdat.map asm review
+FDAT_232.BIN	0x801ed6a4	0x2144	0x801ed6a8	mips_hi16_lo16	reachable-code	0x80198f28	bss	viewer	lui+addiu		manual-decoded	reviewed	fdat.map asm review
+FDAT_232.BIN	0x801ed6e0	0x2180		mips26	reachable-code	0x801ed388	load		jal		manual-decoded	reviewed	fdat.map asm review
+FDAT_232.BIN	0x801ed714	0x21b4	0x801ed718	mips_hi16_lo16	reachable-code	0x801edb94	bss	fdat_801edb94	lui+lw		manual-decoded	reviewed	fdat.map asm review
+FDAT_232.BIN	0x801ed714	0x21b4	0x801ed738	mips_hi16_lo16	reachable-code	0x801edb94	bss	fdat_801edb94	lui+sw		manual-decoded	reviewed	fdat.map asm review
+FDAT_232.BIN	0x801ed724	0x21c4	0x801ed758	mips_hi16_lo16	reachable-code	0x801edb94	bss	fdat_801edb94	lui+lw		manual-decoded	reviewed	fdat.map asm review
+FDAT_232.BIN	0x801ed724	0x21c4	0x801ed7a8	mips_hi16_lo16	reachable-code	0x801edb94	bss	fdat_801edb94	lui+sw		manual-decoded	reviewed	fdat.map asm review
+FDAT_232.BIN	0x801ed73c	0x21dc	0x801ed740	mips_hi16_lo16	reachable-code	0x801cba08	bss	DAT_801cba08	lui+addiu		manual-decoded	reviewed	fdat.map asm review
+FDAT_232.BIN	0x801ed754	0x21f4	0x801ed758	mips_hi16_lo16	reachable-code	0x801edb94	bss	fdat_801edb94	lui+lw		manual-decoded	reviewed	fdat.map asm review
+FDAT_232.BIN	0x801ed754	0x21f4	0x801ed7a8	mips_hi16_lo16	reachable-code	0x801edb94	bss	fdat_801edb94	lui+sw		manual-decoded	reviewed	fdat.map asm review
+FDAT_232.BIN	0x801ed780	0x2220	0x801ed784	mips_hi16_lo16	reachable-code	0x80198f28	bss	viewer	lui+addiu		manual-decoded	reviewed	fdat.map asm review
+FDAT_232.BIN	0x801ed79c	0x223c		mips26	reachable-code	0x801ed388	load		jal		manual-decoded	reviewed	fdat.map asm review
+FDAT_232.BIN	0x801ed7ac	0x224c	0x801ed7b0	mips_hi16_lo16	reachable-code	0x801edb98	bss	fdat_801edb98	lui+sw		manual-decoded	reviewed	fdat.map asm review
 FDAT_232.BIN	0x801eda5c	0x24fc	0x801eda64	mips_hi16_lo16	reachable-code	0x801c0270	bss	vis_table_a	lui+lw		manual-decoded	reviewed	fdat.map asm review
 FDAT_232.BIN	0x801eda7c	0x251c		mips26	reachable-code	0x801ece7c	load		jal		manual-decoded	reviewed	fdat.map asm review
 FDAT_232.BIN	0x801edab4	0x2554		mips26	reachable-code	0x801edad4	load		j		manual-decoded	reviewed	fdat.map asm review
@@ -12271,6 +12530,88 @@ FDAT_242.BIN	0x801ed41c	0x1ebc		mips26	reachable-code	0x801ed42c	load		j		manual
 FDAT_242.BIN	0x801ed42c	0x1ecc		mips26	reachable-code	0x80054368	load		jal		manual-decoded	reviewed	fdat.common asm review
 FDAT_242.BIN	0x801ed45c	0x1efc	0x801ed468	mips_hi16_lo16	reachable-code	0x801bd638	bss	vis_table_a	lui+addiu		manual-decoded	reviewed	fdat.common asm review
 FDAT_242.BIN	0x801ed4a8	0x1f48		mips26	reachable-code	0x8004af24	load		jal		manual-decoded	reviewed	fdat.common asm review
+FDAT_242.BIN	0x801ed4e4	0x1f84	0x801ed4ec	mips_hi16_lo16	reachable-code	0x801bc8f8	bss	vis_table_a	lui+addiu		manual-decoded	reviewed	fdat.map asm review
+FDAT_242.BIN	0x801ed500	0x1fa0	0x801ed504	mips_hi16_lo16	reachable-code	0x801cce48	bss	DAT_801cba08	lui+lw		manual-decoded	reviewed	fdat.map asm review
+FDAT_242.BIN	0x801ed508	0x1fa8	0x801ed510	mips_hi16_lo16	reachable-code	0x801c22e0	bss	vis_table_b	lui+addiu		manual-decoded	reviewed	fdat.map asm review
+FDAT_242.BIN	0x801ed524	0x1fc4	0x801ed52c	mips_hi16_lo16	reachable-code	0x801ee0bc	bss	fdat_801ee0bc	lui+sw		manual-decoded	reviewed	fdat.map asm review
+FDAT_242.BIN	0x801ed534	0x1fd4	0x801ed544	mips_hi16_lo16	reachable-code	0x801ee0b4	bss	fdat_801ee0b4	lui+sw		manual-decoded	reviewed	fdat.map asm review
+FDAT_242.BIN	0x801ed540	0x1fe0		mips26	reachable-code	0x801ed56c	load		j		manual-decoded	reviewed	fdat.map asm review
+FDAT_242.BIN	0x801ed548	0x1fe8	0x801ed554	mips_hi16_lo16	reachable-code	0x801ee0bc	bss	fdat_801ee0bc	lui+sw		manual-decoded	reviewed	fdat.map asm review
+FDAT_242.BIN	0x801ed550	0x1ff0		mips26	reachable-code	0x80016878	load		jal		manual-decoded	reviewed	fdat.map asm review
+FDAT_242.BIN	0x801ed558	0x1ff8	0x801ed55c	mips_hi16_lo16	reachable-code	0x801ee0b4	bss	fdat_801ee0b4	lui+sw		manual-decoded	reviewed	fdat.map asm review
+FDAT_242.BIN	0x801ed56c	0x200c	0x801ed570	mips_hi16_lo16	reachable-code	0x801cba08	bss	DAT_801cba08	lui+addiu		manual-decoded	reviewed	fdat.map asm review
+FDAT_242.BIN	0x801ed584	0x2024	0x801ed58c	mips_hi16_lo16	reachable-code	0x801ee0b8	bss	fdat_801ee0b8	lui+sw		manual-decoded	reviewed	fdat.map asm review
+FDAT_242.BIN	0x801ed588	0x2028		mips26	reachable-code	0x801ed5e8	load		j		manual-decoded	reviewed	fdat.map asm review
+FDAT_242.BIN	0x801ed5a8	0x2048	0x801ed5b0	mips_hi16_lo16	reachable-code	0x801ee0b8	bss	fdat_801ee0b8	lui+sw		manual-decoded	reviewed	fdat.map asm review
+FDAT_242.BIN	0x801ed5ac	0x204c		mips26	reachable-code	0x801ed5e8	load		j		manual-decoded	reviewed	fdat.map asm review
+FDAT_242.BIN	0x801ed5b4	0x2054	0x801ed5bc	mips_hi16_lo16	reachable-code	0x801ee0b8	bss	fdat_801ee0b8	lui+sw		manual-decoded	reviewed	fdat.map asm review
+FDAT_242.BIN	0x801ed5b8	0x2058		mips26	reachable-code	0x801ed5e8	load		j		manual-decoded	reviewed	fdat.map asm review
+FDAT_242.BIN	0x801ed5c4	0x2064	0x801ed5dc	mips_hi16_lo16	reachable-code	0x801ee0b8	bss	fdat_801ee0b8	lui+sw		manual-decoded	reviewed	fdat.map asm review
+FDAT_242.BIN	0x801ed5c8	0x2068	0x801ed5d4	mips_hi16_lo16	reachable-code	0x801ee0b8	bss	fdat_801ee0b8	lui+sw		manual-decoded	reviewed	fdat.map asm review
+FDAT_242.BIN	0x801ed5d0	0x2070		mips26	reachable-code	0x801ed5e8	load		j		manual-decoded	reviewed	fdat.map asm review
+FDAT_242.BIN	0x801ed5e8	0x2088	0x801ed5ec	mips_hi16_lo16	reachable-code	0x801cba08	bss	DAT_801cba08	lui+addiu		manual-decoded	reviewed	fdat.map asm review
+FDAT_242.BIN	0x801ed640	0x20e0	0x801ed658	mips_hi16_lo16	reachable-code	0x801ee0b8	bss	fdat_801ee0b8	lui+lw		manual-decoded	reviewed	fdat.map asm review
+FDAT_242.BIN	0x801ed640	0x20e0	0x801ed66c	mips_hi16_lo16	reachable-code	0x801ee0b8	bss	fdat_801ee0b8	lui+sw		manual-decoded	reviewed	fdat.map asm review
+FDAT_242.BIN	0x801ed640	0x20e0	0x801ed678	mips_hi16_lo16	reachable-code	0x801ee0b8	bss	fdat_801ee0b8	lui+lw		manual-decoded	reviewed	fdat.map asm review
+FDAT_242.BIN	0x801ed698	0x2138		mips26	reachable-code	0x801ed6f8	load		j		manual-decoded	reviewed	fdat.map asm review
+FDAT_242.BIN	0x801ed6b0	0x2150		mips26	reachable-code	0x801ed6f8	load		j		manual-decoded	reviewed	fdat.map asm review
+FDAT_242.BIN	0x801ed6bc	0x215c		mips26	reachable-code	0x801ed6ec	load		j		manual-decoded	reviewed	fdat.map asm review
+FDAT_242.BIN	0x801ed6cc	0x216c		mips26	reachable-code	0x801ed6f0	load		j		manual-decoded	reviewed	fdat.map asm review
+FDAT_242.BIN	0x801ed720	0x21c0	0x801ed724	mips_hi16_lo16	reachable-code	0x801c2390	bss	vis_table_b	lui+addiu		manual-decoded	reviewed	fdat.map asm review
+FDAT_242.BIN	0x801ed728	0x21c8	0x801ed730	mips_hi16_lo16	reachable-code	0x801bc8f8	bss	vis_table_a	lui+addiu		manual-decoded	reviewed	fdat.map asm review
+FDAT_242.BIN	0x801ed734	0x21d4	0x801ed738	mips_hi16_lo16	reachable-code	0x801ee0b4	bss	fdat_801ee0b4	lui+lw		manual-decoded	reviewed	fdat.map asm review
+FDAT_242.BIN	0x801ed734	0x21d4	0x801ed78c	mips_hi16_lo16	reachable-code	0x801ee0b4	bss	fdat_801ee0b4	lui+sw		manual-decoded	reviewed	fdat.map asm review
+FDAT_242.BIN	0x801ed734	0x21d4	0x801ed7a4	mips_hi16_lo16	reachable-code	0x801ee0b4	bss	fdat_801ee0b4	lui+lw		manual-decoded	reviewed	fdat.map asm review
+FDAT_242.BIN	0x801ed734	0x21d4	0x801ed7c4	mips_hi16_lo16	reachable-code	0x801ee0b4	bss	fdat_801ee0b4	lui+sw		manual-decoded	reviewed	fdat.map asm review
+FDAT_242.BIN	0x801ed784	0x2224	0x801ed788	mips_hi16_lo16	reachable-code	0x801cba08	bss	DAT_801cba08	lui+addiu		manual-decoded	reviewed	fdat.map asm review
+FDAT_242.BIN	0x801ed7a0	0x2240	0x801ed7a4	mips_hi16_lo16	reachable-code	0x801ee0b4	bss	fdat_801ee0b4	lui+lw		manual-decoded	reviewed	fdat.map asm review
+FDAT_242.BIN	0x801ed7a0	0x2240	0x801ed7c4	mips_hi16_lo16	reachable-code	0x801ee0b4	bss	fdat_801ee0b4	lui+sw		manual-decoded	reviewed	fdat.map asm review
+FDAT_242.BIN	0x801ed7b0	0x2250	0x801ed7cc	mips_hi16_lo16	reachable-code	0x801ee0b4	bss	fdat_801ee0b4	lui+lw		manual-decoded	reviewed	fdat.map asm review
+FDAT_242.BIN	0x801ed7b0	0x2250	0x801ed7e4	mips_hi16_lo16	reachable-code	0x801ee0b4	bss	fdat_801ee0b4	lui+lw		manual-decoded	reviewed	fdat.map asm review
+FDAT_242.BIN	0x801ed7c8	0x2268	0x801ed7cc	mips_hi16_lo16	reachable-code	0x801ee0b4	bss	fdat_801ee0b4	lui+lw		manual-decoded	reviewed	fdat.map asm review
+FDAT_242.BIN	0x801ed7c8	0x2268	0x801ed7e4	mips_hi16_lo16	reachable-code	0x801ee0b4	bss	fdat_801ee0b4	lui+lw		manual-decoded	reviewed	fdat.map asm review
+FDAT_242.BIN	0x801ed7dc	0x227c		mips26	reachable-code	0x801edebc	load		jal		manual-decoded	reviewed	fdat.map asm review
+FDAT_242.BIN	0x801ed7f0	0x2290	0x801ed828	mips_hi16_lo16	reachable-code	0x801ee0b8	bss	fdat_801ee0b8	lui+lw		manual-decoded	reviewed	fdat.map asm review
+FDAT_242.BIN	0x801ed7f0	0x2290	0x801ed878	mips_hi16_lo16	reachable-code	0x801ee0b8	bss	fdat_801ee0b8	lui+sw		manual-decoded	reviewed	fdat.map asm review
+FDAT_242.BIN	0x801ed7f4	0x2294	0x801ed7f8	mips_hi16_lo16	reachable-code	0x8019909c	bss	viewer	lui+lw		manual-decoded	reviewed	fdat.map asm review
+FDAT_242.BIN	0x801ed810	0x22b0		mips26	reachable-code	0x801edf2c	load		jal		manual-decoded	reviewed	fdat.map asm review
+FDAT_242.BIN	0x801ed818	0x22b8		mips26	reachable-code	0x8004ae38	load		jal		manual-decoded	reviewed	fdat.map asm review
+FDAT_242.BIN	0x801ed834	0x22d4	0x801ed838	mips_hi16_lo16	reachable-code	0x801990a0	bss	viewer	lui+lh		manual-decoded	reviewed	fdat.map asm review
+FDAT_242.BIN	0x801ed84c	0x22ec		mips26	reachable-code	0x801ed3c8	load		jal		manual-decoded	reviewed	fdat.map asm review
+FDAT_242.BIN	0x801ed858	0x22f8		mips26	reachable-code	0x801eb7f4	load		jal		manual-decoded	reviewed	fdat.map asm review
+FDAT_242.BIN	0x801ed860	0x2300		mips26	reachable-code	0x801ecf84	load		jal		manual-decoded	reviewed	fdat.map asm review
+FDAT_242.BIN	0x801ed888	0x2328	0x801ed88c	mips_hi16_lo16	reachable-code	0x801ee0b8	bss	fdat_801ee0b8	lui+lw		manual-decoded	reviewed	fdat.map asm review
+FDAT_242.BIN	0x801ed888	0x2328	0x801ed8c8	mips_hi16_lo16	reachable-code	0x801ee0b8	bss	fdat_801ee0b8	lui+sw		manual-decoded	reviewed	fdat.map asm review
+FDAT_242.BIN	0x801ed888	0x2328	0x801ed8e4	mips_hi16_lo16	reachable-code	0x801ee0b8	bss	fdat_801ee0b8	lui+lw		manual-decoded	reviewed	fdat.map asm review
+FDAT_242.BIN	0x801ed888	0x2328	0x801ed930	mips_hi16_lo16	reachable-code	0x801ee0b8	bss	fdat_801ee0b8	lui+sw		manual-decoded	reviewed	fdat.map asm review
+FDAT_242.BIN	0x801ed89c	0x233c	0x801ed8a0	mips_hi16_lo16	reachable-code	0x801990a0	bss	viewer	lui+lh		manual-decoded	reviewed	fdat.map asm review
+FDAT_242.BIN	0x801ed8b4	0x2354		mips26	reachable-code	0x801ed3c8	load		jal		manual-decoded	reviewed	fdat.map asm review
+FDAT_242.BIN	0x801ed8e0	0x2380	0x801ed8e4	mips_hi16_lo16	reachable-code	0x801ee0b8	bss	fdat_801ee0b8	lui+lw		manual-decoded	reviewed	fdat.map asm review
+FDAT_242.BIN	0x801ed8e0	0x2380	0x801ed930	mips_hi16_lo16	reachable-code	0x801ee0b8	bss	fdat_801ee0b8	lui+sw		manual-decoded	reviewed	fdat.map asm review
+FDAT_242.BIN	0x801ed8f0	0x2390	0x801ed8f4	mips_hi16_lo16	reachable-code	0x801990a0	bss	viewer	lui+lh		manual-decoded	reviewed	fdat.map asm review
+FDAT_242.BIN	0x801ed908	0x23a8		mips26	reachable-code	0x801ed3c8	load		jal		manual-decoded	reviewed	fdat.map asm review
+FDAT_242.BIN	0x801ed914	0x23b4		mips26	reachable-code	0x801eb7f4	load		jal		manual-decoded	reviewed	fdat.map asm review
+FDAT_242.BIN	0x801ed91c	0x23bc		mips26	reachable-code	0x801ecf84	load		jal		manual-decoded	reviewed	fdat.map asm review
+FDAT_242.BIN	0x801ed948	0x23e8	0x801ed94c	mips_hi16_lo16	reachable-code	0x801ee0b8	bss	fdat_801ee0b8	lui+lw		manual-decoded	reviewed	fdat.map asm review
+FDAT_242.BIN	0x801ed948	0x23e8	0x801ed9b0	mips_hi16_lo16	reachable-code	0x801ee0b8	bss	fdat_801ee0b8	lui+sw		manual-decoded	reviewed	fdat.map asm review
+FDAT_242.BIN	0x801ed958	0x23f8	0x801ed9bc	mips_hi16_lo16	reachable-code	0x801ee0bc	bss	fdat_801ee0bc	lui+lw		manual-decoded	reviewed	fdat.map asm review
+FDAT_242.BIN	0x801ed958	0x23f8	0x801eda54	mips_hi16_lo16	reachable-code	0x801ee0bc	bss	fdat_801ee0bc	lui+sw		manual-decoded	reviewed	fdat.map asm review
+FDAT_242.BIN	0x801ed958	0x23f8	0x801eda78	mips_hi16_lo16	reachable-code	0x801ee0bc	bss	fdat_801ee0bc	lui+sw		manual-decoded	reviewed	fdat.map asm review
+FDAT_242.BIN	0x801ed95c	0x23fc	0x801ed960	mips_hi16_lo16	reachable-code	0x801990a0	bss	viewer	lui+lh		manual-decoded	reviewed	fdat.map asm review
+FDAT_242.BIN	0x801ed974	0x2414		mips26	reachable-code	0x801ed3c8	load		jal		manual-decoded	reviewed	fdat.map asm review
+FDAT_242.BIN	0x801ed980	0x2420		mips26	reachable-code	0x801eb7f4	load		jal		manual-decoded	reviewed	fdat.map asm review
+FDAT_242.BIN	0x801ed988	0x2428		mips26	reachable-code	0x80057d58	load		jal		manual-decoded	reviewed	fdat.map asm review
+FDAT_242.BIN	0x801ed98c	0x242c	0x801ed9bc	mips_hi16_lo16	reachable-code	0x801ee0bc	bss	fdat_801ee0bc	lui+lw		manual-decoded	reviewed	fdat.map asm review
+FDAT_242.BIN	0x801ed98c	0x242c	0x801eda54	mips_hi16_lo16	reachable-code	0x801ee0bc	bss	fdat_801ee0bc	lui+sw		manual-decoded	reviewed	fdat.map asm review
+FDAT_242.BIN	0x801ed98c	0x242c	0x801eda78	mips_hi16_lo16	reachable-code	0x801ee0bc	bss	fdat_801ee0bc	lui+sw		manual-decoded	reviewed	fdat.map asm review
+FDAT_242.BIN	0x801ed998	0x2438		mips26	reachable-code	0x801ecf84	load		jal		manual-decoded	reviewed	fdat.map asm review
+FDAT_242.BIN	0x801ed9cc	0x246c	0x801ed9d0	mips_hi16_lo16	reachable-code	0x801eb72c	load		lui+addiu		manual-decoded	reviewed	fdat.map asm review
+FDAT_242.BIN	0x801ed9f4	0x2494	0x801ed9f8	mips_hi16_lo16	reachable-code	0x801eb734	load		lui+addiu		manual-decoded	reviewed	fdat.map asm review
+FDAT_242.BIN	0x801eda30	0x24d0		mips26	reachable-code	0x800168e0	load		jal		manual-decoded	reviewed	fdat.map asm review
+FDAT_242.BIN	0x801eda48	0x24e8		mips26	reachable-code	0x800168e0	load		jal		manual-decoded	reviewed	fdat.map asm review
+FDAT_242.BIN	0x801eda50	0x24f0		mips26	reachable-code	0x801eda7c	load		j		manual-decoded	reviewed	fdat.map asm review
+FDAT_242.BIN	0x801eda5c	0x24fc	0x801eda60	mips_hi16_lo16	reachable-code	0x801b5920	bss	area_state	lui+lh		manual-decoded	reviewed	fdat.map asm review
+FDAT_242.BIN	0x801eda70	0x2510		mips26	reachable-code	0x801edf2c	load		jal		manual-decoded	reviewed	fdat.map asm review
 FDAT_242.BIN	0x801edaa4	0x2544	0x801edaa8	mips_hi16_lo16	reachable-code	0x801bcaa0	bss	vis_table_a	lui+addiu		manual-decoded	reviewed	fdat.map asm review
 FDAT_242.BIN	0x801edabc	0x255c	0x801edac0	mips_hi16_lo16	reachable-code	0x801ee0b8	bss	fdat_801ee0b8	lui+lw		manual-decoded	reviewed	fdat.map asm review
 FDAT_242.BIN	0x801edabc	0x255c	0x801edad8	mips_hi16_lo16	reachable-code	0x801ee0b8	bss	fdat_801ee0b8	lui+sw		manual-decoded	reviewed	fdat.map asm review
@@ -12292,6 +12633,20 @@ FDAT_242.BIN	0x801edec4	0x2964	0x801edec8	mips_hi16_lo16	reachable-code	0x801ee0
 FDAT_242.BIN	0x801edec4	0x2964	0x801edf08	mips_hi16_lo16	reachable-code	0x801ee0b0	bss	fdat_801ee0b0	lui+sw		manual-decoded	reviewed	fdat.map asm review
 FDAT_242.BIN	0x801edf04	0x29a4		mips26	reachable-code	0x801edf24	load		j		manual-decoded	reviewed	fdat.map asm review
 FDAT_242.BIN	0x801edf10	0x29b0	0x801edf20	mips_hi16_lo16	reachable-code	0x801ee0b4	bss	fdat_801ee0b4	lui+sw		manual-decoded	reviewed	fdat.map asm review
+FDAT_242.BIN	0x801edf30	0x29d0	0x801edf38	mips_hi16_lo16	reachable-code	0x801eb7bc	load		lui+addiu		manual-decoded	reviewed	fdat.map asm review
+FDAT_242.BIN	0x801edf5c	0x29fc	0x801edf60	mips_hi16_lo16	reachable-code	0x801eb7c4	load		lui+addiu		manual-decoded	reviewed	fdat.map asm review
+FDAT_242.BIN	0x801edf84	0x2a24	0x801edf88	mips_hi16_lo16	reachable-code	0x801eb7cc	load		lui+addiu		manual-decoded	reviewed	fdat.map asm review
+FDAT_242.BIN	0x801edfac	0x2a4c	0x801edfb0	mips_hi16_lo16	reachable-code	0x801eb7d4	load		lui+addiu		manual-decoded	reviewed	fdat.map asm review
+FDAT_242.BIN	0x801edfd4	0x2a74	0x801edfd8	mips_hi16_lo16	reachable-code	0x801eb7dc	load		lui+addiu		manual-decoded	reviewed	fdat.map asm review
+FDAT_242.BIN	0x801edffc	0x2a9c	0x801ee000	mips_hi16_lo16	reachable-code	0x801eb7e4	load		lui+addiu		manual-decoded	reviewed	fdat.map asm review
+FDAT_242.BIN	0x801ee02c	0x2acc		mips26	reachable-code	0x80079dcc	load		jal		manual-decoded	reviewed	fdat.map asm review
+FDAT_242.BIN	0x801ee03c	0x2adc		mips26	reachable-code	0x80079dcc	load		jal		manual-decoded	reviewed	fdat.map asm review
+FDAT_242.BIN	0x801ee04c	0x2aec		mips26	reachable-code	0x80079dcc	load		jal		manual-decoded	reviewed	fdat.map asm review
+FDAT_242.BIN	0x801ee05c	0x2afc		mips26	reachable-code	0x80079dcc	load		jal		manual-decoded	reviewed	fdat.map asm review
+FDAT_242.BIN	0x801ee06c	0x2b0c		mips26	reachable-code	0x80079dcc	load		jal		manual-decoded	reviewed	fdat.map asm review
+FDAT_242.BIN	0x801ee07c	0x2b1c		mips26	reachable-code	0x80079dcc	load		jal		manual-decoded	reviewed	fdat.map asm review
+FDAT_242.BIN	0x801ee084	0x2b24	0x801ee088	mips_hi16_lo16	reachable-code	0x801b5948	bss	vis_lists	lui+addiu		manual-decoded	reviewed	fdat.map asm review
+FDAT_242.BIN	0x801ee08c	0x2b2c	0x801ee098	mips_hi16_lo16	reachable-code	0x801ee0b4	bss	fdat_801ee0b4	lui+sw		manual-decoded	reviewed	fdat.map asm review
 FDAT_252.BIN	0x801eb564	0x4		mips32_candidate	data-word	0x801ed498	load	fdat_801ed498	word		manual-decoded	reviewed	fdat.header rodata review
 FDAT_252.BIN	0x801eb568	0x8		mips32_candidate	data-word	0x801ed4ec	load	func_801ed4ec	word		manual-decoded	reviewed	fdat.header rodata review
 FDAT_252.BIN	0x801eb56c	0xc		mips32_candidate	data-word	0x801ed498	load	fdat_801ed498	word		manual-decoded	reviewed	fdat.header rodata review
@@ -12777,6 +13132,7 @@ FDAT_272.BIN	0x801ed544	0x1fe4		mips26	reachable-code	0x801ed5a4	load		j		manual
 FDAT_272.BIN	0x801ed55c	0x1ffc		mips26	reachable-code	0x801ed67c	load		j		manual-decoded	reviewed	fdat.map asm review
 FDAT_272.BIN	0x801ed564	0x2004	0x801ed568	mips_hi16_lo16	reachable-code	0x801cba08	bss	DAT_801cba08	lui+addiu		manual-decoded	reviewed	fdat.map asm review
 FDAT_272.BIN	0x801ed580	0x2020	0x801ed5a8	mips_hi16_lo16	reachable-code	0x801ef938	bss	fdat_801ef938	lui+lw		manual-decoded	reviewed	fdat.map asm review
+FDAT_272.BIN	0x801ed580	0x2020	0x801ed5d0	mips_hi16_lo16	reachable-code	0x801ef938	bss	fdat_801ef938	lui+sw		manual-decoded	reviewed	fdat.map asm review
 FDAT_272.BIN	0x801ed5a4	0x2044	0x801ed5a8	mips_hi16_lo16	reachable-code	0x801ef938	bss	fdat_801ef938	lui+lw		manual-decoded	reviewed	fdat.map asm review
 FDAT_272.BIN	0x801ed5a4	0x2044	0x801ed5d0	mips_hi16_lo16	reachable-code	0x801ef938	bss	fdat_801ef938	lui+sw		manual-decoded	reviewed	fdat.map asm review
 FDAT_272.BIN	0x801ed5b4	0x2054	0x801ed5d8	mips_hi16_lo16	reachable-code	0x801cba08	bss	DAT_801cba08	lui+addiu		manual-decoded	reviewed	fdat.map asm review
@@ -12791,6 +13147,7 @@ FDAT_272.BIN	0x801ed624	0x20c4	0x801ed628	mips_hi16_lo16	reachable-code	0x801ef5
 FDAT_272.BIN	0x801ed668	0x2108	0x801ed680	mips_hi16_lo16	reachable-code	0x801cce48	bss	DAT_801cba08	lui+lw		manual-decoded	reviewed	fdat.map asm review
 FDAT_272.BIN	0x801ed67c	0x211c	0x801ed680	mips_hi16_lo16	reachable-code	0x801cce48	bss	DAT_801cba08	lui+lw		manual-decoded	reviewed	fdat.map asm review
 FDAT_272.BIN	0x801ed694	0x2134	0x801ed6d4	mips_hi16_lo16	reachable-code	0x801ef934	bss	fdat_801ef934	lui+lw		manual-decoded	reviewed	fdat.map asm review
+FDAT_272.BIN	0x801ed694	0x2134	0x801ed740	mips_hi16_lo16	reachable-code	0x801ef934	bss	fdat_801ef934	lui+sw		manual-decoded	reviewed	fdat.map asm review
 FDAT_272.BIN	0x801ed698	0x2138	0x801ed69c	mips_hi16_lo16	reachable-code	0x801ef930	bss	fdat_801ef930	lui+lw		manual-decoded	reviewed	fdat.map asm review
 FDAT_272.BIN	0x801ed698	0x2138	0x801ed6cc	mips_hi16_lo16	reachable-code	0x801ef930	bss	fdat_801ef930	lui+sw		manual-decoded	reviewed	fdat.map asm review
 FDAT_272.BIN	0x801ed6b4	0x2154		mips26	reachable-code	0x801ef1c0	load		jal		manual-decoded	reviewed	fdat.map asm review
@@ -12857,7 +13214,7 @@ FDAT_272.BIN	0x801ede84	0x2924	0x801ede88	mips_hi16_lo16	reachable-code	0x80198f
 FDAT_272.BIN	0x801ede90	0x2930		mips26	reachable-code	0x801ed3b8	load		jal		manual-decoded	reviewed	fdat.map asm review
 FDAT_272.BIN	0x801ede98	0x2938		mips26	reachable-code	0x801ed214	load		jal		manual-decoded	reviewed	fdat.map asm review
 FDAT_272.BIN	0x801edea0	0x2940		mips26	reachable-code	0x801ef07c	load		jal		manual-decoded	reviewed	fdat.map asm review
-FDAT_272.BIN	0x801ededc	0x297c	0x801edeec	mips_hi16_lo16	reachable-code	0x8017c11d	bss		lui+lbu		manual-decoded	reviewed	fdat.map asm review
+FDAT_272.BIN	0x801ededc	0x297c	0x801edeec	mips_hi16_lo16	reachable-code	0x8017c11d	bss	vis_records	lui+lbu		manual-decoded	reviewed	fdat.map asm review
 FDAT_272.BIN	0x801edefc	0x299c	0x801edf00	mips_hi16_lo16	reachable-code	0x801cba08	bss	DAT_801cba08	lui+addiu		manual-decoded	reviewed	fdat.map asm review
 FDAT_272.BIN	0x801edf20	0x29c0		mips26	reachable-code	0x801ee0ec	load		j		manual-decoded	reviewed	fdat.map asm review
 FDAT_272.BIN	0x801edf28	0x29c8	0x801edf2c	mips_hi16_lo16	reachable-code	0x801990a0	bss	viewer	lui+lh		manual-decoded	reviewed	fdat.map asm review

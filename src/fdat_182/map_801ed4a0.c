@@ -15,11 +15,7 @@
 
 /* 1 or 2: the gate the event 0x131 opened (func_801ed604); 0 none. */
 DATA(0x801edc50, 0x4, ".bss")
-static int fdat_801edc50;
-
-/* 1 while the area 3 exit scene is armed, 0xff once played. */
-DATA(0x801edc54, 0x4, ".bss")
-static int fdat_801edc54;
+int fdat_801edc50;
 
 void func_801ed9cc(int gate);
 
