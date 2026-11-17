@@ -110,9 +110,8 @@ void fdat_801eb96c(Vis212 *e)
 
 /*
  * Plays the script sound when its trigger fires this frame.
- * Not exact: retail keeps the 0x1000/0x4000 frame in a0 and copies it to s0
- * only for the 0x8000 (random) case; this build keeps it in s0 throughout,
- * and loads the trigger before the sound byte.
+ * Not exact: retail loads the sound byte before the trigger, with the
+ * script pointer in v0 and the 255 comparison value in a0.
  */
 ADDRESS(0x801eba4c, 0x17c)
 void fdat_801eba4c(Vis212 *e)
@@ -140,6 +139,7 @@ void fdat_801eba4c(Vis212 *e)
         break;
     case 0x8000:
         chance = at;
+        at = 0;
         if (chance >= (short)frame - (short)step && chance < (short)frame
             && rand() >> 3 < chance)
             fdat_801eb96c(e);
