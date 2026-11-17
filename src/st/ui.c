@@ -1536,9 +1536,6 @@ void func_8002c1a4(void)
  * 1, scroll arrows, the cursor bar and three rows of record number, title,
  * kind name and figure. Each row's glyph overflow count goes to
  * DAT_8017beb0.
- *
- * Not exact: retail sets the row count 3 later in its block and adds the
- * record offset to the list base into the base register.
  */
 ADDRESS(0x8002c2b8, 0x604)
 void func_8002c2b8(void)
@@ -1601,8 +1598,8 @@ void func_8002c2b8(void)
     sp->unk330.w = 256;
     sp->unk330.h = 40;
     sp->unk330.y = sp->unk1FE * 48 + 74;
-    n = 3;
     func_80027d18(&sp->unk330, &sp->unk32C, 257, 1);
+    n = 3;
     func_800286a8(1, 0, 0);
     sp->unk330.y = 74;
     if (sp->unk1FA < 3)
@@ -2213,8 +2210,9 @@ void func_8002e490(void)
  * under the cursor and, while +0x2c6 is 1, prints each equipped item's
  * +0x28 figure with a shadow.
  *
- * Not exact: the same instructions with another saved-register
- * assignment (retail: s2 slot pointer, s3 draw mode, s4 scratchpad base).
+ * Not exact: retail keeps the scratchpad base, draw mode and rectangle
+ * offset in s4/s3/s5, this source in s3/s5/s4; the loop-latch increments
+ * also schedule in the opposite order.
  */
 ADDRESS(0x8002e4d0, 0x47c)
 void func_8002e4d0(void)
@@ -2255,22 +2253,22 @@ void func_8002e4d0(void)
     sp->style[7].b = 96;
     sp->style[7].cd = 48;
     equip = viewer.unk38;
-    for (i = 0; i < EQUIP_SLOTS; i++) {
+    for (i = 0; i < EQUIP_SLOTS; i++, equip++) {
         if (i == 2 || (i == 3 && vis_table_c.unk0118[viewer.unk38[16]].unk26 == 9) ||
             (i == 4 && vis_table_c.unk0118[viewer.unk38[17]].unk26 == 9))
             mode = 48;
         else
             mode = 16;
-        if (i != 6 && i != 12 && sp->unk2C6 == 1 && equip[i] != 0xffff &&
-            vis_table_c.unk0118[equip[i]].unk27) {
+        if (i != 6 && i != 12 && sp->unk2C6 == 1 && *equip != 0xffff &&
+            vis_table_c.unk0118[*equip].unk27) {
             sp->style[7].r = 200;
             sp->style[7].g = 164;
             sp->style[7].b = 96;
-            func_80027440(vis_table_c.unk0118[equip[i]].unk28 | 0x2000000, rects[i].x + 8,
+            func_80027440(vis_table_c.unk0118[*equip].unk28 | 0x2000000, rects[i].x + 8,
                           rects[i].y + 4, &sp->style[7]);
             sp->style[7].g = sp->style[7].r = 8;
             sp->style[7].b = 0;
-            func_80027440(vis_table_c.unk0118[equip[i]].unk28 | 0x2000000, rects[i].x + 9,
+            func_80027440(vis_table_c.unk0118[*equip].unk28 | 0x2000000, rects[i].x + 9,
                           rects[i].y + 5, &sp->style[7]);
         }
         func_80028364(&rects[i], &tex[i], &clut, 0, mode);
