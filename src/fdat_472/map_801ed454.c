@@ -28,7 +28,6 @@ void SsSetSerialVol(short s_num, short voll, short volr);
 void func_80042cec(void);
 void func_8005f54c(void);
 
-/* Not exact (one attempt, retries off; 87.2%): first divergence retail `bnez v1,<func_801ed454+0x20c>`, this source `bnez v1,<func_801ed454+0x210>`. */
 /*
  * Once: picks the ending by the items the viewer holds: the least
  * (two thirds of the base) x (wear) over the worn ones against the
@@ -44,23 +43,22 @@ void func_801ed454(void)
     int none;
     int i;
     int n;
-    Vis44 *k;
 
     if (fdat_801ed8c4 != 0)
         return;
     fdat_801ed8c4 = 1;
     least = 0xffff;
     none = 1;
-    k = vis_table_c.unk0118;
     for (i = 0; i < 266; i++) {
-        if (DAT_801c7590.counts[i].count != 0 && k->unk27 != k->unk28) {
-            n = k->unk3 * 2 / 3 * (k->unk27 - k->unk28);
+        if (DAT_801c7590.counts[i].count != 0
+            && vis_table_c.unk0118[i].unk27 != vis_table_c.unk0118[i].unk28) {
+            n = vis_table_c.unk0118[i].unk3 * 2 / 3
+                * (vis_table_c.unk0118[i].unk27 - vis_table_c.unk0118[i].unk28);
             if (n < least)
                 least = n;
-            if (k->unk27 != k->unk28)
+            if (vis_table_c.unk0118[i].unk27 != vis_table_c.unk0118[i].unk28)
                 none = 0;
         }
-        k++;
     }
     if (least != 0xffff && least >= viewer.unk2) {
         fdat_801ed8cc = 1;
