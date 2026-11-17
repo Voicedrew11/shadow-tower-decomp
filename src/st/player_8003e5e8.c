@@ -1119,9 +1119,7 @@ void func_80040f04(u8 magic, u8 hand)
 /* Moves the viewer `speed` units along heading `angle`, sliding along the
  * walls func_80049544 reports (at most three tries), and keeps the motion
  * in viewer.unk260.
- * Not exact: the setup block schedules the viewer position copy after
- * vel.vz and the unk1C/unk1E stores (retail copies first, keeping the
- * vel.vz product in $t1); the rest matches. */
+ */
 ADDRESS(0x80041150, 0x4dc)
 void func_80041150(int angle, int speed)
 {
@@ -1135,20 +1133,21 @@ void func_80041150(int angle, int speed)
     int slid_b;
     int ang;
     int dy;
+    int initial_z;
+    Viewer *source;
 
     slid_a = 0;
     slid_b = 0;
     slid = 0;
     tries = 0;
     vel.vx = rcos(angle) * speed / 4096;
-    vel.vz = rsin(angle) * speed / 4096;
-    vis_lists.unk4.vx = viewer.position.vx;
-    vis_lists.unk4.vy = viewer.position.vy;
-    vis_lists.unk4.vz = viewer.position.vz;
-    vis_lists.unk4.pad = viewer.position.pad;
+    initial_z = rsin(angle) * speed / 4096;
+    source = &viewer;
+    vis_lists.unk4 = source->position;
+    vel.vz = initial_z;
     vis_lists.unk1C = 256;
     vis_lists.unk1E = 1600;
-    vel.vy = viewer.unk2D4;
+    vel.vy = source->unk2D4;
     vis_lists.unk0 = 1074;
 loop:
     viewer.unk260.vz = vel.vz + viewer.unk1D0;
