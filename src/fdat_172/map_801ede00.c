@@ -13,6 +13,12 @@
 #include <st/menu.h>
 #include <st/fdat.h>
 
+/* Entry 48: 0 asleep, 0xfd hit, 0xfe awake, 0xff gone (flags 29, 30);
+ * defined here only because each map unit places one COMMON word
+ * (src/fdat_172/map_801ed4a0.c and map_801edbf8.c use it). */
+DATA(0x801edfd4, 0x4, ".bss")
+int fdat_801edfd4;
+
 /* Lifts table C item 28 by 0x200, 24 a frame while its model is loaded. */
 ADDRESS(0x801ede00, 0xf8)
 void func_801ede00(void)

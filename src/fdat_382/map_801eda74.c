@@ -11,6 +11,13 @@
 #include <st/menu.h>
 #include <st/fdat.h>
 
+
+/* 1 when entries 0..2 and 32 stand (flags 21..23); defined here only
+ * because each map unit places one COMMON word (src/fdat_382/
+ * map_801ed4a0.c uses it). */
+DATA(0x801edafc, 0x4, ".bss")
+int fdat_801edafc;
+
 /* In area 0, while flag 24 is clear, hands table A entry 32 to its exit once
  * its record's stream counter has reached 2. */
 ADDRESS(0x801eda74, 0x88)

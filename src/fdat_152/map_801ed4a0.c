@@ -1,12 +1,13 @@
 /*
- * FDAT_152.BIN: its first two handlers and the scene word after its code
- * (WIP module; a unit of its own until its neighbours in the run are exact).
+ * FDAT_152.BIN: its first four handlers and the scene word after its code
+ * (WIP module; fdat_801ed4a0 after them is not yet exact).
  */
 #include <kf/lib/address.h>
 #include <kf/lib/types.h>
 #include <sys/types.h>
 #include <LIBGTE.H>
 #include <st/vis.h>
+#include <st/data.h>
 #include <st/light.h>
 #include <st/menu.h>
 #include <st/fdat.h>
@@ -57,5 +58,41 @@ void func_801ed530(void)
         }
         fdat_801edb84 = 2;
         DAT_801cba08.unk1440.bit.f15 = 1;
+    }
+}
+
+/* An empty handler between the others. */
+ADDRESS(0x801ed5e0, 0x8)
+void func_801ed5e0(void)
+{
+}
+
+/* Item 0x130 used in front of table B entry 4 sets fdat_801edb84; the
+ * result is 1 then, else 2. */
+ADDRESS(0x801ed5e8, 0xc8)
+void func_801ed5e8(short id)
+{
+    VECTOR p;
+    VisRequest req;
+
+    p.vx = viewer.x;
+    p.vy = viewer.y + 1600;
+    p.vz = viewer.z;
+    req.unk0 = 0;
+    req.unk4 = p;
+    req.unk1C = 1056;
+    req.unk1E = 1600;
+    req.unk14.vx = 0;
+    req.unk14.vy = 0;
+    req.unk14.vz = 0;
+    req.unk22 = 0;
+    req.unk20 = 0;
+    if (id == 0x130) {
+        if (func_8004f53c((VisLists *)&req) == 4) {
+            fdat_801edb84 = 1;
+            DAT_801cd0e0 = 1;
+        } else {
+            DAT_801cd0e0 = 2;
+        }
     }
 }
