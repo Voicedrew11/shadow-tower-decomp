@@ -20,17 +20,19 @@
 RODATA(0x8001274c, 0x48)
 JUMPTABLES(0x80012794, 0xc0)
 
-/* Uses item `id`; DAT_801cd0e0 says whether it was used (1) or not (2). */
+/* Uses item `id`; DAT_801cd0e0 says whether it was used (1) or not (2).
+ * Not exact: cure/boost store order, the shared area-callback tail, and
+ * key-success constant lifetimes still differ; source is 8 bytes short.
+ */
 ADDRESS(0x80054a54, 0x848)
 void func_80054a54(int id)
 {
     VECTOR pos;
     int i;
-    int k;
     int r;
     int points;
 
-    pos = *(VECTOR *)&viewer.position.vx;
+    pos = viewer.position;
     DAT_801cd0e0 = 2;
     pos.vy += 1600;
     switch (id) {
@@ -70,7 +72,10 @@ void func_80054a54(int id)
     case 0x115:
     case 0x116:
     case 0x117:
-    case 0x118:
+    case 0x118: {
+        Data801cba08 *use_state;
+
+        i = 0;
         vis_lists.unk4 = pos;
         vis_lists.unk1C = 1056;
         vis_lists.unk1E = 1600;
@@ -80,33 +85,37 @@ void func_80054a54(int id)
         vis_lists.unk22 = 0;
         vis_lists.unk20 = 0;
         vis_lists.unk0 = 0;
-        i = 0;
-        while ((k = func_8004f718(i, &vis_lists)) != -1) {
-            r = func_8004fb88(&vis_table_b.entries[k], id);
-            if (r == 1) {
-                if (id == 0x114) {
-                    area_state.unkC->unk30(k | 0x4000);
-                    DAT_801cd0e0 = 1;
-                    break;
-                }
-                func_80057d58();
-                DAT_801cd0e0 = 1;
-                if (id == 0x116)
-                    goto used;
+        use_state = &DAT_801cba08;
+        while ((i = func_8004f718(i, &vis_lists)) != -1) {
+            r = func_8004fb88(&vis_table_b.entries[i], id);
+            switch (r) {
+            case 0:
+                use_state->unk16D8 = 2;
                 goto done;
+            case 1:
+                goto key_success;
+            case 3:
+                goto key_denied;
             }
-            if (r == 0) {
-                DAT_801cd0e0 = 2;
-                goto done;
-            }
-            if (r == 3) {
-                func_80057cec();
-                DAT_801cd0e0 = 1;
-                goto done;
-            }
-            i = k + 1;
+            i++;
         }
-        break;
+        goto used;
+    key_success:
+        if (id == 0x114) {
+            area_state.unkC->unk30(i | 0x4000);
+            use_state->unk16D8 = 1;
+        } else {
+            func_80057d58();
+            use_state->unk16D8 = 1;
+        }
+        if (id == 0x114 || id == 0x116)
+            goto used;
+        goto done;
+    key_denied:
+        func_80057cec();
+        use_state->unk16D8 = 1;
+        goto done;
+    }
     case 0x11c:
         if (viewer.unk2 < viewer.unk0) {
             viewer.unk2 = viewer.unk0;
