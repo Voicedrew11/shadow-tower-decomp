@@ -32,7 +32,6 @@ void func_800500ac(int arg0, int arg1, int arg2, int arg3);
 void func_8004e324(void);
 void func_80042c10(void);
 
-/* Not exact (one attempt, retries off; 93.9%): first divergence retail `lbu a0,11(s0)`, this source `lbu v0,11(s0)`. */
 /* The hall scene: fades out, puts the viewer at the hall's start, fades
  * in with table A entry 0 awake (loading its model if needed); unless
  * record 0's stream counter has started it is handed to its exit. */
@@ -41,14 +40,14 @@ void func_801edea0(void)
 {
     Vis212 *e = vis_table_a.entries;
     int index = e->unk02;
-    int slot = e->unk0B + 128;
     Vis192 *r = &vis_table_a.unk3500[index];
+    int slot = e->unk0B + 128;
 
     func_80057c54();
     func_800500ac(2, 0, 0x1000, 0x100);
     func_8004e2d8();
-    viewer.position.vy = 0x3f9c0;
     viewer.position.vx = 0x45800;
+    viewer.position.vy = 0x3f9c0;
     viewer.position.vz = 0x40000;
     viewer.unk278.vy = 0;
     viewer.unk278.vx = 0;
