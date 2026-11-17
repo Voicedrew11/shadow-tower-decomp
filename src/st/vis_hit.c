@@ -516,17 +516,22 @@ void func_80047884(VECTOR *pos, int kind)
 /* Resolves a request against the collision parts around its position, its
  * position plus velocity and a point 1027 below its height: bit 0 floor,
  * bit 1 wall, bit 2 ceiling, bit 3 the second wall. The heights and wall
- * normals go to vis_lists. */
+ * normals go to vis_lists.
+ * Not exact: unset-constant setup and the record/last-array-pointer
+ * preparation are scheduled in another order before the triangle pass. */
 ADDRESS(0x80048ad0, 0x824)
 int func_80048ad0(VisLists *req)
 {
     VisHitScratch *sp = VIS_HIT_SCRATCH;
     VECTOR pos[384];
+    VisLists *lists;
+    u32 record;
     int hits;
     int r;
-    int a;
     s16 ang;
     int t;
+    int floor_motion;
+    int unset;
 
     sp->base = (u8 *)world_state.unk8308[1];
     sp->pos[0].vx = req->unk4.vx;
@@ -561,33 +566,35 @@ int func_80048ad0(VisLists *req)
         }
         sp->dir.vx = req->unk14.vx + rcos(ratan2(req->unk14.vz, req->unk14.vx)) * req->unk1C / 4096;
         sp->dir.vy = req->unk14.vy + req->unk1E;
-        a = ratan2(req->unk14.vz, req->unk14.vx);
+        sp->dir.vz = req->unk14.vz + rsin(ratan2(req->unk14.vz, req->unk14.vx)) * req->unk1C / 4096;
     } else {
         sp->dir.vx = req->unk14.vx + rcos(req->unk20) * req->unk1C / 4096;
         sp->dir.vy = req->unk14.vy;
-        a = req->unk20;
+        sp->dir.vz = req->unk14.vz + rsin(req->unk20) * req->unk1C / 4096;
     }
-    sp->dir.vz = req->unk14.vz + rsin(a) * req->unk1C / 4096;
 heights:
+    unset = 0x80000;
     sp->hit = -1;
-    sp->h124 = 0x80000;
-    sp->h144 = 0x80000;
-    sp->h138 = 0x80000;
-    sp->h120 = 0x80000;
-    sp->h11c = 0x80000;
-    sp->h118 = 0x80000;
-    sp->h114 = 0x80000;
-    sp->h128 = 0x80000;
-    sp->h12c = 0x80000;
-    sp->h130 = 0x80000;
-    sp->h134 = 0x80000;
+    lists = &vis_lists;
+    sp->h124 = unset;
+    sp->h144 = unset;
+    sp->h138 = unset;
+    sp->h120 = unset;
+    sp->h11c = unset;
+    sp->h118 = unset;
+    sp->h114 = unset;
+    sp->h128 = unset;
+    sp->h12c = unset;
+    sp->h130 = unset;
+    sp->h134 = unset;
     sp->flags = 0;
-    sp->world = vis_lists.unkC0;
-    sp->rel[0] = vis_lists.unk11C0;
-    sp->rel[1] = vis_lists.unk22C0;
-    sp->rel[2] = vis_lists.unk33C0;
+    sp->world = lists->unkC0;
+    sp->rel[0] = lists->unk11C0;
+    sp->rel[1] = lists->unk22C0;
     /* the record index is stored as a word here */
-    *(u32 *)&vis_lists.unk47D8 = vis_lists.sources[0];
+    record = lists->sources[0];
+    sp->rel[2] = lists->unk33C0;
+    *(u32 *)&lists->unk47D8 = record;
     func_800468c0(pos, req->unk0);
     sp->world = vis_lists.unkC0;
     sp->rel[0] = vis_lists.unk11C0;
@@ -625,7 +632,8 @@ heights:
     }
     if (sp->h120 < 256 - req->unk14.vy)
         hits |= 4;
-    if (sp->h114 < req->unk1E - req->unk14.vy * -4096 / 4096)
+    floor_motion = req->unk14.vy * -4096 / 4096;
+    if (sp->h114 < req->unk1E - floor_motion)
         hits |= 1;
     t = DOT(req->unk14, sp->n170) / 4096;
     if (sp->h128 < req->unk1C - t)
