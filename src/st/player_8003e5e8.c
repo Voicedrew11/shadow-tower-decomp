@@ -717,7 +717,9 @@ void func_8003f910(int kind, int slot, ...)
     }
 }
 
-/* Per hand: starts the queued magic, or recovers the second bar. */
+/* Per hand: starts the queued magic, or recovers the second bar.
+ * Not exact: retail scales each item index before forming the record-array
+ * base; this source forms the base early, changing temporary roles. */
 ADDRESS(0x80040024, 0x288)
 void func_80040024(u8 hand)
 {
