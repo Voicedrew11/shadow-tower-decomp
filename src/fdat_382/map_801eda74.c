@@ -22,7 +22,7 @@ void func_801eda74(void)
     e = &vis_table_a.entries[32];
     r = &vis_table_a.unk3500[1];
 
-    if (DAT_801cba08.unk1448[r->unk09] >= 2 && !(DAT_801cba08.unk1440 >> 24 & 1)
+    if (DAT_801cba08.unk1448[r->unk09] >= 2 && !(DAT_801cba08.unk1440.word >> 24 & 1)
         && vis_table_a.unk6168 == 0) {
         DAT_801cba08.unk1448[r->unk09] = 3;
         e->unk70 |= 0x2000000;

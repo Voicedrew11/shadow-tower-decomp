@@ -69,7 +69,7 @@ void func_801edf48(void)
     r = &vis_table_a.unk3500[14];
 
     if (DAT_801cba08.unk1448[r->unk09] != 0
-        && !(DAT_801cba08.unk1440 >> 27 & 1) && vis_table_a.unk6168 == 3) {
+        && !(DAT_801cba08.unk1440.word >> 27 & 1) && vis_table_a.unk6168 == 3) {
         DAT_801cba08.unk1448[r->unk09] = 2;
         e->unk70 |= 0x2000000;
         fdat_801ed388(e, 1, 1);

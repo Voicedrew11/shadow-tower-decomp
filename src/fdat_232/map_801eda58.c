@@ -28,7 +28,7 @@ void func_801edb08(void)
     e = &vis_table_a.entries[32];
     r = &vis_table_a.unk3500[12];
 
-    if (DAT_801cba08.unk1448[r->unk09] >= 2 && !(DAT_801cba08.unk1440 >> 28 & 1)
+    if (DAT_801cba08.unk1448[r->unk09] >= 2 && !(DAT_801cba08.unk1440.word >> 28 & 1)
         && vis_table_a.unk6168 == 3) {
         DAT_801cba08.unk1448[r->unk09] = 3;
         e->unk70 |= 0x2000000;

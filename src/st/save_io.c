@@ -36,7 +36,7 @@ void func_800562d4(StSaveData *save, int fresh)
     func_80014cfc(save->unk24C, DAT_801cba08.unk240[0], 0x180);
     func_80014cfc(save->unk84C, DAT_801cba08.unk840[0], 0x180);
     func_80014cfc(save->unkE4C, DAT_801cba08.unkE40[0], 0x180);
-    func_80014cfc(save->unk144C, &DAT_801cba08.unk1440, 2);
+    func_80014cfc(save->unk144C, &DAT_801cba08.unk1440.word, 2);
     func_80014cfc(save->unk1454, (u32 *)DAT_801cba08.unk1448, 12);
     func_80014cfc(save->unk1484, (u32 *)DAT_801cba08.unk1478, 12);
     func_80014cfc(save->unk14B4, DAT_801cba08.unk14A8, 5);
@@ -198,7 +198,7 @@ void func_80056aa0(StSaveData *save)
     func_80014cfc(DAT_801cba08.unk240[0], save->unk24C, 0x180);
     func_80014cfc(DAT_801cba08.unk840[0], save->unk84C, 0x180);
     func_80014cfc(DAT_801cba08.unkE40[0], save->unkE4C, 0x180);
-    func_80014cfc(&DAT_801cba08.unk1440, save->unk144C, 2);
+    func_80014cfc(&DAT_801cba08.unk1440.word, save->unk144C, 2);
     func_80014cfc((u32 *)DAT_801cba08.unk1448, save->unk1454, 12);
     func_80014cfc((u32 *)DAT_801cba08.unk1478, save->unk1484, 12);
     func_80014cfc(DAT_801cba08.unk14A8, save->unk14B4, 5);

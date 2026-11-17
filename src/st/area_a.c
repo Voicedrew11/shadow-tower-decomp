@@ -58,7 +58,7 @@ void func_80044404(void)
     func_800456f8();
     func_80015ad4();
     if (area_state.area == 24) {
-        if (!((DAT_801cba08.unk1440 >> 17) & 1))
+        if (!((DAT_801cba08.unk1440.word >> 17) & 1))
             return;
         flag = (vis_lists.unk47E0 >> 3) & 1;
         if (flag != 1)
@@ -79,7 +79,7 @@ void func_80044404(void)
             MoveImage(&f, 0, 490);
         }
     } else if (area_state.area == 27) {
-        flag = (DAT_801cba08.unk1440 >> 13) & 1;
+        flag = (DAT_801cba08.unk1440.word >> 13) & 1;
         if (flag != 1)
             return;
         flag = (vis_lists.unk47E0 >> 4) & 1;
