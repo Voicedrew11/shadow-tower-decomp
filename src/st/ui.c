@@ -760,8 +760,10 @@ void func_80029548(int x, int y, int w, int h)
  * Draws a window frame from 16x16 tiles of the menu texture page: corners,
  * edges, an inner bevel and the filled middle, then a grey blended wash.
  */
-/* Not exact: register allocation: retail spills `right` to the stack and keeps
- * w and h in $s7/$s6; this build spills w. */
+/* Not exact (4 bytes short): retail spills `right` and keeps w/h in s7/s6;
+ * this build spills w. Distinct tile-phase counters improve the loop shape.
+ * A word-sized right edge adds sign extensions absent from retail, while
+ * halfword signedness does not change the code. */
 ADDRESS(0x80029618, 0x55c)
 void func_80029618(short x, short y, short w, short h)
 {
@@ -770,7 +772,6 @@ void func_80029618(short x, short y, short w, short h)
     CVECTOR wash = {48, 48, 48};
     short right;
     short bottom;
-    int i, j;
 
     sp->unk33C.w = 16;
     sp->unk33C.h = 16;
@@ -806,45 +807,55 @@ void func_80029618(short x, short y, short w, short h)
     sp->unk33C.y = y + 32;
     sp->unk33C.x = x;
     sp->unk358.vx = 624;
-    i = h / 16 - 4;
-    while (i--) {
-        sp->unk33C.x = x;
-        func_80028364(&sp->unk33C, &sp->unk358, &sp->unk35C, NULL, TILE_HFLIP);
-        sp->unk33C.x = right;
-        func_80028364(&sp->unk33C, &sp->unk358, &sp->unk35C, NULL, TILE);
-        sp->unk33C.y += 16;
+    {
+        int rows = h / 16 - 4;
+        while (rows--) {
+            sp->unk33C.x = x;
+            func_80028364(&sp->unk33C, &sp->unk358, &sp->unk35C, NULL, TILE_HFLIP);
+            sp->unk33C.x = right;
+            func_80028364(&sp->unk33C, &sp->unk358, &sp->unk35C, NULL, TILE);
+            sp->unk33C.y += 16;
+        }
     }
     sp->unk33C.x = x + 16;
     sp->unk358.vx = 616;
-    i = w / 16 - 2;
-    while (i--) {
-        sp->unk33C.y = y;
-        func_80028364(&sp->unk33C, &sp->unk358, &sp->unk35C, NULL, TILE);
-        sp->unk33C.y = y + h - 16;
-        func_80028364(&sp->unk33C, &sp->unk358, &sp->unk35C, NULL, TILE_VFLIP);
-        sp->unk33C.x += 16;
+    {
+        int columns = w / 16 - 2;
+        while (columns--) {
+            sp->unk33C.y = y;
+            func_80028364(&sp->unk33C, &sp->unk358, &sp->unk35C, NULL, TILE);
+            sp->unk33C.y = y + h - 16;
+            func_80028364(&sp->unk33C, &sp->unk358, &sp->unk35C, NULL, TILE_VFLIP);
+            sp->unk33C.x += 16;
+        }
     }
     sp->unk33C.x = x + 16;
     sp->unk358.vx = 608;
-    i = w / 16 - 2;
-    while (i--) {
-        sp->unk33C.y = y + 16;
-        func_80028364(&sp->unk33C, &sp->unk358, &sp->unk35C, NULL, TILE);
-        sp->unk33C.y = y + h - 32;
-        func_80028364(&sp->unk33C, &sp->unk358, &sp->unk35C, NULL, TILE_VFLIP);
-        sp->unk33C.x += 16;
+    {
+        int columns = w / 16 - 2;
+        while (columns--) {
+            sp->unk33C.y = y + 16;
+            func_80028364(&sp->unk33C, &sp->unk358, &sp->unk35C, NULL, TILE);
+            sp->unk33C.y = y + h - 32;
+            func_80028364(&sp->unk33C, &sp->unk358, &sp->unk35C, NULL, TILE_VFLIP);
+            sp->unk33C.x += 16;
+        }
     }
     sp->unk33C.y = y + 32;
     sp->unk358.vx = 600;
-    j = h / 16 - 4;
-    while (j--) {
-        sp->unk33C.x = x + 16;
-        i = w / 16 - 2;
-        while (i--) {
-            func_80028364(&sp->unk33C, &sp->unk358, &sp->unk35C, NULL, TILE);
-            sp->unk33C.x += 16;
+    {
+        int rows = h / 16 - 4;
+        while (rows--) {
+            int columns;
+
+            sp->unk33C.x = x + 16;
+            columns = w / 16 - 2;
+            while (columns--) {
+                func_80028364(&sp->unk33C, &sp->unk358, &sp->unk35C, NULL, TILE);
+                sp->unk33C.x += 16;
+            }
+            sp->unk33C.y += 16;
         }
-        sp->unk33C.y += 16;
     }
     r.x = x;
     r.y = y;
