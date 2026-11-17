@@ -207,9 +207,9 @@ int depth;
  * Fades the screen in from black over 120 ticks after area_state.unk18 is
  * set, then out.
  *
- * Not exact (size-exact): retail keeps the start tick in $v1 and the elapsed
- * count in $a0, this source the reverse, which shifts the schedule of the
- * level computations.
+ * Not exact: retail keeps start tick in v1 and elapsed in a0; this
+ * source uses the reverse. Color is narrowed earlier, and the 360-tick
+ * test does not fill the preceding branch delay slot.
  */
 ADDRESS(0x80021654, 0x1c8)
 void func_80021654(void)
