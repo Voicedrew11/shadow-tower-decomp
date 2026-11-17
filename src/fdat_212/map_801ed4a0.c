@@ -37,7 +37,6 @@ static int fdat_801edce0;
 
 void func_801edbd0(int which);
 
-/* Not exact (one attempt, retries off; 83.7%): first divergence retail `bne v0,v1,<func_801ed4a0+0xc8>`, this source `bne v0,v1,<func_801ed4a0+0xc4>`. */
 /* Sets up the area by the second flag word's bits 8 and 9: table C items
  * 28/29, the scene words and the bridge pieces (table B kind 0x97). */
 ADDRESS(0x801ed4a0, 0xf4)
@@ -54,8 +53,8 @@ void func_801ed4a0(void)
     else
         fdat_801edcd4 = 0;
     if (DAT_801cba08.unk1444.bit.f9 == 1) {
-        fdat_801edcd8 = 0xff;
         b = vis_table_b.entries;
+        fdat_801edcd8 = 0xff;
         for (i = 239; i != -1; i--) {
             if (b->unk0a == 0x97)
                 b->unk00 = 2;
@@ -70,7 +69,6 @@ void func_801ed4a0(void)
     }
 }
 
-/* Not exact (one attempt, retries off; 97.9%): first divergence retail `lui v0,0x0`, this source `lui v0,0x0`. */
 /*
  * Runs the area: events 0x2e and 2 start table B entries 46 and 2 (each
  * carrying its table C item on node 0, vertex 0x23); once entry 2 and then
@@ -122,11 +120,11 @@ void func_801ed594(void)
         fdat_801edcd8 = 0xff;
     }
     if (fdat_801edcdc == 1) {
-        b = vis_table_b.entries;
+        Vis88 *rising_bridge = vis_table_b.entries;
         for (i = 239; i != -1; i--) {
-            if (b->unk0a == 0x97)
-                b->unk24.vy += 0x18;
-            b++;
+            if (rising_bridge->unk0a == 0x97)
+                rising_bridge->unk24.vy += 0x18;
+            rising_bridge++;
         }
         if (++fdat_801edce0 >= 0x97)
             fdat_801edcdc = 2;
