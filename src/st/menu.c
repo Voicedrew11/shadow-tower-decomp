@@ -4088,8 +4088,11 @@ long func_80062bc0(int port)
 }
 
 /*
- * Not exact (91.8%): this build keeps the button word's address in s0
+ * Not exact (size-exact): this build keeps the button word's address in s0
  * across the result waits; retail forms it again for each load and store.
+ * A structured empty while hoists the nonvolatile read; scoping the save
+ * buffer does not change the listing. The counter interrupt's 800153b4 ->
+ * 80057744 path updates this halfword while the retail waits reload it.
  *
  * The memory card save/load screen (unk2DC's high byte set: save). Steps
  * through port choice, probe, format offer, directory, file headers, file
