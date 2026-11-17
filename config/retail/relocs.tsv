@@ -4912,11 +4912,17 @@ ST.EXE	0x8004f000	0x3e800		mips26	reachable-code	0x8004f014	load		j		manual-deco
 ST.EXE	0x8004f058	0x3e858		mips26	reachable-code	0x80014cfc	load		jal		manual-decoded	reviewed	st.vis_b_load asm review
 ST.EXE	0x8004f068	0x3e868		mips26	reachable-code	0x80014d5c	load		jal		manual-decoded	reviewed	st.vis_b_load asm review
 ST.EXE	0x8004f0ac	0x3e8ac		mips26	reachable-code	0x8004f310	load		j		manual-decoded	reviewed	st.vis_b_load asm review
+ST.EXE	0x8004f0c8	0x3e8c8	0x8004f4d8	mips_hi16_lo16	reachable-code	0x801b592c	bss	area_state	lui+lw		manual-decoded	reviewed	st.vis_b_load shared area hook LW; feasible kind witness 0x4; direct fallthrough J, taken path kills high
 ST.EXE	0x8004f0cc	0x3e8cc		mips26	reachable-code	0x8004f4d8	load		j		manual-decoded	reviewed	st.vis_b_load asm review
+ST.EXE	0x8004f0e4	0x3e8e4	0x8004f4d8	mips_hi16_lo16	reachable-code	0x801b592c	bss	area_state	lui+lw		manual-decoded	reviewed	st.vis_b_load shared area hook LW; feasible kind witness 0x8; direct fallthrough J, taken path kills high
 ST.EXE	0x8004f0e8	0x3e8e8		mips26	reachable-code	0x8004f4d8	load		j		manual-decoded	reviewed	st.vis_b_load asm review
+ST.EXE	0x8004f118	0x3e918	0x8004f4d8	mips_hi16_lo16	reachable-code	0x801b592c	bss	area_state	lui+lw		manual-decoded	reviewed	st.vis_b_load shared area hook LW; feasible kind witness 0x35; direct fallthrough J, taken path kills high
 ST.EXE	0x8004f11c	0x3e91c		mips26	reachable-code	0x8004f4d8	load		j		manual-decoded	reviewed	st.vis_b_load asm review
+ST.EXE	0x8004f12c	0x3e92c	0x8004f4d8	mips_hi16_lo16	reachable-code	0x801b592c	bss	area_state	lui+lw		manual-decoded	reviewed	st.vis_b_load shared area hook LW; feasible kind witness 0xe2; direct fallthrough J, taken path kills high
 ST.EXE	0x8004f130	0x3e930		mips26	reachable-code	0x8004f4d8	load		j		manual-decoded	reviewed	st.vis_b_load asm review
+ST.EXE	0x8004f150	0x3e950	0x8004f4d8	mips_hi16_lo16	reachable-code	0x801b592c	bss	area_state	lui+lw		manual-decoded	reviewed	st.vis_b_load shared area hook LW; feasible kind witness 0xee; direct fallthrough J, taken path kills high
 ST.EXE	0x8004f154	0x3e954		mips26	reachable-code	0x8004f4d8	load		j		manual-decoded	reviewed	st.vis_b_load asm review
+ST.EXE	0x8004f16c	0x3e96c	0x8004f4d8	mips_hi16_lo16	reachable-code	0x801b592c	bss	area_state	lui+lw		manual-decoded	reviewed	st.vis_b_load shared area hook LW; feasible kind witness 0xf0; direct fallthrough J, taken path kills high
 ST.EXE	0x8004f170	0x3e970		mips26	reachable-code	0x8004f4d8	load		j		manual-decoded	reviewed	st.vis_b_load asm review
 ST.EXE	0x8004f190	0x3e990	0x8004f194	mips_hi16_lo16	reachable-code	0x8017bed0	bss	vis_records	lui+addiu		manual-decoded	reviewed	st.vis_b_load asm review
 ST.EXE	0x8004f220	0x3ea20		mips26	reachable-code	0x8004f22c	load		j		manual-decoded	reviewed	st.vis_b_load asm review
