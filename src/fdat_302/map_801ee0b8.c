@@ -21,27 +21,32 @@
 DATA(0x801ee474, 0x4, ".bss")
 int fdat_801ee474;
 
-/* Not exact (one attempt, retries off; 87.9%): first divergence retail `lui v0,0x0`, this source `lui v1,0x0`. */
 /* Entry 0 finishes animation 10; entry 48 takes its place and goes, entry
  * 3 rises there (animation 10) and entry 49 replaces 48 until 3 is up. */
 ADDRESS(0x801ee0b8, 0x2c4)
 void func_801ee0b8(void)
 {
-    Vis212 *e0 = vis_table_a.entries;
-    Vis212 *e48 = &vis_table_a.entries[48];
-    Vis212 *e49 = &vis_table_a.entries[49];
-    Vis212 *e3 = &vis_table_a.entries[3];
-    Vis192 *r2 = &vis_table_a.unk3500[2];
+    Vis212 *e0;
+    Vis212 *e48;
+    Vis212 *e49;
+    Vis212 *e3;
+    Vis192 *r2;
     StAnimFile *file;
 
     viewer.unk218 = 5;
+    e0 = vis_table_a.entries;
+    e48 = &vis_table_a.entries[48];
+    e49 = &vis_table_a.entries[49];
+    e3 = &vis_table_a.entries[3];
+    r2 = &vis_table_a.unk3500[2];
     fdat_801eb7b4(e0, 10);
     for (;;) {
         e0->unk2A += e0->unkB0;
         if ((short)e0->unk2A >= 0x1000)
-            break;
+            goto first_animation_done;
         func_80026dd4(NULL, NULL, 0);
     }
+first_animation_done:
     e48->unk74 = e0->unk74;
     *(SVECTOR *)&e48->unk8C = *(SVECTOR *)&e0->unk8C;
     e48->unk26 = e0->unk26;
@@ -82,10 +87,9 @@ void func_801ee0b8(void)
     fdat_801ee474 = 0xff;
 }
 
-/* Not exact (one attempt, retries off; 43.7%): first divergence retail `addiu a3,v0,0`, this source `addiu a2,v0,0`. */
 /* While record 0's stream counter has started: wakes entry 0 (counter 2)
  * until its scene ran, else entry 3 (record 3's counter 1) until it is
- * beaten, else entry 5 (record 8's counter 3). */
+ * gone, else entry 5 (record 8's counter 3) until it is gone. */
 ADDRESS(0x801ee37c, 0xf0)
 void func_801ee37c(void)
 {
@@ -94,22 +98,23 @@ void func_801ee37c(void)
     Vis192 *r3 = &vis_table_a.unk3500[3];
     Vis212 *e5 = &vis_table_a.entries[5];
     Vis192 *r8 = &vis_table_a.unk3500[8];
-    Vis212 *e;
+    Data801cba08 *story = &DAT_801cba08;
 
-    if (DAT_801cba08.unk1448[vis_table_a.unk3500[0].unk09] == 0)
+    if (story->unk1448[vis_table_a.unk3500[0].unk09] == 0)
         return;
     if (fdat_801ee474 != 0xff) {
-        DAT_801cba08.unk1448[vis_table_a.unk3500[0].unk09] = 2;
-        e = e0;
-    } else if (fdat_801ee478 != 1) {
-        DAT_801cba08.unk1448[r3->unk09] = 1;
-        e = e3;
-    } else if (DAT_801cba08.unk1448[r8->unk09] != 0 && fdat_801ee480 != 1) {
-        DAT_801cba08.unk1448[r8->unk09] = 3;
-        e = e5;
+        story->unk1448[vis_table_a.unk3500[0].unk09] = 2;
+        e0->unk70 |= 0x2000000;
+        fdat_801ed388(e0, 1, 1);
+    } else if (fdat_801ee478 != 0xff) {
+        story->unk1448[r3->unk09] = 1;
+        e3->unk70 |= 0x2000000;
+        fdat_801ed388(e3, 1, 1);
+    } else if (story->unk1448[r8->unk09] != 0 && fdat_801ee480 != 0xff) {
+        story->unk1448[r8->unk09] = 3;
+        e5->unk70 |= 0x2000000;
+        fdat_801ed388(e5, 1, 1);
     } else {
         return;
     }
-    e->unk70 |= 0x2000000;
-    fdat_801ed388(e, 1, 1);
 }
