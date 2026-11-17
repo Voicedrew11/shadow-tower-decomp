@@ -178,18 +178,14 @@ void func_800562d4(StSaveData *save, int fresh)
     func_80014d2c(save->unk1D6E, DAT_801cd180.unk22, 12);
 }
 
-/*
- * Not exact (same size): register choice only in the area-count loop, the
- * second table C loop and the kill-count loop.
- */
 /* Restores the state func_800562d4 saved. */
 ADDRESS(0x80056aa0, 0x8bc)
 void func_80056aa0(StSaveData *save)
 {
     int i;
-    int j;
-    Vis48 *e32;
-    Vis48 *e48;
+    int area;
+    int bit;
+    Vis48 *entry;
     Vis44 *r;
 
     ((StAreaBytes *)&area_state)->unk4 = *(StBytes5 *)save->unk4;
@@ -202,11 +198,11 @@ void func_80056aa0(StSaveData *save)
     func_80014cfc((u32 *)DAT_801cba08.unk1448, save->unk1454, 12);
     func_80014cfc((u32 *)DAT_801cba08.unk1478, save->unk1484, 12);
     func_80014cfc(DAT_801cba08.unk14A8, save->unk14B4, 5);
-    for (i = 0; i < 48; i++) {
-        DAT_801cba08.unk16E4[i] = 0;
-        for (j = 0; j < 64; j++) {
-            if ((DAT_801cba08.unk0[i][j / 32] & BIT(j)) && j < 48)
-                DAT_801cba08.unk16E4[i]++;
+    for (area = 0; area < 48; area++) {
+        DAT_801cba08.unk16E4[area] = 0;
+        for (i = 0; i < 64; i++) {
+            if ((DAT_801cba08.unk0[area][i / 32] & BIT(i)) && i < 48)
+                DAT_801cba08.unk16E4[area]++;
         }
     }
     vis_table_c.unk0000[2] = save->unk14C8[0];
@@ -214,56 +210,56 @@ void func_80056aa0(StSaveData *save)
     vis_table_c.unk0000[4] = save->unk14C8[2];
     vis_table_c.unk0000[5] = save->unk14C8[3];
     func_80014cfc(vis_table_c.unk0070, save->unk14CC, 9);
-    e32 = &vis_table_c.entries[32];
-    for (i = 0; i < 16; i++, e32++) {
+    entry = &vis_table_c.entries[32];
+    for (i = 0; i < 16; i++, entry++) {
         if (i < vis_table_c.unk0000[2]) {
-            e32->unk00 = save->unk14F0[i].unk00;
-            e32->unk02 = save->unk14F0[i].unk02;
-            e32->unk08.vx = save->unk14F0[i].unk04[0];
-            e32->unk08.vy = save->unk14F0[i].unk04[1];
-            e32->unk08.vz = save->unk14F0[i].unk04[2];
-            e32->unk18 = save->unk14F0[i].unk10[0];
-            e32->unk1A = save->unk14F0[i].unk10[1];
-            e32->unk1C = save->unk14F0[i].unk10[2];
-            e32->unk22 = save->unk14F0[i].unk16;
-            e32->unk2c = save->unk14F0[i].unk17;
-            r = &vis_table_c.unk0118[e32->unk00];
-            *(u32 *)e32->unk04 = 0;
-            e32->unk20 = r->unk1E;
-            e32->unk23 = 0;
-            e32->unk24 = 0;
-            e32->unk25 = 0;
-            e32->unk26 = 0;
-            e32->unk2D = r->unk5[1];
+            entry->unk00 = save->unk14F0[i].unk00;
+            entry->unk02 = save->unk14F0[i].unk02;
+            entry->unk08.vx = save->unk14F0[i].unk04[0];
+            entry->unk08.vy = save->unk14F0[i].unk04[1];
+            entry->unk08.vz = save->unk14F0[i].unk04[2];
+            entry->unk18 = save->unk14F0[i].unk10[0];
+            entry->unk1A = save->unk14F0[i].unk10[1];
+            entry->unk1C = save->unk14F0[i].unk10[2];
+            entry->unk22 = save->unk14F0[i].unk16;
+            entry->unk2c = save->unk14F0[i].unk17;
+            r = &vis_table_c.unk0118[entry->unk00];
+            *(u32 *)entry->unk04 = 0;
+            entry->unk20 = r->unk1E;
+            entry->unk23 = 0;
+            entry->unk24 = 0;
+            entry->unk25 = 0;
+            entry->unk26 = 0;
+            entry->unk2D = r->unk5[1];
         } else {
-            e32->unk00 = 0xffff;
-            e32->unk22 = 0;
+            entry->unk00 = 0xffff;
+            entry->unk22 = 0;
         }
     }
-    e48 = &vis_table_c.entries[48];
-    for (i = 0; i < 16; i++, e48++) {
+    entry = &vis_table_c.entries[48];
+    for (i = 0; i < 16; i++, entry++) {
         if (i < vis_table_c.unk0000[3]) {
-            e48->unk00 = save->unk14F0[16 + i].unk00;
-            e48->unk02 = save->unk14F0[16 + i].unk02;
-            e48->unk08.vx = save->unk14F0[16 + i].unk04[0];
-            e48->unk08.vy = save->unk14F0[16 + i].unk04[1];
-            e48->unk08.vz = save->unk14F0[16 + i].unk04[2];
-            e48->unk18 = save->unk14F0[16 + i].unk10[0];
-            e48->unk1A = save->unk14F0[16 + i].unk10[1];
-            e48->unk1C = save->unk14F0[16 + i].unk10[2];
-            e48->unk22 = save->unk14F0[16 + i].unk16;
-            e48->unk2c = save->unk14F0[16 + i].unk17;
-            r = &vis_table_c.unk0118[e48->unk00];
-            *(u32 *)e48->unk04 = 0;
-            e48->unk20 = r->unk1E;
-            e48->unk23 = 0;
-            e48->unk24 = 0;
-            e48->unk25 = 0;
-            e48->unk26 = 0;
-            e48->unk2D = r->unk5[1];
+            entry->unk00 = save->unk14F0[16 + i].unk00;
+            entry->unk02 = save->unk14F0[16 + i].unk02;
+            entry->unk08.vx = save->unk14F0[16 + i].unk04[0];
+            entry->unk08.vy = save->unk14F0[16 + i].unk04[1];
+            entry->unk08.vz = save->unk14F0[16 + i].unk04[2];
+            entry->unk18 = save->unk14F0[16 + i].unk10[0];
+            entry->unk1A = save->unk14F0[16 + i].unk10[1];
+            entry->unk1C = save->unk14F0[16 + i].unk10[2];
+            entry->unk22 = save->unk14F0[16 + i].unk16;
+            entry->unk2c = save->unk14F0[16 + i].unk17;
+            r = &vis_table_c.unk0118[entry->unk00];
+            *(u32 *)entry->unk04 = 0;
+            entry->unk20 = r->unk1E;
+            entry->unk23 = 0;
+            entry->unk24 = 0;
+            entry->unk25 = 0;
+            entry->unk26 = 0;
+            entry->unk2D = r->unk5[1];
         } else {
-            e48->unk00 = 0xffff;
-            e48->unk22 = 0;
+            entry->unk00 = 0xffff;
+            entry->unk22 = 0;
         }
     }
     viewer.unk2C = save->unk17F0;
@@ -275,8 +271,8 @@ void func_80056aa0(StSaveData *save)
     viewer.unk26 = save->unk1800;
     viewer.unk27 = save->unk1801;
     viewer.unk28 = 0;
-    for (i = 0; i < 266; i++) {
-        if (vis_table_c.unk0070[i / 32] & BIT(i))
+    for (bit = 0; bit < 266; bit++) {
+        if (vis_table_c.unk0070[bit / 32] & BIT(bit))
             viewer.unk28++;
     }
     viewer.unk32 = save->unk1803;
@@ -313,7 +309,7 @@ void func_80056aa0(StSaveData *save)
     viewer.unk219 = save->unk18B0[0];
     viewer.unk21A = save->unk18B0[1];
     viewer.unk21B = save->unk18B0[2];
-    *(VECTOR *)&viewer.position.vx = save->unk1858;
+    viewer.position = save->unk1858;
     viewer.unk278 = save->unk1868;
     DAT_801cd120.unk0 = save->unk18B4[0];
     DAT_801cd120.unk1 = save->unk18B4[1];
