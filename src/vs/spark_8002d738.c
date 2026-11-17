@@ -14,8 +14,8 @@
  * facing the opponent, each with a random life and velocity; a particle
  * whose x and z speeds are both 48 or more is dropped again.
  */
-/* Not exact: retail tests the second speed pair from registers without
- * re-reading the record; 0x10 bytes long. */
+/* Not exact: the last velocity result has an extra copy; temporary
+ * registers and the store/branch schedule differ (4 bytes long). */
 ADDRESS(0x8002d738, 0x260)
 void func_8002d738(int n)
 {
@@ -31,17 +31,26 @@ void func_8002d738(int n)
     off.vz = f->unk4DF18.unk1B4 * rcos(off.vy - 2048) / 16384;
     while (i--) {
         if (rec->unk10 == 0) {
+            int vx;
+            short vz;
+
             rec->unk10 = rand() & 0x7f;
             rec->unk0.vx = f->unk4DEF0.vx + off.vx;
             rec->unk0.vy = f->unk4DEF0.vy - f->unk4DF18.unk1B6 / 2;
             rec->unk0.vz = f->unk4DEF0.vz + off.vz;
             rec->unk8.vx = (rand() & 0x7f) - 63;
             rec->unk8.vy = (rand() & 0x7f) - 63;
-            rec->unk8.vz = (rand() & 0x7f) - 63;
-            if (rec->unk8.vx >= 48 && (rec->unk8.vz >= 48 || rec->unk8.vz < -47))
+            vz = (rand() & 0x7f) - 63;
+            vx = rec->unk8.vx;
+            rec->unk8.vz = vz;
+            if (vx >= 48 && (vz >= 48 || vz < -47))
                 rec->unk10 = 0;
-            if (rec->unk8.vx < -47 && (rec->unk8.vz >= 48 || rec->unk8.vz < -47))
-                rec->unk10 = 0;
+            else if (vx < -47) {
+                if (vz >= 48)
+                    rec->unk10 = 0;
+                else if (vz < -47)
+                    rec->unk10 = 0;
+            }
             if (++count == 200)
                 break;
         }
