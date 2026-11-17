@@ -42,7 +42,9 @@ typedef char VsCardStateSize[sizeof(VsCardState) == 0x1b8 ? 1 : -1];
 
 /* The 512-byte card file header; only the values the code reads. */
 typedef struct {
-    u8 unk0[0x3d];
+    u8 unk0[0x34];
+    u8 unk34[6];         /* 0x34: the title's three SJIS digits (func_8001c5e0) */
+    u8 unk3A[0x3d - 0x3a];
     u8 unk3D;
     u16 unk3E;
     u16 unk40;
@@ -60,7 +62,8 @@ typedef struct {
     u8 unk150[266];      /* 0x150: the item is held */
     u8 unk25A[0x2b4 - 0x25a];
     u16 unk2B4[21];      /* 0x2b4: listed item ids */
-    u8 unk2DE[0x2ec - 0x2de];
+    u8 unk2DE[0x2e0 - 0x2de];
+    s32 unk2E0[3];       /* 0x2e0: the player's team (VsTeam.slot, func_8001bb48) */
 } VsSaveSub;
 
 typedef char VsSaveSubSize[sizeof(VsSaveSub) == 0x2ec ? 1 : -1];
@@ -69,7 +72,9 @@ typedef struct {
     s32 unk0;            /* 0x0000: compared with the card file's first word */
     u8 unk4[0x14cc - 4];
     u32 unk14CC[9];      /* 0x14cc: 266 flag bits, counted into the header */
-    u8 unk14F0[0x18bc - 0x14f0];
+    u8 unk14F0[0x1802 - 0x14f0];
+    u8 unk1802;          /* 0x1802: the count of items won (func_8001c5e0) */
+    u8 unk1803[0x18bc - 0x1803];
     VsSaveSub unk18BC;   /* 0x18bc (VS band 6) */
     u8 unk1BA8[0x1d88 - 0x1ba8]; /* 0x1ba8: a count per item id (func_800222d8) */
 } VsSave;
@@ -80,6 +85,10 @@ typedef char VsSaveUnk18BCAt0x18BC[offsetof(VsSave, unk18BC) == 0x18bc ? 1 : -1]
 /* The two players' card file names (0x801a0a30, bss). */
 extern char DAT_801a0a30[2][40];
 extern VsSave DAT_801a0a80[2];
+
+/* The file list rows the two players' saves were loaded from
+ * (func_8001bb48; bss). */
+extern u16 DAT_80063328[2];
 
 /* The card file headers of the two players' saves (0x8015ffc0, bss). */
 extern VsCardHeader DAT_8015ffc0[2];

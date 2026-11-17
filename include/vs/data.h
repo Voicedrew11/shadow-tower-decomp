@@ -45,6 +45,9 @@ typedef struct {
     StCdRequest *unkD8; /* 0xd8: the next free entry (ST: unk9D4) */
     StCdRequest *unkDC; /* 0xdc: the entry being read (ST: unk9D8) */
     VsArchive archives[ST_ARCHIVES]; /* 0xe0: count as in ST.EXE (WIP) */
+    u8 unk1D0[0x4a0 - 0x1d0];
+    u_long *unk4A0;      /* 0x4a0: the menu file buffer below (func_8001bb48) */
+    u_long unk4A4[1];    /* 0x4a4: a menu file load buffer (WIP extent) */
 } VsCdState;
 
 /* Layout check: the offset the code proves. */

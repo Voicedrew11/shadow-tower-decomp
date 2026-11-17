@@ -89,6 +89,7 @@ void func_80013aec(void);                                /* src/vs/snd_800129bc.
 void func_80014070(void);                                /* src/vs/snd_800129bc.c */
 void func_8001c9b8(void);                                /* src/vs/card_8001c8b8.c */
 void func_80016d94(void);                                /* src/vs/gfx_80016ca8.c */
+void func_80016ca8(void);                                /* src/vs/gfx_80016ca8.c */
 int func_80016f10(void);                                 /* not reconstructed */
 int func_8001c5e0(int won, int again);                   /* not reconstructed */
 void func_80014480(void);                                /* src/vs/main.c */
