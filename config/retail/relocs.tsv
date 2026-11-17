@@ -4342,6 +4342,8 @@ ST.EXE	0x80045680	0x34e80	0x80045688	mips_hi16_lo16	reachable-code	0x801b5920	bs
 ST.EXE	0x80045680	0x34e80	0x800456f4	mips_hi16_lo16	reachable-code	0x801b5920	bss	area_state	lui+sh		manual-decoded	reviewed	st.area_cb asm review
 ST.EXE	0x800456f8	0x34ef8	0x800456fc	mips_hi16_lo16	reachable-code	0x801b5920	bss	area_state	lui+lh		manual-decoded	reviewed	st.area_load asm review
 ST.EXE	0x800456f8	0x34ef8	0x80045710	mips_hi16_lo16	reachable-code	0x801b5920	bss	area_state	lui+addiu		manual-decoded	reviewed	st.area_load asm review
+ST.EXE	0x80045708	0x34f08	0x800458fc	mips_hi16_lo16	reachable-code	0x80088c88	bss	DAT_80088c88	lui+addiu		manual-decoded	reviewed	st.area_load entryHI reaches state1 bufferlow; sameexistingowner/addend; noS2redefinition onthatpath
+ST.EXE	0x80045708	0x34f08	0x80045978	mips_hi16_lo16	reachable-code	0x80088c88	bss	DAT_80088c88	lui+addiu		manual-decoded	reviewed	st.area_load entryHI reaches state2 bufferlow; sameexistingowner/addend; noS2redefinition onthatpath
 ST.EXE	0x80045774	0x34f74		mips26	reachable-code	0x80045f68	load		j		manual-decoded	reviewed	st.area_load asm review
 ST.EXE	0x80045788	0x34f88	0x800459b0	mips_hi16_lo16	reachable-code	0x801b5920	bss	area_state	lui+addiu		manual-decoded	reviewed	st.area_load asm review (delay-slot lui)
 ST.EXE	0x8004578c	0x34f8c		mips26	reachable-code	0x80045f68	load		j		manual-decoded	reviewed	st.area_load asm review

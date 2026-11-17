@@ -24,6 +24,10 @@
 
 RODATA(0x800122a8, 0xc)
 
+/* Not exact: retail retains the file-buffer high half across the initial
+ * dispatch; this build forms it within cases (first divergence +0xc).
+ * Empty-case return routing and address/register lifetimes also differ;
+ * this build is 12 bytes short. */
 ADDRESS(0x800456f8, 0x898)
 void func_800456f8(void)
 {
@@ -89,6 +93,7 @@ void func_800456f8(void)
             func_80015d54(1, area_state.unk11 * 10 + 4, (u8 *)DAT_800fc488, func_800455c4);
         }
         if (area_state.unk10 != 0xff) {
+            p = DAT_80088c88;
             a = vis_table_a.entries;
             for (i = 63; i != -1; i--) {
                 if (a->unkA4) {
@@ -127,9 +132,9 @@ void func_800456f8(void)
                 if (world_state.unk8C7C[i])
                     func_80015230(world_state.unk8C7C[i]);
             }
-            func_80014cfc((u32 *)vis_table_a.unk3500, (u32 *)&DAT_80088c88[1], 2816);
+            func_80014cfc((u32 *)vis_table_a.unk3500, (u32 *)(p + 1), 2816);
             func_8004e8ec();
-            p = &DAT_80088c88[1] + DAT_80088c88[0] / 4;
+            p = (u_long *)((u8 *)p + *p + 4);
             func_8004e960((VisAFileEntry *)(p + 1));
             p = (u_long *)((u8 *)p + *p + 4);
             func_80014cfc((u32 *)&vis_table_b.unk0000[300], (u32 *)(p + 1), 192);
@@ -165,8 +170,15 @@ void func_800456f8(void)
         }
         if (area_state.unk11 != 0xff)
             break;
-        /* fall through */
+        goto phase5;
+    case 4:
+        if (area_state.unk11 != 0xff) {
+            area_state.unk2 = 240;
+            func_80015d54(1, area_state.unk11 * 10 + 5, (u8 *)DAT_800f2c88, func_800455dc);
+        }
+        break;
     case 5:
+    phase5:
         if (area_state.unk12 != 0xff) {
             area_state.unk2 = 240;
             func_80045f90(1, area_state.unk12 * 10 + 6, func_800455f4);
@@ -181,10 +193,11 @@ void func_800456f8(void)
         area_state.unk2 = 6;
         /* fall through */
     case 6:
-        if (DAT_801dd1c0.slots[1].vab != -1) {
-            SsVabClose(DAT_801dd1c0.slots[1].vab);
-            DAT_801dd1c0.slots[1].vab = -1;
-            DAT_801dd1c0.slots[1].block = NULL;
+        slot = &DAT_801dd1c0.slots[1];
+        if (slot->vab != -1) {
+            SsVabClose(slot->vab);
+            slot->vab = -1;
+            slot->block = NULL;
         }
         if (area_state.unk13 != 0xff) {
             area_state.unk2 = 240;
@@ -194,15 +207,11 @@ void func_800456f8(void)
             goto done;
         area_state.unk2 = 7;
         break;
-    case 4:
-        if (area_state.unk11 != 0xff) {
-            area_state.unk2 = 240;
-            func_80015d54(1, area_state.unk11 * 10 + 5, (u8 *)DAT_800f2c88, func_800455dc);
-        }
-        break;
     case 7:
-    case 8:
     done:
+        func_8004567c();
+        break;
+    case 8:
         func_8004567c();
         break;
     case 240:
