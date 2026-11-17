@@ -785,16 +785,16 @@ void func_80068258(void)
  * display area with the D-pad (raw pad bits, active low) until START,
  * polling the host debugger each frame; then restores it.
  */
-/* Not exact: retail keeps %hi(DAT_801cd130 + 2) in $s1 across the adjust loop
- * and sign-extends the raw bits before inverting them, and enters the second
- * wait loop after one test; this build re-forms the address for each read. */
+/* Not exact: the three button-read phases materialize full owner addresses
+ * here, where retail applies the low relocations directly to its loads
+ * (first divergence +0xc8); the body is eight bytes longer than retail. */
 ADDRESS(0x80068440, 0x214)
 void func_80068440(void)
 {
     RECT saved;
     DISPENV *disp;
     DRAWENV *draw;
-    s16 bits;
+    int bits;
 
     world_state.draw[0].isbg = 0;
     world_state.draw[1].isbg = 0;
