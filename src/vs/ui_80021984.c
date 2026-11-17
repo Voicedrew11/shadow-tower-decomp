@@ -12,9 +12,6 @@
 #include <vs/menu.h>
 #include <vs/funcs.h>
 
-/* The two players' picked fighters, -1 for none (bss, unowned). */
-extern s32 DAT_80063330[2];
-
 /*
  * Starts a frame and draws, in team mode (DAT_80063228 == 3), the six
  * slot pictures in two columns of three (black for an empty slot),

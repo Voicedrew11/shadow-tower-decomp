@@ -8,11 +8,8 @@
 #include <sys/types.h>
 #include <LIBGTE.H>
 #include <LIBGPU.H>
+#include <vs/data.h>
 #include <vs/menu.h>
-
-/* Seven words and seven halfwords the page clears (bss, unowned). */
-extern s32 DAT_801c4a38[7];
-extern u16 DAT_80117598[7];
 
 /*
  * Draws message 370 + unk1BC, the highlight bar over the choice unk1CC

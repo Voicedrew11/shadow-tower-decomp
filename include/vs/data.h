@@ -219,4 +219,10 @@ extern u16 DAT_80063340;
  * the graphics state (bss; ST.EXE's DAT_8011c488). */
 extern u_long DAT_8011c528[];
 
+/* VS band 6: seven words and seven halfwords func_8001f9a0 clears, and the
+ * two players' picked fighters, -1 for none (bss, unowned). */
+extern s32 DAT_801c4a38[7];
+extern u16 DAT_80117598[7];
+extern s32 DAT_80063330[2];
+
 #endif
