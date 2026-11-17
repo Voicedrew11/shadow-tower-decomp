@@ -25,6 +25,8 @@ void func_80014f90(StBlock *heap)
 }
 
 /* Moves the used blocks down over the free ones and updates their owners. */
+/* Not exact: the final end-header test loads dst->state into v0 and uses
+ * beq v0,v1; retail loads v1 and compares v1,v0. */
 ADDRESS(0x80015024, 0x120)
 void func_80015024(StBlock *heap)
 {
