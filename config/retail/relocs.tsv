@@ -10488,8 +10488,15 @@ VS.EXE	0x800299d4	0x191d4		mips26	reachable-code	0x80029a0c	load		j		manual-deco
 VS.EXE	0x80029a38	0x19238		mips26	reachable-code	0x80029aa4	load		j		manual-decoded	reviewed	vs.timer_800297fc asm review
 VS.EXE	0x80029a58	0x19258		mips26	reachable-code	0x80029a9c	load		j		manual-decoded	reviewed	vs.timer_800297fc asm review
 VS.EXE	0x80029a70	0x19270		mips26	reachable-code	0x80029aa4	load		j		manual-decoded	reviewed	vs.timer_800297fc asm review
+VS.EXE	0x80029b14	0x19314		mips_gprel16	reachable-code	0x800632e4	load	DAT_800632e4	lbu	gp	manual-decoded	reviewed	vs.gauge_80029b10 direct gp+0xcc static blink byte
+VS.EXE	0x80029b24	0x19324		mips_gprel16	reachable-code	0x800632e4	load	DAT_800632e4	sb	gp	manual-decoded	reviewed	vs.gauge_80029b10 direct gp+0xcc static blink byte
+VS.EXE	0x80029b34	0x19334	0x80029b38	mips_hi16_lo16	reachable-code	0x8016a4d0	bss	DAT_801624d0	lui+addiu		manual-decoded	reviewed	vs.gauge_80029b10 directly decoded existing owner anchor+0x8000
+VS.EXE	0x80029b5c	0x1935c	0x80029b60	mips_hi16_lo16	reachable-code	0x800633b0	bss	DAT_800633b0	lui+addiu		manual-decoded	reviewed	vs.gauge_80029b10 directly decoded existing owner base
 VS.EXE	0x80029c04	0x19404		mips26	reachable-code	0x80029c30	load		j		manual-decoded	reviewed	vs.gauge_80029b10 asm review
+VS.EXE	0x80029c54	0x19454		mips_gprel16	reachable-code	0x800632e4	load	DAT_800632e4	lbu	gp	manual-decoded	reviewed	vs.gauge_80029b10 direct gp+0xcc static blink byte
 VS.EXE	0x80029cc8	0x194c8		mips26	reachable-code	0x80029ce8	load		j		manual-decoded	reviewed	vs.gauge_80029b10 asm review
+VS.EXE	0x80029d38	0x19538	0x80029d3c	mips_hi16_lo16	reachable-code	0x8016a4d0	bss	DAT_801624d0	lui+addiu		manual-decoded	reviewed	vs.gauge_80029b10 directly decoded existing owner anchor+0x8000
+VS.EXE	0x80029d5c	0x1955c	0x80029d60	mips_hi16_lo16	reachable-code	0x800633b0	bss	DAT_800633b0	lui+addiu		manual-decoded	reviewed	vs.gauge_80029b10 directly decoded existing owner base
 VS.EXE	0x80029e1c	0x1961c		mips26	reachable-code	0x80029e4c	load		j		manual-decoded	reviewed	vs.gauge_80029b10 asm review
 VS.EXE	0x80029f50	0x19750		mips26	reachable-code	0x80029f94	load		j		manual-decoded	reviewed	vs.hud_80029f28 asm review
 VS.EXE	0x80029f70	0x19770		mips26	reachable-code	0x80029f94	load		j		manual-decoded	reviewed	vs.hud_80029f28 asm review

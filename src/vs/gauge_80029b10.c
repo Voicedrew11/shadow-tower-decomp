@@ -19,12 +19,12 @@ static u8 DAT_800632e4 = 0;
  * centre, white while below 31% on alternate frames) and, when it has
  * one, its second gauge under it; `level` (at most 32) scales the colours.
  */
-/* Not exact: this build hoists level * 125 out of the second loop, which
- * swaps the level and loop-counter registers there; 0x10 bytes long. */
+/* Not exact: level * 125 hoists out of the second loop; the level and
+ * loop counter use different registers. */
 ADDRESS(0x80029b10, 0x418)
 void func_80029b10(int level)
 {
-    int i;
+    int i = 0;
     int w;
     VsFighter *f;
     POLY_G4 *p;
@@ -34,7 +34,7 @@ void func_80029b10(int level)
     if (level > 32)
         level = 32;
     f = DAT_800633b0.fighter;
-    for (i = 0; i < 2; i++) {
+    for (; i < 2; i++) {
         packet = DAT_801624d0.packet;
         p = (POLY_G4 *)packet->cur;
         packet->cur = (u_long *)(p + 1);
@@ -47,12 +47,12 @@ void func_80029b10(int level)
             setXY4(p, w + 205, 20, 205, 20, w + 200, 25, 200, 25);
         setRGB0(p, 0, 0, 0);
         setRGB1(p, 0, 0, 0);
-        if (w < 31 && DAT_800632e4 == 0) {
-            setRGB3(p, 200, 200, 200);
-            setRGB2(p, 200, 200, 200);
-        } else {
+        if (w >= 31 || DAT_800632e4 != 0) {
             setRGB3(p, level * 250 / 32, 0, 0);
             setRGB2(p, 250 - w * 5 / 2, w * 5 / 2 * level / 32, 0);
+        } else {
+            setRGB3(p, 200, 200, 200);
+            setRGB2(p, 200, 200, 200);
         }
         addPrim(&DAT_801624d0.ot_cur[1], p);
         f++;
