@@ -40,4 +40,25 @@ typedef struct {
     u_short n3, i3;
 } VsFaceG4;
 
+/* VS band 6: a model part's face list as func_8002345c walks it (the
+ * part headers are 40 bytes, as MeshHeader): the list's offset from the
+ * parts and its record count. */
+typedef struct {
+    u8 unk0[0x10];
+    u_long faces;        /* 0x10 */
+    u_long n_faces;      /* 0x14 */
+    u8 unk18[0x10];
+} VsModelPart;
+
+typedef char VsModelPartSize[sizeof(VsModelPart) == 0x28 ? 1 : -1];
+
+/* The tag word before each face record: the record's length in words
+ * and its GPU code. */
+typedef struct {
+    u_long unk0 : 8;
+    u_long len : 8;
+    u_long unk16 : 8;
+    u_long code : 8;
+} VsFaceTag;
+
 #endif

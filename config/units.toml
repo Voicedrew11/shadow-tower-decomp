@@ -610,6 +610,12 @@ source = "src/vs/ui_80020384.c"
 profile = "probe-gcc272cdk-o2-g8"
 
 [[unit]]
+unit = "vs.ui_800207d4"
+image = "VS.EXE"
+source = "src/vs/ui_800207d4.c"
+profile = "probe-gcc272cdk-o2-g8"
+
+[[unit]]
 unit = "vs.ui_80021984"
 image = "VS.EXE"
 source = "src/vs/ui_80021984.c"
@@ -637,6 +643,12 @@ profile = "probe-gcc272cdk-o2-g8"
 unit = "vs.ui_80022f14"
 image = "VS.EXE"
 source = "src/vs/ui_80022f14.c"
+profile = "probe-gcc272cdk-o2-g8"
+
+[[unit]]
+unit = "vs.model_8002345c"
+image = "VS.EXE"
+source = "src/vs/model_8002345c.c"
 profile = "probe-gcc272cdk-o2-g8"
 
 [[unit]]
