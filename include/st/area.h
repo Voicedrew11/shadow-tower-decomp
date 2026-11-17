@@ -55,7 +55,7 @@ void func_80045ffc(void);
 extern AreaHooks DAT_8008038c;
 
 /* src/st/area_request.c (also declared in st/player.h) */
-void func_80045044(u8 a0, u8 a1, u8 a2, u8 a3, u8 a4, s8 f0, s8 f1, s8 f2, u8 f3, u8 f4,
+KF_VALUELESS_S32 func_80045044(u8 a0, u8 a1, u8 a2, u8 a3, u8 a4, s8 f0, s8 f1, s8 f2, u8 f3, u8 f4,
                    u8 f5);
 
 /* WIP prototypes of the rest of the area code */

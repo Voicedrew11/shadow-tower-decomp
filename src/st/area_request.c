@@ -13,8 +13,10 @@
 
 /* Starts loading areas a0..a4 unless they are already loaded or being
  * loaded; f0..f2 is the fade colour and f3..f5 the next fade's (WIP). */
+/* All nine direct callers discard the word result; the return edges keep
+ * v0 live. */
 ADDRESS(0x80045044, 0x524)
-void func_80045044(u8 a0, u8 a1, u8 a2, u8 a3, u8 a4, s8 f0, s8 f1, s8 f2, u8 f3, u8 f4,
+KF_VALUELESS_S32 func_80045044(u8 a0, u8 a1, u8 a2, u8 a3, u8 a4, s8 f0, s8 f1, s8 f2, u8 f3, u8 f4,
                    u8 f5)
 {
     u8 n0, n1, n2, n3, n4;
@@ -121,8 +123,8 @@ busy:
     ExitCriticalSection();
     if (area_state.unk1C && a0 != 0xff && f0 == 127 && area_state.unk10 != a0) {
         f0 = -area_state.unk20;
-        f1 = -area_state.unk21;
         f2 = -area_state.unk22;
+        f1 = -area_state.unk21;
     }
 
     goto start;

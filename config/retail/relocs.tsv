@@ -4304,7 +4304,7 @@ ST.EXE	0x80045298	0x34a98	0x8004529c	mips_hi16_lo16	reachable-code	0x80088204	bs
 ST.EXE	0x800452a0	0x34aa0		mips26	reachable-code	0x800452b0	load		j		manual-decoded	reviewed	st.area_request asm review
 ST.EXE	0x800452bc	0x34abc	0x800452cc	mips_hi16_lo16	reachable-code	0x801b5920	bss	area_state	lui+addiu		manual-decoded	reviewed	st.area_request asm review (delay-slot lui)
 ST.EXE	0x800452c0	0x34ac0	0x800452c8	mips_hi16_lo16	reachable-code	0x801b593d	bss	area_state	lui+sb		manual-decoded	reviewed	st.area_request asm review
-ST.EXE	0x800452c0	0x34ac0	0x800452cc	mips_hi16_lo16	reachable-code	0x801b5920	bss	area_state	lui+addiu		manual-decoded	reviewed	st.area_request asm review
+ST.EXE	0x800452c0	0x34ac0	0x800452cc	mips_hi16_lo16	reachable-code	0x801b5920	bss	area_state	lui+addiu		manual-decoded	rejected	st.area_request: this high reaches sb in the return jump delay slot at 0x800452c8, not the alternate branch low at 0x800452cc
 ST.EXE	0x800452c4	0x34ac4		mips26	reachable-code	0x80045534	load		j		manual-decoded	reviewed	st.area_request asm review
 ST.EXE	0x800452d8	0x34ad8		mips26	reachable-code	0x80045534	load		j		manual-decoded	reviewed	st.area_request asm review
 ST.EXE	0x800452f8	0x34af8	0x80045340	mips_hi16_lo16	reachable-code	0x801b5920	bss	area_state	lui+addiu		manual-decoded	reviewed	st.area_request asm review (delay-slot lui)
