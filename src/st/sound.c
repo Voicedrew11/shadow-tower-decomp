@@ -204,9 +204,8 @@ void func_80057f3c(void)
  * the listener over `fade`, panned by the direction from the listener's
  * yaw. Bit 15 of `id` keeps more of the volume on the far side.
  *
- * Not exact: retail clamps the wide volume through a temporary (li v1,127;
- * move v1,s2; move s2,v1) and keeps vol + 32 in a0; this build assigns 127
- * first.
+ * Not exact: the wide-volume clamp uses a1 for its temporary where retail
+ * uses v1 (the three load/copy words around the clamp).
  */
 ADDRESS(0x80057fc4, 0x25c)
 s16 func_80057fc4(int id, VECTOR *pos, int volume, int range, int fade, int note)
@@ -235,11 +234,13 @@ s16 func_80057fc4(int id, VECTOR *pos, int volume, int range, int fade, int note
         left = vol + (127 - vol) / 4;
     } else {
         int near = vol + 32;
-        int sum = near + (127 - vol) / 2;
+        int capped;
 
-        left = 127;
-        if (sum < 128)
-            left = sum;
+        wide = near + (127 - vol) / 2;
+        capped = 127;
+        if (wide < 128)
+            capped = wide;
+        left = capped;
     }
     angle = func_8004a1b4(pos->vx - DAT_801dd1c0.listener.vx, pos->vz - DAT_801dd1c0.listener.vz)
             - DAT_801dd1c0.listener_rot.vy;
