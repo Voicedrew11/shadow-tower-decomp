@@ -19,7 +19,6 @@
 
 void func_801edb90(Vis212 *e);
 
-/* Not exact (one attempt, retries off; 88.8%): first divergence retail `lui v1,0x0`, this source `lui v0,0x0`. */
 /*
  * The current entry's handler: kind 10 wakes once its record's stream
  * counter is 3 (flag 6) and, when hit, gives the viewer status timer 4 and
@@ -30,9 +29,10 @@ void func_801edb90(Vis212 *e);
 ADDRESS(0x801ed770, 0x420)
 void func_801ed770(void)
 {
+    VisTableA *a = &vis_table_a;
     Vis48 *c7 = &vis_table_c.entries[7];
-    Vis212 *e = vis_table_a.unk6138;
-    Vis192 *r = vis_table_a.unk6134;
+    Vis212 *e = a->unk6138;
+    Vis192 *r = a->unk6134;
     VECTOR v;
 
     if (e->unk02 == 10) {
@@ -104,14 +104,17 @@ next:
                 e->unk1C.bytes[3] = 3;
             }
         } else if (e->unk02 == 5) {
-            if (e->unk1C.bytes[0] == 0) {
+            switch (e->unk1C.bytes[0]) {
+            case 0:
                 fdat_801eb7b4(e, 0);
-            } else if (e->unk1C.bytes[0] == 1) {
+                break;
+            case 1:
                 fdat_801eb7b4(e, 6);
                 e->unk2A = 0xfff;
                 func_8005335c(c7, 1);
                 fdat_801eb7b4(e, 7);
                 e->unk1C.bytes[0] = 2;
+                break;
             }
         } else {
             fdat_801ed4a0();

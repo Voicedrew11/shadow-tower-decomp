@@ -19,7 +19,6 @@
 
 void func_801ed8f8(Vis212 *e);
 
-/* Not exact (one attempt, retries off; 97.4%): first divergence retail `lui a1,0x0`, this source `lui a1,0x0`. */
 /* The current entry's handler: kind 0 dying sets fdat_801ed938 and the
  * second flag word's bit 15; then the animation steps as fdat_801ed6e4
  * does, kind 2 running func_801ed8f8 after its next move. */
@@ -27,10 +26,14 @@ ADDRESS(0x801ed77c, 0x104)
 void func_801ed77c(void)
 {
     Vis212 *e = vis_table_a.unk6138;
+    u32 flags;
 
     if (e->unk02 == 0 && e->unk05 == 5) {
+        Data801cba08 *story = &DAT_801cba08;
+
+        flags = story->unk1444.word;
         fdat_801ed938 = 1;
-        DAT_801cba08.unk1444.word |= 0x8000;
+        story->unk1444.word = flags | 0x8000;
     }
     e->unk2A += e->unkB0;
     if (fdat_801ece7c(e) == 1)
