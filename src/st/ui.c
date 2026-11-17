@@ -2310,7 +2310,9 @@ void func_8002e4d0(void)
  * item would make on page 2) and bars scaled to +0x2c4.
  *
  * Not exact: retail schedules the colour stores in another order and
- * keeps the scratchpad base in s2 (this build: s3).
+ * keeps the scratchpad base in s2 (this build: s3). The selected-count
+ * loop now uses a plain byte argument and advances its cursor in the
+ * update clause, matching the retail backedge and pointer walk.
  */
 ADDRESS(0x8002e94c, 0x44c)
 void func_8002e94c(void)
@@ -2352,8 +2354,8 @@ void func_8002e94c(void)
     if (sp->unk2DC == 2 && sp->unk2C6) {
         if (sp->unk2BE != -1) {
             count = vis_table_c.unk0118[sp->unk2C0].unk10;
-            for (i = 0, y = 16; i < STATUS_ROWS; i++, y += 15)
-                func_80027440(*count++ | 0x13000000, 590, y, sp->unk320);
+            for (i = 0, y = 16; i < STATUS_ROWS; count++, y += 15, i++)
+                func_80027440(*count | 0x13000000, 590, y, sp->unk320);
         }
         return;
     }
