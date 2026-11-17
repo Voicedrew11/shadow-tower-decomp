@@ -417,7 +417,12 @@ OPTXT.EXE	0x8001f7e0	0xefe0	0x6	bss	proven	act_align	u_char[6]	asm;src/optxt/mai
 OPTXT.EXE	0x8001f7e6	0xefe6	0x2	unclassified	coverage-gap			payload-complement	.sbss alignment
 OPTXT.EXE	0x8001f7e8	0xefe8	0x4	bss	proven	frame	int	asm;src/optxt/main.c optxt.main	.sbss; $gp+80
 OPTXT.EXE	0x8001f7ec	0xefec	0x14	unclassified	coverage-gap			payload-complement	the opening state word 0x8001f7ec (read and written by its fixed address, absolute lui pairs, no relocation), .sbss alignment and MALLOC.OBJ .bss
-VS.EXE	0x80011000	0x800	0x1980	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
+VS.EXE	0x80011000	0x800	0xf40	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
+VS.EXE	0x80011f40	0x1740	0x4	defined	candidate	DAT_80011f40	u8 *	asm;src/vs/main_tail.c vs.main_tail	end of the game .rdata: a heap bound main reads
+VS.EXE	0x80011f44	0x1744	0x4	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
+VS.EXE	0x80011f48	0x1748	0x4	defined	candidate	DAT_80011f48	u8 *	asm;src/vs/main_tail.c vs.main_tail	end of the game .rdata: a heap bound main reads
+VS.EXE	0x80011f4c	0x174c	0x4	defined	candidate	DAT_80011f4c	u8 *	asm;src/vs/main_tail.c vs.main_tail	end of the game .rdata: main stores the heap base here
+VS.EXE	0x80011f50	0x1750	0xa30	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 VS.EXE	0x80035d78	0x25578	0x4	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 VS.EXE	0x80035d88	0x25588	0x4	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 VS.EXE	0x80035d98	0x25598	0x4	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
@@ -572,7 +577,9 @@ VS.EXE	0x8004a198	0x39998	0xc	unclassified	coverage-gap			payload-complement	may
 VS.EXE	0x8004a1b8	0x399b8	0xc	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 VS.EXE	0x8004a1d8	0x399d8	0xc	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 VS.EXE	0x8004a1f8	0x399f8	0xc	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
-VS.EXE	0x8004a218	0x39a18	0x11090	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
+VS.EXE	0x8004a218	0x39a18	0xc	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
+VS.EXE	0x8004a224	0x39a24	0x1ce	defined	candidate	DAT_8004a224	VsFighterData[]	asm;src/vs/fighter_800140d8.c vs.fighter_800140d8	first record of the fighters' data blocks (0x1ce bytes each; WIP extent)
+VS.EXE	0x8004a3f2	0x39bf2	0x10eb6	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 VS.EXE	0x8005b2a8	0x4aaa8	0x10	defined	candidate	DAT_8005b2a8	VECTOR	asm;src/vs/model_80024b5c.c vs.model_80024b5c	.data VECTOR (4096, 4096, 4096): the scale func_80025204/func_80028914/func_800291d4 apply to their light matrix
 VS.EXE	0x8005b2b8	0x4aab8	0x7f60	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 VS.EXE	0x80063218	0x52a18	0x4	defined	candidate	DAT_80063218	s32	asm;src/vs/model_80024b5c.c vs.model_80024b5c	.sdata word (0) read absolutely by the -G8 model renderers: an x angle added to the light rotation

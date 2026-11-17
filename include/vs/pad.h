@@ -21,14 +21,18 @@ typedef struct {
 
 typedef struct {
     VsPad pads[2];       /* 0x00 */
-    u8 unk28[8];
+    s32 unk28;           /* 0x28: frame statistics shown when 1 (func_80015e50 toggles it) */
+    s32 unk2C;           /* 0x2c: frames button 1 has been held (func_80015e50) */
     volatile s32 unk30;  /* 0x30: frames, counted by the func_80013848 callback */
-    u8 unk34[8];
+    u8 unk34[4];
+    s32 unk38;           /* 0x38: main's root counter 2 event */
     volatile s32 unk3C;  /* 0x3c: frames, counted by the func_80013868 callback */
+    u32 unk40;           /* 0x40: a frame count the periodic sound triggers divide */
+    s32 unk44;           /* 0x44: main's root counter 3 event */
 } VsPadState;
 
 typedef char VsPadSize[sizeof(VsPad) == 0x14 ? 1 : -1];
-typedef char VsPadStateSize[sizeof(VsPadState) == 0x40 ? 1 : -1];
+typedef char VsPadStateSize[sizeof(VsPadState) == 0x48 ? 1 : -1];
 
 extern VsPadState DAT_801603c0;
 

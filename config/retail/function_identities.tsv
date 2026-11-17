@@ -748,7 +748,7 @@ VS.EXE	0x80015020	func_80015020			unknown	unknown *object;unknown *pointer1;unkn
 VS.EXE	0x80015e50	func_80015e50			unknown	unknown *object;unknown arg1;unknown arg2;unknown arg3	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
 VS.EXE	0x80016488	func_80016488			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
 VS.EXE	0x800165f4	func_800165f4			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-VS.EXE	0x8001683c	func_8001683c			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+VS.EXE	0x8001683c	main			int		supported	proven	asm;callers;src/vs/main.c vs.main	called by NONE3 startup (calls __main); sets up the heap, pads, CD, card and root counter events, runs the versus loop, then the next program TITLE.EXE
 VS.EXE	0x80016c48	func_80016c48			void	unknown arg0;unknown arg1;unknown arg2	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
 VS.EXE	0x80016ca8	func_80016ca8			unknown	unknown arg0;unknown arg1;unknown arg2	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
 VS.EXE	0x80016d94	func_80016d94			unknown	unknown *object;unknown arg1;unknown arg2	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review

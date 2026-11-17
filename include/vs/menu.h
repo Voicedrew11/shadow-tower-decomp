@@ -48,14 +48,19 @@ typedef struct {
     s16 unk1C4;          /* 0x1c4: the file list scroll */
     u16 unk1C6;          /* 0x1c6 (ST MenuScratch.unk202) */
     s16 unk1C8;          /* 0x1c8: the first free save number */
-    u8 unk1CA[2];
-    u16 unk1CC;          /* 0x1cc (ST unk2DC) */
+    s16 unk1CA;          /* 0x1ca: func_8001bb48's mode */
+    u16 unk1CC;          /* 0x1cc (ST unk2DC); func_8001bb48 shifts its step bit through it */
     u8 unk1CE[2];
     s16 unk1D0;          /* 0x1d0: the list cursor row (ST unk2E0) */
     u8 unk1D2[2];
     u8 unk1D4;           /* 0x1d4: cursor blink phase (ST unk2E4) */
     u8 unk1D5;           /* 0x1d5: font mode (ST unk2E5) */
-    u8 unk1D6[0x1f0 - 0x1d6];
+    u8 unk1D6[0x1d8 - 0x1d6];
+    DVECTOR unk1D8;      /* 0x1d8: the message font page's VRAM position (func_8001bb48) */
+    DVECTOR unk1DC;      /* 0x1dc: its CLUT position */
+    DVECTOR unk1E0;      /* 0x1e0: the item name page's VRAM position (func_8001bb48) */
+    DVECTOR unk1E4;      /* 0x1e4: its CLUT position */
+    u8 unk1E8[0x1f0 - 0x1e8];
     CVECTOR style[8];    /* 0x1f0: text colours (ST 0x300) */
     u8 unk210[4];
     CVECTOR unk214;      /* 0x214: highlight colour (ST unk32C) */

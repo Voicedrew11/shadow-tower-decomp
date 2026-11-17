@@ -464,8 +464,10 @@ def diff_image(
     results: list[UnitDataDiff] = []
     failures: list[ArtifactFailure] = []
     linked = linked_addresses(image)
-    from scripts.kf.roundtrip import initialized_definitions
-    definitions = initialized_definitions(image, manifest.units)
+    from scripts.kf.roundtrip import (allocated_definitions, initialized_definitions,
+                                      usable_definitions)
+    definitions = {**allocated_definitions(image, manifest.units),
+                   **initialized_definitions(image, manifest.units)}
     for unit in manifest.units:
         if unit.image != image:
             continue
@@ -478,7 +480,8 @@ def diff_image(
                 image, unit.unit, "missing " + ", ".join(missing)
             ))
             continue
-        diff = diff_unit(unit, delink_dir, objdiff_dir, linked, definitions)
+        diff = diff_unit(unit, delink_dir, objdiff_dir, linked,
+                         usable_definitions(definitions, unit, manifest.units))
         if diff is not None:
             results.append(diff)
     return results, failures
