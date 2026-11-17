@@ -566,8 +566,8 @@ int func_8001b314(int fd, int offset, u8 *buf, int size)
 
 /* Reads blocks written by func_8001b314, rereading a bad block up to three
  * times; returns the sum of the check bytes, or -1. */
-/* Not exact: retail keeps the running block sum in a second register (addu
- * $a1,$a0,$v0; move $a0,$a1) and is one instruction longer. */
+/* Not exact: retail keeps the running and new block sums in a0/a1;
+ * this build swaps them. */
 ADDRESS(0x8001b3f8, 0x10c)
 int func_8001b3f8(int fd, int offset, u8 *buf, int size)
 {
@@ -577,14 +577,15 @@ int func_8001b3f8(int fd, int offset, u8 *buf, int size)
     int sum = 0;
     int n = 0;
     int check;
+    int next_check;
     int i;
 
     while (size > 0) {
         lseek(fd, offset + n * 128, SEEK_SET);
         if (read(fd, block, 128) != 128)
             return -1;
-        for (check = i = 0; i < 127; i++) {
-            check += block[i];
+        for (next_check = i = 0; i < 127; i++) {
+            check = next_check += block[i];
             *data++ = block[i];
         }
         check = ~check;
