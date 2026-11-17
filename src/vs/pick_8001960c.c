@@ -38,9 +38,8 @@ void exit(int code);
 #define COUNT (sp->unk0.menu.half[1])
 #define IDS (sp->unk0.menu.list.ids)
 
-/* Not exact (one attempt; 76.1%): first divergence at +0x0, retail saves
- * $s5 (152-byte frame, `player` in $s5; here 144 and $s4); the list
- * search and the scroll branches then allocate differently. */
+/* Not exact: frame 144 bytes instead of 152; eligibility, search and
+ * preview values use different temporary registers and loop edges. */
 ADDRESS(0x8001960c, 0xb18)
 void func_8001960c(int player)
 {
@@ -79,16 +78,25 @@ void func_8001960c(int player)
     COUNT = 1;
     IDS[0] = -2;
     for (i = 0; i < 266; i++) {
-        if (!mine->unk150[i] && other->unk150[i] &&
-            (!(save->unk14CC[i / 32] & (1 << (i % 32))) || mine->unk14[i]) &&
-            other->unk2B4[0] != i && other->unk2B4[1] != i && other->unk2B4[2] != i &&
-            other->unk2B4[3] != i && other->unk2B4[4] != i && other->unk2B4[5] != i &&
-            other->unk2B4[6] != i && other->unk2B4[7] != i && other->unk2B4[8] != i &&
-            other->unk2B4[9] != i && other->unk2B4[10] != i && other->unk2B4[11] != i &&
-            other->unk2B4[12] != i && other->unk2B4[13] != i && other->unk2B4[14] != i &&
-            other->unk2B4[15] != i && other->unk2B4[16] != i && other->unk2B4[17] != i &&
-            other->unk2B4[18] != i && other->unk2B4[19] != i && other->unk2B4[20] != i)
-            IDS[COUNT++] = i;
+        u32 mask;
+        u32 word;
+
+        if (mine->unk150[i] != 0 || other->unk150[i] == 0)
+            continue;
+        mask = 1;
+        word = save->unk14CC[i / 32];
+        mask <<= i % 32;
+        if ((word & mask) && mine->unk14[i] == 0)
+            continue;
+        if (other->unk2B4[0] == i || other->unk2B4[1] == i || other->unk2B4[2] == i
+            || other->unk2B4[3] == i || other->unk2B4[4] == i || other->unk2B4[5] == i
+            || other->unk2B4[6] == i || other->unk2B4[7] == i || other->unk2B4[8] == i
+            || other->unk2B4[9] == i || other->unk2B4[10] == i || other->unk2B4[11] == i
+            || other->unk2B4[12] == i || other->unk2B4[13] == i || other->unk2B4[14] == i
+            || other->unk2B4[15] == i || other->unk2B4[16] == i || other->unk2B4[17] == i
+            || other->unk2B4[18] == i || other->unk2B4[19] == i || other->unk2B4[20] == i)
+            continue;
+        IDS[COUNT++] = i;
     }
     sp->unk1CC = 2;
     sp->unk1D0 = 0;
@@ -97,13 +105,12 @@ void func_8001960c(int player)
     if (picked != -1) {
         count = COUNT;
         i = 0;
-        if (count != 0) {
-            p = IDS;
-            do {
-                if (picked == *p++)
-                    break;
-                i++;
-            } while (count != 0);
+        p = IDS;
+        /* Retail tests the same count again; it does not decrement it. */
+        while (count != 0) {
+            if (picked == *p++)
+                break;
+            i++;
         }
         if (COUNT < 12 || i < 6) {
             sp->unk1D0 = i;
