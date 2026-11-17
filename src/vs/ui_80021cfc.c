@@ -144,10 +144,10 @@ void func_80022228(void)
  * (four columns of four), the count the opponent's save holds, the
  * record's +0x27 value and its weight (+0x24 / 4.54, with tenths).
  */
-/* Not exact (0x4c0 of 0x4bc bytes): retail reads the left column x from
- * its .sdata initializer through an absolute address held like a spilled
- * constant (this build addresses the static $gp-relative), and has a
- * 96-byte frame with y and id at 24/32 (this build: 88). */
+/* Not exact (same extent and 96-byte frame): the initial panel writes
+ * schedule before the selection reads here (first divergence +0xc). The
+ * column-loop lifetimes differ, and the static left x is $gp-relative
+ * here where retail rematerializes its absolute .sdata address. */
 ADDRESS(0x800222d8, 0x4bc)
 void func_800222d8(int page)
 {
@@ -165,6 +165,8 @@ void func_800222d8(int page)
     u8 *counts;
     Vis44 *item;
     int weight;
+    int whole;
+    int tenths;
 
     sp->unk238.w = 192;
     sp->unk238.h = 124;
@@ -187,14 +189,17 @@ void func_800222d8(int page)
         counts = DAT_80191d00.unk0118[id].unk10;
         DAT_8006337a = 1;
         for (row = 0; row < 4; row++) {
+            int label_x = x;
+            int count_x = x + 42;
+
             line = y;
             for (col = 0; col < 4; col++) {
                 if (n == 14)
                     goto done;
                 n++;
                 if (*counts != 0) {
-                    func_8001d8b8(VS_MESSAGE(200 + message), x, line, &sp->style[0]);
-                    func_8001d9cc(*counts | 0x1300000, x + 42, line, &sp->style[3]);
+                    func_8001d8b8(VS_MESSAGE(200 + message), label_x, line, &sp->style[0]);
+                    func_8001d9cc(*counts | 0x13000000, count_x, line, &sp->style[3]);
                 }
                 counts++;
                 message++;
@@ -213,11 +218,13 @@ void func_800222d8(int page)
         item = &DAT_80191d00.unk0118[id];
         func_8001d9cc(item->unk27 | 0x3000000, left + 138, y, &sp->style[3]);
         weight = item->unk24;
+        whole = weight * 100 / 454;
+        tenths = weight * 1000 / 454 % 10;
         y += 15;
         func_8001d8b8(VS_MESSAGE(503), pos.vx, y, &sp->style[0]);
-        func_8001d9cc((u8)(weight * 100 / 454) | 0x3000000, left + 70, y, &sp->style[3]);
+        func_8001d9cc((u8)whole | 0x3000000, left + 70, y, &sp->style[3]);
         func_8001d3f0(18, left + 109, y, &sp->style[0]);
-        func_8001d9cc((u8)(weight * 1000 / 454 % 10) | 0x1000000, left + 115, y, &sp->style[3]);
+        func_8001d9cc((u8)tenths | 0x1000000, left + 115, y, &sp->style[3]);
         func_8001d3f0(53, left + 132, y, &sp->style[0]);
     }
     func_8001f23c(334, 9, 296, 222);
