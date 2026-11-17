@@ -668,8 +668,6 @@ void player_wear_item(int amount, u16 *slot)
 }
 
 /* Wears the shield (slot 16) while it is raised, and the armour. */
-/* Not exact: `wear` and the table cursor swap $s1/$s2, and the armour
- * loop constants are set up in another order. */
 ADDRESS(0x8003d288, 0x30c)
 void player_wear_armour(int damage, u16 flags)
 {
@@ -681,7 +679,6 @@ void player_wear_armour(int damage, u16 flags)
     int i;
     u8 a;
     u8 b;
-    u16 **p;
 
     if (viewer.unk189 != 0 && viewer.unk38[16] != 0xffff) {
         if (damage * 20 < viewer.unk0) {
@@ -732,14 +729,15 @@ void player_wear_armour(int damage, u16 flags)
             pick = 4;
         }
     }
-    i = 4;
-    p = &armour[3];
-    while (i--) {
-        if (**p != 0xffff) {
-            player_wear_item(i != pick ? wear : wear * 2, *p);
+    i = 3;
+    do {
+        if (*armour[i] != 0xffff) {
+            if (i == pick)
+                player_wear_item(wear * 2, armour[i]);
+            else
+                player_wear_item(wear, armour[i]);
         }
-        p--;
-    }
+    } while (--i != -1);
 }
 
 /* The screen shake offsets player_update_shake adds to the view angles. */
