@@ -21,11 +21,10 @@ RODATA(0x801eb72c, 0x8)
 
 void func_801ef1c0(void);
 
-/* Not exact (one attempt, retries off; 93.8%): first divergence retail `addiu a2,v0,8408`, this source `addiu a3,v0,8408`. */
 /*
- * Not exact (registers, one instruction long): retail keeps table B entry
- * 5's pointer in a2 and the flags' base in a1 (this source: a3, a2) and
- * reloads the flags word once less.
+ * Not exact: initial door/flag registers and call-argument setup differ.
+ * The backwards LO at 0x801ed54c also lacks an admitted relocation: its
+ * shared HI feeds another LO with a different addend on the forward path.
  *
  * Runs the gate stages (story flag bits 10-12) by table B entry 5's state;
  * sets flag 13 once the six entries of fdat_801ef504 are all beaten, then
@@ -38,6 +37,7 @@ void func_801ed4d0(void)
     Vis88 *d5 = &vis_table_b.entries[5];
     Vis212 *e32 = &vis_table_a.entries[32];
     int i;
+    u32 flags;
 
     if ((DAT_801cba08.unk1440.word >> 10 & 7) == 0 && d5->unk10 != 0) {
         DAT_801cba08.unk1440.word = (DAT_801cba08.unk1440.word & ~0x1c00) | 0x400;
@@ -73,8 +73,9 @@ void func_801ed4d0(void)
         RECT rect = {0, 487, 256, 1};
 
         MoveImage(&rect, 0, 489);
+        flags = vis_lists.unk47E0;
         fdat_801ef930 = -1;
         fdat_801ef934 = 0;
-        vis_lists.unk47E0 |= 0x10;
+        vis_lists.unk47E0 = flags | 0x10;
     }
 }
