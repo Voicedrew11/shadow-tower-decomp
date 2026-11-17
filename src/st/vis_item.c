@@ -36,19 +36,16 @@ void func_8004d7fc(void)
 
 /* Drops item `id` where the entry stands: a slot of table C's group 48
  * (kind 30) or group 32, the oldest slot giving way when the group is full. */
-/*
- * Not exact: in both copy loops retail counts in t2 and ends at t1; this
- * source swaps the two registers.
- */
 ADDRESS(0x8004d804, 0x228)
 void func_8004d804(Vis212 *e, int id)
 {
     Vis44 *rec = &vis_table_c.unk0118[id];
     Vis48 *slot;
-    int n;
 
     if (rec->unk26 == 30) {
         if (vis_table_c.unk0000[3] == 16) {
+            int n;
+
             slot = &vis_table_c.entries[48];
             n = 15;
             while (n--) {
@@ -60,6 +57,8 @@ void func_8004d804(Vis212 *e, int id)
             vis_table_c.unk0000[3]++;
         }
     } else if (vis_table_c.unk0000[2] == 16) {
+        int n;
+
         slot = &vis_table_c.entries[32];
         n = 15;
         while (n--) {
