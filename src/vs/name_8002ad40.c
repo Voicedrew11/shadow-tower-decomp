@@ -9,12 +9,6 @@
 #include <vs/data.h>
 #include <vs/menu.h>
 
-/* The selected entry of DAT_801624b8's rows (bss). */
-extern s32 DAT_80063338;
-
-/* Each fighter's three item-name ids (bss). */
-extern s32 DAT_801624b8[2][3];
-
 /*
  * Draws both fighters' names (item names DAT_801624b8[n][DAT_80063338]) in
  * 11-pixel glyphs from the font page at VRAM (640, 0): the first on the

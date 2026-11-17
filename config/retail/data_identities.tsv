@@ -142,7 +142,7 @@ VS.EXE	0x800632d8	0x4	DAT_800632d8	global	load	u_long		candidate	asm;src/vs/mode
 VS.EXE	0x800632dc	0x4	DAT_800632dc	global	load	u_long		candidate	asm;src/vs/fade_80028fcc.c vs.fade_80028fcc	$gp+0xc4 .sdata word 0x808080: func_800291d4's default NCCS colour
 VS.EXE	0x800632e0	0x4	DAT_800632e0	static	load	s32	func_80028fcc	address-only	asm;src/vs/fade_80028fcc.c vs.fade_80028fcc	$gp+0xc8 .sdata word; func_80028fcc's texture-window step 0..5
 VS.EXE	0x800632e4	0x1	DAT_800632e4	static	load	u8	func_80029b10	address-only	asm;src/vs/gauge_80029b10.c vs.gauge_80029b10	$gp+0xcc .sdata byte (0); func_80029b10 flips it every frame to blink a low hit-point bar
-VS.EXE	0x80063300	0x4	DAT_80063300	global	bss	VsFighter *		candidate	asm;src/vs/model_80024b5c.c vs.model_80024b5c	bss pointer to the fighter the model renderers draw (func_80024b5c/func_80025204/func_80028914)
+VS.EXE	0x80063300	0x4	DAT_80063300	global	bss	u8 *		candidate	asm;src/vs/model_80024b5c.c vs.model_80024b5c	bss pointer to the VsFighter the model renderers draw (func_80024b5c/func_80025204/func_80028914)
 VS.EXE	0x80063304	0x4	DAT_80063304	global	bss	s32		candidate	asm;src/vs/stub_8001ca10.c vs.stub_8001ca10	picture x func_8001cac0 saves for its CD read callback func_8001ca74 (read back as a halfword)
 VS.EXE	0x80063308	0x4	DAT_80063308	global	bss	s32		candidate	asm;src/vs/stub_8001ca10.c vs.stub_8001ca10	picture y, as DAT_80063304
 VS.EXE	0x80063324	0x4	DAT_80063324	global	bss	s32		candidate	asm;src/vs/fighter_8002dec4.c vs.fighter_8002dec4	word func_8002dec4 requires to be 1 before a hit counts (read absolutely there, gp-relative by func_80014634/func_80015020/func_80015e50/func_800165f4)

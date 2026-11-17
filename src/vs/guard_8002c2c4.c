@@ -16,10 +16,6 @@
 /* func_8002c2c4's switch table. */
 JUMPTABLES(0x80011574, 0x14)
 
-/* The guard flash's mesh model: a centre vertex and three rings of 16
- * (bss). */
-extern u8 DAT_8015ec38[];
-
 /* Projects the current part's vertices: RTPT in threes, the first group
  * ahead of the loop so each pass stores one group and starts the next, then
  * RTPS for the rest. */

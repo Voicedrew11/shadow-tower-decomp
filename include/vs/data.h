@@ -217,7 +217,7 @@ typedef struct {
  * A fighter's animated model file (st/anim.h StAnimFile) is loaded at its
  * start; only the state fields the code proves are spelled.
  */
-typedef struct VsFighter {
+typedef struct {
     u8 file[0x4b000];        /* 0x00000: the model file, then unmodeled */
     u_long unk4B000[(0x4dee0 - 0x4b000) / 4]; /* 0x4b000: a second mesh model, absent when its first word is 0 */
     StAnimSet *unk4DEE0;     /* 0x4dee0: the fighter's skeletal-animation slot */
@@ -291,7 +291,7 @@ typedef struct {
 } VsLights;
 
 /* The fighter being drawn (bss, unowned). */
-extern struct VsFighter *DAT_80063300;
+extern VsFighter *DAT_80063300;
 
 /* Rotation offsets added to the drawn fighter's x and y angles (.sdata,
  * unowned; read absolutely). */
@@ -300,6 +300,16 @@ extern s32 DAT_8006321c;
 
 /* The model renderers' scale (4096, 4096, 4096; .data, unowned). */
 extern VECTOR DAT_8005b2a8;
+
+/* The column of DAT_801624b8 func_8002ad40 shows (bss, unowned). */
+extern s32 DAT_80063338;
+
+/* Each fighter's three item-name ids (bss, unowned). */
+extern s32 DAT_801624b8[2][3];
+
+/* The guard flash's mesh model: a centre vertex and three rings of 16
+ * (bss, unowned). */
+extern u8 DAT_8015ec38[];
 
 /* Rounds won per fighter (bss, unowned). */
 extern s32 DAT_80063370[2];
