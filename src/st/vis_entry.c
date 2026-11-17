@@ -539,10 +539,10 @@ int func_8004be80(VisLists *req)
     Vis212 *e;
     VECTOR v;
     int i;
-    int none = -1;
+    int none;
 
     e = vis_table_a.entries;
-    for (i = 0; i < 64; i++, e++) {
+    for (i = 0, none = -1; i < 64; i++, e++) {
         if (e->unk05 != 1)
             continue;
         if (e->unk70 & vis_table_a.unk6101)
