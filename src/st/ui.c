@@ -865,12 +865,7 @@ static s32 DAT_80087f34 = 0;
     func_8002948c();                   \
     func_80017634()
 
-/*
- * The status page.
- *
- * Not exact (99.8%): retail schedules the second `i = 0` after the first
- * number call's colour argument (move s4,zero after move a3,s0).
- */
+/* The status page. */
 ADDRESS(0x80029b74, 0x65c)
 void func_80029b74(void)
 {
@@ -918,8 +913,8 @@ void func_80029b74(void)
     }
     for (i = 0; i < 8; i++)
         func_8002732c(MESSAGE(11 + i), label_x[i] + 172, i * 16 + 90, &sp->style[2]);
-    i = 0;
     func_800276bc(viewer.unk2 | DIGITS(4), 78, 48, &sp->style[0]);
+    i = 0;
     func_80026ecc(15, 106, 48, &sp->style[0]);
     func_800276bc(viewer.unk0 | DIGITS(4), 120, 48, &sp->style[0]);
     func_800276bc(viewer.unk6 | DIGITS(4), 78, 64, &sp->style[0]);
@@ -957,12 +952,7 @@ void func_80029b74(void)
     PAGE_END();
 }
 
-/*
- * A scrolling list page (five rows of icon, name and count).
- *
- * Not exact (95.4%): retail loads both cursor-colour bytes before the
- * rectangle height store and keeps green in $t0; register/schedule residue.
- */
+/* A scrolling list page (five rows of icon, name and count). */
 ADDRESS(0x8002a1d0, 0x3d4)
 void func_8002a1d0(void)
 {
@@ -971,6 +961,7 @@ void func_8002a1d0(void)
     int entry;
     int rows;
     int i;
+    int red, green;
 
     func_800174c4();
     sp->style[0].r = sp->style[4].r = 72;
@@ -988,10 +979,12 @@ void func_8002a1d0(void)
         sp->unk360 = sp->unk2E4 - 24;
     sp->unk330.x = 23;
     sp->unk330.w = 276;
-    sp->unk330.h = 26;
+    red = (u8)sp->unk360 * 4 + 96;
     sp->unk32C.b = 0;
-    sp->unk32C.r = (u8)sp->unk360 * 4 + 96;
-    sp->unk32C.g = (u8)sp->unk360 * 2 + 48;
+    green = (u8)sp->unk360 * 2 + 48;
+    sp->unk330.h = 26;
+    sp->unk32C.r = red;
+    sp->unk32C.g = green;
     sp->unk330.y = sp->unk2E0 * 26 + 69;
     func_80027d18(&sp->unk330, &sp->unk32C, 257, 1);
     func_800286a8(1, 0, 0);

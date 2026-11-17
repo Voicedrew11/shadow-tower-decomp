@@ -3298,8 +3298,6 @@ int func_800616f8(void)
 
 /*
  * Reads each listed file's header bytes into its MenuRecord.
- * Not exact (96.9%): the record address adds its operands the other way
- * round (addu v0,v0,s1 for retail's addu v0,s1,v0).
  */
 ADDRESS(0x8006184c, 0x1bc)
 int func_8006184c(void)
@@ -3335,10 +3333,10 @@ int func_8006184c(void)
             lseek(fd, 0, SEEK_SET);
             goto read;
         }
-        sp->unk1F4->files[i].kind = header.title.kind;
-        sp->unk1F4->files[i].unk1A = header.title.unk3A;
-        sp->unk1F4->files[i].unk1C = header.title.unk3C;
-        sp->unk1F4->files[i].unk1E = header.title.unk3E;
+        (i + sp->unk1F4->files)->kind = header.title.kind;
+        (i + sp->unk1F4->files)->unk1A = header.title.unk3A;
+        (i + sp->unk1F4->files)->unk1C = header.title.unk3C;
+        (i + sp->unk1F4->files)->unk1E = header.title.unk3E;
         close(fd);
     }
     return 1;
