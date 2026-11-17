@@ -827,11 +827,10 @@ void func_8005aa80(void)
  * and an item for it from its list (unk2C7: the list kind; 10 is the
  * magic grid), recomputing the figures as the choice changes.
  *
- * Not exact (0x48 bytes short): register allocation differs from the
- * first block (retail keeps the archive table address in $s0 and forms the
- * buffer from it; base/offset/debounce live in $s6/$s7/$s8), and several
- * case bodies schedule their loads differently. Its three switch tables'
- * labels therefore differ from retail (the unit's .rdata addends).
+ * Not exact: the initial archive/buffer address lifetimes and several
+ * switch-arm load orders differ. Retail also saves a signed full-width row
+ * in the magic-grid arm; the unsigned snapshot here remains unresolved.
+ * The three switch tables consequently retain differing .rdata addends.
  */
 ADDRESS(0x8005ad00, 0x1afc)
 void func_8005ad00(void)
@@ -847,7 +846,7 @@ void func_8005ad00(void)
     s16 *slot;
     s16 base;
     s16 offset;
-    s16 file;
+    int file;
     int debounce;
     int prev;
     u16 row;
@@ -1177,6 +1176,7 @@ void func_8005ad00(void)
                     func_8003ec5c(CD_BUFFER, &picture, NULL, 1);
                     func_8005a3a8(0);
                 }
+                DAT_801cd180.unk4 = 0;
                 goto moved;
             }
             if (DAT_801cd180.unkC & 0x20) {
