@@ -95,9 +95,8 @@ void func_80023788(void *data)
  * (the larger size), then, when member `index + 2` exists, frees the other
  * slots of the bank's column and loads it as a sound bank.
  *
- * Not exact: retail's slot loop keeps the slot pointer as the only induction
- * variable (the skipped slot's step is self + 4), where GCC here adds a
- * second one for &p->vab; the extra register spills `archive` to the stack.
+ * A skipped bank advances from self; visited slots advance from the cursor.
+ * Keep these as distinct paths so no second VAB-field cursor spans the loop.
  */
 ADDRESS(0x800237a8, 0x244)
 void func_800237a8(archive, index, slot, tag)
@@ -132,9 +131,11 @@ u8 tag;
     bank = index / 5;
     self = &DAT_801dd1c0.slots[8 + bank];
     p = &DAT_801dd1c0.slots[8 + bank % 4];
-    for (i = 4; i--; p += 4) {
-        if (p == self)
+    for (i = 4; i--;) {
+        if (p == self) {
+            p = self + 4;
             continue;
+        }
         if (p->block != NULL) {
             while (p->block[2] == ST_BLOCK_LOADING)
                 func_8001531c();
@@ -142,6 +143,7 @@ u8 tag;
             p->vab = -1;
             p->block = NULL;
         }
+        p += 4;
     }
     if (self->block == NULL)
         func_80058a0c(archive, index + 2, bank + 8);
