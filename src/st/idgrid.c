@@ -153,10 +153,9 @@ void func_80066240(void)
  * and draws the frame, until cancel; then writes each listed id's grid back
  * to its flag bit.
  */
-/* Not exact: the same 192 blocks and branches; retail saves $s0 first and
- * keeps the range index in $a3 and the state block in $t1 (this build
- * $t0/$a3), and the two closing flag loops fill their delay slots
- * differently. */
+/* Not exact: retail saves $s0 first; two row-index additions schedule their
+ * operands differently. The closing flag loops duplicate a count shift
+ * in their hole-branch delay slots here, adding eight bytes. */
 ADDRESS(0x800666b0, 0xed0)
 void func_800666b0(void)
 {
@@ -171,6 +170,8 @@ void func_800666b0(void)
     s16 k;
     s16 idx;
     int i, j;
+    int range;
+    int hole;
     int found;
     int cur;
     int anchor;
@@ -194,13 +195,13 @@ void func_800666b0(void)
                 if (ST.unk0 == 104) {
                     if (!ST.unk4)
                         ST.unk8 = ST.unkC = GRID->row0 + sp->unk2E0;
-                    for (j = ST.unk8; j <= ST.unkC; j++) {
-                        idx = j;
+                    for (range = ST.unk8; range <= ST.unkC; range++) {
+                        idx = range;
                         if (GRID->ids0[idx] != -1) {
                             k = GRID->count1;
-                            for (i = 0; i < GRID->count1; i++) {
-                                if (GRID->ids1[i] == -1) {
-                                    k = i;
+                            for (hole = 0; hole < GRID->count1; hole++) {
+                                if (GRID->ids1[hole] == -1) {
+                                    k = hole;
                                     break;
                                 }
                             }
@@ -213,13 +214,13 @@ void func_800666b0(void)
                 } else {
                     if (!ST.unk4)
                         ST.unk8 = ST.unkC = GRID->row1 + sp->unk2E0;
-                    for (j = ST.unk8; j <= ST.unkC; j++) {
-                        idx = j;
+                    for (range = ST.unk8; range <= ST.unkC; range++) {
+                        idx = range;
                         if (GRID->ids1[idx] != -1) {
                             k = GRID->count0;
-                            for (i = 0; i < GRID->count0; i++) {
-                                if (GRID->ids0[i] == -1) {
-                                    k = i;
+                            for (hole = 0; hole < GRID->count0; hole++) {
+                                if (GRID->ids0[hole] == -1) {
+                                    k = hole;
                                     break;
                                 }
                             }
@@ -242,15 +243,15 @@ void func_800666b0(void)
                 } else {
                     found = 1;
                     if (ST.unk0 == 104) {
-                        for (j = ST.unk8; j <= ST.unkC; j++) {
-                            if (GRID->ids0[j] != -1) {
+                        for (i = ST.unk8; i <= ST.unkC; i++) {
+                            if (GRID->ids0[i] != -1) {
                                 found = 0;
                                 break;
                             }
                         }
                     } else {
-                        for (j = ST.unk8; j <= ST.unkC; j++) {
-                            if (GRID->ids1[j] != -1) {
+                        for (i = ST.unk8; i <= ST.unkC; i++) {
+                            if (GRID->ids1[i] != -1) {
                                 found = 0;
                                 break;
                             }
