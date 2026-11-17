@@ -44,15 +44,11 @@ s16 func_8006616c(void)
 }
 
 /* The load callback: copies the loaded image to VRAM (640, 0). */
-/* Not exact: retail saves $ra before the argument setup; this build
- * schedules the store after it (one word moved). */
 ADDRESS(0x800661c8, 0x44)
 void func_800661c8(void)
 {
-    DVECTOR pos;
+    DVECTOR pos = {640, 0};
 
-    pos.vx = 640;
-    pos.vy = 0;
     func_8003ec5c(DAT_80088c88, &pos, NULL, 1);
     DrawSync(0);
 }
