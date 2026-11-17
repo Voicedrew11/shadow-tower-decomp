@@ -41,8 +41,6 @@ void func_800443f4(StCdRequest *request)
 
 /*
  * Reloads the area, then copies the images two areas patch in VRAM.
- * Not exact: retail keeps each `!= 1` flag test as a compare with 1 and
- * reuses the first flag (known 1) as the constant for the second.
  */
 ADDRESS(0x80044404, 0x270)
 void func_80044404(void)
@@ -58,10 +56,12 @@ void func_80044404(void)
     func_800456f8();
     func_80015ad4();
     if (area_state.area == 24) {
+        u32 marker;
+
         if (!((DAT_801cba08.unk1440.word >> 17) & 1))
             return;
-        flag = (vis_lists.unk47E0 >> 3) & 1;
-        if (flag != 1)
+        marker = (vis_lists.unk47E0 >> 3) & 1;
+        if (marker != 1)
             return;
         {
             RECT a = {496, 0, 16, 64};
@@ -82,8 +82,7 @@ void func_80044404(void)
         flag = (DAT_801cba08.unk1440.word >> 13) & 1;
         if (flag != 1)
             return;
-        flag = (vis_lists.unk47E0 >> 4) & 1;
-        if (flag != 1)
+        if (((vis_lists.unk47E0 >> 4) & 1) != flag)
             return;
         {
             RECT g = {0, 487, 256, 1};
