@@ -155,7 +155,8 @@ typedef struct {
     u8 unk1AE[0x1b4 - 0x1ae];
     s16 unk1B4;              /* 0x1b4: hit radius */
     s16 unk1B6;              /* 0x1b6: height */
-    u8 unk1B8[0x1bc - 0x1b8];
+    s16 unk1B8;              /* 0x1b8: full hit points */
+    s16 unk1BA;              /* 0x1ba: full second gauge (0: none) */
     u16 unk1BC[9];           /* 0x1bc: resistance per damage kind */
     u8 unk1CE[0x1d0 - 0x1ce];
 } VsFighterData;
@@ -180,7 +181,7 @@ typedef struct {
     s16 unk4DF02;            /* 0x4df02: facing angle */
     u8 unk4DF04[0x4df08 - 0x4df04];
     s16 unk4DF08;            /* 0x4df08: hit points */
-    u8 unk4DF0A[2];
+    s16 unk4DF0A;            /* 0x4df0a: second gauge */
     s16 unk4DF0C;            /* 0x4df0c: hit points left by the last hit */
     s16 unk4DF0E;            /* 0x4df0e: state; 3 hit, 4 down; 3 and 4 cannot be hit */
     u8 unk4DF10[0x4df14 - 0x4df10];
