@@ -138,47 +138,81 @@ void func_80017cc4(u16 i0, u16 i1, u16 i2)
 /*
  * Blends the current lighting with one of three targets by t / 4096.
  *
- * Not exact (4 bytes long): retail keeps t in t0 and the scratchpad base in
- * a3 and interleaves each blend's multiplies; this build schedules them one
- * after another.
+ * Not exact: the first 0x10 coefficient's loads, sum and multiply use
+ * different temporary registers.
  */
 ADDRESS(0x80017d28, 0x718)
 void func_80017d28(u32 t, int flags)
 {
     ScratchPad *sp = SCRATCHPAD;
     StLight *cur = world_state.light;
-    StLight *to;
     short m[3][3];
     CVECTOR back1, back2, back3;
-    u32 s;
+    u32 to_00, current_00;
+    u32 to_01, current_01;
+    u32 to_02, current_02;
+    u32 to_10, current_10;
+    u32 to_11, current_11;
+    u32 to_12, current_12;
+    u32 to_20, current_20;
+    u32 to_21, current_21;
+    u32 to_22, current_22;
+    u32 to_r, current_r;
+    u32 to_g, current_g;
+    u32 to_b, current_b;
 
     sp->unk394 = cur;
     if (flags & 0x20) {
-        to = &lighting.light[47];
-        s = 4096 - t;
+        StLight *to = &lighting.light[47];
+        u32 s = 4096 - t;
+        to_00 = to->color.m[0][0] * s;
         sp->unk64 = cur->unk68;
-        sp->unk394 = to;
         sp->unk68 = cur->unk6A;
-        m[0][0] = (to->color.m[0][0] * s + cur->color.m[0][0] * t) >> 12;
-        m[0][1] = (to->color.m[0][1] * s + cur->color.m[0][1] * t) >> 12;
-        m[0][2] = (to->color.m[0][2] * s + cur->color.m[0][2] * t) >> 12;
-        m[1][0] = (to->color.m[1][0] * s + cur->color.m[1][0] * t) >> 12;
-        m[1][1] = (to->color.m[1][1] * s + cur->color.m[1][1] * t) >> 12;
-        m[1][2] = (to->color.m[1][2] * s + cur->color.m[1][2] * t) >> 12;
-        m[2][0] = (to->color.m[2][0] * s + cur->color.m[2][0] * t) >> 12;
-        m[2][1] = (to->color.m[2][1] * s + cur->color.m[2][1] * t) >> 12;
-        m[2][2] = (to->color.m[2][2] * s + cur->color.m[2][2] * t) >> 12;
-        back1.r = (to->back.r * s + cur->back.r * t) >> 12;
-        back1.g = (to->back.g * s + cur->back.g * t) >> 12;
-        back1.b = (to->back.b * s + cur->back.b * t) >> 12;
+        sp->unk394 = to;
+        current_00 = cur->color.m[0][0] * t;
+        to_01 = to->color.m[0][1] * s;
+        m[0][0] = (to_00 + current_00) >> 12;
+        current_01 = cur->color.m[0][1] * t;
+        to_02 = to->color.m[0][2] * s;
+        m[0][1] = (to_01 + current_01) >> 12;
+        current_02 = cur->color.m[0][2] * t;
+        to_10 = to->color.m[1][0] * s;
+        m[0][2] = (to_02 + current_02) >> 12;
+        current_10 = cur->color.m[1][0] * t;
+        to_11 = to->color.m[1][1] * s;
+        m[1][0] = (to_10 + current_10) >> 12;
+        current_11 = cur->color.m[1][1] * t;
+        to_12 = to->color.m[1][2] * s;
+        m[1][1] = (to_11 + current_11) >> 12;
+        current_12 = cur->color.m[1][2] * t;
+        to_20 = to->color.m[2][0] * s;
+        m[1][2] = (to_12 + current_12) >> 12;
+        current_20 = cur->color.m[2][0] * t;
+        to_21 = to->color.m[2][1] * s;
+        m[2][0] = (to_20 + current_20) >> 12;
+        current_21 = cur->color.m[2][1] * t;
+        to_22 = to->color.m[2][2] * s;
+        m[2][1] = (to_21 + current_21) >> 12;
+        current_22 = cur->color.m[2][2] * t;
+        to_r = to->back.r * s;
+        m[2][2] = (to_22 + current_22) >> 12;
+        current_r = cur->back.r * t;
+        back1.r = (to_r + current_r) >> 12;
+        to_g = to->back.g * s;
+        current_g = cur->back.g * t;
+        to_b = to->back.b * s;
+        back1.g = (to_g + current_g) >> 12;
+        current_b = cur->back.b * t;
+        back1.b = (to_b + current_b) >> 12;
         gte_SetColorMatrix(m);
         gte_SetBackColor(back1.r, back1.g, back1.b);
     } else if (flags & 0x10) {
-        to = &lighting.light[46];
+        StLight *to = &lighting.light[46];
+        u32 s;
         sp->unk64 = cur->unk68;
         s = 4096 - t;
-        sp->unk394 = to;
         sp->unk68 = cur->unk6A;
+        sp->unk394 = to;
         m[0][0] = ((to->color.m[0][0] + cur->color.m[0][0]) * s) >> 13;
         m[0][1] = ((to->color.m[0][1] + cur->color.m[0][1]) * s) >> 13;
         m[0][2] = ((to->color.m[0][2] + cur->color.m[0][2]) * s) >> 13;
@@ -194,10 +228,10 @@ void func_80017d28(u32 t, int flags)
         gte_SetColorMatrix(m);
         gte_SetBackColor(back2.r, back2.g, back2.b);
     } else if (flags & 0x8) {
-        to = &lighting.light[45];
+        StLight *to = &lighting.light[45];
         sp->unk64 = cur->unk68;
-        sp->unk394 = to;
         sp->unk68 = cur->unk6A;
+        sp->unk394 = to;
         m[0][0] = ((to->color.m[0][0] + cur->color.m[0][0]) * t) >> 13;
         m[0][1] = ((to->color.m[0][1] + cur->color.m[0][1]) * t) >> 13;
         m[0][2] = ((to->color.m[0][2] + cur->color.m[0][2]) * t) >> 13;
