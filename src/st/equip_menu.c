@@ -163,12 +163,9 @@ void func_80063cb0(void)
  * the slot (or, for the two ring slots, opens the ring sub-list) and loads
  * the equipped id's image. Returns 1 on cancel.
  */
-/* Not exact: same calls, both switches and case labels at retail's offsets
- * (the unit's jump tables match); retail keeps the input block pointer in
- * $s1, the scratchpad in $s0 and the selection pointer in $s3, saves the
- * listed count through the sub-list register and returns 0 from the delay
- * slot (one word longer here; func_80064ba8 is one word shorter, so the
- * functions after them keep their offsets). */
+/* Not exact: input/scratch/current-id registers, clear-loop induction and
+ * the return schedule differ. Both this function and func_80064ba8 currently
+ * have their retail extents; the internal switch-label residue remains. */
 ADDRESS(0x800642e8, 0x8c0)
 int func_800642e8(int *sel)
 {
@@ -408,9 +405,8 @@ int func_800642e8(int *sel)
 }
 
 /* The ring sub-list: moves the cursor in its entries and equips one. */
-/* Not exact: same control flow; retail clears the pressed bits before
- * loading the two saved .sbss halfwords and re-forms the state block
- * address for each slot compare (one word longer). */
+/* Not exact: retail clears the pressed bits before loading the two saved
+ * .sbss halfwords; this build hoists those loads. The body is size-exact. */
 ADDRESS(0x80064ba8, 0x33c)
 void func_80064ba8(void)
 {
