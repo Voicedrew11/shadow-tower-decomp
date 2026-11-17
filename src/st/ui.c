@@ -1249,8 +1249,9 @@ void func_8002a954(void)
  * The option page. `wash` is func_8002948c's {32, 32, 32}: GCC merged the
  * two constants.
  *
- * Not exact: retail copies the NULL argument's zero into `i` before the first
- * tile call and steps the first label loop's y later.
+ * Not exact: retail copies the NULL argument's zero into `i` before the
+ * first tile call. The first label loop's y step and highlight counter's
+ * initialization also have different schedules.
  */
 ADDRESS(0x8002b2e8, 0x564)
 void func_8002b2e8(void)
@@ -2660,8 +2661,9 @@ void func_8002fc4c(void)
 #define STORE_ROWS 3
 
 /*
- * Not exact: the same instructions with the scratchpad base and the
- * constant 48 in swapped saved registers (retail: s3 and s2).
+ * Not exact: the scratchpad base and constant 48 swap saved registers
+ * (retail: s3 and s2), and the column-loop latch has an extra nop. The body
+ * is four bytes long; changing its length moves later unit functions.
  */
 ADDRESS(0x8002fe4c, 0x410)
 void func_8002fe4c(void)
