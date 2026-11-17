@@ -10,8 +10,6 @@
 #include <st/vis.h>
 #include <st/fdat.h>
 
-extern int fdat_801edb3c;
-
 void func_801ed9e8(void);
 
 /*

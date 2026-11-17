@@ -10,8 +10,6 @@
 #include <st/menu.h>
 #include <st/fdat.h>
 
-extern int fdat_801edfac;
-
 /* Arms the scene when the entry comes within 0xc00, then plays script 8
  * once it is defeated or beyond 0x1000. */
 ADDRESS(0x801edf0c, 0x7c)

@@ -67,4 +67,11 @@ void fdat_801ed498(void);
 void fdat_801ed4a0(void);
 void fdat_801ed6e4(void);
 
+/*
+ * Overlay words one map unit defines and a later unit of the same overlay
+ * reads (each name exists in its own overlay only).
+ */
+extern int fdat_801edfac; /* FDAT_012.BIN: src/fdat_012/map_801ed4a0.c */
+extern int fdat_801edb3c; /* FDAT_332.BIN: src/fdat_332/map_801ed614.c */
+
 #endif
