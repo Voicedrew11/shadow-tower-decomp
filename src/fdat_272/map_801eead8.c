@@ -17,14 +17,13 @@
 #include <st/xa.h>
 #include <st/fdat.h>
 
-/* Not exact (one attempt, retries off; 91.7%): first divergence retail `sw s3,36(sp)`, this source `sw s3,36(sp)`. */
 /* Slides table C item 29 by 0x1ea, 24 a frame while its model is loaded. */
 ADDRESS(0x801eead8, 0xdc)
 void func_801eead8(void)
 {
-    int step = 24;
     Vis48 *item = &vis_table_c.entries[29];
     Vis44 *kind = &vis_table_c.unk0118[303];
+    int step = 24;
     int top;
 
     item->unk22 = 5;
