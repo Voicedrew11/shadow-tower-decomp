@@ -19,10 +19,9 @@ SDATA(0x8006323c, 0x8)
 int func_8002ee90(int archive, int member, u_long *buf);
 void func_80021984(void);
 
-/* Not exact (one attempt; 89.8%): first divergence at +0x58, the first
- * loop's registers (retail i s0, x s1, buffer s2; here buffer s1, x s0,
- * i s2, set up before the buffer); retail also reloads &DAT_801a4590 for
- * the later loops where this derives it from the buffer address. */
+/* Not exact: the title loop's index, x and buffer have different register
+ * lifetimes; later loops derive the CD base from the buffer address.
+ * The byte-extent shifts precede the TIM calls instead of their delay slots. */
 ADDRESS(0x8001789c, 0x328)
 void func_8001789c(void)
 {
@@ -75,9 +74,9 @@ void func_8001789c(void)
             r2.h = 48;
             ClearImage(&r2, 0, 0, 0);
         } else {
-            n = func_8002ee90(10, slot, DAT_801a4590.unk4A0) * 512;
+            n = func_8002ee90(10, slot, DAT_801a4590.unk4A0) * 2048;
             func_80012c2c(DAT_801a4590.unk4A0, &sp->unk0.team.pos[i], NULL);
-            DAT_801a4590.unk4A0 += n;
+            DAT_801a4590.unk4A0 = (u_long *)((u8 *)DAT_801a4590.unk4A0 + n);
         }
     }
     for (i = 0; i < 2; i++) {
@@ -89,9 +88,9 @@ void func_8001789c(void)
             ClearImage(&r, 0, 0, 0);
         } else {
             n = func_8002ee90(11, DAT_80191d00.unk0118[DAT_80063330[i]].unk5[0],
-                              DAT_801a4590.unk4A0) * 512;
+                              DAT_801a4590.unk4A0) * 2048;
             func_80012c2c(DAT_801a4590.unk4A0, &sp->unk0.team.pos[6 + i], NULL);
-            DAT_801a4590.unk4A0 += n;
+            DAT_801a4590.unk4A0 = (u_long *)((u8 *)DAT_801a4590.unk4A0 + n);
         }
     }
     r.x = sp->unk0.team.pos[8].vx;
