@@ -1,8 +1,10 @@
 /*
  * The first own handler of FDAT_442.BIN, FDAT_452.BIN, FDAT_462.BIN and
  * FDAT_472.BIN, one body at the same address in all four (WIP module), with
- * the scene state static it clears. The static sits 4 bytes after each
- * overlay's code and carries FDAT_442.BIN's address as its shared name.
+ * the scene state it clears. The state sits 4 bytes after each overlay's
+ * code and carries FDAT_442.BIN's address as its shared name; it is defined
+ * here and the overlay's later units declare it extern (an overlay's data
+ * keeps no linkage evidence, so the WIP split uses globals).
  * One source for the four overlays: FDAT_442.BIN binds by address, the
  * others by name.
  */
@@ -16,7 +18,7 @@
 #include <st/fdat.h>
 
 DATA(0x801ed8c4, 0x4, ".bss")
-static int fdat_801ed8c4;
+int fdat_801ed8c4;
 
 /* Resets the map scene: the viewer's slots, pitch and the scene state. */
 ADDRESS(0x801ed420, 0x34)

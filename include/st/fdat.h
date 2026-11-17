@@ -26,6 +26,7 @@ void func_8004ed54(Vis88 *e, int sound);
 /* ST.EXE functions declared in st/funcs.h, which the overlay units do not
  * include (see below). */
 void func_80053aa4(void);
+void func_800402ac(u8 hand);
 
 /*
  * ST.EXE's positional sound starters and player_hit (src/st/sound.c,

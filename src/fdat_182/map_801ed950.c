@@ -24,7 +24,7 @@ void func_801ed950(void)
     e = &vis_table_a.entries[32];
     r = &vis_table_a.unk3500[12];
 
-    if (!(DAT_801cba08.unk1440 >> 18 & 1) && vis_table_a.unk6168 == 3) {
+    if (!(DAT_801cba08.unk1440.word >> 18 & 1) && vis_table_a.unk6168 == 3) {
         DAT_801cba08.unk1448[r->unk09] = 2;
         e->unk70 |= 0x2000000;
         fdat_801ed388(e, 1, 1);

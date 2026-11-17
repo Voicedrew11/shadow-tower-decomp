@@ -1,1 +1,9 @@
 image	va	name	size	class	evidence
+FDAT_042.BIN	0x801ed96c	fdat_801ed96c	0x4	fixed	overlay statics: consecutive words in retail; ASPSX .lcomm requests pack without alignment
+FDAT_042.BIN	0x801ed970	fdat_801ed970	0x4	fixed	overlay statics: consecutive words in retail; ASPSX .lcomm requests pack without alignment
+FDAT_182.BIN	0x801edc50	fdat_801edc50	0x4	fixed	overlay statics: consecutive words in retail; ASPSX .lcomm requests pack without alignment
+FDAT_182.BIN	0x801edc54	fdat_801edc54	0x4	fixed	overlay statics: consecutive words in retail; ASPSX .lcomm requests pack without alignment
+FDAT_212.BIN	0x801edcd4	fdat_801edcd4	0x4	fixed	overlay statics: consecutive words in retail; ASPSX .lcomm requests pack without alignment
+FDAT_212.BIN	0x801edcd8	fdat_801edcd8	0x4	fixed	overlay statics: consecutive words in retail; ASPSX .lcomm requests pack without alignment
+FDAT_242.BIN	0x801ee0b0	fdat_801ee0b0	0x4	fixed	overlay statics: consecutive words in retail; ASPSX .lcomm requests pack without alignment
+FDAT_242.BIN	0x801ee0b4	fdat_801ee0b4	0x4	fixed	overlay statics: consecutive words in retail; ASPSX .lcomm requests pack without alignment

@@ -325,3 +325,14 @@ overlay's own variant in five; a source names the variant by defining
 overlays) is not yet exact, and no unit includes it until it is, because
 its switch table sits in the overlay's read-only run and its entries would
 move with the code.
+
+An overlay's handlers keep their state in words right after its code (in
+the archive entry's zero tail). They are `.bss` `DATA()` claims of the
+first map unit that uses them, with FDAT data identities (`fdat_<address>`).
+A unit's single word is a global (a COMMON request placed at its claim) so
+that later units of the overlay can declare it `extern`; two or more words
+in one unit are statics with `fixed` rows in `data_reservations.tsv`, since
+ASPSX packs `.lcomm` requests without alignment and retail keeps them in
+consecutive words. A map handler's own read-only data, such as
+`FDAT_032.BIN`'s `RECT` initializer, is a `RODATA()` claim of its unit for
+that slice of the overlay's read-only run.
