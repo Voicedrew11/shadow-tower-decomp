@@ -19,9 +19,6 @@
 /*
  * Loads member `index + 4` of `archive` into a heap block owned by
  * world_state.unk834C[slot - 16].
- *
- * Not exact (size-exact): retail allocates index + 4 to $s2 and slot to $s1;
- * this source swaps the two.
  */
 ADDRESS(0x800239ec, 0xd0)
 void func_800239ec(archive, index, slot, tag)
@@ -30,11 +27,12 @@ int index;
 u16 slot;
 u8 tag;
 {
+    int member;
     u32 size;
     void *data;
 
-    index += 4;
-    size = func_80015ec8(archive, index);
+    member = index + 4;
+    size = func_80015ec8(archive, member);
     if (size == 0)
         return;
     data = func_80015164(DAT_8009c888, size, &world_state.unk834C[slot - 16]);
@@ -43,7 +41,7 @@ u8 tag;
     func_80015250(data, ST_BLOCK_LOADING);
     func_80015278(data, slot - 16);
     func_80015264(data, tag);
-    func_80015d54(archive, index, data, func_80023288);
+    func_80015d54(archive, member, data, func_80023288);
 }
 
 /* Loads members `index` and `index + 1` of `archive` into one heap block (the larger size). */
