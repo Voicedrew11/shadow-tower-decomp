@@ -139,6 +139,15 @@ typedef struct {
         s16 s[16];
         u16 u[16];
         u8 b[32];
+        s32 w[8];
+        struct {             /* FDAT attack commands (fdat_801ebc88) */
+            u16 unk10[2];
+            u16 frame[3];    /* 0x14: frame of each hit, 0xffff none */
+            s16 unk1A;       /* 0x1a: passed to func_8004cee8 */
+            u16 vertex[3];   /* 0x1c: model vertex of each hit, 0xffff the origin */
+            u16 node[3];     /* 0x22: skeleton node of each hit */
+            s16 offset[3];   /* 0x28: offset added after the turn */
+        } hit;
     } arg;
 } VisScript;
 
@@ -196,10 +205,11 @@ typedef struct {
     u16 unk54;
     u16 unk56;           /* 0x56: facing the viewer is compared with; heading to the viewer */
     u16 unk58;           /* 0x58: its difference from the facing */
-    u8 unk5A[0x5e - 0x5a];
+    u8 unk5A[2];
+    s16 unk5C;           /* 0x5c: FDAT: the heading an entry turns to */
     u16 unk5E;           /* 0x5e: heading of the wall slid along */
     u16 unk60;
-    s16 unk62;           /* 0x62: an FDAT overlay's attack state */
+    u16 unk62;           /* 0x62: FDAT: 1 or 2 masks a range bit of unk60 for a frame */
     u8 unk64;            /* 0x64: set when hit */
     u8 unk65;            /* 0x65..0x67: percent chances of unk10..unk14 */
     u8 unk66;
@@ -254,7 +264,7 @@ typedef struct {
     s16 unk0E;           /* 0x0e: gravity */
     u16 unk10;           /* 0x10: map bit, 0xffff none */
     u16 unk12;           /* 0x12: added to vis_table_a.unk612C while live */
-    u8 unk14[2];
+    u16 unk14;           /* 0x14: FDAT: near range (squared << 16 against Vis212.unk3C) */
     u16 unk16;
     u16 unk18;
     u16 unk1A;

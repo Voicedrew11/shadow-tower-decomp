@@ -302,7 +302,14 @@ sources that each bind by name. A unit's own source, one that no other unit
 lists, may bind by name and still claim its image's `RODATA()`,
 `JUMPTABLES()` and `SDATA()` ranges: the ranges belong to that one image,
 while the fragment's functions resolve through the image's identities. The
-FDAT overlays use this: every `src/fdat_nnn/main.c` owns its overlay's
-handler table and includes `src/lib/fdat_common.inc`, whose 21 functions
-sit at different addresses in seven of the 36 overlays and carry one shared
-identity name (`fdat_<FDAT_002.BIN address>`) in all of them.
+FDAT overlays use this: the 21 functions every overlay starts with sit at
+different addresses in seven of the 36 overlays and carry one shared
+identity name (`fdat_<FDAT_002.BIN address>`) in all of them. Each overlay
+has three units: the shared source `src/lib/fdat_common_a.c` (the first ten
+functions), its own `src/fdat_nnn/main.c` (the handler table and
+`fdat_801ebec4`'s switch table as one `RODATA()` run, and the fragment
+`src/lib/fdat_common.inc` with `fdat_801ebec4` and `fdat_801ec6a4`), and the
+shared `src/lib/fdat_common_b.c` (the last nine). The boundaries are WIP:
+they keep the two not-yet-exact functions `fdat_801eba4c` and
+`fdat_801ec6a4` from moving the switch-table and handler-table pointers
+(a non-exact function ends its unit).

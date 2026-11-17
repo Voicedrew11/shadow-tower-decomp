@@ -1,5 +1,6 @@
 /*
- * FDAT_402.BIN: the handler table and the common functions (WIP module).
+ * FDAT_402.BIN: its handler table, then fdat_801ebec4 (whose switch
+ * table follows the handler table) and fdat_801ec6a4 (WIP module).
  * A byte-identical copy of FDAT_002.BIN.
  */
 #include <kf/lib/address.h>
@@ -17,7 +18,7 @@
 #include <st/vis.h>
 #include <st/fdat.h>
 
-RODATA(0x801eb560, 0x88)
+RODATA(0x801eb560, 0x1cc)
 
 void func_801ed4a0();
 void func_801ed6e4();

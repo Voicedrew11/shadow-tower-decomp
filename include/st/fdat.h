@@ -19,17 +19,6 @@ typedef struct {
     s32 unk84;           /* 0x84: id + 0x33 in every overlay */
 } FdatHeader;
 
-/* An attack description fdat_801ebc88 reads (WIP): up to three hits, each
- * active from frame unk14[i] while the entry's animation passes it. */
-typedef struct {
-    u8 unk00[0x14];
-    u16 unk14[3];        /* 0x14: frame of each hit, 0xffff none */
-    s16 unk1A;           /* 0x1a: passed to func_8004cee8 */
-    u16 unk1C[3];        /* 0x1c: model vertex of each hit, 0xffff the origin */
-    u16 unk22[3];        /* 0x22: skeleton node of each hit */
-    s16 unk28[3];        /* 0x28: offset added after the turn */
-} FdatAttack;
-
 /* ST.EXE, no source yet. */
 void func_8004cee8(Vis212 *e, int arg, VECTOR *pos);
 
@@ -54,7 +43,7 @@ int fdat_801eb940(Vis212 *e);
 void fdat_801eb96c(Vis212 *e);
 void fdat_801eba4c(Vis212 *e);
 void fdat_801ebbc8(Vis212 *e, VisScript *s);
-void fdat_801ebc88(Vis212 *e, FdatAttack *a);
+void fdat_801ebc88(Vis212 *e, VisScript *s);
 void fdat_801ebec4(Vis212 *e);
 void fdat_801ed498(void);
 
