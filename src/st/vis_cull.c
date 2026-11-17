@@ -2,7 +2,7 @@
  * ST.EXE visible-id culling (WIP module): vis_measure_position measures one
  * position (in the scratchpad) against the viewer, with an optional
  * side-plane rejection; vis_cull_by_range drops visible ids that are out of
- * range and flags the near ones.
+ * range and flags the configured distance bands.
  */
 #include <kf/lib/address.h>
 #include <kf/lib/types.h>
@@ -109,11 +109,6 @@ int vis_measure_position(void)
     return (x - ox) * (x - ox) + (z - oz) * (z - oz) + y * y;
 }
 
-/*
- * Not exact: retail loads the middle range before the far-range pointer and
- * keeps the far depth and its biased copy in separate registers; the rest
- * agrees.
- */
 ADDRESS(0x8001c60c, 0x1f4)
 void vis_cull_by_range(void)
 {
@@ -129,8 +124,8 @@ void vis_cull_by_range(void)
     range_near = (world_state.unk1EE00 >> 11) * (world_state.unk1EE00 >> 11);
     range_mid = (world_state.unk1EE04 >> 11) * (world_state.unk1EE04 >> 11);
     i = vis_lists.n_visible;
-    range_far = world_state.light->unk6A / 2048 + 2;
-    range_far = range_far * range_far;
+    range_far = (world_state.light->unk6A / 2048 + 2) *
+                (world_state.light->unk6A / 2048 + 2);
     while (i--) {
         rec = &vis_records[vis_lists.visible[i]];
         sp->x = rec->unk08 << 12;
@@ -144,7 +139,7 @@ void vis_cull_by_range(void)
             for (k = i; k < vis_lists.n_visible; k++) {
                 vis_lists.visible[k] = vis_lists.visible[k + 1];
             }
-        } else if (d < range_near || d <= range_mid) {
+        } else if (d >= range_near || d <= range_mid) {
             rec->unk04 |= 2;
         }
     }
