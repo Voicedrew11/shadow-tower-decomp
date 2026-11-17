@@ -394,8 +394,11 @@ void func_80027900(DVECTOR *pos, CVECTOR *color, u16 dir)
 
 /* Draws a rectangle outline: bars `border & 0xff` high at the top and
  * bottom and `border >> 8` wide at the sides. */
-/* Not exact: retail keeps `color` in $t4 and computes `border >> 8` at entry;
- * the bottom bar loads y before h. */
+/* Not exact (size-exact): retail keeps `color` in $t4 and computes
+ * `border >> 8` before the world-state address. The bottom/right bars also
+ * load y before h and x before w into different operand registers. Explicit
+ * coordinate order, separate packet phases and low-border reuse did not
+ * resolve those differences. */
 ADDRESS(0x80027d18, 0x508)
 void func_80027d18(RECT *r, CVECTOR *color, u16 border, u16 semi)
 {
