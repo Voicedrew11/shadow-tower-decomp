@@ -783,8 +783,6 @@ void player_update_shake(void)
 
 /* Takes `damage` hit points, pushes the viewer away from `from` and starts
  * the red fade and the screen shake. */
-/* Not exact: unk2E2's sum adds the constant to rand() rather than to
- * `amount` (register choice only). */
 ADDRESS(0x8003d788, 0x458)
 void player_take_damage(int damage, int flags, long *from)
 {
@@ -794,6 +792,8 @@ void player_take_damage(int damage, int flags, long *from)
     int scaled;
     int reach;
     int amount;
+    int random;
+    int shake_amount;
     short time;
 
     if (viewer.unk218 == 4 || damage == 0) {
@@ -849,7 +849,10 @@ void player_take_damage(int damage, int flags, long *from)
     if (amount > 128) {
         amount = 128;
     }
-    viewer.unk2E2 = (rand() - 16384 + amount) >> 9;
+    random = rand();
+    shake_amount = amount - 16384;
+    shake_amount += random;
+    viewer.unk2E2 = shake_amount >> 9;
     viewer.unk2DE += amount + (rand() >> 9);
     if (hp == 0) {
         player_kill((int)&push);
