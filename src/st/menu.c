@@ -2163,10 +2163,6 @@ done:
  * of kind 20 or 30), five rows with their icons, and uses the confirmed
  * one (func_80054a54). Returns the use result (DAT_801cba08.unk16D8), 0 when
  * cancelled; items from 310 and item 288 recompute the viewer's figures.
- *
- * Not exact (size-exact): retail keeps `result` on the stack and stores
- * the load cursor through the image+4 register; this build allocates
- * them differently from the prologue on.
  */
 ADDRESS(0x8005ec10, 0x77c)
 int func_8005ec10(void)
@@ -2181,7 +2177,7 @@ int func_8005ec10(void)
     };
     RECT rect;
     RECT row;
-    u_long *image;
+    u8 *image;
     u_long *p;
     int reload;
     int first;
@@ -2203,11 +2199,11 @@ int func_8005ec10(void)
     sp->unk0.page_list.icons[4].vx = 896;
     sp->unk0.page_list.icons[4].vy = 488;
     sp->unk0.block = func_800152d0(21504);
-    image = CD_BUFFER;
-    func_80016030(3, 3, image);
-    func_80014cfc(sp->unk0.block, (u32 *)(image + 1), 5376);
-    image = (u_long *)((u8 *)image + (CD_BUFFER[0] + 4));
-    func_8003ec5c(image + 1, &sp->unk2E6[2], &sp->unk2E6[3], 1);
+    image = (u8 *)CD_BUFFER;
+    func_80016030(3, 3, (u_long *)image);
+    func_80014cfc(sp->unk0.block, (u32 *)(image + 4), 5376);
+    image += *(u32 *)image + 4;
+    func_8003ec5c(image + 4, &sp->unk2E6[2], &sp->unk2E6[3], 1);
     cd_state.unkA84 = CD_BUFFER;
     func_80016030(6, 800, cd_state.unkA84);
     sp->unk0.page_list.entries = func_800152d0(92);
@@ -2333,11 +2329,13 @@ int func_8005ec10(void)
     func_800152f8(sp->unk0.page_list.entries);
     if (reload)
         func_8005a3a8(0);
-    image = CD_BUFFER;
-    func_80016030(3, 9, image);
-    func_8003ec5c(image + 1, NULL, NULL, 0);
-    image = (u_long *)((u8 *)image + (CD_BUFFER[0] + 4));
-    func_8003ec5c(image + 1, NULL, NULL, 0);
+    {
+        u8 *restore = (u8 *)CD_BUFFER;
+        func_80016030(3, 9, (u_long *)restore);
+        func_8003ec5c(restore + 4, NULL, NULL, 0);
+        restore += *(u32 *)restore + 4;
+        func_8003ec5c(restore + 4, NULL, NULL, 0);
+    }
     return result;
 }
 
