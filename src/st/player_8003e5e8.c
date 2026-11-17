@@ -243,18 +243,37 @@ void func_8003ec4c(volatile u8 *p)
  * CLUT block at `clut` and each pixel block at `pix`, offset from the
  * TIM's own position unless `absolute`.
  */
-/* Not exact: retail copies each TIM block header word 1, 0, 2 interleaved
- * with the absolute test; this copies them in order. */
+/* Not exact: the length-word store precedes the final dimensions load;
+ * retail delays that store until after the payload pointer advances. */
 ADDRESS(0x8003ec5c, 0x1dc)
 void func_8003ec5c(void *data, DVECTOR *pix, DVECTOR *clut, int absolute)
 {
-    TimBlock block;
+    typedef struct {
+        u_long byte_count;
+        u_long position;
+        u_long dimensions;
+    } TimBlockWords;
+    union {
+        TimBlock header;
+        TimBlockWords words;
+    } block;
+    typedef char HeaderWordSize[sizeof(u_long) == 4 ? 1 : -1];
+    typedef char HeaderSize[sizeof(TimBlock) == 12 ? 1 : -1];
+    typedef char HeaderLengthAt0[offsetof(TimBlock, len) == 0 ? 1 : -1];
+    typedef char HeaderRectAt4[offsetof(TimBlock, rect) == 4 ? 1 : -1];
+    typedef char HeaderRectSize[sizeof(RECT) == 8 ? 1 : -1];
+    typedef char HeaderWordsSize[sizeof(TimBlockWords) == 12 ? 1 : -1];
+    typedef char HeaderPositionAt4[offsetof(TimBlockWords, position) == 4 ? 1 : -1];
+    typedef char HeaderDimensionsAt8[offsetof(TimBlockWords, dimensions) == 8 ? 1 : -1];
+    typedef char HeaderUnionSize[sizeof(block) == 12 ? 1 : -1];
     RECT rect;
     DVECTOR zero_clut;
     DVECTOR zero_pix;
     DVECTOR *cp;
     DVECTOR *pp;
     u_long *p;
+    u_long position_word;
+    u_long length_word;
 
     memset(&zero_clut, 0, sizeof(zero_clut));
     memset(&zero_pix, 0, sizeof(zero_pix));
@@ -270,33 +289,41 @@ void func_8003ec5c(void *data, DVECTOR *pix, DVECTOR *clut, int absolute)
 next:
     if (*p++ == 0x10) {
         if (*p++ & 8) {
-            block = *(TimBlock *)p;
+            position_word = p[1];
+            length_word = p[0];
+            block.words.position = position_word;
+            block.words.byte_count = length_word;
+            block.words.dimensions = p[2];
             p += 3;
             if (!absolute) {
-                rect.x = block.rect.x + cp->vx;
-                rect.y = block.rect.y + cp->vy;
+                rect.x = block.header.rect.x + cp->vx;
+                rect.y = block.header.rect.y + cp->vy;
             } else {
                 rect.x = cp->vx;
                 rect.y = cp->vy;
             }
-            rect.w = block.rect.w;
-            rect.h = block.rect.h;
+            rect.w = block.header.rect.w;
+            rect.h = block.header.rect.h;
             LoadImage(&rect, p);
-            p = (u_long *)((u8 *)p + (block.len - 12));
+            p = (u_long *)((u8 *)p + (block.header.len - 12));
         }
-        block = *(TimBlock *)p;
+        position_word = p[1];
+        length_word = p[0];
+        block.words.position = position_word;
+        block.words.byte_count = length_word;
+        block.words.dimensions = p[2];
         p += 3;
         if (!absolute) {
-            rect.x = block.rect.x + pp->vx;
-            rect.y = block.rect.y + pp->vy;
+            rect.x = block.header.rect.x + pp->vx;
+            rect.y = block.header.rect.y + pp->vy;
         } else {
             rect.x = pp->vx;
             rect.y = pp->vy;
         }
-        rect.w = block.rect.w;
-        rect.h = block.rect.h;
+        rect.w = block.header.rect.w;
+        rect.h = block.header.rect.h;
         LoadImage(&rect, p);
-        p = (u_long *)((u8 *)p + (block.len - 12));
+        p = (u_long *)((u8 *)p + (block.header.len - 12));
         goto next;
     }
 }
