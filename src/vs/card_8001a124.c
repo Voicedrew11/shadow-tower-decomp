@@ -803,9 +803,8 @@ int func_8001c378(VsSave *save);
  * message and waiting for a press when a step fails; 0x80 and 0x8000
  * restart. Reloads the menu pictures and both players' fighter faces
  * before returning 1 when the card was used, else 0.
- * Not exact: retail saves the registers in another order (mode in $s2,
- * port in $s4; first divergence at +0x4) and is 0x830 bytes, this build
- * 0x818.
+ * Not exact: restoring the team slots uses different load temporaries;
+ * the final menu reload holds different CD and message-table bases.
  */
 ADDRESS(0x8001bb48, 0x830)
 int func_8001bb48(int mode, int port)
@@ -843,13 +842,25 @@ int func_8001bb48(int mode, int port)
 again:
     sp->unk1BC = port;
     sp->unk1B8 = &sp->unk0.card.ports[sp->unk1BC];
-    result = 0;
-    if (!func_8001ad18(port))
+    if (!func_8001ad18(port)) {
+        result = 0;
         goto done;
-    if ((sp->unk1CC & 0xff00) && !(port == 0 ? DAT_80063380 : DAT_80063381)) {
-        sp->unk0.menu.half[0] = MSG_NOT_LOADED;
-        sp->unk1CC <<= 5;
-        goto wait;
+    }
+    result = 0;
+    if (sp->unk1CC & 0xff00) {
+        if (port == 0) {
+            if (!DAT_80063380) {
+                sp->unk0.menu.half[0] = MSG_NOT_LOADED;
+                sp->unk1CC <<= 5;
+                goto wait;
+            }
+        } else {
+            if (!DAT_80063381) {
+                sp->unk0.menu.half[0] = MSG_NOT_LOADED;
+                sp->unk1CC <<= 5;
+                goto wait;
+            }
+        }
     }
     func_800204b0();
     func_800204b0();
@@ -871,14 +882,15 @@ again:
     DAT_801603c0.pads[1].unkC = 0;
     if (sp->unk1CC & 0xff00) {
         func_8001a5b4(sp->unk1BC);
-        if (sp->unk1B8->status != 0) {
+        if (sp->unk1B8->status == 0) {
+            strcpy(sp->unk1B8->files[0].name, DAT_801a0a30[port]);
+            sp->unk1B8->count = 1;
+            sp->unk1B8->unkC8 = 0;
+        } else {
             sp->unk0.menu.half[0] = MSG_NO_SAVE;
             sp->unk1CC <<= 3;
             goto wait;
         }
-        strcpy(sp->unk1B8->files[0].name, DAT_801a0a30[port]);
-        sp->unk1B8->count = 1;
-        sp->unk1B8->unkC8 = 0;
     } else {
         func_8001a6dc(sp->unk1BC);
         status = sp->unk1B8->status;
@@ -924,8 +936,12 @@ again:
         result = func_8001b504(&DAT_801a0a80[port]);
     }
     if (!result) {
-        if (sp->unk0.menu.half[0] == 0)
-            sp->unk0.menu.half[0] = (sp->unk1CC & 0xff00) ? MSG_SAVE_FAILED : MSG_LOAD_FAILED;
+        if (sp->unk0.menu.half[0] == 0) {
+            if (sp->unk1CC & 0xff00)
+                sp->unk0.menu.half[0] = MSG_SAVE_FAILED;
+            else
+                sp->unk0.menu.half[0] = MSG_LOAD_FAILED;
+        }
         sp->unk1CC <<= 2;
         goto wait;
     }
@@ -961,36 +977,40 @@ wait:
     }
     result = 1;
 done:
-    func_8001d39c();
-    DrawSync(0);
-    func_80016ca8();
-    buf = DAT_801a4590.unk4A4;
-    DAT_801a4590.unk4A0 = buf;
-    face.vx = 640;
-    face.vy = 124;
-    func_8002ee90(8, 4, buf);
-    func_8002e630((u32 *)DAT_80196230[1].offsets, (u32 *)(DAT_801a4590.unk4A4 + 1), 0x1500);
-    func_80012c2c((u_long *)((u8 *)buf + DAT_801a4590.unk4A4[0] + 8), &sp->unk1E0, &sp->unk1E4);
-    DrawSync(0);
-    func_8002ee90(8, 8, buf);
-    func_8002e630((u32 *)DAT_80196230[0].offsets, (u32 *)(DAT_801a4590.unk4A4 + 1), 0x1500);
-    func_80012c2c((u_long *)((u8 *)buf + DAT_801a4590.unk4A4[0] + 8), &sp->unk1D8, &sp->unk1DC);
-    DrawSync(0);
-    func_8002ee90(8, 7, buf);
-    func_80012c2c(buf, &pos, &clut);
-    DrawSync(0);
-    if (DAT_80063330[0] != -1) {
-        func_8002ee90(11, DAT_80191d00.unk0118[DAT_80063330[0]].unk5[0], buf);
-        func_80012c2c(buf, &face, NULL);
+    {
+        u_long *menu_buf;
+
+        func_8001d39c();
         DrawSync(0);
+        func_80016ca8();
+        menu_buf = DAT_801a4590.unk4A4;
+        DAT_801a4590.unk4A0 = menu_buf;
+        face.vx = 640;
+        face.vy = 124;
+        func_8002ee90(8, 4, menu_buf);
+        func_8002e630((u32 *)DAT_80196230[1].offsets, (u32 *)(DAT_801a4590.unk4A4 + 1), 0x1500);
+        func_80012c2c((u_long *)((u8 *)menu_buf + DAT_801a4590.unk4A4[0] + 8), &sp->unk1E0, &sp->unk1E4);
+        DrawSync(0);
+        func_8002ee90(8, 8, menu_buf);
+        func_8002e630((u32 *)DAT_80196230[0].offsets, (u32 *)(DAT_801a4590.unk4A4 + 1), 0x1500);
+        func_80012c2c((u_long *)((u8 *)menu_buf + DAT_801a4590.unk4A4[0] + 8), &sp->unk1D8, &sp->unk1DC);
+        DrawSync(0);
+        func_8002ee90(8, 7, menu_buf);
+        func_80012c2c(menu_buf, &pos, &clut);
+        DrawSync(0);
+        if (DAT_80063330[0] != -1) {
+            func_8002ee90(11, DAT_80191d00.unk0118[DAT_80063330[0]].unk5[0], menu_buf);
+            func_80012c2c(menu_buf, &face, NULL);
+            DrawSync(0);
+        }
+        face.vy += 28;
+        if (DAT_80063334 != -1) {
+            func_8002ee90(11, DAT_80191d00.unk0118[DAT_80063334].unk5[0], menu_buf);
+            func_80012c2c(menu_buf, &face, NULL);
+            DrawSync(1);
+        }
+        return result;
     }
-    face.vy += 28;
-    if (DAT_80063334 != -1) {
-        func_8002ee90(11, DAT_80191d00.unk0118[DAT_80063334].unk5[0], buf);
-        func_80012c2c(buf, &face, NULL);
-        DrawSync(1);
-    }
-    return result;
 }
 
 /* Writes `save` over its player's card file (named in DAT_801a0a30): 1 on
