@@ -32,11 +32,11 @@ void func_8001c978(void)
 }
 
 /* Opens the menu sound bank and transfers its body to SPU memory. */
-/* Not exact: retail computes the body address before SsVabOpenHead and
- * keeps it in $s0 across the call. */
 ADDRESS(0x8001c9b8, 0x58)
 void func_8001c9b8(void)
 {
-    SsVabTransBody(DAT_800ff580, DAT_8006335a = SsVabOpenHead(DAT_80116580, -1));
+    u_char *body = DAT_800ff580;
+
+    SsVabTransBody(body, DAT_8006335a = SsVabOpenHead(DAT_80116580, -1));
     SsVabTransCompleted(SS_WAIT_COMPLETED);
 }
