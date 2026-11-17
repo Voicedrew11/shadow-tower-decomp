@@ -14,7 +14,10 @@
 #include <st/vis.h>
 
 /* Shows entry c in front of the viewer until a button takes it (bit 10)
- * or puts it back (bit 11, unless forced). */
+ * or puts it back (bit 11, unless forced).
+ * Not exact: the high half at retail 0x80053490 has no proved feasible
+ * consumer. The cancel/take block placement and rotation-store order
+ * also differ. */
 ADDRESS(0x8005335c, 0x748)
 void func_8005335c(Vis48 *c, int forced)
 {
@@ -35,9 +38,13 @@ void func_8005335c(Vis48 *c, int forced)
     gte_ldv0((SVECTOR *)&info->unk5[3]);
     gte_rtv0();
     gte_stlvnl(&a);
-    a.vx += viewer.position.vx;
-    a.vy += viewer.position.vy;
-    a.vz += viewer.position.vz;
+    {
+        VECTOR *position = &viewer.position;
+
+        a.vx += position->vx;
+        a.vy += position->vy;
+        a.vz += position->vz;
+    }
     switch (info->unk5[2]) {
     case 0:
         r.vx = -viewer.unk268;
@@ -87,14 +94,14 @@ void func_8005335c(Vis48 *c, int forced)
         c->unk08.vx = (i * save.unk08.vx + j * a.vx) >> 4;
         c->unk08.vy = (i * save.unk08.vy + j * a.vy) >> 4;
         c->unk08.vz = (i * save.unk08.vz + j * a.vz) >> 4;
-        if (i < 9) {
-            c->unk18 = (i * save.unk18 + (8 - i) * r.vx) >> 3;
-            c->unk1A = r.vy;
-            c->unk1C = (i * save.unk1C + (8 - i) * r.vz) >> 3;
-        } else {
+        if (i >= 9) {
             c->unk18 = save.unk18;
             c->unk1A = ((i - 8) * save.unk1A + j * r.vy) >> 3;
             c->unk1C = save.unk1C;
+        } else {
+            c->unk18 = (i * save.unk18 + (8 - i) * r.vx) >> 3;
+            c->unk1A = r.vy;
+            c->unk1C = (i * save.unk1C + (8 - i) * r.vz) >> 3;
         }
         func_80026afc(0, 0);
         player_update_status(0);
@@ -103,10 +110,7 @@ void func_8005335c(Vis48 *c, int forced)
     }
     take = 1;
     a = c->unk08;
-    b.vx = viewer.position.vx;
-    b.vy = viewer.position.vy;
-    b.vz = viewer.position.vz;
-    b.pad = viewer.position.pad;
+    b = viewer.position;
     b.vy += 800;
     r = *(SVECTOR *)&c->unk18;
     r2 = r;
@@ -118,24 +122,24 @@ back:
         c->unk08.vx = (i * a.vx + j * b.vx) >> 4;
         c->unk08.vy = (i * a.vy + j * b.vy) >> 4;
         c->unk08.vz = (i * a.vz + j * b.vz) >> 4;
-        if (i < 9) {
-            c->unk18 = r2.vx;
-            c->unk1A = (i * r.vy + (8 - i) * r2.vy) >> 3;
-            c->unk1C = r2.vz;
-        } else {
+        if (i >= 9) {
             c->unk18 = ((i - 8) * r.vx + j * r2.vx) >> 3;
             c->unk1A = r.vy;
             c->unk1C = ((i - 8) * r.vz + j * r2.vz) >> 3;
+        } else {
+            c->unk18 = r2.vx;
+            c->unk1A = (i * r.vy + (8 - i) * r2.vy) >> 3;
+            c->unk1C = r2.vz;
         }
         func_80026afc(0, 0);
         player_update_status(0);
     }
     c->unk2D += 8;
-    if (take) {
-        func_80052d98(c);
-        func_80052e50(c);
-    } else {
+    if (!take) {
         *c = save;
         c->unk22 = c->unk23;
+    } else {
+        func_80052d98(c);
+        func_80052e50(c);
     }
 }

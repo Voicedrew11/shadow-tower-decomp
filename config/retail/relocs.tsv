@@ -5303,6 +5303,7 @@ ST.EXE	0x800533a0	0x42ba0	0x800533a4	mips_hi16_lo16	reachable-code	0x801c7810	bs
 ST.EXE	0x800533d8	0x42bd8	0x800533dc	mips_hi16_lo16	reachable-code	0x80198f28	bss	viewer	lui+addiu		manual-decoded	reviewed	st.vis_pickup asm review
 ST.EXE	0x800533e4	0x42be4	0x800533e8	mips_hi16_lo16	reachable-code	0x801991c0	bss	viewer	lui+addiu		manual-decoded	reviewed	st.vis_pickup asm review
 ST.EXE	0x80053494	0x42c94		mips26	reachable-code	0x8005364c	load		j		manual-decoded	reviewed	st.vis_pickup asm review
+ST.EXE	0x800534a8	0x42ca8	0x80053650	mips_hi16_lo16	reachable-code	0x80199192	bss	viewer	lui+lhu		manual-decoded	reviewed	st.vis_pickup mode>=4 default path; v0HI in BEQ delay reaches yawLHU via directJ without redefinition; existingviewer+26a
 ST.EXE	0x800534ac	0x42cac		mips26	reachable-code	0x8005364c	load		j		manual-decoded	reviewed	st.vis_pickup asm review
 ST.EXE	0x800534c4	0x42cc4		mips26	reachable-code	0x80053648	load		j		manual-decoded	reviewed	st.vis_pickup asm review
 ST.EXE	0x800534d8	0x42cd8		mips26	reachable-code	0x800534f0	load		j		manual-decoded	reviewed	st.vis_pickup asm review
