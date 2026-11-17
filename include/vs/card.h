@@ -55,7 +55,8 @@ typedef struct {
     s32 unk0;            /* 0x0000: compared with the card file's first word */
     u8 unk4[0x14cc - 4];
     u32 unk14CC[9];      /* 0x14cc: 266 flag bits, counted into the header */
-    u8 unk14F0[0x1d88 - 0x14f0];
+    u8 unk14F0[0x1ba8 - 0x14f0];
+    u8 unk1BA8[0x1d88 - 0x1ba8]; /* 0x1ba8: a count per item id (func_800222d8) */
 } VsSave;
 
 typedef char VsSaveSize[sizeof(VsSave) == 0x1d88 ? 1 : -1];

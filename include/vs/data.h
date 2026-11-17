@@ -17,6 +17,7 @@
 #include <LIBCD.H>
 #include <st/cd.h>
 #include <st/gfx.h>
+#include <st/vis.h>
 
 /* Ordering-table lengths, as in ST.EXE (src/st/gfx.c). */
 #define VS_OT_LENGTH 4096
@@ -196,6 +197,14 @@ extern s32 DAT_80063220;
 
 /* A frame count the periodic sound triggers divide (bss, unowned). */
 extern u32 DAT_80160400;
+
+/* VS's copy of ST.EXE's vis_table_c (bss, 0x80191d00): the 44-byte item
+ * records from +0x118; only those are used so far. */
+extern VisTableC DAT_80191d00;
+
+/* A switch func_800222d8 sets around its count list and func_8001d9cc
+ * reads (bss). */
+extern u16 DAT_8006337a;
 
 /* Rounds won per fighter (bss, unowned). */
 extern s32 DAT_80063370[2];

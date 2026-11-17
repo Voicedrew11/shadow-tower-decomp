@@ -586,6 +586,12 @@ source = "src/vs/ui_80021c14.c"
 profile = "probe-gcc272cdk-o2-g8"
 
 [[unit]]
+unit = "vs.ui_80021cfc"
+image = "VS.EXE"
+source = "src/vs/ui_80021cfc.c"
+profile = "probe-gcc272cdk-o2-g8"
+
+[[unit]]
 unit = "vs.ui_800228d8"
 image = "VS.EXE"
 source = "src/vs/ui_800228d8.c"
