@@ -500,16 +500,15 @@ void func_800675f4(void)
  * The detail panel of the id under the cursor: its image (when the CD is
  * idle), its fourteen table C counts and its two figures.
  */
-/* Not exact: like func_80031674 (src/st/ui.c), retail spills the panel
- * position, text x/y and the id to a 120-byte frame with $t1 as temporary
- * and forms each scratchpad address with its own lui; this build keeps them
- * in registers. */
+/* Not exact: scratchpad address reuse, the empty-selection join,
+ * frame/spills and text lookup ordering still differ. */
 ADDRESS(0x80067624, 0x5c8)
 void func_80067624(void)
 {
     int text_x, text_y;
     s16 x, y;
     s16 id;
+    s16 selected;
     int none;
     int n, k;
     int i, j;
@@ -534,11 +533,13 @@ void func_80067624(void)
     MENU_SCRATCH->unk350.y = y;
     none = 0;
     if (ST.unk0 == 104) {
-        id = MENU_SCRATCH->unk0.grid.ids0[MENU_SCRATCH->unk0.grid.row0 + MENU_SCRATCH->unk2E0];
-        none = id == -1;
+        selected = MENU_SCRATCH->unk0.grid.row0 + MENU_SCRATCH->unk2E0;
+        none = MENU_SCRATCH->unk0.grid.ids0[selected] == -1;
+        id = MENU_SCRATCH->unk0.grid.ids0[selected];
     } else {
-        id = MENU_SCRATCH->unk0.grid.ids1[MENU_SCRATCH->unk0.grid.row1 + MENU_SCRATCH->unk2E0];
-        if (id == -1)
+        selected = MENU_SCRATCH->unk0.grid.row1 + MENU_SCRATCH->unk2E0;
+        id = MENU_SCRATCH->unk0.grid.ids1[selected];
+        if (MENU_SCRATCH->unk0.grid.ids1[selected] == -1)
             none = 1;
     }
     if (!none) {
@@ -558,13 +559,16 @@ void func_80067624(void)
         name_x = text_x - 4;
         count_x = text_x;
         for (i = 0; i < 4; i++) {
+            u16 label_x = name_x;
+            u16 value_x = count_x + 40;
+
             for (j = 0; j < 4; j++) {
                 if (n == 14)
                     goto done;
                 n++;
                 if (*count) {
-                    func_8002732c(MESSAGE(200 + k), name_x, text_y + j * 15, &MENU_SCRATCH->style[0]);
-                    func_80027440(*count | 0x13000000, count_x + 40, text_y + j * 15,
+                    func_8002732c(MESSAGE(200 + k), label_x, text_y + j * 15, &MENU_SCRATCH->style[0]);
+                    func_80027440(*count | 0x13000000, value_x, text_y + j * 15,
                                   &MENU_SCRATCH->style[4]);
                 }
                 count++;
@@ -593,7 +597,7 @@ void func_80067624(void)
         }
         text_y += 15;
         if (vis_table_c.unk0118[id].unk24) {
-            whole = vis_table_c.unk0118[id].unk24 * 100u / 454;
+            whole = vis_table_c.unk0118[id].unk24 * 100 / 454;
             tenths = vis_table_c.unk0118[id].unk24 * 1000 / 454 - whole * 10;
             func_8002732c(MESSAGE(28), text_x, text_y, &MENU_SCRATCH->style[0]);
             func_80027440(whole | 0x3000000, text_x + 70, text_y, &MENU_SCRATCH->style[4]);
