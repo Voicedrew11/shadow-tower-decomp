@@ -269,9 +269,6 @@ void func_80031178(VsFighter *f, s16 from, s16 to)
  * turn and start attacks; 2 and 6 run an attack (combo follow-ups, hit
  * frames and lunges); 3 and 4 drain hit points while hit or down.
  */
-/* Not exact (size-exact): retail keeps the 0x48000 field-base constant in
- * $a1 across the gauge refill and the turn, this build in $a0 (24 words of
- * register choice from +0xf0). */
 ADDRESS(0x80031478, 0xc90)
 void func_80031478(int n)
 {
@@ -296,7 +293,8 @@ void func_80031478(int n)
             f->unk4DF0A = d->unk1BA;
     }
     if (f->unk4DF0E != 5 && (DAT_800633a8 & 0x800)) {
-        VsFighter *o = &DAT_800633b0.fighter[1 - n];
+        VsFighter *base = DAT_800633b0.fighter;
+        VsFighter *o = base + (1 - n);
         s16 target;
 
 
