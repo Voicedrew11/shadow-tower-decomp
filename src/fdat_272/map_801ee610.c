@@ -20,20 +20,21 @@
 DATA(0x801ef930, 0x4, ".bss")
 int fdat_801ef930;
 
-/* Not exact (one attempt, retries off; 68.2%): first divergence retail `lui v0,0x0`, this source `lui v0,0x0`. */
 /* Takes the item of slot 3, recomputes the figures and slots, raises table
  * B entry 16 and slides table C item 28 along. */
 ADDRESS(0x801ee610, 0x1c4)
 void func_801ee610(void)
 {
     Vis88 *d16 = &vis_table_b.entries[16];
+    u8 *speed = &d16->unk48;
     Vis48 *c28 = &vis_table_c.entries[28];
+    Data801c7590 *items = &DAT_801c7590;
     Vis44 *kind;
     int step;
 
-    ((u8 *)&DAT_801c7590)[viewer.unk38[3]] = 0;
-    viewer.unk38[3] = 0xffff;
     kind = &vis_table_c.unk0118[c28->unk00];
+    *(u8 *)&items->counts[viewer.unk38[3]] = 0;
+    viewer.unk38[3] = 0xffff;
     func_8005a3a8(0);
     func_8003d030();
     func_8003f12c(viewer.unk38[3], 0, 0);
@@ -43,29 +44,33 @@ void func_801ee610(void)
     d16->unk10 = 0;
     c28->unk22 = 5;
     c28->unk2D += 3;
-    while (c28->unk08.vz <= d16->unk24.vz - 0x300) {
+    for (;;) {
         StAnimFile *file;
 
+        if (c28->unk08.vz > d16->unk24.vz - 0x300)
+            goto item_placed;
         anim_get_file(kind->unk4 + 588, &file);
         if (file != NULL)
             c28->unk08.vz += 36;
         func_80026dd4(NULL, NULL, 0);
     }
-    step = d16->unk48 * 4;
+item_placed:
+    step = *speed * 4;
     for (;;) {
         int v;
+        int next;
 
         func_8004ed54(d16, d16->unk0a * 3 + 0xd0);
         v = d16->unk10;
+        next = v + step;
         if (v == 0xfff) {
             d16->unk0C = 0xff;
             break;
         }
-        v += step;
-        if (v >= 0x1000)
+        if (next >= 0x1000)
             d16->unk10 = 0xfff;
         else
-            d16->unk10 = v;
+            d16->unk10 = next;
         c28->unk08.vz += 12;
         func_80026dd4(NULL, NULL, 0);
     }
