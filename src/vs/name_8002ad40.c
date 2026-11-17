@@ -15,9 +15,8 @@
  * left, the second on the right, wrapping to a second line at glyph 49;
  * `bright` sets their green tint.
  */
-/* Not exact: retail initialises the four x positions after the first
- * glyph test and keeps 29, 40, 50 and the graphics state in registers
- * (this build: 40, 50 and the state, 0x8 bytes short). */
+/* Not exact: the 29/40/50 coordinates and graphics base initialize in
+ * a different order and use different registers. */
 ADDRESS(0x8002ad40, 0x338)
 void func_8002ad40(int bright)
 {
@@ -25,13 +24,16 @@ void func_8002ad40(int bright)
     int line = 0;
     int n;
     int x0, x1, x2, x3;
+    u16 glyph;
 
-    for (n = 0; n < 2; n++) {
+    for (n = 0; n < 2;) {
+        int top;
+
         s = VS_ITEM_NAME(DAT_801624b8[n].slot[DAT_80063338]);
-        if (*s == 0xffff || *s == 0) {
-            line = 0;
-            continue;
-        }
+        glyph = *s;
+        if (glyph == 0xffff || glyph == 0)
+            goto next;
+        top = 29;
         x3 = 212;
         x2 = 201;
         x1 = 31;
@@ -40,7 +42,7 @@ void func_8002ad40(int bright)
             POLY_FT4 *p;
             int c;
 
-            if (*s == 1)
+            if (glyph == 1)
                 break;
             c = *s - 2;
             if (c == 47) {
@@ -60,12 +62,12 @@ void func_8002ad40(int bright)
                 if (line)
                     setXY4(p, x0, 40, x1, 40, x0, 50, x1, 50);
                 else
-                    setXY4(p, x0, 29, x1, 29, x0, 39, x1, 39);
+                    setXY4(p, x0, top, x1, top, x0, 39, x1, 39);
             } else {
                 if (line)
                     setXY4(p, x2, 40, x3, 40, x2, 50, x3, 50);
                 else
-                    setXY4(p, x2, 29, x3, 29, x2, 39, x3, 39);
+                    setXY4(p, x2, top, x3, top, x2, 39, x3, 39);
             }
             p->tpage = GetTPage(0, 1, 640, 0);
             p->clut = GetClut(640, 480);
@@ -76,7 +78,10 @@ void func_8002ad40(int bright)
             x2 += 11;
             x1 += 11;
             x0 += 11;
-        } while (*s != 0xffff && *s != 0);
+            glyph = *s;
+        } while (glyph != 0xffff && glyph != 0);
+    next:
+        n++;
         line = 0;
     }
 }
