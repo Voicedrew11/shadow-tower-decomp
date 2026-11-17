@@ -750,6 +750,9 @@ def _rebase_hi_lo(
     A HI16 pairs with the LO16s of its symbol that follow it, up to a later
     HI16 of that symbol once a LO16 has been seen: one `lui` may feed several
     signed lows, and consecutive `lui`s on converging paths feed the same low.
+    A low based on the register of a later `lui` of the symbol that sits
+    before it (and not on this `lui`'s register) belongs to that `lui`: a dead
+    `lui` in a delay slot pairs with the first low that uses its own register.
     A HI16 with no following LO16 shares the nearest preceding one. Each pair
     is re-encoded from the original words, so a shared half is written once
     with the same value.
@@ -762,13 +765,20 @@ def _rebase_hi_lo(
         if high.kind != "R_MIPS_HI16" or high.symbol not in offsets:
             continue
         lows = []
+        hi_register = (original[high.offset] >> 16) & 0x1F
+        intervening: set[int] = set()
         for later in range(index + 1, len(relocations)):
             item = relocations[later]
             if item.symbol != high.symbol:
                 continue
-            if item.kind == "R_MIPS_HI16" and lows:
-                break
+            if item.kind == "R_MIPS_HI16":
+                if lows:
+                    break
+                intervening.add((original[item.offset] >> 16) & 0x1F)
             if item.kind == "R_MIPS_LO16":
+                base = (original[item.offset] >> 21) & 0x1F
+                if base != hi_register and base in intervening:
+                    continue
                 lows.append(later)
         if not lows:
             lows = [earlier for earlier in range(index - 1, -1, -1)
