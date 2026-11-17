@@ -580,9 +580,21 @@ source = "src/vs/ui_8001e3d8.c"
 profile = "probe-gcc272cdk-o2-g8"
 
 [[unit]]
+unit = "vs.ui_8001eb18"
+image = "VS.EXE"
+source = "src/vs/ui_8001eb18.c"
+profile = "probe-gcc272cdk-o2-g8"
+
+[[unit]]
 unit = "vs.ui_8001f23c"
 image = "VS.EXE"
 source = "src/vs/ui_8001f23c.c"
+profile = "probe-gcc272cdk-o2-g8"
+
+[[unit]]
+unit = "vs.ui_8001f30c"
+image = "VS.EXE"
+source = "src/vs/ui_8001f30c.c"
 profile = "probe-gcc272cdk-o2-g8"
 
 [[unit]]

@@ -105,7 +105,7 @@ void func_8001de8c(RECT *r, CVECTOR *color, u16 border, u16 semi); /* ST func_80
 void func_8001eef4(RECT *r, CVECTOR *color, u16 dir);    /* ST func_8002916c */
 void func_8001d3f0(u16 c, u16 x, u16 y, CVECTOR *color);  /* ST func_80026ecc */
 void func_8001d9cc(u32 num, u16 x, u16 y, CVECTOR *color); /* ST func_80027440 */
-void func_8001f30c(int x, int y, int w, int h);
+void func_8001f30c(short x, short y, short w, short h); /* ST func_80029618 */
 void func_8001f828(void);                                /* ST func_8002c9e8 */
 void func_8001f8c4(void);
 void func_8001f960(void);                                /* ST func_8002c050 */
