@@ -90,6 +90,7 @@ typedef struct {
     MATRIX unk2C998;     /* 0x2c998: the camera matrix */
     u8 unk2C9B8[0x2ca78 - 0x2c9b8];
     VECTOR unk2CA78;     /* 0x2ca78: the camera position */
+    SVECTOR unk2CA88;    /* 0x2ca88: the camera angles (func_80024b5c) */
 } VsWorldState;
 
 /* Layout checks: the offsets the code proves. */
@@ -122,7 +123,9 @@ extern s32 DAT_80063308;
 /* A fighter's attack record: its damage per kind (32 bytes, the stride
  * func_8002e314 indexes). */
 typedef struct {
-    u8 unk0[14];
+    u8 unk0[10];
+    s16 unkA;                /* 0x0a: the frame it strikes on (func_80031478) */
+    u16 unkC;                /* 0x0c: its cost to the second gauge */
     u16 damage[9];           /* 0x0e */
 } VsAttack;
 
@@ -133,6 +136,30 @@ typedef struct {
     s16 kind;
     u16 amount;
 } VsHit;
+
+/* A fighter's 70-byte hit record for one attack animation
+ * (func_80031478): up to three hits, each landing on its frame within its
+ * reach and arc, and up to three lunges that move the fighter between two
+ * frames. */
+typedef struct {
+    u8 count;
+    u8 unk1;
+    struct {
+        s16 frame;
+        s16 range;           /* added to the fighter's hit radius */
+        s16 arc;
+        VsHit hit;
+    } hits[3];               /* 0x02 */
+    u8 count2;               /* 0x32 */
+    u8 unk33;
+    struct {
+        s16 from;
+        s16 to;
+        s16 speed;
+    } moves[3];              /* 0x34 */
+} VsHitRecord;
+
+typedef char VsHitRecordSize[sizeof(VsHitRecord) == 70 ? 1 : -1];
 
 /* A fighter's animation sound effects (func_80013c5c), a view of the first
  * 0x64 bytes of its VsFighterData block: keys[i].frame is the animation id
@@ -169,11 +196,13 @@ typedef struct {
  */
 typedef struct {
     VsAnimRef unk0[13];      /* 0x000: animations (count WIP) */
-    u8 unk34[0x14a - 0x34];
+    u8 unk34[0x78 - 0x34];
+    VsHitRecord unk78[3];    /* 0x078: hit records of the three combo animations (func_80031478) */
     VsAttack unk14A[3];      /* 0x14a: attacks (count WIP) */
     s16 unk1AA;              /* 0x1aa: movement kind */
     s16 unk1AC;              /* 0x1ac: walking speed */
-    u8 unk1AE[0x1b4 - 0x1ae];
+    s16 unk1AE;              /* 0x1ae: turning speed */
+    u8 unk1B0[0x1b4 - 0x1b0];
     s16 unk1B4;              /* 0x1b4: hit radius */
     s16 unk1B6;              /* 0x1b6: height */
     s16 unk1B8;              /* 0x1b8: full hit points */
@@ -192,24 +221,25 @@ typedef struct {
     u8 file[0x4b000];        /* 0x00000: the model file, then unmodeled */
     u_long unk4B000[(0x4dee0 - 0x4b000) / 4]; /* 0x4b000: a second mesh model, absent when its first word is 0 */
     StAnimSet *unk4DEE0;     /* 0x4dee0: the fighter's skeletal-animation slot */
-    u8 unk4DEE4[0x4dee8 - 0x4dee4];
+    StAnimSlot *unk4DEE4;    /* 0x4dee4: the fighter's vertex-animation slot (func_80028914) */
     u8 unk4DEE8;             /* 0x4dee8: animation playing (VsAnimRef.unk0); func_80013c5c matches it against the sound keys */
     u8 unk4DEE9;
     s16 unk4DEEA;            /* 0x4deea: animation frame */
     s16 unk4DEEC;            /* 0x4deec */
     u8 unk4DEEE[0x4def0 - 0x4deee];
     VECTOR unk4DEF0;         /* 0x4def0: position */
-    u8 unk4DF00[0x4df02 - 0x4df00];
+    s16 unk4DF00;            /* 0x4df00: rotation (an SVECTOR over 0x4df00..0x4df06): x */
     s16 unk4DF02;            /* 0x4df02: facing angle */
-    u8 unk4DF04[0x4df08 - 0x4df04];
+    s16 unk4DF04;            /* 0x4df04: z */
+    u8 unk4DF06[0x4df08 - 0x4df06];
     s16 unk4DF08;            /* 0x4df08: hit points */
     s16 unk4DF0A;            /* 0x4df0a: second gauge */
     s16 unk4DF0C;            /* 0x4df0c: hit points left by the last hit */
     s16 unk4DF0E;            /* 0x4df0e: state; 3 hit, 4 down; 3 and 4 cannot be hit */
     s16 unk4DF10;            /* 0x4df10: model kind: 1 several parts, 2 one part */
-    u8 unk4DF12[0x4df14 - 0x4df12];
+    s16 unk4DF12;            /* 0x4df12: model brightness; 128 and up: the default colour (func_80025204) */
     s16 unk4DF14;            /* 0x4df14: state when an attack was blocked */
-    u8 unk4DF16[0x4df18 - 0x4df16];
+    s16 unk4DF16;            /* 0x4df16: hits left in the current attack (func_80031478) */
     VsFighterData unk4DF18;  /* 0x4df18: the fighter's data block (its first 0x64 bytes: VsFighterSfx) */
 } VsFighter;
 
@@ -246,6 +276,40 @@ extern VisTableC DAT_80191d00;
 /* A switch func_800222d8 sets around its count list and func_8001d9cc
  * reads (bss). */
 extern u16 DAT_8006337a;
+
+/* A light matrix, a light colour matrix, a back colour and the depth-cue
+ * near and far depths, as the model renderers load them (func_80025204,
+ * func_800353d0). Halfword-aligned: retail copies its initializers with
+ * an alignment test. */
+typedef struct {
+    short l[3][3];
+    short pad0;
+    short lc[3][3];
+    short pad1;
+    CVECTOR bk;
+    short dq[2];
+} VsLights;
+
+/* The fighter being drawn (bss, unowned). */
+extern VsFighter *DAT_80063300;
+
+/* Rotation offsets added to the drawn fighter's x and y angles (.sdata,
+ * unowned; read absolutely). */
+extern s32 DAT_80063218;
+extern s32 DAT_8006321c;
+
+/* The model renderers' scale (4096, 4096, 4096; .data, unowned). */
+extern VECTOR DAT_8005b2a8;
+
+/* The column of DAT_801624b8 func_8002ad40 shows (bss, unowned). */
+extern s32 DAT_80063338;
+
+/* Each fighter's three ids func_8002ad40 names are DAT_801624b8, both
+ * players' teams (vs/menu.h VsTeam.slot). */
+
+/* The guard flash's mesh model: a centre vertex and three rings of 16
+ * (bss, unowned). */
+extern u8 DAT_8015ec38[];
 
 /* Rounds won per fighter (bss, unowned). */
 extern s32 DAT_80063370[2];
