@@ -579,7 +579,10 @@ VS.EXE	0x80063228	0x52a28	0x4	defined	candidate	DAT_80063228	s32	asm;src/vs/ui_8
 VS.EXE	0x8006322c	0x52a2c	0xb4	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 VS.EXE	0x800632e0	0x52ae0	0x4	defined	candidate	DAT_800632e0	s32	asm;src/vs/fade_80028fcc.c vs.fade_80028fcc	$gp+0xc8 .sdata word; func_80028fcc's texture-window step
 VS.EXE	0x800632e4	0x52ae4	0x1	defined	candidate	DAT_800632e4	u8	asm;src/vs/gauge_80029b10.c vs.gauge_80029b10	$gp .sdata byte, func_80029b10's blink toggle (0 in the image)
-VS.EXE	0x800632e5	0x52ae5	0x51b	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
+VS.EXE	0x800632e5	0x52ae5	0xb7	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
+VS.EXE	0x8006339c	0x52b9c	0x4	bss	proven	DAT_8006339c	s32	layout;src/vs/ui_8001d3f0.c vs.ui_8001d3f0	.sbss; unreferenced word in vs.ui_8001d3f0's .sbss run: the clip window statics around it are 2-aligned at +0 and +2 and word-aligned at +4, +8 and +0x10
+VS.EXE	0x800633a0	0x52ba0	0x4	bss	proven	DAT_800633a0	s32	asm;src/vs/ui_8001d3f0.c vs.ui_8001d3f0	.sbss; the clip window statics' last word ($gp-relative, func_8001d3f0/func_8001fcac)
+VS.EXE	0x800633a4	0x52ba4	0x45c	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 END.EXE	0x80011000	0x800	0x960	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 END.EXE	0x80013138	0x2938	0x4	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 END.EXE	0x80013238	0x2a38	0x4	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data

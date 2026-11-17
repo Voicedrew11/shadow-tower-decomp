@@ -250,4 +250,20 @@ extern u16 DAT_8006337a;
 /* Rounds won per fighter (bss, unowned). */
 extern s32 DAT_80063370[2];
 
+/* VS band 6: the text scroll switch and the two scroll offsets
+ * func_8001d3f0 picks between (ST.EXE's DAT_800881ac/a0/a2; bss, unowned). */
+extern u16 DAT_80063378;
+extern u16 DAT_8006333e;
+extern u16 DAT_80063340;
+
+/* VS band 6: the two 0x20000-byte GPU packet buffers func_80014480 hands
+ * the graphics state (bss; ST.EXE's DAT_8011c488). */
+extern u_long DAT_8011c528[];
+
+/* VS band 6: seven words and seven halfwords func_8001f9a0 clears, and the
+ * two players' picked fighters, -1 for none (bss, unowned). */
+extern s32 DAT_801c4a38[7];
+extern u16 DAT_80117598[7];
+extern s32 DAT_80063330[2];
+
 #endif
