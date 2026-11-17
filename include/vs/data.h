@@ -82,7 +82,9 @@ typedef struct {
     StAnimSet anim_sets[12]; /* 0xa51c: 12 skeletal-animation slots (ST: 16 at 0xa77c) */
     u8 unkA7EC[0xc7f0 - 0xa7ec];
     SVECTOR unkC7F0[0x2000]; /* 0xc7f0: the vertices func_800281d4 interpolates (ST: unkEB40) */
-    u8 unk1C7F0[0x2c972 - 0x1c7f0];
+    u8 unk1C7F0[0x2c970 - 0x1c7f0];
+    u8 unk2C970;         /* 0x2c970: frames drawn since the last rate update (func_80015e50) */
+    u8 unk2C971;         /* 0x2c971: the frame rate func_80015e50 shows */
     u8 frame;            /* 0x2c972: index of the current DRAWENV and buffers (ST: 0x1ecc2) */
     u8 unk2C973;
     u8 unk2C974;         /* 0x2c974: set while the loading display runs (ST: unk1ECC4) */
@@ -90,6 +92,7 @@ typedef struct {
     MATRIX unk2C998;     /* 0x2c998: the camera matrix */
     u8 unk2C9B8[0x2ca78 - 0x2c9b8];
     VECTOR unk2CA78;     /* 0x2ca78: the camera position */
+    SVECTOR unk2CA88;    /* 0x2ca88: the camera angles */
 } VsWorldState;
 
 /* Layout checks: the offsets the code proves. */
@@ -173,14 +176,21 @@ typedef struct {
     VsAttack unk14A[3];      /* 0x14a: attacks (count WIP) */
     s16 unk1AA;              /* 0x1aa: movement kind */
     s16 unk1AC;              /* 0x1ac: walking speed */
-    u8 unk1AE[0x1b4 - 0x1ae];
+    u8 unk1AE[0x1b2 - 0x1ae];
+    s16 unk1B2;              /* 0x1b2: the start height, negated (func_800140d8) */
     s16 unk1B4;              /* 0x1b4: hit radius */
     s16 unk1B6;              /* 0x1b6: height */
     s16 unk1B8;              /* 0x1b8: full hit points */
     s16 unk1BA;              /* 0x1ba: full second gauge (0: none) */
     u16 unk1BC[9];           /* 0x1bc: resistance per damage kind */
-    u8 unk1CE[0x1d0 - 0x1ce];
 } VsFighterData;
+
+/* func_800140d8 copies a whole record (0x1ce bytes, halfword aligned). */
+typedef char VsFighterDataSize[sizeof(VsFighterData) == 0x1ce ? 1 : -1];
+
+/* The fighters' data blocks by character, copied into VsFighter.unk4DF18
+ * when a round loads (.data; WIP extent: one record). */
+extern VsFighterData DAT_8004a224[];
 
 /*
  * The two fighters at 0x800633b0 (bss), 0x4e0e8 bytes each (the code
@@ -192,22 +202,23 @@ typedef struct {
     u8 file[0x4b000];        /* 0x00000: the model file, then unmodeled */
     u_long unk4B000[(0x4dee0 - 0x4b000) / 4]; /* 0x4b000: a second mesh model, absent when its first word is 0 */
     StAnimSet *unk4DEE0;     /* 0x4dee0: the fighter's skeletal-animation slot */
-    u8 unk4DEE4[0x4dee8 - 0x4dee4];
+    s32 unk4DEE4;
     u8 unk4DEE8;             /* 0x4dee8: animation playing (VsAnimRef.unk0); func_80013c5c matches it against the sound keys */
     u8 unk4DEE9;
     s16 unk4DEEA;            /* 0x4deea: animation frame */
     s16 unk4DEEC;            /* 0x4deec */
     u8 unk4DEEE[0x4def0 - 0x4deee];
     VECTOR unk4DEF0;         /* 0x4def0: position */
-    u8 unk4DF00[0x4df02 - 0x4df00];
+    s16 unk4DF00;
     s16 unk4DF02;            /* 0x4df02: facing angle */
-    u8 unk4DF04[0x4df08 - 0x4df04];
+    s16 unk4DF04;
+    u8 unk4DF06[0x4df08 - 0x4df06];
     s16 unk4DF08;            /* 0x4df08: hit points */
     s16 unk4DF0A;            /* 0x4df0a: second gauge */
     s16 unk4DF0C;            /* 0x4df0c: hit points left by the last hit */
     s16 unk4DF0E;            /* 0x4df0e: state; 3 hit, 4 down; 3 and 4 cannot be hit */
     s16 unk4DF10;            /* 0x4df10: model kind: 1 several parts, 2 one part */
-    u8 unk4DF12[0x4df14 - 0x4df12];
+    s16 unk4DF12;
     s16 unk4DF14;            /* 0x4df14: state when an attack was blocked */
     u8 unk4DF16[0x4df18 - 0x4df16];
     VsFighterData unk4DF18;  /* 0x4df18: the fighter's data block (its first 0x64 bytes: VsFighterSfx) */
@@ -236,8 +247,6 @@ extern s32 DAT_80063360;
  * (.sdata, 0 in the image; unowned). */
 extern s32 DAT_80063220;
 
-/* A frame count the periodic sound triggers divide (bss, unowned). */
-extern u32 DAT_80160400;
 
 /* VS's copy of ST.EXE's vis_table_c (bss, 0x80191d00): the 44-byte item
  * records from +0x118; only those are used so far. */
@@ -247,8 +256,10 @@ extern VisTableC DAT_80191d00;
  * reads (bss). */
 extern u16 DAT_8006337a;
 
-/* Rounds won per fighter (bss, unowned). */
-extern s32 DAT_80063370[2];
+/* Rounds won per fighter (bss, unowned): src/vs/main.c proves the first
+ * word its own symbol (the second, DAT_80063374, is read absolutely where
+ * the first is $gp-relative); func_80029f28 still walks both from it. */
+extern s32 DAT_80063370[];
 
 /* VS band 6: the text scroll switch and the two scroll offsets
  * func_8001d3f0 picks between (ST.EXE's DAT_800881ac/a0/a2; bss, unowned). */
@@ -264,6 +275,6 @@ extern u_long DAT_8011c528[];
  * two players' picked fighters, -1 for none (bss, unowned). */
 extern s32 DAT_801c4a38[7];
 extern u16 DAT_80117598[7];
-extern s32 DAT_80063330[2];
+extern s32 DAT_80063330[]; /* the second player's is DAT_80063334 (vs/main.h) */
 
 #endif

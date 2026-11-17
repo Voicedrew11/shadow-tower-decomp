@@ -12,6 +12,7 @@
 #include <LIBGTE.H>
 #include <st/cd.h>
 #include <st/mesh.h>
+#include <st/anim.h>
 
 /* src/vs/cd_8001cb34.c */
 void func_8001cb34(void);                 /* ST func_8001531c */
@@ -70,5 +71,42 @@ int func_8001ca18(void);
 
 /* src/vs/mesh_800258f0.c */
 void func_80027ba4(u_short part);
+
+/* VS main module callees (src/vs/main.c). */
+u32 *func_8002e630(u32 *dst, u32 *src, int count);       /* src/vs/cd_8002e5e4.c */
+void func_80012a70(int bank);                            /* src/vs/snd_800129bc.c */
+void func_80012b50(u_long *data, int page, int clut_y);  /* src/vs/snd_800129bc.c */
+void func_80012d10(int id);                              /* src/vs/snd_800129bc.c */
+void func_8001381c(void);                                /* src/vs/snd_800129bc.c */
+int func_8001c530(void);                                 /* src/vs/card_8001c530.c */
+void func_80023764(u16 id, StAnimFile *file);            /* src/vs/anim_80023764.c */
+void func_80027fec(u16 id, StAnimFile *file);            /* src/vs/anim_80027f30.c */
+void func_8002345c(ModelFile *file);                     /* src/vs/model_8002345c.c */
+int func_8002ef3c(u_long *buf, char *name, u32 size);    /* src/vs/cd_8002e5e4.c */
+void func_80013848(void);                                /* src/vs/snd_800129bc.c */
+void func_80013868(void);                                /* src/vs/snd_800129bc.c */
+void func_80013aec(void);                                /* src/vs/snd_800129bc.c */
+void func_80014070(void);                                /* src/vs/snd_800129bc.c */
+void func_8001c9b8(void);                                /* src/vs/card_8001c8b8.c */
+void func_80016d94(void);                                /* src/vs/gfx_80016ca8.c */
+int func_80016f10(void);                                 /* not reconstructed */
+int func_8001c5e0(int won, int again);                   /* not reconstructed */
+void func_80014480(void);                                /* src/vs/main.c */
+void func_80015020(void);                                /* src/vs/main.c */
+void func_80015e50(void);                                /* src/vs/main.c */
+void func_80016488(void);                                /* src/vs/main.c */
+void func_800165f4(void);                                /* src/vs/main.c */
+void func_80014634(void);                                /* src/vs/main.c */
+void func_800140d8(void);                                /* src/vs/fighter_800140d8.c */
+void func_800129e8(int channel);                         /* src/vs/snd_800129bc.c */
+void func_8001336c(int id, int mode);                    /* src/vs/snd_800129bc.c */
+void func_800138a0(void);                                /* src/vs/snd_800129bc.c */
+void func_80013c5c(void);                                /* src/vs/snd_800129bc.c */
+void func_8002d710(void);                                /* src/vs/texanim_8002d710.c */
+int func_8002dcd8(void);                                 /* src/vs/fighter_8002dcd8.c */
+int func_8002e510(int id);                               /* src/vs/fighter_8002e114.c */
+void func_800352cc(void);                                /* src/vs/effect_run_800352cc.c */
+void func_800352fc(void);                                /* src/vs/effect_run_800352cc.c */
+void func_80031478(int id);                              /* not reconstructed */
 
 #endif

@@ -460,9 +460,27 @@ source = "src/vs/snd_800129bc.c"
 profile = "probe-gcc272cdk-o2-g8"
 
 [[unit]]
-unit = "vs.gfx_80014480"
+unit = "vs.fighter_800140d8"
 image = "VS.EXE"
-source = "src/vs/gfx_80014480.c"
+source = "src/vs/fighter_800140d8.c"
+profile = "probe-gcc272cdk-o2-g8"
+
+[[unit]]
+unit = "vs.camera_80014480"
+image = "VS.EXE"
+source = "src/vs/camera_80014480.c"
+profile = "probe-gcc272cdk-o2-g8"
+
+[[unit]]
+unit = "vs.frame_80015020"
+image = "VS.EXE"
+source = "src/vs/frame_80015020.c"
+profile = "probe-gcc272cdk-o2-g8"
+
+[[unit]]
+unit = "vs.main"
+image = "VS.EXE"
+source = "src/vs/main.c"
 profile = "probe-gcc272cdk-o2-g8"
 
 [[unit]]

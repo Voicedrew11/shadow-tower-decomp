@@ -507,7 +507,7 @@ void func_80013c5c(void)
             }
             break;
         case 0x4000:
-            if (at == 0 || DAT_80160400 / 20 % at != 0)
+            if (at == 0 || DAT_801603c0.unk40 / 20 % at != 0)
                 continue;
             break;
         default:
