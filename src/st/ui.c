@@ -2471,8 +2471,9 @@ void func_8002ed98(void)
  * apart horizontally and 12 vertically, semi-transparent in color.
  *
  * Not exact: retail keeps pos and tex in t0/t1 with caller-save
- * spills and hoists v and v + 10 out of the inner loop; this build keeps
- * pos in s8 and hoists the addPrim mask instead.
+ * spills and caches both row UV coordinates after the inner entry guard.
+ * This build keeps pos in s8, hoists the addPrim mask, and remains
+ * 16 bytes short; the frame and the 11-block loop shape agree.
  */
 ADDRESS(0x8002f1f8, 0x2a0)
 void func_8002f1f8(DVECTOR *pos, DVECTOR *tex, DVECTOR *clut, CVECTOR *color, int arg4)
