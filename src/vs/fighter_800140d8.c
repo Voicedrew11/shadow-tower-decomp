@@ -33,10 +33,9 @@ s32 DAT_80063338;
  * animations and second model from archive 0 (five members per
  * character), registers its animations, and resets its state from its
  * character's data block.
- * Not exact: retail keeps the page argument i * 4 in its own induction
- * register ($s8) and spills the second model's offset to sp+32 (an 80-byte
- * frame); this build computes i * 4 in the loop (56-byte frame, first
- * divergence at +0x0). Retail is 0x3a8 bytes, this build 0x394.
+ * Not exact: the page counter is spilled instead of the second-model
+ * offset (64-byte frame, retail 80); the template-copy base temporary
+ * and loop-update schedule differ.
  */
 ADDRESS(0x800140d8, 0x3a8)
 void func_800140d8(void)
@@ -44,11 +43,14 @@ void func_800140d8(void)
     VsFighter *f;
     int member;
     int i;
+    int page;
+    int clut_y;
 
-    for (i = 0, f = DAT_800633b0.fighter; i < 2; i++, f++) {
+    for (i = 0, page = 0, clut_y = 0, f = DAT_800633b0.fighter;
+         i < 2; i++, page += 4, clut_y += 12, f++) {
         member = DAT_801624b8[i].slot[DAT_80063338] * 5;
         func_8002ee90(0, member + 1, (u_long *)f);
-        func_80012b50((u_long *)f, i * 4, i * 12);
+        func_80012b50((u_long *)f, page, clut_y);
         DrawSync(0);
         func_8002ee90(0, member + 2, (u_long *)DAT_801604b0[i].head);
         func_8002ee90(0, member + 3, (u_long *)f);
