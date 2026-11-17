@@ -553,9 +553,9 @@ static void scroll_pages_3(void)
 }
 
 /*
- * Not exact: GCC's loop pass keeps OPENING_STATE's constant address in a
- * saved register for the state if-chain (an extra $s3, 0x210 bytes); retail
- * reaches every state access with its own absolute lui pair (0x20c bytes).
+ * Not exact: the state address stays in a saved register across the frame
+ * loop; retail rematerializes it at each access. This adds a saved register
+ * (48-byte frame versus 40) and four code bytes (0x210 versus 0x20c).
  */
 ADDRESS(0x80012d04, 0x20c)
 static void play_opening_text(void)
