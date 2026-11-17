@@ -241,6 +241,9 @@ u32 func_80015950(CdlLOC *pos)
     return minute * 60 * 75 + second * 75 + func_800158f4(pos->sector);
 }
 
+/* Writes a sector count as a BCD CD position without a lead-in offset.
+ * Not exact: retail stores second before the final call and leaves its
+ * delay slot empty; this build moves that store into the delay slot. */
 ADDRESS(0x800159d4, 0xc0)
 void func_800159d4(CdlLOC *pos, u32 sector)
 {
