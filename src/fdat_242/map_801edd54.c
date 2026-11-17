@@ -1,5 +1,5 @@
 /*
- * FDAT_242.BIN: two handlers after fdat_801ed4a0 and the two scene words
+ * FDAT_242.BIN: three handlers after fdat_801ed4a0 and the two scene words
  * they step (WIP module; a unit of its own until its neighbours in the run
  * are exact).
  */
@@ -7,6 +7,7 @@
 #include <kf/lib/types.h>
 #include <sys/types.h>
 #include <LIBGTE.H>
+#include <psyq/libc.h>
 #include <st/gfx.h>
 #include <st/vis.h>
 #include <st/menu.h>
@@ -19,6 +20,34 @@ static int fdat_801ee0b0;
 /* The exit scene state: 3 once the animation ends, 4 played. */
 DATA(0x801ee0b4, 0x4, ".bss")
 static int fdat_801ee0b4;
+
+void func_801edb10(void);
+
+/*
+ * The step of the overlay's entries, like fdat_801ed6e4: entry record 0
+ * restarts script 0 at the end of a run until stream counter 12 starts.
+ */
+ADDRESS(0x801edd54, 0xe8)
+void func_801edd54(void)
+{
+    Vis212 *e = vis_table_a.unk6138;
+
+    e->unk2A += e->unkB0;
+    if (fdat_801ece7c(e) == 1)
+        return;
+    if (e->unkB0 >= 0 ? (short)e->unk2A >= 4096 : (short)e->unk2A <= 0) {
+        if (e->unk02 == 0 && DAT_801cba08.unk1448[12] == 0) {
+            fdat_801eb7b4(e, 0);
+        } else {
+            e->unk1A = 0xff;
+            func_801edb10();
+        }
+    }
+    if (e->unkA8 != NULL) {
+        fdat_801ebec4(e);
+        e->unk1A = 0xf0;
+    }
+}
 
 /* In area 0, unless the scene was played, hands table A entry 48 to its
  * exit once its record's stream counter has started. */
