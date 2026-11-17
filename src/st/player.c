@@ -1507,7 +1507,7 @@ void func_8003f12c(u16 id, u8 slot, u8 reload)
         func_80058a0c(1, model * 4 + 486, viewer.unk1D4[slot] - 22);
     }
     if (slot < 2) {
-        viewer.unk130[slot] = -1;
+        viewer.unk130.halves[slot] = -1;
     }
     viewer.unk108[slot] = 0;
     viewer.unk14E = 0;
@@ -1524,10 +1524,10 @@ ADDRESS(0x8003f4ec, 0x184)
 void func_8003f4ec(u8 value, u8 slot)
 {
     if (slot == 0) {
-        if (viewer.unk130[0] != -1) {
+        if (viewer.unk130.halves[0] != -1) {
             return;
         }
-        if (viewer.unk130[1] >= 2048 && !viewer.unk14F) {
+        if (viewer.unk130.halves[1] >= 2048 && !viewer.unk14F) {
             return;
         }
         if (viewer.unk148[0] == 255) {
@@ -1537,14 +1537,14 @@ void func_8003f4ec(u8 value, u8 slot)
             return;
         }
         viewer.unk150[0] = value;
-        viewer.unk130[0] = 0;
+        viewer.unk130.halves[0] = 0;
         viewer.unk154 = 1;
         DAT_801cd180.unk4 &= ~DAT_801cd180.unk22[8];
-        viewer.unk130[2] = viewer.unkE8[0]->unk6;
+        viewer.unk130.halves[2] = viewer.unkE8[0]->unk6;
         viewer.unk138[0] = viewer.unkE8[0]->unk8;
         viewer.unk187 = 15;
     } else {
-        if (viewer.unk130[slot] != -1 || viewer.unk130[0] != -1) {
+        if (viewer.unk130.halves[slot] != -1 || viewer.unk130.halves[0] != -1) {
             return;
         }
         if (viewer.unk13C[slot] != -1 || viewer.unk13C[0] != -1) {
@@ -1558,9 +1558,9 @@ void func_8003f4ec(u8 value, u8 slot)
         }
         DAT_801cd180.unk4 &= ~DAT_801cd180.unk22[9];
         viewer.unk150[slot] = value;
-        viewer.unk130[slot] = 0;
+        viewer.unk130.halves[slot] = 0;
         viewer.unk154 = 1;
-        viewer.unk130[slot + 2] = viewer.unkE8[slot]->unk6;
+        viewer.unk130.halves[slot + 2] = viewer.unkE8[slot]->unk6;
         viewer.unk138[slot] = viewer.unkE8[slot]->unk8;
     }
 }
@@ -1572,7 +1572,7 @@ void func_8003f670(u8 unused, u8 slot)
     Viewer *v;
 
     v = &viewer;
-    if (*(s32 *)v->unk13C == -1 && *(s32 *)v->unk130 == -1 && v->unk14C[slot] != 255 &&
+    if (*(s32 *)v->unk13C == -1 && v->unk130.word == -1 && v->unk14C[slot] != 255 &&
         !(v->unk2C & 0x10) && (!v->unk1CB || v->unk190[12][0] != 0)) {
         v->unk13C[slot] = 0;
         v->unk184 = v->unk182;
@@ -1630,9 +1630,7 @@ int func_8003f704(int length, VECTOR *pos, SVECTOR *dir, SVECTOR *rot, int slot)
 #define PLAYER_MATRIX(sp) ((MATRIX *)&(sp)->part_pos)
 /* Fires equipment slot `slot`'s effect of kind `kind`. va_start names
  * `kind`, so kind lives in its home slot: retail reads its low byte back
- * (lbu 128(sp)) for each effect request.
- * Not exact: case 7 schedules `length = 16` ahead of the loop's hoisted
- * viewer addresses (retail sets $s0 after them); all else matches. */
+ * (lbu 128(sp)) for each effect request. */
 ADDRESS(0x8003f910, 0x714)
 void func_8003f910(int kind, int slot, ...)
 {
@@ -1668,16 +1666,15 @@ void func_8003f910(int kind, int slot, ...)
         func_80036484(10, side | 0x42, kind, &pos, &dir, speed, &viewer.unk268);
         break;
     case 7:
-        length = 16;
         i = 2;
         while (i--) {
+            length = i * 32 - 16;
             aim.vx = viewer.unk270.vx - 512;
             aim.vy = viewer.unk270.vy + length;
             aim.vz = viewer.unk270.vz;
             func_8003f704(700, &pos, &dir, &aim, slot);
             func_80036484(10, side | 0x42, kind, &pos, &dir, 1024, &viewer.unk268);
             viewer.unk160[slot].vx += 1024;
-            length -= 32;
         }
         break;
     case 1:
@@ -1842,7 +1839,7 @@ void func_80040024(u8 hand)
 }
 
 /* Steps hand `hand`'s swing or cast for its held item kind: the swing
- * timer viewer.unk130[hand] against its hit window (unk130[hand + 2]) and
+ * timer viewer.unk130.halves[hand] against its hit window (unk130[hand + 2]) and
  * its end (unk138[hand]), the stamina bar viewer.unk17E, the hit search
  * over vis_table_a's entries and the item wear. The unused aggregates
  * keep retail's frame layout (sv at 24, v at 56, req at 104, p at 144).
@@ -1889,21 +1886,21 @@ void func_800402ac(u8 hand)
         if (viewer.unk2E0 != 0) {
             viewer.unk2E0 -= viewer.unk2E0 / 20;
         }
-        if (viewer.unk130[hand] == -1) {
+        if (viewer.unk130.halves[hand] == -1) {
             break;
         }
         cost = rec->unk4 + rec->unk4 * viewer.unk62[1] / 1600;
-        if (viewer.unk130[hand ^ 1] != -1) {
+        if (viewer.unk130.halves[hand ^ 1] != -1) {
             viewer.unk14F = 1;
         }
         if (viewer.unk14F) {
-            viewer.unk130[hand] -= cost;
+            viewer.unk130.halves[hand] -= cost;
         } else if ((!(DAT_801cd180.unk2 & DAT_801cd180.unk22[8]) && hand == 0) ||
                    (!(DAT_801cd180.unk2 & DAT_801cd180.unk22[9]) && hand != 0)) {
-            viewer.unk130[hand] -= cost;
+            viewer.unk130.halves[hand] -= cost;
             viewer.unk189 = 0;
-        } else if (viewer.unk130[hand + 2] - cost < viewer.unk130[hand] &&
-                   viewer.unk130[hand] <= viewer.unk130[hand + 2]) {
+        } else if (viewer.unk130.halves[hand + 2] - cost < viewer.unk130.halves[hand] &&
+                   viewer.unk130.halves[hand] <= viewer.unk130.halves[hand + 2]) {
             viewer.unk189 = 1;
             sv.vx = 0;
             sv.vy = 0;
@@ -1942,10 +1939,10 @@ void func_800402ac(u8 hand)
         } else if (viewer.unk154) {
             viewer.unk154 = 0;
         } else {
-            viewer.unk130[hand] += cost;
+            viewer.unk130.halves[hand] += cost;
         }
-        if ((u16)viewer.unk130[hand] > 4095) {
-            viewer.unk130[hand] = -1;
+        if ((u16)viewer.unk130.halves[hand] > 4095) {
+            viewer.unk130.halves[hand] = -1;
             viewer.unk14F = 0;
             viewer.unk2DE = 0;
             viewer.unk2E0 = 0;
@@ -1953,20 +1950,20 @@ void func_800402ac(u8 hand)
         }
         break;
     case 31 ... 34:
-        if (viewer.unk130[hand] != -1) {
+        if (viewer.unk130.halves[hand] != -1) {
             cost = rec->unk4 + rec->unk4 * viewer.unk62[1] / 1600;
             if (viewer.unk21F) {
-                if (viewer.unk138[hand] - cost >= viewer.unk130[hand]) {
-                    viewer.unk130[hand] -= cost;
+                if (viewer.unk138[hand] - cost >= viewer.unk130.halves[hand]) {
+                    viewer.unk130.halves[hand] -= cost;
                 } else {
-                    viewer.unk130[hand] += cost;
-                    if (viewer.unk130[hand + 2] < viewer.unk130[hand] &&
-                        viewer.unk130[hand] <= viewer.unk130[hand + 2] + cost) {
+                    viewer.unk130.halves[hand] += cost;
+                    if (viewer.unk130.halves[hand + 2] < viewer.unk130.halves[hand] &&
+                        viewer.unk130.halves[hand] <= viewer.unk130.halves[hand + 2] + cost) {
                         kind = viewer.unk148[hand];
                         func_800582f0((viewer.unk1D4[hand] - 24) / 2 + 22, 128);
-                        viewer.unk130[hand] -= cost;
+                        viewer.unk130.halves[hand] -= cost;
                         func_80040f04(kind + 13, hand);
-                        viewer.unk130[hand] += cost;
+                        viewer.unk130.halves[hand] += cost;
                     }
                 }
             } else if ((!(DAT_801cd180.unk2 & DAT_801cd180.unk22[8]) && hand == 0) ||
@@ -1974,13 +1971,13 @@ void func_800402ac(u8 hand)
                 viewer.unk21F = 1;
                 viewer.unk180 = viewer.unk17E;
                 viewer.unk17E = 0;
-            } else if (viewer.unk130[hand + 2] - cost < viewer.unk130[hand] &&
-                       viewer.unk130[hand] <= viewer.unk130[hand + 2]) {
+            } else if (viewer.unk130.halves[hand + 2] - cost < viewer.unk130.halves[hand] &&
+                       viewer.unk130.halves[hand] <= viewer.unk130.halves[hand + 2]) {
                 viewer.unk17E += (viewer.unk62[1] * 96 / 800 + 96) * 2;
                 if (viewer.unk17E > 5120) {
                     viewer.unk17E = 5120;
                 }
-            } else if (viewer.unk130[hand] == 0 && viewer.unk154) {
+            } else if (viewer.unk130.halves[hand] == 0 && viewer.unk154) {
                 viewer.unk154 = 0;
                 viewer.unk21F = 0;
             } else {
@@ -1988,41 +1985,41 @@ void func_800402ac(u8 hand)
                 if (viewer.unk17E > 5120) {
                     viewer.unk17E = 5120;
                 }
-                viewer.unk130[hand] += cost;
-                if (viewer.unk138[hand] - cost < viewer.unk130[hand] &&
-                    viewer.unk130[hand] <= viewer.unk138[hand]) {
+                viewer.unk130.halves[hand] += cost;
+                if (viewer.unk138[hand] - cost < viewer.unk130.halves[hand] &&
+                    viewer.unk130.halves[hand] <= viewer.unk138[hand]) {
                     func_800582f0(viewer.unk1D4[hand], 128);
                     player_wear_item(1, &viewer.unk38[3]);
                 }
             }
-            if ((u16)viewer.unk130[hand] > 4095) {
-                viewer.unk130[hand] = -1;
+            if ((u16)viewer.unk130.halves[hand] > 4095) {
+                viewer.unk130.halves[hand] = -1;
                 viewer.unk14E = 0;
                 viewer.unk21F = 0;
             }
-            viewer.unk130[hand ^ 1] = viewer.unk130[hand];
+            viewer.unk130.halves[hand ^ 1] = viewer.unk130.halves[hand];
         } else {
             viewer.unk187 = 0;
         }
         break;
     case 0 ... 30:
-        if (viewer.unk130[hand] != -1) {
+        if (viewer.unk130.halves[hand] != -1) {
             cost = rec->unk4 + rec->unk4 * viewer.unk62[1] / 1600;
             max = rec->unk8;
             if (DAT_801cd180.unk4 & DAT_801cd180.unk22[8]) {
                 DAT_801cd180.unk4 &= ~DAT_801cd180.unk22[8];
             }
-            if (viewer.unk14E && !(viewer.unk130[hand + 2] - cost < viewer.unk130[hand])) {
-                viewer.unk130[hand] -= cost;
+            if (viewer.unk14E && !(viewer.unk130.halves[hand + 2] - cost < viewer.unk130.halves[hand])) {
+                viewer.unk130.halves[hand] -= cost;
             } else if (viewer.unk154) {
                 viewer.unk180 = viewer.unk17E;
                 viewer.unk17E = 0;
                 viewer.unk154 = 0;
             } else {
-                viewer.unk130[hand] += cost;
+                viewer.unk130.halves[hand] += cost;
             }
-            if (viewer.unk138[hand] - cost < viewer.unk130[hand] &&
-                viewer.unk130[hand] <= viewer.unk138[hand]) {
+            if (viewer.unk138[hand] - cost < viewer.unk130.halves[hand] &&
+                viewer.unk130.halves[hand] <= viewer.unk138[hand]) {
                 func_800582f0(viewer.unk1D4[hand], 128);
                 if (viewer.unk138[hand] >= max) {
                     viewer.unk138[hand] = 5000;
@@ -2031,8 +2028,8 @@ void func_800402ac(u8 hand)
                 }
             }
             if (viewer.unk148[hand] < 36 || viewer.unk148[hand] > 254) {
-                if (viewer.unk130[hand + 2] - cost < viewer.unk130[hand] &&
-                    viewer.unk130[hand] <= viewer.unk130[hand + 2]) {
+                if (viewer.unk130.halves[hand + 2] - cost < viewer.unk130.halves[hand] &&
+                    viewer.unk130.halves[hand] <= viewer.unk130.halves[hand + 2]) {
                     e = vis_table_a.entries;
                     best = -1;
                     hit = NULL;
@@ -2071,8 +2068,8 @@ void func_800402ac(u8 hand)
                         }
                     }
                 }
-                if ((u16)viewer.unk130[hand] > 4095) {
-                    viewer.unk130[hand] = -1;
+                if ((u16)viewer.unk130.halves[hand] > 4095) {
+                    viewer.unk130.halves[hand] = -1;
                     viewer.unk14E = 0;
                 }
             }
@@ -2081,7 +2078,7 @@ void func_800402ac(u8 hand)
             if (!(DAT_801cd180.unk2 & DAT_801cd180.unk22[8])) {
                 if (viewer.unk187 == 0) {
                     inc = viewer.unk62[1] / (viewer.unk62[1] + 1000) * 96 + 96;
-                    if (viewer.unk38[16] != 0xffff && viewer.unk130[1] >= 0) {
+                    if (viewer.unk38[16] != 0xffff && viewer.unk130.halves[1] >= 0) {
                         inc >>= 1;
                     }
                     viewer.unk17E += inc * 2;
@@ -2763,22 +2760,21 @@ void func_80042620(u8 a, u8 b)
 
 /*
  * Consumes the frame's item request, then steps the queued magic.
- * Not exact: retail tests both hands' unk130 halfwords as one word
- * (lw 0x130 against -1) where this reads unk130[0] with lh.
+ * The paired timer word must be -1 before either equipment request runs.
  */
 ADDRESS(0x80042900, 0x29c)
 void func_80042900(void)
 {
     if (DAT_801cd180.unk14 == 2) {
         DAT_801cd180.unk14 = 0;
-        if (viewer.unk130[0] == -1 && viewer.unk38[4] != 0xffff) {
+        if (viewer.unk130.word == -1 && viewer.unk38[4] != 0xffff) {
             func_80042620(0, 2);
             func_8003d030();
         }
     }
     if (DAT_801cd180.unk14 == 3) {
         DAT_801cd180.unk14 = 0;
-        if (viewer.unk130[0] == -1 && viewer.unk38[17] != 0xffff) {
+        if (viewer.unk130.word == -1 && viewer.unk38[17] != 0xffff) {
             func_80042620(1, 3);
             func_8003d030();
         }
@@ -2882,11 +2878,8 @@ void func_80042cfc(void)
  * viewer.unk218 (walking, using an item, dying, falling into a pit), the
  * floor damage and the status damage over time, the view angles, the
  * swings and the hit/magic point recovery.
- * Not exact: the both-hands-idle word test materializes &viewer.unk130
- * and derives the viewer base from it (retail addresses it from the
- * viewer base), and register allocation differs in places (the two loop
- * counters of the menu path swap $s1/$s2); size, CFG, calls, constants
- * and the frame layout match. */
+ * Not exact: the menu path's two loop counters swap $s1/$s2, with further
+ * register and scheduling differences in that path. */
 ADDRESS(0x80042d74, 0x1678)
 void func_80042d74(void)
 {
@@ -2901,7 +2894,7 @@ void func_80042d74(void)
 
     player_update_status(1);
     if (viewer.unk218 == 0 || viewer.unk218 == 4 || viewer.unk218 == 16 || viewer.unk218 == 1) {
-        if (((DAT_801cd180.unk4 & 1) || DAT_801cd180.unk14 == 1) && ((s32 *)&viewer)[0x130 / 4] == -1 &&
+        if (((DAT_801cd180.unk4 & 1) || DAT_801cd180.unk14 == 1) && viewer.unk130.word == -1 &&
             viewer.unk218 != 1 && viewer.unk218 != 4 && !(viewer.unk2C & 0x10) &&
             area_state.unk0 == 0 && vis_table_a.unk6169 == 0 && area_state.unk18 == -1) {
             i = 16;

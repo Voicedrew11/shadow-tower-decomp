@@ -27,7 +27,7 @@ void func_801ed420(void)
     DAT_801cd0e4 = 0;
     viewer.unk218 = 6;
     viewer.unk278.vx = 0;
-    viewer.unk130[0] = -1;
-    viewer.unk130[1] = -1;
+    viewer.unk130.halves[0] = -1;
+    viewer.unk130.halves[1] = -1;
     fdat_801ed8c4 = 0;
 }

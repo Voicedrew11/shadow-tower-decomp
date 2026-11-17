@@ -107,7 +107,7 @@ void func_80021ac4(u8 slot)
     SVECTOR *in;
     int n;
 
-    if (viewer.unk130[slot] == -1) {
+    if (viewer.unk130.halves[slot] == -1) {
         return;
     }
     func_80017d28(0, 0);
@@ -143,7 +143,7 @@ void func_80021ac4(u8 slot)
         sp->model = MODEL_DATA(world_state.unk834C[slot + 32]);
         sp->header = (MeshHeader *)(sp->model + 12);
         if (anim_prepare((StAnimSlot **)&viewer.unk108[slot], slot + 32, viewer.unk150[slot],
-                          viewer.unk130[slot])) {
+                          viewer.unk130.halves[slot])) {
             sp->z_ot += sp->header->n_vertices;
             out = (MeshVertex *)sp->vertices;
             in = (SVECTOR *)sp->local_vertices;
@@ -154,7 +154,7 @@ void func_80021ac4(u8 slot)
     } else {
         sp->model = MODEL_DATA(world_state.unk834C[slot + 32]);
         if (anim_prepare_any(&viewer.unk108[slot], slot + 32, viewer.unk150[slot],
-                          viewer.unk130[slot])) {
+                          viewer.unk130.halves[slot])) {
             model_draw_list(0x80, 0);
         }
     }

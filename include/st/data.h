@@ -56,6 +56,18 @@ typedef struct {
     SVECTOR unk14;
 } ViewerModel;
 
+/* The first two halfwords are the hand timers; the next two are their
+ * hit-window values. Retail also tests the timers together as one word. */
+typedef union {
+    s32 word;
+    s16 halves[4];
+} ViewerHandState;
+
+typedef char ViewerHandStateSize[sizeof(ViewerHandState) == 8 ? 1 : -1];
+typedef char ViewerHandStateWordWidth[sizeof(((ViewerHandState *)0)->word) == 4 ? 1 : -1];
+typedef char ViewerHandStateWordAt0[offsetof(ViewerHandState, word) == 0 ? 1 : -1];
+typedef char ViewerHandStateHalvesAt0[offsetof(ViewerHandState, halves) == 0 ? 1 : -1];
+
 typedef struct {
     u16 unk0;
     u16 unk2;
@@ -108,7 +120,7 @@ typedef struct {
     void *unk118[2];     /* 0x118: func_8003ee38's effects.defs record per slot */
     u8 *unk120[2];       /* 0x120: its load buffers (DAT_80190f28) */
     s32 unk128[2];
-    s16 unk130[4];       /* 0x130: -1: slot empty */
+    ViewerHandState unk130; /* 0x130..0x137: timers and hit windows */
     s16 unk138[2];       /* 0x138 */
     s16 unk13C[2];       /* 0x13c: per hand, -1 when idle */
     u8 unk140[0x148 - 0x140];
@@ -234,6 +246,9 @@ typedef struct {
     s32 unk2F0;
     s32 unk2F4;          /* 0x2f4: player_update_shake's countdown, -1 when idle */
 } Viewer;
+
+typedef char ViewerHandStateAt0x130[offsetof(Viewer, unk130) == 0x130 ? 1 : -1];
+typedef char ViewerHandStateEndsAt0x138[offsetof(Viewer, unk138) == 0x138 ? 1 : -1];
 
 typedef char ViewerPositionAt0x248[offsetof(Viewer, position) == 0x248 ? 1 : -1];
 typedef char ViewerPositionEndsAt0x258[offsetof(Viewer, unk258) == 0x258 ? 1 : -1];
