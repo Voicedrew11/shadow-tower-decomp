@@ -646,7 +646,7 @@ ST.EXE	0x80036370	0x25b70	0x44	0x44	1	function	mips-return-carve			scripts/kf/au
 ST.EXE	0x800363b4	0x25bb4	0x38	0x38	1	function	mips-return-carve			scripts/kf/audit_functions.py	anonymous WIP start; previous-return+return-delimited-valid-code
 ST.EXE	0x800363ec	0x25bec	0x38	0x38	1	function	mips-return-carve			scripts/kf/audit_functions.py	anonymous WIP start; previous-return+return-delimited-valid-code
 ST.EXE	0x80036424	0x25c24	0x60	0x60	1	function	mips-return-carve			scripts/kf/audit_functions.py	anonymous WIP start; previous-return+return-delimited-valid-code
-ST.EXE	0x80036484	0x25c84	0xb4	0xb4	1	function	mips-call-carve			scripts/kf/audit_functions.py	anonymous WIP start; jal-target x43+first-unconditional-transfer
+ST.EXE	0x80036484	0x25c84	0x198c	0x198c	1	function	mips-call-carve			scripts/kf/audit_functions.py	anonymous WIP start; jal-target x43+first-unconditional-transfer; extended to its only return at 0x80037e08 (the 0x18d8 coverage gap after the first unconditional transfer is its body)
 ST.EXE	0x80037e10	0x27610	0x1e8	0x1e8	1	function	mips-frame-carve			scripts/kf/audit_functions.py	anonymous WIP start; stack-frame+ra-save+matching-stack-return
 ST.EXE	0x80037ff8	0x277f8	0x1b0	0x1b0	1	function	mips-frame-carve			scripts/kf/audit_functions.py	anonymous WIP start; stack-frame+ra-save+matching-stack-return
 ST.EXE	0x800381a8	0x279a8	0x158	0x158	1	function	mips-frame-carve			scripts/kf/audit_functions.py	anonymous WIP start; stack-frame+ra-save+matching-stack-return
@@ -738,7 +738,7 @@ ST.EXE	0x80046270	0x35a70	0x2fc	0x2fc	1	function	mips-return-carve			scripts/kf/
 ST.EXE	0x8004656c	0x35d6c	0x98	0x98	1	function	mips-return-carve			scripts/kf/audit_functions.py	anonymous WIP start; previous-return+return-delimited-valid-code
 ST.EXE	0x80046604	0x35e04	0x2bc	0x2bc	1	function	mips-return-carve			scripts/kf/audit_functions.py	anonymous WIP start; previous-return+return-delimited-valid-code
 ST.EXE	0x800468c0	0x360c0	0xfc4	0xfc4	1	function	mips-return-carve			scripts/kf/audit_functions.py	anonymous WIP start; previous-return+return-delimited-valid-code
-ST.EXE	0x80047884	0x37084	0xe28	0xe28	1	function	mips-call-carve			scripts/kf/audit_functions.py	anonymous WIP start; jal-target x1+first-unconditional-transfer
+ST.EXE	0x80047884	0x37084	0x124c	0x124c	1	function	mips-call-carve			scripts/kf/audit_functions.py	anonymous WIP start; jal-target x1+first-unconditional-transfer; extended to its only return at 0x80048ac8 (the 0x424 coverage gap after the first unconditional transfer is its body)
 ST.EXE	0x80048ad0	0x382d0	0x824	0x824	1	function	mips-frame-carve			scripts/kf/audit_functions.py	anonymous WIP start; stack-frame+ra-save+matching-stack-return
 ST.EXE	0x800492f4	0x38af4	0x250	0x250	1	function	mips-frame-carve			scripts/kf/audit_functions.py	anonymous WIP start; stack-frame+ra-save+matching-stack-return
 ST.EXE	0x80049544	0x38d44	0x184	0x184	1	function	mips-frame-carve			scripts/kf/audit_functions.py	anonymous WIP start; stack-frame+ra-save+matching-stack-return
