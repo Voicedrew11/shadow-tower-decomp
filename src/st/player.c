@@ -904,8 +904,9 @@ void player_take_damage(int damage, int flags, long *from)
  * caps the status times, then turns the three physical and six elemental
  * damage values into hit points through the defence values.
  */
-/* Not exact (8 bytes short): register allocation of the status-time
- * products and of the two damage sums. */
+/* Not exact (8 bytes short): status-cap products and damage sums use
+ * different registers. Retail also copies the shared row-0 cap before
+ * the comparisons; a size fix moves later exact unit functions. */
 ADDRESS(0x8003dbe0, 0xa08)
 void player_hit(u16 *damage, u16 scale, u16 effect, long *from)
 {
