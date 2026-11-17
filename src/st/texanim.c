@@ -81,6 +81,10 @@ void func_800168e0(RECT *rect, int period, int step, int type, short area)
     }
 }
 
+/* Not exact: the kind 6..9 dispatch branches toward the case rather than
+ * retail's next-slot path (first divergence +0xd4). Traversal-count loads
+ * also follow the temporary RECT extent stores instead of preceding them.
+ * The function extent and frame agree with retail. */
 ADDRESS(0x80016a14, 0x5a4)
 void func_80016a14(void)
 {
@@ -88,7 +92,6 @@ void func_80016a14(void)
     RECT r;
     int i;
     int x, y, offset;
-    short pos, n;
     u16 first;
 
     for (slot = world_state.texanim, i = ST_TEXANIM_SLOTS; i--; slot++) {
@@ -104,8 +107,9 @@ void func_80016a14(void)
                 if (slot->phase >= slot->src.h)
                     slot->phase -= slot->src.h;
                 x = slot->dst.x;
+                y = slot->dst.y + slot->phase;
                 r.h = slot->src.h - slot->phase;
-                MoveImage(&r, x, slot->dst.y + slot->phase);
+                MoveImage(&r, x, y);
                 if (slot->phase) {
                     y = slot->dst.y;
                     r.y = slot->src.y + r.h;
@@ -113,47 +117,56 @@ void func_80016a14(void)
                     MoveImage(&r, x, y);
                 }
                 break;
-            case 6 ... 9:
+            case 6 ... 9: {
+                short row_phase, row_count;
+
                 /* Scroll each row horizontally, one more pixel per row. */
                 slot->phase += slot->step;
                 if (slot->phase >= slot->src.w)
                     slot->phase -= slot->src.w;
                 r.h = 1;
-                pos = slot->phase;
+                row_count = slot->src.h;
+                row_phase = slot->phase;
                 y = slot->dst.y;
-                for (n = slot->src.h; n--;) {
-                    if (pos >= slot->src.w)
-                        pos -= slot->src.w;
+                for (; row_count--;) {
+                    if (row_phase >= slot->src.w)
+                        row_phase -= slot->src.w;
+                    x = slot->dst.x + row_phase;
                     r.x = slot->src.x;
-                    r.w = slot->src.w - pos;
-                    MoveImage(&r, slot->dst.x + pos, y);
-                    if (pos) {
+                    r.w = slot->src.w - row_phase;
+                    MoveImage(&r, x, y);
+                    if (row_phase) {
                         x = slot->dst.x;
                         r.x = slot->src.x + r.w;
-                        r.w = pos;
+                        r.w = row_phase;
                         MoveImage(&r, x, y);
                     }
                     y++;
-                    pos++;
+                    row_phase++;
                     r.y++;
                 }
                 break;
-            case 33 ... 37:
+            }
+            case 33 ... 37: {
+                short column_phase, column_count;
+
                 /* Wave each column vertically. */
                 slot->phase += slot->step;
                 if (slot->phase >= slot->src.h)
                     slot->phase -= slot->src.h;
                 r.w = 1;
-                pos = slot->phase;
+                column_count = slot->src.w;
+                column_phase = slot->phase;
                 x = slot->dst.x;
-                for (n = slot->src.w; n--;) {
+                for (; column_count--;) {
                     offset = slot->src.h / 2 +
-                             slot->src.h / 4 * rsin(4096 / slot->src.w * pos) / 4096;
+                             slot->src.h / 4 * rsin(4096 / slot->src.w * column_phase) / 4096;
                     if (offset >= slot->src.h)
                         offset -= slot->src.h;
+                    y = slot->dst.y + offset;
                     r.y = slot->src.y;
                     r.h = slot->src.h - offset;
-                    MoveImage(&r, x, slot->dst.y + offset);
+                    MoveImage(&r, x, y);
                     if (offset) {
                         y = slot->dst.y;
                         r.y = slot->src.y + r.h;
@@ -161,10 +174,11 @@ void func_80016a14(void)
                         MoveImage(&r, x, y);
                     }
                     x++;
-                    pos++;
+                    column_phase++;
                     r.x++;
                 }
                 break;
+            }
             case 17 ... 20:
                 /* Step through frames stacked below the source. */
                 if (++slot->phase >= slot->step) {
@@ -176,23 +190,27 @@ void func_80016a14(void)
                 }
                 break;
             case 49:
-                /* Rotate CLUT entries 1-14. */
-                first = DAT_8009ac88[1];
-                DAT_8009ac88[1] = DAT_8009ac88[2];
-                DAT_8009ac88[2] = DAT_8009ac88[3];
-                DAT_8009ac88[3] = DAT_8009ac88[4];
-                DAT_8009ac88[4] = DAT_8009ac88[5];
-                DAT_8009ac88[5] = DAT_8009ac88[6];
-                DAT_8009ac88[6] = DAT_8009ac88[7];
-                DAT_8009ac88[7] = DAT_8009ac88[8];
-                DAT_8009ac88[8] = DAT_8009ac88[9];
-                DAT_8009ac88[9] = DAT_8009ac88[10];
-                DAT_8009ac88[10] = DAT_8009ac88[11];
-                DAT_8009ac88[11] = DAT_8009ac88[12];
-                DAT_8009ac88[12] = DAT_8009ac88[13];
-                DAT_8009ac88[13] = DAT_8009ac88[14];
-                DAT_8009ac88[14] = first;
-                LoadImage(&r, (u_long *)DAT_8009ac88);
+                /* Entry zero is fixed; rotate the fourteen following colours. */
+                {
+                    u16 *colors = &DAT_8009ac88[1];
+
+                    first = colors[0];
+                    colors[0] = colors[1];
+                    colors[1] = colors[2];
+                    colors[2] = colors[3];
+                    colors[3] = colors[4];
+                    colors[4] = colors[5];
+                    colors[5] = colors[6];
+                    colors[6] = colors[7];
+                    colors[7] = colors[8];
+                    colors[8] = colors[9];
+                    colors[9] = colors[10];
+                    colors[10] = colors[11];
+                    colors[11] = colors[12];
+                    colors[12] = colors[13];
+                    colors[13] = first;
+                    LoadImage(&r, (u_long *)(colors - 1));
+                }
                 break;
             case TEXANIM_FREE:
                 break;
