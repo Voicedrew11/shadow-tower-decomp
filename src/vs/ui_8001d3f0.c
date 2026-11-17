@@ -254,24 +254,26 @@ void func_8001d9cc(u32 num, u16 x, u16 y, CVECTOR *color)
 }
 
 /* Draws a number with the fixed 7-pixel digit glyphs (codes 2-11). */
-/* Not exact: as func_8001d9cc, the power-of-ten loop's entry test. */
+/* Not exact: the digit-count decode follows the parameter copies here;
+ * retail schedules it before them. */
 ADDRESS(0x8001dc48, 0x244)
 void func_8001dc48(u32 num, u16 x, u16 y, CVECTOR *color)
 {
     u16 digit[8];
+    int end;
     u8 leading = 1;
     u8 neg = 0;
+    int n = NUMBER_DIGITS(num);
     u16 width = 7;
-    int n;
     u32 sign;
     s16 value;
     u32 pow;
     u32 div;
     int i;
 
-    n = NUMBER_DIGITS(num);
     value = num;
     sign = num & NUMBER_SIGNED;
+    end = -1;
     if ((s16)num < 0) {
         value = -num;
         neg = 1;
@@ -281,9 +283,12 @@ void func_8001dc48(u32 num, u16 x, u16 y, CVECTOR *color)
         return;
     }
     pow = 1;
-    i = n;
-    while (i--)
-        pow *= 10;
+    i = n - 1;
+    if (i != end) {
+        do {
+            pow *= 10;
+        } while (--i != -1);
+    }
     if (value < pow) {
         div = pow;
         i = n;
