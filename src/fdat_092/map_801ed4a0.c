@@ -116,7 +116,9 @@ void func_801ed4a0(void)
     }
 }
 
-/* Not exact (one attempt, retries off; 62.2%): first divergence retail `lui v0,0x0`, this source `sw s1,20(sp)`. */
+/* Not exact: several entry accesses still fold the field bias into the
+ * relocation; retail materializes each entry pointer. Saved prologue roles
+ * and the pair-opening merge also differ. */
 /*
  * Runs the area: the gate scene once record 14's stream counter is 1;
  * opens table B entry pairs 7/8 and 5/6 once table A entries 32 and 35 are
@@ -147,7 +149,7 @@ void func_801ed680(void)
         fdat_801ed388(e40, 1, 0);
         fdat_801ed1e4(e40);
         fdat_801ed388(e40, 0, 0);
-        e48->unk00 = 100;
+        e40->unk00 = 100;
         viewer.unk218 = 0;
         fdat_801edf54 = 0xff;
         e40->unk70 &= ~0x2000000;
@@ -175,27 +177,39 @@ void func_801ed680(void)
         fdat_801edf60 = 0xff;
     }
     if (fdat_801edf64 == 0 && vis_table_b.entries[14].unk0C == 1) {
+        int height;
+        u8 stream;
+
         fdat_801ed410(e39);
         e39->unk36 = -1;
         e39->unk1C.bytes[2] &= 0xf2;
         fdat_801eb7b4(e39, 0);
         e39->unk00 = 100;
+        height = e39->unk74.vy;
         e39->unk1C.bytes[3] = 1;
-        e39->unk07 = vis_table_a.unk6103;
+        stream = vis_table_a.unk6103;
         fdat_801edf64 = 1;
-        e39->unk74.vy += 0xa00;
+        height += 0xa00;
+        e39->unk07 = stream;
+        e39->unk74.vy = height;
         DAT_801cba08.unk1444.word |= 0x10000;
     }
     if (fdat_801edf68 == 0 && vis_table_b.entries[17].unk0C == 1) {
+        int height;
+        u8 stream;
+
         fdat_801ed410(e38);
         e38->unk36 = -1;
         e38->unk1C.bytes[2] &= 0xf2;
         fdat_801eb7b4(e38, 0);
         e38->unk00 = 100;
+        height = e38->unk74.vy;
         e38->unk1C.bytes[3] = 1;
-        e38->unk07 = vis_table_a.unk6103;
+        stream = vis_table_a.unk6103;
         fdat_801edf68 = 1;
-        e38->unk74.vy += 0xa00;
+        height += 0xa00;
+        e38->unk07 = stream;
+        e38->unk74.vy = height;
         DAT_801cba08.unk1444.word |= 0x20000;
     }
     if (fdat_801edf64 == 1 && vis_table_b.entries[14].unk10 > 0xc00)
@@ -203,19 +217,19 @@ void func_801ed680(void)
     if (fdat_801edf68 == 1 && vis_table_b.entries[17].unk10 > 0xc00)
         fdat_801edf68 = 2;
     if (fdat_801edf64 == 2) {
-        if (fdat_801edf6c < e39->unk74.vy) {
-            e39->unk74.vy -= 0x100;
-        } else {
+        if (e39->unk74.vy <= fdat_801edf6c) {
             e39->unk1C.bytes[3] = 0;
             fdat_801edf64 = 0xff;
+        } else {
+            e39->unk74.vy -= 0x100;
         }
     }
     if (fdat_801edf68 == 2) {
-        if (fdat_801edf70 < e38->unk74.vy) {
-            e38->unk74.vy -= 0x100;
-        } else {
+        if (e38->unk74.vy <= fdat_801edf70) {
             e38->unk1C.bytes[3] = 0;
             fdat_801edf68 = 0xff;
+        } else {
+            e38->unk74.vy -= 0x100;
         }
     }
 }
