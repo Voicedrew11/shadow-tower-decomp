@@ -125,8 +125,21 @@ typedef union {
 /* A table A record's script: a command stream (WIP). */
 typedef struct {
     u8 unk00;            /* 0x00: kind; 'P' and '@' are picked by func_8004def8 */
-    u8 unk01[0xb];
+    u8 unk01;            /* 0x01: the FDAT overlays copy it to Vis212.unk08 */
+    u8 unk02;
+    u8 unk03;            /* 0x03: an FDAT overlay squares it into a range */
+    u8 unk04;            /* 0x04: an FDAT overlay's pick weight */
+    u8 unk05;            /* 0x05: FDAT sound bank offset; 0xff none */
+    u8 unk06[2];
+    u32 unk08;           /* 0x08: FDAT: the Vis212.unk44 states it may run in */
     u16 unk0C;           /* 0x0c */
+    u16 unk0E;           /* 0x0e: FDAT sound trigger: kind (0xf000) and frame/period */
+    /* 0x10: FDAT command arguments; signed or unsigned by command (WIP) */
+    union {
+        s16 s[16];
+        u16 u[16];
+        u8 b[32];
+    } arg;
 } VisScript;
 
 typedef struct {
@@ -171,7 +184,7 @@ typedef struct {
     s16 unk36;           /* 0x36 */
     u8 unk38;
     u8 unk39;
-    u8 unk3A[2];
+    u16 unk3A;           /* 0x3a: the FDAT overlays' last sound id */
     u32 unk3C;           /* 0x3c: squared distance */
     s32 unk40;           /* 0x40: horizontal distance */
     s32 unk44;
@@ -186,7 +199,7 @@ typedef struct {
     u8 unk5A[0x5e - 0x5a];
     u16 unk5E;           /* 0x5e: heading of the wall slid along */
     u16 unk60;
-    u8 unk62[2];
+    s16 unk62;           /* 0x62: an FDAT overlay's attack state */
     u8 unk64;            /* 0x64: set when hit */
     u8 unk65;            /* 0x65..0x67: percent chances of unk10..unk14 */
     u8 unk66;
@@ -207,10 +220,13 @@ typedef struct {
     SVECTOR unk9C;       /* 0x9c: velocity: this frame's movement */
     u32 unkA4;           /* 0xa4: from here the anim block objects.c hands model_draw (&unkA4) */
     VisScript *unkA8;    /* 0xa8: the running script, an entry of its record's unk60 list */
-    s32 unkAC;
+    VisScript *unkAC;    /* 0xac: FDAT: the script a 17/20 command returns to */
     s16 unkB0;           /* 0xb0: magnitude of the last unk2A step; set from the script's unk0C */
     u16 unkB2;
-    u8 unkB4[0x20];
+    u8 unkB4[8];
+    s16 unkBC;           /* 0xbc: cleared by the FDAT overlays */
+    s16 unkBE;
+    u8 unkC0[0x14];
 } Vis212;
 
 /* An entry of a Vis192 record's unk60 list (func_8004b1e8). */

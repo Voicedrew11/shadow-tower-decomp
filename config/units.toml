@@ -710,3 +710,254 @@ unit = "end.main"
 image = "END.EXE"
 source = "src/end/main.c"
 profile = "probe-gcc272cdk-o2-g8"
+
+[[unit]]
+unit = "fdat_002.main"
+image = "FDAT_002.BIN"
+source = "src/fdat_002/main.c"
+profile = "probe-gcc272cdk-o2-g0"
+
+[[unit]]
+unit = "fdat_012.main"
+image = "FDAT_012.BIN"
+source = "src/fdat_012/main.c"
+profile = "probe-gcc272cdk-o2-g0"
+bind = "name"
+
+[[unit]]
+unit = "fdat_022.main"
+image = "FDAT_022.BIN"
+source = "src/fdat_022/main.c"
+profile = "probe-gcc272cdk-o2-g0"
+bind = "name"
+
+[[unit]]
+unit = "fdat_032.main"
+image = "FDAT_032.BIN"
+source = "src/fdat_032/main.c"
+profile = "probe-gcc272cdk-o2-g0"
+bind = "name"
+
+[[unit]]
+unit = "fdat_042.main"
+image = "FDAT_042.BIN"
+source = "src/fdat_042/main.c"
+profile = "probe-gcc272cdk-o2-g0"
+bind = "name"
+
+[[unit]]
+unit = "fdat_052.main"
+image = "FDAT_052.BIN"
+source = "src/fdat_052/main.c"
+profile = "probe-gcc272cdk-o2-g0"
+bind = "name"
+
+[[unit]]
+unit = "fdat_062.main"
+image = "FDAT_062.BIN"
+source = "src/fdat_062/main.c"
+profile = "probe-gcc272cdk-o2-g0"
+bind = "name"
+
+[[unit]]
+unit = "fdat_082.main"
+image = "FDAT_082.BIN"
+source = "src/fdat_082/main.c"
+profile = "probe-gcc272cdk-o2-g0"
+bind = "name"
+
+[[unit]]
+unit = "fdat_092.main"
+image = "FDAT_092.BIN"
+source = "src/fdat_092/main.c"
+profile = "probe-gcc272cdk-o2-g0"
+bind = "name"
+
+[[unit]]
+unit = "fdat_102.main"
+image = "FDAT_102.BIN"
+source = "src/fdat_102/main.c"
+profile = "probe-gcc272cdk-o2-g0"
+bind = "name"
+
+[[unit]]
+unit = "fdat_112.main"
+image = "FDAT_112.BIN"
+source = "src/fdat_112/main.c"
+profile = "probe-gcc272cdk-o2-g0"
+bind = "name"
+
+[[unit]]
+unit = "fdat_122.main"
+image = "FDAT_122.BIN"
+source = "src/fdat_122/main.c"
+profile = "probe-gcc272cdk-o2-g0"
+bind = "name"
+
+[[unit]]
+unit = "fdat_132.main"
+image = "FDAT_132.BIN"
+source = "src/fdat_132/main.c"
+profile = "probe-gcc272cdk-o2-g0"
+bind = "name"
+
+[[unit]]
+unit = "fdat_142.main"
+image = "FDAT_142.BIN"
+source = "src/fdat_142/main.c"
+profile = "probe-gcc272cdk-o2-g0"
+bind = "name"
+
+[[unit]]
+unit = "fdat_152.main"
+image = "FDAT_152.BIN"
+source = "src/fdat_152/main.c"
+profile = "probe-gcc272cdk-o2-g0"
+bind = "name"
+
+[[unit]]
+unit = "fdat_172.main"
+image = "FDAT_172.BIN"
+source = "src/fdat_172/main.c"
+profile = "probe-gcc272cdk-o2-g0"
+bind = "name"
+
+[[unit]]
+unit = "fdat_182.main"
+image = "FDAT_182.BIN"
+source = "src/fdat_182/main.c"
+profile = "probe-gcc272cdk-o2-g0"
+bind = "name"
+
+[[unit]]
+unit = "fdat_202.main"
+image = "FDAT_202.BIN"
+source = "src/fdat_202/main.c"
+profile = "probe-gcc272cdk-o2-g0"
+bind = "name"
+
+[[unit]]
+unit = "fdat_212.main"
+image = "FDAT_212.BIN"
+source = "src/fdat_212/main.c"
+profile = "probe-gcc272cdk-o2-g0"
+bind = "name"
+
+[[unit]]
+unit = "fdat_232.main"
+image = "FDAT_232.BIN"
+source = "src/fdat_232/main.c"
+profile = "probe-gcc272cdk-o2-g0"
+bind = "name"
+
+[[unit]]
+unit = "fdat_242.main"
+image = "FDAT_242.BIN"
+source = "src/fdat_242/main.c"
+profile = "probe-gcc272cdk-o2-g0"
+bind = "name"
+
+[[unit]]
+unit = "fdat_252.main"
+image = "FDAT_252.BIN"
+source = "src/fdat_252/main.c"
+profile = "probe-gcc272cdk-o2-g0"
+bind = "name"
+
+[[unit]]
+unit = "fdat_262.main"
+image = "FDAT_262.BIN"
+source = "src/fdat_262/main.c"
+profile = "probe-gcc272cdk-o2-g0"
+bind = "name"
+
+[[unit]]
+unit = "fdat_272.main"
+image = "FDAT_272.BIN"
+source = "src/fdat_272/main.c"
+profile = "probe-gcc272cdk-o2-g0"
+bind = "name"
+
+[[unit]]
+unit = "fdat_282.main"
+image = "FDAT_282.BIN"
+source = "src/fdat_282/main.c"
+profile = "probe-gcc272cdk-o2-g0"
+bind = "name"
+
+[[unit]]
+unit = "fdat_302.main"
+image = "FDAT_302.BIN"
+source = "src/fdat_302/main.c"
+profile = "probe-gcc272cdk-o2-g0"
+bind = "name"
+
+[[unit]]
+unit = "fdat_322.main"
+image = "FDAT_322.BIN"
+source = "src/fdat_322/main.c"
+profile = "probe-gcc272cdk-o2-g0"
+bind = "name"
+
+[[unit]]
+unit = "fdat_332.main"
+image = "FDAT_332.BIN"
+source = "src/fdat_332/main.c"
+profile = "probe-gcc272cdk-o2-g0"
+bind = "name"
+
+[[unit]]
+unit = "fdat_372.main"
+image = "FDAT_372.BIN"
+source = "src/fdat_372/main.c"
+profile = "probe-gcc272cdk-o2-g0"
+bind = "name"
+
+[[unit]]
+unit = "fdat_382.main"
+image = "FDAT_382.BIN"
+source = "src/fdat_382/main.c"
+profile = "probe-gcc272cdk-o2-g0"
+bind = "name"
+
+[[unit]]
+unit = "fdat_402.main"
+image = "FDAT_402.BIN"
+source = "src/fdat_402/main.c"
+profile = "probe-gcc272cdk-o2-g0"
+bind = "name"
+
+[[unit]]
+unit = "fdat_412.main"
+image = "FDAT_412.BIN"
+source = "src/fdat_412/main.c"
+profile = "probe-gcc272cdk-o2-g0"
+bind = "name"
+
+[[unit]]
+unit = "fdat_442.main"
+image = "FDAT_442.BIN"
+source = "src/fdat_442/main.c"
+profile = "probe-gcc272cdk-o2-g0"
+bind = "name"
+
+[[unit]]
+unit = "fdat_452.main"
+image = "FDAT_452.BIN"
+source = "src/fdat_452/main.c"
+profile = "probe-gcc272cdk-o2-g0"
+bind = "name"
+
+[[unit]]
+unit = "fdat_462.main"
+image = "FDAT_462.BIN"
+source = "src/fdat_462/main.c"
+profile = "probe-gcc272cdk-o2-g0"
+bind = "name"
+
+[[unit]]
+unit = "fdat_472.main"
+image = "FDAT_472.BIN"
+source = "src/fdat_472/main.c"
+profile = "probe-gcc272cdk-o2-g0"
+bind = "name"
