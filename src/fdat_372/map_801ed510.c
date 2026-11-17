@@ -16,9 +16,7 @@
 #include <st/light.h>
 #include <st/xa.h>
 #include <st/fdat.h>
-
-/* src/fdat_372/map_801ed4a0.c (a static of FDAT_132.BIN has the name) */
-extern int fdat_801eda3c;
+#include <st/fdat_372.h>
 
 /* Until record 5's stream counter starts, the viewer passing z 0x4c000
  * sends table A entry 32; beaten, it changes the lighting of four areas

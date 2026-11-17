@@ -17,9 +17,6 @@
 #include <st/xa.h>
 #include <st/fdat.h>
 
-/* src/fdat_382/map_801ed4a0.c */
-extern int fdat_801edb04;
-
 /* 0xff once the scene ran (record 1's stream counter 2). */
 DATA(0x801edb00, 0x4, ".bss")
 int fdat_801edb00;

@@ -16,11 +16,7 @@
 #include <st/light.h>
 #include <st/xa.h>
 #include <st/fdat.h>
-
-/* src/fdat_382/map_801eda74.c and map_801ed9b4.c (statics of FDAT_142.BIN
- * have the names) */
-extern int fdat_801edafc;
-extern int fdat_801edb00;
+#include <st/fdat_382.h>
 
 /* Table A entry 32 beaten: 0, 1 this visit, 0xff gone (flag 24). */
 DATA(0x801edb04, 0x4, ".bss")
