@@ -655,7 +655,9 @@ void func_80028db8(RECT *r, CVECTOR *mid, CVECTOR *edge, int semi)
 
 /* Draws a triangle filling `r` that points along `dir` (0, 1024, 2048 or
  * 3072), over a copy offset by one pixel. */
-/* Not exact: the x1 and world_state-base temporaries are swapped ($t2/$t1). */
+/* Not exact: the x1 and world_state-base temporaries are swapped ($t2/$t1).
+ * The shadow's last y store precedes its length/code stores here; retail
+ * schedules that y store after them. */
 ADDRESS(0x8002916c, 0x320)
 void func_8002916c(RECT *r, CVECTOR *color, u16 dir)
 {
@@ -1105,7 +1107,7 @@ void func_8002a5a4(void)
 /*
  * The map page: visited areas and their completion, or the area summary.
  *
- * Not exact (93.7%): in the summary branch retail keeps the total minutes in
+ * Not exact: in the summary branch retail keeps the total minutes in
  * $a0 and hours/minutes in $s5 (this build: $s1), and swaps $s2/$s3 for the
  * two colour pointers.
  */
