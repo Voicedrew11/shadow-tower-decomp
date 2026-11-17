@@ -53,9 +53,9 @@ int func_80055300(int id)
 }
 
 /*
- * Not exact (36 bytes long): the switch's compare tree splits the cases
- * above 51 at 225 where retail splits at 226, and retail keeps the -1 test
- * value in a copy of the first result instead of a hoisted constant.
+ * Not exact: the switch's compare tree splits the cases above 51 at
+ * 225 where retail splits at 226. The initial item-record address and
+ * several branch delay slots also use different instruction ordering.
  */
 /* The examine action at `pos` facing `rot` (vx: yaw, vy: pitch). */
 ADDRESS(0x80055374, 0x61c)
@@ -64,9 +64,10 @@ void func_80055374(long *pos, SVECTOR *rot)
     VECTOR p;
     VisRequest req;
     int i;
+    int first_result;
     int up;
     int down;
-    u8 kind;
+    int kind;
     u16 r;
     int n;
     int d;
@@ -88,6 +89,7 @@ void func_80055374(long *pos, SVECTOR *rot)
     req.unk1E = 1600;
     req.unk20 = 0;
     i = func_80053174((VisLists *)&req, 1);
+    first_result = i;
     if (i != -1) {
         c = &vis_table_c.entries[i];
         kind = c->unk22;
@@ -97,7 +99,7 @@ void func_80055374(long *pos, SVECTOR *rot)
     }
     /* VisLists starts with the request fields func_8004bb88 reads. */
     i = func_8004bb88((VisLists *)&req, 1);
-    if (i != -1) {
+    if (i != first_result) {
         a = &vis_table_a.entries[i];
         up = ratan2(a->unk74.vy - a->unk30 - viewer.position.vy, a->unk40);
         down = ratan2(a->unk74.vy - (a->unk30 >> 1) - viewer.position.vy, a->unk40);
@@ -128,9 +130,9 @@ void func_80055374(long *pos, SVECTOR *rot)
     vis_lists.unk0 = 0;
     for (; (i = func_8004f718(i, &vis_lists)) != -1; i++) {
         b = &vis_table_b.entries[i];
-        kind = vis_table_b.unk0000[b->unk0a].unk00[0];
         DAT_801cd0e0 = 1;
         b->unk0E = 1;
+        kind = vis_table_b.unk0000[b->unk0a].unk00[0];
         switch (kind) {
         case 0:
         case 1:
@@ -140,7 +142,8 @@ void func_80055374(long *pos, SVECTOR *rot)
                 r = b->unk22;
                 if ((short)b->unk22 > 2048)
                     r -= 4096;
-                if ((short)r >= -1023 && (short)r <= 1023) {
+                /* The offset window wraps at the halfword boundary. */
+                if ((u16)(r + 1023) < 2047) {
                     func_80057d58();
                     b->unk4A.door.unk4F = 255;
                 }
@@ -148,7 +151,7 @@ void func_80055374(long *pos, SVECTOR *rot)
                 r = b->unk22;
                 if ((short)b->unk22 > 2048)
                     r -= 4096;
-                if ((short)r < -1024 || (short)r > 1024) {
+                if ((u16)(r + 1024) >= 2049) {
                     func_80057d58();
                     b->unk4A.door.unk4F = 255;
                 }
@@ -160,31 +163,6 @@ void func_80055374(long *pos, SVECTOR *rot)
                     b->unk0C = 8;
             } else if (b->unk4A.door.unk4F < 0xf0 || b->unk4A.door.unk4F > 0xf3) {
                 func_80057d7c();
-            }
-            break;
-        case 14:
-            if (area_state.unk0 != 1 && area_state.unk18 == -1) {
-                lighting.unkA = 1;
-                func_80015ad4();
-                func_80055cf4(area_state.unk4);
-                func_80057cc8();
-                func_80042cfc();
-                func_80057a3c();
-                func_80057a68(0);
-                b = vis_table_b.entries;
-                n = 240;
-                while (n--) {
-                    if (b->unk05 == 236 && b->unk54 != -1) {
-                        func_8005850c(b->unk54, b->unk4A.snd.unk4A + 1108);
-                        b->unk54 = -1;
-                    }
-                    b++;
-                }
-                func_80058dc4(1, 1);
-                func_80062c28(1);
-                lighting.unkA = 2;
-                func_80057a3c();
-                func_80058ed4();
             }
             break;
         case 52:
@@ -211,6 +189,31 @@ void func_80055374(long *pos, SVECTOR *rot)
         case 254:
             if (b->unk0C == 0)
                 b->unk0C = 1;
+            break;
+        case 14:
+            if (area_state.unk0 != 1 && area_state.unk18 == -1) {
+                lighting.unkA = 1;
+                func_80015ad4();
+                func_80055cf4(area_state.unk4);
+                func_80057cc8();
+                func_80042cfc();
+                func_80057a3c();
+                func_80057a68(0);
+                b = vis_table_b.entries;
+                n = 240;
+                while (n--) {
+                    if (b->unk05 == 236 && b->unk54 != -1) {
+                        func_8005850c(b->unk54, b->unk4A.snd.unk4A + 1108);
+                        b->unk54 = -1;
+                    }
+                    b++;
+                }
+                func_80058dc4(1, 1);
+                func_80062c28(1);
+                lighting.unkA = 2;
+                func_80057a3c();
+                func_80058ed4();
+            }
             break;
         }
     }
