@@ -24,7 +24,6 @@ int fdat_801edfd8;
 void func_801ede00(void);
 void func_801edef8(void);
 
-/* Not exact (one attempt, retries off; 97.6%): first divergence retail `lui v1,0x0`, this source `lui v0,0x0`. */
 /* Sets up the area by flags 14, 26, 27, 29 and 30: table C item 28,
  * entry 48 (asleep, awake or gone), table B entry 6 and record 14. */
 ADDRESS(0x801ed4a0, 0x174)
@@ -33,8 +32,8 @@ void func_801ed4a0(void)
     Vis212 *e48 = &vis_table_a.entries[48];
     Vis192 *r1 = &vis_table_a.unk3500[1];
     Vis48 *c28 = &vis_table_c.entries[28];
-    Vis88 *d6 = &vis_table_b.entries[6];
     Vis192 *r14 = &vis_table_a.unk3500[14];
+    Vis88 *d6 = &vis_table_b.entries[6];
 
     if (DAT_801cba08.unk1440.bit.f26 == 1) {
         c28->unk22 = 5;
