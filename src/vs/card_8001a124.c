@@ -400,8 +400,6 @@ int func_8001ad18(int first)
 
 /* Reads the three header values of each listed save file; -1 on a read
  * error. */
-/* Not exact (3 words): retail adds the files[i] offset as addu $v0,$s1,$v0;
- * this build emits addu $v0,$v0,$s1. */
 ADDRESS(0x8001ae78, 0x154)
 int func_8001ae78(void)
 {
@@ -420,9 +418,9 @@ int func_8001ae78(void)
         lseek(fd, 0, SEEK_SET);
         if (read(fd, &header, 512) == -1)
             return -1;
-        sp->unk1B8->files[i].unk15 = header.unk3D;
-        sp->unk1B8->files[i].unk16 = header.unk3E;
-        sp->unk1B8->files[i].unk18 = header.unk40;
+        (i + sp->unk1B8->files)->unk15 = header.unk3D;
+        (i + sp->unk1B8->files)->unk16 = header.unk3E;
+        (i + sp->unk1B8->files)->unk18 = header.unk40;
         close(fd);
     }
     return 1;
