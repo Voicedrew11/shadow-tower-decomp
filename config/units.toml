@@ -514,6 +514,12 @@ source = "src/vs/gfx_80016ca8.c"
 profile = "probe-gcc272cdk-o2-g8"
 
 [[unit]]
+unit = "vs.menu_80016f10"
+image = "VS.EXE"
+source = "src/vs/menu_80016f10.c"
+profile = "probe-gcc272cdk-o2-g8"
+
+[[unit]]
 unit = "vs.team_8001789c"
 image = "VS.EXE"
 source = "src/vs/team_8001789c.c"
@@ -553,6 +559,12 @@ profile = "probe-gcc272cdk-o2-g8"
 unit = "vs.save_800193e8"
 image = "VS.EXE"
 source = "src/vs/save_800193e8.c"
+profile = "probe-gcc272cdk-o2-g8"
+
+[[unit]]
+unit = "vs.pick_8001960c"
+image = "VS.EXE"
+source = "src/vs/pick_8001960c.c"
 profile = "probe-gcc272cdk-o2-g8"
 
 [[unit]]
@@ -796,6 +808,12 @@ source = "src/vs/name_8002ad40.c"
 profile = "probe-gcc272cdk-o2-g0"
 
 [[unit]]
+unit = "vs.round_8002b078"
+image = "VS.EXE"
+source = "src/vs/round_8002b078.c"
+profile = "probe-gcc272cdk-o2-g8"
+
+[[unit]]
 unit = "vs.shadow_8002bfe8"
 image = "VS.EXE"
 source = "src/vs/shadow_8002bfe8.c"
@@ -892,9 +910,21 @@ source = "src/vs/effect_80032228.c"
 profile = "probe-gcc272cdk-o2-g0"
 
 [[unit]]
+unit = "vs.effect_80032404"
+image = "VS.EXE"
+source = "src/vs/effect_80032404.c"
+profile = "probe-gcc272cdk-o2-g0"
+
+[[unit]]
 unit = "vs.effect_move_8003333c"
 image = "VS.EXE"
 source = "src/vs/effect_move_8003333c.c"
+profile = "probe-gcc272cdk-o2-g0"
+
+[[unit]]
+unit = "vs.effect_800335e8"
+image = "VS.EXE"
+source = "src/vs/effect_800335e8.c"
 profile = "probe-gcc272cdk-o2-g0"
 
 [[unit]]

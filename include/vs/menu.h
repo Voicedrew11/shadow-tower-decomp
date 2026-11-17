@@ -55,7 +55,7 @@ typedef struct {
     s16 unk1C4;          /* 0x1c4: the file list scroll */
     u16 unk1C6;          /* 0x1c6 (ST MenuScratch.unk202) */
     s16 unk1C8;          /* 0x1c8: the first free save number */
-    u8 unk1CA[2];
+    u16 unk1CA;          /* 0x1ca (func_80016f10 clears it) */
     u16 unk1CC;          /* 0x1cc (ST unk2DC) */
     s16 unk1CE;          /* 0x1ce: the versus setup cursor line (func_80022a00) */
     s16 unk1D0;          /* 0x1d0: the list cursor row (ST unk2E0) */
@@ -68,7 +68,8 @@ typedef struct {
     DVECTOR unk1DC;      /* 0x1dc: and its CLUT's */
     DVECTOR unk1E0;      /* 0x1e0: the item name font's VRAM position */
     DVECTOR unk1E4;      /* 0x1e4: and its CLUT's */
-    u8 unk1E8[0x1f0 - 0x1e8];
+    DVECTOR unk1E8;      /* 0x1e8: the setup page picture's VRAM position (func_80016f10) */
+    u8 unk1EC[0x1f0 - 0x1ec];
     CVECTOR style[8];    /* 0x1f0: text colours (ST 0x300) */
     u8 unk210[4];
     CVECTOR unk214;      /* 0x214: highlight colour (ST unk32C) */
