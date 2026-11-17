@@ -526,9 +526,9 @@ void func_800286a8(int abr, int x, int y)
  * card image in and out, and counts the frames in unk1EE19
  * (unk1EE17 is the card mode, unk1EE18 the fade length).
  */
-/* Not exact: retail keeps separate divides for the fade-in and fade-out cases
- * (this build cross-jumps them, 0x30 bytes shorter) and forms the world_state
- * base later. */
+/* Not exact (48 bytes short): this build cross-jumps the two fade divides;
+ * retail keeps them separate with a common colour/draw tail. The world_state
+ * base is formed early, and the SHOW arguments precede the mode choice. */
 ADDRESS(0x80028784, 0x4a8)
 void func_80028784(void)
 {
