@@ -22,15 +22,15 @@
 DATA(0x801edb04, 0x4, ".bss")
 int fdat_801edb04;
 
-/* Not exact (one attempt, retries off; 72.7%): first divergence retail `lui a2,0x0`, this source `lui v0,0x0`. */
 /* Sets up the area: with flags 21..23 all set entries 0..2 and 32 stand
  * (scene word 1), else they wait; flag 24 and record 1's stream counter
  * set the other words. */
 ADDRESS(0x801ed4a0, 0xe8)
 void func_801ed4a0(void)
 {
-    Vis212 *e32 = &vis_table_a.entries[32];
-    Vis192 *r1 = &vis_table_a.unk3500[1];
+    VisTableA *a = &vis_table_a;
+    Vis212 *e32 = &a->entries[32];
+    Vis192 *r1 = &a->unk3500[1];
 
     if ((DAT_801cba08.unk1440.word & 0xe00000) == 0xe00000) {
         vis_table_a.entries[32].unk00 = 100;
@@ -57,7 +57,6 @@ void func_801ed4a0(void)
         fdat_801edb00 = 0;
 }
 
-/* Not exact (one attempt, retries off; 87.0%): first divergence retail `bnez v0,<func_801ed588+0xd8>`, this source `bnez v0,<func_801ed588+0xd4>`. */
 /* Runs the area: the viewer reaching z 0x3a800 wakes entry 32 (or sends
  * it, with entries 0 and 32 out of range); beaten, it changes the lighting
  * of four areas (flag 24) and leaves. */
@@ -72,13 +71,14 @@ void func_801ed588(void)
         if (fdat_801edafc == 0) {
             DAT_801cba08.unk1448[r1->unk09] = 0;
             fdat_801ed388(e32, 1, 0);
+            e32->unk70 &= ~0x2000000;
         } else {
             DAT_801cba08.unk1448[r1->unk09] = 1;
             fdat_801ed388(e32, 0, 0);
+            e32->unk70 &= ~0x2000000;
             e32->unk1C.bytes[3] = 0;
             e0->unk1C.bytes[3] = 0;
         }
-        e32->unk70 &= ~0x2000000;
         fdat_801edb00 = 0xff;
     }
     if (fdat_801edb04 == 0 && e32->unk2C == 0) {
