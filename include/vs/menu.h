@@ -14,11 +14,31 @@
 #include <st/menu.h>
 #include <vs/card.h>
 
+/* A fighter team: three character slots, -1 for an empty one (VS band 6). */
+typedef struct {
+    s32 slot[3];
+} VsTeam;
+
+/* The team screen's edit record (a local of func_800182ec): the slot picked
+ * (unk4) and a copy of the team being edited. */
+typedef struct {
+    s32 unk0;
+    s32 unk4;            /* 0x04: the picked slot */
+    VsTeam team;         /* 0x08 */
+} VsTeamEdit;
+
+/* Both players' teams (bss, 0x801624b8). */
+extern VsTeam DAT_801624b8[2];
+
 /* The menu screens' scratchpad block; only proven fields are spelled. */
 typedef struct {
     union {
         MenuState menu;  /* the menu screens' state */
         VsCardState card; /* the memory card screens' state (vs/card.h) */
+        struct {
+            u8 unk00[0x10];
+            DVECTOR pos[15]; /* 0x10: VRAM positions; [12..14] the team slot pictures */
+        } team;          /* the team screen (func_80017c84) */
     } unk0;              /* 0x000 */
     VsCardPort *unk1B8;  /* 0x1b8: the card slot being scanned */
     s16 unk1BC;          /* 0x1bc: its card port */
@@ -34,7 +54,8 @@ typedef struct {
     s16 unk1D0;          /* 0x1d0: the list cursor row (ST unk2E0) */
     u8 unk1D2[2];
     u8 unk1D4;           /* 0x1d4: cursor blink phase (ST unk2E4) */
-    u8 unk1D5[0x1f0 - 0x1d5];
+    u8 unk1D5;           /* 0x1d5: font mode (ST unk2E5) */
+    u8 unk1D6[0x1f0 - 0x1d6];
     CVECTOR style[8];    /* 0x1f0: text colours (ST 0x300) */
     u8 unk210[4];
     CVECTOR unk214;      /* 0x214: highlight colour (ST unk32C) */

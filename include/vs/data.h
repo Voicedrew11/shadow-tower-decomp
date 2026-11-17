@@ -209,4 +209,10 @@ extern u16 DAT_8006337a;
 /* Rounds won per fighter (bss, unowned). */
 extern s32 DAT_80063370[2];
 
+/* VS band 6: the text scroll switch and the two scroll offsets
+ * func_8001d3f0 picks between (ST.EXE's DAT_800881ac/a0/a2; bss, unowned). */
+extern u16 DAT_80063378;
+extern u16 DAT_8006333e;
+extern u16 DAT_80063340;
+
 #endif
