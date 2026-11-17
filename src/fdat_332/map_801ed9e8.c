@@ -17,24 +17,29 @@
 #include <st/xa.h>
 #include <st/fdat.h>
 
-/* Not exact (one attempt, retries off; 77.1%): first divergence retail `addiu sp,sp,-40`, this source `addiu sp,sp,-32`. */
+/* Not exact: all body instructions agree, but retail reserves 40 bytes
+ * and saves the four registers from sp+24; this source reserves 32 and
+ * saves them from sp+16. The extra retail area has no observed access. */
 /* Entry 33's end: it faces the viewer, finishes its animation, leaves its
  * drops (20/30/100 percent), dies (animation 12) and table B entry 3
  * opens; the area's history is reset (scene word 2). */
 ADDRESS(0x801ed9e8, 0x154)
 void func_801ed9e8(void)
 {
-    Vis212 *e = &vis_table_a.entries[33];
-    Vis88 *d3 = &vis_table_b.entries[3];
+    Vis212 *e;
+    Vis88 *d3;
 
     viewer.unk218 = 5;
+    e = &vis_table_a.entries[33];
+    d3 = &vis_table_b.entries[3];
     fdat_801ed1e4(e);
     for (;;) {
         e->unk2A += e->unkB0;
         if ((short)e->unk2A >= 0x1000)
-            break;
+            goto animation_done;
         func_80026dd4(NULL, NULL, 0);
     }
+animation_done:
     fdat_801ed388(e, 0, 0);
     fdat_801ed388(e, 0, 0);
     vis_table_a.unk6158[3] = 0xff;
