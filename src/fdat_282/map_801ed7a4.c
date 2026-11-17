@@ -195,13 +195,11 @@ void func_801edba4(int id)
 /*
  * The gate scene of table A entry 50: swaps door 3's records, raises it and
  * plays the entry's script to its end.
- * Not exact (longer): retail keeps the raise loop with its test at the top
- * and the zero-extended step in s2, r in s1; this build copies the test in
- * front of the loop (s1, s2 swapped).
  */
 ADDRESS(0x801ede88, 0x228)
 void func_801ede88(void)
 {
+    int raising_step;
     Vis212 *e = &vis_table_a.entries[50];
     Vis192 *r = &vis_table_a.unk3500[e->unk02];
     Vis88 *door = &vis_table_b.entries[3];
@@ -223,12 +221,15 @@ void func_801ede88(void)
         vis_records[door->unk4A.door.unk4C + n].part = vis_records[door->unk4A.door.unk4A + n].part;
         vis_records[door->unk4A.door.unk4A + n].part = t;
     }
+    /* The look-ahead test uses the promoted halfword step. */
+    raising_step = step;
     for (;;) {
         door->unk10 += step;
-        if (door->unk10 + step >= 0x1000)
-            break;
+        if (door->unk10 + raising_step >= 0x1000)
+            goto gate_raised;
         func_80026dd4(NULL, NULL, 0);
     }
+gate_raised:
     door->unk10 = 0xfff;
     door->unk00 = 0;
     door->unk0C = 0xff;
