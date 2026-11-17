@@ -807,9 +807,8 @@ void func_8001fb98(void)
  * cursor bar and up to three rows (file number, the fighter of the save
  * and its won count), each framed; the clipped text advance of each row
  * goes to DAT_801c4a38.
- * Not exact: retail's frame is 272 bytes, this build's 264 (first
- * divergence at +0x0), and retail rereads the file row for each field;
- * retail is 0x6d8 bytes, this build 0x6a4.
+ * Not exact: an unaccounted 8-byte stack span precedes retail's two RECT
+ * initializers; its frame is 272 bytes, this build's 264.
  */
 ADDRESS(0x8001fcac, 0x6d8)
 void func_8001fcac(void)
@@ -827,8 +826,14 @@ void func_8001fcac(void)
     int i;
 
     if (sp->unk0.menu.half[1] == 1) {
-        func_8001d8b8(VS_MESSAGE((sp->unk1CC & 0xff) ? 323 : 324), 68, 128, &sp->style[0]);
-        sp->style[0].r = sp->style[0].g = sp->style[0].b = 24;
+        int message;
+
+        if (sp->unk1CC & 0xff)
+            message = 323;
+        else
+            message = 324;
+        func_8001d8b8(VS_MESSAGE(message), 68, 128, &sp->style[0]);
+        sp->style[0].b = sp->style[0].g = sp->style[0].r = 24;
         if (sp->unk1C6) {
             func_8001d8b8(VS_MESSAGE(325), 120, 150, &sp->style[1]);
             func_8001d8b8(VS_MESSAGE(326), 190, 150, &sp->style[0]);
@@ -836,7 +841,7 @@ void func_8001fcac(void)
             func_8001d8b8(VS_MESSAGE(325), 120, 150, &sp->style[0]);
             func_8001d8b8(VS_MESSAGE(326), 190, 150, &sp->style[1]);
         }
-        sp->style[0].r = sp->style[0].g = sp->style[0].b = 72;
+        sp->style[0].b = sp->style[0].g = sp->style[0].r = 72;
         sp->unk224.x = 60;
         sp->unk224.y = 120;
         sp->unk224.w = 200;
@@ -845,8 +850,8 @@ void func_8001fcac(void)
         sp->unk230.y = 121;
         sp->unk230.w = 198;
         sp->unk230.h = 48;
-        sp->unk220.b = sp->unk220.g = sp->unk220.r = 64;
-        sp->unk22C.b = sp->unk22C.g = sp->unk22C.r = 32;
+        sp->unk220.r = sp->unk220.g = sp->unk220.b = 64;
+        sp->unk22C.r = sp->unk22C.g = sp->unk22C.b = 32;
         func_8001e3d8(&sp->unk230, &sp->unk22C, 1);
         func_8001e890(2, 0, 0);
         func_8001e3d8(&sp->unk224, &sp->unk220, 0);
@@ -880,11 +885,11 @@ void func_8001fcac(void)
     if (sp->unk1BE < 3)
         rows = sp->unk1BE;
     for (i = 0; i < rows; i++) {
-        if (sp->unk1C0 == 1 && i + sp->unk1C4 == sp->unk1BE - 1) {
+        if ((s16)sp->unk1C0 == 1 && i + sp->unk1C4 == sp->unk1BE - 1) {
             func_8001d8b8(VS_MESSAGE(322), 64, sp->unk218.y + 6, &sp->style[0]);
         } else {
             if (sp->unk1CC & 0xff00)
-                func_8001dc48(0x2000000 | (DAT_80063328[sp->unk1BC] + 1), 38,
+                func_8001dc48(0x2000000 | ((s16)DAT_80063328[sp->unk1BC] + 1), 38,
                               sp->unk218.y + 6, &sp->style[0]);
             else
                 func_8001dc48(0x2000000 | (u16)(sp->unk1C4 + i + 1), 38,
@@ -895,16 +900,19 @@ void func_8001fcac(void)
             DAT_80063390 = 0;
             DAT_80063392 = 280;
             file = &sp->unk1B8->files[i + sp->unk1C4];
-            if (picture[file->unk15] != -1)
-                func_8001d8b8(VS_MESSAGE(610 + picture[file->unk15]), 64, sp->unk218.y + 6,
-                              &sp->style[0]);
+            if (picture[file->unk15] == -1)
+                goto no_picture;
+            func_8001d8b8(VS_MESSAGE(610 + picture[file->unk15]), 64, sp->unk218.y + 6,
+                          &sp->style[0]);
             file = &sp->unk1B8->files[i + sp->unk1C4];
             if (picture[file->unk15] != -1)
                 func_8001d8b8(VS_MESSAGE(700 + file->unk15), DAT_80063394 + 64,
                               sp->unk218.y + 22, &sp->style[0]);
-            else
+            else {
+            no_picture:
                 func_8001d8b8(VS_MESSAGE(700 + sp->unk1B8->files[i + sp->unk1C4].unk15),
                               DAT_80063394 + 64, sp->unk218.y + 6, &sp->style[0]);
+            }
             func_8001dc48(0x4000000 | sp->unk1B8->files[i + sp->unk1C4].unk16, 248,
                           sp->unk218.y + 6, &sp->style[0]);
         }
