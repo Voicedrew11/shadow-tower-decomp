@@ -513,7 +513,8 @@ def validate_config(config_dir: Path, exe_dir: Path | None = None) -> dict[str, 
             and row["opcode"] == "jal"
             and row["channel"] == "reachable-code"
             and row["target_region"] == "load"
-            and (row["image"], target) not in starts
+            # An overlay's call into its host names the host's function.
+            and (referent_image(row["image"], target), target) not in starts
         ):
             raise ValueError(
                 f"{reloc_path}: reachable call target lacks a function row {row!r}"
