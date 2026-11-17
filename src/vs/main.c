@@ -395,9 +395,6 @@ void func_800165f4(void)
  * counter events, the graphics, the loading picture and the menu sound
  * bank; then the character select / match loop until func_80016f10
  * declines, and the shutdown back to TITLE.EXE (next program 1).
- * Not exact (size-exact): retail schedules the second addiu of
- * &DAT_800633b0 before the loading picture's position stores (first
- * divergence at +0x16c).
  */
 ADDRESS(0x8001683c, 0x40c)
 int main(void)
@@ -432,11 +429,15 @@ int main(void)
     DAT_801603c0.unk28 = 0;
     func_8002f0f4();
     func_80014480();
-    pos.vx = 0;
-    pos.vy = 300;
-    memset(&clut, 0, sizeof(clut));
-    func_8002ef3c((u_long *)&DAT_800633b0, "\\LOAD02.TIM;1", 0);
-    func_80012c2c((u_long *)&DAT_800633b0, &pos, &clut);
+    {
+        u_long *loading_picture = (u_long *)&DAT_800633b0;
+
+        pos.vx = 0;
+        pos.vy = 300;
+        memset(&clut, 0, sizeof(clut));
+        func_8002ef3c(loading_picture, "\\LOAD02.TIM;1", 0);
+        func_80012c2c(loading_picture, &pos, &clut);
+    }
     DrawSync(0);
     func_80013aec();
     func_80014070();
