@@ -93,4 +93,3 @@ void func_800140d8(void)
         DAT_800633b0.fighter[1].unk4DEF0.vx = 2048;
     }
 }
-
