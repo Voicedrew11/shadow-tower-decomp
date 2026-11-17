@@ -18,15 +18,18 @@
 
 
 /*
- * Not exact (4 bytes short): retail strength-reduces the byte address into
- * a pointer counted down from counts + 313; this source indexes it.
+ * Not exact (4 bytes short): retail carries a decrementing byte cursor
+ * from the last count; this build forms an indexed address each iteration
+ * (first divergence +0x8). Both packed fields are cleared.
  */
 ADDRESS(0x80055990, 0x2c)
 void func_80055990(void)
 {
     int i;
 
-    for (i = 313; i >= 0; i--)
-        *(u8 *)&DAT_801c7590.counts[i] = 0;
+    for (i = 313; i >= 0; i--) {
+        DAT_801c7590.counts[i].count = 0;
+        DAT_801c7590.counts[i].flag = 0;
+    }
     viewer.unk27 = 0;
 }
