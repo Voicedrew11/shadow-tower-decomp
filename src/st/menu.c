@@ -2670,10 +2670,10 @@ void func_80060018(void)
  * (MenuState.levels); a row waits for the next button (unk2E2), row 12
  * restores the defaults, row 13 returns, and buttons used twice mark
  * levels.flags.
- * Not exact (62.0%, one word long): this build gives the scratchpad base
- * s1 instead of s0 and the button masks a base-plus-34 address instead of
- * retail's pointer at +34, and hoists other constants (retail: s3 12,
- * s4 1, s5 13, s6 5).
+ * Not exact (size-exact): retail keeps the scratchpad in s0 and the
+ * decode cursor in s1; this build reverses them and uses different
+ * counter registers. The cursor setup before the sound call, slider-first
+ * branches and final halfword pointer walk now agree with retail.
  */
 ADDRESS(0x80060334, 0x878)
 void func_80060334(void)
@@ -2713,32 +2713,32 @@ void func_80060334(void)
             if (DAT_801cd180.unk4 & 0x4000) {
                 DAT_801cd180.unk4 = 0;
                 if (sp->unk2E0 == 5) {
+                    const u16 *decode = DAT_801cd180.unk22;
                     func_80057cc8();
-                    key = DAT_801cd180.unk22;
-                    for (i = 0; i < 12; i++, key++) {
-                        if (*key & 0x1000)
+                    for (i = 0; i < 12; i++, decode++) {
+                        if (*decode & 0x1000)
                             sp->unk0.levels.level[i] = 0;
-                        else if (*key & 0x2000)
+                        else if (*decode & 0x2000)
                             sp->unk0.levels.level[i] = 1;
-                        else if (*key & 0x8000)
+                        else if (*decode & 0x8000)
                             sp->unk0.levels.level[i] = 2;
-                        else if (*key & 0x4000)
+                        else if (*decode & 0x4000)
                             sp->unk0.levels.level[i] = 3;
-                        else if (*key & 0x80)
+                        else if (*decode & 0x80)
                             sp->unk0.levels.level[i] = 4;
-                        else if (*key & 0x10)
+                        else if (*decode & 0x10)
                             sp->unk0.levels.level[i] = 5;
-                        else if (*key & 0x20)
+                        else if (*decode & 0x20)
                             sp->unk0.levels.level[i] = 6;
-                        else if (*key & 0x40)
+                        else if (*decode & 0x40)
                             sp->unk0.levels.level[i] = 7;
-                        else if (*key & 0x400)
+                        else if (*decode & 0x400)
                             sp->unk0.levels.level[i] = 8;
-                        else if (*key & 0x100)
+                        else if (*decode & 0x100)
                             sp->unk0.levels.level[i] = 9;
-                        else if (*key & 0x800)
+                        else if (*decode & 0x800)
                             sp->unk0.levels.level[i] = 10;
-                        else if (*key & 0x200)
+                        else if (*decode & 0x200)
                             sp->unk0.levels.level[i] = 11;
                     }
                     sp->unk2E0 = 0;
@@ -2751,22 +2751,22 @@ void func_80060334(void)
                 option = &DAT_801cd120.unk1;
                 func_80057d10();
                 DAT_801cd180.unkC = 0;
-                if (sp->unk2E0 > 0) {
-                    if (sp->unk2E0 < 5)
-                        option[sp->unk2E0] = 0;
-                } else if (option[sp->unk2E0] < 63) {
-                    option[sp->unk2E0]++;
+                if (sp->unk2E0 <= 0) {
+                    if (option[sp->unk2E0] < 63)
+                        option[sp->unk2E0]++;
+                } else if (sp->unk2E0 < 5) {
+                    option[sp->unk2E0] = 0;
                 }
             }
             if (DAT_801cd180.unkC & 0x80) {
                 option = &DAT_801cd120.unk1;
                 func_80057d10();
                 DAT_801cd180.unkC = 0;
-                if (sp->unk2E0 > 0) {
-                    if (sp->unk2E0 < 5)
-                        option[sp->unk2E0] = 1;
-                } else if (option[sp->unk2E0] != 0) {
-                    option[sp->unk2E0]--;
+                if (sp->unk2E0 <= 0) {
+                    if (option[sp->unk2E0] != 0)
+                        option[sp->unk2E0]--;
+                } else if (sp->unk2E0 < 5) {
+                    option[sp->unk2E0] = 1;
                 }
             }
         } else if (sp->unk2E2 == 0) {
@@ -2913,12 +2913,15 @@ void func_80060334(void)
                 *key = 0x200;
             }
             sp->unk0.levels.flags = 0;
-            used = 15;
-            for (i = 0; i < 12; i++) {
-                if (DAT_801cd180.unk22[i] & used)
-                    sp->unk0.levels.flags |= DAT_801cd180.unk22[i];
-                else
-                    used |= DAT_801cd180.unk22[i];
+            {
+                const u16 *scan = DAT_801cd180.unk22;
+                used = 15;
+                for (i = 0; i < 12; i++, scan++) {
+                    if (*scan & used)
+                        sp->unk0.levels.flags |= *scan;
+                    else
+                        used |= *scan;
+                }
             }
             DAT_801cd180.unk4 = 0;
             DAT_801cd180.unkC = 0;
