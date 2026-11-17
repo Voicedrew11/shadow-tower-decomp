@@ -3449,8 +3449,10 @@ int func_80061a08(void)
 }
 
 /*
- * Not exact (80.2%): the offset, probe countdown and retry count take
- * other s-registers and retail keeps -1 in s8 for the I/O tests.
+ * Not exact (size-exact): the working offset starts after the positive
+ * size guard, both checksum loop initializations and the successful-frame
+ * updates agree. The input data copy is earlier, and the offset/probe
+ * countdown use s2/s1 instead of retail's s1/s2. Both versions keep -1 in s8.
  *
  * Writes size bytes from data to the open file fd at offset, 127 bytes per
  * 128-byte frame with an inverted byte sum in the last byte, reading each
@@ -3469,41 +3471,45 @@ int func_80061d34(int fd, int offset, u8 *data, int size)
     u8 sum;
     int i;
 
-    while (size > 0) {
-        frame[127] = 0;
-        for (i = 0; i < 127; i++) {
-            frame[i] = *data;
-            frame[127] += *data++;
-        }
-        frame[127] = ~frame[127];
-    again:
-        if (n == 0) {
-            if (func_80061578(sp->unk1F8) == 0)
+    if (size > 0) {
+        int frame_offset = offset;
+
+        do {
+            frame[127] = i = 0;
+            for (; i < 127; i++) {
+                frame[i] = *data;
+                frame[127] += *data++;
+            }
+            frame[127] = ~frame[127];
+        again:
+            if (n == 0) {
+                if (func_80061578(sp->unk1F8) == 0)
+                    return -1;
+                n = 3;
+            }
+            if (retry >= 3) {
+                sp->unk0.half[0] = 355;
                 return -1;
-            n = 3;
-        }
-        if (retry >= 3) {
-            sp->unk0.half[0] = 355;
-            return -1;
-        }
-        retry++;
-        lseek(fd, offset, SEEK_SET);
-        if (write(fd, frame, 128) == -1)
-            goto again;
-        lseek(fd, offset, SEEK_SET);
-        if (read(fd, check, 128) == -1)
-            goto again;
-        sum = 0;
-        for (i = 0; i < 127; i++)
-            sum += check[i];
-        sum = ~sum;
-        if (sum != frame[127])
-            goto again;
-        size -= 127;
-        offset += 128;
-        retry = 0;
-        n--;
-        total += sum;
+            }
+            retry++;
+            lseek(fd, frame_offset, SEEK_SET);
+            if (write(fd, frame, 128) == -1)
+                goto again;
+            lseek(fd, frame_offset, SEEK_SET);
+            if (read(fd, check, 128) == -1)
+                goto again;
+            sum = i = 0;
+            for (; i < 127; i++)
+                sum += check[i];
+            sum = ~sum;
+            if (sum != frame[127])
+                goto again;
+            size -= 127;
+            frame_offset += 128;
+            retry = 0;
+            total += sum;
+            n--;
+        } while (size > 0);
     }
     return total;
 }
