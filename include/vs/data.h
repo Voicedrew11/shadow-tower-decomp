@@ -215,4 +215,8 @@ extern u16 DAT_80063378;
 extern u16 DAT_8006333e;
 extern u16 DAT_80063340;
 
+/* VS band 6: the two 0x20000-byte GPU packet buffers func_80014480 hands
+ * the graphics state (bss; ST.EXE's DAT_8011c488). */
+extern u_long DAT_8011c528[];
+
 #endif
