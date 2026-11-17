@@ -4101,6 +4101,8 @@ long func_80062bc0(int port)
  * 80057744 path updates this halfword while the retail waits reload it.
  * A narrow volatile while read reloads it correctly but peels the loop
  * entries, adding 48 bytes and moving the following exact functions.
+ * Keeping the goto waits with qualified field pointers instead forms
+ * full addresses (+12 bytes), also moving those functions.
  *
  * The memory card save/load screen (unk2DC's high byte set: save). Steps
  * through port choice, probe, format offer, directory, file headers, file
