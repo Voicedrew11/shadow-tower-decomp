@@ -286,9 +286,10 @@ s16 func_800582f0(int sound, int volume)
  * Keys sound `id` on with the two volumes (scaled by the sound option) on a
  * free voice, else on one that is releasing; returns the voice or -1.
  *
- * Not exact: retail places the key-on block after the `note = 0` jump and
- * sends every early return to one shared `li v0,-1`; this build keeps the
- * block at the end and emits a return stub first (0x14 bytes longer).
+ * Not exact: the shared failure return and key-on control flow agree.
+ * The voice-ID store reloads the sound-state base instead of retaining
+ * the scan owner, and note narrowing is scheduled after volume arguments.
+ * This build is eight bytes long.
  */
 ADDRESS(0x80058318, 0x1f4)
 s16 func_80058318(int id, int left, int right, int note)
@@ -300,27 +301,37 @@ s16 func_80058318(int id, int left, int right, int note)
     int i;
 
     if (id == 255)
-        return -1;
+        goto failed;
     opt = &DAT_801cd120;
     if (opt->unk1 == 0)
-        return -1;
+        goto failed;
     snd = &DAT_801dd1c0.sounds[id & 0x7ff];
     if (snd->slot == -1)
-        return -1;
+        goto failed;
     slot = &DAT_801dd1c0.slots[snd->slot];
     if (slot->vab == -1)
-        return -1;
+        goto failed;
     if (slot->vab == 254)
-        return -1;
+        goto failed;
     if (slot->block[2] == 3)
-        return -1;
+        goto failed;
     left = left * opt->unk1 >> 7;
     right = right * opt->unk1 >> 7;
     note += snd->note;
-    if (note < 0)
-        note = 0;
-    else if (note >= 128)
+    if (note >= 0)
+        goto clamp_high;
+    note = 0;
+    goto find_voice;
+release:
+    SsUtKeyOffV(i);
+key_on:
+    voice = SsUtKeyOn(slot->vab, snd->prog, snd->tone, note, 0, left, right);
+    DAT_801dd1c0.voices[voice] = id;
+    return voice;
+clamp_high:
+    if (note >= 128)
         note = 127;
+find_voice:
     SpuGetAllKeysStatus(DAT_801dd1c0.keys);
     i = 24;
     while (i--) {
@@ -329,14 +340,9 @@ s16 func_80058318(int id, int left, int right, int note)
     }
     i = 24;
     while (i--) {
-        if (DAT_801dd1c0.keys[i] == 3) {
-            SsUtKeyOffV(i);
-            goto key_on;
-        }
+        if (DAT_801dd1c0.keys[i] == 3)
+            goto release;
     }
+failed:
     return -1;
-key_on:
-    voice = SsUtKeyOn(slot->vab, snd->prog, snd->tone, note, 0, left, right);
-    DAT_801dd1c0.voices[voice] = id;
-    return voice;
 }
