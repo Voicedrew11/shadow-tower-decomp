@@ -17,7 +17,6 @@
 #include <st/xa.h>
 #include <st/fdat.h>
 
-/* Not exact (one attempt, retries off; 74.6%): first divergence retail `addiu sp,sp,-32`, this source `addiu sp,sp,-40`. */
 /*
  * The current entry's handler: the animation steps as fdat_801ed6e4 does,
  * except that a script of kind 0x17 flies the entry: it keeps 0x640 under
@@ -41,9 +40,12 @@ void func_801ed8f4(void)
     s = e->unkA8;
     if (s == NULL)
         return;
-    speed = e->unkB0 < 0 ? -e->unkB0 : e->unkB0;
-    if (e->unk0F == 0x17)
+    speed = abs(e->unkB0);
+    switch (e->unk0F) {
+    case 0x17:
         *(s32 *)&e->unk48 = viewer.position.vy - 0x640;
+        break;
+    }
     if (e->unk0F == 0x17) {
         e->unk08 = s->unk01;
         fdat_801eb814(e->unk5C, s->arg.s[1] * speed >> 12);
