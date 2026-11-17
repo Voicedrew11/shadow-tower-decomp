@@ -534,9 +534,11 @@ void func_80059cec(void)
  * Totals the attribute rows from the viewer's figures and equipment, and
  * fills one record per shown equipment slot with its figures and kind.
  *
- * Not exact: retail reads the effect row index (unk16C/unk170) before the
+ * Not exact (size-exact): retail reads the effect row index (unk16C/unk170) before the
  * slot id and folds the +0xa field offset into the effects address
- * constant; this build keeps it as a displacement.
+ * constant; this build keeps it as a displacement. A row-value local forwards
+ * the quotient instead of reloading the row. A typed values-array phase folds
+ * the field address but drops the two slot reloads, moving later exact code.
  */
 ADDRESS(0x80059dc0, 0x5ac)
 void func_80059dc0(void)
