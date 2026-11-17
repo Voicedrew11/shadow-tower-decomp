@@ -12,8 +12,6 @@
  * flagged here without its second mark, and that is none of the other
  * record's 21 listed ids.
  */
-/* Not exact: register choice (retail keeps the other record in $a3, the
- * item id in $a0 and the bit's 1 in $a1), one word longer here. */
 ADDRESS(0x800193e8, 0x224)
 int func_800193e8(int player)
 {
@@ -23,9 +21,15 @@ int func_800193e8(int player)
     int i;
 
     for (i = 0; i < 266; i++) {
+        u32 mask;
+        u32 word;
+
         if (mine->unk150[i] != 0 || other->unk150[i] == 0)
             continue;
-        if (DAT_801a0a80[player].unk14CC[i / 32] & (1 << (i % 32))) {
+        mask = 1;
+        word = DAT_801a0a80[player].unk14CC[i / 32];
+        mask <<= i % 32;
+        if (word & mask) {
             if (mine->unk14[i] == 0)
                 continue;
         }
