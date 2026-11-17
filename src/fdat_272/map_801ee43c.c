@@ -24,6 +24,7 @@ void func_801ee610(void);
 void func_801ee7d4(void);
 void func_801ee948(void);
 
+/* Not exact (one attempt, retries off; 94.0%): first divergence retail `lui v1,0x0`, this source `lui v0,0x0`. */
 /* Standing at table B entry 16 with item slot 3 below 50 and the scene not
  * yet run: walks up to it and plays the scene (scene stage 2). */
 ADDRESS(0x801ee43c, 0x108)

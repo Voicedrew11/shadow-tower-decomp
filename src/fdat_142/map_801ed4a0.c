@@ -55,6 +55,7 @@ void func_801ed4a0(void)
     }
 }
 
+/* Not exact (one attempt, retries off; 99.5%): first divergence retail `j <func_801ed54c+0x78>`, this source `j <func_801ed54c+0x7c>`. */
 /*
  * Runs the area: the viewer standing on record 0x1f2 or 0x63 picks the
  * scene words; entry 48 asleep until it wakes (scene word 3 armed), then

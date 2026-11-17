@@ -72,7 +72,8 @@ void fdat_801ed6e4(void);
 
 /*
  * Overlay words one map unit defines and a later unit of the same overlay
- * reads (each name exists in its own overlay only).
+ * reads (each name exists in its own overlay only). A name that is a
+ * static in another overlay is declared in its reader instead.
  */
 extern int fdat_801edfac; /* FDAT_012.BIN: src/fdat_012/map_801ed4a0.c */
 extern int fdat_801edb3c; /* FDAT_332.BIN: src/fdat_332/map_801ed614.c */
@@ -87,6 +88,13 @@ extern int fdat_801eda08; /* FDAT_202.BIN: src/fdat_202/map_801ed4a0.c */
 extern int fdat_801ee0b4; /* FDAT_242.BIN: src/fdat_242/map_801edf2c.c */
 extern int fdat_801ee0b8; /* FDAT_242.BIN: src/fdat_242/map_801edaa4.c */
 extern int fdat_801ee0bc; /* FDAT_242.BIN: src/fdat_242/map_801ed4e0.c */
+extern int fdat_801ed8cc; /* FDAT_252.BIN: src/fdat_252/map_801ed4a0.c */
+extern int fdat_801ee370; /* FDAT_262.BIN: src/fdat_262/map_801edec4.c */
+extern int fdat_801ee474; /* FDAT_302.BIN: src/fdat_302/map_801ee0b8.c */
+extern int fdat_801ee478; /* FDAT_302.BIN: src/fdat_302/map_801edc60.c */
+extern int fdat_801ee47c; /* FDAT_302.BIN: src/fdat_302/map_801edea0.c */
+extern int fdat_801ee480; /* FDAT_302.BIN: src/fdat_302/map_801edd9c.c */
+extern int fdat_801ed8c4; /* FDAT_442..472.BIN: src/lib/fdat_801ed420.c */
 extern int fdat_801eda7c; /* FDAT_102.BIN: src/fdat_102/map_801ed6b8.c */
 /* FDAT_272.BIN: each word is defined by one of its map units (one COMMON
  * word per unit; see the DATA() claims in src/fdat_272/). */

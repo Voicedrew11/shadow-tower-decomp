@@ -29,6 +29,7 @@ int fdat_801ee0bc;
 void func_801edebc(void);
 void func_801edf2c(void);
 
+/* Not exact (one attempt, retries off; 93.3%): first divergence retail `beq v1,a3,<func_801ed4e0+0x1f4>`, this source `beq v1,a3,<func_801ed4e0+0x1e8>`. */
 /* Sets up the area by flag 17 and the stream counters of records 12 and
  * 13: entries 48..50, the gate scene stage fdat_801ee0b8 and table B
  * entry 2. */

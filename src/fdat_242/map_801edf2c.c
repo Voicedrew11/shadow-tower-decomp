@@ -23,6 +23,7 @@ RODATA(0x801eb7bc, 0x30)
 DATA(0x801ee0b4, 0x4, ".bss")
 int fdat_801ee0b4;
 
+/* Not exact (one attempt, retries off; 98.3%): first divergence retail `lui a1,0x0`, this source `lui a1,0x0`. */
 /* Moves the finished texture animation's pages and palette rows into
  * place and ends the exit scene. */
 ADDRESS(0x801edf2c, 0x184)

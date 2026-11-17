@@ -17,6 +17,7 @@
 #include <st/xa.h>
 #include <st/fdat.h>
 
+/* Not exact (one attempt, retries off; 57.1%): first divergence retail `sw s2,40(sp)`, this source `sw s1,36(sp)`. */
 /*
  * The falling entry's stages (Vis212.unk1C byte 0): 1 falls and pushes the
  * viewer away while near, 2 lands (animation 6), 3 walks off (animation

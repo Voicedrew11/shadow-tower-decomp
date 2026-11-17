@@ -17,6 +17,7 @@
 #include <st/xa.h>
 #include <st/fdat.h>
 
+/* Not exact (one attempt, retries off; 47.0%): first divergence retail `lui v1,0x0`, this source `lui v1,0x0`. */
 /*
  * Table B entry 33 (a switch) state 0xff turns the area's table B entries
  * off: kinds 0x29, 0x2b and 0x94 stop (0x94 also loses its scale), 0xaf is

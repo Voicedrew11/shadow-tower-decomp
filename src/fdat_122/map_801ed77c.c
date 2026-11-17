@@ -19,6 +19,7 @@
 
 void func_801ed8f8(Vis212 *e);
 
+/* Not exact (one attempt, retries off; 97.4%): first divergence retail `lui a1,0x0`, this source `lui a1,0x0`. */
 /* The current entry's handler: kind 0 dying sets fdat_801ed938 and the
  * second flag word's bit 15; then the animation steps as fdat_801ed6e4
  * does, kind 2 running func_801ed8f8 after its next move. */

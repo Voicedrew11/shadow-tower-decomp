@@ -1585,6 +1585,13 @@ profile = "probe-gcc272cdk-o2-g0"
 bind = "name"
 
 [[unit]]
+unit = "fdat_252.map_801ed4ec"
+image = "FDAT_252.BIN"
+source = "src/fdat_252/map_801ed4ec.c"
+profile = "probe-gcc272cdk-o2-g0"
+bind = "name"
+
+[[unit]]
 unit = "fdat_252.map_801ed81c"
 image = "FDAT_252.BIN"
 source = "src/fdat_252/map_801ed81c.c"
@@ -1609,6 +1616,20 @@ bind = "name"
 unit = "fdat_262.common_b"
 image = "FDAT_262.BIN"
 source = "src/lib/fdat_common_b.c"
+profile = "probe-gcc272cdk-o2-g0"
+bind = "name"
+
+[[unit]]
+unit = "fdat_262.map_801ed4a0"
+image = "FDAT_262.BIN"
+source = "src/fdat_262/map_801ed4a0.c"
+profile = "probe-gcc272cdk-o2-g0"
+bind = "name"
+
+[[unit]]
+unit = "fdat_262.map_801edec4"
+image = "FDAT_262.BIN"
+source = "src/fdat_262/map_801edec4.c"
 profile = "probe-gcc272cdk-o2-g0"
 bind = "name"
 
@@ -1795,6 +1816,20 @@ profile = "probe-gcc272cdk-o2-g0"
 bind = "name"
 
 [[unit]]
+unit = "fdat_302.map_801ed4a0"
+image = "FDAT_302.BIN"
+source = "src/fdat_302/map_801ed4a0.c"
+profile = "probe-gcc272cdk-o2-g0"
+bind = "name"
+
+[[unit]]
+unit = "fdat_302.map_801edc60"
+image = "FDAT_302.BIN"
+source = "src/fdat_302/map_801edc60.c"
+profile = "probe-gcc272cdk-o2-g0"
+bind = "name"
+
+[[unit]]
 unit = "fdat_302.map_801edd9c"
 image = "FDAT_302.BIN"
 source = "src/fdat_302/map_801edd9c.c"
@@ -1802,9 +1837,23 @@ profile = "probe-gcc272cdk-o2-g0"
 bind = "name"
 
 [[unit]]
+unit = "fdat_302.map_801edea0"
+image = "FDAT_302.BIN"
+source = "src/fdat_302/map_801edea0.c"
+profile = "probe-gcc272cdk-o2-g0"
+bind = "name"
+
+[[unit]]
 unit = "fdat_302.map_801ee090"
 image = "FDAT_302.BIN"
 source = "src/fdat_302/map_801ee090.c"
+profile = "probe-gcc272cdk-o2-g0"
+bind = "name"
+
+[[unit]]
+unit = "fdat_302.map_801ee0b8"
+image = "FDAT_302.BIN"
+source = "src/fdat_302/map_801ee0b8.c"
 profile = "probe-gcc272cdk-o2-g0"
 bind = "name"
 
@@ -1858,6 +1907,13 @@ profile = "probe-gcc272cdk-o2-g0"
 bind = "name"
 
 [[unit]]
+unit = "fdat_332.map_801ed4a0"
+image = "FDAT_332.BIN"
+source = "src/fdat_332/map_801ed4a0.c"
+profile = "probe-gcc272cdk-o2-g0"
+bind = "name"
+
+[[unit]]
 unit = "fdat_332.map_801ed614"
 image = "FDAT_332.BIN"
 source = "src/fdat_332/map_801ed614.c"
@@ -1868,6 +1924,13 @@ bind = "name"
 unit = "fdat_332.map_801ed904"
 image = "FDAT_332.BIN"
 source = "src/fdat_332/map_801ed904.c"
+profile = "probe-gcc272cdk-o2-g0"
+bind = "name"
+
+[[unit]]
+unit = "fdat_332.map_801ed9e8"
+image = "FDAT_332.BIN"
+source = "src/fdat_332/map_801ed9e8.c"
 profile = "probe-gcc272cdk-o2-g0"
 bind = "name"
 
@@ -1896,6 +1959,13 @@ bind = "name"
 unit = "fdat_372.map_801ed4a0"
 image = "FDAT_372.BIN"
 source = "src/fdat_372/map_801ed4a0.c"
+profile = "probe-gcc272cdk-o2-g0"
+bind = "name"
+
+[[unit]]
+unit = "fdat_372.map_801ed510"
+image = "FDAT_372.BIN"
+source = "src/fdat_372/map_801ed510.c"
 profile = "probe-gcc272cdk-o2-g0"
 bind = "name"
 
@@ -1931,6 +2001,20 @@ bind = "name"
 unit = "fdat_382.common_b"
 image = "FDAT_382.BIN"
 source = "src/lib/fdat_common_b.c"
+profile = "probe-gcc272cdk-o2-g0"
+bind = "name"
+
+[[unit]]
+unit = "fdat_382.map_801ed4a0"
+image = "FDAT_382.BIN"
+source = "src/fdat_382/map_801ed4a0.c"
+profile = "probe-gcc272cdk-o2-g0"
+bind = "name"
+
+[[unit]]
+unit = "fdat_382.map_801ed9b4"
+image = "FDAT_382.BIN"
+source = "src/fdat_382/map_801ed9b4.c"
 profile = "probe-gcc272cdk-o2-g0"
 bind = "name"
 
@@ -2033,6 +2117,13 @@ profile = "probe-gcc272cdk-o2-g0"
 bind = "name"
 
 [[unit]]
+unit = "fdat_442.map_801ed454"
+image = "FDAT_442.BIN"
+source = "src/fdat_442/map_801ed454.c"
+profile = "probe-gcc272cdk-o2-g0"
+bind = "name"
+
+[[unit]]
 unit = "fdat_452.common_a"
 image = "FDAT_452.BIN"
 source = "src/lib/fdat_common_a.c"
@@ -2057,6 +2148,13 @@ bind = "name"
 unit = "fdat_452.map_801ed420"
 image = "FDAT_452.BIN"
 source = "src/lib/fdat_801ed420.c"
+profile = "probe-gcc272cdk-o2-g0"
+bind = "name"
+
+[[unit]]
+unit = "fdat_452.map_801ed454"
+image = "FDAT_452.BIN"
+source = "src/fdat_452/map_801ed454.c"
 profile = "probe-gcc272cdk-o2-g0"
 bind = "name"
 
@@ -2089,6 +2187,13 @@ profile = "probe-gcc272cdk-o2-g0"
 bind = "name"
 
 [[unit]]
+unit = "fdat_462.map_801ed454"
+image = "FDAT_462.BIN"
+source = "src/fdat_462/map_801ed454.c"
+profile = "probe-gcc272cdk-o2-g0"
+bind = "name"
+
+[[unit]]
 unit = "fdat_472.common_a"
 image = "FDAT_472.BIN"
 source = "src/lib/fdat_common_a.c"
@@ -2113,5 +2218,12 @@ bind = "name"
 unit = "fdat_472.map_801ed420"
 image = "FDAT_472.BIN"
 source = "src/lib/fdat_801ed420.c"
+profile = "probe-gcc272cdk-o2-g0"
+bind = "name"
+
+[[unit]]
+unit = "fdat_472.map_801ed454"
+image = "FDAT_472.BIN"
+source = "src/fdat_472/map_801ed454.c"
 profile = "probe-gcc272cdk-o2-g0"
 bind = "name"

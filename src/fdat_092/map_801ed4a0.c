@@ -116,6 +116,7 @@ void func_801ed4a0(void)
     }
 }
 
+/* Not exact (one attempt, retries off; 62.2%): first divergence retail `lui v0,0x0`, this source `sw s1,20(sp)`. */
 /*
  * Runs the area: the gate scene once record 14's stream counter is 1;
  * opens table B entry pairs 7/8 and 5/6 once table A entries 32 and 35 are

@@ -1,0 +1,151 @@
+/*
+ * FDAT_472.BIN: its ending handlers and the ending word fdat_801ed8cc (WIP module; a unit of its own until its neighbours in
+ * the run are exact).
+ */
+#include <kf/lib/address.h>
+#include <kf/lib/types.h>
+#include <sys/types.h>
+#include <LIBGTE.H>
+#include <LIBGPU.H>
+#include <psyq/libc.h>
+#include <st/vis.h>
+#include <st/data.h>
+#include <st/anim.h>
+#include <st/hud.h>
+#include <st/menu.h>
+#include <st/light.h>
+#include <st/xa.h>
+#include <st/fdat.h>
+
+#include <st/gfx.h>
+#include <st/cd.h>
+
+/* Which ending plays: 0..3 by the viewer's state (see func_801ed454). */
+DATA(0x801ed8cc, 0x4, ".bss")
+int fdat_801ed8cc;
+
+void SsSetSerialVol(short s_num, short voll, short volr);
+void func_80042cec(void);
+void func_8005f54c(void);
+
+/* Not exact (one attempt, retries off; 87.2%): first divergence retail `bnez v1,<func_801ed454+0x20c>`, this source `bnez v1,<func_801ed454+0x210>`. */
+/*
+ * Once: picks the ending by the items the viewer holds: the least
+ * (two thirds of the base) x (wear) over the worn ones against the
+ * viewer's figure, none worn, then the second flag word's bits 5-6 and a
+ * random draw.
+ */
+ADDRESS(0x801ed454, 0x228)
+void func_801ed454(void)
+{
+    Vis212 *e = vis_table_a.unk6138;
+    Vis192 *r = &vis_table_a.unk3500[e->unk02];
+    int least;
+    int none;
+    int i;
+    int n;
+    Vis44 *k;
+
+    if (fdat_801ed8c4 != 0)
+        return;
+    fdat_801ed8c4 = 1;
+    least = 0xffff;
+    none = 1;
+    k = vis_table_c.unk0118;
+    for (i = 0; i < 266; i++) {
+        if (DAT_801c7590.counts[i].count != 0 && k->unk27 != k->unk28) {
+            n = k->unk3 * 2 / 3 * (k->unk27 - k->unk28);
+            if (n < least)
+                least = n;
+            if (k->unk27 != k->unk28)
+                none = 0;
+        }
+        k++;
+    }
+    if (least != 0xffff && least >= viewer.unk2) {
+        fdat_801ed8cc = 1;
+        fdat_801eb7b4(e, 1);
+    } else if (none) {
+        fdat_801ed8cc = 2;
+        fdat_801eb7b4(e, 2);
+    } else if ((DAT_801cba08.unk1444.word >> 5 & 3) == 0) {
+        fdat_801ed8cc = 0;
+        fdat_801eb7b4(e, 0);
+        DAT_801cba08.unk1444.word = (DAT_801cba08.unk1444.word & ~0x60) | 0x20;
+    } else if ((short)rand() < 0x1000) {
+        fdat_801ed8cc = 3;
+        fdat_801eb7b4(e, 3);
+    } else {
+        fdat_801ed8cc = 4;
+        fdat_801eb7b4(e, 4);
+        fdat_801ed8c4 = 4;
+    }
+    if (fdat_801ed8cc != 4) {
+        func_80015ad4();
+        func_800542d0(r->unk09 * 6 + fdat_801ed8cc, 1);
+    }
+}
+
+/* Not exact (one attempt, retries off; 68.8%): first divergence retail `lw s3,24884(v0)`, this source `lw s4,24884(v0)`. */
+/*
+ * The ending entry's handler: steps the ending stages in fdat_801ed8c4
+ * (1 waiting for half the animation, 2 streaming, 3 stream done, 4 menu,
+ * 5 done) by the XA stream state in the world block.
+ */
+ADDRESS(0x801ed67c, 0x248)
+void func_801ed67c(void)
+{
+    Vis212 *e = vis_table_a.unk6138;
+    Vis192 *r = vis_table_a.unk6134;
+    u8 *xa;
+
+    e->unk1C.bytes[2] &= 0xf2;
+    e->unk36 = -1;
+    if (e->unkA4 == 0)
+        return;
+    if (fdat_801ed8c4 == 2 && func_800541f4()) {
+        xa = (u8 *)&world_state + 0x18000;
+        if (xa[0x6e16] == 3) {
+            func_80054278();
+            xa[0x6e19] = 0;
+            xa[0x6e16] = 4;
+        }
+    }
+    xa = (u8 *)&world_state + 0x18000;
+    if (xa[0x6e16] == 5) {
+        fdat_801ed8c4 = 3;
+        xa[0x6e16] = 0;
+    }
+    e->unk2A += e->unkB0;
+    if ((short)e->unk2A >= 0x1000) {
+        e->unk2A = 0;
+        if (fdat_801ed8c4 == 2 && (fdat_801ed8cc == 0 || fdat_801ed8cc == 2))
+            fdat_801eb7b4(e, 4);
+    }
+    if (fdat_801ed8c4 == 1) {
+        if (fdat_801ed8cc != 0 || (short)e->unk2A >= 0x600) {
+            viewer.unk1E4 = 0;
+            func_8005408c(r->unk09, fdat_801ed8cc);
+            SsSetSerialVol(0, 0x40, 0x40);
+            xa = (u8 *)&world_state + 0x18000;
+            xa[0x6e16] = 2;
+            xa[0x6e17] = 1;
+            xa[0x6e19] = 0;
+            fdat_801ed8c4 = 2;
+            func_80042cec();
+        }
+    } else if (fdat_801ed8c4 == 3) {
+        if (fdat_801ed8cc == 2)
+            fdat_801ed8c4 = 5;
+        else
+            fdat_801ed8c4 = 4;
+    } else if (fdat_801ed8c4 == 4) {
+        DAT_801cd180.unk4 = 0;
+        *(s16 *)0x1f8002dc = 8;
+        *(u8 *)0x1f8002e5 = 0;
+        func_8005f54c();
+        fdat_801ed8c4 = 5;
+    } else if (fdat_801ed8c4 == 5) {
+        DAT_801cd0e4 = 1;
+    }
+}

@@ -37,6 +37,7 @@ static int fdat_801edce0;
 
 void func_801edbd0(int which);
 
+/* Not exact (one attempt, retries off; 83.7%): first divergence retail `bne v0,v1,<func_801ed4a0+0xc8>`, this source `bne v0,v1,<func_801ed4a0+0xc4>`. */
 /* Sets up the area by the second flag word's bits 8 and 9: table C items
  * 28/29, the scene words and the bridge pieces (table B kind 0x97). */
 ADDRESS(0x801ed4a0, 0xf4)
@@ -69,6 +70,7 @@ void func_801ed4a0(void)
     }
 }
 
+/* Not exact (one attempt, retries off; 97.9%): first divergence retail `lui v0,0x0`, this source `lui v0,0x0`. */
 /*
  * Runs the area: events 0x2e and 2 start table B entries 46 and 2 (each
  * carrying its table C item on node 0, vertex 0x23); once entry 2 and then

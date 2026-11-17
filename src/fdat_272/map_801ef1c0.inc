@@ -1,6 +1,9 @@
 /*
- * FDAT_272.BIN: the palette blend (WIP module; a unit of its own until its neighbours in
- * the run are exact).
+ * FDAT_272.BIN: the palette blend, not claimed (one attempt, retries off;
+ * 93.4%). Retail reads its second RECT from func_801ed4d0's initializer at
+ * 0x801eb72c, which this local initializer duplicates (the unit's .rodata
+ * would be 16 bytes for 8), and packs its three statics from 0x801ef51c
+ * where ASPSX aligns the arrays; the unit could not pass the data gate.
  */
 #include <kf/lib/address.h>
 #include <kf/lib/types.h>

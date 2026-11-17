@@ -33,6 +33,7 @@ void func_800500ac(int arg0, int arg1, int arg2, int arg3);
 void func_8004e324(void);
 void func_80042c10(void);
 
+/* Not exact (one attempt, retries off; 95.4%): first divergence retail `lui a1,0x5`, this source `lui a1,0x3`. */
 /*
  * The gate scene of func_801ed604's event: fades out, puts the viewer at
  * gate 0 or 1 facing in, fades in; at gate 0 table A entry 32 wakes

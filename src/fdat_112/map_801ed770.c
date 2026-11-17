@@ -19,6 +19,7 @@
 
 void func_801edb90(Vis212 *e);
 
+/* Not exact (one attempt, retries off; 88.8%): first divergence retail `lui v1,0x0`, this source `lui v0,0x0`. */
 /*
  * The current entry's handler: kind 10 wakes once its record's stream
  * counter is 3 (flag 6) and, when hit, gives the viewer status timer 4 and

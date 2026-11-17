@@ -52,6 +52,7 @@ void func_801edbf8(void)
     }
 }
 
+/* Not exact (one attempt, retries off; 98.3%): first divergence retail `sh v0,62(sp)`, this source `sh v0,62(sp)`. */
 /* Item 0x12a used in front of table B entry 12 sets fdat_801edfd0; the
  * result is 1 then, else 2. */
 ADDRESS(0x801edd38, 0xc8)

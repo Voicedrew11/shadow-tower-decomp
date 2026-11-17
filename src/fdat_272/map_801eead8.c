@@ -17,6 +17,7 @@
 #include <st/xa.h>
 #include <st/fdat.h>
 
+/* Not exact (one attempt, retries off; 91.7%): first divergence retail `sw s3,36(sp)`, this source `sw s3,36(sp)`. */
 /* Slides table C item 29 by 0x1ea, 24 a frame while its model is loaded. */
 ADDRESS(0x801eead8, 0xdc)
 void func_801eead8(void)

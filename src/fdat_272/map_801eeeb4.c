@@ -17,6 +17,7 @@
 #include <st/xa.h>
 #include <st/fdat.h>
 
+/* Not exact (one attempt, retries off; 98.4%): first divergence retail `addiu s2,s1,48`, this source `addiu a1,s1,48`. */
 /*
  * Entry 49 plays animation 4 and lifts its arm a frame at a time; table C
  * item 10 (11 once 10 is taken) rides on vertex 0x160 until the arm is up.

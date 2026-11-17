@@ -751,7 +751,13 @@ FDAT_252.BIN	0x801eb560	0x0	0x24c	unclassified	coverage-gap			payload-complement
 FDAT_252.BIN	0x801ed8cc	0x236c	0x4	bss	candidate	fdat_801ed8cc	int	asm;src/fdat_252/map_801ed4a0.c	FDAT overlay word after the code (zero in the archive entry)
 FDAT_252.BIN	0x801ed8d0	0x2370	0x490	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 FDAT_262.BIN	0x801eb560	0x0	0x24c	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
-FDAT_262.BIN	0x801ee370	0x2e10	0x1f0	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
+FDAT_262.BIN	0x801ee370	0x2e10	0x4	bss	candidate	fdat_801ee370	int	asm;src/fdat_262/map_801edec4.c	FDAT overlay word after the code (zero in the archive entry)
+FDAT_262.BIN	0x801ee374	0x2e14	0x4	bss	candidate	fdat_801ee374	int	asm;src/fdat_262/map_801ed4a0.c	FDAT overlay word after the code (zero in the archive entry)
+FDAT_262.BIN	0x801ee378	0x2e18	0x4	bss	candidate	fdat_801ee378	int	asm;src/fdat_262/map_801ed4a0.c	FDAT overlay word after the code (zero in the archive entry)
+FDAT_262.BIN	0x801ee37c	0x2e1c	0x4	bss	candidate	fdat_801ee37c	int	asm;src/fdat_262/map_801ed4a0.c	FDAT overlay word after the code (zero in the archive entry)
+FDAT_262.BIN	0x801ee380	0x2e20	0x4	bss	candidate	fdat_801ee380	int	asm;src/fdat_262/map_801ed4a0.c	FDAT overlay word after the code (zero in the archive entry)
+FDAT_262.BIN	0x801ee384	0x2e24	0x4	bss	candidate	fdat_801ee384	int	asm;src/fdat_262/map_801ed4a0.c	FDAT overlay word after the code (zero in the archive entry)
+FDAT_262.BIN	0x801ee388	0x2e28	0x1d8	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 FDAT_272.BIN	0x801eb560	0x0	0x27c	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 FDAT_272.BIN	0x801ef504	0x3fa4	0x18	bss	candidate	fdat_801ef504	int[6]	asm;src/fdat_272/map_801ed4d0.c	FDAT overlay word after the code (zero in the archive entry)
 FDAT_272.BIN	0x801ef51c	0x3fbc	0x404	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
@@ -767,7 +773,13 @@ FDAT_272.BIN	0x801ef940	0x43e0	0x420	unclassified	coverage-gap			payload-complem
 FDAT_282.BIN	0x801eb560	0x0	0x24c	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 FDAT_282.BIN	0x801ee0b0	0x2b50	0x4b0	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 FDAT_302.BIN	0x801eb560	0x0	0x24c	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
-FDAT_302.BIN	0x801ee46c	0x2f0c	0xf4	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
+FDAT_302.BIN	0x801ee46c	0x2f0c	0x4	bss	candidate	fdat_801ee46c	int	asm;src/fdat_302/map_801ed4a0.c	FDAT overlay word after the code (zero in the archive entry)
+FDAT_302.BIN	0x801ee470	0x2f10	0x4	bss	candidate	fdat_801ee470	int	asm;src/fdat_302/map_801ed4a0.c	FDAT overlay word after the code (zero in the archive entry)
+FDAT_302.BIN	0x801ee474	0x2f14	0x4	bss	candidate	fdat_801ee474	int	asm;src/fdat_302/map_801ee0b8.c	FDAT overlay word after the code (zero in the archive entry)
+FDAT_302.BIN	0x801ee478	0x2f18	0x4	bss	candidate	fdat_801ee478	int	asm;src/fdat_302/map_801edc60.c	FDAT overlay word after the code (zero in the archive entry)
+FDAT_302.BIN	0x801ee47c	0x2f1c	0x4	bss	candidate	fdat_801ee47c	int	asm;src/fdat_302/map_801edea0.c	FDAT overlay word after the code (zero in the archive entry)
+FDAT_302.BIN	0x801ee480	0x2f20	0x4	bss	candidate	fdat_801ee480	int	asm;src/fdat_302/map_801edd9c.c	FDAT overlay word after the code (zero in the archive entry)
+FDAT_302.BIN	0x801ee484	0x2f24	0xdc	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 FDAT_322.BIN	0x801eb560	0x0	0x24c	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 FDAT_322.BIN	0x801ed794	0x2234	0x5cc	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 FDAT_332.BIN	0x801eb560	0x0	0x24c	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
@@ -777,7 +789,10 @@ FDAT_372.BIN	0x801eb560	0x0	0x24c	unclassified	coverage-gap			payload-complement
 FDAT_372.BIN	0x801eda3c	0x24dc	0x4	bss	candidate	fdat_801eda3c	int	asm;src/fdat_372/map_801ed4a0.c	FDAT overlay word after the code (zero in the archive entry)
 FDAT_372.BIN	0x801eda40	0x24e0	0x320	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 FDAT_382.BIN	0x801eb560	0x0	0x24c	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
-FDAT_382.BIN	0x801edafc	0x259c	0x264	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
+FDAT_382.BIN	0x801edafc	0x259c	0x4	bss	candidate	fdat_801edafc	int	asm;src/fdat_382/map_801eda74.c	FDAT overlay word after the code (zero in the archive entry)
+FDAT_382.BIN	0x801edb00	0x25a0	0x4	bss	candidate	fdat_801edb00	int	asm;src/fdat_382/map_801ed9b4.c	FDAT overlay word after the code (zero in the archive entry)
+FDAT_382.BIN	0x801edb04	0x25a4	0x4	bss	candidate	fdat_801edb04	int	asm;src/fdat_382/map_801ed4a0.c	FDAT overlay word after the code (zero in the archive entry)
+FDAT_382.BIN	0x801edb08	0x25a8	0x258	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 FDAT_402.BIN	0x801eb560	0x0	0x24c	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 FDAT_402.BIN	0x801ed794	0x2234	0x5cc	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 FDAT_412.BIN	0x801eb560	0x0	0x24c	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
@@ -785,16 +800,20 @@ FDAT_412.BIN	0x801ed7c0	0x2260	0x5a0	unclassified	coverage-gap			payload-complem
 FDAT_442.BIN	0x801eb560	0x0	0x1cc	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 FDAT_442.BIN	0x801ed8c0	0x2360	0x4	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 FDAT_442.BIN	0x801ed8c4	0x2364	0x4	bss	candidate	fdat_801ed8c4	int	asm;src/lib/fdat_801ed420.c	FDAT overlay word after the code (zero in the archive entry)
-FDAT_442.BIN	0x801ed8c8	0x2368	0x498	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
+FDAT_442.BIN	0x801ed8c8	0x2368	0x4	bss	candidate	fdat_801ed8c8	int	asm;src/fdat_442/map_801ed454.c	FDAT overlay word after the code (zero in the archive entry)
+FDAT_442.BIN	0x801ed8cc	0x236c	0x494	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 FDAT_452.BIN	0x801eb560	0x0	0x1cc	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 FDAT_452.BIN	0x801ed980	0x2420	0x4	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 FDAT_452.BIN	0x801ed984	0x2424	0x4	bss	candidate	fdat_801ed8c4	int	asm;src/lib/fdat_801ed420.c	FDAT overlay word after the code (zero in the archive entry)
-FDAT_452.BIN	0x801ed988	0x2428	0x3d8	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
+FDAT_452.BIN	0x801ed988	0x2428	0x4	bss	candidate	fdat_801ed988	int	asm;src/fdat_452/map_801ed454.c	FDAT overlay word after the code (zero in the archive entry)
+FDAT_452.BIN	0x801ed98c	0x242c	0x3d4	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 FDAT_462.BIN	0x801eb560	0x0	0x1cc	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 FDAT_462.BIN	0x801ed9a0	0x2440	0x4	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 FDAT_462.BIN	0x801ed9a4	0x2444	0x4	bss	candidate	fdat_801ed8c4	int	asm;src/lib/fdat_801ed420.c	FDAT overlay word after the code (zero in the archive entry)
-FDAT_462.BIN	0x801ed9a8	0x2448	0x3b8	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
+FDAT_462.BIN	0x801ed9a8	0x2448	0x4	bss	candidate	fdat_801ed9a8	int	asm;src/fdat_462/map_801ed454.c	FDAT overlay word after the code (zero in the archive entry)
+FDAT_462.BIN	0x801ed9ac	0x244c	0x3b4	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 FDAT_472.BIN	0x801eb560	0x0	0x1cc	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 FDAT_472.BIN	0x801ed8c4	0x2364	0x4	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 FDAT_472.BIN	0x801ed8c8	0x2368	0x4	bss	candidate	fdat_801ed8c4	int	asm;src/lib/fdat_801ed420.c	FDAT overlay word after the code (zero in the archive entry)
-FDAT_472.BIN	0x801ed8cc	0x236c	0x494	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
+FDAT_472.BIN	0x801ed8cc	0x236c	0x4	bss	candidate	fdat_801ed8cc	int	asm;src/fdat_472/map_801ed454.c	FDAT overlay word after the code (zero in the archive entry)
+FDAT_472.BIN	0x801ed8d0	0x2370	0x490	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data

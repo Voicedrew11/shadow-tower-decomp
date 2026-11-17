@@ -17,6 +17,7 @@
 #include <st/xa.h>
 #include <st/fdat.h>
 
+/* Not exact (one attempt, retries off; 96.7%): first divergence retail `mflo a3`, this source `mflo v0`. */
 /* Entry 49 plays animation 0 to its end while the view turns from its
  * pitch and yaw to (0, -0x400). */
 ADDRESS(0x801eec74, 0x240)

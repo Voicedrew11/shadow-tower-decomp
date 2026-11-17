@@ -20,6 +20,7 @@
 DATA(0x801ef930, 0x4, ".bss")
 int fdat_801ef930;
 
+/* Not exact (one attempt, retries off; 68.2%): first divergence retail `lui v0,0x0`, this source `lui v0,0x0`. */
 /* Takes the item of slot 3, recomputes the figures and slots, raises table
  * B entry 16 and slides table C item 28 along. */
 ADDRESS(0x801ee610, 0x1c4)

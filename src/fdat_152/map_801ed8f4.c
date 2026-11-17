@@ -17,6 +17,7 @@
 #include <st/xa.h>
 #include <st/fdat.h>
 
+/* Not exact (one attempt, retries off; 74.6%): first divergence retail `addiu sp,sp,-32`, this source `addiu sp,sp,-40`. */
 /*
  * The current entry's handler: the animation steps as fdat_801ed6e4 does,
  * except that a script of kind 0x17 flies the entry: it keeps 0x640 under

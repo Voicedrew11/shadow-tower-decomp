@@ -41,6 +41,7 @@ void func_801ed4a0(void)
     }
 }
 
+/* Not exact (one attempt, retries off; 94.5%): first divergence retail `sw s7,44(sp)`, this source `sw s6,40(sp)`. */
 /*
  * Not exact (registers): retail gives entry 49's pointer s7 and table B
  * entry 41's s6; this source swaps them (3 retries spent).

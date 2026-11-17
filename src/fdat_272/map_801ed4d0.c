@@ -21,6 +21,7 @@ RODATA(0x801eb72c, 0x8)
 
 void func_801ef1c0(void);
 
+/* Not exact (one attempt, retries off; 93.8%): first divergence retail `addiu a2,v0,8408`, this source `addiu a3,v0,8408`. */
 /*
  * Not exact (registers, one instruction long): retail keeps table B entry
  * 5's pointer in a2 and the flags' base in a1 (this source: a3, a2) and

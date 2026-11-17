@@ -12,6 +12,12 @@
 #include <st/effect.h>
 #include <st/fdat.h>
 
+/* Table A entry 5's stage: 0, 1 hit, 2 fleeing, 3 beaten, 0xff gone;
+ * defined here only because each map unit places one COMMON word
+ * (src/fdat_302/map_801ed4a0.c and map_801ee0b8.c use it). */
+DATA(0x801ee480, 0x4, ".bss")
+int fdat_801ee480;
+
 /* Moves the viewer, every live table A entry and every live effect 0x6000
  * along z (`up`) or back. */
 ADDRESS(0x801edd9c, 0x104)

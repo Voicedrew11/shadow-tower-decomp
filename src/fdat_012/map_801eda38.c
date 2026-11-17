@@ -17,6 +17,7 @@
 #include <st/xa.h>
 #include <st/fdat.h>
 
+/* Not exact (one attempt, retries off; 63.6%): first divergence retail `lui a1,0xfdff`, this source `lui a0,0xfdff`. */
 /*
  * Starts the entry's fall (animation 9) and, once its record's stream
  * counter is 4, adds table C item 0x10a at its place to the drop slots

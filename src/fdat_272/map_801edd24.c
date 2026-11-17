@@ -30,6 +30,7 @@ void func_801eeeb4(void);
 void func_801eea14(void);
 void func_801ef07c(void);
 
+/* Not exact (one attempt, retries off; 90.9%): first divergence retail `addiu v0,v0,0`, this source `addiu a2,v0,10176`. */
 /*
  * The current entry's handler: kind 4 runs the item 0x12f scene once,
  * kind 0 steps the gate stages (story flag bits 10-12), kind 10 the scene

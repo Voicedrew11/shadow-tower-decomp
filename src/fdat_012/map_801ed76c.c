@@ -21,6 +21,7 @@ void func_801eda38(Vis212 *e);
 void func_801edbec(Vis212 *e);
 void func_801edf0c(Vis212 *e);
 
+/* Not exact (one attempt, retries off; 80.4%): first divergence retail `j <func_801ed76c+0x25c>`, this source `j <func_801ed76c+0x260>`. */
 /*
  * The current entry's handler: kind 4 drops once record's stream counter
  * reaches 4 (or when hit) and then runs func_801edbec; kind 10 plays the
