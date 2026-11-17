@@ -13,11 +13,7 @@
 
 /* The scene state: -1 armed, 0 idle. */
 DATA(0x801ed96c, 0x4, ".bss")
-static int fdat_801ed96c;
-
-/* 0 or 0xff: table A entry 32 set up asleep or awake. */
-DATA(0x801ed970, 0x4, ".bss")
-static int fdat_801ed970;
+int fdat_801ed96c;
 
 void func_801ed8d0(void);
 
