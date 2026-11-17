@@ -35,6 +35,6 @@ int func_80032110(int reach, u_long height)
         return 0;
     d.vx = f->unk4DEF0.vx - e->unk20.vx;
     d.vz = f->unk4DEF0.vz - e->unk20.vz;
-    r = reach + f->unk4E0CC;
+    r = reach + f->unk4DF18.unk1B4;
     return d.vx * d.vx + d.vz * d.vz <= r * r;
 }

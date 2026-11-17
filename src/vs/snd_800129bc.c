@@ -433,7 +433,7 @@ void func_80013c5c(void)
 
     for (i = 0; i < 2; i++) {
         f = &DAT_800633b0.fighter[i];
-        sfx = &f->unk4DF18;
+        sfx = (VsFighterSfx *)&f->unk4DF18;
         switch (f->unk4DF0E) {
         case 0:
         case 5:

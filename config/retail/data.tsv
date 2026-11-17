@@ -418,8 +418,6 @@ OPTXT.EXE	0x8001f7e6	0xefe6	0x2	unclassified	coverage-gap			payload-complement	.
 OPTXT.EXE	0x8001f7e8	0xefe8	0x4	bss	proven	frame	int	asm;src/optxt/main.c optxt.main	.sbss; $gp+80
 OPTXT.EXE	0x8001f7ec	0xefec	0x14	unclassified	coverage-gap			payload-complement	the opening state word 0x8001f7ec (read and written by its fixed address, absolute lui pairs, no relocation), .sbss alignment and MALLOC.OBJ .bss
 VS.EXE	0x80011000	0x800	0x1980	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
-VS.EXE	0x8002c380	0x1bb80	0x1390	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
-VS.EXE	0x8002f3e0	0x1ebe0	0x1240	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 VS.EXE	0x80035d78	0x25578	0x4	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 VS.EXE	0x80035d88	0x25588	0x4	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 VS.EXE	0x80035d98	0x25598	0x4	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
@@ -575,12 +573,13 @@ VS.EXE	0x8004a1b8	0x399b8	0xc	unclassified	coverage-gap			payload-complement	may
 VS.EXE	0x8004a1d8	0x399d8	0xc	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 VS.EXE	0x8004a1f8	0x399f8	0xc	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 VS.EXE	0x8004a218	0x39a18	0x19008	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
-VS.EXE	0x80063220	0x52a20	0x4	defined	candidate	DAT_80063220	s32	asm;src/vs/snd_800129bc.c vs.snd_800129bc	.sdata word (0), read $gp-relative by func_80013c5c, func_80015020, func_80015e50 and others
+VS.EXE	0x80063220	0x52a20	0x4	defined	candidate	DAT_80063220	s32	asm;src/vs/snd_800129bc.c vs.snd_800129bc;src/vs/move_80030620.c vs.move_80030620	.sdata word (0), read $gp-relative by func_80013c5c, func_80015020, func_80015e50 and others; read absolutely by the -G8 walking moves (src/vs/move_80030620.c)
 VS.EXE	0x80063224	0x52a24	0x4	defined	candidate	DAT_80063224	s32	asm;src/vs/mesh_800258f0.c vs.mesh_800258f0	.sdata word read absolutely by the -G8 renderers; fixed-OT-depth switch (0 in the image)
 VS.EXE	0x80063228	0x52a28	0x4	defined	candidate	DAT_80063228	s32	asm;src/vs/ui_80022f14.c vs.ui_80022f14	.sdata word (1), read $gp-relative by func_80015020/func_80015e50/func_8001683c and through lui by func_80022f14
 VS.EXE	0x8006322c	0x52a2c	0xb4	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 VS.EXE	0x800632e0	0x52ae0	0x4	defined	candidate	DAT_800632e0	s32	asm;src/vs/fade_80028fcc.c vs.fade_80028fcc	$gp+0xc8 .sdata word; func_80028fcc's texture-window step
-VS.EXE	0x800632e4	0x52ae4	0x51c	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
+VS.EXE	0x800632e4	0x52ae4	0x1	defined	candidate	DAT_800632e4	u8	asm;src/vs/gauge_80029b10.c vs.gauge_80029b10	$gp .sdata byte, func_80029b10's blink toggle (0 in the image)
+VS.EXE	0x800632e5	0x52ae5	0x51b	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 END.EXE	0x80011000	0x800	0x960	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 END.EXE	0x80013138	0x2938	0x4	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 END.EXE	0x80013238	0x2a38	0x4	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data

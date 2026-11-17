@@ -918,7 +918,7 @@ VS.EXE	0x8002ab58	func_8002ab58			unknown	unknown *object;unknown arg1	address-o
 VS.EXE	0x8002ad40	func_8002ad40			unknown	unknown arg0	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
 VS.EXE	0x8002b078	func_8002b078			unknown	unknown *object	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
 VS.EXE	0x8002bfe8	func_8002bfe8			unknown	unknown *object;unknown *pointer1	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-VS.EXE	0x8002c2c4	func_8002c2c4			unknown	unknown arg0	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+VS.EXE	0x8002c2c4	func_8002c2c4			unknown	unknown *object	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
 VS.EXE	0x8002d710	func_8002d710			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
 VS.EXE	0x8002d738	func_8002d738			unknown	unknown arg0	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
 VS.EXE	0x8002d998	func_8002d998			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review

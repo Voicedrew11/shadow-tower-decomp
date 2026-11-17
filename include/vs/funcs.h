@@ -37,6 +37,9 @@ void func_80027400(int count, MeshFaceFT4 *face, u_long *ot);
 void func_80027698(int count, MeshFaceGT3 *face, u_long *ot);
 void func_800278f8(int count, MeshFaceGT4 *face, u_long *ot);
 
+/* src/vs/spark_8002d738.c */
+void func_8002d738(int n);
+
 /* src/vs/cd_8002e5e4.c */
 void func_8002e5e4(void);                 /* ST func_800214cc */
 void *func_8002e690(u32 size);            /* ST func_8001528c */
@@ -61,5 +64,11 @@ void func_80012c2c(u_long *data, DVECTOR *pos, DVECTOR *clut_pos);
 
 /* src/vs/anim_80023764.c */
 void *func_8002398c(u32 size);            /* malloc, NULL outside main RAM */
+
+/* src/vs/stub_8001ca10.c */
+int func_8001ca18(void);
+
+/* src/vs/mesh_800258f0.c */
+void func_80027ba4(u_short part);
 
 #endif

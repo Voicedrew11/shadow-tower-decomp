@@ -60,7 +60,11 @@ row's `confidence` names the rule that admitted it:
   code cannot fall through into it.
 
 A `jal` target up to 0x40 bytes of straight-line code above an admitted
-start moves that start back (the row's note records it). After the last
+start moves that start back (the row's note records it). A carve that
+stops at its own GCC switch dispatch (`jr reg` proved a table jump by
+`scripts/kf/sema/cfg.py`) whose cases all lie in the unowned bytes up to
+the next admitted start grows over those cases (`switch-extend`; VS
+`0x8002c2c4` and `0x8002f334`). After the last
 pass every `jal` target decoded from admitted code lands on an admitted
 start, except 18 interior entries (GTE assembly with two entry points in
 ST `0x80075acc`, `0x80075ecc`, `0x8007636c`, plus ST `0x8006887c` and VS

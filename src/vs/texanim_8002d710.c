@@ -1,7 +1,7 @@
 /*
- * VS.EXE: clearing a 2000-record table (WIP module), shaped as ST.EXE's
- * func_80016878 (src/st/texanim.c), which frees the 16 animated-texture
- * slots.
+ * VS.EXE: clearing the 2000 hit-spark particles (WIP module), shaped as
+ * ST.EXE's func_80016878 (src/st/texanim.c), which frees the 16
+ * animated-texture slots.
  */
 #include <kf/lib/address.h>
 #include <kf/lib/types.h>
