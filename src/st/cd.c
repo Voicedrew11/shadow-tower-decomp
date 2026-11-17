@@ -120,13 +120,13 @@ void func_80015dfc(int archive, int member, u8 *dest, void (*done)())
     }
 }
 
-/* Not exact: retail loads sectors[member] before sectors[member + 1]. */
 ADDRESS(0x80015ec8, 0x44)
 int func_80015ec8(u16 archive, u16 member)
 {
     StArchive *a = &cd_state.archives[archive];
+    int first = a->sectors[member];
 
-    return (a->sectors[member + 1] - a->sectors[member]) << 11;
+    return (a->sectors[member + 1] - first) << 11;
 }
 
 ADDRESS(0x80015f0c, 0xe8)
@@ -226,10 +226,6 @@ void func_8001624c(void)
     VSync(4);
 }
 
-/*
- * Not exact: retail stores a->sectors after loading func_80014d2c's count
- * and source arguments; this build stores it first.
- */
 ADDRESS(0x80016294, 0xe0)
 void func_80016294(u16 archive, char *name)
 {
@@ -240,6 +236,9 @@ void func_80016294(u16 archive, char *name)
     CdlFILE file;
     char path[64];
     StArchive *a = &cd_state.archives[archive];
+    u16 *sectors;
+    int count;
+    u16 *source;
 
     strcpy(path, "\\ST\\");
     strcat(path, name);
@@ -249,8 +248,11 @@ void func_80016294(u16 archive, char *name)
     a->file.pos = file.pos;
     a->file.size = file.size;
     func_80015ff4((u_long *)&header, &a->file, 2048);
-    a->sectors = func_800152d0((header.count + 1) * 2);
-    func_80014d2c(a->sectors, header.sectors, header.count + 1);
+    sectors = func_800152d0((header.count + 1) * 2);
+    count = header.count + 1;
+    source = header.sectors;
+    a->sectors = sectors;
+    func_80014d2c(sectors, source, count);
 }
 
 ADDRESS(0x80016374, 0xe0)
