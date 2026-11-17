@@ -10591,6 +10591,7 @@ VS.EXE	0x8002bf4c	0x1b74c		mips26	reachable-code	0x80028914	load		jal		manual-de
 VS.EXE	0x8002bf54	0x1b754	0x8002bf58	mips_hi16_lo16	reachable-code	0x80063300	bss	DAT_80063300	lui+lw		manual-decoded	reviewed	vs.round_8002b078 asm review
 VS.EXE	0x8002bf5c	0x1b75c	0x8002bf60	mips_hi16_lo16	reachable-code	0x80063220	load	DAT_80063220	lui+lw		manual-decoded	reviewed	vs.round_8002b078 asm review
 VS.EXE	0x8002bf90	0x1b790		mips26	reachable-code	0x8002bfe8	load		jal		manual-decoded	reviewed	vs.round_8002b078 asm review
+VS.EXE	0x8002bff4	0x1b7f4	0x8002bff8	mips_hi16_lo16	reachable-code	0x800633b0	bss	DAT_800633b0	lui+addiu		manual-decoded	reviewed	vs.shadow_8002bfe8 decoded table-base pair; existing VsBuffer owner
 VS.EXE	0x8002c060	0x1b860	0x8002c064	mips_hi16_lo16	reachable-code	0x801624d0	bss	DAT_801624d0	lui+addiu		manual-decoded	reviewed	vs.shadow_8002bfe8 asm review
 VS.EXE	0x8002c0f4	0x1b8f4	0x8002c0f8	mips_hi16_lo16	reachable-code	0x8018ee68	bss	DAT_801624d0	lui+addiu		manual-decoded	reviewed	vs.shadow_8002bfe8 asm review
 VS.EXE	0x8002c0fc	0x1b8fc		mips26	reachable-code	0x80042bf4	load		jal		manual-decoded	reviewed	vs.shadow_8002bfe8 asm review

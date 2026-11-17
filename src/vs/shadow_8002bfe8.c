@@ -15,12 +15,11 @@
  * radius scaled by scale/4096, on the ground under it, through the camera
  * matrix.
  */
-/* Not exact: retail loads &DAT_800633b0 before the fighter index
- * multiply; same size. */
 ADDRESS(0x8002bfe8, 0x2dc)
 void func_8002bfe8(int n, int scale)
 {
-    VsFighter *f = &DAT_800633b0.fighter[n];
+    VsFighter *base = DAT_800633b0.fighter;
+    VsFighter *f = base + n;
     int r = f->unk4DF18.unk1B4 * scale / 4096;
     MATRIX m;
     SVECTOR v[4];
