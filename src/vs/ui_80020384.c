@@ -43,8 +43,6 @@ void func_80020460(void)
 /* The menu page frame: title tabs, the page body by page bit, the frame.
  * Unlike ST.EXE's copy it skips the tabs on the first page and always
  * draws the trailing panel. */
-/* Not exact: in the second tab draw retail stores x = 32 before setting up
- * the call's arguments; this build stores it after them. */
 ADDRESS(0x800204b0, 0x324)
 void func_800204b0(void)
 {
@@ -76,12 +74,14 @@ void func_800204b0(void)
         sp->unk240.vy = 512;
         func_8001e530(&sp->unk224, &sp->unk240, &sp->unk244, NULL, 3);
         sp->unk224.y = 44;
-        if (sp->unk1CC & 0xff)
+        if (sp->unk1CC & 0xff) {
             sp->unk240.vx = 906;
-        else
+            sp->unk224.x = 32;
+        } else {
             sp->unk240.vx = 934;
+            sp->unk224.x = 32;
+        }
         sp->unk224.w = 40;
-        sp->unk224.x = 32;
         func_8001e530(&sp->unk224, &sp->unk240, &sp->unk244, NULL, 3);
     }
     switch (sp->unk1CC) {
