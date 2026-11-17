@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import re
 import struct
+from collections.abc import Sequence
 from dataclasses import dataclass
 
 from scripts.kf.retail import IMAGE_GP, parse_int
@@ -109,14 +110,59 @@ def lui_copy_register(
     return copy
 
 
+def written_register(word: int) -> int | None:
+    """The general register an instruction writes (None for none or $zero)."""
+    opcode = word >> 26
+    rt = (word >> 16) & 0x1F
+    if opcode == 0:
+        if word & 0x3F in (0x08, 0x0C, 0x0D, 0x11, 0x13, 0x18, 0x19, 0x1A, 0x1B):
+            return None  # jr, syscall, break, mthi, mtlo, mult/div: no GPR
+        register = (word >> 11) & 0x1F
+    elif opcode == 1:
+        register = 31 if rt in (0x10, 0x11) else 0  # bltzal/bgezal link
+    elif opcode == 3:
+        register = 31
+    elif 0x08 <= opcode <= 0x0F or 0x20 <= opcode <= 0x26:
+        register = rt
+    elif 0x10 <= opcode <= 0x13 and (word >> 21) & 0x1F in (0, 2):
+        register = rt  # mfcz, cfcz
+    else:
+        register = 0
+    return register or None
+
+
+def lui_copied_through(hi_word: int, between: Sequence[int]) -> set[int]:
+    """Registers holding the LUI value after `between`, the straight-line
+    instructions from the LUI to a low that follows it.
+
+    GCC can hoist a loop's high half and copy it into the register the
+    loop's low uses a few instructions later (VS.EXE 0x80013978: `lui a0`,
+    the loop's first test, then `move v1,a0` before the loop reading
+    `lhu 0x61e2(v1)`). A `move` from a holding register adds its
+    destination; any other write to a holding register drops it.
+    """
+    holding = {(hi_word >> 16) & 0x1F}
+    for word in between:
+        destination = written_register(word)
+        if destination is None:
+            continue
+        if word & 0xFC1F07FF == 0x21 and (word >> 21) & 0x1F in holding:
+            holding.add(destination)
+        else:
+            holding.discard(destination)
+    return holding
+
+
 def decode_hi_lo_target(
     hi_word: int,
     lo_word: int,
     copy_word: int | None = None,
     after_word: int | None = None,
+    between: Sequence[int] | None = None,
 ) -> int:
     """Decode a HI/LO address; `copy_word` and `after_word` are the two
-    instructions after the LUI."""
+    instructions after the LUI, and `between` (when the low follows the LUI)
+    every instruction from the LUI to the low."""
     if hi_word >> 26 != 0x0F:
         raise ValueError("HI site is not LUI")
     hi_register = (hi_word >> 16) & 0x1F
@@ -124,7 +170,8 @@ def decode_hi_lo_target(
     base = (lo_word >> 21) & 0x1F
     if base != hi_register and (
             copy_word is None
-            or lui_copy_register(hi_word, copy_word, after_word) != base):
+            or lui_copy_register(hi_word, copy_word, after_word) != base) and (
+            between is None or base not in lui_copied_through(hi_word, between)):
         raise ValueError("LO instruction does not consume the LUI register")
     low = lo_word & 0xFFFF
     if low_opcode == 0x0D:  # ori
@@ -259,8 +306,10 @@ def validate_relocation(
         paired_word = _word(blob, paired_offset)
         copy_word = _word(blob, offset + 4) if offset + 8 <= len(blob) else None
         after_word = _word(blob, offset + 8) if offset + 12 <= len(blob) else None
+        between = ([_word(blob, at) for at in range(offset + 4, paired_offset, 4)]
+                   if paired_offset > offset else None)
         try:
-            decoded = decode_hi_lo_target(word, paired_word, copy_word, after_word)
+            decoded = decode_hi_lo_target(word, paired_word, copy_word, after_word, between)
         except ValueError as error:
             raise ValueError(f"instruction-pair-mismatch:{error}") from error
         if decoded != target:
