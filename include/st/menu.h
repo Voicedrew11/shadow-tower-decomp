@@ -269,6 +269,20 @@ typedef struct {
 
 #define MENU_SCRATCH ((MenuScratch *)0x1f800000)
 
+/*
+ * A word of story flags: ST.EXE masks it whole; the FDAT overlays read single
+ * bits as 1-bit fields (a byte load for bit 7, a compare with 1).
+ */
+typedef union {
+    u32 word;
+    struct {
+        u32 f0 : 1, f1 : 1, f2 : 1, f3 : 1, f4 : 1, f5 : 1, f6 : 1, f7 : 1;
+        u32 f8 : 1, f9 : 1, f10 : 1, f11 : 1, f12 : 1, f13 : 1, f14 : 1, f15 : 1;
+        u32 f16 : 1, f17 : 1, f18 : 1, f19 : 1, f20 : 1, f21 : 1, f22 : 1, f23 : 1;
+        u32 f24 : 1, f25 : 1, f26 : 1, f27 : 1, f28 : 1, f29 : 1, f30 : 1, f31 : 1;
+    } bit;
+} Flags801cba08;
+
 /* Per-area counts read by the map page (byte +0x16e4 onwards); WIP extent. */
 typedef struct {
     /* 0x0..0x1440: per area (48), one bit per table A entry, table C slot 32..63
@@ -278,8 +292,8 @@ typedef struct {
     u32 unk240[48][8];
     u32 unk840[48][8];
     u32 unkE40[48][8];
-    u32 unk1440;         /* 0x1440: flag bits; 13 and 17 gate func_80044404's images */
-    u32 unk1444;
+    Flags801cba08 unk1440; /* 0x1440: flag bits; 13 and 17 gate func_80044404's images */
+    Flags801cba08 unk1444;
     u8 unk1448[48];      /* 0x1448: per XA stream file, the next channel to play */
     u8 unk1478[48];
     u32 unk14A8[0x5c];   /* 0x14a8: one bit per map id (func_800241d0) */

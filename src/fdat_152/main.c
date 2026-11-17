@@ -23,7 +23,6 @@ void func_801ed4a0();
 void func_801ed530();
 void func_801ed5e0();
 void func_801ed5e8();
-void func_801ed6b0();
 void func_801ed8f4();
 
 const FdatHeader fdat_header = {
@@ -33,7 +32,7 @@ const FdatHeader fdat_header = {
         fdat_801ed498, func_801ed4a0, fdat_801ed498, fdat_801ed498,
         fdat_801ed498, func_801ed5e0, fdat_801ed498, fdat_801ed498,
         func_801ed5e8, fdat_801ed498, fdat_801ed498, fdat_801ed498,
-        func_801ed6b0, func_801ed8f4, fdat_801ed498, fdat_801ed498,
+        fdat_801ed4a0, func_801ed8f4, fdat_801ed498, fdat_801ed498,
         fdat_801ed498, fdat_801ed498, fdat_801ed498, fdat_801ed498,
         fdat_801ed498, fdat_801ed498, fdat_801ed498, fdat_801ed498,
         fdat_801ed498, fdat_801ed498, fdat_801ed498, fdat_801ed498,

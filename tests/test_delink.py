@@ -1061,6 +1061,54 @@ class ModuleObjectTests(unittest.TestCase):
             self.assertEqual(decode_hi_lo_target(words[high], words[low]), 0x20)
         self.assertEqual(words[6] & 0xFFFF, 4)
 
+    def test_dead_lui_pairs_with_the_low_of_its_own_register(self) -> None:
+        # A lui left dead in a delay slot (s1), another lui of the same static
+        # (v1) feeding a store, then the live lui s1 and its load: the dead
+        # lui must not take the v1-based store as its low.
+        function = Function("GAME.EXE", 0x80010000, 20, 20, 1, "only", "test", "test")
+        words = (0x3c110000, 0x3c030000, 0xac600000, 0x3c110000, 0x8e300000)
+        carved = {function.va: (struct.pack("<5I", *words), [
+            MipsRelocation(0, "R_MIPS_HI16", "big"),
+            MipsRelocation(4, "R_MIPS_HI16", "big"),
+            MipsRelocation(8, "R_MIPS_LO16", "big"),
+            MipsRelocation(12, "R_MIPS_HI16", "big"),
+            MipsRelocation(16, "R_MIPS_LO16", "big"),
+        ])}
+        module = Module("GAME.EXE", "game.unit", "unit", (function.va,), (
+            Datum(0x80058020, 0x20, "pad", "bss", "static"),
+            Datum(0x80058040, 0x10, "big", "bss", "static"),
+        ))
+        built = _module_object(module, {function.va: function}, carved)
+        self.assertEqual([item.symbol for item in built.relocations], [".bss"] * 5)
+        section = elf_sections(built.data)[".text"]
+        text = built.data[section[4]:section[4] + section[5]]
+        words = struct.unpack_from("<5I", text)
+        for high, low in ((0, 4), (1, 2), (3, 4)):
+            self.assertEqual(decode_hi_lo_target(words[high], words[low]), 0x20)
+
+    def test_branch_path_lui_keeps_off_the_other_paths_low(self) -> None:
+        # lui v0 in a delay slot feeds a store on the taken path; the other
+        # path loads lui v1 and stores through it. The v1 lui must not take
+        # the v0-based store that follows its own low.
+        function = Function("GAME.EXE", 0x80010000, 16, 16, 1, "only", "test", "test")
+        words = (0x3c020000, 0x3c030000, 0xac600000, 0xac400000)
+        carved = {function.va: (struct.pack("<4I", *words), [
+            MipsRelocation(0, "R_MIPS_HI16", "big"),
+            MipsRelocation(4, "R_MIPS_HI16", "big"),
+            MipsRelocation(8, "R_MIPS_LO16", "big"),
+            MipsRelocation(12, "R_MIPS_LO16", "big"),
+        ])}
+        module = Module("GAME.EXE", "game.unit", "unit", (function.va,), (
+            Datum(0x80058020, 0x20, "pad", "bss", "static"),
+            Datum(0x80058040, 0x10, "big", "bss", "static"),
+        ))
+        built = _module_object(module, {function.va: function}, carved)
+        section = elf_sections(built.data)[".text"]
+        text = built.data[section[4]:section[4] + section[5]]
+        words = struct.unpack_from("<4I", text)
+        for high, low in ((0, 3), (1, 2)):
+            self.assertEqual(decode_hi_lo_target(words[high], words[low]), 0x20)
+
     def test_same_module_initialized_data_uses_section_offsets(self) -> None:
         function = Function("GAME.EXE", 0x80010000, 32, 32, 1, "only", "test", "test")
         words = (0x3c020000, 0x24420004, 12, 0x3c030000, 0x24630000,

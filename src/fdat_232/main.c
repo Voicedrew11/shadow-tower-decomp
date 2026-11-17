@@ -22,7 +22,6 @@ RODATA(0x801eb560, 0x1cc)
 void func_801ed4a0();
 void func_801ed59c();
 void func_801ed7d8();
-void func_801eda58();
 void func_801edb08();
 
 const FdatHeader fdat_header = {
@@ -32,7 +31,7 @@ const FdatHeader fdat_header = {
         fdat_801ed498, func_801ed4a0, fdat_801ed498, fdat_801ed498,
         fdat_801ed498, fdat_801ed498, fdat_801ed498, fdat_801ed498,
         fdat_801ed498, func_801edb08, fdat_801ed498, fdat_801ed498,
-        func_801ed7d8, func_801eda58, fdat_801ed498, fdat_801ed498,
+        func_801ed7d8, fdat_801ed6e4, fdat_801ed498, fdat_801ed498,
         fdat_801ed498, fdat_801ed498, fdat_801ed498, fdat_801ed498,
         fdat_801ed498, fdat_801ed498, fdat_801ed498, fdat_801ed498,
         fdat_801ed498, fdat_801ed498, fdat_801ed498, fdat_801ed498,

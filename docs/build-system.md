@@ -313,3 +313,26 @@ shared `src/lib/fdat_common_b.c` (the last nine). The boundaries are WIP:
 they keep the two not-yet-exact functions `fdat_801eba4c` and
 `fdat_801ec6a4` from moving the switch-table and handler-table pointers
 (a non-exact function ends its unit).
+
+The overlays' own handlers after those 21 functions are units named by
+their first function, `fdat_nnn.map_<address>` in
+`src/fdat_nnn/map_<address>.c`, each a contiguous run of exact handlers.
+Handlers that several overlays share are fragments named like the common
+functions: `src/lib/fdat_801ed6e4.inc` (19 overlays) calls the overlay's
+move picker, which is the shared `fdat_801ed4a0` in 14 of them and an
+overlay's own variant in five; a source names the variant by defining
+`FDAT_PICK_MOVE` before the include. `src/lib/fdat_801ed4a0.inc` (21
+overlays) is not yet exact, and no unit includes it until it is, because
+its switch table sits in the overlay's read-only run and its entries would
+move with the code.
+
+An overlay's handlers keep their state in words right after its code (in
+the archive entry's zero tail). They are `.bss` `DATA()` claims of the
+first map unit that uses them, with FDAT data identities (`fdat_<address>`).
+A unit's single word is a global (a COMMON request placed at its claim) so
+that later units of the overlay can declare it `extern`; two or more words
+in one unit are statics with `fixed` rows in `data_reservations.tsv`, since
+ASPSX packs `.lcomm` requests without alignment and retail keeps them in
+consecutive words. A map handler's own read-only data, such as
+`FDAT_032.BIN`'s `RECT` initializer, is a `RODATA()` claim of its unit for
+that slice of the overlay's read-only run.

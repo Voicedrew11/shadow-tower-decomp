@@ -21,6 +21,12 @@ typedef struct {
 
 /* ST.EXE, no source yet. */
 void func_8004cee8(Vis212 *e, int arg, VECTOR *pos);
+void func_8004ed54(Vis88 *e, int sound);
+
+/* ST.EXE functions declared in st/funcs.h, which the overlay units do not
+ * include (see below). */
+void func_80053aa4(void);
+void func_800402ac(u8 hand);
 
 /*
  * ST.EXE's positional sound starters and player_hit (src/st/sound.c,
@@ -45,6 +51,27 @@ void fdat_801eba4c(Vis212 *e);
 void fdat_801ebbc8(Vis212 *e, VisScript *s);
 void fdat_801ebc88(Vis212 *e, VisScript *s);
 void fdat_801ebec4(Vis212 *e);
+void fdat_801ec6a4(void);
+int fdat_801ecbcc(void);
+int fdat_801ece7c(Vis212 *e);
+void fdat_801ecf44(Vis212 *e);
+void fdat_801ecfc4(VECTOR *pos, SVECTOR *rot);
+void fdat_801ed1e4(Vis212 *e);
+void fdat_801ed2f0(Vis212 *e);
+void fdat_801ed388(Vis212 *e, int fixed, int arg2);
+void fdat_801ed410(Vis212 *e);
 void fdat_801ed498(void);
+
+/* The map handlers several overlays share (src/lib/fdat_801ed4a0.inc,
+ * src/lib/fdat_801ed6e4.inc), spelled with their FDAT_002.BIN addresses. */
+void fdat_801ed4a0(void);
+void fdat_801ed6e4(void);
+
+/*
+ * Overlay words one map unit defines and a later unit of the same overlay
+ * reads (each name exists in its own overlay only).
+ */
+extern int fdat_801edfac; /* FDAT_012.BIN: src/fdat_012/map_801ed4a0.c */
+extern int fdat_801edb3c; /* FDAT_332.BIN: src/fdat_332/map_801ed614.c */
 
 #endif
