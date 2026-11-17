@@ -55,8 +55,9 @@ void func_801ed4a0(void)
     }
 }
 
-/* Not exact (one attempt, retries off; 99.5%): first divergence retail `j <func_801ed54c+0x78>`, this source `j <func_801ed54c+0x7c>`. */
 /*
+ * Not exact: the instructions agree, but equivalent .bss+8 HI16 pairs
+ * order differently in the two ELF views (module offsets 0x160/0x19c/0x1b0).
  * Runs the area: the viewer standing on record 0x1f2 or 0x63 picks the
  * scene words; entry 48 asleep until it wakes (scene word 3 armed), then
  * leaves once the area fade is done, keeping the viewer's status 0x188 at
@@ -75,6 +76,7 @@ void func_801ed54c(void)
     if (fdat_801edaf8 == 0) {
         if (viewer.unk178 == 0x1f2) {
             fdat_801edaf4 = 1;
+            fdat_801edaf8 = 1;
         } else if (viewer.unk178 == 0x63) {
             fdat_801edaf4 = 0;
             fdat_801edaf8 = 1;

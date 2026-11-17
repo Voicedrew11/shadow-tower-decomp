@@ -11,7 +11,8 @@
  * After the entry's move and script pick, sets the heading it turns to and
  * its second heading (unk5C, unk5A) from its state, then bends both by the
  * offset of its visible record.
- * Not exact (8 bytes long): retail keeps e in s1 and the cosine in s0
+ * The first heading uses a -1024 phase; the second passes unk5A directly.
+ * Not exact (size-exact): retail keeps e in s1 and the cosine in s0
  * (this build: s0, s1) and adds the record's bytes as z + unk06 after
  * loading unk05 first; this build loads unk06 first and adds it in front.
  */
@@ -61,8 +62,8 @@ void fdat_801ed4a0(void)
         dz = z + vis_records[e->unk26].unk06;
         dx = x + vis_records[e->unk26].unk05;
         e->unk5C = (ratan2(dz, dx) + 1024) & 0xfff;
-        x = rcos(e->unk5A - 1024) >> 5;
-        z = rsin(e->unk5A - 1024) >> 5;
+        x = rcos(e->unk5A) >> 5;
+        z = rsin(e->unk5A) >> 5;
         dz = z + vis_records[e->unk26].unk06;
         dx = x + vis_records[e->unk26].unk05;
         e->unk5A = ratan2(dz, dx);
