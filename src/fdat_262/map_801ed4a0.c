@@ -122,8 +122,9 @@ void func_801ed4a0(void)
     }
 }
 
-/* Not exact: the dead prologue LUI for vis_table_b has no curated retail
- * relocation. The remaining instruction and relocation listings agree. */
+/* Not exact: the dead prologue `lui v1` for vis_table_b pairs only with a
+ * low based on a3, which relocation validation withholds
+ * (instruction-pair-mismatch); everything else agrees. */
 /*
  * Runs the area: entry 48 wakes when hit or once record 1's counter is 2
  * (func_801edfb4's scene) and changes its scripts after its flash; entry

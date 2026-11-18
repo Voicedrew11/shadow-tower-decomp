@@ -1,7 +1,9 @@
 /*
- * FDAT_322.BIN: its handler table, then fdat_801ebec4 (whose switch
- * table follows the handler table) and fdat_801ec6a4 (WIP module).
- * A byte-identical copy of FDAT_002.BIN.
+ * FDAT_322.BIN as one translation unit (WIP module): its handler table,
+ * the 21 functions every overlay starts with (src/lib/fdat_common_a.inc,
+ * fdat_common.inc, fdat_common_b.inc), then its map handlers through the
+ * shared fdat_801ed4a0. One object, because fdat_801ed4a0's switch table
+ * is 8-aligned after fdat_801ebec4's in the same read-only run.
  */
 #include <kf/lib/address.h>
 #include <kf/lib/types.h>
@@ -18,8 +20,7 @@
 #include <st/vis.h>
 #include <st/fdat.h>
 
-RODATA(0x801eb560, 0x1cc)
-
+RODATA(0x801eb560, 0x24c)
 
 const FdatHeader fdat_header = {
     0x37,
@@ -36,4 +37,9 @@ const FdatHeader fdat_header = {
     0x6a,
 };
 
+#include "../lib/fdat_common_a.inc"
 #include "../lib/fdat_common.inc"
+#include "../lib/fdat_common_b.inc"
+
+#include "../lib/fdat_801ed4a0.inc"
+#include "../lib/fdat_801ed6e4.inc"

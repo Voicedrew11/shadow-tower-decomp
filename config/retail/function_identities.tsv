@@ -1015,7 +1015,7 @@ FDAT_002.BIN	0x801ed2f0	fdat_801ed2f0			unknown	unknown arg0	candidate	candidate
 FDAT_002.BIN	0x801ed388	fdat_801ed388			unknown	unknown arg0;unknown arg1;unknown arg2	candidate	candidate	relocation-masked-body	FDAT common function (src/lib/fdat_common.inc), the same body in all 36 overlays; named by its FDAT_002.BIN address
 FDAT_002.BIN	0x801ed410	fdat_801ed410			unknown	unknown arg0	candidate	candidate	relocation-masked-body	FDAT common function (src/lib/fdat_common.inc), the same body in all 36 overlays; named by its FDAT_002.BIN address
 FDAT_002.BIN	0x801ed498	fdat_801ed498			void		candidate	candidate	relocation-masked-body	FDAT common function (src/lib/fdat_common.inc), the same body in all 36 overlays; named by its FDAT_002.BIN address
-FDAT_002.BIN	0x801ed4a0	fdat_801ed4a0			unknown		candidate	candidate	relocation-masked-body	FDAT shared map handler (src/lib/fdat_801ed4a0.inc), the same body in 21 overlays; named by its FDAT_002.BIN address
+FDAT_002.BIN	0x801ed4a0	fdat_801ed4a0			unknown		candidate	candidate	relocation-masked-body	FDAT shared map handler (src/lib/fdat_801ed4a0.inc), the same body in 23 overlays; named by its FDAT_002.BIN address
 FDAT_002.BIN	0x801ed6e4	fdat_801ed6e4			unknown		candidate	candidate	relocation-masked-body	FDAT shared map handler (src/lib/fdat_801ed6e4.inc), the same body in 19 overlays; named by its FDAT_002.BIN address
 FDAT_012.BIN	0x801eb7ac	fdat_801eb7ac			void	unknown *object	candidate	candidate	relocation-masked-body	FDAT common function (src/lib/fdat_common.inc), the same body in all 36 overlays; named by its FDAT_002.BIN address
 FDAT_012.BIN	0x801eb7b4	fdat_801eb7b4			unknown	unknown *object;unknown *pointer1	candidate	candidate	relocation-masked-body	FDAT common function (src/lib/fdat_common.inc), the same body in all 36 overlays; named by its FDAT_002.BIN address
@@ -1040,7 +1040,7 @@ FDAT_012.BIN	0x801ed410	fdat_801ed410			unknown	unknown arg0	candidate	candidate
 FDAT_012.BIN	0x801ed498	fdat_801ed498			void		candidate	candidate	relocation-masked-body	FDAT common function (src/lib/fdat_common.inc), the same body in all 36 overlays; named by its FDAT_002.BIN address
 FDAT_012.BIN	0x801ed4a0	func_801ed4a0			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
 FDAT_012.BIN	0x801ed4e8	func_801ed4e8			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-FDAT_012.BIN	0x801ed528	fdat_801ed4a0			unknown		candidate	candidate	relocation-masked-body	FDAT shared map handler (src/lib/fdat_801ed4a0.inc), the same body in 21 overlays; named by its FDAT_002.BIN address
+FDAT_012.BIN	0x801ed528	fdat_801ed4a0			unknown		candidate	candidate	relocation-masked-body	FDAT shared map handler (src/lib/fdat_801ed4a0.inc), the same body in 23 overlays; named by its FDAT_002.BIN address
 FDAT_012.BIN	0x801ed76c	func_801ed76c			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
 FDAT_012.BIN	0x801ed9e0	func_801ed9e0			unknown	unknown arg0	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
 FDAT_012.BIN	0x801eda38	func_801eda38			unknown	unknown arg0	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
@@ -1070,7 +1070,7 @@ FDAT_022.BIN	0x801ed410	fdat_801ed410			unknown	unknown arg0	candidate	candidate
 FDAT_022.BIN	0x801ed498	fdat_801ed498			void		candidate	candidate	relocation-masked-body	FDAT common function (src/lib/fdat_common.inc), the same body in all 36 overlays; named by its FDAT_002.BIN address
 FDAT_022.BIN	0x801ed4a0	func_801ed4a0			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
 FDAT_022.BIN	0x801ed514	func_801ed514			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-FDAT_022.BIN	0x801ed5fc	fdat_801ed4a0			unknown		candidate	candidate	relocation-masked-body	FDAT shared map handler (src/lib/fdat_801ed4a0.inc), the same body in 21 overlays; named by its FDAT_002.BIN address
+FDAT_022.BIN	0x801ed5fc	fdat_801ed4a0			unknown		candidate	candidate	relocation-masked-body	FDAT shared map handler (src/lib/fdat_801ed4a0.inc), the same body in 23 overlays; named by its FDAT_002.BIN address
 FDAT_022.BIN	0x801ed840	fdat_801ed6e4			unknown		candidate	candidate	relocation-masked-body	FDAT shared map handler (src/lib/fdat_801ed6e4.inc), the same body in 19 overlays; named by its FDAT_002.BIN address
 FDAT_022.BIN	0x801ed8f0	func_801ed8f0			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
 FDAT_032.BIN	0x801eb7b4	fdat_801eb7ac			void	unknown *object	candidate	candidate	relocation-masked-body	FDAT common function (src/lib/fdat_common.inc), the same body in all 36 overlays; named by its FDAT_002.BIN address
@@ -1095,7 +1095,7 @@ FDAT_032.BIN	0x801ed390	fdat_801ed388			unknown	unknown arg0;unknown arg1;unknow
 FDAT_032.BIN	0x801ed418	fdat_801ed410			unknown	unknown arg0	candidate	candidate	relocation-masked-body	FDAT common function (src/lib/fdat_common.inc), the same body in all 36 overlays; named by its FDAT_002.BIN address
 FDAT_032.BIN	0x801ed4a0	fdat_801ed498			void		candidate	candidate	relocation-masked-body	FDAT common function (src/lib/fdat_common.inc), the same body in all 36 overlays; named by its FDAT_002.BIN address
 FDAT_032.BIN	0x801ed4a8	func_801ed4a8			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-FDAT_032.BIN	0x801ed50c	func_801ed50c			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_032.BIN	0x801ed50c	fdat_801ed4a0			unknown		candidate	candidate	relocation-masked-body	FDAT shared map handler (src/lib/fdat_801ed4a0.inc), the same body in 23 overlays; named by its FDAT_002.BIN address
 FDAT_032.BIN	0x801ed750	fdat_801ed6e4			unknown		candidate	candidate	relocation-masked-body	FDAT shared map handler (src/lib/fdat_801ed6e4.inc), the same body in 19 overlays; named by its FDAT_002.BIN address
 FDAT_042.BIN	0x801eb7ac	fdat_801eb7ac			void	unknown *object	candidate	candidate	relocation-masked-body	FDAT common function (src/lib/fdat_common.inc), the same body in all 36 overlays; named by its FDAT_002.BIN address
 FDAT_042.BIN	0x801eb7b4	fdat_801eb7b4			unknown	unknown *object;unknown *pointer1	candidate	candidate	relocation-masked-body	FDAT common function (src/lib/fdat_common.inc), the same body in all 36 overlays; named by its FDAT_002.BIN address
@@ -1144,7 +1144,7 @@ FDAT_052.BIN	0x801ed2f0	fdat_801ed2f0			unknown	unknown arg0	candidate	candidate
 FDAT_052.BIN	0x801ed388	fdat_801ed388			unknown	unknown arg0;unknown arg1;unknown arg2	candidate	candidate	relocation-masked-body	FDAT common function (src/lib/fdat_common.inc), the same body in all 36 overlays; named by its FDAT_002.BIN address
 FDAT_052.BIN	0x801ed410	fdat_801ed410			unknown	unknown arg0	candidate	candidate	relocation-masked-body	FDAT common function (src/lib/fdat_common.inc), the same body in all 36 overlays; named by its FDAT_002.BIN address
 FDAT_052.BIN	0x801ed498	fdat_801ed498			void		candidate	candidate	relocation-masked-body	FDAT common function (src/lib/fdat_common.inc), the same body in all 36 overlays; named by its FDAT_002.BIN address
-FDAT_052.BIN	0x801ed4a0	fdat_801ed4a0			unknown		candidate	candidate	relocation-masked-body	FDAT shared map handler (src/lib/fdat_801ed4a0.inc), the same body in 21 overlays; named by its FDAT_002.BIN address
+FDAT_052.BIN	0x801ed4a0	fdat_801ed4a0			unknown		candidate	candidate	relocation-masked-body	FDAT shared map handler (src/lib/fdat_801ed4a0.inc), the same body in 23 overlays; named by its FDAT_002.BIN address
 FDAT_052.BIN	0x801ed6e4	fdat_801ed6e4			unknown		candidate	candidate	relocation-masked-body	FDAT shared map handler (src/lib/fdat_801ed6e4.inc), the same body in 19 overlays; named by its FDAT_002.BIN address
 FDAT_062.BIN	0x801eb7ac	fdat_801eb7ac			void	unknown *object	candidate	candidate	relocation-masked-body	FDAT common function (src/lib/fdat_common.inc), the same body in all 36 overlays; named by its FDAT_002.BIN address
 FDAT_062.BIN	0x801eb7b4	fdat_801eb7b4			unknown	unknown *object;unknown *pointer1	candidate	candidate	relocation-masked-body	FDAT common function (src/lib/fdat_common.inc), the same body in all 36 overlays; named by its FDAT_002.BIN address
@@ -1169,7 +1169,7 @@ FDAT_062.BIN	0x801ed410	fdat_801ed410			unknown	unknown arg0	candidate	candidate
 FDAT_062.BIN	0x801ed498	fdat_801ed498			void		candidate	candidate	relocation-masked-body	FDAT common function (src/lib/fdat_common.inc), the same body in all 36 overlays; named by its FDAT_002.BIN address
 FDAT_062.BIN	0x801ed4a0	func_801ed4a0			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
 FDAT_062.BIN	0x801ed58c	func_801ed58c			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-FDAT_062.BIN	0x801ed7d0	fdat_801ed4a0			unknown		candidate	candidate	relocation-masked-body	FDAT shared map handler (src/lib/fdat_801ed4a0.inc), the same body in 21 overlays; named by its FDAT_002.BIN address
+FDAT_062.BIN	0x801ed7d0	fdat_801ed4a0			unknown		candidate	candidate	relocation-masked-body	FDAT shared map handler (src/lib/fdat_801ed4a0.inc), the same body in 23 overlays; named by its FDAT_002.BIN address
 FDAT_062.BIN	0x801eda14	fdat_801ed6e4			unknown		candidate	candidate	relocation-masked-body	FDAT shared map handler (src/lib/fdat_801ed6e4.inc), the same body in 19 overlays; named by its FDAT_002.BIN address
 FDAT_082.BIN	0x801eb7ac	fdat_801eb7ac			void	unknown *object	candidate	candidate	relocation-masked-body	FDAT common function (src/lib/fdat_common.inc), the same body in all 36 overlays; named by its FDAT_002.BIN address
 FDAT_082.BIN	0x801eb7b4	fdat_801eb7b4			unknown	unknown *object;unknown *pointer1	candidate	candidate	relocation-masked-body	FDAT common function (src/lib/fdat_common.inc), the same body in all 36 overlays; named by its FDAT_002.BIN address
@@ -1194,7 +1194,7 @@ FDAT_082.BIN	0x801ed410	fdat_801ed410			unknown	unknown arg0	candidate	candidate
 FDAT_082.BIN	0x801ed498	fdat_801ed498			void		candidate	candidate	relocation-masked-body	FDAT common function (src/lib/fdat_common.inc), the same body in all 36 overlays; named by its FDAT_002.BIN address
 FDAT_082.BIN	0x801ed4a0	func_801ed4a0			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
 FDAT_082.BIN	0x801ed4f8	func_801ed4f8			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-FDAT_082.BIN	0x801ed588	fdat_801ed4a0			unknown		candidate	candidate	relocation-masked-body	FDAT shared map handler (src/lib/fdat_801ed4a0.inc), the same body in 21 overlays; named by its FDAT_002.BIN address
+FDAT_082.BIN	0x801ed588	fdat_801ed4a0			unknown		candidate	candidate	relocation-masked-body	FDAT shared map handler (src/lib/fdat_801ed4a0.inc), the same body in 23 overlays; named by its FDAT_002.BIN address
 FDAT_082.BIN	0x801ed7cc	fdat_801ed6e4			unknown		candidate	candidate	relocation-masked-body	FDAT shared map handler (src/lib/fdat_801ed6e4.inc), the same body in 19 overlays; named by its FDAT_002.BIN address
 FDAT_092.BIN	0x801eb7ac	fdat_801eb7ac			void	unknown *object	candidate	candidate	relocation-masked-body	FDAT common function (src/lib/fdat_common.inc), the same body in all 36 overlays; named by its FDAT_002.BIN address
 FDAT_092.BIN	0x801eb7b4	fdat_801eb7b4			unknown	unknown *object;unknown *pointer1	candidate	candidate	relocation-masked-body	FDAT common function (src/lib/fdat_common.inc), the same body in all 36 overlays; named by its FDAT_002.BIN address
@@ -1219,7 +1219,7 @@ FDAT_092.BIN	0x801ed410	fdat_801ed410			unknown	unknown arg0	candidate	candidate
 FDAT_092.BIN	0x801ed498	fdat_801ed498			void		candidate	candidate	relocation-masked-body	FDAT common function (src/lib/fdat_common.inc), the same body in all 36 overlays; named by its FDAT_002.BIN address
 FDAT_092.BIN	0x801ed4a0	func_801ed4a0			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
 FDAT_092.BIN	0x801ed680	func_801ed680			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-FDAT_092.BIN	0x801edb20	fdat_801ed4a0			unknown		candidate	candidate	relocation-masked-body	FDAT shared map handler (src/lib/fdat_801ed4a0.inc), the same body in 21 overlays; named by its FDAT_002.BIN address
+FDAT_092.BIN	0x801edb20	fdat_801ed4a0			unknown		candidate	candidate	relocation-masked-body	FDAT shared map handler (src/lib/fdat_801ed4a0.inc), the same body in 23 overlays; named by its FDAT_002.BIN address
 FDAT_092.BIN	0x801edd64	fdat_801ed6e4			unknown		candidate	candidate	relocation-masked-body	FDAT shared map handler (src/lib/fdat_801ed6e4.inc), the same body in 19 overlays; named by its FDAT_002.BIN address
 FDAT_092.BIN	0x801ede14	func_801ede14			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
 FDAT_092.BIN	0x801edea4	func_801edea4			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
@@ -1247,7 +1247,7 @@ FDAT_102.BIN	0x801ed498	fdat_801ed498			void		candidate	candidate	relocation-mas
 FDAT_102.BIN	0x801ed4a0	func_801ed4a0			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
 FDAT_102.BIN	0x801ed554	func_801ed554			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
 FDAT_102.BIN	0x801ed6b8	func_801ed6b8			unknown	unknown arg0	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-FDAT_102.BIN	0x801ed784	fdat_801ed4a0			unknown		candidate	candidate	relocation-masked-body	FDAT shared map handler (src/lib/fdat_801ed4a0.inc), the same body in 21 overlays; named by its FDAT_002.BIN address
+FDAT_102.BIN	0x801ed784	fdat_801ed4a0			unknown		candidate	candidate	relocation-masked-body	FDAT shared map handler (src/lib/fdat_801ed4a0.inc), the same body in 23 overlays; named by its FDAT_002.BIN address
 FDAT_102.BIN	0x801ed9c8	fdat_801ed6e4			unknown		candidate	candidate	relocation-masked-body	FDAT shared map handler (src/lib/fdat_801ed6e4.inc), the same body in 19 overlays; named by its FDAT_002.BIN address
 FDAT_112.BIN	0x801eb7ac	fdat_801eb7ac			void	unknown *object	candidate	candidate	relocation-masked-body	FDAT common function (src/lib/fdat_common.inc), the same body in all 36 overlays; named by its FDAT_002.BIN address
 FDAT_112.BIN	0x801eb7b4	fdat_801eb7b4			unknown	unknown *object;unknown *pointer1	candidate	candidate	relocation-masked-body	FDAT common function (src/lib/fdat_common.inc), the same body in all 36 overlays; named by its FDAT_002.BIN address
@@ -1271,7 +1271,7 @@ FDAT_112.BIN	0x801ed388	fdat_801ed388			unknown	unknown arg0;unknown arg1;unknow
 FDAT_112.BIN	0x801ed410	fdat_801ed410			unknown	unknown arg0	candidate	candidate	relocation-masked-body	FDAT common function (src/lib/fdat_common.inc), the same body in all 36 overlays; named by its FDAT_002.BIN address
 FDAT_112.BIN	0x801ed498	fdat_801ed498			void		candidate	candidate	relocation-masked-body	FDAT common function (src/lib/fdat_common.inc), the same body in all 36 overlays; named by its FDAT_002.BIN address
 FDAT_112.BIN	0x801ed4a0	func_801ed4a0			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-FDAT_112.BIN	0x801ed52c	fdat_801ed4a0			unknown		candidate	candidate	relocation-masked-body	FDAT shared map handler (src/lib/fdat_801ed4a0.inc), the same body in 21 overlays; named by its FDAT_002.BIN address
+FDAT_112.BIN	0x801ed52c	fdat_801ed4a0			unknown		candidate	candidate	relocation-masked-body	FDAT shared map handler (src/lib/fdat_801ed4a0.inc), the same body in 23 overlays; named by its FDAT_002.BIN address
 FDAT_112.BIN	0x801ed770	func_801ed770			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
 FDAT_112.BIN	0x801edb90	func_801edb90			unknown	unknown arg0	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
 FDAT_122.BIN	0x801eb7ac	fdat_801eb7ac			void	unknown *object	candidate	candidate	relocation-masked-body	FDAT common function (src/lib/fdat_common.inc), the same body in all 36 overlays; named by its FDAT_002.BIN address
@@ -1297,7 +1297,7 @@ FDAT_122.BIN	0x801ed410	fdat_801ed410			unknown	unknown arg0	candidate	candidate
 FDAT_122.BIN	0x801ed498	fdat_801ed498			void		candidate	candidate	relocation-masked-body	FDAT common function (src/lib/fdat_common.inc), the same body in all 36 overlays; named by its FDAT_002.BIN address
 FDAT_122.BIN	0x801ed4a0	func_801ed4a0			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
 FDAT_122.BIN	0x801ed4e4	func_801ed4e4			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-FDAT_122.BIN	0x801ed538	fdat_801ed4a0			unknown		candidate	candidate	relocation-masked-body	FDAT shared map handler (src/lib/fdat_801ed4a0.inc), the same body in 21 overlays; named by its FDAT_002.BIN address
+FDAT_122.BIN	0x801ed538	fdat_801ed4a0			unknown		candidate	candidate	relocation-masked-body	FDAT shared map handler (src/lib/fdat_801ed4a0.inc), the same body in 23 overlays; named by its FDAT_002.BIN address
 FDAT_122.BIN	0x801ed77c	func_801ed77c			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
 FDAT_122.BIN	0x801ed880	func_801ed880			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
 FDAT_122.BIN	0x801ed8f8	func_801ed8f8			unknown	unknown *object	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
@@ -1324,7 +1324,7 @@ FDAT_132.BIN	0x801ed410	fdat_801ed410			unknown	unknown arg0	candidate	candidate
 FDAT_132.BIN	0x801ed498	fdat_801ed498			void		candidate	candidate	relocation-masked-body	FDAT common function (src/lib/fdat_common.inc), the same body in all 36 overlays; named by its FDAT_002.BIN address
 FDAT_132.BIN	0x801ed4a0	func_801ed4a0			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
 FDAT_132.BIN	0x801ed5bc	func_801ed5bc			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-FDAT_132.BIN	0x801ed73c	fdat_801ed4a0			unknown		candidate	candidate	relocation-masked-body	FDAT shared map handler (src/lib/fdat_801ed4a0.inc), the same body in 21 overlays; named by its FDAT_002.BIN address
+FDAT_132.BIN	0x801ed73c	fdat_801ed4a0			unknown		candidate	candidate	relocation-masked-body	FDAT shared map handler (src/lib/fdat_801ed4a0.inc), the same body in 23 overlays; named by its FDAT_002.BIN address
 FDAT_132.BIN	0x801ed980	fdat_801ed6e4			unknown		candidate	candidate	relocation-masked-body	FDAT shared map handler (src/lib/fdat_801ed6e4.inc), the same body in 19 overlays; named by its FDAT_002.BIN address
 FDAT_142.BIN	0x801eb7ac	fdat_801eb7ac			void	unknown *object	candidate	candidate	relocation-masked-body	FDAT common function (src/lib/fdat_common.inc), the same body in all 36 overlays; named by its FDAT_002.BIN address
 FDAT_142.BIN	0x801eb7b4	fdat_801eb7b4			unknown	unknown *object;unknown *pointer1	candidate	candidate	relocation-masked-body	FDAT common function (src/lib/fdat_common.inc), the same body in all 36 overlays; named by its FDAT_002.BIN address
@@ -1376,7 +1376,7 @@ FDAT_152.BIN	0x801ed4a0	func_801ed4a0			unknown		address-only	candidate	mips-liv
 FDAT_152.BIN	0x801ed530	func_801ed530			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
 FDAT_152.BIN	0x801ed5e0	func_801ed5e0			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
 FDAT_152.BIN	0x801ed5e8	func_801ed5e8			unknown	unknown arg0	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-FDAT_152.BIN	0x801ed6b0	fdat_801ed4a0			unknown		candidate	candidate	relocation-masked-body	FDAT shared map handler (src/lib/fdat_801ed4a0.inc), the same body in 21 overlays; named by its FDAT_002.BIN address
+FDAT_152.BIN	0x801ed6b0	fdat_801ed4a0			unknown		candidate	candidate	relocation-masked-body	FDAT shared map handler (src/lib/fdat_801ed4a0.inc), the same body in 23 overlays; named by its FDAT_002.BIN address
 FDAT_152.BIN	0x801ed8f4	func_801ed8f4			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
 FDAT_152.BIN	0x801eda8c	func_801eda8c			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
 FDAT_172.BIN	0x801eb7ac	fdat_801eb7ac			void	unknown *object	candidate	candidate	relocation-masked-body	FDAT common function (src/lib/fdat_common.inc), the same body in all 36 overlays; named by its FDAT_002.BIN address
@@ -1432,7 +1432,7 @@ FDAT_182.BIN	0x801ed498	fdat_801ed498			void		candidate	candidate	relocation-mas
 FDAT_182.BIN	0x801ed4a0	func_801ed4a0			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
 FDAT_182.BIN	0x801ed4b4	func_801ed4b4			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
 FDAT_182.BIN	0x801ed604	func_801ed604			unknown	unknown *object	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-FDAT_182.BIN	0x801ed65c	fdat_801ed4a0			unknown		candidate	candidate	relocation-masked-body	FDAT shared map handler (src/lib/fdat_801ed4a0.inc), the same body in 21 overlays; named by its FDAT_002.BIN address
+FDAT_182.BIN	0x801ed65c	fdat_801ed4a0			unknown		candidate	candidate	relocation-masked-body	FDAT shared map handler (src/lib/fdat_801ed4a0.inc), the same body in 23 overlays; named by its FDAT_002.BIN address
 FDAT_182.BIN	0x801ed8a0	fdat_801ed6e4			unknown		candidate	candidate	relocation-masked-body	FDAT shared map handler (src/lib/fdat_801ed6e4.inc), the same body in 19 overlays; named by its FDAT_002.BIN address
 FDAT_182.BIN	0x801ed950	func_801ed950			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
 FDAT_182.BIN	0x801ed9cc	func_801ed9cc			unknown	unknown arg0	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
@@ -1459,7 +1459,7 @@ FDAT_202.BIN	0x801ed410	fdat_801ed410			unknown	unknown arg0	candidate	candidate
 FDAT_202.BIN	0x801ed498	fdat_801ed498			void		candidate	candidate	relocation-masked-body	FDAT common function (src/lib/fdat_common.inc), the same body in all 36 overlays; named by its FDAT_002.BIN address
 FDAT_202.BIN	0x801ed4a0	func_801ed4a0			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
 FDAT_202.BIN	0x801ed560	func_801ed560			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-FDAT_202.BIN	0x801ed710	fdat_801ed4a0			unknown		candidate	candidate	relocation-masked-body	FDAT shared map handler (src/lib/fdat_801ed4a0.inc), the same body in 21 overlays; named by its FDAT_002.BIN address
+FDAT_202.BIN	0x801ed710	fdat_801ed4a0			unknown		candidate	candidate	relocation-masked-body	FDAT shared map handler (src/lib/fdat_801ed4a0.inc), the same body in 23 overlays; named by its FDAT_002.BIN address
 FDAT_202.BIN	0x801ed954	fdat_801ed6e4			unknown		candidate	candidate	relocation-masked-body	FDAT shared map handler (src/lib/fdat_801ed6e4.inc), the same body in 19 overlays; named by its FDAT_002.BIN address
 FDAT_212.BIN	0x801eb7ac	fdat_801eb7ac			void	unknown *object	candidate	candidate	relocation-masked-body	FDAT common function (src/lib/fdat_common.inc), the same body in all 36 overlays; named by its FDAT_002.BIN address
 FDAT_212.BIN	0x801eb7b4	fdat_801eb7b4			unknown	unknown *object;unknown *pointer1	candidate	candidate	relocation-masked-body	FDAT common function (src/lib/fdat_common.inc), the same body in all 36 overlays; named by its FDAT_002.BIN address
@@ -1485,7 +1485,7 @@ FDAT_212.BIN	0x801ed498	fdat_801ed498			void		candidate	candidate	relocation-mas
 FDAT_212.BIN	0x801ed4a0	func_801ed4a0			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
 FDAT_212.BIN	0x801ed594	func_801ed594			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
 FDAT_212.BIN	0x801ed890	func_801ed890			unknown	unknown arg0	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-FDAT_212.BIN	0x801ed8dc	fdat_801ed4a0			unknown		candidate	candidate	relocation-masked-body	FDAT shared map handler (src/lib/fdat_801ed4a0.inc), the same body in 21 overlays; named by its FDAT_002.BIN address
+FDAT_212.BIN	0x801ed8dc	fdat_801ed4a0			unknown		candidate	candidate	relocation-masked-body	FDAT shared map handler (src/lib/fdat_801ed4a0.inc), the same body in 23 overlays; named by its FDAT_002.BIN address
 FDAT_212.BIN	0x801edb20	fdat_801ed6e4			unknown		candidate	candidate	relocation-masked-body	FDAT shared map handler (src/lib/fdat_801ed6e4.inc), the same body in 19 overlays; named by its FDAT_002.BIN address
 FDAT_212.BIN	0x801edbd0	func_801edbd0			unknown	unknown arg0	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
 FDAT_232.BIN	0x801eb7ac	fdat_801eb7ac			void	unknown *object	candidate	candidate	relocation-masked-body	FDAT common function (src/lib/fdat_common.inc), the same body in all 36 overlays; named by its FDAT_002.BIN address
@@ -1538,7 +1538,7 @@ FDAT_242.BIN	0x801ed4d8	fdat_801ed498			void		candidate	candidate	relocation-mas
 FDAT_242.BIN	0x801ed4e0	func_801ed4e0			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
 FDAT_242.BIN	0x801ed71c	func_801ed71c			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
 FDAT_242.BIN	0x801edaa4	func_801edaa4			unknown	unknown *object	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-FDAT_242.BIN	0x801edb10	func_801edb10			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_242.BIN	0x801edb10	fdat_801ed4a0			unknown		candidate	candidate	relocation-masked-body	FDAT shared map handler (src/lib/fdat_801ed4a0.inc), the same body in 23 overlays; named by its FDAT_002.BIN address
 FDAT_242.BIN	0x801edd54	func_801edd54			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
 FDAT_242.BIN	0x801ede3c	func_801ede3c			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
 FDAT_242.BIN	0x801edebc	func_801edebc			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
@@ -1657,7 +1657,7 @@ FDAT_282.BIN	0x801ed410	fdat_801ed410			unknown	unknown arg0	candidate	candidate
 FDAT_282.BIN	0x801ed498	fdat_801ed498			void		candidate	candidate	relocation-masked-body	FDAT common function (src/lib/fdat_common.inc), the same body in all 36 overlays; named by its FDAT_002.BIN address
 FDAT_282.BIN	0x801ed4a0	func_801ed4a0			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
 FDAT_282.BIN	0x801ed4e8	func_801ed4e8			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-FDAT_282.BIN	0x801ed560	fdat_801ed4a0			unknown		candidate	candidate	relocation-masked-body	FDAT shared map handler (src/lib/fdat_801ed4a0.inc), the same body in 21 overlays; named by its FDAT_002.BIN address
+FDAT_282.BIN	0x801ed560	fdat_801ed4a0			unknown		candidate	candidate	relocation-masked-body	FDAT shared map handler (src/lib/fdat_801ed4a0.inc), the same body in 23 overlays; named by its FDAT_002.BIN address
 FDAT_282.BIN	0x801ed7a4	func_801ed7a4			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
 FDAT_282.BIN	0x801eda18	func_801eda18			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
 FDAT_282.BIN	0x801eda20	func_801eda20			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
@@ -1686,7 +1686,7 @@ FDAT_302.BIN	0x801ed410	fdat_801ed410			unknown	unknown arg0	candidate	candidate
 FDAT_302.BIN	0x801ed498	fdat_801ed498			void		candidate	candidate	relocation-masked-body	FDAT common function (src/lib/fdat_common.inc), the same body in all 36 overlays; named by its FDAT_002.BIN address
 FDAT_302.BIN	0x801ed4a0	func_801ed4a0			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
 FDAT_302.BIN	0x801ed5b0	func_801ed5b0			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-FDAT_302.BIN	0x801eda1c	fdat_801ed4a0			unknown		candidate	candidate	relocation-masked-body	FDAT shared map handler (src/lib/fdat_801ed4a0.inc), the same body in 21 overlays; named by its FDAT_002.BIN address
+FDAT_302.BIN	0x801eda1c	fdat_801ed4a0			unknown		candidate	candidate	relocation-masked-body	FDAT shared map handler (src/lib/fdat_801ed4a0.inc), the same body in 23 overlays; named by its FDAT_002.BIN address
 FDAT_302.BIN	0x801edc60	func_801edc60			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
 FDAT_302.BIN	0x801edd9c	func_801edd9c			unknown	unknown arg0	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
 FDAT_302.BIN	0x801edea0	func_801edea0			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
@@ -1714,7 +1714,7 @@ FDAT_322.BIN	0x801ed2f0	fdat_801ed2f0			unknown	unknown arg0	candidate	candidate
 FDAT_322.BIN	0x801ed388	fdat_801ed388			unknown	unknown arg0;unknown arg1;unknown arg2	candidate	candidate	relocation-masked-body	FDAT common function (src/lib/fdat_common.inc), the same body in all 36 overlays; named by its FDAT_002.BIN address
 FDAT_322.BIN	0x801ed410	fdat_801ed410			unknown	unknown arg0	candidate	candidate	relocation-masked-body	FDAT common function (src/lib/fdat_common.inc), the same body in all 36 overlays; named by its FDAT_002.BIN address
 FDAT_322.BIN	0x801ed498	fdat_801ed498			void		candidate	candidate	relocation-masked-body	FDAT common function (src/lib/fdat_common.inc), the same body in all 36 overlays; named by its FDAT_002.BIN address
-FDAT_322.BIN	0x801ed4a0	fdat_801ed4a0			unknown		candidate	candidate	relocation-masked-body	FDAT shared map handler (src/lib/fdat_801ed4a0.inc), the same body in 21 overlays; named by its FDAT_002.BIN address
+FDAT_322.BIN	0x801ed4a0	fdat_801ed4a0			unknown		candidate	candidate	relocation-masked-body	FDAT shared map handler (src/lib/fdat_801ed4a0.inc), the same body in 23 overlays; named by its FDAT_002.BIN address
 FDAT_322.BIN	0x801ed6e4	fdat_801ed6e4			unknown		candidate	candidate	relocation-masked-body	FDAT shared map handler (src/lib/fdat_801ed6e4.inc), the same body in 19 overlays; named by its FDAT_002.BIN address
 FDAT_332.BIN	0x801eb7ac	fdat_801eb7ac			void	unknown *object	candidate	candidate	relocation-masked-body	FDAT common function (src/lib/fdat_common.inc), the same body in all 36 overlays; named by its FDAT_002.BIN address
 FDAT_332.BIN	0x801eb7b4	fdat_801eb7b4			unknown	unknown *object;unknown *pointer1	candidate	candidate	relocation-masked-body	FDAT common function (src/lib/fdat_common.inc), the same body in all 36 overlays; named by its FDAT_002.BIN address
@@ -1739,7 +1739,7 @@ FDAT_332.BIN	0x801ed410	fdat_801ed410			unknown	unknown arg0	candidate	candidate
 FDAT_332.BIN	0x801ed498	fdat_801ed498			void		candidate	candidate	relocation-masked-body	FDAT common function (src/lib/fdat_common.inc), the same body in all 36 overlays; named by its FDAT_002.BIN address
 FDAT_332.BIN	0x801ed4a0	func_801ed4a0			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
 FDAT_332.BIN	0x801ed614	func_801ed614			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-FDAT_332.BIN	0x801ed6c0	fdat_801ed4a0			unknown		candidate	candidate	relocation-masked-body	FDAT shared map handler (src/lib/fdat_801ed4a0.inc), the same body in 21 overlays; named by its FDAT_002.BIN address
+FDAT_332.BIN	0x801ed6c0	fdat_801ed4a0			unknown		candidate	candidate	relocation-masked-body	FDAT shared map handler (src/lib/fdat_801ed4a0.inc), the same body in 23 overlays; named by its FDAT_002.BIN address
 FDAT_332.BIN	0x801ed904	func_801ed904			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
 FDAT_332.BIN	0x801ed9e8	func_801ed9e8			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
 FDAT_372.BIN	0x801eb7ac	fdat_801eb7ac			void	unknown *object	candidate	candidate	relocation-masked-body	FDAT common function (src/lib/fdat_common.inc), the same body in all 36 overlays; named by its FDAT_002.BIN address
@@ -1815,7 +1815,7 @@ FDAT_402.BIN	0x801ed2f0	fdat_801ed2f0			unknown	unknown arg0	candidate	candidate
 FDAT_402.BIN	0x801ed388	fdat_801ed388			unknown	unknown arg0;unknown arg1;unknown arg2	candidate	candidate	relocation-masked-body	FDAT common function (src/lib/fdat_common.inc), the same body in all 36 overlays; named by its FDAT_002.BIN address
 FDAT_402.BIN	0x801ed410	fdat_801ed410			unknown	unknown arg0	candidate	candidate	relocation-masked-body	FDAT common function (src/lib/fdat_common.inc), the same body in all 36 overlays; named by its FDAT_002.BIN address
 FDAT_402.BIN	0x801ed498	fdat_801ed498			void		candidate	candidate	relocation-masked-body	FDAT common function (src/lib/fdat_common.inc), the same body in all 36 overlays; named by its FDAT_002.BIN address
-FDAT_402.BIN	0x801ed4a0	fdat_801ed4a0			unknown		candidate	candidate	relocation-masked-body	FDAT shared map handler (src/lib/fdat_801ed4a0.inc), the same body in 21 overlays; named by its FDAT_002.BIN address
+FDAT_402.BIN	0x801ed4a0	fdat_801ed4a0			unknown		candidate	candidate	relocation-masked-body	FDAT shared map handler (src/lib/fdat_801ed4a0.inc), the same body in 23 overlays; named by its FDAT_002.BIN address
 FDAT_402.BIN	0x801ed6e4	fdat_801ed6e4			unknown		candidate	candidate	relocation-masked-body	FDAT shared map handler (src/lib/fdat_801ed6e4.inc), the same body in 19 overlays; named by its FDAT_002.BIN address
 FDAT_412.BIN	0x801eb7ac	fdat_801eb7ac			void	unknown *object	candidate	candidate	relocation-masked-body	FDAT common function (src/lib/fdat_common.inc), the same body in all 36 overlays; named by its FDAT_002.BIN address
 FDAT_412.BIN	0x801eb7b4	fdat_801eb7b4			unknown	unknown *object;unknown *pointer1	candidate	candidate	relocation-masked-body	FDAT common function (src/lib/fdat_common.inc), the same body in all 36 overlays; named by its FDAT_002.BIN address
@@ -1839,7 +1839,7 @@ FDAT_412.BIN	0x801ed388	fdat_801ed388			unknown	unknown arg0;unknown arg1;unknow
 FDAT_412.BIN	0x801ed410	fdat_801ed410			unknown	unknown arg0	candidate	candidate	relocation-masked-body	FDAT common function (src/lib/fdat_common.inc), the same body in all 36 overlays; named by its FDAT_002.BIN address
 FDAT_412.BIN	0x801ed498	fdat_801ed498			void		candidate	candidate	relocation-masked-body	FDAT common function (src/lib/fdat_common.inc), the same body in all 36 overlays; named by its FDAT_002.BIN address
 FDAT_412.BIN	0x801ed4a0	func_801ed4a0			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-FDAT_412.BIN	0x801ed4cc	fdat_801ed4a0			unknown		candidate	candidate	relocation-masked-body	FDAT shared map handler (src/lib/fdat_801ed4a0.inc), the same body in 21 overlays; named by its FDAT_002.BIN address
+FDAT_412.BIN	0x801ed4cc	fdat_801ed4a0			unknown		candidate	candidate	relocation-masked-body	FDAT shared map handler (src/lib/fdat_801ed4a0.inc), the same body in 23 overlays; named by its FDAT_002.BIN address
 FDAT_412.BIN	0x801ed710	fdat_801ed6e4			unknown		candidate	candidate	relocation-masked-body	FDAT shared map handler (src/lib/fdat_801ed6e4.inc), the same body in 19 overlays; named by its FDAT_002.BIN address
 FDAT_442.BIN	0x801eb72c	fdat_801eb7ac			void	unknown *object	candidate	candidate	relocation-masked-body	FDAT common function (src/lib/fdat_common.inc), the same body in all 36 overlays; named by its FDAT_002.BIN address
 FDAT_442.BIN	0x801eb734	fdat_801eb7b4			unknown	unknown *object;unknown *pointer1	candidate	candidate	relocation-masked-body	FDAT common function (src/lib/fdat_common.inc), the same body in all 36 overlays; named by its FDAT_002.BIN address

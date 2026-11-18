@@ -25,7 +25,7 @@
 
 /* 1 while the area 3 exit scene is armed, 0xff once played; defined here
  * only because each map unit places one COMMON word (src/fdat_182/
- * map_801ed4a0.c uses it). */
+ * main.c uses it). */
 DATA(0x801edc54, 0x4, ".bss")
 int fdat_801edc54;
 
