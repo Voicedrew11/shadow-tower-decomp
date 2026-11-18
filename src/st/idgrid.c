@@ -742,8 +742,6 @@ void func_80067bec(u8 grid)
 
 /* Draws the screen: the text colours, the cursor blink, one grid with its
  * detail panel or both grids, and the arrow toward the current grid. */
-/* Not exact: as func_80066004: retail stores the 48 group before loading the
- * blink phase; this build hoists the load (7 words). */
 ADDRESS(0x80068258, 0x1e8)
 void func_80068258(void)
 {
@@ -753,12 +751,13 @@ void func_80068258(void)
 
     func_800174c4();
     sp = MENU_SCRATCH;
-    sp->style[2].b = sp->style[6].b = sp->style[3].g = sp->style[7].g = sp->style[3].b =
-        sp->style[7].b = 48;
+    sp->style[3].r = sp->style[7].r = 96;
+    sp->style[3].g = sp->style[7].g = sp->style[3].b = sp->style[7].b = 48;
     sp->style[0].b = sp->style[4].b = sp->style[0].g = sp->style[4].g = sp->style[0].r =
-        sp->style[4].r = sp->style[3].r = sp->style[7].r = 96;
+        sp->style[4].r = 96;
     sp->style[2].r = sp->style[6].r = 98;
     sp->style[2].g = sp->style[6].g = 66;
+    sp->style[2].b = sp->style[6].b = 48;
     sp->style[0].cd = sp->style[2].cd = sp->style[3].cd = 73;
     sp->style[4].cd = sp->style[6].cd = sp->style[7].cd = 49;
     if (MENU_SCRATCH->unk2E4 < 16)

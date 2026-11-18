@@ -814,8 +814,6 @@ void func_80065f40(void)
 
 /* Draws the screen: the text colours, the cursor blink and the active
  * list's panels. */
-/* Not exact: retail stores the 48 group before it loads the blink phase
- * (unk2E4) into $v1; this build hoists the load (7 words, $v0/$v1 swapped). */
 ADDRESS(0x80066004, 0x168)
 void func_80066004(void)
 {
@@ -823,12 +821,13 @@ void func_80066004(void)
 
     func_800174c4();
     sp = MENU_SCRATCH;
-    sp->style[2].b = sp->style[6].b = sp->style[3].g = sp->style[7].g = sp->style[3].b =
-        sp->style[7].b = 48;
+    sp->style[3].r = sp->style[7].r = 96;
+    sp->style[3].g = sp->style[7].g = sp->style[3].b = sp->style[7].b = 48;
     sp->style[0].b = sp->style[4].b = sp->style[0].g = sp->style[4].g = sp->style[0].r =
-        sp->style[4].r = sp->style[3].r = sp->style[7].r = 96;
+        sp->style[4].r = 96;
     sp->style[2].r = sp->style[6].r = 98;
     sp->style[2].g = sp->style[6].g = 66;
+    sp->style[2].b = sp->style[6].b = 48;
     sp->style[0].cd = sp->style[2].cd = sp->style[3].cd = 57;
     sp->style[4].cd = sp->style[6].cd = sp->style[7].cd = 41;
     if (MENU_SCRATCH->unk2E4 < 16)
