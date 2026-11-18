@@ -81,8 +81,6 @@ void func_80012a70(int bank)
 
 /* Uploads a run of TIM images, shifting each image `page` texture pages
  * right and each CLUT `clut_y` lines down. */
-/* Not exact: retail keeps the record start in $a0 and the CLUT flag test in
- * $v1 (this build swaps the two). */
 ADDRESS(0x80012b50, 0xdc)
 void func_80012b50(u_long *data, int page, int clut_y)
 {
@@ -95,11 +93,11 @@ void func_80012b50(u_long *data, int page, int clut_y)
     u_long *image_data;
 
     for (;;) {
-        if (tim[0] != 0x10)
-            return;
         p = tim;
-        flags = p[1];
+        if (p[0] != 0x10)
+            return;
         tim += 2;
+        flags = p[1];
         if (flags & 8) {
             clut_data = p + 5;
             clut = tim;
@@ -118,8 +116,6 @@ void func_80012b50(u_long *data, int page, int clut_y)
 }
 
 /* Uploads a run of TIM images to the given image and CLUT positions. */
-/* Not exact: as func_80012b50, and retail copies the parameters to
- * $s1/$s5/$s6 (the record pointer in $s1). */
 ADDRESS(0x80012c2c, 0xe4)
 void func_80012c2c(u_long *data, DVECTOR *pos, DVECTOR *clut_pos)
 {
@@ -132,11 +128,11 @@ void func_80012c2c(u_long *data, DVECTOR *pos, DVECTOR *clut_pos)
     u_long *image_data;
 
     for (;;) {
-        if (tim[0] != 0x10)
-            return;
         p = tim;
-        flags = p[1];
+        if (p[0] != 0x10)
+            return;
         tim += 2;
+        flags = p[1];
         if (flags & 8) {
             clut_data = p + 5;
             clut = tim;
