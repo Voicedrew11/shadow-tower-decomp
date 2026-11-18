@@ -14,9 +14,6 @@
  * Records the source the request resolved to (the viewer, table A entry
  * unk5C or table B entry unk64): its position, its horizontal distance
  * from `pos` and its two levels at unk44C0/unk44C2.
- *
- * Not exact: retail loads b->unk04 into v1 (`lbu v1; andi v0,v1,0x10`),
- * this source into v0; everything else agrees.
  */
 ADDRESS(0x800492f4, 0x250)
 void func_800492f4(VECTOR *pos)
@@ -26,6 +23,7 @@ void func_800492f4(VECTOR *pos)
     Vis88 *b;
     Vis24 *r;
     int dx, dz;
+    int n;
 
     if (v->unk74 & 0x80) {
         dx = pos->vx - viewer.position.vx;
@@ -42,14 +40,15 @@ void func_800492f4(VECTOR *pos)
         v->unkAC = a->unk74;
         v->unk44C0 = a->unk2E;
         v->unk44C2 = a->unk30;
-    } else if (v->unk64 != v->unk5C) {
-        b = &vis_table_b.entries[v->unk64];
+    } else if ((n = v->unk64) != -1) {
+        b = &vis_table_b.entries[n];
         dx = pos->vx - b->unk24.vx;
         dz = pos->vz - b->unk24.vz;
         r = &vis_table_b.unk0000[b->unk0a];
         v->unkBC = SquareRoot0(dx * dx + dz * dz);
         v->unkAC = b->unk24;
-        if (b->unk04 & 0x10)
+        n = b->unk04;
+        if (n & 0x10)
             v->unk44C0 = r->unk04 * b->unk48 >> 7;
         else
             v->unk44C0 = r->unk04;
@@ -62,10 +61,6 @@ void func_800492f4(VECTOR *pos)
  * target, 0x40: func_8004be80, 0x20: a table B entry, 0x80: a projectile)
  * with its height unk1E added for the duration; returns and records the
  * bits that hit.
- *
- * Not exact: retail keeps `req` in s1 and `hits` in s0, this source the
- * reverse. Retail also copies req to a0 before the optional unk1C update;
- * this source places that copy in func_8003beb4's call delay slot.
  */
 ADDRESS(0x80049544, 0x184)
 int func_80049544(VisLists *req)
@@ -91,9 +86,11 @@ int func_80049544(VisLists *req)
     } else
         vis_lists.unk64 = -1;
     if (req->unk0 & 0x80) {
-        if (req->unk0 & 0x800)
+        if (req->unk0 & 0x800) {
             req->unk1C += 512;
-        if (func_8003beb4(req) != -1)
+            if (func_8003beb4(req) != -1)
+                hits |= 0x80;
+        } else if (func_8003beb4(req) != -1)
             hits |= 0x80;
     }
     req->unk4.vy -= req->unk1E;
