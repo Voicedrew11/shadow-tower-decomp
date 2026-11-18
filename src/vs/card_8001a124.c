@@ -566,36 +566,27 @@ int func_8001b314(int fd, int offset, u8 *buf, int size)
 
 /* Reads blocks written by func_8001b314, rereading a bad block up to three
  * times; returns the sum of the check bytes, or -1. */
-/* Not exact (size-exact, 4 words): retail keeps the running sum in $a0 and
- * each new sum in $a1 (`addu a1,a0,v0; move a0,a1`), then complements into
- * $a0; this build swaps the two. Both pseudos have 8 weighted refs and the
- * new sum the shorter life (7 insns against 10), so global-alloc takes it
- * first. Ruled out: one statement or two for the sum, a third local for the
- * complement, the complement assigned back to the running sum (cse then
- * folds the pair into one register), the copy after the byte store or in the
- * for increment, either declaration order. */
 ADDRESS(0x8001b3f8, 0x10c)
 int func_8001b3f8(int fd, int offset, u8 *buf, int size)
 {
     u8 *data = buf;
     u8 block[128];
     int retries = 0;
-    int sum = 0;
+    u8 sum = 0;
     int n = 0;
-    int check;
-    int next_check;
+    u8 check;
     int i;
 
     while (size > 0) {
         lseek(fd, offset + n * 128, SEEK_SET);
         if (read(fd, block, 128) != 128)
             return -1;
-        for (next_check = i = 0; i < 127; i++) {
-            check = next_check += block[i];
+        for (check = i = 0; i < 127; i++) {
+            check += block[i];
             *data++ = block[i];
         }
         check = ~check;
-        if ((u8)check != block[127]) {
+        if (check != block[127]) {
             data -= 127;
             if (retries >= 3)
                 return -1;
@@ -606,7 +597,7 @@ int func_8001b3f8(int fd, int offset, u8 *buf, int size)
             sum += check;
         }
     }
-    return sum & 0xff;
+    return sum;
 }
 
 /* Loads the chosen save file into `save`: 1 on success, 0 on failure. */
@@ -1022,15 +1013,14 @@ done:
 /* Writes `save` over its player's card file (named in DAT_801a0a30): 1 on
  * success, 0 on failure.
  *
- * Not exact (size-exact): retail's frame is 88 bytes, this build's 80: eight
- * untouched bytes lie between path[32] and the saved registers (sp+48),
- * where the loading twin func_8001b504 keeps its two-byte digit base. No
- * access to them exists here, so the local that owns them is not evidenced.
+ * func_8001b850 without its create branch: `number` (the new file's digits
+ * there) is still declared ahead of `path` and never used.
  */
 ADDRESS(0x8001c378, 0x1b8)
 int func_8001c378(VsSave *save)
 {
     VsMenuScratch *sp = VS_MENU_SCRATCH;
+    char number[3];
     char path[32];
     VsCardHeader *header;
     char *name;
@@ -1051,11 +1041,10 @@ open:
     strcat(path, name);
     fd = open(path, O_WRONLY);
     if (fd == -1) {
-        if (tries) {
-            tries--;
-            goto open;
-        }
-        return 0;
+        if (!tries)
+            return 0;
+        tries--;
+        goto open;
     }
 write:
     lseek(fd, 0, SEEK_SET);
@@ -1120,29 +1109,33 @@ int func_8001c530(void)
  * the header's three-digit count the first time) and hands the loser's
  * count of it over; then writes both records back. Returns a bit per
  * player whose write failed.
- * Not exact: retail's frame is 56 bytes, this build's 48 (first
- * divergence at +0x0). The save/header roots still have different
- * lifetimes; this build is eight bytes short.
+ *
+ * Not exact (frame size only, every instruction agrees): retail's frame is
+ * 56 bytes with eight untouched bytes at sp+24, right after `zero`; this
+ * build's is 48. The allocation matches, HI is not spilled and nothing is
+ * caller-saved, so the slot is a declared local of up to 8 bytes that the
+ * code never uses; no twin names it (an unused `char number[3];` as in
+ * func_8001c378 would make the function exact).
  */
 ADDRESS(0x8001c5e0, 0x2d8)
 int func_8001c5e0(int side, int again)
 {
     VsMenuScratch *sp = VS_MENU_SCRATCH;
     int failed = 0;
-    int started = failed;
-    char zero[2] = "\x82\x4f";
     u16 id = DAT_80063330[side];
-    VsSave *winner = &DAT_801a0a80[side];
-    VsSave *loser = &DAT_801a0a80[1 - side];
-    VsSaveSub *win = &winner->unk18BC;
-    VsSaveSub *lose = &loser->unk18BC;
+    char zero[2] = "\x82\x4f";
+    VsSaveSub *win = &DAT_801a0a80[side].unk18BC;
+    VsSaveSub *lose = &DAT_801a0a80[1 - side].unk18BC;
+    int started = failed;
     u16 count;
     int i;
 
     if (!again) {
-        if (!(winner->unk14CC[id / 32] & (1 << (id % 32)))) {
-            count = DAT_8015ffc0[side].unk40 + 1;
-            winner->unk1802 = count;
+        if (!(DAT_801a0a80[side].unk14CC[id / 32] & (1 << (id % 32)))) {
+            /* The count is reached through its own address (header + 0x40),
+             * not as a member of the header element. */
+            count = *(u16 *)&DAT_8015ffc0[side].unk40 + 1;
+            DAT_801a0a80[side].unk1802 = count;
             if (count >= 100) {
                 DAT_8015ffc0[side].unk34[0] = zero[0];
                 DAT_8015ffc0[side].unk34[1] = zero[1] + count / 100 % 10;
@@ -1153,13 +1146,19 @@ int func_8001c5e0(int side, int again)
             }
             DAT_8015ffc0[side].unk34[4] = zero[0];
             DAT_8015ffc0[side].unk34[5] = zero[1] + count % 10;
-            DAT_8015ffc0[side].unk40 = count;
-            winner->unk14CC[id / 32] |= 1 << (id % 32);
+            *(u16 *)&DAT_8015ffc0[side].unk40 = count;
+            DAT_801a0a80[side].unk14CC[id / 32] |= 1 << (id % 32);
         }
         win->unk150[id] = 1;
-        win->unk14[id] = 0;
         win->unk2EC[id] = lose->unk2EC[id];
-        lose->unk14[id] = 1;
+        win->unk14[id] = 0;
+        {
+            /* Retail loads this 1 on its own: an int-typed value, not the
+             * byte constant stored above. */
+            int on = 1;
+
+            lose->unk14[id] = on;
+        }
         lose->unk150[id] = 0;
         lose->unk2EC[id] = 0;
     }
