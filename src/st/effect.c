@@ -208,9 +208,14 @@ StEffect *effect_alloc(void)
     return NULL;
 }
 
-/* Slot presets (no direct callers). */
+/* Slot presets, called by the spawner (src/st/effect_spawn.c) without
+ * prototypes. */
 ADDRESS(0x800363b4, 0x38)
-void effect_preset_1(StEffect *e, s16 a, s16 scale, u8 b)
+void effect_preset_1(e, a, scale, b)
+    StEffect *e;
+    s16 a;
+    s16 scale;
+    u8 b;
 {
     e->unk6 = 1;
     e->unk2 = 128;
@@ -222,7 +227,11 @@ void effect_preset_1(StEffect *e, s16 a, s16 scale, u8 b)
 }
 
 ADDRESS(0x800363ec, 0x38)
-void effect_preset_5(StEffect *e, s16 a, s16 scale, u8 b)
+void effect_preset_5(e, a, scale, b)
+    StEffect *e;
+    s16 a;
+    s16 scale;
+    u8 b;
 {
     e->unk6 = 5;
     e->unk2 = 128;
@@ -234,7 +243,11 @@ void effect_preset_5(StEffect *e, s16 a, s16 scale, u8 b)
 }
 
 ADDRESS(0x80036424, 0x60)
-void effect_preset_14(StEffect *e, s16 a, s16 yaw, int height)
+void effect_preset_14(e, a, yaw, height)
+    StEffect *e;
+    s16 a;
+    s16 yaw;
+    int height;
 {
     e->unk6 = 14;
     e->unk2 = 128;

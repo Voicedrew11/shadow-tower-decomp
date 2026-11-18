@@ -48,16 +48,20 @@ typedef struct StEffect {
     SVECTOR unk38;       /* 0x38: scale */
     SVECTOR unk40;       /* 0x40: velocity */
     u8 unk48[4];
-    u8 unk4C;            /* 0x4c: VS.EXE: the owner fighter's number */
+    u8 unk4C;            /* 0x4c: VS.EXE: the owner fighter's number; ST.EXE: a word, ST_EFFECT_ENTRY */
     u8 unk4D;            /* 0x4d: VS.EXE: the attack's index among the fighter's */
     u8 unk4E[2];
     union {
         s16 h;
         s8 b;
+        u8 ub[2];
     } unk50;             /* 0x50: script state, by kind */
     s16 unk52;           /* 0x52 */
     u8 unk54[4];
 } StEffect;
+
+/* ST.EXE: the table A entry (Vis212, st/vis.h) the effect belongs to. */
+#define ST_EFFECT_ENTRY(e) (*(Vis212 **)&(e)->unk4C)
 
 #define ST_EFFECT_FREE 255
 #define ST_EFFECT_SLOTS 128
@@ -83,9 +87,11 @@ void effect_emit_behind(u_long flags);
 void effect_vertex(StEffect *e, int index, VECTOR *out, SVECTOR *scale);
 void effect_vertex_world(StEffect *e, int index, VECTOR *out, SVECTOR *scale);
 StEffect *effect_alloc(void);
-void effect_preset_1(StEffect *e, s16 a, s16 scale, u8 b);
-void effect_preset_5(StEffect *e, s16 a, s16 scale, u8 b);
-void effect_preset_14(StEffect *e, s16 a, s16 yaw, int height);
+/* The presets are old-style definitions: the spawner (src/st/effect_spawn.c)
+ * passes their arguments unconverted. */
+void effect_preset_1();
+void effect_preset_5();
+void effect_preset_14();
 
 /* src/st/effect_move.c */
 int effect_accelerate(int scale, int limit, int attack, int height, SVECTOR *accel);
