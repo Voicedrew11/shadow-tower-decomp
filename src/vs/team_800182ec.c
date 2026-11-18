@@ -42,11 +42,15 @@ void func_800182ec(VsMenuScratch *sp, int player)
     int top;
     int col;
     int row;
+    int pick;
     int idx;
+    int slot;
     int id;
     int n;
     int size;
-    int i, j;
+    int i;
+    int j;
+    int k;
 
     edit.unk0 = 0;
     for (;;) {
@@ -67,8 +71,8 @@ void func_800182ec(VsMenuScratch *sp, int player)
                 col = -1;
                 row = ~cursor;
             } else {
+                col = (s16)(cursor - (cursor >> 2) * 4);
                 row = cursor >> 2;
-                col = (s16)(cursor - row * 4);
             }
             if (PRESSED & 0x2000) {
                 if (!edit.unk0) {
@@ -157,7 +161,7 @@ void func_800182ec(VsMenuScratch *sp, int player)
                     sp->unk1D6 = 0;
                     func_80017bc4();
                 } else {
-                    idx = sp->unk1D2 * 4 + sp->unk1D0;
+                    pick = sp->unk1D2 * 4 + sp->unk1D0;
                     edit.unk0 = 1;
                     sp->unk1D6 = 1;
                     if (sp->unk1D0 < 0) {
@@ -167,32 +171,39 @@ void func_800182ec(VsMenuScratch *sp, int player)
                             func_80017c84(sp, player, &edit);
                             goto scrolled;
                         }
-                    } else if (DAT_801624b8[player].slot[2] == -1 &&
-                               sp->unk0.team.kinds[idx] != 0xff) {
+                    } else if (team[2] == -1) {
+                        if (sp->unk0.team.kinds[pick] == 0xff) {
+                            func_8001c938();
+                            edit.unk0 = 0;
+                            sp->unk1D6 = 0;
+                            goto scrolled;
+                        }
                         for (i = 0; i < 3; i++) {
-                            if (team[i] == sp->unk0.team.kinds[idx])
+                            if (team[i] == sp->unk0.team.kinds[pick])
                                 break;
                         }
                         if (i == 3) {
-                            for (j = 0; j < 3; j++) {
-                                if (team[j] == -1) {
+                            for (i = 0; i < 3; i++) {
+                                int none = -1;
+
+                                if (team[i] == none) {
                                     RECT r;
 
-                                    team[j] = sp->unk0.team.kinds[idx];
-                                    r.x = sp->unk0.team.pos[idx % 12].vx;
-                                    r.y = sp->unk0.team.pos[idx % 12].vy;
+                                    team[i] = sp->unk0.team.kinds[pick];
+                                    r.x = sp->unk0.team.pos[pick % 12].vx;
+                                    r.y = sp->unk0.team.pos[pick % 12].vy;
                                     r.w = 96;
                                     r.h = 48;
-                                    MoveImage2(&r, sp->unk0.team.pos[12 + j].vx,
-                                               sp->unk0.team.pos[12 + j].vy);
+                                    MoveImage2(&r, sp->unk0.team.pos[12 + i].vx,
+                                               sp->unk0.team.pos[12 + i].vy);
                                     DrawSync(0);
                                     break;
                                 }
                             }
-                            if (j != 3) {
+                            if (i != 3) {
                                 func_8001c978();
-                                sp->unk1D0 = ~j;
-                                edit.unk4 = j;
+                                sp->unk1D0 = ~i;
+                                edit.unk4 = i;
                                 func_80017c84(sp, player, &edit);
                                 goto scrolled;
                             }
@@ -206,22 +217,22 @@ void func_800182ec(VsMenuScratch *sp, int player)
                 DAT_8006335c = 0;
                 func_8001c978();
                 if (sp->unk1D0 < 0) {
-                    id = team[-1 - sp->unk1D0];
-                    if (id == -1) {
-                        idx = -1;
-                    } else {
+                    id = team[-sp->unk1D0 - 1];
+                    if (id != -1) {
                         /* Retail only updates idx when a kind matches. */
-                        for (i = 0; i < sp->unk0.team.count; i++) {
-                            if (id == sp->unk0.team.kinds[i]) {
-                                idx = i;
+                        for (k = 0; k < sp->unk0.team.count; k++) {
+                            if (id == sp->unk0.team.kinds[k]) {
+                                idx = k;
                                 break;
                             }
                         }
+                    } else {
+                        idx = -1;
                     }
                 } else {
                     idx = sp->unk1D2 * 4 + sp->unk1D0;
-                    for (i = 0; i < 3; i++) {
-                        if (sp->unk0.team.kinds[idx] == team[i]) {
+                    for (k = 0; k < 3; k++) {
+                        if (sp->unk0.team.kinds[idx] == team[k]) {
                             idx = -1;
                             break;
                         }
@@ -232,9 +243,9 @@ void func_800182ec(VsMenuScratch *sp, int player)
                         DVECTOR tex;
                         DVECTOR clut;
 
-                        shown = idx;
                         buf = DAT_801a4590.unk4A4;
                         func_8002ee90(10, sp->unk0.team.kinds[idx] + 200, buf);
+                        shown = idx;
                         func_80012c2c(&buf[1], &sp->unk0.team.pos[15], NULL);
                         tex.vx = 960;
                         tex.vy = 446;
@@ -249,20 +260,24 @@ void func_800182ec(VsMenuScratch *sp, int player)
         scrolled:
             if (sp->unk1D2 != top) {
                 if (top < sp->unk1D2) {
-                    n = sp->unk1D2 - top;
-                    idx = (top + 3) * 4;
+                    n = (sp->unk1D2 - top) * 4;
+                    slot = (top + 3) * 4;
                 } else {
-                    n = top - sp->unk1D2;
-                    idx = sp->unk1D2 * 4;
+                    n = (top - sp->unk1D2) * 4;
+                    slot = sp->unk1D2 * 4;
                 }
                 DAT_801a4590.unk4A0 = DAT_801a4590.unk4A4;
-                for (i = 0; i < n * 4; i++, idx++) {
-                    if (idx < sp->unk0.team.count) {
-                        size = func_8002ee90(10, sp->unk0.team.kinds[idx],
-                                             DAT_801a4590.unk4A0) * 2048;
-                        func_80012c2c(DAT_801a4590.unk4A0, &sp->unk0.team.pos[idx % 12], NULL);
-                        DAT_801a4590.unk4A0 = (u_long *)((u8 *)DAT_801a4590.unk4A0 + size);
-                    }
+                j = 0;
+                if (j < n) {
+                    VsCdState *cd = &DAT_801a4590;
+
+                    do {
+                        if (slot < sp->unk0.team.count) {
+                            size = func_8002ee90(10, sp->unk0.team.kinds[slot], cd->unk4A0) * 2048;
+                            func_80012c2c(cd->unk4A0, &sp->unk0.team.pos[slot % 12], NULL);
+                            cd->unk4A0 = (u_long *)((u8 *)cd->unk4A0 + size);
+                        }
+                    } while (j++, slot++, j < n);
                 }
                 DrawSync(0);
             }
