@@ -1436,13 +1436,10 @@ void func_8005ad00(void)
  * three rows shown with their pictures, and shows the detail page of the
  * confirmed one (func_80030ab8 draws the page).
  *
- * Not exact: one register. The detail load tests `k != -1` with the -1
- * in $t0 (`li t0,-1` in the preceding branch's delay slot), this build in
- * $v0. $t0 is the reload register, so retail's -1 had no hard register:
- * loop.c moved it out of the main loop, which needs a lifetime of about
- * 17 insns for that constant where this source gives 1 (.loop: "regno 438
- * (life 1), savings 1 not desirable"). Ruled out: a dead `k = -1`
- * initialiser, a block-local `none = -1` variable.
+ * The detail load is skipped for the id in `shown`, which starts as -1
+ * and is never updated here (func_8005f54c's shop screens keep theirs
+ * current): a call-crossing variable with no saved register left, so
+ * retail rematerialises the -1 in the reload register at the test.
  */
 ADDRESS(0x8005c7fc, 0xa60)
 void func_8005c7fc(void)
@@ -1459,6 +1456,7 @@ void func_8005c7fc(void)
     int col;
     int row;
     int first;
+    int shown = -1;
     int used;
 
     int n;
@@ -1641,7 +1639,7 @@ void func_8005c7fc(void)
                 DAT_801cd180.unk4 = 0;
                 k = sp->unk2E2 * 5 + sp->unk2E0;
                 if (k < sp->unk0.store.count) {
-                    if (k != -1) {
+                    if (k != shown) {
                         u_long *p = CD_BUFFER;
 
 
