@@ -287,8 +287,7 @@ void func_800468c0(VECTOR *pos, int kind)
 }
 
 /* func_800468c0 for the parts' quads (vertex order 0, 1, 3, 2).
- * Not exact: h138/h144 use world-space w plus query Y, double-counting
- * that offset. Retail uses relative vertex a0 plus query Y. */
+ * Not exact: same shape as func_800468c0, not worked on this round. */
 ADDRESS(0x80047884, 0x124c)
 void func_80047884(VECTOR *pos, int kind)
 {
@@ -431,7 +430,7 @@ void func_80047884(VECTOR *pos, int kind)
                         sp->flags = 2;
                     if ((f->flags & 0x40) && !((vis_lists.unk47E0 >> 2) & 1)) {
                         sp->flags |= 4;
-                        sp->h138 = w->vy + sp->pos[0].vy;
+                        sp->h138 = a0->vy + sp->pos[0].vy;
                     }
                     if ((f->flags & 0x80) && !((vis_lists.unk47E0 >> 3) & 1))
                         sp->flags = 8;
@@ -439,7 +438,7 @@ void func_80047884(VECTOR *pos, int kind)
                         sp->flags = 16;
                     if ((f->flags & 0x200) && !((vis_lists.unk47E0 >> 5) & 1)) {
                         sp->flags |= 0x20;
-                        sp->h144 = w->vy + sp->pos[0].vy;
+                        sp->h144 = a0->vy + sp->pos[0].vy;
                     }
                     if (f->flags & 0x400)
                         goto next;
