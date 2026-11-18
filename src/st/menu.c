@@ -763,9 +763,6 @@ void func_8005a3a8(int apply)
 /*
  * Fades the screen to black over sixteen frames: each frame subtracts
  * 16 from the display through a translucent quad without clearing.
- *
- * Not exact (size-exact): retail builds the POLY_F4 tag before its XY
- * stores, as in func_80021158; this source builds it after them.
  */
 ADDRESS(0x8005aa80, 0x280)
 void func_8005aa80(void)
@@ -789,11 +786,19 @@ void func_8005aa80(void)
         ClearOTagR(ot, 1);
         setcode(&poly, 0x28);
         setSemiTrans(&poly, 1);
-        setXY4(&poly, 0, 0, world_state.draw[1 - world_state.frame].clip.w, 0,
-               0, world_state.draw[1 - world_state.frame].clip.h,
-               world_state.draw[1 - world_state.frame].clip.w,
-               world_state.draw[1 - world_state.frame].clip.h);
-        mesh_add_prim(ot, &poly, 5);
+        /* The quad is linked while it is filled in: its tag word first, the
+         * OT entry between the last corner's x and y (retail's store and
+         * load order pins both there). */
+        poly.tag = (ot[0] & 0xffffff) | (5 << 24);
+        poly.x0 = 0;
+        poly.y0 = 0;
+        poly.x1 = world_state.draw[1 - world_state.frame].clip.w;
+        poly.y1 = 0;
+        poly.x2 = 0;
+        poly.y2 = world_state.draw[1 - world_state.frame].clip.h;
+        poly.x3 = world_state.draw[1 - world_state.frame].clip.w;
+        mesh_set_ot(ot, &poly);
+        poly.y3 = world_state.draw[1 - world_state.frame].clip.h;
         poly.r0 = poly.g0 = poly.b0 = 16;
         SetDrawMode(&mode, 0, 0, GetTPage(0, 2, 640, 0), NULL);
         addPrim(ot, &mode);
