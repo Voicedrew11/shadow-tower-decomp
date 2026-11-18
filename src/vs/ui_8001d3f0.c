@@ -595,8 +595,10 @@ void func_8001f23c(int x, int y, int w, int h)
  * Draws a window frame from 16x16 tiles of the menu texture page: corners,
  * edges, an inner bevel and the filled middle.
  */
-/* Not exact: height normalizes at entry; saved-register and width/right
- * lifetimes differ (88-byte frame, retail 96). */
+/* Not exact: an unaccounted 8-byte stack span (sp+208) lies between the
+ * picture table and retail's two RECT initializers; its frame is 272 bytes,
+ * this build's 264. The table copy is 192 bytes, so the span is a local of
+ * its own that the code never touches. */
 ADDRESS(0x8001f30c, 0x51c)
 void func_8001f30c(short x, short y, short w, short h)
 {
@@ -803,8 +805,11 @@ void func_8001fb98(void)
  * cursor bar and up to three rows (file number, the fighter of the save
  * and its won count), each framed; the clipped text advance of each row
  * goes to DAT_801c4a38.
- * Not exact: an unaccounted 8-byte stack span precedes retail's two RECT
- * initializers; its frame is 272 bytes, this build's 264.
+ *
+ * Not exact: an unaccounted 8-byte stack span (sp+208) lies between the
+ * picture table and retail's two RECT initializers; its frame is 272 bytes,
+ * this build's 264. The table copy is 192 bytes, so the span is a local of
+ * its own that the code never touches.
  */
 ADDRESS(0x8001fcac, 0x6d8)
 void func_8001fcac(void)

@@ -15,8 +15,15 @@
  * left, the second on the right, wrapping to a second line at glyph 49;
  * `bright` sets their green tint.
  */
-/* Not exact: the 29/40/50 coordinates and graphics base initialize in
- * a different order and use different registers. */
+/* Not exact (size-exact, order and registers): retail sets the four x
+ * coordinates (and the 29) AFTER the constants loop.c hoists out of the
+ * glyph loop (graphics base, 40, 50), so they were emitted after the loop's
+ * start note, and the 29 takes $s8 while 40 and 50 fall to caller-saved
+ * $t1/$t0. Here they precede the hoisted constants, the 29 gets $t1 and 50
+ * gets $s8. Ruled out: literal 29 (not hoisted, one register freed,
+ * allocation changes throughout), an enclosing while, do-while(0) or for(;;)
+ * around the settings (the extra loop depth moves bright into a register),
+ * -G8. */
 ADDRESS(0x8002ad40, 0x338)
 void func_8002ad40(int bright)
 {

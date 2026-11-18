@@ -27,10 +27,14 @@ void func_800207d4(DVECTOR *pos, DVECTOR *tex, DVECTOR *clut, CVECTOR *color, in
 
 /* The detail page toggle: the attribute figures when nonzero (bss, unowned). */
 
-/* Not exact (one attempt; 96.0%): first divergence at +0x298, retail
- * stores tex and clut before setting up func_800207d4's arguments (here
- * after); the weight and size quotients also land in other saved
- * registers (retail a in $s0 via a temporary, b in $s1). */
+/* Not exact (size-exact): retail stores tex and clut before func_800207d4's
+ * argument registers are loaded and pos after them; sched1 gives the two
+ * stores a lower priority than the argument loads, which happens when they
+ * do not depend on the stacked fifth argument's store (same-base or varying-
+ * address stores). Here all six stores follow the argument loads. The weight
+ * and size quotients also land in other saved registers (retail a in $s0
+ * through a temporary, b in $s1). Ruled out: every order of the tex, clut,
+ * pos and style statements. */
 ADDRESS(0x80021140, 0x844)
 void func_80021140(int player)
 {

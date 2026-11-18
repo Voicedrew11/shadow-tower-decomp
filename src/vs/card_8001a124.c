@@ -566,8 +566,14 @@ int func_8001b314(int fd, int offset, u8 *buf, int size)
 
 /* Reads blocks written by func_8001b314, rereading a bad block up to three
  * times; returns the sum of the check bytes, or -1. */
-/* Not exact: retail keeps the running and new block sums in a0/a1;
- * this build swaps them. */
+/* Not exact (size-exact, 4 words): retail keeps the running sum in $a0 and
+ * each new sum in $a1 (`addu a1,a0,v0; move a0,a1`), then complements into
+ * $a0; this build swaps the two. Both pseudos have 8 weighted refs and the
+ * new sum the shorter life (7 insns against 10), so global-alloc takes it
+ * first. Ruled out: one statement or two for the sum, a third local for the
+ * complement, the complement assigned back to the running sum (cse then
+ * folds the pair into one register), the copy after the byte store or in the
+ * for increment, either declaration order. */
 ADDRESS(0x8001b3f8, 0x10c)
 int func_8001b3f8(int fd, int offset, u8 *buf, int size)
 {
@@ -1015,8 +1021,11 @@ done:
 
 /* Writes `save` over its player's card file (named in DAT_801a0a30): 1 on
  * success, 0 on failure.
- * Not exact (size-exact): retail's frame is 88 bytes, this build's 80
- * (first divergence at +0x0).
+ *
+ * Not exact (size-exact): retail's frame is 88 bytes, this build's 80: eight
+ * untouched bytes lie between path[32] and the saved registers (sp+48),
+ * where the loading twin func_8001b504 keeps its two-byte digit base. No
+ * access to them exists here, so the local that owns them is not evidenced.
  */
 ADDRESS(0x8001c378, 0x1b8)
 int func_8001c378(VsSave *save)

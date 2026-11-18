@@ -773,11 +773,13 @@ void func_801eebb4(void)
     d->unk0C = 0xff;
 }
 
-/* Not exact (registers): retail takes the two to-products in a3 and v1,
- * this source in v0, and loads unk280 before unk288. Here global-alloc
- * puts both products in LO, reload spills LO for the from-product's output
- * reload and the retry gives them v0; operand order, a `total - n` local
- * and x/y locals were ruled out. */
+/* Not exact (registers): retail takes the two to-products in a3 and v1, this
+ * source in v0, and loads unk280 before unk288. Here global-alloc puts both
+ * to-products in LO, reload spills LO for the from-product's output reload
+ * and the retry gives them v0 (free at that point); retail's retry skipped
+ * v0 for both and a1/a2 for the first, which fits a retry with v0 already
+ * taken as a reload register. Operand order, a total - n local and x/y
+ * locals were ruled out. */
 /* Entry 49 plays animation 0 to its end while the view turns from its
  * pitch and yaw to (0, -0x400). */
 ADDRESS(0x801eec74, 0x240)
