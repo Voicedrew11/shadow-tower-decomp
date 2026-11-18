@@ -161,9 +161,16 @@ void func_80063cb0(void)
  * the slot (or, for the two ring slots, opens the ring sub-list) and loads
  * the equipped id's image. Returns 1 on cancel.
  */
-/* Not exact: input/scratch/current-id registers, clear-loop induction and
- * the return schedule differ. Both this function and func_80064ba8 currently
- * have their retail extents; the internal switch-label residue remains. */
+/* Not exact (size-exact). Retail has the scratchpad in s0, the pad base and
+ * then `kind` in s1 and `cur` in s2; here cur and the pad base take s0,
+ * kind s1 and the scratchpad s2. global-alloc ranks cur 0.43, pad 0.42,
+ * kind 0.36, sp 0.22: retail needs sp first (its life not doubled by a
+ * REG_EQUIV, i.e. two live sets) and kind ahead of cur. Smaller residues:
+ * the clear loop is a walking pointer in retail, `count + list` operand
+ * order, the store order of the sub-list hand-off and where the two givs
+ * of the 266 loop step. Ruled out: block-local counters, a separate image
+ * variable, sp assigned after the cancel test or twice, an up-counting
+ * clear loop (one instruction longer), direct DAT_801e0d08 accesses. */
 ADDRESS(0x800642e8, 0x8c0)
 int func_800642e8(int *sel)
 {
