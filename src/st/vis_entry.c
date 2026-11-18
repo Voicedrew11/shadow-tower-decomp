@@ -623,8 +623,17 @@ int func_8004c184(Vis212 *e, u16 v)
 /* Moves the entry by its velocity, sliding along up to three walls the
  * request hits, then settles it on the floor. */
 /*
- * Not exact: floor-branch sharing, correction loads and flag setup
- * still differ, as do the record and slide temporaries' lifetimes.
+ * Not exact (7 words short). In the two wall arms retail reloads the
+ * constant 1 at each use (`li v1,1; subu v1,v1,v0` and `li a2,1; sw
+ * a2,48(sp)`): one cse-shared pseudo that got no saved register and was
+ * rematerialised, because the vis_lists base of the arms sits in s3 and
+ * the slide quotient in s0 (`sra s0,v0,12`); here the base takes s0 and
+ * the constant s3. Also: slid/record are s8/s7 in retail (s7/s8 here)
+ * and the two slid_wall clears come after the `move s8,zero`. Ruled out:
+ * a separate product variable for `speed * rcos()` (right size, but the
+ * record pointer is spilled and the frame grows 16 bytes). The goto
+ * shape hides the loop from loop.c in both builds; the floor tail is
+ * still a first-pass draft.
  */
 ADDRESS(0x8004c1b4, 0x654)
 void func_8004c1b4(Vis212 *e)
