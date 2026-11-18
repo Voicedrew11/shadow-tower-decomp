@@ -153,6 +153,126 @@ def lui_copied_through(hi_word: int, between: Sequence[int]) -> set[int]:
     return holding
 
 
+def read_registers(word: int) -> set[int]:
+    """The general registers an instruction reads ($zero excluded)."""
+    opcode = word >> 26
+    rs = (word >> 21) & 0x1F
+    rt = (word >> 16) & 0x1F
+    if opcode == 0:
+        function = word & 0x3F
+        if function in (0x00, 0x02, 0x03):  # sll, srl, sra
+            registers = {rt}
+        elif function in (0x08, 0x09, 0x11, 0x13):  # jr, jalr, mthi, mtlo
+            registers = {rs}
+        elif function in (0x0C, 0x0D, 0x10, 0x12):  # syscall, break, mfhi, mflo
+            registers = set()
+        else:
+            registers = {rs, rt}
+    elif opcode in (2, 3, 0x0F):  # j, jal, lui
+        registers = set()
+    elif opcode in (4, 5) or 0x28 <= opcode <= 0x2E or opcode in (0x22, 0x26):
+        registers = {rs, rt}  # beq/bne, stores, lwl/lwr (merge into rt)
+    elif 0x10 <= opcode <= 0x13:
+        registers = {rt} if rs in (4, 6) else set()  # mtcz, ctcz
+    else:
+        registers = {rs}  # regimm, blez/bgtz, immediates, loads, lwcz/swcz
+    registers.discard(0)
+    return registers
+
+
+ARGUMENT_REGISTERS = frozenset({4, 5, 6, 7})
+# at, v0-v1, t0-t7, t8-t9: a callee may clobber them and no caller reads
+# them back, so a call ends their life.
+CALL_CLOBBERED_TEMPORARIES = frozenset({1, 2, 3, *range(8, 16), 24, 25})
+
+
+def lui_register_is_dead(words: Sequence[int], index: int) -> bool:
+    """Whether the register loaded by the LUI at `words[index]` is overwritten
+    on every path before anything reads it.
+
+    `words` are one function's instructions. The walk follows both edges of a
+    conditional branch (its delay slot first) and stays conservative: a path
+    that leaves the function, reaches a computed jump, returns with the value
+    in a result or saved register, or passes it to a call as an argument
+    counts as a read.
+    """
+    if words[index] >> 26 != 0x0F:
+        return False
+    register = (words[index] >> 16) & 0x1F
+    if register == 0:
+        return False
+    seen: set[int] = set()
+
+    def touches(at: int) -> bool | None:
+        """True: written first. False: read first. None: neither."""
+        if at >= len(words) or register in read_registers(words[at]):
+            return False
+        return True if written_register(words[at]) == register else None
+
+    def dead_from(at: int) -> bool:
+        while True:
+            if at >= len(words):
+                return False
+            if at in seen:
+                return True
+            seen.add(at)
+            word = words[at]
+            opcode = word >> 26
+            function = word & 0x3F if opcode == 0 else None
+            branch = opcode in (1, 4, 5, 6, 7)
+            jump = opcode in (2, 3) or function in (0x08, 0x09)
+            if not branch and not jump:
+                state = touches(at)
+                if state is not None:
+                    return state
+                at += 1
+                continue
+            if register in read_registers(word):
+                return False
+            slot = touches(at + 1)
+            if slot is not None:
+                return slot
+            if branch:
+                if opcode == 1 and (word >> 16) & 0x1F in (0x10, 0x11):
+                    return False  # bltzal/bgezal link: not followed
+                offset = word & 0xFFFF
+                target = at + 1 + (offset - 0x10000 if offset & 0x8000 else offset)
+                if not 0 <= target < len(words) or not dead_from(target):
+                    return False
+                if opcode == 4 and (word >> 16) & 0x3FF == 0:  # beq $0,$0
+                    return True
+                at += 2
+                continue
+            if opcode == 3 or function == 0x09:  # jal, jalr
+                if register in ARGUMENT_REGISTERS:
+                    return False
+                if register in CALL_CLOBBERED_TEMPORARIES:
+                    return True
+                at += 2
+                continue
+            # j and jr leave this walk: only a temporary is known dead at a
+            # plain return, and nothing is known past a jump.
+            return (function == 0x08 and (word >> 21) & 0x1F == 31
+                    and register in CALL_CLOBBERED_TEMPORARIES - {2, 3})
+
+    return dead_from(index + 1)
+
+
+def decode_orphan_hi_target(hi_word: int, target: int) -> None:
+    """Check a LUI that no low instruction completes against `target`.
+
+    Reload can leave the high half of an address behind when the pseudo that
+    held it is rematerialized elsewhere (FDAT_262.BIN 0x801ed78c: `lui v1`
+    in the prologue, v1 rewritten on both paths). The instruction still
+    carries the symbol's HI16; with no low to decode, only the carry-adjusted
+    high half of the named target can be checked.
+    """
+    if hi_word >> 26 != 0x0F:
+        raise ValueError("HI site is not LUI")
+    if ((target + 0x8000) >> 16) & 0xFFFF != hi_word & 0xFFFF:
+        raise ValueError("orphan-high-half-mismatch")
+
+
 def decode_hi_lo_target(
     hi_word: int,
     lo_word: int,
@@ -190,6 +310,11 @@ def encode_hi_lo_addend(hi_word: int, lo_word: int, addend: int) -> tuple[int, i
     high = ((addend + 0x8000) >> 16) & 0xFFFF
     low = addend & 0xFFFF
     return (hi_word & 0xFFFF0000) | high, (lo_word & 0xFFFF0000) | low
+
+
+def encode_orphan_hi_addend(hi_word: int, addend: int) -> int:
+    """Encode the implicit addend of an R_MIPS_HI16 that has no LO16 of its own."""
+    return (hi_word & 0xFFFF0000) | (((addend + 0x8000) >> 16) & 0xFFFF)
 
 
 # addiu, lb, lh, lwl, lw, lbu, lhu, lwr, sb, sh, swl, sw, swr, lwc2, swc2
@@ -252,6 +377,25 @@ def policy_reason(row: dict[str, str], policy: str) -> str | None:
     return None
 
 
+def is_orphan_high_row(row: dict[str, str]) -> bool:
+    """A `mips_hi16_lo16` row that names a LUI with no low: no paired site,
+    opcode `lui`, and individually reviewed."""
+    return (row["kind"] == "mips_hi16_lo16" and not row["paired_site_va"]
+            and row["opcode"] == "lui" and row["status"] == "reviewed")
+
+
+def orphan_high_reason(words: Sequence[int], index: int, target: int) -> str | None:
+    """Why the LUI at `words[index]` is not an admissible orphan HI16 for
+    `target`, or None. Shared by the delinker and the semantic navigator."""
+    try:
+        decode_orphan_hi_target(words[index], target)
+    except ValueError as error:
+        return f"instruction-pair-mismatch:{error}"
+    if not lui_register_is_dead(words, index):
+        return "orphan-high-register-is-live"
+    return None
+
+
 def _word(blob: bytes | bytearray, offset: int) -> int:
     if offset < 0 or offset + 4 > len(blob):
         raise ValueError("site-outside-function-extent")
@@ -299,7 +443,16 @@ def validate_relocation(
         ):
             raise ValueError("target-outside-load-image")
         if not row["paired_site_va"]:
-            raise ValueError("missing-paired-site")
+            if not is_orphan_high_row(row):
+                raise ValueError("missing-paired-site")
+            # A reviewed LUI whose register dies unread: HI16 only.
+            if offset & 3 or len(blob) & 3:
+                raise ValueError("site-outside-function-extent")
+            words = struct.unpack_from(f"<{len(blob) // 4}I", blob)
+            reason = orphan_high_reason(words, offset // 4, target)
+            if reason:
+                raise ValueError(reason)
+            return RelocationValidation(site, target, offset, word=word)
         paired = parse_int(row["paired_site_va"])
         if not function.contains(paired, 4):
             raise ValueError("pair-crosses-function-extent")

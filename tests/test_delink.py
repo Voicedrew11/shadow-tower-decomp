@@ -25,6 +25,7 @@ from scripts.kf.delink import (
 )
 from scripts.kf.mips_elf import MipsRelocation, write_mips_elf
 from scripts.kf.objdiff import generate_projects
+from scripts.kf.relocations import lui_register_is_dead, read_registers
 from scripts.kf.retail import write_tsv
 
 from kf2_images import kf2_images
@@ -247,6 +248,103 @@ class MipsElfTests(unittest.TestCase):
             ],
         )
         self.assertEqual(used["action"], "paired-symbol")
+
+    def test_orphan_high_half_keeps_its_symbol_without_a_low(self) -> None:
+        # FDAT_262.BIN 0x801ed788: lw v0,..(s1); lui v1,0x801c; sw ra; bnez v0;
+        # sw s2 (delay); lui v1,0x801d on the fallthrough and lw v1,..(s1) at
+        # the branch target. Reload left the first lui v1 behind: nothing
+        # reads it, and no low instruction completes it.
+        words = (
+            0x8E22E370,  # lw v0,-7312(s1)
+            0x3C03801C,  # lui v1,0x801c
+            0xAFBF0034,  # sw ra,52(sp)
+            0x14400002,  # bnez v0,+2
+            0xAFB20018,  # sw s2,24(sp)
+            0x3C03801D,  # lui v1,0x801d
+            0x8E23E370,  # lw v1,-7312(s1)
+            0x03E00008,  # jr ra
+            0x00000000,  # nop
+        )
+        function = Function(
+            "GAME.EXE", 0x80010000, 4 * len(words), 4 * len(words), 1, "test", "test", "test"
+        )
+        catalog = Catalog(
+            functions={"GAME.EXE": (function,)},
+            function_starts={"GAME.EXE": {function.va: function}},
+            data={"GAME.EXE": ()},
+        )
+        row = {
+            "image": "GAME.EXE",
+            "site_va": f"{function.va + 4:#x}",
+            "paired_site_va": "",
+            "kind": "mips_hi16_lo16",
+            "channel": "reachable-code",
+            "target_va": "0x801c2230",
+            "target_region": "bss",
+            "target_name": "DAT_801c2230",
+            "opcode": "lui",
+            "confidence": "manual-decoded",
+            "status": "reviewed",
+        }
+        blob = bytearray(struct.pack(f"<{len(words)}I", *words))
+        relocations, used = _apply_relocation(blob, function, row, catalog, "safe")
+        self.assertEqual(relocations, [MipsRelocation(4, "R_MIPS_HI16", "DAT_801c2230")])
+        self.assertEqual(used["action"], "orphan-high")
+        self.assertEqual(used["relocation"], "R_MIPS_HI16")
+        # The addend's carry-adjusted high half (zero) replaces the linked one;
+        # every other word is untouched.
+        self.assertEqual(struct.unpack_from("<I", blob, 4)[0], 0x3C030000)
+        self.assertEqual(blob[:4] + blob[8:], struct.pack(f"<{len(words)}I", *words)[:4]
+                         + struct.pack(f"<{len(words)}I", *words)[8:])
+
+        fresh = bytearray(struct.pack(f"<{len(words)}I", *words))
+        # Only a reviewed row with opcode `lui` is an orphan; anything else
+        # without a paired site stays withheld.
+        for change in ({"status": "candidate"}, {"opcode": "lui+addiu"}):
+            with self.assertRaisesRegex(ValueError, "missing-paired-site|not-manually|outside"):
+                _apply_relocation(bytearray(fresh), function, row | change, catalog, "safe")
+        # The high half must be the named target's.
+        with self.assertRaisesRegex(ValueError, "orphan-high-half-mismatch"):
+            _apply_relocation(bytearray(fresh), function, row | {"target_va": "0x801d2230"},
+                              catalog, "safe")
+        # A low that reads the register on one path makes it a live high.
+        live = list(words)
+        live[6] = 0x24638000  # addiu v1,v1,-32768 at the branch target
+        with self.assertRaisesRegex(ValueError, "orphan-high-register-is-live"):
+            _apply_relocation(bytearray(struct.pack(f"<{len(live)}I", *live)), function, row,
+                              catalog, "safe")
+
+    def test_lui_register_deadness_walk_is_conservative(self) -> None:
+        lui_v1, lui_a0, lui_s0, lui_t0 = 0x3C03801C, 0x3C04801C, 0x3C10801C, 0x3C08801C
+        nop, jr_ra, jal = 0, 0x03E00008, 0x0C004000
+        self.assertEqual(read_registers(0x8E22E370), {17})          # lw v0,..(s1)
+        self.assertEqual(read_registers(0xAE62AC68), {19, 2})       # sw v0,..(s3)
+        self.assertEqual(read_registers(0x00031880), {3})           # sll v1,v1,2
+        self.assertEqual(read_registers(0x3C03801C), set())         # lui
+        self.assertEqual(read_registers(0x00430018), {2, 3})        # mult v0,v1
+        # Rewritten before any read.
+        self.assertTrue(lui_register_is_dead((lui_v1, 0x24030001, jr_ra, nop), 0))
+        # Read by the next instruction.
+        self.assertFalse(lui_register_is_dead((lui_v1, 0x24630001, jr_ra, nop), 0))
+        # v1 can carry a result at a return; a t register cannot.
+        self.assertFalse(lui_register_is_dead((lui_v1, jr_ra, nop), 0))
+        self.assertTrue(lui_register_is_dead((lui_t0, jr_ra, nop), 0))
+        # A call ends a temporary, reads an argument register, keeps a saved one.
+        self.assertTrue(lui_register_is_dead((lui_v1, jal, nop, jr_ra, nop), 0))
+        self.assertFalse(lui_register_is_dead((lui_a0, jal, nop, jr_ra, nop), 0))
+        self.assertFalse(lui_register_is_dead((lui_s0, jal, nop, jr_ra, nop), 0))
+        # The delay slot of a call still runs before it.
+        self.assertFalse(lui_register_is_dead((lui_v1, jal, 0x00602021, jr_ra, nop), 0))
+        # One live path through a branch is enough.
+        branch = 0x10800002  # beqz a0,+2
+        self.assertTrue(lui_register_is_dead(
+            (lui_v1, branch, nop, 0x24030001, 0x24030002, jr_ra, nop), 0))
+        self.assertFalse(lui_register_is_dead(
+            (lui_v1, branch, nop, 0x24030001, 0x00601021, jr_ra, nop), 0))
+        # Falling off the function, a computed jump and a non-LUI are not dead.
+        self.assertFalse(lui_register_is_dead((lui_t0, nop), 0))
+        self.assertFalse(lui_register_is_dead((lui_t0, 0x00400008, nop), 0))  # jr v0
+        self.assertFalse(lui_register_is_dead((nop, jr_ra, nop), 0))
 
     def test_hi_lo_pair_through_a_copied_lui_register(self) -> None:
         # lui v0,0x801c; move s3,v0; nop; sw v0,-21400(s3): GCC copies the high

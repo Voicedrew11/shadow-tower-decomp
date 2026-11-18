@@ -40,6 +40,7 @@ from scripts.kf.relocations import (
     decode_mips26_target,
     encode_hi_lo_addend,
     encode_mips26_addend,
+    encode_orphan_hi_addend,
     named_data_referent,
     validate_relocation,
 )
@@ -605,6 +606,13 @@ def _apply_relocation(
         action = "local-section" if local_target else "external-symbol"
         kinds = "R_MIPS_26"
         relocations = [relocation]
+    elif row["kind"] == "mips_hi16_lo16" and validation.paired_offset is None:
+        # An orphan high half (relocations.is_orphan_high_row): the LUI keeps
+        # its symbol, and no low instruction is rewritten.
+        _put_word(blob, offset, encode_orphan_hi_addend(validation.word, addend))
+        relocations = [MipsRelocation(offset, "R_MIPS_HI16", symbol)]
+        action = "orphan-high"
+        kinds = "R_MIPS_HI16"
     elif row["kind"] == "mips_hi16_lo16":
         paired_offset = validation.paired_offset
         assert paired_offset is not None and validation.paired_word is not None

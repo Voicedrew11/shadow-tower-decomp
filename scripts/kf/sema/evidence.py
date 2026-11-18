@@ -12,7 +12,9 @@ from scripts.kf.relocations import (
     decode_gprel16_target,
     decode_hi_lo_target,
     decode_mips26_target,
+    is_orphan_high_row,
     named_data_referent,
+    orphan_high_reason,
     validate_relocation,
 )
 from scripts.kf.retail import parse_int, read_tsv, referent_image
@@ -150,7 +152,14 @@ class Evidence:
         if row["kind"] != "mips_hi16_lo16":
             return "unsupported-relocation-kind"
         if not row["paired_site_va"]:
-            return "missing-paired-site"
+            if not is_orphan_high_row(row) or owner is None:
+                return "missing-paired-site"
+            # A LUI no low completes: its register must die unread inside
+            # its own function (the delinker's rule).
+            words = [self.img.u32(at) for at in range(owner.va, owner.va + owner.size, 4)]
+            if None in words:
+                return "site-outside-load-image"
+            return orphan_high_reason(words, (site - owner.va) // 4, target)
         paired = parse_int(row["paired_site_va"])
         paired_word = self.img.u32(paired)
         if paired_word is None:
