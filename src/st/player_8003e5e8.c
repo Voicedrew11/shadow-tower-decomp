@@ -243,8 +243,6 @@ void func_8003ec4c(volatile u8 *p)
  * CLUT block at `clut` and each pixel block at `pix`, offset from the
  * TIM's own position unless `absolute`.
  */
-/* Not exact: the length-word store precedes the final dimensions load;
- * retail delays that store until after the payload pointer advances. */
 ADDRESS(0x8003ec5c, 0x1dc)
 void func_8003ec5c(void *data, DVECTOR *pix, DVECTOR *clut, int absolute)
 {
@@ -274,6 +272,7 @@ void func_8003ec5c(void *data, DVECTOR *pix, DVECTOR *clut, int absolute)
     u_long *p;
     u_long position_word;
     u_long length_word;
+    u_long dimensions_word;
 
     memset(&zero_clut, 0, sizeof(zero_clut));
     memset(&zero_pix, 0, sizeof(zero_pix));
@@ -292,9 +291,10 @@ next:
             position_word = p[1];
             length_word = p[0];
             block.words.position = position_word;
-            block.words.byte_count = length_word;
-            block.words.dimensions = p[2];
+            dimensions_word = p[2];
             p += 3;
+            block.words.byte_count = length_word;
+            block.words.dimensions = dimensions_word;
             if (!absolute) {
                 rect.x = block.header.rect.x + cp->vx;
                 rect.y = block.header.rect.y + cp->vy;
@@ -310,9 +310,10 @@ next:
         position_word = p[1];
         length_word = p[0];
         block.words.position = position_word;
-        block.words.byte_count = length_word;
-        block.words.dimensions = p[2];
+        dimensions_word = p[2];
         p += 3;
+        block.words.byte_count = length_word;
+        block.words.dimensions = dimensions_word;
         if (!absolute) {
             rect.x = block.header.rect.x + pp->vx;
             rect.y = block.header.rect.y + pp->vy;
