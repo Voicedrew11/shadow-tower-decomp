@@ -34,22 +34,21 @@ s32 DAT_80063338;
  * character), registers its animations, and resets its state from its
  * character's data block.
  *
- * Not exact: three things remain. (1) Retail's frame is 80 bytes with
- * sp+16..31 never referenced (ours 64): 16 bytes that left no code, either
- * an unused aggregate or the argument area of a call with 5 to 8 arguments
- * that was compiled away; nothing names it and no local is invented. (2)
- * Retail keeps the page and CLUT counters in $s8/$s7 and spills the
- * fighter-offset induction value (i * sizeof(VsFighter), sp+32); this build
- * spills the page counter. Equal weighted references, so the order is live
- * length: page lives two insns longer than the loop-made value. (3) Retail
- * forms the template table's address inside the loop ($a0, base first, then
- * the index); here loop.c hoists it (threshold 20 x savings 2 x life 7 >=
- * 173 insns) and it is rebuilt in $t1. It stays in the loop only if it is a
- * user variable referenced earlier, or if three more invariants are moved
- * first. Ruled out: f = &fighter[i] and page = i * 4 / clut_y = i * 12 in
- * the body, every order of the for initialisers and increments, a pointer
- * local or pointer arithmetic for the template (the address is then formed
- * last and schedules after the index), an index local.
+ * Not exact: three things remain. (1) Retail's frame is 80 bytes (ours 64):
+ * sp+16..31 is never referenced and the spill slot is sp+32, which is what
+ * a 32-byte outgoing argument area gives, i.e. a call with seven or eight
+ * arguments that left no code. Nothing names it, so none is invented. (2)
+ * Retail spills the fighter-offset induction value (sp+32) and keeps the
+ * page counter in $s8; this build spills the page counter. (3) Retail forms
+ * DAT_8004a224's address inside the loop ($a0); here loop.c hoists it
+ * (threshold 20 x savings 2 x life 7 >= 173 insns) and reload rebuilds it in
+ * $t1. Every spelling of the access forms the base before the index, so it
+ * stays in only if three more insns are moved ahead of it (as the team
+ * chain does in func_800182ec) or the base sits in a variable used in
+ * another block. Ruled out: f = &fighter[i], page = i * 4 and clut_y =
+ * i * 12 in the body, every order of the for initialisers and increments,
+ * a pointer or index local, pointer and byte-offset arithmetic for the
+ * template.
  */
 ADDRESS(0x800140d8, 0x3a8)
 void func_800140d8(void)
