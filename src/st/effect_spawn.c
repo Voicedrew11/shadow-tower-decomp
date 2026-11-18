@@ -114,7 +114,7 @@ void *func_80036484(u8 type, u8 flags, u8 kind, VECTOR *pos, SVECTOR *dir, ...)
             effect_preset_1(e, args[4] + (second << 3), args[1], args[6]);
             e->unk50.h = args[2];
             e->unk10 = args[3];
-            e->unk52 = args[5];
+            e->unk52.h = args[5];
             e->unk30 = *(SVECTOR *)args[7];
             break;
         case 0x07:
@@ -168,7 +168,7 @@ void *func_80036484(u8 type, u8 flags, u8 kind, VECTOR *pos, SVECTOR *dir, ...)
             e->unk50.ub[0] = 8;
             e->unkC = e->unk38.vx / 16;
             e->unk18 = (e->unk38.vy / 16) | 0x80000000;
-            e->unk52 = rand() / 128;
+            e->unk52.h = rand() / 128;
             goto bolt;
         case 0x0c:
             e->unk7 = 15;
@@ -226,7 +226,7 @@ void *func_80036484(u8 type, u8 flags, u8 kind, VECTOR *pos, SVECTOR *dir, ...)
             e->unk7 = 0;
             e->unk50.ub[0] = 8;
             e->unkA = e->unk1 - 94;
-            e->unk52 = args[2];
+            e->unk52.h = args[2];
             break;
         case 0x30:
         case 0x38:
@@ -335,9 +335,9 @@ void *func_80036484(u8 type, u8 flags, u8 kind, VECTOR *pos, SVECTOR *dir, ...)
             SCALE(e, args[1]);
             REACH(e, e->unk38.vx / 8);
             if (e->unk1 == 0x56 || e->unk1 == 0x5f || e->unk1 == 0x79 || e->unk1 == 0x70)
-                e->unk50.b = (rand() >> 9) - 128;
+                e->unk50.b[0] = (rand() >> 9) - 128;
             else
-                e->unk50.b = (rand() >> 11) + 16;
+                e->unk50.b[0] = (rand() >> 11) + 16;
             break;
         case 0xc8:
         case 0xd3:
@@ -406,7 +406,7 @@ void *func_80036484(u8 type, u8 flags, u8 kind, VECTOR *pos, SVECTOR *dir, ...)
             REACH(e, e->unk38.vx / 8);
             ST_EFFECT_ENTRY(e) = (Vis212 *)args[4];
             e->unk50.h = ST_EFFECT_ENTRY(e)->unkA8->arg.u[6];
-            e->unk52 = ST_EFFECT_ENTRY(e)->unkA8->arg.u[9];
+            e->unk52.h = ST_EFFECT_ENTRY(e)->unkA8->arg.u[9];
             break;
         case 0x3d:
         case 0x46:
@@ -546,7 +546,7 @@ void *func_80036484(u8 type, u8 flags, u8 kind, VECTOR *pos, SVECTOR *dir, ...)
             e->unk7 = 15;
             e->unk12 = 4096;
             SCALE(e, args[1]);
-            e->unk50.b = (rand() >> 11) + 16;
+            e->unk50.b[0] = (rand() >> 11) + 16;
             break;
         case 0x57:
         case 0x58:
@@ -590,7 +590,7 @@ void *func_80036484(u8 type, u8 flags, u8 kind, VECTOR *pos, SVECTOR *dir, ...)
             e->unk7 = 15;
             e->unk12 = 4096;
             SCALE(e, args[1]);
-            e->unk50.b = (rand() >> 11) + 16;
+            e->unk50.b[0] = (rand() >> 11) + 16;
             break;
         case 0x55:
             e->unk6 = 1;

@@ -178,9 +178,9 @@ void *func_80032404(int n, u8 attack, u8 flags, u8 kind, VECTOR *pos, SVECTOR *d
             SCALE(e, args[1]);
             REACH(e, e->unk38.vx / 8);
             if (e->unk1 == 0x56 || e->unk1 == 0x5f || e->unk1 == 0x79 || e->unk1 == 0x70)
-                e->unk50.b = (rand() >> 9) - 128;
+                e->unk50.b[0] = (rand() >> 9) - 128;
             else
-                e->unk50.b = (rand() >> 11) + 16;
+                e->unk50.b[0] = (rand() >> 11) + 16;
             e->unk8 = args[2];
             break;
         case 0xc8:
@@ -360,7 +360,7 @@ void *func_80032404(int n, u8 attack, u8 flags, u8 kind, VECTOR *pos, SVECTOR *d
             e->unk7 = 15;
             e->unk12 = 4096;
             SCALE(e, args[1]);
-            e->unk50.b = (rand() >> 11) + 16;
+            e->unk50.b[0] = (rand() >> 11) + 16;
             e->unk8 = 1;
             break;
         case 0x57:
@@ -404,7 +404,7 @@ void *func_80032404(int n, u8 attack, u8 flags, u8 kind, VECTOR *pos, SVECTOR *d
             e->unk7 = 15;
             e->unk12 = 4096;
             SCALE(e, args[1]);
-            e->unk50.b = (rand() >> 11) + 16;
+            e->unk50.b[0] = (rand() >> 11) + 16;
             e->unk8 = 1;
             break;
         case 0x55:

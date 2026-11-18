@@ -53,11 +53,15 @@ typedef struct StEffect {
     u8 unk4E[2];
     union {
         s16 h;
-        s8 b;
+        s8 b[2];
         u8 ub[2];
     } unk50;             /* 0x50: script state, by kind */
-    s16 unk52;           /* 0x52 */
-    u8 unk54[4];
+    union {
+        s16 h;
+        s8 b[2];
+        u8 ub[2];
+    } unk52;             /* 0x52: more of it */
+    void *unk54;         /* 0x54: ST.EXE: the table A entry (Vis212) a bolt hit */
 } StEffect;
 
 /* ST.EXE: the table A entry (Vis212, st/vis.h) the effect belongs to. */

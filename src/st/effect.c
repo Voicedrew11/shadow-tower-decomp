@@ -161,7 +161,7 @@ void effect_emit_behind(u_long flags)
     pos.vx = e->unk20.vx - e->unk40.vx * 8;
     pos.vy = e->unk20.vy - e->unk40.vy * 8;
     pos.vz = e->unk20.vz - e->unk40.vz * 8;
-    effect_emit_current(flags, (u8)(e->unk1 - 44) < 4 ? e->unk52 : 5120, &pos);
+    effect_emit_current(flags, (u8)(e->unk1 - 44) < 4 ? e->unk52.h : 5120, &pos);
 }
 
 /* Vertex `index` of the effect's model, scaled by `scale` (4096ths) and

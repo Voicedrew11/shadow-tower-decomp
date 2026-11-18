@@ -433,7 +433,7 @@ void func_800335e8(void)
         e->unk38.vx += 128;
         e->unk38.vy += 128;
         REACH(e, e->unk38.vx * 896 / 4096);
-        func_8003333c(e->unkC, e->unk18, e->unk50.b);
+        func_8003333c(e->unkC, e->unk18, e->unk50.b[0]);
         FADE_IN(e);
         e->unk40.vy += 2;
         if (e->unk8 == 0) {
@@ -495,7 +495,7 @@ void func_800335e8(void)
     case 0xd7:
         e->unk38.vx += 96;
         e->unk38.vy += 96;
-        func_8003333c(e->unkC, e->unk18, e->unk50.b);
+        func_8003333c(e->unkC, e->unk18, e->unk50.b[0]);
         e->unk12 = e->unk10 * 256;
         e->unk40.vy += 2;
         break;
@@ -505,7 +505,7 @@ void func_800335e8(void)
         e->unk38.vx += 96;
         e->unk38.vy += 96;
         REACH(e, e->unk38.vx * 896 / 4096);
-        HIT_COUNTED(e, func_8003333c(e->unkC, e->unk18, e->unk50.b));
+        HIT_COUNTED(e, func_8003333c(e->unkC, e->unk18, e->unk50.b[0]));
         if (e->unk10 % 5 == 0) {
             SVECTOR dir;
             VECTOR pos;
@@ -524,7 +524,7 @@ void func_800335e8(void)
     case 0xd5:
         e->unk38.vx += 96;
         e->unk38.vy += 96;
-        func_8003333c(e->unkC, e->unk18, e->unk50.b);
+        func_8003333c(e->unkC, e->unk18, e->unk50.b[0]);
         e->unk12 = e->unk10 * 256;
         e->unk40.vy -= 16;
         break;
