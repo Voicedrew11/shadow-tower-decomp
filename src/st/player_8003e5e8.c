@@ -1830,8 +1830,8 @@ void func_80042cfc(void)
  * viewer.unk218 (walking, using an item, dying, falling into a pit), the
  * floor damage and the status damage over time, the view angles, the
  * swings and the hit/magic point recovery.
- * Not exact: input-owner and masked-button scheduling, a status scalar's
- * address temporary, and the later damage/wear loop temporaries differ. */
+ * Not exact: the DAT_801cd0e0 address temporary (+0x96c, v1 vs v0), the
+ * status damage temporary and the wear loop's s0/s1 differ. */
 ADDRESS(0x80042d74, 0x1678)
 void func_80042d74(void)
 {
@@ -1992,8 +1992,8 @@ void func_80042d74(void)
                      viewer.unk38[11] != 0xffff || viewer.unk38[20] != 0xffff ||
                      viewer.unk38[18] != 0xffff)) {
                     func_80057cc8();
-                    viewer.unk218 = 1;
                     DAT_801cd180.unk4 &= DAT_801cd180.unk22[11];
+                    viewer.unk218 = 1;
                     func_80057a3c();
                 }
             }
@@ -2227,7 +2227,7 @@ void func_80042d74(void)
                 player_add_hp(-1);
                 player_add_mp(-1);
             }
-            if (viewer.unk24 < viewer.unk22 && viewer.unk23C % 20 == 0) {
+            if (viewer.unk22 > viewer.unk24 && viewer.unk23C % 20 == 0) {
                 player_add_hp(viewer.unk24 / 10 - viewer.unk22 / 10);
             }
             if ((viewer.unk2C & 0x400) || viewer.unk2F0) {
