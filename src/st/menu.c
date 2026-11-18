@@ -3631,7 +3631,13 @@ read:
  * it to the icon store (frame store vs constant-based scratch load do not
  * conflict), so it sinks below the store; retail keeps it above. Ruled
  * out: operand order of the compare, the statement before/after strcpy,
- * an s16 row variable (it sinks to the block top and takes t3).
+ * an s16 row variable (it sinks to the block top and takes t3). Retail's
+ * order is stable under sched2 only when the load already precedes the
+ * icon store after sched1 (then 18 and 2 take v1 because the row holds
+ * v0); that needs the store to depend on the load, i.e. a scratchpad
+ * base sched1 does not know to be constant. A 3000-variant sweep of
+ * row/count temporaries, statement positions and compare spellings
+ * found no such form.
  *
  * Saves to the selected file, or to a new file numbered unk204: builds the
  * header (the title with the file number, the area name and the play

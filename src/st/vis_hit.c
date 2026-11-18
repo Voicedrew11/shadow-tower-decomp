@@ -287,7 +287,11 @@ void func_800468c0(VECTOR *pos, int kind)
 }
 
 /* func_800468c0 for the parts' quads (vertex order 0, 1, 3, 2).
- * Not exact: same shape as func_800468c0, not worked on this round. */
+ * Not exact (21 words long): same shape and residue as func_800468c0.
+ * Both are leaf functions under full register pressure; retail keeps two
+ * more values in stack slots (frame 64 against 56 there, `sw s7,16(sp)`,
+ * `sw v0,8(sp)` and a `move t9,sp` frame copy), so the set of live
+ * locals differs, not only their order. Not reworked this round. */
 ADDRESS(0x80047884, 0x124c)
 void func_80047884(VECTOR *pos, int kind)
 {
