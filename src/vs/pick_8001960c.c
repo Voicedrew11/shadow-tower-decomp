@@ -38,12 +38,6 @@ void exit(int code);
 #define COUNT (sp->unk0.menu.half[1])
 #define IDS (sp->unk0.menu.list.ids)
 
-/* Not exact: retail keeps one more value in a callee-saved register (player
- * in $s5, seven saved registers and a 152-byte frame; this build has six and
- * 144 bytes), so every later register is one off; the locals' slots agree
- * (sp+16 unused0, sp+24 unused1, the two paths, tex, clut, pos). The
- * eligibility, search and preview temporaries and the loop edges then
- * differ. Not worked beyond this reading. */
 ADDRESS(0x8001960c, 0xb18)
 void func_8001960c(int player)
 {
@@ -57,14 +51,11 @@ void func_8001960c(int player)
     VsMenuScratch *sp = VS_MENU_SCRATCH;
     VsSaveSub *mine;
     VsSaveSub *other;
-    VsSave *save;
     u_long *buf;
-    s16 *p;
     s16 shown;
     s16 id;
-    int count;
-    int picked;
     int i;
+    int j;
 
     buf = func_8002398c(0x1000);
     func_8002ee90(5, 6, buf);
@@ -78,7 +69,6 @@ void func_8001960c(int player)
     memset((u8 *)IDS, 0xff, 0x276);
     mine = &DAT_801a0a80[player].unk18BC;
     other = &DAT_801a0a80[~player & 1].unk18BC;
-    save = &DAT_801a0a80[player];
     COUNT = 1;
     IDS[0] = -2;
     for (i = 0; i < 266; i++) {
@@ -88,7 +78,7 @@ void func_8001960c(int player)
         if (mine->unk150[i] != 0 || other->unk150[i] == 0)
             continue;
         mask = 1;
-        word = save->unk14CC[i / 32];
+        word = DAT_801a0a80[player].unk14CC[i / 32];
         mask <<= i % 32;
         if ((word & mask) && mine->unk14[i] == 0)
             continue;
@@ -105,24 +95,19 @@ void func_8001960c(int player)
     sp->unk1CC = 2;
     sp->unk1D0 = 0;
     TOP = 0;
-    picked = DAT_80063330[player];
-    if (picked != -1) {
-        count = COUNT;
-        i = 0;
-        p = IDS;
-        /* Retail tests the same count again; it does not decrement it. */
-        while (count != 0) {
-            if (picked == *p++)
+    if (DAT_80063330[player] != -1) {
+        /* The count is never stepped: the search ends only by its match. */
+        for (j = 0; COUNT != 0; j++) {
+            if (DAT_80063330[player] == IDS[j])
                 break;
-            i++;
         }
-        if (COUNT < 12 || i < 6) {
-            sp->unk1D0 = i;
-        } else if (i > COUNT - 5) {
+        if (COUNT < 12 || j < 6) {
+            sp->unk1D0 = j;
+        } else if (j > COUNT - 5) {
             TOP = COUNT - 11;
-            sp->unk1D0 = i - (COUNT - 11);
+            sp->unk1D0 = j - TOP;
         } else {
-            TOP = i - 5;
+            TOP = j - 5;
             sp->unk1D0 = 5;
         }
     }
@@ -141,20 +126,22 @@ void func_8001960c(int player)
         }
         if (PRESSED & 0x2000) {
             func_8001c8f8();
-            if (!(sp->unk1CC & 0x8000)) {
+            if (sp->unk1CC & 0x8000) {
+                sp->unk1CC &= 0x7fff;
+            } else {
                 while ((s16)func_8001ca18() != 0)
                     ;
                 break;
             }
-            sp->unk1CC &= 0x7fff;
         }
         if (PRESSED & 0x4000) {
             func_8001c978();
             if (sp->unk1CC & 0x8000) {
-                id = IDS[TOP + sp->unk1D0];
-                if (id == -2)
-                    id = -1;
-                DAT_80063330[player] = id;
+                s16 chosen = IDS[TOP + sp->unk1D0];
+
+                if (chosen == -2)
+                    chosen = -1;
+                DAT_80063330[player] = chosen;
                 while ((s16)func_8001ca18() != 0)
                     ;
                 break;
@@ -189,17 +176,17 @@ void func_8001960c(int player)
             if (REPEAT & 0x40) {
                 func_8001c8b8();
                 if ((DAT_801603c0.pads[0].unk0 | DAT_801603c0.pads[1].unk0) & 0x8000) {
-                    if (COUNT < 11) {
-                        sp->unk1D0 = COUNT - 1;
-                    } else {
+                    if (COUNT >= 11) {
                         TOP += 11;
                         if (TOP > COUNT - 11) {
                             if (TOP >= COUNT)
                                 sp->unk1D0 = 10;
                             TOP = COUNT - 11;
                         }
+                    } else {
+                        sp->unk1D0 = COUNT - 1;
                     }
-                } else if (sp->unk1D0 + TOP < COUNT - 1) {
+                } else if (COUNT - 1 > sp->unk1D0 + TOP) {
                     if (sp->unk1D0 < 10) {
                         sp->unk1D0++;
                     } else if (TOP < COUNT - 11) {
@@ -212,34 +199,34 @@ void func_8001960c(int player)
             }
             if (REPEAT & 0x800) {
                 func_8001c8b8();
-                if (COUNT < 11) {
-                    sp->unk1D0 = 0;
-                    if (REPEAT & 0x200)
-                        func_8001c8b8();
-                } else {
+                if (COUNT >= 11) {
                     TOP -= 11;
                     if (TOP < 0) {
                         if (TOP + 10 < 0)
                             sp->unk1D0 = 0;
                         TOP = 0;
                     }
-                }
-                if (COUNT < 11) {
-                    sp->unk1D0 = COUNT - 1;
                 } else {
+                    sp->unk1D0 = 0;
+                    if (REPEAT & 0x200)
+                        func_8001c8b8();
+                }
+                if (COUNT >= 11) {
                     TOP += 11;
                     if (TOP > COUNT - 11) {
                         if (TOP >= COUNT)
                             sp->unk1D0 = 10;
                         TOP = COUNT - 11;
                     }
+                } else {
+                    sp->unk1D0 = COUNT - 1;
                 }
             }
             if (sp->unk1CC == 2 && (s16)func_8001ca18() == 0) {
                 id = IDS[TOP + sp->unk1D0];
                 if (shown != id && id != -1 && id != -2) {
-                    shown = id;
                     func_8001cac0(11, DAT_80191d00.unk0118[id].unk5[0] + 200, 640, 0);
+                    shown = id;
                 }
             }
         }
