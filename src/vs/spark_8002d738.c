@@ -14,8 +14,6 @@
  * facing the opponent, each with a random life and velocity; a particle
  * whose x and z speeds are both 48 or more is dropped again.
  */
-/* Not exact: the last velocity result has an extra copy; temporary
- * registers and the store/branch schedule differ (4 bytes long). */
 ADDRESS(0x8002d738, 0x260)
 void func_8002d738(int n)
 {
@@ -32,7 +30,7 @@ void func_8002d738(int n)
     while (i--) {
         if (rec->unk10 == 0) {
             int vx;
-            short vz;
+            int vz;
 
             rec->unk10 = rand() & 0x7f;
             rec->unk0.vx = f->unk4DEF0.vx + off.vx;
@@ -46,9 +44,9 @@ void func_8002d738(int n)
             if (vx >= 48 && (vz >= 48 || vz < -47))
                 rec->unk10 = 0;
             else if (vx < -47) {
-                if (vz >= 48)
+                if ((short)vz >= 48)
                     rec->unk10 = 0;
-                else if (vz < -47)
+                else if ((short)vz < -47)
                     rec->unk10 = 0;
             }
             if (++count == 200)
