@@ -1818,11 +1818,12 @@ void func_8005d25c(void)
         sp->unk0.grid.tex[i].vx = (i - 29) / 9 * 56 + 640;
         sp->unk0.grid.tex[i].vy = (i - 29) % 9 * 28 + 256;
     }
+    i = 0;
     used = 0;
     clear.w = 56;
     clear.h = 28;
     cd_state.unkA84 = CD_BUFFER;
-    for (i = 0, n = 40; n--; i++) {
+    for (n = 40; n--; i++) {
         if (used + 0x1000 > 0x12000) {
             DrawSync(0);
             cd_state.unkA84 = CD_BUFFER;
