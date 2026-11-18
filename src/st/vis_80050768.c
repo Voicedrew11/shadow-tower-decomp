@@ -58,15 +58,15 @@ static SVECTOR DAT_800881e0;
 /*
  * Updates every table B entry by its kind.
  *
- * Not exact (2104 of retail's 2123 instructions; the blocks and their order
- * agree): the frame is 144 bytes against 160. Retail keeps the warp's area
- * byte in a stack slot (104(sp)) with copies in s2 and s8, and gives the
- * loop's hoisted constants (255, 1, 3, &vis_table_b) no register, so each
- * use rematerialises them in t2/t3; here 255 takes s8 and the area a
- * register. Retail also recomputes step * 4 in the door arms (the speed is a
- * 16-bit variable, which is in) where cse still reaches the first copy here,
- * and copies the kind to a0 before the switch. Not tried yet: x/y/z/area as
- * function-level bytes, and the arms' statement order against sched.
+ * Not exact (2119 of retail's 2123 instructions; the blocks and their order
+ * agree): the frame is 144 bytes against 160. Retail has the warp's area in
+ * three places: the loaded byte (s2, the last call's fifth argument), a copy
+ * (s8: the first call, the same-area test and the < 44 test) and a byte in a
+ * stack slot (104(sp), the last call's fourth argument); two byte variables
+ * (area, lit) are in, the third is not found, so one spill slot is missing.
+ * Also open: retail recomputes step * 4 in the door arms where cse still
+ * reaches the first copy here, and the kind sits in a0 (v1 here) through the
+ * switch. Ruled out: the byte variables at function scope (same code).
  */
 ADDRESS(0x80050768, 0x212c)
 void func_80050768(void)
@@ -80,7 +80,7 @@ void func_80050768(void)
     int dy;
     int dz;
     int angle;
-    int turn;
+    int off;
     u16 n;
     u8 t;
 
@@ -101,10 +101,10 @@ void func_80050768(void)
         }
         angle = (ratan2(dz, dx) - 1024) & 0xfff;
         e->unk20 = angle;
-        turn = ((u16)e->unk36 - angle) & 0xfff;
-        e->unk22 = turn;
-        if (turn > 2048)
-            e->unk22 = 4096 - turn;
+        off = ((u16)e->unk36 - angle) & 0xfff;
+        e->unk22 = off;
+        if (off > 2048)
+            e->unk22 = 4096 - off;
         if (e->unk05 == 255)
             continue;
         switch (e->unk05) {
@@ -661,10 +661,12 @@ void func_80050768(void)
             StWarp *here;
             Vis88 *o;
             int j;
+            int turn;
             u8 x;
             u8 y;
             u8 z;
             u8 area;
+            u8 lit;
 
             if (func_8004fd28(e->unk24.vx, e->unk24.vz, 3072, 3072, e->unk24.vy) == 0)
                 goto away;
@@ -695,6 +697,7 @@ void func_80050768(void)
             func_80057c54();
             func_800500ac(2, 0, 0x1000, 0x100);
             area = e->unk48;
+            lit = area;
             do {
                 func_8001531c();
                 func_800456f8();
@@ -748,7 +751,7 @@ void func_80050768(void)
             func_80057c54();
             func_800500ac(2, 0x1000, 0, -0x100);
             if (area < 44)
-                func_80045044(0xff, 0xff, 0xff, area, area, 127, 127, 127, 0, 0, 0);
+                func_80045044(0xff, 0xff, 0xff, lit, lit, 127, 127, 127, 0, 0, 0);
             lighting_clear_requests();
             break;
         away:
