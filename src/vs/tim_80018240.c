@@ -8,30 +8,29 @@
 #include <LIBGPU.H>
 
 /* Uploads one TIM image (and its CLUT) to the given positions. */
-/* Not exact: cursor and image header coalesce in s0, eliminating retail
- * record/image pointer copies (8 bytes short). */
 ADDRESS(0x80018240, 0xac)
 void func_80018240(u_long *tim, DVECTOR *pos, DVECTOR *clut_pos)
 {
     u_long flags;
-    u_long *p = tim;
     u_long *cursor;
     u_long *clut;
     u_long *clut_data;
     u_long *image;
     u_long *image_data;
 
-    if (tim[0] != 0x10)
+    cursor = tim;
+    if (cursor[0] != 0x10)
         return;
-    flags = p[1];
-    cursor = tim + 2;
+    cursor += 2;
+    flags = tim[1];
     if (flags & 8) {
-        clut_data = p + 5;
+        clut_data = tim + 5;
         clut = cursor;
-        cursor = (u_long *)((u_char *)cursor + p[2]);
+        cursor = (u_long *)((u_char *)cursor + tim[2]);
     }
     image = cursor;
     image_data = image + 3;
+    cursor = (u_long *)((u_char *)cursor + image[0]);
     if (flags & 8) {
         ((RECT *)(clut + 1))->x = clut_pos->vx;
         ((RECT *)(clut + 1))->y = clut_pos->vy;
