@@ -20,12 +20,16 @@
 RODATA(0x8001274c, 0x48)
 JUMPTABLES(0x80012794, 0xc0)
 
-/* Uses item `id`; the result word says whether it was used (1) or not (2).
- * The word is DAT_801cba08.unk16D8, which the relocation census names
- * DAT_801cd0e0. Retail's two loops reach it from the DAT_801cba08 base
- * (base + 0x16d8), and the 0x10e arm keeps the callback load after the
- * store, which the scheduler only does for a store to an aggregate member;
- * those three places use the member spelling, the rest the census name.
+/* The use result: whether the item was used (1) or not (2). The word is
+ * DAT_801cba08.unk16D8, which the relocation census names DAT_801cd0e0.
+ * Retail's two loops reach it from the DAT_801cba08 base (base + 0x16d8),
+ * and the 0x10e arm keeps the callback load after the store, which the
+ * scheduler only does for a store to an aggregate member; those places use
+ * the member spelling, the rest the census name. */
+#define USE_RESULT DAT_801cd0e0
+#define USE_RESULT_MEMBER DAT_801cba08.unk16D8
+
+/* Uses item `id` and leaves the use result.
  * Not exact: every instruction matches. Only the relocation of the 0x10e
  * store differs (DAT_801cba08 + 0x16d8 against the census's DAT_801cd0e0).
  * Renaming relocs.tsv row 0x80054b84 to DAT_801cba08 makes it exact but
@@ -40,7 +44,7 @@ void func_80054a54(int id)
     int points;
 
     pos = viewer.position;
-    DAT_801cd0e0 = 2;
+    USE_RESULT = 2;
     pos.vy += 1600;
     switch (id) {
     case 0x10a:
@@ -48,7 +52,7 @@ void func_80054a54(int id)
         break;
     case 0x10c:
         if (!(viewer.unk2C & 0x30000)) {
-            DAT_801cd0e0 = 1;
+            USE_RESULT = 1;
             viewer.unk190[5][1] = 3000;
             viewer.unk190[5][0] = 0;
             viewer.unk2C |= 0x10000;
@@ -56,7 +60,7 @@ void func_80054a54(int id)
         break;
     case 0x10d:
         if (!(viewer.unk2C & 0x30000)) {
-            DAT_801cd0e0 = 1;
+            USE_RESULT = 1;
             viewer.unk190[5][1] = 18000;
             viewer.unk190[5][0] = 0;
             viewer.unk2C |= 0x20000;
@@ -67,7 +71,7 @@ void func_80054a54(int id)
             viewer.unk2B = 1;
             viewer.unk2F0 = 0;
             viewer.unk2EC = 0;
-            DAT_801cba08.unk16D8 = 1;
+            USE_RESULT_MEMBER = 1;
             area_state.unkC->unk30(id);
         }
         break;
@@ -93,20 +97,20 @@ void func_80054a54(int id)
         while ((i = func_8004f718(i, &vis_lists)) != -1) {
             switch (func_8004fb88(&vis_table_b.entries[i], id)) {
             case 0:
-                DAT_801cba08.unk16D8 = 2;
+                USE_RESULT_MEMBER = 2;
                 goto done;
             case 1:
                 if (id == 0x114)
                     area_state.unkC->unk30(i | 0x4000);
                 else
                     func_80057d58();
-                DAT_801cba08.unk16D8 = 1;
+                USE_RESULT_MEMBER = 1;
                 if (id == 0x114 || id == 0x116)
                     goto used;
                 goto done;
             case 3:
                 func_80057cec();
-                DAT_801cba08.unk16D8 = 1;
+                USE_RESULT_MEMBER = 1;
                 goto done;
             }
             i++;
@@ -115,14 +119,14 @@ void func_80054a54(int id)
     case 0x11c:
         if (viewer.unk2 < viewer.unk0) {
             viewer.unk2 = viewer.unk0;
-            DAT_801cd0e0 = 1;
+            USE_RESULT = 1;
             func_800582f0(8, 128);
         }
         break;
     case 0x11d:
         if (viewer.unk6 < viewer.unk4) {
             viewer.unk6 = viewer.unk4;
-            DAT_801cd0e0 = 1;
+            USE_RESULT = 1;
             func_800582f0(8, 128);
         }
         break;
@@ -131,7 +135,7 @@ void func_80054a54(int id)
             viewer.unk190[0][1] = 0;
             viewer.unk190[0][0] = 0;
             viewer.unk2C &= ~7;
-            DAT_801cd0e0 = 1;
+            USE_RESULT = 1;
             func_800582f0(8, 128);
         }
         break;
@@ -140,7 +144,7 @@ void func_80054a54(int id)
             viewer.unk190[1][1] = 0;
             viewer.unk190[1][0] = 0;
             viewer.unk2C &= ~0x18;
-            DAT_801cd0e0 = 1;
+            USE_RESULT = 1;
             func_800582f0(8, 128);
         }
         break;
@@ -149,7 +153,7 @@ void func_80054a54(int id)
             viewer.unk190[4][1] = 0;
             viewer.unk190[4][0] = 0;
             viewer.unk2C &= ~0x100;
-            DAT_801cd0e0 = 1;
+            USE_RESULT = 1;
             func_800582f0(8, 128);
         }
         break;
@@ -158,7 +162,7 @@ void func_80054a54(int id)
             viewer.unk190[6][1] = 300;
             viewer.unk190[6][0] = 0;
             viewer.unk2C |= 0x40000;
-            DAT_801cd0e0 = 1;
+            USE_RESULT = 1;
         }
         break;
     case 0x123:
@@ -166,7 +170,7 @@ void func_80054a54(int id)
             viewer.unk190[7][1] = 3000;
             viewer.unk190[7][0] = 0;
             viewer.unk2C |= 0x80000;
-            DAT_801cd0e0 = 1;
+            USE_RESULT = 1;
         }
         break;
     case 0x124:
@@ -174,7 +178,7 @@ void func_80054a54(int id)
             viewer.unk190[8][1] = 600;
             viewer.unk190[8][0] = 0;
             viewer.unk2C |= 0x100000;
-            DAT_801cd0e0 = 1;
+            USE_RESULT = 1;
         }
         break;
     case 0x125:
@@ -182,7 +186,7 @@ void func_80054a54(int id)
             viewer.unk190[9][1] = 300;
             viewer.unk190[9][0] = 0;
             viewer.unk2C |= 0x200000;
-            DAT_801cd0e0 = 1;
+            USE_RESULT = 1;
         }
         break;
     case 0x126:
@@ -190,7 +194,7 @@ void func_80054a54(int id)
             viewer.unk190[10][1] = 6000;
             viewer.unk190[10][0] = 0;
             viewer.unk2C |= 0x400000;
-            DAT_801cd0e0 = 1;
+            USE_RESULT = 1;
         }
         break;
     case 0x127:
@@ -198,7 +202,7 @@ void func_80054a54(int id)
             viewer.unk190[11][1] = 3000;
             viewer.unk190[11][0] = 0;
             viewer.unk2C |= 0x800000;
-            DAT_801cd0e0 = 1;
+            USE_RESULT = 1;
         }
         break;
     case 0x128:
@@ -206,7 +210,7 @@ void func_80054a54(int id)
             viewer.unk190[12][1] = 6000;
             viewer.unk190[12][0] = 0;
             viewer.unk2C |= 0x800;
-            DAT_801cd0e0 = 1;
+            USE_RESULT = 1;
         }
         break;
     case 0x12e: {
@@ -233,7 +237,7 @@ void func_80054a54(int id)
                     c->unk28 = c->unk27;
                 else
                     c->unk28 += n;
-                DAT_801cba08.unk16D8 = 1;
+                USE_RESULT_MEMBER = 1;
             }
         }
         func_8003d030();
@@ -251,23 +255,23 @@ void func_80054a54(int id)
         goto done;
     case 0x136:
         func_80057cc8();
-        DAT_801cd0e0 = func_8005e924(5);
+        USE_RESULT = func_8005e924(5);
         break;
     case 0x137:
         func_80057cc8();
-        DAT_801cd0e0 = func_8005e924(53);
+        USE_RESULT = func_8005e924(53);
         break;
     case 0x138:
         func_80057cc8();
-        DAT_801cd0e0 = func_8005e924(29);
+        USE_RESULT = func_8005e924(29);
         break;
     case 0x139:
         func_80057cc8();
-        DAT_801cd0e0 = func_8005e924(14);
+        USE_RESULT = func_8005e924(14);
         break;
     }
 used:
-    if (DAT_801cd0e0 == 1)
+    if (USE_RESULT == 1)
         func_800552bc(id);
 done:
     func_8003ead0();
