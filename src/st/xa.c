@@ -66,8 +66,8 @@ void func_8005408c(u8 file, int channel)
     viewer.unk1E0 = DAT_800804ac[file][byte_channel];
     /* the file's position, by byte offset from the start of the save data */
     save = (u8 *)&DAT_801cba08;
-    memcpy((void *)&viewer.unk1DC, save + file * 4 + offsetof(Data801cba08, unk1618), 4);
-    memcpy(&viewer.unk1D8, (void *)&viewer.unk1DC, 4);
+    memcpy((CdlLOC *)&viewer.unk1DC, save + file * 4 + offsetof(Data801cba08, unk1618), 4);
+    memcpy(&viewer.unk1D8, (CdlLOC *)&viewer.unk1DC, 4);
     while (CdControl(CdlSetloc, (u8 *)&DAT_801cba08.unk1618[file], NULL) == 0)
         ;
     filter.file = 1;
