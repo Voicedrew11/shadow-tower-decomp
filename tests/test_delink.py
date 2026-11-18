@@ -1272,6 +1272,38 @@ class ModuleRodataTests(unittest.TestCase):
             [item for item in built.relocations if item.symbol == "viewer"], reviewed
         )
 
+    def test_module_rodata_rebases_reviewed_pointers_to_its_own_functions(self) -> None:
+        first = Function("GAME.EXE", 0x80010000, 8, 8, 1, "first", "test", "test")
+        second = Function("GAME.EXE", 0x80010008, 8, 8, 1, "second", "test", "test")
+        carved = {
+            0x80010000: (struct.pack("<2I", 0x03E00008, 0), []),
+            0x80010008: (struct.pack("<2I", 0x03E00008, 0), []),
+        }
+        module = Module(
+            "GAME.EXE", "game.pair", "pair", (0x80010000, 0x80010008), (), (0x80012000, 0xC)
+        )
+        # a handler table whose reviewed rows name the unit's own functions
+        # (already rebased against those symbols) and a foreign one
+        blob = struct.pack("<3I", 0, 0, 0)
+        reviewed = [
+            MipsRelocation(0, "R_MIPS_32", "second"),
+            MipsRelocation(4, "R_MIPS_32", "first"),
+            MipsRelocation(8, "R_MIPS_32", "elsewhere"),
+        ]
+        built = _module_object(
+            module, {first.va: first, second.va: second}, carved, {}, blob,
+            rodata_relocations=reviewed,
+        )
+        sections = elf_sections(built.data)
+        rodata = built.data[sections[".rodata"][4]:sections[".rodata"][4] + sections[".rodata"][5]]
+        self.assertEqual(struct.unpack_from("<3I", rodata), (8, 0, 0))
+        self.assertEqual(
+            [item for item in built.relocations if item.offset in (0, 4, 8)
+             and item.kind == "R_MIPS_32"],
+            [MipsRelocation(0, "R_MIPS_32", ".text"), MipsRelocation(4, "R_MIPS_32", ".text"),
+             MipsRelocation(8, "R_MIPS_32", "elsewhere")],
+        )
+
     def test_module_switch_table_rodata_ends_at_the_retail_claim(self) -> None:
         function = Function("GAME.EXE", 0x80010000, 8, 8, 1, "first", "test", "test")
         carved = {0x80010000: (struct.pack("<2I", 0x03E00008, 0), [])}

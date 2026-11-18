@@ -1143,6 +1143,13 @@ def _module_object(
             raise ValueError(f"module {module.unit}: RODATA range was not carved")
         rodata, rodata_relocations = _module_rodata(
             module, rodata_blob, len(text), rodata_relocations)
+        # A reviewed pointer to one of the unit's own functions (an overlay's
+        # handler table in the unit that also defines the handlers) is a
+        # .text-relative word, as the assembler emits it.
+        rodata_bytes = bytearray(rodata)
+        rodata_relocations = _module_function_data_relocations(
+            rodata_bytes, rodata_relocations, function_offsets)
+        rodata = bytes(rodata_bytes)
     rdata, rdata_relocations = b"", []
     if module.jumptables is not None:
         if jumptable_blob is None:
