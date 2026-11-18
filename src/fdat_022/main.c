@@ -99,9 +99,6 @@ void func_801ed514(void)
 #include "../lib/fdat_801ed6e4.inc"
 
 /*
- * Not exact (registers): retail keeps item 6's pointer in s2 (then reused
- * for 0xfff), this source gets a1 (3 retries spent).
- *
  * Entry 48 plays animation 6 and turns its arm up a frame at a time; table
  * C item 5 (6 once 5 is taken) rides on vertex 0x15a until the arm is up.
  * Then the view settles, the entry leaves, the item drops and flag 25 is
@@ -111,15 +108,13 @@ ADDRESS(0x801ed8f0, 0x1e0)
 void func_801ed8f0(void)
 {
     Vis212 *e = &vis_table_a.entries[48];
-    Vis48 *c5;
-    Vis48 *c6;
+    Vis48 *c5 = &vis_table_c.entries[5];
+    Vis48 *c6 = &vis_table_c.entries[6];
     Vis48 *c;
     SVECTOR v;
     SVECTOR unused;
 
     fdat_801eb7b4(e, 6);
-    c5 = &vis_table_c.entries[5];
-    c6 = &vis_table_c.entries[6];
     c = c5;
     if (vis_table_c.unk0070[c5->unk00 / 32] & (1 << (c5->unk00 % 32)))
         c = c6;

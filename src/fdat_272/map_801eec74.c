@@ -17,8 +17,11 @@
 #include <st/xa.h>
 #include <st/fdat.h>
 
-/* Not exact: retail takes the two to-products in a3 and v1 (this source v0)
- * and loads unk280 before unk288. */
+/* Not exact (registers): retail takes the two to-products in a3 and v1,
+ * this source in v0, and loads unk280 before unk288. Here global-alloc
+ * puts both products in LO, reload spills LO for the from-product's output
+ * reload and the retry gives them v0; operand order, a `total - n` local
+ * and x/y locals were ruled out. */
 /* Entry 49 plays animation 0 to its end while the view turns from its
  * pitch and yaw to (0, -0x400). */
 ADDRESS(0x801eec74, 0x240)

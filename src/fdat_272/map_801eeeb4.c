@@ -17,7 +17,6 @@
 #include <st/xa.h>
 #include <st/fdat.h>
 
-/* Not exact (one attempt, retries off; 98.4%): first divergence retail `addiu s2,s1,48`, this source `addiu a1,s1,48`. */
 /*
  * Entry 49 plays animation 4 and lifts its arm a frame at a time; table C
  * item 10 (11 once 10 is taken) rides on vertex 0x160 until the arm is up.
@@ -27,15 +26,13 @@ ADDRESS(0x801eeeb4, 0x1c8)
 void func_801eeeb4(void)
 {
     Vis212 *e = &vis_table_a.entries[49];
-    Vis48 *c10;
-    Vis48 *c11;
+    Vis48 *c10 = &vis_table_c.entries[10];
+    Vis48 *c11 = &vis_table_c.entries[11];
     Vis48 *c;
     SVECTOR v;
     SVECTOR unused;
 
     fdat_801eb7b4(e, 4);
-    c10 = &vis_table_c.entries[10];
-    c11 = &vis_table_c.entries[11];
     c = c10;
     if (vis_table_c.unk0070[c10->unk00 / 32] & (1 << (c10->unk00 % 32)))
         c = c11;
