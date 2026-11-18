@@ -1,10 +1,8 @@
 /*
  * The first ten of the 21 functions every FDAT overlay starts with (WIP).
  * One source for all 36 overlays: FDAT_002.BIN binds by address, the others
- * by name. A unit of its own only so that fdat_801eba4c, which is not yet
- * exact, does not move fdat_801ebec4's switch table in the overlay's unit;
- * the next two functions are src/lib/fdat_common.inc, the last nine
- * src/lib/fdat_common_b.c.
+ * by name. A unit of its own (WIP boundary); the next two functions are
+ * src/lib/fdat_common.inc, the last nine src/lib/fdat_common_b.c.
  */
 #include <kf/lib/address.h>
 #include <kf/lib/types.h>
@@ -108,18 +106,14 @@ void fdat_801eb96c(Vis212 *e)
         e->unk22 = func_80058220(e->unk0B * 10 + 48 + sound, &e->unk74, 127, fdat_801eb940(e));
 }
 
-/*
- * Plays the script sound when its trigger fires this frame.
- * Not exact: retail loads the sound byte before the trigger, with the
- * script pointer in v0 and the 255 comparison value in a0.
- */
+/* Plays the script sound when its trigger fires this frame. */
 ADDRESS(0x801eba4c, 0x17c)
 void fdat_801eba4c(Vis212 *e)
 {
     VisScript *s = e->unkA8;
-    u16 frame = e->unk2A;
-    u8 sound = s->unk05;
+    int sound = s->unk05;
     u16 trigger = s->unk0E;
+    u16 frame = e->unk2A;
     u16 step = s->unk0C;
     int at;
     int chance;
