@@ -1711,28 +1711,15 @@ void func_8005c7fc(void)
     func_80057a3c();
 }
 
+/* The storage page's cursor: eight columns (four per grid) by five rows. */
+#define CURSOR_COL ((s16)(sp->unk2E0 % 8))
+#define CURSOR_ROW (sp->unk2E0 / 8)
+
 /*
  * The item storage page: the items carried (ids0) and stored (ids1, the
  * count flag bit) as two four-column grids of five rows; confirming a cell
  * twice moves its item to the first free entry of the other list. Leaving
  * writes the flag bits back.
- *
- * Not exact (0x64 bytes short); the first 365 instructions agree. Agreed
- * with retail so far: the file cursor and its (*p + 4) advance, the
- * plain `i / 4`, `i % 4` cell positions, the first image loop (the load
- * written in both arms, sizes as block-local shifted values, the counter
- * zeroed before the byte count) and the cleanup behind the loop's
- * `break`. Open: from the first image loop on four saved registers are
- * rotated (retail: n $s3, the cd_state base $s4, the tex offset $s5,
- * used $s6; here used $s3, n $s4, base $s5, offset $s6), and the cell
- * moves of the main loop are still first-pass code: retail converts the
- * found index and the cell index to s16 once each and keeps both the
- * value and its shifted form ($t0/$t1, $a0/$a3) for the % 20 that
- * follows, compares and stores the -1 from a hoisted register ($s8) and
- * multiplies by a hoisted 0x66666667 ($s7). Those two extra temporaries
- * are why retail's reload register is $t2 and this build's $t1.
- * `shown` and the saved row live on the stack in retail (128(sp),
- * 120(sp)).
  */
 ADDRESS(0x8005d25c, 0x16c8)
 void func_8005d25c(void)
@@ -1750,13 +1737,11 @@ void func_8005d25c(void)
     s16 shown;
     s16 n;
     s16 id;
-    s16 col;
     s16 idx;
     s16 k;
     u_long *p;
     int used;
     int total;
-    s16 row;
     int i;
     int hole;
     int empty;
@@ -1811,13 +1796,9 @@ void func_8005d25c(void)
         sp->unk0.grid.tex[i].vx = i / 4 * 56 + 640;
         sp->unk0.grid.tex[i].vy = i % 4 * 28 + 124;
     }
-    {
-        int y;
-
-        for (i = 20, y = 0; i < 29; i++, y += 28) {
-            sp->unk0.grid.tex[i].vx = 960;
-            sp->unk0.grid.tex[i].vy = y;
-        }
+    for (i = 20; i < 29; i++) {
+        sp->unk0.grid.tex[i].vx = 960;
+        sp->unk0.grid.tex[i].vy = (i - 20) * 28;
     }
     for (i = 29; i < 40; i++) {
         sp->unk0.grid.tex[i].vx = (i - 29) / 9 * 56 + 640;
@@ -1883,10 +1864,8 @@ void func_8005d25c(void)
             func_80057cc8();
             DAT_801cd180.unk4 = 0;
             if (sp->unk2DC & 0x8000) {
-                col = sp->unk2E0 % 8;
-                row = sp->unk2E0 / 8;
-                if (col < 4) {
-                    idx = row * 4 + col + sp->unk0.grid.row0 * 4;
+                if (CURSOR_COL < 4) {
+                    idx = CURSOR_ROW * 4 + CURSOR_COL + sp->unk0.grid.row0 * 4;
                     k = sp->unk0.grid.count1;
                     for (hole = 0; hole < sp->unk0.grid.count1; hole++) {
                         if (sp->unk0.grid.ids1[hole] == -1) {
@@ -1910,7 +1889,7 @@ void func_8005d25c(void)
                     sp->unk0.grid.count1++;
                     sp->unk0.grid.count0--;
                 } else {
-                    idx = row * 4 + col - 4 + sp->unk0.grid.row1 * 4;
+                    idx = CURSOR_ROW * 4 + CURSOR_COL + (sp->unk0.grid.row1 * 4 - 4);
                     k = sp->unk0.grid.count0;
                     for (hole = 0; hole < sp->unk0.grid.count0; hole++) {
                         if (sp->unk0.grid.ids0[hole] == -1) {
@@ -1936,15 +1915,15 @@ void func_8005d25c(void)
                 sp->unk2DC &= 0x7fff;
             } else {
                 empty = 0;
-                if ((s16)(sp->unk2E0 % 8) < 4) {
-                    int cell = (sp->unk0.grid.row0 + sp->unk2E0 / 8) * 4;
+                if (CURSOR_COL < 4) {
+                    int cell = (sp->unk0.grid.row0 + CURSOR_ROW) * 4;
 
-                    if (sp->unk0.grid.ids0[cell + (s16)(sp->unk2E0 % 8)] == -1)
+                    if (sp->unk0.grid.ids0[cell + CURSOR_COL] == -1)
                         empty = 1;
                 } else {
-                    int cell = (sp->unk0.grid.row1 + sp->unk2E0 / 8) * 4 - 4;
+                    int cell = (sp->unk0.grid.row1 + CURSOR_ROW) * 4 - 4;
 
-                    if (sp->unk0.grid.ids1[cell + (s16)(sp->unk2E0 % 8)] == -1)
+                    if (sp->unk0.grid.ids1[cell + CURSOR_COL] == -1)
                         empty = 1;
                 }
                 if (!empty)
@@ -1975,7 +1954,7 @@ void func_8005d25c(void)
             if (DAT_801cd180.unkC & 0x10) {
                 func_80057d10();
                 if (DAT_801cd180.unk2 & 0x8000) {
-                    if ((s16)(sp->unk2E0 % 8) < 4) {
+                    if (CURSOR_COL < 4) {
                         sp->unk0.grid.row0 -= 5;
                         if (sp->unk0.grid.row0 < 0)
                             sp->unk0.grid.row0 = 0;
@@ -1986,7 +1965,7 @@ void func_8005d25c(void)
                     }
                 } else if (sp->unk2E0 >= 8) {
                     sp->unk2E0 -= 8;
-                } else if ((s16)(sp->unk2E0 % 8) < 4) {
+                } else if (CURSOR_COL < 4) {
                     if (sp->unk0.grid.row0 > 0)
                         sp->unk0.grid.row0--;
                 } else if (sp->unk0.grid.row1 > 0) {
@@ -1997,7 +1976,7 @@ void func_8005d25c(void)
             if (DAT_801cd180.unkC & 0x40) {
                 func_80057d10();
                 if (DAT_801cd180.unk2 & 0x8000) {
-                    if ((s16)(sp->unk2E0 % 8) < 4) {
+                    if (CURSOR_COL < 4) {
                         sp->unk0.grid.row0 += 5;
                         if (sp->unk0.grid.row0 > 73)
                             sp->unk0.grid.row0 = 73;
@@ -2008,7 +1987,7 @@ void func_8005d25c(void)
                     }
                 } else if (sp->unk2E0 < 32) {
                     sp->unk2E0 += 8;
-                } else if ((s16)(sp->unk2E0 % 8) < 4) {
+                } else if (CURSOR_COL < 4) {
                     if (sp->unk0.grid.row0 < 73)
                         sp->unk0.grid.row0++;
                 } else if (sp->unk0.grid.row1 < 73) {
@@ -2045,10 +2024,10 @@ void func_8005d25c(void)
                     sp->unk0.grid.row1 = 73;
             }
             if (sp->unk2DC == 2) {
-                if ((s16)(sp->unk2E0 % 8) < 4)
-                    id = sp->unk0.grid.ids0[sp->unk0.grid.row0 * 4 + (sp->unk2E0 / 8 * 4 + (s16)(sp->unk2E0 % 8))];
+                if (CURSOR_COL < 4)
+                    id = sp->unk0.grid.ids0[sp->unk0.grid.row0 * 4 + (CURSOR_ROW * 4 + CURSOR_COL)];
                 else
-                    id = sp->unk0.grid.ids1[sp->unk0.grid.row1 * 4 + (sp->unk2E0 / 8 * 4 + (s16)(sp->unk2E0 % 8)) - 4];
+                    id = sp->unk0.grid.ids1[sp->unk0.grid.row1 * 4 + (CURSOR_ROW * 4 + CURSOR_COL) - 4];
                 if (shown != id && id != -1) {
                     func_80016030(6, vis_table_c.unk0118[id].unk5[0] + 200, DAT_80088c88);
                     func_8003ec5c(DAT_80088c88, &picture, NULL, 1);
@@ -2058,7 +2037,7 @@ void func_8005d25c(void)
             if (sp->unk0.grid.row0 != r0) {
                 if (r0 < sp->unk0.grid.row0) {
                     n = (sp->unk0.grid.row0 - r0) * 4;
-                    i = sp->unk0.grid.row0 * 4 - (n - 20);
+                    i = sp->unk0.grid.row0 * 4 + 20 - n;
                 } else {
                     n = (r0 - sp->unk0.grid.row0) * 4;
                     i = sp->unk0.grid.row0 * 4;
@@ -2091,7 +2070,7 @@ void func_8005d25c(void)
             if (sp->unk0.grid.row1 != r1) {
                 if (r1 < sp->unk0.grid.row1) {
                     n = (sp->unk0.grid.row1 - r1) * 4;
-                    i = sp->unk0.grid.row1 * 4 - (n - 20);
+                    i = sp->unk0.grid.row1 * 4 + 20 - n;
                 } else {
                     n = (r1 - sp->unk0.grid.row1) * 4;
                     i = sp->unk0.grid.row1 * 4;
@@ -2148,6 +2127,9 @@ void func_8005d25c(void)
     func_80058d30();
     func_80057a3c();
 }
+
+#undef CURSOR_COL
+#undef CURSOR_ROW
 
 /*
  * Lets the player spend points on the fourteen attributes (two columns of
