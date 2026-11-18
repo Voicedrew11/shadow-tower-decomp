@@ -649,10 +649,6 @@ void func_8005a36c(void)
  * func_80059dc0 totals (after func_8005975c applies a slot change when
  * `apply` is set), then restores the slots (`apply`) or copies the rows
  * into the viewer.
- *
- * Not exact (4 bytes long): retail keeps the halved figures in the
- * division registers and reloads recs[3].unk1 every pass of the first
- * loop; this build copies b6 to another register and hoists that load.
  */
 ADDRESS(0x8005a3a8, 0x6d8)
 void func_8005a3a8(int apply)
@@ -660,7 +656,7 @@ void func_8005a3a8(int apply)
     MenuAttrScratch *at = MENU_ATTR;
     u16 b6;
     u16 b8;
-    u16 *p;
+    u16 *p = NULL;
     u16 min;
     u16 max;
     int i;
@@ -672,12 +668,12 @@ void func_8005a3a8(int apply)
                   + at->unk1B4[4] + at->unk1B4[5] + at->unk1B4[6];
     viewer.unk4 = at->unk1B4[7] * 5 + at->unk1B4[8] + at->unk1B4[9] + at->unk1B4[10]
                   + at->unk1B4[11] + at->unk1B4[12] + at->unk1B4[13];
-    b6 = viewer.unk0 / 80;
-    viewer.unkB6 = b6;
-    b8 = viewer.unk4 / 80;
-    viewer.unkB8 = b8;
+    viewer.unkB6 = viewer.unk0 / 80;
+    viewer.unkB8 = viewer.unk4 / 80;
     if (viewer.unk2C & 0x100) {
+        b6 = viewer.unkB6;
         viewer.unkB6 = b6 / 2;
+        b8 = viewer.unkB8;
         viewer.unkB8 = b8 / 2;
     }
     if (viewer.unk0 == 0)
