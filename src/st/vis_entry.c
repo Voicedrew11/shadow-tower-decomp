@@ -397,16 +397,6 @@ void *func_8004b658(VECTOR *pos, short yaw, short pitch, int range, int arg4, in
 
 /* Distance from (x, y, z) to the segment a..b, or -1 beyond r (r + extra
  * from its interior). */
-/*
- * Not exact: retail compares in each arm (`addu v0,s0,v0; j shared; slt
- * v0,v0,v1` / `slt v0,s0,v1`) and shares only `bnez v0; li v0,-1; move
- * v0,v1`; this source adds `extra` into s0 and shares the compare. The
- * compare result is block-local (v0) and d global (v1), so the two arms
- * carry their own test and jump2 merges the tails. Ruled out: `if (r +
- * extra < d) return -1;` per arm with the shared `return d` (no merge,
- * +9 words), per-arm `return -1; return d;` (jump1 hoists `li v0,-1`, d
- * lands in a0), a `miss` flag set in both arms (+5 words, flag in v1).
- */
 ADDRESS(0x8004b8ec, 0x29c)
 int func_8004b8ec(int x, int y, int z, int r, VECTOR *a, VECTOR *b, int extra)
 {
@@ -429,15 +419,16 @@ int func_8004b8ec(int x, int y, int z, int r, VECTOR *a, VECTOR *b, int extra)
                 dy = dy * t / len2 + a->vy - y;
                 dz = dz * t / len2 + a->vz - z;
                 d = SquareRoot0(dx * dx + dz * dz + dy * dy);
-                r += extra;
+                if (r + extra >= d)
+                    return d;
             } else {
                 dx = b->vx - x;
                 dz = b->vz - z;
                 dy = b->vy - y;
                 d = SquareRoot0(dx * dx + dz * dz + dy * dy);
+                if (r >= d)
+                    return d;
             }
-            if (r < d)
-                return -1;
         } else {
             dx = a->vx - x;
             dz = a->vz - z;
@@ -445,9 +436,7 @@ int func_8004b8ec(int x, int y, int z, int r, VECTOR *a, VECTOR *b, int extra)
             d = SquareRoot0(dx * dx + dz * dz + dy * dy);
             if (r >= d)
                 return d;
-            return -1;
         }
-        return d;
     }
     return -1;
 }
@@ -634,8 +623,17 @@ int func_8004c184(Vis212 *e, u16 v)
 /* Moves the entry by its velocity, sliding along up to three walls the
  * request hits, then settles it on the floor. */
 /*
- * Not exact: floor-branch sharing, correction loads and flag setup
- * still differ, as do the record and slide temporaries' lifetimes.
+ * Not exact (7 words short). In the two wall arms retail reloads the
+ * constant 1 at each use (`li v1,1; subu v1,v1,v0` and `li a2,1; sw
+ * a2,48(sp)`): one cse-shared pseudo that got no saved register and was
+ * rematerialised, because the vis_lists base of the arms sits in s3 and
+ * the slide quotient in s0 (`sra s0,v0,12`); here the base takes s0 and
+ * the constant s3. Also: slid/record are s8/s7 in retail (s7/s8 here)
+ * and the two slid_wall clears come after the `move s8,zero`. Ruled out:
+ * a separate product variable for `speed * rcos()` (right size, but the
+ * record pointer is spilled and the frame grows 16 bytes). The goto
+ * shape hides the loop from loop.c in both builds; the floor tail is
+ * still a first-pass draft.
  */
 ADDRESS(0x8004c1b4, 0x654)
 void func_8004c1b4(Vis212 *e)

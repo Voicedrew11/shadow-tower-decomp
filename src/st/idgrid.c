@@ -499,19 +499,28 @@ void func_800675f4(void)
  * The detail panel of the id under the cursor: its image (when the CD is
  * idle), its fourteen table C counts and its two figures.
  */
-/* Not exact: scratchpad address reuse, the empty-selection join,
- * frame/spills and text lookup ordering still differ. */
+/* Not exact (2 words short). Retail copies the empty flag twice
+ * (`sltiu v1,v1,1; move a0,v1` in the first arm and `move v0,a0` before
+ * the test), which no flag type tried here reproduces (int, u8, s8, s16,
+ * a second flag variable), and it keeps the four rectangle stores in
+ * source order where sched2 here floats the two constant stores up (no
+ * order of the five statements changes that). The rest depends on the
+ * register pressure: `sp` is one variable that gets no register (reload
+ * then spells each access as a constant address), the declaration order
+ * gives the spill slots, and the two column positions are written as
+ * expressions of i so that loop.c makes the registers retail has. */
 ADDRESS(0x80067624, 0x5c8)
 void func_80067624(void)
 {
+    MenuScratch *sp = MENU_SCRATCH;
     int text_x, text_y;
-    s16 x, y;
     s16 id;
+    int i;
+    s16 x, y;
     s16 selected;
     int none;
     int n, k;
-    int i, j;
-    int name_x, count_x;
+    int j;
     u8 *count;
     CVECTOR *label, *value;
     u8 whole, tenths;
@@ -526,68 +535,61 @@ void func_80067624(void)
         text_x = 18;
     }
     text_y = 135;
-    MENU_SCRATCH->unk350.w = 192;
-    MENU_SCRATCH->unk350.x = x;
-    MENU_SCRATCH->unk350.h = 124;
-    MENU_SCRATCH->unk350.y = y;
+    sp->unk350.w = 192;
+    sp->unk350.x = x;
+    sp->unk350.h = 124;
+    sp->unk350.y = y;
     none = 0;
     if (ST.unk0 == 104) {
-        selected = MENU_SCRATCH->unk0.grid.row0 + MENU_SCRATCH->unk2E0;
-        none = MENU_SCRATCH->unk0.grid.ids0[selected] == -1;
-        id = MENU_SCRATCH->unk0.grid.ids0[selected];
+        selected = sp->unk0.grid.row0 + sp->unk2E0;
+        none = sp->unk0.grid.ids0[selected] == -1;
+        id = sp->unk0.grid.ids0[selected];
     } else {
-        selected = MENU_SCRATCH->unk0.grid.row1 + MENU_SCRATCH->unk2E0;
-        id = MENU_SCRATCH->unk0.grid.ids1[selected];
-        if (MENU_SCRATCH->unk0.grid.ids1[selected] == -1)
+        selected = sp->unk0.grid.row1 + sp->unk2E0;
+        id = sp->unk0.grid.ids1[selected];
+        if (sp->unk0.grid.ids1[selected] == -1)
             none = 1;
     }
     if (!none) {
         if (!func_8006616c()) {
-            MENU_SCRATCH->unk358.vx = 640;
-            MENU_SCRATCH->unk358.vy = 0;
-            func_80028364(&MENU_SCRATCH->unk350, &MENU_SCRATCH->unk358, NULL, NULL, 16);
-            MENU_SCRATCH->unk350.w = 100;
-            MENU_SCRATCH->unk358.vx = 832;
-            MENU_SCRATCH->unk350.x += 192;
-            func_80028364(&MENU_SCRATCH->unk350, &MENU_SCRATCH->unk358, NULL, NULL, 16);
+            sp->unk358.vx = 640;
+            sp->unk358.vy = 0;
+            func_80028364(&sp->unk350, &sp->unk358, NULL, NULL, 16);
+            sp->unk350.w = 100;
+            sp->unk358.vx = 832;
+            sp->unk350.x += 192;
+            func_80028364(&sp->unk350, &sp->unk358, NULL, NULL, 16);
         }
         n = 0;
         k = 2;
         count = vis_table_c.unk0118[id].unk10;
         DAT_800881ae = 1;
-        name_x = text_x - 4;
-        count_x = text_x;
         for (i = 0; i < 4; i++) {
-            u16 label_x = name_x;
-            u16 value_x = count_x + 40;
-
             for (j = 0; j < 4; j++) {
                 if (n == 14)
                     goto done;
                 n++;
                 if (*count) {
-                    func_8002732c(MESSAGE(200 + k), label_x, text_y + j * 15, &MENU_SCRATCH->style[0]);
-                    func_80027440(*count | 0x13000000, value_x, text_y + j * 15,
-                                  &MENU_SCRATCH->style[4]);
+                    func_8002732c(MESSAGE(200 + k), text_x - 4 + i * 72, text_y + j * 15, &sp->style[0]);
+                    func_80027440(*count | 0x13000000, text_x + i * 72 + 40, text_y + j * 15,
+                                  &sp->style[4]);
                 }
                 count++;
                 k++;
             }
             if (n == 14)
                 break;
-            count_x += 72;
-            name_x += 72;
         }
     done:
         DAT_800881ae = 0;
         text_y += 60;
         if (vis_table_c.unk0118[id].unk27) {
             if (vis_table_c.unk0118[id].unk28 < 4) {
-                label = &MENU_SCRATCH->style[2];
-                value = &MENU_SCRATCH->style[6];
+                label = &sp->style[2];
+                value = &sp->style[6];
             } else {
-                label = &MENU_SCRATCH->style[0];
-                value = &MENU_SCRATCH->style[4];
+                label = &sp->style[0];
+                value = &sp->style[4];
             }
             func_8002732c(MESSAGE(29), text_x, text_y, label);
             func_80027440(vis_table_c.unk0118[id].unk28 | 0x3000000, text_x + 70, text_y, value);
@@ -598,11 +600,11 @@ void func_80067624(void)
         if (vis_table_c.unk0118[id].unk24) {
             whole = vis_table_c.unk0118[id].unk24 * 100 / 454;
             tenths = vis_table_c.unk0118[id].unk24 * 1000 / 454 - whole * 10;
-            func_8002732c(MESSAGE(28), text_x, text_y, &MENU_SCRATCH->style[0]);
-            func_80027440(whole | 0x3000000, text_x + 70, text_y, &MENU_SCRATCH->style[4]);
-            func_80026ecc(18, text_x + 109, text_y, &MENU_SCRATCH->style[0]);
-            func_80027440(tenths | 0x1000000, text_x + 116, text_y, &MENU_SCRATCH->style[4]);
-            func_80026ecc(53, text_x + 132, text_y, &MENU_SCRATCH->style[0]);
+            func_8002732c(MESSAGE(28), text_x, text_y, &sp->style[0]);
+            func_80027440(whole | 0x3000000, text_x + 70, text_y, &sp->style[4]);
+            func_80026ecc(18, text_x + 109, text_y, &sp->style[0]);
+            func_80027440(tenths | 0x1000000, text_x + 116, text_y, &sp->style[4]);
+            func_80026ecc(53, text_x + 132, text_y, &sp->style[0]);
         }
     }
     func_80029548(x, y, 296, 222);
@@ -612,8 +614,17 @@ void func_80067624(void)
  * Draws one grid (104 or 98): the cursor bar, the scroll arrows and bar, the
  * header image and eleven rows of names, the held range highlighted.
  */
-/* Not exact: header-call argument setup, row-loop grid reloads and
- * temporary lifetimes, and text lookup order still differ. */
+/* Not exact (6 words short). Residues: (1) retail loads the header call's
+ * three scratch-address arguments after the last two stores, here they
+ * sink above them; (2) the row loop reloads `grid` from its stack slot
+ * (`lbu s6,160(sp)`), here it copies the register; (3) retail sums the
+ * row into v0 in both arms and copies it to a0 at the join; (4) the first
+ * `id != -1` branch is threaded straight to the draw call; (5) the saved
+ * registers of i/id/y/colour rotate. The row y is a giv in retail
+ * (`li a2,35; ... move s4,a2` after the hoisted constants). Ruled out:
+ * a row variable summed after the arms (the scratchpad moves to s0),
+ * per-arm id loads, a shared `idx = n` copy. The unused RECT/CVECTOR
+ * locals only reproduce the frame. */
 ADDRESS(0x80067bec, 0x66c)
 void func_80067bec(u8 grid)
 {
@@ -708,7 +719,7 @@ void func_80067bec(u8 grid)
             x = 342;
         y = 35;
         sp->style[0].cd |= 0x80;
-        for (i = 0; i < 11; i++, y += 16) {
+        for (i = 0; i < 11; i++) {
             if (grid == 104) {
                 idx = sp->unk0.grid.row0 + i;
                 list = sp->unk0.grid.ids0;
@@ -719,18 +730,18 @@ void func_80067bec(u8 grid)
             id = list[idx];
             color = &sp->style[0];
             if (grid == ST.unk0 && ST.unk4 && idx >= ST.unk8 && idx <= ST.unkC) {
-                if (id != -1) {
-                    color = &held;
-                } else {
+                if (id == -1) {
                     box.x = x;
-                    box.y = y;
+                    box.y = y + i * 16;
                     box.w = 266;
                     box.h = 12;
                     func_80028220(&box, &empty, 0);
+                } else {
+                    color = &held;
                 }
             }
             if (id != -1)
-                func_8002732c(MESSAGE_IN(sp->unk0.grid.messages, id), x, y, color);
+                func_8002732c(MESSAGE_IN(sp->unk0.grid.messages, id), x, y + i * 16, color);
         }
         sp->style[0].cd &= 0x7f;
     }

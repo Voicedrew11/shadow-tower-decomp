@@ -416,12 +416,6 @@ void func_800595d4(void)
  * slot copy at scratch +0x292 when `redraw` is 0): a two-handed weapon
  * empties the other hand's slots; with `redraw` 1 the changed pictures are
  * reloaded.
- *
- * Not exact (4 bytes longer): only the final switch's dispatch differs.
- * Retail has `bne x,14,exit; j case14` (the case's `li v0,0xffff` in the
- * jump's delay slot); this build keeps the raw `beq x,14,case14; j exit;
- * nop`. Ruled out: an if/else chain, the redraw repeated per case, a guard
- * before the switch.
  */
 ADDRESS(0x8005975c, 0x590)
 void func_8005975c(int redraw)
@@ -510,16 +504,12 @@ void func_8005975c(int redraw)
         if (redraw == 1)
             func_80059204(sp->unk2E0 - 1);
     }
-    switch (sp->unk2E0) {
-    case 0:
-        viewer.unk38[6] = 0xffff;
-        break;
-    case 14:
-        viewer.unk38[12] = 0xffff;
-        break;
-    default:
+    if (sp->unk2E0 != 0 && sp->unk2E0 != 14)
         return;
-    }
+    if (sp->unk2E0 == 0)
+        viewer.unk38[6] = 0xffff;
+    else
+        viewer.unk38[12] = 0xffff;
     if (redraw == 1) {
         DrawSync(0);
         func_80059204(sp->unk2E0 == 0 ? 6 : 12);
@@ -659,10 +649,6 @@ void func_8005a36c(void)
  * func_80059dc0 totals (after func_8005975c applies a slot change when
  * `apply` is set), then restores the slots (`apply`) or copies the rows
  * into the viewer.
- *
- * Not exact (4 bytes long): retail keeps the halved figures in the
- * division registers and reloads recs[3].unk1 every pass of the first
- * loop; this build copies b6 to another register and hoists that load.
  */
 ADDRESS(0x8005a3a8, 0x6d8)
 void func_8005a3a8(int apply)
@@ -670,7 +656,7 @@ void func_8005a3a8(int apply)
     MenuAttrScratch *at = MENU_ATTR;
     u16 b6;
     u16 b8;
-    u16 *p;
+    u16 *p = NULL;
     u16 min;
     u16 max;
     int i;
@@ -682,12 +668,12 @@ void func_8005a3a8(int apply)
                   + at->unk1B4[4] + at->unk1B4[5] + at->unk1B4[6];
     viewer.unk4 = at->unk1B4[7] * 5 + at->unk1B4[8] + at->unk1B4[9] + at->unk1B4[10]
                   + at->unk1B4[11] + at->unk1B4[12] + at->unk1B4[13];
-    b6 = viewer.unk0 / 80;
-    viewer.unkB6 = b6;
-    b8 = viewer.unk4 / 80;
-    viewer.unkB8 = b8;
+    viewer.unkB6 = viewer.unk0 / 80;
+    viewer.unkB8 = viewer.unk4 / 80;
     if (viewer.unk2C & 0x100) {
+        b6 = viewer.unkB6;
         viewer.unkB6 = b6 / 2;
+        b8 = viewer.unkB8;
         viewer.unkB8 = b8 / 2;
     }
     if (viewer.unk0 == 0)
@@ -777,9 +763,6 @@ void func_8005a3a8(int apply)
 /*
  * Fades the screen to black over sixteen frames: each frame subtracts
  * 16 from the display through a translucent quad without clearing.
- *
- * Not exact (size-exact): retail builds the POLY_F4 tag before its XY
- * stores, as in func_80021158; this source builds it after them.
  */
 ADDRESS(0x8005aa80, 0x280)
 void func_8005aa80(void)
@@ -803,11 +786,19 @@ void func_8005aa80(void)
         ClearOTagR(ot, 1);
         setcode(&poly, 0x28);
         setSemiTrans(&poly, 1);
-        setXY4(&poly, 0, 0, world_state.draw[1 - world_state.frame].clip.w, 0,
-               0, world_state.draw[1 - world_state.frame].clip.h,
-               world_state.draw[1 - world_state.frame].clip.w,
-               world_state.draw[1 - world_state.frame].clip.h);
-        mesh_add_prim(ot, &poly, 5);
+        /* The quad is linked while it is filled in: its tag word first, the
+         * OT entry between the last corner's x and y (retail's store and
+         * load order pins both there). */
+        poly.tag = (ot[0] & 0xffffff) | (5 << 24);
+        poly.x0 = 0;
+        poly.y0 = 0;
+        poly.x1 = world_state.draw[1 - world_state.frame].clip.w;
+        poly.y1 = 0;
+        poly.x2 = 0;
+        poly.y2 = world_state.draw[1 - world_state.frame].clip.h;
+        poly.x3 = world_state.draw[1 - world_state.frame].clip.w;
+        mesh_set_ot(ot, &poly);
+        poly.y3 = world_state.draw[1 - world_state.frame].clip.h;
         poly.r0 = poly.g0 = poly.b0 = 16;
         SetDrawMode(&mode, 0, 0, GetTPage(0, 2, 640, 0), NULL);
         addPrim(ot, &mode);
@@ -2686,18 +2677,13 @@ void func_80060018(void)
  * (MenuState.levels); a row waits for the next button (unk2E2), row 12
  * restores the defaults, row 13 returns, and buttons used twice mark
  * levels.flags.
- * Not exact (size-exact): retail keeps the scratchpad in s0 and the
- * decode cursor in s1; this build reverses them and uses different
- * counter registers. The cursor setup before the sound call, slider-first
- * branches and final halfword pointer walk now agree with retail.
  */
 ADDRESS(0x80060334, 0x878)
 void func_80060334(void)
 {
     MenuScratch *sp = MENU_SCRATCH;
-    int i;
-    int used;
-    u8 *option;
+
+
     u16 *key;
 
     sp->unk2E0 = 0;
@@ -2730,6 +2716,8 @@ void func_80060334(void)
                 DAT_801cd180.unk4 = 0;
                 if (sp->unk2E0 == 5) {
                     const u16 *decode = DAT_801cd180.unk22;
+                    int i;
+
                     func_80057cc8();
                     for (i = 0; i < 12; i++, decode++) {
                         if (*decode & 0x1000)
@@ -2764,7 +2752,8 @@ void func_80060334(void)
                 }
             }
             if (DAT_801cd180.unkC & 0x20) {
-                option = &DAT_801cd120.unk1;
+                u8 *option = &DAT_801cd120.unk1;
+
                 func_80057d10();
                 DAT_801cd180.unkC = 0;
                 if (sp->unk2E0 <= 0) {
@@ -2775,7 +2764,8 @@ void func_80060334(void)
                 }
             }
             if (DAT_801cd180.unkC & 0x80) {
-                option = &DAT_801cd120.unk1;
+                u8 *option = &DAT_801cd120.unk1;
+
                 func_80057d10();
                 DAT_801cd180.unkC = 0;
                 if (sp->unk2E0 <= 0) {
@@ -2928,10 +2918,12 @@ void func_80060334(void)
                 sp->unk0.levels.level[sp->unk2E0] = 11;
                 *key = 0x200;
             }
-            sp->unk0.levels.flags = 0;
             {
                 const u16 *scan = DAT_801cd180.unk22;
-                used = 15;
+                int used = 15;
+                int i;
+
+                sp->unk0.levels.flags = 0;
                 for (i = 0; i < 12; i++, scan++) {
                     if (*scan & used)
                         sp->unk0.levels.flags |= *scan;
@@ -3639,7 +3631,13 @@ read:
  * it to the icon store (frame store vs constant-based scratch load do not
  * conflict), so it sinks below the store; retail keeps it above. Ruled
  * out: operand order of the compare, the statement before/after strcpy,
- * an s16 row variable (it sinks to the block top and takes t3).
+ * an s16 row variable (it sinks to the block top and takes t3). Retail's
+ * order is stable under sched2 only when the load already precedes the
+ * icon store after sched1 (then 18 and 2 take v1 because the row holds
+ * v0); that needs the store to depend on the load, i.e. a scratchpad
+ * base sched1 does not know to be constant. A 3000-variant sweep of
+ * row/count temporaries, statement positions and compare spellings
+ * found no such form.
  *
  * Saves to the selected file, or to a new file numbered unk204: builds the
  * header (the title with the file number, the area name and the play

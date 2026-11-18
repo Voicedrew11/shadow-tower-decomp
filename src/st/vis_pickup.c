@@ -15,9 +15,14 @@
 
 /* Shows entry c in front of the viewer until a button takes it (bit 10)
  * or puts it back (bit 11, unless forced).
- * Not exact: the high half at retail 0x80053490 has no proved feasible
- * consumer. The cancel/take block placement and rotation-store order
- * also differ. */
+ * Not exact (same size): the only residue is the register of the second
+ * product of each of the twelve interpolations (`mflo v1` or `mflo a2`,
+ * never v0 or a0, where this build has `mflo v0`). The products prefer LO,
+ * get it in global-alloc and are moved to a general register when reload
+ * spills LO; retail's choice needs v0 and a0 in their conflicts at that
+ * point, which nothing in this RTL provides. Ruled out: operand and sum
+ * order, `16 - i` inline, a short or unsigned j, the products or the sum
+ * in named variables. */
 ADDRESS(0x8005335c, 0x748)
 void func_8005335c(Vis48 *c, int forced)
 {
@@ -48,18 +53,15 @@ void func_8005335c(Vis48 *c, int forced)
     switch (info->unk5[2]) {
     case 0:
         r.vx = -viewer.unk268;
-        r.vy = 0;
-        r.vz = 0;
+        r.vy = r.vz = 0;
         break;
     case 1:
         r.vx = 1024 - viewer.unk268;
-        r.vy = 0;
-        r.vz = 0;
+        r.vy = r.vz = 0;
         break;
     case 2:
         r.vx = -1024 - viewer.unk268;
-        r.vy = 0;
-        r.vz = 0;
+        r.vy = r.vz = 0;
         break;
     case 3:
         r.vx = 0;
@@ -86,10 +88,18 @@ void func_8005335c(Vis48 *c, int forced)
             r = *(SVECTOR *)&c->unk18;
             r2 = *(SVECTOR *)&save.unk18;
             i = 16 - i;
-            goto back;
-        }
-        if ((DAT_801cd180.unk4 & DAT_801cd180.unk22[10]) && !DAT_801cd180.unk12)
             break;
+        }
+        if ((DAT_801cd180.unk4 & DAT_801cd180.unk22[10]) && !DAT_801cd180.unk12) {
+            take = 1;
+            a = c->unk08;
+            b = viewer.position;
+            b.vy += 800;
+            r = *(SVECTOR *)&c->unk18;
+            r2 = r;
+            i = 16;
+            break;
+        }
         j = 16 - i;
         c->unk08.vx = (i * save.unk08.vx + j * a.vx) >> 4;
         c->unk08.vy = (i * save.unk08.vy + j * a.vy) >> 4;
@@ -108,14 +118,6 @@ void func_8005335c(Vis48 *c, int forced)
         if (i > 0)
             i--;
     }
-    take = 1;
-    a = c->unk08;
-    b = viewer.position;
-    b.vy += 800;
-    r = *(SVECTOR *)&c->unk18;
-    r2 = r;
-    i = 16;
-back:
     DAT_801cd180.unk4 = 0;
     while (i--) {
         j = 16 - i;

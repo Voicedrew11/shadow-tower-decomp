@@ -287,7 +287,15 @@ void func_800468c0(VECTOR *pos, int kind)
 }
 
 /* func_800468c0 for the parts' quads (vertex order 0, 1, 3, 2).
- * Not exact: same shape as func_800468c0, not worked on this round. */
+ * Not exact (21 words long): same shape and residue as func_800468c0.
+ * Both are leaf functions under full register pressure; retail keeps two
+ * more values in stack slots (frame 64 against 56 there), so the set of
+ * live locals differs, not only their order. Read of retail's frame:
+ * `nrm` is at 0(sp) and `move t9,sp` is its address hoisted out of both
+ * loops; the spill slots are 8(sp) (the source list position), 12 and
+ * 16(sp) (the outer count i); s7 is reload's spill register. The slot
+ * order is the declaration order of the spilled variables (see
+ * func_80067624 in src/st/idgrid.c). Not reworked this round. */
 ADDRESS(0x80047884, 0x124c)
 void func_80047884(VECTOR *pos, int kind)
 {

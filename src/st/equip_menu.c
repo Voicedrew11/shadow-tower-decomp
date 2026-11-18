@@ -161,9 +161,16 @@ void func_80063cb0(void)
  * the slot (or, for the two ring slots, opens the ring sub-list) and loads
  * the equipped id's image. Returns 1 on cancel.
  */
-/* Not exact: input/scratch/current-id registers, clear-loop induction and
- * the return schedule differ. Both this function and func_80064ba8 currently
- * have their retail extents; the internal switch-label residue remains. */
+/* Not exact (size-exact). Retail has the scratchpad in s0, the pad base and
+ * then `kind` in s1 and `cur` in s2; here cur and the pad base take s0,
+ * kind s1 and the scratchpad s2. global-alloc ranks cur 0.43, pad 0.42,
+ * kind 0.36, sp 0.22: retail needs sp first (its life not doubled by a
+ * REG_EQUIV, i.e. two live sets) and kind ahead of cur. Smaller residues:
+ * the clear loop is a walking pointer in retail, `count + list` operand
+ * order, the store order of the sub-list hand-off and where the two givs
+ * of the 266 loop step. Ruled out: block-local counters, a separate image
+ * variable, sp assigned after the cancel test or twice, an up-counting
+ * clear loop (one instruction longer), direct DAT_801e0d08 accesses. */
 ADDRESS(0x800642e8, 0x8c0)
 int func_800642e8(int *sel)
 {
@@ -644,8 +651,6 @@ void func_80065270(void)
 
 /* The slot list: the two load figures, then five slots with what each
  * holds and its figures. */
-/* Not exact: same calls and switch; register allocation differs from the
- * first row loop on (retail: messages base in $s3, this build $s5). */
 ADDRESS(0x80065770, 0x670)
 void func_80065770(void)
 {
@@ -675,8 +680,10 @@ void func_80065770(void)
     func_80027440(DAT_8008819e | 0x3000000, 243, 26, value);
     func_80026ecc(78, 274, 26, label);
     func_80027440((u16)(DAT_80088188 - DAT_8008819e * 10) | 0x1000000, 279, 26, value);
-    for (i = 0, y = 48, y2 = 64; i < 5; i++, y += 36, y2 += 36) {
-        func_8002732c(MESSAGE(900 + sp->unk2E2 + i), 28, y, &sp->style[0]);
+    for (i = 0; i < 5; i++) {
+        y = 48 + i * 36;
+        y2 = 64 + i * 36;
+        func_8002732c(MESSAGE(sp->unk2E2 + i + 900), 28, y, &sp->style[0]);
         switch (sp->unk2E2 + i) {
         case 0:
             cur = viewer.unk38[8];
@@ -737,8 +744,8 @@ void func_80065770(void)
                 func_8002732c(MESSAGE(935), 92, y, &sp->style[0]);
             }
         } else if (cur != 0xffff) {
-            sp->style[3].cd |= 0x80;
             sp->style[0].cd |= 0x80;
+            sp->style[3].cd |= 0x80;
             func_8002732c(MESSAGE_IN(sp->unk0.list.messages, cur), 92, y, &sp->style[0]);
             sp->style[0].cd &= 0x7f;
             sp->style[3].cd &= 0x7f;

@@ -293,7 +293,11 @@ int func_8004fd28(int x, int z, int w, int d, int y)
  * branch (no REG_DEAD on it, e.g. a reloaded test value, or stale block
  * liveness); the pattern is unique in ST and VS. Ruled out: switch, `!x`,
  * inverted arms, the tail repeated in both arms, a `done = 1` result
- * variable. */
+ * variable. reorg.c read through (fill_slots_from_thread,
+ * mark_target_live_regs, find_dead_or_set_registers): with these insns
+ * both `li v0` candidates are legal, so retail's RTL differed here in a
+ * way the final instructions do not show (a USE left by an earlier slot
+ * fill, or a first insn that reads v0 on one side). */
 ADDRESS(0x8004fdd0, 0x2dc)
 int func_8004fdd0(Vis88 *src, Vis88 *e, SVECTOR *from, SVECTOR *to, int fade, int steps)
 {
