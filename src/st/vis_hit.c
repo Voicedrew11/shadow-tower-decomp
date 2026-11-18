@@ -516,22 +516,18 @@ void func_80047884(VECTOR *pos, int kind)
 /* Resolves a request against the collision parts around its position, its
  * position plus velocity and a point 1027 below its height: bit 0 floor,
  * bit 1 wall, bit 2 ceiling, bit 3 the second wall. The heights and wall
- * normals go to vis_lists.
- * Not exact: retail loads 0x80000 into s5 before the -1 for sp->hit (+0x26c);
- * this build loads the -1 first. */
+ * normals go to vis_lists. */
 ADDRESS(0x80048ad0, 0x824)
 int func_80048ad0(VisLists *req)
 {
     VisHitScratch *sp = VIS_HIT_SCRATCH;
     VECTOR pos[384];
     VisLists *lists;
-    u32 record;
     int hits;
     int r;
     s16 ang;
     int t;
     int floor_motion;
-    int unset;
 
     sp->base = (u8 *)world_state.unk8308[1];
     sp->pos[0].vx = req->unk4.vx;
@@ -573,27 +569,25 @@ int func_80048ad0(VisLists *req)
         sp->dir.vz = req->unk14.vz + rsin(req->unk20) * req->unk1C / 4096;
     }
 heights:
-    unset = 0x80000;
-    sp->hit = -1;
     lists = &vis_lists;
-    sp->h124 = unset;
-    sp->h144 = unset;
-    sp->h138 = unset;
-    sp->h120 = unset;
-    sp->h11c = unset;
-    sp->h118 = unset;
-    sp->h114 = unset;
-    sp->h128 = unset;
-    sp->h12c = unset;
-    sp->h130 = unset;
-    sp->h134 = unset;
+    sp->h124 = 0x80000;
+    sp->h144 = 0x80000;
+    sp->h138 = 0x80000;
+    sp->h120 = 0x80000;
+    sp->h11c = 0x80000;
+    sp->h118 = 0x80000;
+    sp->h114 = 0x80000;
+    sp->h128 = 0x80000;
+    sp->h12c = 0x80000;
+    sp->h130 = 0x80000;
+    sp->h134 = 0x80000;
+    sp->hit = -1;
     sp->flags = 0;
     sp->world = lists->unkC0;
     sp->rel[0] = lists->unk11C0;
     sp->rel[1] = lists->unk22C0;
-    record = lists->sources[0];
     sp->rel[2] = lists->unk33C0;
-    lists->unk47D8 = record;
+    lists->unk47D8 = lists->sources[0];
     func_800468c0(pos, req->unk0);
     sp->world = vis_lists.unkC0;
     sp->rel[0] = vis_lists.unk11C0;
