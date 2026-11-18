@@ -4108,17 +4108,11 @@ long func_80062bc0(int port)
     return format(path);
 }
 
+/* The pressed-button word as the waits read it: one volatile halfword at
+ * its own address (the counter interrupt updates it). */
+#define PRESSED_NOW (*(volatile u16 *)&DAT_801cd180.unk4)
+
 /*
- * Not exact (size-exact): this build keeps the button word's address in s0
- * across the result waits; retail forms it again for each load and store.
- * A structured empty while hoists the nonvolatile read; scoping the save
- * buffer does not change the listing. The counter interrupt's 800153b4 ->
- * 80057744 path updates this halfword while the retail waits reload it.
- * A narrow volatile while read reloads it correctly but peels the loop
- * entries, adding 48 bytes and moving the following exact functions.
- * Keeping the goto waits with qualified field pointers instead forms
- * full addresses (+12 bytes), also moving those functions.
- *
  * The memory card save/load screen (unk2DC's high byte set: save). Steps
  * through port choice, probe, format offer, directory, file headers, file
  * choice and the transfer, shifting unk2DC's step bit as it goes; returns
@@ -4245,27 +4239,24 @@ done:
     func_8002ca84();
     func_8002ca84();
     if (sp->unk2DC & 0x80) {
-    wait0:
-        if (DAT_801cd180.unk4 == 0)
-            goto wait0;
+        while (PRESSED_NOW == 0)
+            ;
         func_80057cec();
         DAT_801cd180.unk4 = 0;
         sp->unk2DC = 2;
         goto select;
     }
     if (sp->unk2DC & 0x8000) {
-    wait1:
-        if (DAT_801cd180.unk4 == 0)
-            goto wait1;
+        while (PRESSED_NOW == 0)
+            ;
         func_80057cec();
         DAT_801cd180.unk4 = 0;
         sp->unk2DC = 0x200;
         goto select;
     }
     if (sp->unk2DC & 0xff00) {
-    wait2:
-        if (DAT_801cd180.unk4 == 0)
-            goto wait2;
+        while (PRESSED_NOW == 0)
+            ;
         func_80057cec();
         DAT_801cd180.unk4 = 0;
     }
