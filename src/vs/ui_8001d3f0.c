@@ -803,10 +803,9 @@ void func_8001fb98(void)
  * and its won count), each framed; the clipped text advance of each row
  * goes to DAT_801c4a38.
  *
- * Not exact: an unaccounted 8-byte stack span (sp+208) lies between the
- * picture table and retail's two RECT initializers; its frame is 272 bytes,
- * this build's 264. The table copy is 192 bytes, so the span is a local of
- * its own that the code never touches.
+ * The three RECT locals are never used. The first is the one ST.EXE's copy
+ * (func_8002c2b8, src/st/ui.c) also keeps right after its table; VS added
+ * the two arrow rectangles behind it.
  */
 ADDRESS(0x8001fcac, 0x6d8)
 void func_8001fcac(void)
@@ -817,6 +816,7 @@ void func_8001fcac(void)
         -1, 5, 2, -1, 2, 3, -1, 6, 2, 6, 6, 1, 1, -1, -1, -1,
         3, 1, -1, -1, -1, 3, 4, -1, -1, -1, -1, -1, -1, -1, -1, -1,
     };
+    RECT unused;
     RECT unused_left = {25, 93, 16, 8};
     RECT unused_right = {294, 93, 16, 8};
     VsCardFile *file;
