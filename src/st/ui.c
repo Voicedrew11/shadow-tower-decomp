@@ -1260,10 +1260,6 @@ void func_8002a954(void)
 /*
  * The option page. `wash` is func_8002948c's {32, 32, 32}: GCC merged the
  * two constants.
- *
- * Not exact: retail copies the NULL argument's zero into `i` before the
- * first tile call. The first label loop's y step and highlight counter's
- * initialization also have different schedules.
  */
 ADDRESS(0x8002b2e8, 0x564)
 void func_8002b2e8(void)
@@ -1304,7 +1300,6 @@ void func_8002b2e8(void)
     sp->unk33C.w = 5;
     sp->unk33C.h = 5;
     sp->unk33C.x = DAT_801cd120.unk1 * 83 / 63 + 180;
-    i = 0;
     func_80028364(&sp->unk33C, &sp->unk358, &sp->unk35C, NULL, 0);
     sp->unk358.vx = 576;
     sp->unk33C.x = 176;
@@ -1313,7 +1308,7 @@ void func_8002b2e8(void)
     sp->unk33C.h = 14;
     sp->unk358.vy = 416;
     func_80028364(&sp->unk33C, &sp->unk358, &sp->unk35C, NULL, 1);
-    for (; i < 6; i++, y += 20)
+    for (i = 0; i < 6; y += 20, i++)
         func_8002732c(MESSAGE(0xc9 + i), label_x[i] + 32, y, &sp->style[2]);
     for (on = &DAT_801cd120.unk2, i = 1; i < 5; on++, i++) {
         if (*on == 1) {
@@ -1324,7 +1319,6 @@ void func_8002b2e8(void)
             func_8002732c(MESSAGE(0xd0), 241, i * 20 + 80, &sp->style[2]);
         }
     }
-    i = 0;
     func_800276bc(DAT_801cd120.unk1 | DIGITS(2), 280, 80, &sp->style[0]);
     func_8002732c(MESSAGE(0xe0 + sp->unk2E0), 64, 208, &sp->style[0]);
     sp->unk358.vx = 596;
@@ -1336,7 +1330,7 @@ void func_8002b2e8(void)
     sp->unk33C.w = 70;
     sp->unk33C.h = 16;
     func_80028364(&sp->unk33C, &sp->unk358, &sp->unk35C, NULL, 3);
-    for (; i < 6; i++) {
+    for (i = 0; i < 6; i++) {
         if (i == sp->unk2E0)
             func_80028c2c(row, lit, 1);
         else
