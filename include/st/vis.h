@@ -87,8 +87,7 @@ typedef struct {
     s16 unk47D0;
     s16 unk47D2;
     u8 unk47D4[0x47d8 - 0x47d4];
-    u16 unk47D8;         /* 0x47d8: record index of the floor found */
-    u8 unk47DA[2];
+    u32 unk47D8;         /* 0x47d8: record index of the floor found */
     s32 unk47DC;         /* 0x47dc: cleared by func_8003c054 */
     u32 unk47E0;         /* 0x47e0: flag bits func_80044404 tests */
     s32 unk47E4;         /* 0x47e4: floor height (func_80048ad0) */
