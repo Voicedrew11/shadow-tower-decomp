@@ -8,6 +8,13 @@
 #include <kf/lib/null.h>
 #include <kf/lib/types.h>
 #include <sys/types.h>
+
+/* Whether each player's memory card holds a usable save: tentative
+ * definitions, read $gp-relative here as in the card screen's module
+ * (allocated by an earlier object). */
+u8 DAT_80063380;
+u8 DAT_80063381;
+
 #include <LIBGTE.H>
 #include <LIBGPU.H>
 #define VS_PICKED_PAIR
@@ -21,10 +28,6 @@
 
 /* func_80016f10's switch table. */
 JUMPTABLES(0x80011160, 0x1c)
-
-/* Whether each player's memory card holds a usable save (.sbss, read
- * $gp-relative here; declared extern because a one-byte COMMON request
- * cannot be placed yet, so this build reads them absolutely). */
 
 int func_8002ee90(int archive, int member, u_long *buf);
 u32 *func_8002e630(u32 *dst, u32 *src, int count);
