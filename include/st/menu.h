@@ -309,7 +309,9 @@ typedef struct {
 } Data801cba08;
 extern Data801cba08 DAT_801cba08;
 /* 0x801cd0e0: the examine/item-use result (0 none, 1 done, 2 nothing to use;
- * src/st/item.c). Retail addresses it only as its own scalar. */
+ * src/st/item.c). It is DAT_801cba08.unk16D8: func_80054a54's loops reach it
+ * from that base and its 0x10e arm needs the member store (src/st/item_use.c);
+ * the other sites address it directly, which either spelling reproduces. */
 extern s32 DAT_801cd0e0;
 
 /* Nonzero runs the warp func_80052c5c after the table A pass (func_8004e324;

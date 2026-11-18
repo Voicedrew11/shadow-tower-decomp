@@ -5483,18 +5483,25 @@ ST.EXE	0x80054df0	0x445f0		mips26	reachable-code	0x800582f0	load		jal		manual-de
 ST.EXE	0x80054df8	0x445f8		mips26	reachable-code	0x800551d4	load		j		manual-decoded	reviewed	st.item_use asm review
 ST.EXE	0x80054dfc	0x445fc	0x800551d4	mips_hi16_lo16	reachable-code	0x801cd0e0	bss	DAT_801cd0e0	lui+lw		manual-decoded	reviewed	st.item_use asm review (delay-slot lui)
 ST.EXE	0x80054e00	0x44600	0x80054e04	mips_hi16_lo16	reachable-code	0x80198f28	bss	viewer	lui+addiu		manual-decoded	reviewed	st.item_use asm review
+ST.EXE	0x80054e2c	0x4462c	0x800551cc	mips_hi16_lo16	reachable-code	0x801cd0e0	bss	DAT_801cd0e0	lui+sw		manual-decoded	reviewed	st.item_use asm review (lui before the jump to the shared store)
 ST.EXE	0x80054e30	0x44630		mips26	reachable-code	0x800551cc	load		j		manual-decoded	reviewed	st.item_use asm review
 ST.EXE	0x80054e38	0x44638	0x80054e3c	mips_hi16_lo16	reachable-code	0x80198f28	bss	viewer	lui+addiu		manual-decoded	reviewed	st.item_use asm review
+ST.EXE	0x80054e64	0x44664	0x800551cc	mips_hi16_lo16	reachable-code	0x801cd0e0	bss	DAT_801cd0e0	lui+sw		manual-decoded	reviewed	st.item_use asm review (lui before the jump to the shared store)
 ST.EXE	0x80054e68	0x44668		mips26	reachable-code	0x800551cc	load		j		manual-decoded	reviewed	st.item_use asm review
 ST.EXE	0x80054e70	0x44670	0x80054e74	mips_hi16_lo16	reachable-code	0x80198f28	bss	viewer	lui+addiu		manual-decoded	reviewed	st.item_use asm review
+ST.EXE	0x80054e9c	0x4469c	0x800551cc	mips_hi16_lo16	reachable-code	0x801cd0e0	bss	DAT_801cd0e0	lui+sw		manual-decoded	reviewed	st.item_use asm review (lui before the jump to the shared store)
 ST.EXE	0x80054ea0	0x446a0		mips26	reachable-code	0x800551cc	load		j		manual-decoded	reviewed	st.item_use asm review
 ST.EXE	0x80054ea8	0x446a8	0x80054eac	mips_hi16_lo16	reachable-code	0x80198f28	bss	viewer	lui+addiu		manual-decoded	reviewed	st.item_use asm review
+ST.EXE	0x80054ed4	0x446d4	0x800551cc	mips_hi16_lo16	reachable-code	0x801cd0e0	bss	DAT_801cd0e0	lui+sw		manual-decoded	reviewed	st.item_use asm review (lui before the jump to the shared store)
 ST.EXE	0x80054ed8	0x446d8		mips26	reachable-code	0x800551cc	load		j		manual-decoded	reviewed	st.item_use asm review
 ST.EXE	0x80054ee0	0x446e0	0x80054ee4	mips_hi16_lo16	reachable-code	0x80198f28	bss	viewer	lui+addiu		manual-decoded	reviewed	st.item_use asm review
+ST.EXE	0x80054f0c	0x4470c	0x800551cc	mips_hi16_lo16	reachable-code	0x801cd0e0	bss	DAT_801cd0e0	lui+sw		manual-decoded	reviewed	st.item_use asm review (lui before the jump to the shared store)
 ST.EXE	0x80054f10	0x44710		mips26	reachable-code	0x800551cc	load		j		manual-decoded	reviewed	st.item_use asm review
 ST.EXE	0x80054f18	0x44718	0x80054f1c	mips_hi16_lo16	reachable-code	0x80198f28	bss	viewer	lui+addiu		manual-decoded	reviewed	st.item_use asm review
+ST.EXE	0x80054f44	0x44744	0x800551cc	mips_hi16_lo16	reachable-code	0x801cd0e0	bss	DAT_801cd0e0	lui+sw		manual-decoded	reviewed	st.item_use asm review (lui before the jump to the shared store)
 ST.EXE	0x80054f48	0x44748		mips26	reachable-code	0x800551cc	load		j		manual-decoded	reviewed	st.item_use asm review
 ST.EXE	0x80054f50	0x44750	0x80054f54	mips_hi16_lo16	reachable-code	0x80198f28	bss	viewer	lui+addiu		manual-decoded	reviewed	st.item_use asm review
+ST.EXE	0x80054f7c	0x4477c	0x800551cc	mips_hi16_lo16	reachable-code	0x801cd0e0	bss	DAT_801cd0e0	lui+sw		manual-decoded	reviewed	st.item_use asm review (lui before the jump to the shared store)
 ST.EXE	0x80054f80	0x44780		mips26	reachable-code	0x800551cc	load		j		manual-decoded	reviewed	st.item_use asm review
 ST.EXE	0x80054f8c	0x4478c	0x80054f90	mips_hi16_lo16	reachable-code	0x8001274c	load		lui+addiu		manual-decoded	reviewed	st.item_use asm review
 ST.EXE	0x80054fc4	0x447c4	0x80054fc8	mips_hi16_lo16	reachable-code	0x80198f28	bss	viewer	lui+addiu		manual-decoded	reviewed	st.item_use asm review
