@@ -398,9 +398,14 @@ void *func_8004b658(VECTOR *pos, short yaw, short pitch, int range, int arg4, in
 /* Distance from (x, y, z) to the segment a..b, or -1 beyond r (r + extra
  * from its interior). */
 /*
- * Not exact: in the interior branch retail adds `extra` into v0 and
- * compares before jumping to the shared test; this source adds into s0 and
- * compares after the jump.
+ * Not exact: retail compares in each arm (`addu v0,s0,v0; j shared; slt
+ * v0,v0,v1` / `slt v0,s0,v1`) and shares only `bnez v0; li v0,-1; move
+ * v0,v1`; this source adds `extra` into s0 and shares the compare. The
+ * compare result is block-local (v0) and d global (v1), so the two arms
+ * carry their own test and jump2 merges the tails. Ruled out: `if (r +
+ * extra < d) return -1;` per arm with the shared `return d` (no merge,
+ * +9 words), per-arm `return -1; return d;` (jump1 hoists `li v0,-1`, d
+ * lands in a0), a `miss` flag set in both arms (+5 words, flag in v1).
  */
 ADDRESS(0x8004b8ec, 0x29c)
 int func_8004b8ec(int x, int y, int z, int r, VECTOR *a, VECTOR *b, int extra)

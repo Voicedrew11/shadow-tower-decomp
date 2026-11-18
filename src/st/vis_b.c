@@ -287,8 +287,13 @@ int func_8004fd28(int x, int z, int w, int d, int y)
 
 /* Moves `e` from `from` to `to` (both turned by src's rotation, relative to
  * src) over `steps` calls, fading it in when `fade`; returns 1 when done.
- * Not exact: at +0x294 retail leaves the bnez delay slot empty where this
- * fills it with `li v0,99` (2 words). */
+ * Not exact: at +0x294 retail leaves the `bnez v0` delay slot empty where
+ * this fills it with `li v0,99` from the target (2 words). reorg only
+ * refuses both `li v0,..` candidates if it believes v0 live after the
+ * branch (no REG_DEAD on it, e.g. a reloaded test value, or stale block
+ * liveness); the pattern is unique in ST and VS. Ruled out: switch, `!x`,
+ * inverted arms, the tail repeated in both arms, a `done = 1` result
+ * variable. */
 ADDRESS(0x8004fdd0, 0x2dc)
 int func_8004fdd0(Vis88 *src, Vis88 *e, SVECTOR *from, SVECTOR *to, int fade, int steps)
 {

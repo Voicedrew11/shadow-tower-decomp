@@ -28,8 +28,11 @@
 void *memcpy(void *dst, void *src, int size);
 
 /*
- * Not exact: retail stores loc[0] before loc[1]; this source schedules the
- * loc[1] store first (same size).
+ * Not exact: retail stores loc[0] before loc[1]. sched1 already emits the
+ * three stores in order; sched2 moves the minute store behind `andi
+ * a0,s0,0xff` ("greater potential hazard" over the zero-extension that
+ * reuses a0). Ruled out: int or K&R intr, if-chain instead of the switch,
+ * a CdlLOC pointer.
  */
 /* CdReadyCallback while a stream plays: keeps the current position and
  * restarts the read from the start position after a disk error. */

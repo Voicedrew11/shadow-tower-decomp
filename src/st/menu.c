@@ -3640,6 +3640,11 @@ read:
 /*
  * Not exact (99.7%): the header's icon byte is stored before the unk1FE
  * load that retail schedules first (li v0,18 / sb for lhu v0,510; li v1,18).
+ * In sched1 the load is a boosted single-set temporary and nothing ties
+ * it to the icon store (frame store vs constant-based scratch load do not
+ * conflict), so it sinks below the store; retail keeps it above. Ruled
+ * out: operand order of the compare, the statement before/after strcpy,
+ * an s16 row variable (it sinks to the block top and takes t3).
  *
  * Saves to the selected file, or to a new file numbered unk204: builds the
  * header (the title with the file number, the area name and the play
