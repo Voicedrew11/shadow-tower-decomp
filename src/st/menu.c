@@ -906,17 +906,16 @@ void func_8005ad00(void)
         if (kind == 0xff)
             continue;
         if (kind == 9) {
-            slot = &sp->unk174[6][sp->unk19C[6]++];
+            sp->unk174[6][sp->unk19C[6]++] = i;
         } else if (kind == 10) {
-            slot = &sp->unk174[1][sp->unk19C[1]++];
+            sp->unk174[1][sp->unk19C[1]++] = i;
         } else if (kind == 20 || kind == 30) {
             if (i == 266 || i == 310 || i == 311 || i == 312 || i == 313)
                 continue;
-            slot = &sp->unk174[9][sp->unk19C[9]++];
+            sp->unk174[9][sp->unk19C[9]++] = i;
         } else {
-            slot = &sp->unk174[kind][sp->unk19C[kind]++];
+            sp->unk174[kind][sp->unk19C[kind]++] = i;
         }
-        *slot = i;
     }
     func_80031cfc();
     DrawSync(0);
