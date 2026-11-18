@@ -15,15 +15,21 @@
  * opponent (state 5) facing the attack blocks it (state copied to 0x4df14,
  * returns 0); otherwise the opponent's sparks start and it returns 1.
  */
-/* Not exact: per-path angle copies are missing and the opponent field
- * base rematerializes at the block store (4 bytes short). */
+/* Not exact (size-exact): retail copies the attack angle into a fresh
+ * temporary on each arc path (`move a0,a2`, `move v1,a2`, `move a1,a2`: a
+ * narrowing that folded to a copy, as an inlined helper with a short
+ * parameter would leave) and reads the opponent's state through a1; with the
+ * angle a 16-bit local this build has the first copy ($a3, reused for the
+ * guard test) but compares the angle's own register on the three paths.
+ * Ruled out: int or u16 angle, (s16) casts at each compare, an int copy
+ * assigned on each path. */
 ADDRESS(0x8002dec4, 0x250)
 int func_8002dec4(int n, s16 reach, s16 arc)
 {
     VsFighter *f = &DAT_800633b0.fighter[n];
     VsFighter *o = &DAT_800633b0.fighter[1 - n];
     SVECTOR d;
-    int angle;
+    s16 angle;
     int lo;
     int hi;
     int t;
