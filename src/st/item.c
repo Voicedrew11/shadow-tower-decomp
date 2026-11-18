@@ -52,11 +52,6 @@ int func_80055300(int id)
     return 1;
 }
 
-/*
- * Not exact: the switch's compare tree splits the cases above 51 at
- * 225 where retail splits at 226. The initial item-record address and
- * several branch delay slots also use different instruction ordering.
- */
 /* The examine action at `pos` facing `rot` (vx: yaw, vy: pitch). */
 ADDRESS(0x80055374, 0x61c)
 void func_80055374(long *pos, SVECTOR *rot)
@@ -92,9 +87,8 @@ void func_80055374(long *pos, SVECTOR *rot)
     first_result = i;
     if (i != -1) {
         c = &vis_table_c.entries[i];
-        kind = c->unk22;
+        c->unk23 = c->unk22;
         c->unk22 = 3;
-        c->unk23 = kind;
         return;
     }
     /* VisLists starts with the request fields func_8004bb88 reads. */
@@ -134,23 +128,27 @@ void func_80055374(long *pos, SVECTOR *rot)
         b->unk0E = 1;
         kind = vis_table_b.unk0000[b->unk0a].unk00[0];
         switch (kind) {
+        case 254:
+            if (b->unk0C == 0)
+                b->unk0C = 1;
+            break;
+        /* An empty case above 226: retail's compare tree splits its four
+         * upper cases at 226, which takes a fifth node on that side. */
+        case 255:
+            break;
         case 0:
         case 1:
         case 50:
         case 51:
             if (b->unk4A.door.unk4F == 251) {
-                r = b->unk22;
-                if ((short)b->unk22 > 2048)
-                    r -= 4096;
+                r = (short)b->unk22 > 2048 ? b->unk22 - 4096 : b->unk22;
                 /* The offset window wraps at the halfword boundary. */
                 if ((u16)(r + 1023) < 2047) {
                     func_80057d58();
                     b->unk4A.door.unk4F = 255;
                 }
             } else if (b->unk4A.door.unk4F == 252) {
-                r = b->unk22;
-                if ((short)b->unk22 > 2048)
-                    r -= 4096;
+                r = (short)b->unk22 > 2048 ? b->unk22 - 4096 : b->unk22;
                 if ((u16)(r + 1024) >= 2049) {
                     func_80057d58();
                     b->unk4A.door.unk4F = 255;
@@ -178,17 +176,13 @@ void func_80055374(long *pos, SVECTOR *rot)
             }
             break;
         case 225:
-            d = (b->unk36 - b->unk20) & 0xfff;
+            d = (u16)(b->unk36 - b->unk20) & 0xfff;
             if (d < 512 || d > 3584)
                 func_80054858(b->unk48);
             break;
         case 226:
             viewer.unk2 = viewer.unk0;
             func_800582f0(8, 128);
-            break;
-        case 254:
-            if (b->unk0C == 0)
-                b->unk0C = 1;
             break;
         case 14:
             if (area_state.unk0 != 1 && area_state.unk18 == -1) {
