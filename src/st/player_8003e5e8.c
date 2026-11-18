@@ -745,32 +745,42 @@ void func_8003f910(int kind, int slot, ...)
     }
 }
 
-/* Per hand: starts the queued magic, or recovers the second bar.
- * Not exact: retail scales each item index before forming the record-array
- * base; this source forms the base early, changing temporary roles. */
+/* Per hand: starts the queued magic, or recovers the second bar. */
 ADDRESS(0x80040024, 0x288)
 void func_80040024(u8 hand)
 {
+    Vis44 *item;
     int active;
     int rate = 36;
 
     if (viewer.unk13C[hand] != -1) {
         if (hand) {
-            if (viewer.unk38[13] != 0xffff && (vis_table_c.unk0118 + viewer.unk38[13])->unk28)
-                func_80040f04(viewer.unk14C[hand], hand);
+            if (viewer.unk38[13] != 0xffff) {
+                item = &vis_table_c.unk0118[viewer.unk38[13]];
+                if (item->unk28)
+                    func_80040f04(viewer.unk14C[hand], hand);
+            }
         } else {
-            if (viewer.unk38[0] != 0xffff && (vis_table_c.unk0118 + viewer.unk38[0])->unk28)
-                func_80040f04(viewer.unk14C[0], 0);
+            if (viewer.unk38[0] != 0xffff) {
+                item = &vis_table_c.unk0118[viewer.unk38[0]];
+                if (item->unk28)
+                    func_80040f04(viewer.unk14C[0], 0);
+            }
         }
         viewer.unk13C[hand] = -1;
         return;
     }
     active = 0;
-    if (viewer.unk38[0] != 0xffff && (vis_table_c.unk0118 + viewer.unk38[0])->unk28)
-        active = viewer.unk38[6] != 0xffff;
-    if (viewer.unk38[13] != 0xffff && (vis_table_c.unk0118 + viewer.unk38[13])->unk28 &&
-        viewer.unk38[12] != 0xffff)
-        active = 1;
+    if (viewer.unk38[0] != 0xffff) {
+        item = &vis_table_c.unk0118[viewer.unk38[0]];
+        if (item->unk28)
+            active = viewer.unk38[6] != 0xffff;
+    }
+    if (viewer.unk38[13] != 0xffff) {
+        item = &vis_table_c.unk0118[viewer.unk38[13]];
+        if (item->unk28 && viewer.unk38[12] != 0xffff)
+            active = 1;
+    }
     if (!viewer.unk1CB || viewer.unk190[12][0] != 0) {
         if (!active)
             return;
