@@ -1,6 +1,6 @@
 /*
  * ST.EXE: CD position offset and the request-ring waits (WIP module). Split
- * from src/st/cdreq.c only because func_800159d4 there is not exact.
+ * from src/st/cdreq.c while func_800159d4 there was not exact.
  */
 #include <kf/lib/address.h>
 #include <kf/lib/null.h>
