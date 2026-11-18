@@ -2674,11 +2674,6 @@ void func_8002fc4c(void)
 #define STORE_COLUMNS 5
 #define STORE_ROWS 3
 
-/*
- * Not exact: the scratchpad base and constant 48 swap saved registers
- * (retail: s3 and s2), and the column-loop latch has an extra nop. The body
- * is four bytes long; changing its length moves later unit functions.
- */
 ADDRESS(0x8002fe4c, 0x410)
 void func_8002fe4c(void)
 {
@@ -2718,11 +2713,12 @@ void func_8002fe4c(void)
     sp->unk350.y = 32;
     index = sp->unk2E2 * STORE_COLUMNS;
     for (row = 0; row < STORE_ROWS; row++) {
-        cols = STORE_COLUMNS;
         if (sp->unk2E2 + row == sp->unk0.store.rows)
             cols = sp->unk0.store.last;
+        else
+            cols = STORE_COLUMNS;
         sp->unk350.x = 48;
-        for (col = 0; col < cols; col++, index++) {
+        for (col = 0; col < cols; index++, col++) {
             if (index < sp->unk0.store.count) {
                 func_80027d18(&sp->unk350, &sp->style[0], 513, 1);
                 func_80028364(&sp->unk350, &sp->unk0.store.tex[index % 15], 0, 0, 16);
