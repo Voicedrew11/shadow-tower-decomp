@@ -281,6 +281,10 @@ typedef union {
         u32 f16 : 1, f17 : 1, f18 : 1, f19 : 1, f20 : 1, f21 : 1, f22 : 1, f23 : 1;
         u32 f24 : 1, f25 : 1, f26 : 1, f27 : 1, f28 : 1, f29 : 1, f30 : 1, f31 : 1;
     } bit;
+    struct {
+        u32 : 10;
+        u32 gate : 3; /* bits 10-12: FDAT_272.BIN's gate stage (func_801ed4d0) */
+    } field;
 } Flags801cba08;
 
 /* Per-area counts read by the map page (byte +0x16e4 onwards); WIP extent. */

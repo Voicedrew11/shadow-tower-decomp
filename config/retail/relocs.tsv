@@ -16580,7 +16580,7 @@ FDAT_272.BIN	0x801ed5f4	0x2094	0x801ed5f8	mips_hi16_lo16	reachable-code	0x801ef9
 FDAT_272.BIN	0x801ed604	0x20a4	0x801ed680	mips_hi16_lo16	reachable-code	0x801cce48	bss	DAT_801cba08	lui+lw		manual-decoded	reviewed	fdat.map asm review
 FDAT_272.BIN	0x801ed614	0x20b4	0x801ed618	mips_hi16_lo16	reachable-code	0x801ba138	bss	vis_table_a	lui+addiu		manual-decoded	reviewed	fdat.map asm review
 FDAT_272.BIN	0x801ed624	0x20c4	0x801ed628	mips_hi16_lo16	reachable-code	0x801ef504	bss	fdat_801ef504	lui+addiu		manual-decoded	reviewed	fdat.map asm review
-FDAT_272.BIN	0x801ed668	0x2108	0x801ed680	mips_hi16_lo16	reachable-code	0x801cce48	bss	DAT_801cba08	lui+lw		manual-decoded	reviewed	fdat.map asm review
+FDAT_272.BIN	0x801ed668	0x2108	0x801ed54c	mips_hi16_lo16	reachable-code	0x801cba08	bss	DAT_801cba08	lui+addiu		manual-decoded	reviewed	fdat.map asm review: delay-slot lui of the branch back to the moved loop-exit block; v0 is rewritten at 0x801ed670 on the fallthrough
 FDAT_272.BIN	0x801ed67c	0x211c	0x801ed680	mips_hi16_lo16	reachable-code	0x801cce48	bss	DAT_801cba08	lui+lw		manual-decoded	reviewed	fdat.map asm review
 FDAT_272.BIN	0x801ed694	0x2134	0x801ed6d4	mips_hi16_lo16	reachable-code	0x801ef934	bss	fdat_801ef934	lui+lw		manual-decoded	reviewed	fdat.map asm review
 FDAT_272.BIN	0x801ed694	0x2134	0x801ed740	mips_hi16_lo16	reachable-code	0x801ef934	bss	fdat_801ef934	lui+sw		manual-decoded	reviewed	fdat.map asm review

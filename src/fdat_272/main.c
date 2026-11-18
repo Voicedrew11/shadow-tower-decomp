@@ -57,10 +57,6 @@ int fdat_801ef504[6];
 void func_801ef1c0(void);
 
 /*
- * Not exact: initial door/flag registers and call-argument setup differ.
- * The backwards LO at 0x801ed54c also lacks an admitted relocation: its
- * shared HI feeds another LO with a different addend on the forward path.
- *
  * Runs the gate stages (story flag bits 10-12) by table B entry 5's state;
  * sets flag 13 once the six entries of fdat_801ef504 are all beaten, then
  * counts down to func_801ef1c0's scene; moves the palette row 487 to 489
@@ -74,24 +70,24 @@ void func_801ed4d0(void)
     int i;
     u32 flags;
 
-    if ((DAT_801cba08.unk1440.word >> 10 & 7) == 0 && d5->unk10 != 0) {
-        DAT_801cba08.unk1440.word = (DAT_801cba08.unk1440.word & ~0x1c00) | 0x400;
+    if (DAT_801cba08.unk1440.field.gate == 0 && d5->unk10 != 0) {
+        DAT_801cba08.unk1440.field.gate = 1;
         fdat_801ed410(e32);
         e32->unk36 = -1;
         e32->unk03 = 1;
         e32->unk1C.bytes[2] &= 0xf2;
-    } else if ((DAT_801cba08.unk1440.word >> 10 & 7) == 1 && d5->unk10 > 0x800) {
-        DAT_801cba08.unk1440.word = (DAT_801cba08.unk1440.word & ~0x1c00) | 0x800;
+    } else if (DAT_801cba08.unk1440.field.gate == 1 && d5->unk10 > 0x800) {
+        DAT_801cba08.unk1440.field.gate = 2;
     }
     if (fdat_801ef938 == 0 && area_state.unk0 == 0)
         fdat_801ef938 = 1;
-    if (!(DAT_801cba08.unk1440.word >> 13 & 1) && fdat_801ef938 == 1) {
-        DAT_801cba08.unk1440.word |= 0x2000;
+    if (!DAT_801cba08.unk1440.bit.f13 && fdat_801ef938 == 1) {
+        DAT_801cba08.unk1440.bit.f13 = 1;
         for (i = 0; i < 6; i++) {
             u8 state = vis_table_a.entries[fdat_801ef504[i]].unk05;
 
             if (state != 3 && state != 5) {
-                DAT_801cba08.unk1440.word &= ~0x2000;
+                DAT_801cba08.unk1440.bit.f13 = 0;
                 break;
             }
         }
