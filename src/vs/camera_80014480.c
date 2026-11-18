@@ -82,11 +82,15 @@ void func_80014480(void)
  * build cross-jumps them, 0x18 bytes shorter), holds dist in $a3 and the
  * near limit in $a2 (here $a1/$a3), keeps the two offsets in $a0/$v1 as arm-
  * local values, reuses the raw look.vx halfword for eye.vx and shares only
- * the eye.vz store with the plain arm. Ruled out: arm-local offset variables
- * (same registers on both arms, still cross-jumped), the far limit assigned
- * inside its arm, a common `eye.vz = z` after the three arms with z
- * completed in each arm (both spellings, much worse). The winner camera, the
- * easing and the clamps agree.
+ * the eye.vz store with the plain arm. jump2 only merges tails before jumps
+ * to a label that existed when the pass began, so the arms' common target
+ * (the eye.vz store) is itself the product of an earlier merge: some code
+ * after the three arms was written out in each of them (as the key-on call
+ * of func_80013c5c is). Which code is not established. Ruled out: arm-local
+ * offset variables (same registers on both arms, still cross-jumped), the
+ * far limit assigned inside its arm, a common `eye.vz = z` after the three
+ * arms with z completed in each arm (both spellings, much worse). The winner
+ * camera, the easing and the clamps agree.
  */
 ADDRESS(0x80014634, 0x9ec)
 void func_80014634(void)
