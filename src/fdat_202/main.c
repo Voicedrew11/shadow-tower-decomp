@@ -79,8 +79,9 @@ void func_801ed4a0(void)
     }
 }
 
-/* Not exact: the enable loop uses another induction-field base and
- * assigns its state constants to different argument registers. */
+/* Not exact (registers): in the enable loop retail keeps the constants 2,
+ * 5 and -1 in a1, a2 and a3; this source has 5, -1 and 2 there (global-alloc
+ * ranks 5 first: it has two uses; nothing found that gives 2 a second use). */
 /*
  * Table B entry 33 (a switch) state 0xff turns the area's table B entries
  * off: kinds 0x29, 0x2b and 0x94 stop (0x94 also loses its scale), 0xaf is
@@ -125,8 +126,8 @@ void func_801ed560(void)
                 b->unk3C.vy = 0;
                 b->unk3C.vz = 0;
                 b->unk03 = 5;
-                *(u8 *)&b->unk50 = 0;
                 b->unk04 |= 0x40;
+                *(u8 *)&b->unk50 = 0;
             }
         }
         fdat_801eda08 = 0;

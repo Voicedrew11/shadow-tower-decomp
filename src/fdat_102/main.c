@@ -79,11 +79,7 @@ void func_801ed4a0(void)
     }
 }
 
-/* Not exact (one attempt, retries off; 94.5%): first divergence retail `sw s7,44(sp)`, this source `sw s6,40(sp)`. */
 /*
- * Not exact (registers): retail gives entry 49's pointer s7 and table B
- * entry 41's s6; this source swaps them (3 retries spent).
- *
  * Runs the area: once record 0's stream counter reaches 2, entry 48 takes
  * item 0x127 and leaves; a hit does the same. Record 4's counter is held at
  * 1 or more. Item 0x12b used on entry 0x31 (func_801ed6b8) sends entry 49
@@ -96,12 +92,13 @@ void func_801ed554(void)
     Vis88 *d39 = &vis_table_b.entries[39];
     Vis192 *r0 = &vis_table_a.unk3500[0];
     Vis212 *e49 = &vis_table_a.entries[49];
+    int state = fdat_801eda78;
     Vis192 *r4 = &vis_table_a.unk3500[4];
     Vis88 *d40 = &vis_table_b.entries[40];
     Vis88 *d41 = &vis_table_b.entries[41];
     Vis88 *d42 = &vis_table_b.entries[42];
 
-    if (fdat_801eda78 != 0xff && DAT_801cba08.unk1448[r0->unk09] == 2) {
+    if (state != 0xff && DAT_801cba08.unk1448[r0->unk09] == 2) {
         func_8004d804(e48, 0x127);
         fdat_801ecf44(e48);
         fdat_801eda78 = 0xff;
