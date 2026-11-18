@@ -2382,62 +2382,57 @@ static s32 DAT_80087f68[2] = {0, 0};
 /*
  * The figure page: two current/maximum pairs coloured by how low the
  * current value is, the other figures and two weights in tenths.
- *
- * Not exact: the final scalar rows have their own y lifetime, matching
- * retail's saved registers. Weight conversions still reload after the first
- * shared result store, and the comparison evaluates the other operand
- * first. Initialization schedules differ; the body is four bytes long.
  */
 ADDRESS(0x8002ed98, 0x460)
 void func_8002ed98(void)
 {
     MenuScratch *sp = MENU_SCRATCH;
     s16 *p;
-    int y, i;
+    int i;
+    s16 w;
 
     sp->style[6].r = 96;
     sp->style[7].r = 96;
-    sp->style[7].g = 96;
-    sp->style[7].b = 32;
     sp->style[6].g = 48;
+    sp->style[7].g = 96;
     sp->style[6].b = 48;
+    sp->style[7].b = 32;
     sp->style[7].cd = 49;
     sp->style[6].cd = 49;
-    for (i = 0, y = 16; i < STATUS_ROWS; y += 15, i++)
-        func_8002732c(MESSAGE(i), 316, y, &sp->style[0]);
+    for (i = 0; i < STATUS_ROWS; i++)
+        func_8002732c(MESSAGE(i), 316, i * 15 + 16, &sp->style[0]);
     p = (s16 *)&viewer;
-    for (i = 0, y = 16; i < 2; y += 15, i++) {
+    for (i = 0; i < 2; i++) {
         if (p[1] < p[0] / 2)
             sp->unk320 = &sp->style[7];
         else if (p[1] < (short)(p[0] / 5))
             sp->unk320 = &sp->style[6];
         else
             sp->unk320 = &sp->style[4];
-        func_80027440((u16)*p++ | 0x5000000, 566, y, sp->unk320);
-        func_80026ecc(14, 554, y, sp->unk320);
-        func_80027440((u16)*p++ | 0x5000000, 494, y, sp->unk320);
+        func_80027440((u16)*p++ | 0x5000000, 566, i * 15 + 16, sp->unk320);
+        func_80026ecc(14, 554, i * 15 + 16, sp->unk320);
+        func_80027440((u16)*p++ | 0x5000000, 494, i * 15 + 16, sp->unk320);
     }
     p++;
     func_80027440((u16)*p++ | 0x3000000, 542, 46, &sp->style[4]);
     func_80026ecc(15, 578, 46, &sp->style[4]);
     func_80027440((u16)*p++ | 0x3000000, 590, 46, &sp->style[4]);
-    {
-        int figure_y;
-        for (i = 3, figure_y = 61; i < 13; figure_y += 15, i++)
-            func_80027440((u16)*p++ | 0x3000000, 590, figure_y, &sp->style[4]);
-    }
-    if ((short)(p[1] / 10) < (short)(p[0] / 10))
+    for (i = 3; i < 13; i++)
+        func_80027440((u16)*p++ | 0x3000000, 590, i * 15 + 16, &sp->style[4]);
+    if ((short)(p[0] / 10) > (short)(p[1] / 10))
         sp->unk320 = &sp->style[6];
     else
         sp->unk320 = &sp->style[4];
-    DAT_8008819e = *p * 100 / 454;
-    DAT_80088188 = *p++ * 1000 / 454;
+    w = *p++;
+    DAT_8008819e = w * 100 / 454;
+    DAT_80088188 = w * 1000 / 454;
     func_80027440(DAT_8008819e | 0x3000000, 494, 211, sp->unk320);
     func_80026ecc(18, 534, 211, sp->unk320);
     func_80027440((u16)(DAT_80088188 - DAT_8008819e * 10) | 0x1000000, 542, 211, sp->unk320);
     func_80026ecc(14, 554, 211, sp->unk320);
-    DAT_8008819e = *p * 100 / 454;
-    DAT_80088188 = *p * 1000 / 454;
+    w = *p;
+    DAT_8008819e = w * 100 / 454;
+    DAT_80088188 = w * 1000 / 454;
     func_80027440(DAT_8008819e | 0x3000000, 566, 211, sp->unk320);
     func_80026ecc(18, 606, 211, sp->unk320);
     func_80027440((u16)(DAT_80088188 - DAT_8008819e * 10) | 0x1000000, 614, 211, sp->unk320);
