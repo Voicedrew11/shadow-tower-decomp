@@ -28,8 +28,6 @@ void SsSetSerialVol(short s_num, short voll, short volr);
 void func_80042cec(void);
 void func_8005f54c(void);
 
-/* Not exact: retail loads the first flag word before the second and
- * shifts its high bit before testing the second word's low bit. */
 /*
  * Once: picks the ending: item 266 not held makes ending 1; flags 31 and
  * the second word's bit 0 clear make 0; then no stock, the viewer's
@@ -41,6 +39,7 @@ void func_801ed454(void)
     Vis212 *e = vis_table_a.unk6138;
     Vis192 *r = &vis_table_a.unk3500[e->unk02];
     int sum;
+    u32 flag31;
     int i;
     Data801c7590 *items;
 
@@ -51,28 +50,31 @@ void func_801ed454(void)
     if (!(*(u16 *)&items->counts[266] & 0x7f)) {
         fdat_801ed8c8 = 1;
         fdat_801eb7b4(e, 1);
-    } else if (((DAT_801cba08.unk1444.word & 1) << 1 | DAT_801cba08.unk1440.word >> 31) == 0) {
-        fdat_801ed8c8 = 0;
-        fdat_801eb7b4(e, 0);
-        DAT_801cba08.unk1440.word |= 0x80000000;
-        DAT_801cba08.unk1444.word &= ~1;
     } else {
-        sum = 0;
-        for (i = 0; i < 14; i++)
-            sum += DAT_801c7590.unk156[i];
-        if (sum == 0) {
-            fdat_801ed8c8 = 2;
-            fdat_801eb7b4(e, 2);
-        } else if (viewer.unk2 < viewer.unk0 >> 3) {
-            fdat_801ed8c8 = 3;
-            fdat_801eb7b4(e, 3);
-        } else if (rand() < 0x2000) {
-            fdat_801ed8c8 = 4;
-            fdat_801eb7b4(e, 1);
+        flag31 = DAT_801cba08.unk1440.word >> 31;
+        if (((DAT_801cba08.unk1444.word & 1) << 1 | flag31) == 0) {
+            fdat_801ed8c8 = 0;
+            fdat_801eb7b4(e, 0);
+            DAT_801cba08.unk1440.word |= 0x80000000;
+            DAT_801cba08.unk1444.word &= ~1;
         } else {
-            fdat_801ed8c8 = 5;
-            fdat_801eb7b4(e, 1);
-            fdat_801ed8c4 = 4;
+            sum = 0;
+            for (i = 0; i < 14; i++)
+                sum += DAT_801c7590.unk156[i];
+            if (sum == 0) {
+                fdat_801ed8c8 = 2;
+                fdat_801eb7b4(e, 2);
+            } else if (viewer.unk2 < viewer.unk0 >> 3) {
+                fdat_801ed8c8 = 3;
+                fdat_801eb7b4(e, 3);
+            } else if (rand() < 0x2000) {
+                fdat_801ed8c8 = 4;
+                fdat_801eb7b4(e, 1);
+            } else {
+                fdat_801ed8c8 = 5;
+                fdat_801eb7b4(e, 1);
+                fdat_801ed8c4 = 4;
+            }
         }
     }
     if (fdat_801ed8c8 != 5) {
