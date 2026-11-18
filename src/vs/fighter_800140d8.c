@@ -34,19 +34,22 @@ s32 DAT_80063338;
  * character), registers its animations, and resets its state from its
  * character's data block.
  *
- * Not exact: two things remain. Retail's frame is 80 bytes with sp+16..31
- * never referenced (ours 64), so 16 bytes of stack were reserved by
- * something that left no code; no cause is known, and no local is invented
- * for it. And retail keeps the page and CLUT counters in $s8/$s7 and spills
- * the second-model offset (i * sizeof(VsFighter), at sp+32), where this
- * build spills the page counter: all four loop values have 7 weighted
- * references and differ only in live length, and the counters'
- * initializations precede the induction variables' in every form tried.
- * Retail also forms the template table's address inside the loop ($a0) where
- * this build hoists it. Ruled out: f = &fighter[i] and page = i * 4 / clut_y
- * = i * 12 in the body (f and the page lose their registers), initializing
- * before the for statement, i++ first or last (the update order f, page,
- * clut_y, i is retail's), a model pointer local.
+ * Not exact: three things remain. (1) Retail's frame is 80 bytes with
+ * sp+16..31 never referenced (ours 64): 16 bytes that left no code, either
+ * an unused aggregate or the argument area of a call with 5 to 8 arguments
+ * that was compiled away; nothing names it and no local is invented. (2)
+ * Retail keeps the page and CLUT counters in $s8/$s7 and spills the
+ * fighter-offset induction value (i * sizeof(VsFighter), sp+32); this build
+ * spills the page counter. Equal weighted references, so the order is live
+ * length: page lives two insns longer than the loop-made value. (3) Retail
+ * forms the template table's address inside the loop ($a0, base first, then
+ * the index); here loop.c hoists it (threshold 20 x savings 2 x life 7 >=
+ * 173 insns) and it is rebuilt in $t1. It stays in the loop only if it is a
+ * user variable referenced earlier, or if three more invariants are moved
+ * first. Ruled out: f = &fighter[i] and page = i * 4 / clut_y = i * 12 in
+ * the body, every order of the for initialisers and increments, a pointer
+ * local or pointer arithmetic for the template (the address is then formed
+ * last and schedules after the index), an index local.
  */
 ADDRESS(0x800140d8, 0x3a8)
 void func_800140d8(void)
