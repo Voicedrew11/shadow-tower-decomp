@@ -9,7 +9,8 @@
  * kf build then runs the native PSYLINK link, which fails until the ST
  * data globals have defining objects. Built locally as unit
  * st.effect_script (profile probe-gcc272cdk-o2-g8, between st.effect_move
- * and st.effect_run).
+ * and st.effect_run) the function, its switch table and its small-data
+ * initialisers match retail.
  */
 #include <kf/lib/address.h>
 #include <kf/lib/types.h>
@@ -49,9 +50,14 @@ void vram_roll(u8 right, u8 *step, RECT *src, DVECTOR *dst); /* src/st/effect_mo
 
 /* Emits for a hit `r`, unless it hit an entry that is dead or in state 1. */
 #define EMIT_LIVE(r)                                                           \
-    if (!((r) & 0x10)                                                          \
-        || (HIT_ENTRY()->unk2C != 0 && HIT_ENTRY()->unk1C.bytes[3] != 1))      \
-        effect_emit_behind(r)
+    if ((r) & 0x10) {                                                          \
+        Vis212 *t = HIT_ENTRY();                                               \
+                                                                               \
+        if (t->unk2C != 0 && t->unk1C.bytes[3] != 1)                           \
+            effect_emit_behind(r);                                             \
+    } else {                                                                   \
+        effect_emit_behind(r);                                                 \
+    }
 
 /* A hit ends the effect, emitting when it hit the viewer. */
 #define HIT_ENDS(e, r)                                                         \
@@ -108,9 +114,13 @@ void vram_roll(u8 right, u8 *step, RECT *src, DVECTOR *dst); /* src/st/effect_mo
 /*
  * Runs the current effect (effects.cur) for one frame.
  *
- * `unused` stands for 32 bytes of locals that retail's frame has ahead of
- * the first block's and that nothing reads or writes (VS.EXE's
- * func_800335e8 has the same 32); their real declarations are not known.
+ * Three sets of locals are here only because retail's frame has their
+ * bytes and nothing reads or writes them; their real declarations are not
+ * known: `unused` (32 bytes ahead of the first block's locals, as in
+ * VS.EXE's func_800335e8), `spare` in the ring kinds' block (8 bytes: the
+ * debris pair of kinds 0x57... only fits behind it) and `spare_dir` /
+ * `spare_pos` (24 bytes behind the last pair; put in the last block, their
+ * place among the later kinds is a guess).
  */
 ADDRESS(0x800385b0, 0x3660)
 void func_800385b0(void)
@@ -177,17 +187,15 @@ void func_800385b0(void)
         break;
     }
     case 0xab:
-        if (e->unk1C->unk0 == ST_EFFECT_FREE)
-            e->unk0 = ST_EFFECT_FREE;
-        else
+        if (e->unk1C->unk0 != ST_EFFECT_FREE)
             e->unk20 = e->unk1C->unk20;
+        else
+            e->unk0 = ST_EFFECT_FREE;
         if (e->unk10 < 8)
             e->unk12 = e->unk10 * 512;
         break;
     case 0xaa:
-        if (e->unk1C->unk0 == ST_EFFECT_FREE) {
-            e->unk0 = ST_EFFECT_FREE;
-        } else {
+        if (e->unk1C->unk0 != ST_EFFECT_FREE) {
             u8 frames[6] = { 0, 1, 2, 3, 2, 1 };
 
             e->unk50.b[0]++;
@@ -195,6 +203,8 @@ void func_800385b0(void)
                 e->unk50.b[0] = 0;
             e->unk2 = frames[e->unk50.b[0]] | 0x80;
             e->unk20 = e->unk1C->unk20;
+        } else {
+            e->unk0 = ST_EFFECT_FREE;
         }
         if (e->unk10 < 8)
             e->unk12 = e->unk10 * 512;
@@ -234,8 +244,8 @@ void func_800385b0(void)
         e->unk20.vx += e->unk40.vx;
         e->unk20.vz += e->unk40.vz;
         e->unk38.vx += e->unk50.h - e->unk5 * 128;
-        e->unk5++;
         e->unk38.vz = e->unk38.vx;
+        e->unk5++;
         e->unk20.vy += e->unk40.vy;
         if (e->unk10 < 8)
             e->unk12 = e->unk10 * 512;
@@ -246,7 +256,7 @@ void func_800385b0(void)
 
         to.vx = 784;
         to.vy = 352;
-        vram_roll((e->unk0 & 0x20) != 0, &e->unk50.ub[0], &strip, &to);
+        vram_roll(((e->unk0 & 0x20) >> 5) != 0, &e->unk50.ub[0], &strip, &to);
         e->unk50.ub[0] += 4;
         if (step == 0) {
             SVECTOR dir;
@@ -387,7 +397,7 @@ void func_800385b0(void)
             e->unk12 = e->unk10 * 512;
         break;
     case 0x03:
-        if (e->unk10 & 8)
+        if ((e->unk10 >> 3) & 1)
             e->unk38.vx -= 64;
         else
             e->unk38.vx += 64;
@@ -449,10 +459,12 @@ void func_800385b0(void)
             e->unk38.vz += 128;
             REACH(e, e->unk38.vx / 16);
             if (e->unk38.vx >= 6144) {
+                int hit;
+
                 e->unk0 = ST_EFFECT_FREE;
-                n = effect_attack(e->unkC, e->unk18, 0);
-                if (n & 0x10)
-                    effect_emit_behind(n);
+                hit = effect_attack(e->unkC, e->unk18, 0);
+                if (hit & 0x10)
+                    effect_emit_behind(hit);
             }
         } else {
             r = effect_attack_move(e->unkC, e->unk18, 0);
@@ -484,9 +496,7 @@ void func_800385b0(void)
         FADE_IN(e);
         break;
     case 0x2b:
-        if (e->unk1C->unk0 == ST_EFFECT_FREE) {
-            e->unk0 = ST_EFFECT_FREE;
-        } else {
+        if (e->unk1C->unk0 != ST_EFFECT_FREE) {
             u8 frames[4] = { 0, 1, 2, 1 };
 
             e->unk50.b[0]++;
@@ -494,6 +504,8 @@ void func_800385b0(void)
                 e->unk50.b[0] = 0;
             e->unk2 = frames[e->unk50.b[0]] | 0x80;
             e->unk20 = e->unk1C->unk20;
+        } else {
+            e->unk0 = ST_EFFECT_FREE;
         }
         if (e->unk10 < 16)
             e->unk12 = e->unk10 * 256;
@@ -746,7 +758,7 @@ void func_800385b0(void)
             if (e->unk50.h != -1) {
                 if (kind == 0xca || kind == 0xe1 || kind == 0xd0 || kind == 0xe6 || kind == 0xdb
                     || kind == 0xde) {
-                    anim_get_vertex(owner->unk0B + 128, owner->unk08, owner->unk2A, e->unk50.h,
+                    anim_get_vertex(owner->unk0B + 128, owner->unk08, (s16)owner->unk2A, e->unk50.h,
                                     &v);
                 } else if (kind == 0xcd || kind == 0xeb || kind == 0xd8) {
                     anim_set_node_vertex((StAnimSet *)owner->unkA4, owner->unk0B + 128,
@@ -811,6 +823,7 @@ void func_800385b0(void)
         VECTOR pos;
         Vis212 *entry;
         int len;
+        int model;
 
         SCALE(e, rcos(e->unk10 << 11) / 4);
         entry = ST_EFFECT_ENTRY(e);
@@ -824,6 +837,7 @@ void func_800385b0(void)
         r = effect_attack(1024, 0x80000400, 0);
         if (r != 0 && (r & 0x80))
             effect_emit_behind(r);
+        model = e->unkA - 16;
         pos.vx = e->unk20.vx;
         pos.vy = e->unk20.vy;
         pos.vz = e->unk20.vz;
@@ -831,23 +845,23 @@ void func_800385b0(void)
         dir.vy = 0;
         dir.vz = 0;
         if (kind == 0x3d)
-            SPAWN(e, 0xcc), &pos, &dir, 512, 256, 6, e->unkA - 16, 3);
+            SPAWN(e, 0xcc), &pos, &dir, 512, 256, 6, model, 3);
         else if (kind == 0x8a)
-            SPAWN(e, 0xed), &pos, &dir, 512, 256, 6, e->unkA - 16, 3);
+            SPAWN(e, 0xed), &pos, &dir, 512, 256, 6, model, 3);
         else if (kind == 0x46)
-            SPAWN(e, 0xcf), &pos, &dir, 512, 256, 6, e->unkA - 16, 3);
+            SPAWN(e, 0xcf), &pos, &dir, 512, 256, 6, model, 3);
         else if (kind == 0x81)
-            SPAWN(e, 0xe3), &pos, &dir, 512, 256, 6, e->unkA - 16, 3);
+            SPAWN(e, 0xe3), &pos, &dir, 512, 256, 6, model, 3);
         else if (kind == 0x52)
-            SPAWN(e, 0xd2), &pos, &dir, 512, 256, 6, e->unkA - 16, 3);
+            SPAWN(e, 0xd2), &pos, &dir, 512, 256, 6, model, 3);
         else if (kind == 0x86)
-            SPAWN(e, 0xe8), &pos, &dir, 512, 256, 6, e->unkA - 16, 3);
+            SPAWN(e, 0xe8), &pos, &dir, 512, 256, 6, model, 3);
         else if (kind == 0x5a)
-            SPAWN(e, 0xda), &pos, &dir, 512, 256, 6, e->unkA - 16, 3);
+            SPAWN(e, 0xda), &pos, &dir, 512, 256, 6, model, 3);
         else if (kind == 0x64)
-            SPAWN(e, 0xdd), &pos, &dir, 512, 256, 6, e->unkA - 16, 3);
+            SPAWN(e, 0xdd), &pos, &dir, 512, 256, 6, model, 3);
         else if (kind == 0x7e)
-            SPAWN(e, 0xe0), &pos, &dir, 512, 256, 6, e->unkA - 16, 3);
+            SPAWN(e, 0xe0), &pos, &dir, 512, 256, 6, model, 3);
         break;
     }
     case 0x7e:
@@ -859,6 +873,7 @@ void func_800385b0(void)
         int sine;
         int top;
         int len;
+        int model;
 
         SCALE(e, rcos(e->unk10 << 11) / 4);
         e->unk50.h += 32;
@@ -874,6 +889,7 @@ void func_800385b0(void)
         r = effect_attack(1024, 0x80000400, 0);
         if (r != 0 && (r & 0x80))
             effect_emit_behind(r);
+        model = e->unkA - 16;
         pos.vx = e->unk20.vx;
         pos.vy = e->unk20.vy;
         pos.vz = e->unk20.vz;
@@ -881,23 +897,23 @@ void func_800385b0(void)
         dir.vy = 0;
         dir.vz = 0;
         if (kind == 0x3d)
-            SPAWN(e, 0xcc), &pos, &dir, 512, 256, 6, e->unkA - 16, 3);
+            SPAWN(e, 0xcc), &pos, &dir, 512, 256, 6, model, 3);
         else if (kind == 0x8a)
-            SPAWN(e, 0xed), &pos, &dir, 512, 256, 6, e->unkA - 16, 3);
+            SPAWN(e, 0xed), &pos, &dir, 512, 256, 6, model, 3);
         else if (kind == 0x46)
-            SPAWN(e, 0xcf), &pos, &dir, 512, 256, 6, e->unkA - 16, 3);
+            SPAWN(e, 0xcf), &pos, &dir, 512, 256, 6, model, 3);
         else if (kind == 0x81)
-            SPAWN(e, 0xe3), &pos, &dir, 512, 256, 6, e->unkA - 16, 3);
+            SPAWN(e, 0xe3), &pos, &dir, 512, 256, 6, model, 3);
         else if (kind == 0x52)
-            SPAWN(e, 0xd2), &pos, &dir, 512, 256, 6, e->unkA - 16, 3);
+            SPAWN(e, 0xd2), &pos, &dir, 512, 256, 6, model, 3);
         else if (kind == 0x86)
-            SPAWN(e, 0xe8), &pos, &dir, 512, 256, 6, e->unkA - 16, 3);
+            SPAWN(e, 0xe8), &pos, &dir, 512, 256, 6, model, 3);
         else if (kind == 0x5a)
-            SPAWN(e, 0xda), &pos, &dir, 512, 256, 6, e->unkA - 16, 3);
+            SPAWN(e, 0xda), &pos, &dir, 512, 256, 6, model, 3);
         else if (kind == 0x64)
-            SPAWN(e, 0xdd), &pos, &dir, 512, 256, 6, e->unkA - 16, 3);
+            SPAWN(e, 0xdd), &pos, &dir, 512, 256, 6, model, 3);
         else if (kind == 0x7e)
-            SPAWN(e, 0xe0), &pos, &dir, 512, 256, 6, e->unkA - 16, 3);
+            SPAWN(e, 0xe0), &pos, &dir, 512, 256, 6, model, 3);
         break;
     }
     case 0xcb:
@@ -1018,8 +1034,9 @@ void func_800385b0(void)
         if (e->unk8 != 0) {
             e->unk8--;
         } else {
-            s16 left = viewer.unk6 - n;
+            s16 left = viewer.unk6;
 
+            left -= n;
             if (left < 0)
                 left = 0;
             viewer.unk6 = left;
@@ -1052,8 +1069,9 @@ void func_800385b0(void)
         if (e->unk8 != 0) {
             e->unk8--;
         } else {
-            s16 left = viewer.unk2 - n;
+            s16 left = viewer.unk2;
 
+            left -= n;
             if (left <= 0) {
                 left = 0;
                 player_kill(0);
@@ -1185,28 +1203,33 @@ void func_800385b0(void)
         HIT_ENDS(e, r);
         FADE_IN(e);
         break;
-    case 0xe9:
+    case 0xe9: {
+        int len;
+
         if (e->unk1C->unk0 == ST_EFFECT_FREE) {
             e->unk0 = ST_EFFECT_FREE;
             break;
         }
-        c = e->unk1C->unk38.vx * rcos(e->unk1C->unk30.vz) / 4096;
-        x = c * rcos(e->unk1C->unk30.vy) / 4096;
-        z = c * rsin(e->unk1C->unk30.vy) / 4096;
+        len = e->unk1C->unk38.vx * rcos(e->unk1C->unk30.vz) / 4096;
+        x = len * rcos(e->unk1C->unk30.vy) / 4096;
+        z = len * rsin(e->unk1C->unk30.vy) / 4096;
         y = rsin(e->unk1C->unk30.vz);
         e->unk20.vx = e->unk1C->unk20.vx + x;
         e->unk20.vy = e->unk1C->unk20.vy + e->unk1C->unk38.vx * rsin(e->unk1C->unk30.vz) / 4096;
         e->unk20.vz = e->unk1C->unk20.vz + z;
         FADE_IN(e);
         break;
-    case 0xea:
+    }
+    case 0xea: {
+        int len;
+
         if (e->unk1C->unk0 == ST_EFFECT_FREE) {
             e->unk0 = ST_EFFECT_FREE;
             break;
         }
-        c = e->unk1C->unk38.vx * rcos(e->unk1C->unk30.vz + 2048) / 4096;
-        x = c * rcos(e->unk1C->unk30.vy) / 4096;
-        z = c * rsin(e->unk1C->unk30.vy) / 4096;
+        len = e->unk1C->unk38.vx * rcos(e->unk1C->unk30.vz + 2048) / 4096;
+        x = len * rcos(e->unk1C->unk30.vy) / 4096;
+        z = len * rsin(e->unk1C->unk30.vy) / 4096;
         y = rsin(e->unk1C->unk30.vz + 2048);
         e->unk20.vx = e->unk1C->unk20.vx + x;
         e->unk20.vy = e->unk1C->unk20.vy
@@ -1214,6 +1237,7 @@ void func_800385b0(void)
         e->unk20.vz = e->unk1C->unk20.vz + z;
         FADE_IN(e);
         break;
+    }
     case 0x40:
     case 0x5e:
     case 0x69:
@@ -1232,9 +1256,10 @@ void func_800385b0(void)
             e->unk30.vy += rsin(64 - e->unk10);
         e->unk38.vx += 128;
         e->unk38.vy += 128;
-        height = e->unk38.vy / 2;
         e->unk38.vz += 128;
         e->unkC = e->unk38.vx / 2;
+        height = e->unk38.vy;
+        height /= 2;
         e->unk18 = height;
         r = effect_attack(e->unkC, height | 0x80000000, height / 2);
         if (r != 0 && (r & 0x80)) {
