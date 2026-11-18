@@ -783,14 +783,15 @@ void func_80068258(void)
     func_80017680();
 }
 
+/* The pad's button word (active low) read as one volatile halfword at its
+ * own address; retail forms that address directly in each load. */
+#define RAW_BUTTONS (*(volatile s16 *)&DAT_801cd130.unk2)
+
 /*
  * Unreferenced debug tool: shows the other frame buffer and moves the
  * display area with the D-pad (raw pad bits, active low) until START,
  * polling the host debugger each frame; then restores it.
  */
-/* Not exact: the three button-read phases materialize full owner addresses
- * here, where retail applies the low relocations directly to its loads
- * (first divergence +0xc8); the body is eight bytes longer than retail. */
 ADDRESS(0x80068440, 0x214)
 void func_80068440(void)
 {
@@ -809,10 +810,10 @@ void func_80068440(void)
     disp = &world_state.disp[world_state.frame];
     draw = &world_state.draw[world_state.frame];
     func_80014cfc((u32 *)&saved, (u32 *)&disp->disp, 2);
-    while (!((s16)DAT_801cd130.unk2 & 0x8))
+    while (!(RAW_BUTTONS & 0x8))
         ;
     for (;;) {
-        bits = ~(s16)DAT_801cd130.unk2;
+        bits = ~RAW_BUTTONS;
         if (bits & 0x2000)
             disp->disp.x += 4;
         if (bits & 0x8000)
@@ -830,7 +831,7 @@ void func_80068440(void)
         PutDrawEnv(draw);
         pollhost();
     }
-    while (!((s16)DAT_801cd130.unk2 & 0x8))
+    while (!(RAW_BUTTONS & 0x8))
         ;
     func_80014cfc((u32 *)&disp->disp, (u32 *)&saved, 2);
     world_state.draw[0].isbg = 1;
