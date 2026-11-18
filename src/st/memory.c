@@ -86,8 +86,6 @@ void func_80014e20(StBlock *block)
 /*
  * First free block of at least `size` bytes; failing that, the first run of
  * releasable blocks spanning that many, released and merged.
- * Not exact: retail reloads the run scan's state constant into v1; this
- * source reuses the outer scan's a0, leaving the body one instruction short.
  */
 ADDRESS(0x80014e4c, 0x144)
 StBlock *func_80014e4c(StBlock *heap, u32 size)
@@ -101,10 +99,8 @@ StBlock *func_80014e4c(StBlock *heap, u32 size)
     }
     for (p = heap; p->state != ST_BLOCK_END;) {
         if (p->state == ST_BLOCK_RELEASABLE) {
-            run = p;
-            do {
-                p = NEXT_BLOCK(p);
-            } while (p->state == ST_BLOCK_RELEASABLE);
+            for (run = p; p->state == ST_BLOCK_RELEASABLE; p = NEXT_BLOCK(p))
+                ;
             if ((u8 *)p - (u8 *)run - sizeof(StBlock) >= size) {
                 for (p = run; p->state == ST_BLOCK_RELEASABLE; p = NEXT_BLOCK(p))
                     func_80014e20(p);
