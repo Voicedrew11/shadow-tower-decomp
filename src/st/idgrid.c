@@ -151,18 +151,15 @@ void func_80066240(void)
  * and draws the frame, until cancel; then writes each listed id's grid back
  * to its flag bit.
  */
-/* Not exact: retail saves $s0 first; two row-index additions schedule their
- * operands differently. The closing flag loops duplicate a count shift
- * in their hole-branch delay slots here, adding eight bytes. */
 ADDRESS(0x800666b0, 0xed0)
 void func_800666b0(void)
 {
+    MenuScratch *sp = MENU_SCRATCH;
     DVECTOR unused0;
     DVECTOR pos = {640, 0};
     char name1[] = "\\st\\itemcg\\icon1\\0000.tim";
     char name5[] = "\\st\\itemcg\\icon5\\0000.tim";
     DVECTOR unused1;
-    MenuScratch *sp = MENU_SCRATCH;
     s16 id;
     s16 n;
     s16 k;
@@ -234,10 +231,14 @@ void func_800666b0(void)
             } else {
                 found = 0;
                 if (!ST.unk4) {
-                    if (ST.unk0 == 104)
-                        found = GRID->ids0[GRID->row0 + sp->unk2E0] == -1;
-                    else if (GRID->ids1[GRID->row1 + sp->unk2E0] == -1)
-                        found = 1;
+                    if (ST.unk0 == 104) {
+                        cur = GRID->row0;
+                        found = GRID->ids0[cur + sp->unk2E0] == -1;
+                    } else {
+                        cur = GRID->row1;
+                        if (GRID->ids1[cur + sp->unk2E0] == -1)
+                            found = 1;
+                    }
                 } else {
                     found = 1;
                     if (ST.unk0 == 104) {
@@ -454,17 +455,19 @@ void func_800666b0(void)
         func_80068258();
         sp->unk2E4 = (sp->unk2E4 + 1) % 32;
     }
-    for (i = 0, n = GRID->count0; n; i++) {
+    for (i = 0, n = GRID->count0; n;) {
         if (GRID->ids0[i] != -1) {
             DAT_801c7590.counts[GRID->ids0[i]].flag = 0;
             n--;
         }
+        i++;
     }
-    for (i = 0, n = GRID->count1; n; i++) {
+    for (i = 0, n = GRID->count1; n;) {
         if (GRID->ids1[i] != -1) {
             DAT_801c7590.counts[GRID->ids1[i]].flag = 1;
             n--;
         }
+        i++;
     }
 }
 
