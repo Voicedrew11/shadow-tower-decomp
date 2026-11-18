@@ -529,20 +529,15 @@ int func_8004bb88(VisLists *req, int arg1)
 }
 
 /* Finds the first live entry whose body req touches. */
-/*
- * Not exact: retail keeps req in s1, the entry pointer in s3, -1 in s4 and
- * the table base in s5; this source uses s3, s1, s5 and s4.
- */
 ADDRESS(0x8004be80, 0x1bc)
 int func_8004be80(VisLists *req)
 {
     Vis212 *e;
     VECTOR v;
     int i;
-    int none;
 
     e = vis_table_a.entries;
-    for (i = 0, none = -1; i < 64; i++, e++) {
+    for (i = 0; i < 64; i++, e++) {
         if (e->unk05 != 1)
             continue;
         if (e->unk70 & vis_table_a.unk6101)
@@ -555,19 +550,25 @@ int func_8004be80(VisLists *req)
             v.vx = e->unk74.vx;
             v.vz = e->unk74.vz;
             v.vy = e->unk74.vy - e->unk30 + e->unk6E;
+            if (func_8004a484(&v, req->unk4.vx, req->unk4.vy, req->unk4.vz, e->unk2E + req->unk1C,
+                              e->unk30, req->unk1E) != -1)
+                return i;
         } else if (e->unk70 & 0x400000) {
             func_8004c934(e, 0, &v);
             v.vx += e->unk74.vx;
             v.vz += e->unk74.vz;
             v.vy += e->unk74.vy;
+            if (func_8004a484(&v, req->unk4.vx, req->unk4.vy, req->unk4.vz, e->unk2E + req->unk1C,
+                              e->unk30, req->unk1E) != -1)
+                return i;
         } else {
             v.vx = e->unk74.vx;
             v.vz = e->unk74.vz;
             v.vy = e->unk74.vy;
+            if (func_8004a484(&v, req->unk4.vx, req->unk4.vy, req->unk4.vz, e->unk2E + req->unk1C,
+                              e->unk30, req->unk1E) != -1)
+                return i;
         }
-        if (func_8004a484(&v, req->unk4.vx, req->unk4.vy, req->unk4.vz, e->unk2E + req->unk1C,
-                          e->unk30, req->unk1E) != none)
-            return i;
     }
     return -1;
 }
