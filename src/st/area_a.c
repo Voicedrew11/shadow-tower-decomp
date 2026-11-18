@@ -3,7 +3,7 @@
  * the requests for a new area set, the loader's step setters and CD
  * completion callbacks, and the area load state machine, one step per call.
  * One translation unit: the state machine reads this module's .sbss word
- * DAT_800881d8 through $gp, and its string continues this module's
+ * at 0x800881d8 through $gp, and its string continues this module's
  * constant pool (0x800122a8).
  */
 #include <kf/lib/address.h>

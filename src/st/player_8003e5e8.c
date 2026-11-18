@@ -1839,14 +1839,7 @@ void func_80042cfc(void)
  * and the map, the walk and stamina limits, the state machine of
  * viewer.unk218 (walking, using an item, dying, falling into a pit), the
  * floor damage and the status damage over time, the view angles, the
- * swings and the hit/magic point recovery.
- * Not exact: one site (+0x96c). Retail reads the item-use result with a
- * separate address temporary (lui v0; lw v1,lo(v0)); this -G8 unit sees the
- * 4-byte scalar DAT_801cd0e0 as small data and emits `lw v1,sym`. Spelling it
- * DAT_801cba08.unk16D8 (an object over 8 bytes) with that owner in the
- * site's relocs.tsv row makes the function exact, but the access then
- * crosses DAT_801cba08's identity extent (a new closure issue), so the
- * identity merge is left to the data model. */
+ * swings and the hit/magic point recovery. */
 ADDRESS(0x80042d74, 0x1678)
 void func_80042d74(void)
 {

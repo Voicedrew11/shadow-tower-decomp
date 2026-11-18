@@ -364,7 +364,6 @@ typedef struct {
 } Data801c7590;
 extern Data801c7590 DAT_801c7590;
 
-extern u32 DAT_801cceb0[2][5];
 
 typedef struct {
     u16 unk0;            /* 0x00: unk2 of the previous frame (src/st/pad.c) */
