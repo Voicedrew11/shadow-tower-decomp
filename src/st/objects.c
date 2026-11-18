@@ -121,14 +121,8 @@ void func_800241d0(void)
         func_80023c6c(2, 0, 128, 16);
 }
 
-/*
- * Not exact: one instruction short. In the type-236 sound retail shifts
- * e->unk48 << 7 in $v0 and copies it to $a1 (`range`); this build shifts
- * straight into $a1. The copy survived combine in retail, so the shift and
- * the assignment were not one statement in one block there. Ruled out: a
- * second variable or a narrowing cast for the shifted value (u8 gives andi,
- * short folds away), * 128, a nested assignment and an inline helper.
- */
+/* Steps the visible table B entries: the two kinds of area sound (over a
+ * floor rectangle, around a point) and the models with their shadows. */
 ADDRESS(0x800246e4, 0xae4)
 void func_800246e4(void)
 {
@@ -233,13 +227,15 @@ void func_800246e4(void)
                     e->unk50 = now + (e->unk4A.snd.unk4E * 60 + (rand() >> 9));
                 else
                     e->unk50 = now + e->unk4A.snd.unk4E * 60;
-                range = e->unk48 << 7;
-                dz = e->unk4A.snd.unk4C << 7;
-                d = range - dz;
-                if (e->unk1C >= d && range != d)
-                    volume = e->unk4A.snd.unk4B * (range - e->unk1C) / (range - d);
-                else
-                    volume = e->unk4A.snd.unk4B;
+                {
+                    int inner = (e->unk48 << 7) - (e->unk4A.snd.unk4C << 7);
+
+                    range = e->unk48 << 7;
+                    if (e->unk1C >= inner && range != inner)
+                        volume = e->unk4A.snd.unk4B * (range - e->unk1C) / (range - inner);
+                    else
+                        volume = e->unk4A.snd.unk4B;
+                }
                 if (e->unk4A.snd.unk4D & 1) {
                     int dy = viewer.position.vy - e->unk24.vy;
 
