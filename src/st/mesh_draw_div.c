@@ -456,12 +456,6 @@ void mesh_div_gt4_tint_b(CVECTOR *rgb)
 
 /* The tint callbacks take only the colour; this renderer also passes each
  * vertex's depth, through an unprototyped pointer. */
-/*
- * Not exact: at the loop latch retail reloads the spilled face cursor
- * (next) before the spilled count and leaves a load-delay nop. This build
- * fills the count's load delay with the face reload, making it four bytes
- * short; every other instruction agrees.
- */
 ADDRESS(0x8001b5dc, 0x934)
 void mesh_div_draw_gt4(int count, MeshFaceGT4 *face, u_long *ot, int flags)
 {
@@ -569,6 +563,8 @@ void mesh_div_draw_gt4(int count, MeshFaceGT4 *face, u_long *ot, int flags)
                     if (sp->prim_end < sp->prim) {
                         return;
                     }
+                    face = next;
+                    continue;
                 } else {
                     gte_ldv3(sp->normals + face->n0, sp->normals + face->n1, sp->normals + face->n2);
                     *(u_long *)&p->u0 = face->uv0_clut;
