@@ -3052,10 +3052,9 @@ void func_80031378(void)
 }
 
 /*
- * Not exact: the 104-byte frame and cached column coordinates agree, but
- * the initial panel setup is merged and the selected ID test is extended
- * before the sentinel branch rather than loaded separately. The saved
- * column register also differs; this build remains 12 bytes short.
+ * The id grid's detail panel: the panel sits on the side away from the
+ * selected column, and lists the selected id's fourteen counts in columns
+ * of four.
  */
 ADDRESS(0x80031674, 0x334)
 void func_80031674(void)
@@ -3066,7 +3065,8 @@ void func_80031674(void)
     short x, y;
     int name_x;
     int count_x;
-    short column, index;
+    short column;
+    short index;
     short id;
     int none;
     u8 *count;
@@ -3077,43 +3077,51 @@ void func_80031674(void)
         y = 9;
         text_y = 135;
         count_x = 342;
+        sp->unk350.x = x;
+        sp->unk350.y = y;
+        sp->unk350.w = 192;
+        sp->unk350.h = 124;
     } else {
         x = 10;
         y = 9;
         text_y = 135;
         count_x = 18;
+        sp->unk350.x = x;
+        sp->unk350.y = y;
+        sp->unk350.w = 192;
+        sp->unk350.h = 124;
     }
-    sp->unk350.x = x;
-    sp->unk350.w = 192;
-    sp->unk350.h = 124;
-    sp->unk350.y = y;
     none = 0;
     column = sp->unk2E0 % 8;
     if (column < 4) {
-        index = (sp->unk0.grid.row0 + sp->unk2E0 / 8) * 4 + column;
+        index = (sp->unk0.grid.row0 + sp->unk2E0 / 8) * 4;
+        index += column;
         id = sp->unk0.grid.ids0[index];
+        if (sp->unk0.grid.ids0[index] == -1)
+            none = 1;
     } else {
-        index = (sp->unk0.grid.row1 + sp->unk2E0 / 8 - 1) * 4 + column;
+        index = (sp->unk0.grid.row1 + sp->unk2E0 / 8) * 4 - 4;
+        index += column;
         id = sp->unk0.grid.ids1[index];
+        if (sp->unk0.grid.ids1[index] == -1)
+            none = 1;
     }
-    if (id == -1)
-        none = 1;
-    if (!none) {
+    /* The flag is tested as a short (retail copies it to a temporary first). */
+    if (!(short)none) {
         sp->unk358.vx = 640;
         sp->unk358.vy = 0;
         func_80028364(&sp->unk350, &sp->unk358, 0, 0, 16);
-        n = 0;
-        k = 2;
-        name_x = count_x;
         sp->unk350.w = 100;
         sp->unk358.vx = 832;
         sp->unk350.x += 192;
         func_80028364(&sp->unk350, &sp->unk358, 0, 0, 16);
+        n = 0;
+        k = 2;
         count = vis_table_c.unk0118[id].unk10;
-        for (i = 0; i < 4; i++) {
-            int label_x = name_x;
-            int value_x = name_x + 42;
-            for (j = 0; j < 4; j++) {
+        for (i = 0, name_x = count_x; i < 4; i++) {
+            int label_x;
+            int value_x;
+            for (j = 0, label_x = name_x, value_x = name_x + 42; j < 4; j++) {
                 if (n == 14)
                     goto done;
                 n++;
