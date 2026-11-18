@@ -23,11 +23,6 @@ u32 *func_8002e630(u32 *dst, u32 *src, int count);
 void func_8001d39c(void);
 void func_800182ec(VsMenuScratch *sp, int player);
 
-/* The picture after a loaded message file: its byte size, then the file. */
-#define TIM_AFTER(buf) ((u_long *)((u8 *)&(buf)[1] + (buf)[0]) + 1)
-
-/* Not exact: the load-buffer and message-table bases use different saved
- * registers, and the buffer's reload before the font picture differs. */
 ADDRESS(0x80018c84, 0x764)
 void func_80018c84(int player)
 {
@@ -37,6 +32,7 @@ void func_80018c84(int player)
     DVECTOR pos;
     VsMenuScratch *sp = VS_MENU_SCRATCH;
     u_long *buf;
+    u_long *tim;
     u32 *owned;
     int size;
     int n;
@@ -115,27 +111,26 @@ void func_80018c84(int player)
     buf = (u_long *)((buf[0] + sizeof(*buf)) + (u8 *)buf);
     func_80012c2c(buf + 1, &sp->unk1D8, &sp->unk1DC);
     DrawSync(0);
-    buf = DAT_801a4590.unk4A4;
-    func_8002ee90(8, 7, buf);
-    func_80012c2c(buf, &tex, &clut);
+    func_8002ee90(8, 7, DAT_801a4590.unk4A4);
+    func_80012c2c(DAT_801a4590.unk4A4, &tex, &clut);
     DrawSync(0);
-    DAT_801a4590.unk4A0 = buf;
+    DAT_801a4590.unk4A0 = DAT_801a4590.unk4A4;
     n = 12;
     if (sp->unk0.team.count < 13)
         n = sp->unk0.team.count;
     for (i = 0; i < n; i++) {
-        size = func_8002ee90(10, sp->unk0.team.kinds[i], DAT_801a4590.unk4A0) * 512;
+        size = func_8002ee90(10, sp->unk0.team.kinds[i], DAT_801a4590.unk4A0) * 2048;
         func_80012c2c(DAT_801a4590.unk4A0, &sp->unk0.team.pos[i], NULL);
-        DAT_801a4590.unk4A0 += size;
+        DAT_801a4590.unk4A0 = (u_long *)((u8 *)DAT_801a4590.unk4A0 + size);
     }
     if (DrawSync(1) > 8)
         DrawSync(0);
     DAT_801a4590.unk4A0 = DAT_801a4590.unk4A4;
     for (i = 0; i < 3; i++) {
         if (DAT_801624b8[player].slot[i] != -1) {
-            size = func_8002ee90(10, DAT_801624b8[player].slot[i], DAT_801a4590.unk4A0) * 512;
+            size = func_8002ee90(10, DAT_801624b8[player].slot[i], DAT_801a4590.unk4A0) * 2048;
             func_80012c2c(DAT_801a4590.unk4A0, &sp->unk0.team.pos[12 + i], NULL);
-            DAT_801a4590.unk4A0 += size;
+            DAT_801a4590.unk4A0 = (u_long *)((u8 *)DAT_801a4590.unk4A0 + size);
         }
     }
     func_8001d39c();
@@ -146,17 +141,18 @@ void func_80018c84(int player)
     func_800182ec(sp, player);
     free(sp->unk0.team.kinds);
     free(sp->unk0.team.items);
-    buf = DAT_801a4590.unk4A4;
     pos.vx = 640;
     pos.vy = 124;
-    DAT_801a4590.unk4A0 = buf;
+    DAT_801a4590.unk4A0 = buf = DAT_801a4590.unk4A4;
     func_8002ee90(8, 4, buf);
     func_8002e630((u32 *)&DAT_80196230[1], (u32 *)&buf[1], 0x1500);
-    func_80012c2c(TIM_AFTER(buf), &sp->unk1E0, &sp->unk1E4);
+    tim = (u_long *)((u8 *)buf + DAT_801a4590.unk4A4[0]);
+    func_80012c2c(tim + 2, &sp->unk1E0, &sp->unk1E4);
     DrawSync(0);
     func_8002ee90(8, 8, buf);
     func_8002e630((u32 *)&DAT_80196230[0], (u32 *)&buf[1], 0x1500);
-    func_80012c2c(TIM_AFTER(buf), &sp->unk1D8, &sp->unk1DC);
+    tim = (u_long *)((u8 *)buf + DAT_801a4590.unk4A4[0]);
+    func_80012c2c(tim + 2, &sp->unk1D8, &sp->unk1DC);
     DrawSync(0);
     func_8002ee90(8, 7, buf);
     func_80012c2c(buf, &tex, &clut);
