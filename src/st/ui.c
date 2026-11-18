@@ -2097,12 +2097,6 @@ void func_8002daa0(void)
     }
 }
 
-/*
- * Not exact (20 bytes long): retail keeps the scratchpad base in s4 from the first
- * load; this build rematerializes lui 0x1f80 for the first load and the
- * first three argument addresses. Direct rectangle-coordinate selection,
- * a named MenuList owner and a separate RECT owner did not resolve it.
- */
 ADDRESS(0x8002dd70, 0x5a0)
 void func_8002dd70(void)
 {
@@ -2111,12 +2105,13 @@ void func_8002dd70(void)
     int price;
     int i;
     int y;
-    int x;
+    int flag;
 
-    x = 105;
-    if (sp->unk0.list.unkA == 0)
-        x = 167;
-    sp->unk33C.x = x;
+    flag = sp->unk0.list.unkA;
+    if (flag == 0)
+        sp->unk33C.x = 167;
+    else
+        sp->unk33C.x = 105;
     sp->unk33C.y = 206;
     sp->unk33C.w = 50;
     sp->unk33C.h = 16;
