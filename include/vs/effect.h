@@ -34,7 +34,7 @@ int func_80032110(int arg0, u_long height);
 /* src/vs/effect_spawn_80032404.c: spawns an effect for fighter n's attack
  * (ST.EXE's func_80036484); the StEffect or NULL */
 void *func_80032404(int n, u8 attack, u8 flags, u8 kind, VECTOR *pos, SVECTOR *dir, ...);
-/* VS's effect script interpreter (ST func_800385b0's place; not reconstructed) */
+/* src/vs/effect_800335e8.c: the effect script interpreter (ST func_800385b0's place) */
 void func_800335e8(void);
 
 #endif
