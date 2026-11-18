@@ -415,14 +415,12 @@ void func_80050170(int dx, int dy, int dz)
 }
 
 /* Spawns a debris entry of `kind` beside src, `size` units out along its
- * yaw turned by `angle`.
- * Not exact: the prologue copies a2 to s2 before a3/a1 where retail copies
- * it after them (6 words). */
+ * yaw turned by `angle`. */
 ADDRESS(0x80050288, 0x1e0)
 Vis88 *func_80050288(src, kind, state, arg3, size, angle, ox, oy, oz)
     Vis88 *src;
     u8 kind;
-    u8 state;
+    u16 state;
     s16 arg3;
     u8 size;
     short angle;
