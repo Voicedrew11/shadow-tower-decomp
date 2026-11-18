@@ -416,12 +416,6 @@ void func_800595d4(void)
  * slot copy at scratch +0x292 when `redraw` is 0): a two-handed weapon
  * empties the other hand's slots; with `redraw` 1 the changed pictures are
  * reloaded.
- *
- * Not exact (4 bytes longer): only the final switch's dispatch differs.
- * Retail has `bne x,14,exit; j case14` (the case's `li v0,0xffff` in the
- * jump's delay slot); this build keeps the raw `beq x,14,case14; j exit;
- * nop`. Ruled out: an if/else chain, the redraw repeated per case, a guard
- * before the switch.
  */
 ADDRESS(0x8005975c, 0x590)
 void func_8005975c(int redraw)
@@ -510,16 +504,12 @@ void func_8005975c(int redraw)
         if (redraw == 1)
             func_80059204(sp->unk2E0 - 1);
     }
-    switch (sp->unk2E0) {
-    case 0:
-        viewer.unk38[6] = 0xffff;
-        break;
-    case 14:
-        viewer.unk38[12] = 0xffff;
-        break;
-    default:
+    if (sp->unk2E0 != 0 && sp->unk2E0 != 14)
         return;
-    }
+    if (sp->unk2E0 == 0)
+        viewer.unk38[6] = 0xffff;
+    else
+        viewer.unk38[12] = 0xffff;
     if (redraw == 1) {
         DrawSync(0);
         func_80059204(sp->unk2E0 == 0 ? 6 : 12);
