@@ -42,3 +42,15 @@ FDAT_302.BIN	0x801ee480	fdat_801ee480	0x4	fixed	overlay statics: consecutive wor
 FDAT_382.BIN	0x801edafc	fdat_801edafc	0x4	fixed	overlay statics: consecutive words in retail; ASPSX .lcomm requests pack without alignment
 FDAT_382.BIN	0x801edb00	fdat_801edb00	0x4	fixed	overlay statics: consecutive words in retail; ASPSX .lcomm requests pack without alignment
 FDAT_382.BIN	0x801edb04	fdat_801edb04	0x4	fixed	overlay statics: consecutive words in retail; ASPSX .lcomm requests pack without alignment
+FDAT_442.BIN	0x801ed8c0	fdat_801ed8c0	0x4	fixed	overlay statics: consecutive words in retail; ASPSX .lcomm requests pack without alignment
+FDAT_442.BIN	0x801ed8c4	fdat_801ed8c4	0x4	fixed	overlay statics: consecutive words in retail; ASPSX .lcomm requests pack without alignment
+FDAT_442.BIN	0x801ed8c8	fdat_801ed8c8	0x4	fixed	overlay statics: consecutive words in retail; ASPSX .lcomm requests pack without alignment
+FDAT_452.BIN	0x801ed980	fdat_801ed8c0	0x4	fixed	overlay statics: consecutive words in retail; ASPSX .lcomm requests pack without alignment
+FDAT_452.BIN	0x801ed984	fdat_801ed8c4	0x4	fixed	overlay statics: consecutive words in retail; ASPSX .lcomm requests pack without alignment
+FDAT_452.BIN	0x801ed988	fdat_801ed988	0x4	fixed	overlay statics: consecutive words in retail; ASPSX .lcomm requests pack without alignment
+FDAT_462.BIN	0x801ed9a0	fdat_801ed8c0	0x4	fixed	overlay statics: consecutive words in retail; ASPSX .lcomm requests pack without alignment
+FDAT_462.BIN	0x801ed9a4	fdat_801ed8c4	0x4	fixed	overlay statics: consecutive words in retail; ASPSX .lcomm requests pack without alignment
+FDAT_462.BIN	0x801ed9a8	fdat_801ed9a8	0x4	fixed	overlay statics: consecutive words in retail; ASPSX .lcomm requests pack without alignment
+FDAT_472.BIN	0x801ed8c4	fdat_801ed8c0	0x4	fixed	overlay statics: consecutive words in retail; ASPSX .lcomm requests pack without alignment
+FDAT_472.BIN	0x801ed8c8	fdat_801ed8c4	0x4	fixed	overlay statics: consecutive words in retail; ASPSX .lcomm requests pack without alignment
+FDAT_472.BIN	0x801ed8cc	fdat_801ed8cc	0x4	fixed	overlay statics: consecutive words in retail; ASPSX .lcomm requests pack without alignment

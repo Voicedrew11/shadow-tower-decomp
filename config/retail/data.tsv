@@ -816,22 +816,22 @@ FDAT_402.BIN	0x801ed794	0x2234	0x5cc	unclassified	coverage-gap			payload-complem
 FDAT_412.BIN	0x801eb560	0x0	0x24c	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 FDAT_412.BIN	0x801ed7c0	0x2260	0x5a0	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 FDAT_442.BIN	0x801eb560	0x0	0x1cc	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
-FDAT_442.BIN	0x801ed8c0	0x2360	0x4	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
-FDAT_442.BIN	0x801ed8c4	0x2364	0x4	bss	candidate	fdat_801ed8c4	int	asm;src/lib/fdat_801ed420.c	FDAT overlay word after the code (zero in the archive entry)
-FDAT_442.BIN	0x801ed8c8	0x2368	0x4	bss	candidate	fdat_801ed8c8	int	asm;src/fdat_442/map_801ed454.c	FDAT overlay word after the code (zero in the archive entry)
+FDAT_442.BIN	0x801ed8c0	0x2360	0x4	bss	candidate	fdat_801ed8c0	int	asm;src/fdat_442/main.c	FDAT overlay word after the code (zero in the archive entry)
+FDAT_442.BIN	0x801ed8c4	0x2364	0x4	bss	candidate	fdat_801ed8c4	int	asm;src/fdat_442/main.c	FDAT overlay word after the code (zero in the archive entry)
+FDAT_442.BIN	0x801ed8c8	0x2368	0x4	bss	candidate	fdat_801ed8c8	int	asm;src/fdat_442/main.c	FDAT overlay word after the code (zero in the archive entry)
 FDAT_442.BIN	0x801ed8cc	0x236c	0x494	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 FDAT_452.BIN	0x801eb560	0x0	0x1cc	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
-FDAT_452.BIN	0x801ed980	0x2420	0x4	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
-FDAT_452.BIN	0x801ed984	0x2424	0x4	bss	candidate	fdat_801ed8c4	int	asm;src/lib/fdat_801ed420.c	FDAT overlay word after the code (zero in the archive entry)
-FDAT_452.BIN	0x801ed988	0x2428	0x4	bss	candidate	fdat_801ed988	int	asm;src/fdat_452/map_801ed454.c	FDAT overlay word after the code (zero in the archive entry)
+FDAT_452.BIN	0x801ed980	0x2420	0x4	bss	candidate	fdat_801ed8c0	int	asm;src/fdat_452/main.c	FDAT overlay word after the code (zero in the archive entry)
+FDAT_452.BIN	0x801ed984	0x2424	0x4	bss	candidate	fdat_801ed8c4	int	asm;src/fdat_452/main.c	FDAT overlay word after the code (zero in the archive entry)
+FDAT_452.BIN	0x801ed988	0x2428	0x4	bss	candidate	fdat_801ed988	int	asm;src/fdat_452/main.c	FDAT overlay word after the code (zero in the archive entry)
 FDAT_452.BIN	0x801ed98c	0x242c	0x3d4	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 FDAT_462.BIN	0x801eb560	0x0	0x1cc	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
-FDAT_462.BIN	0x801ed9a0	0x2440	0x4	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
-FDAT_462.BIN	0x801ed9a4	0x2444	0x4	bss	candidate	fdat_801ed8c4	int	asm;src/lib/fdat_801ed420.c	FDAT overlay word after the code (zero in the archive entry)
-FDAT_462.BIN	0x801ed9a8	0x2448	0x4	bss	candidate	fdat_801ed9a8	int	asm;src/fdat_462/map_801ed454.c	FDAT overlay word after the code (zero in the archive entry)
+FDAT_462.BIN	0x801ed9a0	0x2440	0x4	bss	candidate	fdat_801ed8c0	int	asm;src/fdat_462/main.c	FDAT overlay word after the code (zero in the archive entry)
+FDAT_462.BIN	0x801ed9a4	0x2444	0x4	bss	candidate	fdat_801ed8c4	int	asm;src/fdat_462/main.c	FDAT overlay word after the code (zero in the archive entry)
+FDAT_462.BIN	0x801ed9a8	0x2448	0x4	bss	candidate	fdat_801ed9a8	int	asm;src/fdat_462/main.c	FDAT overlay word after the code (zero in the archive entry)
 FDAT_462.BIN	0x801ed9ac	0x244c	0x3b4	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 FDAT_472.BIN	0x801eb560	0x0	0x1cc	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
-FDAT_472.BIN	0x801ed8c4	0x2364	0x4	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
-FDAT_472.BIN	0x801ed8c8	0x2368	0x4	bss	candidate	fdat_801ed8c4	int	asm;src/lib/fdat_801ed420.c	FDAT overlay word after the code (zero in the archive entry)
-FDAT_472.BIN	0x801ed8cc	0x236c	0x4	bss	candidate	fdat_801ed8cc	int	asm;src/fdat_472/map_801ed454.c	FDAT overlay word after the code (zero in the archive entry)
+FDAT_472.BIN	0x801ed8c4	0x2364	0x4	bss	candidate	fdat_801ed8c0	int	asm;src/fdat_472/main.c	FDAT overlay word after the code (zero in the archive entry)
+FDAT_472.BIN	0x801ed8c8	0x2368	0x4	bss	candidate	fdat_801ed8c4	int	asm;src/fdat_472/main.c	FDAT overlay word after the code (zero in the archive entry)
+FDAT_472.BIN	0x801ed8cc	0x236c	0x4	bss	candidate	fdat_801ed8cc	int	asm;src/fdat_472/main.c	FDAT overlay word after the code (zero in the archive entry)
 FDAT_472.BIN	0x801ed8d0	0x2370	0x490	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data

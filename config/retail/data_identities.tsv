@@ -306,11 +306,15 @@ FDAT_372.BIN	0x801eda3c	0x4	fdat_801eda3c	global	bss	int	func_801ed4a0	candidate
 FDAT_382.BIN	0x801edafc	0x4	fdat_801edafc	static	bss	int	func_801ed4a0	candidate	asm;src/fdat_382/main.c	FDAT overlay word after the code: scene state
 FDAT_382.BIN	0x801edb00	0x4	fdat_801edb00	static	bss	int	func_801ed588	candidate	asm;src/fdat_382/main.c	FDAT overlay word after the code: scene state
 FDAT_382.BIN	0x801edb04	0x4	fdat_801edb04	static	bss	int	func_801ed588	candidate	asm;src/fdat_382/main.c	FDAT overlay word after the code: scene state
-FDAT_442.BIN	0x801ed8c4	0x4	fdat_801ed8c4	global	bss	int	func_801ed420	candidate	asm;src/lib/fdat_801ed420.c	FDAT overlay static after the code: the scene state (shared name, FDAT_442.BIN address)
-FDAT_442.BIN	0x801ed8c8	0x4	fdat_801ed8c8	global	bss	int	func_801ed454	candidate	asm;src/fdat_442/map_801ed454.c	FDAT overlay word after the code: the ending picked
-FDAT_452.BIN	0x801ed984	0x4	fdat_801ed8c4	global	bss	int	func_801ed420	candidate	asm;src/lib/fdat_801ed420.c	FDAT overlay static after the code: the scene state (shared name, FDAT_442.BIN address)
-FDAT_452.BIN	0x801ed988	0x4	fdat_801ed988	global	bss	int	func_801ed454	candidate	asm;src/fdat_452/map_801ed454.c	FDAT overlay word after the code: the ending picked
-FDAT_462.BIN	0x801ed9a4	0x4	fdat_801ed8c4	global	bss	int	func_801ed420	candidate	asm;src/lib/fdat_801ed420.c	FDAT overlay static after the code: the scene state (shared name, FDAT_442.BIN address)
-FDAT_462.BIN	0x801ed9a8	0x4	fdat_801ed9a8	global	bss	int	func_801ed454	candidate	asm;src/fdat_462/map_801ed454.c	FDAT overlay word after the code: the ending picked
-FDAT_472.BIN	0x801ed8c8	0x4	fdat_801ed8c4	global	bss	int	func_801ed420	candidate	asm;src/lib/fdat_801ed420.c	FDAT overlay static after the code: the scene state (shared name, FDAT_442.BIN address)
-FDAT_472.BIN	0x801ed8cc	0x4	fdat_801ed8cc	global	bss	int	func_801ed454	candidate	asm;src/fdat_472/map_801ed454.c	FDAT overlay word after the code: the ending picked
+FDAT_442.BIN	0x801ed8c0	0x4	fdat_801ed8c0	static	bss	int		candidate	asm;src/fdat_442/main.c	FDAT overlay static after the code that no handler references: four bytes between the code and the scene state, inside the unit's packed .lcomm run (shared name, FDAT_442.BIN address)
+FDAT_442.BIN	0x801ed8c4	0x4	fdat_801ed8c4	static	bss	int	func_801ed420	candidate	asm;src/fdat_442/main.c	FDAT overlay static after the code: the scene state (shared name, FDAT_442.BIN address)
+FDAT_442.BIN	0x801ed8c8	0x4	fdat_801ed8c8	static	bss	int	func_801ed454	candidate	asm;src/fdat_442/main.c	FDAT overlay word after the code: the ending picked
+FDAT_452.BIN	0x801ed980	0x4	fdat_801ed8c0	static	bss	int		candidate	asm;src/fdat_452/main.c	FDAT overlay static after the code that no handler references: four bytes between the code and the scene state, inside the unit's packed .lcomm run (shared name, FDAT_442.BIN address)
+FDAT_452.BIN	0x801ed984	0x4	fdat_801ed8c4	static	bss	int	func_801ed420	candidate	asm;src/fdat_452/main.c	FDAT overlay static after the code: the scene state (shared name, FDAT_442.BIN address)
+FDAT_452.BIN	0x801ed988	0x4	fdat_801ed988	static	bss	int	func_801ed454	candidate	asm;src/fdat_452/main.c	FDAT overlay word after the code: the ending picked
+FDAT_462.BIN	0x801ed9a0	0x4	fdat_801ed8c0	static	bss	int		candidate	asm;src/fdat_462/main.c	FDAT overlay static after the code that no handler references: four bytes between the code and the scene state, inside the unit's packed .lcomm run (shared name, FDAT_442.BIN address)
+FDAT_462.BIN	0x801ed9a4	0x4	fdat_801ed8c4	static	bss	int	func_801ed420	candidate	asm;src/fdat_462/main.c	FDAT overlay static after the code: the scene state (shared name, FDAT_442.BIN address)
+FDAT_462.BIN	0x801ed9a8	0x4	fdat_801ed9a8	static	bss	int	func_801ed454	candidate	asm;src/fdat_462/main.c	FDAT overlay word after the code: the ending picked
+FDAT_472.BIN	0x801ed8c4	0x4	fdat_801ed8c0	static	bss	int		candidate	asm;src/fdat_472/main.c	FDAT overlay static after the code that no handler references: four bytes between the code and the scene state, inside the unit's packed .lcomm run (shared name, FDAT_442.BIN address)
+FDAT_472.BIN	0x801ed8c8	0x4	fdat_801ed8c4	static	bss	int	func_801ed420	candidate	asm;src/fdat_472/main.c	FDAT overlay static after the code: the scene state (shared name, FDAT_442.BIN address)
+FDAT_472.BIN	0x801ed8cc	0x4	fdat_801ed8cc	static	bss	int	func_801ed454	candidate	asm;src/fdat_472/main.c	FDAT overlay word after the code: the ending picked
