@@ -417,9 +417,11 @@ void func_800595d4(void)
  * empties the other hand's slots; with `redraw` 1 the changed pictures are
  * reloaded.
  *
- * Not exact (4 bytes longer): retail forms the slot 2/15 stores from a
- * viewer+0x3c base; this build stores both from
- * the viewer base. The final switch's blocks are ordered differently.
+ * Not exact (4 bytes longer): only the final switch's dispatch differs.
+ * Retail has `bne x,14,exit; j case14` (the case's `li v0,0xffff` in the
+ * jump's delay slot); this build keeps the raw `beq x,14,case14; j exit;
+ * nop`. Ruled out: an if/else chain, the redraw repeated per case, a guard
+ * before the switch.
  */
 ADDRESS(0x8005975c, 0x590)
 void func_8005975c(int redraw)
@@ -484,7 +486,10 @@ void func_8005975c(int redraw)
     }
     if (sp->unk2E0 == 2 || sp->unk2E0 == 16) {
         if (sp->unk2C0 == -1) {
-            viewer.unk38[15] = viewer.unk38[2] = 0xffff;
+            u16 *hand = &viewer.unk38[2];
+
+            *hand = 0xffff;
+            hand[13] = 0xffff;
         } else {
             viewer.unk38[2] = sp->unk2C0;
         }
@@ -517,7 +522,7 @@ void func_8005975c(int redraw)
     }
     if (redraw == 1) {
         DrawSync(0);
-        func_80059204(sp->unk2E0 ? 12 : 6);
+        func_80059204(sp->unk2E0 == 0 ? 6 : 12);
     }
 }
 
