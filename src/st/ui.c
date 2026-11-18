@@ -521,9 +521,6 @@ void func_800286a8(int abr, int x, int y)
  * card image in and out, and counts the frames in unk1EE19
  * (unk1EE17 is the card mode, unk1EE18 the fade length).
  */
-/* Not exact (48 bytes short): this build cross-jumps the two fade divides;
- * retail keeps them separate with a common colour/draw tail. The world_state
- * base is formed early, and the SHOW arguments precede the mode choice. */
 ADDRESS(0x80028784, 0x4a8)
 void func_80028784(void)
 {
@@ -531,13 +528,9 @@ void func_80028784(void)
     RECT card = {32, 132, 255, 255};
     CVECTOR fill;
     CVECTOR tint;
-    DVECTOR tex;
-    DVECTOR clut;
+    DVECTOR tex = {960, 256};
+    DVECTOR clut = {560, 495};
 
-    tex.vx = 960;
-    tex.vy = 256;
-    clut.vx = 560;
-    clut.vy = 495;
     if (world_state.unk1EE17 == 1) {
         tex.vy = 0;
         clut.vx = 0;
@@ -547,8 +540,10 @@ void func_80028784(void)
         world_state.unk1EE18 = 1;
     switch (world_state.unk1EE16) {
     case CARD_FADE_IN:
-        fill.r = fill.g = fill.b =
-            world_state.unk1EE17 == 3 ? 255 : (world_state.unk1EE19 << 4) / world_state.unk1EE18;
+        if (world_state.unk1EE17 != 3)
+            fill.r = fill.g = fill.b = (world_state.unk1EE19 << 4) / world_state.unk1EE18;
+        else
+            fill.r = fill.g = fill.b = 255;
         func_80028220(&screen, &fill, 1);
         func_800286a8(2, 0, 0);
         break;
@@ -565,8 +560,10 @@ void func_80028784(void)
     case CARD_SHOW:
         if (DAT_801cd120.unk4 == 1 || world_state.unk1EE17 == 2) {
             tint.r = tint.g = tint.b = 128;
-            func_80028364(&card, &tex, &clut, &tint,
-                          DAT_80088190 == 25 || DAT_80088190 == 30 || DAT_80088190 == 5 ? 2 : 3);
+            if (DAT_80088190 == 25 || DAT_80088190 == 30 || DAT_80088190 == 5)
+                func_80028364(&card, &tex, &clut, &tint, 2);
+            else
+                func_80028364(&card, &tex, &clut, &tint, 3);
         }
         break;
     case CARD_SHOW_OUT:
@@ -580,10 +577,11 @@ void func_80028784(void)
         }
         break;
     case CARD_FADE_OUT:
-        fill.r = fill.g = fill.b =
-            world_state.unk1EE17 == 3
-                ? 255
-                : ((world_state.unk1EE18 - world_state.unk1EE19) << 4) / world_state.unk1EE18;
+        if (world_state.unk1EE17 != 3)
+            fill.r = fill.g = fill.b =
+                ((world_state.unk1EE18 - world_state.unk1EE19) << 4) / world_state.unk1EE18;
+        else
+            fill.r = fill.g = fill.b = 255;
         func_80028220(&screen, &fill, 1);
         func_800286a8(2, 0, 0);
         break;
