@@ -893,10 +893,6 @@ void func_8004cba0(SVECTOR *off, VECTOR *out, VECTOR *base)
  * by at most `turn` per step; with pitch -1 the pitch turns too. n > 1
  * steps lead the target by its motion. Stores the final rotation (facing
  * the other way) in out and returns its yaw. */
-/*
- * Not exact: retail loads pitch once (`lhu s2,104(sp)`); this source loads
- * it twice (lw and lh) and needs s8, so the frame and s-registers shift.
- */
 ADDRESS(0x8004cc70, 0x278)
 int func_8004cc70(e, pos, speed, target, dir, out, pitch, turn, n)
 Vis212 *e;
@@ -905,7 +901,7 @@ int speed;
 VECTOR *target;
 SVECTOR *dir;
 SVECTOR *out;
-int pitch;
+short pitch;
 short turn;
 int n;
 {
@@ -913,6 +909,7 @@ int n;
     SVECTOR rot;
     int k;
     int d;
+    int t;
 
     p = *pos;
     k = turn << 12;
@@ -926,8 +923,10 @@ int n;
             d = k / d;
         if (d > 4096)
             d = 4096;
-        rot.vy = func_8004a848(rot.vy, e->unk8E + 2048, d);
-        if ((short)pitch == -1) {
+        t = func_8004a848(rot.vy, e->unk8E + 2048, d);
+        rot.vy = t;
+        t = pitch;
+        if (t == -1) {
             d = (rot.vx - (short)e->unk8C) & 0xfff;
             if (d >= 2048)
                 d = 4096 - d;
