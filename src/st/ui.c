@@ -148,7 +148,6 @@ void func_80026ecc(u16 c, u16 x, u16 y, CVECTOR *color)
 }
 
 /* Draws a 0xffff-terminated glyph string; code 0 starts a new line. */
-/* Not exact: the loop-end 0xffff lands in $t0 here, $v0 in retail. */
 ADDRESS(0x8002732c, 0x114)
 void func_8002732c(u16 *s, u16 x, u16 y, CVECTOR *color)
 {
@@ -171,7 +170,8 @@ void func_8002732c(u16 *s, u16 x, u16 y, CVECTOR *color)
         if (*s == 0) {
             x = left;
             y += line;
-            s += 2;
+            s++;
+            s++;
         } else {
             func_80026ecc(*s, x, y, color);
             if (*s < split)
@@ -193,8 +193,6 @@ void func_8002732c(u16 *s, u16 x, u16 y, CVECTOR *color)
 
 /* Draws a number with the proportional font: digit glyphs follow the
  * half-width codes. */
-/* Not exact: the num-to-value copy precedes the digit-count shift here;
- * retail schedules it after the shift and mask. */
 ADDRESS(0x80027440, 0x27c)
 void func_80027440(u32 num, u16 x, u16 y, CVECTOR *color)
 {
@@ -204,7 +202,7 @@ void func_80027440(u32 num, u16 x, u16 y, CVECTOR *color)
     u8 neg = 0;
     u16 width = color->cd >> 2;
     u16 base;
-    int n;
+    u8 n;
     u32 sign;
     s16 value;
     int pow;
@@ -263,16 +261,13 @@ void func_80027440(u32 num, u16 x, u16 y, CVECTOR *color)
 }
 
 /* Draws a number with the fixed 7-pixel digit glyphs (codes 2-11). */
-/* Not exact: as func_80027440, the value/parameter copies precede the
- * digit-count extraction; retail extracts it first. The guarded power loop
- * now agrees. */
 ADDRESS(0x800276bc, 0x244)
 void func_800276bc(u32 num, u16 x, u16 y, CVECTOR *color)
 {
     u16 digit[8];
     u8 leading = 1;
     u8 neg = 0;
-    int n = NUMBER_DIGITS(num);
+    u8 n = NUMBER_DIGITS(num);
     u16 width = 7;
     int end;
     u32 sign;
