@@ -19,15 +19,16 @@ SDATA(0x8006323c, 0x8)
 int func_8002ee90(int archive, int member, u_long *buf);
 void func_80021984(void);
 
-/* Not exact (0xc short): retail keeps the load buffer's address in $s2 from
- * the top of the function (`addiu v0,a2,1188; move s2,v0` before the title
- * loop's index and x are cleared) and rebuilds the CD state's address for
- * the later loops, where this build takes the buffer into $s4 after them and
- * derives the state's address from it (cse2 sees the hoisted argument's
- * REG_EQUAL note). The title loop's own counter and the block-local sizes
- * agree. Ruled out: a buf local at the declarations or before the loop (the
- * address folds to one lui/addiu and the store goes through buf - 4), a
- * VsCdState pointer local, and passing unk4A0 to the title loop's calls. */
+/* Not exact (4 bytes short): retail forms the CD state's address in $a2 at
+ * the top, copies the buffer's address out of a temporary (`addiu
+ * v0,a2,1188; move s2,v0`) before the title loop's counter and x are set,
+ * and stores the cursor after the picture positions; this build adds
+ * straight into $s2 after them and stores at once. The copy and its early
+ * place say the buffer local is assigned more than once (retail reuses $s2
+ * for the later loops' counter). Ruled out: the local set at its declaration
+ * or in a separate statement before the store (the address folds to
+ * DAT+0x4a4 and the store goes through buf - 4), a VsCdState pointer local,
+ * passing unk4A0 to the title loop. */
 ADDRESS(0x8001789c, 0x328)
 void func_8001789c(void)
 {
@@ -41,7 +42,9 @@ void func_8001789c(void)
     int x;
     int slot;
     int i;
+    u_long *buf;
 
+    DAT_801a4590.unk4A0 = buf = DAT_801a4590.unk4A4;
     sp->unk0.team.pos[0].vx = 640;
     sp->unk0.team.pos[0].vy = 144;
     sp->unk0.team.pos[1].vx = 640;
@@ -62,12 +65,12 @@ void func_8001789c(void)
     sp->unk0.team.pos[8].vy = 200;
     sp->unk0.team.pos[15].vx = 640;
     sp->unk0.team.pos[15].vy = 0;
-    DAT_801a4590.unk4A0 = DAT_801a4590.unk4A4;
+
     for (n = 0, x = 320; n < 5; n++, x += 64) {
-        func_8002ee90(5, n + 31, DAT_801a4590.unk4A4);
+        func_8002ee90(5, n + 31, buf);
         pos.vx = base.x + x;
         pos.vy = base.y;
-        func_80012c2c(DAT_801a4590.unk4A4, &pos, NULL);
+        func_80012c2c(buf, &pos, NULL);
         DrawSync(0);
     }
     id = DAT_801624b8[0].slot;
