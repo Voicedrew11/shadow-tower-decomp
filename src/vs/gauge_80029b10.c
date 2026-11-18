@@ -19,8 +19,6 @@ static u8 DAT_800632e4 = 0;
  * centre, white while below 31% on alternate frames) and, when it has
  * one, its second gauge under it; `level` (at most 32) scales the colours.
  */
-/* Not exact: level * 125 hoists out of the second loop; the level and
- * loop counter use different registers. */
 ADDRESS(0x80029b10, 0x418)
 void func_80029b10(int level)
 {
@@ -33,8 +31,8 @@ void func_80029b10(int level)
     DAT_800632e4 = 1 - DAT_800632e4;
     if (level > 32)
         level = 32;
-    f = DAT_800633b0.fighter;
     for (; i < 2; i++) {
+        f = &DAT_800633b0.fighter[i];
         packet = DAT_801624d0.packet;
         p = (POLY_G4 *)packet->cur;
         packet->cur = (u_long *)(p + 1);
@@ -55,10 +53,9 @@ void func_80029b10(int level)
             setRGB2(p, 200, 200, 200);
         }
         addPrim(&DAT_801624d0.ot_cur[1], p);
-        f++;
     }
-    f = DAT_800633b0.fighter;
     for (i = 0; i < 2; i++) {
+        f = &DAT_800633b0.fighter[i];
         if (f->unk4DF18.unk1BA != 0) {
             packet = DAT_801624d0.packet;
             p = (POLY_G4 *)packet->cur;
@@ -76,6 +73,5 @@ void func_80029b10(int level)
             setRGB2(p, level * 250 / 32, w * 5 / 2 * level / 32, 0);
             addPrim(&DAT_801624d0.ot_cur[1], p);
         }
-        f++;
     }
 }
