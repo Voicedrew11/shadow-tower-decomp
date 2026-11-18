@@ -15,15 +15,14 @@
  * left, the second on the right, wrapping to a second line at glyph 49;
  * `bright` sets their green tint.
  */
-/* Not exact (size-exact, order and registers): retail sets the four x
- * coordinates (and the 29) AFTER the constants loop.c hoists out of the
- * glyph loop (graphics base, 40, 50), so they were emitted after the loop's
- * start note, and the 29 takes $s8 while 40 and 50 fall to caller-saved
- * $t1/$t0. Here they precede the hoisted constants, the 29 gets $t1 and 50
- * gets $s8. Ruled out: literal 29 (not hoisted, one register freed,
- * allocation changes throughout), an enclosing while, do-while(0) or for(;;)
- * around the settings (the extra loop depth moves bright into a register),
- * -G8. */
+/* Not exact (size-exact, 8 lines, registers agree): in the glyph loop's pre-
+ * header retail has the hoisted constants first (graphics base, 40, 50, 29)
+ * and then the four x settings; here the x settings come first. loop.c puts
+ * what it hoists directly in front of the loop's start note, so in retail
+ * the x settings sit behind that note. Ruled out: an enclosing do-while(0),
+ * while or for(;;) around the settings (flow counts it as a loop level and
+ * bright moves into a register), a function-level row variable (the 29 is
+ * then not hoisted last and takes $t1). */
 ADDRESS(0x8002ad40, 0x338)
 void func_8002ad40(int bright)
 {
@@ -34,13 +33,11 @@ void func_8002ad40(int bright)
     u16 glyph;
 
     for (n = 0; n < 2;) {
-        int top;
-
         s = VS_ITEM_NAME(DAT_801624b8[n].slot[DAT_80063338]);
         glyph = *s;
         if (glyph == 0xffff || glyph == 0)
             goto next;
-        top = 29;
+
         x3 = 212;
         x2 = 201;
         x1 = 31;
@@ -66,15 +63,25 @@ void func_8002ad40(int bright)
             setUV4(p, c % 18 * 12, c / 18 * 10, c % 18 * 12 + 11, c / 18 * 10,
                    c % 18 * 12, c / 18 * 10 + 10, c % 18 * 12 + 11, c / 18 * 10 + 10);
             if (n == 0) {
-                if (line)
-                    setXY4(p, x0, 40, x1, 40, x0, 50, x1, 50);
-                else
-                    setXY4(p, x0, top, x1, top, x0, 39, x1, 39);
+                if (line) {
+                    int y = 40;
+
+                    setXY4(p, x0, y, x1, y, x0, y + 10, x1, y + 10);
+                } else {
+                    int y = 29;
+
+                    setXY4(p, x0, y, x1, y, x0, y + 10, x1, y + 10);
+                }
             } else {
-                if (line)
-                    setXY4(p, x2, 40, x3, 40, x2, 50, x3, 50);
-                else
-                    setXY4(p, x2, top, x3, top, x2, 39, x3, 39);
+                if (line) {
+                    int y = 40;
+
+                    setXY4(p, x2, y, x3, y, x2, y + 10, x3, y + 10);
+                } else {
+                    int y = 29;
+
+                    setXY4(p, x2, y, x3, y, x2, y + 10, x3, y + 10);
+                }
             }
             p->tpage = GetTPage(0, 1, 640, 0);
             p->clut = GetClut(640, 480);
