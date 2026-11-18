@@ -8312,7 +8312,7 @@ VS.EXE	0x80013f68	0x3768		mips26	reachable-code	0x80014008	load		j		manual-decod
 VS.EXE	0x80013f70	0x3770		mips_gprel16	reachable-code	0x80063220	load	DAT_80063220	lw	gp	manual-decoded	reviewed	vs.snd_800129bc asm review
 VS.EXE	0x80013fa0	0x37a0		mips26	reachable-code	0x80045954	load		jal		manual-decoded	reviewed	vs.snd_800129bc asm review
 VS.EXE	0x80013fb8	0x37b8		mips26	reachable-code	0x80014008	load		j		manual-decoded	reviewed	vs.snd_800129bc asm review
-VS.EXE	0x80013fc8	0x37c8	0x80013fcc	mips_hi16_lo16	reachable-code	0x80160400	bss	DAT_80160400	lui+lw		manual-decoded	reviewed	vs.snd_800129bc asm review
+VS.EXE	0x80013fc8	0x37c8	0x80013fcc	mips_hi16_lo16	reachable-code	0x80160400	bss	DAT_801603c0	lui+lw		manual-decoded	reviewed	vs.snd_800129bc asm review
 VS.EXE	0x80014008	0x3808		mips26	reachable-code	0x80045954	load		jal		manual-decoded	reviewed	vs.snd_800129bc asm review
 VS.EXE	0x80014024	0x3824		mips26	reachable-code	0x80013b74	load		jal		manual-decoded	reviewed	vs.snd_800129bc asm review
 VS.EXE	0x8001407c	0x387c	0x80014084	mips_hi16_lo16	reachable-code	0x80011014	load		lui+addiu		manual-decoded	reviewed	vs.snd_800129bc asm review

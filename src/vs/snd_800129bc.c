@@ -403,6 +403,10 @@ short func_80013b74(u_char tone, int note, int bank)
     return -1;
 }
 
+/* Keys the entry's tone on for fighter i, at a random note from 58 to 62.
+ * Every trigger test ends in its own copy of this call. */
+#define KEY_ON_TONE() func_80013b74(tone, (rand() * 5 >> 15) + 58, i)
+
 /*
  * Plays both fighters' animation sound effects. The fighter's state (and
  * in states 2 and 6 its key frame) picks a sound entry, which keeps the
@@ -411,9 +415,6 @@ short func_80013b74(u_char tone, int note, int bank)
  * then at random), or every `period` / 20 frames (kind 4). The tone is
  * keyed on at a random note from 58 to 62.
  */
-/* Not exact: fighter/entry/tone registers differ, the payload promotion
- * adds a halfword mask, and the direction-specific kind 8 random tests
- * share one call here. */
 ADDRESS(0x80013c5c, 0x414)
 void func_80013c5c(void)
 {
@@ -423,8 +424,8 @@ void func_80013c5c(void)
     VsFighterSfx *sfx;
     u16 trigger;
     u16 tone;
-    u16 operand;
-    int frame;
+    int operand;
+    int kind;
 
     for (i = 0; i < 2; i++) {
         f = &DAT_800633b0.fighter[i];
@@ -462,62 +463,62 @@ void func_80013c5c(void)
         }
         trigger = sfx->sounds[entry].trigger;
         tone = sfx->sounds[entry].tone;
+        kind = trigger & 0xf000;
         operand = trigger & 0xfff;
-        switch (trigger & 0xf000) {
-        case 0x1000: {
-            int at = operand;
-
+        switch (kind) {
+        case 0x1000:
             if (f->unk4DEEC > 0) {
-                frame = f->unk4DEEA;
-                if (at < frame - f->unk4DEEC * DAT_80063220 || at >= frame)
-                    continue;
+                int frame = f->unk4DEEA;
+                u16 at = operand;
+
+                if (at >= frame - f->unk4DEEC * DAT_80063220 && at < frame)
+                    KEY_ON_TONE();
             } else {
-                frame = f->unk4DEEA;
-                if (frame - f->unk4DEEC * DAT_80063220 < at || frame >= at)
-                    continue;
+                int frame = f->unk4DEEA;
+                u16 at = operand;
+
+                if (frame - f->unk4DEEC * DAT_80063220 >= at && frame < at)
+                    KEY_ON_TONE();
             }
             break;
-        }
         case 0x2000:
             if (f->unk4DEEC > 0) {
-                frame = f->unk4DEEA & 0x7ff;
-                if ((trigger & 0x7ff) < frame - f->unk4DEEC * DAT_80063220 || (trigger & 0x7ff) >= frame)
-                    continue;
+                int at = trigger & 0x7ff;
+                int frame = f->unk4DEEA & 0x7ff;
+
+                if (at >= frame - f->unk4DEEC * DAT_80063220 && at < frame)
+                    KEY_ON_TONE();
             } else {
-                frame = f->unk4DEEA & 0x7ff;
-                if (frame - f->unk4DEEC * DAT_80063220 < (trigger & 0x7ff) || frame >= (trigger & 0x7ff))
-                    continue;
+                int at = trigger & 0x7ff;
+                int frame = f->unk4DEEA & 0x7ff;
+
+                if (frame - f->unk4DEEC * DAT_80063220 >= at && frame < at)
+                    KEY_ON_TONE();
             }
             break;
-        case 0x8000: {
-            int at = operand;
-
+        case 0x8000:
             if (f->unk4DEEC > 0) {
-                frame = f->unk4DEEA;
-                if (at < frame - f->unk4DEEC * DAT_80063220 || at >= frame)
-                    continue;
-                if ((rand() >> 3) >= at)
-                    continue;
+                int frame = f->unk4DEEA;
+                u16 at = operand;
+
+                if (at >= frame - f->unk4DEEC * DAT_80063220 && at < frame && (rand() >> 3) < at)
+                    KEY_ON_TONE();
             } else {
-                frame = f->unk4DEEA;
-                if (frame - f->unk4DEEC * DAT_80063220 < at || frame >= at)
-                    continue;
-                if ((rand() >> 3) >= at)
-                    continue;
+                int frame = f->unk4DEEA;
+                u16 at = operand;
+
+                if (frame - f->unk4DEEC * DAT_80063220 >= at && frame < at && (rand() >> 3) < at)
+                    KEY_ON_TONE();
             }
             break;
-        }
         case 0x4000: {
-            int at = operand;
+            u16 at = operand;
 
-            if (at == 0 || DAT_801603c0.unk40 / 20 % at != 0)
-                continue;
+            if (at != 0 && DAT_801603c0.unk40 / 20 % at == 0)
+                KEY_ON_TONE();
             break;
         }
-        default:
-            continue;
         }
-        func_80013b74(tone, (rand() * 5 >> 15) + 58, i);
     }
 }
 
