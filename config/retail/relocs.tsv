@@ -7350,7 +7350,7 @@ ST.EXE	0x800647b8	0x53fb8	0x800647bc	mips_hi16_lo16	reachable-code	0x801e0d08	bs
 ST.EXE	0x80064804	0x54004	0x80064808	mips_hi16_lo16	reachable-code	0x801e0d0c	bss	DAT_801e0d08	lui+lw		manual-decoded	reviewed	st.equip_menu asm review
 ST.EXE	0x80064818	0x54018		mips26	reachable-code	0x80057cc8	load		jal		manual-decoded	reviewed	st.equip_menu asm review
 ST.EXE	0x80064840	0x54040		mips_gprel16	reachable-code	0x800881e8	bss	DAT_800881e8	sh	gp	manual-decoded	reviewed	st.equip_menu asm review
-ST.EXE	0x80064844	0x54044		mips_gprel16	reachable-code	0x800881ea	bss	DAT_800881ea	sh	gp	manual-decoded	reviewed	st.equip_menu asm review
+ST.EXE	0x80064844	0x54044		mips_gprel16	reachable-code	0x800881ea	bss	DAT_800881e8	sh	gp	manual-decoded	reviewed	st.equip_menu asm review
 ST.EXE	0x80064848	0x54048		mips26	reachable-code	0x80064b88	load		j		manual-decoded	reviewed	st.equip_menu asm review
 ST.EXE	0x80064850	0x54050		mips26	reachable-code	0x80057d34	load		jal		manual-decoded	reviewed	st.equip_menu asm review
 ST.EXE	0x80064858	0x54058		mips26	reachable-code	0x80064b88	load		j		manual-decoded	reviewed	st.equip_menu asm review
@@ -7388,7 +7388,7 @@ ST.EXE	0x80064bac	0x543ac	0x80064bbc	mips_hi16_lo16	reachable-code	0x80013880	lo
 ST.EXE	0x80064bf0	0x543f0	0x80064bf4	mips_hi16_lo16	reachable-code	0x801cd180	bss	DAT_801cd180	lui+addiu		manual-decoded	reviewed	st.equip_menu asm review
 ST.EXE	0x80064c0c	0x5440c		mips26	reachable-code	0x80057cec	load		jal		manual-decoded	reviewed	st.equip_menu asm review
 ST.EXE	0x80064c1c	0x5441c		mips_gprel16	reachable-code	0x800881e8	bss	DAT_800881e8	lhu	gp	manual-decoded	reviewed	st.equip_menu asm review
-ST.EXE	0x80064c20	0x54420		mips_gprel16	reachable-code	0x800881ea	bss	DAT_800881ea	lhu	gp	manual-decoded	reviewed	st.equip_menu asm review
+ST.EXE	0x80064c20	0x54420		mips_gprel16	reachable-code	0x800881ea	bss	DAT_800881e8	lhu	gp	manual-decoded	reviewed	st.equip_menu asm review
 ST.EXE	0x80064c34	0x54434		mips26	reachable-code	0x80064ecc	load		j		manual-decoded	reviewed	st.equip_menu asm review
 ST.EXE	0x80064c50	0x54450		mips26	reachable-code	0x80057d10	load		jal		manual-decoded	reviewed	st.equip_menu asm review
 ST.EXE	0x80064c7c	0x5447c		mips26	reachable-code	0x80064ecc	load		j		manual-decoded	reviewed	st.equip_menu asm review
@@ -7417,7 +7417,7 @@ ST.EXE	0x80064e64	0x54664		mips26	reachable-code	0x80064ecc	load		j		manual-deco
 ST.EXE	0x80064e6c	0x5466c		mips26	reachable-code	0x80057cc8	load		jal		manual-decoded	reviewed	st.equip_menu asm review
 ST.EXE	0x80064e74	0x54674	0x80064e98	mips_hi16_lo16	reachable-code	0x801e0cf8	bss	DAT_801e0ce8	lui+lw		manual-decoded	reviewed	st.equip_menu asm review
 ST.EXE	0x80064eac	0x546ac		mips_gprel16	reachable-code	0x800881e8	bss	DAT_800881e8	lhu	gp	manual-decoded	reviewed	st.equip_menu asm review
-ST.EXE	0x80064eb0	0x546b0		mips_gprel16	reachable-code	0x800881ea	bss	DAT_800881ea	lhu	gp	manual-decoded	reviewed	st.equip_menu asm review
+ST.EXE	0x80064eb0	0x546b0		mips_gprel16	reachable-code	0x800881ea	bss	DAT_800881e8	lhu	gp	manual-decoded	reviewed	st.equip_menu asm review
 ST.EXE	0x80064ec4	0x546c4		mips26	reachable-code	0x80063bdc	load		jal		manual-decoded	reviewed	st.equip_menu asm review
 ST.EXE	0x80064f08	0x54708		mips26	reachable-code	0x80057a3c	load		jal		manual-decoded	reviewed	st.equip_menu asm review
 ST.EXE	0x80064f10	0x54710	0x80064f14	mips_hi16_lo16	reachable-code	0x801e0ce8	bss	DAT_801e0ce8	lui+addiu		manual-decoded	reviewed	st.equip_menu asm review

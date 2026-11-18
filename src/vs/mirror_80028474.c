@@ -23,9 +23,9 @@
         SVECTOR *in = (SVECTOR *)(sp)->local_vertices;                        \
         if (n--) {                                                            \
             if (flip) {                                                       \
-                in[0].vy = -in[0].vy;                                         \
-                in[1].vy = -in[1].vy;                                         \
-                in[2].vy = -in[2].vy;                                         \
+                in[0].vy *= -1;                                               \
+                in[1].vy *= -1;                                               \
+                in[2].vy *= -1;                                               \
             }                                                                 \
             gte_ldv3c(in);                                                    \
             gte_rtpt();                                                       \
@@ -37,9 +37,9 @@
                 if (!n--)                                                     \
                     break;                                                    \
                 if (flip) {                                                   \
-                    in[0].vy = -in[0].vy;                                     \
-                    in[1].vy = -in[1].vy;                                     \
-                    in[2].vy = -in[2].vy;                                     \
+                    in[0].vy *= -1;                                           \
+                    in[1].vy *= -1;                                           \
+                    in[2].vy *= -1;                                           \
                 }                                                             \
                 gte_ldv3c(in);                                                \
                 in += 3;                                                      \
@@ -49,7 +49,7 @@
         n = (sp)->header->n_vertices % 3;                                     \
         while (n--) {                                                         \
             if (flip)                                                         \
-                in->vy = -in->vy;                                             \
+                in->vy *= -1;                                                 \
             gte_ldv0(in);                                                     \
             gte_rtps();                                                       \
             in++;                                                             \
@@ -64,8 +64,6 @@
  * renderer switches off), then flips it in y and draws it again mirrored
  * and semi-transparent, leaving the vertices flipped and the switches on.
  */
-/* Not exact (same size and CFG): seven Y negations load with LHU rather
- * than retail's LH (first divergence at +0x19c). */
 ADDRESS(0x80028474, 0x4a0)
 void func_80028474(void)
 {

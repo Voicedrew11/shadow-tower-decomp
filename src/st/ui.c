@@ -664,13 +664,10 @@ void func_80028db8(RECT *r, CVECTOR *mid, CVECTOR *edge, int semi)
 
 /* Draws a triangle filling `r` that points along `dir` (0, 1024, 2048 or
  * 3072), over a copy offset by one pixel. */
-/* Not exact: the x1 and world_state-base temporaries are swapped ($t2/$t1).
- * The shadow's last y store precedes its length/code stores here; retail
- * schedules that y store after them. */
 ADDRESS(0x8002916c, 0x320)
 void func_8002916c(RECT *r, CVECTOR *color, u16 dir)
 {
-    short x0 = 0, y0 = 0, x1 = 0, y1 = 0, x2 = 0, y2 = 0;
+    short x0 = 0, x1 = 0, x2 = 0, y0 = 0, y1 = 0, y2 = 0;
     StPacketBuffer *buf;
     POLY_F3 *p;
 
@@ -715,9 +712,9 @@ void func_8002916c(RECT *r, CVECTOR *color, u16 dir)
     setRGB0(p, color->r, color->g, color->b);
     addPrim(world_state.ot_cur, p);
     NEW_PRIM(buf, p, POLY_F3);
-    setXY3(p, x0 + 1, y0 + 1, x1 + 1, y1 + 1, x2 + 1, y2 + 1);
     setlen(p, 4);
     setcode(p, 0x22);
+    setXY3(p, x0 + 1, y0 + 1, x1 + 1, y1 + 1, x2 + 1, y2 + 1);
     setRGB0(p, color->r, color->g, color->b);
     addPrim(world_state.ot_cur, p);
 }

@@ -417,11 +417,9 @@ void func_800595d4(void)
  * empties the other hand's slots; with `redraw` 1 the changed pictures are
  * reloaded.
  *
- * Not exact (8 bytes longer): retail forms the slot 2/15 stores from a
- * viewer+0x3c base and folds the -1 of the second-hand index into the
- * address constant; this build stores from the viewer base and keeps the
- * -2 as a displacement, and the final switch's blocks are ordered
- * differently.
+ * Not exact (4 bytes longer): retail forms the slot 2/15 stores from a
+ * viewer+0x3c base; this build stores both from
+ * the viewer base. The final switch's blocks are ordered differently.
  */
 ADDRESS(0x8005975c, 0x590)
 void func_8005975c(int redraw)
@@ -501,9 +499,9 @@ void func_8005975c(int redraw)
             func_80059204(sp->unk2E0);
     } else {
         if (sp->unk2C0 == -1)
-            MENU_SLOTS->ids[sp->unk2E0 - 1] = 0xffff;
+            *(MENU_SLOTS->ids - 1 + sp->unk2E0) = 0xffff;
         else
-            MENU_SLOTS->ids[sp->unk2E0 - 1] = sp->unk2C0;
+            *(MENU_SLOTS->ids - 1 + sp->unk2E0) = sp->unk2C0;
         if (redraw == 1)
             func_80059204(sp->unk2E0 - 1);
     }
@@ -533,12 +531,6 @@ void func_80059cec(void)
 /*
  * Totals the attribute rows from the viewer's figures and equipment, and
  * fills one record per shown equipment slot with its figures and kind.
- *
- * Not exact (size-exact): retail reads the effect row index (unk16C/unk170) before the
- * slot id and folds the +0xa field offset into the effects address
- * constant; this build keeps it as a displacement. A row-value local forwards
- * the quotient instead of reloading the row. A typed values-array phase folds
- * the field address but drops the two slot reloads, moving later exact code.
  */
 ADDRESS(0x80059dc0, 0x5ac)
 void func_80059dc0(void)
@@ -615,14 +607,14 @@ void func_80059dc0(void)
     }
     if (viewer.unk38[6] != 0xffff) {
         at->unk16C = viewer.unk38[6] / 3;
-        at->unk16E = effects.defs[viewer.unk38[6]].unkA[at->unk16C];
+        at->unk16E = *(at->unk16C + effects.defs[viewer.unk38[6]].unkA);
     } else {
         at->unk16C = 0xffff;
         at->unk16E = 0;
     }
     if (viewer.unk38[12] != 0xffff) {
         at->unk170 = viewer.unk38[12] / 3;
-        at->unk172 = effects.defs[viewer.unk38[12]].unkA[at->unk170];
+        at->unk172 = *(at->unk170 + effects.defs[viewer.unk38[12]].unkA);
     } else {
         at->unk170 = 0xffff;
         at->unk172 = 0;
