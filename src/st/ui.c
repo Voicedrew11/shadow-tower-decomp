@@ -2282,11 +2282,6 @@ void func_8002e4d0(void)
 /*
  * The attribute table: names, current values (with the change a candidate
  * item would make on page 2) and bars scaled to +0x2c4.
- *
- * Not exact: retail schedules the colour stores in another order and
- * keeps the scratchpad base in s2 (this build: s3). The selected-count
- * loop now uses a plain byte argument and advances its cursor in the
- * update clause, matching the retail backedge and pointer walk.
  */
 ADDRESS(0x8002e94c, 0x44c)
 void func_8002e94c(void)
@@ -2297,18 +2292,26 @@ void func_8002e94c(void)
     RECT unused;
     RECT bar;
     short xoff[STATUS_ROWS] = {0};
-    int i, y;
+    int i;
     u8 *count;
     s16 *figure;
 
-    sp->style[3].r = sp->style[2].g = 120;
-    sp->style[2].r = sp->style[2].b = sp->style[3].b = 40;
+    sp->style[2].r = 40;
+    sp->style[3].r = 120;
+    sp->style[2].g = 120;
     sp->style[3].g = 60;
-    sp->style[3].cd = sp->style[2].cd = 73;
-    sp->style[7].r = sp->style[6].g = 120;
-    sp->style[6].r = sp->style[6].b = sp->style[7].b = 40;
+    sp->style[2].b = 40;
+    sp->style[3].b = 40;
+    sp->style[3].cd = 73;
+    sp->style[2].cd = 73;
+    sp->style[6].r = 40;
+    sp->style[7].r = 120;
+    sp->style[6].g = 120;
     sp->style[7].g = 60;
-    sp->style[7].cd = sp->style[6].cd = 49;
+    sp->style[6].b = 40;
+    sp->style[7].b = 40;
+    sp->style[7].cd = 49;
+    sp->style[6].cd = 49;
     if (sp->unk2DC == 1) {
         sp->unk320 = sp->unk324 = sp->unk328 = &sp->style[0];
     } else {
@@ -2316,8 +2319,8 @@ void func_8002e94c(void)
         sp->unk324 = &sp->style[2];
         sp->unk328 = &sp->style[3];
     }
-    for (i = 0, y = 16; i < STATUS_ROWS; i++, y += 15)
-        func_8002732c(MESSAGE(14 + i), xoff[i] + 316, y, sp->unk320);
+    for (i = 0; i < STATUS_ROWS; i++)
+        func_8002732c(MESSAGE(14 + i), xoff[i] + 316, i * 15 + 16, sp->unk320);
     if (sp->unk2DC == 1) {
         sp->unk320 = sp->unk324 = sp->unk328 = &sp->style[4];
     } else {
@@ -2328,37 +2331,37 @@ void func_8002e94c(void)
     if (sp->unk2DC == 2 && sp->unk2C6) {
         if (sp->unk2BE != -1) {
             count = vis_table_c.unk0118[sp->unk2C0].unk10;
-            for (i = 0, y = 16; i < STATUS_ROWS; count++, y += 15, i++)
-                func_80027440(*count | 0x13000000, 590, y, sp->unk320);
+            for (i = 0; i < STATUS_ROWS; count++, i++)
+                func_80027440(*count | 0x13000000, 590, i * 15 + 16, sp->unk320);
         }
         return;
     }
     figure = viewer.unk62;
-    for (i = 0, y = 16; i < STATUS_ROWS; i++, y += 15, figure++) {
+    for (i = 0; i < STATUS_ROWS; figure++, i++) {
         if (sp->unk2DC == 2) {
             if (sp->unk25C[i] > 0) {
-                func_80027440(sp->unk1B4[i] | 0x3000000, 590, y, sp->unk320);
-                func_80026ecc(19, 544, y, sp->unk324);
-                func_80027440(sp->unk25C[i] | 0x3000000, 508, y, sp->unk324);
+                func_80027440(sp->unk1B4[i] | 0x3000000, 590, i * 15 + 16, sp->unk320);
+                func_80026ecc(19, 544, i * 15 + 16, sp->unk324);
+                func_80027440(sp->unk25C[i] | 0x3000000, 508, i * 15 + 16, sp->unk324);
             } else if (sp->unk25C[i] < 0) {
-                func_80027440(sp->unk1B4[i] | 0x3000000, 590, y, sp->unk320);
-                func_80026ecc(20, 544, y, sp->unk328);
-                func_80027440(-sp->unk25C[i] | 0x3000000, 508, y, sp->unk328);
+                func_80027440(sp->unk1B4[i] | 0x3000000, 590, i * 15 + 16, sp->unk320);
+                func_80026ecc(20, 544, i * 15 + 16, sp->unk328);
+                func_80027440(-sp->unk25C[i] | 0x3000000, 508, i * 15 + 16, sp->unk328);
             } else {
-                func_80027440(sp->unk1B4[i] | 0x3000000, 590, y, sp->unk320);
+                func_80027440(sp->unk1B4[i] | 0x3000000, 590, i * 15 + 16, sp->unk320);
             }
         } else if (*figure < 0) {
-            func_80027440(0x3000000, 590, y, sp->unk320);
+            func_80027440(0x3000000, 590, i * 15 + 16, sp->unk320);
         } else {
-            func_80027440((u16)*figure | 0x3000000, 590, y, sp->unk320);
+            func_80027440((u16)*figure | 0x3000000, 590, i * 15 + 16, sp->unk320);
         }
     }
     bar.h = 4;
-    for (i = 0, y = 27; i < STATUS_ROWS; i++, y += 15) {
+    for (i = 0; i < STATUS_ROWS; i++) {
         bar.w = sp->unk1B4[i] * 50 / sp->unk2C4;
         if (bar.w > 100)
             bar.w = 100;
-        bar.y = y;
+        bar.y = i * 15 + 27;
         bar.x = 626 - bar.w;
         func_80028db8(&bar, &bright, &dark, 1);
     }
