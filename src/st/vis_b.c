@@ -354,15 +354,16 @@ int func_8004fdd0(Vis88 *src, Vis88 *e, SVECTOR *from, SVECTOR *to, int fade, in
     return 1;
 }
 
-/* Runs frames while the screen fades from level `v` to `end` by `step`.
- * Not exact: retail keeps mode, end and step in s3, s4, s2; this build in
- * s2, s3, s4 (11 words). */
+/* Runs frames while the screen fades from level `start` to `end` by
+ * `delta`. */
 ADDRESS(0x800500ac, 0xc4)
-void func_800500ac(int mode, int v, int end, int step)
+void func_800500ac(int mode, int start, int end, int delta)
 {
     VECTOR pos;
     SVECTOR rot;
     int c;
+    int step = delta;
+    int v = start;
 
     for (;;) {
         c = v * v >> 16;
