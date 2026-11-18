@@ -203,9 +203,6 @@ void func_80057f3c(void)
  * Plays sound `id` from `pos`: silent at `range` or beyond, louder towards
  * the listener over `fade`, panned by the direction from the listener's
  * yaw. Bit 15 of `id` keeps more of the volume on the far side.
- *
- * Not exact: the wide-volume clamp uses a1 for its temporary where retail
- * uses v1 (the three load/copy words around the clamp).
  */
 ADDRESS(0x80057fc4, 0x25c)
 s16 func_80057fc4(int id, VECTOR *pos, int volume, int range, int fade, int note)
@@ -214,13 +211,12 @@ s16 func_80057fc4(int id, VECTOR *pos, int volume, int range, int fade, int note
     int dy = (pos->vy - DAT_801dd1c0.listener.vy) >> 3;
     int dz = (pos->vz - DAT_801dd1c0.listener.vz) >> 3;
     int dist;
-    int wide;
+    int left; /* the wide flag (bit 15 of id) until the volume is known */
     int vol;
-    int left;
     int right;
     int angle;
 
-    wide = id & 0x8000;
+    left = id & 0x8000;
     id &= 0xfff;
     dist = SquareRoot0(dx * dx + dy * dy + dz * dz) << 3;
     if (dist >= range)
@@ -230,16 +226,16 @@ s16 func_80057fc4(int id, VECTOR *pos, int volume, int range, int fade, int note
         return -1;
     if (vol >= 128)
         vol = 127;
-    if (wide == 0) {
+    if (left == 0) {
         left = vol + (127 - vol) / 4;
     } else {
         int near = vol + 32;
         int capped;
 
-        wide = near + (127 - vol) / 2;
+        left = near + (127 - vol) / 2;
         capped = 127;
-        if (wide < 128)
-            capped = wide;
+        if (left < 128)
+            capped = left;
         left = capped;
     }
     angle = func_8004a1b4(pos->vx - DAT_801dd1c0.listener.vx, pos->vz - DAT_801dd1c0.listener.vz)
