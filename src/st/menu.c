@@ -3460,11 +3460,6 @@ int func_80061a08(void)
 }
 
 /*
- * Not exact (size-exact): the working offset starts after the positive
- * size guard, both checksum loop initializations and the successful-frame
- * updates agree. The input data copy is earlier, and the offset/probe
- * countdown use s2/s1 instead of retail's s1/s2. Both versions keep -1 in s8.
- *
  * Writes size bytes from data to the open file fd at offset, 127 bytes per
  * 128-byte frame with an inverted byte sum in the last byte, reading each
  * frame back to verify it (three tries). Returns the sum of the frame sums,
@@ -3476,6 +3471,7 @@ int func_80061d34(int fd, int offset, u8 *data, int size)
     MenuScratch *sp = MENU_SCRATCH;
     u8 frame[128];
     u8 check[128];
+    u8 *src = data;
     int retry = 0;
     int n = 0;
     u8 total = 0;
@@ -3483,13 +3479,13 @@ int func_80061d34(int fd, int offset, u8 *data, int size)
     int i;
 
     if (size > 0) {
-        int frame_offset = offset;
+        int block = 0;
 
         do {
             frame[127] = i = 0;
             for (; i < 127; i++) {
-                frame[i] = *data;
-                frame[127] += *data++;
+                frame[i] = *src;
+                frame[127] += *src++;
             }
             frame[127] = ~frame[127];
         again:
@@ -3503,10 +3499,10 @@ int func_80061d34(int fd, int offset, u8 *data, int size)
                 return -1;
             }
             retry++;
-            lseek(fd, frame_offset, SEEK_SET);
+            lseek(fd, offset + block * 128, SEEK_SET);
             if (write(fd, frame, 128) == -1)
                 goto again;
-            lseek(fd, frame_offset, SEEK_SET);
+            lseek(fd, offset + block * 128, SEEK_SET);
             if (read(fd, check, 128) == -1)
                 goto again;
             sum = i = 0;
@@ -3516,7 +3512,7 @@ int func_80061d34(int fd, int offset, u8 *data, int size)
             if (sum != frame[127])
                 goto again;
             size -= 127;
-            frame_offset += 128;
+            block++;
             retry = 0;
             total += sum;
             n--;
@@ -3525,18 +3521,13 @@ int func_80061d34(int fd, int offset, u8 *data, int size)
     return total;
 }
 
-/*
- * Reads size bytes back the same way, verifying each frame's sum.
- * Not exact (size-exact): the working offset now starts after the positive-
- * size guard. The data, offset, frame base and probe countdown still use
- * different saved registers, and the checksum counters are zeroed in a
- * different order. A wide checksum or explicit frame pointer diverges more.
- */
+/* Reads size bytes back the same way, verifying each frame's sum. */
 ADDRESS(0x80061ee8, 0x174)
 int func_80061ee8(int fd, int offset, u8 *data, int size)
 {
     MenuScratch *sp = MENU_SCRATCH;
     u8 frame[128];
+    u8 *dst = data;
     int retry = 0;
     int n = 0;
     u8 total = 0;
@@ -3544,7 +3535,7 @@ int func_80061ee8(int fd, int offset, u8 *data, int size)
     int i;
 
     if (size > 0) {
-        int frame_offset = offset;
+        int block = 0;
 
         do {
         again:
@@ -3556,13 +3547,12 @@ int func_80061ee8(int fd, int offset, u8 *data, int size)
             if (retry >= 3)
                 return -1;
             retry++;
-            lseek(fd, frame_offset, SEEK_SET);
+            lseek(fd, offset + block * 128, SEEK_SET);
             if (read(fd, frame, 128) == -1) {
                 sp->unk0.half[0] = 354;
                 goto again;
             }
-            sum = 0;
-            for (i = 0; i < 127; i++)
+            for (i = 0, sum = 0; i < 127; i++)
                 sum += frame[i];
             sum = ~sum;
             if (sum != frame[127]) {
@@ -3570,9 +3560,9 @@ int func_80061ee8(int fd, int offset, u8 *data, int size)
                 goto again;
             }
             for (i = 0; i < 127; i++)
-                *data++ = frame[i];
+                *dst++ = frame[i];
             size -= 127;
-            frame_offset += 128;
+            block++;
             retry = 0;
             n--;
             total += frame[127];
