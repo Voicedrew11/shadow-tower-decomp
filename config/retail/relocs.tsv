@@ -5302,6 +5302,7 @@ ST.EXE	0x800532d8	0x42ad8		mips26	reachable-code	0x800746c4	load		jal		manual-de
 ST.EXE	0x800533a0	0x42ba0	0x800533a4	mips_hi16_lo16	reachable-code	0x801c7810	bss	vis_table_c	lui+addiu		manual-decoded	reviewed	st.vis_pickup asm review
 ST.EXE	0x800533d8	0x42bd8	0x800533dc	mips_hi16_lo16	reachable-code	0x80198f28	bss	viewer	lui+addiu		manual-decoded	reviewed	st.vis_pickup asm review
 ST.EXE	0x800533e4	0x42be4	0x800533e8	mips_hi16_lo16	reachable-code	0x801991c0	bss	viewer	lui+addiu		manual-decoded	reviewed	st.vis_pickup asm review
+ST.EXE	0x80053490	0x42c90	0x80053650	mips_hi16_lo16	reachable-code	0x80199192	bss	viewer	lui+lhu		manual-decoded	reviewed	st.vis_pickup mode 0 test; v0 HI in BEQZ delay reaches the yaw LHU via the direct J at 0x80053494 (the compiler emits that path although a u8 mode below 2 and not 1 is always 0); existing viewer+26a
 ST.EXE	0x80053494	0x42c94		mips26	reachable-code	0x8005364c	load		j		manual-decoded	reviewed	st.vis_pickup asm review
 ST.EXE	0x800534a8	0x42ca8	0x80053650	mips_hi16_lo16	reachable-code	0x80199192	bss	viewer	lui+lhu		manual-decoded	reviewed	st.vis_pickup mode>=4 default path; v0HI in BEQ delay reaches yawLHU via directJ without redefinition; existingviewer+26a
 ST.EXE	0x800534ac	0x42cac		mips26	reachable-code	0x8005364c	load		j		manual-decoded	reviewed	st.vis_pickup asm review
