@@ -17,6 +17,11 @@
 #include <st/xa.h>
 #include <st/fdat.h>
 
+/* The scene word of the overlay's first unit (src/fdat_272/main.c, which
+ * already owns fdat_801ef504: a unit defines one COMMON word). */
+DATA(0x801ef928, 0x4, ".bss")
+int fdat_801ef928;
+
 /* Slides table C item 29 by 0x1ea, 24 a frame while its model is loaded. */
 ADDRESS(0x801eead8, 0xdc)
 void func_801eead8(void)

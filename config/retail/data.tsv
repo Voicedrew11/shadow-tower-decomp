@@ -777,11 +777,11 @@ FDAT_262.BIN	0x801ee380	0x2e20	0x4	bss	candidate	fdat_801ee380	int	asm;src/fdat_
 FDAT_262.BIN	0x801ee384	0x2e24	0x4	bss	candidate	fdat_801ee384	int	asm;src/fdat_262/main.c	FDAT overlay word after the code (zero in the archive entry)
 FDAT_262.BIN	0x801ee388	0x2e28	0x1d8	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 FDAT_272.BIN	0x801eb560	0x0	0x27c	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
-FDAT_272.BIN	0x801ef504	0x3fa4	0x18	bss	candidate	fdat_801ef504	int[6]	asm;src/fdat_272/map_801ed4d0.c	FDAT overlay word after the code (zero in the archive entry)
+FDAT_272.BIN	0x801ef504	0x3fa4	0x18	bss	candidate	fdat_801ef504	int[6]	asm;src/fdat_272/main.c	FDAT overlay word after the code (zero in the archive entry)
 FDAT_272.BIN	0x801ef51c	0x3fbc	0x404	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 FDAT_272.BIN	0x801ef920	0x43c0	0x4	bss	candidate	fdat_801ef920	int	asm;src/fdat_272/map_801eea14.c	FDAT overlay word after the code (zero in the archive entry)
 FDAT_272.BIN	0x801ef924	0x43c4	0x4	bss	candidate	fdat_801ef924	int	asm;src/fdat_272/map_801edd24.c	FDAT overlay word after the code (zero in the archive entry)
-FDAT_272.BIN	0x801ef928	0x43c8	0x4	bss	candidate	fdat_801ef928	int	asm;src/fdat_272/map_801ed760.c	FDAT overlay word after the code (zero in the archive entry)
+FDAT_272.BIN	0x801ef928	0x43c8	0x4	bss	candidate	fdat_801ef928	int	asm;src/fdat_272/map_801eead8.c	FDAT overlay word after the code (zero in the archive entry)
 FDAT_272.BIN	0x801ef92c	0x43cc	0x4	bss	candidate	fdat_801ef92c	int	asm;src/fdat_272/map_801ee43c.c	FDAT overlay word after the code (zero in the archive entry)
 FDAT_272.BIN	0x801ef930	0x43d0	0x4	bss	candidate	fdat_801ef930	int	asm;src/fdat_272/map_801ee610.c	FDAT overlay word after the code (zero in the archive entry)
 FDAT_272.BIN	0x801ef934	0x43d4	0x4	bss	candidate	fdat_801ef934	int	asm;src/fdat_272/map_801ee7d4.c	FDAT overlay word after the code (zero in the archive entry)
