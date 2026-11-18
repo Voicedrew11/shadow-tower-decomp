@@ -38,8 +38,12 @@ void exit(int code);
 #define COUNT (sp->unk0.menu.half[1])
 #define IDS (sp->unk0.menu.list.ids)
 
-/* Not exact: frame 144 bytes instead of 152; eligibility, search and
- * preview values use different temporary registers and loop edges. */
+/* Not exact: retail keeps one more value in a callee-saved register (player
+ * in $s5, seven saved registers and a 152-byte frame; this build has six and
+ * 144 bytes), so every later register is one off; the locals' slots agree
+ * (sp+16 unused0, sp+24 unused1, the two paths, tex, clut, pos). The
+ * eligibility, search and preview temporaries and the loop edges then
+ * differ. Not worked beyond this reading. */
 ADDRESS(0x8001960c, 0xb18)
 void func_8001960c(int player)
 {

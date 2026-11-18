@@ -600,10 +600,14 @@ void func_8001f23c(int x, int y, int w, int h)
  * Draws a window frame from 16x16 tiles of the menu texture page: corners,
  * edges, an inner bevel and the filled middle.
  */
-/* Not exact: an unaccounted 8-byte stack span (sp+208) lies between the
- * picture table and retail's two RECT initializers; its frame is 272 bytes,
- * this build's 264. The table copy is 192 bytes, so the span is a local of
- * its own that the code never touches. */
+/* Not exact: retail's frame is 96 bytes with four 8-byte spill slots (sp+24
+ * x, sp+32, sp+40 w, sp+48 h) where this build has three (88 bytes): retail
+ * keeps one more value across the calls. Its registers are x $s5, y $s4, h
+ * $s6, the two tile modes $s2/$s1, y + h $s0, y + h - 16 $s3 and the right
+ * edge $s7; this build sign-extends h into `height` at entry and keeps y +
+ * height - 16 without y + height. ST.EXE's twin func_80029618 is open with
+ * the mirror residue (retail spills `right` there). Not yet tried here: h
+ * used directly with a `bottom` local, per-loop counters as in the ST twin. */
 ADDRESS(0x8001f30c, 0x51c)
 void func_8001f30c(short x, short y, short w, short h)
 {
