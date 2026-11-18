@@ -238,7 +238,7 @@ END.EXE	0x801ba490	0xe4	display	global	bss	DisplayBuffers	main	supported	asm;src
 END.EXE	0x801ba584	0x4	StCdIntrFlag	global	bss	int		supported	asm;PSYLINK map of the native END link;LIBCD StCdInterrupt users	LIBCD streaming flag; strCallback clears it after StCdInterrupt
 FDAT_012.BIN	0x801edfac	0x4	fdat_801edfac	global	bss	int	func_801edf0c	candidate	asm;src/fdat_012/main.c	FDAT overlay word after the code: the scene state
 FDAT_022.BIN	0x801edad0	0x4	fdat_801edad0	global	bss	int	func_801ed4a0	candidate	asm;src/fdat_022/main.c	FDAT overlay word after the code: the scene state
-FDAT_042.BIN	0x801ed96c	0x4	fdat_801ed96c	global	bss	int	func_801ed500	candidate	asm;src/fdat_042/map_801ed4a0.c	FDAT overlay word after the code: the scene state
+FDAT_042.BIN	0x801ed96c	0x4	fdat_801ed96c	global	bss	int	func_801ed500	candidate	asm;src/fdat_042/main.c	FDAT overlay word after the code: the scene state
 FDAT_042.BIN	0x801ed970	0x4	fdat_801ed970	global	bss	int	func_801ed7b4	candidate	asm;src/fdat_042/map_801ed7b4.c	FDAT overlay word after the code: table A entry 32's setup
 FDAT_082.BIN	0x801ed87c	0x4	fdat_801ed87c	global	bss	int	func_801ed4f8	candidate	asm;src/fdat_082/main.c	FDAT overlay word after the code: the scene state
 FDAT_092.BIN	0x801edf54	0x4	fdat_801edf54	static	bss	int	func_801ed4a0	candidate	asm;src/fdat_092/map_801ed4a0.c	FDAT overlay word after the code: scene state
