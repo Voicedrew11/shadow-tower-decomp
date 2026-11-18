@@ -1365,13 +1365,9 @@ void func_8002b2e8(void)
  * A settings page: two columns of six labels (lit while their DAT_801cd180.unk22
  * bit is set in the page flags), twelve level gauges and two buttons
  * below them.
- * The masks are indexed through &DAT_801cd180.unk22[0] so the base register
- * holds the array address (retail's lui/addiu of DAT_801cd180+0x22).
- *
- * Not exact (12 bytes long): conditional draw paths now pick each label
- * colour before its message and x. The y normalization is duplicated and
- * label positions are indexed rather than walked as in retail. The level
- * byte's address still follows the row divide.
+ * The button masks are read through a pointer set before each column's
+ * loop (retail walks it; indexing the array directly keeps the label
+ * positions from being strength-reduced).
  */
 ADDRESS(0x8002b84c, 0x804)
 void func_8002b84c(void)
@@ -1382,6 +1378,7 @@ void func_8002b84c(void)
     u16 label_x[14] = {26, 36, 20, 16, 20, 16, 27, 20, 17, 20, 34, 16, 10, 37};
     MenuScratch *sp;
     int i;
+    u16 *mask;
 
     func_800174c4();
     sp = MENU_SCRATCH;
@@ -1407,14 +1404,16 @@ void func_8002b84c(void)
     } else {
         sp->unk32C = sp->style[2];
     }
+    mask = DAT_801cd180.unk22;
     for (i = 0; i < 6; i++) {
-        if ((&DAT_801cd180.unk22[0])[i] & sp->unk0.levels.flags)
+        if (mask[i] & sp->unk0.levels.flags)
             func_8002732c(MESSAGE(209 + i), label_x[i] + 32, i * 18 + 80, &sp->style[3]);
         else
             func_8002732c(MESSAGE(209 + i), label_x[i] + 32, i * 18 + 80, &sp->style[2]);
     }
+    mask = &DAT_801cd180.unk22[6];
     for (i = 0; i < 6; i++) {
-        if ((&DAT_801cd180.unk22[0])[i + 6] & sp->unk0.levels.flags)
+        if (mask[i] & sp->unk0.levels.flags)
             func_8002732c(MESSAGE(215 + i), label_x[i + 6] + 168, i * 18 + 80, &sp->style[3]);
         else
             func_8002732c(MESSAGE(215 + i), label_x[i + 6] + 168, i * 18 + 80, &sp->style[2]);
@@ -1425,13 +1424,13 @@ void func_8002b84c(void)
         sp->unk33C.x = i < 6 ? 138 : 274;
         sp->unk33C.y = i % 6 * 18 + 79;
         if (sp->unk0.levels.level[i] >= 8) {
+            sp->unk358.vx = sp->unk0.levels.level[i] * 8 + 544;
             sp->unk33C.w = 32;
             sp->unk35C.vy = 506;
-            sp->unk358.vx = sp->unk0.levels.level[i] * 8 + 544;
             sp->unk33C.x -= 8;
         } else {
-            sp->unk33C.w = 16;
             sp->unk358.vx = sp->unk0.levels.level[i] * 4 + 576;
+            sp->unk33C.w = 16;
             if (sp->unk0.levels.level[i] < 4)
                 sp->unk35C.vy = 510 - sp->unk0.levels.level[i];
             else
@@ -1445,26 +1444,25 @@ void func_8002b84c(void)
     }
     sp->unk358.vx = 576;
     sp->unk358.vy = 432;
-    sp->unk33C.x = 32;
     sp->unk35C.vx = 544;
     sp->unk35C.vy = 511;
+    sp->unk33C.x = 32;
     sp->unk33C.y = 44;
     sp->unk33C.w = 60;
     sp->unk33C.h = 16;
     func_80028364(&sp->unk33C, &sp->unk358, &sp->unk35C, NULL, 3);
     sp->unk358.vx = 590;
     sp->unk358.vy = 480;
-    sp->unk33C.x = 96;
     sp->unk35C.vx = 544;
     sp->unk35C.vy = 511;
+    sp->unk33C.x = 96;
     sp->unk33C.y = 44;
     sp->unk33C.w = 120;
     sp->unk33C.h = 16;
     func_80028364(&sp->unk33C, &sp->unk358, &sp->unk35C, NULL, 3);
-    i = 0;
     func_8002732c(MESSAGE(221), label_x[12] + 48, 204, &sp->style[2]);
     func_8002732c(MESSAGE(222), label_x[13] + 152, 204, &sp->style[2]);
-    for (; i < 12; i++) {
+    for (i = 0; i < 12; i++) {
         if (i == 6) {
             row[0].vx = 184;
             row[1].vx = 250;
@@ -2097,12 +2095,6 @@ void func_8002daa0(void)
     }
 }
 
-/*
- * Not exact (20 bytes long): retail keeps the scratchpad base in s4 from the first
- * load; this build rematerializes lui 0x1f80 for the first load and the
- * first three argument addresses. Direct rectangle-coordinate selection,
- * a named MenuList owner and a separate RECT owner did not resolve it.
- */
 ADDRESS(0x8002dd70, 0x5a0)
 void func_8002dd70(void)
 {
@@ -2111,12 +2103,13 @@ void func_8002dd70(void)
     int price;
     int i;
     int y;
-    int x;
+    int flag;
 
-    x = 105;
-    if (sp->unk0.list.unkA == 0)
-        x = 167;
-    sp->unk33C.x = x;
+    flag = sp->unk0.list.unkA;
+    if (flag == 0)
+        sp->unk33C.x = 167;
+    else
+        sp->unk33C.x = 105;
     sp->unk33C.y = 206;
     sp->unk33C.w = 50;
     sp->unk33C.h = 16;
@@ -3059,10 +3052,9 @@ void func_80031378(void)
 }
 
 /*
- * Not exact: the 104-byte frame and cached column coordinates agree, but
- * the initial panel setup is merged and the selected ID test is extended
- * before the sentinel branch rather than loaded separately. The saved
- * column register also differs; this build remains 12 bytes short.
+ * The id grid's detail panel: the panel sits on the side away from the
+ * selected column, and lists the selected id's fourteen counts in columns
+ * of four.
  */
 ADDRESS(0x80031674, 0x334)
 void func_80031674(void)
@@ -3073,7 +3065,8 @@ void func_80031674(void)
     short x, y;
     int name_x;
     int count_x;
-    short column, index;
+    short column;
+    short index;
     short id;
     int none;
     u8 *count;
@@ -3084,43 +3077,51 @@ void func_80031674(void)
         y = 9;
         text_y = 135;
         count_x = 342;
+        sp->unk350.x = x;
+        sp->unk350.y = y;
+        sp->unk350.w = 192;
+        sp->unk350.h = 124;
     } else {
         x = 10;
         y = 9;
         text_y = 135;
         count_x = 18;
+        sp->unk350.x = x;
+        sp->unk350.y = y;
+        sp->unk350.w = 192;
+        sp->unk350.h = 124;
     }
-    sp->unk350.x = x;
-    sp->unk350.w = 192;
-    sp->unk350.h = 124;
-    sp->unk350.y = y;
     none = 0;
     column = sp->unk2E0 % 8;
     if (column < 4) {
-        index = (sp->unk0.grid.row0 + sp->unk2E0 / 8) * 4 + column;
+        index = (sp->unk0.grid.row0 + sp->unk2E0 / 8) * 4;
+        index += column;
         id = sp->unk0.grid.ids0[index];
+        if (sp->unk0.grid.ids0[index] == -1)
+            none = 1;
     } else {
-        index = (sp->unk0.grid.row1 + sp->unk2E0 / 8 - 1) * 4 + column;
+        index = (sp->unk0.grid.row1 + sp->unk2E0 / 8) * 4 - 4;
+        index += column;
         id = sp->unk0.grid.ids1[index];
+        if (sp->unk0.grid.ids1[index] == -1)
+            none = 1;
     }
-    if (id == -1)
-        none = 1;
-    if (!none) {
+    /* The flag is tested as a short (retail copies it to a temporary first). */
+    if (!(short)none) {
         sp->unk358.vx = 640;
         sp->unk358.vy = 0;
         func_80028364(&sp->unk350, &sp->unk358, 0, 0, 16);
-        n = 0;
-        k = 2;
-        name_x = count_x;
         sp->unk350.w = 100;
         sp->unk358.vx = 832;
         sp->unk350.x += 192;
         func_80028364(&sp->unk350, &sp->unk358, 0, 0, 16);
+        n = 0;
+        k = 2;
         count = vis_table_c.unk0118[id].unk10;
-        for (i = 0; i < 4; i++) {
-            int label_x = name_x;
-            int value_x = name_x + 42;
-            for (j = 0; j < 4; j++) {
+        for (i = 0, name_x = count_x; i < 4; i++) {
+            int label_x;
+            int value_x;
+            for (j = 0, label_x = name_x, value_x = name_x + 42; j < 4; j++) {
                 if (n == 14)
                     goto done;
                 n++;

@@ -243,7 +243,10 @@ u32 func_80015950(CdlLOC *pos)
 
 /* Writes a sector count as a BCD CD position without a lead-in offset.
  * Not exact: retail stores second before the final call and leaves its
- * delay slot empty; this build moves that store into the delay slot. */
+ * delay slot empty (`sb v0,1(s2); jal; nop`); this build's insns before
+ * reorg are the same and reorg moves the store into the slot. Ruled out:
+ * a non-void return type, -g, a temporary or u8 local for the remainder,
+ * a do-while wrapper. The function has no label that could stop reorg. */
 ADDRESS(0x800159d4, 0xc0)
 void func_800159d4(CdlLOC *pos, u32 sector)
 {

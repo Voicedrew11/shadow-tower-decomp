@@ -33,8 +33,11 @@
  * the lighting's near/far depths (ScratchPad.unk64/unk68).
  */
 /*
- * Not exact: retail loads unk34 for unk38 after building part_vertices;
- * this build hoists that load above the header store. Same size.
+ * Not exact: retail reads unk34 for the unk38 copy after the part_vertices
+ * sum (`addu v1,v1,v0; lw v0,52(t0)`) and stores it last; sched1 gives that
+ * load a lower priority than the header stores here and moves it up. All
+ * orders of the five header statements and scratch-variable forms give the
+ * same schedule. Same size.
  */
 ADDRESS(0x8001cdf8, 0x42c)
 void world_project_parts(VECTOR *trans)
