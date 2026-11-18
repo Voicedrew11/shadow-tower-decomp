@@ -803,8 +803,6 @@ int func_8001c378(VsSave *save);
  * message and waiting for a press when a step fails; 0x80 and 0x8000
  * restart. Reloads the menu pictures and both players' fighter faces
  * before returning 1 when the card was used, else 0.
- * Not exact: restoring the team slots uses different load temporaries;
- * the final menu reload holds different CD and message-table bases.
  */
 ADDRESS(0x8001bb48, 0x830)
 int func_8001bb48(int mode, int port)
@@ -979,21 +977,23 @@ wait:
 done:
     {
         u_long *menu_buf;
+        u_long *tim;
 
         func_8001d39c();
         DrawSync(0);
         func_80016ca8();
-        menu_buf = DAT_801a4590.unk4A4;
-        DAT_801a4590.unk4A0 = menu_buf;
         face.vx = 640;
         face.vy = 124;
+        DAT_801a4590.unk4A0 = menu_buf = DAT_801a4590.unk4A4;
         func_8002ee90(8, 4, menu_buf);
-        func_8002e630((u32 *)DAT_80196230[1].offsets, (u32 *)(DAT_801a4590.unk4A4 + 1), 0x1500);
-        func_80012c2c((u_long *)((u8 *)menu_buf + DAT_801a4590.unk4A4[0] + 8), &sp->unk1E0, &sp->unk1E4);
+        func_8002e630((u32 *)DAT_80196230[1].offsets, (u32 *)&menu_buf[1], 0x1500);
+        tim = (u_long *)((u8 *)menu_buf + DAT_801a4590.unk4A4[0]);
+        func_80012c2c(tim + 2, &sp->unk1E0, &sp->unk1E4);
         DrawSync(0);
         func_8002ee90(8, 8, menu_buf);
-        func_8002e630((u32 *)DAT_80196230[0].offsets, (u32 *)(DAT_801a4590.unk4A4 + 1), 0x1500);
-        func_80012c2c((u_long *)((u8 *)menu_buf + DAT_801a4590.unk4A4[0] + 8), &sp->unk1D8, &sp->unk1DC);
+        func_8002e630((u32 *)DAT_80196230[0].offsets, (u32 *)&menu_buf[1], 0x1500);
+        tim = (u_long *)((u8 *)menu_buf + DAT_801a4590.unk4A4[0]);
+        func_80012c2c(tim + 2, &sp->unk1D8, &sp->unk1DC);
         DrawSync(0);
         func_8002ee90(8, 7, menu_buf);
         func_80012c2c(menu_buf, &pos, &clut);

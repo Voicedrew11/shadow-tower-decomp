@@ -359,7 +359,7 @@ extern u16 DAT_80117598[7];
 #ifdef VS_PICKED_PAIR
 extern s32 DAT_80063330[2];
 #else
-extern s32 DAT_80063330[];
+extern s32 DAT_80063330[1];
 #endif
 
 /* Read-only words the first-pass round sequence and effect code read
