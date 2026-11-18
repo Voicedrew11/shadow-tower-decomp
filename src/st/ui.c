@@ -2442,18 +2442,20 @@ void func_8002ed98(void)
  * Draws a 25 x 5 grid of 10 x 10 texture cells from tex at pos, 11 pixels
  * apart horizontally and 12 vertically, semi-transparent in color.
  *
- * Not exact: retail keeps pos and tex in t0/t1 with caller-save
- * spills and caches both row UV coordinates after the inner entry guard.
- * This build keeps pos in s8, hoists the addPrim mask, and remains
- * 16 bytes short; the frame and the 11-block loop shape agree.
+ * Not exact (4 bytes short, the loops agree): retail loads tex->vx into a0
+ * and tex->vy into v1, this build the reverse, so `move t0,a0` fills the
+ * first load's delay slot instead of leading the function. Global-alloc
+ * ranks the vx value first here (5 refs over 11 insns against 5 over 16)
+ * and gives it v1; retail's order needs vy first. Ruled out: the position
+ * of the cols/rows assignments, short u0/v0, literal bounds, operand order
+ * of the u/v sums. VS 0x800207d4 is the same function with the same residue.
  */
 ADDRESS(0x8002f1f8, 0x2a0)
 void func_8002f1f8(DVECTOR *pos, DVECTOR *tex, DVECTOR *clut, CVECTOR *color, int arg4)
 {
-    int row;
-    int u0;
+    int row, col;
     int cols, rows;
-    int col, x, y;
+    int u0, v0;
     int u, v;
     StPacketBuffer *buf;
     POLY_FT4 *p;
@@ -2462,20 +2464,17 @@ void func_8002f1f8(DVECTOR *pos, DVECTOR *tex, DVECTOR *clut, CVECTOR *color, in
     cols = 25;
     rows = 5;
     u0 = (short)(tex->vx % 64) * 4;
-    v = (short)(tex->vy % 256);
-    for (row = 0, y = 0; row < rows; row++, y += 12, v += 10) {
-        for (col = 0, x = 0, u = u0; col < cols; col++, x += 11, u += 10) {
-            buf = world_state.packet;
-            p = (POLY_FT4 *)buf->cur;
-            if (buf->end < (u_long *)(p + 1))
-                return;
-            buf->cur = (u_long *)(p + 1);
-            world_state.unk8328++;
+    v0 = (short)(tex->vy % 256);
+    for (row = 0; row < rows; row++) {
+        for (col = 0; col < cols; col++) {
+            u = u0 + col * 10;
+            v = v0 + row * 10;
+            NEW_PRIM(buf, p, POLY_FT4);
             setUV4(p, u, v, u + 10, v, u, v + 10, u + 10, v + 10);
-            p->x0 = p->x2 = pos->vx + x;
-            p->x1 = p->x3 = pos->vx + x + 10;
-            p->y0 = p->y1 = pos->vy + y;
-            p->y2 = p->y3 = pos->vy + y + 10;
+            p->x0 = p->x2 = pos->vx + col * 11;
+            p->x1 = p->x3 = pos->vx + col * 11 + 10;
+            p->y0 = p->y1 = pos->vy + row * 12;
+            p->y2 = p->y3 = pos->vy + row * 12 + 10;
             c = *color;
             setRGB0(p, c.r, c.g, c.b);
             p->tpage = GetTPage(0, color->cd & 3, tex->vx, tex->vy);
