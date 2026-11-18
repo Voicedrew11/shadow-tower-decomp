@@ -424,34 +424,28 @@ void func_80027900(DVECTOR *pos, CVECTOR *color, u16 dir)
     setRGB0(p, (color)->r, (color)->g, (color)->b);            \
     *world_state.ot_cur = (u_long)(p) & 0xffffff
 
+/* FILL_F4 over the rectangle with top left (x, y), width w and height h. */
+#define FILL_RECT_F4(p, semi, x, y, w, h, color) \
+    FILL_F4(p, semi, x, y, (x) + (w), y, x, (y) + (h), (x) + (w), (y) + (h), color)
+
 /* Draws a rectangle outline: bars `border & 0xff` high at the top and
  * bottom and `border >> 8` wide at the sides. */
-/* Not exact (size-exact): retail keeps `color` in $t4 and computes
- * `border >> 8` before the world-state address. The bottom/right bars also
- * load y before h and x before w into different operand registers. Explicit
- * coordinate order, separate packet phases and low-border reuse did not
- * resolve those differences. */
 ADDRESS(0x80027d18, 0x508)
 void func_80027d18(RECT *r, CVECTOR *color, u16 border, u16 semi)
 {
     POLY_F4 *p;
     StPacketBuffer *buf;
-    int w = border >> 8;
-    int h = border & 0xff;
+    short w = border >> 8;
+    short h = border & 0xff;
 
     NEW_PRIM(buf, p, POLY_F4);
-    FILL_F4(p, semi, r->x, r->y, r->x + r->w, r->y, r->x, r->y + h, r->x + r->w, r->y + h,
-            color);
+    FILL_RECT_F4(p, semi, r->x, r->y, r->w, h, color);
     NEW_PRIM(buf, p, POLY_F4);
-    FILL_F4(p, semi, r->x, r->y + r->h - h, r->x + r->w, r->y + r->h - h, r->x, r->h + r->y,
-            r->x + r->w, r->h + r->y, color);
+    FILL_RECT_F4(p, semi, r->x, r->y + r->h - h, r->w, h, color);
     NEW_PRIM(buf, p, POLY_F4);
-    FILL_F4(p, semi, r->x, r->y + h, r->x + w, r->y + h, r->x, r->y + h + (r->h - h * 2),
-            r->x + w, r->y + h + (r->h - h * 2), color);
+    FILL_RECT_F4(p, semi, r->x, r->y + h, w, r->h - h * 2, color);
     NEW_PRIM(buf, p, POLY_F4);
-    FILL_F4(p, semi, r->x + r->w - w, r->y + h, r->w + r->x, r->y + h,
-            r->x + r->w - w, r->y + h + (r->h - h * 2), r->w + r->x, r->y + h + (r->h - h * 2),
-            color);
+    FILL_RECT_F4(p, semi, r->x + r->w - w, r->y + h, w, r->h - h * 2, color);
 }
 
 /* Fills a rectangle (semi-transparent when `semi` is 1). */
