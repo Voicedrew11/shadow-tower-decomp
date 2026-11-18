@@ -1698,8 +1698,15 @@ void func_8005c7fc(void)
  * twice moves its item to the first free entry of the other list. Leaving
  * writes the flag bits back.
  *
- * Not exact (0x14 bytes long): register allocation and the order of
- * the cell loads differ from the first CD load on.
+ * Not exact (0x64 bytes short). Agreed with retail so far: the file
+ * cursor and its (*p + 4) advance, the plain `i / 4`, `i % 4` cell
+ * positions, the first image loop (the load written in both arms, sizes
+ * as block-local shifted values) and the cleanup behind the loop's
+ * `break`. Open: from the first image loop on the saved registers are
+ * rotated (retail: used $s6, the cd_state base $s4, the tex and id
+ * offsets $s5/$s7, n $s3) and the main loop's cell moves still use the
+ * first-pass variables; `shown` and the saved row live on the stack in
+ * retail (128(sp), 120(sp)).
  */
 ADDRESS(0x8005d25c, 0x16c8)
 void func_8005d25c(void)
@@ -1718,8 +1725,8 @@ void func_8005d25c(void)
     s16 shown;
     s16 n;
     s16 id;
+    u_long *p;
     int used;
-    int size;
     int col;
     int row;
     int i;
@@ -1728,19 +1735,21 @@ void func_8005d25c(void)
 
     func_80058cc8();
     sp->unk0.grid.messages = func_800152d0(21504);
-    func_80016030(3, 1, CD_BUFFER);
-    func_80014cfc((u32 *)&menu_messages, (u32 *)(CD_BUFFER + 1), 5376);
-    func_8003ec5c((u_long *)((u8 *)CD_BUFFER + (CD_BUFFER[0] + 4)) + 1, &sp->unk2E6[0],
-                  &sp->unk2E6[1], 1);
-    func_80016030(3, 4, CD_BUFFER);
-    func_80014cfc((u32 *)sp->unk0.grid.messages, (u32 *)(CD_BUFFER + 1), 5376);
-    func_8003ec5c((u_long *)((u8 *)CD_BUFFER + (CD_BUFFER[0] + 4)) + 1, &sp->unk2E6[2],
-                  &sp->unk2E6[3], 1);
-    func_80016030(3, 5, CD_BUFFER);
-    func_8003ec5c(CD_BUFFER, &sp->unk2E6[4], NULL, 1);
+    p = DAT_80088c88;
+    func_80016030(3, 1, p);
+    func_80014cfc((u32 *)&menu_messages, (u32 *)(p + 1), 5376);
+    p = (u_long *)((u8 *)p + (*p + 4));
+    func_8003ec5c(p + 1, &sp->unk2E6[0], &sp->unk2E6[1], 1);
+    p = DAT_80088c88;
+    func_80016030(3, 4, p);
+    func_80014cfc((u32 *)sp->unk0.grid.messages, (u32 *)(p + 1), 5376);
+    p = (u_long *)((u8 *)p + (*p + 4));
+    func_8003ec5c(p + 1, &sp->unk2E6[2], &sp->unk2E6[3], 1);
+    func_80016030(3, 5, DAT_80088c88);
+    func_8003ec5c(DAT_80088c88, &sp->unk2E6[4], NULL, 1);
     DrawSync(0);
-    func_80016030(3, 7, CD_BUFFER);
-    func_8003ec5c(CD_BUFFER, &image, &clut, 1);
+    func_80016030(3, 7, DAT_80088c88);
+    func_8003ec5c(DAT_80088c88, &image, &clut, 1);
     DrawSync(0);
     sp->unk0.grid.count0 = 0;
     sp->unk0.grid.count1 = 0;
@@ -1761,27 +1770,30 @@ void func_8005d25c(void)
             && i != viewer.unk38[13] && i != viewer.unk38[14] && i != viewer.unk38[15]
             && i != viewer.unk38[16] && i != viewer.unk38[17] && i != viewer.unk38[18]
             && i != viewer.unk38[19] && i != viewer.unk38[20]) {
-            if (DAT_801c7590.counts[i].flag)
-                sp->unk0.grid.ids1[sp->unk0.grid.count1++] = i;
-            else
+            if (!DAT_801c7590.counts[i].flag)
                 sp->unk0.grid.ids0[sp->unk0.grid.count0++] = i;
+            else
+                sp->unk0.grid.ids1[sp->unk0.grid.count1++] = i;
         }
     }
     sp->unk0.grid.tex = func_800152d0(160);
     if (sp->unk0.grid.tex == NULL)
         exit(1);
     for (i = 0; i < 20; i++) {
-        sp->unk0.grid.tex[i].vx = (s16)(i / 4) * 56 + 640;
-        sp->unk0.grid.tex[i].vy = ((s16)i - (s16)(i / 4) * 4) * 28 + 124;
+        sp->unk0.grid.tex[i].vx = i / 4 * 56 + 640;
+        sp->unk0.grid.tex[i].vy = i % 4 * 28 + 124;
     }
-    for (i = 20, n = 0; i < 29; i++, n += 28) {
-        sp->unk0.grid.tex[i].vx = 960;
-        sp->unk0.grid.tex[i].vy = n;
+    {
+        int y;
+
+        for (i = 20, y = 0; i < 29; i++, y += 28) {
+            sp->unk0.grid.tex[i].vx = 960;
+            sp->unk0.grid.tex[i].vy = y;
+        }
     }
     for (i = 29; i < 40; i++) {
-        k = i - 29;
-        sp->unk0.grid.tex[i].vx = (s16)(k / 9) * 56 + 640;
-        sp->unk0.grid.tex[i].vy = ((s16)k - (s16)(k / 9) * 9) * 28 + 256;
+        sp->unk0.grid.tex[i].vx = (i - 29) / 9 * 56 + 640;
+        sp->unk0.grid.tex[i].vy = (i - 29) % 9 * 28 + 256;
     }
     used = 0;
     clear.w = 56;
@@ -1793,23 +1805,25 @@ void func_8005d25c(void)
             cd_state.unkA84 = CD_BUFFER;
             used = 0;
         }
-        if (i < 20) {
-            if (i < sp->unk0.grid.count0) {
-                id = sp->unk0.grid.ids0[i];
-                goto load;
-            }
-        } else if (i - 20 < sp->unk0.grid.count1) {
-            id = sp->unk0.grid.ids1[i - 20];
-        load:
-            size = func_80016030(6, vis_table_c.unk0118[id].unk5[0], cd_state.unkA84);
+        if (i < 20 && i < sp->unk0.grid.count0) {
+            int size = func_80016030(6, vis_table_c.unk0118[sp->unk0.grid.ids0[i]].unk5[0],
+                                     cd_state.unkA84) << 11;
+
             func_8003ec5c(cd_state.unkA84, &sp->unk0.grid.tex[i], NULL, 1);
-            used += size << 11;
-            cd_state.unkA84 = (u_long *)((u8 *)cd_state.unkA84 + (size << 11));
-            continue;
+            used += size;
+            cd_state.unkA84 = (u_long *)((u8 *)cd_state.unkA84 + size);
+        } else if (i >= 20 && i - 20 < sp->unk0.grid.count1) {
+            int size = func_80016030(6, vis_table_c.unk0118[sp->unk0.grid.ids1[i - 20]].unk5[0],
+                                     cd_state.unkA84) << 11;
+
+            func_8003ec5c(cd_state.unkA84, &sp->unk0.grid.tex[i], NULL, 1);
+            used += size;
+            cd_state.unkA84 = (u_long *)((u8 *)cd_state.unkA84 + size);
+        } else {
+            clear.x = sp->unk0.grid.tex[i].vx;
+            clear.y = sp->unk0.grid.tex[i].vy;
+            ClearImage(&clear, 0, 0, 0);
         }
-        clear.x = sp->unk0.grid.tex[i].vx;
-        clear.y = sp->unk0.grid.tex[i].vy;
-        ClearImage(&clear, 0, 0, 0);
     }
     shown = -1;
     sp->unk2E0 = 0;
@@ -1831,26 +1845,7 @@ void func_8005d25c(void)
             } else if (sp->unk2DC == 2) {
                 sp->unk2DC = 1;
             } else {
-                for (i = 0, n = sp->unk0.grid.count0; n != 0; i++) {
-                    if (sp->unk0.grid.ids0[i] != -1) {
-                        n--;
-                        DAT_801c7590.counts[sp->unk0.grid.ids0[i]].flag = 0;
-                    }
-                }
-                for (i = 0, n = sp->unk0.grid.count1; n != 0; i++) {
-                    if (sp->unk0.grid.ids1[i] != -1) {
-                        n--;
-                        DAT_801c7590.counts[sp->unk0.grid.ids1[i]].flag = 1;
-                    }
-                }
-                func_80058c4c();
-                func_800152f8(sp->unk0.grid.ids0);
-                func_800152f8(sp->unk0.grid.ids1);
-                func_800152f8(sp->unk0.grid.tex);
-                func_800152f8(sp->unk0.grid.messages);
-                func_80058d30();
-                func_80057a3c();
-                return;
+                break;
             }
         }
         if (DAT_801cd180.unk4 & 0x4000) {
@@ -2013,8 +2008,8 @@ void func_8005d25c(void)
                     id = sp->unk0.grid.ids1[sp->unk0.grid.row1 * 4 + row * 4 + col - 4];
                 if (shown != id && id != -1) {
                     shown = id;
-                    func_80016030(6, vis_table_c.unk0118[id].unk5[0] + 200, CD_BUFFER);
-                    func_8003ec5c(CD_BUFFER, &picture, NULL, 1);
+                    func_80016030(6, vis_table_c.unk0118[id].unk5[0] + 200, DAT_80088c88);
+                    func_8003ec5c(DAT_80088c88, &picture, NULL, 1);
                 }
             }
             if (sp->unk0.grid.row0 != r0) {
@@ -2040,11 +2035,12 @@ void func_8005d25c(void)
                         clear.y = sp->unk0.grid.tex[k % 20].vy;
                         ClearImage(&clear, 0, 0, 0);
                     } else {
-                        size = func_80016030(6, vis_table_c.unk0118[sp->unk0.grid.ids0[k]].unk5[0],
-                                             cd_state.unkA84);
+                        int size = func_80016030(
+                            6, vis_table_c.unk0118[sp->unk0.grid.ids0[k]].unk5[0], cd_state.unkA84) << 11;
+
                         func_8003ec5c(cd_state.unkA84, &sp->unk0.grid.tex[k % 20], NULL, 1);
-                        used += size << 11;
-                        cd_state.unkA84 = (u_long *)((u8 *)cd_state.unkA84 + (size << 11));
+                        used += size;
+                        cd_state.unkA84 = (u_long *)((u8 *)cd_state.unkA84 + size);
                     }
                     k++;
                 }
@@ -2072,11 +2068,12 @@ void func_8005d25c(void)
                         clear.y = sp->unk0.grid.tex[k % 20 + 20].vy;
                         ClearImage(&clear, 0, 0, 0);
                     } else {
-                        size = func_80016030(6, vis_table_c.unk0118[sp->unk0.grid.ids1[k]].unk5[0],
-                                             cd_state.unkA84);
+                        int size = func_80016030(
+                            6, vis_table_c.unk0118[sp->unk0.grid.ids1[k]].unk5[0], cd_state.unkA84) << 11;
+
                         func_8003ec5c(cd_state.unkA84, &sp->unk0.grid.tex[k % 20 + 20], NULL, 1);
-                        used += size << 11;
-                        cd_state.unkA84 = (u_long *)((u8 *)cd_state.unkA84 + (size << 11));
+                        used += size;
+                        cd_state.unkA84 = (u_long *)((u8 *)cd_state.unkA84 + size);
                     }
                     k++;
                 }
@@ -2086,6 +2083,25 @@ void func_8005d25c(void)
         func_80031aec();
         sp->unk2E4 = (sp->unk2E4 + 1) % 32;
     }
+    for (i = 0, n = sp->unk0.grid.count0; n != 0; i++) {
+        if (sp->unk0.grid.ids0[i] != -1) {
+            n--;
+            DAT_801c7590.counts[sp->unk0.grid.ids0[i]].flag = 0;
+        }
+    }
+    for (i = 0, n = sp->unk0.grid.count1; n != 0; i++) {
+        if (sp->unk0.grid.ids1[i] != -1) {
+            n--;
+            DAT_801c7590.counts[sp->unk0.grid.ids1[i]].flag = 1;
+        }
+    }
+    func_80058c4c();
+    func_800152f8(sp->unk0.grid.ids0);
+    func_800152f8(sp->unk0.grid.ids1);
+    func_800152f8(sp->unk0.grid.tex);
+    func_800152f8(sp->unk0.grid.messages);
+    func_80058d30();
+    func_80057a3c();
 }
 
 /*
