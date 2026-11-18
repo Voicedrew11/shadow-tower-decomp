@@ -819,10 +819,17 @@ void func_8005aa80(void)
  * and an item for it from its list (unk2C7: the list kind; 10 is the
  * magic grid), recomputing the figures as the choice changes.
  *
- * Not exact (0x38 bytes short): archive/buffer lifetimes and several case
- * joins/load orders differ. The saved magic-page row can be -1 and must
- * stay signed across frame callbacks; file arithmetic stays promoted until
- * the call boundary. The switch-table addends still differ from retail.
+ * Not exact (0x74 bytes short). Agreed with retail so far: the archive
+ * is reached through one pointer (`arc`: retail forms cd_state + 0xa00
+ * first and derives the member 1 position and the file buffer from it),
+ * the file cursor advances by (*p + 4), and the slot preview loop has its
+ * own counter (the kind sort's counter never crosses a call and sits in
+ * $a2). Open: retail keeps a zero in $s6 from the top (`move s6,zero;
+ * move s7,s6`) and passes it for every zero argument of the first block,
+ * the kind sort increments each list count before it forms the slot
+ * address, and the saved registers of the main loop are rotated. The
+ * saved magic-page row can be -1 and must stay signed across frame
+ * callbacks; the switch-table addends still differ from retail.
  */
 ADDRESS(0x8005ad00, 0x1afc)
 void func_8005ad00(void)
@@ -835,6 +842,7 @@ void func_8005ad00(void)
     DVECTOR unused2;
     CdlLOC loc;
     u_long *p;
+    StArchive *arc;
     s16 *slot;
     s16 base;
     s16 offset;
@@ -847,9 +855,10 @@ void func_8005ad00(void)
     int n;
     int i;
 
-    base = 0;
     offset = 0;
-    func_80015a94(&cd_state.unkA00.file.pos, cd_state.unkA00.sectors[1], &loc);
+    base = 0;
+    arc = &cd_state.unkA00;
+    func_80015a94(&arc->file.pos, arc->sectors[1], &loc);
     CdControl(CdlSetloc, (u_char *)&loc, NULL);
     ResetGraph(1);
     func_8005aa80();
@@ -858,14 +867,14 @@ void func_8005ad00(void)
     p = CD_BUFFER;
     func_80016030(3, 1, p);
     func_80014cfc((u32 *)&menu_messages, (u32 *)(p + 1), 5376);
-    p = (u_long *)((u8 *)p + (CD_BUFFER[0] + 4));
+    p = (u_long *)((u8 *)p + (*p + 4));
     func_8003ec5c(p + 1, &sp->unk2E6[0], &sp->unk2E6[1], 1);
     p = (u_long *)((u8 *)p + (*p + 4));
     func_80014cfc(sp->unk2D0, (u32 *)(p + 1), 36);
     p = CD_BUFFER;
     func_80016030(3, 4, p);
     func_80014cfc((u32 *)sp->unk2CC, (u32 *)(p + 1), 5376);
-    p = (u_long *)((u8 *)p + (CD_BUFFER[0] + 4));
+    p = (u_long *)((u8 *)p + (*p + 4));
     func_8003ec5c(p + 1, &sp->unk2E6[2], &sp->unk2E6[3], 1);
     func_80016030(3, 5, CD_BUFFER);
     func_8003ec5c(CD_BUFFER, &sp->unk2E6[4], NULL, 1);
@@ -929,6 +938,7 @@ void func_8005ad00(void)
     {
         RECT clear = {640, 0, 384, 256};
         int slots[20] = {3, 4, 8, 9, 2, 10, 16, 17, 0, 13, 1, 14, 7, 5, 11, 18, 19, 20, 6, 12};
+        int j;
 
         DAT_800881aa = 0;
         ClearImage(&clear, 0, 0, 0);
@@ -938,14 +948,14 @@ void func_8005ad00(void)
         func_8002fc4c();
         func_80059204(slots[0]);
         func_8002fc4c();
-        for (i = 1; i < 20; i++) {
+        for (j = 1; j < 20; j++) {
             if ((viewer.unk38[3] == 0xffff || vis_table_c.unk0118[viewer.unk38[3]].unk26 != 9
-                 || slots[i] != 16)
+                 || slots[j] != 16)
                 && (viewer.unk38[4] == 0xffff || vis_table_c.unk0118[viewer.unk38[4]].unk26 != 9
-                    || slots[i] != 17)
+                    || slots[j] != 17)
                 && (viewer.unk38[9] == 0xffff || vis_table_c.unk0118[viewer.unk38[9]].unk26 != 10
-                    || (slots[i] != 2 && slots[i] != 10 && slots[i] != 15))) {
-                func_80059204(slots[i]);
+                    || (slots[j] != 2 && slots[j] != 10 && slots[j] != 15))) {
+                func_80059204(slots[j]);
                 func_8002fc4c();
                 func_80057d10();
             }
