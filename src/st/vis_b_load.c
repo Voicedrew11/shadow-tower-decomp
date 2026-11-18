@@ -13,10 +13,7 @@
 
 /* Each entry takes its record, position and parameters from the file; the
  * record's kind (byte 0) sets its state, unknown kinds go to the area's
- * handler.
- * Not exact: relative byte-parameter subtraction order and the sound-period
- * temporary still differ.
- */
+ * handler. */
 ADDRESS(0x8004eebc, 0x680)
 void func_8004eebc(u8 *src)
 {
@@ -25,6 +22,7 @@ void func_8004eebc(u8 *src)
     int now;
     int i;
     u16 n;
+    u16 secs;
     int kind;
     int state;
 
@@ -160,9 +158,9 @@ void func_8004eebc(u8 *src)
                     e->unk24.vx = src[0] * 4096 + *(s16 *)(src + 8) + 0x800;
                     e->unk24.vy = src[1] * 4096 + *(s16 *)(src + 10);
                     e->unk24.vz = src[2] * 4096 + *(s16 *)(src + 12) + 0x800;
-                    ((u8 *)&e->unk50)[0] = e->unk48 - (src[0] - 64);
-                    ((u8 *)&e->unk50)[1] = e->unk49 - (src[1] - 64);
-                    ((u8 *)&e->unk50)[2] = e->unk4A.snd.unk4A - (src[2] - 64);
+                    ((u8 *)&e->unk50)[0] = e->unk48 - (u8)(src[0] - 64);
+                    ((u8 *)&e->unk50)[1] = e->unk49 - (u8)(src[1] - 64);
+                    ((u8 *)&e->unk50)[2] = e->unk4A.snd.unk4A - (u8)(src[2] - 64);
                     e->unk4A.door.unk4F -= *(s16 *)(src + 10) / 128;
                 }
                 break;
@@ -172,17 +170,17 @@ void func_8004eebc(u8 *src)
                 ((u8 *)&e->unk50)[0] = 1;
                 break;
             case 0xec:
-                n = e->unk4A.snd.unk4E;
+                secs = e->unk4A.snd.unk4E;
                 e->unk05 = 0xec;
                 e->unk54 = -1;
-                e->unk50 = now + n * 60;
+                e->unk50 = now + secs * 60;
                 break;
             case 31:
-                n = e->unk4A.snd.unk4E;
+                secs = e->unk4A.snd.unk4E;
                 e->unk01 = 0;
                 e->unk54 = -1;
                 e->unk05 = 31;
-                e->unk50 = now + n * 60;
+                e->unk50 = now + secs * 60;
                 break;
             case 0xfe:
                 e->unk05 = 0xfe;

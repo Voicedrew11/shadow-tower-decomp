@@ -1256,9 +1256,6 @@ void world_draw_gt4_far(VECTOR *trans)
  * back.
  *
  * The 0x90/0x92 halves (st.mesh_draw*'s prim_count) hold 240 and 320 here.
- *
- * Not exact: retail stores the packet cursor (sp->prim) before the 320;
- * this build schedules the 320 first. Same size.
  */
 ADDRESS(0x80020a80, 0x428)
 void world_draw(void)
@@ -1275,8 +1272,8 @@ void world_draw(void)
     sp->far_z = 4096;
     sp->ot = world_state.ot_cur;
     sp->prim = world_state.packet->cur;
-    sp->prim_count.halves[1] = 320;
     sp->prim_end = world_state.packet->end;
+    sp->prim_count.halves[1] = 320;
     sp->prim_count.halves[0] = 240;
     sp->part_vertex_count = world_state.unk831C[0];
     sp->part_faces = world_state.unk831C[1];

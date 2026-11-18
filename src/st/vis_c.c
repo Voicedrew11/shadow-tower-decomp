@@ -216,9 +216,7 @@ void func_80052e50(Vis48 *c)
 }
 
 /* Loads the first 32 entries from an area file, then drops the collected
- * ones of the 16 from entry 32.
- * Not exact: this build hoists &area_state into s7 out of the first loop;
- * retail reads area_state.area with lui+lbu inside it (frame 48, not 56). */
+ * ones of the 16 from entry 32. */
 ADDRESS(0x80052f30, 0x244)
 void func_80052f30(VisCFileEntry *src)
 {
@@ -227,7 +225,7 @@ void func_80052f30(VisCFileEntry *src)
     int i;
 
     vis_table_c.unk0000[0] = 0;
-    for (i = 0; i < 32; i++, c++, src++) {
+    for (i = 0; i < 32; c++, src++, i++) {
         c->unk00 = src->unk00;
         c->unk02 = src->unk16;
         c->unk08.vx = (src->unk04 << 12) + src->unk08;
@@ -242,8 +240,8 @@ void func_80052f30(VisCFileEntry *src)
             c->unk22 = 0;
             continue;
         }
-        c->unk2c = area_state.area;
         rec = &vis_table_c.unk0118[c->unk00];
+        c->unk2c = area_state.area;
         c->unk2D = rec->unk5[1];
         vis_table_c.unk0048[c->unk00 >> 5] |= 1 << (c->unk00 & 0x1f);
         vis_table_c.unk0000[1]++;

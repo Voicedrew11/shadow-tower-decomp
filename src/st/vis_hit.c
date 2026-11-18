@@ -238,8 +238,7 @@ void func_800468c0(VECTOR *pos, int kind)
                     goto next;
                 if (UP(sp->e[1][0]) && UP(sp->e[1][1]) && UP(sp->e[1][2]) && h1 < sp->h118) {
                     sp->h118 = h1;
-                    /* the record index is stored as a word here */
-                    *(u32 *)&vis_lists.unk47D8 = vis_lists.sources[i];
+                    vis_lists.unk47D8 = vis_lists.sources[i];
                     sp->n160 = nrm;
                 }
             }
@@ -463,8 +462,7 @@ void func_80047884(VECTOR *pos, int kind)
                 if (UP(sp->e[1][0]) && UP(sp->e[1][1]) && UP(sp->e[1][2]) && UP(sp->e[1][3]) &&
                     h1 < sp->h118) {
                     sp->h118 = h1;
-                    /* the record index is stored as a word here */
-                    *(u32 *)&vis_lists.unk47D8 = vis_lists.sources[i];
+                    vis_lists.unk47D8 = vis_lists.sources[i];
                     sp->n160 = nrm;
                 }
             }
@@ -519,8 +517,8 @@ void func_80047884(VECTOR *pos, int kind)
  * position plus velocity and a point 1027 below its height: bit 0 floor,
  * bit 1 wall, bit 2 ceiling, bit 3 the second wall. The heights and wall
  * normals go to vis_lists.
- * Not exact: unset-constant setup and the record/last-array-pointer
- * preparation are scheduled in another order before the triangle pass. */
+ * Not exact: retail loads 0x80000 into s5 before the -1 for sp->hit (+0x26c);
+ * this build loads the -1 first. */
 ADDRESS(0x80048ad0, 0x824)
 int func_80048ad0(VisLists *req)
 {
@@ -593,10 +591,9 @@ heights:
     sp->world = lists->unkC0;
     sp->rel[0] = lists->unk11C0;
     sp->rel[1] = lists->unk22C0;
-    /* the record index is stored as a word here */
     record = lists->sources[0];
     sp->rel[2] = lists->unk33C0;
-    *(u32 *)&lists->unk47D8 = record;
+    lists->unk47D8 = record;
     func_800468c0(pos, req->unk0);
     sp->world = vis_lists.unkC0;
     sp->rel[0] = vis_lists.unk11C0;

@@ -138,10 +138,7 @@ void func_8004e2d8(void)
 
 /* The per-frame table A pass: on an area change frees the animation files
  * and parks the entries of other areas, then measures each entry against
- * the viewer, runs it and moves it.
- * Not exact: at +0x1e0 the second pass copies the table base (move s4,s3)
- * before loading area_state where retail copies it after, and derives the
- * row pointer s0 = e + 0x23 from s3 instead of s4 (4 words). */
+ * the viewer, runs it and moves it. */
 ADDRESS(0x8004e324, 0x5c8)
 void func_8004e324(void)
 {
@@ -200,7 +197,7 @@ void func_8004e324(void)
     }
     vis_table_a.unk614C = 0;
     for (e = vis_table_a.entries, vis_table_a.unk6144 = 0; vis_table_a.unk6144 < 64;
-         vis_table_a.unk6144++, e++) {
+         e++, vis_table_a.unk6144++) {
         if (e->unk00 != 0xff) {
             func_8004c03c(e);
             dx = e->unk74.vx - viewer.position.vx;

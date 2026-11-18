@@ -243,8 +243,6 @@ void func_8003ec4c(volatile u8 *p)
  * CLUT block at `clut` and each pixel block at `pix`, offset from the
  * TIM's own position unless `absolute`.
  */
-/* Not exact: the length-word store precedes the final dimensions load;
- * retail delays that store until after the payload pointer advances. */
 ADDRESS(0x8003ec5c, 0x1dc)
 void func_8003ec5c(void *data, DVECTOR *pix, DVECTOR *clut, int absolute)
 {
@@ -274,6 +272,7 @@ void func_8003ec5c(void *data, DVECTOR *pix, DVECTOR *clut, int absolute)
     u_long *p;
     u_long position_word;
     u_long length_word;
+    u_long dimensions_word;
 
     memset(&zero_clut, 0, sizeof(zero_clut));
     memset(&zero_pix, 0, sizeof(zero_pix));
@@ -292,9 +291,10 @@ next:
             position_word = p[1];
             length_word = p[0];
             block.words.position = position_word;
-            block.words.byte_count = length_word;
-            block.words.dimensions = p[2];
+            dimensions_word = p[2];
             p += 3;
+            block.words.byte_count = length_word;
+            block.words.dimensions = dimensions_word;
             if (!absolute) {
                 rect.x = block.header.rect.x + cp->vx;
                 rect.y = block.header.rect.y + cp->vy;
@@ -310,9 +310,10 @@ next:
         position_word = p[1];
         length_word = p[0];
         block.words.position = position_word;
-        block.words.byte_count = length_word;
-        block.words.dimensions = p[2];
+        dimensions_word = p[2];
         p += 3;
+        block.words.byte_count = length_word;
+        block.words.dimensions = dimensions_word;
         if (!absolute) {
             rect.x = block.header.rect.x + pp->vx;
             rect.y = block.header.rect.y + pp->vy;
@@ -1642,11 +1643,7 @@ void func_800420a0(void)
     }
 }
 
-/*
- * Swaps hand `a`'s item with slot `b`, twice for a two-handed item.
- * Not exact: the b-slot address forms before the a-slot address, and
- * saved per-slot bases differ. The swap load/store widths and order agree.
- */
+/* Swaps hand `a`'s item with slot `b`, twice for a two-handed item. */
 ADDRESS(0x80042620, 0x2e0)
 void func_80042620(u8 a, u8 b)
 {
@@ -1654,13 +1651,9 @@ void func_80042620(u8 a, u8 b)
     SVECTOR unused0 = {0, 128, 0, -128};
     SVECTOR unused1 = {0, 4, 0, -4};
     u16 id;
-    ViewerModel *model_b;
     ViewerModel *model_a;
-    StAnimFile *block_b;
     StAnimFile *block_a;
-    u8 model_id_b;
     u8 model_id_a;
-    u8 sound_b;
     u8 sound_a;
 
     if ((viewer.unk38[3] != 0xffff && vis_table_c.unk0118[viewer.unk38[3]].unk26 == 9) ||
@@ -1676,17 +1669,14 @@ void func_80042620(u8 a, u8 b)
             viewer.unk38[16] = viewer.unk38[17];
             viewer.unk38[17] = id;
         }
-        model_b = viewer.unkE8[b];
         model_a = viewer.unkE8[a];
-        viewer.unkE8[a] = model_b;
+        viewer.unkE8[a] = viewer.unkE8[b];
         viewer.unkE8[b] = model_a;
-        block_b = viewer.unkF8[b];
         block_a = viewer.unkF8[a];
-        viewer.unkF8[a] = block_b;
+        viewer.unkF8[a] = viewer.unkF8[b];
         viewer.unkF8[b] = block_a;
-        model_id_b = viewer.unk148[b];
         model_id_a = viewer.unk148[a];
-        viewer.unk148[a] = model_id_b;
+        viewer.unk148[a] = viewer.unk148[b];
         viewer.unk148[b] = model_id_a;
         if (viewer.unk148[a] != 0xff)
             anim_register(a + 32, viewer.unkF8[a]);
@@ -1696,9 +1686,8 @@ void func_80042620(u8 a, u8 b)
             ((StAnimSlot *)viewer.unk108[a])->unk2 = 0xffff;
         if (viewer.unk108[b])
             ((StAnimSlot *)viewer.unk108[b])->unk2 = 0xffff;
-        sound_b = viewer.unk1D4[b];
         sound_a = viewer.unk1D4[a];
-        viewer.unk1D4[a] = sound_b;
+        viewer.unk1D4[a] = viewer.unk1D4[b];
         viewer.unk1D4[b] = sound_a;
         if (a == 0) {
             viewer.unk17E = 0;
@@ -1841,8 +1830,8 @@ void func_80042cfc(void)
  * viewer.unk218 (walking, using an item, dying, falling into a pit), the
  * floor damage and the status damage over time, the view angles, the
  * swings and the hit/magic point recovery.
- * Not exact: input-owner and masked-button scheduling, a status scalar's
- * address temporary, and the later damage/wear loop temporaries differ. */
+ * Not exact: the DAT_801cd0e0 address temporary (+0x96c, v1 vs v0), the
+ * status damage temporary and the wear loop's s0/s1 differ. */
 ADDRESS(0x80042d74, 0x1678)
 void func_80042d74(void)
 {
@@ -2003,8 +1992,8 @@ void func_80042d74(void)
                      viewer.unk38[11] != 0xffff || viewer.unk38[20] != 0xffff ||
                      viewer.unk38[18] != 0xffff)) {
                     func_80057cc8();
-                    viewer.unk218 = 1;
                     DAT_801cd180.unk4 &= DAT_801cd180.unk22[11];
+                    viewer.unk218 = 1;
                     func_80057a3c();
                 }
             }
@@ -2238,7 +2227,7 @@ void func_80042d74(void)
                 player_add_hp(-1);
                 player_add_mp(-1);
             }
-            if (viewer.unk24 < viewer.unk22 && viewer.unk23C % 20 == 0) {
+            if (viewer.unk22 > viewer.unk24 && viewer.unk23C % 20 == 0) {
                 player_add_hp(viewer.unk24 / 10 - viewer.unk22 / 10);
             }
             if ((viewer.unk2C & 0x400) || viewer.unk2F0) {
