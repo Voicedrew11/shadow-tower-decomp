@@ -763,12 +763,9 @@ void func_80065770(void)
 }
 
 /* The ring sub-list: five entries with their names and effect figures. */
-/* Not exact: retail keeps the DAT_8008092c address in the loop (base in v0,
- * `addu v1,v1,v0`, entry address in a0) and adds the message offset first
- * (`addu a0,a0,s7`); here loop.c hoists the address (it then lands in the
- * reload register t0) and the sum is `strings + offset`. Ruled out: no
- * locals for list/label/offsets/strings (operand order then matches, the
- * saved registers rotate), a MenuMessages pointer, narrow y/i types. */
+/* The text base is added as an integer after the offset, and the name table
+ * pointer is assigned inside the loop: retail adds in that operand order
+ * and keeps the table address in the loop. */
 ADDRESS(0x80065de0, 0x160)
 void func_80065de0(void)
 {
@@ -777,22 +774,21 @@ void func_80065de0(void)
     EquipSubList *list = &DAT_801e0d08;
     CVECTOR *label = &sp->style[0];
     u16 *offsets = menu_messages.offsets;
-    u8 *strings = menu_messages.text;
+    u32 text = (u32)menu_messages.text;
     int y, y2;
-    u8 entry;
-    u8 *entry_slot;
+    u8 *names = NULL;
 
     y2 = 64;
     y = 48;
     for (; i < 5; i++) {
-        entry_slot = &list->entries[sp->unk2E2 + i];
-        entry = *entry_slot;
-        if (entry != 255) {
-            func_8002732c((u16 *)(strings + offsets[916 + DAT_8008092c[entry]]), 28, y, label);
-            func_8002732c((u16 *)(strings + offsets[936]), 140, y2, label);
-            entry_slot = &list->entries[sp->unk2E2 + i];
-            func_80027440(effects.defs[*entry_slot].unk2 | 0x3000000, 204, y2,
-                          &sp->style[4]);
+        if (*(list->entries + (sp->unk2E2 + i)) != 255) {
+            names = DAT_8008092c;
+            func_8002732c(
+                (u16 *)(offsets[916 + names[*(list->entries + (sp->unk2E2 + i))]] + text), 28, y,
+                label);
+            func_8002732c((u16 *)(offsets[936] + text), 140, y2, label);
+            func_80027440(effects.defs[*(list->entries + (sp->unk2E2 + i))].unk2 | 0x3000000,
+                          204, y2, &sp->style[4]);
             y2 += 36;
             y += 36;
         }
