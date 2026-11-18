@@ -144,34 +144,45 @@ void func_80022228(void)
  * (four columns of four), the count the opponent's save holds, the
  * record's +0x27 value and its weight (+0x24 / 4.54, with tenths).
  */
-/* Not exact (same extent and 96-byte frame): the initial panel writes
- * schedule before the selection reads here (first divergence +0xc). The
- * column-loop lifetimes differ, and the static left x is $gp-relative
- * here where retail rematerializes its absolute .sdata address. */
+/* Not exact (3 bytes short, 32 lines): two things remain. (1) Retail reads
+ * the label x through an address rebuilt in the reload register (`lui t1;
+ * addiu t1,t1,lo; lhu s2,0(t1)`, once, then kept in $s2): the 4 bytes {342,
+ * 0} sit in the unit's .sdata between func_80021cfc's initialisers and
+ * func_80022794's, but cc1 did not treat the symbol as small data and the
+ * pointer to it had no register. A sized static const is read $gp-relative
+ * here; an unsized static array goes to .data/.rodata; a pointer local folds
+ * back; an auto aggregate is stored field by field. (2) The loop's message
+ * number, name x and count pointer are in $s5/$s7/$s6 where retail has
+ * $s7/$s6/$s5: after the loops retail gives the message base + 3072 $s5 and
+ * &style[3] $s7 (here swapped), and the scratchpad pseudo's preference for
+ * the latter's register is what the loop values avoid. Fixing (1) changes
+ * the lives in that block. */
 ADDRESS(0x800222d8, 0x4bc)
 void func_800222d8(int page)
 {
     VsMenuScratch *sp = VS_MENU_SCRATCH;
     static const DVECTOR pos = {342, 0};
-    int y = 135;
-    int left = 342;
+    int text_y;
+    short x, y;
+    int count_x;
     s16 id;
-    int x;
-    int n;
-    int row;
-    int col;
-    int message;
-    int line;
-    u8 *counts;
-    Vis44 *item;
-    int weight;
-    int whole;
-    int tenths;
+    int name_x;
+    int i;
+    u8 *count;
+    int n, k, j;
 
+    int weight;
+    u8 whole;
+    u8 tenths;
+
+    x = 334;
+    y = 9;
+    text_y = 135;
+    count_x = 342;
+    sp->unk238.x = x;
+    sp->unk238.y = y;
     sp->unk238.w = 192;
     sp->unk238.h = 124;
-    sp->unk238.x = 334;
-    sp->unk238.y = 9;
     id = sp->unk0.menu.grid.ids0[(s16)(sp->unk0.menu.grid.row0 + sp->unk1D0)];
     if (id != -1 && id != -2) {
         if ((s16)func_8001ca18() == 0) {
@@ -184,50 +195,46 @@ void func_800222d8(int page)
             func_8001e530(&sp->unk238, &sp->unk240, NULL, NULL, 16);
         }
         n = 0;
-        message = 2;
-        x = left;
-        counts = DAT_80191d00.unk0118[id].unk10;
+        k = 2;
+        count = DAT_80191d00.unk0118[id].unk10;
         DAT_8006337a = 1;
-        for (row = 0; row < 4; row++) {
-            int label_x = x;
-            int count_x = x + 42;
+        for (i = 0, name_x = count_x; i < 4; i++) {
+            int label_x;
+            int value_x;
 
-            line = y;
-            for (col = 0; col < 4; col++) {
+            for (j = 0, label_x = name_x, value_x = name_x + 42; j < 4; j++) {
                 if (n == 14)
                     goto done;
                 n++;
-                if (*counts != 0) {
-                    func_8001d8b8(VS_MESSAGE(200 + message), label_x, line, &sp->style[0]);
-                    func_8001d9cc(*counts | 0x13000000, count_x, line, &sp->style[3]);
+                if (*count) {
+                    func_8001d8b8(VS_MESSAGE(200 + k), label_x, text_y + j * 15, &sp->style[0]);
+                    func_8001d9cc(*count | 0x13000000, value_x, text_y + j * 15, &sp->style[3]);
                 }
-                counts++;
-                message++;
-                line += 15;
+                count++;
+                k++;
             }
             if (n == 14)
                 break;
-            x += 70;
+            name_x += 70;
         }
     done:
         DAT_8006337a = 0;
-        y += 60;
-        func_8001d8b8(VS_MESSAGE(501), pos.vx, y, &sp->style[0]);
-        func_8001d9cc(DAT_801a0a80[1 - page].unk18BC.unk2EC[id] | 0x3000000, left + 70, y, &sp->style[3]);
-        func_8001d8b8(VS_MESSAGE(502), left + 114, y, &sp->style[0]);
-        item = &DAT_80191d00.unk0118[id];
-        func_8001d9cc(item->unk27 | 0x3000000, left + 138, y, &sp->style[3]);
-        weight = item->unk24;
+        text_y += 60;
+        func_8001d8b8(VS_MESSAGE(501), pos.vx, text_y, &sp->style[0]);
+        func_8001d9cc(DAT_801a0a80[1 - page].unk18BC.unk2EC[id] | 0x3000000, count_x + 70, text_y, &sp->style[3]);
+        func_8001d8b8(VS_MESSAGE(502), count_x + 114, text_y, &sp->style[0]);
+        func_8001d9cc(DAT_80191d00.unk0118[id].unk27 | 0x3000000, count_x + 138, text_y, &sp->style[3]);
+        weight = DAT_80191d00.unk0118[id].unk24;
         whole = weight * 100 / 454;
         tenths = weight * 1000 / 454 % 10;
-        y += 15;
-        func_8001d8b8(VS_MESSAGE(503), pos.vx, y, &sp->style[0]);
-        func_8001d9cc((u8)whole | 0x3000000, left + 70, y, &sp->style[3]);
-        func_8001d3f0(18, left + 109, y, &sp->style[0]);
-        func_8001d9cc((u8)tenths | 0x1000000, left + 115, y, &sp->style[3]);
-        func_8001d3f0(53, left + 132, y, &sp->style[0]);
+        text_y += 15;
+        func_8001d8b8(VS_MESSAGE(503), pos.vx, text_y, &sp->style[0]);
+        func_8001d9cc(whole | 0x3000000, count_x + 70, text_y, &sp->style[3]);
+        func_8001d3f0(18, count_x + 109, text_y, &sp->style[0]);
+        func_8001d9cc(tenths | 0x1000000, count_x + 115, text_y, &sp->style[3]);
+        func_8001d3f0(53, count_x + 132, text_y, &sp->style[0]);
     }
-    func_8001f23c(334, 9, 296, 222);
+    func_8001f23c(x, y, 296, 222);
 }
 
 /* A two-tile emblem with its caption in a framed panel. */
