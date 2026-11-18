@@ -1721,15 +1721,22 @@ void func_8005c7fc(void)
  * twice moves its item to the first free entry of the other list. Leaving
  * writes the flag bits back.
  *
- * Not exact (0x64 bytes short). Agreed with retail so far: the file
- * cursor and its (*p + 4) advance, the plain `i / 4`, `i % 4` cell
- * positions, the first image loop (the load written in both arms, sizes
- * as block-local shifted values) and the cleanup behind the loop's
- * `break`. Open: from the first image loop on the saved registers are
- * rotated (retail: used $s6, the cd_state base $s4, the tex and id
- * offsets $s5/$s7, n $s3) and the main loop's cell moves still use the
- * first-pass variables; `shown` and the saved row live on the stack in
- * retail (128(sp), 120(sp)).
+ * Not exact (0x64 bytes short); the first 365 instructions agree. Agreed
+ * with retail so far: the file cursor and its (*p + 4) advance, the
+ * plain `i / 4`, `i % 4` cell positions, the first image loop (the load
+ * written in both arms, sizes as block-local shifted values, the counter
+ * zeroed before the byte count) and the cleanup behind the loop's
+ * `break`. Open: from the first image loop on four saved registers are
+ * rotated (retail: n $s3, the cd_state base $s4, the tex offset $s5,
+ * used $s6; here used $s3, n $s4, base $s5, offset $s6), and the cell
+ * moves of the main loop are still first-pass code: retail converts the
+ * found index and the cell index to s16 once each and keeps both the
+ * value and its shifted form ($t0/$t1, $a0/$a3) for the % 20 that
+ * follows, compares and stores the -1 from a hoisted register ($s8) and
+ * multiplies by a hoisted 0x66666667 ($s7). Those two extra temporaries
+ * are why retail's reload register is $t2 and this build's $t1.
+ * `shown` and the saved row live on the stack in retail (128(sp),
+ * 120(sp)).
  */
 ADDRESS(0x8005d25c, 0x16c8)
 void func_8005d25c(void)
