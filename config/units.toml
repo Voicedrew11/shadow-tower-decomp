@@ -1157,20 +1157,6 @@ profile = "probe-gcc272cdk-o2-g0"
 bind = "name"
 
 [[unit]]
-unit = "fdat_172.map_801edbf8"
-image = "FDAT_172.BIN"
-source = "src/fdat_172/map_801edbf8.c"
-profile = "probe-gcc272cdk-o2-g0"
-bind = "name"
-
-[[unit]]
-unit = "fdat_172.map_801ede00"
-image = "FDAT_172.BIN"
-source = "src/fdat_172/map_801ede00.c"
-profile = "probe-gcc272cdk-o2-g0"
-bind = "name"
-
-[[unit]]
 unit = "fdat_182.main"
 image = "FDAT_182.BIN"
 source = "src/fdat_182/main.c"
@@ -1398,20 +1384,6 @@ bind = "name"
 unit = "fdat_382.main"
 image = "FDAT_382.BIN"
 source = "src/fdat_382/main.c"
-profile = "probe-gcc272cdk-o2-g0"
-bind = "name"
-
-[[unit]]
-unit = "fdat_382.map_801ed9b4"
-image = "FDAT_382.BIN"
-source = "src/fdat_382/map_801ed9b4.c"
-profile = "probe-gcc272cdk-o2-g0"
-bind = "name"
-
-[[unit]]
-unit = "fdat_382.map_801eda74"
-image = "FDAT_382.BIN"
-source = "src/fdat_382/map_801eda74.c"
 profile = "probe-gcc272cdk-o2-g0"
 bind = "name"
 

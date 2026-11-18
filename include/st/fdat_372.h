@@ -6,6 +6,6 @@
  * st/fdat.h because FDAT_132.BIN has a static of the same name (a
  * file-scope extern would change that overlay's .bss layout).
  */
-extern int fdat_801eda3c; /* src/fdat_372/map_801ed4a0.c */
+extern int fdat_801eda3c; /* src/fdat_372/main.c */
 
 #endif

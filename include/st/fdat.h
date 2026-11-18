@@ -80,8 +80,6 @@ extern int fdat_801edb3c; /* FDAT_332.BIN: src/fdat_332/main.c */
 extern int fdat_801ed96c; /* FDAT_042.BIN: src/fdat_042/main.c */
 extern int fdat_801ed970; /* FDAT_042.BIN: src/fdat_042/map_801ed7b4.c */
 extern int fdat_801ed938; /* FDAT_122.BIN: src/fdat_122/main.c */
-extern int fdat_801edfd0; /* FDAT_172.BIN: src/fdat_172/map_801edbf8.c */
-extern int fdat_801edfd4; /* FDAT_172.BIN: src/fdat_172/map_801ede00.c */
 extern int fdat_801edc50; /* FDAT_182.BIN: src/fdat_182/main.c */
 extern int fdat_801edc54; /* FDAT_182.BIN: src/fdat_182/map_801ed9cc.c */
 extern int fdat_801eda08; /* FDAT_202.BIN: src/fdat_202/main.c */

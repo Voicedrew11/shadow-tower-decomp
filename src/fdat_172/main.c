@@ -25,11 +25,23 @@
 
 RODATA(0x801eb560, 0x24c)
 
+/* 0 until item 0x12a is used (1), 0xff once its scene ran (flag 26). */
+DATA(0x801edfd0, 0x4, ".bss")
+static int fdat_801edfd0;
+
+/* Entry 48: 0 asleep, 0xfd hit, 0xfe awake, 0xff gone (flags 29, 30). */
+DATA(0x801edfd4, 0x4, ".bss")
+static int fdat_801edfd4;
+
+/* 0 until table A entry 33 is beaten, 1 then (flag 27), 0xff once it left. */
+DATA(0x801edfd8, 0x4, ".bss")
+static int fdat_801edfd8;
+
 void func_801ed4a0();
 void func_801ed614();
 void func_801ed93c();
 void func_801edbf8();
-void func_801edd38();
+void func_801edd38(short id);
 void func_801edf48();
 
 const FdatHeader fdat_header = {
@@ -50,10 +62,6 @@ const FdatHeader fdat_header = {
 #include "../lib/fdat_common_a.inc"
 #include "../lib/fdat_common.inc"
 #include "../lib/fdat_common_b.inc"
-
-/* 0 until table A entry 33 is beaten, 1 then (flag 27), 0xff once it left. */
-DATA(0x801edfd8, 0x4, ".bss")
-int fdat_801edfd8;
 
 void func_801ede00(void);
 void func_801edef8(void);
@@ -234,5 +242,129 @@ void func_801ed93c(void)
         dx = x + vis_records[e->unk26].unk05;
         dz = z + vis_records[e->unk26].unk06;
         e->unk5A = ratan2(dz, dx);
+    }
+}
+
+void func_801ed93c(void);
+
+/* The current entry's handler: entries below 56 other than kind 1 are kept
+ * in range (unk03 3) until the item scene ran; then the animation steps as
+ * fdat_801ed6e4 does, kind 1 replaying animation 9 while entry 48 sleeps. */
+ADDRESS(0x801edbf8, 0x140)
+void func_801edbf8(void)
+{
+    Vis212 *e = vis_table_a.unk6138;
+
+    if (fdat_801edfd0 != 0xff && e->unk02 != 1 && e < &vis_table_a.entries[56] && e->unk05 != 5)
+        e->unk03 = 3;
+    else
+        e->unk03 = 0;
+    e->unk2A += e->unkB0;
+    if (fdat_801ece7c(e) == 1)
+        return;
+    if (e->unkB0 >= 0 ? (short)e->unk2A >= 4096 : (short)e->unk2A <= 0) {
+        if (e->unk02 == 1 && (fdat_801edfd4 == 0 || fdat_801edfd4 == 0xfd)) {
+            fdat_801eb7b4(e, 9);
+        } else {
+            e->unk1A = 0xff;
+            func_801ed93c();
+        }
+    }
+    if (e->unkA8 != NULL) {
+        fdat_801ebec4(e);
+        e->unk1A = 0xf0;
+    }
+}
+
+/* Item 0x12a used in front of table B entry 12 sets fdat_801edfd0; the
+ * result is 1 then, else 2. */
+ADDRESS(0x801edd38, 0xc8)
+void func_801edd38(short id)
+{
+    VECTOR p;
+    VisRequest req;
+
+    if (id == 0x12a) {
+        p.vx = viewer.position.vx;
+        p.vy = viewer.position.vy + 1600;
+        p.vz = viewer.position.vz;
+        req.unk0 = 0;
+        req.unk4 = p;
+        req.unk1C = 1056;
+        req.unk14.vx = 0;
+        req.unk14.vy = 0;
+        req.unk14.vz = 0;
+        req.unk22 = 0;
+        req.unk1E = 1600;
+        req.unk20 = 0;
+        if (func_8004f53c((VisLists *)&req) == 12) {
+            DAT_801cd0e0 = 1;
+            fdat_801edfd0 = 1;
+        } else {
+            DAT_801cd0e0 = 2;
+        }
+    }
+}
+
+/* Lifts table C item 28 by 0x200, 24 a frame while its model is loaded. */
+ADDRESS(0x801ede00, 0xf8)
+void func_801ede00(void)
+{
+    int step = 24;
+    Vis48 *item = &vis_table_c.entries[28];
+    Vis44 *kind;
+    int top;
+
+    item->unk22 = 5;
+    kind = &vis_table_c.unk0118[item->unk00];
+    top = item->unk08.vy + 0x200;
+    item->unk2D -= 2;
+    for (;;) {
+        StAnimFile *file;
+
+        if (item->unk08.vy == top)
+            break;
+        anim_get_file(kind->unk4 + 588, &file);
+        if (file != NULL)
+            item->unk08.vy += step;
+        if (item->unk08.vy > top)
+            item->unk08.vy = top;
+        func_80026dd4(NULL, NULL, 0);
+    }
+    item->unk2D += 2;
+}
+
+/* Marks every active table A entry: unk36 0xfff and range bits 0xd. */
+ADDRESS(0x801edef8, 0x50)
+void func_801edef8(void)
+{
+    Vis212 *e = vis_table_a.entries;
+    int i = 64;
+
+    while (i--) {
+        if (e->unk05 == 1) {
+            e->unk36 = 0xfff;
+            e->unk1C.bytes[2] |= 0xd;
+        }
+        e++;
+    }
+}
+
+/* In area 3, while flag 27 is clear, hands table A entry 33 to its exit once
+ * its record's stream counter has started. */
+ADDRESS(0x801edf48, 0x88)
+void func_801edf48(void)
+{
+    Vis212 *e;
+    Vis192 *r;
+
+    e = &vis_table_a.entries[33];
+    r = &vis_table_a.unk3500[14];
+
+    if (DAT_801cba08.unk1448[r->unk09] != 0
+        && !(DAT_801cba08.unk1440.word >> 27 & 1) && vis_table_a.unk6168 == 3) {
+        DAT_801cba08.unk1448[r->unk09] = 2;
+        e->unk70 |= 0x2000000;
+        fdat_801ed388(e, 1, 1);
     }
 }

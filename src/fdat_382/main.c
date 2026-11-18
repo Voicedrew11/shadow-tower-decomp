@@ -22,9 +22,20 @@
 #include <LIBGPU.H>
 #include <st/menu.h>
 #include <st/light.h>
-#include <st/fdat_382.h>
 
 RODATA(0x801eb560, 0x24c)
+
+/* 1 when entries 0..2 and 32 stand (flags 21..23). */
+DATA(0x801edafc, 0x4, ".bss")
+static int fdat_801edafc;
+
+/* 0xff once the scene ran (record 1's stream counter 2). */
+DATA(0x801edb00, 0x4, ".bss")
+static int fdat_801edb00;
+
+/* Table A entry 32 beaten: 0, 1 this visit, 0xff gone (flag 24). */
+DATA(0x801edb04, 0x4, ".bss")
+static int fdat_801edb04;
 
 void func_801ed4a0();
 void func_801ed588();
@@ -50,10 +61,6 @@ const FdatHeader fdat_header = {
 #include "../lib/fdat_common_a.inc"
 #include "../lib/fdat_common.inc"
 #include "../lib/fdat_common_b.inc"
-
-/* Table A entry 32 beaten: 0, 1 this visit, 0xff gone (flag 24). */
-DATA(0x801edb04, 0x4, ".bss")
-int fdat_801edb04;
 
 /* Sets up the area: with flags 21..23 all set entries 0..2 and 32 stand
  * (scene word 1), else they wait; flag 24 and record 1's stream counter
@@ -189,5 +196,46 @@ void func_801ed74c(void)
         dx = x + vis_records[e->unk26].unk05;
         dz = z + vis_records[e->unk26].unk06;
         e->unk5A = ratan2(dz, dx);
+    }
+}
+
+void func_801ed74c(void);
+
+/* The current entry's handler: the animation steps as fdat_801ed6e4 does;
+ * the next move is picked only once the scene ran. */
+ADDRESS(0x801ed9b4, 0xc0)
+void func_801ed9b4(void)
+{
+    Vis212 *e = vis_table_a.unk6138;
+
+    e->unk2A += e->unkB0;
+    if (fdat_801ece7c(e) == 1)
+        return;
+    if ((e->unkB0 >= 0 ? (short)e->unk2A >= 4096 : (short)e->unk2A <= 0) && fdat_801edb00 == 0xff) {
+        e->unk1A = 0xff;
+        func_801ed74c();
+    }
+    if (e->unkA8 != NULL) {
+        fdat_801ebec4(e);
+        e->unk1A = 0xf0;
+    }
+}
+
+/* In area 0, while flag 24 is clear, hands table A entry 32 to its exit once
+ * its record's stream counter has reached 2. */
+ADDRESS(0x801eda74, 0x88)
+void func_801eda74(void)
+{
+    Vis212 *e;
+    Vis192 *r;
+
+    e = &vis_table_a.entries[32];
+    r = &vis_table_a.unk3500[1];
+
+    if (DAT_801cba08.unk1448[r->unk09] >= 2 && !(DAT_801cba08.unk1440.word >> 24 & 1)
+        && vis_table_a.unk6168 == 0) {
+        DAT_801cba08.unk1448[r->unk09] = 3;
+        e->unk70 |= 0x2000000;
+        fdat_801ed388(e, 1, 1);
     }
 }

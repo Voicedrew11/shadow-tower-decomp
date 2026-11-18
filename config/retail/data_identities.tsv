@@ -262,9 +262,9 @@ FDAT_142.BIN	0x801edaf8	0x4	fdat_801edaf8	static	bss	int	func_801ed4a0	candidate
 FDAT_142.BIN	0x801edafc	0x4	fdat_801edafc	static	bss	int	func_801ed4a0	candidate	asm;src/fdat_142/main.c	FDAT overlay word after the code: scene state
 FDAT_142.BIN	0x801edb00	0x4	fdat_801edb00	static	bss	int	func_801ed4a0	candidate	asm;src/fdat_142/main.c	FDAT overlay word after the code: scene state
 FDAT_152.BIN	0x801edb84	0x4	fdat_801edb84	global	bss	int	func_801ed530	candidate	asm;src/fdat_152/main.c	FDAT overlay word after the code: the scene state
-FDAT_172.BIN	0x801edfd0	0x4	fdat_801edfd0	global	bss	int	func_801edd38	candidate	asm;src/fdat_172/map_801edbf8.c	FDAT overlay word after the code: item 0x12a scene state
-FDAT_172.BIN	0x801edfd4	0x4	fdat_801edfd4	global	bss	int	func_801ed614	candidate	asm;src/fdat_172/map_801ede00.c	FDAT overlay word after the code: entry 48 state
-FDAT_172.BIN	0x801edfd8	0x4	fdat_801edfd8	global	bss	int	func_801ed614	candidate	asm;src/fdat_172/main.c	FDAT overlay word after the code: scene state
+FDAT_172.BIN	0x801edfd0	0x4	fdat_801edfd0	static	bss	int	func_801edd38	candidate	asm;src/fdat_172/main.c	FDAT overlay word after the code: item 0x12a scene state
+FDAT_172.BIN	0x801edfd4	0x4	fdat_801edfd4	static	bss	int	func_801ed614	candidate	asm;src/fdat_172/main.c	FDAT overlay word after the code: entry 48 state
+FDAT_172.BIN	0x801edfd8	0x4	fdat_801edfd8	static	bss	int	func_801ed614	candidate	asm;src/fdat_172/main.c	FDAT overlay word after the code: scene state
 FDAT_182.BIN	0x801edc50	0x4	fdat_801edc50	global	bss	int	func_801ed604	candidate	asm;src/fdat_182/main.c	FDAT overlay static after the code: the gate event 0x131 opened
 FDAT_182.BIN	0x801edc54	0x4	fdat_801edc54	global	bss	int	func_801ed9cc	candidate	asm;src/fdat_182/map_801ed9cc.c	FDAT overlay static after the code: the exit scene state
 FDAT_202.BIN	0x801eda08	0x4	fdat_801eda08	global	bss	int	func_801ed4a0	candidate	asm;src/fdat_202/main.c	FDAT overlay word after the code: scene state
@@ -303,9 +303,9 @@ FDAT_302.BIN	0x801ee47c	0x4	fdat_801ee47c	static	bss	int	func_801ed5b0	candidate
 FDAT_302.BIN	0x801ee480	0x4	fdat_801ee480	static	bss	int	func_801ed5b0	candidate	asm;src/fdat_302/main.c	FDAT overlay word after the code: scene state
 FDAT_332.BIN	0x801edb3c	0x4	fdat_801edb3c	global	bss	int	func_801ed614	candidate	asm;src/fdat_332/main.c	FDAT overlay word after the code: scene state
 FDAT_372.BIN	0x801eda3c	0x4	fdat_801eda3c	global	bss	int	func_801ed4a0	candidate	asm;src/fdat_372/main.c	FDAT overlay word after the code: the scene state
-FDAT_382.BIN	0x801edafc	0x4	fdat_801edafc	global	bss	int	func_801ed4a0	candidate	asm;src/fdat_382/map_801eda74.c	FDAT overlay word after the code: scene state
-FDAT_382.BIN	0x801edb00	0x4	fdat_801edb00	global	bss	int	func_801ed588	candidate	asm;src/fdat_382/map_801ed9b4.c	FDAT overlay word after the code: scene state
-FDAT_382.BIN	0x801edb04	0x4	fdat_801edb04	global	bss	int	func_801ed588	candidate	asm;src/fdat_382/main.c	FDAT overlay word after the code: scene state
+FDAT_382.BIN	0x801edafc	0x4	fdat_801edafc	static	bss	int	func_801ed4a0	candidate	asm;src/fdat_382/main.c	FDAT overlay word after the code: scene state
+FDAT_382.BIN	0x801edb00	0x4	fdat_801edb00	static	bss	int	func_801ed588	candidate	asm;src/fdat_382/main.c	FDAT overlay word after the code: scene state
+FDAT_382.BIN	0x801edb04	0x4	fdat_801edb04	static	bss	int	func_801ed588	candidate	asm;src/fdat_382/main.c	FDAT overlay word after the code: scene state
 FDAT_442.BIN	0x801ed8c4	0x4	fdat_801ed8c4	global	bss	int	func_801ed420	candidate	asm;src/lib/fdat_801ed420.c	FDAT overlay static after the code: the scene state (shared name, FDAT_442.BIN address)
 FDAT_442.BIN	0x801ed8c8	0x4	fdat_801ed8c8	global	bss	int	func_801ed454	candidate	asm;src/fdat_442/map_801ed454.c	FDAT overlay word after the code: the ending picked
 FDAT_452.BIN	0x801ed984	0x4	fdat_801ed8c4	global	bss	int	func_801ed420	candidate	asm;src/lib/fdat_801ed420.c	FDAT overlay static after the code: the scene state (shared name, FDAT_442.BIN address)
