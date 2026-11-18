@@ -293,9 +293,7 @@ void func_8004e8ec(void)
     }
 }
 
-/* Loads the 64 table A entries from an area file.
- * Not exact: the u16 counter and the cnt base swap s6/s7, and retail forms
- * &cnt[k >> 2] twice at +0xb8 (9 words). */
+/* Loads the 64 table A entries from an area file. */
 ADDRESS(0x8004e960, 0x3f4)
 void func_8004e960(VisAFileEntry *src)
 {
@@ -326,7 +324,8 @@ void func_8004e960(VisAFileEntry *src)
         k = src->unk01;
         if (map[k] == 0xff) {
             map[k] = e->unk0C = cnt[k >> 2];
-            cnt[k >> 2] = (cnt[k >> 2] + t->unk04) & 3;
+            k >>= 2;
+            cnt[k] = (cnt[k] + t->unk04) & 3;
         } else {
             e->unk0C = map[k];
         }

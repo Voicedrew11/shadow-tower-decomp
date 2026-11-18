@@ -60,9 +60,6 @@ void func_80058534(short voice, int id, int note)
  * Transfers the body of the bank the current CD request (kind 4) reads: a
  * failed transfer reloads the bank, a partial one seeks on, the last one
  * marks the bank's buffer loaded.
- *
- * Not exact: retail loads the reload call's archive byte (volatile unk10)
- * before the index halfword; this build hoists the halfword load.
  */
 ADDRESS(0x80058620, 0x150)
 void func_80058620(void)
@@ -82,7 +79,11 @@ void func_80058620(void)
             SsVabClose(slot->vab);
             slot->vab = r;
             func_80015848(request);
-            func_80058a0c(request->unk10, request->unk4.bank.member, request->unk4.bank.slot);
+            /* A bank request keeps its archive number in the byte the read
+             * requests use for the callbacks' state; retail reads it as a
+             * plain byte (one combined load, first of the three). */
+            func_80058a0c(*(u8 *)&request->unk10, request->unk4.bank.member,
+                          request->unk4.bank.slot);
         } else if (r == -2) {
             request->unk1 = 0;
             request->unk11 = 1;

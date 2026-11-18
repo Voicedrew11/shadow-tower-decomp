@@ -151,18 +151,15 @@ void func_80066240(void)
  * and draws the frame, until cancel; then writes each listed id's grid back
  * to its flag bit.
  */
-/* Not exact: retail saves $s0 first; two row-index additions schedule their
- * operands differently. The closing flag loops duplicate a count shift
- * in their hole-branch delay slots here, adding eight bytes. */
 ADDRESS(0x800666b0, 0xed0)
 void func_800666b0(void)
 {
+    MenuScratch *sp = MENU_SCRATCH;
     DVECTOR unused0;
     DVECTOR pos = {640, 0};
     char name1[] = "\\st\\itemcg\\icon1\\0000.tim";
     char name5[] = "\\st\\itemcg\\icon5\\0000.tim";
     DVECTOR unused1;
-    MenuScratch *sp = MENU_SCRATCH;
     s16 id;
     s16 n;
     s16 k;
@@ -234,10 +231,14 @@ void func_800666b0(void)
             } else {
                 found = 0;
                 if (!ST.unk4) {
-                    if (ST.unk0 == 104)
-                        found = GRID->ids0[GRID->row0 + sp->unk2E0] == -1;
-                    else if (GRID->ids1[GRID->row1 + sp->unk2E0] == -1)
-                        found = 1;
+                    if (ST.unk0 == 104) {
+                        cur = GRID->row0;
+                        found = GRID->ids0[cur + sp->unk2E0] == -1;
+                    } else {
+                        cur = GRID->row1;
+                        if (GRID->ids1[cur + sp->unk2E0] == -1)
+                            found = 1;
+                    }
                 } else {
                     found = 1;
                     if (ST.unk0 == 104) {
@@ -454,17 +455,19 @@ void func_800666b0(void)
         func_80068258();
         sp->unk2E4 = (sp->unk2E4 + 1) % 32;
     }
-    for (i = 0, n = GRID->count0; n; i++) {
+    for (i = 0, n = GRID->count0; n;) {
         if (GRID->ids0[i] != -1) {
             DAT_801c7590.counts[GRID->ids0[i]].flag = 0;
             n--;
         }
+        i++;
     }
-    for (i = 0, n = GRID->count1; n; i++) {
+    for (i = 0, n = GRID->count1; n;) {
         if (GRID->ids1[i] != -1) {
             DAT_801c7590.counts[GRID->ids1[i]].flag = 1;
             n--;
         }
+        i++;
     }
 }
 
@@ -739,8 +742,6 @@ void func_80067bec(u8 grid)
 
 /* Draws the screen: the text colours, the cursor blink, one grid with its
  * detail panel or both grids, and the arrow toward the current grid. */
-/* Not exact: as func_80066004: retail stores the 48 group before loading the
- * blink phase; this build hoists the load (7 words). */
 ADDRESS(0x80068258, 0x1e8)
 void func_80068258(void)
 {
@@ -750,12 +751,13 @@ void func_80068258(void)
 
     func_800174c4();
     sp = MENU_SCRATCH;
-    sp->style[2].b = sp->style[6].b = sp->style[3].g = sp->style[7].g = sp->style[3].b =
-        sp->style[7].b = 48;
+    sp->style[3].r = sp->style[7].r = 96;
+    sp->style[3].g = sp->style[7].g = sp->style[3].b = sp->style[7].b = 48;
     sp->style[0].b = sp->style[4].b = sp->style[0].g = sp->style[4].g = sp->style[0].r =
-        sp->style[4].r = sp->style[3].r = sp->style[7].r = 96;
+        sp->style[4].r = 96;
     sp->style[2].r = sp->style[6].r = 98;
     sp->style[2].g = sp->style[6].g = 66;
+    sp->style[2].b = sp->style[6].b = 48;
     sp->style[0].cd = sp->style[2].cd = sp->style[3].cd = 73;
     sp->style[4].cd = sp->style[6].cd = sp->style[7].cd = 49;
     if (MENU_SCRATCH->unk2E4 < 16)
@@ -783,14 +785,15 @@ void func_80068258(void)
     func_80017680();
 }
 
+/* The pad's button word (active low) read as one volatile halfword at its
+ * own address; retail forms that address directly in each load. */
+#define RAW_BUTTONS (*(volatile s16 *)&DAT_801cd130.unk2)
+
 /*
  * Unreferenced debug tool: shows the other frame buffer and moves the
  * display area with the D-pad (raw pad bits, active low) until START,
  * polling the host debugger each frame; then restores it.
  */
-/* Not exact: the three button-read phases materialize full owner addresses
- * here, where retail applies the low relocations directly to its loads
- * (first divergence +0xc8); the body is eight bytes longer than retail. */
 ADDRESS(0x80068440, 0x214)
 void func_80068440(void)
 {
@@ -809,10 +812,10 @@ void func_80068440(void)
     disp = &world_state.disp[world_state.frame];
     draw = &world_state.draw[world_state.frame];
     func_80014cfc((u32 *)&saved, (u32 *)&disp->disp, 2);
-    while (!((s16)DAT_801cd130.unk2 & 0x8))
+    while (!(RAW_BUTTONS & 0x8))
         ;
     for (;;) {
-        bits = ~(s16)DAT_801cd130.unk2;
+        bits = ~RAW_BUTTONS;
         if (bits & 0x2000)
             disp->disp.x += 4;
         if (bits & 0x8000)
@@ -830,7 +833,7 @@ void func_80068440(void)
         PutDrawEnv(draw);
         pollhost();
     }
-    while (!((s16)DAT_801cd130.unk2 & 0x8))
+    while (!(RAW_BUTTONS & 0x8))
         ;
     func_80014cfc((u32 *)&disp->disp, (u32 *)&saved, 2);
     world_state.draw[0].isbg = 1;

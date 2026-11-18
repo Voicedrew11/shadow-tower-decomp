@@ -417,9 +417,11 @@ void func_800595d4(void)
  * empties the other hand's slots; with `redraw` 1 the changed pictures are
  * reloaded.
  *
- * Not exact (4 bytes longer): retail forms the slot 2/15 stores from a
- * viewer+0x3c base; this build stores both from
- * the viewer base. The final switch's blocks are ordered differently.
+ * Not exact (4 bytes longer): only the final switch's dispatch differs.
+ * Retail has `bne x,14,exit; j case14` (the case's `li v0,0xffff` in the
+ * jump's delay slot); this build keeps the raw `beq x,14,case14; j exit;
+ * nop`. Ruled out: an if/else chain, the redraw repeated per case, a guard
+ * before the switch.
  */
 ADDRESS(0x8005975c, 0x590)
 void func_8005975c(int redraw)
@@ -484,7 +486,10 @@ void func_8005975c(int redraw)
     }
     if (sp->unk2E0 == 2 || sp->unk2E0 == 16) {
         if (sp->unk2C0 == -1) {
-            viewer.unk38[15] = viewer.unk38[2] = 0xffff;
+            u16 *hand = &viewer.unk38[2];
+
+            *hand = 0xffff;
+            hand[13] = 0xffff;
         } else {
             viewer.unk38[2] = sp->unk2C0;
         }
@@ -517,7 +522,7 @@ void func_8005975c(int redraw)
     }
     if (redraw == 1) {
         DrawSync(0);
-        func_80059204(sp->unk2E0 ? 12 : 6);
+        func_80059204(sp->unk2E0 == 0 ? 6 : 12);
     }
 }
 
@@ -3460,11 +3465,6 @@ int func_80061a08(void)
 }
 
 /*
- * Not exact (size-exact): the working offset starts after the positive
- * size guard, both checksum loop initializations and the successful-frame
- * updates agree. The input data copy is earlier, and the offset/probe
- * countdown use s2/s1 instead of retail's s1/s2. Both versions keep -1 in s8.
- *
  * Writes size bytes from data to the open file fd at offset, 127 bytes per
  * 128-byte frame with an inverted byte sum in the last byte, reading each
  * frame back to verify it (three tries). Returns the sum of the frame sums,
@@ -3476,6 +3476,7 @@ int func_80061d34(int fd, int offset, u8 *data, int size)
     MenuScratch *sp = MENU_SCRATCH;
     u8 frame[128];
     u8 check[128];
+    u8 *src = data;
     int retry = 0;
     int n = 0;
     u8 total = 0;
@@ -3483,13 +3484,13 @@ int func_80061d34(int fd, int offset, u8 *data, int size)
     int i;
 
     if (size > 0) {
-        int frame_offset = offset;
+        int block = 0;
 
         do {
             frame[127] = i = 0;
             for (; i < 127; i++) {
-                frame[i] = *data;
-                frame[127] += *data++;
+                frame[i] = *src;
+                frame[127] += *src++;
             }
             frame[127] = ~frame[127];
         again:
@@ -3503,10 +3504,10 @@ int func_80061d34(int fd, int offset, u8 *data, int size)
                 return -1;
             }
             retry++;
-            lseek(fd, frame_offset, SEEK_SET);
+            lseek(fd, offset + block * 128, SEEK_SET);
             if (write(fd, frame, 128) == -1)
                 goto again;
-            lseek(fd, frame_offset, SEEK_SET);
+            lseek(fd, offset + block * 128, SEEK_SET);
             if (read(fd, check, 128) == -1)
                 goto again;
             sum = i = 0;
@@ -3516,7 +3517,7 @@ int func_80061d34(int fd, int offset, u8 *data, int size)
             if (sum != frame[127])
                 goto again;
             size -= 127;
-            frame_offset += 128;
+            block++;
             retry = 0;
             total += sum;
             n--;
@@ -3525,18 +3526,13 @@ int func_80061d34(int fd, int offset, u8 *data, int size)
     return total;
 }
 
-/*
- * Reads size bytes back the same way, verifying each frame's sum.
- * Not exact (size-exact): the working offset now starts after the positive-
- * size guard. The data, offset, frame base and probe countdown still use
- * different saved registers, and the checksum counters are zeroed in a
- * different order. A wide checksum or explicit frame pointer diverges more.
- */
+/* Reads size bytes back the same way, verifying each frame's sum. */
 ADDRESS(0x80061ee8, 0x174)
 int func_80061ee8(int fd, int offset, u8 *data, int size)
 {
     MenuScratch *sp = MENU_SCRATCH;
     u8 frame[128];
+    u8 *dst = data;
     int retry = 0;
     int n = 0;
     u8 total = 0;
@@ -3544,7 +3540,7 @@ int func_80061ee8(int fd, int offset, u8 *data, int size)
     int i;
 
     if (size > 0) {
-        int frame_offset = offset;
+        int block = 0;
 
         do {
         again:
@@ -3556,13 +3552,12 @@ int func_80061ee8(int fd, int offset, u8 *data, int size)
             if (retry >= 3)
                 return -1;
             retry++;
-            lseek(fd, frame_offset, SEEK_SET);
+            lseek(fd, offset + block * 128, SEEK_SET);
             if (read(fd, frame, 128) == -1) {
                 sp->unk0.half[0] = 354;
                 goto again;
             }
-            sum = 0;
-            for (i = 0; i < 127; i++)
+            for (i = 0, sum = 0; i < 127; i++)
                 sum += frame[i];
             sum = ~sum;
             if (sum != frame[127]) {
@@ -3570,9 +3565,9 @@ int func_80061ee8(int fd, int offset, u8 *data, int size)
                 goto again;
             }
             for (i = 0; i < 127; i++)
-                *data++ = frame[i];
+                *dst++ = frame[i];
             size -= 127;
-            frame_offset += 128;
+            block++;
             retry = 0;
             n--;
             total += frame[127];
@@ -3640,6 +3635,11 @@ read:
 /*
  * Not exact (99.7%): the header's icon byte is stored before the unk1FE
  * load that retail schedules first (li v0,18 / sb for lhu v0,510; li v1,18).
+ * In sched1 the load is a boosted single-set temporary and nothing ties
+ * it to the icon store (frame store vs constant-based scratch load do not
+ * conflict), so it sinks below the store; retail keeps it above. Ruled
+ * out: operand order of the compare, the statement before/after strcpy,
+ * an s16 row variable (it sinks to the block top and takes t3).
  *
  * Saves to the selected file, or to a new file numbered unk204: builds the
  * header (the title with the file number, the area name and the play
@@ -4113,17 +4113,11 @@ long func_80062bc0(int port)
     return format(path);
 }
 
+/* The pressed-button word as the waits read it: one volatile halfword at
+ * its own address (the counter interrupt updates it). */
+#define PRESSED_NOW (*(volatile u16 *)&DAT_801cd180.unk4)
+
 /*
- * Not exact (size-exact): this build keeps the button word's address in s0
- * across the result waits; retail forms it again for each load and store.
- * A structured empty while hoists the nonvolatile read; scoping the save
- * buffer does not change the listing. The counter interrupt's 800153b4 ->
- * 80057744 path updates this halfword while the retail waits reload it.
- * A narrow volatile while read reloads it correctly but peels the loop
- * entries, adding 48 bytes and moving the following exact functions.
- * Keeping the goto waits with qualified field pointers instead forms
- * full addresses (+12 bytes), also moving those functions.
- *
  * The memory card save/load screen (unk2DC's high byte set: save). Steps
  * through port choice, probe, format offer, directory, file headers, file
  * choice and the transfer, shifting unk2DC's step bit as it goes; returns
@@ -4250,27 +4244,24 @@ done:
     func_8002ca84();
     func_8002ca84();
     if (sp->unk2DC & 0x80) {
-    wait0:
-        if (DAT_801cd180.unk4 == 0)
-            goto wait0;
+        while (PRESSED_NOW == 0)
+            ;
         func_80057cec();
         DAT_801cd180.unk4 = 0;
         sp->unk2DC = 2;
         goto select;
     }
     if (sp->unk2DC & 0x8000) {
-    wait1:
-        if (DAT_801cd180.unk4 == 0)
-            goto wait1;
+        while (PRESSED_NOW == 0)
+            ;
         func_80057cec();
         DAT_801cd180.unk4 = 0;
         sp->unk2DC = 0x200;
         goto select;
     }
     if (sp->unk2DC & 0xff00) {
-    wait2:
-        if (DAT_801cd180.unk4 == 0)
-            goto wait2;
+        while (PRESSED_NOW == 0)
+            ;
         func_80057cec();
         DAT_801cd180.unk4 = 0;
     }

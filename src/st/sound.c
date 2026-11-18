@@ -203,9 +203,6 @@ void func_80057f3c(void)
  * Plays sound `id` from `pos`: silent at `range` or beyond, louder towards
  * the listener over `fade`, panned by the direction from the listener's
  * yaw. Bit 15 of `id` keeps more of the volume on the far side.
- *
- * Not exact: the wide-volume clamp uses a1 for its temporary where retail
- * uses v1 (the three load/copy words around the clamp).
  */
 ADDRESS(0x80057fc4, 0x25c)
 s16 func_80057fc4(int id, VECTOR *pos, int volume, int range, int fade, int note)
@@ -214,13 +211,12 @@ s16 func_80057fc4(int id, VECTOR *pos, int volume, int range, int fade, int note
     int dy = (pos->vy - DAT_801dd1c0.listener.vy) >> 3;
     int dz = (pos->vz - DAT_801dd1c0.listener.vz) >> 3;
     int dist;
-    int wide;
+    int left; /* the wide flag (bit 15 of id) until the volume is known */
     int vol;
-    int left;
     int right;
     int angle;
 
-    wide = id & 0x8000;
+    left = id & 0x8000;
     id &= 0xfff;
     dist = SquareRoot0(dx * dx + dy * dy + dz * dz) << 3;
     if (dist >= range)
@@ -230,16 +226,16 @@ s16 func_80057fc4(int id, VECTOR *pos, int volume, int range, int fade, int note
         return -1;
     if (vol >= 128)
         vol = 127;
-    if (wide == 0) {
+    if (left == 0) {
         left = vol + (127 - vol) / 4;
     } else {
         int near = vol + 32;
         int capped;
 
-        wide = near + (127 - vol) / 2;
+        left = near + (127 - vol) / 2;
         capped = 127;
-        if (wide < 128)
-            capped = wide;
+        if (left < 128)
+            capped = left;
         left = capped;
     }
     angle = func_8004a1b4(pos->vx - DAT_801dd1c0.listener.vx, pos->vz - DAT_801dd1c0.listener.vz)
@@ -285,11 +281,6 @@ s16 func_800582f0(int sound, int volume)
 /*
  * Keys sound `id` on with the two volumes (scaled by the sound option) on a
  * free voice, else on one that is releasing; returns the voice or -1.
- *
- * Not exact: the shared failure return and key-on control flow agree.
- * The voice-ID store reloads the sound-state base instead of retaining
- * the scan owner, and note narrowing is scheduled after volume arguments.
- * This build is eight bytes long.
  */
 ADDRESS(0x80058318, 0x1f4)
 s16 func_80058318(int id, int left, int right, int note)
@@ -301,48 +292,42 @@ s16 func_80058318(int id, int left, int right, int note)
     int i;
 
     if (id == 255)
-        goto failed;
+        return -1;
     opt = &DAT_801cd120;
     if (opt->unk1 == 0)
-        goto failed;
+        return -1;
     snd = &DAT_801dd1c0.sounds[id & 0x7ff];
     if (snd->slot == -1)
-        goto failed;
+        return -1;
     slot = &DAT_801dd1c0.slots[snd->slot];
-    if (slot->vab == -1)
-        goto failed;
-    if (slot->vab == 254)
-        goto failed;
+    if (slot->vab == -1 || slot->vab == 254)
+        return -1;
     if (slot->block[2] == 3)
-        goto failed;
+        return -1;
     left = left * opt->unk1 >> 7;
     right = right * opt->unk1 >> 7;
     note += snd->note;
-    if (note >= 0)
-        goto clamp_high;
-    note = 0;
-    goto find_voice;
-release:
-    SsUtKeyOffV(i);
-key_on:
-    voice = SsUtKeyOn(slot->vab, snd->prog, snd->tone, note, 0, left, right);
-    DAT_801dd1c0.voices[voice] = id;
-    return voice;
-clamp_high:
-    if (note >= 128)
+    if (note < 0)
+        note = 0;
+    else if (note >= 128)
         note = 127;
-find_voice:
     SpuGetAllKeysStatus(DAT_801dd1c0.keys);
     i = 24;
     while (i--) {
-        if (DAT_801dd1c0.keys[i] == 0)
-            goto key_on;
+        if (DAT_801dd1c0.keys[i] == 0) {
+            voice = SsUtKeyOn(slot->vab, snd->prog, snd->tone, note, 0, left, right);
+            DAT_801dd1c0.voices[voice] = id;
+            return voice;
+        }
     }
     i = 24;
     while (i--) {
-        if (DAT_801dd1c0.keys[i] == 3)
-            goto release;
+        if (DAT_801dd1c0.keys[i] == 3) {
+            SsUtKeyOffV(i);
+            voice = SsUtKeyOn(slot->vab, snd->prog, snd->tone, note, 0, left, right);
+            DAT_801dd1c0.voices[voice] = id;
+            return voice;
+        }
     }
-failed:
     return -1;
 }

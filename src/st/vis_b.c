@@ -287,8 +287,13 @@ int func_8004fd28(int x, int z, int w, int d, int y)
 
 /* Moves `e` from `from` to `to` (both turned by src's rotation, relative to
  * src) over `steps` calls, fading it in when `fade`; returns 1 when done.
- * Not exact: at +0x294 retail leaves the bnez delay slot empty where this
- * fills it with `li v0,99` (2 words). */
+ * Not exact: at +0x294 retail leaves the `bnez v0` delay slot empty where
+ * this fills it with `li v0,99` from the target (2 words). reorg only
+ * refuses both `li v0,..` candidates if it believes v0 live after the
+ * branch (no REG_DEAD on it, e.g. a reloaded test value, or stale block
+ * liveness); the pattern is unique in ST and VS. Ruled out: switch, `!x`,
+ * inverted arms, the tail repeated in both arms, a `done = 1` result
+ * variable. */
 ADDRESS(0x8004fdd0, 0x2dc)
 int func_8004fdd0(Vis88 *src, Vis88 *e, SVECTOR *from, SVECTOR *to, int fade, int steps)
 {
@@ -354,15 +359,16 @@ int func_8004fdd0(Vis88 *src, Vis88 *e, SVECTOR *from, SVECTOR *to, int fade, in
     return 1;
 }
 
-/* Runs frames while the screen fades from level `v` to `end` by `step`.
- * Not exact: retail keeps mode, end and step in s3, s4, s2; this build in
- * s2, s3, s4 (11 words). */
+/* Runs frames while the screen fades from level `start` to `end` by
+ * `delta`. */
 ADDRESS(0x800500ac, 0xc4)
-void func_800500ac(int mode, int v, int end, int step)
+void func_800500ac(int mode, int start, int end, int delta)
 {
     VECTOR pos;
     SVECTOR rot;
     int c;
+    int step = delta;
+    int v = start;
 
     for (;;) {
         c = v * v >> 16;
@@ -415,14 +421,12 @@ void func_80050170(int dx, int dy, int dz)
 }
 
 /* Spawns a debris entry of `kind` beside src, `size` units out along its
- * yaw turned by `angle`.
- * Not exact: the prologue copies a2 to s2 before a3/a1 where retail copies
- * it after them (6 words). */
+ * yaw turned by `angle`. */
 ADDRESS(0x80050288, 0x1e0)
 Vis88 *func_80050288(src, kind, state, arg3, size, angle, ox, oy, oz)
     Vis88 *src;
     u8 kind;
-    u8 state;
+    u16 state;
     s16 arg3;
     u8 size;
     short angle;

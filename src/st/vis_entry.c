@@ -398,9 +398,14 @@ void *func_8004b658(VECTOR *pos, short yaw, short pitch, int range, int arg4, in
 /* Distance from (x, y, z) to the segment a..b, or -1 beyond r (r + extra
  * from its interior). */
 /*
- * Not exact: in the interior branch retail adds `extra` into v0 and
- * compares before jumping to the shared test; this source adds into s0 and
- * compares after the jump.
+ * Not exact: retail compares in each arm (`addu v0,s0,v0; j shared; slt
+ * v0,v0,v1` / `slt v0,s0,v1`) and shares only `bnez v0; li v0,-1; move
+ * v0,v1`; this source adds `extra` into s0 and shares the compare. The
+ * compare result is block-local (v0) and d global (v1), so the two arms
+ * carry their own test and jump2 merges the tails. Ruled out: `if (r +
+ * extra < d) return -1;` per arm with the shared `return d` (no merge,
+ * +9 words), per-arm `return -1; return d;` (jump1 hoists `li v0,-1`, d
+ * lands in a0), a `miss` flag set in both arms (+5 words, flag in v1).
  */
 ADDRESS(0x8004b8ec, 0x29c)
 int func_8004b8ec(int x, int y, int z, int r, VECTOR *a, VECTOR *b, int extra)
@@ -450,10 +455,6 @@ int func_8004b8ec(int x, int y, int z, int r, VECTOR *a, VECTOR *b, int extra)
 /* Finds the live entry in front of req within its reach: mode (arg1 & 5)
  * 1 and 4 also require it inside the viewer's view cone; mode 0 returns the
  * first hit, otherwise the nearest. */
-/*
- * Not exact: retail keeps req in s5, mode in s3 and the entry pointer in
- * s6; this source uses s3, s6 and s5. Instructions otherwise agree.
- */
 ADDRESS(0x8004bb88, 0x2f8)
 int func_8004bb88(VisLists *req, int arg1)
 {
@@ -473,7 +474,7 @@ int func_8004bb88(VisLists *req, int arg1)
     min = 0x7fffffff;
     best = -1;
     mode = arg1 & 5;
-    for (i = 0, e = vis_table_a.entries; i < 64; i++, e++) {
+    for (e = vis_table_a.entries, i = 0; i < 64; i++, e++) {
         if (e->unk05 != 1)
             continue;
         if (e->unk70 & vis_table_a.unk6101)
@@ -507,11 +508,13 @@ int func_8004bb88(VisLists *req, int arg1)
             lim = e->unk2E + req->unk1C;
         if (dist - fwd >= lim)
             continue;
-        if (e->unk74.vy < req->unk4.vy)
-            miss = e->unk74.vy < req->unk4.vy - req->unk1E;
-        else
-            miss = req->unk4.vy < e->unk74.vy - e->unk30;
-        if (miss) {
+        if (e->unk74.vy < req->unk4.vy) {
+            if (e->unk74.vy < req->unk4.vy - req->unk1E) {
+                if (mode == 0)
+                    return -1;
+                continue;
+            }
+        } else if (req->unk4.vy < e->unk74.vy - e->unk30) {
             if (mode == 0)
                 return -1;
             continue;
@@ -529,20 +532,15 @@ int func_8004bb88(VisLists *req, int arg1)
 }
 
 /* Finds the first live entry whose body req touches. */
-/*
- * Not exact: retail keeps req in s1, the entry pointer in s3, -1 in s4 and
- * the table base in s5; this source uses s3, s1, s5 and s4.
- */
 ADDRESS(0x8004be80, 0x1bc)
 int func_8004be80(VisLists *req)
 {
     Vis212 *e;
     VECTOR v;
     int i;
-    int none;
 
     e = vis_table_a.entries;
-    for (i = 0, none = -1; i < 64; i++, e++) {
+    for (i = 0; i < 64; i++, e++) {
         if (e->unk05 != 1)
             continue;
         if (e->unk70 & vis_table_a.unk6101)
@@ -555,19 +553,25 @@ int func_8004be80(VisLists *req)
             v.vx = e->unk74.vx;
             v.vz = e->unk74.vz;
             v.vy = e->unk74.vy - e->unk30 + e->unk6E;
+            if (func_8004a484(&v, req->unk4.vx, req->unk4.vy, req->unk4.vz, e->unk2E + req->unk1C,
+                              e->unk30, req->unk1E) != -1)
+                return i;
         } else if (e->unk70 & 0x400000) {
             func_8004c934(e, 0, &v);
             v.vx += e->unk74.vx;
             v.vz += e->unk74.vz;
             v.vy += e->unk74.vy;
+            if (func_8004a484(&v, req->unk4.vx, req->unk4.vy, req->unk4.vz, e->unk2E + req->unk1C,
+                              e->unk30, req->unk1E) != -1)
+                return i;
         } else {
             v.vx = e->unk74.vx;
             v.vz = e->unk74.vz;
             v.vy = e->unk74.vy;
+            if (func_8004a484(&v, req->unk4.vx, req->unk4.vy, req->unk4.vz, e->unk2E + req->unk1C,
+                              e->unk30, req->unk1E) != -1)
+                return i;
         }
-        if (func_8004a484(&v, req->unk4.vx, req->unk4.vy, req->unk4.vz, e->unk2E + req->unk1C,
-                          e->unk30, req->unk1E) != none)
-            return i;
     }
     return -1;
 }
@@ -894,10 +898,6 @@ void func_8004cba0(SVECTOR *off, VECTOR *out, VECTOR *base)
  * by at most `turn` per step; with pitch -1 the pitch turns too. n > 1
  * steps lead the target by its motion. Stores the final rotation (facing
  * the other way) in out and returns its yaw. */
-/*
- * Not exact: retail loads pitch once (`lhu s2,104(sp)`); this source loads
- * it twice (lw and lh) and needs s8, so the frame and s-registers shift.
- */
 ADDRESS(0x8004cc70, 0x278)
 int func_8004cc70(e, pos, speed, target, dir, out, pitch, turn, n)
 Vis212 *e;
@@ -906,7 +906,7 @@ int speed;
 VECTOR *target;
 SVECTOR *dir;
 SVECTOR *out;
-int pitch;
+short pitch;
 short turn;
 int n;
 {
@@ -914,6 +914,7 @@ int n;
     SVECTOR rot;
     int k;
     int d;
+    int t;
 
     p = *pos;
     k = turn << 12;
@@ -927,8 +928,10 @@ int n;
             d = k / d;
         if (d > 4096)
             d = 4096;
-        rot.vy = func_8004a848(rot.vy, e->unk8E + 2048, d);
-        if ((short)pitch == -1) {
+        t = func_8004a848(rot.vy, e->unk8E + 2048, d);
+        rot.vy = t;
+        t = pitch;
+        if (t == -1) {
             d = (rot.vx - (short)e->unk8C) & 0xfff;
             if (d >= 2048)
                 d = 4096 - d;

@@ -763,8 +763,9 @@ void func_80065770(void)
 }
 
 /* The ring sub-list: five entries with their names and effect figures. */
-/* Not exact: the selected-entry and name-map addresses use different
- * temporaries, and the message-address additions have reversed operands. */
+/* The text base is added as an integer after the offset, and the name table
+ * pointer is assigned inside the loop: retail adds in that operand order
+ * and keeps the table address in the loop. */
 ADDRESS(0x80065de0, 0x160)
 void func_80065de0(void)
 {
@@ -773,21 +774,21 @@ void func_80065de0(void)
     EquipSubList *list = &DAT_801e0d08;
     CVECTOR *label = &sp->style[0];
     u16 *offsets = menu_messages.offsets;
-    u8 *strings = menu_messages.text;
+    u32 text = (u32)menu_messages.text;
     int y, y2;
-    u8 entry;
-    u8 *entry_slot;
+    u8 *names = NULL;
 
     y2 = 64;
     y = 48;
     for (; i < 5; i++) {
-        entry_slot = &list->entries[sp->unk2E2 + i];
-        entry = *entry_slot;
-        if (entry != 255) {
-            func_8002732c((u16 *)(strings + offsets[916 + DAT_8008092c[entry]]), 28, y, label);
-            func_8002732c((u16 *)(strings + offsets[936]), 140, y2, label);
-            func_80027440(effects.defs[list->entries[sp->unk2E2 + i]].unk2 | 0x3000000, 204, y2,
-                          &sp->style[4]);
+        if (*(list->entries + (sp->unk2E2 + i)) != 255) {
+            names = DAT_8008092c;
+            func_8002732c(
+                (u16 *)(offsets[916 + names[*(list->entries + (sp->unk2E2 + i))]] + text), 28, y,
+                label);
+            func_8002732c((u16 *)(offsets[936] + text), 140, y2, label);
+            func_80027440(effects.defs[*(list->entries + (sp->unk2E2 + i))].unk2 | 0x3000000,
+                          204, y2, &sp->style[4]);
             y2 += 36;
             y += 36;
         }
@@ -809,8 +810,6 @@ void func_80065f40(void)
 
 /* Draws the screen: the text colours, the cursor blink and the active
  * list's panels. */
-/* Not exact: retail stores the 48 group before it loads the blink phase
- * (unk2E4) into $v1; this build hoists the load (7 words, $v0/$v1 swapped). */
 ADDRESS(0x80066004, 0x168)
 void func_80066004(void)
 {
@@ -818,12 +817,13 @@ void func_80066004(void)
 
     func_800174c4();
     sp = MENU_SCRATCH;
-    sp->style[2].b = sp->style[6].b = sp->style[3].g = sp->style[7].g = sp->style[3].b =
-        sp->style[7].b = 48;
+    sp->style[3].r = sp->style[7].r = 96;
+    sp->style[3].g = sp->style[7].g = sp->style[3].b = sp->style[7].b = 48;
     sp->style[0].b = sp->style[4].b = sp->style[0].g = sp->style[4].g = sp->style[0].r =
-        sp->style[4].r = sp->style[3].r = sp->style[7].r = 96;
+        sp->style[4].r = 96;
     sp->style[2].r = sp->style[6].r = 98;
     sp->style[2].g = sp->style[6].g = 66;
+    sp->style[2].b = sp->style[6].b = 48;
     sp->style[0].cd = sp->style[2].cd = sp->style[3].cd = 57;
     sp->style[4].cd = sp->style[6].cd = sp->style[7].cd = 41;
     if (MENU_SCRATCH->unk2E4 < 16)

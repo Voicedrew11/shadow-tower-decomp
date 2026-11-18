@@ -10,7 +10,7 @@
 #include <LIBGTE.H>
 #include <st/vis.h>
 
-void func_800549c8(Vis212 *e, int id);
+Vis88 *func_800549c8(Vis212 *e, int id);
 int func_8005529c(int id);
 int func_800552bc(int id);
 int func_80055300(int id);

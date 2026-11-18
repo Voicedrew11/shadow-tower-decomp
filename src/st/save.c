@@ -21,8 +21,13 @@
 #define BIT(i) (1 << ((i) % 32))
 
 /*
- * Not exact: retail hoists the 0x7fffffff mask into t4; this source uses
- * t1 and rotates the other mask registers. The item-quantity 1 load is late.
+ * Not exact: retail has the four 32-bit masks in t4 (0x7fffffff), t3, t2,
+ * t1 and loads the quantity 1 (t0) earlier; here 0x7fffffff takes t1 and
+ * the others rotate. local-alloc gives the shortest-lived mask the lowest
+ * register, so in retail the unk1440 `and` sat after the three unk1444
+ * mask `and`s when local-alloc ran (sched1), and sched2 moved it back.
+ * Ruled out: bit-fields for the flags, `= 0` for the second unk1440
+ * statement, the 0x7fffffff spelling, swapping the two middle statements.
  */
 /* New-game defaults. */
 ADDRESS(0x800559bc, 0x338)
