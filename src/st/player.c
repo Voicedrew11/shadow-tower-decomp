@@ -585,8 +585,6 @@ void player_take_damage(int damage, int flags, long *from)
  * caps the status times, then turns the three physical and six elemental
  * damage values into hit points through the defence values.
  */
-/* Not exact: status-cap products and damage sums still use different
- * registers. The shared row-0 cap has its own value before comparison. */
 ADDRESS(0x8003dbe0, 0xa08)
 void player_hit(u16 *damage, u16 scale, u16 effect, long *from)
 {
@@ -595,9 +593,6 @@ void player_hit(u16 *damage, u16 scale, u16 effect, long *from)
     int elemental;
     u16 *defence;
     u16 *extra;
-    int k300;
-    int k75;
-    int k600;
     int resist;
     int base;
     int limit300;
@@ -612,7 +607,7 @@ void player_hit(u16 *damage, u16 scale, u16 effect, long *from)
     int v;
     int i;
 
-    physical = elemental = 0;
+    elemental = physical = 0;
     defence = viewer.unkD8;
     memset(bonus, 0, sizeof(bonus));
     extra = bonus;
@@ -732,13 +727,13 @@ void player_hit(u16 *damage, u16 scale, u16 effect, long *from)
             break;
         }
     limits:
-        k300 = 300;
-        k75 = 75;
-        k600 = 600;
+        limit300 = 300;
+        limit75 = 75;
+        limit600 = 600;
         base = (112 - viewer.unk20) * 50 / 59 + 50;
-        limit300 = base * k300 / 100;
-        limit75 = base * k75 / 100;
-        limit600 = base * k600 / 100;
+        limit300 = base * limit300 / 100;
+        limit75 = base * limit75 / 100;
+        limit600 = base * limit600 / 100;
         limit300 = limit300 * viewer.unk1C8 / 100;
         limit75 = limit75 * viewer.unk1C8 / 100;
         limit600 = limit600 * viewer.unk1C8 / 100;

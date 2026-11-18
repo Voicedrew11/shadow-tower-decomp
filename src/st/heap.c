@@ -38,9 +38,7 @@ void func_80015024(StBlock *heap)
     u32 words;
 
     func_80014f90(heap);
-    if (heap->state == ST_BLOCK_END)
-        return;
-    do {
+    while (p->state != ST_BLOCK_END) {
         next = (StBlock *)((u8 *)p + p->size + sizeof(StBlock));
         if (p->state == ST_BLOCK_RELEASABLE)
             func_80014e20(p);
@@ -63,7 +61,7 @@ void func_80015024(StBlock *heap)
             }
         }
         p = next;
-    } while (p->state != ST_BLOCK_END);
+    }
     if (dst->state != ST_BLOCK_END) {
         dst->state = ST_BLOCK_FREE;
         dst->size = (u8 *)p - (u8 *)dst - sizeof(StBlock);

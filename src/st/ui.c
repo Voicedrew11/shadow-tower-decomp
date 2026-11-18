@@ -60,19 +60,33 @@ static s32 DAT_800881c8;
     (buf)->cur = (u_long *)((p) + 1);     \
     world_state.unk8328++
 
-/* Not exact: this build is 8 bytes shorter than retail. Layout constants
- * and packet-pointer registers differ; retail zero-extends the half width
- * before the u multiply and reloads rgb.r before setRGB0. The extent
- * difference also shifts later switch labels in this unit's JUMPTABLES. */
+/*
+ * NEW_PRIM with the end of the new primitive kept in the caller's `next`:
+ * a function that takes a primitive in two branches uses one variable for
+ * both.
+ */
+#define NEW_PRIM_NEXT(buf, p, next, type) \
+    (buf) = world_state.packet;           \
+    (p) = (type *)(buf)->cur;             \
+    (next) = (u_long *)((p) + 1);         \
+    if ((buf)->end < (next))              \
+        return;                           \
+    (buf)->cur = (next);                  \
+    world_state.unk8328++
+
+/* Draws glyph `c` at (x, y): half-width codes below the split, full-width
+ * codes after it. */
 ADDRESS(0x80026ecc, 0x460)
 void func_80026ecc(u16 c, u16 x, u16 y, CVECTOR *color)
 {
     StPacketBuffer *buf;
     POLY_FT4 *p;
+    u_long *next;
     CVECTOR rgb;
-    int half, cols, qw, qh, fw, ch;
+    u16 half, cols, qw, qh, fw, ch;
     u16 split;
-    u16 u, v, q, r;
+    int u, v;
+    u16 q, r;
     int n;
 
     if (MENU_SCRATCH->unk2E5 == 0) {
@@ -97,10 +111,13 @@ void func_80026ecc(u16 c, u16 x, u16 y, CVECTOR *color)
         q = c / (cols * 2);
         u = r * half;
         v = ch * q;
-        NEW_PRIM(buf, p, POLY_FT4);
+        NEW_PRIM_NEXT(buf, p, next, POLY_FT4);
         setUV4(p, u, v, half + u, v, u, ch + v, half + u, ch + v);
         if (DAT_800881c4) {
-            x -= (DAT_800881ac == 1 ? DAT_800881a0 : DAT_800881a2) * (half + 1);
+            if (DAT_800881ac == 1)
+                x -= DAT_800881a0 * (half + 1);
+            else
+                x -= DAT_800881a2 * (half + 1);
             DAT_800881c0 += half + 1;
             if (DAT_800881bc < x) {
                 DAT_800881c8++;
@@ -109,17 +126,27 @@ void func_80026ecc(u16 c, u16 x, u16 y, CVECTOR *color)
             if (x < DAT_800881ba)
                 return;
         }
-        setXY4(p, x, y, x + half, y, x, y + qh, x + half, y + qh);
+        p->x1 = p->x3 = x + half;
+        p->x0 = p->x2 = x;
+        p->y0 = p->y1 = y;
+        p->y2 = p->y3 = y + qh;
+        rgb = *color;
+        rgb.r += 8;
+        rgb.g += 8;
+        rgb.b += 8;
     } else {
         n = c - split / 2;
         r = n % cols;
         q = n / cols;
         u = fw * r;
         v = ch * q;
-        NEW_PRIM(buf, p, POLY_FT4);
+        NEW_PRIM_NEXT(buf, p, next, POLY_FT4);
         setUV4(p, u, v, fw + u, v, u, ch + v, fw + u, ch + v);
         if (DAT_800881c4) {
-            x -= (DAT_800881ac == 1 ? DAT_800881a0 : DAT_800881a2) * (half + 1);
+            if (DAT_800881ac == 1)
+                x -= DAT_800881a0 * (half + 1);
+            else
+                x -= DAT_800881a2 * (half + 1);
             DAT_800881c0 += fw;
             if (DAT_800881bc < x) {
                 DAT_800881c8++;
@@ -128,12 +155,15 @@ void func_80026ecc(u16 c, u16 x, u16 y, CVECTOR *color)
             if (x < DAT_800881ba)
                 return;
         }
-        setXY4(p, x, y, x + qw, y, x, y + qh, x + qw, y + qh);
+        p->x1 = p->x3 = x + qw;
+        p->x0 = p->x2 = x;
+        p->y0 = p->y1 = y;
+        p->y2 = p->y3 = y + qh;
+        rgb = *color;
+        rgb.r += 8;
+        rgb.g += 8;
+        rgb.b += 8;
     }
-    rgb = *color;
-    rgb.r += 8;
-    rgb.b += 8;
-    rgb.g += 8;
     setRGB0(p, rgb.r, rgb.g, rgb.b);
     if (color->cd & 0x80) {
         p->tpage = GetTPage(0, color->cd & 3, 896, 256);
@@ -148,7 +178,6 @@ void func_80026ecc(u16 c, u16 x, u16 y, CVECTOR *color)
 }
 
 /* Draws a 0xffff-terminated glyph string; code 0 starts a new line. */
-/* Not exact: the loop-end 0xffff lands in $t0 here, $v0 in retail. */
 ADDRESS(0x8002732c, 0x114)
 void func_8002732c(u16 *s, u16 x, u16 y, CVECTOR *color)
 {
@@ -171,7 +200,8 @@ void func_8002732c(u16 *s, u16 x, u16 y, CVECTOR *color)
         if (*s == 0) {
             x = left;
             y += line;
-            s += 2;
+            s++;
+            s++;
         } else {
             func_80026ecc(*s, x, y, color);
             if (*s < split)
@@ -193,8 +223,6 @@ void func_8002732c(u16 *s, u16 x, u16 y, CVECTOR *color)
 
 /* Draws a number with the proportional font: digit glyphs follow the
  * half-width codes. */
-/* Not exact: the num-to-value copy precedes the digit-count shift here;
- * retail schedules it after the shift and mask. */
 ADDRESS(0x80027440, 0x27c)
 void func_80027440(u32 num, u16 x, u16 y, CVECTOR *color)
 {
@@ -204,7 +232,7 @@ void func_80027440(u32 num, u16 x, u16 y, CVECTOR *color)
     u8 neg = 0;
     u16 width = color->cd >> 2;
     u16 base;
-    int n;
+    u8 n;
     u32 sign;
     s16 value;
     int pow;
@@ -263,16 +291,13 @@ void func_80027440(u32 num, u16 x, u16 y, CVECTOR *color)
 }
 
 /* Draws a number with the fixed 7-pixel digit glyphs (codes 2-11). */
-/* Not exact: as func_80027440, the value/parameter copies precede the
- * digit-count extraction; retail extracts it first. The guarded power loop
- * now agrees. */
 ADDRESS(0x800276bc, 0x244)
 void func_800276bc(u32 num, u16 x, u16 y, CVECTOR *color)
 {
     u16 digit[8];
     u8 leading = 1;
     u8 neg = 0;
-    int n = NUMBER_DIGITS(num);
+    u8 n = NUMBER_DIGITS(num);
     u16 width = 7;
     int end;
     u32 sign;
@@ -399,34 +424,28 @@ void func_80027900(DVECTOR *pos, CVECTOR *color, u16 dir)
     setRGB0(p, (color)->r, (color)->g, (color)->b);            \
     *world_state.ot_cur = (u_long)(p) & 0xffffff
 
+/* FILL_F4 over the rectangle with top left (x, y), width w and height h. */
+#define FILL_RECT_F4(p, semi, x, y, w, h, color) \
+    FILL_F4(p, semi, x, y, (x) + (w), y, x, (y) + (h), (x) + (w), (y) + (h), color)
+
 /* Draws a rectangle outline: bars `border & 0xff` high at the top and
  * bottom and `border >> 8` wide at the sides. */
-/* Not exact (size-exact): retail keeps `color` in $t4 and computes
- * `border >> 8` before the world-state address. The bottom/right bars also
- * load y before h and x before w into different operand registers. Explicit
- * coordinate order, separate packet phases and low-border reuse did not
- * resolve those differences. */
 ADDRESS(0x80027d18, 0x508)
 void func_80027d18(RECT *r, CVECTOR *color, u16 border, u16 semi)
 {
     POLY_F4 *p;
     StPacketBuffer *buf;
-    int w = border >> 8;
-    int h = border & 0xff;
+    short w = border >> 8;
+    short h = border & 0xff;
 
     NEW_PRIM(buf, p, POLY_F4);
-    FILL_F4(p, semi, r->x, r->y, r->x + r->w, r->y, r->x, r->y + h, r->x + r->w, r->y + h,
-            color);
+    FILL_RECT_F4(p, semi, r->x, r->y, r->w, h, color);
     NEW_PRIM(buf, p, POLY_F4);
-    FILL_F4(p, semi, r->x, r->y + r->h - h, r->x + r->w, r->y + r->h - h, r->x, r->h + r->y,
-            r->x + r->w, r->h + r->y, color);
+    FILL_RECT_F4(p, semi, r->x, r->y + r->h - h, r->w, h, color);
     NEW_PRIM(buf, p, POLY_F4);
-    FILL_F4(p, semi, r->x, r->y + h, r->x + w, r->y + h, r->x, r->y + h + (r->h - h * 2),
-            r->x + w, r->y + h + (r->h - h * 2), color);
+    FILL_RECT_F4(p, semi, r->x, r->y + h, w, r->h - h * 2, color);
     NEW_PRIM(buf, p, POLY_F4);
-    FILL_F4(p, semi, r->x + r->w - w, r->y + h, r->w + r->x, r->y + h,
-            r->x + r->w - w, r->y + h + (r->h - h * 2), r->w + r->x, r->y + h + (r->h - h * 2),
-            color);
+    FILL_RECT_F4(p, semi, r->x + r->w - w, r->y + h, w, r->h - h * 2, color);
 }
 
 /* Fills a rectangle (semi-transparent when `semi` is 1). */
@@ -526,9 +545,6 @@ void func_800286a8(int abr, int x, int y)
  * card image in and out, and counts the frames in unk1EE19
  * (unk1EE17 is the card mode, unk1EE18 the fade length).
  */
-/* Not exact (48 bytes short): this build cross-jumps the two fade divides;
- * retail keeps them separate with a common colour/draw tail. The world_state
- * base is formed early, and the SHOW arguments precede the mode choice. */
 ADDRESS(0x80028784, 0x4a8)
 void func_80028784(void)
 {
@@ -536,13 +552,9 @@ void func_80028784(void)
     RECT card = {32, 132, 255, 255};
     CVECTOR fill;
     CVECTOR tint;
-    DVECTOR tex;
-    DVECTOR clut;
+    DVECTOR tex = {960, 256};
+    DVECTOR clut = {560, 495};
 
-    tex.vx = 960;
-    tex.vy = 256;
-    clut.vx = 560;
-    clut.vy = 495;
     if (world_state.unk1EE17 == 1) {
         tex.vy = 0;
         clut.vx = 0;
@@ -552,8 +564,10 @@ void func_80028784(void)
         world_state.unk1EE18 = 1;
     switch (world_state.unk1EE16) {
     case CARD_FADE_IN:
-        fill.r = fill.g = fill.b =
-            world_state.unk1EE17 == 3 ? 255 : (world_state.unk1EE19 << 4) / world_state.unk1EE18;
+        if (world_state.unk1EE17 != 3)
+            fill.r = fill.g = fill.b = (world_state.unk1EE19 << 4) / world_state.unk1EE18;
+        else
+            fill.r = fill.g = fill.b = 255;
         func_80028220(&screen, &fill, 1);
         func_800286a8(2, 0, 0);
         break;
@@ -570,8 +584,10 @@ void func_80028784(void)
     case CARD_SHOW:
         if (DAT_801cd120.unk4 == 1 || world_state.unk1EE17 == 2) {
             tint.r = tint.g = tint.b = 128;
-            func_80028364(&card, &tex, &clut, &tint,
-                          DAT_80088190 == 25 || DAT_80088190 == 30 || DAT_80088190 == 5 ? 2 : 3);
+            if (DAT_80088190 == 25 || DAT_80088190 == 30 || DAT_80088190 == 5)
+                func_80028364(&card, &tex, &clut, &tint, 2);
+            else
+                func_80028364(&card, &tex, &clut, &tint, 3);
         }
         break;
     case CARD_SHOW_OUT:
@@ -585,10 +601,11 @@ void func_80028784(void)
         }
         break;
     case CARD_FADE_OUT:
-        fill.r = fill.g = fill.b =
-            world_state.unk1EE17 == 3
-                ? 255
-                : ((world_state.unk1EE18 - world_state.unk1EE19) << 4) / world_state.unk1EE18;
+        if (world_state.unk1EE17 != 3)
+            fill.r = fill.g = fill.b =
+                ((world_state.unk1EE18 - world_state.unk1EE19) << 4) / world_state.unk1EE18;
+        else
+            fill.r = fill.g = fill.b = 255;
         func_80028220(&screen, &fill, 1);
         func_800286a8(2, 0, 0);
         break;
@@ -1121,13 +1138,7 @@ void func_8002a5a4(void)
     PAGE_END();
 }
 
-/*
- * The map page: visited areas and their completion, or the area summary.
- *
- * Not exact: in the summary branch retail keeps the total minutes in
- * $a0 and hours/minutes in $s5 (this build: $s1), and swaps $s2/$s3 for the
- * two colour pointers.
- */
+/* The map page: visited areas and their completion, or the area summary. */
 ADDRESS(0x8002a954, 0x994)
 void func_8002a954(void)
 {
@@ -1217,7 +1228,8 @@ void func_8002a954(void)
         func_80026ecc(15, 213, 168, &sp->style[0]);
         func_80027440(630 | DIGITS(3), 221, 168, &sp->style[4]);
         time = (u32)viewer.unk34 / 60;
-        hours = time / 60;
+        minutes = time / 60;
+        hours = minutes;
         minutes = time - hours * 60;
         func_80027440((u16)hours | DIGITS(2), 199, 198, &sp->style[4]);
         func_80026ecc(27, 224, 198, &sp->style[0]);
@@ -1265,10 +1277,6 @@ void func_8002a954(void)
 /*
  * The option page. `wash` is func_8002948c's {32, 32, 32}: GCC merged the
  * two constants.
- *
- * Not exact: retail copies the NULL argument's zero into `i` before the
- * first tile call. The first label loop's y step and highlight counter's
- * initialization also have different schedules.
  */
 ADDRESS(0x8002b2e8, 0x564)
 void func_8002b2e8(void)
@@ -1309,7 +1317,6 @@ void func_8002b2e8(void)
     sp->unk33C.w = 5;
     sp->unk33C.h = 5;
     sp->unk33C.x = DAT_801cd120.unk1 * 83 / 63 + 180;
-    i = 0;
     func_80028364(&sp->unk33C, &sp->unk358, &sp->unk35C, NULL, 0);
     sp->unk358.vx = 576;
     sp->unk33C.x = 176;
@@ -1318,7 +1325,7 @@ void func_8002b2e8(void)
     sp->unk33C.h = 14;
     sp->unk358.vy = 416;
     func_80028364(&sp->unk33C, &sp->unk358, &sp->unk35C, NULL, 1);
-    for (; i < 6; i++, y += 20)
+    for (i = 0; i < 6; y += 20, i++)
         func_8002732c(MESSAGE(0xc9 + i), label_x[i] + 32, y, &sp->style[2]);
     for (on = &DAT_801cd120.unk2, i = 1; i < 5; on++, i++) {
         if (*on == 1) {
@@ -1329,7 +1336,6 @@ void func_8002b2e8(void)
             func_8002732c(MESSAGE(0xd0), 241, i * 20 + 80, &sp->style[2]);
         }
     }
-    i = 0;
     func_800276bc(DAT_801cd120.unk1 | DIGITS(2), 280, 80, &sp->style[0]);
     func_8002732c(MESSAGE(0xe0 + sp->unk2E0), 64, 208, &sp->style[0]);
     sp->unk358.vx = 596;
@@ -1341,7 +1347,7 @@ void func_8002b2e8(void)
     sp->unk33C.w = 70;
     sp->unk33C.h = 16;
     func_80028364(&sp->unk33C, &sp->unk358, &sp->unk35C, NULL, 3);
-    for (; i < 6; i++) {
+    for (i = 0; i < 6; i++) {
         if (i == sp->unk2E0)
             func_80028c2c(row, lit, 1);
         else
@@ -2173,23 +2179,19 @@ void func_8002dd70(void)
     func_80028364(&sp->unk350, &sp->unk358, 0, 0, 16);
 }
 
-/*
- * Not exact: retail loads the constant 48 before reading +0x2e4;
- * this build hoists the +0x2e4 load, swapping v0 and v1 in the first
- * colour stores.
- */
 ADDRESS(0x8002e310, 0x180)
 void func_8002e310(void)
 {
     MenuScratch *sp = MENU_SCRATCH;
 
     func_800174c4();
-    sp->style[2].b = sp->style[6].b = sp->style[3].g = sp->style[7].g =
-        sp->style[3].b = sp->style[7].b = 48;
-    sp->style[0].b = sp->style[4].b = sp->style[0].g = sp->style[4].g =
-        sp->style[0].r = sp->style[4].r = sp->style[3].r = sp->style[7].r = 96;
+    sp->style[3].r = sp->style[7].r = 96;
+    sp->style[3].g = sp->style[7].g = sp->style[3].b = sp->style[7].b = 48;
+    sp->style[0].b = sp->style[4].b = sp->style[0].g = sp->style[4].g = sp->style[0].r =
+        sp->style[4].r = 96;
     sp->style[2].r = sp->style[6].r = 98;
     sp->style[2].g = sp->style[6].g = 66;
+    sp->style[2].b = sp->style[6].b = 48;
     sp->style[0].cd = sp->style[2].cd = sp->style[3].cd = 57;
     sp->style[4].cd = sp->style[6].cd = sp->style[7].cd = 41;
     if (sp->unk2E4 < 16)
@@ -2236,10 +2238,6 @@ void func_8002e490(void)
  * Draws the equipment slots from their VRAM images, highlights the slot
  * under the cursor and, while +0x2c6 is 1, prints each equipped item's
  * +0x28 figure with a shadow.
- *
- * Not exact: retail keeps the scratchpad base, draw mode and rectangle
- * offset in s4/s3/s5, this source in s3/s5/s4; the loop-latch increments
- * also schedule in the opposite order.
  */
 ADDRESS(0x8002e4d0, 0x47c)
 void func_8002e4d0(void)
@@ -2280,9 +2278,11 @@ void func_8002e4d0(void)
     sp->style[7].b = 96;
     sp->style[7].cd = 48;
     equip = viewer.unk38;
-    for (i = 0; i < EQUIP_SLOTS; i++, equip++) {
-        if (i == 2 || (i == 3 && vis_table_c.unk0118[viewer.unk38[16]].unk26 == 9) ||
-            (i == 4 && vis_table_c.unk0118[viewer.unk38[17]].unk26 == 9))
+    for (i = 0; i < EQUIP_SLOTS; equip++, i++) {
+        if (i == 2)
+            mode = 48;
+        else if ((i == 3 && vis_table_c.unk0118[viewer.unk38[16]].unk26 == 9) ||
+                 (i == 4 && vis_table_c.unk0118[viewer.unk38[17]].unk26 == 9))
             mode = 48;
         else
             mode = 16;
@@ -2692,11 +2692,6 @@ void func_8002fc4c(void)
 #define STORE_COLUMNS 5
 #define STORE_ROWS 3
 
-/*
- * Not exact: the scratchpad base and constant 48 swap saved registers
- * (retail: s3 and s2), and the column-loop latch has an extra nop. The body
- * is four bytes long; changing its length moves later unit functions.
- */
 ADDRESS(0x8002fe4c, 0x410)
 void func_8002fe4c(void)
 {
@@ -2736,11 +2731,12 @@ void func_8002fe4c(void)
     sp->unk350.y = 32;
     index = sp->unk2E2 * STORE_COLUMNS;
     for (row = 0; row < STORE_ROWS; row++) {
-        cols = STORE_COLUMNS;
         if (sp->unk2E2 + row == sp->unk0.store.rows)
             cols = sp->unk0.store.last;
+        else
+            cols = STORE_COLUMNS;
         sp->unk350.x = 48;
-        for (col = 0; col < cols; col++, index++) {
+        for (col = 0; col < cols; index++, col++) {
             if (index < sp->unk0.store.count) {
                 func_80027d18(&sp->unk350, &sp->style[0], 513, 1);
                 func_80028364(&sp->unk350, &sp->unk0.store.tex[index % 15], 0, 0, 16);

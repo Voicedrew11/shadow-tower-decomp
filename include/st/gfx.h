@@ -236,7 +236,7 @@ int func_80016554(void);
 /* src/st/texanim.c */
 void func_80016878(void);
 StTexAnim *func_800168a4(void);
-void func_800168e0(RECT *rect, int period, int step, int type, short area);
+int func_800168e0(RECT *rect, int period, int step, int type, short area);
 void func_80016a14(void);
 
 /* src/st/gfx.c */

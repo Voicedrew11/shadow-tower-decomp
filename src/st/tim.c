@@ -46,57 +46,54 @@ void placements_expand(StPlacement *src)
  * Uploads the TIM images packed in `buf` (each its 8-byte header, an
  * optional CLUT block and the pixel block) and returns the bytes of the
  * complete images; it stops at the first truncated or inconsistent one.
- *
- * Not exact: the block-header loads agree, but the cursor and payload
- * pointers occupy s0/s1 instead of retail's s1/s0. Initial save order
- * also differs; the function is size-exact with the same control flow.
  */
 ADDRESS(0x80031efc, 0x15c)
 int tim_load_images(u_long *buf, u_long size)
 {
-    u_char *start = (u_char *)buf;
-    u_char *p = start;
-    u_char *done = start;
+    u_char *p = (u_char *)buf;
+    u_char *done = (u_char *)buf;
 
     for (;;) {
         TimHeader *tim;
         TimBlock *block;
-        u_long *data;
+        u_long *pixels;
         int bytes;
 
-        if (size < p - start + sizeof(TimHeader))
+        if (size < p - (u_char *)buf + sizeof(TimHeader))
             break;
         tim = (TimHeader *)p;
         p += sizeof(TimHeader);
         if (tim->flag & 8) {
+            u_long *clut;
+
             block = (TimBlock *)p;
-            if (size < p - start + sizeof(TimBlock))
+            if (size < p - (u_char *)buf + sizeof(TimBlock))
                 break;
             p += sizeof(TimBlock);
             bytes = block->w * block->h * 2;
             if (block->bnum != bytes + sizeof(TimBlock))
                 break;
-            if (size < p - start + bytes)
+            if (size < p - (u_char *)buf + bytes)
                 break;
-            data = (u_long *)p;
+            clut = (u_long *)p;
             p += bytes;
             VSync(0);
-            LoadImage((RECT *)&block->x, data);
+            LoadImage((RECT *)&block->x, clut);
         }
         block = (TimBlock *)p;
-        if (size < p - start + sizeof(TimBlock))
+        if (size < p - (u_char *)buf + sizeof(TimBlock))
             break;
         p += sizeof(TimBlock);
         bytes = block->w * block->h * 2;
         if (block->bnum != bytes + sizeof(TimBlock))
             break;
-        if (size < p - start + bytes)
+        if (size < p - (u_char *)buf + bytes)
             break;
-        data = (u_long *)p;
+        pixels = (u_long *)p;
         p += bytes;
         VSync(0);
-        LoadImage((RECT *)&block->x, data);
+        LoadImage((RECT *)&block->x, pixels);
         done = p;
     }
-    return done - start;
+    return done - (u_char *)buf;
 }

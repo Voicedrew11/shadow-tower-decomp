@@ -745,32 +745,42 @@ void func_8003f910(int kind, int slot, ...)
     }
 }
 
-/* Per hand: starts the queued magic, or recovers the second bar.
- * Not exact: retail scales each item index before forming the record-array
- * base; this source forms the base early, changing temporary roles. */
+/* Per hand: starts the queued magic, or recovers the second bar. */
 ADDRESS(0x80040024, 0x288)
 void func_80040024(u8 hand)
 {
+    Vis44 *item;
     int active;
     int rate = 36;
 
     if (viewer.unk13C[hand] != -1) {
         if (hand) {
-            if (viewer.unk38[13] != 0xffff && (vis_table_c.unk0118 + viewer.unk38[13])->unk28)
-                func_80040f04(viewer.unk14C[hand], hand);
+            if (viewer.unk38[13] != 0xffff) {
+                item = &vis_table_c.unk0118[viewer.unk38[13]];
+                if (item->unk28)
+                    func_80040f04(viewer.unk14C[hand], hand);
+            }
         } else {
-            if (viewer.unk38[0] != 0xffff && (vis_table_c.unk0118 + viewer.unk38[0])->unk28)
-                func_80040f04(viewer.unk14C[0], 0);
+            if (viewer.unk38[0] != 0xffff) {
+                item = &vis_table_c.unk0118[viewer.unk38[0]];
+                if (item->unk28)
+                    func_80040f04(viewer.unk14C[0], 0);
+            }
         }
         viewer.unk13C[hand] = -1;
         return;
     }
     active = 0;
-    if (viewer.unk38[0] != 0xffff && (vis_table_c.unk0118 + viewer.unk38[0])->unk28)
-        active = viewer.unk38[6] != 0xffff;
-    if (viewer.unk38[13] != 0xffff && (vis_table_c.unk0118 + viewer.unk38[13])->unk28 &&
-        viewer.unk38[12] != 0xffff)
-        active = 1;
+    if (viewer.unk38[0] != 0xffff) {
+        item = &vis_table_c.unk0118[viewer.unk38[0]];
+        if (item->unk28)
+            active = viewer.unk38[6] != 0xffff;
+    }
+    if (viewer.unk38[13] != 0xffff) {
+        item = &vis_table_c.unk0118[viewer.unk38[13]];
+        if (item->unk28 && viewer.unk38[12] != 0xffff)
+            active = 1;
+    }
     if (!viewer.unk1CB || viewer.unk190[12][0] != 0) {
         if (!active)
             return;
@@ -1830,8 +1840,13 @@ void func_80042cfc(void)
  * viewer.unk218 (walking, using an item, dying, falling into a pit), the
  * floor damage and the status damage over time, the view angles, the
  * swings and the hit/magic point recovery.
- * Not exact: the DAT_801cd0e0 address temporary (+0x96c, v1 vs v0), the
- * status damage temporary and the wear loop's s0/s1 differ. */
+ * Not exact: one site (+0x96c). Retail reads the item-use result with a
+ * separate address temporary (lui v0; lw v1,lo(v0)); this -G8 unit sees the
+ * 4-byte scalar DAT_801cd0e0 as small data and emits `lw v1,sym`. Spelling it
+ * DAT_801cba08.unk16D8 (an object over 8 bytes) with that owner in the
+ * site's relocs.tsv row makes the function exact, but the access then
+ * crosses DAT_801cba08's identity extent (a new closure issue), so the
+ * identity merge is left to the data model. */
 ADDRESS(0x80042d74, 0x1678)
 void func_80042d74(void)
 {
@@ -2232,11 +2247,12 @@ void func_80042d74(void)
             }
             if ((viewer.unk2C & 0x400) || viewer.unk2F0) {
                 if (viewer.unk23C % 20 == 0) {
-                    d = (viewer.unkD8[3] - 256) / 4;
+                    int heal = (viewer.unkD8[3] - 256) / 4;
+
                     if (viewer.unk2C & 0x800000) {
-                        player_add_hp(d / 2);
+                        player_add_hp(heal / 2);
                     } else {
-                        player_add_hp(d);
+                        player_add_hp(heal);
                     }
                 }
                 if (viewer.unk23C % 60 == 0) {
@@ -2245,16 +2261,18 @@ void func_80042d74(void)
                                      &viewer.unk38[0], &viewer.unk38[13], NULL};
 
                     if (viewer.unk2F0) {
+                        int j;
+
                         if (viewer.unk2C & 0x800000) {
-                            for (i = 0; i < 8; i++) {
-                                if (*slots[i] != 0xffff) {
-                                    player_wear_item(1, slots[i]);
+                            for (j = 0; j < 8; j++) {
+                                if (*slots[j] != 0xffff) {
+                                    player_wear_item(1, slots[j]);
                                 }
                             }
                         } else {
-                            for (i = 0; i < 8; i++) {
-                                if (*slots[i] != 0xffff) {
-                                    player_wear_item(2, slots[i]);
+                            for (j = 0; j < 8; j++) {
+                                if (*slots[j] != 0xffff) {
+                                    player_wear_item(2, slots[j]);
                                 }
                             }
                         }
