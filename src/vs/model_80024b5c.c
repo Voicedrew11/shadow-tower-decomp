@@ -66,9 +66,12 @@ s32 DAT_800632d4 = 0;
  * on the entry whose index matches DAT_800632d4's slot (every 6th, 4th,
  * 8th), stepping it.
  */
-/* Not exact (size-exact): retail keeps the entry count in $s1 and the
- * entry cursor in $s0 (this build swaps them), and loads the drawn fighter
- * into $v1 for the camera-relative angles (this build: $a2). */
+/* Not exact (size-exact, registers only): retail keeps the entry count in
+ * $s1 and the strength-reduced entry cursor in $s0; this build swaps them
+ * (global-alloc priority 0.871 for the count against 0.841 for the cursor:
+ * the cursor needs two more references or the count two fewer). Ruled out:
+ * while loops with a repeated e++ before each continue, either loop as for
+ * or while, and a local for the i % n values. */
 ADDRESS(0x80024b5c, 0x6a8)
 void func_80024b5c(void)
 {
@@ -92,9 +95,9 @@ void func_80024b5c(void)
             MATRIX face = {{{ONE, 0, 0}, {0, ONE, 0}, {0, 0, ONE}}, {0, 0, 0}};
             SVECTOR angle;
 
-            angle.vx = DAT_801624d0.unk2CA88.vx - DAT_80063300->unk4DF00;
-            angle.vy = DAT_801624d0.unk2CA88.vy - DAT_80063300->unk4DF02;
-            angle.vz = DAT_801624d0.unk2CA88.vz - DAT_80063300->unk4DF04;
+            angle.vx = -DAT_80063300->unk4DF00 + DAT_801624d0.unk2CA88.vx;
+            angle.vy = -DAT_80063300->unk4DF02 + DAT_801624d0.unk2CA88.vy;
+            angle.vz = -DAT_80063300->unk4DF04 + DAT_801624d0.unk2CA88.vz;
             RotMatrixX(angle.vx, &face);
             RotMatrixY(angle.vy, &face);
             RotMatrixZ(angle.vz, &face);
