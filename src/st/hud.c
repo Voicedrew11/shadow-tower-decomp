@@ -330,9 +330,6 @@ void func_80026964(u8 first)
 }
 
 /* Queues `value` in a free one of the five HUD number slots for 60 frames. */
-/* Not exact: retail keeps value in $a3 and -1 in $a2 and fills the first
- * beq delay slot with the lui of DAT_801cd120.unk3; this build swaps the two
- * registers and leaves a nop. */
 ADDRESS(0x80026a88, 0x74)
 void func_80026a88(short value)
 {
@@ -353,8 +350,6 @@ void func_80026a88(short value)
 DATA(0x80087f18, 0x4, ".sdata")
 static s32 DAT_80087f18 = 0;
 
-/* Not exact: retail fills the delay slot of the unk218 == 1 test with the
- * lui of DAT_801cd120.unk3 from the branch target; this build leaves a nop. */
 ADDRESS(0x80026afc, 0x2d8)
 void func_80026afc(VECTOR *pos, SVECTOR *rot)
 {

@@ -94,11 +94,6 @@ void func_80015da8(int archive, int member, u8 *dest, void (*done)())
         func_80015bcc(CD_REQUEST_READ_4, &loc, size, dest, done);
 }
 
-/*
- * Not exact: the two field clears and the &loc argument are scheduled in a
- * different order around the func_80015cd0 call (retail puts &loc in the
- * delay slot).
- */
 ADDRESS(0x80015dfc, 0xcc)
 void func_80015dfc(int archive, int member, u8 *dest, void (*done)())
 {
