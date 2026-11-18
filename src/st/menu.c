@@ -1745,19 +1745,21 @@ void func_8005d25c(void)
     DVECTOR image = {896, 448};
     DVECTOR clut = {544, 502};
     RECT move;
-    s16 *list;
     s16 r0;
     s16 r1;
     s16 shown;
     s16 n;
     s16 id;
+    s16 col;
+    s16 idx;
+    s16 k;
     u_long *p;
     int used;
-    int col;
-    int row;
+    int total;
+    s16 row;
     int i;
-    int j;
-    int k;
+    int hole;
+    int empty;
 
     func_80058cc8();
     sp->unk0.grid.messages = func_800152d0(21504);
@@ -1822,29 +1824,31 @@ void func_8005d25c(void)
         sp->unk0.grid.tex[i].vy = (i - 29) % 9 * 28 + 256;
     }
     i = 0;
-    used = 0;
+    total = 0;
     clear.w = 56;
     clear.h = 28;
     cd_state.unkA84 = CD_BUFFER;
     for (n = 40; n--; i++) {
-        if (used + 0x1000 > 0x12000) {
+        int size;
+
+        if (total + 0x1000 > 0x12000) {
             DrawSync(0);
             cd_state.unkA84 = CD_BUFFER;
-            used = 0;
+            total = 0;
         }
         if (i < 20 && i < sp->unk0.grid.count0) {
-            int size = func_80016030(6, vis_table_c.unk0118[sp->unk0.grid.ids0[i]].unk5[0],
-                                     cd_state.unkA84) << 11;
+            size = func_80016030(6, vis_table_c.unk0118[sp->unk0.grid.ids0[i]].unk5[0],
+                                 cd_state.unkA84) << 11;
 
             func_8003ec5c(cd_state.unkA84, &sp->unk0.grid.tex[i], NULL, 1);
-            used += size;
+            total += size;
             cd_state.unkA84 = (u_long *)((u8 *)cd_state.unkA84 + size);
         } else if (i >= 20 && i - 20 < sp->unk0.grid.count1) {
-            int size = func_80016030(6, vis_table_c.unk0118[sp->unk0.grid.ids1[i - 20]].unk5[0],
-                                     cd_state.unkA84) << 11;
+            size = func_80016030(6, vis_table_c.unk0118[sp->unk0.grid.ids1[i - 20]].unk5[0],
+                                 cd_state.unkA84) << 11;
 
             func_8003ec5c(cd_state.unkA84, &sp->unk0.grid.tex[i], NULL, 1);
-            used += size;
+            total += size;
             cd_state.unkA84 = (u_long *)((u8 *)cd_state.unkA84 + size);
         } else {
             clear.x = sp->unk0.grid.tex[i].vx;
@@ -1878,59 +1882,73 @@ void func_8005d25c(void)
         if (DAT_801cd180.unk4 & 0x4000) {
             func_80057cc8();
             DAT_801cd180.unk4 = 0;
-            col = (s16)(sp->unk2E0 % 8);
-            row = sp->unk2E0 / 8;
-            if (!(sp->unk2DC & 0x8000)) {
+            if (sp->unk2DC & 0x8000) {
+                col = sp->unk2E0 % 8;
+                row = sp->unk2E0 / 8;
                 if (col < 4) {
-                    k = (sp->unk0.grid.row0 + row) * 4;
-                    list = sp->unk0.grid.ids0;
-                } else {
-                    k = (sp->unk0.grid.row1 + row) * 4 - 4;
-                    list = sp->unk0.grid.ids1;
-                }
-                if (list[k + col] != -1)
-                    sp->unk2DC |= 0x8000;
-            } else {
-                if (col < 4) {
-                    for (j = 0; j < sp->unk0.grid.count1; j++) {
-                        if (sp->unk0.grid.ids1[j] == -1)
+                    idx = row * 4 + col + sp->unk0.grid.row0 * 4;
+                    k = sp->unk0.grid.count1;
+                    for (hole = 0; hole < sp->unk0.grid.count1; hole++) {
+                        if (sp->unk0.grid.ids1[hole] == -1) {
+                            k = hole;
                             break;
+                        }
                     }
-                    k = (s16)(row * 4 + col + sp->unk0.grid.row0 * 4);
-                    sp->unk0.grid.ids1[(s16)j] = sp->unk0.grid.ids0[k];
-                    sp->unk0.grid.ids0[k] = -1;
-                    k %= 20;
-                    move.x = sp->unk0.grid.tex[k].vx;
-                    move.y = sp->unk0.grid.tex[k].vy;
+                    sp->unk0.grid.ids1[k] = sp->unk0.grid.ids0[idx];
+                    sp->unk0.grid.ids0[idx] = -1;
+                    idx %= 20;
+                    move.x = sp->unk0.grid.tex[idx].vx;
+                    move.y = sp->unk0.grid.tex[idx].vy;
                     move.w = 56;
                     move.h = 28;
-                    if (sp->unk0.grid.row1 * 4 <= (s16)j && (s16)j < sp->unk0.grid.row1 * 4 + 20)
-                        MoveImage(&move, sp->unk0.grid.tex[(s16)j % 20 + 20].vx,
-                                  sp->unk0.grid.tex[(s16)j % 20 + 20].vy);
+                    if (k >= sp->unk0.grid.row1 * 4 && k < sp->unk0.grid.row1 * 4 + 20) {
+                        k %= 20;
+                        MoveImage(&move, sp->unk0.grid.tex[k + 20].vx,
+                                  sp->unk0.grid.tex[k + 20].vy);
+                    }
                     ClearImage(&move, 0, 0, 0);
                     sp->unk0.grid.count1++;
                     sp->unk0.grid.count0--;
                 } else {
-                    for (j = 0; j < sp->unk0.grid.count0; j++) {
-                        if (sp->unk0.grid.ids0[j] == -1)
+                    idx = row * 4 + col - 4 + sp->unk0.grid.row1 * 4;
+                    k = sp->unk0.grid.count0;
+                    for (hole = 0; hole < sp->unk0.grid.count0; hole++) {
+                        if (sp->unk0.grid.ids0[hole] == -1) {
+                            k = hole;
                             break;
+                        }
                     }
-                    k = (s16)(row * 4 + col - 4 + sp->unk0.grid.row1 * 4);
-                    sp->unk0.grid.ids0[(s16)j] = sp->unk0.grid.ids1[k];
-                    sp->unk0.grid.ids1[k] = -1;
-                    k %= 20;
-                    move.x = sp->unk0.grid.tex[k + 20].vx;
-                    move.y = sp->unk0.grid.tex[k + 20].vy;
+                    sp->unk0.grid.ids0[k] = sp->unk0.grid.ids1[idx];
+                    sp->unk0.grid.ids1[idx] = -1;
+                    idx %= 20;
+                    move.x = sp->unk0.grid.tex[idx + 20].vx;
+                    move.y = sp->unk0.grid.tex[idx + 20].vy;
                     move.w = 56;
                     move.h = 28;
-                    if (sp->unk0.grid.row0 * 4 <= (s16)j && (s16)j < sp->unk0.grid.row0 * 4 + 20)
-                        MoveImage(&move, sp->unk0.grid.tex[(s16)j % 20].vx,
-                                  sp->unk0.grid.tex[(s16)j % 20].vy);
+                    if (k >= sp->unk0.grid.row0 * 4 && k < sp->unk0.grid.row0 * 4 + 20) {
+                        k %= 20;
+                        MoveImage(&move, sp->unk0.grid.tex[k].vx, sp->unk0.grid.tex[k].vy);
+                    }
                     ClearImage(&move, 0, 0, 0);
                     sp->unk0.grid.count0++;
                     sp->unk0.grid.count1--;
                 }
                 sp->unk2DC &= 0x7fff;
+            } else {
+                empty = 0;
+                if ((s16)(sp->unk2E0 % 8) < 4) {
+                    int cell = (sp->unk0.grid.row0 + sp->unk2E0 / 8) * 4;
+
+                    if (sp->unk0.grid.ids0[cell + (s16)(sp->unk2E0 % 8)] == -1)
+                        empty = 1;
+                } else {
+                    int cell = (sp->unk0.grid.row1 + sp->unk2E0 / 8) * 4 - 4;
+
+                    if (sp->unk0.grid.ids1[cell + (s16)(sp->unk2E0 % 8)] == -1)
+                        empty = 1;
+                }
+                if (!empty)
+                    sp->unk2DC |= 0x8000;
             }
         }
         if (!(sp->unk2DC & 0x8000)) {
@@ -2027,25 +2045,23 @@ void func_8005d25c(void)
                     sp->unk0.grid.row1 = 73;
             }
             if (sp->unk2DC == 2) {
-                col = (s16)(sp->unk2E0 % 8);
-                row = sp->unk2E0 / 8;
-                if (col < 4)
-                    id = sp->unk0.grid.ids0[sp->unk0.grid.row0 * 4 + row * 4 + col];
+                if ((s16)(sp->unk2E0 % 8) < 4)
+                    id = sp->unk0.grid.ids0[sp->unk0.grid.row0 * 4 + (sp->unk2E0 / 8 * 4 + (s16)(sp->unk2E0 % 8))];
                 else
-                    id = sp->unk0.grid.ids1[sp->unk0.grid.row1 * 4 + row * 4 + col - 4];
+                    id = sp->unk0.grid.ids1[sp->unk0.grid.row1 * 4 + (sp->unk2E0 / 8 * 4 + (s16)(sp->unk2E0 % 8)) - 4];
                 if (shown != id && id != -1) {
-                    shown = id;
                     func_80016030(6, vis_table_c.unk0118[id].unk5[0] + 200, DAT_80088c88);
                     func_8003ec5c(DAT_80088c88, &picture, NULL, 1);
+                    shown = id;
                 }
             }
             if (sp->unk0.grid.row0 != r0) {
                 if (r0 < sp->unk0.grid.row0) {
                     n = (sp->unk0.grid.row0 - r0) * 4;
-                    k = sp->unk0.grid.row0 * 4 - (n - 20);
+                    i = sp->unk0.grid.row0 * 4 - (n - 20);
                 } else {
                     n = (r0 - sp->unk0.grid.row0) * 4;
-                    k = sp->unk0.grid.row0 * 4;
+                    i = sp->unk0.grid.row0 * 4;
                 }
                 used = 0;
                 clear.w = 56;
@@ -2057,28 +2073,28 @@ void func_8005d25c(void)
                         cd_state.unkA84 = CD_BUFFER;
                         used = 0;
                     }
-                    if (sp->unk0.grid.ids0[k] == -1) {
-                        clear.x = sp->unk0.grid.tex[k % 20].vx;
-                        clear.y = sp->unk0.grid.tex[k % 20].vy;
-                        ClearImage(&clear, 0, 0, 0);
-                    } else {
+                    if (sp->unk0.grid.ids0[i] != -1) {
                         int size = func_80016030(
-                            6, vis_table_c.unk0118[sp->unk0.grid.ids0[k]].unk5[0], cd_state.unkA84) << 11;
+                            6, vis_table_c.unk0118[sp->unk0.grid.ids0[i]].unk5[0], cd_state.unkA84) << 11;
 
-                        func_8003ec5c(cd_state.unkA84, &sp->unk0.grid.tex[k % 20], NULL, 1);
+                        func_8003ec5c(cd_state.unkA84, &sp->unk0.grid.tex[i % 20], NULL, 1);
                         used += size;
                         cd_state.unkA84 = (u_long *)((u8 *)cd_state.unkA84 + size);
+                    } else {
+                        clear.x = sp->unk0.grid.tex[i % 20].vx;
+                        clear.y = sp->unk0.grid.tex[i % 20].vy;
+                        ClearImage(&clear, 0, 0, 0);
                     }
-                    k++;
+                    i++;
                 }
             }
             if (sp->unk0.grid.row1 != r1) {
                 if (r1 < sp->unk0.grid.row1) {
                     n = (sp->unk0.grid.row1 - r1) * 4;
-                    k = sp->unk0.grid.row1 * 4 - (n - 20);
+                    i = sp->unk0.grid.row1 * 4 - (n - 20);
                 } else {
                     n = (r1 - sp->unk0.grid.row1) * 4;
-                    k = sp->unk0.grid.row1 * 4;
+                    i = sp->unk0.grid.row1 * 4;
                 }
                 used = 0;
                 clear.w = 56;
@@ -2090,19 +2106,19 @@ void func_8005d25c(void)
                         cd_state.unkA84 = CD_BUFFER;
                         used = 0;
                     }
-                    if (sp->unk0.grid.ids1[k] == -1) {
-                        clear.x = sp->unk0.grid.tex[k % 20 + 20].vx;
-                        clear.y = sp->unk0.grid.tex[k % 20 + 20].vy;
-                        ClearImage(&clear, 0, 0, 0);
-                    } else {
+                    if (sp->unk0.grid.ids1[i] != -1) {
                         int size = func_80016030(
-                            6, vis_table_c.unk0118[sp->unk0.grid.ids1[k]].unk5[0], cd_state.unkA84) << 11;
+                            6, vis_table_c.unk0118[sp->unk0.grid.ids1[i]].unk5[0], cd_state.unkA84) << 11;
 
-                        func_8003ec5c(cd_state.unkA84, &sp->unk0.grid.tex[k % 20 + 20], NULL, 1);
+                        func_8003ec5c(cd_state.unkA84, &sp->unk0.grid.tex[i % 20 + 20], NULL, 1);
                         used += size;
                         cd_state.unkA84 = (u_long *)((u8 *)cd_state.unkA84 + size);
+                    } else {
+                        clear.x = sp->unk0.grid.tex[i % 20 + 20].vx;
+                        clear.y = sp->unk0.grid.tex[i % 20 + 20].vy;
+                        ClearImage(&clear, 0, 0, 0);
                     }
-                    k++;
+                    i++;
                 }
             }
         }
@@ -2110,17 +2126,19 @@ void func_8005d25c(void)
         func_80031aec();
         sp->unk2E4 = (sp->unk2E4 + 1) % 32;
     }
-    for (i = 0, n = sp->unk0.grid.count0; n != 0; i++) {
+    for (i = 0, n = sp->unk0.grid.count0; n;) {
         if (sp->unk0.grid.ids0[i] != -1) {
-            n--;
             DAT_801c7590.counts[sp->unk0.grid.ids0[i]].flag = 0;
-        }
-    }
-    for (i = 0, n = sp->unk0.grid.count1; n != 0; i++) {
-        if (sp->unk0.grid.ids1[i] != -1) {
             n--;
-            DAT_801c7590.counts[sp->unk0.grid.ids1[i]].flag = 1;
         }
+        i++;
+    }
+    for (i = 0, n = sp->unk0.grid.count1; n;) {
+        if (sp->unk0.grid.ids1[i] != -1) {
+            DAT_801c7590.counts[sp->unk0.grid.ids1[i]].flag = 1;
+            n--;
+        }
+        i++;
     }
     func_80058c4c();
     func_800152f8(sp->unk0.grid.ids0);
