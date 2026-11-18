@@ -1427,9 +1427,13 @@ void func_8005ad00(void)
  * three rows shown with their pictures, and shows the detail page of the
  * confirmed one (func_80030ab8 draws the page).
  *
- * Not exact (4 bytes long): register allocation differs from the bit
- * scan on (retail keeps the bit index in $s1, which later holds the row
- * count).
+ * Not exact: one register. The detail load tests `k != -1` with the -1
+ * in $t0 (`li t0,-1` in the preceding branch's delay slot), this build in
+ * $v0. $t0 is the reload register, so retail's -1 had no hard register:
+ * loop.c moved it out of the main loop, which needs a lifetime of about
+ * 17 insns for that constant where this source gives 1 (.loop: "regno 438
+ * (life 1), savings 1 not desirable"). Ruled out: a dead `k = -1`
+ * initialiser, a block-local `none = -1` variable.
  */
 ADDRESS(0x8005c7fc, 0xa60)
 void func_8005c7fc(void)
@@ -1447,10 +1451,9 @@ void func_8005c7fc(void)
     int row;
     int first;
     int used;
-    int size;
+
     int n;
     int i;
-    int k;
 
     func_80058cc8();
     sp->unk0.store.messages = func_800152d0(21504);
@@ -1489,9 +1492,9 @@ void func_8005c7fc(void)
     sp->unk0.store.image.vy = 0;
     sp->unk0.store.kinds = func_800152d0(151);
     sp->unk0.store.count = 0;
+    n = 0;
     bits = DAT_801cceb0[0];
     bit = 1;
-    n = 0;
     for (i = 0; i < 151; i++) {
         if (n == 32) {
             n = 0;
@@ -1511,12 +1514,12 @@ void func_8005c7fc(void)
     p = CD_BUFFER;
     func_80016030(3, 1, p);
     func_80014cfc((u32 *)&menu_messages, (u32 *)(p + 1), 5376);
-    p = (u_long *)((u8 *)p + (CD_BUFFER[0] + 4));
+    p = (u_long *)((u8 *)p + (*p + 4));
     func_8003ec5c(p + 1, &sp->unk2E6[0], &sp->unk2E6[1], 1);
     p = CD_BUFFER;
     func_80016030(3, 2, p);
     func_80014cfc((u32 *)sp->unk0.store.messages, (u32 *)(p + 1), 5376);
-    p = (u_long *)((u8 *)p + (CD_BUFFER[0] + 4));
+    p = (u_long *)((u8 *)p + (*p + 4));
     func_8003ec5c(p + 1, &sp->unk2E6[2], &sp->unk2E6[3], 1);
     func_80016030(3, 5, CD_BUFFER);
     func_8003ec5c(CD_BUFFER, &sp->unk2E6[4], NULL, 1);
@@ -1532,17 +1535,21 @@ void func_8005c7fc(void)
         n = sp->unk0.store.count;
     used = 0;
     for (i = 0; i < n; i++) {
-        k = sp->unk2E2 * 5 + i;
+        int k = sp->unk2E2 * 5 + i;
+
         if (k < sp->unk0.store.count) {
             if (used + 0x2800 > 0x12000) {
                 DrawSync(0);
                 cd_state.unkA84 = CD_BUFFER;
                 used = 0;
             }
-            size = func_80016030(4, sp->unk0.store.kinds[k], cd_state.unkA84);
-            func_8003ec5c(cd_state.unkA84, &sp->unk0.store.tex[k % 15], NULL, 1);
-            used += size << 11;
-            cd_state.unkA84 = (u_long *)((u8 *)cd_state.unkA84 + (size << 11));
+            {
+                int size = func_80016030(4, sp->unk0.store.kinds[k], cd_state.unkA84) << 11;
+
+                func_8003ec5c(cd_state.unkA84, &sp->unk0.store.tex[k % 15], NULL, 1);
+                used += size;
+                cd_state.unkA84 = (u_long *)((u8 *)cd_state.unkA84 + size);
+            }
         }
     }
     func_80031cfc();
@@ -1559,13 +1566,7 @@ void func_8005c7fc(void)
             if (DAT_801cd180.unk4 & 0x2000) {
                 func_80057cec();
                 DAT_801cd180.unk4 = 0;
-                func_800152f8(sp->unk0.store.messages);
-                func_800152f8(sp->unk0.store.kinds);
-                func_800152f8(sp->unk0.store.items);
-                func_80058c4c();
-                func_80058d30();
-                func_80057a3c();
-                return;
+                break;
             }
             if (DAT_801cd180.unkC & 0x20) {
                 func_80057d10();
@@ -1625,42 +1626,52 @@ void func_8005c7fc(void)
                 }
             }
             if (DAT_801cd180.unk4 & 0x5000) {
+                int k;
+
                 func_80057cc8();
                 DAT_801cd180.unk4 = 0;
                 k = sp->unk2E2 * 5 + sp->unk2E0;
                 if (k < sp->unk0.store.count) {
                     if (k != -1) {
-                        p = CD_BUFFER;
+                        u_long *p = CD_BUFFER;
+
+
                         func_80016030(4, sp->unk0.store.kinds[k] + 200, p);
                         func_8003ec5c(p + 1, &sp->unk0.store.image, NULL, 1);
-                        p = (u_long *)((u8 *)p + (CD_BUFFER[0] + 4));
+                        p = (u_long *)((u8 *)p + (*p + 4));
                         func_8003ec5c(p + 1, &detail, &detail_clut, 1);
                     }
                     sp->unk2DC = 2;
                 }
             }
             if (sp->unk2E2 != first) {
+                int count;
+                int k;
+
                 if (first < sp->unk2E2) {
-                    n = sp->unk2E2 - first;
-                    k = first + 3;
+                    count = (sp->unk2E2 - first) * 5;
+                    k = (first + 3) * 5;
                 } else {
-                    n = first - sp->unk2E2;
-                    k = sp->unk2E2;
+                    count = (first - sp->unk2E2) * 5;
+                    k = sp->unk2E2 * 5;
                 }
-                k *= 5;
                 cd_state.unkA84 = CD_BUFFER;
                 used = 0;
-                for (i = 0; i < n * 5; i++, k++) {
+                for (i = 0; i < count; i++, k++) {
                     if (k < sp->unk0.store.count) {
                         if (used + 0x2800 > 0x12000) {
                             DrawSync(0);
                             cd_state.unkA84 = CD_BUFFER;
                             used = 0;
                         }
-                        size = func_80016030(4, sp->unk0.store.kinds[k], cd_state.unkA84);
-                        func_8003ec5c(cd_state.unkA84, &sp->unk0.store.tex[k % 15], NULL, 1);
-                        used += size << 11;
-                        cd_state.unkA84 = (u_long *)((u8 *)cd_state.unkA84 + (size << 11));
+                        {
+                            int size =
+                                func_80016030(4, sp->unk0.store.kinds[k], cd_state.unkA84) << 11;
+
+                            func_8003ec5c(cd_state.unkA84, &sp->unk0.store.tex[k % 15], NULL, 1);
+                            used += size;
+                            cd_state.unkA84 = (u_long *)((u8 *)cd_state.unkA84 + size);
+                        }
                     }
                 }
             }
@@ -1673,6 +1684,12 @@ void func_8005c7fc(void)
         func_80030ab8();
         sp->unk2E4 = (sp->unk2E4 + 1) % 32;
     }
+    func_800152f8(sp->unk0.store.messages);
+    func_800152f8(sp->unk0.store.kinds);
+    func_800152f8(sp->unk0.store.items);
+    func_80058c4c();
+    func_80058d30();
+    func_80057a3c();
 }
 
 /*
