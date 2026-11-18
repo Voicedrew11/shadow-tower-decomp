@@ -28,10 +28,8 @@ JUMPTABLES(0x800138d8, 0x9c)
 SDATA(0x8008810c, 0x20)
 
 /* The list row and column saved while the ring sub-list is open. */
-DATA(0x800881e8, 0x2, ".sbss")
-static s16 DAT_800881e8;
-DATA(0x800881ea, 0x2, ".sbss")
-static s16 DAT_800881ea;
+DATA(0x800881e8, 0x4, ".sbss")
+static s16 DAT_800881e8[2];
 
 #define EQ DAT_801e0ce8
 #define PAD DAT_801cd180
@@ -322,8 +320,8 @@ int func_800642e8(int *sel)
                 }
                 if (DAT_801e0d08.count) {
                     func_80057cc8();
-                    DAT_800881e8 = sp->unk2E2;
-                    DAT_800881ea = sp->unk2E0;
+                    DAT_800881e8[0] = sp->unk2E2;
+                    DAT_800881e8[1] = sp->unk2E0;
                     sp->unk2E2 = 0;
                     sp->unk2E0 = 0;
                     sp->unk2DC = (sp->unk2DC | 0x2) & ~0x1;
@@ -405,8 +403,6 @@ int func_800642e8(int *sel)
 }
 
 /* The ring sub-list: moves the cursor in its entries and equips one. */
-/* Not exact: retail clears the pressed bits before loading the two saved
- * .sbss halfwords; this build hoists those loads. The body is size-exact. */
 ADDRESS(0x80064ba8, 0x33c)
 void func_80064ba8(void)
 {
@@ -419,8 +415,8 @@ void func_80064ba8(void)
         func_80057cec();
         PAD.unk4 = 0;
         sp->unk2DC = (sp->unk2DC & ~0x2) | 0x1;
-        sp->unk2E2 = DAT_800881e8;
-        sp->unk2E0 = DAT_800881ea;
+        sp->unk2E2 = DAT_800881e8[0];
+        sp->unk2E0 = DAT_800881e8[1];
     } else if (PAD.unkC & 0x10) {
         func_80057d10();
         PAD.unkC = 0;
@@ -470,8 +466,8 @@ void func_80064ba8(void)
             func_80057cc8();
             *EQ.unk10 = list->entries[sp->unk2E2 + sp->unk2E0];
             sp->unk2DC = (sp->unk2DC & ~0x2) | 0x1;
-            sp->unk2E2 = DAT_800881e8;
-            sp->unk2E0 = DAT_800881ea;
+            sp->unk2E2 = DAT_800881e8[0];
+            sp->unk2E0 = DAT_800881e8[1];
             func_80063bdc();
         }
     }
