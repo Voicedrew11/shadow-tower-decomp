@@ -2179,23 +2179,19 @@ void func_8002dd70(void)
     func_80028364(&sp->unk350, &sp->unk358, 0, 0, 16);
 }
 
-/*
- * Not exact: retail loads the constant 48 before reading +0x2e4;
- * this build hoists the +0x2e4 load, swapping v0 and v1 in the first
- * colour stores.
- */
 ADDRESS(0x8002e310, 0x180)
 void func_8002e310(void)
 {
     MenuScratch *sp = MENU_SCRATCH;
 
     func_800174c4();
-    sp->style[2].b = sp->style[6].b = sp->style[3].g = sp->style[7].g =
-        sp->style[3].b = sp->style[7].b = 48;
-    sp->style[0].b = sp->style[4].b = sp->style[0].g = sp->style[4].g =
-        sp->style[0].r = sp->style[4].r = sp->style[3].r = sp->style[7].r = 96;
+    sp->style[3].r = sp->style[7].r = 96;
+    sp->style[3].g = sp->style[7].g = sp->style[3].b = sp->style[7].b = 48;
+    sp->style[0].b = sp->style[4].b = sp->style[0].g = sp->style[4].g = sp->style[0].r =
+        sp->style[4].r = 96;
     sp->style[2].r = sp->style[6].r = 98;
     sp->style[2].g = sp->style[6].g = 66;
+    sp->style[2].b = sp->style[6].b = 48;
     sp->style[0].cd = sp->style[2].cd = sp->style[3].cd = 57;
     sp->style[4].cd = sp->style[6].cd = sp->style[7].cd = 41;
     if (sp->unk2E4 < 16)
