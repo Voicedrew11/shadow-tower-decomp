@@ -18,13 +18,14 @@
 #include <vs/funcs.h>
 
 RODATA(0x800112d0, 0x50)
-SDATA(0x800632d0, 0x8)
 
 /* The renderers' default NCCS colour (128, 128, 128). */
+SDATA(0x800632d0, 0x4)
 u_long DAT_800632d0 = 0x808080;
 
 /* The frame slot of the model list's every-nth parts. */
-s32 DAT_800632d4 = 0;
+DATA(0x800632d4, 0x4, ".sdata")
+static s32 DAT_800632d4 = 0;
 
 /* Projects the current part's vertices: RTPT in threes, the first group
  * ahead of the loop so each pass stores one group and starts the next, then
