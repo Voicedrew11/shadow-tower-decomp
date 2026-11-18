@@ -417,11 +417,9 @@ void func_800595d4(void)
  * empties the other hand's slots; with `redraw` 1 the changed pictures are
  * reloaded.
  *
- * Not exact (8 bytes longer): retail forms the slot 2/15 stores from a
- * viewer+0x3c base and folds the -1 of the second-hand index into the
- * address constant; this build stores from the viewer base and keeps the
- * -2 as a displacement, and the final switch's blocks are ordered
- * differently.
+ * Not exact (4 bytes longer): retail forms the slot 2/15 stores from a
+ * viewer+0x3c base; this build stores both from
+ * the viewer base. The final switch's blocks are ordered differently.
  */
 ADDRESS(0x8005975c, 0x590)
 void func_8005975c(int redraw)
@@ -501,9 +499,9 @@ void func_8005975c(int redraw)
             func_80059204(sp->unk2E0);
     } else {
         if (sp->unk2C0 == -1)
-            MENU_SLOTS->ids[sp->unk2E0 - 1] = 0xffff;
+            *(MENU_SLOTS->ids - 1 + sp->unk2E0) = 0xffff;
         else
-            MENU_SLOTS->ids[sp->unk2E0 - 1] = sp->unk2C0;
+            *(MENU_SLOTS->ids - 1 + sp->unk2E0) = sp->unk2C0;
         if (redraw == 1)
             func_80059204(sp->unk2E0 - 1);
     }
