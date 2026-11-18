@@ -802,17 +802,22 @@ void func_80040024(u8 hand)
 /* Steps hand `hand`'s swing or cast for its held item kind: the swing
  * timer viewer.unk130.halves[hand] against its hit window (unk130[hand + 2]) and
  * its end (unk138[hand]), the stamina bar viewer.unk17E, the hit search
- * over vis_table_a's entries and the item wear. Retail accesses sv at
- * sp+24, v at +56, req at +104 and p at +144; this draft accesses those
- * aggregates eight bytes higher within the same frame.
- * Not exact: the hand argument and hit search retain extra pointer/copy
- * temporaries, stamina multiplication forms differ, and case-local cost
- * and limit loads still have different schedules. */
+ * over vis_table_a's entries and the item wear.
+ *
+ * The step and the stamina gain are loaded and then scaled in place
+ * (`x = base; x += x * skill / n`): retail multiplies by the register
+ * that holds 96 instead of shifting, and keeps the raw argument in a0.
+ * In case 0..30 retail keeps the step's add ahead of the pad address
+ * and the limit's load behind it, where the scheduler would otherwise
+ * sink the add into the load gap: a loop note between them (a
+ * statement macro's do/while (0)) and the pad pointer taken before the
+ * limit reproduce that; the other two cases have neither.
+ * The unused locals stand for stack retail reserves and never touches:
+ * 24 bytes after sv, 32 after v and 8 after p. */
 ADDRESS(0x800402ac, 0xc58)
 void func_800402ac(u8 hand)
 {
     ViewerModel *rec;
-    SVECTOR unused0;
     SVECTOR sv;
     VECTOR unused1;
     SVECTOR unused2;
@@ -820,6 +825,7 @@ void func_800402ac(u8 hand)
     MATRIX unused3;
     VisRequest req;
     VECTOR p;
+    SVECTOR unused4;
     Vis212 *e;
     Vis212 *hit;
     int d;
@@ -849,7 +855,8 @@ void func_800402ac(u8 hand)
         if (viewer.unk130.halves[hand] == -1) {
             break;
         }
-        cost = rec->unk4 + rec->unk4 * viewer.unk62[1] / 1600;
+        cost = rec->unk4;
+        cost += cost * viewer.unk62[1] / 1600;
         if (viewer.unk130.halves[hand ^ 1] != -1) {
             viewer.unk14F = 1;
         }
@@ -913,18 +920,19 @@ void func_800402ac(u8 hand)
     case 31 ... 34: {
         int cost;
         if (viewer.unk130.halves[hand] != -1) {
-            cost = rec->unk4 + rec->unk4 * viewer.unk62[1] / 1600;
+            cost = rec->unk4;
+            cost += cost * viewer.unk62[1] / 1600;
             if (viewer.unk21F) {
                 if (viewer.unk138[hand] - cost >= viewer.unk130.halves[hand]) {
                     viewer.unk130.halves[hand] -= cost;
                 } else {
                     viewer.unk130.halves[hand] += cost;
-                    if (viewer.unk130.halves[hand + 2] < viewer.unk130.halves[hand] &&
+                    if (viewer.unk130.halves[hand] > viewer.unk130.halves[hand + 2] &&
                         viewer.unk130.halves[hand] <= viewer.unk130.halves[hand + 2] + cost) {
-                        kind = viewer.unk148[hand];
+                        kind = viewer.unk148[hand] + 13;
                         func_800582f0((viewer.unk1D4[hand] - 24) / 2 + 22, 128);
                         viewer.unk130.halves[hand] -= cost;
-                        func_80040f04(kind + 13, hand);
+                        func_80040f04(kind, hand);
                         viewer.unk130.halves[hand] += cost;
                     }
                 }
@@ -935,7 +943,9 @@ void func_800402ac(u8 hand)
                 viewer.unk17E = 0;
             } else if (viewer.unk130.halves[hand + 2] - cost < viewer.unk130.halves[hand] &&
                        viewer.unk130.halves[hand] <= viewer.unk130.halves[hand + 2]) {
-                viewer.unk17E += (viewer.unk62[1] * 96 / 800 + 96) * 2;
+                inc = 96;
+                inc += viewer.unk62[1] * inc / 800;
+                viewer.unk17E += inc * 2;
                 if (viewer.unk17E > 5120) {
                     viewer.unk17E = 5120;
                 }
@@ -943,12 +953,16 @@ void func_800402ac(u8 hand)
                 viewer.unk154 = 0;
                 viewer.unk21F = 0;
             } else {
-                viewer.unk17E += viewer.unk62[1] * 96 / 800 + 96;
+                {
+                int gain = 96;
+                gain += viewer.unk62[1] * gain / 800;
+                viewer.unk17E += gain;
+                }
                 if (viewer.unk17E > 5120) {
                     viewer.unk17E = 5120;
                 }
                 viewer.unk130.halves[hand] += cost;
-                if (viewer.unk138[hand] - cost < viewer.unk130.halves[hand] &&
+                if (viewer.unk130.halves[hand] > viewer.unk138[hand] - cost &&
                     viewer.unk130.halves[hand] <= viewer.unk138[hand]) {
                     func_800582f0(viewer.unk1D4[hand], 128);
                     player_wear_item(1, &viewer.unk38[3]);
@@ -968,11 +982,16 @@ void func_800402ac(u8 hand)
     case 0 ... 30: {
         int cost;
         int max;
+        Data801cd180 *pad;
         if (viewer.unk130.halves[hand] != -1) {
-            cost = rec->unk4 + rec->unk4 * viewer.unk62[1] / 1600;
+            do {
+                cost = rec->unk4;
+                cost += cost * viewer.unk62[1] / 1600;
+            } while (0);
+            pad = &DAT_801cd180;
             max = rec->unk8;
-            if (DAT_801cd180.unk4 & DAT_801cd180.unk22[8]) {
-                DAT_801cd180.unk4 &= ~DAT_801cd180.unk22[8];
+            if (pad->unk4 & pad->unk22[8]) {
+                pad->unk4 &= ~pad->unk22[8];
             }
             if (viewer.unk14E && !(viewer.unk130.halves[hand + 2] - cost < viewer.unk130.halves[hand])) {
                 viewer.unk130.halves[hand] -= cost;
@@ -995,25 +1014,24 @@ void func_800402ac(u8 hand)
             if (viewer.unk148[hand] < 36 || viewer.unk148[hand] > 254) {
                 if (viewer.unk130.halves[hand + 2] - cost < viewer.unk130.halves[hand] &&
                     viewer.unk130.halves[hand] <= viewer.unk130.halves[hand + 2]) {
+                    int side;
                     e = vis_table_a.entries;
                     best = -1;
                     hit = NULL;
                     hr = 0;
                     dmg = 0;
                     reach = viewer.unkE8[hand]->unk2;
-                    vis_table_a.unk6144 = 0;
-                    do {
+                    for (vis_table_a.unk6144 = 0; vis_table_a.unk6144 < 64; vis_table_a.unk6144++, e++) {
                         if (e->unk00 != 255) {
                             func_8004c03c(e);
                             if (e->unk05 == 1 && e->unk1C.bytes[3] != 1 && e->unk2C != 0 &&
-                                (r = func_8004db9c(e, reach)) != 0 && e->unk3C < best) {
+                                (side = func_8004db9c(e, reach)) != 0 && e->unk3C < best) {
                                 best = e->unk3C;
                                 hit = e;
-                                hr = r;
+                                hr = side;
                             }
                         }
-                        e++;
-                    } while (++vis_table_a.unk6144 < 64);
+                    }
                     if (hit != NULL) {
                         dmg = func_8004def8(hit, hr, viewer.unk180, viewer.unkBA, 0);
                         func_80026a88(dmg);
@@ -1042,7 +1060,8 @@ void func_800402ac(u8 hand)
             viewer.unk14E = 0;
             if (!(DAT_801cd180.unk2 & DAT_801cd180.unk22[8])) {
                 if (viewer.unk187 == 0) {
-                    inc = viewer.unk62[1] / (viewer.unk62[1] + 1000) * 96 + 96;
+                    inc = 96;
+                    inc += viewer.unk62[1] / (viewer.unk62[1] + 1000) * inc;
                     if (viewer.unk38[16] != 0xffff && viewer.unk130.halves[1] >= 0) {
                         inc >>= 1;
                     }
