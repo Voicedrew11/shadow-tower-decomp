@@ -78,11 +78,9 @@ void vis_build_planes(void)
 }
 
 /*
- * Not exact: same instructions and size. Retail has z, x, the two cell
- * offsets and the viewer pointer in a3, t0, t1, t2, t3; this build gives the
- * pointer t1 (its priority must fall below the offsets': 3 refs, or 5 refs
- * for x/z and 4 for the offsets), and the final squares use a1/v1 for
- * retail's v1/v0. A permuter run and reordering the reads did not get there.
+ * Squared distance (in 2048ths) from the viewer to the scratchpad position,
+ * or 256 when the position is outside the two view planes. The distance is
+ * written out on both paths; the compiler merges the copies.
  */
 ADDRESS(0x8001c4c8, 0x144)
 int vis_measure_position(void)
@@ -99,12 +97,15 @@ int vis_measure_position(void)
 
     x = (sp->x - cam->position.vx) / 2048 + (ox = sp->offset_x);
     z = (sp->z - cam->position.vz) / 2048 + (oz = sp->offset_z);
-    if (!sp->no_plane_test) {
-        a = sp->plane[0] * x - sp->plane[2] * z + sp->plane[4];
-        c = sp->plane[1] * x - sp->plane[3] * z + sp->plane[5];
-        if (a > 0 || c < 0) {
-            return 256;
-        }
+    if (sp->no_plane_test) {
+        sp->unk1EC = -(sp->unk208 * 8) >> 12;
+        y = (sp->y - cam->position.vy) / 2048;
+        return (x - ox) * (x - ox) + (z - oz) * (z - oz) + y * y;
+    }
+    a = sp->plane[0] * x - sp->plane[2] * z + sp->plane[4];
+    c = sp->plane[1] * x - sp->plane[3] * z + sp->plane[5];
+    if (a > 0 || c < 0) {
+        return 256;
     }
     sp->unk1EC = -(sp->unk208 * 8) >> 12;
     y = (sp->y - cam->position.vy) / 2048;
