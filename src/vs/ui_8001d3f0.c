@@ -48,21 +48,16 @@ SDATA(0x80063260, 0x10)
 
 /* Draws glyph `c` at (x, y): half-width codes below the split, full-width
  * codes after it. */
-/* Not exact: entry copies and layout constants use different registers;
- * the drawing x coordinate is normalized at entry, and the packet-base
- * setup follows the multiply rather than the glyph-split branch. */
 ADDRESS(0x8001d3f0, 0x4c8)
 void func_8001d3f0(u16 c, u16 x, u16 y, CVECTOR *color)
 {
     StPacketBuffer *buf;
     POLY_FT4 *p;
     CVECTOR rgb;
-    int cols, qw, qh, fw, ch;
-    u16 half;
+    u16 half, cols, qw, qh, fw, ch;
     u16 split;
-    u16 u, v, q, r;
+    u16 q, r;
     int n;
-    int draw_x = x;
 
     if (VS_MENU_SCRATCH->unk1D5 == 0) {
         ch = 12;
@@ -82,29 +77,38 @@ void func_8001d3f0(u16 c, u16 x, u16 y, CVECTOR *color)
         ch = qh;
     }
     if (c < split) {
-        int remainder = c % (cols * 2);
+        int u, v;
 
+        r = c % (cols * 2);
         q = c / (cols * 2);
-        u = remainder * half;
+        u = r * half;
         v = ch * q;
         NEW_PRIM(buf, p, POLY_FT4);
         setUV4(p, u, v, half + u, v, u, ch + v, half + u, ch + v);
         if (DAT_80063398) {
-            draw_x -= (DAT_80063378 == 1 ? DAT_8006333e : DAT_80063340) * (half + 1);
+            if (DAT_80063378 == 1)
+                x -= DAT_8006333e * (half + 1);
+            else
+                x -= DAT_80063340 * (half + 1);
             DAT_80063394 += half + 1;
-            if (DAT_80063392 < (u16)draw_x) {
+            if (DAT_80063392 < x) {
                 DAT_800633a0++;
                 return;
             }
-            if ((u16)draw_x < DAT_80063390)
+            if (x < DAT_80063390)
                 return;
         }
-        setXY4(p, draw_x, y, draw_x + half, y, draw_x, y + qh, draw_x + half, y + qh);
+        p->x1 = p->x3 = x + half;
+        p->x0 = p->x2 = x;
+        p->y0 = p->y1 = y;
+        p->y2 = p->y3 = y + qh;
         rgb = *color;
         rgb.r += 8;
         rgb.g += 8;
         rgb.b += 8;
     } else {
+        int u, v;
+
         n = c - split / 2;
         r = n % cols;
         q = n / cols;
@@ -113,16 +117,22 @@ void func_8001d3f0(u16 c, u16 x, u16 y, CVECTOR *color)
         NEW_PRIM(buf, p, POLY_FT4);
         setUV4(p, u, v, fw + u, v, u, ch + v, fw + u, ch + v);
         if (DAT_80063398) {
-            draw_x -= (DAT_80063378 == 1 ? DAT_8006333e : DAT_80063340) * (half + 1);
+            if (DAT_80063378 == 1)
+                x -= DAT_8006333e * (half + 1);
+            else
+                x -= DAT_80063340 * (half + 1);
             DAT_80063394 += fw;
-            if (DAT_80063392 < (u16)draw_x) {
+            if (DAT_80063392 < x) {
                 DAT_800633a0++;
                 return;
             }
-            if ((u16)draw_x < DAT_80063390)
+            if (x < DAT_80063390)
                 return;
         }
-        setXY4(p, draw_x, y, draw_x + qw, y, draw_x, y + qh, draw_x + qw, y + qh);
+        p->x1 = p->x3 = x + qw;
+        p->x0 = p->x2 = x;
+        p->y0 = p->y1 = y;
+        p->y2 = p->y3 = y + qh;
         rgb = *color;
         rgb.r -= 12;
         rgb.g -= 6;
