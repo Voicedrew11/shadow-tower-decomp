@@ -13,21 +13,20 @@
  * cross-fading from the previous second's digits over the first 16 frames
  * of each second, reddening over the last 14 seconds.
  */
-/* Not exact: retail keeps seconds/frame/warning in t1/t2/t3;
- * this build cycles them through t3/t1/t2. */
 ADDRESS(0x800297fc, 0x314)
 void func_800297fc(int time)
 {
-    int secs = time + 59;
-    int frame = secs % 60;
+    int frame;
     int warn;
     int i;
     int digit;
     StPacketBuffer *packet;
     POLY_FT4 *p;
 
-    secs /= 60;
-    warn = (14 - secs) * 2;
+    time += 59;
+    frame = time % 60;
+    time /= 60;
+    warn = (14 - time) * 2;
     if (warn < 0)
         warn = 0;
     if (warn > 8)
@@ -42,16 +41,16 @@ void func_800297fc(int time)
                i % 2 * 32 + 128, 48, i % 2 * 32 + 160, 48);
         switch (i) {
         case 0:
-            digit = secs / 10;
+            digit = time / 10;
             break;
         case 1:
-            digit = secs % 10;
+            digit = time % 10;
             break;
         case 2:
-            digit = (secs - 1) / 10;
+            digit = (time - 1) / 10;
             break;
         case 3:
-            digit = (secs - 1) % 10;
+            digit = (time - 1) % 10;
             break;
         }
         if (digit < 5) {
