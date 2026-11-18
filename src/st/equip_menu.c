@@ -763,8 +763,12 @@ void func_80065770(void)
 }
 
 /* The ring sub-list: five entries with their names and effect figures. */
-/* Not exact: the selected-entry and name-map addresses use different
- * temporaries, and the message-address additions have reversed operands. */
+/* Not exact: retail keeps the DAT_8008092c address in the loop (base in v0,
+ * `addu v1,v1,v0`, entry address in a0) and adds the message offset first
+ * (`addu a0,a0,s7`); here loop.c hoists the address (it then lands in the
+ * reload register t0) and the sum is `strings + offset`. Ruled out: no
+ * locals for list/label/offsets/strings (operand order then matches, the
+ * saved registers rotate), a MenuMessages pointer, narrow y/i types. */
 ADDRESS(0x80065de0, 0x160)
 void func_80065de0(void)
 {
@@ -786,7 +790,8 @@ void func_80065de0(void)
         if (entry != 255) {
             func_8002732c((u16 *)(strings + offsets[916 + DAT_8008092c[entry]]), 28, y, label);
             func_8002732c((u16 *)(strings + offsets[936]), 140, y2, label);
-            func_80027440(effects.defs[list->entries[sp->unk2E2 + i]].unk2 | 0x3000000, 204, y2,
+            entry_slot = &list->entries[sp->unk2E2 + i];
+            func_80027440(effects.defs[*entry_slot].unk2 | 0x3000000, 204, y2,
                           &sp->style[4]);
             y2 += 36;
             y += 36;
