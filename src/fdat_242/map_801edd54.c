@@ -17,7 +17,6 @@
 DATA(0x801ee0b0, 0x4, ".bss")
 static int fdat_801ee0b0;
 
-void func_801edb10(void);
 
 /*
  * The step of the overlay's entries, like fdat_801ed6e4: entry record 0
@@ -36,7 +35,7 @@ void func_801edd54(void)
             fdat_801eb7b4(e, 0);
         } else {
             e->unk1A = 0xff;
-            func_801edb10();
+            fdat_801ed4a0();
         }
     }
     if (e->unkA8 != NULL) {

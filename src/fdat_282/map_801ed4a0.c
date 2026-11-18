@@ -1,6 +1,7 @@
 /*
- * FDAT_282.BIN: the first two of its own handlers (WIP module; a unit of its
- * own because fdat_801ed4a0 after it is not yet exact).
+ * FDAT_282.BIN: the first two of its own handlers (WIP module), then
+ * the shared handler fdat_801ed4a0, whose switch table is the unit's
+ * read-only claim.
  */
 #include <kf/lib/address.h>
 #include <kf/lib/types.h>
@@ -9,6 +10,8 @@
 #include <st/vis.h>
 #include <st/menu.h>
 #include <st/fdat.h>
+
+RODATA(0x801eb730, 0x7c)
 
 void func_801eda20(void);
 
@@ -43,3 +46,5 @@ void func_801ed4e8(void)
     a48->unk1C.bytes[3] = 2;
     DAT_801cba08.unk1448[r->unk09] = 3;
 }
+
+#include "../lib/fdat_801ed4a0.inc"

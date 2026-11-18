@@ -1,6 +1,6 @@
 /*
- * FDAT_112.BIN: the first of its own handlers (WIP module; a unit of its own
- * because fdat_801ed4a0 after it is not yet exact).
+ * FDAT_112.BIN: the first of its own handlers (WIP module), then the shared
+ * handler fdat_801ed4a0, whose switch table is the unit's read-only claim.
  */
 #include <kf/lib/address.h>
 #include <kf/lib/types.h>
@@ -10,6 +10,8 @@
 #include <st/data.h>
 #include <st/menu.h>
 #include <st/fdat.h>
+
+RODATA(0x801eb730, 0x7c)
 
 /* Sets up the area: table C item 7, and table A entry 48 by flags 14 and 7
  * and the count of item 303. */
@@ -29,3 +31,5 @@ void func_801ed4a0(void)
         e->unk1C.bytes[3] = 2;
     }
 }
+
+#include "../lib/fdat_801ed4a0.inc"

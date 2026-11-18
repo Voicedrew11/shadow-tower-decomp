@@ -1,6 +1,7 @@
 /*
- * FDAT_302.BIN: its first two handlers and two scene words after its code (WIP module; a unit of its own until its neighbours in
- * the run are exact).
+ * FDAT_302.BIN: its first two handlers and two scene words after its code (WIP
+ * module), then the shared handler fdat_801ed4a0, whose switch table is the
+ * unit's read-only claim.
  */
 #include <kf/lib/address.h>
 #include <kf/lib/types.h>
@@ -16,6 +17,8 @@
 #include <st/light.h>
 #include <st/xa.h>
 #include <st/fdat.h>
+
+RODATA(0x801eb730, 0x7c)
 
 /* 1 while table B entries 1..6 are all open (flags 16, 18, 20, 24, 27,
  * 28). */
@@ -169,3 +172,5 @@ void func_801ed5b0(void)
         e5->unk70 |= 0x2000000;
     }
 }
+
+#include "../lib/fdat_801ed4a0.inc"

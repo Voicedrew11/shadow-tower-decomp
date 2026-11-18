@@ -1,5 +1,7 @@
 /*
- * FDAT_212.BIN's handler fdat_801ed6e4, which 19 overlays share (WIP module).
+ * FDAT_212.BIN's shared handlers fdat_801ed4a0 (23 overlays; its switch
+ * table is the unit's read-only claim) and fdat_801ed6e4 (19 overlays;
+ * WIP module).
  * Then the overlay's last handler, func_801edbd0.
  */
 #include <kf/lib/address.h>
@@ -13,6 +15,9 @@
 #include <st/sound.h>
 #include <st/fdat.h>
 
+RODATA(0x801eb730, 0x7c)
+
+#include "../lib/fdat_801ed4a0.inc"
 #include "../lib/fdat_801ed6e4.inc"
 
 /* Lifts table C item 28 (`which` 0) or 29 by 0x200 along z, 24 a frame

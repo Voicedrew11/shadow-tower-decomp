@@ -1,6 +1,7 @@
 /*
  * FDAT_152.BIN: its first four handlers and the scene word after its code
- * (WIP module; fdat_801ed4a0 after them is not yet exact).
+ * (WIP module), then the shared handler fdat_801ed4a0, whose switch table
+ * is the unit's read-only claim.
  */
 #include <kf/lib/address.h>
 #include <kf/lib/types.h>
@@ -11,6 +12,8 @@
 #include <st/light.h>
 #include <st/menu.h>
 #include <st/fdat.h>
+
+RODATA(0x801eb730, 0x7c)
 
 /* The scene state: 0 pending, 1 armed, 2 done (flag 15). */
 DATA(0x801edb84, 0x4, ".bss")
@@ -96,3 +99,5 @@ void func_801ed5e8(short id)
         }
     }
 }
+
+#include "../lib/fdat_801ed4a0.inc"

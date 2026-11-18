@@ -1,7 +1,7 @@
 /*
- * FDAT_332.BIN: a handler before fdat_801ed4a0 and the scene word after its
- * code (WIP module; a unit of its own until its neighbours in the run are
- * exact).
+ * FDAT_332.BIN: a handler, the shared handler fdat_801ed4a0 (its switch
+ * table is the unit's read-only claim) and the scene word after its code
+ * (WIP module).
  */
 #include <kf/lib/address.h>
 #include <kf/lib/types.h>
@@ -10,6 +10,8 @@
 #include <st/vis.h>
 #include <st/menu.h>
 #include <st/fdat.h>
+
+RODATA(0x801eb730, 0x7c)
 
 /* The scene state: 0 idle, 1 armed, 2 done (flag 48). */
 DATA(0x801edb3c, 0x4, ".bss")
@@ -39,3 +41,5 @@ void func_801ed614(void)
         e->unk70 &= ~0x2000000;
     }
 }
+
+#include "../lib/fdat_801ed4a0.inc"

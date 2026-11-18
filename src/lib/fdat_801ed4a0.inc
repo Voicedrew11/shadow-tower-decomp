@@ -1,10 +1,10 @@
 /*
- * fdat_801ed4a0, the map handler 21 FDAT overlays share (WIP; shared
+ * fdat_801ed4a0, the map handler 23 FDAT overlays share (WIP; shared
  * fragment, named by its FDAT_002.BIN address like the common functions).
- * No unit includes it yet: it is not exact, and its switch table, the last
- * entry of each overlay's read-only run, would diverge (the table's code
- * offsets move with it). An overlay's map unit includes it at its place in
- * the run, with its table in the unit's RODATA() claim, once it is exact.
+ * Each of those overlays' map unit includes it at its place in the run; the
+ * claim is FDAT_002.BIN's address and the other overlays bind by name. Its
+ * switch table is the last entry of the overlay's read-only run, so the
+ * including unit's RODATA() claim covers it.
  */
 
 /*
@@ -12,9 +12,6 @@
  * its second heading (unk5C, unk5A) from its state, then bends both by the
  * offset of its visible record.
  * The first heading uses a -1024 phase; the second passes unk5A directly.
- * Not exact (size-exact): retail adds the record's bytes as z + unk06
- * after loading unk05 first; this build loads unk06 first and adds it
- * in front.
  */
 ADDRESS(0x801ed4a0, 0x244)
 void fdat_801ed4a0(void)
@@ -22,9 +19,8 @@ void fdat_801ed4a0(void)
     Vis212 *e = vis_table_a.unk6138;
     u16 wall;
     int d;
-    int x;
-    int second_x;
-    int z;
+    short x;
+    short z;
     short dx;
     short dz;
 
@@ -47,7 +43,7 @@ void fdat_801ed4a0(void)
         break;
     case 2:
     case 4:
-    case 18:
+    case 16:
     case 32:
         e->unk5A = e->unk5C = e->unk56;
         break;
@@ -60,13 +56,13 @@ void fdat_801ed4a0(void)
     if (vis_records[e->unk26].unk05 != 0 || vis_records[e->unk26].unk06 != 0) {
         x = rcos(e->unk5C - 1024) >> 5;
         z = rsin(e->unk5C - 1024) >> 5;
-        dz = z + vis_records[e->unk26].unk06;
         dx = x + vis_records[e->unk26].unk05;
-        e->unk5C = (ratan2(dz, dx) + 1024) & 0xfff;
-        second_x = rcos(e->unk5A) >> 5;
-        z = rsin(e->unk5A) >> 5;
         dz = z + vis_records[e->unk26].unk06;
-        dx = second_x + vis_records[e->unk26].unk05;
+        e->unk5C = (ratan2(dz, dx) + 1024) & 0xfff;
+        x = rcos(e->unk5A) >> 5;
+        z = rsin(e->unk5A) >> 5;
+        dx = x + vis_records[e->unk26].unk05;
+        dz = z + vis_records[e->unk26].unk06;
         e->unk5A = ratan2(dz, dx);
     }
 }
