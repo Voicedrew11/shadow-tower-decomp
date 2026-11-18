@@ -77,20 +77,20 @@ void func_80014480(void)
  * its target at DAT_80063354 units per frame, keeps within +-32767 on x
  * and z, and faces the target.
  *
- * Not exact: the regular camera's near and far arms. Retail keeps the two
- * arms apart although their last six instructions print identically (this
- * build cross-jumps them, 0x18 bytes shorter), holds dist in $a3 and the
- * near limit in $a2 (here $a1/$a3), keeps the two offsets in $a0/$v1 as arm-
- * local values, reuses the raw look.vx halfword for eye.vx and shares only
- * the eye.vz store with the plain arm. jump2 only merges tails before jumps
- * to a label that existed when the pass began, so the arms' common target
- * (the eye.vz store) is itself the product of an earlier merge: some code
- * after the three arms was written out in each of them (as the key-on call
- * of func_80013c5c is). Which code is not established. Ruled out: arm-local
- * offset variables (same registers on both arms, still cross-jumped), the
- * far limit assigned inside its arm, a common `eye.vz = z` after the three
- * arms with z completed in each arm (both spellings, much worse). The winner
- * camera, the easing and the clamps agree.
+ * Not exact: the regular camera's near and far arms. Retail holds dist in
+ * $a3 and the near limit in $a2 (here $a1/$a3), keeps the two offsets in
+ * $a0/$v1 as arm-local values, reuses the raw look.vx halfword for eye.vx,
+ * and ends all three arms with the eye.vz value in $v0, so each of the first
+ * two arms shares just the final store with the plain arm (`j; addu
+ * v0,v0,v1` to the `sh v0,28(sp)`) and the two are not merged with each
+ * other; this build stores eye.vz from $v1 there, shares nothing with the
+ * plain arm and so cross-jumps the two arms' whole tails (0x14 bytes short).
+ * The far limit is not a known constant in its arm (`negu v0,t0; sll
+ * v0,v0,1`), so it is assigned before the tall-fighter test. Ruled out: arm-
+ * local offset variables (x in $a1, z in $a0, still merged), the far limit
+ * assigned inside its arm, a common `eye.vz = z` after the three arms. The
+ * look.vz/look.vx stores also swap. The winner camera, the easing and the
+ * clamps agree.
  */
 ADDRESS(0x80014634, 0x9ec)
 void func_80014634(void)
@@ -154,10 +154,10 @@ void func_80014634(void)
         look.vy = (DAT_800633b0.fighter[0].unk4DEF0.vy + DAT_800633b0.fighter[1].unk4DEF0.vy) / 2;
         dist = SquareRoot0(delta_z * delta_z + delta_x * delta_x) + 1;
         near = CAMERA_NEAR;
+        far = CAMERA_FAR;
         if (DAT_800633b0.fighter[0].unk4DF18.unk1B6 > 2500
             || DAT_800633b0.fighter[1].unk4DF18.unk1B6 > 2500)
             near = CAMERA_NEAR_TALL;
-        far = CAMERA_FAR;
         if (dist < near) {
             x = (DAT_800633b0.fighter[1].unk4DEF0.vz - look.vz) * near * 3 / dist;
             z = (look.vx - DAT_800633b0.fighter[1].unk4DEF0.vx) * near * 3 / dist;
