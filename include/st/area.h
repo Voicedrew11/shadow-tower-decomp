@@ -10,9 +10,11 @@
 #include <sys/types.h>
 #include <st/cd.h>
 
-/* 0x800881dc: set to the overlay area start next to DAT_800881d8; this
- * unit addresses it as an extern with lui, not $gp. */
-extern u8 *DAT_800881dc;
+/* 0x800881dc: set to the overlay area start next to DAT_800881d8; the area
+ * module addresses it as an extern with lui, not $gp, and as an aggregate:
+ * retail keeps its load in front of a store through a pointer, which the
+ * scheduler only does for an in-struct read. */
+extern u8 *DAT_800881dc[1];
 /* Tables func_80044674 fills from its pack; WIP extents. */
 extern u8 DAT_8009b088[];
 
