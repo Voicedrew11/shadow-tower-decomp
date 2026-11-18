@@ -12,9 +12,8 @@
 
 /*
  * Runs the movement or attack of the entry's current script command.
- * Not exact: same instructions and size; retail allocates e, the script and
- * the speed to s2, s1 and s0 (this build: s1, s0, s2) and loads the second
- * push window's bounds into a0/a1 the other way round.
+ * Command 32's two push windows share their locals: `inner` is the first
+ * window's end and the second window's start, `outer` the other two bounds.
  */
 ADDRESS(0x801ebec4, 0x7e0)
 void fdat_801ebec4(Vis212 *e)
@@ -22,7 +21,11 @@ void fdat_801ebec4(Vis212 *e)
     int speed = abs(e->unkB0);
     VisScript *s = e->unkA8;
     int turn;
+    int move;
     int push;
+    int frame;
+    int inner;
+    int outer;
 
     fdat_801eba4c(e);
     switch (e->unk0F) {
@@ -55,9 +58,9 @@ void fdat_801ebec4(Vis212 *e)
         e->unk08 = s->unk01;
         if ((((short)e->unk2A - s->arg.s[4] + 4096) & 0xfff) < s->arg.s[5]) {
             turn = s->arg.s[1] * speed / s->arg.s[5];
-            speed = s->arg.s[0] * speed / s->arg.s[5];
+            move = s->arg.s[0] * speed / s->arg.s[5];
             fdat_801eb814(e->unk5C, turn);
-            fdat_801eb880(e->unk8E + s->arg.u[3] - 1024, speed);
+            fdat_801eb880(e->unk8E + s->arg.u[3] - 1024, move);
         } else {
             fdat_801eb814(e->unk5C, s->arg.s[2] * speed / (4096 - s->arg.s[5]));
         }
@@ -67,14 +70,14 @@ void fdat_801ebec4(Vis212 *e)
         push = 0;
         if (e->unkBC == 1)
             break;
-        if (s->arg.u[11] != 0xffff && (short)e->unk2A >= s->arg.u[11]
-            && s->arg.u[12] >= (short)e->unk2A) {
-            push = s->arg.s[10] * speed / (s->arg.u[12] - s->arg.u[11]);
+        if (s->arg.u[11] != 0xffff && (frame = (short)e->unk2A) >= (outer = s->arg.u[11])
+            && (inner = s->arg.u[12]) >= frame) {
+            push = s->arg.s[10] * speed / (inner - outer);
             fdat_801eb880(e->unk8E - 1024, push);
         }
-        if (s->arg.u[14] != 0xffff && (short)e->unk2A >= s->arg.u[14]
-            && (short)e->unk2A <= s->arg.u[15]) {
-            push = s->arg.s[13] * speed / (s->arg.u[15] - s->arg.u[14]);
+        if (s->arg.u[14] != 0xffff && (frame = (short)e->unk2A) >= (inner = s->arg.u[14])
+            && frame <= (outer = s->arg.u[15])) {
+            push = s->arg.s[13] * speed / (outer - inner);
             fdat_801eb880(e->unk8E + 1024, push);
         }
         if (s->arg.w[1] == -1 && s->arg.u[4] == 0xffff) {
