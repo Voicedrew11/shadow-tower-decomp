@@ -247,12 +247,9 @@ game candidates (LIBSND, LIBSPU and LIBPAD members; see
 ## OPTXT.EXE
 
 `src/optxt/main.c` reconstructs OPTXT.EXE's eighteen game functions as one
-unit (`probe-gcc272cdk-o2-g8`); seventeen are exact. `play_opening_text`
-comes out four bytes longer than retail (an extra saved register for the
-hoisted address of the opening's state word), so the link puts everything
-after it four bytes late.
-With that function's retail size, every byte outside it equals retail, which
-confirmed the END.EXE rules above and these:
+unit (`probe-gcc272cdk-o2-g8`) and `src/optxt/state.c` defines the opening's
+state word; with the `IMAGE_LINKS` entry above the whole 61,440-byte file
+equals retail. The link confirmed the END.EXE rules above and these:
 
 - The unit's `.data` (the text-page table) starts right after the last LIBPAD
   text at `0x8001df50`; its `.sbss` statics follow `MALLOC.OBJ`'s 32-byte
@@ -262,9 +259,10 @@ confirmed the END.EXE rules above and these:
   status.
 - The opening's state word `0x8001f7ec`, the word after the unit's `.sbss`,
   is read and written only with absolute `lui` pairs, which no symbol of the
-  unit gets; the source spells the fixed address. An `extern int` defined
-  outside the unit reproduces the same access form and is never hoisted by
-  the loop pass, so the original may have named a symbol from another object.
+  unit gets: ASPSX sees a unit's own small data before its text and
+  addresses it through `$gp`. It is an `int` global of another object
+  (`src/optxt/state.c`): `main.c` only declares it, and PSYLINK places the
+  small COMMON at the end of `.sbss`, after `main.c`'s statics.
 
 ## PS-X EXE header
 

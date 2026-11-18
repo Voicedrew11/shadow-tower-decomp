@@ -127,6 +127,7 @@ OPTXT.EXE	0x8001f79c	0x4	PTR_8001f79c	global	load	u8 *	main	supported	asm;src/op
 OPTXT.EXE	0x8001f7a0	0x4	clut_origin	global	load	VramOffset		supported	asm;src/optxt/main.c optxt.main	$gp+8; holds (0, 480), the CLUT row; never referenced
 OPTXT.EXE	0x8001f7e0	0x6	act_align	static	bss	u_char[6]	pad_set_act_align	supported	asm;src/optxt/main.c optxt.main	$gp+72; PadSetActAlign data
 OPTXT.EXE	0x8001f7e8	0x4	frame	static	bss	int	scroll_pages_1	supported	asm;src/optxt/main.c optxt.main	$gp+80; frame counter of the current opening part
+OPTXT.EXE	0x8001f7ec	0x4	opening_state	global	bss	int	play_opening_text	supported	asm;src/optxt/state.c optxt.state	absolute lui pairs; the opening's state 0..5, defined after the code that uses it
 OPTXT.EXE	0x8001f800	0x190000	text_buffer	global	bss	u_long[0x64000]	play_opening_text	supported	asm;src/optxt/main.c optxt.main	OPTXT.MIC load buffer; WIP extent up to display; COMMON in hash-bucket order (WIP spelling fits it)
 OPTXT.EXE	0x801af800	0xe4	display	global	bss	DisplayBuffers	main	supported	asm;src/optxt/main.c optxt.main	two DISPENVs, two DRAWENVs and an id; COMMON in hash-bucket order (WIP spelling fits it)
 OPTXT.EXE	0x801af8e8	0x4c	pad_data	global	bss	PadBuffers	pad_init	supported	asm;src/optxt/main.c optxt.main	PadInitDirect buffers and PadSetAct data; COMMON in hash-bucket order (WIP spelling fits it)

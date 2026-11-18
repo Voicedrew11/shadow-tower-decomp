@@ -20,18 +20,13 @@
 #include <LIBSND.H>
 #include <LIBPAD.H>
 #include <psyq/libc.h>
+/* opening_state: another object defines it, so the assembler does not know
+ * it is small data here and every access is an absolute lui pair. */
+#include <optxt/state.h>
 
 /* PSX.EXE's next-program byte and the mailbox byte after it (see src/psx/main.c). */
 #define NEXT_PROGRAM_BYTE ((u8 *)0x800103f0)
 #define MAILBOX_BYTE_1 ((u8 *)0x800103f1)
-/*
- * The opening's state word, read and written by its fixed address: every
- * access is an absolute lui pair with no $gp form, which a symbol of this
- * unit's small data would get. 0x8001f7ec is the word after the unit's own
- * .sbss, the slot END.EXE also writes by address (its 0x8002fd7c). How the
- * original spelled the address is unknown.
- */
-#define OPENING_STATE (*(int *)0x8001f7ec)
 /* PSX.EXE's program table index of ST.EXE. */
 #define PROGRAM_ST 3
 
@@ -469,7 +464,7 @@ static void scroll_pages_1(void)
     if (y1 >= -240 && y1 <= 240)
         draw_text_page(1, y1, level);
     if (frame == 720) {
-        OPENING_STATE = 2;
+        opening_state = 2;
         frame = 0;
     } else {
         frame++;
@@ -507,7 +502,7 @@ static void scroll_pages_2(void)
     if (y1 >= -240 && y1 <= 240)
         draw_text_page(3, y1, level);
     if (frame == 920) {
-        OPENING_STATE = 3;
+        opening_state = 3;
         frame = 0;
     } else {
         frame++;
@@ -545,7 +540,7 @@ static void scroll_pages_3(void)
     if (y1 >= -240 && y1 <= 240)
         draw_text_page(5, y1, level);
     if (frame == 900) {
-        OPENING_STATE = 4;
+        opening_state = 4;
         frame = 0;
     } else {
         frame++;
@@ -572,7 +567,7 @@ static void play_opening_text(void)
         p += *(u_long *)p + 4;
     }
     DrawSync(0);
-    OPENING_STATE = 0;
+    opening_state = 0;
     frame = 0;
     do {
         pad_read();
@@ -581,23 +576,26 @@ static void play_opening_text(void)
         VSync(0);
         PutDrawEnv(&display.draw[display.id]);
         PutDispEnv(&display.disp[display.id]);
-        if (OPENING_STATE == 0) {
+        if (opening_state == 0) {
             play_opening_xa();
             SsSetSerialVol(SS_SERIAL_A, 64, 64);
             SsSetMVol(127, 127);
-            OPENING_STATE = 1;
-        } else if (OPENING_STATE == 1) {
+            opening_state = 1;
+        } else if (opening_state == 1) {
             scroll_pages_1();
-        } else if (OPENING_STATE == 2) {
+        } else if (opening_state == 2) {
             scroll_pages_2();
-        } else if (OPENING_STATE == 3) {
+        } else if (opening_state == 3) {
             scroll_pages_3();
-        } else if (OPENING_STATE == 4) {
-            OPENING_STATE = 5;
+        } else if (opening_state == 4) {
+            opening_state = 5;
         }
-        if (pad.buttons & PAD_RAW_START)
-            OPENING_STATE = 5;
-    } while (OPENING_STATE != 5);
+        /* The held buttons as the third word from pad.trigger: the address
+         * is one constant, which the loop pass leaves in the loop (the
+         * member form's base register would be hoisted). */
+        if ((&pad.trigger)[2] & PAD_RAW_START)
+            opening_state = 5;
+    } while (opening_state != 5);
     param[0] = CdlModeSpeed | CdlModeSize1;
     CdControlB(CdlSetmode, param, 0);
     SsSetSerialVol(SS_SERIAL_A, 0, 0);

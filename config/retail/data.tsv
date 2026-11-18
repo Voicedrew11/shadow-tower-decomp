@@ -415,7 +415,8 @@ OPTXT.EXE	0x8001f7c0	0xefc0	0x20	unclassified	coverage-gap			payload-complement	
 OPTXT.EXE	0x8001f7e0	0xefe0	0x6	bss	proven	act_align	u_char[6]	asm;src/optxt/main.c optxt.main	.sbss; $gp+72
 OPTXT.EXE	0x8001f7e6	0xefe6	0x2	unclassified	coverage-gap			payload-complement	.sbss alignment
 OPTXT.EXE	0x8001f7e8	0xefe8	0x4	bss	proven	frame	int	asm;src/optxt/main.c optxt.main	.sbss; $gp+80
-OPTXT.EXE	0x8001f7ec	0xefec	0x14	unclassified	coverage-gap			payload-complement	the opening state word 0x8001f7ec (read and written by its fixed address, absolute lui pairs, no relocation), .sbss alignment and MALLOC.OBJ .bss
+OPTXT.EXE	0x8001f7ec	0xefec	0x4	bss	proven	opening_state	int	asm;src/optxt/state.c optxt.state	.sbss; absolute lui pairs
+OPTXT.EXE	0x8001f7f0	0xeff0	0x10	unclassified	coverage-gap			payload-complement	MALLOC.OBJ .bss
 VS.EXE	0x80011000	0x800	0xf40	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 VS.EXE	0x80011f40	0x1740	0x4	defined	candidate	DAT_80011f40	u8 *	asm;src/vs/main_tail.c vs.main_tail	end of the game .rdata: a heap bound main reads
 VS.EXE	0x80011f44	0x1744	0x4	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data

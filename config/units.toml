@@ -511,6 +511,12 @@ image = "OPTXT.EXE"
 source = "src/optxt/main.c"
 profile = "probe-gcc272cdk-o2-g8"
 
+[[unit]]
+unit = "optxt.state"
+image = "OPTXT.EXE"
+source = "src/optxt/state.c"
+profile = "probe-gcc272cdk-o2-g8"
+
 # VS.EXE: VS's own copies of ST.EXE functions (src/vs/); shared fragments in src/lib/.
 
 [[unit]]
