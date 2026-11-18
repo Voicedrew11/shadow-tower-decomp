@@ -2426,16 +2426,17 @@ void func_8005f4fc(void)
  * for items 284/285, otherwise the damaged items held to repair for
  * viewer.unk2. Bit 15 is the confirmation step.
  *
- * Not exact: retail's mode & 6 tests read a word, and the count at 266
- * is updated through a halfword container while preserving adjacent bits.
- * The corresponding shared members currently produce narrower accesses.
+ * The trade test is written as two bit tests (fold merges them into one
+ * word-wide read of unk2DC, which is retail's `lw`). The three removals
+ * each close their own list gap and take the same exit, the buy only
+ * when the stock runs out; jump2 merges the tails. The item's record is
+ * indexed through vis_table_c each time, never through a pointer.
  */
 ADDRESS(0x8005f54c, 0xacc)
 void func_8005f54c(void)
 {
     MenuScratch *sp = MENU_SCRATCH;
     DVECTOR pos = {448, 256};
-    Vis44 *rec;
     int shown;
     int done;
     int cost;
@@ -2452,7 +2453,7 @@ void func_8005f54c(void)
             if (DAT_801c7590.unk156[i] != 0 && func_80052d40(DAT_801c7590.unk13A[i]) != 0)
                 sp->unk0.list.ids[sp->unk0.list.count++] = i;
         }
-    } else if (sp->unk2DC & 6) {
+    } else if ((sp->unk2DC & 2) || (sp->unk2DC & 4)) {
         sp->unk0.list.ids = func_800152d0(530);
         sp->unk0.list.count = 0;
         for (i = 0; i < 266; i++) {
@@ -2484,68 +2485,61 @@ void func_8005f54c(void)
             }
             if (DAT_801cd180.unk4 & 0x4000) {
                 DAT_801cd180.unk4 = 0;
-                if (sp->unk0.list.unkA == 1) {
+                if ((s16)sp->unk0.list.unkA == 1) {
                     done = 1;
                     if (sp->unk2DC & 1) {
-                        rec = &vis_table_c.unk0118[DAT_801c7590.unk13A[sp->unk0.list.ids[sp->unk2E2 + sp->unk2E0]]];
-                        if (rec->unk2 > DAT_801c7590.counts[266].count)
-                            goto refuse;
-                        DAT_801c7590.counts[266].count -= rec->unk2;
-                        DAT_801c7590.counts[DAT_801c7590.unk13A[sp->unk0.list.ids[sp->unk2E2 + sp->unk2E0]]].count++;
-                        DAT_801c7590.unk156[sp->unk0.list.ids[sp->unk2E2 + sp->unk2E0]]--;
-                        i = sp->unk2E2 + sp->unk2E0;
-                        if (DAT_801c7590.unk156[sp->unk0.list.ids[i]] != 0)
-                            goto bought;
-                        goto compact_buy_test;
-                    compact_buy:
-                        sp->unk0.list.ids[i] = sp->unk0.list.ids[i + 1];
-                        i++;
-                    compact_buy_test:
-                        if (i < sp->unk0.list.count - 1)
-                            goto compact_buy;
-                    } else if (sp->unk2DC & 6) {
+                        int id = DAT_801c7590.unk13A[sp->unk0.list.ids[sp->unk2E2 + sp->unk2E0]];
+
+                        if (DAT_801c7590.counts[266].count < vis_table_c.unk0118[id].unk2) {
+                            done = 0;
+                            func_80057d34();
+                        } else {
+                            DAT_801c7590.counts[266].count -= vis_table_c.unk0118[id].unk2;
+                            DAT_801c7590.counts[id].count++;
+                            DAT_801c7590.unk156[sp->unk0.list.ids[sp->unk2E2 + sp->unk2E0]]--;
+                            if (DAT_801c7590.unk156[sp->unk0.list.ids[sp->unk2E2 + sp->unk2E0]] == 0) {
+                                for (i = sp->unk2E2 + sp->unk2E0; i < sp->unk0.list.count - 1; i++)
+                                    sp->unk0.list.ids[i] = sp->unk0.list.ids[i + 1];
+                                sp->unk0.list.count--;
+                            }
+                            func_80057cc8();
+                            sp->unk2DC &= ~0x8000;
+                        }
+                    } else if ((sp->unk2DC & 2) || (sp->unk2DC & 4)) {
                         int exchange = 285;
+                        int j;
 
                         if (sp->unk2DC & 2)
                             exchange = 284;
                         DAT_801c7590.counts[sp->unk0.list.ids[sp->unk2E2 + sp->unk2E0]].count--;
                         DAT_801c7590.counts[exchange].count++;
-                        i = sp->unk2E2 + sp->unk2E0;
-                        goto compact_trade_test;
-                    compact_trade:
-                        sp->unk0.list.ids[i] = sp->unk0.list.ids[i + 1];
-                        i++;
-                    compact_trade_test:
-                        if (i < sp->unk0.list.count - 1)
-                            goto compact_trade;
+                        for (j = sp->unk2E2 + sp->unk2E0; j < sp->unk0.list.count - 1; j++)
+                            sp->unk0.list.ids[j] = sp->unk0.list.ids[j + 1];
+                        sp->unk0.list.count--;
+                        func_80057cc8();
+                        sp->unk2DC &= ~0x8000;
                     } else {
-                        rec = &vis_table_c.unk0118[sp->unk0.list.ids[sp->unk2E2 + sp->unk2E0]];
-                        cost = rec->unk3 * 2 / 3 * (rec->unk27 - rec->unk28);
-                        if (rec->unk28 == 0)
+                        int id = sp->unk0.list.ids[sp->unk2E2 + sp->unk2E0];
+                        int j;
+
+                        cost = vis_table_c.unk0118[id].unk3 * 2 / 3
+                            * (vis_table_c.unk0118[id].unk27 - vis_table_c.unk0118[id].unk28);
+                        if (vis_table_c.unk0118[id].unk28 == 0)
                             cost *= 2;
-                        if (cost >= viewer.unk2)
-                            goto refuse;
-                        viewer.unk2 -= cost;
-                        rec->unk28 = rec->unk27;
-                        i = sp->unk2E2 + sp->unk2E0;
-                        goto compact_repair_test;
-                    compact_repair:
-                        sp->unk0.list.ids[i] = sp->unk0.list.ids[i + 1];
-                        i++;
-                    compact_repair_test:
-                        if (i < sp->unk0.list.count - 1)
-                            goto compact_repair;
+                        if (cost < viewer.unk2) {
+                            viewer.unk2 -= cost;
+                            vis_table_c.unk0118[id].unk28 = vis_table_c.unk0118[id].unk27;
+                            for (j = sp->unk2E2 + sp->unk2E0; j < sp->unk0.list.count - 1; j++)
+                                sp->unk0.list.ids[j] = sp->unk0.list.ids[j + 1];
+                            sp->unk0.list.count--;
+                            func_80057cc8();
+                            sp->unk2DC &= ~0x8000;
+                        } else {
+                            done = 0;
+                            func_80057d34();
+                        }
                     }
-                    sp->unk0.list.count--;
-                bought:
-                    func_80057cc8();
-                    sp->unk2DC &= ~0x8000;
-                    goto moved;
-                refuse:
-                    done = 0;
-                    func_80057d34();
-                moved:
-                    if (done && sp->unk0.list.count <= sp->unk2E2 + 4) {
+                    if (done && sp->unk2E2 + 4 >= sp->unk0.list.count) {
                         if (sp->unk2E2 > 0)
                             sp->unk2E2--;
                         else if (sp->unk2E0 > 0)
@@ -2597,12 +2591,13 @@ void func_8005f54c(void)
             }
             if (DAT_801cd180.unk4 & 0x4000) {
                 DAT_801cd180.unk4 = 0;
-                if (sp->unk2E2 + sp->unk2E0 < sp->unk0.list.count) {
+                if (sp->unk2E2 + sp->unk2E0 >= sp->unk0.list.count) {
+                    func_80057d34();
+                } else {
                     if (sp->unk2DC & 1)
-                        kind = DAT_801c7590.unk13A[sp->unk0.list.ids[sp->unk2E2 + sp->unk2E0]];
+                        kind = vis_table_c.unk0118[DAT_801c7590.unk13A[sp->unk0.list.ids[sp->unk2E2 + sp->unk2E0]]].unk5[0];
                     else
-                        kind = sp->unk0.list.ids[sp->unk2E2 + sp->unk2E0];
-                    kind = vis_table_c.unk0118[kind].unk5[0];
+                        kind = vis_table_c.unk0118[sp->unk0.list.ids[sp->unk2E2 + sp->unk2E0]].unk5[0];
                     func_80057cc8();
                     sp->unk0.list.unkA = 1;
                     sp->unk2DC |= 0x8000;
@@ -2611,8 +2606,6 @@ void func_8005f54c(void)
                         func_8003ec5c(DAT_80088c88, &pos, NULL, 1);
                         shown = kind;
                     }
-                } else {
-                    func_80057d34();
                 }
             }
         }
