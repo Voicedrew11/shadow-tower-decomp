@@ -47,14 +47,27 @@ static SVECTOR DAT_800881e0;
 
 /* Swaps the first bytes of the entry's two record ranges. */
 #define SWAP_RECORDS(e)                                                        \
-    for (n = (e)->unk4A.door.unk4E - 1; n != 0xffff; n--) {                    \
+    n = (e)->unk4A.door.unk4E;                                                 \
+    while (n--) {                                                              \
         t = vis_records[(e)->unk4A.door.unk4C + n].part;                      \
         vis_records[(e)->unk4A.door.unk4C + n].part =                         \
             vis_records[(e)->unk4A.door.unk4A + n].part;                      \
         vis_records[(e)->unk4A.door.unk4A + n].part = t;                      \
     }
 
-/* Updates every table B entry by its kind. */
+/*
+ * Updates every table B entry by its kind.
+ *
+ * Not exact (2104 of retail's 2123 instructions; the blocks and their order
+ * agree): the frame is 144 bytes against 160. Retail keeps the warp's area
+ * byte in a stack slot (104(sp)) with copies in s2 and s8, and gives the
+ * loop's hoisted constants (255, 1, 3, &vis_table_b) no register, so each
+ * use rematerialises them in t2/t3; here 255 takes s8 and the area a
+ * register. Retail also recomputes step * 4 in the door arms (the speed is a
+ * 16-bit variable, which is in) where cse still reaches the first copy here,
+ * and copies the kind to a0 before the switch. Not tried yet: x/y/z/area as
+ * function-level bytes, and the arms' statement order against sched.
+ */
 ADDRESS(0x80050768, 0x212c)
 void func_80050768(void)
 {
@@ -66,7 +79,7 @@ void func_80050768(void)
     int dx;
     int dy;
     int dz;
-    int kind;
+    int angle;
     int turn;
     u16 n;
     u8 t;
@@ -86,19 +99,19 @@ void func_80050768(void)
             e->unk18 = dx * dx + dy * dy + dz * dz;
             e->unk1C = SquareRoot0(dx * dx + dz * dz);
         }
-        e->unk20 = (ratan2(dz, dx) - 1024) & 0xfff;
-        turn = (e->unk36 - e->unk20) & 0xfff;
+        angle = (ratan2(dz, dx) - 1024) & 0xfff;
+        e->unk20 = angle;
+        turn = ((u16)e->unk36 - angle) & 0xfff;
         e->unk22 = turn;
         if (turn > 2048)
             e->unk22 = 4096 - turn;
-        kind = e->unk05;
-        if (kind == 255)
+        if (e->unk05 == 255)
             continue;
-        switch (kind) {
+        switch (e->unk05) {
         case 0:
         case 1: {
             int step = e->unk48;
-            int speed = step * 4;
+            short speed = step * 4;
 
             switch (e->unk0C) {
             case 0:
@@ -118,11 +131,11 @@ void func_80050768(void)
                         e->unk00 = 1;
                     SOUND(e, 208);
                 }
-                if (speed + e->unk10 < 4095) {
-                    e->unk10 = (e->unk10 + speed) & 0xfff;
-                } else {
+                if (speed + e->unk10 >= 4095) {
                     e->unk10 = 4095;
                     e->unk0C = 2;
+                } else {
+                    e->unk10 = (e->unk10 + speed) & 0xfff;
                 }
                 if (e->unk10 < 3072 && speed + e->unk10 >= 3072)
                     SOUND(e, 210);
@@ -199,7 +212,7 @@ void func_80050768(void)
                 SOUND(e, 209);
                 break;
             case 7:
-                if (kind == 1)
+                if (e->unk05 == 1)
                     e->unk00 = 2;
                 break;
             case 8:
@@ -233,7 +246,7 @@ void func_80050768(void)
         case 50:
         case 51: {
             int step = e->unk48;
-            int speed = step * 4;
+            short speed = step * 4;
 
             switch (e->unk0C) {
             case 0:
@@ -357,7 +370,7 @@ void func_80050768(void)
         }
         case 52: {
             int step = e->unk48;
-            int speed = step * 4;
+            short speed = step * 4;
             Vis88 *o;
             int j;
             int group;
