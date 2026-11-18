@@ -476,12 +476,11 @@ void func_8001e978(DVECTOR *xy, CVECTOR *rgb, int semi)
 
 /* Fills `r` with a vertical gradient from `edge` at the top and bottom to
  * `mid` across the middle. */
-/* Not exact: as ST.EXE's copy, retail schedules the halved height around
- * the packet-buffer load with other temporaries. */
 ADDRESS(0x8001eb18, 0x3dc)
 void func_8001eb18(RECT *r, CVECTOR *mid, CVECTOR *edge, int semi)
 {
     StPacketBuffer *buf;
+    StPacketBuffer *lower;
     POLY_G4 *p;
     RECT b;
 
@@ -498,8 +497,8 @@ void func_8001eb18(RECT *r, CVECTOR *mid, CVECTOR *edge, int semi)
     *DAT_801624d0.ot_cur = (u_long)p & 0xffffff;
     b = *r;
     b.h = b.h >> 1;
-    b.y = b.h + b.y;
-    NEW_PRIM(buf, p, POLY_G4);
+    b.y += b.h;
+    NEW_PRIM(lower, p, POLY_G4);
     p->code = semi == 0 ? 0x38 : 0x3a;
     p->tag = (*DAT_801624d0.ot_cur & 0xffffff) | 0x08000000;
     setRGB0(p, mid->r, mid->g, mid->b);
