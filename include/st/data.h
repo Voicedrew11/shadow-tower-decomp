@@ -182,7 +182,10 @@ typedef struct {
     u8 unk1D2[2];
     u8 unk1D4[4];        /* 0x1d4: per slot/hand: sound id */
     CdlLOC unk1D8;       /* 0x1d8: XA stream start position (src/st/xa.c) */
-    CdlLOC unk1DC;       /* 0x1dc: its current position */
+    /* 0x1dc: its current position. Volatile: the CD ready callback
+     * (func_80054000) writes it, and retail keeps its three byte stores in
+     * source order where the scheduler would otherwise reorder them. */
+    volatile CdlLOC unk1DC;
     s32 unk1E0;          /* 0x1e0: its length in sectors */
     u8 unk1E4;
     u8 unk1E5[3];

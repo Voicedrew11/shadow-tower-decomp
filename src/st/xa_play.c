@@ -32,7 +32,7 @@ int func_800541f4(void)
     /* Retail keeps both positions in stack slots and reloads them. */
     volatile int pos[2];
 
-    pos[1] = func_80015950(&viewer.unk1DC);
+    pos[1] = func_80015950((CdlLOC *)&viewer.unk1DC);
     pos[0] = func_80015950(&viewer.unk1D8);
     if (viewer.unk1E8 + 3600 < cd_state.unk4)
         return 1;

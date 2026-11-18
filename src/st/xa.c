@@ -27,13 +27,6 @@
  * this prototype is not GCC's builtin one. */
 void *memcpy(void *dst, void *src, int size);
 
-/*
- * Not exact: retail stores loc[0] before loc[1]. sched1 already emits the
- * three stores in order; sched2 moves the minute store behind `andi
- * a0,s0,0xff` ("greater potential hazard" over the zero-extension that
- * reuses a0). Ruled out: int or K&R intr, if-chain instead of the switch,
- * a CdlLOC pointer.
- */
 /* CdReadyCallback while a stream plays: keeps the current position and
  * restarts the read from the start position after a disk error. */
 ADDRESS(0x80054000, 0x8c)
@@ -73,8 +66,8 @@ void func_8005408c(u8 file, int channel)
     viewer.unk1E0 = DAT_800804ac[file][byte_channel];
     /* the file's position, by byte offset from the start of the save data */
     save = (u8 *)&DAT_801cba08;
-    memcpy(&viewer.unk1DC, save + file * 4 + offsetof(Data801cba08, unk1618), 4);
-    memcpy(&viewer.unk1D8, &viewer.unk1DC, 4);
+    memcpy((void *)&viewer.unk1DC, save + file * 4 + offsetof(Data801cba08, unk1618), 4);
+    memcpy(&viewer.unk1D8, (void *)&viewer.unk1DC, 4);
     while (CdControl(CdlSetloc, (u8 *)&DAT_801cba08.unk1618[file], NULL) == 0)
         ;
     filter.file = 1;
