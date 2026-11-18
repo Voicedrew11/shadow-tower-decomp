@@ -33,11 +33,15 @@
  * the lighting's near/far depths (ScratchPad.unk64/unk68).
  */
 /*
- * Not exact: retail reads unk34 for the unk38 copy after the part_vertices
- * sum (`addu v1,v1,v0; lw v0,52(t0)`) and stores it last; sched1 gives that
- * load a lower priority than the header stores here and moves it up. All
- * orders of the five header statements and scratch-variable forms give the
- * same schedule. Same size.
+ * Not exact (same size, same instructions): retail keeps the unk38 copy
+ * (`lw v0,52(t0)` ... `sw v0,56(t0)`) behind the two vertex pointer stores;
+ * here sched1 lifts it above the header->vertices load, which swaps v0/v1
+ * in between. In the sched1 trace the copy's store has priority 4 (a load
+ * at depth 3 plus its latency) against 5 for the vertex stores (their
+ * chain starts with the rec->part load), so it is placed after them in
+ * the backward pass; retail needs it at 5 or tied. Ruled out: every order
+ * of the five header statements, scratch variables for the copied value,
+ * `*(T *)&field` spellings, moving the n_vertices read ahead of the copy.
  */
 ADDRESS(0x8001cdf8, 0x42c)
 void world_project_parts(VECTOR *trans)

@@ -815,10 +815,17 @@ void func_8005aa80(void)
  * and an item for it from its list (unk2C7: the list kind; 10 is the
  * magic grid), recomputing the figures as the choice changes.
  *
- * Not exact (0x38 bytes short): archive/buffer lifetimes and several case
- * joins/load orders differ. The saved magic-page row can be -1 and must
- * stay signed across frame callbacks; file arithmetic stays promoted until
- * the call boundary. The switch-table addends still differ from retail.
+ * Shapes retail's code fixes: the archive is reached through one pointer
+ * (`arc`), the file cursor advances by (*p + 4), `base` and `offset` are
+ * ints (the zero in `base` is what reload copies for every zero argument
+ * of the first block), the kind sort reads the kind from the table each
+ * time and its last arm goes through a list and a count pointer, the
+ * held id is read by pointer arithmetic on viewer.unk38, each list case
+ * sets the kind after its call and the two file numbers in its own
+ * order, and the navigation cases follow the cursor's path. Each loop
+ * family has its own counter (i, k, the preview's j), and the picked
+ * index its own int (sel, at). The grid's down step tests the row
+ * against 1, as retail does.
  */
 ADDRESS(0x8005ad00, 0x1afc)
 void func_8005ad00(void)
@@ -831,21 +838,24 @@ void func_8005ad00(void)
     DVECTOR unused2;
     CdlLOC loc;
     u_long *p;
-    s16 *slot;
-    s16 base;
-    s16 offset;
+    StArchive *arc;
+    int base;
+    int offset;
     int file;
     int debounce;
     int prev;
     int row;
     u16 cur;
-    u8 kind;
     int n;
     int i;
+    int k;
+    int held;
+    int sel;
 
     base = 0;
     offset = 0;
-    func_80015a94(&cd_state.unkA00.file.pos, cd_state.unkA00.sectors[1], &loc);
+    arc = &cd_state.unkA00;
+    func_80015a94(&arc->file.pos, arc->sectors[1], &loc);
     CdControl(CdlSetloc, (u_char *)&loc, NULL);
     ResetGraph(1);
     func_8005aa80();
@@ -854,14 +864,14 @@ void func_8005ad00(void)
     p = CD_BUFFER;
     func_80016030(3, 1, p);
     func_80014cfc((u32 *)&menu_messages, (u32 *)(p + 1), 5376);
-    p = (u_long *)((u8 *)p + (CD_BUFFER[0] + 4));
+    p = (u_long *)((u8 *)p + (*p + 4));
     func_8003ec5c(p + 1, &sp->unk2E6[0], &sp->unk2E6[1], 1);
     p = (u_long *)((u8 *)p + (*p + 4));
     func_80014cfc(sp->unk2D0, (u32 *)(p + 1), 36);
     p = CD_BUFFER;
     func_80016030(3, 4, p);
     func_80014cfc((u32 *)sp->unk2CC, (u32 *)(p + 1), 5376);
-    p = (u_long *)((u8 *)p + (CD_BUFFER[0] + 4));
+    p = (u_long *)((u8 *)p + (*p + 4));
     func_8003ec5c(p + 1, &sp->unk2E6[2], &sp->unk2E6[3], 1);
     func_80016030(3, 5, CD_BUFFER);
     func_8003ec5c(CD_BUFFER, &sp->unk2E6[4], NULL, 1);
@@ -889,21 +899,23 @@ void func_8005ad00(void)
     for (i = 0; i < 314; i++) {
         if (DAT_801c7590.counts[i].count == 0 || DAT_801c7590.counts[i].flag)
             continue;
-        kind = vis_table_c.unk0118[i].unk26;
-        if (kind == 0xff)
+        if (vis_table_c.unk0118[i].unk26 == 0xff)
             continue;
-        if (kind == 9) {
-            slot = &sp->unk174[6][sp->unk19C[6]++];
-        } else if (kind == 10) {
-            slot = &sp->unk174[1][sp->unk19C[1]++];
-        } else if (kind == 20 || kind == 30) {
+        if (vis_table_c.unk0118[i].unk26 == 9) {
+            sp->unk174[6][sp->unk19C[6]++] = i;
+        } else if (vis_table_c.unk0118[i].unk26 == 10) {
+            sp->unk174[1][sp->unk19C[1]++] = i;
+        } else if (vis_table_c.unk0118[i].unk26 == 20 || vis_table_c.unk0118[i].unk26 == 30) {
             if (i == 266 || i == 310 || i == 311 || i == 312 || i == 313)
                 continue;
-            slot = &sp->unk174[9][sp->unk19C[9]++];
+            sp->unk174[9][sp->unk19C[9]++] = i;
         } else {
-            slot = &sp->unk174[kind][sp->unk19C[kind]++];
+            {
+            s16 *list = sp->unk174[vis_table_c.unk0118[i].unk26];
+            s16 *len = &sp->unk19C[vis_table_c.unk0118[i].unk26];
+            list[(*len)++] = i;
+            }
         }
-        *slot = i;
     }
     func_80031cfc();
     DrawSync(0);
@@ -922,11 +934,12 @@ void func_8005ad00(void)
     sp->unk2DA = viewer.unk6;
     func_8005a3a8(0);
     func_80057a3c();
+    DAT_800881aa = 0;
     {
         RECT clear = {640, 0, 384, 256};
         int slots[20] = {3, 4, 8, 9, 2, 10, 16, 17, 0, 13, 1, 14, 7, 5, 11, 18, 19, 20, 6, 12};
+        int j;
 
-        DAT_800881aa = 0;
         ClearImage(&clear, 0, 0, 0);
         DrawSync(0);
         DAT_80088192 = 0;
@@ -934,14 +947,14 @@ void func_8005ad00(void)
         func_8002fc4c();
         func_80059204(slots[0]);
         func_8002fc4c();
-        for (i = 1; i < 20; i++) {
+        for (j = 1; j < 20; j++) {
             if ((viewer.unk38[3] == 0xffff || vis_table_c.unk0118[viewer.unk38[3]].unk26 != 9
-                 || slots[i] != 16)
+                 || slots[j] != 16)
                 && (viewer.unk38[4] == 0xffff || vis_table_c.unk0118[viewer.unk38[4]].unk26 != 9
-                    || slots[i] != 17)
+                    || slots[j] != 17)
                 && (viewer.unk38[9] == 0xffff || vis_table_c.unk0118[viewer.unk38[9]].unk26 != 10
-                    || (slots[i] != 2 && slots[i] != 10 && slots[i] != 15))) {
-                func_80059204(slots[i]);
+                    || (slots[j] != 2 && slots[j] != 10 && slots[j] != 15))) {
+                func_80059204(slots[j]);
                 func_8002fc4c();
                 func_80057d10();
             }
@@ -975,111 +988,112 @@ void func_8005ad00(void)
             if (DAT_801cd180.unk4 & 0x4000) {
                 DAT_801cd180.unk4 = 0;
                 sp->unk2DC = 2;
-                if (sp->unk2E0 == 16)
-                    cur = viewer.unk38[2];
-                else if (sp->unk2E0 < 10)
-                    cur = viewer.unk38[sp->unk2E0];
+                held = sp->unk2E0;
+                if (held == 16)
+                    cur = *(viewer.unk38 + 2);
+                else if (held < 10)
+                    cur = *(viewer.unk38 + held);
                 else
-                    cur = viewer.unk38[sp->unk2E0 - 1];
+                    cur = *(viewer.unk38 + held - 1);
                 sp->unk2C2 = 0;
                 switch (sp->unk2E0) {
                 case 3:
                 case 4:
                     n = sp->unk19C[6];
-                    for (i = 0; i < n; i++) {
-                        if ((sp->unk2E0 == 3 && sp->unk174[6][i] != viewer.unk38[4])
-                            || (sp->unk2E0 == 4 && sp->unk174[6][i] != viewer.unk38[3]))
-                            sp->unk1B0[sp->unk2C2++] = sp->unk174[6][i];
+                    for (k = 0; k < n; k++) {
+                        if ((sp->unk2E0 == 3 && sp->unk174[6][k] != viewer.unk38[4])
+                            || (sp->unk2E0 == 4 && sp->unk174[6][k] != viewer.unk38[3]))
+                            sp->unk1B0[sp->unk2C2++] = sp->unk174[6][k];
                     }
-                    base = 0;
                     func_80057cc8();
                     sp->unk2C7 = 6;
+                    base = 0;
                     offset = 1;
                     break;
                 case 17:
                 case 18:
                     n = sp->unk19C[7];
-                    for (i = 0; i < n; i++) {
-                        if ((sp->unk2E0 == 17 && sp->unk174[7][i] != viewer.unk38[17])
-                            || (sp->unk2E0 == 18 && sp->unk174[7][i] != viewer.unk38[16]))
-                            sp->unk1B0[sp->unk2C2++] = sp->unk174[7][i];
+                    for (k = 0; k < n; k++) {
+                        if ((sp->unk2E0 == 17 && sp->unk174[7][k] != viewer.unk38[17])
+                            || (sp->unk2E0 == 18 && sp->unk174[7][k] != viewer.unk38[16]))
+                            sp->unk1B0[sp->unk2C2++] = sp->unk174[7][k];
                     }
-                    base = 166;
                     func_80057cc8();
                     sp->unk2C7 = 7;
+                    base = 166;
                     offset = 6;
                     break;
                 case 8:
                     n = sp->unk19C[0];
-                    for (i = 0; i < n; i++)
-                        sp->unk1B0[sp->unk2C2++] = sp->unk174[0][i];
-                    base = 72;
+                    for (k = 0; k < n; k++)
+                        sp->unk1B0[sp->unk2C2++] = sp->unk174[0][k];
                     func_80057cc8();
                     sp->unk2C7 = 0;
+                    base = 72;
                     offset = 2;
                     break;
                 case 9:
                 case 10:
                     n = sp->unk19C[1];
-                    for (i = 0; i < n; i++)
-                        sp->unk1B0[sp->unk2C2++] = sp->unk174[1][i];
-                    offset = 3;
+                    for (k = 0; k < n; k++)
+                        sp->unk1B0[sp->unk2C2++] = sp->unk174[1][k];
                     func_80057cc8();
                     sp->unk2C7 = 1;
+                    offset = 3;
                     base = 93;
                     break;
                 case 2:
                 case 16:
                     n = sp->unk19C[2];
-                    for (i = 0; i < n; i++)
-                        sp->unk1B0[sp->unk2C2++] = sp->unk174[2][i];
-                    offset = 4;
+                    for (k = 0; k < n; k++)
+                        sp->unk1B0[sp->unk2C2++] = sp->unk174[2][k];
                     func_80057cc8();
                     sp->unk2C7 = 2;
+                    offset = 4;
                     base = 124;
                     break;
                 case 11:
                     n = sp->unk19C[3];
-                    for (i = 0; i < n; i++)
-                        sp->unk1B0[sp->unk2C2++] = sp->unk174[3][i];
-                    offset = 5;
+                    for (k = 0; k < n; k++)
+                        sp->unk1B0[sp->unk2C2++] = sp->unk174[3][k];
                     func_80057cc8();
                     sp->unk2C7 = 3;
+                    offset = 5;
                     base = 145;
                     break;
                 case 0:
                 case 14:
                     n = sp->unk19C[4];
-                    for (i = 0; i < n; i++) {
-                        if ((sp->unk2E0 == 0 && sp->unk174[4][i] != viewer.unk38[13])
-                            || (sp->unk2E0 == 14 && sp->unk174[4][i] != viewer.unk38[0]))
-                            sp->unk1B0[sp->unk2C2++] = sp->unk174[4][i];
+                    for (k = 0; k < n; k++) {
+                        if ((sp->unk2E0 == 0 && sp->unk174[4][k] != viewer.unk38[13])
+                            || (sp->unk2E0 == 14 && sp->unk174[4][k] != viewer.unk38[0]))
+                            sp->unk1B0[sp->unk2C2++] = sp->unk174[4][k];
                     }
-                    offset = 7;
                     func_80057cc8();
                     sp->unk2C7 = 4;
+                    offset = 7;
                     base = 202;
                     break;
                 case 1:
                 case 15:
                     n = sp->unk19C[8];
-                    for (i = 0; i < n; i++) {
-                        if ((sp->unk2E0 == 1 && sp->unk174[8][i] != viewer.unk38[14])
-                            || (sp->unk2E0 == 15 && sp->unk174[8][i] != viewer.unk38[1]))
-                            sp->unk1B0[sp->unk2C2++] = sp->unk174[8][i];
+                    for (k = 0; k < n; k++) {
+                        if ((sp->unk2E0 == 1 && sp->unk174[8][k] != viewer.unk38[14])
+                            || (sp->unk2E0 == 15 && sp->unk174[8][k] != viewer.unk38[1]))
+                            sp->unk1B0[sp->unk2C2++] = sp->unk174[8][k];
                     }
-                    offset = 8;
                     func_80057cc8();
                     sp->unk2C7 = 8;
+                    offset = 8;
                     base = 238;
                     break;
                 case 7:
                     n = sp->unk19C[5];
-                    for (i = 0; i < n; i++)
-                        sp->unk1B0[sp->unk2C2++] = sp->unk174[5][i];
-                    offset = 9;
+                    for (k = 0; k < n; k++)
+                        sp->unk1B0[sp->unk2C2++] = sp->unk174[5][k];
                     func_80057cc8();
                     sp->unk2C7 = 5;
+                    offset = 9;
                     base = 259;
                     break;
                 case 5:
@@ -1088,36 +1102,38 @@ void func_8005ad00(void)
                 case 20:
                 case 21:
                     n = sp->unk19C[9];
-                    for (i = 0; i < n; i++) {
-                        if ((sp->unk174[9][i] != viewer.unk38[5] && sp->unk174[9][i] != viewer.unk38[19]
-                             && sp->unk174[9][i] != viewer.unk38[11]
-                             && sp->unk174[9][i] != viewer.unk38[20]
-                             && sp->unk174[9][i] != viewer.unk38[18])
-                            || (sp->unk2E0 == 5 && sp->unk174[9][i] == viewer.unk38[5])
-                            || (sp->unk2E0 == 20 && sp->unk174[9][i] == viewer.unk38[19])
-                            || (sp->unk2E0 == 12 && sp->unk174[9][i] == viewer.unk38[11])
-                            || (sp->unk2E0 == 21 && sp->unk174[9][i] == viewer.unk38[20])
-                            || (sp->unk2E0 == 19 && sp->unk174[9][i] == viewer.unk38[18]))
-                            sp->unk1B0[sp->unk2C2++] = sp->unk174[9][i];
+                    for (k = 0; k < n; k++) {
+                        if ((sp->unk174[9][k] != viewer.unk38[5] && sp->unk174[9][k] != viewer.unk38[19]
+                             && sp->unk174[9][k] != viewer.unk38[11]
+                             && sp->unk174[9][k] != viewer.unk38[20]
+                             && sp->unk174[9][k] != viewer.unk38[18])
+                            || (sp->unk2E0 == 5 && sp->unk174[9][k] == viewer.unk38[5])
+                            || (sp->unk2E0 == 20 && sp->unk174[9][k] == viewer.unk38[19])
+                            || (sp->unk2E0 == 12 && sp->unk174[9][k] == viewer.unk38[11])
+                            || (sp->unk2E0 == 21 && sp->unk174[9][k] == viewer.unk38[20])
+                            || (sp->unk2E0 == 19 && sp->unk174[9][k] == viewer.unk38[18]))
+                            sp->unk1B0[sp->unk2C2++] = sp->unk174[9][k];
                     }
-                    offset = 10;
                     func_80057cc8();
                     sp->unk2C7 = 9;
+                    offset = 10;
                     base = 275;
                     break;
                 case 6:
                 case 13:
-                    if ((sp->unk2E0 != 6 || viewer.unk38[0] == 0xffff)
-                        && (sp->unk2E0 != 13 || viewer.unk38[13] == 0xffff)) {
+                    if ((sp->unk2E0 == 6 && viewer.unk38[0] != 0xffff)
+                        || (sp->unk2E0 == 13 && viewer.unk38[13] != 0xffff)) {
+                        func_80057cc8();
+                    } else {
                         func_80057d34();
                         sp->unk2DC = 1;
                         goto next;
                     }
-                    func_80057cc8();
                     sp->unk2C7 = 10;
-                    sp->unk2BE = cur;
                     if (cur == 0xffff)
                         sp->unk2BE = 0;
+                    else
+                        sp->unk2BE = cur;
                     offset = 977;
                     base = 976;
                     sp->unk2C0 = sp->unk2BE;
@@ -1131,10 +1147,10 @@ void func_8005ad00(void)
                 if (sp->unk2C7 == 10) {
                     sp->unk358.vx = 640;
                     sp->unk358.vy = 0;
-                    cur = viewer.unk38[13];
                     if (sp->unk2E0 == 6)
-                        cur = viewer.unk38[0];
-                    sp->unk2D4 = sp->unk2D0 + cur - 196;
+                        sp->unk2D4 = sp->unk2D0 + (viewer.unk38[0] - 196);
+                    else
+                        sp->unk2D4 = sp->unk2D0 + (viewer.unk38[13] - 196);
                     func_80016030(7, 975, CD_BUFFER);
                     func_8003ec5c(CD_BUFFER, &sp->unk358, NULL, 1);
                     func_80016030(7, sp->unk2BE + 995, CD_BUFFER);
@@ -1150,11 +1166,12 @@ void func_8005ad00(void)
                             }
                         }
                     }
-                    if (sp->unk2BE == -1) {
-                        sp->unk2C0 = sp->unk2BE;
+                    sel = sp->unk2BE;
+                    if (sel == -1) {
+                        sp->unk2C0 = sel;
                         file = base;
                     } else {
-                        sp->unk2C0 = sp->unk1B0[sp->unk2BE];
+                        sp->unk2C0 = sp->unk1B0[sel];
                         file = sp->unk2C0 + offset;
                     }
                     func_80016030(7, file * 3, CD_BUFFER);
@@ -1173,23 +1190,23 @@ void func_8005ad00(void)
                 case 0:
                     sp->unk2E0 = 6;
                     break;
-                case 5:
-                    sp->unk2E0 = 20;
-                    break;
                 case 6:
                     sp->unk2E0 = 7;
                     break;
                 case 7:
                     sp->unk2E0 = 13;
                     break;
-                case 12:
-                    sp->unk2E0 = 21;
-                    break;
                 case 13:
                     sp->unk2E0 = 14;
                     break;
+                case 5:
+                    sp->unk2E0 = 20;
+                    break;
                 case 20:
                     sp->unk2E0 = 12;
+                    break;
+                case 12:
+                    sp->unk2E0 = 21;
                     break;
                 case 21:
                     sp->unk2E0 = 19;
@@ -1202,29 +1219,29 @@ void func_8005ad00(void)
             } else if (DAT_801cd180.unkC & 0x80) {
                 debounce = 1;
                 switch (sp->unk2E0) {
-                case 6:
-                    sp->unk2E0 = 0;
-                    break;
-                case 7:
-                    sp->unk2E0 = 6;
-                    break;
-                case 12:
-                    sp->unk2E0 = 20;
+                case 14:
+                    sp->unk2E0 = 13;
                     break;
                 case 13:
                     sp->unk2E0 = 7;
                     break;
-                case 14:
-                    sp->unk2E0 = 13;
+                case 7:
+                    sp->unk2E0 = 6;
+                    break;
+                case 6:
+                    sp->unk2E0 = 0;
                     break;
                 case 19:
                     sp->unk2E0 = 21;
                     break;
-                case 20:
-                    sp->unk2E0 = 5;
-                    break;
                 case 21:
                     sp->unk2E0 = 12;
+                    break;
+                case 12:
+                    sp->unk2E0 = 20;
+                    break;
+                case 20:
+                    sp->unk2E0 = 5;
                     break;
                 default:
                     if (sp->unk2E0 > 5)
@@ -1278,12 +1295,15 @@ void func_8005ad00(void)
                 prev = sp->unk2E0;
             }
         } else {
-            row = sp->unk2BE;
             if (sp->unk2C7 != 10) {
                 if (DAT_801cd180.unk4 & 0x4000) {
-                    if (sp->unk2C0 == -1 || vis_table_c.unk0118[sp->unk2C0].unk27 == 0
-                        || vis_table_c.unk0118[sp->unk2C0].unk28 != 0
-                        || vis_table_c.unk0118[sp->unk2C0].unk26 == 4) {
+                    sel = sp->unk2C0;
+                    if (sel != -1 && vis_table_c.unk0118[sel].unk27 != 0
+                        && vis_table_c.unk0118[sel].unk28 == 0
+                        && vis_table_c.unk0118[sel].unk26 != 4) {
+                        func_80057d34();
+                        DAT_801cd180.unk4 = 0;
+                    } else {
                         func_80057cc8();
                         func_8005975c(1);
                         func_8005a3a8(0);
@@ -1293,31 +1313,36 @@ void func_8005ad00(void)
                             viewer.unk6 = viewer.unk4;
                         sp->unk2DC = 1;
                         DAT_801cd180.unk4 = 0;
-                    } else {
-                        func_80057d34();
-                        DAT_801cd180.unk4 = 0;
                     }
                 } else if (DAT_801cd180.unkC & 0x20) {
                     func_80057d10();
-                    if (sp->unk2BE++ < sp->unk2C2 - 1) {
+                    if (sp->unk2BE < sp->unk2C2 - 1) {
+                        sp->unk2BE++;
                         sp->unk2C0 = sp->unk1B0[sp->unk2BE];
                     } else {
-                        sp->unk2C0 = -1;
                         sp->unk2BE = -1;
+                        sp->unk2C0 = -1;
                     }
                 } else if (DAT_801cd180.unkC & 0x80) {
                     func_80057d10();
-                    if (sp->unk2BE < 0)
-                        sp->unk2BE = sp->unk2C2;
-                    sp->unk2BE--;
-                    sp->unk2C0 = sp->unk2BE;
-                    if (sp->unk2BE != -1)
-                        sp->unk2C0 = sp->unk1B0[sp->unk2BE];
+                    if (sp->unk2BE >= 0)
+                        sp->unk2BE--;
+                    else
+                        sp->unk2BE = sp->unk2C2 - 1;
+                    {
+                        int at = sp->unk2BE;
+
+                        if (at == -1)
+                            sp->unk2C0 = at;
+                        else
+                            sp->unk2C0 = sp->unk1B0[at];
+                    }
                 }
                 if (DAT_801cd180.unkC & 0xa0) {
                     debounce = 3;
-                    file = base;
-                    if (sp->unk2BE != -1)
+                    if (sp->unk2BE == -1)
+                        file = base;
+                    else
                         file = sp->unk2C0 + offset;
                     func_80016030(7, file * 3, CD_BUFFER);
                     func_8003ec5c(CD_BUFFER, &sp->unk0.vram[0], &sp->unk0.vram[1], 1);
@@ -1327,6 +1352,7 @@ void func_8005ad00(void)
                     DAT_801cd180.unkC = 0;
                 }
             } else {
+                row = sp->unk2BE;
                 if (DAT_801cd180.unkC & 0x20) {
                     debounce = 1;
                     func_80057d10();
@@ -1349,31 +1375,30 @@ void func_8005ad00(void)
                     debounce = 1;
                     func_80057d10();
                     DAT_801cd180.unkC = 0;
-                    if (sp->unk2BE % 3 != 2)
+                    if (sp->unk2BE % 3 != 1)
                         sp->unk2BE++;
                 } else if (DAT_801cd180.unk4 & 0x4000) {
                     DAT_801cd180.unk4 = 0;
                     if (*sp->unk2D4 & (1 << sp->unk2BE)) {
                         func_80057cc8();
-                        sp->unk33C.w = 48;
-                        sp->unk33C.h = 24;
                         sp->unk33C.x = (s16)(sp->unk2BE / 3) * 48 + 640;
                         sp->unk33C.y = (s16)(sp->unk2BE % 3) * 24;
+                        sp->unk33C.w = 48;
+                        sp->unk33C.h = 24;
                         if (sp->unk2E0 == 6) {
-                            n = 740;
                             viewer.unk38[6] = sp->unk2BE;
+                            MoveImage(&sp->unk33C, 740, 124);
                         } else {
-                            n = 788;
                             viewer.unk38[12] = sp->unk2BE;
+                            MoveImage(&sp->unk33C, 788, 124);
                         }
-                        MoveImage(&sp->unk33C, n, 124);
                         sp->unk2DC = 1;
                         func_8005a3a8(0);
                     } else {
                         func_80057d34();
                     }
                 }
-                if (sp->unk2BE != row) {
+                if (row != sp->unk2BE) {
                     func_80016030(7, sp->unk2BE + 995, CD_BUFFER);
                     func_8003ec5c(CD_BUFFER, &sp->unk0.vram[0], &sp->unk0.vram[1], 1);
                     sp->unk2C0 = sp->unk2BE;
@@ -1423,9 +1448,10 @@ void func_8005ad00(void)
  * three rows shown with their pictures, and shows the detail page of the
  * confirmed one (func_80030ab8 draws the page).
  *
- * Not exact (4 bytes long): register allocation differs from the bit
- * scan on (retail keeps the bit index in $s1, which later holds the row
- * count).
+ * The detail load is skipped for the id in `shown`, which starts as -1
+ * and is never updated here (func_8005f54c's shop screens keep theirs
+ * current): a call-crossing variable with no saved register left, so
+ * retail rematerialises the -1 in the reload register at the test.
  */
 ADDRESS(0x8005c7fc, 0xa60)
 void func_8005c7fc(void)
@@ -1442,11 +1468,11 @@ void func_8005c7fc(void)
     int col;
     int row;
     int first;
+    int shown = -1;
     int used;
-    int size;
+
     int n;
     int i;
-    int k;
 
     func_80058cc8();
     sp->unk0.store.messages = func_800152d0(21504);
@@ -1485,9 +1511,9 @@ void func_8005c7fc(void)
     sp->unk0.store.image.vy = 0;
     sp->unk0.store.kinds = func_800152d0(151);
     sp->unk0.store.count = 0;
+    n = 0;
     bits = DAT_801cceb0[0];
     bit = 1;
-    n = 0;
     for (i = 0; i < 151; i++) {
         if (n == 32) {
             n = 0;
@@ -1507,12 +1533,12 @@ void func_8005c7fc(void)
     p = CD_BUFFER;
     func_80016030(3, 1, p);
     func_80014cfc((u32 *)&menu_messages, (u32 *)(p + 1), 5376);
-    p = (u_long *)((u8 *)p + (CD_BUFFER[0] + 4));
+    p = (u_long *)((u8 *)p + (*p + 4));
     func_8003ec5c(p + 1, &sp->unk2E6[0], &sp->unk2E6[1], 1);
     p = CD_BUFFER;
     func_80016030(3, 2, p);
     func_80014cfc((u32 *)sp->unk0.store.messages, (u32 *)(p + 1), 5376);
-    p = (u_long *)((u8 *)p + (CD_BUFFER[0] + 4));
+    p = (u_long *)((u8 *)p + (*p + 4));
     func_8003ec5c(p + 1, &sp->unk2E6[2], &sp->unk2E6[3], 1);
     func_80016030(3, 5, CD_BUFFER);
     func_8003ec5c(CD_BUFFER, &sp->unk2E6[4], NULL, 1);
@@ -1528,17 +1554,21 @@ void func_8005c7fc(void)
         n = sp->unk0.store.count;
     used = 0;
     for (i = 0; i < n; i++) {
-        k = sp->unk2E2 * 5 + i;
+        int k = sp->unk2E2 * 5 + i;
+
         if (k < sp->unk0.store.count) {
             if (used + 0x2800 > 0x12000) {
                 DrawSync(0);
                 cd_state.unkA84 = CD_BUFFER;
                 used = 0;
             }
-            size = func_80016030(4, sp->unk0.store.kinds[k], cd_state.unkA84);
-            func_8003ec5c(cd_state.unkA84, &sp->unk0.store.tex[k % 15], NULL, 1);
-            used += size << 11;
-            cd_state.unkA84 = (u_long *)((u8 *)cd_state.unkA84 + (size << 11));
+            {
+                int size = func_80016030(4, sp->unk0.store.kinds[k], cd_state.unkA84) << 11;
+
+                func_8003ec5c(cd_state.unkA84, &sp->unk0.store.tex[k % 15], NULL, 1);
+                used += size;
+                cd_state.unkA84 = (u_long *)((u8 *)cd_state.unkA84 + size);
+            }
         }
     }
     func_80031cfc();
@@ -1555,13 +1585,7 @@ void func_8005c7fc(void)
             if (DAT_801cd180.unk4 & 0x2000) {
                 func_80057cec();
                 DAT_801cd180.unk4 = 0;
-                func_800152f8(sp->unk0.store.messages);
-                func_800152f8(sp->unk0.store.kinds);
-                func_800152f8(sp->unk0.store.items);
-                func_80058c4c();
-                func_80058d30();
-                func_80057a3c();
-                return;
+                break;
             }
             if (DAT_801cd180.unkC & 0x20) {
                 func_80057d10();
@@ -1621,42 +1645,52 @@ void func_8005c7fc(void)
                 }
             }
             if (DAT_801cd180.unk4 & 0x5000) {
+                int k;
+
                 func_80057cc8();
                 DAT_801cd180.unk4 = 0;
                 k = sp->unk2E2 * 5 + sp->unk2E0;
                 if (k < sp->unk0.store.count) {
-                    if (k != -1) {
-                        p = CD_BUFFER;
+                    if (k != shown) {
+                        u_long *p = CD_BUFFER;
+
+
                         func_80016030(4, sp->unk0.store.kinds[k] + 200, p);
                         func_8003ec5c(p + 1, &sp->unk0.store.image, NULL, 1);
-                        p = (u_long *)((u8 *)p + (CD_BUFFER[0] + 4));
+                        p = (u_long *)((u8 *)p + (*p + 4));
                         func_8003ec5c(p + 1, &detail, &detail_clut, 1);
                     }
                     sp->unk2DC = 2;
                 }
             }
             if (sp->unk2E2 != first) {
+                int count;
+                int k;
+
                 if (first < sp->unk2E2) {
-                    n = sp->unk2E2 - first;
-                    k = first + 3;
+                    count = (sp->unk2E2 - first) * 5;
+                    k = (first + 3) * 5;
                 } else {
-                    n = first - sp->unk2E2;
-                    k = sp->unk2E2;
+                    count = (first - sp->unk2E2) * 5;
+                    k = sp->unk2E2 * 5;
                 }
-                k *= 5;
                 cd_state.unkA84 = CD_BUFFER;
                 used = 0;
-                for (i = 0; i < n * 5; i++, k++) {
+                for (i = 0; i < count; i++, k++) {
                     if (k < sp->unk0.store.count) {
                         if (used + 0x2800 > 0x12000) {
                             DrawSync(0);
                             cd_state.unkA84 = CD_BUFFER;
                             used = 0;
                         }
-                        size = func_80016030(4, sp->unk0.store.kinds[k], cd_state.unkA84);
-                        func_8003ec5c(cd_state.unkA84, &sp->unk0.store.tex[k % 15], NULL, 1);
-                        used += size << 11;
-                        cd_state.unkA84 = (u_long *)((u8 *)cd_state.unkA84 + (size << 11));
+                        {
+                            int size =
+                                func_80016030(4, sp->unk0.store.kinds[k], cd_state.unkA84) << 11;
+
+                            func_8003ec5c(cd_state.unkA84, &sp->unk0.store.tex[k % 15], NULL, 1);
+                            used += size;
+                            cd_state.unkA84 = (u_long *)((u8 *)cd_state.unkA84 + size);
+                        }
                     }
                 }
             }
@@ -1669,6 +1703,12 @@ void func_8005c7fc(void)
         func_80030ab8();
         sp->unk2E4 = (sp->unk2E4 + 1) % 32;
     }
+    func_800152f8(sp->unk0.store.messages);
+    func_800152f8(sp->unk0.store.kinds);
+    func_800152f8(sp->unk0.store.items);
+    func_80058c4c();
+    func_80058d30();
+    func_80057a3c();
 }
 
 /*
@@ -1677,8 +1717,22 @@ void func_8005c7fc(void)
  * twice moves its item to the first free entry of the other list. Leaving
  * writes the flag bits back.
  *
- * Not exact (0x14 bytes long): register allocation and the order of
- * the cell loads differ from the first CD load on.
+ * Not exact (0x64 bytes short); the first 365 instructions agree. Agreed
+ * with retail so far: the file cursor and its (*p + 4) advance, the
+ * plain `i / 4`, `i % 4` cell positions, the first image loop (the load
+ * written in both arms, sizes as block-local shifted values, the counter
+ * zeroed before the byte count) and the cleanup behind the loop's
+ * `break`. Open: from the first image loop on four saved registers are
+ * rotated (retail: n $s3, the cd_state base $s4, the tex offset $s5,
+ * used $s6; here used $s3, n $s4, base $s5, offset $s6), and the cell
+ * moves of the main loop are still first-pass code: retail converts the
+ * found index and the cell index to s16 once each and keeps both the
+ * value and its shifted form ($t0/$t1, $a0/$a3) for the % 20 that
+ * follows, compares and stores the -1 from a hoisted register ($s8) and
+ * multiplies by a hoisted 0x66666667 ($s7). Those two extra temporaries
+ * are why retail's reload register is $t2 and this build's $t1.
+ * `shown` and the saved row live on the stack in retail (128(sp),
+ * 120(sp)).
  */
 ADDRESS(0x8005d25c, 0x16c8)
 void func_8005d25c(void)
@@ -1697,8 +1751,8 @@ void func_8005d25c(void)
     s16 shown;
     s16 n;
     s16 id;
+    u_long *p;
     int used;
-    int size;
     int col;
     int row;
     int i;
@@ -1707,19 +1761,21 @@ void func_8005d25c(void)
 
     func_80058cc8();
     sp->unk0.grid.messages = func_800152d0(21504);
-    func_80016030(3, 1, CD_BUFFER);
-    func_80014cfc((u32 *)&menu_messages, (u32 *)(CD_BUFFER + 1), 5376);
-    func_8003ec5c((u_long *)((u8 *)CD_BUFFER + (CD_BUFFER[0] + 4)) + 1, &sp->unk2E6[0],
-                  &sp->unk2E6[1], 1);
-    func_80016030(3, 4, CD_BUFFER);
-    func_80014cfc((u32 *)sp->unk0.grid.messages, (u32 *)(CD_BUFFER + 1), 5376);
-    func_8003ec5c((u_long *)((u8 *)CD_BUFFER + (CD_BUFFER[0] + 4)) + 1, &sp->unk2E6[2],
-                  &sp->unk2E6[3], 1);
-    func_80016030(3, 5, CD_BUFFER);
-    func_8003ec5c(CD_BUFFER, &sp->unk2E6[4], NULL, 1);
+    p = DAT_80088c88;
+    func_80016030(3, 1, p);
+    func_80014cfc((u32 *)&menu_messages, (u32 *)(p + 1), 5376);
+    p = (u_long *)((u8 *)p + (*p + 4));
+    func_8003ec5c(p + 1, &sp->unk2E6[0], &sp->unk2E6[1], 1);
+    p = DAT_80088c88;
+    func_80016030(3, 4, p);
+    func_80014cfc((u32 *)sp->unk0.grid.messages, (u32 *)(p + 1), 5376);
+    p = (u_long *)((u8 *)p + (*p + 4));
+    func_8003ec5c(p + 1, &sp->unk2E6[2], &sp->unk2E6[3], 1);
+    func_80016030(3, 5, DAT_80088c88);
+    func_8003ec5c(DAT_80088c88, &sp->unk2E6[4], NULL, 1);
     DrawSync(0);
-    func_80016030(3, 7, CD_BUFFER);
-    func_8003ec5c(CD_BUFFER, &image, &clut, 1);
+    func_80016030(3, 7, DAT_80088c88);
+    func_8003ec5c(DAT_80088c88, &image, &clut, 1);
     DrawSync(0);
     sp->unk0.grid.count0 = 0;
     sp->unk0.grid.count1 = 0;
@@ -1740,55 +1796,61 @@ void func_8005d25c(void)
             && i != viewer.unk38[13] && i != viewer.unk38[14] && i != viewer.unk38[15]
             && i != viewer.unk38[16] && i != viewer.unk38[17] && i != viewer.unk38[18]
             && i != viewer.unk38[19] && i != viewer.unk38[20]) {
-            if (DAT_801c7590.counts[i].flag)
-                sp->unk0.grid.ids1[sp->unk0.grid.count1++] = i;
-            else
+            if (!DAT_801c7590.counts[i].flag)
                 sp->unk0.grid.ids0[sp->unk0.grid.count0++] = i;
+            else
+                sp->unk0.grid.ids1[sp->unk0.grid.count1++] = i;
         }
     }
     sp->unk0.grid.tex = func_800152d0(160);
     if (sp->unk0.grid.tex == NULL)
         exit(1);
     for (i = 0; i < 20; i++) {
-        sp->unk0.grid.tex[i].vx = (s16)(i / 4) * 56 + 640;
-        sp->unk0.grid.tex[i].vy = ((s16)i - (s16)(i / 4) * 4) * 28 + 124;
+        sp->unk0.grid.tex[i].vx = i / 4 * 56 + 640;
+        sp->unk0.grid.tex[i].vy = i % 4 * 28 + 124;
     }
-    for (i = 20, n = 0; i < 29; i++, n += 28) {
-        sp->unk0.grid.tex[i].vx = 960;
-        sp->unk0.grid.tex[i].vy = n;
+    {
+        int y;
+
+        for (i = 20, y = 0; i < 29; i++, y += 28) {
+            sp->unk0.grid.tex[i].vx = 960;
+            sp->unk0.grid.tex[i].vy = y;
+        }
     }
     for (i = 29; i < 40; i++) {
-        k = i - 29;
-        sp->unk0.grid.tex[i].vx = (s16)(k / 9) * 56 + 640;
-        sp->unk0.grid.tex[i].vy = ((s16)k - (s16)(k / 9) * 9) * 28 + 256;
+        sp->unk0.grid.tex[i].vx = (i - 29) / 9 * 56 + 640;
+        sp->unk0.grid.tex[i].vy = (i - 29) % 9 * 28 + 256;
     }
+    i = 0;
     used = 0;
     clear.w = 56;
     clear.h = 28;
     cd_state.unkA84 = CD_BUFFER;
-    for (i = 0, n = 40; n--; i++) {
+    for (n = 40; n--; i++) {
         if (used + 0x1000 > 0x12000) {
             DrawSync(0);
             cd_state.unkA84 = CD_BUFFER;
             used = 0;
         }
-        if (i < 20) {
-            if (i < sp->unk0.grid.count0) {
-                id = sp->unk0.grid.ids0[i];
-                goto load;
-            }
-        } else if (i - 20 < sp->unk0.grid.count1) {
-            id = sp->unk0.grid.ids1[i - 20];
-        load:
-            size = func_80016030(6, vis_table_c.unk0118[id].unk5[0], cd_state.unkA84);
+        if (i < 20 && i < sp->unk0.grid.count0) {
+            int size = func_80016030(6, vis_table_c.unk0118[sp->unk0.grid.ids0[i]].unk5[0],
+                                     cd_state.unkA84) << 11;
+
             func_8003ec5c(cd_state.unkA84, &sp->unk0.grid.tex[i], NULL, 1);
-            used += size << 11;
-            cd_state.unkA84 = (u_long *)((u8 *)cd_state.unkA84 + (size << 11));
-            continue;
+            used += size;
+            cd_state.unkA84 = (u_long *)((u8 *)cd_state.unkA84 + size);
+        } else if (i >= 20 && i - 20 < sp->unk0.grid.count1) {
+            int size = func_80016030(6, vis_table_c.unk0118[sp->unk0.grid.ids1[i - 20]].unk5[0],
+                                     cd_state.unkA84) << 11;
+
+            func_8003ec5c(cd_state.unkA84, &sp->unk0.grid.tex[i], NULL, 1);
+            used += size;
+            cd_state.unkA84 = (u_long *)((u8 *)cd_state.unkA84 + size);
+        } else {
+            clear.x = sp->unk0.grid.tex[i].vx;
+            clear.y = sp->unk0.grid.tex[i].vy;
+            ClearImage(&clear, 0, 0, 0);
         }
-        clear.x = sp->unk0.grid.tex[i].vx;
-        clear.y = sp->unk0.grid.tex[i].vy;
-        ClearImage(&clear, 0, 0, 0);
     }
     shown = -1;
     sp->unk2E0 = 0;
@@ -1810,26 +1872,7 @@ void func_8005d25c(void)
             } else if (sp->unk2DC == 2) {
                 sp->unk2DC = 1;
             } else {
-                for (i = 0, n = sp->unk0.grid.count0; n != 0; i++) {
-                    if (sp->unk0.grid.ids0[i] != -1) {
-                        n--;
-                        DAT_801c7590.counts[sp->unk0.grid.ids0[i]].flag = 0;
-                    }
-                }
-                for (i = 0, n = sp->unk0.grid.count1; n != 0; i++) {
-                    if (sp->unk0.grid.ids1[i] != -1) {
-                        n--;
-                        DAT_801c7590.counts[sp->unk0.grid.ids1[i]].flag = 1;
-                    }
-                }
-                func_80058c4c();
-                func_800152f8(sp->unk0.grid.ids0);
-                func_800152f8(sp->unk0.grid.ids1);
-                func_800152f8(sp->unk0.grid.tex);
-                func_800152f8(sp->unk0.grid.messages);
-                func_80058d30();
-                func_80057a3c();
-                return;
+                break;
             }
         }
         if (DAT_801cd180.unk4 & 0x4000) {
@@ -1992,8 +2035,8 @@ void func_8005d25c(void)
                     id = sp->unk0.grid.ids1[sp->unk0.grid.row1 * 4 + row * 4 + col - 4];
                 if (shown != id && id != -1) {
                     shown = id;
-                    func_80016030(6, vis_table_c.unk0118[id].unk5[0] + 200, CD_BUFFER);
-                    func_8003ec5c(CD_BUFFER, &picture, NULL, 1);
+                    func_80016030(6, vis_table_c.unk0118[id].unk5[0] + 200, DAT_80088c88);
+                    func_8003ec5c(DAT_80088c88, &picture, NULL, 1);
                 }
             }
             if (sp->unk0.grid.row0 != r0) {
@@ -2019,11 +2062,12 @@ void func_8005d25c(void)
                         clear.y = sp->unk0.grid.tex[k % 20].vy;
                         ClearImage(&clear, 0, 0, 0);
                     } else {
-                        size = func_80016030(6, vis_table_c.unk0118[sp->unk0.grid.ids0[k]].unk5[0],
-                                             cd_state.unkA84);
+                        int size = func_80016030(
+                            6, vis_table_c.unk0118[sp->unk0.grid.ids0[k]].unk5[0], cd_state.unkA84) << 11;
+
                         func_8003ec5c(cd_state.unkA84, &sp->unk0.grid.tex[k % 20], NULL, 1);
-                        used += size << 11;
-                        cd_state.unkA84 = (u_long *)((u8 *)cd_state.unkA84 + (size << 11));
+                        used += size;
+                        cd_state.unkA84 = (u_long *)((u8 *)cd_state.unkA84 + size);
                     }
                     k++;
                 }
@@ -2051,11 +2095,12 @@ void func_8005d25c(void)
                         clear.y = sp->unk0.grid.tex[k % 20 + 20].vy;
                         ClearImage(&clear, 0, 0, 0);
                     } else {
-                        size = func_80016030(6, vis_table_c.unk0118[sp->unk0.grid.ids1[k]].unk5[0],
-                                             cd_state.unkA84);
+                        int size = func_80016030(
+                            6, vis_table_c.unk0118[sp->unk0.grid.ids1[k]].unk5[0], cd_state.unkA84) << 11;
+
                         func_8003ec5c(cd_state.unkA84, &sp->unk0.grid.tex[k % 20 + 20], NULL, 1);
-                        used += size << 11;
-                        cd_state.unkA84 = (u_long *)((u8 *)cd_state.unkA84 + (size << 11));
+                        used += size;
+                        cd_state.unkA84 = (u_long *)((u8 *)cd_state.unkA84 + size);
                     }
                     k++;
                 }
@@ -2065,6 +2110,25 @@ void func_8005d25c(void)
         func_80031aec();
         sp->unk2E4 = (sp->unk2E4 + 1) % 32;
     }
+    for (i = 0, n = sp->unk0.grid.count0; n != 0; i++) {
+        if (sp->unk0.grid.ids0[i] != -1) {
+            n--;
+            DAT_801c7590.counts[sp->unk0.grid.ids0[i]].flag = 0;
+        }
+    }
+    for (i = 0, n = sp->unk0.grid.count1; n != 0; i++) {
+        if (sp->unk0.grid.ids1[i] != -1) {
+            n--;
+            DAT_801c7590.counts[sp->unk0.grid.ids1[i]].flag = 1;
+        }
+    }
+    func_80058c4c();
+    func_800152f8(sp->unk0.grid.ids0);
+    func_800152f8(sp->unk0.grid.ids1);
+    func_800152f8(sp->unk0.grid.tex);
+    func_800152f8(sp->unk0.grid.messages);
+    func_80058d30();
+    func_80057a3c();
 }
 
 /*
@@ -2380,16 +2444,17 @@ void func_8005f4fc(void)
  * for items 284/285, otherwise the damaged items held to repair for
  * viewer.unk2. Bit 15 is the confirmation step.
  *
- * Not exact: retail's mode & 6 tests read a word, and the count at 266
- * is updated through a halfword container while preserving adjacent bits.
- * The corresponding shared members currently produce narrower accesses.
+ * The trade test is written as two bit tests (fold merges them into one
+ * word-wide read of unk2DC, which is retail's `lw`). The three removals
+ * each close their own list gap and take the same exit, the buy only
+ * when the stock runs out; jump2 merges the tails. The item's record is
+ * indexed through vis_table_c each time, never through a pointer.
  */
 ADDRESS(0x8005f54c, 0xacc)
 void func_8005f54c(void)
 {
     MenuScratch *sp = MENU_SCRATCH;
     DVECTOR pos = {448, 256};
-    Vis44 *rec;
     int shown;
     int done;
     int cost;
@@ -2406,7 +2471,7 @@ void func_8005f54c(void)
             if (DAT_801c7590.unk156[i] != 0 && func_80052d40(DAT_801c7590.unk13A[i]) != 0)
                 sp->unk0.list.ids[sp->unk0.list.count++] = i;
         }
-    } else if (sp->unk2DC & 6) {
+    } else if ((sp->unk2DC & 2) || (sp->unk2DC & 4)) {
         sp->unk0.list.ids = func_800152d0(530);
         sp->unk0.list.count = 0;
         for (i = 0; i < 266; i++) {
@@ -2438,68 +2503,61 @@ void func_8005f54c(void)
             }
             if (DAT_801cd180.unk4 & 0x4000) {
                 DAT_801cd180.unk4 = 0;
-                if (sp->unk0.list.unkA == 1) {
+                if ((s16)sp->unk0.list.unkA == 1) {
                     done = 1;
                     if (sp->unk2DC & 1) {
-                        rec = &vis_table_c.unk0118[DAT_801c7590.unk13A[sp->unk0.list.ids[sp->unk2E2 + sp->unk2E0]]];
-                        if (rec->unk2 > DAT_801c7590.counts[266].count)
-                            goto refuse;
-                        DAT_801c7590.counts[266].count -= rec->unk2;
-                        DAT_801c7590.counts[DAT_801c7590.unk13A[sp->unk0.list.ids[sp->unk2E2 + sp->unk2E0]]].count++;
-                        DAT_801c7590.unk156[sp->unk0.list.ids[sp->unk2E2 + sp->unk2E0]]--;
-                        i = sp->unk2E2 + sp->unk2E0;
-                        if (DAT_801c7590.unk156[sp->unk0.list.ids[i]] != 0)
-                            goto bought;
-                        goto compact_buy_test;
-                    compact_buy:
-                        sp->unk0.list.ids[i] = sp->unk0.list.ids[i + 1];
-                        i++;
-                    compact_buy_test:
-                        if (i < sp->unk0.list.count - 1)
-                            goto compact_buy;
-                    } else if (sp->unk2DC & 6) {
+                        int id = DAT_801c7590.unk13A[sp->unk0.list.ids[sp->unk2E2 + sp->unk2E0]];
+
+                        if (DAT_801c7590.counts[266].count < vis_table_c.unk0118[id].unk2) {
+                            done = 0;
+                            func_80057d34();
+                        } else {
+                            DAT_801c7590.counts[266].count -= vis_table_c.unk0118[id].unk2;
+                            DAT_801c7590.counts[id].count++;
+                            DAT_801c7590.unk156[sp->unk0.list.ids[sp->unk2E2 + sp->unk2E0]]--;
+                            if (DAT_801c7590.unk156[sp->unk0.list.ids[sp->unk2E2 + sp->unk2E0]] == 0) {
+                                for (i = sp->unk2E2 + sp->unk2E0; i < sp->unk0.list.count - 1; i++)
+                                    sp->unk0.list.ids[i] = sp->unk0.list.ids[i + 1];
+                                sp->unk0.list.count--;
+                            }
+                            func_80057cc8();
+                            sp->unk2DC &= ~0x8000;
+                        }
+                    } else if ((sp->unk2DC & 2) || (sp->unk2DC & 4)) {
                         int exchange = 285;
+                        int j;
 
                         if (sp->unk2DC & 2)
                             exchange = 284;
                         DAT_801c7590.counts[sp->unk0.list.ids[sp->unk2E2 + sp->unk2E0]].count--;
                         DAT_801c7590.counts[exchange].count++;
-                        i = sp->unk2E2 + sp->unk2E0;
-                        goto compact_trade_test;
-                    compact_trade:
-                        sp->unk0.list.ids[i] = sp->unk0.list.ids[i + 1];
-                        i++;
-                    compact_trade_test:
-                        if (i < sp->unk0.list.count - 1)
-                            goto compact_trade;
+                        for (j = sp->unk2E2 + sp->unk2E0; j < sp->unk0.list.count - 1; j++)
+                            sp->unk0.list.ids[j] = sp->unk0.list.ids[j + 1];
+                        sp->unk0.list.count--;
+                        func_80057cc8();
+                        sp->unk2DC &= ~0x8000;
                     } else {
-                        rec = &vis_table_c.unk0118[sp->unk0.list.ids[sp->unk2E2 + sp->unk2E0]];
-                        cost = rec->unk3 * 2 / 3 * (rec->unk27 - rec->unk28);
-                        if (rec->unk28 == 0)
+                        int id = sp->unk0.list.ids[sp->unk2E2 + sp->unk2E0];
+                        int j;
+
+                        cost = vis_table_c.unk0118[id].unk3 * 2 / 3
+                            * (vis_table_c.unk0118[id].unk27 - vis_table_c.unk0118[id].unk28);
+                        if (vis_table_c.unk0118[id].unk28 == 0)
                             cost *= 2;
-                        if (cost >= viewer.unk2)
-                            goto refuse;
-                        viewer.unk2 -= cost;
-                        rec->unk28 = rec->unk27;
-                        i = sp->unk2E2 + sp->unk2E0;
-                        goto compact_repair_test;
-                    compact_repair:
-                        sp->unk0.list.ids[i] = sp->unk0.list.ids[i + 1];
-                        i++;
-                    compact_repair_test:
-                        if (i < sp->unk0.list.count - 1)
-                            goto compact_repair;
+                        if (cost < viewer.unk2) {
+                            viewer.unk2 -= cost;
+                            vis_table_c.unk0118[id].unk28 = vis_table_c.unk0118[id].unk27;
+                            for (j = sp->unk2E2 + sp->unk2E0; j < sp->unk0.list.count - 1; j++)
+                                sp->unk0.list.ids[j] = sp->unk0.list.ids[j + 1];
+                            sp->unk0.list.count--;
+                            func_80057cc8();
+                            sp->unk2DC &= ~0x8000;
+                        } else {
+                            done = 0;
+                            func_80057d34();
+                        }
                     }
-                    sp->unk0.list.count--;
-                bought:
-                    func_80057cc8();
-                    sp->unk2DC &= ~0x8000;
-                    goto moved;
-                refuse:
-                    done = 0;
-                    func_80057d34();
-                moved:
-                    if (done && sp->unk0.list.count <= sp->unk2E2 + 4) {
+                    if (done && sp->unk2E2 + 4 >= sp->unk0.list.count) {
                         if (sp->unk2E2 > 0)
                             sp->unk2E2--;
                         else if (sp->unk2E0 > 0)
@@ -2551,12 +2609,13 @@ void func_8005f54c(void)
             }
             if (DAT_801cd180.unk4 & 0x4000) {
                 DAT_801cd180.unk4 = 0;
-                if (sp->unk2E2 + sp->unk2E0 < sp->unk0.list.count) {
+                if (sp->unk2E2 + sp->unk2E0 >= sp->unk0.list.count) {
+                    func_80057d34();
+                } else {
                     if (sp->unk2DC & 1)
-                        kind = DAT_801c7590.unk13A[sp->unk0.list.ids[sp->unk2E2 + sp->unk2E0]];
+                        kind = vis_table_c.unk0118[DAT_801c7590.unk13A[sp->unk0.list.ids[sp->unk2E2 + sp->unk2E0]]].unk5[0];
                     else
-                        kind = sp->unk0.list.ids[sp->unk2E2 + sp->unk2E0];
-                    kind = vis_table_c.unk0118[kind].unk5[0];
+                        kind = vis_table_c.unk0118[sp->unk0.list.ids[sp->unk2E2 + sp->unk2E0]].unk5[0];
                     func_80057cc8();
                     sp->unk0.list.unkA = 1;
                     sp->unk2DC |= 0x8000;
@@ -2565,8 +2624,6 @@ void func_8005f54c(void)
                         func_8003ec5c(DAT_80088c88, &pos, NULL, 1);
                         shown = kind;
                     }
-                } else {
-                    func_80057d34();
                 }
             }
         }

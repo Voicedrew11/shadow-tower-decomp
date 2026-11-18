@@ -141,7 +141,7 @@ void func_80015848(StCdRequest *request);
 int func_800158f4(u8 bcd);
 int func_80015914(u8 value);
 u32 func_80015950(CdlLOC *pos);
-void func_800159d4(CdlLOC *pos, u32 sector);
+void func_800159d4(volatile CdlLOC *pos, u32 sector);
 
 /* src/st/cdpos.c */
 void func_80015a94(CdlLOC *pos, int offset, CdlLOC *out);

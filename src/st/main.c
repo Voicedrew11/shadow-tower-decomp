@@ -17,6 +17,7 @@
 #include <LIBPAD.H>
 #include <st/memory.h>
 #include <st/data.h>
+#include <st/menu.h>
 #include <st/main.h>
 #include <st/funcs.h>
 #include <st/cd.h>

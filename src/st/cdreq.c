@@ -1,8 +1,7 @@
 /*
  * ST.EXE: the frame wait, the vsync counters, the CD read-request ring
- * callbacks and BCD/CD position helpers (WIP module). The module ends at
- * func_800159d4, which is not exact, so that the functions after it keep
- * their retail offsets in their own unit (src/st/cdpos.c).
+ * callbacks and BCD/CD position helpers (WIP module). src/st/cdpos.c
+ * continues it: the two were split while func_800159d4 was not exact.
  */
 #include <kf/lib/address.h>
 #include <kf/lib/null.h>
@@ -242,13 +241,11 @@ u32 func_80015950(CdlLOC *pos)
 }
 
 /* Writes a sector count as a BCD CD position without a lead-in offset.
- * Not exact: retail stores second before the final call and leaves its
- * delay slot empty (`sb v0,1(s2); jal; nop`); this build's insns before
- * reorg are the same and reorg moves the store into the slot. Ruled out:
- * a non-void return type, -g, a temporary or u8 local for the remainder,
- * a do-while wrapper. The function has no label that could stop reorg. */
+ * The position is volatile (the CD callbacks read the ones this fills):
+ * retail leaves the last call's delay slot empty behind the store of the
+ * second, which reorg only does for a volatile store. */
 ADDRESS(0x800159d4, 0xc0)
-void func_800159d4(CdlLOC *pos, u32 sector)
+void func_800159d4(volatile CdlLOC *pos, u32 sector)
 {
     pos->minute = func_80015914(sector / (60 * 75));
     sector %= 60 * 75;

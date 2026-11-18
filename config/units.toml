@@ -290,30 +290,6 @@ source = "src/st/area_a.c"
 profile = "probe-gcc272cdk-o2-g8"
 
 [[unit]]
-unit = "st.area_wait"
-image = "ST.EXE"
-source = "src/st/area_wait.c"
-profile = "probe-gcc272cdk-o2-g8"
-
-[[unit]]
-unit = "st.area_request"
-image = "ST.EXE"
-source = "src/st/area_request.c"
-profile = "probe-gcc272cdk-o2-g8"
-
-[[unit]]
-unit = "st.area_cb"
-image = "ST.EXE"
-source = "src/st/area_cb.c"
-profile = "probe-gcc272cdk-o2-g8"
-
-[[unit]]
-unit = "st.area_load"
-image = "ST.EXE"
-source = "src/st/area_load.c"
-profile = "probe-gcc272cdk-o2-g8"
-
-[[unit]]
 unit = "st.area_cd"
 image = "ST.EXE"
 source = "src/st/area_cd.c"

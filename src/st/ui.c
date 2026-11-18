@@ -781,18 +781,13 @@ void func_80029548(int x, int y, int w, int h)
  * Draws a window frame from 16x16 tiles of the menu texture page: corners,
  * edges, an inner bevel and the filled middle, then a grey blended wash.
  */
-/* Not exact (4 bytes short): retail spills `right` and keeps w/h in s7/s6;
- * this build spills w. Distinct tile-phase counters improve the loop shape.
- * A word-sized right edge adds sign extensions absent from retail, while
- * halfword signedness does not change the code. */
 ADDRESS(0x80029618, 0x55c)
 void func_80029618(short x, short y, short w, short h)
 {
     MenuScratch *sp = MENU_SCRATCH;
     RECT r;
     CVECTOR wash = {48, 48, 48};
-    short right;
-    short bottom;
+    int rows, columns;
 
     sp->unk33C.w = 16;
     sp->unk33C.h = 16;
@@ -805,10 +800,9 @@ void func_80029618(short x, short y, short w, short h)
     func_80028364(&sp->unk33C, &sp->unk358, &sp->unk35C, NULL, TILE);
     sp->unk33C.y = y + h - 16;
     func_80028364(&sp->unk33C, &sp->unk358, &sp->unk35C, NULL, TILE_VFLIP);
-    right = x + w - 16;
+    sp->unk33C.x = x + w - 16;
     sp->unk33C.y = y;
     sp->unk358.vx = 620;
-    sp->unk33C.x = right;
     func_80028364(&sp->unk33C, &sp->unk358, &sp->unk35C, NULL, TILE);
     sp->unk33C.y = y + h - 16;
     func_80028364(&sp->unk33C, &sp->unk358, &sp->unk35C, NULL, TILE_VFLIP);
@@ -818,9 +812,9 @@ void func_80029618(short x, short y, short w, short h)
     func_80028364(&sp->unk33C, &sp->unk358, &sp->unk35C, NULL, TILE);
     sp->unk33C.y = y + h - 32;
     func_80028364(&sp->unk33C, &sp->unk358, &sp->unk35C, NULL, TILE_VFLIP);
+    sp->unk33C.x = x + w - 16;
     sp->unk33C.y = y + 16;
     sp->unk358.vx = 596;
-    sp->unk33C.x = right;
     func_80028364(&sp->unk33C, &sp->unk358, &sp->unk35C, NULL, TILE);
     sp->unk33C.y = y + h - 32;
     func_80028364(&sp->unk33C, &sp->unk358, &sp->unk35C, NULL, TILE_VFLIP);
@@ -828,55 +822,45 @@ void func_80029618(short x, short y, short w, short h)
     sp->unk33C.y = y + 32;
     sp->unk33C.x = x;
     sp->unk358.vx = 624;
-    {
-        int rows = h / 16 - 4;
-        while (rows--) {
-            sp->unk33C.x = x;
-            func_80028364(&sp->unk33C, &sp->unk358, &sp->unk35C, NULL, TILE_HFLIP);
-            sp->unk33C.x = right;
-            func_80028364(&sp->unk33C, &sp->unk358, &sp->unk35C, NULL, TILE);
-            sp->unk33C.y += 16;
-        }
+    rows = h / 16 - 4;
+    while (rows--) {
+        sp->unk33C.x = x;
+        func_80028364(&sp->unk33C, &sp->unk358, &sp->unk35C, NULL, TILE_HFLIP);
+        sp->unk33C.x = x + w - 16;
+        func_80028364(&sp->unk33C, &sp->unk358, &sp->unk35C, NULL, TILE);
+        sp->unk33C.y += 16;
     }
     sp->unk33C.x = x + 16;
     sp->unk358.vx = 616;
-    {
-        int columns = w / 16 - 2;
-        while (columns--) {
-            sp->unk33C.y = y;
-            func_80028364(&sp->unk33C, &sp->unk358, &sp->unk35C, NULL, TILE);
-            sp->unk33C.y = y + h - 16;
-            func_80028364(&sp->unk33C, &sp->unk358, &sp->unk35C, NULL, TILE_VFLIP);
-            sp->unk33C.x += 16;
-        }
+    columns = w / 16 - 2;
+    while (columns--) {
+        sp->unk33C.y = y;
+        func_80028364(&sp->unk33C, &sp->unk358, &sp->unk35C, NULL, TILE);
+        sp->unk33C.y = y + h - 16;
+        func_80028364(&sp->unk33C, &sp->unk358, &sp->unk35C, NULL, TILE_VFLIP);
+        sp->unk33C.x += 16;
     }
     sp->unk33C.x = x + 16;
     sp->unk358.vx = 608;
-    {
-        int columns = w / 16 - 2;
-        while (columns--) {
-            sp->unk33C.y = y + 16;
-            func_80028364(&sp->unk33C, &sp->unk358, &sp->unk35C, NULL, TILE);
-            sp->unk33C.y = y + h - 32;
-            func_80028364(&sp->unk33C, &sp->unk358, &sp->unk35C, NULL, TILE_VFLIP);
-            sp->unk33C.x += 16;
-        }
+    columns = w / 16 - 2;
+    while (columns--) {
+        sp->unk33C.y = y + 16;
+        func_80028364(&sp->unk33C, &sp->unk358, &sp->unk35C, NULL, TILE);
+        sp->unk33C.y = y + h - 32;
+        func_80028364(&sp->unk33C, &sp->unk358, &sp->unk35C, NULL, TILE_VFLIP);
+        sp->unk33C.x += 16;
     }
     sp->unk33C.y = y + 32;
     sp->unk358.vx = 600;
-    {
-        int rows = h / 16 - 4;
-        while (rows--) {
-            int columns;
-
-            sp->unk33C.x = x + 16;
-            columns = w / 16 - 2;
-            while (columns--) {
-                func_80028364(&sp->unk33C, &sp->unk358, &sp->unk35C, NULL, TILE);
-                sp->unk33C.x += 16;
-            }
-            sp->unk33C.y += 16;
+    rows = h / 16 - 4;
+    while (rows--) {
+        sp->unk33C.x = x + 16;
+        columns = w / 16 - 2;
+        while (columns--) {
+            func_80028364(&sp->unk33C, &sp->unk358, &sp->unk35C, NULL, TILE);
+            sp->unk33C.x += 16;
         }
+        sp->unk33C.y += 16;
     }
     r.x = x;
     r.y = y;
@@ -2298,11 +2282,6 @@ void func_8002e4d0(void)
 /*
  * The attribute table: names, current values (with the change a candidate
  * item would make on page 2) and bars scaled to +0x2c4.
- *
- * Not exact: retail schedules the colour stores in another order and
- * keeps the scratchpad base in s2 (this build: s3). The selected-count
- * loop now uses a plain byte argument and advances its cursor in the
- * update clause, matching the retail backedge and pointer walk.
  */
 ADDRESS(0x8002e94c, 0x44c)
 void func_8002e94c(void)
@@ -2313,18 +2292,26 @@ void func_8002e94c(void)
     RECT unused;
     RECT bar;
     short xoff[STATUS_ROWS] = {0};
-    int i, y;
+    int i;
     u8 *count;
     s16 *figure;
 
-    sp->style[3].r = sp->style[2].g = 120;
-    sp->style[2].r = sp->style[2].b = sp->style[3].b = 40;
+    sp->style[2].r = 40;
+    sp->style[3].r = 120;
+    sp->style[2].g = 120;
     sp->style[3].g = 60;
-    sp->style[3].cd = sp->style[2].cd = 73;
-    sp->style[7].r = sp->style[6].g = 120;
-    sp->style[6].r = sp->style[6].b = sp->style[7].b = 40;
+    sp->style[2].b = 40;
+    sp->style[3].b = 40;
+    sp->style[3].cd = 73;
+    sp->style[2].cd = 73;
+    sp->style[6].r = 40;
+    sp->style[7].r = 120;
+    sp->style[6].g = 120;
     sp->style[7].g = 60;
-    sp->style[7].cd = sp->style[6].cd = 49;
+    sp->style[6].b = 40;
+    sp->style[7].b = 40;
+    sp->style[7].cd = 49;
+    sp->style[6].cd = 49;
     if (sp->unk2DC == 1) {
         sp->unk320 = sp->unk324 = sp->unk328 = &sp->style[0];
     } else {
@@ -2332,8 +2319,8 @@ void func_8002e94c(void)
         sp->unk324 = &sp->style[2];
         sp->unk328 = &sp->style[3];
     }
-    for (i = 0, y = 16; i < STATUS_ROWS; i++, y += 15)
-        func_8002732c(MESSAGE(14 + i), xoff[i] + 316, y, sp->unk320);
+    for (i = 0; i < STATUS_ROWS; i++)
+        func_8002732c(MESSAGE(14 + i), xoff[i] + 316, i * 15 + 16, sp->unk320);
     if (sp->unk2DC == 1) {
         sp->unk320 = sp->unk324 = sp->unk328 = &sp->style[4];
     } else {
@@ -2344,37 +2331,37 @@ void func_8002e94c(void)
     if (sp->unk2DC == 2 && sp->unk2C6) {
         if (sp->unk2BE != -1) {
             count = vis_table_c.unk0118[sp->unk2C0].unk10;
-            for (i = 0, y = 16; i < STATUS_ROWS; count++, y += 15, i++)
-                func_80027440(*count | 0x13000000, 590, y, sp->unk320);
+            for (i = 0; i < STATUS_ROWS; count++, i++)
+                func_80027440(*count | 0x13000000, 590, i * 15 + 16, sp->unk320);
         }
         return;
     }
     figure = viewer.unk62;
-    for (i = 0, y = 16; i < STATUS_ROWS; i++, y += 15, figure++) {
+    for (i = 0; i < STATUS_ROWS; figure++, i++) {
         if (sp->unk2DC == 2) {
             if (sp->unk25C[i] > 0) {
-                func_80027440(sp->unk1B4[i] | 0x3000000, 590, y, sp->unk320);
-                func_80026ecc(19, 544, y, sp->unk324);
-                func_80027440(sp->unk25C[i] | 0x3000000, 508, y, sp->unk324);
+                func_80027440(sp->unk1B4[i] | 0x3000000, 590, i * 15 + 16, sp->unk320);
+                func_80026ecc(19, 544, i * 15 + 16, sp->unk324);
+                func_80027440(sp->unk25C[i] | 0x3000000, 508, i * 15 + 16, sp->unk324);
             } else if (sp->unk25C[i] < 0) {
-                func_80027440(sp->unk1B4[i] | 0x3000000, 590, y, sp->unk320);
-                func_80026ecc(20, 544, y, sp->unk328);
-                func_80027440(-sp->unk25C[i] | 0x3000000, 508, y, sp->unk328);
+                func_80027440(sp->unk1B4[i] | 0x3000000, 590, i * 15 + 16, sp->unk320);
+                func_80026ecc(20, 544, i * 15 + 16, sp->unk328);
+                func_80027440(-sp->unk25C[i] | 0x3000000, 508, i * 15 + 16, sp->unk328);
             } else {
-                func_80027440(sp->unk1B4[i] | 0x3000000, 590, y, sp->unk320);
+                func_80027440(sp->unk1B4[i] | 0x3000000, 590, i * 15 + 16, sp->unk320);
             }
         } else if (*figure < 0) {
-            func_80027440(0x3000000, 590, y, sp->unk320);
+            func_80027440(0x3000000, 590, i * 15 + 16, sp->unk320);
         } else {
-            func_80027440((u16)*figure | 0x3000000, 590, y, sp->unk320);
+            func_80027440((u16)*figure | 0x3000000, 590, i * 15 + 16, sp->unk320);
         }
     }
     bar.h = 4;
-    for (i = 0, y = 27; i < STATUS_ROWS; i++, y += 15) {
+    for (i = 0; i < STATUS_ROWS; i++) {
         bar.w = sp->unk1B4[i] * 50 / sp->unk2C4;
         if (bar.w > 100)
             bar.w = 100;
-        bar.y = y;
+        bar.y = i * 15 + 27;
         bar.x = 626 - bar.w;
         func_80028db8(&bar, &bright, &dark, 1);
     }
@@ -2395,62 +2382,57 @@ static s32 DAT_80087f68[2] = {0, 0};
 /*
  * The figure page: two current/maximum pairs coloured by how low the
  * current value is, the other figures and two weights in tenths.
- *
- * Not exact: the final scalar rows have their own y lifetime, matching
- * retail's saved registers. Weight conversions still reload after the first
- * shared result store, and the comparison evaluates the other operand
- * first. Initialization schedules differ; the body is four bytes long.
  */
 ADDRESS(0x8002ed98, 0x460)
 void func_8002ed98(void)
 {
     MenuScratch *sp = MENU_SCRATCH;
     s16 *p;
-    int y, i;
+    int i;
+    s16 w;
 
     sp->style[6].r = 96;
     sp->style[7].r = 96;
-    sp->style[7].g = 96;
-    sp->style[7].b = 32;
     sp->style[6].g = 48;
+    sp->style[7].g = 96;
     sp->style[6].b = 48;
+    sp->style[7].b = 32;
     sp->style[7].cd = 49;
     sp->style[6].cd = 49;
-    for (i = 0, y = 16; i < STATUS_ROWS; y += 15, i++)
-        func_8002732c(MESSAGE(i), 316, y, &sp->style[0]);
+    for (i = 0; i < STATUS_ROWS; i++)
+        func_8002732c(MESSAGE(i), 316, i * 15 + 16, &sp->style[0]);
     p = (s16 *)&viewer;
-    for (i = 0, y = 16; i < 2; y += 15, i++) {
+    for (i = 0; i < 2; i++) {
         if (p[1] < p[0] / 2)
             sp->unk320 = &sp->style[7];
         else if (p[1] < (short)(p[0] / 5))
             sp->unk320 = &sp->style[6];
         else
             sp->unk320 = &sp->style[4];
-        func_80027440((u16)*p++ | 0x5000000, 566, y, sp->unk320);
-        func_80026ecc(14, 554, y, sp->unk320);
-        func_80027440((u16)*p++ | 0x5000000, 494, y, sp->unk320);
+        func_80027440((u16)*p++ | 0x5000000, 566, i * 15 + 16, sp->unk320);
+        func_80026ecc(14, 554, i * 15 + 16, sp->unk320);
+        func_80027440((u16)*p++ | 0x5000000, 494, i * 15 + 16, sp->unk320);
     }
     p++;
     func_80027440((u16)*p++ | 0x3000000, 542, 46, &sp->style[4]);
     func_80026ecc(15, 578, 46, &sp->style[4]);
     func_80027440((u16)*p++ | 0x3000000, 590, 46, &sp->style[4]);
-    {
-        int figure_y;
-        for (i = 3, figure_y = 61; i < 13; figure_y += 15, i++)
-            func_80027440((u16)*p++ | 0x3000000, 590, figure_y, &sp->style[4]);
-    }
-    if ((short)(p[1] / 10) < (short)(p[0] / 10))
+    for (i = 3; i < 13; i++)
+        func_80027440((u16)*p++ | 0x3000000, 590, i * 15 + 16, &sp->style[4]);
+    if ((short)(p[0] / 10) > (short)(p[1] / 10))
         sp->unk320 = &sp->style[6];
     else
         sp->unk320 = &sp->style[4];
-    DAT_8008819e = *p * 100 / 454;
-    DAT_80088188 = *p++ * 1000 / 454;
+    w = *p++;
+    DAT_8008819e = w * 100 / 454;
+    DAT_80088188 = w * 1000 / 454;
     func_80027440(DAT_8008819e | 0x3000000, 494, 211, sp->unk320);
     func_80026ecc(18, 534, 211, sp->unk320);
     func_80027440((u16)(DAT_80088188 - DAT_8008819e * 10) | 0x1000000, 542, 211, sp->unk320);
     func_80026ecc(14, 554, 211, sp->unk320);
-    DAT_8008819e = *p * 100 / 454;
-    DAT_80088188 = *p * 1000 / 454;
+    w = *p;
+    DAT_8008819e = w * 100 / 454;
+    DAT_80088188 = w * 1000 / 454;
     func_80027440(DAT_8008819e | 0x3000000, 566, 211, sp->unk320);
     func_80026ecc(18, 606, 211, sp->unk320);
     func_80027440((u16)(DAT_80088188 - DAT_8008819e * 10) | 0x1000000, 614, 211, sp->unk320);
@@ -2460,18 +2442,20 @@ void func_8002ed98(void)
  * Draws a 25 x 5 grid of 10 x 10 texture cells from tex at pos, 11 pixels
  * apart horizontally and 12 vertically, semi-transparent in color.
  *
- * Not exact: retail keeps pos and tex in t0/t1 with caller-save
- * spills and caches both row UV coordinates after the inner entry guard.
- * This build keeps pos in s8, hoists the addPrim mask, and remains
- * 16 bytes short; the frame and the 11-block loop shape agree.
+ * Not exact (4 bytes short, the loops agree): retail loads tex->vx into a0
+ * and tex->vy into v1, this build the reverse, so `move t0,a0` fills the
+ * first load's delay slot instead of leading the function. Global-alloc
+ * ranks the vx value first here (5 refs over 11 insns against 5 over 16)
+ * and gives it v1; retail's order needs vy first. Ruled out: the position
+ * of the cols/rows assignments, short u0/v0, literal bounds, operand order
+ * of the u/v sums. VS 0x800207d4 is the same function with the same residue.
  */
 ADDRESS(0x8002f1f8, 0x2a0)
 void func_8002f1f8(DVECTOR *pos, DVECTOR *tex, DVECTOR *clut, CVECTOR *color, int arg4)
 {
-    int row;
-    int u0;
+    int row, col;
     int cols, rows;
-    int col, x, y;
+    int u0, v0;
     int u, v;
     StPacketBuffer *buf;
     POLY_FT4 *p;
@@ -2480,20 +2464,17 @@ void func_8002f1f8(DVECTOR *pos, DVECTOR *tex, DVECTOR *clut, CVECTOR *color, in
     cols = 25;
     rows = 5;
     u0 = (short)(tex->vx % 64) * 4;
-    v = (short)(tex->vy % 256);
-    for (row = 0, y = 0; row < rows; row++, y += 12, v += 10) {
-        for (col = 0, x = 0, u = u0; col < cols; col++, x += 11, u += 10) {
-            buf = world_state.packet;
-            p = (POLY_FT4 *)buf->cur;
-            if (buf->end < (u_long *)(p + 1))
-                return;
-            buf->cur = (u_long *)(p + 1);
-            world_state.unk8328++;
+    v0 = (short)(tex->vy % 256);
+    for (row = 0; row < rows; row++) {
+        for (col = 0; col < cols; col++) {
+            u = u0 + col * 10;
+            v = v0 + row * 10;
+            NEW_PRIM(buf, p, POLY_FT4);
             setUV4(p, u, v, u + 10, v, u, v + 10, u + 10, v + 10);
-            p->x0 = p->x2 = pos->vx + x;
-            p->x1 = p->x3 = pos->vx + x + 10;
-            p->y0 = p->y1 = pos->vy + y;
-            p->y2 = p->y3 = pos->vy + y + 10;
+            p->x0 = p->x2 = pos->vx + col * 11;
+            p->x1 = p->x3 = pos->vx + col * 11 + 10;
+            p->y0 = p->y1 = pos->vy + row * 12;
+            p->y2 = p->y3 = pos->vy + row * 12 + 10;
             c = *color;
             setRGB0(p, c.r, c.g, c.b);
             p->tpage = GetTPage(0, color->cd & 3, tex->vx, tex->vy);

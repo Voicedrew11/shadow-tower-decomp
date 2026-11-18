@@ -287,7 +287,7 @@ typedef union {
     } field;
 } Flags801cba08;
 
-/* Per-area counts read by the map page (byte +0x16e4 onwards); WIP extent. */
+/* The save-game state block at 0x801cba08 (0x1714 bytes). */
 typedef struct {
     /* 0x0..0x1440: per area (48), one bit per table A entry, table C slot 32..63
      * and three bits per table B entry (src/st/save.c) */
@@ -303,28 +303,22 @@ typedef struct {
     u32 unk14A8[0x5c];   /* 0x14a8: one bit per map id (func_800241d0) */
     CdlLOC unk1618[40];  /* 0x1618: the XA stream positions func_80044674 searches */
     u8 unk16B8[0x16d8 - 0x16b8];
-    s32 unk16D8;         /* 0x16d8: the word DAT_801cd0e0 names; the item use page
-                          * (func_8005ec10) reaches it through this object's base */
-    u8 unk16DC;          /* 0x16dc: the byte DAT_801cd0e4 names; the new-game reset
-                          * (func_800559bc) clears it through this object's base */
+    s32 unk16D8;         /* 0x16d8: the examine/item-use result */
+    u8 unk16DC;          /* 0x16dc: the warp request byte */
     u8 unk16DD[3];
     s32 unk16E0;         /* 0x16e0: save id, -1 until the first save (src/st/save.c) */
     u8 unk16E4[48];      /* by area */
 } Data801cba08;
 extern Data801cba08 DAT_801cba08;
-/* 0x801cd0e0: the examine/item-use result (0 none, 1 done, 2 nothing to use;
- * src/st/item.c). It is DAT_801cba08.unk16D8: func_80054a54's loops reach it
- * from that base and its 0x10e arm needs the member store (src/st/item_use.c);
- * the other sites address it directly, which either spelling reproduces. */
-extern s32 DAT_801cd0e0;
-
-/* Nonzero runs the warp func_80052c5c after the table A pass (func_8004e324;
- * func_80052c5c clears it). It is DAT_801cba08.unk16DC: band M's code
- * addresses it directly, the new-game reset (func_800559bc) through the
- * DAT_801cba08 base, which only the field spelling reproduces. Whether it
- * belongs to that object is unresolved; the identity stays separate because
- * DAT_801cba08's WIP extent stops at DAT_801cceb0. */
-extern u8 DAT_801cd0e4;
+typedef char Data801cba08Size[sizeof(Data801cba08) == 0x1714 ? 1 : -1];
+/* Members of DAT_801cba08 under the names they had as separate identities:
+ * +0x14a8, two 5-word rows cleared to -1 (src/st/main.c); +0x16d8, the
+ * examine/item-use result (0 none, 1 done, 2 nothing to use; src/st/item.c);
+ * +0x16dc, nonzero runs the warp func_80052c5c after the table A pass
+ * (func_8004e324; func_80052c5c clears it). */
+#define DAT_801cceb0 ((u32 (*)[5])DAT_801cba08.unk14A8)
+#define DAT_801cd0e0 DAT_801cba08.unk16D8
+#define DAT_801cd0e4 DAT_801cba08.unk16DC
 
 
 /* .sbss words the map page reads with lui; their owner is unknown. */

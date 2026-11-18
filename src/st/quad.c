@@ -89,14 +89,6 @@ void func_800210f4(void)
  * Shows the loading screen: reads \LOAD02.TIM;1 (up to 50 attempts) while a
  * dark translucent quad covers the display, then hands the image to
  * tim_load_images and copies the lower half of VRAM to the upper.
- *
- * Not exact (size-exact). Retail's first body insn is the 0x18000 field
- * offset (`sw s1` leads the prologue), ahead of the RECT copy: opening a
- * block with `RECT clear` after the first three statements reproduces that
- * and nothing else. Retail also builds the POLY_F4 tag in a2 before the XY
- * stores (GetTPage's `li a2,640` waits for it) and stores the ordering-table
- * word between the last two XY loads; tag/OT statement orders and a scalar
- * `ot` did not give that schedule.
  */
 ADDRESS(0x80021158, 0x34c)
 void func_80021158(void)
@@ -104,8 +96,6 @@ void func_80021158(void)
     u_char result[8];
     POLY_F4 poly;
     DR_MODE mode;
-    RECT clear = {0, 0, 320, 480};
-    u_long ot[1];
     int status;
     int i;
 
@@ -116,41 +106,53 @@ void func_80021158(void)
     world_state.draw[0].dfe = 1;
     world_state.draw[1].isbg = 0;
     world_state.draw[0].isbg = 0;
-    PutDrawEnv(&world_state.draw[world_state.frame]);
-    PutDrawEnv(&world_state.draw[1 - world_state.frame]);
-    ClearOTagR(ot, 1);
-    setcode(&poly, 0x28);
-    setSemiTrans(&poly, 1);
-    setXY4(&poly, 0, 0, world_state.draw[1 - world_state.frame].clip.w, 0,
-           0, world_state.draw[1 - world_state.frame].clip.h,
-           world_state.draw[1 - world_state.frame].clip.w,
-           world_state.draw[1 - world_state.frame].clip.h);
-    mesh_add_prim(ot, &poly, 5);
-    poly.r0 = poly.g0 = poly.b0 = 8;
-    SetDrawMode(&mode, 0, 0, GetTPage(0, 2, 640, 0), NULL);
-    addPrim(ot, &mode);
-    for (i = 0; i < 50; i++) {
-        CdControl(CdlSetloc, (u_char *)&cd_state.unkA6C.pos, NULL);
-        CdRead((cd_state.unkA6C.size + 2047) >> 11, world_state.unkE0, CdlModeSpeed);
-        while ((status = CdReadSync(1, result)) > 0) {
-            VSync(0);
-            DrawOTag(ot);
-        }
-        if (status == 0)
-            break;
-    }
-    ClearImage(&clear, 0, 0, 0);
-    DrawSync(0);
-    func_800173a8();
-    tim_load_images(world_state.unkE0, cd_state.unkA6C.size);
+    /* A block: retail forms the display flags' address before it copies the
+     * rectangle, so the rectangle is declared after the flag stores. */
     {
-        RECT lower = {0, 240, 320, 240};
+        RECT clear = {0, 0, 320, 480};
+        u_long ot[1];
 
-        VSync(0);
-        MoveImage(&lower, 0, 0);
+        PutDrawEnv(&world_state.draw[world_state.frame]);
+        PutDrawEnv(&world_state.draw[1 - world_state.frame]);
+        ClearOTagR(ot, 1);
+        setcode(&poly, 0x28);
+        setSemiTrans(&poly, 1);
+        poly.tag = (ot[0] & 0xffffff) | (5 << 24);
+        poly.x0 = 0;
+        poly.y0 = 0;
+        poly.x1 = world_state.draw[1 - world_state.frame].clip.w;
+        poly.y1 = 0;
+        poly.x2 = 0;
+        poly.y2 = world_state.draw[1 - world_state.frame].clip.h;
+        poly.x3 = world_state.draw[1 - world_state.frame].clip.w;
+        mesh_set_ot(ot, &poly);
+        poly.y3 = world_state.draw[1 - world_state.frame].clip.h;
+        poly.r0 = poly.g0 = poly.b0 = 8;
+        SetDrawMode(&mode, 0, 0, GetTPage(0, 2, 640, 0), NULL);
+        addPrim(ot, &mode);
+        for (i = 0; i < 50; i++) {
+            CdControl(CdlSetloc, (u_char *)&cd_state.unkA6C.pos, NULL);
+            CdRead((cd_state.unkA6C.size + 2047) >> 11, world_state.unkE0, CdlModeSpeed);
+            while ((status = CdReadSync(1, result)) > 0) {
+                VSync(0);
+                DrawOTag(ot);
+            }
+            if (status == 0)
+                break;
+        }
+        ClearImage(&clear, 0, 0, 0);
+        DrawSync(0);
+        func_800173a8();
+        tim_load_images(world_state.unkE0, cd_state.unkA6C.size);
+        {
+            RECT lower = {0, 240, 320, 240};
+
+            VSync(0);
+            MoveImage(&lower, 0, 0);
+        }
+        DrawSync(0);
+        SetDispMask(1);
     }
-    DrawSync(0);
-    SetDispMask(1);
 }
 
 ADDRESS(0x800214a4, 0x28)
@@ -210,17 +212,12 @@ int depth;
 /*
  * Fades the screen in from black over 120 ticks after area_state.unk18 is
  * set, then out.
- *
- * Not exact: retail keeps start tick in v1 and elapsed in a0; this
- * source uses the reverse. Color is narrowed earlier, and the 360-tick
- * test does not fill the preceding branch delay slot.
  */
 ADDRESS(0x80021654, 0x1c8)
 void func_80021654(void)
 {
     int elapsed = cd_state.unk4 - area_state.unk18;
     int early;
-    int level;
 
     if (area_state.unk0 == 0 && area_state.unk18 == -1)
         return;
@@ -229,20 +226,23 @@ void func_80021654(void)
         return;
     }
     if (elapsed < 120) {
-        level = (u8)(elapsed * 2);
+        u8 level = elapsed * 2;
+
         func_80021518(0, 0, 320, 240, 0, 224, 15, 15, 1, getTPage(0, 2, 896, 256),
                       getClut(560, 496), level, level, level, 0);
         return;
     }
     early = elapsed < 240;
     if (early || area_state.unk0 != 0) {
-        level = (u8)((elapsed - 120) * 2);
+        u8 level = (elapsed - 120) * 2;
+
         func_80021518(32, 0, 288, 256, 0, 0, 255, 255, 1, getTPage(0, 1, 960, 256),
                       getClut(560, 495), level, level, level, 0);
         if (!early)
             area_state.unk18 = cd_state.unk4 - 240;
     } else if (elapsed < 360) {
-        level = (u8)((360 - elapsed) * 2);
+        u8 level = (360 - elapsed) * 2;
+
         func_80021518(32, 0, 288, 256, 0, 0, 255, 255, 1, getTPage(0, 1, 960, 256),
                       getClut(560, 495), level, level, level, 0);
     } else {

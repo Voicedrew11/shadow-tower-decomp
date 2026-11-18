@@ -166,8 +166,13 @@ typedef struct {
     u16 unk18A;          /* 0x18a: unk2 as last shown */
     u16 unk18C;          /* 0x18c: unk6 as last shown */
     u8 unk18E[2];
-    s16 unk190[13][2];   /* 0x190: status timers: level, peak (func_8003c17c);
-                          * the HUD shows an icon while timer 5.. as a word is nonzero */
+    union {
+        s16 halves[13][2]; /* level, peak (func_8003c17c) */
+        s32 words[13];     /* both at once: zero when the status is over; the HUD
+                            * shows an icon while timer 5.. is nonzero */
+    } timers;            /* 0x190: status timers */
+/* The halfword view under its first name. */
+#define unk190 timers.halves
     u8 unk1C4;
     u8 unk1C5;
     u8 unk1C6;
@@ -264,6 +269,9 @@ typedef struct {
 typedef char ViewerHandStateAt0x130[offsetof(Viewer, unk130) == 0x130 ? 1 : -1];
 typedef char ViewerHandStateEndsAt0x138[offsetof(Viewer, unk138) == 0x138 ? 1 : -1];
 
+typedef char ViewerTimersAt0x190[offsetof(Viewer, timers) == 0x190 ? 1 : -1];
+typedef char ViewerTimersEndAt0x1C4[offsetof(Viewer, unk1C4) == 0x1c4 ? 1 : -1];
+
 typedef char ViewerAnglePairAt0x280[offsetof(Viewer, unk280) == 0x280 ? 1 : -1];
 typedef char ViewerAnglePairSecondAt0x282[offsetof(Viewer, unk280) + sizeof(s16) == 0x282 ? 1 : -1];
 typedef char ViewerAnglePairEndsAt0x284[offsetof(Viewer, unk284) == 0x284 ? 1 : -1];
@@ -359,7 +367,6 @@ typedef struct {
 } Data801c7590;
 extern Data801c7590 DAT_801c7590;
 
-extern u32 DAT_801cceb0[2][5];
 
 typedef struct {
     u16 unk0;            /* 0x00: unk2 of the previous frame (src/st/pad.c) */

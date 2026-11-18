@@ -119,9 +119,6 @@ short func_8003c17c(short *level, short *peak, int ramp, int max, int apply)
 }
 
 /* Steps the status timers and the damage fades once per frame. */
-/* Not exact: timer-word tests retain %hi(viewer) across callbacks, where
- * retail derives the viewer base from the current timer address (first
- * divergence +0xf0). This build is 20 bytes longer than retail. */
 ADDRESS(0x8003c24c, 0x710)
 void player_update_status(int apply)
 {
@@ -155,7 +152,7 @@ void player_update_status(int apply)
     level = func_8003c17c(&viewer.unk190[0][0], &viewer.unk190[0][1], 20, 4096, apply);
     if (level != -1) {
         func_80021994(0, 40, 0, level, 1);
-        if (*(s32 *)viewer.unk190[0] == 0) {
+        if (viewer.timers.words[0] == 0) {
             viewer.unk2C &= ~7;
         }
     }
@@ -170,23 +167,23 @@ void player_update_status(int apply)
         func_8003ead0();
         vis_table_b.unk71A4 = vis_table_b.unk71A6 = vis_table_b.unk71A8 = 0;
         vis_lists.unk47CE = vis_lists.unk47D0 = vis_lists.unk47D2 = 0;
-        vis_table_a.unk6160 = vis_table_a.unk6162 = vis_table_a.unk6164 = 0;
-        viewer.unk1CC = viewer.unk1CE = viewer.unk1D0 = 0;
-        if (*(s32 *)viewer.unk190[1] == 0) {
+        viewer.unk1CC = viewer.unk1CE = viewer.unk1D0 = vis_table_a.unk6160 = vis_table_a.unk6162 =
+            vis_table_a.unk6164 = 0;
+        if (viewer.timers.words[1] == 0) {
             viewer.unk2C &= ~0x18;
         }
     }
     level = func_8003c17c(&viewer.unk190[2][0], &viewer.unk190[2][1], 0, 4096, apply);
     if (level != -1) {
         func_80021994(20, 20, 20, level, 2);
-        if (*(s32 *)viewer.unk190[2] == 0) {
+        if (viewer.timers.words[2] == 0) {
             viewer.unk2C &= ~0x60;
             lighting.unk4 |= 4;
         }
     }
     level = func_8003c17c(&viewer.unk190[3][0], &viewer.unk190[3][1], 20, 4096, apply);
     if (level != -1) {
-        if (*(s32 *)viewer.unk190[3] == 0) {
+        if (viewer.timers.words[3] == 0) {
             viewer.unk2C &= ~0x80;
             func_8005a3a8(0);
             PLAYER_CLAMP_HP();
@@ -195,7 +192,7 @@ void player_update_status(int apply)
     level = func_8003c17c(&viewer.unk190[4][0], &viewer.unk190[4][1], 20, 4096, apply);
     if (level != -1) {
         func_80021994(40, 0, 20, level, 1);
-        if (*(s32 *)viewer.unk190[4] == 0) {
+        if (viewer.timers.words[4] == 0) {
             viewer.unk2C &= ~0x100;
             func_8005a3a8(0);
             PLAYER_CLAMP_HP();
@@ -211,32 +208,32 @@ void player_update_status(int apply)
     if (level != -1) {
         lighting.unk4 |= 0x10;
         lighting.unk3 |= 2;
-        if (*(s32 *)viewer.unk190[5] == 0) {
+        if (viewer.timers.words[5] == 0) {
             viewer.unk2C &= ~0x20000;
             viewer.unk2C &= ~0x10000;
         }
     }
     level = func_8003c17c(&viewer.unk190[6][0], &viewer.unk190[6][1], 0, 4096, apply);
     if (level != -1) {
-        if (*(s32 *)viewer.unk190[6] == 0) {
+        if (viewer.timers.words[6] == 0) {
             viewer.unk2C &= ~0x40000;
         }
     }
     level = func_8003c17c(&viewer.unk190[7][0], &viewer.unk190[7][1], 0, 4096, apply);
     if (level != -1) {
-        if (*(s32 *)viewer.unk190[7] == 0) {
+        if (viewer.timers.words[7] == 0) {
             viewer.unk2C &= ~0x80000;
         }
     }
     level = func_8003c17c(&viewer.unk190[8][0], &viewer.unk190[8][1], 0, 4096, apply);
     if (level != -1) {
-        if (*(s32 *)viewer.unk190[8] == 0) {
+        if (viewer.timers.words[8] == 0) {
             viewer.unk2C &= ~0x100000;
         }
     }
     level = func_8003c17c(&viewer.unk190[9][0], &viewer.unk190[9][1], 0, 4096, apply);
     if (level != -1) {
-        if (*(s32 *)viewer.unk190[9] == 0) {
+        if (viewer.timers.words[9] == 0) {
             viewer.unk2C &= ~0x200000;
         }
     }
@@ -245,19 +242,19 @@ void player_update_status(int apply)
         lighting.unk9 = 1;
         lighting.unk4 |= 0x20;
         lighting.unk3 |= 1;
-        if (*(s32 *)viewer.unk190[10] == 0) {
+        if (viewer.timers.words[10] == 0) {
             viewer.unk2C &= ~0x400000;
         }
     }
     level = func_8003c17c(&viewer.unk190[11][0], &viewer.unk190[11][1], 0, 4096, apply);
     if (level != -1) {
-        if (*(s32 *)viewer.unk190[11] == 0) {
+        if (viewer.timers.words[11] == 0) {
             viewer.unk2C &= ~0x800000;
         }
     }
     level = func_8003c17c(&viewer.unk190[12][0], &viewer.unk190[12][1], 0, 4096, apply);
     if (level != -1) {
-        if (*(s32 *)viewer.unk190[12] == 0) {
+        if (viewer.timers.words[12] == 0) {
             viewer.unk2C &= ~0x800;
         }
     }
