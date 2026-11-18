@@ -33,9 +33,20 @@ s32 DAT_80063338;
  * animations and second model from archive 0 (five members per
  * character), registers its animations, and resets its state from its
  * character's data block.
- * Not exact: the page counter is spilled instead of the second-model
- * offset (64-byte frame, retail 80); the template-copy base temporary
- * and loop-update schedule differ.
+ *
+ * Not exact: two things remain. Retail's frame is 80 bytes with sp+16..31
+ * never referenced (ours 64), so 16 bytes of stack were reserved by
+ * something that left no code; no cause is known, and no local is invented
+ * for it. And retail keeps the page and CLUT counters in $s8/$s7 and spills
+ * the second-model offset (i * sizeof(VsFighter), at sp+32), where this
+ * build spills the page counter: all four loop values have 7 weighted
+ * references and differ only in live length, and the counters'
+ * initializations precede the induction variables' in every form tried.
+ * Retail also forms the template table's address inside the loop ($a0) where
+ * this build hoists it. Ruled out: f = &fighter[i] and page = i * 4 / clut_y
+ * = i * 12 in the body (f and the page lose their registers), initializing
+ * before the for statement, i++ first or last (the update order f, page,
+ * clut_y, i is retail's), a model pointer local.
  */
 ADDRESS(0x800140d8, 0x3a8)
 void func_800140d8(void)
@@ -46,8 +57,8 @@ void func_800140d8(void)
     int page;
     int clut_y;
 
-    for (i = 0, page = 0, clut_y = 0, f = DAT_800633b0.fighter;
-         i < 2; i++, page += 4, clut_y += 12, f++) {
+    for (i = 0, f = DAT_800633b0.fighter, page = 0, clut_y = 0;
+         i < 2; f++, page += 4, clut_y += 12, i++) {
         member = DAT_801624b8[i].slot[DAT_80063338] * 5;
         func_8002ee90(0, member + 1, (u_long *)f);
         func_80012b50((u_long *)f, page, clut_y);

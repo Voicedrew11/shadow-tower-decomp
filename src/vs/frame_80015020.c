@@ -67,8 +67,6 @@ s32 DAT_8006336c;
  * menus func_8002a360 fades by level), the clock, both fighters, their
  * gauges and the arena (the pieces past the camera hidden), then shows the
  * frame and measures its length in fields (DAT_80063220, at most 5).
- * Not exact: caption 17's fade orders its elapsed/scroll arithmetic
- * differently, and cases 6/7 share a different caption tail (8 bytes short).
  */
 ADDRESS(0x80015020, 0xe30)
 void func_80015020(void)
@@ -122,9 +120,9 @@ void func_80015020(void)
             func_8002a360(DAT_8006331c, fade - FRAME_CLOCK());
             if (DAT_8006331c == 12) {
                 u32 left;
-                u32 elapsed = ELAPSED();
+                u32 rest = 16 - ELAPSED();
 
-                func_8002a360(17, 16 - elapsed - DAT_8006336c + 2);
+                func_8002a360(17, rest - DAT_8006336c + 2);
                 func_8002a360(18, DAT_8006336c - ELAPSED() + 6);
                 left = SCREEN_START();
                 left += 16;
@@ -200,13 +198,12 @@ void func_80015020(void)
             func_8002a360(1, ELAPSED());
             func_8002a360(4, ELAPSED());
         } else if (ELAPSED() < 46) {
-            u32 left = SCREEN_START();
+            u32 left = SCREEN_START() + 46;
+            u32 left2;
 
-            left += 46;
             func_8002a360(1, left - FRAME_CLOCK());
-            left = SCREEN_START();
-            left += 46;
-            func_8002a360(4, left - FRAME_CLOCK());
+            left2 = SCREEN_START() + 46;
+            func_8002a360(4, left2 - FRAME_CLOCK());
         } else {
             DAT_80063314 = DAT_801603c0.unk3C;
             DAT_80063324 += 2;
@@ -263,7 +260,11 @@ void func_80015020(void)
         func_8002a360(10, 16 - ELAPSED());
         func_8002a360(16, 16 - ELAPSED());
         func_8002a360(13, 16 - ELAPSED());
-        func_8002a360(17, 16 - ELAPSED() - DAT_8006336c + 2);
+        {
+            u32 rest = 16 - ELAPSED();
+
+            func_8002a360(17, rest - DAT_8006336c + 2);
+        }
         func_8002a360(18, DAT_8006336c - ELAPSED() + 6);
         func_8002a360(19, ELAPSED() - 4);
         func_8002a360(9, ELAPSED() - 4);
@@ -311,7 +312,7 @@ void func_80015020(void)
             func_8002bfe8(i, 4096);
         }
         func_80029b10(32);
-        func_80029f28(DAT_801603c0.unk3C % 96, 32);
+        func_80029f28((u32)DAT_801603c0.unk3C % 96, 32);
     }
     func_80028fcc(DAT_80063324 == 2 || DAT_80063324 >= 16);
     rot.vz = 0;

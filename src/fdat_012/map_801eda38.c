@@ -17,9 +17,15 @@
 #include <st/xa.h>
 #include <st/fdat.h>
 
-/* Not exact: the initial flag-byte writes and record-index load move
- * ahead of the other state writes, and the range mask occupies a0 instead
- * of a1. The record lookup, drop queue and final slot writes agree. */
+/* Not exact (size-exact, schedule): retail's listing is this statement order
+ * untouched, with the two bytes[] stores and the record index sharing $a0
+ * and the range mask in $a1; here sched1 lifts the constant 1 and the index
+ * load to the top of the block (their variable is set twice, so they are not
+ * held back next to their uses) and the mask takes $a0. With a literal 1 and
+ * a single-set index the index load sinks to its use instead. The record
+ * lookup, drop queue and final slot writes agree. Ruled out: every position
+ * of the two masked updates as compound assignments, the index in i,
+ * distance or a u8 local, r computed before or after the stores. */
 /*
  * Starts the entry's fall (animation 9) and, once its record's stream
  * counter is 4, adds table C item 0x10a at its place to the drop slots

@@ -51,9 +51,12 @@ JUMPTABLES(0x80011574, 0x14)
     }
 
 /* A semi-transparent Gouraud triangle over vertices a, b, c in colours
- * ca, cb, cb at the OT depth of the three. */
+ * ca, cb, cb at the OT depth of the three, then the mode triangle at the
+ * same depth. */
 #define FLASH_G3(sp, va, vb, vc, ca, cb)                                       \
     {                                                                          \
+        int z;                                                                 \
+                                                                               \
         p3 = (POLY_G3 *)DAT_801624d0.packet->cur;                              \
         DAT_801624d0.packet->cur = (u_long *)(p3 + 1);                         \
         SetPolyG3(p3);                                                         \
@@ -64,12 +67,12 @@ JUMPTABLES(0x80011574, 0x14)
         p3->y1 = VTX(sp, vb).sxy.vy;                                           \
         p3->x2 = VTX(sp, vc).sxy.vx;                                           \
         p3->y2 = VTX(sp, vc).sxy.vy;                                           \
-        z = VTX(sp, va).z + VTX(sp, vb).z;                                     \
-        z += VTX(sp, vc).z;                                                    \
+        z = (VTX(sp, va).z + VTX(sp, vb).z + VTX(sp, vc).z) >> 7;              \
         setRGB0(p3, ca.r, ca.g, ca.b);                                         \
         setRGB1(p3, cb.r, cb.g, cb.b);                                         \
         setRGB2(p3, cb.r, cb.g, cb.b);                                         \
-        addPrim(DAT_801624d0.ot_cur + (z >> 7), p3);                           \
+        addPrim(DAT_801624d0.ot_cur + z, p3);                                  \
+        FLASH_MODE(z);                                                         \
     }
 
 /* A semi-transparent Gouraud quad over vertices a, b, c, d in colours
@@ -77,6 +80,8 @@ JUMPTABLES(0x80011574, 0x14)
  * three corners of ring row i. */
 #define FLASH_G4(sp, va, vb, vc, vd, ca, cc)                                   \
     {                                                                          \
+        int z;                                                                 \
+                                                                               \
         p4 = (POLY_G4 *)DAT_801624d0.packet->cur;                              \
         DAT_801624d0.packet->cur = (u_long *)(p4 + 1);                         \
         SetPolyG4(p4);                                                         \
@@ -89,19 +94,19 @@ JUMPTABLES(0x80011574, 0x14)
         p4->y2 = VTX(sp, vc).sxy.vy;                                           \
         p4->x3 = VTX(sp, vd).sxy.vx;                                           \
         p4->y3 = VTX(sp, vd).sxy.vy;                                           \
-        z = VTX(sp, 0).z + VTX(sp, i + 16).z;                                  \
-        z += VTX(sp, i + 17).z;                                                \
-        z += VTX(sp, i + 1).z;                                                 \
+        z = (VTX(sp, 0).z + VTX(sp, i + 16).z + VTX(sp, i + 17).z              \
+             + VTX(sp, i + 1).z) >> 7;                                         \
         setRGB0(p4, ca.r, ca.g, ca.b);                                         \
         setRGB1(p4, ca.r, ca.g, ca.b);                                         \
         setRGB2(p4, cc.r, cc.g, cc.b);                                         \
         setRGB3(p4, cc.r, cc.g, cc.b);                                         \
-        addPrim(DAT_801624d0.ot_cur + (z >> 7), p4);                           \
+        addPrim(DAT_801624d0.ot_cur + z, p4);                                  \
+        FLASH_MODE(z);                                                         \
     }
 
-/* An empty textured triangle that sets the semi-transparency mode (tpage
- * 56) for the flash polygons before it. */
-#define FLASH_MODE()                                                           \
+/* An empty textured triangle at OT depth z that sets the semi-transparency
+ * mode (tpage 56) for the flash polygon before it. */
+#define FLASH_MODE(z)                                                          \
     {                                                                          \
         t = (POLY_FT3 *)DAT_801624d0.packet->cur;                              \
         DAT_801624d0.packet->cur = (u_long *)(t + 1);                          \
@@ -111,7 +116,7 @@ JUMPTABLES(0x80011574, 0x14)
         t->clut = 32641;                                                       \
         t->tpage = 56;                                                         \
         setRGB0(t, 0, 0, 0);                                                   \
-        addPrim(DAT_801624d0.ot_cur + (z >> 7), t);                            \
+        addPrim(DAT_801624d0.ot_cur + z, t);                                   \
     }
 
 /* The scratchpad's projected vertex n. */
@@ -127,8 +132,6 @@ JUMPTABLES(0x80011574, 0x14)
  * picks the rings' colours): a three-ring disc at its hit radius in front
  * of it, scaled by its hit radius and height.
  */
-/* Not exact (size-exact): retail sums each OT depth in $s0 itself; this
- * build picks other temporaries for the vertex loads (37 words). */
 ADDRESS(0x8002c2c4, 0x144c)
 void func_8002c2c4(int id)
 {
@@ -141,7 +144,6 @@ void func_8002c2c4(int id)
     MeshVertex *out;
     SVECTOR *in;
     int n;
-    int z;
     POLY_G3 *p3;
     POLY_G4 *p4;
     POLY_FT3 *t;
@@ -244,16 +246,10 @@ void func_8002c2c4(int id)
     PROJECT(sp, out, in, n);
     for (i = 1; i < 16; i++) {
         FLASH_G3(sp, 0, i, i + 1, c[0], c[1]);
-        FLASH_MODE();
         FLASH_G4(sp, i, i + 1, i + 16, i + 17, c[1], c[2]);
-        FLASH_MODE();
         FLASH_G4(sp, i + 16, i + 17, i + 32, i + 33, c[2], c[3]);
-        FLASH_MODE();
     }
     FLASH_G3(sp, 0, 16, 1, c[0], c[1]);
-    FLASH_MODE();
     FLASH_G4(sp, 16, 1, 32, 17, c[1], c[2]);
-    FLASH_MODE();
     FLASH_G4(sp, 32, 17, 48, 33, c[2], c[3]);
-    FLASH_MODE();
 }

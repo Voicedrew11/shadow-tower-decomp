@@ -48,21 +48,16 @@ SDATA(0x80063260, 0x10)
 
 /* Draws glyph `c` at (x, y): half-width codes below the split, full-width
  * codes after it. */
-/* Not exact: entry copies and layout constants use different registers;
- * the drawing x coordinate is normalized at entry, and the packet-base
- * setup follows the multiply rather than the glyph-split branch. */
 ADDRESS(0x8001d3f0, 0x4c8)
 void func_8001d3f0(u16 c, u16 x, u16 y, CVECTOR *color)
 {
     StPacketBuffer *buf;
     POLY_FT4 *p;
     CVECTOR rgb;
-    int cols, qw, qh, fw, ch;
-    u16 half;
+    u16 half, cols, qw, qh, fw, ch;
     u16 split;
-    u16 u, v, q, r;
+    u16 q, r;
     int n;
-    int draw_x = x;
 
     if (VS_MENU_SCRATCH->unk1D5 == 0) {
         ch = 12;
@@ -82,29 +77,38 @@ void func_8001d3f0(u16 c, u16 x, u16 y, CVECTOR *color)
         ch = qh;
     }
     if (c < split) {
-        int remainder = c % (cols * 2);
+        int u, v;
 
+        r = c % (cols * 2);
         q = c / (cols * 2);
-        u = remainder * half;
+        u = r * half;
         v = ch * q;
         NEW_PRIM(buf, p, POLY_FT4);
         setUV4(p, u, v, half + u, v, u, ch + v, half + u, ch + v);
         if (DAT_80063398) {
-            draw_x -= (DAT_80063378 == 1 ? DAT_8006333e : DAT_80063340) * (half + 1);
+            if (DAT_80063378 == 1)
+                x -= DAT_8006333e * (half + 1);
+            else
+                x -= DAT_80063340 * (half + 1);
             DAT_80063394 += half + 1;
-            if (DAT_80063392 < (u16)draw_x) {
+            if (DAT_80063392 < x) {
                 DAT_800633a0++;
                 return;
             }
-            if ((u16)draw_x < DAT_80063390)
+            if (x < DAT_80063390)
                 return;
         }
-        setXY4(p, draw_x, y, draw_x + half, y, draw_x, y + qh, draw_x + half, y + qh);
+        p->x1 = p->x3 = x + half;
+        p->x0 = p->x2 = x;
+        p->y0 = p->y1 = y;
+        p->y2 = p->y3 = y + qh;
         rgb = *color;
         rgb.r += 8;
         rgb.g += 8;
         rgb.b += 8;
     } else {
+        int u, v;
+
         n = c - split / 2;
         r = n % cols;
         q = n / cols;
@@ -113,16 +117,22 @@ void func_8001d3f0(u16 c, u16 x, u16 y, CVECTOR *color)
         NEW_PRIM(buf, p, POLY_FT4);
         setUV4(p, u, v, fw + u, v, u, ch + v, fw + u, ch + v);
         if (DAT_80063398) {
-            draw_x -= (DAT_80063378 == 1 ? DAT_8006333e : DAT_80063340) * (half + 1);
+            if (DAT_80063378 == 1)
+                x -= DAT_8006333e * (half + 1);
+            else
+                x -= DAT_80063340 * (half + 1);
             DAT_80063394 += fw;
-            if (DAT_80063392 < (u16)draw_x) {
+            if (DAT_80063392 < x) {
                 DAT_800633a0++;
                 return;
             }
-            if ((u16)draw_x < DAT_80063390)
+            if (x < DAT_80063390)
                 return;
         }
-        setXY4(p, draw_x, y, draw_x + qw, y, draw_x, y + qh, draw_x + qw, y + qh);
+        p->x1 = p->x3 = x + qw;
+        p->x0 = p->x2 = x;
+        p->y0 = p->y1 = y;
+        p->y2 = p->y3 = y + qh;
         rgb = *color;
         rgb.r -= 12;
         rgb.g -= 6;
@@ -324,32 +334,27 @@ void func_8001dc48(u32 num, u16 x, u16 y, CVECTOR *color)
     setRGB0(p, (color)->r, (color)->g, (color)->b);                  \
     *DAT_801624d0.ot_cur = (u_long)(p) & 0xffffff
 
+/* FILL_F4 over the rectangle with top left (x, y), width w and height h. */
+#define FILL_RECT_F4(p, semi, x, y, w, h, color)     FILL_F4(p, semi, x, y, (x) + (w), y, x, (y) + (h), (x) + (w), (y) + (h), color)
+
 /* Draws a rectangle outline: bars `border & 0xff` high at the top and
  * bottom and `border >> 8` wide at the sides. */
-/* Not exact: color and the border width use different registers; the
- * width shift follows the packet-buffer load, and the bottom bar loads
- * height before y. */
 ADDRESS(0x8001de8c, 0x54c)
 void func_8001de8c(RECT *r, CVECTOR *color, u16 border, u16 semi)
 {
     POLY_F4 *p;
     StPacketBuffer *buf;
-    int w = border >> 8;
-    int h = border & 0xff;
+    short w = border >> 8;
+    short h = border & 0xff;
 
     NEW_PRIM(buf, p, POLY_F4);
-    FILL_F4(p, semi, r->x, r->y, r->x + r->w, r->y, r->x, r->y + h, r->x + r->w, r->y + h,
-            color);
+    FILL_RECT_F4(p, semi, r->x, r->y, r->w, h, color);
     NEW_PRIM(buf, p, POLY_F4);
-    FILL_F4(p, semi, r->x, r->y + r->h - h, r->x + r->w, r->y + r->h - h, r->x, r->h + r->y,
-            r->x + r->w, r->h + r->y, color);
+    FILL_RECT_F4(p, semi, r->x, r->y + r->h - h, r->w, h, color);
     NEW_PRIM(buf, p, POLY_F4);
-    FILL_F4(p, semi, r->x, r->y + h, r->x + w, r->y + h, r->x, r->y + h + (r->h - h * 2),
-            r->x + w, r->y + h + (r->h - h * 2), color);
+    FILL_RECT_F4(p, semi, r->x, r->y + h, w, r->h - h * 2, color);
     NEW_PRIM(buf, p, POLY_F4);
-    FILL_F4(p, semi, r->x + r->w - w, r->y + h, r->w + r->x, r->y + h,
-            r->x + r->w - w, r->y + h + (r->h - h * 2), r->w + r->x, r->y + h + (r->h - h * 2),
-            color);
+    FILL_RECT_F4(p, semi, r->x + r->w - w, r->y + h, w, r->h - h * 2, color);
 }
 
 /*
@@ -595,8 +600,14 @@ void func_8001f23c(int x, int y, int w, int h)
  * Draws a window frame from 16x16 tiles of the menu texture page: corners,
  * edges, an inner bevel and the filled middle.
  */
-/* Not exact: height normalizes at entry; saved-register and width/right
- * lifetimes differ (88-byte frame, retail 96). */
+/* Not exact: retail's frame is 96 bytes with four 8-byte spill slots (sp+24
+ * x, sp+32, sp+40 w, sp+48 h) where this build has three (88 bytes): retail
+ * keeps one more value across the calls. Its registers are x $s5, y $s4, h
+ * $s6, the two tile modes $s2/$s1, y + h $s0, y + h - 16 $s3 and the right
+ * edge $s7; this build sign-extends h into `height` at entry and keeps y +
+ * height - 16 without y + height. ST.EXE's twin func_80029618 is open with
+ * the mirror residue (retail spills `right` there). Not yet tried here: h
+ * used directly with a `bottom` local, per-loop counters as in the ST twin. */
 ADDRESS(0x8001f30c, 0x51c)
 void func_8001f30c(short x, short y, short w, short h)
 {
@@ -803,8 +814,11 @@ void func_8001fb98(void)
  * cursor bar and up to three rows (file number, the fighter of the save
  * and its won count), each framed; the clipped text advance of each row
  * goes to DAT_801c4a38.
- * Not exact: an unaccounted 8-byte stack span precedes retail's two RECT
- * initializers; its frame is 272 bytes, this build's 264.
+ *
+ * Not exact: an unaccounted 8-byte stack span (sp+208) lies between the
+ * picture table and retail's two RECT initializers; its frame is 272 bytes,
+ * this build's 264. The table copy is 192 bytes, so the span is a local of
+ * its own that the code never touches.
  */
 ADDRESS(0x8001fcac, 0x6d8)
 void func_8001fcac(void)

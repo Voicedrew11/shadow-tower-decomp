@@ -69,9 +69,11 @@ IMAGE_LINKS = {
 # pure binary output (`/p`) instead of a CPE, framed as an FDAT.T entry.
 OVERLAY_LINK = ImageLink((), startup=False,
                          evidence='FDAT overlays: own code only, jal into ST.EXE text')
-# FDAT.T frames each entry: the linked bytes, zeros up to the sector multiple
-# that leaves room for one trailing word, and that word, 0x12345678 plus the
-# 32-bit sum of every preceding word (all 36 retail entries agree).
+# FDAT.T frames each entry: the linked bytes, zeros through the overlay's
+# uninitialized storage and up to the sector multiple that leaves room for one
+# trailing word, and that word, 0x12345678 plus the 32-bit sum of every
+# preceding word (all 36 retail entries agree; FDAT_272.BIN's 0x420 bytes of
+# .bss are what carry its entry into a ninth sector).
 ARCHIVE_SECTOR = 0x800
 ARCHIVE_CHECKSUM_SEED = 0x12345678
 ENTRY = '__SN_ENTRY_POINT'
@@ -111,14 +113,30 @@ def file_hash(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
-def pack_archive_entry(payload: bytes) -> bytes:
-    """Frame one linked overlay as its FDAT.T entry (see ARCHIVE_CHECKSUM_SEED)."""
-    if len(payload) % 4:
+def pack_archive_entry(payload: bytes, reserved: int = 0) -> bytes:
+    """Frame one linked overlay as its FDAT.T entry (see ARCHIVE_CHECKSUM_SEED).
+
+    `reserved` is the extent of the overlay's uninitialized storage past the
+    linked bytes: the entry covers it with zeros before the checksum word.
+    """
+    if len(payload) % 4 or reserved % 4 or reserved < 0:
         raise ValueError('an archive entry payload must be whole words')
-    size = -(-(len(payload) + 4) // ARCHIVE_SECTOR) * ARCHIVE_SECTOR
+    size = -(-(len(payload) + reserved + 4) // ARCHIVE_SECTOR) * ARCHIVE_SECTOR
     body = payload + bytes(size - 4 - len(payload))
     total = sum(struct.unpack(f'<{len(body) // 4}I', body)) + ARCHIVE_CHECKSUM_SEED
     return body + struct.pack('<I', total & 0xFFFFFFFF)
+
+
+def overlay_reserved_size(map_text: str, load_address: int, linked_size: int) -> int:
+    """Bytes of the `bss` group that lie past an overlay's linked bytes, from
+    PSYLINK's map (`Start Stop Length Obj Group Section` rows), rounded up to
+    whole words."""
+    end = load_address + linked_size
+    for line in map_text.splitlines():
+        fields = line.split()
+        if len(fields) == 6 and fields[4] == 'bss' and int(fields[2], 16):
+            end = max(end, int(fields[1], 16) + 1)
+    return -(-(end - load_address - linked_size) // 4) * 4
 
 
 def equ_lines(symbols: dict[str, int]) -> list[str]:
@@ -228,7 +246,9 @@ def build_image(name, root, units, compile_one, *, repo, load_address,
             tool_succeeded(root, 'LINK.TXT', stem + '.RAW', b'')
             report['phase'] = 'pack'
             raw = (root / (stem + '.RAW')).read_bytes()
-            (root / name).write_bytes(pack_archive_entry(raw))
+            reserved = overlay_reserved_size(
+                (root / (stem + '.MAP')).read_text(errors='replace'), load_address, len(raw))
+            (root / name).write_bytes(pack_archive_entry(raw, reserved))
             report.update(linked=True, phase='complete', executable=str(root / name),
                           raw=str(root / (stem + '.RAW')), raw_size=len(raw))
             (root / 'build.json').write_text(json.dumps(report, indent=2) + '\n')

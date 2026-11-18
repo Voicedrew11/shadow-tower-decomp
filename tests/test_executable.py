@@ -388,7 +388,7 @@ class NativeBuildControls(unittest.TestCase):
             self.assertEqual(len(entry), 0x800)
 
     def test_archive_entry_frame_matches_the_retail_checksum_rule(self):
-        from scripts.psxbuild.link import equ_lines, pack_archive_entry
+        from scripts.psxbuild.link import equ_lines, overlay_reserved_size, pack_archive_entry
 
         payload = struct.pack('<3I', 0x37, 0x801EB56C, 0x03E00008)
         entry = pack_archive_entry(payload)
@@ -403,6 +403,28 @@ class NativeBuildControls(unittest.TestCase):
         self.assertEqual(len(pack_archive_entry(bytes(0x800))), 0x1000)
         with self.assertRaises(ValueError):
             pack_archive_entry(b'\0\0')
+        # Uninitialized storage past the linked bytes counts toward the entry
+        # (FDAT_272.BIN: 16320 linked bytes, 0x420 of .bss, nine sectors).
+        self.assertEqual(len(pack_archive_entry(bytes(16320))), 0x4000)
+        grown = pack_archive_entry(bytes(16320), 0x420)
+        self.assertEqual(len(grown), 0x4800)
+        self.assertEqual(struct.unpack_from('<I', grown, 0x47FC)[0], 0x12345678)
+        self.assertEqual(len(pack_archive_entry(bytes(0x7F0), 0xC)), 0x800)
+        self.assertEqual(len(pack_archive_entry(bytes(0x7F0), 0x10)), 0x1000)
+        with self.assertRaises(ValueError):
+            pack_archive_entry(bytes(8), 2)
+        map_text = (
+            '    Start     Stop   Length      Obj Group            Section name\n'
+            ' 801EB560 801EB7DB 0000027C 801EB560 text             .rodata\n'
+            ' 801EB7DC 801EF503 00003D28 801EB7DC text             .text\n'
+            ' 801EF504 801EF51F 0000001C 801EF504 text             .data\n'
+            ' 801EF520 801EF520 00000000 801EF520 bss              .sbss\n'
+            ' 801EF520 801EF93F 00000420 801EF520 bss              .bss\n'
+            '\n  Address  Names alphabetically\n 801EF520  _bss_org\n')
+        self.assertEqual(overlay_reserved_size(map_text, 0x801EB560, 16320), 0x420)
+        # Storage that ends inside the linked bytes, or no bss at all, adds nothing.
+        self.assertEqual(overlay_reserved_size(map_text, 0x801EB560, 0x4400), 0)
+        self.assertEqual(overlay_reserved_size('', 0x801EB560, 16320), 0)
         self.assertEqual(equ_lines({'rcos': 0x800744C4}), ['rcos\tequ\t$800744c4'])
         with self.assertRaises(ValueError):
             equ_lines({'bad name': 1})

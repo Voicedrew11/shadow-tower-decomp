@@ -17,9 +17,12 @@
 #include <st/xa.h>
 #include <st/fdat.h>
 
-/* Not exact: all body instructions agree, but retail reserves 40 bytes
- * and saves the four registers from sp+24; this source reserves 32 and
- * saves them from sp+16. The extra retail area has no observed access. */
+/* Not exact: all body instructions agree, but retail reserves 40 bytes and
+ * saves the four registers from sp+24; this source reserves 32 and saves
+ * them from sp+16. The eight bytes at sp+16 are never accessed: either an
+ * unused 8-byte local (the sibling scenes keep an SVECTOR there) or a third
+ * word pair of outgoing arguments from a five-argument call that was
+ * optimized away; neither is evidenced by an instruction. */
 /* Entry 33's end: it faces the viewer, finishes its animation, leaves its
  * drops (20/30/100 percent), dies (animation 12) and table B entry 3
  * opens; the area's history is reset (scene word 2). */
