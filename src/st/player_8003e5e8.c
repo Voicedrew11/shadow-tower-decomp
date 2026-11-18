@@ -1643,11 +1643,7 @@ void func_800420a0(void)
     }
 }
 
-/*
- * Swaps hand `a`'s item with slot `b`, twice for a two-handed item.
- * Not exact: the b-slot address forms before the a-slot address, and
- * saved per-slot bases differ. The swap load/store widths and order agree.
- */
+/* Swaps hand `a`'s item with slot `b`, twice for a two-handed item. */
 ADDRESS(0x80042620, 0x2e0)
 void func_80042620(u8 a, u8 b)
 {
@@ -1655,13 +1651,9 @@ void func_80042620(u8 a, u8 b)
     SVECTOR unused0 = {0, 128, 0, -128};
     SVECTOR unused1 = {0, 4, 0, -4};
     u16 id;
-    ViewerModel *model_b;
     ViewerModel *model_a;
-    StAnimFile *block_b;
     StAnimFile *block_a;
-    u8 model_id_b;
     u8 model_id_a;
-    u8 sound_b;
     u8 sound_a;
 
     if ((viewer.unk38[3] != 0xffff && vis_table_c.unk0118[viewer.unk38[3]].unk26 == 9) ||
@@ -1677,17 +1669,14 @@ void func_80042620(u8 a, u8 b)
             viewer.unk38[16] = viewer.unk38[17];
             viewer.unk38[17] = id;
         }
-        model_b = viewer.unkE8[b];
         model_a = viewer.unkE8[a];
-        viewer.unkE8[a] = model_b;
+        viewer.unkE8[a] = viewer.unkE8[b];
         viewer.unkE8[b] = model_a;
-        block_b = viewer.unkF8[b];
         block_a = viewer.unkF8[a];
-        viewer.unkF8[a] = block_b;
+        viewer.unkF8[a] = viewer.unkF8[b];
         viewer.unkF8[b] = block_a;
-        model_id_b = viewer.unk148[b];
         model_id_a = viewer.unk148[a];
-        viewer.unk148[a] = model_id_b;
+        viewer.unk148[a] = viewer.unk148[b];
         viewer.unk148[b] = model_id_a;
         if (viewer.unk148[a] != 0xff)
             anim_register(a + 32, viewer.unkF8[a]);
@@ -1697,9 +1686,8 @@ void func_80042620(u8 a, u8 b)
             ((StAnimSlot *)viewer.unk108[a])->unk2 = 0xffff;
         if (viewer.unk108[b])
             ((StAnimSlot *)viewer.unk108[b])->unk2 = 0xffff;
-        sound_b = viewer.unk1D4[b];
         sound_a = viewer.unk1D4[a];
-        viewer.unk1D4[a] = sound_b;
+        viewer.unk1D4[a] = viewer.unk1D4[b];
         viewer.unk1D4[b] = sound_a;
         if (a == 0) {
             viewer.unk17E = 0;
