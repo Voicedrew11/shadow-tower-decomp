@@ -129,8 +129,6 @@ void fdat_801ebec4(Vis212 *e)
 /*
  * Updates the current entry's alert state (unk1D) and picks its next action
  * (unk44) from the viewer's range and bearing (unk60 keeps the range bits).
- * Not exact (4 bytes short): retail computes the alert flag into a1 and
- * copies it to s1 before or-ing in 2, and takes its products in a2.
  */
 ADDRESS(0x801ec6a4, 0x528)
 void fdat_801ec6a4(void)
@@ -142,12 +140,14 @@ void fdat_801ec6a4(void)
     int bearing;
     int alert;
     int n;
+    u16 state;
 
     fdat_801eb7ac(e);
     if (e->unk44 == 128) {
-        range = e->unkA8->unk03 * e->unkA8->unk03;
+        int reach = e->unkA8->unk03 * e->unkA8->unk03;
+
         e->unk1C.bytes[3] = 2;
-        if (e->unk3C < range << 16 || e->unk64 != 0)
+        if (e->unk3C < reach << 16 || e->unk64 != 0)
             e->unk44 = 256;
         e->unk64 = 0;
         return;
@@ -198,18 +198,18 @@ void fdat_801ec6a4(void)
     near = (r->unk14 * r->unk14) << 16;
     bearing = abs((short)e->unk58);
     alert = e->unk1C.bytes[1] != 0;
-    n = (s32)e->unk3C < near ? alert | 2 : alert;
+    state = (s32)e->unk3C < near ? alert | 2 : alert;
     if (bearing < 512)
-        n |= 4;
+        state |= 4;
     if (e->unk62 == 1)
-        n &= 0xfffd;
+        state &= 0xfffd;
     else if (e->unk62 == 2)
-        n &= 0xfffb;
+        state &= 0xfffb;
     e->unk62 = 0;
-    if (!(n & 1)) {
+    if (!(state & 1)) {
         e->unk44 = 1;
-    } else if (n & 2) {
-        if (n & 4) {
+    } else if (state & 2) {
+        if (state & 4) {
             if (r->unk1C & 0x10) {
                 if (e->unk54) {
                     if (rand() < 24576)
@@ -246,7 +246,7 @@ void fdat_801ec6a4(void)
         } else {
             e->unk44 = 1;
         }
-    } else if (n & 4) {
+    } else if (state & 4) {
         if (e->unk54) {
             if (r->unk1C & 0x20) {
                 if (!(r->unk1C & 4))
@@ -279,5 +279,5 @@ void fdat_801ec6a4(void)
     } else {
         e->unk44 = 1;
     }
-    e->unk60 = n;
+    e->unk60 = state;
 }
