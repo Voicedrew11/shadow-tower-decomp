@@ -8,6 +8,7 @@
 #include <sys/types.h>
 #include <LIBGTE.H>
 #include <LIBGPU.H>
+#define VS_PICKED_PAIR
 #include <vs/data.h>
 #include <vs/menu.h>
 #include <vs/funcs.h>
@@ -18,8 +19,6 @@
  * otherwise each player's first slot; then each player's fighter
  * picture over the shared frame tile, and the two background strips.
  */
-/* Not exact: retail holds the 56 in $t0 and stores it in the mode test's
- * delay slot (this build fills that slot from the other branch). */
 ADDRESS(0x80021984, 0x290)
 void func_80021984(void)
 {
@@ -50,6 +49,7 @@ void func_80021984(void)
             }
         }
     } else {
+        sp->unk238.x = 56;
         sp->unk238.y = 96;
         func_8001e530(&sp->unk238, &sp->unk0.team.pos[0], NULL, NULL, 272);
         sp->unk238.x = 216;
