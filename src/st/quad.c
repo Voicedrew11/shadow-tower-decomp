@@ -90,9 +90,13 @@ void func_800210f4(void)
  * dark translucent quad covers the display, then hands the image to
  * tim_load_images and copies the lower half of VRAM to the upper.
  *
- * Not exact (size-exact): retail sets up the 0x18000 field offset in $s1
- * before the RECT copy and builds the POLY_F4 tag before its XY stores; this
- * source does both later.
+ * Not exact (size-exact). Retail's first body insn is the 0x18000 field
+ * offset (`sw s1` leads the prologue), ahead of the RECT copy: opening a
+ * block with `RECT clear` after the first three statements reproduces that
+ * and nothing else. Retail also builds the POLY_F4 tag in a2 before the XY
+ * stores (GetTPage's `li a2,640` waits for it) and stores the ordering-table
+ * word between the last two XY loads; tag/OT statement orders and a scalar
+ * `ot` did not give that schedule.
  */
 ADDRESS(0x80021158, 0x34c)
 void func_80021158(void)

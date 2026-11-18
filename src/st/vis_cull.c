@@ -78,9 +78,11 @@ void vis_build_planes(void)
 }
 
 /*
- * Not exact: same instructions and size; GCC allocates the viewer pointer
- * and the two offsets to t1/t3/t2 where retail has t3/t2/t1, and orders
- * the final squares' temporaries differently.
+ * Not exact: same instructions and size. Retail has z, x, the two cell
+ * offsets and the viewer pointer in a3, t0, t1, t2, t3; this build gives the
+ * pointer t1 (its priority must fall below the offsets': 3 refs, or 5 refs
+ * for x/z and 4 for the offsets), and the final squares use a1/v1 for
+ * retail's v1/v0. A permuter run and reordering the reads did not get there.
  */
 ADDRESS(0x8001c4c8, 0x144)
 int vis_measure_position(void)
