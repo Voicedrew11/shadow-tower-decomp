@@ -15,14 +15,6 @@
  * opponent (state 5) facing the attack blocks it (state copied to 0x4df14,
  * returns 0); otherwise the opponent's sparks start and it returns 1.
  */
-/* Not exact (size-exact): retail copies the attack angle into a fresh
- * temporary on each arc path (`move a0,a2`, `move v1,a2`, `move a1,a2`: a
- * narrowing that folded to a copy, as an inlined helper with a short
- * parameter would leave) and reads the opponent's state through a1; with the
- * angle a 16-bit local this build has the first copy ($a3, reused for the
- * guard test) but compares the angle's own register on the three paths.
- * Ruled out: int or u16 angle, (s16) casts at each compare, an int copy
- * assigned on each path. */
 ADDRESS(0x8002dec4, 0x250)
 int func_8002dec4(int n, s16 reach, s16 arc)
 {
@@ -46,12 +38,12 @@ int func_8002dec4(int n, s16 reach, s16 arc)
     angle = ratan2(d.vx, d.vz) & 0xfff;
     lo = f->unk4DF02 - arc;
     if (lo < 0) {
-        if (angle < lo + 4096 && f->unk4DF02 + arc < angle)
+        if (lo + 4096 > angle && f->unk4DF02 + arc < angle)
             goto miss;
     } else {
         hi = f->unk4DF02 + arc;
         if (hi >= 4096) {
-            if (angle > hi - 4096 && angle < lo)
+            if (hi - 4096 < angle && angle < lo)
                 goto miss;
         } else {
             if (angle < lo)
@@ -71,9 +63,11 @@ int func_8002dec4(int n, s16 reach, s16 arc)
     }
     if (t - o->unk4DF02 >= 256 && t - o->unk4DF02 <= 3840)
         goto hit;
-blocked:
     o->unk4DF14 = state;
 miss:
+    return 0;
+blocked:
+    o->unk4DF14 = state;
     return 0;
 hit:
     func_8002d738(1 - n);
