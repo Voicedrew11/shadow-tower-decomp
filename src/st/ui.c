@@ -2225,10 +2225,6 @@ void func_8002e490(void)
  * Draws the equipment slots from their VRAM images, highlights the slot
  * under the cursor and, while +0x2c6 is 1, prints each equipped item's
  * +0x28 figure with a shadow.
- *
- * Not exact: retail keeps the scratchpad base, draw mode and rectangle
- * offset in s4/s3/s5, this source in s3/s5/s4; the loop-latch increments
- * also schedule in the opposite order.
  */
 ADDRESS(0x8002e4d0, 0x47c)
 void func_8002e4d0(void)
@@ -2269,9 +2265,11 @@ void func_8002e4d0(void)
     sp->style[7].b = 96;
     sp->style[7].cd = 48;
     equip = viewer.unk38;
-    for (i = 0; i < EQUIP_SLOTS; i++, equip++) {
-        if (i == 2 || (i == 3 && vis_table_c.unk0118[viewer.unk38[16]].unk26 == 9) ||
-            (i == 4 && vis_table_c.unk0118[viewer.unk38[17]].unk26 == 9))
+    for (i = 0; i < EQUIP_SLOTS; equip++, i++) {
+        if (i == 2)
+            mode = 48;
+        else if ((i == 3 && vis_table_c.unk0118[viewer.unk38[16]].unk26 == 9) ||
+                 (i == 4 && vis_table_c.unk0118[viewer.unk38[17]].unk26 == 9))
             mode = 48;
         else
             mode = 16;
