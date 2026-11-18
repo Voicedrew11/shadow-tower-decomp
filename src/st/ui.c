@@ -1116,13 +1116,7 @@ void func_8002a5a4(void)
     PAGE_END();
 }
 
-/*
- * The map page: visited areas and their completion, or the area summary.
- *
- * Not exact: in the summary branch retail keeps the total minutes in
- * $a0 and hours/minutes in $s5 (this build: $s1), and swaps $s2/$s3 for the
- * two colour pointers.
- */
+/* The map page: visited areas and their completion, or the area summary. */
 ADDRESS(0x8002a954, 0x994)
 void func_8002a954(void)
 {
@@ -1212,7 +1206,8 @@ void func_8002a954(void)
         func_80026ecc(15, 213, 168, &sp->style[0]);
         func_80027440(630 | DIGITS(3), 221, 168, &sp->style[4]);
         time = (u32)viewer.unk34 / 60;
-        hours = time / 60;
+        minutes = time / 60;
+        hours = minutes;
         minutes = time - hours * 60;
         func_80027440((u16)hours | DIGITS(2), 199, 198, &sp->style[4]);
         func_80026ecc(27, 224, 198, &sp->style[0]);
