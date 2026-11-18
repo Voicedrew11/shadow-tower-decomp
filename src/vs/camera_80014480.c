@@ -76,8 +76,17 @@ void func_80014480(void)
  * separation, sweeping in during the round start. The camera eases toward
  * its target at DAT_80063354 units per frame, keeps within +-32767 on x
  * and z, and faces the target.
- * Not exact: midpoint/easing temporaries and regular-camera block edges
- * differ; the winner-record lifetime and component write order agree.
+ *
+ * Not exact: the regular camera's near and far arms. Retail keeps the two
+ * arms apart although their last six instructions print identically (this
+ * build cross-jumps them, 0x18 bytes shorter), holds dist in $a3 and the
+ * near limit in $a2 (here $a1/$a3), keeps the two offsets in $a0/$v1 as arm-
+ * local values, reuses the raw look.vx halfword for eye.vx and shares only
+ * the eye.vz store with the plain arm. Ruled out: arm-local offset variables
+ * (same registers on both arms, still cross-jumped), the far limit assigned
+ * inside its arm, a common `eye.vz = z` after the three arms with z
+ * completed in each arm (both spellings, much worse). The winner camera, the
+ * easing and the clamps agree.
  */
 ADDRESS(0x80014634, 0x9ec)
 void func_80014634(void)
