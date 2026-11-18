@@ -1,8 +1,6 @@
 /*
  * ST.EXE: new-game defaults and the per-area snapshots of the entry tables
- * in DAT_801cba08 (WIP module, 0x800559bc..0x800562d4; ends at
- * func_80055f9c, which is not exact and 20 bytes long, so that the save
- * image code keeps its offsets in src/st/save_io.c).
+ * in DAT_801cba08 (WIP module, 0x800559bc..0x800562d4).
  */
 #include <kf/lib/address.h>
 #include <kf/lib/types.h>
@@ -182,12 +180,6 @@ void func_80055cf4(int area)
     }
 }
 
-/*
- * Not exact (20 bytes long): retail keeps 0xffff in a delay slot and needs
- * no saved register; this source hoists it into $s0. Sentinel spelling and
- * scoped swap temporaries emit the same code; explicit mask-row pointers
- * add another saved base and diverge further.
- */
 /* Restores what func_80055cf4 recorded for area `area`. */
 ADDRESS(0x80055f9c, 0x338)
 void func_80055f9c(int area)
@@ -196,7 +188,6 @@ void func_80055f9c(int area)
     Vis48 *c = vis_table_c.entries;
     Vis88 *b = vis_table_b.entries;
     int i;
-    int bit;
     u16 n;
     u8 t;
 
@@ -208,23 +199,22 @@ void func_80055f9c(int area)
         if (DAT_801cba08.unk180[area][i / 32] & BIT(i))
             c->unk22 = 0;
     }
-    for (i = 0; i < 240; i++, b++) {
-        bit = BIT(i);
-        if (DAT_801cba08.unk240[area][i / 32] & bit) {
+    for (i = 0; i < 240; b++, i++) {
+        if (DAT_801cba08.unk240[area][i / 32] & BIT(i)) {
             b->unk0a = 0xffff;
         } else {
             switch (b->unk05) {
             default:
-                if (DAT_801cba08.unk840[area][i / 32] & bit)
+                if (DAT_801cba08.unk840[area][i / 32] & BIT(i))
                     b->unk4A.door.unk4F = 255;
-                if (DAT_801cba08.unkE40[area][i / 32] & bit)
+                if (DAT_801cba08.unkE40[area][i / 32] & BIT(i))
                     b->unk0C = 255;
                 break;
             case 0:
             case 1:
-                if (DAT_801cba08.unk840[area][i / 32] & bit)
+                if (DAT_801cba08.unk840[area][i / 32] & BIT(i))
                     b->unk4A.door.unk4F = 255;
-                if (DAT_801cba08.unkE40[area][i / 32] & bit) {
+                if (DAT_801cba08.unkE40[area][i / 32] & BIT(i)) {
                     n = b->unk4A.door.unk4E;
                     while (n--) {
                         t = vis_records[b->unk4A.door.unk4C + n].part;
@@ -241,9 +231,9 @@ void func_80055f9c(int area)
                 }
                 break;
             case 52:
-                if (DAT_801cba08.unk840[area][i / 32] & bit)
+                if (DAT_801cba08.unk840[area][i / 32] & BIT(i))
                     b->unk4A.door.unk4F = 255;
-                if (DAT_801cba08.unkE40[area][i / 32] & bit) {
+                if (DAT_801cba08.unkE40[area][i / 32] & BIT(i)) {
                     b->unk0C = 255;
                     b->unk10 = 0;
                     b->unk02 = 1;
