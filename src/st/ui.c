@@ -2441,20 +2441,15 @@ void func_8002ed98(void)
 /*
  * Draws a 25 x 5 grid of 10 x 10 texture cells from tex at pos, 11 pixels
  * apart horizontally and 12 vertically, semi-transparent in color.
- *
- * Not exact (4 bytes short, the loops agree): retail loads tex->vx into a0
- * and tex->vy into v1, this build the reverse, so `move t0,a0` fills the
- * first load's delay slot instead of leading the function. Global-alloc
- * ranks the vx value first here (5 refs over 11 insns against 5 over 16)
- * and gives it v1; retail's order needs vy first. Ruled out: the position
- * of the cols/rows assignments, short u0/v0, literal bounds, operand order
- * of the u/v sums. VS 0x800207d4 is the same function with the same residue.
  */
 ADDRESS(0x8002f1f8, 0x2a0)
 void func_8002f1f8(DVECTOR *pos, DVECTOR *tex, DVECTOR *clut, CVECTOR *color, int arg4)
 {
     int row, col;
-    int cols, rows;
+    int cols, rows; /* cells across and down */
+    int w, h;       /* a cell on screen */
+    int tw, th;     /* a cell in the texture */
+    int dx, dy;     /* cell pitch on screen */
     int u0, v0;
     int u, v;
     StPacketBuffer *buf;
@@ -2463,18 +2458,24 @@ void func_8002f1f8(DVECTOR *pos, DVECTOR *tex, DVECTOR *clut, CVECTOR *color, in
 
     cols = 25;
     rows = 5;
+    w = 10;
+    h = 10;
+    tw = 10;
+    th = 10;
+    dx = 11;
+    dy = 12;
     u0 = (short)(tex->vx % 64) * 4;
     v0 = (short)(tex->vy % 256);
     for (row = 0; row < rows; row++) {
         for (col = 0; col < cols; col++) {
-            u = u0 + col * 10;
-            v = v0 + row * 10;
+            u = u0 + col * tw;
+            v = v0 + row * th;
             NEW_PRIM(buf, p, POLY_FT4);
-            setUV4(p, u, v, u + 10, v, u, v + 10, u + 10, v + 10);
-            p->x0 = p->x2 = pos->vx + col * 11;
-            p->x1 = p->x3 = pos->vx + col * 11 + 10;
-            p->y0 = p->y1 = pos->vy + row * 12;
-            p->y2 = p->y3 = pos->vy + row * 12 + 10;
+            setUV4(p, u, v, u + tw, v, u, v + th, u + tw, v + th);
+            p->x0 = p->x2 = pos->vx + col * dx;
+            p->x1 = p->x3 = pos->vx + col * dx + w;
+            p->y0 = p->y1 = pos->vy + row * dy;
+            p->y2 = p->y3 = pos->vy + row * dy + h;
             c = *color;
             setRGB0(p, c.r, c.g, c.b);
             p->tpage = GetTPage(0, color->cd & 3, tex->vx, tex->vy);
