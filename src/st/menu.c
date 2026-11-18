@@ -2676,18 +2676,13 @@ void func_80060018(void)
  * (MenuState.levels); a row waits for the next button (unk2E2), row 12
  * restores the defaults, row 13 returns, and buttons used twice mark
  * levels.flags.
- * Not exact (size-exact): retail keeps the scratchpad in s0 and the
- * decode cursor in s1; this build reverses them and uses different
- * counter registers. The cursor setup before the sound call, slider-first
- * branches and final halfword pointer walk now agree with retail.
  */
 ADDRESS(0x80060334, 0x878)
 void func_80060334(void)
 {
     MenuScratch *sp = MENU_SCRATCH;
-    int i;
-    int used;
-    u8 *option;
+
+
     u16 *key;
 
     sp->unk2E0 = 0;
@@ -2720,6 +2715,8 @@ void func_80060334(void)
                 DAT_801cd180.unk4 = 0;
                 if (sp->unk2E0 == 5) {
                     const u16 *decode = DAT_801cd180.unk22;
+                    int i;
+
                     func_80057cc8();
                     for (i = 0; i < 12; i++, decode++) {
                         if (*decode & 0x1000)
@@ -2754,7 +2751,8 @@ void func_80060334(void)
                 }
             }
             if (DAT_801cd180.unkC & 0x20) {
-                option = &DAT_801cd120.unk1;
+                u8 *option = &DAT_801cd120.unk1;
+
                 func_80057d10();
                 DAT_801cd180.unkC = 0;
                 if (sp->unk2E0 <= 0) {
@@ -2765,7 +2763,8 @@ void func_80060334(void)
                 }
             }
             if (DAT_801cd180.unkC & 0x80) {
-                option = &DAT_801cd120.unk1;
+                u8 *option = &DAT_801cd120.unk1;
+
                 func_80057d10();
                 DAT_801cd180.unkC = 0;
                 if (sp->unk2E0 <= 0) {
@@ -2918,10 +2917,12 @@ void func_80060334(void)
                 sp->unk0.levels.level[sp->unk2E0] = 11;
                 *key = 0x200;
             }
-            sp->unk0.levels.flags = 0;
             {
                 const u16 *scan = DAT_801cd180.unk22;
-                used = 15;
+                int used = 15;
+                int i;
+
+                sp->unk0.levels.flags = 0;
                 for (i = 0; i < 12; i++, scan++) {
                     if (*scan & used)
                         sp->unk0.levels.flags |= *scan;
