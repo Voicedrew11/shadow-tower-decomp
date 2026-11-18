@@ -135,12 +135,7 @@ void func_80017cc4(u16 i0, u16 i1, u16 i2)
     gte_stopz(&SCRATCHPAD->opz);
 }
 
-/*
- * Blends the current lighting with one of three targets by t / 4096.
- *
- * Not exact: the first 0x10 coefficient's loads, sum and multiply use
- * different temporary registers.
- */
+/* Blends the current lighting with one of three targets by t / 4096. */
 ADDRESS(0x80017d28, 0x718)
 void func_80017d28(u32 t, int flags)
 {
@@ -208,23 +203,21 @@ void func_80017d28(u32 t, int flags)
         gte_SetBackColor(back1.r, back1.g, back1.b);
     } else if (flags & 0x10) {
         StLight *to = &lighting.light[46];
-        u32 s;
         sp->unk64 = cur->unk68;
-        s = 4096 - t;
         sp->unk68 = cur->unk6A;
         sp->unk394 = to;
-        m[0][0] = ((to->color.m[0][0] + cur->color.m[0][0]) * s) >> 13;
-        m[0][1] = ((to->color.m[0][1] + cur->color.m[0][1]) * s) >> 13;
-        m[0][2] = ((to->color.m[0][2] + cur->color.m[0][2]) * s) >> 13;
-        m[1][0] = ((to->color.m[1][0] + cur->color.m[1][0]) * s) >> 13;
-        m[1][1] = ((to->color.m[1][1] + cur->color.m[1][1]) * s) >> 13;
-        m[1][2] = ((to->color.m[1][2] + cur->color.m[1][2]) * s) >> 13;
-        m[2][0] = ((to->color.m[2][0] + cur->color.m[2][0]) * s) >> 13;
-        m[2][1] = ((to->color.m[2][1] + cur->color.m[2][1]) * s) >> 13;
-        m[2][2] = ((to->color.m[2][2] + cur->color.m[2][2]) * s) >> 13;
-        back2.r = ((to->back.r + cur->back.r) * s) >> 13;
-        back2.g = ((to->back.g + cur->back.g) * s) >> 13;
-        back2.b = ((to->back.b + cur->back.b) * s) >> 13;
+        m[0][0] = ((to->color.m[0][0] + cur->color.m[0][0]) * (4096 - t)) >> 13;
+        m[0][1] = ((to->color.m[0][1] + cur->color.m[0][1]) * (4096 - t)) >> 13;
+        m[0][2] = ((to->color.m[0][2] + cur->color.m[0][2]) * (4096 - t)) >> 13;
+        m[1][0] = ((to->color.m[1][0] + cur->color.m[1][0]) * (4096 - t)) >> 13;
+        m[1][1] = ((to->color.m[1][1] + cur->color.m[1][1]) * (4096 - t)) >> 13;
+        m[1][2] = ((to->color.m[1][2] + cur->color.m[1][2]) * (4096 - t)) >> 13;
+        m[2][0] = ((to->color.m[2][0] + cur->color.m[2][0]) * (4096 - t)) >> 13;
+        m[2][1] = ((to->color.m[2][1] + cur->color.m[2][1]) * (4096 - t)) >> 13;
+        m[2][2] = ((to->color.m[2][2] + cur->color.m[2][2]) * (4096 - t)) >> 13;
+        back2.r = ((to->back.r + cur->back.r) * (4096 - t)) >> 13;
+        back2.g = ((to->back.g + cur->back.g) * (4096 - t)) >> 13;
+        back2.b = ((to->back.b + cur->back.b) * (4096 - t)) >> 13;
         gte_SetColorMatrix(m);
         gte_SetBackColor(back2.r, back2.g, back2.b);
     } else if (flags & 0x8) {
