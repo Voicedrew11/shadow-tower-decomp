@@ -20,10 +20,6 @@ SDATA(0x80063270, 0x10)
 /* Number-width flag for func_8001d9cc (ST.EXE's DIGITS, src/st/ui.c). */
 #define DIGITS(n) ((n) << 24)
 
-/* Not exact (one attempt; 79.3%): first divergence at +0xd8, the cursor
- * box: retail keeps ~unk1D0 apart from the row (in $v1) and stores the box
- * x before its y on each path so the y tails cross-jump; register choices
- * then differ through the item lookup and the grid loops. */
 ADDRESS(0x80020aa4, 0x69c)
 void func_80020aa4(int player)
 {
@@ -33,30 +29,33 @@ void func_80020aa4(int player)
     CVECTOR frame;
     VsMenuScratch *sp = VS_MENU_SCRATCH;
     int c;
-    int row;
+    s16 row;
     int id;
     int idx;
     int n;
     int i, j, k;
-    s16 x, y;
+    int x, y;
 
     func_8001d8b8(VS_MESSAGE(180), 44, 21, &sp->style[0]);
     func_8001f23c(16, 16, 138, 22);
     c = sp->unk1D0;
     row = c >> 2;
     if (c < 0) {
-        row = ~c;
+        int slot = ~c;
+
         if (sp->unk1D6) {
             sp->unk218.x = 26;
-            sp->unk218.y = row * 56 + 44;
-            goto box;
+            sp->unk218.y = slot * 56 + 44;
+        } else {
+            sp->unk218.x = 32;
+            sp->unk218.y = slot * 56 + 48;
         }
-        sp->unk218.x = 32;
     } else {
-        sp->unk218.x = (s16)(c - row * 4) * 112 + 176;
+        s16 col = c - row * 4;
+
+        sp->unk218.x = col * 112 + 176;
+        sp->unk218.y = row * 56 + 48;
     }
-    sp->unk218.y = row * 56 + 48;
-box:
     sp->unk218.w = 96;
     sp->unk218.h = 48;
     func_8001de8c(&sp->unk218, &sp->unk214, 513, 1);
@@ -70,9 +69,9 @@ box:
     if (c < 0) {
         id = DAT_801624b8[player].slot[-c - 1];
         if (id != -1) {
-            for (i = 0; i < sp->unk0.team.count; i++) {
-                if (id == sp->unk0.team.kinds[i]) {
-                    idx = i;
+            for (k = 0; k < sp->unk0.team.count; k++) {
+                if (id == sp->unk0.team.kinds[k]) {
+                    idx = k;
                     break;
                 }
             }
@@ -82,8 +81,8 @@ box:
     } else {
         idx = sp->unk1D2 * 4 + c;
         id = sp->unk0.team.kinds[idx];
-        for (i = 0; i < 3; i++) {
-            if (id == DAT_801624b8[player].slot[i])
+        for (k = 0; k < 3; k++) {
+            if (id == DAT_801624b8[player].slot[k])
                 idx = -1;
         }
     }
@@ -101,15 +100,17 @@ box:
     frame.b = 50;
     idx = sp->unk1D2 * 4;
     for (i = 0; i < 3; i++) {
-        n = 4;
-        if (sp->unk0.team.rows == sp->unk1D2 + i)
+        if (sp->unk1D2 + i == sp->unk0.team.rows)
             n = sp->unk0.team.last;
+        else
+            n = 4;
         sp->unk238.x = 176;
-        for (j = 0; j < n; j++, idx++) {
+        for (j = 0; j < n; idx++, j++) {
             if (idx < sp->unk0.team.count) {
                 func_8001de8c(&sp->unk238, &frame, 513, 0);
+                id = sp->unk0.team.kinds[idx];
                 for (k = 0; k < 3; k++) {
-                    if (DAT_801624b8[player].slot[k] == sp->unk0.team.kinds[idx]) {
+                    if (DAT_801624b8[player].slot[k] == id) {
                         black.r = 0;
                         black.g = 0;
                         black.b = 0;
