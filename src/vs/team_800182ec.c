@@ -30,14 +30,14 @@ void func_80021c14(int page);
 #define REPEAT (DAT_801603c0.pads[0].unkC | DAT_801603c0.pads[1].unkC)
 #define HELD (DAT_801603c0.pads[0].unk0 | DAT_801603c0.pads[1].unk0)
 
-/* Not exact: player/pad/index lifetimes and some button-tail edges differ;
- * retail spills player to the stack instead of keeping it in s7. */
+/* The team being edited: the three ids of `player`. */
+#define TEAM (DAT_801624b8[player].slot)
+
 ADDRESS(0x800182ec, 0x998)
 void func_800182ec(VsMenuScratch *sp, int player)
 {
     VsTeamEdit edit;
     int shown = -1;
-    s32 *team = DAT_801624b8[player].slot;
     u_long *buf;
     int top;
     int col;
@@ -123,7 +123,7 @@ void func_800182ec(VsMenuScratch *sp, int player)
             } else if (REPEAT & 0x40) {
                 func_8001c8b8();
                 if (edit.unk0) {
-                    if (row < 2 && team[row + 1] != -1) {
+                    if (row < 2 && TEAM[row + 1] != -1) {
                         sp->unk1D0--;
                         func_80017da4(sp, player, &edit);
                     }
@@ -166,12 +166,12 @@ void func_800182ec(VsMenuScratch *sp, int player)
                     sp->unk1D6 = 1;
                     if (sp->unk1D0 < 0) {
                         edit.unk4 = ~sp->unk1D0;
-                        if (team[edit.unk4] != -1) {
+                        if (TEAM[edit.unk4] != -1) {
                             func_8001c978();
                             func_80017c84(sp, player, &edit);
                             goto scrolled;
                         }
-                    } else if (team[2] == -1) {
+                    } else if (TEAM[2] == -1) {
                         if (sp->unk0.team.kinds[pick] == 0xff) {
                             func_8001c938();
                             edit.unk0 = 0;
@@ -179,17 +179,15 @@ void func_800182ec(VsMenuScratch *sp, int player)
                             goto scrolled;
                         }
                         for (i = 0; i < 3; i++) {
-                            if (team[i] == sp->unk0.team.kinds[pick])
+                            if (TEAM[i] == sp->unk0.team.kinds[pick])
                                 break;
                         }
                         if (i == 3) {
                             for (i = 0; i < 3; i++) {
-                                int none = -1;
-
-                                if (team[i] == none) {
+                                if (TEAM[i] == -1) {
                                     RECT r;
 
-                                    team[i] = sp->unk0.team.kinds[pick];
+                                    TEAM[i] = sp->unk0.team.kinds[pick];
                                     r.x = sp->unk0.team.pos[pick % 12].vx;
                                     r.y = sp->unk0.team.pos[pick % 12].vy;
                                     r.w = 96;
@@ -217,7 +215,7 @@ void func_800182ec(VsMenuScratch *sp, int player)
                 DAT_8006335c = 0;
                 func_8001c978();
                 if (sp->unk1D0 < 0) {
-                    id = team[-sp->unk1D0 - 1];
+                    id = TEAM[-sp->unk1D0 - 1];
                     if (id != -1) {
                         /* Retail only updates idx when a kind matches. */
                         for (k = 0; k < sp->unk0.team.count; k++) {
@@ -231,8 +229,9 @@ void func_800182ec(VsMenuScratch *sp, int player)
                     }
                 } else {
                     idx = sp->unk1D2 * 4 + sp->unk1D0;
+                    id = sp->unk0.team.kinds[idx];
                     for (k = 0; k < 3; k++) {
-                        if (sp->unk0.team.kinds[idx] == team[k]) {
+                        if (id == TEAM[k]) {
                             idx = -1;
                             break;
                         }
@@ -240,19 +239,17 @@ void func_800182ec(VsMenuScratch *sp, int player)
                 }
                 if (idx < sp->unk0.team.count && idx != -1) {
                     if (idx != shown) {
-                        DVECTOR tex;
-                        DVECTOR clut;
-
                         buf = DAT_801a4590.unk4A4;
                         func_8002ee90(10, sp->unk0.team.kinds[idx] + 200, buf);
                         shown = idx;
                         func_80012c2c(&buf[1], &sp->unk0.team.pos[15], NULL);
-                        tex.vx = 960;
-                        tex.vy = 446;
-                        clut.vx = 560;
-                        clut.vy = 497;
-                        buf = (u_long *)((buf[0] + sizeof(*buf)) + (u8 *)buf);
-                        func_80018240(buf + 1, &tex, &clut);
+                        {
+                            DVECTOR tex = {960, 446};
+                            DVECTOR clut = {560, 497};
+
+                            buf = (u_long *)((buf[0] + sizeof(*buf)) + (u8 *)buf);
+                            func_80018240(buf + 1, &tex, &clut);
+                        }
                     }
                     sp->unk1CC = 2;
                 }
@@ -267,17 +264,13 @@ void func_800182ec(VsMenuScratch *sp, int player)
                     slot = sp->unk1D2 * 4;
                 }
                 DAT_801a4590.unk4A0 = DAT_801a4590.unk4A4;
-                j = 0;
-                if (j < n) {
-                    VsCdState *cd = &DAT_801a4590;
-
-                    do {
-                        if (slot < sp->unk0.team.count) {
-                            size = func_8002ee90(10, sp->unk0.team.kinds[slot], cd->unk4A0) * 2048;
-                            func_80012c2c(cd->unk4A0, &sp->unk0.team.pos[slot % 12], NULL);
-                            cd->unk4A0 = (u_long *)((u8 *)cd->unk4A0 + size);
-                        }
-                    } while (j++, slot++, j < n);
+                for (j = 0; j < n; j++, slot++) {
+                    if (slot < sp->unk0.team.count) {
+                        size = func_8002ee90(10, sp->unk0.team.kinds[slot],
+                                             DAT_801a4590.unk4A0) * 2048;
+                        func_80012c2c(DAT_801a4590.unk4A0, &sp->unk0.team.pos[slot % 12], NULL);
+                        DAT_801a4590.unk4A0 = (u_long *)((u8 *)DAT_801a4590.unk4A0 + size);
+                    }
                 }
                 DrawSync(0);
             }
