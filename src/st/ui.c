@@ -60,19 +60,33 @@ static s32 DAT_800881c8;
     (buf)->cur = (u_long *)((p) + 1);     \
     world_state.unk8328++
 
-/* Not exact: this build is 8 bytes shorter than retail. Layout constants
- * and packet-pointer registers differ; retail zero-extends the half width
- * before the u multiply and reloads rgb.r before setRGB0. The extent
- * difference also shifts later switch labels in this unit's JUMPTABLES. */
+/*
+ * NEW_PRIM with the end of the new primitive kept in the caller's `next`:
+ * a function that takes a primitive in two branches uses one variable for
+ * both.
+ */
+#define NEW_PRIM_NEXT(buf, p, next, type) \
+    (buf) = world_state.packet;           \
+    (p) = (type *)(buf)->cur;             \
+    (next) = (u_long *)((p) + 1);         \
+    if ((buf)->end < (next))              \
+        return;                           \
+    (buf)->cur = (next);                  \
+    world_state.unk8328++
+
+/* Draws glyph `c` at (x, y): half-width codes below the split, full-width
+ * codes after it. */
 ADDRESS(0x80026ecc, 0x460)
 void func_80026ecc(u16 c, u16 x, u16 y, CVECTOR *color)
 {
     StPacketBuffer *buf;
     POLY_FT4 *p;
+    u_long *next;
     CVECTOR rgb;
-    int half, cols, qw, qh, fw, ch;
+    u16 half, cols, qw, qh, fw, ch;
     u16 split;
-    u16 u, v, q, r;
+    int u, v;
+    u16 q, r;
     int n;
 
     if (MENU_SCRATCH->unk2E5 == 0) {
@@ -97,10 +111,13 @@ void func_80026ecc(u16 c, u16 x, u16 y, CVECTOR *color)
         q = c / (cols * 2);
         u = r * half;
         v = ch * q;
-        NEW_PRIM(buf, p, POLY_FT4);
+        NEW_PRIM_NEXT(buf, p, next, POLY_FT4);
         setUV4(p, u, v, half + u, v, u, ch + v, half + u, ch + v);
         if (DAT_800881c4) {
-            x -= (DAT_800881ac == 1 ? DAT_800881a0 : DAT_800881a2) * (half + 1);
+            if (DAT_800881ac == 1)
+                x -= DAT_800881a0 * (half + 1);
+            else
+                x -= DAT_800881a2 * (half + 1);
             DAT_800881c0 += half + 1;
             if (DAT_800881bc < x) {
                 DAT_800881c8++;
@@ -109,17 +126,27 @@ void func_80026ecc(u16 c, u16 x, u16 y, CVECTOR *color)
             if (x < DAT_800881ba)
                 return;
         }
-        setXY4(p, x, y, x + half, y, x, y + qh, x + half, y + qh);
+        p->x1 = p->x3 = x + half;
+        p->x0 = p->x2 = x;
+        p->y0 = p->y1 = y;
+        p->y2 = p->y3 = y + qh;
+        rgb = *color;
+        rgb.r += 8;
+        rgb.g += 8;
+        rgb.b += 8;
     } else {
         n = c - split / 2;
         r = n % cols;
         q = n / cols;
         u = fw * r;
         v = ch * q;
-        NEW_PRIM(buf, p, POLY_FT4);
+        NEW_PRIM_NEXT(buf, p, next, POLY_FT4);
         setUV4(p, u, v, fw + u, v, u, ch + v, fw + u, ch + v);
         if (DAT_800881c4) {
-            x -= (DAT_800881ac == 1 ? DAT_800881a0 : DAT_800881a2) * (half + 1);
+            if (DAT_800881ac == 1)
+                x -= DAT_800881a0 * (half + 1);
+            else
+                x -= DAT_800881a2 * (half + 1);
             DAT_800881c0 += fw;
             if (DAT_800881bc < x) {
                 DAT_800881c8++;
@@ -128,12 +155,15 @@ void func_80026ecc(u16 c, u16 x, u16 y, CVECTOR *color)
             if (x < DAT_800881ba)
                 return;
         }
-        setXY4(p, x, y, x + qw, y, x, y + qh, x + qw, y + qh);
+        p->x1 = p->x3 = x + qw;
+        p->x0 = p->x2 = x;
+        p->y0 = p->y1 = y;
+        p->y2 = p->y3 = y + qh;
+        rgb = *color;
+        rgb.r += 8;
+        rgb.g += 8;
+        rgb.b += 8;
     }
-    rgb = *color;
-    rgb.r += 8;
-    rgb.b += 8;
-    rgb.g += 8;
     setRGB0(p, rgb.r, rgb.g, rgb.b);
     if (color->cd & 0x80) {
         p->tpage = GetTPage(0, color->cd & 3, 896, 256);
