@@ -88,7 +88,7 @@ extern int fdat_801eda08; /* FDAT_202.BIN: src/fdat_202/main.c */
 extern int fdat_801ee0b4; /* FDAT_242.BIN: src/fdat_242/main.c */
 extern int fdat_801ee0b8; /* FDAT_242.BIN: src/fdat_242/main.c */
 extern int fdat_801ee0bc; /* FDAT_242.BIN: src/fdat_242/main.c */
-extern int fdat_801ed8cc; /* FDAT_252.BIN: src/fdat_252/map_801ed4a0.c */
+extern int fdat_801ed8cc; /* FDAT_252.BIN: src/fdat_252/main.c */
 extern int fdat_801ee370; /* FDAT_262.BIN: src/fdat_262/map_801edec4.c */
 extern int fdat_801ed8c4; /* FDAT_442..472.BIN: src/lib/fdat_801ed420.c */
 /* FDAT_272.BIN: each word is defined by one of its map units (one COMMON

@@ -1,6 +1,9 @@
 /*
- * FDAT_142.BIN: its handler table, then fdat_801ebec4 (whose switch
- * table follows the handler table) and fdat_801ec6a4 (WIP module).
+ * FDAT_142.BIN as one translation unit (WIP module): its handler table,
+ * the 21 functions every overlay starts with (src/lib/fdat_common_a.inc,
+ * fdat_common.inc, fdat_common_b.inc), then its map handlers through its
+ * own move picker. One object, because the picker's switch table is
+ * 8-aligned after fdat_801ebec4's in the same read-only run.
  */
 #include <kf/lib/address.h>
 #include <kf/lib/types.h>
@@ -16,8 +19,9 @@
 #include <st/xa.h>
 #include <st/vis.h>
 #include <st/fdat.h>
+#include <st/menu.h>
 
-RODATA(0x801eb560, 0x1cc)
+RODATA(0x801eb560, 0x24c)
 
 void func_801ed4a0();
 void func_801ed54c();
@@ -38,4 +42,176 @@ const FdatHeader fdat_header = {
     0x46,
 };
 
+#include "../lib/fdat_common_a.inc"
 #include "../lib/fdat_common.inc"
+#include "../lib/fdat_common_b.inc"
+
+DATA(0x801edaf4, 0x4, ".bss")
+static int fdat_801edaf4;
+
+DATA(0x801edaf8, 0x4, ".bss")
+static int fdat_801edaf8;
+
+/* 0xff once record 0's stream counter has started. */
+DATA(0x801edafc, 0x4, ".bss")
+static int fdat_801edafc;
+
+/* 0xff once record 4's stream counter reached 2. */
+DATA(0x801edb00, 0x4, ".bss")
+static int fdat_801edb00;
+
+/* Sets up the area: the scene words by records 0 and 4's stream counters;
+ * until record 4's reaches 2, table A entries 5..7 are cleared and entry
+ * 49's range bits set. */
+ADDRESS(0x801ed4a0, 0xac)
+void func_801ed4a0(void)
+{
+    Vis192 *r0 = &vis_table_a.unk3500[0];
+    Vis212 *e49 = &vis_table_a.entries[49];
+    Vis192 *r4 = &vis_table_a.unk3500[4];
+    Vis212 *e5 = &vis_table_a.entries[5];
+    Vis212 *e6 = &vis_table_a.entries[6];
+    Vis212 *e7 = &vis_table_a.entries[7];
+
+    fdat_801edaf4 = 0;
+    fdat_801edaf8 = 0;
+    if (DAT_801cba08.unk1448[r0->unk09] != 0)
+        fdat_801edafc = 0xff;
+    else
+        fdat_801edafc = 0;
+    if (DAT_801cba08.unk1448[r4->unk09] == 2) {
+        fdat_801edb00 = 0xff;
+    } else {
+        e7->unk00 = 0;
+        e6->unk00 = 0;
+        e5->unk00 = 0;
+        e49->unk1C.bytes[3] = 2;
+        fdat_801edb00 = 0;
+    }
+}
+
+/*
+ * Runs the area: the viewer standing on record 0x1f2 or 0x63 picks the
+ * scene words; entry 48 asleep until it wakes (scene word 3 armed), then
+ * leaves once the area fade is done, keeping the viewer's status 0x188 at
+ * 30; record 0x10e with both words set sends entry 49 away and frees
+ * entries 5..7.
+ */
+ADDRESS(0x801ed54c, 0x26c)
+void func_801ed54c(void)
+{
+    Vis212 *e48 = &vis_table_a.entries[48];
+    Vis212 *e49 = &vis_table_a.entries[49];
+    Vis212 *e5 = &vis_table_a.entries[5];
+    Vis212 *e6 = &vis_table_a.entries[6];
+    Vis212 *e7 = &vis_table_a.entries[7];
+
+    if (fdat_801edaf8 == 0) {
+        if (viewer.unk178 == 0x1f2) {
+            fdat_801edaf4 = 1;
+            fdat_801edaf8 = 1;
+        } else if (viewer.unk178 == 0x63) {
+            fdat_801edaf4 = 0;
+            fdat_801edaf8 = 1;
+        }
+    }
+    if (fdat_801edaf4 == 1 && fdat_801edaf8 == 1)
+        e48->unk00 = 0;
+    if (fdat_801edaf4 == 0) {
+        if (fdat_801edaf8 == 1)
+            e49->unk00 = 0;
+        if (fdat_801edaf4 == 0 && e48->unk05 == 1) {
+            fdat_801edafc = 1;
+            viewer.unk218 = 5;
+        }
+    }
+    if (fdat_801edafc == 1 && area_state.unk18 == -1 && (short)area_state.unk2 >= 2)
+        fdat_801edafc = 2;
+    if (fdat_801edafc == 2) {
+        fdat_801ed388(e48, 0, 0);
+        fdat_801ecf44(e48);
+        fdat_801edafc = 0xff;
+        viewer.unk218 = 0;
+    }
+    if (fdat_801edafc == 0xff && !(viewer.unk2C & 0x800)) {
+        viewer.unk188 = 30;
+        viewer.unk182 = 0;
+    }
+    if (fdat_801edb00 == 0 && viewer.unk178 == 0x10e && fdat_801edaf4 == 1
+        && fdat_801edaf8 == 1) {
+        fdat_801ed388(e49, 0, 0);
+        fdat_801ed388(e49, 0, 0);
+        fdat_801ecf44(e49);
+        fdat_801ed410(e5);
+        fdat_801ed410(e6);
+        fdat_801ed410(e7);
+        fdat_801edb00 = 0xff;
+    }
+}
+
+/*
+ * The entry's move picker, fdat_801ed4a0 with one addition: kind 0 waits
+ * (action 128) once fdat_801edafc is 0xff, and kind 4 once fdat_801edb00 is.
+ */
+ADDRESS(0x801ed7b8, 0x28c)
+void func_801ed7b8(void)
+{
+    Vis212 *e = vis_table_a.unk6138;
+    u16 wall;
+    int d;
+    short x;
+    short z;
+    short dx;
+    short dz;
+
+    if (e->unk1A == 0xf0 || e->unk1A == 0)
+        return;
+    fdat_801ec6a4();
+    if (e->unk02 == 0 && fdat_801edafc == 0xff)
+        e->unk44 = 128;
+    if (e->unk02 == 4 && fdat_801edb00 == 0xff)
+        e->unk44 = 128;
+    fdat_801ecbcc();
+    switch (e->unk44) {
+    case 8:
+        wall = e->unk5E;
+        if ((short)wall == 0x7fff) {
+            e->unk5A = e->unk5C = (e->unk56 + 2048) & 0xfff;
+        } else {
+            d = (((e->unk56 + 2048) & 0xfff) - wall + 1024) & 0xfff;
+            if (d < 1024 || d > 3072)
+                e->unk5A = e->unk5C = (wall + 3072) & 0xfff;
+            else
+                e->unk5A = e->unk5C = (wall + 1024) & 0xfff;
+        }
+        break;
+    case 2:
+    case 4:
+    case 16:
+    case 32:
+        e->unk5A = e->unk5C = e->unk56;
+        break;
+    default:
+        e->unk5A = e->unk5C = e->unk8E;
+        break;
+    }
+    if (e->unk44 != 8)
+        e->unk5E = 0x7fff;
+    if (vis_records[e->unk26].unk05 != 0 || vis_records[e->unk26].unk06 != 0) {
+        x = rcos(e->unk5C - 1024) >> 5;
+        z = rsin(e->unk5C - 1024) >> 5;
+        dx = x + vis_records[e->unk26].unk05;
+        dz = z + vis_records[e->unk26].unk06;
+        e->unk5C = (ratan2(dz, dx) + 1024) & 0xfff;
+        x = rcos(e->unk5A) >> 5;
+        z = rsin(e->unk5A) >> 5;
+        dx = x + vis_records[e->unk26].unk05;
+        dz = z + vis_records[e->unk26].unk06;
+        e->unk5A = ratan2(dz, dx);
+    }
+}
+
+void func_801ed7b8(void);
+#define FDAT_PICK_MOVE func_801ed7b8
+
+#include "../lib/fdat_801ed6e4.inc"
