@@ -450,10 +450,6 @@ int func_8004b8ec(int x, int y, int z, int r, VECTOR *a, VECTOR *b, int extra)
 /* Finds the live entry in front of req within its reach: mode (arg1 & 5)
  * 1 and 4 also require it inside the viewer's view cone; mode 0 returns the
  * first hit, otherwise the nearest. */
-/*
- * Not exact: retail keeps req in s5, mode in s3 and the entry pointer in
- * s6; this source uses s3, s6 and s5. Instructions otherwise agree.
- */
 ADDRESS(0x8004bb88, 0x2f8)
 int func_8004bb88(VisLists *req, int arg1)
 {
@@ -473,7 +469,7 @@ int func_8004bb88(VisLists *req, int arg1)
     min = 0x7fffffff;
     best = -1;
     mode = arg1 & 5;
-    for (i = 0, e = vis_table_a.entries; i < 64; i++, e++) {
+    for (e = vis_table_a.entries, i = 0; i < 64; i++, e++) {
         if (e->unk05 != 1)
             continue;
         if (e->unk70 & vis_table_a.unk6101)
@@ -507,11 +503,13 @@ int func_8004bb88(VisLists *req, int arg1)
             lim = e->unk2E + req->unk1C;
         if (dist - fwd >= lim)
             continue;
-        if (e->unk74.vy < req->unk4.vy)
-            miss = e->unk74.vy < req->unk4.vy - req->unk1E;
-        else
-            miss = req->unk4.vy < e->unk74.vy - e->unk30;
-        if (miss) {
+        if (e->unk74.vy < req->unk4.vy) {
+            if (e->unk74.vy < req->unk4.vy - req->unk1E) {
+                if (mode == 0)
+                    return -1;
+                continue;
+            }
+        } else if (req->unk4.vy < e->unk74.vy - e->unk30) {
             if (mode == 0)
                 return -1;
             continue;
