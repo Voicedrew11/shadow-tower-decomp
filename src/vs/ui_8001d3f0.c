@@ -324,32 +324,27 @@ void func_8001dc48(u32 num, u16 x, u16 y, CVECTOR *color)
     setRGB0(p, (color)->r, (color)->g, (color)->b);                  \
     *DAT_801624d0.ot_cur = (u_long)(p) & 0xffffff
 
+/* FILL_F4 over the rectangle with top left (x, y), width w and height h. */
+#define FILL_RECT_F4(p, semi, x, y, w, h, color)     FILL_F4(p, semi, x, y, (x) + (w), y, x, (y) + (h), (x) + (w), (y) + (h), color)
+
 /* Draws a rectangle outline: bars `border & 0xff` high at the top and
  * bottom and `border >> 8` wide at the sides. */
-/* Not exact: color and the border width use different registers; the
- * width shift follows the packet-buffer load, and the bottom bar loads
- * height before y. */
 ADDRESS(0x8001de8c, 0x54c)
 void func_8001de8c(RECT *r, CVECTOR *color, u16 border, u16 semi)
 {
     POLY_F4 *p;
     StPacketBuffer *buf;
-    int w = border >> 8;
-    int h = border & 0xff;
+    short w = border >> 8;
+    short h = border & 0xff;
 
     NEW_PRIM(buf, p, POLY_F4);
-    FILL_F4(p, semi, r->x, r->y, r->x + r->w, r->y, r->x, r->y + h, r->x + r->w, r->y + h,
-            color);
+    FILL_RECT_F4(p, semi, r->x, r->y, r->w, h, color);
     NEW_PRIM(buf, p, POLY_F4);
-    FILL_F4(p, semi, r->x, r->y + r->h - h, r->x + r->w, r->y + r->h - h, r->x, r->h + r->y,
-            r->x + r->w, r->h + r->y, color);
+    FILL_RECT_F4(p, semi, r->x, r->y + r->h - h, r->w, h, color);
     NEW_PRIM(buf, p, POLY_F4);
-    FILL_F4(p, semi, r->x, r->y + h, r->x + w, r->y + h, r->x, r->y + h + (r->h - h * 2),
-            r->x + w, r->y + h + (r->h - h * 2), color);
+    FILL_RECT_F4(p, semi, r->x, r->y + h, w, r->h - h * 2, color);
     NEW_PRIM(buf, p, POLY_F4);
-    FILL_F4(p, semi, r->x + r->w - w, r->y + h, r->w + r->x, r->y + h,
-            r->x + r->w - w, r->y + h + (r->h - h * 2), r->w + r->x, r->y + h + (r->h - h * 2),
-            color);
+    FILL_RECT_F4(p, semi, r->x + r->w - w, r->y + h, w, r->h - h * 2, color);
 }
 
 /*
