@@ -612,8 +612,17 @@ void func_80067624(void)
  * Draws one grid (104 or 98): the cursor bar, the scroll arrows and bar, the
  * header image and eleven rows of names, the held range highlighted.
  */
-/* Not exact: header-call argument setup, row-loop grid reloads and
- * temporary lifetimes, and text lookup order still differ. */
+/* Not exact (6 words short). Residues: (1) retail loads the header call's
+ * three scratch-address arguments after the last two stores, here they
+ * sink above them; (2) the row loop reloads `grid` from its stack slot
+ * (`lbu s6,160(sp)`), here it copies the register; (3) retail sums the
+ * row into v0 in both arms and copies it to a0 at the join; (4) the first
+ * `id != -1` branch is threaded straight to the draw call; (5) the saved
+ * registers of i/id/y/colour rotate. The row y is a giv in retail
+ * (`li a2,35; ... move s4,a2` after the hoisted constants). Ruled out:
+ * a row variable summed after the arms (the scratchpad moves to s0),
+ * per-arm id loads, a shared `idx = n` copy. The unused RECT/CVECTOR
+ * locals only reproduce the frame. */
 ADDRESS(0x80067bec, 0x66c)
 void func_80067bec(u8 grid)
 {
@@ -708,7 +717,7 @@ void func_80067bec(u8 grid)
             x = 342;
         y = 35;
         sp->style[0].cd |= 0x80;
-        for (i = 0; i < 11; i++, y += 16) {
+        for (i = 0; i < 11; i++) {
             if (grid == 104) {
                 idx = sp->unk0.grid.row0 + i;
                 list = sp->unk0.grid.ids0;
@@ -719,18 +728,18 @@ void func_80067bec(u8 grid)
             id = list[idx];
             color = &sp->style[0];
             if (grid == ST.unk0 && ST.unk4 && idx >= ST.unk8 && idx <= ST.unkC) {
-                if (id != -1) {
-                    color = &held;
-                } else {
+                if (id == -1) {
                     box.x = x;
-                    box.y = y;
+                    box.y = y + i * 16;
                     box.w = 266;
                     box.h = 12;
                     func_80028220(&box, &empty, 0);
+                } else {
+                    color = &held;
                 }
             }
             if (id != -1)
-                func_8002732c(MESSAGE_IN(sp->unk0.grid.messages, id), x, y, color);
+                func_8002732c(MESSAGE_IN(sp->unk0.grid.messages, id), x, y + i * 16, color);
         }
         sp->style[0].cd &= 0x7f;
     }
