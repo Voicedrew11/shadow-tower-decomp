@@ -793,7 +793,7 @@ profile = "probe-gcc272cdk-o2-g8"
 unit = "vs.hud_80029f28"
 image = "VS.EXE"
 source = "src/vs/hud_80029f28.c"
-profile = "probe-gcc272cdk-o2-g0"
+profile = "probe-gcc272cdk-o2-g8"
 
 [[unit]]
 unit = "vs.name_8002ad40"

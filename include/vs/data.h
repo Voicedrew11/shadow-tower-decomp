@@ -335,7 +335,7 @@ extern u8 DAT_8015ec38[5000];
 /* Rounds won per fighter (bss, unowned): src/vs/main.c proves the first
  * word its own symbol (the second, DAT_80063374, is read absolutely where
  * the first is $gp-relative); func_80029f28 still walks both from it. */
-extern s32 DAT_80063370[];
+extern s32 DAT_80063370[1];
 
 /* VS band 6: the text scroll switch and the two scroll offsets
  * func_8001d3f0 picks between (ST.EXE's DAT_800881ac/a0/a2; bss, unowned). */

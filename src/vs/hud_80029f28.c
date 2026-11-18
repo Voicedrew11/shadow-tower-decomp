@@ -17,9 +17,6 @@ JUMPTABLES(0x80011524, 0x50)
  * One pulsing red marker per round won (DAT_80063370) for each fighter,
  * left to right for the first and right to left for the second; `phase`
  * (0..95) cycles the gradient, `scale` its brightness.
- *
- * Not exact (size-exact): retail builds &DAT_80063370 for the outer loop
- * with lui/addiu both in $a1; this build puts the lui in $v0.
  */
 ADDRESS(0x80029f28, 0x1fc)
 void func_80029f28(int phase, int scale)
