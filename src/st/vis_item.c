@@ -170,10 +170,6 @@ int func_8004db9c(Vis212 *e, short reach)
 }
 
 /* Sums the record's weights over the 9 levels (arg 0 only). */
-/*
- * Not exact: retail counts in a3 and walks the weights in t0; this source
- * swaps the two registers.
- */
 ADDRESS(0x8004de24, 0xd4)
 int func_8004de24(Vis212 *e, int arg, u16 *levels)
 {
@@ -190,7 +186,7 @@ int func_8004de24(Vis212 *e, int arg, u16 *levels)
         for (i = 0; i < 9; i++, levels++, w++) {
             l = *levels;
             if (l != 0) {
-                m = *w ? *w : 1;
+                m = *w ?: 1;
                 sum += l * 50000 / (m * (1000 - l));
             }
         }
