@@ -461,7 +461,9 @@ typedef struct {
     u16 unk0A;           /* 0x0a: the entry's OT depth bias (func_8004eebc) */
     u16 unk0C;           /* 0x0c */
     u16 unk0E;           /* 0x0e */
-    u8 unk10[8];
+    u8 unk10[2];
+    u16 unk12;           /* 0x12: which side a door swings the viewer from (func_80050768) */
+    u8 unk14[4];
 } Vis24;
 
 typedef struct {
@@ -472,7 +474,8 @@ typedef struct {
     s16 unk71A4;         /* 0x71a4..0x71a8: cleared by player_update_status */
     s16 unk71A6;
     s16 unk71A8;
-    u8 unk71AA[6];
+    u8 unk71AA[2];
+    Vis24 *unk71AC;      /* 0x71ac: the record of the entry func_80050768 is updating */
     Vis88 *unk71B0;      /* 0x71b0: an entry func_8004f53c skips */
     u16 list[96];        /* 0x71b4 */
     u8 count;            /* 0x7274 */
