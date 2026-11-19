@@ -51,7 +51,7 @@ JUMPTABLES(0x800114cc, 0x3d8)
  * a do/while (0) around the store, the copy or the three entry stores.
  */
 ADDRESS(0x80036484, 0x198c)
-void *func_80036484(u8 type, u8 flags, u8 kind, VECTOR *pos, SVECTOR *dir, ...)
+StEffect *func_80036484(u8 type, u8 flags, u8 kind, VECTOR *pos, SVECTOR *dir, ...)
 {
     int *args = (int *)&dir;
     u8 second = (flags & 0x20) >> 5;

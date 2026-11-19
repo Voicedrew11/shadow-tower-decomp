@@ -38,7 +38,7 @@ JUMPTABLES(0x80011934, 0x300)
  * the pool is full.
  */
 ADDRESS(0x80032404, 0xf38)
-void *func_80032404(int n, u8 attack, u8 flags, u8 kind, VECTOR *pos, SVECTOR *dir, ...)
+StEffect *func_80032404(int n, u8 attack, u8 flags, u8 kind, VECTOR *pos, SVECTOR *dir, ...)
 {
     int *args = (int *)&dir;
     StEffect *e;
