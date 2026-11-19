@@ -78,7 +78,10 @@ void func_801ee278(int which);
  * other way round (global-alloc priority 392 against 405; r4 needs a live
  * range four instructions shorter, e.g. one copy fewer of the three "gone"
  * arms, but each copy needs its own branch for cse to reach the entry
- * address through the pointer's high part). */
+ * address through the pointer's high part). Declaring r4 three or more
+ * places later swaps the registers but moves its address load out of
+ * retail's position, so the declaration order stands; a fifth use of r4
+ * (8/204 -> 10/204) would also do it and none shows. */
 /* Sets up the area by flags 14, 29, 30 and the second word's bits 10/11:
  * entry 48 (asleep, awake or gone), entries 50, 33 and 49, table B entry
  * 0 and table C items 7..10, 28 and 29. */

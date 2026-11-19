@@ -59,9 +59,11 @@ void func_80023308(int page);
     sp->unk1D5 = 1;                        \
     sp->unk1CC = 0
 
-/* Not exact: shared player choices extend their lifetime across calls;
- * page-loop registers/edges differ, and the usable-save flags still use
- * absolute references where retail uses gp. */
+/* Likewise the team page and the save page of each player. */
+#define TEAM_PAGE(player)                       sp->unk1D5 = 1;                            func_80018c84(player);                      sp->unk1CC = 0
+
+#define SAVE_PAGE(player)                                          if (DAT_801a0a80[0].unk0 == DAT_801a0a80[1].unk0) {                sp->unk1CC = 9;                                           } else if (func_800193e8(player) == 0) {                           sp->unk1CC = 99;                                          } else {                                                           sp->unk1D5 = 1;                                               func_8001960c(player);                                         sp->unk1CC = 0;                                           }
+
 ADDRESS(0x80016f10, 0x98c)
 int func_80016f10(void)
 {
@@ -70,7 +72,6 @@ int func_80016f10(void)
     DVECTOR pos;
     VsMenuScratch *sp = VS_MENU_SCRATCH;
     u_long *buf;
-    int player;
     u32 b;
 
     func_8001d39c();
@@ -163,53 +164,33 @@ int func_80016f10(void)
                     if (!(DAT_801603c0.pads[0].unk8 & 0x4000) || !DAT_80063380)
                         goto buzz;
                     func_8001c978();
-                    player = 0;
                     DAT_801603c0.pads[0].unk8 = 0;
-                team:
-                    sp->unk1D5 = 1;
-                    func_80018c84(player);
-                    sp->unk1CC = 0;
+                    TEAM_PAGE(0);
                     break;
                 case 4:
                     if ((DAT_801603c0.pads[1].unk8 & 0x4000) && DAT_80063381) {
                         func_8001c978();
-                        player = 1;
                         DAT_801603c0.pads[1].unk8 = 0;
-                        goto team;
+                        TEAM_PAGE(1);
+                        break;
                     }
-                buzz:
-                    func_8001c938();
-                    break;
+                    goto buzz;
                 case 5:
                     if (!(DAT_801603c0.pads[0].unk8 & 0x4000) || !DAT_80063380 || !DAT_80063381)
                         goto buzz;
                     func_8001c978();
                     DAT_801603c0.pads[0].unk8 = 0;
-                    if (DAT_801a0a80[0].unk0 == DAT_801a0a80[1].unk0) {
-                    same:
-                        sp->unk1CC = 9;
-                    } else {
-                        player = 0;
-                        if (func_800193e8(0) == 0)
-                            goto failed;
-                    save:
-                        sp->unk1D5 = 1;
-                        func_8001960c(player);
-                        sp->unk1CC = 0;
-                    }
+                    SAVE_PAGE(0);
                     break;
                 case 6:
                     if (!(DAT_801603c0.pads[1].unk8 & 0x4000) || !DAT_80063380 || !DAT_80063381)
                         goto buzz;
                     func_8001c978();
                     DAT_801603c0.pads[1].unk8 = 0;
-                    if (DAT_801a0a80[0].unk0 == DAT_801a0a80[1].unk0)
-                        goto same;
-                    player = 1;
-                    if (func_800193e8(1) != 0)
-                        goto save;
-                failed:
-                    sp->unk1CC = 99;
+                    SAVE_PAGE(1);
+                    break;
+                buzz:
+                    func_8001c938();
                     break;
                 }
                 DAT_801603c0.pads[0].unk8 = 0;

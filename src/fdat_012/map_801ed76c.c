@@ -21,8 +21,6 @@ void func_801eda38(Vis212 *e);
 void func_801edbec(Vis212 *e);
 void func_801edf0c(Vis212 *e);
 
-/* Not exact: retail reads the signed phase with LH; this build reads an
- * unsigned halfword and extends it before the bobbing arithmetic. */
 /*
  * The current entry's handler: kind 4 drops once record's stream counter
  * reaches 4 (or when hit) and then runs func_801edbec; kind 10 plays the
@@ -65,7 +63,11 @@ void func_801ed76c(void)
         }
     } else if (e->unk02 == 1 || e->unk02 == 9) {
         if (e->unk0F == 0x20) {
-            a = (short)e->unk2A;
+            /* The phase is sign-extended in the variable itself (retail
+             * loads it with LH and halves that register); through a (short)
+             * cast cse merges the halving into the extension's shift. */
+            a = e->unk2A << 16;
+            a >>= 16;
             if (a < 0x400) {
                 a >>= 1;
                 e->unk74.vy = e->unk84 - a;

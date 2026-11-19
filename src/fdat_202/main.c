@@ -81,7 +81,10 @@ void func_801ed4a0(void)
 
 /* Not exact (registers): in the enable loop retail keeps the constants 2,
  * 5 and -1 in a1, a2 and a3; this source has 5, -1 and 2 there (global-alloc
- * ranks 5 first: it has two uses; nothing found that gives 2 a second use). */
+ * ranks 5 first: it has two uses; nothing found that gives 2 a second use).
+ * For retail's order the 2 needs two weighted uses when registers are
+ * allocated and only one in the listing, i.e. a second kind-0x94 store that
+ * jump2 or reorg removed afterwards; no such copy shows in the layout. */
 /*
  * Table B entry 33 (a switch) state 0xff turns the area's table B entries
  * off: kinds 0x29, 0x2b and 0x94 stop (0x94 also loses its scale), 0xaf is

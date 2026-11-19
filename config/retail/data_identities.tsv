@@ -141,7 +141,7 @@ VS.EXE	0x80063220	0x4	DAT_80063220	global	load	s32		candidate	asm;src/vs/snd_800
 VS.EXE	0x80063224	0x4	DAT_80063224	global	load	s32		candidate	asm;src/vs/mesh_800258f0.c vs.mesh_800258f0	renderer switch: when nonzero every face is drawn at OT depth far_z minus it (word read absolute by -G0 renderers)
 VS.EXE	0x80063228	0x4	DAT_80063228	global	load	s32		candidate	asm;src/vs/ui_80022f14.c vs.ui_80022f14	initialized word (1) read gp-relative by func_80015020/func_80015e50/func_8001683c and through lui by func_80022f14, which lights its second choice when it equals the page
 VS.EXE	0x800632d0	0x4	DAT_800632d0	global	load	u_long		candidate	asm;src/vs/model_80024b5c.c vs.model_80024b5c	$gp+0xb8 .sdata word 0x808080: func_80025204's default NCCS colour
-VS.EXE	0x800632d4	0x4	DAT_800632d4	global	load	s32		candidate	asm;src/vs/model_80024b5c.c vs.model_80024b5c	$gp+0xbc .sdata word (0): func_80024b5c's every-nth part slot
+VS.EXE	0x800632d4	0x4	DAT_800632d4	static	load	s32	func_80024b5c	address-only	asm;src/vs/model_80024b5c.c vs.model_80024b5c	$gp+0xbc .sdata word (0): func_80024b5c's every-nth part slot
 VS.EXE	0x800632d8	0x4	DAT_800632d8	global	load	u_long		candidate	asm;src/vs/model_80028914.c vs.model_80028914	$gp+0xc0 .sdata word 0x808080: func_80028914's default NCCS colour
 VS.EXE	0x800632dc	0x4	DAT_800632dc	global	load	u_long		candidate	asm;src/vs/fade_80028fcc.c vs.fade_80028fcc	$gp+0xc4 .sdata word 0x808080: func_800291d4's default NCCS colour
 VS.EXE	0x800632e0	0x4	DAT_800632e0	static	load	s32	func_80028fcc	address-only	asm;src/vs/fade_80028fcc.c vs.fade_80028fcc	$gp+0xc8 .sdata word; func_80028fcc's texture-window step 0..5

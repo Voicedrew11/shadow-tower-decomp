@@ -18,13 +18,14 @@
 #include <vs/funcs.h>
 
 RODATA(0x800112d0, 0x50)
-SDATA(0x800632d0, 0x8)
 
 /* The renderers' default NCCS colour (128, 128, 128). */
+SDATA(0x800632d0, 0x4)
 u_long DAT_800632d0 = 0x808080;
 
 /* The frame slot of the model list's every-nth parts. */
-s32 DAT_800632d4 = 0;
+DATA(0x800632d4, 0x4, ".sdata")
+static s32 DAT_800632d4 = 0;
 
 /* Projects the current part's vertices: RTPT in threes, the first group
  * ahead of the loop so each pass stores one group and starts the next, then
@@ -66,12 +67,6 @@ s32 DAT_800632d4 = 0;
  * on the entry whose index matches DAT_800632d4's slot (every 6th, 4th,
  * 8th), stepping it.
  */
-/* Not exact (size-exact, registers only): retail keeps the entry count in
- * $s1 and the strength-reduced entry cursor in $s0; this build swaps them
- * (global-alloc priority 0.871 for the count against 0.841 for the cursor:
- * the cursor needs two more references or the count two fewer). Ruled out:
- * while loops with a repeated e++ before each continue, either loop as for
- * or while, and a local for the i % n values. */
 ADDRESS(0x80024b5c, 0x6a8)
 void func_80024b5c(void)
 {
@@ -87,57 +82,66 @@ void func_80024b5c(void)
         e->obj->unk0 = 0;
         e++;
     }
-    for (i = ((ModelList *)sp->anims)->count, e = ((ModelList *)sp->anims)->entries; i--; e++) {
+    i = ((ModelList *)sp->anims)->count;
+    e = ((ModelList *)sp->anims)->entries;
+    while (i--) {
         e->obj->unk0 = 0;
-        if (e->unk0C == -1 || e->part == 0xffff)
-            continue;
-        if (e->kind == 2) {
-            MATRIX face = {{{ONE, 0, 0}, {0, ONE, 0}, {0, 0, ONE}}, {0, 0, 0}};
-            SVECTOR angle;
+        if (e->unk0C != -1 && e->part != 0xffff) {
+            if (e->kind == 2) {
+                MATRIX face = {{{ONE, 0, 0}, {0, ONE, 0}, {0, 0, ONE}}, {0, 0, 0}};
+                SVECTOR angle;
 
-            angle.vx = -DAT_80063300->unk4DF00 + DAT_801624d0.unk2CA88.vx;
-            angle.vy = -DAT_80063300->unk4DF02 + DAT_801624d0.unk2CA88.vy;
-            angle.vz = -DAT_80063300->unk4DF04 + DAT_801624d0.unk2CA88.vz;
-            RotMatrixX(angle.vx, &face);
-            RotMatrixY(angle.vy, &face);
-            RotMatrixZ(angle.vz, &face);
-            if (e->obj->unk48->unk2 == 0) {
-                RotMatrix(&e->obj->unk48->unk44->rot, &e->obj->unk48->unk4);
+                angle.vx = -DAT_80063300->unk4DF00 + DAT_801624d0.unk2CA88.vx;
+                angle.vy = -DAT_80063300->unk4DF02 + DAT_801624d0.unk2CA88.vy;
+                angle.vz = -DAT_80063300->unk4DF04 + DAT_801624d0.unk2CA88.vz;
+                RotMatrixX(angle.vx, &face);
+                RotMatrixY(angle.vy, &face);
+                RotMatrixZ(angle.vz, &face);
+                if (e->obj->unk48->unk2 == 0) {
+                    RotMatrix(&e->obj->unk48->unk44->rot, &e->obj->unk48->unk4);
+                }
+                gte_MulMatrix0(&e->obj->unk48->unk4, &face, &e->obj->unk48->unk4);
+                e->obj->unk48->unk2 = 0;
             }
-            gte_MulMatrix0(&e->obj->unk48->unk4, &face, &e->obj->unk48->unk4);
-            e->obj->unk48->unk2 = 0;
+            anim_record_compose(e->obj);
+            if (e->kind == 1) {
+                if (DAT_800632d4 >= 6)
+                    DAT_800632d4 = 0;
+                ScaleMatrix(&scale, &e->obj->unk44->scale);
+                gte_SetRotMatrix(&scale);
+                if (i % 6 != DAT_800632d4) {
+                    e++;
+                    continue;
+                }
+                DAT_800632d4 = i % 6 + 1;
+            } else if (e->kind == 3) {
+                if (DAT_800632d4 >= 4)
+                    DAT_800632d4 = 0;
+                ScaleMatrix(&scale, &e->obj->unk44->scale);
+                gte_SetRotMatrix(&scale);
+                if (i % 4 != DAT_800632d4) {
+                    e++;
+                    continue;
+                }
+                DAT_800632d4 = i % 4 + 1;
+            } else if (e->kind == 4) {
+                if (DAT_800632d4 >= 8)
+                    DAT_800632d4 = 0;
+                ScaleMatrix(&scale, &e->obj->unk44->scale);
+                gte_SetRotMatrix(&scale);
+                if (i % 8 != DAT_800632d4) {
+                    e++;
+                    continue;
+                }
+                DAT_800632d4 = i % 8 + 1;
+            }
+            sp->header = (MeshHeader *)(sp->model + 12) + e->part;
+            sp->local_vertices = sp->model + 12 + sp->header->vertices;
+            PROJECT(sp, out, in, n);
+            DAT_80063360 = 0;
+            func_80027ba4(e->part);
         }
-        anim_record_compose(e->obj);
-        if (e->kind == 1) {
-            if (DAT_800632d4 >= 6)
-                DAT_800632d4 = 0;
-            ScaleMatrix(&scale, &e->obj->unk44->scale);
-            gte_SetRotMatrix(&scale);
-            if (i % 6 != DAT_800632d4)
-                continue;
-            DAT_800632d4 = i % 6 + 1;
-        } else if (e->kind == 3) {
-            if (DAT_800632d4 >= 4)
-                DAT_800632d4 = 0;
-            ScaleMatrix(&scale, &e->obj->unk44->scale);
-            gte_SetRotMatrix(&scale);
-            if (i % 4 != DAT_800632d4)
-                continue;
-            DAT_800632d4 = i % 4 + 1;
-        } else if (e->kind == 4) {
-            if (DAT_800632d4 >= 8)
-                DAT_800632d4 = 0;
-            ScaleMatrix(&scale, &e->obj->unk44->scale);
-            gte_SetRotMatrix(&scale);
-            if (i % 8 != DAT_800632d4)
-                continue;
-            DAT_800632d4 = i % 8 + 1;
-        }
-        sp->header = (MeshHeader *)(sp->model + 12) + e->part;
-        sp->local_vertices = sp->model + 12 + sp->header->vertices;
-        PROJECT(sp, out, in, n);
-        DAT_80063360 = 0;
-        func_80027ba4(e->part);
+        e++;
     }
 }
 

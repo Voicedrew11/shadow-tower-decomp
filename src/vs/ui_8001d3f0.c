@@ -600,22 +600,11 @@ void func_8001f23c(int x, int y, int w, int h)
  * Draws a window frame from 16x16 tiles of the menu texture page: corners,
  * edges, an inner bevel and the filled middle.
  */
-/* Not exact: retail's frame is 96 bytes with four 8-byte spill slots (sp+24
- * x, sp+32, sp+40 w, sp+48 h) where this build has three (88 bytes): retail
- * keeps one more value across the calls. Its registers are x $s5, y $s4, h
- * $s6, the two tile modes $s2/$s1, y + h $s0, y + h - 16 $s3 and the right
- * edge $s7; this build sign-extends h into `height` at entry and keeps y +
- * height - 16 without y + height. ST.EXE's twin func_80029618 is open with
- * the mirror residue (retail spills `right` there). Not yet tried here: h
- * used directly with a `bottom` local, per-loop counters as in the ST twin. */
 ADDRESS(0x8001f30c, 0x51c)
 void func_8001f30c(short x, short y, short w, short h)
 {
     VsMenuScratch *sp = VS_MENU_SCRATCH;
-    short right;
-    short bottom;
-    int i, j;
-    int height = h;
+    int rows, columns;
 
     sp->unk224.w = 16;
     sp->unk224.h = 16;
@@ -626,66 +615,65 @@ void func_8001f30c(short x, short y, short w, short h)
     sp->unk224.y = y;
     sp->unk240.vy = 400;
     func_8001e530(&sp->unk224, &sp->unk240, &sp->unk244, NULL, TILE);
-    sp->unk224.y = y + height - 16;
+    sp->unk224.y = y + h - 16;
     func_8001e530(&sp->unk224, &sp->unk240, &sp->unk244, NULL, TILE_VFLIP);
-    right = x + w - 16;
+    sp->unk224.x = x + w - 16;
     sp->unk224.y = y;
     sp->unk240.vx = 620;
-    sp->unk224.x = right;
     func_8001e530(&sp->unk224, &sp->unk240, &sp->unk244, NULL, TILE);
-    sp->unk224.y = y + height - 16;
+    sp->unk224.y = y + h - 16;
     func_8001e530(&sp->unk224, &sp->unk240, &sp->unk244, NULL, TILE_VFLIP);
     sp->unk224.x = x;
     sp->unk224.y = y + 16;
     sp->unk240.vx = 604;
     func_8001e530(&sp->unk224, &sp->unk240, &sp->unk244, NULL, TILE);
-    sp->unk224.y = y + height - 32;
+    sp->unk224.y = y + h - 32;
     func_8001e530(&sp->unk224, &sp->unk240, &sp->unk244, NULL, TILE_VFLIP);
+    sp->unk224.x = x + w - 16;
     sp->unk224.y = y + 16;
     sp->unk240.vx = 596;
-    sp->unk224.x = right;
     func_8001e530(&sp->unk224, &sp->unk240, &sp->unk244, NULL, TILE);
-    sp->unk224.y = y + height - 32;
+    sp->unk224.y = y + h - 32;
     func_8001e530(&sp->unk224, &sp->unk240, &sp->unk244, NULL, TILE_VFLIP);
 
     sp->unk224.y = y + 32;
     sp->unk224.x = x;
     sp->unk240.vx = 624;
-    i = height / 16 - 4;
-    while (i--) {
+    rows = h / 16 - 4;
+    while (rows--) {
         sp->unk224.x = x;
         func_8001e530(&sp->unk224, &sp->unk240, &sp->unk244, NULL, TILE_HFLIP);
-        sp->unk224.x = right;
+        sp->unk224.x = x + w - 16;
         func_8001e530(&sp->unk224, &sp->unk240, &sp->unk244, NULL, TILE);
         sp->unk224.y += 16;
     }
     sp->unk224.x = x + 16;
     sp->unk240.vx = 616;
-    i = w / 16 - 2;
-    while (i--) {
+    columns = w / 16 - 2;
+    while (columns--) {
         sp->unk224.y = y;
         func_8001e530(&sp->unk224, &sp->unk240, &sp->unk244, NULL, TILE);
-        sp->unk224.y = y + height - 16;
+        sp->unk224.y = y + h - 16;
         func_8001e530(&sp->unk224, &sp->unk240, &sp->unk244, NULL, TILE_VFLIP);
         sp->unk224.x += 16;
     }
     sp->unk224.x = x + 16;
     sp->unk240.vx = 608;
-    i = w / 16 - 2;
-    while (i--) {
+    columns = w / 16 - 2;
+    while (columns--) {
         sp->unk224.y = y + 16;
         func_8001e530(&sp->unk224, &sp->unk240, &sp->unk244, NULL, TILE);
-        sp->unk224.y = y + height - 32;
+        sp->unk224.y = y + h - 32;
         func_8001e530(&sp->unk224, &sp->unk240, &sp->unk244, NULL, TILE_VFLIP);
         sp->unk224.x += 16;
     }
     sp->unk224.y = y + 32;
     sp->unk240.vx = 600;
-    j = height / 16 - 4;
-    while (j--) {
+    rows = h / 16 - 4;
+    while (rows--) {
         sp->unk224.x = x + 16;
-        i = w / 16 - 2;
-        while (i--) {
+        columns = w / 16 - 2;
+        while (columns--) {
             func_8001e530(&sp->unk224, &sp->unk240, &sp->unk244, NULL, TILE);
             sp->unk224.x += 16;
         }
@@ -815,10 +803,9 @@ void func_8001fb98(void)
  * and its won count), each framed; the clipped text advance of each row
  * goes to DAT_801c4a38.
  *
- * Not exact: an unaccounted 8-byte stack span (sp+208) lies between the
- * picture table and retail's two RECT initializers; its frame is 272 bytes,
- * this build's 264. The table copy is 192 bytes, so the span is a local of
- * its own that the code never touches.
+ * The three RECT locals are never used. The first is the one ST.EXE's copy
+ * (func_8002c2b8, src/st/ui.c) also keeps right after its table; VS added
+ * the two arrow rectangles behind it.
  */
 ADDRESS(0x8001fcac, 0x6d8)
 void func_8001fcac(void)
@@ -829,6 +816,7 @@ void func_8001fcac(void)
         -1, 5, 2, -1, 2, 3, -1, 6, 2, 6, 6, 1, 1, -1, -1, -1,
         3, 1, -1, -1, -1, 3, 4, -1, -1, -1, -1, -1, -1, -1, -1, -1,
     };
+    RECT unused;
     RECT unused_left = {25, 93, 16, 8};
     RECT unused_right = {294, 93, 16, 8};
     VsCardFile *file;

@@ -16,16 +16,15 @@
  * apart horizontally and 12 vertically, semi-transparent in `color`
  * darkened by (12, 6, 6).
  */
-/* Not exact: as ST.EXE's copy, retail keeps pos and tex in $t0/$t1 with
- * caller-save spills and hoists v and v + 10 out of the inner loop; this
- * build keeps pos in $s8 (0x10 bytes shorter). */
 ADDRESS(0x800207d4, 0x2d0)
 void func_800207d4(DVECTOR *pos, DVECTOR *tex, DVECTOR *clut, CVECTOR *color, int arg4)
 {
-    int row;
-    int u0;
-    int cols, rows;
-    int col, x, y;
+    int row, col;
+    int cols, rows; /* tiles across and down */
+    int w, h;       /* a tile on screen */
+    int tw, th;     /* a tile in the texture */
+    int dx, dy;     /* tile pitch on screen */
+    int u0, v0;
     int u, v;
     StPacketBuffer *buf;
     POLY_FT4 *p;
@@ -33,21 +32,29 @@ void func_800207d4(DVECTOR *pos, DVECTOR *tex, DVECTOR *clut, CVECTOR *color, in
 
     cols = 25;
     rows = 5;
+    w = 10;
+    h = 10;
+    tw = 10;
+    th = 10;
+    dx = 11;
+    dy = 12;
     u0 = (short)(tex->vx % 64) * 4;
-    v = (short)(tex->vy % 256);
-    for (row = 0, y = 0; row < rows; row++, y += 12, v += 10) {
-        for (col = 0, x = 0, u = u0; col < cols; col++, x += 11, u += 10) {
+    v0 = (short)(tex->vy % 256);
+    for (row = 0; row < rows; row++) {
+        for (col = 0; col < cols; col++) {
+            u = u0 + col * tw;
+            v = v0 + row * th;
             buf = DAT_801624d0.packet;
             p = (POLY_FT4 *)buf->cur;
             buf->cur = (u_long *)(p + 1);
             if (DAT_801624d0.packet->cur > DAT_801624d0.packet->end)
                 return;
             DAT_801624d0.unk8328++;
-            setUV4(p, u, v, u + 10, v, u, v + 10, u + 10, v + 10);
-            p->x0 = p->x2 = pos->vx + x;
-            p->x1 = p->x3 = pos->vx + x + 10;
-            p->y0 = p->y1 = pos->vy + y;
-            p->y2 = p->y3 = pos->vy + y + 10;
+            setUV4(p, u, v, u + tw, v, u, v + th, u + tw, v + th);
+            p->x0 = p->x2 = pos->vx + col * dx;
+            p->x1 = p->x3 = pos->vx + col * dx + w;
+            p->y0 = p->y1 = pos->vy + row * dy;
+            p->y2 = p->y3 = pos->vy + row * dy + h;
             c = *color;
             c.r -= 12;
             c.g -= 6;

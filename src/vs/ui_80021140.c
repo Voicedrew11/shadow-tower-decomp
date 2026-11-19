@@ -27,14 +27,14 @@ void func_800207d4(DVECTOR *pos, DVECTOR *tex, DVECTOR *clut, CVECTOR *color, in
 
 /* The detail page toggle: the attribute figures when nonzero (bss, unowned). */
 
-/* Not exact (size-exact): retail stores tex and clut before func_800207d4's
- * argument registers are loaded and pos after them; sched1 gives the two
- * stores a lower priority than the argument loads, which happens when they
- * do not depend on the stacked fifth argument's store (same-base or varying-
- * address stores). Here all six stores follow the argument loads. The weight
- * and size quotients also land in other saved registers (retail a in $s0
- * through a temporary, b in $s1). Ruled out: every order of the tex, clut,
- * pos and style statements. */
+/* Not exact (one register, 2 lines): the high word of the inches quotient is
+ * read with `mfhi v0` where retail has `mfhi v1` (then `addu a0,v1,t0`).
+ * That pseudo first gets HI, is spilled by reload and re-allocated to the
+ * lowest free register, so retail's value conflicts with $v0 (or a lower-
+ * ranked neighbour prefers $v0) between the `mult` and the `addu`; nothing
+ * in the final code shows what was live there. Ruled out: the quotient or
+ * the remainder in a u16/int variable, reusing a, an inner (u16) cast as in
+ * ST's copy (unsigned divide). */
 ADDRESS(0x80021140, 0x844)
 void func_80021140(int player)
 {
@@ -42,9 +42,7 @@ void func_80021140(int player)
     RECT right = {621, 119, 16, 8};
     VsMenuScratch *sp = VS_MENU_SCRATCH;
     u16 kind_w[17] = {113, 58, 36, 36, 58, 135, 168, 157, 69, 135, 80, 0, 58, 0, 69, 113, 0};
-    DVECTOR tex;
-    DVECTOR clut;
-    DVECTOR pos;
+
     MenuStoredItem *item;
     int kind;
     int col;
@@ -73,14 +71,14 @@ void func_80021140(int player)
     func_8001e890(1, 0, 0);
     sp->style[0].cd |= 0x80;
     func_8001d8b8(VS_ITEM_NAME(kind), 32, 16, &sp->style[0]);
-    tex.vx = 960;
-    tex.vy = 446;
-    clut.vx = 560;
-    clut.vy = 497;
-    pos.vx = 32;
-    pos.vy = 150;
-    sp->style[0].cd &= 0x7f;
-    func_800207d4(&pos, &tex, &clut, &sp->style[0], 0xf0005);
+    {
+        DVECTOR tex = {960, 446};
+        DVECTOR clut = {560, 497};
+        DVECTOR pos = {32, 150};
+
+        sp->style[0].cd &= 0x7f;
+        func_800207d4(&pos, &tex, &clut, &sp->style[0], 0xf0005);
+    }
     if (DAT_8006335c) {
         for (i = 0; i < 14; i++) {
             func_8001d8b8(VS_MESSAGE(100 + i), 336, i * 15 + 16, &sp->style[0]);
@@ -100,11 +98,11 @@ void func_80021140(int player)
         func_8001d9cc((u16)((item->unk4 * 10 - a * 3048) / 254) | DIGITS(2), 570, 61,
                       &sp->style[3]);
         func_8001d3f0(54, 595, 61, &sp->style[3]);
-        b = item->unk6 * 100 / 454;
-        a = item->unk6 * 1000 / 454;
-        func_8001d9cc(b | DIGITS(4), 522, 76, &sp->style[3]);
+        a = item->unk6 * 100 / 454;
+        b = item->unk6 * 1000 / 454;
+        func_8001d9cc(a | DIGITS(4), 522, 76, &sp->style[3]);
         func_8001d3f0(18, 574, 76, &sp->style[3]);
-        func_8001d9cc((u16)(a - b * 10) | DIGITS(1), 582, 76, &sp->style[3]);
+        func_8001d9cc((u16)(b - a * 10) | DIGITS(1), 582, 76, &sp->style[3]);
         func_8001d3f0(53, 594, 76, &sp->style[3]);
         if (item->pairs[0][1]) {
             func_8001d9cc((u16)item->pairs[0][1] | DIGITS(3), 522, 91, &sp->style[3]);
