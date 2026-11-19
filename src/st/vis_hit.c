@@ -99,6 +99,7 @@ void func_800468c0(VECTOR *pos, int kind)
     SVECTOR *fn;
     VisRecord *rec;
     VisHitTri *f;
+    int i;
     MATRIX *m;
     VECTOR *w;
     VECTOR *a0;
@@ -110,7 +111,6 @@ void func_800468c0(VECTOR *pos, int kind)
     VECTOR *c0;
     VECTOR *c1;
     VECTOR *c2;
-    int i;
     int d;
     int h0;
     int h1;
@@ -124,8 +124,11 @@ void func_800468c0(VECTOR *pos, int kind)
         sp->vertices = HIT_DATA(sp, sp->part->vertices);
         sp->normals = HIT_DATA(sp, sp->part->normals);
         n = sp->part->n_tris;
-        f = (VisHitTri *)(HIT_DATA(sp, sp->part->faces) + sp->part->n18 * 20 +
-                          sp->part->n1c * 28 + sp->part->n1a * 24 + sp->part->n1e * 32);
+        f = (VisHitTri *)HIT_DATA(sp, sp->part->faces);
+        f = (VisHitTri *)((u8 *)f + sp->part->n18 * 20);
+        f = (VisHitTri *)((u8 *)f + sp->part->n1c * 28);
+        f = (VisHitTri *)((u8 *)f + sp->part->n1a * 24);
+        f = (VisHitTri *)((u8 *)f + sp->part->n1e * 32);
         m = &DAT_8008042c[rec->unk03 & 3];
         while (n-- > 0) {
             fn = (SVECTOR *)(sp->normals + f->normal);
@@ -135,14 +138,14 @@ void func_800468c0(VECTOR *pos, int kind)
             gte_stsv(nv);
             /* flags 1 and 4, read as one word with the push bytes */
             if (DOT(*nv, sp->dir) > 0 && !(*(u32 *)f & 0x50000))
-                goto next;
+                { f++; continue; }
             w = AT(sp->world, f->v[0]);
             d = -DOT(*nv, *w);
             h0 = (DOT(*nv, sp->pos[0]) + d) / 4096;
             h1 = (DOT(*nv, sp->pos[1]) + d) / 4096;
             h2 = (DOT(*nv, sp->pos[2]) + d) / 4096;
             if (h0 < -256)
-                goto next;
+                { f++; continue; }
             a0 = AT(sp->rel[0], f->v[0]);
             a1 = AT(sp->rel[0], f->v[1]);
             a2 = AT(sp->rel[0], f->v[2]);
@@ -195,7 +198,7 @@ void func_800468c0(VECTOR *pos, int kind)
                     COPY_NORMAL(sp->n150, nv);
                 }
                 if (h1 < -256)
-                    goto next;
+                    { f++; continue; }
                 if (DOWN(sp->e[1][0]) && DOWN(sp->e[1][1]) && DOWN(sp->e[1][2]) &&
                     h1 < sp->h124)
                     sp->h124 = h1;
@@ -224,9 +227,9 @@ void func_800468c0(VECTOR *pos, int kind)
                         sp->h144 = a0->vy + sp->pos[0].vy;
                     }
                     if (f->flags & 0x400)
-                        goto next;
-                    sp->h114 = h0;
+                        { f++; continue; }
                     sp->hit = vis_lists.sources[i];
+                    sp->h114 = h0;
                     COPY_NORMAL(sp->n158, nv);
                     sp->v190.vx = (s8)f->x;
                     sp->v190.vy = 0;
@@ -240,7 +243,7 @@ void func_800468c0(VECTOR *pos, int kind)
                     vis_lists.unk47D2 += sp->v190.vz;
                 }
                 if (h1 < -256)
-                    goto next;
+                    { f++; continue; }
                 if (UP(sp->e[1][0]) && UP(sp->e[1][1]) && UP(sp->e[1][2]) && h1 < sp->h118) {
                     sp->h118 = h1;
                     vis_lists.unk47D8 = vis_lists.sources[i];
@@ -248,7 +251,7 @@ void func_800468c0(VECTOR *pos, int kind)
                 }
             }
             if (!(f->flags & 2))
-                goto next;
+                { f++; continue; }
             if (DOT(*nv, sp->e[0][0]) > 0 || DOT(*nv, sp->e[0][1]) > 0 ||
                 DOT(*nv, sp->e[0][2]) > 0) {
                 if (DOT(sp->dir, sp->e[0][0]) >= 0 && DOT(sp->dir, sp->e[0][1]) >= 0 &&
@@ -257,19 +260,19 @@ void func_800468c0(VECTOR *pos, int kind)
                     COPY_NORMAL(sp->n178, nv);
                 }
             } else if (h0 < sp->h128) {
-                sp->h128 = h0;
                 sp->hit = vis_lists.sources[i];
+                sp->h128 = h0;
                 COPY_NORMAL(sp->n170, nv);
             }
             if (h1 < -256)
-                goto next;
+                { f++; continue; }
             if (UP(sp->e[1][0]) && UP(sp->e[1][1]) && UP(sp->e[1][2]) && h1 < sp->h11c) {
-                sp->h11c = h1;
                 sp->hit = vis_lists.sources[i];
+                sp->h11c = h1;
                 COPY_NORMAL(sp->n168, nv);
             }
             if (h2 < -256)
-                goto next;
+                { f++; continue; }
             if (DOT(*nv, sp->e[2][0]) > 0 || DOT(*nv, sp->e[2][1]) > 0 ||
                 DOT(*nv, sp->e[2][2]) > 0) {
                 if (DOT(sp->dir, sp->e[2][0]) >= 0 && DOT(sp->dir, sp->e[2][1]) >= 0 &&
@@ -281,7 +284,6 @@ void func_800468c0(VECTOR *pos, int kind)
                 sp->h130 = h2;
                 COPY_NORMAL(sp->n180, nv);
             }
-        next:
             f++;
         }
         sp->world += sp->part->n_vertices;
@@ -291,16 +293,8 @@ void func_800468c0(VECTOR *pos, int kind)
     }
 }
 
-/* func_800468c0 for the parts' quads (vertex order 0, 1, 3, 2).
- * Not exact (21 words long): same shape and residue as func_800468c0.
- * Both are leaf functions under full register pressure; retail keeps two
- * more values in stack slots (frame 64 against 56 there), so the set of
- * live locals differs, not only their order. Read of retail's frame:
- * `nrm` is at 0(sp) and `move t9,sp` is its address hoisted out of both
- * loops; the spill slots are 8(sp) (the source list position), 12 and
- * 16(sp) (the outer count i); s7 is reload's spill register. The slot
- * order is the declaration order of the spilled variables (see
- * func_80067624 in src/st/idgrid.c). Not reworked this round. */
+/* func_800468c0 for the parts' quads (vertex order 0, 1, 3, 2); its
+ * floor-kind bit 0x800 is gated by bit 6 of unk47E0, not bit 0. */
 ADDRESS(0x80047884, 0x124c)
 void func_80047884(VECTOR *pos, int kind)
 {
@@ -310,6 +304,7 @@ void func_80047884(VECTOR *pos, int kind)
     SVECTOR *fn;
     VisRecord *rec;
     VisHitQuad *f;
+    int i;
     MATRIX *m;
     VECTOR *w;
     VECTOR *a0;
@@ -324,7 +319,6 @@ void func_80047884(VECTOR *pos, int kind)
     VECTOR *c1;
     VECTOR *c2;
     VECTOR *c3;
-    int i;
     int d;
     int h0;
     int h1;
@@ -338,9 +332,12 @@ void func_80047884(VECTOR *pos, int kind)
         sp->vertices = HIT_DATA(sp, sp->part->vertices);
         sp->normals = HIT_DATA(sp, sp->part->normals);
         n = sp->part->n_quads;
-        f = (VisHitQuad *)(HIT_DATA(sp, sp->part->faces) + sp->part->n18 * 20 +
-                           sp->part->n1c * 28 + sp->part->n1a * 24 + sp->part->n1e * 32 +
-                           sp->part->n_tris * 12);
+        f = (VisHitQuad *)HIT_DATA(sp, sp->part->faces);
+        f = (VisHitQuad *)((u8 *)f + sp->part->n18 * 20);
+        f = (VisHitQuad *)((u8 *)f + sp->part->n1c * 28);
+        f = (VisHitQuad *)((u8 *)f + sp->part->n1a * 24);
+        f = (VisHitQuad *)((u8 *)f + sp->part->n1e * 32);
+        f = (VisHitQuad *)((u8 *)f + sp->part->n_tris * 12);
         m = &DAT_8008042c[rec->unk03 & 3];
         while (n-- > 0) {
             fn = (SVECTOR *)(sp->normals + f->normal);
@@ -350,14 +347,14 @@ void func_80047884(VECTOR *pos, int kind)
             gte_stsv(nv);
             /* flags 1 and 4, read as one word with the push bytes */
             if (DOT(*nv, sp->dir) > 0 && !(*(u32 *)f & 0x50000))
-                goto next;
+                { f++; continue; }
             w = AT(sp->world, f->v[0]);
             d = -DOT(*nv, *w);
             h0 = (DOT(*nv, sp->pos[0]) + d) / 4096;
             h1 = (DOT(*nv, sp->pos[1]) + d) / 4096;
             h2 = (DOT(*nv, sp->pos[2]) + d) / 4096;
             if (h0 < -256)
-                goto next;
+                { f++; continue; }
             a0 = AT(sp->rel[0], f->v[0]);
             a1 = AT(sp->rel[0], f->v[1]);
             a2 = AT(sp->rel[0], f->v[2]);
@@ -425,7 +422,7 @@ void func_80047884(VECTOR *pos, int kind)
                     COPY_NORMAL(sp->n150, nv);
                 }
                 if (h1 < -256)
-                    goto next;
+                    { f++; continue; }
                 if (DOWN(sp->e[1][0]) && DOWN(sp->e[1][1]) && DOWN(sp->e[1][2]) &&
                     DOWN(sp->e[1][3]) && h1 < sp->h124)
                     sp->h124 = h1;
@@ -433,7 +430,7 @@ void func_80047884(VECTOR *pos, int kind)
             if (f->flags & 1) {
                 if (UP(sp->e[0][0]) && UP(sp->e[0][1]) && UP(sp->e[0][2]) && UP(sp->e[0][3]) &&
                     h0 < sp->h114) {
-                    if ((f->flags & 0x800) && !(vis_lists.unk47E0 & 1)) {
+                    if ((f->flags & 0x800) && !((vis_lists.unk47E0 >> 6) & 1)) {
                         sp->flags &= ~0x10;
                         sp->flags &= ~0x8;
                         sp->flags &= ~0x20;
@@ -455,9 +452,9 @@ void func_80047884(VECTOR *pos, int kind)
                         sp->h144 = a0->vy + sp->pos[0].vy;
                     }
                     if (f->flags & 0x400)
-                        goto next;
-                    sp->h114 = h0;
+                        { f++; continue; }
                     sp->hit = vis_lists.sources[i];
+                    sp->h114 = h0;
                     COPY_NORMAL(sp->n158, nv);
                     sp->v190.vx = (s8)f->x;
                     sp->v190.vy = 0;
@@ -471,7 +468,7 @@ void func_80047884(VECTOR *pos, int kind)
                     vis_lists.unk47D2 += sp->v190.vz;
                 }
                 if (h1 < -256)
-                    goto next;
+                    { f++; continue; }
                 if (UP(sp->e[1][0]) && UP(sp->e[1][1]) && UP(sp->e[1][2]) && UP(sp->e[1][3]) &&
                     h1 < sp->h118) {
                     sp->h118 = h1;
@@ -480,7 +477,7 @@ void func_80047884(VECTOR *pos, int kind)
                 }
             }
             if (!(f->flags & 2))
-                goto next;
+                { f++; continue; }
             if (DOT(*nv, sp->e[0][0]) > 0 || DOT(*nv, sp->e[0][1]) > 0 ||
                 DOT(*nv, sp->e[0][2]) > 0 || DOT(*nv, sp->e[0][3]) > 0) {
                 if (DOT(sp->dir, sp->e[0][0]) >= 0 && DOT(sp->dir, sp->e[0][1]) >= 0 &&
@@ -490,20 +487,20 @@ void func_80047884(VECTOR *pos, int kind)
                     COPY_NORMAL(sp->n178, nv);
                 }
             } else if (h0 < sp->h128) {
-                sp->h128 = h0;
                 sp->hit = vis_lists.sources[i];
+                sp->h128 = h0;
                 COPY_NORMAL(sp->n170, nv);
             }
             if (h1 < -256)
-                goto next;
+                { f++; continue; }
             if (UP(sp->e[1][0]) && UP(sp->e[1][1]) && UP(sp->e[1][2]) && UP(sp->e[1][3]) &&
                 h1 < sp->h11c) {
-                sp->h11c = h1;
                 sp->hit = vis_lists.sources[i];
+                sp->h11c = h1;
                 COPY_NORMAL(sp->n168, nv);
             }
             if (h2 < -256)
-                goto next;
+                { f++; continue; }
             if (DOT(*nv, sp->e[2][0]) > 0 || DOT(*nv, sp->e[2][1]) > 0 ||
                 DOT(*nv, sp->e[2][2]) > 0 || DOT(*nv, sp->e[2][3]) > 0) {
                 if (DOT(sp->dir, sp->e[2][0]) >= 0 && DOT(sp->dir, sp->e[2][1]) >= 0 &&
@@ -516,7 +513,6 @@ void func_80047884(VECTOR *pos, int kind)
                 sp->h130 = h2;
                 COPY_NORMAL(sp->n180, nv);
             }
-        next:
             f++;
         }
         sp->world += sp->part->n_vertices;
