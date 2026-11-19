@@ -78,18 +78,6 @@ void func_801edfb4(void);
 void func_801ee140(int which);
 void func_801ee278(int which);
 
-/* Not exact (registers only): retail gives r4 t3 and r1 t4, this source the
- * other way round. Global-alloc ranks r1 at 405 (3 refs / 74) and r4 at 392
- * (8 / 204); retail needs r4 above r1 and still below c29's 457. Any of
- * these would do it and none has a source form yet: three or more
- * instructions that exist at allocation time between r4's initialiser and
- * the last r1 load and are gone afterwards (3/80 against 8/210), r4's life
- * four shorter, or a fifth r4 use with 8 to 21 more instructions of life.
- * Ruled out: fewer copies of the "gone" arm (cse only reaches the entry's
- * high part through a label with one use), the declaration order (the
- * prologue fixes it), the first test's byte in a local declared between the
- * pointers (changes the prologue), a repeated store in the arm that uses r1
- * (reload's cse keeps a repeated store of zero, so it stays in the code). */
 /* Sets up the area by flags 14, 29, 30 and the second word's bits 10/11:
  * entry 48 (asleep, awake or gone), entries 50, 33 and 49, table B entry
  * 0 and table C items 7..10, 28 and 29. */
@@ -111,25 +99,18 @@ void func_801ed4a0(void)
     Vis48 *c10 = &vis_table_c.entries[10];
     Vis88 *d0 = &vis_table_b.entries[0];
 
-    if (e48->unk05 != 3) {
-        if (DAT_801cba08.unk1440.bit.f29 != 1) {
-            if (DAT_801cba08.unk1440.bit.f14) {
-                if (DAT_801cba08.unk1440.bit.f30 == 1) {
-                    fdat_801ee370 = 0xfe;
-                    e48->unk70 &= ~0x2000000;
-                } else {
-                    fdat_801ee370 = 0;
-                    e48->unk1C.bytes[3] = 3;
-                    r1->unk60[13]->unk00 = 0x72;
-                    r1->unk60[14]->unk00 = 0x80;
-                }
-            } else {
-                e48->unk00 = 0;
-                fdat_801ee370 = 0xff;
-            }
+    if (e48->unk05 == 3 || DAT_801cba08.unk1440.bit.f29 == 1) {
+        e48->unk00 = 0;
+        fdat_801ee370 = 0xff;
+    } else if (DAT_801cba08.unk1440.bit.f14) {
+        if (DAT_801cba08.unk1440.bit.f30 == 1) {
+            fdat_801ee370 = 0xfe;
+            e48->unk70 &= ~0x2000000;
         } else {
-            e48->unk00 = 0;
-            fdat_801ee370 = 0xff;
+            fdat_801ee370 = 0;
+            e48->unk1C.bytes[3] = 3;
+            r1->unk60[13]->unk00 = 0x72;
+            r1->unk60[14]->unk00 = 0x80;
         }
     } else {
         e48->unk00 = 0;
