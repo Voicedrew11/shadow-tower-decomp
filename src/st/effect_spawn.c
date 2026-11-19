@@ -41,14 +41,6 @@ JUMPTABLES(0x800114cc, 0x3d8)
  * set, and the arguments after `dir` depend on the kind: mostly a scale,
  * a rotation and a model. Returns the effect, freed again for a kind
  * without one, or NULL when the pool is full.
- *
- * Not exact (1633 of 1635 instructions; the rest is identical): kinds
- * 0x9a/0xf0-0xf5 at +0x1084. Retail loads the entry into $v0, copies it
- * to $v1 and stores $v0 (`lw v0,4(s3); move v1,v0; sw v0,76(s2)`); this
- * keeps one register. Ruled out: the variable set before the store, a
- * chained assignment, args[1] read twice, a variable shared with another
- * kind (the copy then sinks and the store takes $v1), a member store, and
- * a do/while (0) around the store, the copy or the three entry stores.
  */
 ADDRESS(0x80036484, 0x198c)
 StEffect *func_80036484(u8 type, u8 flags, u8 kind, VECTOR *pos, SVECTOR *dir, ...)
@@ -57,6 +49,7 @@ StEffect *func_80036484(u8 type, u8 flags, u8 kind, VECTOR *pos, SVECTOR *dir, .
     u8 second = (flags & 0x20) >> 5;
     StEffect *e;
     Vis212 *entry;
+    Vis212 *owner;
     VECTOR a;
     VECTOR b;
     u8 frame;
@@ -527,17 +520,30 @@ StEffect *func_80036484(u8 type, u8 flags, u8 kind, VECTOR *pos, SVECTOR *dir, .
         case 0xf0:
         case 0xf1:
         case 0xf2:
-        case 0xf3:
-        case 0xf4:
-        case 0xf5:
             e->unk10 = 16;
             e->unk6 = 0;
-            ST_EFFECT_ENTRY(e) = (Vis212 *)args[1];
-            entry = ST_EFFECT_ENTRY(e);
+            owner = (Vis212 *)args[1];
+            entry = owner;
+        mark_owner:
+            ST_EFFECT_ENTRY(e) = owner;
             entry->unk24 = 4096;
             entry->unk1C.bytes[2] = 13;
             entry->unk36 = 4095;
             break;
+        case 0xf3:
+        case 0xf4:
+        case 0xf5:
+            /*
+             * The second family (the interpreter keeps the two apart as
+             * well) repeats the set-up and joins the first. Retail's one
+             * merged copy still holds the entry in two registers, which
+             * takes two variables that meet at a label.
+             */
+            e->unk10 = 16;
+            e->unk6 = 0;
+            owner = (Vis212 *)args[1];
+            entry = owner;
+            goto mark_owner;
         case 0xd5:
             e->unk6 = 5;
             e->unk10 = 16;
