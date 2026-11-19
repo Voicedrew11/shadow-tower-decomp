@@ -499,16 +499,6 @@ void func_800675f4(void)
  * The detail panel of the id under the cursor: its image (when the CD is
  * idle), its fourteen table C counts and its two figures.
  */
-/* Not exact (2 words short). Retail copies the empty flag twice
- * (`sltiu v1,v1,1; move a0,v1` in the first arm and `move v0,a0` before
- * the test), which no flag type tried here reproduces (int, u8, s8, s16,
- * a second flag variable), and it keeps the four rectangle stores in
- * source order where sched2 here floats the two constant stores up (no
- * order of the five statements changes that). The rest depends on the
- * register pressure: `sp` is one variable that gets no register (reload
- * then spells each access as a constant address), the declaration order
- * gives the spill slots, and the two column positions are written as
- * expressions of i so that loop.c makes the registers retail has. */
 ADDRESS(0x80067624, 0x5c8)
 void func_80067624(void)
 {
@@ -518,7 +508,7 @@ void func_80067624(void)
     int i;
     s16 x, y;
     s16 selected;
-    int none;
+    short none;
     int n, k;
     int j;
     u8 *count;
@@ -529,16 +519,21 @@ void func_80067624(void)
         x = 334;
         y = 9;
         text_x = 342;
+        text_y = 135;
+        sp->unk350.w = 192;
+        sp->unk350.x = x;
+        sp->unk350.h = 124;
+        sp->unk350.y = y;
     } else {
         x = 10;
         y = 9;
         text_x = 18;
+        text_y = 135;
+        sp->unk350.w = 192;
+        sp->unk350.x = x;
+        sp->unk350.h = 124;
+        sp->unk350.y = y;
     }
-    text_y = 135;
-    sp->unk350.w = 192;
-    sp->unk350.x = x;
-    sp->unk350.h = 124;
-    sp->unk350.y = y;
     none = 0;
     if (ST.unk0 == 104) {
         selected = sp->unk0.grid.row0 + sp->unk2E0;
