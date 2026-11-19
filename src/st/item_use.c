@@ -20,22 +20,11 @@
 RODATA(0x8001274c, 0x48)
 JUMPTABLES(0x80012794, 0xc0)
 
-/* The use result: whether the item was used (1) or not (2). The word is
- * DAT_801cba08.unk16D8, which the relocation census names DAT_801cd0e0.
- * Retail's two loops reach it from the DAT_801cba08 base (base + 0x16d8),
- * and the 0x10e arm keeps the callback load after the store, which the
- * scheduler only does for a store to an aggregate member; those places use
- * the member spelling, the rest the census name. */
-#define USE_RESULT DAT_801cd0e0
-#define USE_RESULT_MEMBER DAT_801cba08.unk16D8
+/* The use result: whether the item was used (1) or not (2), a member of
+ * the save-game state block. */
+#define USE_RESULT DAT_801cba08.unk16D8
 
-/* Uses item `id` and leaves the use result.
- * Not exact: every instruction matches. Only the relocation of the 0x10e
- * store differs (DAT_801cba08 + 0x16d8 against the census's DAT_801cd0e0).
- * Renaming relocs.tsv row 0x80054b84 to DAT_801cba08 makes it exact but
- * raises access-crosses-owner, because that identity's extent stops at
- * +0x14a8.
- */
+/* Uses item `id` and leaves the use result. */
 ADDRESS(0x80054a54, 0x848)
 void func_80054a54(int id)
 {
@@ -71,7 +60,7 @@ void func_80054a54(int id)
             viewer.unk2B = 1;
             viewer.unk2F0 = 0;
             viewer.unk2EC = 0;
-            USE_RESULT_MEMBER = 1;
+            USE_RESULT = 1;
             area_state.unkC->unk30(id);
         }
         break;
@@ -97,20 +86,20 @@ void func_80054a54(int id)
         while ((i = func_8004f718(i, &vis_lists)) != -1) {
             switch (func_8004fb88(&vis_table_b.entries[i], id)) {
             case 0:
-                USE_RESULT_MEMBER = 2;
+                USE_RESULT = 2;
                 goto done;
             case 1:
                 if (id == 0x114)
                     area_state.unkC->unk30(i | 0x4000);
                 else
                     func_80057d58();
-                USE_RESULT_MEMBER = 1;
+                USE_RESULT = 1;
                 if (id == 0x114 || id == 0x116)
                     goto used;
                 goto done;
             case 3:
                 func_80057cec();
-                USE_RESULT_MEMBER = 1;
+                USE_RESULT = 1;
                 goto done;
             }
             i++;
@@ -237,7 +226,7 @@ void func_80054a54(int id)
                     c->unk28 = c->unk27;
                 else
                     c->unk28 += n;
-                USE_RESULT_MEMBER = 1;
+                USE_RESULT = 1;
             }
         }
         func_8003d030();

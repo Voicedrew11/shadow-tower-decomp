@@ -297,7 +297,11 @@ int func_8004fd28(int x, int z, int w, int d, int y)
  * mark_target_live_regs, find_dead_or_set_registers): with these insns
  * both `li v0` candidates are legal, so retail's RTL differed here in a
  * way the final instructions do not show (a USE left by an earlier slot
- * fill, or a first insn that reads v0 on one side). */
+ * fill, or a first insn that reads v0 on one side). reorg caches the
+ * live set of each branch target per insn (mark_target_live_regs), and
+ * it simulates from the last BARRIER: a tested value without a REG_DEAD
+ * note at the branch (a reload, or a use deleted after flow) keeps v0
+ * live there; no source form found that leaves one. */
 ADDRESS(0x8004fdd0, 0x2dc)
 int func_8004fdd0(Vis88 *src, Vis88 *e, SVECTOR *from, SVECTOR *to, int fade, int steps)
 {

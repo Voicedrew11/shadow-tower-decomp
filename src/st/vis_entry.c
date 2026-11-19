@@ -623,17 +623,23 @@ int func_8004c184(Vis212 *e, u16 v)
 /* Moves the entry by its velocity, sliding along up to three walls the
  * request hits, then settles it on the floor. */
 /*
- * Not exact (7 words short). In the two wall arms retail reloads the
- * constant 1 at each use (`li v1,1; subu v1,v1,v0` and `li a2,1; sw
- * a2,48(sp)`): one cse-shared pseudo that got no saved register and was
- * rematerialised, because the vis_lists base of the arms sits in s3 and
- * the slide quotient in s0 (`sra s0,v0,12`); here the base takes s0 and
- * the constant s3. Also: slid/record are s8/s7 in retail (s7/s8 here)
- * and the two slid_wall clears come after the `move s8,zero`. Ruled out:
- * a separate product variable for `speed * rcos()` (right size, but the
- * record pointer is spilled and the frame grows 16 bytes). The goto
- * shape hides the loop from loop.c in both builds; the floor tail is
- * still a first-pass draft.
+ * Not exact (1 word long). From retail and in place: each wall arm ends
+ * with its own quotient and unk44C6 store (retail's arms jump into the
+ * last arm's copy, and that is what keeps each arm's vis_lists base in s3
+ * while the quotient is in s0); the wall angle is stored straight from
+ * ratan2 and read back; the two wall flags are an array in memory (their
+ * stores stay behind the calls, where a spilled scalar's would sink); the
+ * floor tail is one if chain. Open, and the reason the listing score is
+ * below the earlier goto draft's: the constant 1 that each wall arm shares
+ * between `1 - (...)` and the flag store crosses two calls and takes s4
+ * here (priority 0.054), which pushes tries, heading, speed and the record
+ * to s5..s8 and spills `slid`; retail gives that constant no register (it
+ * is rematerialised through a2, reload's spill register, hence `mflo a3`
+ * for the first product) and has tries/heading/speed/record/slid in
+ * s4..s8. Its life would have to be about four times longer (one pseudo
+ * across all arms). Ruled out: scalar flags, a request pointer set in
+ * each arm, a local copy of the parameter, write-backs repeated on the
+ * early exits, a separate product variable.
  */
 ADDRESS(0x8004c1b4, 0x654)
 void func_8004c1b4(Vis212 *e)
@@ -697,24 +703,26 @@ loop:
         vel.vz = dy * vis_lists.unk90 / 4096;
         if (slid_wall[0])
             goto done;
-        normal_angle = ratan2(vis_lists.unk90, vis_lists.unk8C);
-        vis_lists.unk78 = normal_angle;
-        ang = normal_angle + 1024;
+        vis_lists.unk78 = ratan2(vis_lists.unk90, vis_lists.unk8C);
+        ang = vis_lists.unk78 + 1024;
         e->unk5E = ang & 0xfff;
         push = speed * rcos(heading - (ang & 0xfff));
         slid_wall[0] = 1;
+        push /= 4096;
+        vis_lists.unk44C6 = push;
     } else if (hits & 8) {
         dy = 1 - (vis_lists.unk44 - e->unk2E);
         vel.vx = dy * vis_lists.unk9C / 4096;
         vel.vz = dy * vis_lists.unkA0 / 4096;
         if (slid_wall[1])
             goto done;
-        normal_angle = ratan2(vis_lists.unkA0, vis_lists.unk9C);
-        vis_lists.unk78 = normal_angle;
-        ang = normal_angle + 1024;
+        vis_lists.unk78 = ratan2(vis_lists.unkA0, vis_lists.unk9C);
+        ang = vis_lists.unk78 + 1024;
         e->unk5E = ang & 0xfff;
         push = speed * rcos(heading - (ang & 0xfff));
         slid_wall[1] = 1;
+        push /= 4096;
+        vis_lists.unk44C6 = push;
     } else if (hits & 0xd0) {
         if (hits & 0x80)
             e->unk39 = 1;
@@ -728,15 +736,14 @@ loop:
         if (slid)
             goto done;
         slid = 1;
-        normal_angle = ratan2(d.vz, d.vx);
-        vis_lists.unk78 = normal_angle;
-        ang = normal_angle + 1024;
+        vis_lists.unk78 = ratan2(d.vz, d.vx);
+        ang = vis_lists.unk78 + 1024;
         push = speed * rcos(heading - (ang & 0xfff));
+        push /= 4096;
+        vis_lists.unk44C6 = push;
     } else {
         goto done;
     }
-    push /= 4096;
-    vis_lists.unk44C6 = push;
     if (push != 0) {
         vel.vx += rcos(ang) * push / 4096;
         vel.vz += rsin(ang) * push / 4096;
@@ -749,49 +756,40 @@ done:
     e->unk4C = dy;
     if (e->unk0E == 1 || e->unk0E == 2) {
         vel.vy = 0;
-        goto finish;
-    }
-    if (dy <= 0 || e->unk0E == 4)
-        goto outside_floor;
-    if (e->unk30 < dy && e->unk0E != 8)
-        goto stop_horizontal;
-    if (e->unk16 > 0) {
-        if (dy < vel.vy) {
-            vel.vy = dy;
-            goto clear_fall;
-        }
-    } else if (e->unk16 < 0) {
-        if (dy < e->unk16) {
+    } else if (dy > 0 && e->unk0E != 4) {
+        if (e->unk30 < dy && e->unk0E != 8) {
+            vel.vx = vel.vz = 0;
+        } else if (e->unk16 > 0) {
+            if (dy < vel.vy) {
+                vel.vy = dy;
+                e->unk16 = 0;
+            } else {
+                e->unk16 += r->unk0E;
+            }
+        } else if (e->unk16 < 0) {
+            if (dy < e->unk16) {
+                vel.vy += dy;
+                e->unk16 = 0;
+            } else {
+                e->unk16 += r->unk0E;
+            }
+        } else if (dy < r->unk0E) {
             vel.vy += dy;
-            goto clear_fall;
+            e->unk16 = 0;
+        } else {
+            e->unk16 += r->unk0E;
+        }
+    } else if (dy < 0) {
+        if (-dy < e->unk30 >> 1) {
+            vel.vy += dy;
+            e->unk16 = 0;
+        } else {
+            vel.vx = vel.vz = 0;
         }
     } else {
-        goto no_vertical_speed;
+        vel.vy = 0;
+        e->unk16 = 0;
     }
-    e->unk16 += r->unk0E;
-    goto finish;
-no_vertical_speed:
-    if (dy < r->unk0E) {
-        vel.vy += dy;
-        goto clear_fall;
-    }
-    e->unk16 += r->unk0E;
-    goto finish;
-outside_floor:
-    if (dy >= 0)
-        goto zero_vertical;
-    if (-dy < e->unk30 >> 1) {
-        vel.vy += dy;
-        goto clear_fall;
-    }
-stop_horizontal:
-    vel.vx = vel.vz = 0;
-    goto finish;
-zero_vertical:
-    vel.vy = 0;
-clear_fall:
-    e->unk16 = 0;
-finish:
     e->unk9C.vx = vel.vx;
     e->unk9C.vy = vel.vy;
     e->unk9C.vz = vel.vz;

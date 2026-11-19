@@ -47,8 +47,10 @@ void func_80057a68(int arg0);
 void func_80055990(void);
 void func_800595d4(void);
 struct StEffect *func_80036484(u8 type, u8 flags, u8 kind, VECTOR *pos, SVECTOR *dir, ...); /* src/st/effect_spawn.c: the effect spawned (st/effect.h) or NULL */
+#ifndef ST_FUNC_80045044_OLD_STYLE /* one caller has no prototype in scope */
 KF_VALUELESS_S32 func_80045044(u8 a0, u8 a1, u8 a2, u8 a3, u8 a4, s8 f0, s8 f1, s8 f2, u8 f3, u8 f4,
                    u8 f5);           /* src/st/area_request.c */
+#endif
 
 /* src/st/player.c: state, stats, wear, damage, models */
 void player_kill(int unused);

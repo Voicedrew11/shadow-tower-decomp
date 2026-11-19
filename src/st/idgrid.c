@@ -499,16 +499,6 @@ void func_800675f4(void)
  * The detail panel of the id under the cursor: its image (when the CD is
  * idle), its fourteen table C counts and its two figures.
  */
-/* Not exact (2 words short). Retail copies the empty flag twice
- * (`sltiu v1,v1,1; move a0,v1` in the first arm and `move v0,a0` before
- * the test), which no flag type tried here reproduces (int, u8, s8, s16,
- * a second flag variable), and it keeps the four rectangle stores in
- * source order where sched2 here floats the two constant stores up (no
- * order of the five statements changes that). The rest depends on the
- * register pressure: `sp` is one variable that gets no register (reload
- * then spells each access as a constant address), the declaration order
- * gives the spill slots, and the two column positions are written as
- * expressions of i so that loop.c makes the registers retail has. */
 ADDRESS(0x80067624, 0x5c8)
 void func_80067624(void)
 {
@@ -518,7 +508,7 @@ void func_80067624(void)
     int i;
     s16 x, y;
     s16 selected;
-    int none;
+    short none;
     int n, k;
     int j;
     u8 *count;
@@ -529,16 +519,21 @@ void func_80067624(void)
         x = 334;
         y = 9;
         text_x = 342;
+        text_y = 135;
+        sp->unk350.w = 192;
+        sp->unk350.x = x;
+        sp->unk350.h = 124;
+        sp->unk350.y = y;
     } else {
         x = 10;
         y = 9;
         text_x = 18;
+        text_y = 135;
+        sp->unk350.w = 192;
+        sp->unk350.x = x;
+        sp->unk350.h = 124;
+        sp->unk350.y = y;
     }
-    text_y = 135;
-    sp->unk350.w = 192;
-    sp->unk350.x = x;
-    sp->unk350.h = 124;
-    sp->unk350.y = y;
     none = 0;
     if (ST.unk0 == 104) {
         selected = sp->unk0.grid.row0 + sp->unk2E0;
@@ -614,17 +609,19 @@ void func_80067624(void)
  * Draws one grid (104 or 98): the cursor bar, the scroll arrows and bar, the
  * header image and eleven rows of names, the held range highlighted.
  */
-/* Not exact (6 words short). Residues: (1) retail loads the header call's
- * three scratch-address arguments after the last two stores, here they
- * sink above them; (2) the row loop reloads `grid` from its stack slot
- * (`lbu s6,160(sp)`), here it copies the register; (3) retail sums the
- * row into v0 in both arms and copies it to a0 at the join; (4) the first
- * `id != -1` branch is threaded straight to the draw call; (5) the saved
- * registers of i/id/y/colour rotate. The row y is a giv in retail
- * (`li a2,35; ... move s4,a2` after the hoisted constants). Ruled out:
- * a row variable summed after the arms (the scratchpad moves to s0),
- * per-arm id loads, a shared `idx = n` copy. The unused RECT/CVECTOR
- * locals only reproduce the frame. */
+/* Not exact (5 words short). In place now: the two clut stores in both
+ * arms ahead of the header call (its argument loads follow them), the held
+ * colour set before the empty test (the id test is then threaded to the
+ * draw call) and the row summed after the arms (the scratchpad is back in
+ * s1). Open: (1) retail keeps `row` in v0 and copies it to the index in
+ * a0 (`addu v0,v0,s2; move a0,v0`), here the copy is coalesced; (2) the
+ * row loop reloads `grid` from its stack slot (`lbu s6,160(sp)`), here it
+ * copies the register that tested it for x; (3) the row y starts as
+ * `li a2,35 ... move s4,a2` after the hoisted constants (a giv initialised
+ * from a variable set before the loop), here loop.c gets the constant;
+ * (4) i, y and the colour rotate through s2..s4 (i 0.41, y 0.45, colour
+ * 0.30 here; retail has i, colour, y). The unused RECT/CVECTOR locals only
+ * reproduce the frame. */
 ADDRESS(0x80067bec, 0x66c)
 void func_80067bec(u8 grid)
 {
@@ -649,6 +646,7 @@ void func_80067bec(u8 grid)
     s16 *list;
     CVECTOR *color;
     int x, y;
+    int row;
 
     if (ST.unk0 == 104) {
         sp->unk330.x = 26;
@@ -697,6 +695,8 @@ void func_80067bec(u8 grid)
         sp->unk33C.h = 16;
         sp->unk358.vx = 896;
         sp->unk358.vy = 448;
+        sp->unk35C.vx = 544;
+        sp->unk35C.vy = 502;
     } else {
         sp->unk33C.x = 384;
         sp->unk33C.y = 12;
@@ -704,9 +704,9 @@ void func_80067bec(u8 grid)
         sp->unk33C.h = 16;
         sp->unk358.vx = 896;
         sp->unk358.vy = 464;
+        sp->unk35C.vx = 544;
+        sp->unk35C.vy = 502;
     }
-    sp->unk35C.vx = 544;
-    sp->unk35C.vy = 502;
     func_80028364(&sp->unk33C, &sp->unk358, &sp->unk35C, NULL, 3);
     {
         CVECTOR held = {0, 128, 128, 201};
@@ -721,23 +721,24 @@ void func_80067bec(u8 grid)
         sp->style[0].cd |= 0x80;
         for (i = 0; i < 11; i++) {
             if (grid == 104) {
-                idx = sp->unk0.grid.row0 + i;
+                row = sp->unk0.grid.row0;
                 list = sp->unk0.grid.ids0;
             } else {
-                idx = sp->unk0.grid.row1 + i;
+                row = sp->unk0.grid.row1;
                 list = sp->unk0.grid.ids1;
             }
+            row += i;
+            idx = row;
             id = list[idx];
             color = &sp->style[0];
             if (grid == ST.unk0 && ST.unk4 && idx >= ST.unk8 && idx <= ST.unkC) {
+                color = &held;
                 if (id == -1) {
                     box.x = x;
                     box.y = y + i * 16;
                     box.w = 266;
                     box.h = 12;
                     func_80028220(&box, &empty, 0);
-                } else {
-                    color = &held;
                 }
             }
             if (id != -1)

@@ -29,6 +29,9 @@
  * after). Ruled out: 32-bit and 64-bit bit-fields (the bit 31/32 pair is
  * one straddling 2-bit field in retail's order), `= 0`, shift and
  * subtract spellings of both unk1440 statements, the statement order.
+ * Retail's t4..t1 is birth order with the lowest register for the last
+ * born, i.e. all four constants die in reverse birth order or together:
+ * the 0x7fffffff pseudo needs a later, since-deleted use.
  */
 /* New-game defaults. */
 ADDRESS(0x800559bc, 0x338)
