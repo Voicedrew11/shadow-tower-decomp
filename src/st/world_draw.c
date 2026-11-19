@@ -42,6 +42,10 @@
  * the backward pass; retail needs it at 5 or tied. Ruled out: every order
  * of the five header statements, scratch variables for the copied value,
  * `*(T *)&field` spellings, moving the n_vertices read ahead of the copy.
+ * Retail's final order (`lw v0,52; sw 60; sw 64; sw v0,56`) is what sched2
+ * makes of "vertex stores, then the copy" once sched1 leaves the copy
+ * last; the copy's store is free of every other insn in sched1 (same
+ * constant base, other offsets), so only its priority places it.
  */
 ADDRESS(0x8001cdf8, 0x42c)
 void world_project_parts(VECTOR *trans)

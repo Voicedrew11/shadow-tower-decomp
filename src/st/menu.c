@@ -3694,7 +3694,10 @@ read:
  * v0); that needs the store to depend on the load, i.e. a scratchpad
  * base sched1 does not know to be constant. A 3000-variant sweep of
  * row/count temporaries, statement positions and compare spellings
- * found no such form.
+ * found no such form. Also ruled out since: the count read into a
+ * variable ahead of the magic copy with the row compared after it, the
+ * row loaded into a reused int, and a twice-set scratch pointer (the
+ * dead first set is gone before sched1 and only moves the lui).
  *
  * Saves to the selected file, or to a new file numbered unk204: builds the
  * header (the title with the file number, the area name and the play
