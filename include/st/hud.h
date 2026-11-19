@@ -43,7 +43,10 @@ void func_80026508(void);
 void func_80026964(u8 first);
 void func_80026a88(short value);
 void func_80026afc(VECTOR *pos, SVECTOR *rot);
-void func_80026dd4(VECTOR *pos, SVECTOR *rot, int arg);
+/* Returns int as far as its callers can tell: FDAT_272's func_801eec74 only
+ * matches when this call has a value (reload then keeps v0 free). Nothing
+ * uses the result. */
+int func_80026dd4(VECTOR *pos, SVECTOR *rot, int arg);
 void func_80026e04(void);
 void func_80026e90(void);
 
