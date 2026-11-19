@@ -19,21 +19,15 @@
 #define BIT(i) (1 << ((i) % 32))
 
 /*
- * Not exact: only the registers of the four 32-bit masks differ. Retail
- * has 0x7fffffff in t4 and ~0x20000, ~0x10000, ~0x8000 in t3, t2, t1;
- * here 0x7fffffff takes t1 and the others t4, t3, t2. All four loads sink
- * to the block top in sched1 (a split `li` is set twice, so not birthing)
- * and local-alloc ranks them by life: retail needs the 0x7fffffff pseudo
- * to live at least five insns longer (or the other three to count three
- * references). Its death cannot move (v1 is reused for the -2 mask right
- * after). Ruled out: 32-bit and 64-bit bit-fields (the bit 31/32 pair is
- * one straddling 2-bit field in retail's order), `= 0`, shift and
- * subtract spellings of both unk1440 statements, the statement order.
- * Retail's t4..t1 is birth order with the lowest register for the last
- * born, i.e. all four constants die in reverse birth order or together:
- * the 0x7fffffff pseudo needs a later, since-deleted use.
+ * New-game defaults.
+ *
+ * The three flags whose masks take two instructions (bits 17, 16 and 15
+ * of unk1444) are each cleared twice. The repeat leaves no instruction
+ * (cse cannot fold it because the merged mask is not a valid operand,
+ * combine can), but flow has already counted the mask's second use, and
+ * that is what ranks those three masks ahead of 0x7fffffff in local-alloc
+ * (retail: 0x7fffffff in t4, the others in t3, t2, t1).
  */
-/* New-game defaults. */
 ADDRESS(0x800559bc, 0x338)
 void func_800559bc(void)
 {
@@ -109,7 +103,10 @@ void func_800559bc(void)
     DAT_801cba08.unk1444.word &= ~0x1;
     DAT_801cba08.unk1440.word &= 0x80000000;
     DAT_801cba08.unk1444.word &= ~0x20000;
+    DAT_801cba08.unk1444.word &= ~0x20000;
     DAT_801cba08.unk1444.word &= ~0x10000;
+    DAT_801cba08.unk1444.word &= ~0x10000;
+    DAT_801cba08.unk1444.word &= ~0x8000;
     DAT_801cba08.unk1444.word &= ~0x8000;
     DAT_801cba08.unk1444.word &= ~0x4000;
     DAT_801cba08.unk1444.word &= ~0x2000;
