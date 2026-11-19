@@ -57,8 +57,10 @@ void func_80045ffc(void);
 extern AreaHooks DAT_8008038c;
 
 /* src/st/area_request.c (also declared in st/player.h) */
+#ifndef ST_FUNC_80045044_OLD_STYLE /* one caller has no prototype in scope */
 KF_VALUELESS_S32 func_80045044(u8 a0, u8 a1, u8 a2, u8 a3, u8 a4, s8 f0, s8 f1, s8 f2, u8 f3, u8 f4,
                    u8 f5);
+#endif
 
 /* WIP prototypes of the rest of the area code */
 void func_800456f8(void);

@@ -3,6 +3,10 @@
  * traps, warps and the other fixed things of an area) (WIP module, -G8: the
  * two shake amounts are $gp-relative statics).
  */
+/* The area request's last three arguments leave here as sign-extended
+ * bytes although the function takes them as u8: retail's caller saw it
+ * without a prototype. */
+#define ST_FUNC_80045044_OLD_STYLE
 #include <kf/lib/address.h>
 #include <kf/lib/null.h>
 #include <kf/lib/types.h>
@@ -18,6 +22,8 @@
 #include <st/effect.h>
 #include <st/funcs.h>
 #include <st/vis.h>
+
+KF_VALUELESS_S32 func_80045044();
 
 /* func_80050768's switch table (a door's swing side). */
 JUMPTABLES(0x80012720, 0x18)
@@ -46,14 +52,7 @@ static SVECTOR DAT_800881e0;
         SOUND(e, 208)
 
 /* Swaps the first bytes of the entry's two record ranges. */
-#define SWAP_RECORDS(e)                                                        \
-    n = (e)->unk4A.door.unk4E;                                                 \
-    while (n--) {                                                              \
-        t = vis_records[(e)->unk4A.door.unk4C + n].part;                      \
-        vis_records[(e)->unk4A.door.unk4C + n].part =                         \
-            vis_records[(e)->unk4A.door.unk4A + n].part;                      \
-        vis_records[(e)->unk4A.door.unk4A + n].part = t;                      \
-    }
+#define SWAP_RECORDS(e)                                                            n = (e)->unk4A.door.unk4E;                                                     while (n--) {                                                                      u8 t = vis_records[(e)->unk4A.door.unk4C + n].part;                                                                                                          vis_records[(e)->unk4A.door.unk4C + n].part =                                     vis_records[(e)->unk4A.door.unk4A + n].part;                              vis_records[(e)->unk4A.door.unk4A + n].part = t;                          }
 
 /*
  * Updates every table B entry by its kind.
@@ -82,9 +81,8 @@ void func_80050768(void)
     int angle;
     int off;
     u16 n;
-    u8 t;
 
-    for (i = 240; i != 0; i--, e++) {
+    for (i = 240; i != 0; e++, i--) {
         if (e->unk0a == 0xffff)
             continue;
         vis_table_b.unk71B0 = e;
@@ -111,8 +109,9 @@ void func_80050768(void)
         case 0:
         case 1: {
             int step = e->unk48;
-            short speed = step * 4;
+            short speed = step;
 
+            speed *= 4;
             switch (e->unk0C) {
             case 0:
                 if (e->unk05 == 1) {
@@ -145,10 +144,13 @@ void func_80050768(void)
                     int push = 0;
 
                     switch (rec->unk12) {
-                    case 0:
-                        if ((s16)e->unk22 > -1024 && (s16)e->unk22 < 1024)
+                    case 0: {
+                        short side = e->unk22;
+
+                        if (side > -1024 && side < 1024)
                             push = 1;
                         break;
+                    }
                     case 1:
                         if (e->unk22 > 0 && e->unk22 < 2048)
                             push = 1;
@@ -221,8 +223,8 @@ void func_80050768(void)
                 if (speed + e->unk10 < 4095) {
                     e->unk10 = (e->unk10 + speed) & 0xfff;
                 } else {
-                    e->unk10 = 4095;
                     e->unk00 = 0;
+                    e->unk10 = 4095;
                     e->unk0C = 255;
                 }
                 break;
@@ -246,8 +248,9 @@ void func_80050768(void)
         case 50:
         case 51: {
             int step = e->unk48;
-            short speed = step * 4;
+            short speed = step;
 
+            speed *= 4;
             switch (e->unk0C) {
             case 0:
                 if (e->unk05 == 51)
@@ -322,6 +325,8 @@ void func_80050768(void)
                     e->unk0C = 5;
                 }
                 break;
+            case 7:
+                break;
             case 8:
                 START(e, step);
                 if (speed + e->unk10 < 4095) {
@@ -370,11 +375,12 @@ void func_80050768(void)
         }
         case 52: {
             int step = e->unk48;
-            short speed = step * 4;
+            short speed = step;
             Vis88 *o;
             int j;
             int group;
 
+            speed *= 4;
             switch (e->unk0C) {
             case 0:
                 break;
@@ -392,7 +398,7 @@ void func_80050768(void)
                 if (e->unk4A.snd.unk4B == 255)
                     break;
                 group = e->unk4A.snd.unk4B;
-                for (j = 0, o = vis_table_b.entries; j < 240; j++, o++) {
+                for (o = vis_table_b.entries, j = 0; j < 240; j++, o++) {
                     if ((o->unk05 == 0 || o->unk05 == 50) && o->unk4A.door.unk4F == group) {
                         if (o->unk0C == 0) {
                             o->unk49 = 252;
@@ -410,46 +416,40 @@ void func_80050768(void)
                 break;
             case 3:
                 START(e, step);
-                if (speed + e->unk10 < 4095) {
-                    e->unk10 = (e->unk10 + speed) & 0xfff;
-                    break;
-                }
-                e->unk02 = 0;
-                e->unk10 = 0;
-                e->unk0C = 0;
-                if (e->unk4A.snd.unk4B == 255)
-                    break;
-                group = e->unk4A.snd.unk4B;
-                for (j = 0, o = vis_table_b.entries; j < 240; j++, o++) {
-                    if (o->unk05 == 0 && o->unk4A.door.unk4F == group) {
-                        if (o->unk0C == 0) {
-                            o->unk49 = 252;
-                            o->unk0C = 1;
-                            o->unk02 = 0;
-                            o->unk10 = 0;
-                        } else if (o->unk0C == 255) {
-                            o->unk49 = 0;
-                            o->unk0C = 3;
-                            o->unk02 = 1;
-                            o->unk10 = 0;
-                            SOUND(o, 208);
+                if (speed + e->unk10 >= 4095) {
+                    e->unk02 = 0;
+                    e->unk10 = 0;
+                    e->unk0C = 0;
+                    if (e->unk4A.snd.unk4B == 255)
+                        break;
+                    group = e->unk4A.snd.unk4B;
+                    for (o = vis_table_b.entries, j = 0; j < 240; j++, o++) {
+                        if (o->unk05 == 0 && o->unk4A.door.unk4F == group) {
+                            if (o->unk0C == 0) {
+                                o->unk49 = 252;
+                                o->unk0C = 1;
+                                o->unk02 = 0;
+                                o->unk10 = 0;
+                            } else if (o->unk0C == 255) {
+                                o->unk49 = 0;
+                                o->unk0C = 3;
+                                o->unk02 = 1;
+                                o->unk10 = 0;
+                                SOUND(o, 208);
+                            }
                         }
                     }
+                } else {
+                    e->unk10 = (e->unk10 + speed) & 0xfff;
                 }
                 break;
             }
             break;
         }
         case 2: {
-            u_long a = rand();
-            u_long b;
-            u_long c;
-
-            a >>= 8;
-            b = rand();
-            b >>= 6;
-            c = rand();
-            c >>= 8;
+            u_long a = (u_long)rand() >> 8;
+            u_long b = (u_long)rand() >> 6;
+            u_long c = (u_long)rand() >> 8;
             if (B50(e))
                 B50(e)--;
             if (e->unk0C == 0) {
@@ -603,7 +603,7 @@ void func_80050768(void)
                 rising = 0;
                 func_80015ad4();
                 viewer.unk21E = 1;
-                for (j = 7; j != -1; j--, a++) {
+                for (j = 7; j != -1; a++, j--) {
                     a->unk2A = 0;
                     if (a->unk00 != 255) {
                         func_80058220(a->unk0B * 10 + 48, &a->unk74, 127, (rand() * 5 >> 15) - 2);
@@ -617,9 +617,9 @@ void func_80050768(void)
                     vis_table_a.unk6169 = 2;
             }
             if (vis_table_a.unk6169 == 2) {
-                func_8003ead0();
                 a = &vis_table_a.entries[56];
-                for (j = 7; j != -1; j--, a++) {
+                func_8003ead0();
+                for (rising = 7; rising != -1; a++, rising--) {
                     vis_table_b.unk71A4 = DAT_800881e0.vx;
                     vis_table_b.unk71A8 = DAT_800881e0.vz;
                     if (a->unk00 != 255 && (s16)a->unk2A + a->unkB0 > 3584) {
@@ -631,11 +631,12 @@ void func_80050768(void)
                 }
                 break;
             }
-            if (vis_table_a.unk6169 == 3) {
+            if (vis_table_a.unk6169 != 3) {
+                if (W50(e) != 0xffffff)
+                    break;
+            } else {
                 DAT_800881e0.vx = 0;
                 DAT_800881e0.vz = 0;
-            } else if (W50(e) != 0xffffff) {
-                break;
             }
             vis_table_a.unk6169 = 4;
             func_80045044(e->unk4A.snd.unk4D, e->unk4A.snd.unk4D, e->unk4A.snd.unk4D, e->unk4A.snd.unk4D,
@@ -646,64 +647,67 @@ void func_80050768(void)
                 vis_table_b.unk71A8 = -DAT_800881e0.vz * 2;
                 viewer.position.vx = e->unk24.vx - 2048;
                 viewer.position.vy = e->unk24.vy - 1600;
+                viewer.position.vz = e->unk24.vz - 2048;
                 viewer.unk2B8.vx = 0;
                 viewer.unk2B8.vz = 0;
-                viewer.position.vz = e->unk24.vz - 2048;
             }
-            if (e->unk4A.door.unk4E != 255)
-                viewer.unk278.vy += e->unk4A.door.unk4E << 10;
+            if (e->unk4A.door.unk4E != 255) {
+                int yaw = e->unk4A.door.unk4E << 10;
+
+                viewer.unk278.vy += yaw;
+            }
             break;
         }
         case 225:
             break;
         case 237:
         case 239: {
-            StWarp *here;
             Vis88 *o;
             int j;
-            int turn;
+            short turn;
             u8 x;
             u8 y;
             u8 z;
             u8 area;
             u8 lit;
+            u8 lit2;
 
             if (func_8004fd28(e->unk24.vx, e->unk24.vz, 3072, 3072, e->unk24.vy) == 0)
                 goto away;
             turn = (viewer.unk26A - e->unk20) & 0xfff;
             if (turn > 2048)
                 turn |= 0xf000;
-            if (!((DAT_801cd180.unk2 & DAT_801cd180.unk22[10]) && (s16)turn > -400 && (s16)turn < 400)
+            if (!((DAT_801cd180.unk2 & DAT_801cd180.unk22[10]) && turn > -400 && turn < 400)
                 && e->unk05 != 239)
                 goto away;
             if (B50(e))
                 break;
-            here = (StWarp *)viewer.unk220;
-            here->x = viewer.position.vx >> 12;
-            here->area = area_state.unk4;
-            here->y = viewer.position.vy >> 12;
-            here->z = viewer.position.vz >> 12;
-            here->dx = viewer.position.vx - (here->x << 12);
-            here->dy = viewer.position.vy - (here->y << 12);
-            here->dz = viewer.position.vz - (here->z << 12);
-            here->yaw = e->unk36 + 2048;
+            viewer.unk220.warp.x = viewer.position.vx >> 12;
+            viewer.unk220.warp.area = area_state.unk4;
+            viewer.unk220.warp.y = viewer.position.vy >> 12;
+            viewer.unk220.warp.z = viewer.position.vz >> 12;
+            viewer.unk220.warp.dx = viewer.position.vx - (viewer.unk220.warp.x << 12);
+            viewer.unk220.warp.dy = viewer.position.vy - (viewer.unk220.warp.y << 12);
+            viewer.unk220.warp.dz = viewer.position.vz - (viewer.unk220.warp.z << 12);
+            viewer.unk220.warp.yaw = e->unk36 + 2048;
             for (j = 240, o = vis_table_b.entries; j != 0; j--, o++) {
                 if (o->unk05 == e->unk05)
                     B50(o) = 1;
             }
             x = e->unk49 + 64;
-            z = e->unk4A.snd.unk4B + 64;
             y = e->unk4A.snd.unk4A + 64;
+            z = e->unk4A.snd.unk4B + 64;
             func_80057c54();
             func_800500ac(2, 0, 0x1000, 0x100);
             area = e->unk48;
             lit = area;
+            lit2 = area;
             do {
                 func_8001531c();
                 func_800456f8();
             } while (area_state.unk0 != 0);
-            viewer.unk278.vx = 0;
             viewer.unk278.vy = e->unk4A.door.unk4F << 10;
+            viewer.unk278.vx = 0;
             if (area != area_state.unk4) {
                 func_80045044(area, area, area, 0xff, 0xff, 127, 127, 127, 0, 0, 0);
             } else {
@@ -721,9 +725,9 @@ void func_80050768(void)
             *(SVECTOR *)&viewer.unk268 = viewer.unk278;
             viewer.position.vx = (x << 12) + ((s8)e->unk4A.snd.unk4C << 7);
             viewer.position.vz = (z << 12) + ((s8)e->unk4A.door.unk4E << 7);
+            viewer.position.vy = (y << 12) + ((s8)e->unk4A.snd.unk4D << 7) - 1600;
             viewer.unk2F0 = 0;
             viewer.unk2EC = 0;
-            viewer.position.vy = (y << 12) + ((s8)e->unk4A.snd.unk4D << 7) - 1600;
             func_8003ead0();
             vis_table_b.unk71A8 = 0;
             vis_table_b.unk71A6 = 0;
@@ -751,7 +755,7 @@ void func_80050768(void)
             func_80057c54();
             func_800500ac(2, 0x1000, 0, -0x100);
             if (area < 44)
-                func_80045044(0xff, 0xff, 0xff, lit, lit, 127, 127, 127, 0, 0, 0);
+                func_80045044(0xff, 0xff, 0xff, lit2, lit, 127, 127, 127, 0, 0, 0);
             lighting_clear_requests();
             break;
         away:

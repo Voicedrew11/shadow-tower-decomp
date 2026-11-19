@@ -126,7 +126,7 @@ void func_80052c5c(void)
 {
     viewer.unk218 = 5;
     func_8003d030();
-    func_80052894((StWarp *)viewer.unk220, 1);
+    func_80052894(&viewer.unk220.warp, 1);
     DAT_801cd0e4 = 0;
 }
 

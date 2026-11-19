@@ -74,6 +74,19 @@ typedef union {
     s16 halves[2];
 } ViewerAnglePair;
 
+/* A warp destination (viewer.unk220, viewer.unk22C): area, cell and offset,
+ * yaw (func_80052894). */
+typedef struct {
+    u8 area;
+    u8 x;
+    u8 y;
+    u8 z;
+    s16 dx;
+    s16 dy;
+    s16 dz;
+    u16 yaw;
+} StWarp;
+
 typedef char ViewerAnglePairSize[sizeof(ViewerAnglePair) == 4 ? 1 : -1];
 typedef char ViewerAnglePairWordWidth[sizeof(((ViewerAnglePair *)0)->word) == 4 ? 1 : -1];
 typedef char ViewerAnglePairHalfWidth[sizeof(((ViewerAnglePair *)0)->halves[0]) == 2 ? 1 : -1];
@@ -207,7 +220,10 @@ typedef struct {
     u8 unk21D;
     u8 unk21E;
     u8 unk21F;
-    u8 unk220[0xc];      /* 0x220: a StWarp (func_80052c5c) */
+    union {
+        u8 bytes[0xc];
+        StWarp warp;
+    } unk220;            /* 0x220: the place a warp was entered from (func_80052c5c) */
     u8 unk22C;
     u8 unk22D;
     u8 unk22E;
@@ -280,19 +296,6 @@ typedef char ViewerPositionAt0x248[offsetof(Viewer, position) == 0x248 ? 1 : -1]
 typedef char ViewerPositionEndsAt0x258[offsetof(Viewer, unk258) == 0x258 ? 1 : -1];
 
 extern Viewer viewer;
-
-/* A warp destination (viewer.unk220, viewer.unk22C): area, cell and offset,
- * yaw (func_80052894). */
-typedef struct {
-    u8 area;
-    u8 x;
-    u8 y;
-    u8 z;
-    s16 dx;
-    s16 dy;
-    s16 dz;
-    u16 yaw;
-} StWarp;
 
 /*
  * The state block at 0x801b5920: func_80014544 sets bytes 4..9 from FN.;
