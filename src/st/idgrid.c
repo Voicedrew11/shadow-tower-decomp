@@ -609,19 +609,6 @@ void func_80067624(void)
  * Draws one grid (104 or 98): the cursor bar, the scroll arrows and bar, the
  * header image and eleven rows of names, the held range highlighted.
  */
-/* Not exact (5 words short). In place now: the two clut stores in both
- * arms ahead of the header call (its argument loads follow them), the held
- * colour set before the empty test (the id test is then threaded to the
- * draw call) and the row summed after the arms (the scratchpad is back in
- * s1). Open: (1) retail keeps `row` in v0 and copies it to the index in
- * a0 (`addu v0,v0,s2; move a0,v0`), here the copy is coalesced; (2) the
- * row loop reloads `grid` from its stack slot (`lbu s6,160(sp)`), here it
- * copies the register that tested it for x; (3) the row y starts as
- * `li a2,35 ... move s4,a2` after the hoisted constants (a giv initialised
- * from a variable set before the loop), here loop.c gets the constant;
- * (4) i, y and the colour rotate through s2..s4 (i 0.41, y 0.45, colour
- * 0.30 here; retail has i, colour, y). The unused RECT/CVECTOR locals only
- * reproduce the frame. */
 ADDRESS(0x80067bec, 0x66c)
 void func_80067bec(u8 grid)
 {
@@ -643,7 +630,6 @@ void func_80067bec(u8 grid)
     int i;
     int idx;
     s16 id;
-    s16 *list;
     CVECTOR *color;
     int x, y;
     int row;
@@ -713,23 +699,24 @@ void func_80067bec(u8 grid)
         CVECTOR empty = {0, 96, 96, 201};
         RECT box;
 
-        if (grid == 104)
+        if (grid == 104) {
             x = 28;
-        else
+            y = 35;
+        } else {
             x = 342;
-        y = 35;
+            y = 35;
+        }
         sp->style[0].cd |= 0x80;
         for (i = 0; i < 11; i++) {
             if (grid == 104) {
-                row = sp->unk0.grid.row0;
-                list = sp->unk0.grid.ids0;
+                row = sp->unk0.grid.row0 + i;
+                id = sp->unk0.grid.ids0[row];
+                idx = row;
             } else {
-                row = sp->unk0.grid.row1;
-                list = sp->unk0.grid.ids1;
+                row = sp->unk0.grid.row1 + i;
+                id = sp->unk0.grid.ids1[row];
+                idx = row;
             }
-            row += i;
-            idx = row;
-            id = list[idx];
             color = &sp->style[0];
             if (grid == ST.unk0 && ST.unk4 && idx >= ST.unk8 && idx <= ST.unkC) {
                 color = &held;
@@ -740,6 +727,8 @@ void func_80067bec(u8 grid)
                     box.h = 12;
                     func_80028220(&box, &empty, 0);
                 }
+            } else {
+                color = &sp->style[0];
             }
             if (id != -1)
                 func_8002732c(MESSAGE_IN(sp->unk0.grid.messages, id), x, y + i * 16, color);
