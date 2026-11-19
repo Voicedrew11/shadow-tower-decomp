@@ -622,25 +622,6 @@ int func_8004c184(Vis212 *e, u16 v)
 
 /* Moves the entry by its velocity, sliding along up to three walls the
  * request hits, then settles it on the floor. */
-/*
- * Not exact (1 word long). From retail and in place: each wall arm ends
- * with its own quotient and unk44C6 store (retail's arms jump into the
- * last arm's copy, and that is what keeps each arm's vis_lists base in s3
- * while the quotient is in s0); the wall angle is stored straight from
- * ratan2 and read back; the two wall flags are an array in memory (their
- * stores stay behind the calls, where a spilled scalar's would sink); the
- * floor tail is one if chain. Open, and the reason the listing score is
- * below the earlier goto draft's: the constant 1 that each wall arm shares
- * between `1 - (...)` and the flag store crosses two calls and takes s4
- * here (priority 0.054), which pushes tries, heading, speed and the record
- * to s5..s8 and spills `slid`; retail gives that constant no register (it
- * is rematerialised through a2, reload's spill register, hence `mflo a3`
- * for the first product) and has tries/heading/speed/record/slid in
- * s4..s8. Its life would have to be about four times longer (one pseudo
- * across all arms). Ruled out: scalar flags, a request pointer set in
- * each arm, a local copy of the parameter, write-backs repeated on the
- * early exits, a separate product variable.
- */
 ADDRESS(0x8004c1b4, 0x654)
 void func_8004c1b4(Vis212 *e)
 {
@@ -653,16 +634,16 @@ void func_8004c1b4(Vis212 *e)
     int hits;
     int tries;
     int slid;
-    int slid_wall[2];
-    int normal_angle;
+    int wall0, wall1;
+    int depth;
     int ang;
     int push;
     int dy;
 
+    wall0 = 0;
+    wall1 = 0;
     slid = 0;
     tries = 0;
-    slid_wall[0] = 0;
-    slid_wall[1] = 0;
     r = &vis_table_a.unk3500[e->unk02];
     speed = SquareRoot0(e->unk9C.vx * e->unk9C.vx + e->unk9C.vz * e->unk9C.vz);
     heading = ratan2(e->unk9C.vz, e->unk9C.vx);
@@ -698,30 +679,28 @@ loop:
     if (hits == 0 || tries++ >= 3)
         goto done;
     if (hits & 2) {
-        dy = 1 - (vis_lists.unk3C - e->unk2E);
-        vel.vx = dy * vis_lists.unk8C / 4096;
-        vel.vz = dy * vis_lists.unk90 / 4096;
-        if (slid_wall[0])
+        depth = 1 - (vis_lists.unk3C - e->unk2E);
+        vel.vx = depth * vis_lists.unk8C / 4096;
+        vel.vz = depth * vis_lists.unk90 / 4096;
+        if (wall0)
             goto done;
+        wall0 = 1;
         vis_lists.unk78 = ratan2(vis_lists.unk90, vis_lists.unk8C);
         ang = vis_lists.unk78 + 1024;
         e->unk5E = ang & 0xfff;
-        push = speed * rcos(heading - (ang & 0xfff));
-        slid_wall[0] = 1;
-        push /= 4096;
+        push = speed * rcos(heading - (ang & 0xfff)) / 4096;
         vis_lists.unk44C6 = push;
     } else if (hits & 8) {
-        dy = 1 - (vis_lists.unk44 - e->unk2E);
-        vel.vx = dy * vis_lists.unk9C / 4096;
-        vel.vz = dy * vis_lists.unkA0 / 4096;
-        if (slid_wall[1])
+        depth = 1 - (vis_lists.unk44 - e->unk2E);
+        vel.vx = depth * vis_lists.unk9C / 4096;
+        vel.vz = depth * vis_lists.unkA0 / 4096;
+        if (wall1)
             goto done;
+        wall1 = 1;
         vis_lists.unk78 = ratan2(vis_lists.unkA0, vis_lists.unk9C);
         ang = vis_lists.unk78 + 1024;
         e->unk5E = ang & 0xfff;
-        push = speed * rcos(heading - (ang & 0xfff));
-        slid_wall[1] = 1;
-        push /= 4096;
+        push = speed * rcos(heading - (ang & 0xfff)) / 4096;
         vis_lists.unk44C6 = push;
     } else if (hits & 0xd0) {
         if (hits & 0x80)
@@ -738,8 +717,7 @@ loop:
         slid = 1;
         vis_lists.unk78 = ratan2(d.vz, d.vx);
         ang = vis_lists.unk78 + 1024;
-        push = speed * rcos(heading - (ang & 0xfff));
-        push /= 4096;
+        push = speed * rcos(heading - (ang & 0xfff)) / 4096;
         vis_lists.unk44C6 = push;
     } else {
         goto done;
@@ -750,8 +728,10 @@ loop:
     }
     goto loop;
 done:
-    if (hits & 4)
-        vel.vy += vis_lists.unk2C - e->unk30;
+    if (hits & 4) {
+        dy = vis_lists.unk2C;
+        vel.vy += dy - e->unk30;
+    }
     dy = vis_lists.unk2C - e->unk30;
     e->unk4C = dy;
     if (e->unk0E == 1 || e->unk0E == 2) {
