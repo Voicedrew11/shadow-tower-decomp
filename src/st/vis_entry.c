@@ -623,22 +623,26 @@ int func_8004c184(Vis212 *e, u16 v)
 /* Moves the entry by its velocity, sliding along up to three walls the
  * request hits, then settles it on the floor. */
 /*
- * Not exact (7 words short). In the two wall arms retail reloads the
- * constant 1 at each use (`li v1,1; subu v1,v1,v0` and `li a2,1; sw
- * a2,48(sp)`): one cse-shared pseudo that got no saved register and was
- * rematerialised, because the vis_lists base of the arms sits in s3 and
- * the slide quotient in s0 (`sra s0,v0,12`); here the base takes s0 and
- * the constant s3. Also: slid/record are s8/s7 in retail (s7/s8 here)
- * and the two slid_wall clears come after the `move s8,zero`. Ruled out:
- * a separate product variable for `speed * rcos()` (right size, but the
- * record pointer is spilled and the frame grows 16 bytes). The goto
- * shape hides the loop from loop.c in both builds; the floor tail is
- * still a first-pass draft.
+ * Not exact (3 words short; the listing score is lower than the earlier
+ * goto draft's because two saved registers are swapped over the whole
+ * function). From retail: the two wall flags are scalars that get no
+ * register (48(sp), 52(sp), reloaded through a2, which also keeps the first
+ * product out of a2); the wall angle is stored straight from ratan2 and
+ * read back; the request block is reached through a pointer set in each
+ * arm (the shared `sh s0,17606(s3)` after the arms); the floor tail is one
+ * if chain. With these, tries/heading/speed/record sit in s4..s7 as in
+ * retail. Open: retail has the entry in s2 and the request pointer in s3
+ * (here s3/s2: the pointer ranks 0.47 against the entry's 0.41), and it
+ * spills slid_a/slid_b and keeps `slid` in s8 (here slid and slid_a are
+ * spilled: equal references, slid lives longest). Ruled out: a local copy
+ * of the parameter, write-backs repeated on the early exits, a separate
+ * product variable for `speed * rcos()`.
  */
 ADDRESS(0x8004c1b4, 0x654)
 void func_8004c1b4(Vis212 *e)
 {
     Vis192 *r;
+    VisLists *req;
     SVECTOR vel;
     VECTOR d;
     SVECTOR n;
@@ -647,7 +651,8 @@ void func_8004c1b4(Vis212 *e)
     int hits;
     int tries;
     int slid;
-    int slid_wall[2];
+    int slid_a;
+    int slid_b;
     int normal_angle;
     int ang;
     int push;
@@ -655,8 +660,8 @@ void func_8004c1b4(Vis212 *e)
 
     slid = 0;
     tries = 0;
-    slid_wall[0] = 0;
-    slid_wall[1] = 0;
+    slid_a = 0;
+    slid_b = 0;
     r = &vis_table_a.unk3500[e->unk02];
     speed = SquareRoot0(e->unk9C.vx * e->unk9C.vx + e->unk9C.vz * e->unk9C.vz);
     heading = ratan2(e->unk9C.vz, e->unk9C.vx);
@@ -692,51 +697,51 @@ loop:
     if (hits == 0 || tries++ >= 3)
         goto done;
     if (hits & 2) {
-        dy = 1 - (vis_lists.unk3C - e->unk2E);
-        vel.vx = dy * vis_lists.unk8C / 4096;
-        vel.vz = dy * vis_lists.unk90 / 4096;
-        if (slid_wall[0])
+        req = &vis_lists;
+        dy = 1 - (req->unk3C - e->unk2E);
+        vel.vx = dy * req->unk8C / 4096;
+        vel.vz = dy * req->unk90 / 4096;
+        if (slid_a)
             goto done;
-        normal_angle = ratan2(vis_lists.unk90, vis_lists.unk8C);
-        vis_lists.unk78 = normal_angle;
-        ang = normal_angle + 1024;
+        req->unk78 = ratan2(req->unk90, req->unk8C);
+        ang = req->unk78 + 1024;
         e->unk5E = ang & 0xfff;
         push = speed * rcos(heading - (ang & 0xfff));
-        slid_wall[0] = 1;
+        slid_a = 1;
     } else if (hits & 8) {
-        dy = 1 - (vis_lists.unk44 - e->unk2E);
-        vel.vx = dy * vis_lists.unk9C / 4096;
-        vel.vz = dy * vis_lists.unkA0 / 4096;
-        if (slid_wall[1])
+        req = &vis_lists;
+        dy = 1 - (req->unk44 - e->unk2E);
+        vel.vx = dy * req->unk9C / 4096;
+        vel.vz = dy * req->unkA0 / 4096;
+        if (slid_b)
             goto done;
-        normal_angle = ratan2(vis_lists.unkA0, vis_lists.unk9C);
-        vis_lists.unk78 = normal_angle;
-        ang = normal_angle + 1024;
+        req->unk78 = ratan2(req->unkA0, req->unk9C);
+        ang = req->unk78 + 1024;
         e->unk5E = ang & 0xfff;
         push = speed * rcos(heading - (ang & 0xfff));
-        slid_wall[1] = 1;
+        slid_b = 1;
     } else if (hits & 0xd0) {
         if (hits & 0x80)
             e->unk39 = 1;
         func_800492f4(&e->unk74);
-        d.vx = e->unk74.vx - vis_lists.unkAC.vx;
+        req = &vis_lists;
+        d.vx = e->unk74.vx - req->unkAC.vx;
         d.vy = 0;
-        d.vz = e->unk74.vz - vis_lists.unkAC.vz;
+        d.vz = e->unk74.vz - req->unkAC.vz;
         VectorNormalS(&d, &n);
         vel.vx = 0;
         vel.vz = 0;
         if (slid)
             goto done;
         slid = 1;
-        normal_angle = ratan2(d.vz, d.vx);
-        vis_lists.unk78 = normal_angle;
-        ang = normal_angle + 1024;
+        req->unk78 = ratan2(d.vz, d.vx);
+        ang = req->unk78 + 1024;
         push = speed * rcos(heading - (ang & 0xfff));
     } else {
         goto done;
     }
     push /= 4096;
-    vis_lists.unk44C6 = push;
+    req->unk44C6 = push;
     if (push != 0) {
         vel.vx += rcos(ang) * push / 4096;
         vel.vz += rsin(ang) * push / 4096;
@@ -749,49 +754,40 @@ done:
     e->unk4C = dy;
     if (e->unk0E == 1 || e->unk0E == 2) {
         vel.vy = 0;
-        goto finish;
-    }
-    if (dy <= 0 || e->unk0E == 4)
-        goto outside_floor;
-    if (e->unk30 < dy && e->unk0E != 8)
-        goto stop_horizontal;
-    if (e->unk16 > 0) {
-        if (dy < vel.vy) {
-            vel.vy = dy;
-            goto clear_fall;
-        }
-    } else if (e->unk16 < 0) {
-        if (dy < e->unk16) {
+    } else if (dy > 0 && e->unk0E != 4) {
+        if (e->unk30 < dy && e->unk0E != 8) {
+            vel.vx = vel.vz = 0;
+        } else if (e->unk16 > 0) {
+            if (dy < vel.vy) {
+                vel.vy = dy;
+                e->unk16 = 0;
+            } else {
+                e->unk16 += r->unk0E;
+            }
+        } else if (e->unk16 < 0) {
+            if (dy < e->unk16) {
+                vel.vy += dy;
+                e->unk16 = 0;
+            } else {
+                e->unk16 += r->unk0E;
+            }
+        } else if (dy < r->unk0E) {
             vel.vy += dy;
-            goto clear_fall;
+            e->unk16 = 0;
+        } else {
+            e->unk16 += r->unk0E;
+        }
+    } else if (dy < 0) {
+        if (-dy < e->unk30 >> 1) {
+            vel.vy += dy;
+            e->unk16 = 0;
+        } else {
+            vel.vx = vel.vz = 0;
         }
     } else {
-        goto no_vertical_speed;
+        vel.vy = 0;
+        e->unk16 = 0;
     }
-    e->unk16 += r->unk0E;
-    goto finish;
-no_vertical_speed:
-    if (dy < r->unk0E) {
-        vel.vy += dy;
-        goto clear_fall;
-    }
-    e->unk16 += r->unk0E;
-    goto finish;
-outside_floor:
-    if (dy >= 0)
-        goto zero_vertical;
-    if (-dy < e->unk30 >> 1) {
-        vel.vy += dy;
-        goto clear_fall;
-    }
-stop_horizontal:
-    vel.vx = vel.vz = 0;
-    goto finish;
-zero_vertical:
-    vel.vy = 0;
-clear_fall:
-    e->unk16 = 0;
-finish:
     e->unk9C.vx = vel.vx;
     e->unk9C.vy = vel.vy;
     e->unk9C.vz = vel.vz;
