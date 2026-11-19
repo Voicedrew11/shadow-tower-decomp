@@ -25,6 +25,14 @@
 
 RODATA(0x801eb560, 0x24c)
 
+/* A word no handler touches; it keeps the scene word four bytes off the code. */
+DATA(0x801eda04, 0x4, ".bss")
+static int fdat_801eda04;
+
+/* 0xff once door 33 of table B is open. */
+DATA(0x801eda08, 0x4, ".bss")
+static int fdat_801eda08;
+
 void func_801ed4a0();
 void func_801ed560();
 
@@ -46,10 +54,6 @@ const FdatHeader fdat_header = {
 #include "../lib/fdat_common_a.inc"
 #include "../lib/fdat_common.inc"
 #include "../lib/fdat_common_b.inc"
-
-/* 0xff once door 33 of table B is open. */
-DATA(0x801eda08, 0x4, ".bss")
-int fdat_801eda08;
 
 /* Sets up the area by door 33: once it is open, retires every table B entry
  * of records 0x29, 0x2b and 0x94; the lighting of area 20 unless flag 18 is

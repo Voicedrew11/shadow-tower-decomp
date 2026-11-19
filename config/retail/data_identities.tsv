@@ -265,7 +265,8 @@ FDAT_172.BIN	0x801edfd4	0x4	fdat_801edfd4	static	bss	int	func_801ed614	candidate
 FDAT_172.BIN	0x801edfd8	0x4	fdat_801edfd8	static	bss	int	func_801ed614	candidate	asm;src/fdat_172/main.c	FDAT overlay word after the code: scene state
 FDAT_182.BIN	0x801edc50	0x4	fdat_801edc50	global	bss	int	func_801ed604	candidate	asm;src/fdat_182/main.c	FDAT overlay static after the code: the gate event 0x131 opened
 FDAT_182.BIN	0x801edc54	0x4	fdat_801edc54	global	bss	int	func_801ed9cc	candidate	asm;src/fdat_182/map_801ed9cc.c	FDAT overlay static after the code: the exit scene state
-FDAT_202.BIN	0x801eda08	0x4	fdat_801eda08	global	bss	int	func_801ed4a0	candidate	asm;src/fdat_202/main.c	FDAT overlay word after the code: scene state
+FDAT_202.BIN	0x801eda04	0x4	fdat_801eda04	static	bss	int		candidate	asm;src/fdat_202/main.c	FDAT overlay static after the code that no handler references: four bytes between the code and the scene state, inside the unit's packed .lcomm run
+FDAT_202.BIN	0x801eda08	0x4	fdat_801eda08	static	bss	int	func_801ed4a0	candidate	asm;src/fdat_202/main.c	FDAT overlay static after the code: scene state
 FDAT_212.BIN	0x801edcd4	0x4	fdat_801edcd4	static	bss	int	func_801ed890	candidate	asm;src/fdat_212/main.c	FDAT overlay word after the code: set by event 0x2e
 FDAT_212.BIN	0x801edcd8	0x4	fdat_801edcd8	static	bss	int	func_801ed890	candidate	asm;src/fdat_212/main.c	FDAT overlay word after the code: set by event 2
 FDAT_212.BIN	0x801edcdc	0x4	fdat_801edcdc	static	bss	int	func_801ed594	candidate	asm;src/fdat_212/main.c	FDAT overlay word after the code: bridge state
