@@ -623,26 +623,28 @@ int func_8004c184(Vis212 *e, u16 v)
 /* Moves the entry by its velocity, sliding along up to three walls the
  * request hits, then settles it on the floor. */
 /*
- * Not exact (3 words short; the listing score is lower than the earlier
- * goto draft's because two saved registers are swapped over the whole
- * function). From retail: the two wall flags are scalars that get no
- * register (48(sp), 52(sp), reloaded through a2, which also keeps the first
- * product out of a2); the wall angle is stored straight from ratan2 and
- * read back; the request block is reached through a pointer set in each
- * arm (the shared `sh s0,17606(s3)` after the arms); the floor tail is one
- * if chain. With these, tries/heading/speed/record sit in s4..s7 as in
- * retail. Open: retail has the entry in s2 and the request pointer in s3
- * (here s3/s2: the pointer ranks 0.47 against the entry's 0.41), and it
- * spills slid_a/slid_b and keeps `slid` in s8 (here slid and slid_a are
- * spilled: equal references, slid lives longest). Ruled out: a local copy
- * of the parameter, write-backs repeated on the early exits, a separate
- * product variable for `speed * rcos()`.
+ * Not exact (1 word long). From retail and in place: each wall arm ends
+ * with its own quotient and unk44C6 store (retail's arms jump into the
+ * last arm's copy, and that is what keeps each arm's vis_lists base in s3
+ * while the quotient is in s0); the wall angle is stored straight from
+ * ratan2 and read back; the two wall flags are an array in memory (their
+ * stores stay behind the calls, where a spilled scalar's would sink); the
+ * floor tail is one if chain. Open, and the reason the listing score is
+ * below the earlier goto draft's: the constant 1 that each wall arm shares
+ * between `1 - (...)` and the flag store crosses two calls and takes s4
+ * here (priority 0.054), which pushes tries, heading, speed and the record
+ * to s5..s8 and spills `slid`; retail gives that constant no register (it
+ * is rematerialised through a2, reload's spill register, hence `mflo a3`
+ * for the first product) and has tries/heading/speed/record/slid in
+ * s4..s8. Its life would have to be about four times longer (one pseudo
+ * across all arms). Ruled out: scalar flags, a request pointer set in
+ * each arm, a local copy of the parameter, write-backs repeated on the
+ * early exits, a separate product variable.
  */
 ADDRESS(0x8004c1b4, 0x654)
 void func_8004c1b4(Vis212 *e)
 {
     Vis192 *r;
-    VisLists *req;
     SVECTOR vel;
     VECTOR d;
     SVECTOR n;
@@ -651,8 +653,7 @@ void func_8004c1b4(Vis212 *e)
     int hits;
     int tries;
     int slid;
-    int slid_a;
-    int slid_b;
+    int slid_wall[2];
     int normal_angle;
     int ang;
     int push;
@@ -660,8 +661,8 @@ void func_8004c1b4(Vis212 *e)
 
     slid = 0;
     tries = 0;
-    slid_a = 0;
-    slid_b = 0;
+    slid_wall[0] = 0;
+    slid_wall[1] = 0;
     r = &vis_table_a.unk3500[e->unk02];
     speed = SquareRoot0(e->unk9C.vx * e->unk9C.vx + e->unk9C.vz * e->unk9C.vz);
     heading = ratan2(e->unk9C.vz, e->unk9C.vx);
@@ -697,51 +698,52 @@ loop:
     if (hits == 0 || tries++ >= 3)
         goto done;
     if (hits & 2) {
-        req = &vis_lists;
-        dy = 1 - (req->unk3C - e->unk2E);
-        vel.vx = dy * req->unk8C / 4096;
-        vel.vz = dy * req->unk90 / 4096;
-        if (slid_a)
+        dy = 1 - (vis_lists.unk3C - e->unk2E);
+        vel.vx = dy * vis_lists.unk8C / 4096;
+        vel.vz = dy * vis_lists.unk90 / 4096;
+        if (slid_wall[0])
             goto done;
-        req->unk78 = ratan2(req->unk90, req->unk8C);
-        ang = req->unk78 + 1024;
+        vis_lists.unk78 = ratan2(vis_lists.unk90, vis_lists.unk8C);
+        ang = vis_lists.unk78 + 1024;
         e->unk5E = ang & 0xfff;
         push = speed * rcos(heading - (ang & 0xfff));
-        slid_a = 1;
+        slid_wall[0] = 1;
+        push /= 4096;
+        vis_lists.unk44C6 = push;
     } else if (hits & 8) {
-        req = &vis_lists;
-        dy = 1 - (req->unk44 - e->unk2E);
-        vel.vx = dy * req->unk9C / 4096;
-        vel.vz = dy * req->unkA0 / 4096;
-        if (slid_b)
+        dy = 1 - (vis_lists.unk44 - e->unk2E);
+        vel.vx = dy * vis_lists.unk9C / 4096;
+        vel.vz = dy * vis_lists.unkA0 / 4096;
+        if (slid_wall[1])
             goto done;
-        req->unk78 = ratan2(req->unkA0, req->unk9C);
-        ang = req->unk78 + 1024;
+        vis_lists.unk78 = ratan2(vis_lists.unkA0, vis_lists.unk9C);
+        ang = vis_lists.unk78 + 1024;
         e->unk5E = ang & 0xfff;
         push = speed * rcos(heading - (ang & 0xfff));
-        slid_b = 1;
+        slid_wall[1] = 1;
+        push /= 4096;
+        vis_lists.unk44C6 = push;
     } else if (hits & 0xd0) {
         if (hits & 0x80)
             e->unk39 = 1;
         func_800492f4(&e->unk74);
-        req = &vis_lists;
-        d.vx = e->unk74.vx - req->unkAC.vx;
+        d.vx = e->unk74.vx - vis_lists.unkAC.vx;
         d.vy = 0;
-        d.vz = e->unk74.vz - req->unkAC.vz;
+        d.vz = e->unk74.vz - vis_lists.unkAC.vz;
         VectorNormalS(&d, &n);
         vel.vx = 0;
         vel.vz = 0;
         if (slid)
             goto done;
         slid = 1;
-        req->unk78 = ratan2(d.vz, d.vx);
-        ang = req->unk78 + 1024;
+        vis_lists.unk78 = ratan2(d.vz, d.vx);
+        ang = vis_lists.unk78 + 1024;
         push = speed * rcos(heading - (ang & 0xfff));
+        push /= 4096;
+        vis_lists.unk44C6 = push;
     } else {
         goto done;
     }
-    push /= 4096;
-    req->unk44C6 = push;
     if (push != 0) {
         vel.vx += rcos(ang) * push / 4096;
         vel.vz += rsin(ang) * push / 4096;
