@@ -7,10 +7,20 @@
  * Parked: no unit claims this file (config/units.toml) so ST.EXE stays a
  * partial image. Claiming 0x800385b0 completes ST's function coverage, and
  * kf build then runs the native PSYLINK link, which fails until the ST
- * data globals have defining objects. Built locally as unit
- * st.effect_script (profile probe-gcc272cdk-o2-g8, between st.effect_move
- * and st.effect_run) the function, its switch table and its small-data
- * initialisers match retail.
+ * data globals have defining objects. To claim it, add to config/units.toml
+ * between st.effect_move and st.effect_run:
+ *
+ *     [[unit]]
+ *     unit = "st.effect_script"
+ *     image = "ST.EXE"
+ *     source = "src/st/effect_script.c"
+ *     profile = "probe-gcc272cdk-o2-g8"
+ *
+ * The file already carries its claims: ADDRESS(0x800385b0, 0x3660),
+ * JUMPTABLES(0x800118a4, 0x3d8) and SDATA(0x80088018, 0x14) (no RODATA).
+ * It needs the -G8 profile: its three small initialisers are in .sdata.
+ * Built that way the function is objdiff 100% and the unit's .rdata and
+ * .sdata match retail.
  */
 #include <kf/lib/address.h>
 #include <kf/lib/types.h>

@@ -47,7 +47,8 @@ JUMPTABLES(0x800114cc, 0x3d8)
  * to $v1 and stores $v0 (`lw v0,4(s3); move v1,v0; sw v0,76(s2)`); this
  * keeps one register. Ruled out: the variable set before the store, a
  * chained assignment, args[1] read twice, a variable shared with another
- * kind (the copy then sinks and the store takes $v1), a member store.
+ * kind (the copy then sinks and the store takes $v1), a member store, and
+ * a do/while (0) around the store, the copy or the three entry stores.
  */
 ADDRESS(0x80036484, 0x198c)
 void *func_80036484(u8 type, u8 flags, u8 kind, VECTOR *pos, SVECTOR *dir, ...)
