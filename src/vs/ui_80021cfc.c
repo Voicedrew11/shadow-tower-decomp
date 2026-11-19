@@ -144,24 +144,15 @@ void func_80022228(void)
  * (four columns of four), the count the opponent's save holds, the
  * record's +0x27 value and its weight (+0x24 / 4.54, with tenths).
  */
-/* Not exact (3 bytes short, 32 lines): two things remain. (1) Retail reads
- * the label x through an address rebuilt in the reload register (`lui t1;
- * addiu t1,t1,lo; lhu s2,0(t1)`, once, then kept in $s2): the 4 bytes {342,
- * 0} sit in the unit's .sdata between func_80021cfc's initialisers and
- * func_80022794's, but cc1 did not treat the symbol as small data and the
- * pointer to it had no register. A sized static const is read $gp-relative
- * here; an unsized static array goes to .data/.rodata; a pointer local folds
- * back; an auto aggregate is stored field by field. (2) The loop's message
- * number, name x and count pointer are in $s5/$s7/$s6 where retail has
- * $s7/$s6/$s5: after the loops retail gives the message base + 3072 $s5 and
- * &style[3] $s7 (here swapped), and the scratchpad pseudo's preference for
- * the latter's register is what the loop values avoid. Fixing (1) changes
- * the lives in that block. */
+/* The two captions' x is count_x itself. As a u16 argument it is a zero
+ * extension of a variable that has no register and is known to be 342, and
+ * reload satisfies that by reading the constant from memory: the halfword
+ * 342 in the unit's .sdata (0x800632b0) is reload's own pool entry, not a
+ * table of the game's. */
 ADDRESS(0x800222d8, 0x4bc)
 void func_800222d8(int page)
 {
     VsMenuScratch *sp = VS_MENU_SCRATCH;
-    static const DVECTOR pos = {342, 0};
     int text_y;
     short x, y;
     int count_x;
@@ -220,7 +211,7 @@ void func_800222d8(int page)
     done:
         DAT_8006337a = 0;
         text_y += 60;
-        func_8001d8b8(VS_MESSAGE(501), pos.vx, text_y, &sp->style[0]);
+        func_8001d8b8(VS_MESSAGE(501), count_x, text_y, &sp->style[0]);
         func_8001d9cc(DAT_801a0a80[1 - page].unk18BC.unk2EC[id] | 0x3000000, count_x + 70, text_y, &sp->style[3]);
         func_8001d8b8(VS_MESSAGE(502), count_x + 114, text_y, &sp->style[0]);
         func_8001d9cc(DAT_80191d00.unk0118[id].unk27 | 0x3000000, count_x + 138, text_y, &sp->style[3]);
@@ -228,7 +219,7 @@ void func_800222d8(int page)
         whole = weight * 100 / 454;
         tenths = weight * 1000 / 454 % 10;
         text_y += 15;
-        func_8001d8b8(VS_MESSAGE(503), pos.vx, text_y, &sp->style[0]);
+        func_8001d8b8(VS_MESSAGE(503), count_x, text_y, &sp->style[0]);
         func_8001d9cc(whole | 0x3000000, count_x + 70, text_y, &sp->style[3]);
         func_8001d3f0(18, count_x + 109, text_y, &sp->style[0]);
         func_8001d9cc(tenths | 0x1000000, count_x + 115, text_y, &sp->style[3]);

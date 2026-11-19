@@ -415,8 +415,10 @@ void func_80026afc(VECTOR *pos, SVECTOR *rot)
     world_state.unk1ECC0++;
 }
 
+/* One frame of the world and the player's status; no value is returned
+ * (see the prototype). */
 ADDRESS(0x80026dd4, 0x30)
-void func_80026dd4(VECTOR *pos, SVECTOR *rot, int arg)
+int func_80026dd4(VECTOR *pos, SVECTOR *rot, int arg)
 {
     func_80026afc(pos, rot);
     player_update_status(arg);

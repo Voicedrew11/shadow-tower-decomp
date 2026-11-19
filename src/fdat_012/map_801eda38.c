@@ -17,15 +17,23 @@
 #include <st/xa.h>
 #include <st/fdat.h>
 
-/* Not exact (size-exact, schedule): retail's listing is this statement order
- * untouched, with the two bytes[] stores and the record index sharing $a0
- * and the range mask in $a1; here sched1 lifts the constant 1 and the index
- * load to the top of the block (their variable is set twice, so they are not
- * held back next to their uses) and the mask takes $a0. With a literal 1 and
- * a single-set index the index load sinks to its use instead. The record
- * lookup, drop queue and final slot writes agree. Ruled out: every position
- * of the two masked updates as compound assignments, the index in i,
- * distance or a u8 local, r computed before or after the stores. */
+/* Not exact (size-exact, the first block's order): retail's listing is this
+ * statement order untouched, with both masked loads ahead of the stores that
+ * follow them, the two bytes[] stores and the record index in $a0 after the
+ * collision load, and the range mask in $a1. sched2 only breaks ties by
+ * sched1's order, so retail's sched1 already had the loads early and the
+ * three in place; a literal 1 and a single-set index then take $a0 by
+ * themselves ($v0 and $v1 are busy) and the mask $a1. Here sched1 lifts the
+ * three to the top (record is set twice and loses every tie to a ready
+ * store) or, with single-set values, sinks each load to its use. Keeping
+ * them needs each load to depend on the stores after it, and sched1 sees no
+ * dependence between fields of one pointer. Ruled out: 141,120 orders of
+ * the block's statements in fourteen spellings of the 1, the index and the
+ * constants (cc1 grid, scratch grid012.py), a do-while (0) around any part
+ * (the loop level changes the allocation), a second pointer for the stores
+ * (cse folds it, or the parameter stays in $a0), a volatile pointer (source
+ * order, but the 1 ahead of the collision load), scratch variables shared
+ * with the later info and distance loads. */
 /*
  * Starts the entry's fall (animation 9) and, once its record's stream
  * counter is 4, adds table C item 0x10a at its place to the drop slots

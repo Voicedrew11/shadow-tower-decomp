@@ -15,21 +15,18 @@
  * left, the second on the right, wrapping to a second line at glyph 49;
  * `bright` sets their green tint.
  */
-/* Not exact (size-exact, 8 lines, registers agree): in the glyph loop's pre-
- * header retail has the hoisted constants first (graphics base, 40, 50, 29)
- * and then the four x settings; here the x settings come first. loop.c puts
- * what it hoists directly in front of the loop's start note, so in retail
- * the x settings sit behind that note. Ruled out: an enclosing do-while(0),
- * while or for(;;) around the settings (flow counts it as a loop level and
- * bright moves into a register), a function-level row variable (the 29 is
- * then not hoisted last and takes $t1). */
+/* The four x positions are not stepped variables: they are written from a
+ * column counter that the line break sets back to 0. loop.c accepts a
+ * constant assignment to a counter in an innermost loop, turns the four
+ * sums into stepped registers, initialises them after the constants it
+ * hoists and sets them again next to the `col = 0`. */
 ADDRESS(0x8002ad40, 0x338)
 void func_8002ad40(int bright)
 {
     u16 *s;
     int line = 0;
     int n;
-    int x0, x1, x2, x3;
+    int col;
     u16 glyph;
 
     for (n = 0; n < 2;) {
@@ -38,24 +35,23 @@ void func_8002ad40(int bright)
         if (glyph == 0xffff || glyph == 0)
             goto next;
 
-        x3 = 212;
-        x2 = 201;
-        x1 = 31;
-        x0 = 20;
+        col = 0;
         do {
             POLY_FT4 *p;
             int c;
+            int x0, x1, x2, x3;
 
             if (glyph == 1)
                 break;
             c = *s - 2;
             if (c == 47) {
                 line = 1;
-                x3 = 212;
-                x2 = 201;
-                x1 = 31;
-                x0 = 20;
+                col = 0;
             }
+            x0 = 20 + col * 11;
+            x1 = 31 + col * 11;
+            x2 = 201 + col * 11;
+            x3 = 212 + col * 11;
             p = (POLY_FT4 *)DAT_801624d0.packet->cur;
             DAT_801624d0.packet->cur = (u_long *)(p + 1);
             setPolyFT4(p);
@@ -88,10 +84,7 @@ void func_8002ad40(int bright)
             setRGB0(p, bright * 3, bright * 3 + 16, bright * 3);
             addPrim(DAT_801624d0.ot_cur + 5, p);
             s++;
-            x3 += 11;
-            x2 += 11;
-            x1 += 11;
-            x0 += 11;
+            col++;
             glyph = *s;
         } while (glyph != 0xffff && glyph != 0);
     next:
