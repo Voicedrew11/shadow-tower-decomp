@@ -248,6 +248,12 @@ source = "src/st/effect.c"
 profile = "probe-gcc272cdk-o2-g0"
 
 [[unit]]
+unit = "st.effect_spawn"
+image = "ST.EXE"
+source = "src/st/effect_spawn.c"
+profile = "probe-gcc272cdk-o2-g0"
+
+[[unit]]
 unit = "st.effect_move"
 image = "ST.EXE"
 source = "src/st/effect_move.c"

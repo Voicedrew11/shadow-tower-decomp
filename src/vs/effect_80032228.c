@@ -28,7 +28,7 @@ void func_80032264(u_long flags)
     pos.vx = e->unk20.vx - e->unk40.vx * 8;
     pos.vy = e->unk20.vy - e->unk40.vy * 8;
     pos.vz = e->unk20.vz - e->unk40.vz * 8;
-    func_80032228(flags, (u8)(e->unk1 - 44) < 4 ? e->unk52 : 5120, &pos);
+    func_80032228(flags, (u8)(e->unk1 - 44) < 4 ? e->unk52.h : 5120, &pos);
 }
 
 /* A free effect slot, or NULL. */
