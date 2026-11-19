@@ -164,13 +164,22 @@ void func_80063cb0(void)
 /* Not exact (size-exact, every instruction in place): only three saved
  * registers differ. Retail has the scratchpad in s0, the pad base and then
  * `kind` in s1 and `cur` in s2; here cur and the pad base take s0, kind s1
- * and the scratchpad s2. global-alloc ranks cur 0.43, pad 0.42, kind 0.36
- * and sp 0.22 (its life is doubled by the REG_EQUIV constant). Retail's
- * registers follow from either order sp, kind, cur or sp, pad, cur, kind
- * with cur live while the pad base is. Ruled out: block-local counters,
- * sp assigned after the cancel test or twice (a dead second set is gone
- * before local-alloc), a u16 cur. The second index `id` of the 266 loop
- * is what puts the table giv's step behind the counter's. */
+ * and the scratchpad s2 (global-alloc: cur 0.43, pad 0.42, kind 0.36, sp
+ * 0.22 with its life doubled by REG_EQUIV). Retail needs sp first and
+ * kind ahead of cur. Both halves measured:
+ * - kind passes cur (0.425 against 0.422) when cases 8 and 4 of the list
+ *   loop end with their own `if (unk26 != kind) continue; goto add;`
+ *   instead of `break`; jump2 merges the copies back (same bytes).
+ * - sp is first only without the doubling (0.44): a test build with a
+ *   second live `sp = MENU_SCRATCH` after the slot switch has retail's
+ *   s0/s1/s1/s2. Nothing found that leaves two live sets and one `lui`:
+ *   cse deletes a repeat it can reach from the entry, flow a dead one.
+ * Writing every case's tail out (six copies of the add, no goto) also
+ * gives the three registers (sp 68 refs), but the loop is then 218 insns
+ * and loop.c stops hoisting &viewer.unk38[3] (10 * 18 < 218), so retail's
+ * loop had at most 180. Ruled out before: block-local counters, a u16
+ * cur, sp assigned after the cancel test. The second index `id` of the
+ * 266 loop is what puts the table giv's step behind the counter's. */
 ADDRESS(0x800642e8, 0x8c0)
 int func_800642e8(int *sel)
 {

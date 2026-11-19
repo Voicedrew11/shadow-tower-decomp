@@ -45,7 +45,10 @@
  * Retail's final order (`lw v0,52; sw 60; sw 64; sw v0,56`) is what sched2
  * makes of "vertex stores, then the copy" once sched1 leaves the copy
  * last; the copy's store is free of every other insn in sched1 (same
- * constant base, other offsets), so only its priority places it.
+ * constant base, other offsets), so only its priority places it. A test
+ * build whose scratch base sched1 cannot resolve adds the store's
+ * dependence on the header->vertices load and still leaves it ahead of
+ * the vertex stores, so the base is not the cause.
  */
 ADDRESS(0x8001cdf8, 0x42c)
 void world_project_parts(VECTOR *trans)

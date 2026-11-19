@@ -3683,21 +3683,20 @@ read:
 
 /*
  * Not exact (99.7%): the header's icon byte is stored before the unk1FE
- * load that retail schedules first (li v0,18 / sb for lhu v0,510; li v1,18).
- * In sched1 the load is a boosted single-set temporary and nothing ties
- * it to the icon store (frame store vs constant-based scratch load do not
- * conflict), so it sinks below the store; retail keeps it above. Ruled
- * out: operand order of the compare, the statement before/after strcpy,
- * an s16 row variable (it sinks to the block top and takes t3). Retail's
- * order is stable under sched2 only when the load already precedes the
- * icon store after sched1 (then 18 and 2 take v1 because the row holds
- * v0); that needs the store to depend on the load, i.e. a scratchpad
- * base sched1 does not know to be constant. A 3000-variant sweep of
- * row/count temporaries, statement positions and compare spellings
- * found no such form. Also ruled out since: the count read into a
- * variable ahead of the magic copy with the row compared after it, the
- * row loaded into a reused int, and a twice-set scratch pointer (the
- * dead first set is gone before sched1 and only moves the lui).
+ * load (retail: lhu v0,510(s4); li v1,18; sb v1,58(sp); li v1,2; sb).
+ * sched1 trace: the load is a boosted single-set temporary, launched two
+ * ticks after its shift and blocked for one cycle behind the `blocks`
+ * store, so it lands between the two header stores. Retail's order needs
+ * the icon store to depend on the load. A test build whose scratch base
+ * sched1 cannot resolve (a second live `sp = MENU_SCRATCH`) with the
+ * source order count, strcpy, row compare, icon, blocks gives retail's
+ * order in this block, but the unk1F8 and unk204 loads further down then
+ * stay behind the path/num stores they float above in retail: the base
+ * is known there, so something ties header.icon to the row load alone.
+ * Ruled out: compare operand order, the statement before/after strcpy,
+ * s16 and reused-int row variables, a count variable, a dead first set
+ * of sp, a duplicate set in the entry block (cse drops it), and a
+ * 3000-variant cc1 sweep of temporaries and positions.
  *
  * Saves to the selected file, or to a new file numbered unk204: builds the
  * header (the title with the file number, the area name and the play
