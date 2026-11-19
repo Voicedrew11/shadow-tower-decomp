@@ -30,6 +30,7 @@ FDAT_232.BIN	0x801edb94	fdat_801edb94	0x4	fixed	overlay statics: consecutive wor
 FDAT_232.BIN	0x801edb98	fdat_801edb98	0x4	fixed	overlay statics: consecutive words in retail; ASPSX .lcomm requests pack without alignment
 FDAT_232.BIN	0x801edb9c	fdat_801edb9c	0x4	fixed	overlay statics: consecutive words in retail; ASPSX .lcomm requests pack without alignment
 FDAT_242.BIN	0x801ee0b0	fdat_801ee0b0	0x4	fixed	overlay statics: consecutive words in retail; ASPSX .lcomm requests pack without alignment
+FDAT_262.BIN	0x801ee370	fdat_801ee370	0x4	fixed	overlay statics: consecutive words in retail; ASPSX .lcomm requests pack without alignment
 FDAT_262.BIN	0x801ee374	fdat_801ee374	0x4	fixed	overlay statics: consecutive words in retail; ASPSX .lcomm requests pack without alignment
 FDAT_262.BIN	0x801ee378	fdat_801ee378	0x4	fixed	overlay statics: consecutive words in retail; ASPSX .lcomm requests pack without alignment
 FDAT_262.BIN	0x801ee37c	fdat_801ee37c	0x4	fixed	overlay statics: consecutive words in retail; ASPSX .lcomm requests pack without alignment

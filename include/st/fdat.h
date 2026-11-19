@@ -85,6 +85,5 @@ extern int fdat_801edc54; /* FDAT_182.BIN: src/fdat_182/map_801ed9cc.c */
 extern int fdat_801ee0b4; /* FDAT_242.BIN: src/fdat_242/main.c */
 extern int fdat_801ee0b8; /* FDAT_242.BIN: src/fdat_242/main.c */
 extern int fdat_801ee0bc; /* FDAT_242.BIN: src/fdat_242/main.c */
-extern int fdat_801ee370; /* FDAT_262.BIN: src/fdat_262/map_801edec4.c */
 
 #endif

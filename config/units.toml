@@ -1180,20 +1180,6 @@ profile = "probe-gcc272cdk-o2-g0"
 bind = "name"
 
 [[unit]]
-unit = "fdat_262.map_801edec4"
-image = "FDAT_262.BIN"
-source = "src/fdat_262/map_801edec4.c"
-profile = "probe-gcc272cdk-o2-g0"
-bind = "name"
-
-[[unit]]
-unit = "fdat_262.map_801ee140"
-image = "FDAT_262.BIN"
-source = "src/fdat_262/map_801ee140.c"
-profile = "probe-gcc272cdk-o2-g0"
-bind = "name"
-
-[[unit]]
 unit = "fdat_272.main"
 image = "FDAT_272.BIN"
 source = "src/fdat_272/main.c"
