@@ -56,16 +56,6 @@ static SVECTOR DAT_800881e0;
 
 /*
  * Updates every table B entry by its kind.
- *
- * Not exact (2119 of retail's 2123 instructions; the blocks and their order
- * agree): the frame is 144 bytes against 160. Retail has the warp's area in
- * three places: the loaded byte (s2, the last call's fifth argument), a copy
- * (s8: the first call, the same-area test and the < 44 test) and a byte in a
- * stack slot (104(sp), the last call's fourth argument); two byte variables
- * (area, lit) are in, the third is not found, so one spill slot is missing.
- * Also open: retail recomputes step * 4 in the door arms where cse still
- * reaches the first copy here, and the kind sits in a0 (v1 here) through the
- * switch. Ruled out: the byte variables at function scope (same code).
  */
 ADDRESS(0x80050768, 0x212c)
 void func_80050768(void)
@@ -619,9 +609,9 @@ void func_80050768(void)
             if (vis_table_a.unk6169 == 2) {
                 a = &vis_table_a.entries[56];
                 func_8003ead0();
+                vis_table_b.unk71A4 = DAT_800881e0.vx;
+                vis_table_b.unk71A8 = DAT_800881e0.vz;
                 for (rising = 7; rising != -1; a++, rising--) {
-                    vis_table_b.unk71A4 = DAT_800881e0.vx;
-                    vis_table_b.unk71A8 = DAT_800881e0.vz;
                     if (a->unk00 != 255 && (s16)a->unk2A + a->unkB0 > 3584) {
                         a->unkB0 = 0;
                         a->unk2A = 4095;
