@@ -69,6 +69,7 @@ void func_80055374(long *pos, SVECTOR *rot)
     Vis48 *c;
     Vis212 *a;
     Vis88 *b;
+    Vis24 *def;
 
     p.vx = pos[0];
     p.vy = pos[1] + 1600;
@@ -124,9 +125,10 @@ void func_80055374(long *pos, SVECTOR *rot)
     vis_lists.unk0 = 0;
     for (; (i = func_8004f718(i, &vis_lists)) != -1; i++) {
         b = &vis_table_b.entries[i];
+        def = &vis_table_b.unk0000[b->unk0a];
         DAT_801cd0e0 = 1;
         b->unk0E = 1;
-        kind = vis_table_b.unk0000[b->unk0a].unk00[0];
+        kind = def->unk00[0];
         switch (kind) {
         case 254:
             if (b->unk0C == 0)

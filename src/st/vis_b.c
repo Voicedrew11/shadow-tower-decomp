@@ -301,7 +301,14 @@ int func_8004fd28(int x, int z, int w, int d, int y)
  * live set of each branch target per insn (mark_target_live_regs), and
  * it simulates from the last BARRIER: a tested value without a REG_DEAD
  * note at the branch (a reload, or a use deleted after flow) keeps v0
- * live there; no source form found that leaves one. */
+ * live there; no source form found that leaves one. Since tested: a
+ * second test of the same value with merged arms (`else if (x > 0)` and
+ * the tail repeated) keeps the value in v0 with no REG_DEAD at the branch,
+ * and the slot is still filled: mark_target_live_regs applies REG_DEAD
+ * only at the next label, and find_dead_or_set_registers kills whatever
+ * the first insn of a thread sets. Both `li v0` are refused only if the
+ * first active insn of both threads is something else when reorg looks
+ * (an update_block USE, or a label that ends own_thread). */
 ADDRESS(0x8004fdd0, 0x2dc)
 int func_8004fdd0(Vis88 *src, Vis88 *e, SVECTOR *from, SVECTOR *to, int fade, int steps)
 {
