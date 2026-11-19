@@ -161,16 +161,16 @@ void func_80063cb0(void)
  * the slot (or, for the two ring slots, opens the ring sub-list) and loads
  * the equipped id's image. Returns 1 on cancel.
  */
-/* Not exact (size-exact). Retail has the scratchpad in s0, the pad base and
- * then `kind` in s1 and `cur` in s2; here cur and the pad base take s0,
- * kind s1 and the scratchpad s2. global-alloc ranks cur 0.43, pad 0.42,
- * kind 0.36, sp 0.22: retail needs sp first (its life not doubled by a
- * REG_EQUIV, i.e. two live sets) and kind ahead of cur. Smaller residues:
- * the clear loop is a walking pointer in retail, `count + list` operand
- * order, the store order of the sub-list hand-off and where the two givs
- * of the 266 loop step. Ruled out: block-local counters, a separate image
- * variable, sp assigned after the cancel test or twice, an up-counting
- * clear loop (one instruction longer), direct DAT_801e0d08 accesses. */
+/* Not exact (size-exact, every instruction in place): only three saved
+ * registers differ. Retail has the scratchpad in s0, the pad base and then
+ * `kind` in s1 and `cur` in s2; here cur and the pad base take s0, kind s1
+ * and the scratchpad s2. global-alloc ranks cur 0.43, pad 0.42, kind 0.36
+ * and sp 0.22 (its life is doubled by the REG_EQUIV constant). Retail's
+ * registers follow from either order sp, kind, cur or sp, pad, cur, kind
+ * with cur live while the pad base is. Ruled out: block-local counters,
+ * sp assigned after the cancel test or twice (a dead second set is gone
+ * before local-alloc), a u16 cur. The second index `id` of the 266 loop
+ * is what puts the table giv's step behind the counter's. */
 ADDRESS(0x800642e8, 0x8c0)
 int func_800642e8(int *sel)
 {
@@ -179,6 +179,7 @@ int func_800642e8(int *sel)
     int kind;
     int cur;
     int i;
+    int id;
 
     if (PAD.unk4 & 0x2000) {
         func_80057cec();
@@ -316,34 +317,34 @@ int func_800642e8(int *sel)
                     bits = &DAT_801e0d08.bits[viewer.unk38[0] - 196];
                 else
                     bits = &DAT_801e0d08.bits[viewer.unk38[13] - 196];
-                list = &DAT_801e0d08;
-                list->count = 0;
-                for (i = 11; i >= 0; i--)
-                    list->entries[i] = 255;
-                list = &DAT_801e0d08;
+                DAT_801e0d08.count = 0;
+                for (i = 0; i < 12; i++)
+                    DAT_801e0d08.entries[i] = 255;
                 for (i = 0; i < 12; i++) {
                     if (*bits & (1 << entries[i]))
-                        list->entries[list->count++] = entries[i];
+                        DAT_801e0d08.entries[DAT_801e0d08.count++] = entries[i];
                 }
                 if (DAT_801e0d08.count) {
                     func_80057cc8();
+                    sp->unk2DC = (sp->unk2DC | 0x2) & ~0x1;
                     DAT_800881e8[0] = sp->unk2E2;
                     DAT_800881e8[1] = sp->unk2E0;
                     sp->unk2E2 = 0;
                     sp->unk2E0 = 0;
-                    sp->unk2DC = (sp->unk2DC | 0x2) & ~0x1;
-                    return 0;
+                } else {
+                    func_80057d34();
                 }
+            } else {
+                func_80057d34();
             }
-            func_80057d34();
             return 0;
         }
         func_80057cc8();
         sp->unk0.list.ids = func_800152d0(532);
         sp->unk0.list.count = 0;
-        for (i = 0; i < 266; i++) {
+        for (i = 0, id = 0; i < 266; i++, id++) {
             if (!DAT_801c7590.counts[i].count || DAT_801c7590.counts[i].flag ||
-                vis_table_c.unk0118[i].unk26 == 255)
+                vis_table_c.unk0118[id].unk26 == 255)
                 continue;
             switch (kind) {
             case 8:
@@ -359,11 +360,11 @@ int func_800642e8(int *sel)
                     continue;
                 if (EQ.unk10 == SLOT(4) && i == viewer.unk38[3])
                     continue;
-                if (vis_table_c.unk0118[i].unk26 == 6 || vis_table_c.unk0118[i].unk26 == 9)
+                if (vis_table_c.unk0118[id].unk26 == 6 || vis_table_c.unk0118[id].unk26 == 9)
                     goto add;
                 continue;
             case 1:
-                if (vis_table_c.unk0118[i].unk26 == 1 || vis_table_c.unk0118[i].unk26 == 10)
+                if (vis_table_c.unk0118[id].unk26 == 1 || vis_table_c.unk0118[id].unk26 == 10)
                     goto add;
                 continue;
             case 7:
@@ -373,7 +374,7 @@ int func_800642e8(int *sel)
                     continue;
                 break;
             }
-            if (vis_table_c.unk0118[i].unk26 != kind)
+            if (vis_table_c.unk0118[id].unk26 != kind)
                 continue;
         add:
             sp->unk0.list.ids[sp->unk0.list.count++] = i;
