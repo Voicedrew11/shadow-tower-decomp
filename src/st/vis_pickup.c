@@ -9,20 +9,16 @@
 #include <LIBGTE.H>
 #include <INLINE_C.H>
 #include <st/data.h>
-#include <st/hud.h>
 #include <st/funcs.h>
 #include <st/vis.h>
 
+/* Draws the HUD (src/st/hud.c). Retail's caller saw it without a
+ * declaration, as a function returning a word: nothing reads the result,
+ * but v0 counts as used, which keeps it out of reach of reload. */
+int func_80026afc();
+
 /* Shows entry c in front of the viewer until a button takes it (bit 10)
- * or puts it back (bit 11, unless forced).
- * Not exact (same size): the only residue is the register of the second
- * product of each of the twelve interpolations (`mflo v1` or `mflo a2`,
- * never v0 or a0, where this build has `mflo v0`). The products prefer LO,
- * get it in global-alloc and are moved to a general register when reload
- * spills LO; retail's choice needs v0 and a0 in their conflicts at that
- * point, which nothing in this RTL provides. Ruled out: operand and sum
- * order, `16 - i` inline, a short or unsigned j, the products or the sum
- * in named variables. */
+ * or puts it back (bit 11, unless forced). */
 ADDRESS(0x8005335c, 0x748)
 void func_8005335c(Vis48 *c, int forced)
 {
