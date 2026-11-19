@@ -23,18 +23,17 @@ SDATA(0x80063280, 0x10)
 /* Number-width flag for func_8001d9cc (ST.EXE's DIGITS, src/st/ui.c). */
 #define DIGITS(n) ((n) << 24)
 
-void func_800207d4(DVECTOR *pos, DVECTOR *tex, DVECTOR *clut, CVECTOR *color, int arg4);
+/*
+ * The cell grid (src/vs/ui_800207d4.c) has no prototype in a header, and
+ * retail's page saw it as returning int (an implicit declaration, written
+ * out here): reload keeps the inches quotient's high word out of $v0
+ * (`mfhi v1`), which it only does when some call in the function has a
+ * value. The result is not used.
+ */
+int func_800207d4();
 
 /* The detail page toggle: the attribute figures when nonzero (bss, unowned). */
 
-/* Not exact (one register, 2 lines): the high word of the inches quotient is
- * read with `mfhi v0` where retail has `mfhi v1` (then `addu a0,v1,t0`).
- * That pseudo first gets HI, is spilled by reload and re-allocated to the
- * lowest free register, so retail's value conflicts with $v0 (or a lower-
- * ranked neighbour prefers $v0) between the `mult` and the `addu`; nothing
- * in the final code shows what was live there. Ruled out: the quotient or
- * the remainder in a u16/int variable, reusing a, an inner (u16) cast as in
- * ST's copy (unsigned divide). */
 ADDRESS(0x80021140, 0x844)
 void func_80021140(int player)
 {
