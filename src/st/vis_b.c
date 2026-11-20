@@ -287,28 +287,7 @@ int func_8004fd28(int x, int z, int w, int d, int y)
 
 /* Moves `e` from `from` to `to` (both turned by src's rotation, relative to
  * src) over `steps` calls, fading it in when `fade`; returns 1 when done.
- * Not exact: at +0x294 retail leaves the `bnez v0` delay slot empty where
- * this fills it with `li v0,99` from the target (2 words). reorg only
- * refuses both `li v0,..` candidates if it believes v0 live after the
- * branch (no REG_DEAD on it, e.g. a reloaded test value, or stale block
- * liveness); the pattern is unique in ST and VS. Ruled out: switch, `!x`,
- * inverted arms, the tail repeated in both arms, a `done = 1` result
- * variable. reorg.c read through (fill_slots_from_thread,
- * mark_target_live_regs, find_dead_or_set_registers): with these insns
- * both `li v0` candidates are legal, so retail's RTL differed here in a
- * way the final instructions do not show (a USE left by an earlier slot
- * fill, or a first insn that reads v0 on one side). reorg caches the
- * live set of each branch target per insn (mark_target_live_regs), and
- * it simulates from the last BARRIER: a tested value without a REG_DEAD
- * note at the branch (a reload, or a use deleted after flow) keeps v0
- * live there; no source form found that leaves one. Since tested: a
- * second test of the same value with merged arms (`else if (x > 0)` and
- * the tail repeated) keeps the value in v0 with no REG_DEAD at the branch,
- * and the slot is still filled: mark_target_live_regs applies REG_DEAD
- * only at the next label, and find_dead_or_set_registers kills whatever
- * the first insn of a thread sets. Both `li v0` are refused only if the
- * first active insn of both threads is something else when reorg looks
- * (an update_block USE, or a label that ends own_thread). */
+ */
 ADDRESS(0x8004fdd0, 0x2dc)
 int func_8004fdd0(Vis88 *src, Vis88 *e, SVECTOR *from, SVECTOR *to, int fade, int steps)
 {
@@ -364,14 +343,15 @@ int func_8004fdd0(Vis88 *src, Vis88 *e, SVECTOR *from, SVECTOR *to, int fade, in
     e->unk24.vx = src->unk24.vx + func_8004a830(a.vx, b.vx, t);
     e->unk24.vy = src->unk24.vy + func_8004a830(a.vy, b.vy, t);
     e->unk24.vz = src->unk24.vz + func_8004a830(a.vz, b.vz, t);
-    if (*(u8 *)&src->unk50 < steps)
-        return 0;
-    if (fade)
-        e->unk10 = 4095;
-    if (area_state.unk0 == 0)
-        e->unk48 = 0xff;
-    src->unk0C = 99;
-    return 1;
+    if (*(u8 *)&src->unk50 >= steps) {
+        if (fade)
+            e->unk10 = 4095;
+        if (area_state.unk0 == 0)
+            e->unk48 = 0xff;
+        src->unk0C = 99;
+        return 1;
+    }
+    return 0;
 }
 
 /* Runs frames while the screen fades from level `start` to `end` by
