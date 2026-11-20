@@ -23,13 +23,13 @@ int func_8001d134(int archive, int member, CdlLOC *loc); /* ST func_80015cd0 */
 void func_8001d298(void);                 /* ST func_800175a4 */
 void func_8001d328(void);                 /* ST func_80017634 */
 
-/* src/vs/anim_80023764.c */
+/* src/vs/model_8002345c.c */
 void func_80023820(struct StAnimSet *set);
 void func_8002392c(void);
 void *func_8002398c(u32 size);           /* ST func_8001528c */
 void func_800241b4(struct StAnimSet **out);
 
-/* src/vs/anim_8002429c.c */
+/* src/vs/model_8002345c.c */
 int func_800246d8(struct StAnimSet **setp, int id, int clip, u_long frame); /* ST anim_prepare_any + anim_set_pose */
 
 /* src/vs/anim_80027f30.c */
@@ -72,7 +72,7 @@ void func_8002f014(u16 archive, char *name); /* ST func_80016294 */
 /* src/vs/snd_80012a70.c */
 void func_80012c2c(u_long *data, DVECTOR *pos, DVECTOR *clut_pos);
 
-/* src/vs/anim_80023764.c */
+/* src/vs/model_8002345c.c */
 void *func_8002398c(u32 size);            /* malloc, NULL outside main RAM */
 
 /* src/vs/stub_8001ca10.c */
@@ -94,7 +94,7 @@ void func_80012b50(u_long *data, int page, int clut_y);  /* src/vs/main.c */
 void func_80012d10(int id);                              /* src/vs/main.c */
 void func_8001381c(void);                                /* src/vs/main.c */
 int func_8001c530(void);                                 /* src/vs/card_8001c530.c */
-void func_80023764(u16 id, StAnimFile *file);            /* src/vs/anim_80023764.c */
+void func_80023764(u16 id, StAnimFile *file);            /* src/vs/model_8002345c.c */
 void func_80027fec(u16 id, StAnimFile *file);            /* src/vs/anim_80027f30.c */
 void func_8002345c(ModelFile *file);                     /* src/vs/model_8002345c.c */
 int func_8002ef3c(u_long *buf, char *name, u32 size);    /* src/vs/cd_8002e5e4.c */
@@ -126,7 +126,7 @@ void func_800352fc(void);                                /* src/vs/effect_run_80
 void func_80031478(int id);                              /* not reconstructed */
 int func_8003333c(int arg0, u_long height, int spin);    /* src/vs/effect_move_8003333c.c */
 void func_8002e314(u8 id, u8 attack);                    /* src/vs/fighter_8002e114.c */
-void func_800256bc(int id, int node, int index, VECTOR *out); /* src/vs/anim_80025670.c */
+void func_800256bc(int id, int node, int index, VECTOR *out); /* src/vs/model_8002345c.c */
 int func_80028d94(int id, int part, int frame, int index, SVECTOR *out); /* src/vs/anim_80028d94.c */
 
 #endif

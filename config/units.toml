@@ -616,30 +616,6 @@ source = "src/vs/model_8002345c.c"
 profile = "probe-gcc272cdk-o2-g8"
 
 [[unit]]
-unit = "vs.anim_80023764"
-image = "VS.EXE"
-source = "src/vs/anim_80023764.c"
-profile = "probe-gcc272cdk-o2-g0"
-
-[[unit]]
-unit = "vs.anim_8002429c"
-image = "VS.EXE"
-source = "src/vs/anim_8002429c.c"
-profile = "probe-gcc272cdk-o2-g0"
-
-[[unit]]
-unit = "vs.model_80024b5c"
-image = "VS.EXE"
-source = "src/vs/model_80024b5c.c"
-profile = "probe-gcc272cdk-o2-g8"
-
-[[unit]]
-unit = "vs.anim_80025670"
-image = "VS.EXE"
-source = "src/vs/anim_80025670.c"
-profile = "probe-gcc272cdk-o2-g0"
-
-[[unit]]
 unit = "vs.prim_80025878"
 image = "VS.EXE"
 source = "src/vs/prim_80025878.c"
