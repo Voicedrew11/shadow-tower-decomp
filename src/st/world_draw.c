@@ -48,7 +48,12 @@
  * constant base, other offsets), so only its priority places it. A test
  * build whose scratch base sched1 cannot resolve adds the store's
  * dependence on the header->vertices load and still leaves it ahead of
- * the vertex stores, so the base is not the cause.
+ * the vertex stores, so the base is not the cause. With retail's sched1
+ * order local-alloc gives every register by itself (offset v0, model and
+ * sum v1, unk34 v0, header reload a0), but only while all of them are
+ * single-death block locals: one variable shared by the copy and the
+ * offset or the sum does order the copy last, yet has two deaths, goes to
+ * global-alloc and takes a0/a1 (or pulls unk34 into v1).
  */
 ADDRESS(0x8001cdf8, 0x42c)
 void world_project_parts(VECTOR *trans)

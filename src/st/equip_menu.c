@@ -179,7 +179,14 @@ void func_80063cb0(void)
  * and loop.c stops hoisting &viewer.unk38[3] (10 * 18 < 218), so retail's
  * loop had at most 180. Ruled out before: block-local counters, a u16
  * cur, sp assigned after the cancel test. The second index `id` of the
- * 266 loop is what puts the table giv's step behind the counter's. */
+ * 266 loop is what puts the table giv's step behind the counter's.
+ * Measured since: the loop has no call, so loop.c starts at threshold 58;
+ * it is 142 insns now, the counts base needs <= 232 and the third viewer
+ * address <= 180. Eight written-out adds (two per `||` of cases 6 and 1,
+ * one each in 8, 4, 7 and the last) give all three registers at the same
+ * size, but 238 insns (the counts base stays inside). A second
+ * `sp = MENU_SCRATCH` at the cancel test's target would be merged into the
+ * delay-slot copy by reorg, but cse1 deletes it first. */
 ADDRESS(0x800642e8, 0x8c0)
 int func_800642e8(int *sel)
 {
