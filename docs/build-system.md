@@ -89,10 +89,11 @@ JUMPTABLES(0x80011490, 0x18)
 ```
 
 The compiler writes a unit's constants (string literals, aggregate
-initializers, const data) and its switch jump tables to `.rdata`. Retail
-`ST.EXE` lays out every unit's constants before any unit's tables, each group
-in link order, with the SDK libraries' read-only data after the tables; the
-build therefore moves each constant block to `.rodata`
+initializers, const data) and its switch jump tables to `.rdata`. In the
+default (`separate`) read-only mode of a PS-X EXE, every unit's constants
+link before any unit's tables, each group in link order, with the SDK
+libraries' read-only data after the tables (`STR.EXE`'s pool, then its one
+table); the build therefore moves each constant block to `.rodata`
 (`separate_read_only` in `scripts/psxbuild/sdk.py`) and the link script
 places `.rodata` before `.rdata`. A unit's constant pool ends on an eight-byte
 boundary (its zero tail is part of the claim). `RODATA()` claims the

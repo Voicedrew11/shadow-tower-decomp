@@ -32,7 +32,7 @@ admitted game functions, is not linked: its code still calls and reads game
 code no source provides, which PSYLINK cannot resolve. `kf build` reports it
 as `partial` with the number of unclaimed game functions and does not fail;
 its units are verified by the target relink and data gates of `kf check`
-(`ST.EXE` is the first such image). Sources that claim no retail function,
+(`ST.EXE` was the first such image). Sources that claim no retail function,
 such as the synthetic link controls, are always linked.
 
 ## Link model
@@ -68,8 +68,11 @@ bss	group	bss
   followed by the SDK libraries' read-only data. The compiler writes both
   kinds of game data to `.rdata`; the build moves the constants (see
   [the build system](build-system.md#unit-manifest-and-address-claims)).
-  `ST.EXE` is the evidence: every unit's constants precede every unit's
-  tables, each in link order. The overlays' text starts at the entry point.
+  An image whose retail layout keeps each object's constants and switch
+  tables together instead (`read_only = "together"` in
+  `config/images.toml`: `ST.EXE` and the overlays) keeps cc1's order under
+  one section name, so each unit claims one `RODATA()` run. The overlays'
+  text starts at the entry point.
 - **`.ctors`/`.dtors`.** LIBSN `SNMAIN` declares them. Placed after
   `.text`, both are empty at `.data`'s start, which is where retail
   `PSX.EXE`'s `__main` walks the constructor list (`0x80010350`). Left
@@ -144,7 +147,7 @@ second run of `RECT` initializers after its switch table, and the code of
 `FDAT_442.BIN`, which has neither, starts directly after the tables at
 `0x801EB72C` with no pool padding.
 
-A partially claimed overlay is reported `partial` like `ST.EXE`; its units
+A partially claimed overlay is reported `partial` like a partial program; its units
 are verified by the target relink and data gates. `kf link --compare-only`
 compares an overlay's file bytes strictly (header size 0) and keeps it out of
 the island report and the README executable block.
@@ -218,6 +221,48 @@ LIBPAD controller module. The link confirmed END's rules and adds:
   `tim_buf` 237, `display` 253, `poison_image` 262, `pad_data` 310,
   `cdl_file` 314, `pad_info` 328, `image_rgb` 422), and LIBCD's
   `StCdIntrFlag` follows them.
+
+## ST.EXE
+
+ST.EXE links natively at retail's size (491,520 bytes); 26 bytes differ,
+all inside the one non-exact function `world_project_parts` (`0x8001cee8`-
+`0x8001cf0c`). The read-only data, `.data`, `.sdata` and every
+`.sbss`/`.bss` placement equal retail, and the bss group ends at
+`0x801EB560`, where the FDAT overlays load. The link established:
+
+- Each object's constants and switch tables stay together in cc1 order
+  (`read_only = "together"`): retail follows each object's constants with
+  that object's own tables (the world renderer's pools at `0x80011000`,
+  then its tables from `0x800113b0`; the two player modules' pools, then
+  both modules' tables from `0x80011cfc`), which forced the minimal
+  translation units named in the units' header comments (`st.texanim`,
+  `st.effect_spawn`, `st.player`, `st.vis_b`, `st.equip_menu`). A table
+  is eight-aligned relative to its object's read-only start, and PSYLINK
+  aligns an object's `.rdata` to four only, so an object with constants
+  and no tables ends four-aligned: `st.area_a` claims its pool at its raw
+  size, `RODATA(0x80011f18, 0x39b)`.
+- The first `.sbss` run `0x80088188`-`0x800881b7` belongs to four
+  data-only units linked before the code (`link = "first"`); the `.data`
+  tables from `0x8008038c` and every `.bss` object to data-only units
+  linked after the code. Unreferenced holes are unused statics (`.data`, `.sdata`)
+  or layout-evidenced objects confirmed by the linked `.SYM` (`.sbss`,
+  `.bss`).
+- A new object's `.sbss` contribution starts eight-aligned, while COMMON
+  after the same object's statics does not: retail's `0x800881d4`-
+  `0x800881df` is one COMMON batch right after `st.player`'s static
+  `shake`, so `st.player` allocates all three words (the first is
+  unreferenced), although `st.area_a` is the module that uses the other
+  two.
+- Seven read-only words after the last unit's switch tables
+  (`0x80013974`-`0x8001398f`) are defined by a data-only unit linked last
+  (`src/st/rdata_80013974.c`) as `const` pointers: `_bss_org`,
+  `_bss_orgend` three times, `_bss_orgend + 0x84` (past the overlay's id
+  word and handler table) and `_bss_orgend + 0x43e0` twice (the extent of
+  `FDAT_272.BIN` with its bss, the largest overlay). `main` places the heap
+  above the overlay area from the fourth and sixth words. No kit object
+  holds such a table, and the last three values most likely came from an
+  overlay group in retail's link, which this build's ST link does not
+  have; the source form is inferred from the values.
 
 ## TITLE.EXE
 
@@ -299,8 +344,9 @@ ASPSX 2.79D and PSYLINK 2.73D chain:
   unreferenced identity rather than padding.
 - A jump table is emitted after `.align 3`, which ASPSX applies relative to
   the object's `.rdata` start; table offsets therefore show which object an
-  unexplained word belongs to. Constant pools link separately, before every
-  table (`.rodata`), each ending eight-byte aligned.
+  unexplained word belongs to. In the separate read-only mode, constant
+  pools link before every table (`.rodata`), each ending eight-byte
+  aligned; in the together mode each object keeps cc1's order, unpadded.
 - Under `-G8`, initialized data of at most eight bytes goes to `.sdata` and
   private tentative data of at most eight bytes to `.sbss`. Unlike ASPSX
   1.07, ASPSX 2.79 also addresses that data `$gp`-relative, so `-G` changes
