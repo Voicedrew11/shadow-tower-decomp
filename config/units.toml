@@ -464,12 +464,6 @@ source = "src/st/equip_menu.c"
 profile = "probe-gcc272cdk-o2-g8"
 
 [[unit]]
-unit = "st.idgrid"
-image = "ST.EXE"
-source = "src/st/idgrid.c"
-profile = "probe-gcc272cdk-o2-g8"
-
-[[unit]]
 unit = "st.data_8008038c"
 image = "ST.EXE"
 source = "src/st/data_8008038c.c"
