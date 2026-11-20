@@ -312,6 +312,58 @@ class ReachabilityTest(unittest.TestCase):
         self.assertIn("config-only-data-not-compared", report["summary"]["issues"])
         self.assertEqual(report["ranges"][0]["size"], 4)
 
+    def test_library_bss_identity_is_compared_by_the_current_link_placement(self):
+        flag = replace(datum(0x1800, 4, source="data_identities.tsv", storage="bss"),
+                       name="StCdIntrFlag")
+        img = RetailImage.synthetic(IMAGE, 0x1000, b"\0" * 0x1000)
+        refs = (ref(0x1000, 0x1800),)
+
+        def run(linked, game=frozenset()):
+            return audit(IMAGE, (function(),), (flag,), refs, img,
+                         linked_symbols=linked, game_symbols=game)
+
+        placed = run({"StCdIntrFlag": 0x1800, "after": 0x1804})
+        self.assertEqual(placed["summary"]["issues"], {})
+        self.assertEqual(placed["summary"]["sdk_bss_link_placed"], 1)
+        self.assertEqual([r["comparison"] for r in placed["ranges"] if r["kind"] == "data"],
+                         ["sdk-bss-link-placed"])
+        gap = {"config-only-data-not-compared": 1}
+        # No current link, a link that puts it elsewhere, a game object that
+        # defines the name, another symbol inside the extent, or unknown game
+        # objects: the range stays an uncompared config-only gap.
+        self.assertEqual(run(None)["summary"]["issues"], gap)
+        self.assertEqual(run({"StCdIntrFlag": 0x1810})["summary"]["issues"], gap)
+        self.assertEqual(run({"StCdIntrFlag": 0x1800}, frozenset({"StCdIntrFlag"}))
+                         ["summary"]["issues"], gap)
+        self.assertEqual(run({"StCdIntrFlag": 0x1800, "inside": 0x1802})["summary"]["issues"],
+                         gap)
+        self.assertEqual(run({"StCdIntrFlag": 0x1800}, None)["summary"]["issues"], gap)
+        # Initialized config data never qualifies, however the link places it.
+        table = replace(flag, storage="load")
+        report = audit(IMAGE, (function(),), (table,), refs, img,
+                       linked_symbols={"StCdIntrFlag": 0x1800}, game_symbols=frozenset())
+        self.assertEqual(report["summary"]["issues"], gap)
+
+    def test_game_object_symbols_need_every_unit_object(self):
+        import tempfile
+        from pathlib import Path
+
+        from scripts.kf.data_reachability import game_object_symbols
+        from scripts.kf.mips_elf import STT_OBJECT, DefinedSymbol, write_mips_elf
+
+        manifest = SimpleNamespace(units=(
+            SimpleNamespace(image=IMAGE, object_name="00001000_a.o"),
+            SimpleNamespace(image="OTHER.EXE", object_name="00001000_b.o"),
+        ))
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            self.assertIsNone(game_object_symbols(IMAGE, manifest, root))
+            (root / "game" / "base").mkdir(parents=True)
+            (root / "game" / "base" / "00001000_a.o").write_bytes(write_mips_elf(
+                b"\0" * 8, "fn", 8, data=b"\0" * 4,
+                data_symbols=(DefinedSymbol("table", 0, 4, STT_OBJECT),)))
+            self.assertEqual(game_object_symbols(IMAGE, manifest, root), {"fn", "table"})
+
     def test_source_owner_supersedes_interior_tsv_rows_without_duplication(self):
         report = self.audit([function()], [
             datum(0x1200, 16, source="RODATA"),

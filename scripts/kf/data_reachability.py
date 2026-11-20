@@ -86,6 +86,49 @@ def data_extents(
     return tuple(out)
 
 
+def game_object_symbols(image: str, manifest: Manifest,
+                        objdiff_dir: Path = BUILD / "objdiff") -> frozenset[str] | None:
+    """Names that IMAGE's compiled source units define or request as COMMON.
+
+    None when any unit's object is missing: then nothing can show that a
+    linked name came from outside the game sources.
+    """
+    from scripts.kf.data_match import Elf
+    from scripts.kf.retail import image_key
+
+    names: set[str] = set()
+    for unit in manifest.units:
+        if unit.image != image:
+            continue
+        path = objdiff_dir / image_key(image) / "base" / unit.object_name
+        if not path.is_file():
+            return None
+        recon = Elf(path)
+        names.update(request.name for request in recon.common_requests)
+        names.update(item.name for items in recon.allocations.values() for item in items)
+    return frozenset(names)
+
+
+def sdk_bss_link_placed(extent: DataExtent, linked: dict[str, int] | None,
+                        game_symbols: frozenset[str] | None) -> bool:
+    """Whether the current link places a library-owned `bss` identity exactly.
+
+    A Sony library member's COMMON (LIBCD's `StCdIntrFlag`) has no source
+    unit and no initialized bytes for a provider comparison, so the only
+    evidence of its placement is the link itself: the identity is a curated
+    `bss` row, no compiled game unit defines or requests the name (so a
+    library or kit object supplied it), the current source-hash-checked
+    `.SYM` (`linked_symbols.linked_addresses`) puts the name at the
+    identity's address, and no other linked symbol starts inside its extent.
+    """
+    if (linked is None or game_symbols is None or extent.claimed
+            or extent.source != "data_identities.tsv" or extent.storage != "bss"
+            or extent.name in game_symbols or linked.get(extent.name) != extent.va):
+        return False
+    return not any(extent.va < address < extent.end
+                   for name, address in linked.items() if name != extent.name)
+
+
 def _function_key(function: Binding) -> str:
     return f"function:{function.va:08x}"
 
@@ -204,6 +247,8 @@ def audit(
     link_labels: frozenset[int] = frozenset(),
     host_functions: tuple[Binding, ...] = (),
     host_extents: tuple[DataExtent, ...] = (),
+    linked_symbols: dict[str, int] | None = None,
+    game_symbols: frozenset[str] | None = None,
 ) -> dict:
     """Lossless reference worklist with weakest-edge reachability witnesses.
 
@@ -218,6 +263,10 @@ def audit(
     program (`retail.referent_image`). They are checked against the host's
     owners (`host_functions`, `host_extents`) and recorded as cross-image
     edges; the host's own closure is audited with the host image.
+
+    A config-only library `bss` identity that the current link places
+    (`sdk_bss_link_placed`, from `linked_symbols` and the names the game
+    objects define, `game_symbols`) is compared, not a gap.
     """
     if img.image != image:
         raise ValueError("reference audit image does not match retail bytes")
@@ -409,6 +458,8 @@ def audit(
                 if len(verified) == 1:
                     row["comparison"] = "config-provider-matched"
                     row["comparison_unit"] = verified[0].unit
+                elif sdk_bss_link_placed(node, linked_symbols, game_symbols):
+                    row["comparison"] = "sdk-bss-link-placed"
                 else:
                     issue("config-only-data-not-compared", key)
         range_rows.append(row)
@@ -454,6 +505,8 @@ def audit(
             ),
             "config_matched_data_ranges": sum(r.get("comparison") == "config-provider-matched"
                                               for r in range_rows),
+            "sdk_bss_link_placed": sum(r.get("comparison") == "sdk-bss-link-placed"
+                                       for r in range_rows),
             "reference_occurrences": len(reference_rows),
             "vendored_indirect_exempt": len(dispatch_witnesses),
             "proven_vendored_dispatch": sum(
@@ -472,6 +525,7 @@ def audit(
 
 def run(images: tuple[str, ...], *, output: Path | None = None) -> int:
     from scripts.kf.config_data import audit as compare_config_data
+    from scripts.kf.linked_symbols import linked_addresses
     from scripts.kf.roundtrip import link_labels
 
     manifest = load_manifest()
@@ -485,7 +539,9 @@ def run(images: tuple[str, ...], *, output: Path | None = None) -> int:
         report = audit(image, ctx.idx.functions, extents, ctx.refs.references, ctx.img,
                        config_comparisons=comparisons,
                        link_labels=frozenset(link_labels(image).values()),
-                       host_functions=host_functions, host_extents=extents)
+                       host_functions=host_functions, host_extents=extents,
+                       linked_symbols=linked_addresses(image),
+                       game_symbols=game_object_symbols(image, manifest))
         reports.append(report)
         summary = report["summary"]
         print(f"{image} known-reference closure: {summary['game_roots']} game roots, "
@@ -501,6 +557,9 @@ def run(images: tuple[str, ...], *, output: Path | None = None) -> int:
                   f"{summary['host_references']}")
         if summary['config_matched_data_ranges']:
             print(f"  independent provider/retail matches: {summary['config_matched_data_ranges']} config ranges")
+        if summary["sdk_bss_link_placed"]:
+            print(f"  library bss identities placed by the current link: "
+                  f"{summary['sdk_bss_link_placed']}")
         for code, count in summary["issues"].items():
             print(f"  {code}: {count}")
         print("  exhaustive reachable-byte coverage is not yet proven")
