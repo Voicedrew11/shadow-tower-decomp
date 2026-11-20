@@ -46,8 +46,7 @@ s32 DAT_80063370[1];
 /* The module's constants (the archive and music file names, the frame
  * statistics' format strings and main's file name), then its switch tables
  * (func_80013c5c's and func_80015020's phase table). */
-RODATA(0x80011000, 0xa0)
-JUMPTABLES(0x800110a0, 0x70)
+RODATA(0x80011000, 0x110)
 
 /* The model renderers' light scale (func_80025204, func_80028914 and
  * func_800291d4 scale their light matrix by it). */

@@ -24,8 +24,7 @@
 #include <vs/scratch.h>
 
 /* The module's constants, then its switch tables. */
-RODATA(0x800118c4, 0x70)
-JUMPTABLES(0x80011934, 0x600)
+RODATA(0x800118c4, 0x670)
 
 /*
  * Spawning an effect. VS's form of ST.EXE's

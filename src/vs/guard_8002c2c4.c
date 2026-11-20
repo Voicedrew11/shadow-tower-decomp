@@ -14,7 +14,7 @@
 #include <vs/scratch.h>
 
 /* func_8002c2c4's switch table. */
-JUMPTABLES(0x80011574, 0x14)
+RODATA(0x80011574, 0x14)
 
 /* Projects the current part's vertices: RTPT in threes, the first group
  * ahead of the loop so each pass stores one group and starts the next, then

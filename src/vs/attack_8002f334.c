@@ -18,7 +18,7 @@
 #include <vs/funcs.h>
 
 /* The module's switch tables. */
-JUMPTABLES(0x80011588, 0x33c)
+RODATA(0x80011588, 0x33c)
 
 /*
  * A fighter's attack: the effects each attack kind spawns from

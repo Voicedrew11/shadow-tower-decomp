@@ -29,8 +29,7 @@
 #include <vs/buffer.h>
 
 /* The module's constants, then its switch tables. */
-RODATA(0x800112a8, 0x98)
-JUMPTABLES(0x80011340, 0x9c)
+RODATA(0x800112a8, 0x134)
 
 /* The file's mesh model, part headers and part vertex arrays. */
 #define ANIM_MODEL(file) ((u8 *)(file) + (file)->model)

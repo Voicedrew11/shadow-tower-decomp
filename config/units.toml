@@ -727,30 +727,6 @@ source = "src/vs/fade_80028fcc.c"
 profile = "probe-gcc272cdk-o2-g8"
 
 [[unit]]
-unit = "vs.timer_800297fc"
-image = "VS.EXE"
-source = "src/vs/timer_800297fc.c"
-profile = "probe-gcc272cdk-o2-g0"
-
-[[unit]]
-unit = "vs.gauge_80029b10"
-image = "VS.EXE"
-source = "src/vs/gauge_80029b10.c"
-profile = "probe-gcc272cdk-o2-g8"
-
-[[unit]]
-unit = "vs.hud_80029f28"
-image = "VS.EXE"
-source = "src/vs/hud_80029f28.c"
-profile = "probe-gcc272cdk-o2-g8"
-
-[[unit]]
-unit = "vs.name_8002ad40"
-image = "VS.EXE"
-source = "src/vs/name_8002ad40.c"
-profile = "probe-gcc272cdk-o2-g0"
-
-[[unit]]
 unit = "vs.shadow_8002bfe8"
 image = "VS.EXE"
 source = "src/vs/shadow_8002bfe8.c"

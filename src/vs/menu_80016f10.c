@@ -45,8 +45,7 @@ u8 DAT_80063388[8];
 #include <vs/buffer.h>
 
 /* The module's constants, then its switch table. */
-RODATA(0x80011110, 0x50)
-JUMPTABLES(0x80011160, 0x1c)
+RODATA(0x80011110, 0x6c)
 
 /*
  * The versus setup screen's loop: loads the menu
