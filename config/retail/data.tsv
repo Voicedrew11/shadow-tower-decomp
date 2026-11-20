@@ -598,7 +598,10 @@ VS.EXE	0x800632d8	0x52ad8	0x4	defined	candidate	DAT_800632d8	u_long	asm;src/vs/m
 VS.EXE	0x800632dc	0x52adc	0x4	defined	candidate	DAT_800632dc	u_long	asm;src/vs/fade_80028fcc.c vs.fade_80028fcc	$gp+0xc4 .sdata word 0x808080: func_800291d4's default NCCS colour
 VS.EXE	0x800632e0	0x52ae0	0x4	defined	candidate	DAT_800632e0	s32	asm;src/vs/fade_80028fcc.c vs.fade_80028fcc	$gp+0xc8 .sdata word; func_80028fcc's texture-window step
 VS.EXE	0x800632e4	0x52ae4	0x1	defined	candidate	DAT_800632e4	u8	asm;src/vs/gauge_80029b10.c vs.gauge_80029b10	$gp .sdata byte, func_80029b10's blink toggle (0 in the image)
-VS.EXE	0x800632e5	0x52ae5	0xb7	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
+VS.EXE	0x800632e5	0x52ae5	0xf	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
+VS.EXE	0x800632f4	0x52af4	0x4	defined	candidate	DAT_800632f4	s32	retail-layout;src/vs/sdata_800632f4.c vs.sdata_800632f4	unreferenced zero .sdata word: the bss group starts at 0x80063300, so initialized small data runs past 0x800632f8
+VS.EXE	0x800632f8	0x52af8	0x4	defined	candidate	DAT_800632f8	s32	retail-layout;src/vs/sdata_800632f4.c vs.sdata_800632f4	unreferenced zero .sdata word: the bss group starts at 0x80063300, so initialized small data runs past 0x800632f8
+VS.EXE	0x800632fc	0x52afc	0xa0	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 VS.EXE	0x8006339c	0x52b9c	0x4	bss	proven	DAT_8006339c	s32	layout;src/vs/ui_8001d3f0.c vs.ui_8001d3f0	.sbss; unreferenced word in vs.ui_8001d3f0's .sbss run: the clip window statics around it are 2-aligned at +0 and +2 and word-aligned at +4, +8 and +0x10
 VS.EXE	0x800633a0	0x52ba0	0x4	bss	proven	DAT_800633a0	s32	asm;src/vs/ui_8001d3f0.c vs.ui_8001d3f0	.sbss; the clip window statics' last word ($gp-relative, func_8001d3f0/func_8001fcac)
 VS.EXE	0x800633a4	0x52ba4	0x45c	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data

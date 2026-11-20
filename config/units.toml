@@ -830,6 +830,13 @@ profile = "probe-gcc272cdk-o2-g0"
 link = "last"
 
 [[unit]]
+unit = "vs.sdata_800632f4"
+image = "VS.EXE"
+source = "src/vs/sdata_800632f4.c"
+profile = "probe-gcc272cdk-o2-g8"
+link = "last"
+
+[[unit]]
 unit = "vs.bss_800633b0"
 image = "VS.EXE"
 source = "src/vs/bss_800633b0.c"
