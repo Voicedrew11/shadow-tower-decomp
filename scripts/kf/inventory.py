@@ -131,6 +131,18 @@ SCOPES = {"unknown", "global", "static", "function-static"}
 IDENTIFIER = re.compile(r"^[A-Za-z_][A-Za-z0-9_]*$")
 # Vendored data is owned by a Psy-Q archive member such as "LIBCD BIOS.OBJ".
 SDK_OBJECT_OWNER = re.compile(r"^(?:[A-Z][A-Z0-9_]* )?[A-Z0-9_]+\.OBJ$")
+# Evidence token of an unreferenced BSS object admitted from the retail
+# layout alone (a hole between referenced objects that a COMMON allocation
+# reproduces). Only a global (COMMON) identity qualifies, and the data gate
+# accepts its owner only when the current link's .SYM places it at its claim
+# (scripts/kf/data_match.py layout_identity_issues).
+LAYOUT_BSS_EVIDENCE = "retail-bss-layout"
+
+
+def layout_bss_identity(row) -> bool:
+    """Whether a data identity is an unreferenced, layout-evidenced COMMON."""
+    return (row.storage == "bss" and row.scope == "global"
+            and LAYOUT_BSS_EVIDENCE in row.evidence.split(";"))
 REGISTER_NAMES = (
     "zero", "at", "v0", "v1", "a0", "a1", "a2", "a3",
     "t0", "t1", "t2", "t3", "t4", "t5", "t6", "t7",
@@ -859,6 +871,7 @@ def validate(config_dir: Path = RETAIL_CONFIG) -> dict[str, int]:
             and key not in bss_starts
             and not ghidra_bss
             and not sdk_bss
+            and not layout_bss_identity(row)
             and not (row.storage == "bss" and bss_interior_evidence(row))
         ):
             raise ValueError(

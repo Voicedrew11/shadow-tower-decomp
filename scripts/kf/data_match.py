@@ -394,9 +394,34 @@ def _proven_issue(label: str, issue: dict, proven: frozenset[str]) -> bool:
     return False
 
 
+def layout_identity_issues(unit: Unit, layout: frozenset[str],
+                           linked: dict[str, int] | None) -> list[SectionDiff]:
+    """Layout-evidenced claims the current link has not placed at their address.
+
+    An unreferenced BSS object admitted from the retail layout alone
+    (`inventory.LAYOUT_BSS_EVIDENCE`) has no reference that proves it; only
+    the current, source-hash-checked link's .SYM can, so its section diverges
+    until that link puts the symbol exactly at the claim.
+    """
+    issues = []
+    for datum in unit.data:
+        if datum.symbol in layout and (linked is None or linked.get(datum.symbol) != datum.va):
+            issues.append(SectionDiff(
+                datum.section_name, datum.size, 0, "unresolved-common-placement",
+                f"layout-evidenced {datum.symbol} awaits the current link's .SYM placement"))
+    return issues
+
+
+def layout_identities(image: str, config_dir: Path = RETAIL_CONFIG) -> frozenset[str]:
+    from scripts.kf.inventory import layout_bss_identity, load_data_identities
+
+    return frozenset(row.name for row in load_data_identities(config_dir).values()
+                     if row.image == image and layout_bss_identity(row))
+
+
 def diff_unit(unit: Unit, delink_dir: Path, objdiff_dir: Path,
               linked: dict[str, int] | None = None,
-              definitions=None) -> UnitDataDiff | None:
+              definitions=None, layout: frozenset[str] = frozenset()) -> UnitDataDiff | None:
     key, object_name = image_key(unit.image), unit.object_name
     target = delink_dir / key / "modules" / object_name
     base = objdiff_dir / key / "base" / object_name
@@ -452,6 +477,15 @@ def diff_unit(unit: Unit, delink_dir: Path, objdiff_dir: Path,
                 diff.status = "placement"
             detail = f"{label}: {json.dumps(issue, sort_keys=True)}"
             diff.detail = f"{diff.detail}; {detail}" if diff.detail else detail
+    for issue in layout_identity_issues(unit, layout, linked):
+        diff = by_section.get(issue.name)
+        if diff is None:
+            result.diffs.append(issue)
+            by_section[issue.name] = issue
+        else:
+            if diff.status == "match":
+                diff.status = issue.status
+            diff.detail = f"{diff.detail}; {issue.detail}" if diff.detail else issue.detail
     return result if result.diffs else None
 
 
@@ -464,6 +498,7 @@ def diff_image(
     results: list[UnitDataDiff] = []
     failures: list[ArtifactFailure] = []
     linked = linked_addresses(image)
+    layout = layout_identities(image)
     from scripts.kf.roundtrip import (allocated_definitions, initialized_definitions,
                                       usable_definitions)
     definitions = {**allocated_definitions(image, manifest.units),
@@ -481,7 +516,7 @@ def diff_image(
             ))
             continue
         diff = diff_unit(unit, delink_dir, objdiff_dir, linked,
-                         usable_definitions(definitions, unit, manifest.units))
+                         usable_definitions(definitions, unit, manifest.units), layout)
         if diff is not None:
             results.append(diff)
     return results, failures
