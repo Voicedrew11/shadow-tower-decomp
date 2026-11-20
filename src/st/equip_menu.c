@@ -160,33 +160,14 @@ void func_80063cb0(void)
  * The slot list: moves the cursor; on confirm lists the held ids that fit
  * the slot (or, for the two ring slots, opens the ring sub-list) and loads
  * the equipped id's image. Returns 1 on cancel.
+ *
+ * The list loop reaches the item records through a pointer to the table
+ * set just before it, and every case of its switch tests the record's
+ * kind and adds the id itself; jump2 merges the copies. Both matter to the
+ * allocation only: the pointer keeps the table's address out of loop.c's
+ * hoisting budget, and the written-out adds are what rank the scratchpad
+ * ahead of `kind` and `cur` for the saved registers.
  */
-/* Not exact (size-exact, every instruction in place): only three saved
- * registers differ. Retail has the scratchpad in s0, the pad base and then
- * `kind` in s1 and `cur` in s2; here cur and the pad base take s0, kind s1
- * and the scratchpad s2 (global-alloc: cur 0.43, pad 0.42, kind 0.36, sp
- * 0.22 with its life doubled by REG_EQUIV). Retail needs sp first and
- * kind ahead of cur. Both halves measured:
- * - kind passes cur (0.425 against 0.422) when cases 8 and 4 of the list
- *   loop end with their own `if (unk26 != kind) continue; goto add;`
- *   instead of `break`; jump2 merges the copies back (same bytes).
- * - sp is first only without the doubling (0.44): a test build with a
- *   second live `sp = MENU_SCRATCH` after the slot switch has retail's
- *   s0/s1/s1/s2. Nothing found that leaves two live sets and one `lui`:
- *   cse deletes a repeat it can reach from the entry, flow a dead one.
- * Writing every case's tail out (six copies of the add, no goto) also
- * gives the three registers (sp 68 refs), but the loop is then 218 insns
- * and loop.c stops hoisting &viewer.unk38[3] (10 * 18 < 218), so retail's
- * loop had at most 180. Ruled out before: block-local counters, a u16
- * cur, sp assigned after the cancel test. The second index `id` of the
- * 266 loop is what puts the table giv's step behind the counter's.
- * Measured since: the loop has no call, so loop.c starts at threshold 58;
- * it is 142 insns now, the counts base needs <= 232 and the third viewer
- * address <= 180. Eight written-out adds (two per `||` of cases 6 and 1,
- * one each in 8, 4, 7 and the last) give all three registers at the same
- * size, but 238 insns (the counts base stays inside). A second
- * `sp = MENU_SCRATCH` at the cancel test's target would be merged into the
- * delay-slot copy by reorg, but cse1 deletes it first. */
 ADDRESS(0x800642e8, 0x8c0)
 int func_800642e8(int *sel)
 {
@@ -195,7 +176,7 @@ int func_800642e8(int *sel)
     int kind;
     int cur;
     int i;
-    int id;
+    VisTableC *table;
 
     if (PAD.unk4 & 0x2000) {
         func_80057cec();
@@ -326,7 +307,6 @@ int func_800642e8(int *sel)
             if ((EQ.unk10 == SLOT(6) && viewer.unk38[0] != 0xffff) ||
                 (EQ.unk10 == SLOT(12) && viewer.unk38[13] != 0xffff)) {
                 u8 entries[] = {0, 1, 3, 4, 6, 7, 9, 10, 12, 13, 15, 16};
-                EquipSubList *list;
                 u32 *bits;
 
                 if (EQ.unk10 == SLOT(6))
@@ -358,42 +338,49 @@ int func_800642e8(int *sel)
         func_80057cc8();
         sp->unk0.list.ids = func_800152d0(532);
         sp->unk0.list.count = 0;
-        for (i = 0, id = 0; i < 266; i++, id++) {
+        table = &vis_table_c;
+        for (i = 0; i < 266; i++) {
             if (!DAT_801c7590.counts[i].count || DAT_801c7590.counts[i].flag ||
-                vis_table_c.unk0118[id].unk26 == 255)
+                table->unk0118[i].unk26 == 255)
                 continue;
             switch (kind) {
             case 8:
                 if (i == (EQ.unk10 == SLOT(1) ? viewer.unk38[14] : viewer.unk38[1]))
                     continue;
+                if (table->unk0118[i].unk26 == kind)
+                    sp->unk0.list.ids[sp->unk0.list.count++] = i;
                 break;
             case 4:
                 if (i == (EQ.unk10 == SLOT(0) ? viewer.unk38[13] : viewer.unk38[0]))
                     continue;
+                if (table->unk0118[i].unk26 == kind)
+                    sp->unk0.list.ids[sp->unk0.list.count++] = i;
                 break;
             case 6:
                 if (EQ.unk10 == SLOT(3) && i == viewer.unk38[4])
                     continue;
                 if (EQ.unk10 == SLOT(4) && i == viewer.unk38[3])
                     continue;
-                if (vis_table_c.unk0118[id].unk26 == 6 || vis_table_c.unk0118[id].unk26 == 9)
-                    goto add;
-                continue;
+                if (table->unk0118[i].unk26 == 6 || table->unk0118[i].unk26 == 9)
+                    sp->unk0.list.ids[sp->unk0.list.count++] = i;
+                break;
             case 1:
-                if (vis_table_c.unk0118[id].unk26 == 1 || vis_table_c.unk0118[id].unk26 == 10)
-                    goto add;
-                continue;
+                if (table->unk0118[i].unk26 == 1 || table->unk0118[i].unk26 == 10)
+                    sp->unk0.list.ids[sp->unk0.list.count++] = i;
+                break;
             case 7:
                 if (EQ.unk10 == SLOT(16) && i == viewer.unk38[17])
                     continue;
                 if (EQ.unk10 == SLOT(17) && i == viewer.unk38[16])
                     continue;
+                if (table->unk0118[i].unk26 == kind)
+                    sp->unk0.list.ids[sp->unk0.list.count++] = i;
+                break;
+            default:
+                if (table->unk0118[i].unk26 == kind)
+                    sp->unk0.list.ids[sp->unk0.list.count++] = i;
                 break;
             }
-            if (vis_table_c.unk0118[id].unk26 != kind)
-                continue;
-        add:
-            sp->unk0.list.ids[sp->unk0.list.count++] = i;
         }
         if (cur == 0xffff) {
             EQ.unk8 = -1;
