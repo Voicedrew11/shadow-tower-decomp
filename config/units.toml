@@ -488,6 +488,96 @@ source = "src/st/idgrid.c"
 profile = "probe-gcc272cdk-o2-g8"
 
 [[unit]]
+unit = "st.bss_800881f0"
+image = "ST.EXE"
+source = "src/st/bss_800881f0.c"
+profile = "probe-gcc272cdk-o2-g0"
+
+[[unit]]
+unit = "st.bss_80088c88"
+image = "ST.EXE"
+source = "src/st/bss_80088c88.c"
+profile = "probe-gcc272cdk-o2-g0"
+
+[[unit]]
+unit = "st.bss_8009b088"
+image = "ST.EXE"
+source = "src/st/bss_8009b088.c"
+profile = "probe-gcc272cdk-o2-g0"
+
+[[unit]]
+unit = "st.bss_8011c488"
+image = "ST.EXE"
+source = "src/st/bss_8011c488.c"
+profile = "probe-gcc272cdk-o2-g0"
+
+[[unit]]
+unit = "st.bss_8015d090"
+image = "ST.EXE"
+source = "src/st/bss_8015d090.c"
+profile = "probe-gcc272cdk-o2-g0"
+
+[[unit]]
+unit = "st.bss_8017bed0"
+image = "ST.EXE"
+source = "src/st/bss_8017bed0.c"
+profile = "probe-gcc272cdk-o2-g0"
+
+[[unit]]
+unit = "st.bss_8018d298"
+image = "ST.EXE"
+source = "src/st/bss_8018d298.c"
+profile = "probe-gcc272cdk-o2-g0"
+
+[[unit]]
+unit = "st.bss_80198f28"
+image = "ST.EXE"
+source = "src/st/bss_80198f28.c"
+profile = "probe-gcc272cdk-o2-g0"
+
+[[unit]]
+unit = "st.bss_801b5920"
+image = "ST.EXE"
+source = "src/st/bss_801b5920.c"
+profile = "probe-gcc272cdk-o2-g0"
+
+[[unit]]
+unit = "st.bss_801ba138"
+image = "ST.EXE"
+source = "src/st/bss_801ba138.c"
+profile = "probe-gcc272cdk-o2-g0"
+
+[[unit]]
+unit = "st.bss_801c76f8"
+image = "ST.EXE"
+source = "src/st/bss_801c76f8.c"
+profile = "probe-gcc272cdk-o2-g0"
+
+[[unit]]
+unit = "st.bss_801cd120"
+image = "ST.EXE"
+source = "src/st/bss_801cd120.c"
+profile = "probe-gcc272cdk-o2-g0"
+
+[[unit]]
+unit = "st.bss_801d01c0"
+image = "ST.EXE"
+source = "src/st/bss_801d01c0.c"
+profile = "probe-gcc272cdk-o2-g0"
+
+[[unit]]
+unit = "st.bss_801e0d08"
+image = "ST.EXE"
+source = "src/st/bss_801e0d08.c"
+profile = "probe-gcc272cdk-o2-g0"
+
+[[unit]]
+unit = "st.bss_801e0d28"
+image = "ST.EXE"
+source = "src/st/bss_801e0d28.c"
+profile = "probe-gcc272cdk-o2-g0"
+
+[[unit]]
 unit = "title.main"
 image = "TITLE.EXE"
 source = "src/title/main.c"

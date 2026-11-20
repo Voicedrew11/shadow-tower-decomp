@@ -22,8 +22,10 @@
  */
 typedef struct {
     u16 offsets[0x600];
-    u8 text[1];
+    u8 text[0x5400 - 0xc00];
 } MenuMessages;
+
+typedef char MenuMessagesSize[sizeof(MenuMessages) == 0x5400 ? 1 : -1];
 
 /*
  * The id grid two screens share (func_80031378, func_80031674): two tables
