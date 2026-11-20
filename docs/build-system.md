@@ -161,7 +161,12 @@ Data need not be contiguous with the unit's code. The bindings file records
 data claims with `kind=data`. A data-only unit (no `ADDRESS()` claims) may
 also claim named `const` data in `.rodata`, carved into its object's
 `.rodata` like `.data` claims (VS.EXE's heap words); a code unit's read-only
-data stays its anonymous `RODATA()`/`JUMPTABLES()` ranges.
+data stays its anonymous `RODATA()`/`JUMPTABLES()` ranges. A word that
+holds a linker-defined bound is relocated against a curated link label
+(`link_labels.tsv`, such as PSYLINK's `_bss_org`): its reviewed
+`mips32_candidate` row must name the label at exactly the label's address,
+and the data gate keeps the section `unresolved-link-label` until the
+current link's `.SYM` puts the name there.
 
 The delinker carves claimed `load` data from the retail image into the module
 object's `.data` section (claims packed in order, each at the alignment its

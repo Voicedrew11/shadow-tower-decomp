@@ -529,6 +529,14 @@ def _resolve_symbol(
     return f"DAT_{target:08x}", 0
 
 
+def _link_label_mismatch(row: dict[str, str], labels: dict[str, int]) -> bool:
+    """Whether a data row names a curated link label (a linker-defined bound,
+    link_labels.tsv) other than as a whole data word at exactly its address."""
+    label = labels.get(row["target_name"])
+    return label is not None and (row["kind"] != "mips32_candidate"
+                                  or parse_int(row["target_va"]) != label)
+
+
 def _withheld(row: dict[str, str], owner: Function | None, reason: str) -> dict[str, object]:
     return {
         "image": row["image"],
@@ -1405,6 +1413,8 @@ def delink(
         # validator. Raw pointer words stay withheld under the safe policy
         # unless their exact site, target, and semantic owner were reviewed.
         data_blobs: dict[int, tuple[bytes, list[MipsRelocation]]] = {}
+        from scripts.kf.roundtrip import link_labels
+        labels = link_labels(image, config_dir)
         for datum in claimed_load_data:
             start = expected.file_offset(datum.va)
             blob = bytearray(executable[start:start + datum.size])
@@ -1414,6 +1424,9 @@ def delink(
             datum_relocations: list[MipsRelocation] = []
             for row in rows_by_datum[datum.va]:
                 owned = owned_by_datum.get(datum.va, Owned())
+                if _link_label_mismatch(row, labels):
+                    withheld_rows.append(_withheld(row, None, "data:link-label-mismatch"))
+                    continue
                 try:
                     relocations, used = _apply_relocation(
                         blob, owner, row, catalog, policy,
