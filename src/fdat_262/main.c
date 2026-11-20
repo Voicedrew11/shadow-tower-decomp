@@ -25,6 +25,30 @@
 
 RODATA(0x801eb560, 0x24c)
 
+/* Entry 48: 0 asleep, 0xfd hit, 0xfe awake, 0xff gone (flags 29, 30). */
+DATA(0x801ee370, 0x4, ".bss")
+static int fdat_801ee370;
+
+/* 0xff once record 13's stream counter reached 1 (or entry 50 was hit). */
+DATA(0x801ee374, 0x4, ".bss")
+static int fdat_801ee374;
+
+/* Table A entry 33 sent off: 0 not yet, 0xff done. */
+DATA(0x801ee378, 0x4, ".bss")
+static int fdat_801ee378;
+
+/* 0xff once table A entry 49 is beaten. */
+DATA(0x801ee37c, 0x4, ".bss")
+static int fdat_801ee37c;
+
+/* Item 0x129 on table B entries 0x16 and 0x17: 1 due, 0xff done (second
+ * flag word bits 10 and 11). */
+DATA(0x801ee380, 0x4, ".bss")
+static int fdat_801ee380;
+
+DATA(0x801ee384, 0x4, ".bss")
+static int fdat_801ee384;
+
 void func_801ed4a0();
 void func_801ed740();
 void func_801edb0c(short id);
@@ -50,42 +74,10 @@ const FdatHeader fdat_header = {
 #include "../lib/fdat_common.inc"
 #include "../lib/fdat_common_b.inc"
 
-/* 0xff once record 13's stream counter reached 1 (or entry 50 was hit). */
-DATA(0x801ee374, 0x4, ".bss")
-static int fdat_801ee374;
-
-/* Table A entry 33 sent off: 0 not yet, 0xff done. */
-DATA(0x801ee378, 0x4, ".bss")
-static int fdat_801ee378;
-
-/* 0xff once table A entry 49 is beaten. */
-DATA(0x801ee37c, 0x4, ".bss")
-static int fdat_801ee37c;
-
-/* Item 0x129 on table B entries 0x16 and 0x17: 1 due, 0xff done (second
- * flag word bits 10 and 11). */
-DATA(0x801ee380, 0x4, ".bss")
-static int fdat_801ee380;
-
-DATA(0x801ee384, 0x4, ".bss")
-static int fdat_801ee384;
-
 void func_801edfb4(void);
 void func_801ee140(int which);
 void func_801ee278(int which);
 
-/* Not exact (registers only): retail gives r4 t3 and r1 t4, this source the
- * other way round. Global-alloc ranks r1 at 405 (3 refs / 74) and r4 at 392
- * (8 / 204); retail needs r4 above r1 and still below c29's 457. Any of
- * these would do it and none has a source form yet: three or more
- * instructions that exist at allocation time between r4's initialiser and
- * the last r1 load and are gone afterwards (3/80 against 8/210), r4's life
- * four shorter, or a fifth r4 use with 8 to 21 more instructions of life.
- * Ruled out: fewer copies of the "gone" arm (cse only reaches the entry's
- * high part through a label with one use), the declaration order (the
- * prologue fixes it), the first test's byte in a local declared between the
- * pointers (changes the prologue), a repeated store in the arm that uses r1
- * (reload's cse keeps a repeated store of zero, so it stays in the code). */
 /* Sets up the area by flags 14, 29, 30 and the second word's bits 10/11:
  * entry 48 (asleep, awake or gone), entries 50, 33 and 49, table B entry
  * 0 and table C items 7..10, 28 and 29. */
@@ -107,25 +99,18 @@ void func_801ed4a0(void)
     Vis48 *c10 = &vis_table_c.entries[10];
     Vis88 *d0 = &vis_table_b.entries[0];
 
-    if (e48->unk05 != 3) {
-        if (DAT_801cba08.unk1440.bit.f29 != 1) {
-            if (DAT_801cba08.unk1440.bit.f14) {
-                if (DAT_801cba08.unk1440.bit.f30 == 1) {
-                    fdat_801ee370 = 0xfe;
-                    e48->unk70 &= ~0x2000000;
-                } else {
-                    fdat_801ee370 = 0;
-                    e48->unk1C.bytes[3] = 3;
-                    r1->unk60[13]->unk00 = 0x72;
-                    r1->unk60[14]->unk00 = 0x80;
-                }
-            } else {
-                e48->unk00 = 0;
-                fdat_801ee370 = 0xff;
-            }
+    if (e48->unk05 == 3 || DAT_801cba08.unk1440.bit.f29 == 1) {
+        e48->unk00 = 0;
+        fdat_801ee370 = 0xff;
+    } else if (DAT_801cba08.unk1440.bit.f14) {
+        if (DAT_801cba08.unk1440.bit.f30 == 1) {
+            fdat_801ee370 = 0xfe;
+            e48->unk70 &= ~0x2000000;
         } else {
-            e48->unk00 = 0;
-            fdat_801ee370 = 0xff;
+            fdat_801ee370 = 0;
+            e48->unk1C.bytes[3] = 3;
+            r1->unk60[13]->unk00 = 0x72;
+            r1->unk60[14]->unk00 = 0x80;
         }
     } else {
         e48->unk00 = 0;
@@ -364,4 +349,141 @@ void func_801edc18(void)
         dz = z + vis_records[e->unk26].unk06;
         e->unk5A = ratan2(dz, dx);
     }
+}
+
+void func_801edc18(void);
+
+/* The current entry's handler: the animation steps as fdat_801ed6e4 does,
+ * kind 1 replaying animation 10 while entry 48 sleeps. */
+ADDRESS(0x801edec4, 0xf0)
+void func_801edec4(void)
+{
+    Vis212 *e = vis_table_a.unk6138;
+
+    e->unk2A += e->unkB0;
+    if (fdat_801ece7c(e) == 1)
+        return;
+    if (e->unkB0 >= 0 ? (short)e->unk2A >= 4096 : (short)e->unk2A <= 0) {
+        if (e->unk02 == 1 && (fdat_801ee370 == 0 || fdat_801ee370 == 0xfd)) {
+            fdat_801eb7b4(e, 10);
+        } else {
+            e->unk1A = 0xff;
+            func_801edc18();
+        }
+    }
+    if (e->unkA8 != NULL) {
+        fdat_801ebec4(e);
+        e->unk1A = 0xf0;
+    }
+}
+
+/*
+ * Entry 48 plays animation 15 and lifts its arm a frame at a time; table C
+ * item 5 rides on vertex 0x160 until the arm is up. Then the view settles
+ * and the item drops.
+ */
+ADDRESS(0x801edfb4, 0x18c)
+void func_801edfb4(void)
+{
+    Vis212 *e = &vis_table_a.entries[48];
+    Vis48 *c = &vis_table_c.entries[5];
+    SVECTOR v;
+    SVECTOR unused;
+
+    fdat_801eb7b4(e, 15);
+    do {
+        e->unk2A += e->unkB0;
+        if ((s16)e->unk2A >= 0x1000)
+            e->unk2A = 0xfff;
+        anim_get_vertex(e->unk0B + 128, e->unk08, (s16)e->unk2A, 0x160, &v);
+        c->unk08.vx = e->unk74.vx - v.vz;
+        c->unk08.vy = e->unk74.vy + v.vy;
+        c->unk08.vz = e->unk74.vz + v.vx;
+        func_80026dd4(NULL, &viewer.unk278, 0);
+    } while ((s16)e->unk2A != 0xfff);
+    c->unk22 = 2;
+    viewer.unk268 = viewer.unk278.vx + viewer.unk280.halves[0] + viewer.unk288 + viewer.unk290;
+    viewer.unk26A = viewer.unk278.vy + viewer.unk280.halves[1] + viewer.unk28A + viewer.unk292;
+    viewer.unk26C = viewer.unk278.vz + viewer.unk284 + viewer.unk28C + viewer.unk294;
+    viewer.unk270.vx = 4096 - viewer.unk268;
+    viewer.unk270.vy = 4096 - viewer.unk26A;
+    viewer.unk270.vz = 4096 - viewer.unk26C;
+    RotMatrixZYX(&viewer.unk270, &viewer.unk298);
+    func_8005335c(c, 1);
+}
+
+/* Slides table C item 28 (`which` 0, by -0x200) or 29 (by 0x200) along x,
+ * 24 a frame while its model is loaded. */
+ADDRESS(0x801ee140, 0x138)
+void func_801ee140(int which)
+{
+    Vis48 *item;
+    int end;
+    int step;
+    Vis44 *kind;
+
+    if (which == 0) {
+        item = &vis_table_c.entries[28];
+        step = -24;
+        end = item->unk08.vx - 0x200;
+    } else {
+        item = &vis_table_c.entries[29];
+        step = 24;
+        end = item->unk08.vx + 0x200;
+    }
+    item->unk22 = 5;
+    kind = &vis_table_c.unk0118[item->unk00];
+    item->unk2D -= 1;
+    for (;;) {
+        StAnimFile *file;
+
+        if (item->unk08.vx == end)
+            break;
+        anim_get_file(kind->unk4 + 588, &file);
+        if (file != NULL)
+            item->unk08.vx += step;
+        if ((step > 0 && item->unk08.vx > end) || (step < 0 && item->unk08.vx < end))
+            item->unk08.vx = end;
+        func_80026dd4(NULL, NULL, 0);
+    }
+    func_80057d58();
+}
+
+/*
+ * Turns one of two table C items into its table A form: items 7 and 9
+ * (`which` 0) or 8 and 10, the one whose id bit is clear first. Both items
+ * are cleared.
+ */
+ADDRESS(0x801ee278, 0xf8)
+void func_801ee278(int which)
+{
+    Vis212 e;
+    Vis48 *a;
+    Vis48 *b;
+
+    if (which == 0) {
+        if (vis_table_c.unk0070[1] & 0x20) {
+            a = &vis_table_c.entries[9];
+            b = &vis_table_c.entries[7];
+        } else {
+            a = &vis_table_c.entries[7];
+            b = &vis_table_c.entries[9];
+        }
+    } else {
+        if (vis_table_c.unk0070[1] & 0x800) {
+            a = &vis_table_c.entries[10];
+            b = &vis_table_c.entries[8];
+        } else {
+            a = &vis_table_c.entries[8];
+            b = &vis_table_c.entries[10];
+        }
+    }
+    e.unk26 = a->unk02;
+    e.unk74 = a->unk08;
+    e.unk30 = 0;
+    *(SVECTOR *)&e.unk8C = *(SVECTOR *)&a->unk18;
+    e.unk40 = a->unk28;
+    func_8004d804(&e, a->unk00);
+    b->unk22 = 0;
+    a->unk22 = 0;
 }

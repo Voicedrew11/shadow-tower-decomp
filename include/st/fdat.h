@@ -82,10 +82,8 @@ extern int fdat_801ed970; /* FDAT_042.BIN: src/fdat_042/map_801ed7b4.c */
 extern int fdat_801ed938; /* FDAT_122.BIN: src/fdat_122/main.c */
 extern int fdat_801edc50; /* FDAT_182.BIN: src/fdat_182/main.c */
 extern int fdat_801edc54; /* FDAT_182.BIN: src/fdat_182/map_801ed9cc.c */
-extern int fdat_801eda08; /* FDAT_202.BIN: src/fdat_202/main.c */
 extern int fdat_801ee0b4; /* FDAT_242.BIN: src/fdat_242/main.c */
 extern int fdat_801ee0b8; /* FDAT_242.BIN: src/fdat_242/main.c */
 extern int fdat_801ee0bc; /* FDAT_242.BIN: src/fdat_242/main.c */
-extern int fdat_801ee370; /* FDAT_262.BIN: src/fdat_262/map_801edec4.c */
 
 #endif

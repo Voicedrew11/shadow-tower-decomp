@@ -17,23 +17,33 @@
 #include <st/xa.h>
 #include <st/fdat.h>
 
-/* Not exact (size-exact, the first block's order): retail's listing is this
- * statement order untouched, with both masked loads ahead of the stores that
- * follow them, the two bytes[] stores and the record index in $a0 after the
- * collision load, and the range mask in $a1. sched2 only breaks ties by
- * sched1's order, so retail's sched1 already had the loads early and the
- * three in place; a literal 1 and a single-set index then take $a0 by
- * themselves ($v0 and $v1 are busy) and the mask $a1. Here sched1 lifts the
- * three to the top (record is set twice and loses every tie to a ready
- * store) or, with single-set values, sinks each load to its use. Keeping
- * them needs each load to depend on the stores after it, and sched1 sees no
- * dependence between fields of one pointer. Ruled out: 141,120 orders of
- * the block's statements in fourteen spellings of the 1, the index and the
- * constants (cc1 grid, scratch grid012.py), a do-while (0) around any part
- * (the loop level changes the allocation), a second pointer for the stores
- * (cse folds it, or the parameter stays in $a0), a volatile pointer (source
- * order, but the 1 ahead of the collision load), scratch variables shared
- * with the later info and distance loads. */
+/* Not exact (size-exact; the first block's registers and, from them, its
+ * order): retail keeps the 1 of the two bytes[] stores and then the record
+ * index in $a0 and the unk70 mask in $a1; here they are $a1 and $a0, and the
+ * three sit at the top instead of after the collision load. No load has to
+ * be held in place: sched2 lifts every load as far as its register allows.
+ * The block is the plain statements in this order,
+ *     e->unk70 &= ~0x2000000; e->unk0F = 0x80; e->unk08 = 9; e->unkB0 = 0x40;
+ *     e->unk0E = 8; e->unk50 &= ~0x80; e->unk1C.bytes[0] = 1;
+ *     e->unk1C.bytes[3] = 1; r = &vis_table_a.unk3500[e->unk02];
+ *     e->unk2A = 0; e->unk16 = 0;
+ * and it comes out as retail's, instruction for instruction, once two of its
+ * pseudos are allocated by global-alloc instead of local-alloc: the mask
+ * constant (it then takes $a1, because the record index already holds $a0
+ * locally) and the 1, in a variable that is set more than once in the
+ * function (its `li` is then not "birthing" for sched1, floats to the top of
+ * the block, conflicts with $v0 and $v1 and takes $a0). A pseudo is left to
+ * global-alloc when it is referenced in a second basic block or dies twice.
+ * Still missing: what in the source references both again without leaving
+ * an instruction. This source keeps the reused `record`, which is such a
+ * variable but pins the two stores above the constants.
+ * Ruled out: a dependence that holds the loads (a volatile pointer gives the
+ * source order with the 1 in $v0), every spelling and type of a block-local
+ * 1 (literal, variable, chain, initialiser: always $v0, its life is two
+ * instructions), bit-field clears (same RTL as &=), the block in identical
+ * if/else arms (r is then set twice and its sum moves up), 990 orders of
+ * the plain statements, 39,600 with one store repeated, and batch K's
+ * 141,120 orders of the split forms. */
 /*
  * Starts the entry's fall (animation 9) and, once its record's stream
  * counter is 4, adds table C item 0x10a at its place to the drop slots
