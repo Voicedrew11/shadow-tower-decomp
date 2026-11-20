@@ -130,7 +130,11 @@ OPTXT.EXE	0x8001f800	0x190000	text_buffer	global	bss	u_long[0x64000]	play_openin
 OPTXT.EXE	0x801af800	0xe4	display	global	bss	DisplayBuffers	main	supported	asm;src/optxt/main.c optxt.main	two DISPENVs, two DRAWENVs and an id; COMMON in hash-bucket order (WIP spelling fits it)
 OPTXT.EXE	0x801af8e8	0x4c	pad_data	global	bss	PadBuffers	pad_init	supported	asm;src/optxt/main.c optxt.main	PadInitDirect buffers and PadSetAct data; COMMON in hash-bucket order (WIP spelling fits it)
 OPTXT.EXE	0x801af938	0x14	pad	global	bss	PadStatus	pad_read	supported	asm;src/optxt/main.c optxt.main	pad state, flags and button words; COMMON in hash-bucket order (WIP spelling fits it)
+VS.EXE	0x80011f34	0x4	DAT_80011f34	global	load	u8 *		candidate	retail-word;src/vs/rdata_80011f34.c vs.rdata_80011f34	unreferenced read-only word: the bss group start (_bss_org = .sbss start 0x80063300)
+VS.EXE	0x80011f38	0x4	DAT_80011f38	global	load	u8 *		candidate	retail-word;src/vs/rdata_80011f34.c vs.rdata_80011f34	unreferenced read-only word: the bss group end (_bss_orgend 0x801dbaa8)
+VS.EXE	0x80011f3c	0x4	DAT_80011f3c	global	load	u8 *		candidate	retail-word;src/vs/rdata_80011f34.c vs.rdata_80011f34	unreferenced read-only word: the bss group end (_bss_orgend 0x801dbaa8)
 VS.EXE	0x80011f40	0x4	DAT_80011f40	global	load	u8 *		candidate	asm;src/vs/main.c vs.main	word at the end of the game .rdata: the load image end main rounds up to the heap base (as ST.EXE DAT_80013980)
+VS.EXE	0x80011f44	0x4	DAT_80011f44	global	load	u8 *		candidate	retail-word;src/vs/rdata_80011f34.c vs.rdata_80011f34	unreferenced read-only word: the bss group end (_bss_orgend 0x801dbaa8)
 VS.EXE	0x80011f48	0x4	DAT_80011f48	global	load	u8 *		candidate	asm;src/vs/main.c vs.main	word at the end of the game .rdata: the other heap bound main reads (as ST.EXE DAT_80013988)
 VS.EXE	0x80011f4c	0x4	DAT_80011f4c	global	load	u8 *		candidate	asm;src/vs/main.c vs.main	word at the end of the game .rdata where main stores the heap base (as ST.EXE DAT_8001398c)
 VS.EXE	0x8004a224	0x11082	DAT_8004a224	global	load	VsFighterData[151]		candidate	asm;src/vs/main.c vs.main (func_800140d8);retail .data 0x8004a224-0x8005b2a5	the fighters' data blocks by character (0x1ce-byte records func_800140d8 copies into VsFighter.unk4DF18): 151 records fill .data up to the VECTOR's alignment

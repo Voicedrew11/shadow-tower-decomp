@@ -5,3 +5,5 @@
 # row at exactly this address) compares as unresolved-link-label until the current link's
 # .SYM puts the name at this address.
 image	name	va	evidence	note
+VS.EXE	_bss_org	0x80063300	PSYLINK group symbol;NONE3.OBJ bss clear loop;retail .sbss start	bss group start (= .sbss start); word 0x80011f34
+VS.EXE	_bss_orgend	0x801dbaa8	PSYLINK group symbol;NONE3.OBJ bss clear loop;retail bss end	bss group end (after the SDK COMMON); words 0x80011f38-0x80011f4c

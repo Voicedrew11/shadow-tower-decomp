@@ -847,6 +847,13 @@ source = "src/vs/effect_80032404.c"
 profile = "probe-gcc272cdk-o2-g8"
 
 [[unit]]
+unit = "vs.rdata_80011f34"
+image = "VS.EXE"
+source = "src/vs/rdata_80011f34.c"
+profile = "probe-gcc272cdk-o2-g0"
+link = "last"
+
+[[unit]]
 unit = "vs.bss_800633b0"
 image = "VS.EXE"
 source = "src/vs/bss_800633b0.c"
