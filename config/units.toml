@@ -858,9 +858,21 @@ source = "src/vs/bss_80117708.c"
 profile = "probe-gcc272cdk-o2-g0"
 
 [[unit]]
+unit = "vs.bss_80160408"
+image = "VS.EXE"
+source = "src/vs/bss_80160408.c"
+profile = "probe-gcc272cdk-o2-g0"
+
+[[unit]]
 unit = "vs.bss_801604b0"
 image = "VS.EXE"
 source = "src/vs/bss_801604b0.c"
+profile = "probe-gcc272cdk-o2-g0"
+
+[[unit]]
+unit = "vs.bss_8018ef60"
+image = "VS.EXE"
+source = "src/vs/bss_8018ef60.c"
 profile = "probe-gcc272cdk-o2-g0"
 
 [[unit]]
@@ -870,9 +882,21 @@ source = "src/vs/bss_80191d00.c"
 profile = "probe-gcc272cdk-o2-g0"
 
 [[unit]]
+unit = "vs.bss_80196010"
+image = "VS.EXE"
+source = "src/vs/bss_80196010.c"
+profile = "probe-gcc272cdk-o2-g0"
+
+[[unit]]
 unit = "vs.bss_801961e0"
 image = "VS.EXE"
 source = "src/vs/bss_801961e0.c"
+profile = "probe-gcc272cdk-o2-g0"
+
+[[unit]]
+unit = "vs.bss_80196228"
+image = "VS.EXE"
+source = "src/vs/bss_80196228.c"
 profile = "probe-gcc272cdk-o2-g0"
 
 [[unit]]
@@ -885,6 +909,12 @@ profile = "probe-gcc272cdk-o2-g0"
 unit = "vs.bss_801a4590"
 image = "VS.EXE"
 source = "src/vs/bss_801a4590.c"
+profile = "probe-gcc272cdk-o2-g0"
+
+[[unit]]
+unit = "vs.bss_801d1ba8"
+image = "VS.EXE"
+source = "src/vs/bss_801d1ba8.c"
 profile = "probe-gcc272cdk-o2-g0"
 
 [[unit]]
