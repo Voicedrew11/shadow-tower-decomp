@@ -54,6 +54,10 @@ JUMPTABLES(0x800110a0, 0x70)
 DATA(0x8005b2a8, 0x10, ".data")
 VECTOR DAT_8005b2a8 = {ONE, ONE, ONE};
 
+/* An identity matrix nothing references (retail keeps it after the scale). */
+DATA(0x8005b2b8, 0x20, ".data")
+MATRIX DAT_8005b2b8 = {{{ONE, 0, 0}, {0, ONE, 0}, {0, 0, ONE}}, {0, 0, 0}};
+
 /* Rotation offsets the model draw adds to the fighter's x and y angles
  * (the model renderers read them absolutely: they are not theirs). */
 DATA(0x80063218, 0x4, ".sdata")
