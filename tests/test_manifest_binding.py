@@ -9,7 +9,8 @@ from unittest import mock
 
 from scripts.kf import retail
 from scripts.kf.manifest import (
-    _check_together_read_only, _rebind_claims_by_name, _rebind_data_claims_by_name,
+    _check_link_order, _check_together_read_only, _rebind_claims_by_name,
+    _rebind_data_claims_by_name,
 )
 from scripts.kf.model import Claim, DataClaim, DataIdentity, RodataClaim
 
@@ -62,6 +63,35 @@ class NameBindingTests(unittest.TestCase):
         claims = (DataClaim(0x800A01FC, 0x44, "memory_allocation_stack", 3, ".bss"),)
         rebound = _rebind_data_claims_by_name(None, "OPEN.EXE", claims, identities)
         self.assertEqual(rebound[0].va, 0x80075854)
+
+
+class LinkOrderTests(unittest.TestCase):
+    @staticmethod
+    def unit(name, va, first=False, image="VS.EXE"):
+        from types import SimpleNamespace
+
+        return SimpleNamespace(unit=name, image=image, va=va, linked_first=first)
+
+    def test_units_ascend_unless_a_data_only_unit_opts_into_linking_first(self) -> None:
+        check = _check_link_order
+        code = [self.unit("vs.main", 0x800129BC)]
+        with self.assertRaisesRegex(ValueError, "linked order"):
+            check("m", "vs.sbss_80011000", "VS.EXE", 0x80011000, False, False, code)
+        # Without the key a data-only unit still sorts by its first datum.
+        check("m", "vs.bss_80063300", "VS.EXE", 0x80063300, False, False, code)
+        # Linked first: listed before the code units, ascending among themselves.
+        first = [self.unit("vs.sbss_80063300", 0x80063300, True)]
+        check("m", "vs.sbss_80063310", "VS.EXE", 0x80063310, True, False, first)
+        with self.assertRaisesRegex(ValueError, "linked order"):
+            check("m", "vs.sbss_800632f0", "VS.EXE", 0x800632F0, True, False, first)
+        check("m", "vs.main", "VS.EXE", 0x800129BC, False, True, first)
+        with self.assertRaisesRegex(ValueError, "listed before"):
+            check("m", "vs.sbss_80063310", "VS.EXE", 0x80063310, True, False, [*first, *code])
+        with self.assertRaisesRegex(ValueError, "data-only"):
+            check("m", "vs.main", "VS.EXE", 0x800129BC, True, True, [])
+        # Another image's units never constrain the order.
+        check("m", "st.main", "ST.EXE", 0x80014320, False, True,
+              [self.unit("vs.sbss", 0x80063300, True)])
 
 
 class OverlayReadOnlyTests(unittest.TestCase):

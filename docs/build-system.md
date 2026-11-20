@@ -72,7 +72,11 @@ binding rules are structural, in the spirit of Gruntz's `RVA()`:
   function between its first and last claim, so a source file is a contiguous
   run of the linked image (address-order incrementalism);
 - units are listed in ascending address order within each image, so the
-  manifest itself reads as the recovered link order; and
+  manifest itself reads as the recovered link order; a data-only unit may
+  opt out with `link = "first"`: it is listed at the start of its image's
+  block and links before the code units (the object that allocated VS.EXE's
+  first .sbss run preceded the start-up module, which reads part of that run
+  with lui pairs); and
 - an address is claimed by at most one unit.
 
 A unit may also claim its read-only contributions, each once:

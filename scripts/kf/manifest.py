@@ -70,6 +70,9 @@ class Unit:
     # SDATA() literal ranges in ascending order.
     sdata: tuple[tuple[int, int], ...] = ()
     jumptables: tuple[int, int] | None = None
+    # A data-only unit listed with `link = "first"` links before the image's
+    # code units (see _check_link_order).
+    linked_first: bool = False
 
     def __post_init__(self) -> None:
         object.__setattr__(self, "sdata", _ranges(self.sdata))
@@ -458,6 +461,37 @@ def _check_together_read_only(source: Path, image: str, jumptable_claims) -> Non
                          "switch tables inside its RODATA() run, not with JUMPTABLES()")
 
 
+def _check_link_order(path: Path, name: str, image: str, start: int, first: bool,
+                      has_functions: bool, units: list[Unit]) -> None:
+    """Units are listed in linked order, which ascends by address per image.
+
+    The exception is opt-in: a data-only unit marked `link = "first"` links
+    ahead of every code unit of its image, the way an object listed first on
+    the PSYLINK command line allocates its .sdata/.sbss/.bss batch before the
+    code's (VS.EXE's start-up module reads words of the first .sbss run with
+    lui pairs, so an earlier object allocated them). Such units are listed at
+    the start of the image's block and ascend among themselves; the units
+    after them ascend as usual.
+    """
+    image_units = [unit for unit in units if unit.image == image]
+    if first:
+        if has_functions:
+            raise ValueError(f"{path}: unit {name!r} claims functions; only a data-only unit "
+                             'may be linked first (link = "first")')
+        if any(not unit.linked_first for unit in image_units):
+            raise ValueError(f"{path}: unit {name!r} links first and must be listed before "
+                             f"the other {image} units")
+        previous = image_units[-1] if image_units else None
+    else:
+        ordinary = [unit for unit in image_units if not unit.linked_first]
+        previous = ordinary[-1] if ordinary else None
+    if previous is not None and previous.va >= start:
+        raise ValueError(
+            f"{path}: unit {name!r} at {start:#x} is listed after "
+            f"{previous.unit!r} at {previous.va:#x}; units follow the linked order"
+        )
+
+
 def load(
     path: Path = UNITS_MANIFEST,
     *,
@@ -500,7 +534,7 @@ def load(
         if not isinstance(row, dict):
             raise ValueError(f"{path}: unit #{index} is not a table")
         required = {"unit", "image", "source", "profile"}
-        optional = {"bind", "defines", "scope"}
+        optional = {"bind", "defines", "scope", "link"}
         missing = required - set(row)
         extra = set(row) - required - optional
         if "va" in extra:
@@ -552,6 +586,9 @@ def load(
             raise ValueError(
                 f"{source}: address-derived spellings of labelled identities: {shown}"
             )
+        link = str(row.get("link", "address"))
+        if link not in {"address", "first"}:
+            raise ValueError(f"{path}: unit {name!r} has unknown link mode {link!r}")
         bind = str(row.get("bind", "address"))
         if bind not in {"address", "name"}:
             raise ValueError(f"{path}: unit {name!r} has unknown bind mode {bind!r}")
@@ -618,11 +655,7 @@ def load(
         ) if claims else ()
         data = _bind_data_claims(name, image, source, data_claims, curated_data, claimed_data)
         start = functions[0].va if functions else data[0].va
-        if units and units[-1].image == image and units[-1].va >= start:
-            raise ValueError(
-                f"{path}: unit {name!r} at {start:#x} is listed after "
-                f"{units[-1].unit!r} at {units[-1].va:#x}; units follow the linked order"
-            )
+        _check_link_order(path, name, image, start, link == "first", bool(functions), units)
         units.append(
             Unit(
                 name,
@@ -636,6 +669,7 @@ def load(
                 scope,
                 sdata,
                 jumptables,
+                link == "first",
             )
         )
         for ordinal, (claim, function) in enumerate(zip(claims, functions)):
