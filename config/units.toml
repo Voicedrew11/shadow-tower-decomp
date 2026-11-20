@@ -38,6 +38,34 @@ source = "src/str/main.c"
 profile = "probe-gcc272cdk-o2-g8"
 
 [[unit]]
+unit = "st.sbss_80088188"
+image = "ST.EXE"
+source = "src/st/sbss_80088188.c"
+profile = "probe-gcc272cdk-o2-g8"
+link = "first"
+
+[[unit]]
+unit = "st.sbss_80088190"
+image = "ST.EXE"
+source = "src/st/sbss_80088190.c"
+profile = "probe-gcc272cdk-o2-g8"
+link = "first"
+
+[[unit]]
+unit = "st.sbss_800881a0"
+image = "ST.EXE"
+source = "src/st/sbss_800881a0.c"
+profile = "probe-gcc272cdk-o2-g8"
+link = "first"
+
+[[unit]]
+unit = "st.sbss_800881b0"
+image = "ST.EXE"
+source = "src/st/sbss_800881b0.c"
+profile = "probe-gcc272cdk-o2-g8"
+link = "first"
+
+[[unit]]
 unit = "st.main"
 image = "ST.EXE"
 source = "src/st/main.c"

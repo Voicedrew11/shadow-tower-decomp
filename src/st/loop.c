@@ -36,8 +36,11 @@
 
 SDATA(0x80087ec4, 0x8)
 
-/* Read by the game loop; other modules set it to end the game. */
-DATA(0x800881a4, 0x4, ".sbss")
+/*
+ * Read by the game loop; other modules set it to end the game. A tentative
+ * definition, so that ASPSX reaches it through $gp: the word lies inside
+ * the .sbss run st.sbss_800881a0 allocates, and the request merges there.
+ */
 s32 DAT_800881a4;
 
 ADDRESS(0x80014a30, 0x2cc)
