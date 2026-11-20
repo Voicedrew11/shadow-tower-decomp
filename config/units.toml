@@ -781,7 +781,7 @@ profile = "probe-gcc272cdk-o2-g0"
 unit = "vs.effect_80032404"
 image = "VS.EXE"
 source = "src/vs/effect_80032404.c"
-profile = "probe-gcc272cdk-o2-g0"
+profile = "probe-gcc272cdk-o2-g8"
 
 [[unit]]
 unit = "vs.bss_800633b0"
