@@ -138,7 +138,7 @@ class OverlayReadOnlyTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "RODATA"):
             _check_together_read_only("map.c", "FDAT_002.BIN", tables)
         _check_together_read_only("map.c", "FDAT_002.BIN", ())
-        _check_together_read_only("menu.c", "ST.EXE", tables)
+        _check_together_read_only("boot.c", "PSX.EXE", tables)
 
     def test_a_program_that_keeps_read_only_together_claims_tables_inside_rodata(self) -> None:
         tables = (RodataClaim(0x800110A0, 0x1C, 9),)
@@ -168,7 +168,7 @@ class OverlayReadOnlyTests(unittest.TestCase):
                 retail._load_read_only(path)
 
     def test_the_configured_images_use_their_retail_read_only_layout(self) -> None:
-        self.assertEqual(retail.read_only_mode("ST.EXE"), "separate")
+        self.assertEqual(retail.read_only_mode("PSX.EXE"), "separate")
         self.assertEqual(retail.read_only_mode("FDAT_002.BIN"), "together")
 
 
