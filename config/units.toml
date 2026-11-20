@@ -790,30 +790,6 @@ source = "src/vs/effect_80032404.c"
 profile = "probe-gcc272cdk-o2-g0"
 
 [[unit]]
-unit = "vs.effect_move_8003333c"
-image = "VS.EXE"
-source = "src/vs/effect_move_8003333c.c"
-profile = "probe-gcc272cdk-o2-g0"
-
-[[unit]]
-unit = "vs.effect_800335e8"
-image = "VS.EXE"
-source = "src/vs/effect_800335e8.c"
-profile = "probe-gcc272cdk-o2-g0"
-
-[[unit]]
-unit = "vs.effect_run_800352cc"
-image = "VS.EXE"
-source = "src/vs/effect_run_800352cc.c"
-profile = "probe-gcc272cdk-o2-g0"
-
-[[unit]]
-unit = "vs.model_800353d0"
-image = "VS.EXE"
-source = "src/vs/model_800353d0.c"
-profile = "probe-gcc272cdk-o2-g0"
-
-[[unit]]
 unit = "vs.bss_800633b0"
 image = "VS.EXE"
 source = "src/vs/bss_800633b0.c"
