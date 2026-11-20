@@ -3697,6 +3697,12 @@ read:
  * s16 and reused-int row variables, a count variable, a dead first set
  * of sp, a duplicate set in the entry block (cse drops it), and a
  * 3000-variant cc1 sweep of temporaries and positions.
+ * Read from the trace since: the strcpy is one BLK insn at sched1 (priority
+ * 2 through its anti-dependence on the count load), and retail's order
+ * needs the icon store, or its `li`, to wait for the row load. No memory
+ * rule gives that with a known base, the pending lists are far below the
+ * 32-entry flush, and a loop-note barrier is excluded by memset's argument
+ * loads sitting at the top of the block.
  *
  * Saves to the selected file, or to a new file numbered unk204: builds the
  * header (the title with the file number, the area name and the play
