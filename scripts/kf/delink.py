@@ -1144,8 +1144,13 @@ def _module_object(
                 text, relocations, module_load, section_symbol
             )
     rodata = b""
+    rodata_symbols: list[DefinedSymbol] = []
     if module.rodata is None:
-        rodata_relocations = []
+        # A data-only unit's named const data (DATA(..., ".rodata"); the
+        # manifest admits it only without ADDRESS() claims) packs like .data.
+        rodata, rodata_symbols, rodata_relocations, _, _ = _module_data(
+            module, data_blobs or {}, load_padding, section=".rodata"
+        )
     else:
         if rodata_blob is None:
             raise ValueError(f"module {module.unit}: RODATA range was not carved")
@@ -1193,6 +1198,7 @@ def _module_object(
             sbss_alignment=4,
             rodata=rodata,
             rodata_relocations=rodata_relocations,
+            rodata_symbols=rodata_symbols,
             rdata=rdata,
             rdata_relocations=rdata_relocations,
         ),

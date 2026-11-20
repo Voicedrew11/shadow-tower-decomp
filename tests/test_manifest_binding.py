@@ -9,7 +9,7 @@ from unittest import mock
 
 from scripts.kf import retail
 from scripts.kf.manifest import (
-    _check_link_order, _check_together_read_only, _rebind_claims_by_name,
+    _bind_data_claims, _check_link_order, _check_together_read_only, _rebind_claims_by_name,
     _rebind_data_claims_by_name,
 )
 from scripts.kf.model import Claim, DataClaim, DataIdentity, RodataClaim
@@ -110,6 +110,26 @@ class LinkOrderTests(unittest.TestCase):
             check("m", "vs.more", "VS.EXE", 0x80040000, False, True, after)
         with self.assertRaisesRegex(ValueError, "data-only"):
             check("m", "vs.heap", "VS.EXE", 0x80011F34, False, True, code, last=True)
+
+
+class ReadOnlyDataClaimTests(unittest.TestCase):
+    def test_only_a_data_only_unit_claims_named_rodata(self) -> None:
+        from dataclasses import replace
+
+        identity = replace(_datum("VS.EXE", 0x80011F40, "DAT_80011f40"), storage="load")
+        identities = {("VS.EXE", 0x80011F40): identity}
+        claims = (DataClaim(0x80011F40, 4, "DAT_80011f40", 3, ".rodata"),)
+        data = _bind_data_claims("vs.heap", "VS.EXE", Path("heap.c"), claims, identities, {},
+                                 data_only=True)
+        self.assertEqual(data[0].section_name, ".rodata")
+        # A code unit keeps its read-only data in anonymous RODATA() ranges.
+        with self.assertRaisesRegex(ValueError, "invalid for load storage"):
+            _bind_data_claims("vs.main", "VS.EXE", Path("main.c"), claims, identities, {})
+        # Read-only data is never uninitialized storage.
+        bss = {("VS.EXE", 0x80011F40): replace(identity, storage="bss")}
+        with self.assertRaisesRegex(ValueError, "invalid for bss storage"):
+            _bind_data_claims("vs.heap", "VS.EXE", Path("heap.c"), claims, bss, {},
+                              data_only=True)
 
 
 class OverlayReadOnlyTests(unittest.TestCase):
