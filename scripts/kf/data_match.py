@@ -284,7 +284,7 @@ def _diff_bss(retail: Elf, recon: Elf, name: str = ".bss",
     if not (rt_size or rc_size or left or right):
         return None
     if rt is None or rc is None:
-        if name == ".bss" and rt is not None and rc is None and unit is not None:
+        if name in BSS_SECTIONS and rt is not None and rc is None and unit is not None:
             claimed = {datum.symbol for datum in unit.data
                        if datum.section_name == name and datum.scope == "global"}
             requests = {request.name for request in recon.common_requests}
@@ -339,7 +339,7 @@ def linked_common_proof(unit: Unit, recon: Elf,
     if not linked or not recon.common_requests:
         return frozenset()
     claims = {datum.symbol: datum for datum in unit.data
-              if datum.section_name == ".bss" and datum.scope == "global"}
+              if datum.section_name in BSS_SECTIONS and datum.scope == "global"}
     for request in recon.common_requests:
         claim = claims.get(request.name)
         if (claim is None or linked.get(request.name) != claim.va
@@ -385,11 +385,11 @@ def _proven_issue(label: str, issue: dict, proven: frozenset[str]) -> bool:
     if label == "reconstruction" and kind == "owned-symbol-layout":
         return (issue.get("symbol") in proven
                 and issue.get("actual_section") == "SHN_COMMON"
-                and issue.get("expected_section") == ".bss"
+                and issue.get("expected_section") in BSS_SECTIONS
                 and issue.get("actual_size", 0) >= issue.get("expected_size", 1))
     if label == "target" and kind == "conflicting-section-bases":
         claims = issue.get("claims", ())
-        return (issue.get("section") == ".bss" and bool(claims)
+        return (issue.get("section") in BSS_SECTIONS and bool(claims)
                 and all(claim.get("symbol") in proven for claim in claims))
     return False
 
