@@ -13,10 +13,17 @@
 #include <sys/types.h>
 
 /* Whether each player's memory card holds a usable save (the "record
- * loaded" bytes): tentative definitions, read and set $gp-relative here
- * (allocated by an earlier object). */
+ * loaded" bytes), read and set $gp-relative here; main reads them
+ * absolutely. This module's small COMMON follows the first .sbss run. */
+DATA(0x80063380, 0x1, ".sbss")
 u8 DAT_80063380;
+DATA(0x80063381, 0x1, ".sbss")
 u8 DAT_80063381;
+
+/* Unreferenced (layout evidence only): the eight bytes before the next
+ * module's .sbss statics (0x80063390). */
+DATA(0x80063388, 0x8, ".sbss")
+u8 DAT_80063388[8];
 
 /* The setup, team and pick screens index both picked fighters. */
 #define VS_PICKED_PAIR

@@ -183,6 +183,7 @@ VS.EXE	0x8006337a	0x2	DAT_8006337a	global	bss	u16		candidate	asm;src/vs/ui_80021
 VS.EXE	0x8006337c	0x4	DAT_8006337c	global	bss	s32		candidate	retail-bss-layout;VS.EXE .sbss 0x80063300-0x8006337f	unreferenced: a hole inside the first .sbss run that PSYLINK only leaves when an object allocates it (bucket order of the run's 16-byte batch); extent WIP
 VS.EXE	0x80063380	0x1	DAT_80063380	global	bss	u8		candidate	asm;src/vs/main.c vs.main	byte main clears (absolutely; $gp-relative in func_80016f10/func_8001bb48)
 VS.EXE	0x80063381	0x1	DAT_80063381	global	bss	u8		candidate	asm;src/vs/main.c vs.main	byte main clears, as DAT_80063380
+VS.EXE	0x80063388	0x8	DAT_80063388	global	bss	u8[8]		candidate	retail-bss-layout;VS.EXE .sbss 0x80063382-0x8006338f	unreferenced: the trial link places the next module statics 8 bytes early without it; extent WIP
 VS.EXE	0x80063390	0x2	DAT_80063390	static	bss	s16	func_8001d3f0	address-only	asm;src/vs/ui_8001d3f0.c vs.ui_8001d3f0	$gp .sbss: the text clip window's left edge (also func_8001fcac)
 VS.EXE	0x80063392	0x2	DAT_80063392	static	bss	s16	func_8001d3f0	address-only	asm;src/vs/ui_8001d3f0.c vs.ui_8001d3f0	$gp .sbss: the text clip window's right edge
 VS.EXE	0x80063394	0x4	DAT_80063394	static	bss	s32	func_8001d3f0	address-only	asm;src/vs/ui_8001d3f0.c vs.ui_8001d3f0	$gp .sbss: the clipped text's advance
