@@ -412,6 +412,31 @@ def layout_identity_issues(unit: Unit, layout: frozenset[str],
     return issues
 
 
+def link_label_issues(retail: Elf, labels: dict[str, int],
+                      linked: dict[str, int] | None) -> list[SectionDiff]:
+    """Initialized words relocated against a link label the current link has
+    not placed at the label's curated address.
+
+    A word that holds a linker-defined bound (PSYLINK's `_bss_org`, the bss
+    group start) is relocated against a name no object defines. Only the
+    curated labels of `link_labels.tsv` qualify, and the section stays
+    unresolved until the current, source-hash-checked link's .SYM resolves
+    the name to exactly that address.
+    """
+    issues = []
+    for name in INIT_SECTIONS:
+        pending = sorted({reloc.symbol for reloc in retail.relocations(name)
+                          if reloc.symbol in labels
+                          and (linked is None or linked.get(reloc.symbol) != labels[reloc.symbol])})
+        if pending:
+            section = retail.sections.get(name)
+            size = section.size if section else 0
+            issues.append(SectionDiff(
+                name, size, size, "unresolved-link-label",
+                f"link label(s) {', '.join(pending)} await the current link's .SYM placement"))
+    return issues
+
+
 def layout_identities(image: str, config_dir: Path = RETAIL_CONFIG) -> frozenset[str]:
     from scripts.kf.inventory import layout_bss_identity, load_data_identities
 
@@ -421,7 +446,8 @@ def layout_identities(image: str, config_dir: Path = RETAIL_CONFIG) -> frozenset
 
 def diff_unit(unit: Unit, delink_dir: Path, objdiff_dir: Path,
               linked: dict[str, int] | None = None,
-              definitions=None, layout: frozenset[str] = frozenset()) -> UnitDataDiff | None:
+              definitions=None, layout: frozenset[str] = frozenset(),
+              labels: dict[str, int] | None = None) -> UnitDataDiff | None:
     key, object_name = image_key(unit.image), unit.object_name
     target = delink_dir / key / "modules" / object_name
     base = objdiff_dir / key / "base" / object_name
@@ -477,7 +503,8 @@ def diff_unit(unit: Unit, delink_dir: Path, objdiff_dir: Path,
                 diff.status = "placement"
             detail = f"{label}: {json.dumps(issue, sort_keys=True)}"
             diff.detail = f"{diff.detail}; {detail}" if diff.detail else detail
-    for issue in layout_identity_issues(unit, layout, linked):
+    for issue in (*layout_identity_issues(unit, layout, linked),
+                  *link_label_issues(retail, labels or {}, linked)):
         diff = by_section.get(issue.name)
         if diff is None:
             result.diffs.append(issue)
@@ -500,7 +527,8 @@ def diff_image(
     linked = linked_addresses(image)
     layout = layout_identities(image)
     from scripts.kf.roundtrip import (allocated_definitions, initialized_definitions,
-                                      usable_definitions)
+                                      link_labels, usable_definitions)
+    labels = link_labels(image)
     definitions = {**allocated_definitions(image, manifest.units),
                    **initialized_definitions(image, manifest.units)}
     for unit in manifest.units:
@@ -516,7 +544,7 @@ def diff_image(
             ))
             continue
         diff = diff_unit(unit, delink_dir, objdiff_dir, linked,
-                         usable_definitions(definitions, unit, manifest.units), layout)
+                         usable_definitions(definitions, unit, manifest.units), layout, labels)
         if diff is not None:
             results.append(diff)
     return results, failures
