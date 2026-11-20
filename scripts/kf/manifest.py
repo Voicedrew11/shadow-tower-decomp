@@ -23,7 +23,7 @@ from scripts.kf.model import (
     write_bindings,
 )
 from scripts.kf.paths import REPO, RETAIL_CONFIG, UNITS_MANIFEST
-from scripts.kf.retail import IMAGE_LAYOUTS, OVERLAY_SOURCES, image_key
+from scripts.kf.retail import IMAGE_LAYOUTS, image_key, read_only_mode
 
 
 DEFINE_RE = re.compile(r"[A-Za-z_][A-Za-z0-9_]*(=[A-Za-z0-9_x]+)?")
@@ -448,11 +448,13 @@ def _sdata_ranges(
     return tuple(ranges)
 
 
-def _check_overlay_read_only(source: Path, image: str, jumptable_claims) -> None:
-    """An FDAT overlay keeps cc1's read-only order (sdk.keep_read_only_together):
-    its constants and switch tables are one run, claimed with RODATA() alone."""
-    if image in OVERLAY_SOURCES and jumptable_claims:
-        raise ValueError(f"{source}:{jumptable_claims[0].line}: an overlay unit claims its "
+def _check_together_read_only(source: Path, image: str, jumptable_claims) -> None:
+    """An image that keeps cc1's read-only order (sdk.keep_read_only_together:
+    every FDAT overlay, and a PS-X EXE whose images.toml row says
+    `read_only = "together"`) has each unit's constants and switch tables in
+    one run, claimed with RODATA() alone."""
+    if read_only_mode(image) == "together" and jumptable_claims:
+        raise ValueError(f"{source}:{jumptable_claims[0].line}: a {image} unit claims its "
                          "switch tables inside its RODATA() run, not with JUMPTABLES()")
 
 
@@ -566,7 +568,7 @@ def load(
         rodata_claims = scan_rodata_claims(source_path)
         jumptable_claims = scan_jumptable_claims(source_path)
         sdata_claims = scan_sdata_claims(source_path)
-        _check_overlay_read_only(source, image, jumptable_claims)
+        _check_together_read_only(source, image, jumptable_claims)
         image_token = image_key(image).upper()
         data_claims = tuple(
             claim for claim in data_claims

@@ -169,7 +169,8 @@ def keep_read_only_together(assembly: str) -> str:
 
 # How a unit's read-only data is sectioned: `separate` (constants to .rodata,
 # switch tables in .rdata, the pool padded to eight bytes) for the PS-X EXE
-# programs; `together` (cc1 order, unpadded) for the FDAT overlays.
+# programs; `together` (cc1 order, unpadded) for the FDAT overlays and any
+# program whose config/images.toml row selects it (scripts/kf/retail.py).
 READ_ONLY_MODES = {'separate': separate_read_only, 'together': keep_read_only_together}
 
 

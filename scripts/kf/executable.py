@@ -9,7 +9,6 @@ import os
 from pathlib import Path
 import struct
 
-from scripts.kf.compile import read_only_mode
 from scripts.kf.delink import load_catalog
 from scripts.kf.sdk import compile_c
 from scripts.psxbuild.sdk import ASPSX_VERSION
@@ -19,7 +18,9 @@ from scripts.kf.graph import IncludeScanner
 from scripts.kf.manifest import Manifest, Profile, Unit, load as load_manifest
 from scripts.kf.paths import BUILD, REPO, RETAIL_CONFIG
 from scripts.kf.readme import refresh_executable
-from scripts.kf.retail import IMAGE_KEYS, IMAGE_LAYOUTS, IMAGE_NAMES, OVERLAY_SOURCES, image_key
+from scripts.kf.retail import (
+    IMAGE_KEYS, IMAGE_LAYOUTS, IMAGE_NAMES, OVERLAY_SOURCES, image_key, read_only_mode,
+)
 from scripts.kf.sema.image import RetailImage
 
 

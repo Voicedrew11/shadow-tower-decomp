@@ -142,6 +142,40 @@ def _load_gp(path: Path) -> dict[str, int]:
 
 IMAGE_GP = _load_gp(IMAGES_CONFIG)
 
+# How a unit's read-only data is sectioned (scripts/psxbuild/sdk.py
+# READ_ONLY_MODES): `separate` moves each unit's constants ahead of every
+# unit's switch tables (retail ST.EXE); `together` keeps cc1's order, each
+# object's constants and then its switch tables in one run with no pool
+# padding (the FDAT overlays). A PS-X EXE selects `together` with
+# `read_only = "together"` in its `[[image]]` row; an overlay always has it.
+READ_ONLY_MODE_NAMES = ("separate", "together")
+
+
+def _load_read_only(path: Path) -> dict[str, str]:
+    with path.open("rb") as stream:
+        table = tomllib.load(stream)
+    result: dict[str, str] = {}
+    for row in table["image"]:
+        mode = row.get("read_only", "separate")
+        if mode not in READ_ONLY_MODE_NAMES:
+            raise ValueError(f"{path}: image {row['name']!r} has unknown read_only {mode!r}")
+        result[row["name"]] = mode
+    for row in table.get("overlay", ()):
+        if "read_only" in row:
+            raise ValueError(f"{path}: overlay {row['name']!r} always keeps read-only data together")
+        result[row["name"]] = "together"
+    return result
+
+
+IMAGE_READ_ONLY = _load_read_only(IMAGES_CONFIG)
+
+
+def read_only_mode(image: str) -> str:
+    """`separate` or `together`: how the image's units section read-only data.
+
+    An image outside config/images.toml (a synthetic test program) separates."""
+    return IMAGE_READ_ONLY.get(image, "separate")
+
 
 def referent_image(image: str, va: int) -> str:
     """The image whose inventories own an address that `image`'s code references.
