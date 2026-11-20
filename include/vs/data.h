@@ -319,7 +319,7 @@ extern VsFighter *DAT_80063300;
 extern s32 DAT_80063218;
 extern s32 DAT_8006321c;
 
-/* The model renderers' scale (4096, 4096, 4096; .data, unowned). */
+/* The model renderers' scale (4096, 4096, 4096; .data, src/vs/main.c). */
 extern VECTOR DAT_8005b2a8;
 
 /* The column of DAT_801624b8 func_8002ad40 shows (bss, unowned). */

@@ -49,6 +49,11 @@ s32 DAT_80063370[1];
 RODATA(0x80011000, 0xa0)
 JUMPTABLES(0x800110a0, 0x70)
 
+/* The model renderers' light scale (func_80025204, func_80028914 and
+ * func_800291d4 scale their light matrix by it). */
+DATA(0x8005b2a8, 0x10, ".data")
+VECTOR DAT_8005b2a8 = {ONE, ONE, ONE};
+
 /* The module's initialized small data. */
 DATA(0x80063220, 0x4, ".sdata")
 s32 DAT_80063220 = 0;
