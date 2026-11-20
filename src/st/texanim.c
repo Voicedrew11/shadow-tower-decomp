@@ -50,6 +50,21 @@ SDATA(0x80087f38, 0x30)
 SDATA(0x80087f70, 0x14)
 SDATA(0x80087f88, 0x8c)
 
+/*
+ * The module's first .sdata (retail 0x80087ed8..0x80087ef3, before quad's
+ * literals): two RECTs and eight zero bytes nothing references, and the
+ * NCDS input colour func_80021ac4 draws with (128, 128, 128), which it
+ * loads $gp-relative.
+ */
+DATA(0x80087ed8, 0x8, ".sdata")
+static const RECT DAT_80087ed8 = {320, 0, 320, 240};
+DATA(0x80087ee0, 0x8, ".sdata")
+static const RECT DAT_80087ee0 = {960, 256, 64, 240};
+DATA(0x80087ee8, 0x4, ".sdata")
+u_long DAT_80087ee8 = 0x00808080;
+DATA(0x80087eec, 0x8, ".sdata")
+static u32 DAT_80087eec[2] = {0, 0};
+
 #define TEXANIM_FREE 255
 /* Slot area that is active everywhere. */
 #define TEXANIM_ANY_AREA 255
@@ -3840,14 +3855,6 @@ void func_80021994(int r, int g, int b, int scale, int mode)
 
 /* A model block's part data. */
 #define MODEL_DATA(block) ((u8 *)(block) + ((ModelFile *)(block))->unk8)
-
-/*
- * The NCDS input colour func_80021ac4 draws with (128, 128, 128). A
- * tentative definition: the linker merges it into the initialized .sdata
- * word another unit defines; its size lets ASPSX use the $gp-relative load
- * (an extern declaration gets lui+lw).
- */
-u_long DAT_80087ee8;
 
 /*
  * Projects the current part's model-space vertices (RTPS) into the

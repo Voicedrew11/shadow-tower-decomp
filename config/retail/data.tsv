@@ -241,9 +241,12 @@ ST.EXE	0x8008042c	0x6fc2c	0x80	defined	candidate	DAT_8008042c	MATRIX[4]	asm;src/
 ST.EXE	0x800804ac	0x6fcac	0x3c0	defined	candidate	DAT_800804ac	u32[40][6]	asm;src/st/xa.c st.xa;src/st/data_8008038c.c st.data_8008038c	XA stream lengths in sectors per stream file and channel (func_8005408c); WIP extent of 40 rows (DAT_801cba08.unk1618 holds 40 positions)
 ST.EXE	0x8008086c	0x7006c	0xc0	defined	proven	DAT_8008086c	u32[48]	src/st/data_8008092c.c st.data_8008092c	unreferenced zero words in .data between DAT_800804ac and DAT_8008092c
 ST.EXE	0x8008092c	0x7012c	0x12	defined	candidate	DAT_8008092c	u8[18]	asm;src/st/equip_menu.c st.equip_menu;src/st/data_8008092c.c st.data_8008092c	byte table: message offset from 916 per ring sub-list entry
-ST.EXE	0x8008093e	0x7013e	0x75aa	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
-ST.EXE	0x80087ee8	0x776e8	0x4	defined	proven	DAT_80087ee8	u_long	asm;src/st/model_draw.c st.model_draw	$gp+0x28; initialized word 0x00808080 (colour 128, 128, 128) func_80021ac4 loads; owning unit unknown
-ST.EXE	0x80087eec	0x776ec	0x2c	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
+ST.EXE	0x8008093e	0x7013e	0x759a	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
+ST.EXE	0x80087ed8	0x776d8	0x8	defined	proven	DAT_80087ed8	RECT	retail-layout;src/st/texanim.c st.texanim	unreferenced .sdata RECT {320, 0, 320, 240} at the start of st.texanim's .sdata (an 8-byte constant under -G8)
+ST.EXE	0x80087ee0	0x776e0	0x8	defined	proven	DAT_80087ee0	RECT	retail-layout;src/st/texanim.c st.texanim	unreferenced .sdata RECT {960, 256, 64, 240} before the colour word DAT_80087ee8
+ST.EXE	0x80087ee8	0x776e8	0x4	defined	proven	DAT_80087ee8	u_long	asm;src/st/texanim.c st.texanim	$gp+0x28; initialized word 0x00808080 (colour 128, 128, 128) func_80021ac4 loads; defined by st.texanim
+ST.EXE	0x80087eec	0x776ec	0x8	defined	proven	DAT_80087eec	u32[2]	retail-layout;src/st/texanim.c st.texanim	unreferenced zero .sdata bytes after DAT_80087ee8, before quad's literals
+ST.EXE	0x80087ef4	0x776f4	0x24	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 ST.EXE	0x80087f18	0x77718	0x4	defined	candidate	DAT_80087f18	s32	asm;src/st/hud.c st.hud	$gp+0x58 .sdata word; blink phase of func_80026afc's selection frame
 ST.EXE	0x80087f1c	0x7771c	0x18	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 ST.EXE	0x80087f34	0x77734	0x4	defined	candidate	DAT_80087f34	s32	asm;src/st/ui.c st.ui	$gp+0x74 .sdata word; blink phase of the map page arrows (func_8002a954)
