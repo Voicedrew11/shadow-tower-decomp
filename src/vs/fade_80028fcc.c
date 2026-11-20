@@ -38,7 +38,7 @@ static s32 DAT_800632e0 = 0;
 ADDRESS(0x80028fcc, 0x208)
 void func_80028fcc(int hold)
 {
-    StPacketBuffer *packet = DAT_801624d0.packet;
+    StPacketBuffer *packet = vs_gfx_state.packet;
     POLY_FT4 *p = (POLY_FT4 *)packet->cur;
 
     packet->cur = (u_long *)(p + 1);
@@ -69,7 +69,7 @@ void func_80028fcc(int hold)
         break;
     }
     setRGB0(p, 100, 100, 100);
-    addPrim(&DAT_801624d0.ot_cur[VS_OT_LENGTH - 1], p);
+    addPrim(&vs_gfx_state.ot_cur[VS_OT_LENGTH - 1], p);
     if (hold == 0) {
         if (++DAT_800632e0 >= 6)
             DAT_800632e0 = 0;
@@ -137,9 +137,9 @@ void func_800291d4(u8 *model, int part, SVECTOR *pos, SVECTOR *rot, SVECTOR *sca
     sp->unk68 = lights.dq[0];
     sp->unk6C = lights.dq[1];
     gte_SetBackColor(lights.bk.r, lights.bk.g, lights.bk.b);
-    sp->matrix.t[0] = pos->vx - DAT_801624d0.unk2CA78.vx;
-    sp->matrix.t[1] = pos->vy - DAT_801624d0.unk2CA78.vy;
-    sp->matrix.t[2] = pos->vz - DAT_801624d0.unk2CA78.vz;
+    sp->matrix.t[0] = pos->vx - vs_gfx_state.unk2CA78.vx;
+    sp->matrix.t[1] = pos->vy - vs_gfx_state.unk2CA78.vy;
+    sp->matrix.t[2] = pos->vz - vs_gfx_state.unk2CA78.vz;
     RotMatrixZYX(rot, &sp->matrix);
     sp->matrix.m[0][0] *= scale->vx;
     sp->matrix.m[0][1] *= scale->vx;
@@ -150,17 +150,17 @@ void func_800291d4(u8 *model, int part, SVECTOR *pos, SVECTOR *rot, SVECTOR *sca
     sp->matrix.m[2][0] *= scale->vz;
     sp->matrix.m[2][1] *= scale->vz;
     sp->matrix.m[2][2] *= scale->vz;
-    CompMatrix(&DAT_801624d0.unk2C998, &sp->matrix, &sp->matrix);
+    CompMatrix(&vs_gfx_state.unk2C998, &sp->matrix, &sp->matrix);
     gte_SetRotMatrix(&sp->matrix);
     gte_SetTransMatrix(&sp->matrix);
     sp->far_z = 4096;
-    sp->ot = DAT_801624d0.ot_cur;
+    sp->ot = vs_gfx_state.ot_cur;
     sp->near_z = 4;
-    sp->face_count = DAT_801624d0.unk831C[1];
-    sp->prim_count = DAT_801624d0.unk8324;
-    sp->prim = DAT_801624d0.packet->cur;
-    sp->prim_end = DAT_801624d0.packet->end;
-    sp->vertices = DAT_801624d0.unkA7EC;
+    sp->face_count = vs_gfx_state.unk831C[1];
+    sp->prim_count = vs_gfx_state.unk8324;
+    sp->prim = vs_gfx_state.packet->cur;
+    sp->prim_end = vs_gfx_state.packet->end;
+    sp->vertices = vs_gfx_state.unkA7EC;
     sp->clut_base = 0;
     sp->model = model;
     sp->header = (MeshHeader *)(model + 12) + part;
@@ -173,8 +173,8 @@ void func_800291d4(u8 *model, int part, SVECTOR *pos, SVECTOR *rot, SVECTOR *sca
     if (DAT_80063224 != 3)
         DAT_80063350 = 0;
     func_80027ba4(part);
-    DAT_801624d0.packet->cur = sp->prim;
-    DAT_801624d0.packet->end = sp->prim_end;
-    DAT_801624d0.unk831C[1] = sp->face_count;
-    DAT_801624d0.unk8324 = sp->prim_count;
+    vs_gfx_state.packet->cur = sp->prim;
+    vs_gfx_state.packet->end = sp->prim_end;
+    vs_gfx_state.unk831C[1] = sp->face_count;
+    vs_gfx_state.unk8324 = sp->prim_count;
 }

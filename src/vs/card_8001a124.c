@@ -318,15 +318,15 @@ s16 func_8001abfc(int first)
     sp->unk1C6 = 0;
     for (;;) {
         if (first) {
-            DAT_801603c0.pads[0].unk8 = 0;
-            DAT_801603c0.pads[0].unkC = 0;
-            DAT_801603c0.pads[0].unk0 = 0;
+            pad_state.pads[0].unk8 = 0;
+            pad_state.pads[0].unkC = 0;
+            pad_state.pads[0].unk0 = 0;
         } else {
-            DAT_801603c0.pads[1].unk8 = 0;
-            DAT_801603c0.pads[1].unkC = 0;
-            DAT_801603c0.pads[1].unk0 = 0;
+            pad_state.pads[1].unk8 = 0;
+            pad_state.pads[1].unkC = 0;
+            pad_state.pads[1].unk0 = 0;
         }
-        buttons = DAT_801603c0.pads[0].unk8 | DAT_801603c0.pads[1].unk8;
+        buttons = pad_state.pads[0].unk8 | pad_state.pads[1].unk8;
         if (buttons & 0x4000) {
             func_8001c978();
             break;
@@ -340,12 +340,12 @@ s16 func_8001abfc(int first)
             func_8001c8b8();
             sp->unk1C6 = 1;
         }
-        if ((DAT_801603c0.pads[0].unk8 | DAT_801603c0.pads[1].unk8) & 0x20) {
+        if ((pad_state.pads[0].unk8 | pad_state.pads[1].unk8) & 0x20) {
             func_8001c8b8();
             sp->unk1C6 = 0;
         }
-        DAT_801603c0.pads[0].unk8 = 0;
-        DAT_801603c0.pads[1].unk8 = 0;
+        pad_state.pads[0].unk8 = 0;
+        pad_state.pads[1].unk8 = 0;
         func_800204b0();
     }
     return sp->unk1C6;
@@ -361,15 +361,15 @@ int func_8001ad18(int first)
     sp->unk1D4 = 0;
     for (;;) {
         if (first) {
-            DAT_801603c0.pads[0].unk8 = 0;
-            DAT_801603c0.pads[0].unkC = 0;
-            DAT_801603c0.pads[0].unk0 = 0;
+            pad_state.pads[0].unk8 = 0;
+            pad_state.pads[0].unkC = 0;
+            pad_state.pads[0].unk0 = 0;
         } else {
-            DAT_801603c0.pads[1].unk8 = 0;
-            DAT_801603c0.pads[1].unkC = 0;
-            DAT_801603c0.pads[1].unk0 = 0;
+            pad_state.pads[1].unk8 = 0;
+            pad_state.pads[1].unkC = 0;
+            pad_state.pads[1].unk0 = 0;
         }
-        buttons = DAT_801603c0.pads[0].unk8 | DAT_801603c0.pads[1].unk8;
+        buttons = pad_state.pads[0].unk8 | pad_state.pads[1].unk8;
         if (buttons & 0x4000) {
             func_8001c978();
             sp->unk1CC <<= 1;
@@ -380,18 +380,18 @@ int func_8001ad18(int first)
             sp->unk1CC = 0;
             break;
         }
-        if ((DAT_801603c0.pads[0].unkC | DAT_801603c0.pads[1].unkC) & 0x10) {
+        if ((pad_state.pads[0].unkC | pad_state.pads[1].unkC) & 0x10) {
             func_8001c8b8();
             sp->unk1CC = 2;
         }
-        if ((DAT_801603c0.pads[0].unkC | DAT_801603c0.pads[1].unkC) & 0x40) {
+        if ((pad_state.pads[0].unkC | pad_state.pads[1].unkC) & 0x40) {
             func_8001c8b8();
             sp->unk1CC = 512;
         }
-        DAT_801603c0.pads[0].unk8 = 0;
-        DAT_801603c0.pads[1].unk8 = 0;
-        DAT_801603c0.pads[0].unkC = 0;
-        DAT_801603c0.pads[1].unkC = 0;
+        pad_state.pads[0].unk8 = 0;
+        pad_state.pads[1].unk8 = 0;
+        pad_state.pads[0].unkC = 0;
+        pad_state.pads[1].unkC = 0;
         func_800204b0();
         sp->unk1D4 = (sp->unk1D4 + 1) % 32;
     }
@@ -441,18 +441,18 @@ int func_8001afcc(int first)
     sp->unk1D4 = 0;
     for (;;) {
         if (first) {
-            DAT_801603c0.pads[0].unk8 = 0;
-            DAT_801603c0.pads[0].unkC = 0;
-            DAT_801603c0.pads[0].unk0 = 0;
+            pad_state.pads[0].unk8 = 0;
+            pad_state.pads[0].unkC = 0;
+            pad_state.pads[0].unk0 = 0;
         } else {
-            DAT_801603c0.pads[1].unk8 = 0;
-            DAT_801603c0.pads[1].unkC = 0;
-            DAT_801603c0.pads[1].unk0 = 0;
+            pad_state.pads[1].unk8 = 0;
+            pad_state.pads[1].unkC = 0;
+            pad_state.pads[1].unk0 = 0;
         }
-        if ((sp->unk1CC & 0xff00) || ((DAT_801603c0.pads[0].unk8 | DAT_801603c0.pads[1].unk8) & 0x4000)) {
+        if ((sp->unk1CC & 0xff00) || ((pad_state.pads[0].unk8 | pad_state.pads[1].unk8) & 0x4000)) {
             func_8001c978();
-            DAT_801603c0.pads[0].unk8 = 0;
-            DAT_801603c0.pads[1].unk8 = 0;
+            pad_state.pads[0].unk8 = 0;
+            pad_state.pads[1].unk8 = 0;
             sp->unk0.menu.half[1] = 1;
             sp->unk1D4 = 32;
             sp->unk1C6 = 1;
@@ -460,15 +460,15 @@ int func_8001afcc(int first)
                 u32 buttons;
 
                 if (first) {
-                    DAT_801603c0.pads[0].unk8 = 0;
-                    DAT_801603c0.pads[0].unkC = 0;
-                    DAT_801603c0.pads[0].unk0 = 0;
+                    pad_state.pads[0].unk8 = 0;
+                    pad_state.pads[0].unkC = 0;
+                    pad_state.pads[0].unk0 = 0;
                 } else {
-                    DAT_801603c0.pads[1].unk8 = 0;
-                    DAT_801603c0.pads[1].unkC = 0;
-                    DAT_801603c0.pads[1].unk0 = 0;
+                    pad_state.pads[1].unk8 = 0;
+                    pad_state.pads[1].unkC = 0;
+                    pad_state.pads[1].unk0 = 0;
                 }
-                buttons = DAT_801603c0.pads[0].unk8 | DAT_801603c0.pads[1].unk8;
+                buttons = pad_state.pads[0].unk8 | pad_state.pads[1].unk8;
                 if (buttons & 0x4000) {
                     func_8001c978();
                     break;
@@ -482,16 +482,16 @@ int func_8001afcc(int first)
                     func_8001c8b8();
                     sp->unk1C6 = 1;
                 }
-                if ((DAT_801603c0.pads[0].unk8 | DAT_801603c0.pads[1].unk8) & 0x20) {
+                if ((pad_state.pads[0].unk8 | pad_state.pads[1].unk8) & 0x20) {
                     func_8001c8b8();
                     sp->unk1C6 = 0;
                 }
-                DAT_801603c0.pads[0].unk8 = 0;
-                DAT_801603c0.pads[1].unk8 = 0;
+                pad_state.pads[0].unk8 = 0;
+                pad_state.pads[1].unk8 = 0;
                 func_800204b0();
             }
-            DAT_801603c0.pads[0].unk8 = 0;
-            DAT_801603c0.pads[1].unk8 = 0;
+            pad_state.pads[0].unk8 = 0;
+            pad_state.pads[1].unk8 = 0;
             if (sp->unk1C6)
                 goto done;
             if (sp->unk1CC & 0xff00) {
@@ -501,12 +501,12 @@ int func_8001afcc(int first)
             sp->unk0.menu.half[1] = 0;
             continue;
         }
-        if ((DAT_801603c0.pads[0].unk8 | DAT_801603c0.pads[1].unk8) & 0x2000) {
+        if ((pad_state.pads[0].unk8 | pad_state.pads[1].unk8) & 0x2000) {
             func_8001c8f8();
             sp->unk1C2 = -1;
             goto done;
         }
-        if ((DAT_801603c0.pads[0].unkC | DAT_801603c0.pads[1].unkC) & 0x10) {
+        if ((pad_state.pads[0].unkC | pad_state.pads[1].unkC) & 0x10) {
             func_8001c8b8();
             if (sp->unk1C2 == 0) {
                 if (sp->unk1C4 > 0)
@@ -515,7 +515,7 @@ int func_8001afcc(int first)
                 sp->unk1C2--;
             }
         }
-        if ((DAT_801603c0.pads[0].unkC | DAT_801603c0.pads[1].unkC) & 0x40) {
+        if ((pad_state.pads[0].unkC | pad_state.pads[1].unkC) & 0x40) {
             func_8001c8b8();
             if (sp->unk1C2 == 2) {
                 if (sp->unk1C4 < sp->unk1BE - 3)
@@ -524,10 +524,10 @@ int func_8001afcc(int first)
                 sp->unk1C2++;
             }
         }
-        DAT_801603c0.pads[0].unk8 = 0;
-        DAT_801603c0.pads[1].unk8 = 0;
-        DAT_801603c0.pads[0].unkC = 0;
-        DAT_801603c0.pads[1].unkC = 0;
+        pad_state.pads[0].unk8 = 0;
+        pad_state.pads[1].unk8 = 0;
+        pad_state.pads[0].unkC = 0;
+        pad_state.pads[1].unkC = 0;
         func_800204b0();
         sp->unk1D4 = (sp->unk1D4 + 1) % 32;
         }
@@ -830,10 +830,10 @@ int func_8001bb48(int mode, int port)
     sp->unk0.menu.half[0] = 0;
     sp->unk0.menu.half[1] = 0;
     sp->unk1CA = mode;
-    DAT_801603c0.pads[0].unk8 = 0;
-    DAT_801603c0.pads[1].unk8 = 0;
-    DAT_801603c0.pads[0].unkC = 0;
-    DAT_801603c0.pads[1].unkC = 0;
+    pad_state.pads[0].unk8 = 0;
+    pad_state.pads[1].unk8 = 0;
+    pad_state.pads[0].unkC = 0;
+    pad_state.pads[1].unkC = 0;
 again:
     sp->unk1BC = port;
     sp->unk1B8 = &sp->unk0.card.ports[sp->unk1BC];
@@ -871,10 +871,10 @@ again:
         goto wait;
     }
     sp->unk1CC <<= 2;
-    DAT_801603c0.pads[0].unk8 = 0;
-    DAT_801603c0.pads[1].unk8 = 0;
-    DAT_801603c0.pads[0].unkC = 0;
-    DAT_801603c0.pads[1].unkC = 0;
+    pad_state.pads[0].unk8 = 0;
+    pad_state.pads[1].unk8 = 0;
+    pad_state.pads[0].unkC = 0;
+    pad_state.pads[1].unkC = 0;
     if (sp->unk1CC & 0xff00) {
         func_8001a5b4(sp->unk1BC);
         if (sp->unk1B8->status == 0) {
@@ -958,9 +958,9 @@ wait:
     func_800204b0();
     func_800204b0();
     if (port)
-        WAIT_PRESS(DAT_801603c0.pads[1]);
+        WAIT_PRESS(pad_state.pads[1]);
     else
-        WAIT_PRESS(DAT_801603c0.pads[0]);
+        WAIT_PRESS(pad_state.pads[0]);
     func_8001c8f8();
     if (sp->unk1CC & 0x80) {
         sp->unk1CC = 2;

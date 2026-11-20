@@ -8247,20 +8247,20 @@ VS.EXE	0x800133d0	0x2bd0		mips26	reachable-code	0x800136d8	load		j		manual-decod
 VS.EXE	0x8001356c	0x2d6c		mips26	reachable-code	0x800136d8	load		j		manual-decoded	reviewed	vs.snd_800129bc asm review
 VS.EXE	0x800136e0	0x2ee0	0x800136e4	mips_hi16_lo16	reachable-code	0x801961e0	bss	DAT_801961e0	lui+lbu		manual-decoded	reviewed	vs.snd_800129bc asm review
 VS.EXE	0x800136e0	0x2ee0	0x800136f0	mips_hi16_lo16	reachable-code	0x801961e0	bss	DAT_801961e0	lui+addiu		manual-decoded	reviewed	vs.snd_800129bc asm review
-VS.EXE	0x800136f4	0x2ef4	0x800136f8	mips_hi16_lo16	reachable-code	0x801603c0	bss	DAT_801603c0	lui+addiu		manual-decoded	reviewed	vs.snd_800129bc asm review
-VS.EXE	0x800136f4	0x2ef4	0x80013714	mips_hi16_lo16	reachable-code	0x801603c0	bss	DAT_801603c0	lui+sw		manual-decoded	reviewed	vs.snd_800129bc asm review
+VS.EXE	0x800136f4	0x2ef4	0x800136f8	mips_hi16_lo16	reachable-code	0x801603c0	bss	pad_state	lui+addiu		manual-decoded	reviewed	vs.snd_800129bc asm review
+VS.EXE	0x800136f4	0x2ef4	0x80013714	mips_hi16_lo16	reachable-code	0x801603c0	bss	pad_state	lui+sw		manual-decoded	reviewed	vs.snd_800129bc asm review
 VS.EXE	0x8001373c	0x2f3c		mips26	reachable-code	0x80013770	load		j		manual-decoded	reviewed	vs.snd_800129bc asm review
 VS.EXE	0x80013770	0x2f70	0x80013774	mips_hi16_lo16	reachable-code	0x801961e0	bss	DAT_801961e0	lui+addiu		manual-decoded	reviewed	vs.snd_800129bc asm review
-VS.EXE	0x80013784	0x2f84	0x80013788	mips_hi16_lo16	reachable-code	0x801603c0	bss	DAT_801603c0	lui+addiu		manual-decoded	reviewed	vs.snd_800129bc asm review
+VS.EXE	0x80013784	0x2f84	0x80013788	mips_hi16_lo16	reachable-code	0x801603c0	bss	pad_state	lui+addiu		manual-decoded	reviewed	vs.snd_800129bc asm review
 VS.EXE	0x800137cc	0x2fcc		mips26	reachable-code	0x80013800	load		j		manual-decoded	reviewed	vs.snd_800129bc asm review
-VS.EXE	0x80013800	0x3000	0x80013804	mips_hi16_lo16	reachable-code	0x801603c0	bss	DAT_801603c0	lui+addiu		manual-decoded	reviewed	vs.snd_800129bc asm review
-VS.EXE	0x80013800	0x3000	0x80013808	mips_hi16_lo16	reachable-code	0x801603c0	bss	DAT_801603c0	lui+lw		manual-decoded	reviewed	vs.snd_800129bc asm review
-VS.EXE	0x8001381c	0x301c	0x80013820	mips_hi16_lo16	reachable-code	0x801603c0	bss	DAT_801603c0	lui+addiu		manual-decoded	reviewed	vs.snd_800129bc asm review
-VS.EXE	0x8001381c	0x301c	0x80013844	mips_hi16_lo16	reachable-code	0x801603c0	bss	DAT_801603c0	lui+sw		manual-decoded	reviewed	vs.snd_800129bc asm review
-VS.EXE	0x80013848	0x3048	0x8001384c	mips_hi16_lo16	reachable-code	0x801603c0	bss	DAT_801603c0	lui+addiu		manual-decoded	reviewed	vs.snd_800129bc asm review
-VS.EXE	0x8001386c	0x306c	0x80013870	mips_hi16_lo16	reachable-code	0x801603c0	bss	DAT_801603c0	lui+addiu		manual-decoded	reviewed	vs.snd_800129bc asm review
+VS.EXE	0x80013800	0x3000	0x80013804	mips_hi16_lo16	reachable-code	0x801603c0	bss	pad_state	lui+addiu		manual-decoded	reviewed	vs.snd_800129bc asm review
+VS.EXE	0x80013800	0x3000	0x80013808	mips_hi16_lo16	reachable-code	0x801603c0	bss	pad_state	lui+lw		manual-decoded	reviewed	vs.snd_800129bc asm review
+VS.EXE	0x8001381c	0x301c	0x80013820	mips_hi16_lo16	reachable-code	0x801603c0	bss	pad_state	lui+addiu		manual-decoded	reviewed	vs.snd_800129bc asm review
+VS.EXE	0x8001381c	0x301c	0x80013844	mips_hi16_lo16	reachable-code	0x801603c0	bss	pad_state	lui+sw		manual-decoded	reviewed	vs.snd_800129bc asm review
+VS.EXE	0x80013848	0x3048	0x8001384c	mips_hi16_lo16	reachable-code	0x801603c0	bss	pad_state	lui+addiu		manual-decoded	reviewed	vs.snd_800129bc asm review
+VS.EXE	0x8001386c	0x306c	0x80013870	mips_hi16_lo16	reachable-code	0x801603c0	bss	pad_state	lui+addiu		manual-decoded	reviewed	vs.snd_800129bc asm review
 VS.EXE	0x80013888	0x3088		mips26	reachable-code	0x800136e0	load		jal		manual-decoded	reviewed	vs.snd_800129bc asm review
-VS.EXE	0x800138b4	0x30b4	0x800138b8	mips_hi16_lo16	reachable-code	0x801624d0	bss	DAT_801624d0	lui+addiu		manual-decoded	reviewed	vs.snd_800129bc asm review
+VS.EXE	0x800138b4	0x30b4	0x800138b8	mips_hi16_lo16	reachable-code	0x801624d0	bss	vs_gfx_state	lui+addiu		manual-decoded	reviewed	vs.snd_800129bc asm review
 VS.EXE	0x800138dc	0x30dc		mips26	reachable-code	0x80047390	load		jal		manual-decoded	reviewed	vs.snd_800129bc asm review
 VS.EXE	0x800138e4	0x30e4		mips26	reachable-code	0x80044024	load		jal		manual-decoded	reviewed	vs.snd_800129bc asm review
 VS.EXE	0x80013900	0x3100		mips26	reachable-code	0x80047bc0	load		jal		manual-decoded	reviewed	vs.snd_800129bc asm review
@@ -8274,7 +8274,7 @@ VS.EXE	0x80013a58	0x3258		mips26	reachable-code	0x80047bc0	load		jal		manual-dec
 VS.EXE	0x80013a60	0x3260		mips26	reachable-code	0x800479f4	load		jal		manual-decoded	reviewed	vs.snd_800129bc asm review
 VS.EXE	0x80013a6c	0x326c		mips26	reachable-code	0x800139ac	load		j		manual-decoded	reviewed	vs.snd_800129bc asm review
 VS.EXE	0x80013a84	0x3284	0x80013a88	mips_hi16_lo16	reachable-code	0x801961e2	bss	DAT_801961e0	lui+lhu		manual-decoded	reviewed	vs.snd_800129bc asm review
-VS.EXE	0x80013abc	0x32bc	0x80013ac0	mips_hi16_lo16	reachable-code	0x801624d0	bss	DAT_801624d0	lui+addiu		manual-decoded	reviewed	vs.snd_800129bc asm review
+VS.EXE	0x80013abc	0x32bc	0x80013ac0	mips_hi16_lo16	reachable-code	0x801624d0	bss	vs_gfx_state	lui+addiu		manual-decoded	reviewed	vs.snd_800129bc asm review
 VS.EXE	0x80013af4	0x32f4		mips26	reachable-code	0x8003af4c	load		jal		manual-decoded	reviewed	vs.snd_800129bc asm review
 VS.EXE	0x80013b00	0x3300		mips26	reachable-code	0x8003b4cc	load		jal		manual-decoded	reviewed	vs.snd_800129bc asm review
 VS.EXE	0x80013b08	0x3308	0x80013b0c	mips_hi16_lo16	reachable-code	0x801175a8	bss	DAT_801175a8	lui+addiu		manual-decoded	reviewed	vs.snd_800129bc asm review
@@ -8320,7 +8320,7 @@ VS.EXE	0x80013f68	0x3768		mips26	reachable-code	0x80014008	load		j		manual-decod
 VS.EXE	0x80013f70	0x3770		mips_gprel16	reachable-code	0x80063220	load	DAT_80063220	lw	gp	manual-decoded	reviewed	vs.snd_800129bc asm review
 VS.EXE	0x80013fa0	0x37a0		mips26	reachable-code	0x80045954	load		jal		manual-decoded	reviewed	vs.snd_800129bc asm review
 VS.EXE	0x80013fb8	0x37b8		mips26	reachable-code	0x80014008	load		j		manual-decoded	reviewed	vs.snd_800129bc asm review
-VS.EXE	0x80013fc8	0x37c8	0x80013fcc	mips_hi16_lo16	reachable-code	0x80160400	bss	DAT_801603c0	lui+lw		manual-decoded	reviewed	vs.snd_800129bc asm review
+VS.EXE	0x80013fc8	0x37c8	0x80013fcc	mips_hi16_lo16	reachable-code	0x80160400	bss	pad_state	lui+lw		manual-decoded	reviewed	vs.snd_800129bc asm review
 VS.EXE	0x80014008	0x3808		mips26	reachable-code	0x80045954	load		jal		manual-decoded	reviewed	vs.snd_800129bc asm review
 VS.EXE	0x80014024	0x3824		mips26	reachable-code	0x80013b74	load		jal		manual-decoded	reviewed	vs.snd_800129bc asm review
 VS.EXE	0x8001407c	0x387c	0x80014084	mips_hi16_lo16	reachable-code	0x80011014	load		lui+addiu		manual-decoded	reviewed	vs.snd_800129bc asm review
@@ -8361,7 +8361,7 @@ VS.EXE	0x80014438	0x3c38		mips26	reachable-code	0x8001444c	load		j		manual-decod
 VS.EXE	0x80014498	0x3c98		mips26	reachable-code	0x80047014	load		jal		manual-decoded	reviewed	vs.main asm review
 VS.EXE	0x800144a0	0x3ca0		mips26	reachable-code	0x80047188	load		jal		manual-decoded	reviewed	vs.main asm review
 VS.EXE	0x800144a8	0x3ca8		mips26	reachable-code	0x80042a5c	load		jal		manual-decoded	reviewed	vs.main asm review
-VS.EXE	0x800144d0	0x3cd0	0x800144d4	mips_hi16_lo16	reachable-code	0x801624d0	bss	DAT_801624d0	lui+addiu		manual-decoded	reviewed	vs.main asm review
+VS.EXE	0x800144d0	0x3cd0	0x800144d4	mips_hi16_lo16	reachable-code	0x801624d0	bss	vs_gfx_state	lui+addiu		manual-decoded	reviewed	vs.main asm review
 VS.EXE	0x800144ec	0x3cec		mips26	reachable-code	0x800464a4	load		jal		manual-decoded	reviewed	vs.main asm review
 VS.EXE	0x80014508	0x3d08		mips26	reachable-code	0x80046558	load		jal		manual-decoded	reviewed	vs.main asm review
 VS.EXE	0x80014524	0x3d24		mips26	reachable-code	0x800464a4	load		jal		manual-decoded	reviewed	vs.main asm review
@@ -8382,10 +8382,10 @@ VS.EXE	0x800147b0	0x3fb0		mips26	reachable-code	0x800429b4	load		jal		manual-dec
 VS.EXE	0x800147c4	0x3fc4		mips26	reachable-code	0x80014850	load		j		manual-decoded	reviewed	vs.main asm review
 VS.EXE	0x800147ec	0x3fec		mips26	reachable-code	0x800428e4	load		jal		manual-decoded	reviewed	vs.main asm review
 VS.EXE	0x80014824	0x4024		mips26	reachable-code	0x800429b4	load		jal		manual-decoded	reviewed	vs.main asm review
-VS.EXE	0x80014850	0x4050	0x80014854	mips_hi16_lo16	reachable-code	0x801603c0	bss	DAT_801603c0	lui+addiu		manual-decoded	reviewed	vs.main asm review
+VS.EXE	0x80014850	0x4050	0x80014854	mips_hi16_lo16	reachable-code	0x801603c0	bss	pad_state	lui+addiu		manual-decoded	reviewed	vs.main asm review
 VS.EXE	0x80014858	0x4058		mips_gprel16	reachable-code	0x80063314	bss	DAT_80063314	lw	gp	manual-decoded	reviewed	vs.main asm review
 VS.EXE	0x8001487c	0x407c		mips26	reachable-code	0x800428e4	load		jal		manual-decoded	reviewed	vs.main asm review
-VS.EXE	0x8001488c	0x408c	0x80014890	mips_hi16_lo16	reachable-code	0x801624d0	bss	DAT_801624d0	lui+addiu		manual-decoded	reviewed	vs.main asm review
+VS.EXE	0x8001488c	0x408c	0x80014890	mips_hi16_lo16	reachable-code	0x801624d0	bss	vs_gfx_state	lui+addiu		manual-decoded	reviewed	vs.main asm review
 VS.EXE	0x800148b4	0x40b4		mips26	reachable-code	0x800429b4	load		jal		manual-decoded	reviewed	vs.main asm review
 VS.EXE	0x800148c8	0x40c8		mips26	reachable-code	0x80014c0c	load		j		manual-decoded	reviewed	vs.main asm review
 VS.EXE	0x800148e0	0x40e0	0x800148e4	mips_hi16_lo16	reachable-code	0x800633b0	bss	DAT_800633b0	lui+addiu		manual-decoded	reviewed	vs.main asm review
@@ -8398,7 +8398,7 @@ VS.EXE	0x80014b64	0x4364	0x80014b68	mips_hi16_lo16	reachable-code	0x800633b0	bss
 VS.EXE	0x80014bc0	0x43c0		mips_gprel16	reachable-code	0x80063324	bss	DAT_80063324	lw	gp	manual-decoded	reviewed	vs.main asm review
 VS.EXE	0x80014bd0	0x43d0		mips_gprel16	reachable-code	0x80063364	bss	DAT_80063364	lw	gp	manual-decoded	reviewed	vs.main asm review
 VS.EXE	0x80014bfc	0x43fc		mips26	reachable-code	0x80014c0c	load		j		manual-decoded	reviewed	vs.main asm review
-VS.EXE	0x80014c14	0x4414	0x80014c18	mips_hi16_lo16	reachable-code	0x801624d0	bss	DAT_801624d0	lui+addiu		manual-decoded	reviewed	vs.main asm review
+VS.EXE	0x80014c14	0x4414	0x80014c18	mips_hi16_lo16	reachable-code	0x801624d0	bss	vs_gfx_state	lui+addiu		manual-decoded	reviewed	vs.main asm review
 VS.EXE	0x80014c90	0x4490		mips26	reachable-code	0x80042ae4	load		jal		manual-decoded	reviewed	vs.main asm review
 VS.EXE	0x80014ca8	0x44a8		mips_gprel16	reachable-code	0x80063354	bss	DAT_80063354	sw	gp	manual-decoded	reviewed	vs.main asm review
 VS.EXE	0x80014cac	0x44ac		mips26	reachable-code	0x80014d24	load		j		manual-decoded	reviewed	vs.main asm review
@@ -8410,21 +8410,21 @@ VS.EXE	0x80014cfc	0x44fc		mips_gprel16	reachable-code	0x80063354	bss	DAT_8006335
 VS.EXE	0x80014d10	0x4510		mips26	reachable-code	0x80014d20	load		j		manual-decoded	reviewed	vs.main asm review
 VS.EXE	0x80014d20	0x4520		mips_gprel16	reachable-code	0x80063354	bss	DAT_80063354	sw	gp	manual-decoded	reviewed	vs.main asm review
 VS.EXE	0x80014d28	0x4528		mips_gprel16	reachable-code	0x80063354	bss	DAT_80063354	lw	gp	manual-decoded	reviewed	vs.main asm review
-VS.EXE	0x80014dfc	0x45fc	0x80014e00	mips_hi16_lo16	reachable-code	0x801624d0	bss	DAT_801624d0	lui+addiu		manual-decoded	reviewed	vs.main asm review
+VS.EXE	0x80014dfc	0x45fc	0x80014e00	mips_hi16_lo16	reachable-code	0x801624d0	bss	vs_gfx_state	lui+addiu		manual-decoded	reviewed	vs.main asm review
 VS.EXE	0x80014ecc	0x46cc		mips26	reachable-code	0x80014ee4	load		j		manual-decoded	reviewed	vs.main asm review
 VS.EXE	0x80014edc	0x46dc		mips26	reachable-code	0x80043d24	load		jal		manual-decoded	reviewed	vs.main asm review
-VS.EXE	0x80014ef0	0x46f0	0x80014ef4	mips_hi16_lo16	reachable-code	0x801624d0	bss	DAT_801624d0	lui+addiu		manual-decoded	reviewed	vs.main asm review
+VS.EXE	0x80014ef0	0x46f0	0x80014ef4	mips_hi16_lo16	reachable-code	0x801624d0	bss	vs_gfx_state	lui+addiu		manual-decoded	reviewed	vs.main asm review
 VS.EXE	0x80014f14	0x4714		mips_gprel16	reachable-code	0x80063324	bss	DAT_80063324	lw	gp	manual-decoded	reviewed	vs.main asm review
 VS.EXE	0x80014f48	0x4748		mips26	reachable-code	0x80042ae4	load		jal		manual-decoded	reviewed	vs.main asm review
 VS.EXE	0x80014f5c	0x475c		mips26	reachable-code	0x80014fb8	load		j		manual-decoded	reviewed	vs.main asm review
 VS.EXE	0x80014f84	0x4784		mips26	reachable-code	0x80042ae4	load		jal		manual-decoded	reviewed	vs.main asm review
 VS.EXE	0x80014fb8	0x47b8		mips26	reachable-code	0x80043d24	load		jal		manual-decoded	reviewed	vs.main asm review
-VS.EXE	0x80014fc4	0x47c4	0x80014fc8	mips_hi16_lo16	reachable-code	0x8018ef58	bss	DAT_801624d0	lui+addiu		manual-decoded	reviewed	vs.main asm review
+VS.EXE	0x80014fc4	0x47c4	0x80014fc8	mips_hi16_lo16	reachable-code	0x8018ef58	bss	vs_gfx_state	lui+addiu		manual-decoded	reviewed	vs.main asm review
 VS.EXE	0x80014fd0	0x47d0		mips26	reachable-code	0x800435b4	load		jal		manual-decoded	reviewed	vs.main asm review
 VS.EXE	0x80014fdc	0x47dc		mips26	reachable-code	0x80043054	load		jal		manual-decoded	reviewed	vs.main asm review
-VS.EXE	0x80014fec	0x47ec	0x80014ff0	mips_hi16_lo16	reachable-code	0x801624d0	bss	DAT_801624d0	lui+addiu		manual-decoded	reviewed	vs.main asm review
-VS.EXE	0x8001502c	0x482c	0x80015030	mips_hi16_lo16	reachable-code	0x801624d0	bss	DAT_801624d0	lui+addiu		manual-decoded	reviewed	vs.main asm review
-VS.EXE	0x80015070	0x4870	0x80015074	mips_hi16_lo16	reachable-code	0x8016a7bc	bss	DAT_801624d0	lui+addiu		manual-decoded	reviewed	vs.main asm review
+VS.EXE	0x80014fec	0x47ec	0x80014ff0	mips_hi16_lo16	reachable-code	0x801624d0	bss	vs_gfx_state	lui+addiu		manual-decoded	reviewed	vs.main asm review
+VS.EXE	0x8001502c	0x482c	0x80015030	mips_hi16_lo16	reachable-code	0x801624d0	bss	vs_gfx_state	lui+addiu		manual-decoded	reviewed	vs.main asm review
+VS.EXE	0x80015070	0x4870	0x80015074	mips_hi16_lo16	reachable-code	0x8016a7bc	bss	vs_gfx_state	lui+addiu		manual-decoded	reviewed	vs.main asm review
 VS.EXE	0x8001509c	0x489c		mips26	reachable-code	0x8004787c	load		jal		manual-decoded	reviewed	vs.main asm review
 VS.EXE	0x800150c8	0x48c8		mips26	reachable-code	0x800237e4	load		jal		manual-decoded	reviewed	vs.main asm review
 VS.EXE	0x800150d0	0x48d0		mips26	reachable-code	0x800280e0	load		jal		manual-decoded	reviewed	vs.main asm review
@@ -8434,7 +8434,7 @@ VS.EXE	0x800150f8	0x48f8		mips_gprel16	reachable-code	0x80063364	bss	DAT_8006336
 VS.EXE	0x800150fc	0x48fc		mips26	reachable-code	0x8002b078	load		jal		manual-decoded	reviewed	vs.main asm review
 VS.EXE	0x8001510c	0x490c		mips_gprel16	reachable-code	0x8006331c	bss	DAT_8006331c	sw	gp	manual-decoded	reviewed	vs.main asm review
 VS.EXE	0x80015114	0x4914		mips_gprel16	reachable-code	0x80063324	bss	DAT_80063324	sw	gp	manual-decoded	reviewed	vs.main asm review
-VS.EXE	0x80015118	0x4918	0x8001511c	mips_hi16_lo16	reachable-code	0x801603c0	bss	DAT_801603c0	lui+addiu		manual-decoded	reviewed	vs.main asm review
+VS.EXE	0x80015118	0x4918	0x8001511c	mips_hi16_lo16	reachable-code	0x801603c0	bss	pad_state	lui+addiu		manual-decoded	reviewed	vs.main asm review
 VS.EXE	0x8001512c	0x492c		mips_gprel16	reachable-code	0x80063364	bss	DAT_80063364	sw	gp	manual-decoded	reviewed	vs.main asm review
 VS.EXE	0x80015130	0x4930		mips_gprel16	reachable-code	0x80063314	bss	DAT_80063314	sw	gp	manual-decoded	reviewed	vs.main asm review
 VS.EXE	0x80015134	0x4934		mips26	reachable-code	0x8003925c	load		jal		manual-decoded	reviewed	vs.main asm review
@@ -8443,12 +8443,12 @@ VS.EXE	0x8001514c	0x494c		mips_gprel16	reachable-code	0x80063324	bss	DAT_8006332
 VS.EXE	0x8001515c	0x495c		mips26	reachable-code	0x8002ad40	load		jal		manual-decoded	reviewed	vs.main asm review
 VS.EXE	0x80015164	0x4964		mips_gprel16	reachable-code	0x80063324	bss	DAT_80063324	lw	gp	manual-decoded	reviewed	vs.main asm review
 VS.EXE	0x80015178	0x4978	0x8001517c	mips_hi16_lo16	reachable-code	0x800110c0	load		lui+addiu		manual-decoded	reviewed	vs.main asm review
-VS.EXE	0x80015198	0x4998	0x8001519c	mips_hi16_lo16	reachable-code	0x801603c0	bss	DAT_801603c0	lui+addiu		manual-decoded	reviewed	vs.main asm review
+VS.EXE	0x80015198	0x4998	0x8001519c	mips_hi16_lo16	reachable-code	0x801603c0	bss	pad_state	lui+addiu		manual-decoded	reviewed	vs.main asm review
 VS.EXE	0x800151a4	0x49a4		mips_gprel16	reachable-code	0x80063314	bss	DAT_80063314	lw	gp	manual-decoded	reviewed	vs.main asm review
 VS.EXE	0x800151c0	0x49c0		mips_gprel16	reachable-code	0x8006331c	bss	DAT_8006331c	lw	gp	manual-decoded	reviewed	vs.main asm review
 VS.EXE	0x800151c4	0x49c4		mips26	reachable-code	0x8002a360	load		jal		manual-decoded	reviewed	vs.main asm review
 VS.EXE	0x800151cc	0x49cc		mips_gprel16	reachable-code	0x8006331c	bss	DAT_8006331c	lw	gp	manual-decoded	reviewed	vs.main asm review
-VS.EXE	0x800151d8	0x49d8	0x80015240	mips_hi16_lo16	reachable-code	0x801603c0	bss	DAT_801603c0	lui+addiu		manual-decoded	reviewed	vs.frame_80015020 alternate delay-slot high; taken 0x800151d4 reaches existing low without clobber
+VS.EXE	0x800151d8	0x49d8	0x80015240	mips_hi16_lo16	reachable-code	0x801603c0	bss	pad_state	lui+addiu		manual-decoded	reviewed	vs.frame_80015020 alternate delay-slot high; taken 0x800151d4 reaches existing low without clobber
 VS.EXE	0x800151e4	0x49e4		mips_gprel16	reachable-code	0x80063314	bss	DAT_80063314	lw	gp	manual-decoded	reviewed	vs.main asm review
 VS.EXE	0x800151f0	0x49f0		mips_gprel16	reachable-code	0x8006336c	bss	DAT_8006336c	lw	gp	manual-decoded	reviewed	vs.main asm review
 VS.EXE	0x800151fc	0x49fc		mips26	reachable-code	0x8002a360	load		jal		manual-decoded	reviewed	vs.main asm review
@@ -8457,11 +8457,11 @@ VS.EXE	0x80015210	0x4a10		mips_gprel16	reachable-code	0x8006336c	bss	DAT_8006336
 VS.EXE	0x8001521c	0x4a1c		mips26	reachable-code	0x8002a360	load		jal		manual-decoded	reviewed	vs.main asm review
 VS.EXE	0x80015228	0x4a28		mips_gprel16	reachable-code	0x80063314	bss	DAT_80063314	lw	gp	manual-decoded	reviewed	vs.main asm review
 VS.EXE	0x80015234	0x4a34		mips26	reachable-code	0x8002ab58	load		jal		manual-decoded	reviewed	vs.main asm review
-VS.EXE	0x8001523c	0x4a3c	0x80015240	mips_hi16_lo16	reachable-code	0x801603c0	bss	DAT_801603c0	lui+addiu		manual-decoded	reviewed	vs.main asm review
+VS.EXE	0x8001523c	0x4a3c	0x80015240	mips_hi16_lo16	reachable-code	0x801603c0	bss	pad_state	lui+addiu		manual-decoded	reviewed	vs.main asm review
 VS.EXE	0x80015244	0x4a44		mips_gprel16	reachable-code	0x80063364	bss	DAT_80063364	lw	gp	manual-decoded	reviewed	vs.main asm review
 VS.EXE	0x80015260	0x4a60		mips26	reachable-code	0x80015af4	load		j		manual-decoded	reviewed	vs.main asm review
 VS.EXE	0x80015268	0x4a68		mips26	reachable-code	0x80015af4	load		j		manual-decoded	reviewed	vs.main asm review
-VS.EXE	0x80015270	0x4a70	0x80015274	mips_hi16_lo16	reachable-code	0x801603c0	bss	DAT_801603c0	lui+addiu		manual-decoded	reviewed	vs.main asm review
+VS.EXE	0x80015270	0x4a70	0x80015274	mips_hi16_lo16	reachable-code	0x801603c0	bss	pad_state	lui+addiu		manual-decoded	reviewed	vs.main asm review
 VS.EXE	0x8001527c	0x4a7c		mips_gprel16	reachable-code	0x80063314	bss	DAT_80063314	lw	gp	manual-decoded	reviewed	vs.main asm review
 VS.EXE	0x8001529c	0x4a9c		mips26	reachable-code	0x8002a360	load		jal		manual-decoded	reviewed	vs.main asm review
 VS.EXE	0x800152a8	0x4aa8		mips_gprel16	reachable-code	0x80063314	bss	DAT_80063314	lw	gp	manual-decoded	reviewed	vs.main asm review
@@ -8476,7 +8476,7 @@ VS.EXE	0x80015310	0x4b10		mips26	reachable-code	0x8002a360	load		jal		manual-dec
 VS.EXE	0x80015318	0x4b18		mips_gprel16	reachable-code	0x8006336c	bss	DAT_8006336c	lw	gp	manual-decoded	reviewed	vs.main asm review
 VS.EXE	0x80015320	0x4b20		mips26	reachable-code	0x8002a360	load		jal		manual-decoded	reviewed	vs.main asm review
 VS.EXE	0x8001532c	0x4b2c		mips26	reachable-code	0x80015ae8	load		j		manual-decoded	reviewed	vs.main asm review
-VS.EXE	0x80015334	0x4b34	0x80015338	mips_hi16_lo16	reachable-code	0x801603c0	bss	DAT_801603c0	lui+addiu		manual-decoded	reviewed	vs.main asm review
+VS.EXE	0x80015334	0x4b34	0x80015338	mips_hi16_lo16	reachable-code	0x801603c0	bss	pad_state	lui+addiu		manual-decoded	reviewed	vs.main asm review
 VS.EXE	0x80015340	0x4b40		mips_gprel16	reachable-code	0x80063314	bss	DAT_80063314	lw	gp	manual-decoded	reviewed	vs.main asm review
 VS.EXE	0x80015360	0x4b60		mips26	reachable-code	0x8002a360	load		jal		manual-decoded	reviewed	vs.main asm review
 VS.EXE	0x8001536c	0x4b6c		mips_gprel16	reachable-code	0x80063314	bss	DAT_80063314	lw	gp	manual-decoded	reviewed	vs.main asm review
@@ -8485,7 +8485,7 @@ VS.EXE	0x80015388	0x4b88		mips_gprel16	reachable-code	0x80063338	bss	DAT_8006333
 VS.EXE	0x800153a8	0x4ba8		mips26	reachable-code	0x800153b4	load		j		manual-decoded	reviewed	vs.main asm review
 VS.EXE	0x800153b4	0x4bb4		mips26	reachable-code	0x8002a360	load		jal		manual-decoded	reviewed	vs.main asm review
 VS.EXE	0x800153bc	0x4bbc		mips26	reachable-code	0x80015af0	load		j		manual-decoded	reviewed	vs.main asm review
-VS.EXE	0x800153c4	0x4bc4	0x800153c8	mips_hi16_lo16	reachable-code	0x801603c0	bss	DAT_801603c0	lui+addiu		manual-decoded	reviewed	vs.main asm review
+VS.EXE	0x800153c4	0x4bc4	0x800153c8	mips_hi16_lo16	reachable-code	0x801603c0	bss	pad_state	lui+addiu		manual-decoded	reviewed	vs.main asm review
 VS.EXE	0x800153d0	0x4bd0		mips_gprel16	reachable-code	0x80063314	bss	DAT_80063314	lw	gp	manual-decoded	reviewed	vs.main asm review
 VS.EXE	0x800153f0	0x4bf0		mips26	reachable-code	0x8002a360	load		jal		manual-decoded	reviewed	vs.main asm review
 VS.EXE	0x800153f8	0x4bf8		mips26	reachable-code	0x80015af4	load		j		manual-decoded	reviewed	vs.main asm review
@@ -8496,14 +8496,14 @@ VS.EXE	0x800154c4	0x4cc4		mips_gprel16	reachable-code	0x80063364	bss	DAT_8006336
 VS.EXE	0x800154c8	0x4cc8		mips_gprel16	reachable-code	0x80063314	bss	DAT_80063314	sw	gp	manual-decoded	reviewed	vs.main asm review
 VS.EXE	0x800154e8	0x4ce8		mips_gprel16	reachable-code	0x80063324	bss	DAT_80063324	sw	gp	manual-decoded	reviewed	vs.main asm review
 VS.EXE	0x800154ec	0x4cec		mips26	reachable-code	0x80015338	load		j		manual-decoded	reviewed	vs.main asm review
-VS.EXE	0x800154f0	0x4cf0	0x80015338	mips_hi16_lo16	reachable-code	0x801603c0	bss	DAT_801603c0	lui+addiu		manual-decoded	reviewed	vs.frame_80015020 alternate delay-slot high; jump 0x800154ec reaches existing low without clobber
+VS.EXE	0x800154f0	0x4cf0	0x80015338	mips_hi16_lo16	reachable-code	0x801603c0	bss	pad_state	lui+addiu		manual-decoded	reviewed	vs.frame_80015020 alternate delay-slot high; jump 0x800154ec reaches existing low without clobber
 VS.EXE	0x800154fc	0x4cfc		mips_gprel16	reachable-code	0x80063324	bss	DAT_80063324	sw	gp	manual-decoded	reviewed	vs.main asm review
 VS.EXE	0x80015500	0x4d00		mips26	reachable-code	0x80015514	load		j		manual-decoded	reviewed	vs.main asm review
 VS.EXE	0x8001550c	0x4d0c		mips_gprel16	reachable-code	0x80063324	bss	DAT_80063324	sw	gp	manual-decoded	reviewed	vs.main asm review
 VS.EXE	0x80015514	0x4d14		mips26	reachable-code	0x8001336c	load		jal		manual-decoded	reviewed	vs.main asm review
 VS.EXE	0x8001551c	0x4d1c		mips26	reachable-code	0x800155e8	load		j		manual-decoded	reviewed	vs.main asm review
-VS.EXE	0x80015520	0x4d20	0x800155e8	mips_hi16_lo16	reachable-code	0x801603c0	bss	DAT_801603c0	lui+addiu		manual-decoded	reviewed	vs.frame_80015020 alternate delay-slot high; jump 0x8001551c reaches existing low without clobber
-VS.EXE	0x80015524	0x4d24	0x80015528	mips_hi16_lo16	reachable-code	0x801603c0	bss	DAT_801603c0	lui+addiu		manual-decoded	reviewed	vs.main asm review
+VS.EXE	0x80015520	0x4d20	0x800155e8	mips_hi16_lo16	reachable-code	0x801603c0	bss	pad_state	lui+addiu		manual-decoded	reviewed	vs.frame_80015020 alternate delay-slot high; jump 0x8001551c reaches existing low without clobber
+VS.EXE	0x80015524	0x4d24	0x80015528	mips_hi16_lo16	reachable-code	0x801603c0	bss	pad_state	lui+addiu		manual-decoded	reviewed	vs.main asm review
 VS.EXE	0x80015530	0x4d30		mips_gprel16	reachable-code	0x80063314	bss	DAT_80063314	lw	gp	manual-decoded	reviewed	vs.main asm review
 VS.EXE	0x80015550	0x4d50		mips26	reachable-code	0x8002a360	load		jal		manual-decoded	reviewed	vs.main asm review
 VS.EXE	0x8001555c	0x4d5c		mips_gprel16	reachable-code	0x80063314	bss	DAT_80063314	lw	gp	manual-decoded	reviewed	vs.main asm review
@@ -8513,37 +8513,37 @@ VS.EXE	0x80015598	0x4d98		mips_gprel16	reachable-code	0x80063314	bss	DAT_8006331
 VS.EXE	0x8001559c	0x4d9c		mips_gprel16	reachable-code	0x80063324	bss	DAT_80063324	sw	gp	manual-decoded	reviewed	vs.main asm review
 VS.EXE	0x800155a0	0x4da0		mips26	reachable-code	0x8001336c	load		jal		manual-decoded	reviewed	vs.main asm review
 VS.EXE	0x800155a8	0x4da8		mips26	reachable-code	0x800155e8	load		j		manual-decoded	reviewed	vs.main asm review
-VS.EXE	0x800155ac	0x4dac	0x800155e8	mips_hi16_lo16	reachable-code	0x801603c0	bss	DAT_801603c0	lui+addiu		manual-decoded	reviewed	vs.frame_80015020 alternate delay-slot high; jump 0x800155a8 reaches existing low without clobber
+VS.EXE	0x800155ac	0x4dac	0x800155e8	mips_hi16_lo16	reachable-code	0x801603c0	bss	pad_state	lui+addiu		manual-decoded	reviewed	vs.frame_80015020 alternate delay-slot high; jump 0x800155a8 reaches existing low without clobber
 VS.EXE	0x800155b8	0x4db8		mips26	reachable-code	0x8002a360	load		jal		manual-decoded	reviewed	vs.main asm review
 VS.EXE	0x800155c4	0x4dc4		mips_gprel16	reachable-code	0x80063314	bss	DAT_80063314	lw	gp	manual-decoded	reviewed	vs.main asm review
 VS.EXE	0x800155d4	0x4dd4		mips26	reachable-code	0x8002a360	load		jal		manual-decoded	reviewed	vs.main asm review
 VS.EXE	0x800155dc	0x4ddc		mips26	reachable-code	0x80015af0	load		j		manual-decoded	reviewed	vs.main asm review
-VS.EXE	0x800155e4	0x4de4	0x800155e8	mips_hi16_lo16	reachable-code	0x801603c0	bss	DAT_801603c0	lui+addiu		manual-decoded	reviewed	vs.main asm review
+VS.EXE	0x800155e4	0x4de4	0x800155e8	mips_hi16_lo16	reachable-code	0x801603c0	bss	pad_state	lui+addiu		manual-decoded	reviewed	vs.main asm review
 VS.EXE	0x800155f0	0x4df0		mips_gprel16	reachable-code	0x80063314	bss	DAT_80063314	lw	gp	manual-decoded	reviewed	vs.main asm review
-VS.EXE	0x80015604	0x4e04	0x80015684	mips_hi16_lo16	reachable-code	0x801603c0	bss	DAT_801603c0	lui+addiu		manual-decoded	reviewed	vs.frame_80015020 alternate delay-slot high; taken 0x80015600 reaches existing low without clobber
+VS.EXE	0x80015604	0x4e04	0x80015684	mips_hi16_lo16	reachable-code	0x801603c0	bss	pad_state	lui+addiu		manual-decoded	reviewed	vs.frame_80015020 alternate delay-slot high; taken 0x80015600 reaches existing low without clobber
 VS.EXE	0x80015624	0x4e24	0x8001562c	mips_hi16_lo16	reachable-code	0x800633b0	bss	DAT_800633b0	lui+addiu		manual-decoded	reviewed	vs.main asm review
 VS.EXE	0x80015628	0x4e28		mips_gprel16	reachable-code	0x80063324	bss	DAT_80063324	lw	gp	manual-decoded	reviewed	vs.main asm review
 VS.EXE	0x80015670	0x4e70		mips_gprel16	reachable-code	0x80063314	bss	DAT_80063314	lhu	gp	manual-decoded	reviewed	vs.main asm review
-VS.EXE	0x80015680	0x4e80	0x80015684	mips_hi16_lo16	reachable-code	0x801603c0	bss	DAT_801603c0	lui+addiu		manual-decoded	reviewed	vs.main asm review
+VS.EXE	0x80015680	0x4e80	0x80015684	mips_hi16_lo16	reachable-code	0x801603c0	bss	pad_state	lui+addiu		manual-decoded	reviewed	vs.main asm review
 VS.EXE	0x8001568c	0x4e8c		mips_gprel16	reachable-code	0x80063314	bss	DAT_80063314	lw	gp	manual-decoded	reviewed	vs.main asm review
-VS.EXE	0x800156a0	0x4ea0	0x800156d4	mips_hi16_lo16	reachable-code	0x801603c0	bss	DAT_801603c0	lui+addiu		manual-decoded	reviewed	vs.frame_80015020 alternate delay-slot high; taken 0x8001569c reaches existing low without clobber
-VS.EXE	0x800156b8	0x4eb8	0x800156d4	mips_hi16_lo16	reachable-code	0x801603c0	bss	DAT_801603c0	lui+addiu		manual-decoded	reviewed	vs.frame_80015020 alternate delay-slot high; taken 0x800156b4 reaches existing low without clobber
+VS.EXE	0x800156a0	0x4ea0	0x800156d4	mips_hi16_lo16	reachable-code	0x801603c0	bss	pad_state	lui+addiu		manual-decoded	reviewed	vs.frame_80015020 alternate delay-slot high; taken 0x8001569c reaches existing low without clobber
+VS.EXE	0x800156b8	0x4eb8	0x800156d4	mips_hi16_lo16	reachable-code	0x801603c0	bss	pad_state	lui+addiu		manual-decoded	reviewed	vs.frame_80015020 alternate delay-slot high; taken 0x800156b4 reaches existing low without clobber
 VS.EXE	0x800156c8	0x4ec8		mips26	reachable-code	0x8002a360	load		jal		manual-decoded	reviewed	vs.main asm review
-VS.EXE	0x800156d0	0x4ed0	0x800156d4	mips_hi16_lo16	reachable-code	0x801603c0	bss	DAT_801603c0	lui+addiu		manual-decoded	reviewed	vs.main asm review
+VS.EXE	0x800156d0	0x4ed0	0x800156d4	mips_hi16_lo16	reachable-code	0x801603c0	bss	pad_state	lui+addiu		manual-decoded	reviewed	vs.main asm review
 VS.EXE	0x800156dc	0x4edc		mips_gprel16	reachable-code	0x80063314	bss	DAT_80063314	lw	gp	manual-decoded	reviewed	vs.main asm review
 VS.EXE	0x800156f4	0x4ef4		mips_gprel16	reachable-code	0x80063228	load	DAT_80063228	lw	gp	manual-decoded	reviewed	vs.main asm review
 VS.EXE	0x800156f8	0x4ef8		mips_gprel16	reachable-code	0x80063338	bss	DAT_80063338	lw	gp	manual-decoded	reviewed	vs.main asm review
 VS.EXE	0x80015718	0x4f18		mips26	reachable-code	0x80015728	load		j		manual-decoded	reviewed	vs.main asm review
 VS.EXE	0x80015728	0x4f28		mips26	reachable-code	0x8002a360	load		jal		manual-decoded	reviewed	vs.main asm review
 VS.EXE	0x80015730	0x4f30		mips26	reachable-code	0x80015af0	load		j		manual-decoded	reviewed	vs.main asm review
-VS.EXE	0x80015738	0x4f38	0x8001573c	mips_hi16_lo16	reachable-code	0x801603c0	bss	DAT_801603c0	lui+addiu		manual-decoded	reviewed	vs.main asm review
+VS.EXE	0x80015738	0x4f38	0x8001573c	mips_hi16_lo16	reachable-code	0x801603c0	bss	pad_state	lui+addiu		manual-decoded	reviewed	vs.main asm review
 VS.EXE	0x80015744	0x4f44		mips_gprel16	reachable-code	0x80063314	bss	DAT_80063314	lw	gp	manual-decoded	reviewed	vs.main asm review
 VS.EXE	0x8001574c	0x4f4c		mips26	reachable-code	0x8002a360	load		jal		manual-decoded	reviewed	vs.main asm review
 VS.EXE	0x80015758	0x4f58		mips_gprel16	reachable-code	0x80063314	bss	DAT_80063314	lw	gp	manual-decoded	reviewed	vs.main asm review
 VS.EXE	0x80015760	0x4f60		mips26	reachable-code	0x8002a360	load		jal		manual-decoded	reviewed	vs.main asm review
 VS.EXE	0x8001576c	0x4f6c		mips_gprel16	reachable-code	0x80063314	bss	DAT_80063314	lw	gp	manual-decoded	reviewed	vs.main asm review
 VS.EXE	0x80015774	0x4f74		mips26	reachable-code	0x80015ae8	load		j		manual-decoded	reviewed	vs.main asm review
-VS.EXE	0x8001577c	0x4f7c	0x80015780	mips_hi16_lo16	reachable-code	0x801603c0	bss	DAT_801603c0	lui+addiu		manual-decoded	reviewed	vs.main asm review
+VS.EXE	0x8001577c	0x4f7c	0x80015780	mips_hi16_lo16	reachable-code	0x801603c0	bss	pad_state	lui+addiu		manual-decoded	reviewed	vs.main asm review
 VS.EXE	0x8001578c	0x4f8c		mips_gprel16	reachable-code	0x80063314	bss	DAT_80063314	lw	gp	manual-decoded	reviewed	vs.main asm review
 VS.EXE	0x80015798	0x4f98		mips26	reachable-code	0x8002a360	load		jal		manual-decoded	reviewed	vs.main asm review
 VS.EXE	0x800157a4	0x4fa4		mips_gprel16	reachable-code	0x80063314	bss	DAT_80063314	lw	gp	manual-decoded	reviewed	vs.main asm review
@@ -8555,7 +8555,7 @@ VS.EXE	0x800157d8	0x4fd8		mips26	reachable-code	0x8002a360	load		jal		manual-dec
 VS.EXE	0x800157e4	0x4fe4		mips_gprel16	reachable-code	0x80063314	bss	DAT_80063314	lw	gp	manual-decoded	reviewed	vs.main asm review
 VS.EXE	0x800157ec	0x4fec		mips26	reachable-code	0x8002a360	load		jal		manual-decoded	reviewed	vs.main asm review
 VS.EXE	0x800157f4	0x4ff4		mips26	reachable-code	0x80015ae4	load		j		manual-decoded	reviewed	vs.main asm review
-VS.EXE	0x800157fc	0x4ffc	0x80015800	mips_hi16_lo16	reachable-code	0x801603c0	bss	DAT_801603c0	lui+addiu		manual-decoded	reviewed	vs.main asm review
+VS.EXE	0x800157fc	0x4ffc	0x80015800	mips_hi16_lo16	reachable-code	0x801603c0	bss	pad_state	lui+addiu		manual-decoded	reviewed	vs.main asm review
 VS.EXE	0x80015808	0x5008		mips_gprel16	reachable-code	0x80063314	bss	DAT_80063314	lw	gp	manual-decoded	reviewed	vs.main asm review
 VS.EXE	0x8001582c	0x502c		mips26	reachable-code	0x8002a360	load		jal		manual-decoded	reviewed	vs.main asm review
 VS.EXE	0x80015838	0x5038		mips_gprel16	reachable-code	0x80063314	bss	DAT_80063314	lw	gp	manual-decoded	reviewed	vs.main asm review
@@ -8570,7 +8570,7 @@ VS.EXE	0x80015898	0x5098		mips_gprel16	reachable-code	0x80063314	bss	DAT_8006331
 VS.EXE	0x800158a4	0x50a4		mips26	reachable-code	0x8002a360	load		jal		manual-decoded	reviewed	vs.main asm review
 VS.EXE	0x800158b0	0x50b0		mips_gprel16	reachable-code	0x80063314	bss	DAT_80063314	lw	gp	manual-decoded	reviewed	vs.main asm review
 VS.EXE	0x800158d0	0x50d0		mips26	reachable-code	0x80015ad8	load		j		manual-decoded	reviewed	vs.main asm review
-VS.EXE	0x800158d8	0x50d8	0x800158dc	mips_hi16_lo16	reachable-code	0x801603c0	bss	DAT_801603c0	lui+addiu		manual-decoded	reviewed	vs.main asm review
+VS.EXE	0x800158d8	0x50d8	0x800158dc	mips_hi16_lo16	reachable-code	0x801603c0	bss	pad_state	lui+addiu		manual-decoded	reviewed	vs.main asm review
 VS.EXE	0x800158e8	0x50e8		mips_gprel16	reachable-code	0x80063314	bss	DAT_80063314	lw	gp	manual-decoded	reviewed	vs.main asm review
 VS.EXE	0x800158f4	0x50f4		mips26	reachable-code	0x8002a360	load		jal		manual-decoded	reviewed	vs.main asm review
 VS.EXE	0x80015900	0x5100		mips_gprel16	reachable-code	0x80063314	bss	DAT_80063314	lw	gp	manual-decoded	reviewed	vs.main asm review
@@ -8587,7 +8587,7 @@ VS.EXE	0x80015974	0x5174		mips_gprel16	reachable-code	0x80063314	bss	DAT_8006331
 VS.EXE	0x80015980	0x5180		mips26	reachable-code	0x8002a360	load		jal		manual-decoded	reviewed	vs.main asm review
 VS.EXE	0x8001598c	0x518c		mips_gprel16	reachable-code	0x80063314	bss	DAT_80063314	lw	gp	manual-decoded	reviewed	vs.main asm review
 VS.EXE	0x80015998	0x5198		mips26	reachable-code	0x80015ad8	load		j		manual-decoded	reviewed	vs.main asm review
-VS.EXE	0x800159a0	0x51a0	0x800159a4	mips_hi16_lo16	reachable-code	0x801603c0	bss	DAT_801603c0	lui+addiu		manual-decoded	reviewed	vs.main asm review
+VS.EXE	0x800159a0	0x51a0	0x800159a4	mips_hi16_lo16	reachable-code	0x801603c0	bss	pad_state	lui+addiu		manual-decoded	reviewed	vs.main asm review
 VS.EXE	0x800159ac	0x51ac		mips_gprel16	reachable-code	0x80063314	bss	DAT_80063314	lw	gp	manual-decoded	reviewed	vs.main asm review
 VS.EXE	0x800159d0	0x51d0		mips26	reachable-code	0x8002a360	load		jal		manual-decoded	reviewed	vs.main asm review
 VS.EXE	0x800159dc	0x51dc		mips_gprel16	reachable-code	0x80063314	bss	DAT_80063314	lw	gp	manual-decoded	reviewed	vs.main asm review
@@ -8627,7 +8627,7 @@ VS.EXE	0x80015b7c	0x537c		mips26	reachable-code	0x8002c2c4	load		jal		manual-dec
 VS.EXE	0x80015b84	0x5384		mips_gprel16	reachable-code	0x80063300	bss	DAT_80063300	lw	gp	manual-decoded	reviewed	vs.main asm review
 VS.EXE	0x80015ba4	0x53a4		mips26	reachable-code	0x8002bfe8	load		jal		manual-decoded	reviewed	vs.main asm review
 VS.EXE	0x80015bc8	0x53c8		mips26	reachable-code	0x80029b10	load		jal		manual-decoded	reviewed	vs.main asm review
-VS.EXE	0x80015bd0	0x53d0	0x80015bd4	mips_hi16_lo16	reachable-code	0x801603c0	bss	DAT_801603c0	lui+addiu		manual-decoded	reviewed	vs.main asm review
+VS.EXE	0x80015bd0	0x53d0	0x80015bd4	mips_hi16_lo16	reachable-code	0x801603c0	bss	pad_state	lui+addiu		manual-decoded	reviewed	vs.main asm review
 VS.EXE	0x80015c00	0x5400		mips26	reachable-code	0x80029f28	load		jal		manual-decoded	reviewed	vs.main asm review
 VS.EXE	0x80015c08	0x5408		mips_gprel16	reachable-code	0x80063324	bss	DAT_80063324	lw	gp	manual-decoded	reviewed	vs.main asm review
 VS.EXE	0x80015c28	0x5428		mips26	reachable-code	0x80028fcc	load		jal		manual-decoded	reviewed	vs.main asm review
@@ -8639,7 +8639,7 @@ VS.EXE	0x80015c84	0x5484		mips26	reachable-code	0x800291d4	load		jal		manual-dec
 VS.EXE	0x80015c8c	0x548c	0x80015c90	mips_hi16_lo16	reachable-code	0x8015c528	bss	DAT_8015c528	lui+addiu		manual-decoded	reviewed	vs.main asm review
 VS.EXE	0x80015ca4	0x54a4		mips_gprel16	reachable-code	0x80063224	load	DAT_80063224	sw	gp	manual-decoded	reviewed	vs.main asm review
 VS.EXE	0x80015ca8	0x54a8		mips26	reachable-code	0x800291d4	load		jal		manual-decoded	reviewed	vs.main asm review
-VS.EXE	0x80015cb8	0x54b8	0x80015cbc	mips_hi16_lo16	reachable-code	0x801624d0	bss	DAT_801624d0	lui+addiu		manual-decoded	reviewed	vs.main asm review
+VS.EXE	0x80015cb8	0x54b8	0x80015cbc	mips_hi16_lo16	reachable-code	0x801624d0	bss	vs_gfx_state	lui+addiu		manual-decoded	reviewed	vs.main asm review
 VS.EXE	0x80015ccc	0x54cc		mips_gprel16	reachable-code	0x80063224	load	DAT_80063224	sw	gp	manual-decoded	reviewed	vs.main asm review
 VS.EXE	0x80015d18	0x5518	0x80015d1c	mips_hi16_lo16	reachable-code	0x8015d8b0	bss	DAT_8015d8b0	lui+addiu		manual-decoded	reviewed	vs.main asm review
 VS.EXE	0x80015d18	0x5518	0x80015d5c	mips_hi16_lo16	reachable-code	0x8015d8b0	bss	DAT_8015d8b0	lui+addiu		manual-decoded	reviewed	vs.main asm review
@@ -8651,7 +8651,7 @@ VS.EXE	0x80015d6c	0x556c		mips26	reachable-code	0x80044024	load		jal		manual-dec
 VS.EXE	0x80015d88	0x5588		mips_gprel16	reachable-code	0x80063220	load	DAT_80063220	sw	gp	manual-decoded	reviewed	vs.main asm review
 VS.EXE	0x80015d98	0x5598		mips_gprel16	reachable-code	0x80063220	load	DAT_80063220	sw	gp	manual-decoded	reviewed	vs.main asm review
 VS.EXE	0x80015d9c	0x559c		mips26	reachable-code	0x8004692c	load		jal		manual-decoded	reviewed	vs.main asm review
-VS.EXE	0x80015dac	0x55ac	0x80015db0	mips_hi16_lo16	reachable-code	0x801624d0	bss	DAT_801624d0	lui+addiu		manual-decoded	reviewed	vs.main asm review
+VS.EXE	0x80015dac	0x55ac	0x80015db0	mips_hi16_lo16	reachable-code	0x801624d0	bss	vs_gfx_state	lui+addiu		manual-decoded	reviewed	vs.main asm review
 VS.EXE	0x80015dd0	0x55d0		mips26	reachable-code	0x80047bc0	load		jal		manual-decoded	reviewed	vs.main asm review
 VS.EXE	0x80015df4	0x55f4		mips26	reachable-code	0x800479f4	load		jal		manual-decoded	reviewed	vs.main asm review
 VS.EXE	0x80015e08	0x5608		mips26	reachable-code	0x80047984	load		jal		manual-decoded	reviewed	vs.main asm review
@@ -8669,14 +8669,14 @@ VS.EXE	0x80015eac	0x56ac		mips_gprel16	reachable-code	0x80063310	bss	DAT_8006331
 VS.EXE	0x80015eb0	0x56b0		mips26	reachable-code	0x800140d8	load		jal		manual-decoded	reviewed	vs.main asm review
 VS.EXE	0x80015eb8	0x56b8		mips26	reachable-code	0x800352cc	load		jal		manual-decoded	reviewed	vs.main asm review
 VS.EXE	0x80015ec0	0x56c0		mips26	reachable-code	0x8002d710	load		jal		manual-decoded	reviewed	vs.main asm review
-VS.EXE	0x80015ed0	0x56d0	0x80015ed4	mips_hi16_lo16	reachable-code	0x801624d0	bss	DAT_801624d0	lui+addiu		manual-decoded	reviewed	vs.main asm review
+VS.EXE	0x80015ed0	0x56d0	0x80015ed4	mips_hi16_lo16	reachable-code	0x801624d0	bss	vs_gfx_state	lui+addiu		manual-decoded	reviewed	vs.main asm review
 VS.EXE	0x80015edc	0x56dc		mips_gprel16	reachable-code	0x80063338	bss	DAT_80063338	lw	gp	manual-decoded	reviewed	vs.main asm review
 VS.EXE	0x80015f04	0x5704		mips26	reachable-code	0x80016d94	load		jal		manual-decoded	reviewed	vs.main asm review
 VS.EXE	0x80015f0c	0x570c		mips26	reachable-code	0x80047390	load		jal		manual-decoded	reviewed	vs.main asm review
 VS.EXE	0x80015f14	0x5714		mips_gprel16	reachable-code	0x80063338	bss	DAT_80063338	lw	gp	manual-decoded	reviewed	vs.main asm review
-VS.EXE	0x80015f18	0x5718	0x80015f1c	mips_hi16_lo16	reachable-code	0x801603c0	bss	DAT_801603c0	lui+addiu		manual-decoded	reviewed	vs.main asm review
-VS.EXE	0x80015f18	0x5718	0x800160e8	mips_hi16_lo16	reachable-code	0x801603c0	bss	DAT_801603c0	lui+lw		manual-decoded	reviewed	vs.main asm review
-VS.EXE	0x80015f18	0x5718	0x8001610c	mips_hi16_lo16	reachable-code	0x801603c0	bss	DAT_801603c0	lui+lw		manual-decoded	reviewed	vs.main asm review
+VS.EXE	0x80015f18	0x5718	0x80015f1c	mips_hi16_lo16	reachable-code	0x801603c0	bss	pad_state	lui+addiu		manual-decoded	reviewed	vs.main asm review
+VS.EXE	0x80015f18	0x5718	0x800160e8	mips_hi16_lo16	reachable-code	0x801603c0	bss	pad_state	lui+lw		manual-decoded	reviewed	vs.main asm review
+VS.EXE	0x80015f18	0x5718	0x8001610c	mips_hi16_lo16	reachable-code	0x801603c0	bss	pad_state	lui+lw		manual-decoded	reviewed	vs.main asm review
 VS.EXE	0x80015f20	0x5720		mips26	reachable-code	0x800129e8	load		jal		manual-decoded	reviewed	vs.main asm review
 VS.EXE	0x80015f28	0x5728		mips26	reachable-code	0x80014634	load		jal		manual-decoded	reviewed	vs.main asm review
 VS.EXE	0x80015f30	0x5730		mips_gprel16	reachable-code	0x80063324	bss	DAT_80063324	lw	gp	manual-decoded	reviewed	vs.main asm review
@@ -8762,7 +8762,7 @@ VS.EXE	0x8001636c	0x5b6c		mips26	reachable-code	0x80031478	load		jal		manual-dec
 VS.EXE	0x80016374	0x5b74		mips26	reachable-code	0x8002dcd8	load		jal		manual-decoded	reviewed	vs.main asm review
 VS.EXE	0x80016380	0x5b80		mips26	reachable-code	0x80015020	load		jal		manual-decoded	reviewed	vs.main asm review
 VS.EXE	0x80016388	0x5b88		mips26	reachable-code	0x80013c5c	load		jal		manual-decoded	reviewed	vs.main asm review
-VS.EXE	0x80016390	0x5b90	0x80016394	mips_hi16_lo16	reachable-code	0x801624d0	bss	DAT_801624d0	lui+addiu		manual-decoded	reviewed	vs.main asm review
+VS.EXE	0x80016390	0x5b90	0x80016394	mips_hi16_lo16	reachable-code	0x801624d0	bss	vs_gfx_state	lui+addiu		manual-decoded	reviewed	vs.main asm review
 VS.EXE	0x80016420	0x5c20	0x8001642c	mips_hi16_lo16	reachable-code	0x80011050	load		lui+addiu		manual-decoded	reviewed	vs.main asm review
 VS.EXE	0x80016428	0x5c28		mips26	reachable-code	0x80046c48	load		jal		manual-decoded	reviewed	vs.main asm review
 VS.EXE	0x80016430	0x5c30	0x8001643c	mips_hi16_lo16	reachable-code	0x80011060	load		lui+addiu		manual-decoded	reviewed	vs.main asm review
@@ -8803,13 +8803,13 @@ VS.EXE	0x80016614	0x5e14		mips26	reachable-code	0x80035e68	load		jal		manual-dec
 VS.EXE	0x8001661c	0x5e1c		mips26	reachable-code	0x80035d6c	load		jal		manual-decoded	reviewed	vs.main asm review
 VS.EXE	0x80016624	0x5e24		mips26	reachable-code	0x8001381c	load		jal		manual-decoded	reviewed	vs.main asm review
 VS.EXE	0x80016630	0x5e30		mips_gprel16	reachable-code	0x80063324	bss	DAT_80063324	sw	gp	manual-decoded	reviewed	vs.main asm review
-VS.EXE	0x80016634	0x5e34	0x80016638	mips_hi16_lo16	reachable-code	0x801603c0	bss	DAT_801603c0	lui+addiu		manual-decoded	reviewed	vs.main asm review
+VS.EXE	0x80016634	0x5e34	0x80016638	mips_hi16_lo16	reachable-code	0x801603c0	bss	pad_state	lui+addiu		manual-decoded	reviewed	vs.main asm review
 VS.EXE	0x8001663c	0x5e3c		mips_gprel16	reachable-code	0x80063338	bss	DAT_80063338	lw	gp	manual-decoded	reviewed	vs.main asm review
 VS.EXE	0x80016648	0x5e48		mips_gprel16	reachable-code	0x80063338	bss	DAT_80063338	sw	gp	manual-decoded	reviewed	vs.main asm review
 VS.EXE	0x8001664c	0x5e4c		mips_gprel16	reachable-code	0x80063314	bss	DAT_80063314	sw	gp	manual-decoded	reviewed	vs.main asm review
 VS.EXE	0x80016650	0x5e50		mips26	reachable-code	0x80015020	load		jal		manual-decoded	reviewed	vs.main asm review
 VS.EXE	0x80016658	0x5e58		mips26	reachable-code	0x80047390	load		jal		manual-decoded	reviewed	vs.main asm review
-VS.EXE	0x80016668	0x5e68	0x8001666c	mips_hi16_lo16	reachable-code	0x801603c0	bss	DAT_801603c0	lui+addiu		manual-decoded	reviewed	vs.main asm review
+VS.EXE	0x80016668	0x5e68	0x8001666c	mips_hi16_lo16	reachable-code	0x801603c0	bss	pad_state	lui+addiu		manual-decoded	reviewed	vs.main asm review
 VS.EXE	0x80016670	0x5e70		mips26	reachable-code	0x8001c530	load		jal		manual-decoded	reviewed	vs.main asm review
 VS.EXE	0x80016680	0x5e80		mips_gprel16	reachable-code	0x80063324	bss	DAT_80063324	sw	gp	manual-decoded	reviewed	vs.main asm review
 VS.EXE	0x80016684	0x5e84		mips26	reachable-code	0x8001669c	load		j		manual-decoded	reviewed	vs.main asm review
@@ -8859,7 +8859,7 @@ VS.EXE	0x800168d0	0x60d0		mips26	reachable-code	0x800168b4	load		j		manual-decod
 VS.EXE	0x800168d8	0x60d8		mips26	reachable-code	0x80036314	load		jal		manual-decoded	reviewed	vs.main asm review
 VS.EXE	0x800168e0	0x60e0		mips26	reachable-code	0x80035dfc	load		jal		manual-decoded	reviewed	vs.main asm review
 VS.EXE	0x800168e8	0x60e8		mips26	reachable-code	0x80044de4	load		jal		manual-decoded	reviewed	vs.main asm review
-VS.EXE	0x800168ec	0x60ec	0x80016910	mips_hi16_lo16	reachable-code	0x801603c0	bss	DAT_801603c0	lui+addiu		manual-decoded	reviewed	vs.main asm review
+VS.EXE	0x800168ec	0x60ec	0x80016910	mips_hi16_lo16	reachable-code	0x801603c0	bss	pad_state	lui+addiu		manual-decoded	reviewed	vs.main asm review
 VS.EXE	0x80016900	0x6100	0x80016908	mips_hi16_lo16	reachable-code	0x80013868	load		lui+addiu		manual-decoded	reviewed	vs.main asm review
 VS.EXE	0x80016904	0x6104		mips26	reachable-code	0x80044d34	load		jal		manual-decoded	reviewed	vs.main asm review
 VS.EXE	0x80016914	0x6114		mips26	reachable-code	0x80044d74	load		jal		manual-decoded	reviewed	vs.main asm review
@@ -8927,19 +8927,19 @@ VS.EXE	0x80016be8	0x63e8		mips26	reachable-code	0x8003ae9c	load		jal		manual-dec
 VS.EXE	0x80016bf8	0x63f8		mips26	reachable-code	0x80043ff8	load		jal		manual-decoded	reviewed	vs.main asm review
 VS.EXE	0x80016c00	0x6400		mips26	reachable-code	0x80047014	load		jal		manual-decoded	reviewed	vs.main asm review
 VS.EXE	0x80016c08	0x6408		mips26	reachable-code	0x80044dd4	load		jal		manual-decoded	reviewed	vs.main asm review
-VS.EXE	0x80016c10	0x6410	0x80016c14	mips_hi16_lo16	reachable-code	0x80160404	bss	DAT_801603c0	lui+lw		manual-decoded	reviewed	vs.main asm review
+VS.EXE	0x80016c10	0x6410	0x80016c14	mips_hi16_lo16	reachable-code	0x80160404	bss	pad_state	lui+lw		manual-decoded	reviewed	vs.main asm review
 VS.EXE	0x80016c18	0x6418		mips26	reachable-code	0x80044d44	load		jal		manual-decoded	reviewed	vs.main asm review
 VS.EXE	0x80016c20	0x6420		mips26	reachable-code	0x80044de4	load		jal		manual-decoded	reviewed	vs.main asm review
 VS.EXE	0x80016c28	0x6428		mips26	reachable-code	0x80044328	load		jal		manual-decoded	reviewed	vs.main asm review
 VS.EXE	0x80016c68	0x6468		mips26	reachable-code	0x800427dc	load		jal		manual-decoded	reviewed	vs.gfx_80016ca8 asm review
 VS.EXE	0x80016c7c	0x647c		mips26	reachable-code	0x8004280c	load		jal		manual-decoded	reviewed	vs.gfx_80016ca8 asm review
 VS.EXE	0x80016c84	0x6484		mips26	reachable-code	0x800427fc	load		jal		manual-decoded	reviewed	vs.gfx_80016ca8 asm review
-VS.EXE	0x80016ce0	0x64e0	0x80016ce4	mips_hi16_lo16	reachable-code	0x801624d0	bss	DAT_801624d0	lui+addiu		manual-decoded	reviewed	vs.gfx_80016ca8 asm review
+VS.EXE	0x80016ce0	0x64e0	0x80016ce4	mips_hi16_lo16	reachable-code	0x801624d0	bss	vs_gfx_state	lui+addiu		manual-decoded	reviewed	vs.gfx_80016ca8 asm review
 VS.EXE	0x80016cf8	0x64f8		mips26	reachable-code	0x800464a4	load		jal		manual-decoded	reviewed	vs.gfx_80016ca8 asm review
 VS.EXE	0x80016d10	0x6510		mips26	reachable-code	0x80046558	load		jal		manual-decoded	reviewed	vs.gfx_80016ca8 asm review
 VS.EXE	0x80016d2c	0x652c		mips26	reachable-code	0x800464a4	load		jal		manual-decoded	reviewed	vs.gfx_80016ca8 asm review
 VS.EXE	0x80016d44	0x6544		mips26	reachable-code	0x80046558	load		jal		manual-decoded	reviewed	vs.gfx_80016ca8 asm review
-VS.EXE	0x80016dd4	0x65d4	0x80016dd8	mips_hi16_lo16	reachable-code	0x801624d0	bss	DAT_801624d0	lui+addiu		manual-decoded	reviewed	vs.gfx_80016ca8 asm review
+VS.EXE	0x80016dd4	0x65d4	0x80016dd8	mips_hi16_lo16	reachable-code	0x801624d0	bss	vs_gfx_state	lui+addiu		manual-decoded	reviewed	vs.gfx_80016ca8 asm review
 VS.EXE	0x80016dec	0x65ec		mips26	reachable-code	0x800464a4	load		jal		manual-decoded	reviewed	vs.gfx_80016ca8 asm review
 VS.EXE	0x80016e08	0x6608		mips26	reachable-code	0x80046558	load		jal		manual-decoded	reviewed	vs.gfx_80016ca8 asm review
 VS.EXE	0x80016e24	0x6624		mips26	reachable-code	0x800464a4	load		jal		manual-decoded	reviewed	vs.gfx_80016ca8 asm review
@@ -8984,7 +8984,7 @@ VS.EXE	0x80017150	0x6950		mips26	reachable-code	0x8002ee90	load		jal		manual-dec
 VS.EXE	0x80017160	0x6960		mips26	reachable-code	0x80012c2c	load		jal		manual-decoded	reviewed	vs.menu_80016f10 asm review
 VS.EXE	0x80017168	0x6968		mips26	reachable-code	0x80047390	load		jal		manual-decoded	reviewed	vs.menu_80016f10 asm review
 VS.EXE	0x80017174	0x6974		mips26	reachable-code	0x8001381c	load		jal		manual-decoded	reviewed	vs.menu_80016f10 asm review
-VS.EXE	0x8001717c	0x697c	0x80017180	mips_hi16_lo16	reachable-code	0x801603c0	bss	DAT_801603c0	lui+addiu		manual-decoded	reviewed	vs.menu_80016f10 asm review
+VS.EXE	0x8001717c	0x697c	0x80017180	mips_hi16_lo16	reachable-code	0x801603c0	bss	pad_state	lui+addiu		manual-decoded	reviewed	vs.menu_80016f10 asm review
 VS.EXE	0x800171dc	0x69dc	0x800171e0	mips_hi16_lo16	reachable-code	0x80011160	load		lui+addiu		manual-decoded	reviewed	vs.menu_80016f10 asm review
 VS.EXE	0x800171fc	0x69fc	0x80017200	mips_hi16_lo16	reachable-code	0x80063330	bss	DAT_80063330	lui+lw		manual-decoded	reviewed	vs.menu_80016f10 asm review
 VS.EXE	0x80017210	0x6a10	0x80017214	mips_hi16_lo16	reachable-code	0x80063334	bss	DAT_80063334	lui+lw		manual-decoded	reviewed	vs.menu_80016f10 asm review
@@ -9127,9 +9127,9 @@ VS.EXE	0x800181f0	0x79f0		mips26	reachable-code	0x80047390	load		jal		manual-dec
 VS.EXE	0x800181f8	0x79f8	0x800181fc	mips_hi16_lo16	reachable-code	0x801624b8	bss	DAT_801624b8	lui+addiu		manual-decoded	reviewed	vs.team_80017c84 asm review
 VS.EXE	0x800182ac	0x7aac		mips26	reachable-code	0x8004763c	load		jal		manual-decoded	reviewed	vs.tim_80018240 asm review
 VS.EXE	0x800182c8	0x7ac8		mips26	reachable-code	0x8004763c	load		jal		manual-decoded	reviewed	vs.tim_80018240 asm review
-VS.EXE	0x80018300	0x7b00	0x80018308	mips_hi16_lo16	reachable-code	0x801603c0	bss	DAT_801603c0	lui+addiu		manual-decoded	reviewed	vs.team_800182ec asm review
+VS.EXE	0x80018300	0x7b00	0x80018308	mips_hi16_lo16	reachable-code	0x801603c0	bss	pad_state	lui+addiu		manual-decoded	reviewed	vs.team_800182ec asm review
 VS.EXE	0x8001830c	0x7b0c	0x80018310	mips_hi16_lo16	reachable-code	0x801624b8	bss	DAT_801624b8	lui+addiu		manual-decoded	reviewed	vs.team_800182ec asm review
-VS.EXE	0x8001835c	0x7b5c	0x8001836c	mips_hi16_lo16	reachable-code	0x801603c0	bss	DAT_801603c0	lui+sw		manual-decoded	reviewed	vs.team_800182ec asm review
+VS.EXE	0x8001835c	0x7b5c	0x8001836c	mips_hi16_lo16	reachable-code	0x801603c0	bss	pad_state	lui+sw		manual-decoded	reviewed	vs.team_800182ec asm review
 VS.EXE	0x80018368	0x7b68		mips26	reachable-code	0x8001837c	load		j		manual-decoded	reviewed	vs.team_800182ec asm review
 VS.EXE	0x800183ac	0x7bac		mips26	reachable-code	0x800183c8	load		j		manual-decoded	reviewed	vs.team_800182ec asm review
 VS.EXE	0x800183f4	0x7bf4		mips26	reachable-code	0x8001c8f8	load		jal		manual-decoded	reviewed	vs.team_800182ec asm review
@@ -9142,7 +9142,7 @@ VS.EXE	0x80018474	0x7c74		mips26	reachable-code	0x80018490	load		j		manual-decod
 VS.EXE	0x800184c0	0x7cc0		mips26	reachable-code	0x8001c8b8	load		jal		manual-decoded	reviewed	vs.team_800182ec asm review
 VS.EXE	0x800184d4	0x7cd4		mips26	reachable-code	0x800184e4	load		j		manual-decoded	reviewed	vs.team_800182ec asm review
 VS.EXE	0x80018504	0x7d04		mips26	reachable-code	0x8001c8b8	load		jal		manual-decoded	reviewed	vs.team_800182ec asm review
-VS.EXE	0x80018518	0x7d18	0x80018538	mips_hi16_lo16	reachable-code	0x801603c0	bss	DAT_801603c0	lui+lw		manual-decoded	reviewed	vs.team_800182ec asm review (delay-slot lui)
+VS.EXE	0x80018518	0x7d18	0x80018538	mips_hi16_lo16	reachable-code	0x801603c0	bss	pad_state	lui+lw		manual-decoded	reviewed	vs.team_800182ec asm review (delay-slot lui)
 VS.EXE	0x80018530	0x7d30		mips26	reachable-code	0x800185e8	load		j		manual-decoded	reviewed	vs.team_800182ec asm review
 VS.EXE	0x8001856c	0x7d6c		mips26	reachable-code	0x80018ac0	load		j		manual-decoded	reviewed	vs.team_800182ec asm review
 VS.EXE	0x8001857c	0x7d7c		mips26	reachable-code	0x80018ac0	load		j		manual-decoded	reviewed	vs.team_800182ec asm review
@@ -9150,7 +9150,7 @@ VS.EXE	0x80018594	0x7d94		mips26	reachable-code	0x80018ac0	load		j		manual-decod
 VS.EXE	0x800185a4	0x7da4		mips26	reachable-code	0x8001c8b8	load		jal		manual-decoded	reviewed	vs.team_800182ec asm review
 VS.EXE	0x800185e8	0x7de8		mips26	reachable-code	0x80017da4	load		jal		manual-decoded	reviewed	vs.team_800182ec asm review
 VS.EXE	0x800185f0	0x7df0		mips26	reachable-code	0x80018ac0	load		j		manual-decoded	reviewed	vs.team_800182ec asm review
-VS.EXE	0x800185f8	0x7df8	0x800185fc	mips_hi16_lo16	reachable-code	0x801603c0	bss	DAT_801603c0	lui+lw		manual-decoded	reviewed	vs.team_800182ec asm review
+VS.EXE	0x800185f8	0x7df8	0x800185fc	mips_hi16_lo16	reachable-code	0x801603c0	bss	pad_state	lui+lw		manual-decoded	reviewed	vs.team_800182ec asm review
 VS.EXE	0x8001862c	0x7e2c		mips26	reachable-code	0x80018ac0	load		j		manual-decoded	reviewed	vs.team_800182ec asm review
 VS.EXE	0x8001864c	0x7e4c		mips26	reachable-code	0x80018ac0	load		j		manual-decoded	reviewed	vs.team_800182ec asm review
 VS.EXE	0x80018678	0x7e78		mips26	reachable-code	0x80018ac0	load		j		manual-decoded	reviewed	vs.team_800182ec asm review
@@ -9272,10 +9272,10 @@ VS.EXE	0x80019aa0	0x92a0		mips26	reachable-code	0x80019ad0	load		j		manual-decod
 VS.EXE	0x80019ab8	0x92b8		mips26	reachable-code	0x80019acc	load		j		manual-decoded	reviewed	vs.pick_8001960c asm review
 VS.EXE	0x80019ad0	0x92d0		mips26	reachable-code	0x8001d39c	load		jal		manual-decoded	reviewed	vs.pick_8001960c asm review
 VS.EXE	0x80019ad8	0x92d8		mips26	reachable-code	0x80047390	load		jal		manual-decoded	reviewed	vs.pick_8001960c asm review
-VS.EXE	0x80019ae0	0x92e0	0x80019ae4	mips_hi16_lo16	reachable-code	0x801603c0	bss	DAT_801603c0	lui+addiu		manual-decoded	reviewed	vs.pick_8001960c asm review
-VS.EXE	0x80019ae0	0x92e0	0x80019afc	mips_hi16_lo16	reachable-code	0x801603c0	bss	DAT_801603c0	lui+sw		manual-decoded	reviewed	vs.pick_8001960c asm review
-VS.EXE	0x80019ae0	0x92e0	0x80019c78	mips_hi16_lo16	reachable-code	0x801603c0	bss	DAT_801603c0	lui+lw		manual-decoded	reviewed	vs.pick_8001960c asm review
-VS.EXE	0x80019ae0	0x92e0	0x80019d40	mips_hi16_lo16	reachable-code	0x801603c0	bss	DAT_801603c0	lui+lw		manual-decoded	reviewed	vs.pick_8001960c asm review
+VS.EXE	0x80019ae0	0x92e0	0x80019ae4	mips_hi16_lo16	reachable-code	0x801603c0	bss	pad_state	lui+addiu		manual-decoded	reviewed	vs.pick_8001960c asm review
+VS.EXE	0x80019ae0	0x92e0	0x80019afc	mips_hi16_lo16	reachable-code	0x801603c0	bss	pad_state	lui+sw		manual-decoded	reviewed	vs.pick_8001960c asm review
+VS.EXE	0x80019ae0	0x92e0	0x80019c78	mips_hi16_lo16	reachable-code	0x801603c0	bss	pad_state	lui+lw		manual-decoded	reviewed	vs.pick_8001960c asm review
+VS.EXE	0x80019ae0	0x92e0	0x80019d40	mips_hi16_lo16	reachable-code	0x801603c0	bss	pad_state	lui+lw		manual-decoded	reviewed	vs.pick_8001960c asm review
 VS.EXE	0x80019af8	0x92f8		mips26	reachable-code	0x80019b0c	load		j		manual-decoded	reviewed	vs.pick_8001960c asm review
 VS.EXE	0x80019b28	0x9328		mips26	reachable-code	0x8001c8f8	load		jal		manual-decoded	reviewed	vs.pick_8001960c asm review
 VS.EXE	0x80019b44	0x9344		mips26	reachable-code	0x80019b68	load		j		manual-decoded	reviewed	vs.pick_8001960c asm review
@@ -9425,8 +9425,8 @@ VS.EXE	0x8001ab94	0xa394		mips26	reachable-code	0x8001abcc	load		j		manual-decod
 VS.EXE	0x8001aba4	0xa3a4		mips26	reachable-code	0x8001abcc	load		j		manual-decoded	reviewed	vs.card_8001a124 asm review
 VS.EXE	0x8001abb4	0xa3b4		mips26	reachable-code	0x8001abcc	load		j		manual-decoded	reviewed	vs.card_8001a124 asm review
 VS.EXE	0x8001abcc	0xa3cc		mips26	reachable-code	0x8001a35c	load		jal		manual-decoded	reviewed	vs.card_8001a124 asm review
-VS.EXE	0x8001ac0c	0xa40c	0x8001ac14	mips_hi16_lo16	reachable-code	0x801603c0	bss	DAT_801603c0	lui+addiu		manual-decoded	reviewed	vs.card_8001a124 asm review
-VS.EXE	0x8001ac0c	0xa40c	0x8001ac40	mips_hi16_lo16	reachable-code	0x801603c0	bss	DAT_801603c0	lui+sw		manual-decoded	reviewed	vs.card_8001a124 asm review
+VS.EXE	0x8001ac0c	0xa40c	0x8001ac14	mips_hi16_lo16	reachable-code	0x801603c0	bss	pad_state	lui+addiu		manual-decoded	reviewed	vs.card_8001a124 asm review
+VS.EXE	0x8001ac0c	0xa40c	0x8001ac40	mips_hi16_lo16	reachable-code	0x801603c0	bss	pad_state	lui+sw		manual-decoded	reviewed	vs.card_8001a124 asm review
 VS.EXE	0x8001ac3c	0xa43c		mips26	reachable-code	0x8001ac50	load		j		manual-decoded	reviewed	vs.card_8001a124 asm review
 VS.EXE	0x8001ac6c	0xa46c		mips26	reachable-code	0x8001c978	load		jal		manual-decoded	reviewed	vs.card_8001a124 asm review
 VS.EXE	0x8001ac74	0xa474		mips26	reachable-code	0x8001ace8	load		j		manual-decoded	reviewed	vs.card_8001a124 asm review
@@ -9436,8 +9436,8 @@ VS.EXE	0x8001ac9c	0xa49c		mips26	reachable-code	0x8001c8b8	load		jal		manual-dec
 VS.EXE	0x8001acc8	0xa4c8		mips26	reachable-code	0x8001c8b8	load		jal		manual-decoded	reviewed	vs.card_8001a124 asm review
 VS.EXE	0x8001acd8	0xa4d8		mips26	reachable-code	0x800204b0	load		jal		manual-decoded	reviewed	vs.card_8001a124 asm review
 VS.EXE	0x8001ace0	0xa4e0		mips26	reachable-code	0x8001ac2c	load		j		manual-decoded	reviewed	vs.card_8001a124 asm review
-VS.EXE	0x8001ad30	0xa530	0x8001ad38	mips_hi16_lo16	reachable-code	0x801603c0	bss	DAT_801603c0	lui+addiu		manual-decoded	reviewed	vs.card_8001a124 asm review
-VS.EXE	0x8001ad30	0xa530	0x8001ad58	mips_hi16_lo16	reachable-code	0x801603c0	bss	DAT_801603c0	lui+sw		manual-decoded	reviewed	vs.card_8001a124 asm review
+VS.EXE	0x8001ad30	0xa530	0x8001ad38	mips_hi16_lo16	reachable-code	0x801603c0	bss	pad_state	lui+addiu		manual-decoded	reviewed	vs.card_8001a124 asm review
+VS.EXE	0x8001ad30	0xa530	0x8001ad58	mips_hi16_lo16	reachable-code	0x801603c0	bss	pad_state	lui+sw		manual-decoded	reviewed	vs.card_8001a124 asm review
 VS.EXE	0x8001ad54	0xa554		mips26	reachable-code	0x8001ad68	load		j		manual-decoded	reviewed	vs.card_8001a124 asm review
 VS.EXE	0x8001ad84	0xa584		mips26	reachable-code	0x8001c978	load		jal		manual-decoded	reviewed	vs.card_8001a124 asm review
 VS.EXE	0x8001ad98	0xa598		mips26	reachable-code	0x8001ae4c	load		j		manual-decoded	reviewed	vs.card_8001a124 asm review
@@ -9458,9 +9458,9 @@ VS.EXE	0x8001af38	0xa738		mips26	reachable-code	0x80044e04	load		jal		manual-dec
 VS.EXE	0x8001af48	0xa748		mips26	reachable-code	0x80044e14	load		jal		manual-decoded	reviewed	vs.card_8001a124 asm review
 VS.EXE	0x8001af58	0xa758		mips26	reachable-code	0x8001afa4	load		j		manual-decoded	reviewed	vs.card_8001a124 asm review
 VS.EXE	0x8001af90	0xa790		mips26	reachable-code	0x80044e34	load		jal		manual-decoded	reviewed	vs.card_8001a124 asm review
-VS.EXE	0x8001afe4	0xa7e4	0x8001aff8	mips_hi16_lo16	reachable-code	0x801603c0	bss	DAT_801603c0	lui+addiu		manual-decoded	reviewed	vs.card_8001a124 asm review
-VS.EXE	0x8001afe4	0xa7e4	0x8001b030	mips_hi16_lo16	reachable-code	0x801603c0	bss	DAT_801603c0	lui+sw		manual-decoded	reviewed	vs.card_8001a124 asm review
-VS.EXE	0x8001afe4	0xa7e4	0x8001b0c4	mips_hi16_lo16	reachable-code	0x801603c0	bss	DAT_801603c0	lui+sw		manual-decoded	reviewed	vs.card_8001a124 asm review
+VS.EXE	0x8001afe4	0xa7e4	0x8001aff8	mips_hi16_lo16	reachable-code	0x801603c0	bss	pad_state	lui+addiu		manual-decoded	reviewed	vs.card_8001a124 asm review
+VS.EXE	0x8001afe4	0xa7e4	0x8001b030	mips_hi16_lo16	reachable-code	0x801603c0	bss	pad_state	lui+sw		manual-decoded	reviewed	vs.card_8001a124 asm review
+VS.EXE	0x8001afe4	0xa7e4	0x8001b0c4	mips_hi16_lo16	reachable-code	0x801603c0	bss	pad_state	lui+sw		manual-decoded	reviewed	vs.card_8001a124 asm review
 VS.EXE	0x8001b02c	0xa82c		mips26	reachable-code	0x8001b060	load		j		manual-decoded	reviewed	vs.card_8001a124 asm review
 VS.EXE	0x8001b034	0xa834		mips26	reachable-code	0x8001c978	load		jal		manual-decoded	reviewed	vs.card_8001a124 asm review
 VS.EXE	0x8001b03c	0xa83c		mips26	reachable-code	0x8001b148	load		j		manual-decoded	reviewed	vs.card_8001a124 asm review
@@ -9566,7 +9566,7 @@ VS.EXE	0x8001bc10	0xb410		mips26	reachable-code	0x80047390	load		jal		manual-dec
 VS.EXE	0x8001bc24	0xb424		mips26	reachable-code	0x8002ee90	load		jal		manual-decoded	reviewed	vs.card_8001a124 asm review
 VS.EXE	0x8001bc34	0xb434		mips26	reachable-code	0x80012c2c	load		jal		manual-decoded	reviewed	vs.card_8001a124 asm review
 VS.EXE	0x8001bc3c	0xb43c		mips26	reachable-code	0x80047390	load		jal		manual-decoded	reviewed	vs.card_8001a124 asm review
-VS.EXE	0x8001bc48	0xb448	0x8001bc4c	mips_hi16_lo16	reachable-code	0x801603c0	bss	DAT_801603c0	lui+addiu		manual-decoded	reviewed	vs.card_8001a124 asm review
+VS.EXE	0x8001bc48	0xb448	0x8001bc4c	mips_hi16_lo16	reachable-code	0x801603c0	bss	pad_state	lui+addiu		manual-decoded	reviewed	vs.card_8001a124 asm review
 VS.EXE	0x8001bca0	0xb4a0		mips26	reachable-code	0x8001ad18	load		jal		manual-decoded	reviewed	vs.card_8001a124 asm review
 VS.EXE	0x8001bccc	0xb4cc		mips_gprel16	reachable-code	0x80063380	bss	DAT_80063380	lbu	gp	manual-decoded	reviewed	vs.card_8001a124 asm review
 VS.EXE	0x8001bce4	0xb4e4		mips26	reachable-code	0x8001c0f4	load		j		manual-decoded	reviewed	vs.card_8001a124 asm review
@@ -9578,7 +9578,7 @@ VS.EXE	0x8001bd24	0xb524		mips26	reachable-code	0x80035e68	load		jal		manual-dec
 VS.EXE	0x8001bd2c	0xb52c		mips26	reachable-code	0x80035d6c	load		jal		manual-decoded	reviewed	vs.card_8001a124 asm review
 VS.EXE	0x8001bd40	0xb540		mips26	reachable-code	0x8001aa84	load		jal		manual-decoded	reviewed	vs.card_8001a124 asm review
 VS.EXE	0x8001bd68	0xb568		mips26	reachable-code	0x8001c0f4	load		j		manual-decoded	reviewed	vs.card_8001a124 asm review
-VS.EXE	0x8001bd80	0xb580	0x8001bd88	mips_hi16_lo16	reachable-code	0x801603c0	bss	DAT_801603c0	lui+addiu		manual-decoded	reviewed	vs.card_8001a124 asm review
+VS.EXE	0x8001bd80	0xb580	0x8001bd88	mips_hi16_lo16	reachable-code	0x801603c0	bss	pad_state	lui+addiu		manual-decoded	reviewed	vs.card_8001a124 asm review
 VS.EXE	0x8001bdb0	0xb5b0		mips26	reachable-code	0x8001a5b4	load		jal		manual-decoded	reviewed	vs.card_8001a124 asm review
 VS.EXE	0x8001bddc	0xb5dc	0x8001bde0	mips_hi16_lo16	reachable-code	0x801a0a30	bss	DAT_801a0a30	lui+addiu		manual-decoded	reviewed	vs.card_8001a124 asm review
 VS.EXE	0x8001bde4	0xb5e4		mips26	reachable-code	0x80045924	load		jal		manual-decoded	reviewed	vs.card_8001a124 asm review
@@ -9615,15 +9615,15 @@ VS.EXE	0x8001c0d8	0xb8d8		mips26	reachable-code	0x8001c0e8	load		j		manual-decod
 VS.EXE	0x8001c0e4	0xb8e4		mips_gprel16	reachable-code	0x80063381	bss	DAT_80063381	sb	gp	manual-decoded	reviewed	vs.card_8001a124 asm review
 VS.EXE	0x8001c0f4	0xb8f4		mips26	reachable-code	0x800204b0	load		jal		manual-decoded	reviewed	vs.card_8001a124 asm review
 VS.EXE	0x8001c0fc	0xb8fc		mips26	reachable-code	0x800204b0	load		jal		manual-decoded	reviewed	vs.card_8001a124 asm review
-VS.EXE	0x8001c108	0xb908	0x8001c10c	mips_hi16_lo16	reachable-code	0x801603c0	bss	DAT_801603c0	lui+addiu		manual-decoded	reviewed	vs.card_8001a124 asm review
-VS.EXE	0x8001c108	0xb908	0x8001c140	mips_hi16_lo16	reachable-code	0x801603c0	bss	DAT_801603c0	lui+addiu		manual-decoded	reviewed	vs.card_8001a124 asm review
-VS.EXE	0x8001c120	0xb920	0x8001c13c	mips_hi16_lo16	reachable-code	0x801603dc	bss	DAT_801603c0	lui+sw		manual-decoded	reviewed	vs.card_8001a124 asm review
-VS.EXE	0x8001c124	0xb924	0x8001c128	mips_hi16_lo16	reachable-code	0x801603dc	bss	DAT_801603c0	lui+lhu		manual-decoded	reviewed	vs.card_8001a124 asm review
-VS.EXE	0x8001c134	0xb934	0x8001c13c	mips_hi16_lo16	reachable-code	0x801603dc	bss	DAT_801603c0	lui+sw		manual-decoded	reviewed	vs.card_8001a124 asm review
+VS.EXE	0x8001c108	0xb908	0x8001c10c	mips_hi16_lo16	reachable-code	0x801603c0	bss	pad_state	lui+addiu		manual-decoded	reviewed	vs.card_8001a124 asm review
+VS.EXE	0x8001c108	0xb908	0x8001c140	mips_hi16_lo16	reachable-code	0x801603c0	bss	pad_state	lui+addiu		manual-decoded	reviewed	vs.card_8001a124 asm review
+VS.EXE	0x8001c120	0xb920	0x8001c13c	mips_hi16_lo16	reachable-code	0x801603dc	bss	pad_state	lui+sw		manual-decoded	reviewed	vs.card_8001a124 asm review
+VS.EXE	0x8001c124	0xb924	0x8001c128	mips_hi16_lo16	reachable-code	0x801603dc	bss	pad_state	lui+lhu		manual-decoded	reviewed	vs.card_8001a124 asm review
+VS.EXE	0x8001c134	0xb934	0x8001c13c	mips_hi16_lo16	reachable-code	0x801603dc	bss	pad_state	lui+sw		manual-decoded	reviewed	vs.card_8001a124 asm review
 VS.EXE	0x8001c138	0xb938		mips26	reachable-code	0x8001c170	load		j		manual-decoded	reviewed	vs.card_8001a124 asm review
-VS.EXE	0x8001c154	0xb954	0x8001c16c	mips_hi16_lo16	reachable-code	0x801603c8	bss	DAT_801603c0	lui+sw		manual-decoded	reviewed	vs.card_8001a124 asm review
-VS.EXE	0x8001c158	0xb958	0x8001c15c	mips_hi16_lo16	reachable-code	0x801603c8	bss	DAT_801603c0	lui+lhu		manual-decoded	reviewed	vs.card_8001a124 asm review
-VS.EXE	0x8001c168	0xb968	0x8001c16c	mips_hi16_lo16	reachable-code	0x801603c8	bss	DAT_801603c0	lui+sw		manual-decoded	reviewed	vs.card_8001a124 asm review
+VS.EXE	0x8001c154	0xb954	0x8001c16c	mips_hi16_lo16	reachable-code	0x801603c8	bss	pad_state	lui+sw		manual-decoded	reviewed	vs.card_8001a124 asm review
+VS.EXE	0x8001c158	0xb958	0x8001c15c	mips_hi16_lo16	reachable-code	0x801603c8	bss	pad_state	lui+lhu		manual-decoded	reviewed	vs.card_8001a124 asm review
+VS.EXE	0x8001c168	0xb968	0x8001c16c	mips_hi16_lo16	reachable-code	0x801603c8	bss	pad_state	lui+sw		manual-decoded	reviewed	vs.card_8001a124 asm review
 VS.EXE	0x8001c170	0xb970		mips26	reachable-code	0x8001c8f8	load		jal		manual-decoded	reviewed	vs.card_8001a124 asm review
 VS.EXE	0x8001c18c	0xb98c		mips26	reachable-code	0x8001bc6c	load		j		manual-decoded	reviewed	vs.card_8001a124 asm review
 VS.EXE	0x8001c1a0	0xb9a0		mips26	reachable-code	0x8001bc6c	load		j		manual-decoded	reviewed	vs.card_8001a124 asm review
@@ -9764,17 +9764,17 @@ VS.EXE	0x8001d0e4	0xc8e4		mips26	reachable-code	0x800363d0	load		jal		manual-dec
 VS.EXE	0x8001d0f4	0xc8f4		mips26	reachable-code	0x800363f8	load		jal		manual-decoded	reviewed	vs.cd_8001cb34 asm review
 VS.EXE	0x8001d144	0xc944	0x8001d148	mips_hi16_lo16	reachable-code	0x801a4670	bss	DAT_801a4590	lui+addiu		manual-decoded	reviewed	vs.cd_8001cb34 asm review
 VS.EXE	0x8001d178	0xc978		mips26	reachable-code	0x8002ece0	load		jal		manual-decoded	reviewed	vs.cd_8001cb34 asm review
-VS.EXE	0x8001d1c8	0xc9c8	0x8001d1cc	mips_hi16_lo16	reachable-code	0x801624d0	bss	DAT_801624d0	lui+addiu		manual-decoded	reviewed	vs.cd_8001cb34 asm review
-VS.EXE	0x8001d200	0xca00	0x8001d204	mips_hi16_lo16	reachable-code	0x8016a7bc	bss	DAT_801624d0	lui+addiu		manual-decoded	reviewed	vs.cd_8001cb34 asm review
+VS.EXE	0x8001d1c8	0xc9c8	0x8001d1cc	mips_hi16_lo16	reachable-code	0x801624d0	bss	vs_gfx_state	lui+addiu		manual-decoded	reviewed	vs.cd_8001cb34 asm review
+VS.EXE	0x8001d200	0xca00	0x8001d204	mips_hi16_lo16	reachable-code	0x8016a7bc	bss	vs_gfx_state	lui+addiu		manual-decoded	reviewed	vs.cd_8001cb34 asm review
 VS.EXE	0x8001d22c	0xca2c		mips26	reachable-code	0x8004787c	load		jal		manual-decoded	reviewed	vs.cd_8001cb34 asm review
-VS.EXE	0x8001d238	0xca38	0x8001d240	mips_hi16_lo16	reachable-code	0x8016a5b8	bss	DAT_801624d0	lui+addiu		manual-decoded	reviewed	vs.cd_8001cb34 asm review
+VS.EXE	0x8001d238	0xca38	0x8001d240	mips_hi16_lo16	reachable-code	0x8016a5b8	bss	vs_gfx_state	lui+addiu		manual-decoded	reviewed	vs.cd_8001cb34 asm review
 VS.EXE	0x8001d24c	0xca4c		mips26	reachable-code	0x8004787c	load		jal		manual-decoded	reviewed	vs.cd_8001cb34 asm review
 VS.EXE	0x8001d2a8	0xcaa8		mips26	reachable-code	0x80047390	load		jal		manual-decoded	reviewed	vs.cd_8001cb34 asm review
 VS.EXE	0x8001d2b0	0xcab0		mips26	reachable-code	0x80044024	load		jal		manual-decoded	reviewed	vs.cd_8001cb34 asm review
-VS.EXE	0x8001d2c0	0xcac0	0x8001d2c4	mips_hi16_lo16	reachable-code	0x801624d0	bss	DAT_801624d0	lui+addiu		manual-decoded	reviewed	vs.cd_8001cb34 asm review
+VS.EXE	0x8001d2c0	0xcac0	0x8001d2c4	mips_hi16_lo16	reachable-code	0x801624d0	bss	vs_gfx_state	lui+addiu		manual-decoded	reviewed	vs.cd_8001cb34 asm review
 VS.EXE	0x8001d2e4	0xcae4		mips26	reachable-code	0x80047bc0	load		jal		manual-decoded	reviewed	vs.cd_8001cb34 asm review
 VS.EXE	0x8001d308	0xcb08		mips26	reachable-code	0x800479f4	load		jal		manual-decoded	reviewed	vs.cd_8001cb34 asm review
-VS.EXE	0x8001d330	0xcb30	0x8001d334	mips_hi16_lo16	reachable-code	0x801624d0	bss	DAT_801624d0	lui+addiu		manual-decoded	reviewed	vs.cd_8001cb34 asm review
+VS.EXE	0x8001d330	0xcb30	0x8001d334	mips_hi16_lo16	reachable-code	0x801624d0	bss	vs_gfx_state	lui+addiu		manual-decoded	reviewed	vs.cd_8001cb34 asm review
 VS.EXE	0x8001d34c	0xcb4c		mips26	reachable-code	0x8004a0d4	load		jal		manual-decoded	reviewed	vs.cd_8001cb34 asm review
 VS.EXE	0x8001d358	0xcb58		mips26	reachable-code	0x80047984	load		jal		manual-decoded	reviewed	vs.cd_8001cb34 asm review
 VS.EXE	0x8001d37c	0xcb7c		mips26	reachable-code	0x8001d298	load		jal		manual-decoded	reviewed	vs.cd_8001cb34 asm review
@@ -9782,8 +9782,8 @@ VS.EXE	0x8001d384	0xcb84		mips26	reachable-code	0x8001d328	load		jal		manual-dec
 VS.EXE	0x8001d3a4	0xcba4	0x8001d3a8	mips_hi16_lo16	reachable-code	0x80063258	load		lui+addiu		manual-decoded	reviewed	vs.cd_8001cb34 asm review
 VS.EXE	0x8001d3d8	0xcbd8		mips26	reachable-code	0x80047514	load		jal		manual-decoded	reviewed	vs.cd_8001cb34 asm review
 VS.EXE	0x8001d428	0xcc28		mips26	reachable-code	0x8001d44c	load		j		manual-decoded	reviewed	vs.ui_8001d3f0 asm review
-VS.EXE	0x8001d45c	0xcc5c	0x8001d4a0	mips_hi16_lo16	reachable-code	0x801624d0	bss	DAT_801624d0	lui+addiu		manual-decoded	reviewed	vs.ui_8001d3f0 asm review
-VS.EXE	0x8001d45c	0xcc5c	0x8001d648	mips_hi16_lo16	reachable-code	0x801624d0	bss	DAT_801624d0	lui+addiu		manual-decoded	reviewed	vs.ui_8001d3f0 asm review
+VS.EXE	0x8001d45c	0xcc5c	0x8001d4a0	mips_hi16_lo16	reachable-code	0x801624d0	bss	vs_gfx_state	lui+addiu		manual-decoded	reviewed	vs.ui_8001d3f0 asm review
+VS.EXE	0x8001d45c	0xcc5c	0x8001d648	mips_hi16_lo16	reachable-code	0x801624d0	bss	vs_gfx_state	lui+addiu		manual-decoded	reviewed	vs.ui_8001d3f0 asm review
 VS.EXE	0x8001d520	0xcd20		mips_gprel16	reachable-code	0x80063398	bss	DAT_80063398	lw	gp	manual-decoded	reviewed	vs.ui_8001d3f0 asm review
 VS.EXE	0x8001d530	0xcd30	0x8001d534	mips_hi16_lo16	reachable-code	0x80063378	bss	DAT_80063378	lui+lhu		manual-decoded	reviewed	vs.ui_8001d3f0 asm review
 VS.EXE	0x8001d544	0xcd44	0x8001d548	mips_hi16_lo16	reachable-code	0x8006333e	bss	DAT_8006333e	lui+lhu		manual-decoded	reviewed	vs.ui_8001d3f0 asm review
@@ -9810,7 +9810,7 @@ VS.EXE	0x8001d808	0xd008		mips26	reachable-code	0x8004a034	load		jal		manual-dec
 VS.EXE	0x8001d814	0xd014		mips26	reachable-code	0x8001d834	load		j		manual-decoded	reviewed	vs.ui_8001d3f0 asm review
 VS.EXE	0x8001d824	0xd024		mips26	reachable-code	0x8004a034	load		jal		manual-decoded	reviewed	vs.ui_8001d3f0 asm review
 VS.EXE	0x8001d834	0xd034		mips26	reachable-code	0x8004a074	load		jal		manual-decoded	reviewed	vs.ui_8001d3f0 asm review
-VS.EXE	0x8001d854	0xd054	0x8001d858	mips_hi16_lo16	reachable-code	0x801624d0	bss	DAT_801624d0	lui+addiu		manual-decoded	reviewed	vs.ui_8001d3f0 asm review
+VS.EXE	0x8001d854	0xd054	0x8001d858	mips_hi16_lo16	reachable-code	0x801624d0	bss	vs_gfx_state	lui+addiu		manual-decoded	reviewed	vs.ui_8001d3f0 asm review
 VS.EXE	0x8001d918	0xd118		mips26	reachable-code	0x8001d92c	load		j		manual-decoded	reviewed	vs.ui_8001d3f0 asm review
 VS.EXE	0x8001d94c	0xd14c		mips26	reachable-code	0x8001d988	load		j		manual-decoded	reviewed	vs.ui_8001d3f0 asm review
 VS.EXE	0x8001d95c	0xd15c		mips26	reachable-code	0x8001d3f0	load		jal		manual-decoded	reviewed	vs.ui_8001d3f0 asm review
@@ -9826,41 +9826,41 @@ VS.EXE	0x8001dce4	0xd4e4		mips26	reachable-code	0x8001de5c	load		j		manual-decod
 VS.EXE	0x8001dd90	0xd590		mips26	reachable-code	0x8001ddc8	load		j		manual-decoded	reviewed	vs.ui_8001d3f0 asm review
 VS.EXE	0x8001dde4	0xd5e4		mips26	reachable-code	0x8001d3f0	load		jal		manual-decoded	reviewed	vs.ui_8001d3f0 asm review
 VS.EXE	0x8001de44	0xd644		mips26	reachable-code	0x8001d3f0	load		jal		manual-decoded	reviewed	vs.ui_8001d3f0 asm review
-VS.EXE	0x8001de90	0xd690	0x8001de94	mips_hi16_lo16	reachable-code	0x801624d0	bss	DAT_801624d0	lui+addiu		manual-decoded	reviewed	vs.ui_8001d3f0 asm review
-VS.EXE	0x8001defc	0xd6fc	0x8001df00	mips_hi16_lo16	reachable-code	0x801624d0	bss	DAT_801624d0	lui+addiu		manual-decoded	reviewed	vs.ui_8001d3f0 asm review
-VS.EXE	0x8001e030	0xd830	0x8001e034	mips_hi16_lo16	reachable-code	0x801624d0	bss	DAT_801624d0	lui+addiu		manual-decoded	reviewed	vs.ui_8001d3f0 asm review
-VS.EXE	0x8001e184	0xd984	0x8001e188	mips_hi16_lo16	reachable-code	0x801624d0	bss	DAT_801624d0	lui+addiu		manual-decoded	reviewed	vs.ui_8001d3f0 asm review
-VS.EXE	0x8001e2c8	0xdac8	0x8001e2cc	mips_hi16_lo16	reachable-code	0x801624d0	bss	DAT_801624d0	lui+addiu		manual-decoded	reviewed	vs.ui_8001d3f0 asm review
-VS.EXE	0x8001e3dc	0xdbdc	0x8001e3e0	mips_hi16_lo16	reachable-code	0x801624d0	bss	DAT_801624d0	lui+addiu		manual-decoded	reviewed	vs.ui_8001e3d8 asm review
-VS.EXE	0x8001e448	0xdc48	0x8001e44c	mips_hi16_lo16	reachable-code	0x801624d0	bss	DAT_801624d0	lui+addiu		manual-decoded	reviewed	vs.ui_8001e3d8 asm review
-VS.EXE	0x8001e54c	0xdd4c	0x8001e550	mips_hi16_lo16	reachable-code	0x801624d0	bss	DAT_801624d0	lui+addiu		manual-decoded	reviewed	vs.ui_8001e3d8 asm review
+VS.EXE	0x8001de90	0xd690	0x8001de94	mips_hi16_lo16	reachable-code	0x801624d0	bss	vs_gfx_state	lui+addiu		manual-decoded	reviewed	vs.ui_8001d3f0 asm review
+VS.EXE	0x8001defc	0xd6fc	0x8001df00	mips_hi16_lo16	reachable-code	0x801624d0	bss	vs_gfx_state	lui+addiu		manual-decoded	reviewed	vs.ui_8001d3f0 asm review
+VS.EXE	0x8001e030	0xd830	0x8001e034	mips_hi16_lo16	reachable-code	0x801624d0	bss	vs_gfx_state	lui+addiu		manual-decoded	reviewed	vs.ui_8001d3f0 asm review
+VS.EXE	0x8001e184	0xd984	0x8001e188	mips_hi16_lo16	reachable-code	0x801624d0	bss	vs_gfx_state	lui+addiu		manual-decoded	reviewed	vs.ui_8001d3f0 asm review
+VS.EXE	0x8001e2c8	0xdac8	0x8001e2cc	mips_hi16_lo16	reachable-code	0x801624d0	bss	vs_gfx_state	lui+addiu		manual-decoded	reviewed	vs.ui_8001d3f0 asm review
+VS.EXE	0x8001e3dc	0xdbdc	0x8001e3e0	mips_hi16_lo16	reachable-code	0x801624d0	bss	vs_gfx_state	lui+addiu		manual-decoded	reviewed	vs.ui_8001e3d8 asm review
+VS.EXE	0x8001e448	0xdc48	0x8001e44c	mips_hi16_lo16	reachable-code	0x801624d0	bss	vs_gfx_state	lui+addiu		manual-decoded	reviewed	vs.ui_8001e3d8 asm review
+VS.EXE	0x8001e54c	0xdd4c	0x8001e550	mips_hi16_lo16	reachable-code	0x801624d0	bss	vs_gfx_state	lui+addiu		manual-decoded	reviewed	vs.ui_8001e3d8 asm review
 VS.EXE	0x8001e60c	0xde0c		mips26	reachable-code	0x8001e630	load		j		manual-decoded	reviewed	vs.ui_8001e3d8 asm review
 VS.EXE	0x8001e694	0xde94		mips26	reachable-code	0x8004a034	load		jal		manual-decoded	reviewed	vs.ui_8001e3d8 asm review
 VS.EXE	0x8001e6a8	0xdea8		mips26	reachable-code	0x8004a074	load		jal		manual-decoded	reviewed	vs.ui_8001e3d8 asm review
 VS.EXE	0x8001e6c0	0xdec0		mips26	reachable-code	0x8001e6e4	load		j		manual-decoded	reviewed	vs.ui_8001e3d8 asm review
-VS.EXE	0x8001e6ec	0xdeec	0x8001e6f0	mips_hi16_lo16	reachable-code	0x801624d0	bss	DAT_801624d0	lui+addiu		manual-decoded	reviewed	vs.ui_8001e3d8 asm review
+VS.EXE	0x8001e6ec	0xdeec	0x8001e6f0	mips_hi16_lo16	reachable-code	0x801624d0	bss	vs_gfx_state	lui+addiu		manual-decoded	reviewed	vs.ui_8001e3d8 asm review
 VS.EXE	0x8001e7c8	0xdfc8		mips26	reachable-code	0x8001e81c	load		j		manual-decoded	reviewed	vs.ui_8001e3d8 asm review
 VS.EXE	0x8001e7f8	0xdff8		mips26	reachable-code	0x8001e820	load		j		manual-decoded	reviewed	vs.ui_8001e3d8 asm review
-VS.EXE	0x8001e840	0xe040	0x8001e844	mips_hi16_lo16	reachable-code	0x801624d0	bss	DAT_801624d0	lui+addiu		manual-decoded	reviewed	vs.ui_8001e3d8 asm review
-VS.EXE	0x8001e894	0xe094	0x8001e898	mips_hi16_lo16	reachable-code	0x801624d0	bss	DAT_801624d0	lui+addiu		manual-decoded	reviewed	vs.ui_8001e3d8 asm review
+VS.EXE	0x8001e840	0xe040	0x8001e844	mips_hi16_lo16	reachable-code	0x801624d0	bss	vs_gfx_state	lui+addiu		manual-decoded	reviewed	vs.ui_8001e3d8 asm review
+VS.EXE	0x8001e894	0xe094	0x8001e898	mips_hi16_lo16	reachable-code	0x801624d0	bss	vs_gfx_state	lui+addiu		manual-decoded	reviewed	vs.ui_8001e3d8 asm review
 VS.EXE	0x8001e8fc	0xe0fc		mips26	reachable-code	0x8004a034	load		jal		manual-decoded	reviewed	vs.ui_8001e3d8 asm review
 VS.EXE	0x8001e914	0xe114		mips26	reachable-code	0x80048264	load		jal		manual-decoded	reviewed	vs.ui_8001e3d8 asm review
-VS.EXE	0x8001e978	0xe178	0x8001e97c	mips_hi16_lo16	reachable-code	0x801624d0	bss	DAT_801624d0	lui+addiu		manual-decoded	reviewed	vs.ui_8001e3d8 asm review
+VS.EXE	0x8001e978	0xe178	0x8001e97c	mips_hi16_lo16	reachable-code	0x801624d0	bss	vs_gfx_state	lui+addiu		manual-decoded	reviewed	vs.ui_8001e3d8 asm review
 VS.EXE	0x8001eadc	0xe2dc		mips26	reachable-code	0x8001eae8	load		j		manual-decoded	reviewed	vs.ui_8001e3d8 asm review
-VS.EXE	0x8001eaf4	0xe2f4	0x8001eaf8	mips_hi16_lo16	reachable-code	0x801624d0	bss	DAT_801624d0	lui+addiu		manual-decoded	reviewed	vs.ui_8001e3d8 asm review
-VS.EXE	0x8001eb44	0xe344	0x8001eb48	mips_hi16_lo16	reachable-code	0x801624d0	bss	DAT_801624d0	lui+addiu		manual-decoded	reviewed	vs.ui_8001eb18 asm review
+VS.EXE	0x8001eaf4	0xe2f4	0x8001eaf8	mips_hi16_lo16	reachable-code	0x801624d0	bss	vs_gfx_state	lui+addiu		manual-decoded	reviewed	vs.ui_8001e3d8 asm review
+VS.EXE	0x8001eb44	0xe344	0x8001eb48	mips_hi16_lo16	reachable-code	0x801624d0	bss	vs_gfx_state	lui+addiu		manual-decoded	reviewed	vs.ui_8001eb18 asm review
 VS.EXE	0x8001ebac	0xe3ac		mips26	reachable-code	0x8001ebb8	load		j		manual-decoded	reviewed	vs.ui_8001eb18 asm review
-VS.EXE	0x8001ebbc	0xe3bc	0x8001ebc0	mips_hi16_lo16	reachable-code	0x801624d0	bss	DAT_801624d0	lui+addiu		manual-decoded	reviewed	vs.ui_8001eb18 asm review
+VS.EXE	0x8001ebbc	0xe3bc	0x8001ebc0	mips_hi16_lo16	reachable-code	0x801624d0	bss	vs_gfx_state	lui+addiu		manual-decoded	reviewed	vs.ui_8001eb18 asm review
 VS.EXE	0x8001ed8c	0xe58c		mips26	reachable-code	0x8001ed98	load		j		manual-decoded	reviewed	vs.ui_8001eb18 asm review
-VS.EXE	0x8001ed9c	0xe59c	0x8001eda0	mips_hi16_lo16	reachable-code	0x801624d0	bss	DAT_801624d0	lui+addiu		manual-decoded	reviewed	vs.ui_8001eb18 asm review
-VS.EXE	0x8001ef2c	0xe72c	0x8001ef34	mips_hi16_lo16	reachable-code	0x801624d0	bss	DAT_801624d0	lui+addiu		manual-decoded	reviewed	vs.ui_8001eb18 asm review
+VS.EXE	0x8001ed9c	0xe59c	0x8001eda0	mips_hi16_lo16	reachable-code	0x801624d0	bss	vs_gfx_state	lui+addiu		manual-decoded	reviewed	vs.ui_8001eb18 asm review
+VS.EXE	0x8001ef2c	0xe72c	0x8001ef34	mips_hi16_lo16	reachable-code	0x801624d0	bss	vs_gfx_state	lui+addiu		manual-decoded	reviewed	vs.ui_8001eb18 asm review
 VS.EXE	0x8001ef30	0xe730		mips26	reachable-code	0x8001f08c	load		j		manual-decoded	reviewed	vs.ui_8001eb18 asm review
-VS.EXE	0x8001ef44	0xe744	0x8001ef4c	mips_hi16_lo16	reachable-code	0x801624d0	bss	DAT_801624d0	lui+addiu		manual-decoded	reviewed	vs.ui_8001eb18 asm review
+VS.EXE	0x8001ef44	0xe744	0x8001ef4c	mips_hi16_lo16	reachable-code	0x801624d0	bss	vs_gfx_state	lui+addiu		manual-decoded	reviewed	vs.ui_8001eb18 asm review
 VS.EXE	0x8001ef48	0xe748		mips26	reachable-code	0x8001f08c	load		j		manual-decoded	reviewed	vs.ui_8001eb18 asm review
 VS.EXE	0x8001ef78	0xe778		mips26	reachable-code	0x8001f000	load		j		manual-decoded	reviewed	vs.ui_8001eb18 asm review
 VS.EXE	0x8001efcc	0xe7cc		mips26	reachable-code	0x8001f080	load		j		manual-decoded	reviewed	vs.ui_8001eb18 asm review
 VS.EXE	0x8001f028	0xe828		mips26	reachable-code	0x8001f084	load		j		manual-decoded	reviewed	vs.ui_8001eb18 asm review
-VS.EXE	0x8001f084	0xe884	0x8001f088	mips_hi16_lo16	reachable-code	0x801624d0	bss	DAT_801624d0	lui+addiu		manual-decoded	reviewed	vs.ui_8001eb18 asm review
+VS.EXE	0x8001f084	0xe884	0x8001f088	mips_hi16_lo16	reachable-code	0x801624d0	bss	vs_gfx_state	lui+addiu		manual-decoded	reviewed	vs.ui_8001eb18 asm review
 VS.EXE	0x8001f2bc	0xeabc		mips26	reachable-code	0x8001e3d8	load		jal		manual-decoded	reviewed	vs.ui_8001f23c asm review
 VS.EXE	0x8001f2cc	0xeacc		mips26	reachable-code	0x8001e890	load		jal		manual-decoded	reviewed	vs.ui_8001f23c asm review
 VS.EXE	0x8001f2e4	0xeae4		mips26	reachable-code	0x8001e3d8	load		jal		manual-decoded	reviewed	vs.ui_8001f23c asm review
@@ -9982,7 +9982,7 @@ VS.EXE	0x800207a0	0xffa0		mips26	reachable-code	0x8001f30c	load		jal		manual-dec
 VS.EXE	0x800207a8	0xffa8		mips26	reachable-code	0x8001f8c4	load		jal		manual-decoded	reviewed	vs.ui_80020384 asm review
 VS.EXE	0x800207b0	0xffb0		mips26	reachable-code	0x8001d298	load		jal		manual-decoded	reviewed	vs.ui_80020384 asm review
 VS.EXE	0x800207b8	0xffb8		mips26	reachable-code	0x8001d328	load		jal		manual-decoded	reviewed	vs.ui_80020384 asm review
-VS.EXE	0x80020850	0x10050	0x80020854	mips_hi16_lo16	reachable-code	0x8016a4d0	bss	DAT_801624d0	lui+addiu		manual-decoded	reviewed	vs.ui_800207d4 asm review
+VS.EXE	0x80020850	0x10050	0x80020854	mips_hi16_lo16	reachable-code	0x8016a4d0	bss	vs_gfx_state	lui+addiu		manual-decoded	reviewed	vs.ui_800207d4 asm review
 VS.EXE	0x800209c0	0x101c0		mips26	reachable-code	0x8004a034	load		jal		manual-decoded	reviewed	vs.ui_800207d4 asm review
 VS.EXE	0x800209dc	0x101dc		mips26	reachable-code	0x8004a074	load		jal		manual-decoded	reviewed	vs.ui_800207d4 asm review
 VS.EXE	0x80020ab0	0x102b0	0x80020ad8	mips_hi16_lo16	reachable-code	0x80063270	load		lui+addiu		manual-decoded	reviewed	vs.ui_80020aa4 asm review
@@ -10025,10 +10025,10 @@ VS.EXE	0x800211c0	0x109c0	0x800211c4	mips_hi16_lo16	reachable-code	0x8001123c	lo
 VS.EXE	0x80021224	0x10a24		mips26	reachable-code	0x8002125c	load		j		manual-decoded	reviewed	vs.ui_80021140 asm review
 VS.EXE	0x8002127c	0x10a7c	0x80021280	mips_hi16_lo16	reachable-code	0x801624b8	bss	DAT_801624b8	lui+addiu		manual-decoded	reviewed	vs.ui_80021140 asm review
 VS.EXE	0x800212a0	0x10aa0		mips26	reachable-code	0x800212cc	load		j		manual-decoded	reviewed	vs.ui_80021140 asm review
-VS.EXE	0x800212e8	0x10ae8	0x800212ec	mips_hi16_lo16	reachable-code	0x801603c0	bss	DAT_801603c0	lui+addiu		manual-decoded	reviewed	vs.ui_80021140 asm review
-VS.EXE	0x800212e8	0x10ae8	0x800212fc	mips_hi16_lo16	reachable-code	0x801603c0	bss	DAT_801603c0	lui+sw		manual-decoded	reviewed	vs.ui_80021140 asm review
+VS.EXE	0x800212e8	0x10ae8	0x800212ec	mips_hi16_lo16	reachable-code	0x801603c0	bss	pad_state	lui+addiu		manual-decoded	reviewed	vs.ui_80021140 asm review
+VS.EXE	0x800212e8	0x10ae8	0x800212fc	mips_hi16_lo16	reachable-code	0x801603c0	bss	pad_state	lui+sw		manual-decoded	reviewed	vs.ui_80021140 asm review
 VS.EXE	0x800212f8	0x10af8		mips26	reachable-code	0x80021314	load		j		manual-decoded	reviewed	vs.ui_80021140 asm review
-VS.EXE	0x80021300	0x10b00	0x80021304	mips_hi16_lo16	reachable-code	0x801603c0	bss	DAT_801603c0	lui+addiu		manual-decoded	reviewed	vs.ui_80021140 asm review
+VS.EXE	0x80021300	0x10b00	0x80021304	mips_hi16_lo16	reachable-code	0x801603c0	bss	pad_state	lui+addiu		manual-decoded	reviewed	vs.ui_80021140 asm review
 VS.EXE	0x80021314	0x10b14	0x80021318	mips_hi16_lo16	reachable-code	0x8006335c	bss		lui+lhu		manual-decoded	reviewed	vs.ui_80021140 asm review
 VS.EXE	0x8002132c	0x10b2c		mips26	reachable-code	0x8002133c	load		j		manual-decoded	reviewed	vs.ui_80021140 asm review
 VS.EXE	0x8002133c	0x10b3c		mips26	reachable-code	0x8001eef4	load		jal		manual-decoded	reviewed	vs.ui_80021140 asm review
@@ -10255,16 +10255,16 @@ VS.EXE	0x80023614	0x12e14		mips26	reachable-code	0x8002373c	load		j		manual-deco
 VS.EXE	0x80023648	0x12e48		mips26	reachable-code	0x8002373c	load		j		manual-decoded	reviewed	vs.model_8002345c asm review
 VS.EXE	0x80023688	0x12e88		mips26	reachable-code	0x8002373c	load		j		manual-decoded	reviewed	vs.model_8002345c asm review
 VS.EXE	0x800236d4	0x12ed4		mips26	reachable-code	0x8002373c	load		j		manual-decoded	reviewed	vs.model_8002345c asm review
-VS.EXE	0x80023764	0x12f64	0x80023768	mips_hi16_lo16	reachable-code	0x801624d0	bss	DAT_801624d0	lui+addiu		manual-decoded	reviewed	vs.anim_80023764 asm review
-VS.EXE	0x800237a0	0x12fa0	0x800237a4	mips_hi16_lo16	reachable-code	0x8016c9ec	bss	DAT_801624d0	lui+addiu		manual-decoded	reviewed	vs.anim_80023764 asm review
-VS.EXE	0x800237e4	0x12fe4	0x800237e8	mips_hi16_lo16	reachable-code	0x8016c9ec	bss	DAT_801624d0	lui+addiu		manual-decoded	reviewed	vs.anim_80023764 asm review
+VS.EXE	0x80023764	0x12f64	0x80023768	mips_hi16_lo16	reachable-code	0x801624d0	bss	vs_gfx_state	lui+addiu		manual-decoded	reviewed	vs.anim_80023764 asm review
+VS.EXE	0x800237a0	0x12fa0	0x800237a4	mips_hi16_lo16	reachable-code	0x8016c9ec	bss	vs_gfx_state	lui+addiu		manual-decoded	reviewed	vs.anim_80023764 asm review
+VS.EXE	0x800237e4	0x12fe4	0x800237e8	mips_hi16_lo16	reachable-code	0x8016c9ec	bss	vs_gfx_state	lui+addiu		manual-decoded	reviewed	vs.anim_80023764 asm review
 VS.EXE	0x8002384c	0x1304c		mips26	reachable-code	0x80045974	load		jal		manual-decoded	reviewed	vs.anim_80023764 asm review
 VS.EXE	0x80023868	0x13068		mips26	reachable-code	0x80045974	load		jal		manual-decoded	reviewed	vs.anim_80023764 asm review
 VS.EXE	0x80023884	0x13084		mips26	reachable-code	0x80045974	load		jal		manual-decoded	reviewed	vs.anim_80023764 asm review
 VS.EXE	0x800238a0	0x130a0		mips26	reachable-code	0x80045974	load		jal		manual-decoded	reviewed	vs.anim_80023764 asm review
-VS.EXE	0x800238c4	0x130c4	0x800238cc	mips_hi16_lo16	reachable-code	0x8016c9ec	bss	DAT_801624d0	lui+addiu		manual-decoded	reviewed	vs.anim_80023764 asm review
+VS.EXE	0x800238c4	0x130c4	0x800238cc	mips_hi16_lo16	reachable-code	0x8016c9ec	bss	vs_gfx_state	lui+addiu		manual-decoded	reviewed	vs.anim_80023764 asm review
 VS.EXE	0x800238f4	0x130f4		mips26	reachable-code	0x80023820	load		jal		manual-decoded	reviewed	vs.anim_80023764 asm review
-VS.EXE	0x80023930	0x13130	0x80023938	mips_hi16_lo16	reachable-code	0x8016c9ec	bss	DAT_801624d0	lui+addiu		manual-decoded	reviewed	vs.anim_80023764 asm review
+VS.EXE	0x80023930	0x13130	0x80023938	mips_hi16_lo16	reachable-code	0x8016c9ec	bss	vs_gfx_state	lui+addiu		manual-decoded	reviewed	vs.anim_80023764 asm review
 VS.EXE	0x80023958	0x13158		mips26	reachable-code	0x80023820	load		jal		manual-decoded	reviewed	vs.anim_80023764 asm review
 VS.EXE	0x80023994	0x13194		mips26	reachable-code	0x80045964	load		jal		manual-decoded	reviewed	vs.anim_80023764 asm review
 VS.EXE	0x80023c14	0x13414		mips26	reachable-code	0x80023c2c	load		j		manual-decoded	reviewed	vs.anim_80023764 asm review
@@ -10292,7 +10292,7 @@ VS.EXE	0x800240ac	0x138ac		mips26	reachable-code	0x80023aa0	load		jal		manual-de
 VS.EXE	0x800240b4	0x138b4		mips26	reachable-code	0x800240c4	load		j		manual-decoded	reviewed	vs.anim_80023764 asm review
 VS.EXE	0x800240bc	0x138bc		mips26	reachable-code	0x80023bd0	load		jal		manual-decoded	reviewed	vs.anim_80023764 asm review
 VS.EXE	0x8002416c	0x1396c		mips26	reachable-code	0x80023c78	load		jal		manual-decoded	reviewed	vs.anim_80023764 asm review
-VS.EXE	0x800241b4	0x139b4	0x800241b8	mips_hi16_lo16	reachable-code	0x8016c9ec	bss	DAT_801624d0	lui+addiu		manual-decoded	reviewed	vs.anim_80023764 asm review
+VS.EXE	0x800241b4	0x139b4	0x800241b8	mips_hi16_lo16	reachable-code	0x8016c9ec	bss	vs_gfx_state	lui+addiu		manual-decoded	reviewed	vs.anim_80023764 asm review
 VS.EXE	0x800241e0	0x139e0		mips26	reachable-code	0x80024204	load		j		manual-decoded	reviewed	vs.anim_80023764 asm review
 VS.EXE	0x80024218	0x13a18	0x8002421c	mips_hi16_lo16	reachable-code	0x800112a8	load		lui+addiu		manual-decoded	reviewed	vs.anim_80023764 asm review
 VS.EXE	0x80024224	0x13a24		mips26	reachable-code	0x80046c48	load		jal		manual-decoded	reviewed	vs.anim_80023764 asm review
@@ -10305,7 +10305,7 @@ VS.EXE	0x80024460	0x13c60		mips26	reachable-code	0x80024624	load		j		manual-deco
 VS.EXE	0x800244b8	0x13cb8		mips26	reachable-code	0x80024628	load		j		manual-decoded	reviewed	vs.anim_8002429c asm review
 VS.EXE	0x800244c0	0x13cc0		mips26	reachable-code	0x8002429c	load		jal		manual-decoded	reviewed	vs.anim_8002429c asm review
 VS.EXE	0x800246a4	0x13ea4		mips26	reachable-code	0x8002429c	load		jal		manual-decoded	reviewed	vs.anim_8002429c asm review
-VS.EXE	0x800246f4	0x13ef4	0x800246f8	mips_hi16_lo16	reachable-code	0x801624d0	bss	DAT_801624d0	lui+addiu		manual-decoded	reviewed	vs.anim_8002429c asm review
+VS.EXE	0x800246f4	0x13ef4	0x800246f8	mips_hi16_lo16	reachable-code	0x801624d0	bss	vs_gfx_state	lui+addiu		manual-decoded	reviewed	vs.anim_8002429c asm review
 VS.EXE	0x80024748	0x13f48		mips26	reachable-code	0x80023820	load		jal		manual-decoded	reviewed	vs.anim_8002429c asm review
 VS.EXE	0x80024780	0x13f80		mips26	reachable-code	0x80024b30	load		j		manual-decoded	reviewed	vs.anim_8002429c asm review
 VS.EXE	0x80024790	0x13f90		mips26	reachable-code	0x800241b4	load		jal		manual-decoded	reviewed	vs.anim_8002429c asm review
@@ -10324,7 +10324,7 @@ VS.EXE	0x80024a28	0x14228		mips26	reachable-code	0x80024110	load		jal		manual-de
 VS.EXE	0x80024ae0	0x142e0		mips26	reachable-code	0x80024110	load		jal		manual-decoded	reviewed	vs.anim_8002429c asm review
 VS.EXE	0x80024aec	0x142ec		mips26	reachable-code	0x80024640	load		jal		manual-decoded	reviewed	vs.anim_8002429c asm review
 VS.EXE	0x80024b90	0x14390	0x80024b94	mips_hi16_lo16	reachable-code	0x800112d0	load		lui+addiu		manual-decoded	reviewed	vs.model_80024b5c asm review
-VS.EXE	0x80024c24	0x14424	0x80024c28	mips_hi16_lo16	reachable-code	0x8018a4d0	bss	DAT_801624d0	lui+addiu		manual-decoded	reviewed	vs.model_80024b5c asm review
+VS.EXE	0x80024c24	0x14424	0x80024c28	mips_hi16_lo16	reachable-code	0x8018a4d0	bss	vs_gfx_state	lui+addiu		manual-decoded	reviewed	vs.model_80024b5c asm review
 VS.EXE	0x80024c68	0x14468	0x80024c6c	mips_hi16_lo16	reachable-code	0x800112d0	load		lui+addiu		manual-decoded	reviewed	vs.model_80024b5c asm review
 VS.EXE	0x80024cb8	0x144b8	0x80024cbc	mips_hi16_lo16	reachable-code	0x80063300	bss	DAT_80063300	lui+lw		manual-decoded	reviewed	vs.model_80024b5c asm review
 VS.EXE	0x80024cfc	0x144fc		mips26	reachable-code	0x80043844	load		jal		manual-decoded	reviewed	vs.model_80024b5c asm review
@@ -10361,10 +10361,10 @@ VS.EXE	0x80025368	0x14b68		mips26	reachable-code	0x80042ef4	load		jal		manual-de
 VS.EXE	0x80025374	0x14b74		mips26	reachable-code	0x80043844	load		jal		manual-decoded	reviewed	vs.model_80024b5c asm review
 VS.EXE	0x80025380	0x14b80		mips26	reachable-code	0x800439e4	load		jal		manual-decoded	reviewed	vs.model_80024b5c asm review
 VS.EXE	0x8002538c	0x14b8c		mips26	reachable-code	0x80042d54	load		jal		manual-decoded	reviewed	vs.model_80024b5c asm review
-VS.EXE	0x8002542c	0x14c2c	0x80025430	mips_hi16_lo16	reachable-code	0x801624d0	bss	DAT_801624d0	lui+addiu		manual-decoded	reviewed	vs.model_80024b5c asm review
+VS.EXE	0x8002542c	0x14c2c	0x80025430	mips_hi16_lo16	reachable-code	0x801624d0	bss	vs_gfx_state	lui+addiu		manual-decoded	reviewed	vs.model_80024b5c asm review
 VS.EXE	0x8002543c	0x14c3c	0x80025440	mips_hi16_lo16	reachable-code	0x80063300	bss	DAT_80063300	lui+lw		manual-decoded	reviewed	vs.model_80024b5c asm review
 VS.EXE	0x80025480	0x14c80		mips26	reachable-code	0x80043094	load		jal		manual-decoded	reviewed	vs.model_80024b5c asm review
-VS.EXE	0x80025488	0x14c88	0x8002548c	mips_hi16_lo16	reachable-code	0x8018ee68	bss	DAT_801624d0	lui+addiu		manual-decoded	reviewed	vs.model_80024b5c asm review
+VS.EXE	0x80025488	0x14c88	0x8002548c	mips_hi16_lo16	reachable-code	0x8018ee68	bss	vs_gfx_state	lui+addiu		manual-decoded	reviewed	vs.model_80024b5c asm review
 VS.EXE	0x80025494	0x14c94		mips26	reachable-code	0x80042bf4	load		jal		manual-decoded	reviewed	vs.model_80024b5c asm review
 VS.EXE	0x800254a4	0x14ca4	0x800254b0	mips_hi16_lo16	reachable-code	0x800633b0	bss	DAT_800633b0	lui+addiu		manual-decoded	reviewed	vs.model_80024b5c asm review
 VS.EXE	0x800254a8	0x14ca8	0x800254ac	mips_hi16_lo16	reachable-code	0x80063300	bss	DAT_80063300	lui+lw		manual-decoded	reviewed	vs.model_80024b5c asm review
@@ -10376,8 +10376,8 @@ VS.EXE	0x80025578	0x14d78	0x8002557c	mips_hi16_lo16	reachable-code	0x80063350	bs
 VS.EXE	0x80025580	0x14d80		mips26	reachable-code	0x80025598	load		j		manual-decoded	reviewed	vs.model_80024b5c asm review
 VS.EXE	0x80025588	0x14d88		mips_gprel16	reachable-code	0x800632d0	load	DAT_800632d0	lw	gp	manual-decoded	reviewed	vs.model_80024b5c asm review
 VS.EXE	0x8002558c	0x14d8c	0x80025590	mips_hi16_lo16	reachable-code	0x80063350	bss	DAT_80063350	lui+sw		manual-decoded	reviewed	vs.model_80024b5c asm review
-VS.EXE	0x80025598	0x14d98	0x8002559c	mips_hi16_lo16	reachable-code	0x801624d0	bss	DAT_801624d0	lui+addiu		manual-decoded	reviewed	vs.model_80024b5c asm review
-VS.EXE	0x800255d8	0x14dd8	0x800255e8	mips_hi16_lo16	reachable-code	0x8016ccbc	bss	DAT_801624d0	lui+addiu		manual-decoded	reviewed	vs.model_80024b5c asm review
+VS.EXE	0x80025598	0x14d98	0x8002559c	mips_hi16_lo16	reachable-code	0x801624d0	bss	vs_gfx_state	lui+addiu		manual-decoded	reviewed	vs.model_80024b5c asm review
+VS.EXE	0x800255d8	0x14dd8	0x800255e8	mips_hi16_lo16	reachable-code	0x8016ccbc	bss	vs_gfx_state	lui+addiu		manual-decoded	reviewed	vs.model_80024b5c asm review
 VS.EXE	0x800255e0	0x14de0	0x800255e4	mips_hi16_lo16	reachable-code	0x80063300	bss	DAT_80063300	lui+lw		manual-decoded	reviewed	vs.model_80024b5c asm review
 VS.EXE	0x8002560c	0x14e0c		mips26	reachable-code	0x80024b5c	load		jal		manual-decoded	reviewed	vs.model_80024b5c asm review
 VS.EXE	0x800256d8	0x14ed8	0x800256dc	mips_hi16_lo16	reachable-code	0x800633b0	bss	DAT_800633b0	lui+addiu		manual-decoded	reviewed	vs.anim_80025670 asm review
@@ -10405,16 +10405,16 @@ VS.EXE	0x80027c30	0x17430		mips26	reachable-code	0x80027698	load		jal		manual-de
 VS.EXE	0x80027c48	0x17448		mips26	reachable-code	0x800278f8	load		jal		manual-decoded	reviewed	vs.mesh_800258f0 asm review
 VS.EXE	0x80027f00	0x17700		mips26	reachable-code	0x80027f28	load		j		manual-decoded	reviewed	vs.anim_80027c64 asm review
 VS.EXE	0x80027fb4	0x177b4		mips26	reachable-code	0x80027fd8	load		j		manual-decoded	reviewed	vs.anim_80027f30 asm review
-VS.EXE	0x80027fec	0x177ec	0x80027ff0	mips_hi16_lo16	reachable-code	0x801624d0	bss	DAT_801624d0	lui+addiu		manual-decoded	reviewed	vs.anim_80027f30 asm review
+VS.EXE	0x80027fec	0x177ec	0x80027ff0	mips_hi16_lo16	reachable-code	0x801624d0	bss	vs_gfx_state	lui+addiu		manual-decoded	reviewed	vs.anim_80027f30 asm review
 VS.EXE	0x80028054	0x17854		mips26	reachable-code	0x80045974	load		jal		manual-decoded	reviewed	vs.anim_80027f30 asm review
-VS.EXE	0x80028078	0x17878	0x80028080	mips_hi16_lo16	reachable-code	0x8016c8cc	bss	DAT_801624d0	lui+addiu		manual-decoded	reviewed	vs.anim_80027f30 asm review
+VS.EXE	0x80028078	0x17878	0x80028080	mips_hi16_lo16	reachable-code	0x8016c8cc	bss	vs_gfx_state	lui+addiu		manual-decoded	reviewed	vs.anim_80027f30 asm review
 VS.EXE	0x800280a8	0x178a8		mips26	reachable-code	0x80028028	load		jal		manual-decoded	reviewed	vs.anim_80027f30 asm review
-VS.EXE	0x800280e0	0x178e0	0x800280e4	mips_hi16_lo16	reachable-code	0x8016c8cc	bss	DAT_801624d0	lui+addiu		manual-decoded	reviewed	vs.anim_80027f30 asm review
-VS.EXE	0x80028120	0x17920	0x80028128	mips_hi16_lo16	reachable-code	0x8016c8cc	bss	DAT_801624d0	lui+addiu		manual-decoded	reviewed	vs.anim_80027f30 asm review
+VS.EXE	0x800280e0	0x178e0	0x800280e4	mips_hi16_lo16	reachable-code	0x8016c8cc	bss	vs_gfx_state	lui+addiu		manual-decoded	reviewed	vs.anim_80027f30 asm review
+VS.EXE	0x80028120	0x17920	0x80028128	mips_hi16_lo16	reachable-code	0x8016c8cc	bss	vs_gfx_state	lui+addiu		manual-decoded	reviewed	vs.anim_80027f30 asm review
 VS.EXE	0x80028148	0x17948		mips26	reachable-code	0x80028028	load		jal		manual-decoded	reviewed	vs.anim_80027f30 asm review
-VS.EXE	0x8002817c	0x1797c	0x80028180	mips_hi16_lo16	reachable-code	0x8016c8cc	bss	DAT_801624d0	lui+addiu		manual-decoded	reviewed	vs.anim_80027f30 asm review
+VS.EXE	0x8002817c	0x1797c	0x80028180	mips_hi16_lo16	reachable-code	0x8016c8cc	bss	vs_gfx_state	lui+addiu		manual-decoded	reviewed	vs.anim_80027f30 asm review
 VS.EXE	0x800281a8	0x179a8		mips26	reachable-code	0x800281cc	load		j		manual-decoded	reviewed	vs.anim_80027f30 asm review
-VS.EXE	0x800281f0	0x179f0	0x800281f4	mips_hi16_lo16	reachable-code	0x801624d0	bss	DAT_801624d0	lui+addiu		manual-decoded	reviewed	vs.anim_80027f30 asm review
+VS.EXE	0x800281f0	0x179f0	0x800281f4	mips_hi16_lo16	reachable-code	0x801624d0	bss	vs_gfx_state	lui+addiu		manual-decoded	reviewed	vs.anim_80027f30 asm review
 VS.EXE	0x80028244	0x17a44		mips26	reachable-code	0x80028028	load		jal		manual-decoded	reviewed	vs.anim_80027f30 asm review
 VS.EXE	0x8002827c	0x17a7c		mips26	reachable-code	0x80028448	load		j		manual-decoded	reviewed	vs.anim_80027f30 asm review
 VS.EXE	0x8002828c	0x17a8c		mips26	reachable-code	0x8002817c	load		jal		manual-decoded	reviewed	vs.anim_80027f30 asm review
@@ -10426,9 +10426,9 @@ VS.EXE	0x800282ec	0x17aec		mips26	reachable-code	0x8002831c	load		j		manual-deco
 VS.EXE	0x80028304	0x17b04		mips26	reachable-code	0x80028028	load		jal		manual-decoded	reviewed	vs.anim_80027f30 asm review
 VS.EXE	0x80028314	0x17b14		mips26	reachable-code	0x800282ac	load		j		manual-decoded	reviewed	vs.anim_80027f30 asm review
 VS.EXE	0x80028330	0x17b30		mips26	reachable-code	0x80027f30	load		jal		manual-decoded	reviewed	vs.anim_80027f30 asm review
-VS.EXE	0x80028360	0x17b60	0x800283f0	mips_hi16_lo16	reachable-code	0x8016ecc0	bss	DAT_801624d0	lui+addiu		manual-decoded	reviewed	vs.anim_80027f30 asm review
+VS.EXE	0x80028360	0x17b60	0x800283f0	mips_hi16_lo16	reachable-code	0x8016ecc0	bss	vs_gfx_state	lui+addiu		manual-decoded	reviewed	vs.anim_80027f30 asm review
 VS.EXE	0x800283d8	0x17bd8		mips26	reachable-code	0x80027c64	load		jal		manual-decoded	reviewed	vs.anim_80027f30 asm review
-VS.EXE	0x800283dc	0x17bdc	0x800283f0	mips_hi16_lo16	reachable-code	0x8016ecc0	bss	DAT_801624d0	lui+addiu		manual-decoded	reviewed	vs.anim_80027f30 asm review
+VS.EXE	0x800283dc	0x17bdc	0x800283f0	mips_hi16_lo16	reachable-code	0x8016ecc0	bss	vs_gfx_state	lui+addiu		manual-decoded	reviewed	vs.anim_80027f30 asm review
 VS.EXE	0x80028414	0x17c14		mips26	reachable-code	0x80027ce0	load		jal		manual-decoded	reviewed	vs.anim_80027f30 asm review
 VS.EXE	0x80028430	0x17c30		mips26	reachable-code	0x80042b74	load		jal		manual-decoded	reviewed	vs.anim_80027f30 asm review
 VS.EXE	0x80028474	0x17c74	0x80028478	mips_hi16_lo16	reachable-code	0x80063360	bss	DAT_80063360	lui+lw		manual-decoded	reviewed	vs.mirror_80028474 directly decoded renderer switch
@@ -10453,10 +10453,10 @@ VS.EXE	0x80028a50	0x18250		mips26	reachable-code	0x80043844	load		jal		manual-de
 VS.EXE	0x80028a58	0x18258	0x80028a5c	mips_hi16_lo16	reachable-code	0x8006321c	load	DAT_8006321c	lui+lw		manual-decoded	reviewed	vs.model_80028914 asm review
 VS.EXE	0x80028a60	0x18260		mips26	reachable-code	0x800439e4	load		jal		manual-decoded	reviewed	vs.model_80028914 asm review
 VS.EXE	0x80028a6c	0x1826c		mips26	reachable-code	0x80042d54	load		jal		manual-decoded	reviewed	vs.model_80028914 asm review
-VS.EXE	0x80028b14	0x18314	0x80028b18	mips_hi16_lo16	reachable-code	0x801624d0	bss	DAT_801624d0	lui+addiu		manual-decoded	reviewed	vs.model_80028914 asm review
+VS.EXE	0x80028b14	0x18314	0x80028b18	mips_hi16_lo16	reachable-code	0x801624d0	bss	vs_gfx_state	lui+addiu		manual-decoded	reviewed	vs.model_80028914 asm review
 VS.EXE	0x80028b24	0x18324	0x80028b28	mips_hi16_lo16	reachable-code	0x80063300	bss	DAT_80063300	lui+lw		manual-decoded	reviewed	vs.model_80028914 asm review
 VS.EXE	0x80028b68	0x18368		mips26	reachable-code	0x80043094	load		jal		manual-decoded	reviewed	vs.model_80028914 asm review
-VS.EXE	0x80028b70	0x18370	0x80028b74	mips_hi16_lo16	reachable-code	0x8018ee68	bss	DAT_801624d0	lui+addiu		manual-decoded	reviewed	vs.model_80028914 asm review
+VS.EXE	0x80028b70	0x18370	0x80028b74	mips_hi16_lo16	reachable-code	0x8018ee68	bss	vs_gfx_state	lui+addiu		manual-decoded	reviewed	vs.model_80028914 asm review
 VS.EXE	0x80028b7c	0x1837c		mips26	reachable-code	0x80042bf4	load		jal		manual-decoded	reviewed	vs.model_80028914 asm review
 VS.EXE	0x80028bcc	0x183cc	0x80028bd8	mips_hi16_lo16	reachable-code	0x800633b0	bss	DAT_800633b0	lui+addiu		manual-decoded	reviewed	vs.model_80028914 asm review
 VS.EXE	0x80028bd0	0x183d0	0x80028bd4	mips_hi16_lo16	reachable-code	0x80063300	bss	DAT_80063300	lui+lw		manual-decoded	reviewed	vs.model_80028914 asm review
@@ -10468,8 +10468,8 @@ VS.EXE	0x80028ca8	0x184a8	0x80028cac	mips_hi16_lo16	reachable-code	0x80063350	bs
 VS.EXE	0x80028cb0	0x184b0		mips26	reachable-code	0x80028cc8	load		j		manual-decoded	reviewed	vs.model_80028914 asm review
 VS.EXE	0x80028cb8	0x184b8		mips_gprel16	reachable-code	0x800632d8	load	DAT_800632d8	lw	gp	manual-decoded	reviewed	vs.model_80028914 asm review
 VS.EXE	0x80028cbc	0x184bc	0x80028cc0	mips_hi16_lo16	reachable-code	0x80063350	bss	DAT_80063350	lui+sw		manual-decoded	reviewed	vs.model_80028914 asm review
-VS.EXE	0x80028ccc	0x184cc	0x80028cd0	mips_hi16_lo16	reachable-code	0x801624d0	bss	DAT_801624d0	lui+addiu		manual-decoded	reviewed	vs.model_80028914 asm review
-VS.EXE	0x80028d08	0x18508	0x80028d18	mips_hi16_lo16	reachable-code	0x8016ccbc	bss	DAT_801624d0	lui+addiu		manual-decoded	reviewed	vs.model_80028914 asm review
+VS.EXE	0x80028ccc	0x184cc	0x80028cd0	mips_hi16_lo16	reachable-code	0x801624d0	bss	vs_gfx_state	lui+addiu		manual-decoded	reviewed	vs.model_80028914 asm review
+VS.EXE	0x80028d08	0x18508	0x80028d18	mips_hi16_lo16	reachable-code	0x8016ccbc	bss	vs_gfx_state	lui+addiu		manual-decoded	reviewed	vs.model_80028914 asm review
 VS.EXE	0x80028d10	0x18510	0x80028d14	mips_hi16_lo16	reachable-code	0x80063300	bss	DAT_80063300	lui+lw		manual-decoded	reviewed	vs.model_80028914 asm review
 VS.EXE	0x80028d3c	0x1853c		mips26	reachable-code	0x80028474	load		jal		manual-decoded	reviewed	vs.model_80028914 asm review
 VS.EXE	0x80028dcc	0x185cc	0x80028dd8	mips_hi16_lo16	reachable-code	0x800633b0	bss	DAT_800633b0	lui+addiu		manual-decoded	reviewed	vs.anim_80028d94 asm review
@@ -10477,14 +10477,14 @@ VS.EXE	0x80028dfc	0x185fc		mips26	reachable-code	0x80028fac	load		j		manual-deco
 VS.EXE	0x80028e64	0x18664		mips26	reachable-code	0x80028fa8	load		j		manual-decoded	reviewed	vs.anim_80028d94 asm review
 VS.EXE	0x80028e7c	0x1867c		mips26	reachable-code	0x80028e1c	load		j		manual-decoded	reviewed	vs.anim_80028d94 asm review
 VS.EXE	0x80028e98	0x18698		mips26	reachable-code	0x80027f30	load		jal		manual-decoded	reviewed	vs.anim_80028d94 asm review
-VS.EXE	0x80028fd0	0x187d0	0x80028fd4	mips_hi16_lo16	reachable-code	0x801624d0	bss	DAT_801624d0	lui+addiu		manual-decoded	reviewed	vs.fade_80028fcc asm review
+VS.EXE	0x80028fd0	0x187d0	0x80028fd4	mips_hi16_lo16	reachable-code	0x801624d0	bss	vs_gfx_state	lui+addiu		manual-decoded	reviewed	vs.fade_80028fcc asm review
 VS.EXE	0x80029004	0x18804		mips26	reachable-code	0x8004a1a4	load		jal		manual-decoded	reviewed	vs.fade_80028fcc asm review
 VS.EXE	0x80029034	0x18834		mips_gprel16	reachable-code	0x800632e0	load	DAT_800632e0	lw	gp	manual-decoded	reviewed	vs.fade_80028fcc asm review
 VS.EXE	0x8002904c	0x1884c	0x80029050	mips_hi16_lo16	reachable-code	0x8001150c	load		lui+addiu		manual-decoded	reviewed	vs.fade_80028fcc asm review
 VS.EXE	0x80029088	0x18888		mips26	reachable-code	0x800290b0	load		j		manual-decoded	reviewed	vs.fade_80028fcc asm review
 VS.EXE	0x800290c0	0x188c0		mips26	reachable-code	0x80029134	load		j		manual-decoded	reviewed	vs.fade_80028fcc asm review
 VS.EXE	0x80029100	0x18900		mips26	reachable-code	0x80029134	load		j		manual-decoded	reviewed	vs.fade_80028fcc asm review
-VS.EXE	0x80029140	0x18940	0x80029144	mips_hi16_lo16	reachable-code	0x801624d0	bss	DAT_801624d0	lui+addiu		manual-decoded	reviewed	vs.fade_80028fcc asm review
+VS.EXE	0x80029140	0x18940	0x80029144	mips_hi16_lo16	reachable-code	0x801624d0	bss	vs_gfx_state	lui+addiu		manual-decoded	reviewed	vs.fade_80028fcc asm review
 VS.EXE	0x8002919c	0x1899c		mips_gprel16	reachable-code	0x800632e0	load	DAT_800632e0	lw	gp	manual-decoded	reviewed	vs.fade_80028fcc asm review
 VS.EXE	0x800291a8	0x189a8		mips_gprel16	reachable-code	0x800632e0	load	DAT_800632e0	sw	gp	manual-decoded	reviewed	vs.fade_80028fcc asm review
 VS.EXE	0x800291b8	0x189b8		mips_gprel16	reachable-code	0x800632e0	load	DAT_800632e0	sw	gp	manual-decoded	reviewed	vs.fade_80028fcc asm review
@@ -10500,19 +10500,19 @@ VS.EXE	0x80029354	0x18b54		mips26	reachable-code	0x80043844	load		jal		manual-de
 VS.EXE	0x8002935c	0x18b5c	0x80029360	mips_hi16_lo16	reachable-code	0x8006321c	load	DAT_8006321c	lui+lw		manual-decoded	reviewed	vs.fade_80028fcc asm review
 VS.EXE	0x80029364	0x18b64		mips26	reachable-code	0x800439e4	load		jal		manual-decoded	reviewed	vs.fade_80028fcc asm review
 VS.EXE	0x80029370	0x18b70		mips26	reachable-code	0x80042d54	load		jal		manual-decoded	reviewed	vs.fade_80028fcc asm review
-VS.EXE	0x8002940c	0x18c0c	0x80029410	mips_hi16_lo16	reachable-code	0x801624d0	bss	DAT_801624d0	lui+addiu		manual-decoded	reviewed	vs.fade_80028fcc asm review
+VS.EXE	0x8002940c	0x18c0c	0x80029410	mips_hi16_lo16	reachable-code	0x801624d0	bss	vs_gfx_state	lui+addiu		manual-decoded	reviewed	vs.fade_80028fcc asm review
 VS.EXE	0x80029450	0x18c50		mips26	reachable-code	0x800435b4	load		jal		manual-decoded	reviewed	vs.fade_80028fcc asm review
-VS.EXE	0x80029528	0x18d28	0x8002952c	mips_hi16_lo16	reachable-code	0x8018ee68	bss	DAT_801624d0	lui+addiu		manual-decoded	reviewed	vs.fade_80028fcc asm review
+VS.EXE	0x80029528	0x18d28	0x8002952c	mips_hi16_lo16	reachable-code	0x8018ee68	bss	vs_gfx_state	lui+addiu		manual-decoded	reviewed	vs.fade_80028fcc asm review
 VS.EXE	0x8002953c	0x18d3c		mips26	reachable-code	0x80042bf4	load		jal		manual-decoded	reviewed	vs.fade_80028fcc asm review
-VS.EXE	0x800295c8	0x18dc8	0x800295d0	mips_hi16_lo16	reachable-code	0x8016ccbc	bss	DAT_801624d0	lui+addiu		manual-decoded	reviewed	vs.fade_80028fcc asm review
+VS.EXE	0x800295c8	0x18dc8	0x800295d0	mips_hi16_lo16	reachable-code	0x8016ccbc	bss	vs_gfx_state	lui+addiu		manual-decoded	reviewed	vs.fade_80028fcc asm review
 VS.EXE	0x80029650	0x18e50		mips_gprel16	reachable-code	0x800632dc	load	DAT_800632dc	lw	gp	manual-decoded	reviewed	vs.fade_80028fcc asm review
 VS.EXE	0x80029690	0x18e90		mips26	reachable-code	0x800296c0	load		j		manual-decoded	reviewed	vs.fade_80028fcc asm review
 VS.EXE	0x80029764	0x18f64	0x80029768	mips_hi16_lo16	reachable-code	0x80063224	load	DAT_80063224	lui+lw		manual-decoded	reviewed	vs.fade_80028fcc asm review
 VS.EXE	0x80029770	0x18f70	0x80029774	mips_hi16_lo16	reachable-code	0x80063360	bss	DAT_80063360	lui+sw		manual-decoded	reviewed	vs.fade_80028fcc asm review
 VS.EXE	0x80029780	0x18f80	0x80029784	mips_hi16_lo16	reachable-code	0x80063350	bss	DAT_80063350	lui+sw		manual-decoded	reviewed	vs.fade_80028fcc asm review
 VS.EXE	0x80029788	0x18f88		mips26	reachable-code	0x80027ba4	load		jal		manual-decoded	reviewed	vs.fade_80028fcc asm review
-VS.EXE	0x80029790	0x18f90	0x80029794	mips_hi16_lo16	reachable-code	0x801624d0	bss	DAT_801624d0	lui+addiu		manual-decoded	reviewed	vs.fade_80028fcc asm review
-VS.EXE	0x800298a0	0x190a0	0x800298a4	mips_hi16_lo16	reachable-code	0x8016a4d0	bss	DAT_801624d0	lui+addiu		manual-decoded	reviewed	vs.timer_800297fc decoded state anchor at owner+0x8000
+VS.EXE	0x80029790	0x18f90	0x80029794	mips_hi16_lo16	reachable-code	0x801624d0	bss	vs_gfx_state	lui+addiu		manual-decoded	reviewed	vs.fade_80028fcc asm review
+VS.EXE	0x800298a0	0x190a0	0x800298a4	mips_hi16_lo16	reachable-code	0x8016a4d0	bss	vs_gfx_state	lui+addiu		manual-decoded	reviewed	vs.timer_800297fc decoded state anchor at owner+0x8000
 VS.EXE	0x80029944	0x19144		mips26	reachable-code	0x800299ac	load		j		manual-decoded	reviewed	vs.timer_800297fc asm review
 VS.EXE	0x8002995c	0x1915c		mips26	reachable-code	0x800299ac	load		j		manual-decoded	reviewed	vs.timer_800297fc asm review
 VS.EXE	0x80029968	0x19168		mips26	reachable-code	0x800299a8	load		j		manual-decoded	reviewed	vs.timer_800297fc asm review
@@ -10524,28 +10524,28 @@ VS.EXE	0x80029a58	0x19258		mips26	reachable-code	0x80029a9c	load		j		manual-deco
 VS.EXE	0x80029a70	0x19270		mips26	reachable-code	0x80029aa4	load		j		manual-decoded	reviewed	vs.timer_800297fc asm review
 VS.EXE	0x80029b14	0x19314		mips_gprel16	reachable-code	0x800632e4	load	DAT_800632e4	lbu	gp	manual-decoded	reviewed	vs.gauge_80029b10 direct gp+0xcc static blink byte
 VS.EXE	0x80029b24	0x19324		mips_gprel16	reachable-code	0x800632e4	load	DAT_800632e4	sb	gp	manual-decoded	reviewed	vs.gauge_80029b10 direct gp+0xcc static blink byte
-VS.EXE	0x80029b34	0x19334	0x80029b38	mips_hi16_lo16	reachable-code	0x8016a4d0	bss	DAT_801624d0	lui+addiu		manual-decoded	reviewed	vs.gauge_80029b10 directly decoded existing owner anchor+0x8000
+VS.EXE	0x80029b34	0x19334	0x80029b38	mips_hi16_lo16	reachable-code	0x8016a4d0	bss	vs_gfx_state	lui+addiu		manual-decoded	reviewed	vs.gauge_80029b10 directly decoded existing owner anchor+0x8000
 VS.EXE	0x80029b5c	0x1935c	0x80029b60	mips_hi16_lo16	reachable-code	0x800633b0	bss	DAT_800633b0	lui+addiu		manual-decoded	reviewed	vs.gauge_80029b10 directly decoded existing owner base
 VS.EXE	0x80029c04	0x19404		mips26	reachable-code	0x80029c30	load		j		manual-decoded	reviewed	vs.gauge_80029b10 asm review
 VS.EXE	0x80029c54	0x19454		mips_gprel16	reachable-code	0x800632e4	load	DAT_800632e4	lbu	gp	manual-decoded	reviewed	vs.gauge_80029b10 direct gp+0xcc static blink byte
 VS.EXE	0x80029cc8	0x194c8		mips26	reachable-code	0x80029ce8	load		j		manual-decoded	reviewed	vs.gauge_80029b10 asm review
-VS.EXE	0x80029d38	0x19538	0x80029d3c	mips_hi16_lo16	reachable-code	0x8016a4d0	bss	DAT_801624d0	lui+addiu		manual-decoded	reviewed	vs.gauge_80029b10 directly decoded existing owner anchor+0x8000
+VS.EXE	0x80029d38	0x19538	0x80029d3c	mips_hi16_lo16	reachable-code	0x8016a4d0	bss	vs_gfx_state	lui+addiu		manual-decoded	reviewed	vs.gauge_80029b10 directly decoded existing owner anchor+0x8000
 VS.EXE	0x80029d5c	0x1955c	0x80029d60	mips_hi16_lo16	reachable-code	0x800633b0	bss	DAT_800633b0	lui+addiu		manual-decoded	reviewed	vs.gauge_80029b10 directly decoded existing owner base
 VS.EXE	0x80029e1c	0x1961c		mips26	reachable-code	0x80029e4c	load		j		manual-decoded	reviewed	vs.gauge_80029b10 asm review
 VS.EXE	0x80029f50	0x19750		mips26	reachable-code	0x80029f94	load		j		manual-decoded	reviewed	vs.hud_80029f28 asm review
 VS.EXE	0x80029f70	0x19770		mips26	reachable-code	0x80029f94	load		j		manual-decoded	reviewed	vs.hud_80029f28 asm review
-VS.EXE	0x80029f94	0x19794	0x80029f98	mips_hi16_lo16	reachable-code	0x8016a4d0	bss	DAT_801624d0	lui+addiu		manual-decoded	reviewed	vs.hud_80029f28 asm review
+VS.EXE	0x80029f94	0x19794	0x80029f98	mips_hi16_lo16	reachable-code	0x8016a4d0	bss	vs_gfx_state	lui+addiu		manual-decoded	reviewed	vs.hud_80029f28 asm review
 VS.EXE	0x80029fa4	0x197a4	0x80029fa8	mips_hi16_lo16	reachable-code	0x80063370	bss	DAT_80063370	lui+addiu		manual-decoded	reviewed	vs.hud_80029f28 asm review
 VS.EXE	0x80029fe4	0x197e4	0x80029fe8	mips_hi16_lo16	reachable-code	0x80063370	bss	DAT_80063370	lui+addiu		manual-decoded	reviewed	vs.hud_80029f28 asm review
 VS.EXE	0x8002a024	0x19824		mips26	reachable-code	0x8002a034	load		j		manual-decoded	reviewed	vs.hud_80029f28 asm review
-VS.EXE	0x8002a194	0x19994	0x8002a198	mips_hi16_lo16	reachable-code	0x8016a4d0	bss	DAT_801624d0	lui+addiu		manual-decoded	reviewed	vs.hud_80029f28 asm review
+VS.EXE	0x8002a194	0x19994	0x8002a198	mips_hi16_lo16	reachable-code	0x8016a4d0	bss	vs_gfx_state	lui+addiu		manual-decoded	reviewed	vs.hud_80029f28 asm review
 VS.EXE	0x8002a20c	0x19a0c		mips26	reachable-code	0x8002a274	load		j		manual-decoded	reviewed	vs.hud_80029f28 asm review
 VS.EXE	0x8002a224	0x19a24		mips26	reachable-code	0x8002a274	load		j		manual-decoded	reviewed	vs.hud_80029f28 asm review
 VS.EXE	0x8002a230	0x19a30		mips26	reachable-code	0x8002a270	load		j		manual-decoded	reviewed	vs.hud_80029f28 asm review
 VS.EXE	0x8002a24c	0x19a4c		mips26	reachable-code	0x8002a270	load		j		manual-decoded	reviewed	vs.hud_80029f28 asm review
 VS.EXE	0x8002a254	0x19a54		mips26	reachable-code	0x8002a270	load		j		manual-decoded	reviewed	vs.hud_80029f28 asm review
 VS.EXE	0x8002a29c	0x19a9c		mips26	reachable-code	0x8002a2d4	load		j		manual-decoded	reviewed	vs.hud_80029f28 asm review
-VS.EXE	0x8002a374	0x19b74	0x8002a37c	mips_hi16_lo16	reachable-code	0x801624d0	bss	DAT_801624d0	lui+addiu		manual-decoded	reviewed	vs.hud_80029f28 asm review
+VS.EXE	0x8002a374	0x19b74	0x8002a37c	mips_hi16_lo16	reachable-code	0x801624d0	bss	vs_gfx_state	lui+addiu		manual-decoded	reviewed	vs.hud_80029f28 asm review
 VS.EXE	0x8002a3b8	0x19bb8	0x8002a3bc	mips_hi16_lo16	reachable-code	0x80011524	load		lui+addiu		manual-decoded	reviewed	vs.hud_80029f28 asm review
 VS.EXE	0x8002a430	0x19c30		mips26	reachable-code	0x8002a910	load		j		manual-decoded	reviewed	vs.hud_80029f28 asm review
 VS.EXE	0x8002a484	0x19c84		mips26	reachable-code	0x8002a904	load		j		manual-decoded	reviewed	vs.hud_80029f28 asm review
@@ -10566,22 +10566,22 @@ VS.EXE	0x8002a854	0x1a054		mips26	reachable-code	0x8002a904	load		j		manual-deco
 VS.EXE	0x8002a8a8	0x1a0a8		mips26	reachable-code	0x8002a904	load		j		manual-decoded	reviewed	vs.hud_80029f28 asm review
 VS.EXE	0x8002a920	0x1a120		mips26	reachable-code	0x8002a934	load		j		manual-decoded	reviewed	vs.hud_80029f28 asm review
 VS.EXE	0x8002a950	0x1a150		mips26	reachable-code	0x8002a968	load		j		manual-decoded	reviewed	vs.hud_80029f28 asm review
-VS.EXE	0x8002a970	0x1a170	0x8002a974	mips_hi16_lo16	reachable-code	0x801624d0	bss	DAT_801624d0	lui+addiu		manual-decoded	reviewed	vs.hud_80029f28 asm review
-VS.EXE	0x8002a9d4	0x1a1d4	0x8002a9dc	mips_hi16_lo16	reachable-code	0x801624d0	bss	DAT_801624d0	lui+addiu		manual-decoded	reviewed	vs.hud_80029f28 asm review
+VS.EXE	0x8002a970	0x1a170	0x8002a974	mips_hi16_lo16	reachable-code	0x801624d0	bss	vs_gfx_state	lui+addiu		manual-decoded	reviewed	vs.hud_80029f28 asm review
+VS.EXE	0x8002a9d4	0x1a1d4	0x8002a9dc	mips_hi16_lo16	reachable-code	0x801624d0	bss	vs_gfx_state	lui+addiu		manual-decoded	reviewed	vs.hud_80029f28 asm review
 VS.EXE	0x8002aa30	0x1a230		mips26	reachable-code	0x8002aaac	load		j		manual-decoded	reviewed	vs.hud_80029f28 asm review
 VS.EXE	0x8002aa44	0x1a244		mips26	reachable-code	0x8002aaac	load		j		manual-decoded	reviewed	vs.hud_80029f28 asm review
 VS.EXE	0x8002aa5c	0x1a25c		mips26	reachable-code	0x8002aa8c	load		j		manual-decoded	reviewed	vs.hud_80029f28 asm review
 VS.EXE	0x8002aa70	0x1a270		mips26	reachable-code	0x8002aa8c	load		j		manual-decoded	reviewed	vs.hud_80029f28 asm review
-VS.EXE	0x8002aaf4	0x1a2f4	0x8002aaf8	mips_hi16_lo16	reachable-code	0x801624d0	bss	DAT_801624d0	lui+addiu		manual-decoded	reviewed	vs.hud_80029f28 asm review
-VS.EXE	0x8002ab84	0x1a384	0x8002ab8c	mips_hi16_lo16	reachable-code	0x801624d0	bss	DAT_801624d0	lui+addiu		manual-decoded	reviewed	vs.hud_80029f28 asm review
+VS.EXE	0x8002aaf4	0x1a2f4	0x8002aaf8	mips_hi16_lo16	reachable-code	0x801624d0	bss	vs_gfx_state	lui+addiu		manual-decoded	reviewed	vs.hud_80029f28 asm review
+VS.EXE	0x8002ab84	0x1a384	0x8002ab8c	mips_hi16_lo16	reachable-code	0x801624d0	bss	vs_gfx_state	lui+addiu		manual-decoded	reviewed	vs.hud_80029f28 asm review
 VS.EXE	0x8002abe4	0x1a3e4		mips26	reachable-code	0x8002ac0c	load		j		manual-decoded	reviewed	vs.hud_80029f28 asm review
-VS.EXE	0x8002ac24	0x1a424	0x8002ac28	mips_hi16_lo16	reachable-code	0x801624d0	bss	DAT_801624d0	lui+addiu		manual-decoded	reviewed	vs.hud_80029f28 asm review
+VS.EXE	0x8002ac24	0x1a424	0x8002ac28	mips_hi16_lo16	reachable-code	0x801624d0	bss	vs_gfx_state	lui+addiu		manual-decoded	reviewed	vs.hud_80029f28 asm review
 VS.EXE	0x8002ac94	0x1a494		mips26	reachable-code	0x8004a164	load		jal		manual-decoded	reviewed	vs.hud_80029f28 asm review
 VS.EXE	0x8002ad54	0x1a554	0x8002ad58	mips_hi16_lo16	reachable-code	0x801624b8	bss	DAT_801624b8	lui+addiu		manual-decoded	reviewed	vs.name_8002ad40 asm review
 VS.EXE	0x8002ad84	0x1a584	0x8002ad88	mips_hi16_lo16	reachable-code	0x80063338	bss	DAT_80063338	lui+lw		manual-decoded	reviewed	vs.name_8002ad40 asm review
 VS.EXE	0x8002ad98	0x1a598	0x8002ada0	mips_hi16_lo16	reachable-code	0x80196230	bss	DAT_80196230	lui+addiu		manual-decoded	reviewed	vs.name_8002ad40 asm review
 VS.EXE	0x8002adac	0x1a5ac	0x8002adb4	mips_hi16_lo16	reachable-code	0x8019c230	bss	DAT_80196230	lui+addiu		manual-decoded	reviewed	vs.name_8002ad40 asm review
-VS.EXE	0x8002add4	0x1a5d4	0x8002add8	mips_hi16_lo16	reachable-code	0x8016a4d0	bss	DAT_801624d0	lui+addiu		manual-decoded	reviewed	vs.name_8002ad40 asm review
+VS.EXE	0x8002add4	0x1a5d4	0x8002add8	mips_hi16_lo16	reachable-code	0x8016a4d0	bss	vs_gfx_state	lui+addiu		manual-decoded	reviewed	vs.name_8002ad40 asm review
 VS.EXE	0x8002aee8	0x1a6e8		mips26	reachable-code	0x8002af5c	load		j		manual-decoded	reviewed	vs.name_8002ad40 asm review
 VS.EXE	0x8002af08	0x1a708		mips26	reachable-code	0x8002af58	load		j		manual-decoded	reviewed	vs.name_8002ad40 asm review
 VS.EXE	0x8002af34	0x1a734		mips26	reachable-code	0x8002af5c	load		j		manual-decoded	reviewed	vs.name_8002ad40 asm review
@@ -10595,14 +10595,14 @@ VS.EXE	0x8002b198	0x1a998		mips26	reachable-code	0x8002a360	load		jal		manual-de
 VS.EXE	0x8002b1ac	0x1a9ac		mips26	reachable-code	0x8002a360	load		jal		manual-decoded	reviewed	vs.round_8002b078 asm review
 VS.EXE	0x8002b1b8	0x1a9b8		mips26	reachable-code	0x8002a124	load		jal		manual-decoded	reviewed	vs.round_8002b078 asm review
 VS.EXE	0x8002b1c0	0x1a9c0		mips26	reachable-code	0x80029b10	load		jal		manual-decoded	reviewed	vs.round_8002b078 asm review
-VS.EXE	0x8002b1c8	0x1a9c8	0x8002b1cc	mips_hi16_lo16	reachable-code	0x801603c0	bss	DAT_801603c0	lui+addiu		manual-decoded	reviewed	vs.round_8002b078 asm review
+VS.EXE	0x8002b1c8	0x1a9c8	0x8002b1cc	mips_hi16_lo16	reachable-code	0x801603c0	bss	pad_state	lui+addiu		manual-decoded	reviewed	vs.round_8002b078 asm review
 VS.EXE	0x8002b1f8	0x1a9f8		mips26	reachable-code	0x80029f28	load		jal		manual-decoded	reviewed	vs.round_8002b078 asm review
 VS.EXE	0x8002b200	0x1aa00		mips26	reachable-code	0x8002ad40	load		jal		manual-decoded	reviewed	vs.round_8002b078 asm review
 VS.EXE	0x8002b208	0x1aa08		mips26	reachable-code	0x8002b2d4	load		j		manual-decoded	reviewed	vs.round_8002b078 asm review
 VS.EXE	0x8002b230	0x1aa30		mips26	reachable-code	0x8002a360	load		jal		manual-decoded	reviewed	vs.round_8002b078 asm review
 VS.EXE	0x8002b23c	0x1aa3c		mips26	reachable-code	0x8002a124	load		jal		manual-decoded	reviewed	vs.round_8002b078 asm review
 VS.EXE	0x8002b244	0x1aa44		mips26	reachable-code	0x80029b10	load		jal		manual-decoded	reviewed	vs.round_8002b078 asm review
-VS.EXE	0x8002b24c	0x1aa4c	0x8002b250	mips_hi16_lo16	reachable-code	0x801603c0	bss	DAT_801603c0	lui+addiu		manual-decoded	reviewed	vs.round_8002b078 asm review
+VS.EXE	0x8002b24c	0x1aa4c	0x8002b250	mips_hi16_lo16	reachable-code	0x801603c0	bss	pad_state	lui+addiu		manual-decoded	reviewed	vs.round_8002b078 asm review
 VS.EXE	0x8002b27c	0x1aa7c		mips26	reachable-code	0x80029f28	load		jal		manual-decoded	reviewed	vs.round_8002b078 asm review
 VS.EXE	0x8002b284	0x1aa84		mips26	reachable-code	0x8002ad40	load		jal		manual-decoded	reviewed	vs.round_8002b078 asm review
 VS.EXE	0x8002b28c	0x1aa8c		mips26	reachable-code	0x8002b2d4	load		j		manual-decoded	reviewed	vs.round_8002b078 asm review
@@ -10615,18 +10615,18 @@ VS.EXE	0x8002b338	0x1ab38		mips26	reachable-code	0x8002b344	load		j		manual-deco
 VS.EXE	0x8002b35c	0x1ab5c		mips26	reachable-code	0x8002b3ac	load		j		manual-decoded	reviewed	vs.round_8002b078 asm review
 VS.EXE	0x8002b390	0x1ab90		mips26	reachable-code	0x8002b39c	load		j		manual-decoded	reviewed	vs.round_8002b078 asm review
 VS.EXE	0x8002b3b0	0x1abb0	0x8002b3b4	mips_hi16_lo16	reachable-code	0x800633b0	bss	DAT_800633b0	lui+addiu		manual-decoded	reviewed	vs.round_8002b078 asm review
-VS.EXE	0x8002b40c	0x1ac0c	0x8002b410	mips_hi16_lo16	reachable-code	0x8018a4d0	bss	DAT_801624d0	lui+addiu		manual-decoded	reviewed	vs.round_8002b078 asm review
-VS.EXE	0x8002b55c	0x1ad5c	0x8002b560	mips_hi16_lo16	reachable-code	0x801624d0	bss	DAT_801624d0	lui+addiu		manual-decoded	reviewed	vs.round_8002b078 asm review
+VS.EXE	0x8002b40c	0x1ac0c	0x8002b410	mips_hi16_lo16	reachable-code	0x8018a4d0	bss	vs_gfx_state	lui+addiu		manual-decoded	reviewed	vs.round_8002b078 asm review
+VS.EXE	0x8002b55c	0x1ad5c	0x8002b560	mips_hi16_lo16	reachable-code	0x801624d0	bss	vs_gfx_state	lui+addiu		manual-decoded	reviewed	vs.round_8002b078 asm review
 VS.EXE	0x8002b5d4	0x1add4		mips26	reachable-code	0x80042bf4	load		jal		manual-decoded	reviewed	vs.round_8002b078 asm review
-VS.EXE	0x8002b6e0	0x1aee0	0x8002b6e4	mips_hi16_lo16	reachable-code	0x8016a4d0	bss	DAT_801624d0	lui+addiu		manual-decoded	reviewed	vs.round_8002b078 asm review
+VS.EXE	0x8002b6e0	0x1aee0	0x8002b6e4	mips_hi16_lo16	reachable-code	0x8016a4d0	bss	vs_gfx_state	lui+addiu		manual-decoded	reviewed	vs.round_8002b078 asm review
 VS.EXE	0x8002b724	0x1af24		mips26	reachable-code	0x8004a1c4	load		jal		manual-decoded	reviewed	vs.round_8002b078 asm review
 VS.EXE	0x8002b858	0x1b058		mips26	reachable-code	0x8002b944	load		j		manual-decoded	reviewed	vs.round_8002b078 asm review
 VS.EXE	0x8002ba44	0x1b244		mips26	reachable-code	0x8004a164	load		jal		manual-decoded	reviewed	vs.round_8002b078 asm review
 VS.EXE	0x8002ba80	0x1b280		mips26	reachable-code	0x8002baa8	load		j		manual-decoded	reviewed	vs.round_8002b078 asm review
-VS.EXE	0x8002bb94	0x1b394	0x8002bb9c	mips_hi16_lo16	reachable-code	0x8018a4d0	bss	DAT_801624d0	lui+addiu		manual-decoded	reviewed	vs.round_8002b078 asm review
-VS.EXE	0x8002bba0	0x1b3a0	0x8002bba4	mips_hi16_lo16	reachable-code	0x8016a4d0	bss	DAT_801624d0	lui+addiu		manual-decoded	reviewed	vs.round_8002b078 asm review
+VS.EXE	0x8002bb94	0x1b394	0x8002bb9c	mips_hi16_lo16	reachable-code	0x8018a4d0	bss	vs_gfx_state	lui+addiu		manual-decoded	reviewed	vs.round_8002b078 asm review
+VS.EXE	0x8002bba0	0x1b3a0	0x8002bba4	mips_hi16_lo16	reachable-code	0x8016a4d0	bss	vs_gfx_state	lui+addiu		manual-decoded	reviewed	vs.round_8002b078 asm review
 VS.EXE	0x8002bbbc	0x1b3bc	0x8002bbc0	mips_hi16_lo16	reachable-code	0x800633b0	bss	DAT_800633b0	lui+addiu		manual-decoded	reviewed	vs.round_8002b078 asm review
-VS.EXE	0x8002bc08	0x1b408	0x8002bc0c	mips_hi16_lo16	reachable-code	0x8018ee68	bss	DAT_801624d0	lui+addiu		manual-decoded	reviewed	vs.round_8002b078 asm review
+VS.EXE	0x8002bc08	0x1b408	0x8002bc0c	mips_hi16_lo16	reachable-code	0x8018ee68	bss	vs_gfx_state	lui+addiu		manual-decoded	reviewed	vs.round_8002b078 asm review
 VS.EXE	0x8002bcc0	0x1b4c0		mips26	reachable-code	0x80042bf4	load		jal		manual-decoded	reviewed	vs.round_8002b078 asm review
 VS.EXE	0x8002be44	0x1b644		mips26	reachable-code	0x8002be78	load		j		manual-decoded	reviewed	vs.round_8002b078 asm review
 VS.EXE	0x8002be60	0x1b660		mips26	reachable-code	0x8002be6c	load		j		manual-decoded	reviewed	vs.round_8002b078 asm review
@@ -10641,8 +10641,8 @@ VS.EXE	0x8002bf54	0x1b754	0x8002bf58	mips_hi16_lo16	reachable-code	0x80063300	bs
 VS.EXE	0x8002bf5c	0x1b75c	0x8002bf60	mips_hi16_lo16	reachable-code	0x80063220	load	DAT_80063220	lui+lw		manual-decoded	reviewed	vs.round_8002b078 asm review
 VS.EXE	0x8002bf90	0x1b790		mips26	reachable-code	0x8002bfe8	load		jal		manual-decoded	reviewed	vs.round_8002b078 asm review
 VS.EXE	0x8002bff4	0x1b7f4	0x8002bff8	mips_hi16_lo16	reachable-code	0x800633b0	bss	DAT_800633b0	lui+addiu		manual-decoded	reviewed	vs.shadow_8002bfe8 decoded table-base pair; existing VsBuffer owner
-VS.EXE	0x8002c060	0x1b860	0x8002c064	mips_hi16_lo16	reachable-code	0x801624d0	bss	DAT_801624d0	lui+addiu		manual-decoded	reviewed	vs.shadow_8002bfe8 asm review
-VS.EXE	0x8002c0f4	0x1b8f4	0x8002c0f8	mips_hi16_lo16	reachable-code	0x8018ee68	bss	DAT_801624d0	lui+addiu		manual-decoded	reviewed	vs.shadow_8002bfe8 asm review
+VS.EXE	0x8002c060	0x1b860	0x8002c064	mips_hi16_lo16	reachable-code	0x801624d0	bss	vs_gfx_state	lui+addiu		manual-decoded	reviewed	vs.shadow_8002bfe8 asm review
+VS.EXE	0x8002c0f4	0x1b8f4	0x8002c0f8	mips_hi16_lo16	reachable-code	0x8018ee68	bss	vs_gfx_state	lui+addiu		manual-decoded	reviewed	vs.shadow_8002bfe8 asm review
 VS.EXE	0x8002c0fc	0x1b8fc		mips26	reachable-code	0x80042bf4	load		jal		manual-decoded	reviewed	vs.shadow_8002bfe8 asm review
 VS.EXE	0x8002c30c	0x1bb0c	0x8002c310	mips_hi16_lo16	reachable-code	0x800633b0	bss	DAT_800633b0	lui+addiu		manual-decoded	reviewed	vs.guard_8002c2c4 asm review
 VS.EXE	0x8002c360	0x1bb60	0x8002c364	mips_hi16_lo16	reachable-code	0x80011574	load		lui+addiu		manual-decoded	reviewed	vs.guard_8002c2c4 asm review
@@ -10651,21 +10651,21 @@ VS.EXE	0x8002c3e0	0x1bbe0		mips26	reachable-code	0x8002c454	load		j		manual-deco
 VS.EXE	0x8002c414	0x1bc14		mips26	reachable-code	0x8002c454	load		j		manual-decoded	reviewed	vs.guard_8002c2c4 asm review
 VS.EXE	0x8002c41c	0x1bc1c		mips26	reachable-code	0x8002c428	load		j		manual-decoded	reviewed	vs.guard_8002c2c4 asm review
 VS.EXE	0x8002c468	0x1bc68		mips26	reachable-code	0x800428e4	load		jal		manual-decoded	reviewed	vs.guard_8002c2c4 asm review
-VS.EXE	0x8002c494	0x1bc94	0x8002c498	mips_hi16_lo16	reachable-code	0x801624d0	bss	DAT_801624d0	lui+addiu		manual-decoded	reviewed	vs.guard_8002c2c4 asm review
+VS.EXE	0x8002c494	0x1bc94	0x8002c498	mips_hi16_lo16	reachable-code	0x801624d0	bss	vs_gfx_state	lui+addiu		manual-decoded	reviewed	vs.guard_8002c2c4 asm review
 VS.EXE	0x8002c4e4	0x1bce4		mips26	reachable-code	0x800429b4	load		jal		manual-decoded	reviewed	vs.guard_8002c2c4 asm review
 VS.EXE	0x8002c540	0x1bd40		mips26	reachable-code	0x80043094	load		jal		manual-decoded	reviewed	vs.guard_8002c2c4 asm review
-VS.EXE	0x8002c548	0x1bd48	0x8002c54c	mips_hi16_lo16	reachable-code	0x8018ee68	bss	DAT_801624d0	lui+addiu		manual-decoded	reviewed	vs.guard_8002c2c4 asm review
+VS.EXE	0x8002c548	0x1bd48	0x8002c54c	mips_hi16_lo16	reachable-code	0x8018ee68	bss	vs_gfx_state	lui+addiu		manual-decoded	reviewed	vs.guard_8002c2c4 asm review
 VS.EXE	0x8002c554	0x1bd54		mips26	reachable-code	0x80042bf4	load		jal		manual-decoded	reviewed	vs.guard_8002c2c4 asm review
 VS.EXE	0x8002c770	0x1bf70	0x8002c774	mips_hi16_lo16	reachable-code	0x8015ec38	bss	DAT_8015ec38	lui+addiu		manual-decoded	reviewed	vs.guard_8002c2c4 asm review
 VS.EXE	0x8002c7e4	0x1bfe4		mips26	reachable-code	0x8002c814	load		j		manual-decoded	reviewed	vs.guard_8002c2c4 asm review
-VS.EXE	0x8002c8c0	0x1c0c0	0x8002c8c4	mips_hi16_lo16	reachable-code	0x8016a4d0	bss	DAT_801624d0	lui+addiu		manual-decoded	reviewed	vs.guard_8002c2c4 asm review
+VS.EXE	0x8002c8c0	0x1c0c0	0x8002c8c4	mips_hi16_lo16	reachable-code	0x8016a4d0	bss	vs_gfx_state	lui+addiu		manual-decoded	reviewed	vs.guard_8002c2c4 asm review
 VS.EXE	0x8002c8ec	0x1c0ec		mips26	reachable-code	0x8004a184	load		jal		manual-decoded	reviewed	vs.guard_8002c2c4 asm review
 VS.EXE	0x8002ca64	0x1c264		mips26	reachable-code	0x8004a164	load		jal		manual-decoded	reviewed	vs.guard_8002c2c4 asm review
 VS.EXE	0x8002cb10	0x1c310		mips26	reachable-code	0x8004a1c4	load		jal		manual-decoded	reviewed	vs.guard_8002c2c4 asm review
 VS.EXE	0x8002cce4	0x1c4e4		mips26	reachable-code	0x8004a164	load		jal		manual-decoded	reviewed	vs.guard_8002c2c4 asm review
 VS.EXE	0x8002cd90	0x1c590		mips26	reachable-code	0x8004a1c4	load		jal		manual-decoded	reviewed	vs.guard_8002c2c4 asm review
 VS.EXE	0x8002cf64	0x1c764		mips26	reachable-code	0x8004a164	load		jal		manual-decoded	reviewed	vs.guard_8002c2c4 asm review
-VS.EXE	0x8002cf78	0x1c778	0x8002d00c	mips_hi16_lo16	reachable-code	0x801624d0	bss	DAT_801624d0	lui+addiu		manual-decoded	reviewed	vs.guard_8002c2c4 asm review
+VS.EXE	0x8002cf78	0x1c778	0x8002d00c	mips_hi16_lo16	reachable-code	0x801624d0	bss	vs_gfx_state	lui+addiu		manual-decoded	reviewed	vs.guard_8002c2c4 asm review
 VS.EXE	0x8002d030	0x1c830		mips26	reachable-code	0x8004a184	load		jal		manual-decoded	reviewed	vs.guard_8002c2c4 asm review
 VS.EXE	0x8002d190	0x1c990		mips26	reachable-code	0x8004a164	load		jal		manual-decoded	reviewed	vs.guard_8002c2c4 asm review
 VS.EXE	0x8002d23c	0x1ca3c		mips26	reachable-code	0x8004a1c4	load		jal		manual-decoded	reviewed	vs.guard_8002c2c4 asm review
@@ -10683,11 +10683,11 @@ VS.EXE	0x8002d8d8	0x1d0d8		mips26	reachable-code	0x80045954	load		jal		manual-de
 VS.EXE	0x8002d8e8	0x1d0e8		mips26	reachable-code	0x80045954	load		jal		manual-decoded	reviewed	vs.spark_8002d738 asm review
 VS.EXE	0x8002d8f8	0x1d0f8		mips26	reachable-code	0x80045954	load		jal		manual-decoded	reviewed	vs.spark_8002d738 asm review
 VS.EXE	0x8002d9a0	0x1d1a0	0x8002d9a4	mips_hi16_lo16	reachable-code	0x801c4a58	bss	DAT_801c4a58	lui+addiu		manual-decoded	reviewed	vs.spark_8002d998 asm review
-VS.EXE	0x8002da4c	0x1d24c	0x8002da50	mips_hi16_lo16	reachable-code	0x801624d0	bss	DAT_801624d0	lui+addiu		manual-decoded	reviewed	vs.spark_8002d998 asm review
-VS.EXE	0x8002da94	0x1d294	0x8002da98	mips_hi16_lo16	reachable-code	0x8018ee68	bss	DAT_801624d0	lui+addiu		manual-decoded	reviewed	vs.spark_8002d998 asm review
+VS.EXE	0x8002da4c	0x1d24c	0x8002da50	mips_hi16_lo16	reachable-code	0x801624d0	bss	vs_gfx_state	lui+addiu		manual-decoded	reviewed	vs.spark_8002d998 asm review
+VS.EXE	0x8002da94	0x1d294	0x8002da98	mips_hi16_lo16	reachable-code	0x8018ee68	bss	vs_gfx_state	lui+addiu		manual-decoded	reviewed	vs.spark_8002d998 asm review
 VS.EXE	0x8002dab0	0x1d2b0		mips26	reachable-code	0x80042bf4	load		jal		manual-decoded	reviewed	vs.spark_8002d998 asm review
 VS.EXE	0x8002dafc	0x1d2fc	0x8002db00	mips_hi16_lo16	reachable-code	0x801c4a58	bss	DAT_801c4a58	lui+addiu		manual-decoded	reviewed	vs.spark_8002d998 asm review
-VS.EXE	0x8002db08	0x1d308	0x8002db0c	mips_hi16_lo16	reachable-code	0x8016a4d0	bss	DAT_801624d0	lui+addiu		manual-decoded	reviewed	vs.spark_8002d998 asm review
+VS.EXE	0x8002db08	0x1d308	0x8002db0c	mips_hi16_lo16	reachable-code	0x8016a4d0	bss	vs_gfx_state	lui+addiu		manual-decoded	reviewed	vs.spark_8002d998 asm review
 VS.EXE	0x8002dbdc	0x1d3dc		mips26	reachable-code	0x8002dbe8	load		j		manual-decoded	reviewed	vs.spark_8002d998 asm review
 VS.EXE	0x8002dc24	0x1d424		mips26	reachable-code	0x8002dcb4	load		j		manual-decoded	reviewed	vs.spark_8002d998 asm review
 VS.EXE	0x8002dce4	0x1d4e4	0x8002dcec	mips_hi16_lo16	reachable-code	0x800633b0	bss	DAT_800633b0	lui+addiu		manual-decoded	reviewed	vs.fighter_8002dcd8 asm review
@@ -10711,7 +10711,7 @@ VS.EXE	0x8002e34c	0x1db4c	0x8002e350	mips_hi16_lo16	reachable-code	0x800633b0	bs
 VS.EXE	0x8002e438	0x1dc38		mips26	reachable-code	0x8002e4ac	load		j		manual-decoded	reviewed	vs.fighter_8002e114 asm review
 VS.EXE	0x8002e4e4	0x1dce4		mips26	reachable-code	0x8002e4f4	load		j		manual-decoded	reviewed	vs.fighter_8002e114 asm review
 VS.EXE	0x8002e544	0x1dd44	0x8002e548	mips_hi16_lo16	reachable-code	0x800633b0	bss	DAT_800633b0	lui+addiu		manual-decoded	reviewed	vs.fighter_8002e114 asm review
-VS.EXE	0x8002e5f0	0x1ddf0	0x8002e5f4	mips_hi16_lo16	reachable-code	0x801624d0	bss	DAT_801624d0	lui+addiu		manual-decoded	reviewed	vs.cd_8002e5e4 asm review
+VS.EXE	0x8002e5f0	0x1ddf0	0x8002e5f4	mips_hi16_lo16	reachable-code	0x801624d0	bss	vs_gfx_state	lui+addiu		manual-decoded	reviewed	vs.cd_8002e5e4 asm review
 VS.EXE	0x8002e610	0x1de10		mips26	reachable-code	0x8001d1b8	load		jal		manual-decoded	reviewed	vs.cd_8002e5e4 asm review
 VS.EXE	0x8002e618	0x1de18		mips26	reachable-code	0x8001d374	load		jal		manual-decoded	reviewed	vs.cd_8002e5e4 asm review
 VS.EXE	0x8002e698	0x1de98		mips26	reachable-code	0x80045964	load		jal		manual-decoded	reviewed	vs.cd_8002e5e4 asm review
@@ -10954,12 +10954,12 @@ VS.EXE	0x800313c8	0x20bc8	0x800313cc	mips_hi16_lo16	reachable-code	0x80063220	lo
 VS.EXE	0x800313f4	0x20bf4		mips26	reachable-code	0x80031440	load		j		manual-decoded	reviewed	vs.move_80030620 asm review
 VS.EXE	0x80031408	0x20c08		mips26	reachable-code	0x80031440	load		j		manual-decoded	reviewed	vs.move_80030620 asm review
 VS.EXE	0x800314b8	0x20cb8	0x800314bc	mips_hi16_lo16	reachable-code	0x800633b0	bss	DAT_800633b0	lui+addiu		manual-decoded	reviewed	vs.move_80030620 asm review
-VS.EXE	0x800314ec	0x20cec	0x800314f0	mips_hi16_lo16	reachable-code	0x801603c0	bss	DAT_801603c0	lui+addiu		manual-decoded	reviewed	vs.move_80030620 asm review
-VS.EXE	0x800314ec	0x20cec	0x800314f4	mips_hi16_lo16	reachable-code	0x801603c0	bss	DAT_801603c0	lui+lw		manual-decoded	reviewed	vs.move_80030620 asm review
+VS.EXE	0x800314ec	0x20cec	0x800314f0	mips_hi16_lo16	reachable-code	0x801603c0	bss	pad_state	lui+addiu		manual-decoded	reviewed	vs.move_80030620 asm review
+VS.EXE	0x800314ec	0x20cec	0x800314f4	mips_hi16_lo16	reachable-code	0x801603c0	bss	pad_state	lui+lw		manual-decoded	reviewed	vs.move_80030620 asm review
 VS.EXE	0x800314fc	0x20cfc		mips_gprel16	reachable-code	0x800633a8	bss	DAT_800633a8	sw	gp	manual-decoded	reviewed	vs.move_80030620 asm review
 VS.EXE	0x80031500	0x20d00		mips_gprel16	reachable-code	0x800633ac	bss	DAT_800633ac	sw	gp	manual-decoded	reviewed	vs.move_80030620 asm review
 VS.EXE	0x80031504	0x20d04		mips26	reachable-code	0x80031528	load		j		manual-decoded	reviewed	vs.move_80030620 asm review
-VS.EXE	0x8003150c	0x20d0c	0x80031510	mips_hi16_lo16	reachable-code	0x801603c0	bss	DAT_801603c0	lui+addiu		manual-decoded	reviewed	vs.move_80030620 asm review
+VS.EXE	0x8003150c	0x20d0c	0x80031510	mips_hi16_lo16	reachable-code	0x801603c0	bss	pad_state	lui+addiu		manual-decoded	reviewed	vs.move_80030620 asm review
 VS.EXE	0x8003151c	0x20d1c		mips_gprel16	reachable-code	0x800633a8	bss	DAT_800633a8	sw	gp	manual-decoded	reviewed	vs.move_80030620 asm review
 VS.EXE	0x80031520	0x20d20		mips_gprel16	reachable-code	0x800633ac	bss	DAT_800633ac	sw	gp	manual-decoded	reviewed	vs.move_80030620 asm review
 VS.EXE	0x80031534	0x20d34	0x80031538	mips_hi16_lo16	reachable-code	0x80063220	load	DAT_80063220	lui+lw		manual-decoded	reviewed	vs.move_80030620 asm review
@@ -11205,7 +11205,7 @@ VS.EXE	0x8003485c	0x2405c		mips26	reachable-code	0x8003333c	load		jal		manual-de
 VS.EXE	0x80034898	0x24098		mips26	reachable-code	0x8002e314	load		jal		manual-decoded	reviewed	vs.effect_800335e8 asm review
 VS.EXE	0x800348a0	0x240a0		mips26	reachable-code	0x800348ac	load		j		manual-decoded	reviewed	vs.effect_800335e8 asm review
 VS.EXE	0x800348ac	0x240ac		mips26	reachable-code	0x80045954	load		jal		manual-decoded	reviewed	vs.effect_800335e8 asm review
-VS.EXE	0x800348f0	0x240f0	0x800348f4	mips_hi16_lo16	reachable-code	0x801624d0	bss	DAT_801624d0	lui+addiu		manual-decoded	reviewed	vs.effect_800335e8 asm review
+VS.EXE	0x800348f0	0x240f0	0x800348f4	mips_hi16_lo16	reachable-code	0x801624d0	bss	vs_gfx_state	lui+addiu		manual-decoded	reviewed	vs.effect_800335e8 asm review
 VS.EXE	0x80034918	0x24118		mips26	reachable-code	0x8003529c	load		j		manual-decoded	reviewed	vs.effect_800335e8 asm review
 VS.EXE	0x80034978	0x24178		mips26	reachable-code	0x8003333c	load		jal		manual-decoded	reviewed	vs.effect_800335e8 asm review
 VS.EXE	0x80034990	0x24190		mips26	reachable-code	0x8002e314	load		jal		manual-decoded	reviewed	vs.effect_800335e8 asm review
@@ -11258,10 +11258,10 @@ VS.EXE	0x80035400	0x24c00	0x8003540c	mips_hi16_lo16	reachable-code	0x800118c4	lo
 VS.EXE	0x80035480	0x24c80		mips26	reachable-code	0x800354bc	load		j		manual-decoded	reviewed	vs.model_800353d0 asm review
 VS.EXE	0x80035484	0x24c84	0x800354bc	mips_hi16_lo16	reachable-code	0x800118f4	load		lui+addiu		manual-decoded	reviewed	vs.model_800353d0 asm review (delay-slot lui)
 VS.EXE	0x800354b8	0x24cb8	0x800354bc	mips_hi16_lo16	reachable-code	0x800118f4	load		lui+addiu		manual-decoded	reviewed	vs.model_800353d0 asm review
-VS.EXE	0x80035500	0x24d00	0x80035528	mips_hi16_lo16	reachable-code	0x8016ccbc	bss	DAT_801624d0	lui+addiu		manual-decoded	reviewed	vs.model_800353d0 asm review
-VS.EXE	0x80035504	0x24d04	0x80035508	mips_hi16_lo16	reachable-code	0x801624d0	bss	DAT_801624d0	lui+addiu		manual-decoded	reviewed	vs.model_800353d0 asm review
-VS.EXE	0x8003554c	0x24d4c	0x80035558	mips_hi16_lo16	reachable-code	0x8018ee68	bss	DAT_801624d0	lui+addiu		manual-decoded	reviewed	vs.model_800353d0 asm review
-VS.EXE	0x80035588	0x24d88	0x80035590	mips_hi16_lo16	reachable-code	0x8018ee68	bss	DAT_801624d0	lui+addiu		manual-decoded	reviewed	vs.model_800353d0 asm review
+VS.EXE	0x80035500	0x24d00	0x80035528	mips_hi16_lo16	reachable-code	0x8016ccbc	bss	vs_gfx_state	lui+addiu		manual-decoded	reviewed	vs.model_800353d0 asm review
+VS.EXE	0x80035504	0x24d04	0x80035508	mips_hi16_lo16	reachable-code	0x801624d0	bss	vs_gfx_state	lui+addiu		manual-decoded	reviewed	vs.model_800353d0 asm review
+VS.EXE	0x8003554c	0x24d4c	0x80035558	mips_hi16_lo16	reachable-code	0x8018ee68	bss	vs_gfx_state	lui+addiu		manual-decoded	reviewed	vs.model_800353d0 asm review
+VS.EXE	0x80035588	0x24d88	0x80035590	mips_hi16_lo16	reachable-code	0x8018ee68	bss	vs_gfx_state	lui+addiu		manual-decoded	reviewed	vs.model_800353d0 asm review
 VS.EXE	0x8003558c	0x24d8c		mips26	reachable-code	0x80043034	load		jal		manual-decoded	reviewed	vs.model_800353d0 asm review
 VS.EXE	0x80035618	0x24e18		mips26	reachable-code	0x80035648	load		j		manual-decoded	reviewed	vs.model_800353d0 asm review
 VS.EXE	0x8003564c	0x24e4c		mips26	reachable-code	0x80043324	load		jal		manual-decoded	reviewed	vs.model_800353d0 asm review
@@ -11271,12 +11271,12 @@ VS.EXE	0x80035898	0x25098		mips26	reachable-code	0x800358c8	load		j		manual-deco
 VS.EXE	0x8003596c	0x2516c		mips26	reachable-code	0x80035ab8	load		j		manual-decoded	reviewed	vs.model_800353d0 asm review
 VS.EXE	0x800359e0	0x251e0		mips26	reachable-code	0x80035a10	load		j		manual-decoded	reviewed	vs.model_800353d0 asm review
 VS.EXE	0x80035adc	0x252dc		mips26	reachable-code	0x80027ba4	load		jal		manual-decoded	reviewed	vs.model_800353d0 asm review
-VS.EXE	0x80035ae4	0x252e4	0x80035ae8	mips_hi16_lo16	reachable-code	0x801624d0	bss	DAT_801624d0	lui+addiu		manual-decoded	reviewed	vs.model_800353d0 asm review
+VS.EXE	0x80035ae4	0x252e4	0x80035ae8	mips_hi16_lo16	reachable-code	0x801624d0	bss	vs_gfx_state	lui+addiu		manual-decoded	reviewed	vs.model_800353d0 asm review
 VS.EXE	0x80035b74	0x25374	0x80035b7c	mips_hi16_lo16	reachable-code	0x801cef98	bss	DAT_801ce698	lui+addiu		manual-decoded	reviewed	vs.model_800353d0 asm review
 VS.EXE	0x80035b80	0x25380	0x80035ba0	mips_hi16_lo16	reachable-code	0x80011914	load		lui+addiu		manual-decoded	reviewed	vs.model_800353d0 asm review
-VS.EXE	0x80035be8	0x253e8	0x80035bec	mips_hi16_lo16	reachable-code	0x8016a4d0	bss	DAT_801624d0	lui+addiu		manual-decoded	reviewed	vs.model_800353d0 asm review
+VS.EXE	0x80035be8	0x253e8	0x80035bec	mips_hi16_lo16	reachable-code	0x8016a4d0	bss	vs_gfx_state	lui+addiu		manual-decoded	reviewed	vs.model_800353d0 asm review
 VS.EXE	0x80035bf0	0x253f0	0x80035bf4	mips_hi16_lo16	reachable-code	0x800ae3b0	bss	DAT_800633b0	lui+addiu		manual-decoded	reviewed	vs.model_800353d0 asm review
-VS.EXE	0x80035c90	0x25490	0x80035c98	mips_hi16_lo16	reachable-code	0x8018ee68	bss	DAT_801624d0	lui+addiu		manual-decoded	reviewed	vs.model_800353d0 asm review
+VS.EXE	0x80035c90	0x25490	0x80035c98	mips_hi16_lo16	reachable-code	0x8018ee68	bss	vs_gfx_state	lui+addiu		manual-decoded	reviewed	vs.model_800353d0 asm review
 VS.EXE	0x80035c94	0x25494		mips26	reachable-code	0x80035cb4	load		j		manual-decoded	reviewed	vs.model_800353d0 asm review
 VS.EXE	0x80035d18	0x25518		mips26	reachable-code	0x800353d0	load		jal		manual-decoded	reviewed	vs.model_800353d0 asm review
 END.EXE	0x80011fb0	0x17b0	0x80011fb4	mips_hi16_lo16	reachable-code	0x8002fd18	load		lui+addiu		manual-decoded	reviewed	end.main asm review

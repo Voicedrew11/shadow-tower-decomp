@@ -35,7 +35,7 @@
 ADDRESS(0x800246d8, 0x484)
 int func_800246d8(StAnimSet **setp, int id, int clip, u_long frame)
 {
-    StAnimFile *file = DAT_801624d0.unk834C[id];
+    StAnimFile *file = vs_gfx_state.unk834C[id];
     StAnimSet *set = *setp;
     VsScratchPad *sp = VS_SCRATCHPAD;
     StAnimFile *still;
@@ -46,7 +46,7 @@ int func_800246d8(StAnimSet **setp, int id, int clip, u_long frame)
     if (file->unk4 == 0) {
         if (set != NULL)
             func_80023820(set);
-        still = DAT_801624d0.unk834C[id];
+        still = vs_gfx_state.unk834C[id];
         model = ANIM_MODEL(still);
         sp->model = model;
         sp->header = MODEL_PARTS(model);

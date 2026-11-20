@@ -251,61 +251,61 @@ ADDRESS(0x800136e0, 0x13c)
 void func_800136e0(void)
 {
     if (DAT_801961e0[0].status == 0) {
-        DAT_801603c0.pads[0].unk0 = ~DAT_801961e0[0].buttons;
-        if (DAT_801603c0.pads[0].unk0 != DAT_801603c0.pads[0].unk4) {
-            DAT_801603c0.pads[0].unk10 = 30;
-            DAT_801603c0.pads[0].unk8 |= DAT_801603c0.pads[0].unk0 & ~DAT_801603c0.pads[0].unk4;
-            DAT_801603c0.pads[0].unkC |= DAT_801603c0.pads[0].unk0 & ~DAT_801603c0.pads[0].unk4;
-        } else if (DAT_801603c0.pads[0].unk10 != 0) {
-            if (--DAT_801603c0.pads[0].unk10 == 0) {
-                DAT_801603c0.pads[0].unk10 = 5;
-                DAT_801603c0.pads[0].unkC |= DAT_801603c0.pads[0].unk0;
+        pad_state.pads[0].unk0 = ~DAT_801961e0[0].buttons;
+        if (pad_state.pads[0].unk0 != pad_state.pads[0].unk4) {
+            pad_state.pads[0].unk10 = 30;
+            pad_state.pads[0].unk8 |= pad_state.pads[0].unk0 & ~pad_state.pads[0].unk4;
+            pad_state.pads[0].unkC |= pad_state.pads[0].unk0 & ~pad_state.pads[0].unk4;
+        } else if (pad_state.pads[0].unk10 != 0) {
+            if (--pad_state.pads[0].unk10 == 0) {
+                pad_state.pads[0].unk10 = 5;
+                pad_state.pads[0].unkC |= pad_state.pads[0].unk0;
             }
         }
     }
     if (DAT_801961e0[1].status == 0) {
-        DAT_801603c0.pads[1].unk0 = ~DAT_801961e0[1].buttons;
-        if (DAT_801603c0.pads[1].unk0 != DAT_801603c0.pads[1].unk4) {
-            DAT_801603c0.pads[1].unk10 = 30;
-            DAT_801603c0.pads[1].unk8 |= DAT_801603c0.pads[1].unk0 & ~DAT_801603c0.pads[1].unk4;
-            DAT_801603c0.pads[1].unkC |= DAT_801603c0.pads[1].unk0 & ~DAT_801603c0.pads[1].unk4;
-        } else if (DAT_801603c0.pads[1].unk10 != 0) {
-            if (--DAT_801603c0.pads[1].unk10 == 0) {
-                DAT_801603c0.pads[1].unk10 = 5;
-                DAT_801603c0.pads[1].unkC |= DAT_801603c0.pads[1].unk0;
+        pad_state.pads[1].unk0 = ~DAT_801961e0[1].buttons;
+        if (pad_state.pads[1].unk0 != pad_state.pads[1].unk4) {
+            pad_state.pads[1].unk10 = 30;
+            pad_state.pads[1].unk8 |= pad_state.pads[1].unk0 & ~pad_state.pads[1].unk4;
+            pad_state.pads[1].unkC |= pad_state.pads[1].unk0 & ~pad_state.pads[1].unk4;
+        } else if (pad_state.pads[1].unk10 != 0) {
+            if (--pad_state.pads[1].unk10 == 0) {
+                pad_state.pads[1].unk10 = 5;
+                pad_state.pads[1].unkC |= pad_state.pads[1].unk0;
             }
         }
     }
-    DAT_801603c0.pads[0].unk4 = DAT_801603c0.pads[0].unk0;
-    DAT_801603c0.pads[1].unk4 = DAT_801603c0.pads[1].unk0;
+    pad_state.pads[0].unk4 = pad_state.pads[0].unk0;
+    pad_state.pads[1].unk4 = pad_state.pads[1].unk0;
 }
 
 /* Clears both controller records. */
 ADDRESS(0x8001381c, 0x2c)
 void func_8001381c(void)
 {
-    DAT_801603c0.pads[1].unkC = 0;
-    DAT_801603c0.pads[0].unkC = 0;
-    DAT_801603c0.pads[1].unk8 = 0;
-    DAT_801603c0.pads[0].unk8 = 0;
-    DAT_801603c0.pads[1].unk4 = 0;
-    DAT_801603c0.pads[0].unk4 = 0;
-    DAT_801603c0.pads[1].unk0 = 0;
-    DAT_801603c0.pads[0].unk0 = 0;
+    pad_state.pads[1].unkC = 0;
+    pad_state.pads[0].unkC = 0;
+    pad_state.pads[1].unk8 = 0;
+    pad_state.pads[0].unk8 = 0;
+    pad_state.pads[1].unk4 = 0;
+    pad_state.pads[0].unk4 = 0;
+    pad_state.pads[1].unk0 = 0;
+    pad_state.pads[0].unk0 = 0;
 }
 
 /* A frame callback: counts. */
 ADDRESS(0x80013848, 0x20)
 void func_80013848(void)
 {
-    DAT_801603c0.unk30++;
+    pad_state.unk30++;
 }
 
 /* A frame callback: counts and decodes the controllers. */
 ADDRESS(0x80013868, 0x38)
 void func_80013868(void)
 {
-    DAT_801603c0.unk3C++;
+    pad_state.unk3C++;
     func_800136e0();
 }
 
@@ -328,15 +328,15 @@ void func_800138a0(void)
     DISPENV *disp;
     int bits;
 
-    DAT_801624d0.draw[0].isbg = 0;
-    DAT_801624d0.draw[1].isbg = 0;
-    DAT_801624d0.frame = DAT_801624d0.frame == 0;
+    vs_gfx_state.draw[0].isbg = 0;
+    vs_gfx_state.draw[1].isbg = 0;
+    vs_gfx_state.frame = vs_gfx_state.frame == 0;
     DrawSync(0);
     VSync(0);
-    PutDispEnv(&DAT_801624d0.disp[DAT_801624d0.frame]);
-    PutDrawEnv(&DAT_801624d0.draw[DAT_801624d0.frame]);
-    disp = &DAT_801624d0.disp[DAT_801624d0.frame];
-    draw = &DAT_801624d0.draw[DAT_801624d0.frame];
+    PutDispEnv(&vs_gfx_state.disp[vs_gfx_state.frame]);
+    PutDrawEnv(&vs_gfx_state.draw[vs_gfx_state.frame]);
+    disp = &vs_gfx_state.disp[vs_gfx_state.frame];
+    draw = &vs_gfx_state.draw[vs_gfx_state.frame];
     saved = disp->disp;
     while (!(VS_PAD0_BUTTONS & 0x8))
         ;
@@ -362,8 +362,8 @@ void func_800138a0(void)
     while (!(VS_PAD0_BUTTONS & 0x8))
         ;
     disp->disp = saved;
-    DAT_801624d0.draw[0].isbg = 1;
-    DAT_801624d0.draw[1].isbg = 1;
+    vs_gfx_state.draw[0].isbg = 1;
+    vs_gfx_state.draw[1].isbg = 1;
 }
 
 /* Starts libsnd: the SEQ attribute table, 60 Hz ticks, studio reverb at
@@ -514,7 +514,7 @@ void func_80013c5c(void)
         case 0x4000: {
             u16 at = operand;
 
-            if (at != 0 && DAT_801603c0.unk40 / 20 % at == 0)
+            if (at != 0 && pad_state.unk40 / 20 % at == 0)
                 KEY_ON_TONE();
             break;
         }

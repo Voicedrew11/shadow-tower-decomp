@@ -38,7 +38,7 @@ void func_80035b68(void);
 void func_800291d4(u_long *model, int flags, SVECTOR *a, SVECTOR *b, SVECTOR *c);
 
 /* The callback's frame clock and the current screen's starting frame. */
-#define FRAME_CLOCK() (DAT_801603c0.unk3C)
+#define FRAME_CLOCK() (pad_state.unk3C)
 #define SCREEN_START() (DAT_80063314)
 #define ELAPSED() (FRAME_CLOCK() - SCREEN_START())
 
@@ -80,29 +80,29 @@ void func_80015020(void)
     s16 a;
     s16 b;
 
-    DAT_801624d0.frame = DAT_801624d0.frame == 0;
-    packet = &DAT_801624d0.packets[DAT_801624d0.frame];
-    DAT_801624d0.packet = packet;
+    vs_gfx_state.frame = vs_gfx_state.frame == 0;
+    packet = &vs_gfx_state.packets[vs_gfx_state.frame];
+    vs_gfx_state.packet = packet;
     packet->cur = packet->start;
-    DAT_801624d0.ot_cur = DAT_801624d0.ot[DAT_801624d0.frame];
-    ClearOTagR(DAT_801624d0.ot_cur, VS_OT_LENGTH);
-    DAT_801624d0.unk8328 = 0;
-    DAT_801624d0.unk8324 = 0;
-    DAT_801624d0.unk831C[1] = 0;
-    DAT_801624d0.unk832C = 0;
-    DAT_801624d0.unk8330 = 0;
-    DAT_801624d0.unk8338[0] = 0;
-    DAT_801624d0.unk8338[1] = 0;
-    DAT_801624d0.unk8338[2] = 0;
-    DAT_801624d0.unk8338[3] = 0;
-    DAT_801624d0.unk8338[4] = 0;
+    vs_gfx_state.ot_cur = vs_gfx_state.ot[vs_gfx_state.frame];
+    ClearOTagR(vs_gfx_state.ot_cur, VS_OT_LENGTH);
+    vs_gfx_state.unk8328 = 0;
+    vs_gfx_state.unk8324 = 0;
+    vs_gfx_state.unk831C[1] = 0;
+    vs_gfx_state.unk832C = 0;
+    vs_gfx_state.unk8330 = 0;
+    vs_gfx_state.unk8338[0] = 0;
+    vs_gfx_state.unk8338[1] = 0;
+    vs_gfx_state.unk8338[2] = 0;
+    vs_gfx_state.unk8338[3] = 0;
+    vs_gfx_state.unk8338[4] = 0;
     func_800237e4();
     func_800280e0();
     if (DAT_80063324 == 0 && func_8002b078(DAT_80063364++)) {
         DAT_8006331c = 3;
         DAT_80063324 = 1;
-        DAT_80063364 = DAT_801603c0.unk3C + 1800;
-        DAT_80063314 = DAT_801603c0.unk3C;
+        DAT_80063364 = pad_state.unk3C + 1800;
+        DAT_80063314 = pad_state.unk3C;
         while (!CdRead2(CdlModeSpeed | CdlModeRT | CdlModeSF))
             ;
         func_800129bc(64);
@@ -179,7 +179,7 @@ void func_80015020(void)
         a = (DAT_800633b0.fighter[0].unk4DF08 << 12) / DAT_800633b0.fighter[0].unk4DF18.unk1B8;
         b = (DAT_800633b0.fighter[1].unk4DF08 << 12) / DAT_800633b0.fighter[1].unk4DF18.unk1B8;
         DAT_80063364 = 0;
-        DAT_80063314 = DAT_801603c0.unk3C;
+        DAT_80063314 = pad_state.unk3C;
         if (a == b) {
             DAT_80063324 = 4;
             goto draw;
@@ -205,7 +205,7 @@ void func_80015020(void)
             left2 = SCREEN_START() + 46;
             func_8002a360(4, left2 - FRAME_CLOCK());
         } else {
-            DAT_80063314 = DAT_801603c0.unk3C;
+            DAT_80063314 = pad_state.unk3C;
             DAT_80063324 += 2;
             func_8001336c(9 - DAT_80063324, 1);
             goto result;
@@ -217,7 +217,7 @@ void func_80015020(void)
     result:
         if (ELAPSED() > 30 && ELAPSED() < 159)
             DAT_800633b0.fighter[~DAT_80063324 & 1].unk4DF12 =
-                DAT_80063314 - (DAT_801603c0.unk3C - 158);
+                DAT_80063314 - (pad_state.unk3C - 158);
         if (ELAPSED() > 100 && ELAPSED() <= 200)
             func_8002a360(2, ELAPSED() - 100);
         if (ELAPSED() > 200) {
@@ -312,7 +312,7 @@ void func_80015020(void)
             func_8002bfe8(i, 4096);
         }
         func_80029b10(32);
-        func_80029f28((u32)DAT_801603c0.unk3C % 96, 32);
+        func_80029f28((u32)pad_state.unk3C % 96, 32);
     }
     func_80028fcc(DAT_80063324 == 2 || DAT_80063324 >= 16);
     rot.vz = 0;
@@ -332,13 +332,13 @@ void func_80015020(void)
     func_800291d4((u_long *)DAT_8015c528, 0, &rot, &rot, &scale);
     DAT_80063224 = 3;
     mask = 0;
-    if (DAT_801624d0.unk2CA78.vz > ARENA_EDGE)
+    if (vs_gfx_state.unk2CA78.vz > ARENA_EDGE)
         mask = 0x83;
-    if (DAT_801624d0.unk2CA78.vx > ARENA_EDGE)
+    if (vs_gfx_state.unk2CA78.vx > ARENA_EDGE)
         mask |= 0x0e;
-    if (DAT_801624d0.unk2CA78.vz < -ARENA_EDGE)
+    if (vs_gfx_state.unk2CA78.vz < -ARENA_EDGE)
         mask |= 0x38;
-    if (DAT_801624d0.unk2CA78.vx < -ARENA_EDGE)
+    if (vs_gfx_state.unk2CA78.vx < -ARENA_EDGE)
         mask |= 0xe0;
     for (i = 0; i < 8; i++) {
         DAT_80063350 = mask & (1 << i);
@@ -351,10 +351,10 @@ void func_80015020(void)
     if (DAT_80063220 >= 6)
         DAT_80063220 = 5;
     FntFlush(-1);
-    PutDispEnv(&DAT_801624d0.disp[DAT_801624d0.frame]);
-    PutDrawEnv(&DAT_801624d0.draw[DAT_801624d0.frame]);
-    DrawOTag(DAT_801624d0.ot_cur + VS_OT_LENGTH - 1);
+    PutDispEnv(&vs_gfx_state.disp[vs_gfx_state.frame]);
+    PutDrawEnv(&vs_gfx_state.draw[vs_gfx_state.frame]);
+    DrawOTag(vs_gfx_state.ot_cur + VS_OT_LENGTH - 1);
     func_800238c0();
     func_80028074();
-    DAT_801624d0.unk2C970++;
+    vs_gfx_state.unk2C970++;
 }

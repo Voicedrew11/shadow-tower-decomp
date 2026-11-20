@@ -118,12 +118,12 @@ void func_80015e50(void)
     func_800140d8();
     func_800352cc();
     func_8002d710();
-    DAT_801624d0.unk2CA78.vy = -14000;
-    DAT_801624d0.unk2CA78.vx = 0;
-    DAT_801624d0.unk2CA78.vz = -15000;
-    DAT_801624d0.unk2CA88.vx = 0;
-    DAT_801624d0.unk2CA88.vy = 0;
-    DAT_801624d0.unk2CA88.vz = 0;
+    vs_gfx_state.unk2CA78.vy = -14000;
+    vs_gfx_state.unk2CA78.vx = 0;
+    vs_gfx_state.unk2CA78.vz = -15000;
+    vs_gfx_state.unk2CA88.vx = 0;
+    vs_gfx_state.unk2CA88.vy = 0;
+    vs_gfx_state.unk2CA88.vz = 0;
     if (DAT_80063338 == 0) {
         func_80016d94();
         DrawSync(0);
@@ -135,23 +135,23 @@ void func_80015e50(void)
             choice = 0;
             DAT_8006336c = 0;
             for (;;) {
-                if ((DAT_801603c0.pads[0].unk8 | DAT_801603c0.pads[1].unk8) & 0x10)
+                if ((pad_state.pads[0].unk8 | pad_state.pads[1].unk8) & 0x10)
                     choice = 0;
-                if ((DAT_801603c0.pads[0].unk8 | DAT_801603c0.pads[1].unk8) & 0x40)
+                if ((pad_state.pads[0].unk8 | pad_state.pads[1].unk8) & 0x40)
                     choice = 1;
-                if ((DAT_801603c0.pads[0].unk8 | DAT_801603c0.pads[1].unk8) & 9) {
-                    DAT_80063364 += DAT_801603c0.unk3C;
+                if ((pad_state.pads[0].unk8 | pad_state.pads[1].unk8) & 9) {
+                    DAT_80063364 += pad_state.unk3C;
                     DAT_80063324 = PHASE_FIGHT;
-                    DAT_80063314 = DAT_801603c0.unk3C;
+                    DAT_80063314 = pad_state.unk3C;
                     while (!CdRead2(CdlModeSpeed | CdlModeRT | CdlModeSF))
                         ;
                     break;
                 }
-                if ((DAT_801603c0.pads[0].unk8 | DAT_801603c0.pads[1].unk8) & 0x4000) {
+                if ((pad_state.pads[0].unk8 | pad_state.pads[1].unk8) & 0x4000) {
                     if (choice == 0) {
-                        DAT_80063364 += DAT_801603c0.unk3C;
+                        DAT_80063364 += pad_state.unk3C;
                         DAT_80063324 = PHASE_FIGHT;
-                        DAT_80063314 = DAT_801603c0.unk3C;
+                        DAT_80063314 = pad_state.unk3C;
                         while (!CdRead2(CdlModeSpeed | CdlModeRT | CdlModeSF))
                             ;
                         break;
@@ -168,68 +168,68 @@ void func_80015e50(void)
                     if (--DAT_8006336c < 0)
                         DAT_8006336c = 0;
                 }
-                DAT_801603c0.pads[0].unk8 = 0;
-                DAT_801603c0.pads[1].unk8 = 0;
+                pad_state.pads[0].unk8 = 0;
+                pad_state.pads[1].unk8 = 0;
                 func_80015020();
             }
         } else if (DAT_80063324 == PHASE_FIGHT
-                   && ((DAT_801603c0.pads[0].unk8 | DAT_801603c0.pads[1].unk8) & 9)) {
+                   && ((pad_state.pads[0].unk8 | pad_state.pads[1].unk8) & 9)) {
             while (!CdControl(CdlPause, 0, 0))
                 ;
             DAT_8006331c = 12;
             DAT_80063324 = PHASE_PAUSE;
-            DAT_80063364 -= DAT_801603c0.unk3C;
-            DAT_80063314 = DAT_801603c0.unk3C;
+            DAT_80063364 -= pad_state.unk3C;
+            DAT_80063314 = pad_state.unk3C;
         }
-        if ((DAT_801603c0.pads[0].unk8 & 1) && (DAT_801603c0.pads[0].unk0 & 8))
-            DAT_801603c0.unk28 = 1 - DAT_801603c0.unk28;
-        if (DAT_801603c0.pads[0].unk0 & 1) {
-            if (++DAT_801603c0.unk2C >= 60)
+        if ((pad_state.pads[0].unk8 & 1) && (pad_state.pads[0].unk0 & 8))
+            pad_state.unk28 = 1 - pad_state.unk28;
+        if (pad_state.pads[0].unk0 & 1) {
+            if (++pad_state.unk2C >= 60)
                 func_800138a0();
         } else {
-            DAT_801603c0.unk2C = 0;
+            pad_state.unk2C = 0;
         }
         if (DAT_80063324 == PHASE_FIGHT) {
-            if (DAT_80063364 <= DAT_801603c0.unk3C) {
+            if (DAT_80063364 <= pad_state.unk3C) {
                 DAT_80063324 = PHASE_TIME_UP;
-                DAT_80063314 = DAT_801603c0.unk3C;
+                DAT_80063314 = pad_state.unk3C;
             } else {
                 if (DAT_800633b0.fighter[0].unk4DF08 == 0) {
                     if (DAT_800633b0.fighter[1].unk4DF08 == 0) {
                         DAT_80063324 = PHASE_DRAW;
-                        DAT_80063364 -= DAT_801603c0.unk3C;
-                        DAT_80063314 = DAT_801603c0.unk3C;
+                        DAT_80063364 -= pad_state.unk3C;
+                        DAT_80063314 = pad_state.unk3C;
                     } else {
                         ko = 0;
                         side = 1;
                         DAT_80063324 = PHASE_SECOND_WINS;
-                        DAT_80063364 -= DAT_801603c0.unk3C;
-                        DAT_80063314 = DAT_801603c0.unk3C;
+                        DAT_80063364 -= pad_state.unk3C;
+                        DAT_80063314 = pad_state.unk3C;
                         func_8001336c(ko, side);
                     }
                 } else if (DAT_800633b0.fighter[1].unk4DF08 == 0) {
                     ko = 1;
                     side = 1;
                     DAT_80063324 = PHASE_FIRST_WINS;
-                    DAT_80063364 -= DAT_801603c0.unk3C;
-                    DAT_80063314 = DAT_801603c0.unk3C;
+                    DAT_80063364 -= pad_state.unk3C;
+                    DAT_80063314 = pad_state.unk3C;
                     func_8001336c(ko, side);
                 }
                 if (func_8002e510(0)) {
                     DAT_80063324 = PHASE_KO_FIRST;
-                    DAT_80063364 -= DAT_801603c0.unk3C;
-                    DAT_80063314 = DAT_801603c0.unk3C;
+                    DAT_80063364 -= pad_state.unk3C;
+                    DAT_80063314 = pad_state.unk3C;
                 }
                 if (func_8002e510(1)) {
                     DAT_80063324 = PHASE_KO_SECOND;
-                    DAT_80063364 -= DAT_801603c0.unk3C;
-                    DAT_80063314 = DAT_801603c0.unk3C;
+                    DAT_80063364 -= pad_state.unk3C;
+                    DAT_80063314 = pad_state.unk3C;
                 }
             }
         } else if (DAT_80063324 == PHASE_DRAW || DAT_80063324 == PHASE_FIRST_WINS
                    || DAT_80063324 == PHASE_SECOND_WINS) {
             func_8001381c();
-            if (DAT_801603c0.unk3C - DAT_80063314 > RESULT_FRAMES) {
+            if (pad_state.unk3C - DAT_80063314 > RESULT_FRAMES) {
                 if (DAT_80063324 == PHASE_FIRST_WINS)
                     DAT_80063370[0]++;
                 else if (DAT_80063324 == PHASE_SECOND_WINS)
@@ -244,23 +244,23 @@ void func_80015e50(void)
             func_80031478(1 - (DAT_80063364 & 1));
             func_8002dcd8();
         }
-        DAT_801603c0.pads[0].unk8 = 0;
-        DAT_801603c0.pads[1].unk8 = 0;
+        pad_state.pads[0].unk8 = 0;
+        pad_state.pads[1].unk8 = 0;
         func_80015020();
         func_80013c5c();
-        DAT_801624d0.unk831C[1] = 0;
-        DAT_801624d0.unk8324 = 0;
-        if (DAT_801603c0.unk40 + 59 < DAT_801603c0.unk3C) {
-            DAT_801624d0.unk2C971 = DAT_801624d0.unk2C970 * 60
-                                    / (DAT_801603c0.unk3C - DAT_801603c0.unk40);
-            DAT_801624d0.unk2C970 = 0;
-            DAT_801603c0.unk40 = DAT_801603c0.unk3C;
+        vs_gfx_state.unk831C[1] = 0;
+        vs_gfx_state.unk8324 = 0;
+        if (pad_state.unk40 + 59 < pad_state.unk3C) {
+            vs_gfx_state.unk2C971 = vs_gfx_state.unk2C970 * 60
+                                    / (pad_state.unk3C - pad_state.unk40);
+            vs_gfx_state.unk2C970 = 0;
+            pad_state.unk40 = pad_state.unk3C;
         }
-        if (DAT_801603c0.unk28 == 1) {
-            FntPrint("frm      =%d\n", DAT_801624d0.unk2C971);
+        if (pad_state.unk28 == 1) {
+            FntPrint("frm      =%d\n", vs_gfx_state.unk2C971);
             FntPrint("frm/draw =%d\n", DAT_80063220);
-            FntPrint("calc_poly=%d\n", DAT_801624d0.unk831C[1]);
-            FntPrint("draw_poly=%d\n", DAT_801624d0.unk8324);
+            FntPrint("calc_poly=%d\n", vs_gfx_state.unk831C[1]);
+            FntPrint("draw_poly=%d\n", vs_gfx_state.unk8324);
         }
     }
 }
@@ -321,7 +321,7 @@ void func_800165f4(void)
     func_8001381c();
     DAT_80063324 = SCREEN_FADE_IN;
     DAT_80063338--;
-    DAT_80063314 = DAT_801603c0.unk3C;
+    DAT_80063314 = pad_state.unk3C;
     for (i = FADE_FRAMES - 1; i != -1; i--) {
         func_80015020();
         DrawSync(0);
@@ -334,7 +334,7 @@ void func_800165f4(void)
             DAT_80063324 = SCREEN_RETRY_ASK;
             DAT_8006336c = 0;
         }
-        DAT_80063314 = DAT_801603c0.unk3C;
+        DAT_80063314 = pad_state.unk3C;
         for (i = FADE_FRAMES - 1; i != -1; i--) {
             func_80015020();
             DrawSync(0);
@@ -348,16 +348,16 @@ void func_800165f4(void)
             choice = 0;
             DAT_80063324 = SCREEN_SAVE;
             DAT_8006336c = 0;
-            DAT_80063314 = DAT_801603c0.unk3C;
+            DAT_80063314 = pad_state.unk3C;
             for (i = FADE_FRAMES - 1; i != -1; i--) {
                 func_80015020();
                 DrawSync(0);
             }
         }
-        DAT_801603c0.pads[0].unk8 = 0;
-        DAT_801603c0.pads[1].unk8 = 0;
+        pad_state.pads[0].unk8 = 0;
+        pad_state.pads[1].unk8 = 0;
         for (;;) {
-            bits = DAT_801603c0.pads[0].unk8 | DAT_801603c0.pads[1].unk8;
+            bits = pad_state.pads[0].unk8 | pad_state.pads[1].unk8;
             if (bits & 0x10)
                 choice = 0;
             if (bits & 0x40)
@@ -376,13 +376,13 @@ void func_800165f4(void)
                 if (--DAT_8006336c < 0)
                     DAT_8006336c = 0;
             }
-            DAT_801603c0.pads[0].unk8 = 0;
-            DAT_801603c0.pads[1].unk8 = 0;
+            pad_state.pads[0].unk8 = 0;
+            pad_state.pads[1].unk8 = 0;
             func_80015020();
             DrawSync(0);
         }
         DAT_80063324 = SCREEN_FADE_OUT;
-        DAT_80063314 = DAT_801603c0.unk3C;
+        DAT_80063314 = pad_state.unk3C;
         for (i = FADE_FRAMES - 1; i != -1; i--) {
             func_80015020();
             DrawSync(0);
@@ -418,15 +418,15 @@ int main(void)
     CdSetDebug(0);
     InitCARD(1);
     ExitCriticalSection();
-    DAT_801603c0.unk44 = OpenEvent(RCntCNT3, EvSpINT, EvMdINTR, func_80013868);
-    EnableEvent(DAT_801603c0.unk44);
+    pad_state.unk44 = OpenEvent(RCntCNT3, EvSpINT, EvMdINTR, func_80013868);
+    EnableEvent(pad_state.unk44);
     SetRCnt(RCntCNT3, 60000, RCntMdINTR);
     StartRCnt(RCntCNT3);
-    DAT_801603c0.unk38 = OpenEvent(RCntCNT2, EvSpINT, EvMdINTR, func_80013848);
-    EnableEvent(DAT_801603c0.unk38);
+    pad_state.unk38 = OpenEvent(RCntCNT2, EvSpINT, EvMdINTR, func_80013848);
+    EnableEvent(pad_state.unk38);
     SetRCnt(RCntCNT2, 60000, RCntMdINTR);
     StartRCnt(RCntCNT2);
-    DAT_801603c0.unk28 = 0;
+    pad_state.unk28 = 0;
     func_8002f0f4();
     func_80014480();
     {
@@ -488,7 +488,7 @@ int main(void)
     PadStop();
     ResetGraph(3);
     EnterCriticalSection();
-    CloseEvent(DAT_801603c0.unk44);
+    CloseEvent(pad_state.unk44);
     ExitCriticalSection();
     StopCallback();
 }

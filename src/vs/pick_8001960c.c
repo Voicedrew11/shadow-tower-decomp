@@ -31,8 +31,8 @@ void func_8001cac0(int archive, int member, int x, int y);
 void func_800228d8(int page);
 void exit(int code);
 
-#define REPEAT (DAT_801603c0.pads[0].unkC | DAT_801603c0.pads[1].unkC)
-#define PRESSED (DAT_801603c0.pads[0].unk8 | DAT_801603c0.pads[1].unk8)
+#define REPEAT (pad_state.pads[0].unkC | pad_state.pads[1].unkC)
+#define PRESSED (pad_state.pads[0].unk8 | pad_state.pads[1].unk8)
 
 #define TOP (sp->unk0.menu.half[0])
 #define COUNT (sp->unk0.menu.half[1])
@@ -116,13 +116,13 @@ void func_8001960c(int player)
     DrawSync(0);
     for (;;) {
         if (player) {
-            DAT_801603c0.pads[0].unk8 = 0;
-            DAT_801603c0.pads[0].unkC = 0;
-            DAT_801603c0.pads[0].unk0 = 0;
+            pad_state.pads[0].unk8 = 0;
+            pad_state.pads[0].unkC = 0;
+            pad_state.pads[0].unk0 = 0;
         } else {
-            DAT_801603c0.pads[1].unk8 = 0;
-            DAT_801603c0.pads[1].unkC = 0;
-            DAT_801603c0.pads[1].unk0 = 0;
+            pad_state.pads[1].unk8 = 0;
+            pad_state.pads[1].unkC = 0;
+            pad_state.pads[1].unk0 = 0;
         }
         if (PRESSED & 0x2000) {
             func_8001c8f8();
@@ -152,7 +152,7 @@ void func_8001960c(int player)
         if (!(sp->unk1CC & 0x8000)) {
             if (REPEAT & 0x10) {
                 func_8001c8b8();
-                if (DAT_801603c0.pads[0].unk0 & 0x8000) {
+                if (pad_state.pads[0].unk0 & 0x8000) {
                     if (COUNT < 11) {
                         sp->unk1D0 = 0;
                     } else {
@@ -171,11 +171,11 @@ void func_8001960c(int player)
                     TOP = 0;
                     sp->unk1D0 = 0;
                 }
-                DAT_801603c0.pads[0].unkC = 0;
+                pad_state.pads[0].unkC = 0;
             }
             if (REPEAT & 0x40) {
                 func_8001c8b8();
-                if ((DAT_801603c0.pads[0].unk0 | DAT_801603c0.pads[1].unk0) & 0x8000) {
+                if ((pad_state.pads[0].unk0 | pad_state.pads[1].unk0) & 0x8000) {
                     if (COUNT >= 11) {
                         TOP += 11;
                         if (TOP > COUNT - 11) {
@@ -230,10 +230,10 @@ void func_8001960c(int player)
                 }
             }
         }
-        DAT_801603c0.pads[0].unk8 = 0;
-        DAT_801603c0.pads[1].unk8 = 0;
-        DAT_801603c0.pads[0].unkC = 0;
-        DAT_801603c0.pads[1].unkC = 0;
+        pad_state.pads[0].unk8 = 0;
+        pad_state.pads[1].unk8 = 0;
+        pad_state.pads[0].unkC = 0;
+        pad_state.pads[1].unkC = 0;
         func_800228d8(player);
         sp->unk1D4 = (sp->unk1D4 + 1) % 32;
     }

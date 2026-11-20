@@ -57,8 +57,8 @@ JUMPTABLES(0x80011574, 0x14)
     {                                                                          \
         int z;                                                                 \
                                                                                \
-        p3 = (POLY_G3 *)DAT_801624d0.packet->cur;                              \
-        DAT_801624d0.packet->cur = (u_long *)(p3 + 1);                         \
+        p3 = (POLY_G3 *)vs_gfx_state.packet->cur;                              \
+        vs_gfx_state.packet->cur = (u_long *)(p3 + 1);                         \
         SetPolyG3(p3);                                                         \
         setSemiTrans(p3, 1);                                                   \
         p3->x0 = VTX(sp, va).sxy.vx;                                           \
@@ -71,7 +71,7 @@ JUMPTABLES(0x80011574, 0x14)
         setRGB0(p3, ca.r, ca.g, ca.b);                                         \
         setRGB1(p3, cb.r, cb.g, cb.b);                                         \
         setRGB2(p3, cb.r, cb.g, cb.b);                                         \
-        addPrim(DAT_801624d0.ot_cur + z, p3);                                  \
+        addPrim(vs_gfx_state.ot_cur + z, p3);                                  \
         FLASH_MODE(z);                                                         \
     }
 
@@ -82,8 +82,8 @@ JUMPTABLES(0x80011574, 0x14)
     {                                                                          \
         int z;                                                                 \
                                                                                \
-        p4 = (POLY_G4 *)DAT_801624d0.packet->cur;                              \
-        DAT_801624d0.packet->cur = (u_long *)(p4 + 1);                         \
+        p4 = (POLY_G4 *)vs_gfx_state.packet->cur;                              \
+        vs_gfx_state.packet->cur = (u_long *)(p4 + 1);                         \
         SetPolyG4(p4);                                                         \
         setSemiTrans(p4, 1);                                                   \
         p4->x0 = VTX(sp, va).sxy.vx;                                           \
@@ -100,7 +100,7 @@ JUMPTABLES(0x80011574, 0x14)
         setRGB1(p4, ca.r, ca.g, ca.b);                                         \
         setRGB2(p4, cc.r, cc.g, cc.b);                                         \
         setRGB3(p4, cc.r, cc.g, cc.b);                                         \
-        addPrim(DAT_801624d0.ot_cur + z, p4);                                  \
+        addPrim(vs_gfx_state.ot_cur + z, p4);                                  \
         FLASH_MODE(z);                                                         \
     }
 
@@ -108,15 +108,15 @@ JUMPTABLES(0x80011574, 0x14)
  * mode (tpage 56) for the flash polygon before it. */
 #define FLASH_MODE(z)                                                          \
     {                                                                          \
-        t = (POLY_FT3 *)DAT_801624d0.packet->cur;                              \
-        DAT_801624d0.packet->cur = (u_long *)(t + 1);                          \
+        t = (POLY_FT3 *)vs_gfx_state.packet->cur;                              \
+        vs_gfx_state.packet->cur = (u_long *)(t + 1);                          \
         SetPolyFT3(t);                                                         \
         setXY3(t, 0, 0, 0, 0, 0, 0);                                           \
         setUV3(t, 0, 0, 0, 0, 0, 0);                                           \
         t->clut = 32641;                                                       \
         t->tpage = 56;                                                         \
         setRGB0(t, 0, 0, 0);                                                   \
-        addPrim(DAT_801624d0.ot_cur + z, t);                                   \
+        addPrim(vs_gfx_state.ot_cur + z, t);                                   \
     }
 
 /* The scratchpad's projected vertex n. */
@@ -221,14 +221,14 @@ void func_8002c2c4(int id)
         c[3].b = 0;
         break;
     }
-    m.t[0] = f->unk4DEF0.vx + rsin(f->unk4DF02 - 2048) * d->unk1B4 / 4096 - DAT_801624d0.unk2CA78.vx;
-    m.t[1] = f->unk4DEF0.vy - d->unk1B6 / 2 - DAT_801624d0.unk2CA78.vy;
-    m.t[2] = f->unk4DEF0.vz + rcos(f->unk4DF02 - 2048) * d->unk1B4 / 4096 - DAT_801624d0.unk2CA78.vz;
+    m.t[0] = f->unk4DEF0.vx + rsin(f->unk4DF02 - 2048) * d->unk1B4 / 4096 - vs_gfx_state.unk2CA78.vx;
+    m.t[1] = f->unk4DEF0.vy - d->unk1B6 / 2 - vs_gfx_state.unk2CA78.vy;
+    m.t[2] = f->unk4DEF0.vz + rcos(f->unk4DF02 - 2048) * d->unk1B4 / 4096 - vs_gfx_state.unk2CA78.vz;
     rot.vx = f->unk4DF00;
     rot.vy = f->unk4DF02;
     rot.vz = f->unk4DF04;
     RotMatrix(&rot, &m);
-    CompMatrix(&DAT_801624d0.unk2C998, &m, &m);
+    CompMatrix(&vs_gfx_state.unk2C998, &m, &m);
     m.m[0][0] = m.m[0][0] * d->unk1B4 / 500;
     m.m[0][1] = m.m[0][1] * d->unk1B4 / 500;
     m.m[0][2] = m.m[0][2] * d->unk1B4 / 500;

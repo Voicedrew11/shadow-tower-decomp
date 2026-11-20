@@ -47,9 +47,9 @@ void func_8002bfe8(int n, int scale);                    /* src/vs/shadow_8002bf
 
 /* The fighter's place seen from the camera, unrotated. */
 #define PLACE(m, f)                                                            \
-    (m).t[0] = (f).unk4DEF0.vx - DAT_801624d0.unk2CA78.vx;                    \
-    (m).t[1] = -DAT_801624d0.unk2CA78.vy;                                      \
-    (m).t[2] = (f).unk4DEF0.vz - DAT_801624d0.unk2CA78.vz;                    \
+    (m).t[0] = (f).unk4DEF0.vx - vs_gfx_state.unk2CA78.vx;                    \
+    (m).t[1] = -vs_gfx_state.unk2CA78.vy;                                      \
+    (m).t[2] = (f).unk4DEF0.vz - vs_gfx_state.unk2CA78.vz;                    \
     (m).m[0][0] = 4096;                                                        \
     (m).m[0][1] = 0;                                                           \
     (m).m[0][2] = 0;                                                           \
@@ -59,7 +59,7 @@ void func_8002bfe8(int n, int scale);                    /* src/vs/shadow_8002bf
     (m).m[2][0] = 0;                                                           \
     (m).m[2][1] = 0;                                                           \
     (m).m[2][2] = 4096;                                                        \
-    CompMatrix(&DAT_801624d0.unk2C998, &(m), &(m));                            \
+    CompMatrix(&vs_gfx_state.unk2C998, &(m), &(m));                            \
     gte_SetRotMatrix(&(m));                                                    \
     gte_SetTransMatrix(&(m))
 
@@ -67,8 +67,8 @@ void func_8002bfe8(int n, int scale);                    /* src/vs/shadow_8002bf
  * mode (tpage 56) for the ring quad before it. */
 #define RING_MODE(z)                                                           \
     {                                                                          \
-        t3 = (POLY_FT3 *)DAT_801624d0.packet->cur;                             \
-        DAT_801624d0.packet->cur = (u_long *)(t3 + 1);                         \
+        t3 = (POLY_FT3 *)vs_gfx_state.packet->cur;                             \
+        vs_gfx_state.packet->cur = (u_long *)(t3 + 1);                         \
         SetPolyFT3(t3);                                                        \
         if (i != 15)                                                           \
             z = (u_long)(v[i + 16].vz + v[i + 17].vz + v[i].vz + v[i + 1].vz) >> 7; \
@@ -79,7 +79,7 @@ void func_8002bfe8(int n, int scale);                    /* src/vs/shadow_8002bf
         t3->clut = 32641;                                                      \
         t3->tpage = 56;                                                        \
         setRGB0(t3, 0, 0, 0);                                                  \
-        addPrim(DAT_801624d0.ot_cur + z, t3);                                  \
+        addPrim(vs_gfx_state.ot_cur + z, t3);                                  \
     }
 
 /*
@@ -118,13 +118,13 @@ int func_8002b078(int frame)
         func_8002a360(3, (frame - 100) * 2);
         func_8002a124(30, 32);
         func_80029b10(32);
-        func_80029f28((u32)DAT_801603c0.unk3C % 96, 32);
+        func_80029f28((u32)pad_state.unk3C % 96, 32);
         func_8002ad40(32);
     } else if (frame > 70) {
         func_8002a360(7, (frame - 70) * 2);
         func_8002a124(30, frame - 70);
         func_80029b10((frame - 70) * 2);
-        func_80029f28((u32)DAT_801603c0.unk3C % 96, (frame - 70) * 2);
+        func_80029f28((u32)pad_state.unk3C % 96, (frame - 70) * 2);
         func_8002ad40(frame - 70);
     } else if (frame > 40) {
         func_8002a9c0(DAT_80063338 + 16, (48 - frame) * 2, 50 - frame);
@@ -152,7 +152,7 @@ int func_8002b078(int frame)
                 v[i].vy = 0;
                 v[i].vz = r * sins[i] * open / 409600;
                 v[i + 16].vx = r * coss[i] * open / 409600;
-                v[i + 16].vy = DAT_801624d0.unk2CA78.vy;
+                v[i + 16].vy = vs_gfx_state.unk2CA78.vy;
                 v[i + 16].vz = r * sins[i] * open / 409600;
             }
             PLACE(m, DAT_800633b0.fighter[n]);
@@ -167,8 +167,8 @@ int func_8002b078(int frame)
             gte_stsxy01(&v[30], &v[31]);
             gte_stsz3(&v[30].vz, &v[31].vz, &sz);
             for (i = 0; i < 16; i++) {
-                p = (POLY_G4 *)DAT_801624d0.packet->cur;
-                DAT_801624d0.packet->cur = (u_long *)(p + 1);
+                p = (POLY_G4 *)vs_gfx_state.packet->cur;
+                vs_gfx_state.packet->cur = (u_long *)(p + 1);
                 SetPolyG4(p);
                 if (frame > 45)
                     setSemiTrans(p, 1);
@@ -205,7 +205,7 @@ int func_8002b078(int frame)
                 setRGB1(p, ring[1].r, ring[1].g, col[3].b);
                 setRGB2(p, ring[0].r, ring[0].g, col[0].b);
                 setRGB3(p, ring[0].r, ring[0].g, col[1].b);
-                addPrim(DAT_801624d0.ot_cur + z, p);
+                addPrim(vs_gfx_state.ot_cur + z, p);
                 RING_MODE(z);
             }
         }
@@ -232,8 +232,8 @@ int func_8002b078(int frame)
             gte_ldv0(&v[i + 3]);
             gte_rtps();
             gte_stsxy(&v[i + 3]);
-            q = (POLY_FT4 *)DAT_801624d0.packet->cur;
-            DAT_801624d0.packet->cur = (u_long *)(q + 1);
+            q = (POLY_FT4 *)vs_gfx_state.packet->cur;
+            vs_gfx_state.packet->cur = (u_long *)(q + 1);
             setPolyFT4(q);
             setSemiTrans(q, 1);
             setXY4(q, v[i].vx, v[i].vy, v[i + 1].vx, v[i + 1].vy,
@@ -252,7 +252,7 @@ int func_8002b078(int frame)
                 c = frame * 4;
                 setRGB0(q, c, c, c);
             }
-            addPrim(DAT_801624d0.ot_cur + 4091, q);
+            addPrim(vs_gfx_state.ot_cur + 4091, q);
         }
     }
     if (frame > 45) {

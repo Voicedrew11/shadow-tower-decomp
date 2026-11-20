@@ -52,8 +52,8 @@ void func_8002ad40(int bright)
             x1 = 31 + col * 11;
             x2 = 201 + col * 11;
             x3 = 212 + col * 11;
-            p = (POLY_FT4 *)DAT_801624d0.packet->cur;
-            DAT_801624d0.packet->cur = (u_long *)(p + 1);
+            p = (POLY_FT4 *)vs_gfx_state.packet->cur;
+            vs_gfx_state.packet->cur = (u_long *)(p + 1);
             setPolyFT4(p);
             setSemiTrans(p, 1);
             setUV4(p, c % 18 * 12, c / 18 * 10, c % 18 * 12 + 11, c / 18 * 10,
@@ -82,7 +82,7 @@ void func_8002ad40(int bright)
             p->tpage = GetTPage(0, 1, 640, 0);
             p->clut = GetClut(640, 480);
             setRGB0(p, bright * 3, bright * 3 + 16, bright * 3);
-            addPrim(DAT_801624d0.ot_cur + 5, p);
+            addPrim(vs_gfx_state.ot_cur + 5, p);
             s++;
             col++;
             glyph = *s;

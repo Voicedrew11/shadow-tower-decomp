@@ -46,26 +46,26 @@ void func_80014480(void)
     InitGeom();
     gte_SetGeomOffset(160, 120);
     gte_SetGeomScreen(300);
-    SetDefDrawEnv(&DAT_801624d0.draw[0], 0, 0, 320, 240);
-    SetDefDispEnv(&DAT_801624d0.disp[0], 0, 240, 320, 240);
-    SetDefDrawEnv(&DAT_801624d0.draw[1], 0, 240, 320, 240);
-    SetDefDispEnv(&DAT_801624d0.disp[1], 0, 0, 320, 240);
-    DAT_801624d0.draw[0].dtd = 1;
-    DAT_801624d0.draw[1].dtd = 1;
-    DAT_801624d0.draw[0].isbg = 1;
-    DAT_801624d0.draw[1].isbg = 1;
-    setRGB0(&DAT_801624d0.draw[0], 0, 0, 0);
-    setRGB0(&DAT_801624d0.draw[1], 0, 0, 0);
-    PutDispEnv(&DAT_801624d0.disp[0]);
-    PutDrawEnv(&DAT_801624d0.draw[0]);
+    SetDefDrawEnv(&vs_gfx_state.draw[0], 0, 0, 320, 240);
+    SetDefDispEnv(&vs_gfx_state.disp[0], 0, 240, 320, 240);
+    SetDefDrawEnv(&vs_gfx_state.draw[1], 0, 240, 320, 240);
+    SetDefDispEnv(&vs_gfx_state.disp[1], 0, 0, 320, 240);
+    vs_gfx_state.draw[0].dtd = 1;
+    vs_gfx_state.draw[1].dtd = 1;
+    vs_gfx_state.draw[0].isbg = 1;
+    vs_gfx_state.draw[1].isbg = 1;
+    setRGB0(&vs_gfx_state.draw[0], 0, 0, 0);
+    setRGB0(&vs_gfx_state.draw[1], 0, 0, 0);
+    PutDispEnv(&vs_gfx_state.disp[0]);
+    PutDrawEnv(&vs_gfx_state.draw[0]);
     gte_SetBackColor(80, 80, 80);
     gte_SetFarColor(5, 5, 5);
-    DAT_801624d0.frame = 255;
-    DAT_801624d0.unkE0 = DAT_8011c528;
-    DAT_801624d0.packets[0].start = DAT_801624d0.unkE0;
-    DAT_801624d0.packets[0].end = DAT_801624d0.packets[0].start + PACKET_WORDS;
-    DAT_801624d0.packets[1].start = DAT_801624d0.packets[0].end;
-    DAT_801624d0.packets[1].end = DAT_801624d0.packets[1].start + PACKET_WORDS;
+    vs_gfx_state.frame = 255;
+    vs_gfx_state.unkE0 = DAT_8011c528;
+    vs_gfx_state.packets[0].start = vs_gfx_state.unkE0;
+    vs_gfx_state.packets[0].end = vs_gfx_state.packets[0].start + PACKET_WORDS;
+    vs_gfx_state.packets[1].start = vs_gfx_state.packets[0].end;
+    vs_gfx_state.packets[1].end = vs_gfx_state.packets[1].start + PACKET_WORDS;
     SetDispMask(1);
 }
 
@@ -123,10 +123,10 @@ void func_80014634(void)
             eye.vy = -500;
             eye.vz = f->unk4DEF0.vz + rcos(f->unk4DF02 + 1536) * 3 / 4;
         }
-        if (DAT_801603c0.unk3C < DAT_80063314 + 5) {
-            DAT_801624d0.unk2CA78.vx = f->unk4DEF0.vx + rsin(f->unk4DF02 + 3072) * 2;
-            DAT_801624d0.unk2CA78.vy = -7000;
-            DAT_801624d0.unk2CA78.vz = f->unk4DEF0.vz + rcos(f->unk4DF02 + 3072) * 2;
+        if (pad_state.unk3C < DAT_80063314 + 5) {
+            vs_gfx_state.unk2CA78.vx = f->unk4DEF0.vx + rsin(f->unk4DF02 + 3072) * 2;
+            vs_gfx_state.unk2CA78.vy = -7000;
+            vs_gfx_state.unk2CA78.vz = f->unk4DEF0.vz + rcos(f->unk4DF02 + 3072) * 2;
         }
     } else {
         int delta_x;
@@ -166,9 +166,9 @@ void func_80014634(void)
             }
         }
     }
-    eye.vx -= DAT_801624d0.unk2CA78.vx;
-    eye.vy -= DAT_801624d0.unk2CA78.vy;
-    eye.vz -= DAT_801624d0.unk2CA78.vz;
+    eye.vx -= vs_gfx_state.unk2CA78.vx;
+    eye.vy -= vs_gfx_state.unk2CA78.vy;
+    eye.vz -= vs_gfx_state.unk2CA78.vz;
     dist = SquareRoot0(eye.vx * eye.vx + eye.vy * eye.vy + eye.vz * eye.vz) + 1;
     if (dist < 200) {
         DAT_80063354 = 0;
@@ -191,41 +191,41 @@ void func_80014634(void)
     x = eye.vx * DAT_80063354 / dist;
     y = eye.vy * DAT_80063354 / dist;
     z = eye.vz * DAT_80063354 / dist;
-    DAT_801624d0.unk2CA78.vx += x;
-    DAT_801624d0.unk2CA78.vy += y;
-    DAT_801624d0.unk2CA78.vz += z;
-    if (DAT_801624d0.unk2CA78.vx > 32767) {
-        DAT_801624d0.unk2CA78.vy += 32767 - DAT_801624d0.unk2CA78.vx;
-        DAT_801624d0.unk2CA78.vx = 32767;
+    vs_gfx_state.unk2CA78.vx += x;
+    vs_gfx_state.unk2CA78.vy += y;
+    vs_gfx_state.unk2CA78.vz += z;
+    if (vs_gfx_state.unk2CA78.vx > 32767) {
+        vs_gfx_state.unk2CA78.vy += 32767 - vs_gfx_state.unk2CA78.vx;
+        vs_gfx_state.unk2CA78.vx = 32767;
     }
-    if (DAT_801624d0.unk2CA78.vx < -32767) {
-        DAT_801624d0.unk2CA78.vy += 32767 + DAT_801624d0.unk2CA78.vx;
-        DAT_801624d0.unk2CA78.vx = -32767;
+    if (vs_gfx_state.unk2CA78.vx < -32767) {
+        vs_gfx_state.unk2CA78.vy += 32767 + vs_gfx_state.unk2CA78.vx;
+        vs_gfx_state.unk2CA78.vx = -32767;
     }
-    if (DAT_801624d0.unk2CA78.vz > 32767) {
-        DAT_801624d0.unk2CA78.vy += 32767 - DAT_801624d0.unk2CA78.vz;
-        DAT_801624d0.unk2CA78.vz = 32767;
+    if (vs_gfx_state.unk2CA78.vz > 32767) {
+        vs_gfx_state.unk2CA78.vy += 32767 - vs_gfx_state.unk2CA78.vz;
+        vs_gfx_state.unk2CA78.vz = 32767;
     }
-    if (DAT_801624d0.unk2CA78.vz < -32767) {
-        DAT_801624d0.unk2CA78.vy += 32767 + DAT_801624d0.unk2CA78.vz;
-        DAT_801624d0.unk2CA78.vz = -32767;
+    if (vs_gfx_state.unk2CA78.vz < -32767) {
+        vs_gfx_state.unk2CA78.vy += 32767 + vs_gfx_state.unk2CA78.vz;
+        vs_gfx_state.unk2CA78.vz = -32767;
     }
-    if (look.vz == DAT_801624d0.unk2CA78.vz)
-        DAT_801624d0.unk2CA88.vy = 2048;
+    if (look.vz == vs_gfx_state.unk2CA78.vz)
+        vs_gfx_state.unk2CA88.vy = 2048;
     else
-        DAT_801624d0.unk2CA88.vy = ratan2(look.vx - DAT_801624d0.unk2CA78.vx,
-                                          look.vz - DAT_801624d0.unk2CA78.vz);
-    look.vx -= DAT_801624d0.unk2CA78.vx;
-    look.vz -= DAT_801624d0.unk2CA78.vz;
+        vs_gfx_state.unk2CA88.vy = ratan2(look.vx - vs_gfx_state.unk2CA78.vx,
+                                          look.vz - vs_gfx_state.unk2CA78.vz);
+    look.vx -= vs_gfx_state.unk2CA78.vx;
+    look.vz -= vs_gfx_state.unk2CA78.vz;
     if (DAT_80063324 & 8)
-        DAT_801624d0.unk2CA88.vx = ratan2(DAT_801624d0.unk2CA78.vy - look.vy,
+        vs_gfx_state.unk2CA88.vx = ratan2(vs_gfx_state.unk2CA78.vy - look.vy,
                                           SquareRoot0(look.vx * look.vx + look.vz * look.vz));
     else
-        DAT_801624d0.unk2CA88.vx = ratan2((DAT_801624d0.unk2CA78.vy - look.vy) * 2 / 3,
+        vs_gfx_state.unk2CA88.vx = ratan2((vs_gfx_state.unk2CA78.vy - look.vy) * 2 / 3,
                                           SquareRoot0(look.vx * look.vx + look.vz * look.vz));
-    RotMatrixZYX(&DAT_801624d0.unk2CA88, &DAT_801624d0.unk2C998);
-    TransposeMatrix(&DAT_801624d0.unk2C998, &DAT_801624d0.unk2C998);
-    DAT_801624d0.unk2C998.t[0] = 0;
-    DAT_801624d0.unk2C998.t[1] = 0;
-    DAT_801624d0.unk2C998.t[2] = 0;
+    RotMatrixZYX(&vs_gfx_state.unk2CA88, &vs_gfx_state.unk2C998);
+    TransposeMatrix(&vs_gfx_state.unk2C998, &vs_gfx_state.unk2C998);
+    vs_gfx_state.unk2C998.t[0] = 0;
+    vs_gfx_state.unk2C998.t[1] = 0;
+    vs_gfx_state.unk2C998.t[2] = 0;
 }

@@ -32,7 +32,7 @@ void func_800297fc(int time)
     if (warn > 8)
         warn = 8;
     for (i = 0; i < 4; i++) {
-        packet = DAT_801624d0.packet;
+        packet = vs_gfx_state.packet;
         p = (POLY_FT4 *)packet->cur;
         packet->cur = (u_long *)(p + 1);
         setPolyFT4(p);
@@ -76,6 +76,6 @@ void func_800297fc(int time)
                     -128 - warn * 16 - frame * (8 - warn),
                     -128 - warn * 16 - frame * (8 - warn));
         }
-        addPrim(&DAT_801624d0.ot_cur[3], p);
+        addPrim(&vs_gfx_state.ot_cur[3], p);
     }
 }

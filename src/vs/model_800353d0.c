@@ -77,20 +77,20 @@ void func_800353d0(u8 *model, VECTOR *pos, SVECTOR *rot, SVECTOR *scale, MATRIX 
     SVECTOR *in;
     int n;
 
-    sp->vertices = DAT_801624d0.unkA7EC;
-    sp->unk48 = DAT_801624d0.unkA7EC;
-    sp->z_ot = DAT_801624d0.unk831C[0];
-    sp->face_count = DAT_801624d0.unk831C[1];
-    sp->prim_count = DAT_801624d0.unk8324;
-    sp->unk94 = DAT_801624d0.unk8328;
-    sp->prim = DAT_801624d0.packet->cur;
-    sp->prim_end = DAT_801624d0.packet->end;
-    gte_SetRotMatrix(&DAT_801624d0.unk2C998);
-    SetTransMatrix(&DAT_801624d0.unk2C998);
+    sp->vertices = vs_gfx_state.unkA7EC;
+    sp->unk48 = vs_gfx_state.unkA7EC;
+    sp->z_ot = vs_gfx_state.unk831C[0];
+    sp->face_count = vs_gfx_state.unk831C[1];
+    sp->prim_count = vs_gfx_state.unk8324;
+    sp->unk94 = vs_gfx_state.unk8328;
+    sp->prim = vs_gfx_state.packet->cur;
+    sp->prim_end = vs_gfx_state.packet->end;
+    gte_SetRotMatrix(&vs_gfx_state.unk2C998);
+    SetTransMatrix(&vs_gfx_state.unk2C998);
     if (view) {
-        rel.vx = pos->vx - DAT_801624d0.unk2CA78.vx;
-        rel.vy = pos->vy - DAT_801624d0.unk2CA78.vy;
-        rel.vz = pos->vz - DAT_801624d0.unk2CA78.vz;
+        rel.vx = pos->vx - vs_gfx_state.unk2CA78.vx;
+        rel.vy = pos->vy - vs_gfx_state.unk2CA78.vy;
+        rel.vz = pos->vz - vs_gfx_state.unk2CA78.vz;
         gte_RotTrans(&rel, (VECTOR *)sp->matrix.t, &flag);
     } else {
         sp->matrix.t[0] = pos->vx;
@@ -124,12 +124,12 @@ void func_800353d0(u8 *model, VECTOR *pos, SVECTOR *rot, SVECTOR *scale, MATRIX 
     sp->rgb.b = light / 32;
     sp->rgb.cd = 0;
     func_80027ba4(part);
-    DAT_801624d0.packet->cur = sp->prim;
-    DAT_801624d0.packet->end = sp->prim_end;
-    DAT_801624d0.unk831C[0] = sp->z_ot;
-    DAT_801624d0.unk831C[1] = sp->face_count;
-    DAT_801624d0.unk8324 = sp->prim_count;
-    DAT_801624d0.unk8328 = sp->unk94;
+    vs_gfx_state.packet->cur = sp->prim;
+    vs_gfx_state.packet->end = sp->prim_end;
+    vs_gfx_state.unk831C[0] = sp->z_ot;
+    vs_gfx_state.unk831C[1] = sp->face_count;
+    vs_gfx_state.unk8324 = sp->prim_count;
+    vs_gfx_state.unk8328 = sp->unk94;
 }
 
 /* Draws every live effect with a model (VS's copy of ST.EXE's
@@ -154,14 +154,14 @@ void func_80035b68(void)
         case 0:
             sp->near_z = 11;
             sp->far_z = 4103;
-            sp->ot = DAT_801624d0.ot_cur - 7;
+            sp->ot = vs_gfx_state.ot_cur - 7;
             func_800353d0((u8 *)DAT_800633b0.fighter[o->unk4C].unk4B000, &o->unk20, &o->unk30,
-                          &o->unk38, &DAT_801624d0.unk2C998, o->unk2 & 0x7f, o->unk12, o->unk7, 0);
+                          &o->unk38, &vs_gfx_state.unk2C998, o->unk2 & 0x7f, o->unk12, o->unk7, 0);
             break;
         case 4:
             sp->near_z = 11;
             sp->far_z = 4103;
-            sp->ot = DAT_801624d0.ot_cur - 7;
+            sp->ot = vs_gfx_state.ot_cur - 7;
             func_800353d0((u8 *)DAT_800633b0.fighter[o->unk4C].unk4B000, &o->unk20, &o->unk30,
                           &o->unk38, &unit, o->unk2 & 0x7f, o->unk12, o->unk7, 0);
             break;

@@ -35,14 +35,14 @@ JUMPTABLES(0x800113b8, 0x24)
 ADDRESS(0x80023764, 0x3c)
 void func_80023764(u16 id, StAnimFile *file)
 {
-    DAT_801624d0.unk834C[id] = file;
+    vs_gfx_state.unk834C[id] = file;
     SCRATCHPAD->model = ANIM_MODEL(file);
 }
 
 ADDRESS(0x800237a0, 0x44)
 void func_800237a0(void)
 {
-    StAnimSet *set = DAT_801624d0.anim_sets;
+    StAnimSet *set = vs_gfx_state.anim_sets;
     u16 i;
 
     i = 12;
@@ -60,7 +60,7 @@ void func_800237a0(void)
 ADDRESS(0x800237e4, 0x3c)
 void func_800237e4(void)
 {
-    StAnimSet *set = DAT_801624d0.anim_sets;
+    StAnimSet *set = vs_gfx_state.anim_sets;
     u16 i;
 
     i = 12;
@@ -100,7 +100,7 @@ void func_80023820(StAnimSet *set)
 ADDRESS(0x800238c0, 0x6c)
 void func_800238c0(void)
 {
-    StAnimSet *set = DAT_801624d0.anim_sets;
+    StAnimSet *set = vs_gfx_state.anim_sets;
     u16 i;
 
     i = 12;
@@ -115,7 +115,7 @@ void func_800238c0(void)
 ADDRESS(0x8002392c, 0x60)
 void func_8002392c(void)
 {
-    StAnimSet *set = DAT_801624d0.anim_sets;
+    StAnimSet *set = vs_gfx_state.anim_sets;
     s16 i;
 
     i = 12;
@@ -149,7 +149,7 @@ void func_800241b4(StAnimSet **out)
 {
     u16 i;
 
-    *out = DAT_801624d0.anim_sets;
+    *out = vs_gfx_state.anim_sets;
     i = 12;
     do {
         if (!(*out)->unk0) {

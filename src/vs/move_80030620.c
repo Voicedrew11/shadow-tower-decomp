@@ -283,11 +283,11 @@ void func_80031478(int n)
     int step;
 
     if (n == 0) {
-        DAT_800633a8 = DAT_801603c0.pads[0].unk0;
-        DAT_800633ac = DAT_801603c0.pads[0].unk8;
+        DAT_800633a8 = pad_state.pads[0].unk0;
+        DAT_800633ac = pad_state.pads[0].unk8;
     } else {
-        DAT_800633a8 = DAT_801603c0.pads[1].unk0;
-        DAT_800633ac = DAT_801603c0.pads[1].unk8;
+        DAT_800633a8 = pad_state.pads[1].unk0;
+        DAT_800633ac = pad_state.pads[1].unk8;
     }
     f->unk4DEEA += f->unk4DEEC * DAT_80063220;
     if (f->unk4DF0A < d->unk1BA) {

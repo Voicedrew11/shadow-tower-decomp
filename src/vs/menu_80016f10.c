@@ -46,7 +46,7 @@ void func_80023308(int page);
 /* The CD state's reusable menu-file buffer. */
 #define LOAD_BUFFER (DAT_801a4590.unk4A4)
 
-#define PAD(n) (DAT_801603c0.pads[(n)])
+#define PAD(n) (pad_state.pads[(n)])
 #define PRESSED (PAD(0).unk8 | PAD(1).unk8)
 #define REPEAT (PAD(0).unkC | PAD(1).unkC)
 
@@ -146,66 +146,66 @@ int func_80016f10(void)
                     sp->unk1CC = 1;
                     break;
                 case 1:
-                    if (!(DAT_801603c0.pads[0].unk8 & 0x4000))
+                    if (!(pad_state.pads[0].unk8 & 0x4000))
                         goto buzz;
                     func_8001c978();
-                    DAT_801603c0.pads[0].unk8 = 0;
+                    pad_state.pads[0].unk8 = 0;
                     CARD_PAGE(0);
                     break;
                 case 2:
-                    if (DAT_801603c0.pads[1].unk8 & 0x4000) {
+                    if (pad_state.pads[1].unk8 & 0x4000) {
                         func_8001c978();
-                        DAT_801603c0.pads[1].unk8 = 0;
+                        pad_state.pads[1].unk8 = 0;
                         CARD_PAGE(1);
                         break;
                     }
                     goto buzz;
                 case 3:
-                    if (!(DAT_801603c0.pads[0].unk8 & 0x4000) || !DAT_80063380)
+                    if (!(pad_state.pads[0].unk8 & 0x4000) || !DAT_80063380)
                         goto buzz;
                     func_8001c978();
-                    DAT_801603c0.pads[0].unk8 = 0;
+                    pad_state.pads[0].unk8 = 0;
                     TEAM_PAGE(0);
                     break;
                 case 4:
-                    if ((DAT_801603c0.pads[1].unk8 & 0x4000) && DAT_80063381) {
+                    if ((pad_state.pads[1].unk8 & 0x4000) && DAT_80063381) {
                         func_8001c978();
-                        DAT_801603c0.pads[1].unk8 = 0;
+                        pad_state.pads[1].unk8 = 0;
                         TEAM_PAGE(1);
                         break;
                     }
                     goto buzz;
                 case 5:
-                    if (!(DAT_801603c0.pads[0].unk8 & 0x4000) || !DAT_80063380 || !DAT_80063381)
+                    if (!(pad_state.pads[0].unk8 & 0x4000) || !DAT_80063380 || !DAT_80063381)
                         goto buzz;
                     func_8001c978();
-                    DAT_801603c0.pads[0].unk8 = 0;
+                    pad_state.pads[0].unk8 = 0;
                     SAVE_PAGE(0);
                     break;
                 case 6:
-                    if (!(DAT_801603c0.pads[1].unk8 & 0x4000) || !DAT_80063380 || !DAT_80063381)
+                    if (!(pad_state.pads[1].unk8 & 0x4000) || !DAT_80063380 || !DAT_80063381)
                         goto buzz;
                     func_8001c978();
-                    DAT_801603c0.pads[1].unk8 = 0;
+                    pad_state.pads[1].unk8 = 0;
                     SAVE_PAGE(1);
                     break;
                 buzz:
                     func_8001c938();
                     break;
                 }
-                DAT_801603c0.pads[0].unk8 = 0;
-                DAT_801603c0.pads[1].unk8 = 0;
+                pad_state.pads[0].unk8 = 0;
+                pad_state.pads[1].unk8 = 0;
             }
             if (REPEAT & 0x10) {
                 func_8001c8b8();
-                DAT_801603c0.pads[0].unkC = 0;
-                DAT_801603c0.pads[1].unkC = 0;
+                pad_state.pads[0].unkC = 0;
+                pad_state.pads[1].unkC = 0;
                 sp->unk1CE = (sp->unk1CE + 6) % 7;
             }
             if (REPEAT & 0x40) {
                 func_8001c8b8();
-                DAT_801603c0.pads[0].unkC = 0;
-                DAT_801603c0.pads[1].unkC = 0;
+                pad_state.pads[0].unkC = 0;
+                pad_state.pads[1].unkC = 0;
                 sp->unk1CE = (sp->unk1CE + 1) % 7;
             }
             if (PRESSED & 0x2000) {
@@ -269,8 +269,8 @@ int func_80016f10(void)
         } else if (sp->unk1CC == 5 || sp->unk1CC == 6) {
             if (PRESSED & 0x4000) {
                 if (sp->unk1CC == 5) {
-                    DAT_801603c0.pads[0].unk8 = 0;
-                    DAT_801603c0.pads[1].unk8 = 0;
+                    pad_state.pads[0].unk8 = 0;
+                    pad_state.pads[1].unk8 = 0;
                     return 0;
                 }
                 sp->unk1CC = 0;
@@ -285,10 +285,10 @@ int func_80016f10(void)
             sp->unk1CC = 0;
         }
     next:
-        DAT_801603c0.pads[0].unk8 = 0;
-        DAT_801603c0.pads[1].unk8 = 0;
-        DAT_801603c0.pads[0].unkC = 0;
-        DAT_801603c0.pads[1].unkC = 0;
+        pad_state.pads[0].unk8 = 0;
+        pad_state.pads[1].unk8 = 0;
+        pad_state.pads[0].unkC = 0;
+        pad_state.pads[1].unkC = 0;
         func_80023308(sp->unk1CC);
         sp->unk1D4 = (sp->unk1D4 + 1) % 32;
     }

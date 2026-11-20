@@ -40,8 +40,8 @@ void func_80029f28(int phase, int scale)
     }
     for (j = 0; j < 2; j++) {
         for (i = 0; i < DAT_80063370[j]; i++) {
-            p = (POLY_G4 *)DAT_801624d0.packet->cur;
-            DAT_801624d0.packet->cur = (u_long *)(p + 1);
+            p = (POLY_G4 *)vs_gfx_state.packet->cur;
+            vs_gfx_state.packet->cur = (u_long *)(p + 1);
             setlen(p, 8);
             setcode(p, 58);
             if (j == 0)
@@ -53,7 +53,7 @@ void func_80029f28(int phase, int scale)
             setRGB1(p, top * scale / 32, 0, 0);
             setRGB2(p, bottom * scale / 32, 0, 0);
             setRGB3(p, bottom * scale / 32, 0, 0);
-            addPrim(&DAT_801624d0.ot_cur[1], p);
+            addPrim(&vs_gfx_state.ot_cur[1], p);
         }
     }
 }
@@ -74,8 +74,8 @@ void func_8002a124(int value, int level)
     if (level < 0)
         level = 0;
     for (i = 0; i < 2; i++) {
-        p = (POLY_FT4 *)DAT_801624d0.packet->cur;
-        DAT_801624d0.packet->cur = (u_long *)(p + 1);
+        p = (POLY_FT4 *)vs_gfx_state.packet->cur;
+        vs_gfx_state.packet->cur = (u_long *)(p + 1);
         setlen(p, 9);
         setcode(p, 46);
         setXY4(p, 128 + i * 32, 16, 160 + i * 32, 16, 128 + i * 32, 48, 160 + i * 32, 48);
@@ -102,7 +102,7 @@ void func_8002a124(int value, int level)
         p->clut = 32290;
         p->tpage = 61;
         setRGB0(p, level * 8, level * 8, level * 8);
-        addPrim(&DAT_801624d0.ot_cur[3], p);
+        addPrim(&vs_gfx_state.ot_cur[3], p);
     }
 }
 
@@ -121,8 +121,8 @@ void func_8002a360(int kind, int level)
         level = 15;
     if (level < 0)
         level = 0;
-    p = (POLY_FT4 *)DAT_801624d0.packet->cur;
-    DAT_801624d0.packet->cur = (u_long *)(p + 1);
+    p = (POLY_FT4 *)vs_gfx_state.packet->cur;
+    vs_gfx_state.packet->cur = (u_long *)(p + 1);
     setlen(p, 9);
     setcode(p, 46);
     switch (kind) {
@@ -210,7 +210,7 @@ void func_8002a360(int kind, int level)
         setRGB0(p, level * 8, level * 8, level * 8);
     else
         setRGB0(p, level * 16, 0, 0);
-    addPrim(&DAT_801624d0.ot_cur[5], p);
+    addPrim(&vs_gfx_state.ot_cur[5], p);
 }
 
 /*
@@ -226,8 +226,8 @@ void func_8002a9c0(int kind, int level, int size)
         level = 15;
     if (level < 0)
         level = 0;
-    p = (POLY_FT4 *)DAT_801624d0.packet->cur;
-    DAT_801624d0.packet->cur = (u_long *)(p + 1);
+    p = (POLY_FT4 *)vs_gfx_state.packet->cur;
+    vs_gfx_state.packet->cur = (u_long *)(p + 1);
     setlen(p, 9);
     setcode(p, 46);
     switch (kind) {
@@ -246,7 +246,7 @@ void func_8002a9c0(int kind, int level, int size)
     p->clut = 32226;
     p->tpage = 63;
     setRGB0(p, level * 16, 0, 0);
-    addPrim(&DAT_801624d0.ot_cur[5], p);
+    addPrim(&vs_gfx_state.ot_cur[5], p);
 }
 
 /*
@@ -263,8 +263,8 @@ void func_8002ab58(int level, int wide)
         level = 15;
     if (level < 0)
         level = 0;
-    p = (POLY_F4 *)DAT_801624d0.packet->cur;
-    DAT_801624d0.packet->cur = (u_long *)(p + 1);
+    p = (POLY_F4 *)vs_gfx_state.packet->cur;
+    vs_gfx_state.packet->cur = (u_long *)(p + 1);
     setlen(p, 5);
     setcode(p, 42);
     if (wide)
@@ -272,14 +272,14 @@ void func_8002ab58(int level, int wide)
     else
         setXY4(p, 80, 80, 239, 80, 80, 185, 239, 185);
     setRGB0(p, 0, 0, level * 4);
-    addPrim(&DAT_801624d0.ot_cur[5], p);
-    t = (POLY_FT3 *)DAT_801624d0.packet->cur;
-    DAT_801624d0.packet->cur = (u_long *)(t + 1);
+    addPrim(&vs_gfx_state.ot_cur[5], p);
+    t = (POLY_FT3 *)vs_gfx_state.packet->cur;
+    vs_gfx_state.packet->cur = (u_long *)(t + 1);
     SetPolyFT3(t);
     t->clut = 32641;
     setXY3(t, 0, 0, 0, 0, 0, 0);
     setUV3(t, 0, 0, 0, 0, 0, 0);
     t->tpage = 24;
     setRGB0(t, 0, 0, 0);
-    addPrim(&DAT_801624d0.ot_cur[5], t);
+    addPrim(&vs_gfx_state.ot_cur[5], t);
 }

@@ -33,7 +33,7 @@ void func_80029b10(int level)
         level = 32;
     for (; i < 2; i++) {
         f = &DAT_800633b0.fighter[i];
-        packet = DAT_801624d0.packet;
+        packet = vs_gfx_state.packet;
         p = (POLY_G4 *)packet->cur;
         packet->cur = (u_long *)(p + 1);
         setPolyG4(p);
@@ -52,12 +52,12 @@ void func_80029b10(int level)
             setRGB3(p, 200, 200, 200);
             setRGB2(p, 200, 200, 200);
         }
-        addPrim(&DAT_801624d0.ot_cur[1], p);
+        addPrim(&vs_gfx_state.ot_cur[1], p);
     }
     for (i = 0; i < 2; i++) {
         f = &DAT_800633b0.fighter[i];
         if (f->unk4DF18.unk1BA != 0) {
-            packet = DAT_801624d0.packet;
+            packet = vs_gfx_state.packet;
             p = (POLY_G4 *)packet->cur;
             packet->cur = (u_long *)(p + 1);
             setPolyG4(p);
@@ -71,7 +71,7 @@ void func_80029b10(int level)
             setRGB1(p, 0, 0, 0);
             setRGB3(p, level * 250 / 32, 0, 0);
             setRGB2(p, level * 250 / 32, w * 5 / 2 * level / 32, 0);
-            addPrim(&DAT_801624d0.ot_cur[1], p);
+            addPrim(&vs_gfx_state.ot_cur[1], p);
         }
     }
 }

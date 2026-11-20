@@ -55,13 +55,13 @@ void func_80021140(int player)
         kind = sp->unk0.team.kinds[sp->unk1D2 * 4 + col];
     item = &sp->unk0.team.items[kind];
     if (player) {
-        DAT_801603c0.pads[0].unk8 = 0;
-        DAT_801603c0.pads[0].unkC = 0;
-        DAT_801603c0.pads[0].unk0 = 0;
+        pad_state.pads[0].unk8 = 0;
+        pad_state.pads[0].unkC = 0;
+        pad_state.pads[0].unk0 = 0;
     } else {
-        DAT_801603c0.pads[1].unk8 = 0;
-        DAT_801603c0.pads[1].unkC = 0;
-        DAT_801603c0.pads[1].unk0 = 0;
+        pad_state.pads[1].unk8 = 0;
+        pad_state.pads[1].unkC = 0;
+        pad_state.pads[1].unk0 = 0;
     }
     if (DAT_8006335c == 0)
         func_8001eef4(&right, &sp->unk214, 0);

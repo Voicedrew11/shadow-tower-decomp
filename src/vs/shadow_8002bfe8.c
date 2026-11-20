@@ -38,9 +38,9 @@ void func_8002bfe8(int n, int scale)
     v[3].vx = r;
     v[3].vy = 0;
     v[3].vz = r;
-    m.t[0] = f->unk4DEF0.vx - DAT_801624d0.unk2CA78.vx;
-    m.t[1] = -DAT_801624d0.unk2CA78.vy;
-    m.t[2] = f->unk4DEF0.vz - DAT_801624d0.unk2CA78.vz;
+    m.t[0] = f->unk4DEF0.vx - vs_gfx_state.unk2CA78.vx;
+    m.t[1] = -vs_gfx_state.unk2CA78.vy;
+    m.t[2] = f->unk4DEF0.vz - vs_gfx_state.unk2CA78.vz;
     m.m[0][0] = 4096;
     m.m[0][1] = 0;
     m.m[0][2] = 0;
@@ -50,7 +50,7 @@ void func_8002bfe8(int n, int scale)
     m.m[2][0] = 0;
     m.m[2][1] = 0;
     m.m[2][2] = 4096;
-    CompMatrix(&DAT_801624d0.unk2C998, &m, &m);
+    CompMatrix(&vs_gfx_state.unk2C998, &m, &m);
     gte_SetRotMatrix(&m);
     gte_SetTransMatrix(&m);
     gte_ldv3c(&v[0]);
@@ -59,7 +59,7 @@ void func_8002bfe8(int n, int scale)
     gte_ldv0(&v[3]);
     gte_rtps();
     gte_stsxy(&v[3]);
-    packet = DAT_801624d0.packet;
+    packet = vs_gfx_state.packet;
     p = (POLY_FT4 *)packet->cur;
     packet->cur = (u_long *)(p + 1);
     setPolyFT4(p);
@@ -69,5 +69,5 @@ void func_8002bfe8(int n, int scale)
     p->clut = 30816;
     p->tpage = 93;
     setRGB0(p, 255, 255, 255);
-    addPrim(&DAT_801624d0.ot_cur[4090], p);
+    addPrim(&vs_gfx_state.ot_cur[4090], p);
 }

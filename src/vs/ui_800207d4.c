@@ -44,12 +44,12 @@ void func_800207d4(DVECTOR *pos, DVECTOR *tex, DVECTOR *clut, CVECTOR *color, in
         for (col = 0; col < cols; col++) {
             u = u0 + col * tw;
             v = v0 + row * th;
-            buf = DAT_801624d0.packet;
+            buf = vs_gfx_state.packet;
             p = (POLY_FT4 *)buf->cur;
             buf->cur = (u_long *)(p + 1);
-            if (DAT_801624d0.packet->cur > DAT_801624d0.packet->end)
+            if (vs_gfx_state.packet->cur > vs_gfx_state.packet->end)
                 return;
-            DAT_801624d0.unk8328++;
+            vs_gfx_state.unk8328++;
             setUV4(p, u, v, u + tw, v, u, v + th, u + tw, v + th);
             p->x0 = p->x2 = pos->vx + col * dx;
             p->x1 = p->x3 = pos->vx + col * dx + w;
@@ -64,7 +64,7 @@ void func_800207d4(DVECTOR *pos, DVECTOR *tex, DVECTOR *clut, CVECTOR *color, in
             p->clut = GetClut(clut->vx, clut->vy);
             setPolyFT4(p);
             setSemiTrans(p, 1);
-            addPrim(DAT_801624d0.ot_cur, p);
+            addPrim(vs_gfx_state.ot_cur, p);
         }
     }
 }

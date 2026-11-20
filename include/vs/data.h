@@ -111,7 +111,7 @@ typedef char VsWorldStateAnimSlotsAt0xA3FC[offsetof(VsWorldState, anim_slots) ==
 typedef char VsWorldStateFrameAt0x2C972[offsetof(VsWorldState, frame) == 0x2c972 ? 1 : -1];
 typedef char VsWorldStateCameraAt0x2CA78[offsetof(VsWorldState, unk2CA78) == 0x2ca78 ? 1 : -1];
 
-extern VsWorldState DAT_801624d0;
+extern VsWorldState vs_gfx_state;
 
 /* 2000 20-byte particle records at 0x801c4a58 (bss): func_8002d738
  * starts them, func_8002d710 clears their lives. */

@@ -24,7 +24,7 @@
 ADDRESS(0x8002e5e4, 0x4c)
 void func_8002e5e4(void)
 {
-    if (DAT_801624d0.unk2C974) {
+    if (vs_gfx_state.unk2C974) {
         func_8001d1b8();
         func_8001d374();
     }

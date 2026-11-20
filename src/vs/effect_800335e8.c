@@ -444,7 +444,7 @@ void func_800335e8(void)
         }
         shake = (rand() - 16384) >> ((64 - e->unk10) / 8 + 9);
         if (shake < -2 || shake > 2)
-            DAT_801624d0.unk2CA78.vy += shake * 10;
+            vs_gfx_state.unk2CA78.vy += shake * 10;
         break;
     case 0x57:
     case 0x58:

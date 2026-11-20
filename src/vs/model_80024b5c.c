@@ -91,9 +91,9 @@ void func_80024b5c(void)
                 MATRIX face = {{{ONE, 0, 0}, {0, ONE, 0}, {0, 0, ONE}}, {0, 0, 0}};
                 SVECTOR angle;
 
-                angle.vx = -DAT_80063300->unk4DF00 + DAT_801624d0.unk2CA88.vx;
-                angle.vy = -DAT_80063300->unk4DF02 + DAT_801624d0.unk2CA88.vy;
-                angle.vz = -DAT_80063300->unk4DF04 + DAT_801624d0.unk2CA88.vz;
+                angle.vx = -DAT_80063300->unk4DF00 + vs_gfx_state.unk2CA88.vx;
+                angle.vy = -DAT_80063300->unk4DF02 + vs_gfx_state.unk2CA88.vy;
+                angle.vz = -DAT_80063300->unk4DF04 + vs_gfx_state.unk2CA88.vz;
                 RotMatrixX(angle.vx, &face);
                 RotMatrixY(angle.vy, &face);
                 RotMatrixZ(angle.vz, &face);
@@ -178,17 +178,17 @@ void func_80025204(void)
     sp->unk68 = lights.dq[0];
     sp->unk6C = lights.dq[1];
     gte_SetBackColor(lights.bk.r, lights.bk.g, lights.bk.b);
-    sp->matrix.t[0] = DAT_80063300->unk4DEF0.vx - DAT_801624d0.unk2CA78.vx;
-    sp->matrix.t[1] = DAT_80063300->unk4DEF0.vy - DAT_801624d0.unk2CA78.vy;
-    sp->matrix.t[2] = DAT_80063300->unk4DEF0.vz - DAT_801624d0.unk2CA78.vz;
+    sp->matrix.t[0] = DAT_80063300->unk4DEF0.vx - vs_gfx_state.unk2CA78.vx;
+    sp->matrix.t[1] = DAT_80063300->unk4DEF0.vy - vs_gfx_state.unk2CA78.vy;
+    sp->matrix.t[2] = DAT_80063300->unk4DEF0.vz - vs_gfx_state.unk2CA78.vz;
     RotMatrix((SVECTOR *)&DAT_80063300->unk4DF00, &sp->matrix);
-    CompMatrix(&DAT_801624d0.unk2C998, &sp->matrix, &sp->matrix);
+    CompMatrix(&vs_gfx_state.unk2C998, &sp->matrix, &sp->matrix);
     n = DAT_80063300 - DAT_800633b0.fighter;
-    sp->model = (u8 *)DAT_801624d0.unk834C[n] + ((ModelFile *)DAT_801624d0.unk834C[n])->unk8;
+    sp->model = (u8 *)vs_gfx_state.unk834C[n] + ((ModelFile *)vs_gfx_state.unk834C[n])->unk8;
     if (func_800246d8(&DAT_80063300->unk4DEE0, n, DAT_80063300->unk4DEE8,
                       DAT_80063300->unk4DEEA) == 0)
         return;
-    sp->ot = DAT_801624d0.ot_cur;
+    sp->ot = vs_gfx_state.ot_cur;
     sp->far_z = 4096;
     if (DAT_80063300->unk4DF12 < 128) {
         sp->rgb.r = DAT_80063300->unk4DF12;
@@ -200,19 +200,19 @@ void func_80025204(void)
         *(u_long *)&sp->rgb = DAT_800632d0;
         DAT_80063350 = 0;
     }
-    sp->face_count = DAT_801624d0.unk831C[1];
-    sp->prim_count = DAT_801624d0.unk8324;
-    sp->unk94 = DAT_801624d0.unk8328;
-    sp->prim = DAT_801624d0.packet->cur;
-    sp->prim_end = DAT_801624d0.packet->end;
-    sp->vertices = DAT_801624d0.unkA7EC;
+    sp->face_count = vs_gfx_state.unk831C[1];
+    sp->prim_count = vs_gfx_state.unk8324;
+    sp->unk94 = vs_gfx_state.unk8328;
+    sp->prim = vs_gfx_state.packet->cur;
+    sp->prim_end = vs_gfx_state.packet->end;
+    sp->vertices = vs_gfx_state.unkA7EC;
     sp->clut_base = 0;
     if (DAT_80063300->unk4DEEA != -1)
         func_80024b5c();
-    DAT_801624d0.packet->cur = sp->prim;
-    DAT_801624d0.packet->end = sp->prim_end;
-    DAT_801624d0.unk831C[1] = sp->face_count;
-    DAT_801624d0.unk8328 = sp->unk94;
-    DAT_801624d0.unk8324 = sp->prim_count;
+    vs_gfx_state.packet->cur = sp->prim;
+    vs_gfx_state.packet->end = sp->prim_end;
+    vs_gfx_state.unk831C[1] = sp->face_count;
+    vs_gfx_state.unk8328 = sp->unk94;
+    vs_gfx_state.unk8324 = sp->prim_count;
     }
 }

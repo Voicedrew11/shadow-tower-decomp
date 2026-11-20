@@ -26,9 +26,9 @@ void func_80021c14(int page);
 
 /* The detail page toggle: the attribute figures when nonzero (bss, unowned). */
 
-#define PRESSED (DAT_801603c0.pads[0].unk8 | DAT_801603c0.pads[1].unk8)
-#define REPEAT (DAT_801603c0.pads[0].unkC | DAT_801603c0.pads[1].unkC)
-#define HELD (DAT_801603c0.pads[0].unk0 | DAT_801603c0.pads[1].unk0)
+#define PRESSED (pad_state.pads[0].unk8 | pad_state.pads[1].unk8)
+#define REPEAT (pad_state.pads[0].unkC | pad_state.pads[1].unkC)
+#define HELD (pad_state.pads[0].unk0 | pad_state.pads[1].unk0)
 
 /* The team being edited: the three ids of `player`. */
 #define TEAM (DAT_801624b8[player].slot)
@@ -55,13 +55,13 @@ void func_800182ec(VsMenuScratch *sp, int player)
     edit.unk0 = 0;
     for (;;) {
         if (player) {
-            DAT_801603c0.pads[0].unk8 = 0;
-            DAT_801603c0.pads[0].unkC = 0;
-            DAT_801603c0.pads[0].unk0 = 0;
+            pad_state.pads[0].unk8 = 0;
+            pad_state.pads[0].unkC = 0;
+            pad_state.pads[0].unk0 = 0;
         } else {
-            DAT_801603c0.pads[1].unk8 = 0;
-            DAT_801603c0.pads[1].unkC = 0;
-            DAT_801603c0.pads[1].unk0 = 0;
+            pad_state.pads[1].unk8 = 0;
+            pad_state.pads[1].unkC = 0;
+            pad_state.pads[1].unk0 = 0;
         }
         top = sp->unk1D2;
         if (sp->unk1CC == 1) {
@@ -282,10 +282,10 @@ void func_800182ec(VsMenuScratch *sp, int player)
         } else if (PRESSED & 0x400) {
             DAT_8006335c = 0;
         }
-        DAT_801603c0.pads[0].unk8 = 0;
-        DAT_801603c0.pads[1].unk8 = 0;
-        DAT_801603c0.pads[0].unkC = 0;
-        DAT_801603c0.pads[1].unkC = 0;
+        pad_state.pads[0].unk8 = 0;
+        pad_state.pads[1].unk8 = 0;
+        pad_state.pads[0].unkC = 0;
+        pad_state.pads[1].unkC = 0;
         func_80021c14(player);
         sp->unk1D4 = (sp->unk1D4 + 1) % 32;
     }
