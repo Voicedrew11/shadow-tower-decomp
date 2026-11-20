@@ -232,8 +232,8 @@ typedef struct {
 typedef char VsFighterDataSize[sizeof(VsFighterData) == 0x1ce ? 1 : -1];
 
 /* The fighters' data blocks by character, copied into VsFighter.unk4DF18
- * when a round loads (.data; WIP extent: one record). */
-extern VsFighterData DAT_8004a224[];
+ * when a round loads (.data, src/vs/data_8004a224.c). */
+extern VsFighterData DAT_8004a224[151];
 
 /*
  * The two fighters at 0x800633b0 (bss), 0x4e0e8 bytes each (the code
@@ -315,11 +315,11 @@ typedef struct {
 extern VsFighter *DAT_80063300;
 
 /* Rotation offsets added to the drawn fighter's x and y angles (.sdata,
- * unowned; read absolutely). */
+ * src/vs/main.c; read absolutely elsewhere). */
 extern s32 DAT_80063218;
 extern s32 DAT_8006321c;
 
-/* The model renderers' scale (4096, 4096, 4096; .data, unowned). */
+/* The model renderers' scale (4096, 4096, 4096; .data, src/vs/main.c). */
 extern VECTOR DAT_8005b2a8;
 
 /* The column of DAT_801624b8 func_8002ad40 shows (bss, unowned). */

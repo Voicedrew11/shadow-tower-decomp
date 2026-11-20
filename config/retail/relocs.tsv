@@ -8259,6 +8259,13 @@ OPTXT.EXE	0x800130b0	0x28b0		mips26	reachable-code	0x80012168	load		jal		manual-
 OPTXT.EXE	0x800130b8	0x28b8		mips26	reachable-code	0x8001b400	load		jal		manual-decoded	reviewed	optxt.main asm review
 OPTXT.EXE	0x800130c0	0x28c0		mips26	reachable-code	0x800182d0	load		jal		manual-decoded	reviewed	optxt.main asm review
 OPTXT.EXE	0x800130c8	0x28c8		mips26	reachable-code	0x80017524	load		jal		manual-decoded	reviewed	optxt.main asm review
+VS.EXE	0x80011f34	0x1734		mips32_candidate	data-word	0x80063300	bss	_bss_org	word		manual-decoded	reviewed	vs.rdata_80011f34 PSYLINK group symbol review
+VS.EXE	0x80011f38	0x1738		mips32_candidate	data-word	0x801dbaa8	bss	_bss_orgend	word		manual-decoded	reviewed	vs.rdata_80011f34 PSYLINK group symbol review
+VS.EXE	0x80011f3c	0x173c		mips32_candidate	data-word	0x801dbaa8	bss	_bss_orgend	word		manual-decoded	reviewed	vs.rdata_80011f34 PSYLINK group symbol review
+VS.EXE	0x80011f40	0x1740		mips32_candidate	data-word	0x801dbaa8	bss	_bss_orgend	word		manual-decoded	reviewed	vs.rdata_80011f34 PSYLINK group symbol review
+VS.EXE	0x80011f44	0x1744		mips32_candidate	data-word	0x801dbaa8	bss	_bss_orgend	word		manual-decoded	reviewed	vs.rdata_80011f34 PSYLINK group symbol review
+VS.EXE	0x80011f48	0x1748		mips32_candidate	data-word	0x801dbaa8	bss	_bss_orgend	word		manual-decoded	reviewed	vs.rdata_80011f34 PSYLINK group symbol review
+VS.EXE	0x80011f4c	0x174c		mips32_candidate	data-word	0x801dbaa8	bss	_bss_orgend	word		manual-decoded	reviewed	vs.rdata_80011f34 PSYLINK group symbol review
 VS.EXE	0x800129d0	0x21d0		mips26	reachable-code	0x8003ccfc	load		jal		manual-decoded	reviewed	vs.snd_800129bc asm review
 VS.EXE	0x800129f8	0x21f8	0x80012a08	mips_hi16_lo16	reachable-code	0x80011000	load		lui+addiu		manual-decoded	reviewed	vs.snd_800129bc asm review
 VS.EXE	0x80012a04	0x2204		mips26	reachable-code	0x8003813c	load		jal		manual-decoded	reviewed	vs.snd_800129bc asm review

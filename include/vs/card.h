@@ -105,7 +105,7 @@ extern VsCardHeader DAT_8015ffc0[2];
  * value in a static buffer. */
 extern char *itoa(int value);
 
-/* src/vs/card_8001a124.c */
+/* src/vs/menu_80016f10.c */
 void func_8001a5b4(int port);
 int func_8001b314(int fd, int offset, u8 *buf, int size);
 
