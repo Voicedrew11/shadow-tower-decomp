@@ -1,6 +1,7 @@
 /*
  * ST.EXE: a data-only module (WIP) defining game .bss:
- * the option screens' equipment ids, the id grid state and the message table.
+ * an unreferenced block, the option screens' equipment ids, the id grid
+ * state and the message table.
  * PSYLINK allocates each object's tentative definitions (COMMON) after the
  * previous object's, in symbol-hash bucket order (docs/executable-linking.md),
  * so the definitions here are listed in address order and their spellings
@@ -16,7 +17,9 @@
 #include <st/idgrid.h>
 #include <st/menu.h>
 
-/* Retail leaves 0x801e0d20..0x801e0d28 unreferenced before this batch. */
+/* Unreferenced (layout evidence only). */
+DATA(0x801e0d20, 0x8, ".bss")
+u8 DAT_801e0d20[0x8];
 DATA(0x801e0d28, 0xc, ".bss")
 u16 DAT_801e0d28[6];
 DATA(0x801e0d38, 0x14, ".bss")

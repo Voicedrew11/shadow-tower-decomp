@@ -14,7 +14,6 @@
 #include <st/data.h>
 #include <st/effect.h>
 
-/* Retail leaves 0x8018d23c..0x8018d298 unreferenced before this batch. */
 DATA(0x8018d298, 0x3c8c, ".bss")
 StEffects effects;
 DATA(0x80190f28, 0x8000, ".bss")

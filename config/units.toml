@@ -512,6 +512,12 @@ source = "src/st/bss_8017bed0.c"
 profile = "probe-gcc272cdk-o2-g0"
 
 [[unit]]
+unit = "st.bss_8018d240"
+image = "ST.EXE"
+source = "src/st/bss_8018d240.c"
+profile = "probe-gcc272cdk-o2-g0"
+
+[[unit]]
 unit = "st.bss_8018d298"
 image = "ST.EXE"
 source = "src/st/bss_8018d298.c"
@@ -560,9 +566,9 @@ source = "src/st/bss_801e0d08.c"
 profile = "probe-gcc272cdk-o2-g0"
 
 [[unit]]
-unit = "st.bss_801e0d28"
+unit = "st.bss_801e0d20"
 image = "ST.EXE"
-source = "src/st/bss_801e0d28.c"
+source = "src/st/bss_801e0d20.c"
 profile = "probe-gcc272cdk-o2-g0"
 
 [[unit]]

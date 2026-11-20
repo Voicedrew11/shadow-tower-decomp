@@ -15,7 +15,6 @@
 #include <st/area.h>
 #include <st/memory.h>
 
-/* Retail leaves 0x8009aca8..0x8009b088 unreferenced before this batch. */
 DATA(0x8009b088, 0x1800, ".bss")
 u8 DAT_8009b088[0x1800];
 DATA(0x8009c888, 0x56400, ".bss")
