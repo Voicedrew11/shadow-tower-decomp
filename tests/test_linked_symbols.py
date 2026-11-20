@@ -63,6 +63,19 @@ class LinkedCommonProofTests(unittest.TestCase):
         self.assertFalse(linked_common_proof(unit, _recon(("a", 4)), {"a": 0x100}))
         self.assertFalse(linked_common_proof(unit, _recon(("a", 8)), None))
 
+    def test_small_common_claims_in_sbss_are_proven_the_same_way(self) -> None:
+        small = SimpleNamespace(symbol="w", va=0x80063304, size=4,
+                                section_name=".sbss", scope="global")
+        unit = _unit(small)
+        self.assertEqual(linked_common_proof(unit, _recon(("w", 4)), {"w": 0x80063304}),
+                         {"w"})
+        self.assertFalse(linked_common_proof(unit, _recon(("w", 4)), {"w": 0x80063308}))
+        self.assertFalse(linked_common_proof(unit, _recon(("w", 4)), None))
+        self.assertTrue(_proven_issue("reconstruction", {
+            "kind": "owned-symbol-layout", "symbol": "w", "actual_section": "SHN_COMMON",
+            "expected_section": ".sbss", "actual_size": 4, "expected_size": 4},
+            frozenset({"w"})))
+
     def test_only_common_restatements_are_waived(self) -> None:
         proven = frozenset({"a"})
         self.assertTrue(_proven_issue("reconstruction", {
