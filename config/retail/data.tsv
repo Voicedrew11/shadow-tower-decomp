@@ -254,7 +254,9 @@ ST.EXE	0x80087f38	0x77738	0x30	unclassified	coverage-gap			payload-complement	ma
 ST.EXE	0x80087f68	0x77768	0x8	defined	proven	DAT_80087f68	s32[2]	src/st/ui.c st.ui	unreferenced zero words in .sdata between func_8002e94c and func_8002f498 constants
 ST.EXE	0x80087f70	0x77770	0x14	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 ST.EXE	0x80087f84	0x77784	0x4	defined	proven	DAT_80087f84	s32	src/st/ui.c st.ui	unreferenced zero word in .sdata between func_8002f97c and func_8002fc4c constants
-ST.EXE	0x80087f88	0x77788	0xb4	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
+ST.EXE	0x80087f88	0x77788	0x8c	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
+ST.EXE	0x80088014	0x77814	0x4	defined	proven	DAT_80088014	u32	retail-layout;src/st/texanim.c st.texanim	unreferenced zero .sdata word between st.texanim's literals (to 0x80088013) and the effect script's (0x80088018)
+ST.EXE	0x80088018	0x77818	0x24	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 ST.EXE	0x8008803c	0x7783c	0x2	defined	proven	DAT_8008803c	s16	asm;src/st/player.c st.player	$gp+0x17c .sdata halfword func_8004162c halves each frame
 ST.EXE	0x8008803e	0x7783e	0x12	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 ST.EXE	0x80088050	0x77850	0x4	defined	proven	DAT_80088050	s32	asm;band J	small-data word func_80042c44 compares with viewer+0x23c; .sdata after func_80042620 constants

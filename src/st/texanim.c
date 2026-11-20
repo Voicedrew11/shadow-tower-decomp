@@ -9537,3 +9537,8 @@ int anim_prepare(StAnimSlot **slotp, int id, int clip, int frame)
 #include "../lib/anim_list_find_id.inc"
 
 #include "../lib/anim_list.inc"
+
+/* Unreferenced: the module's last .sdata word (0x80088014), after the menu
+ * text's literals and before the effect module's. */
+DATA(0x80088014, 0x4, ".sdata")
+static u32 DAT_80088014 = 0;
