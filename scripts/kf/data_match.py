@@ -349,32 +349,36 @@ def linked_common_proof(unit: Unit, recon: Elf,
 
 
 def _place_proven_commons(unit: Unit, recon: Elf, proven: frozenset[str]) -> None:
-    """Add linked COMMON beside a unit's fixed .bss when the link proved them.
+    """Add linked COMMON beside a unit's fixed .bss/.sbss when the link proved them.
 
-    A unit may own fixed .bss (statics) and COMMON requests whose linked
-    addresses follow it. Once the current link placed every request at its
-    claim, compare the section as the link laid it out: the fixed allocations
-    keep their object offsets and each COMMON sits at its claim's distance
-    from the one base the fixed allocations imply.
+    A unit may own fixed BSS (statics) and COMMON requests whose linked
+    addresses follow it, in .bss or, for small data, in .sbss. Once the
+    current link placed every request at its claim, compare each section as
+    the link laid it out: the fixed allocations keep their object offsets and
+    each COMMON claimed in that section sits at its claim's distance from the
+    one base the section's fixed allocations imply.
     """
-    section = recon.sections.get(".bss")
-    if not proven or section is None:
+    if not proven:
         return
-    claims = {datum.symbol: datum for datum in unit.data if datum.section_name == ".bss"}
-    fixed = recon.allocations.get(".bss", [])
-    bases = {claims[item.name].va - item.offset for item in fixed if item.name in claims}
-    if len(bases) != 1 or any(item.name not in claims for item in fixed):
-        return
-    base = bases.pop()
-    placed = list(fixed)
-    present = {item.name for item in fixed}
-    for request in recon.common_requests:
-        if request.name in proven and request.name not in present:
-            placed.append(Allocation(request.name, claims[request.name].va - base,
-                                     request.size, 1, 0))  # STB_GLOBAL, STV_DEFAULT
-    size = max(section.size, *(item.offset + item.size for item in placed))
-    recon.sections[".bss"] = Section(".bss", section.type, size, b"", section.flags)
-    recon.allocations[".bss"] = placed
+    for name in BSS_SECTIONS:
+        section = recon.sections.get(name)
+        if section is None:
+            continue
+        claims = {datum.symbol: datum for datum in unit.data if datum.section_name == name}
+        fixed = recon.allocations.get(name, [])
+        bases = {claims[item.name].va - item.offset for item in fixed if item.name in claims}
+        if len(bases) != 1 or any(item.name not in claims for item in fixed):
+            continue
+        base = bases.pop()
+        placed = list(fixed)
+        present = {item.name for item in fixed}
+        for request in recon.common_requests:
+            if request.name in proven and request.name in claims and request.name not in present:
+                placed.append(Allocation(request.name, claims[request.name].va - base,
+                                         request.size, 1, 0))  # STB_GLOBAL, STV_DEFAULT
+        size = max(section.size, *(item.offset + item.size for item in placed))
+        recon.sections[name] = Section(name, section.type, size, b"", section.flags)
+        recon.allocations[name] = placed
 
 
 def _proven_issue(label: str, issue: dict, proven: frozenset[str]) -> bool:
