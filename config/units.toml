@@ -526,60 +526,6 @@ source = "src/vs/menu_80016f10.c"
 profile = "probe-gcc272cdk-o2-g8"
 
 [[unit]]
-unit = "vs.team_8001789c"
-image = "VS.EXE"
-source = "src/vs/team_8001789c.c"
-profile = "probe-gcc272cdk-o2-g8"
-
-[[unit]]
-unit = "vs.gfx_80017bc4"
-image = "VS.EXE"
-source = "src/vs/gfx_80017bc4.c"
-profile = "probe-gcc272cdk-o2-g8"
-
-[[unit]]
-unit = "vs.team_80017c84"
-image = "VS.EXE"
-source = "src/vs/team_80017c84.c"
-profile = "probe-gcc272cdk-o2-g8"
-
-[[unit]]
-unit = "vs.tim_80018240"
-image = "VS.EXE"
-source = "src/vs/tim_80018240.c"
-profile = "probe-gcc272cdk-o2-g8"
-
-[[unit]]
-unit = "vs.team_800182ec"
-image = "VS.EXE"
-source = "src/vs/team_800182ec.c"
-profile = "probe-gcc272cdk-o2-g8"
-
-[[unit]]
-unit = "vs.team_80018c84"
-image = "VS.EXE"
-source = "src/vs/team_80018c84.c"
-profile = "probe-gcc272cdk-o2-g8"
-
-[[unit]]
-unit = "vs.save_800193e8"
-image = "VS.EXE"
-source = "src/vs/save_800193e8.c"
-profile = "probe-gcc272cdk-o2-g8"
-
-[[unit]]
-unit = "vs.pick_8001960c"
-image = "VS.EXE"
-source = "src/vs/pick_8001960c.c"
-profile = "probe-gcc272cdk-o2-g8"
-
-[[unit]]
-unit = "vs.card_8001a124"
-image = "VS.EXE"
-source = "src/vs/card_8001a124.c"
-profile = "probe-gcc272cdk-o2-g8"
-
-[[unit]]
 unit = "vs.card_8001c8b8"
 image = "VS.EXE"
 source = "src/vs/card_8001c8b8.c"
