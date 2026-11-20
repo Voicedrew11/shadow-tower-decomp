@@ -76,7 +76,9 @@ binding rules are structural, in the spirit of Gruntz's `RVA()`:
   opt out with `link = "first"`: it is listed at the start of its image's
   block and links before the code units (the object that allocated VS.EXE's
   first .sbss run preceded the start-up module, which reads part of that run
-  with lui pairs); and
+  with lui pairs); its mirror `link = "last"` lists a data-only unit whose
+  first datum lies below the code after every code unit, unsorted (VS.EXE's
+  heap words follow the last unit's switch tables); and
 - an address is claimed by at most one unit.
 
 A unit may also claim its read-only contributions, each once:

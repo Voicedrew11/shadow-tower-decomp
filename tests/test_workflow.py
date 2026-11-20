@@ -105,7 +105,10 @@ class ManifestTests(unittest.TestCase):
             first = [unit for unit in units if unit.linked_first]
             self.assertEqual(units[:len(first)], first)
             self.assertTrue(all(not unit.functions for unit in first))
-            for group in (first, units[len(first):]):
+            last = [unit for unit in units if unit.linked_last]
+            self.assertTrue(all(not unit.functions for unit in last))
+            rest = [unit for unit in units[len(first):] if not unit.linked_last]
+            for group in (first, rest):
                 starts = [unit.va for unit in group]
                 self.assertEqual(starts, sorted(starts))
         for unit in manifest.units:

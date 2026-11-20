@@ -73,6 +73,9 @@ class Unit:
     # A data-only unit listed with `link = "first"` links before the image's
     # code units (see _check_link_order).
     linked_first: bool = False
+    # A data-only unit listed with `link = "last"` links after the image's
+    # code units although its first datum precedes them.
+    linked_last: bool = False
 
     def __post_init__(self) -> None:
         object.__setattr__(self, "sdata", _ranges(self.sdata))
@@ -462,7 +465,7 @@ def _check_together_read_only(source: Path, image: str, jumptable_claims) -> Non
 
 
 def _check_link_order(path: Path, name: str, image: str, start: int, first: bool,
-                      has_functions: bool, units: list[Unit]) -> None:
+                      has_functions: bool, units: list[Unit], last: bool = False) -> None:
     """Units are listed in linked order, which ascends by address per image.
 
     The exception is opt-in: a data-only unit marked `link = "first"` links
@@ -472,8 +475,23 @@ def _check_link_order(path: Path, name: str, image: str, start: int, first: bool
     lui pairs, so an earlier object allocated them). Such units are listed at
     the start of the image's block and ascend among themselves; the units
     after them ascend as usual.
+
+    Its mirror, `link = "last"`, is a data-only unit whose first datum lies
+    below the code (read-only data) but whose object follows the last code
+    unit: VS.EXE's seven heap words sit after the last unit's switch tables.
+    It is listed after every code unit of its image and is not compared by
+    address; no code unit may follow it.
     """
     image_units = [unit for unit in units if unit.image == image]
+    if last or has_functions:
+        if has_functions and any(unit.linked_last for unit in image_units):
+            raise ValueError(f"{path}: unit {name!r} claims functions after a unit linked "
+                             'last (link = "last")')
+        if last:
+            if has_functions or first:
+                raise ValueError(f"{path}: unit {name!r}: only a data-only unit may be "
+                                 'linked last (link = "last")')
+            return
     if first:
         if has_functions:
             raise ValueError(f"{path}: unit {name!r} claims functions; only a data-only unit "
@@ -483,7 +501,8 @@ def _check_link_order(path: Path, name: str, image: str, start: int, first: bool
                              f"the other {image} units")
         previous = image_units[-1] if image_units else None
     else:
-        ordinary = [unit for unit in image_units if not unit.linked_first]
+        ordinary = [unit for unit in image_units
+                    if not unit.linked_first and not unit.linked_last]
         previous = ordinary[-1] if ordinary else None
     if previous is not None and previous.va >= start:
         raise ValueError(
@@ -587,7 +606,7 @@ def load(
                 f"{source}: address-derived spellings of labelled identities: {shown}"
             )
         link = str(row.get("link", "address"))
-        if link not in {"address", "first"}:
+        if link not in {"address", "first", "last"}:
             raise ValueError(f"{path}: unit {name!r} has unknown link mode {link!r}")
         bind = str(row.get("bind", "address"))
         if bind not in {"address", "name"}:
@@ -655,7 +674,8 @@ def load(
         ) if claims else ()
         data = _bind_data_claims(name, image, source, data_claims, curated_data, claimed_data)
         start = functions[0].va if functions else data[0].va
-        _check_link_order(path, name, image, start, link == "first", bool(functions), units)
+        _check_link_order(path, name, image, start, link == "first", bool(functions), units,
+                          last=link == "last")
         units.append(
             Unit(
                 name,
@@ -670,6 +690,7 @@ def load(
                 sdata,
                 jumptables,
                 link == "first",
+                link == "last",
             )
         )
         for ordinal, (claim, function) in enumerate(zip(claims, functions)):

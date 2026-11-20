@@ -67,10 +67,11 @@ class NameBindingTests(unittest.TestCase):
 
 class LinkOrderTests(unittest.TestCase):
     @staticmethod
-    def unit(name, va, first=False, image="VS.EXE"):
+    def unit(name, va, first=False, image="VS.EXE", last=False):
         from types import SimpleNamespace
 
-        return SimpleNamespace(unit=name, image=image, va=va, linked_first=first)
+        return SimpleNamespace(unit=name, image=image, va=va, linked_first=first,
+                               linked_last=last)
 
     def test_units_ascend_unless_a_data_only_unit_opts_into_linking_first(self) -> None:
         check = _check_link_order
@@ -92,6 +93,23 @@ class LinkOrderTests(unittest.TestCase):
         # Another image's units never constrain the order.
         check("m", "st.main", "ST.EXE", 0x80014320, False, True,
               [self.unit("vs.sbss", 0x80063300, True)])
+
+    def test_a_data_only_unit_may_link_after_the_code_below_its_address(self) -> None:
+        check = _check_link_order
+        code = [self.unit("vs.effect", 0x80032404)]
+        # Without the key a read-only datum sorts before the code.
+        with self.assertRaisesRegex(ValueError, "linked order"):
+            check("m", "vs.heap", "VS.EXE", 0x80011F34, False, False, code)
+        check("m", "vs.heap", "VS.EXE", 0x80011F34, False, False, code, last=True)
+        after = [*code, self.unit("vs.heap", 0x80011F34, last=True)]
+        # Later data-only units ascend from the last ordinary unit.
+        check("m", "vs.bss", "VS.EXE", 0x800633B0, False, False, after)
+        with self.assertRaisesRegex(ValueError, "linked order"):
+            check("m", "vs.bss", "VS.EXE", 0x80030000, False, False, after)
+        with self.assertRaisesRegex(ValueError, "after a unit linked last"):
+            check("m", "vs.more", "VS.EXE", 0x80040000, False, True, after)
+        with self.assertRaisesRegex(ValueError, "data-only"):
+            check("m", "vs.heap", "VS.EXE", 0x80011F34, False, True, code, last=True)
 
 
 class OverlayReadOnlyTests(unittest.TestCase):
