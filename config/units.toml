@@ -508,6 +508,62 @@ profile = "probe-gcc272cdk-o2-g8"
 # VS.EXE: VS's own copies of ST.EXE functions (src/vs/); shared fragments in src/lib/.
 
 [[unit]]
+unit = "vs.sbss_80063300"
+image = "VS.EXE"
+source = "src/vs/sbss_80063300.c"
+profile = "probe-gcc272cdk-o2-g8"
+link = "first"
+
+[[unit]]
+unit = "vs.sbss_80063310"
+image = "VS.EXE"
+source = "src/vs/sbss_80063310.c"
+profile = "probe-gcc272cdk-o2-g8"
+link = "first"
+
+[[unit]]
+unit = "vs.sbss_80063320"
+image = "VS.EXE"
+source = "src/vs/sbss_80063320.c"
+profile = "probe-gcc272cdk-o2-g8"
+link = "first"
+
+[[unit]]
+unit = "vs.sbss_80063330"
+image = "VS.EXE"
+source = "src/vs/sbss_80063330.c"
+profile = "probe-gcc272cdk-o2-g8"
+link = "first"
+
+[[unit]]
+unit = "vs.sbss_80063340"
+image = "VS.EXE"
+source = "src/vs/sbss_80063340.c"
+profile = "probe-gcc272cdk-o2-g8"
+link = "first"
+
+[[unit]]
+unit = "vs.sbss_80063350"
+image = "VS.EXE"
+source = "src/vs/sbss_80063350.c"
+profile = "probe-gcc272cdk-o2-g8"
+link = "first"
+
+[[unit]]
+unit = "vs.sbss_80063360"
+image = "VS.EXE"
+source = "src/vs/sbss_80063360.c"
+profile = "probe-gcc272cdk-o2-g8"
+link = "first"
+
+[[unit]]
+unit = "vs.sbss_80063370"
+image = "VS.EXE"
+source = "src/vs/sbss_80063370.c"
+profile = "probe-gcc272cdk-o2-g8"
+link = "first"
+
+[[unit]]
 unit = "vs.main"
 image = "VS.EXE"
 source = "src/vs/main.c"
