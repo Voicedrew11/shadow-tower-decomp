@@ -757,12 +757,6 @@ profile = "probe-gcc272cdk-o2-g0"
 unit = "vs.attack_8002f334"
 image = "VS.EXE"
 source = "src/vs/attack_8002f334.c"
-profile = "probe-gcc272cdk-o2-g0"
-
-[[unit]]
-unit = "vs.move_80030620"
-image = "VS.EXE"
-source = "src/vs/move_80030620.c"
 profile = "probe-gcc272cdk-o2-g8"
 
 [[unit]]
