@@ -508,6 +508,13 @@ profile = "probe-gcc272cdk-o2-g8"
 # VS.EXE: VS's own copies of ST.EXE functions (src/vs/); shared fragments in src/lib/.
 
 [[unit]]
+unit = "vs.data_8004a224"
+image = "VS.EXE"
+source = "src/vs/data_8004a224.c"
+profile = "probe-gcc272cdk-o2-g0"
+link = "first"
+
+[[unit]]
 unit = "vs.sbss_80063300"
 image = "VS.EXE"
 source = "src/vs/sbss_80063300.c"

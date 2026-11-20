@@ -578,8 +578,8 @@ VS.EXE	0x8004a1b8	0x399b8	0xc	unclassified	coverage-gap			payload-complement	may
 VS.EXE	0x8004a1d8	0x399d8	0xc	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 VS.EXE	0x8004a1f8	0x399f8	0xc	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 VS.EXE	0x8004a218	0x39a18	0xc	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
-VS.EXE	0x8004a224	0x39a24	0x1ce	defined	candidate	DAT_8004a224	VsFighterData[]	asm;src/vs/fighter_800140d8.c vs.fighter_800140d8	first record of the fighters' data blocks (0x1ce bytes each; WIP extent)
-VS.EXE	0x8004a3f2	0x39bf2	0x10eb6	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
+VS.EXE	0x8004a224	0x39a24	0x11082	defined	candidate	DAT_8004a224	VsFighterData[]	asm;src/vs/fighter_800140d8.c vs.fighter_800140d8	the fighters' data blocks: 151 VsFighterData records (0x1ce bytes each) func_800140d8 indexes by character; src/vs/data_8004a224.c
+VS.EXE	0x8005b2a6	0x4aaa6	0x2	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 VS.EXE	0x8005b2a8	0x4aaa8	0x10	defined	candidate	DAT_8005b2a8	VECTOR	asm;src/vs/model_80024b5c.c vs.model_80024b5c	.data VECTOR (4096, 4096, 4096): the scale func_80025204/func_80028914/func_800291d4 apply to their light matrix
 VS.EXE	0x8005b2b8	0x4aab8	0x7f60	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 VS.EXE	0x80063218	0x52a18	0x4	defined	candidate	DAT_80063218	s32	asm;src/vs/model_80024b5c.c vs.model_80024b5c	.sdata word (0) read absolutely by the -G8 model renderers: an x angle added to the light rotation

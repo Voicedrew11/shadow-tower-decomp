@@ -232,8 +232,8 @@ typedef struct {
 typedef char VsFighterDataSize[sizeof(VsFighterData) == 0x1ce ? 1 : -1];
 
 /* The fighters' data blocks by character, copied into VsFighter.unk4DF18
- * when a round loads (.data; WIP extent: one record). */
-extern VsFighterData DAT_8004a224[];
+ * when a round loads (.data, src/vs/data_8004a224.c). */
+extern VsFighterData DAT_8004a224[151];
 
 /*
  * The two fighters at 0x800633b0 (bss), 0x4e0e8 bytes each (the code
