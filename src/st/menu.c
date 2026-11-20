@@ -3682,39 +3682,23 @@ read:
 }
 
 /*
- * Not exact (99.7%): the header's icon byte is stored before the unk1FE
- * load (retail: lhu v0,510(s4); li v1,18; sb v1,58(sp); li v1,2; sb).
- * sched1 trace: the load is a boosted single-set temporary, launched two
- * ticks after its shift and blocked for one cycle behind the `blocks`
- * store, so it lands between the two header stores. Retail's order needs
- * the icon store to depend on the load. A test build whose scratch base
- * sched1 cannot resolve (a second live `sp = MENU_SCRATCH`) with the
- * source order count, strcpy, row compare, icon, blocks gives retail's
- * order in this block, but the unk1F8 and unk204 loads further down then
- * stay behind the path/num stores they float above in retail: the base
- * is known there, so something ties header.icon to the row load alone.
- * Ruled out: compare operand order, the statement before/after strcpy,
- * s16 and reused-int row variables, a count variable, a dead first set
- * of sp, a duplicate set in the entry block (cse drops it), and a
- * 3000-variant cc1 sweep of temporaries and positions.
- * Read from the trace since: the strcpy is one BLK insn at sched1 (priority
- * 2 through its anti-dependence on the count load), and retail's order
- * needs the icon store, or its `li`, to wait for the row load. No memory
- * rule gives that with a known base, the pending lists are far below the
- * 32-entry flush, and a loop-note barrier is excluded by memset's argument
- * loads sitting at the top of the block.
- *
  * Saves to the selected file, or to a new file numbered unk204: builds the
  * header (the title with the file number, the area name and the play
  * time, an icon by file number), writes the 7560 bytes of data after it,
  * then the header again with the data's sum, and records the position the
  * game resumes from.
+ *
+ * The header's block count is a local set at the top and used once. Its
+ * `li` is not in the header block when sched1 orders it (local-alloc moves
+ * a once-used constant's initialisation down to the use afterwards), which
+ * is what leaves the unk1FE load ahead of the icon store.
  */
 ADDRESS(0x80062228, 0x998)
 int func_80062228(u8 *data)
 {
     MenuScratch *sp = MENU_SCRATCH;
     int retry = 3;
+    int blocks = 2;
     char num[8];
     char path[32];
     CardHeader header;
@@ -4053,7 +4037,7 @@ int func_80062228(u8 *data)
     new_file = sp->unk1FE == sp->unk1F4->count;
     strcpy(header.magic, "SC");
     header.icon = 0x12;
-    header.blocks = 2;
+    header.blocks = blocks;
     memset(header.unk44, 0, sizeof(header.unk44));
     if (new_file)
         n = sp->unk204;
@@ -4410,8 +4394,6 @@ pause_done:
 /*
  * A two-choice page over the menu font (CD archive 3 member 0): returns
  * the choice.
- * Not exact (93.8%): retail keeps the file buffer's base in s0 and forms
- * the image address as (size + 4) + base + 4; this build reuses base + 4.
  */
 ADDRESS(0x80063260, 0x174)
 int func_80063260(void)
