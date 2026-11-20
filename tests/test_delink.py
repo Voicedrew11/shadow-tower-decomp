@@ -1064,11 +1064,12 @@ class ModuleObjectTests(unittest.TestCase):
         self.assertEqual(names["second"][3] >> 4, 0)  # STB_LOCAL
         self.assertEqual((names["second"][1], names["second"][5]), (4, rodata_index))
 
-    def test_a_link_label_is_only_a_whole_word_at_its_address(self) -> None:
+    def test_a_link_label_is_only_a_whole_word(self) -> None:
         labels = {"_bss_org": 0x80063300}
         row = {"kind": "mips32_candidate", "target_va": "0x80063300", "target_name": "_bss_org"}
         self.assertFalse(_link_label_mismatch(row, labels))
-        self.assertTrue(_link_label_mismatch({**row, "target_va": "0x80063304"}, labels))
+        # label + constant: the distance from the label is the addend.
+        self.assertFalse(_link_label_mismatch({**row, "target_va": "0x80063384"}, labels))
         self.assertTrue(_link_label_mismatch({**row, "kind": "mips_hi16_lo16"}, labels))
         # Names that are not curated labels are left to the ordinary rules.
         self.assertFalse(_link_label_mismatch({**row, "target_name": "DAT_80063300"}, labels))

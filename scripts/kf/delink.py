@@ -18,7 +18,7 @@ from collections import Counter, defaultdict
 from dataclasses import dataclass
 from pathlib import Path
 from dataclasses import replace
-from typing import Callable, Iterable, Sequence
+from typing import Callable, Iterable, Mapping, Sequence
 
 from scripts.kf.mips_elf import (
     BSS_SECTION_SYMBOL,
@@ -480,7 +480,12 @@ def _resolve_symbol(
     owned: Owned | None = None,
     *,
     data_reference: bool = False,
+    labels: Mapping[str, int] | None = None,
 ) -> tuple[str, int]:
+    if labels and target_name in labels:
+        # A curated link label (a linker-defined bound) is a referent by
+        # name; the word's distance from its address is the addend.
+        return target_name, target - labels[target_name]
     # An overlay's references outside its own window name its host's
     # functions and data (retail.referent_image).
     owner_image = referent_image(function.image, target)
@@ -531,10 +536,12 @@ def _resolve_symbol(
 
 def _link_label_mismatch(row: dict[str, str], labels: dict[str, int]) -> bool:
     """Whether a data row names a curated link label (a linker-defined bound,
-    link_labels.tsv) other than as a whole data word at exactly its address."""
-    label = labels.get(row["target_name"])
-    return label is not None and (row["kind"] != "mips32_candidate"
-                                  or parse_int(row["target_va"]) != label)
+    link_labels.tsv) other than as a whole data word.
+
+    The word holds the label's address, or that address plus a constant
+    (`_bss_orgend + 0x84`): the row's target is the word's value and its
+    distance from the label's curated address is the relocation addend."""
+    return labels.get(row["target_name"]) is not None and row["kind"] != "mips32_candidate"
 
 
 def _withheld(row: dict[str, str], owner: Function | None, reason: str) -> dict[str, object]:
@@ -592,6 +599,7 @@ def _apply_relocation(
     original: bytes | None = None,
     *,
     jumptables: tuple[int, int] | None = None,
+    labels: Mapping[str, int] | None = None,
 ) -> tuple[list[MipsRelocation], dict[str, object]]:
     # Rows of one shared HI/LO family validate against the linked bytes, not
     # the addend an earlier member of the family already wrote.
@@ -605,6 +613,7 @@ def _apply_relocation(
         data_reference=(row["status"] == "reviewed"
                         and row["kind"] in {"mips_hi16_lo16", "mips32_candidate",
                                             "mips_gprel16"}),
+        labels=labels if row["kind"] == "mips32_candidate" else None,
     )
 
     if row["kind"] == "mips26":
@@ -1431,6 +1440,7 @@ def delink(
                     relocations, used = _apply_relocation(
                         blob, owner, row, catalog, policy,
                         owned.rodata, owned.sdata, jumptables=owned.jumptables,
+                        labels=labels,
                     )
                 except ValueError as error:
                     withheld_rows.append(_withheld(row, None, f"data:{error}"))

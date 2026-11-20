@@ -164,8 +164,10 @@ also claim named `const` data in `.rodata`, carved into its object's
 data stays its anonymous `RODATA()`/`JUMPTABLES()` ranges. A word that
 holds a linker-defined bound is relocated against a curated link label
 (`link_labels.tsv`, such as PSYLINK's `_bss_org`): its reviewed
-`mips32_candidate` row must name the label at exactly the label's address,
-and the data gate keeps the section `unresolved-link-label` until the
+`mips32_candidate` row names the label and has the word's value as its
+target: the label's address, or that address plus a constant
+(`_bss_orgend + 0x84`), whose distance from the label becomes the
+relocation addend. The data gate keeps the section `unresolved-link-label` until the
 current link's `.SYM` puts the name there.
 
 The delinker carves claimed `load` data from the retail image into the module

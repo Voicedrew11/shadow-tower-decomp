@@ -400,9 +400,11 @@ def audit(
                 cross_image[number] = hosts
                 continue
             found = owners(reference.destination)
-            if not found and reference.target in link_labels:
+            if not found and reference.destination in link_labels:
                 # A curated zero-size link-layout label (BSS_END) names a
-                # boundary, not storage, so it has no owner to reach.
+                # boundary, not storage, so it has no owner to reach. A data
+                # word holding the label plus a constant has the label as its
+                # referent (sema.evidence), so its destination is the label.
                 destinations[number] = []
                 continue
             if not found:

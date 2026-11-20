@@ -2,8 +2,10 @@
 
 from __future__ import annotations
 
+from collections.abc import Mapping
 from dataclasses import dataclass, replace
 from functools import lru_cache
+from types import MappingProxyType
 
 from scripts.kf.delink import load_catalog, sanitize_symbol
 from scripts.kf.relocations import (
@@ -103,6 +105,9 @@ def _reference_kind(row: dict[str, str], owner: Binding | None, idx: Index) -> s
 
 
 class Evidence:
+    # Curated link labels (link_labels.tsv): linker-defined bounds by name.
+    labels: Mapping[str, int] = MappingProxyType({})
+
     def __init__(
         self,
         image: str,
@@ -115,6 +120,8 @@ class Evidence:
         self.idx = idx or index(image)
         self.img = img or retail(image)
         self.catalog = load_catalog(self.idx.config_dir)
+        from scripts.kf.roundtrip import link_labels
+        self.labels = link_labels(image, self.idx.config_dir)
         if rows is None:
             _, all_rows = read_tsv(self.idx.config_dir / "relocs.tsv")
             rows = [row for row in all_rows if row["image"] == image]
@@ -237,12 +244,20 @@ class Evidence:
             if (tier != "rejected" and row["status"] == "reviewed"
                     and row["kind"] in {"mips_hi16_lo16", "mips32_candidate"}
                     and row.get("target_name")):
-                try:
-                    referent = named_data_referent(
-                        self.catalog, referent_image(self.image, target),
-                        sanitize_symbol(row["target_name"], ""))
-                except ValueError as error:
-                    tier, reason = "candidate", str(error)
+                label = (self.labels.get(row["target_name"])
+                         if row["kind"] == "mips32_candidate" else None)
+                if label is not None:
+                    # A data word holding a link label, or the label plus a
+                    # constant (delink._link_label_mismatch): the referent is
+                    # the label's boundary, which has no storage to reach.
+                    referent = DataReferent(row["target_name"], label)
+                else:
+                    try:
+                        referent = named_data_referent(
+                            self.catalog, referent_image(self.image, target),
+                            sanitize_symbol(row["target_name"], ""))
+                    except ValueError as error:
+                        tier, reason = "candidate", str(error)
 
             origin = Origin(
                 tier,

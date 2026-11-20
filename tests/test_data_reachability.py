@@ -10,7 +10,7 @@ from types import SimpleNamespace
 
 from scripts.kf.cli import main as cli_main
 from scripts.kf.data_reachability import DataExtent, access_span, audit
-from scripts.kf.relocations import validate_relocation
+from scripts.kf.relocations import DataReferent, validate_relocation
 from scripts.kf.sema.evidence import Evidence, Origin, Reference
 from scripts.kf.sema.image import RetailImage
 from scripts.kf.sema.index import Binding
@@ -303,6 +303,10 @@ class ReachabilityTest(unittest.TestCase):
         self.assertEqual(unlabelled["summary"]["issues"], {"unmodeled-target": 1})
         labelled = audit(IMAGE, (function(),), (), refs, img, link_labels=frozenset({0x1300}))
         self.assertEqual(labelled["summary"]["issues"], {})
+        # label + constant: the word's referent is the label, past any owner.
+        offset = (replace(ref(0x1000, 0x1384), referent=DataReferent("_end", 0x1300)),)
+        report = audit(IMAGE, (function(),), (), offset, img, link_labels=frozenset({0x1300}))
+        self.assertEqual(report["summary"]["issues"], {})
 
     def test_partial_config_prefix_is_not_promoted_to_source_ownership(self):
         prefix = replace(datum(0x1200, 4, source="data_identities.tsv"),
@@ -480,10 +484,29 @@ class DataPointerEvidenceTest(unittest.TestCase):
                                                data_owner=lambda _: data)
                 result = evidence._relocation_references()[0]
                 self.assertEqual(result.tier, tier)
+                self.assertIsNone(result.referent)
                 if status == "reviewed":
                     decoded = validate_relocation(img.require(0x1000, 4), data,
                                                   row, None, "safe")
                     self.assertEqual((result.site, result.target), (decoded.site, decoded.target))
+
+    def test_reviewed_word_naming_a_link_label_has_the_label_as_referent(self):
+        data = replace(function(0x1000), space="data", kind="pointer", size=4)
+        img = RetailImage.synthetic(IMAGE, 0x1000, (0x1384).to_bytes(4, "little"))
+        row = {"image": IMAGE, "site_va": "0x1000", "paired_site_va": "",
+               "target_va": "0x1384", "target_name": "_end", "kind": "mips32_candidate",
+               "status": "reviewed", "channel": "data-word", "confidence": "test",
+               "provenance": "test"}
+        evidence = object.__new__(Evidence)
+        evidence.image, evidence.img, evidence.rows = IMAGE, img, [row]
+        evidence.catalog = None
+        evidence.labels = {"_end": 0x1300}
+        evidence.idx = SimpleNamespace(function_owner=lambda _: None,
+                                       data_owner=lambda _: data)
+        result = evidence._relocation_references()[0]
+        self.assertEqual((result.tier, result.target, result.destination),
+                         ("validated", 0x1384, 0x1300))
+        self.assertEqual(result.as_dict()["addend"], 0x84)
 
 
 if __name__ == "__main__":
