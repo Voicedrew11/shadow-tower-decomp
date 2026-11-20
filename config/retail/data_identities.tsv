@@ -73,8 +73,9 @@ ST.EXE	0x800881c0	0x4	DAT_800881c0	static	bss	s32	func_80026ecc	candidate	asm;sr
 ST.EXE	0x800881c4	0x4	DAT_800881c4	static	bss	s32	func_80026ecc	candidate	asm;src/st/ui.c st.ui	.sbss; $gp-relative; enables the glyph clip/scroll window
 ST.EXE	0x800881c8	0x4	DAT_800881c8	static	bss	s32	func_80026ecc	candidate	asm;src/st/ui.c st.ui	.sbss; $gp-relative; glyphs dropped past DAT_800881bc
 ST.EXE	0x800881d0	0x4	shake	static	bss	short[2]	player_update_shake	candidate	asm;src/st/player_wear.c st.player_wear	.sbss; $gp+0x310/0x312; random view-angle offsets halved each frame
-ST.EXE	0x800881d8	0x4	DAT_800881d8	global	bss	u8 *	func_80044674	address-only	asm;band J	.sbss word ($gp) func_80044674 sets to the overlay area start + 4; func_800456f8 reads it
-ST.EXE	0x800881dc	0x4	DAT_800881dc	global	bss	u8 *	func_80044674	address-only	asm;band J;src/st/area_cd.c st.area_cd	word after DAT_800881d8 set to the overlay area start; addressed with lui, not $gp
+ST.EXE	0x800881d4	0x4	DAT_800881d4	global	bss	s32		candidate	retail-bss-layout;ST.EXE .sbss 0x800881d0-0x800881df	unreferenced: the word between shake (0x800881d0) and DAT_800881d8; the first object of st.player's small COMMON batch (bucket 277, then DAT_800881d8 281 and DAT_800881dc 324); extent WIP
+ST.EXE	0x800881d8	0x4	DAT_800881d8	global	bss	u8 *	func_80044674	address-only	asm;band J;src/st/player.c st.player	.sbss word ($gp) func_80044674 sets to the overlay area start + 4; func_800456f8 reads it
+ST.EXE	0x800881dc	0x4	DAT_800881dc	global	bss	u8 *	func_80044674	address-only	asm;band J;src/st/player.c st.player	word after DAT_800881d8 set to the overlay area start; addressed with lui, not $gp
 ST.EXE	0x800881e0	0x8	DAT_800881e0	static	bss	SVECTOR	func_80050768	candidate	asm;src/st/vis_80050768.c st.vis_80050768	.sbss; $gp+0x320/0x324: the view shake (x, z) a kind 224 table B entry sets while its table A entries rise
 ST.EXE	0x800881e8	0x4	DAT_800881e8	static	bss	s16[2]	func_800642e8	candidate	asm;src/st/equip_menu.c st.equip_menu	.sbss; $gp+0x328: the list row and column (MenuScratch.unk2E2, unk2E0) saved across the slot sub-list; one array: retail schedules its loads as array (in-struct) accesses, behind the pad-state store
 ST.EXE	0x800881f0	0xe	DAT_800881f0	global	bss	s16[7]	func_8002c090	address-only	asm;src/st/ui.c st.ui	cleared with DAT_8017beb0 by func_8002c090

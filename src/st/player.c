@@ -735,6 +735,21 @@ void player_wear_armour(int damage, u16 flags)
 DATA(0x800881d0, 0x4, ".sbss")
 static short shake[2];
 
+/*
+ * The area module's overlay pointers (st.area_a sets both from
+ * DAT_80013980) and the unreferenced word before them: retail allocates
+ * the three as one small COMMON batch right after shake, in hash-bucket
+ * order. They are this object's: another object's small data would start
+ * eight-aligned, and st.area_a reads DAT_800881dc with lui pairs, so it
+ * does not request it (its tentative DAT_800881d8 merges into this one).
+ */
+DATA(0x800881d4, 0x4, ".sbss")
+s32 DAT_800881d4;
+DATA(0x800881d8, 0x4, ".sbss")
+u8 *DAT_800881d8;
+DATA(0x800881dc, 0x4, ".sbss")
+u8 *DAT_800881dc[1];
+
 /* Steps the screen shake started by player_take_damage. */
 ADDRESS(0x8003d594, 0x1f4)
 void player_update_shake(void)

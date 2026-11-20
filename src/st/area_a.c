@@ -2,9 +2,8 @@
  * ST.EXE: the area module (WIP name): the area image fix-ups after a load,
  * the requests for a new area set, the loader's step setters and CD
  * completion callbacks, and the area load state machine, one step per call.
- * One translation unit: the state machine reads this module's .sbss word
- * at 0x800881d8 through $gp, and its string continues this module's
- * constant pool (0x800122a8).
+ * One translation unit: its string continues this module's constant pool
+ * (0x800122a8).
  */
 #include <kf/lib/address.h>
 #include <kf/lib/types.h>
@@ -32,7 +31,8 @@
 RODATA(0x80011f18, 0x39c)
 SDATA(0x80088064, 0x38)
 
-DATA(0x800881d8, 0x4, ".sbss")
+/* A tentative definition, so that ASPSX reaches it through $gp; st.player
+ * allocates it. */
 u8 *DAT_800881d8;
 
 /* The empty area handler: every slot of the default table at 0x8008038c
