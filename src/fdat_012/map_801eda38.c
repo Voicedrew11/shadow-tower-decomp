@@ -43,7 +43,15 @@
  * instructions), bit-field clears (same RTL as &=), the block in identical
  * if/else arms (r is then set twice and its sum moves up), 990 orders of
  * the plain statements, 39,600 with one store repeated, and batch K's
- * 141,120 orders of the split forms. */
+ * 141,120 orders of the split forms.
+ * Narrowed since (sched1 trace): the 1 and the index are two pseudos. With
+ * one variable for both, the index load is a priority-1 load that every
+ * ready store beats, so the two bytes[] stores come out above the four
+ * constants (retail has them below). That variable plus a mask referenced
+ * in a second block does give retail's $a0/$a1. A local 1 with two sets
+ * and one death would need no second block at all (four refs rank it above
+ * the mask), but nothing natural sets it twice; inline helpers taking the 1
+ * as a parameter compile like the literal. */
 /*
  * Starts the entry's fall (animation 9) and, once its record's stream
  * counter is 4, adds table C item 0x10a at its place to the drop slots

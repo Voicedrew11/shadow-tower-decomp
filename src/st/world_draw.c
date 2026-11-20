@@ -54,6 +54,13 @@
  * single-death block locals: one variable shared by the copy and the
  * offset or the sum does order the copy last, yet has two deaths, goes to
  * global-alloc and takes a0/a1 (or pulls unk34 into v1).
+ * Narrowed since: priority alone is not enough. With the copy's store at
+ * 5 or more it is picked first, but its load is a boosted temporary that
+ * is blocked behind the two vertex stores and then lands above the sum,
+ * where the offset still holds v0. Retail needs the load itself to wait
+ * for the sum (the header reload in a0 shows the offset and the model
+ * are block locals there, so no variable is shared), and sched1 has no
+ * memory or register rule that gives it for these addresses.
  */
 ADDRESS(0x8001cdf8, 0x42c)
 void world_project_parts(VECTOR *trans)
