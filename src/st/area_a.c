@@ -28,7 +28,7 @@
 #include <LIBSND.H>
 #include <st/tim.h>
 
-RODATA(0x80011f18, 0x39c)
+RODATA(0x80011f18, 0x39b)
 SDATA(0x80088064, 0x38)
 
 /* A tentative definition, so that ASPSX reaches it through $gp; st.player

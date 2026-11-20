@@ -13,7 +13,7 @@
 #include <st/funcs.h>
 #include <st/player.h>
 
-JUMPTABLES(0x80012854, 0x1c)
+RODATA(0x80012854, 0x1c)
 
 ADDRESS(0x8005738c, 0x30)
 void func_8005738c(void)

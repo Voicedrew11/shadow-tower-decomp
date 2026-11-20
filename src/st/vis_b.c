@@ -35,7 +35,7 @@
 #include <st/menu.h>
 #include <INLINE_C.H>
 
-JUMPTABLES(0x800125d0, 0x17c)
+RODATA(0x800125d0, 0x17c)
 
 /* The first entry (other than unk71B0) whose record radius, widened by the
  * request's and shortened along its heading, reaches the request at a

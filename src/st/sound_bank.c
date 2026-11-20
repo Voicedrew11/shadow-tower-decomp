@@ -20,7 +20,7 @@
 #include <st/player.h>
 #include <st/sound.h>
 
-JUMPTABLES(0x80012870, 0x60)
+RODATA(0x80012870, 0x60)
 
 ADDRESS(0x8005850c, 0x28)
 void func_8005850c(s16 voice, int sound)

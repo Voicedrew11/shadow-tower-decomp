@@ -35,8 +35,7 @@
 #include <st/pad.h>
 #include <st/menu_main.h>
 
-RODATA(0x80013880, 0x58)
-JUMPTABLES(0x800138d8, 0x9c)
+RODATA(0x80013880, 0xf4)
 SDATA(0x8008810c, 0x7c)
 
 /* The list row and column saved while the ring sub-list is open. */

@@ -17,8 +17,7 @@
 #include <st/item.h>
 #include <st/vis.h>
 
-RODATA(0x8001274c, 0x48)
-JUMPTABLES(0x80012794, 0xc0)
+RODATA(0x8001274c, 0x108)
 
 /* The use result: whether the item was used (1) or not (2), a member of
  * the save-game state block. */

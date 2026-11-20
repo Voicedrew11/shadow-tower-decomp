@@ -13,7 +13,7 @@
 #include <st/player.h>
 #include <st/vis.h>
 
-JUMPTABLES(0x800122b4, 0x31c)
+RODATA(0x800122b4, 0x31c)
 
 /* Entry e attacks with effect kind `kind` from pos. */
 ADDRESS(0x8004cee8, 0x874)
