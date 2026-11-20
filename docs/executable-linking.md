@@ -330,6 +330,12 @@ ASPSX 2.79D and PSYLINK 2.73D chain:
 - `kf verify data` accepts a unit's COMMON placement only when the current
   link's `.SYM` (`scripts/kf/linked_symbols.py`) puts every request at its
   claim, and the link report's input hashes all match the working tree.
+- A Sony library member's COMMON (LIBCD's `StCdIntrFlag` in STR.EXE and
+  END.EXE) has no source unit and no initialized bytes to compare. The
+  known-reference closure (`scripts/kf/data_reachability.py`) counts such a
+  curated `bss` identity as compared (`sdk-bss-link-placed`) when no compiled
+  game unit defines or requests the name and that same current `.SYM` puts
+  it at the identity's address with no other symbol inside its extent.
 
 ### Runtime smoke test
 
