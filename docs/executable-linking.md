@@ -264,6 +264,31 @@ equals retail. The link confirmed the END.EXE rules above and these:
   (`src/optxt/state.c`): `main.c` only declares it, and PSYLINK places the
   small COMMON at the end of `.sbss`, after `main.c`'s statics.
 
+## VS.EXE
+
+VS.EXE links natively; 38 bytes differ from retail, all inside the two
+non-exact functions `func_800140d8` and `func_8001c5e0` (frame size
+only). The read-only data, `.data`, `.sdata` and every `.sbss`/`.bss`
+placement equal retail. The link established:
+
+- Each object's constants and switch tables stay together in cc1 order
+  (`read_only = "together"`, as in the FDAT overlays), so a VS unit claims
+  one `RODATA()` run; the minimal translation units this forces are in the
+  units' header comments.
+- The `.sbss` run `0x80063300`-`0x80063381` and the first `.data`/`.sdata`
+  belong to data-only units linked before the start-up module
+  (`link = "first"`); the `.bss` objects to data-only units after the code,
+  with layout-evidenced holes confirmed by the linked `.SYM`.
+- Seven read-only words after the last unit's switch tables
+  (`0x80011f34`-`0x80011f4f`) hold PSYLINK's bss group bounds: a data-only
+  unit linked last defines them as `const` pointers to the link labels
+  `_bss_org` and `_bss_orgend` (no kit object holds them; the source form
+  is inferred from the values).
+- The bss group starts at `0x80063300`, the next eight-byte boundary after
+  at least five more bytes of zero, unreferenced `.sdata` past the last
+  literal at `0x800632f3`; a data-only unit linked last holds two zero
+  words there (`src/vs/sdata_800632f4.c`).
+
 ## PS-X EXE header
 
 `KERNEL.H` defines the 0x88-byte header as follows:
