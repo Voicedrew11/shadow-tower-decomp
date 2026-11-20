@@ -22,8 +22,9 @@
 /*
  * Words at the end of the game .rdata, before LIBCD's: 0x80013974 holds the
  * bss start, 0x80013978..0x80013980 the overlay area 0x801eb560, 0x80013988
- * its end. main stores the heap base at 0x8001398c. Their owner is unknown;
- * main addresses each with its own lui pair, as separate scalars.
+ * its end. main stores the heap base at 0x8001398c. src/st/rdata_80013974.c
+ * defines them (const there); main addresses each with its own lui pair, as
+ * separate scalars.
  */
 extern u8 *DAT_80013980;
 extern u8 *DAT_80013988;

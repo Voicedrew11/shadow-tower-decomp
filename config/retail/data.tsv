@@ -83,7 +83,15 @@ STR.EXE	0x80032906	0x22106	0x2	bss	proven	end_frame	u_short	asm;src/str/main.c s
 STR.EXE	0x80032908	0x22108	0x10	unclassified	coverage-gap			payload-complement	.sbss alignment and MALLOC.OBJ .bss
 STR.EXE	0x80032918	0x22118	0x38	bss	proven	dec	DECENV	asm;src/str/main.c str.main	str.main fixed .bss
 STR.EXE	0x80032950	0x22150	0x6b0	bss	proven	vlc_buffer	u_long[2][40960]	asm;src/str/main.c str.main	COMMON; continues past the load image
-ST.EXE	0x80011000	0x800	0x3320	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
+ST.EXE	0x80011000	0x800	0x2974	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
+ST.EXE	0x80013974	0x3174	0x4	defined	candidate	DAT_80013974	u8 *	retail-word;src/st/rdata_80013974.c st.rdata_80013974	read-only word: the bss group start (_bss_org = .sbss start 0x80088188)
+ST.EXE	0x80013978	0x3178	0x4	defined	candidate	DAT_80013978	u8 *	retail-word;src/st/rdata_80013974.c st.rdata_80013974	read-only word: the bss group end (_bss_orgend 0x801eb560, the FDAT load address)
+ST.EXE	0x8001397c	0x317c	0x4	defined	candidate	DAT_8001397c	u8 *	retail-word;src/st/rdata_80013974.c st.rdata_80013974	read-only word: the bss group end (_bss_orgend 0x801eb560, the FDAT load address)
+ST.EXE	0x80013980	0x3180	0x4	defined	candidate	DAT_80013980	u8 *	retail-word;src/st/rdata_80013974.c st.rdata_80013974	read-only word: the bss group end = the overlay area start; main and st.area_a read it
+ST.EXE	0x80013984	0x3184	0x4	defined	candidate	DAT_80013984	u8 *	retail-word;src/st/rdata_80013974.c st.rdata_80013974	read-only word: the overlay area after the FDAT header (0x801eb560 + 0x84)
+ST.EXE	0x80013988	0x3188	0x4	defined	candidate	DAT_80013988	u8 *	retail-word;src/st/rdata_80013974.c st.rdata_80013974	read-only word: the end of the largest overlay with its bss (FDAT_272); main reads it
+ST.EXE	0x8001398c	0x318c	0x4	defined	candidate	DAT_8001398c	u8 *	retail-word;src/st/rdata_80013974.c st.rdata_80013974	read-only word: the end of the largest overlay; main stores the heap base here
+ST.EXE	0x80013990	0x3190	0x990	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 ST.EXE	0x80068660	0x57e60	0x4	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 ST.EXE	0x80068670	0x57e70	0x4	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 ST.EXE	0x80068680	0x57e80	0x4	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data

@@ -288,6 +288,13 @@ ST.EXE	0x80012780	0x1f80		mips32_candidate	data-word	0x80198f86	bss	viewer	word	
 ST.EXE	0x80012784	0x1f84		mips32_candidate	data-word	0x80198f76	bss	viewer	word		manual-decoded	reviewed	st.item_use rodata review
 ST.EXE	0x80012788	0x1f88		mips32_candidate	data-word	0x80198f88	bss	viewer	word		manual-decoded	reviewed	st.item_use rodata review
 ST.EXE	0x8001278c	0x1f8c		mips32_candidate	data-word	0x80198f84	bss	viewer	word		manual-decoded	reviewed	st.item_use rodata review
+ST.EXE	0x80013974	0x3174		mips32_candidate	data-word	0x80088188	bss	_bss_org	word		manual-decoded	reviewed	st.rdata_80013974 PSYLINK group symbol review
+ST.EXE	0x80013978	0x3178		mips32_candidate	data-word	0x801eb560	bss	_bss_orgend	word		manual-decoded	reviewed	st.rdata_80013974 PSYLINK group symbol review
+ST.EXE	0x8001397c	0x317c		mips32_candidate	data-word	0x801eb560	bss	_bss_orgend	word		manual-decoded	reviewed	st.rdata_80013974 PSYLINK group symbol review
+ST.EXE	0x80013980	0x3180		mips32_candidate	data-word	0x801eb560	bss	_bss_orgend	word		manual-decoded	reviewed	st.rdata_80013974 PSYLINK group symbol review
+ST.EXE	0x80013984	0x3184		mips32_candidate	data-word	0x801eb5e4	bss	_bss_orgend	word		manual-decoded	reviewed	st.rdata_80013974 overlay area bound review
+ST.EXE	0x80013988	0x3188		mips32_candidate	data-word	0x801ef940	bss	_bss_orgend	word		manual-decoded	reviewed	st.rdata_80013974 overlay area bound review
+ST.EXE	0x8001398c	0x318c		mips32_candidate	data-word	0x801ef940	bss	_bss_orgend	word		manual-decoded	reviewed	st.rdata_80013974 overlay area bound review
 ST.EXE	0x80014364	0x3b64		mips26	reachable-code	0x80014354	load		jal		manual-decoded	reviewed	st.main asm review
 ST.EXE	0x80014374	0x3b74	0x80014378	mips_hi16_lo16	reachable-code	0x80013988	load	DAT_80013988	lui+lw		manual-decoded	reviewed	st.main asm review
 ST.EXE	0x8001437c	0x3b7c	0x80014380	mips_hi16_lo16	reachable-code	0x80013980	load	DAT_80013980	lui+lw		manual-decoded	reviewed	st.main asm review
