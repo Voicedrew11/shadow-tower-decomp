@@ -315,6 +315,8 @@ def _bind_data_claims(
     claims: tuple[DataClaim, ...],
     identities: dict[tuple[str, int], DataIdentity],
     claimed: dict[tuple[str, int], str],
+    *,
+    data_only: bool = False,
 ) -> tuple[Datum, ...]:
     """Validate one source's DATA() claims against the curated data identities."""
     data: list[Datum] = []
@@ -341,7 +343,11 @@ def _bind_data_claims(
                 f"{where}: {identity.name} has storage {identity.storage!r}; only load and "
                 "bss data can be claimed"
             )
-        allowed_sections = {"load": {".data", ".sdata"},
+        # A data-only unit may also claim named read-only data: an object
+        # whose only contribution is a few const words (VS.EXE's heap words
+        # after the last unit's switch tables). A code unit's read-only data
+        # stays its anonymous RODATA()/JUMPTABLES() ranges.
+        allowed_sections = {"load": {".data", ".sdata", *((".rodata",) if data_only else ())},
                             "bss": {".bss", ".sbss"}}
         if claim.section not in allowed_sections[identity.storage]:
             raise ValueError(
@@ -672,7 +678,8 @@ def load(
         functions = _bind_claims(
             path, name, image, source, claims, catalog, identities, claimed, scope,
         ) if claims else ()
-        data = _bind_data_claims(name, image, source, data_claims, curated_data, claimed_data)
+        data = _bind_data_claims(name, image, source, data_claims, curated_data, claimed_data,
+                                 data_only=not claims)
         start = functions[0].va if functions else data[0].va
         _check_link_order(path, name, image, start, link == "first", bool(functions), units,
                           last=link == "last")

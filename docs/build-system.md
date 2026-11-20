@@ -158,7 +158,10 @@ datum is claimed by one unit only, and the claims of each section ascend
 inside a source (GCC writes a section's data in source order; a unit's
 `.sbss` statics may precede its later `.sdata` words).
 Data need not be contiguous with the unit's code. The bindings file records
-data claims with `kind=data`.
+data claims with `kind=data`. A data-only unit (no `ADDRESS()` claims) may
+also claim named `const` data in `.rodata`, carved into its object's
+`.rodata` like `.data` claims (VS.EXE's heap words); a code unit's read-only
+data stays its anonymous `RODATA()`/`JUMPTABLES()` ranges.
 
 The delinker carves claimed `load` data from the retail image into the module
 object's `.data` section (claims packed in order, each at the alignment its
