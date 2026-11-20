@@ -315,7 +315,7 @@ typedef struct {
 extern VsFighter *DAT_80063300;
 
 /* Rotation offsets added to the drawn fighter's x and y angles (.sdata,
- * unowned; read absolutely). */
+ * src/vs/main.c; read absolutely elsewhere). */
 extern s32 DAT_80063218;
 extern s32 DAT_8006321c;
 

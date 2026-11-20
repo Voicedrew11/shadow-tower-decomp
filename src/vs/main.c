@@ -54,6 +54,13 @@ JUMPTABLES(0x800110a0, 0x70)
 DATA(0x8005b2a8, 0x10, ".data")
 VECTOR DAT_8005b2a8 = {ONE, ONE, ONE};
 
+/* Rotation offsets the model draw adds to the fighter's x and y angles
+ * (the model renderers read them absolutely: they are not theirs). */
+DATA(0x80063218, 0x4, ".sdata")
+s32 DAT_80063218 = 0;
+DATA(0x8006321c, 0x4, ".sdata")
+s32 DAT_8006321c = 0;
+
 /* The module's initialized small data. */
 DATA(0x80063220, 0x4, ".sdata")
 s32 DAT_80063220 = 0;
