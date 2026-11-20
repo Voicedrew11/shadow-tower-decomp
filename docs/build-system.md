@@ -101,7 +101,8 @@ as a named extern.
 
 An FDAT overlay unit is the exception: its read-only data stays in cc1 order
 under one section (`keep_read_only_together`, selected by
-`compile.read_only_mode` for every overlay image), without the pool padding,
+`retail.read_only_mode` for every overlay image, and for a PS-X EXE whose
+`config/images.toml` row sets `read_only = "together"`), without the pool padding,
 and its single `RODATA()` claim covers constants and switch tables together
 (see [the linking guide](executable-linking.md#fdat-overlays) for the retail
 evidence). Pointers in that run into the unit's own code are rewritten like

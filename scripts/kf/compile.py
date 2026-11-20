@@ -14,7 +14,7 @@ from pathlib import Path
 
 from scripts.kf.delink import image_key
 from scripts.kf.model import scan_data_claims
-from scripts.kf.retail import IMAGE_LAYOUTS, OVERLAY_SOURCES, read_tsv
+from scripts.kf.retail import IMAGE_LAYOUTS, read_only_mode, read_tsv
 
 
 # Native probe compilers: tool basenames and provenance labels. The labels are
@@ -147,11 +147,6 @@ def _source_data_sizes(preprocessed: Path, names: tuple[str, ...],
     if values[:2] != (0x4B46535A, 4):
         raise RuntimeError('source-size probe does not use target 32-bit words')
     return dict(zip(names, values[2:], strict=True))
-
-
-def read_only_mode(image: str) -> str:
-    """An FDAT overlay keeps cc1's read-only order (sdk.keep_read_only_together)."""
-    return 'together' if image in OVERLAY_SOURCES else 'separate'
 
 
 def compile_source(

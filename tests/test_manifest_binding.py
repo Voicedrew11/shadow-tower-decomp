@@ -2,10 +2,14 @@
 
 from __future__ import annotations
 
+import tempfile
 import unittest
+from pathlib import Path
+from unittest import mock
 
+from scripts.kf import retail
 from scripts.kf.manifest import (
-    _check_overlay_read_only, _rebind_claims_by_name, _rebind_data_claims_by_name,
+    _check_together_read_only, _rebind_claims_by_name, _rebind_data_claims_by_name,
 )
 from scripts.kf.model import Claim, DataClaim, DataIdentity, RodataClaim
 
@@ -64,9 +68,40 @@ class OverlayReadOnlyTests(unittest.TestCase):
     def test_overlay_units_claim_switch_tables_inside_rodata(self) -> None:
         tables = (RodataClaim(0x801EB730, 0x7C, 9),)
         with self.assertRaisesRegex(ValueError, "RODATA"):
-            _check_overlay_read_only("map.c", "FDAT_002.BIN", tables)
-        _check_overlay_read_only("map.c", "FDAT_002.BIN", ())
-        _check_overlay_read_only("menu.c", "ST.EXE", tables)
+            _check_together_read_only("map.c", "FDAT_002.BIN", tables)
+        _check_together_read_only("map.c", "FDAT_002.BIN", ())
+        _check_together_read_only("menu.c", "ST.EXE", tables)
+
+    def test_a_program_that_keeps_read_only_together_claims_tables_inside_rodata(self) -> None:
+        tables = (RodataClaim(0x800110A0, 0x1C, 9),)
+        with mock.patch.dict(retail.IMAGE_READ_ONLY, {"VS.EXE": "together"}):
+            self.assertEqual(retail.read_only_mode("VS.EXE"), "together")
+            with self.assertRaisesRegex(ValueError, "RODATA"):
+                _check_together_read_only("snd.c", "VS.EXE", tables)
+        with mock.patch.dict(retail.IMAGE_READ_ONLY, {"VS.EXE": "separate"}):
+            _check_together_read_only("snd.c", "VS.EXE", tables)
+
+    def test_images_toml_selects_the_read_only_mode(self) -> None:
+        base = ('[[image]]\nname = "A.EXE"\n{extra}\n'
+                '[[archive]]\nname = "X.T"\n'
+                '[[overlay]]\nname = "X_001.BIN"\narchive = "X.T"\nhost = "A.EXE"\n{overlay}\n')
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "images.toml"
+            path.write_text(base.format(extra="", overlay=""))
+            self.assertEqual(retail._load_read_only(path),
+                             {"A.EXE": "separate", "X_001.BIN": "together"})
+            path.write_text(base.format(extra='read_only = "together"', overlay=""))
+            self.assertEqual(retail._load_read_only(path)["A.EXE"], "together")
+            path.write_text(base.format(extra='read_only = "mixed"', overlay=""))
+            with self.assertRaisesRegex(ValueError, "unknown read_only"):
+                retail._load_read_only(path)
+            path.write_text(base.format(extra="", overlay='read_only = "separate"'))
+            with self.assertRaisesRegex(ValueError, "always keeps"):
+                retail._load_read_only(path)
+
+    def test_the_configured_images_use_their_retail_read_only_layout(self) -> None:
+        self.assertEqual(retail.read_only_mode("ST.EXE"), "separate")
+        self.assertEqual(retail.read_only_mode("FDAT_002.BIN"), "together")
 
 
 class OverlaySourceBindingTests(unittest.TestCase):
