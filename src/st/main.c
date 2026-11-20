@@ -205,6 +205,10 @@ void func_80014544(void)
  * 46 records in runs that end with flags 0xff (src/st/hud.c draws them).
  */
 
+/* Unreferenced: sixteen zero bytes between the end of .text and the records. */
+DATA(0x8007f3e4, 0x10, ".data")
+static u32 DAT_8007f3e4[4] = {0, 0, 0, 0};
+
 DATA(0x8007f3f4, 0x398, ".data")
 StHudSprite hud_sprites[46] = {
     {0x01, 0xff, 104, 162, 7, 10, {13, 32, 112, 5}, 0x7e62, 0x0019, 0},

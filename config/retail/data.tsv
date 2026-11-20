@@ -232,14 +232,14 @@ ST.EXE	0x8007e248	0x6da48	0xc	unclassified	coverage-gap			payload-complement	may
 ST.EXE	0x8007ee90	0x6e690	0x4	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 ST.EXE	0x8007eea0	0x6e6a0	0x4	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 ST.EXE	0x8007f318	0x6eb18	0xc	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
-ST.EXE	0x8007f3e4	0x6ebe4	0x10	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
+ST.EXE	0x8007f3e4	0x6ebe4	0x10	defined	proven	DAT_8007f3e4	u32[4]	src/st/main.c st.main	unreferenced zero words at the start of .data, before hud_sprites (a native link puts hud_sprites directly after .text)
 ST.EXE	0x8007f3f4	0x6ebf4	0x398	defined	candidate	hud_sprites	StHudSprite[46]	asm;src/st/hud.c st.hud;src/st/main.c st.main	46 HUD sprite records of 20 bytes in runs ended by flags 0xff
 ST.EXE	0x8007f78c	0x6ef8c	0xc00	defined	candidate	DAT_8007f78c	StLightInit[64]	asm;src/st/light.c st.light;src/st/area_a.c st.area_a;src/st/main.c st.main	64 default lighting environments of 0x30 bytes; 0..47 zero, filled per area by func_80014cfc
 ST.EXE	0x8008038c	0x6fb8c	0x80	defined	candidate	DAT_8008038c	AreaHooks	asm;src/st/area_load.c st.area_load;src/st/data_8008038c.c st.data_8008038c	the handler table an area uses until its own is loaded: 32 slots, each area_hook_none
 ST.EXE	0x8008040c	0x6fc0c	0x20	defined	candidate	DAT_8008040c	MATRIX	asm;src/st/objects.c st.objects;src/st/anim_set.c st.anim_set;src/st/data_8008038c.c st.data_8008038c	identity MATRIX handed to model_draw by func_800241d0 and func_800255f0 and copied to the scratchpad MATRIX by anim_set_node_vertex
 ST.EXE	0x8008042c	0x6fc2c	0x80	defined	candidate	DAT_8008042c	MATRIX[4]	asm;src/st/vis_hit.c st.vis_hit;src/st/data_8008038c.c st.data_8008038c	the four light-set rotations of the collision test
 ST.EXE	0x800804ac	0x6fcac	0x3c0	defined	candidate	DAT_800804ac	u32[40][6]	asm;src/st/xa.c st.xa;src/st/data_8008038c.c st.data_8008038c	XA stream lengths in sectors per stream file and channel (func_8005408c); WIP extent of 40 rows (DAT_801cba08.unk1618 holds 40 positions)
-ST.EXE	0x8008086c	0x7006c	0xc0	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
+ST.EXE	0x8008086c	0x7006c	0xc0	defined	proven	DAT_8008086c	u32[48]	src/st/data_8008092c.c st.data_8008092c	unreferenced zero words in .data between DAT_800804ac and DAT_8008092c
 ST.EXE	0x8008092c	0x7012c	0x12	defined	candidate	DAT_8008092c	u8[18]	asm;src/st/equip_menu.c st.equip_menu;src/st/data_8008092c.c st.data_8008092c	byte table: message offset from 916 per ring sub-list entry
 ST.EXE	0x8008093e	0x7013e	0x75aa	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 ST.EXE	0x80087ee8	0x776e8	0x4	defined	proven	DAT_80087ee8	u_long	asm;src/st/model_draw.c st.model_draw	$gp+0x28; initialized word 0x00808080 (colour 128, 128, 128) func_80021ac4 loads; owning unit unknown
