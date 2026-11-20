@@ -7813,6 +7813,38 @@ ST.EXE	0x800685e4	0x57de4		mips26	reachable-code	0x80068524	load		j		manual-deco
 ST.EXE	0x80068600	0x57e00	0x80068604	mips_hi16_lo16	reachable-code	0x801cd132	bss	DAT_801cd130	lui+lhu		manual-decoded	reviewed	st.idgrid asm review
 ST.EXE	0x8006861c	0x57e1c		mips26	reachable-code	0x80014cfc	load		jal		manual-decoded	reviewed	st.idgrid asm review
 ST.EXE	0x80068624	0x57e24	0x80068628	mips_hi16_lo16	reachable-code	0x8015d090	bss	world_state	lui+addiu		manual-decoded	reviewed	st.idgrid asm review
+ST.EXE	0x8008038c	0x6fb8c		mips32_candidate	data-word	0x800443ec	load	area_hook_none	word		manual-decoded	reviewed	st.data_8008038c area hooks review
+ST.EXE	0x80080390	0x6fb90		mips32_candidate	data-word	0x800443ec	load	area_hook_none	word		manual-decoded	reviewed	st.data_8008038c area hooks review
+ST.EXE	0x80080394	0x6fb94		mips32_candidate	data-word	0x800443ec	load	area_hook_none	word		manual-decoded	reviewed	st.data_8008038c area hooks review
+ST.EXE	0x80080398	0x6fb98		mips32_candidate	data-word	0x800443ec	load	area_hook_none	word		manual-decoded	reviewed	st.data_8008038c area hooks review
+ST.EXE	0x8008039c	0x6fb9c		mips32_candidate	data-word	0x800443ec	load	area_hook_none	word		manual-decoded	reviewed	st.data_8008038c area hooks review
+ST.EXE	0x800803a0	0x6fba0		mips32_candidate	data-word	0x800443ec	load	area_hook_none	word		manual-decoded	reviewed	st.data_8008038c area hooks review
+ST.EXE	0x800803a4	0x6fba4		mips32_candidate	data-word	0x800443ec	load	area_hook_none	word		manual-decoded	reviewed	st.data_8008038c area hooks review
+ST.EXE	0x800803a8	0x6fba8		mips32_candidate	data-word	0x800443ec	load	area_hook_none	word		manual-decoded	reviewed	st.data_8008038c area hooks review
+ST.EXE	0x800803ac	0x6fbac		mips32_candidate	data-word	0x800443ec	load	area_hook_none	word		manual-decoded	reviewed	st.data_8008038c area hooks review
+ST.EXE	0x800803b0	0x6fbb0		mips32_candidate	data-word	0x800443ec	load	area_hook_none	word		manual-decoded	reviewed	st.data_8008038c area hooks review
+ST.EXE	0x800803b4	0x6fbb4		mips32_candidate	data-word	0x800443ec	load	area_hook_none	word		manual-decoded	reviewed	st.data_8008038c area hooks review
+ST.EXE	0x800803b8	0x6fbb8		mips32_candidate	data-word	0x800443ec	load	area_hook_none	word		manual-decoded	reviewed	st.data_8008038c area hooks review
+ST.EXE	0x800803bc	0x6fbbc		mips32_candidate	data-word	0x800443ec	load	area_hook_none	word		manual-decoded	reviewed	st.data_8008038c area hooks review
+ST.EXE	0x800803c0	0x6fbc0		mips32_candidate	data-word	0x800443ec	load	area_hook_none	word		manual-decoded	reviewed	st.data_8008038c area hooks review
+ST.EXE	0x800803c4	0x6fbc4		mips32_candidate	data-word	0x800443ec	load	area_hook_none	word		manual-decoded	reviewed	st.data_8008038c area hooks review
+ST.EXE	0x800803c8	0x6fbc8		mips32_candidate	data-word	0x800443ec	load	area_hook_none	word		manual-decoded	reviewed	st.data_8008038c area hooks review
+ST.EXE	0x800803cc	0x6fbcc		mips32_candidate	data-word	0x800443ec	load	area_hook_none	word		manual-decoded	reviewed	st.data_8008038c area hooks review
+ST.EXE	0x800803d0	0x6fbd0		mips32_candidate	data-word	0x800443ec	load	area_hook_none	word		manual-decoded	reviewed	st.data_8008038c area hooks review
+ST.EXE	0x800803d4	0x6fbd4		mips32_candidate	data-word	0x800443ec	load	area_hook_none	word		manual-decoded	reviewed	st.data_8008038c area hooks review
+ST.EXE	0x800803d8	0x6fbd8		mips32_candidate	data-word	0x800443ec	load	area_hook_none	word		manual-decoded	reviewed	st.data_8008038c area hooks review
+ST.EXE	0x800803dc	0x6fbdc		mips32_candidate	data-word	0x800443ec	load	area_hook_none	word		manual-decoded	reviewed	st.data_8008038c area hooks review
+ST.EXE	0x800803e0	0x6fbe0		mips32_candidate	data-word	0x800443ec	load	area_hook_none	word		manual-decoded	reviewed	st.data_8008038c area hooks review
+ST.EXE	0x800803e4	0x6fbe4		mips32_candidate	data-word	0x800443ec	load	area_hook_none	word		manual-decoded	reviewed	st.data_8008038c area hooks review
+ST.EXE	0x800803e8	0x6fbe8		mips32_candidate	data-word	0x800443ec	load	area_hook_none	word		manual-decoded	reviewed	st.data_8008038c area hooks review
+ST.EXE	0x800803ec	0x6fbec		mips32_candidate	data-word	0x800443ec	load	area_hook_none	word		manual-decoded	reviewed	st.data_8008038c area hooks review
+ST.EXE	0x800803f0	0x6fbf0		mips32_candidate	data-word	0x800443ec	load	area_hook_none	word		manual-decoded	reviewed	st.data_8008038c area hooks review
+ST.EXE	0x800803f4	0x6fbf4		mips32_candidate	data-word	0x800443ec	load	area_hook_none	word		manual-decoded	reviewed	st.data_8008038c area hooks review
+ST.EXE	0x800803f8	0x6fbf8		mips32_candidate	data-word	0x800443ec	load	area_hook_none	word		manual-decoded	reviewed	st.data_8008038c area hooks review
+ST.EXE	0x800803fc	0x6fbfc		mips32_candidate	data-word	0x800443ec	load	area_hook_none	word		manual-decoded	reviewed	st.data_8008038c area hooks review
+ST.EXE	0x80080400	0x6fc00		mips32_candidate	data-word	0x800443ec	load	area_hook_none	word		manual-decoded	reviewed	st.data_8008038c area hooks review
+ST.EXE	0x80080404	0x6fc04		mips32_candidate	data-word	0x800443ec	load	area_hook_none	word		manual-decoded	reviewed	st.data_8008038c area hooks review
+ST.EXE	0x80080408	0x6fc08		mips32_candidate	data-word	0x800443ec	load	area_hook_none	word		manual-decoded	reviewed	st.data_8008038c area hooks review
 TITLE.EXE	0x80013084	0x1884	0x80013088	mips_hi16_lo16	reachable-code	0x80028ac4	load		lui+addiu		manual-decoded	reviewed	title.main asm review
 TITLE.EXE	0x800130b8	0x18b8		mips26	reachable-code	0x8002118c	load		jal		manual-decoded	reviewed	title.main asm review
 TITLE.EXE	0x80013110	0x1910		mips26	reachable-code	0x800209cc	load		jal		manual-decoded	reviewed	title.main asm review

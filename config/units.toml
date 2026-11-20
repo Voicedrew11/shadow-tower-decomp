@@ -488,9 +488,9 @@ source = "src/st/idgrid.c"
 profile = "probe-gcc272cdk-o2-g8"
 
 [[unit]]
-unit = "st.data_8008040c"
+unit = "st.data_8008038c"
 image = "ST.EXE"
-source = "src/st/data_8008040c.c"
+source = "src/st/data_8008038c.c"
 profile = "probe-gcc272cdk-o2-g0"
 
 [[unit]]

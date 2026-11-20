@@ -20,7 +20,7 @@ extern u8 DAT_8009b088[];
 
 /* src/st/area_a.c */
 extern u8 *DAT_800881d8;
-void func_800443ec(void);
+void area_hook_none(void);
 void func_800443f4(StCdRequest *request);
 void func_80044404(void);
 void func_80044674(void);

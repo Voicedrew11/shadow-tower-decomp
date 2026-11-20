@@ -35,9 +35,10 @@ SDATA(0x80088064, 0x38)
 DATA(0x800881d8, 0x4, ".sbss")
 u8 *DAT_800881d8;
 
-/* The handler every entry of the table at 0x8008038c starts with. */
+/* The empty area handler: every slot of the default table at 0x8008038c
+ * (DAT_8008038c) until an area's own handlers are loaded. */
 ADDRESS(0x800443ec, 0x8)
-void func_800443ec(void)
+void area_hook_none(void)
 {
 }
 

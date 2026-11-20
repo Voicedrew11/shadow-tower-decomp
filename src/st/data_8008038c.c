@@ -1,6 +1,7 @@
 /*
- * ST.EXE: a data-only module (WIP) defining game .data: the identity
- * matrix, the four light-set rotations and the XA stream lengths.
+ * ST.EXE: a data-only module (WIP) defining game .data: the default area
+ * handlers, the identity matrix, the four light-set rotations and the XA
+ * stream lengths.
  * No code unit but st.main contributes .data, and retail keeps these after
  * st.main's run, so a module linked after the code defines them; every user
  * declares them extern.
@@ -11,9 +12,37 @@
 #include <LIBGTE.H>
 #include <LIBGPU.H>
 #include <st/data.h>
+#include <st/area.h>
 #include <st/anim.h>
 #include <st/vis.h>
 #include <st/xa.h>
+
+/* The default area handlers: every slot is the empty handler. */
+DATA(0x8008038c, 0x80, ".data")
+AreaHooks DAT_8008038c = {
+    area_hook_none,
+    area_hook_none,
+    area_hook_none,
+    area_hook_none,
+    area_hook_none,
+    area_hook_none,
+    (void (*)())area_hook_none,
+    area_hook_none,
+    (void (*)())area_hook_none,
+    area_hook_none,
+    area_hook_none,
+    area_hook_none,
+    area_hook_none,
+    area_hook_none,
+    area_hook_none,
+    area_hook_none,
+    area_hook_none,
+    area_hook_none,
+    {area_hook_none, area_hook_none, area_hook_none, area_hook_none,
+     area_hook_none, area_hook_none, area_hook_none, area_hook_none,
+     area_hook_none, area_hook_none, area_hook_none, area_hook_none,
+     area_hook_none, area_hook_none},
+};
 
 DATA(0x8008040c, 0x20, ".data")
 MATRIX DAT_8008040c = {{{4096, 0, 0}, {0, 4096, 0}, {0, 0, 4096}}, {0, 0, 0}};

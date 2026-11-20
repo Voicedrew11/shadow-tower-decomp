@@ -303,24 +303,32 @@ extern Viewer viewer;
  * byte 9 is the current area the texture slots and table C entries are
  * compared with.
  */
-/* The current area's handlers (area_state.unkC); called without arguments
- * unless noted. WIP extent. */
+/* The current area's handlers (area_state.unkC): 32 slots, the handler
+ * table an overlay starts with after its id (FdatHeader.unk04, st/fdat.h);
+ * called without arguments unless noted. */
 typedef struct {
     void (*unk0)();      /* 0x00: called by func_80055374 with (position, facing) */
     void (*unk4)(void);  /* 0x04: per frame (func_8005735c) */
-    u8 unk08[0x14 - 0x08];
+    void (*unk08)();
+    void (*unk0C)();
+    void (*unk10)();
     void (*unk14)(void); /* 0x14: called once the area is loaded (func_800456f8) */
     void (*unk18)(int);  /* 0x18: item id rose by one (func_80055300) */
-    u8 unk1C[0x20 - 0x1c];
+    void (*unk1C)();
     void (*unk20)(void *entry, void *record); /* 0x20: a table B entry kind func_8004eebc does not know */
     void (*unk24)(void);
-    u8 unk28[0x30 - 0x28];
+    void (*unk28)();
+    void (*unk2C)();
     void (*unk30)();     /* 0x30: item use hook */
     void (*unk34)(void); /* 0x34: the player died (func_80042d74) */
-    u8 unk38[0x40 - 0x38];
+    void (*unk38)();
+    void (*unk3C)();
     void (*unk40)(void); /* 0x40: per table A entry, every fourth frame (func_8004e324) */
     void (*unk44)(void); /* 0x44: per table A entry, every frame */
+    void (*unk48[14])();
 } AreaHooks;
+
+typedef char AreaHooksSize[sizeof(AreaHooks) == 0x80 ? 1 : -1];
 
 typedef struct {
     s16 unk0;

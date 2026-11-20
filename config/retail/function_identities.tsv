@@ -399,7 +399,7 @@ ST.EXE	0x80042c44	func_80042c44			unknown	unknown arg0;unknown arg1;unknown arg2
 ST.EXE	0x80042cec	func_80042cec			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
 ST.EXE	0x80042cfc	func_80042cfc			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
 ST.EXE	0x80042d74	func_80042d74			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-ST.EXE	0x800443ec	func_800443ec			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+ST.EXE	0x800443ec	area_hook_none			void		candidate	candidate	mips-live-in-heuristic	empty body (jr ra); every one of the 32 slots of the default area handler table DAT_8008038c points to it
 ST.EXE	0x800443f4	func_800443f4			unknown	unknown *object	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
 ST.EXE	0x80044404	func_80044404			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
 ST.EXE	0x80044674	func_80044674			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
