@@ -231,31 +231,7 @@ profile = "probe-gcc272cdk-o2-g0"
 unit = "st.vis_b"
 image = "ST.EXE"
 source = "src/st/vis_b.c"
-profile = "probe-gcc272cdk-o2-g0"
-
-[[unit]]
-unit = "st.vis_80050768"
-image = "ST.EXE"
-source = "src/st/vis_80050768.c"
 profile = "probe-gcc272cdk-o2-g8"
-
-[[unit]]
-unit = "st.vis_c"
-image = "ST.EXE"
-source = "src/st/vis_c.c"
-profile = "probe-gcc272cdk-o2-g0"
-
-[[unit]]
-unit = "st.vis_pickup"
-image = "ST.EXE"
-source = "src/st/vis_pickup.c"
-profile = "probe-gcc272cdk-o2-g0"
-
-[[unit]]
-unit = "st.vis_c_run"
-image = "ST.EXE"
-source = "src/st/vis_c_run.c"
-profile = "probe-gcc272cdk-o2-g0"
 
 [[unit]]
 unit = "st.vis_move"
