@@ -152,12 +152,12 @@ void func_8001cd60(u_char status, u_char *result)
                         while (CdControl(CdlSeekL, (u_char *)&request->unk18, 0) == 0)
                             ;
                     } else {
-                        if (request->unk2C != NULL)
-                            request->unk2C(request->unk20);
+                        if (request->done != NULL)
+                            request->done(request->unk20);
                         func_8002ea94(request);
                     }
-                } else if (request->unk2C != NULL) {
-                    request->unk2C(request);
+                } else if (request->done != NULL) {
+                    request->done(request);
                 }
                 break;
             }
@@ -208,7 +208,7 @@ StCdRequest *func_8001d030(int kind, CdlLOC *loc, u32 size, u8 *dest, void (*don
     req->unk18 = *loc;
     req->unk20 = dest;
     req->unk28 = (size + 2047) >> 11;
-    req->unk2C = done;
+    req->done = done;
     if (++DAT_801a4590.unkD8 == &DAT_801a4590.unk8[VS_CD_REQUESTS])
         DAT_801a4590.unkD8 = DAT_801a4590.unk8;
     if (DAT_801a4590.unkDC == req) {
@@ -234,22 +234,22 @@ int func_8001d134(int archive, int member, CdlLOC *loc)
 ADDRESS(0x8001d1b8, 0xe0)
 void func_8001d1b8(void)
 {
-    DAT_801624d0.frame = !DAT_801624d0.frame;
-    DAT_801624d0.packet = &DAT_801624d0.packets[DAT_801624d0.frame];
-    DAT_801624d0.packet->cur = DAT_801624d0.packet->start;
-    DAT_801624d0.ot_cur = DAT_801624d0.ot[DAT_801624d0.frame];
-    ClearOTagR(DAT_801624d0.ot_cur, VS_OT_LENGTH);
-    DAT_801624d0.ot2_cur = DAT_801624d0.ot2[DAT_801624d0.frame];
-    ClearOTagR(DAT_801624d0.ot2_cur, VS_OT2_LENGTH);
-    DAT_801624d0.unk831C[0] = DAT_801624d0.unk831C[1] =
-        DAT_801624d0.unk8324 = DAT_801624d0.unk8328 = 0;
-    DAT_801624d0.unk832C = 0;
-    DAT_801624d0.unk8330 = 0;
-    DAT_801624d0.unk8338[0] = 0;
-    DAT_801624d0.unk8338[1] = 0;
-    DAT_801624d0.unk8338[2] = 0;
-    DAT_801624d0.unk8338[3] = 0;
-    DAT_801624d0.unk8338[4] = 0;
+    vs_gfx_state.frame = !vs_gfx_state.frame;
+    vs_gfx_state.packet = &vs_gfx_state.packets[vs_gfx_state.frame];
+    vs_gfx_state.packet->cur = vs_gfx_state.packet->start;
+    vs_gfx_state.ot_cur = vs_gfx_state.ot[vs_gfx_state.frame];
+    ClearOTagR(vs_gfx_state.ot_cur, VS_OT_LENGTH);
+    vs_gfx_state.ot2_cur = vs_gfx_state.ot2[vs_gfx_state.frame];
+    ClearOTagR(vs_gfx_state.ot2_cur, VS_OT2_LENGTH);
+    vs_gfx_state.unk831C[0] = vs_gfx_state.unk831C[1] =
+        vs_gfx_state.unk8324 = vs_gfx_state.unk8328 = 0;
+    vs_gfx_state.unk832C = 0;
+    vs_gfx_state.unk8330 = 0;
+    vs_gfx_state.unk8338[0] = 0;
+    vs_gfx_state.unk8338[1] = 0;
+    vs_gfx_state.unk8338[2] = 0;
+    vs_gfx_state.unk8338[3] = 0;
+    vs_gfx_state.unk8338[4] = 0;
 }
 
 ADDRESS(0x8001d298, 0x90)
@@ -257,16 +257,16 @@ void func_8001d298(void)
 {
     DrawSync(0);
     VSync(3);
-    PutDispEnv(&DAT_801624d0.disp[DAT_801624d0.frame]);
-    PutDrawEnv(&DAT_801624d0.draw[DAT_801624d0.frame]);
+    PutDispEnv(&vs_gfx_state.disp[vs_gfx_state.frame]);
+    PutDrawEnv(&vs_gfx_state.draw[vs_gfx_state.frame]);
 }
 
 ADDRESS(0x8001d328, 0x4c)
 void func_8001d328(void)
 {
-    AddPrims(DAT_801624d0.ot_cur, &DAT_801624d0.ot2_cur[VS_OT2_LENGTH - 1],
-             DAT_801624d0.ot2_cur);
-    DrawOTag(&DAT_801624d0.ot_cur[VS_OT_LENGTH - 1]);
+    AddPrims(vs_gfx_state.ot_cur, &vs_gfx_state.ot2_cur[VS_OT2_LENGTH - 1],
+             vs_gfx_state.ot2_cur);
+    DrawOTag(&vs_gfx_state.ot_cur[VS_OT_LENGTH - 1]);
 }
 
 ADDRESS(0x8001d374, 0x28)

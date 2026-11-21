@@ -81,8 +81,10 @@
   claim.
 - A unit's constant pool (string literals, initializers) is its
   `RODATA(va, size)` claim and its switch tables are its
-  `JUMPTABLES(va, size)` claim (one of each per unit; all pools link before
-  all tables): jump-table pointer rows and literal strings inside those
+  `JUMPTABLES(va, size)` claim (one of each per unit; retail follows each
+  object's constants with its own tables, object by object, so a
+  `read_only = "together"` image claims both in one `RODATA()` run):
+  jump-table pointer rows and literal strings inside those
   ranges are not separate identities, and the source spells the literals the
   original used.
 - A global lives in the module that owns it, defined under

@@ -1,7 +1,10 @@
 /*
  * ST.EXE: reading an area file into the small-file buffer, and the CD
  * completion callback that streams a read buffer of image blocks into VRAM
- * (WIP module).
+ * (WIP module). It is its own object, apart from st.area_a: retail places
+ * its .sdata vector 0x8008809c right after st.area_a's SDATA, and it can be
+ * neither st.area_a's own nor st.math's, which reads it with a lui pair (a
+ * -G8 unit reaches its own small data through $gp).
  */
 #include <kf/lib/address.h>
 #include <kf/lib/types.h>
@@ -12,6 +15,11 @@
 #include <st/cd.h>
 #include <st/data.h>
 #include <st/area.h>
+#include <st/funcs.h>
+
+/* The unit z vector func_80049fe4 turns (src/st/math.c). */
+DATA(0x8008809c, 0x8, ".sdata")
+SVECTOR DAT_8008809c = {0, 0, 4096, 0};
 
 ADDRESS(0x80045f90, 0x28)
 void func_80045f90(int archive, int member, void (*done)())
@@ -98,7 +106,7 @@ void func_80045ffc(void)
             DrawSync(0);
             request->unk10 = 2;
             request->unk24 = 0;
-            request->unk2C(request);
+            request->done(request);
             func_80015848(request);
             return;
         }

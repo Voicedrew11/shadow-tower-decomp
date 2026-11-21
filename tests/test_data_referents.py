@@ -81,6 +81,26 @@ class DataReferentTests(unittest.TestCase):
         self.assertEqual(int(used["addend"], 0), -0x200)
         self.assertEqual(struct.unpack("<i", blob)[0], -0x200)
 
+    def test_link_label_word_keeps_its_distance_from_the_label_as_addend(self):
+        labels = {"_bss_orgend": BASE + 0x1000}
+        for target, addend in ((BASE + 0x1000, 0), (BASE + 0x1084, 0x84)):
+            with self.subTest(target=target):
+                _payload, row = pair(target, name="_bss_orgend")
+                row.update(kind="mips32_candidate", paired_site_va="")
+                blob = bytearray(struct.pack("<I", target))
+                relocs, used = _apply_relocation(blob, FUNCTION, row, catalog(TABLE), "safe",
+                                                 labels=labels)
+                self.assertEqual([(r.symbol, r.kind) for r in relocs],
+                                 [("_bss_orgend", "R_MIPS_32")])
+                self.assertEqual(int(used["addend"], 0), addend)
+                self.assertEqual(struct.unpack("<I", blob)[0], addend)
+        # Without the curated label the name is an ordinary referent.
+        _payload, row = pair(BASE + 0x1084, name="_bss_orgend")
+        row.update(kind="mips32_candidate", paired_site_va="")
+        blob = bytearray(struct.pack("<I", BASE + 0x1084))
+        _apply_relocation(blob, FUNCTION, row, catalog(TABLE), "safe")
+        self.assertEqual(struct.unpack("<I", blob)[0], 0)
+
     def test_data_base_coinciding_with_unrelated_rodata_retains_actual_owner(self):
         payload, row = pair(BASE + 0x100)
         relocs, used = _apply_relocation(bytearray(payload), FUNCTION, row,

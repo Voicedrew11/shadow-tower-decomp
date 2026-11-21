@@ -39,12 +39,12 @@ SDATA(0x80063260, 0x10)
  * the buffer has overflowed (the cursor is advanced first).
  */
 #define NEW_PRIM(buf, p, type)                                       \
-    (buf) = DAT_801624d0.packet;                                     \
+    (buf) = vs_gfx_state.packet;                                     \
     (p) = (type *)(buf)->cur;                                        \
     (buf)->cur = (u_long *)((p) + 1);                                \
-    if (DAT_801624d0.packet->cur > DAT_801624d0.packet->end)         \
+    if (vs_gfx_state.packet->cur > vs_gfx_state.packet->end)         \
         return;                                                      \
-    DAT_801624d0.unk8328++
+    vs_gfx_state.unk8328++
 
 /* Draws glyph `c` at (x, y): half-width codes below the split, full-width
  * codes after it. */
@@ -148,7 +148,7 @@ void func_8001d3f0(u16 c, u16 x, u16 y, CVECTOR *color)
     }
     setlen(p, 9);
     setcode(p, 0x2e);
-    addPrim(DAT_801624d0.ot_cur, p);
+    addPrim(vs_gfx_state.ot_cur, p);
 }
 
 /* Draws a 0xffff-terminated glyph string; code 0 starts a new line. */
@@ -329,10 +329,10 @@ void func_8001dc48(u32 num, u16 x, u16 y, CVECTOR *color)
  * and the colour. */
 #define FILL_F4(p, semi, x0, y0, x1, y1, x2, y2, x3, y3, color)      \
     (p)->code = (semi) == 1 ? 0x2a : 0x28;                           \
-    (p)->tag = (*DAT_801624d0.ot_cur & 0xffffff) | 0x05000000;       \
+    (p)->tag = (*vs_gfx_state.ot_cur & 0xffffff) | 0x05000000;       \
     setXY4(p, x0, y0, x1, y1, x2, y2, x3, y3);                       \
     setRGB0(p, (color)->r, (color)->g, (color)->b);                  \
-    *DAT_801624d0.ot_cur = (u_long)(p) & 0xffffff
+    *vs_gfx_state.ot_cur = (u_long)(p) & 0xffffff
 
 /* FILL_F4 over the rectangle with top left (x, y), width w and height h. */
 #define FILL_RECT_F4(p, semi, x, y, w, h, color)     FILL_F4(p, semi, x, y, (x) + (w), y, x, (y) + (h), (x) + (w), (y) + (h), color)
@@ -427,7 +427,7 @@ void func_8001e530(RECT *r, DVECTOR *tex, DVECTOR *clut, CVECTOR *color, int mod
     } else {
         setRGB0(p, color->r, color->g, color->b);
     }
-    p->tag = (*DAT_801624d0.ot_cur & 0xffffff) | 0x09000000;
+    p->tag = (*vs_gfx_state.ot_cur & 0xffffff) | 0x09000000;
     setXY4(p, r->x, r->y, r->x + r->w, r->y, r->x, r->y + r->h, r->x + r->w, r->y + r->h);
     if (flip == 1)
         setUV4(p, u1 - 1, v0, u0 - 1, v0, u1 - 1, v1, u0 - 1, v1);
@@ -436,7 +436,7 @@ void func_8001e530(RECT *r, DVECTOR *tex, DVECTOR *clut, CVECTOR *color, int mod
     else
         setUV4(p, u0, v0, u1, v0, u0, v1, u1, v1);
     p->code = semi ? 0x2e : 0x2c;
-    *DAT_801624d0.ot_cur = (u_long)p & 0xffffff;
+    *vs_gfx_state.ot_cur = (u_long)p & 0xffffff;
 }
 
 /* Adds a draw-mode primitive selecting the texture page at (x, y) with
@@ -449,7 +449,7 @@ void func_8001e890(int abr, int x, int y)
 
     NEW_PRIM(buf, p, DR_MODE);
     SetDrawMode(p, 0, 0, GetTPage(0, abr, x, y), NULL);
-    addPrim(DAT_801624d0.ot_cur, p);
+    addPrim(vs_gfx_state.ot_cur, p);
 }
 
 /* Draws a Gouraud quad: corner positions and colours in setXY4 order. */
@@ -460,14 +460,14 @@ void func_8001e978(DVECTOR *xy, CVECTOR *rgb, int semi)
     POLY_G4 *p;
 
     NEW_PRIM(buf, p, POLY_G4);
-    p->tag = (*DAT_801624d0.ot_cur & 0xffffff) | 0x08000000;
+    p->tag = (*vs_gfx_state.ot_cur & 0xffffff) | 0x08000000;
     setRGB0(p, rgb[0].r, rgb[0].g, rgb[0].b);
     setRGB1(p, rgb[1].r, rgb[1].g, rgb[1].b);
     setRGB2(p, rgb[2].r, rgb[2].g, rgb[2].b);
     setRGB3(p, rgb[3].r, rgb[3].g, rgb[3].b);
     setXY4(p, xy[0].vx, xy[0].vy, xy[1].vx, xy[1].vy, xy[2].vx, xy[2].vy, xy[3].vx, xy[3].vy);
     p->code = semi == 0 ? 0x38 : 0x3a;
-    *DAT_801624d0.ot_cur = (u_long)p & 0xffffff;
+    *vs_gfx_state.ot_cur = (u_long)p & 0xffffff;
 }
 
 /*
@@ -489,25 +489,25 @@ void func_8001eb18(RECT *r, CVECTOR *mid, CVECTOR *edge, int semi)
     b.h = b.h >> 1;
     NEW_PRIM(buf, p, POLY_G4);
     p->code = semi == 0 ? 0x38 : 0x3a;
-    p->tag = (*DAT_801624d0.ot_cur & 0xffffff) | 0x08000000;
+    p->tag = (*vs_gfx_state.ot_cur & 0xffffff) | 0x08000000;
     setRGB0(p, edge->r, edge->g, edge->b);
     setRGB1(p, edge->r, edge->g, edge->b);
     setRGB2(p, mid->r, mid->g, mid->b);
     setRGB3(p, mid->r, mid->g, mid->b);
     setXY4(p, b.x, b.y, b.x + b.w, b.y, b.x, b.y + b.h, b.x + b.w, b.y + b.h);
-    *DAT_801624d0.ot_cur = (u_long)p & 0xffffff;
+    *vs_gfx_state.ot_cur = (u_long)p & 0xffffff;
     b = *r;
     b.h = b.h >> 1;
     b.y += b.h;
     NEW_PRIM(lower, p, POLY_G4);
     p->code = semi == 0 ? 0x38 : 0x3a;
-    p->tag = (*DAT_801624d0.ot_cur & 0xffffff) | 0x08000000;
+    p->tag = (*vs_gfx_state.ot_cur & 0xffffff) | 0x08000000;
     setRGB0(p, mid->r, mid->g, mid->b);
     setRGB1(p, mid->r, mid->g, mid->b);
     setRGB2(p, edge->r, edge->g, edge->b);
     setRGB3(p, edge->r, edge->g, edge->b);
     setXY4(p, b.x, b.y, b.x + b.w, b.y, b.x, b.y + b.h, b.x + b.w, b.y + b.h);
-    *DAT_801624d0.ot_cur = (u_long)p & 0xffffff;
+    *vs_gfx_state.ot_cur = (u_long)p & 0xffffff;
 }
 
 /* Draws a triangle filling `r` that points along `dir` (0, 1024, 2048 or
@@ -558,13 +558,13 @@ void func_8001eef4(RECT *r, CVECTOR *color, u16 dir)
     setcode(p, 0x22);
     setXY3(p, x0, y0, x1, y1, x2, y2);
     setRGB0(p, color->r, color->g, color->b);
-    addPrim(DAT_801624d0.ot_cur, p);
+    addPrim(vs_gfx_state.ot_cur, p);
     NEW_PRIM(buf, p, POLY_F3);
     setlen(p, 4);
     setcode(p, 0x22);
     setXY3(p, x0 + 1, y0 + 1, x1 + 1, y1 + 1, x2 + 1, y2 + 1);
     setRGB0(p, color->r, color->g, color->b);
-    addPrim(DAT_801624d0.ot_cur, p);
+    addPrim(vs_gfx_state.ot_cur, p);
 }
 
 /* Draws a menu panel: a dark fill over a lighter border, both blended. */

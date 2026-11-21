@@ -20,7 +20,7 @@ extern u8 DAT_8009b088[];
 
 /* src/st/area_a.c */
 extern u8 *DAT_800881d8;
-void func_800443ec(void);
+void area_hook_none(void);
 void func_800443f4(StCdRequest *request);
 void func_80044404(void);
 void func_80044674(void);
@@ -54,7 +54,7 @@ void func_80045ffc(void);
 
 /* 0x8008038c: the handlers an area uses until its own are loaded (load
  * data, WIP owner; src/st/area_load.c). */
-extern AreaHooks DAT_8008038c;
+extern AreaHooks area_hooks_default;
 
 /* src/st/area_request.c (also declared in st/player.h) */
 #ifndef ST_FUNC_80045044_OLD_STYLE /* one caller has no prototype in scope */

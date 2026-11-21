@@ -306,7 +306,7 @@ def plan(elf: ELFFile, unit: Unit, result: UnitResult,
                      reservation_size=request['reservation_size'])
     common_claim = named_common_bss_claim(elf, unit)
     named_bss = {datum.symbol: datum for datum in unit.data
-                 if datum.section_name == '.bss' and datum.scope == 'global'}
+                 if datum.section_name in COMMON_SECTIONS and datum.scope == 'global'}
     symbols: dict[str, list] = defaultdict(list)
     for symbol in symtab.iter_symbols():
         # COMMON has no input section: SHF_ALLOC enumeration cannot see it,

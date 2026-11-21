@@ -18,7 +18,7 @@ from collections import Counter, defaultdict
 from dataclasses import dataclass
 from pathlib import Path
 from dataclasses import replace
-from typing import Callable, Iterable, Sequence
+from typing import Callable, Iterable, Mapping, Sequence
 
 from scripts.kf.mips_elf import (
     BSS_SECTION_SYMBOL,
@@ -480,7 +480,12 @@ def _resolve_symbol(
     owned: Owned | None = None,
     *,
     data_reference: bool = False,
+    labels: Mapping[str, int] | None = None,
 ) -> tuple[str, int]:
+    if labels and target_name in labels:
+        # A curated link label (a linker-defined bound) is a referent by
+        # name; the word's distance from its address is the addend.
+        return target_name, target - labels[target_name]
     # An overlay's references outside its own window name its host's
     # functions and data (retail.referent_image).
     owner_image = referent_image(function.image, target)
@@ -527,6 +532,16 @@ def _resolve_symbol(
     if target_data is not None:
         return target_data.symbol, target - target_data.va
     return f"DAT_{target:08x}", 0
+
+
+def _link_label_mismatch(row: dict[str, str], labels: dict[str, int]) -> bool:
+    """Whether a data row names a curated link label (a linker-defined bound,
+    link_labels.tsv) other than as a whole data word.
+
+    The word holds the label's address, or that address plus a constant
+    (`_bss_orgend + 0x84`): the row's target is the word's value and its
+    distance from the label's curated address is the relocation addend."""
+    return labels.get(row["target_name"]) is not None and row["kind"] != "mips32_candidate"
 
 
 def _withheld(row: dict[str, str], owner: Function | None, reason: str) -> dict[str, object]:
@@ -584,6 +599,7 @@ def _apply_relocation(
     original: bytes | None = None,
     *,
     jumptables: tuple[int, int] | None = None,
+    labels: Mapping[str, int] | None = None,
 ) -> tuple[list[MipsRelocation], dict[str, object]]:
     # Rows of one shared HI/LO family validate against the linked bytes, not
     # the addend an earlier member of the family already wrote.
@@ -597,6 +613,7 @@ def _apply_relocation(
         data_reference=(row["status"] == "reviewed"
                         and row["kind"] in {"mips_hi16_lo16", "mips32_candidate",
                                             "mips_gprel16"}),
+        labels=labels if row["kind"] == "mips32_candidate" else None,
     )
 
     if row["kind"] == "mips26":
@@ -1144,8 +1161,13 @@ def _module_object(
                 text, relocations, module_load, section_symbol
             )
     rodata = b""
+    rodata_symbols: list[DefinedSymbol] = []
     if module.rodata is None:
-        rodata_relocations = []
+        # A data-only unit's named const data (DATA(..., ".rodata"); the
+        # manifest admits it only without ADDRESS() claims) packs like .data.
+        rodata, rodata_symbols, rodata_relocations, _, _ = _module_data(
+            module, data_blobs or {}, load_padding, section=".rodata"
+        )
     else:
         if rodata_blob is None:
             raise ValueError(f"module {module.unit}: RODATA range was not carved")
@@ -1193,6 +1215,7 @@ def _module_object(
             sbss_alignment=4,
             rodata=rodata,
             rodata_relocations=rodata_relocations,
+            rodata_symbols=rodata_symbols,
             rdata=rdata,
             rdata_relocations=rdata_relocations,
         ),
@@ -1399,6 +1422,8 @@ def delink(
         # validator. Raw pointer words stay withheld under the safe policy
         # unless their exact site, target, and semantic owner were reviewed.
         data_blobs: dict[int, tuple[bytes, list[MipsRelocation]]] = {}
+        from scripts.kf.roundtrip import link_labels
+        labels = link_labels(image, config_dir)
         for datum in claimed_load_data:
             start = expected.file_offset(datum.va)
             blob = bytearray(executable[start:start + datum.size])
@@ -1408,10 +1433,14 @@ def delink(
             datum_relocations: list[MipsRelocation] = []
             for row in rows_by_datum[datum.va]:
                 owned = owned_by_datum.get(datum.va, Owned())
+                if _link_label_mismatch(row, labels):
+                    withheld_rows.append(_withheld(row, None, "data:link-label-mismatch"))
+                    continue
                 try:
                     relocations, used = _apply_relocation(
                         blob, owner, row, catalog, policy,
                         owned.rodata, owned.sdata, jumptables=owned.jumptables,
+                        labels=labels,
                     )
                 except ValueError as error:
                     withheld_rows.append(_withheld(row, None, f"data:{error}"))

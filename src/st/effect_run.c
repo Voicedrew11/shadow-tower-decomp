@@ -1,7 +1,6 @@
 /*
- * ST.EXE: clearing and running the effect pool (WIP module split from
- * src/st/effect_move.c by the effect script interpreter 0x800385b0, not
- * reconstructed).
+ * ST.EXE: clearing and running the effect pool (WIP module, after the
+ * effect spawner, mover and script interpreter unit src/st/effect_spawn.c).
  */
 #include <kf/lib/address.h>
 #include <kf/lib/types.h>

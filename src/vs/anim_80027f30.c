@@ -28,7 +28,7 @@
 ADDRESS(0x80027fec, 0x3c)
 void func_80027fec(u16 id, StAnimFile *file)
 {
-    DAT_801624d0.unk834C[id] = file;
+    vs_gfx_state.unk834C[id] = file;
     SCRATCHPAD->model = ANIM_MODEL(file);
 }
 
@@ -50,7 +50,7 @@ void func_80028028(StAnimSlot *slot)
 ADDRESS(0x80028074, 0x6c)
 void func_80028074(void)
 {
-    StAnimSlot *slot = DAT_801624d0.anim_slots;
+    StAnimSlot *slot = vs_gfx_state.anim_slots;
     u16 i;
 
     i = 12;
@@ -65,7 +65,7 @@ void func_80028074(void)
 ADDRESS(0x800280e0, 0x3c)
 void func_800280e0(void)
 {
-    StAnimSlot *slot = DAT_801624d0.anim_slots;
+    StAnimSlot *slot = vs_gfx_state.anim_slots;
     u16 i;
 
     i = 12;
@@ -80,7 +80,7 @@ void func_800280e0(void)
 ADDRESS(0x8002811c, 0x60)
 void func_8002811c(void)
 {
-    StAnimSlot *slot = DAT_801624d0.anim_slots;
+    StAnimSlot *slot = vs_gfx_state.anim_slots;
     s16 i;
 
     i = 12;
@@ -98,7 +98,7 @@ void func_8002817c(StAnimSlot **out)
 {
     u16 i;
 
-    *out = DAT_801624d0.anim_slots;
+    *out = vs_gfx_state.anim_slots;
     i = 12;
     do {
         if (!(*out)->unk0) {
@@ -116,13 +116,13 @@ void func_8002817c(StAnimSlot **out)
  * model (returns 1); otherwise poses model `id` at `frame` of `clip`
  * through the slot at *slotp, claiming one and its delta buffer first
  * (freeing every slot until the buffer fits). The posed vertices go to
- * DAT_801624d0.unkC7F0 and the scratchpad's model-space vertex pointer.
+ * vs_gfx_state.unkC7F0 and the scratchpad's model-space vertex pointer.
  * Returns the slot, or 0 when none is free.
  */
 ADDRESS(0x800281d4, 0x2a0)
 int func_800281d4(StAnimSlot **slotp, int id, int clip, int frame)
 {
-    StAnimFile *file = DAT_801624d0.unk834C[id];
+    StAnimFile *file = vs_gfx_state.unk834C[id];
     StAnimSlot *slot = *slotp;
     VsScratchPad *sp = VS_SCRATCHPAD;
     StAnimFile *still;
@@ -136,7 +136,7 @@ int func_800281d4(StAnimSlot **slotp, int id, int clip, int frame)
 
         if (slot != NULL)
             func_80028028(slot);
-        still = DAT_801624d0.unk834C[id];
+        still = vs_gfx_state.unk834C[id];
         model = ANIM_MODEL(still);
         sp->model = model;
         sp->header = MODEL_PARTS(model);
@@ -175,10 +175,10 @@ int func_800281d4(StAnimSlot **slotp, int id, int clip, int frame)
         slot->unk4 = clip;
         slot->unk6 = key;
     }
-    vertices_add(DAT_801624d0.unkC7F0, (SVECTOR *)(sp->model + (sp->header->vertices + 12)),
+    vertices_add(vs_gfx_state.unkC7F0, (SVECTOR *)(sp->model + (sp->header->vertices + 12)),
                  slot->unk8, sp->header->n_vertices);
-    gteMIMefunc(DAT_801624d0.unkC7F0, slot->unk10, sp->header->n_vertices, frac);
-    sp->local_vertices = (u8 *)DAT_801624d0.unkC7F0;
+    gteMIMefunc(vs_gfx_state.unkC7F0, slot->unk10, sp->header->n_vertices, frac);
+    sp->local_vertices = (u8 *)vs_gfx_state.unkC7F0;
     slot->unk0 = 2;
     return (int)slot;
 }

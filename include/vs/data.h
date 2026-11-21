@@ -111,7 +111,7 @@ typedef char VsWorldStateAnimSlotsAt0xA3FC[offsetof(VsWorldState, anim_slots) ==
 typedef char VsWorldStateFrameAt0x2C972[offsetof(VsWorldState, frame) == 0x2c972 ? 1 : -1];
 typedef char VsWorldStateCameraAt0x2CA78[offsetof(VsWorldState, unk2CA78) == 0x2ca78 ? 1 : -1];
 
-extern VsWorldState DAT_801624d0;
+extern VsWorldState vs_gfx_state;
 
 /* 2000 20-byte particle records at 0x801c4a58 (bss): func_8002d738
  * starts them, func_8002d710 clears their lives. */
@@ -178,26 +178,6 @@ typedef struct {
 
 typedef char VsHitRecordSize[sizeof(VsHitRecord) == 70 ? 1 : -1];
 
-/* A fighter's animation sound effects (func_80013c5c), a view of the first
- * 0x64 bytes of its VsFighterData block: keys[i].frame is the animation id
- * of VsFighterData.unk0[2 + i] (compared with VsFighter.unk4DEE8), and per
- * entry a tone and a trigger word (kind in the top nibble, a frame or
- * period below). */
-typedef struct {
-    u8 unk0[8];
-    struct {
-        u8 frame;
-        u8 unk1[3];
-    } keys[6];               /* 0x08 */
-    u8 unk20[0x3c - 0x20];
-    struct {
-        u16 tone;
-        u16 trigger;
-    } sounds[10];            /* 0x3c */
-} VsFighterSfx;
-
-typedef char VsFighterSfxSize[sizeof(VsFighterSfx) == 0x64 ? 1 : -1];
-
 /* An animation a fighter plays: its id and its frame step (negated to
  * play it backwards). */
 typedef struct {
@@ -206,14 +186,24 @@ typedef struct {
     u16 unk2;                /* frame step */
 } VsAnimRef;
 
+/* A fighter's animation sound effect (func_80013c5c): the tone keyed on
+ * and a trigger word (kind in the top nibble: 1 at a frame, 2 at a frame on
+ * 11 bits, 8 at a frame by chance, 4 when the frame count / 20 is a
+ * multiple of the period; the frame or period below). Tone 255 with
+ * trigger 0: no sound. */
+typedef struct {
+    u16 tone;
+    u16 trigger;
+} VsFighterSound;
+
 /*
  * A fighter's data block at +0x4df18 to the record's end: the movement
  * code addresses its animations and walking speed through one pointer to
  * it, so it is one object. Offsets in the field names are block-relative.
  */
 typedef struct {
-    VsAnimRef unk0[13];      /* 0x000: animations (count WIP) */
-    u8 unk34[0x78 - 0x34];
+    VsAnimRef unk0[15];      /* 0x000: animations (13 and 14: id 255 in every record) */
+    VsFighterSound sounds[15]; /* 0x03c: the sound of each animation (func_80013c5c plays 0-9; 2-7 go with unk0[2..7]) */
     VsHitRecord unk78[3];    /* 0x078: hit records of the three combo animations (func_80031478) */
     VsAttack unk14A[3];      /* 0x14a: attacks (count WIP) */
     s16 unk1AA;              /* 0x1aa: movement kind */
@@ -232,8 +222,8 @@ typedef struct {
 typedef char VsFighterDataSize[sizeof(VsFighterData) == 0x1ce ? 1 : -1];
 
 /* The fighters' data blocks by character, copied into VsFighter.unk4DF18
- * when a round loads (.data; WIP extent: one record). */
-extern VsFighterData DAT_8004a224[];
+ * when a round loads (.data, src/vs/data_8004a224.c). */
+extern VsFighterData DAT_8004a224[151];
 
 /*
  * The two fighters at 0x800633b0 (bss), 0x4e0e8 bytes each (the code
@@ -264,7 +254,7 @@ typedef struct {
     s16 unk4DF12;            /* 0x4df12: model brightness; 128 and up: the default colour (func_80025204) */
     s16 unk4DF14;            /* 0x4df14: state when an attack was blocked */
     s16 unk4DF16;            /* 0x4df16: hits left in the current attack (func_80031478) */
-    VsFighterData unk4DF18;  /* 0x4df18: the fighter's data block (its first 0x64 bytes: VsFighterSfx) */
+    VsFighterData unk4DF18;  /* 0x4df18: the fighter's data block */
 } VsFighter;
 
 /* Layout check: the record size the index arithmetic proves. */
@@ -315,11 +305,11 @@ typedef struct {
 extern VsFighter *DAT_80063300;
 
 /* Rotation offsets added to the drawn fighter's x and y angles (.sdata,
- * unowned; read absolutely). */
+ * src/vs/main.c; read absolutely elsewhere). */
 extern s32 DAT_80063218;
 extern s32 DAT_8006321c;
 
-/* The model renderers' scale (4096, 4096, 4096; .data, unowned). */
+/* The model renderers' scale (4096, 4096, 4096; .data, src/vs/main.c). */
 extern VECTOR DAT_8005b2a8;
 
 /* The column of DAT_801624b8 func_8002ad40 shows (bss, unowned). */

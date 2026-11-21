@@ -11,7 +11,8 @@ from tempfile import TemporaryDirectory
 from unittest.mock import patch
 
 from scripts.kf.data_match import (
-    Elf, _diff_bss, _diff_init_section, _subtract, _union, coverage, diff_image, run,
+    Elf, _diff_bss, _diff_init_section, _subtract, _union, coverage, diff_image,
+    layout_identity_issues, link_label_issues, run,
 )
 from scripts.kf.delink import Datum, Function
 from scripts.kf.manifest import Manifest, Unit
@@ -503,6 +504,58 @@ class CoverageTest(unittest.TestCase):
             owned, total, fragments = coverage("GAME.EXE", Manifest({}, (unit,)))
         self.assertEqual((owned, total), (12, 16))
         self.assertEqual(fragments, [(0x100c, 4, "")])
+
+class LayoutIdentityTests(unittest.TestCase):
+    def test_layout_evidenced_claim_needs_the_current_link_placement(self) -> None:
+        from types import SimpleNamespace
+
+        from scripts.kf.inventory import layout_bss_identity
+
+        hole = Datum(0x8006330C, 4, "DAT_8006330c", "bss", "global", ".sbss")
+        word = Datum(0x80063308, 4, "DAT_80063308", "bss", "global", ".sbss")
+        unit = Unit("vs.sbss_80063300", "VS.EXE", "src/vs/sbss_80063300.c", "p", (),
+                    (word, hole))
+        layout = frozenset({"DAT_8006330c"})
+        for linked in (None, {"DAT_8006330c": 0x80063310}, {}):
+            issues = layout_identity_issues(unit, layout, linked)
+            self.assertEqual([(i.name, i.status) for i in issues],
+                             [(".sbss", "unresolved-common-placement")])
+        self.assertEqual(layout_identity_issues(
+            unit, layout, {"DAT_8006330c": 0x8006330C, "DAT_80063308": 0}), [])
+        # Referenced claims are untouched by the layout rule.
+        self.assertEqual(layout_identity_issues(unit, frozenset(), None), [])
+
+        def row(storage="bss", scope="global", evidence="retail-bss-layout;vs sbss hole"):
+            return SimpleNamespace(storage=storage, scope=scope, evidence=evidence)
+
+        self.assertTrue(layout_bss_identity(row()))
+        self.assertFalse(layout_bss_identity(row(scope="static")))
+        self.assertFalse(layout_bss_identity(row(storage="load")))
+        self.assertFalse(layout_bss_identity(row(evidence="asm;retail-bss-layouts")))
+
+
+class LinkLabelTests(unittest.TestCase):
+    def test_a_word_relocated_against_a_link_label_needs_the_current_link(self) -> None:
+        with TemporaryDirectory() as directory:
+            path = Path(directory) / "heap.o"
+            path.write_bytes(write_mips_elf(
+                b"", None, 0, rodata=bytes(12), rodata_relocations=[
+                    MipsRelocation(0, "R_MIPS_32", "_bss_org"),
+                    MipsRelocation(4, "R_MIPS_32", "_bss_orgend"),
+                    MipsRelocation(8, "R_MIPS_32", "DAT_80063300"),
+                ]))
+            target = Elf(path)
+        labels = {"_bss_org": 0x80063300, "_bss_orgend": 0x801DBAA8}
+        for linked in (None, {}, {"_bss_org": 0x80063300, "_bss_orgend": 0x801DBA90}):
+            issues = link_label_issues(target, labels, linked)
+            self.assertEqual([(i.name, i.status) for i in issues],
+                             [(".rodata", "unresolved-link-label")])
+        self.assertIn("_bss_orgend", link_label_issues(target, labels, {})[0].detail)
+        self.assertEqual(link_label_issues(
+            target, labels, {"_bss_org": 0x80063300, "_bss_orgend": 0x801DBAA8}), [])
+        # Only curated labels count: any other undefined name is an ordinary referent.
+        self.assertEqual(link_label_issues(target, {}, None), [])
+
 
 if __name__ == "__main__":
     unittest.main()

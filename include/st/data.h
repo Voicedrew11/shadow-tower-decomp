@@ -22,8 +22,9 @@
 /*
  * Words at the end of the game .rdata, before LIBCD's: 0x80013974 holds the
  * bss start, 0x80013978..0x80013980 the overlay area 0x801eb560, 0x80013988
- * its end. main stores the heap base at 0x8001398c. Their owner is unknown;
- * main addresses each with its own lui pair, as separate scalars.
+ * its end. main stores the heap base at 0x8001398c. src/st/rdata_80013974.c
+ * defines them (const there); main addresses each with its own lui pair, as
+ * separate scalars.
  */
 extern u8 *DAT_80013980;
 extern u8 *DAT_80013988;
@@ -303,24 +304,36 @@ extern Viewer viewer;
  * byte 9 is the current area the texture slots and table C entries are
  * compared with.
  */
-/* The current area's handlers (area_state.unkC); called without arguments
- * unless noted. WIP extent. */
+/* The current area's handlers (area_state.hooks): 32 slots, the handler
+ * table an overlay starts with after its id (FdatHeader.unk04, st/fdat.h);
+ * called without arguments unless noted. area_state.hooks is set only by
+ * the area loader func_800456f8: to area_hooks_default (every slot
+ * area_hook_none) while an area loads, then to the loaded overlay's table
+ * (DAT_800881d8). The value sources of each called slot are listed in
+ * config/retail/indirect_pointers.tsv. */
 typedef struct {
-    void (*unk0)();      /* 0x00: called by func_80055374 with (position, facing) */
-    void (*unk4)(void);  /* 0x04: per frame (func_8005735c) */
-    u8 unk08[0x14 - 0x08];
-    void (*unk14)(void); /* 0x14: called once the area is loaded (func_800456f8) */
-    void (*unk18)(int);  /* 0x18: item id rose by one (func_80055300) */
-    u8 unk1C[0x20 - 0x1c];
+    void (*examine)();   /* 0x00: the examine action, (position, facing) (func_80055374) */
+    void (*frame)(void); /* 0x04: per frame (func_8005735c) */
+    void (*unk08)();
+    void (*unk0C)();
+    void (*unk10)();
+    void (*loaded)(void); /* 0x14: called once the area is loaded (func_800456f8) */
+    void (*item_added)(int); /* 0x18: item id rose by one (func_80055300) */
+    void (*unk1C)();
     void (*unk20)(void *entry, void *record); /* 0x20: a table B entry kind func_8004eebc does not know */
-    void (*unk24)(void);
-    u8 unk28[0x30 - 0x28];
-    void (*unk30)();     /* 0x30: item use hook */
-    void (*unk34)(void); /* 0x34: the player died (func_80042d74) */
-    u8 unk38[0x40 - 0x38];
+    void (*unk24)(void); /* 0x24: a table B entry kind func_80050768 does not handle */
+    void (*unk28)();
+    void (*unk2C)();
+    void (*item_used)(); /* 0x30: item use (item id, or 0x4000 | slot) (func_80054a54) */
+    void (*player_died)(void); /* 0x34: the player died (func_80042d74) */
+    void (*unk38)();
+    void (*unk3C)();
     void (*unk40)(void); /* 0x40: per table A entry, every fourth frame (func_8004e324) */
     void (*unk44)(void); /* 0x44: per table A entry, every frame */
+    void (*unk48[14])();
 } AreaHooks;
+
+typedef char AreaHooksSize[sizeof(AreaHooks) == 0x80 ? 1 : -1];
 
 typedef struct {
     s16 unk0;
@@ -332,7 +345,7 @@ typedef struct {
     u8 unk8;
     u8 area;             /* 0x09 */
     u8 unkA[2];
-    AreaHooks *unkC;     /* 0x0c: the area's handlers */
+    AreaHooks *hooks;    /* 0x0c: the area's handlers */
     u8 unk10;            /* 0x10: 0xff when unset */
     u8 unk11;
     u8 unk12;            /* 0x12 */

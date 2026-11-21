@@ -42,8 +42,7 @@
 #include <st/save.h>
 #include <st/item.h>
 
-RODATA(0x800128d0, 0xe68)
-JUMPTABLES(0x80013738, 0x148)
+RODATA(0x800128d0, 0xfb0)
 SDATA(0x800880a4, 0x3f)
 
 /* The CD file buffer (DAT_80088c88) follows cd_state; these screens spell

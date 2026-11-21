@@ -167,12 +167,12 @@ void func_8001561c(u_char status, u_char *result)
                         while (CdControl(CdlSeekL, (u_char *)&request->unk18, 0) == 0)
                             ;
                     } else {
-                        if (request->unk2C != NULL)
-                            request->unk2C(request->unk20);
+                        if (request->done != NULL)
+                            request->done(request->unk20);
                         func_80015848(request);
                     }
-                } else if (request->unk2C != NULL) {
-                    request->unk2C(request);
+                } else if (request->done != NULL) {
+                    request->done(request);
                 }
                 break;
             }

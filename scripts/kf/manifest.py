@@ -23,7 +23,7 @@ from scripts.kf.model import (
     write_bindings,
 )
 from scripts.kf.paths import REPO, RETAIL_CONFIG, UNITS_MANIFEST
-from scripts.kf.retail import IMAGE_LAYOUTS, OVERLAY_SOURCES, image_key
+from scripts.kf.retail import IMAGE_LAYOUTS, image_key, read_only_mode
 
 
 DEFINE_RE = re.compile(r"[A-Za-z_][A-Za-z0-9_]*(=[A-Za-z0-9_x]+)?")
@@ -70,6 +70,12 @@ class Unit:
     # SDATA() literal ranges in ascending order.
     sdata: tuple[tuple[int, int], ...] = ()
     jumptables: tuple[int, int] | None = None
+    # A data-only unit listed with `link = "first"` links before the image's
+    # code units (see _check_link_order).
+    linked_first: bool = False
+    # A data-only unit listed with `link = "last"` links after the image's
+    # code units although its first datum precedes them.
+    linked_last: bool = False
 
     def __post_init__(self) -> None:
         object.__setattr__(self, "sdata", _ranges(self.sdata))
@@ -309,6 +315,8 @@ def _bind_data_claims(
     claims: tuple[DataClaim, ...],
     identities: dict[tuple[str, int], DataIdentity],
     claimed: dict[tuple[str, int], str],
+    *,
+    data_only: bool = False,
 ) -> tuple[Datum, ...]:
     """Validate one source's DATA() claims against the curated data identities."""
     data: list[Datum] = []
@@ -335,7 +343,11 @@ def _bind_data_claims(
                 f"{where}: {identity.name} has storage {identity.storage!r}; only load and "
                 "bss data can be claimed"
             )
-        allowed_sections = {"load": {".data", ".sdata"},
+        # A data-only unit may also claim named read-only data: an object
+        # whose only contribution is a few const words (VS.EXE's heap words
+        # after the last unit's switch tables). A code unit's read-only data
+        # stays its anonymous RODATA()/JUMPTABLES() ranges.
+        allowed_sections = {"load": {".data", ".sdata", *((".rodata",) if data_only else ())},
                             "bss": {".bss", ".sbss"}}
         if claim.section not in allowed_sections[identity.storage]:
             raise ValueError(
@@ -448,12 +460,61 @@ def _sdata_ranges(
     return tuple(ranges)
 
 
-def _check_overlay_read_only(source: Path, image: str, jumptable_claims) -> None:
-    """An FDAT overlay keeps cc1's read-only order (sdk.keep_read_only_together):
-    its constants and switch tables are one run, claimed with RODATA() alone."""
-    if image in OVERLAY_SOURCES and jumptable_claims:
-        raise ValueError(f"{source}:{jumptable_claims[0].line}: an overlay unit claims its "
+def _check_together_read_only(source: Path, image: str, jumptable_claims) -> None:
+    """An image that keeps cc1's read-only order (sdk.keep_read_only_together:
+    every FDAT overlay, and a PS-X EXE whose images.toml row says
+    `read_only = "together"`) has each unit's constants and switch tables in
+    one run, claimed with RODATA() alone."""
+    if read_only_mode(image) == "together" and jumptable_claims:
+        raise ValueError(f"{source}:{jumptable_claims[0].line}: a {image} unit claims its "
                          "switch tables inside its RODATA() run, not with JUMPTABLES()")
+
+
+def _check_link_order(path: Path, name: str, image: str, start: int, first: bool,
+                      has_functions: bool, units: list[Unit], last: bool = False) -> None:
+    """Units are listed in linked order, which ascends by address per image.
+
+    The exception is opt-in: a data-only unit marked `link = "first"` links
+    ahead of every code unit of its image, the way an object listed first on
+    the PSYLINK command line allocates its .sdata/.sbss/.bss batch before the
+    code's (VS.EXE's start-up module reads words of the first .sbss run with
+    lui pairs, so an earlier object allocated them). Such units are listed at
+    the start of the image's block and ascend among themselves; the units
+    after them ascend as usual.
+
+    Its mirror, `link = "last"`, is a data-only unit whose first datum lies
+    below the code (read-only data) but whose object follows the last code
+    unit: VS.EXE's seven heap words sit after the last unit's switch tables.
+    It is listed after every code unit of its image and is not compared by
+    address; no code unit may follow it.
+    """
+    image_units = [unit for unit in units if unit.image == image]
+    if last or has_functions:
+        if has_functions and any(unit.linked_last for unit in image_units):
+            raise ValueError(f"{path}: unit {name!r} claims functions after a unit linked "
+                             'last (link = "last")')
+        if last:
+            if has_functions or first:
+                raise ValueError(f"{path}: unit {name!r}: only a data-only unit may be "
+                                 'linked last (link = "last")')
+            return
+    if first:
+        if has_functions:
+            raise ValueError(f"{path}: unit {name!r} claims functions; only a data-only unit "
+                             'may be linked first (link = "first")')
+        if any(not unit.linked_first for unit in image_units):
+            raise ValueError(f"{path}: unit {name!r} links first and must be listed before "
+                             f"the other {image} units")
+        previous = image_units[-1] if image_units else None
+    else:
+        ordinary = [unit for unit in image_units
+                    if not unit.linked_first and not unit.linked_last]
+        previous = ordinary[-1] if ordinary else None
+    if previous is not None and previous.va >= start:
+        raise ValueError(
+            f"{path}: unit {name!r} at {start:#x} is listed after "
+            f"{previous.unit!r} at {previous.va:#x}; units follow the linked order"
+        )
 
 
 def load(
@@ -498,7 +559,7 @@ def load(
         if not isinstance(row, dict):
             raise ValueError(f"{path}: unit #{index} is not a table")
         required = {"unit", "image", "source", "profile"}
-        optional = {"bind", "defines", "scope"}
+        optional = {"bind", "defines", "scope", "link"}
         missing = required - set(row)
         extra = set(row) - required - optional
         if "va" in extra:
@@ -550,6 +611,9 @@ def load(
             raise ValueError(
                 f"{source}: address-derived spellings of labelled identities: {shown}"
             )
+        link = str(row.get("link", "address"))
+        if link not in {"address", "first", "last"}:
+            raise ValueError(f"{path}: unit {name!r} has unknown link mode {link!r}")
         bind = str(row.get("bind", "address"))
         if bind not in {"address", "name"}:
             raise ValueError(f"{path}: unit {name!r} has unknown bind mode {bind!r}")
@@ -566,7 +630,7 @@ def load(
         rodata_claims = scan_rodata_claims(source_path)
         jumptable_claims = scan_jumptable_claims(source_path)
         sdata_claims = scan_sdata_claims(source_path)
-        _check_overlay_read_only(source, image, jumptable_claims)
+        _check_together_read_only(source, image, jumptable_claims)
         image_token = image_key(image).upper()
         data_claims = tuple(
             claim for claim in data_claims
@@ -614,13 +678,11 @@ def load(
         functions = _bind_claims(
             path, name, image, source, claims, catalog, identities, claimed, scope,
         ) if claims else ()
-        data = _bind_data_claims(name, image, source, data_claims, curated_data, claimed_data)
+        data = _bind_data_claims(name, image, source, data_claims, curated_data, claimed_data,
+                                 data_only=not claims)
         start = functions[0].va if functions else data[0].va
-        if units and units[-1].image == image and units[-1].va >= start:
-            raise ValueError(
-                f"{path}: unit {name!r} at {start:#x} is listed after "
-                f"{units[-1].unit!r} at {units[-1].va:#x}; units follow the linked order"
-            )
+        _check_link_order(path, name, image, start, link == "first", bool(functions), units,
+                          last=link == "last")
         units.append(
             Unit(
                 name,
@@ -634,6 +696,8 @@ def load(
                 scope,
                 sdata,
                 jumptables,
+                link == "first",
+                link == "last",
             )
         )
         for ordinal, (claim, function) in enumerate(zip(claims, functions)):

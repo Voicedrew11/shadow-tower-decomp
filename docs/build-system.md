@@ -40,7 +40,9 @@ path.
 `kf analyze` drives the incremental Ninja graph for inspection. Source
 compilation uses the same native SDK path; ELF objects are read-only views
 of its LNK outputs. Retail delinking and the progress ledger are comparison
-tools and supply no bytes or layout to the executable build.
+tools and supply no bytes or layout to the executable build. It runs Ninja
+with `-k 0`, so a failing image does not stop the others from being checked;
+it exits non-zero and lists every failed (or blocked) edge.
 
 ## Unit manifest and ADDRESS() claims
 
@@ -72,7 +74,13 @@ binding rules are structural, in the spirit of Gruntz's `RVA()`:
   function between its first and last claim, so a source file is a contiguous
   run of the linked image (address-order incrementalism);
 - units are listed in ascending address order within each image, so the
-  manifest itself reads as the recovered link order; and
+  manifest itself reads as the recovered link order; a data-only unit may
+  opt out with `link = "first"`: it is listed at the start of its image's
+  block and links before the code units (the object that allocated VS.EXE's
+  first .sbss run preceded the start-up module, which reads part of that run
+  with lui pairs); its mirror `link = "last"` lists a data-only unit whose
+  first datum lies below the code after every code unit, unsorted (VS.EXE's
+  heap words follow the last unit's switch tables); and
 - an address is claimed by at most one unit.
 
 A unit may also claim its read-only contributions, each once:
@@ -83,10 +91,11 @@ JUMPTABLES(0x80011490, 0x18)
 ```
 
 The compiler writes a unit's constants (string literals, aggregate
-initializers, const data) and its switch jump tables to `.rdata`. Retail
-`ST.EXE` lays out every unit's constants before any unit's tables, each group
-in link order, with the SDK libraries' read-only data after the tables; the
-build therefore moves each constant block to `.rodata`
+initializers, const data) and its switch jump tables to `.rdata`. In the
+default (`separate`) read-only mode of a PS-X EXE, every unit's constants
+link before any unit's tables, each group in link order, with the SDK
+libraries' read-only data after the tables (`STR.EXE`'s pool, then its one
+table); the build therefore moves each constant block to `.rodata`
 (`separate_read_only` in `scripts/psxbuild/sdk.py`) and the link script
 places `.rodata` before `.rdata`. A unit's constant pool ends on an eight-byte
 boundary (its zero tail is part of the claim). `RODATA()` claims the
@@ -101,7 +110,8 @@ as a named extern.
 
 An FDAT overlay unit is the exception: its read-only data stays in cc1 order
 under one section (`keep_read_only_together`, selected by
-`compile.read_only_mode` for every overlay image), without the pool padding,
+`retail.read_only_mode` for every overlay image, and for a PS-X EXE whose
+`config/images.toml` row sets `read_only = "together"`), without the pool padding,
 and its single `RODATA()` claim covers constants and switch tables together
 (see [the linking guide](executable-linking.md#fdat-overlays) for the retail
 evidence). Pointers in that run into the unit's own code are rewritten like
@@ -151,7 +161,17 @@ datum is claimed by one unit only, and the claims of each section ascend
 inside a source (GCC writes a section's data in source order; a unit's
 `.sbss` statics may precede its later `.sdata` words).
 Data need not be contiguous with the unit's code. The bindings file records
-data claims with `kind=data`.
+data claims with `kind=data`. A data-only unit (no `ADDRESS()` claims) may
+also claim named `const` data in `.rodata`, carved into its object's
+`.rodata` like `.data` claims (VS.EXE's heap words); a code unit's read-only
+data stays its anonymous `RODATA()`/`JUMPTABLES()` ranges. A word that
+holds a linker-defined bound is relocated against a curated link label
+(`link_labels.tsv`, such as PSYLINK's `_bss_org`): its reviewed
+`mips32_candidate` row names the label and has the word's value as its
+target: the label's address, or that address plus a constant
+(`_bss_orgend + 0x84`), whose distance from the label becomes the
+relocation addend. The data gate keeps the section `unresolved-link-label` until the
+current link's `.SYM` puts the name there.
 
 The delinker carves claimed `load` data from the retail image into the module
 object's `.data` section (claims packed in order, each at the alignment its

@@ -34,7 +34,7 @@ typedef struct {
 } Data801e0ce8;
 
 /* 0x801e0d08: the slot sub-list. func_800637c0 allocates its 144-byte bit
- * table (src/st/menu_vram.c) and func_80063954 frees it. WIP extent 0x20. */
+ * table (src/st/menu_vram.c) and func_80063954 frees it. */
 extern EquipSubList DAT_801e0d08;
 
 /* The equipment ids func_800637c0 records (viewer.unk38[3], [4], [16],

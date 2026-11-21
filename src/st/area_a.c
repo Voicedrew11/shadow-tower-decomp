@@ -2,9 +2,8 @@
  * ST.EXE: the area module (WIP name): the area image fix-ups after a load,
  * the requests for a new area set, the loader's step setters and CD
  * completion callbacks, and the area load state machine, one step per call.
- * One translation unit: the state machine reads this module's .sbss word
- * at 0x800881d8 through $gp, and its string continues this module's
- * constant pool (0x800122a8).
+ * One translation unit: its string continues this module's constant pool
+ * (0x800122a8).
  */
 #include <kf/lib/address.h>
 #include <kf/lib/types.h>
@@ -29,15 +28,17 @@
 #include <LIBSND.H>
 #include <st/tim.h>
 
-RODATA(0x80011f18, 0x39c)
+RODATA(0x80011f18, 0x39b)
 SDATA(0x80088064, 0x38)
 
-DATA(0x800881d8, 0x4, ".sbss")
+/* A tentative definition, so that ASPSX reaches it through $gp; st.player
+ * allocates it. */
 u8 *DAT_800881d8;
 
-/* The handler every entry of the table at 0x8008038c starts with. */
+/* The empty area handler: every slot of the default table at 0x8008038c
+ * (area_hooks_default) until an area's own handlers are loaded. */
 ADDRESS(0x800443ec, 0x8)
-void func_800443ec(void)
+void area_hook_none(void)
 {
 }
 
@@ -536,7 +537,7 @@ void func_800456f8(void)
         break;
     case 1:
         area_state.unk2 = 240;
-        area_state.unkC = &DAT_8008038c;
+        area_state.hooks = &area_hooks_default;
         func_80015d54(1, area_state.unk10 * 10 + 2, DAT_800881dc[0], func_80045594);
         viewer.unk174 = NULL;
         viewer.unk178 = -1;
@@ -621,9 +622,9 @@ void func_800456f8(void)
             placements_expand((StPlacement *)(p + 1));
             func_80055f9c(area_state.unk10);
             DAT_801cba08.unk1478[area_state.unk10] |= 1;
-            area_state.unkC = (AreaHooks *)DAT_800881d8;
+            area_state.hooks = (AreaHooks *)DAT_800881d8;
             func_80016878();
-            area_state.unkC->unk14();
+            area_state.hooks->loaded();
             vis_table_a.unk6168 = 254;
             vis_table_a.unk6158[3] = 0xff;
             vis_table_a.unk6158[2] = 0xff;

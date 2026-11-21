@@ -10,7 +10,7 @@ from types import SimpleNamespace
 
 from scripts.kf.cli import main as cli_main
 from scripts.kf.data_reachability import DataExtent, access_span, audit
-from scripts.kf.relocations import validate_relocation
+from scripts.kf.relocations import DataReferent, validate_relocation
 from scripts.kf.sema.evidence import Evidence, Origin, Reference
 from scripts.kf.sema.image import RetailImage
 from scripts.kf.sema.index import Binding
@@ -147,6 +147,53 @@ class ReachabilityTest(unittest.TestCase):
         report = self.switch_table(0x102C, unresolved=False)
         self.assertEqual(report["issues"], [])
         self.assertEqual([row["site"] for row in report["switch_dispatch"]], [0x1020])
+
+    def hoisted_switch(self, base_load=None):
+        # lui t7,0; addiu t7,t7,0x80 (the hoisted base, or BASE_LOAD);
+        # addiu v1,a0,-1; sltiu v0,v1,2; beqz v0,0x30; sll v0,v1,2;
+        # addu v0,v0,t7; lw v0,0(v0); nop; jr v0; nop;
+        # 0x2c: addiu a0,a0,1; 0x30: jr ra; nop
+        head = (0x3C0F0000, 0x25EF0080) if base_load is None else (0, base_load)
+        code = words(*head, 0x2483FFFF, 0x2C620002, 0x10400007, 0x00031080,
+                     0x004F1021, 0x8C420000, 0, 0x00400008, 0, 0x24840001,
+                     0x03E00008, 0)
+        img = RetailImage.synthetic(IMAGE, 0x0, code + b"\0" * (0x80 - len(code))
+                                    + words(0x2C, 0x30) + b"\0" * 0x100)
+        game = replace(function(0x0), size=0x38, body_size=0x38)
+        return audit(IMAGE, (game,), (), (ref(0x24, None, tier="proven", kind="jump"),), img)
+
+    def test_hoisted_switch_table_base_is_proven_by_reaching_definitions(self):
+        report = self.hoisted_switch()
+        self.assertEqual(report["issues"], [])
+        self.assertEqual(report["switch_dispatch"], [{
+            "owner": "function:00000000", "site": 0x24,
+            "pattern": "switch-table-hoisted", "table": 0x80, "entries": 2,
+        }])
+
+    def test_hoisted_switch_with_an_unknown_base_stays_unresolved(self):
+        report = self.hoisted_switch(base_load=0x8CAF0000)  # lw t7,0(a1)
+        self.assertEqual(report["summary"]["issues"]["unresolved-indirect-control"], 1)
+        self.assertEqual(report["switch_dispatch"], [])
+
+    def constant_call(self, low):
+        # lui s0,0; addiu s0,s0,LOW; jalr s0; nop; jr ra; nop
+        code = words(0x3C100000, 0x26100000 | low, 0x0200F809, 0, 0x03E00008, 0)
+        img = RetailImage.synthetic(IMAGE, 0x1000, code + b"\0" * 0x200)
+        caller = replace(function(0x1000), size=0x18, body_size=0x18)
+        return audit(IMAGE, (caller, function(0x1100)), (),
+                     (ref(0x1008, None, tier="proven", kind="indirect-call"),), img)
+
+    def test_constant_pointer_call_reaches_its_function(self):
+        report = self.constant_call(0x1100)
+        self.assertEqual(report["issues"], [])
+        self.assertEqual(report["constant_dispatch"], [{
+            "owner": "function:00001000", "site": 0x1008, "pattern": "constant-pointer",
+            "values": [0x1100], "targets": ["function:00001100"],
+        }])
+
+    def test_constant_pointer_to_no_function_stays_unresolved(self):
+        report = self.constant_call(0x1104)
+        self.assertEqual(report["summary"]["issues"]["unresolved-indirect-control"], 1)
 
     def test_vendored_switch_table_is_exempt_but_not_switch_proved(self):
         report = self.switch_table(0x102C, vendor=True)
@@ -303,6 +350,10 @@ class ReachabilityTest(unittest.TestCase):
         self.assertEqual(unlabelled["summary"]["issues"], {"unmodeled-target": 1})
         labelled = audit(IMAGE, (function(),), (), refs, img, link_labels=frozenset({0x1300}))
         self.assertEqual(labelled["summary"]["issues"], {})
+        # label + constant: the word's referent is the label, past any owner.
+        offset = (replace(ref(0x1000, 0x1384), referent=DataReferent("_end", 0x1300)),)
+        report = audit(IMAGE, (function(),), (), offset, img, link_labels=frozenset({0x1300}))
+        self.assertEqual(report["summary"]["issues"], {})
 
     def test_partial_config_prefix_is_not_promoted_to_source_ownership(self):
         prefix = replace(datum(0x1200, 4, source="data_identities.tsv"),
@@ -311,6 +362,58 @@ class ReachabilityTest(unittest.TestCase):
         self.assertEqual(report["summary"]["config_only_data_ranges"], 1)
         self.assertIn("config-only-data-not-compared", report["summary"]["issues"])
         self.assertEqual(report["ranges"][0]["size"], 4)
+
+    def test_library_bss_identity_is_compared_by_the_current_link_placement(self):
+        flag = replace(datum(0x1800, 4, source="data_identities.tsv", storage="bss"),
+                       name="StCdIntrFlag")
+        img = RetailImage.synthetic(IMAGE, 0x1000, b"\0" * 0x1000)
+        refs = (ref(0x1000, 0x1800),)
+
+        def run(linked, game=frozenset()):
+            return audit(IMAGE, (function(),), (flag,), refs, img,
+                         linked_symbols=linked, game_symbols=game)
+
+        placed = run({"StCdIntrFlag": 0x1800, "after": 0x1804})
+        self.assertEqual(placed["summary"]["issues"], {})
+        self.assertEqual(placed["summary"]["sdk_bss_link_placed"], 1)
+        self.assertEqual([r["comparison"] for r in placed["ranges"] if r["kind"] == "data"],
+                         ["sdk-bss-link-placed"])
+        gap = {"config-only-data-not-compared": 1}
+        # No current link, a link that puts it elsewhere, a game object that
+        # defines the name, another symbol inside the extent, or unknown game
+        # objects: the range stays an uncompared config-only gap.
+        self.assertEqual(run(None)["summary"]["issues"], gap)
+        self.assertEqual(run({"StCdIntrFlag": 0x1810})["summary"]["issues"], gap)
+        self.assertEqual(run({"StCdIntrFlag": 0x1800}, frozenset({"StCdIntrFlag"}))
+                         ["summary"]["issues"], gap)
+        self.assertEqual(run({"StCdIntrFlag": 0x1800, "inside": 0x1802})["summary"]["issues"],
+                         gap)
+        self.assertEqual(run({"StCdIntrFlag": 0x1800}, None)["summary"]["issues"], gap)
+        # Initialized config data never qualifies, however the link places it.
+        table = replace(flag, storage="load")
+        report = audit(IMAGE, (function(),), (table,), refs, img,
+                       linked_symbols={"StCdIntrFlag": 0x1800}, game_symbols=frozenset())
+        self.assertEqual(report["summary"]["issues"], gap)
+
+    def test_game_object_symbols_need_every_unit_object(self):
+        import tempfile
+        from pathlib import Path
+
+        from scripts.kf.data_reachability import game_object_symbols
+        from scripts.kf.mips_elf import STT_OBJECT, DefinedSymbol, write_mips_elf
+
+        manifest = SimpleNamespace(units=(
+            SimpleNamespace(image=IMAGE, object_name="00001000_a.o"),
+            SimpleNamespace(image="OTHER.EXE", object_name="00001000_b.o"),
+        ))
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            self.assertIsNone(game_object_symbols(IMAGE, manifest, root))
+            (root / "game" / "base").mkdir(parents=True)
+            (root / "game" / "base" / "00001000_a.o").write_bytes(write_mips_elf(
+                b"\0" * 8, "fn", 8, data=b"\0" * 4,
+                data_symbols=(DefinedSymbol("table", 0, 4, STT_OBJECT),)))
+            self.assertEqual(game_object_symbols(IMAGE, manifest, root), {"fn", "table"})
 
     def test_source_owner_supersedes_interior_tsv_rows_without_duplication(self):
         report = self.audit([function()], [
@@ -428,10 +531,29 @@ class DataPointerEvidenceTest(unittest.TestCase):
                                                data_owner=lambda _: data)
                 result = evidence._relocation_references()[0]
                 self.assertEqual(result.tier, tier)
+                self.assertIsNone(result.referent)
                 if status == "reviewed":
                     decoded = validate_relocation(img.require(0x1000, 4), data,
                                                   row, None, "safe")
                     self.assertEqual((result.site, result.target), (decoded.site, decoded.target))
+
+    def test_reviewed_word_naming_a_link_label_has_the_label_as_referent(self):
+        data = replace(function(0x1000), space="data", kind="pointer", size=4)
+        img = RetailImage.synthetic(IMAGE, 0x1000, (0x1384).to_bytes(4, "little"))
+        row = {"image": IMAGE, "site_va": "0x1000", "paired_site_va": "",
+               "target_va": "0x1384", "target_name": "_end", "kind": "mips32_candidate",
+               "status": "reviewed", "channel": "data-word", "confidence": "test",
+               "provenance": "test"}
+        evidence = object.__new__(Evidence)
+        evidence.image, evidence.img, evidence.rows = IMAGE, img, [row]
+        evidence.catalog = None
+        evidence.labels = {"_end": 0x1300}
+        evidence.idx = SimpleNamespace(function_owner=lambda _: None,
+                                       data_owner=lambda _: data)
+        result = evidence._relocation_references()[0]
+        self.assertEqual((result.tier, result.target, result.destination),
+                         ("validated", 0x1384, 0x1300))
+        self.assertEqual(result.as_dict()["addend"], 0x84)
 
 
 if __name__ == "__main__":

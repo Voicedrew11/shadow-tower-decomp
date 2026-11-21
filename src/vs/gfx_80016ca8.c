@@ -33,16 +33,16 @@ void func_80016ca8(void)
 
     gte_SetGeomOffset(320, 120);
     gte_SetGeomScreen(300);
-    SetDefDrawEnv(&DAT_801624d0.draw[0], 0, 0, 640, h);
-    SetDefDispEnv(&DAT_801624d0.disp[0], 0, h, 640, h);
-    SetDefDrawEnv(&DAT_801624d0.draw[1], 0, h, 640, h);
-    SetDefDispEnv(&DAT_801624d0.disp[1], 0, 0, 640, h);
-    DAT_801624d0.draw[0].dtd = 1;
-    DAT_801624d0.draw[1].dtd = 1;
-    DAT_801624d0.draw[0].isbg = 1;
-    DAT_801624d0.draw[1].isbg = 1;
-    setRGB0(&DAT_801624d0.draw[0], 0, 0, 0);
-    setRGB0(&DAT_801624d0.draw[1], 0, 0, 0);
+    SetDefDrawEnv(&vs_gfx_state.draw[0], 0, 0, 640, h);
+    SetDefDispEnv(&vs_gfx_state.disp[0], 0, h, 640, h);
+    SetDefDrawEnv(&vs_gfx_state.draw[1], 0, h, 640, h);
+    SetDefDispEnv(&vs_gfx_state.disp[1], 0, 0, 640, h);
+    vs_gfx_state.draw[0].dtd = 1;
+    vs_gfx_state.draw[1].dtd = 1;
+    vs_gfx_state.draw[0].isbg = 1;
+    vs_gfx_state.draw[1].isbg = 1;
+    setRGB0(&vs_gfx_state.draw[0], 0, 0, 0);
+    setRGB0(&vs_gfx_state.draw[1], 0, 0, 0);
 }
 
 /* The 320-wide setup; unlike ST.EXE's copy it also clears the background. */
@@ -53,20 +53,20 @@ void func_80016d94(void)
 
     gte_SetGeomOffset(160, 120);
     gte_SetGeomScreen(300);
-    SetDefDrawEnv(&DAT_801624d0.draw[0], 0, 0, 320, h);
-    SetDefDispEnv(&DAT_801624d0.disp[0], 0, h, 320, h);
-    SetDefDrawEnv(&DAT_801624d0.draw[1], 0, h, 320, h);
-    SetDefDispEnv(&DAT_801624d0.disp[1], 0, 0, 320, h);
-    DAT_801624d0.draw[0].dtd = 1;
-    DAT_801624d0.draw[1].dtd = 1;
-    DAT_801624d0.draw[0].isbg = 1;
-    DAT_801624d0.draw[1].isbg = 1;
-    setRGB0(&DAT_801624d0.draw[0], 0, 0, 0);
-    setRGB0(&DAT_801624d0.draw[1], 0, 0, 0);
-    PutDrawEnv(&DAT_801624d0.draw[0]);
-    PutDrawEnv(&DAT_801624d0.draw[1]);
-    PutDispEnv(&DAT_801624d0.disp[0]);
-    PutDispEnv(&DAT_801624d0.disp[1]);
+    SetDefDrawEnv(&vs_gfx_state.draw[0], 0, 0, 320, h);
+    SetDefDispEnv(&vs_gfx_state.disp[0], 0, h, 320, h);
+    SetDefDrawEnv(&vs_gfx_state.draw[1], 0, h, 320, h);
+    SetDefDispEnv(&vs_gfx_state.disp[1], 0, 0, 320, h);
+    vs_gfx_state.draw[0].dtd = 1;
+    vs_gfx_state.draw[1].dtd = 1;
+    vs_gfx_state.draw[0].isbg = 1;
+    vs_gfx_state.draw[1].isbg = 1;
+    setRGB0(&vs_gfx_state.draw[0], 0, 0, 0);
+    setRGB0(&vs_gfx_state.draw[1], 0, 0, 0);
+    PutDrawEnv(&vs_gfx_state.draw[0]);
+    PutDrawEnv(&vs_gfx_state.draw[1]);
+    PutDispEnv(&vs_gfx_state.disp[0]);
+    PutDispEnv(&vs_gfx_state.disp[1]);
 }
 
 /* ResetGraph only (ST.EXE's copy then reloads and shows the loading

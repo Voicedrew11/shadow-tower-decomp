@@ -150,7 +150,9 @@ class SmallDataPlacementTests(unittest.TestCase):
             Datum(BASE + 0x208, 4, 'other', 'bss', 'static', '.sbss'),))
         result = UnitResult('GAME.EXE', 'game.control', 'synthetic')
         plan(ELFFile(io.BytesIO(object_bytes(common=True, with_data=False))), sample, result)
-        self.assertIn('unsupported-common-allocation', {i['kind'] for i in result.issues})
+        kinds = {i['kind'] for i in result.issues}
+        self.assertIn('unresolved-common-placement', kinds)
+        self.assertNotIn('unsupported-common-allocation', kinds)
 
     def test_sdata_literal_range_alone_places_the_section(self):
         sample = replace(unit(with_data=False), sdata=(BASE + 0x100, 4))

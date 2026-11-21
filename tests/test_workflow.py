@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import os
+import shutil
 import tempfile
 import unittest
 from pathlib import Path
@@ -98,10 +99,19 @@ class ManifestTests(unittest.TestCase):
             for function in unit.functions
         ))
         # Units follow the linked order inside each image, and every unit is a
-        # contiguous run of ascending claims.
+        # contiguous run of ascending claims. Data-only units linked first
+        # (link = "first") lead their image's block and ascend among themselves.
         for image in {unit.image for unit in manifest.units}:
-            starts = [unit.va for unit in manifest.units if unit.image == image]
-            self.assertEqual(starts, sorted(starts))
+            units = [unit for unit in manifest.units if unit.image == image]
+            first = [unit for unit in units if unit.linked_first]
+            self.assertEqual(units[:len(first)], first)
+            self.assertTrue(all(not unit.functions for unit in first))
+            last = [unit for unit in units if unit.linked_last]
+            self.assertTrue(all(not unit.functions for unit in last))
+            rest = [unit for unit in units[len(first):] if not unit.linked_last]
+            for group in (first, rest):
+                starts = [unit.va for unit in group]
+                self.assertEqual(starts, sorted(starts))
         for unit in manifest.units:
             for previous, following in zip(unit.functions, unit.functions[1:]):
                 self.assertEqual(previous.va + previous.size, following.va)
@@ -248,6 +258,58 @@ class ProgressTests(unittest.TestCase):
         self.assertEqual(len(buckets["CHANGED"]), 1)
         self.assertEqual(buckets["REGRESS"], [])
 
+    @staticmethod
+    def _banked_exact(row: Current, input_sha256: str) -> dict[tuple[str, int], dict[str, str]]:
+        return {
+            (row.target.image, row.target.va): {
+                "image": row.target.image,
+                "va": hex(row.target.va),
+                "unit": row.unit.unit,
+                "name": row.target.name,
+                "input_sha256": input_sha256,
+                "best_pct": "100.000000000",
+                "hist_pct": "100.000000000",
+                "banked_pct": "100.000000000",
+                "code_size": "16",
+            }
+        }
+
+    def test_changed_input_banked_exact_row_below_exact_regresses(self) -> None:
+        row = sample_current(99.5)
+        buckets = classifications([row], self._banked_exact(row, "b" * 64))
+        self.assertEqual(buckets["REGRESS"], [(row, buckets["REGRESS"][0][1])])
+        self.assertEqual(buckets["CHANGED"], [])
+
+    def test_changed_input_banked_exact_row_still_exact_is_only_changed(self) -> None:
+        row = sample_current(100.0)
+        buckets = classifications([row], self._banked_exact(row, "b" * 64))
+        self.assertEqual(len(buckets["CHANGED"]), 1)
+        self.assertEqual(buckets["REGRESS"], [])
+
+    def _check_with(self, row: Current, baseline: dict) -> int:
+        universe = {(row.target.image, row.target.va): row.target}
+        with (
+            mock.patch.object(progress, "current_state",
+                              return_value=(STARTED_GAME, universe, [row], [])),
+            mock.patch.object(progress, "load_baseline", return_value=baseline),
+            mock.patch.object(progress, "print_status", return_value=0),
+            mock.patch.object(progress, "_report_cleanliness"),
+            mock.patch("scripts.kf.data_match.run", return_value=0),
+            mock.patch("scripts.kf.data_reachability.run", return_value=0),
+            mock.patch("scripts.kf.roundtrip.run", return_value=0),
+            mock.patch("scripts.kf.readme.refresh", return_value=False),
+            mock.patch("builtins.print"),
+        ):
+            return progress.check(("GAME.EXE",))
+
+    def test_check_fails_when_changed_input_breaks_a_banked_exact_function(self) -> None:
+        row = sample_current(99.5)
+        self.assertEqual(self._check_with(row, self._banked_exact(row, "b" * 64)), 1)
+
+    def test_check_passes_when_changed_input_keeps_a_banked_function_exact(self) -> None:
+        row = sample_current(100.0)
+        self.assertEqual(self._check_with(row, self._banked_exact(row, "b" * 64)), 0)
+
     @kf2_images
     def test_selective_bank_preserves_unrelated_rows(self) -> None:
         row = sample_current(100.0)
@@ -315,6 +377,94 @@ class ProgressTests(unittest.TestCase):
     def test_bank_function_selector_rejects_missing_image(self) -> None:
         with self.assertRaisesRegex(ValueError, "expected IMAGE:VA"):
             _bank_functions(["0x80010000"])
+
+
+class AnalyzeKeepsGoingTests(unittest.TestCase):
+    """`kf analyze` checks every image even after one image fails."""
+
+    GRAPH = "\n".join((
+        "rule run",
+        "  command = $cmd",
+        "  description = $desc",
+        "build a.stamp: run",
+        "  cmd = false",
+        "  desc = check A",
+        "build b.stamp: run",
+        "  cmd = touch b.stamp",
+        "  desc = check B",
+        "build c.stamp: run",
+        "  cmd = false",
+        "  desc = check C",
+        "build all: phony a.stamp b.stamp c.stamp",
+        "",
+    ))
+
+    def _project(self, root: Path):
+        (root / "build").mkdir()
+        ninja = root / "build" / "build.ninja"
+        ninja.write_text(self.GRAPH)
+        return mock.patch.multiple(graph, NINJA=ninja, REPO=root)
+
+    @unittest.skipUnless(shutil.which("ninja"), "ninja required")
+    def test_keep_going_runs_every_edge_after_a_failure(self) -> None:
+        with tempfile.TemporaryDirectory() as directory, self._project(Path(directory)):
+            root = Path(directory)
+            self.assertNotEqual(graph.run_ninja(["all"], jobs=1, keep_going=True), 0)
+            self.assertTrue((root / "b.stamp").is_file())
+
+    @unittest.skipUnless(shutil.which("ninja"), "ninja required")
+    def test_default_ninja_run_stops_at_the_first_failure(self) -> None:
+        with tempfile.TemporaryDirectory() as directory, self._project(Path(directory)):
+            graph.run_ninja(["all"], jobs=1)
+            self.assertFalse((Path(directory) / "b.stamp").is_file())
+
+    def test_check_edge_marks_a_failure_and_clears_it_on_success(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            baseline = root / "baseline.tsv"
+            baseline.write_text("")
+            stamp = root / "objdiff" / "st" / ".verify.stamp"
+            with (
+                mock.patch.object(graph, "BUILD", root),
+                mock.patch.object(graph, "BASELINE", baseline),
+            ):
+                (root / "objdiff").mkdir()
+                (root / "objdiff" / "report.json").write_text("{}")
+                with mock.patch("scripts.kf.progress.check", return_value=1):
+                    self.assertEqual(graph.edge_check("ST.EXE", stamp), 1)
+                self.assertTrue(graph.check_failure_marker("ST.EXE").is_file())
+                self.assertFalse(stamp.exists())
+                with mock.patch("scripts.kf.progress.check", return_value=0):
+                    self.assertEqual(graph.edge_check("ST.EXE", stamp), 0)
+                self.assertFalse(graph.check_failure_marker("ST.EXE").exists())
+                self.assertTrue(stamp.is_file())
+
+    def test_analyze_keeps_going_and_names_every_failed_image(self) -> None:
+        from scripts.kf import cli
+
+        args = cli.parser().parse_args(["analyze"])
+        with (
+            mock.patch.object(cli, "configure_if_needed"),
+            mock.patch.object(cli, "clear_check_failures") as clear,
+            mock.patch.object(cli, "run_ninja", return_value=1) as run,
+            mock.patch.object(cli, "failed_checks", return_value=["ST.EXE", "VS.EXE"]),
+            mock.patch("builtins.print") as printed,
+        ):
+            self.assertEqual(cli._analyze(args), 1)
+        self.assertTrue(run.call_args.kwargs["keep_going"])
+        self.assertEqual(tuple(clear.call_args.args[0]), tuple(IMAGE_LAYOUTS))
+        text = "\n".join(str(call.args[0]) for call in printed.call_args_list)
+        self.assertIn("2 image check(s) failed: st, vs", text)
+
+    def test_failed_checks_reads_the_markers(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            with mock.patch.object(graph, "BUILD", Path(directory)):
+                marker = graph.check_failure_marker("VS.EXE")
+                marker.parent.mkdir(parents=True)
+                marker.write_text("1\n")
+                self.assertEqual(graph.failed_checks(("ST.EXE", "VS.EXE")), ["VS.EXE"])
+                graph.clear_check_failures(("ST.EXE", "VS.EXE"))
+                self.assertEqual(graph.failed_checks(("ST.EXE", "VS.EXE")), [])
 
 
 class GraphTests(unittest.TestCase):

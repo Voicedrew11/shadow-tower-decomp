@@ -15,6 +15,7 @@ from scripts.kf.delink import (
     Module,
     _apply_relocation,
     _competes_for_site,
+    _link_label_mismatch,
     _module_data,
     _module_object,
     decode_hi_lo_target,
@@ -1034,6 +1035,45 @@ class ModuleObjectTests(unittest.TestCase):
         self.assertEqual(names["buffer"][5], section_names.index(".bss") + 1)
         self.assertEqual(names["only"][5], section_names.index(".text") + 1)
         self.assertEqual(names["callee"][5], 0)  # undefined
+
+    def test_data_only_module_carries_named_rodata(self) -> None:
+        module = Module(
+            "VS.EXE", "vs.heap", "heap", (),
+            (
+                Datum(0x80011F34, 4, "first", "load", "global", ".rodata"),
+                Datum(0x80011F38, 4, "second", "load", "static", ".rodata"),
+            ),
+        )
+        blobs = {
+            0x80011F34: (bytes(4), [MipsRelocation(0, "R_MIPS_32", "_bss_org")]),
+            0x80011F38: (b"\xa8\xba\x1d\x80", []),
+        }
+        built = _module_object(module, {}, {}, blobs)
+        self.assertEqual((built.size, built.data_size, built.rodata_size), (0, 0, 8))
+        self.assertEqual(built.relocations, [MipsRelocation(0, "R_MIPS_32", "_bss_org")])
+        sections = elf_sections(built.data)
+        self.assertNotIn(".data", sections)
+        header = sections[".rodata"]
+        self.assertEqual(built.data[header[4]:header[4] + header[5]],
+                         bytes(4) + b"\xa8\xba\x1d\x80")
+        self.assertIn(".rel.rodata", sections)
+        names = dict(elf_symbols(built.data))
+        rodata_index = list(sections).index(".rodata") + 1
+        self.assertEqual((names["first"][1], names["first"][2], names["first"][5]),
+                         (0, 4, rodata_index))
+        self.assertEqual(names["second"][3] >> 4, 0)  # STB_LOCAL
+        self.assertEqual((names["second"][1], names["second"][5]), (4, rodata_index))
+
+    def test_a_link_label_is_only_a_whole_word(self) -> None:
+        labels = {"_bss_org": 0x80063300}
+        row = {"kind": "mips32_candidate", "target_va": "0x80063300", "target_name": "_bss_org"}
+        self.assertFalse(_link_label_mismatch(row, labels))
+        # label + constant: the distance from the label is the addend.
+        self.assertFalse(_link_label_mismatch({**row, "target_va": "0x80063384"}, labels))
+        self.assertTrue(_link_label_mismatch({**row, "kind": "mips_hi16_lo16"}, labels))
+        # Names that are not curated labels are left to the ordinary rules.
+        self.assertFalse(_link_label_mismatch({**row, "target_name": "DAT_80063300"}, labels))
+        self.assertFalse(_link_label_mismatch(row, {}))
 
     def test_initialized_packing_preserves_nonzero_bytes_and_following_relocations(self) -> None:
         module = Module('GAME.EXE', 'game.gap', 'gap', (0x80010000,), (

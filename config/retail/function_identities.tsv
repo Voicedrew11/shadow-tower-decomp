@@ -102,8 +102,8 @@ ST.EXE	0x80017c8c	func_80017c8c			unknown	unknown *object;unknown arg1	address-o
 ST.EXE	0x80017cb0	func_80017cb0			unknown	unknown arg0	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
 ST.EXE	0x80017cc4	func_80017cc4			unknown	unknown *object;unknown *pointer1;unknown arg2	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
 ST.EXE	0x80017d28	func_80017d28			unknown	unknown *object;unknown arg1	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-ST.EXE	0x80018440	mesh_ft3_tint_a			void	CVECTOR *rgb	candidate	candidate	asm;callers;src/st/prim.c st.prim	mesh_draw_ft3 tint callback (band B body): clamps blue to 85, r = 3b, g = 2b
-ST.EXE	0x80018480	mesh_ft3_tint_b			void	CVECTOR *rgb	candidate	candidate	asm;callers;src/st/prim.c st.prim	mesh_draw_ft3 tint callback (band B body): clamps red to 85, b = g = 3r
+ST.EXE	0x80018440	mesh_ft3_tint_a			void	CVECTOR *rgb	candidate	candidate	asm;callers;src/st/texanim.c st.texanim	mesh_draw_ft3 tint callback (band B body): clamps blue to 85, r = 3b, g = 2b
+ST.EXE	0x80018480	mesh_ft3_tint_b			void	CVECTOR *rgb	candidate	candidate	asm;callers;src/st/texanim.c st.texanim	mesh_draw_ft3 tint callback (band B body): clamps red to 85, b = g = 3r
 ST.EXE	0x800184c4	mesh_draw_ft3			void	int count;MeshFaceFT3 *face;u_long *ot;int flags	supported	proven	asm;callers;src/st band C	depth-cued FT3 face renderer
 ST.EXE	0x800187a4	mesh_ft4_tint_a			void	CVECTOR *rgb	supported	proven	asm;callers;src/st band C	tint callback: clamps blue to 85, r = 3b, g = 2b
 ST.EXE	0x800187e4	mesh_ft4_tint_b			void	CVECTOR *rgb	supported	proven	asm;callers;src/st band C	tint callback: clamps red to 85, b = g = 3r
@@ -264,51 +264,51 @@ ST.EXE	0x800319a8	func_800319a8			unknown		address-only	candidate	mips-live-in-h
 ST.EXE	0x80031aec	func_80031aec			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
 ST.EXE	0x80031cfc	func_80031cfc			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
 ST.EXE	0x80031d50	func_80031d50			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-ST.EXE	0x80031de4	placements_expand			void	StPlacement *src	candidate	candidate	asm;callers;src/st/tim.c st.tim	expands 128 16-byte placement records into DAT_8015c48c (block * 4096 + offset coordinates, rand() start below unk3)
-ST.EXE	0x80031efc	tim_load_images			int	u_long *buf;u_long size	candidate	candidate	asm;callers;src/st/tim.c st.tim	LoadImage()s the CLUT and pixel blocks of the TIMs packed in buf and returns the bytes of the complete ones
-ST.EXE	0x80032058	lighting_load_defaults			void		candidate	candidate	asm;callers;src/st/light.c st.light	fills the 64 lighting environments from the load-image defaults and requests a matrix rebuild
-ST.EXE	0x8003216c	lighting_build_matrices			void		candidate	candidate	asm;callers;src/st/light.c st.light	when requested, derives light matrices 0..3 of every environment (func_80049aac)
-ST.EXE	0x80032210	lighting_blend_matrix			void	StLightInit *init;StLight *light;short t	candidate	candidate	asm;callers;src/st/light.c st.light	blends an environment's light matrix 0 toward a default part (func_8004a888)
-ST.EXE	0x80032244	lighting_blend_color			void	StLightInit *init;StLight *light;short t	candidate	candidate	asm;callers;src/st/light.c st.light	blends an environment's colour matrix toward a default part (func_8004a888)
-ST.EXE	0x8003227c	lighting_blend_back			void	StLightInit *init;StLight *light;short t	candidate	candidate	asm;callers;src/st/light.c st.light	blends an environment's back colour toward a default part (func_8004a830)
-ST.EXE	0x800322f8	lighting_blend_near			void	StLightInit *init;StLight *light;short t	candidate	candidate	asm;callers;src/st/light.c st.light	blends unk68 (the near range source) and keeps unk6A 4096 beyond it
-ST.EXE	0x80032358	lighting_blend_far			void	StLightInit *init;StLight *light;short t	candidate	candidate	asm;callers;src/st/light.c st.light	blends unk6A (the far range) and keeps unk68 4096 below it
-ST.EXE	0x800323b8	lighting_blend			void	int flags;StLightInit *init;short t	candidate	candidate	asm;callers;src/st/light.c st.light	blends the flagged parts of a default into the first 48 environments
-ST.EXE	0x80032530	lighting_blend_back_ranges			void	u8 r;u8 g;u8 b;int unk68;int unk6A;short t	candidate	candidate	asm;callers;src/st/light.c st.light	old-style; blends a back colour (unless a component is 255) and the ranges (unless 0xffff); no callers
-ST.EXE	0x800325c4	lighting_blend_matrices			void	StLightMatrix color;StLightMatrix matrix;short t	candidate	candidate	asm;callers;src/st/light.c st.light	blends a colour and a light matrix passed by value (unless an element is 0x7fff); no callers
-ST.EXE	0x80032774	lighting_grid_index			int	u8 flags	candidate	candidate	asm;callers;src/st/light.c st.light	old-style; row (0x10..0x80) * 3 + column (1..4) of the lowest flags
-ST.EXE	0x80032800	lighting_select			void	u8 rows;u8 columns;int blend	candidate	candidate	asm;callers;src/st/light.c st.light	old-style; selects the environment of the row/column flags, starting a blend into it when blend is set
-ST.EXE	0x8003306c	lighting_start			void		candidate	candidate	asm;callers;src/st/light.c st.light	points the current and blend-start environments at slots 43/44 and selects the area's environment
-ST.EXE	0x800330f0	lighting_clear_requests			void		candidate	candidate	asm;callers;src/st/light.c st.light	clears the lighting request bytes 3..6 and 9
-ST.EXE	0x80033110	lighting_update			void		candidate	candidate	asm;callers;src/st/light.c st.light	per frame: picks the row/column flags for the area and state and advances the 64-step blend
-ST.EXE	0x800339c4	anim_register_pack			void	u16 id;u8 *pack	candidate	candidate	asm;callers;src/st/anim.c st.anim	registers the model files of a pack under consecutive ids
-ST.EXE	0x80033a48	anim_register			void	u16 id;StAnimFile *file	candidate	candidate	asm;callers;src/st/anim.c st.anim	registers one model file and sets the scratchpad model
-ST.EXE	0x80033a84	vertices_sub			void	SVECTOR *dst;SVECTOR *from;SVECTOR *to;int count	candidate	candidate	asm;callers;src/st/anim.c st.anim	dst = to - from per vertex
-ST.EXE	0x80033b00	vertices_add			void	SVECTOR *dst;SVECTOR *a;SVECTOR *b;int count	candidate	candidate	asm;callers;src/st/anim.c st.anim	dst = a + b per vertex
-ST.EXE	0x80033b7c	vertex_list_copy			void	short *dst;short *src	candidate	candidate	asm;callers;src/st/anim.c st.anim	copies a count-prefixed vertex list; no callers
-ST.EXE	0x80033bdc	vertex_list_add			void	SVECTOR *dst;SVECTOR *a;short *b	candidate	candidate	asm;callers;src/st/anim.c st.anim	dst = a + a count-prefixed list; no callers
-ST.EXE	0x80033c60	vertex_list_accumulate			void	SVECTOR *dst;short *src	candidate	candidate	asm;callers;src/st/anim.c st.anim	dst += a count-prefixed list; no callers
-ST.EXE	0x80033cd4	vertex_list_scale_add			void	SVECTOR *dst;short *src;long p	candidate	candidate	asm;callers;src/st/anim.c st.anim	gteMIMefunc over a count-prefixed list; no callers
-ST.EXE	0x80033cfc	anim_find_key			StAnimKey *	StAnimFile *file;int clip;int frame;int *key;int *frac	candidate	candidate	asm;callers;src/st/anim.c st.anim	the clip key a frame falls in, its index and the position in it (4096ths)
-ST.EXE	0x80033db8	anim_get_file			void	u16 id;StAnimFile **out	candidate	candidate	asm;callers;src/st/anim.c st.anim	the registered model file; ids 112 and up only while their heap block is releasable or used
-ST.EXE	0x80033e30	anim_get_vertex			int	u16 id;int part;int frame;int index;SVECTOR *out	candidate	candidate	asm;callers;src/st/anim.c st.anim	a part vertex, or part 0's vertex posed at a clip frame; 1 when the model is missing
-ST.EXE	0x8003405c	anim_vertex_count			u_long	int id;int part	candidate	candidate	asm;callers;src/st/anim.c st.anim	vertex count of part 0 (or of part & 0x7f for part >= 128); no callers
-ST.EXE	0x800340c4	anim_slots_init			void		candidate	candidate	asm;callers;src/st/anim.c st.anim	resets the 16 vertex-animation slots
-ST.EXE	0x800340f8	anim_slots_retire			void		candidate	candidate	asm;callers;src/st/anim.c st.anim	sets every slot in use to state 5
-ST.EXE	0x8003413c	anim_slot_free			void	StAnimSlot *slot	candidate	candidate	asm;callers;src/st/anim.c st.anim	frees a slot: clears its owner pointer and frees its delta buffer
-ST.EXE	0x800341a0	anim_slots_free_idle			void		candidate	candidate	asm;callers;src/st/anim.c st.anim	frees the slots in state 1
-ST.EXE	0x80034224	anim_slots_free_all			void		candidate	candidate	asm;callers;src/st/anim.c st.anim	frees every slot in use
-ST.EXE	0x80034294	anim_slot_alloc			void	StAnimSlot **out	candidate	candidate	asm;callers;src/st/anim.c st.anim	a free slot (freeing the state-1 slots when none is), or NULL
-ST.EXE	0x80034364	anim_pose			int	StAnimSlot **slotp;int id;int clip;int frame	candidate	candidate	asm;callers;src/st/anim.c st.anim	poses part 0 at a clip frame into world_state.unkEB40 through a slot; returns the slot, 0 on failure
-ST.EXE	0x80034604	anim_prepare			int	StAnimSlot **slotp;int id;int clip;int frame	candidate	candidate	asm;callers;src/st/anim.c st.anim	sets up a model for drawing: directly when unanimated, else through func_8003569c or anim_pose
-ST.EXE	0x800346dc	anim_list_init			void	StAnimSet *set;int count	candidate	candidate	asm;callers;src/st/anim.c st.anim	links a set's nodes to their records and empties its list
-ST.EXE	0x80034760	anim_list_find_id			StAnimNode *	StAnimList *list;int id	candidate	candidate	asm;callers;src/st/anim.c st.anim	the node whose unk8 is id, or NULL
-ST.EXE	0x800347ac	anim_list_find_key			StAnimNode *	StAnimList *list;int key	candidate	candidate	asm;callers;src/st/anim.c st.anim	the node whose unkC is key, or NULL
-ST.EXE	0x800347f8	anim_list_add			StAnimNode *	StAnimList *list;int key	candidate	candidate	asm;callers;src/st/anim.c st.anim	claims a free or new node for key with an identity transform, or NULL when full
-ST.EXE	0x80034928	anim_list_remove			StAnimNode *	StAnimList *list;int key	candidate	candidate	asm;callers;src/st/anim.c st.anim	releases the node of key; NULL when absent
-ST.EXE	0x8003498c	anim_id_index			u16	u_long *set;u_long *ids;u_long id	candidate	candidate	asm;callers;src/st/anim.c st.anim	index of id among set[1] words of ids, or 0xffff
-ST.EXE	0x800349d0	anim_node_command			u_long *	u_long *cmd;StAnimList *list;u_long *ids;u8 *table;u_long *set	candidate	candidate	asm;callers;src/st/anim.c st.anim	runs one skeletal node command (flags/transform/id/parent/add-remove) and returns the next
-ST.EXE	0x80034e68	anim_block_run			StAnimBlock *	u_long frame;StAnimBlock *block;StAnimList *list;u_long *ids;u8 *table;u_long *set	candidate	candidate	asm;callers;src/st/anim.c st.anim	runs a clip block's node commands once frame reaches it; returns the next block
+ST.EXE	0x80031de4	placements_expand			void	StPlacement *src	candidate	candidate	asm;callers;src/st/texanim.c st.texanim	expands 128 16-byte placement records into DAT_8015c48c (block * 4096 + offset coordinates, rand() start below unk3)
+ST.EXE	0x80031efc	tim_load_images			int	u_long *buf;u_long size	candidate	candidate	asm;callers;src/st/texanim.c st.texanim	LoadImage()s the CLUT and pixel blocks of the TIMs packed in buf and returns the bytes of the complete ones
+ST.EXE	0x80032058	lighting_load_defaults			void		candidate	candidate	asm;callers;src/st/texanim.c st.texanim	fills the 64 lighting environments from the load-image defaults and requests a matrix rebuild
+ST.EXE	0x8003216c	lighting_build_matrices			void		candidate	candidate	asm;callers;src/st/texanim.c st.texanim	when requested, derives light matrices 0..3 of every environment (func_80049aac)
+ST.EXE	0x80032210	lighting_blend_matrix			void	StLightInit *init;StLight *light;short t	candidate	candidate	asm;callers;src/st/texanim.c st.texanim	blends an environment's light matrix 0 toward a default part (func_8004a888)
+ST.EXE	0x80032244	lighting_blend_color			void	StLightInit *init;StLight *light;short t	candidate	candidate	asm;callers;src/st/texanim.c st.texanim	blends an environment's colour matrix toward a default part (func_8004a888)
+ST.EXE	0x8003227c	lighting_blend_back			void	StLightInit *init;StLight *light;short t	candidate	candidate	asm;callers;src/st/texanim.c st.texanim	blends an environment's back colour toward a default part (func_8004a830)
+ST.EXE	0x800322f8	lighting_blend_near			void	StLightInit *init;StLight *light;short t	candidate	candidate	asm;callers;src/st/texanim.c st.texanim	blends unk68 (the near range source) and keeps unk6A 4096 beyond it
+ST.EXE	0x80032358	lighting_blend_far			void	StLightInit *init;StLight *light;short t	candidate	candidate	asm;callers;src/st/texanim.c st.texanim	blends unk6A (the far range) and keeps unk68 4096 below it
+ST.EXE	0x800323b8	lighting_blend			void	int flags;StLightInit *init;short t	candidate	candidate	asm;callers;src/st/texanim.c st.texanim	blends the flagged parts of a default into the first 48 environments
+ST.EXE	0x80032530	lighting_blend_back_ranges			void	u8 r;u8 g;u8 b;int unk68;int unk6A;short t	candidate	candidate	asm;callers;src/st/texanim.c st.texanim	old-style; blends a back colour (unless a component is 255) and the ranges (unless 0xffff); no callers
+ST.EXE	0x800325c4	lighting_blend_matrices			void	StLightMatrix color;StLightMatrix matrix;short t	candidate	candidate	asm;callers;src/st/texanim.c st.texanim	blends a colour and a light matrix passed by value (unless an element is 0x7fff); no callers
+ST.EXE	0x80032774	lighting_grid_index			int	u8 flags	candidate	candidate	asm;callers;src/st/texanim.c st.texanim	old-style; row (0x10..0x80) * 3 + column (1..4) of the lowest flags
+ST.EXE	0x80032800	lighting_select			void	u8 rows;u8 columns;int blend	candidate	candidate	asm;callers;src/st/texanim.c st.texanim	old-style; selects the environment of the row/column flags, starting a blend into it when blend is set
+ST.EXE	0x8003306c	lighting_start			void		candidate	candidate	asm;callers;src/st/texanim.c st.texanim	points the current and blend-start environments at slots 43/44 and selects the area's environment
+ST.EXE	0x800330f0	lighting_clear_requests			void		candidate	candidate	asm;callers;src/st/texanim.c st.texanim	clears the lighting request bytes 3..6 and 9
+ST.EXE	0x80033110	lighting_update			void		candidate	candidate	asm;callers;src/st/texanim.c st.texanim	per frame: picks the row/column flags for the area and state and advances the 64-step blend
+ST.EXE	0x800339c4	anim_register_pack			void	u16 id;u8 *pack	candidate	candidate	asm;callers;src/st/texanim.c st.texanim	registers the model files of a pack under consecutive ids
+ST.EXE	0x80033a48	anim_register			void	u16 id;StAnimFile *file	candidate	candidate	asm;callers;src/st/texanim.c st.texanim	registers one model file and sets the scratchpad model
+ST.EXE	0x80033a84	vertices_sub			void	SVECTOR *dst;SVECTOR *from;SVECTOR *to;int count	candidate	candidate	asm;callers;src/st/texanim.c st.texanim	dst = to - from per vertex
+ST.EXE	0x80033b00	vertices_add			void	SVECTOR *dst;SVECTOR *a;SVECTOR *b;int count	candidate	candidate	asm;callers;src/st/texanim.c st.texanim	dst = a + b per vertex
+ST.EXE	0x80033b7c	vertex_list_copy			void	short *dst;short *src	candidate	candidate	asm;callers;src/st/texanim.c st.texanim	copies a count-prefixed vertex list; no callers
+ST.EXE	0x80033bdc	vertex_list_add			void	SVECTOR *dst;SVECTOR *a;short *b	candidate	candidate	asm;callers;src/st/texanim.c st.texanim	dst = a + a count-prefixed list; no callers
+ST.EXE	0x80033c60	vertex_list_accumulate			void	SVECTOR *dst;short *src	candidate	candidate	asm;callers;src/st/texanim.c st.texanim	dst += a count-prefixed list; no callers
+ST.EXE	0x80033cd4	vertex_list_scale_add			void	SVECTOR *dst;short *src;long p	candidate	candidate	asm;callers;src/st/texanim.c st.texanim	gteMIMefunc over a count-prefixed list; no callers
+ST.EXE	0x80033cfc	anim_find_key			StAnimKey *	StAnimFile *file;int clip;int frame;int *key;int *frac	candidate	candidate	asm;callers;src/st/texanim.c st.texanim	the clip key a frame falls in, its index and the position in it (4096ths)
+ST.EXE	0x80033db8	anim_get_file			void	u16 id;StAnimFile **out	candidate	candidate	asm;callers;src/st/texanim.c st.texanim	the registered model file; ids 112 and up only while their heap block is releasable or used
+ST.EXE	0x80033e30	anim_get_vertex			int	u16 id;int part;int frame;int index;SVECTOR *out	candidate	candidate	asm;callers;src/st/texanim.c st.texanim	a part vertex, or part 0's vertex posed at a clip frame; 1 when the model is missing
+ST.EXE	0x8003405c	anim_vertex_count			u_long	int id;int part	candidate	candidate	asm;callers;src/st/texanim.c st.texanim	vertex count of part 0 (or of part & 0x7f for part >= 128); no callers
+ST.EXE	0x800340c4	anim_slots_init			void		candidate	candidate	asm;callers;src/st/texanim.c st.texanim	resets the 16 vertex-animation slots
+ST.EXE	0x800340f8	anim_slots_retire			void		candidate	candidate	asm;callers;src/st/texanim.c st.texanim	sets every slot in use to state 5
+ST.EXE	0x8003413c	anim_slot_free			void	StAnimSlot *slot	candidate	candidate	asm;callers;src/st/texanim.c st.texanim	frees a slot: clears its owner pointer and frees its delta buffer
+ST.EXE	0x800341a0	anim_slots_free_idle			void		candidate	candidate	asm;callers;src/st/texanim.c st.texanim	frees the slots in state 1
+ST.EXE	0x80034224	anim_slots_free_all			void		candidate	candidate	asm;callers;src/st/texanim.c st.texanim	frees every slot in use
+ST.EXE	0x80034294	anim_slot_alloc			void	StAnimSlot **out	candidate	candidate	asm;callers;src/st/texanim.c st.texanim	a free slot (freeing the state-1 slots when none is), or NULL
+ST.EXE	0x80034364	anim_pose			int	StAnimSlot **slotp;int id;int clip;int frame	candidate	candidate	asm;callers;src/st/texanim.c st.texanim	poses part 0 at a clip frame into world_state.unkEB40 through a slot; returns the slot, 0 on failure
+ST.EXE	0x80034604	anim_prepare			int	StAnimSlot **slotp;int id;int clip;int frame	candidate	candidate	asm;callers;src/st/texanim.c st.texanim	sets up a model for drawing: directly when unanimated, else through func_8003569c or anim_pose
+ST.EXE	0x800346dc	anim_list_init			void	StAnimSet *set;int count	candidate	candidate	asm;callers;src/st/texanim.c st.texanim	links a set's nodes to their records and empties its list
+ST.EXE	0x80034760	anim_list_find_id			StAnimNode *	StAnimList *list;int id	candidate	candidate	asm;callers;src/st/texanim.c st.texanim	the node whose unk8 is id, or NULL
+ST.EXE	0x800347ac	anim_list_find_key			StAnimNode *	StAnimList *list;int key	candidate	candidate	asm;callers;src/st/texanim.c st.texanim	the node whose unkC is key, or NULL
+ST.EXE	0x800347f8	anim_list_add			StAnimNode *	StAnimList *list;int key	candidate	candidate	asm;callers;src/st/texanim.c st.texanim	claims a free or new node for key with an identity transform, or NULL when full
+ST.EXE	0x80034928	anim_list_remove			StAnimNode *	StAnimList *list;int key	candidate	candidate	asm;callers;src/st/texanim.c st.texanim	releases the node of key; NULL when absent
+ST.EXE	0x8003498c	anim_id_index			u16	u_long *set;u_long *ids;u_long id	candidate	candidate	asm;callers;src/st/texanim.c st.texanim	index of id among set[1] words of ids, or 0xffff
+ST.EXE	0x800349d0	anim_node_command			u_long *	u_long *cmd;StAnimList *list;u_long *ids;u8 *table;u_long *set	candidate	candidate	asm;callers;src/st/texanim.c st.texanim	runs one skeletal node command (flags/transform/id/parent/add-remove) and returns the next
+ST.EXE	0x80034e68	anim_block_run			StAnimBlock *	u_long frame;StAnimBlock *block;StAnimList *list;u_long *ids;u8 *table;u_long *set	candidate	candidate	asm;callers;src/st/texanim.c st.texanim	runs a clip block's node commands once frame reaches it; returns the next block
 ST.EXE	0x80034f0c	anim_set_register			void	u16 id;StAnimFile *file	candidate	candidate	asm;callers;src/st/anim_set.c st.anim_set	registers a skeletal model file under id (anim_register's body repeated; no direct callers)
 ST.EXE	0x80034f48	anim_sets_init			void		candidate	candidate	asm;callers;src/st/anim_set.c st.anim_set	resets the 16 skeletal-animation slots at world_state+0xa77c
 ST.EXE	0x80034fc4	anim_sets_retire			void		candidate	candidate	asm;callers;src/st/anim_set.c st.anim_set	puts every skeletal slot in use into state 1 (bit 3 kept)
@@ -333,14 +333,14 @@ ST.EXE	0x800363b4	effect_preset_1			void	StEffect *e;s16 a;s16 scale;u8 b	candid
 ST.EXE	0x800363ec	effect_preset_5			void	StEffect *e;s16 a;s16 scale;u8 b	candidate	candidate	asm;callers;src/st/effect.c st.effect	slot preset (state 5); no direct callers
 ST.EXE	0x80036424	effect_preset_14			void	StEffect *e;s16 a;s16 yaw;int height	candidate	candidate	asm;callers;src/st/effect.c st.effect	slot preset (state 14); no direct callers
 ST.EXE	0x80036484	func_80036484			unknown	unknown arg0;unknown arg1;unknown *pointer2;unknown arg3	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-ST.EXE	0x80037e10	effect_accelerate			int	int scale;int limit;int attack;int height;SVECTOR *accel	candidate	candidate	asm;callers;src/st/effect_move.c st.effect_move	adds a scaled acceleration to the current effect's velocity, limits it, moves the effect and optionally attacks; -1 when attacked
-ST.EXE	0x80037ff8	effect_home			int	int limit;int scale;int turn;int attack;int height;int near;int scale_near;int range	candidate	candidate	asm;callers;src/st/effect_move.c st.effect_move	turns the current effect toward its target (func_8004b658 entry or the viewer) and accelerates it along its heading
-ST.EXE	0x800381a8	effect_fire			int	int arg0;int height;int spin	candidate	candidate	asm;callers;src/st/effect_move.c st.effect_move	kind-128 projectile request (func_8003beb4) from the current effect, then moves and spins it; 128 when taken
-ST.EXE	0x80038300	effect_attack_move			int	int arg0;u_long height;int spin	candidate	candidate	asm;callers;src/st/effect_move.c st.effect_move	effect_attack, then moves the current effect and turns its roll
-ST.EXE	0x8003837c	effect_step_back			void		candidate	candidate	asm;callers;src/st/effect_move.c st.effect_move	moves the current effect back by its velocity; no direct callers
-ST.EXE	0x800383bc	effect_step_back_half			void		candidate	candidate	asm;callers;src/st/effect_move.c st.effect_move	moves the current effect back by half its velocity; no direct callers
-ST.EXE	0x80038438	vram_move_to			void	RECT *rect;DVECTOR *pos	candidate	candidate	asm;callers;src/st/effect_move.c st.effect_move	MoveImage of rect to pos
-ST.EXE	0x80038464	vram_roll			void	u8 right;u8 *step;RECT *src;DVECTOR *dst	candidate	candidate	asm;callers;src/st/effect_move.c st.effect_move	copies a VRAM rectangle rolled down by *step rows with wrap-around (MoveImage)
+ST.EXE	0x80037e10	effect_accelerate			int	int scale;int limit;int attack;int height;SVECTOR *accel	candidate	candidate	asm;callers;src/st/effect_spawn.c st.effect_spawn	adds a scaled acceleration to the current effect's velocity, limits it, moves the effect and optionally attacks; -1 when attacked
+ST.EXE	0x80037ff8	effect_home			int	int limit;int scale;int turn;int attack;int height;int near;int scale_near;int range	candidate	candidate	asm;callers;src/st/effect_spawn.c st.effect_spawn	turns the current effect toward its target (func_8004b658 entry or the viewer) and accelerates it along its heading
+ST.EXE	0x800381a8	effect_fire			int	int arg0;int height;int spin	candidate	candidate	asm;callers;src/st/effect_spawn.c st.effect_spawn	kind-128 projectile request (func_8003beb4) from the current effect, then moves and spins it; 128 when taken
+ST.EXE	0x80038300	effect_attack_move			int	int arg0;u_long height;int spin	candidate	candidate	asm;callers;src/st/effect_spawn.c st.effect_spawn	effect_attack, then moves the current effect and turns its roll
+ST.EXE	0x8003837c	effect_step_back			void		candidate	candidate	asm;callers;src/st/effect_spawn.c st.effect_spawn	moves the current effect back by its velocity; no direct callers
+ST.EXE	0x800383bc	effect_step_back_half			void		candidate	candidate	asm;callers;src/st/effect_spawn.c st.effect_spawn	moves the current effect back by half its velocity; no direct callers
+ST.EXE	0x80038438	vram_move_to			void	RECT *rect;DVECTOR *pos	candidate	candidate	asm;callers;src/st/effect_spawn.c st.effect_spawn	MoveImage of rect to pos
+ST.EXE	0x80038464	vram_roll			void	u8 right;u8 *step;RECT *src;DVECTOR *dst	candidate	candidate	asm;callers;src/st/effect_spawn.c st.effect_spawn	copies a VRAM rectangle rolled down by *step rows with wrap-around (MoveImage)
 ST.EXE	0x800385b0	func_800385b0			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
 ST.EXE	0x8003bc10	effects_clear			void		candidate	candidate	asm;callers;src/st/effect_run.c st.effect_run	marks all 128 effect slots free
 ST.EXE	0x8003bc40	effects_run			void		candidate	candidate	asm;callers;src/st/effect_run.c st.effect_run	runs each live effect through the interpreter (func_800385b0) once per frame, freeing expired ones
@@ -399,7 +399,7 @@ ST.EXE	0x80042c44	func_80042c44			unknown	unknown arg0;unknown arg1;unknown arg2
 ST.EXE	0x80042cec	func_80042cec			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
 ST.EXE	0x80042cfc	func_80042cfc			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
 ST.EXE	0x80042d74	func_80042d74			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-ST.EXE	0x800443ec	func_800443ec			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+ST.EXE	0x800443ec	area_hook_none			void		candidate	candidate	mips-live-in-heuristic	empty body (jr ra); every one of the 32 slots of the default area handler table DAT_8008038c points to it
 ST.EXE	0x800443f4	func_800443f4			unknown	unknown *object	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
 ST.EXE	0x80044404	func_80044404			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
 ST.EXE	0x80044674	func_80044674			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review

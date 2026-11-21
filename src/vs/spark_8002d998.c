@@ -55,10 +55,10 @@ void func_8002d998(void)
     m.m[2][0] = 0;
     m.m[2][1] = 0;
     m.m[2][2] = 4096;
-    m.t[0] = -DAT_801624d0.unk2CA78.vx;
-    m.t[1] = -DAT_801624d0.unk2CA78.vy;
-    m.t[2] = -DAT_801624d0.unk2CA78.vz;
-    CompMatrix(&DAT_801624d0.unk2C998, &m, &m);
+    m.t[0] = -vs_gfx_state.unk2CA78.vx;
+    m.t[1] = -vs_gfx_state.unk2CA78.vy;
+    m.t[2] = -vs_gfx_state.unk2CA78.vz;
+    CompMatrix(&vs_gfx_state.unk2C998, &m, &m);
     gte_SetRotMatrix(&m);
     gte_SetTransMatrix(&m);
     rec = DAT_801c4a58;
@@ -68,7 +68,7 @@ void func_8002d998(void)
             if (rec->unk0.vy == 0) {
                 gte_ldv0(&rec->unk0);
                 gte_rtps();
-                packet = DAT_801624d0.packet;
+                packet = vs_gfx_state.packet;
                 tile = (TILE *)packet->cur;
                 packet->cur = (u_long *)(tile + 1);
                 setTile(tile);
@@ -82,18 +82,18 @@ void func_8002d998(void)
                     tile->r0 = 100;
                 tile->g0 = 0;
                 tile->b0 = 0;
-                addPrim(&DAT_801624d0.ot_cur[4091], tile);
+                addPrim(&vs_gfx_state.ot_cur[4091], tile);
             } else {
                 gte_ldv0(&rec->unk0);
                 gte_rtps();
-                packet = DAT_801624d0.packet;
+                packet = vs_gfx_state.packet;
                 dot = (TILE_1 *)packet->cur;
                 packet->cur = (u_long *)(dot + 1);
                 setTile1(dot);
                 gte_stsxy(&dot->x0);
                 gte_stsz(&z);
                 setRGB0(dot, 100, 0, 0);
-                addPrim(&DAT_801624d0.ot_cur[1], dot);
+                addPrim(&vs_gfx_state.ot_cur[1], dot);
             }
         }
         rec++;

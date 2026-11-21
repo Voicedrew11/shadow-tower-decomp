@@ -22,8 +22,10 @@
  */
 typedef struct {
     u16 offsets[0x600];
-    u8 text[1];
+    u8 text[0x5400 - 0xc00];
 } MenuMessages;
+
+typedef char MenuMessagesSize[sizeof(MenuMessages) == 0x5400 ? 1 : -1];
 
 /*
  * The id grid two screens share (func_80031378, func_80031674): two tables
@@ -301,8 +303,9 @@ typedef struct {
     u8 unk1448[48];      /* 0x1448: per XA stream file, the next channel to play */
     u8 unk1478[48];
     u32 unk14A8[0x5c];   /* 0x14a8: one bit per map id (func_800241d0) */
-    CdlLOC unk1618[40];  /* 0x1618: the XA stream positions func_80044674 searches */
-    u8 unk16B8[0x16d8 - 0x16b8];
+    /* 0x1618: per XA stream file, its position (func_8005408c); func_80044674
+     * searches the first 40 */
+    CdlLOC unk1618[48];
     s32 unk16D8;         /* 0x16d8: the examine/item-use result */
     u8 unk16DC;          /* 0x16dc: the warp request byte */
     u8 unk16DD[3];

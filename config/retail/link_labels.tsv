@@ -1,4 +1,12 @@
-# MANUALLY MANAGED - zero-size link-layout labels (config/link/overlay_bounds.asm)
-# with their retail addresses. They name boundaries, not storage, so they never
-# appear in data_identities.tsv; the target relink resolves references to them.
+# MANUALLY MANAGED - zero-size link-layout labels: bounds the linker defines (PSYLINK's
+# group symbols such as _bss_org), with their retail addresses. They name boundaries, not
+# storage, so they never appear in data_identities.tsv; the target relink and the closure
+# resolve references to them. A data word relocated against one (a reviewed mips32_candidate
+# row naming it, whose target is this address or this address plus a constant addend)
+# compares as unresolved-link-label until the current link's .SYM puts the name at this
+# address.
 image	name	va	evidence	note
+ST.EXE	_bss_org	0x80088188	PSYLINK group symbol;NONE3.OBJ bss clear loop;retail .sbss start	bss group start (= .sbss start); word 0x80013974
+ST.EXE	_bss_orgend	0x801eb560	PSYLINK group symbol;NONE3.OBJ bss clear loop;retail bss end	bss group end (after the SDK COMMON) = FDAT load address; words 0x80013978-0x80013980, and with an addend 0x80013984-0x8001398c
+VS.EXE	_bss_org	0x80063300	PSYLINK group symbol;NONE3.OBJ bss clear loop;retail .sbss start	bss group start (= .sbss start); word 0x80011f34
+VS.EXE	_bss_orgend	0x801dbaa8	PSYLINK group symbol;NONE3.OBJ bss clear loop;retail bss end	bss group end (after the SDK COMMON); words 0x80011f38-0x80011f4c

@@ -17,8 +17,7 @@
 #include <st/item.h>
 #include <st/vis.h>
 
-RODATA(0x8001274c, 0x48)
-JUMPTABLES(0x80012794, 0xc0)
+RODATA(0x8001274c, 0x108)
 
 /* The use result: whether the item was used (1) or not (2), a member of
  * the save-game state block. */
@@ -61,7 +60,7 @@ void func_80054a54(int id)
             viewer.unk2F0 = 0;
             viewer.unk2EC = 0;
             USE_RESULT = 1;
-            area_state.unkC->unk30(id);
+            area_state.hooks->item_used(id);
         }
         break;
     case 0x110:
@@ -90,7 +89,7 @@ void func_80054a54(int id)
                 goto done;
             case 1:
                 if (id == 0x114)
-                    area_state.unkC->unk30(i | 0x4000);
+                    area_state.hooks->item_used(i | 0x4000);
                 else
                     func_80057d58();
                 USE_RESULT = 1;
@@ -237,10 +236,10 @@ void func_80054a54(int id)
     case 0x12b:
     case 0x12f:
     case 0x130:
-        area_state.unkC->unk30(id);
+        area_state.hooks->item_used(id);
         break;
     case 0x131:
-        area_state.unkC->unk30(id);
+        area_state.hooks->item_used(id);
         goto done;
     case 0x136:
         func_80057cc8();

@@ -195,7 +195,7 @@ void func_8004eebc(u8 *src)
             case 0xff:
                 break;
             default:
-                area_state.unkC->unk20(e, rec);
+                area_state.hooks->unk20(e, rec);
                 break;
             }
         }

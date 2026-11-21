@@ -284,7 +284,7 @@ def _diff_bss(retail: Elf, recon: Elf, name: str = ".bss",
     if not (rt_size or rc_size or left or right):
         return None
     if rt is None or rc is None:
-        if name == ".bss" and rt is not None and rc is None and unit is not None:
+        if name in BSS_SECTIONS and rt is not None and rc is None and unit is not None:
             claimed = {datum.symbol for datum in unit.data
                        if datum.section_name == name and datum.scope == "global"}
             requests = {request.name for request in recon.common_requests}
@@ -339,7 +339,7 @@ def linked_common_proof(unit: Unit, recon: Elf,
     if not linked or not recon.common_requests:
         return frozenset()
     claims = {datum.symbol: datum for datum in unit.data
-              if datum.section_name == ".bss" and datum.scope == "global"}
+              if datum.section_name in BSS_SECTIONS and datum.scope == "global"}
     for request in recon.common_requests:
         claim = claims.get(request.name)
         if (claim is None or linked.get(request.name) != claim.va
@@ -349,32 +349,36 @@ def linked_common_proof(unit: Unit, recon: Elf,
 
 
 def _place_proven_commons(unit: Unit, recon: Elf, proven: frozenset[str]) -> None:
-    """Add linked COMMON beside a unit's fixed .bss when the link proved them.
+    """Add linked COMMON beside a unit's fixed .bss/.sbss when the link proved them.
 
-    A unit may own fixed .bss (statics) and COMMON requests whose linked
-    addresses follow it. Once the current link placed every request at its
-    claim, compare the section as the link laid it out: the fixed allocations
-    keep their object offsets and each COMMON sits at its claim's distance
-    from the one base the fixed allocations imply.
+    A unit may own fixed BSS (statics) and COMMON requests whose linked
+    addresses follow it, in .bss or, for small data, in .sbss. Once the
+    current link placed every request at its claim, compare each section as
+    the link laid it out: the fixed allocations keep their object offsets and
+    each COMMON claimed in that section sits at its claim's distance from the
+    one base the section's fixed allocations imply.
     """
-    section = recon.sections.get(".bss")
-    if not proven or section is None:
+    if not proven:
         return
-    claims = {datum.symbol: datum for datum in unit.data if datum.section_name == ".bss"}
-    fixed = recon.allocations.get(".bss", [])
-    bases = {claims[item.name].va - item.offset for item in fixed if item.name in claims}
-    if len(bases) != 1 or any(item.name not in claims for item in fixed):
-        return
-    base = bases.pop()
-    placed = list(fixed)
-    present = {item.name for item in fixed}
-    for request in recon.common_requests:
-        if request.name in proven and request.name not in present:
-            placed.append(Allocation(request.name, claims[request.name].va - base,
-                                     request.size, 1, 0))  # STB_GLOBAL, STV_DEFAULT
-    size = max(section.size, *(item.offset + item.size for item in placed))
-    recon.sections[".bss"] = Section(".bss", section.type, size, b"", section.flags)
-    recon.allocations[".bss"] = placed
+    for name in BSS_SECTIONS:
+        section = recon.sections.get(name)
+        if section is None:
+            continue
+        claims = {datum.symbol: datum for datum in unit.data if datum.section_name == name}
+        fixed = recon.allocations.get(name, [])
+        bases = {claims[item.name].va - item.offset for item in fixed if item.name in claims}
+        if len(bases) != 1 or any(item.name not in claims for item in fixed):
+            continue
+        base = bases.pop()
+        placed = list(fixed)
+        present = {item.name for item in fixed}
+        for request in recon.common_requests:
+            if request.name in proven and request.name in claims and request.name not in present:
+                placed.append(Allocation(request.name, claims[request.name].va - base,
+                                         request.size, 1, 0))  # STB_GLOBAL, STV_DEFAULT
+        size = max(section.size, *(item.offset + item.size for item in placed))
+        recon.sections[name] = Section(name, section.type, size, b"", section.flags)
+        recon.allocations[name] = placed
 
 
 def _proven_issue(label: str, issue: dict, proven: frozenset[str]) -> bool:
@@ -385,18 +389,69 @@ def _proven_issue(label: str, issue: dict, proven: frozenset[str]) -> bool:
     if label == "reconstruction" and kind == "owned-symbol-layout":
         return (issue.get("symbol") in proven
                 and issue.get("actual_section") == "SHN_COMMON"
-                and issue.get("expected_section") == ".bss"
+                and issue.get("expected_section") in BSS_SECTIONS
                 and issue.get("actual_size", 0) >= issue.get("expected_size", 1))
     if label == "target" and kind == "conflicting-section-bases":
         claims = issue.get("claims", ())
-        return (issue.get("section") == ".bss" and bool(claims)
+        return (issue.get("section") in BSS_SECTIONS and bool(claims)
                 and all(claim.get("symbol") in proven for claim in claims))
     return False
 
 
+def layout_identity_issues(unit: Unit, layout: frozenset[str],
+                           linked: dict[str, int] | None) -> list[SectionDiff]:
+    """Layout-evidenced claims the current link has not placed at their address.
+
+    An unreferenced BSS object admitted from the retail layout alone
+    (`inventory.LAYOUT_BSS_EVIDENCE`) has no reference that proves it; only
+    the current, source-hash-checked link's .SYM can, so its section diverges
+    until that link puts the symbol exactly at the claim.
+    """
+    issues = []
+    for datum in unit.data:
+        if datum.symbol in layout and (linked is None or linked.get(datum.symbol) != datum.va):
+            issues.append(SectionDiff(
+                datum.section_name, datum.size, 0, "unresolved-common-placement",
+                f"layout-evidenced {datum.symbol} awaits the current link's .SYM placement"))
+    return issues
+
+
+def link_label_issues(retail: Elf, labels: dict[str, int],
+                      linked: dict[str, int] | None) -> list[SectionDiff]:
+    """Initialized words relocated against a link label the current link has
+    not placed at the label's curated address.
+
+    A word that holds a linker-defined bound (PSYLINK's `_bss_org`, the bss
+    group start) is relocated against a name no object defines. Only the
+    curated labels of `link_labels.tsv` qualify, and the section stays
+    unresolved until the current, source-hash-checked link's .SYM resolves
+    the name to exactly that address.
+    """
+    issues = []
+    for name in INIT_SECTIONS:
+        pending = sorted({reloc.symbol for reloc in retail.relocations(name)
+                          if reloc.symbol in labels
+                          and (linked is None or linked.get(reloc.symbol) != labels[reloc.symbol])})
+        if pending:
+            section = retail.sections.get(name)
+            size = section.size if section else 0
+            issues.append(SectionDiff(
+                name, size, size, "unresolved-link-label",
+                f"link label(s) {', '.join(pending)} await the current link's .SYM placement"))
+    return issues
+
+
+def layout_identities(image: str, config_dir: Path = RETAIL_CONFIG) -> frozenset[str]:
+    from scripts.kf.inventory import layout_bss_identity, load_data_identities
+
+    return frozenset(row.name for row in load_data_identities(config_dir).values()
+                     if row.image == image and layout_bss_identity(row))
+
+
 def diff_unit(unit: Unit, delink_dir: Path, objdiff_dir: Path,
               linked: dict[str, int] | None = None,
-              definitions=None) -> UnitDataDiff | None:
+              definitions=None, layout: frozenset[str] = frozenset(),
+              labels: dict[str, int] | None = None) -> UnitDataDiff | None:
     key, object_name = image_key(unit.image), unit.object_name
     target = delink_dir / key / "modules" / object_name
     base = objdiff_dir / key / "base" / object_name
@@ -452,6 +507,16 @@ def diff_unit(unit: Unit, delink_dir: Path, objdiff_dir: Path,
                 diff.status = "placement"
             detail = f"{label}: {json.dumps(issue, sort_keys=True)}"
             diff.detail = f"{diff.detail}; {detail}" if diff.detail else detail
+    for issue in (*layout_identity_issues(unit, layout, linked),
+                  *link_label_issues(retail, labels or {}, linked)):
+        diff = by_section.get(issue.name)
+        if diff is None:
+            result.diffs.append(issue)
+            by_section[issue.name] = issue
+        else:
+            if diff.status == "match":
+                diff.status = issue.status
+            diff.detail = f"{diff.detail}; {issue.detail}" if diff.detail else issue.detail
     return result if result.diffs else None
 
 
@@ -464,8 +529,10 @@ def diff_image(
     results: list[UnitDataDiff] = []
     failures: list[ArtifactFailure] = []
     linked = linked_addresses(image)
+    layout = layout_identities(image)
     from scripts.kf.roundtrip import (allocated_definitions, initialized_definitions,
-                                      usable_definitions)
+                                      link_labels, usable_definitions)
+    labels = link_labels(image)
     definitions = {**allocated_definitions(image, manifest.units),
                    **initialized_definitions(image, manifest.units)}
     for unit in manifest.units:
@@ -481,7 +548,7 @@ def diff_image(
             ))
             continue
         diff = diff_unit(unit, delink_dir, objdiff_dir, linked,
-                         usable_definitions(definitions, unit, manifest.units))
+                         usable_definitions(definitions, unit, manifest.units), layout, labels)
         if diff is not None:
             results.append(diff)
     return results, failures
