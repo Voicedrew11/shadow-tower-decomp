@@ -1,6 +1,6 @@
 /*
- * ST.EXE: a data-only module (WIP) defining game .data: unreferenced zero
- * words and the ring sub-list message offsets.
+ * ST.EXE: a data-only module (WIP) defining game .data: the ring sub-list
+ * message offsets.
  * No code unit but st.main contributes .data, and retail keeps these after
  * st.main's run, so a module linked after the code defines them; every user
  * declares them extern.
@@ -12,10 +12,6 @@
 #include <LIBGPU.H>
 #include <st/data.h>
 #include <st/equip_menu.h>
-
-/* Unreferenced: 48 zero words after the XA stream lengths. */
-DATA(0x8008086c, 0xc0, ".data")
-static u32 DAT_8008086c[48] = {0};
 
 DATA(0x8008092c, 0x12, ".data")
 u8 DAT_8008092c[18] = {0, 1, 255, 2, 3, 255, 4, 5, 255,

@@ -53,7 +53,13 @@ RODATA(0x80011000, 0x110)
 DATA(0x8005b2a8, 0x10, ".data")
 VECTOR DAT_8005b2a8 = {ONE, ONE, ONE};
 
-/* An identity matrix nothing references (retail keeps it after the scale). */
+/*
+ * An identity matrix nothing references (retail keeps it after the scale).
+ * Most likely the counterpart of ST.EXE's DAT_8008040c, the initialized
+ * identity ST's model draws and anim_set_node_vertex read: VS's
+ * anim_set_node_vertex (func_800256bc) composes from a local identity
+ * instead, which leaves this one unused.
+ */
 DATA(0x8005b2b8, 0x20, ".data")
 MATRIX DAT_8005b2b8 = {{{ONE, 0, 0}, {0, ONE, 0}, {0, 0, ONE}}, {0, 0, 0}};
 
@@ -485,7 +491,7 @@ void func_80013c5c(void)
     int i;
     int entry;
     VsFighter *f;
-    VsFighterSfx *sfx;
+    VsFighterData *d;
     u16 trigger;
     u16 tone;
     int operand;
@@ -493,7 +499,7 @@ void func_80013c5c(void)
 
     for (i = 0; i < 2; i++) {
         f = &DAT_800633b0.fighter[i];
-        sfx = (VsFighterSfx *)&f->unk4DF18;
+        d = &f->unk4DF18;
         switch (f->unk4DF0E) {
         case 0:
         case 5:
@@ -503,19 +509,19 @@ void func_80013c5c(void)
             entry = 1;
             break;
         case 2:
-            if (f->unk4DEE8 == sfx->keys[0].frame)
+            if (f->unk4DEE8 == d->unk0[2].unk0)
                 entry = 2;
-            else if (f->unk4DEE8 == sfx->keys[1].frame)
+            else if (f->unk4DEE8 == d->unk0[3].unk0)
                 entry = 3;
-            else if (f->unk4DEE8 == sfx->keys[2].frame)
+            else if (f->unk4DEE8 == d->unk0[4].unk0)
                 entry = 4;
             break;
         case 6:
-            if (f->unk4DEE8 == sfx->keys[3].frame)
+            if (f->unk4DEE8 == d->unk0[5].unk0)
                 entry = 5;
-            else if (f->unk4DEE8 == sfx->keys[4].frame)
+            else if (f->unk4DEE8 == d->unk0[6].unk0)
                 entry = 6;
-            else if (f->unk4DEE8 == sfx->keys[5].frame)
+            else if (f->unk4DEE8 == d->unk0[7].unk0)
                 entry = 7;
             break;
         case 3:
@@ -525,8 +531,8 @@ void func_80013c5c(void)
             entry = 9;
             break;
         }
-        trigger = sfx->sounds[entry].trigger;
-        tone = sfx->sounds[entry].tone;
+        trigger = d->sounds[entry].trigger;
+        tone = d->sounds[entry].tone;
         kind = trigger & 0xf000;
         operand = trigger & 0xfff;
         switch (kind) {
