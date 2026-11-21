@@ -46,7 +46,7 @@ int func_80055300(int id)
 {
     if (DAT_801c7590.counts[id].count < 99) {
         DAT_801c7590.counts[id].count++;
-        area_state.unkC->unk18(id);
+        area_state.hooks->item_added(id);
         return 0;
     }
     return 1;
@@ -213,5 +213,5 @@ void func_80055374(long *pos, SVECTOR *rot)
             break;
         }
     }
-    area_state.unkC->unk0(&p, rot);
+    area_state.hooks->examine(&p, rot);
 }

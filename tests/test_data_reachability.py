@@ -148,6 +148,53 @@ class ReachabilityTest(unittest.TestCase):
         self.assertEqual(report["issues"], [])
         self.assertEqual([row["site"] for row in report["switch_dispatch"]], [0x1020])
 
+    def hoisted_switch(self, base_load=None):
+        # lui t7,0; addiu t7,t7,0x80 (the hoisted base, or BASE_LOAD);
+        # addiu v1,a0,-1; sltiu v0,v1,2; beqz v0,0x30; sll v0,v1,2;
+        # addu v0,v0,t7; lw v0,0(v0); nop; jr v0; nop;
+        # 0x2c: addiu a0,a0,1; 0x30: jr ra; nop
+        head = (0x3C0F0000, 0x25EF0080) if base_load is None else (0, base_load)
+        code = words(*head, 0x2483FFFF, 0x2C620002, 0x10400007, 0x00031080,
+                     0x004F1021, 0x8C420000, 0, 0x00400008, 0, 0x24840001,
+                     0x03E00008, 0)
+        img = RetailImage.synthetic(IMAGE, 0x0, code + b"\0" * (0x80 - len(code))
+                                    + words(0x2C, 0x30) + b"\0" * 0x100)
+        game = replace(function(0x0), size=0x38, body_size=0x38)
+        return audit(IMAGE, (game,), (), (ref(0x24, None, tier="proven", kind="jump"),), img)
+
+    def test_hoisted_switch_table_base_is_proven_by_reaching_definitions(self):
+        report = self.hoisted_switch()
+        self.assertEqual(report["issues"], [])
+        self.assertEqual(report["switch_dispatch"], [{
+            "owner": "function:00000000", "site": 0x24,
+            "pattern": "switch-table-hoisted", "table": 0x80, "entries": 2,
+        }])
+
+    def test_hoisted_switch_with_an_unknown_base_stays_unresolved(self):
+        report = self.hoisted_switch(base_load=0x8CAF0000)  # lw t7,0(a1)
+        self.assertEqual(report["summary"]["issues"]["unresolved-indirect-control"], 1)
+        self.assertEqual(report["switch_dispatch"], [])
+
+    def constant_call(self, low):
+        # lui s0,0; addiu s0,s0,LOW; jalr s0; nop; jr ra; nop
+        code = words(0x3C100000, 0x26100000 | low, 0x0200F809, 0, 0x03E00008, 0)
+        img = RetailImage.synthetic(IMAGE, 0x1000, code + b"\0" * 0x200)
+        caller = replace(function(0x1000), size=0x18, body_size=0x18)
+        return audit(IMAGE, (caller, function(0x1100)), (),
+                     (ref(0x1008, None, tier="proven", kind="indirect-call"),), img)
+
+    def test_constant_pointer_call_reaches_its_function(self):
+        report = self.constant_call(0x1100)
+        self.assertEqual(report["issues"], [])
+        self.assertEqual(report["constant_dispatch"], [{
+            "owner": "function:00001000", "site": 0x1008, "pattern": "constant-pointer",
+            "values": [0x1100], "targets": ["function:00001100"],
+        }])
+
+    def test_constant_pointer_to_no_function_stays_unresolved(self):
+        report = self.constant_call(0x1104)
+        self.assertEqual(report["summary"]["issues"]["unresolved-indirect-control"], 1)
+
     def test_vendored_switch_table_is_exempt_but_not_switch_proved(self):
         report = self.switch_table(0x102C, vendor=True)
         self.assertEqual(report["issues"], [])

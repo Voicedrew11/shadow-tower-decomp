@@ -112,6 +112,7 @@ class SwitchTable:
 
     table: int
     targets: tuple[int, ...]
+    hoisted: bool = False  # proved by `values.hoisted_switch`, not straight-line
 
 
 def switch_table(
@@ -216,13 +217,11 @@ def switch_table(
     return SwitchTable(table, tuple(targets))
 
 
-def switch_tables(
+def _straight_switch_tables(
+    instructions: list[Instruction],
     function: Binding,
-    payload: bytes,
     read_word: Callable[[int], int | None],
 ) -> dict[int, SwitchTable]:
-    """Every proven tablejump of one function body, keyed by its `jr` site."""
-    instructions = with_controls(decode_words(function.va, payload[:function.body_size]))
     found: dict[int, SwitchTable] = {}
     for row in instructions:
         if row.control is not None and row.control.kind == "indirect-jump":
@@ -232,10 +231,73 @@ def switch_tables(
     return found
 
 
+def _hoisted_switch_tables(
+    function: Binding,
+    payload: bytes,
+    idx: Index | None,
+    instructions: list[Instruction],
+    read_word: Callable[[int], int | None],
+    straight: dict[int, SwitchTable],
+) -> dict[int, SwitchTable]:
+    """Tablejumps whose base GCC hoisted, proved by reaching definitions.
+
+    The proof (`values.hoisted_switch`) needs the CFG the switch itself
+    completes, so the case edges are first assumed from a pass over the
+    incomplete graph, then the graph is rebuilt with them and every switch is
+    proved again, until the assumed set is stable. The final set is proved on
+    a complete graph (no other unresolved jump, no CFG issue) that contains
+    exactly the edges it assumes, which by induction over execution makes the
+    assumption hold. Every table word must be an instruction start inside the
+    function, as for the straight-line rule.
+    """
+    from scripts.kf.sema.values import ValueFlow, hoisted_switch
+
+    pending = [
+        row.va for row in instructions
+        if row.control is not None and row.control.kind == "indirect-jump"
+        and row.va not in straight
+    ]
+    if not pending:
+        return {}
+    addresses = {row.va for row in instructions}
+    assumed: dict[int, SwitchTable] = {}
+    for _ in range(8):
+        graph = _graph(function, payload, idx, instructions, {**straight, **assumed})
+        try:
+            flow = ValueFlow(graph, strict=bool(assumed))
+        except ValueError:
+            return {}
+        found: dict[int, SwitchTable] = {}
+        for site in pending:
+            proven = hoisted_switch(flow, site)
+            if proven is None:
+                continue
+            targets = tuple(read_word(proven.table + 4 * entry) for entry in range(proven.count))
+            if all(t is not None and t in addresses and function.contains_body(t)
+                   for t in targets):
+                found[site] = SwitchTable(proven.table, targets, hoisted=True)
+        if found == assumed:
+            return found
+        assumed = found
+    return {}
+
+
+def switch_tables(
+    function: Binding,
+    payload: bytes,
+    read_word: Callable[[int], int | None],
+) -> dict[int, SwitchTable]:
+    """Every proven tablejump of one function body, keyed by its `jr` site."""
+    instructions = with_controls(decode_words(function.va, payload[:function.body_size]))
+    straight = _straight_switch_tables(instructions, function, read_word)
+    return {**straight, **_hoisted_switch_tables(
+        function, payload, None, instructions, read_word, straight)}
+
+
 def build_graph(
     function: Binding,
     payload: bytes,
-    idx: Index,
+    idx: Index | None,
     read_word: Callable[[int], int | None] | None = None,
 ) -> Graph:
     if function.space != "text":
@@ -248,7 +310,21 @@ def build_graph(
     instructions = with_controls(decode_words(function.va, payload[:function.body_size]))
     if not instructions:
         return Graph(function, (), (), {}, ("no complete instruction decoded",), False)
+    switches: dict[int, SwitchTable] = {}
+    if read_word is not None:
+        switches = _straight_switch_tables(instructions, function, read_word)
+        switches.update(_hoisted_switch_tables(
+            function, payload, idx, instructions, read_word, switches))
+    return _graph(function, payload, idx, instructions, switches)
 
+
+def _graph(
+    function: Binding,
+    payload: bytes,
+    idx: Index | None,
+    instructions: list[Instruction],
+    switches: dict[int, SwitchTable],
+) -> Graph:
     addresses = {row.va for row in instructions}
     instruction_by_va = {row.va: row for row in instructions}
     leaders = {instructions[0].va}
@@ -275,14 +351,9 @@ def build_graph(
             leaders.add(after)
 
     # A proven switch table makes each case target a block leader.
-    switch_cases: dict[int, tuple[int, ...]] = {}
-    if read_word is not None:
-        for row in instructions:
-            if row.control is not None and row.control.kind == "indirect-jump":
-                proven = switch_table(instructions, row, function, read_word)
-                if proven is not None:
-                    switch_cases[row.va] = proven.targets
-                    leaders.update(proven.targets)
+    switch_cases = {site: proven.targets for site, proven in switches.items()}
+    for targets in switch_cases.values():
+        leaders.update(targets)
 
     for slot in delay_slots:
         if instruction_by_va[slot].control is not None:
@@ -388,7 +459,7 @@ def build_graph(
                     fallthrough.start,
                 ))
         elif control.kind == "jump":
-            external = idx.function(control.target or 0)
+            external = idx.function(control.target or 0) if idx is not None else None
             kind = "jump" if target_block else "tail" if external else "jump-external"
             edges.append(Edge(
                 block.start,

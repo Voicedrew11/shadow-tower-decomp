@@ -224,8 +224,8 @@ void func_8004e324(void)
                 func_8004b2dc();
             if (e->unk05 == 1) {
                 if ((vis_table_a.unk6150 & 3) == (vis_table_a.unk614C & 3))
-                    area_state.unkC->unk40();
-                area_state.unkC->unk44();
+                    area_state.hooks->unk40();
+                area_state.hooks->unk44();
                 if (e->unk36 != -1) {
                     anim_get_file(e->unk0B + 128, &anim);
                     if (anim) {
@@ -247,7 +247,7 @@ void func_8004e324(void)
                 }
                 vis_table_a.unk614C++;
             } else if (e->unk05 == 5) {
-                area_state.unkC->unk44();
+                area_state.hooks->unk44();
             }
         }
         e->unk23 = 0;

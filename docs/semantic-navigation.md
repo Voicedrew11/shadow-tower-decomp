@@ -89,8 +89,20 @@ addu; lw rt,off(...); jr rt`, index unchanged in between) gets one `switch`
 edge per table word, read from the image, when all N words are instruction
 starts inside the same function (`switch_table` in
 `scripts/kf/sema/cfg.py`, the one switch prover; the reachability audit's
-`switch_dispatch` witnesses use it too). The semantic evidence applies it to
-game functions only, so a Sony member's switch `jr` stays unresolved there.
+`switch_dispatch` witnesses use it too). When GCC hoisted the table base, or
+the whole scaled entry address, out of a loop, the same chain is proved by
+reaching definitions instead (`hoisted_switch` in `scripts/kf/sema/values.py`):
+each link (`jr`'s `lw`, its `addu`, the `sll`, the index both the `sll` and
+the `sltiu` read) must be the only definition reaching its use, the base must
+evaluate to one link-time constant, the dispatch run must be entered only by
+the bound's fall-through, and the index definition must be tied to its
+scaling on one straight-line run, so the bounded index is the one scaled.
+Reaching definitions need the complete CFG the switch itself completes, so
+the case edges are assumed, the graph rebuilt with them and the proof
+repeated until the assumed set is stable (`_hoisted_switch_tables` in
+`cfg.py`); the reachability witness pattern is `switch-table-hoisted`. The
+semantic evidence applies both rules to game functions only, so a Sony
+member's switch `jr` stays unresolved there.
 General indirect target recovery is deliberately deferred; the tool does not
 invent edges from unproven pointer tables.
 

@@ -358,5 +358,5 @@ void func_80056aa0(StSaveData *save)
 ADDRESS(0x8005735c, 0x30)
 void func_8005735c(void)
 {
-    area_state.unkC->unk4();
+    area_state.hooks->frame();
 }

@@ -1,0 +1,25 @@
+# MANUALLY MANAGED - game jalr/jr sites that call through a reviewed run-time pointer (indirect_pointers.tsv).
+# load_offset: every definition of the jump register reaching the site must be lw r, load_offset(base).
+image	site_va	function_va	function	pointer	load_offset	evidence
+VS.EXE	0x8001ced8	0x8001cd60	func_8001cd60	StCdRequest.done	0x2c	request->done(request->unk20): checked read (kind 2) complete
+VS.EXE	0x8001cf00	0x8001cd60	func_8001cd60	StCdRequest.done	0x2c	request->done(request): other kinds complete
+VS.EXE	0x8002e9e0	0x8002e868	func_8002e868	StCdRequest.done	0x2c	twin of func_8001cd60 (installed by func_8002ea94); request->done(request->unk20)
+VS.EXE	0x8002ea08	0x8002e868	func_8002e868	StCdRequest.done	0x2c	twin of func_8001cd60; request->done(request)
+ST.EXE	0x800438b4	0x80042d74	func_80042d74	AreaHooks.player_died	0x34	area_state.hooks->player_died()
+ST.EXE	0x80045d48	0x800456f8	func_800456f8	AreaHooks.loaded	0x14	area_state.hooks->loaded() after the overlay table is installed
+ST.EXE	0x8004b29c	0x8004b270	func_8004b270	AreaHooks.unk40	0x40	area_state.hooks->unk40()
+ST.EXE	0x8004b4d4	0x8004b2dc	func_8004b2dc	AreaHooks.unk40	0x40	area_state.hooks->unk40()
+ST.EXE	0x8004e698	0x8004e324	func_8004e324	AreaHooks.unk40	0x40	area_state.hooks->unk40(), every fourth frame
+ST.EXE	0x8004e6b0	0x8004e324	func_8004e324	AreaHooks.unk44	0x44	area_state.hooks->unk44()
+ST.EXE	0x8004e7b8	0x8004e324	func_8004e324	AreaHooks.unk44	0x44	area_state.hooks->unk44()
+ST.EXE	0x8004f4e8	0x8004eebc	func_8004eebc	AreaHooks.unk20	0x20	area_state.hooks->unk20(entry, record) for an unknown table B kind
+ST.EXE	0x80052794	0x80050768	func_80050768	AreaHooks.unk24	0x24	area_state.hooks->unk24() for an unhandled table B kind
+ST.EXE	0x80054cac	0x80054a54	func_80054a54	AreaHooks.item_used	0x30	area_state.hooks->item_used(id)
+ST.EXE	0x80055150	0x80054a54	func_80054a54	AreaHooks.item_used	0x30	area_state.hooks->item_used(...) (func_80054a54 has four source calls on three sites)
+ST.EXE	0x80055174	0x80054a54	func_80054a54	AreaHooks.item_used	0x30	area_state.hooks->item_used(id)
+ST.EXE	0x80055358	0x80055300	func_80055300	AreaHooks.item_added	0x18	area_state.hooks->item_added(id)
+ST.EXE	0x80055954	0x80055374	func_80055374	AreaHooks.examine	0x0	area_state.hooks->examine(position, facing)
+ST.EXE	0x80057374	0x8005735c	func_8005735c	AreaHooks.frame	0x4	area_state.hooks->frame()
+ST.EXE	0x80015794	0x8001561c	func_8001561c	StCdRequest.done	0x2c	request->done(request->unk20): checked read (kind 2) complete
+ST.EXE	0x800157bc	0x8001561c	func_8001561c	StCdRequest.done	0x2c	request->done(request): other kinds complete
+ST.EXE	0x800461c8	0x80045ffc	func_80045ffc	StCdRequest.done	0x2c	request->done(request): image stream (kind 3) reached its end marker

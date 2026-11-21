@@ -19,7 +19,7 @@
 
 /* The default area handlers: every slot is the empty handler. */
 DATA(0x8008038c, 0x80, ".data")
-AreaHooks DAT_8008038c = {
+AreaHooks area_hooks_default = {
     area_hook_none,
     area_hook_none,
     area_hook_none,

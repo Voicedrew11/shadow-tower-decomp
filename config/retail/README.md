@@ -14,7 +14,10 @@ Shadow Tower `SLUS-00863` executables listed in `../images.toml`:
   types, and owners for initialized globals/statics and referenced BSS;
 - `data_sections.tsv`: reviewed initialized section assignments;
 - `structures.tsv` and `structure_fields.tsv`: target structure layouts with
-  their evidence.
+  their evidence;
+- `indirect_pointers.tsv` and `indirect_sites.tsv`: reviewed value sources of
+  code pointers installed at run time, and the game `jalr`/`jr` sites that
+  call through them (see `docs/delinking-and-matching.md`).
 
 Each image is a separate linked program or overlay, so every row carries an
 `image`. The six programs reuse the 0x80011000 load region, and the 36

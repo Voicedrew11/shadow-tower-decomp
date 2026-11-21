@@ -152,12 +152,12 @@ void func_8001cd60(u_char status, u_char *result)
                         while (CdControl(CdlSeekL, (u_char *)&request->unk18, 0) == 0)
                             ;
                     } else {
-                        if (request->unk2C != NULL)
-                            request->unk2C(request->unk20);
+                        if (request->done != NULL)
+                            request->done(request->unk20);
                         func_8002ea94(request);
                     }
-                } else if (request->unk2C != NULL) {
-                    request->unk2C(request);
+                } else if (request->done != NULL) {
+                    request->done(request);
                 }
                 break;
             }
@@ -208,7 +208,7 @@ StCdRequest *func_8001d030(int kind, CdlLOC *loc, u32 size, u8 *dest, void (*don
     req->unk18 = *loc;
     req->unk20 = dest;
     req->unk28 = (size + 2047) >> 11;
-    req->unk2C = done;
+    req->done = done;
     if (++DAT_801a4590.unkD8 == &DAT_801a4590.unk8[VS_CD_REQUESTS])
         DAT_801a4590.unkD8 = DAT_801a4590.unk8;
     if (DAT_801a4590.unkDC == req) {

@@ -60,7 +60,12 @@ typedef struct {
     u8 *unk20; /* destination queued by func_80015bcc; copied to unk1C as a read starts */
     s32 unk24;
     s32 unk28; /* sector count */
-    void (*unk2C)(); /* completion callback, called unprototyped */
+    /* 0x2c: completion callback, set only by the request builder (ST
+     * func_80015bcc, VS func_8001d030) from its argument; called with the
+     * destination (unk20) when a checked read (kind 2) completes, else
+     * with the request. Its value sources: config/retail/indirect_pointers.tsv
+     * (StCdRequest.done). */
+    void (*done)();
     s32 unk30;
 } StCdRequest;
 
@@ -80,7 +85,7 @@ typedef char StCdRequestunk1COffset[(offsetof(StCdRequest, unk1C) == 0x1c) ? 1 :
 typedef char StCdRequestunk20Offset[(offsetof(StCdRequest, unk20) == 0x20) ? 1 : -1];
 typedef char StCdRequestunk24Offset[(offsetof(StCdRequest, unk24) == 0x24) ? 1 : -1];
 typedef char StCdRequestunk28Offset[(offsetof(StCdRequest, unk28) == 0x28) ? 1 : -1];
-typedef char StCdRequestunk2COffset[(offsetof(StCdRequest, unk2C) == 0x2c) ? 1 : -1];
+typedef char StCdRequestDoneOffset[(offsetof(StCdRequest, done) == 0x2c) ? 1 : -1];
 typedef char StCdRequestunk30Offset[(offsetof(StCdRequest, unk30) == 0x30) ? 1 : -1];
 
 

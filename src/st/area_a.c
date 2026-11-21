@@ -36,7 +36,7 @@ SDATA(0x80088064, 0x38)
 u8 *DAT_800881d8;
 
 /* The empty area handler: every slot of the default table at 0x8008038c
- * (DAT_8008038c) until an area's own handlers are loaded. */
+ * (area_hooks_default) until an area's own handlers are loaded. */
 ADDRESS(0x800443ec, 0x8)
 void area_hook_none(void)
 {
@@ -537,7 +537,7 @@ void func_800456f8(void)
         break;
     case 1:
         area_state.unk2 = 240;
-        area_state.unkC = &DAT_8008038c;
+        area_state.hooks = &area_hooks_default;
         func_80015d54(1, area_state.unk10 * 10 + 2, DAT_800881dc[0], func_80045594);
         viewer.unk174 = NULL;
         viewer.unk178 = -1;
@@ -622,9 +622,9 @@ void func_800456f8(void)
             placements_expand((StPlacement *)(p + 1));
             func_80055f9c(area_state.unk10);
             DAT_801cba08.unk1478[area_state.unk10] |= 1;
-            area_state.unkC = (AreaHooks *)DAT_800881d8;
+            area_state.hooks = (AreaHooks *)DAT_800881d8;
             func_80016878();
-            area_state.unkC->unk14();
+            area_state.hooks->loaded();
             vis_table_a.unk6168 = 254;
             vis_table_a.unk6158[3] = 0xff;
             vis_table_a.unk6158[2] = 0xff;
