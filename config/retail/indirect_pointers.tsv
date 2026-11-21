@@ -1,0 +1,6 @@
+# MANUALLY MANAGED - reviewed value sources of game code pointers installed at run time.
+# One row per source: table-word = a code pointer in a data word (reviewed mips32_candidate row required);
+# address = a lui/low pair in this image's code taking a function's address (validated reviewed reference required).
+# source_image FDAT_*.BIN = the same word in every overlay of this program. evidence: why the list is complete.
+# Checked by scripts/kf/indirect_pointers.py; see docs/delinking-and-matching.md.
+image	pointer	source	source_image	source_va	evidence

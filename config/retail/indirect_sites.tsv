@@ -1,0 +1,3 @@
+# MANUALLY MANAGED - game jalr/jr sites that call through a reviewed run-time pointer (indirect_pointers.tsv).
+# load_offset: every definition of the jump register reaching the site must be lw r, load_offset(base).
+image	site_va	function_va	function	pointer	load_offset	evidence

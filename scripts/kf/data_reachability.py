@@ -22,7 +22,7 @@ from scripts.kf.manifest import Manifest, load as load_manifest
 from scripts.kf.paths import BUILD, RETAIL_CONFIG
 from scripts.kf.retail import IMAGE_LAYOUTS, IMAGE_NAMES, OVERLAY_SOURCES, read_tsv
 from scripts.kf.sema import Context
-from scripts.kf.sema.cfg import switch_tables
+from scripts.kf.sema.cfg import build_graph, switch_tables
 from scripts.kf.sema.evidence import Reference, TIER_RANK
 from scripts.kf.sema.image import RetailImage
 from scripts.kf.sema.index import Binding
@@ -211,6 +211,46 @@ def proven_switch_dispatch(img: RetailImage, function: Binding) -> dict[int, dic
     }
 
 
+def function_flow(img: RetailImage, function: Binding):
+    """Reaching definitions over FUNCTION's complete CFG, or None."""
+    from scripts.kf.sema.values import ValueFlow
+
+    if function.fragments != 1:
+        return None
+    payload = img.read(function.va, function.body_size)
+    if payload is None:
+        return None
+    try:
+        return ValueFlow(build_graph(function, payload, None, img.u32))
+    except ValueError:
+        return None
+
+
+def pointer_site_problem(flow, site: int, row) -> str | None:
+    """Why a reviewed pointer row does not describe this `jr`/`jalr`, or None.
+
+    Every definition of the jump register reaching SITE must be
+    `lw r, row.load_offset(base)`: the site loads the reviewed member.
+    """
+    if flow is None or not flow.reached(site):
+        return "no complete CFG reaches the site"
+    word = flow.word_at(site)
+    if word >> 26 != 0 or word & 0x3F not in {0x08, 0x09}:
+        return "not a jr/jalr"
+    register = (word >> 21) & 0x1F
+    defs = flow.definitions(site, register)
+    if not defs:
+        return "no definition reaches the jump register"
+    for definition in defs:
+        if not definition.known:
+            return "the jump register may hold an incoming or clobbered value"
+        load = flow.word_at(definition.va)
+        if (load >> 26 != 0x23 or (load >> 16) & 0x1F != register
+                or load & 0xFFFF != row.load_offset & 0xFFFF):
+            return f"0x{definition.va:08x} does not load offset 0x{row.load_offset:x}"
+    return None
+
+
 def access_span(reference: Reference, img: RetailImage) -> tuple[int, int]:
     """Minimum directly observed memory span, or one anchor byte for an address.
 
@@ -253,6 +293,9 @@ def audit(
     host_extents: tuple[DataExtent, ...] = (),
     linked_symbols: dict[str, int] | None = None,
     game_symbols: frozenset[str] | None = None,
+    indirect_sites: tuple = (),
+    pointer_targets: dict | None = None,
+    pointer_problems: tuple[str, ...] = (),
 ) -> dict:
     """Lossless reference worklist with weakest-edge reachability witnesses.
 
@@ -271,6 +314,13 @@ def audit(
     A config-only library `bss` identity that the current link places
     (`sdk_bss_link_placed`, from `linked_symbols` and the names the game
     objects define, `game_symbols`) is compared, not a gap.
+
+    A game `jalr`/`jr` listed in `indirect_sites` (`indirect_pointers.load_sites`)
+    calls through a reviewed run-time pointer: the site must load the row's
+    member offset (`pointer_site_problem`), and the pointer's checked targets
+    (`pointer_targets`, from `indirect_pointers.resolve`) become `validated`
+    edges; a target in another image (an overlay's handler) is recorded as a
+    cross-image edge. Each such site is a `pointer_dispatch` witness row.
     """
     if img.image != image:
         raise ValueError("reference audit image does not match retail bytes")
@@ -290,6 +340,12 @@ def audit(
     dispatch_witnesses: dict[int, dict] = {}
     switch_witnesses: dict[int, dict] = {}
     switches: dict[str, dict[int, dict]] = {}
+    pointer_witnesses: dict[int, dict] = {}
+    pointer_targets = pointer_targets or {}
+    site_rows = {row.site: row for row in indirect_sites if row.image == image}
+    used_rows: set[int] = set()
+    flows: dict[int, object] = {}
+    starts = {f.va: f for f in functions}
     queue: deque[str] = deque()
 
     def issue(code: str, key: str, ref: int | None = None, **detail) -> None:
@@ -391,6 +447,38 @@ def audit(
                     # A game switch whose every case lands in this function's
                     # body: the transfer adds no edge; its witness row is kept.
                     continue
+                row = site_rows.get(reference.site)
+                if row is not None and isinstance(node, Binding):
+                    used_rows.add(row.site)
+                    if node.va not in flows:
+                        flows[node.va] = function_flow(img, node)
+                    problem = (f"owner 0x{node.va:08x} is not 0x{row.owner:08x}"
+                               if row.owner != node.va else
+                               pointer_site_problem(flows[node.va], reference.site, row))
+                    targets = pointer_targets.get(row.pointer, ())
+                    if problem is None and not targets:
+                        problem = f"{row.pointer} has no checked source"
+                    if problem is not None:
+                        issue("unresolved-indirect-control", key, number,
+                              pointer=row.pointer, problem=problem)
+                        continue
+                    keys = []
+                    for target in targets:
+                        if target.image != image:
+                            keys.append(f"{target.image}:function:{target.va:08x}")
+                            continue
+                        if target.va not in starts:
+                            issue("unmodeled-target", key, number, target=target.va)
+                            continue
+                        keys.append(visit(starts[target.va],
+                                          min(rank, TIER_RANK["validated"]), key, number))
+                    destinations[number] = list(dict.fromkeys(keys))
+                    pointer_witnesses[number] = {
+                        "owner": key, "site": reference.site, "pattern": "reviewed-pointer",
+                        "pointer": row.pointer, "load_offset": row.load_offset,
+                        "targets": destinations[number],
+                    }
+                    continue
                 issue("unresolved-indirect-control", key, number)
                 continue
             path_rank = min(rank, TIER_RANK[reference.tier])
@@ -427,6 +515,13 @@ def audit(
                 if start < owner.va or start + width > owner_end:
                     issue("access-crosses-owner", key, number, target=reference.target,
                           access_start=start, access_size=width)
+
+    for row in site_rows.values():
+        if row.site not in used_rows:
+            issue("stale-indirect-site", f"function:{row.owner:08x}", site=row.site,
+                  pointer=row.pointer)
+    for problem in pointer_problems:
+        issue("invalid-indirect-pointer", image, problem=problem)
 
     tier = {rank: name for name, rank in TIER_RANK.items()}
     range_rows = []
@@ -476,7 +571,11 @@ def audit(
         for number in outgoing[key]:
             reference = references[number]
             path_rank = min(rank, TIER_RANK[reference.tier])
-            if len(destinations.get(number, [])) > 1:
+            if number in pointer_witnesses:
+                # A dispatch reaches each of its targets; several targets are
+                # its reviewed value set, not an ambiguous owner.
+                path_rank = min(path_rank, TIER_RANK["validated"])
+            elif len(destinations.get(number, [])) > 1:
                 path_rank = min(path_rank, TIER_RANK["candidate"])
             if path_rank == TIER_RANK["candidate"]:
                 issue("candidate-reference-path", key, number)
@@ -519,18 +618,21 @@ def audit(
                 w["proof"] is not None for w in dispatch_witnesses.values()
             ),
             "proven_switch_dispatch": len(switch_witnesses),
+            "reviewed_pointer_dispatch": len(pointer_witnesses),
             "host_references": len(cross_image),
             "issues": dict(sorted(Counter(r["code"] for r in issue_rows).items())),
         },
         "ranges": range_rows, "references": reference_rows, "issues": issue_rows,
         "vendored_dispatch": [dispatch_witnesses[n] for n in sorted(dispatch_witnesses)],
         "switch_dispatch": [switch_witnesses[n] for n in sorted(switch_witnesses)],
+        "pointer_dispatch": [pointer_witnesses[n] for n in sorted(pointer_witnesses)],
         "config_comparisons": [asdict(c) for c in config_comparisons if c.image == image],
     }
 
 
 def run(images: tuple[str, ...], *, output: Path | None = None) -> int:
     from scripts.kf.config_data import audit as compare_config_data
+    from scripts.kf.indirect_pointers import load_sites, resolve as resolve_pointers
     from scripts.kf.linked_symbols import linked_addresses
     from scripts.kf.roundtrip import link_labels
 
@@ -542,12 +644,15 @@ def run(images: tuple[str, ...], *, output: Path | None = None) -> int:
         ctx = Context(image)
         host = OVERLAY_SOURCES.get(image)
         host_functions = Context(host.host).idx.functions if host is not None else ()
+        pointer_targets, pointer_problems = resolve_pointers(image, ctx.refs.references)
         report = audit(image, ctx.idx.functions, extents, ctx.refs.references, ctx.img,
                        config_comparisons=comparisons,
                        link_labels=frozenset(link_labels(image).values()),
                        host_functions=host_functions, host_extents=extents,
                        linked_symbols=linked_addresses(image),
-                       game_symbols=game_object_symbols(image, manifest))
+                       game_symbols=game_object_symbols(image, manifest),
+                       indirect_sites=load_sites(image), pointer_targets=pointer_targets,
+                       pointer_problems=tuple(pointer_problems))
         reports.append(report)
         summary = report["summary"]
         print(f"{image} known-reference closure: {summary['game_roots']} game roots, "
@@ -558,6 +663,9 @@ def run(images: tuple[str, ...], *, output: Path | None = None) -> int:
             print(f"  vendored Sony indirect sites exempt (witnessed): "
                   f"{summary['vendored_indirect_exempt']} "
                   f"({summary['proven_vendored_dispatch']} with a value-chain proof)")
+        if summary["reviewed_pointer_dispatch"]:
+            print(f"  game indirect sites through reviewed run-time pointers: "
+                  f"{summary['reviewed_pointer_dispatch']}")
         if summary["host_references"]:
             print(f"  references into {OVERLAY_SOURCES[image].host} (owned there): "
                   f"{summary['host_references']}")

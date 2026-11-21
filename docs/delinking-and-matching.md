@@ -352,7 +352,29 @@ the CFG's `switch_table` rule (`scripts/kf/sema/cfg.py`) is the one prover,
 and each such jump is a `switch_dispatch` witness row. A table whose base
 GCC hoisted out of a loop is proved from the same chain by reaching
 definitions (`scripts/kf/sema/values.py`, see `semantic-navigation.md`) and
-witnessed as `switch-table-hoisted`. A Sony member's
+witnessed as `switch-table-hoisted`.
+
+A game call through a pointer installed at run time (a struct member set from
+an argument, a handler table an overlay brings) has no value chain inside the
+caller. Its evidence is curated in two tables, checked by
+`scripts/kf/indirect_pointers.py`: `config/retail/indirect_pointers.tsv`
+lists every value source the review found for one typed member
+(`AreaHooks.unk40`): a `table-word` (a code pointer in a data word, which needs
+a reviewed `mips32_candidate` row matching the bytes; `source_image`
+`FDAT_*.BIN` means the same word in every overlay of the program) or an
+`address` (a `lui`/low pair in the audited image's code taking a function's
+address, which needs a validated reviewed reference); every source must hold
+a function start, and the `evidence` column says why the list is complete
+(every store to the member, every caller of the installer).
+`config/retail/indirect_sites.tsv` ties a game `jalr`/`jr` to its pointer
+and to the offset of the load: every definition of the jump register that
+reaches the site must be `lw r, load_offset(base)` (reaching definitions,
+`scripts/kf/sema/values.py`). Such a site becomes a `pointer_dispatch`
+witness (`reviewed-pointer`) whose targets are `validated` edges; a target in
+an overlay is a cross-image edge, audited with that overlay. A row the audit
+does not meet is `stale-indirect-site`; a source that fails its check is
+`invalid-indirect-pointer`. Completeness of a source list is the reviewed
+claim, not a proof. A Sony member's
 switch jump is not proved by it; it is covered by the vendored exemption.
 
 Both objdiff front ends are built from the same pinned 3.7.3 source with
