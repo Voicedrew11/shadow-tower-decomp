@@ -222,7 +222,7 @@ incremental Ninja graph. The normal commands are:
 | [`kf literals [--domains] [--member TEXT] [--value N] [--output PATH]`](enum-domain-plan.md) | census every written integer literal and enum constant by semantic sink (field, parameter, return, case subject, index, mask, shift, arithmetic, declaration), join sinks connected by value flow into candidate enum domains with KF1 counterparts, and reconcile all written numeric tokens |
 | [`kf parameters [--all] [--json]`](parameter-inventory.md) | inventory enum/record argument names, declarations and definitions in both modern and retail views for individual semantic review |
 | [`kf resources census FILE --offset N --length N --stride N --field-offset N --encoding E [--json]`](resource-census.md) | count an explicitly identified binary record field with row and byte references |
-| `kf check [--strict]` | fail on data mismatches/incomplete comparisons, known-reference ownership gaps, unfaithful target relink/placement, non-exact vendored source verification, unchanged-input regressions, lost banked rows, or invalid/stale reports |
+| `kf check [--strict]` | fail on data mismatches/incomplete comparisons, known-reference ownership gaps, unfaithful target relink/placement, non-exact vendored source verification, unchanged-input regressions, banked-exact functions that are no longer exact (whatever their inputs), lost banked rows, or invalid/stale reports |
 | `kf verify roundtrip [--image I] [--unit ID] [--output PATH]` | relink manifested target ELF sections at claim-derived addresses with pinned GNU ld and compare all initialized bytes with verified retail |
 | `kf bank [--unit ID] [--dirty]` | manually update all fresh scores, or only selected units when every selected function is exactly 100% |
 
