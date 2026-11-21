@@ -53,7 +53,13 @@ RODATA(0x80011000, 0x110)
 DATA(0x8005b2a8, 0x10, ".data")
 VECTOR DAT_8005b2a8 = {ONE, ONE, ONE};
 
-/* An identity matrix nothing references (retail keeps it after the scale). */
+/*
+ * An identity matrix nothing references (retail keeps it after the scale).
+ * Most likely the counterpart of ST.EXE's DAT_8008040c, the initialized
+ * identity ST's model draws and anim_set_node_vertex read: VS's
+ * anim_set_node_vertex (func_800256bc) composes from a local identity
+ * instead, which leaves this one unused.
+ */
 DATA(0x8005b2b8, 0x20, ".data")
 MATRIX DAT_8005b2b8 = {{{ONE, 0, 0}, {0, ONE, 0}, {0, 0, ONE}}, {0, 0, 0}};
 
