@@ -14,7 +14,8 @@ function's own word stack slots. Model assumptions, each checked or stated:
   `$t0`-`$t9`, `$ra`) after its delay slot, and preserves `$s0`-`$s7`,
   `$gp`, `$sp` and `$fp`.
 * A stack slot is tracked only if every write to `$sp` is an
-  `addiu sp,sp,imm` in the entry block or in the delay slot of `jr $ra`, and
+  `addiu sp,sp,imm` in the entry block or an epilogue restore (in a block
+  ending in `jr $ra`, no `$sp`-based access after it), and
   no other instruction reads `$sp` except as a load/store base or as
   `addiu r,sp,k` (an address taken). A slot whose word an address-taking
   `addiu` names is not tracked; another escaped stack object is assumed not
@@ -89,10 +90,20 @@ class Frame:
     def __init__(self, graph) -> None:
         entry = graph.blocks[0] if graph.blocks else None
         entry_vas = {row.va for row in entry.instructions} if entry else set()
-        returns = {
-            row.va + 4 for block in graph.blocks for row in block.instructions
-            if row.control is not None and row.control.kind == "return"
-        }
+        # An epilogue restore: `addiu sp,sp,N` in a block that ends in
+        # `jr $ra`, with no `$sp`-based access after it in that block.
+        returns: set[int] = set()
+        for block in graph.blocks:
+            rows = block.instructions
+            ret = next((i for i, row in enumerate(rows)
+                        if row.control is not None and row.control.kind == "return"), None)
+            if ret is None:
+                continue
+            for i, row in enumerate(rows):
+                if row.word >> 16 == 0x27BD and not any(
+                        later.word >> 26 >= 0x20 and (later.word >> 21) & 0x1F == SP
+                        for later in rows[i + 1:]):
+                    returns.add(row.va)
         self.tracked = True
         self.escaped: set[int] = set()
         self.outgoing: set[int] = set()

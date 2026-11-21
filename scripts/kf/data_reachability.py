@@ -321,6 +321,13 @@ def audit(
     (`pointer_targets`, from `indirect_pointers.resolve`) become `validated`
     edges; a target in another image (an overlay's handler) is recorded as a
     cross-image edge. Each such site is a `pointer_dispatch` witness row.
+
+    A game `jalr`/`jr` whose register can only hold link-time constants
+    inside its own function (`scripts.kf.sema.values.constant_targets`:
+    every reaching definition builds a constant through `lui`/`addiu`/`ori`,
+    moves and tracked stack slots) reaches each nonzero value, which must be
+    a function start of this image; zero is a null pointer and adds no edge.
+    Each such site is a `constant_dispatch` witness row (`constant-pointer`).
     """
     if img.image != image:
         raise ValueError("reference audit image does not match retail bytes")
@@ -341,6 +348,7 @@ def audit(
     switch_witnesses: dict[int, dict] = {}
     switches: dict[str, dict[int, dict]] = {}
     pointer_witnesses: dict[int, dict] = {}
+    constant_witnesses: dict[int, dict] = {}
     pointer_targets = pointer_targets or {}
     site_rows = {row.site: row for row in indirect_sites if row.image == image}
     used_rows: set[int] = set()
@@ -479,6 +487,25 @@ def audit(
                         "targets": destinations[number],
                     }
                     continue
+                if isinstance(node, Binding):
+                    from scripts.kf.sema.values import constant_targets
+
+                    if node.va not in flows:
+                        flows[node.va] = function_flow(img, node)
+                    flow = flows[node.va]
+                    proven = constant_targets(flow, reference.site) if flow else None
+                    if (proven is not None and proven.targets
+                            and all(target in starts for target in proven.targets)):
+                        destinations[number] = [
+                            visit(starts[target], rank, key, number)
+                            for target in proven.targets
+                        ]
+                        constant_witnesses[number] = {
+                            "owner": key, "site": reference.site,
+                            "pattern": "constant-pointer", "values": list(proven.values),
+                            "targets": destinations[number],
+                        }
+                        continue
                 issue("unresolved-indirect-control", key, number)
                 continue
             path_rank = min(rank, TIER_RANK[reference.tier])
@@ -571,7 +598,9 @@ def audit(
         for number in outgoing[key]:
             reference = references[number]
             path_rank = min(rank, TIER_RANK[reference.tier])
-            if number in pointer_witnesses:
+            if number in constant_witnesses:
+                pass  # a proved value set: each target is reached, none ambiguous
+            elif number in pointer_witnesses:
                 # A dispatch reaches each of its targets; several targets are
                 # its reviewed value set, not an ambiguous owner.
                 path_rank = min(path_rank, TIER_RANK["validated"])
@@ -619,6 +648,7 @@ def audit(
             ),
             "proven_switch_dispatch": len(switch_witnesses),
             "reviewed_pointer_dispatch": len(pointer_witnesses),
+            "proven_constant_dispatch": len(constant_witnesses),
             "host_references": len(cross_image),
             "issues": dict(sorted(Counter(r["code"] for r in issue_rows).items())),
         },
@@ -626,6 +656,7 @@ def audit(
         "vendored_dispatch": [dispatch_witnesses[n] for n in sorted(dispatch_witnesses)],
         "switch_dispatch": [switch_witnesses[n] for n in sorted(switch_witnesses)],
         "pointer_dispatch": [pointer_witnesses[n] for n in sorted(pointer_witnesses)],
+        "constant_dispatch": [constant_witnesses[n] for n in sorted(constant_witnesses)],
         "config_comparisons": [asdict(c) for c in config_comparisons if c.image == image],
     }
 
@@ -663,6 +694,9 @@ def run(images: tuple[str, ...], *, output: Path | None = None) -> int:
             print(f"  vendored Sony indirect sites exempt (witnessed): "
                   f"{summary['vendored_indirect_exempt']} "
                   f"({summary['proven_vendored_dispatch']} with a value-chain proof)")
+        if summary["proven_constant_dispatch"]:
+            print(f"  game indirect sites through proved constant pointers: "
+                  f"{summary['proven_constant_dispatch']}")
         if summary["reviewed_pointer_dispatch"]:
             print(f"  game indirect sites through reviewed run-time pointers: "
                   f"{summary['reviewed_pointer_dispatch']}")

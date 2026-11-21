@@ -354,6 +354,19 @@ GCC hoisted out of a loop is proved from the same chain by reaching
 definitions (`scripts/kf/sema/values.py`, see `semantic-navigation.md`) and
 witnessed as `switch-table-hoisted`.
 
+A game `jalr`/`jr` whose register, inside its own function, can only hold
+link-time constants is proved by reaching definitions
+(`constant_targets` in `scripts/kf/sema/values.py`): every definition that
+reaches the site must build a constant through `lui`/`addiu`/`ori`, register
+moves and the function's own word stack slots (a frame whose only `$sp`
+writes are the prologue and epilogue adjust; an address-taken slot, a slot
+in the outgoing argument area, and caller-saved registers across a call are
+unknown). Each nonzero value must be a function start in the image; zero is
+a null pointer and adds no edge (a call through it would not run code). The
+site is a `constant_dispatch` witness (`constant-pointer`, with its value
+set), and its targets are reached from the caller. This covers a local
+callback chosen inside the function, such as the ST mesh renderers' `tint`.
+
 A game call through a pointer installed at run time (a struct member set from
 an argument, a handler table an overlay brings) has no value chain inside the
 caller. Its evidence is curated in two tables, checked by

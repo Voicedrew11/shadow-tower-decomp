@@ -175,6 +175,26 @@ class ReachabilityTest(unittest.TestCase):
         self.assertEqual(report["summary"]["issues"]["unresolved-indirect-control"], 1)
         self.assertEqual(report["switch_dispatch"], [])
 
+    def constant_call(self, low):
+        # lui s0,0; addiu s0,s0,LOW; jalr s0; nop; jr ra; nop
+        code = words(0x3C100000, 0x26100000 | low, 0x0200F809, 0, 0x03E00008, 0)
+        img = RetailImage.synthetic(IMAGE, 0x1000, code + b"\0" * 0x200)
+        caller = replace(function(0x1000), size=0x18, body_size=0x18)
+        return audit(IMAGE, (caller, function(0x1100)), (),
+                     (ref(0x1008, None, tier="proven", kind="indirect-call"),), img)
+
+    def test_constant_pointer_call_reaches_its_function(self):
+        report = self.constant_call(0x1100)
+        self.assertEqual(report["issues"], [])
+        self.assertEqual(report["constant_dispatch"], [{
+            "owner": "function:00001000", "site": 0x1008, "pattern": "constant-pointer",
+            "values": [0x1100], "targets": ["function:00001100"],
+        }])
+
+    def test_constant_pointer_to_no_function_stays_unresolved(self):
+        report = self.constant_call(0x1104)
+        self.assertEqual(report["summary"]["issues"]["unresolved-indirect-control"], 1)
+
     def test_vendored_switch_table_is_exempt_but_not_switch_proved(self):
         report = self.switch_table(0x102C, vendor=True)
         self.assertEqual(report["issues"], [])
