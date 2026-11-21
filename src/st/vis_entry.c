@@ -235,7 +235,7 @@ ADDRESS(0x8004b270, 0x44)
 void func_8004b270(void)
 {
     vis_table_a.unk6138->unk1A = 255;
-    area_state.unkC->unk40();
+    area_state.hooks->unk40();
 }
 
 ADDRESS(0x8004b2b4, 0x28)
@@ -281,7 +281,7 @@ void func_8004b2dc(void)
             e->unk44 = 0;
             if (r->unk1C & 0x80)
                 e->unk44 = 128;
-            area_state.unkC->unk40();
+            area_state.hooks->unk40();
         } else if (e->unk00 != 0 && vis_table_a.unk6144 < 32) {
             e->unk07 = 253;
         }

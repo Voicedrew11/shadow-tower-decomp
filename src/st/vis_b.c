@@ -1242,7 +1242,7 @@ void func_80050768(void)
             break;
         }
         default:
-            area_state.unkC->unk24();
+            area_state.hooks->unk24();
             break;
         }
     }

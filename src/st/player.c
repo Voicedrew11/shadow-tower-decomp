@@ -3193,7 +3193,7 @@ void func_80042d74(void)
                 func_80021994(255, 255, 255, viewer.unk286 << 8, 2);
                 viewer.unk280.halves[0] += viewer.unk17A;
                 if (viewer.unk286 == 16) {
-                    area_state.unkC->unk34();
+                    area_state.hooks->player_died();
                     func_80021994(255, 255, 255, viewer.unk286 << 8, 2);
                 }
             } else {
