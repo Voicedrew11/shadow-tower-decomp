@@ -106,7 +106,7 @@ void func_80045ffc(void)
             DrawSync(0);
             request->unk10 = 2;
             request->unk24 = 0;
-            request->unk2C(request);
+            request->done(request);
             func_80015848(request);
             return;
         }

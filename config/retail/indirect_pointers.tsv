@@ -4,3 +4,4 @@
 # source_image FDAT_*.BIN = the same word in every overlay of this program. evidence: why the list is complete.
 # Checked by scripts/kf/indirect_pointers.py; see docs/delinking-and-matching.md.
 image	pointer	source	source_image	source_va	evidence
+VS.EXE	StCdRequest.done	address	VS.EXE	0x8001caf4	stored only by the request builder func_8001d030 (req->done = done; no other store to a ring entry's done in VS source); its only caller func_8001cac0 (jal 0x8001cb14) passes func_8001ca74 as the stack argument (lui 0x8001caf4/addiu 0x8001caf8); the ring is cleared by kind/step only (func_8002efcc)

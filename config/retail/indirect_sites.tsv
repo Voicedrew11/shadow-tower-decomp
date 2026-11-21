@@ -1,3 +1,7 @@
 # MANUALLY MANAGED - game jalr/jr sites that call through a reviewed run-time pointer (indirect_pointers.tsv).
 # load_offset: every definition of the jump register reaching the site must be lw r, load_offset(base).
 image	site_va	function_va	function	pointer	load_offset	evidence
+VS.EXE	0x8001ced8	0x8001cd60	func_8001cd60	StCdRequest.done	0x2c	request->done(request->unk20): checked read (kind 2) complete
+VS.EXE	0x8001cf00	0x8001cd60	func_8001cd60	StCdRequest.done	0x2c	request->done(request): other kinds complete
+VS.EXE	0x8002e9e0	0x8002e868	func_8002e868	StCdRequest.done	0x2c	twin of func_8001cd60 (installed by func_8002ea94); request->done(request->unk20)
+VS.EXE	0x8002ea08	0x8002e868	func_8002e868	StCdRequest.done	0x2c	twin of func_8001cd60; request->done(request)

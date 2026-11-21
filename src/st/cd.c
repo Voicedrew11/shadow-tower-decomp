@@ -51,7 +51,7 @@ StCdRequest *func_80015bcc(int kind, CdlLOC *loc, u32 size, u8 *dest, void (*don
     req->unk18 = *loc;
     req->unk20 = dest;
     req->unk28 = (size + 2047) >> 11;
-    req->unk2C = done;
+    req->done = done;
     if (++cd_state.unk9D4 == &cd_state.unk14[ST_CD_REQUESTS])
         cd_state.unk9D4 = cd_state.unk14;
     if (cd_state.unk9D8 == req) {
