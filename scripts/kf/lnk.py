@@ -198,6 +198,21 @@ def convert_patch(kind: int, word: int, addend: int) -> tuple[str, int]:
     raise ValueError(f'unsupported native MIPS patch {kind}')
 
 
+def _own_lo16(high, targets: list[tuple[int, str, str, int]]) -> int | None:
+    """The LO16 site a native HI16 patch belongs to, for ELF REL order.
+
+    PSYLINK resolves every patch from its own expression, so a native object
+    records no HI/LO pairing. ASPSX expands one address operand into a `lui`
+    and a low instruction carrying the same expression; the first later LO16
+    patch with that referent and full addend is therefore the HI16's own.
+    None when no such patch exists (the view then keeps site order).
+    """
+    addend = next(a for o, k, s, a in targets if o == high.offset and k == 'R_MIPS_HI16')
+    return min((offset for offset, kind, symbol, other in targets
+                if kind == 'R_MIPS_LO16' and offset > high.offset
+                and symbol == high.symbol and other == addend), default=None)
+
+
 def elf_view(data: bytes, *, functions: tuple[str, ...] = (),
              sizes: dict[str, int] | None = None,
              referents: tuple[NativeReferent, ...] = ()) -> bytes:
@@ -215,9 +230,10 @@ def elf_view(data: bytes, *, functions: tuple[str, ...] = (),
             del obj.sections[number]
     sizes = sizes or {}
     functions = set(functions) | set(obj.functions) | obj.declared_functions
-    names = {number: '.rodata' if section.name == '.rdata' else section.name
-             for number, section in obj.sections.items()}
-    allowed = {'.text', '.rodata', '.data', '.sdata', '.bss', '.sbss'}
+    # Native and ELF names agree: `.rodata` holds the constants and `.rdata`
+    # the switch tables (scripts/psxbuild/sdk.py separate_read_only).
+    names = {number: section.name for number, section in obj.sections.items()}
+    allowed = {'.text', '.rodata', '.rdata', '.data', '.sdata', '.bss', '.sbss'}
     if set(names.values()) - allowed or len(set(names.values())) != len(names):
         raise ValueError('unsupported native section family')
     sections = {names[number]: section for number, section in obj.sections.items()}
@@ -287,6 +303,7 @@ def elf_view(data: bytes, *, functions: tuple[str, ...] = (),
     for name, section in sections.items():
         payload = bytearray(section.data)
         relocations[name] = []
+        targets = []
         for offset, kind, expression in section.patches:
             if offset % 4 or not 0 <= offset <= len(payload) - 4:
                 raise ValueError('native relocation outside its code record')
@@ -301,6 +318,10 @@ def elf_view(data: bytes, *, functions: tuple[str, ...] = (),
             relocation, value = convert_patch(kind, word, addend)
             struct.pack_into('<I', payload, offset, value)
             relocations[name].append(MipsRelocation(offset, relocation, symbol))
+            targets.append((offset, relocation, symbol, addend))
+        relocations[name] = [replace(item, pair=_own_lo16(item, targets))
+                             if item.kind == 'R_MIPS_HI16' else item
+                             for item in relocations[name]]
         payloads[name] = bytes(payload)
     arguments = {}
     for name in ('.data', '.sdata', '.bss', '.sbss'):
@@ -314,4 +335,6 @@ def elf_view(data: bytes, *, functions: tuple[str, ...] = (),
     return write_mips_elf(
         payloads.get('.text', b''), None, 0, relocations.get('.text', []), symbols['.text'],
         rodata=payloads.get('.rodata', b''), rodata_symbols=symbols['.rodata'],
-        rodata_relocations=relocations.get('.rodata', []), common_symbols=common, **arguments)
+        rodata_relocations=relocations.get('.rodata', []),
+        rdata=payloads.get('.rdata', b''), rdata_relocations=relocations.get('.rdata', []),
+        common_symbols=common, **arguments)

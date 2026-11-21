@@ -6,7 +6,8 @@
 > programs are kept where they illustrate a mechanism.
 
 `kf build` is the source-to-EXE build: the gcc-2.7.2-cdk compiler emits
-assembly, ASPSX 2.79D emits native Psy-Q objects, PSYLINK 2.73D links those
+assembly, ASPSX 2.79D emits native Psy-Q objects, DMPSX 3.0 rewrites the GTE
+placeholder words of `INLINE_C.H` in them, PSYLINK 2.73D links those
 objects with the Runtime Library 4.2 inputs, and CPE2X 1.5 writes each
 executable. See [the linking guide](executable-linking.md) for outputs and
 provenance.
@@ -16,7 +17,7 @@ the README. Tool failures stop the build; reconstruction checks are separate.
 At the command level, the build is a compiler, an assembler, and a linker:
 
 ```text
-source files -> compiler -> assembler -> object files
+source files -> compiler -> assembler -> DMPSX -> object files
 object files + SDK objects/libraries -> linker -> executable
 ```
 
@@ -26,9 +27,15 @@ inputs and their order, the executable load origin and entry point, and the
 uninitialized sections. PSYLINK chooses individual symbol addresses and applies
 relocations. `ADDRESS()` and `DATA()` annotations do not control placement.
 
-The build uses ASPSX's native objects for PSYLINK; the comparison tools
-translate that same format to ELF only because objdiff needs it. No maspsx or
-GNU assembler output enters either path.
+The build uses ASPSX's native objects, after DMPSX, for PSYLINK; the
+comparison tools translate that same format to ELF only because objdiff
+needs it. Every assembled object goes through DMPSX (`rewrite_gte` in
+`scripts/psxbuild/sdk.py`; DMPSX 3.0 is given only the object's `.text` code,
+see [the toolchain page](toolchain.md#dmpsx)), and the result is checked
+against ASPSX's object: one without GTE placeholders must come back
+byte-identical, and in one with them only those `.text` words may change,
+each into a COP2 command. No maspsx or GNU assembler output enters either
+path.
 
 `kf analyze` drives the incremental Ninja graph for inspection. Source
 compilation uses the same native SDK path; ELF objects are read-only views
@@ -68,25 +75,42 @@ binding rules are structural, in the spirit of Gruntz's `RVA()`:
   manifest itself reads as the recovered link order; and
 - an address is claimed by at most one unit.
 
-A unit may also claim its read-only contribution once:
+A unit may also claim its read-only contributions, each once:
 
 ```c
 RODATA(0x8001235c, 0x178)
+JUMPTABLES(0x80011490, 0x18)
 ```
 
-A compiled object keeps its switch jump tables and string literals in
-`.rodata`, in emission order; the retail linker laid each object's `.rdata`
-into the data region in link order, so that range is a contiguous slice of
-the image. The delinker carves the claimed bytes into the module object's
-`.rodata`, rewrites entries that point into the unit's own code into
-`.text`-relative words, and resolves the code's references to `.rodata`
-offsets, so objdiff compares tables and literals too. Source literals must
-therefore appear in retail order, which the address-ordered functions give
-for free; a string that lives inside the range is spelled as the literal the
-original used, not as a named extern.
+The compiler writes a unit's constants (string literals, aggregate
+initializers, const data) and its switch jump tables to `.rdata`. Retail
+`ST.EXE` lays out every unit's constants before any unit's tables, each group
+in link order, with the SDK libraries' read-only data after the tables; the
+build therefore moves each constant block to `.rodata`
+(`separate_read_only` in `scripts/psxbuild/sdk.py`) and the link script
+places `.rodata` before `.rdata`. A unit's constant pool ends on an eight-byte
+boundary (its zero tail is part of the claim). `RODATA()` claims the
+constants, `JUMPTABLES()` the tables; each is a contiguous slice of the image.
+The delinker carves them into the module object's `.rodata` and `.rdata`,
+rewrites entries that point into the unit's own code into `.text`-relative
+words, and resolves the code's references to section offsets, so objdiff
+compares tables and literals too. Source literals must therefore appear in
+retail order, which the address-ordered functions give for free; a string
+that lives inside the range is spelled as the literal the original used, not
+as a named extern.
+
+An FDAT overlay unit is the exception: its read-only data stays in cc1 order
+under one section (`keep_read_only_together`, selected by
+`compile.read_only_mode` for every overlay image), without the pool padding,
+and its single `RODATA()` claim covers constants and switch tables together
+(see [the linking guide](executable-linking.md#fdat-overlays) for the retail
+evidence). Pointers in that run into the unit's own code are rewritten like
+jump-table rows; a pointer into another unit's code needs a reviewed
+`mips32_candidate` relocation row.
 
 A unit compiled with a small-data profile (`small_data = 8`) may also claim
-its anonymous `.sdata` constants once:
+its anonymous `.sdata` constants, one ascending range per run between its
+named small data:
 
 ```c
 SDATA(0x8006d6a4, 0xb)
@@ -98,8 +122,8 @@ is an `.sdata` member, while the same text initializing a larger array keeps
 the array's type and stays in `.rdata`. ASPSX 2.79 addresses such data with
 one `$gp`-relative instruction (native patch type 100, `R_MIPS_GPREL16` in the
 ELF view), so `-G8` changes code as well as placement. The delinker packs the
-claimed range among the unit's `.sdata` `DATA()` claims in address order and
-resolves code references to it as `.sdata` offsets; the range never becomes a
+claimed ranges among the unit's `.sdata` `DATA()` claims in address order and
+resolves code references to them as `.sdata` offsets; a range never becomes a
 symbol. Small statics land in `.sbss` and resolve through that section symbol;
 declare their request in `data_reservations.tsv`. `PSX.EXE`'s `main` is the
 first `-G8` unit: its program index and three byte pointers are the
@@ -123,7 +147,9 @@ static u32 frame_pacer_vsync_count = 0;
 
 The claim binds the declarator to the `data_identities.tsv` row at that
 address: the name and size must match, the storage must be `load` or `bss`, a
-datum is claimed by one unit only, and data claims ascend inside a source.
+datum is claimed by one unit only, and the claims of each section ascend
+inside a source (GCC writes a section's data in source order; a unit's
+`.sbss` statics may precede its later `.sdata` words).
 Data need not be contiguous with the unit's code. The bindings file records
 data claims with `kind=data`.
 
@@ -219,7 +245,7 @@ strict-100% snapshot as `kf status` and replaces only the text between
 
 `kf check` refreshes the block, and `kf analyze` ends in that check. The check
 also requires every vendored source-verification function to remain 100% and
-compares every owned `.data`, `.rodata`, and `.bss` contribution against the
+compares every owned `.data`, `.rodata`, `.rdata`, and `.bss` contribution against the
 retail-delinked object by default. It fails on any byte, exact object-section
 extent (including assembler-owned writable/switch-table zero tails materialized
 by the delinker),
@@ -251,7 +277,62 @@ defines = ["ST_FDAT_012"]
   the definition name, so addresses stay image-qualified. The claimed size
   must still equal that image's body size; a size mismatch means the images
   do not share the body and the difference has to be expressed in source.
-  `RODATA()` ranges are image-specific and cannot be name-bound.
+  `RODATA()`, `JUMPTABLES()` and `SDATA()` ranges are image-specific and
+  cannot be name-bound.
 - `defines` adds `-DNAME` (or `-DNAME=value`) to the preprocessor run for
   that unit only. Use it for constants that provably differ between the
   images, not to fork whole bodies silently.
+
+When the shared functions are only part of each image's unit, or sit in a
+different order around image-specific code, the shared run goes into a
+`src/lib/*.inc` fragment instead: its definitions stack one
+`ADDRESS_AT("ST", ...)` / `ADDRESS_AT("VS", ...)` claim per image, and each
+image's unit source includes it (`#include "../lib/name.inc"`) at its place
+in that image's contiguous run. The fragment must be contiguous and in the
+same order in every image; it may not own `RODATA()`, `JUMPTABLES()` or
+`SDATA()` (the including unit claims its image's ranges), and its text is
+shared verbatim, so every name it spells must be the same identity in both
+images. VS.EXE's copies of ST.EXE's animation node-list and VRAM helpers
+are the first users (`src/lib/anim_*.inc`, `src/lib/vram.inc`); VS copies
+whose callees or globals carry address-derived (image-specific) names, or
+whose structures have VS layouts, stay separate sources under `src/vs/`.
+
+A fragment may instead carry plain `ADDRESS()` claims and be included by
+sources that each bind by name. A unit's own source, one that no other unit
+lists, may bind by name and still claim its image's `RODATA()`,
+`JUMPTABLES()` and `SDATA()` ranges: the ranges belong to that one image,
+while the fragment's functions resolve through the image's identities. The
+FDAT overlays use this: the 21 functions every overlay starts with sit at
+different addresses in seven of the 36 overlays and carry one shared
+identity name (`fdat_<FDAT_002.BIN address>`) in all of them. Each overlay
+has three units: the shared source `src/lib/fdat_common_a.c` (the first ten
+functions), its own `src/fdat_nnn/main.c` (the handler table and
+`fdat_801ebec4`'s switch table as one `RODATA()` run, and the fragment
+`src/lib/fdat_common.inc` with `fdat_801ebec4` and `fdat_801ec6a4`), and the
+shared `src/lib/fdat_common_b.c` (the last nine). The boundaries are WIP:
+they keep the two not-yet-exact functions `fdat_801eba4c` and
+`fdat_801ec6a4` from moving the switch-table and handler-table pointers
+(a non-exact function ends its unit).
+
+The overlays' own handlers after those 21 functions are units named by
+their first function, `fdat_nnn.map_<address>` in
+`src/fdat_nnn/map_<address>.c`, each a contiguous run of exact handlers.
+Handlers that several overlays share are fragments named like the common
+functions: `src/lib/fdat_801ed6e4.inc` (19 overlays) calls the overlay's
+move picker, which is the shared `fdat_801ed4a0` in 14 of them and an
+overlay's own variant in five; a source names the variant by defining
+`FDAT_PICK_MOVE` before the include. `src/lib/fdat_801ed4a0.inc` (21
+overlays) is not yet exact, and no unit includes it until it is, because
+its switch table sits in the overlay's read-only run and its entries would
+move with the code.
+
+An overlay's handlers keep their state in words right after its code (in
+the archive entry's zero tail). They are `.bss` `DATA()` claims of the
+first map unit that uses them, with FDAT data identities (`fdat_<address>`).
+A unit's single word is a global (a COMMON request placed at its claim) so
+that later units of the overlay can declare it `extern`; two or more words
+in one unit are statics with `fixed` rows in `data_reservations.tsv`, since
+ASPSX packs `.lcomm` requests without alignment and retail keeps them in
+consecutive words. A map handler's own read-only data, such as
+`FDAT_032.BIN`'s `RECT` initializer, is a `RODATA()` claim of its unit for
+that slice of the overlay's read-only run.

@@ -2,20 +2,22 @@
 
 from __future__ import annotations
 
-from collections import Counter
 from dataclasses import dataclass, replace
 from functools import lru_cache
 
 from scripts.kf.delink import load_catalog, sanitize_symbol
 from scripts.kf.relocations import (
+    ambiguous_sites,
     DataReferent,
     decode_gprel16_target,
     decode_hi_lo_target,
     decode_mips26_target,
+    is_orphan_high_row,
     named_data_referent,
+    orphan_high_reason,
     validate_relocation,
 )
-from scripts.kf.retail import parse_int, read_tsv
+from scripts.kf.retail import parse_int, read_tsv, referent_image
 from scripts.kf.sema.cfg import build_graph
 from scripts.kf.sema.image import RetailImage, retail
 from scripts.kf.sema.index import Binding, Index, index
@@ -150,7 +152,14 @@ class Evidence:
         if row["kind"] != "mips_hi16_lo16":
             return "unsupported-relocation-kind"
         if not row["paired_site_va"]:
-            return "missing-paired-site"
+            if not is_orphan_high_row(row) or owner is None:
+                return "missing-paired-site"
+            # A LUI no low completes: its register must die unread inside
+            # its own function (the delinker's rule).
+            words = [self.img.u32(at) for at in range(owner.va, owner.va + owner.size, 4)]
+            if None in words:
+                return "site-outside-load-image"
+            return orphan_high_reason(words, (site - owner.va) // 4, target)
         paired = parse_int(row["paired_site_va"])
         paired_word = self.img.u32(paired)
         if paired_word is None:
@@ -158,24 +167,21 @@ class Evidence:
         if owner is not None and not owner.contains(paired, 4):
             return "pair-crosses-function-extent"
         try:
-            decoded = decode_hi_lo_target(word, paired_word)
+            between = ([self.img.u32(at) for at in range(site + 4, paired, 4)]
+                       if paired > site else None)
+            if between is not None and None in between:
+                between = None
+            decoded = decode_hi_lo_target(
+                word, paired_word, self.img.u32(site + 4), self.img.u32(site + 8), between
+            )
         except ValueError as error:
             return f"instruction-pair-mismatch:{error}"
         return None if decoded == target else "decoded-target-mismatch"
 
     def _relocation_references(self) -> list[Reference]:
-        occupied = Counter()
-        reviewed = Counter()
-        for row in self.rows:
-            if row["status"] == "rejected":
-                continue
-            sites = [parse_int(row["site_va"])]
-            if row["paired_site_va"]:
-                sites.append(parse_int(row["paired_site_va"]))
-            for site in sites:
-                occupied[site] += 1
-                if row["status"] == "reviewed":
-                    reviewed[site] += 1
+        live = [row for row in self.rows if row["status"] != "rejected"]
+        occupied = ambiguous_sites(live)
+        reviewed = ambiguous_sites(row for row in live if row["status"] == "reviewed")
 
         out: list[Reference] = []
         for row in self.rows:
@@ -188,10 +194,7 @@ class Evidence:
             tier = "candidate"
             byte_reason = self._byte_reason(row, owner)
             overlap_counts = reviewed if row["status"] == "reviewed" else occupied
-            overlaps = (
-                overlap_counts[site] > 1
-                or paired is not None and overlap_counts[paired] > 1
-            )
+            overlaps = site in overlap_counts or paired is not None and paired in overlap_counts
             if row["status"] == "rejected":
                 tier, reason = "rejected", "candidate-rejected"
             elif byte_reason:
@@ -236,7 +239,8 @@ class Evidence:
                     and row.get("target_name")):
                 try:
                     referent = named_data_referent(
-                        self.catalog, self.image, sanitize_symbol(row["target_name"], ""))
+                        self.catalog, referent_image(self.image, target),
+                        sanitize_symbol(row["target_name"], ""))
                 except ValueError as error:
                     tier, reason = "candidate", str(error)
 
@@ -269,7 +273,12 @@ class Evidence:
             payload = self.img.read(function.va, function.body_size)
             if payload is None:
                 continue
-            graph = build_graph(function, payload, self.idx)
+            # A proven switch table resolves a game function's `jr` into
+            # in-function cases. A Sony member's `jr` stays unresolved: only
+            # its own member patterns (data_reachability) may exempt it.
+            graph = build_graph(
+                function, payload, self.idx, None if function.vendored else self.img.u32
+            )
             for edge in graph.edges:
                 if edge.kind not in {
                     "call",

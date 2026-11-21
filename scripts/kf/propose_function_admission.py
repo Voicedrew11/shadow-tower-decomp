@@ -25,7 +25,9 @@ from scripts.kf.retail import (
 )
 
 
-ADMITTED_CONFIDENCE = {"strong", "strong-leaf", "call-target", "call-split", "call-extend"}
+ADMITTED_CONFIDENCE = {
+    "strong", "strong-leaf", "call-target", "call-split", "call-extend", "switch-extend",
+}
 FUNCTION_CONFIDENCE = {
     "strong": "mips-frame-carve",
     "strong-leaf": "mips-return-carve",
@@ -103,7 +105,20 @@ def proposed_functions(
         owner["body_size"] = format_size(parse_int(owner["body_size"]) + delta)
         owner["note"] = f"{owner['note']}; start moved to jal target ({candidate['note']})"
         by_start[(candidate["image"], start)] = owner
-    candidates = [item for item in candidates if item["confidence"] != "call-extend"]
+    # A switch-extend candidate grows its owner over the switch's case bodies.
+    for candidate in (item for item in candidates if item["confidence"] == "switch-extend"):
+        owner = by_start[(candidate["image"], parse_int(candidate["owner_va"]))]
+        owner_start = parse_int(owner["va"])
+        start = parse_int(candidate["va"])
+        end = parse_int(candidate["return_va"]) + 8
+        if owner_start + parse_int(owner["size"]) != start or end <= start:
+            raise ValueError(f"invalid switch extension of {candidate['image']} {owner['va']}")
+        owner["size"] = format_size(end - owner_start)
+        owner["body_size"] = format_size(end - owner_start)
+        owner["note"] = f"{owner['note']}; extended over its switch cases ({candidate['note']})"
+    candidates = [
+        item for item in candidates if item["confidence"] not in {"call-extend", "switch-extend"}
+    ]
     intervals: dict[str, list[tuple[int, int]]] = defaultdict(list)
     for row in current:
         start = parse_int(row["va"])

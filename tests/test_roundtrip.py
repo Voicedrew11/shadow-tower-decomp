@@ -98,6 +98,23 @@ class PlacementTests(unittest.TestCase):
         plan(ELFFile(io.BytesIO(obj())), sample, result)
         self.assertIn('unclaimed-section', kinds(result))
 
+    def test_literal_only_sdata_is_placed_by_its_sdata_claim(self):
+        sample = replace(unit(), data=(unit().data[1],), sdata=(BASE + 0x300, 8))
+        blob = obj(data=b'', data_symbols=(), data_relocations=(), sdata=b'ST\x00\x00;1\x00\x00')
+        result = UnitResult(sample.image, sample.unit, 'synthetic')
+        bases = plan(ELFFile(io.BytesIO(blob)), sample, result)
+        self.assertNotIn('unclaimed-section', kinds(result))
+        self.assertEqual(bases['.sdata'], BASE + 0x300)
+
+    def test_sdata_claim_does_not_override_a_data_claim_base(self):
+        small = Datum(BASE + 0x300, 4, 'small', 'load', section='.sdata')
+        sample = replace(unit(), data=(small, unit().data[1]), sdata=(BASE + 0x304, 4))
+        blob = obj(data=b'', data_symbols=(), data_relocations=(), sdata=bytes(8),
+                   sdata_symbols=(DefinedSymbol('small', 0, 4, STT_OBJECT),))
+        result = UnitResult(sample.image, sample.unit, 'synthetic')
+        bases = plan(ELFFile(io.BytesIO(blob)), sample, result)
+        self.assertEqual(bases['.sdata'], BASE + 0x300)
+
     def test_missing_owned_symbol_is_not_inferred_from_section_size(self):
         result = UnitResult('GAME.EXE', 'game.control', 'synthetic')
         plan(ELFFile(io.BytesIO(obj(data_symbols=(), data_relocations=DATA_RELOCS[:2]))),
@@ -250,6 +267,22 @@ class LinkerTests(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
+
+
+class OverlayAddressBookTests(unittest.TestCase):
+    def test_overlay_externals_resolve_to_host_identities_outside_its_window(self):
+        from scripts.kf.retail import IMAGE_LAYOUTS
+        from scripts.kf.roundtrip import address_book
+
+        book = address_book("FDAT_002.BIN")
+        self.assertEqual(book["fdat_801eb7ac"], {0x801EB7AC})
+        # LIBGTE rcos is linked in ST.EXE; the overlay calls it there.
+        self.assertEqual(book["rcos"], {0x800744C4})
+        layout = IMAGE_LAYOUTS["FDAT_002.BIN"]
+        host = address_book("ST.EXE")
+        for name, addresses in book.items():
+            if name in host and name != "fdat_801eb7ac":
+                self.assertFalse(any(layout.contains(va) for va in addresses), name)
 
 
 class LinkLabelTests(unittest.TestCase):

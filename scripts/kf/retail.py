@@ -141,6 +141,21 @@ def _load_gp(path: Path) -> dict[str, int]:
 
 
 IMAGE_GP = _load_gp(IMAGES_CONFIG)
+
+
+def referent_image(image: str, va: int) -> str:
+    """The image whose inventories own an address that `image`'s code references.
+
+    An overlay extends its host program at run time: its calls and data
+    references outside its own load window reach the host's functions, data
+    and BSS (an FDAT overlay calls into ST.EXE). Those referents keep the
+    host's identities. Every other address, and every address seen from a
+    root program, belongs to the referencing image itself.
+    """
+    source = OVERLAY_SOURCES.get(image)
+    if source is None or IMAGE_LAYOUTS[image].contains(va):
+        return image
+    return source.host
 IMAGE_ORDER = {image: index for index, image in enumerate(IMAGE_LAYOUTS)}
 IMAGE_KEYS = tuple(image_key(image) for image in IMAGE_LAYOUTS)
 IMAGE_NAMES = {image_key(image): image for image in IMAGE_LAYOUTS}
@@ -207,10 +222,14 @@ VENDORED_FUNCTION_FIELDS = (
 
 # Confidence names carry the SDK release they were proven against: `sdk42`
 # for the supplied archives, `psyq420` for a ghidra_psx_ldr signature set.
+# `relink-map-sdk42` marks a member the byte-identical native relink's PSYLINK
+# map places: too short or too static for a function ID (END.EXE StSetMask,
+# STR.EXE's and TITLE.EXE's relink-placed LIBSND/LIBSPU/LIBPAD members).
 VENDORED_CONFIDENCE = re.compile(
     r"fid-sdk\d+(?:-ambiguous)?"
     r"|exact-sdk\d+(?:-short|-ambiguous|-complete)?"
     r"|psyq\d{3,4}-signature(?:-ambiguous)?"
+    r"|relink-map-sdk\d+"
     r"|sdk-lineage-supported"
 )
 
@@ -494,7 +513,8 @@ def validate_config(config_dir: Path, exe_dir: Path | None = None) -> dict[str, 
             and row["opcode"] == "jal"
             and row["channel"] == "reachable-code"
             and row["target_region"] == "load"
-            and (row["image"], target) not in starts
+            # An overlay's call into its host names the host's function.
+            and (referent_image(row["image"], target), target) not in starts
         ):
             raise ValueError(
                 f"{reloc_path}: reachable call target lacks a function row {row!r}"

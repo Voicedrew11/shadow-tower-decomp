@@ -27,14 +27,18 @@ from scripts.kf.allocation_notes import read_requests
 from scripts.kf.delink import load_catalog, sanitize_symbol
 from scripts.kf.manifest import Unit, load as load_manifest
 from scripts.kf.paths import BUILD, RETAIL_CONFIG
-from scripts.kf.retail import IMAGE_GP, IMAGE_KEYS, IMAGE_LAYOUTS, IMAGE_NAMES, read_tsv
+from scripts.kf.retail import (
+    IMAGE_GP, IMAGE_KEYS, IMAGE_LAYOUTS, IMAGE_NAMES, OVERLAY_SOURCES, read_tsv,
+)
 from scripts.kf.sema.image import RetailImage
 
 
-SECTIONS = {".text": "SHT_PROGBITS", ".rodata": "SHT_PROGBITS",
+SECTIONS = {".text": "SHT_PROGBITS", ".rodata": "SHT_PROGBITS", ".rdata": "SHT_PROGBITS",
             ".data": "SHT_PROGBITS", ".sdata": "SHT_PROGBITS", ".bss": "SHT_NOBITS",
             ".sbss": "SHT_NOBITS"}
 LINKER = "mipsel-linux-gnu-ld"
+# Sections a claimed COMMON request may be placed in (see named_common_bss_claim).
+COMMON_SECTIONS = (".bss", ".sbss")
 SYMBOL_NAME = re.compile(r"[A-Za-z_$][A-Za-z0-9_$]*\Z")
 ADDRESS_NAME = re.compile(r"DAT_([0-9a-fA-F]{8})\Z")
 
@@ -59,13 +63,17 @@ class UnitResult:
     relocation_rows: int = 0
     linker_ran: bool = False
     linker_diagnostics: str = ""
+    merged_commons: list[dict] = field(default_factory=list)
 
     def issue(self, kind: str, **details: object) -> None:
         self.issues.append({"kind": kind, **details})
 
 
 def address_book(image: str, config_dir: Path = RETAIL_CONFIG) -> dict[str, set[int]]:
-    """Image-local input identities only; never infer S from delinker output."""
+    """Input identities only; never infer S from delinker output.
+
+    An overlay also sees its host's identities outside its own load window.
+    """
     book: dict[str, set[int]] = defaultdict(set)
     catalog = load_catalog(config_dir)
     for item in (*catalog.functions[image], *catalog.data[image]):
@@ -77,6 +85,14 @@ def address_book(image: str, config_dir: Path = RETAIL_CONFIG) -> dict[str, set[
             book[sanitize_symbol(row["name"], f"DAT_{va:08x}")].add(va)
     for name, va in link_labels(image, config_dir).items():
         book[name].add(va)
+    source = OVERLAY_SOURCES.get(image)
+    if source is not None:
+        # An overlay's external references outside its own window resolve to
+        # its host's identities (retail.referent_image); its own names win.
+        layout = IMAGE_LAYOUTS[image]
+        for name, addresses in address_book(source.host, config_dir).items():
+            if name not in book and not any(layout.contains(va) for va in addresses):
+                book[name] = set(addresses)
     return dict(book)
 
 
@@ -95,24 +111,164 @@ def link_labels(image: str, config_dir: Path = RETAIL_CONFIG) -> dict[str, int]:
     return labels
 
 
+@dataclass(frozen=True)
+class Definition:
+    """An initialized global datum in an image's load payload, and its owner."""
+
+    symbol: str
+    va: int
+    size: int
+    owner: str  # the claiming unit, or "config" for a curated identity only
+    storage: str = "load"  # "bss": COMMON storage an earlier object allocated
+
+
+def initialized_definitions(image: str, units: tuple[Unit, ...] = (),
+                            config_dir: Path = RETAIL_CONFIG) -> dict[str, Definition]:
+    """Global initialized definitions a COMMON request of `image` can merge into.
+
+    A curated `load`-storage identity, or a unit's `load` DATA() claim, whose
+    extent lies inside the PS-X EXE payload: initialized storage that the
+    linker cannot have allocated for a COMMON request (that goes to BSS).
+    """
+    from scripts.kf.inventory import load_data_identities
+    from scripts.kf.retail import IMAGE_LAYOUTS
+
+    layout = IMAGE_LAYOUTS.get(image)
+    if layout is None:
+        return {}
+    found: dict[str, Definition] = {}
+    for identity in load_data_identities(config_dir).values():
+        if identity.image == image and identity.storage == "load" and identity.scope == "global":
+            symbol = sanitize_symbol(identity.name, f"DAT_{identity.va:08x}")
+            found[symbol] = Definition(symbol, identity.va, identity.size, "config")
+    for unit in units:
+        if unit.image != image:
+            continue
+        for datum in unit.data:
+            if datum.storage == "load" and datum.scope == "global":
+                found[datum.symbol] = Definition(datum.symbol, datum.va, datum.size, unit.unit)
+    return {symbol: item for symbol, item in found.items()
+            if item.size > 0 and layout.contains(item.va, item.size)}
+
+
+def psylink_common_alignment(size: int) -> int:
+    """PSYLINK 2.73D's alignment of a COMMON request of `size` bytes.
+
+    The largest power of two not above the size, capped at 8 (sizes 1, 2,
+    3, 4, 6, 8 align to 1, 2, 2, 4, 4, 8; docs/executable-linking.md).
+    """
+    alignment = 1
+    while alignment < 8 and alignment * 2 <= size:
+        alignment *= 2
+    return alignment
+
+
+def allocated_definitions(image: str, units: tuple[Unit, ...] = (),
+                          config_dir: Path = RETAIL_CONFIG) -> dict[str, Definition]:
+    """Global BSS storage a later COMMON request of `image` can merge into.
+
+    PSYLINK allocates a COMMON name once, in the batch of the first object
+    that requests it (that object's fixed .sbss/.bss, then its new COMMON
+    names in symbol-hash bucket order, contiguous apart from size alignment);
+    a later object's request of the same name contributes no storage. A
+    curated global `bss` identity, or a unit's global .bss/.sbss DATA()
+    claim, is such storage. `usable_definitions` keeps a unit-owned one only
+    for units linked after its owner.
+    """
+    from scripts.kf.inventory import load_data_identities
+
+    if image not in IMAGE_LAYOUTS:
+        return {}
+    found: dict[str, Definition] = {}
+    for identity in load_data_identities(config_dir).values():
+        if identity.image == image and identity.storage == "bss" and identity.scope == "global":
+            symbol = sanitize_symbol(identity.name, f"DAT_{identity.va:08x}")
+            found[symbol] = Definition(symbol, identity.va, identity.size, "config", "bss")
+    for unit in units:
+        if unit.image != image:
+            continue
+        for datum in unit.data:
+            if (datum.storage == "bss" and datum.scope == "global"
+                    and datum.section_name in COMMON_SECTIONS):
+                found[datum.symbol] = Definition(datum.symbol, datum.va, datum.size,
+                                                 unit.unit, "bss")
+    return {symbol: item for symbol, item in found.items() if item.size > 0}
+
+
+def usable_definitions(definitions: dict[str, Definition], unit: Unit,
+                       units: tuple[Unit, ...]) -> dict[str, Definition]:
+    """The definitions a COMMON request of `unit` may merge into.
+
+    Initialized data and curated BSS identities always qualify; a unit's BSS
+    claim only when that unit links (manifest order) before `unit`, since an
+    earlier request of the name would itself be the allocation.
+    """
+    order = {item.unit: index for index, item in enumerate(units) if item.image == unit.image}
+    position = order.get(unit.unit, len(order))
+    return {symbol: item for symbol, item in definitions.items()
+            if item.storage != "bss" or item.owner == "config"
+            or order.get(item.owner, len(order)) < position}
+
+
+def merged_common(symbol, unit: Unit,
+                  definitions: dict[str, Definition] | None) -> Definition | None:
+    """The definition elsewhere that a COMMON request merges into.
+
+    A tentative definition (`u_long x;`) is emitted as COMMON. PSYLINK, like
+    GNU ld, allocates COMMON storage only when no object defines the symbol
+    and no earlier object requested it; otherwise the request merges into
+    that storage and contributes none of its own. A unit may therefore keep
+    a tentative definition of a global another unit initializes, or that an
+    earlier object allocated (ASPSX needs its size to emit the -G8
+    $gp-relative access an `extern` would not get). Admitted only when this
+    unit claims no datum of that name and the definition is a global datum
+    of the image (initialized_definitions, allocated_definitions), at least
+    as large as the request and aligned for it; anything else stays an
+    unsupported COMMON allocation.
+    """
+    if definitions is None or any(datum.symbol == symbol.name for datum in unit.data):
+        return None
+    definition = definitions.get(symbol.name)
+    alignment = symbol['st_value']
+    if definition is not None and definition.storage == "bss":
+        # The object's COMMON value is its section alignment, not PSYLINK's.
+        alignment = psylink_common_alignment(symbol['st_size'])
+    if (definition is None or definition.owner == unit.unit
+            or symbol['st_info']['bind'] != 'STB_GLOBAL'
+            or not 0 < symbol['st_size'] <= definition.size
+            or alignment <= 0 or alignment & (alignment - 1)
+            or definition.va % alignment):
+        return None
+    return definition
+
+
 def named_common_bss_claim(elf: ELFFile, unit: Unit):
     """Recognize one fully claimed COMMON request that ld can place as BSS.
 
     COMMON carries no input section. Only a single, exact, globally named
     reservation is admissible here; the claimed address supplies its placement
     and must satisfy the request's alignment. Other COMMON remains unresolved.
+    The claim's section is `.bss`, or `.sbss` for a small request a -G8 unit
+    leaves to the linker; it must be the only claim there, and the object's
+    section of that name must be empty.
     """
     symtab = elf.get_section_by_name(".symtab")
     if symtab is None:
         return None
     common = [symbol for symbol in symtab.iter_symbols()
               if symbol['st_shndx'] == 'SHN_COMMON']
-    claims = [datum for datum in unit.data if datum.section_name == '.bss']
-    bss = elf.get_section_by_name('.bss')
-    if (len(common) != 1 or len(claims) != 1
-            or (bss is not None and bss['sh_size'])):
+    if len(common) != 1:
         return None
-    symbol, claim = common[0], claims[0]
+    symbol = common[0]
+    named = [datum for datum in unit.data
+             if datum.symbol == symbol.name and datum.section_name in COMMON_SECTIONS]
+    if len(named) != 1:
+        return None
+    claim = named[0]
+    claims = [datum for datum in unit.data if datum.section_name == claim.section_name]
+    section = elf.get_section_by_name(claim.section_name)
+    if len(claims) != 1 or (section is not None and section['sh_size']):
+        return None
     alignment = symbol['st_value']
     if (not symbol.name or symbol.name != claim.symbol
             or symbol['st_info']['bind'] != 'STB_GLOBAL'
@@ -125,8 +281,13 @@ def named_common_bss_claim(elf: ELFFile, unit: Unit):
     return claim
 
 
-def plan(elf: ELFFile, unit: Unit, result: UnitResult) -> dict[str, int]:
-    """Derive one section base from every claim and actual ELF symbol offset."""
+def plan(elf: ELFFile, unit: Unit, result: UnitResult,
+         definitions: dict[str, Definition] | None = None) -> dict[str, int]:
+    """Derive one section base from every claim and actual ELF symbol offset.
+
+    `definitions` (initialized_definitions) lets a COMMON request that merges
+    into another unit's initialized datum resolve as a reference.
+    """
     if (elf.elfclass != 32 or not elf.little_endian
             or elf['e_machine'] != 'EM_MIPS' or elf['e_type'] != 'ET_REL'):
         result.issue("unsupported-object-format")
@@ -155,7 +316,14 @@ def plan(elf: ELFFile, unit: Unit, result: UnitResult) -> dict[str, int]:
         if (symbol['st_shndx'] == 'SHN_COMMON'
                 and (common_claim is None or symbol.name != common_claim.symbol)):
             claim = named_bss.get(symbol.name)
-            if claim is None:
+            merged = merged_common(symbol, unit, definitions)
+            if merged is not None:
+                result.merged_commons.append({
+                    "symbol": symbol.name, "requested_size": symbol['st_size'],
+                    "alignment": symbol['st_value'], "definition_va": merged.va,
+                    "definition_size": merged.size, "definition_owner": merged.owner,
+                    "definition_storage": merged.storage})
+            elif claim is None:
                 result.issue("unsupported-common-allocation", symbol=symbol.name,
                              size=symbol['st_size'], alignment=symbol['st_value'])
             else:
@@ -183,7 +351,7 @@ def plan(elf: ELFFile, unit: Unit, result: UnitResult) -> dict[str, int]:
         index = symbol['st_shndx']
         is_claimed_common = (common_claim is not None and name == common_claim.symbol
                              and index == 'SHN_COMMON')
-        actual_section = ('.bss' if is_claimed_common else
+        actual_section = (common_claim.section_name if is_claimed_common else
                           elf.get_section(index).name if isinstance(index, int) else index)
         if actual_section != section_name or symbol['st_size'] != size:
             result.issue("owned-symbol-layout", symbol=name, expected_section=section_name,
@@ -206,9 +374,15 @@ def plan(elf: ELFFile, unit: Unit, result: UnitResult) -> dict[str, int]:
     text_extent = unit.functions[-1].end - unit.functions[0].va if unit.functions else 0
     if unit.functions:
         sizes[".text"] = text_extent
-    if unit.rodata:
-        bases[".rodata"].add(unit.rodata[0])
-        sizes[".rodata"] = unit.rodata[1]
+    for name, extent in ((".rodata", unit.rodata), (".rdata", unit.jumptables)):
+        if extent:
+            bases[name].add(extent[0])
+            sizes[name] = extent[1]
+    if unit.sdata and not witnesses[".sdata"]:
+        # A unit whose .sdata holds only its SDATA() literals: the target
+        # module packs those ranges alone, so the first starts the section.
+        bases[".sdata"].add(unit.sdata[0][0])
+        sizes[".sdata"] = unit.sdata[-1][0] + unit.sdata[-1][1] - unit.sdata[0][0]
     placed = {}
     seen = set()
     for section in elf.iter_sections():
@@ -227,7 +401,7 @@ def plan(elf: ELFFile, unit: Unit, result: UnitResult) -> dict[str, int]:
             result.issue("unsupported-allocated-section", section=name, size=size)
             continue
         if not size:
-            if name == '.bss' and common_claim is not None:
+            if common_claim is not None and name == common_claim.section_name:
                 continue
             if sizes[name]:
                 result.issue("owned-section-extent", section=name, size=0, claimed=sizes[name])
@@ -256,7 +430,7 @@ def plan(elf: ELFFile, unit: Unit, result: UnitResult) -> dict[str, int]:
             name, base, size, sizes[name], "bss" if name in {".bss", ".sbss"} else "load",
         ))
     if common_claim is not None:
-        name, size, base = '.bss', common_claim.size, common_claim.va
+        name, size, base = common_claim.section_name, common_claim.size, common_claim.va
         if (name in seen and elf.get_section_by_name(name)['sh_size']
                 or sizes[name] != size or bases[name] != {base}):
             result.issue('owned-section-extent', section=name, size=size,
@@ -371,9 +545,11 @@ def verify_unit(unit: Unit, image: RetailImage, book: dict[str, set[int]],
         with tempfile.TemporaryDirectory(prefix="link-", dir=scratch) as temporary:
             root = Path(temporary)
             script = root / "retail.ld"
+            common = named_common_bss_claim(elf, unit)
+            common_section = common.section_name if common is not None else '.bss'
             script.write_text("SECTIONS {\n" + "\n".join(
                 f"  {name} {address:#x} : {{ *({name})"
-                + (" *(COMMON)" if name == '.bss' else "") + " }"
+                + (" *(COMMON)" if name == common_section else "") + " }"
                 for name, address in sorted(placed.items(), key=lambda item: item[1])
             ) + "\n  /DISCARD/ : { *(*) }\n}\n")
             linked = root / "linked.elf"

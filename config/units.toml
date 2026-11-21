@@ -30,3 +30,1263 @@ unit = "psx.main"
 image = "PSX.EXE"
 source = "src/psx/main.c"
 profile = "probe-gcc272cdk-o2-g8"
+
+[[unit]]
+unit = "str.main"
+image = "STR.EXE"
+source = "src/str/main.c"
+profile = "probe-gcc272cdk-o2-g8"
+
+[[unit]]
+unit = "st.main"
+image = "ST.EXE"
+source = "src/st/main.c"
+profile = "probe-gcc272cdk-o2-g8"
+
+[[unit]]
+unit = "st.loop"
+image = "ST.EXE"
+source = "src/st/loop.c"
+profile = "probe-gcc272cdk-o2-g8"
+
+[[unit]]
+unit = "st.memory"
+image = "ST.EXE"
+source = "src/st/memory.c"
+profile = "probe-gcc272cdk-o2-g0"
+
+[[unit]]
+unit = "st.heap"
+image = "ST.EXE"
+source = "src/st/heap.c"
+profile = "probe-gcc272cdk-o2-g0"
+
+[[unit]]
+unit = "st.cdreq"
+image = "ST.EXE"
+source = "src/st/cdreq.c"
+profile = "probe-gcc272cdk-o2-g0"
+
+[[unit]]
+unit = "st.cdpos"
+image = "ST.EXE"
+source = "src/st/cdpos.c"
+profile = "probe-gcc272cdk-o2-g0"
+
+[[unit]]
+unit = "st.cd"
+image = "ST.EXE"
+source = "src/st/cd.c"
+profile = "probe-gcc272cdk-o2-g8"
+
+[[unit]]
+unit = "st.view"
+image = "ST.EXE"
+source = "src/st/view.c"
+profile = "probe-gcc272cdk-o2-g8"
+
+[[unit]]
+unit = "st.texanim"
+image = "ST.EXE"
+source = "src/st/texanim.c"
+profile = "probe-gcc272cdk-o2-g0"
+
+[[unit]]
+unit = "st.gfx"
+image = "ST.EXE"
+source = "src/st/gfx.c"
+profile = "probe-gcc272cdk-o2-g0"
+
+[[unit]]
+unit = "st.prim"
+image = "ST.EXE"
+source = "src/st/prim.c"
+profile = "probe-gcc272cdk-o2-g0"
+
+[[unit]]
+unit = "st.mesh_draw"
+image = "ST.EXE"
+source = "src/st/mesh_draw.c"
+profile = "probe-gcc272cdk-o2-g0"
+
+[[unit]]
+unit = "st.mesh_draw_nccs"
+image = "ST.EXE"
+source = "src/st/mesh_draw_nccs.c"
+profile = "probe-gcc272cdk-o2-g0"
+
+[[unit]]
+unit = "st.mesh_draw_div"
+image = "ST.EXE"
+source = "src/st/mesh_draw_div.c"
+profile = "probe-gcc272cdk-o2-g0"
+
+[[unit]]
+unit = "st.mesh_draw_div_setup"
+image = "ST.EXE"
+source = "src/st/mesh_draw_div_setup.c"
+profile = "probe-gcc272cdk-o2-g0"
+
+[[unit]]
+unit = "st.vis_build"
+image = "ST.EXE"
+source = "src/st/vis_build.c"
+profile = "probe-gcc272cdk-o2-g0"
+
+[[unit]]
+unit = "st.vis_cull"
+image = "ST.EXE"
+source = "src/st/vis_cull.c"
+profile = "probe-gcc272cdk-o2-g0"
+
+[[unit]]
+unit = "st.vis_lists"
+image = "ST.EXE"
+source = "src/st/vis_lists.c"
+profile = "probe-gcc272cdk-o2-g0"
+
+[[unit]]
+unit = "st.world_transform"
+image = "ST.EXE"
+source = "src/st/world_transform.c"
+profile = "probe-gcc272cdk-o2-g0"
+
+[[unit]]
+unit = "st.world_draw"
+image = "ST.EXE"
+source = "src/st/world_draw.c"
+profile = "probe-gcc272cdk-o2-g0"
+
+[[unit]]
+unit = "st.quad"
+image = "ST.EXE"
+source = "src/st/quad.c"
+profile = "probe-gcc272cdk-o2-g8"
+
+[[unit]]
+unit = "st.fade"
+image = "ST.EXE"
+source = "src/st/fade.c"
+profile = "probe-gcc272cdk-o2-g0"
+
+[[unit]]
+unit = "st.model_draw"
+image = "ST.EXE"
+source = "src/st/model_draw.c"
+profile = "probe-gcc272cdk-o2-g8"
+
+[[unit]]
+unit = "st.bank"
+image = "ST.EXE"
+source = "src/st/bank.c"
+profile = "probe-gcc272cdk-o2-g0"
+
+[[unit]]
+unit = "st.bankload"
+image = "ST.EXE"
+source = "src/st/bankload.c"
+profile = "probe-gcc272cdk-o2-g0"
+
+[[unit]]
+unit = "st.slots"
+image = "ST.EXE"
+source = "src/st/slots.c"
+profile = "probe-gcc272cdk-o2-g0"
+
+[[unit]]
+unit = "st.objects"
+image = "ST.EXE"
+source = "src/st/objects.c"
+profile = "probe-gcc272cdk-o2-g8"
+
+[[unit]]
+unit = "st.objects2"
+image = "ST.EXE"
+source = "src/st/objects2.c"
+profile = "probe-gcc272cdk-o2-g8"
+
+[[unit]]
+unit = "st.hud"
+image = "ST.EXE"
+source = "src/st/hud.c"
+profile = "probe-gcc272cdk-o2-g8"
+
+[[unit]]
+unit = "st.ui"
+image = "ST.EXE"
+source = "src/st/ui.c"
+profile = "probe-gcc272cdk-o2-g8"
+
+[[unit]]
+unit = "st.tim"
+image = "ST.EXE"
+source = "src/st/tim.c"
+profile = "probe-gcc272cdk-o2-g0"
+
+[[unit]]
+unit = "st.light"
+image = "ST.EXE"
+source = "src/st/light.c"
+profile = "probe-gcc272cdk-o2-g0"
+
+[[unit]]
+unit = "st.anim"
+image = "ST.EXE"
+source = "src/st/anim.c"
+profile = "probe-gcc272cdk-o2-g0"
+
+[[unit]]
+unit = "st.anim_set"
+image = "ST.EXE"
+source = "src/st/anim_set.c"
+profile = "probe-gcc272cdk-o2-g0"
+
+[[unit]]
+unit = "st.effect"
+image = "ST.EXE"
+source = "src/st/effect.c"
+profile = "probe-gcc272cdk-o2-g0"
+
+[[unit]]
+unit = "st.effect_spawn"
+image = "ST.EXE"
+source = "src/st/effect_spawn.c"
+profile = "probe-gcc272cdk-o2-g0"
+
+[[unit]]
+unit = "st.effect_move"
+image = "ST.EXE"
+source = "src/st/effect_move.c"
+profile = "probe-gcc272cdk-o2-g0"
+
+[[unit]]
+unit = "st.effect_run"
+image = "ST.EXE"
+source = "src/st/effect_run.c"
+profile = "probe-gcc272cdk-o2-g0"
+
+[[unit]]
+unit = "st.player_8003bd14"
+image = "ST.EXE"
+source = "src/st/player_8003bd14.c"
+profile = "probe-gcc272cdk-o2-g8"
+
+[[unit]]
+unit = "st.player_8003c000"
+image = "ST.EXE"
+source = "src/st/player_8003c000.c"
+profile = "probe-gcc272cdk-o2-g8"
+
+[[unit]]
+unit = "st.player"
+image = "ST.EXE"
+source = "src/st/player.c"
+profile = "probe-gcc272cdk-o2-g8"
+
+[[unit]]
+unit = "st.player_8003e5e8"
+image = "ST.EXE"
+source = "src/st/player_8003e5e8.c"
+profile = "probe-gcc272cdk-o2-g8"
+
+[[unit]]
+unit = "st.area_a"
+image = "ST.EXE"
+source = "src/st/area_a.c"
+profile = "probe-gcc272cdk-o2-g8"
+
+[[unit]]
+unit = "st.area_cd"
+image = "ST.EXE"
+source = "src/st/area_cd.c"
+profile = "probe-gcc272cdk-o2-g8"
+
+[[unit]]
+unit = "st.vis_src"
+image = "ST.EXE"
+source = "src/st/vis_src.c"
+profile = "probe-gcc272cdk-o2-g0"
+
+[[unit]]
+unit = "st.vis_hit"
+image = "ST.EXE"
+source = "src/st/vis_hit.c"
+profile = "probe-gcc272cdk-o2-g0"
+
+[[unit]]
+unit = "st.vis_request"
+image = "ST.EXE"
+source = "src/st/vis_request.c"
+profile = "probe-gcc272cdk-o2-g0"
+
+[[unit]]
+unit = "st.math"
+image = "ST.EXE"
+source = "src/st/math.c"
+profile = "probe-gcc272cdk-o2-g0"
+
+[[unit]]
+unit = "st.vis_entry"
+image = "ST.EXE"
+source = "src/st/vis_entry.c"
+profile = "probe-gcc272cdk-o2-g0"
+
+[[unit]]
+unit = "st.vis_attack"
+image = "ST.EXE"
+source = "src/st/vis_attack.c"
+profile = "probe-gcc272cdk-o2-g0"
+
+[[unit]]
+unit = "st.vis_item"
+image = "ST.EXE"
+source = "src/st/vis_item.c"
+profile = "probe-gcc272cdk-o2-g0"
+
+[[unit]]
+unit = "st.vis_a"
+image = "ST.EXE"
+source = "src/st/vis_a.c"
+profile = "probe-gcc272cdk-o2-g0"
+
+[[unit]]
+unit = "st.vis_b_init"
+image = "ST.EXE"
+source = "src/st/vis_b_init.c"
+profile = "probe-gcc272cdk-o2-g0"
+
+[[unit]]
+unit = "st.vis_b_load"
+image = "ST.EXE"
+source = "src/st/vis_b_load.c"
+profile = "probe-gcc272cdk-o2-g0"
+
+[[unit]]
+unit = "st.vis_b"
+image = "ST.EXE"
+source = "src/st/vis_b.c"
+profile = "probe-gcc272cdk-o2-g0"
+
+[[unit]]
+unit = "st.vis_80050768"
+image = "ST.EXE"
+source = "src/st/vis_80050768.c"
+profile = "probe-gcc272cdk-o2-g8"
+
+[[unit]]
+unit = "st.vis_c"
+image = "ST.EXE"
+source = "src/st/vis_c.c"
+profile = "probe-gcc272cdk-o2-g0"
+
+[[unit]]
+unit = "st.vis_pickup"
+image = "ST.EXE"
+source = "src/st/vis_pickup.c"
+profile = "probe-gcc272cdk-o2-g0"
+
+[[unit]]
+unit = "st.vis_c_run"
+image = "ST.EXE"
+source = "src/st/vis_c_run.c"
+profile = "probe-gcc272cdk-o2-g0"
+
+[[unit]]
+unit = "st.vis_move"
+image = "ST.EXE"
+source = "src/st/vis_move.c"
+profile = "probe-gcc272cdk-o2-g0"
+
+[[unit]]
+unit = "st.xa"
+image = "ST.EXE"
+source = "src/st/xa.c"
+profile = "probe-gcc272cdk-o2-g0"
+
+[[unit]]
+unit = "st.xa_play"
+image = "ST.EXE"
+source = "src/st/xa_play.c"
+profile = "probe-gcc272cdk-o2-g8"
+
+[[unit]]
+unit = "st.item_spawn"
+image = "ST.EXE"
+source = "src/st/item_spawn.c"
+profile = "probe-gcc272cdk-o2-g0"
+
+[[unit]]
+unit = "st.item_use"
+image = "ST.EXE"
+source = "src/st/item_use.c"
+profile = "probe-gcc272cdk-o2-g0"
+
+[[unit]]
+unit = "st.item"
+image = "ST.EXE"
+source = "src/st/item.c"
+profile = "probe-gcc272cdk-o2-g0"
+
+[[unit]]
+unit = "st.save_counts"
+image = "ST.EXE"
+source = "src/st/save_counts.c"
+profile = "probe-gcc272cdk-o2-g0"
+
+[[unit]]
+unit = "st.save"
+image = "ST.EXE"
+source = "src/st/save.c"
+profile = "probe-gcc272cdk-o2-g0"
+
+[[unit]]
+unit = "st.save_io"
+image = "ST.EXE"
+source = "src/st/save_io.c"
+profile = "probe-gcc272cdk-o2-g0"
+
+[[unit]]
+unit = "st.pad"
+image = "ST.EXE"
+source = "src/st/pad.c"
+profile = "probe-gcc272cdk-o2-g0"
+
+[[unit]]
+unit = "st.sound"
+image = "ST.EXE"
+source = "src/st/sound.c"
+profile = "probe-gcc272cdk-o2-g0"
+
+[[unit]]
+unit = "st.sound_bank"
+image = "ST.EXE"
+source = "src/st/sound_bank.c"
+profile = "probe-gcc272cdk-o2-g0"
+
+[[unit]]
+unit = "st.menu"
+image = "ST.EXE"
+source = "src/st/menu.c"
+profile = "probe-gcc272cdk-o2-g8"
+
+[[unit]]
+unit = "st.menu_vram"
+image = "ST.EXE"
+source = "src/st/menu_vram.c"
+profile = "probe-gcc272cdk-o2-g8"
+
+[[unit]]
+unit = "st.equip_menu"
+image = "ST.EXE"
+source = "src/st/equip_menu.c"
+profile = "probe-gcc272cdk-o2-g8"
+
+[[unit]]
+unit = "st.idgrid"
+image = "ST.EXE"
+source = "src/st/idgrid.c"
+profile = "probe-gcc272cdk-o2-g8"
+
+[[unit]]
+unit = "title.main"
+image = "TITLE.EXE"
+source = "src/title/main.c"
+profile = "probe-gcc272cdk-o2-g8"
+
+[[unit]]
+unit = "optxt.main"
+image = "OPTXT.EXE"
+source = "src/optxt/main.c"
+profile = "probe-gcc272cdk-o2-g8"
+
+[[unit]]
+unit = "optxt.state"
+image = "OPTXT.EXE"
+source = "src/optxt/state.c"
+profile = "probe-gcc272cdk-o2-g8"
+
+# VS.EXE: VS's own copies of ST.EXE functions (src/vs/); shared fragments in src/lib/.
+
+[[unit]]
+unit = "vs.snd_800129bc"
+image = "VS.EXE"
+source = "src/vs/snd_800129bc.c"
+profile = "probe-gcc272cdk-o2-g8"
+
+[[unit]]
+unit = "vs.fighter_800140d8"
+image = "VS.EXE"
+source = "src/vs/fighter_800140d8.c"
+profile = "probe-gcc272cdk-o2-g8"
+
+[[unit]]
+unit = "vs.camera_80014480"
+image = "VS.EXE"
+source = "src/vs/camera_80014480.c"
+profile = "probe-gcc272cdk-o2-g8"
+
+[[unit]]
+unit = "vs.frame_80015020"
+image = "VS.EXE"
+source = "src/vs/frame_80015020.c"
+profile = "probe-gcc272cdk-o2-g8"
+
+[[unit]]
+unit = "vs.main"
+image = "VS.EXE"
+source = "src/vs/main.c"
+profile = "probe-gcc272cdk-o2-g8"
+
+[[unit]]
+unit = "vs.gfx_80016ca8"
+image = "VS.EXE"
+source = "src/vs/gfx_80016ca8.c"
+profile = "probe-gcc272cdk-o2-g8"
+
+[[unit]]
+unit = "vs.menu_80016f10"
+image = "VS.EXE"
+source = "src/vs/menu_80016f10.c"
+profile = "probe-gcc272cdk-o2-g8"
+
+[[unit]]
+unit = "vs.team_8001789c"
+image = "VS.EXE"
+source = "src/vs/team_8001789c.c"
+profile = "probe-gcc272cdk-o2-g8"
+
+[[unit]]
+unit = "vs.gfx_80017bc4"
+image = "VS.EXE"
+source = "src/vs/gfx_80017bc4.c"
+profile = "probe-gcc272cdk-o2-g8"
+
+[[unit]]
+unit = "vs.team_80017c84"
+image = "VS.EXE"
+source = "src/vs/team_80017c84.c"
+profile = "probe-gcc272cdk-o2-g8"
+
+[[unit]]
+unit = "vs.tim_80018240"
+image = "VS.EXE"
+source = "src/vs/tim_80018240.c"
+profile = "probe-gcc272cdk-o2-g8"
+
+[[unit]]
+unit = "vs.team_800182ec"
+image = "VS.EXE"
+source = "src/vs/team_800182ec.c"
+profile = "probe-gcc272cdk-o2-g8"
+
+[[unit]]
+unit = "vs.team_80018c84"
+image = "VS.EXE"
+source = "src/vs/team_80018c84.c"
+profile = "probe-gcc272cdk-o2-g8"
+
+[[unit]]
+unit = "vs.save_800193e8"
+image = "VS.EXE"
+source = "src/vs/save_800193e8.c"
+profile = "probe-gcc272cdk-o2-g8"
+
+[[unit]]
+unit = "vs.pick_8001960c"
+image = "VS.EXE"
+source = "src/vs/pick_8001960c.c"
+profile = "probe-gcc272cdk-o2-g8"
+
+[[unit]]
+unit = "vs.card_8001a124"
+image = "VS.EXE"
+source = "src/vs/card_8001a124.c"
+profile = "probe-gcc272cdk-o2-g8"
+
+[[unit]]
+unit = "vs.card_8001c8b8"
+image = "VS.EXE"
+source = "src/vs/card_8001c8b8.c"
+profile = "probe-gcc272cdk-o2-g8"
+
+[[unit]]
+unit = "vs.stub_8001ca10"
+image = "VS.EXE"
+source = "src/vs/stub_8001ca10.c"
+profile = "probe-gcc272cdk-o2-g8"
+
+[[unit]]
+unit = "vs.cd_8001cb34"
+image = "VS.EXE"
+source = "src/vs/cd_8001cb34.c"
+profile = "probe-gcc272cdk-o2-g8"
+
+[[unit]]
+unit = "vs.ui_8001d3f0"
+image = "VS.EXE"
+source = "src/vs/ui_8001d3f0.c"
+profile = "probe-gcc272cdk-o2-g8"
+
+[[unit]]
+unit = "vs.ui_80020384"
+image = "VS.EXE"
+source = "src/vs/ui_80020384.c"
+profile = "probe-gcc272cdk-o2-g8"
+
+[[unit]]
+unit = "vs.ui_800207d4"
+image = "VS.EXE"
+source = "src/vs/ui_800207d4.c"
+profile = "probe-gcc272cdk-o2-g8"
+
+[[unit]]
+unit = "vs.ui_80020aa4"
+image = "VS.EXE"
+source = "src/vs/ui_80020aa4.c"
+profile = "probe-gcc272cdk-o2-g8"
+
+[[unit]]
+unit = "vs.ui_80021140"
+image = "VS.EXE"
+source = "src/vs/ui_80021140.c"
+profile = "probe-gcc272cdk-o2-g8"
+
+[[unit]]
+unit = "vs.ui_80021984"
+image = "VS.EXE"
+source = "src/vs/ui_80021984.c"
+profile = "probe-gcc272cdk-o2-g8"
+
+[[unit]]
+unit = "vs.ui_80021c14"
+image = "VS.EXE"
+source = "src/vs/ui_80021c14.c"
+profile = "probe-gcc272cdk-o2-g8"
+
+[[unit]]
+unit = "vs.ui_80021cfc"
+image = "VS.EXE"
+source = "src/vs/ui_80021cfc.c"
+profile = "probe-gcc272cdk-o2-g8"
+
+[[unit]]
+unit = "vs.ui_800228d8"
+image = "VS.EXE"
+source = "src/vs/ui_800228d8.c"
+profile = "probe-gcc272cdk-o2-g8"
+
+[[unit]]
+unit = "vs.ui_80022a00"
+image = "VS.EXE"
+source = "src/vs/ui_80022a00.c"
+profile = "probe-gcc272cdk-o2-g8"
+
+[[unit]]
+unit = "vs.ui_80022f14"
+image = "VS.EXE"
+source = "src/vs/ui_80022f14.c"
+profile = "probe-gcc272cdk-o2-g8"
+
+[[unit]]
+unit = "vs.model_8002345c"
+image = "VS.EXE"
+source = "src/vs/model_8002345c.c"
+profile = "probe-gcc272cdk-o2-g8"
+
+[[unit]]
+unit = "vs.anim_80023764"
+image = "VS.EXE"
+source = "src/vs/anim_80023764.c"
+profile = "probe-gcc272cdk-o2-g0"
+
+[[unit]]
+unit = "vs.anim_8002429c"
+image = "VS.EXE"
+source = "src/vs/anim_8002429c.c"
+profile = "probe-gcc272cdk-o2-g0"
+
+[[unit]]
+unit = "vs.model_80024b5c"
+image = "VS.EXE"
+source = "src/vs/model_80024b5c.c"
+profile = "probe-gcc272cdk-o2-g8"
+
+[[unit]]
+unit = "vs.anim_80025670"
+image = "VS.EXE"
+source = "src/vs/anim_80025670.c"
+profile = "probe-gcc272cdk-o2-g0"
+
+[[unit]]
+unit = "vs.prim_80025878"
+image = "VS.EXE"
+source = "src/vs/prim_80025878.c"
+profile = "probe-gcc272cdk-o2-g0"
+
+[[unit]]
+unit = "vs.mesh_800258f0"
+image = "VS.EXE"
+source = "src/vs/mesh_800258f0.c"
+profile = "probe-gcc272cdk-o2-g8"
+
+[[unit]]
+unit = "vs.anim_80027c64"
+image = "VS.EXE"
+source = "src/vs/anim_80027c64.c"
+profile = "probe-gcc272cdk-o2-g0"
+
+[[unit]]
+unit = "vs.anim_80027f30"
+image = "VS.EXE"
+source = "src/vs/anim_80027f30.c"
+profile = "probe-gcc272cdk-o2-g0"
+
+[[unit]]
+unit = "vs.mirror_80028474"
+image = "VS.EXE"
+source = "src/vs/mirror_80028474.c"
+profile = "probe-gcc272cdk-o2-g8"
+
+[[unit]]
+unit = "vs.model_80028914"
+image = "VS.EXE"
+source = "src/vs/model_80028914.c"
+profile = "probe-gcc272cdk-o2-g8"
+
+[[unit]]
+unit = "vs.anim_80028d94"
+image = "VS.EXE"
+source = "src/vs/anim_80028d94.c"
+profile = "probe-gcc272cdk-o2-g0"
+
+[[unit]]
+unit = "vs.fade_80028fcc"
+image = "VS.EXE"
+source = "src/vs/fade_80028fcc.c"
+profile = "probe-gcc272cdk-o2-g8"
+
+[[unit]]
+unit = "vs.timer_800297fc"
+image = "VS.EXE"
+source = "src/vs/timer_800297fc.c"
+profile = "probe-gcc272cdk-o2-g0"
+
+[[unit]]
+unit = "vs.gauge_80029b10"
+image = "VS.EXE"
+source = "src/vs/gauge_80029b10.c"
+profile = "probe-gcc272cdk-o2-g8"
+
+[[unit]]
+unit = "vs.hud_80029f28"
+image = "VS.EXE"
+source = "src/vs/hud_80029f28.c"
+profile = "probe-gcc272cdk-o2-g8"
+
+[[unit]]
+unit = "vs.name_8002ad40"
+image = "VS.EXE"
+source = "src/vs/name_8002ad40.c"
+profile = "probe-gcc272cdk-o2-g0"
+
+[[unit]]
+unit = "vs.shadow_8002bfe8"
+image = "VS.EXE"
+source = "src/vs/shadow_8002bfe8.c"
+profile = "probe-gcc272cdk-o2-g0"
+
+[[unit]]
+unit = "vs.guard_8002c2c4"
+image = "VS.EXE"
+source = "src/vs/guard_8002c2c4.c"
+profile = "probe-gcc272cdk-o2-g0"
+
+[[unit]]
+unit = "vs.texanim_8002d710"
+image = "VS.EXE"
+source = "src/vs/texanim_8002d710.c"
+profile = "probe-gcc272cdk-o2-g0"
+
+[[unit]]
+unit = "vs.spark_8002d738"
+image = "VS.EXE"
+source = "src/vs/spark_8002d738.c"
+profile = "probe-gcc272cdk-o2-g0"
+
+[[unit]]
+unit = "vs.spark_8002d998"
+image = "VS.EXE"
+source = "src/vs/spark_8002d998.c"
+profile = "probe-gcc272cdk-o2-g0"
+
+[[unit]]
+unit = "vs.fighter_8002dcd8"
+image = "VS.EXE"
+source = "src/vs/fighter_8002dcd8.c"
+profile = "probe-gcc272cdk-o2-g0"
+
+[[unit]]
+unit = "vs.fighter_8002dec4"
+image = "VS.EXE"
+source = "src/vs/fighter_8002dec4.c"
+profile = "probe-gcc272cdk-o2-g0"
+
+[[unit]]
+unit = "vs.fighter_8002e114"
+image = "VS.EXE"
+source = "src/vs/fighter_8002e114.c"
+profile = "probe-gcc272cdk-o2-g0"
+
+[[unit]]
+unit = "vs.cd_8002e5e4"
+image = "VS.EXE"
+source = "src/vs/cd_8002e5e4.c"
+profile = "probe-gcc272cdk-o2-g0"
+
+[[unit]]
+unit = "vs.cd_8002efcc"
+image = "VS.EXE"
+source = "src/vs/cd_8002efcc.c"
+profile = "probe-gcc272cdk-o2-g8"
+
+[[unit]]
+unit = "vs.vis_8002f264"
+image = "VS.EXE"
+source = "src/vs/vis_8002f264.c"
+profile = "probe-gcc272cdk-o2-g0"
+
+[[unit]]
+unit = "vs.attack_8002f334"
+image = "VS.EXE"
+source = "src/vs/attack_8002f334.c"
+profile = "probe-gcc272cdk-o2-g0"
+
+[[unit]]
+unit = "vs.move_80030620"
+image = "VS.EXE"
+source = "src/vs/move_80030620.c"
+profile = "probe-gcc272cdk-o2-g8"
+
+[[unit]]
+unit = "vs.stub_80032108"
+image = "VS.EXE"
+source = "src/vs/stub_80032108.c"
+profile = "probe-gcc272cdk-o2-g0"
+
+[[unit]]
+unit = "vs.effect_80032200"
+image = "VS.EXE"
+source = "src/vs/effect_80032200.c"
+profile = "probe-gcc272cdk-o2-g0"
+
+[[unit]]
+unit = "vs.effect_80032228"
+image = "VS.EXE"
+source = "src/vs/effect_80032228.c"
+profile = "probe-gcc272cdk-o2-g0"
+
+[[unit]]
+unit = "vs.effect_80032404"
+image = "VS.EXE"
+source = "src/vs/effect_80032404.c"
+profile = "probe-gcc272cdk-o2-g0"
+
+[[unit]]
+unit = "vs.effect_move_8003333c"
+image = "VS.EXE"
+source = "src/vs/effect_move_8003333c.c"
+profile = "probe-gcc272cdk-o2-g0"
+
+[[unit]]
+unit = "vs.effect_800335e8"
+image = "VS.EXE"
+source = "src/vs/effect_800335e8.c"
+profile = "probe-gcc272cdk-o2-g0"
+
+[[unit]]
+unit = "vs.effect_run_800352cc"
+image = "VS.EXE"
+source = "src/vs/effect_run_800352cc.c"
+profile = "probe-gcc272cdk-o2-g0"
+
+[[unit]]
+unit = "vs.model_800353d0"
+image = "VS.EXE"
+source = "src/vs/model_800353d0.c"
+profile = "probe-gcc272cdk-o2-g0"
+
+[[unit]]
+unit = "end.main"
+image = "END.EXE"
+source = "src/end/main.c"
+profile = "probe-gcc272cdk-o2-g8"
+
+[[unit]]
+unit = "fdat_002.main"
+image = "FDAT_002.BIN"
+source = "src/fdat_002/main.c"
+profile = "probe-gcc272cdk-o2-g0"
+
+[[unit]]
+unit = "fdat_012.main"
+image = "FDAT_012.BIN"
+source = "src/fdat_012/main.c"
+profile = "probe-gcc272cdk-o2-g0"
+bind = "name"
+
+[[unit]]
+unit = "fdat_012.map_801ed76c"
+image = "FDAT_012.BIN"
+source = "src/fdat_012/map_801ed76c.c"
+profile = "probe-gcc272cdk-o2-g0"
+bind = "name"
+
+[[unit]]
+unit = "fdat_012.map_801ed9e0"
+image = "FDAT_012.BIN"
+source = "src/fdat_012/map_801ed9e0.c"
+profile = "probe-gcc272cdk-o2-g0"
+bind = "name"
+
+[[unit]]
+unit = "fdat_012.map_801eda38"
+image = "FDAT_012.BIN"
+source = "src/fdat_012/map_801eda38.c"
+profile = "probe-gcc272cdk-o2-g0"
+bind = "name"
+
+[[unit]]
+unit = "fdat_012.map_801edbec"
+image = "FDAT_012.BIN"
+source = "src/fdat_012/map_801edbec.c"
+profile = "probe-gcc272cdk-o2-g0"
+bind = "name"
+
+[[unit]]
+unit = "fdat_012.map_801edf0c"
+image = "FDAT_012.BIN"
+source = "src/fdat_012/map_801edf0c.c"
+profile = "probe-gcc272cdk-o2-g0"
+bind = "name"
+
+[[unit]]
+unit = "fdat_022.main"
+image = "FDAT_022.BIN"
+source = "src/fdat_022/main.c"
+profile = "probe-gcc272cdk-o2-g0"
+bind = "name"
+
+[[unit]]
+unit = "fdat_032.main"
+image = "FDAT_032.BIN"
+source = "src/fdat_032/main.c"
+profile = "probe-gcc272cdk-o2-g0"
+bind = "name"
+
+[[unit]]
+unit = "fdat_042.main"
+image = "FDAT_042.BIN"
+source = "src/fdat_042/main.c"
+profile = "probe-gcc272cdk-o2-g0"
+bind = "name"
+
+[[unit]]
+unit = "fdat_042.map_801ed7b4"
+image = "FDAT_042.BIN"
+source = "src/fdat_042/map_801ed7b4.c"
+profile = "probe-gcc272cdk-o2-g0"
+bind = "name"
+
+[[unit]]
+unit = "fdat_052.main"
+image = "FDAT_052.BIN"
+source = "src/fdat_052/main.c"
+profile = "probe-gcc272cdk-o2-g0"
+bind = "name"
+
+[[unit]]
+unit = "fdat_062.main"
+image = "FDAT_062.BIN"
+source = "src/fdat_062/main.c"
+profile = "probe-gcc272cdk-o2-g0"
+bind = "name"
+
+[[unit]]
+unit = "fdat_082.main"
+image = "FDAT_082.BIN"
+source = "src/fdat_082/main.c"
+profile = "probe-gcc272cdk-o2-g0"
+bind = "name"
+
+[[unit]]
+unit = "fdat_092.main"
+image = "FDAT_092.BIN"
+source = "src/fdat_092/main.c"
+profile = "probe-gcc272cdk-o2-g0"
+bind = "name"
+
+[[unit]]
+unit = "fdat_102.main"
+image = "FDAT_102.BIN"
+source = "src/fdat_102/main.c"
+profile = "probe-gcc272cdk-o2-g0"
+bind = "name"
+
+[[unit]]
+unit = "fdat_112.main"
+image = "FDAT_112.BIN"
+source = "src/fdat_112/main.c"
+profile = "probe-gcc272cdk-o2-g0"
+bind = "name"
+
+[[unit]]
+unit = "fdat_112.map_801ed770"
+image = "FDAT_112.BIN"
+source = "src/fdat_112/map_801ed770.c"
+profile = "probe-gcc272cdk-o2-g0"
+bind = "name"
+
+[[unit]]
+unit = "fdat_112.map_801edb90"
+image = "FDAT_112.BIN"
+source = "src/fdat_112/map_801edb90.c"
+profile = "probe-gcc272cdk-o2-g0"
+bind = "name"
+
+[[unit]]
+unit = "fdat_122.main"
+image = "FDAT_122.BIN"
+source = "src/fdat_122/main.c"
+profile = "probe-gcc272cdk-o2-g0"
+bind = "name"
+
+[[unit]]
+unit = "fdat_122.map_801ed77c"
+image = "FDAT_122.BIN"
+source = "src/fdat_122/map_801ed77c.c"
+profile = "probe-gcc272cdk-o2-g0"
+bind = "name"
+
+[[unit]]
+unit = "fdat_122.map_801ed880"
+image = "FDAT_122.BIN"
+source = "src/fdat_122/map_801ed880.c"
+profile = "probe-gcc272cdk-o2-g0"
+bind = "name"
+
+[[unit]]
+unit = "fdat_132.main"
+image = "FDAT_132.BIN"
+source = "src/fdat_132/main.c"
+profile = "probe-gcc272cdk-o2-g0"
+bind = "name"
+
+[[unit]]
+unit = "fdat_142.main"
+image = "FDAT_142.BIN"
+source = "src/fdat_142/main.c"
+profile = "probe-gcc272cdk-o2-g0"
+bind = "name"
+
+[[unit]]
+unit = "fdat_152.main"
+image = "FDAT_152.BIN"
+source = "src/fdat_152/main.c"
+profile = "probe-gcc272cdk-o2-g0"
+bind = "name"
+
+[[unit]]
+unit = "fdat_152.map_801ed8f4"
+image = "FDAT_152.BIN"
+source = "src/fdat_152/map_801ed8f4.c"
+profile = "probe-gcc272cdk-o2-g0"
+bind = "name"
+
+[[unit]]
+unit = "fdat_152.map_801eda8c"
+image = "FDAT_152.BIN"
+source = "src/fdat_152/map_801eda8c.c"
+profile = "probe-gcc272cdk-o2-g0"
+bind = "name"
+
+[[unit]]
+unit = "fdat_172.main"
+image = "FDAT_172.BIN"
+source = "src/fdat_172/main.c"
+profile = "probe-gcc272cdk-o2-g0"
+bind = "name"
+
+[[unit]]
+unit = "fdat_182.main"
+image = "FDAT_182.BIN"
+source = "src/fdat_182/main.c"
+profile = "probe-gcc272cdk-o2-g0"
+bind = "name"
+
+[[unit]]
+unit = "fdat_182.map_801ed950"
+image = "FDAT_182.BIN"
+source = "src/fdat_182/map_801ed950.c"
+profile = "probe-gcc272cdk-o2-g0"
+bind = "name"
+
+[[unit]]
+unit = "fdat_182.map_801ed9cc"
+image = "FDAT_182.BIN"
+source = "src/fdat_182/map_801ed9cc.c"
+profile = "probe-gcc272cdk-o2-g0"
+bind = "name"
+
+[[unit]]
+unit = "fdat_202.main"
+image = "FDAT_202.BIN"
+source = "src/fdat_202/main.c"
+profile = "probe-gcc272cdk-o2-g0"
+bind = "name"
+
+[[unit]]
+unit = "fdat_212.main"
+image = "FDAT_212.BIN"
+source = "src/fdat_212/main.c"
+profile = "probe-gcc272cdk-o2-g0"
+bind = "name"
+
+[[unit]]
+unit = "fdat_232.main"
+image = "FDAT_232.BIN"
+source = "src/fdat_232/main.c"
+profile = "probe-gcc272cdk-o2-g0"
+bind = "name"
+
+[[unit]]
+unit = "fdat_242.main"
+image = "FDAT_242.BIN"
+source = "src/fdat_242/main.c"
+profile = "probe-gcc272cdk-o2-g0"
+bind = "name"
+
+[[unit]]
+unit = "fdat_252.main"
+image = "FDAT_252.BIN"
+source = "src/fdat_252/main.c"
+profile = "probe-gcc272cdk-o2-g0"
+bind = "name"
+
+[[unit]]
+unit = "fdat_262.main"
+image = "FDAT_262.BIN"
+source = "src/fdat_262/main.c"
+profile = "probe-gcc272cdk-o2-g0"
+bind = "name"
+
+[[unit]]
+unit = "fdat_272.main"
+image = "FDAT_272.BIN"
+source = "src/fdat_272/main.c"
+profile = "probe-gcc272cdk-o2-g0"
+bind = "name"
+
+[[unit]]
+unit = "fdat_282.main"
+image = "FDAT_282.BIN"
+source = "src/fdat_282/main.c"
+profile = "probe-gcc272cdk-o2-g0"
+bind = "name"
+
+[[unit]]
+unit = "fdat_282.map_801ed7a4"
+image = "FDAT_282.BIN"
+source = "src/fdat_282/map_801ed7a4.c"
+profile = "probe-gcc272cdk-o2-g0"
+bind = "name"
+
+[[unit]]
+unit = "fdat_302.main"
+image = "FDAT_302.BIN"
+source = "src/fdat_302/main.c"
+profile = "probe-gcc272cdk-o2-g0"
+bind = "name"
+
+[[unit]]
+unit = "fdat_322.main"
+image = "FDAT_322.BIN"
+source = "src/fdat_322/main.c"
+profile = "probe-gcc272cdk-o2-g0"
+bind = "name"
+
+[[unit]]
+unit = "fdat_332.main"
+image = "FDAT_332.BIN"
+source = "src/fdat_332/main.c"
+profile = "probe-gcc272cdk-o2-g0"
+bind = "name"
+
+[[unit]]
+unit = "fdat_332.map_801ed904"
+image = "FDAT_332.BIN"
+source = "src/fdat_332/map_801ed904.c"
+profile = "probe-gcc272cdk-o2-g0"
+bind = "name"
+
+[[unit]]
+unit = "fdat_332.map_801ed9e8"
+image = "FDAT_332.BIN"
+source = "src/fdat_332/map_801ed9e8.c"
+profile = "probe-gcc272cdk-o2-g0"
+bind = "name"
+
+[[unit]]
+unit = "fdat_372.main"
+image = "FDAT_372.BIN"
+source = "src/fdat_372/main.c"
+profile = "probe-gcc272cdk-o2-g0"
+bind = "name"
+
+[[unit]]
+unit = "fdat_382.main"
+image = "FDAT_382.BIN"
+source = "src/fdat_382/main.c"
+profile = "probe-gcc272cdk-o2-g0"
+bind = "name"
+
+[[unit]]
+unit = "fdat_402.main"
+image = "FDAT_402.BIN"
+source = "src/fdat_402/main.c"
+profile = "probe-gcc272cdk-o2-g0"
+bind = "name"
+
+[[unit]]
+unit = "fdat_412.main"
+image = "FDAT_412.BIN"
+source = "src/fdat_412/main.c"
+profile = "probe-gcc272cdk-o2-g0"
+bind = "name"
+
+[[unit]]
+unit = "fdat_442.main"
+image = "FDAT_442.BIN"
+source = "src/fdat_442/main.c"
+profile = "probe-gcc272cdk-o2-g0"
+bind = "name"
+
+[[unit]]
+unit = "fdat_452.main"
+image = "FDAT_452.BIN"
+source = "src/fdat_452/main.c"
+profile = "probe-gcc272cdk-o2-g0"
+bind = "name"
+
+[[unit]]
+unit = "fdat_462.main"
+image = "FDAT_462.BIN"
+source = "src/fdat_462/main.c"
+profile = "probe-gcc272cdk-o2-g0"
+bind = "name"
+
+[[unit]]
+unit = "fdat_472.main"
+image = "FDAT_472.BIN"
+source = "src/fdat_472/main.c"
+profile = "probe-gcc272cdk-o2-g0"
+bind = "name"

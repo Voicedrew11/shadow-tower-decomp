@@ -23,17 +23,20 @@ symbols or pretending that WIP names are original symbols:
 | Image | Functions | Psy-Q | Game |
 | :---- | --------: | ----: | ---: |
 | `PSX.EXE` | 11 | 10 | 1 |
-| `STR.EXE` | 322 | 290 | 32 |
-| `ST.EXE` | 1,139 | 457 | 682 |
-| `TITLE.EXE` | 387 | 353 | 34 |
-| `OPTXT.EXE` | 283 | 254 | 29 |
-| `VS.EXE` | 660 | 401 | 259 |
-| `END.EXE` | 276 | 260 | 16 |
+| `STR.EXE` | 322 | 302 | 20 |
+| `ST.EXE` | 1,139 | 474 | 665 |
+| `TITLE.EXE` | 387 | 369 | 18 |
+| `OPTXT.EXE` | 283 | 265 | 18 |
+| `VS.EXE` | 660 | 406 | 254 |
+| `END.EXE` | 276 | 261 | 15 |
 | 36 `FDAT_nnn.BIN` | 943 (23–37 each) | 0 | 943 |
-| **Total** | **4,021** | **2,025** | **1,996** |
+| **Total** | **4,021** | **2,087** | **1,934** |
 
 PSX.EXE `main` is reconstructed (`src/psx/main.c`) with its six data
-identities and reviewed relocations; every other game identity is
+identities and reviewed relocations, STR.EXE's twenty game functions
+(`src/str/main.c`), TITLE.EXE's eighteen (`src/title/main.c`), OPTXT.EXE's
+eighteen (`src/optxt/main.c`, seventeen exact) and END.EXE's fifteen
+(`src/end/main.c`) with their data; every other game identity is
 address-only with a candidate signature from the static MIPS live-in
 heuristic (`kf inventory seed`). The tables are WIP, and the rules below
 say how they grew.
@@ -57,7 +60,11 @@ row's `confidence` names the rule that admitted it:
   code cannot fall through into it.
 
 A `jal` target up to 0x40 bytes of straight-line code above an admitted
-start moves that start back (the row's note records it). After the last
+start moves that start back (the row's note records it). A carve that
+stops at its own GCC switch dispatch (`jr reg` proved a table jump by
+`scripts/kf/sema/cfg.py`) whose cases all lie in the unowned bytes up to
+the next admitted start grows over those cases (`switch-extend`; VS
+`0x8002c2c4` and `0x8002f334`). After the last
 pass every `jal` target decoded from admitted code lands on an admitted
 start, except 18 interior entries (GTE assembly with two entry points in
 ST `0x80075acc`, `0x80075ecc`, `0x8007636c`, plus ST `0x8006887c` and VS
@@ -70,7 +77,7 @@ candidates, mostly jump-table cases, are not admitted.
 `kf-vendored-seed` layers two channels over the structural rows. First,
 relocation-masked function IDs built from the libraries the build links
 (Runtime Library 4.2 with the 4.2.1 LIBPAD, the 4.5 kit's `NONE3.OBJ` and
-Release 2.5 `MALLOC.OBJ`; `kf-fid-census` builds the same corpus): 743 admitted
+Release 2.5 `MALLOC.OBJ`; `kf-fid-census` builds the same corpus): 760 admitted
 rows are `fid-sdk42`, of which 28 are `MALLOC.OBJ` and 6 `NONE3.OBJ` (their
 `source_version` names the standalone object). Then `ghidra_psx_ldr`
 signature sets fill starts the IDs leave open, preferred set first
@@ -78,6 +85,33 @@ signature sets fill starts the IDs leave open, preferred set first
 `psyq420-signature-ambiguous`, and 6 `psyq410-signature` rows for the
 eight-byte `NONE3` `__main`, too short for a function ID. Each confidence
 names its evidence and release.
+
+END.EXE `0x8001670c` (`StSetMask`, LIBCD member `C_010`) is too short for a
+function ID or signature; the byte-identical native relink maps it there, so
+its row's confidence is `relink-map-sdk42`. The same holds for STR.EXE
+`0x80016c3c` (`StSetMask`) and for eleven LIBPAD starts the census had left
+as game code: `PADMAIN`'s exported `_padSetVsyncParam`, `_padInitSioMode` and
+`_padWaitRXready` and three static functions, and all five static functions
+of `PADIF` (whose only export is the `padIntFunc` data table); the
+byte-identical STR.EXE relink places each at its member offset. The
+byte-identical TITLE.EXE relink places sixteen more the census had left as
+game candidates: `SpuInit` (LIBSPU `S_I`), `SsQuit`, `_SsSndPlay`,
+`SsUtReverbOn`, `_SsVmDamperOff` (LIBSND), three exports and three statics of
+LIBPAD `PADMAIN`, and the five `PADIF` statics that `padIntFunc` points at.
+OPTXT.EXE's same eleven LIBPAD functions (0x5e0 bytes of text between
+`PADCMD` and `PADPORTD`) are placed by the native relink whose bytes outside
+`play_opening_text` all equal retail.
+
+ST.EXE cannot be relinked byte-identical yet, so its seventeen equivalents
+are proven per object instead (evidence `relocation-masked-object-match`,
+confidence `fid-sdk42`): the whole `.text` of the library member, patch-owned
+bits masked, equals retail at one base. `PADMAIN` (0xbe0 bytes, base
+`0x8007cd14`) places `_padSetVsyncParam`, `_padInitSioMode`,
+`_padWaitRXready` and three statics; `PADIF` (0x5e0 bytes, base `0x8007e254`)
+its five statics. Five one-call LIBSND/LIBSPU wrappers (`SsInit`, `SpuInit`,
+`SsQuit`, `SsUtReverbOn`) fit several members' masked bytes, so each row
+names the member whose external reference matches the decoded `jal` target;
+`_SsSndPlay` and `_SsVmDamperOff` fit one member each.
 
 Not admitted: the overlays' two-instruction default handler (`jr ra; nop`),
 matched only by an old LIBSND `VM_VIB` signature, since the overlays link no
@@ -175,4 +209,4 @@ and hardware references are not auto-admitted.
 
 The inventories are intentionally iterative. Missing functions, relocations,
 data extents, and xrefs can invalidate earlier candidates without invalidating
-the workflow. Only PSX.EXE `main`'s relocations are admitted so far.
+the workflow. Only PSX.EXE `main`'s, STR.EXE's, TITLE.EXE's, OPTXT.EXE's and END.EXE's relocations are admitted so far.

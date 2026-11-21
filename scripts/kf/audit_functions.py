@@ -17,6 +17,8 @@ from dataclasses import dataclass
 from pathlib import Path
 
 from scripts.kf.retail import IMAGE_LAYOUTS, IMAGE_ORDER, load_payload, parse_int, read_tsv
+from scripts.kf.sema.cfg import switch_table
+from scripts.kf.sema.mips import decode_words, with_controls
 
 
 FIELDS = (
@@ -42,7 +44,9 @@ FIELDS = (
 CALL_EXTEND_LIMIT = 0x40
 
 # Candidate tiers that kf-function-propose admits.
-ADMISSIBLE = {"strong", "strong-leaf", "call-target", "call-split", "call-extend"}
+ADMISSIBLE = {
+    "strong", "strong-leaf", "call-target", "call-split", "call-extend", "switch-extend",
+}
 
 
 @dataclass(frozen=True)
@@ -339,6 +343,50 @@ def transfer_end(words: ImageWords, address: int, stop: int, limit: int = 0x1000
     return None
 
 
+@dataclass(frozen=True)
+class _Span:
+    """The `contains_body` view of a candidate extent the switch prover asks for."""
+
+    start: int
+    end: int
+
+    def contains_body(self, va: int, size: int = 1) -> bool:
+        return self.start <= va and va + size <= self.end
+
+
+def switch_extension(words: ImageWords, extent: FunctionExtent, stop: int) -> int | None:
+    """End of an extent that was cut at its own switch dispatch, else None.
+
+    A carve that stops at the first unconditional transfer ends at a GCC
+    tablejump (`jr reg`) when the function is a switch. If that jump is a
+    proven table (`scripts.kf.sema.cfg.switch_table`) over valid code up to
+    the next admitted start `stop`, and every case lies in the unowned bytes
+    `[extent.end, stop)`, the cases are the function's own body: it extends
+    to `stop`.
+    """
+    site = extent.end - 8
+    if stop <= extent.end or site < extent.start or not words.contains_word(site):
+        return None
+    word = words.word(site)
+    if (word & 0xFC1FFFFF) != 0x08 or is_jr_ra(word):
+        return None
+    if not valid_span(words, extent.start, stop):
+        return None
+    offset = extent.start - words.layout.load_address
+    instructions = list(with_controls(decode_words(
+        extent.start, words.payload[offset:offset + stop - extent.start],
+    )))
+    terminal = next(row for row in instructions if row.va == site)
+
+    def read_word(address: int) -> int | None:
+        return words.word(address) if words.contains_word(address) else None
+
+    proven = switch_table(instructions, terminal, _Span(extent.start, stop), read_word)
+    if proven is None or not all(extent.end <= target < stop for target in proven.targets):
+        return None
+    return stop
+
+
 def boundary_before(words: ImageWords, address: int) -> str:
     if address == words.layout.load_address:
         return "load-start"
@@ -618,6 +666,43 @@ def audit_image(
             rows.remove(existing)
         rows.append(row)
         rows_by_start[target] = row
+
+    # An admitted extent that ends at its own proven switch dispatch owns the
+    # case bodies that follow it, up to the next admitted or proposed start.
+    starts = sorted(
+        known_starts
+        | {parse_int(str(row["va"])) for row in rows if row["confidence"] in ADMISSIBLE}
+    )
+    for extent in extents:
+        index = bisect.bisect_right(starts, extent.start)
+        stop = starts[index] if index < len(starts) else words.layout.load_end
+        end = switch_extension(words, extent, stop)
+        if end is None:
+            continue
+        # The table's first case is also a pointer-referenced candidate.
+        existing = rows_by_start.get(extent.end)
+        if existing is not None:
+            if existing["confidence"] in ADMISSIBLE:
+                continue
+            rows.remove(existing)
+        row = {
+            "image": image,
+            "va": f"0x{extent.end:08x}",
+            "file_offset": f"0x{words.layout.file_offset(extent.end):x}",
+            "owner_va": f"0x{extent.start:08x}",
+            "frame_size": "",
+            "ra_save_offset": "",
+            "return_va": f"0x{end - 8:08x}",
+            "pointer_refs": pointer_refs[extent.end],
+            "tail_jump_refs": tail_refs[extent.end],
+            "reloc_refs": relocations.get((image, extent.end), 0),
+            "valid_first_12": first_window_score(words, extent.end),
+            "boundary": f"switch-dispatch=0x{extent.end - 8:08x}",
+            "confidence": "switch-extend",
+            "note": "owner-ends-at-proven-switch-dispatch+cases-up-to-next-start",
+        }
+        rows.append(row)
+        rows_by_start[extent.end] = row
     return rows
 
 

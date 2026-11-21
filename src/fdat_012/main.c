@@ -1,0 +1,77 @@
+/*
+ * FDAT_012.BIN as one translation unit (WIP module): its handler table,
+ * the 21 functions every overlay starts with (src/lib/fdat_common_a.inc,
+ * fdat_common.inc, fdat_common_b.inc), then its map handlers through the
+ * shared fdat_801ed4a0. One object, because fdat_801ed4a0's switch table
+ * is 8-aligned after fdat_801ebec4's in the same read-only run.
+ */
+#include <kf/lib/address.h>
+#include <kf/lib/types.h>
+#include <sys/types.h>
+#include <LIBGTE.H>
+#include <psyq/libc.h>
+#include <st/cd.h>
+#include <st/gfx.h>
+#include <st/anim.h>
+#include <st/sound.h>
+#include <st/data.h>
+#include <st/hud.h>
+#include <st/xa.h>
+#include <st/vis.h>
+#include <st/fdat.h>
+#include <st/menu.h>
+
+RODATA(0x801eb560, 0x24c)
+
+void func_801ed4a0();
+void func_801ed4e8();
+void func_801ed76c();
+void func_801ed9e0();
+
+const FdatHeader fdat_header = {
+    0x6,
+    {
+        fdat_801ed498, func_801ed4a0, fdat_801ed498, fdat_801ed498,
+        fdat_801ed498, func_801ed4e8, fdat_801ed498, fdat_801ed498,
+        fdat_801ed498, fdat_801ed498, fdat_801ed498, fdat_801ed498,
+        func_801ed9e0, fdat_801ed498, fdat_801ed498, fdat_801ed498,
+        fdat_801ed4a0, func_801ed76c, fdat_801ed498, fdat_801ed498,
+        fdat_801ed498, fdat_801ed498, fdat_801ed498, fdat_801ed498,
+        fdat_801ed498, fdat_801ed498, fdat_801ed498, fdat_801ed498,
+        fdat_801ed498, fdat_801ed498, fdat_801ed498, fdat_801ed498,
+    },
+    0x39,
+};
+
+#include "../lib/fdat_common_a.inc"
+#include "../lib/fdat_common.inc"
+#include "../lib/fdat_common_b.inc"
+
+/* The scene state: 0 idle, 1 armed, 2 played, 3 done (flag 0 set). */
+DATA(0x801edfac, 0x4, ".bss")
+int fdat_801edfac;
+
+/* Places table A entry 48 again when it is in use but not active. */
+ADDRESS(0x801ed4a0, 0x48)
+void func_801ed4a0(void)
+{
+    Vis212 *e = &vis_table_a.entries[48];
+
+    if (e->unk1C.bytes[0] != 0 && e->unk05 == 0)
+        func_8004ae38(e);
+}
+
+/* Sets up the area: the scene state from flag 0, entry 48's range bits. */
+ADDRESS(0x801ed4e8, 0x40)
+void func_801ed4e8(void)
+{
+    Vis212 *e = &vis_table_a.entries[48];
+
+    if (DAT_801cba08.unk1440.bit.f0)
+        fdat_801edfac = 3;
+    else
+        fdat_801edfac = 0;
+    e->unk1C.bytes[3] = 2;
+}
+
+#include "../lib/fdat_801ed4a0.inc"

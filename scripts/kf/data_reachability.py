@@ -20,8 +20,9 @@ from pathlib import Path
 
 from scripts.kf.manifest import Manifest, load as load_manifest
 from scripts.kf.paths import BUILD, RETAIL_CONFIG
-from scripts.kf.retail import IMAGE_LAYOUTS, IMAGE_NAMES, read_tsv
+from scripts.kf.retail import IMAGE_LAYOUTS, IMAGE_NAMES, OVERLAY_SOURCES, read_tsv
 from scripts.kf.sema import Context
+from scripts.kf.sema.cfg import switch_tables
 from scripts.kf.sema.evidence import Reference, TIER_RANK
 from scripts.kf.sema.image import RetailImage
 from scripts.kf.sema.index import Binding
@@ -48,7 +49,7 @@ class DataExtent:
 
     @property
     def claimed(self) -> bool:
-        return self.source in {"DATA", "RODATA"}
+        return self.source in {"DATA", "RODATA", "JUMPTABLES", "SDATA"}
 
     @property
     def key(self) -> str:
@@ -64,16 +65,9 @@ def data_extents(
             unit.image, datum.va, datum.size, datum.symbol, datum.storage,
             "DATA", unit.unit, "source-claim", unit.source,
         ) for datum in unit.data)
-        if unit.rodata:
-            va, size = unit.rodata
+        for kind, va, size in unit.owned_ranges():
             out.append(DataExtent(
-                unit.image, va, size, f"{unit.unit}.rodata", "load", "RODATA",
-                unit.unit, "source-claim", unit.source,
-            ))
-        if unit.sdata:
-            va, size = unit.sdata
-            out.append(DataExtent(
-                unit.image, va, size, f"{unit.unit}.sdata", "load", "SDATA",
+                unit.image, va, size, f"{unit.unit}.{kind.lower()}", "load", kind,
                 unit.unit, "source-claim", unit.source,
             ))
     for filename in ("data_identities.tsv", "data.tsv"):
@@ -113,7 +107,10 @@ def proven_vendored_dispatch(
       zero (`lui r,0; addiu r,r,0` then `beqz r` before the `jalr`), so the
       call cannot execute.
 
-    Anything else stays unresolved, as AGENTS.md requires for `jr`/`jalr`.
+    These specific proofs are recorded on the witness row; every other
+    indirect transfer inside a Sony member is exempted as `vendored-indirect`
+    by `audit` (a project decision, not a proof). Game-code `jr`/`jalr` stays
+    unresolved, as AGENTS.md requires, unless it is a proven switch.
     """
     word = img.u32(site)
     if word is None:
@@ -142,6 +139,29 @@ def proven_vendored_dispatch(
             if (current >> 21) & 0x1F in zero_registers:
                 return "empty-link-time-table", None
     return None
+
+
+def proven_switch_dispatch(img: RetailImage, function: Binding) -> dict[int, dict]:
+    """Switch `jr` sites of a game function, proved by the shared CFG rule.
+
+    `scripts.kf.sema.cfg.switch_table` is the only switch-table prover: a
+    bounded `sltiu`/`beqz` index, a `lui`/`addiu` table base (the `lui` may
+    sit in the bound's delay slot), `sll`/`addu`/`lw`/`jr`, no branch into
+    the scanned run, the index unchanged, and every table word an instruction
+    start inside this function. Vendored members are not proved by it (their
+    indirect sites are exempted wholesale as `vendored-indirect`).
+    Returns the witness detail per `jr` site.
+    """
+    if function.vendored or function.fragments != 1:
+        return {}
+    payload = img.read(function.va, function.body_size)
+    if payload is None:
+        return {}
+    return {
+        site: {"site": site, "pattern": "switch-table", "table": proven.table,
+               "entries": len(proven.targets)}
+        for site, proven in switch_tables(function, payload, img.u32).items()
+    }
 
 
 def access_span(reference: Reference, img: RetailImage) -> tuple[int, int]:
@@ -182,6 +202,8 @@ def audit(
     config_comparisons: tuple = (),
     include_entry: bool = False,
     link_labels: frozenset[int] = frozenset(),
+    host_functions: tuple[Binding, ...] = (),
+    host_extents: tuple[DataExtent, ...] = (),
 ) -> dict:
     """Lossless reference worklist with weakest-edge reachability witnesses.
 
@@ -191,6 +213,11 @@ def audit(
     scanned conservatively; candidate discovery does not assert execution.
     Optional executable entry roots include SDK startup without changing the
     game-function denominator.
+
+    An overlay's references outside its own load window reach its host
+    program (`retail.referent_image`). They are checked against the host's
+    owners (`host_functions`, `host_extents`) and recorded as cross-image
+    edges; the host's own closure is audited with the host image.
     """
     if img.image != image:
         raise ValueError("reference audit image does not match retail bytes")
@@ -208,6 +235,8 @@ def audit(
     destinations: dict[int, list[str]] = {}
     issues: dict[tuple, dict] = {}
     dispatch_witnesses: dict[int, dict] = {}
+    switch_witnesses: dict[int, dict] = {}
+    switches: dict[str, dict[int, dict]] = {}
     queue: deque[str] = deque()
 
     def issue(code: str, key: str, ref: int | None = None, **detail) -> None:
@@ -233,6 +262,21 @@ def audit(
         identities = [d for d in data if d.source == "data_identities.tsv"]
         return [*code, *(identities or data)]
 
+    host = OVERLAY_SOURCES.get(image)
+    window = IMAGE_LAYOUTS[image] if host is not None else None
+    host_name = host.host if host is not None else ""
+    host_functions = tuple(f for f in host_functions if f.image == host_name)
+    host_extents = tuple(d for d in host_extents if d.image == host_name)
+    cross_image: dict[int, list[str]] = {}
+
+    def host_owners(va: int) -> list[str]:
+        code = [_function_key(f) for f in host_functions if f.va <= va < f.body_end]
+        data = [d for d in host_extents if d.va <= va < d.end]
+        claimed = [d for d in data if d.claimed]
+        identities = [d for d in data if d.source == "data_identities.tsv"]
+        return [f"{host_name}:{key}"
+                for key in (*code, *(d.key for d in (claimed or identities or data)))]
+
     for root in roots:
         visit(root, TIER_RANK["proven"], None, None)
     entry = img.layout.entry
@@ -255,6 +299,12 @@ def audit(
         if key not in outgoing:
             lo, hi = bisect.bisect_left(sites, node.va), bisect.bisect_left(sites, end)
             outgoing[key] = list(range(lo, hi))
+            if isinstance(node, Binding):
+                # The semantic evidence already folds these into the CFG; the
+                # audit re-proves them so each reached switch keeps a witness.
+                switches[key] = proven_switch_dispatch(img, node)
+                for site, witness in switches[key].items():
+                    switch_witnesses[site] = {"owner": key, **witness}
         for number in outgoing[key]:
             reference = references[number]
             if reference.site + 4 > end:
@@ -270,21 +320,36 @@ def audit(
                     issue("invalid-live-reference", key, number)
                 continue
             if reference.target is None:
-                pattern = (
-                    proven_vendored_dispatch(img, node, reference.site)
-                    if isinstance(node, Binding) and node.vendored else None
-                )
-                if pattern is not None:
-                    # Proven by the member's own instruction values, not by
-                    # vendored ownership alone; kept as a witness row.
+                if isinstance(node, Binding) and node.vendored:
+                    # Project decision (2026-11-17): every indirect transfer
+                    # inside a vendored Sony member is exempt from the gate.
+                    # It stays auditable as a witness row; a transfer proved
+                    # from the member's own instruction values also names
+                    # that proof (BIOS vector stub, empty link-time table).
+                    proven = proven_vendored_dispatch(img, node, reference.site)
                     dispatch_witnesses[number] = {
-                        "owner": key, "site": reference.site, "pattern": pattern[0],
-                        "target": pattern[1],
+                        "owner": key, "site": reference.site,
+                        "pattern": "vendored-indirect",
+                        "proof": proven[0] if proven else None,
+                        "target": proven[1] if proven else None,
                     }
+                    continue
+                if reference.site in switches.get(key, {}):
+                    # A game switch whose every case lands in this function's
+                    # body: the transfer adds no edge; its witness row is kept.
                     continue
                 issue("unresolved-indirect-control", key, number)
                 continue
             path_rank = min(rank, TIER_RANK[reference.tier])
+            if window is not None and not window.contains(reference.destination):
+                # A cross-image edge into the host: owned there, not traversed.
+                hosts = host_owners(reference.destination)
+                if not hosts:
+                    issue("unmodeled-target", key, number, target=reference.target,
+                          image=host_name)
+                destinations[number] = hosts
+                cross_image[number] = hosts
+                continue
             found = owners(reference.destination)
             if not found and reference.target in link_labels:
                 # A curated zero-size link-layout label (BSS_END) names a
@@ -390,11 +455,17 @@ def audit(
             "config_matched_data_ranges": sum(r.get("comparison") == "config-provider-matched"
                                               for r in range_rows),
             "reference_occurrences": len(reference_rows),
-            "proven_vendored_dispatch": len(dispatch_witnesses),
+            "vendored_indirect_exempt": len(dispatch_witnesses),
+            "proven_vendored_dispatch": sum(
+                w["proof"] is not None for w in dispatch_witnesses.values()
+            ),
+            "proven_switch_dispatch": len(switch_witnesses),
+            "host_references": len(cross_image),
             "issues": dict(sorted(Counter(r["code"] for r in issue_rows).items())),
         },
         "ranges": range_rows, "references": reference_rows, "issues": issue_rows,
         "vendored_dispatch": [dispatch_witnesses[n] for n in sorted(dispatch_witnesses)],
+        "switch_dispatch": [switch_witnesses[n] for n in sorted(switch_witnesses)],
         "config_comparisons": [asdict(c) for c in config_comparisons if c.image == image],
     }
 
@@ -409,15 +480,25 @@ def run(images: tuple[str, ...], *, output: Path | None = None) -> int:
     reports = []
     for image in images:
         ctx = Context(image)
+        host = OVERLAY_SOURCES.get(image)
+        host_functions = Context(host.host).idx.functions if host is not None else ()
         report = audit(image, ctx.idx.functions, extents, ctx.refs.references, ctx.img,
                        config_comparisons=comparisons,
-                       link_labels=frozenset(link_labels(image).values()))
+                       link_labels=frozenset(link_labels(image).values()),
+                       host_functions=host_functions, host_extents=extents)
         reports.append(report)
         summary = report["summary"]
         print(f"{image} known-reference closure: {summary['game_roots']} game roots, "
               f"{summary['reached_vendor_functions']} reached vendor functions, "
               f"{summary['source_owned_data_ranges']} source-owned / "
               f"{summary['config_only_data_ranges']} config-only data ranges")
+        if summary["vendored_indirect_exempt"]:
+            print(f"  vendored Sony indirect sites exempt (witnessed): "
+                  f"{summary['vendored_indirect_exempt']} "
+                  f"({summary['proven_vendored_dispatch']} with a value-chain proof)")
+        if summary["host_references"]:
+            print(f"  references into {OVERLAY_SOURCES[image].host} (owned there): "
+                  f"{summary['host_references']}")
         if summary['config_matched_data_ranges']:
             print(f"  independent provider/retail matches: {summary['config_matched_data_ranges']} config ranges")
         for code, count in summary["issues"].items():

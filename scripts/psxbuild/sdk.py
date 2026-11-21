@@ -10,6 +10,9 @@ import shutil
 import struct
 import subprocess
 
+from .dmpsx import (dmpsx_command, merge as merge_dmpsx, stage as stage_dmpsx,
+                    verify as verify_dmpsx, view as dmpsx_view)
+
 C_COMPILERS = {
     # Decompals rebuild of the SN Systems GCC 2.7.2 ("cygnus-2.7.2-970404
     # SN32") PSX compiler: the Shadow Tower default.
@@ -78,6 +81,98 @@ def aspsx_command(stem: str, small_data: int) -> str:
     return f'ASPSX.EXE -g -G{small_data} -o {stem}.OBJ {stem}.S > {stem}.TXT'
 
 
+def rewrite_gte(root: Path, stems: tuple[str, ...]) -> dict[str, int]:
+    """Run DMPSX 3.0 on each assembled object; return the GTE words rewritten.
+
+    Psy-Q builds ran DMPSX on the object after `ccpsx -c`. It rewrites
+    INLINE_C.H's placeholder words and must leave an object without them
+    byte-identical; dmpsx.py explains the view it is given and the checks.
+    """
+    if not stems:
+        return {}
+    stage_dmpsx(Path(os.environ['PSYQ_DMPSX']), root)
+    objects = {stem: (root / (stem + '.OBJ')).read_bytes() for stem in stems}
+    for stem, data in objects.items():
+        (root / (stem + '.GTE')).write_bytes(dmpsx_view(data))
+        (root / (stem + '.GTO')).unlink(missing_ok=True)
+    dos_run(root, [dmpsx_command(stem) for stem in stems], 'gte')
+    rewritten = {}
+    for stem, data in objects.items():
+        output = root / (stem + '.GTO')
+        if not output.is_file():
+            raise RuntimeError(f'{stem}.OBJ: DMPSX wrote no {output.name}')
+        result = merge_dmpsx(data, output.read_bytes(), stem + '.OBJ')
+        rewritten[stem] = verify_dmpsx(data, result, stem + '.OBJ')
+        (root / (stem + '.OBJ')).write_bytes(result)
+        for suffix in ('.GTE', '.GTO'):
+            (root / (stem + suffix)).unlink()
+    return rewritten
+
+
+# Retail ST.EXE lays out every game unit's constant pool (string literals,
+# aggregate initializers, const data) before any unit's switch tables, each
+# group in link order, and the SDK libraries' read-only data after the tables
+# (STR.EXE and TITLE.EXE show their unit's table directly before LIBSND's
+# `.rdata`). The compiler writes both groups to `.rdata`, so a unit's tables
+# would sit beside its own constants. The constants therefore move to their own
+# `.rodata` section, which the link script places before `.rdata`; the tables,
+# like the SDK's read-only data, stay in `.rdata`. Which mechanism separated
+# them in the original build is unknown; this models the observed layout.
+CONSTANT_SECTION = '.rodata'
+JUMP_TABLE_LABEL = re.compile(r'\$L\d+:')
+JUMP_TABLE_ROW = re.compile(r'\.(?:gp)?word\s+\$L\d+')
+
+
+def separate_read_only(assembly: str) -> str:
+    """Move every non-switch-table `.rdata` block of cc1 output to `.rodata`.
+
+    GCC emits a switch table as `.rdata`, `.align 3`, a `$Ln:` label and one
+    `.word $Lm` row per case; any other `.rdata` block is a constant.
+    """
+    lines = assembly.split('\n')
+    moved = False
+    for index, line in enumerate(lines):
+        if line.strip() != '.rdata':
+            continue
+        following = [item.strip() for item in lines[index + 1:index + 4]]
+        if (len(following) == 3 and following[0] in ('.align\t3', '.align 3')
+                and JUMP_TABLE_LABEL.fullmatch(following[1])
+                and JUMP_TABLE_ROW.fullmatch(following[2])):
+            continue
+        lines[index] = line.replace('.rdata', f'.section\t{CONSTANT_SECTION}')
+        moved = True
+    if moved:
+        # A unit's constant pool ends on an eight-byte boundary: STR.EXE's
+        # switch table follows its 0x10c-byte pool after four zero bytes, and
+        # every ST.EXE pool boundary is eight-aligned. The trailing directive
+        # makes ASPSX pad the section; nothing follows it.
+        lines[-1:] = [lines[-1], f'\t.section\t{CONSTANT_SECTION}', '\t.align\t3', '']
+    return '\n'.join(lines)
+
+
+def keep_read_only_together(assembly: str) -> str:
+    """Name every `.rdata` block of cc1 output `.rodata`, keeping cc1's order.
+
+    A headerless FDAT overlay is one program of its own whose read-only data
+    is laid out exactly as the compiler emitted it: each function's aggregate
+    initializers, then its switch tables after their `.align 3`, then the
+    next function's constants (FDAT_242.BIN interleaves two constant runs
+    around a table), with no padding after the last constant (FDAT_442.BIN's
+    code follows its 0x1cc-byte handler tables directly). The blocks keep
+    their order and alignment directives; only the section name changes, so
+    the unit's RODATA() claim covers its whole read-only run.
+    """
+    return '\n'.join(line.replace('.rdata', f'.section\t{CONSTANT_SECTION}')
+                     if line.strip() == '.rdata' else line
+                     for line in assembly.split('\n'))
+
+
+# How a unit's read-only data is sectioned: `separate` (constants to .rodata,
+# switch tables in .rdata, the pool padded to eight bytes) for the PS-X EXE
+# programs; `together` (cc1 order, unpadded) for the FDAT overlays.
+READ_ONLY_MODES = {'separate': separate_read_only, 'together': keep_read_only_together}
+
+
 def dos_text(path: Path) -> None:
     # The DOS reader needs CRLF. No directives, instructions or literals change.
     path.write_bytes(path.read_bytes().replace(b'\r\n', b'\n').replace(b'\n', b'\r\n'))
@@ -87,8 +182,10 @@ def compile_c(source: Path, root: Path, stem: str, *, compiler: str,
               optimization: str, small_data: int, include_dirs: tuple[Path, ...],
               cc1_flags: tuple[str, ...] = (), defines: tuple[str, ...] = (),
               cc1_override: Path | None = None,
-              environment: dict[str, str] | None = None, run=run_command) -> dict:
+              environment: dict[str, str] | None = None, run=run_command,
+              read_only: str = 'separate') -> dict:
     cpp, cc1 = C_COMPILERS[compiler]
+    section_read_only = READ_ONLY_MODES[read_only]
     preprocessed, assembly = root / (stem + '.I'), root / (stem + '.S')
     includes = [argument for path in include_dirs for argument in ('-I', str(path.resolve()))]
     # The name becomes the assembly's `.file`; older ASPSX builds hang on long
@@ -115,10 +212,13 @@ def compile_c(source: Path, root: Path, stem: str, *, compiler: str,
         cc1_command = dos_command
     else:
         run(cc1_command, environment=environment)
+    text = assembly.read_bytes().decode('latin-1')
+    assembly.write_bytes(section_read_only(text).encode('latin-1'))
     dos_text(assembly)
     return {'object': stem + '.OBJ', 'assembly': stem + '.S', 'log': stem + '.TXT',
             'preprocessor_command': cpp_command, 'compiler_command': cc1_command, **probe,
             'assembler_command': aspsx_command(stem, small_data),
+            'dmpsx_command': dmpsx_command(stem),
             'assembly_sha256': hashlib.sha256(assembly.read_bytes()).hexdigest()}
 
 
@@ -168,4 +268,5 @@ def assemble_many(root: Path, stems: tuple[str, ...], small_data: int) -> dict[s
     dos_run(root, [aspsx_command(stem, small_data) for stem in stems], 'asm')
     for stem in stems:
         tool_succeeded(root, stem + '.TXT', stem + '.OBJ', b'LNK\x02')
+    rewrite_gte(root, stems)
     return {stem: (root / (stem + '.OBJ')).read_bytes() for stem in stems}

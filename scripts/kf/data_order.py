@@ -15,7 +15,7 @@ from scripts.kf.paths import RETAIL_CONFIG
 from scripts.kf.retail import read_tsv
 
 SECTION_ORDER = {section: rank for rank, section in enumerate(
-    (".rdata", ".text", ".data", ".sdata", ".sbss", ".bss")
+    (".rodata", ".rdata", ".text", ".data", ".sdata", ".sbss", ".bss")
 )}
 
 
@@ -65,15 +65,12 @@ def _initialized_claims(manifest: Manifest) -> dict[tuple[str, str], list[Claim]
                     Claim(unit.image, datum.section_name, datum.va, datum.end,
                           unit.unit, datum.symbol)
                 )
-        if unit.rodata is not None:
-            va, size = unit.rodata
-            sections[(unit.image, ".rdata")].append(
-                Claim(unit.image, ".rdata", va, va + size, unit.unit, "RODATA")
-            )
-        if unit.sdata is not None:
-            va, size = unit.sdata
-            sections[(unit.image, ".sdata")].append(
-                Claim(unit.image, ".sdata", va, va + size, unit.unit, "SDATA")
+        # Constants link as `.rodata` ahead of every unit's switch tables
+        # (`.rdata`); see scripts/psxbuild/sdk.py separate_read_only.
+        for kind, va, size in unit.owned_ranges():
+            section = {"RODATA": ".rodata", "JUMPTABLES": ".rdata", "SDATA": ".sdata"}[kind]
+            sections[(unit.image, section)].append(
+                Claim(unit.image, section, va, va + size, unit.unit, kind)
             )
     for claims in sections.values():
         claims.sort(key=lambda claim: (claim.start, claim.end))

@@ -44,13 +44,14 @@ from elftools.elf.elffile import ELFFile
 
 from scripts.kf.delink import image_key
 from scripts.kf.linked_symbols import linked_addresses
+from scripts.kf.mips_elf import SHF_MIPS_GPREL
 from scripts.kf.manifest import Manifest, Unit, load as load_manifest
 from scripts.kf.mips_elf import R_MIPS_32
 from scripts.kf.paths import BUILD, RETAIL_CONFIG
 from scripts.kf.retail import IMAGE_LAYOUTS, read_tsv
 
 
-INIT_SECTIONS = (".data", ".rodata", ".sdata")
+INIT_SECTIONS = (".data", ".rodata", ".rdata", ".sdata")
 BSS_SECTIONS = (".bss", ".sbss")
 
 
@@ -311,14 +312,15 @@ def _diff_bss(retail: Elf, recon: Elf, name: str = ".bss",
     return SectionDiff(name, rt_size, rc_size, "match")
 
 
-def _data_placement_issues(path: Path, unit: Unit) -> list[tuple[str, dict]]:
+def _data_placement_issues(path: Path, unit: Unit,
+                           definitions=None) -> list[tuple[str, dict]]:
     from scripts.kf.roundtrip import UnitResult, plan
 
     result = UnitResult(unit.image, unit.unit, str(path))
     # This is a data gate: non-exact function sizes must not masquerade as
     # data-placement failures. All DATA/RODATA claims and ELF sections remain.
     with path.open("rb") as stream:
-        plan(ELFFile(stream), replace(unit, functions=()), result)
+        plan(ELFFile(stream), replace(unit, functions=()), result, definitions)
     owned = {d.symbol: d.section_name for d in unit.data}
     return [(issue.get("section", owned.get(issue.get("symbol"), "object")), issue)
             for issue in result.issues if issue.get("section") != ".text"]
@@ -346,6 +348,35 @@ def linked_common_proof(unit: Unit, recon: Elf,
     return frozenset(request.name for request in recon.common_requests)
 
 
+def _place_proven_commons(unit: Unit, recon: Elf, proven: frozenset[str]) -> None:
+    """Add linked COMMON beside a unit's fixed .bss when the link proved them.
+
+    A unit may own fixed .bss (statics) and COMMON requests whose linked
+    addresses follow it. Once the current link placed every request at its
+    claim, compare the section as the link laid it out: the fixed allocations
+    keep their object offsets and each COMMON sits at its claim's distance
+    from the one base the fixed allocations imply.
+    """
+    section = recon.sections.get(".bss")
+    if not proven or section is None:
+        return
+    claims = {datum.symbol: datum for datum in unit.data if datum.section_name == ".bss"}
+    fixed = recon.allocations.get(".bss", [])
+    bases = {claims[item.name].va - item.offset for item in fixed if item.name in claims}
+    if len(bases) != 1 or any(item.name not in claims for item in fixed):
+        return
+    base = bases.pop()
+    placed = list(fixed)
+    present = {item.name for item in fixed}
+    for request in recon.common_requests:
+        if request.name in proven and request.name not in present:
+            placed.append(Allocation(request.name, claims[request.name].va - base,
+                                     request.size, 1, 0))  # STB_GLOBAL, STV_DEFAULT
+    size = max(section.size, *(item.offset + item.size for item in placed))
+    recon.sections[".bss"] = Section(".bss", section.type, size, b"", section.flags)
+    recon.allocations[".bss"] = placed
+
+
 def _proven_issue(label: str, issue: dict, proven: frozenset[str]) -> bool:
     """Whether a placement issue only restates COMMON placement the link proved."""
     kind = issue.get("kind")
@@ -364,7 +395,8 @@ def _proven_issue(label: str, issue: dict, proven: frozenset[str]) -> bool:
 
 
 def diff_unit(unit: Unit, delink_dir: Path, objdiff_dir: Path,
-              linked: dict[str, int] | None = None) -> UnitDataDiff | None:
+              linked: dict[str, int] | None = None,
+              definitions=None) -> UnitDataDiff | None:
     key, object_name = image_key(unit.image), unit.object_name
     target = delink_dir / key / "modules" / object_name
     base = objdiff_dir / key / "base" / object_name
@@ -380,8 +412,12 @@ def diff_unit(unit: Unit, delink_dir: Path, objdiff_dir: Path,
     with base.open('rb') as stream:
         common_claim = named_common_bss_claim(ELFFile(stream), unit)
     if common_claim is not None:
-        recon.sections['.bss'] = Section('.bss', 8, common_claim.size, b'', 3)
-        recon.allocations['.bss'] = [Allocation(
+        common_section = common_claim.section_name
+        # SHF_WRITE|SHF_ALLOC, plus SHF_MIPS_GPREL for small data.
+        flags = 3 | (SHF_MIPS_GPREL if common_section == '.sbss' else 0)
+        recon.sections[common_section] = Section(common_section, 8, common_claim.size, b'',
+                                                 flags)
+        recon.allocations[common_section] = [Allocation(
             common_claim.symbol, 0, common_claim.size, 1, 0)]
     result = UnitDataDiff(unit.image, unit.unit)
     for name in INIT_SECTIONS:
@@ -393,6 +429,7 @@ def diff_unit(unit: Unit, delink_dir: Path, objdiff_dir: Path,
         if section.type == 8 and section.flags & 2  # allocated NOBITS, including custom names
     }
     proven = linked_common_proof(unit, recon, linked)
+    _place_proven_commons(unit, recon, proven)
     for name in sorted(bss_names):
         bss = _diff_bss(retail, recon, name, unit)
         if bss is not None and bss.status == "unresolved-common-placement" and proven:
@@ -402,7 +439,7 @@ def diff_unit(unit: Unit, delink_dir: Path, objdiff_dir: Path,
             result.diffs.append(bss)
     by_section = {diff.name: diff for diff in result.diffs}
     for label, path in (("target", target), ("reconstruction", base)):
-        for name, issue in _data_placement_issues(path, unit):
+        for name, issue in _data_placement_issues(path, unit, definitions):
             if _proven_issue(label, issue, proven):
                 continue
             diff = by_section.get(name)
@@ -427,6 +464,10 @@ def diff_image(
     results: list[UnitDataDiff] = []
     failures: list[ArtifactFailure] = []
     linked = linked_addresses(image)
+    from scripts.kf.roundtrip import (allocated_definitions, initialized_definitions,
+                                      usable_definitions)
+    definitions = {**allocated_definitions(image, manifest.units),
+                   **initialized_definitions(image, manifest.units)}
     for unit in manifest.units:
         if unit.image != image:
             continue
@@ -439,7 +480,8 @@ def diff_image(
                 image, unit.unit, "missing " + ", ".join(missing)
             ))
             continue
-        diff = diff_unit(unit, delink_dir, objdiff_dir, linked)
+        diff = diff_unit(unit, delink_dir, objdiff_dir, linked,
+                         usable_definitions(definitions, unit, manifest.units))
         if diff is not None:
             results.append(diff)
     return results, failures
@@ -497,10 +539,7 @@ def coverage(
         if unit.image != image:
             continue
         claims.extend((d.va, d.va + d.size) for d in unit.data if d.storage == "load")
-        for owned in (unit.rodata, unit.sdata):
-            if owned:
-                start, size = owned
-                claims.append((start, start + size))
+        claims.extend((start, start + size) for _kind, start, size in unit.owned_ranges())
     owners = _union(claims)
     total = sum(end - start for start, end in census)
     unowned = sum(

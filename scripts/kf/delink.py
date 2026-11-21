@@ -18,11 +18,12 @@ from collections import Counter, defaultdict
 from dataclasses import dataclass
 from pathlib import Path
 from dataclasses import replace
-from typing import Callable, Iterable
+from typing import Callable, Iterable, Sequence
 
 from scripts.kf.mips_elf import (
     BSS_SECTION_SYMBOL,
     DATA_SECTION_SYMBOL,
+    JUMPTABLE_SECTION_SYMBOL,
     RODATA_SECTION_SYMBOL,
     STB_GLOBAL,
     STB_LOCAL,
@@ -34,10 +35,12 @@ from scripts.kf.mips_elf import (
     write_mips_elf,
 )
 from scripts.kf.relocations import (
+    ambiguous_sites,
     decode_hi_lo_target,
     decode_mips26_target,
     encode_hi_lo_addend,
     encode_mips26_addend,
+    encode_orphan_hi_addend,
     named_data_referent,
     validate_relocation,
 )
@@ -48,18 +51,61 @@ from scripts.kf.retail import (
     format_size,
     parse_int,
     read_tsv,
+    referent_image,
     verify_retail_image,
     write_tsv,
 )
 
 
-# Working name for a module's anonymous small-data literal range. It never
-# reaches an object's symbol table: module packing rewrites every reference to
-# the .sdata section symbol plus the range's packed offset, as ASPSX does for
-# the compiler's local `$LC` labels.
+# Working name for a module's anonymous small-data literal range (the first;
+# later ranges add `_<index>`). It never reaches an object's symbol table:
+# module packing rewrites every reference to the .sdata section symbol plus
+# the range's packed offset, as ASPSX does for the compiler's local `$LC`
+# labels.
 SDATA_LITERAL_SYMBOL = "$sdata_literals"
 SDATA_SECTION_SYMBOL = ".sdata"
 SBSS_SECTION_SYMBOL = ".sbss"
+
+
+def literal_symbol(index: int) -> str:
+    return SDATA_LITERAL_SYMBOL if index == 0 else f"{SDATA_LITERAL_SYMBOL}_{index}"
+
+
+def _ranges(value) -> tuple[tuple[int, int], ...]:
+    """One (va, size) range or a sequence of them, as a tuple of ranges."""
+    if not value:
+        return ()
+    if isinstance(value[0], int):
+        return (tuple(value),)
+    return tuple(tuple(item) for item in value)
+
+
+@dataclass(frozen=True)
+class Owned:
+    """The anonymous ranges a module claims, and the symbol each resolves to.
+
+    ``.rodata`` holds the unit's constants (RODATA), ``.rdata`` its switch
+    tables (JUMPTABLES); each SDATA literal range has a working symbol that
+    module packing turns into a ``.sdata`` offset.
+    """
+
+    rodata: tuple[int, int] | None = None
+    sdata: tuple[tuple[int, int], ...] = ()
+    jumptables: tuple[int, int] | None = None
+
+    def resolve(self, address: int) -> tuple[str, int] | None:
+        """(symbol, range start) of the range holding ``address``."""
+        for symbol, extent in ((RODATA_SECTION_SYMBOL, self.rodata),
+                               (JUMPTABLE_SECTION_SYMBOL, self.jumptables)):
+            if extent is not None and extent[0] <= address < extent[0] + extent[1]:
+                return symbol, extent[0]
+        for index, (start, size) in enumerate(self.sdata):
+            if start <= address < start + size:
+                return literal_symbol(index), start
+        return None
+
+    def __bool__(self) -> bool:
+        return bool(self.rodata or self.sdata or self.jumptables)
 
 
 __all__ = (
@@ -431,34 +477,33 @@ def _resolve_symbol(
     function: Function,
     target: int,
     target_name: str,
-    rodata: tuple[int, int] | None = None,
+    owned: Owned | None = None,
     *,
     data_reference: bool = False,
-    sdata: tuple[int, int] | None = None,
 ) -> tuple[str, int]:
+    # An overlay's references outside its own window name its host's
+    # functions and data (retail.referent_image).
+    owner_image = referent_image(function.image, target)
     named = named_data_referent(
-        catalog, function.image, sanitize_symbol(target_name, "")
+        catalog, owner_image, sanitize_symbol(target_name, "")
     ) if target_name else None
     if data_reference and named is not None:
         # A biased data base can coincide with unrelated code or RODATA. Use
         # the reviewed allocation, then express unit-owned literals/tables
         # through their actual read-only section contribution.
-        if rodata is not None and rodata[0] <= named.va < rodata[0] + rodata[1]:
-            return RODATA_SECTION_SYMBOL, target - rodata[0]
-        if sdata is not None and sdata[0] <= named.va < sdata[0] + sdata[1]:
-            return SDATA_LITERAL_SYMBOL, target - sdata[0]
+        hit = owned.resolve(named.va) if owned else None
+        if hit is not None:
+            return hit[0], target - hit[1]
         return named.name, target - named.va
     if function.contains(target):
         return SECTION_SYMBOL, target - function.va
-    if rodata is not None and rodata[0] <= target < rodata[0] + rodata[1]:
-        # The owning module's read-only contribution: jump tables and string
-        # literals compare as .rodata offsets, the way the compiler emits them.
-        return RODATA_SECTION_SYMBOL, target - rodata[0]
-    if sdata is not None and sdata[0] <= target < sdata[0] + sdata[1]:
-        # The owning module's small-data literals; module packing turns the
-        # working symbol into a .sdata offset.
-        return SDATA_LITERAL_SYMBOL, target - sdata[0]
-    target_function = catalog.function_starts[function.image].get(target)
+    hit = owned.resolve(target) if owned else None
+    if hit is not None:
+        # The owning module's constants, switch tables or small-data literals
+        # compare as offsets into the section the compiler emitted them to;
+        # module packing turns a literal's working symbol into a .sdata offset.
+        return hit[0], target - hit[1]
+    target_function = catalog.function_starts[owner_image].get(target)
     if target_function is not None:
         return target_function.symbol, 0
     if target_name:
@@ -478,7 +523,7 @@ def _resolve_symbol(
         if named is not None:
             return symbol, target - named.va
         return symbol, 0
-    target_data = _containing_data(catalog, function.image, target)
+    target_data = _containing_data(catalog, owner_image, target)
     if target_data is not None:
         return target_data.symbol, target - target_data.va
     return f"DAT_{target:08x}", 0
@@ -509,6 +554,25 @@ def _competes_for_site(row: dict[str, str], policy: str) -> bool:
     return row["target_region"] == "load" or row["status"] == "reviewed"
 
 
+def _merge_relocations(
+    target: list[MipsRelocation], relocations: Iterable[MipsRelocation]
+) -> None:
+    """Add relocations, emitting a shared HI/LO half once.
+
+    A `lui` that feeds several LO16s is one HI16; it is anchored at its
+    earliest LO16 (its `pair`), the one ELF REL order must keep it ahead of.
+    """
+    for item in relocations:
+        try:
+            index = target.index(item)
+        except ValueError:
+            target.append(item)
+            continue
+        known = target[index]
+        if item.pair is not None and (known.pair is None or item.pair < known.pair):
+            target[index] = replace(known, pair=item.pair)
+
+
 def _apply_relocation(
     blob: bytearray,
     function: Function,
@@ -516,17 +580,23 @@ def _apply_relocation(
     catalog: Catalog,
     policy: str,
     rodata: tuple[int, int] | None = None,
-    sdata: tuple[int, int] | None = None,
+    sdata=None,
+    original: bytes | None = None,
+    *,
+    jumptables: tuple[int, int] | None = None,
 ) -> tuple[list[MipsRelocation], dict[str, object]]:
-    validation = validate_relocation(blob, function, row, catalog, policy)
+    # Rows of one shared HI/LO family validate against the linked bytes, not
+    # the addend an earlier member of the family already wrote.
+    validation = validate_relocation(
+        blob if original is None else original, function, row, catalog, policy)
     target = validation.target
     offset = validation.offset
     symbol, addend = _resolve_symbol(
-        catalog, function, target, row["target_name"], rodata,
+        catalog, function, target, row["target_name"],
+        Owned(rodata, _ranges(sdata), jumptables),
         data_reference=(row["status"] == "reviewed"
                         and row["kind"] in {"mips_hi16_lo16", "mips32_candidate",
                                             "mips_gprel16"}),
-        sdata=sdata,
     )
 
     if row["kind"] == "mips26":
@@ -536,6 +606,13 @@ def _apply_relocation(
         action = "local-section" if local_target else "external-symbol"
         kinds = "R_MIPS_26"
         relocations = [relocation]
+    elif row["kind"] == "mips_hi16_lo16" and validation.paired_offset is None:
+        # An orphan high half (relocations.is_orphan_high_row): the LUI keeps
+        # its symbol, and no low instruction is rewritten.
+        _put_word(blob, offset, encode_orphan_hi_addend(validation.word, addend))
+        relocations = [MipsRelocation(offset, "R_MIPS_HI16", symbol)]
+        action = "orphan-high"
+        kinds = "R_MIPS_HI16"
     elif row["kind"] == "mips_hi16_lo16":
         paired_offset = validation.paired_offset
         assert paired_offset is not None and validation.paired_word is not None
@@ -547,7 +624,7 @@ def _apply_relocation(
         _put_word(blob, offset, hi_word)
         _put_word(blob, paired_offset, lo_word)
         relocations = [
-            MipsRelocation(offset, "R_MIPS_HI16", symbol),
+            MipsRelocation(offset, "R_MIPS_HI16", symbol, paired_offset),
             MipsRelocation(paired_offset, "R_MIPS_LO16", symbol),
         ]
         action = "paired-symbol"
@@ -613,7 +690,16 @@ class Module:
     vas: tuple[int, ...]
     data: tuple[Datum, ...] = ()
     rodata: tuple[int, int] | None = None
-    sdata: tuple[int, int] | None = None
+    # SDATA literal ranges, ascending; one (va, size) pair is accepted too.
+    sdata: tuple[tuple[int, int], ...] = ()
+    jumptables: tuple[int, int] | None = None
+
+    def __post_init__(self) -> None:
+        object.__setattr__(self, "sdata", _ranges(self.sdata))
+
+    @property
+    def owned(self) -> Owned:
+        return Owned(self.rodata, self.sdata, self.jumptables)
 
     @property
     def object_name(self) -> str:
@@ -626,6 +712,10 @@ class Module:
 
     def owns_rodata(self, address: int) -> bool:
         return self.rodata is not None and self.rodata[0] <= address < self.rodata[0] + self.rodata[1]
+
+    def owns_jumptables(self, address: int) -> bool:
+        return (self.jumptables is not None
+                and self.jumptables[0] <= address < self.jumptables[0] + self.jumptables[1])
 
 
 def _get_word(blob: bytes | bytearray, offset: int) -> int:
@@ -656,6 +746,91 @@ def _rebase_section_relocations(
             pending_hi = None
 
 
+def _rebase_hi_lo(
+    blob: bytearray,
+    relocations: list[MipsRelocation],
+    offsets: dict[str, int],
+    section_symbol: str,
+    what: str,
+) -> list[MipsRelocation]:
+    """Move HI16/LO16 families against `offsets` symbols to `section_symbol`.
+
+    A HI16 pairs with the LO16s of its symbol that follow it, up to a later
+    HI16 of that symbol once a LO16 has been seen: one `lui` may feed several
+    signed lows, and consecutive `lui`s on converging paths feed the same low.
+    A low based on another `lui` register of the symbol (and not on this
+    `lui`'s register) belongs to that `lui`: a dead `lui` in a delay slot
+    pairs with the first low that uses its own register, and a `lui` on one
+    branch path does not take the low of the other path's `lui`. A low left
+    over by that walk (its `lui`'s run cut short by another path's `lui` of
+    the symbol) pairs with the nearest preceding `lui` of its base register.
+    A HI16 with no following LO16 shares the nearest preceding one. Each pair
+    is re-encoded from the original words, so a shared half is written once
+    with the same value.
+    """
+    result = list(relocations)
+    original = {item.offset: _get_word(blob, item.offset) for item in relocations
+                if item.kind in {"R_MIPS_HI16", "R_MIPS_LO16"}}
+    paired_lows: set[int] = set()
+    for index, high in enumerate(relocations):
+        if high.kind != "R_MIPS_HI16" or high.symbol not in offsets:
+            continue
+        lows = []
+        hi_register = (original[high.offset] >> 16) & 0x1F
+        others = {(original[item.offset] >> 16) & 0x1F for item in relocations
+                  if item is not high and item.kind == "R_MIPS_HI16"
+                  and item.symbol == high.symbol} - {hi_register}
+        for later in range(index + 1, len(relocations)):
+            item = relocations[later]
+            if item.symbol != high.symbol:
+                continue
+            if item.kind == "R_MIPS_HI16" and lows:
+                break
+            if item.kind == "R_MIPS_LO16":
+                base = (original[item.offset] >> 21) & 0x1F
+                if base != hi_register and base in others:
+                    continue
+                lows.append(later)
+        if not lows:
+            lows = [earlier for earlier in range(index - 1, -1, -1)
+                    if relocations[earlier].kind == "R_MIPS_LO16"
+                    and relocations[earlier].symbol == high.symbol][:1]
+        if not lows:
+            raise ValueError(f"unpaired {what} HI16: {high.symbol}")
+        hi_word = original[high.offset]
+        for low_index in lows:
+            low = relocations[low_index]
+            lo_word = original[low.offset]
+            addend = decode_hi_lo_target(hi_word, lo_word) + offsets[high.symbol]
+            new_hi, new_lo = encode_hi_lo_addend(hi_word, lo_word, addend)
+            _put_word(blob, high.offset, new_hi)
+            _put_word(blob, low.offset, new_lo)
+            result[low_index] = replace(low, symbol=section_symbol)
+            paired_lows.add(low_index)
+        result[index] = replace(high, symbol=section_symbol)
+    for index, low in enumerate(relocations):
+        if low.kind != "R_MIPS_LO16" or low.symbol not in offsets or index in paired_lows:
+            continue
+        # A low the walk above left over (its lui's run was cut short by a
+        # later lui of the symbol on another path) belongs to the nearest
+        # preceding lui of the symbol that loads its base register.
+        lo_word = original[low.offset]
+        base = (lo_word >> 21) & 0x1F
+        owner = next((earlier for earlier in range(index - 1, -1, -1)
+                      if relocations[earlier].kind == "R_MIPS_HI16"
+                      and relocations[earlier].symbol == low.symbol
+                      and (original[relocations[earlier].offset] >> 16) & 0x1F == base), None)
+        if owner is None:
+            raise ValueError(f"unpaired {what} LO16: {low.symbol}")
+        hi_word = original[relocations[owner].offset]
+        addend = decode_hi_lo_target(hi_word, lo_word) + offsets[low.symbol]
+        new_hi, new_lo = encode_hi_lo_addend(hi_word, lo_word, addend)
+        _put_word(blob, relocations[owner].offset, new_hi)
+        _put_word(blob, low.offset, new_lo)
+        result[index] = replace(low, symbol=section_symbol)
+    return result
+
+
 def _module_function_address_relocations(
     blob: bytearray,
     relocations: list[MipsRelocation],
@@ -674,24 +849,9 @@ def _module_function_address_relocations(
             _put_word(blob, high.offset, encode_mips26_addend(
                 word, addend + function_offsets[high.symbol]
             ))
-            result[index] = MipsRelocation(high.offset, high.kind, SECTION_SYMBOL)
+            result[index] = replace(high, symbol=SECTION_SYMBOL)
             continue
-        if high.kind != "R_MIPS_HI16" or high.symbol not in function_offsets:
-            continue
-        if index + 1 >= len(result):
-            raise ValueError(f"unpaired function-address HI16: {high.symbol}")
-        low = result[index + 1]
-        if low.kind != "R_MIPS_LO16" or low.symbol != high.symbol:
-            raise ValueError(f"unpaired function-address HI16: {high.symbol}")
-        hi_word = _get_word(blob, high.offset)
-        lo_word = _get_word(blob, low.offset)
-        addend = decode_hi_lo_target(hi_word, lo_word) + function_offsets[high.symbol]
-        new_hi, new_lo = encode_hi_lo_addend(hi_word, lo_word, addend)
-        _put_word(blob, high.offset, new_hi)
-        _put_word(blob, low.offset, new_lo)
-        result[index] = MipsRelocation(high.offset, high.kind, SECTION_SYMBOL)
-        result[index + 1] = MipsRelocation(low.offset, low.kind, SECTION_SYMBOL)
-    return result
+    return _rebase_hi_lo(blob, result, function_offsets, SECTION_SYMBOL, "function-address")
 
 
 def _module_function_data_relocations(
@@ -706,7 +866,7 @@ def _module_function_data_relocations(
             continue
         _put_word(blob, relocation.offset,
                   _get_word(blob, relocation.offset) + function_offsets[relocation.symbol])
-        result[index] = MipsRelocation(relocation.offset, relocation.kind, SECTION_SYMBOL)
+        result[index] = replace(relocation, symbol=SECTION_SYMBOL)
     return result
 
 
@@ -719,32 +879,26 @@ def _module_static_bss_relocations(
     """Use the BSS section for references to this module's static objects.
 
     The native assembler resolves a local BSS label through its section symbol;
-    under -G a small `.lcomm` lands in .sbss and resolves through that section.
-    The object's section offset must be added to the implicit MIPS addend.
+    under -G a small `.lcomm` lands in .sbss and resolves through that section,
+    including its `$gp`-relative accesses. The object's section offset must be
+    added to the implicit MIPS addend.
     """
     result = list(relocations)
     for index, high in enumerate(result):
         if high.symbol not in offsets:
             continue
         offset = offsets[high.symbol]
-        if high.kind == "R_MIPS_HI16":
-            if index + 1 >= len(result):
-                raise ValueError(f"unpaired static BSS HI16: {high.symbol}")
-            low = result[index + 1]
-            if low.kind != "R_MIPS_LO16" or low.symbol != high.symbol:
-                raise ValueError(f"unpaired static BSS HI16: {high.symbol}")
-            hi_word = _get_word(blob, high.offset)
-            lo_word = _get_word(blob, low.offset)
-            addend = decode_hi_lo_target(hi_word, lo_word) + offset
-            new_hi, new_lo = encode_hi_lo_addend(hi_word, lo_word, addend)
-            _put_word(blob, high.offset, new_hi)
-            _put_word(blob, low.offset, new_lo)
-            result[index] = MipsRelocation(high.offset, high.kind, section_symbol)
-            result[index + 1] = MipsRelocation(low.offset, low.kind, section_symbol)
-        elif high.kind == "R_MIPS_32":
+        if high.kind == "R_MIPS_32":
             _put_word(blob, high.offset, _get_word(blob, high.offset) + offset)
-            result[index] = MipsRelocation(high.offset, high.kind, section_symbol)
-    return result
+            result[index] = replace(high, symbol=section_symbol)
+        elif high.kind == "R_MIPS_GPREL16":
+            word = _get_word(blob, high.offset)
+            addend = (((word & 0xFFFF) ^ 0x8000) - 0x8000) + offset
+            if not -0x8000 <= addend < 0x8000:
+                raise ValueError(f"static small-data GPREL16 addend out of range: {high.symbol}")
+            _put_word(blob, high.offset, (word & 0xFFFF0000) | (addend & 0xFFFF))
+            result[index] = replace(high, symbol=section_symbol)
+    return _rebase_hi_lo(blob, result, offsets, section_symbol, "static BSS")
 
 
 def _module_load_relocations(
@@ -764,23 +918,9 @@ def _module_load_relocations(
         if high.symbol not in offsets:
             continue
         offset = offsets[high.symbol]
-        if high.kind == "R_MIPS_HI16":
-            if index + 1 >= len(result):
-                raise ValueError(f"unpaired static load-data HI16: {high.symbol}")
-            low = result[index + 1]
-            if low.kind != "R_MIPS_LO16" or low.symbol != high.symbol:
-                raise ValueError(f"unpaired static load-data HI16: {high.symbol}")
-            hi_word = _get_word(blob, high.offset)
-            lo_word = _get_word(blob, low.offset)
-            addend = decode_hi_lo_target(hi_word, lo_word) + offset
-            new_hi, new_lo = encode_hi_lo_addend(hi_word, lo_word, addend)
-            _put_word(blob, high.offset, new_hi)
-            _put_word(blob, low.offset, new_lo)
-            result[index] = MipsRelocation(high.offset, high.kind, section_symbol)
-            result[index + 1] = MipsRelocation(low.offset, low.kind, section_symbol)
-        elif high.kind == "R_MIPS_32":
+        if high.kind == "R_MIPS_32":
             _put_word(blob, high.offset, _get_word(blob, high.offset) + offset)
-            result[index] = MipsRelocation(high.offset, high.kind, section_symbol)
+            result[index] = replace(high, symbol=section_symbol)
         elif high.kind == "R_MIPS_GPREL16":
             # The implicit 16-bit addend becomes the datum's section offset.
             word = _get_word(blob, high.offset)
@@ -789,8 +929,8 @@ def _module_load_relocations(
             if not -0x8000 <= addend < 0x8000:
                 raise ValueError(f"GPREL16 addend out of range: {high.symbol}")
             _put_word(blob, high.offset, (word & 0xFFFF0000) | (addend & 0xFFFF))
-            result[index] = MipsRelocation(high.offset, high.kind, section_symbol)
-    return result
+            result[index] = replace(high, symbol=section_symbol)
+    return _rebase_hi_lo(blob, result, offsets, section_symbol, "static load-data")
 
 
 @dataclass(frozen=True)
@@ -807,20 +947,36 @@ class ModuleImage:
 
 
 def _module_rodata(
-    module: Module, blob: bytes, text_size: int
+    module: Module, blob: bytes, text_size: int,
+    reviewed: Sequence[MipsRelocation] = (),
 ) -> tuple[bytes, list[MipsRelocation]]:
-    """Rebase a module's carved read-only range: in-module code pointers become
-    .text-relative words with R_MIPS_32 relocations; everything else (string
-    literals, foreign pointers) keeps its retail bytes."""
+    """Rebase a module's carved read-only range (its RODATA constants or its
+    JUMPTABLES): in-module code pointers become .text-relative words and
+    pointers into the module's own read-only ranges (a table of the unit's own
+    string literals) section-relative words, each with an R_MIPS_32
+    relocation. ``reviewed`` holds relocations already applied to ``blob`` from
+    reviewed rows sited in the range (foreign pointers, such as an automatic
+    aggregate initializer holding a global's field addresses); those words are
+    kept as applied. Everything else (string literals, unreviewed foreign
+    pointers) keeps its retail bytes."""
     start = module.text_start
     end = start + text_size
+    read_only = Owned(module.rodata, (), module.jumptables)
     data = bytearray(blob)
-    relocations: list[MipsRelocation] = []
+    relocations: list[MipsRelocation] = list(reviewed)
+    applied = {relocation.offset for relocation in reviewed}
     for offset in range(0, len(data) - 3, 4):
+        if offset in applied:
+            continue
         word = _get_word(data, offset)
+        hit = read_only.resolve(word)
         if start <= word < end:
             _put_word(data, offset, word - start)
             relocations.append(MipsRelocation(offset, "R_MIPS_32", SECTION_SYMBOL))
+        elif hit is not None:
+            _put_word(data, offset, word - hit[1])
+            relocations.append(MipsRelocation(offset, "R_MIPS_32", hit[0]))
+    relocations.sort(key=lambda relocation: relocation.offset)
     return bytes(data), relocations
 
 
@@ -860,7 +1016,7 @@ def _module_data(
                     raise ValueError(f"module {module.unit}: truncated initialized padding")
                 data.extend(padding)
             data_relocations.extend(
-                MipsRelocation(item.offset + offset, item.kind, item.symbol)
+                item.moved(offset)
                 for item in relocations
             )
             data_symbols.append(
@@ -885,6 +1041,8 @@ def _module_object(
     rodata_blob: bytes | None = None,
     *,
     load_padding: Callable[[int, int], bytes] | None = None,
+    rodata_relocations: Sequence[MipsRelocation] = (),
+    jumptable_blob: bytes | None = None,
 ) -> ModuleImage:
     """Concatenate a module's carved functions into one .text section.
 
@@ -918,7 +1076,7 @@ def _module_object(
             rebased, function_relocations, function_offsets
         )
         relocations.extend(
-            MipsRelocation(item.offset + offset, item.kind, item.symbol)
+            item.moved(offset)
             for item in function_relocations
         )
         symbols.append(DefinedSymbol(function.symbol, offset, function.body_size, STT_FUNC))
@@ -928,21 +1086,22 @@ def _module_object(
     data, data_symbols, data_relocations, bss_size, bss_symbols = _module_data(
         module, data_blobs or {}, load_padding
     )
-    # The SDATA literal range packs among the unit's named .sdata claims in
-    # address order; only its packed offset survives into the object.
+    # The SDATA literal ranges pack among the unit's named .sdata claims in
+    # address order; only their packed offsets survive into the object.
     sdata_module = module
-    if module.sdata is not None:
-        literal = Datum(module.sdata[0], module.sdata[1], SDATA_LITERAL_SYMBOL,
-                        "load", "static", ".sdata")
+    literal_names = {literal_symbol(index) for index in range(len(module.sdata))}
+    if module.sdata:
+        literals = tuple(Datum(va, size, literal_symbol(index), "load", "static", ".sdata")
+                         for index, (va, size) in enumerate(module.sdata))
         sdata_module = replace(module, data=tuple(sorted(
-            (*module.data, literal), key=lambda datum: datum.va)))
+            (*module.data, *literals), key=lambda datum: datum.va)))
     sdata, sdata_symbols, sdata_relocations, _, _ = _module_data(
         sdata_module, data_blobs or {}, load_padding, section=".sdata"
     )
     literal_offsets = {symbol.name: symbol.value for symbol in sdata_symbols
-                       if symbol.name == SDATA_LITERAL_SYMBOL}
+                       if symbol.name in literal_names}
     sdata_symbols = [symbol for symbol in sdata_symbols
-                     if symbol.name != SDATA_LITERAL_SYMBOL]
+                     if symbol.name not in literal_names]
     data_blob = bytearray(data)
     data_relocations = _module_function_data_relocations(
         data_blob, data_relocations, function_offsets
@@ -984,11 +1143,26 @@ def _module_object(
             relocations = _module_load_relocations(
                 text, relocations, module_load, section_symbol
             )
-    rodata, rodata_relocations = b"", []
-    if module.rodata is not None:
+    rodata = b""
+    if module.rodata is None:
+        rodata_relocations = []
+    else:
         if rodata_blob is None:
             raise ValueError(f"module {module.unit}: RODATA range was not carved")
-        rodata, rodata_relocations = _module_rodata(module, rodata_blob, len(text))
+        rodata, rodata_relocations = _module_rodata(
+            module, rodata_blob, len(text), rodata_relocations)
+        # A reviewed pointer to one of the unit's own functions (an overlay's
+        # handler table in the unit that also defines the handlers) is a
+        # .text-relative word, as the assembler emits it.
+        rodata_bytes = bytearray(rodata)
+        rodata_relocations = _module_function_data_relocations(
+            rodata_bytes, rodata_relocations, function_offsets)
+        rodata = bytes(rodata_bytes)
+    rdata, rdata_relocations = b"", []
+    if module.jumptables is not None:
+        if jumptable_blob is None:
+            raise ValueError(f"module {module.unit}: JUMPTABLES range was not carved")
+        rdata, rdata_relocations = _module_rodata(module, jumptable_blob, len(text))
     # The section must carry the strongest constraint used to pack its members,
     # not an unrelated four-byte default. Relink validation still requires one
     # consistent base for every member; changing ELF alignment cannot fix gaps.
@@ -1009,7 +1183,7 @@ def _module_object(
             sdata_relocations=sdata_relocations,
             sdata_alignment=max((*(d.alignment for d in module.data
                                    if d.section_name == ".sdata"),
-                                 *((4,) if module.sdata is not None else ())), default=1),
+                                 *((4,) if module.sdata else ())), default=1),
             bss_size=bss_size,
             bss_symbols=bss_symbols,
             bss_alignment=max((4 if d.reservation_size else d.alignment
@@ -1019,13 +1193,16 @@ def _module_object(
             sbss_alignment=4,
             rodata=rodata,
             rodata_relocations=rodata_relocations,
+            rdata=rdata,
+            rdata_relocations=rdata_relocations,
         ),
-        [*relocations, *data_relocations, *sdata_relocations, *rodata_relocations],
+        [*relocations, *data_relocations, *sdata_relocations, *rodata_relocations,
+         *rdata_relocations],
         len(text),
         body_total,
         len(data) + len(sdata),
         bss_size + sbss_size,
-        len(rodata),
+        len(rodata) + len(rdata),
     )
 
 
@@ -1079,19 +1256,15 @@ def delink(
             key=lambda item: item.va,
         )
         # An initialized pointer table may address a literal owned by the
-        # same unit; its reloc must use that unit's .rodata section.
-        rodata_by_datum = {
-            datum.va: module.rodata
-            for module in selected_modules if module.rodata is not None
-            for datum in module.data if datum.storage == "load"
-        }
-        sdata_by_datum = {
-            datum.va: module.sdata
-            for module in selected_modules if module.sdata is not None
+        # same unit; its reloc must use that unit's read-only section.
+        owned_by_datum = {
+            datum.va: module.owned
+            for module in selected_modules if module.owned
             for datum in module.data if datum.storage == "load"
         }
         rows_by_owner: dict[int, list[dict[str, str]]] = defaultdict(list)
         rows_by_datum: dict[int, list[dict[str, str]]] = defaultdict(list)
+        rows_by_rodata: dict[str, list[dict[str, str]]] = defaultdict(list)
         withheld_rows: list[dict[str, object]] = []
         for row in rows_by_image[image]:
             site = parse_int(row["site_va"])
@@ -1100,8 +1273,13 @@ def delink(
                 datum = next(
                     (item for item in claimed_load_data if item.va <= site < item.end), None
                 )
+                rodata_module = next(
+                    (module for module in selected_modules if module.owns_rodata(site)), None
+                )
                 if datum is not None:
                     rows_by_datum[datum.va].append(row)
+                elif rodata_module is not None:
+                    rows_by_rodata[rodata_module.unit].append(row)
                 elif not selected_vas:
                     withheld_rows.append(_withheld(row, None, "site-outside-function"))
                 continue
@@ -1112,16 +1290,11 @@ def delink(
         used_rows: list[dict[str, object]] = []
         withheld_functions: list[dict[str, object]] = []
         carved: dict[int, tuple[bytes, list[MipsRelocation]]] = {}
-        # Members of a module that claims a RODATA range are carved a second
-        # time with that range resolving to .rodata offsets.
-        rodata_by_function = {
-            va: module.rodata
-            for module in selected_modules if module.rodata is not None
-            for va in module.vas
-        }
-        sdata_by_function = {
-            va: module.sdata
-            for module in selected_modules if module.sdata is not None
+        # Members of a module that claims RODATA/JUMPTABLES/SDATA ranges are
+        # carved a second time with those ranges resolving to section offsets.
+        owned_by_function = {
+            va: module.owned
+            for module in selected_modules if module.owned
             for va in module.vas
         }
         carved_rodata: dict[int, tuple[bytes, list[MipsRelocation]]] = {}
@@ -1141,54 +1314,56 @@ def delink(
                 continue
 
             start = expected.file_offset(function.va)
-            blob = bytearray(executable[start:start + function.size])
+            linked = executable[start:start + function.size]
+            blob = bytearray(linked)
             if len(blob) != function.size:
                 raise ValueError(f"{exe_path}: truncated function {function.va:#x}")
             function_relocations: list[MipsRelocation] = []
-            occupied = Counter()
-            for row in rows_by_owner[function.va]:
-                if not _competes_for_site(row, policy):
-                    continue
-                occupied[parse_int(row["site_va"])] += 1
-                if row["paired_site_va"]:
-                    occupied[parse_int(row["paired_site_va"])] += 1
+            ambiguous = ambiguous_sites(
+                row for row in rows_by_owner[function.va] if _competes_for_site(row, policy)
+            )
 
             for row in rows_by_owner[function.va]:
                 sites = [parse_int(row["site_va"])]
                 if row["paired_site_va"]:
                     sites.append(parse_int(row["paired_site_va"]))
-                if any(occupied[site] > 1 for site in sites):
+                if any(site in ambiguous for site in sites):
                     withheld_rows.append(_withheld(
                         row, function, "ambiguous-overlapping-candidates"
                     ))
                     continue
                 try:
                     relocations, used = _apply_relocation(
-                        blob, function, row, catalog, policy
+                        blob, function, row, catalog, policy, original=linked
                     )
                 except ValueError as error:
                     withheld_rows.append(_withheld(row, function, str(error)))
                     continue
-                function_relocations.extend(relocations)
+                _merge_relocations(function_relocations, relocations)
                 used_rows.append(used)
-            if function.va in rodata_by_function or function.va in sdata_by_function:
+            # Shared HI/LO halves are emitted once; the ELF writer decides
+            # REL order (mips_elf.rel_order) from the site and each HI16's pair.
+            function_relocations.sort(key=lambda item: item.offset)
+            if function.va in owned_by_function:
                 module_blob = bytearray(executable[start:start + function.size])
                 module_relocations: list[MipsRelocation] = []
                 for row in rows_by_owner[function.va]:
                     sites = [parse_int(row["site_va"])]
                     if row["paired_site_va"]:
                         sites.append(parse_int(row["paired_site_va"]))
-                    if any(occupied[site] > 1 for site in sites):
+                    if any(site in ambiguous for site in sites):
                         continue
                     try:
+                        owned = owned_by_function[function.va]
                         relocations, _used = _apply_relocation(
                             module_blob, function, row, catalog, policy,
-                            rodata_by_function.get(function.va),
-                            sdata_by_function.get(function.va),
+                            owned.rodata, owned.sdata, original=linked,
+                            jumptables=owned.jumptables,
                         )
                     except ValueError:
                         continue
-                    module_relocations.extend(relocations)
+                    _merge_relocations(module_relocations, relocations)
+                module_relocations.sort(key=lambda item: item.offset)
                 carved_rodata[function.va] = (bytes(module_blob), module_relocations)
 
             object_name = f"{function.va:08x}_{function.symbol}.o"
@@ -1232,11 +1407,11 @@ def delink(
             owner = _DataOwner(image, datum)
             datum_relocations: list[MipsRelocation] = []
             for row in rows_by_datum[datum.va]:
+                owned = owned_by_datum.get(datum.va, Owned())
                 try:
                     relocations, used = _apply_relocation(
                         blob, owner, row, catalog, policy,
-                        rodata_by_datum.get(datum.va),
-                        sdata_by_datum.get(datum.va),
+                        owned.rodata, owned.sdata, jumptables=owned.jumptables,
                     )
                 except ValueError as error:
                     withheld_rows.append(_withheld(row, None, f"data:{error}"))
@@ -1247,8 +1422,7 @@ def delink(
         # Anonymous small-data literals are carved as bytes; a pointer word
         # inside one would need a reviewed row like any claimed datum.
         for module in selected_modules:
-            if module.sdata is not None:
-                va, size = module.sdata
+            for va, size in module.sdata:
                 start = expected.file_offset(va)
                 blob = executable[start:start + size]
                 if len(blob) != size:
@@ -1272,16 +1446,38 @@ def delink(
                 raise ValueError(f"module {module.unit}: functions not carved: {missing}")
             module_carved = dict(carved)
             module_carved.update({va: carved_rodata[va] for va in module.vas if va in carved_rodata})
-            rodata_blob = None
-            if module.rodata is not None:
-                rodata_start = expected.file_offset(module.rodata[0])
-                rodata_blob = executable[rodata_start:rodata_start + module.rodata[1]]
-                if len(rodata_blob) != module.rodata[1]:
-                    raise ValueError(f"{exe_path}: truncated RODATA range for {module.unit}")
+            blobs = {}
+            for kind, extent in (("RODATA", module.rodata), ("JUMPTABLES", module.jumptables)):
+                if extent is not None:
+                    blob_start = expected.file_offset(extent[0])
+                    blobs[kind] = executable[blob_start:blob_start + extent[1]]
+                    if len(blobs[kind]) != extent[1]:
+                        raise ValueError(f"{exe_path}: truncated {kind} range for {module.unit}")
+            rodata_reviewed: list[MipsRelocation] = []
+            if "RODATA" in blobs:
+                # Reviewed pointer words inside the constant pool (an automatic
+                # aggregate initializer's global addresses) validate and
+                # resolve like a claimed datum's.
+                patched = bytearray(blobs["RODATA"])
+                range_owner = _DataOwner(image, Datum(
+                    module.rodata[0], module.rodata[1], "", "load"))
+                for row in rows_by_rodata[module.unit]:
+                    try:
+                        relocations, used = _apply_relocation(
+                            patched, range_owner, row, catalog, policy)
+                    except ValueError as error:
+                        withheld_rows.append(_withheld(row, None, f"rodata:{error}"))
+                        continue
+                    rodata_reviewed.extend(relocations)
+                    used_rows.append(used)
+                blobs["RODATA"] = bytes(patched)
             built = _module_object(
-                module, catalog.function_starts[image], module_carved, data_blobs, rodata_blob,
+                module, catalog.function_starts[image], module_carved, data_blobs,
+                blobs.get("RODATA"),
                 load_padding=lambda va, size: executable[
                     expected.file_offset(va):expected.file_offset(va) + size],
+                rodata_relocations=rodata_reviewed,
+                jumptable_blob=blobs.get("JUMPTABLES"),
             )
             _write_bytes_if_changed(module_output / module.object_name, built.data)
             live_modules.add(module.object_name)

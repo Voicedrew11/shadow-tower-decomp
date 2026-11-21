@@ -109,11 +109,88 @@ class ComparisonTests(unittest.TestCase):
             self.assertIn('id="minimum"', html)
 
 
+class OverlayHostSymbolTests(unittest.TestCase):
+    @staticmethod
+    def resolve(*symbols):
+        from scripts.kf.lnk import Object
+
+        native = Object({}, dict(enumerate(symbols)), [])
+        with mock.patch('scripts.kf.lnk.read', return_value=native):
+            return executable.host_symbols('FDAT_002.BIN', [Path(__file__)])
+
+    def test_references_resolve_through_the_host_address_book(self):
+        from scripts.kf.lnk import Symbol
+
+        self.assertEqual(self.resolve(Symbol('rcos', None), Symbol('handler', 1, 0x10),
+                                      Symbol('DAT_801c0270', None)),
+                         {'rcos': 0x800744C4, 'DAT_801c0270': 0x801C0270})
+
+    def test_overlay_addresses_and_unknown_names_are_not_host_symbols(self):
+        from scripts.kf.lnk import Symbol
+
+        for name in ('func_801eb7ac', 'no_such_symbol'):
+            with self.subTest(name=name), self.assertRaisesRegex(ValueError, name):
+                self.resolve(Symbol(name, None))
+
+
 @unittest.skipUnless(all(shutil.which(tool) for tool in ('cpppsx-272cdk', 'cc1psx-272cdk', 'dosbox-x'))
                      and all(os.environ.get(key) for key in (
-                         'PSYQ_ASPSX', 'PSYQ_PSYLINK', 'PSYQ_CPE2X', 'PSYQ_LIB',
+                         'PSYQ_ASPSX', 'PSYQ_DMPSX', 'PSYQ_PSYLINK', 'PSYQ_CPE2X', 'PSYQ_LIB',
                          'PSYQ_INCLUDE', 'PSYQ_MALLOC_OBJ', 'PSYQ_STARTUP_OBJ')),
                      'requires the pinned compiler, original SDK tools and libraries')
+class PartialImageTests(unittest.TestCase):
+    @staticmethod
+    def catalog(*addresses, vendored=()):
+        from types import SimpleNamespace
+        from scripts.kf.delink import Function
+        functions = [Function('ST.EXE', va, 8, 8, 1, f'func_{va:08x}', 'test', 'test',
+                              provider='Sony' if va in vendored else '')
+                     for va in addresses]
+        return SimpleNamespace(functions={'ST.EXE': functions})
+
+    @staticmethod
+    def manifest(*claimed):
+        from scripts.kf.delink import Function
+        profile = Profile('control', 'c', 'gcc272cdk-native', 'O2', 0, '2.79', ())
+        functions = tuple(Function('ST.EXE', va, 8, 8, 1, f'func_{va:08x}', 'test', 'test')
+                          for va in claimed)
+        return Manifest({profile.name: profile},
+                        (Unit('st.control', 'ST.EXE', 'src/st/control.c', profile.name, functions),))
+
+    def test_unclaimed_game_function_skips_the_native_link(self):
+        catalog = self.catalog(0x80014000, 0x80014008, 0x80014010, vendored=(0x80014010,))
+        with (tempfile.TemporaryDirectory() as directory,
+              mock.patch.object(executable, 'load_catalog', return_value=catalog),
+              mock.patch.object(executable, 'link_image',
+                                side_effect=AssertionError('partial image linked'))):
+            report = build_image('ST.EXE', self.manifest(0x80014000), Path(directory))
+            self.assertEqual((report['linked'], report['phase']), (False, 'partial'))
+            self.assertEqual(report['unclaimed_game_functions'], 1)
+            self.assertEqual(json.loads((Path(directory) / 'build.json').read_text()), report)
+
+    def test_every_game_function_claimed_links_natively(self):
+        linked = {'image': 'ST.EXE', 'linked': True, 'executable': 'ST.EXE'}
+        catalog = self.catalog(0x80014000, 0x80014010, vendored=(0x80014010,))
+        with (tempfile.TemporaryDirectory() as directory,
+              mock.patch.object(executable, 'load_catalog', return_value=catalog),
+              mock.patch.object(executable, 'link_image', return_value=dict(linked)) as link):
+            report = build_image('ST.EXE', self.manifest(0x80014000), Path(directory))
+            link.assert_called_once()
+            self.assertTrue(report['linked'])
+
+    def test_partial_image_is_not_a_build_failure(self):
+        partial = {'image': 'ST.EXE', 'linked': False, 'phase': 'partial',
+                   'units': ['st.control'], 'unclaimed_game_functions': 3}
+        with (tempfile.TemporaryDirectory() as directory,
+              mock.patch.object(executable, 'BUILD', Path(directory)),
+              mock.patch.object(executable, 'load_manifest', return_value=self.manifest()),
+              mock.patch.object(executable, 'build_image', return_value=partial),
+              contextlib.redirect_stdout(io.StringIO()) as output):
+            (Path(directory) / 'link/st').mkdir(parents=True)
+            self.assertEqual(executable.main(['--image', 'st']), 0)
+        self.assertIn('partial reconstruction (3 game functions unclaimed)', output.getvalue())
+
+
 class NativeBuildControls(unittest.TestCase):
     MAP_SECTION = re.compile(
         r'(?m)^ ([0-9A-F]{8}) [0-9A-F]{8} ([0-9A-F]{8}) [0-9A-F]{8} \w+ +(\.[a-z]+)\s*$')
@@ -255,6 +332,102 @@ class NativeBuildControls(unittest.TestCase):
             low = next(word for word in words if word & 0xffff0000 == 0x279c0000)
             signed_low = (low & 0xffff) - (0x10000 if low & 0x8000 else 0)
             self.assertEqual(((high & 0xffff) << 16) + signed_low, gp_base)
+
+    def test_fdat_overlay_links_raw_at_its_origin_against_host_symbols(self):
+        from scripts.psxbuild.link import pack_archive_entry
+
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            # Handler table first, a constant and a switch table in cc1 order,
+            # a call into ST.EXE's LIBGTE rcos and a store to an ST.EXE word.
+            manifest = self.manifest(root, (
+                'typedef struct { short x, y, w, h; } Box;\n'
+                'extern int rcos(int); extern int DAT_801c0270;\n'
+                'extern int MoveBox(Box *);\n'
+                'void handler(int);\n'
+                'struct { int id; void (*run[2])(int); } const table = {0x37, {handler, handler}};\n'
+                'void handler(int a) {\n'
+                '    Box box = {768, 0, 64, 64};\n'
+                '    MoveBox(&box);\n'
+                '    switch (a) {\n'
+                '    case 0: DAT_801c0270 = rcos(5); break;\n'
+                '    case 1: DAT_801c0270 = 7; break;\n'
+                '    case 2: DAT_801c0270 = 9; break;\n'
+                '    case 3: DAT_801c0270 = 11; break;\n'
+                '    case 4: DAT_801c0270 = 13; break;\n'
+                '    }\n'
+                '}\n',), 'FDAT_002.BIN')
+            output = root / 'output'
+            with mock.patch.object(executable, 'host_symbols',
+                                   return_value={'rcos': 0x800744C4, 'DAT_801c0270': 0x801C0270,
+                                                 'MoveBox': 0x80070000}):
+                report = build_image('FDAT_002.BIN', manifest, output)
+            self.assertTrue(report['linked'], report.get('error'))
+            self.assertIsNone(report['startup'])
+            self.assertEqual(report['libraries'], [])
+            commands = (output / 'LINK.LNK').read_text().splitlines()
+            self.assertIn('rcos\tequ\t$800744c4', commands)
+            self.assertFalse(any('regs' in line for line in commands))
+            raw = (output / 'FDAT_002.RAW').read_bytes()
+            origin = 0x801EB560
+            # cc1 order, no padding after the last constant: table (0xc),
+            # box (8), then the switch table at the next eight-byte boundary.
+            words = struct.unpack_from('<3I', raw, 0)
+            self.assertEqual(words[0], 0x37)
+            self.assertEqual(raw[0xc:0x14], struct.pack('<4h', 768, 0, 64, 64))
+            sections = self.sections((output / 'FDAT_002.MAP').read_text())
+            self.assertEqual(sections['.rodata'][0], origin)
+            text = sections['.text'][0]
+            self.assertEqual(words[1], text)
+            self.assertEqual(text, origin + 0x18 + 5 * 4)
+            self.assertNotIn('.rdata', sections)
+            code = struct.unpack_from(f'<{(len(raw) - (text - origin)) // 4}I', raw, text - origin)
+            self.assertIn(0x0C000000 | (0x800744C4 & 0x0FFFFFFF) >> 2, code)
+            entry = (output / 'FDAT_002.BIN').read_bytes()
+            self.assertEqual(entry, pack_archive_entry(raw))
+            self.assertEqual(len(entry), 0x800)
+
+    def test_archive_entry_frame_matches_the_retail_checksum_rule(self):
+        from scripts.psxbuild.link import equ_lines, overlay_reserved_size, pack_archive_entry
+
+        payload = struct.pack('<3I', 0x37, 0x801EB56C, 0x03E00008)
+        entry = pack_archive_entry(payload)
+        self.assertEqual(len(entry), 0x800)
+        self.assertEqual(entry[:12], payload)
+        self.assertEqual(entry[12:-4], bytes(0x800 - 16))
+        self.assertEqual(struct.unpack_from('<I', entry, 0x7FC)[0],
+                         (0x37 + 0x801EB56C + 0x03E00008 + 0x12345678) & 0xFFFFFFFF)
+        # A payload that fills the sector up to the checksum word still fits;
+        # one more word starts the next sector.
+        self.assertEqual(len(pack_archive_entry(bytes(0x7FC))), 0x800)
+        self.assertEqual(len(pack_archive_entry(bytes(0x800))), 0x1000)
+        with self.assertRaises(ValueError):
+            pack_archive_entry(b'\0\0')
+        # Uninitialized storage past the linked bytes counts toward the entry
+        # (FDAT_272.BIN: 16320 linked bytes, 0x420 of .bss, nine sectors).
+        self.assertEqual(len(pack_archive_entry(bytes(16320))), 0x4000)
+        grown = pack_archive_entry(bytes(16320), 0x420)
+        self.assertEqual(len(grown), 0x4800)
+        self.assertEqual(struct.unpack_from('<I', grown, 0x47FC)[0], 0x12345678)
+        self.assertEqual(len(pack_archive_entry(bytes(0x7F0), 0xC)), 0x800)
+        self.assertEqual(len(pack_archive_entry(bytes(0x7F0), 0x10)), 0x1000)
+        with self.assertRaises(ValueError):
+            pack_archive_entry(bytes(8), 2)
+        map_text = (
+            '    Start     Stop   Length      Obj Group            Section name\n'
+            ' 801EB560 801EB7DB 0000027C 801EB560 text             .rodata\n'
+            ' 801EB7DC 801EF503 00003D28 801EB7DC text             .text\n'
+            ' 801EF504 801EF51F 0000001C 801EF504 text             .data\n'
+            ' 801EF520 801EF520 00000000 801EF520 bss              .sbss\n'
+            ' 801EF520 801EF93F 00000420 801EF520 bss              .bss\n'
+            '\n  Address  Names alphabetically\n 801EF520  _bss_org\n')
+        self.assertEqual(overlay_reserved_size(map_text, 0x801EB560, 16320), 0x420)
+        # Storage that ends inside the linked bytes, or no bss at all, adds nothing.
+        self.assertEqual(overlay_reserved_size(map_text, 0x801EB560, 0x4400), 0)
+        self.assertEqual(overlay_reserved_size('', 0x801EB560, 16320), 0)
+        self.assertEqual(equ_lines({'rcos': 0x800744C4}), ['rcos\tequ\t$800744c4'])
+        with self.assertRaises(ValueError):
+            equ_lines({'bad name': 1})
 
     def test_image_without_a_link_model_fails_readably(self):
         with tempfile.TemporaryDirectory() as directory:

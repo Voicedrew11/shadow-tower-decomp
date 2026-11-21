@@ -10,7 +10,7 @@ kf build
 artifact chain:
 
 ```text
-C source -> CPPPSX/CC1PSX (gcc-2.7.2-cdk) -> assembly -> ASPSX 2.79D -> Psy-Q OBJ
+C source -> CPPPSX/CC1PSX (gcc-2.7.2-cdk) -> assembly -> ASPSX 2.79D -> DMPSX 3.0 -> Psy-Q OBJ
 Psy-Q OBJ + SDK OBJ/LIB -> PSYLINK 2.73D -> CPE -> CPE2X 1.5 /CA -> PS-X EXE
 ```
 
@@ -24,8 +24,16 @@ DOSBox-X runs every tool at a fixed emulated rate (`DOS_CYCLES` in
 `scripts/psxbuild/sdk.py`), so a DOS tool's uninitialized stack bytes cannot
 vary with host load; `nix flake check` (`executable-determinism`) builds
 every linked program in two trees and requires identical CPE and EXE bytes.
-ASPSX, PSYLINK and CPE2X are all DOS programs; DOSBox-X starts each one
+ASPSX, DMPSX, PSYLINK and CPE2X are all DOS programs; DOSBox-X starts each one
 directly from a batch file, with no extender or loader staged.
+
+A partial image, one whose source units claim some but not all of its
+admitted game functions, is not linked: its code still calls and reads game
+code no source provides, which PSYLINK cannot resolve. `kf build` reports it
+as `partial` with the number of unclaimed game functions and does not fail;
+its units are verified by the target relink and data gates of `kf check`
+(`ST.EXE` is the first such image). Sources that claim no retail function,
+such as the synthetic link controls, are always linked.
 
 ## Link model
 
@@ -37,6 +45,7 @@ program shares one command-file layout:
 	org	$<load address>
 text	group
 bss	group	bss
+	section	.rodata,text
 	section	.rdata,text
 	section	.text,text
 	section	.ctors,text
@@ -54,8 +63,13 @@ bss	group	bss
 
 - **Load address.** From `config/images.toml`: `0x80010000` for PSX,
   `0x80012000` for TITLE, `0x80011000` for the others.
-- **`.rdata` before `.text`.** Every program begins with its read-only data;
-  the overlays' text starts at the entry point.
+- **Read-only data before `.text`.** Every program begins with its game
+  units' constant pools (`.rodata`), then `.rdata`: the units' switch tables
+  followed by the SDK libraries' read-only data. The compiler writes both
+  kinds of game data to `.rdata`; the build moves the constants (see
+  [the build system](build-system.md#unit-manifest-and-address-claims)).
+  `ST.EXE` is the evidence: every unit's constants precede every unit's
+  tables, each in link order. The overlays' text starts at the entry point.
 - **`.ctors`/`.dtors`.** LIBSN `SNMAIN` declares them. Placed after
   `.text`, both are empty at `.data`'s start, which is where retail
   `PSX.EXE`'s `__main` walks the constructor list (`0x80010350`). Left
@@ -79,8 +93,8 @@ bss	group	bss
 
 PSYLINK, not the build script, places SDK library members. These rules were
 established for PSYLINK 1.29 in the King's Field II project; the Shadow
-Tower retail member groups follow the same pattern, but only `PSX.EXE` has
-been relinked with 2.73D so far:
+Tower retail member groups follow the same pattern; `PSX.EXE`, `STR.EXE`,
+`TITLE.EXE` and `END.EXE` have been relinked with 2.73D byte-identical:
 
 - Archives are visited in `inclib` order. The groups of members from each
   archive follow one another in the linked text in that order.
@@ -94,6 +108,46 @@ been relinked with 2.73D so far:
 
 So the SND members that call SPU interleave with the SPU group when LIBSPU
 is listed first, which is the shape of every retail program here.
+
+## FDAT overlays
+
+The 36 `FDAT_nnn.BIN` images are raw entries of `ST\COM\FDAT.T`, not PS-X
+EXEs. `ST.EXE` loads one at `0x801EB560`, the end of its bss, and calls into
+it through the handler table at its first byte; the overlay calls `ST.EXE`'s
+functions (its own libraries included) and reads `ST.EXE`'s data in place.
+`kf build` links a fully claimed overlay with `OVERLAY_LINK`:
+
+- the same command file at origin `0x801EB560`, with no startup object,
+  allocator, library or `regs` line;
+- every symbol the overlay's objects reference without defining becomes a
+  command-file `name equ $address` line. `executable.host_symbols` takes the
+  addresses from the host's identities (the target relink's address book,
+  `roundtrip.address_book`, with an unresolved `DAT_xxxxxxxx` spelling its
+  literal address) and refuses a name that is not a unique `ST.EXE` identity
+  outside the overlay's window;
+- PSYLINK's pure binary output (`/p`, written as `<NAME>.RAW`) replaces the
+  CPE and CPE2X; and
+- `pack_archive_entry` frames those bytes as the archive does: zeros up to
+  the sector multiple that leaves room for one trailing word, and that word,
+  `0x12345678` plus the 32-bit sum of every preceding word. All 36 retail
+  entries satisfy that rule; the packing step only appends the frame and
+  never rewrites linked bytes.
+
+An overlay's read-only data is not separated: its compiler output keeps
+every `.rdata` block in cc1 order under one section name
+(`sdk.keep_read_only_together`), and the unit's `RODATA()` claim covers that
+whole run, switch tables included (an overlay unit may not claim
+`JUMPTABLES()`). The retail evidence is the overlays themselves:
+`FDAT_032.BIN` puts a `RECT` initializer right after its 0x1cc-byte handler
+tables and its switch table after four alignment bytes, `FDAT_242.BIN` has a
+second run of `RECT` initializers after its switch table, and the code of
+`FDAT_442.BIN`, which has neither, starts directly after the tables at
+`0x801EB72C` with no pool padding.
+
+A partially claimed overlay is reported `partial` like `ST.EXE`; its units
+are verified by the target relink and data gates. `kf link --compare-only`
+compares an overlay's file bytes strictly (header size 0) and keeps it out of
+the island report and the README executable block.
 
 ## PSX.EXE
 
@@ -125,6 +179,90 @@ curated relocations or data claims yet, so its references compare as raw
 words. `kf check` reports the unit's `.rodata`, `.data` and `.sdata` as
 unclaimed and its EXEC header as an unplaced COMMON request until the data
 identities are admitted.
+
+## END.EXE
+
+`src/end/main.c` reconstructs END.EXE's fifteen game functions as one unit
+(`probe-gcc272cdk-o2-g8`); with the `IMAGE_LINKS` entry above the whole
+129,024-byte file equals retail. The link confirmed these placement rules for
+PSYLINK 2.73D:
+
+- The 12 zero bytes at `0x8001d280` are the tail of the last LIBGPU text
+  contribution, not game `.data`; the unit's `.data` starts at `0x8001d28c`.
+- `.sbss` and `.bss` are allocated object by object in link order: each
+  object's fixed reservations (its `.lcomm` statics, 16-byte aligned in
+  `.bss` by ASPSX), then its exported COMMON in symbol-hash bucket order.
+  END's movie buffers follow the 56-byte `dec` static directly, which only
+  COMMON allows; their spellings are chosen inside the bucket order.
+- GCC writes all of a unit's data directives before its text, so every
+  small symbol the unit defines is `$gp`-relative; the one absolute store to
+  END's own `.sbss` slot `0x8002fd7c` is spelled as a fixed address.
+
+## STR.EXE
+
+`src/str/main.c` reconstructs STR.EXE's twenty game functions as one unit
+(`probe-gcc272cdk-o2-g8`); with the `IMAGE_LINKS` entry above the whole
+141,312-byte file equals retail. It is END.EXE's closest relative: the same
+movie player (24-bit only, with a global end frame) and CD helpers, plus a
+LIBPAD controller module. The link confirmed END's rules and adds:
+
+- GCC writes a unit's constants (strings, initializers) before its code. The
+  unit's constant pool is `0x80011000`-`0x8001110f`, its last four bytes the
+  zero tail that ends a pool on an eight-byte boundary; the one switch table
+  (`pad_update_state`) follows at `0x80011110`, before LIBCD's `.rdata`.
+- `.sdata` ends at `0x800328d4`; `.sbss` starts 8-aligned at `0x800328d8`
+  with MALLOC.OBJ's 32 bytes, then the unit's statics from `0x800328f8`.
+- The ten exported COMMON buffers follow the 56-byte `dec` static in
+  hash-bucket order, each 8-aligned; their spellings are WIP names chosen
+  inside that order (`vlc_buffer` 40, `ring_buffer` 148, `blend_buffer` 234,
+  `tim_buf` 237, `display` 253, `poison_image` 262, `pad_data` 310,
+  `cdl_file` 314, `pad_info` 328, `image_rgb` 422), and LIBCD's
+  `StCdIntrFlag` follows them.
+
+## TITLE.EXE
+
+`src/title/main.c` reconstructs TITLE.EXE's eighteen game functions as one
+unit (`probe-gcc272cdk-o2-g8`); with its `IMAGE_LINKS` entry the whole
+96,256-byte file equals retail. TITLE.EXE alone loads at `0x80012000`.
+`main` loads `\ST\TITLE\TITLE.MIC`, streams `\ST\TITLE\TITLE.XA` and runs
+the menu, then writes the next program: 2 (`OPTXT.EXE`) for a new game,
+3 (`ST.EXE`) with 2 in the mailbox byte `0x800103f1` for Continue, 5
+(`VS.EXE`) for versus, and 0 (`STR.EXE`) when the title times out. The
+link confirmed END's placement rules again:
+
+- `.sdata` holds the two byte pointers and the unit's literals
+  (`0x80028abc`-`0x80028aeb`); `.sbss` starts at `0x80028af0`, after four
+  alignment bytes, with MALLOC.OBJ's 32 bytes, then the unit's `pad_align`; `.bss` starts
+  at `0x80028b18` with MALLOC.OBJ's `SearchPoint` and `TopAllocArea`.
+- The unit's six buffers are COMMON, allocated from `0x80028b28` in
+  hash-bucket order (`sound_bank`, `file_buffer`, `display`, `pad_data`,
+  `menu`, `pad_state`); the spellings are WIP names inside that order.
+- The switch table of `pad_update_state` follows `main`'s literals, the
+  first of the image's `.rdata`.
+
+The relink also places sixteen library functions the FID census left as
+game candidates (LIBSND, LIBSPU and LIBPAD members; see
+`functions_vendored.tsv`, confidence `relink-map-sdk42`).
+
+## OPTXT.EXE
+
+`src/optxt/main.c` reconstructs OPTXT.EXE's eighteen game functions as one
+unit (`probe-gcc272cdk-o2-g8`) and `src/optxt/state.c` defines the opening's
+state word; with the `IMAGE_LINKS` entry above the whole 61,440-byte file
+equals retail. The link confirmed the END.EXE rules above and these:
+
+- The unit's `.data` (the text-page table) starts right after the last LIBPAD
+  text at `0x8001df50`; its `.sbss` statics follow `MALLOC.OBJ`'s 32-byte
+  `.sbss`, and `.bss` starts with `MALLOC.OBJ`'s 16 bytes.
+- Exported COMMON objects are 8-byte aligned in bucket order: the text
+  buffer, `display`, the 0x4c-byte pad buffers (`pad_data`) and the pad
+  status.
+- The opening's state word `0x8001f7ec`, the word after the unit's `.sbss`,
+  is read and written only with absolute `lui` pairs, which no symbol of the
+  unit gets: ASPSX sees a unit's own small data before its text and
+  addresses it through `$gp`. It is an `int` global of another object
+  (`src/optxt/state.c`): `main.c` only declares it, and PSYLINK places the
+  small COMMON at the end of `.sbss`, after `main.c`'s statics.
 
 ## PS-X EXE header
 
@@ -161,7 +299,8 @@ ASPSX 2.79D and PSYLINK 2.73D chain:
   unreferenced identity rather than padding.
 - A jump table is emitted after `.align 3`, which ASPSX applies relative to
   the object's `.rdata` start; table offsets therefore show which object an
-  unexplained word belongs to.
+  unexplained word belongs to. Constant pools link separately, before every
+  table (`.rodata`), each ending eight-byte aligned.
 - Under `-G8`, initialized data of at most eight bytes goes to `.sdata` and
   private tentative data of at most eight bytes to `.sbss`. Unlike ASPSX
   1.07, ASPSX 2.79 also addresses that data `$gp`-relative, so `-G` changes
@@ -176,6 +315,18 @@ ASPSX 2.79D and PSYLINK 2.73D chain:
   retail may hold game COMMON nothing references. Names chosen to fit are WIP spellings,
   not recovered ones; a source shared by two programs spells per-image
   names under a define where the two intervals do not overlap.
+- A controlled PSYLINK 2.73D link of two `-G8` ASPSX objects (`.lcomm` and
+  `.comm` only) showed the per-object order: object A's `.sbss` static, then
+  A's small COMMON in bucket order (later-interned first within a bucket),
+  then B's static and B's new COMMON; a name both request is allocated once,
+  in A's batch. Each request is aligned to the largest power of two not
+  above its size, capped at 8 (sizes 1, 2, 3, 4, 6, 8 at 1, 2, 2, 4, 4, 8);
+  requests over 8 bytes go to `.bss` the same way. One object's batch is
+  therefore contiguous. VS.EXE's `.sbss` run `0x800632e8`-`0x80063381`
+  interleaves words the start-up module (`vs.main`) reads `$gp`-relative
+  (so it requests them as COMMON) with words it reads only absolutely
+  (`0x80063334`, `0x80063374`, so it does not request them), so an earlier
+  object allocated that run and `vs.main`'s requests merge into it.
 - `kf verify data` accepts a unit's COMMON placement only when the current
   link's `.SYM` (`scripts/kf/linked_symbols.py`) puts every request at its
   claim, and the link report's input hashes all match the working tree.
@@ -271,9 +422,9 @@ under `build/link/<image>/` and are not committed.
 
 | Property | Current status |
 | --- | --- |
-| PSYLINK emits each program | Wired through `kf build` for all seven; an image links once it has a source unit |
+| PSYLINK emits each program | Wired through `kf build` for all seven and the 36 FDAT overlays (raw `/p` output, archive frame); an image links once its units claim every game function |
 | Candidate artifact path | Direct source-to-EXE with no output rewriting |
-| Byte-identical retail images | `PSX.EXE` (whole file, header included) |
+| Byte-identical retail images | `PSX.EXE`, `STR.EXE`, `TITLE.EXE` and `END.EXE` (whole files, headers included) |
 | Library half of the overlays | Object-by-object attribution only (see the toolchain page); not yet relinked |
 | Historical toolchain identity | Open: the compiler is a rebuild and the exact ASPSX, PSYLINK and CPE2X builds are the earliest available ones that reproduce retail |
 | Boot | Not yet attempted |
@@ -285,7 +436,7 @@ hash-verified retail disc remains the runtime reference.
 
 `NativeBuildControls` in `tests/test_executable.py` link synthetic programs
 for PSX and for overlays with and without the allocator. They check the
-object and `inclib` order, the startup at the entry point, `.rdata` before
+object and `inclib` order, the startup at the entry point, read-only data before
 `.text`, `$gp` at the first `.sdata` byte, bss exclusion, the CPE2X 1.5
 header, unchanged archives, and rejection of unresolved references, an
 unknown image, or stale output. They read no retail file.

@@ -2,11 +2,12 @@
 
 from __future__ import annotations
 
+from collections.abc import Callable
 from dataclasses import dataclass, field
 
 from scripts.kf.sema.index import Binding, Index
 from scripts.kf.sema.mips import (
-    Instruction, constant_branch_outcome, with_controls, decode_words,
+    Instruction, constant_branch_outcome, sign_extend_16, with_controls, decode_words,
 )
 
 
@@ -84,7 +85,159 @@ def _block_for(blocks: list[Block], va: int | None) -> Block | None:
     return next((block for block in blocks if block.contains(va)), None)
 
 
-def build_graph(function: Binding, payload: bytes, idx: Index) -> Graph:
+def _gpr_written(word: int) -> int | None:
+    """The GPR an ordinary MIPS-I instruction writes, for a backward def scan.
+
+    Stores, branches, plain jumps, `jr`, HI/LO writes and traps write none;
+    `jal` writes $ra. The switch proof scans only straight-line integer code
+    between a bound check and its `jr`.
+    """
+    opcode, rt, rd, funct = word >> 26, (word >> 16) & 0x1F, (word >> 11) & 0x1F, word & 0x3F
+    if opcode == 0:
+        if funct in {0x08, 0x0C, 0x0D, 0x11, 0x13, 0x18, 0x19, 0x1A, 0x1B}:
+            return None  # jr, syscall, break, mthi, mtlo, mult(u), div(u)
+        return rd or None
+    if opcode == 0x03:
+        return 31
+    if opcode in {0x01, 0x02, 0x04, 0x05, 0x06, 0x07} or opcode >= 0x28:
+        return None
+    if opcode in {0x10, 0x12}:  # mfc/cfc write rt; other coprocessor forms write no GPR
+        return rt if (word >> 21) & 0x1F in {0x00, 0x02} else None
+    return rt or None
+
+
+@dataclass(frozen=True)
+class SwitchTable:
+    """A proven GCC tablejump: the linked table and its case targets."""
+
+    table: int
+    targets: tuple[int, ...]
+
+
+def switch_table(
+    instructions: list[Instruction],
+    terminal: Instruction,
+    function: Binding,
+    read_word: Callable[[int], int | None],
+) -> SwitchTable | None:
+    """Prove a GCC MIPS tablejump and return its table, else None.
+
+    This is the one switch-table rule: the CFG, the semantic evidence and the
+    reachability audit's `switch_dispatch` witnesses all use it.
+
+    Accepted value chain, straight-line from the bound check to the jump:
+
+        sltiu rc, ri, N ; beqz rc, default ; [delay slot]
+        lui rb, hi ; addiu rb, rb, lo ; sll rs, ri, 2 ; addu ra, rs, rb
+        lw rt, off(ra) ; jr rt
+
+    (the `lui` may sit in the bound branch's delay slot; operand order of the
+    `addu` is free). The table is the N words at hi:lo + off. No branch may
+    enter the scanned code and the index may not change between the bound and
+    the shift, so both see the same value. Every table word must be a decoded
+    instruction start inside this function. Anything else stays an
+    unresolved indirect jump.
+    """
+    word = terminal.word
+    if word >> 26 != 0 or word & 0x1FFFFF != 0x08:  # jr rs
+        return None
+    position = next(i for i, row in enumerate(instructions) if row.va == terminal.va)
+    entered = {
+        row.control.target for row in instructions
+        if row.control is not None and row.control.target is not None
+    }
+
+    def last_def(register: int, before: int, floor: int) -> int | None:
+        for i in range(before - 1, floor - 1, -1):
+            if _gpr_written(instructions[i].word) == register:
+                return i
+        return None
+
+    def opcode(i: int) -> int:
+        return instructions[i].word >> 26
+
+    # The bound branch is the last control transfer before the jump; its
+    # delay slot and the dispatch block form one straight-line run.
+    bound = next((i for i in range(position - 1, -1, -1) if instructions[i].control), None)
+    if bound is None or bound + 1 >= position:
+        return None
+    branch = instructions[bound].word
+    if branch >> 26 != 0x04 or (branch >> 16) & 0x1F != 0:  # beq rc, zero
+        return None
+    if any(row.va in entered for row in instructions[bound + 1:position + 1]):
+        return None
+    floor = bound
+    while floor > 0 and instructions[floor - 1].control is None \
+            and instructions[floor].va not in entered:
+        floor -= 1
+    load = last_def((word >> 21) & 0x1F, position, bound + 1)
+    if load is None or opcode(load) != 0x23:  # lw
+        return None
+    lw = instructions[load].word
+    add = last_def((lw >> 21) & 0x1F, load, bound + 1)
+    if add is None or opcode(add) != 0 or instructions[add].word & 0x7FF != 0x21:  # addu
+        return None
+    summed = instructions[add].word
+    found = None
+    for left, right in (((summed >> 21) & 0x1F, (summed >> 16) & 0x1F),
+                        ((summed >> 16) & 0x1F, (summed >> 21) & 0x1F)):
+        shift, low = last_def(left, add, bound + 1), last_def(right, add, bound + 1)
+        if shift is None or low is None:
+            continue
+        sll, addiu = instructions[shift].word, instructions[low].word
+        if sll & 0xFFE0003F == 0 and (sll >> 6) & 0x1F == 2 and addiu >> 26 == 0x09:
+            found = shift, (sll >> 16) & 0x1F, low
+            break
+    if found is None:
+        return None
+    shift, index, low = found
+    addiu = instructions[low].word
+    high = last_def((addiu >> 21) & 0x1F, low, bound + 1)
+    if high is None or opcode(high) != 0x0F:  # lui
+        return None
+    table = (((instructions[high].word & 0xFFFF) << 16) + sign_extend_16(addiu & 0xFFFF)
+             + sign_extend_16(lw & 0xFFFF)) & 0xFFFFFFFF
+    compare = last_def((branch >> 21) & 0x1F, bound, floor)
+    if compare is None or opcode(compare) != 0x0B:  # sltiu
+        return None
+    sltiu = instructions[compare].word
+    count = sltiu & 0xFFFF
+    if (sltiu >> 21) & 0x1F != index or not 0 < count <= 0x400:
+        return None
+    if last_def(index, shift, compare + 1) is not None:
+        return None
+    addresses = {row.va for row in instructions}
+    targets = []
+    for entry in range(count):
+        target = read_word(table + 4 * entry)
+        if target is None or target not in addresses or not function.contains_body(target):
+            return None
+        targets.append(target)
+    return SwitchTable(table, tuple(targets))
+
+
+def switch_tables(
+    function: Binding,
+    payload: bytes,
+    read_word: Callable[[int], int | None],
+) -> dict[int, SwitchTable]:
+    """Every proven tablejump of one function body, keyed by its `jr` site."""
+    instructions = with_controls(decode_words(function.va, payload[:function.body_size]))
+    found: dict[int, SwitchTable] = {}
+    for row in instructions:
+        if row.control is not None and row.control.kind == "indirect-jump":
+            proven = switch_table(instructions, row, function, read_word)
+            if proven is not None:
+                found[row.va] = proven
+    return found
+
+
+def build_graph(
+    function: Binding,
+    payload: bytes,
+    idx: Index,
+    read_word: Callable[[int], int | None] | None = None,
+) -> Graph:
     if function.space != "text":
         raise ValueError(f"{function.name}: CFG requires a function")
     if function.fragments != 1:
@@ -120,6 +273,16 @@ def build_graph(function: Binding, payload: bytes, idx: Index) -> Graph:
             leaders.add(control.target)
         if control.terminates_block and after in addresses:
             leaders.add(after)
+
+    # A proven switch table makes each case target a block leader.
+    switch_cases: dict[int, tuple[int, ...]] = {}
+    if read_word is not None:
+        for row in instructions:
+            if row.control is not None and row.control.kind == "indirect-jump":
+                proven = switch_table(instructions, row, function, read_word)
+                if proven is not None:
+                    switch_cases[row.va] = proven.targets
+                    leaders.update(proven.targets)
 
     for slot in delay_slots:
         if instruction_by_va[slot].control is not None:
@@ -237,7 +400,18 @@ def build_graph(function: Binding, payload: bytes, idx: Index) -> Graph:
         elif control.kind == "return":
             edges.append(Edge(block.start, terminal.va, "return"))
         elif control.kind == "indirect-jump":
-            edges.append(Edge(block.start, terminal.va, "indirect-jump"))
+            cases = switch_cases.get(terminal.va)
+            if cases is None:
+                edges.append(Edge(block.start, terminal.va, "indirect-jump"))
+            for case in dict.fromkeys(cases or ()):
+                case_block = _block_for(blocks, case)
+                edges.append(Edge(
+                    block.start,
+                    terminal.va,
+                    "switch",
+                    case,
+                    case_block.start if case_block else None,
+                ))
         elif control.kind == "trap":
             edges.append(Edge(block.start, terminal.va, "trap"))
 

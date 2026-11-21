@@ -12,6 +12,7 @@ FromSoftware ran. Where a fact is only a probe, it says so.
 | --- | --- | --- | --- |
 | Preprocess, compile | `cpppsx-272cdk`, `cc1psx-272cdk`: Decompals old-gcc 0.17 `gcc-2.7.2-cdk`, a native rebuild of the SN Systems GCC "cygnus-2.7.2-970404 SN32" | GitHub release, SHA-256 pinned | `-O2 -G0` reproduces 14 sampled `ST.EXE` game functions and `-O2 -G8` reproduces `PSX.EXE`'s `main`; the original Win32 `CC1PSX.EXE` is not used |
 | Assemble | SDevTC ASPSX 2.79D (1998-05-22, DOS): `BIN/DOS/ASPSXD.EXE` | Psy-Q/SDevTC 4.5 kit, Archive.org `ps1_sdks` | Reproduces the retail expansions; see below |
+| GTE macros | Sony DMPSX 3.0 (DOS): `BIN/DOS/DMPSX.EXE`, run on every assembled object | 4.5 kit | Writes the retail COP2 command for every `INLINE_C.H` placeholder; see below |
 | Link | PSYLINK 2.73D (DOS): `DOS/PSYLINKD.EXE` | SDevTC 2.4 CD (Japan, files dated 1998-06-11), redump in Archive.org `ps1_sdks` | Links `PSX.EXE` byte-identically |
 | Convert | CPE2X 1.5 (1998-01-23, DOS) with `/CA` | 4.5 kit | Writes the whole retail header, including the "North America area" title |
 | Libraries | Sony Runtime Library 4.2 `LIB/`, with `LIBPAD.LIB` from its bundled 4.2.1 pad patch | Archive.org, SHA-256 pinned | Every SDK object in all seven programs matches (below) |
@@ -19,12 +20,12 @@ FromSoftware ran. Where a fact is only a probe, it says so.
 | Allocator | `MALLOC.OBJ` | Psy-Q Release 2.5 floppies | Linked after `NONE3.OBJ` in STR, TITLE, OPTXT and END |
 | Headers | Runtime Library 4.2 `INCLUDE/`, staged as `include-lf/` (CRLF converted to LF) | as the libraries | `PSYQ_INCLUDE` |
 
-All three SDK programs are DOS executables and run unchanged in the pinned
+All four SDK programs are DOS executables and run unchanged in the pinned
 DOSBox-X. ASPSX 2.79D and PSYLINK 2.73D are Watcom C programs with the
-FlashTek X-32VM DOS extender bound into the executable; CPE2X 1.5 is a 16-bit
-real-mode program. No extender, Windows, Wine or Win32 layer is staged, and no
-program is patched. They are staged in the DOS root as `ASPSX.EXE`,
-`PSYLINK.EXE` and `CPE2X.EXE`.
+FlashTek X-32VM DOS extender bound into the executable; DMPSX 3.0 (Borland
+C++) and CPE2X 1.5 are 16-bit real-mode programs. No extender, Windows, Wine
+or Win32 layer is staged, and no program is patched. They are staged in the
+DOS root as `ASPSX.EXE`, `DMPSX.EXE`, `PSYLINK.EXE` and `CPE2X.EXE`.
 
 The SN tool kits ship each tool as a Win32 program and as a DOS build (the
 `D` suffix). Before this all-DOS chain, the Win32 ASPSX 2.79 and PSYLINK 2.74
@@ -52,6 +53,7 @@ ran under the HX DOS extender. The DOS builds give the same output:
 | `PSYQ_LIB` | Runtime Library 4.2 archives (LIBPAD from the 4.2.1 patch) |
 | `PSYQ_INCLUDE` | Runtime Library 4.2 headers with LF line endings |
 | `PSYQ_ASPSX` | ASPSX 2.79D |
+| `PSYQ_DMPSX` | DMPSX 3.0 |
 | `PSYQ_PSYLINK` | PSYLINK 2.73D |
 | `PSYQ_CPE2X`, `PSYQ_STARTUP_OBJ` | CPE2X 1.5, NONE3.OBJ |
 | `PSYQ_MALLOC_OBJ` | Release 2.5 MALLOC.OBJ |
@@ -140,6 +142,70 @@ small-data accesses as single `$gp`-relative instructions (patch type 100);
 the ELF view translates them to `R_MIPS_GPREL16`.
 
 No maspsx or GNU assembler processes game source.
+
+## DMPSX
+
+Runtime Library 4.2's `INLINE_C.H` (identical to the 4.5 kit's but for its
+`$PSLibId$` line; "Macro definitions of DMPSX version 3") writes each GTE
+command as an inline `.word` that is not yet an instruction: opcode SPECIAL,
+function field 0x3f, the command in bits 6-15 (`gte_nclip` is `0x117f`), and
+for `gte_mvmva` its sf/mx/v/cv/lm operands in bits 18-26. The plain macros
+put `nop; nop` before the word; the `_b` forms omit them. Sony's DMPSX
+replaces the words with COP2 commands in the assembled object, the step Psy-Q
+users ran on each object after `ccpsx -c`; the 4.5 kit's `PSYQ.INI` and CCPSX
+do not invoke it.
+
+The chain runs the kit's DOS `BIN/DOS/DMPSX.EXE` (version 3.0, "Copyright
+1995, 1996", Borland C++) after ASPSX on every assembled object, for the
+linked units and for the per-unit comparison objects (`rewrite_gte` in
+`scripts/psxbuild/sdk.py`). DMPSX copies an object record by record and
+rewrites only the code records of `.text`. Version 3.0 reads an XDEF record
+(tag 12) as ten bytes plus its name, where the LNK v2 record ASPSX 2.79 writes
+has eight; the kit's Win32 DMPSX 3.05 (1998-09-07) reads eight. Run on a whole
+ASPSX 2.79 object, 3.0 therefore loses its place after the first XDEF and
+depends on where it lands: of 70 small control objects without any
+placeholder, 51 came back changed, most with their last one to three bytes
+missing and some with a placeholder-shaped byte group inside a debug record
+rewritten. It is given instead a view of the object holding only the `.text`
+section declarations and code records, in their original order and sizes,
+which it reads correctly: `DMPSX.EXE U0000.GTE -o U0000.GTO`. The rewritten
+code bytes are copied back into the ASPSX object, and the build fails unless
+the result differs from the ASPSX object only in `.text` placeholder words,
+each now a COP2 command; DMPSX reports its own errors (an undefined command,
+too few delay slots before one) only on the DOS console. Units without
+placeholders, which is every unit of `PSX`, `STR`, `TITLE`, `OPTXT` and `END`,
+come back byte-identical, and so does any object without them.
+
+`tests/test_dmpsx.py` compiles every type 2 macro of `INLINE_C.H` (65 commands,
+with and without the leading `nop`s, plus `gte_mvmva` operand sets) and checks
+each against the GTE encoding. Retail game code (functions not in
+`functions_vendored.tsv`; the FDAT overlays have no COP2 commands) uses these:
+
+| Command | Word | `INLINE_C.H` macro | `ST.EXE` | `VS.EXE` |
+| --- | --- | --- | ---: | ---: |
+| NCLIP | `4b400006` | `gte_nclip` | 27 | 17 |
+| NCDS | `4ae80413` | `gte_ncds` | 23 | 6 |
+| OP sf=1 | `4b78000c` | `gte_op12` | 21 | 0 |
+| MVMVA sf=1 RT·IR | `4a49e012` | `gte_rtir` | 18 | 12 |
+| NCCS | `4b08041b` | `gte_nccs` | 16 | 6 |
+| DPCS | `4a780010` | `gte_dpcs` | 14 | 0 |
+| MVMVA sf=1 RT·V0+TR | `4a480012` | `gte_rt`, `gte_rtv0tr` | 13 | 4 |
+| MVMVA sf=1 RT·V0 | `4a486012` | `gte_rtv0` | 9 | 0 |
+| NCCT | `4b18043f` | `gte_ncct` | 8 | 4 |
+| NCDT | `4af80416` | `gte_ncdt` | 6 | 4 |
+| RTPS | `4a180001` | `gte_rtps` | 6 | 11 |
+| SQR sf=0 | `4aa00428` | `gte_sqr0` | 2 | 0 |
+| RTPT | `4a280030` | `gte_rtpt` | 1 | 18 |
+
+`ST.EXE` has 164 such commands; 150 follow the macro's two `nop`s and 14
+follow other instructions directly (the `_b` forms after a separate load). All are type 2 macros
+of `INLINE_C.H`, so no other header is needed for them. `GTEMAC.H`'s compound
+macros (`gte_RotTransPers` and the like) are built from the `INLINE_C.H` ones
+and emit the same placeholders; `INLINE_O.H` stages every address through
+`$12`, which the retail loads (straight off the operand register, for example
+`lwc2 $6,0($2)`) do not; `INLINE_A.H` is for assembler sources. The other COP2 traffic (`lwc2`/`swc2`, `mtc2`/`mfc2`,
+`ctc2`/`cfc2`) comes from the type 1 and type 3 macros, which are ordinary
+instructions that ASPSX assembles.
 
 ## Analysis tools
 

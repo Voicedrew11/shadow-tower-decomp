@@ -6,9 +6,11 @@ import json
 import os
 from pathlib import Path
 import shutil
+import struct
 import subprocess
 
-from .sdk import dos_run, tool_succeeded
+from .dmpsx import DMPSX_SHA256
+from .sdk import dos_run, rewrite_gte, tool_succeeded
 from .sdk_compat import library_input
 
 
@@ -61,6 +63,19 @@ IMAGE_LINKS = {
                           'LIBDS', 'LIBGPU'), allocator=True,
                          evidence='retail member groups CD SND/SPU PRESS ETC API C DS GPU'),
 }
+# A headerless FDAT overlay is linked on its own at the address ST.EXE loads
+# it to: no startup object, allocator or library (the overlays call ST.EXE's
+# copies), its references into ST.EXE defined as absolute symbols, PSYLINK's
+# pure binary output (`/p`) instead of a CPE, framed as an FDAT.T entry.
+OVERLAY_LINK = ImageLink((), startup=False,
+                         evidence='FDAT overlays: own code only, jal into ST.EXE text')
+# FDAT.T frames each entry: the linked bytes, zeros through the overlay's
+# uninitialized storage and up to the sector multiple that leaves room for one
+# trailing word, and that word, 0x12345678 plus the 32-bit sum of every
+# preceding word (all 36 retail entries agree; FDAT_272.BIN's 0x420 bytes of
+# .bss are what carry its entry into a ninth sector).
+ARCHIVE_SECTOR = 0x800
+ARCHIVE_CHECKSUM_SEED = 0x12345678
 ENTRY = '__SN_ENTRY_POINT'
 # Psy-Q 4.x overlay startup (identical in the 4.5 and 4.6 kits): clears the
 # bss group, sets $gp and calls main. Retail text starts with it at the entry.
@@ -73,10 +88,13 @@ LINKER_SHA256 = '2014db126ceaea6d287067ea3f829eea1745836fca570f22ef379eaff7832dd
 # title of the retail SLUS-00863 headers.
 CONVERTER_SHA256 = '777caca88327cd18d4f92b43439575c1759381690d49f14177805a94b8ecbef6'
 CONVERTER_REGION = '/CA'
-# All programs lay out .rdata before .text, and the empty .ctors/.dtors that
-# LIBSN SNMAIN declares between .text and .data: SNMAIN's __main walks the
-# constructor list from .data's start in retail PSX.EXE.
+# All programs lay out read-only data before .text, and the empty .ctors/.dtors
+# that LIBSN SNMAIN declares between .text and .data: SNMAIN's __main walks the
+# constructor list from .data's start in retail PSX.EXE. The game units'
+# constants (`.rodata`, see sdk.separate_read_only) precede `.rdata`, which
+# holds their switch tables and then the SDK libraries' read-only data.
 SECTIONS = ('text\tgroup', 'bss\tgroup\tbss',
+            '\tsection\t.rodata,text',
             '\tsection\t.rdata,text', '\tsection\t.text,text',
             '\tsection\t.ctors,text', '\tsection\t.dtors,text',
             '\tsection\t.data,text', '\tsection\t.sdata,text',
@@ -95,6 +113,41 @@ def file_hash(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
+def pack_archive_entry(payload: bytes, reserved: int = 0) -> bytes:
+    """Frame one linked overlay as its FDAT.T entry (see ARCHIVE_CHECKSUM_SEED).
+
+    `reserved` is the extent of the overlay's uninitialized storage past the
+    linked bytes: the entry covers it with zeros before the checksum word.
+    """
+    if len(payload) % 4 or reserved % 4 or reserved < 0:
+        raise ValueError('an archive entry payload must be whole words')
+    size = -(-(len(payload) + reserved + 4) // ARCHIVE_SECTOR) * ARCHIVE_SECTOR
+    body = payload + bytes(size - 4 - len(payload))
+    total = sum(struct.unpack(f'<{len(body) // 4}I', body)) + ARCHIVE_CHECKSUM_SEED
+    return body + struct.pack('<I', total & 0xFFFFFFFF)
+
+
+def overlay_reserved_size(map_text: str, load_address: int, linked_size: int) -> int:
+    """Bytes of the `bss` group that lie past an overlay's linked bytes, from
+    PSYLINK's map (`Start Stop Length Obj Group Section` rows), rounded up to
+    whole words."""
+    end = load_address + linked_size
+    for line in map_text.splitlines():
+        fields = line.split()
+        if len(fields) == 6 and fields[4] == 'bss' and int(fields[2], 16):
+            end = max(end, int(fields[1], 16) + 1)
+    return -(-(end - load_address - linked_size) // 4) * 4
+
+
+def equ_lines(symbols: dict[str, int]) -> list[str]:
+    """PSYLINK command-file definitions of absolute host symbols."""
+    for name in symbols:
+        if not name or not (name[0].isalpha() or name[0] in '_$') or not all(
+                c.isalnum() or c in '_$' for c in name):
+            raise ValueError(f'invalid absolute symbol name {name!r}')
+    return [f'{name}\tequ\t${address:08x}' for name, address in sorted(symbols.items())]
+
+
 def _pinned_object(source: Path, expected: str, root: Path, name: str, provenance: str) -> dict:
     if file_hash(source) != expected:
         raise ValueError(f'{source}: expected the pinned {name} (sha256 {expected[:12]}...)')
@@ -102,17 +155,25 @@ def _pinned_object(source: Path, expected: str, root: Path, name: str, provenanc
     return {'file': name, 'path': str(source), 'sha256': expected, 'provenance': provenance}
 
 
-def build_image(name, root, units, compile_one, *, repo, load_address) -> dict:
-    """Compile and link a program using its source units and SDK libraries."""
+def build_image(name, root, units, compile_one, *, repo, load_address,
+                host_symbols=None) -> dict:
+    """Compile and link a program using its source units and SDK libraries.
+
+    `host_symbols` selects the headerless overlay link (OVERLAY_LINK): it is
+    called with the native objects and returns the absolute addresses of the
+    host-program symbols they reference but do not define.
+    """
     root = root.resolve()
     if root.exists():
         shutil.rmtree(root)
     root.mkdir(parents=True)
     report = {'image': name, 'linked': False, 'phase': 'compile', 'units': [],
               'libraries': [], 'startup': None, 'allocator': None, 'tools': {}}
+    overlay = host_symbols is not None
     try:
-        layout = image_link(name)
+        layout = OVERLAY_LINK if overlay else image_link(name)
         tools = {'ASPSX.EXE': Path(os.environ['PSYQ_ASPSX']),
+                 'DMPSX.EXE': Path(os.environ['PSYQ_DMPSX']),
                  'PSYLINK.EXE': Path(os.environ['PSYQ_PSYLINK']),
                  'CPE2X.EXE': Path(os.environ['PSYQ_CPE2X'])}
         for tool, source in tools.items():
@@ -120,6 +181,8 @@ def build_image(name, root, units, compile_one, *, repo, load_address) -> dict:
             report['tools'][tool] = {'path': str(source), 'sha256': file_hash(source)}
         if report['tools']['PSYLINK.EXE']['sha256'] != LINKER_SHA256:
             raise ValueError(f'{tools["PSYLINK.EXE"]}: expected the pinned PSYLINK 2.73D')
+        if report['tools']['DMPSX.EXE']['sha256'] != DMPSX_SHA256:
+            raise ValueError(f'{tools["DMPSX.EXE"]}: expected the pinned DMPSX 3.0')
         if report['tools']['CPE2X.EXE']['sha256'] != CONVERTER_SHA256:
             raise ValueError(f'{tools["CPE2X.EXE"]}: expected the pinned CPE2X 1.5')
         if not units:
@@ -138,13 +201,16 @@ def build_image(name, root, units, compile_one, *, repo, load_address) -> dict:
                 'Psy-Q Release 2.5 object; retail text follows NONE3.OBJ, relocations masked')
             explicit.append('MALLOC.OBJ')
         report['phase'] = 'assemble'
-        assembler_commands = [u['assembler_command'] for u in report['units']
-                              if 'assembler_command' in u]
-        if assembler_commands:
-            dos_run(root, assembler_commands, 'asm')
+        assembled = [u for u in report['units'] if 'assembler_command' in u]
+        if assembled:
+            dos_run(root, [u['assembler_command'] for u in assembled], 'asm')
+        for unit in assembled:
+            tool_succeeded(root, unit['log'], unit['object'], b'LNK\x02')
+        # Every assembled object then goes through DMPSX (sdk.rewrite_gte).
+        rewritten = rewrite_gte(root, tuple(u['object'].removesuffix('.OBJ') for u in assembled))
         for unit in report['units']:
             if 'assembler_command' in unit:
-                tool_succeeded(root, unit['log'], unit['object'], b'LNK\x02')
+                unit['gte_words_rewritten'] = rewritten[unit['object'].removesuffix('.OBJ')]
             elif not (root / unit['object']).read_bytes().startswith(b'LNK\x02'):
                 raise ValueError('compiler produced no native object')
             unit['object_sha256'] = file_hash(root / unit['object'])
@@ -159,13 +225,34 @@ def build_image(name, root, units, compile_one, *, repo, load_address) -> dict:
                 'corrections': corrections,
             })
         report['phase'] = 'link'
-        stem = name.removesuffix('.EXE')
+        stem = name.rsplit('.', 1)[0]
         objects = [*explicit, *(u['object'] for u in report['units'])]
+        if overlay:
+            absolute = host_symbols([root / u['object'] for u in report['units']])
+            report['host_symbols'] = {key: f'{value:#010x}'
+                                      for key, value in sorted(absolute.items())}
+            tail = equ_lines(absolute)
+        else:
+            tail = [f'\tregs\tpc={ENTRY}']
         commands = [f'\torg\t${load_address:08x}', *SECTIONS,
                     *(f'\tinclude\t"{obj}"' for obj in objects),
                     *(f'\tinclib\t"{library["file"]}"' for library in report['libraries']),
-                    f'\tregs\tpc={ENTRY}']
+                    *tail]
         (root / 'LINK.LNK').write_bytes(('\r\n'.join(commands) + '\r\n').encode('ascii'))
+        if overlay:
+            report['linker_command'] = (
+                f'PSYLINK.EXE /c /m /p @LINK.LNK,{stem}.RAW,{stem}.SYM,{stem}.MAP > LINK.TXT')
+            dos_run(root, [report['linker_command']], 'link')
+            tool_succeeded(root, 'LINK.TXT', stem + '.RAW', b'')
+            report['phase'] = 'pack'
+            raw = (root / (stem + '.RAW')).read_bytes()
+            reserved = overlay_reserved_size(
+                (root / (stem + '.MAP')).read_text(errors='replace'), load_address, len(raw))
+            (root / name).write_bytes(pack_archive_entry(raw, reserved))
+            report.update(linked=True, phase='complete', executable=str(root / name),
+                          raw=str(root / (stem + '.RAW')), raw_size=len(raw))
+            (root / 'build.json').write_text(json.dumps(report, indent=2) + '\n')
+            return report
         report['linker_command'] = (
             f'PSYLINK.EXE /c /m @LINK.LNK,{stem}.CPE,{stem}.SYM,{stem}.MAP > LINK.TXT')
         dos_run(root, [report['linker_command']], 'link')

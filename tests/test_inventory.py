@@ -252,11 +252,11 @@ class InventoryTests(unittest.TestCase):
         # Every carveable non-vendored function in every image has a
         # (candidate) identity row; update these counts with each admission.
         counts = validate(RETAIL_CONFIG)
-        self.assertEqual(counts["functions"], 1996)
-        self.assertEqual(counts["signatures_started"], 1996)
-        self.assertEqual(counts["data"], 6)
+        self.assertEqual(counts["functions"], 1934)
+        self.assertEqual(counts["signatures_started"], 1934)
+        self.assertEqual(counts["data"], 317)
         self.assertGreaterEqual(counts["functions_named"], 0)
-        self.assertEqual(counts["structures"], 0)
+        self.assertEqual(counts["structures"], 10)
 
     def test_static_signature_hint_tracks_live_arguments_and_result(self) -> None:
         parameters, result, shape = _signature_hints(words(

@@ -1216,7 +1216,7 @@ def kf1_counterparts(domain: dict[str, Any], kf1: dict[str, Any]) -> list[dict[s
 
 # ---- written-text reconciliation ------------------------------------------------
 TEXT_NUMBER = re.compile(r"(?<![\w.])(?:0[xX][0-9a-fA-F]+|[0-9]+)[uUlL]*(?![\w.])")
-CLAIM = re.compile(r"\b(?:ADDRESS|ADDRESS_AT|DATA|DATA_AT|RODATA|RODATA_AT)\s*\(")
+CLAIM = re.compile(r"\b(?:ADDRESS|ADDRESS_AT|DATA|DATA_AT|RODATA|RODATA_AT|JUMPTABLES)\s*\(")
 
 
 def text_literals(repo: Path, prefixes: tuple[str, ...] = ("src/", "include/")):

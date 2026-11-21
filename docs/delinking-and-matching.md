@@ -36,8 +36,14 @@ FDAT_012.BIN + config/retail/*.tsv -> build/delink/fdat_012 -> build/objdiff/fda
 ...
 ```
 
-An overlay's calls into `ST.EXE` are cross-image references: they stay
-unmodeled targets until `ST.EXE`'s owner is linked against the overlay.
+An overlay's calls and data references into `ST.EXE` are cross-image
+references (`retail.referent_image`): an address outside the overlay's own
+load window belongs to its host. The delinker names such a referent with the
+host's identity (a call to LIBGTE `rcos` stays `rcos`), the relocation
+validator accepts a J/JAL whose target is a host function start, the target
+relink resolves the external from the host's address book, and the closure
+audit records the edge as a host reference owned there instead of an
+unmodeled target (the host's own closure is audited with the host).
 
 The target object format is ELF32, little-endian, `EM_MIPS`, MIPS-I/O32. It is
 understood by GNU `mipsel` binutils and objdiff 3.7.3. Each initial object has a
@@ -66,6 +72,18 @@ independently validate the TSV claim:
 - an external J/JAL target must be an admitted function start;
 - a HI/LO pair must remain inside one function extent, consume the LUI register,
   decode to the recorded address, and use a sign-extending low instruction;
+  rows may share a site only as one HI/LO family (same target: one `lui`
+  feeding several lows, or `lui`s on converging paths feeding one low), which
+  is emitted once per site in ELF REL order. That order is by site,
+  except where another pair against the same symbol (with a different low
+  half) sits between a HI16 and its own LO16: GNU ld completes a HI16 with
+  the next same-symbol LO16, so that HI16 moves to just before the first
+  following LO16 with its own low half (`mips_elf.rel_order`). Repeated
+  equivalent lows use the same carry regardless of pair provenance. The
+  native object view applies the same rule,
+  pairing each HI16 patch with the first later LO16 carrying its
+  expression, because objdiff reports a HI16's addend from an immediately
+  following LO16 only;
 - an out-of-load HI/LO pair remains withheld unless a human has promoted that
   exact decoded pair to `status=reviewed`; this is the path for RAM/BSS symbols
   whose addresses are real but whose storage is absent from the PS-X EXE payload;
@@ -169,7 +187,7 @@ Every image directory contains:
 | `relocations_withheld.tsv` | every in-scope candidate not used, with reason |
 | `functions_withheld.tsv` | functions that could not be represented safely |
 | `objects/*.o` | synthetic target MIPS ELF objects, one per function |
-| `modules/*.o` | one object per manifested unit: its contiguous run of functions carved as a single `.text` with per-function symbols and rebased section-relative addends, plus `.data`/`.bss` for the globals the unit claims with `DATA()` |
+| `modules/*.o` | one object per manifested unit: its contiguous run of functions carved as a single `.text` with per-function symbols and rebased section-relative addends, plus `.data`/`.bss` for the globals the unit claims with `DATA()` and `.rodata`/`.rdata`/`.sdata` for its `RODATA()`/`JUMPTABLES()`/`SDATA()` ranges |
 
 Candidates in data rather than a current function extent are also retained in
 the withheld audit. They will move into data/translation-unit objects once
@@ -257,7 +275,7 @@ report; progress continues to exclude vendored functions.
 The executable and matching commands share this compilation path:
 
 ```text
-C source -> CPPPSX/CC1PSX -> ASPSX -> native Psy-Q OBJ
+C source -> CPPPSX/CC1PSX -> ASPSX -> DMPSX -> native Psy-Q OBJ
 ```
 
 `kf build` passes the native objects and original SDK inputs to PSYLINK and
@@ -289,7 +307,25 @@ The default build also checks target-object roundtrips through the independent
 GNU MIPS linker. A packed section must admit one retail base for all its owned
 symbols; the linker may not scatter it or override defined symbols to hide a
 layout conflict. Relinked initialized bytes are compared in full, and BSS is
-checked as uninitialized storage. Synthetic tails imitating the probe assembler
+checked as uninitialized storage. A unit's single global COMMON request whose exact `DATA()` claim
+is the only one in its section is placed at that claim: in `.bss`, or in
+`.sbss` for a small request of a `-G8` unit. A COMMON request the unit does
+not claim is a tentative definition merging into an initialized definition
+elsewhere when the image has a global `load` datum of that name (a curated
+identity or another unit's `DATA()` claim) inside the PS-X EXE payload, at
+least as large as the request and aligned for it: the linker allocates
+COMMON only when no object defines the symbol, so the request owns no
+storage and resolves as a reference (`roundtrip.merged_common`; listed as
+`merged_commons` in the relink audit). Such a request also merges into BSS
+storage an earlier object allocated (`roundtrip.allocated_definitions`): a
+curated global `bss` identity, or a global `.bss`/`.sbss` `DATA()` claim of a
+unit linked before this one. PSYLINK allocates each COMMON name once, in the
+batch of the first object that requests it (see `executable-linking.md`),
+so a later request of the name owns no storage; the definition must be
+aligned as PSYLINK aligns the request's size (`psylink_common_alignment`),
+since the converted object's COMMON value is only its section alignment. A `-G8` unit keeps such a tentative
+definition when ASPSX needs the size for a `$gp`-relative access. A unit whose `.sdata` holds
+only its `SDATA()` literal ranges places that section at the first range's start. Synthetic tails imitating the probe assembler
 are not appended to retail claims: source alignment/extent differences remain
 real comparison failures. This is not yet a linked reconstruction or a check
 of all config-only reachable storage.
@@ -298,10 +334,23 @@ of all config-only reachable storage.
 images that at least one source unit claims; an image without units has
 nothing to relink, and its census-wide closure is the curation worklist
 (`kf verify reachability --image KEY`). The OK line says how many images were
-gated. Inside reached Sony functions, only indirect transfers proved from the
-member's own instructions (BIOS `li $t2, 0xA0/0xB0/0xC0; jr $t2` stubs and
-startup table loops with a link-time zero count) are exempt; they are listed
-as `vendored_dispatch` witness rows in the reachability report.
+gated. Inside reached vendored Sony (Psy-Q) functions, every indirect
+`jr`/`jalr` is exempt from the closure gate by project decision (2026-11-17;
+revisit if a vendored site turns out to matter). The exemption is witnessed,
+not silent: each site is a `vendored_dispatch` row (`owner`, `site`,
+`pattern: "vendored-indirect"`) in the reachability report, and the summary
+counts them as `vendored_indirect_exempt`. A site also proved from the
+member's own instructions names that proof in `proof` (`bios-vector-stub`
+for `li $t2, 0xA0/0xB0/0xC0; jr $t2`, with the vector in `target`;
+`empty-link-time-table` for a startup table loop with a link-time zero
+count), counted as `proven_vendored_dispatch`. Game-code indirect transfers
+get no such exemption. In a game
+function, a compiled `switch` jump is proved from its own bounded value
+chain (`sltiu`/`beqz` bound, `lui`/`addiu` table address, `sll`/`addu`/`lw`,
+`jr`) when every table word is an instruction start inside that function;
+the CFG's `switch_table` rule (`scripts/kf/sema/cfg.py`) is the one prover,
+and each such jump is a `switch_dispatch` witness row. A Sony member's
+switch jump is not proved by it; it is covered by the vendored exemption.
 
 Both objdiff front ends are built from the same pinned 3.7.3 source with
 `patches/objdiff-strict-data.patch`. Native section scores include anonymous

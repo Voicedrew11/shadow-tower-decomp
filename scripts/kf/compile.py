@@ -14,7 +14,7 @@ from pathlib import Path
 
 from scripts.kf.delink import image_key
 from scripts.kf.model import scan_data_claims
-from scripts.kf.retail import IMAGE_LAYOUTS, read_tsv
+from scripts.kf.retail import IMAGE_LAYOUTS, OVERLAY_SOURCES, read_tsv
 
 
 # Native probe compilers: tool basenames and provenance labels. The labels are
@@ -138,7 +138,8 @@ def _source_data_sizes(preprocessed: Path, names: tuple[str, ...],
     symbol = symbols[0]
     section = obj.sections[symbol.section]
     start, size = symbol.value, 4 * (len(names) + 2)
-    if section.name not in ('.rdata', '.data', '.sdata') or start + size > len(section.data):
+    if (section.name not in ('.rodata', '.rdata', '.data', '.sdata')
+            or start + size > len(section.data)):
         raise RuntimeError('source-size probe table is not initialized')
     if any(start <= offset < start + size for offset, _, _ in section.patches):
         raise RuntimeError('source-size probe table is not constant')
@@ -146,6 +147,11 @@ def _source_data_sizes(preprocessed: Path, names: tuple[str, ...],
     if values[:2] != (0x4B46535A, 4):
         raise RuntimeError('source-size probe does not use target 32-bit words')
     return dict(zip(names, values[2:], strict=True))
+
+
+def read_only_mode(image: str) -> str:
+    """An FDAT overlay keeps cc1's read-only order (sdk.keep_read_only_together)."""
+    return 'together' if image in OVERLAY_SOURCES else 'separate'
 
 
 def compile_source(
@@ -200,7 +206,8 @@ def compile_source(
         result = compile_c(source, scratch, 'UNIT', compiler=compiler, optimization=optimization,
                            small_data=small_data, include_dirs=include_dirs, cc1_flags=cc1_flags,
                            defines=defines, cc1_override=cc1_override,
-                           trace_environment=trace_environment)
+                           trace_environment=trace_environment,
+                           read_only=read_only_mode(image))
         if trace_path is not None and (not trace_path.is_file() or not trace_path.stat().st_size):
             raise RuntimeError('instrumented compiler produced no trace')
         if data_claims:
@@ -230,7 +237,8 @@ def compile_source(
         'language': 'c' if source.suffix.lower() == '.c' else 'assembly',
         'compiler': C_COMPILERS[compiler][2], 'compiler_probe': compiler,
         'optimization': optimization, 'small_data': small_data, 'cc1_flags': list(cc1_flags),
-        'assembler_model': 'native ASPSX 2.79D (DOS, in DOSBox-X); LNK object -> ELF inspection view',
+        'assembler_model': ('native ASPSX 2.79D then DMPSX 3.0 (DOS, in DOSBox-X); '
+                            'LNK object -> ELF inspection view'),
         'native_object': str(output.with_suffix('.OBJ')),
         'native_object_sha256': hashlib.sha256(native).hexdigest(),
         'native_referents': [
@@ -239,6 +247,7 @@ def compile_source(
              'addend': row.addend, 'provenance': row.provenance}
             for row in referents],
         'assembler_sha256': hashlib.sha256(Path(os.environ['PSYQ_ASPSX']).read_bytes()).hexdigest(),
+        'dmpsx_sha256': hashlib.sha256(Path(os.environ['PSYQ_DMPSX']).read_bytes()).hexdigest(),
         'attribution': 'candidate probe; exact retail compiler/profile unproven',
         'data_claims': [{'name': claim.name, 'va': f'{claim.va:#x}', 'size': claim.size}
                         for claim in data_claims],

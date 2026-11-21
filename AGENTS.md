@@ -9,7 +9,8 @@
   never an identity without its image. `config/images.toml` is the authority.
 - The toolchain is Shadow Tower's own (`docs/toolchain.md`): a native rebuild
   of the SN Systems GCC 2.7.2 compiler (`gcc272cdk-native`), the DOS tools
-  ASPSX 2.79D, PSYLINK 2.73D and CPE2X 1.5 (run in DOSBox-X, no extender
+  ASPSX 2.79D, DMPSX 3.0 (rewrites `INLINE_C.H` GTE placeholders in each
+  object), PSYLINK 2.73D and CPE2X 1.5 (run in DOSBox-X, no extender
   staged), Sony Runtime Library 4.2 (LIBPAD from 4.2.1),
   the 4.5 kit's `NONE3.OBJ` and Release 2.5 `MALLOC.OBJ`; it rebuilds `PSX.EXE`
   byte-identical. Profile `probe-gcc272cdk-o2-g0` is the default; units whose
@@ -78,14 +79,16 @@
 - `config/units.toml` lists units in linked (ascending address) order per
   image and carries no addresses; a function's address lives only in its
   claim.
-- A unit's switch tables and string literals are its `RODATA(va, size)`
-  claim (one per unit): jump-table pointer rows and literal strings inside
-  that range are not separate identities, and the source spells the literals
-  the original used.
+- A unit's constant pool (string literals, initializers) is its
+  `RODATA(va, size)` claim and its switch tables are its
+  `JUMPTABLES(va, size)` claim (one of each per unit; all pools link before
+  all tables): jump-table pointer rows and literal strings inside those
+  ranges are not separate identities, and the source spells the literals the
+  original used.
 - A global lives in the module that owns it, defined under
   `DATA(0xVA, size)` with its curated identity name; every other unit declares
-  it `extern`. Load-image data is explicitly initialized in source, and data
-  claims ascend inside a source like function claims.
+  it `extern`. Load-image data is explicitly initialized in source, and the data
+  claims of each section ascend inside a source like function claims.
 
 ## Game code versus vendored code
 
@@ -114,7 +117,10 @@
   `lui` plus `ori` is not interchangeable. Audit the exact low opcode and
   target addend.
 - `jalr` and non-return `jr` are unresolved indirect control flow until a table
-  or value chain is proved. Do not invent a callee from proximity.
+  or value chain is proved. Do not invent a callee from proximity. The
+  known-reference closure gate exempts indirect sites inside vendored Sony
+  (Psy-Q) functions by project decision, listing each as a
+  `vendored-indirect` witness row; game-code sites still need a proof.
 - Signedness and width are first-class codegen facts. Propagate `char`, `u8`,
   `s16`, `u16`, `int`, and pointer types through callers and callees; `lb/lbu`,
   `lh/lhu`, extension instructions, comparisons, and stack argument slots are

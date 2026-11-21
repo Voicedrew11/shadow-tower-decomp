@@ -12,10 +12,12 @@
 # names, by index, 0 STR.EXE, 1 TITLE.EXE, 2 OPTXT.EXE, 3 ST.EXE, 4 END.EXE,
 # 5 VS.EXE. It starts with index 0, then loops: BIOS Load(table[index]),
 # Exec, and on return reads the next index from the byte at 0x800103F0.
-# ST.EXE stores 4 (END.EXE) there and VS.EXE stores 1 (TITLE.EXE); how STR,
-# TITLE, OPTXT and END pick their successor (each carries its own copy of the
-# six-path table) is not yet traced. ST.EXE alone names `COM\FDAT.T` and
-# loads the FDAT overlays.
+# Each program carries its own copy of the six-path table. STR.EXE stores 1
+# (TITLE.EXE). TITLE.EXE stores 2 (OPTXT.EXE) for a new game, 3 (ST.EXE) for
+# Continue with 2 in the mailbox byte 0x800103F1, 5 (VS.EXE) for versus, and
+# 0 (STR.EXE) when the title times out. OPTXT.EXE stores 3 (ST.EXE), ST.EXE
+# 4 (END.EXE), and END.EXE and VS.EXE 1 (TITLE.EXE). ST.EXE alone names
+# `COM\FDAT.T` and loads the FDAT overlays.
 
 [disc]
 serial = "SLUS-00863"
