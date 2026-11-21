@@ -63,6 +63,8 @@ project. The toolchain and link model are Shadow Tower's own: the SN Systems
 GCC 2.7.2 compiler (a rebuild), the DOS builds ASPSX 2.79D, DMPSX 3.0,
 PSYLINK 2.73D and CPE2X 1.5, and Runtime Library 4.2, which rebuild `PSX.EXE`
 byte-identical. See [AGENTS.md](AGENTS.md) for the reconstruction rules.
+[The compiler notes](docs/compiler-notes.md) explain how the compiler's passes
+decide the code that byte-matching depends on.
 
 <!-- match-score:start -->
 ## Match status
