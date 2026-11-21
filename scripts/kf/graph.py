@@ -11,6 +11,7 @@ import shutil
 import subprocess
 import sys
 from pathlib import Path
+from typing import Iterable
 
 from scripts.kf import compile as compiler
 from scripts.kf.clangd import generate as generate_clangd
@@ -392,15 +393,33 @@ def configure_if_needed(force: bool = False, retail_dir: Path | None = None) -> 
 
 
 def run_ninja(
-    targets: list[str], *, jobs: int | None = None, verbose: bool = False
+    targets: list[str], *, jobs: int | None = None, verbose: bool = False,
+    keep_going: bool = False,
 ) -> int:
+    """Run Ninja; `keep_going` runs every edge whose inputs built (`-k 0`)."""
     arguments = ["ninja", "-f", str(NINJA.relative_to(REPO))]
     if jobs is not None:
         arguments += ["-j", str(jobs)]
     if verbose:
         arguments.append("-v")
+    if keep_going:
+        arguments += ["-k", "0"]
     arguments.extend(targets)
     return subprocess.run(arguments, cwd=REPO).returncode
+
+
+def check_failure_marker(image: str) -> Path:
+    """Written by a failing `check` edge, removed by a passing one."""
+    return BUILD / "objdiff" / image_key(image) / ".verify.failed"
+
+
+def clear_check_failures(images: Iterable[str]) -> None:
+    for image in images:
+        check_failure_marker(image).unlink(missing_ok=True)
+
+
+def failed_checks(images: Iterable[str]) -> list[str]:
+    return [image for image in images if check_failure_marker(image).is_file()]
 
 
 def _directory_digest(path: Path) -> str:
@@ -486,10 +505,15 @@ def edge_check(image: str, stamp: Path) -> int:
     from scripts.kf.progress import check
 
     result = check((image,))
+    marker = check_failure_marker(image)
     if result == 0:
+        marker.unlink(missing_ok=True)
         report = BUILD / "objdiff" / "report.json"
         payload = hashlib.sha256(report.read_bytes() + BASELINE.read_bytes()).hexdigest()
         _write_if_changed(stamp, payload + "\n")
+    else:
+        marker.parent.mkdir(parents=True, exist_ok=True)
+        marker.write_text(f"{result}\n")
     return result
 
 

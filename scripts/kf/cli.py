@@ -9,7 +9,9 @@ import sys
 from pathlib import Path
 
 from scripts.kf.delink import image_key
-from scripts.kf.graph import PHASES, configure_if_needed, emit, run_ninja
+from scripts.kf.graph import (
+    PHASES, clear_check_failures, configure_if_needed, emit, failed_checks, run_ninja,
+)
 from scripts.kf.local_config import extract_disc, initialize
 from scripts.kf.manifest import load as load_manifest
 from scripts.kf.paths import BUILD, NINJA, REPO
@@ -53,7 +55,17 @@ def _analyze(args: argparse.Namespace) -> int:
     targets = [
         f"{args.phase}-{value}" for value in args.image
     ] if args.image else [args.phase]
-    return run_ninja(targets, jobs=args.jobs, verbose=args.verbose)
+    # Images are independent checks: one failing image must not hide another,
+    # so Ninja keeps going and the failed checks are listed at the end.
+    images = _images(args.image)
+    clear_check_failures(images)
+    result = run_ninja(targets, jobs=args.jobs, verbose=args.verbose, keep_going=True)
+    if result:
+        failed = failed_checks(images)
+        print(f"[analyze] FAILED: {len(failed)} image check(s) failed"
+              + (": " + ", ".join(image_key(image) for image in failed) if failed else "")
+              + "; Ninja marks every failed edge FAILED above", file=sys.stderr)
+    return result
 
 
 def _object_census() -> dict[str, str]:

@@ -40,7 +40,9 @@ path.
 `kf analyze` drives the incremental Ninja graph for inspection. Source
 compilation uses the same native SDK path; ELF objects are read-only views
 of its LNK outputs. Retail delinking and the progress ledger are comparison
-tools and supply no bytes or layout to the executable build.
+tools and supply no bytes or layout to the executable build. It runs Ninja
+with `-k 0`, so a failing image does not stop the others from being checked;
+it exits non-zero and lists every failed (or blocked) edge.
 
 ## Unit manifest and ADDRESS() claims
 
