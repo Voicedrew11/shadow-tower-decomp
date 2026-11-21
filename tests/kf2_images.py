@@ -14,7 +14,10 @@ from pathlib import Path
 from scripts.kf import retail
 
 FIXTURE = Path(__file__).resolve().parent / "fixtures" / "kf2_images.toml"
-_TABLES = ("IMAGE_LAYOUTS", "IMAGE_DISC_FILES", "IMAGE_ORDER", "IMAGE_NAMES")
+_TABLES = (
+    "IMAGE_LAYOUTS", "IMAGE_DISC_FILES", "IMAGE_ORDER", "IMAGE_NAMES",
+    "RETAIL_ARCHIVES", "OVERLAY_SOURCES",
+)
 _saved: dict[str, object] = {}
 
 
@@ -28,11 +31,12 @@ def _rebind(old: object, new: object) -> None:
                 setattr(module, attribute, new)
 
 
-def _install(disc, layouts, disc_files) -> None:
+def _install(disc, layouts, disc_files, archives, overlays) -> None:
     order = {image: index for index, image in enumerate(layouts)}
-    names = {image.removesuffix(".EXE").lower(): image for image in layouts}
+    names = {retail.image_key(image): image for image in layouts}
     # Dicts are shared by every `from scripts.kf.retail import ...`; update in place.
-    for table, content in zip(_TABLES, (layouts, disc_files, order, names)):
+    contents = (layouts, disc_files, order, names, archives, overlays)
+    for table, content in zip(_TABLES, contents, strict=True):
         target = getattr(retail, table)
         target.clear()
         target.update(content)
@@ -47,7 +51,7 @@ def use_kf2_images() -> None:
     _saved.update({table: dict(getattr(retail, table)) for table in _TABLES})
     _saved["IMAGE_KEYS"] = retail.IMAGE_KEYS
     _saved["RETAIL_DISC"] = retail.RETAIL_DISC
-    _install(*retail._load_images(FIXTURE))
+    _install(*retail._load_images(FIXTURE), *retail._load_overlays(FIXTURE))
 
 
 def restore_images() -> None:

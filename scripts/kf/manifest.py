@@ -21,7 +21,7 @@ from scripts.kf.model import (
     write_bindings,
 )
 from scripts.kf.paths import REPO, RETAIL_CONFIG, UNITS_MANIFEST
-from scripts.kf.retail import IMAGE_LAYOUTS
+from scripts.kf.retail import IMAGE_LAYOUTS, image_key
 
 
 DEFINE_RE = re.compile(r"[A-Za-z_][A-Za-z0-9_]*(=[A-Za-z0-9_x]+)?")
@@ -43,9 +43,9 @@ class Profile:
     cc1_flags: tuple[str, ...]
 
 
-# Native probe compilers. Each is a Decompals old-gcc rebuild of a PSX GCC
-# target; neither is proven to be the historical Shadow Tower compiler.
-C_COMPILERS = ("gcc260-native", "gcc257-native", "gcc241-kit")
+# Native compilers. Each is a Decompals old-gcc rebuild of a PSX GCC target
+# (gcc241-kit runs the Psy-Q 3.0 kit binary); none is the original Win32 CC1PSX.
+C_COMPILERS = ("gcc272cdk-native", "gcc260-native", "gcc257-native", "gcc241-kit")
 
 
 @dataclass(frozen=True)
@@ -77,7 +77,7 @@ class Unit:
 
     @property
     def image_key(self) -> str:
-        return self.image.removesuffix(".EXE").lower()
+        return image_key(self.image)
 
     @property
     def stem(self) -> str:
@@ -163,7 +163,7 @@ def _profile(name: str, row: object) -> Profile:
         compiler=compiler,
         optimization=str(optimization) if optimization is not None else None,
         small_data=small_data,
-        aspsx_version=str(row.get("aspsx_version", "1.07")),
+        aspsx_version=str(row.get("aspsx_version", "2.79")),
         cc1_flags=tuple(flags),
     )
 
@@ -502,7 +502,7 @@ def load(
         claims, data_claims = scan_source(source_path)
         rodata_claims = scan_rodata_claims(source_path)
         sdata_claims = scan_sdata_claims(source_path)
-        image_token = image.removesuffix(".EXE")
+        image_token = image_key(image).upper()
         data_claims = tuple(
             claim for claim in data_claims
             if claim.image is None or claim.image == image_token

@@ -1,6 +1,6 @@
 # Shadow Tower — C++ source
 
-Clean C++20 sources for Shadow TowerI (SLUS-00863).
+Clean C++20 sources for Shadow Tower (SLUS-00863).
 This branch is the base for the crossplatform port. It builds for the PlayStation so
 the game can be exercised before changing platforms.
 

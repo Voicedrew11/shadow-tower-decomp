@@ -8,7 +8,7 @@ from scripts.kf.clean import (
     MARKER, PROVENANCE, clean_c, compare_program, git, publish, validate_output, write_output,
 )
 from scripts.kf.clean_lexer import resolve_conditionals, rewrite_calls, strip_comments, tidy
-from scripts.kf.retail import IMAGE_LAYOUTS
+from scripts.kf.retail import IMAGE_DISC_FILES
 
 
 class LexicalControls(unittest.TestCase):
@@ -128,7 +128,8 @@ class ExportControls(unittest.TestCase):
                                             else set())
                 self.assertFalse(missing, f'{template} lacks {sorted(missing)}')
                 self.assertNotIn('release-2.5', text)
-                for image in (name.removesuffix('.EXE') for name in IMAGE_LAYOUTS):
+                # Archive overlays are not linked as standalone executables.
+                for image in (name.removesuffix('.EXE') for name in IMAGE_DISC_FILES):
                     self.assertIn(f'build/{image.lower()}/{image}.EXE', text)
                     self.assertIn(f'build/{image.lower()}/{image}.CPE', text)
 

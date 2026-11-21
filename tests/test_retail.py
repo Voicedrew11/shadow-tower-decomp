@@ -7,16 +7,29 @@ import unittest
 from pathlib import Path
 from unittest import mock
 
-from scripts.kf.retail import ImageLayout, _merged_coverage, parse_psx_exe
+from scripts.kf import retail
+from scripts.kf.retail import (
+    IMAGE_LAYOUTS,
+    IMAGE_NAMES,
+    OVERLAY_SOURCES,
+    ImageLayout,
+    _merged_coverage,
+    archive_entry,
+    image_key,
+    parse_psx_exe,
+    verify_retail_image,
+)
 from scripts.kf.propose_function_admission import subtract_interval
 from scripts.kf.seed_retail import escape_trailing_spaces
 from scripts.kf.seed_vendored_functions import (
+    SdkLabel,
     SignaturePattern,
     find_masked_bytes,
     find_signature,
     load_sdk_symbols,
     parse_object_symbols,
     parse_signature,
+    signature_set_version,
 )
 
 
@@ -56,6 +69,103 @@ class RetailTests(unittest.TestCase):
                 0x20,
             ),
         )
+
+    def test_image_keys_strip_any_extension(self) -> None:
+        self.assertEqual(image_key("ST.EXE"), "st")
+        self.assertEqual(image_key("FDAT_012.BIN"), "fdat_012")
+        self.assertEqual(IMAGE_NAMES["fdat_012"], "FDAT_012.BIN")
+
+    def test_fdat_overlays_share_st_address_space_after_its_bss(self) -> None:
+        self.assertEqual(len(OVERLAY_SOURCES), 36)
+        for image, source in OVERLAY_SOURCES.items():
+            layout = IMAGE_LAYOUTS[image]
+            with self.subTest(image=image):
+                self.assertEqual(image, f"FDAT_{source.index:03d}.BIN")
+                self.assertEqual((source.archive, source.host), ("FDAT.T", "ST.EXE"))
+                self.assertEqual(source.index % 10, 2)
+                self.assertIsNone(layout.entry)
+                self.assertEqual(layout.header_size, 0)
+                self.assertEqual(layout.file_size, layout.load_size)
+                self.assertEqual(layout.load_size % retail.ARCHIVE_SECTOR_SIZE, 0)
+                self.assertEqual(layout.load_address, 0x801EB560)
+                self.assertEqual(layout.file_offset(0x801EB564), 4)
+
+    def test_archive_entry_slices_sector_offsets(self) -> None:
+        archive = bytearray(0x1800)
+        struct.pack_into("<4H", archive, 0, 2, 1, 2, 3)
+        archive[0x800:0x1000] = b"A" * 0x800
+        archive[0x1000:0x1800] = b"B" * 0x800
+        self.assertEqual(archive_entry(bytes(archive), 1), b"B" * 0x800)
+        with self.assertRaises(ValueError):
+            archive_entry(bytes(archive), 2)
+
+    def test_verify_overlay_checks_size_and_hash(self) -> None:
+        payload = struct.pack("<I", 0x03E00008) * 0x200
+        layout = ImageLayout(
+            "OVL_001.BIN", hashlib.sha256(payload).hexdigest(), len(payload), None,
+            0x801EB560, len(payload), 0,
+        )
+        source = retail.OverlaySource("OVL.T", 1, "ST.EXE")
+        with (
+            tempfile.TemporaryDirectory() as directory,
+            mock.patch.dict(IMAGE_LAYOUTS, {"OVL_001.BIN": layout}),
+            mock.patch.dict(OVERLAY_SOURCES, {"OVL_001.BIN": source}),
+        ):
+            path = Path(directory) / "OVL_001.BIN"
+            path.write_bytes(payload)
+            self.assertEqual(verify_retail_image(path, "OVL_001.BIN"), payload)
+            self.assertEqual(
+                retail.load_payload(path, "OVL_001.BIN"), (0x801EB560, payload)
+            )
+            path.write_bytes(payload[:-4] + bytes(4))
+            with self.assertRaises(ValueError):
+                verify_retail_image(path, "OVL_001.BIN")
+
+    def test_vendored_labels_carry_their_sdk_release(self) -> None:
+        sdk = SdkLabel.from_directory(Path("/nix/store/x-sdk/psyq-4.2/LIB"))
+        self.assertEqual((sdk.token, sdk.source_version), ("sdk42", "Psy-Q 4.2"))
+        with self.assertRaises(ValueError):
+            SdkLabel.from_directory(Path("/opt/sdk/LIB"))
+        self.assertEqual(signature_set_version("420"), "4.2")
+        self.assertEqual(signature_set_version("300"), "3.0")
+        self.assertEqual(signature_set_version("3610"), "3.61")
+        for confidence in ("fid-sdk42", "exact-sdk42-complete", "psyq420-signature",
+                           "psyq3610-signature-ambiguous", "sdk-lineage-supported"):
+            self.assertIsNotNone(retail.VENDORED_CONFIDENCE.fullmatch(confidence))
+        self.assertIsNone(retail.VENDORED_CONFIDENCE.fullmatch("psyq-signature"))
+
+    def test_gp_relative_relocation_decodes_against_the_startup_gp(self) -> None:
+        from types import SimpleNamespace
+
+        from scripts.kf.relocations import validate_relocation
+
+        self.assertEqual(retail.IMAGE_GP["PSX.EXE"], 0x80010394)
+        self.assertEqual(retail.IMAGE_GP["FDAT_012.BIN"], retail.IMAGE_GP["ST.EXE"])
+        function = SimpleNamespace(image="PSX.EXE", va=0x8001008C)
+        row = {"site_va": "0x8001008c", "target_va": "0x80010398", "kind": "mips_gprel16",
+               "status": "reviewed", "channel": "reachable-code"}
+        lw_v0_4_gp = struct.pack("<I", 0x8F820004)
+        validation = validate_relocation(lw_v0_4_gp, function, row, None, "safe")
+        self.assertEqual(validation.target, 0x80010398)
+        with self.assertRaises(ValueError):
+            validate_relocation(struct.pack("<I", 0x8C820004), function, row, None, "safe")
+
+    def test_vendored_seed_explains_missing_inputs(self) -> None:
+        from scripts.kf import seed_vendored_functions as seed
+
+        with mock.patch.dict("os.environ", {}, clear=False) as environ:
+            environ.pop("PSYQ_LIB", None)
+            with self.assertRaisesRegex(SystemExit, "PSYQ_LIB is unset"):
+                seed.main(["--exe-dir", "retail"])
+        with tempfile.TemporaryDirectory() as directory:
+            with self.assertRaisesRegex(SystemExit, "--exe-dir is required"):
+                seed.main(["--sdk-lib-dir", directory])
+
+    def test_clean_export_is_refused_until_ported(self) -> None:
+        from scripts.kf import clean
+
+        with mock.patch("sys.stderr"):
+            self.assertEqual(clean.main([]), 2)
 
     def test_parse_interleaved_object_symbols(self) -> None:
         parsed = parse_object_symbols(

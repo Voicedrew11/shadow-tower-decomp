@@ -3,3 +3,9 @@
 # Address-only DAT_ names and unknown scope are unresolved, not semantic claims.
 # Future analysis writes build/function-inventory proposals and never overwrites this file.
 image	va	size	name	scope	storage	datatype	owner	confidence	evidence	note
+PSX.EXE	0x80010350	0x18	program_paths	static	load	char *[6]	main	supported	asm;src/psx/main.c psx.main exact	Load() path per program index; PSX main indexes it by program_index
+PSX.EXE	0x80010394	0x4	program_index	global	load	int	main	supported	asm;src/psx/main.c psx.main exact	$gp+0; next program index, read back from the next-program byte
+PSX.EXE	0x80010398	0x4	next_program	global	load	u8 *	main	supported	asm;src/psx/main.c psx.main exact	$gp+4; points at the next-program byte 0x800103f0
+PSX.EXE	0x8001039c	0x4	PTR_8001039c	global	load	u8 *	main	supported	asm;src/psx/main.c psx.main exact	$gp+8; points at 0x800103f1, cleared at start
+PSX.EXE	0x800103a0	0x4	PTR_800103a0	global	load	u8 *	main	supported	asm;src/psx/main.c psx.main exact	$gp+12; points at 0x800103f2, cleared at start
+PSX.EXE	0x800103b0	0x3c	program_header	global	bss	struct EXEC	main	supported	asm;src/psx/main.c psx.main exact	Load()/Exec() header; inside the cleared .bss 0x800103a8..0x800103f0

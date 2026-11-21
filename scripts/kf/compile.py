@@ -21,6 +21,11 @@ from scripts.kf.retail import IMAGE_LAYOUTS, read_tsv
 # recorded in every .o.json so a base object always names the probe that made
 # it; none of them is a historical attribution claim.
 C_COMPILERS = {
+    "gcc272cdk-native": (
+        "cpppsx-272cdk",
+        "cc1psx-272cdk",
+        "Decompals old-gcc 0.17 GCC 2.7.2 SN32 (cygnus-2.7.2-970404) PSX rebuild",
+    ),
     "gcc260-native": (
         "cpppsx-260",
         "cc1psx-260",
@@ -146,9 +151,9 @@ def _source_data_sizes(preprocessed: Path, names: tuple[str, ...],
 def compile_source(
     source: Path, image: str, output: Path,
     delink_dir: Path = Path("build/delink"), optimization: str | None = None,
-    small_data: int = 0, aspsx_version: str = "1.07",
+    small_data: int = 0, aspsx_version: str = "2.79",
     include_dirs: tuple[Path, ...] = (), cc1_flags: tuple[str, ...] = (),
-    compiler: str = "gcc260-native",
+    compiler: str = "gcc272cdk-native",
     defines: tuple[str, ...] = (), *, cc1_override: Path | None = None,
     trace_path: Path | None = None, trace_function: str | None = None,
 ) -> Path:
@@ -159,8 +164,9 @@ def compile_source(
     source, output = source.resolve(), output.resolve()
     if not source.is_file():
         raise ValueError(f"{source}: source is missing")
-    if aspsx_version != '1.07':
-        raise ValueError('the executable chain uses pinned ASPSX 1.07')
+    from scripts.psxbuild.sdk import ASPSX_VERSION
+    if aspsx_version != ASPSX_VERSION:
+        raise ValueError(f'the executable chain uses pinned ASPSX {ASPSX_VERSION}')
     if trace_path is not None and (cc1_override is None or compiler != 'gcc257-native'):
         raise ValueError('tracing requires an explicit GCC 2.5.7 cc1 override')
     if trace_path is not None and source.suffix.lower() != '.c':
@@ -185,7 +191,7 @@ def compile_source(
         if trace_function is not None:
             trace_environment['KF_GCC257_TRACE_FUNCTION'] = trace_function
     data_claims = (tuple(claim for claim in scan_data_claims(source)
-                         if claim.image is None or claim.image == image.removesuffix('.EXE'))
+                         if claim.image is None or claim.image == image_key(image).upper())
                    if source.suffix.lower() == '.c' else ())
     source_sizes = {}
     if source.suffix.lower() == '.c':
@@ -224,7 +230,7 @@ def compile_source(
         'language': 'c' if source.suffix.lower() == '.c' else 'assembly',
         'compiler': C_COMPILERS[compiler][2], 'compiler_probe': compiler,
         'optimization': optimization, 'small_data': small_data, 'cc1_flags': list(cc1_flags),
-        'assembler_model': 'native ASPSX 1.07; LNK object -> ELF inspection view',
+        'assembler_model': 'native ASPSX 2.79D (DOS, in DOSBox-X); LNK object -> ELF inspection view',
         'native_object': str(output.with_suffix('.OBJ')),
         'native_object_sha256': hashlib.sha256(native).hexdigest(),
         'native_referents': [
@@ -257,11 +263,11 @@ def main() -> int:
         "--optimization", choices=("O0", "O1", "O2", "O3")
     )
     parser.add_argument("--small-data", type=int, default=0)
-    parser.add_argument("--aspsx-version", default="1.07")
+    parser.add_argument("--aspsx-version", default="2.79")
     parser.add_argument("--include", action="append", type=Path, default=[])
     parser.add_argument("--cc1-flag", action="append", default=[])
     parser.add_argument(
-        "--compiler", choices=tuple(C_COMPILERS), default="gcc260-native"
+        "--compiler", choices=tuple(C_COMPILERS), default="gcc272cdk-native"
     )
     parser.add_argument("--define", action="append", default=[])
     args = parser.parse_args()

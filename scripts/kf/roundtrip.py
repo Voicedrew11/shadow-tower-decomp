@@ -27,7 +27,7 @@ from scripts.kf.allocation_notes import read_requests
 from scripts.kf.delink import load_catalog, sanitize_symbol
 from scripts.kf.manifest import Unit, load as load_manifest
 from scripts.kf.paths import BUILD, RETAIL_CONFIG
-from scripts.kf.retail import IMAGE_KEYS, IMAGE_LAYOUTS, read_tsv
+from scripts.kf.retail import IMAGE_GP, IMAGE_KEYS, IMAGE_LAYOUTS, IMAGE_NAMES, read_tsv
 from scripts.kf.sema.image import RetailImage
 
 
@@ -285,7 +285,7 @@ def externals(elf: ELFFile, book: dict[str, set[int]], result: UnitResult) -> di
         symtab = elf.get_section(section['sh_link'])
         for row in section.iter_relocations():
             result.relocation_rows += 1
-            if row['r_info_type'] not in {2, 4, 5, 6}:
+            if row['r_info_type'] not in {2, 4, 5, 6, 7}:
                 result.issue("unsupported-relocation", section=target_section.name,
                              offset=row['r_offset'], type=row['r_info_type'])
             if row['r_offset'] & 3 or row['r_offset'] + 4 > target_section['sh_size']:
@@ -341,6 +341,18 @@ def compare_linked(elf: ELFFile, image: RetailImage, result: UnitResult) -> None
                          differing_bytes=sum(a != b for a, b in zip(expected, actual)))
 
 
+def link_command(linker: str, image: str, entry: int, script: Path, linked: Path,
+                 object_path: Path, symbols: dict[str, int]) -> list[str]:
+    """GNU ld arguments that place one target object at its retail addresses."""
+    command = [linker, "-EL", "-G", "0", "--entry", hex(entry), "-T", str(script),
+               "-o", str(linked), str(object_path.resolve())]
+    command += [f"--defsym={name}={address:#x}" for name, address in sorted(symbols.items())]
+    if image in IMAGE_GP:
+        # R_MIPS_GPREL16 resolves against the program's startup $gp.
+        command.append(f"--defsym=_gp={IMAGE_GP[image]:#x}")
+    return command
+
+
 def verify_unit(unit: Unit, image: RetailImage, book: dict[str, set[int]],
                 object_path: Path, scratch: Path, *, linker: str = LINKER) -> UnitResult:
     result = UnitResult(unit.image, unit.unit, str(object_path))
@@ -368,9 +380,8 @@ def verify_unit(unit: Unit, image: RetailImage, book: dict[str, set[int]],
             entry = unit.functions[0].va if unit.functions else min(placed.values())
             # GNU MIPS ld otherwise moves SHN_COMMON requests of up to 8 bytes
             # into .scommon, which this script discards; only claimed BSS is placed.
-            command = [linker, "-EL", "-G", "0", "--entry", hex(entry), "-T", str(script),
-                       "-o", str(linked), str(object_path.resolve())]
-            command += [f"--defsym={name}={address:#x}" for name, address in sorted(symbols.items())]
+            command = link_command(linker, unit.image, entry, script, linked,
+                                   object_path, symbols)
             process = subprocess.run(command, capture_output=True, text=True, timeout=30)
             result.linker_ran = True
             result.linker_diagnostics = process.stderr.strip()
@@ -459,7 +470,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--unit")
     parser.add_argument("--output", type=Path)
     args = parser.parse_args(argv)
-    images = tuple(name.upper() + ".EXE" for name in args.image) if args.image else tuple(IMAGE_LAYOUTS)
+    images = tuple(IMAGE_NAMES[name] for name in args.image) if args.image else tuple(IMAGE_LAYOUTS)
     try:
         return run(images, output=args.output, unit=args.unit)
     except (OSError, ValueError) as error:

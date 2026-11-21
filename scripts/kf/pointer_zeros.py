@@ -25,7 +25,7 @@ from scripts.kf.check_types import select_units
 from scripts.kf.clangd import environment, unit_arguments
 from scripts.kf.manifest import load as load_manifest
 from scripts.kf.paths import REPO
-from scripts.kf.retail import IMAGE_KEYS
+from scripts.kf.retail import IMAGE_KEYS, IMAGE_NAMES
 
 
 CK = cindex.CursorKind
@@ -197,7 +197,7 @@ def main(argv: list[str] | None = None) -> int:
     try:
         manifest = load_manifest()
         units = select_units(
-            manifest, images=tuple(f"{image.upper()}.EXE" for image in args.image),
+            manifest, images=tuple(IMAGE_NAMES[image] for image in args.image),
             names=tuple(args.unit),
         )
         compiler, sdk = environment()

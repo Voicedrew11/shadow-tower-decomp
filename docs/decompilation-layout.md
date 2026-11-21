@@ -1,50 +1,53 @@
-# Four decomps in one repository
+# Forty-three images in one repository
 
-> **Inherited from the King's Field II (`SLPS-00069`) project.** Statements here
-> about retail bytes, linker order, SDK versions or compiler probes describe that
-> game. For Shadow Tower (`SLUS-00863`) they are hypotheses until re-proven.
+This project is one reverse-engineering effort with 43 independent
+decompilation targets: seven linked PS-X EXE programs and 36 code overlays.
+`config/images.toml` is the authority for each image's file, hash and
+layout.
 
-This project is one reverse-engineering effort, but it has four independent
-decompilation targets:
-
-| Target | Retail role | Load window | Current function census |
+| Target | Retail role | Load window | Functions (game / Psy-Q) |
 | --- | --- | --- | ---: |
-| `PSX.EXE` | bootstrap and overlay loader | `0x80010000..0x80010800` | 13 |
-| `OPEN.EXE` | opening program | `0x80011000..0x8003e000` | 308 |
-| `GAME.EXE` | main game program | `0x80011000..0x8006e000` | 818 |
-| `END.EXE` | ending program | `0x80011000..0x8003b000` | 279 |
+| `PSX.EXE` | boot file; program sequencer | `0x80010000..0x80010800` | 1 / 10 |
+| `STR.EXE` | program index 0, run first | `0x80011000..0x80033000` | 32 / 290 |
+| `ST.EXE` | main game program (index 3) | `0x80011000..0x80088800` | 682 / 457 |
+| `TITLE.EXE` | program index 1 | `0x80012000..0x80029000` | 34 / 353 |
+| `OPTXT.EXE` | program index 2 | `0x80011000..0x8001f800` | 29 / 254 |
+| `VS.EXE` | program index 5 | `0x80011000..0x80063800` | 259 / 401 |
+| `END.EXE` | program index 4 | `0x80011000..0x80030000` | 16 / 260 |
+| `FDAT_nnn.BIN` (36) | `ST.EXE` code overlays | `0x801EB560` + `0x2800`–`0x4800` | 943 / 0 (23–37 each) |
 
-`OPEN.EXE`, `GAME.EXE` and `END.EXE` occupy the same RAM window at different
-times. They are not sections of one executable. The same virtual address can
-name unrelated functions or data depending on which program is loaded.
-`PSX.EXE` is a fourth linked program, not a header attached to any overlay.
+Counts are the current WIP census (`config/retail/functions.tsv` and
+`functions_vendored.tsv`); see
+[function-and-data-inventory.md](function-and-data-inventory.md). Indices are
+the slots of `PSX.EXE`'s program table; other roles are not yet established.
 
-Every authoritative address is keyed by `(image, va)`. One objdiff project
-groups the independent object pairs under `psx/`, `game/`, `open/`, and `end/`;
-equal overlay addresses do not collide between object pairs. A symbol,
-relocation, or function must never be joined across images by address alone.
+The six programs occupy overlapping RAM at different times; `PSX.EXE` stays
+resident below them and runs them in turn. The FDAT overlays are not PS-X
+EXEs: they are raw entries of `ST\COM\FDAT.T`, loaded by `ST.EXE` one at a
+time at `0x801EB560`, the end of `ST.EXE`'s `.bss`. They therefore share
+`ST.EXE`'s address space: their `jal` targets outside the overlay are
+`ST.EXE` functions, and an overlay's file offset is its RAM offset from
+`0x801EB560` (there is no 0x800-byte header).
 
-The repository still shares everything that should be shared:
+Every authoritative address is keyed by `(image, va)`. The same virtual
+address names unrelated functions in different programs, and all 36
+overlays use the same window. A symbol, relocation, or function must never
+be joined across images by address alone, and a call from an overlay into
+`ST.EXE` is a cross-image reference.
 
-- the single pinned Psy-Q 3.0 SDK and separate GNU/maspsx analysis route;
+The repository shares everything that should be shared:
+
+- one pinned SDK and the GNU/maspsx analysis route;
 - platform headers, Sony library declarations, and reconstructed types;
 - analysis scripts and Ghidra configuration;
 - evidence and naming conventions; and
-- source files proven byte-identical between programs.
+- source files proven byte-identical between images (the FDAT overlays
+  repeat a common set of functions in every entry).
 
-The source tree is partitioned accordingly:
-
-```text
-src/
-  psx/       PSX.EXE-only reconstruction
-  game/      GAME.EXE-only reconstruction
-  open/      OPEN.EXE-only reconstruction
-  end/       END.EXE-only reconstruction
-  lib/       sources linked into more than one image (ADDRESS_AT claims)
-```
-
-This is therefore "four decomps in one": four link graphs and four match
-scores, with one shared investigation and build environment.
+`src/` holds one directory per image key (`psx/`, `st/`, `fdat_012/`, ...)
+plus `lib/` for sources linked into more than one image (`ADDRESS_AT`
+claims). Linking an overlay is not modeled yet: `kf build` refuses source
+units for an overlay image until its output format is.
 
 ## Address and naming rules
 
@@ -57,17 +60,15 @@ order:
 2. a vendored-function name at the same `(image, va)`; or
 3. a deterministic `func_<va>` placeholder.
 
-Duplicate preferred names within one executable receive an address suffix.
-They do not need suffixes merely because another executable uses the same name.
+Duplicate preferred names within one image receive an address suffix. They
+do not need suffixes merely because another image uses the same name.
 
 Data and relocation ownership will eventually be assigned to translation
 units. That ownership is not inferable from the linked image alone, so the
-initial pipeline deliberately carves one object per contiguous function. It is
-a calibration topology, not a claim that the original source had 1,418
-one-function files. The 882 provider-identified Sony/Psy-Q functions never
-become reconstruction or objdiff units. Seven functions have multiple
-fragments and no fragment-range manifest; six are provider-identified and one
-remains non-vendored, and all seven are withheld rather than guessed.
+initial pipeline carves one object per contiguous function. It is a
+calibration topology, not a claim about the original files. Provider-
+identified Sony/Psy-Q functions never become reconstruction or objdiff
+units.
 
 ## Matching tiers
 

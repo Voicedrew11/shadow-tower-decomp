@@ -13,7 +13,12 @@ import subprocess
 from elftools.common.exceptions import ELFError
 
 from scripts.kf.paths import BUILD, REPO
-from scripts.kf.retail import IMAGE_KEYS, IMAGE_LAYOUTS
+from scripts.kf.retail import IMAGE_KEYS, IMAGE_LAYOUTS, IMAGE_NAMES, OVERLAY_SOURCES, image_key
+
+
+def _linked_keys() -> tuple[str, ...]:
+    """Images the executable chain links: the PS-X EXE programs, not overlays."""
+    return tuple(image_key(name) for name in IMAGE_LAYOUTS if name not in OVERLAY_SOURCES)
 
 
 README = REPO / "README.md"
@@ -36,7 +41,7 @@ def render_block(document: dict) -> str:
         exact = int(summary["exact_functions"])
         eligible = int(summary["eligible_functions"])
         rows.append(
-            f"| `{key.upper()}.EXE` | {exact:,} / {eligible:,} "
+            f"| `{IMAGE_NAMES[key]}` | {exact:,} / {eligible:,} "
             f"({_percent(exact, eligible):.2f}%) | "
             f"{int(summary['manifested_functions']):,} | "
             f"{float(summary['fuzzy_overall_percent']):.2f}% |"
@@ -142,15 +147,15 @@ def data_snapshot() -> dict[str, tuple[int, int]]:
         except (OSError, ValueError, IndexError, struct.error, ELFError):
             continue
         if not failures:
-            result[image.lower().removesuffix('.exe')] = (sum(row.matches for row in rows), len(rows))
+            result[image_key(image)] = (sum(row.matches for row in rows), len(rows))
     return result
 
 
 def executable_snapshot(link_root: Path) -> dict[str, dict]:
     """Use reports only when their EXE hashes match outputs still on disk."""
     result = {}
-    for key in IMAGE_KEYS:
-        image = key.upper() + '.EXE'
+    for key in _linked_keys():
+        image = IMAGE_NAMES[key]
         root = link_root / key
         try:
             data = (root / image).read_bytes()
@@ -202,16 +207,17 @@ def render_executable_block(
     """Keep complete-file equality and heuristic load-area similarity distinct."""
     rows = []
     total_equal = total_bytes = total_nonzero_equal = total_nonzero = 0
-    for key in IMAGE_KEYS:
+    linked = _linked_keys()
+    for key in linked:
         counts = (data_models or {}).get(key)
         data_cell = f'{counts[0]:,} / {counts[1]:,}' if counts is not None else '—'
         if key not in images:
-            rows.append(f"| `{key.upper()}.EXE` | — | — | — | {data_cell} |")
+            rows.append(f"| `{IMAGE_NAMES[key]}` | — | — | — | {data_cell} |")
             continue
         strict, fuzzy = images[key]['strict'], images[key]['fuzzy']
         file_bytes = max(strict['retail_size'], strict['linked_size'])
         fixed = _percent(file_bytes - strict['differing_bytes'], file_bytes)
-        rows.append(f"| `{key.upper()}.EXE` | {fixed:.2f}% | "
+        rows.append(f"| `{IMAGE_NAMES[key]}` | {fixed:.2f}% | "
                     f"{float(fuzzy['byte_similarity_percent']):.2f}% | "
                     f"{float(fuzzy['nonzero_byte_similarity_percent']):.2f}% | {data_cell} |")
         total_equal += fuzzy['equal_paired_bytes']
@@ -221,7 +227,7 @@ def render_executable_block(
     similarity = _percent(2 * total_equal, total_bytes) if total_bytes else 100.0
     nonzero_similarity = _percent(2 * total_nonzero_equal, total_nonzero) if total_nonzero else 100.0
     overall = (
-        f"**Overall ({len(images)}/{len(IMAGE_LAYOUTS)} images): {similarity:.2f}% "
+        f"**Overall ({len(images)}/{len(linked)} images): {similarity:.2f}% "
         f"island-aligned byte similarity &middot; "
         f"{nonzero_similarity:.2f}% nonzero-byte similarity.**"
         if images else "**No current EXE comparison reports are available.**")

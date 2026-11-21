@@ -13,14 +13,13 @@ Every query requires an image:
 
 ```sh
 kf sema --image psx  map
-kf sema --image game addr 0x80021a68
-kf sema --image open disasm 0x80021a68 --blocks
+kf sema --image st addr 0x80077104
+kf sema --image fdat_012 disasm 0x801ed498 --blocks
 ```
 
-This qualification is mandatory because `GAME.EXE`, `OPEN.EXE` and `END.EXE`
-are separate linked overlays. For example, GAME and OPEN both currently have a
-function at `0x80021a68`, but the GAME extent is `0x178` bytes and the OPEN
-extent is `0x6c` bytes. A
+This qualification is mandatory because the six programs share the
+`0x80011000` load region and all 36 FDAT overlays load at `0x801EB560`: the
+same address names a different function in `fdat_012` and `fdat_272`. A
 bare virtual address is therefore not a repository-wide identity.
 
 ## Evidence model
@@ -196,7 +195,7 @@ documents use the stable top-level envelope:
 ```json
 {
   "schema": "kf-sema-v1",
-  "image": "GAME.EXE",
+  "image": "ST.EXE",
   "view": "addr",
   "result": {}
 }

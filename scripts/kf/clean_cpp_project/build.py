@@ -15,7 +15,7 @@ def main():
         report = build_image(
             image['name'], repo / 'build' / image['name'][:-4].lower(), [image['units']],
             lambda units, root, index: compile_program(units, root, index, repo=repo),
-            repo=repo, load_address=image['load_address'], bounds_source='link/overlay_bounds.asm')
+            repo=repo, load_address=image['load_address'])
         if not report['linked']:
             raise RuntimeError(f"{image['name']}: {report['error']}")
         print(report['executable'], flush=True)

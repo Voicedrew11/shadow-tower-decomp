@@ -9,6 +9,7 @@ from functools import lru_cache
 from scripts.kf.delink import load_catalog, sanitize_symbol
 from scripts.kf.relocations import (
     DataReferent,
+    decode_gprel16_target,
     decode_hi_lo_target,
     decode_mips26_target,
     named_data_referent,
@@ -140,6 +141,12 @@ class Evidence:
                 if decode_mips26_target(site, word) == target
                 else "decoded-target-mismatch"
             )
+        if row["kind"] == "mips_gprel16":
+            try:
+                decoded = decode_gprel16_target(self.img.image, word)
+            except ValueError as error:
+                return str(error)
+            return None if decoded == target else "decoded-target-mismatch"
         if row["kind"] != "mips_hi16_lo16":
             return "unsupported-relocation-kind"
         if not row["paired_site_va"]:

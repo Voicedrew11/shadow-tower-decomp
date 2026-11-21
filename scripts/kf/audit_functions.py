@@ -1,8 +1,9 @@
 """Find plausible MIPS function starts missed by the admitted retail census.
 
 This analyzer is deliberately independent of Ghidra.  It combines compiler-like
-stack frames, matching return sequences, cross-function tail jumps, and stored
-code pointers.  Its TSV is review evidence; it never edits ``config/retail``.
+stack frames, matching return sequences, cross-function tail jumps, stored
+code pointers, and direct `jal` targets decoded from admitted functions.  Its
+TSV is review evidence; it never edits ``config/retail``.
 """
 
 from __future__ import annotations
@@ -15,7 +16,7 @@ from collections import Counter, defaultdict
 from dataclasses import dataclass
 from pathlib import Path
 
-from scripts.kf.retail import IMAGE_LAYOUTS, IMAGE_ORDER, parse_int, read_tsv
+from scripts.kf.retail import IMAGE_LAYOUTS, IMAGE_ORDER, load_payload, parse_int, read_tsv
 
 
 FIELDS = (
@@ -34,6 +35,14 @@ FIELDS = (
     "confidence",
     "note",
 )
+
+
+# Longest straight-line run a jal target may sit above an admitted start
+# (GCC hoists constant-division setup and loads above the frame allocation).
+CALL_EXTEND_LIMIT = 0x40
+
+# Candidate tiers that kf-function-propose admits.
+ADMISSIBLE = {"strong", "strong-leaf", "call-target", "call-split", "call-extend"}
 
 
 @dataclass(frozen=True)
@@ -70,6 +79,19 @@ def function_target(site: int, word: int) -> int:
 
 def is_jr_ra(word: int) -> bool:
     return word == 0x03E00008
+
+
+def is_unconditional_transfer(word: int) -> bool:
+    """`j` or `jr reg`: control never falls through past the delay slot."""
+    return opcode(word) == 0x02 or (word & 0xFC1FFFFF) == 0x00000008
+
+
+def is_control_transfer(word: int) -> bool:
+    op = opcode(word)
+    return (
+        op in {0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07}
+        or (op == 0 and (word & 0x3F) in {0x08, 0x09})
+    )
 
 
 def stack_adjust(word: int) -> int | None:
@@ -157,8 +179,7 @@ def valid_instruction(word: int) -> bool:
 class ImageWords:
     def __init__(self, path: Path, image: str):
         self.layout = IMAGE_LAYOUTS[image]
-        raw = path.read_bytes()
-        self.payload = raw[0x800 : 0x800 + self.layout.load_size]
+        _load_address, self.payload = load_payload(path, image)
 
     def contains_word(self, address: int) -> bool:
         return self.layout.contains(address, 4) and not (address & 3)
@@ -219,7 +240,13 @@ def matching_return(
     for site in range(address + 4, end, 4):
         if not is_jr_ra(words.word(site)) or not words.contains_word(site + 4):
             continue
-        if stack_adjust(words.word(site + 4)) == frame.size:
+        # GCC 2.5/2.6 restores the stack in the return's delay slot
+        # (`jr ra; addiu sp`); the Psy-Q 4.x compiler restores it first
+        # (`addiu sp; jr ra; nop`).
+        if (
+            stack_adjust(words.word(site + 4)) == frame.size
+            or stack_adjust(words.word(site - 4)) == frame.size
+        ):
             return site
     return None
 
@@ -249,6 +276,67 @@ def linear_return(
 
 def valid_span(words: ImageWords, start: int, end: int) -> bool:
     return all(valid_instruction(words.word(site)) for site in range(start, end, 4))
+
+
+def hoisted_start(words: ImageWords, address: int, limit: int = 8) -> int | None:
+    """Start of straight-line code scheduled above a stack-frame allocation.
+
+    GCC may hoist loads (and varargs home stores) above `addiu sp,sp,-N`; the
+    function then starts right after the previous function's return. Accept
+    only a short run of valid, non-transfer instructions that reaches such a
+    boundary.
+    """
+    for back in range(1, limit + 1):
+        start = address - 4 * back
+        if not words.contains_word(start):
+            return None
+        word = words.word(start)
+        if word == 0 or not valid_instruction(word) or is_control_transfer(word):
+            return None
+        if boundary_before(words, start):
+            return start
+    return None
+
+
+def call_targets(words: ImageWords, extents: list[FunctionExtent]) -> Counter[int]:
+    """Count `jal` targets inside this image decoded from admitted functions."""
+    targets: Counter[int] = Counter()
+    for extent in extents:
+        for site in range(extent.start, extent.end, 4):
+            if not words.contains_word(site):
+                continue
+            word = words.word(site)
+            if opcode(word) != 0x03:
+                continue
+            target = function_target(site, word)
+            if words.contains_word(target):
+                targets[target] += 1
+    return targets
+
+
+def fallthrough_boundary(words: ImageWords, address: int) -> int | None:
+    """End of the code before `address` when it cannot fall through into it.
+
+    Skips up to three zero padding words, then requires an unconditional
+    transfer (`j`/`jr`) whose delay slot ends there.
+    """
+    end = address
+    for _padding in range(4):
+        if words.contains_word(end - 8) and is_unconditional_transfer(words.word(end - 8)):
+            return end
+        if not words.contains_word(end - 4) or words.word(end - 4) != 0:
+            return None
+        end -= 4
+    return None
+
+
+def transfer_end(words: ImageWords, address: int, stop: int, limit: int = 0x1000) -> int | None:
+    """End (after the delay slot) of the first unconditional transfer from `address`."""
+    end = min(words.layout.load_end - 4, address + limit, stop)
+    for site in range(address, end, 4):
+        if is_unconditional_transfer(words.word(site)) and words.contains_word(site + 4):
+            return site + 8 if site + 8 <= stop else None
+    return None
 
 
 def boundary_before(words: ImageWords, address: int) -> str:
@@ -307,11 +395,22 @@ def audit_image(
         address for address in words.addresses() if frame_at(words, address) is not None
     )
     rows: list[dict[str, object]] = []
-    for address in sorted(candidates - known_starts):
-        frame = frame_at(words, address)
+    for frame_address in sorted(candidates - known_starts):
+        address = frame_address
+        frame = frame_at(words, frame_address)
+        hoisted = False
+        if frame and not boundary_before(words, frame_address):
+            start = hoisted_start(words, frame_address)
+            if (
+                start is not None
+                and start not in known_starts
+                and extent_owner(extents, start) is None
+            ):
+                address, hoisted = start, True
+                rows = [row for row in rows if parse_int(str(row["va"])) != address]
         owner = extent_owner(extents, address)
         boundary = boundary_before(words, address)
-        return_site = matching_return(words, address, frame) if frame else None
+        return_site = matching_return(words, frame_address, frame) if frame else None
         score = first_window_score(words, address)
         valid, total = (int(part) for part in score.split("/"))
         refs = pointer_refs[address] + tail_refs[address]
@@ -331,6 +430,8 @@ def audit_image(
         evidence = []
         if frame:
             evidence.append("stack-frame+ra-save")
+        if hoisted:
+            evidence.append("hoisted-prologue")
         if return_site is not None:
             evidence.append("matching-stack-return")
         if pointer_refs[address]:
@@ -432,6 +533,91 @@ def audit_image(
             rows_by_start[address] = leaf_row
         else:
             existing.update(leaf_row)
+
+    # Direct calls from admitted code are decoded control flow: each target is
+    # a function entry. A target in unowned bytes is carved to its first
+    # unconditional transfer (BIOS stubs end in `jr $t2`, not `jr $ra`). A
+    # target inside an admitted extent splits it only when the preceding code
+    # cannot fall through into it; otherwise it is an interior entry label.
+    calls = call_targets(words, extents)
+    boundaries = sorted(
+        known_starts
+        | {parse_int(str(row["va"])) for row in rows if row["confidence"] in ADMISSIBLE}
+    )
+    candidate_ranges = [
+        (parse_int(str(row["va"])), parse_int(str(row["return_va"])) + 8)
+        for row in rows
+        if row["confidence"] in ADMISSIBLE and row["return_va"]
+    ]
+    splits: dict[int, tuple[FunctionExtent, int]] = {}
+    gaps: list[int] = []
+    for target in sorted(calls):
+        existing = rows_by_start.get(target)
+        if target in known_starts or (existing and existing["confidence"] in ADMISSIBLE):
+            continue
+        if any(start <= target < end for start, end in candidate_ranges):
+            continue
+        owner = extent_owner(extents, target)
+        if owner is None:
+            gaps.append(target)
+            continue
+        split = fallthrough_boundary(words, target)
+        if split is not None and split > owner.start:
+            splits[target] = (owner, split)
+    # Every accepted target bounds the carve of the one before it.
+    boundaries = sorted(set(boundaries) | set(splits) | set(gaps))
+    for target in sorted([*gaps, *splits]):
+        count = calls[target]
+        index = bisect.bisect_right(boundaries, target)
+        stop = boundaries[index] if index < len(boundaries) else words.layout.load_end
+        evidence = [f"jal-target x{count}"]
+        if target not in splits:
+            end = transfer_end(words, target, stop)
+            if end is None and stop in known_starts and stop - target <= CALL_EXTEND_LIMIT and all(
+                valid_instruction(words.word(site)) and not is_control_transfer(words.word(site))
+                for site in range(target, stop, 4)
+            ):
+                # Straight-line code scheduled above an admitted start: the
+                # call proves the function begins earlier.
+                end = extent_owner(extents, stop).end
+                confidence, owner_va = "call-extend", f"0x{stop:08x}"
+                boundary = boundary_before(words, target)
+                evidence.append("hoisted-above-admitted-start")
+            elif end is None or not valid_span(words, target, end):
+                continue
+            else:
+                confidence, owner_va = "call-target", ""
+                boundary = boundary_before(words, target)
+                evidence.append("first-unconditional-transfer")
+        else:
+            owner, split = splits[target]
+            following = splits.get(stop)
+            end = following[1] if following and following[0] == owner else min(owner.end, stop)
+            if end <= target or not valid_span(words, target, end):
+                continue
+            confidence, owner_va = "call-split", f"0x{owner.start:08x}"
+            boundary = f"split-owner-end=0x{split:08x}"
+            evidence.append("owner-cannot-fall-through")
+        row = {
+            "image": image,
+            "va": f"0x{target:08x}",
+            "file_offset": f"0x{words.layout.file_offset(target):x}",
+            "owner_va": owner_va,
+            "frame_size": "",
+            "ra_save_offset": "",
+            "return_va": f"0x{end - 8:08x}",
+            "pointer_refs": pointer_refs[target],
+            "tail_jump_refs": tail_refs[target],
+            "reloc_refs": relocations.get((image, target), 0),
+            "valid_first_12": first_window_score(words, target),
+            "boundary": boundary,
+            "confidence": confidence,
+            "note": "+".join(evidence),
+        }
+        if existing is not None:
+            rows.remove(existing)
+        rows.append(row)
+        rows_by_start[target] = row
     return rows
 
 

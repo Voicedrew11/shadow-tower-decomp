@@ -1,5 +1,10 @@
 # Generated source and classic branches
 
+> **Not yet supported for Shadow Tower.** `kf clean` exits with an error until
+> the export is ported: it still assumes King's Field II's image set, the
+> GCC 2.5.7 classic compile and the Psy-Q 3.0 link tools (TODO in
+> `scripts/kf/clean.py`). The description below is the inherited design.
+
 > **Inherited from the King's Field II (`SLPS-00069`) project.** Statements here
 > about retail bytes, linker order, SDK versions or compiler probes describe that
 > game. For Shadow Tower (`SLUS-00863`) they are hypotheses until re-proven.

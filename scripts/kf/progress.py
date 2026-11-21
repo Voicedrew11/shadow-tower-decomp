@@ -488,12 +488,21 @@ def check(
         delink_dir=BUILD / "delink",
         objdiff_dir=BUILD / "objdiff",
     ) != 0
+    # The closure and relink gates judge reconstructed images. An image that
+    # no source unit claims yet has nothing to relink, and its census-wide
+    # closure is the curation worklist (`kf verify reachability`), not a
+    # regression; it becomes gated with its first unit.
+    started = {unit.image for unit in _manifest.units}
+    gated = tuple(image for image in selected if image in started)
+    if len(gated) != len(selected):
+        print(f"closure/relink gates: {len(selected) - len(gated)} image(s) without "
+              "source units are not gated")
     from scripts.kf.data_reachability import run as check_reachability
 
-    reachability_bad = check_reachability(selected) != 0
+    reachability_bad = bool(gated) and check_reachability(gated) != 0
     from scripts.kf.roundtrip import run as check_roundtrip
 
-    roundtrip_bad = check_roundtrip(selected) != 0
+    roundtrip_bad = bool(gated) and check_roundtrip(gated) != 0
     bad = bad or data_bad or reachability_bad or roundtrip_bad
     from scripts.kf.readme import refresh as refresh_readme
 
@@ -520,8 +529,15 @@ def check(
             reasons.append("target relink or section placement is not faithful to retail")
         print("check FAILED: " + ", ".join(reasons), file=sys.stderr)
         return 1
-    print("check OK: exact claimed data, verified target relink, no known-reference ownership gaps, "
-          "and no unchanged-input regressions or lost banked functions")
+    skipped = len(selected) - len(gated)
+    if gated:
+        verified = (f"verified target relink and no known-reference ownership gaps in "
+                    f"{len(gated)} gated image(s)")
+    else:
+        verified = "no image gated for target relink or ownership closure"
+    print(f"check OK: exact claimed data, {verified}"
+          + (f" ({skipped} image(s) without source units not gated)" if skipped else "")
+          + ", and no unchanged-input regressions or lost banked functions")
     return 0
 
 

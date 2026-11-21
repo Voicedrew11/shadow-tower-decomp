@@ -307,7 +307,7 @@ def main() -> None:
         includes += (Path(os.environ["PSYQ_INCLUDE"]),)
     report = []
     for name, source, object_name, delink, defines, unit in corpus:
-        assembler_version = manifest.profiles[unit.profile].aspsx_version if unit else "1.07"
+        assembler_version = manifest.profiles[unit.profile].aspsx_version if unit else "2.79"
         reference = None
         trace_reference = None
         records = []

@@ -7,6 +7,7 @@ import csv
 import hashlib
 import io
 import os
+import re
 import struct
 import tomllib
 from dataclasses import dataclass
@@ -14,14 +15,24 @@ from pathlib import Path
 from typing import Iterable
 
 
+PSX_EXE_HEADER_SIZE = 0x800
+ARCHIVE_SECTOR_SIZE = 0x800
+
+
 @dataclass(frozen=True)
 class ImageLayout:
+    """One linked image: a PS-X EXE (0x800-byte header) or a headerless overlay.
+
+    `entry` is the PS-X EXE header pc0; overlays have none.
+    """
+
     name: str
     sha256: str
     file_size: int
-    entry: int
+    entry: int | None
     load_address: int
     load_size: int
+    header_size: int = PSX_EXE_HEADER_SIZE
 
     @property
     def load_end(self) -> int:
@@ -31,7 +42,7 @@ class ImageLayout:
         return size >= 0 and self.load_address <= address and address + size <= self.load_end
 
     def file_offset(self, address: int) -> int:
-        return 0x800 + address - self.load_address
+        return self.header_size + address - self.load_address
 
 
 @dataclass(frozen=True)
@@ -41,8 +52,36 @@ class RetailDisc:
     sha256: str
 
 
+@dataclass(frozen=True)
+class RetailArchive:
+    """A FromSoftware `.T` archive: u16 entry count, then u16 sector offsets."""
+
+    name: str
+    disc_path: str
+    sha256: str
+    file_size: int
+
+
+@dataclass(frozen=True)
+class OverlaySource:
+    """Where a headerless overlay image is read from, and the program it extends."""
+
+    archive: str
+    index: int
+    host: str
+
+
+def image_key(image: str) -> str:
+    """The lowercase `--image` stem of an image name (`ST.EXE` -> `st`)."""
+    return image.rsplit(".", 1)[0].lower()
+
+
 def _load_images(path: Path) -> tuple[RetailDisc, dict[str, ImageLayout], dict[str, str]]:
-    """Read the per-game disc and executable table from `config/images.toml`."""
+    """Read the per-game disc and image table from `config/images.toml`.
+
+    The layouts cover root PS-X EXEs and archive overlays; the disc-file table
+    lists only the root executables (the files a disc rebuild replaces).
+    """
     with path.open("rb") as stream:
         table = tomllib.load(stream)
     disc = RetailDisc(**table["disc"])
@@ -57,16 +96,54 @@ def _load_images(path: Path) -> tuple[RetailDisc, dict[str, ImageLayout], dict[s
             row["load_address"], row["load_size"],
         )
         disc_files[name] = row["disc_file"]
+    for row in table.get("overlay", ()):
+        name = row["name"]
+        if name in layouts or row["host"] not in disc_files:
+            raise ValueError(f"{path}: invalid or duplicate overlay {name!r}")
+        layouts[name] = ImageLayout(
+            name, row["sha256"], row["load_size"], None,
+            row["load_address"], row["load_size"], 0,
+        )
     if not layouts:
         raise ValueError(f"{path}: no images")
+    if len({image_key(name) for name in layouts}) != len(layouts):
+        raise ValueError(f"{path}: image keys are not unique")
     return disc, layouts, disc_files
+
+
+def _load_overlays(path: Path) -> tuple[dict[str, RetailArchive], dict[str, OverlaySource]]:
+    """Read the archives and the overlay images carried inside them."""
+    with path.open("rb") as stream:
+        table = tomllib.load(stream)
+    archives = {row["name"]: RetailArchive(**row) for row in table.get("archive", ())}
+    sources: dict[str, OverlaySource] = {}
+    for row in table.get("overlay", ()):
+        if row["archive"] not in archives:
+            raise ValueError(f"{path}: overlay {row['name']!r} names an unknown archive")
+        sources[row["name"]] = OverlaySource(row["archive"], row["index"], row["host"])
+    return archives, sources
 
 
 IMAGES_CONFIG = Path(__file__).resolve().parents[2] / "config" / "images.toml"
 RETAIL_DISC, IMAGE_LAYOUTS, IMAGE_DISC_FILES = _load_images(IMAGES_CONFIG)
+RETAIL_ARCHIVES, OVERLAY_SOURCES = _load_overlays(IMAGES_CONFIG)
+
+
+def _load_gp(path: Path) -> dict[str, int]:
+    """Each image's startup $gp; an overlay runs with its host's."""
+    with path.open("rb") as stream:
+        table = tomllib.load(stream)
+    result = {row["name"]: row["gp"] for row in table["image"] if "gp" in row}
+    for row in table.get("overlay", ()):
+        if row["host"] in result:
+            result[row["name"]] = result[row["host"]]
+    return result
+
+
+IMAGE_GP = _load_gp(IMAGES_CONFIG)
 IMAGE_ORDER = {image: index for index, image in enumerate(IMAGE_LAYOUTS)}
-IMAGE_KEYS = tuple(image.removesuffix(".EXE").lower() for image in IMAGE_LAYOUTS)
-IMAGE_NAMES = {image.removesuffix(".EXE").lower(): image for image in IMAGE_LAYOUTS}
+IMAGE_KEYS = tuple(image_key(image) for image in IMAGE_LAYOUTS)
+IMAGE_NAMES = {image_key(image): image for image in IMAGE_LAYOUTS}
 
 
 FUNCTION_FIELDS = (
@@ -128,17 +205,14 @@ VENDORED_FUNCTION_FIELDS = (
     "note",
 )
 
-VENDORED_CONFIDENCE = {
-    "fid-sdk30",
-    "fid-sdk30-ambiguous",
-    "exact-sdk30",
-    "exact-sdk30-short",
-    "exact-sdk30-ambiguous",
-    "exact-sdk30-complete",
-    "psyq300-signature",
-    "psyq300-signature-ambiguous",
-    "sdk-lineage-supported",
-}
+# Confidence names carry the SDK release they were proven against: `sdk42`
+# for the supplied archives, `psyq420` for a ghidra_psx_ldr signature set.
+VENDORED_CONFIDENCE = re.compile(
+    r"fid-sdk\d+(?:-ambiguous)?"
+    r"|exact-sdk\d+(?:-short|-ambiguous|-complete)?"
+    r"|psyq\d{3,4}-signature(?:-ambiguous)?"
+    r"|sdk-lineage-supported"
+)
 
 
 def parse_int(value: str) -> int:
@@ -210,6 +284,54 @@ def parse_psx_exe(path: Path) -> ImageLayout:
     return ImageLayout(
         path.name.upper(), sha256_path(path), len(data), entry, load_address, load_size
     )
+
+
+def archive_entry(data: bytes, index: int) -> bytes:
+    """Return entry `index` of a `.T` archive (sector-granular, padding included)."""
+    if len(data) < 2:
+        raise ValueError("truncated .T archive")
+    count = struct.unpack_from("<H", data, 0)[0]
+    if not 0 <= index < count or len(data) < 2 + 2 * (index + 2):
+        raise ValueError(f".T archive has no entry {index}")
+    start, end = (
+        value * ARCHIVE_SECTOR_SIZE for value in struct.unpack_from("<2H", data, 2 + 2 * index)
+    )
+    if not 0 < start < end <= len(data):
+        raise ValueError(f".T archive entry {index} has invalid extent {start:#x}..{end:#x}")
+    return data[start:end]
+
+
+def overlay_bytes(archive: bytes, image: str) -> bytes:
+    """Slice one configured overlay image out of its verified archive bytes."""
+    source = OVERLAY_SOURCES[image]
+    if hashlib.sha256(archive).hexdigest() != RETAIL_ARCHIVES[source.archive].sha256:
+        raise ValueError(f"{source.archive}: archive SHA-256 mismatch")
+    data = archive_entry(archive, source.index)
+    if hashlib.sha256(data).hexdigest() != IMAGE_LAYOUTS[image].sha256:
+        raise ValueError(f"{image}: {source.archive} entry {source.index} SHA-256 mismatch")
+    return data
+
+
+def verify_retail_image(path: Path, image: str) -> bytes:
+    """Return the file bytes of one retail image after checking its identity."""
+    layout = IMAGE_LAYOUTS[image]
+    if image in OVERLAY_SOURCES:
+        if not path.is_file():
+            raise ValueError(f"{path}: missing retail overlay")
+        data = path.read_bytes()
+        if len(data) != layout.file_size or hashlib.sha256(data).hexdigest() != layout.sha256:
+            raise ValueError(f"{path}: retail identity/layout mismatch")
+        return data
+    if parse_psx_exe(path) != layout:
+        raise ValueError(f"{path}: retail identity/layout mismatch")
+    return path.read_bytes()
+
+
+def load_payload(path: Path, image: str) -> tuple[int, bytes]:
+    """Return the verified load address and load-image bytes of one image."""
+    layout = IMAGE_LAYOUTS[image]
+    data = verify_retail_image(path, image)
+    return layout.load_address, data[layout.header_size:layout.header_size + layout.load_size]
 
 
 def _require_fields(path: Path, actual: tuple[str, ...], expected: tuple[str, ...]) -> None:
@@ -305,7 +427,7 @@ def validate_config(config_dir: Path, exe_dir: Path | None = None) -> dict[str, 
         coverage[row["image"]].append((address, address + size))
 
     for image, layout in IMAGE_LAYOUTS.items():
-        if (image, layout.entry) not in starts:
+        if layout.entry is not None and (image, layout.entry) not in starts:
             raise ValueError(f"{function_path}: missing {image} entry {layout.entry:#x}")
         previous_end = -1
         for start, end in sorted(function_intervals[image]):
@@ -379,10 +501,8 @@ def validate_config(config_dir: Path, exe_dir: Path | None = None) -> dict[str, 
             )
 
     if exe_dir is not None:
-        for name, expected in IMAGE_LAYOUTS.items():
-            actual = parse_psx_exe(exe_dir / name)
-            if actual != expected:
-                raise ValueError(f"{exe_dir / name}: retail identity/layout mismatch")
+        for name in IMAGE_LAYOUTS:
+            verify_retail_image(exe_dir / name, name)
 
     counts = {
         "functions": len(functions),
@@ -427,7 +547,7 @@ def validate_config(config_dir: Path, exe_dir: Path | None = None) -> dict[str, 
             ):
                 if not row[field]:
                     raise ValueError(f"{vendored_path}: empty {field} in {row!r}")
-            if row["confidence"] not in VENDORED_CONFIDENCE:
+            if VENDORED_CONFIDENCE.fullmatch(row["confidence"]) is None:
                 raise ValueError(
                     f"{vendored_path}: invalid confidence {row['confidence']!r}"
                 )

@@ -12,7 +12,7 @@ from scripts.kf.manifest import Manifest, Profile, Unit
 
 
 def manifest() -> Manifest:
-    profile = Profile("c", "c", "gcc257-native", "O2", 0, "1.07", ())
+    profile = Profile("c", "c", "gcc257-native", "O2", 0, "2.79", ())
     return Manifest({"c": profile}, (
         Unit("game.cast_probe", "GAME.EXE", "src/probe.c", "c", ()),
         Unit(

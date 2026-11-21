@@ -20,7 +20,7 @@ from scripts.kf.parser_machine import (
     CandidateLinkError,
     CandidateProgram,
     ExternalHook,
-    GameSymbols,
+    ImageSymbols,
     HookReturn,
     LinkedFunction,
     LinkedProgram,
@@ -44,7 +44,7 @@ def words(*values: int) -> bytes:
 
 
 def synthetic_retail(code: bytes) -> RetailImage:
-    return RetailImage.synthetic("GAME.EXE", LOAD_VA, code)
+    return RetailImage.synthetic("ST.EXE", LOAD_VA, code)
 
 
 class ParserMachineTest(unittest.TestCase):
@@ -75,7 +75,7 @@ class ParserMachineTest(unittest.TestCase):
     def test_memory_input_cannot_overwrite_hook_stub_but_adjacent_data_is_valid(self) -> None:
         code = words(0x03E00008, 0)
         service = LOAD_VA + 0x40
-        symbols = GameSymbols(
+        symbols = ImageSymbols(
             {"root": (LOAD_VA, len(code)), "service": (service, 12)}, {}
         )
         program = RetailProgram.link(
@@ -94,7 +94,7 @@ class ParserMachineTest(unittest.TestCase):
     def test_retail_executes_non_nop_return_delay_slot(self) -> None:
         # addiu v0, zero, 0x1234; jr ra; sw v0, 0(a0)
         code = words(0x24021234, 0x03E00008, 0xAC820000)
-        symbols = GameSymbols({"return_store": (LOAD_VA, len(code))}, {})
+        symbols = ImageSymbols({"return_store": (LOAD_VA, len(code))}, {})
         program = RetailProgram.link(symbols, ["return_store"])
         result = ParserMachine(synthetic_retail(code), program).call(
             "return_store",
@@ -111,7 +111,7 @@ class ParserMachineTest(unittest.TestCase):
     def test_executed_path_load_delay_audit_rejects_hazard(self) -> None:
         # lw v0, 0(a0); addiu v1, v0, 1; jr ra; nop
         code = words(0x8C820000, 0x24430001, 0x03E00008, 0)
-        symbols = GameSymbols({"hazard": (LOAD_VA, len(code))}, {})
+        symbols = ImageSymbols({"hazard": (LOAD_VA, len(code))}, {})
         program = RetailProgram.link(symbols, ["hazard"])
         with self.assertRaisesRegex(ParserMachineFault, "load-delay hazard reading r2"):
             ParserMachine(synthetic_retail(code), program).call(
@@ -121,7 +121,7 @@ class ParserMachineTest(unittest.TestCase):
     def test_scheduled_load_is_accepted(self) -> None:
         # lw v0, 0(a0); nop; jr ra; nop
         code = words(0x8C820000, 0, 0x03E00008, 0)
-        symbols = GameSymbols({"safe": (LOAD_VA, len(code))}, {})
+        symbols = ImageSymbols({"safe": (LOAD_VA, len(code))}, {})
         result = ParserMachine(
             synthetic_retail(code), RetailProgram.link(symbols, ["safe"])
         ).call("safe", [DATA_VA], memory=[MemoryInput(DATA_VA, words(5))])
@@ -130,7 +130,7 @@ class ParserMachineTest(unittest.TestCase):
     def test_initial_non_abi_register_is_bounded_and_visible(self) -> None:
         # addu v0, s5, zero; jr ra; nop
         code = words(0x02A01021, 0x03E00008, 0)
-        symbols = GameSymbols({"inherit_s5": (LOAD_VA, len(code))}, {})
+        symbols = ImageSymbols({"inherit_s5": (LOAD_VA, len(code))}, {})
         machine = ParserMachine(
             synthetic_retail(code), RetailProgram.link(symbols, ["inherit_s5"])
         )
@@ -169,9 +169,9 @@ class ParserMachineTest(unittest.TestCase):
             ]
         )
         code = words(*code_words)
-        symbols = GameSymbols({"actor_loop": (base, len(code))}, {})
+        symbols = ImageSymbols({"actor_loop": (base, len(code))}, {})
         result = ParserMachine(
-            RetailImage.synthetic("GAME.EXE", base, code),
+            RetailImage.synthetic("ST.EXE", base, code),
             RetailProgram.link(symbols, ["actor_loop"]),
         ).call(
             "actor_loop",
@@ -198,11 +198,11 @@ class ParserMachineTest(unittest.TestCase):
             0x080081B7, 0xAE340000, 0, 0, 0, 0, 0, 0, 0, 0, 0,
             0x03E00008, 0,
         )
-        symbols = GameSymbols({"allocate": (base, len(code))}, {})
+        symbols = ImageSymbols({"allocate": (base, len(code))}, {})
         for value in (0, 0x800A0000):
             with self.subTest(value=value):
                 result = ParserMachine(
-                    RetailImage.synthetic("GAME.EXE", base, code),
+                    RetailImage.synthetic("ST.EXE", base, code),
                     RetailProgram.link(symbols, ["allocate"]),
                 ).call(
                     "allocate",
@@ -237,7 +237,7 @@ class ParserMachineTest(unittest.TestCase):
                 # Use a negative displacement and KSEG1 data alias too.
                 instruction = (opcode << 26) | (4 << 21) | (2 << 16) | (displacement - 8 & 0xFFFF)
                 code = words(instruction, 0x03E00008, 0)
-                symbols = GameSymbols({"store": (LOAD_VA, len(code))}, {})
+                symbols = ImageSymbols({"store": (LOAD_VA, len(code))}, {})
                 result = ParserMachine(
                     synthetic_retail(code), RetailProgram.link(symbols, ["store"])
                 ).call(
@@ -256,7 +256,7 @@ class ParserMachineTest(unittest.TestCase):
 
     def test_store_guard_rejects_before_memory_changes(self) -> None:
         code = words(0xAC820000, 0x03E00008, 0)  # sw v0,0(a0)
-        symbols = GameSymbols({"store": (LOAD_VA, len(code))}, {})
+        symbols = ImageSymbols({"store": (LOAD_VA, len(code))}, {})
         machine = ParserMachine(synthetic_retail(code), RetailProgram.link(symbols, ["store"]))
         with self.assertRaisesRegex(ParserMachineFault, "write outside allowed ranges"):
             machine.call(
@@ -267,7 +267,7 @@ class ParserMachineTest(unittest.TestCase):
 
     def test_unsupported_store_cannot_bypass_write_audit(self) -> None:
         code = words(0xE8800000, 0x03E00008, 0)  # swc2 $0,0(a0)
-        symbols = GameSymbols({"store": (LOAD_VA, len(code))}, {})
+        symbols = ImageSymbols({"store": (LOAD_VA, len(code))}, {})
         with self.assertRaisesRegex(ParserMachineError, "unsupported.*store"):
             ParserMachine(synthetic_retail(code), RetailProgram.link(symbols, ["store"])).call(
                 "store", [DATA_VA]
@@ -282,7 +282,7 @@ class ParserMachineTest(unittest.TestCase):
             0x03E00008,
             0,
         )
-        symbols = GameSymbols({"delay_target": (LOAD_VA, len(code))}, {})
+        symbols = ImageSymbols({"delay_target": (LOAD_VA, len(code))}, {})
         result = ParserMachine(
             synthetic_retail(code), RetailProgram.link(symbols, ["delay_target"])
         ).call("delay_target")
@@ -312,7 +312,7 @@ class ParserMachineTest(unittest.TestCase):
         with tempfile.TemporaryDirectory() as directory:
             path = Path(directory) / "closure.o"
             path.write_bytes(blob)
-            symbols = GameSymbols(
+            symbols = ImageSymbols(
                 {"root": (LOAD_VA, len(root)), "helper": (LOAD_VA + len(root), len(helper))},
                 {},
             )
@@ -345,7 +345,7 @@ class ParserMachineTest(unittest.TestCase):
         with tempfile.TemporaryDirectory() as directory:
             path = Path(directory) / 'objects.o'
             path.write_bytes(blob)
-            symbols = GameSymbols({'load_second': (LOAD_VA, len(code))},
+            symbols = ImageSymbols({'load_second': (LOAD_VA, len(code))},
                                   {'first': (DATA_VA, 4), 'second': (DATA_VA + 0x100, 4)})
             functions = [CandidateFunction('load_second', path)]
             with self.assertRaisesRegex(CandidateLinkError, 'inconsistent .data base'):
@@ -356,11 +356,11 @@ class ParserMachineTest(unittest.TestCase):
                               and p.address < CODE_BASE],
                              [(DATA_VA, words(11)), (DATA_VA + 0x100, words(99))])
             self.assertEqual(ParserMachine(synthetic_retail(b''), program).call('load_second').v0, 99)
-            wrong_size = GameSymbols(symbols.functions,
+            wrong_size = ImageSymbols(symbols.functions,
                                      {**symbols.data, 'second': (DATA_VA + 0x100, 8)})
             with self.assertRaisesRegex(CandidateLinkError, 'data extent differs'):
                 CandidateProgram.link(wrong_size, functions, bind_data_objects=True)
-            overlap = GameSymbols(symbols.functions,
+            overlap = ImageSymbols(symbols.functions,
                                   {**symbols.data, 'second': (DATA_VA + 2, 4)})
             with self.assertRaisesRegex(CandidateLinkError, 'data objects overlap'):
                 CandidateProgram.link(overlap, functions, bind_data_objects=True)
@@ -382,12 +382,12 @@ class ParserMachineTest(unittest.TestCase):
                     data_symbols=[DefinedSymbol('first', 0, first_size, STT_OBJECT),
                                   DefinedSymbol('second', 8, 4, STT_OBJECT)],
                 ))
-                symbols = GameSymbols({'load': (LOAD_VA, len(code))},
+                symbols = ImageSymbols({'load': (LOAD_VA, len(code))},
                                       {'first': (DATA_VA, first_size), 'second': (DATA_VA + 0x100, 4)})
                 with self.subTest(first_size=first_size), self.assertRaisesRegex(
                         CandidateLinkError, 'does not identify one data object'):
                     CandidateProgram.link(symbols, functions, bind_data_objects=True)
-            adjacent = GameSymbols(symbols.functions,
+            adjacent = ImageSymbols(symbols.functions,
                                    {**symbols.data, 'second': (DATA_VA + 8, 4)})
             program = CandidateProgram.link(adjacent, functions, bind_data_objects=True)
             self.assertEqual(ParserMachine(synthetic_retail(b''), program).call('load').v0, 99)
@@ -405,7 +405,7 @@ class ParserMachineTest(unittest.TestCase):
         with tempfile.TemporaryDirectory() as directory:
             path = Path(directory) / "multi.o"
             path.write_bytes(blob)
-            symbols = GameSymbols({"copy_words": (LOAD_VA, len(selected))}, {})
+            symbols = ImageSymbols({"copy_words": (LOAD_VA, len(selected))}, {})
             program = CandidateProgram.link(
                 symbols, [CandidateFunction("copy_words", path)]
             )
@@ -448,7 +448,7 @@ class ParserMachineTest(unittest.TestCase):
         with tempfile.TemporaryDirectory() as directory:
             path = Path(directory) / "owned.o"
             path.write_bytes(blob)
-            symbols = GameSymbols(
+            symbols = ImageSymbols(
                 {"read_owned": (LOAD_VA, len(code))}, {"state": (DATA_VA + 4, 4)}
             )
             program = CandidateProgram.link(
@@ -482,7 +482,7 @@ class ParserMachineTest(unittest.TestCase):
         with tempfile.TemporaryDirectory() as directory:
             path = Path(directory) / "hook.o"
             path.write_bytes(blob)
-            symbols = GameSymbols({"dispatch": (LOAD_VA, len(code))}, {})
+            symbols = ImageSymbols({"dispatch": (LOAD_VA, len(code))}, {})
             program = CandidateProgram.link(
                 symbols,
                 [CandidateFunction("dispatch", path)],
@@ -508,7 +508,7 @@ class ParserMachineTest(unittest.TestCase):
         with tempfile.TemporaryDirectory() as directory:
             path = Path(directory) / "section-call.o"
             path.write_bytes(blob)
-            symbols = GameSymbols({"dispatch": (LOAD_VA, len(selected))}, {})
+            symbols = ImageSymbols({"dispatch": (LOAD_VA, len(selected))}, {})
             program = CandidateProgram.link(
                 symbols,
                 [CandidateFunction("dispatch", path)],
@@ -531,7 +531,7 @@ class ParserMachineTest(unittest.TestCase):
             0,
         )
         payload = root + bytes(0x40 - len(root)) + words(0x27BDFFB0, 0x03E00008, 0)
-        symbols = GameSymbols(
+        symbols = ImageSymbols(
             {"root": (LOAD_VA, len(root)), "service": (service, 12)}, {}
         )
         program = RetailProgram.link(
@@ -549,7 +549,7 @@ class ParserMachineTest(unittest.TestCase):
         target = LOAD_VA + 16
         root = words(0x0C000000 | ((target >> 2) & 0x03FFFFFF), 0, 0x03E00008, 0)
         target_code = words(0x03E00008, 0)
-        symbols = GameSymbols({"root": (LOAD_VA, len(root))}, {})
+        symbols = ImageSymbols({"root": (LOAD_VA, len(root))}, {})
         program = RetailProgram.link(symbols, ["root"])
         with self.assertRaisesRegex(ParserMachineFault, "outside declared"):
             ParserMachine(synthetic_retail(root + target_code), program).call("root")

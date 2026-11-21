@@ -11,6 +11,7 @@ from pathlib import Path
 import re
 import shutil
 import subprocess
+import sys
 import tarfile
 import tempfile
 import tokenize
@@ -34,6 +35,12 @@ IMPLEMENTATION = {'KF_MENU_MODE_IMPLEMENTATION', 'KF_MENU_LIST_IMPLEMENTATION',
                   'KF_EFFECT_POOL_IMPLEMENTATION'}
 EFFECT_ARGUMENTS = {'BRANCH': 1, 'ROTATION': 1, 'ROTATION_SOUND': 2, 'DURATION_SOUND': 2,
                     'SCATTER': 3, 'SOUND': 1, 'HOMING': 3, 'PARENT': 1}
+# TODO(shadow-tower): port the clean export. It still assumes King's Field II:
+# ORIGINS covers every image (the FDAT overlays and unbuilt programs fail),
+# --classic compiles through GCC 2.5.7 (compile_classic), and the generated
+# flakes lack cc1psx-272cdk and the Psy-Q 4.x link tools.
+CLEAN_EXPORT_SUPPORTED = False
+
 ORIGINS = {name: layout.load_address for name, layout in IMAGE_LAYOUTS.items()}
 
 
@@ -147,8 +154,6 @@ def generate(files: dict[str, bytes], *, modern: bool = False) -> dict[str, byte
         output[name] = re.sub(rb'(?m)^\s*#[^\n]*\n', b'', files[name])
     output['scripts/create-toolchain.py'] = without_python_comments(
         files['scripts/create-toolchain.py'].decode()).encode()
-    output['link/overlay_bounds.asm'] = re.sub(rb'(?m)^;[^\n]*\n', b'',
-                                             files['config/link/overlay_bounds.asm'])
     images = []
     for image, origin in ORIGINS.items():
         rows = []
@@ -156,7 +161,7 @@ def generate(files: dict[str, bytes], *, modern: bool = False) -> dict[str, byte
             if unit['image'] != image:
                 continue
             profile = manifest['profiles'][unit['profile']]
-            if profile['language'] != 'c' or profile['aspsx_version'] != '1.07':
+            if profile['language'] != 'c' or profile['aspsx_version'] != '2.79':
                 raise ValueError(f'{unit["unit"]}: unsupported standalone compiler profile')
             options = {key: profile[key] for key in ('compiler', 'optimization', 'small_data', 'cc1_flags')}
             options['defines'] = unit.get('defines', [])
@@ -259,7 +264,7 @@ def classic_reference(repo: Path) -> Path:
         units = [unit for unit in manifest['unit']
                  if unit['image'] == name and unit.get('scope') != 'vendored']
         report = build_image(name, reference / name[:-4].lower(), units, compile_one,
-                             repo=repo, load_address=origin, bounds_source='config/link/overlay_bounds.asm')
+                             repo=repo, load_address=origin)
         if not report['linked']:
             raise ValueError(f'{name}: classic reference build failed: {report["error"]}')
     return reference
@@ -353,6 +358,10 @@ def main(argv=None) -> int:
     parser.add_argument('--publish', metavar='BRANCH')
     parser.add_argument('--worktree', type=Path, default=Path('build/source'))
     args = parser.parse_args(argv)
+    if not CLEAN_EXPORT_SUPPORTED:
+        print('kf clean: not yet supported for Shadow Tower; see docs/clean-source.md',
+              file=sys.stderr)
+        return 2
     try:
         if args.publish and args.working_tree:
             raise ValueError('publication requires a committed revision, not --working-tree')

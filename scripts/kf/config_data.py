@@ -23,7 +23,7 @@ from typing import TYPE_CHECKING
 from scripts.kf.delink import Datum, Module, _write_bytes_if_changed, load_catalog
 from scripts.kf.mips_elf import DefinedSymbol, STB_GLOBAL, STB_LOCAL, STT_OBJECT, write_mips_elf
 from scripts.kf.paths import BUILD, RETAIL_CONFIG
-from scripts.kf.retail import IMAGE_LAYOUTS, read_tsv
+from scripts.kf.retail import IMAGE_LAYOUTS, image_key, read_tsv
 from scripts.kf.seed_vendored_functions import run_psyk
 
 if TYPE_CHECKING:
@@ -61,7 +61,7 @@ class Contribution:
 
     @property
     def image_key(self) -> str:
-        return self.image.removesuffix(".EXE").lower()
+        return image_key(self.image)
 
     @property
     def object_name(self) -> str:
@@ -98,7 +98,7 @@ def load(config_dir: Path = RETAIL_CONFIG, modules: tuple[Module, ...] = ()) -> 
         image, name, unit = row["image"], row["identity"], row["unit"]
         if image not in IMAGE_LAYOUTS or not re.fullmatch(r"[a-z0-9][a-z0-9_.-]*", unit):
             raise ValueError(f"invalid config-data image/unit: {image}/{unit}")
-        if not unit.startswith(image.removesuffix(".EXE").lower() + ".sdk."):
+        if not unit.startswith(image_key(image) + ".sdk."):
             raise ValueError(f"{unit}: SDK contributions must have an image-local SDK namespace")
         if row["provider"] != "psyq" or row["section"] != ".data":
             raise ValueError(f"{unit}: unsupported data provider/section")

@@ -11,13 +11,13 @@
       binutils = pkgs.pkgsCross.mipsel-linux-gnu.buildPackages.binutils;
       environment = {
         PSYQ_SDK = "${sdk.psyqSdk}/psyq-3.0";
-        PSYQ_INCLUDE = "${sdk.psyqSdk}/include-lf";
-        PSYQ_BIN = "${sdk.psyqSdk}/psyq-3.0/BIN";
-        PSYQ_LIB = "${sdk.psyqSdk}/psyq-3.0/LIB";
+        PSYQ_INCLUDE = "${sdk.psyq42Sdk}/include-lf";
+        PSYQ_LIB = "${sdk.psyq42Sdk}/lib";
         PSYQ_MALLOC_OBJ = "${sdk.psyqMallocObj}/MALLOC.OBJ";
-        PSYQ_ASPSX = "${sdk.aspsxNative}/1.07/ASPSX.EXE";
-        PSYQ_ASMPSX = "${sdk.asmpsxNative}";
-        PSYQ_CPE2X = "${sdk.psyqRuntime30Cpe2x}/CPE2X.EXE";
+        PSYQ_STARTUP_OBJ = "${sdk.psyq45Tools}/NONE3.OBJ";
+        PSYQ_ASPSX = "${sdk.psyq45Tools}/ASPSXD.EXE";
+        PSYQ_PSYLINK = "${sdk.sdevtc24Linker}/PSYLINKD.EXE";
+        PSYQ_CPE2X = "${sdk.psyq45Tools}/CPE2X.EXE";
         MIPS_LD = "${binutils}/bin/mipsel-unknown-linux-gnu-ld";
       };
       buildTools = [ python pkgs.llvmPackages.clang-unwrapped binutils pkgs.dosbox-x ];

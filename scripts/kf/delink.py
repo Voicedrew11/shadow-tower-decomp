@@ -41,13 +41,14 @@ from scripts.kf.relocations import (
     named_data_referent,
     validate_relocation,
 )
+from scripts.kf.retail import image_key as retail_image_key
 from scripts.kf.retail import (
     IMAGE_LAYOUTS,
     format_hex,
     format_size,
     parse_int,
-    parse_psx_exe,
     read_tsv,
+    verify_retail_image,
     write_tsv,
 )
 
@@ -238,7 +239,7 @@ def sanitize_symbol(value: str, fallback: str) -> str:
 
 
 def image_key(image: str) -> str:
-    return image.removesuffix(".EXE").lower()
+    return retail_image_key(image)
 
 
 def _put_word(data: bytearray, offset: int, word: int) -> None:
@@ -523,7 +524,8 @@ def _apply_relocation(
     symbol, addend = _resolve_symbol(
         catalog, function, target, row["target_name"], rodata,
         data_reference=(row["status"] == "reviewed"
-                        and row["kind"] in {"mips_hi16_lo16", "mips32_candidate"}),
+                        and row["kind"] in {"mips_hi16_lo16", "mips32_candidate",
+                                            "mips_gprel16"}),
         sdata=sdata,
     )
 
@@ -550,6 +552,13 @@ def _apply_relocation(
         ]
         action = "paired-symbol"
         kinds = "R_MIPS_HI16+R_MIPS_LO16"
+    elif row["kind"] == "mips_gprel16":
+        if not -0x8000 <= addend < 0x8000:
+            raise ValueError("gprel-addend-out-of-range")
+        _put_word(blob, offset, (validation.word & 0xFFFF0000) | (addend & 0xFFFF))
+        relocations = [MipsRelocation(offset, "R_MIPS_GPREL16", symbol)]
+        action = "gp-relative"
+        kinds = "R_MIPS_GPREL16"
     elif row["kind"] == "mips32_candidate" and (
         policy == "all" or row["status"] == "reviewed"
     ):
@@ -771,6 +780,15 @@ def _module_load_relocations(
             result[index + 1] = MipsRelocation(low.offset, low.kind, section_symbol)
         elif high.kind == "R_MIPS_32":
             _put_word(blob, high.offset, _get_word(blob, high.offset) + offset)
+            result[index] = MipsRelocation(high.offset, high.kind, section_symbol)
+        elif high.kind == "R_MIPS_GPREL16":
+            # The implicit 16-bit addend becomes the datum's section offset.
+            word = _get_word(blob, high.offset)
+            low = word & 0xFFFF
+            addend = (low - 0x10000 if low & 0x8000 else low) + offset
+            if not -0x8000 <= addend < 0x8000:
+                raise ValueError(f"GPREL16 addend out of range: {high.symbol}")
+            _put_word(blob, high.offset, (word & 0xFFFF0000) | (addend & 0xFFFF))
             result[index] = MipsRelocation(high.offset, high.kind, section_symbol)
     return result
 
@@ -1041,10 +1059,7 @@ def delink(
     for image in selected_images:
         expected = IMAGE_LAYOUTS[image]
         exe_path = exe_dir / image
-        actual = parse_psx_exe(exe_path)
-        if actual != expected:
-            raise ValueError(f"{exe_path}: retail identity/layout mismatch")
-        executable = exe_path.read_bytes()
+        executable = verify_retail_image(exe_path, image)
         image_output = output_dir / image_key(image)
         object_output = image_output / "objects"
         object_output.mkdir(parents=True, exist_ok=True)

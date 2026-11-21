@@ -11,6 +11,9 @@ import struct
 import subprocess
 
 C_COMPILERS = {
+    # Decompals rebuild of the SN Systems GCC 2.7.2 ("cygnus-2.7.2-970404
+    # SN32") PSX compiler: the Shadow Tower default.
+    "gcc272cdk-native": ("cpppsx-272cdk", "cc1psx-272cdk"),
     "gcc257-native": ("cpppsx-257", "cc1psx-257"),
     "gcc260-native": ("cpppsx-260", "cc1psx-260"),
     # The kit's extensionless CC1PSX (GCC 2.4.1) runs under DOSBox. Its
@@ -64,6 +67,17 @@ def tool_succeeded(root: Path, log: str, product: str, magic: bytes) -> None:
         raise RuntimeError(f'{log}: native tool produced no valid {product}')
 
 
+# ASPSX 2.79D is the DOS build of SDevTC ASPSX 2.79 (the 4.5 kit's
+# BIN/DOS/ASPSXD.EXE). Like PSYLINK 2.73D and CPE2X 1.5 it is a plain DOS
+# program whose FlashTek X-32VM extender is bound into the executable, so
+# DOSBox-X runs it directly and no extender files are staged.
+ASPSX_VERSION = '2.79'
+
+
+def aspsx_command(stem: str, small_data: int) -> str:
+    return f'ASPSX.EXE -g -G{small_data} -o {stem}.OBJ {stem}.S > {stem}.TXT'
+
+
 def dos_text(path: Path) -> None:
     # The DOS reader needs CRLF. No directives, instructions or literals change.
     path.write_bytes(path.read_bytes().replace(b'\r\n', b'\n').replace(b'\n', b'\r\n'))
@@ -77,8 +91,8 @@ def compile_c(source: Path, root: Path, stem: str, *, compiler: str,
     cpp, cc1 = C_COMPILERS[compiler]
     preprocessed, assembly = root / (stem + '.I'), root / (stem + '.S')
     includes = [argument for path in include_dirs for argument in ('-I', str(path.resolve()))]
-    # The name becomes the assembly's `.file`; ASPSX 1.07 hangs on long ones,
-    # so a checkout-relative spelling keeps deep worktrees buildable.
+    # The name becomes the assembly's `.file`; older ASPSX builds hang on long
+    # ones, so a checkout-relative spelling keeps deep worktrees buildable.
     cpp_command = [cpp, '-lang-c', '-undef', '-nostdinc', *includes,
                    *(f'-D{value}' for value in defines), os.path.relpath(source.resolve())]
     preprocessed.write_bytes(run(cpp_command))
@@ -104,7 +118,7 @@ def compile_c(source: Path, root: Path, stem: str, *, compiler: str,
     dos_text(assembly)
     return {'object': stem + '.OBJ', 'assembly': stem + '.S', 'log': stem + '.TXT',
             'preprocessor_command': cpp_command, 'compiler_command': cc1_command, **probe,
-            'assembler_command': f'aspsx -g -G{small_data} -o {stem}.OBJ {stem}.S > {stem}.TXT',
+            'assembler_command': aspsx_command(stem, small_data),
             'assembly_sha256': hashlib.sha256(assembly.read_bytes()).hexdigest()}
 
 
@@ -151,8 +165,7 @@ def assemble_many(root: Path, stems: tuple[str, ...], small_data: int) -> dict[s
     for stem in stems:
         dos_text(root / (stem + '.S'))
         (root / (stem + '.OBJ')).unlink(missing_ok=True)
-    dos_run(root, [f'aspsx -g -G{small_data} -o {stem}.OBJ {stem}.S > {stem}.TXT'
-                   for stem in stems], 'asm')
+    dos_run(root, [aspsx_command(stem, small_data) for stem in stems], 'asm')
     for stem in stems:
         tool_succeeded(root, stem + '.TXT', stem + '.OBJ', b'LNK\x02')
     return {stem: (root / (stem + '.OBJ')).read_bytes() for stem in stems}

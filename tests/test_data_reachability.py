@@ -33,7 +33,46 @@ def ref(site, target, *, tier="validated", kind="address", image=IMAGE, origins=
     return Reference(image, site, target, kind, None, tier=tier, origins=origins)
 
 
+def words(*values):
+    import struct
+
+    return struct.pack(f"<{len(values)}I", *values)
+
+
 class ReachabilityTest(unittest.TestCase):
+    def test_bios_vector_stub_is_a_proven_vendored_dispatch(self):
+        # li $t2,0xb0; jr $t2; li $t1,0x32
+        code = words(0x240A00B0, 0x01400008, 0x24090032)
+        img = RetailImage.synthetic(IMAGE, 0x1000, code + b"\0" * 0x100)
+        report = audit(IMAGE, (function(0x1100), function(0x1000, vendor=True)), (),
+                       (ref(0x1100, 0x1000, tier="proven", kind="call"),
+                        ref(0x1004, None, tier="proven", kind="jump")), img)
+        self.assertEqual(report["issues"], [])
+        self.assertEqual(report["vendored_dispatch"], [{
+            "owner": "function:00001000", "site": 0x1004,
+            "pattern": "bios-vector-stub", "target": 0xB0,
+        }])
+
+    def test_empty_link_time_table_loop_is_proven_dead(self):
+        # lui $s1,0; addiu $s1,$s1,0; beqz $s1,+3; nop; jalr $t0
+        code = words(0x3C110000, 0x26310000, 0x12200003, 0, 0x0100F809)
+        img = RetailImage.synthetic(IMAGE, 0x1000, code + b"\0" * 0x100)
+        report = audit(IMAGE, (function(0x1100), function(0x1000, vendor=True)), (),
+                       (ref(0x1100, 0x1000, tier="proven", kind="call"),
+                        ref(0x1010, None, tier="proven", kind="indirect-call")), img)
+        self.assertEqual(report["issues"], [])
+        self.assertEqual(report["vendored_dispatch"][0]["pattern"], "empty-link-time-table")
+
+    def test_other_vendored_indirect_control_stays_unresolved(self):
+        # jr $v0 through an unproven value
+        code = words(0x00400008, 0)
+        img = RetailImage.synthetic(IMAGE, 0x1000, code + b"\0" * 0x100)
+        report = audit(IMAGE, (function(0x1100), function(0x1000, vendor=True)), (),
+                       (ref(0x1100, 0x1000, tier="proven", kind="call"),
+                        ref(0x1000, None, tier="proven", kind="indirect-jump")), img)
+        self.assertEqual(report["summary"]["issues"]["unresolved-indirect-control"], 1)
+        self.assertEqual(report["vendored_dispatch"], [])
+
     def audit(self, functions, data=(), refs=(), img=None):
         img = img or RetailImage.synthetic(IMAGE, 0x1000, b"\0" * 0x1000)
         return audit(IMAGE, tuple(functions), tuple(data), tuple(refs), img)

@@ -31,7 +31,7 @@ class RecordTests(unittest.TestCase):
 
 
 @unittest.skipUnless(shutil.which('dosbox-x') and os.environ.get('PSYQ_ASPSX')
-                     and os.environ.get('PSYQ_BIN'), 'native SDK tools required')
+                     and os.environ.get('PSYQ_PSYLINK'), 'native SDK tools required')
 class NativeRelocationTests(unittest.TestCase):
     def test_negative_addends_match_psylink_and_native_bytes_stay_unchanged(self):
         # Synthetic assembler control: branch/call, high/low carry, and pointer
@@ -60,11 +60,11 @@ class NativeRelocationTests(unittest.TestCase):
             high, low = struct.unpack_from('<2I', text)
             self.assertEqual((high & 0xffff, low & 0xffff), (0xffff, 0x7ffc))
             self.assertEqual(view.get_section_by_name('.data').data(), struct.pack('<I', 0xfffffffc))
-            shutil.copyfile(Path(os.environ['PSYQ_BIN']) / 'PSYLINK.EXE', root / 'PSYLINK.EXE')
+            shutil.copyfile(os.environ['PSYQ_PSYLINK'], root / 'PSYLINK.EXE')
             (root / 'LINK.LNK').write_bytes(
                 b'\torg $80010000\r\n\tinclude "UNIT.OBJ"\r\n'
                 b'\tinclude "TARGETS.OBJ"\r\n')
-            dos_run(root, ['psylink /c @LINK.LNK,OUT.CPE,OUT.SYM,OUT.MAP > LINK.TXT'], 'link')
+            dos_run(root, ['PSYLINK.EXE /c @LINK.LNK,OUT.CPE,OUT.SYM,OUT.MAP > LINK.TXT'], 'link')
             tool_succeeded(root, 'LINK.TXT', 'OUT.CPE', b'CPE\x01')
             from scripts.kf.executable import cpe_loads
 

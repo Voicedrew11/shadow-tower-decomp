@@ -9,7 +9,7 @@ strict claimed-object comparison from complete reachable-data ownership and
 linked-image closure. The historical first-pass results below do not establish
 that closure.
 
-King's Field II needs the same broad loop as Vostok/Gruntz—split retail bytes into
+Shadow Tower needs the same broad loop as Vostok/Gruntz—split retail bytes into
 target objects, compile reconstruction objects, compare, and ratchet—but not
 Vostok's actual delinker. Vostok consumes PE/COFF sections and a PDB. A PS-X EXE
 is a flat linked MIPS load image with no retained relocation directory, and
@@ -26,14 +26,18 @@ reference shown as `validated` uses the same proof boundary as safe delinking.
 
 ## First-pass topology
 
-The four programs are processed independently:
+The 43 images (seven programs and 36 FDAT overlays) are processed
+independently, each under its `--image` key:
 
 ```text
-PSX.EXE  + config/retail/*.tsv -> build/delink/psx  -> build/objdiff/psx
-GAME.EXE + config/retail/*.tsv -> build/delink/game -> build/objdiff/game
-OPEN.EXE + config/retail/*.tsv -> build/delink/open -> build/objdiff/open
-END.EXE  + config/retail/*.tsv -> build/delink/end  -> build/objdiff/end
+PSX.EXE      + config/retail/*.tsv -> build/delink/psx      -> build/objdiff/psx
+ST.EXE       + config/retail/*.tsv -> build/delink/st       -> build/objdiff/st
+FDAT_012.BIN + config/retail/*.tsv -> build/delink/fdat_012 -> build/objdiff/fdat_012
+...
 ```
+
+An overlay's calls into `ST.EXE` are cross-image references: they stay
+unmodeled targets until `ST.EXE`'s owner is linked against the overlay.
 
 The target object format is ELF32, little-endian, `EM_MIPS`, MIPS-I/O32. It is
 understood by GNU `mipsel` binutils and objdiff 3.7.3. Each initial object has a
@@ -100,33 +104,17 @@ The available policies are:
 
 `all` is useful for experiments, not for establishing a baseline.
 
-The first safe-policy run against the initial SLPS-00069 seed produced:
-
-| Target | Objects | Functions withheld | Candidate rows applied | Candidate rows withheld |
-| --- | ---: | ---: | ---: | ---: |
-| `PSX.EXE` | 13 | 0 | 27 | 4 |
-| `GAME.EXE` | 813 | 5 | 2,932 | 6,365 |
-| `OPEN.EXE` | 307 | 1 | 1,304 | 1,413 |
-| `END.EXE` | 278 | 1 | 1,125 | 1,385 |
-| **Total** | **1,411** | **7** | **5,388** | **9,167** |
-
-A HI16/LO16 candidate produces two ELF relocation entries. Applied plus
-withheld rows equals the full 14,555-row census; per-row reasons are recorded in
-`build/delink/*/relocations_withheld.tsv`.
+Each run records applied and withheld rows, with per-row reasons, in
+`build/delink/*/relocations_withheld.tsv`. A HI16/LO16 candidate produces two
+ELF relocation entries; a reviewed `mips_gprel16` row produces one
+`R_MIPS_GPREL16` against the image's startup `$gp` (`config/images.toml`).
 
 Carving the whole image is not the same as selecting decomp work. Functions in
-`functions_vendored.tsv` are excluded when objdiff projects are generated:
+`functions_vendored.tsv` are excluded when objdiff projects are generated; the
+current per-image counts are in
+[the inventory](function-and-data-inventory.md#current-census).
 
-| Target | Carved target/reference objects | Vendored objects excluded | Eligible functions |
-| --- | ---: | ---: | ---: |
-| `PSX.EXE` | 13 | 12 | 1 |
-| `GAME.EXE` | 813 | 325 | 488 |
-| `OPEN.EXE` | 307 | 279 | 28 |
-| `END.EXE` | 278 | 260 | 18 |
-| **Total** | **1,411** | **876** | **535** |
-
-The provider inventory has six additional fragmented functions, which have no
-carved object. Vendored objects exist only to preserve
+Vendored objects exist only to preserve
 executable topology, provider evidence, symbol identities, and call relocation
 targets. They do not count as source reconstruction or progress.
 
@@ -231,8 +219,8 @@ any bytes. A focused iteration can select an image and function:
 ```sh
 kf-delink \
   --exe-dir /path/to/retail \
-  --image GAME.EXE \
-  --va 0x80014268
+  --image PSX.EXE \
+  --va 0x80010068
 ```
 
 Use `kf analyze` to refresh the shared project after focused delinking.
@@ -303,9 +291,17 @@ symbols; the linker may not scatter it or override defined symbols to hide a
 layout conflict. Relinked initialized bytes are compared in full, and BSS is
 checked as uninitialized storage. Synthetic tails imitating the probe assembler
 are not appended to retail claims: source alignment/extent differences remain
-real comparison failures. See the [placement evidence](../config/evidence/target_roundtrip_layout.md)
-for known conflicts. This is not yet a linked reconstruction or a check of all
-config-only reachable storage.
+real comparison failures. This is not yet a linked reconstruction or a check
+of all config-only reachable storage.
+
+`kf check` applies the target-relink and known-reference closure gates only to
+images that at least one source unit claims; an image without units has
+nothing to relink, and its census-wide closure is the curation worklist
+(`kf verify reachability --image KEY`). The OK line says how many images were
+gated. Inside reached Sony functions, only indirect transfers proved from the
+member's own instructions (BIOS `li $t2, 0xA0/0xB0/0xC0; jr $t2` stubs and
+startup table loops with a link-time zero count) are exempt; they are listed
+as `vendored_dispatch` witness rows in the reachability report.
 
 Both objdiff front ends are built from the same pinned 3.7.3 source with
 `patches/objdiff-strict-data.patch`. Native section scores include anonymous

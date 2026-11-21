@@ -1,16 +1,31 @@
-# MANUALLY MANAGED - the retail disc and the linked programs it carries.
+# MANUALLY MANAGED - the retail disc and the linked images it carries.
 #
-# `name` is the tool's image identity (`--image` takes its lowercase stem);
-# `disc_file` is the root ISO9660 file it is read from. The PS-X EXE header
-# fields are checked by `kf init`, so a wrong dump fails before any query.
-# Images are listed in disc (LBA) order, the order reports and inventories
-# sort them. Which program loads which overlay is not yet established.
+# `name` is the tool's image identity (`--image` takes its lowercase stem,
+# e.g. `st` or `fdat_012`). Root programs are PS-X EXEs read from the root
+# ISO9660 file `disc_file`; `kf init` checks their header fields, so a wrong
+# dump fails before any query. Overlays are headerless code images read from
+# an archive entry (see the end of this file). Images are listed in disc
+# (LBA) order, then the overlays by archive entry; reports and inventories
+# sort them in this order.
+#
+# Who loads what. PSX.EXE is a program sequencer: its table at 0x80010350
+# names, by index, 0 STR.EXE, 1 TITLE.EXE, 2 OPTXT.EXE, 3 ST.EXE, 4 END.EXE,
+# 5 VS.EXE. It starts with index 0, then loops: BIOS Load(table[index]),
+# Exec, and on return reads the next index from the byte at 0x800103F0.
+# ST.EXE stores 4 (END.EXE) there and VS.EXE stores 1 (TITLE.EXE); how STR,
+# TITLE, OPTXT and END pick their successor (each carries its own copy of the
+# six-path table) is not yet traced. ST.EXE alone names `COM\FDAT.T` and
+# loads the FDAT overlays.
 
 [disc]
 serial = "SLUS-00863"
 title = "Shadow Tower (USA)"
 # Single-track MODE2/2352 image.
 sha256 = "420420cee70eec9d6b4c81dcf6e16494f72fc3976a93fcbe4076a7336c659adb"
+
+# `gp` is the $gp value each program's startup loads (lui/addiu gp before the
+# jump to main); gp-relative relocations decode against it. Overlays use
+# their host's.
 
 # Boot loader named by SYSTEM.CNF (`BOOT = cdrom:\SLUS_008.63;1`). The disc
 # also carries a byte-identical copy as PSX.EXE.
@@ -20,6 +35,7 @@ disc_file = "SLUS_008.63"
 sha256 = "dd01da6ae1c9de87ae0f818b60da2cd59d13031c039e2c0013c3657f8654821e"
 file_size = 0x1000
 entry = 0x800101C0
+gp = 0x80010394
 load_address = 0x80010000
 load_size = 0x800
 
@@ -30,6 +46,7 @@ disc_file = "STR.EXE"
 sha256 = "391c6184b5a68d21db908be029acf050f766e90bcb1eafbcef1c1c1676d47765"
 file_size = 0x22800
 entry = 0x800119DC
+gp = 0x8003288C
 load_address = 0x80011000
 load_size = 0x22000
 
@@ -39,6 +56,7 @@ disc_file = "ST.EXE"
 sha256 = "272b1168a246751c8448eaf9e390cdc230b66d401ef7c5d1cde34d35e900ce43"
 file_size = 0x78000
 entry = 0x80014320
+gp = 0x80087EC0
 load_address = 0x80011000
 load_size = 0x77800
 
@@ -48,6 +66,7 @@ disc_file = "TITLE.EXE"
 sha256 = "ff4caed64727535bd9533f1d6a6e63e70cfc392a9eafdbbfeb6d26961cfcab52"
 file_size = 0x17800
 entry = 0x80012A04
+gp = 0x80028ABC
 load_address = 0x80012000
 load_size = 0x17000
 
@@ -57,6 +76,7 @@ disc_file = "OPTXT.EXE"
 sha256 = "793f698ecf7d770c68de41d82ff87c72fe70902be31ee8f79d8cfaee11d94226"
 file_size = 0xF000
 entry = 0x80011944
+gp = 0x8001F798
 load_address = 0x80011000
 load_size = 0xE800
 
@@ -66,6 +86,7 @@ disc_file = "VS.EXE"
 sha256 = "051bed231a93b6d5d6a100b98fcb08ee5f262978808be067e79c208603e053d9"
 file_size = 0x53000
 entry = 0x80012980
+gp = 0x80063218
 load_address = 0x80011000
 load_size = 0x52800
 
@@ -75,5 +96,348 @@ disc_file = "END.EXE"
 sha256 = "c7166c7cea67c1feed6efd6e831f78535d5c8e6584af0fc7fee880ab092e1069"
 file_size = 0x1F800
 entry = 0x80011960
+gp = 0x8002FD04
 load_address = 0x80011000
 load_size = 0x1F000
+
+# Code overlays inside ST\COM\FDAT.T. The archive is a u16 entry count
+# followed by u16 sector (0x800-byte) offsets; entry i spans sectors
+# offset[i]..offset[i+1]. 36 entries hold MIPS code, all at indices 2, 12,
+# 22, ..., 472 (every tenth index that is non-empty); the other entries are
+# data. Each overlay is loaded whole at 0x801EB560, the end of ST.EXE's .bss
+# (ST's startup code clears 0x80088188..0x801EB560), so it shares ST.EXE's
+# address space and calls straight into ST.EXE's text. `load_size` is the
+# sector-granular entry span. Every overlay starts with a u32 id word and 32
+# absolute handler pointers (0x84 bytes); each pointer lands inside its own
+# overlay on a function boundary. Entries 2, 322 and 402 are byte-identical
+# (id 0x37). Overlays are named by archive entry index, not by map, because
+# the map-to-entry relation is not yet proven.
+[[archive]]
+name = "FDAT.T"
+disc_path = "ST/COM/FDAT.T"
+sha256 = "746685a8454c7f6ea34cf3cfbefe198104633f65ea5664d1132ec4bc3f545a06"
+file_size = 0x1695800
+
+[[overlay]]
+name = "FDAT_002.BIN"
+archive = "FDAT.T"
+index = 2
+host = "ST.EXE"
+sha256 = "b58f55e4fee805121b92d9aa16e901fbd1a400baf168e91c5b63cb30328eb5cd"
+load_address = 0x801EB560
+load_size = 0x2800
+
+[[overlay]]
+name = "FDAT_012.BIN"
+archive = "FDAT.T"
+index = 12
+host = "ST.EXE"
+sha256 = "47f251276669f957bcf7cd4e800128ddf625c130f262fa5acec17f0e2847d4d4"
+load_address = 0x801EB560
+load_size = 0x3000
+
+[[overlay]]
+name = "FDAT_022.BIN"
+archive = "FDAT.T"
+index = 22
+host = "ST.EXE"
+sha256 = "3c0f7486cf3b39774460fde380d77d18e09cd6df37e79278964f942f3617a7d1"
+load_address = 0x801EB560
+load_size = 0x2800
+
+[[overlay]]
+name = "FDAT_032.BIN"
+archive = "FDAT.T"
+index = 32
+host = "ST.EXE"
+sha256 = "de14fe5f245f280481b1f56349f2f88e4f433a5facd9fb040b3e1caa9921c08d"
+load_address = 0x801EB560
+load_size = 0x2800
+
+[[overlay]]
+name = "FDAT_042.BIN"
+archive = "FDAT.T"
+index = 42
+host = "ST.EXE"
+sha256 = "49318be80e938ecf6d9680f81ac576d3d3114b83d13452c665066595bc090463"
+load_address = 0x801EB560
+load_size = 0x2800
+
+[[overlay]]
+name = "FDAT_052.BIN"
+archive = "FDAT.T"
+index = 52
+host = "ST.EXE"
+sha256 = "3b3bf2afab1559576dbd707a2fe05cd58401d69aa01dd2142eba90be8a275f96"
+load_address = 0x801EB560
+load_size = 0x2800
+
+[[overlay]]
+name = "FDAT_062.BIN"
+archive = "FDAT.T"
+index = 62
+host = "ST.EXE"
+sha256 = "e4c904cfad717412144c52bb25659dbec3f39a96d89194a056dd566318470703"
+load_address = 0x801EB560
+load_size = 0x2800
+
+[[overlay]]
+name = "FDAT_082.BIN"
+archive = "FDAT.T"
+index = 82
+host = "ST.EXE"
+sha256 = "2bb7aaf144da35f264c312ef7e1707adb46efb8355927900283967a82c64005a"
+load_address = 0x801EB560
+load_size = 0x2800
+
+[[overlay]]
+name = "FDAT_092.BIN"
+archive = "FDAT.T"
+index = 92
+host = "ST.EXE"
+sha256 = "57449171bd82fb71fd58fcb31b504696d2098da405e5c19376e68866f736f5af"
+load_address = 0x801EB560
+load_size = 0x3000
+
+[[overlay]]
+name = "FDAT_102.BIN"
+archive = "FDAT.T"
+index = 102
+host = "ST.EXE"
+sha256 = "ef058701989d60a27cd361bb424f744554ef45359aca591021ad14e588350846"
+load_address = 0x801EB560
+load_size = 0x2800
+
+[[overlay]]
+name = "FDAT_112.BIN"
+archive = "FDAT.T"
+index = 112
+host = "ST.EXE"
+sha256 = "f923471c47e3de37caba3d4843e5f374062ee7aa6776bec433c76fd4808f03c9"
+load_address = 0x801EB560
+load_size = 0x2800
+
+[[overlay]]
+name = "FDAT_122.BIN"
+archive = "FDAT.T"
+index = 122
+host = "ST.EXE"
+sha256 = "443a50dedccba0331d06dcb95ed15d0561b6289ce88add01320c1f9de4e08e24"
+load_address = 0x801EB560
+load_size = 0x2800
+
+[[overlay]]
+name = "FDAT_132.BIN"
+archive = "FDAT.T"
+index = 132
+host = "ST.EXE"
+sha256 = "96682e013ca7581c6a89a1080fbadaf197064556a16c5361cd4e383eedacba42"
+load_address = 0x801EB560
+load_size = 0x2800
+
+[[overlay]]
+name = "FDAT_142.BIN"
+archive = "FDAT.T"
+index = 142
+host = "ST.EXE"
+sha256 = "559e7f09f756f7848cc92f147196d63deb3c684ee884ea4f983aa6526721a335"
+load_address = 0x801EB560
+load_size = 0x2800
+
+[[overlay]]
+name = "FDAT_152.BIN"
+archive = "FDAT.T"
+index = 152
+host = "ST.EXE"
+sha256 = "b618a45611e4d8a68564904ee263220bee1c525c98325ab724fd18c5900117ce"
+load_address = 0x801EB560
+load_size = 0x2800
+
+[[overlay]]
+name = "FDAT_172.BIN"
+archive = "FDAT.T"
+index = 172
+host = "ST.EXE"
+sha256 = "8c4a20ee81195da94cc231705b08cb6cb1ae49032fdce523347a7db864bba5de"
+load_address = 0x801EB560
+load_size = 0x3000
+
+[[overlay]]
+name = "FDAT_182.BIN"
+archive = "FDAT.T"
+index = 182
+host = "ST.EXE"
+sha256 = "171e4274741a8d11f6df0d5d21c8152d7eb6205b9f1a1dba16bf40be67c6d7e4"
+load_address = 0x801EB560
+load_size = 0x2800
+
+[[overlay]]
+name = "FDAT_202.BIN"
+archive = "FDAT.T"
+index = 202
+host = "ST.EXE"
+sha256 = "b2310887b3fd26d6d41dce0beb81a7c940aff9bcfdb2541714c330069d5cb904"
+load_address = 0x801EB560
+load_size = 0x2800
+
+[[overlay]]
+name = "FDAT_212.BIN"
+archive = "FDAT.T"
+index = 212
+host = "ST.EXE"
+sha256 = "26e73463893914a6db5a93d2963ab07d3221a39aa4d4c7216bef0a09df09a082"
+load_address = 0x801EB560
+load_size = 0x2800
+
+[[overlay]]
+name = "FDAT_232.BIN"
+archive = "FDAT.T"
+index = 232
+host = "ST.EXE"
+sha256 = "ac4c7f60e93393e2080d15548d7b6ab9c37cff9d0585888d22cebd8bf19ef239"
+load_address = 0x801EB560
+load_size = 0x2800
+
+[[overlay]]
+name = "FDAT_242.BIN"
+archive = "FDAT.T"
+index = 242
+host = "ST.EXE"
+sha256 = "205d105984f32f80b7db9d94507a6ffe86d319803cfac97a29ba5bd36fbbaf8f"
+load_address = 0x801EB560
+load_size = 0x3000
+
+[[overlay]]
+name = "FDAT_252.BIN"
+archive = "FDAT.T"
+index = 252
+host = "ST.EXE"
+sha256 = "15ee980ba8bce2071e71e374b32c19bb6241aa62aa3025c7783db6befec34b2e"
+load_address = 0x801EB560
+load_size = 0x2800
+
+[[overlay]]
+name = "FDAT_262.BIN"
+archive = "FDAT.T"
+index = 262
+host = "ST.EXE"
+sha256 = "fcdf1a533d66854ce9bc373d8c0222c9b355fc9e4677c420db0f841689a16c83"
+load_address = 0x801EB560
+load_size = 0x3000
+
+[[overlay]]
+name = "FDAT_272.BIN"
+archive = "FDAT.T"
+index = 272
+host = "ST.EXE"
+sha256 = "0c137f1e38e288b417d5918e40e141db3dadb225544d9f3a0442d337e89dbe90"
+load_address = 0x801EB560
+load_size = 0x4800
+
+[[overlay]]
+name = "FDAT_282.BIN"
+archive = "FDAT.T"
+index = 282
+host = "ST.EXE"
+sha256 = "b9664382fc23994abbec1b7430f2358c7c5ac16149d7a157bd80336b0eef2987"
+load_address = 0x801EB560
+load_size = 0x3000
+
+[[overlay]]
+name = "FDAT_302.BIN"
+archive = "FDAT.T"
+index = 302
+host = "ST.EXE"
+sha256 = "2872dddc3d5ca2692bcd23d69d09ff2300d16b02349cc8fa1bf248884c597700"
+load_address = 0x801EB560
+load_size = 0x3000
+
+[[overlay]]
+name = "FDAT_322.BIN"
+archive = "FDAT.T"
+index = 322
+host = "ST.EXE"
+sha256 = "b58f55e4fee805121b92d9aa16e901fbd1a400baf168e91c5b63cb30328eb5cd"
+load_address = 0x801EB560
+load_size = 0x2800
+
+[[overlay]]
+name = "FDAT_332.BIN"
+archive = "FDAT.T"
+index = 332
+host = "ST.EXE"
+sha256 = "656188c42246a87eaa0cf724f409eb3acedf0ac317d9c1ea46abe3610fe72ae8"
+load_address = 0x801EB560
+load_size = 0x2800
+
+[[overlay]]
+name = "FDAT_372.BIN"
+archive = "FDAT.T"
+index = 372
+host = "ST.EXE"
+sha256 = "34bae9da846160e5afe4ce40ec7d4efcc1d7e51682bc2723c5ff2b60d0cb8b10"
+load_address = 0x801EB560
+load_size = 0x2800
+
+[[overlay]]
+name = "FDAT_382.BIN"
+archive = "FDAT.T"
+index = 382
+host = "ST.EXE"
+sha256 = "39c8412c96ed1c166a2d2986ef92635ae75653e4c67593d8c0d60c6000bc21fa"
+load_address = 0x801EB560
+load_size = 0x2800
+
+[[overlay]]
+name = "FDAT_402.BIN"
+archive = "FDAT.T"
+index = 402
+host = "ST.EXE"
+sha256 = "b58f55e4fee805121b92d9aa16e901fbd1a400baf168e91c5b63cb30328eb5cd"
+load_address = 0x801EB560
+load_size = 0x2800
+
+[[overlay]]
+name = "FDAT_412.BIN"
+archive = "FDAT.T"
+index = 412
+host = "ST.EXE"
+sha256 = "9efc19e14a291e02289c21321ff40198d33bcc7ea9689261a2758baf11571e79"
+load_address = 0x801EB560
+load_size = 0x2800
+
+[[overlay]]
+name = "FDAT_442.BIN"
+archive = "FDAT.T"
+index = 442
+host = "ST.EXE"
+sha256 = "78b01e4b0cc2ed6eb12117fbac11c68636a2686b7f5502deb1ec453c7ebdee6a"
+load_address = 0x801EB560
+load_size = 0x2800
+
+[[overlay]]
+name = "FDAT_452.BIN"
+archive = "FDAT.T"
+index = 452
+host = "ST.EXE"
+sha256 = "227ba8d4f432d9797c805667cf2e12480d873b37a786c6b0c88b137323ae5f72"
+load_address = 0x801EB560
+load_size = 0x2800
+
+[[overlay]]
+name = "FDAT_462.BIN"
+archive = "FDAT.T"
+index = 462
+host = "ST.EXE"
+sha256 = "a0ed03dafd4b91caf782e125dfc226c22a49f15ff8f2474326105751782dac2c"
+load_address = 0x801EB560
+load_size = 0x2800
+
+[[overlay]]
+name = "FDAT_472.BIN"
+archive = "FDAT.T"
+index = 472
+host = "ST.EXE"
+sha256 = "dab1c1052ff64a9ba7257457ceb3f5ccb6195e2f91185b3b2c07e062899d965f"
+load_address = 0x801EB560
+load_size = 0x2800

@@ -14,9 +14,9 @@ from kf2_images import kf2_images
 
 def manifest() -> Manifest:
     return Manifest({
-        "c": Profile("c", "c", "gcc257-native", "O2", 0, "1.07",
+        "c": Profile("c", "c", "gcc257-native", "O2", 0, "2.79",
                      ("-mcpu=r2000", "-fno-schedule-insns")),
-        "asm": Profile("asm", "assembly", "gnu-as", None, 0, "1.07", ()),
+        "asm": Profile("asm", "assembly", "gnu-as", None, 0, "2.79", ()),
     }, (
         Unit("game.shared", "GAME.EXE", "src/shared.c", "c", ()),
         Unit("open.shared", "OPEN.EXE", "src/shared.c", "c", (), defines=("KF_OPEN",)),

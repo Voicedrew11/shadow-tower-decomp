@@ -1,6 +1,30 @@
 # MANUALLY MANAGED - admitted WIP relocation candidate census.
 # Seed/audit tooling writes build proposals only; review and edit this file by hand.
-# Each address is qualified by image because GAME.EXE, OPEN.EXE and END.EXE are separate overlays sharing one load window.
+# Each address is qualified by image: the programs share load windows and the FDAT overlays share one window inside ST.EXE's address space.
 # PS-X EXE retains no relocation directory: candidate does not mean linker truth.
 # BSS pair-scan rows remain withheld by safe delinking until individually reviewed.
 image	site_va	site_file_offset	paired_site_va	kind	channel	target_va	target_region	target_name	opcode	register	confidence	status	provenance
+PSX.EXE	0x80010074	0x874		mips26	reachable-code	0x80010268	load		jal		manual-decoded	reviewed	psx.main asm review
+PSX.EXE	0x8001007c	0x87c		mips26	reachable-code	0x80010188	load		jal		manual-decoded	reviewed	psx.main asm review
+PSX.EXE	0x80010084	0x884		mips26	reachable-code	0x80010170	load		jal		manual-decoded	reviewed	psx.main asm review
+PSX.EXE	0x8001008c	0x88c		mips_gprel16	reachable-code	0x80010398	load	next_program	lw	gp	manual-decoded	reviewed	psx.main asm review
+PSX.EXE	0x80010098	0x898	0x8001009c	mips_hi16_lo16	reachable-code	0x80010350	load	program_paths	lui+addiu		manual-decoded	reviewed	psx.main asm review
+PSX.EXE	0x800100a0	0x8a0		mips_gprel16	reachable-code	0x8001039c	load	PTR_8001039c	lw	gp	manual-decoded	reviewed	psx.main asm review
+PSX.EXE	0x800100a4	0x8a4	0x800100b0	mips_hi16_lo16	reachable-code	0x800103b0	load	program_header	lui+addiu		manual-decoded	reviewed	psx.main asm review
+PSX.EXE	0x800100ac	0x8ac		mips_gprel16	reachable-code	0x800103a0	load	PTR_800103a0	lw	gp	manual-decoded	reviewed	psx.main asm review
+PSX.EXE	0x800100c0	0x8c0		mips26	reachable-code	0x800101b0	load		jal		manual-decoded	reviewed	psx.main asm review
+PSX.EXE	0x800100c8	0x8c8		mips_gprel16	reachable-code	0x80010394	load	program_index	lw	gp	manual-decoded	reviewed	psx.main asm review
+PSX.EXE	0x800100dc	0x8dc		mips26	reachable-code	0x80010150	load		jal		manual-decoded	reviewed	psx.main asm review
+PSX.EXE	0x800100f0	0x8f0		mips26	reachable-code	0x80010188	load		jal		manual-decoded	reviewed	psx.main asm review
+PSX.EXE	0x800100fc	0x8fc		mips26	reachable-code	0x800101a0	load		jal		manual-decoded	reviewed	psx.main asm review
+PSX.EXE	0x8001010c	0x90c		mips26	reachable-code	0x80010160	load		jal		manual-decoded	reviewed	psx.main asm review
+PSX.EXE	0x80010114	0x914		mips_gprel16	reachable-code	0x80010398	load	next_program	lw	gp	manual-decoded	reviewed	psx.main asm review
+PSX.EXE	0x80010124	0x924		mips_gprel16	reachable-code	0x80010394	load	program_index	sw	gp	manual-decoded	reviewed	psx.main asm review
+PSX.EXE	0x80010128	0x928		mips26	reachable-code	0x80010170	load		jal		manual-decoded	reviewed	psx.main asm review
+PSX.EXE	0x80010130	0x930		mips26	reachable-code	0x800100c0	load		j		manual-decoded	reviewed	psx.main asm review
+PSX.EXE	0x80010350	0xb50		mips32_candidate	data-word	0x80010058	load		word		manual-decoded	reviewed	psx.main program_paths review
+PSX.EXE	0x80010354	0xb54		mips32_candidate	data-word	0x80010044	load		word		manual-decoded	reviewed	psx.main program_paths review
+PSX.EXE	0x80010358	0xb58		mips32_candidate	data-word	0x80010030	load		word		manual-decoded	reviewed	psx.main program_paths review
+PSX.EXE	0x8001035c	0xb5c		mips32_candidate	data-word	0x80010020	load		word		manual-decoded	reviewed	psx.main program_paths review
+PSX.EXE	0x80010360	0xb60		mips32_candidate	data-word	0x80010010	load		word		manual-decoded	reviewed	psx.main program_paths review
+PSX.EXE	0x80010364	0xb64		mips32_candidate	data-word	0x80010000	load		word		manual-decoded	reviewed	psx.main program_paths review

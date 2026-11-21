@@ -109,10 +109,11 @@ def _format_binding(row: dict[str, object]) -> str:
 
 def _render_overview(ctx: Context, row: dict[str, object]) -> str:
     kinds = ", ".join(f"{name}={count}" for name, count in row["data_kinds"].items())
+    entry = "none (overlay)" if row["entry"] is None else f"0x{row['entry']:08x}"
     return "\n".join([
         f"Memory map {ctx.image}",
         f"  load: 0x{row['load_start']:08x}..0x{row['load_end']:08x} "
-        f"(0x{row['load_size']:x} B); entry=0x{row['entry']:08x}",
+        f"(0x{row['load_size']:x} B); entry={entry}",
         f"  functions: {row['function_count']} (named={row['named_functions']}, "
         f"vendored={row['vendored_functions']}, units={row['unit_functions']})",
         f"  function bytes: body=0x{row['function_body_bytes']:x}, "

@@ -84,7 +84,7 @@ int *probe(int *p, int index) {
             path.write_text('#include "probe.h"\nvoid probe(int *p) {\n'
                             'p=ZERO; p=ZERO; CLEAR(p); p=ID(0); p=ID(NULL);\n'
                             '#ifdef OPEN\np=0;\n#endif\n}\n')
-            profile = Profile("c", "c", "gcc257-native", "O2", 0, "1.07", ())
+            profile = Profile("c", "c", "gcc257-native", "O2", 0, "2.79", ())
             manifest = Manifest({"c": profile}, (
                 Unit("game.probe", "GAME.EXE", "probe.c", "c", ()),
                 Unit("open.probe", "OPEN.EXE", "probe.c", "c", (), defines=("OPEN",)),
@@ -116,7 +116,7 @@ int *probe(int *p, int index) {
                 "#else\n#define OFFSET(t, m) ((unsigned long)&((t *)NULL)->m)\n#endif\n"
                 "typedef char offset_check[OFFSET(struct S, m) == 4 ? 1 : -1];\n"
                 "int *both(void) { return NULL; }\n")
-            profile = Profile("c", "c", "gcc257-native", "O2", 0, "1.07", ())
+            profile = Profile("c", "c", "gcc257-native", "O2", 0, "2.79", ())
             manifest = Manifest({"c": profile}, (Unit("game.probe", "GAME.EXE", "probe.c", "c", ()),))
             reports = {}
             for mode in ("retail", "modern", "all"):
