@@ -257,6 +257,58 @@ class ProgressTests(unittest.TestCase):
         self.assertEqual(len(buckets["CHANGED"]), 1)
         self.assertEqual(buckets["REGRESS"], [])
 
+    @staticmethod
+    def _banked_exact(row: Current, input_sha256: str) -> dict[tuple[str, int], dict[str, str]]:
+        return {
+            (row.target.image, row.target.va): {
+                "image": row.target.image,
+                "va": hex(row.target.va),
+                "unit": row.unit.unit,
+                "name": row.target.name,
+                "input_sha256": input_sha256,
+                "best_pct": "100.000000000",
+                "hist_pct": "100.000000000",
+                "banked_pct": "100.000000000",
+                "code_size": "16",
+            }
+        }
+
+    def test_changed_input_banked_exact_row_below_exact_regresses(self) -> None:
+        row = sample_current(99.5)
+        buckets = classifications([row], self._banked_exact(row, "b" * 64))
+        self.assertEqual(buckets["REGRESS"], [(row, buckets["REGRESS"][0][1])])
+        self.assertEqual(buckets["CHANGED"], [])
+
+    def test_changed_input_banked_exact_row_still_exact_is_only_changed(self) -> None:
+        row = sample_current(100.0)
+        buckets = classifications([row], self._banked_exact(row, "b" * 64))
+        self.assertEqual(len(buckets["CHANGED"]), 1)
+        self.assertEqual(buckets["REGRESS"], [])
+
+    def _check_with(self, row: Current, baseline: dict) -> int:
+        universe = {(row.target.image, row.target.va): row.target}
+        with (
+            mock.patch.object(progress, "current_state",
+                              return_value=(STARTED_GAME, universe, [row], [])),
+            mock.patch.object(progress, "load_baseline", return_value=baseline),
+            mock.patch.object(progress, "print_status", return_value=0),
+            mock.patch.object(progress, "_report_cleanliness"),
+            mock.patch("scripts.kf.data_match.run", return_value=0),
+            mock.patch("scripts.kf.data_reachability.run", return_value=0),
+            mock.patch("scripts.kf.roundtrip.run", return_value=0),
+            mock.patch("scripts.kf.readme.refresh", return_value=False),
+            mock.patch("builtins.print"),
+        ):
+            return progress.check(("GAME.EXE",))
+
+    def test_check_fails_when_changed_input_breaks_a_banked_exact_function(self) -> None:
+        row = sample_current(99.5)
+        self.assertEqual(self._check_with(row, self._banked_exact(row, "b" * 64)), 1)
+
+    def test_check_passes_when_changed_input_keeps_a_banked_function_exact(self) -> None:
+        row = sample_current(100.0)
+        self.assertEqual(self._check_with(row, self._banked_exact(row, "b" * 64)), 0)
+
     @kf2_images
     def test_selective_bank_preserves_unrelated_rows(self) -> None:
         row = sample_current(100.0)

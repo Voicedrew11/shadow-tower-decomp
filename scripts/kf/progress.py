@@ -316,7 +316,13 @@ def classifications(
             buckets["RENAMED"].append((row, old))
         pct = row.pct or 0.0
         if row.input_sha256 != old["input_sha256"]:
-            buckets["CHANGED"].append((row, old))
+            # New inputs reset the high-water mark, but a function banked
+            # exact must stay exact whatever changed (a header or data fold
+            # can silently break it), so that case is a regression.
+            if float(old["banked_pct"]) >= 100.0 and pct < 100.0:
+                buckets["REGRESS"].append((row, old))
+            else:
+                buckets["CHANGED"].append((row, old))
         elif pct < float(old["best_pct"]) - EPSILON:
             buckets["REGRESS"].append((row, old))
         elif pct > float(old["best_pct"]) + EPSILON:
@@ -514,7 +520,9 @@ def check(
         if failures:
             reasons.append(f"{len(failures)} report failure(s)")
         if buckets["REGRESS"]:
-            reasons.append(f"{len(buckets['REGRESS'])} unchanged-input regression(s)")
+            reasons.append(
+                f"{len(buckets['REGRESS'])} regression(s) (unchanged-input score drop, "
+                "or a banked-exact function no longer exact)")
         if buckets["LOST"]:
             reasons.append(f"{len(buckets['LOST'])} lost banked function(s)")
         if strict and strict_changed:
@@ -537,7 +545,7 @@ def check(
         verified = "no image gated for target relink or ownership closure"
     print(f"check OK: exact claimed data, {verified}"
           + (f" ({skipped} image(s) without source units not gated)" if skipped else "")
-          + ", and no unchanged-input regressions or lost banked functions")
+          + ", and no regressions or lost banked functions")
     return 0
 
 
