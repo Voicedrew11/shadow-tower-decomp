@@ -187,11 +187,14 @@ def proven_vendored_dispatch(
 def proven_switch_dispatch(img: RetailImage, function: Binding) -> dict[int, dict]:
     """Switch `jr` sites of a game function, proved by the shared CFG rule.
 
-    `scripts.kf.sema.cfg.switch_table` is the only switch-table prover: a
-    bounded `sltiu`/`beqz` index, a `lui`/`addiu` table base (the `lui` may
-    sit in the bound's delay slot), `sll`/`addu`/`lw`/`jr`, no branch into
-    the scanned run, the index unchanged, and every table word an instruction
-    start inside this function. Vendored members are not proved by it (their
+    `scripts.kf.sema.cfg.switch_table` is the straight-line switch-table
+    prover: a bounded `sltiu`/`beqz` index, a `lui`/`addiu` table base (the
+    `lui` may sit in the bound's delay slot), `sll`/`addu`/`lw`/`jr`, no
+    branch into the scanned run, the index unchanged, and every table word an
+    instruction start inside this function. A table whose base or entry
+    address GCC hoisted out of a loop is proved by reaching definitions
+    (`scripts.kf.sema.values.hoisted_switch`, witness pattern
+    `switch-table-hoisted`). Vendored members are not proved by it (their
     indirect sites are exempted wholesale as `vendored-indirect`).
     Returns the witness detail per `jr` site.
     """
@@ -201,8 +204,9 @@ def proven_switch_dispatch(img: RetailImage, function: Binding) -> dict[int, dic
     if payload is None:
         return {}
     return {
-        site: {"site": site, "pattern": "switch-table", "table": proven.table,
-               "entries": len(proven.targets)}
+        site: {"site": site,
+               "pattern": "switch-table-hoisted" if proven.hoisted else "switch-table",
+               "table": proven.table, "entries": len(proven.targets)}
         for site, proven in switch_tables(function, payload, img.u32).items()
     }
 

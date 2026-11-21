@@ -349,7 +349,10 @@ function, a compiled `switch` jump is proved from its own bounded value
 chain (`sltiu`/`beqz` bound, `lui`/`addiu` table address, `sll`/`addu`/`lw`,
 `jr`) when every table word is an instruction start inside that function;
 the CFG's `switch_table` rule (`scripts/kf/sema/cfg.py`) is the one prover,
-and each such jump is a `switch_dispatch` witness row. A Sony member's
+and each such jump is a `switch_dispatch` witness row. A table whose base
+GCC hoisted out of a loop is proved from the same chain by reaching
+definitions (`scripts/kf/sema/values.py`, see `semantic-navigation.md`) and
+witnessed as `switch-table-hoisted`. A Sony member's
 switch jump is not proved by it; it is covered by the vendored exemption.
 
 Both objdiff front ends are built from the same pinned 3.7.3 source with
