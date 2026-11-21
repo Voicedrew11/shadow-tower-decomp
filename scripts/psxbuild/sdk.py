@@ -109,15 +109,17 @@ def rewrite_gte(root: Path, stems: tuple[str, ...]) -> dict[str, int]:
     return rewritten
 
 
-# Retail ST.EXE lays out every game unit's constant pool (string literals,
-# aggregate initializers, const data) before any unit's switch tables, each
-# group in link order, and the SDK libraries' read-only data after the tables
-# (STR.EXE and TITLE.EXE show their unit's table directly before LIBSND's
-# `.rdata`). The compiler writes both groups to `.rdata`, so a unit's tables
-# would sit beside its own constants. The constants therefore move to their own
+# The `separate` mode models a program whose game constant pools (string
+# literals, aggregate initializers, const data) all precede the game switch
+# tables, with the SDK libraries' read-only data after the tables (STR.EXE and
+# TITLE.EXE show their unit's table directly before LIBSND's `.rdata`). The
+# compiler writes both groups to `.rdata`, so the constants move to their own
 # `.rodata` section, which the link script places before `.rdata`; the tables,
 # like the SDK's read-only data, stay in `.rdata`. Which mechanism separated
 # them in the original build is unknown; this models the observed layout.
+# ST.EXE and VS.EXE do not have that layout: retail follows each object's
+# constants with that object's own tables, object by object, so they use the
+# `together` mode below (docs/executable-linking.md).
 CONSTANT_SECTION = '.rodata'
 JUMP_TABLE_LABEL = re.compile(r'\$L\d+:')
 JUMP_TABLE_ROW = re.compile(r'\.(?:gp)?word\s+\$L\d+')
@@ -143,9 +145,13 @@ def separate_read_only(assembly: str) -> str:
         moved = True
     if moved:
         # A unit's constant pool ends on an eight-byte boundary: STR.EXE's
-        # switch table follows its 0x10c-byte pool after four zero bytes, and
-        # every ST.EXE pool boundary is eight-aligned. The trailing directive
-        # makes ASPSX pad the section; nothing follows it.
+        # switch table follows its 0x10c-byte pool after four zero bytes.
+        # This is not a rule of every program: ST.EXE (`together` mode, no
+        # padding) has pool boundaries that are only four-aligned, such as
+        # 0x80011c7c, 0x80011cb4 and 0x8001274c: inside an object cc1's
+        # constants follow one another unpadded, and PSYLINK aligns an
+        # object's read-only data to four only. The trailing directive makes
+        # ASPSX pad the section; nothing follows it.
         lines[-1:] = [lines[-1], f'\t.section\t{CONSTANT_SECTION}', '\t.align\t3', '']
     return '\n'.join(lines)
 
