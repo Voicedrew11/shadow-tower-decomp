@@ -89,13 +89,19 @@ void map_pick_shopkeeper_line(void)
     for (i = 0; i < 266; i++) {
         if (inventory.counts[i].count == 0)
             continue;
-        if (i == viewer.equipment[0] || i == viewer.equipment[1] || i == viewer.equipment[2]
-            || i == viewer.equipment[3] || i == viewer.equipment[4] || i == viewer.equipment[5]
-            || i == viewer.equipment[7] || i == viewer.equipment[8] || i == viewer.equipment[9]
-            || i == viewer.equipment[10] || i == viewer.equipment[11] || i == viewer.equipment[13]
-            || i == viewer.equipment[14] || i == viewer.equipment[15] || i == viewer.equipment[16]
-            || i == viewer.equipment[17] || i == viewer.equipment[18] || i == viewer.equipment[19]
-            || i == viewer.equipment[20])
+        if (i == viewer.equipment[EQUIP_SLOT_RIGHT_RING] || i == viewer.equipment[EQUIP_SLOT_RIGHT_BRACELET]
+            || i == viewer.equipment[EQUIP_SLOT_GLOVES]
+            || i == viewer.equipment[EQUIP_SLOT_RIGHT_HAND]
+            || i == viewer.equipment[EQUIP_SLOT_RIGHT_RESERVE] || i == viewer.equipment[EQUIP_SLOT_QUICK_1]
+            || i == viewer.equipment[EQUIP_SLOT_AMULET] || i == viewer.equipment[EQUIP_SLOT_HELMET]
+            || i == viewer.equipment[EQUIP_SLOT_ARMOR]
+            || i == viewer.equipment[EQUIP_SLOT_BOOTS] || i == viewer.equipment[EQUIP_SLOT_QUICK_3]
+            || i == viewer.equipment[EQUIP_SLOT_LEFT_RING]
+            || i == viewer.equipment[EQUIP_SLOT_LEFT_BRACELET]
+            || i == viewer.equipment[EQUIP_SLOT_GLOVES_MIRROR] || i == viewer.equipment[EQUIP_SLOT_LEFT_HAND]
+            || i == viewer.equipment[EQUIP_SLOT_LEFT_RESERVE] || i == viewer.equipment[EQUIP_SLOT_QUICK_5]
+            || i == viewer.equipment[EQUIP_SLOT_QUICK_2]
+            || i == viewer.equipment[EQUIP_SLOT_QUICK_4])
             continue;
         none = 0;
         break;

@@ -107,7 +107,8 @@ void menu_equip_pick_item(void)
         mem_free(sp->state.list.ids);
     } else if (PAD.pressed & 0x4000) {
         if (EQ.shown_id != -1) {
-            if (EQ.slot != SLOT(0) && EQ.slot != SLOT(13) && vis_table_c.types[EQ.shown_id].max_durability &&
+            if (EQ.slot != SLOT(EQUIP_SLOT_RIGHT_RING) && EQ.slot != SLOT(EQUIP_SLOT_LEFT_RING)
+                && vis_table_c.types[EQ.shown_id].max_durability &&
                 !vis_table_c.types[EQ.shown_id].durability) {
                 play_refuse_sound();
             } else {
@@ -115,33 +116,42 @@ void menu_equip_pick_item(void)
                 PAD.pressed = 0;
                 sp->mode &= ~0x8;
                 mem_free(sp->state.list.ids);
-                if (EQ.slot == SLOT(0) && EQ.shown_id != viewer.equipment[0])
-                    viewer.equipment[6] = 0xffff;
-                if (EQ.slot == SLOT(13) && EQ.shown_id != viewer.equipment[13])
-                    viewer.equipment[12] = 0xffff;
+                if (EQ.slot == SLOT(EQUIP_SLOT_RIGHT_RING)
+                    && EQ.shown_id != viewer.equipment[EQUIP_SLOT_RIGHT_RING])
+                    viewer.equipment[EQUIP_SLOT_RIGHT_MAGIC] = EQUIP_NONE;
+                if (EQ.slot == SLOT(EQUIP_SLOT_LEFT_RING)
+                    && EQ.shown_id != viewer.equipment[EQUIP_SLOT_LEFT_RING])
+                    viewer.equipment[EQUIP_SLOT_LEFT_MAGIC] = EQUIP_NONE;
                 *EQ.slot = EQ.shown_id;
-                if (EQ.slot == SLOT(2))
-                    viewer.equipment[15] = EQ.shown_id;
-                if (EQ.slot == SLOT(9) && viewer.equipment[9] != 0xffff &&
-                    vis_table_c.types[viewer.equipment[9]].category == 10) {
-                    viewer.equipment[2] = 0xffff;
-                    viewer.equipment[10] = 0xffff;
+                if (EQ.slot == SLOT(EQUIP_SLOT_GLOVES))
+                    viewer.equipment[EQUIP_SLOT_GLOVES_MIRROR] = EQ.shown_id;
+                if (EQ.slot == SLOT(EQUIP_SLOT_ARMOR) && viewer.equipment[EQUIP_SLOT_ARMOR] != EQUIP_NONE &&
+                    vis_table_c.types[viewer.equipment[EQUIP_SLOT_ARMOR]].category == 10) {
+                    viewer.equipment[EQUIP_SLOT_GLOVES] = EQUIP_NONE;
+                    viewer.equipment[EQUIP_SLOT_BOOTS] = EQUIP_NONE;
                 }
-                if ((EQ.slot == SLOT(10) || EQ.slot == SLOT(2)) && viewer.equipment[9] != 0xffff &&
-                    *EQ.slot != 0xffff && vis_table_c.types[viewer.equipment[9]].category == 10)
-                    viewer.equipment[9] = 0xffff;
-                if (EQ.slot == SLOT(3) && viewer.equipment[3] != 0xffff &&
-                    vis_table_c.types[viewer.equipment[3]].category == 9)
-                    viewer.equipment[16] = 0xffff;
-                if (EQ.slot == SLOT(4) && viewer.equipment[4] != 0xffff &&
-                    vis_table_c.types[viewer.equipment[4]].category == 9)
-                    viewer.equipment[17] = 0xffff;
-                if (EQ.slot == SLOT(16) && viewer.equipment[3] != 0xffff && viewer.equipment[16] != 0xffff &&
-                    vis_table_c.types[viewer.equipment[3]].category == 9)
-                    viewer.equipment[3] = 0xffff;
-                if (EQ.slot == SLOT(17) && viewer.equipment[4] != 0xffff && viewer.equipment[17] != 0xffff &&
-                    vis_table_c.types[viewer.equipment[4]].category == 9)
-                    viewer.equipment[4] = 0xffff;
+                if ((EQ.slot == SLOT(EQUIP_SLOT_BOOTS) || EQ.slot == SLOT(EQUIP_SLOT_GLOVES))
+                    && viewer.equipment[EQUIP_SLOT_ARMOR] != EQUIP_NONE &&
+                    *EQ.slot != 0xffff && vis_table_c.types[viewer.equipment[EQUIP_SLOT_ARMOR]].category == 10)
+                    viewer.equipment[EQUIP_SLOT_ARMOR] = EQUIP_NONE;
+                if (EQ.slot == SLOT(EQUIP_SLOT_RIGHT_HAND)
+                    && viewer.equipment[EQUIP_SLOT_RIGHT_HAND] != EQUIP_NONE &&
+                    vis_table_c.types[viewer.equipment[EQUIP_SLOT_RIGHT_HAND]].category == 9)
+                    viewer.equipment[EQUIP_SLOT_LEFT_HAND] = EQUIP_NONE;
+                if (EQ.slot == SLOT(EQUIP_SLOT_RIGHT_RESERVE)
+                    && viewer.equipment[EQUIP_SLOT_RIGHT_RESERVE] != EQUIP_NONE &&
+                    vis_table_c.types[viewer.equipment[EQUIP_SLOT_RIGHT_RESERVE]].category == 9)
+                    viewer.equipment[EQUIP_SLOT_LEFT_RESERVE] = EQUIP_NONE;
+                if (EQ.slot == SLOT(EQUIP_SLOT_LEFT_HAND)
+                    && viewer.equipment[EQUIP_SLOT_RIGHT_HAND] != EQUIP_NONE
+                    && viewer.equipment[EQUIP_SLOT_LEFT_HAND] != EQUIP_NONE &&
+                    vis_table_c.types[viewer.equipment[EQUIP_SLOT_RIGHT_HAND]].category == 9)
+                    viewer.equipment[EQUIP_SLOT_RIGHT_HAND] = EQUIP_NONE;
+                if (EQ.slot == SLOT(EQUIP_SLOT_LEFT_RESERVE)
+                    && viewer.equipment[EQUIP_SLOT_RIGHT_RESERVE] != EQUIP_NONE
+                    && viewer.equipment[EQUIP_SLOT_LEFT_RESERVE] != EQUIP_NONE &&
+                    vis_table_c.types[viewer.equipment[EQUIP_SLOT_RIGHT_RESERVE]].category == 9)
+                    viewer.equipment[EQUIP_SLOT_RIGHT_RESERVE] = EQUIP_NONE;
             }
         } else {
             play_confirm_sound();
@@ -149,10 +159,10 @@ void menu_equip_pick_item(void)
             sp->mode &= ~0x8;
             mem_free(sp->state.list.ids);
             *EQ.slot = 0xffff;
-            if (EQ.slot == SLOT(0))
-                viewer.equipment[6] = 0xffff;
-            if (EQ.slot == SLOT(13))
-                viewer.equipment[12] = 0xffff;
+            if (EQ.slot == SLOT(EQUIP_SLOT_RIGHT_RING))
+                viewer.equipment[EQUIP_SLOT_RIGHT_MAGIC] = EQUIP_NONE;
+            if (EQ.slot == SLOT(EQUIP_SLOT_LEFT_RING))
+                viewer.equipment[EQUIP_SLOT_LEFT_MAGIC] = EQUIP_NONE;
         }
         menu_equip_recalc_stats();
         PAD.pressed = 0;
@@ -235,78 +245,78 @@ int menu_equip_pick_slot(int *sel)
         switch (sp->scroll + sp->cursor) {
         case 0:
             kind = 0;
-            cur = viewer.equipment[8];
-            EQ.slot = SLOT(8);
+            cur = viewer.equipment[EQUIP_SLOT_HELMET];
+            EQ.slot = SLOT(EQUIP_SLOT_HELMET);
             break;
         case 1:
             kind = 1;
-            cur = viewer.equipment[9];
-            EQ.slot = SLOT(9);
+            cur = viewer.equipment[EQUIP_SLOT_ARMOR];
+            EQ.slot = SLOT(EQUIP_SLOT_ARMOR);
             break;
         case 2:
             kind = 2;
-            cur = viewer.equipment[2];
-            EQ.slot = SLOT(2);
+            cur = viewer.equipment[EQUIP_SLOT_GLOVES];
+            EQ.slot = SLOT(EQUIP_SLOT_GLOVES);
             break;
         case 3:
             kind = 3;
-            cur = viewer.equipment[10];
-            EQ.slot = SLOT(10);
+            cur = viewer.equipment[EQUIP_SLOT_BOOTS];
+            EQ.slot = SLOT(EQUIP_SLOT_BOOTS);
             break;
         case 4:
             kind = 6;
-            cur = viewer.equipment[3];
-            EQ.slot = SLOT(3);
+            cur = viewer.equipment[EQUIP_SLOT_RIGHT_HAND];
+            EQ.slot = SLOT(EQUIP_SLOT_RIGHT_HAND);
             break;
         case 5:
             kind = 6;
-            cur = viewer.equipment[4];
-            EQ.slot = SLOT(4);
+            cur = viewer.equipment[EQUIP_SLOT_RIGHT_RESERVE];
+            EQ.slot = SLOT(EQUIP_SLOT_RIGHT_RESERVE);
             break;
         case 6:
             kind = 7;
-            cur = viewer.equipment[16];
-            EQ.slot = SLOT(16);
+            cur = viewer.equipment[EQUIP_SLOT_LEFT_HAND];
+            EQ.slot = SLOT(EQUIP_SLOT_LEFT_HAND);
             break;
         case 7:
             kind = 7;
-            cur = viewer.equipment[17];
-            EQ.slot = SLOT(17);
+            cur = viewer.equipment[EQUIP_SLOT_LEFT_RESERVE];
+            EQ.slot = SLOT(EQUIP_SLOT_LEFT_RESERVE);
             break;
         case 8:
             kind = 8;
-            cur = viewer.equipment[1];
-            EQ.slot = SLOT(1);
+            cur = viewer.equipment[EQUIP_SLOT_RIGHT_BRACELET];
+            EQ.slot = SLOT(EQUIP_SLOT_RIGHT_BRACELET);
             break;
         case 9:
             kind = 8;
-            cur = viewer.equipment[14];
-            EQ.slot = SLOT(14);
+            cur = viewer.equipment[EQUIP_SLOT_LEFT_BRACELET];
+            EQ.slot = SLOT(EQUIP_SLOT_LEFT_BRACELET);
             break;
         case 10:
             kind = 5;
-            cur = viewer.equipment[7];
-            EQ.slot = SLOT(7);
+            cur = viewer.equipment[EQUIP_SLOT_AMULET];
+            EQ.slot = SLOT(EQUIP_SLOT_AMULET);
             break;
         case 11:
             kind = 4;
-            cur = viewer.equipment[0];
-            EQ.slot = SLOT(0);
+            cur = viewer.equipment[EQUIP_SLOT_RIGHT_RING];
+            EQ.slot = SLOT(EQUIP_SLOT_RIGHT_RING);
             break;
         case 12:
             kind = -1;
-            cur = viewer.equipment[6];
-            EQ.slot = SLOT(6);
+            cur = viewer.equipment[EQUIP_SLOT_RIGHT_MAGIC];
+            EQ.slot = SLOT(EQUIP_SLOT_RIGHT_MAGIC);
             break;
         case 13:
             kind = 4;
-            cur = viewer.equipment[13];
-            EQ.slot = SLOT(13);
+            cur = viewer.equipment[EQUIP_SLOT_LEFT_RING];
+            EQ.slot = SLOT(EQUIP_SLOT_LEFT_RING);
             break;
         case 14:
             kind = -1;
-            cur = viewer.equipment[12];
-            EQ.slot = SLOT(12);
+            cur = viewer.equipment[EQUIP_SLOT_LEFT_MAGIC];
+            EQ.slot = SLOT(EQUIP_SLOT_LEFT_MAGIC);
             break;
         default:
             cur = 0xffff;
@@ -315,15 +325,17 @@ int menu_equip_pick_slot(int *sel)
             break;
         }
         if (kind == -1) {
-            if ((EQ.slot == SLOT(6) && viewer.equipment[0] != 0xffff) ||
-                (EQ.slot == SLOT(12) && viewer.equipment[13] != 0xffff)) {
+            if ((EQ.slot == SLOT(EQUIP_SLOT_RIGHT_MAGIC)
+                && viewer.equipment[EQUIP_SLOT_RIGHT_RING] != EQUIP_NONE) ||
+                (EQ.slot == SLOT(EQUIP_SLOT_LEFT_MAGIC)
+                    && viewer.equipment[EQUIP_SLOT_LEFT_RING] != EQUIP_NONE)) {
                 u8 entries[] = {0, 1, 3, 4, 6, 7, 9, 10, 12, 13, 15, 16};
                 u32 *bits;
 
-                if (EQ.slot == SLOT(6))
-                    bits = &equip_magic_list.bits[viewer.equipment[0] - 196];
+                if (EQ.slot == SLOT(EQUIP_SLOT_RIGHT_MAGIC))
+                    bits = &equip_magic_list.bits[viewer.equipment[EQUIP_SLOT_RIGHT_RING] - 196];
                 else
-                    bits = &equip_magic_list.bits[viewer.equipment[13] - 196];
+                    bits = &equip_magic_list.bits[viewer.equipment[EQUIP_SLOT_LEFT_RING] - 196];
                 equip_magic_list.count = 0;
                 for (i = 0; i < 12; i++)
                     equip_magic_list.entries[i] = 255;
@@ -356,21 +368,21 @@ int menu_equip_pick_slot(int *sel)
                 continue;
             switch (kind) {
             case 8:
-                if (i == (EQ.slot == SLOT(1) ? viewer.equipment[14] : viewer.equipment[1]))
+                if (i == (EQ.slot == SLOT(EQUIP_SLOT_RIGHT_BRACELET) ? viewer.equipment[EQUIP_SLOT_LEFT_BRACELET] : viewer.equipment[EQUIP_SLOT_RIGHT_BRACELET]))
                     continue;
                 if (table->types[i].category == kind)
                     sp->state.list.ids[sp->state.list.count++] = i;
                 break;
             case 4:
-                if (i == (EQ.slot == SLOT(0) ? viewer.equipment[13] : viewer.equipment[0]))
+                if (i == (EQ.slot == SLOT(EQUIP_SLOT_RIGHT_RING) ? viewer.equipment[EQUIP_SLOT_LEFT_RING] : viewer.equipment[EQUIP_SLOT_RIGHT_RING]))
                     continue;
                 if (table->types[i].category == kind)
                     sp->state.list.ids[sp->state.list.count++] = i;
                 break;
             case 6:
-                if (EQ.slot == SLOT(3) && i == viewer.equipment[4])
+                if (EQ.slot == SLOT(EQUIP_SLOT_RIGHT_HAND) && i == viewer.equipment[EQUIP_SLOT_RIGHT_RESERVE])
                     continue;
-                if (EQ.slot == SLOT(4) && i == viewer.equipment[3])
+                if (EQ.slot == SLOT(EQUIP_SLOT_RIGHT_RESERVE) && i == viewer.equipment[EQUIP_SLOT_RIGHT_HAND])
                     continue;
                 if (table->types[i].category == 6 || table->types[i].category == 9)
                     sp->state.list.ids[sp->state.list.count++] = i;
@@ -380,9 +392,9 @@ int menu_equip_pick_slot(int *sel)
                     sp->state.list.ids[sp->state.list.count++] = i;
                 break;
             case 7:
-                if (EQ.slot == SLOT(16) && i == viewer.equipment[17])
+                if (EQ.slot == SLOT(EQUIP_SLOT_LEFT_HAND) && i == viewer.equipment[EQUIP_SLOT_LEFT_RESERVE])
                     continue;
-                if (EQ.slot == SLOT(17) && i == viewer.equipment[16])
+                if (EQ.slot == SLOT(EQUIP_SLOT_LEFT_RESERVE) && i == viewer.equipment[EQUIP_SLOT_LEFT_HAND])
                     continue;
                 if (table->types[i].category == kind)
                     sp->state.list.ids[sp->state.list.count++] = i;
@@ -477,10 +489,10 @@ void menu_equip_pick_magic(void)
             sp->scroll = equip_magic_list.count - 5;
     } else if (PAD.pressed & 0x4000) {
         PAD.pressed = 0;
-        if (EQ.slot == SLOT(6))
-            bits = &equip_magic_list.bits[viewer.equipment[0] - 196];
+        if (EQ.slot == SLOT(EQUIP_SLOT_RIGHT_MAGIC))
+            bits = &equip_magic_list.bits[viewer.equipment[EQUIP_SLOT_RIGHT_RING] - 196];
         else
-            bits = &equip_magic_list.bits[viewer.equipment[13] - 196];
+            bits = &equip_magic_list.bits[viewer.equipment[EQUIP_SLOT_LEFT_RING] - 196];
         list = &equip_magic_list;
         if (!(*bits & (1 << list->entries[sp->scroll + sp->cursor]))) {
             play_refuse_sound();
@@ -701,49 +713,49 @@ void menu_equip_draw_slots(void)
         ui_draw_text(MESSAGE(sp->scroll + i + 900), 28, y, &sp->style[0]);
         switch (sp->scroll + i) {
         case 0:
-            cur = viewer.equipment[8];
+            cur = viewer.equipment[EQUIP_SLOT_HELMET];
             break;
         case 1:
-            cur = viewer.equipment[9];
+            cur = viewer.equipment[EQUIP_SLOT_ARMOR];
             break;
         case 2:
-            cur = viewer.equipment[2];
+            cur = viewer.equipment[EQUIP_SLOT_GLOVES];
             break;
         case 3:
-            cur = viewer.equipment[10];
+            cur = viewer.equipment[EQUIP_SLOT_BOOTS];
             break;
         case 4:
-            cur = viewer.equipment[3];
+            cur = viewer.equipment[EQUIP_SLOT_RIGHT_HAND];
             break;
         case 5:
-            cur = viewer.equipment[4];
+            cur = viewer.equipment[EQUIP_SLOT_RIGHT_RESERVE];
             break;
         case 6:
-            cur = viewer.equipment[16];
+            cur = viewer.equipment[EQUIP_SLOT_LEFT_HAND];
             break;
         case 7:
-            cur = viewer.equipment[17];
+            cur = viewer.equipment[EQUIP_SLOT_LEFT_RESERVE];
             break;
         case 8:
-            cur = viewer.equipment[1];
+            cur = viewer.equipment[EQUIP_SLOT_RIGHT_BRACELET];
             break;
         case 9:
-            cur = viewer.equipment[14];
+            cur = viewer.equipment[EQUIP_SLOT_LEFT_BRACELET];
             break;
         case 10:
-            cur = viewer.equipment[7];
+            cur = viewer.equipment[EQUIP_SLOT_AMULET];
             break;
         case 11:
-            cur = viewer.equipment[0];
+            cur = viewer.equipment[EQUIP_SLOT_RIGHT_RING];
             break;
         case 12:
-            cur = viewer.equipment[6];
+            cur = viewer.equipment[EQUIP_SLOT_RIGHT_MAGIC];
             break;
         case 13:
-            cur = viewer.equipment[13];
+            cur = viewer.equipment[EQUIP_SLOT_LEFT_RING];
             break;
         case 14:
-            cur = viewer.equipment[12];
+            cur = viewer.equipment[EQUIP_SLOT_LEFT_MAGIC];
             break;
         default:
             cur = 0xffff;
@@ -952,13 +964,19 @@ void menu_arrange_list_open(void)
     sp->state.grid.bag_count = 0;
     for (i = 0; i < 314; i++) {
         if (vis_table_c.types[i].unk5[0] != 255 && i < 314 && i != 266 &&
-            inventory.counts[i].count && i != viewer.equipment[0] && i != viewer.equipment[1] &&
-            i != viewer.equipment[2] && i != viewer.equipment[3] && i != viewer.equipment[4] &&
-            i != viewer.equipment[5] && i != viewer.equipment[7] && i != viewer.equipment[8] &&
-            i != viewer.equipment[9] && i != viewer.equipment[10] && i != viewer.equipment[11] &&
-            i != viewer.equipment[13] && i != viewer.equipment[14] &&
-            i != viewer.equipment[15] && i != viewer.equipment[16] && i != viewer.equipment[17] &&
-            i != viewer.equipment[18] && i != viewer.equipment[19] && i != viewer.equipment[20]) {
+            inventory.counts[i].count && i != viewer.equipment[EQUIP_SLOT_RIGHT_RING]
+                && i != viewer.equipment[EQUIP_SLOT_RIGHT_BRACELET] &&
+            i != viewer.equipment[EQUIP_SLOT_GLOVES] && i != viewer.equipment[EQUIP_SLOT_RIGHT_HAND]
+                && i != viewer.equipment[EQUIP_SLOT_RIGHT_RESERVE] &&
+            i != viewer.equipment[EQUIP_SLOT_QUICK_1] && i != viewer.equipment[EQUIP_SLOT_AMULET]
+                && i != viewer.equipment[EQUIP_SLOT_HELMET] &&
+            i != viewer.equipment[EQUIP_SLOT_ARMOR] && i != viewer.equipment[EQUIP_SLOT_BOOTS]
+                && i != viewer.equipment[EQUIP_SLOT_QUICK_3] &&
+            i != viewer.equipment[EQUIP_SLOT_LEFT_RING] && i != viewer.equipment[EQUIP_SLOT_LEFT_BRACELET] &&
+            i != viewer.equipment[EQUIP_SLOT_GLOVES_MIRROR] && i != viewer.equipment[EQUIP_SLOT_LEFT_HAND]
+                && i != viewer.equipment[EQUIP_SLOT_LEFT_RESERVE] &&
+            i != viewer.equipment[EQUIP_SLOT_QUICK_5] && i != viewer.equipment[EQUIP_SLOT_QUICK_2]
+                && i != viewer.equipment[EQUIP_SLOT_QUICK_4]) {
             if (!inventory.counts[i].in_bag)
                 sp->state.grid.hand_ids[sp->state.grid.hand_count++] = i;
             else

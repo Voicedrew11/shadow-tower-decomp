@@ -1100,13 +1100,20 @@ int item_request_any_available(int player)
             if (mine->items_lost[i] == 0)
                 continue;
         }
-        if (other->equipment[0] == i || other->equipment[1] == i || other->equipment[2] == i
-            || other->equipment[3] == i || other->equipment[4] == i || other->equipment[5] == i
-            || other->equipment[6] == i || other->equipment[7] == i || other->equipment[8] == i
-            || other->equipment[9] == i || other->equipment[10] == i || other->equipment[11] == i
-            || other->equipment[12] == i || other->equipment[13] == i || other->equipment[14] == i
-            || other->equipment[15] == i || other->equipment[16] == i || other->equipment[17] == i
-            || other->equipment[18] == i || other->equipment[19] == i || other->equipment[20] == i)
+        if (other->equipment[EQUIP_SLOT_RIGHT_RING] == i || other->equipment[EQUIP_SLOT_RIGHT_BRACELET] == i
+            || other->equipment[EQUIP_SLOT_GLOVES] == i
+            || other->equipment[EQUIP_SLOT_RIGHT_HAND] == i
+            || other->equipment[EQUIP_SLOT_RIGHT_RESERVE] == i || other->equipment[EQUIP_SLOT_QUICK_1] == i
+            || other->equipment[EQUIP_SLOT_RIGHT_MAGIC] == i || other->equipment[EQUIP_SLOT_AMULET] == i
+            || other->equipment[EQUIP_SLOT_HELMET] == i
+            || other->equipment[EQUIP_SLOT_ARMOR] == i || other->equipment[EQUIP_SLOT_BOOTS] == i
+            || other->equipment[EQUIP_SLOT_QUICK_3] == i
+            || other->equipment[EQUIP_SLOT_LEFT_MAGIC] == i || other->equipment[EQUIP_SLOT_LEFT_RING] == i
+            || other->equipment[EQUIP_SLOT_LEFT_BRACELET] == i
+            || other->equipment[EQUIP_SLOT_GLOVES_MIRROR] == i
+            || other->equipment[EQUIP_SLOT_LEFT_HAND] == i || other->equipment[EQUIP_SLOT_LEFT_RESERVE] == i
+            || other->equipment[EQUIP_SLOT_QUICK_5] == i || other->equipment[EQUIP_SLOT_QUICK_2] == i
+            || other->equipment[EQUIP_SLOT_QUICK_4] == i)
             continue;
         found = 1;
     }
@@ -1174,13 +1181,20 @@ void menu_item_request_run(int player)
         mask <<= i % 32;
         if ((word & mask) && mine->items_lost[i] == 0)
             continue;
-        if (other->equipment[0] == i || other->equipment[1] == i || other->equipment[2] == i
-            || other->equipment[3] == i || other->equipment[4] == i || other->equipment[5] == i
-            || other->equipment[6] == i || other->equipment[7] == i || other->equipment[8] == i
-            || other->equipment[9] == i || other->equipment[10] == i || other->equipment[11] == i
-            || other->equipment[12] == i || other->equipment[13] == i || other->equipment[14] == i
-            || other->equipment[15] == i || other->equipment[16] == i || other->equipment[17] == i
-            || other->equipment[18] == i || other->equipment[19] == i || other->equipment[20] == i)
+        if (other->equipment[EQUIP_SLOT_RIGHT_RING] == i || other->equipment[EQUIP_SLOT_RIGHT_BRACELET] == i
+            || other->equipment[EQUIP_SLOT_GLOVES] == i
+            || other->equipment[EQUIP_SLOT_RIGHT_HAND] == i
+            || other->equipment[EQUIP_SLOT_RIGHT_RESERVE] == i || other->equipment[EQUIP_SLOT_QUICK_1] == i
+            || other->equipment[EQUIP_SLOT_RIGHT_MAGIC] == i || other->equipment[EQUIP_SLOT_AMULET] == i
+            || other->equipment[EQUIP_SLOT_HELMET] == i
+            || other->equipment[EQUIP_SLOT_ARMOR] == i || other->equipment[EQUIP_SLOT_BOOTS] == i
+            || other->equipment[EQUIP_SLOT_QUICK_3] == i
+            || other->equipment[EQUIP_SLOT_LEFT_MAGIC] == i || other->equipment[EQUIP_SLOT_LEFT_RING] == i
+            || other->equipment[EQUIP_SLOT_LEFT_BRACELET] == i
+            || other->equipment[EQUIP_SLOT_GLOVES_MIRROR] == i
+            || other->equipment[EQUIP_SLOT_LEFT_HAND] == i || other->equipment[EQUIP_SLOT_LEFT_RESERVE] == i
+            || other->equipment[EQUIP_SLOT_QUICK_5] == i || other->equipment[EQUIP_SLOT_QUICK_2] == i
+            || other->equipment[EQUIP_SLOT_QUICK_4] == i)
             continue;
         IDS[COUNT++] = i;
     }

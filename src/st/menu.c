@@ -93,12 +93,12 @@ void menu_reload_assets(void)
     loading_screen_show();
     menu_load_main_messages();
     area_reload_images();
-    player_load_equipment_model(viewer.equipment[3], 0, 1);
-    player_load_equipment_model(viewer.equipment[16], 1, 1);
-    player_load_equipment_model(viewer.equipment[4], 2, 1);
-    player_load_equipment_model(viewer.equipment[17], 3, 1);
-    player_load_magic(viewer.equipment[6], 0);
-    player_load_magic(viewer.equipment[12], 1);
+    player_load_equipment_model(viewer.equipment[EQUIP_SLOT_RIGHT_HAND], 0, 1);
+    player_load_equipment_model(viewer.equipment[EQUIP_SLOT_LEFT_HAND], 1, 1);
+    player_load_equipment_model(viewer.equipment[EQUIP_SLOT_RIGHT_RESERVE], 2, 1);
+    player_load_equipment_model(viewer.equipment[EQUIP_SLOT_LEFT_RESERVE], 3, 1);
+    player_load_magic(viewer.equipment[EQUIP_SLOT_RIGHT_MAGIC], 0);
+    player_load_magic(viewer.equipment[EQUIP_SLOT_LEFT_MAGIC], 1);
     loading_screen_end();
 }
 
@@ -382,11 +382,11 @@ void equip_load_item_slot_pictures(void)
     int size;
 
     i = used = 0;
-    ids[0] = viewer.equipment[5];
-    ids[1] = viewer.equipment[19];
-    ids[2] = viewer.equipment[11];
-    ids[3] = viewer.equipment[20];
-    ids[4] = viewer.equipment[18];
+    ids[0] = viewer.equipment[EQUIP_SLOT_QUICK_1];
+    ids[1] = viewer.equipment[EQUIP_SLOT_QUICK_2];
+    ids[2] = viewer.equipment[EQUIP_SLOT_QUICK_3];
+    ids[3] = viewer.equipment[EQUIP_SLOT_QUICK_4];
+    ids[4] = viewer.equipment[EQUIP_SLOT_QUICK_5];
     cd_state.load_cursor = (u_long *)(&cd_state + 1);
     for (i = 0; i < 5; i++) {
         if (used + 2048 > 0x12000) {
@@ -423,12 +423,13 @@ void equip_apply_slot_change(int redraw)
 
     if (redraw == 0)
         *(EquipmentSlots *)sp->saved_equipment = *MENU_SLOTS;
-    if (viewer.equipment[9] != 0xffff && vis_table_c.types[viewer.equipment[9]].category == 10) {
+    if (viewer.equipment[EQUIP_SLOT_ARMOR] != EQUIP_NONE
+        && vis_table_c.types[viewer.equipment[EQUIP_SLOT_ARMOR]].category == 10) {
         if (sp->cursor == 2 || sp->cursor == 16 || sp->cursor == 9 || sp->cursor == 10
             || sp->cursor == 11) {
-            viewer.equipment[2] = 0xffff;
-            viewer.equipment[9] = 0xffff;
-            viewer.equipment[10] = 0xffff;
+            viewer.equipment[EQUIP_SLOT_GLOVES] = EQUIP_NONE;
+            viewer.equipment[EQUIP_SLOT_ARMOR] = EQUIP_NONE;
+            viewer.equipment[EQUIP_SLOT_BOOTS] = EQUIP_NONE;
             if (redraw == 1) {
                 equip_load_slot_picture(2);
                 equip_load_slot_picture(9);
@@ -436,20 +437,22 @@ void equip_apply_slot_change(int redraw)
             }
         }
     }
-    if (viewer.equipment[3] != 0xffff && vis_table_c.types[viewer.equipment[3]].category == 9) {
+    if (viewer.equipment[EQUIP_SLOT_RIGHT_HAND] != EQUIP_NONE
+        && vis_table_c.types[viewer.equipment[EQUIP_SLOT_RIGHT_HAND]].category == 9) {
         if (sp->cursor == 3 || sp->cursor == 17) {
-            viewer.equipment[3] = 0xffff;
-            viewer.equipment[16] = 0xffff;
+            viewer.equipment[EQUIP_SLOT_RIGHT_HAND] = EQUIP_NONE;
+            viewer.equipment[EQUIP_SLOT_LEFT_HAND] = EQUIP_NONE;
             if (redraw == 1) {
                 equip_load_slot_picture(3);
                 equip_load_slot_picture(16);
             }
         }
     }
-    if (viewer.equipment[4] != 0xffff && vis_table_c.types[viewer.equipment[4]].category == 9) {
+    if (viewer.equipment[EQUIP_SLOT_RIGHT_RESERVE] != EQUIP_NONE
+        && vis_table_c.types[viewer.equipment[EQUIP_SLOT_RIGHT_RESERVE]].category == 9) {
         if (sp->cursor == 4 || sp->cursor == 18) {
-            viewer.equipment[4] = 0xffff;
-            viewer.equipment[17] = 0xffff;
+            viewer.equipment[EQUIP_SLOT_RIGHT_RESERVE] = EQUIP_NONE;
+            viewer.equipment[EQUIP_SLOT_LEFT_RESERVE] = EQUIP_NONE;
             if (redraw == 1) {
                 equip_load_slot_picture(4);
                 equip_load_slot_picture(17);
@@ -458,8 +461,8 @@ void equip_apply_slot_change(int redraw)
     }
     if (sp->choice_id != -1) {
         if (vis_table_c.types[sp->choice_id].category == 10) {
-            viewer.equipment[2] = 0xffff;
-            viewer.equipment[10] = 0xffff;
+            viewer.equipment[EQUIP_SLOT_GLOVES] = EQUIP_NONE;
+            viewer.equipment[EQUIP_SLOT_BOOTS] = EQUIP_NONE;
             if (redraw == 1) {
                 equip_load_slot_picture(2);
                 equip_load_slot_picture(10);
@@ -467,11 +470,11 @@ void equip_apply_slot_change(int redraw)
         }
         if (vis_table_c.types[sp->choice_id].category == 9) {
             if (sp->cursor == 3) {
-                viewer.equipment[16] = 0xffff;
+                viewer.equipment[EQUIP_SLOT_LEFT_HAND] = EQUIP_NONE;
                 if (redraw == 1)
                     equip_load_slot_picture(16);
             } else if (sp->cursor == 4) {
-                viewer.equipment[17] = 0xffff;
+                viewer.equipment[EQUIP_SLOT_LEFT_RESERVE] = EQUIP_NONE;
                 if (redraw == 1)
                     equip_load_slot_picture(17);
             }
@@ -479,12 +482,12 @@ void equip_apply_slot_change(int redraw)
     }
     if (sp->cursor == 2 || sp->cursor == 16) {
         if (sp->choice_id == -1) {
-            u16 *hand = &viewer.equipment[2];
+            u16 *hand = &viewer.equipment[EQUIP_SLOT_GLOVES];
 
             *hand = 0xffff;
             hand[13] = 0xffff;
         } else {
-            viewer.equipment[2] = sp->choice_id;
+            viewer.equipment[EQUIP_SLOT_GLOVES] = sp->choice_id;
         }
         if (redraw == 1)
             equip_load_slot_picture(2);
@@ -506,9 +509,9 @@ void equip_apply_slot_change(int redraw)
     if (sp->cursor != 0 && sp->cursor != 14)
         return;
     if (sp->cursor == 0)
-        viewer.equipment[6] = 0xffff;
+        viewer.equipment[EQUIP_SLOT_RIGHT_MAGIC] = EQUIP_NONE;
     else
-        viewer.equipment[12] = 0xffff;
+        viewer.equipment[EQUIP_SLOT_LEFT_MAGIC] = EQUIP_NONE;
     if (redraw == 1) {
         DrawSync(0);
         equip_load_slot_picture(sp->cursor == 0 ? 6 : 12);
@@ -599,16 +602,16 @@ void player_total_attributes(void)
         }
         at->next_rec++;
     }
-    if (viewer.equipment[6] != 0xffff) {
-        at->right_magic_attr = viewer.equipment[6] / 3;
-        at->right_magic_bonus = *(at->right_magic_attr + effects.defs[viewer.equipment[6]].element_damage);
+    if (viewer.equipment[EQUIP_SLOT_RIGHT_MAGIC] != EQUIP_NONE) {
+        at->right_magic_attr = viewer.equipment[EQUIP_SLOT_RIGHT_MAGIC] / 3;
+        at->right_magic_bonus = *(at->right_magic_attr + effects.defs[viewer.equipment[EQUIP_SLOT_RIGHT_MAGIC]].element_damage);
     } else {
         at->right_magic_attr = 0xffff;
         at->right_magic_bonus = 0;
     }
-    if (viewer.equipment[12] != 0xffff) {
-        at->left_magic_attr = viewer.equipment[12] / 3;
-        at->left_magic_bonus = *(at->left_magic_attr + effects.defs[viewer.equipment[12]].element_damage);
+    if (viewer.equipment[EQUIP_SLOT_LEFT_MAGIC] != EQUIP_NONE) {
+        at->left_magic_attr = viewer.equipment[EQUIP_SLOT_LEFT_MAGIC] / 3;
+        at->left_magic_bonus = *(at->left_magic_attr + effects.defs[viewer.equipment[EQUIP_SLOT_LEFT_MAGIC]].element_damage);
     } else {
         at->left_magic_attr = 0xffff;
         at->left_magic_bonus = 0;
@@ -683,7 +686,7 @@ void player_compute_derived_stats(int apply)
         viewer.physical_base = 1;
     if (viewer.magic_base == 0)
         viewer.magic_base = 1;
-    if (viewer.equipment[3] != 0xffff) {
+    if (viewer.equipment[EQUIP_SLOT_RIGHT_HAND] != EQUIP_NONE) {
         viewer.weapon_attack[0] = viewer.physical_base + (at->attribute_bonuses_clamped[4] >> 1);
         viewer.weapon_attack[1] = viewer.physical_base + (at->attribute_bonuses_clamped[5] >> 1);
         viewer.weapon_attack[2] = viewer.physical_base + (at->attribute_bonuses_clamped[6] >> 1);
@@ -947,11 +950,14 @@ void menu_equip_info_run(void)
         equip_load_slot_picture(slots[0]);
         menu_equip_info_draw();
         for (j = 1; j < 20; j++) {
-            if ((viewer.equipment[3] == 0xffff || vis_table_c.types[viewer.equipment[3]].category != 9
+            if ((viewer.equipment[EQUIP_SLOT_RIGHT_HAND] == EQUIP_NONE
+                || vis_table_c.types[viewer.equipment[EQUIP_SLOT_RIGHT_HAND]].category != 9
                  || slots[j] != 16)
-                && (viewer.equipment[4] == 0xffff || vis_table_c.types[viewer.equipment[4]].category != 9
+                && (viewer.equipment[EQUIP_SLOT_RIGHT_RESERVE] == EQUIP_NONE
+                || vis_table_c.types[viewer.equipment[EQUIP_SLOT_RIGHT_RESERVE]].category != 9
                     || slots[j] != 17)
-                && (viewer.equipment[9] == 0xffff || vis_table_c.types[viewer.equipment[9]].category != 10
+                && (viewer.equipment[EQUIP_SLOT_ARMOR] == EQUIP_NONE
+                || vis_table_c.types[viewer.equipment[EQUIP_SLOT_ARMOR]].category != 10
                     || (slots[j] != 2 && slots[j] != 10 && slots[j] != 15))) {
                 equip_load_slot_picture(slots[j]);
                 menu_equip_info_draw();
@@ -1000,8 +1006,10 @@ void menu_equip_info_run(void)
                 case 4:
                     n = sp->category_counts[6];
                     for (k = 0; k < n; k++) {
-                        if ((sp->cursor == 3 && sp->category_lists[6][k] != viewer.equipment[4])
-                            || (sp->cursor == 4 && sp->category_lists[6][k] != viewer.equipment[3]))
+                        if ((sp->cursor == 3
+                            && sp->category_lists[6][k] != viewer.equipment[EQUIP_SLOT_RIGHT_RESERVE])
+                            || (sp->cursor == 4
+                            && sp->category_lists[6][k] != viewer.equipment[EQUIP_SLOT_RIGHT_HAND]))
                             sp->choices[sp->choice_count++] = sp->category_lists[6][k];
                     }
                     play_confirm_sound();
@@ -1013,8 +1021,10 @@ void menu_equip_info_run(void)
                 case 18:
                     n = sp->category_counts[7];
                     for (k = 0; k < n; k++) {
-                        if ((sp->cursor == 17 && sp->category_lists[7][k] != viewer.equipment[17])
-                            || (sp->cursor == 18 && sp->category_lists[7][k] != viewer.equipment[16]))
+                        if ((sp->cursor == 17
+                            && sp->category_lists[7][k] != viewer.equipment[EQUIP_SLOT_LEFT_RESERVE])
+                            || (sp->cursor == 18
+                            && sp->category_lists[7][k] != viewer.equipment[EQUIP_SLOT_LEFT_HAND]))
                             sp->choices[sp->choice_count++] = sp->category_lists[7][k];
                     }
                     play_confirm_sound();
@@ -1064,8 +1074,10 @@ void menu_equip_info_run(void)
                 case 14:
                     n = sp->category_counts[4];
                     for (k = 0; k < n; k++) {
-                        if ((sp->cursor == 0 && sp->category_lists[4][k] != viewer.equipment[13])
-                            || (sp->cursor == 14 && sp->category_lists[4][k] != viewer.equipment[0]))
+                        if ((sp->cursor == 0
+                            && sp->category_lists[4][k] != viewer.equipment[EQUIP_SLOT_LEFT_RING])
+                            || (sp->cursor == 14
+                            && sp->category_lists[4][k] != viewer.equipment[EQUIP_SLOT_RIGHT_RING]))
                             sp->choices[sp->choice_count++] = sp->category_lists[4][k];
                     }
                     play_confirm_sound();
@@ -1077,8 +1089,10 @@ void menu_equip_info_run(void)
                 case 15:
                     n = sp->category_counts[8];
                     for (k = 0; k < n; k++) {
-                        if ((sp->cursor == 1 && sp->category_lists[8][k] != viewer.equipment[14])
-                            || (sp->cursor == 15 && sp->category_lists[8][k] != viewer.equipment[1]))
+                        if ((sp->cursor == 1
+                            && sp->category_lists[8][k] != viewer.equipment[EQUIP_SLOT_LEFT_BRACELET])
+                            || (sp->cursor == 15
+                            && sp->category_lists[8][k] != viewer.equipment[EQUIP_SLOT_RIGHT_BRACELET]))
                             sp->choices[sp->choice_count++] = sp->category_lists[8][k];
                     }
                     play_confirm_sound();
@@ -1102,15 +1116,21 @@ void menu_equip_info_run(void)
                 case 21:
                     n = sp->category_counts[9];
                     for (k = 0; k < n; k++) {
-                        if ((sp->category_lists[9][k] != viewer.equipment[5] && sp->category_lists[9][k] != viewer.equipment[19]
-                             && sp->category_lists[9][k] != viewer.equipment[11]
-                             && sp->category_lists[9][k] != viewer.equipment[20]
-                             && sp->category_lists[9][k] != viewer.equipment[18])
-                            || (sp->cursor == 5 && sp->category_lists[9][k] == viewer.equipment[5])
-                            || (sp->cursor == 20 && sp->category_lists[9][k] == viewer.equipment[19])
-                            || (sp->cursor == 12 && sp->category_lists[9][k] == viewer.equipment[11])
-                            || (sp->cursor == 21 && sp->category_lists[9][k] == viewer.equipment[20])
-                            || (sp->cursor == 19 && sp->category_lists[9][k] == viewer.equipment[18]))
+                        if ((sp->category_lists[9][k] != viewer.equipment[EQUIP_SLOT_QUICK_1]
+                            && sp->category_lists[9][k] != viewer.equipment[EQUIP_SLOT_QUICK_2]
+                             && sp->category_lists[9][k] != viewer.equipment[EQUIP_SLOT_QUICK_3]
+                             && sp->category_lists[9][k] != viewer.equipment[EQUIP_SLOT_QUICK_4]
+                             && sp->category_lists[9][k] != viewer.equipment[EQUIP_SLOT_QUICK_5])
+                            || (sp->cursor == 5
+                            && sp->category_lists[9][k] == viewer.equipment[EQUIP_SLOT_QUICK_1])
+                            || (sp->cursor == 20
+                            && sp->category_lists[9][k] == viewer.equipment[EQUIP_SLOT_QUICK_2])
+                            || (sp->cursor == 12
+                            && sp->category_lists[9][k] == viewer.equipment[EQUIP_SLOT_QUICK_3])
+                            || (sp->cursor == 21
+                            && sp->category_lists[9][k] == viewer.equipment[EQUIP_SLOT_QUICK_4])
+                            || (sp->cursor == 19
+                            && sp->category_lists[9][k] == viewer.equipment[EQUIP_SLOT_QUICK_5]))
                             sp->choices[sp->choice_count++] = sp->category_lists[9][k];
                     }
                     play_confirm_sound();
@@ -1120,8 +1140,8 @@ void menu_equip_info_run(void)
                     break;
                 case 6:
                 case 13:
-                    if ((sp->cursor == 6 && viewer.equipment[0] != 0xffff)
-                        || (sp->cursor == 13 && viewer.equipment[13] != 0xffff)) {
+                    if ((sp->cursor == 6 && viewer.equipment[EQUIP_SLOT_RIGHT_RING] != EQUIP_NONE)
+                        || (sp->cursor == 13 && viewer.equipment[EQUIP_SLOT_LEFT_RING] != EQUIP_NONE)) {
                         play_confirm_sound();
                     } else {
                         play_refuse_sound();
@@ -1147,9 +1167,9 @@ void menu_equip_info_run(void)
                     sp->tex_pos.vx = 640;
                     sp->tex_pos.vy = 0;
                     if (sp->cursor == 6)
-                        sp->ring_magic = sp->ring_magic_bits + (viewer.equipment[0] - 196);
+                        sp->ring_magic = sp->ring_magic_bits + (viewer.equipment[EQUIP_SLOT_RIGHT_RING] - 196);
                     else
-                        sp->ring_magic = sp->ring_magic_bits + (viewer.equipment[13] - 196);
+                        sp->ring_magic = sp->ring_magic_bits + (viewer.equipment[EQUIP_SLOT_LEFT_RING] - 196);
                     cd_read_member(7, 975, CD_BUFFER);
                     tim_load_images_at(CD_BUFFER, &sp->tex_pos, NULL, 1);
                     cd_read_member(7, sp->choice_index + 995, CD_BUFFER);
@@ -1385,10 +1405,10 @@ void menu_equip_info_run(void)
                         sp->rect.w = 48;
                         sp->rect.h = 24;
                         if (sp->cursor == 6) {
-                            viewer.equipment[6] = sp->choice_index;
+                            viewer.equipment[EQUIP_SLOT_RIGHT_MAGIC] = sp->choice_index;
                             MoveImage(&sp->rect, 740, 124);
                         } else {
-                            viewer.equipment[12] = sp->choice_index;
+                            viewer.equipment[EQUIP_SLOT_LEFT_MAGIC] = sp->choice_index;
                             MoveImage(&sp->rect, 788, 124);
                         }
                         sp->mode = 1;
@@ -1775,13 +1795,20 @@ void menu_arrange_icons_run(void)
     sp->state.grid.bag_count = 0;
     for (i = 0; i < 314; i++) {
         if (vis_table_c.types[i].unk5[0] != 0xff && i < 314 && i != 266
-            && inventory.counts[i].count != 0 && i != viewer.equipment[0] && i != viewer.equipment[1]
-            && i != viewer.equipment[2] && i != viewer.equipment[3] && i != viewer.equipment[4]
-            && i != viewer.equipment[5] && i != viewer.equipment[7] && i != viewer.equipment[8]
-            && i != viewer.equipment[9] && i != viewer.equipment[10] && i != viewer.equipment[11]
-            && i != viewer.equipment[13] && i != viewer.equipment[14] && i != viewer.equipment[15]
-            && i != viewer.equipment[16] && i != viewer.equipment[17] && i != viewer.equipment[18]
-            && i != viewer.equipment[19] && i != viewer.equipment[20]) {
+            && inventory.counts[i].count != 0 && i != viewer.equipment[EQUIP_SLOT_RIGHT_RING]
+            && i != viewer.equipment[EQUIP_SLOT_RIGHT_BRACELET]
+            && i != viewer.equipment[EQUIP_SLOT_GLOVES] && i != viewer.equipment[EQUIP_SLOT_RIGHT_HAND]
+            && i != viewer.equipment[EQUIP_SLOT_RIGHT_RESERVE]
+            && i != viewer.equipment[EQUIP_SLOT_QUICK_1] && i != viewer.equipment[EQUIP_SLOT_AMULET]
+            && i != viewer.equipment[EQUIP_SLOT_HELMET]
+            && i != viewer.equipment[EQUIP_SLOT_ARMOR] && i != viewer.equipment[EQUIP_SLOT_BOOTS]
+            && i != viewer.equipment[EQUIP_SLOT_QUICK_3]
+            && i != viewer.equipment[EQUIP_SLOT_LEFT_RING]
+            && i != viewer.equipment[EQUIP_SLOT_LEFT_BRACELET]
+            && i != viewer.equipment[EQUIP_SLOT_GLOVES_MIRROR]
+            && i != viewer.equipment[EQUIP_SLOT_LEFT_HAND] && i != viewer.equipment[EQUIP_SLOT_LEFT_RESERVE]
+            && i != viewer.equipment[EQUIP_SLOT_QUICK_5]
+            && i != viewer.equipment[EQUIP_SLOT_QUICK_2] && i != viewer.equipment[EQUIP_SLOT_QUICK_4]) {
             if (!inventory.counts[i].in_bag)
                 sp->state.grid.hand_ids[sp->state.grid.hand_count++] = i;
             else
@@ -2474,13 +2501,20 @@ void shop_run(void)
         sp->state.list.ids = mem_alloc(530);
         sp->state.list.count = 0;
         for (i = 0; i < 266; i++) {
-            if (inventory.counts[i].count != 0 && i != viewer.equipment[0] && i != viewer.equipment[1]
-                && i != viewer.equipment[2] && i != viewer.equipment[3] && i != viewer.equipment[4]
-                && i != viewer.equipment[5] && i != viewer.equipment[7] && i != viewer.equipment[8]
-                && i != viewer.equipment[9] && i != viewer.equipment[10] && i != viewer.equipment[11]
-                && i != viewer.equipment[13] && i != viewer.equipment[14] && i != viewer.equipment[15]
-                && i != viewer.equipment[16] && i != viewer.equipment[17] && i != viewer.equipment[18]
-                && i != viewer.equipment[19] && i != viewer.equipment[20])
+            if (inventory.counts[i].count != 0 && i != viewer.equipment[EQUIP_SLOT_RIGHT_RING]
+                && i != viewer.equipment[EQUIP_SLOT_RIGHT_BRACELET]
+                && i != viewer.equipment[EQUIP_SLOT_GLOVES] && i != viewer.equipment[EQUIP_SLOT_RIGHT_HAND]
+                && i != viewer.equipment[EQUIP_SLOT_RIGHT_RESERVE]
+                && i != viewer.equipment[EQUIP_SLOT_QUICK_1] && i != viewer.equipment[EQUIP_SLOT_AMULET]
+                && i != viewer.equipment[EQUIP_SLOT_HELMET]
+                && i != viewer.equipment[EQUIP_SLOT_ARMOR] && i != viewer.equipment[EQUIP_SLOT_BOOTS]
+                && i != viewer.equipment[EQUIP_SLOT_QUICK_3]
+                && i != viewer.equipment[EQUIP_SLOT_LEFT_RING]
+                && i != viewer.equipment[EQUIP_SLOT_LEFT_BRACELET]
+                && i != viewer.equipment[EQUIP_SLOT_GLOVES_MIRROR]
+                && i != viewer.equipment[EQUIP_SLOT_LEFT_HAND]
+                && i != viewer.equipment[EQUIP_SLOT_LEFT_RESERVE] && i != viewer.equipment[EQUIP_SLOT_QUICK_5]
+                && i != viewer.equipment[EQUIP_SLOT_QUICK_2] && i != viewer.equipment[EQUIP_SLOT_QUICK_4])
                 sp->state.list.ids[sp->state.list.count++] = i;
         }
     } else {

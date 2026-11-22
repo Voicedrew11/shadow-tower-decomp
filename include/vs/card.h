@@ -10,6 +10,7 @@
 #include <kf/lib/types.h>
 #include <kf/lib/offsetof.h>
 #include <sys/types.h>
+#include <st/equip_slots.h>
 
 /* One save file listed on a card: its name and three header values. */
 typedef struct {

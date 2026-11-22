@@ -150,12 +150,12 @@ void player_reset_state(void)
 ADDRESS(0x8003c0e0, 0x9c)
 void player_reload_equipment(void)
 {
-    player_load_equipment_model(viewer.equipment[3], 0, 0);
-    player_load_equipment_model(viewer.equipment[16], 1, 0);
-    player_load_equipment_model(viewer.equipment[4], 2, 0);
-    player_load_equipment_model(viewer.equipment[17], 3, 0);
-    player_load_magic(viewer.equipment[6], 0);
-    player_load_magic(viewer.equipment[12], 1);
+    player_load_equipment_model(viewer.equipment[EQUIP_SLOT_RIGHT_HAND], 0, 0);
+    player_load_equipment_model(viewer.equipment[EQUIP_SLOT_LEFT_HAND], 1, 0);
+    player_load_equipment_model(viewer.equipment[EQUIP_SLOT_RIGHT_RESERVE], 2, 0);
+    player_load_equipment_model(viewer.equipment[EQUIP_SLOT_LEFT_RESERVE], 3, 0);
+    player_load_magic(viewer.equipment[EQUIP_SLOT_RIGHT_MAGIC], 0);
+    player_load_magic(viewer.equipment[EQUIP_SLOT_LEFT_MAGIC], 1);
     player_reset_state();
     player_recalc_stats();
     lighting.last_area = 255;
@@ -390,27 +390,27 @@ void player_reset_stats(void)
     viewer.unk26 = 0;
     viewer.max_mp = 0;
     viewer.max_hp = 0;
-    viewer.equipment[20] = 0xffff;
-    viewer.equipment[19] = 0xffff;
-    viewer.equipment[18] = 0xffff;
-    viewer.equipment[4] = 0xffff;
-    viewer.equipment[3] = 0xffff;
-    viewer.equipment[2] = 0xffff;
-    viewer.equipment[1] = 0xffff;
-    viewer.equipment[0] = 0xffff;
-    viewer.equipment[6] = 0xffff;
-    viewer.equipment[11] = 0xffff;
-    viewer.equipment[10] = 0xffff;
-    viewer.equipment[9] = 0xffff;
-    viewer.equipment[8] = 0xffff;
-    viewer.equipment[7] = 0xffff;
-    viewer.equipment[12] = 0xffff;
-    viewer.equipment[5] = 0xffff;
-    viewer.equipment[17] = 0xffff;
-    viewer.equipment[16] = 0xffff;
-    viewer.equipment[15] = 0xffff;
-    viewer.equipment[14] = 0xffff;
-    viewer.equipment[13] = 0xffff;
+    viewer.equipment[EQUIP_SLOT_QUICK_4] = EQUIP_NONE;
+    viewer.equipment[EQUIP_SLOT_QUICK_2] = EQUIP_NONE;
+    viewer.equipment[EQUIP_SLOT_QUICK_5] = EQUIP_NONE;
+    viewer.equipment[EQUIP_SLOT_RIGHT_RESERVE] = EQUIP_NONE;
+    viewer.equipment[EQUIP_SLOT_RIGHT_HAND] = EQUIP_NONE;
+    viewer.equipment[EQUIP_SLOT_GLOVES] = EQUIP_NONE;
+    viewer.equipment[EQUIP_SLOT_RIGHT_BRACELET] = EQUIP_NONE;
+    viewer.equipment[EQUIP_SLOT_RIGHT_RING] = EQUIP_NONE;
+    viewer.equipment[EQUIP_SLOT_RIGHT_MAGIC] = EQUIP_NONE;
+    viewer.equipment[EQUIP_SLOT_QUICK_3] = EQUIP_NONE;
+    viewer.equipment[EQUIP_SLOT_BOOTS] = EQUIP_NONE;
+    viewer.equipment[EQUIP_SLOT_ARMOR] = EQUIP_NONE;
+    viewer.equipment[EQUIP_SLOT_HELMET] = EQUIP_NONE;
+    viewer.equipment[EQUIP_SLOT_AMULET] = EQUIP_NONE;
+    viewer.equipment[EQUIP_SLOT_LEFT_MAGIC] = EQUIP_NONE;
+    viewer.equipment[EQUIP_SLOT_QUICK_1] = EQUIP_NONE;
+    viewer.equipment[EQUIP_SLOT_LEFT_RESERVE] = EQUIP_NONE;
+    viewer.equipment[EQUIP_SLOT_LEFT_HAND] = EQUIP_NONE;
+    viewer.equipment[EQUIP_SLOT_GLOVES_MIRROR] = EQUIP_NONE;
+    viewer.equipment[EQUIP_SLOT_LEFT_BRACELET] = EQUIP_NONE;
+    viewer.equipment[EQUIP_SLOT_LEFT_RING] = EQUIP_NONE;
 }
 
 /*
@@ -600,8 +600,10 @@ ADDRESS(0x8003d030, 0xd4)
 void player_update_durability_warning(void)
 {
     u16 *slots[10] = {
-        &viewer.equipment[0], &viewer.equipment[2],  &viewer.equipment[3],  &viewer.equipment[8],
-        &viewer.equipment[9], &viewer.equipment[10], &viewer.equipment[13], &viewer.equipment[16],
+        &viewer.equipment[EQUIP_SLOT_RIGHT_RING], &viewer.equipment[EQUIP_SLOT_GLOVES],
+            &viewer.equipment[EQUIP_SLOT_RIGHT_HAND],  &viewer.equipment[EQUIP_SLOT_HELMET],
+        &viewer.equipment[EQUIP_SLOT_ARMOR], &viewer.equipment[EQUIP_SLOT_BOOTS],
+            &viewer.equipment[EQUIP_SLOT_LEFT_RING], &viewer.equipment[EQUIP_SLOT_LEFT_HAND],
     };
     u16 **p;
 
@@ -633,19 +635,20 @@ void player_wear_item(int amount, u16 *slot)
     if (left <= 0) {
         sound_play(4, 128);
         vis_table_c.types[*slot].durability = 0;
-        if (slot != &viewer.equipment[0] && slot != &viewer.equipment[13]) {
+        if (slot != &viewer.equipment[EQUIP_SLOT_RIGHT_RING]
+            && slot != &viewer.equipment[EQUIP_SLOT_LEFT_RING]) {
             *slot = 0xffff;
         }
-        if (slot == &viewer.equipment[3]) {
+        if (slot == &viewer.equipment[EQUIP_SLOT_RIGHT_HAND]) {
             if (viewer.slot_model_ids[0] >= 31 && viewer.slot_model_ids[0] <= 34) {
                 player_load_equipment_model(0xffff, 1, 0);
             }
             player_load_equipment_model(0xffff, 0, 0);
-        } else if (slot == &viewer.equipment[16]) {
+        } else if (slot == &viewer.equipment[EQUIP_SLOT_LEFT_HAND]) {
             player_load_equipment_model(0xffff, 1, 0);
-        } else if (slot == &viewer.equipment[4]) {
+        } else if (slot == &viewer.equipment[EQUIP_SLOT_RIGHT_RESERVE]) {
             player_load_equipment_model(0xffff, 2, 0);
-        } else if (slot == &viewer.equipment[17]) {
+        } else if (slot == &viewer.equipment[EQUIP_SLOT_LEFT_RESERVE]) {
             player_load_equipment_model(0xffff, 3, 0);
         }
         player_sum_equipment_bonuses();
@@ -661,7 +664,8 @@ void player_wear_item(int amount, u16 *slot)
 ADDRESS(0x8003d288, 0x30c)
 void player_wear_armour(int damage, u16 flags)
 {
-    u16 *armour[4] = {&viewer.equipment[8], &viewer.equipment[9], &viewer.equipment[10], &viewer.equipment[2]};
+    u16 *armour[4] = {&viewer.equipment[EQUIP_SLOT_HELMET], &viewer.equipment[EQUIP_SLOT_ARMOR],
+        &viewer.equipment[EQUIP_SLOT_BOOTS], &viewer.equipment[EQUIP_SLOT_GLOVES]};
     int wear;
     int n;
     int shield;
@@ -670,7 +674,7 @@ void player_wear_armour(int damage, u16 flags)
     u8 a;
     u8 b;
 
-    if (viewer.shield_raised != 0 && viewer.equipment[16] != 0xffff) {
+    if (viewer.shield_raised != 0 && viewer.equipment[EQUIP_SLOT_LEFT_HAND] != EQUIP_NONE) {
         if (damage * 20 < viewer.max_hp) {
             viewer.shield_wear++;
         } else {
@@ -695,7 +699,7 @@ void player_wear_armour(int damage, u16 flags)
             shield *= 5;
             wear *= 5;
         }
-        player_wear_item(shield, &viewer.equipment[16]);
+        player_wear_item(shield, &viewer.equipment[EQUIP_SLOT_LEFT_HAND]);
         pick = -1;
     } else {
         if (damage * 20 < viewer.max_hp) {
@@ -1075,9 +1079,9 @@ void player_hit(u16 *damage, u16 scale, u16 effect, long *from)
             viewer.unk190[0][1] = limit0;
         }
     }
-    if (viewer.shield_raised != 0 && viewer.equipment[16] != 0xffff) {
+    if (viewer.shield_raised != 0 && viewer.equipment[EQUIP_SLOT_LEFT_HAND] != EQUIP_NONE) {
         attack = viewer.armour_defence + viewer.shield_defence;
-        shield = &vis_table_c.types[viewer.equipment[16]];
+        shield = &vis_table_c.types[viewer.equipment[EQUIP_SLOT_LEFT_HAND]];
         magic = viewer.magic_defence + viewer.shield_magic_defence;
         if (shield->kind2 >= 9) {
             bonus[shield->kind2 - 9] = shield->amount2 >> 1;
@@ -1214,7 +1218,7 @@ void player_reset_new_game(void)
     viewer.slot_sounds[1] = 25;
     viewer.slot_sounds[2] = 26;
     viewer.slot_sounds[3] = 27;
-    viewer.equipment[3] = 0;
+    viewer.equipment[EQUIP_SLOT_RIGHT_HAND] = 0;
     player_load_equipment_model(0, 0, 0);
     item_counts_clear();
     viewer.items_found = 0;
@@ -1836,14 +1840,14 @@ void player_update_cast(u8 hand)
 
     if (viewer.cast_request[hand] != -1) {
         if (hand) {
-            if (viewer.equipment[13] != 0xffff) {
-                item = &vis_table_c.types[viewer.equipment[13]];
+            if (viewer.equipment[EQUIP_SLOT_LEFT_RING] != EQUIP_NONE) {
+                item = &vis_table_c.types[viewer.equipment[EQUIP_SLOT_LEFT_RING]];
                 if (item->durability)
                     player_cast_magic(viewer.magic_ids[hand], hand);
             }
         } else {
-            if (viewer.equipment[0] != 0xffff) {
-                item = &vis_table_c.types[viewer.equipment[0]];
+            if (viewer.equipment[EQUIP_SLOT_RIGHT_RING] != EQUIP_NONE) {
+                item = &vis_table_c.types[viewer.equipment[EQUIP_SLOT_RIGHT_RING]];
                 if (item->durability)
                     player_cast_magic(viewer.magic_ids[0], 0);
             }
@@ -1852,14 +1856,14 @@ void player_update_cast(u8 hand)
         return;
     }
     active = 0;
-    if (viewer.equipment[0] != 0xffff) {
-        item = &vis_table_c.types[viewer.equipment[0]];
+    if (viewer.equipment[EQUIP_SLOT_RIGHT_RING] != EQUIP_NONE) {
+        item = &vis_table_c.types[viewer.equipment[EQUIP_SLOT_RIGHT_RING]];
         if (item->durability)
-            active = viewer.equipment[6] != 0xffff;
+            active = viewer.equipment[EQUIP_SLOT_RIGHT_MAGIC] != EQUIP_NONE;
     }
-    if (viewer.equipment[13] != 0xffff) {
-        item = &vis_table_c.types[viewer.equipment[13]];
-        if (item->durability && viewer.equipment[12] != 0xffff)
+    if (viewer.equipment[EQUIP_SLOT_LEFT_RING] != EQUIP_NONE) {
+        item = &vis_table_c.types[viewer.equipment[EQUIP_SLOT_LEFT_RING]];
+        if (item->durability && viewer.equipment[EQUIP_SLOT_LEFT_MAGIC] != EQUIP_NONE)
             active = 1;
     }
     if (!viewer.blocks_magic || viewer.unk190[12][0] != 0) {
@@ -2046,7 +2050,7 @@ void player_update_hand_action(u8 hand)
                 if (viewer.action_timers.halves[hand] > viewer.action_sound_time[hand] - cost &&
                     viewer.action_timers.halves[hand] <= viewer.action_sound_time[hand]) {
                     sound_play(viewer.slot_sounds[hand], 128);
-                    player_wear_item(1, &viewer.equipment[3]);
+                    player_wear_item(1, &viewer.equipment[EQUIP_SLOT_RIGHT_HAND]);
                 }
             }
             if ((u16)viewer.action_timers.halves[hand] > 4095) {
@@ -2128,7 +2132,7 @@ void player_update_hand_action(u8 hand)
                         }
                         if (viewer.weapon_wear >= 7) {
                             viewer.weapon_wear -= 7;
-                            player_wear_item(1, &viewer.equipment[3]);
+                            player_wear_item(1, &viewer.equipment[EQUIP_SLOT_RIGHT_HAND]);
                         }
                     }
                 }
@@ -2143,7 +2147,8 @@ void player_update_hand_action(u8 hand)
                 if (viewer.weapon_gauge_delay == 0) {
                     inc = 96;
                     inc += viewer.attributes[1] / (viewer.attributes[1] + 1000) * inc;
-                    if (viewer.equipment[16] != 0xffff && viewer.action_timers.halves[1] >= 0) {
+                    if (viewer.equipment[EQUIP_SLOT_LEFT_HAND] != EQUIP_NONE
+                        && viewer.action_timers.halves[1] >= 0) {
                         inc >>= 1;
                     }
                     viewer.weapon_gauge += inc * 2;
@@ -2254,9 +2259,9 @@ void player_cast_magic(u8 magic, u8 hand)
         break;
     default:
         if (hand) {
-            player_wear_item(1, &viewer.equipment[13]);
+            player_wear_item(1, &viewer.equipment[EQUIP_SLOT_LEFT_RING]);
         } else {
-            player_wear_item(1, &viewer.equipment[0]);
+            player_wear_item(1, &viewer.equipment[EQUIP_SLOT_RIGHT_RING]);
         }
     }
 }
@@ -2766,18 +2771,20 @@ void player_swap_hand_items(u8 a, u8 b)
     u8 model_id_a;
     u8 sound_a;
 
-    if ((viewer.equipment[3] != 0xffff && vis_table_c.types[viewer.equipment[3]].category == 9) ||
-        (viewer.equipment[4] != 0xffff && vis_table_c.types[viewer.equipment[4]].category == 9))
+    if ((viewer.equipment[EQUIP_SLOT_RIGHT_HAND] != EQUIP_NONE
+        && vis_table_c.types[viewer.equipment[EQUIP_SLOT_RIGHT_HAND]].category == 9) ||
+        (viewer.equipment[EQUIP_SLOT_RIGHT_RESERVE] != EQUIP_NONE
+            && vis_table_c.types[viewer.equipment[EQUIP_SLOT_RIGHT_RESERVE]].category == 9))
         n = 2;
     do {
         if (a == 0) {
-            id = viewer.equipment[3];
-            viewer.equipment[3] = viewer.equipment[4];
-            viewer.equipment[4] = id;
+            id = viewer.equipment[EQUIP_SLOT_RIGHT_HAND];
+            viewer.equipment[EQUIP_SLOT_RIGHT_HAND] = viewer.equipment[EQUIP_SLOT_RIGHT_RESERVE];
+            viewer.equipment[EQUIP_SLOT_RIGHT_RESERVE] = id;
         } else {
-            id = viewer.equipment[16];
-            viewer.equipment[16] = viewer.equipment[17];
-            viewer.equipment[17] = id;
+            id = viewer.equipment[EQUIP_SLOT_LEFT_HAND];
+            viewer.equipment[EQUIP_SLOT_LEFT_HAND] = viewer.equipment[EQUIP_SLOT_LEFT_RESERVE];
+            viewer.equipment[EQUIP_SLOT_LEFT_RESERVE] = id;
         }
         model_a = viewer.slot_model_info[a];
         viewer.slot_model_info[a] = viewer.slot_model_info[b];
@@ -2829,14 +2836,14 @@ void player_update_hands(void)
 {
     if (pad_state.combo == 2) {
         pad_state.combo = 0;
-        if (viewer.action_timers.word == -1 && viewer.equipment[4] != 0xffff) {
+        if (viewer.action_timers.word == -1 && viewer.equipment[EQUIP_SLOT_RIGHT_RESERVE] != EQUIP_NONE) {
             player_swap_hand_items(0, 2);
             player_update_durability_warning();
         }
     }
     if (pad_state.combo == 3) {
         pad_state.combo = 0;
-        if (viewer.action_timers.word == -1 && viewer.equipment[17] != 0xffff) {
+        if (viewer.action_timers.word == -1 && viewer.equipment[EQUIP_SLOT_LEFT_RESERVE] != EQUIP_NONE) {
             player_swap_hand_items(1, 3);
             player_update_durability_warning();
         }
@@ -2905,7 +2912,8 @@ void player_enter_hurt_state(SVECTOR *arg0, SVECTOR *arg1, s16 arg2, int arg3)
     viewer.red_fade_step = arg2;
     if (viewer.max_hp < arg3 * 10)
         viewer.action_recoil = 1;
-    if (viewer.equipment[16] != 0xffff && viewer.shield_raised && guard_sound_frame != viewer.frame_count) {
+    if (viewer.equipment[EQUIP_SLOT_LEFT_HAND] != EQUIP_NONE && viewer.shield_raised
+        && guard_sound_frame != viewer.frame_count) {
         sound_play(viewer.slot_sounds[1], 128);
         guard_sound_frame = viewer.frame_count;
     }
@@ -3096,9 +3104,11 @@ void player_update(void)
                 player_update_motion();
                 viewer.motion_stopped = 0;
                 if ((pad_state.pressed & pad_state.buttons[11]) && pad_state.combo_timer == 0 &&
-                    (viewer.equipment[5] != 0xffff || viewer.equipment[19] != 0xffff ||
-                     viewer.equipment[11] != 0xffff || viewer.equipment[20] != 0xffff ||
-                     viewer.equipment[18] != 0xffff)) {
+                    (viewer.equipment[EQUIP_SLOT_QUICK_1] != EQUIP_NONE
+                        || viewer.equipment[EQUIP_SLOT_QUICK_2] != EQUIP_NONE ||
+                     viewer.equipment[EQUIP_SLOT_QUICK_3] != EQUIP_NONE
+                         || viewer.equipment[EQUIP_SLOT_QUICK_4] != EQUIP_NONE ||
+                     viewer.equipment[EQUIP_SLOT_QUICK_5] != EQUIP_NONE)) {
                     play_confirm_sound();
                     pad_state.pressed &= pad_state.buttons[11];
                     viewer.state = 1;
@@ -3135,8 +3145,9 @@ void player_update(void)
                     pad_state.pressed &= ~pad_state.buttons[11];
                     pad_state.pressed &= ~pad_state.buttons[10];
                 } else if ((pad_state.pressed & pad_state.buttons[10]) && pad_state.combo_timer == 0) {
-                    int ids[5] = {viewer.equipment[5], viewer.equipment[19], viewer.equipment[11],
-                                  viewer.equipment[20], viewer.equipment[18]};
+                    int ids[5] = {viewer.equipment[EQUIP_SLOT_QUICK_1],
+                        viewer.equipment[EQUIP_SLOT_QUICK_2], viewer.equipment[EQUIP_SLOT_QUICK_3],
+                                  viewer.equipment[EQUIP_SLOT_QUICK_4], viewer.equipment[EQUIP_SLOT_QUICK_5]};
 
                     viewer.state = 0;
                     pad_state.pressed &= ~pad_state.buttons[8];
@@ -3156,19 +3167,19 @@ void player_update(void)
 
                                 switch (viewer.quick_item_index) {
                                 case 0:
-                                    viewer.equipment[5] = 0xffff;
+                                    viewer.equipment[EQUIP_SLOT_QUICK_1] = EQUIP_NONE;
                                     break;
                                 case 1:
-                                    viewer.equipment[19] = 0xffff;
+                                    viewer.equipment[EQUIP_SLOT_QUICK_2] = EQUIP_NONE;
                                     break;
                                 case 2:
-                                    viewer.equipment[11] = 0xffff;
+                                    viewer.equipment[EQUIP_SLOT_QUICK_3] = EQUIP_NONE;
                                     break;
                                 case 3:
-                                    viewer.equipment[20] = 0xffff;
+                                    viewer.equipment[EQUIP_SLOT_QUICK_4] = EQUIP_NONE;
                                     break;
                                 case 4:
-                                    viewer.equipment[18] = 0xffff;
+                                    viewer.equipment[EQUIP_SLOT_QUICK_5] = EQUIP_NONE;
                                     break;
                                 }
                                 icon.y = viewer.quick_item_index * 24 + 256;
@@ -3349,9 +3360,13 @@ void player_update(void)
                     }
                 }
                 if (viewer.frame_count % 60 == 0) {
-                    u16 *slots[9] = {&viewer.equipment[8], &viewer.equipment[9], &viewer.equipment[10],
-                                     &viewer.equipment[3], &viewer.equipment[16], &viewer.equipment[2],
-                                     &viewer.equipment[0], &viewer.equipment[13], NULL};
+                    u16 *slots[9] = {&viewer.equipment[EQUIP_SLOT_HELMET],
+                        &viewer.equipment[EQUIP_SLOT_ARMOR], &viewer.equipment[EQUIP_SLOT_BOOTS],
+                                     &viewer.equipment[EQUIP_SLOT_RIGHT_HAND],
+                                         &viewer.equipment[EQUIP_SLOT_LEFT_HAND],
+                                             &viewer.equipment[EQUIP_SLOT_GLOVES],
+                                     &viewer.equipment[EQUIP_SLOT_RIGHT_RING],
+                                         &viewer.equipment[EQUIP_SLOT_LEFT_RING], NULL};
 
                     if (viewer.submerged_acid) {
                         int j;

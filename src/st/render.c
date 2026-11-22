@@ -3930,7 +3930,7 @@ void player_draw_equipment_model(u8 slot)
     sp->model_t[0] = viewer.slot_model_info[slot]->pos_x;
     sp->model_t[1] = viewer.slot_model_info[slot]->pos_y;
     sp->model_t[2] = viewer.slot_model_info[slot]->pos_z;
-    if (viewer.equipment[16] != 0xffff && slot != 0) {
+    if (viewer.equipment[EQUIP_SLOT_LEFT_HAND] != EQUIP_NONE && slot != 0) {
         rot.vx = viewer.slot_model_info[slot]->rotation.vx + viewer.hand_rot_x;
         rot.vy = viewer.slot_model_info[slot]->rotation.vy + viewer.hand_rot_y;
         rot.vz = viewer.slot_model_info[slot]->rotation.vz + viewer.hand_rot_z;
@@ -6340,8 +6340,9 @@ void menu_main_draw(void)
         ui_draw_text(MESSAGE(24), 106, 112, &sp->style[0]);
     else
         ui_draw_text(MESSAGE(19), 106, 112, &sp->style[0]);
-    if (viewer.equipment[16] != 0xffff && vis_table_c.types[viewer.equipment[16]].unk5[0x1d] >= 9) {
-        kind = vis_table_c.types[viewer.equipment[16]].unk5[0x1d];
+    if (viewer.equipment[EQUIP_SLOT_LEFT_HAND] != EQUIP_NONE
+        && vis_table_c.types[viewer.equipment[EQUIP_SLOT_LEFT_HAND]].unk5[0x1d] >= 9) {
+        kind = vis_table_c.types[viewer.equipment[EQUIP_SLOT_LEFT_HAND]].unk5[0x1d];
         n = 0;
         if (kind - 9 == 2)
             n = 14;
@@ -7612,8 +7613,6 @@ void shop_draw(void)
  * equipment slot grid and the attribute table with its bars.
  */
 
-/* The slots of the equipment grid. */
-#define EQUIP_SLOTS 21
 /* Attribute rows. */
 #define STATUS_ROWS 14
 
@@ -7671,8 +7670,8 @@ void menu_equip_info_draw_slots(void)
     for (i = 0; i < EQUIP_SLOTS; equip++, i++) {
         if (i == 2)
             mode = 48;
-        else if ((i == 3 && vis_table_c.types[viewer.equipment[16]].category == 9) ||
-                 (i == 4 && vis_table_c.types[viewer.equipment[17]].category == 9))
+        else if ((i == 3 && vis_table_c.types[viewer.equipment[EQUIP_SLOT_LEFT_HAND]].category == 9) ||
+                 (i == 4 && vis_table_c.types[viewer.equipment[EQUIP_SLOT_LEFT_RESERVE]].category == 9))
             mode = 48;
         else
             mode = 16;

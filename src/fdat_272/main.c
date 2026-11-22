@@ -535,7 +535,7 @@ void map_object_take_equipment(void)
     VECTOR pos;
     SVECTOR rot;
 
-    if (d == &vis_table_b.entries[16] && viewer.equipment[3] < 50 && d->state == 1
+    if (d == &vis_table_b.entries[16] && viewer.equipment[EQUIP_SLOT_RIGHT_HAND] < 50 && d->state == 1
         && fdat_801ef92c == 0) {
         pos.vx = d->position.vx;
         pos.vz = d->position.vz - 0x600;
@@ -597,12 +597,12 @@ void map_take_equipment_raise_object(void)
     int step;
 
     kind = &vis_table_c.types[c28->item];
-    *(u8 *)&items->counts[viewer.equipment[3]] = 0;
-    viewer.equipment[3] = 0xffff;
+    *(u8 *)&items->counts[viewer.equipment[EQUIP_SLOT_RIGHT_HAND]] = 0;
+    viewer.equipment[EQUIP_SLOT_RIGHT_HAND] = EQUIP_NONE;
     player_compute_derived_stats(0);
     player_update_durability_warning();
-    player_load_equipment_model(viewer.equipment[3], 0, 0);
-    player_load_equipment_model(viewer.equipment[16], 1, 0);
+    player_load_equipment_model(viewer.equipment[EQUIP_SLOT_RIGHT_HAND], 0, 0);
+    player_load_equipment_model(viewer.equipment[EQUIP_SLOT_LEFT_HAND], 1, 0);
     d16->kind = 50;
     d16->anim = 0;
     d16->anim_frame = 0;

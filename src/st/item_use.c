@@ -203,9 +203,12 @@ void item_use(int id)
         break;
     case 0x12e: {
         u16 *ids[12] = {
-            &viewer.equipment[0], &viewer.equipment[2], &viewer.equipment[3], &viewer.equipment[4],
-            &viewer.equipment[8], &viewer.equipment[9], &viewer.equipment[10], &viewer.equipment[13],
-            &viewer.equipment[15], &viewer.equipment[16], &viewer.equipment[17], NULL,
+            &viewer.equipment[EQUIP_SLOT_RIGHT_RING], &viewer.equipment[EQUIP_SLOT_GLOVES],
+                &viewer.equipment[EQUIP_SLOT_RIGHT_HAND], &viewer.equipment[EQUIP_SLOT_RIGHT_RESERVE],
+            &viewer.equipment[EQUIP_SLOT_HELMET], &viewer.equipment[EQUIP_SLOT_ARMOR],
+                &viewer.equipment[EQUIP_SLOT_BOOTS], &viewer.equipment[EQUIP_SLOT_LEFT_RING],
+            &viewer.equipment[EQUIP_SLOT_GLOVES_MIRROR], &viewer.equipment[EQUIP_SLOT_LEFT_HAND],
+                &viewer.equipment[EQUIP_SLOT_LEFT_RESERVE], NULL,
         };
         u16 **p;
         ItemType *c;
@@ -266,8 +269,9 @@ done:
     {
         /* the quick-use slots drop an item used up */
         u16 *slots[5] = {
-            &viewer.equipment[5], &viewer.equipment[19], &viewer.equipment[11], &viewer.equipment[20],
-            &viewer.equipment[18],
+            &viewer.equipment[EQUIP_SLOT_QUICK_1], &viewer.equipment[EQUIP_SLOT_QUICK_2],
+                &viewer.equipment[EQUIP_SLOT_QUICK_3], &viewer.equipment[EQUIP_SLOT_QUICK_4],
+            &viewer.equipment[EQUIP_SLOT_QUICK_5],
         };
         int slot;
 
