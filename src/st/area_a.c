@@ -216,7 +216,7 @@ void game_load_common_data(void)
     DAT_801cba08.unk1618[39] = file.pos;
     cd_read_member(1, 0x1e0, (u_long *)DAT_8009c888);
     image_stream_queue(1, 0x1e1, image_stream_set_ready);
-    func_80058a0c(1, 0x1e2, 0);
+    sound_bank_load(1, 0x1e2, 0);
     copy_words((u32 *)&vis_table_b, p + 1, *p >> 2);
     p = (u32 *)((u8 *)p + (*p + 4));
     copy_words((u32 *)DAT_801b5220, p + 1, *p >> 2);
@@ -348,7 +348,7 @@ KF_VALUELESS_S32 area_request_load(u8 a0, u8 a1, u8 a2, u8 a3, u8 a4, s8 f0, s8 
         return;
 start:
     if (area_state.unk4 != 99 && area_state.unk4 != n0)
-        func_80055cf4(area_state.unk4);
+        area_save_snapshot(area_state.unk4);
     area_state.unk0 = 1;
     area_state.unk2 = 0;
     area_state.unk10 = a0;
@@ -527,7 +527,7 @@ void area_load_update(void)
         b = vis_table_b.entries;
         for (i = 239; i != -1; i--) {
             if (b->unk05 == 236 && b->unk54 != -1) {
-                func_8005850c(b->unk54, b->unk4A.snd.unk4A + 1108);
+                sound_stop(b->unk54, b->unk4A.snd.unk4A + 1108);
                 b->unk54 = -1;
             }
             b->unk05 = 0xff;
@@ -620,7 +620,7 @@ void area_load_update(void)
             ground_items_load((VisCFileEntry *)(p + 1));
             p = (u_long *)((u8 *)p + (*p + 4));
             placements_expand((StPlacement *)(p + 1));
-            func_80055f9c(area_state.unk10);
+            area_restore_snapshot(area_state.unk10);
             DAT_801cba08.unk1478[area_state.unk10] |= 1;
             area_state.hooks = (AreaHooks *)DAT_800881d8;
             texanim_clear_all();
@@ -679,7 +679,7 @@ void area_load_update(void)
     }
         if (area_state.unk13 != 0xff) {
             area_state.unk2 = 240;
-            func_80058a0c(1, area_state.unk13 * 10 + 7, 1);
+            sound_bank_load(1, area_state.unk13 * 10 + 7, 1);
         }
         if (area_state.unk14 == 0xff)
             goto done;

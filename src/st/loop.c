@@ -52,13 +52,13 @@ void game_loop(void)
     gfx_init();
     loading_screen_find_file();
     loading_screen_show();
-    func_80057da0();
+    sound_init();
     objects_clear();
     creatures_clear();
     ground_items_clear();
     effects_clear();
     game_load_common_data();
-    func_800559bc();
+    save_reset_new_game();
     lighting_load_defaults();
     fade_reset();
     lighting_build_matrices();
@@ -68,15 +68,15 @@ void game_loop(void)
 
         ClearImage(&rect, 0, 0, 0);
         card_screen_open(0, 0);
-        func_80057a28();
+        pad_enable();
         if (card_screen_run(0) == 1) {
-            func_80057a3c();
+            pad_clear_input();
             DAT_801cd180.unk10 = 1;
             card_screen_close();
             loading_screen_show();
             player_reload_equipment();
         } else {
-            func_80057a3c();
+            pad_clear_input();
             DAT_801cd180.unk10 = 1;
             card_screen_close();
             loading_screen_show();
@@ -90,8 +90,8 @@ void game_loop(void)
     player_reset_motion();
     heap_init(DAT_8009c888, 0x56400);
     loading_screen_end();
-    func_80057a28();
-    func_80057a3c();
+    pad_enable();
+    pad_clear_input();
     DAT_800881a4 = 0;
     for (;;) {
         VECTOR a;
@@ -105,12 +105,12 @@ void game_loop(void)
         ground_items_update();
         effects_run();
         viewer.unk21C = 0;
-        func_8005735c();
+        area_run_frame_hook();
         area_load_update();
         player_get_camera(&a, &b);
-        func_80058288(&a, &b);
+        sound_set_listener(&a, &b);
         image_stream_update();
-        func_80058620();
+        sound_bank_transfer_body();
         world_render_frame(&a, &b);
         if (DAT_800881a4 == 0)
             continue;

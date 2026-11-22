@@ -298,7 +298,7 @@ void func_801edea0(void)
     Vis192 *r = &vis_table_a.unk3500[index];
     int slot = e->unk0B + 128;
 
-    func_80057c54();
+    play_warp_sound();
     fade_run_frames(2, 0, 0x1000, 0x100);
     creatures_bind_previous_area();
     viewer.position.vx = 0x45800;
@@ -322,9 +322,9 @@ void func_801edea0(void)
     fdat_801eb7b4(e, 7);
     vis_table_a.unk6168 = 0;
     cd_wait_idle();
-    func_80057c54();
+    play_warp_sound();
     fade_run_frames(2, 0x1000, 0, -0x100);
-    func_80057a3c();
+    pad_clear_input();
     if (DAT_801cba08.unk1448[r->unk09] == 0) {
         fdat_801ed388(e, 0, 0);
         e->unk70 &= ~0x2000000;

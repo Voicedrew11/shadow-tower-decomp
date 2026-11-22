@@ -206,7 +206,7 @@ void fdat_801ed2f0(Vis212 *e)
     e->unk1C.bytes[2] &= 0xf2;
 }
 
-/* Hands the entry to func_80054368, fading it out first when unk04 is set. */
+/* Hands the entry to creature_talk, fading it out first when unk04 is set. */
 ADDRESS(0x801ed388, 0x88)
 void fdat_801ed388(Vis212 *e, int fixed, int arg2)
 {
@@ -214,9 +214,9 @@ void fdat_801ed388(Vis212 *e, int fixed, int arg2)
     e->unk70 |= 0x2000000;
     if (e->unk04) {
         fdat_801ed2f0(e);
-        func_80054368(e, fixed, arg2);
+        creature_talk(e, fixed, arg2);
     } else {
-        func_80054368(e, 1, arg2);
+        creature_talk(e, 1, arg2);
     }
 }
 

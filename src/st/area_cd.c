@@ -17,7 +17,7 @@
 #include <st/area.h>
 #include <st/funcs.h>
 
-/* The unit z vector func_80049fe4 turns (src/st/math.c). */
+/* The unit z vector vector_from_angles_zyx turns (src/st/math.c). */
 DATA(0x8008809c, 0x8, ".sdata")
 SVECTOR DAT_8008809c = {0, 0, 4096, 0};
 

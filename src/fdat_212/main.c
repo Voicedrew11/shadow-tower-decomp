@@ -217,5 +217,5 @@ void func_801edbd0(int which)
             item->unk08.vz = end;
         world_run_frame(NULL, NULL, 0);
     }
-    func_80057d58();
+    play_unlock_sound();
 }

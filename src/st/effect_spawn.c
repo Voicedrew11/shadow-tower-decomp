@@ -40,7 +40,7 @@ SDATA(0x80088018, 0x14)
 
 /* The spell's sound at the effect: 28, or 36 with flag 0x20. */
 #define EFFECT_SOUND(e)                                                        \
-    func_80058254((((e)->unk0 & 0x20) >> 2) + 28, &(e)->unk20, 128, 28000, 29000, 0)
+    sound_play_at_range((((e)->unk0 & 0x20) >> 2) + 28, &(e)->unk20, 128, 28000, 29000, 0)
 
 /*
  * Spawns an effect of kind `kind` at `pos` moving by `dir` (either may be
@@ -768,7 +768,7 @@ StEffect *effect_spawn(u8 type, u8 flags, u8 kind, VECTOR *pos, SVECTOR *dir, ..
 }
 
 /*
- * Adds `accel` (scaled by func_8004a0f8) to the current effect's velocity,
+ * Adds `accel` (scaled by vector_scale) to the current effect's velocity,
  * limits its length to `limit` and moves the effect by it; then, unless
  * `height` is -1, requests an attack (effect_attack). Returns -1 when the
  * attack was made, else 0.
@@ -779,11 +779,11 @@ int effect_accelerate(int scale, int limit, int attack, int height, SVECTOR *acc
     StEffect *e = effects.cur;
     int length;
 
-    func_8004a0f8(scale, accel);
+    vector_scale(scale, accel);
     e->unk40.vx += accel->vx;
     e->unk40.vy += accel->vy;
     e->unk40.vz += accel->vz;
-    length = func_8004a340(e->unk40.vx, e->unk40.vy, e->unk40.vz);
+    length = vector_length_xyz(e->unk40.vx, e->unk40.vy, e->unk40.vz);
     if (limit < length) {
         e->unk40.vx = e->unk40.vx * limit / length;
         e->unk40.vy = e->unk40.vy * limit / length;
@@ -822,10 +822,10 @@ int effect_home(int limit, int scale, int turn, int attack, int height, int near
         target.vy = t->unk74.vy - (t->unk30 >> 1);
         target.vz = t->unk74.vz;
     aim:
-        func_8004a390(target.vx - e->unk20.vx, target.vy - e->unk20.vy,
+        vector_to_angles(target.vx - e->unk20.vx, target.vy - e->unk20.vy,
                       target.vz - e->unk20.vz, &dir);
-        e->unk30.vx = func_800496c8(e->unk30.vx, dir.vx, turn);
-        e->unk30.vy = func_800496c8(e->unk30.vy, dir.vy, turn);
+        e->unk30.vx = angle_step_toward(e->unk30.vx, dir.vx, turn);
+        e->unk30.vy = angle_step_toward(e->unk30.vy, dir.vy, turn);
     } else {
         dist = player_distance_in_arc(&e->unk20, e->unk30.vy, 24000, 4096);
         if (dist == -1)
@@ -836,7 +836,7 @@ int effect_home(int limit, int scale, int turn, int attack, int height, int near
         goto aim;
     }
 move:
-    func_80049f08(&e->unk30, &v);
+    vector_from_angles(&e->unk30, &v);
     if (dist >= 0 && near >= dist)
         scale = scale_near;
     return effect_accelerate(scale, limit, attack, height, &v);
@@ -1395,7 +1395,7 @@ void effect_update(void)
             e->unk0 = ST_EFFECT_FREE;
         } else {
             e->unk40.vy += e->unk50.b[0];
-            func_8004a40c(e->unk40.vx, e->unk40.vy, e->unk40.vz, &e->unk30);
+            vector_to_angles_ratan2(e->unk40.vx, e->unk40.vy, e->unk40.vz, &e->unk30);
         }
         break;
     case 0x30:

@@ -194,7 +194,7 @@ void func_801ed71c(void)
     if (fdat_801ee0b8 == 3 && viewer.unk178 == 0x146) {
         fdat_801ed388(e49, 0, 0);
         fdat_801eb7b4(e49, 0);
-        func_80057d58();
+        play_unlock_sound();
         d2->unk4A.door.unk4F = 0xff;
         fdat_801ecf44(e49);
         fdat_801ee0b8 = 4;

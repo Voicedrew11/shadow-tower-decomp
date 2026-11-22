@@ -1,7 +1,7 @@
 /*
  * ST.EXE: controller setup, state polling, the per-frame button words and
  * vibration (WIP module, 0x8005738c..; the vibration helpers after
- * func_80057b10 open the next band and may share its file).
+ * pad_update_vibration open the next band and may share its file).
  */
 #include <kf/lib/address.h>
 #include <kf/lib/types.h>
@@ -16,13 +16,13 @@
 RODATA(0x80012854, 0x1c)
 
 ADDRESS(0x8005738c, 0x30)
-void func_8005738c(void)
+void pad_update_action_mask(void)
 {
     DAT_801cd180.unk3A = DAT_801cd180.unk22[8] | DAT_801cd180.unk22[9] | DAT_801cd180.unk22[10] | DAT_801cd180.unk22[11];
 }
 
 ADDRESS(0x800573bc, 0x6c)
-void func_800573bc(void)
+void pad_set_default_buttons(void)
 {
     DAT_801cd180.unk22[0] = 0x10;
     DAT_801cd180.unk22[1] = 0x40;
@@ -40,7 +40,7 @@ void func_800573bc(void)
 
 /* Waits (up to 60 vsyncs) for the controller in port 1 to settle. */
 ADDRESS(0x80057428, 0x98)
-void func_80057428(void)
+void pad_wait_stable(void)
 {
     int start = VSync(-1);
 
@@ -56,10 +56,10 @@ void func_80057428(void)
 }
 
 ADDRESS(0x800574c0, 0x9c)
-void func_800574c0(void)
+void pad_setup_actuators(void)
 {
     DAT_801cd180.unk18 = PadInfoAct(0, -1, 0);
-    func_80057428();
+    pad_wait_stable();
     if (DAT_801cd180.unk18) {
         DAT_801cd180.unk1A[0] = 0;
         DAT_801cd180.unk1A[1] = 0;
@@ -77,16 +77,16 @@ void func_800574c0(void)
 }
 
 ADDRESS(0x8005755c, 0x44)
-void func_8005755c(void)
+void pad_setup_actuators_if_stable(void)
 {
     if (DAT_801cd180.unk15 == PadStateStable)
-        func_800574c0();
+        pad_setup_actuators();
     else
         DAT_801cd180.unk18 = 0;
 }
 
 ADDRESS(0x800575a0, 0xe4)
-void func_800575a0(void)
+void pad_update_state(void)
 {
     DAT_801cd180.unk15 = PadGetState(0);
     switch (DAT_801cd180.unk15) {
@@ -100,7 +100,7 @@ void func_800575a0(void)
     case PadStateStable:
         if (DAT_801cd180.unk17 && !DAT_801cd180.unk16) {
             DAT_801cd180.unk17 = 0;
-            func_800574c0();
+            pad_setup_actuators();
         }
         /* fall through */
     case PadStateFindCTP1:
@@ -117,7 +117,7 @@ void func_800575a0(void)
 }
 
 ADDRESS(0x80057684, 0xc0)
-void func_80057684(void)
+void pad_init(void)
 {
     DAT_801cd130.unk44[0] = 0x40;
     DAT_801cd130.unk48[0] = 0x40;
@@ -130,8 +130,8 @@ void func_80057684(void)
     PadInitDirect((u8 *)&DAT_801cd130.unk0, (u8 *)DAT_801cd130.unk22);
     PadSetAct(0, (u8 *)DAT_801cd130.unk44, 4);
     PadStartCom();
-    func_80057428();
-    func_8005755c();
+    pad_wait_stable();
+    pad_setup_actuators_if_stable();
     DAT_801cd180.unk10 = 1;
     DAT_801cd180.unkE = 1;
     DAT_801cd180.unk13 = 0;
@@ -143,18 +143,18 @@ void func_80057684(void)
     *(u32 *)&DAT_801cd180.unk0 = 0;
     *(u32 *)&DAT_801cd180.unk4 = 0;
     *(u32 *)&DAT_801cd180.unk8 = 0;
-    func_800573bc();
-    func_8005738c();
+    pad_set_default_buttons();
+    pad_update_action_mask();
 }
 
 /* Per-frame button words: held, newly pressed, auto-repeat and the two-button
  * combinations of unk36/unk38 with unk32/unk34 (unk14 = 1..5). */
 ADDRESS(0x80057744, 0x2e4)
-void func_80057744(void)
+void pad_read(void)
 {
     if (DAT_801cd180.unk10)
         return;
-    func_800575a0();
+    pad_update_state();
     if (DAT_801cd180.unkE)
         return;
     if (DAT_801cd130.unk0)
@@ -218,14 +218,14 @@ void func_80057744(void)
 }
 
 ADDRESS(0x80057a28, 0x14)
-void func_80057a28(void)
+void pad_enable(void)
 {
     DAT_801cd180.unk10 = 0;
     DAT_801cd180.unkE = 0;
 }
 
 ADDRESS(0x80057a3c, 0x2c)
-void func_80057a3c(void)
+void pad_clear_input(void)
 {
     DAT_801cd180.unk10 = 1;
     DAT_801cd180.unk13 = 0;
@@ -239,7 +239,7 @@ void func_80057a3c(void)
 /* Starts the large motor at `strength` + 64 (and the small one on a two-motor
  * controller) for (strength + 64) / 16 + 5 frames; 0 or less stops both. */
 ADDRESS(0x80057a68, 0xa8)
-void func_80057a68(int strength)
+void pad_vibrate(int strength)
 {
     if (DAT_801cd120.unk5) {
         if (strength > 0) {
@@ -259,7 +259,7 @@ void func_80057a68(int strength)
 }
 
 ADDRESS(0x80057b10, 0x38)
-void func_80057b10(void)
+void pad_update_vibration(void)
 {
     if (DAT_801cd180.unk19)
         DAT_801cd180.unk19--;

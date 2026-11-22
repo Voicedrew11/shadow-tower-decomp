@@ -47,7 +47,7 @@ void player_point_to_world(int x, int y, int z, int pitch, int yaw, int dy, int 
     rot.vx = -pitch;
     rot.vy = yaw;
     rot.vz = 0;
-    func_8004a078(&rot, &v, out);
+    vector_rotate(&rot, &v, out);
     out->vx += viewer.position.vx;
     out->vy += viewer.position.vy + dy - 1600;
     out->vz += viewer.position.vz;
@@ -59,14 +59,14 @@ ADDRESS(0x80053e0c, 0xe4)
 void object_lerp_pose(Vis88 *e, VECTOR *from, VECTOR *to, SVECTOR *rfrom, SVECTOR *rto, int t)
 {
     if (from) {
-        e->unk24.vx = func_8004a830(from->vx, to->vx, t);
-        e->unk24.vy = func_8004a830(from->vy, to->vy, t);
-        e->unk24.vz = func_8004a830(from->vz, to->vz, t);
+        e->unk24.vx = math_lerp(from->vx, to->vx, t);
+        e->unk24.vy = math_lerp(from->vy, to->vy, t);
+        e->unk24.vz = math_lerp(from->vz, to->vz, t);
     }
     if (rfrom) {
-        e->unk34 = func_8004a848(rfrom->vx, rto->vx, t);
-        e->unk38 = func_8004a848(rfrom->vz, rto->vz, t);
-        e->unk36 = func_8004a848(rfrom->vy, rto->vy, t);
+        e->unk34 = angle_lerp(rfrom->vx, rto->vx, t);
+        e->unk38 = angle_lerp(rfrom->vz, rto->vz, t);
+        e->unk36 = angle_lerp(rfrom->vy, rto->vy, t);
     }
 }
 
@@ -74,9 +74,9 @@ ADDRESS(0x80053ef0, 0x88)
 void object_lerp_position(Vis88 *e, VECTOR *from, VECTOR *to, int t)
 {
     if (from) {
-        e->unk24.vx = func_8004a830(from->vx, to->vx, t);
-        e->unk24.vy = func_8004a830(from->vy, to->vy, t);
-        e->unk24.vz = func_8004a830(from->vz, to->vz, t);
+        e->unk24.vx = math_lerp(from->vx, to->vx, t);
+        e->unk24.vy = math_lerp(from->vy, to->vy, t);
+        e->unk24.vz = math_lerp(from->vz, to->vz, t);
     }
 }
 
@@ -84,8 +84,8 @@ ADDRESS(0x80053f78, 0x88)
 void object_lerp_rotation(Vis88 *e, SVECTOR *rfrom, SVECTOR *rto, int t)
 {
     if (rfrom) {
-        e->unk34 = func_8004a848(rfrom->vx, rto->vx, t);
-        e->unk38 = func_8004a848(rfrom->vz, rto->vz, t);
-        e->unk36 = func_8004a848(rfrom->vy, rto->vy, t);
+        e->unk34 = angle_lerp(rfrom->vx, rto->vx, t);
+        e->unk38 = angle_lerp(rfrom->vz, rto->vz, t);
+        e->unk36 = angle_lerp(rfrom->vy, rto->vy, t);
     }
 }

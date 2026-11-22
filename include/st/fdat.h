@@ -38,8 +38,8 @@ void player_update_durability_warning(void);
  * st/funcs.h declares void; the overlay units therefore declare these here
  * and do not include st/funcs.h.
  */
-int func_80058254(int id, VECTOR *pos, short volume, int range, int fade, int note);
-int func_80058220(int id, VECTOR *pos, short volume, int note);
+int sound_play_at_range(int id, VECTOR *pos, short volume, int range, int fade, int note);
+int sound_play_at(int id, VECTOR *pos, short volume, int note);
 void player_hit(u16 *damage, u16 scale, u16 effect, long *from);
 
 /* src/lib/fdat_common.inc */

@@ -29,7 +29,7 @@
  * (retail: 0x7fffffff in t4, the others in t3, t2, t1).
  */
 ADDRESS(0x800559bc, 0x338)
-void func_800559bc(void)
+void save_reset_new_game(void)
 {
     u8 unused[128];
 
@@ -140,7 +140,7 @@ void func_800559bc(void)
  * empty table C slots 32..63, and per table B entry: free, unk4F 0xff,
  * unk0C 0xff. */
 ADDRESS(0x80055cf4, 0x2a8)
-void func_80055cf4(int area)
+void area_save_snapshot(int area)
 {
     Vis212 *a = vis_table_a.entries;
     Vis48 *c = vis_table_c.entries;
@@ -180,9 +180,9 @@ void func_80055cf4(int area)
     }
 }
 
-/* Restores what func_80055cf4 recorded for area `area`. */
+/* Restores what area_save_snapshot recorded for area `area`. */
 ADDRESS(0x80055f9c, 0x338)
-void func_80055f9c(int area)
+void area_restore_snapshot(int area)
 {
     Vis212 *a = vis_table_a.entries;
     Vis48 *c = vis_table_c.entries;

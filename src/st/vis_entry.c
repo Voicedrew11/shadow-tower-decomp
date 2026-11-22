@@ -203,7 +203,7 @@ void creature_pick_script(int arg)
 ADDRESS(0x8004b19c, 0x4c)
 void creature_pick_script_by_distance(void)
 {
-    creature_pick_script(func_8004a304(vis_table_a.unk6138->unk74.vx - viewer.position.vx,
+    creature_pick_script(vector_length_xz(vis_table_a.unk6138->unk74.vx - viewer.position.vx,
                                 vis_table_a.unk6138->unk74.vz - viewer.position.vz));
 }
 
@@ -361,9 +361,9 @@ void *creature_find_in_cone(VECTOR *pos, short yaw, short pitch, int range, int 
             v.vx = e->unk74.vx;
             v.vy = e->unk74.vy - e->unk30;
             v.vz = e->unk74.vz;
-            d = func_8004a484(&e->unk74, pos->vx, 0xffff, pos->vz, r, 0, 0);
+            d = vector_distance_xz_within(&e->unk74, pos->vx, 0xffff, pos->vz, r, 0, 0);
             if (d != -1) {
-                func_8004a390(e->unk74.vx - pos->vx, e->unk74.vy - pos->vy, e->unk74.vz - pos->vz,
+                vector_to_angles(e->unk74.vx - pos->vx, e->unk74.vy - pos->vy, e->unk74.vz - pos->vz,
                               &dir);
                 dir.vy = (dir.vy - yaw) & 0xfff;
                 if (dir.vy >= 2048)
@@ -472,13 +472,13 @@ int creature_find_in_reach(VisLists *req, int arg1)
             continue;
         r = &vis_table_a.unk3500[e->unk02];
         if (mode == 1 &&
-            !func_8004a148(viewer.unk278.vy,
-                           (short)func_8004a1b4(e->unk74.vx - viewer.position.vx, e->unk74.vz - viewer.position.vz),
+            !angle_within(viewer.unk278.vy,
+                           (short)angle_from_xz(e->unk74.vx - viewer.position.vx, e->unk74.vz - viewer.position.vz),
                            256))
             continue;
         if (mode == 4 &&
-            !func_8004a148(viewer.unk278.vy,
-                           (short)func_8004a1b4(e->unk74.vx - viewer.position.vx, e->unk74.vz - viewer.position.vz),
+            !angle_within(viewer.unk278.vy,
+                           (short)angle_from_xz(e->unk74.vx - viewer.position.vx, e->unk74.vz - viewer.position.vz),
                            384))
             continue;
         if (r->unk16 == 0)
@@ -542,7 +542,7 @@ int creature_find_touching(VisLists *req)
             v.vx = e->unk74.vx;
             v.vz = e->unk74.vz;
             v.vy = e->unk74.vy - e->unk30 + e->unk6E;
-            if (func_8004a484(&v, req->unk4.vx, req->unk4.vy, req->unk4.vz, e->unk2E + req->unk1C,
+            if (vector_distance_xz_within(&v, req->unk4.vx, req->unk4.vy, req->unk4.vz, e->unk2E + req->unk1C,
                               e->unk30, req->unk1E) != -1)
                 return i;
         } else if (e->unk70 & 0x400000) {
@@ -550,14 +550,14 @@ int creature_find_touching(VisLists *req)
             v.vx += e->unk74.vx;
             v.vz += e->unk74.vz;
             v.vy += e->unk74.vy;
-            if (func_8004a484(&v, req->unk4.vx, req->unk4.vy, req->unk4.vz, e->unk2E + req->unk1C,
+            if (vector_distance_xz_within(&v, req->unk4.vx, req->unk4.vy, req->unk4.vz, e->unk2E + req->unk1C,
                               e->unk30, req->unk1E) != -1)
                 return i;
         } else {
             v.vx = e->unk74.vx;
             v.vz = e->unk74.vz;
             v.vy = e->unk74.vy;
-            if (func_8004a484(&v, req->unk4.vx, req->unk4.vy, req->unk4.vz, e->unk2E + req->unk1C,
+            if (vector_distance_xz_within(&v, req->unk4.vx, req->unk4.vy, req->unk4.vz, e->unk2E + req->unk1C,
                               e->unk30, req->unk1E) != -1)
                 return i;
         }
@@ -821,7 +821,7 @@ int creature_vertex_offset(Vis212 *e, int index, VECTOR *out)
     rot.vx = e->unk8C;
     rot.vy = e->unk8E + 2048;
     rot.vz = e->unk90;
-    func_8004a078(&rot, &v, out);
+    vector_rotate(&rot, &v, out);
     return 1;
 }
 
@@ -896,7 +896,7 @@ int n;
     k = turn << 12;
     p.vy += 800;
     for (;;) {
-        func_8004a390(p.vx - target->vx, p.vy - target->vy, p.vz - target->vz, &rot);
+        vector_to_angles(p.vx - target->vx, p.vy - target->vy, p.vz - target->vz, &rot);
         d = (rot.vy - e->unk8E + 2048) & 0xfff;
         if (d >= 2048)
             d = 4096 - d;
@@ -904,23 +904,23 @@ int n;
             d = k / d;
         if (d > 4096)
             d = 4096;
-        t = func_8004a848(rot.vy, e->unk8E + 2048, d);
+        t = angle_lerp(rot.vy, e->unk8E + 2048, d);
         rot.vy = t;
         t = pitch;
         if (t == -1) {
             d = (rot.vx - (short)e->unk8C) & 0xfff;
             if (d >= 2048)
                 d = 4096 - d;
-            rot.vx = func_8004a848(rot.vx, (short)e->unk8C, d);
+            rot.vx = angle_lerp(rot.vx, (short)e->unk8C, d);
         } else {
             rot.vx = pitch;
         }
-        func_80049f08(&rot, dir);
-        func_8004a0f8((short)speed, dir);
+        vector_from_angles(&rot, dir);
+        vector_scale((short)speed, dir);
         if (--n == 0)
             break;
-        func_8004a8e8(&p, &viewer.unk260,
-                      func_8004a340(target->vx - p.vx, target->vy - p.vy, target->vz - p.vz) / speed,
+        vector_add_scaled(&p, &viewer.unk260,
+                      vector_length_xyz(target->vx - p.vx, target->vy - p.vy, target->vz - p.vz) / speed,
                       &p);
     }
     rot.vy += 2048;

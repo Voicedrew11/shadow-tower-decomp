@@ -36,7 +36,7 @@ typedef struct {
     u16 unk[7];
 } StHalves7;
 
-/* The save-data image func_800562d4 fills and func_80056aa0 reads. */
+/* The save-data image save_pack_data fills and save_unpack_data reads. */
 typedef struct {
     u32 unk0;            /* 0x0000: DAT_801cba08.unk16E0 */
     u8 unk4[5];          /* 0x0004: area_state.unk4..unk8 */
@@ -89,12 +89,12 @@ typedef struct {
     u16 unk1D6E[12];     /* 0x1d6e: the button masks (DAT_801cd180.unk22) */
 } StSaveData;
 
-void func_80055990(void);
-void func_800559bc(void);
-void func_80055cf4(int area);
-void func_80055f9c(int area);
-void func_800562d4(StSaveData *save, int fresh);
-void func_80056aa0(StSaveData *save);
-void func_8005735c(void);
+void item_counts_clear(void);
+void save_reset_new_game(void);
+void area_save_snapshot(int area);
+void area_restore_snapshot(int area);
+void save_pack_data(StSaveData *save, int fresh);
+void save_unpack_data(StSaveData *save);
+void area_run_frame_hook(void);
 
 #endif

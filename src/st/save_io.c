@@ -20,7 +20,7 @@
 
 /* Fills the save image; `fresh` stores the start position and no area. */
 ADDRESS(0x800562d4, 0x7cc)
-void func_800562d4(StSaveData *save, int fresh)
+void save_pack_data(StSaveData *save, int fresh)
 {
     int i;
     Vis48 *e32;
@@ -178,9 +178,9 @@ void func_800562d4(StSaveData *save, int fresh)
     copy_halfwords(save->unk1D6E, DAT_801cd180.unk22, 12);
 }
 
-/* Restores the state func_800562d4 saved. */
+/* Restores the state save_pack_data saved. */
 ADDRESS(0x80056aa0, 0x8bc)
-void func_80056aa0(StSaveData *save)
+void save_unpack_data(StSaveData *save)
 {
     int i;
     int area;
@@ -356,7 +356,7 @@ void func_80056aa0(StSaveData *save)
 }
 
 ADDRESS(0x8005735c, 0x30)
-void func_8005735c(void)
+void area_run_frame_hook(void)
 {
     area_state.hooks->frame();
 }

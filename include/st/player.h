@@ -42,9 +42,9 @@ typedef struct {
 } TimBlock;
 
 /* Not reconstructed yet. */
-void func_80057c0c(void);
-void func_80057a68(int arg0);
-void func_80055990(void);
+void play_death_sound(void);
+void pad_vibrate(int arg0);
+void item_counts_clear(void);
 void equip_load_item_slot_pictures(void);
 struct StEffect *effect_spawn(u8 type, u8 flags, u8 kind, VECTOR *pos, SVECTOR *dir, ...); /* src/st/effect_spawn.c: the effect spawned (st/effect.h) or NULL */
 #ifndef ST_AREA_REQUEST_LOAD_OLD_STYLE /* one caller has no prototype in scope */

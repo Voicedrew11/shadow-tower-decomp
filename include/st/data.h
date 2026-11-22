@@ -202,7 +202,7 @@ typedef struct {
     u8 unk1D4[4];        /* 0x1d4: per slot/hand: sound id */
     CdlLOC unk1D8;       /* 0x1d8: XA stream start position (src/st/xa.c) */
     /* 0x1dc: its current position. Volatile: the CD ready callback
-     * (func_80054000) writes it, and retail keeps its three byte stores in
+     * (xa_ready_callback) writes it, and retail keeps its three byte stores in
      * source order where the scheduler would otherwise reorder them. */
     volatile CdlLOC unk1DC;
     s32 unk1E0;          /* 0x1e0: its length in sectors */
@@ -313,7 +313,7 @@ extern Viewer viewer;
  * config/retail/indirect_pointers.tsv. */
 typedef struct {
     void (*examine)();   /* 0x00: the examine action, (position, facing) (player_examine) */
-    void (*frame)(void); /* 0x04: per frame (func_8005735c) */
+    void (*frame)(void); /* 0x04: per frame (area_run_frame_hook) */
     void (*unk08)();
     void (*unk0C)();
     void (*unk10)();
@@ -410,7 +410,7 @@ typedef struct {
     u8 unk1A[6];         /* 0x1a: PadSetActAlign data */
     u8 unk20[2];
     /* 0x22: twelve button masks tested against unk2 (held) / unk4 (pressed),
-     * set by func_800573bc: the settings page lists them in two columns of
+     * set by pad_set_default_buttons: the settings page lists them in two columns of
      * six (menu_button_config_draw). [2]/[3] and [6]/[7] turn the view (player_update_look);
      * [8] is slot 0's request bit, [9] the other slots' (player_start_hand_action);
      * [10] the hand swap (src/st/player.c). */

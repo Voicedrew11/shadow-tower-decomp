@@ -178,7 +178,7 @@ typedef struct {
     s16 unk202;          /* 0x202: dialog choice (card_ask_yes_no returns it) */
     s16 unk204;          /* 0x204: lowest unused save file number (card_read_directory) */
     s16 unk206;          /* 0x206 */
-    s32 unk208;          /* 0x208: card_screen_run hands it to func_800562d4 */
+    s32 unk208;          /* 0x208: card_screen_run hands it to save_pack_data */
     u8 unk20C[0x50];     /* 0x20c */
     s16 unk25C[14];      /* 0x25c: attribute changes */
     u8 unk278[0x292 - 0x278]; /* 0x278 */
@@ -303,7 +303,7 @@ typedef struct {
     u8 unk1448[48];      /* 0x1448: per XA stream file, the next channel to play */
     u8 unk1478[48];
     u32 unk14A8[0x5c];   /* 0x14a8: one bit per map id (world_draw_creatures) */
-    /* 0x1618: per XA stream file, its position (func_8005408c); game_load_common_data
+    /* 0x1618: per XA stream file, its position (xa_start_stream); game_load_common_data
      * searches the first 40 */
     CdlLOC unk1618[48];
     s32 unk16D8;         /* 0x16d8: the examine/item-use result */

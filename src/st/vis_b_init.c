@@ -16,7 +16,7 @@ ADDRESS(0x8004ed54, 0x54)
 void object_play_sound(Vis88 *e, int sound)
 {
     if (DAT_801dd1c0.sounds[sound].slot != -1)
-        func_80058220(sound, &e->unk24, 127, 0);
+        sound_play_at(sound, &e->unk24, 127, 0);
 }
 
 /* Frees every table B entry. */

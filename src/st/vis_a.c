@@ -51,7 +51,7 @@ int creature_take_damage(e, kind, power, levels, crit)
         dmg = dmg * 3 / 2;
     luck = viewer.unk1C6;
     if (rand() * 100 / 32768 < luck) {
-        func_800582f0(21, 128);
+        sound_play(21, 128);
         dmg <<= 1;
     }
     i = 24;

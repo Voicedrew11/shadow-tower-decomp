@@ -19,7 +19,7 @@ ST.EXE	0x80055150	0x80054a54	item_use	AreaHooks.item_used	0x30	area_state.hooks-
 ST.EXE	0x80055174	0x80054a54	item_use	AreaHooks.item_used	0x30	area_state.hooks->item_used(id)
 ST.EXE	0x80055358	0x80055300	item_add	AreaHooks.item_added	0x18	area_state.hooks->item_added(id)
 ST.EXE	0x80055954	0x80055374	player_examine	AreaHooks.examine	0x0	area_state.hooks->examine(position, facing)
-ST.EXE	0x80057374	0x8005735c	func_8005735c	AreaHooks.frame	0x4	area_state.hooks->frame()
+ST.EXE	0x80057374	0x8005735c	area_run_frame_hook	AreaHooks.frame	0x4	area_state.hooks->frame()
 ST.EXE	0x80015794	0x8001561c	cd_request_sync_callback	StCdRequest.done	0x2c	request->done(request->unk20): checked read (kind 2) complete
 ST.EXE	0x800157bc	0x8001561c	cd_request_sync_callback	StCdRequest.done	0x2c	request->done(request): other kinds complete
 ST.EXE	0x800461c8	0x80045ffc	image_stream_update	StCdRequest.done	0x2c	request->done(request): image stream (kind 3) reached its end marker

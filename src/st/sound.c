@@ -22,20 +22,20 @@
 
 /* Plays the hit sound for damage above 256 and shakes the pad by it. */
 ADDRESS(0x80057b48, 0x64)
-void func_80057b48(int damage)
+void play_landing_sound(int damage)
 {
     if (damage >= 256) {
         damage -= 256;
         if (damage > 512)
             damage = 512;
-        func_800582f0(20, (damage >> 3) + 64);
-        func_80057a68(damage / 4);
+        sound_play(20, (damage >> 3) + 64);
+        pad_vibrate(damage / 4);
     }
 }
 
 /* Plays the footstep sound of the floor the viewer stands on. */
 ADDRESS(0x80057bac, 0x60)
-void func_80057bac(int volume)
+void play_footstep_sound(int volume)
 {
     int flags = vis_lists.unk47DC;
     int id;
@@ -48,78 +48,78 @@ void func_80057bac(int volume)
         id = 18;
     else
         id = 17;
-    func_800582f0(id, (volume >> 2) + 64);
+    sound_play(id, (volume >> 2) + 64);
 }
 
 ADDRESS(0x80057c0c, 0x24)
-void func_80057c0c(void)
+void play_death_sound(void)
 {
-    func_800582f0(3, 128);
+    sound_play(3, 128);
 }
 
 ADDRESS(0x80057c30, 0x24)
 void func_80057c30(void)
 {
-    func_800582f0(2, 128);
+    sound_play(2, 128);
 }
 
 ADDRESS(0x80057c54, 0x24)
-void func_80057c54(void)
+void play_warp_sound(void)
 {
-    func_800582f0(10, 128);
+    sound_play(10, 128);
 }
 
 ADDRESS(0x80057c78, 0x2c)
 void func_80057c78(void)
 {
-    func_80058318(10, 128, 128, 50);
+    sound_key_on(10, 128, 128, 50);
 }
 
 ADDRESS(0x80057ca4, 0x24)
 void func_80057ca4(void)
 {
-    func_800582f0(21, 128);
+    sound_play(21, 128);
 }
 
 ADDRESS(0x80057cc8, 0x24)
-void func_80057cc8(void)
+void play_confirm_sound(void)
 {
-    func_800582f0(12, 128);
+    sound_play(12, 128);
 }
 
 ADDRESS(0x80057cec, 0x24)
-void func_80057cec(void)
+void play_cancel_sound(void)
 {
-    func_800582f0(13, 128);
+    sound_play(13, 128);
 }
 
 ADDRESS(0x80057d10, 0x24)
-void func_80057d10(void)
+void play_cursor_sound(void)
 {
-    func_800582f0(11, 128);
+    sound_play(11, 128);
 }
 
 ADDRESS(0x80057d34, 0x24)
-void func_80057d34(void)
+void play_refuse_sound(void)
 {
-    func_800582f0(14, 128);
+    sound_play(14, 128);
 }
 
 ADDRESS(0x80057d58, 0x24)
-void func_80057d58(void)
+void play_unlock_sound(void)
 {
-    func_800582f0(16, 128);
+    sound_play(16, 128);
 }
 
 ADDRESS(0x80057d7c, 0x24)
-void func_80057d7c(void)
+void play_locked_sound(void)
 {
-    func_800582f0(15, 128);
+    sound_play(15, 128);
 }
 
 /* Starts the sound system and resets the bank slots, voices and buffers. */
 ADDRESS(0x80057da0, 0x19c)
-void func_80057da0(void)
+void sound_init(void)
 {
     StVabSlot *slot;
     StSoundBuf *buf;
@@ -180,7 +180,7 @@ void func_80057da0(void)
 
 /* Closes every open bank and stops the sound system. */
 ADDRESS(0x80057f3c, 0x88)
-void func_80057f3c(void)
+void sound_shutdown(void)
 {
     StVabSlot *slot;
     int n;
@@ -205,7 +205,7 @@ void func_80057f3c(void)
  * yaw. Bit 15 of `id` keeps more of the volume on the far side.
  */
 ADDRESS(0x80057fc4, 0x25c)
-s16 func_80057fc4(int id, VECTOR *pos, int volume, int range, int fade, int note)
+s16 sound_play_positional(int id, VECTOR *pos, int volume, int range, int fade, int note)
 {
     int dx = (pos->vx - DAT_801dd1c0.listener.vx) >> 3;
     int dy = (pos->vy - DAT_801dd1c0.listener.vy) >> 3;
@@ -238,7 +238,7 @@ s16 func_80057fc4(int id, VECTOR *pos, int volume, int range, int fade, int note
             capped = left;
         left = capped;
     }
-    angle = func_8004a1b4(pos->vx - DAT_801dd1c0.listener.vx, pos->vz - DAT_801dd1c0.listener.vz)
+    angle = angle_from_xz(pos->vx - DAT_801dd1c0.listener.vx, pos->vz - DAT_801dd1c0.listener.vz)
             - DAT_801dd1c0.listener_rot.vy;
     if (angle < 0)
         angle += 4096;
@@ -247,24 +247,24 @@ s16 func_80057fc4(int id, VECTOR *pos, int volume, int range, int fade, int note
         right -= (right * rsin(angle) >> 12) * (127 - vol) / 128;
     else
         left = right + (right * rsin(angle) >> 12) * (127 - vol) / 128;
-    return func_80058318(id, left, right, note);
+    return sound_key_on(id, left, right, note);
 }
 
 ADDRESS(0x80058220, 0x34)
-void func_80058220(int id, VECTOR *pos, short volume, int note)
+void sound_play_at(int id, VECTOR *pos, short volume, int note)
 {
-    func_80057fc4(id, pos, volume, 20480, 18432, note);
+    sound_play_positional(id, pos, volume, 20480, 18432, note);
 }
 
 ADDRESS(0x80058254, 0x34)
-void func_80058254(int id, VECTOR *pos, short volume, int range, int fade, int note)
+void sound_play_at_range(int id, VECTOR *pos, short volume, int range, int fade, int note)
 {
-    func_80057fc4(id, pos, volume, range, fade, note);
+    sound_play_positional(id, pos, volume, range, fade, note);
 }
 
 /* Moves the listener; either argument may be NULL. */
 ADDRESS(0x80058288, 0x68)
-void func_80058288(VECTOR *a, SVECTOR *b)
+void sound_set_listener(VECTOR *a, SVECTOR *b)
 {
     if (a != NULL)
         DAT_801dd1c0.listener = *a;
@@ -273,9 +273,9 @@ void func_80058288(VECTOR *a, SVECTOR *b)
 }
 
 ADDRESS(0x800582f0, 0x28)
-s16 func_800582f0(int sound, int volume)
+s16 sound_play(int sound, int volume)
 {
-    return func_80058318(sound, volume, volume, 0);
+    return sound_key_on(sound, volume, volume, 0);
 }
 
 /*
@@ -283,7 +283,7 @@ s16 func_800582f0(int sound, int volume)
  * free voice, else on one that is releasing; returns the voice or -1.
  */
 ADDRESS(0x80058318, 0x1f4)
-s16 func_80058318(int id, int left, int right, int note)
+s16 sound_key_on(int id, int left, int right, int note)
 {
     Data801cd120 *opt;
     StSound *snd;

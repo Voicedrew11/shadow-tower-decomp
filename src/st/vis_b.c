@@ -335,7 +335,7 @@ int object_move_child(Vis88 *src, Vis88 *e, SVECTOR *from, SVECTOR *to, int fade
             e->unk02 = 0;
         else
             e->unk02 = 0x80;
-        func_8004a078((SVECTOR *)&src->unk34, from, &e->unk24);
+        vector_rotate((SVECTOR *)&src->unk34, from, &e->unk24);
         e->unk24.vx += src->unk24.vx;
         e->unk24.vy += src->unk24.vy;
         e->unk24.vz += src->unk24.vz;
@@ -351,13 +351,13 @@ int object_move_child(Vis88 *src, Vis88 *e, SVECTOR *from, SVECTOR *to, int fade
         if (e->unk10 >= 4096)
             e->unk10 = 4095;
     }
-    func_8004a078((SVECTOR *)&src->unk34, from, &a);
-    func_8004a078((SVECTOR *)&src->unk34, to, &b);
+    vector_rotate((SVECTOR *)&src->unk34, from, &a);
+    vector_rotate((SVECTOR *)&src->unk34, to, &b);
     (*(u8 *)&src->unk50)++;
     t = (*(u8 *)&src->unk50 << 12) / steps;
-    e->unk24.vx = src->unk24.vx + func_8004a830(a.vx, b.vx, t);
-    e->unk24.vy = src->unk24.vy + func_8004a830(a.vy, b.vy, t);
-    e->unk24.vz = src->unk24.vz + func_8004a830(a.vz, b.vz, t);
+    e->unk24.vx = src->unk24.vx + math_lerp(a.vx, b.vx, t);
+    e->unk24.vy = src->unk24.vy + math_lerp(a.vy, b.vy, t);
+    e->unk24.vz = src->unk24.vz + math_lerp(a.vz, b.vz, t);
     if (*(u8 *)&src->unk50 >= steps) {
         if (fade)
             e->unk10 = 4095;
@@ -386,7 +386,7 @@ void fade_run_frames(int mode, int start, int end, int delta)
             c = 255;
         fade_add_color(c, c, c, 4096, mode);
         cd_wait_idle();
-        func_80058620();
+        sound_bank_transfer_body();
         image_stream_update();
         player_get_camera(&pos, &rot);
         world_render_frame(&pos, &rot);
@@ -1075,7 +1075,7 @@ void objects_update(void)
                 && W50(e) != 0xffffff && W48(e) != 0xffffff) {
                 vis_table_a.unk6169 = 1;
                 player_stop_motion();
-                func_80057a3c();
+                pad_clear_input();
             }
             if (vis_table_a.unk6169 == 1) {
                 a = &vis_table_a.entries[56];
@@ -1085,7 +1085,7 @@ void objects_update(void)
                 for (j = 7; j != -1; a++, j--) {
                     a->unk2A = 0;
                     if (a->unk00 != 255) {
-                        func_80058220(a->unk0B * 10 + 48, &a->unk74, 127, (rand() * 5 >> 15) - 2);
+                        sound_play_at(a->unk0B * 10 + 48, &a->unk74, 127, (rand() * 5 >> 15) - 2);
                         a->unkB0 = 128;
                         DAT_800881e0.vx = rcos((s16)a->unk56 - 1024) / 256;
                         DAT_800881e0.vz = rsin((s16)a->unk56 - 1024) / 256;
@@ -1105,7 +1105,7 @@ void objects_update(void)
                         a->unkB0 = 0;
                         a->unk2A = 4095;
                         vis_table_a.unk6169 = 3;
-                        func_80057a3c();
+                        pad_clear_input();
                     }
                 }
                 break;
@@ -1176,7 +1176,7 @@ void objects_update(void)
             x = e->unk49 + 64;
             y = e->unk4A.snd.unk4A + 64;
             z = e->unk4A.snd.unk4B + 64;
-            func_80057c54();
+            play_warp_sound();
             fade_run_frames(2, 0, 0x1000, 0x100);
             area = e->unk48;
             lit = area;
@@ -1231,7 +1231,7 @@ void objects_update(void)
             creatures_update();
             fade_run_frames(2, 0x1000, 0x1000, 0);
             cd_wait_idle();
-            func_80057c54();
+            play_warp_sound();
             fade_run_frames(2, 0x1000, 0, -0x100);
             if (area < 44)
                 area_request_load(0xff, 0xff, 0xff, lit2, lit, 127, 127, 127, 0, 0, 0);
@@ -1286,7 +1286,7 @@ void player_warp(to, keep)
     x = to->x;
     y = to->y;
     z = to->z;
-    func_80057c54();
+    play_warp_sound();
     fade_run_frames(2, 0, 0x1000, 0x100);
     area = to->area;
     do {
@@ -1344,13 +1344,13 @@ void player_warp(to, keep)
     }
     fade_run_frames(2, 0x1000, 0x1000, 0);
     cd_wait_idle();
-    func_80057c54();
+    play_warp_sound();
     fade_run_frames(2, 0x1000, 0, -0x100);
     if (!keep) {
         area_request_load(0xff, 0xff, 0xff, area, area, 127, 127, 127, 0, 0, 0);
         lighting_clear_requests();
     }
-    func_80057a3c();
+    pad_clear_input();
     player_enter_normal_state();
 }
 
@@ -1529,8 +1529,8 @@ int ground_item_find_in_reach(VisLists *req, int unused)
             continue;
         if (c->unk08.vy < viewer.position.vy - 0x400 || c->unk08.vy > viewer.position.vy + 0xa40)
             continue;
-        if (!func_8004a148(viewer.unk278.vy,
-                           func_8004a1b4(c->unk08.vx - viewer.position.vx, c->unk08.vz - viewer.position.vz), 300))
+        if (!angle_within(viewer.unk278.vy,
+                           angle_from_xz(c->unk08.vx - viewer.position.vx, c->unk08.vz - viewer.position.vz), 300))
             continue;
         dx = c->unk08.vx - req->unk4.vx;
         if (dx < -0x2800 || dx > 0x2800)

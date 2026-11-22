@@ -1,7 +1,7 @@
 /*
  * ST.EXE: XA voice stream start (WIP module, 0x80054000..0x800541f4; the
  * stream wait, still images and talk sequence continue in src/st/xa_play.c,
- * split off because func_8005408c is not exact and 4 bytes short).
+ * split off because xa_start_stream is not exact and 4 bytes short).
  */
 #include <kf/lib/address.h>
 #include <kf/lib/types.h>
@@ -30,7 +30,7 @@ void *memcpy(void *dst, void *src, int size);
 /* CdReadyCallback while a stream plays: keeps the current position and
  * restarts the read from the start position after a disk error. */
 ADDRESS(0x80054000, 0x8c)
-void func_80054000(u8 intr, u8 *result)
+void xa_ready_callback(u8 intr, u8 *result)
 {
     u8 loc[8];
 
@@ -51,7 +51,7 @@ void func_80054000(u8 intr, u8 *result)
 
 /* Starts channel `channel` of XA stream file `file`. */
 ADDRESS(0x8005408c, 0x168)
-void func_8005408c(u8 file, int channel)
+void xa_start_stream(u8 file, int channel)
 {
     u8 param[8];
     CdlFILTER filter;
@@ -59,7 +59,7 @@ void func_8005408c(u8 file, int channel)
     u8 *save;
 
     cd_wait_idle();
-    CdReadyCallback(func_80054000);
+    CdReadyCallback(xa_ready_callback);
     param[0] = CdlModeSpeed | CdlModeRT | CdlModeSF | CdlModeRept;
     CdControlB(CdlSetmode, param, NULL);
     VSync(4);

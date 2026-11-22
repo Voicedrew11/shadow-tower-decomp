@@ -24,7 +24,7 @@
 ADDRESS(0x8001531c, 0x40)
 void cd_wait_frame(void)
 {
-    func_80058620();
+    sound_bank_transfer_body();
     image_stream_update();
     loading_screen_step();
     DrawSync(0);
@@ -49,7 +49,7 @@ void vsync_handler(void)
         viewer.unk33 = 0;
         viewer.unk34++;
     }
-    func_80057744();
+    pad_read();
 }
 
 ADDRESS(0x8001542c, 0xbc)

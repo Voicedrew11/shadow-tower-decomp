@@ -46,7 +46,7 @@ void player_kill(int unused)
     if (viewer.unk218 != 4) {
         viewer.unk218 = 4;
         viewer.unk2 = 0;
-        func_80057c0c();
+        play_death_sound();
         world_state.unk1EE15 = 1;
         viewer.unk286 = 0;
         viewer.unk17C = 170;
@@ -117,7 +117,7 @@ int player_distance_in_reach(void *request)
 ADDRESS(0x8003c000, 0x54)
 int func_8003c000(int x, int y, int z, int range, int kind)
 {
-    return func_8004a580((VECTOR *)&viewer.position.vx, x, y, z, range + 256, 1000, kind);
+    return vector_distance_xz_within_rev((VECTOR *)&viewer.position.vx, x, y, z, range + 256, 1000, kind);
 }
 
 ADDRESS(0x8003c054, 0x8c)
@@ -631,7 +631,7 @@ void player_wear_item(int amount, u16 *slot)
     }
     left -= amount;
     if (left <= 0) {
-        func_800582f0(4, 128);
+        sound_play(4, 128);
         vis_table_c.unk0118[*slot].unk28 = 0;
         if (slot != &viewer.unk38[0] && slot != &viewer.unk38[13]) {
             *slot = 0xffff;
@@ -815,15 +815,15 @@ void player_take_damage(int damage, int flags, long *from)
     }
     reach = scaled >> 2;
     if (from) {
-        func_8004a390(viewer.position.vx - from[0], viewer.position.vy - from[1], viewer.position.vz - from[2], &dir);
+        vector_to_angles(viewer.position.vx - from[0], viewer.position.vy - from[1], viewer.position.vz - from[2], &dir);
         if (reach < 80) {
             reach = 80;
         }
         if (reach > 450) {
             reach = 450;
         }
-        func_80049f08(&dir, &push);
-        func_8004a0f8(reach, &push);
+        vector_from_angles(&dir, &push);
+        vector_scale(reach, &push);
         if (push.vy > 200) {
             push.vy = 200;
         } else if (push.vy < -200) {
@@ -847,7 +847,7 @@ void player_take_damage(int damage, int flags, long *from)
     if (viewer.unk2F4 > 30) {
         viewer.unk2F4 = 30;
     }
-    func_80057a68(damage * 255 / viewer.unk0);
+    pad_vibrate(damage * 255 / viewer.unk0);
     amount = damage * 255 / viewer.unk0 + 32;
     if (amount > 128) {
         amount = 128;
@@ -1000,7 +1000,7 @@ void player_hit(u16 *damage, u16 scale, u16 effect, long *from)
             break;
         case 512:
             player_add_hp(-(rand() / 256));
-            func_800582f0(9, 128);
+            sound_play(9, 128);
             break;
         case 256:
             if (!(viewer.unk2C & 0x100)) {
@@ -1040,7 +1040,7 @@ void player_hit(u16 *damage, u16 scale, u16 effect, long *from)
         case 1024:
             viewer.unk2C |= 0x400;
             if (viewer.unk23C % 40 == 0) {
-                func_800582f0(7, 128);
+                sound_play(7, 128);
             }
             viewer.unk2DA = 3500;
             viewer.unk2DC = 128;
@@ -1128,12 +1128,12 @@ void player_hit_in_radius(u16 *damage, u16 effect, long *pos, int min, int range
     int d;
 
     if (kind == 0x8000) {
-        d = func_8004a67c((VECTOR *)pos, range, (VECTOR *)&viewer.position.vx, 256, 1000);
+        d = vector_sphere_distance((VECTOR *)pos, range, (VECTOR *)&viewer.position.vx, 256, 1000);
     } else if (kind == 0x8001) {
         if (viewer.position.vy > pos[1]) {
             d = -9999999;
         } else {
-            d = func_8004a67c((VECTOR *)pos, range, (VECTOR *)&viewer.position.vx, 256, 1000);
+            d = vector_sphere_distance((VECTOR *)pos, range, (VECTOR *)&viewer.position.vx, 256, 1000);
         }
     } else {
         d = player_distance_within(pos[0], pos[1], pos[2], range, kind);
@@ -1216,7 +1216,7 @@ void player_reset_new_game(void)
     viewer.unk1D4[3] = 27;
     viewer.unk38[3] = 0;
     player_load_equipment_model(0, 0, 0);
-    func_80055990();
+    item_counts_clear();
     viewer.unk28 = 0;
     viewer.unk33 = 0;
     viewer.unk34 = 0;
@@ -1296,7 +1296,7 @@ int player_distance_in_arc(VECTOR *pos, int angle, int range, int limit)
 
     d = player_distance_within(pos->vx, 0xffff, pos->vz, range, 0);
     if (d != -1) {
-        a = (func_8004a1b4(viewer.position.vx - pos->vx, viewer.position.vz - pos->vz) - angle) & 0xfff;
+        a = (angle_from_xz(viewer.position.vx - pos->vx, viewer.position.vz - pos->vz) - angle) & 0xfff;
         if (a > 2048) {
             a = 4096 - a;
         }
@@ -1310,7 +1310,7 @@ int player_distance_in_arc(VECTOR *pos, int angle, int range, int limit)
 ADDRESS(0x8003ebfc, 0x50)
 int player_distance_within(int x, int y, int z, int range, int kind)
 {
-    return func_8004a580((VECTOR *)&viewer.position.vx, x, y, z, range, 1000, kind);
+    return vector_distance_xz_within_rev((VECTOR *)&viewer.position.vx, x, y, z, range, 1000, kind);
 }
 
 ADDRESS(0x8003ec4c, 0x10)
@@ -1468,7 +1468,7 @@ void player_load_magic(u16 id, u8 slot)
         cd_read_member(1, item * 4 + 741, DAT_80088c88);
         tim_load_images_at(DAT_80088c88, &pix[slot], &clut[slot], 0);
         DrawSync(0);
-        func_80058a0c(1, item * 4 + 742, slot + 6);
+        sound_bank_load(1, item * 4 + 742, slot + 6);
     }
     viewer.unk188 = 30;
     viewer.unk182 = 0;
@@ -1534,7 +1534,7 @@ void player_load_equipment_model(u16 id, u8 slot, u8 reload)
         cd_read_member(1, model * 4 + 485, DAT_80088c88);
         tim_load_images_at(DAT_80088c88, &pix[slot], &clut[slot], 0);
         DrawSync(0);
-        func_80058a0c(1, model * 4 + 486, viewer.unk1D4[slot] - 22);
+        sound_bank_load(1, model * 4 + 486, viewer.unk1D4[slot] - 22);
     }
     if (slot < 2) {
         viewer.unk130.halves[slot] = -1;
@@ -1640,7 +1640,7 @@ int player_get_launch_vector(int length, VECTOR *pos, SVECTOR *dir, SVECTOR *rot
             gte_ldv0(&v);
             gte_rtv0();
             gte_stsv(dir);
-            func_8004a0f8(length, dir);
+            vector_scale(length, dir);
         }
     } else if (dir) {
         SVECTOR v;
@@ -1651,7 +1651,7 @@ int player_get_launch_vector(int length, VECTOR *pos, SVECTOR *dir, SVECTOR *rot
         gte_ldv0(&v);
         gte_rtv0();
         gte_stsv(dir);
-        func_8004a0f8(length, dir);
+        vector_scale(length, dir);
     }
     return 0;
 }
@@ -1811,12 +1811,12 @@ void player_fire_magic_shot(int kind, int slot, ...)
         gte_ldv0(&dir);
         gte_rt();
         gte_stlvnl(&pos2);
-        func_8004a40c(pos.vx - pos2.vx, pos.vy - pos2.vy, pos.vz - pos2.vz, &rot);
-        func_80049fe4(&rot, &dir);
+        vector_to_angles_ratan2(pos.vx - pos2.vx, pos.vy - pos2.vy, pos.vz - pos2.vz, &rot);
+        vector_from_angles_zyx(&rot, &dir);
         if (kind == 44) {
-            func_8004a0f8(viewer.unk180 * 768 / 5120, &dir);
+            vector_scale(viewer.unk180 * 768 / 5120, &dir);
         } else {
-            func_8004a0f8(viewer.unk180 * 1024 / 5120, &dir);
+            vector_scale(viewer.unk180 * 1024 / 5120, &dir);
         }
         pos.vx = pos2.vx;
         pos.vy = pos2.vy + viewer.unk2CE + viewer.unk2D2;
@@ -2011,7 +2011,7 @@ void player_update_hand_action(u8 hand)
                     if (viewer.unk130.halves[hand] > viewer.unk130.halves[hand + 2] &&
                         viewer.unk130.halves[hand] <= viewer.unk130.halves[hand + 2] + cost) {
                         kind = viewer.unk148[hand] + 13;
-                        func_800582f0((viewer.unk1D4[hand] - 24) / 2 + 22, 128);
+                        sound_play((viewer.unk1D4[hand] - 24) / 2 + 22, 128);
                         viewer.unk130.halves[hand] -= cost;
                         player_cast_magic(kind, hand);
                         viewer.unk130.halves[hand] += cost;
@@ -2045,7 +2045,7 @@ void player_update_hand_action(u8 hand)
                 viewer.unk130.halves[hand] += cost;
                 if (viewer.unk130.halves[hand] > viewer.unk138[hand] - cost &&
                     viewer.unk130.halves[hand] <= viewer.unk138[hand]) {
-                    func_800582f0(viewer.unk1D4[hand], 128);
+                    sound_play(viewer.unk1D4[hand], 128);
                     player_wear_item(1, &viewer.unk38[3]);
                 }
             }
@@ -2085,7 +2085,7 @@ void player_update_hand_action(u8 hand)
             }
             if (viewer.unk138[hand] - cost < viewer.unk130.halves[hand] &&
                 viewer.unk130.halves[hand] <= viewer.unk138[hand]) {
-                func_800582f0(viewer.unk1D4[hand], 128);
+                sound_play(viewer.unk1D4[hand], 128);
                 if (viewer.unk138[hand] >= max) {
                     viewer.unk138[hand] = 5000;
                 } else {
@@ -2480,7 +2480,7 @@ void player_update_motion(void)
     d = vis_lists.unk2C - 1600;
     if (d < 0) {
         if (viewer.unk2D4 > 0) {
-            func_80057b48(viewer.unk2D4);
+            play_landing_sound(viewer.unk2D4);
             viewer.unk2D4 >>= 2;
         } else if (viewer.unk2D4 < 0) {
             if (d >= -1024) {
@@ -2549,7 +2549,7 @@ void player_update_motion(void)
             }
             if (viewer.unk244 < 0) {
                 viewer.unk244 = 2048;
-                func_80057bac(viewer.unk2C8);
+                play_footstep_sound(viewer.unk2C8);
             }
         }
     }
@@ -2626,11 +2626,11 @@ void player_update_look(void)
     }
     if (viewer.unk2CC > 0) {
         viewer.unk278.vx = (viewer.unk278.vx + viewer.unk2CC) & 0xfff;
-        if (func_8004a194(viewer.unk278.vx, 700))
+        if (angle_signed_greater(viewer.unk278.vx, 700))
             viewer.unk278.vx = 700;
     } else if (viewer.unk2CC < 0) {
         viewer.unk278.vx = (viewer.unk278.vx + viewer.unk2CC) & 0xfff;
-        if (func_8004a194(3396, viewer.unk278.vx))
+        if (angle_signed_greater(3396, viewer.unk278.vx))
             viewer.unk278.vx = 3396;
     }
 }
@@ -2906,7 +2906,7 @@ void player_enter_hurt_state(SVECTOR *arg0, SVECTOR *arg1, s16 arg2, int arg3)
     if (viewer.unk0 < arg3 * 10)
         viewer.unk14E = 1;
     if (viewer.unk38[16] != 0xffff && viewer.unk189 && DAT_80088050 != viewer.unk23C) {
-        func_800582f0(viewer.unk1D4[1], 128);
+        sound_play(viewer.unk1D4[1], 128);
         DAT_80088050 = viewer.unk23C;
     }
 }
@@ -2961,15 +2961,15 @@ void player_update(void)
 
             i = 16;
             lighting.unkA = 1;
-            func_80057cc8();
+            play_confirm_sound();
             anim_free_all_for_menu();
-            func_80057a3c();
-            func_80057a68(0);
+            pad_clear_input();
+            pad_vibrate(0);
             entry = vis_table_b.entries;
             left = 240;
             while (left--) {
                 if (entry->unk05 == 236 && entry->unk54 != -1) {
-                    func_8005850c(entry->unk54, entry->unk4A.snd.unk4A + 1108);
+                    sound_stop(entry->unk54, entry->unk4A.snd.unk4A + 1108);
                     entry->unk54 = -1;
                 }
                 entry++;
@@ -2983,7 +2983,7 @@ void player_update(void)
             }
             if (viewer.unk2A) {
                 hud_clear_damage_numbers();
-                func_80057a3c();
+                pad_clear_input();
                 DAT_801cd180.unk10 = 1;
                 fade_reset();
                 viewer.unk2D6 = viewer.unk2D8 = viewer.unk2DA = viewer.unk2DC = 0;
@@ -2994,7 +2994,7 @@ void player_update(void)
                 vis_table_a.unk6168 = 254;
                 vis_table_a.unk6158[0] = vis_table_a.unk6158[1] = vis_table_a.unk6158[2] =
                     vis_table_a.unk6158[3] = 255;
-                func_80057a68(0);
+                pad_vibrate(0);
                 fx = effects.slots;
                 k = 128;
                 while (k--) {
@@ -3044,7 +3044,7 @@ void player_update(void)
                     world_state.draw[1].clip.h = 240;
                 }
             }
-            func_80057a3c();
+            pad_clear_input();
             lighting.unkA = 2;
         }
         if (viewer.unk2B) {
@@ -3053,12 +3053,12 @@ void player_update(void)
         if ((DAT_801cd180.unk4 & 8) && viewer.unk218 != 4 && area_state.unk0 == 0 &&
             vis_table_a.unk6169 == 0 && area_state.unk18 == -1) {
             lighting.unkA = 1;
-            func_80057cc8();
+            play_confirm_sound();
             DAT_801cd180.unk4 &= ~8;
-            func_80057a3c();
-            func_80057a68(0);
+            pad_clear_input();
+            pad_vibrate(0);
             pause_screen_run();
-            func_80057a3c();
+            pad_clear_input();
             lighting.unkA = 2;
         }
         viewer.unk2E4 = 192;
@@ -3075,7 +3075,7 @@ void player_update(void)
                 viewer.unk2E8 = 0;
             }
             if (viewer.unk190[1][0] % 20 == 0) {
-                func_800582f0(6, 128);
+                sound_play(6, 128);
             }
         }
         if (viewer.unk22 > viewer.unk24) {
@@ -3099,10 +3099,10 @@ void player_update(void)
                     (viewer.unk38[5] != 0xffff || viewer.unk38[19] != 0xffff ||
                      viewer.unk38[11] != 0xffff || viewer.unk38[20] != 0xffff ||
                      viewer.unk38[18] != 0xffff)) {
-                    func_80057cc8();
+                    play_confirm_sound();
                     DAT_801cd180.unk4 &= DAT_801cd180.unk22[11];
                     viewer.unk218 = 1;
-                    func_80057a3c();
+                    pad_clear_input();
                 }
             }
             player_handle_examine();
@@ -3117,20 +3117,20 @@ void player_update(void)
             player_update_motion();
             viewer.unk21E = 0;
             if (DAT_801cd180.unk4 & DAT_801cd180.unk22[8]) {
-                func_80057d10();
+                play_cursor_sound();
                 DAT_801cd180.unk4 &= ~DAT_801cd180.unk22[8];
                 if (++viewer.unk15E >= 5) {
                     viewer.unk15E = 0;
                 }
             } else if (DAT_801cd180.unk4 & DAT_801cd180.unk22[9]) {
-                func_80057d10();
+                play_cursor_sound();
                 DAT_801cd180.unk4 &= ~DAT_801cd180.unk22[9];
                 if (--viewer.unk15E < 0) {
                     viewer.unk15E = 4;
                 }
             } else {
                 if ((DAT_801cd180.unk4 & DAT_801cd180.unk22[11]) && DAT_801cd180.unk12 == 0) {
-                    func_80057cec();
+                    play_cancel_sound();
                     viewer.unk218 = 0;
                     DAT_801cd180.unk4 &= ~DAT_801cd180.unk22[11];
                     DAT_801cd180.unk4 &= ~DAT_801cd180.unk22[10];
@@ -3147,7 +3147,7 @@ void player_update(void)
                         viewer.unk2B = 0;
                         item_use(ids[viewer.unk15E]);
                         if (DAT_801cd0e0 == 1) {
-                            func_80057cc8();
+                            play_confirm_sound();
                             if (ids[viewer.unk15E] == 288) {
                                 player_compute_derived_stats(0);
                             }
@@ -3175,15 +3175,15 @@ void player_update(void)
                                 ClearImage(&icon, 0, 0, 0);
                             }
                         } else if (DAT_801cd0e0 == 2) {
-                            func_80057d34();
+                            play_refuse_sound();
                         }
                     } else {
-                        func_80057d34();
+                        play_refuse_sound();
                     }
                 } else {
                     goto status;
                 }
-                func_80057a3c();
+                pad_clear_input();
             }
         status:
             player_handle_examine();
@@ -3222,7 +3222,7 @@ void player_update(void)
                             n = 240;
                             while (n--) {
                                 if (b->unk05 == 236 && b->unk54 != -1) {
-                                    func_8005850c(b->unk54, b->unk4A.snd.unk4A + 1108);
+                                    sound_stop(b->unk54, b->unk4A.snd.unk4A + 1108);
                                     b->unk54 = -1;
                                 }
                                 b++;
@@ -3242,12 +3242,12 @@ void player_update(void)
                             n = 240;
                             while (n--) {
                                 if (b->unk05 == 236 && b->unk54 != -1) {
-                                    func_8005850c(b->unk54, b->unk4A.snd.unk4A + 1108);
+                                    sound_stop(b->unk54, b->unk4A.snd.unk4A + 1108);
                                     b->unk54 = -1;
                                 }
                                 b++;
                             }
-                            func_80057a3c();
+                            pad_clear_input();
                             card_screen_close();
                             fade_reset();
                             viewer.unk2D6 = viewer.unk2D8 = viewer.unk2DA = viewer.unk2DC = 0;
@@ -3257,14 +3257,14 @@ void player_update(void)
                             vis_table_a.unk6168 = 254;
                             vis_table_a.unk6158[0] = vis_table_a.unk6158[1] =
                                 vis_table_a.unk6158[2] = vis_table_a.unk6158[3] = 255;
-                            func_80057a68(0);
+                            pad_vibrate(0);
                             area_load_set_blocking(area_state.unk4, area_state.unk4, area_state.unk4,
                                           area_state.unk7, area_state.unk8, 255);
                             cd_wait_idle();
                             player_stop_motion();
                             break;
                         }
-                        func_80057a3c();
+                        pad_clear_input();
                         card_screen_close();
                         ClearImage(&clear, 0, 0, 0);
                         DrawSync(0);
@@ -3328,7 +3328,7 @@ void player_update(void)
                 }
                 if (viewer.unk190[0][0] % 20 == 0) {
                     player_add_hp(d);
-                    func_800582f0(5, 128);
+                    sound_play(5, 128);
                 }
             }
             if (viewer.unk190[4][0] != 0 && viewer.unk190[4][0] % 20 == 0) {

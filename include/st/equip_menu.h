@@ -47,19 +47,19 @@ extern Data801e0ce8 DAT_801e0ce8;
  * owner unknown). */
 extern u8 DAT_8008092c[18];
 
-void func_80063bdc(void);
-void func_80063cb0(void);
-int func_800642e8(int *sel);
-void func_80064ba8(void);
-void func_80064ee4(void);
-void func_80064ff0(void);
+void menu_equip_recalc_stats(void);
+void menu_equip_pick_item(void);
+int menu_equip_pick_slot(int *sel);
+void menu_equip_pick_magic(void);
+void menu_equip_loop(void);
+void menu_equip_run(void);
 void func_80065020(void);
-void func_800650dc(void);
-void func_800651f0(void);
-void func_80065270(void);
-void func_80065770(void);
-void func_80065de0(void);
-void func_80065f40(void);
-void func_80066004(void);
+void menu_equip_draw_frame(void);
+void menu_equip_draw_cursor(void);
+void menu_equip_draw_item_panel(void);
+void menu_equip_draw_slots(void);
+void menu_equip_draw_magic_list(void);
+void menu_equip_draw_backdrop(void);
+void menu_equip_draw(void);
 
 #endif

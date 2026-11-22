@@ -24,9 +24,9 @@ void creature_play_script_sound(Vis212 *e)
     u8 *p = (u8 *)e->unkA8;
 
     if (e->unk70 & 0x800000)
-        func_80058254(p[5] + 48, &e->unk74, 127, 24576, 30720, creature_sound_note(e));
+        sound_play_at_range(p[5] + 48, &e->unk74, 127, 24576, 30720, creature_sound_note(e));
     else
-        func_80058220(p[5] + 48, &e->unk74, 127, creature_sound_note(e));
+        sound_play_at(p[5] + 48, &e->unk74, 127, creature_sound_note(e));
 }
 
 ADDRESS(0x8004d7fc, 0x8)

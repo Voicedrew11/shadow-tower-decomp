@@ -12,9 +12,9 @@
 /* The menu pages menu_main_run runs (not reconstructed yet). */
 void menu_area_info_run(void);
 int menu_use_item_run(void);
-void func_80064ff0(void);
+void menu_equip_run(void);
 void menu_arrange_icons_run(void);
-void func_800675f4(void);
+void menu_arrange_list_run(void);
 void menu_creature_book_run(void);
 void menu_equip_info_run(void);
 void menu_options_run(void);

@@ -47,7 +47,7 @@ void func_801ed9cc(int gate)
     int index;
     int slot;
 
-    func_80057c54();
+    play_warp_sound();
     fade_run_frames(2, 0, 0x1000, 0x100);
     creatures_bind_previous_area();
     if (gate == 0) {
@@ -82,9 +82,9 @@ void func_801ed9cc(int gate)
         vis_table_a.unk6168 = 3;
     }
     cd_wait_idle();
-    func_80057c54();
+    play_warp_sound();
     fade_run_frames(2, 0x1000, 0, -0x100);
-    func_80057a3c();
+    pad_clear_input();
     if (gate == 0 && DAT_801cba08.unk1448[r->unk09] == 0) {
         fdat_801ed388(e, 0, 0);
         e->unk70 &= ~0x2000000;

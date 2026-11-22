@@ -361,7 +361,7 @@ void func_801edd24(void)
         fdat_801ecfc4(&pos, &rot);
         func_801eebb4();
         func_801eec74();
-        func_80054368(e, 0, 0);
+        creature_talk(e, 0, 0);
         func_801eeeb4();
         fdat_801ecf44(e);
         fdat_801ef93c = 2;
@@ -417,7 +417,7 @@ void func_801edd24(void)
         case 6:
             if (e->unk64 != 0) {
                 e->unk70 |= 0x2000000;
-                func_80054368(e, 0, 0);
+                creature_talk(e, 0, 0);
                 e->unk36 = -1;
                 e->unk34 = -1;
                 e->unk1C.bytes[3] = 0;
@@ -694,7 +694,7 @@ void func_801ee948(void)
     r->unk60[5]->unk00 = 0x70;
     r->unk60[6]->unk00 = 0x71;
     r->unk60[7]->unk00 = 0x72;
-    func_80054368(e, 0, 0);
+    creature_talk(e, 0, 0);
     fdat_801ecf44(e);
     e--;
     fdat_801eb7b4(e, 0);

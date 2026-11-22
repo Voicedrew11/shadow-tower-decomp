@@ -20,7 +20,7 @@
 ADDRESS(0x80035cc8, 0x3c)
 void effect_play_sound(StEffect *e, int id)
 {
-    func_80058254(id, &e->unk20, 128, 28000, 29000, 0);
+    sound_play_at_range(id, &e->unk20, 128, 28000, 29000, 0);
 }
 
 /*
@@ -101,8 +101,8 @@ void effect_emit(u_long flags, int kind, StEffectDef *def, int arg, VECTOR *pos)
         return;
     target = &vis_table_a.entries[vis_lists.unk5C];
     if (pos != NULL) {
-        if (!func_8004a148(target->unk8E,
-                           func_8004a1b4(target->unk74.vx - pos->vx, target->unk74.vz - pos->vz) + 2048,
+        if (!angle_within(target->unk8E,
+                           angle_from_xz(target->unk74.vx - pos->vx, target->unk74.vz - pos->vz) + 2048,
                            2048))
             return;
     }
@@ -179,7 +179,7 @@ void effect_vertex(StEffect *e, int index, VECTOR *out, SVECTOR *scale)
     rot.vx = e->unk30.vx;
     rot.vy = e->unk30.vy + 2048;
     rot.vz = e->unk30.vz;
-    func_8004a078(&rot, &v, out);
+    vector_rotate(&rot, &v, out);
 }
 
 /* effect_vertex moved to the effect's position. */

@@ -26,19 +26,19 @@ typedef struct {
 
 extern IdGridState DAT_801e0d38;
 
-/* Raw controller bits (active low), owner unknown; func_80068440 polls them,
+/* Raw controller bits (active low), owner unknown; debug_pan_display polls them,
  * so they change under the code. */
 
-s16 func_8006616c(void);
-void func_800661c8(void);
-void func_8006620c(u16 archive, u16 member);
-void func_80066240(void);
-void func_800666b0(void);
-void func_80067580(void);
-void func_800675f4(void);
-void func_80067624(void);
-void func_80067bec(u8 grid);
-void func_80068258(void);
-void func_80068440(void);
+s16 cd_queue_busy(void);
+void menu_arrange_list_upload_image(void);
+void menu_arrange_list_queue_image(u16 archive, u16 member);
+void menu_arrange_list_open(void);
+void menu_arrange_list_loop(void);
+void menu_arrange_list_close(void);
+void menu_arrange_list_run(void);
+void menu_arrange_list_draw_details(void);
+void menu_arrange_list_draw_list(u8 grid);
+void menu_arrange_list_draw(void);
+void debug_pan_display(void);
 
 #endif

@@ -106,9 +106,9 @@ void player_examine(long *pos, SVECTOR *rot)
             up = 96;
         if (down < 160)
             down = 160;
-        if (func_8004a184((short)down, rot->vx) && func_8004a184(rot->vx, (short)up)) {
-            if (func_8004a148(rot->vy, a->unk8E, 512))
-                func_80054368(a, 0, 0);
+        if (angle_is_after((short)down, rot->vx) && angle_is_after(rot->vx, (short)up)) {
+            if (angle_within(rot->vy, a->unk8E, 512))
+                creature_talk(a, 0, 0);
             return;
         }
     }
@@ -146,13 +146,13 @@ void player_examine(long *pos, SVECTOR *rot)
                 r = (short)b->unk22 > 2048 ? b->unk22 - 4096 : b->unk22;
                 /* The offset window wraps at the halfword boundary. */
                 if ((u16)(r + 1023) < 2047) {
-                    func_80057d58();
+                    play_unlock_sound();
                     b->unk4A.door.unk4F = 255;
                 }
             } else if (b->unk4A.door.unk4F == 252) {
                 r = (short)b->unk22 > 2048 ? b->unk22 - 4096 : b->unk22;
                 if ((u16)(r + 1024) >= 2049) {
-                    func_80057d58();
+                    play_unlock_sound();
                     b->unk4A.door.unk4F = 255;
                 }
             }
@@ -162,7 +162,7 @@ void player_examine(long *pos, SVECTOR *rot)
                 if (b->unk0C == 7)
                     b->unk0C = 8;
             } else if (b->unk4A.door.unk4F < 0xf0 || b->unk4A.door.unk4F > 0xf3) {
-                func_80057d7c();
+                play_locked_sound();
             }
             break;
         case 52:
@@ -180,26 +180,26 @@ void player_examine(long *pos, SVECTOR *rot)
         case 225:
             d = (u16)(b->unk36 - b->unk20) & 0xfff;
             if (d < 512 || d > 3584)
-                func_80054858(b->unk48);
+                talk_show_message(b->unk48);
             break;
         case 226:
             viewer.unk2 = viewer.unk0;
-            func_800582f0(8, 128);
+            sound_play(8, 128);
             break;
         case 14:
             if (area_state.unk0 != 1 && area_state.unk18 == -1) {
                 lighting.unkA = 1;
                 cd_wait_idle();
-                func_80055cf4(area_state.unk4);
-                func_80057cc8();
+                area_save_snapshot(area_state.unk4);
+                play_confirm_sound();
                 anim_free_all_for_menu();
-                func_80057a3c();
-                func_80057a68(0);
+                pad_clear_input();
+                pad_vibrate(0);
                 b = vis_table_b.entries;
                 n = 240;
                 while (n--) {
                     if (b->unk05 == 236 && b->unk54 != -1) {
-                        func_8005850c(b->unk54, b->unk4A.snd.unk4A + 1108);
+                        sound_stop(b->unk54, b->unk4A.snd.unk4A + 1108);
                         b->unk54 = -1;
                     }
                     b++;
@@ -207,7 +207,7 @@ void player_examine(long *pos, SVECTOR *rot)
                 card_screen_open(1, 1);
                 card_screen_run(1);
                 lighting.unkA = 2;
-                func_80057a3c();
+                pad_clear_input();
                 card_screen_close();
             }
             break;

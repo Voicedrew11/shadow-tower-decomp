@@ -85,10 +85,10 @@ void fdat_801eb96c(Vis212 *e)
 
     e->unk3A = e->unk0B * 10 + 48 + sound;
     if (e->unk70 & 0x800000)
-        e->unk22 = func_80058254(e->unk0B * 10 + 48 + sound, &e->unk74, 127, 0x6000, 0x7800,
+        e->unk22 = sound_play_at_range(e->unk0B * 10 + 48 + sound, &e->unk74, 127, 0x6000, 0x7800,
                                  fdat_801eb940(e));
     else
-        e->unk22 = func_80058220(e->unk0B * 10 + 48 + sound, &e->unk74, 127, fdat_801eb940(e));
+        e->unk22 = sound_play_at(e->unk0B * 10 + 48 + sound, &e->unk74, 127, fdat_801eb940(e));
 }
 
 /* Plays the script sound when its trigger fires this frame. */

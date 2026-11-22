@@ -92,7 +92,7 @@ void menu_equip_open(void)
     DAT_801e0d28[3] = viewer.unk38[17];
     DAT_801e0d28[4] = viewer.unk38[6];
     DAT_801e0d28[5] = viewer.unk38[12];
-    func_80057a3c();
+    pad_clear_input();
 }
 
 /*

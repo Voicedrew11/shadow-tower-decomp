@@ -49,7 +49,7 @@ static s16 DAT_800881e8[2];
 /* Runs player_compute_derived_stats(0) with the list state kept, then clamps
  * the two viewer figures it may have raised. */
 ADDRESS(0x80063bdc, 0xd4)
-void func_80063bdc(void)
+void menu_equip_recalc_stats(void)
 {
     MenuMessages *messages = MENU_SCRATCH->unk0.list.messages;
     s16 *ids = MENU_SCRATCH->unk0.list.ids;
@@ -73,13 +73,13 @@ void func_80063bdc(void)
  * (dropping the slots it excludes) or clears the slot, and loads the
  * shown id's image. */
 ADDRESS(0x80063cb0, 0x638)
-void func_80063cb0(void)
+void menu_equip_pick_item(void)
 {
     MenuScratch *sp = MENU_SCRATCH;
     DVECTOR pos = {448, 256};
 
     if (PAD.unkC & 0x20) {
-        func_80057d10();
+        play_cursor_sound();
         if (EQ.unk8 == sp->unk0.list.count - 1) {
             EQ.unk8 = -1;
             EQ.unk0 = -1;
@@ -89,7 +89,7 @@ void func_80063cb0(void)
         }
         EQ.unkC = 1;
     } else if (PAD.unkC & 0x80) {
-        func_80057d10();
+        play_cursor_sound();
         if (EQ.unk8 == -1)
             EQ.unk8 = sp->unk0.list.count - 1;
         else
@@ -100,7 +100,7 @@ void func_80063cb0(void)
             EQ.unk0 = sp->unk0.list.ids[EQ.unk8];
         EQ.unkC = 1;
     } else if (PAD.unk4 & 0x2000) {
-        func_80057cec();
+        play_cancel_sound();
         PAD.unk4 = 0;
         sp->unk2DC &= ~0x8;
         mem_free(sp->unk0.list.ids);
@@ -108,9 +108,9 @@ void func_80063cb0(void)
         if (EQ.unk0 != -1) {
             if (EQ.unk10 != SLOT(0) && EQ.unk10 != SLOT(13) && vis_table_c.unk0118[EQ.unk0].unk27 &&
                 !vis_table_c.unk0118[EQ.unk0].unk28) {
-                func_80057d34();
+                play_refuse_sound();
             } else {
-                func_80057cc8();
+                play_confirm_sound();
                 PAD.unk4 = 0;
                 sp->unk2DC &= ~0x8;
                 mem_free(sp->unk0.list.ids);
@@ -143,7 +143,7 @@ void func_80063cb0(void)
                     viewer.unk38[4] = 0xffff;
             }
         } else {
-            func_80057cc8();
+            play_confirm_sound();
             PAD.unk4 = 0;
             sp->unk2DC &= ~0x8;
             mem_free(sp->unk0.list.ids);
@@ -153,7 +153,7 @@ void func_80063cb0(void)
             if (EQ.unk10 == SLOT(13))
                 viewer.unk38[12] = 0xffff;
         }
-        func_80063bdc();
+        menu_equip_recalc_stats();
         PAD.unk4 = 0;
     }
     if (EQ.unk0 != EQ.unk4) {
@@ -179,7 +179,7 @@ void func_80063cb0(void)
  * ahead of `kind` and `cur` for the saved registers.
  */
 ADDRESS(0x800642e8, 0x8c0)
-int func_800642e8(int *sel)
+int menu_equip_pick_slot(int *sel)
 {
     MenuScratch *sp = MENU_SCRATCH;
     DVECTOR pos = {448, 256};
@@ -189,12 +189,12 @@ int func_800642e8(int *sel)
     VisTableC *table;
 
     if (PAD.unk4 & 0x2000) {
-        func_80057cec();
+        play_cancel_sound();
         PAD.unk4 = 0;
         return 1;
     }
     if (PAD.unkC & 0x10) {
-        func_80057d10();
+        play_cursor_sound();
         PAD.unkC = 0;
         if (sp->unk2E0 == 0) {
             if (sp->unk2E2 > 0)
@@ -203,7 +203,7 @@ int func_800642e8(int *sel)
             sp->unk2E0--;
         }
     } else if (PAD.unkC & 0x40) {
-        func_80057d10();
+        play_cursor_sound();
         PAD.unkC = 0;
         if (sp->unk2E0 == 4) {
             if (sp->unk2E2 < 10)
@@ -212,7 +212,7 @@ int func_800642e8(int *sel)
             sp->unk2E0++;
         }
     } else if (PAD.unkC & 0x800) {
-        func_80057d10();
+        play_cursor_sound();
         PAD.unkC = 0;
         if (sp->unk2E2 == 0)
             sp->unk2E0 = 0;
@@ -221,7 +221,7 @@ int func_800642e8(int *sel)
         else
             sp->unk2E2 = 0;
     } else if (PAD.unkC & 0x200) {
-        func_80057d10();
+        play_cursor_sound();
         PAD.unkC = 0;
         if (sp->unk2E2 == 10)
             sp->unk2E0 = 4;
@@ -331,21 +331,21 @@ int func_800642e8(int *sel)
                         DAT_801e0d08.entries[DAT_801e0d08.count++] = entries[i];
                 }
                 if (DAT_801e0d08.count) {
-                    func_80057cc8();
+                    play_confirm_sound();
                     sp->unk2DC = (sp->unk2DC | 0x2) & ~0x1;
                     DAT_800881e8[0] = sp->unk2E2;
                     DAT_800881e8[1] = sp->unk2E0;
                     sp->unk2E2 = 0;
                     sp->unk2E0 = 0;
                 } else {
-                    func_80057d34();
+                    play_refuse_sound();
                 }
             } else {
-                func_80057d34();
+                play_refuse_sound();
             }
             return 0;
         }
-        func_80057cc8();
+        play_confirm_sound();
         sp->unk0.list.ids = mem_alloc(532);
         sp->unk0.list.count = 0;
         table = &vis_table_c;
@@ -425,7 +425,7 @@ int func_800642e8(int *sel)
 
 /* The ring sub-list: moves the cursor in its entries and equips one. */
 ADDRESS(0x80064ba8, 0x33c)
-void func_80064ba8(void)
+void menu_equip_pick_magic(void)
 {
     MenuScratch *sp = MENU_SCRATCH;
     u8 entries[] = {0, 1, 3, 4, 6, 7, 9, 10, 12, 13, 15, 16};
@@ -433,13 +433,13 @@ void func_80064ba8(void)
     u32 *bits;
 
     if (PAD.unk4 & 0x2000) {
-        func_80057cec();
+        play_cancel_sound();
         PAD.unk4 = 0;
         sp->unk2DC = (sp->unk2DC & ~0x2) | 0x1;
         sp->unk2E2 = DAT_800881e8[0];
         sp->unk2E0 = DAT_800881e8[1];
     } else if (PAD.unkC & 0x10) {
-        func_80057d10();
+        play_cursor_sound();
         PAD.unkC = 0;
         if (sp->unk2E0 == 0) {
             if (sp->unk2E2 > 0)
@@ -448,7 +448,7 @@ void func_80064ba8(void)
             sp->unk2E0--;
         }
     } else if (PAD.unkC & 0x40) {
-        func_80057d10();
+        play_cursor_sound();
         PAD.unkC = 0;
         if (sp->unk2E0 == 4) {
             if (sp->unk2E2 < DAT_801e0d08.count - 5)
@@ -457,7 +457,7 @@ void func_80064ba8(void)
             sp->unk2E0++;
         }
     } else if (PAD.unkC & 0x800) {
-        func_80057d10();
+        play_cursor_sound();
         PAD.unkC = 0;
         if (sp->unk2E2 == 0)
             sp->unk2E0 = 0;
@@ -466,7 +466,7 @@ void func_80064ba8(void)
         else
             sp->unk2E2 = 0;
     } else if (PAD.unkC & 0x200) {
-        func_80057d10();
+        play_cursor_sound();
         PAD.unkC = 0;
         if (sp->unk2E2 + 5 >= DAT_801e0d08.count)
             sp->unk2E0 = DAT_801e0d08.count - sp->unk2E2 - 1;
@@ -482,21 +482,21 @@ void func_80064ba8(void)
             bits = &DAT_801e0d08.bits[viewer.unk38[13] - 196];
         list = &DAT_801e0d08;
         if (!(*bits & (1 << list->entries[sp->unk2E2 + sp->unk2E0]))) {
-            func_80057d34();
+            play_refuse_sound();
         } else {
-            func_80057cc8();
+            play_confirm_sound();
             *EQ.unk10 = list->entries[sp->unk2E2 + sp->unk2E0];
             sp->unk2DC = (sp->unk2DC & ~0x2) | 0x1;
             sp->unk2E2 = DAT_800881e8[0];
             sp->unk2E0 = DAT_800881e8[1];
-            func_80063bdc();
+            menu_equip_recalc_stats();
         }
     }
 }
 
 /* The screen loop: the active list until the slot list cancels. */
 ADDRESS(0x80064ee4, 0x10c)
-void func_80064ee4(void)
+void menu_equip_loop(void)
 {
     MenuScratch *sp = MENU_SCRATCH;
     int sel;
@@ -504,7 +504,7 @@ void func_80064ee4(void)
     sp->unk2E2 = 0;
     sp->unk2E0 = 0;
     sel = -1;
-    func_80057a3c();
+    pad_clear_input();
     EQ.unkC = 0;
     for (;;) {
         if (EQ.unkC) {
@@ -512,25 +512,25 @@ void func_80064ee4(void)
             EQ.unkC--;
         }
         if (sp->unk2DC & 0x8) {
-            func_80063cb0();
+            menu_equip_pick_item();
         } else if (sp->unk2DC & 0x1) {
-            if (func_800642e8(&sel))
+            if (menu_equip_pick_slot(&sel))
                 break;
         } else if (sp->unk2DC & 0x2) {
-            func_80064ba8();
+            menu_equip_pick_magic();
         }
         frame_rate_update();
-        func_80066004();
+        menu_equip_draw();
         sp->unk2E4 = (sp->unk2E4 + 1) % 32;
     }
-    func_80057a3c();
+    pad_clear_input();
 }
 
 ADDRESS(0x80064ff0, 0x30)
-void func_80064ff0(void)
+void menu_equip_run(void)
 {
     menu_equip_open();
-    func_80064ee4();
+    menu_equip_loop();
     menu_equip_close();
 }
 
@@ -550,7 +550,7 @@ void func_80065020(void)
 /* The title image and frame; the screen is dimmed while the slot list
  * is not active. */
 ADDRESS(0x800650dc, 0x114)
-void func_800650dc(void)
+void menu_equip_draw_frame(void)
 {
     MENU_SCRATCH->unk33C.x = 32;
     MENU_SCRATCH->unk33C.y = 24;
@@ -573,7 +573,7 @@ void func_800650dc(void)
 
 /* The slot list's cursor bar. */
 ADDRESS(0x800651f0, 0x80)
-void func_800651f0(void)
+void menu_equip_draw_cursor(void)
 {
     MENU_SCRATCH->unk330.w = 272;
     MENU_SCRATCH->unk330.x = 24;
@@ -586,7 +586,7 @@ void func_800651f0(void)
 /* The candidate list's panel: the arrows, the shown id's name, figures and
  * counts, and its image. */
 ADDRESS(0x80065270, 0x500)
-void func_80065270(void)
+void menu_equip_draw_item_panel(void)
 {
     MenuScratch *sp = MENU_SCRATCH;
     s16 id;
@@ -666,7 +666,7 @@ void func_80065270(void)
 /* The slot list: the two load figures, then five slots with what each
  * holds and its figures. */
 ADDRESS(0x80065770, 0x670)
-void func_80065770(void)
+void menu_equip_draw_slots(void)
 {
     MenuScratch *sp = MENU_SCRATCH;
     CVECTOR *label, *value;
@@ -788,7 +788,7 @@ void func_80065770(void)
  * pointer is assigned inside the loop: retail adds in that operand order
  * and keeps the table address in the loop. */
 ADDRESS(0x80065de0, 0x160)
-void func_80065de0(void)
+void menu_equip_draw_magic_list(void)
 {
     MenuScratch *sp = MENU_SCRATCH;
     int i = 0;
@@ -818,7 +818,7 @@ void func_80065de0(void)
 
 /* Unreferenced: as func_80065020 from 64 KiB into the packet area. */
 ADDRESS(0x80065f40, 0xc4)
-void func_80065f40(void)
+void menu_equip_draw_backdrop(void)
 {
     RECT r = {0, 0, 320, 240};
     CVECTOR c = {32, 32, 32};
@@ -832,7 +832,7 @@ void func_80065f40(void)
 /* Draws the screen: the text colours, the cursor blink and the active
  * list's panels. */
 ADDRESS(0x80066004, 0x168)
-void func_80066004(void)
+void menu_equip_draw(void)
 {
     MenuScratch *sp;
 
@@ -855,22 +855,22 @@ void func_80066004(void)
     sp->unk32C.r = (u8)sp->unk360 * 4 + 96;
     sp->unk32C.g = (u8)sp->unk360 * 2 + 48;
     if (!(sp->unk2DC & 0x8))
-        func_800651f0();
+        menu_equip_draw_cursor();
     if (sp->unk2DC & 0x8)
-        func_80065270();
+        menu_equip_draw_item_panel();
     else if (sp->unk2DC & 0x1)
-        func_80065770();
+        menu_equip_draw_slots();
     else
-        func_80065de0();
-    func_800650dc();
+        menu_equip_draw_magic_list();
+    menu_equip_draw_frame();
     gfx_flip();
-    func_80065f40();
+    menu_equip_draw_backdrop();
     gfx_draw_ot();
 }
 
 /* Nonzero while the CD request ring still holds a request. */
 ADDRESS(0x8006616c, 0x5c)
-s16 func_8006616c(void)
+s16 cd_queue_busy(void)
 {
     s16 busy;
 
@@ -884,7 +884,7 @@ s16 func_8006616c(void)
 
 /* The load callback: copies the loaded image to VRAM (640, 0). */
 ADDRESS(0x800661c8, 0x44)
-void func_800661c8(void)
+void menu_arrange_list_upload_image(void)
 {
     DVECTOR pos = {640, 0};
 
@@ -893,11 +893,11 @@ void func_800661c8(void)
 }
 
 ADDRESS(0x8006620c, 0x34)
-void func_8006620c(u16 archive, u16 member)
+void menu_arrange_list_queue_image(u16 archive, u16 member)
 {
     DVECTOR unused;
 
-    cd_queue_read_member(archive, member, (u8 *)DAT_80088c88, func_800661c8);
+    cd_queue_read_member(archive, member, (u8 *)DAT_80088c88, menu_arrange_list_upload_image);
 }
 
 /*
@@ -907,7 +907,7 @@ void func_8006620c(u16 archive, u16 member)
  * use a length-prefixed cursor; raw TIM files use the load buffer directly.
  */
 ADDRESS(0x80066240, 0x470)
-void func_80066240(void)
+void menu_arrange_list_open(void)
 {
     DVECTOR tex = {896, 448};
     DVECTOR clut = {544, 502};
@@ -991,7 +991,7 @@ void func_80066240(void)
  * to its flag bit.
  */
 ADDRESS(0x800666b0, 0xed0)
-void func_800666b0(void)
+void menu_arrange_list_loop(void)
 {
     MenuScratch *sp = MENU_SCRATCH;
     DVECTOR unused0;
@@ -1010,10 +1010,10 @@ void func_800666b0(void)
     int cur;
     int anchor;
 
-    func_80057a3c();
+    pad_clear_input();
     for (;;) {
         if (PAD.unk4 & 0x2000) {
-            func_80057cec();
+            play_cancel_sound();
             PAD.unk4 = 0;
             if (sp->unk2DC & 0x8000)
                 sp->unk2DC &= 0x7fff;
@@ -1023,7 +1023,7 @@ void func_800666b0(void)
                 break;
         }
         if (PAD.unk4 & 0x4000) {
-            func_80057cc8();
+            play_confirm_sound();
             PAD.unk4 = 0;
             if (sp->unk2DC & 0x8000) {
                 if (ST.unk0 == 104) {
@@ -1102,7 +1102,7 @@ void func_800666b0(void)
         }
         if (!(sp->unk2DC & 0x8000)) {
             if (PAD.unk4 & 0x1) {
-                func_80057cc8();
+                play_confirm_sound();
                 PAD.unk4 = 0;
                 if (ST.unk0 == 104) {
                     for (i = 0; i < 314; i++) {
@@ -1131,7 +1131,7 @@ void func_800666b0(void)
                 }
             }
             if (PAD.unk4 & 0x8000) {
-                func_80057cc8();
+                play_confirm_sound();
                 PAD.unk4 = 0;
                 if (ST.unk4) {
                     RANGE_CLEAR();
@@ -1145,7 +1145,7 @@ void func_800666b0(void)
                 }
             }
             if (PAD.unk4 & 0x1000) {
-                func_80057cc8();
+                play_confirm_sound();
                 PAD.unk4 = 0;
                 if (sp->unk2DC == 1)
                     sp->unk2DC = 2;
@@ -1153,7 +1153,7 @@ void func_800666b0(void)
                     sp->unk2DC = 1;
             }
             if (PAD.unkC & 0x20) {
-                func_80057d10();
+                play_cursor_sound();
                 PAD.unkC = 0;
                 if (ST.unk0 == 104) {
                     ST.unk0 = 98;
@@ -1161,7 +1161,7 @@ void func_800666b0(void)
                 }
             }
             if (PAD.unkC & 0x80) {
-                func_80057d10();
+                play_cursor_sound();
                 PAD.unkC = 0;
                 if (ST.unk0 == 98) {
                     ST.unk0 = 104;
@@ -1169,7 +1169,7 @@ void func_800666b0(void)
                 }
             }
             if (PAD.unkC & 0x10) {
-                func_80057d10();
+                play_cursor_sound();
                 if (PAD.unk2 & 0x8000) {
                     if (ST.unk0 == 104) {
                         if (GRID->row0 == 0)
@@ -1196,7 +1196,7 @@ void func_800666b0(void)
                 PAD.unkC = 0;
             }
             if (PAD.unkC & 0x40) {
-                func_80057d10();
+                play_cursor_sound();
                 if (PAD.unk2 & 0x8000) {
                     if (ST.unk0 == 104) {
                         if (GRID->row0 == 303)
@@ -1224,7 +1224,7 @@ void func_800666b0(void)
             }
             if ((sp->unk2DC == 2 && ST.unk0 == 104) || sp->unk2DC != 2) {
                 if (PAD.unkC & 0x400) {
-                    func_80057d10();
+                    play_cursor_sound();
                     PAD.unkC = 0;
                     if (ST.unk0 == 104 && GRID->row0 == 0)
                         sp->unk2E0 = 0;
@@ -1233,7 +1233,7 @@ void func_800666b0(void)
                         GRID->row0 = 0;
                 }
                 if (PAD.unkC & 0x100) {
-                    func_80057d10();
+                    play_cursor_sound();
                     PAD.unkC = 0;
                     if (ST.unk0 == 104 && GRID->row0 == 303)
                         sp->unk2E0 = 10;
@@ -1244,7 +1244,7 @@ void func_800666b0(void)
             }
             if ((sp->unk2DC == 2 && ST.unk0 == 98) || sp->unk2DC != 2) {
                 if (PAD.unkC & 0x800) {
-                    func_80057d10();
+                    play_cursor_sound();
                     PAD.unkC = 0;
                     if (ST.unk0 == 98 && GRID->row1 == 0)
                         sp->unk2E0 = 0;
@@ -1253,7 +1253,7 @@ void func_800666b0(void)
                         GRID->row1 = 0;
                 }
                 if (PAD.unkC & 0x200) {
-                    func_80057d10();
+                    play_cursor_sound();
                     PAD.unkC = 0;
                     if (ST.unk0 == 98 && GRID->row1 == 303)
                         sp->unk2E0 = 10;
@@ -1279,19 +1279,19 @@ void func_800666b0(void)
                     ST.unkC = anchor;
                 }
             }
-            if (sp->unk2DC == 2 && !func_8006616c()) {
+            if (sp->unk2DC == 2 && !cd_queue_busy()) {
                 if (ST.unk0 == 104)
                     id = GRID->ids0[GRID->row0 + sp->unk2E0];
                 else
                     id = GRID->ids1[GRID->row1 + sp->unk2E0];
                 if (ST.unk2 != id && id != -1) {
-                    func_8006620c(6, vis_table_c.unk0118[id].unk5[0] + 200);
+                    menu_arrange_list_queue_image(6, vis_table_c.unk0118[id].unk5[0] + 200);
                     ST.unk2 = id;
                 }
             }
         }
         frame_rate_update();
-        func_80068258();
+        menu_arrange_list_draw();
         sp->unk2E4 = (sp->unk2E4 + 1) % 32;
     }
     for (i = 0, n = GRID->count0; n;) {
@@ -1312,26 +1312,26 @@ void func_800666b0(void)
 
 /* Closes the screen once the CD ring is idle. */
 ADDRESS(0x80067580, 0x74)
-void func_80067580(void)
+void menu_arrange_list_close(void)
 {
     MenuScratch *sp = MENU_SCRATCH;
 
-    while (func_8006616c())
+    while (cd_queue_busy())
         ;
     menu_load_main_messages();
     mem_free(sp->unk0.grid.ids0);
     mem_free(sp->unk0.grid.ids1);
     mem_free(sp->unk0.grid.messages);
     menu_reload_assets();
-    func_80057a3c();
+    pad_clear_input();
 }
 
 ADDRESS(0x800675f4, 0x30)
-void func_800675f4(void)
+void menu_arrange_list_run(void)
 {
-    func_80066240();
-    func_800666b0();
-    func_80067580();
+    menu_arrange_list_open();
+    menu_arrange_list_loop();
+    menu_arrange_list_close();
 }
 
 /*
@@ -1339,7 +1339,7 @@ void func_800675f4(void)
  * idle), its fourteen table C counts and its two figures.
  */
 ADDRESS(0x80067624, 0x5c8)
-void func_80067624(void)
+void menu_arrange_list_draw_details(void)
 {
     MenuScratch *sp = MENU_SCRATCH;
     int text_x, text_y;
@@ -1385,7 +1385,7 @@ void func_80067624(void)
             none = 1;
     }
     if (!none) {
-        if (!func_8006616c()) {
+        if (!cd_queue_busy()) {
             sp->unk358.vx = 640;
             sp->unk358.vy = 0;
             ui_draw_image(&sp->unk350, &sp->unk358, NULL, NULL, 16);
@@ -1449,7 +1449,7 @@ void func_80067624(void)
  * header image and eleven rows of names, the held range highlighted.
  */
 ADDRESS(0x80067bec, 0x66c)
-void func_80067bec(u8 grid)
+void menu_arrange_list_draw_list(u8 grid)
 {
     MenuScratch *sp = MENU_SCRATCH;
     RECT unused5;
@@ -1583,7 +1583,7 @@ void func_80067bec(u8 grid)
 /* Draws the screen: the text colours, the cursor blink, one grid with its
  * detail panel or both grids, and the arrow toward the current grid. */
 ADDRESS(0x80068258, 0x1e8)
-void func_80068258(void)
+void menu_arrange_list_draw(void)
 {
     RECT arrow = {319, 110, 24, 16};
     CVECTOR color = {16, 48, 16, 0};
@@ -1610,11 +1610,11 @@ void func_80068258(void)
     if (sp->unk2DC & 0x8000)
         menu_draw_button_prompt();
     if (sp->unk2DC & 0x1) {
-        func_80067bec(104);
-        func_80067bec(98);
+        menu_arrange_list_draw_list(104);
+        menu_arrange_list_draw_list(98);
     } else {
-        func_80067bec(ST.unk0 == 104 ? 104 : 98);
-        func_80067624();
+        menu_arrange_list_draw_list(ST.unk0 == 104 ? 104 : 98);
+        menu_arrange_list_draw_details();
     }
     if (ST.unk0 == 104)
         ui_draw_arrow(&arrow, &color, 0);
@@ -1635,7 +1635,7 @@ void func_80068258(void)
  * polling the host debugger each frame; then restores it.
  */
 ADDRESS(0x80068440, 0x214)
-void func_80068440(void)
+void debug_pan_display(void)
 {
     RECT saved;
     DISPENV *disp;

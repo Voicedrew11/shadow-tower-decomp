@@ -57,7 +57,7 @@ int main(void)
     InitCARD(0);
     StartCARD();
     _bu_init();
-    func_80057684();
+    pad_init();
     ExitCriticalSection();
     game_loop();
 }
@@ -65,7 +65,7 @@ int main(void)
 ADDRESS(0x80014410, 0x40)
 void game_shutdown(void)
 {
-    func_80057f3c();
+    sound_shutdown();
     cd_shutdown();
     PadStopCom();
     ResetGraph(3);

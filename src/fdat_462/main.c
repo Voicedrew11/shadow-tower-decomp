@@ -124,7 +124,7 @@ void func_801ed454(void)
     }
     if (fdat_801ed9a8 != 4) {
         cd_wait_idle();
-        func_800542d0(r->unk09 * 6 + fdat_801ed9a8, 1);
+        talk_load_image(r->unk09 * 6 + fdat_801ed9a8, 1);
     }
 }
 
@@ -144,9 +144,9 @@ void func_801ed760(void)
     e->unk36 = -1;
     if (e->unkA4 == 0)
         return;
-    if (fdat_801ed8c4 == 2 && func_800541f4()) {
+    if (fdat_801ed8c4 == 2 && xa_stream_finished()) {
         if (world_state.unk1EE16 == 3) {
-            func_80054278();
+            xa_stop_stream();
             world_state.unk1EE19 = 0;
             world_state.unk1EE16 = 4;
         }
@@ -165,7 +165,7 @@ void func_801ed760(void)
         int ending = fdat_801ed9a8;
         if (ending != 0 || (short)e->unk2A >= 0x600) {
             viewer.unk1E4 = 0;
-            func_8005408c(r->unk09, ending);
+            xa_start_stream(r->unk09, ending);
             SsSetSerialVol(0, 0x40, 0x40);
             world_state.unk1EE16 = 2;
             world_state.unk1EE17 = 1;

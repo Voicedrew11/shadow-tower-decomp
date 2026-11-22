@@ -91,13 +91,13 @@ void item_use(int id)
                 if (id == 0x114)
                     area_state.hooks->item_used(i | 0x4000);
                 else
-                    func_80057d58();
+                    play_unlock_sound();
                 USE_RESULT = 1;
                 if (id == 0x114 || id == 0x116)
                     goto used;
                 goto done;
             case 3:
-                func_80057cec();
+                play_cancel_sound();
                 USE_RESULT = 1;
                 goto done;
             }
@@ -108,14 +108,14 @@ void item_use(int id)
         if (viewer.unk2 < viewer.unk0) {
             viewer.unk2 = viewer.unk0;
             USE_RESULT = 1;
-            func_800582f0(8, 128);
+            sound_play(8, 128);
         }
         break;
     case 0x11d:
         if (viewer.unk6 < viewer.unk4) {
             viewer.unk6 = viewer.unk4;
             USE_RESULT = 1;
-            func_800582f0(8, 128);
+            sound_play(8, 128);
         }
         break;
     case 0x11e:
@@ -124,7 +124,7 @@ void item_use(int id)
             viewer.unk190[0][0] = 0;
             viewer.unk2C &= ~7;
             USE_RESULT = 1;
-            func_800582f0(8, 128);
+            sound_play(8, 128);
         }
         break;
     case 0x11f:
@@ -133,7 +133,7 @@ void item_use(int id)
             viewer.unk190[1][0] = 0;
             viewer.unk2C &= ~0x18;
             USE_RESULT = 1;
-            func_800582f0(8, 128);
+            sound_play(8, 128);
         }
         break;
     case 0x120:
@@ -142,7 +142,7 @@ void item_use(int id)
             viewer.unk190[4][0] = 0;
             viewer.unk2C &= ~0x100;
             USE_RESULT = 1;
-            func_800582f0(8, 128);
+            sound_play(8, 128);
         }
         break;
     case 0x122:
@@ -242,19 +242,19 @@ void item_use(int id)
         area_state.hooks->item_used(id);
         goto done;
     case 0x136:
-        func_80057cc8();
+        play_confirm_sound();
         USE_RESULT = menu_attribute_points_run(5);
         break;
     case 0x137:
-        func_80057cc8();
+        play_confirm_sound();
         USE_RESULT = menu_attribute_points_run(53);
         break;
     case 0x138:
-        func_80057cc8();
+        play_confirm_sound();
         USE_RESULT = menu_attribute_points_run(29);
         break;
     case 0x139:
-        func_80057cc8();
+        play_confirm_sound();
         USE_RESULT = menu_attribute_points_run(14);
         break;
     }

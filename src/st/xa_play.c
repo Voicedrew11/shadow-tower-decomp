@@ -1,7 +1,7 @@
 /*
  * ST.EXE: XA voice stream wait and stop, the still images shown with the
  * streams, and the table A entry talk sequence (WIP module,
- * 0x800541f4..0x800549c8; func_80054000/func_8005408c open the file in
+ * 0x800541f4..0x800549c8; xa_ready_callback/xa_start_stream open the file in
  * src/st/xa.c). -G8: the store to the 2-byte extern DAT_80088190 is the
  * assembler's lui $at form.
  */
@@ -27,7 +27,7 @@
 
 /* Nonzero once the stream has run its length (or 3600 ticks). */
 ADDRESS(0x800541f4, 0x84)
-int func_800541f4(void)
+int xa_stream_finished(void)
 {
     /* Retail keeps both positions in stack slots and reloads them. */
     volatile int pos[2];
@@ -40,7 +40,7 @@ int func_800541f4(void)
 }
 
 ADDRESS(0x80054278, 0x58)
-void func_80054278(void)
+void xa_stop_stream(void)
 {
     u8 param[8];
 
@@ -53,7 +53,7 @@ void func_80054278(void)
 
 /* Loads still image `id` (archive 8) into VRAM. */
 ADDRESS(0x800542d0, 0x98)
-void func_800542d0(int id, int full)
+void talk_load_image(int id, int full)
 {
     DVECTOR pix;
     DVECTOR clut;
@@ -78,7 +78,7 @@ void func_800542d0(int id, int full)
  * record plays, then the 0x72 animation fades out. `fixed` runs 24-frame
  * fades without animations. */
 ADDRESS(0x80054368, 0x4f0)
-void func_80054368(Vis212 *e, int fixed, int arg2)
+void creature_talk(Vis212 *e, int fixed, int arg2)
 {
     Vis192 *r = &vis_table_a.unk3500[e->unk02];
     VisAnim *a;
@@ -128,17 +128,17 @@ void func_80054368(Vis212 *e, int fixed, int arg2)
         e->unkB0 = a->unkC;
     }
     if (DAT_801cd120.unk4 == 1)
-        func_800542d0(r->unk09 * 6 + DAT_801cba08.unk1448[r->unk09], 0);
+        talk_load_image(r->unk09 * 6 + DAT_801cba08.unk1448[r->unk09], 0);
     DAT_80088190 = r->unk09;
     i = 0;
-    func_8005408c(r->unk09, DAT_801cba08.unk1448[r->unk09]);
+    xa_start_stream(r->unk09, DAT_801cba08.unk1448[r->unk09]);
     DAT_801cba08.unk1448[r->unk09]++;
     SsSetSerialVol(0, 64, 64);
     world_state.unk1EE16 = 2;
     world_state.unk1EE19 = 0;
     do {
-        if (func_800541f4()) {
-            func_80054278();
+        if (xa_stream_finished()) {
+            xa_stop_stream();
             if (world_state.unk1EE16 == 3)
                 world_state.unk1EE19 = 0;
             world_state.unk1EE16 = 4;
@@ -183,12 +183,12 @@ void func_80054368(Vis212 *e, int fixed, int arg2)
         world_run_frame(NULL, NULL, 0);
     }
     world_state.unk1EE16 = 0;
-    func_80057a3c();
+    pad_clear_input();
 }
 
 /* Shows still image 300 + id until a button is pressed. */
 ADDRESS(0x80054858, 0x170)
-void func_80054858(int id)
+void talk_show_message(int id)
 {
     int n;
 
@@ -199,10 +199,10 @@ void func_80054858(int id)
     n = 16;
     while (n--)
         world_run_frame(NULL, NULL, 0);
-    func_800542d0(id + 300, 0);
+    talk_load_image(id + 300, 0);
     world_state.unk1EE16 = 2;
     world_state.unk1EE19 = 0;
-    func_80057a3c();
+    pad_clear_input();
     do {
         if (DAT_801cd180.unk4) {
             if (world_state.unk1EE16 == 3)
@@ -219,5 +219,5 @@ void func_80054858(int id)
         world_run_frame(NULL, NULL, 0);
     world_state.unk1EE16 = 0;
     world_state.unk1EE17 = 0;
-    func_80057a3c();
+    pad_clear_input();
 }

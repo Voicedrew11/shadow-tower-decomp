@@ -166,22 +166,22 @@ void menu_main_run(void)
     tim_load_images_at(image + 1, &sp->unk2E6[0], &sp->unk2E6[1], 1);
     menu_store_screen();
     sp->unk2DE = 0;
-    func_80057a3c();
+    pad_clear_input();
     DrawSync(0);
     for (;;) {
         if (DAT_801cd180.unk4 & 0x2000) {
-            func_80057cec();
+            play_cancel_sound();
             DAT_801cd180.unk4 = 0;
             break;
         }
         if (DAT_801cd180.unk4 & 0x1000) {
-            func_80057cc8();
+            play_confirm_sound();
             DAT_801cd180.unk4 = 0;
             sp->unk2E5 = 0;
             menu_area_info_run();
         }
         if (DAT_801cd180.unk4 & 0x4000) {
-            func_80057cc8();
+            play_confirm_sound();
             DAT_801cd180.unk4 = 0;
             if ((s16)sp->unk2DE == 0) {
                 sp->unk2E5 = 0;
@@ -189,14 +189,14 @@ void menu_main_run(void)
                     break;
             } else if ((s16)sp->unk2DE == 1) {
                 sp->unk2E5 = 0;
-                func_80064ff0();
+                menu_equip_run();
             } else if ((s16)sp->unk2DE == 2) {
                 viewer.unk21D = 1;
                 sp->unk2E5 = 1;
                 if (DAT_801cd180.unk2 & 0x800)
                     menu_arrange_icons_run();
                 else
-                    func_800675f4();
+                    menu_arrange_list_run();
             } else if ((s16)sp->unk2DE == 3) {
                 viewer.unk21D = 1;
                 sp->unk2E5 = 1;
@@ -221,14 +221,14 @@ void menu_main_run(void)
             }
         }
         if (DAT_801cd180.unkC & 0x40) {
-            func_80057d10();
+            play_cursor_sound();
             DAT_801cd180.unkC = 0;
             sp->unk2DE++;
             if ((s16)sp->unk2DE >= 8)
                 sp->unk2DE = 0;
         }
         if (DAT_801cd180.unkC & 0x10) {
-            func_80057d10();
+            play_cursor_sound();
             DAT_801cd180.unkC = 0;
             sp->unk2DE--;
             if ((s16)sp->unk2DE < 0)
@@ -238,7 +238,7 @@ void menu_main_run(void)
         frame_rate_update();
         menu_main_draw();
     }
-    func_80057a3c();
+    pad_clear_input();
     menu_restore_screen();
 }
 
@@ -932,7 +932,7 @@ void menu_equip_info_run(void)
     sp->unk2D8 = viewer.unk2;
     sp->unk2DA = viewer.unk6;
     player_compute_derived_stats(0);
-    func_80057a3c();
+    pad_clear_input();
     DAT_800881aa = 0;
     {
         RECT clear = {640, 0, 384, 256};
@@ -955,13 +955,13 @@ void menu_equip_info_run(void)
                     || (slots[j] != 2 && slots[j] != 10 && slots[j] != 15))) {
                 equip_load_slot_picture(slots[j]);
                 menu_equip_info_draw();
-                func_80057d10();
+                play_cursor_sound();
             }
         }
     }
     menu_equip_info_draw();
-    func_80057d10();
-    func_80057a3c();
+    play_cursor_sound();
+    pad_clear_input();
     for (;;) {
         if (debounce != 0) {
             DAT_801cd180.unkC = 0;
@@ -974,13 +974,13 @@ void menu_equip_info_run(void)
                 DAT_800881aa = 0;
             if (DAT_801cd180.unk2 & 0x1000) {
                 if (sp->unk2C6 == 0)
-                    func_80057cc8();
+                    play_confirm_sound();
                 sp->unk2C6 = 1;
             } else {
                 sp->unk2C6 = 0;
             }
             if (DAT_801cd180.unk4 & 0x2000) {
-                func_80057cec();
+                play_cancel_sound();
                 DAT_801cd180.unk4 = 0;
                 break;
             }
@@ -1004,7 +1004,7 @@ void menu_equip_info_run(void)
                             || (sp->unk2E0 == 4 && sp->unk174[6][k] != viewer.unk38[3]))
                             sp->unk1B0[sp->unk2C2++] = sp->unk174[6][k];
                     }
-                    func_80057cc8();
+                    play_confirm_sound();
                     sp->unk2C7 = 6;
                     base = 0;
                     offset = 1;
@@ -1017,7 +1017,7 @@ void menu_equip_info_run(void)
                             || (sp->unk2E0 == 18 && sp->unk174[7][k] != viewer.unk38[16]))
                             sp->unk1B0[sp->unk2C2++] = sp->unk174[7][k];
                     }
-                    func_80057cc8();
+                    play_confirm_sound();
                     sp->unk2C7 = 7;
                     base = 166;
                     offset = 6;
@@ -1026,7 +1026,7 @@ void menu_equip_info_run(void)
                     n = sp->unk19C[0];
                     for (k = 0; k < n; k++)
                         sp->unk1B0[sp->unk2C2++] = sp->unk174[0][k];
-                    func_80057cc8();
+                    play_confirm_sound();
                     sp->unk2C7 = 0;
                     base = 72;
                     offset = 2;
@@ -1036,7 +1036,7 @@ void menu_equip_info_run(void)
                     n = sp->unk19C[1];
                     for (k = 0; k < n; k++)
                         sp->unk1B0[sp->unk2C2++] = sp->unk174[1][k];
-                    func_80057cc8();
+                    play_confirm_sound();
                     sp->unk2C7 = 1;
                     offset = 3;
                     base = 93;
@@ -1046,7 +1046,7 @@ void menu_equip_info_run(void)
                     n = sp->unk19C[2];
                     for (k = 0; k < n; k++)
                         sp->unk1B0[sp->unk2C2++] = sp->unk174[2][k];
-                    func_80057cc8();
+                    play_confirm_sound();
                     sp->unk2C7 = 2;
                     offset = 4;
                     base = 124;
@@ -1055,7 +1055,7 @@ void menu_equip_info_run(void)
                     n = sp->unk19C[3];
                     for (k = 0; k < n; k++)
                         sp->unk1B0[sp->unk2C2++] = sp->unk174[3][k];
-                    func_80057cc8();
+                    play_confirm_sound();
                     sp->unk2C7 = 3;
                     offset = 5;
                     base = 145;
@@ -1068,7 +1068,7 @@ void menu_equip_info_run(void)
                             || (sp->unk2E0 == 14 && sp->unk174[4][k] != viewer.unk38[0]))
                             sp->unk1B0[sp->unk2C2++] = sp->unk174[4][k];
                     }
-                    func_80057cc8();
+                    play_confirm_sound();
                     sp->unk2C7 = 4;
                     offset = 7;
                     base = 202;
@@ -1081,7 +1081,7 @@ void menu_equip_info_run(void)
                             || (sp->unk2E0 == 15 && sp->unk174[8][k] != viewer.unk38[1]))
                             sp->unk1B0[sp->unk2C2++] = sp->unk174[8][k];
                     }
-                    func_80057cc8();
+                    play_confirm_sound();
                     sp->unk2C7 = 8;
                     offset = 8;
                     base = 238;
@@ -1090,7 +1090,7 @@ void menu_equip_info_run(void)
                     n = sp->unk19C[5];
                     for (k = 0; k < n; k++)
                         sp->unk1B0[sp->unk2C2++] = sp->unk174[5][k];
-                    func_80057cc8();
+                    play_confirm_sound();
                     sp->unk2C7 = 5;
                     offset = 9;
                     base = 259;
@@ -1113,7 +1113,7 @@ void menu_equip_info_run(void)
                             || (sp->unk2E0 == 19 && sp->unk174[9][k] == viewer.unk38[18]))
                             sp->unk1B0[sp->unk2C2++] = sp->unk174[9][k];
                     }
-                    func_80057cc8();
+                    play_confirm_sound();
                     sp->unk2C7 = 9;
                     offset = 10;
                     base = 275;
@@ -1122,9 +1122,9 @@ void menu_equip_info_run(void)
                 case 13:
                     if ((sp->unk2E0 == 6 && viewer.unk38[0] != 0xffff)
                         || (sp->unk2E0 == 13 && viewer.unk38[13] != 0xffff)) {
-                        func_80057cc8();
+                        play_confirm_sound();
                     } else {
-                        func_80057d34();
+                        play_refuse_sound();
                         sp->unk2DC = 1;
                         goto next;
                     }
@@ -1290,7 +1290,7 @@ void menu_equip_info_run(void)
             DAT_801cd180.unk4 = 0;
     moved:
             if (sp->unk2E0 != prev) {
-                func_80057d10();
+                play_cursor_sound();
                 prev = sp->unk2E0;
             }
         } else {
@@ -1300,10 +1300,10 @@ void menu_equip_info_run(void)
                     if (sel != -1 && vis_table_c.unk0118[sel].unk27 != 0
                         && vis_table_c.unk0118[sel].unk28 == 0
                         && vis_table_c.unk0118[sel].unk26 != 4) {
-                        func_80057d34();
+                        play_refuse_sound();
                         DAT_801cd180.unk4 = 0;
                     } else {
-                        func_80057cc8();
+                        play_confirm_sound();
                         equip_apply_slot_change(1);
                         player_compute_derived_stats(0);
                         if (viewer.unk0 < sp->unk2D8)
@@ -1314,7 +1314,7 @@ void menu_equip_info_run(void)
                         DAT_801cd180.unk4 = 0;
                     }
                 } else if (DAT_801cd180.unkC & 0x20) {
-                    func_80057d10();
+                    play_cursor_sound();
                     if (sp->unk2BE < sp->unk2C2 - 1) {
                         sp->unk2BE++;
                         sp->unk2C0 = sp->unk1B0[sp->unk2BE];
@@ -1323,7 +1323,7 @@ void menu_equip_info_run(void)
                         sp->unk2C0 = -1;
                     }
                 } else if (DAT_801cd180.unkC & 0x80) {
-                    func_80057d10();
+                    play_cursor_sound();
                     if (sp->unk2BE >= 0)
                         sp->unk2BE--;
                     else
@@ -1354,32 +1354,32 @@ void menu_equip_info_run(void)
                 row = sp->unk2BE;
                 if (DAT_801cd180.unkC & 0x20) {
                     debounce = 1;
-                    func_80057d10();
+                    play_cursor_sound();
                     DAT_801cd180.unkC = 0;
                     if (sp->unk2BE < 15)
                         sp->unk2BE += 3;
                 } else if (DAT_801cd180.unkC & 0x80) {
                     debounce = 1;
-                    func_80057d10();
+                    play_cursor_sound();
                     DAT_801cd180.unkC = 0;
                     if (sp->unk2BE > 1)
                         sp->unk2BE -= 3;
                 } else if (DAT_801cd180.unkC & 0x10) {
                     debounce = 1;
-                    func_80057d10();
+                    play_cursor_sound();
                     DAT_801cd180.unkC = 0;
                     if (sp->unk2BE % 3 != 0)
                         sp->unk2BE--;
                 } else if (DAT_801cd180.unkC & 0x40) {
                     debounce = 1;
-                    func_80057d10();
+                    play_cursor_sound();
                     DAT_801cd180.unkC = 0;
                     if (sp->unk2BE % 3 != 1)
                         sp->unk2BE++;
                 } else if (DAT_801cd180.unk4 & 0x4000) {
                     DAT_801cd180.unk4 = 0;
                     if (*sp->unk2D4 & (1 << sp->unk2BE)) {
-                        func_80057cc8();
+                        play_confirm_sound();
                         sp->unk33C.x = (s16)(sp->unk2BE / 3) * 48 + 640;
                         sp->unk33C.y = (s16)(sp->unk2BE % 3) * 24;
                         sp->unk33C.w = 48;
@@ -1394,7 +1394,7 @@ void menu_equip_info_run(void)
                         sp->unk2DC = 1;
                         player_compute_derived_stats(0);
                     } else {
-                        func_80057d34();
+                        play_refuse_sound();
                     }
                 }
                 if (row != sp->unk2BE) {
@@ -1405,14 +1405,14 @@ void menu_equip_info_run(void)
                 }
             }
             if (DAT_801cd180.unk4 & 0x2000) {
-                func_80057cec();
+                play_cancel_sound();
                 DAT_801cd180.unk4 = 0;
                 player_compute_derived_stats(0);
                 sp->unk2DC = 1;
             } else if (sp->unk2C7 != 10) {
                 if (DAT_801cd180.unk2 & 0x1000) {
                     if (sp->unk2C6 == 0)
-                        func_80057cc8();
+                        play_confirm_sound();
                     sp->unk2C6 = 1;
                 } else {
                     sp->unk2C6 = 0;
@@ -1439,7 +1439,7 @@ void menu_equip_info_run(void)
     mem_free(sp->unk2D0);
     mem_free(sp->unk1B0);
     menu_reload_assets();
-    func_80057a3c();
+    pad_clear_input();
 }
 
 /*
@@ -1575,31 +1575,31 @@ void menu_creature_book_run(void)
     gfx_setup_640x240();
     sp->unk2DC = 1;
     sp->unk2E0 = 0;
-    func_80057a3c();
+    pad_clear_input();
     for (;;) {
         first = sp->unk2E2;
         if (sp->unk2DC == 1) {
             col = (s16)(sp->unk2E0 % 5);
             row = (s16)(sp->unk2E0 / 5);
             if (DAT_801cd180.unk4 & 0x2000) {
-                func_80057cec();
+                play_cancel_sound();
                 DAT_801cd180.unk4 = 0;
                 break;
             }
             if (DAT_801cd180.unkC & 0x20) {
-                func_80057d10();
+                play_cursor_sound();
                 DAT_801cd180.unkC = 0;
                 if (col < 4)
                     sp->unk2E0++;
             }
             if (DAT_801cd180.unkC & 0x80) {
-                func_80057d10();
+                play_cursor_sound();
                 DAT_801cd180.unkC = 0;
                 if (col != 0)
                     sp->unk2E0--;
             }
             if (DAT_801cd180.unkC & 0x10) {
-                func_80057d10();
+                play_cursor_sound();
                 if (DAT_801cd180.unk2 & 0x8000) {
                     sp->unk2E2 -= 3;
                     if (sp->unk2E2 < 0)
@@ -1612,7 +1612,7 @@ void menu_creature_book_run(void)
                 DAT_801cd180.unkC = 0;
             }
             if (DAT_801cd180.unkC & 0x40) {
-                func_80057d10();
+                play_cursor_sound();
                 if (DAT_801cd180.unk2 & 0x8000) {
                     if (sp->unk0.store.rows > 2) {
                         sp->unk2E2 += 3;
@@ -1628,14 +1628,14 @@ void menu_creature_book_run(void)
                 DAT_801cd180.unkC = 0;
             }
             if (DAT_801cd180.unkC & 0x800) {
-                func_80057d10();
+                play_cursor_sound();
                 DAT_801cd180.unkC = 0;
                 sp->unk2E2 -= 3;
                 if (sp->unk2E2 < 0)
                     sp->unk2E2 = 0;
             }
             if (DAT_801cd180.unkC & 0x200) {
-                func_80057d10();
+                play_cursor_sound();
                 DAT_801cd180.unkC = 0;
                 if (sp->unk0.store.rows > 2) {
                     sp->unk2E2 += 3;
@@ -1646,7 +1646,7 @@ void menu_creature_book_run(void)
             if (DAT_801cd180.unk4 & 0x5000) {
                 int k;
 
-                func_80057cc8();
+                play_confirm_sound();
                 DAT_801cd180.unk4 = 0;
                 k = sp->unk2E2 * 5 + sp->unk2E0;
                 if (k < sp->unk0.store.count) {
@@ -1694,7 +1694,7 @@ void menu_creature_book_run(void)
                 }
             }
         } else if (DAT_801cd180.unk4 & 0x2000) {
-            func_80057cec();
+            play_cancel_sound();
             DAT_801cd180.unk4 = 0;
             sp->unk2DC = 1;
         }
@@ -1707,7 +1707,7 @@ void menu_creature_book_run(void)
     mem_free(sp->unk0.store.items);
     menu_load_main_messages();
     menu_reload_assets();
-    func_80057a3c();
+    pad_clear_input();
 }
 
 /* The storage page's cursor: eight columns (four per grid) by five rows. */
@@ -1844,12 +1844,12 @@ void menu_arrange_icons_run(void)
     clear_vram();
     DrawSync(0);
     gfx_setup_640x240();
-    func_80057a3c();
+    pad_clear_input();
     for (;;) {
         r0 = sp->unk0.grid.row0;
         r1 = sp->unk0.grid.row1;
         if (DAT_801cd180.unk4 & 0x2000) {
-            func_80057cec();
+            play_cancel_sound();
             DAT_801cd180.unk4 = 0;
             if (sp->unk2DC & 0x8000) {
                 sp->unk2DC &= 0x7fff;
@@ -1860,7 +1860,7 @@ void menu_arrange_icons_run(void)
             }
         }
         if (DAT_801cd180.unk4 & 0x4000) {
-            func_80057cc8();
+            play_confirm_sound();
             DAT_801cd180.unk4 = 0;
             if (sp->unk2DC & 0x8000) {
                 if (CURSOR_COL < 4) {
@@ -1931,7 +1931,7 @@ void menu_arrange_icons_run(void)
         }
         if (!(sp->unk2DC & 0x8000)) {
             if (DAT_801cd180.unk4 & 0x1000) {
-                func_80057cc8();
+                play_confirm_sound();
                 DAT_801cd180.unk4 = 0;
                 if (sp->unk2DC == 1)
                     sp->unk2DC = 2;
@@ -1939,19 +1939,19 @@ void menu_arrange_icons_run(void)
                     sp->unk2DC = 1;
             }
             if (DAT_801cd180.unkC & 0x20) {
-                func_80057d10();
+                play_cursor_sound();
                 DAT_801cd180.unkC = 0;
                 if (sp->unk2E0 % 8 != 7)
                     sp->unk2E0++;
             }
             if (DAT_801cd180.unkC & 0x80) {
-                func_80057d10();
+                play_cursor_sound();
                 DAT_801cd180.unkC = 0;
                 if (sp->unk2E0 & 7)
                     sp->unk2E0--;
             }
             if (DAT_801cd180.unkC & 0x10) {
-                func_80057d10();
+                play_cursor_sound();
                 if (DAT_801cd180.unk2 & 0x8000) {
                     if (CURSOR_COL < 4) {
                         sp->unk0.grid.row0 -= 5;
@@ -1973,7 +1973,7 @@ void menu_arrange_icons_run(void)
                 DAT_801cd180.unkC = 0;
             }
             if (DAT_801cd180.unkC & 0x40) {
-                func_80057d10();
+                play_cursor_sound();
                 if (DAT_801cd180.unk2 & 0x8000) {
                     if (CURSOR_COL < 4) {
                         sp->unk0.grid.row0 += 5;
@@ -1995,28 +1995,28 @@ void menu_arrange_icons_run(void)
                 DAT_801cd180.unkC = 0;
             }
             if (DAT_801cd180.unkC & 0x400) {
-                func_80057d10();
+                play_cursor_sound();
                 DAT_801cd180.unkC = 0;
                 sp->unk0.grid.row0 -= 5;
                 if (sp->unk0.grid.row0 < 0)
                     sp->unk0.grid.row0 = 0;
             }
             if (DAT_801cd180.unkC & 0x100) {
-                func_80057d10();
+                play_cursor_sound();
                 DAT_801cd180.unkC = 0;
                 sp->unk0.grid.row0 += 5;
                 if (sp->unk0.grid.row0 > 73)
                     sp->unk0.grid.row0 = 73;
             }
             if (DAT_801cd180.unkC & 0x800) {
-                func_80057d10();
+                play_cursor_sound();
                 DAT_801cd180.unkC = 0;
                 sp->unk0.grid.row1 -= 5;
                 if (sp->unk0.grid.row1 < 0)
                     sp->unk0.grid.row1 = 0;
             }
             if (DAT_801cd180.unkC & 0x200) {
-                func_80057d10();
+                play_cursor_sound();
                 DAT_801cd180.unkC = 0;
                 sp->unk0.grid.row1 += 5;
                 if (sp->unk0.grid.row1 > 73)
@@ -2124,7 +2124,7 @@ void menu_arrange_icons_run(void)
     mem_free(sp->unk0.grid.tex);
     mem_free(sp->unk0.grid.messages);
     menu_reload_assets();
-    func_80057a3c();
+    pad_clear_input();
 }
 
 #undef CURSOR_COL
@@ -2148,17 +2148,17 @@ int menu_attribute_points_run(int points)
         sp->unk0.stats.base[0][i] = viewer.unk9A[i];
         sp->unk0.stats.bonus[0][i] = 0;
     }
-    func_80057a3c();
+    pad_clear_input();
     do {
         if (DAT_801cd180.unk4 & 0x2000) {
             DAT_801cd180.unk4 = 0;
-            func_80057cec();
+            play_cancel_sound();
             result = 0;
             goto done;
         }
         if (DAT_801cd180.unkC & 0x10) {
             DAT_801cd180.unkC = 0;
-            func_80057d10();
+            play_cursor_sound();
             if (sp->unk0.stats.selected % 7 == 0)
                 sp->unk0.stats.selected += 6;
             else
@@ -2166,7 +2166,7 @@ int menu_attribute_points_run(int points)
         }
         if (DAT_801cd180.unkC & 0x40) {
             DAT_801cd180.unkC = 0;
-            func_80057d10();
+            play_cursor_sound();
             if (sp->unk0.stats.selected % 7 == 6)
                 sp->unk0.stats.selected -= 6;
             else
@@ -2174,7 +2174,7 @@ int menu_attribute_points_run(int points)
         }
         if (DAT_801cd180.unkC & 0xa0) {
             DAT_801cd180.unkC = 0;
-            func_80057d10();
+            play_cursor_sound();
             if (sp->unk0.stats.selected < 7)
                 sp->unk0.stats.selected += 7;
             else
@@ -2187,11 +2187,11 @@ int menu_attribute_points_run(int points)
                         + sp->unk0.stats.bonus[0][sp->unk0.stats.selected]
                     < 999) {
                     if (sp->unk0.stats.value >= 2)
-                        func_80057cc8();
+                        play_confirm_sound();
                     sp->unk0.stats.bonus[0][sp->unk0.stats.selected]++;
                     sp->unk0.stats.value--;
                 } else {
-                    func_80057d34();
+                    play_refuse_sound();
                 }
             }
         }
@@ -2205,7 +2205,7 @@ int menu_attribute_points_run(int points)
     }
     result = 1;
 done:
-    func_80057a3c();
+    pad_clear_input();
     return result;
 }
 
@@ -2279,7 +2279,7 @@ int menu_use_item_run(void)
     }
     sp->unk2E2 = 0;
     sp->unk2E0 = 0;
-    func_80057a3c();
+    pad_clear_input();
     reload = 0;
     for (;;) {
         first = sp->unk2E2;
@@ -2290,11 +2290,11 @@ int menu_use_item_run(void)
             else
                 DAT_801cba08.unk16D8 = 2;
             if (DAT_801cba08.unk16D8 == 1)
-                func_80057cc8();
+                play_confirm_sound();
             else if (DAT_801cba08.unk16D8 == 2)
-                func_80057d34();
+                play_refuse_sound();
             else
-                func_80057cec();
+                play_cancel_sound();
             if (DAT_801cba08.unk16D8 != 2) {
                 result = DAT_801cba08.unk16D8;
                 if (DAT_801cba08.unk16D8 == 1) {
@@ -2306,12 +2306,12 @@ int menu_use_item_run(void)
             }
         }
         if (DAT_801cd180.unk4 & 0x2000) {
-            func_80057cec();
+            play_cancel_sound();
             DAT_801cd180.unk4 = 0;
             break;
         }
         if (DAT_801cd180.unkC & 0x10) {
-            func_80057d10();
+            play_cursor_sound();
             DAT_801cd180.unkC = 0;
             if (sp->unk2E0 == 0) {
                 if (sp->unk2E2 > 0)
@@ -2322,7 +2322,7 @@ int menu_use_item_run(void)
             sp->unk2E4 = 0;
         }
         if (DAT_801cd180.unkC & 0x40) {
-            func_80057d10();
+            play_cursor_sound();
             DAT_801cd180.unkC = 0;
             if (sp->unk2E0 == 4) {
                 if (sp->unk2E2 < sp->unk0.page_list.count - 5)
@@ -2333,7 +2333,7 @@ int menu_use_item_run(void)
             sp->unk2E4 = 0;
         }
         if (DAT_801cd180.unkC & 0x20) {
-            func_80057d10();
+            play_cursor_sound();
             DAT_801cd180.unkC = 0;
             sp->unk2E2 += 5;
             if (sp->unk2E2 > sp->unk0.page_list.count - 5) {
@@ -2345,7 +2345,7 @@ int menu_use_item_run(void)
             sp->unk2E4 = 0;
         }
         if (DAT_801cd180.unkC & 0x80) {
-            func_80057d10();
+            play_cursor_sound();
             DAT_801cd180.unkC = 0;
             sp->unk2E2 -= 5;
             if (sp->unk2E2 < 0)
@@ -2375,7 +2375,7 @@ int menu_use_item_run(void)
         menu_use_item_draw();
         sp->unk2E4 = (sp->unk2E4 + 1) % 32;
     }
-    func_80057a3c();
+    pad_clear_input();
     mem_free(sp->unk0.block);
     mem_free(sp->unk0.page_list.entries);
     if (reload)
@@ -2424,7 +2424,7 @@ void shop_open(void)
     p += *(u32 *)p + 4;
     tim_load_images_at(p + 4, &sp->unk2E6[2], &sp->unk2E6[3], 1);
     menu_store_screen();
-    func_80057a3c();
+    pad_clear_input();
 }
 
 /* Copies the saved page back to 896,256. */
@@ -2496,7 +2496,7 @@ void shop_run(void)
     for (;;) {
         if (sp->unk2DC & 0x8000) {
             if (DAT_801cd180.unk4 & 0x2000) {
-                func_80057cec();
+                play_cancel_sound();
                 DAT_801cd180.unk4 = 0;
                 sp->unk2DC &= ~0x8000;
             }
@@ -2509,7 +2509,7 @@ void shop_run(void)
 
                         if (DAT_801c7590.counts[266].count < vis_table_c.unk0118[id].unk2) {
                             done = 0;
-                            func_80057d34();
+                            play_refuse_sound();
                         } else {
                             DAT_801c7590.counts[266].count -= vis_table_c.unk0118[id].unk2;
                             DAT_801c7590.counts[id].count++;
@@ -2519,7 +2519,7 @@ void shop_run(void)
                                     sp->unk0.list.ids[i] = sp->unk0.list.ids[i + 1];
                                 sp->unk0.list.count--;
                             }
-                            func_80057cc8();
+                            play_confirm_sound();
                             sp->unk2DC &= ~0x8000;
                         }
                     } else if ((sp->unk2DC & 2) || (sp->unk2DC & 4)) {
@@ -2533,7 +2533,7 @@ void shop_run(void)
                         for (j = sp->unk2E2 + sp->unk2E0; j < sp->unk0.list.count - 1; j++)
                             sp->unk0.list.ids[j] = sp->unk0.list.ids[j + 1];
                         sp->unk0.list.count--;
-                        func_80057cc8();
+                        play_confirm_sound();
                         sp->unk2DC &= ~0x8000;
                     } else {
                         int id = sp->unk0.list.ids[sp->unk2E2 + sp->unk2E0];
@@ -2549,11 +2549,11 @@ void shop_run(void)
                             for (j = sp->unk2E2 + sp->unk2E0; j < sp->unk0.list.count - 1; j++)
                                 sp->unk0.list.ids[j] = sp->unk0.list.ids[j + 1];
                             sp->unk0.list.count--;
-                            func_80057cc8();
+                            play_confirm_sound();
                             sp->unk2DC &= ~0x8000;
                         } else {
                             done = 0;
-                            func_80057d34();
+                            play_refuse_sound();
                         }
                     }
                     if (done && sp->unk2E2 + 4 >= sp->unk0.list.count) {
@@ -2563,31 +2563,31 @@ void shop_run(void)
                             sp->unk2E0--;
                     }
                 } else {
-                    func_80057cec();
+                    play_cancel_sound();
                     DAT_801cd180.unk4 = 0;
                     sp->unk2DC &= ~0x8000;
                 }
             }
             if (DAT_801cd180.unkC & 0x80) {
-                func_80057d10();
+                play_cursor_sound();
                 DAT_801cd180.unkC = 0;
                 sp->unk2E4 = 0;
                 sp->unk0.list.unkA = 1;
             }
             if (DAT_801cd180.unkC & 0x20) {
-                func_80057d10();
+                play_cursor_sound();
                 DAT_801cd180.unkC = 0;
                 sp->unk2E4 = 0;
                 sp->unk0.list.unkA = 0;
             }
         } else {
             if (DAT_801cd180.unk4 & 0x2000) {
-                func_80057cec();
+                play_cancel_sound();
                 DAT_801cd180.unk4 = 0;
                 break;
             }
             if (DAT_801cd180.unkC & 0x10) {
-                func_80057d10();
+                play_cursor_sound();
                 DAT_801cd180.unkC = 0;
                 if (sp->unk2E0 == 0) {
                     if (sp->unk2E2 > 0)
@@ -2597,7 +2597,7 @@ void shop_run(void)
                 }
             }
             if (DAT_801cd180.unkC & 0x40) {
-                func_80057d10();
+                play_cursor_sound();
                 DAT_801cd180.unkC = 0;
                 if (sp->unk2E0 == 4) {
                     if (sp->unk2E2 < sp->unk0.list.count - 5)
@@ -2609,13 +2609,13 @@ void shop_run(void)
             if (DAT_801cd180.unk4 & 0x4000) {
                 DAT_801cd180.unk4 = 0;
                 if (sp->unk2E2 + sp->unk2E0 >= sp->unk0.list.count) {
-                    func_80057d34();
+                    play_refuse_sound();
                 } else {
                     if (sp->unk2DC & 1)
                         kind = vis_table_c.unk0118[DAT_801c7590.unk13A[sp->unk0.list.ids[sp->unk2E2 + sp->unk2E0]]].unk5[0];
                     else
                         kind = vis_table_c.unk0118[sp->unk0.list.ids[sp->unk2E2 + sp->unk2E0]].unk5[0];
-                    func_80057cc8();
+                    play_confirm_sound();
                     sp->unk0.list.unkA = 1;
                     sp->unk2DC |= 0x8000;
                     if (kind != shown) {
@@ -2631,7 +2631,7 @@ void shop_run(void)
         sp->unk2E4 = (sp->unk2E4 + 1) % 32;
     }
     shop_restore_texture_page();
-    func_80057a3c();
+    pad_clear_input();
     mem_free(sp->unk0.list.ids);
     mem_free(sp->unk0.block);
     menu_restore_screen();
@@ -2656,7 +2656,7 @@ void menu_area_info_run(void)
     int i;
 
     head = NULL;
-    func_80057a3c();
+    pad_clear_input();
     seen = 0;
     sp->unk0.map.unk00 = 0;
     sp->unk0.map.current = -1;
@@ -2684,14 +2684,14 @@ void menu_area_info_run(void)
         if (DAT_801cd180.unk4 & 0x2000) {
             DAT_800881a8 = 0;
             DAT_801cd180.unk4 = 0;
-            func_80057cec();
+            play_cancel_sound();
             break;
         }
         if (DAT_800881a8 == 1) {
             if (DAT_801cd180.unkC & 0x10) {
                 DAT_801cd180.unkC = 0;
                 if (sp->unk0.map.unk00 > 0) {
-                    func_80057d10();
+                    play_cursor_sound();
                     moved = 1;
                     sp->unk0.map.unk00--;
                 }
@@ -2699,7 +2699,7 @@ void menu_area_info_run(void)
             if (DAT_801cd180.unkC & 0x40) {
                 DAT_801cd180.unkC = 0;
                 if (sp->unk0.map.unk00 < 25) {
-                    func_80057d10();
+                    play_cursor_sound();
                     moved = 1;
                     sp->unk0.map.unk00++;
                 }
@@ -2723,7 +2723,7 @@ void menu_area_info_run(void)
         frame_rate_update();
         menu_area_info_draw();
     }
-    func_80057a3c();
+    pad_clear_input();
 }
 
 /*
@@ -2744,16 +2744,16 @@ void menu_options_run(void)
 
     sp->unk2E0 = 0;
     sp->unk2DC = 1;
-    func_80057a3c();
+    pad_clear_input();
     while (1) {
         if (sp->unk2DC == 1) {
             if (DAT_801cd180.unk4 & 0x2000) {
-                func_80057cec();
+                play_cancel_sound();
                 DAT_801cd180.unk4 = 0;
                 break;
             }
             if (DAT_801cd180.unkC & 0x10) {
-                func_80057d10();
+                play_cursor_sound();
                 DAT_801cd180.unkC = 0;
                 if (sp->unk2E0 == 0)
                     sp->unk2E0 = 5;
@@ -2761,7 +2761,7 @@ void menu_options_run(void)
                     sp->unk2E0--;
             }
             if (DAT_801cd180.unkC & 0x40) {
-                func_80057d10();
+                play_cursor_sound();
                 DAT_801cd180.unkC = 0;
                 if (sp->unk2E0 == 5)
                     sp->unk2E0 = 0;
@@ -2774,7 +2774,7 @@ void menu_options_run(void)
                     const u16 *decode = DAT_801cd180.unk22;
                     int i;
 
-                    func_80057cc8();
+                    play_confirm_sound();
                     for (i = 0; i < 12; i++, decode++) {
                         if (*decode & 0x1000)
                             sp->unk0.levels.level[i] = 0;
@@ -2810,7 +2810,7 @@ void menu_options_run(void)
             if (DAT_801cd180.unkC & 0x20) {
                 u8 *option = &DAT_801cd120.unk1;
 
-                func_80057d10();
+                play_cursor_sound();
                 DAT_801cd180.unkC = 0;
                 if (sp->unk2E0 <= 0) {
                     if (option[sp->unk2E0] < 63)
@@ -2822,7 +2822,7 @@ void menu_options_run(void)
             if (DAT_801cd180.unkC & 0x80) {
                 u8 *option = &DAT_801cd120.unk1;
 
-                func_80057d10();
+                play_cursor_sound();
                 DAT_801cd180.unkC = 0;
                 if (sp->unk2E0 <= 0) {
                     if (option[sp->unk2E0] != 0)
@@ -2834,26 +2834,26 @@ void menu_options_run(void)
         } else if (sp->unk2E2 == 0) {
             if (DAT_801cd180.unk4 & 0x2000) {
                 if (sp->unk0.levels.flags == 0) {
-                    func_8005738c();
-                    func_80057cc8();
+                    pad_update_action_mask();
+                    play_confirm_sound();
                     DAT_801cd180.unk4 = 0;
                     sp->unk2DC = 1;
                     sp->unk2E0 = 5;
                 } else {
-                    func_80057d34();
+                    play_refuse_sound();
                     DAT_801cd180.unk4 = 0;
                 }
             }
             if (DAT_801cd180.unk4 & 0x4000) {
                 DAT_801cd180.unk4 = 0;
                 if (sp->unk2E0 < 12) {
-                    func_80057cc8();
+                    play_confirm_sound();
                     sp->unk2E4 = 0;
                     sp->unk2E2 = 1;
                 } else if (sp->unk2E0 == 12) {
-                    func_80057cc8();
-                    func_800573bc();
-                    func_8005738c();
+                    play_confirm_sound();
+                    pad_set_default_buttons();
+                    pad_update_action_mask();
                     sp->unk0.levels.level[0] = 5;
                     sp->unk0.levels.level[1] = 7;
                     sp->unk0.levels.level[2] = 4;
@@ -2868,23 +2868,23 @@ void menu_options_run(void)
                     sp->unk0.levels.level[11] = 1;
                     sp->unk0.levels.level[10] = 3;
                 } else if (sp->unk0.levels.flags == 0) {
-                    func_8005738c();
-                    func_80057cc8();
+                    pad_update_action_mask();
+                    play_confirm_sound();
                     DAT_801cd180.unk4 = 0;
                     sp->unk2DC = 1;
                     sp->unk2E0 = 5;
                 } else {
-                    func_80057d34();
+                    play_refuse_sound();
                     DAT_801cd180.unk4 = 0;
                 }
             }
             if (DAT_801cd180.unk4 & 8) {
-                func_80057d10();
+                play_cursor_sound();
                 DAT_801cd180.unk4 = 0;
                 sp->unk2E0 = 13;
             }
             if (DAT_801cd180.unkC & 0x10) {
-                func_80057d10();
+                play_cursor_sound();
                 DAT_801cd180.unkC = 0;
                 if (sp->unk2E0 == 0)
                     sp->unk2E0 = 12;
@@ -2898,7 +2898,7 @@ void menu_options_run(void)
                     sp->unk2E0--;
             }
             if (DAT_801cd180.unkC & 0x40) {
-                func_80057d10();
+                play_cursor_sound();
                 DAT_801cd180.unkC = 0;
                 if (sp->unk2E0 == 12)
                     sp->unk2E0 = 0;
@@ -2912,7 +2912,7 @@ void menu_options_run(void)
                     sp->unk2E0++;
             }
             if (DAT_801cd180.unkC & 0x20) {
-                func_80057d10();
+                play_cursor_sound();
                 DAT_801cd180.unkC = 0;
                 if (sp->unk2E0 < 6)
                     sp->unk2E0 += 6;
@@ -2924,7 +2924,7 @@ void menu_options_run(void)
                     sp->unk2E0 -= 6;
             }
             if (DAT_801cd180.unkC & 0x80) {
-                func_80057d10();
+                play_cursor_sound();
                 DAT_801cd180.unkC = 0;
                 if (sp->unk2E0 < 7)
                     sp->unk2E0 += 6;
@@ -2998,7 +2998,7 @@ void menu_options_run(void)
             menu_options_draw();
         sp->unk2E4 = (sp->unk2E4 + 1) % 32;
     }
-    func_80057a3c();
+    pad_clear_input();
 }
 
 /* Clears any pending SwCARD event. */
@@ -3287,7 +3287,7 @@ int card_ask_yes_no(void)
 
     sp->unk2E4 = 0;
     sp->unk202 = 0;
-    func_80057a3c();
+    pad_clear_input();
     while (1) {
         if (n == 0) {
             if (card_check_inserted(sp->unk1F8) == 0)
@@ -3295,30 +3295,30 @@ int card_ask_yes_no(void)
             n = 3;
         }
         if (DAT_801cd180.unk4 & 0x4000) {
-            func_80057cc8();
+            play_confirm_sound();
             DAT_801cd180.unk4 = 0;
             break;
         }
         if (DAT_801cd180.unk4 & 0x2000) {
-            func_80057cec();
+            play_cancel_sound();
             DAT_801cd180.unk4 = 0;
             sp->unk202 = 0;
             break;
         }
         if (DAT_801cd180.unk4 & 0x80) {
-            func_80057d10();
+            play_cursor_sound();
             DAT_801cd180.unk4 = 0;
             sp->unk202 = 1;
         }
         if (DAT_801cd180.unk4 & 0x20) {
-            func_80057d10();
+            play_cursor_sound();
             DAT_801cd180.unk4 = 0;
             sp->unk202 = 0;
         }
         n--;
         card_screen_draw();
     }
-    func_80057a3c();
+    pad_clear_input();
     return sp->unk202;
 }
 
@@ -3330,28 +3330,28 @@ int card_choose_port(void)
 
     sp->unk1F8 = 0;
     sp->unk2E4 = 0;
-    func_80057a3c();
+    pad_clear_input();
     while (1) {
         if (DAT_801cd180.unk4 & 0x4000) {
-            func_80057cc8();
+            play_confirm_sound();
             DAT_801cd180.unk4 = 0;
             sp->unk1F4 = &((MenuCardScratch *)sp)->cards[sp->unk1F8];
             break;
         }
         if (DAT_801cd180.unk4 & 0x2000) {
-            func_80057cec();
+            play_cancel_sound();
             DAT_801cd180.unk4 = 0;
             sp->unk1F8 = -1;
             break;
         }
         if (DAT_801cd180.unkC & 0x10) {
-            func_80057d10();
+            play_cursor_sound();
             DAT_801cd180.unkC = 0;
             sp->unk1F8 = 0;
             sp->unk2E4 = 0;
         }
         if (DAT_801cd180.unkC & 0x40) {
-            func_80057d10();
+            play_cursor_sound();
             DAT_801cd180.unkC = 0;
             sp->unk1F8 = 1;
             sp->unk2E4 = 0;
@@ -3359,7 +3359,7 @@ int card_choose_port(void)
         card_screen_draw();
         sp->unk2E4 = (sp->unk2E4 + 1) % 32;
     }
-    func_80057a3c();
+    pad_clear_input();
     return sp->unk1F8 != -1;
 }
 
@@ -3431,7 +3431,7 @@ int card_choose_file(void)
     sp->unk1FE = 0;
     sp->unk200 = 0;
     sp->unk2E4 = 0;
-    func_80057a3c();
+    pad_clear_input();
     while (1) {
         if (n == 0) {
             if (card_check_inserted(sp->unk1F8) == 0)
@@ -3439,30 +3439,30 @@ int card_choose_file(void)
             n = 20;
         }
         if (DAT_801cd180.unk4 & 0x4000) {
-            func_80057cc8();
+            play_confirm_sound();
             DAT_801cd180.unk4 = 0;
             sp->unk0.half[1] = 1;
             sp->unk2E4 = 32;
             sp->unk202 = 1;
             while (1) {
                 if (DAT_801cd180.unk4 & 0x4000) {
-                    func_80057cc8();
+                    play_confirm_sound();
                     DAT_801cd180.unk4 = 0;
                     break;
                 }
                 if (DAT_801cd180.unk4 & 0x2000) {
-                    func_80057cec();
+                    play_cancel_sound();
                     DAT_801cd180.unk4 = 0;
                     sp->unk202 = 0;
                     break;
                 }
                 if (DAT_801cd180.unk4 & 0x80) {
-                    func_80057d10();
+                    play_cursor_sound();
                     DAT_801cd180.unk4 = 0;
                     sp->unk202 = 1;
                 }
                 if (DAT_801cd180.unk4 & 0x20) {
-                    func_80057d10();
+                    play_cursor_sound();
                     DAT_801cd180.unk4 = 0;
                     sp->unk202 = 0;
                 }
@@ -3474,13 +3474,13 @@ int card_choose_file(void)
             continue;
         }
         if (DAT_801cd180.unk4 & 0x2000) {
-            func_80057cec();
+            play_cancel_sound();
             DAT_801cd180.unk4 = 0;
             sp->unk1FE = -1;
             break;
         }
         if (DAT_801cd180.unkC & 0x10) {
-            func_80057d10();
+            play_cursor_sound();
             DAT_801cd180.unkC = 0;
             if (sp->unk1FE == 0) {
                 if (sp->unk200 > 0)
@@ -3491,7 +3491,7 @@ int card_choose_file(void)
             sp->unk2E4 = 0;
         }
         if (DAT_801cd180.unkC & 0x40) {
-            func_80057d10();
+            play_cursor_sound();
             DAT_801cd180.unkC = 0;
             if (sp->unk1FE == 2) {
                 if (sp->unk200 < sp->unk1FA - 3)
@@ -3505,7 +3505,7 @@ int card_choose_file(void)
         sp->unk2E4 = (sp->unk2E4 + 1) % 32;
         n--;
     }
-    func_80057a3c();
+    pad_clear_input();
     if (sp->unk1FE == -1)
         return 0;
     sp->unk1FE += sp->unk200;
@@ -3668,7 +3668,7 @@ read:
         if (sum != sp->unk1F4->files[sp->unk1FE].unk1E)
             sp->unk0.half[0] = 349;
         if (retry == 0) {
-            func_80057a3c();
+            pad_clear_input();
             close(fd);
             return 0;
         }
@@ -4114,7 +4114,7 @@ write:
     sum = card_write_blocks(fd, sizeof(header), data, 7560);
     if (sum == -1) {
         if (retry == 0) {
-            func_80057a3c();
+            pad_clear_input();
             close(fd);
             return 0;
         }
@@ -4143,7 +4143,7 @@ write:
     viewer.unk234 = viewer.position.vz - (viewer.unk22F << 12);
     viewer.unk236 = viewer.unk278.vy + 2048;
     close(fd);
-    func_80057a3c();
+    pad_clear_input();
     return 1;
 }
 
@@ -4179,7 +4179,7 @@ int card_screen_run(int arg)
     sp->unk0.half[0] = 0;
     sp->unk0.half[1] = 0;
     sp->unk206 = arg;
-    func_80057a3c();
+    pad_clear_input();
     card_screen_draw();
     card_screen_draw();
     sp->unk2DC <<= 1;
@@ -4268,12 +4268,12 @@ select:
         goto done;
     }
     if (sp->unk2DC & 0xff00) {
-        func_800562d4((StSaveData *)buf, sp->unk208);
+        save_pack_data((StSaveData *)buf, sp->unk208);
         result = card_save_game(buf);
     } else {
         result = card_load_game(buf);
         if (result)
-            func_80056aa0((StSaveData *)buf);
+            save_unpack_data((StSaveData *)buf);
     }
     mem_free(buf);
     if (result == 0) {
@@ -4292,7 +4292,7 @@ done:
     if (sp->unk2DC & 0x80) {
         while (PRESSED_NOW == 0)
             ;
-        func_80057cec();
+        play_cancel_sound();
         DAT_801cd180.unk4 = 0;
         sp->unk2DC = 2;
         goto select;
@@ -4300,7 +4300,7 @@ done:
     if (sp->unk2DC & 0x8000) {
         while (PRESSED_NOW == 0)
             ;
-        func_80057cec();
+        play_cancel_sound();
         DAT_801cd180.unk4 = 0;
         sp->unk2DC = 0x200;
         goto select;
@@ -4308,11 +4308,11 @@ done:
     if (sp->unk2DC & 0xff00) {
         while (PRESSED_NOW == 0)
             ;
-        func_80057cec();
+        play_cancel_sound();
         DAT_801cd180.unk4 = 0;
     }
     viewer.unk2A = 1;
-    func_80057a3c();
+    pad_clear_input();
     return 1;
 }
 
@@ -4326,25 +4326,25 @@ int menu_end_game_run(void)
     MenuScratch *sp = MENU_SCRATCH;
 
     sp->unk2E0 = 1;
-    func_80057a3c();
+    pad_clear_input();
     while (1) {
         if (DAT_801cd180.unk4 & 0x2000) {
-            func_80057cec();
+            play_cancel_sound();
             DAT_801cd180.unk4 = 0;
             break;
         }
         if (DAT_801cd180.unkC & 0x80) {
-            func_80057d10();
+            play_cursor_sound();
             DAT_801cd180.unkC = 0;
             sp->unk2E0 = 0;
         }
         if (DAT_801cd180.unkC & 0x20) {
-            func_80057d10();
+            play_cursor_sound();
             DAT_801cd180.unkC = 0;
             sp->unk2E0 = 1;
         }
         if (DAT_801cd180.unk4 & 0x4000) {
-            func_80057cc8();
+            play_confirm_sound();
             DAT_801cd180.unk4 = 0;
             if (sp->unk2E0 != 0)
                 break;
@@ -4355,7 +4355,7 @@ int menu_end_game_run(void)
         menu_end_game_draw();
         sp->unk2E4 = (sp->unk2E4 + 1) % 32;
     }
-    func_80057a3c();
+    pad_clear_input();
     return 0;
 }
 
@@ -4374,7 +4374,7 @@ void pause_screen_run(void)
 
     cd_wait_idle();
     menu_store_screen();
-    func_80057a3c();
+    pad_clear_input();
     DrawSync(0);
     pad = &DAT_801cd180;
 pause_wait:
@@ -4384,7 +4384,7 @@ pause_wait:
     pause_screen_draw();
     goto pause_wait;
 pause_done:
-    func_80057a3c();
+    pad_clear_input();
     menu_restore_screen();
     viewer.unk34 = seconds;
     viewer.unk33 = frames;
@@ -4412,20 +4412,20 @@ int menu_game_over_run(void)
     tim_load_images_at(p + 4, &sp->unk2E6[0], &sp->unk2E6[1], 1);
     sp->unk0.word = 0;
     sp->unk2E4 = 0;
-    func_80057a3c();
+    pad_clear_input();
     while (1) {
         if (DAT_801cd180.unk4 & 0x4000) {
-            func_80057cc8();
+            play_confirm_sound();
             DAT_801cd180.unk4 = 0;
             break;
         }
         if (DAT_801cd180.unkC & 0x40) {
-            func_80057d10();
+            play_cursor_sound();
             DAT_801cd180.unkC = 0;
             sp->unk0.word = 1;
         }
         if (DAT_801cd180.unkC & 0x10) {
-            func_80057d10();
+            play_cursor_sound();
             DAT_801cd180.unkC = 0;
             sp->unk0.word = 0;
         }
@@ -4434,7 +4434,7 @@ int menu_game_over_run(void)
         menu_game_over_draw();
         sp->unk2E4 = (sp->unk2E4 + 1) % 32;
     }
-    func_80057a3c();
+    pad_clear_input();
     return sp->unk0.word;
 }
 
@@ -4464,7 +4464,7 @@ void menu_save_prompt_run(void)
     ClearImage(&clear, 0, 0, 0);
     sp->unk2DE = 0;
     sp->unk2E4 = 0;
-    func_80057a3c();
+    pad_clear_input();
     sp->unk33C.x = 0;
     sp->unk33C.y = 0;
     sp->unk33C.w = 320;
@@ -4472,30 +4472,30 @@ void menu_save_prompt_run(void)
     for (;;) {
         if (DAT_801cd180.unk4 & 0x4000) {
             DAT_801cd180.unk4 = 0;
-            func_80057cc8();
+            play_confirm_sound();
             if (sp->unk2DE != 0)
                 break;
             ClearImage(&clear, 0, 0, 0);
             cd_wait_idle();
-            func_80055cf4(area_state.unk4);
+            area_save_snapshot(area_state.unk4);
             anim_free_all_for_menu();
-            func_80057a3c();
-            func_80057a68(0);
+            pad_clear_input();
+            pad_vibrate(0);
             card_screen_open(1, 0);
             sp->unk208 = 1;
             result = card_screen_run(0);
-            func_80057a3c();
+            pad_clear_input();
             card_screen_close();
             if (result == 1)
                 break;
         }
         if (DAT_801cd180.unkC & 0x80) {
-            func_80057d10();
+            play_cursor_sound();
             DAT_801cd180.unkC = 0;
             sp->unk2DE = 0;
         }
         if (DAT_801cd180.unkC & 0x20) {
-            func_80057d10();
+            play_cursor_sound();
             DAT_801cd180.unkC = 0;
             sp->unk2DE = 1;
         }
@@ -4504,6 +4504,6 @@ void menu_save_prompt_run(void)
         menu_save_prompt_draw();
         sp->unk2E4 = (sp->unk2E4 + 1) % 32;
     }
-    func_80057a3c();
+    pad_clear_input();
     ClearImage(&clear, 0, 0, 0);
 }

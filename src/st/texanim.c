@@ -443,8 +443,8 @@ void gfx_set_camera(VECTOR *pos, SVECTOR *rot)
     angle.vz = world_state.unk1EDD8.vz;
     angle.vy = world_state.unk1EDD8.vy;
     RotMatrix(&angle, &world_state.unk1ECE8);
-    func_80049cd4(angle.vx, &world_state.unk1EDA8);
-    func_800498cc(&world_state.unk1ECE8, world_state.unk1ED28);
+    matrix_rot_x(angle.vx, &world_state.unk1EDA8);
+    matrix_quarter_turns_y(&world_state.unk1ECE8, world_state.unk1ED28);
 }
 
 /* Texture fields shared by the textured primitive kinds. */
@@ -4122,7 +4122,7 @@ void model_draw(int unused0, u16 model, VECTOR *pos, SVECTOR *rot, SVECTOR *scal
         sp->model_t[1] = pos->vy;
         sp->model_t[2] = pos->vz;
     }
-    func_80049e30(rot, SCRATCH_MATRIX(sp));
+    matrix_rot_yxz(rot, SCRATCH_MATRIX(sp));
     lighting_load_gte(light, flags);
     gte_MulMatrix0((MATRIX *)sp->unk394, SCRATCH_MATRIX(sp), &lm);
     gte_SetLightMatrix(&lm);
@@ -4337,7 +4337,7 @@ u8 tag;
         p += 4;
     }
     if (self->block == NULL)
-        func_80058a0c(archive, index + 2, bank + 8);
+        sound_bank_load(archive, index + 2, bank + 8);
     else if (self->block[2] == 1)
         self->block[2] = 2;
 }
@@ -4501,7 +4501,7 @@ void object_models_sync(int archive, int first, int slot, int count)
             if (cd_archive_member_size(archive, i * 3 + 1)) {
                 vslot = &DAT_801dd1c0.slots[i + 24];
                 if (vslot->block == NULL) {
-                    func_80058a0c(archive, i * 3 + 1, i + 24);
+                    sound_bank_load(archive, i * 3 + 1, i + 24);
                 } else {
                     vab = vslot->block;
                     if (vab[2] == 2)
@@ -4698,15 +4698,15 @@ void world_draw_objects(void)
                 if (volume < 20)
                     continue;
                 if (e->unk54 != -1) {
-                    func_8005850c(e->unk54, e->unk4A.snd.unk4A + 208);
+                    sound_stop(e->unk54, e->unk4A.snd.unk4A + 208);
                     e->unk54 = -1;
                 }
-                e->unk54 = func_800582f0(e->unk4A.snd.unk4A + 208, volume);
+                e->unk54 = sound_play(e->unk4A.snd.unk4A + 208, volume);
             } else {
                 e->unk50 = now + e->unk4A.snd.unk4E * 6;
                 if (e->unk54 == -1)
                     continue;
-                func_8005850c(e->unk54, e->unk4A.snd.unk4A + 208);
+                sound_stop(e->unk54, e->unk4A.snd.unk4A + 208);
                 e->unk54 = -1;
             }
             break;
@@ -4741,15 +4741,15 @@ void world_draw_objects(void)
                 if (volume < 20)
                     continue;
                 if (e->unk54 != -1) {
-                    func_8005850c(e->unk54, e->unk4A.snd.unk4A + 1108);
+                    sound_stop(e->unk54, e->unk4A.snd.unk4A + 1108);
                     e->unk54 = -1;
                 }
-                e->unk54 = func_800582f0(e->unk4A.snd.unk4A + 1108, volume);
+                e->unk54 = sound_play(e->unk4A.snd.unk4A + 1108, volume);
             } else {
                 e->unk50 = now + e->unk4A.snd.unk4E * 60;
                 if (e->unk54 == -1)
                     continue;
-                func_8005850c(e->unk54, e->unk4A.snd.unk4A + 1108);
+                sound_stop(e->unk54, e->unk4A.snd.unk4A + 1108);
                 e->unk54 = -1;
             }
             break;
@@ -5347,7 +5347,7 @@ void world_render_frame(VECTOR *pos, SVECTOR *rot)
     int level;
     int i;
 
-    func_80057b10();
+    pad_update_vibration();
     gfx_set_camera(pos, rot);
     texanim_update();
     if (viewer.unk218 == 0 || viewer.unk218 == 5 || viewer.unk218 == 6 || viewer.unk218 == 1)
@@ -8750,10 +8750,10 @@ void lighting_build_matrices(void)
         light = lighting.light;
         i = 64;
         while (i--) {
-            func_80049aac(light, &light->light[0], 0);
-            func_80049aac(light, &light->light[1], 1);
-            func_80049aac(light, &light->light[2], 2);
-            func_80049aac(light, &light->light[3], 3);
+            lighting_quarter_turn_matrix(light, &light->light[0], 0);
+            lighting_quarter_turn_matrix(light, &light->light[1], 1);
+            lighting_quarter_turn_matrix(light, &light->light[2], 2);
+            lighting_quarter_turn_matrix(light, &light->light[3], 3);
             light++;
         }
         lighting.unk2 = 0;
@@ -8763,28 +8763,28 @@ void lighting_build_matrices(void)
 ADDRESS(0x80032210, 0x34)
 void lighting_blend_matrix(StLightInit *init, StLight *light, short t)
 {
-    func_8004a888(&light->light[0], &init->unk0, &light->light[0], t);
+    matrix_lerp(&light->light[0], &init->unk0, &light->light[0], t);
 }
 
 ADDRESS(0x80032244, 0x38)
 void lighting_blend_color(StLightInit *init, StLight *light, short t)
 {
-    func_8004a888(&light->color, &init->color, &light->color, t);
+    matrix_lerp(&light->color, &init->color, &light->color, t);
 }
 
 ADDRESS(0x8003227c, 0x7c)
 void lighting_blend_back(StLightInit *init, StLight *light, short t)
 {
-    light->back.r = func_8004a830(light->back.r, init->back.r, t);
-    light->back.g = func_8004a830(light->back.g, init->back.g, t);
-    light->back.b = func_8004a830(light->back.b, init->back.b, t);
+    light->back.r = math_lerp(light->back.r, init->back.r, t);
+    light->back.g = math_lerp(light->back.g, init->back.g, t);
+    light->back.b = math_lerp(light->back.b, init->back.b, t);
 }
 
 /* Blends unk68, keeping unk6A at least 4096 beyond it. */
 ADDRESS(0x800322f8, 0x60)
 void lighting_blend_near(StLightInit *init, StLight *light, short t)
 {
-    light->unk68 = func_8004a830(light->unk68, init->unk2C, t);
+    light->unk68 = math_lerp(light->unk68, init->unk2C, t);
     if (light->unk68 > light->unk6A - 4096)
         light->unk6A = light->unk68 + 4096;
 }
@@ -8793,7 +8793,7 @@ void lighting_blend_near(StLightInit *init, StLight *light, short t)
 ADDRESS(0x80032358, 0x60)
 void lighting_blend_far(StLightInit *init, StLight *light, short t)
 {
-    light->unk6A = func_8004a830(light->unk6A, init->unk2E, t);
+    light->unk6A = math_lerp(light->unk6A, init->unk2E, t);
     if (light->unk6A < light->unk68 + 4096)
         light->unk68 = light->unk6A - 4096;
 }

@@ -27,17 +27,17 @@ typedef struct {
 
 extern volatile StPadData DAT_801cd130;
 
-void func_8005738c(void);
-void func_800573bc(void);
-void func_80057428(void);
-void func_800574c0(void);
-void func_8005755c(void);
-void func_800575a0(void);
-void func_80057684(void);
-void func_80057744(void);
-void func_80057a28(void);
-void func_80057a3c(void);
-void func_80057a68(int arg0);
-void func_80057b10(void);
+void pad_update_action_mask(void);
+void pad_set_default_buttons(void);
+void pad_wait_stable(void);
+void pad_setup_actuators(void);
+void pad_setup_actuators_if_stable(void);
+void pad_update_state(void);
+void pad_init(void);
+void pad_read(void);
+void pad_enable(void);
+void pad_clear_input(void);
+void pad_vibrate(int arg0);
+void pad_update_vibration(void);
 
 #endif
