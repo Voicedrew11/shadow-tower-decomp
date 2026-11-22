@@ -227,17 +227,17 @@ void effect_spawn_attack(Creature *e, int kind, VECTOR *pos)
     case 0x3b:
     case 0x50:
     case 0x54:
-        effect = 24;
+        effect = STATUS_PARALYZE;
         goto hit;
     case 0x44:
     case 0x4e:
-        effect = 128;
+        effect = STATUS_SLOW;
         goto hit;
     case 0x4c:
-        effect = 256;
+        effect = STATUS_CURSED;
         goto hit;
     case 0xf6:
-        effect = 96;
+        effect = STATUS_DARK;
     hit:
         player_hit(dmg, 0x1000, effect, from);
         break;

@@ -941,20 +941,20 @@ void player_hit(u16 *damage, u16 scale, u16 effect, long *from)
     extra = bonus;
     if (effect != 0) {
         switch (effect) {
-        case 8:
-        case 16:
-        case 24:
+        case STATUS_PARALYZE_1:
+        case STATUS_PARALYZE_2:
+        case STATUS_PARALYZE:
         case 32:
         case 64:
-        case 96:
-        case 128:
-        case 256:
+        case STATUS_DARK:
+        case STATUS_SLOW:
+        case STATUS_CURSED:
             resist = (u16)(viewer.physical_base / 20) + viewer.attributes[13] * 3 / 80 + viewer.element_defence[5] * 60 / 255;
             if (101 - resist < rand() * 100 / 32768) {
                 goto limits;
             }
             break;
-        case 7:
+        case STATUS_POISON:
             resist = (u16)(viewer.physical_base / 20) + viewer.attributes[12] * 3 / 80 + viewer.element_defence[2] * 60 / 255;
             if (101 - resist < rand() * 100 / 32768) {
                 goto limits;
@@ -962,7 +962,7 @@ void player_hit(u16 *damage, u16 scale, u16 effect, long *from)
             break;
         }
         switch (effect) {
-        case 128:
+        case STATUS_SLOW:
             if (!(viewer.status_flags & STATUS_SLOW)) {
                 viewer.unk190[3][1] = 300;
                 viewer.unk190[3][0] = 0;
@@ -974,9 +974,9 @@ void player_hit(u16 *damage, u16 scale, u16 effect, long *from)
                 viewer.unk190[3][1] = 300;
             }
             break;
-        case 8:
-        case 16:
-        case 24:
+        case STATUS_PARALYZE_1:
+        case STATUS_PARALYZE_2:
+        case STATUS_PARALYZE:
             if (!(viewer.status_flags & STATUS_PARALYZE)) {
                 viewer.unk190[1][1] = 75;
                 viewer.unk190[1][0] = 0;
@@ -992,7 +992,7 @@ void player_hit(u16 *damage, u16 scale, u16 effect, long *from)
             break;
         case 32:
         case 64:
-        case 96:
+        case STATUS_DARK:
             if (!(viewer.status_flags & STATUS_DARK)) {
                 viewer.unk190[2][1] = 600;
                 viewer.unk190[2][0] = 0;
@@ -1006,7 +1006,7 @@ void player_hit(u16 *damage, u16 scale, u16 effect, long *from)
             player_add_hp(-(rand() / 256));
             sound_play(9, 128);
             break;
-        case 256:
+        case STATUS_CURSED:
             if (!(viewer.status_flags & STATUS_CURSED)) {
                 viewer.unk190[4][1] = 6000;
                 viewer.unk190[4][0] = 0;
@@ -1018,10 +1018,10 @@ void player_hit(u16 *damage, u16 scale, u16 effect, long *from)
                 viewer.unk190[4][1] = 6000;
             }
             break;
-        case 1:
-        case 2:
-        case 4:
-        case 7:
+        case STATUS_POISON_1:
+        case STATUS_POISON_2:
+        case STATUS_POISON_3:
+        case STATUS_POISON:
             if (!(viewer.status_flags & STATUS_POISON_WARD)) {
                 if (viewer.status_flags & STATUS_POISON) {
                     if (viewer.unk190[0][0] >= 220 && viewer.unk190[0][1] != 0) {
@@ -1041,7 +1041,7 @@ void player_hit(u16 *damage, u16 scale, u16 effect, long *from)
                 }
             }
             break;
-        case 1024:
+        case STATUS_FLOOR_HIT:
             viewer.status_flags |= STATUS_FLOOR_HIT;
             if (viewer.frame_count % 40 == 0) {
                 sound_play(SOUND_FLOOR_DAMAGE, 128);
@@ -3325,12 +3325,12 @@ void player_update(void)
             if ((vis_lists.floor_kinds & 0x10) && vis_lists.floor_dist < 1601) {
                 memset(hit, 0, sizeof(hit));
                 memset(from, 0, sizeof(from));
-                player_hit(hit, 4096, 7, from);
+                player_hit(hit, 4096, STATUS_POISON, from);
             }
             if ((vis_lists.floor_kinds & 0x20) && vis_lists.floor_dist < 1601) {
                 memset(hit2, 0, sizeof(hit2));
                 memset(from2, 0, sizeof(from2));
-                player_hit(hit2, 4096, 1024, from2);
+                player_hit(hit2, 4096, STATUS_FLOOR_HIT, from2);
             }
             if ((vis_lists.floor_kinds & 8) && vis_lists.floor_dist < 1601) {
                 memset(hit3, 0, sizeof(hit3));

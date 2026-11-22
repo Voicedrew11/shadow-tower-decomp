@@ -20,7 +20,8 @@
  * viewer.status_flags. Evidence: the pause menu's status line
  * (menu_main_draw) shows STAT.T messages 20..24 (poison, paralyze, dark,
  * slow, cursed) by these bits; player_update and player_update_status run
- * their timers (viewer.timers, in the same order) and effects.
+ * their timers (viewer.timers, in the same order) and effects. A hit's
+ * effect code (player_hit) uses the same bits for the status it inflicts.
  */
 #define STATUS_POISON_1 0x1        /* HP -16 every 20 frames */
 #define STATUS_POISON_2 0x2        /* HP -64 */
