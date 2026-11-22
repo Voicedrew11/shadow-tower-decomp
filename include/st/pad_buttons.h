@@ -40,7 +40,7 @@
 #define PAD_ACTION_RIGHT_HAND 8
 #define PAD_ACTION_LEFT_HAND 9
 #define PAD_ACTION_EVENT 10       /* examine, take, use */
-#define PAD_ACTION_MAGIC_MENU 11  /* back; twice opens the pause menu */
+#define PAD_ACTION_MAGIC_MENU 11  /* opens and cancels the quick items; twice opens the pause menu */
 #define PAD_ACTIONS 12
 
 /* pad_state.combo: two actions pressed in a row (pad_read). */
