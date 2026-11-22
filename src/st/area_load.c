@@ -27,6 +27,7 @@
 #include <kf/lib/null.h>
 #include <LIBSND.H>
 #include <st/tim.h>
+#include <st/model_slots.h>
 
 RODATA(0x80011f18, 0x39b)
 SDATA(0x80088064, 0x38)
@@ -608,12 +609,12 @@ void area_load_update(void)
             }
             item_model_slots_clear();
             for (i = 15; i != -1; i--) {
-                if (world_state.model_files[128 + i])
-                    heap_free(world_state.model_files[128 + i]);
+                if (world_state.model_files[MODEL_SLOT_CREATURES + i])
+                    heap_free(world_state.model_files[MODEL_SLOT_CREATURES + i]);
             }
             for (i = 127; i != -1; i--) {
-                if (world_state.model_files[588 + i])
-                    heap_free(world_state.model_files[588 + i]);
+                if (world_state.model_files[MODEL_SLOT_ITEMS + i])
+                    heap_free(world_state.model_files[MODEL_SLOT_ITEMS + i]);
             }
             copy_words((u32 *)vis_table_a.types, (u32 *)(p + 1), 2816);
             creature_types_link_scripts();
