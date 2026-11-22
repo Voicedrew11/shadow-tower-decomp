@@ -250,7 +250,7 @@ typedef struct {
     s16 gauge;               /* 0x4df0a: second gauge */
     s16 hp_target;           /* 0x4df0c: hit points left by the last hit */
     s16 state;               /* 0x4df0e: state; 3 hit, 4 down; 3 and 4 cannot be hit */
-    s16 model_kind;          /* 0x4df10: model kind: 1 several parts, 2 one part */
+    s16 model_kind;          /* 0x4df10: model kind: 1 skeletal, 2 vertex-animated */
     s16 brightness;          /* 0x4df12: model brightness; 128 and up: the default colour (fighter_draw_skeletal) */
     s16 guard_flash;         /* 0x4df14: state when an attack was blocked */
     s16 hits_left;           /* 0x4df16: hits left in the current attack (fighter_update) */
@@ -315,11 +315,11 @@ extern s32 light_rot_y;
 /* The model renderers' scale (4096, 4096, 4096; .data, src/vs/main.c). */
 extern VECTOR light_scale;
 
-/* The column of teams hud_draw_fighter_names shows (bss, unowned). */
+/* The lineup column hud_draw_fighter_names shows (bss, unowned). */
 extern s32 round_index;
 
-/* Each fighter's three ids hud_draw_fighter_names names are teams, both
- * players' teams (vs/menu.h VsLineup.slot). */
+/* The ids hud_draw_fighter_names names come from both players' lineups
+ * (vs/menu.h VsLineup.slot). */
 
 /* A 5000-byte file buffer (archive 5 member 3, match_load_resources): the guard
  * flash's mesh model, a centre vertex and three rings of 16 (bss). */

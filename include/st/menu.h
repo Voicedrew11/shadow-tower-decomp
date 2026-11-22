@@ -44,7 +44,7 @@ typedef struct {
 } ArrangeGrids;
 
 /*
- * The item list the shop and inventory screens share: its message table,
+ * The item list the shop and the equip menu share: its message table,
  * the listed ids and their count.
  */
 typedef struct {
@@ -56,7 +56,7 @@ typedef struct {
 
 /* A 44-byte creature kind record menu_creature_book_draw_entry details. */
 typedef struct {
-    u8 category;         /* 0x00: indexes its name table */
+    u8 category;         /* 0x00: indexes the type names (MESSAGE(150 + n)) */
     u8 sp_gain;          /* 0x01 */
     u16 hp;              /* 0x02 */
     s16 height;          /* 0x04: shown as height * 10 / 3048 and its remainder / 254 */
@@ -197,7 +197,7 @@ typedef struct {
     s16 hp_before;       /* 0x2d8: viewer.hp when the equip info page opened (src/st/menu_equip_arrange.c, src/st/menu.c) */
     s16 mp_before;       /* 0x2da: viewer.mp */
     u16 mode;            /* 0x2dc */
-    u16 main_row;        /* 0x2de: selected row of the item and stats menus */
+    u16 main_row;        /* 0x2de: selected row of the pause menu (and the save prompt's choice) */
     s16 cursor;          /* 0x2e0 */
     s16 scroll;          /* 0x2e2 */
     u8 blink_phase;      /* 0x2e4: cursor blink phase */
@@ -291,7 +291,7 @@ typedef union {
 
 /* The save-game state block at 0x801cba08 (0x1714 bytes). */
 typedef struct {
-    /* 0x0..0x1440: per area (48), one bit per table A entry, table C slot 32..63
+    /* 0x0..0x1440: per area (48), one bit per table A entry, table C slot 0..31
      * and three bits per table B entry (src/st/save.c) */
     u32 creatures_gone[48][2];
     u32 ground_items_gone[48][1];
@@ -302,7 +302,7 @@ typedef struct {
     EventFlags event_flags2;
     u8 talk_counts[48];  /* 0x1448: per XA stream file, the next channel to play */
     u8 areas_visited[48];
-    u32 creature_bits_and_vs_data[0x5c]; /* 0x14a8: one bit per map id (world_draw_creatures) */
+    u32 creature_bits_and_vs_data[0x5c]; /* 0x14a8: kind bits seen [0..4] (world_draw_creatures) and killed [5..9]; VS: items lost [10..88], lineups [89..91] */
     /* 0x1618: per XA stream file, its position (xa_start_stream); game_load_common_data
      * searches the first 40 */
     CdlLOC xa_positions[48];

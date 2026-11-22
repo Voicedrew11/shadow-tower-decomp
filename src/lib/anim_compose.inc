@@ -5,7 +5,7 @@
  */
 
 /*
- * rec->unk24 = the GTE's current matrix (the parent's) times rec->unk4,
+ * rec->composed_matrix = the GTE's current matrix (the parent's) times rec->local_matrix,
  * left loaded as the GTE rotation and translation.
  */
 #define RECORD_COMPOSE(sp, rec)                                   \

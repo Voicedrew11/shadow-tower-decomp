@@ -46,7 +46,7 @@ extern StBlock model_heap[];
 typedef struct {
     u8 unk0[2];
     u16 reach;           /* 0x02: reach (player_update_hand_action) */
-    u16 action_step;     /* 0x04: swing cost, scaled by viewer.attributes[1] (player_update_hand_action) */
+    u16 action_step;     /* 0x04: per-frame step of the hand action timer, scaled by viewer.attributes[1] (player_update_hand_action) */
     u16 hit_time;        /* 0x06: player_start_hand_action copies it to viewer.unk134 */
     u16 sound_time;      /* 0x08: and this one to viewer.action_sound_time */
     u8 unkA[2];
@@ -161,7 +161,7 @@ typedef struct {
     u8 shot_interval[2]; /* 0x159: per hand: reload for shot_countdown */
     u8 shot_countdown[2]; /* 0x15b: per hand: countdown to the next player_fire_magic_shot */
     u8 unk15D;
-    s8 quick_item_index; /* 0x15e: HUD frame offset (world_render_frame) */
+    s8 quick_item_index; /* 0x15e: quick-item cursor; the HUD frame offset (world_render_frame) */
     u8 unk15F;
     SVECTOR shot_offsets[2]; /* 0x160: player_get_launch_vector's offsets per slot */
     void *prev_block_record; /* 0x170: block_record before the last move (player_update_motion) */
@@ -378,7 +378,7 @@ typedef struct {
 /* The counts of the 314 table C ids, then a halfword id table. */
 typedef struct {
     ItemCount counts[314];
-    u16 shop_ids[14];    /* 0x13a: ids the item list screens show */
+    u16 shop_ids[14];    /* 0x13a: the shop's item ids */
     u8 shop_stock[14];   /* 0x156: their stock (src/st/save.c) */
     u8 unk164[4];
 } Inventory;

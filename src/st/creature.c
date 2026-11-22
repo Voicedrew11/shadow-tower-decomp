@@ -13,7 +13,7 @@
 #include <st/menu.h>
 #include <st/anim.h>
 
-/* Moves the entry to the cell of record unk28, offset by unk6A..unk6E. */
+/* Moves the entry to the cell of record home_block, offset by home_offset_x..home_offset_z. */
 ADDRESS(0x8004ac38, 0x64)
 void creature_return_home(Creature *e)
 {

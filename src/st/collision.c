@@ -523,7 +523,7 @@ void collision_test_quads(VECTOR *pos, int kind)
 }
 
 /* Resolves a request against the collision parts around its position, its
- * position plus velocity and a point 1027 below its height: bit 0 floor,
+ * position plus velocity and position + height - 1027 (1027 above the foot): bit 0 floor,
  * bit 1 wall, bit 2 ceiling, bit 3 the second wall. The heights and wall
  * normals go to vis_lists. */
 ADDRESS(0x80048ad0, 0x824)

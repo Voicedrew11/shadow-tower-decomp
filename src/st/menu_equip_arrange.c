@@ -38,7 +38,7 @@
 RODATA(0x80013880, 0xf4)
 SDATA(0x8008810c, 0x7c)
 
-/* The list's scroll top (sp->unk2E2) and cursor offset (sp->unk2E0), saved
+/* The list's scroll top (sp->scroll) and cursor offset (sp->cursor), saved
  * while the magic sub-list is open. */
 DATA(0x800881e8, 0x4, ".sbss")
 static s16 equip_saved_list_cursor[2];

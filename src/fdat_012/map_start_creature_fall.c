@@ -19,14 +19,14 @@
 
 /* Not exact (size-exact; the first block's registers and, from them, its
  * order): retail keeps the 1 of the two bytes[] stores and then the record
- * index in $a0 and the unk70 mask in $a1; here they are $a1 and $a0, and the
+ * index in $a0 and the flags mask in $a1; here they are $a1 and $a0, and the
  * three sit at the top instead of after the collision load. No load has to
  * be held in place: sched2 lifts every load as far as its register allows.
  * The block is the plain statements in this order,
- *     e->unk70 &= ~0x2000000; e->unk0F = 0x80; e->unk08 = 9; e->unkB0 = 0x40;
- *     e->unk0E = 8; e->unk50 &= ~0x80; e->unk1C.bytes[0] = 1;
- *     e->unk1C.bytes[3] = 1; r = &vis_table_a.types[e->unk02];
- *     e->unk2A = 0; e->unk16 = 0;
+ *     e->flags &= ~0x2000000; e->command = 0x80; e->anim = 9;
+ *     e->anim_step = 0x40; e->move_mode = 8; e->collision_tests &= ~0x80;
+ *     e->status.bytes[0] = 1; e->status.bytes[3] = 1;
+ *     r = &vis_table_a.types[e->type]; e->anim_frame = 0; e->vertical_speed = 0;
  * and it comes out as retail's, instruction for instruction, once two of its
  * pseudos are allocated by global-alloc instead of local-alloc: the mask
  * constant (it then takes $a1, because the record index already holds $a0

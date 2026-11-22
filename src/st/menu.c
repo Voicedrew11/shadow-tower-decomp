@@ -2727,10 +2727,10 @@ void menu_area_info_run(void)
 }
 
 /*
- * Page 1 (unk2DC 1) edits the option bytes game_settings.sfx_volume (a 0..63
- * slider) and unk2..unk5 (on/off), row 5 opens page 2. Page 2 lists the
+ * Page 1 (mode 1) edits the option bytes game_settings.sfx_volume (a 0..63
+ * slider) and walk_bob..vibration (on/off), row 5 opens page 2. Page 2 lists the
  * twelve button masks (pad_state.buttons) as button numbers
- * (MenuState.levels); a row waits for the next button (unk2E2), row 12
+ * (MenuState.levels); a row waits for the next button (scroll), row 12
  * restores the defaults, row 13 returns, and buttons used twice mark
  * levels.flags.
  */

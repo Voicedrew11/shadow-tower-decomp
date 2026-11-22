@@ -137,8 +137,8 @@ void save_reset_new_game(void)
 }
 
 /* Records area `area`'s entry states: live table A entries in state 3 or 5,
- * empty table C slots 32..63, and per table B entry: free, unk4F 0xff,
- * unk0C 0xff. */
+ * placed table C slots 0..31 in state 0, and per table B entry: free, lock
+ * 0xff, state 0xff. */
 ADDRESS(0x80055cf4, 0x2a8)
 void area_save_snapshot(int area)
 {

@@ -1881,11 +1881,11 @@ void player_update_cast(u8 hand)
 }
 
 /* Steps hand `hand`'s swing or cast for its held item kind: the swing
- * timer viewer.action_timers.halves[hand] against its hit window (unk130[hand + 2]) and
- * its end (unk138[hand]), the stamina bar viewer.weapon_gauge, the hit search
+ * timer viewer.action_timers.halves[hand] against its hit window (action_timers.halves[hand + 2]) and
+ * its end (action_sound_time[hand]), the weapon gauge viewer.weapon_gauge, the hit search
  * over vis_table_a's entries and the item wear.
  *
- * The step and the stamina gain are loaded and then scaled in place
+ * The step and the gauge gain are loaded and then scaled in place
  * (`x = base; x += x * skill / n`): retail multiplies by the register
  * that holds 96 instead of shifting, and keeps the raw argument in a0.
  * In case 0..30 retail keeps the step's add ahead of the pad address
@@ -2385,7 +2385,7 @@ static s16 vertical_speed_pitch = 0;
 
 /* Coasts the viewer on its push offsets while it is not walking (sliding
  * along walls as player_move does), then steps the vertical speed
- * against the floor, the head bob and the stamina, and records the
+ * against the floor, the head bob and the footsteps, and records the
  * visible record the viewer stands in.
  */
 ADDRESS(0x8004162c, 0x720)
@@ -2638,7 +2638,7 @@ void player_update_look(void)
 /* Walks the viewer from the held buttons: accelerates the walk velocity
  * (viewer.walk_velocity) towards viewer.walk_speed_max or lets it decay, turns it by the
  * yaw and moves the viewer along it (player_move); eases the push
- * offsets viewer.push_x..unk1D0 back and adds the area's drift. */
+ * offsets viewer.push_x..push_z back and adds the area's drift. */
 ADDRESS(0x800420a0, 0x580)
 void player_update_walk(void)
 {

@@ -56,12 +56,12 @@ typedef struct {
 /* Per-item marks item_request_any_available compares between the two saves (VS band 6):
  * item ids 0..265 index the byte arrays. */
 typedef struct {
-    u32 creature_killed_bits[5]; /* 0x000: one bit per fighter id owned (menu_creature_select_run) */
-    u8 items_lost[266];  /* 0x014: a second mark, needed when the item's flag bit is set */
+    u32 creature_killed_bits[5]; /* 0x000: killed creature kind bits (menu_creature_select_run) */
+    u8 items_lost[266];  /* 0x014: items lost in a versus match (match_award_requested_item) */
     u8 unk11E[0x150 - 0x11e];
-    u8 inventory_counts[266]; /* 0x150: the item is held */
+    u8 inventory_counts[266]; /* 0x150: the Inventory.counts bytes */
     u8 unk25A[0x2b4 - 0x25a];
-    u16 equipment[21];   /* 0x2b4: listed item ids */
+    u16 equipment[21];   /* 0x2b4: the 21 equipment slots */
     u8 unk2DE[0x2e0 - 0x2de];
     s32 lineup[3];       /* 0x2e0: the player's team (VsLineup.slot, card_screen_run) */
     u8 item_durability[314]; /* 0x2ec: per-item durability, shared with ST's save format */
@@ -74,7 +74,7 @@ typedef struct {
     u8 unk4[0x14cc - 4];
     u32 collected_bits[9]; /* 0x14cc: 266 flag bits, counted into the header */
     u8 unk14F0[0x1802 - 0x14f0];
-    u8 items_found;      /* 0x1802: the count of items won (match_award_requested_item) */
+    u8 items_found;      /* 0x1802: StSaveData.items_found (match_award_requested_item) */
     u8 unk1803[0x18bc - 0x1803];
     VsSaveVersus versus; /* 0x18bc (VS band 6) */
     u8 unk1CE4[0x1d88 - 0x1ce4]; /* remaining save payload */

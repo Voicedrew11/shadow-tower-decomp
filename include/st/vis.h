@@ -77,20 +77,20 @@ typedef struct {
     u16 hit_body_height; /* 0x44c2 */
     u8 unk44C4[2];
     s16 slide_speed;     /* 0x44c6: push along the wall */
-    s16 hit_block;       /* 0x44c8: the visible record the viewer stands in, -1: none (player_update_motion) */
+    s16 hit_block;       /* 0x44c8: block of the last floor/wall face collision_test_map hit, -1: none; player_update_motion takes it as the viewer's */
     u16 n_sources;       /* 0x44ca */
     u16 n_visible;       /* 0x44cc */
     u16 sources[0x80];   /* 0x44ce */
     u16 visible[0x80];   /* 0x45ce */
     u8 unk46CE[0x47ce - 0x46ce];
-    s16 floor_push_x;    /* 0x47ce..0x47d2: cleared by player_update_status */
+    s16 floor_push_x;    /* 0x47ce..0x47d2: floor push sum (collision_test_*), decayed by src/st/player.c */
     s16 floor_push_y;
     s16 floor_push_z;
     u8 unk47D4[0x47d8 - 0x47d4];
     u32 next_floor_block; /* 0x47d8: record index of the floor found */
     s32 floor_kinds;     /* 0x47dc: cleared by player_reset_state */
     u32 floor_kinds_off; /* 0x47e0: flag bits area_reload_images tests */
-    s32 floor_y;         /* 0x47e4: floor height (collision_test_map) */
+    s32 floor_y;         /* 0x47e4: floor height; never written (read by the uncalled creature_move_vertical) */
     s32 ceiling_y;       /* 0x47e8: ceiling height */
     u8 unk47EC[4];
 } CollisionState;
@@ -104,7 +104,7 @@ typedef struct {
     u8 draw_flags;       /* bit 1: flagged by vis_cull_by_range */
     s8 heading_bias_x;   /* 0x05, 0x06: FDAT: an offset (x, z) its entries' headings bend by */
     s8 heading_bias_z;
-    u8 zone;             /* 0x07: area id; 0xff none (creatures_update) */
+    u8 zone;             /* 0x07: spawn zone; 0xff none (creatures_update) */
     u8 cell_x;
     u8 cell_y;
     u8 cell_z;
@@ -161,7 +161,7 @@ typedef struct {
     u8 *normals;         /* 0x008 */
     u8 *vertices;        /* 0x00c */
     VECTOR *world;       /* 0x010: vis_lists.vertices cursor */
-    VECTOR *rel[3];      /* 0x014: unk11C0..unk33C0 cursors */
+    VECTOR *rel[3];      /* 0x014: rel_vertices..low_rel_vertices cursors */
     u16 turn;            /* 0x020: the record's quarter turn (quarter_turn_matrices) */
     s16 hit;             /* 0x022: the record hit, -1 none */
     VECTOR e[3][4];      /* 0x024: per point, the face edges' outer products */
@@ -243,7 +243,7 @@ typedef struct {
 typedef struct {
     u8 spawn_chance;     /* 0x00: 0xff when free (creatures_clear) */
     u8 kind;
-    u8 type;             /* 0x02: index of its 192-byte CreatureTable record */
+    u8 type;             /* 0x02: index of its 192-byte CreatureType record */
     u8 visibility;
     u8 draw_state;
     u8 state;            /* 0x05: state (creature_update_spawn); 1 active, 5 dying (creature_take_damage) */
@@ -253,7 +253,7 @@ typedef struct {
     u8 unk09;
     u8 unk0A;
     u8 model_slot;       /* 0x0b: model slot - 128 */
-    u8 vram_tag;         /* 0x0c: block tag */
+    u8 vram_tag;         /* 0x0c: heap/VRAM tag: picks the texture column and CLUT row (creature_model_load) */
     u8 spawn_cost;       /* 0x0d: added to vis_table_a.spawn_cost_total while live */
     u8 move_mode;
     u8 command;
@@ -351,7 +351,7 @@ typedef struct {
     u8 talk_id;          /* 0x09: its XA stream file (src/st/xa.c) */
     u8 unk0A[4];
     s16 gravity;         /* 0x0e: gravity */
-    u16 kind;            /* 0x10: map bit, 0xffff none */
+    u16 kind;            /* 0x10: kind id: bit index of the seen and killed kind bits, 0xffff none */
     u16 unk12;           /* 0x12: added to vis_table_a.unk612C while live */
     u16 near_range;      /* 0x14: FDAT: near range (squared << 16 against Creature.player_dist_sq) */
     u16 radius;
@@ -410,7 +410,7 @@ typedef struct {
     u8 unk06;
     u8 drawn;
     u16 block;
-    u16 type;            /* 0x0a: index of its 24-byte AreaObjectTable record */
+    u16 type;            /* 0x0a: index of its 24-byte AreaObjectType record */
     u16 state;           /* 0x0c: state of a moving entry (object_move_child); 0xff once opened (src/st/save.c) */
     u16 examined;
     u16 anim_frame;      /* 0x10 */
@@ -419,8 +419,8 @@ typedef struct {
     s16 light;           /* 0x16 */
     u32 player_dist_sq;  /* 0x18: squared distance */
     s32 player_dist_xz;  /* 0x1c: distance (sound type 236) */
-    u16 player_heading;  /* 0x20: facing */
-    u16 player_bearing;  /* 0x22: a door's opening angle (src/st/item.c) */
+    u16 player_heading;  /* 0x20: heading between it and the player */
+    u16 player_bearing;  /* 0x22: |facing - player_heading| (door push side, one-sided locks; src/st/item.c) */
     VECTOR position;     /* 0x24: position */
     u16 rot_x;           /* 0x34: rotation */
     s16 facing;          /* 0x36: yaw */
@@ -428,8 +428,8 @@ typedef struct {
     u8 unk3A[2];
     SVECTOR scale;       /* 0x3c: scale */
     u8 anim_slot[4];     /* 0x44 */
-    u8 unk48;            /* 0x48: sound area width (2048 units) */
-    u8 unk49;            /* 0x49: sound area depth */
+    u8 unk48;            /* 0x48: sound kinds: area width (2048 units) */
+    u8 unk49;            /* 0x49: sound kinds: area depth */
     /* 0x4a: by kind: a sound source's sound (src/st/objects.c) or the record
      * swap and open state of a door (src/st/save.c) */
     union {
@@ -444,7 +444,7 @@ typedef struct {
             u16 block_a; /* 0x4a: first record of one swap range */
             u16 block_b; /* 0x4c: first record of the other */
             u8 n_blocks; /* 0x4e: records to swap */
-            u8 lock;     /* 0x4f: state, 0xff idle */
+            u8 lock;     /* 0x4f: key item - 272; 255 unlocked, 251/252 open from one side */
         } door;
     } params;
     s32 unk50;           /* 0x50: next tick to play; other kinds keep halfwords here */
@@ -493,7 +493,7 @@ typedef struct {
  */
 typedef struct {
     u8 unk0[2];
-    u8 price;            /* 0x02: carry limit or price base (src/st/menu_shop.c) */
+    u8 price;            /* 0x02: buying price (src/st/menu_shop.c) */
     u8 repair_price;     /* 0x03 */
     u8 model;            /* 0xff: none (game_load_start_file); player_load_equipment_model's model */
     u8 unk5[0xb];
@@ -523,7 +523,7 @@ typedef struct {
     s16 rot_z;
     u8 unk1E[2];
     u16 unk20;           /* 0x20 */
-    u8 state;            /* 0x22: kind; 0 and 4 are not drawn */
+    u8 state;            /* 0x22: state; 0 and 4 are not drawn */
     u8 prev_state;
     u8 draw_flags;       /* 0x24 */
     s8 bounces;          /* 0x25: bounces (ground_items_update) */

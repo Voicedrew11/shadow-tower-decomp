@@ -11,7 +11,7 @@
 #include <st/funcs.h>
 #include <st/item.h>
 
-/* Spawns table B kind 150 for entry e and returns it; e->unk49 remembers it
+/* Spawns table B kind 150 for entry e and returns it; e->spawned_object remembers it
  * as 106 + its index. */
 ADDRESS(0x800549c8, 0x8c)
 AreaObject *creature_alloc_object(Creature *e, int id)

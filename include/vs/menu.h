@@ -14,13 +14,13 @@
 #include <st/menu.h>
 #include <vs/card.h>
 
-/* A fighter team: three character slots, -1 for an empty one (VS band 6). */
+/* A lineup: three creature slots, -1 for an empty one (VS band 6). */
 typedef struct {
     s32 slot[3];
 } VsLineup;
 
-/* The team screen's edit record (a local of menu_creature_select_loop): the slot picked
- * (unk4) and a copy of the team being edited. */
+/* The creature select screen's edit record (a local of menu_creature_select_loop): the slot
+ * picked (held_slot) and a copy of the lineup being edited. */
 typedef struct {
     u8 holding;          /* 0x00: a slot is held (menu_creature_select_loop) */
     u8 unk1[3];
@@ -43,9 +43,9 @@ typedef struct {
             s16 rows;    /* 0x0a: its last row */
             s16 last;    /* 0x0c: items on the last row */
             u8 unk0E[2];
-            DVECTOR pos[16]; /* 0x10: VRAM positions; [12..14] the team slot pictures, [15] the detail image */
+            DVECTOR pos[16]; /* 0x10: VRAM positions; [12..14] the lineup slot pictures, [15] the detail image */
             CreatureBookEntry *entries; /* 0x50: item records by kind (menu_creature_book_draw_entry) */
-        } creature_select; /* the team screen (menu_creature_select_pick_up_slot) */
+        } creature_select; /* the creature select screen (menu_creature_select_pick_up_slot) */
     } state;             /* 0x000 */
     VsCardDirectory *card; /* 0x1b8: the card slot being scanned */
     s16 port;            /* 0x1bc: its card port */
@@ -62,7 +62,7 @@ typedef struct {
     s16 scroll;          /* 0x1d2: the item grid row (menu_creature_book_draw_entry) */
     u8 blink_phase;      /* 0x1d4: cursor blink phase (ST unk2E4) */
     u8 font_mode;        /* 0x1d5: font mode (ST unk2E5) */
-    u8 holding;          /* 0x1d6: a team slot is picked up (menu_creature_select_draw_grid) */
+    u8 holding;          /* 0x1d6: a lineup slot is picked up (menu_creature_select_draw_grid) */
     u8 unk1D7;
     DVECTOR message_font_vram; /* 0x1d8: the message/menu font page's VRAM position (card_screen_run, menu_creature_select_run) */
     DVECTOR message_font_clut; /* 0x1dc: its CLUT position */

@@ -29,7 +29,7 @@ typedef struct StEffect {
     u8 part;
     u8 unk3;
     u8 spawn_type;       /* 0x04: ST.EXE: the spawner's first argument */
-    u8 step;             /* 0x05: script step */
+    u8 step;             /* 0x05: per-kind step */
     u8 draw_mode;        /* 0x06: bits 0-1 cull mode, bits 2-3 kind (world_draw_effects_placements) */
     u8 draw_flags;
     u8 attack_delay;     /* 0x08: frames left before the next attack */
@@ -55,7 +55,7 @@ typedef struct StEffect {
         s16 h;
         s8 b[2];
         u8 ub[2];
-    } state;             /* 0x50: script state, by kind */
+    } state;             /* 0x50: state, by kind */
     union {
         s16 h;
         s8 b[2];
@@ -70,7 +70,7 @@ typedef struct StEffect {
 #define ST_EFFECT_FREE 255
 #define ST_EFFECT_SLOTS 128
 
-/* The definitions, the effects and the interpreter's current ones (WIP
+/* The definitions, the effects and the current ones (WIP
  * extent; 0x8003e... reads a word past it). */
 typedef struct {
     StEffectDef defs[176];

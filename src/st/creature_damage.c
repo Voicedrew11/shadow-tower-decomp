@@ -74,7 +74,7 @@ void creature_drop_item(Creature *e, int id)
     *(u32 *)slot->anim_slot = 0;
     slot->position = e->position;
     slot->position.vy -= e->height >> 1;
-    /* One 8-byte copy of the rotation (unk8C..unk92) over unk18..unk1E. */
+    /* One 8-byte copy of the rotation (rot_x..unk92) over the item's (rot_x..unk1E). */
     *(SVECTOR *)&slot->rot_x = *(SVECTOR *)&e->rot_x;
     slot->unk20 = rec->flags;
     slot->state = 1;

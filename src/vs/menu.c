@@ -2117,7 +2117,7 @@ int card_overwrite_player_save(VsSave *save);
 
 /*
  * The card screen of player `port`: loads its pictures, then steps
- * through the card checks (sp->unk1CC holds the step as a moving bit),
+ * through the card checks (sp->mode holds the step as a moving bit),
  * saving (step bits 0xff00) or loading that player's record, showing a
  * message and waiting for a press when a step fails; 0x80 and 0x8000
  * restart. Reloads the menu pictures and both players' fighter faces

@@ -1507,7 +1507,7 @@ void ground_items_load(GroundItemFileEntry *src)
 }
 
 /* The nearest lying item in view of the viewer within the request's reach
- * (its record's radius plus req->unk1C); -1 when none. */
+ * (its record's radius plus req->radius); -1 when none. */
 ADDRESS(0x80053174, 0x1e8)
 int ground_item_find_in_reach(CollisionState *req, int unused)
 {
