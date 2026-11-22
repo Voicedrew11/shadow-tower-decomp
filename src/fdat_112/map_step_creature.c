@@ -49,8 +49,8 @@ void map_step_creature(void)
             goto next;
         }
         if (!(game_progress.event_flags.word >> 7 & 1) && e->hit != 0) {
-            viewer.unk190[4][1] = 6000;
-            viewer.unk190[4][0] = 0;
+            viewer.timers.halves[4][1] = 6000;
+            viewer.timers.halves[4][0] = 0;
             game_progress.event_flags.word |= 0x80;
             viewer.status_flags |= 0x100;
             e->status.bytes[3] = 0;

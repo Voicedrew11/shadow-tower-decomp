@@ -13,8 +13,9 @@
 #include <LIBGTE.H>
 #include <st/gfx.h>
 
-/* One 24-byte effect definition. */
-typedef struct {
+/* One 24-byte effect definition (viewer.magic_defs points at the ones the
+ * hands cast). */
+typedef struct StEffectDef {
     u8 unk0;
     u8 unk1;
     u16 mp_cost;         /* 0x02: shown by the equipment screen (src/st/menu_equip_arrange.c) */

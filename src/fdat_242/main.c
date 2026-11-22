@@ -163,7 +163,7 @@ void map_update_events(void)
         fdat_801ee0b4 = 2;
     if (fdat_801ee0b4 == 2)
         map_wind_down_texanims();
-    if (fdat_801ee0b4 == 3 && ((MapBlock *)viewer.block_record)->zone != 3) {
+    if (fdat_801ee0b4 == 3 && viewer.block_record->zone != 3) {
         map_move_texture_pages();
         creature_despawn(e48);
         e33->spawn_chance = 100;

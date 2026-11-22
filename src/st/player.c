@@ -50,7 +50,7 @@ void player_kill(int unused)
         world_state.no_plane_test = 1;
         viewer.death_timer = 0;
         viewer.unk17C = 170;
-        viewer.death_pitch_step = (-1024 - (viewer.pitch & 0x7ff)) / 24;
+        viewer.death_pitch_step = (-1024 - (viewer.rotation.vx & 0x7ff)) / 24;
     }
 }
 
@@ -87,9 +87,8 @@ void player_update_submersion(void)
 
 /* The viewer's distance to `t` when it is within t's reach, else -1. */
 ADDRESS(0x8003beb4, 0x14c)
-int player_distance_in_reach(void *request)
+int player_distance_in_reach(CollisionState *t)
 {
-    PlayerTarget *t = request;
     int dx;
     int dz;
     int dist;
@@ -138,7 +137,7 @@ void player_reset_state(void)
     viewer.roll_offset = 0;
     viewer.rot_offset.halves[1] = 0;
     viewer.rot_offset.halves[0] = 0;
-    *(SVECTOR *)&viewer.pitch = viewer.view_rot;
+    viewer.rotation = viewer.view_rot;
     viewer.shot_magic[0] = 255;
     viewer.shot_magic[1] = 255;
     viewer.submerged_acid = 0;
@@ -233,16 +232,16 @@ void player_update_status(int apply)
         fade_add_color(60, 60, 0, level, 1);
     }
 
-    level = player_step_status_timer(&viewer.unk190[0][0], &viewer.unk190[0][1], 20, 4096, apply);
+    level = player_step_status_timer(&viewer.timers.halves[0][0], &viewer.timers.halves[0][1], 20, 4096, apply);
     if (level != -1) {
         fade_add_color(0, 40, 0, level, 1);
         if (viewer.timers.words[0] == 0) {
             viewer.status_flags &= ~7;
         }
     }
-    level = player_step_status_timer(&viewer.unk190[1][0], &viewer.unk190[1][1], 20, 4096, apply);
+    level = player_step_status_timer(&viewer.timers.halves[1][0], &viewer.timers.halves[1][1], 20, 4096, apply);
     if (level != -1) {
-        if ((viewer.unk190[1][0] & 3) == 3) {
+        if ((viewer.timers.halves[1][0] & 3) == 3) {
             level = 4096;
         } else {
             level -= 512;
@@ -257,7 +256,7 @@ void player_update_status(int apply)
             viewer.status_flags &= ~0x18;
         }
     }
-    level = player_step_status_timer(&viewer.unk190[2][0], &viewer.unk190[2][1], 0, 4096, apply);
+    level = player_step_status_timer(&viewer.timers.halves[2][0], &viewer.timers.halves[2][1], 0, 4096, apply);
     if (level != -1) {
         fade_add_color(20, 20, 20, level, 2);
         if (viewer.timers.words[2] == 0) {
@@ -265,7 +264,7 @@ void player_update_status(int apply)
             lighting.row_request |= 4;
         }
     }
-    level = player_step_status_timer(&viewer.unk190[3][0], &viewer.unk190[3][1], 20, 4096, apply);
+    level = player_step_status_timer(&viewer.timers.halves[3][0], &viewer.timers.halves[3][1], 20, 4096, apply);
     if (level != -1) {
         if (viewer.timers.words[3] == 0) {
             viewer.status_flags &= ~0x80;
@@ -273,7 +272,7 @@ void player_update_status(int apply)
             PLAYER_CLAMP_HP();
         }
     }
-    level = player_step_status_timer(&viewer.unk190[4][0], &viewer.unk190[4][1], 20, 4096, apply);
+    level = player_step_status_timer(&viewer.timers.halves[4][0], &viewer.timers.halves[4][1], 20, 4096, apply);
     if (level != -1) {
         fade_add_color(40, 0, 20, level, 1);
         if (viewer.timers.words[4] == 0) {
@@ -288,7 +287,7 @@ void player_update_status(int apply)
     if (viewer.submerged_acid) {
         fade_add_color(40, 40, 0, 4096, 1);
     }
-    level = player_step_status_timer(&viewer.unk190[5][0], &viewer.unk190[5][1], 0, 4096, apply);
+    level = player_step_status_timer(&viewer.timers.halves[5][0], &viewer.timers.halves[5][1], 0, 4096, apply);
     if (level != -1) {
         lighting.row_request |= 0x10;
         lighting.column_request |= 2;
@@ -297,31 +296,31 @@ void player_update_status(int apply)
             viewer.status_flags &= ~0x10000;
         }
     }
-    level = player_step_status_timer(&viewer.unk190[6][0], &viewer.unk190[6][1], 0, 4096, apply);
+    level = player_step_status_timer(&viewer.timers.halves[6][0], &viewer.timers.halves[6][1], 0, 4096, apply);
     if (level != -1) {
         if (viewer.timers.words[6] == 0) {
             viewer.status_flags &= ~0x40000;
         }
     }
-    level = player_step_status_timer(&viewer.unk190[7][0], &viewer.unk190[7][1], 0, 4096, apply);
+    level = player_step_status_timer(&viewer.timers.halves[7][0], &viewer.timers.halves[7][1], 0, 4096, apply);
     if (level != -1) {
         if (viewer.timers.words[7] == 0) {
             viewer.status_flags &= ~0x80000;
         }
     }
-    level = player_step_status_timer(&viewer.unk190[8][0], &viewer.unk190[8][1], 0, 4096, apply);
+    level = player_step_status_timer(&viewer.timers.halves[8][0], &viewer.timers.halves[8][1], 0, 4096, apply);
     if (level != -1) {
         if (viewer.timers.words[8] == 0) {
             viewer.status_flags &= ~0x100000;
         }
     }
-    level = player_step_status_timer(&viewer.unk190[9][0], &viewer.unk190[9][1], 0, 4096, apply);
+    level = player_step_status_timer(&viewer.timers.halves[9][0], &viewer.timers.halves[9][1], 0, 4096, apply);
     if (level != -1) {
         if (viewer.timers.words[9] == 0) {
             viewer.status_flags &= ~0x200000;
         }
     }
-    level = player_step_status_timer(&viewer.unk190[10][0], &viewer.unk190[10][1], 0, 4096, apply);
+    level = player_step_status_timer(&viewer.timers.halves[10][0], &viewer.timers.halves[10][1], 0, 4096, apply);
     if (level != -1) {
         lighting.force_first_column = 1;
         lighting.row_request |= 0x20;
@@ -330,13 +329,13 @@ void player_update_status(int apply)
             viewer.status_flags &= ~0x400000;
         }
     }
-    level = player_step_status_timer(&viewer.unk190[11][0], &viewer.unk190[11][1], 0, 4096, apply);
+    level = player_step_status_timer(&viewer.timers.halves[11][0], &viewer.timers.halves[11][1], 0, 4096, apply);
     if (level != -1) {
         if (viewer.timers.words[11] == 0) {
             viewer.status_flags &= ~0x800000;
         }
     }
-    level = player_step_status_timer(&viewer.unk190[12][0], &viewer.unk190[12][1], 0, 4096, apply);
+    level = player_step_status_timer(&viewer.timers.halves[12][0], &viewer.timers.halves[12][1], 0, 4096, apply);
     if (level != -1) {
         if (viewer.timers.words[12] == 0) {
             viewer.status_flags &= ~0x800;
@@ -865,7 +864,7 @@ void player_take_damage(int damage, int flags, long *from)
         viewer.red_fade = 3500;
         viewer.red_fade_step = time;
     } else {
-        switch ((dir.vy - viewer.yaw + 256) >> 9 & 7) {
+        switch ((dir.vy - viewer.rotation.vy + 256) >> 9 & 7) {
         case 0:
             dir.vx = -scaled;
             dir.vz = 0;
@@ -960,42 +959,42 @@ void player_hit(u16 *damage, u16 scale, u16 effect, long *from)
         switch (effect) {
         case 128:
             if (!(viewer.status_flags & 0x80)) {
-                viewer.unk190[3][1] = 300;
-                viewer.unk190[3][0] = 0;
+                viewer.timers.halves[3][1] = 300;
+                viewer.timers.halves[3][0] = 0;
                 viewer.status_flags |= 0x80;
                 player_compute_derived_stats(0);
                 PLAYER_CLAMP_HP();
             } else {
-                viewer.unk190[3][0] = 20;
-                viewer.unk190[3][1] = 300;
+                viewer.timers.halves[3][0] = 20;
+                viewer.timers.halves[3][1] = 300;
             }
             break;
         case 8:
         case 16:
         case 24:
             if (!(viewer.status_flags & 0x18)) {
-                viewer.unk190[1][1] = 75;
-                viewer.unk190[1][0] = 0;
+                viewer.timers.halves[1][1] = 75;
+                viewer.timers.halves[1][0] = 0;
                 viewer.status_flags |= 8;
             } else if (viewer.status_flags & 8) {
-                viewer.unk190[1][1] = 75;
-                viewer.unk190[1][0] = 0;
+                viewer.timers.halves[1][1] = 75;
+                viewer.timers.halves[1][0] = 0;
                 viewer.status_flags |= 0x10;
             } else {
-                viewer.unk190[1][0] = 20;
-                viewer.unk190[1][1] = 75;
+                viewer.timers.halves[1][0] = 20;
+                viewer.timers.halves[1][1] = 75;
             }
             break;
         case 32:
         case 64:
         case 96:
             if (!(viewer.status_flags & 0x60)) {
-                viewer.unk190[2][1] = 600;
-                viewer.unk190[2][0] = 0;
+                viewer.timers.halves[2][1] = 600;
+                viewer.timers.halves[2][0] = 0;
                 viewer.status_flags |= 0x60;
             } else {
-                viewer.unk190[2][0] = 20;
-                viewer.unk190[2][1] = 600;
+                viewer.timers.halves[2][0] = 20;
+                viewer.timers.halves[2][1] = 600;
             }
             break;
         case 512:
@@ -1004,14 +1003,14 @@ void player_hit(u16 *damage, u16 scale, u16 effect, long *from)
             break;
         case 256:
             if (!(viewer.status_flags & 0x100)) {
-                viewer.unk190[4][1] = 6000;
-                viewer.unk190[4][0] = 0;
+                viewer.timers.halves[4][1] = 6000;
+                viewer.timers.halves[4][0] = 0;
                 viewer.status_flags |= 0x100;
                 player_compute_derived_stats(0);
                 PLAYER_CLAMP_HP();
             } else {
-                viewer.unk190[4][0] = 20;
-                viewer.unk190[4][1] = 6000;
+                viewer.timers.halves[4][0] = 20;
+                viewer.timers.halves[4][1] = 6000;
             }
             break;
         case 1:
@@ -1020,9 +1019,9 @@ void player_hit(u16 *damage, u16 scale, u16 effect, long *from)
         case 7:
             if (!(viewer.status_flags & 0x100000)) {
                 if (viewer.status_flags & 7) {
-                    if (viewer.unk190[0][0] >= 220 && viewer.unk190[0][1] != 0) {
-                        viewer.unk190[0][0] = 20;
-                        viewer.unk190[0][1] = 600;
+                    if (viewer.timers.halves[0][0] >= 220 && viewer.timers.halves[0][1] != 0) {
+                        viewer.timers.halves[0][0] = 20;
+                        viewer.timers.halves[0][1] = 600;
                         if (viewer.status_flags & 2) {
                             viewer.status_flags |= 4;
                         }
@@ -1031,8 +1030,8 @@ void player_hit(u16 *damage, u16 scale, u16 effect, long *from)
                         }
                     }
                 } else {
-                    viewer.unk190[0][1] = 600;
-                    viewer.unk190[0][0] = 0;
+                    viewer.timers.halves[0][1] = 600;
+                    viewer.timers.halves[0][0] = 0;
                     viewer.status_flags |= 1;
                 }
             }
@@ -1062,17 +1061,17 @@ void player_hit(u16 *damage, u16 scale, u16 effect, long *from)
         limit75 = limit75 * viewer.status_time_scale / 100;
         limit600 = limit600 * viewer.status_time_scale / 100;
         limit0 = limit600;
-        if (limit300 < viewer.unk190[3][1]) {
-            viewer.unk190[3][1] = limit300;
+        if (limit300 < viewer.timers.halves[3][1]) {
+            viewer.timers.halves[3][1] = limit300;
         }
-        if (limit75 < viewer.unk190[1][1]) {
-            viewer.unk190[1][1] = limit75;
+        if (limit75 < viewer.timers.halves[1][1]) {
+            viewer.timers.halves[1][1] = limit75;
         }
-        if (limit600 < viewer.unk190[2][1]) {
-            viewer.unk190[2][1] = limit600;
+        if (limit600 < viewer.timers.halves[2][1]) {
+            viewer.timers.halves[2][1] = limit600;
         }
-        if (limit0 < viewer.unk190[0][1]) {
-            viewer.unk190[0][1] = limit0;
+        if (limit0 < viewer.timers.halves[0][1]) {
+            viewer.timers.halves[0][1] = limit0;
         }
     }
     if (viewer.shield_raised != 0 && viewer.equipment[16] != 0xffff) {
@@ -1153,24 +1152,24 @@ void player_get_camera(VECTOR *pos, SVECTOR *rot)
     pos->vx = viewer.position.vx;
     pos->vz = viewer.position.vz;
     pos->vy = viewer.position.vy + viewer.bob_offset + viewer.unk2D2 - 1600;
-    rot->vx = viewer.pitch;
-    rot->vy = viewer.yaw;
-    rot->vz = viewer.roll;
+    rot->vx = viewer.rotation.vx;
+    rot->vy = viewer.rotation.vy;
+    rot->vz = viewer.rotation.vz;
 }
 
 /* Clears the status timers and restores the hit and magic points. */
 ADDRESS(0x8003e794, 0xac)
 void player_recover_all(void)
 {
-    viewer.unk190[0][0] = viewer.unk190[0][1] = viewer.unk190[1][0] = viewer.unk190[1][1] =
-        viewer.unk190[2][0] = viewer.unk190[2][1] = viewer.unk190[3][0] = viewer.unk190[3][1] =
-            viewer.unk190[4][0] = viewer.unk190[4][1] = viewer.unk190[5][0] =
-                viewer.unk190[5][1] = viewer.unk190[6][0] = viewer.unk190[6][1] =
-                    viewer.unk190[7][0] = viewer.unk190[7][1] = viewer.unk190[8][0] =
-                        viewer.unk190[8][1] = viewer.unk190[9][0] = viewer.unk190[9][1] =
-                            viewer.unk190[10][0] = viewer.unk190[10][1] =
-                                viewer.unk190[11][0] = viewer.unk190[11][1] =
-                                    viewer.unk190[12][0] = viewer.unk190[12][1] = 0;
+    viewer.timers.halves[0][0] = viewer.timers.halves[0][1] = viewer.timers.halves[1][0] = viewer.timers.halves[1][1] =
+        viewer.timers.halves[2][0] = viewer.timers.halves[2][1] = viewer.timers.halves[3][0] = viewer.timers.halves[3][1] =
+            viewer.timers.halves[4][0] = viewer.timers.halves[4][1] = viewer.timers.halves[5][0] =
+                viewer.timers.halves[5][1] = viewer.timers.halves[6][0] = viewer.timers.halves[6][1] =
+                    viewer.timers.halves[7][0] = viewer.timers.halves[7][1] = viewer.timers.halves[8][0] =
+                        viewer.timers.halves[8][1] = viewer.timers.halves[9][0] = viewer.timers.halves[9][1] =
+                            viewer.timers.halves[10][0] = viewer.timers.halves[10][1] =
+                                viewer.timers.halves[11][0] = viewer.timers.halves[11][1] =
+                                    viewer.timers.halves[12][0] = viewer.timers.halves[12][1] = 0;
     viewer.fall_death = 0;
     viewer.hp = viewer.hud_hp = viewer.max_hp;
     viewer.mp = viewer.hud_mp = viewer.max_mp;
@@ -1231,14 +1230,14 @@ void player_reset_new_game(void)
     viewer.push_x = viewer.push_y = viewer.push_z = 0;
     player_recover_all();
     equip_load_item_slot_pictures();
-    viewer.save_x = 61;
-    viewer.save_y = 64;
-    viewer.save_z = 63;
-    viewer.save_area = 0;
-    viewer.save_dx = 0;
-    viewer.save_dy = 1472;
-    viewer.save_dz = 0;
-    viewer.save_yaw = 3072;
+    viewer.save_point.x = 61;
+    viewer.save_point.y = 64;
+    viewer.save_point.z = 63;
+    viewer.save_point.area = 0;
+    viewer.save_point.dx = 0;
+    viewer.save_point.dy = 1472;
+    viewer.save_point.dz = 0;
+    viewer.save_point.yaw = 3072;
     hud_clear_damage_numbers();
 }
 
@@ -1247,10 +1246,10 @@ void player_init(void)
 {
     viewer.magic_buffers[0] = magic_model_buffers[0];
     viewer.magic_buffers[1] = magic_model_buffers[1];
-    viewer.slot_model_files[0] = equipment_model_buffers[0];
-    viewer.slot_model_files[1] = equipment_model_buffers[1];
-    viewer.slot_model_files[2] = equipment_model_buffers[2];
-    viewer.slot_model_files[3] = equipment_model_buffers[3];
+    viewer.slot_model_files[0] = (StAnimFile *)equipment_model_buffers[0];
+    viewer.slot_model_files[1] = (StAnimFile *)equipment_model_buffers[1];
+    viewer.slot_model_files[2] = (StAnimFile *)equipment_model_buffers[2];
+    viewer.slot_model_files[3] = (StAnimFile *)equipment_model_buffers[3];
     player_reset_new_game();
     game_settings.sfx_volume = 63;
     game_settings.bgm_volume = 63;
@@ -1521,13 +1520,13 @@ void player_load_equipment_model(u16 id, u8 slot, u8 reload)
         if (paired) {
             pair = slot ^ 1;
             viewer.slot_model_info[pair] = &equipment_model_placements[other];
-            cd_read_member(1, model * 4 + 484, viewer.slot_model_files[slot]);
-            cd_read_member(1, other * 4 + 484, viewer.slot_model_files[pair]);
+            cd_read_member(1, model * 4 + 484, (u_long *)viewer.slot_model_files[slot]);
+            cd_read_member(1, other * 4 + 484, (u_long *)viewer.slot_model_files[pair]);
             anim_register(slot + 32, viewer.slot_model_files[slot]);
             model_offset_textures((Model *)sp->model, &pix[slot], &clut[slot], 0);
             anim_register(pair + 32, viewer.slot_model_files[pair]);
         } else {
-            cd_read_member(1, model * 4 + 484, viewer.slot_model_files[slot]);
+            cd_read_member(1, model * 4 + 484, (u_long *)viewer.slot_model_files[slot]);
             anim_register(slot + 32, viewer.slot_model_files[slot]);
             model_offset_textures((Model *)sp->model, &pix[slot], &clut[slot], 1);
         }
@@ -1563,7 +1562,7 @@ void player_start_hand_action(u8 value, u8 slot)
         if (viewer.slot_model_ids[0] == 255) {
             return;
         }
-        if (viewer.unk190[1][0] != 0) {
+        if (viewer.timers.halves[1][0] != 0) {
             return;
         }
         viewer.slot_anim_ids[0] = value;
@@ -1583,7 +1582,7 @@ void player_start_hand_action(u8 value, u8 slot)
         if (viewer.slot_model_ids[slot] == 255) {
             return;
         }
-        if (viewer.unk190[1][0] != 0) {
+        if (viewer.timers.halves[1][0] != 0) {
             return;
         }
         pad_state.pressed &= ~pad_state.buttons[9];
@@ -1603,7 +1602,7 @@ void player_start_cast(u8 unused, u8 slot)
 
     v = &viewer;
     if (*(s32 *)v->cast_request == -1 && v->action_timers.word == -1 && v->magic_ids[slot] != 255 &&
-        !(v->status_flags & 0x10) && (!v->blocks_magic || v->unk190[12][0] != 0)) {
+        !(v->status_flags & 0x10) && (!v->blocks_magic || v->timers.halves[12][0] != 0)) {
         v->cast_request[slot] = 0;
         v->cast_gauge = v->magic_gauge;
         v->magic_gauge = 0;
@@ -1693,7 +1692,7 @@ void player_fire_magic_shot(int kind, int slot, ...)
         rot.vy = viewer.camera_rot.vy;
         rot.vz = viewer.camera_rot.vz;
         player_get_launch_vector(700, &pos, &dir, &rot, slot);
-        effect_spawn(10, side | 0x42, kind, &pos, &dir, speed, &viewer.pitch);
+        effect_spawn(10, side | 0x42, kind, &pos, &dir, speed, &viewer.rotation);
         break;
     case 7:
         i = 2;
@@ -1703,7 +1702,7 @@ void player_fire_magic_shot(int kind, int slot, ...)
             aim.vy = viewer.camera_rot.vy + length;
             aim.vz = viewer.camera_rot.vz;
             player_get_launch_vector(700, &pos, &dir, &aim, slot);
-            effect_spawn(10, side | 0x42, kind, &pos, &dir, 1024, &viewer.pitch);
+            effect_spawn(10, side | 0x42, kind, &pos, &dir, 1024, &viewer.rotation);
             viewer.shot_offsets[slot].vx += 1024;
         }
         break;
@@ -1862,7 +1861,7 @@ void player_update_cast(u8 hand)
         if (item->durability && viewer.equipment[12] != 0xffff)
             active = 1;
     }
-    if (!viewer.blocks_magic || viewer.unk190[12][0] != 0) {
+    if (!viewer.blocks_magic || viewer.timers.halves[12][0] != 0) {
         if (!active)
             return;
         if (viewer.magic_gauge_delay == 0) {
@@ -1972,7 +1971,7 @@ void player_update_hand_action(u8 hand)
                 req.height = 1024;
                 r = creature_find_in_reach((CollisionState *)&req, 4);
                 if (r != -1) {
-                    d = viewer.yaw - (short)vis_table_a.entries[r].player_heading;
+                    d = viewer.rotation.vy - (short)vis_table_a.entries[r].player_heading;
                     if (d > 2048) {
                         d -= 4096;
                     }
@@ -2169,14 +2168,14 @@ void player_update_hand_action(u8 hand)
 ADDRESS(0x80040f04, 0x24c)
 void player_cast_magic(u8 magic, u8 hand)
 {
-    StMagic *rec;
+    StEffectDef *rec;
     int cost;
     SVECTOR unused;
 
     if (viewer.shot_magic[hand] != 255 || magic == 255) {
         return;
     }
-    rec = (StMagic *)&effects.defs[magic];
+    rec = &effects.defs[magic];
     cost = rec->mp_cost;
     if (viewer.mp < cost) {
         return;
@@ -3066,15 +3065,15 @@ void player_update(void)
         if (!(pad_state.held & (pad_state.buttons[0] | pad_state.buttons[1]))) {
             viewer.yaw_speed_max = 40;
         }
-        if (viewer.unk190[3][0] != 0) {
+        if (viewer.timers.halves[3][0] != 0) {
             viewer.walk_speed_max = 96;
         }
-        if (viewer.unk190[1][0] != 0) {
+        if (viewer.timers.halves[1][0] != 0) {
             viewer.walk_speed_max = 0;
             if (viewer.status_flags & 0x10) {
                 viewer.yaw_speed_max = 0;
             }
-            if (viewer.unk190[1][0] % 20 == 0) {
+            if (viewer.timers.halves[1][0] % 20 == 0) {
                 sound_play(6, 128);
             }
         }
@@ -3317,7 +3316,7 @@ void player_update(void)
                 memset(from3, 0, sizeof(from3));
                 player_hit(hit3, 4096, 0, from3);
             }
-            if (viewer.unk190[0][0] != 0) {
+            if (viewer.timers.halves[0][0] != 0) {
                 d = 0;
                 if (viewer.status_flags & 4) {
                     d = -256;
@@ -3326,12 +3325,12 @@ void player_update(void)
                 } else if (viewer.status_flags & 1) {
                     d = -16;
                 }
-                if (viewer.unk190[0][0] % 20 == 0) {
+                if (viewer.timers.halves[0][0] % 20 == 0) {
                     player_add_hp(d);
                     sound_play(5, 128);
                 }
             }
-            if (viewer.unk190[4][0] != 0 && viewer.unk190[4][0] % 20 == 0) {
+            if (viewer.timers.halves[4][0] != 0 && viewer.timers.halves[4][0] % 20 == 0) {
                 player_add_hp(-1);
                 player_add_mp(-1);
             }
@@ -3380,13 +3379,13 @@ void player_update(void)
                 viewer.status_flags &= ~0x400;
             }
             player_update_shake();
-            viewer.pitch = viewer.view_rot.vx + viewer.rot_offset.halves[0] + viewer.shake_pitch + viewer.fall_pitch;
-            viewer.yaw = viewer.view_rot.vy + viewer.rot_offset.halves[1] + viewer.shake_yaw + viewer.unk292;
-            viewer.roll = viewer.view_rot.vz + viewer.roll_offset + viewer.shake_roll + viewer.unk294;
+            viewer.rotation.vx = viewer.view_rot.vx + viewer.rot_offset.halves[0] + viewer.shake_pitch + viewer.fall_pitch;
+            viewer.rotation.vy = viewer.view_rot.vy + viewer.rot_offset.halves[1] + viewer.shake_yaw + viewer.unk292;
+            viewer.rotation.vz = viewer.view_rot.vz + viewer.roll_offset + viewer.shake_roll + viewer.unk294;
             viewer.shake_pitch = viewer.shake_yaw = viewer.shake_roll = 0;
-            viewer.camera_rot.vx = 4096 - viewer.pitch;
-            viewer.camera_rot.vy = 4096 - viewer.yaw;
-            viewer.camera_rot.vz = 4096 - viewer.roll;
+            viewer.camera_rot.vx = 4096 - viewer.rotation.vx;
+            viewer.camera_rot.vy = 4096 - viewer.rotation.vy;
+            viewer.camera_rot.vz = 4096 - viewer.rotation.vz;
             RotMatrixZYX(&viewer.camera_rot, &viewer.camera_matrix);
             vis_lists.floor_push_x /= 2;
             vis_lists.floor_push_y /= 2;

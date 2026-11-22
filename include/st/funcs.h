@@ -11,8 +11,10 @@
 #include <LIBGTE.H>
 #include <LIBGPU.H>
 
+struct CollisionState; /* st/vis.h */
+
 void effect_update(void); /* runs effects.cur one frame by its kind (a per-kind switch with a step counter) */
-int player_distance_in_reach(void *request);
+int player_distance_in_reach(struct CollisionState *req);
 void player_reload_equipment(void);
 void player_update_status(int apply);
 void player_recalc_stats(void);

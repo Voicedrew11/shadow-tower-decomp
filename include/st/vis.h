@@ -28,7 +28,7 @@ typedef struct {
     s16 speed;
 } CollisionRequest;
 
-typedef struct {
+typedef struct CollisionState {
     s32 tests;           /* 0x00: the kind of the request collision_query takes */
     VECTOR position;     /* 0x04: its position */
     SVECTOR velocity;    /* 0x14: its velocity */
@@ -90,7 +90,7 @@ typedef struct {
 } CollisionState;
 
 /* 0x8017bed0: 12-byte records indexed by visible id. */
-typedef struct {
+typedef struct MapBlock {
     u8 part;             /* 0x00: the model part drawn for this record */
     u8 region;           /* 0x01: copied to a table A entry's region (creatures_load) */
     u8 unk02;

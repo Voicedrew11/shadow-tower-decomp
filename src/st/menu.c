@@ -4134,14 +4134,14 @@ write:
         lseek(fd, 0, SEEK_SET);
         goto write;
     }
-    viewer.save_area = area_state.loaded_area;
-    viewer.save_x = viewer.position.vx >> 12;
-    viewer.save_y = viewer.position.vy >> 12;
-    viewer.save_z = viewer.position.vz >> 12;
-    viewer.save_dx = viewer.position.vx - (viewer.save_x << 12);
-    viewer.save_dy = viewer.position.vy - (viewer.save_y << 12);
-    viewer.save_dz = viewer.position.vz - (viewer.save_z << 12);
-    viewer.save_yaw = viewer.view_rot.vy + 2048;
+    viewer.save_point.area = area_state.loaded_area;
+    viewer.save_point.x = viewer.position.vx >> 12;
+    viewer.save_point.y = viewer.position.vy >> 12;
+    viewer.save_point.z = viewer.position.vz >> 12;
+    viewer.save_point.dx = viewer.position.vx - (viewer.save_point.x << 12);
+    viewer.save_point.dy = viewer.position.vy - (viewer.save_point.y << 12);
+    viewer.save_point.dz = viewer.position.vz - (viewer.save_point.z << 12);
+    viewer.save_point.yaw = viewer.view_rot.vy + 2048;
     close(fd);
     pad_clear_input();
     return 1;

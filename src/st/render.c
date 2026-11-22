@@ -1962,8 +1962,8 @@ void vis_build_planes(void)
     short rx;
     short rz;
 
-    yaw = cam->yaw + 1024;
-    pitch = cam->pitch;
+    yaw = cam->rotation.vy + 1024;
+    pitch = cam->rotation.vx;
     if (pitch > 2048) {
         half = 4096 - pitch;
     } else {
@@ -4012,9 +4012,9 @@ void model_draw_list(u8 flags, SVECTOR *rot)
             MATRIX face = {{{ONE, 0, 0}, {0, ONE, 0}, {0, 0, ONE}}, {0, 0, 0}};
             SVECTOR angle;
 
-            angle.vx = -viewer.pitch;
-            angle.vy = -viewer.yaw;
-            angle.vz = -viewer.roll;
+            angle.vx = -viewer.rotation.vx;
+            angle.vy = -viewer.rotation.vy;
+            angle.vz = -viewer.rotation.vz;
             RotMatrixX(angle.vx, &face);
             RotMatrixY(angle.vy + rot->vy, &face);
             RotMatrixZ(angle.vz, &face);
@@ -5255,31 +5255,31 @@ void hud_update(void)
         hud_sprites[12].flags |= 1;
     else
         hud_sprites[12].flags = 0;
-    if (*(s32 *)viewer.unk190[5] == 0)
+    if (viewer.timers.words[5] == 0)
         hud_sprites[37].flags = 0;
     else
         hud_sprites[37].flags |= 1;
-    if (*(s32 *)viewer.unk190[12] == 0)
+    if (viewer.timers.words[12] == 0)
         hud_sprites[38].flags = 0;
     else
         hud_sprites[38].flags |= 1;
-    if (*(s32 *)viewer.unk190[7] == 0)
+    if (viewer.timers.words[7] == 0)
         hud_sprites[39].flags = 0;
     else
         hud_sprites[39].flags |= 1;
-    if (*(s32 *)viewer.unk190[8] == 0)
+    if (viewer.timers.words[8] == 0)
         hud_sprites[40].flags = 0;
     else
         hud_sprites[40].flags |= 1;
-    if (*(s32 *)viewer.unk190[9] == 0)
+    if (viewer.timers.words[9] == 0)
         hud_sprites[41].flags = 0;
     else
         hud_sprites[41].flags |= 1;
-    if (*(s32 *)viewer.unk190[10] == 0)
+    if (viewer.timers.words[10] == 0)
         hud_sprites[42].flags = 0;
     else
         hud_sprites[42].flags |= 1;
-    if (*(s32 *)viewer.unk190[11] == 0)
+    if (viewer.timers.words[11] == 0)
         hud_sprites[43].flags = 0;
     else
         hud_sprites[43].flags |= 1;

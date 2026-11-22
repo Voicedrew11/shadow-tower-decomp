@@ -24,17 +24,6 @@
         viewer.hp = viewer.max_hp;                                             \
     }
 
-/* What player_distance_in_reach measures the viewer against: a position and a reach. */
-typedef struct {
-    s32 tests;
-    VECTOR position;     /* 0x04 */
-    SVECTOR velocity;
-    u16 radius;          /* 0x1c: added to the reach */
-    u16 height;          /* 0x1e: height below position.vy */
-    s16 heading;         /* 0x20: heading */
-    s16 speed;           /* 0x22: reach along the heading */
-} PlayerTarget;
-
 /* One TIM block header (the bytes after the flags word). */
 typedef struct {
     u_long len;
@@ -84,14 +73,6 @@ int player_get_launch_vector(int length, VECTOR *pos, SVECTOR *dir, SVECTOR *rot
 
 /* Not reconstructed exactly yet (0x8003f910); called with two arguments. */
 void player_fire_magic_shot(int kind, int slot, ...);
-
-/* A view of one 24-byte effects.defs record (StEffectDef, st/effect.h) as
- * a magic record: viewer.magic_defs holds the one each hand casts. */
-typedef struct {
-    u8 unk0[2];
-    u16 mp_cost;         /* 0x02: cost, taken from viewer.mp */
-    u8 unk4[0x14];
-} StMagic;
 
 /* src/st/player.c: held items, magic, view, hand swaps */
 void player_update_cast(u8 hand);

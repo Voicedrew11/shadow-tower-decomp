@@ -167,8 +167,8 @@ void map_talk_then_open_door(int id)
         if ((short)e->anim_frame >= 0x1000)
             e->anim_frame = 0xfff;
         if ((short)e->anim_frame + e->anim_step >= 0x800 && (short)e->anim_frame < 0x800) {
-            viewer.unk190[4][0] = 0;
-            viewer.unk190[4][1] = 6000;
+            viewer.timers.halves[4][0] = 0;
+            viewer.timers.halves[4][1] = 6000;
             viewer.status_flags |= 0x100;
         }
         world_run_frame(NULL, NULL, 0);

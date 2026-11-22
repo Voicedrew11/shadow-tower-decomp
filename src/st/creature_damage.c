@@ -131,8 +131,8 @@ int creature_test_player_aim(Creature *e, short reach)
     short half;
     int ay;
 
-    yaw = (viewer.yaw - e->player_heading) & 0xfff;
-    pitch = viewer.pitch & 0xfff;
+    yaw = (viewer.rotation.vy - e->player_heading) & 0xfff;
+    pitch = viewer.rotation.vx & 0xfff;
     if (reach + e->radius < e->player_dist_xz)
         return 0;
     dy = e->position.vy - viewer.position.vy;

@@ -66,7 +66,7 @@ void map_warp_player(int gate)
     viewer.shake_yaw = 0;
     viewer.shake_pitch = 0;
     viewer.view_rot.vx = 0;
-    *(SVECTOR *)&viewer.pitch = viewer.view_rot;
+    viewer.rotation = viewer.view_rot;
     viewer.state = 5;
     fade_run_frames(2, 0x1000, 0x1000, 0);
     creatures_update();

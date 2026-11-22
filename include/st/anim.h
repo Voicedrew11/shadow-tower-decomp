@@ -13,7 +13,7 @@
 #include <LIBGTE.H>
 #include <st/gfx.h>
 
-typedef struct {
+typedef struct StAnimFile {
     u_long size;         /* 0x00: bytes, header included */
     u16 animated;        /* 0x04: 0 for a model without animation */
     u16 node_count;

@@ -673,8 +673,8 @@ void map_play_two_creature_scripts(void)
     n = 16;
     while (n--) {
         viewer.view_rot.vx += 16;
-        viewer.pitch = viewer.view_rot.vx + viewer.rot_offset.halves[0] + viewer.shake_pitch + viewer.fall_pitch;
-        world_run_frame(NULL, (SVECTOR *)&viewer.pitch, 0);
+        viewer.rotation.vx = viewer.view_rot.vx + viewer.rot_offset.halves[0] + viewer.shake_pitch + viewer.fall_pitch;
+        world_run_frame(NULL, &viewer.rotation, 0);
     }
 }
 
@@ -801,10 +801,10 @@ void map_turn_view_during_script(void)
         if ((short)e->anim_frame >= 0x1000)
             e->anim_frame = 0xfff;
         viewer.view_rot.vx = (from.vx * n + to.vx * (total - n)) / total;
-        viewer.pitch = viewer.view_rot.vx + viewer.rot_offset.halves[0] + viewer.shake_pitch + viewer.fall_pitch;
+        viewer.rotation.vx = viewer.view_rot.vx + viewer.rot_offset.halves[0] + viewer.shake_pitch + viewer.fall_pitch;
         viewer.view_rot.vy = (from.vy * n + to.vy * (total - n)) / total;
-        viewer.yaw = viewer.view_rot.vy + viewer.rot_offset.halves[1] + viewer.shake_yaw + viewer.unk292;
-        world_run_frame(NULL, (SVECTOR *)&viewer.pitch, 0);
+        viewer.rotation.vy = viewer.view_rot.vy + viewer.rot_offset.halves[1] + viewer.shake_yaw + viewer.unk292;
+        world_run_frame(NULL, &viewer.rotation, 0);
         n--;
     } while ((short)e->anim_frame != 0xfff);
     e->flags |= 0x2000000;
@@ -841,12 +841,12 @@ void map_hand_over_item(void)
         world_run_frame(NULL, &viewer.view_rot, 0);
     } while ((s16)e->anim_frame != 0xfff);
     c->state = 2;
-    viewer.pitch = viewer.view_rot.vx + viewer.rot_offset.halves[0] + viewer.shake_pitch + viewer.fall_pitch;
-    viewer.yaw = viewer.view_rot.vy + viewer.rot_offset.halves[1] + viewer.shake_yaw + viewer.unk292;
-    viewer.roll = viewer.view_rot.vz + viewer.roll_offset + viewer.shake_roll + viewer.unk294;
-    viewer.camera_rot.vx = 4096 - viewer.pitch;
-    viewer.camera_rot.vy = 4096 - viewer.yaw;
-    viewer.camera_rot.vz = 4096 - viewer.roll;
+    viewer.rotation.vx = viewer.view_rot.vx + viewer.rot_offset.halves[0] + viewer.shake_pitch + viewer.fall_pitch;
+    viewer.rotation.vy = viewer.view_rot.vy + viewer.rot_offset.halves[1] + viewer.shake_yaw + viewer.unk292;
+    viewer.rotation.vz = viewer.view_rot.vz + viewer.roll_offset + viewer.shake_roll + viewer.unk294;
+    viewer.camera_rot.vx = 4096 - viewer.rotation.vx;
+    viewer.camera_rot.vy = 4096 - viewer.rotation.vy;
+    viewer.camera_rot.vz = 4096 - viewer.rotation.vz;
     RotMatrixZYX(&viewer.camera_rot, &viewer.camera_matrix);
     ground_item_pick_up(c, 1);
 }

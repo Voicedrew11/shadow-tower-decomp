@@ -111,7 +111,7 @@ int object_find_usable(int start, CollisionState *req)
         if (e->position.vy < req->position.vy ? e->position.vy < req->position.vy - req->height
                                        : req->position.vy < e->position.vy - (e->height + 0x300))
             continue;
-        d = (viewer.yaw - e->player_heading) & 0xfff;
+        d = (viewer.rotation.vy - e->player_heading) & 0xfff;
         if (d > 0x800)
             d |= 0xf000;
         if ((r->flags & 8) && (u16)(d + 400) > 800)
@@ -1155,7 +1155,7 @@ void objects_update(void)
 
             if (player_in_centred_rect(e->position.vx, e->position.vz, 3072, 3072, e->position.vy) == 0)
                 goto away;
-            turn = (viewer.yaw - e->player_heading) & 0xfff;
+            turn = (viewer.rotation.vy - e->player_heading) & 0xfff;
             if (turn > 2048)
                 turn |= 0xf000;
             if (!((pad_state.held & pad_state.buttons[10]) && turn > -400 && turn < 400)
@@ -1163,14 +1163,14 @@ void objects_update(void)
                 goto away;
             if (B50(e))
                 break;
-            viewer.warp_return.warp.x = viewer.position.vx >> 12;
-            viewer.warp_return.warp.area = area_state.loaded_area;
-            viewer.warp_return.warp.y = viewer.position.vy >> 12;
-            viewer.warp_return.warp.z = viewer.position.vz >> 12;
-            viewer.warp_return.warp.dx = viewer.position.vx - (viewer.warp_return.warp.x << 12);
-            viewer.warp_return.warp.dy = viewer.position.vy - (viewer.warp_return.warp.y << 12);
-            viewer.warp_return.warp.dz = viewer.position.vz - (viewer.warp_return.warp.z << 12);
-            viewer.warp_return.warp.yaw = e->rotation.vy + 2048;
+            viewer.warp_return.x = viewer.position.vx >> 12;
+            viewer.warp_return.area = area_state.loaded_area;
+            viewer.warp_return.y = viewer.position.vy >> 12;
+            viewer.warp_return.z = viewer.position.vz >> 12;
+            viewer.warp_return.dx = viewer.position.vx - (viewer.warp_return.x << 12);
+            viewer.warp_return.dy = viewer.position.vy - (viewer.warp_return.y << 12);
+            viewer.warp_return.dz = viewer.position.vz - (viewer.warp_return.z << 12);
+            viewer.warp_return.yaw = e->rotation.vy + 2048;
             for (j = 240, o = vis_table_b.entries; j != 0; j--, o++) {
                 if (o->kind == e->kind)
                     B50(o) = 1;
@@ -1203,7 +1203,7 @@ void objects_update(void)
             viewer.shake_roll = 0;
             viewer.shake_yaw = 0;
             viewer.shake_pitch = 0;
-            *(SVECTOR *)&viewer.pitch = viewer.view_rot;
+            viewer.rotation = viewer.view_rot;
             viewer.position.vx = (x << 12) + ((s8)e->params.snd.fade_range << 7);
             viewer.position.vz = (z << 12) + ((s8)e->params.door.n_blocks << 7);
             viewer.position.vy = (y << 12) + ((s8)e->params.snd.sound_flags << 7) - 1600;
@@ -1310,7 +1310,7 @@ void player_warp(to, keep)
     viewer.shake_roll = 0;
     viewer.shake_yaw = 0;
     viewer.shake_pitch = 0;
-    *(SVECTOR *)&viewer.pitch = viewer.view_rot;
+    viewer.rotation = viewer.view_rot;
     viewer.position.vx = (x << 12) + to->dx;
     viewer.position.vz = (z << 12) + to->dz;
     viewer.position.vy = (y << 12) + to->dy;
@@ -1356,11 +1356,11 @@ void player_warp(to, keep)
     player_enter_normal_state();
 }
 
-/* Warps to viewer.save_area. */
+/* Warps to viewer.save_point. */
 ADDRESS(0x80052c24, 0x38)
 void player_warp_to_save_point(void)
 {
-    player_warp((StWarp *)&viewer.save_area, 0);
+    player_warp(&viewer.save_point, 0);
     viewer.save_warp_request = 0;
 }
 
@@ -1370,7 +1370,7 @@ void player_warp_back(void)
 {
     viewer.state = 5;
     player_update_durability_warning();
-    player_warp(&viewer.warp_return.warp, 1);
+    player_warp(&viewer.warp_return, 1);
     DAT_801cd0e4 = 0;
 }
 
@@ -1585,24 +1585,24 @@ void ground_item_pick_up(GroundItem *c, int forced)
     }
     switch (info->pickup_pose) {
     case 0:
-        r.vx = -viewer.pitch;
+        r.vx = -viewer.rotation.vx;
         r.vy = r.vz = 0;
         break;
     case 1:
-        r.vx = 1024 - viewer.pitch;
+        r.vx = 1024 - viewer.rotation.vx;
         r.vy = r.vz = 0;
         break;
     case 2:
-        r.vx = -1024 - viewer.pitch;
+        r.vx = -1024 - viewer.rotation.vx;
         r.vy = r.vz = 0;
         break;
     case 3:
         r.vx = 0;
         r.vy = 1024;
-        r.vz = viewer.pitch - 256;
+        r.vz = viewer.rotation.vx - 256;
         break;
     }
-    r.vy += viewer.yaw;
+    r.vy += viewer.rotation.vy;
     if (r.vx - c->rotation.vx > 2048)
         r.vx -= 4096;
     if (r.vx - c->rotation.vx < -2048)

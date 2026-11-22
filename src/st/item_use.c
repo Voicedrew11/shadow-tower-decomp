@@ -41,21 +41,21 @@ void item_use(int id)
     case 0x10c:
         if (!(viewer.status_flags & 0x30000)) {
             USE_RESULT = 1;
-            viewer.unk190[5][1] = 3000;
-            viewer.unk190[5][0] = 0;
+            viewer.timers.halves[5][1] = 3000;
+            viewer.timers.halves[5][0] = 0;
             viewer.status_flags |= 0x10000;
         }
         break;
     case 0x10d:
         if (!(viewer.status_flags & 0x30000)) {
             USE_RESULT = 1;
-            viewer.unk190[5][1] = 18000;
-            viewer.unk190[5][0] = 0;
+            viewer.timers.halves[5][1] = 18000;
+            viewer.timers.halves[5][0] = 0;
             viewer.status_flags |= 0x20000;
         }
         break;
     case 0x10e:
-        if (area_state.area != 30 && viewer.save_area != 0xff) {
+        if (area_state.area != 30 && viewer.save_point.area != 0xff) {
             viewer.save_warp_request = 1;
             viewer.submerged_acid = 0;
             viewer.submerged = 0;
@@ -120,8 +120,8 @@ void item_use(int id)
         break;
     case 0x11e:
         if (viewer.status_flags & 7) {
-            viewer.unk190[0][1] = 0;
-            viewer.unk190[0][0] = 0;
+            viewer.timers.halves[0][1] = 0;
+            viewer.timers.halves[0][0] = 0;
             viewer.status_flags &= ~7;
             USE_RESULT = 1;
             sound_play(8, 128);
@@ -129,8 +129,8 @@ void item_use(int id)
         break;
     case 0x11f:
         if (viewer.status_flags & 0x18) {
-            viewer.unk190[1][1] = 0;
-            viewer.unk190[1][0] = 0;
+            viewer.timers.halves[1][1] = 0;
+            viewer.timers.halves[1][0] = 0;
             viewer.status_flags &= ~0x18;
             USE_RESULT = 1;
             sound_play(8, 128);
@@ -138,8 +138,8 @@ void item_use(int id)
         break;
     case 0x120:
         if (viewer.status_flags & 0x100) {
-            viewer.unk190[4][1] = 0;
-            viewer.unk190[4][0] = 0;
+            viewer.timers.halves[4][1] = 0;
+            viewer.timers.halves[4][0] = 0;
             viewer.status_flags &= ~0x100;
             USE_RESULT = 1;
             sound_play(8, 128);
@@ -147,56 +147,56 @@ void item_use(int id)
         break;
     case 0x122:
         if (!(viewer.status_flags & 0x40000)) {
-            viewer.unk190[6][1] = 300;
-            viewer.unk190[6][0] = 0;
+            viewer.timers.halves[6][1] = 300;
+            viewer.timers.halves[6][0] = 0;
             viewer.status_flags |= 0x40000;
             USE_RESULT = 1;
         }
         break;
     case 0x123:
         if (!(viewer.status_flags & 0x80000)) {
-            viewer.unk190[7][1] = 3000;
-            viewer.unk190[7][0] = 0;
+            viewer.timers.halves[7][1] = 3000;
+            viewer.timers.halves[7][0] = 0;
             viewer.status_flags |= 0x80000;
             USE_RESULT = 1;
         }
         break;
     case 0x124:
         if (!(viewer.status_flags & 0x100000)) {
-            viewer.unk190[8][1] = 600;
-            viewer.unk190[8][0] = 0;
+            viewer.timers.halves[8][1] = 600;
+            viewer.timers.halves[8][0] = 0;
             viewer.status_flags |= 0x100000;
             USE_RESULT = 1;
         }
         break;
     case 0x125:
         if (!(viewer.status_flags & 0x200000)) {
-            viewer.unk190[9][1] = 300;
-            viewer.unk190[9][0] = 0;
+            viewer.timers.halves[9][1] = 300;
+            viewer.timers.halves[9][0] = 0;
             viewer.status_flags |= 0x200000;
             USE_RESULT = 1;
         }
         break;
     case 0x126:
         if (!(viewer.status_flags & 0x400000)) {
-            viewer.unk190[10][1] = 6000;
-            viewer.unk190[10][0] = 0;
+            viewer.timers.halves[10][1] = 6000;
+            viewer.timers.halves[10][0] = 0;
             viewer.status_flags |= 0x400000;
             USE_RESULT = 1;
         }
         break;
     case 0x127:
         if (!(viewer.status_flags & 0x800000)) {
-            viewer.unk190[11][1] = 3000;
-            viewer.unk190[11][0] = 0;
+            viewer.timers.halves[11][1] = 3000;
+            viewer.timers.halves[11][0] = 0;
             viewer.status_flags |= 0x800000;
             USE_RESULT = 1;
         }
         break;
     case 0x128:
         if (!(viewer.status_flags & 0x800)) {
-            viewer.unk190[12][1] = 6000;
-            viewer.unk190[12][0] = 0;
+            viewer.timers.halves[12][1] = 6000;
+            viewer.timers.halves[12][0] = 0;
             viewer.status_flags |= 0x800;
             USE_RESULT = 1;
         }
