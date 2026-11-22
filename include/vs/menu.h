@@ -56,7 +56,7 @@ typedef struct {
     u16 unk1C6;          /* 0x1c6 (ST MenuScratch.unk202) */
     s16 unk1C8;          /* 0x1c8: the first free save number */
     s16 unk1CA;          /* 0x1ca: card_screen_run's mode (menu_vs_setup_run clears it) */
-    u16 unk1CC;          /* 0x1cc (ST unk2DC); func_8001bb48 shifts its step bit through it */
+    u16 unk1CC;          /* 0x1cc (ST unk2DC); card_screen_run shifts its step bit through it */
     s16 unk1CE;          /* 0x1ce: the versus setup cursor line (menu_vs_setup_draw_options) */
     s16 unk1D0;          /* 0x1d0: the list cursor row (ST unk2E0) */
     s16 unk1D2;          /* 0x1d2: the item grid row (menu_creature_book_draw_entry) */
