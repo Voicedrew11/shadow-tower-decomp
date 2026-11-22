@@ -54,18 +54,18 @@ DATA(0x801ee480, 0x4, ".bss")
 static int fdat_801ee480;
 
 void map_restore_progress();
-void func_801ed5b0();
-void func_801edc60();
-void func_801ee37c();
+void map_update_events();
+void map_step_creature();
+void map_talk_on_player_death();
 
 const FdatHeader fdat_header = {
     0x23,
     {
-        map_hook_none, func_801ed5b0, map_hook_none, map_hook_none,
+        map_hook_none, map_update_events, map_hook_none, map_hook_none,
         map_hook_none, map_restore_progress, map_hook_none, map_hook_none,
         map_hook_none, map_hook_none, map_hook_none, map_hook_none,
-        map_hook_none, func_801ee37c, map_hook_none, map_hook_none,
-        creature_pick_move, func_801edc60, map_hook_none, map_hook_none,
+        map_hook_none, map_talk_on_player_death, map_hook_none, map_hook_none,
+        creature_pick_move, map_step_creature, map_hook_none, map_hook_none,
         map_hook_none, map_hook_none, map_hook_none, map_hook_none,
         map_hook_none, map_hook_none, map_hook_none, map_hook_none,
         map_hook_none, map_hook_none, map_hook_none, map_hook_none,
@@ -77,10 +77,10 @@ const FdatHeader fdat_header = {
 #include "../lib/fdat_common.inc"
 #include "../lib/fdat_common_b.inc"
 
-void func_801edd9c(int which);
-void func_801edea0(void);
-void func_801ee090(u8 area);
-void func_801ee0b8(void);
+void map_shift_player_and_creatures(int which);
+void map_warp_player(void);
+void map_set_block_areas(u8 area);
+void map_transform_creature(void);
 
 /* Sets up the area: table B entries 1..6 closed unless their flags are
  * set (entry 9 off when all are open), entries 4 and 5 placed, the scene
@@ -136,7 +136,7 @@ void map_restore_progress(void)
  * dying starts its scene, entries 3 and 5 leave once beaten.
  */
 ADDRESS(0x801ed5b0, 0x46c)
-void func_801ed5b0(void)
+void map_update_events(void)
 {
     Vis88 *d9 = &vis_table_b.entries[9];
     Vis212 *e0 = &vis_table_a.entries[0];
@@ -145,15 +145,15 @@ void func_801ed5b0(void)
 
     if (fdat_801ee46c != 0
         && player_in_centred_rect(d9->unk24.vx, d9->unk24.vz, 0xc00, 0xc00, d9->unk24.vy)) {
-        func_801edea0();
+        map_warp_player();
         fdat_801ee470 = 1;
     }
     if (viewer.position.vz > 0x46800) {
-        func_801edd9c(0);
+        map_shift_player_and_creatures(0);
         fdat_801ee470++;
     }
     if (viewer.position.vz < 0x40800) {
-        func_801edd9c(1);
+        map_shift_player_and_creatures(1);
         fdat_801ee470--;
     }
     if (e0->unk40 >= 0x6000)
@@ -179,7 +179,7 @@ void func_801ed5b0(void)
         fdat_801ee474 = 1;
     }
     if (fdat_801ee474 == 2)
-        func_801ee0b8();
+        map_transform_creature();
     if (fdat_801ee478 == 0 && e3->unk2C == 0)
         fdat_801ee478 = 1;
     if (fdat_801ee478 == 1 && e3->unk05 == 3) {
@@ -213,7 +213,7 @@ void func_801ed5b0(void)
         e5->unk70 &= ~0x2000000;
     }
     if (fdat_801ee47c == 0 && fdat_801ee470 == 3) {
-        func_801ee090(2);
+        map_set_block_areas(2);
         e5->unk00 = 100;
         e5->unk1C.bytes[3] = 1;
         fdat_801ee47c = 1;
@@ -227,7 +227,7 @@ void func_801ed5b0(void)
  * kind 0 at the end of entry 0's dying stage turns to its scripts 7 and 9
  * and leaves (scene word 2). */
 ADDRESS(0x801edc60, 0x13c)
-void func_801edc60(void)
+void map_step_creature(void)
 {
     Vis212 *e = vis_table_a.unk6138;
     Vis192 *r = vis_table_a.unk6134;
@@ -257,7 +257,7 @@ void func_801edc60(void)
 /* Moves the viewer, every live table A entry and every live effect 0x6000
  * along z (`up`) or back. */
 ADDRESS(0x801edd9c, 0x104)
-void func_801edd9c(int up)
+void map_shift_player_and_creatures(int up)
 {
     Vis212 *e = vis_table_a.entries;
     StEffect *fx = effects.slots;
@@ -291,7 +291,7 @@ void player_enter_normal_state(void);
  * in with table A entry 0 awake (loading its model if needed); unless
  * record 0's stream counter has started it is handed to its exit. */
 ADDRESS(0x801edea0, 0x1f0)
-void func_801edea0(void)
+void map_warp_player(void)
 {
     Vis212 *e = vis_table_a.entries;
     int index = e->unk02;
@@ -337,7 +337,7 @@ void func_801edea0(void)
 
 /* Sets the area id of every visible record. */
 ADDRESS(0x801ee090, 0x28)
-void func_801ee090(u8 area)
+void map_set_block_areas(u8 area)
 {
     VisRecord *r = vis_records;
     int i = 512;
@@ -351,7 +351,7 @@ void func_801ee090(u8 area)
 /* Entry 0 finishes animation 10; entry 48 takes its place and goes, entry
  * 3 rises there (animation 10) and entry 49 replaces 48 until 3 is up. */
 ADDRESS(0x801ee0b8, 0x2c4)
-void func_801ee0b8(void)
+void map_transform_creature(void)
 {
     Vis212 *e0;
     Vis212 *e48;
@@ -418,7 +418,7 @@ first_animation_done:
  * until its scene ran, else entry 3 (record 3's counter 1) until it is
  * gone, else entry 5 (record 8's counter 3) until it is gone. */
 ADDRESS(0x801ee37c, 0xf0)
-void func_801ee37c(void)
+void map_talk_on_player_death(void)
 {
     Vis212 *e0 = vis_table_a.entries;
     Vis212 *e3 = &vis_table_a.entries[3];

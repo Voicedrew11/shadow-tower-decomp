@@ -7,7 +7,7 @@
  */
 /* Resets the map scene: the viewer's slots, pitch and the scene state. */
 ADDRESS(0x801ed420, 0x34)
-void func_801ed420(void)
+void map_enter_shop(void)
 {
     DAT_801cd0e4 = 0;
     viewer.unk218 = 6;

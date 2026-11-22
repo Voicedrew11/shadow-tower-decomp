@@ -14,8 +14,8 @@
 #include <st/xa.h>
 #include <st/fdat.h>
 
-void func_801edba4(int id);
-void func_801ede88(void);
+void map_talk_then_open_door(int id);
+void map_open_door_then_play_script(void);
 
 /*
  * Steps table A entries 19 and 48..50: 48 and 49 open their doors when the
@@ -23,7 +23,7 @@ void func_801ede88(void);
  * hits; then runs the script like creature_step_script.
  */
 ADDRESS(0x801ed7a4, 0x274)
-void func_801ed7a4(void)
+void map_step_creature(void)
 {
     Vis212 *e = vis_table_a.unk6138;
     Vis192 *r = vis_table_a.unk6134;
@@ -34,7 +34,7 @@ void func_801ed7a4(void)
 
     if (e == a48) {
         if (viewer.unk178 == 0x55 || viewer.unk178 == 0x29) {
-            func_801edba4(0x55);
+            map_talk_then_open_door(0x55);
             creature_despawn(e);
             return;
         }
@@ -44,7 +44,7 @@ void func_801ed7a4(void)
             e->unk8E = 0;
     }
     if (e == a50 && viewer.unk178 == 0x65) {
-        func_801ede88();
+        map_open_door_then_play_script();
         creature_despawn(e);
         creature_despawn(a48);
         creature_despawn(a49);
@@ -59,7 +59,7 @@ void func_801ed7a4(void)
             e->unk70 &= ~0x2000000;
     }
     if (e == a49 && viewer.unk178 == 0x61) {
-        func_801edba4(0x61);
+        map_talk_then_open_door(0x61);
         creature_despawn(e);
         return;
     }
@@ -85,7 +85,7 @@ void func_801ed7a4(void)
 }
 
 ADDRESS(0x801eda18, 0x8)
-void func_801eda18(void)
+void map_object_hook_none(void)
 {
 }
 
@@ -93,7 +93,7 @@ void func_801eda18(void)
  * Opens door 26 of table B: raises it to 0xfff, dropping item 2 on the way.
  */
 ADDRESS(0x801eda20, 0x184)
-void func_801eda20(void)
+void map_open_object_drop_item(void)
 {
     int step;
     VECTOR pos;
@@ -131,7 +131,7 @@ void func_801eda20(void)
  * records.
  */
 ADDRESS(0x801edba4, 0x2e4)
-void func_801edba4(int id)
+void map_talk_then_open_door(int id)
 {
     Vis212 *e;
     Vis88 *door;
@@ -197,7 +197,7 @@ void func_801edba4(int id)
  * plays the entry's script to its end.
  */
 ADDRESS(0x801ede88, 0x228)
-void func_801ede88(void)
+void map_open_door_then_play_script(void)
 {
     int raising_step;
     Vis212 *e = &vis_table_a.entries[50];

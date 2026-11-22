@@ -27,16 +27,16 @@
 RODATA(0x801eb560, 0x24c)
 
 void map_restore_progress();
-void func_801ed594();
-void func_801ed890();
+void map_update_events();
+void map_use_key_on_object();
 
 const FdatHeader fdat_header = {
     0x1a,
     {
-        map_hook_none, func_801ed594, map_hook_none, map_hook_none,
+        map_hook_none, map_update_events, map_hook_none, map_hook_none,
         map_hook_none, map_restore_progress, map_hook_none, map_hook_none,
         map_hook_none, map_hook_none, map_hook_none, map_hook_none,
-        func_801ed890, map_hook_none, map_hook_none, map_hook_none,
+        map_use_key_on_object, map_hook_none, map_hook_none, map_hook_none,
         creature_pick_move, creature_step_script, map_hook_none, map_hook_none,
         map_hook_none, map_hook_none, map_hook_none, map_hook_none,
         map_hook_none, map_hook_none, map_hook_none, map_hook_none,
@@ -65,7 +65,7 @@ static int fdat_801edcdc;
 DATA(0x801edce0, 0x4, ".bss")
 static int fdat_801edce0;
 
-void func_801edbd0(int which);
+void map_slide_ground_item(int which);
 
 /* Sets up the area by the second flag word's bits 8 and 9: table C items
  * 28/29, the scene words and the bridge pieces (table B kind 0x97). */
@@ -105,7 +105,7 @@ void map_restore_progress(void)
  * entry 3 are done the bridge rises 0x18 a frame for 0x97 frames.
  */
 ADDRESS(0x801ed594, 0x2fc)
-void func_801ed594(void)
+void map_update_events(void)
 {
     Vis48 *c28 = &vis_table_c.entries[28];
     Vis48 *c29 = &vis_table_c.entries[29];
@@ -118,7 +118,7 @@ void func_801ed594(void)
     int i;
 
     if (fdat_801edcd4 == 1) {
-        func_801edbd0(0);
+        map_slide_ground_item(0);
         fdat_801edcd4 = 2;
         d46->unk0C = 1;
         d46->unk02 = 0;
@@ -132,7 +132,7 @@ void func_801ed594(void)
             fdat_801edcd4 = 0xff;
     }
     if (fdat_801edcd8 == 1) {
-        func_801edbd0(1);
+        map_slide_ground_item(1);
         fdat_801edcd8 = 2;
         d2->unk0C = 1;
         d2->unk02 = 0;
@@ -172,7 +172,7 @@ void func_801ed594(void)
 
 /* Records events 0x2e and 2 when they come with flag 0x4000. */
 ADDRESS(0x801ed890, 0x4c)
-void func_801ed890(int event)
+void map_use_key_on_object(int event)
 {
     short id = event & ~0x4000;
 
@@ -190,7 +190,7 @@ void func_801ed890(int event)
 /* Lifts table C item 28 (`which` 0) or 29 by 0x200 along z, 24 a frame
  * while its model is loaded. */
 ADDRESS(0x801edbd0, 0x104)
-void func_801edbd0(int which)
+void map_slide_ground_item(int which)
 {
     int step = 24;
     Vis48 *item;

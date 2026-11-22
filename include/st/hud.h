@@ -43,7 +43,7 @@ void hud_update(void);
 void hud_draw_records(u8 first);
 void hud_queue_damage_number(short value);
 void world_render_frame(VECTOR *pos, SVECTOR *rot);
-/* Returns int as far as its callers can tell: FDAT_272's func_801eec74 only
+/* Returns int as far as its callers can tell: FDAT_272's map_turn_view_during_script only
  * matches when this call has a value (reload then keeps v0 free). Nothing
  * uses the result. */
 int world_run_frame(VECTOR *pos, SVECTOR *rot, int arg);

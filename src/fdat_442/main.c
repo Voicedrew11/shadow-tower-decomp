@@ -30,26 +30,26 @@ RODATA(0x801eb560, 0x1cc)
 DATA(0x801ed8c0, 0x4, ".bss")
 static int fdat_801ed8c0;
 
-/* The scene state: 0 until the ending is picked (func_801ed420 clears it). */
+/* The scene state: 0 until the ending is picked (map_enter_shop clears it). */
 DATA(0x801ed8c4, 0x4, ".bss")
 static int fdat_801ed8c4;
 
-/* Which ending plays: 0..3 by the viewer's state (see func_801ed454). */
+/* Which ending plays: 0..3 by the viewer's state (see map_pick_shopkeeper_line). */
 DATA(0x801ed8c8, 0x4, ".bss")
 static int fdat_801ed8c8;
 
-void func_801ed420();
-void func_801ed454();
-void func_801ed63c();
+void map_enter_shop();
+void map_pick_shopkeeper_line();
+void map_run_shop_visit();
 
 const FdatHeader fdat_header = {
     0x31,
     {
         map_hook_none, map_hook_none, map_hook_none, map_hook_none,
-        map_hook_none, func_801ed420, map_hook_none, map_hook_none,
+        map_hook_none, map_enter_shop, map_hook_none, map_hook_none,
         map_hook_none, map_hook_none, map_hook_none, map_hook_none,
         map_hook_none, map_hook_none, map_hook_none, map_hook_none,
-        func_801ed454, func_801ed63c, map_hook_none, map_hook_none,
+        map_pick_shopkeeper_line, map_run_shop_visit, map_hook_none, map_hook_none,
         map_hook_none, map_hook_none, map_hook_none, map_hook_none,
         map_hook_none, map_hook_none, map_hook_none, map_hook_none,
         map_hook_none, map_hook_none, map_hook_none, map_hook_none,
@@ -73,7 +73,7 @@ void shop_run(void);
  * figures and a random draw choose 2, 3, 4 or 5 (no stream).
  */
 ADDRESS(0x801ed454, 0x1e8)
-void func_801ed454(void)
+void map_pick_shopkeeper_line(void)
 {
     Vis212 *e = vis_table_a.unk6138;
     Vis192 *r = &vis_table_a.unk3500[e->unk02];
@@ -128,7 +128,7 @@ void func_801ed454(void)
  * 5 done) by the XA stream state in the world block.
  */
 ADDRESS(0x801ed63c, 0x284)
-void func_801ed63c(void)
+void map_run_shop_visit(void)
 {
     Vis212 *e = vis_table_a.unk6138;
     Vis192 *r = vis_table_a.unk6134;

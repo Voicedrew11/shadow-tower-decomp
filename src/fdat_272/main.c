@@ -2,7 +2,7 @@
  * FDAT_272.BIN as one translation unit (WIP module): its handler table,
  * the 21 functions every overlay starts with (src/lib/fdat_common_a.inc,
  * fdat_common.inc, fdat_common_b.inc), then its map handlers through the
- * palette blend. One object: the blend reads func_801ed4d0's RECT
+ * palette blend. One object: the blend reads map_update_events's RECT
  * initializer (cc1 pools one copy of equal constants), the read-only run
  * is one pool, and the scene words are consecutive statics.
  */
@@ -32,7 +32,7 @@ typedef struct {
     u32 r1 : 5, g1 : 5, b1 : 5, s1 : 1;
 } ClutPair;
 
-/* Table A entries that must all be beaten for flag 13 (func_801ed4d0). */
+/* Table A entries that must all be beaten for flag 13 (map_update_events). */
 DATA(0x801ef504, 0x18, ".data")
 static int fdat_801ef504[6] = {16, 17, 18, 19, 20, 21};
 
@@ -70,21 +70,21 @@ static int fdat_801ef938;
 DATA(0x801ef93c, 0x4, ".bss")
 static int fdat_801ef93c;
 
-void func_801ed4d0();
-void func_801ed760();
-void func_801edad8();
-void func_801edd24();
-void func_801ee43c();
-void func_801ee544(short id);
+void map_update_events();
+void map_restore_progress();
+void map_pick_creature_move();
+void map_step_creature();
+void map_object_take_equipment();
+void map_use_item_on_creature(short id);
 
 const FdatHeader fdat_header = {
     0x20,
     {
-        map_hook_none, func_801ed4d0, map_hook_none, map_hook_none,
-        map_hook_none, func_801ed760, map_hook_none, map_hook_none,
-        map_hook_none, func_801ee43c, map_hook_none, map_hook_none,
-        func_801ee544, map_hook_none, map_hook_none, map_hook_none,
-        func_801edad8, func_801edd24, map_hook_none, map_hook_none,
+        map_hook_none, map_update_events, map_hook_none, map_hook_none,
+        map_hook_none, map_restore_progress, map_hook_none, map_hook_none,
+        map_hook_none, map_object_take_equipment, map_hook_none, map_hook_none,
+        map_use_item_on_creature, map_hook_none, map_hook_none, map_hook_none,
+        map_pick_creature_move, map_step_creature, map_hook_none, map_hook_none,
         map_hook_none, map_hook_none, map_hook_none, map_hook_none,
         map_hook_none, map_hook_none, map_hook_none, map_hook_none,
         map_hook_none, map_hook_none, map_hook_none, map_hook_none,
@@ -96,16 +96,16 @@ const FdatHeader fdat_header = {
 #include "../lib/fdat_common.inc"
 #include "../lib/fdat_common_b.inc"
 
-void func_801ef1c0(void);
+void map_fade_palette_row(void);
 
 /*
  * Runs the gate stages (story flag bits 10-12) by table B entry 5's state;
  * sets flag 13 once the six entries of fdat_801ef504 are all beaten, then
- * counts down to func_801ef1c0's scene; moves the palette row 487 to 489
+ * counts down to map_fade_palette_row's scene; moves the palette row 487 to 489
  * when fdat_801ef934 asks.
  */
 ADDRESS(0x801ed4d0, 0x290)
-void func_801ed4d0(void)
+void map_update_events(void)
 {
     Vis88 *d5 = &vis_table_b.entries[5];
     Vis212 *e32 = &vis_table_a.entries[32];
@@ -136,7 +136,7 @@ void func_801ed4d0(void)
     }
     if (DAT_801cba08.unk1440.bit.f13 == 1 && fdat_801ef930 >= 0) {
         if (fdat_801ef930 == 0) {
-            func_801ef1c0();
+            map_fade_palette_row();
             fdat_801ef938 = 0xff;
         } else {
             fdat_801ef930--;
@@ -159,7 +159,7 @@ void func_801ed4d0(void)
  * and the scene stage (bits 8-9) poses entries 50/51 and table C item 28.
  */
 ADDRESS(0x801ed760, 0x378)
-void func_801ed760(void)
+void map_restore_progress(void)
 {
     Vis212 *e49 = &vis_table_a.entries[49];
     Vis212 *e48 = &vis_table_a.entries[48];
@@ -267,7 +267,7 @@ void func_801ed760(void)
  * stay as they are when no script was picked.
  */
 ADDRESS(0x801edad8, 0x24c)
-void func_801edad8(void)
+void map_pick_creature_move(void)
 {
     Vis212 *e = vis_table_a.unk6138;
     u16 wall;
@@ -322,13 +322,13 @@ void func_801edad8(void)
 }
 
 
-void func_801edad8(void);
-void func_801eead8(void);
-void func_801eebb4(void);
-void func_801eec74(void);
-void func_801eeeb4(void);
-void func_801eea14(void);
-void func_801ef07c(void);
+void map_pick_creature_move(void);
+void map_slide_ground_item(void);
+void map_open_object(void);
+void map_turn_view_during_script(void);
+void map_hand_over_item(void);
+void map_start_creature_pair_scene(void);
+void map_walk_creature_off(void);
 
 /*
  * The current entry's handler: kind 4 runs the item 0x12f scene once,
@@ -337,7 +337,7 @@ void func_801ef07c(void);
  * steps as creature_step_script does.
  */
 ADDRESS(0x801edd24, 0x718)
-void func_801edd24(void)
+void map_step_creature(void)
 {
     VisTableA *a = &vis_table_a;
     Vis212 *e48 = &a->entries[48];
@@ -355,14 +355,14 @@ void func_801edd24(void)
         pos.vx = e48->unk74.vx - 0xa00;
         pos.vz = e48->unk74.vz;
         player_glide_to_pose(&pos, &rot);
-        func_801eead8();
+        map_slide_ground_item();
         rot.vx = 0xc0;
         rot.vy = -0x500;
         player_glide_to_pose(&pos, &rot);
-        func_801eebb4();
-        func_801eec74();
+        map_open_object();
+        map_turn_view_during_script();
         creature_talk(e, 0, 0);
-        func_801eeeb4();
+        map_hand_over_item();
         creature_fade_out_despawn(e);
         fdat_801ef93c = 2;
         viewer.unk218 = 0;
@@ -374,7 +374,7 @@ void func_801edd24(void)
             viewer.unk218 = 5;
             creature_force_talk(e, 0, 0);
             player_turn_to_creature(e);
-            func_801ef07c();
+            map_walk_creature_off();
             viewer.unk218 = 0;
             e->unk00 = 100;
             e->unk8E = 0x400;
@@ -435,7 +435,7 @@ void func_801edd24(void)
     }
     if (e->unk02 == 10) {
         if (e->unk64 != 0) {
-            func_801eea14();
+            map_start_creature_pair_scene();
             fdat_801ef924 = 3;
         }
         switch (fdat_801ef924) {
@@ -451,7 +451,7 @@ void func_801edd24(void)
             break;
         case 1:
             if (fdat_801ef920 == 0) {
-                func_801eea14();
+                map_start_creature_pair_scene();
                 fdat_801ef924 = 3;
             } else {
                 fdat_801ef920--;
@@ -492,7 +492,7 @@ void func_801edd24(void)
                 creature_start_script(e, 0);
             } else {
                 e->unk1A = 0xff;
-                func_801edad8();
+                map_pick_creature_move();
             }
         } else if (e->unk02 == 10) {
             if (fdat_801ef924 < 2) {
@@ -512,7 +512,7 @@ repeat_current_script:
             e->unkB0 = 0;
         } else {
             e->unk1A = 0xff;
-            func_801edad8();
+            map_pick_creature_move();
         }
     }
     if (e->unkA8 != NULL) {
@@ -521,14 +521,14 @@ repeat_current_script:
     }
 }
 
-void func_801ee610(void);
-void func_801ee7d4(void);
-void func_801ee948(void);
+void map_take_equipment_raise_object(void);
+void map_play_two_creature_scripts(void);
+void map_talk_then_remove_creatures(void);
 
 /* Standing at table B entry 16 with item slot 3 below 50 and the scene not
  * yet run: walks up to it and plays the scene (scene stage 2). */
 ADDRESS(0x801ee43c, 0x108)
-void func_801ee43c(void)
+void map_object_take_equipment(void)
 {
     Vis88 *d = vis_table_b.unk71B0;
     Vis212 *e51 = &vis_table_a.entries[51];
@@ -543,10 +543,10 @@ void func_801ee43c(void)
         rot.vy = 0;
         viewer.unk218 = 5;
         player_glide_to_pose(&pos, &rot);
-        func_801ee610();
+        map_take_equipment_raise_object();
         player_turn_to_creature(e51);
-        func_801ee7d4();
-        func_801ee948();
+        map_play_two_creature_scripts();
+        map_talk_then_remove_creatures();
         viewer.unk218 = 0;
         fdat_801ef924 = 2;
         fdat_801ef92c = 2;
@@ -557,7 +557,7 @@ void func_801ee43c(void)
 /* Item 0x12f used in front of table A entry 0x30 sets fdat_801ef93c; the
  * result is 1 then, else 2. */
 ADDRESS(0x801ee544, 0xcc)
-void func_801ee544(short id)
+void map_use_item_on_creature(short id)
 {
     VECTOR p;
     VisRequest req;
@@ -587,7 +587,7 @@ void func_801ee544(short id)
 /* Takes the item of slot 3, recomputes the figures and slots, raises table
  * B entry 16 and slides table C item 28 along. */
 ADDRESS(0x801ee610, 0x1c4)
-void func_801ee610(void)
+void map_take_equipment_raise_object(void)
 {
     Vis88 *d16 = &vis_table_b.entries[16];
     u8 *speed = &d16->unk48;
@@ -644,7 +644,7 @@ item_placed:
  * through), table B entry 19 steps from state 11 to 12, and the view
  * pitches up 16 a frame for 16 frames. */
 ADDRESS(0x801ee7d4, 0x174)
-void func_801ee7d4(void)
+void map_play_two_creature_scripts(void)
 {
     Vis212 *e51 = &vis_table_a.entries[51];
     Vis88 *d19 = &vis_table_b.entries[19];
@@ -681,7 +681,7 @@ void func_801ee7d4(void)
 /* Bumps record 10's stream counter, sends entry 51 away (its scripts 0..2
  * become 0x80, 5..7 0x70..0x72) and restarts entry 50. */
 ADDRESS(0x801ee948, 0xcc)
-void func_801ee948(void)
+void map_talk_then_remove_creatures(void)
 {
     Vis212 *e = &vis_table_a.entries[51];
     Vis192 *r = &vis_table_a.unk3500[10];
@@ -704,7 +704,7 @@ void func_801ee948(void)
 /* Once: entry 51 plays animation 8 and entry 50 animation 1, record 11's
  * ranges are set and the scene stage becomes 1. */
 ADDRESS(0x801eea14, 0xc4)
-void func_801eea14(void)
+void map_start_creature_pair_scene(void)
 {
     Vis212 *e51 = &vis_table_a.entries[51];
     Vis212 *e50 = e51 - 1;
@@ -726,7 +726,7 @@ void func_801eea14(void)
 
 /* Slides table C item 29 by 0x1ea, 24 a frame while its model is loaded. */
 ADDRESS(0x801eead8, 0xdc)
-void func_801eead8(void)
+void map_slide_ground_item(void)
 {
     Vis48 *item = &vis_table_c.entries[29];
     Vis44 *kind = &vis_table_c.unk0118[303];
@@ -753,7 +753,7 @@ void func_801eead8(void)
 
 /* Raises table B entry 15 until its state is 0xfff, then marks it open. */
 ADDRESS(0x801eebb4, 0xc0)
-void func_801eebb4(void)
+void map_open_object(void)
 {
     Vis88 *d = &vis_table_b.entries[15];
     int step;
@@ -776,7 +776,7 @@ void func_801eebb4(void)
 /* Entry 49 plays animation 0 to its end while the view turns from its
  * pitch and yaw to (0, -0x400). */
 ADDRESS(0x801eec74, 0x240)
-void func_801eec74(void)
+void map_turn_view_during_script(void)
 {
     SVECTOR from;
     SVECTOR to;
@@ -816,7 +816,7 @@ void func_801eec74(void)
  * Then the view settles and the item drops.
  */
 ADDRESS(0x801eeeb4, 0x1c8)
-void func_801eeeb4(void)
+void map_hand_over_item(void)
 {
     Vis212 *e = &vis_table_a.entries[49];
     Vis48 *c10 = &vis_table_c.entries[10];
@@ -854,7 +854,7 @@ void func_801eeeb4(void)
 /* Entry 32 plays animation 9 (the ground shakes through its middle part
  * and it starts moving near the end), then walks off along x to 0x3f000. */
 ADDRESS(0x801ef07c, 0x144)
-void func_801ef07c(void)
+void map_walk_creature_off(void)
 {
     Vis212 *e = &vis_table_a.entries[32];
 
@@ -886,7 +886,7 @@ void func_801ef07c(void)
  * call; at 0 loads row 487's copy and ends.
  */
 ADDRESS(0x801ef1c0, 0x344)
-void func_801ef1c0(void)
+void map_fade_palette_row(void)
 {
     RECT dst = {0, 489, 256, 1};
     RECT src = {0, 487, 256, 1};

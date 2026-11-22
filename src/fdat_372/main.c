@@ -27,18 +27,18 @@
 RODATA(0x801eb560, 0x24c)
 
 void map_restore_progress();
-void func_801ed510();
-void func_801ed688();
-void func_801ed9b4();
+void map_update_events();
+void map_pick_creature_move();
+void map_talk_on_player_death();
 
 const FdatHeader fdat_header = {
     0x2a,
     {
-        map_hook_none, func_801ed510, map_hook_none, map_hook_none,
+        map_hook_none, map_update_events, map_hook_none, map_hook_none,
         map_hook_none, map_restore_progress, map_hook_none, map_hook_none,
         map_hook_none, map_hook_none, map_hook_none, map_hook_none,
-        map_hook_none, func_801ed9b4, map_hook_none, map_hook_none,
-        func_801ed688, creature_step_script, map_hook_none, map_hook_none,
+        map_hook_none, map_talk_on_player_death, map_hook_none, map_hook_none,
+        map_pick_creature_move, creature_step_script, map_hook_none, map_hook_none,
         map_hook_none, map_hook_none, map_hook_none, map_hook_none,
         map_hook_none, map_hook_none, map_hook_none, map_hook_none,
         map_hook_none, map_hook_none, map_hook_none, map_hook_none,
@@ -73,7 +73,7 @@ void map_restore_progress(void)
  * sends table A entry 32; beaten, it changes the lighting of four areas
  * (flag 20) and leaves. */
 ADDRESS(0x801ed510, 0x178)
-void func_801ed510(void)
+void map_update_events(void)
 {
     Vis212 *e = &vis_table_a.entries[32];
     Vis192 *r = &vis_table_a.unk3500[5];
@@ -108,7 +108,7 @@ void func_801ed510(void)
  * (action 128) while its record's stream counter is 0.
  */
 ADDRESS(0x801ed688, 0x27c)
-void func_801ed688(void)
+void map_pick_creature_move(void)
 {
     Vis212 *e = vis_table_a.unk6138;
     Vis192 *r = vis_table_a.unk6134;
@@ -164,15 +164,15 @@ void func_801ed688(void)
     }
 }
 
-void func_801ed688(void);
-#define FDAT_PICK_MOVE func_801ed688
+void map_pick_creature_move(void);
+#define FDAT_PICK_MOVE map_pick_creature_move
 
 #include "../lib/fdat_801ed6e4.inc"
 
 /* In area 1, while flag 20 is clear, hands table A entry 32 to its exit once
  * its record's stream counter has started. */
 ADDRESS(0x801ed9b4, 0x88)
-void func_801ed9b4(void)
+void map_talk_on_player_death(void)
 {
     Vis212 *e;
     Vis192 *r;

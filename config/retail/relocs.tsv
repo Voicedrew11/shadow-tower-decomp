@@ -15065,7 +15065,7 @@ FDAT_182.BIN	0x801edc10	0x26b0		mips26	reachable-code	0x801ed65c	load		jal		manu
 FDAT_182.BIN	0x801edc18	0x26b8		mips26	reachable-code	0x80042c10	load		jal		manual-decoded	reviewed	fdat.map asm review
 FDAT_182.BIN	0x801edc20	0x26c0	0x801edc24	mips_hi16_lo16	reachable-code	0x801edc50	bss	fdat_801edc50	lui+sw		manual-decoded	reviewed	fdat.map asm review
 FDAT_202.BIN	0x801eb564	0x4		mips32_candidate	data-word	0x801ed498	load	map_hook_none	word		manual-decoded	reviewed	fdat.header rodata review
-FDAT_202.BIN	0x801eb568	0x8		mips32_candidate	data-word	0x801ed560	load	func_801ed560	word		manual-decoded	reviewed	fdat.header rodata review
+FDAT_202.BIN	0x801eb568	0x8		mips32_candidate	data-word	0x801ed560	load	map_update_switch_objects	word		manual-decoded	reviewed	fdat.header rodata review
 FDAT_202.BIN	0x801eb56c	0xc		mips32_candidate	data-word	0x801ed498	load	map_hook_none	word		manual-decoded	reviewed	fdat.header rodata review
 FDAT_202.BIN	0x801eb570	0x10		mips32_candidate	data-word	0x801ed498	load	map_hook_none	word		manual-decoded	reviewed	fdat.header rodata review
 FDAT_202.BIN	0x801eb574	0x14		mips32_candidate	data-word	0x801ed498	load	map_hook_none	word		manual-decoded	reviewed	fdat.header rodata review
@@ -15256,7 +15256,7 @@ FDAT_202.BIN	0x801ed9b0	0x2450		mips26	reachable-code	0x801ed9d0	load		j		manual
 FDAT_202.BIN	0x801ed9c8	0x2468		mips26	reachable-code	0x801ed710	load		jal		manual-decoded	reviewed	fdat.map asm review
 FDAT_202.BIN	0x801ed9e0	0x2480		mips26	reachable-code	0x801ebec4	load		jal		manual-decoded	reviewed	fdat.map asm review
 FDAT_212.BIN	0x801eb564	0x4		mips32_candidate	data-word	0x801ed498	load	map_hook_none	word		manual-decoded	reviewed	fdat.header rodata review
-FDAT_212.BIN	0x801eb568	0x8		mips32_candidate	data-word	0x801ed594	load	func_801ed594	word		manual-decoded	reviewed	fdat.header rodata review
+FDAT_212.BIN	0x801eb568	0x8		mips32_candidate	data-word	0x801ed594	load	map_update_events	word		manual-decoded	reviewed	fdat.header rodata review
 FDAT_212.BIN	0x801eb56c	0xc		mips32_candidate	data-word	0x801ed498	load	map_hook_none	word		manual-decoded	reviewed	fdat.header rodata review
 FDAT_212.BIN	0x801eb570	0x10		mips32_candidate	data-word	0x801ed498	load	map_hook_none	word		manual-decoded	reviewed	fdat.header rodata review
 FDAT_212.BIN	0x801eb574	0x14		mips32_candidate	data-word	0x801ed498	load	map_hook_none	word		manual-decoded	reviewed	fdat.header rodata review
@@ -15267,7 +15267,7 @@ FDAT_212.BIN	0x801eb584	0x24		mips32_candidate	data-word	0x801ed498	load	map_hoo
 FDAT_212.BIN	0x801eb588	0x28		mips32_candidate	data-word	0x801ed498	load	map_hook_none	word		manual-decoded	reviewed	fdat.header rodata review
 FDAT_212.BIN	0x801eb58c	0x2c		mips32_candidate	data-word	0x801ed498	load	map_hook_none	word		manual-decoded	reviewed	fdat.header rodata review
 FDAT_212.BIN	0x801eb590	0x30		mips32_candidate	data-word	0x801ed498	load	map_hook_none	word		manual-decoded	reviewed	fdat.header rodata review
-FDAT_212.BIN	0x801eb594	0x34		mips32_candidate	data-word	0x801ed890	load	func_801ed890	word		manual-decoded	reviewed	fdat.header rodata review
+FDAT_212.BIN	0x801eb594	0x34		mips32_candidate	data-word	0x801ed890	load	map_use_key_on_object	word		manual-decoded	reviewed	fdat.header rodata review
 FDAT_212.BIN	0x801eb598	0x38		mips32_candidate	data-word	0x801ed498	load	map_hook_none	word		manual-decoded	reviewed	fdat.header rodata review
 FDAT_212.BIN	0x801eb59c	0x3c		mips32_candidate	data-word	0x801ed498	load	map_hook_none	word		manual-decoded	reviewed	fdat.header rodata review
 FDAT_212.BIN	0x801eb5a0	0x40		mips32_candidate	data-word	0x801ed498	load	map_hook_none	word		manual-decoded	reviewed	fdat.header rodata review
@@ -15490,7 +15490,7 @@ FDAT_212.BIN	0x801edc9c	0x273c		mips26	reachable-code	0x80026dd4	load		jal		manu
 FDAT_212.BIN	0x801edca4	0x2744		mips26	reachable-code	0x801edc44	load		j		manual-decoded	reviewed	fdat.map asm review
 FDAT_212.BIN	0x801edcac	0x274c		mips26	reachable-code	0x80057d58	load		jal		manual-decoded	reviewed	fdat.map asm review
 FDAT_232.BIN	0x801eb564	0x4		mips32_candidate	data-word	0x801ed498	load	map_hook_none	word		manual-decoded	reviewed	fdat.header rodata review
-FDAT_232.BIN	0x801eb568	0x8		mips32_candidate	data-word	0x801ed59c	load	func_801ed59c	word		manual-decoded	reviewed	fdat.header rodata review
+FDAT_232.BIN	0x801eb568	0x8		mips32_candidate	data-word	0x801ed59c	load	map_update_events	word		manual-decoded	reviewed	fdat.header rodata review
 FDAT_232.BIN	0x801eb56c	0xc		mips32_candidate	data-word	0x801ed498	load	map_hook_none	word		manual-decoded	reviewed	fdat.header rodata review
 FDAT_232.BIN	0x801eb570	0x10		mips32_candidate	data-word	0x801ed498	load	map_hook_none	word		manual-decoded	reviewed	fdat.header rodata review
 FDAT_232.BIN	0x801eb574	0x14		mips32_candidate	data-word	0x801ed498	load	map_hook_none	word		manual-decoded	reviewed	fdat.header rodata review
@@ -15502,10 +15502,10 @@ FDAT_232.BIN	0x801eb588	0x28		mips32_candidate	data-word	0x801ed498	load	map_hoo
 FDAT_232.BIN	0x801eb58c	0x2c		mips32_candidate	data-word	0x801ed498	load	map_hook_none	word		manual-decoded	reviewed	fdat.header rodata review
 FDAT_232.BIN	0x801eb590	0x30		mips32_candidate	data-word	0x801ed498	load	map_hook_none	word		manual-decoded	reviewed	fdat.header rodata review
 FDAT_232.BIN	0x801eb594	0x34		mips32_candidate	data-word	0x801ed498	load	map_hook_none	word		manual-decoded	reviewed	fdat.header rodata review
-FDAT_232.BIN	0x801eb598	0x38		mips32_candidate	data-word	0x801edb08	load	func_801edb08	word		manual-decoded	reviewed	fdat.header rodata review
+FDAT_232.BIN	0x801eb598	0x38		mips32_candidate	data-word	0x801edb08	load	map_talk_on_player_death	word		manual-decoded	reviewed	fdat.header rodata review
 FDAT_232.BIN	0x801eb59c	0x3c		mips32_candidate	data-word	0x801ed498	load	map_hook_none	word		manual-decoded	reviewed	fdat.header rodata review
 FDAT_232.BIN	0x801eb5a0	0x40		mips32_candidate	data-word	0x801ed498	load	map_hook_none	word		manual-decoded	reviewed	fdat.header rodata review
-FDAT_232.BIN	0x801eb5a4	0x44		mips32_candidate	data-word	0x801ed7d8	load	func_801ed7d8	word		manual-decoded	reviewed	fdat.header rodata review
+FDAT_232.BIN	0x801eb5a4	0x44		mips32_candidate	data-word	0x801ed7d8	load	map_pick_creature_move	word		manual-decoded	reviewed	fdat.header rodata review
 FDAT_232.BIN	0x801eb5a8	0x48		mips32_candidate	data-word	0x801eda58	load	creature_step_script	word		manual-decoded	reviewed	fdat.header rodata review
 FDAT_232.BIN	0x801eb5ac	0x4c		mips32_candidate	data-word	0x801ed498	load	map_hook_none	word		manual-decoded	reviewed	fdat.header rodata review
 FDAT_232.BIN	0x801eb5b0	0x50		mips32_candidate	data-word	0x801ed498	load	map_hook_none	word		manual-decoded	reviewed	fdat.header rodata review
@@ -15711,23 +15711,23 @@ FDAT_232.BIN	0x801edb0c	0x25ac	0x801edb10	mips_hi16_lo16	reachable-code	0x801bbb
 FDAT_232.BIN	0x801edb14	0x25b4	0x801edb20	mips_hi16_lo16	reachable-code	0x801cba08	bss	DAT_801cba08	lui+addiu		manual-decoded	reviewed	fdat.map asm review
 FDAT_232.BIN	0x801edb7c	0x261c		mips26	reachable-code	0x801ed388	load		jal		manual-decoded	reviewed	fdat.map asm review
 FDAT_242.BIN	0x801eb564	0x4		mips32_candidate	data-word	0x801ed4d8	load	map_hook_none	word		manual-decoded	reviewed	fdat.header rodata review
-FDAT_242.BIN	0x801eb568	0x8		mips32_candidate	data-word	0x801ed71c	load	func_801ed71c	word		manual-decoded	reviewed	fdat.header rodata review
+FDAT_242.BIN	0x801eb568	0x8		mips32_candidate	data-word	0x801ed71c	load	map_update_events	word		manual-decoded	reviewed	fdat.header rodata review
 FDAT_242.BIN	0x801eb56c	0xc		mips32_candidate	data-word	0x801ed4d8	load	map_hook_none	word		manual-decoded	reviewed	fdat.header rodata review
 FDAT_242.BIN	0x801eb570	0x10		mips32_candidate	data-word	0x801ed4d8	load	map_hook_none	word		manual-decoded	reviewed	fdat.header rodata review
 FDAT_242.BIN	0x801eb574	0x14		mips32_candidate	data-word	0x801ed4d8	load	map_hook_none	word		manual-decoded	reviewed	fdat.header rodata review
-FDAT_242.BIN	0x801eb578	0x18		mips32_candidate	data-word	0x801ed4e0	load	func_801ed4e0	word		manual-decoded	reviewed	fdat.header rodata review
+FDAT_242.BIN	0x801eb578	0x18		mips32_candidate	data-word	0x801ed4e0	load	map_restore_progress	word		manual-decoded	reviewed	fdat.header rodata review
 FDAT_242.BIN	0x801eb57c	0x1c		mips32_candidate	data-word	0x801ed4d8	load	map_hook_none	word		manual-decoded	reviewed	fdat.header rodata review
 FDAT_242.BIN	0x801eb580	0x20		mips32_candidate	data-word	0x801ed4d8	load	map_hook_none	word		manual-decoded	reviewed	fdat.header rodata review
 FDAT_242.BIN	0x801eb584	0x24		mips32_candidate	data-word	0x801ed4d8	load	map_hook_none	word		manual-decoded	reviewed	fdat.header rodata review
 FDAT_242.BIN	0x801eb588	0x28		mips32_candidate	data-word	0x801ed4d8	load	map_hook_none	word		manual-decoded	reviewed	fdat.header rodata review
 FDAT_242.BIN	0x801eb58c	0x2c		mips32_candidate	data-word	0x801ed4d8	load	map_hook_none	word		manual-decoded	reviewed	fdat.header rodata review
 FDAT_242.BIN	0x801eb590	0x30		mips32_candidate	data-word	0x801ed4d8	load	map_hook_none	word		manual-decoded	reviewed	fdat.header rodata review
-FDAT_242.BIN	0x801eb594	0x34		mips32_candidate	data-word	0x801edaa4	load	func_801edaa4	word		manual-decoded	reviewed	fdat.header rodata review
-FDAT_242.BIN	0x801eb598	0x38		mips32_candidate	data-word	0x801ede3c	load	func_801ede3c	word		manual-decoded	reviewed	fdat.header rodata review
+FDAT_242.BIN	0x801eb594	0x34		mips32_candidate	data-word	0x801edaa4	load	map_use_item_advance_scene	word		manual-decoded	reviewed	fdat.header rodata review
+FDAT_242.BIN	0x801eb598	0x38		mips32_candidate	data-word	0x801ede3c	load	map_talk_on_player_death	word		manual-decoded	reviewed	fdat.header rodata review
 FDAT_242.BIN	0x801eb59c	0x3c		mips32_candidate	data-word	0x801ed4d8	load	map_hook_none	word		manual-decoded	reviewed	fdat.header rodata review
 FDAT_242.BIN	0x801eb5a0	0x40		mips32_candidate	data-word	0x801ed4d8	load	map_hook_none	word		manual-decoded	reviewed	fdat.header rodata review
 FDAT_242.BIN	0x801eb5a4	0x44		mips32_candidate	data-word	0x801edb10	load	creature_pick_move	word		manual-decoded	reviewed	fdat.header rodata review
-FDAT_242.BIN	0x801eb5a8	0x48		mips32_candidate	data-word	0x801edd54	load	func_801edd54	word		manual-decoded	reviewed	fdat.header rodata review
+FDAT_242.BIN	0x801eb5a8	0x48		mips32_candidate	data-word	0x801edd54	load	map_step_creature	word		manual-decoded	reviewed	fdat.header rodata review
 FDAT_242.BIN	0x801eb5ac	0x4c		mips32_candidate	data-word	0x801ed4d8	load	map_hook_none	word		manual-decoded	reviewed	fdat.header rodata review
 FDAT_242.BIN	0x801eb5b0	0x50		mips32_candidate	data-word	0x801ed4d8	load	map_hook_none	word		manual-decoded	reviewed	fdat.header rodata review
 FDAT_242.BIN	0x801eb5b4	0x54		mips32_candidate	data-word	0x801ed4d8	load	map_hook_none	word		manual-decoded	reviewed	fdat.header rodata review
@@ -15994,7 +15994,7 @@ FDAT_242.BIN	0x801ee07c	0x2b1c		mips26	reachable-code	0x80079dcc	load		jal		manu
 FDAT_242.BIN	0x801ee084	0x2b24	0x801ee088	mips_hi16_lo16	reachable-code	0x801b5948	bss	vis_lists	lui+addiu		manual-decoded	reviewed	fdat.map asm review
 FDAT_242.BIN	0x801ee08c	0x2b2c	0x801ee098	mips_hi16_lo16	reachable-code	0x801ee0b4	bss	fdat_801ee0b4	lui+sw		manual-decoded	reviewed	fdat.map asm review
 FDAT_252.BIN	0x801eb564	0x4		mips32_candidate	data-word	0x801ed498	load	map_hook_none	word		manual-decoded	reviewed	fdat.header rodata review
-FDAT_252.BIN	0x801eb568	0x8		mips32_candidate	data-word	0x801ed4ec	load	func_801ed4ec	word		manual-decoded	reviewed	fdat.header rodata review
+FDAT_252.BIN	0x801eb568	0x8		mips32_candidate	data-word	0x801ed4ec	load	map_update_events	word		manual-decoded	reviewed	fdat.header rodata review
 FDAT_252.BIN	0x801eb56c	0xc		mips32_candidate	data-word	0x801ed498	load	map_hook_none	word		manual-decoded	reviewed	fdat.header rodata review
 FDAT_252.BIN	0x801eb570	0x10		mips32_candidate	data-word	0x801ed498	load	map_hook_none	word		manual-decoded	reviewed	fdat.header rodata review
 FDAT_252.BIN	0x801eb574	0x14		mips32_candidate	data-word	0x801ed498	load	map_hook_none	word		manual-decoded	reviewed	fdat.header rodata review
@@ -16009,7 +16009,7 @@ FDAT_252.BIN	0x801eb594	0x34		mips32_candidate	data-word	0x801ed498	load	map_hoo
 FDAT_252.BIN	0x801eb598	0x38		mips32_candidate	data-word	0x801ed498	load	map_hook_none	word		manual-decoded	reviewed	fdat.header rodata review
 FDAT_252.BIN	0x801eb59c	0x3c		mips32_candidate	data-word	0x801ed498	load	map_hook_none	word		manual-decoded	reviewed	fdat.header rodata review
 FDAT_252.BIN	0x801eb5a0	0x40		mips32_candidate	data-word	0x801ed498	load	map_hook_none	word		manual-decoded	reviewed	fdat.header rodata review
-FDAT_252.BIN	0x801eb5a4	0x44		mips32_candidate	data-word	0x801ed5b4	load	func_801ed5b4	word		manual-decoded	reviewed	fdat.header rodata review
+FDAT_252.BIN	0x801eb5a4	0x44		mips32_candidate	data-word	0x801ed5b4	load	map_pick_creature_move	word		manual-decoded	reviewed	fdat.header rodata review
 FDAT_252.BIN	0x801eb5a8	0x48		mips32_candidate	data-word	0x801ed81c	load	creature_step_script	word		manual-decoded	reviewed	fdat.header rodata review
 FDAT_252.BIN	0x801eb5ac	0x4c		mips32_candidate	data-word	0x801ed498	load	map_hook_none	word		manual-decoded	reviewed	fdat.header rodata review
 FDAT_252.BIN	0x801eb5b0	0x50		mips32_candidate	data-word	0x801ed498	load	map_hook_none	word		manual-decoded	reviewed	fdat.header rodata review
@@ -16177,7 +16177,7 @@ FDAT_252.BIN	0x801ed878	0x2318		mips26	reachable-code	0x801ed898	load		j		manual
 FDAT_252.BIN	0x801ed890	0x2330		mips26	reachable-code	0x801ed5b4	load		jal		manual-decoded	reviewed	fdat.map asm review
 FDAT_252.BIN	0x801ed8a8	0x2348		mips26	reachable-code	0x801ebec4	load		jal		manual-decoded	reviewed	fdat.map asm review
 FDAT_262.BIN	0x801eb564	0x4		mips32_candidate	data-word	0x801ed498	load	map_hook_none	word		manual-decoded	reviewed	fdat.header rodata review
-FDAT_262.BIN	0x801eb568	0x8		mips32_candidate	data-word	0x801ed740	load	func_801ed740	word		manual-decoded	reviewed	fdat.header rodata review
+FDAT_262.BIN	0x801eb568	0x8		mips32_candidate	data-word	0x801ed740	load	map_update_events	word		manual-decoded	reviewed	fdat.header rodata review
 FDAT_262.BIN	0x801eb56c	0xc		mips32_candidate	data-word	0x801ed498	load	map_hook_none	word		manual-decoded	reviewed	fdat.header rodata review
 FDAT_262.BIN	0x801eb570	0x10		mips32_candidate	data-word	0x801ed498	load	map_hook_none	word		manual-decoded	reviewed	fdat.header rodata review
 FDAT_262.BIN	0x801eb574	0x14		mips32_candidate	data-word	0x801ed498	load	map_hook_none	word		manual-decoded	reviewed	fdat.header rodata review
@@ -16188,12 +16188,12 @@ FDAT_262.BIN	0x801eb584	0x24		mips32_candidate	data-word	0x801ed498	load	map_hoo
 FDAT_262.BIN	0x801eb588	0x28		mips32_candidate	data-word	0x801ed498	load	map_hook_none	word		manual-decoded	reviewed	fdat.header rodata review
 FDAT_262.BIN	0x801eb58c	0x2c		mips32_candidate	data-word	0x801ed498	load	map_hook_none	word		manual-decoded	reviewed	fdat.header rodata review
 FDAT_262.BIN	0x801eb590	0x30		mips32_candidate	data-word	0x801ed498	load	map_hook_none	word		manual-decoded	reviewed	fdat.header rodata review
-FDAT_262.BIN	0x801eb594	0x34		mips32_candidate	data-word	0x801edb0c	load	func_801edb0c	word		manual-decoded	reviewed	fdat.header rodata review
+FDAT_262.BIN	0x801eb594	0x34		mips32_candidate	data-word	0x801edb0c	load	map_use_item_on_object	word		manual-decoded	reviewed	fdat.header rodata review
 FDAT_262.BIN	0x801eb598	0x38		mips32_candidate	data-word	0x801ed498	load	map_hook_none	word		manual-decoded	reviewed	fdat.header rodata review
 FDAT_262.BIN	0x801eb59c	0x3c		mips32_candidate	data-word	0x801ed498	load	map_hook_none	word		manual-decoded	reviewed	fdat.header rodata review
 FDAT_262.BIN	0x801eb5a0	0x40		mips32_candidate	data-word	0x801ed498	load	map_hook_none	word		manual-decoded	reviewed	fdat.header rodata review
-FDAT_262.BIN	0x801eb5a4	0x44		mips32_candidate	data-word	0x801edc18	load	func_801edc18	word		manual-decoded	reviewed	fdat.header rodata review
-FDAT_262.BIN	0x801eb5a8	0x48		mips32_candidate	data-word	0x801edec4	load	func_801edec4	word		manual-decoded	reviewed	fdat.header rodata review
+FDAT_262.BIN	0x801eb5a4	0x44		mips32_candidate	data-word	0x801edc18	load	map_pick_creature_move	word		manual-decoded	reviewed	fdat.header rodata review
+FDAT_262.BIN	0x801eb5a8	0x48		mips32_candidate	data-word	0x801edec4	load	map_step_creature	word		manual-decoded	reviewed	fdat.header rodata review
 FDAT_262.BIN	0x801eb5ac	0x4c		mips32_candidate	data-word	0x801ed498	load	map_hook_none	word		manual-decoded	reviewed	fdat.header rodata review
 FDAT_262.BIN	0x801eb5b0	0x50		mips32_candidate	data-word	0x801ed498	load	map_hook_none	word		manual-decoded	reviewed	fdat.header rodata review
 FDAT_262.BIN	0x801eb5b4	0x54		mips32_candidate	data-word	0x801ed498	load	map_hook_none	word		manual-decoded	reviewed	fdat.header rodata review
@@ -16467,23 +16467,23 @@ FDAT_262.BIN	0x801ee2bc	0x2d5c	0x801ee2c0	mips_hi16_lo16	reachable-code	0x801c76
 FDAT_262.BIN	0x801ee2d8	0x2d78		mips26	reachable-code	0x801ee2e8	load		j		manual-decoded	reviewed	fdat.map asm review
 FDAT_262.BIN	0x801ee348	0x2de8		mips26	reachable-code	0x8004d804	load		jal		manual-decoded	reviewed	fdat.map asm review
 FDAT_272.BIN	0x801eb564	0x4		mips32_candidate	data-word	0x801ed4c8	load	map_hook_none	word		manual-decoded	reviewed	fdat.header rodata review
-FDAT_272.BIN	0x801eb568	0x8		mips32_candidate	data-word	0x801ed4d0	load	func_801ed4d0	word		manual-decoded	reviewed	fdat.header rodata review
+FDAT_272.BIN	0x801eb568	0x8		mips32_candidate	data-word	0x801ed4d0	load	map_update_events	word		manual-decoded	reviewed	fdat.header rodata review
 FDAT_272.BIN	0x801eb56c	0xc		mips32_candidate	data-word	0x801ed4c8	load	map_hook_none	word		manual-decoded	reviewed	fdat.header rodata review
 FDAT_272.BIN	0x801eb570	0x10		mips32_candidate	data-word	0x801ed4c8	load	map_hook_none	word		manual-decoded	reviewed	fdat.header rodata review
 FDAT_272.BIN	0x801eb574	0x14		mips32_candidate	data-word	0x801ed4c8	load	map_hook_none	word		manual-decoded	reviewed	fdat.header rodata review
-FDAT_272.BIN	0x801eb578	0x18		mips32_candidate	data-word	0x801ed760	load	func_801ed760	word		manual-decoded	reviewed	fdat.header rodata review
+FDAT_272.BIN	0x801eb578	0x18		mips32_candidate	data-word	0x801ed760	load	map_restore_progress	word		manual-decoded	reviewed	fdat.header rodata review
 FDAT_272.BIN	0x801eb57c	0x1c		mips32_candidate	data-word	0x801ed4c8	load	map_hook_none	word		manual-decoded	reviewed	fdat.header rodata review
 FDAT_272.BIN	0x801eb580	0x20		mips32_candidate	data-word	0x801ed4c8	load	map_hook_none	word		manual-decoded	reviewed	fdat.header rodata review
 FDAT_272.BIN	0x801eb584	0x24		mips32_candidate	data-word	0x801ed4c8	load	map_hook_none	word		manual-decoded	reviewed	fdat.header rodata review
-FDAT_272.BIN	0x801eb588	0x28		mips32_candidate	data-word	0x801ee43c	load	func_801ee43c	word		manual-decoded	reviewed	fdat.header rodata review
+FDAT_272.BIN	0x801eb588	0x28		mips32_candidate	data-word	0x801ee43c	load	map_object_take_equipment	word		manual-decoded	reviewed	fdat.header rodata review
 FDAT_272.BIN	0x801eb58c	0x2c		mips32_candidate	data-word	0x801ed4c8	load	map_hook_none	word		manual-decoded	reviewed	fdat.header rodata review
 FDAT_272.BIN	0x801eb590	0x30		mips32_candidate	data-word	0x801ed4c8	load	map_hook_none	word		manual-decoded	reviewed	fdat.header rodata review
-FDAT_272.BIN	0x801eb594	0x34		mips32_candidate	data-word	0x801ee544	load	func_801ee544	word		manual-decoded	reviewed	fdat.header rodata review
+FDAT_272.BIN	0x801eb594	0x34		mips32_candidate	data-word	0x801ee544	load	map_use_item_on_creature	word		manual-decoded	reviewed	fdat.header rodata review
 FDAT_272.BIN	0x801eb598	0x38		mips32_candidate	data-word	0x801ed4c8	load	map_hook_none	word		manual-decoded	reviewed	fdat.header rodata review
 FDAT_272.BIN	0x801eb59c	0x3c		mips32_candidate	data-word	0x801ed4c8	load	map_hook_none	word		manual-decoded	reviewed	fdat.header rodata review
 FDAT_272.BIN	0x801eb5a0	0x40		mips32_candidate	data-word	0x801ed4c8	load	map_hook_none	word		manual-decoded	reviewed	fdat.header rodata review
-FDAT_272.BIN	0x801eb5a4	0x44		mips32_candidate	data-word	0x801edad8	load	func_801edad8	word		manual-decoded	reviewed	fdat.header rodata review
-FDAT_272.BIN	0x801eb5a8	0x48		mips32_candidate	data-word	0x801edd24	load	func_801edd24	word		manual-decoded	reviewed	fdat.header rodata review
+FDAT_272.BIN	0x801eb5a4	0x44		mips32_candidate	data-word	0x801edad8	load	map_pick_creature_move	word		manual-decoded	reviewed	fdat.header rodata review
+FDAT_272.BIN	0x801eb5a8	0x48		mips32_candidate	data-word	0x801edd24	load	map_step_creature	word		manual-decoded	reviewed	fdat.header rodata review
 FDAT_272.BIN	0x801eb5ac	0x4c		mips32_candidate	data-word	0x801ed4c8	load	map_hook_none	word		manual-decoded	reviewed	fdat.header rodata review
 FDAT_272.BIN	0x801eb5b0	0x50		mips32_candidate	data-word	0x801ed4c8	load	map_hook_none	word		manual-decoded	reviewed	fdat.header rodata review
 FDAT_272.BIN	0x801eb5b4	0x54		mips32_candidate	data-word	0x801ed4c8	load	map_hook_none	word		manual-decoded	reviewed	fdat.header rodata review
@@ -16897,7 +16897,7 @@ FDAT_282.BIN	0x801eb578	0x18		mips32_candidate	data-word	0x801ed4e8	load	map_res
 FDAT_282.BIN	0x801eb57c	0x1c		mips32_candidate	data-word	0x801ed498	load	map_hook_none	word		manual-decoded	reviewed	fdat.header rodata review
 FDAT_282.BIN	0x801eb580	0x20		mips32_candidate	data-word	0x801ed498	load	map_hook_none	word		manual-decoded	reviewed	fdat.header rodata review
 FDAT_282.BIN	0x801eb584	0x24		mips32_candidate	data-word	0x801ed498	load	map_hook_none	word		manual-decoded	reviewed	fdat.header rodata review
-FDAT_282.BIN	0x801eb588	0x28		mips32_candidate	data-word	0x801eda18	load	func_801eda18	word		manual-decoded	reviewed	fdat.header rodata review
+FDAT_282.BIN	0x801eb588	0x28		mips32_candidate	data-word	0x801eda18	load	map_object_hook_none	word		manual-decoded	reviewed	fdat.header rodata review
 FDAT_282.BIN	0x801eb58c	0x2c		mips32_candidate	data-word	0x801ed498	load	map_hook_none	word		manual-decoded	reviewed	fdat.header rodata review
 FDAT_282.BIN	0x801eb590	0x30		mips32_candidate	data-word	0x801ed498	load	map_hook_none	word		manual-decoded	reviewed	fdat.header rodata review
 FDAT_282.BIN	0x801eb594	0x34		mips32_candidate	data-word	0x801ed498	load	map_hook_none	word		manual-decoded	reviewed	fdat.header rodata review
@@ -16905,7 +16905,7 @@ FDAT_282.BIN	0x801eb598	0x38		mips32_candidate	data-word	0x801ed498	load	map_hoo
 FDAT_282.BIN	0x801eb59c	0x3c		mips32_candidate	data-word	0x801ed498	load	map_hook_none	word		manual-decoded	reviewed	fdat.header rodata review
 FDAT_282.BIN	0x801eb5a0	0x40		mips32_candidate	data-word	0x801ed498	load	map_hook_none	word		manual-decoded	reviewed	fdat.header rodata review
 FDAT_282.BIN	0x801eb5a4	0x44		mips32_candidate	data-word	0x801ed560	load	creature_pick_move	word		manual-decoded	reviewed	fdat.header rodata review
-FDAT_282.BIN	0x801eb5a8	0x48		mips32_candidate	data-word	0x801ed7a4	load	func_801ed7a4	word		manual-decoded	reviewed	fdat.header rodata review
+FDAT_282.BIN	0x801eb5a8	0x48		mips32_candidate	data-word	0x801ed7a4	load	map_step_creature	word		manual-decoded	reviewed	fdat.header rodata review
 FDAT_282.BIN	0x801eb5ac	0x4c		mips32_candidate	data-word	0x801ed498	load	map_hook_none	word		manual-decoded	reviewed	fdat.header rodata review
 FDAT_282.BIN	0x801eb5b0	0x50		mips32_candidate	data-word	0x801ed498	load	map_hook_none	word		manual-decoded	reviewed	fdat.header rodata review
 FDAT_282.BIN	0x801eb5b4	0x54		mips32_candidate	data-word	0x801ed498	load	map_hook_none	word		manual-decoded	reviewed	fdat.header rodata review
@@ -17122,7 +17122,7 @@ FDAT_282.BIN	0x801ee024	0x2ac4		mips26	reachable-code	0x801eb7b4	load		jal		manu
 FDAT_282.BIN	0x801ee060	0x2b00		mips26	reachable-code	0x80026dd4	load		jal		manual-decoded	reviewed	fdat.map asm review
 FDAT_282.BIN	0x801ee074	0x2b14	0x801ee07c	mips_hi16_lo16	reachable-code	0x801cba08	bss	DAT_801cba08	lui+addiu		manual-decoded	reviewed	fdat.map asm review
 FDAT_302.BIN	0x801eb564	0x4		mips32_candidate	data-word	0x801ed498	load	map_hook_none	word		manual-decoded	reviewed	fdat.header rodata review
-FDAT_302.BIN	0x801eb568	0x8		mips32_candidate	data-word	0x801ed5b0	load	func_801ed5b0	word		manual-decoded	reviewed	fdat.header rodata review
+FDAT_302.BIN	0x801eb568	0x8		mips32_candidate	data-word	0x801ed5b0	load	map_update_events	word		manual-decoded	reviewed	fdat.header rodata review
 FDAT_302.BIN	0x801eb56c	0xc		mips32_candidate	data-word	0x801ed498	load	map_hook_none	word		manual-decoded	reviewed	fdat.header rodata review
 FDAT_302.BIN	0x801eb570	0x10		mips32_candidate	data-word	0x801ed498	load	map_hook_none	word		manual-decoded	reviewed	fdat.header rodata review
 FDAT_302.BIN	0x801eb574	0x14		mips32_candidate	data-word	0x801ed498	load	map_hook_none	word		manual-decoded	reviewed	fdat.header rodata review
@@ -17134,11 +17134,11 @@ FDAT_302.BIN	0x801eb588	0x28		mips32_candidate	data-word	0x801ed498	load	map_hoo
 FDAT_302.BIN	0x801eb58c	0x2c		mips32_candidate	data-word	0x801ed498	load	map_hook_none	word		manual-decoded	reviewed	fdat.header rodata review
 FDAT_302.BIN	0x801eb590	0x30		mips32_candidate	data-word	0x801ed498	load	map_hook_none	word		manual-decoded	reviewed	fdat.header rodata review
 FDAT_302.BIN	0x801eb594	0x34		mips32_candidate	data-word	0x801ed498	load	map_hook_none	word		manual-decoded	reviewed	fdat.header rodata review
-FDAT_302.BIN	0x801eb598	0x38		mips32_candidate	data-word	0x801ee37c	load	func_801ee37c	word		manual-decoded	reviewed	fdat.header rodata review
+FDAT_302.BIN	0x801eb598	0x38		mips32_candidate	data-word	0x801ee37c	load	map_talk_on_player_death	word		manual-decoded	reviewed	fdat.header rodata review
 FDAT_302.BIN	0x801eb59c	0x3c		mips32_candidate	data-word	0x801ed498	load	map_hook_none	word		manual-decoded	reviewed	fdat.header rodata review
 FDAT_302.BIN	0x801eb5a0	0x40		mips32_candidate	data-word	0x801ed498	load	map_hook_none	word		manual-decoded	reviewed	fdat.header rodata review
 FDAT_302.BIN	0x801eb5a4	0x44		mips32_candidate	data-word	0x801eda1c	load	creature_pick_move	word		manual-decoded	reviewed	fdat.header rodata review
-FDAT_302.BIN	0x801eb5a8	0x48		mips32_candidate	data-word	0x801edc60	load	func_801edc60	word		manual-decoded	reviewed	fdat.header rodata review
+FDAT_302.BIN	0x801eb5a8	0x48		mips32_candidate	data-word	0x801edc60	load	map_step_creature	word		manual-decoded	reviewed	fdat.header rodata review
 FDAT_302.BIN	0x801eb5ac	0x4c		mips32_candidate	data-word	0x801ed498	load	map_hook_none	word		manual-decoded	reviewed	fdat.header rodata review
 FDAT_302.BIN	0x801eb5b0	0x50		mips32_candidate	data-word	0x801ed498	load	map_hook_none	word		manual-decoded	reviewed	fdat.header rodata review
 FDAT_302.BIN	0x801eb5b4	0x54		mips32_candidate	data-word	0x801ed498	load	map_hook_none	word		manual-decoded	reviewed	fdat.header rodata review
@@ -17613,7 +17613,7 @@ FDAT_332.BIN	0x801eb598	0x38		mips32_candidate	data-word	0x801ed498	load	map_hoo
 FDAT_332.BIN	0x801eb59c	0x3c		mips32_candidate	data-word	0x801ed498	load	map_hook_none	word		manual-decoded	reviewed	fdat.header rodata review
 FDAT_332.BIN	0x801eb5a0	0x40		mips32_candidate	data-word	0x801ed498	load	map_hook_none	word		manual-decoded	reviewed	fdat.header rodata review
 FDAT_332.BIN	0x801eb5a4	0x44		mips32_candidate	data-word	0x801ed6c0	load	creature_pick_move	word		manual-decoded	reviewed	fdat.header rodata review
-FDAT_332.BIN	0x801eb5a8	0x48		mips32_candidate	data-word	0x801ed904	load	func_801ed904	word		manual-decoded	reviewed	fdat.header rodata review
+FDAT_332.BIN	0x801eb5a8	0x48		mips32_candidate	data-word	0x801ed904	load	map_step_creature	word		manual-decoded	reviewed	fdat.header rodata review
 FDAT_332.BIN	0x801eb5ac	0x4c		mips32_candidate	data-word	0x801ed498	load	map_hook_none	word		manual-decoded	reviewed	fdat.header rodata review
 FDAT_332.BIN	0x801eb5b0	0x50		mips32_candidate	data-word	0x801ed498	load	map_hook_none	word		manual-decoded	reviewed	fdat.header rodata review
 FDAT_332.BIN	0x801eb5b4	0x54		mips32_candidate	data-word	0x801ed498	load	map_hook_none	word		manual-decoded	reviewed	fdat.header rodata review
@@ -17806,7 +17806,7 @@ FDAT_332.BIN	0x801edac4	0x2564		mips26	reachable-code	0x801eb7b4	load		jal		manu
 FDAT_332.BIN	0x801edaf4	0x2594	0x801edafc	mips_hi16_lo16	reachable-code	0x80199140	bss	viewer	lui+sb		manual-decoded	reviewed	fdat.map asm review
 FDAT_332.BIN	0x801edaf8	0x2598	0x801edb04	mips_hi16_lo16	reachable-code	0x801edb3c	bss	fdat_801edb3c	lui+sw		manual-decoded	reviewed	fdat.map asm review
 FDAT_372.BIN	0x801eb564	0x4		mips32_candidate	data-word	0x801ed498	load	map_hook_none	word		manual-decoded	reviewed	fdat.header rodata review
-FDAT_372.BIN	0x801eb568	0x8		mips32_candidate	data-word	0x801ed510	load	func_801ed510	word		manual-decoded	reviewed	fdat.header rodata review
+FDAT_372.BIN	0x801eb568	0x8		mips32_candidate	data-word	0x801ed510	load	map_update_events	word		manual-decoded	reviewed	fdat.header rodata review
 FDAT_372.BIN	0x801eb56c	0xc		mips32_candidate	data-word	0x801ed498	load	map_hook_none	word		manual-decoded	reviewed	fdat.header rodata review
 FDAT_372.BIN	0x801eb570	0x10		mips32_candidate	data-word	0x801ed498	load	map_hook_none	word		manual-decoded	reviewed	fdat.header rodata review
 FDAT_372.BIN	0x801eb574	0x14		mips32_candidate	data-word	0x801ed498	load	map_hook_none	word		manual-decoded	reviewed	fdat.header rodata review
@@ -17818,10 +17818,10 @@ FDAT_372.BIN	0x801eb588	0x28		mips32_candidate	data-word	0x801ed498	load	map_hoo
 FDAT_372.BIN	0x801eb58c	0x2c		mips32_candidate	data-word	0x801ed498	load	map_hook_none	word		manual-decoded	reviewed	fdat.header rodata review
 FDAT_372.BIN	0x801eb590	0x30		mips32_candidate	data-word	0x801ed498	load	map_hook_none	word		manual-decoded	reviewed	fdat.header rodata review
 FDAT_372.BIN	0x801eb594	0x34		mips32_candidate	data-word	0x801ed498	load	map_hook_none	word		manual-decoded	reviewed	fdat.header rodata review
-FDAT_372.BIN	0x801eb598	0x38		mips32_candidate	data-word	0x801ed9b4	load	func_801ed9b4	word		manual-decoded	reviewed	fdat.header rodata review
+FDAT_372.BIN	0x801eb598	0x38		mips32_candidate	data-word	0x801ed9b4	load	map_talk_on_player_death	word		manual-decoded	reviewed	fdat.header rodata review
 FDAT_372.BIN	0x801eb59c	0x3c		mips32_candidate	data-word	0x801ed498	load	map_hook_none	word		manual-decoded	reviewed	fdat.header rodata review
 FDAT_372.BIN	0x801eb5a0	0x40		mips32_candidate	data-word	0x801ed498	load	map_hook_none	word		manual-decoded	reviewed	fdat.header rodata review
-FDAT_372.BIN	0x801eb5a4	0x44		mips32_candidate	data-word	0x801ed688	load	func_801ed688	word		manual-decoded	reviewed	fdat.header rodata review
+FDAT_372.BIN	0x801eb5a4	0x44		mips32_candidate	data-word	0x801ed688	load	map_pick_creature_move	word		manual-decoded	reviewed	fdat.header rodata review
 FDAT_372.BIN	0x801eb5a8	0x48		mips32_candidate	data-word	0x801ed904	load	creature_step_script	word		manual-decoded	reviewed	fdat.header rodata review
 FDAT_372.BIN	0x801eb5ac	0x4c		mips32_candidate	data-word	0x801ed498	load	map_hook_none	word		manual-decoded	reviewed	fdat.header rodata review
 FDAT_372.BIN	0x801eb5b0	0x50		mips32_candidate	data-word	0x801ed498	load	map_hook_none	word		manual-decoded	reviewed	fdat.header rodata review
@@ -18003,7 +18003,7 @@ FDAT_372.BIN	0x801ed9b8	0x2458	0x801ed9bc	mips_hi16_lo16	reachable-code	0x801bbb
 FDAT_372.BIN	0x801ed9c0	0x2460	0x801ed9cc	mips_hi16_lo16	reachable-code	0x801cba08	bss	DAT_801cba08	lui+addiu		manual-decoded	reviewed	fdat.map asm review
 FDAT_372.BIN	0x801eda24	0x24c4		mips26	reachable-code	0x801ed388	load		jal		manual-decoded	reviewed	fdat.map asm review
 FDAT_382.BIN	0x801eb564	0x4		mips32_candidate	data-word	0x801ed498	load	map_hook_none	word		manual-decoded	reviewed	fdat.header rodata review
-FDAT_382.BIN	0x801eb568	0x8		mips32_candidate	data-word	0x801ed588	load	func_801ed588	word		manual-decoded	reviewed	fdat.header rodata review
+FDAT_382.BIN	0x801eb568	0x8		mips32_candidate	data-word	0x801ed588	load	map_update_events	word		manual-decoded	reviewed	fdat.header rodata review
 FDAT_382.BIN	0x801eb56c	0xc		mips32_candidate	data-word	0x801ed498	load	map_hook_none	word		manual-decoded	reviewed	fdat.header rodata review
 FDAT_382.BIN	0x801eb570	0x10		mips32_candidate	data-word	0x801ed498	load	map_hook_none	word		manual-decoded	reviewed	fdat.header rodata review
 FDAT_382.BIN	0x801eb574	0x14		mips32_candidate	data-word	0x801ed498	load	map_hook_none	word		manual-decoded	reviewed	fdat.header rodata review
@@ -18015,11 +18015,11 @@ FDAT_382.BIN	0x801eb588	0x28		mips32_candidate	data-word	0x801ed498	load	map_hoo
 FDAT_382.BIN	0x801eb58c	0x2c		mips32_candidate	data-word	0x801ed498	load	map_hook_none	word		manual-decoded	reviewed	fdat.header rodata review
 FDAT_382.BIN	0x801eb590	0x30		mips32_candidate	data-word	0x801ed498	load	map_hook_none	word		manual-decoded	reviewed	fdat.header rodata review
 FDAT_382.BIN	0x801eb594	0x34		mips32_candidate	data-word	0x801ed498	load	map_hook_none	word		manual-decoded	reviewed	fdat.header rodata review
-FDAT_382.BIN	0x801eb598	0x38		mips32_candidate	data-word	0x801eda74	load	func_801eda74	word		manual-decoded	reviewed	fdat.header rodata review
+FDAT_382.BIN	0x801eb598	0x38		mips32_candidate	data-word	0x801eda74	load	map_talk_on_player_death	word		manual-decoded	reviewed	fdat.header rodata review
 FDAT_382.BIN	0x801eb59c	0x3c		mips32_candidate	data-word	0x801ed498	load	map_hook_none	word		manual-decoded	reviewed	fdat.header rodata review
 FDAT_382.BIN	0x801eb5a0	0x40		mips32_candidate	data-word	0x801ed498	load	map_hook_none	word		manual-decoded	reviewed	fdat.header rodata review
-FDAT_382.BIN	0x801eb5a4	0x44		mips32_candidate	data-word	0x801ed74c	load	func_801ed74c	word		manual-decoded	reviewed	fdat.header rodata review
-FDAT_382.BIN	0x801eb5a8	0x48		mips32_candidate	data-word	0x801ed9b4	load	func_801ed9b4	word		manual-decoded	reviewed	fdat.header rodata review
+FDAT_382.BIN	0x801eb5a4	0x44		mips32_candidate	data-word	0x801ed74c	load	map_pick_creature_move	word		manual-decoded	reviewed	fdat.header rodata review
+FDAT_382.BIN	0x801eb5a8	0x48		mips32_candidate	data-word	0x801ed9b4	load	map_step_creature	word		manual-decoded	reviewed	fdat.header rodata review
 FDAT_382.BIN	0x801eb5ac	0x4c		mips32_candidate	data-word	0x801ed498	load	map_hook_none	word		manual-decoded	reviewed	fdat.header rodata review
 FDAT_382.BIN	0x801eb5b0	0x50		mips32_candidate	data-word	0x801ed498	load	map_hook_none	word		manual-decoded	reviewed	fdat.header rodata review
 FDAT_382.BIN	0x801eb5b4	0x54		mips32_candidate	data-word	0x801ed498	load	map_hook_none	word		manual-decoded	reviewed	fdat.header rodata review
@@ -18564,7 +18564,7 @@ FDAT_442.BIN	0x801eb568	0x8		mips32_candidate	data-word	0x801ed418	load	map_hook
 FDAT_442.BIN	0x801eb56c	0xc		mips32_candidate	data-word	0x801ed418	load	map_hook_none	word		manual-decoded	reviewed	fdat.header rodata review
 FDAT_442.BIN	0x801eb570	0x10		mips32_candidate	data-word	0x801ed418	load	map_hook_none	word		manual-decoded	reviewed	fdat.header rodata review
 FDAT_442.BIN	0x801eb574	0x14		mips32_candidate	data-word	0x801ed418	load	map_hook_none	word		manual-decoded	reviewed	fdat.header rodata review
-FDAT_442.BIN	0x801eb578	0x18		mips32_candidate	data-word	0x801ed420	load	func_801ed420	word		manual-decoded	reviewed	fdat.header rodata review
+FDAT_442.BIN	0x801eb578	0x18		mips32_candidate	data-word	0x801ed420	load	map_enter_shop	word		manual-decoded	reviewed	fdat.header rodata review
 FDAT_442.BIN	0x801eb57c	0x1c		mips32_candidate	data-word	0x801ed418	load	map_hook_none	word		manual-decoded	reviewed	fdat.header rodata review
 FDAT_442.BIN	0x801eb580	0x20		mips32_candidate	data-word	0x801ed418	load	map_hook_none	word		manual-decoded	reviewed	fdat.header rodata review
 FDAT_442.BIN	0x801eb584	0x24		mips32_candidate	data-word	0x801ed418	load	map_hook_none	word		manual-decoded	reviewed	fdat.header rodata review
@@ -18575,8 +18575,8 @@ FDAT_442.BIN	0x801eb594	0x34		mips32_candidate	data-word	0x801ed418	load	map_hoo
 FDAT_442.BIN	0x801eb598	0x38		mips32_candidate	data-word	0x801ed418	load	map_hook_none	word		manual-decoded	reviewed	fdat.header rodata review
 FDAT_442.BIN	0x801eb59c	0x3c		mips32_candidate	data-word	0x801ed418	load	map_hook_none	word		manual-decoded	reviewed	fdat.header rodata review
 FDAT_442.BIN	0x801eb5a0	0x40		mips32_candidate	data-word	0x801ed418	load	map_hook_none	word		manual-decoded	reviewed	fdat.header rodata review
-FDAT_442.BIN	0x801eb5a4	0x44		mips32_candidate	data-word	0x801ed454	load	func_801ed454	word		manual-decoded	reviewed	fdat.header rodata review
-FDAT_442.BIN	0x801eb5a8	0x48		mips32_candidate	data-word	0x801ed63c	load	func_801ed63c	word		manual-decoded	reviewed	fdat.header rodata review
+FDAT_442.BIN	0x801eb5a4	0x44		mips32_candidate	data-word	0x801ed454	load	map_pick_shopkeeper_line	word		manual-decoded	reviewed	fdat.header rodata review
+FDAT_442.BIN	0x801eb5a8	0x48		mips32_candidate	data-word	0x801ed63c	load	map_run_shop_visit	word		manual-decoded	reviewed	fdat.header rodata review
 FDAT_442.BIN	0x801eb5ac	0x4c		mips32_candidate	data-word	0x801ed418	load	map_hook_none	word		manual-decoded	reviewed	fdat.header rodata review
 FDAT_442.BIN	0x801eb5b0	0x50		mips32_candidate	data-word	0x801ed418	load	map_hook_none	word		manual-decoded	reviewed	fdat.header rodata review
 FDAT_442.BIN	0x801eb5b4	0x54		mips32_candidate	data-word	0x801ed418	load	map_hook_none	word		manual-decoded	reviewed	fdat.header rodata review
@@ -18785,7 +18785,7 @@ FDAT_452.BIN	0x801eb568	0x8		mips32_candidate	data-word	0x801ed418	load	map_hook
 FDAT_452.BIN	0x801eb56c	0xc		mips32_candidate	data-word	0x801ed418	load	map_hook_none	word		manual-decoded	reviewed	fdat.header rodata review
 FDAT_452.BIN	0x801eb570	0x10		mips32_candidate	data-word	0x801ed418	load	map_hook_none	word		manual-decoded	reviewed	fdat.header rodata review
 FDAT_452.BIN	0x801eb574	0x14		mips32_candidate	data-word	0x801ed418	load	map_hook_none	word		manual-decoded	reviewed	fdat.header rodata review
-FDAT_452.BIN	0x801eb578	0x18		mips32_candidate	data-word	0x801ed420	load	func_801ed420	word		manual-decoded	reviewed	fdat.header rodata review
+FDAT_452.BIN	0x801eb578	0x18		mips32_candidate	data-word	0x801ed420	load	map_enter_shop	word		manual-decoded	reviewed	fdat.header rodata review
 FDAT_452.BIN	0x801eb57c	0x1c		mips32_candidate	data-word	0x801ed418	load	map_hook_none	word		manual-decoded	reviewed	fdat.header rodata review
 FDAT_452.BIN	0x801eb580	0x20		mips32_candidate	data-word	0x801ed418	load	map_hook_none	word		manual-decoded	reviewed	fdat.header rodata review
 FDAT_452.BIN	0x801eb584	0x24		mips32_candidate	data-word	0x801ed418	load	map_hook_none	word		manual-decoded	reviewed	fdat.header rodata review
@@ -18796,8 +18796,8 @@ FDAT_452.BIN	0x801eb594	0x34		mips32_candidate	data-word	0x801ed418	load	map_hoo
 FDAT_452.BIN	0x801eb598	0x38		mips32_candidate	data-word	0x801ed418	load	map_hook_none	word		manual-decoded	reviewed	fdat.header rodata review
 FDAT_452.BIN	0x801eb59c	0x3c		mips32_candidate	data-word	0x801ed418	load	map_hook_none	word		manual-decoded	reviewed	fdat.header rodata review
 FDAT_452.BIN	0x801eb5a0	0x40		mips32_candidate	data-word	0x801ed418	load	map_hook_none	word		manual-decoded	reviewed	fdat.header rodata review
-FDAT_452.BIN	0x801eb5a4	0x44		mips32_candidate	data-word	0x801ed454	load	func_801ed454	word		manual-decoded	reviewed	fdat.header rodata review
-FDAT_452.BIN	0x801eb5a8	0x48		mips32_candidate	data-word	0x801ed740	load	func_801ed740	word		manual-decoded	reviewed	fdat.header rodata review
+FDAT_452.BIN	0x801eb5a4	0x44		mips32_candidate	data-word	0x801ed454	load	map_pick_shopkeeper_line	word		manual-decoded	reviewed	fdat.header rodata review
+FDAT_452.BIN	0x801eb5a8	0x48		mips32_candidate	data-word	0x801ed740	load	map_run_shop_visit	word		manual-decoded	reviewed	fdat.header rodata review
 FDAT_452.BIN	0x801eb5ac	0x4c		mips32_candidate	data-word	0x801ed418	load	map_hook_none	word		manual-decoded	reviewed	fdat.header rodata review
 FDAT_452.BIN	0x801eb5b0	0x50		mips32_candidate	data-word	0x801ed418	load	map_hook_none	word		manual-decoded	reviewed	fdat.header rodata review
 FDAT_452.BIN	0x801eb5b4	0x54		mips32_candidate	data-word	0x801ed418	load	map_hook_none	word		manual-decoded	reviewed	fdat.header rodata review
@@ -19002,7 +19002,7 @@ FDAT_462.BIN	0x801eb568	0x8		mips32_candidate	data-word	0x801ed418	load	map_hook
 FDAT_462.BIN	0x801eb56c	0xc		mips32_candidate	data-word	0x801ed418	load	map_hook_none	word		manual-decoded	reviewed	fdat.header rodata review
 FDAT_462.BIN	0x801eb570	0x10		mips32_candidate	data-word	0x801ed418	load	map_hook_none	word		manual-decoded	reviewed	fdat.header rodata review
 FDAT_462.BIN	0x801eb574	0x14		mips32_candidate	data-word	0x801ed418	load	map_hook_none	word		manual-decoded	reviewed	fdat.header rodata review
-FDAT_462.BIN	0x801eb578	0x18		mips32_candidate	data-word	0x801ed420	load	func_801ed420	word		manual-decoded	reviewed	fdat.header rodata review
+FDAT_462.BIN	0x801eb578	0x18		mips32_candidate	data-word	0x801ed420	load	map_enter_shop	word		manual-decoded	reviewed	fdat.header rodata review
 FDAT_462.BIN	0x801eb57c	0x1c		mips32_candidate	data-word	0x801ed418	load	map_hook_none	word		manual-decoded	reviewed	fdat.header rodata review
 FDAT_462.BIN	0x801eb580	0x20		mips32_candidate	data-word	0x801ed418	load	map_hook_none	word		manual-decoded	reviewed	fdat.header rodata review
 FDAT_462.BIN	0x801eb584	0x24		mips32_candidate	data-word	0x801ed418	load	map_hook_none	word		manual-decoded	reviewed	fdat.header rodata review
@@ -19013,8 +19013,8 @@ FDAT_462.BIN	0x801eb594	0x34		mips32_candidate	data-word	0x801ed418	load	map_hoo
 FDAT_462.BIN	0x801eb598	0x38		mips32_candidate	data-word	0x801ed418	load	map_hook_none	word		manual-decoded	reviewed	fdat.header rodata review
 FDAT_462.BIN	0x801eb59c	0x3c		mips32_candidate	data-word	0x801ed418	load	map_hook_none	word		manual-decoded	reviewed	fdat.header rodata review
 FDAT_462.BIN	0x801eb5a0	0x40		mips32_candidate	data-word	0x801ed418	load	map_hook_none	word		manual-decoded	reviewed	fdat.header rodata review
-FDAT_462.BIN	0x801eb5a4	0x44		mips32_candidate	data-word	0x801ed454	load	func_801ed454	word		manual-decoded	reviewed	fdat.header rodata review
-FDAT_462.BIN	0x801eb5a8	0x48		mips32_candidate	data-word	0x801ed760	load	func_801ed760	word		manual-decoded	reviewed	fdat.header rodata review
+FDAT_462.BIN	0x801eb5a4	0x44		mips32_candidate	data-word	0x801ed454	load	map_pick_shopkeeper_line	word		manual-decoded	reviewed	fdat.header rodata review
+FDAT_462.BIN	0x801eb5a8	0x48		mips32_candidate	data-word	0x801ed760	load	map_run_shop_visit	word		manual-decoded	reviewed	fdat.header rodata review
 FDAT_462.BIN	0x801eb5ac	0x4c		mips32_candidate	data-word	0x801ed418	load	map_hook_none	word		manual-decoded	reviewed	fdat.header rodata review
 FDAT_462.BIN	0x801eb5b0	0x50		mips32_candidate	data-word	0x801ed418	load	map_hook_none	word		manual-decoded	reviewed	fdat.header rodata review
 FDAT_462.BIN	0x801eb5b4	0x54		mips32_candidate	data-word	0x801ed418	load	map_hook_none	word		manual-decoded	reviewed	fdat.header rodata review
@@ -19221,7 +19221,7 @@ FDAT_472.BIN	0x801eb568	0x8		mips32_candidate	data-word	0x801ed418	load	map_hook
 FDAT_472.BIN	0x801eb56c	0xc		mips32_candidate	data-word	0x801ed418	load	map_hook_none	word		manual-decoded	reviewed	fdat.header rodata review
 FDAT_472.BIN	0x801eb570	0x10		mips32_candidate	data-word	0x801ed418	load	map_hook_none	word		manual-decoded	reviewed	fdat.header rodata review
 FDAT_472.BIN	0x801eb574	0x14		mips32_candidate	data-word	0x801ed418	load	map_hook_none	word		manual-decoded	reviewed	fdat.header rodata review
-FDAT_472.BIN	0x801eb578	0x18		mips32_candidate	data-word	0x801ed420	load	func_801ed420	word		manual-decoded	reviewed	fdat.header rodata review
+FDAT_472.BIN	0x801eb578	0x18		mips32_candidate	data-word	0x801ed420	load	map_enter_shop	word		manual-decoded	reviewed	fdat.header rodata review
 FDAT_472.BIN	0x801eb57c	0x1c		mips32_candidate	data-word	0x801ed418	load	map_hook_none	word		manual-decoded	reviewed	fdat.header rodata review
 FDAT_472.BIN	0x801eb580	0x20		mips32_candidate	data-word	0x801ed418	load	map_hook_none	word		manual-decoded	reviewed	fdat.header rodata review
 FDAT_472.BIN	0x801eb584	0x24		mips32_candidate	data-word	0x801ed418	load	map_hook_none	word		manual-decoded	reviewed	fdat.header rodata review
@@ -19232,8 +19232,8 @@ FDAT_472.BIN	0x801eb594	0x34		mips32_candidate	data-word	0x801ed418	load	map_hoo
 FDAT_472.BIN	0x801eb598	0x38		mips32_candidate	data-word	0x801ed418	load	map_hook_none	word		manual-decoded	reviewed	fdat.header rodata review
 FDAT_472.BIN	0x801eb59c	0x3c		mips32_candidate	data-word	0x801ed418	load	map_hook_none	word		manual-decoded	reviewed	fdat.header rodata review
 FDAT_472.BIN	0x801eb5a0	0x40		mips32_candidate	data-word	0x801ed418	load	map_hook_none	word		manual-decoded	reviewed	fdat.header rodata review
-FDAT_472.BIN	0x801eb5a4	0x44		mips32_candidate	data-word	0x801ed454	load	func_801ed454	word		manual-decoded	reviewed	fdat.header rodata review
-FDAT_472.BIN	0x801eb5a8	0x48		mips32_candidate	data-word	0x801ed67c	load	func_801ed67c	word		manual-decoded	reviewed	fdat.header rodata review
+FDAT_472.BIN	0x801eb5a4	0x44		mips32_candidate	data-word	0x801ed454	load	map_pick_shopkeeper_line	word		manual-decoded	reviewed	fdat.header rodata review
+FDAT_472.BIN	0x801eb5a8	0x48		mips32_candidate	data-word	0x801ed67c	load	map_run_shop_visit	word		manual-decoded	reviewed	fdat.header rodata review
 FDAT_472.BIN	0x801eb5ac	0x4c		mips32_candidate	data-word	0x801ed418	load	map_hook_none	word		manual-decoded	reviewed	fdat.header rodata review
 FDAT_472.BIN	0x801eb5b0	0x50		mips32_candidate	data-word	0x801ed418	load	map_hook_none	word		manual-decoded	reviewed	fdat.header rodata review
 FDAT_472.BIN	0x801eb5b4	0x54		mips32_candidate	data-word	0x801ed418	load	map_hook_none	word		manual-decoded	reviewed	fdat.header rodata review

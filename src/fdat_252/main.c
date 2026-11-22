@@ -26,17 +26,17 @@
 RODATA(0x801eb560, 0x24c)
 
 void map_restore_progress();
-void func_801ed4ec();
-void func_801ed5b4();
+void map_update_events();
+void map_pick_creature_move();
 
 const FdatHeader fdat_header = {
     0x1e,
     {
-        map_hook_none, func_801ed4ec, map_hook_none, map_hook_none,
+        map_hook_none, map_update_events, map_hook_none, map_hook_none,
         map_hook_none, map_restore_progress, map_hook_none, map_hook_none,
         map_hook_none, map_hook_none, map_hook_none, map_hook_none,
         map_hook_none, map_hook_none, map_hook_none, map_hook_none,
-        func_801ed5b4, creature_step_script, map_hook_none, map_hook_none,
+        map_pick_creature_move, creature_step_script, map_hook_none, map_hook_none,
         map_hook_none, map_hook_none, map_hook_none, map_hook_none,
         map_hook_none, map_hook_none, map_hook_none, map_hook_none,
         map_hook_none, map_hook_none, map_hook_none, map_hook_none,
@@ -71,7 +71,7 @@ void map_restore_progress(void)
  * table A entry 32 off (record 8 loses its range bits); otherwise the entry
  * keeps state 0x80. */
 ADDRESS(0x801ed4ec, 0xc8)
-void func_801ed4ec(void)
+void map_update_events(void)
 {
     Vis212 *e = &vis_table_a.entries[32];
     Vis192 *r = &vis_table_a.unk3500[8];
@@ -96,7 +96,7 @@ void func_801ed4ec(void)
  * (action 128) while fdat_801ed8cc is 0.
  */
 ADDRESS(0x801ed5b4, 0x268)
-void func_801ed5b4(void)
+void map_pick_creature_move(void)
 {
     Vis212 *e = vis_table_a.unk6138;
     u16 wall;
@@ -151,7 +151,7 @@ void func_801ed5b4(void)
     }
 }
 
-void func_801ed5b4(void);
-#define FDAT_PICK_MOVE func_801ed5b4
+void map_pick_creature_move(void);
+#define FDAT_PICK_MOVE map_pick_creature_move
 
 #include "../lib/fdat_801ed6e4.inc"

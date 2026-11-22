@@ -10,14 +10,14 @@
 #include <st/vis.h>
 #include <st/fdat.h>
 
-void func_801ed9e8(void);
+void map_kill_creature_open_warp(void);
 
 /*
  * The step of the overlay's entries, like creature_step_script: an entry of record
  * 4 plays the scene at the end of a run while it is armed.
  */
 ADDRESS(0x801ed904, 0xe4)
-void func_801ed904(void)
+void map_step_creature(void)
 {
     Vis212 *e = vis_table_a.unk6138;
 
@@ -26,7 +26,7 @@ void func_801ed904(void)
         return;
     if (e->unkB0 >= 0 ? (short)e->unk2A >= 4096 : (short)e->unk2A <= 0) {
         if (e->unk02 == 4 && fdat_801edb3c == 1) {
-            func_801ed9e8();
+            map_kill_creature_open_warp();
             return;
         }
         e->unk1A = 0xff;

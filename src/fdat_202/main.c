@@ -34,12 +34,12 @@ DATA(0x801eda08, 0x4, ".bss")
 static int fdat_801eda08;
 
 void map_restore_progress();
-void func_801ed560();
+void map_update_switch_objects();
 
 const FdatHeader fdat_header = {
     0x19,
     {
-        map_hook_none, func_801ed560, map_hook_none, map_hook_none,
+        map_hook_none, map_update_switch_objects, map_hook_none, map_hook_none,
         map_hook_none, map_restore_progress, map_hook_none, map_hook_none,
         map_hook_none, map_hook_none, map_hook_none, map_hook_none,
         map_hook_none, map_hook_none, map_hook_none, map_hook_none,
@@ -96,7 +96,7 @@ void map_restore_progress(void)
  * the first store and the flags gives the same bytes.
  */
 ADDRESS(0x801ed560, 0x1b0)
-void func_801ed560(void)
+void map_update_switch_objects(void)
 {
     Vis88 *sw = &vis_table_b.entries[33];
     int i;

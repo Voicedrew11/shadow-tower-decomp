@@ -27,7 +27,7 @@
  * drops (20/30/100 percent), dies (animation 12) and table B entry 3
  * opens; the area's history is reset (scene word 2). */
 ADDRESS(0x801ed9e8, 0x154)
-void func_801ed9e8(void)
+void map_kill_creature_open_warp(void)
 {
     Vis212 *e;
     Vis88 *d3;

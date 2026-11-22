@@ -26,18 +26,18 @@
 RODATA(0x801eb560, 0x24c)
 
 void map_restore_progress();
-void func_801ed59c();
-void func_801ed7d8();
-void func_801edb08();
+void map_update_events();
+void map_pick_creature_move();
+void map_talk_on_player_death();
 
 const FdatHeader fdat_header = {
     0x1c,
     {
-        map_hook_none, func_801ed59c, map_hook_none, map_hook_none,
+        map_hook_none, map_update_events, map_hook_none, map_hook_none,
         map_hook_none, map_restore_progress, map_hook_none, map_hook_none,
         map_hook_none, map_hook_none, map_hook_none, map_hook_none,
-        map_hook_none, func_801edb08, map_hook_none, map_hook_none,
-        func_801ed7d8, creature_step_script, map_hook_none, map_hook_none,
+        map_hook_none, map_talk_on_player_death, map_hook_none, map_hook_none,
+        map_pick_creature_move, creature_step_script, map_hook_none, map_hook_none,
         map_hook_none, map_hook_none, map_hook_none, map_hook_none,
         map_hook_none, map_hook_none, map_hook_none, map_hook_none,
         map_hook_none, map_hook_none, map_hook_none, map_hook_none,
@@ -92,7 +92,7 @@ void map_restore_progress(void)
  * leaves (flag 28).
  */
 ADDRESS(0x801ed59c, 0x23c)
-void func_801ed59c(void)
+void map_update_events(void)
 {
     Vis212 *e = &vis_table_a.entries[32];
     Vis192 *r = &vis_table_a.unk3500[12];
@@ -139,7 +139,7 @@ void func_801ed59c(void)
  * (action 128) until its record's stream counter reaches 2.
  */
 ADDRESS(0x801ed7d8, 0x280)
-void func_801ed7d8(void)
+void map_pick_creature_move(void)
 {
     Vis212 *e = vis_table_a.unk6138;
     Vis192 *r = vis_table_a.unk6134;
@@ -195,15 +195,15 @@ void func_801ed7d8(void)
     }
 }
 
-void func_801ed7d8(void);
-#define FDAT_PICK_MOVE func_801ed7d8
+void map_pick_creature_move(void);
+#define FDAT_PICK_MOVE map_pick_creature_move
 
 #include "../lib/fdat_801ed6e4.inc"
 
 /* In area 3, while flag 28 is clear, hands table A entry 32 to its exit once
  * its record's stream counter has reached 2. */
 ADDRESS(0x801edb08, 0x8c)
-void func_801edb08(void)
+void map_talk_on_player_death(void)
 {
     Vis212 *e;
     Vis192 *r;

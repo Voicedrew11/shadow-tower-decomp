@@ -25,17 +25,17 @@ RODATA(0x801eb560, 0x24c)
 
 void map_update_events();
 void map_restore_progress();
-void func_801ed7a4();
-void func_801eda18();
+void map_step_creature();
+void map_object_hook_none();
 
 const FdatHeader fdat_header = {
     0x21,
     {
         map_hook_none, map_update_events, map_hook_none, map_hook_none,
         map_hook_none, map_restore_progress, map_hook_none, map_hook_none,
-        map_hook_none, func_801eda18, map_hook_none, map_hook_none,
+        map_hook_none, map_object_hook_none, map_hook_none, map_hook_none,
         map_hook_none, map_hook_none, map_hook_none, map_hook_none,
-        creature_pick_move, func_801ed7a4, map_hook_none, map_hook_none,
+        creature_pick_move, map_step_creature, map_hook_none, map_hook_none,
         map_hook_none, map_hook_none, map_hook_none, map_hook_none,
         map_hook_none, map_hook_none, map_hook_none, map_hook_none,
         map_hook_none, map_hook_none, map_hook_none, map_hook_none,
@@ -47,7 +47,7 @@ const FdatHeader fdat_header = {
 #include "../lib/fdat_common.inc"
 #include "../lib/fdat_common_b.inc"
 
-void func_801eda20(void);
+void map_open_object_drop_item(void);
 
 /* Opens door 26 of table B unless it is already open. */
 ADDRESS(0x801ed4a0, 0x48)
@@ -56,7 +56,7 @@ void map_update_events(void)
     Vis88 *door = &vis_table_b.entries[26];
 
     if (door->unk0E != 0 && door->unk0C != 0xff)
-        func_801eda20();
+        map_open_object_drop_item();
 }
 
 /* Sets up the area: table C item 2 and table A entries 48..50. */

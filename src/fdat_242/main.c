@@ -25,7 +25,7 @@
 
 RODATA(0x801eb560, 0x28c)
 
-/* Frames the texture animation has run (func_801edebc). */
+/* Frames the texture animation has run (map_wind_down_texanims). */
 DATA(0x801ee0b0, 0x4, ".bss")
 static int fdat_801ee0b0;
 
@@ -41,20 +41,20 @@ int fdat_801ee0b8;
 DATA(0x801ee0bc, 0x4, ".bss")
 int fdat_801ee0bc;
 
-void func_801ed4e0();
-void func_801ed71c();
-void func_801edaa4(short id);
-void func_801edd54();
-void func_801ede3c();
+void map_restore_progress();
+void map_update_events();
+void map_use_item_advance_scene(short id);
+void map_step_creature();
+void map_talk_on_player_death();
 
 const FdatHeader fdat_header = {
     0x1d,
     {
-        map_hook_none, func_801ed71c, map_hook_none, map_hook_none,
-        map_hook_none, func_801ed4e0, map_hook_none, map_hook_none,
+        map_hook_none, map_update_events, map_hook_none, map_hook_none,
+        map_hook_none, map_restore_progress, map_hook_none, map_hook_none,
         map_hook_none, map_hook_none, map_hook_none, map_hook_none,
-        func_801edaa4, func_801ede3c, map_hook_none, map_hook_none,
-        creature_pick_move, func_801edd54, map_hook_none, map_hook_none,
+        map_use_item_advance_scene, map_talk_on_player_death, map_hook_none, map_hook_none,
+        creature_pick_move, map_step_creature, map_hook_none, map_hook_none,
         map_hook_none, map_hook_none, map_hook_none, map_hook_none,
         map_hook_none, map_hook_none, map_hook_none, map_hook_none,
         map_hook_none, map_hook_none, map_hook_none, map_hook_none,
@@ -66,14 +66,14 @@ const FdatHeader fdat_header = {
 #include "../lib/fdat_common.inc"
 #include "../lib/fdat_common_b.inc"
 
-void func_801edebc(void);
-void func_801edf2c(void);
+void map_wind_down_texanims(void);
+void map_move_texture_pages(void);
 
 /* Sets up the area by flag 17 and the stream counters of records 12 and
  * 13: entries 48..50, the gate scene stage fdat_801ee0b8 and table B
  * entry 2. */
 ADDRESS(0x801ed4e0, 0x23c)
-void func_801ed4e0(void)
+void map_restore_progress(void)
 {
     Vis212 *e48 = &vis_table_a.entries[48];
     Vis212 *e50 = &vis_table_a.entries[50];
@@ -138,13 +138,13 @@ void func_801ed4e0(void)
 
 /*
  * Runs the area: table B entries 4 then 3 open the exit scene
- * (func_801edebc, flag 17), which ends once the viewer leaves area 3; the
+ * (map_wind_down_texanims, flag 17), which ends once the viewer leaves area 3; the
  * viewer standing on records 0x126, 0xa0, 0x124 and 0x146 steps the gate
  * scene through entries 50, 48, 50 and 49; and the texture animation
  * starts or its pages are moved.
  */
 ADDRESS(0x801ed71c, 0x388)
-void func_801ed71c(void)
+void map_update_events(void)
 {
     Vis88 *d4 = &vis_table_b.entries[4];
     Vis212 *e48 = &vis_table_a.entries[48];
@@ -162,9 +162,9 @@ void func_801ed71c(void)
     if (fdat_801ee0b4 == 1 && d3->unk0C == 0xff)
         fdat_801ee0b4 = 2;
     if (fdat_801ee0b4 == 2)
-        func_801edebc();
+        map_wind_down_texanims();
     if (fdat_801ee0b4 == 3 && ((VisRecord *)viewer.unk174)->unk07 != 3) {
-        func_801edf2c();
+        map_move_texture_pages();
         creature_despawn(e48);
         e33->unk00 = 100;
     }
@@ -208,7 +208,7 @@ void func_801ed71c(void)
         texanim_start(&b, 2, 1, 0x31, 24);
         fdat_801ee0bc = 0;
     } else if (fdat_801ee0bc == 2 && area_state.unk0 == 0) {
-        func_801edf2c();
+        map_move_texture_pages();
         fdat_801ee0bc = 0;
     }
 }
@@ -216,7 +216,7 @@ void func_801ed71c(void)
 /* Event 0x10e opens the armed gate: table A entry 50 dies, 49 wakes, and
  * record stream counter 13 advances. */
 ADDRESS(0x801edaa4, 0x6c)
-void func_801edaa4(short id)
+void map_use_item_advance_scene(short id)
 {
     Vis212 *e = &vis_table_a.entries[50];
 
@@ -236,7 +236,7 @@ void func_801edaa4(short id)
  * restarts script 0 at the end of a run until stream counter 12 starts.
  */
 ADDRESS(0x801edd54, 0xe8)
-void func_801edd54(void)
+void map_step_creature(void)
 {
     Vis212 *e = vis_table_a.unk6138;
 
@@ -260,7 +260,7 @@ void func_801edd54(void)
 /* In area 0, unless the scene was played, hands table A entry 48 to its
  * exit once its record's stream counter has started. */
 ADDRESS(0x801ede3c, 0x80)
-void func_801ede3c(void)
+void map_talk_on_player_death(void)
 {
     Vis212 *e;
     Vis192 *r;
@@ -279,7 +279,7 @@ void func_801ede3c(void)
 /* Slows texture animations 0 and 1 every 4th frame for 32 frames, then
  * stops them and ends the scene. */
 ADDRESS(0x801edebc, 0x70)
-void func_801edebc(void)
+void map_wind_down_texanims(void)
 {
     StTexAnim *t0 = &world_state.texanim[0];
     StTexAnim *t1 = &world_state.texanim[1];
@@ -300,7 +300,7 @@ void func_801edebc(void)
 /* Moves the finished texture animation's pages and palette rows into
  * place and ends the exit scene. */
 ADDRESS(0x801edf2c, 0x184)
-void func_801edf2c(void)
+void map_move_texture_pages(void)
 {
     RECT a = {496, 0, 16, 64};
     RECT b = {480, 160, 16, 96};

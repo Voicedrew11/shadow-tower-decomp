@@ -38,19 +38,19 @@ DATA(0x801edb04, 0x4, ".bss")
 static int fdat_801edb04;
 
 void map_restore_progress();
-void func_801ed588();
-void func_801ed74c();
-void func_801ed9b4();
-void func_801eda74();
+void map_update_events();
+void map_pick_creature_move();
+void map_step_creature();
+void map_talk_on_player_death();
 
 const FdatHeader fdat_header = {
     0x2b,
     {
-        map_hook_none, func_801ed588, map_hook_none, map_hook_none,
+        map_hook_none, map_update_events, map_hook_none, map_hook_none,
         map_hook_none, map_restore_progress, map_hook_none, map_hook_none,
         map_hook_none, map_hook_none, map_hook_none, map_hook_none,
-        map_hook_none, func_801eda74, map_hook_none, map_hook_none,
-        func_801ed74c, func_801ed9b4, map_hook_none, map_hook_none,
+        map_hook_none, map_talk_on_player_death, map_hook_none, map_hook_none,
+        map_pick_creature_move, map_step_creature, map_hook_none, map_hook_none,
         map_hook_none, map_hook_none, map_hook_none, map_hook_none,
         map_hook_none, map_hook_none, map_hook_none, map_hook_none,
         map_hook_none, map_hook_none, map_hook_none, map_hook_none,
@@ -101,7 +101,7 @@ void map_restore_progress(void)
  * it, with entries 0 and 32 out of range); beaten, it changes the lighting
  * of four areas (flag 24) and leaves. */
 ADDRESS(0x801ed588, 0x1c4)
-void func_801ed588(void)
+void map_update_events(void)
 {
     Vis212 *e0 = vis_table_a.entries;
     Vis212 *e32 = &vis_table_a.entries[32];
@@ -144,7 +144,7 @@ void func_801ed588(void)
  * (action 128) while fdat_801edb00 is 0.
  */
 ADDRESS(0x801ed74c, 0x268)
-void func_801ed74c(void)
+void map_pick_creature_move(void)
 {
     Vis212 *e = vis_table_a.unk6138;
     u16 wall;
@@ -199,12 +199,12 @@ void func_801ed74c(void)
     }
 }
 
-void func_801ed74c(void);
+void map_pick_creature_move(void);
 
 /* The current entry's handler: the animation steps as creature_step_script does;
  * the next move is picked only once the scene ran. */
 ADDRESS(0x801ed9b4, 0xc0)
-void func_801ed9b4(void)
+void map_step_creature(void)
 {
     Vis212 *e = vis_table_a.unk6138;
 
@@ -213,7 +213,7 @@ void func_801ed9b4(void)
         return;
     if ((e->unkB0 >= 0 ? (short)e->unk2A >= 4096 : (short)e->unk2A <= 0) && fdat_801edb00 == 0xff) {
         e->unk1A = 0xff;
-        func_801ed74c();
+        map_pick_creature_move();
     }
     if (e->unkA8 != NULL) {
         creature_run_script_command(e);
@@ -224,7 +224,7 @@ void func_801ed9b4(void)
 /* In area 0, while flag 24 is clear, hands table A entry 32 to its exit once
  * its record's stream counter has reached 2. */
 ADDRESS(0x801eda74, 0x88)
-void func_801eda74(void)
+void map_talk_on_player_death(void)
 {
     Vis212 *e;
     Vis192 *r;

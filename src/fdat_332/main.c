@@ -27,7 +27,7 @@ RODATA(0x801eb560, 0x24c)
 
 void map_update_events();
 void map_restore_progress();
-void func_801ed904();
+void map_step_creature();
 
 const FdatHeader fdat_header = {
     0x26,
@@ -36,7 +36,7 @@ const FdatHeader fdat_header = {
         map_hook_none, map_restore_progress, map_hook_none, map_hook_none,
         map_hook_none, map_hook_none, map_hook_none, map_hook_none,
         map_hook_none, map_hook_none, map_hook_none, map_hook_none,
-        creature_pick_move, func_801ed904, map_hook_none, map_hook_none,
+        creature_pick_move, map_step_creature, map_hook_none, map_hook_none,
         map_hook_none, map_hook_none, map_hook_none, map_hook_none,
         map_hook_none, map_hook_none, map_hook_none, map_hook_none,
         map_hook_none, map_hook_none, map_hook_none, map_hook_none,

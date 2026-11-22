@@ -50,19 +50,19 @@ DATA(0x801ee384, 0x4, ".bss")
 static int fdat_801ee384;
 
 void map_restore_progress();
-void func_801ed740();
-void func_801edb0c(short id);
-void func_801edc18();
-void func_801edec4();
+void map_update_events();
+void map_use_item_on_object(short id);
+void map_pick_creature_move();
+void map_step_creature();
 
 const FdatHeader fdat_header = {
     0x1f,
     {
-        map_hook_none, func_801ed740, map_hook_none, map_hook_none,
+        map_hook_none, map_update_events, map_hook_none, map_hook_none,
         map_hook_none, map_restore_progress, map_hook_none, map_hook_none,
         map_hook_none, map_hook_none, map_hook_none, map_hook_none,
-        func_801edb0c, map_hook_none, map_hook_none, map_hook_none,
-        func_801edc18, func_801edec4, map_hook_none, map_hook_none,
+        map_use_item_on_object, map_hook_none, map_hook_none, map_hook_none,
+        map_pick_creature_move, map_step_creature, map_hook_none, map_hook_none,
         map_hook_none, map_hook_none, map_hook_none, map_hook_none,
         map_hook_none, map_hook_none, map_hook_none, map_hook_none,
         map_hook_none, map_hook_none, map_hook_none, map_hook_none,
@@ -74,9 +74,9 @@ const FdatHeader fdat_header = {
 #include "../lib/fdat_common.inc"
 #include "../lib/fdat_common_b.inc"
 
-void func_801edfb4(void);
-void func_801ee140(int which);
-void func_801ee278(int which);
+void map_hand_over_item(void);
+void map_slide_ground_item(int which);
+void map_redrop_ground_item(int which);
 
 /* Sets up the area by flags 14, 29, 30 and the second word's bits 10/11:
  * entry 48 (asleep, awake or gone), entries 50, 33 and 49, table B entry
@@ -163,12 +163,12 @@ void map_restore_progress(void)
 
 /*
  * Runs the area: entry 48 wakes when hit or once record 1's counter is 2
- * (func_801edfb4's scene) and changes its scripts after its flash; entry
+ * (map_hand_over_item's scene) and changes its scripts after its flash; entry
  * 50 leaves; the viewer on records 0x9c, 0xe9, 0xa0, 0xa2 or 0xa4 sends
  * entry 33 until entry 49 is beaten; item 0x129's two scenes run.
  */
 ADDRESS(0x801ed740, 0x3cc)
-void func_801ed740(void)
+void map_update_events(void)
 {
     Vis212 *e48 = &vis_table_a.entries[48];
     Vis192 *r1 = &vis_table_a.unk3500[1];
@@ -181,7 +181,7 @@ void func_801ed740(void)
 
     if (fdat_801ee370 == 0) {
         if (DAT_801cba08.unk1448[r1->unk09] == 2) {
-            func_801edfb4();
+            map_hand_over_item();
             creature_fade_out_despawn(e48);
             viewer.unk218 = 0;
             fdat_801ee370 = 0xff;
@@ -238,14 +238,14 @@ void func_801ed740(void)
         e33->unk1C.bytes[3] = 3;
     }
     if (fdat_801ee380 == 1) {
-        func_801ee140(0);
-        func_801ee278(0);
+        map_slide_ground_item(0);
+        map_redrop_ground_item(0);
         fdat_801ee380 = 0xff;
         DAT_801cba08.unk1444.word |= 0x400;
     }
     if (fdat_801ee384 == 1) {
-        func_801ee140(1);
-        func_801ee278(1);
+        map_slide_ground_item(1);
+        map_redrop_ground_item(1);
         fdat_801ee384 = 0xff;
         DAT_801cba08.unk1444.word |= 0x800;
     }
@@ -254,7 +254,7 @@ void func_801ed740(void)
 /* Item 0x129 used in front of table B entry 0x16 or 0x17 starts its
  * scene; the result is 1 then, else 2. */
 ADDRESS(0x801edb0c, 0x10c)
-void func_801edb0c(short id)
+void map_use_item_on_object(short id)
 {
     VECTOR p;
     VisRequest req;
@@ -292,7 +292,7 @@ void func_801edb0c(short id)
  * 10 while fdat_801ee370 is 0 or 253.
  */
 ADDRESS(0x801edc18, 0x2ac)
-void func_801edc18(void)
+void map_pick_creature_move(void)
 {
     Vis212 *e = vis_table_a.unk6138;
     u16 wall;
@@ -351,12 +351,12 @@ void func_801edc18(void)
     }
 }
 
-void func_801edc18(void);
+void map_pick_creature_move(void);
 
 /* The current entry's handler: the animation steps as creature_step_script does,
  * kind 1 replaying animation 10 while entry 48 sleeps. */
 ADDRESS(0x801edec4, 0xf0)
-void func_801edec4(void)
+void map_step_creature(void)
 {
     Vis212 *e = vis_table_a.unk6138;
 
@@ -368,7 +368,7 @@ void func_801edec4(void)
             creature_start_script(e, 10);
         } else {
             e->unk1A = 0xff;
-            func_801edc18();
+            map_pick_creature_move();
         }
     }
     if (e->unkA8 != NULL) {
@@ -383,7 +383,7 @@ void func_801edec4(void)
  * and the item drops.
  */
 ADDRESS(0x801edfb4, 0x18c)
-void func_801edfb4(void)
+void map_hand_over_item(void)
 {
     Vis212 *e = &vis_table_a.entries[48];
     Vis48 *c = &vis_table_c.entries[5];
@@ -415,7 +415,7 @@ void func_801edfb4(void)
 /* Slides table C item 28 (`which` 0, by -0x200) or 29 (by 0x200) along x,
  * 24 a frame while its model is loaded. */
 ADDRESS(0x801ee140, 0x138)
-void func_801ee140(int which)
+void map_slide_ground_item(int which)
 {
     Vis48 *item;
     int end;
@@ -455,7 +455,7 @@ void func_801ee140(int which)
  * are cleared.
  */
 ADDRESS(0x801ee278, 0xf8)
-void func_801ee278(int which)
+void map_redrop_ground_item(int which)
 {
     Vis212 e;
     Vis48 *a;

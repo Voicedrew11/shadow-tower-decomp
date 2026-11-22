@@ -285,7 +285,7 @@ typedef union {
     } bit;
     struct {
         u32 : 10;
-        u32 gate : 3; /* bits 10-12: FDAT_272.BIN's gate stage (func_801ed4d0) */
+        u32 gate : 3; /* bits 10-12: FDAT_272.BIN's gate stage (map_update_events) */
     } field;
 } Flags801cba08;
 
