@@ -1,7 +1,7 @@
 /*
  * ST.EXE: word/halfword copy and fill helpers and the first block heap
  * functions: merge, release and search (WIP module). The module ends at
- * func_80014e4c, which is not exact, so that the heap functions after it
+ * heap_find_free, which is not exact, so that the heap functions after it
  * keep their retail offsets in their own unit (src/st/heap.c).
  */
 #include <kf/lib/address.h>
@@ -14,7 +14,7 @@
 
 /* Returns the end of the source. */
 ADDRESS(0x80014cfc, 0x30)
-u32 *func_80014cfc(u32 *dst, u32 *src, int count)
+u32 *copy_words(u32 *dst, u32 *src, int count)
 {
     int left;
 
@@ -24,7 +24,7 @@ u32 *func_80014cfc(u32 *dst, u32 *src, int count)
 }
 
 ADDRESS(0x80014d2c, 0x30)
-u16 *func_80014d2c(u16 *dst, u16 *src, int count)
+u16 *copy_halfwords(u16 *dst, u16 *src, int count)
 {
     int left;
 
@@ -44,7 +44,7 @@ u32 *fill_words(u32 *dst, u32 value, int count)
 }
 
 ADDRESS(0x80014d80, 0x24)
-u16 *func_80014d80(u16 *dst, u16 value, int count)
+u16 *fill_halfwords(u16 *dst, u16 value, int count)
 {
     int left;
 
@@ -55,7 +55,7 @@ u16 *func_80014d80(u16 *dst, u16 value, int count)
 
 /* Merges the free blocks that follow a run of free blocks into `block`. */
 ADDRESS(0x80014da4, 0x7c)
-void func_80014da4(StBlock *block)
+void heap_merge_free(StBlock *block)
 {
     StBlock *p = block;
 
@@ -72,7 +72,7 @@ void func_80014da4(StBlock *block)
 }
 
 ADDRESS(0x80014e20, 0x2c)
-void func_80014e20(StBlock *block)
+void heap_block_release(StBlock *block)
 {
     block->state = ST_BLOCK_FREE;
     if (block->owner != NULL) {
@@ -88,7 +88,7 @@ void func_80014e20(StBlock *block)
  * releasable blocks spanning that many, released and merged.
  */
 ADDRESS(0x80014e4c, 0x144)
-StBlock *func_80014e4c(StBlock *heap, u32 size)
+StBlock *heap_find_free(StBlock *heap, u32 size)
 {
     StBlock *p;
     StBlock *run;
@@ -103,8 +103,8 @@ StBlock *func_80014e4c(StBlock *heap, u32 size)
                 ;
             if ((u8 *)p - (u8 *)run - sizeof(StBlock) >= size) {
                 for (p = run; p->state == ST_BLOCK_RELEASABLE; p = NEXT_BLOCK(p))
-                    func_80014e20(p);
-                func_80014da4(run);
+                    heap_block_release(p);
+                heap_merge_free(run);
                 return run;
             }
         } else {

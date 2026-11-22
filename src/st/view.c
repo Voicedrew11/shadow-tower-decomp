@@ -16,7 +16,7 @@
  * and closer than 12 units (of 2048).
  */
 ADDRESS(0x80016554, 0x324)
-int func_80016554(void)
+int view_point_in_near_cone(void)
 {
     ScratchPad *sp = SCRATCHPAD;
     int pitch = viewer.unk268;

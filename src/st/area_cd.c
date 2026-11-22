@@ -24,7 +24,7 @@ SVECTOR DAT_8008809c = {0, 0, 4096, 0};
 ADDRESS(0x80045f90, 0x28)
 void func_80045f90(int archive, int member, void (*done)())
 {
-    func_80015dfc(archive, member, (u8 *)DAT_80088c88, done);
+    cd_queue_stream_member(archive, member, (u8 *)DAT_80088c88, done);
 }
 
 /* Takes the next run of at most 16 sectors from the request's count. */
@@ -107,7 +107,7 @@ void func_80045ffc(void)
             request->unk10 = 2;
             request->unk24 = 0;
             request->done(request);
-            func_80015848(request);
+            cd_request_retire(request);
             return;
         }
         request->unk4.image.x = p[0];
@@ -116,7 +116,7 @@ void func_80045ffc(void)
         request->unk4.image.h = p[3];
         p += 8;
     }
-    func_80015a94(&request->unk18, request->unk28, &request->unk18);
+    cd_loc_add_sectors(&request->unk18, request->unk28, &request->unk18);
     func_80045fb8(request);
     request->unk1 = 0;
     DrawSync(0);

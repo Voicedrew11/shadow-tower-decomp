@@ -33,7 +33,7 @@ StAnimSet	24	4	unk18	u_long	candidate	asm;src/st/anim_set.c st.anim_set	the clip
 StAnimSet	28	4	unk1C	u_long	candidate	asm;src/st/anim_set.c st.anim_set	the clip length in frames (last block frame)
 StAnimSet	32	4	unk20	u_long	candidate	asm;src/st/anim_set.c st.anim_set	frame last posed, -1 when unset
 StAnimSet	36	4	unk24	StAnimBlock *	candidate	asm;src/st/anim_set.c st.anim_set	next block to run
-StAnimSet	40	4	unk28	StAnimNode *	candidate	asm;src/st/anim_set.c st.anim_set	node buffer from func_800152d0 (nodes first), freed by anim_set_free
+StAnimSet	40	4	unk28	StAnimNode *	candidate	asm;src/st/anim_set.c st.anim_set	node buffer from mem_alloc (nodes first), freed by anim_set_free
 StAnimSet	44	4	unk2C	StAnimRecord *	candidate	asm;src/st/anim_set.c st.anim_set	records in the node buffer
 StAnimSet	48	4	unk30	StAnimSubRecord *	candidate	asm;src/st/anim_set.c st.anim_set	sub-records in the node buffer
 StAnimSet	52	4	unk34	StAnimList *	candidate	asm;src/st/anim_set.c st.anim_set	node list in the node buffer
@@ -44,7 +44,7 @@ StAnimSlot	4	2	unk4	u16	candidate	asm;src/st/anim.c st.anim	clip, 255 when unset
 StAnimSlot	6	2	unk6	u16	candidate	asm;src/st/anim.c st.anim	key index inside the clip
 StAnimSlot	8	4	unk8	SVECTOR *	candidate	asm;src/st/anim.c st.anim	the key's start keyframe
 StAnimSlot	12	4	unkC	SVECTOR *	candidate	asm;src/st/anim.c st.anim	the key's end keyframe
-StAnimSlot	16	4	unk10	SVECTOR *	candidate	asm;src/st/anim.c st.anim	end minus start per vertex, from func_800152d0, freed by anim_slot_free
+StAnimSlot	16	4	unk10	SVECTOR *	candidate	asm;src/st/anim.c st.anim	end minus start per vertex, from mem_alloc, freed by anim_slot_free
 StAnimSlot	20	4	unk14	StAnimSlot **	candidate	asm;src/st/anim.c st.anim	the owner's slot pointer, cleared by anim_slot_free
 StAnimSubRecord	0	16	scale	VECTOR	candidate	asm;src/st/anim.c st.anim	ScaleMatrix input (4096ths)
 StAnimSubRecord	16	8	rot	SVECTOR	candidate	asm;src/st/anim.c st.anim	RotMatrix input

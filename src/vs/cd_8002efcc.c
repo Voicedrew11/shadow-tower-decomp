@@ -1,7 +1,7 @@
 /*
  * VS.EXE: stopping the drive, opening an archive, resetting the CD request
  * ring and a random particle offset (WIP module). The first two are VS's
- * copies of ST.EXE's func_8001624c and func_80016294 (src/st/cd.c).
+ * copies of ST.EXE's cd_stop_drive and cd_archive_open (src/st/cd.c).
  */
 #include <kf/lib/address.h>
 #include <kf/lib/types.h>
@@ -15,11 +15,11 @@
 #include <vs/data.h>
 #include <vs/funcs.h>
 
-/* func_8002f014's path parts. */
+/* cd_archive_open's path parts. */
 SDATA(0x800632e8, 0xb)
 
 ADDRESS(0x8002efcc, 0x48)
-void func_8002efcc(void)
+void cd_stop_drive(void)
 {
     u_char param[16];
 
@@ -34,7 +34,7 @@ void func_8002efcc(void)
  * loads its start-sector table.
  */
 ADDRESS(0x8002f014, 0xe0)
-void func_8002f014(u16 archive, char *name)
+void cd_archive_open(u16 archive, char *name)
 {
     struct {
         u16 count;
@@ -54,17 +54,17 @@ void func_8002f014(u16 archive, char *name)
         ;
     a->file.pos = file.pos;
     a->file.size = file.size;
-    func_8002ee54((u_long *)&header, &a->file, 2048);
-    sectors = func_8002e6d4((header.count + 1) * 2);
+    cd_read_file_extent((u_long *)&header, &a->file, 2048);
+    sectors = mem_alloc((header.count + 1) * 2);
     count = header.count + 1;
     source = header.sectors;
     a->sectors = sectors;
-    func_8002e660(sectors, source, count);
+    copy_halfwords(sectors, source, count);
 }
 
 /* Resets the CD request ring and callbacks, then stops the drive. */
 ADDRESS(0x8002f0f4, 0x80)
-void func_8002f0f4(void)
+void cd_init(void)
 {
     StCdRequest *r;
     int i;
@@ -84,13 +84,13 @@ void func_8002f0f4(void)
     CdReadyCallback(0);
     CdReadCallback(0);
     ExitCriticalSection();
-    func_8002efcc();
+    cd_stop_drive();
 }
 
 /* A random offset (x and z within +-8, y below `height`) and `pos` minus it
  * (y plus `dy`). */
 ADDRESS(0x8002f174, 0xf0)
-void func_8002f174(SVECTOR *offset, VECTOR *out, VECTOR *pos, short dy, short height)
+void effect_random_offset(SVECTOR *offset, VECTOR *out, VECTOR *pos, short dy, short height)
 {
     offset->vx = 8 - rand() / 2048;
     offset->vy = height - rand() / 1024;

@@ -176,7 +176,7 @@ void func_800222d8(int page)
     sp->unk238.h = 124;
     id = sp->unk0.menu.grid.ids0[(s16)(sp->unk0.menu.grid.row0 + sp->unk1D0)];
     if (id != -1 && id != -2) {
-        if ((s16)func_8001ca18() == 0) {
+        if ((s16)cd_queue_busy() == 0) {
             sp->unk240.vx = 640;
             sp->unk240.vy = 0;
             func_8001e530(&sp->unk238, &sp->unk240, NULL, NULL, 16);

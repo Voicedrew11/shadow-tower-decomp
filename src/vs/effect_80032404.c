@@ -592,7 +592,7 @@ ADDRESS(0x8003333c, 0x78)
 int func_8003333c(int arg0, u_long height, int spin)
 {
     StEffect *e = DAT_801ce698.cur;
-    int result = func_80032110(arg0, height);
+    int result = effect_reaches_opponent(arg0, height);
 
     e->unk20.vx += e->unk40.vx;
     e->unk20.vy += e->unk40.vy;
@@ -951,7 +951,7 @@ void func_800335e8(void)
         e->unk20.vz = e->unk1C->unk20.vz + len * rsin(e->unk1C->unk30.vy + 1024) / 4096;
         e->unk20.vy = 0;
         FADE_IN(e);
-        HIT_COUNTED(e, func_80032110(1024, 0x80000400));
+        HIT_COUNTED(e, effect_reaches_opponent(1024, 0x80000400));
         pos.vx = e->unk20.vx;
         pos.vy = e->unk20.vy;
         pos.vz = e->unk20.vz;
@@ -1217,7 +1217,7 @@ void func_800335e8(void)
         e->unk38.vz += 128;
         e->unkC = e->unk38.vx / 2;
         e->unk18 = e->unk38.vx / 2;
-        HIT_COUNTED(e, func_80032110(e->unkC, e->unk18 | 0x80000000));
+        HIT_COUNTED(e, effect_reaches_opponent(e->unkC, e->unk18 | 0x80000000));
         break;
     default:
         break;

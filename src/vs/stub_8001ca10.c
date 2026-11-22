@@ -23,7 +23,7 @@ void func_8001ca10(void)
 
 /* Nonzero while the CD request queue holds or runs a request. */
 ADDRESS(0x8001ca18, 0x5c)
-int func_8001ca18(void)
+int cd_queue_busy(void)
 {
     u8 busy;
 
@@ -38,7 +38,7 @@ int func_8001ca18(void)
 /* The picture read's completion callback: uploads the TIM images from the
  * read buffer to the saved position. */
 ADDRESS(0x8001ca74, 0x4c)
-void func_8001ca74(void)
+void tim_load_member_done(void)
 {
     DVECTOR pos;
 
@@ -51,13 +51,13 @@ void func_8001ca74(void)
 /* Queues the read of archive member `member` into the read buffer, to be
  * uploaded at (x, y) when it completes. */
 ADDRESS(0x8001cac0, 0x74)
-void func_8001cac0(u16 archive, u16 member, s32 x, s32 y)
+void tim_load_member_async(u16 archive, u16 member, s32 x, s32 y)
 {
     CdlLOC loc;
     int size;
 
-    size = func_8001d134(archive, member, &loc);
+    size = cd_archive_member_locate(archive, member, &loc);
     DAT_80063304 = x;
     DAT_80063308 = y;
-    func_8001d030(2, &loc, size, (u8 *)&DAT_800633b0, func_8001ca74);
+    cd_request_queue(2, &loc, size, (u8 *)&DAT_800633b0, tim_load_member_done);
 }

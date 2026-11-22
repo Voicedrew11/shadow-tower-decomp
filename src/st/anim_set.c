@@ -89,7 +89,7 @@ void anim_set_free(StAnimSet *set)
         set->unk20 = 0xffff;
         set->unk24 = NULL;
         if (set->unk28 != NULL) {
-            func_800152f8(set->unk28);
+            mem_free(set->unk28);
             set->unk28 = NULL;
         }
         set->unk38 = NULL;
@@ -181,10 +181,10 @@ int anim_set_pose(StAnimSet **setp, int id, int clip, u_long frame)
         set->unk2 = id;
         set->unk38 = setp;
         if (set->unk28 != NULL) {
-            func_800152f8(set->unk28);
+            mem_free(set->unk28);
             set->unk28 = NULL;
         }
-        set->unk28 = func_800152d0(file->unk6 * size);
+        set->unk28 = mem_alloc(file->unk6 * size);
         set->unk2C = (StAnimRecord *)(set->unk28 + file->unk6);
         set->unk30 = (StAnimSubRecord *)(set->unk2C + file->unk6);
         set->unk34 = (StAnimList *)(set->unk30 + file->unk6);

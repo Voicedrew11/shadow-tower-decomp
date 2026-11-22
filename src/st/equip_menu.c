@@ -103,7 +103,7 @@ void func_80063cb0(void)
         func_80057cec();
         PAD.unk4 = 0;
         sp->unk2DC &= ~0x8;
-        func_800152f8(sp->unk0.list.ids);
+        mem_free(sp->unk0.list.ids);
     } else if (PAD.unk4 & 0x4000) {
         if (EQ.unk0 != -1) {
             if (EQ.unk10 != SLOT(0) && EQ.unk10 != SLOT(13) && vis_table_c.unk0118[EQ.unk0].unk27 &&
@@ -113,7 +113,7 @@ void func_80063cb0(void)
                 func_80057cc8();
                 PAD.unk4 = 0;
                 sp->unk2DC &= ~0x8;
-                func_800152f8(sp->unk0.list.ids);
+                mem_free(sp->unk0.list.ids);
                 if (EQ.unk10 == SLOT(0) && EQ.unk0 != viewer.unk38[0])
                     viewer.unk38[6] = 0xffff;
                 if (EQ.unk10 == SLOT(13) && EQ.unk0 != viewer.unk38[13])
@@ -146,7 +146,7 @@ void func_80063cb0(void)
             func_80057cc8();
             PAD.unk4 = 0;
             sp->unk2DC &= ~0x8;
-            func_800152f8(sp->unk0.list.ids);
+            mem_free(sp->unk0.list.ids);
             *EQ.unk10 = 0xffff;
             if (EQ.unk10 == SLOT(0))
                 viewer.unk38[6] = 0xffff;
@@ -158,9 +158,9 @@ void func_80063cb0(void)
     }
     if (EQ.unk0 != EQ.unk4) {
         if (EQ.unk0 == -1)
-            func_80016030(6, 801, DAT_80088c88);
+            cd_read_member(6, 801, DAT_80088c88);
         else
-            func_80016030(6, vis_table_c.unk0118[EQ.unk0].unk5[0] + 600, DAT_80088c88);
+            cd_read_member(6, vis_table_c.unk0118[EQ.unk0].unk5[0] + 600, DAT_80088c88);
         func_8003ec5c(DAT_80088c88, &pos, NULL, 1);
         EQ.unk4 = EQ.unk0;
     }
@@ -346,7 +346,7 @@ int func_800642e8(int *sel)
             return 0;
         }
         func_80057cc8();
-        sp->unk0.list.ids = func_800152d0(532);
+        sp->unk0.list.ids = mem_alloc(532);
         sp->unk0.list.count = 0;
         table = &vis_table_c;
         for (i = 0; i < 266; i++) {
@@ -409,11 +409,11 @@ int func_800642e8(int *sel)
             i = -1;
         sp->unk2DC |= 0x8;
         if (cur == 0xffff) {
-            func_80016030(6, 801, DAT_80088c88);
+            cd_read_member(6, 801, DAT_80088c88);
             EQ.unk0 = -1;
             EQ.unk4 = -1;
         } else {
-            func_80016030(6, i + 600, DAT_80088c88);
+            cd_read_member(6, i + 600, DAT_80088c88);
             EQ.unk0 = cur;
             EQ.unk4 = cur;
         }
@@ -519,7 +519,7 @@ void func_80064ee4(void)
         } else if (sp->unk2DC & 0x2) {
             func_80064ba8();
         }
-        func_800164b4();
+        frame_rate_update();
         func_80066004();
         sp->unk2E4 = (sp->unk2E4 + 1) % 32;
     }
@@ -897,7 +897,7 @@ void func_8006620c(u16 archive, u16 member)
 {
     DVECTOR unused;
 
-    func_80015d54(archive, member, (u8 *)DAT_80088c88, func_800661c8);
+    cd_queue_read_member(archive, member, (u8 *)DAT_80088c88, func_800661c8);
 }
 
 /*
@@ -921,28 +921,28 @@ void func_80066240(void)
     DAT_801e0d38.unk4 = 0;
     DAT_801e0d38.unk10 = DAT_801e0d38.unkC = DAT_801e0d38.unk8 = -1;
     func_80058cc8();
-    MENU_SCRATCH->unk0.grid.messages = func_800152d0(21504);
+    MENU_SCRATCH->unk0.grid.messages = mem_alloc(21504);
     tim = DAT_80088c88;
-    func_80016030(3, 1, tim);
-    func_80014cfc((u32 *)&menu_messages, (u32 *)(tim + 1), 5376);
+    cd_read_member(3, 1, tim);
+    copy_words((u32 *)&menu_messages, (u32 *)(tim + 1), 5376);
     tim = (u_long *)((u8 *)tim + (*tim + sizeof(*tim)));
     func_8003ec5c(tim + 1, &MENU_SCRATCH->unk2E6[0], &MENU_SCRATCH->unk2E6[1], 1);
     tim = DAT_80088c88;
-    func_80016030(3, 4, tim);
+    cd_read_member(3, 4, tim);
     sp = MENU_SCRATCH;
-    func_80014cfc((u32 *)sp->unk0.grid.messages, (u32 *)(tim + 1), 5376);
+    copy_words((u32 *)sp->unk0.grid.messages, (u32 *)(tim + 1), 5376);
     tim = (u_long *)((u8 *)tim + (*tim + sizeof(*tim)));
     func_8003ec5c(tim + 1, &sp->unk2E6[2], &sp->unk2E6[3], 1);
-    func_80016030(3, 5, DAT_80088c88);
+    cd_read_member(3, 5, DAT_80088c88);
     func_8003ec5c(DAT_80088c88, &sp->unk2E6[4], NULL, 1);
     DrawSync(0);
-    func_80016030(3, 7, DAT_80088c88);
+    cd_read_member(3, 7, DAT_80088c88);
     func_8003ec5c(DAT_80088c88, &tex, &clut, 1);
     DrawSync(0);
     sp->unk0.grid.count0 = 0;
     sp->unk0.grid.count1 = 0;
-    sp->unk0.grid.ids0 = func_800152d0(628);
-    sp->unk0.grid.ids1 = func_800152d0(628);
+    sp->unk0.grid.ids0 = mem_alloc(628);
+    sp->unk0.grid.ids1 = mem_alloc(628);
     if (sp->unk0.grid.ids0 == NULL || sp->unk0.grid.ids1 == NULL)
         exit(1);
     fill_words((u32 *)sp->unk0.grid.ids0, -1, 157);
@@ -1290,7 +1290,7 @@ void func_800666b0(void)
                 }
             }
         }
-        func_800164b4();
+        frame_rate_update();
         func_80068258();
         sp->unk2E4 = (sp->unk2E4 + 1) % 32;
     }
@@ -1319,9 +1319,9 @@ void func_80067580(void)
     while (func_8006616c())
         ;
     func_80058c4c();
-    func_800152f8(sp->unk0.grid.ids0);
-    func_800152f8(sp->unk0.grid.ids1);
-    func_800152f8(sp->unk0.grid.messages);
+    mem_free(sp->unk0.grid.ids0);
+    mem_free(sp->unk0.grid.ids1);
+    mem_free(sp->unk0.grid.messages);
     func_80058d30();
     func_80057a3c();
 }
@@ -1651,7 +1651,7 @@ void func_80068440(void)
     PutDrawEnv(&world_state.draw[world_state.frame]);
     disp = &world_state.disp[world_state.frame];
     draw = &world_state.draw[world_state.frame];
-    func_80014cfc((u32 *)&saved, (u32 *)&disp->disp, 2);
+    copy_words((u32 *)&saved, (u32 *)&disp->disp, 2);
     while (!(RAW_BUTTONS & 0x8))
         ;
     for (;;) {
@@ -1675,7 +1675,7 @@ void func_80068440(void)
     }
     while (!(RAW_BUTTONS & 0x8))
         ;
-    func_80014cfc((u32 *)&disp->disp, (u32 *)&saved, 2);
+    copy_words((u32 *)&disp->disp, (u32 *)&saved, 2);
     world_state.draw[0].isbg = 1;
     world_state.draw[1].isbg = 1;
 }

@@ -242,8 +242,8 @@ typedef struct {
     VECTOR position;     /* 0x248..0x257: includes the copied pad word */
     u8 unk258[8];
     SVECTOR unk260;      /* 0x260: motion (func_8004cc70 leads targets by it) */
-    short unk268;        /* 0x268: pitch in func_80016554 */
-    short unk26A;        /* 0x26a: yaw in func_80016554 */
+    short unk268;        /* 0x268: pitch in view_point_in_near_cone */
+    short unk26A;        /* 0x26a: yaw in view_point_in_near_cone */
     short unk26C;        /* 0x26c: roll; model_draw_list turns kind-2 parts by all three */
     short unk26E;
     SVECTOR unk270;      /* 0x270 */
@@ -299,7 +299,7 @@ typedef char ViewerPositionEndsAt0x258[offsetof(Viewer, unk258) == 0x258 ? 1 : -
 extern Viewer viewer;
 
 /*
- * The state block at 0x801b5920: func_80014544 sets bytes 4..9 from FN.;
+ * The state block at 0x801b5920: game_load_start_file sets bytes 4..9 from FN.;
  * func_80021654 times the screen fade from the tick word at +0x18;
  * byte 9 is the current area the texture slots and table C entries are
  * compared with.
@@ -486,7 +486,7 @@ extern u8 DAT_801d41c0[4][0x1000];
 extern u8 DAT_801d81c0[0x1000];
 extern u8 DAT_801d91c0[4][0x1000];
 
-/* The CD file buffer func_80016030 loads TIMs and models into (WIP extent:
+/* The CD file buffer cd_read_member loads TIMs and models into (WIP extent:
  * up to DAT_8009ac88). */
 extern u_long DAT_80088c88[];
 

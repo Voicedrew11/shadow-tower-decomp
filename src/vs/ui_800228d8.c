@@ -21,7 +21,7 @@ void func_800228d8(int page)
     CVECTOR unused2 = {16, 48, 16};
     VsMenuScratch *sp = VS_MENU_SCRATCH;
 
-    func_8001d1b8();
+    gfx_begin_frame();
     sp->style[0].r = sp->style[3].r = 96;
     sp->style[0].g = sp->style[3].g = 96;
     sp->style[0].b = sp->style[3].b = 96;
@@ -39,5 +39,5 @@ void func_800228d8(int page)
     func_80021cfc();
     func_800222d8(page);
     func_8001f828();
-    func_8001d374();
+    gfx_end_frame();
 }

@@ -117,7 +117,7 @@ void func_801ed454(void)
         }
     }
     if (fdat_801ed8c8 != 5) {
-        func_80015ad4();
+        cd_wait_idle();
         func_800542d0(r->unk09 * 6 + fdat_801ed8c8, 1);
     }
 }

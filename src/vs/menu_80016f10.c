@@ -54,9 +54,9 @@ RODATA(0x80011110, 0x6c)
  * prompts; returns 1 to start the match, 0 to leave.
  */
 
-int func_8002ee90(int archive, int member, u_long *buf);
-u32 *func_8002e630(u32 *dst, u32 *src, int count);
-void func_8001d39c(void);
+int cd_read_member(int archive, int member, u_long *buf);
+u32 *copy_words(u32 *dst, u32 *src, int count);
+void clear_vram(void);
 void func_80016ca8(void);
 void func_80016d94(void);
 void func_8001789c(void);
@@ -99,7 +99,7 @@ int func_80016f10(void)
     u_long *buf;
     u32 b;
 
-    func_8001d39c();
+    clear_vram();
     DrawSync(0);
     func_80016ca8();
     sp->unk1D8.vx = 960;
@@ -117,33 +117,33 @@ int func_80016f10(void)
     {
         u_long *message = LOAD_BUFFER;
 
-        func_8002ee90(8, 4, message);
-        func_8002e630((u32 *)&DAT_80196230[1], (u32 *)&message[1], 0x1500);
+        cd_read_member(8, 4, message);
+        copy_words((u32 *)&DAT_80196230[1], (u32 *)&message[1], 0x1500);
         message = (u_long *)((message[0] + sizeof(*message)) + (u8 *)message);
         func_80012c2c(message + 1, &sp->unk1E0, &sp->unk1E4);
         DrawSync(0);
         message = LOAD_BUFFER;
-        func_8002ee90(8, 8, message);
-        func_8002e630((u32 *)&DAT_80196230[0], (u32 *)&message[1], 0x1500);
+        cd_read_member(8, 8, message);
+        copy_words((u32 *)&DAT_80196230[0], (u32 *)&message[1], 0x1500);
         message = (u_long *)((message[0] + sizeof(*message)) + (u8 *)message);
         func_80012c2c(message + 1, &sp->unk1D8, &sp->unk1DC);
         DrawSync(0);
     }
     buf = LOAD_BUFFER;
-    func_8002ee90(8, 5, buf);
+    cd_read_member(8, 5, buf);
     func_80012c2c(buf, &sp->unk1E8, NULL);
     DrawSync(0);
-    func_8002ee90(8, 7, buf);
+    cd_read_member(8, 7, buf);
     func_80012c2c(buf, &tex, &clut);
     DrawSync(0);
     if (DAT_80063330[0] != -1) {
-        func_8002ee90(11, DAT_80191d00.unk0118[DAT_80063330[0]].unk5[0], buf);
+        cd_read_member(11, DAT_80191d00.unk0118[DAT_80063330[0]].unk5[0], buf);
         func_80012c2c(buf, &pos, NULL);
         DrawSync(0);
     }
     pos.vy += 28;
     if (DAT_80063334 != -1) {
-        func_8002ee90(11, DAT_80191d00.unk0118[DAT_80063334].unk5[0], buf);
+        cd_read_member(11, DAT_80191d00.unk0118[DAT_80063334].unk5[0], buf);
         func_80012c2c(buf, &pos, NULL);
         DrawSync(1);
     }
@@ -167,19 +167,19 @@ int func_80016f10(void)
                     }
                     goto buzz;
                 start:
-                    func_8001c978();
+                    play_confirm_sound();
                     sp->unk1CC = 1;
                     break;
                 case 1:
                     if (!(pad_state.pads[0].unk8 & 0x4000))
                         goto buzz;
-                    func_8001c978();
+                    play_confirm_sound();
                     pad_state.pads[0].unk8 = 0;
                     CARD_PAGE(0);
                     break;
                 case 2:
                     if (pad_state.pads[1].unk8 & 0x4000) {
-                        func_8001c978();
+                        play_confirm_sound();
                         pad_state.pads[1].unk8 = 0;
                         CARD_PAGE(1);
                         break;
@@ -188,13 +188,13 @@ int func_80016f10(void)
                 case 3:
                     if (!(pad_state.pads[0].unk8 & 0x4000) || !DAT_80063380)
                         goto buzz;
-                    func_8001c978();
+                    play_confirm_sound();
                     pad_state.pads[0].unk8 = 0;
                     TEAM_PAGE(0);
                     break;
                 case 4:
                     if ((pad_state.pads[1].unk8 & 0x4000) && DAT_80063381) {
-                        func_8001c978();
+                        play_confirm_sound();
                         pad_state.pads[1].unk8 = 0;
                         TEAM_PAGE(1);
                         break;
@@ -203,38 +203,38 @@ int func_80016f10(void)
                 case 5:
                     if (!(pad_state.pads[0].unk8 & 0x4000) || !DAT_80063380 || !DAT_80063381)
                         goto buzz;
-                    func_8001c978();
+                    play_confirm_sound();
                     pad_state.pads[0].unk8 = 0;
                     SAVE_PAGE(0);
                     break;
                 case 6:
                     if (!(pad_state.pads[1].unk8 & 0x4000) || !DAT_80063380 || !DAT_80063381)
                         goto buzz;
-                    func_8001c978();
+                    play_confirm_sound();
                     pad_state.pads[1].unk8 = 0;
                     SAVE_PAGE(1);
                     break;
                 buzz:
-                    func_8001c938();
+                    play_refuse_sound();
                     break;
                 }
                 pad_state.pads[0].unk8 = 0;
                 pad_state.pads[1].unk8 = 0;
             }
             if (REPEAT & 0x10) {
-                func_8001c8b8();
+                play_cursor_sound();
                 pad_state.pads[0].unkC = 0;
                 pad_state.pads[1].unkC = 0;
                 sp->unk1CE = (sp->unk1CE + 6) % 7;
             }
             if (REPEAT & 0x40) {
-                func_8001c8b8();
+                play_cursor_sound();
                 pad_state.pads[0].unkC = 0;
                 pad_state.pads[1].unkC = 0;
                 sp->unk1CE = (sp->unk1CE + 1) % 7;
             }
             if (PRESSED & 0x2000) {
-                func_8001c8b8();
+                play_cursor_sound();
                 sp->unk1CC = 6;
             }
             if (PRESSED & 8) {
@@ -248,10 +248,10 @@ int func_80016f10(void)
                         goto ready;
                     sp->unk1CC = 3;
                 }
-                func_8001c938();
+                play_refuse_sound();
                 goto ready_done;
             ready:
-                func_8001c978();
+                play_confirm_sound();
                 sp->unk1CC = 1;
             ready_done:
                 PAD(0).unk8 = 0;
@@ -272,11 +272,11 @@ int func_80016f10(void)
                         func_80023308(11);
                         if (func_8001c530()) {
                             sp->unk1CC = 10;
-                            func_8001c938();
+                            play_refuse_sound();
                         }
                     }
                     if (sp->unk1CC == 1) {
-                        func_8001d39c();
+                        clear_vram();
                         DrawSync(0);
                         func_80016d94();
                         func_8001789c();
@@ -328,7 +328,7 @@ int func_80016f10(void)
 /* The load's RECT initializer: 8 bytes, so .sdata under -G8. */
 SDATA(0x8006323c, 0x8)
 
-int func_8002ee90(int archive, int member, u_long *buf);
+int cd_read_member(int archive, int member, u_long *buf);
 void func_80021984(void);
 
 ADDRESS(0x8001789c, 0x328)
@@ -370,7 +370,7 @@ void func_8001789c(void)
     buf = DAT_801a4590.unk4A0;
 
     for (n = 0, x = 320; n < 5; n++, x += 64) {
-        func_8002ee90(5, n + 31, buf);
+        cd_read_member(5, n + 31, buf);
         pos.vx = base.x + x;
         pos.vy = base.y;
         func_80012c2c(buf, &pos, NULL);
@@ -386,7 +386,7 @@ void func_8001789c(void)
             r2.h = 48;
             ClearImage(&r2, 0, 0, 0);
         } else {
-            int size = func_8002ee90(10, slot, DAT_801a4590.unk4A0) * 2048;
+            int size = cd_read_member(10, slot, DAT_801a4590.unk4A0) * 2048;
 
             func_80012c2c(DAT_801a4590.unk4A0, &sp->unk0.team.pos[i], NULL);
             DAT_801a4590.unk4A0 = (u_long *)((u8 *)DAT_801a4590.unk4A0 + size);
@@ -400,7 +400,7 @@ void func_8001789c(void)
             r.h = 28;
             ClearImage(&r, 0, 0, 0);
         } else {
-            int size = func_8002ee90(11, DAT_80191d00.unk0118[DAT_80063330[i]].unk5[0],
+            int size = cd_read_member(11, DAT_80191d00.unk0118[DAT_80063330[i]].unk5[0],
                                      DAT_801a4590.unk4A0) * 2048;
 
             func_80012c2c(DAT_801a4590.unk4A0, &sp->unk0.team.pos[6 + i], NULL);
@@ -643,7 +643,7 @@ void func_80018240(u_long *tim, DVECTOR *pos, DVECTOR *clut_pos)
  * slots, scrolls the grid (reloading the pictures that scroll in) and
  * opens the detail page, until the cancel button leaves.
  */
-int func_8002ee90(int archive, int member, u_long *buf);
+int cd_read_member(int archive, int member, u_long *buf);
 void func_80017bc4(void);
 void func_80017c84(VsMenuScratch *sp, int player, VsTeamEdit *edit);
 void func_80017da4(VsMenuScratch *sp, int player, VsTeamEdit *edit);
@@ -701,10 +701,10 @@ void func_800182ec(VsMenuScratch *sp, int player)
             }
             if (PRESSED & 0x2000) {
                 if (!edit.unk0) {
-                    func_8001c8f8();
+                    play_cancel_sound();
                     return;
                 }
-                func_8001c8f8();
+                play_cancel_sound();
                 func_80017fe8(sp, player, &edit);
                 edit.unk0 = 0;
                 sp->unk1D6 = 0;
@@ -712,14 +712,14 @@ void func_800182ec(VsMenuScratch *sp, int player)
             }
             if (!edit.unk0) {
                 if (REPEAT & 0x20) {
-                    func_8001c8b8();
+                    play_cursor_sound();
                     if (col < 0 && !edit.unk0)
                         sp->unk1D0 = row << 2;
                     else if (col < 3)
                         sp->unk1D0++;
                 }
                 if (!edit.unk0 && (REPEAT & 0x80)) {
-                    func_8001c8b8();
+                    play_cursor_sound();
                     if (col > 0)
                         sp->unk1D0--;
                     else if (col == 0)
@@ -727,7 +727,7 @@ void func_800182ec(VsMenuScratch *sp, int player)
                 }
             }
             if (REPEAT & 0x10) {
-                func_8001c8b8();
+                play_cursor_sound();
                 if (edit.unk0) {
                     if (row > 0) {
                         sp->unk1D0++;
@@ -746,7 +746,7 @@ void func_800182ec(VsMenuScratch *sp, int player)
                     sp->unk1D2--;
                 }
             } else if (REPEAT & 0x40) {
-                func_8001c8b8();
+                play_cursor_sound();
                 if (edit.unk0) {
                     if (row < 2 && TEAM[row + 1] != -1) {
                         sp->unk1D0--;
@@ -768,12 +768,12 @@ void func_800182ec(VsMenuScratch *sp, int player)
                         sp->unk1D2++;
                 }
             } else if (REPEAT & 0x800) {
-                func_8001c8b8();
+                play_cursor_sound();
                 sp->unk1D2 -= 3;
                 if (sp->unk1D2 < 0)
                     sp->unk1D2 = 0;
             } else if (REPEAT & 0x200) {
-                func_8001c8b8();
+                play_cursor_sound();
                 if (sp->unk0.team.rows > 2) {
                     sp->unk1D2 += 3;
                     if (sp->unk1D2 > sp->unk0.team.rows - 2)
@@ -781,7 +781,7 @@ void func_800182ec(VsMenuScratch *sp, int player)
                 }
             } else if (PRESSED & 0x4000) {
                 if (edit.unk0) {
-                    func_8001c978();
+                    play_confirm_sound();
                     edit.unk0 = 0;
                     sp->unk1D6 = 0;
                     func_80017bc4();
@@ -792,13 +792,13 @@ void func_800182ec(VsMenuScratch *sp, int player)
                     if (sp->unk1D0 < 0) {
                         edit.unk4 = ~sp->unk1D0;
                         if (TEAM[edit.unk4] != -1) {
-                            func_8001c978();
+                            play_confirm_sound();
                             func_80017c84(sp, player, &edit);
                             goto scrolled;
                         }
                     } else if (TEAM[2] == -1) {
                         if (sp->unk0.team.kinds[pick] == 0xff) {
-                            func_8001c938();
+                            play_refuse_sound();
                             edit.unk0 = 0;
                             sp->unk1D6 = 0;
                             goto scrolled;
@@ -824,7 +824,7 @@ void func_800182ec(VsMenuScratch *sp, int player)
                                 }
                             }
                             if (i != 3) {
-                                func_8001c978();
+                                play_confirm_sound();
                                 sp->unk1D0 = ~i;
                                 edit.unk4 = i;
                                 func_80017c84(sp, player, &edit);
@@ -832,13 +832,13 @@ void func_800182ec(VsMenuScratch *sp, int player)
                             }
                         }
                     }
-                    func_8001c938();
+                    play_refuse_sound();
                     edit.unk0 = 0;
                     sp->unk1D6 = 0;
                 }
             } else if ((PRESSED & 0x1000) && !edit.unk0) {
                 DAT_8006335c = 0;
-                func_8001c978();
+                play_confirm_sound();
                 if (sp->unk1D0 < 0) {
                     id = TEAM[-sp->unk1D0 - 1];
                     if (id != -1) {
@@ -865,7 +865,7 @@ void func_800182ec(VsMenuScratch *sp, int player)
                 if (idx < sp->unk0.team.count && idx != -1) {
                     if (idx != shown) {
                         buf = DAT_801a4590.unk4A4;
-                        func_8002ee90(10, sp->unk0.team.kinds[idx] + 200, buf);
+                        cd_read_member(10, sp->unk0.team.kinds[idx] + 200, buf);
                         shown = idx;
                         func_80012c2c(&buf[1], &sp->unk0.team.pos[15], NULL);
                         {
@@ -891,7 +891,7 @@ void func_800182ec(VsMenuScratch *sp, int player)
                 DAT_801a4590.unk4A0 = DAT_801a4590.unk4A4;
                 for (j = 0; j < n; j++, slot++) {
                     if (slot < sp->unk0.team.count) {
-                        size = func_8002ee90(10, sp->unk0.team.kinds[slot],
+                        size = cd_read_member(10, sp->unk0.team.kinds[slot],
                                              DAT_801a4590.unk4A0) * 2048;
                         func_80012c2c(DAT_801a4590.unk4A0, &sp->unk0.team.pos[slot % 12], NULL);
                         DAT_801a4590.unk4A0 = (u_long *)((u8 *)DAT_801a4590.unk4A0 + size);
@@ -900,7 +900,7 @@ void func_800182ec(VsMenuScratch *sp, int player)
                 DrawSync(0);
             }
         } else if (PRESSED & 0x2000) {
-            func_8001c8f8();
+            play_cancel_sound();
             sp->unk1CC = 1;
         } else if (PRESSED & 0x800) {
             DAT_8006335c = 1;
@@ -923,9 +923,9 @@ void func_800182ec(VsMenuScratch *sp, int player)
  * tables and both players' fighter pictures.
  */
 
-int func_8002ee90(int archive, int member, u_long *buf);
-u32 *func_8002e630(u32 *dst, u32 *src, int count);
-void func_8001d39c(void);
+int cd_read_member(int archive, int member, u_long *buf);
+u32 *copy_words(u32 *dst, u32 *src, int count);
+void clear_vram(void);
 void func_800182ec(VsMenuScratch *sp, int player);
 
 ADDRESS(0x80018c84, 0x764)
@@ -1003,20 +1003,20 @@ void func_80018c84(int player)
         sp->unk0.team.rows--;
     }
     sp->unk0.team.items = func_8002398c(0x2000);
-    func_8002ee90(10, 400, (u_long *)sp->unk0.team.items);
+    cd_read_member(10, 400, (u_long *)sp->unk0.team.items);
     buf = DAT_801a4590.unk4A4;
-    func_8002ee90(8, 2, buf);
-    func_8002e630((u32 *)&DAT_80196230[1], (u32 *)&buf[1], 0x1500);
+    cd_read_member(8, 2, buf);
+    copy_words((u32 *)&DAT_80196230[1], (u32 *)&buf[1], 0x1500);
     buf = (u_long *)((buf[0] + sizeof(*buf)) + (u8 *)buf);
     func_80012c2c(buf + 1, &sp->unk1E0, &sp->unk1E4);
     DrawSync(0);
     buf = DAT_801a4590.unk4A4;
-    func_8002ee90(8, 1, buf);
-    func_8002e630((u32 *)&DAT_80196230[0], (u32 *)&buf[1], 0x1500);
+    cd_read_member(8, 1, buf);
+    copy_words((u32 *)&DAT_80196230[0], (u32 *)&buf[1], 0x1500);
     buf = (u_long *)((buf[0] + sizeof(*buf)) + (u8 *)buf);
     func_80012c2c(buf + 1, &sp->unk1D8, &sp->unk1DC);
     DrawSync(0);
-    func_8002ee90(8, 7, DAT_801a4590.unk4A4);
+    cd_read_member(8, 7, DAT_801a4590.unk4A4);
     func_80012c2c(DAT_801a4590.unk4A4, &tex, &clut);
     DrawSync(0);
     DAT_801a4590.unk4A0 = DAT_801a4590.unk4A4;
@@ -1024,7 +1024,7 @@ void func_80018c84(int player)
     if (sp->unk0.team.count < 13)
         n = sp->unk0.team.count;
     for (i = 0; i < n; i++) {
-        size = func_8002ee90(10, sp->unk0.team.kinds[i], DAT_801a4590.unk4A0) * 2048;
+        size = cd_read_member(10, sp->unk0.team.kinds[i], DAT_801a4590.unk4A0) * 2048;
         func_80012c2c(DAT_801a4590.unk4A0, &sp->unk0.team.pos[i], NULL);
         DAT_801a4590.unk4A0 = (u_long *)((u8 *)DAT_801a4590.unk4A0 + size);
     }
@@ -1033,12 +1033,12 @@ void func_80018c84(int player)
     DAT_801a4590.unk4A0 = DAT_801a4590.unk4A4;
     for (i = 0; i < 3; i++) {
         if (DAT_801624b8[player].slot[i] != -1) {
-            size = func_8002ee90(10, DAT_801624b8[player].slot[i], DAT_801a4590.unk4A0) * 2048;
+            size = cd_read_member(10, DAT_801624b8[player].slot[i], DAT_801a4590.unk4A0) * 2048;
             func_80012c2c(DAT_801a4590.unk4A0, &sp->unk0.team.pos[12 + i], NULL);
             DAT_801a4590.unk4A0 = (u_long *)((u8 *)DAT_801a4590.unk4A0 + size);
         }
     }
-    func_8001d39c();
+    clear_vram();
     DrawSync(0);
     sp->unk1CC = 1;
     sp->unk1D0 = 0;
@@ -1049,27 +1049,27 @@ void func_80018c84(int player)
     pos.vx = 640;
     pos.vy = 124;
     DAT_801a4590.unk4A0 = buf = DAT_801a4590.unk4A4;
-    func_8002ee90(8, 4, buf);
-    func_8002e630((u32 *)&DAT_80196230[1], (u32 *)&buf[1], 0x1500);
+    cd_read_member(8, 4, buf);
+    copy_words((u32 *)&DAT_80196230[1], (u32 *)&buf[1], 0x1500);
     tim = (u_long *)((u8 *)buf + DAT_801a4590.unk4A4[0]);
     func_80012c2c(tim + 2, &sp->unk1E0, &sp->unk1E4);
     DrawSync(0);
-    func_8002ee90(8, 8, buf);
-    func_8002e630((u32 *)&DAT_80196230[0], (u32 *)&buf[1], 0x1500);
+    cd_read_member(8, 8, buf);
+    copy_words((u32 *)&DAT_80196230[0], (u32 *)&buf[1], 0x1500);
     tim = (u_long *)((u8 *)buf + DAT_801a4590.unk4A4[0]);
     func_80012c2c(tim + 2, &sp->unk1D8, &sp->unk1DC);
     DrawSync(0);
-    func_8002ee90(8, 7, buf);
+    cd_read_member(8, 7, buf);
     func_80012c2c(buf, &tex, &clut);
     DrawSync(0);
     if (DAT_80063330[0] != -1) {
-        func_8002ee90(11, DAT_80191d00.unk0118[DAT_80063330[0]].unk5[0], buf);
+        cd_read_member(11, DAT_80191d00.unk0118[DAT_80063330[0]].unk5[0], buf);
         func_80012c2c(buf, &pos, NULL);
         DrawSync(0);
     }
     pos.vy += 28;
     if (DAT_80063334 != -1) {
-        func_8002ee90(11, DAT_80191d00.unk0118[DAT_80063334].unk5[0], buf);
+        cd_read_member(11, DAT_80191d00.unk0118[DAT_80063334].unk5[0], buf);
         func_80012c2c(buf, &pos, NULL);
         DrawSync(1);
     }
@@ -1126,9 +1126,9 @@ int func_800193e8(int player)
  * DAT_80063330[player].
  */
 
-int func_8002ee90(int archive, int member, u_long *buf);
-void func_8001d39c(void);
-void func_8001cac0(int archive, int member, int x, int y);
+int cd_read_member(int archive, int member, u_long *buf);
+void clear_vram(void);
+void tim_load_member_async(int archive, int member, int x, int y);
 void func_800228d8(int page);
 void exit(int code);
 
@@ -1156,7 +1156,7 @@ void func_8001960c(int player)
     int j;
 
     buf = func_8002398c(0x1000);
-    func_8002ee90(5, 6, buf);
+    cd_read_member(5, 6, buf);
     func_80012b50(buf, 0, 0);
     DrawSync(0);
     free(buf);
@@ -1210,7 +1210,7 @@ void func_8001960c(int player)
         }
     }
     shown = -1;
-    func_8001d39c();
+    clear_vram();
     DrawSync(0);
     for (;;) {
         if (player) {
@@ -1223,24 +1223,24 @@ void func_8001960c(int player)
             pad_state.pads[1].unk0 = 0;
         }
         if (PRESSED & 0x2000) {
-            func_8001c8f8();
+            play_cancel_sound();
             if (sp->unk1CC & 0x8000) {
                 sp->unk1CC &= 0x7fff;
             } else {
-                while ((s16)func_8001ca18() != 0)
+                while ((s16)cd_queue_busy() != 0)
                     ;
                 break;
             }
         }
         if (PRESSED & 0x4000) {
-            func_8001c978();
+            play_confirm_sound();
             if (sp->unk1CC & 0x8000) {
                 s16 chosen = IDS[TOP + sp->unk1D0];
 
                 if (chosen == -2)
                     chosen = -1;
                 DAT_80063330[player] = chosen;
-                while ((s16)func_8001ca18() != 0)
+                while ((s16)cd_queue_busy() != 0)
                     ;
                 break;
             }
@@ -1249,7 +1249,7 @@ void func_8001960c(int player)
         }
         if (!(sp->unk1CC & 0x8000)) {
             if (REPEAT & 0x10) {
-                func_8001c8b8();
+                play_cursor_sound();
                 if (pad_state.pads[0].unk0 & 0x8000) {
                     if (COUNT < 11) {
                         sp->unk1D0 = 0;
@@ -1272,7 +1272,7 @@ void func_8001960c(int player)
                 pad_state.pads[0].unkC = 0;
             }
             if (REPEAT & 0x40) {
-                func_8001c8b8();
+                play_cursor_sound();
                 if ((pad_state.pads[0].unk0 | pad_state.pads[1].unk0) & 0x8000) {
                     if (COUNT >= 11) {
                         TOP += 11;
@@ -1296,7 +1296,7 @@ void func_8001960c(int player)
                 }
             }
             if (REPEAT & 0x800) {
-                func_8001c8b8();
+                play_cursor_sound();
                 if (COUNT >= 11) {
                     TOP -= 11;
                     if (TOP < 0) {
@@ -1307,7 +1307,7 @@ void func_8001960c(int player)
                 } else {
                     sp->unk1D0 = 0;
                     if (REPEAT & 0x200)
-                        func_8001c8b8();
+                        play_cursor_sound();
                 }
                 if (COUNT >= 11) {
                     TOP += 11;
@@ -1320,10 +1320,10 @@ void func_8001960c(int player)
                     sp->unk1D0 = COUNT - 1;
                 }
             }
-            if (sp->unk1CC == 2 && (s16)func_8001ca18() == 0) {
+            if (sp->unk1CC == 2 && (s16)cd_queue_busy() == 0) {
                 id = IDS[TOP + sp->unk1D0];
                 if (shown != id && id != -1 && id != -2) {
-                    func_8001cac0(11, DAT_80191d00.unk0118[id].unk5[0] + 200, 640, 0);
+                    tim_load_member_async(11, DAT_80191d00.unk0118[id].unk5[0] + 200, 640, 0);
                     shown = id;
                 }
             }
@@ -1339,13 +1339,13 @@ void func_8001960c(int player)
     pos.vx = 640;
     pos.vy = 124;
     if (DAT_80063330[0] != -1) {
-        func_8002ee90(11, DAT_80191d00.unk0118[DAT_80063330[0]].unk5[0], DAT_801a4590.unk4A4);
+        cd_read_member(11, DAT_80191d00.unk0118[DAT_80063330[0]].unk5[0], DAT_801a4590.unk4A4);
         func_80012c2c(DAT_801a4590.unk4A4, &pos, NULL);
         DrawSync(0);
     }
     pos.vy += 28;
     if (DAT_80063334 != -1) {
-        func_8002ee90(11, DAT_80191d00.unk0118[DAT_80063334].unk5[0], DAT_801a4590.unk4A4);
+        cd_read_member(11, DAT_80191d00.unk0118[DAT_80063334].unk5[0], DAT_801a4590.unk4A4);
         func_80012c2c(DAT_801a4590.unk4A4, &pos, NULL);
         DrawSync(1);
     }
@@ -1357,7 +1357,7 @@ void func_8001960c(int player)
  * there). func_8001c5e0 uses this module's merged "O" literal.
  */
 
-int func_8002ee90();
+int cd_read_member();
 
 /* The card path pieces ("bu", "0:", "0:*", "*") and a two-byte SJIS digit:
  * short literals, so .sdata under -G8. */
@@ -1656,20 +1656,20 @@ s16 func_8001abfc(int first)
         }
         buttons = pad_state.pads[0].unk8 | pad_state.pads[1].unk8;
         if (buttons & 0x4000) {
-            func_8001c978();
+            play_confirm_sound();
             break;
         }
         if (buttons & 0x2000) {
-            func_8001c8f8();
+            play_cancel_sound();
             sp->unk1C6 = 0;
             break;
         }
         if (buttons & 0x80) {
-            func_8001c8b8();
+            play_cursor_sound();
             sp->unk1C6 = 1;
         }
         if ((pad_state.pads[0].unk8 | pad_state.pads[1].unk8) & 0x20) {
-            func_8001c8b8();
+            play_cursor_sound();
             sp->unk1C6 = 0;
         }
         pad_state.pads[0].unk8 = 0;
@@ -1699,21 +1699,21 @@ int func_8001ad18(int first)
         }
         buttons = pad_state.pads[0].unk8 | pad_state.pads[1].unk8;
         if (buttons & 0x4000) {
-            func_8001c978();
+            play_confirm_sound();
             sp->unk1CC <<= 1;
             break;
         }
         if (buttons & 0x2000) {
-            func_8001c8f8();
+            play_cancel_sound();
             sp->unk1CC = 0;
             break;
         }
         if ((pad_state.pads[0].unkC | pad_state.pads[1].unkC) & 0x10) {
-            func_8001c8b8();
+            play_cursor_sound();
             sp->unk1CC = 2;
         }
         if ((pad_state.pads[0].unkC | pad_state.pads[1].unkC) & 0x40) {
-            func_8001c8b8();
+            play_cursor_sound();
             sp->unk1CC = 512;
         }
         pad_state.pads[0].unk8 = 0;
@@ -1778,7 +1778,7 @@ int func_8001afcc(int first)
             pad_state.pads[1].unk0 = 0;
         }
         if ((sp->unk1CC & 0xff00) || ((pad_state.pads[0].unk8 | pad_state.pads[1].unk8) & 0x4000)) {
-            func_8001c978();
+            play_confirm_sound();
             pad_state.pads[0].unk8 = 0;
             pad_state.pads[1].unk8 = 0;
             sp->unk0.menu.half[1] = 1;
@@ -1798,20 +1798,20 @@ int func_8001afcc(int first)
                 }
                 buttons = pad_state.pads[0].unk8 | pad_state.pads[1].unk8;
                 if (buttons & 0x4000) {
-                    func_8001c978();
+                    play_confirm_sound();
                     break;
                 }
                 if (buttons & 0x2000) {
-                    func_8001c8f8();
+                    play_cancel_sound();
                     sp->unk1C6 = 0;
                     break;
                 }
                 if (buttons & 0x80) {
-                    func_8001c8b8();
+                    play_cursor_sound();
                     sp->unk1C6 = 1;
                 }
                 if ((pad_state.pads[0].unk8 | pad_state.pads[1].unk8) & 0x20) {
-                    func_8001c8b8();
+                    play_cursor_sound();
                     sp->unk1C6 = 0;
                 }
                 pad_state.pads[0].unk8 = 0;
@@ -1830,12 +1830,12 @@ int func_8001afcc(int first)
             continue;
         }
         if ((pad_state.pads[0].unk8 | pad_state.pads[1].unk8) & 0x2000) {
-            func_8001c8f8();
+            play_cancel_sound();
             sp->unk1C2 = -1;
             goto done;
         }
         if ((pad_state.pads[0].unkC | pad_state.pads[1].unkC) & 0x10) {
-            func_8001c8b8();
+            play_cursor_sound();
             if (sp->unk1C2 == 0) {
                 if (sp->unk1C4 > 0)
                     sp->unk1C4--;
@@ -1844,7 +1844,7 @@ int func_8001afcc(int first)
             }
         }
         if ((pad_state.pads[0].unkC | pad_state.pads[1].unkC) & 0x40) {
-            func_8001c8b8();
+            play_cursor_sound();
             if (sp->unk1C2 == 2) {
                 if (sp->unk1C4 < sp->unk1BE - 3)
                     sp->unk1C4++;
@@ -2143,16 +2143,16 @@ int func_8001bb48(int mode, int port)
     int result;
     int status;
 
-    func_8001d39c();
+    clear_vram();
     DrawSync(0);
     func_80016d94();
     buf = DAT_801a4590.unk4A4;
-    func_8002ee90(8, 0, buf);
-    func_8002e630((u32 *)DAT_80196230[0].offsets, (u32 *)(buf + 1), 0x1500);
+    cd_read_member(8, 0, buf);
+    copy_words((u32 *)DAT_80196230[0].offsets, (u32 *)(buf + 1), 0x1500);
     buf = (u_long *)((u8 *)buf + (buf[0] + 4));
     func_80012c2c(buf + 1, &sp->unk1D8, &sp->unk1DC);
     DrawSync(0);
-    func_8002ee90(8, 6, DAT_801a4590.unk4A4);
+    cd_read_member(8, 6, DAT_801a4590.unk4A4);
     func_80012c2c(DAT_801a4590.unk4A4, &pos, &clut);
     DrawSync(0);
     sp->unk0.menu.half[0] = 0;
@@ -2289,7 +2289,7 @@ wait:
         WAIT_PRESS(pad_state.pads[1]);
     else
         WAIT_PRESS(pad_state.pads[0]);
-    func_8001c8f8();
+    play_cancel_sound();
     if (sp->unk1CC & 0x80) {
         sp->unk1CC = 2;
         goto again;
@@ -2304,33 +2304,33 @@ done:
         u_long *menu_buf;
         u_long *tim;
 
-        func_8001d39c();
+        clear_vram();
         DrawSync(0);
         func_80016ca8();
         face.vx = 640;
         face.vy = 124;
         DAT_801a4590.unk4A0 = menu_buf = DAT_801a4590.unk4A4;
-        func_8002ee90(8, 4, menu_buf);
-        func_8002e630((u32 *)DAT_80196230[1].offsets, (u32 *)&menu_buf[1], 0x1500);
+        cd_read_member(8, 4, menu_buf);
+        copy_words((u32 *)DAT_80196230[1].offsets, (u32 *)&menu_buf[1], 0x1500);
         tim = (u_long *)((u8 *)menu_buf + DAT_801a4590.unk4A4[0]);
         func_80012c2c(tim + 2, &sp->unk1E0, &sp->unk1E4);
         DrawSync(0);
-        func_8002ee90(8, 8, menu_buf);
-        func_8002e630((u32 *)DAT_80196230[0].offsets, (u32 *)&menu_buf[1], 0x1500);
+        cd_read_member(8, 8, menu_buf);
+        copy_words((u32 *)DAT_80196230[0].offsets, (u32 *)&menu_buf[1], 0x1500);
         tim = (u_long *)((u8 *)menu_buf + DAT_801a4590.unk4A4[0]);
         func_80012c2c(tim + 2, &sp->unk1D8, &sp->unk1DC);
         DrawSync(0);
-        func_8002ee90(8, 7, menu_buf);
+        cd_read_member(8, 7, menu_buf);
         func_80012c2c(menu_buf, &pos, &clut);
         DrawSync(0);
         if (DAT_80063330[0] != -1) {
-            func_8002ee90(11, DAT_80191d00.unk0118[DAT_80063330[0]].unk5[0], menu_buf);
+            cd_read_member(11, DAT_80191d00.unk0118[DAT_80063330[0]].unk5[0], menu_buf);
             func_80012c2c(menu_buf, &face, NULL);
             DrawSync(0);
         }
         face.vy += 28;
         if (DAT_80063334 != -1) {
-            func_8002ee90(11, DAT_80191d00.unk0118[DAT_80063334].unk5[0], menu_buf);
+            cd_read_member(11, DAT_80191d00.unk0118[DAT_80063334].unk5[0], menu_buf);
             func_80012c2c(menu_buf, &face, NULL);
             DrawSync(1);
         }

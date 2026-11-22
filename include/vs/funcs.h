@@ -15,18 +15,18 @@
 #include <st/anim.h>
 
 /* src/vs/cd_8001cb34.c */
-void func_8001cb34(void);                 /* ST func_8001531c */
-void func_8001d1b8(void);                 /* ST func_800174c4 */
-void func_8001d374(void);                 /* ST func_80017680 */
-StCdRequest *func_8001d030(int kind, CdlLOC *loc, u32 size, u8 *dest, void (*done)()); /* ST func_80015bcc */
-int func_8001d134(int archive, int member, CdlLOC *loc); /* ST func_80015cd0 */
-void func_8001d298(void);                 /* ST func_800175a4 */
-void func_8001d328(void);                 /* ST func_80017634 */
+void cd_wait_frame(void);                 /* ST cd_wait_frame */
+void gfx_begin_frame(void);                 /* ST func_800174c4 */
+void gfx_end_frame(void);                 /* ST func_80017680 */
+StCdRequest *cd_request_queue(int kind, CdlLOC *loc, u32 size, u8 *dest, void (*done)()); /* ST cd_request_queue */
+int cd_archive_member_locate(int archive, int member, CdlLOC *loc); /* ST cd_archive_member_locate */
+void gfx_flip(void);                 /* ST func_800175a4 */
+void gfx_draw_ot(void);                 /* ST func_80017634 */
 
 /* src/vs/model_8002345c.c */
 void func_80023820(struct StAnimSet *set);
 void func_8002392c(void);
-void *func_8002398c(u32 size);           /* ST func_8001528c */
+void *func_8002398c(u32 size);           /* ST mem_alloc_checked */
 void func_800241b4(struct StAnimSet **out);
 
 /* src/vs/model_8002345c.c */
@@ -51,23 +51,23 @@ void func_800278f8(int count, MeshFaceGT4 *face, u_long *ot);
 void func_8002d738(int n);
 
 /* src/vs/cd_8002e5e4.c */
-void func_8002e5e4(void);                 /* ST func_800214cc */
-void *func_8002e690(u32 size);            /* ST func_8001528c */
-u16 *func_8002e660(u16 *dst, u16 *src, int count); /* ST func_80014d2c */
-void *func_8002e6d4(u32 size);            /* ST func_800152d0 */
-void func_8002e6fc(void *p);              /* ST func_800152f8 */
-void func_8002e720(u_char status, u_char *result); /* ST func_800154e8 */
-void func_8002e868(u_char status, u_char *result); /* ST func_8001561c */
-void func_8002ea94(StCdRequest *request); /* ST func_80015848 */
-u32 func_8002eb9c(CdlLOC *pos);           /* ST func_80015950 */
-void func_8002ece0(CdlLOC *pos, int offset, CdlLOC *out); /* ST func_80015a94 */
-int func_8002ed20(u32 *data, int sectors); /* ST func_80015b78 */
-void func_8002ed74(CdlLOC *loc, u_long *buf, int sectors); /* ST func_80015f0c */
-void func_8002ee54(u_long *buf, StFileExtent *file, u32 size); /* ST func_80015ff4 */
+void loading_screen_step(void);                 /* ST func_800214cc */
+void *mem_alloc_checked(u32 size);            /* ST mem_alloc_checked */
+u16 *copy_halfwords(u16 *dst, u16 *src, int count); /* ST copy_halfwords */
+void *mem_alloc(u32 size);            /* ST mem_alloc */
+void mem_free(void *p);              /* ST mem_free */
+void cd_request_ready_callback(u_char status, u_char *result); /* ST cd_request_ready_callback */
+void cd_request_sync_callback(u_char status, u_char *result); /* ST cd_request_sync_callback */
+void cd_request_retire(StCdRequest *request); /* ST cd_request_retire */
+u32 cd_loc_to_sector(CdlLOC *pos);           /* ST cd_loc_to_sector */
+void cd_loc_add_sectors(CdlLOC *pos, int offset, CdlLOC *out); /* ST cd_loc_add_sectors */
+int cd_checksum_mismatch(u32 *data, int sectors); /* ST cd_checksum_mismatch */
+void cd_read_sectors(CdlLOC *loc, u_long *buf, int sectors); /* ST cd_read_sectors */
+void cd_read_file_extent(u_long *buf, StFileExtent *file, u32 size); /* ST cd_read_file_extent */
 
 /* src/vs/cd_8002efcc.c */
-void func_8002efcc(void);                 /* ST func_8001624c */
-void func_8002f014(u16 archive, char *name); /* ST func_80016294 */
+void cd_stop_drive(void);                 /* ST cd_stop_drive */
+void cd_archive_open(u16 archive, char *name); /* ST cd_archive_open */
 
 /* src/vs/snd_80012a70.c */
 void func_80012c2c(u_long *data, DVECTOR *pos, DVECTOR *clut_pos);
@@ -76,19 +76,19 @@ void func_80012c2c(u_long *data, DVECTOR *pos, DVECTOR *clut_pos);
 void *func_8002398c(u32 size);            /* malloc, NULL outside main RAM */
 
 /* src/vs/stub_8001ca10.c */
-int func_8001ca18(void);
+int cd_queue_busy(void);
 
 /* src/vs/cd_8001cb34.c */
-void func_8001d39c(void);
+void clear_vram(void);
 
 /* src/vs/cd_8002efcc.c */
-void func_8002f0f4(void);
+void cd_init(void);
 
 /* src/vs/mesh_800258f0.c */
 void func_80027ba4(u_short part);
 
 /* VS main module callees (src/vs/main.c). */
-u32 *func_8002e630(u32 *dst, u32 *src, int count);       /* src/vs/cd_8002e5e4.c */
+u32 *copy_words(u32 *dst, u32 *src, int count);       /* src/vs/cd_8002e5e4.c */
 void func_80012a70(int bank);                            /* src/vs/main.c */
 void func_80012b50(u_long *data, int page, int clut_y);  /* src/vs/main.c */
 void func_80012d10(int id);                              /* src/vs/main.c */
@@ -97,12 +97,12 @@ int func_8001c530(void);                                 /* src/vs/card_8001c530
 void func_80023764(u16 id, StAnimFile *file);            /* src/vs/model_8002345c.c */
 void func_80027fec(u16 id, StAnimFile *file);            /* src/vs/anim_80027f30.c */
 void func_8002345c(ModelFile *file);                     /* src/vs/model_8002345c.c */
-int func_8002ef3c(u_long *buf, char *name, u32 size);    /* src/vs/cd_8002e5e4.c */
+int load_file(u_long *buf, char *name, u32 size);    /* src/vs/cd_8002e5e4.c */
 void func_80013848(void);                                /* src/vs/main.c */
 void func_80013868(void);                                /* src/vs/main.c */
 void func_80013aec(void);                                /* src/vs/main.c */
 void func_80014070(void);                                /* src/vs/main.c */
-void func_8001c9b8(void);                                /* src/vs/card_8001c8b8.c */
+void load_menu_sound_bank(void);                                /* src/vs/card_8001c8b8.c */
 void func_80016d94(void);                                /* src/vs/gfx_80016ca8.c */
 void func_80016ca8(void);                                /* src/vs/gfx_80016ca8.c */
 int func_80016f10(void);                                 /* not reconstructed */

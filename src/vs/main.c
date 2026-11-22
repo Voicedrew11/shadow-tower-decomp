@@ -100,7 +100,7 @@ s32 DAT_8006336c;
 /* Loads archive member `member` into `buf`, nonzero on success
  * (src/vs/cd_8002e5e4.c). Declared without a prototype: the callers pass
  * the numbers as unmasked ints. */
-int func_8002ee90();
+int cd_read_member();
 
 /* The packet buffers' size in words. */
 #define PACKET_WORDS (0x20000 / 4)
@@ -596,11 +596,11 @@ void func_80013c5c(void)
 ADDRESS(0x80014070, 0x68)
 void func_80014070(void)
 {
-    func_8002f014(0, "VS\\VS_CRT.T");
-    func_8002f014(5, "VS\\VS_ETC.T");
-    func_8002f014(8, "COM\\STAT.T");
-    func_8002f014(10, "COM\\CRT.T");
-    func_8002f014(11, "COM\\ICON.T");
+    cd_archive_open(0, "VS\\VS_CRT.T");
+    cd_archive_open(5, "VS\\VS_ETC.T");
+    cd_archive_open(8, "COM\\STAT.T");
+    cd_archive_open(10, "COM\\CRT.T");
+    cd_archive_open(11, "COM\\ICON.T");
 }
 
 /* The fighter being loaded. */
@@ -628,17 +628,17 @@ void func_800140d8(void)
 
     for (i = 0; i < 2; i++) {
         member = DAT_801624b8[i].slot[DAT_80063338] * 5;
-        func_8002ee90(0, member + 1, (u_long *)&FIGHTER);
+        cd_read_member(0, member + 1, (u_long *)&FIGHTER);
         func_80012b50((u_long *)&FIGHTER, i * 4, i * 12);
         DrawSync(0);
-        func_8002ee90(0, member + 2, (u_long *)DAT_801604b0[i].head);
-        func_8002ee90(0, member + 3, (u_long *)&FIGHTER);
+        cd_read_member(0, member + 2, (u_long *)DAT_801604b0[i].head);
+        cd_read_member(0, member + 3, (u_long *)&FIGHTER);
         func_80012a70(i);
-        if (func_8002ee90(0, member + 4, FIGHTER.unk4B000))
+        if (cd_read_member(0, member + 4, FIGHTER.unk4B000))
             func_8002345c((ModelFile *)FIGHTER.unk4B000);
         else
             FIGHTER.unk4B000[0] = 0;
-        func_8002ee90(0, member, (u_long *)&FIGHTER);
+        cd_read_member(0, member, (u_long *)&FIGHTER);
         if (((StAnimFile *)FIGHTER.file)->unk6) {
             FIGHTER.unk4DF10 = 1;
             func_80023764(i, (StAnimFile *)FIGHTER.file);
@@ -1422,21 +1422,21 @@ void func_80016488(void)
     clut.x = 640;
     clut.y = 480;
     p = DAT_80117708;
-    func_8002ee90(8, 2, p);
-    func_8002e630((u32 *)DAT_80196230[1].offsets, (u32 *)(p + 1), 0x1500);
+    cd_read_member(8, 2, p);
+    copy_words((u32 *)DAT_80196230[1].offsets, (u32 *)(p + 1), 0x1500);
     p = (u_long *)((u8 *)p + (p[0] + 4));
     func_80012c2c(p + 1, (DVECTOR *)&pos, (DVECTOR *)&clut);
     DrawSync(0);
-    func_8002ee90(5, 10, DAT_80117708);
+    cd_read_member(5, 10, DAT_80117708);
     func_80012b50(DAT_80117708, 0, 0);
     DrawSync(0);
-    func_8002ee90(5, 0, DAT_80117708);
+    cd_read_member(5, 0, DAT_80117708);
     func_8002345c((ModelFile *)DAT_80117708);
-    func_8002ee90(5, 1, (u_long *)DAT_8015c528);
+    cd_read_member(5, 1, (u_long *)DAT_8015c528);
     func_8002345c((ModelFile *)DAT_8015c528);
-    func_8002ee90(5, 2, (u_long *)DAT_8015d8b0);
+    cd_read_member(5, 2, (u_long *)DAT_8015d8b0);
     func_8002345c((ModelFile *)DAT_8015d8b0);
-    func_8002ee90(5, 3, (u_long *)DAT_8015ec38);
+    cd_read_member(5, 3, (u_long *)DAT_8015ec38);
     func_8002345c((ModelFile *)DAT_8015ec38);
     DAT_80063370[0] = 0;
     DAT_80063374 = 0;
@@ -1568,7 +1568,7 @@ int main(void)
     SetRCnt(RCntCNT2, 60000, RCntMdINTR);
     StartRCnt(RCntCNT2);
     pad_state.unk28 = 0;
-    func_8002f0f4();
+    cd_init();
     func_80014480();
     {
         u_long *loading_picture = (u_long *)&DAT_800633b0;
@@ -1576,16 +1576,16 @@ int main(void)
         pos.vx = 0;
         pos.vy = 300;
         memset(&clut, 0, sizeof(clut));
-        func_8002ef3c(loading_picture, "\\LOAD02.TIM;1", 0);
+        load_file(loading_picture, "\\LOAD02.TIM;1", 0);
         func_80012c2c(loading_picture, &pos, &clut);
     }
     DrawSync(0);
     func_80013aec();
     func_80014070();
-    func_8002ee90(5, 4, DAT_80116580);
-    func_8002ee90(5, 5, DAT_800ff580);
-    func_8001c9b8();
-    func_8002ee90(5, 20, (u_long *)DAT_80191d00.unk0118);
+    cd_read_member(5, 4, DAT_80116580);
+    cd_read_member(5, 5, DAT_800ff580);
+    load_menu_sound_bank();
+    cd_read_member(5, 20, (u_long *)DAT_80191d00.unk0118);
     DAT_801624b8[0].slot[0] = -1;
     DAT_801624b8[0].slot[1] = -1;
     DAT_801624b8[0].slot[2] = -1;
@@ -1618,7 +1618,7 @@ int main(void)
     pos2.vy = 60;
     memset(&clut2, 0, sizeof(clut2));
     func_80016d94();
-    func_8002ef3c(picture, "\\LOAD02.TIM;1", 0);
+    load_file(picture, "\\LOAD02.TIM;1", 0);
     func_80012c2c(picture, &pos2, &clut2);
     DrawSync(0);
     *NEXT_PROGRAM_BYTE = 1;

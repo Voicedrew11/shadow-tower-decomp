@@ -48,7 +48,7 @@ void func_800204b0(void)
 {
     VsMenuScratch *sp = VS_MENU_SCRATCH;
 
-    func_8001d1b8();
+    gfx_begin_frame();
     sp->style[0].b = sp->style[0].g = sp->style[0].r = 72;
     sp->style[1].r = 98;
     sp->style[1].g = 66;
@@ -117,6 +117,6 @@ void func_800204b0(void)
     func_8001f23c(16, 36, 288, 192);
     func_8001f30c(16, 36, 288, 192);
     func_8001f8c4();
-    func_8001d298();
-    func_8001d328();
+    gfx_flip();
+    gfx_draw_ot();
 }

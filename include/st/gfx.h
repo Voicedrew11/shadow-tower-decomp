@@ -100,7 +100,7 @@ typedef struct StAnimSlot {
     u16 unk6;            /* 0x06: key */
     SVECTOR *unk8;       /* 0x08: the key's start keyframe */
     SVECTOR *unkC;       /* 0x0c: its end keyframe */
-    SVECTOR *unk10;      /* 0x10: end minus start, from func_800152d0 */
+    SVECTOR *unk10;      /* 0x10: end minus start, from mem_alloc */
     struct StAnimSlot **unk14; /* 0x14: the owner's slot pointer */
 } StAnimSlot;
 
@@ -120,7 +120,7 @@ typedef struct StAnimSet {
     u_long unk1C;        /* 0x1c: the clip's length in frames */
     u_long unk20;        /* 0x20: the frame last posed, -1 when unset */
     struct StAnimBlock *unk24; /* 0x24: the next block to run */
-    struct StAnimNode *unk28; /* 0x28: the node buffer, from func_800152d0 */
+    struct StAnimNode *unk28; /* 0x28: the node buffer, from mem_alloc */
     struct StAnimRecord *unk2C;
     struct StAnimSubRecord *unk30;
     struct StAnimList *unk34;
@@ -231,7 +231,7 @@ extern StAnimObjects DAT_8015c488;
 extern u16 DAT_8009ac88[16];
 
 /* src/st/view.c */
-int func_80016554(void);
+int view_point_in_near_cone(void);
 
 /* src/st/texanim.c */
 void func_80016878(void);

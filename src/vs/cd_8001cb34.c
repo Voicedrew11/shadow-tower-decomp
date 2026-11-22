@@ -25,17 +25,17 @@
 /* The VRAM clear's RECT initializer: an 8-byte constant, so .sdata under -G8. */
 SDATA(0x80063258, 0x8)
 
-/* The frame wait (ST.EXE's func_8001531c also steps sound, images and the
+/* The frame wait (ST.EXE's cd_wait_frame also steps sound, images and the
  * loading display). */
 ADDRESS(0x8001cb34, 0x28)
-void func_8001cb34(void)
+void cd_wait_frame(void)
 {
     DrawSync(0);
     VSync(0);
 }
 
 ADDRESS(0x8001cb5c, 0xbc)
-void func_8001cb5c(u_char status, u_char *result)
+void cd_request_read_callback(u_char status, u_char *result)
 {
     StCdRequest *request = DAT_801a4590.unkDC;
     u_char param[8]; /* unused */
@@ -70,7 +70,7 @@ void func_8001cb5c(u_char status, u_char *result)
 /* CdReadyCallback of a read: copies each sector's data into the request,
  * then ends the read with CdlNop polling. */
 ADDRESS(0x8001cc18, 0x148)
-void func_8001cc18(u_char status, u_char *result)
+void cd_queue_ready_callback(u_char status, u_char *result)
 {
     StCdRequest *request = DAT_801a4590.unkDC;
     u_char param[8]; /* unused */
@@ -117,7 +117,7 @@ void func_8001cc18(u_char status, u_char *result)
 
 /* CdSyncCallback of the request ring: seek, read, check, finish. */
 ADDRESS(0x8001cd60, 0x22c)
-void func_8001cd60(u_char status, u_char *result)
+void cd_queue_sync_callback(u_char status, u_char *result)
 {
     StCdRequest *request = DAT_801a4590.unkDC;
 
@@ -134,8 +134,8 @@ void func_8001cd60(u_char status, u_char *result)
                 request->unk1 = STEP_READ;
                 request->unk24 = request->unk28;
                 request->unk1C = request->unk20;
-                CdReadyCallback(func_8001cc18);
-                CdSyncCallback(func_8001cd60);
+                CdReadyCallback(cd_queue_ready_callback);
+                CdSyncCallback(cd_queue_sync_callback);
                 while (CdControlF(CdlReadN, 0) == 0)
                     ;
                 break;
@@ -147,14 +147,14 @@ void func_8001cd60(u_char status, u_char *result)
                         request->unk1 = STEP_SEEK;
                         while (CdControl(CdlSeekL, (u_char *)&request->unk18, 0) == 0)
                             ;
-                    } else if (func_8002ed20((u32 *)request->unk20, request->unk28) != 0) {
+                    } else if (cd_checksum_mismatch((u32 *)request->unk20, request->unk28) != 0) {
                         request->unk1 = STEP_SEEK;
                         while (CdControl(CdlSeekL, (u_char *)&request->unk18, 0) == 0)
                             ;
                     } else {
                         if (request->done != NULL)
                             request->done(request->unk20);
-                        func_8002ea94(request);
+                        cd_request_retire(request);
                     }
                 } else if (request->done != NULL) {
                     request->done(request);
@@ -184,25 +184,25 @@ void func_8001cd60(u_char status, u_char *result)
 
 /* Waits until the request ring is empty. */
 ADDRESS(0x8001cf8c, 0x58)
-void func_8001cf8c(void)
+void cd_wait_idle(void)
 {
     while (DAT_801a4590.unkDC != DAT_801a4590.unkD8 || DAT_801a4590.unkDC->unk0 != 0)
-        func_8001cb34();
+        cd_wait_frame();
 }
 
 ADDRESS(0x8001cfe4, 0x4c)
-void func_8001cfe4(StCdRequest *request)
+void cd_request_wait_free(StCdRequest *request)
 {
     while (request->unk0)
-        func_8001cb34();
+        cd_wait_frame();
 }
 
 ADDRESS(0x8001d030, 0x104)
-StCdRequest *func_8001d030(int kind, CdlLOC *loc, u32 size, u8 *dest, void (*done)())
+StCdRequest *cd_request_queue(int kind, CdlLOC *loc, u32 size, u8 *dest, void (*done)())
 {
     StCdRequest *req = DAT_801a4590.unkD8;
 
-    func_8001cfe4(req);
+    cd_request_wait_free(req);
     req->unk0 = kind;
     req->unk1 = 0;
     req->unk18 = *loc;
@@ -213,7 +213,7 @@ StCdRequest *func_8001d030(int kind, CdlLOC *loc, u32 size, u8 *dest, void (*don
         DAT_801a4590.unkD8 = DAT_801a4590.unk8;
     if (DAT_801a4590.unkDC == req) {
         CdReadyCallback(0);
-        CdSyncCallback(func_8001cd60);
+        CdSyncCallback(cd_queue_sync_callback);
         while (!CdControl(CdlSeekL, (u_char *)loc, 0))
             ;
     }
@@ -221,18 +221,18 @@ StCdRequest *func_8001d030(int kind, CdlLOC *loc, u32 size, u8 *dest, void (*don
 }
 
 ADDRESS(0x8001d134, 0x84)
-int func_8001d134(int archive, int member, CdlLOC *loc)
+int cd_archive_member_locate(int archive, int member, CdlLOC *loc)
 {
     VsArchive *a = &DAT_801a4590.archives[archive];
     u16 start = a->sectors[member];
 
     if (loc)
-        func_8002ece0(&a->file.pos, start, loc);
+        cd_loc_add_sectors(&a->file.pos, start, loc);
     return (a->sectors[member + 1] - start) << 11;
 }
 
 ADDRESS(0x8001d1b8, 0xe0)
-void func_8001d1b8(void)
+void gfx_begin_frame(void)
 {
     vs_gfx_state.frame = !vs_gfx_state.frame;
     vs_gfx_state.packet = &vs_gfx_state.packets[vs_gfx_state.frame];
@@ -253,7 +253,7 @@ void func_8001d1b8(void)
 }
 
 ADDRESS(0x8001d298, 0x90)
-void func_8001d298(void)
+void gfx_flip(void)
 {
     DrawSync(0);
     VSync(3);
@@ -262,7 +262,7 @@ void func_8001d298(void)
 }
 
 ADDRESS(0x8001d328, 0x4c)
-void func_8001d328(void)
+void gfx_draw_ot(void)
 {
     AddPrims(vs_gfx_state.ot_cur, &vs_gfx_state.ot2_cur[VS_OT2_LENGTH - 1],
              vs_gfx_state.ot2_cur);
@@ -270,15 +270,15 @@ void func_8001d328(void)
 }
 
 ADDRESS(0x8001d374, 0x28)
-void func_8001d374(void)
+void gfx_end_frame(void)
 {
-    func_8001d298();
-    func_8001d328();
+    gfx_flip();
+    gfx_draw_ot();
 }
 
 /* Clears the 640x480 VRAM area from the origin to black. */
 ADDRESS(0x8001d39c, 0x54)
-void func_8001d39c(void)
+void clear_vram(void)
 {
     RECT r = {0, 0, 640, 480};
 

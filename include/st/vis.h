@@ -487,14 +487,14 @@ typedef struct {
 
 /*
  * 0x801c76f8: the index list, a bit per id at +0x70, 314 records of 44
- * bytes from +0x118 (func_80014544 reads byte +4 of each), then 64 entries
+ * bytes from +0x118 (game_load_start_file reads byte +4 of each), then 64 entries
  * of 48 bytes at +0x3710.
  */
 typedef struct {
     u8 unk0[2];
     u8 unk2;             /* 0x02: carry limit or price base (src/st/menu_shop.c) */
     u8 unk3;             /* 0x03 */
-    u8 unk4;             /* 0xff: none (func_80014544); func_8003f12c's model */
+    u8 unk4;             /* 0xff: none (game_load_start_file); func_8003f12c's model */
     u8 unk5[0xb];
     u8 unk10[14];        /* 0x10: counts func_80031674 lists */
     u16 unk1E;           /* 0x1e */

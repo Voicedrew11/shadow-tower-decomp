@@ -81,7 +81,7 @@ typedef struct {
     long model_t[3];     /* 0xbc: st.model_draw's model translation (the MATRIX's t) */
     u8 unkC8[16];        /* 0xc8: block tag per slot (low four bits) */
     SVECTOR unkD8;       /* 0xd8: rotation func_800241d0 hands model_draw */
-    s32 unkE0;           /* 0xe0: a position func_80016554 tests (x, y, z) */
+    s32 unkE0;           /* 0xe0: a position view_point_in_near_cone tests (x, y, z) */
     s32 unkE4;           /* 0xe4 */
     s32 unkE8;           /* 0xe8 */
     u8 unkEC[4];         /* 0xec */

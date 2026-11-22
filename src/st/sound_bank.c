@@ -78,7 +78,7 @@ void func_80058620(void)
         if (r == -1) {
             SsVabClose(slot->vab);
             slot->vab = r;
-            func_80015848(request);
+            cd_request_retire(request);
             /* A bank request keeps its archive number in the byte the read
              * requests use for the callbacks' state; retail reads it as a
              * plain byte (one combined load, first of the three). */
@@ -87,7 +87,7 @@ void func_80058620(void)
         } else if (r == -2) {
             request->unk1 = 0;
             request->unk11 = 1;
-            func_80015a94(&request->unk18, request->unk28, &request->unk18);
+            cd_loc_add_sectors(&request->unk18, request->unk28, &request->unk18);
             SsVabTransCompleted(1);
             while (CdControl(CdlSeekL, (u_char *)&request->unk18, NULL) == 0)
                 ;
@@ -95,7 +95,7 @@ void func_80058620(void)
         } else {
             if (r == slot->vab) {
                 SsVabTransCompleted(1);
-                func_80015848(request);
+                cd_request_retire(request);
                 /* The bank payload holds its typed buffer pointer at +8. */
                 request->unk4.bank.buffer->state = 1;
                 request->unk24 = 0;
@@ -166,7 +166,7 @@ void func_800588b4(StCdRequest *request)
     switch (request->unk11) {
     case 0:
         slot = &DAT_801dd1c0.slots[request->unk4.bank.slot];
-        if (func_80015b78((u32 *)request->unk4.bank.buffer->data, request->unk28)) {
+        if (cd_checksum_mismatch((u32 *)request->unk4.bank.buffer->data, request->unk28)) {
             request->unk1 = 0;
             while (CdControl(CdlSeekL, (u_char *)&request->unk18, NULL) == 0)
                 ;
@@ -178,10 +178,10 @@ void func_800588b4(StCdRequest *request)
         }
         if ((slot->vab = SsVabOpenHeadSticky(request->unk4.bank.buffer->data, -1,
                                              *(u32 *)&request->unkC)) == -1) {
-            func_80015848(request);
+            cd_request_retire(request);
             return;
         }
-        func_80015a94(&request->unk18, request->unk28, &request->unk18);
+        cd_loc_add_sectors(&request->unk18, request->unk28, &request->unk18);
         request->unk11 = 1;
         request->unk20 = (u8 *)DAT_80088c88;
         request->unk1 = 0;
@@ -264,12 +264,12 @@ void func_80058a0c(int archive, int index, int slot)
     s->block = (s16 *)buf;
     buf->state = 3;
     request = cd_state.unk9D4;
-    func_80015b2c(request);
+    cd_request_wait_free(request);
     request->unk11 = 0;
     request->unk4.bank.buffer = buf;
     request->unk4.bank.slot = slot;
     *(u32 *)&request->unkC = spu;
     request->unk10 = archive;
     request->unk4.bank.member = index;
-    func_80015da8(archive, index, buf->data, func_800588b4);
+    cd_queue_read_member_unchecked(archive, index, buf->data, func_800588b4);
 }

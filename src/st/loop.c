@@ -2,7 +2,7 @@
  * ST.EXE: the game loop, which returns to PSX.EXE with the next program
  * (WIP module). Its unit is -G8: the loop reads its exit word $gp-relative
  * and copies the clear RECT from an .sdata literal. It is split from
- * src/st/main.c only because func_80014544 there is not exact.
+ * src/st/main.c only because game_load_start_file there is not exact.
  */
 #include <kf/lib/address.h>
 #include <kf/lib/types.h>
@@ -44,11 +44,11 @@ SDATA(0x80087ec4, 0x8)
 s32 DAT_800881a4;
 
 ADDRESS(0x80014a30, 0x2cc)
-void func_80014a30(void)
+void game_loop(void)
 {
     u8 program;
 
-    func_80016374();
+    cd_init();
     func_80016fb8();
     func_800210f4();
     func_80021158();
@@ -60,7 +60,7 @@ void func_80014a30(void)
     func_80044674();
     func_800559bc();
     lighting_load_defaults();
-    func_80016508();
+    fade_reset();
     lighting_build_matrices();
     SsSetMVol(127, 127);
     if (*MAILBOX_BYTE_1 == MAILBOX_CONTINUE) {
@@ -80,15 +80,15 @@ void func_80014a30(void)
             DAT_801cd180.unk10 = 1;
             func_80058ed4();
             func_80021158();
-            func_80014544();
+            game_load_start_file();
         }
     } else {
-        func_80014544();
+        game_load_start_file();
     }
     lighting_start();
     func_80044ee8();
     func_8003eaf8();
-    func_80015144(DAT_8009c888, 0x56400);
+    heap_init(DAT_8009c888, 0x56400);
     func_800214a4();
     func_80057a28();
     func_80057a3c();
@@ -97,8 +97,8 @@ void func_80014a30(void)
         VECTOR a;
         SVECTOR b;
 
-        func_800164b4();
-        func_80016508();
+        frame_rate_update();
+        fade_reset();
         func_80042d74();
         func_80050768();
         func_8004e324();
@@ -119,12 +119,12 @@ void func_80014a30(void)
         VSync(10);
         switch (DAT_800881a4) {
         case EXIT_TITLE:
-            func_80014410();
+            game_shutdown();
             program = PROGRAM_TITLE;
             break;
         case EXIT_ENDING:
             func_800633d4();
-            func_80014410();
+            game_shutdown();
             program = PROGRAM_END;
             break;
         default:

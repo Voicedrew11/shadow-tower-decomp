@@ -24,7 +24,7 @@ void func_80032108(void)
  * requests the hit instead.
  */
 ADDRESS(0x80032110, 0xf0)
-int func_80032110(int reach, u_long height)
+int effect_reaches_opponent(int reach, u_long height)
 {
     StEffect *e = DAT_801ce698.cur;
     VsFighter *f = &DAT_800633b0.fighter[1 - e->unk4C];

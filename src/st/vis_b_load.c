@@ -73,7 +73,7 @@ void func_8004eebc(u8 *src)
             e->unk24.vx = src[0] * 4096 + *(s16 *)(src + 8);
             e->unk24.vy = src[1] * 4096 + *(s16 *)(src + 10);
             e->unk24.vz = src[2] * 4096 + *(s16 *)(src + 12);
-            func_80014cfc((u32 *)&e->unk48, (u32 *)(src + 16), 2);
+            copy_words((u32 *)&e->unk48, (u32 *)(src + 16), 2);
             fill_words((u32 *)&e->unk50, 0xff, 2);
             kind = rec->unk00[0];
             switch (kind) {

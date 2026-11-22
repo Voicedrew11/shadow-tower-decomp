@@ -27,7 +27,7 @@ void func_80021984(void)
     CVECTOR black;
     int i;
 
-    func_8001d1b8();
+    gfx_begin_frame();
     sp->unk238.w = 48;
     sp->unk238.h = 48;
     sp->unk238.y = 48;
@@ -83,5 +83,5 @@ void func_80021984(void)
     sp->unk240.vx = 480;
     func_8001e530(&sp->unk238, &sp->unk240, NULL, NULL, 16);
     func_8001e890(0, 0, 0);
-    func_8001d374();
+    gfx_end_frame();
 }

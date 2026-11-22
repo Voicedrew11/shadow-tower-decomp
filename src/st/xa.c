@@ -58,7 +58,7 @@ void func_8005408c(u8 file, int channel)
     u8 byte_channel = channel;
     u8 *save;
 
-    func_80015ad4();
+    cd_wait_idle();
     CdReadyCallback(func_80054000);
     param[0] = CdlModeSpeed | CdlModeRT | CdlModeSF | CdlModeRept;
     CdControlB(CdlSetmode, param, NULL);

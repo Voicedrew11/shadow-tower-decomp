@@ -64,7 +64,7 @@ void func_80044404(void)
     area_state.unk14 = 0xff;
     area_state.unk12 = area_state.unk4;
     func_800456f8();
-    func_80015ad4();
+    cd_wait_idle();
     if (area_state.area == 24) {
         u32 marker;
 
@@ -125,15 +125,15 @@ void func_80044674(void)
     vis_table_a.unk6169 = 0;
     DAT_800881d8 = DAT_80013980 + 4;
     DAT_800881dc[0] = DAT_80013980;
-    func_80016294(2, "CHR0\\M00.T");
-    func_80016294(0, "COM\\MO.T");
-    func_80016294(1, "COM\\FDAT.T");
-    func_80016294(3, "COM\\STAT.T");
-    func_80016294(4, "COM\\CRT.T");
-    func_80016294(6, "COM\\ICON.T");
-    func_80016294(5, "COM\\ITEM.T");
-    func_80016294(7, "COM\\EQUIP.T");
-    func_80016294(8, "COM\\TALKMSG.T");
+    cd_archive_open(2, "CHR0\\M00.T");
+    cd_archive_open(0, "COM\\MO.T");
+    cd_archive_open(1, "COM\\FDAT.T");
+    cd_archive_open(3, "COM\\STAT.T");
+    cd_archive_open(4, "COM\\CRT.T");
+    cd_archive_open(6, "COM\\ICON.T");
+    cd_archive_open(5, "COM\\ITEM.T");
+    cd_archive_open(7, "COM\\EQUIP.T");
+    cd_archive_open(8, "COM\\TALKMSG.T");
     CdSearchFile(&file, "\\ST\\XA0\\HAM.XA;1");
     DAT_801cba08.unk1618[0] = file.pos;
     CdSearchFile(&file, "\\ST\\XA0\\SHOP0.XA;1");
@@ -214,29 +214,29 @@ void func_80044674(void)
     DAT_801cba08.unk1618[38] = file.pos;
     CdSearchFile(&file, "\\ST\\XA1\\30600.XA;1");
     DAT_801cba08.unk1618[39] = file.pos;
-    func_80016030(1, 0x1e0, (u_long *)DAT_8009c888);
+    cd_read_member(1, 0x1e0, (u_long *)DAT_8009c888);
     func_80045f90(1, 0x1e1, func_800443f4);
     func_80058a0c(1, 0x1e2, 0);
-    func_80014cfc((u32 *)&vis_table_b, p + 1, *p >> 2);
+    copy_words((u32 *)&vis_table_b, p + 1, *p >> 2);
     p = (u32 *)((u8 *)p + (*p + 4));
-    func_80014cfc((u32 *)DAT_801b5220, p + 1, *p >> 2);
+    copy_words((u32 *)DAT_801b5220, p + 1, *p >> 2);
     p = (u32 *)((u8 *)p + (*p + 4));
-    func_80014cfc((u32 *)DAT_80088c88, p + 1, *p >> 2);
+    copy_words((u32 *)DAT_80088c88, p + 1, *p >> 2);
     p = (u32 *)((u8 *)p + (*p + 4));
-    func_80014cfc((u32 *)effects.defs, p + 1, *p >> 2);
+    copy_words((u32 *)effects.defs, p + 1, *p >> 2);
     p = (u32 *)((u8 *)p + (*p + 4));
-    func_80014cfc((u32 *)DAT_8007f78c, p + 1, *p >> 2);
+    copy_words((u32 *)DAT_8007f78c, p + 1, *p >> 2);
     p = (u32 *)((u8 *)p + (*p + 4));
-    func_80014cfc((u32 *)DAT_801dd1c0.sounds, p + 1, *p >> 2);
+    copy_words((u32 *)DAT_801dd1c0.sounds, p + 1, *p >> 2);
     p = (u32 *)((u8 *)p + (*p + 4));
-    func_80014cfc((u32 *)&menu_messages, p + 1, *p >> 2);
+    copy_words((u32 *)&menu_messages, p + 1, *p >> 2);
     p = (u32 *)((u8 *)p + (*p + 4));
-    func_80014cfc((u32 *)vis_table_c.unk0118, p + 1, *p >> 2);
+    copy_words((u32 *)vis_table_c.unk0118, p + 1, *p >> 2);
     p = (u32 *)((u8 *)p + (*p + 4));
     p = (u32 *)((u8 *)p + (*p + 4));
-    func_80014cfc((u32 *)DAT_8009b088, p + 1, *p >> 2);
+    copy_words((u32 *)DAT_8009b088, p + 1, *p >> 2);
     anim_register_pack(40, DAT_8009b088);
-    func_80015ad4();
+    cd_wait_idle();
     func_8003ea20();
     func_80052d10();
 }
@@ -268,12 +268,12 @@ void func_80044ee8(void)
     area_state.unk22 = 127;
     area_state.unk1F = 0;
     do {
-        func_8001531c();
+        cd_wait_frame();
         func_800456f8();
         if (area_state.unk0 == 0)
             break;
     } while ((s16)area_state.unk2 < 6 || (s16)area_state.unk2 == 240);
-    func_80015ad4();
+    cd_wait_idle();
     world_state.unk8308[0] = DAT_800fc488;
     world_state.unk8308[1] = DAT_800f2c88;
 }
@@ -391,14 +391,14 @@ busy:
     if ((area_state.unk10 != 0xff && a0 == 0xff) || (area_state.unk11 != 0xff && a1 == 0xff) ||
         (area_state.unk12 != 0xff && a2 == 0xff) || (area_state.unk13 != 0xff && a3 == 0xff) ||
         (area_state.unk14 != 0xff && a4 == 0xff)) {
-        func_80015ad4();
+        cd_wait_idle();
         while (area_state.unk0) {
-            func_8001531c();
+            cd_wait_frame();
             func_800456f8();
         }
     } else {
         while ((s16)area_state.unk2 == 240)
-            func_8001531c();
+            cd_wait_frame();
     }
     ExitCriticalSection();
     if (area_state.unk1C && a0 != 0xff && f0 == 127 && area_state.unk10 != a0) {
@@ -521,7 +521,7 @@ void func_800456f8(void)
     case 0:
         if (area_state.unk10 == 0xff)
             goto phase3;
-        if (func_80015ec8(1, area_state.unk10 * 10))
+        if (cd_archive_member_size(1, area_state.unk10 * 10))
             func_80045f90(1, area_state.unk10 * 10, func_80045648);
         area_state.unk2 = 240;
         b = vis_table_b.entries;
@@ -533,15 +533,15 @@ void func_800456f8(void)
             b->unk05 = 0xff;
             b++;
         }
-        func_80015d54(1, (area_state.unk10 * 10) | 1, (u8 *)DAT_80088c88, func_8004557c);
+        cd_queue_read_member(1, (area_state.unk10 * 10) | 1, (u8 *)DAT_80088c88, func_8004557c);
         break;
     case 1:
         area_state.unk2 = 240;
         area_state.hooks = &area_hooks_default;
-        func_80015d54(1, area_state.unk10 * 10 + 2, DAT_800881dc[0], func_80045594);
+        cd_queue_read_member(1, area_state.unk10 * 10 + 2, DAT_800881dc[0], func_80045594);
         viewer.unk174 = NULL;
         viewer.unk178 = -1;
-        func_80014cfc((u32 *)vis_records, (u32 *)DAT_80088c88, 0x3e00);
+        copy_words((u32 *)vis_records, (u32 *)DAT_80088c88, 0x3e00);
         if ((s8)area_state.unk20 != 127) {
             area_state.unk1C = 1;
             func_80045010((s8)area_state.unk20 * 4096 + (s8)area_state.unk23 * 128,
@@ -552,21 +552,21 @@ void func_800456f8(void)
         break;
     case 2:
         area_state.unk2 = 240;
-        func_80015d54(1, area_state.unk10 * 10 + 3, (u8 *)DAT_80088c88, func_800455ac);
+        cd_queue_read_member(1, area_state.unk10 * 10 + 3, (u8 *)DAT_80088c88, func_800455ac);
         break;
     case 3:
     phase3:
         if (area_state.unk11 != 0xff) {
             char name[] = "CHRX\\MXX.T";
 
-            func_800152f8(cd_state.archives[2].sectors);
+            mem_free(cd_state.archives[2].sectors);
             cd_state.archives[2].sectors = NULL;
             name[3] = area_state.unk10 / 10 + '0';
             name[6] = area_state.unk10 / 10 + '0';
             name[7] = area_state.unk10 % 10 + '0';
-            func_80016294(2, name);
+            cd_archive_open(2, name);
             area_state.unk2 = 240;
-            func_80015d54(1, area_state.unk11 * 10 + 4, (u8 *)DAT_800fc488, func_800455c4);
+            cd_queue_read_member(1, area_state.unk11 * 10 + 4, (u8 *)DAT_800fc488, func_800455c4);
         }
         if (area_state.unk10 != 0xff) {
             p = DAT_80088c88;
@@ -602,18 +602,18 @@ void func_800456f8(void)
             func_80052d10();
             for (i = 15; i != -1; i--) {
                 if (world_state.unk834C[128 + i])
-                    func_80015230(world_state.unk834C[128 + i]);
+                    heap_free(world_state.unk834C[128 + i]);
             }
             for (i = 127; i != -1; i--) {
                 if (world_state.unk8C7C[i])
-                    func_80015230(world_state.unk8C7C[i]);
+                    heap_free(world_state.unk8C7C[i]);
             }
-            func_80014cfc((u32 *)vis_table_a.unk3500, (u32 *)(p + 1), 2816);
+            copy_words((u32 *)vis_table_a.unk3500, (u32 *)(p + 1), 2816);
             func_8004e8ec();
             p = (u_long *)((u8 *)p + (*p + 4));
             func_8004e960((VisAFileEntry *)(p + 1));
             p = (u_long *)((u8 *)p + (*p + 4));
-            func_80014cfc((u32 *)&vis_table_b.unk0000[300], (u32 *)(p + 1), 192);
+            copy_words((u32 *)&vis_table_b.unk0000[300], (u32 *)(p + 1), 192);
             p = (u_long *)((u8 *)p + (*p + 4));
             func_8004eebc((u8 *)(p + 1));
             p = (u_long *)((u8 *)p + (*p + 4));
@@ -634,7 +634,7 @@ void func_800456f8(void)
             for (j = 15; j != -1; j--) {
                 if (slot->block) {
                     while (slot->block[2] == 3)
-                        func_8001531c();
+                        cd_wait_frame();
                     SsVabClose(slot->vab);
                     slot->vab = -1;
                     slot->block = NULL;
@@ -650,7 +650,7 @@ void func_800456f8(void)
     case 4:
         if (area_state.unk11 != 0xff) {
             area_state.unk2 = 240;
-            func_80015d54(1, area_state.unk11 * 10 + 5, (u8 *)DAT_800f2c88, func_800455dc);
+            cd_queue_read_member(1, area_state.unk11 * 10 + 5, (u8 *)DAT_800f2c88, func_800455dc);
         }
         break;
     case 5:
@@ -659,7 +659,7 @@ void func_800456f8(void)
             area_state.unk2 = 240;
             func_80045f90(1, area_state.unk12 * 10 + 6, func_800455f4);
         }
-        func_80015ad4();
+        cd_wait_idle();
         area_state.unk1D = 0;
         area_state.unk1F = 0;
         if (area_state.unk13 == 0xff && area_state.unk14 == 0xff) {

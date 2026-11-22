@@ -31,20 +31,20 @@ void func_800562d4(StSaveData *save, int fresh)
         save->unk4[0] = save->unk4[1] = save->unk4[2] = save->unk4[3] = save->unk4[4] = 0;
     else
         *(StBytes5 *)save->unk4 = ((StAreaBytes *)&area_state)->unk4;
-    func_80014cfc(save->unkC, DAT_801cba08.unk0[0], 0x60);
-    func_80014cfc(save->unk18C, DAT_801cba08.unk180[0], 0x30);
-    func_80014cfc(save->unk24C, DAT_801cba08.unk240[0], 0x180);
-    func_80014cfc(save->unk84C, DAT_801cba08.unk840[0], 0x180);
-    func_80014cfc(save->unkE4C, DAT_801cba08.unkE40[0], 0x180);
-    func_80014cfc(save->unk144C, &DAT_801cba08.unk1440.word, 2);
-    func_80014cfc(save->unk1454, (u32 *)DAT_801cba08.unk1448, 12);
-    func_80014cfc(save->unk1484, (u32 *)DAT_801cba08.unk1478, 12);
-    func_80014cfc(save->unk14B4, DAT_801cba08.unk14A8, 5);
+    copy_words(save->unkC, DAT_801cba08.unk0[0], 0x60);
+    copy_words(save->unk18C, DAT_801cba08.unk180[0], 0x30);
+    copy_words(save->unk24C, DAT_801cba08.unk240[0], 0x180);
+    copy_words(save->unk84C, DAT_801cba08.unk840[0], 0x180);
+    copy_words(save->unkE4C, DAT_801cba08.unkE40[0], 0x180);
+    copy_words(save->unk144C, &DAT_801cba08.unk1440.word, 2);
+    copy_words(save->unk1454, (u32 *)DAT_801cba08.unk1448, 12);
+    copy_words(save->unk1484, (u32 *)DAT_801cba08.unk1478, 12);
+    copy_words(save->unk14B4, DAT_801cba08.unk14A8, 5);
     save->unk14C8[0] = vis_table_c.unk0000[2];
     save->unk14C8[1] = vis_table_c.unk0000[3];
     save->unk14C8[2] = vis_table_c.unk0000[4];
     save->unk14C8[3] = vis_table_c.unk0000[5];
-    func_80014cfc(save->unk14CC, vis_table_c.unk0070, 9);
+    copy_words(save->unk14CC, vis_table_c.unk0070, 9);
     e32 = &vis_table_c.entries[32];
     for (i = 0; i < 16; i++, e32++) {
         if (i < vis_table_c.unk0000[2]) {
@@ -85,10 +85,10 @@ void func_800562d4(StSaveData *save, int fresh)
     save->unk1801 = viewer.unk27;
     save->unk1802 = viewer.unk28;
     save->unk1803 = viewer.unk32;
-    func_80014d2c((u16 *)save->unk1804, (u16 *)viewer.unk62, 14);
-    func_80014d2c((u16 *)save->unk1820, (u16 *)viewer.unk7E, 14);
-    func_80014d2c(save->unk183C, viewer.unk9A, 14);
-    func_80014cfc(save->unk1870, (u32 *)&viewer.unk22C, 3);
+    copy_halfwords((u16 *)save->unk1804, (u16 *)viewer.unk62, 14);
+    copy_halfwords((u16 *)save->unk1820, (u16 *)viewer.unk7E, 14);
+    copy_halfwords(save->unk183C, viewer.unk9A, 14);
+    copy_words(save->unk1870, (u32 *)&viewer.unk22C, 3);
     save->unk187C[0][0] = viewer.unk190[0][0];
     save->unk187C[0][1] = viewer.unk190[0][1];
     save->unk187C[1][0] = viewer.unk190[1][0];
@@ -141,10 +141,10 @@ void func_800562d4(StSaveData *save, int fresh)
         ((u16 *)&DAT_801cba08.unk16E0)[1] = rand();
     }
     save->unk0 = DAT_801cba08.unk16E0;
-    func_80014cfc(save->unk18BC, &DAT_801cba08.unk14A8[5], 5);
-    func_80014cfc(save->unk18D0, &DAT_801cba08.unk14A8[10], 0x4f);
-    func_80014cfc(save->unk1A0C, (u32 *)&DAT_801c7590, 0x4f);
-    func_80014cfc(save->unk1B48, vis_table_c.unk0048, 10);
+    copy_words(save->unk18BC, &DAT_801cba08.unk14A8[5], 5);
+    copy_words(save->unk18D0, &DAT_801cba08.unk14A8[10], 0x4f);
+    copy_words(save->unk1A0C, (u32 *)&DAT_801c7590, 0x4f);
+    copy_words(save->unk1B48, vis_table_c.unk0048, 10);
     save->unk1B70[0] = viewer.unk38[0];
     save->unk1B70[1] = viewer.unk38[1];
     save->unk1B70[2] = viewer.unk38[2];
@@ -172,10 +172,10 @@ void func_800562d4(StSaveData *save, int fresh)
     r = vis_table_c.unk0118;
     for (i = 0; i < 314; i++, r++)
         save->unk1BA8[i] = r->unk28;
-    func_80014cfc(save->unk1CE4, (u32 *)lighting.area_mode, 24);
-    func_80014d2c(save->unk1D44, DAT_801c7590.unk13A, 14);
+    copy_words(save->unk1CE4, (u32 *)lighting.area_mode, 24);
+    copy_halfwords(save->unk1D44, DAT_801c7590.unk13A, 14);
     *(StHalves7 *)save->unk1D60 = *(StHalves7 *)DAT_801c7590.unk156;
-    func_80014d2c(save->unk1D6E, DAT_801cd180.unk22, 12);
+    copy_halfwords(save->unk1D6E, DAT_801cd180.unk22, 12);
 }
 
 /* Restores the state func_800562d4 saved. */
@@ -189,15 +189,15 @@ void func_80056aa0(StSaveData *save)
     Vis44 *r;
 
     ((StAreaBytes *)&area_state)->unk4 = *(StBytes5 *)save->unk4;
-    func_80014cfc(DAT_801cba08.unk0[0], save->unkC, 0x60);
-    func_80014cfc(DAT_801cba08.unk180[0], save->unk18C, 0x30);
-    func_80014cfc(DAT_801cba08.unk240[0], save->unk24C, 0x180);
-    func_80014cfc(DAT_801cba08.unk840[0], save->unk84C, 0x180);
-    func_80014cfc(DAT_801cba08.unkE40[0], save->unkE4C, 0x180);
-    func_80014cfc(&DAT_801cba08.unk1440.word, save->unk144C, 2);
-    func_80014cfc((u32 *)DAT_801cba08.unk1448, save->unk1454, 12);
-    func_80014cfc((u32 *)DAT_801cba08.unk1478, save->unk1484, 12);
-    func_80014cfc(DAT_801cba08.unk14A8, save->unk14B4, 5);
+    copy_words(DAT_801cba08.unk0[0], save->unkC, 0x60);
+    copy_words(DAT_801cba08.unk180[0], save->unk18C, 0x30);
+    copy_words(DAT_801cba08.unk240[0], save->unk24C, 0x180);
+    copy_words(DAT_801cba08.unk840[0], save->unk84C, 0x180);
+    copy_words(DAT_801cba08.unkE40[0], save->unkE4C, 0x180);
+    copy_words(&DAT_801cba08.unk1440.word, save->unk144C, 2);
+    copy_words((u32 *)DAT_801cba08.unk1448, save->unk1454, 12);
+    copy_words((u32 *)DAT_801cba08.unk1478, save->unk1484, 12);
+    copy_words(DAT_801cba08.unk14A8, save->unk14B4, 5);
     for (area = 0; area < 48; area++) {
         DAT_801cba08.unk16E4[area] = 0;
         for (i = 0; i < 64; i++) {
@@ -209,7 +209,7 @@ void func_80056aa0(StSaveData *save)
     vis_table_c.unk0000[3] = save->unk14C8[1];
     vis_table_c.unk0000[4] = save->unk14C8[2];
     vis_table_c.unk0000[5] = save->unk14C8[3];
-    func_80014cfc(vis_table_c.unk0070, save->unk14CC, 9);
+    copy_words(vis_table_c.unk0070, save->unk14CC, 9);
     entry = &vis_table_c.entries[32];
     for (i = 0; i < 16; i++, entry++) {
         if (i < vis_table_c.unk0000[2]) {
@@ -276,10 +276,10 @@ void func_80056aa0(StSaveData *save)
             viewer.unk28++;
     }
     viewer.unk32 = save->unk1803;
-    func_80014d2c((u16 *)viewer.unk62, (u16 *)save->unk1804, 14);
-    func_80014d2c((u16 *)viewer.unk7E, (u16 *)save->unk1820, 14);
-    func_80014d2c(viewer.unk9A, save->unk183C, 14);
-    func_80014cfc((u32 *)&viewer.unk22C, save->unk1870, 3);
+    copy_halfwords((u16 *)viewer.unk62, (u16 *)save->unk1804, 14);
+    copy_halfwords((u16 *)viewer.unk7E, (u16 *)save->unk1820, 14);
+    copy_halfwords(viewer.unk9A, save->unk183C, 14);
+    copy_words((u32 *)&viewer.unk22C, save->unk1870, 3);
     viewer.unk190[0][0] = save->unk187C[0][0];
     viewer.unk190[0][1] = save->unk187C[0][1];
     viewer.unk190[1][0] = save->unk187C[1][0];
@@ -318,10 +318,10 @@ void func_80056aa0(StSaveData *save)
     DAT_801cd120.unk4 = save->unk18B4[4];
     DAT_801cd120.unk5 = save->unk18B4[5];
     DAT_801cba08.unk16E0 = save->unk0;
-    func_80014cfc(&DAT_801cba08.unk14A8[5], save->unk18BC, 5);
-    func_80014cfc(&DAT_801cba08.unk14A8[10], save->unk18D0, 0x4f);
-    func_80014cfc((u32 *)&DAT_801c7590, save->unk1A0C, 0x4f);
-    func_80014cfc(vis_table_c.unk0048, save->unk1B48, 10);
+    copy_words(&DAT_801cba08.unk14A8[5], save->unk18BC, 5);
+    copy_words(&DAT_801cba08.unk14A8[10], save->unk18D0, 0x4f);
+    copy_words((u32 *)&DAT_801c7590, save->unk1A0C, 0x4f);
+    copy_words(vis_table_c.unk0048, save->unk1B48, 10);
     viewer.unk38[0] = save->unk1B70[0];
     viewer.unk38[1] = save->unk1B70[1];
     viewer.unk38[2] = save->unk1B70[2];
@@ -349,10 +349,10 @@ void func_80056aa0(StSaveData *save)
     r = vis_table_c.unk0118;
     for (i = 0; i < 314; i++, r++)
         r->unk28 = save->unk1BA8[i];
-    func_80014cfc((u32 *)lighting.area_mode, save->unk1CE4, 24);
-    func_80014d2c(DAT_801c7590.unk13A, save->unk1D44, 14);
+    copy_words((u32 *)lighting.area_mode, save->unk1CE4, 24);
+    copy_halfwords(DAT_801c7590.unk13A, save->unk1D44, 14);
     *(StHalves7 *)DAT_801c7590.unk156 = *(StHalves7 *)save->unk1D60;
-    func_80014d2c(DAT_801cd180.unk22, save->unk1D6E, 12);
+    copy_halfwords(DAT_801cd180.unk22, save->unk1D6E, 12);
 }
 
 ADDRESS(0x8005735c, 0x30)

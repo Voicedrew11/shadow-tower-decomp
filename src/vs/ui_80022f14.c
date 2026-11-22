@@ -99,7 +99,7 @@ void func_80023308(int page)
 {
     VsMenuScratch *sp = VS_MENU_SCRATCH;
 
-    func_8001d1b8();
+    gfx_begin_frame();
     sp->style[0].r = sp->style[3].r = 96;
     sp->style[0].g = sp->style[3].g = 96;
     sp->style[0].b = sp->style[3].b = 96;
@@ -133,5 +133,5 @@ void func_80023308(int page)
     func_80022a00();
     func_8001f23c(24, 16, 592, 208);
     func_8001f828();
-    func_8001d374();
+    gfx_end_frame();
 }

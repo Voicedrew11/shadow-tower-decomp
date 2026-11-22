@@ -1,7 +1,7 @@
 /*
  * ST.EXE: the frame wait, the vsync counters, the CD read-request ring
  * callbacks and BCD/CD position helpers (WIP module). src/st/cdpos.c
- * continues it: the two were split while func_800159d4 was not exact.
+ * continues it: the two were split while cd_sector_to_loc was not exact.
  */
 #include <kf/lib/address.h>
 #include <kf/lib/null.h>
@@ -22,7 +22,7 @@
 #define STEP_DONE 2
 
 ADDRESS(0x8001531c, 0x40)
-void func_8001531c(void)
+void cd_wait_frame(void)
 {
     func_80058620();
     func_80045ffc();
@@ -33,7 +33,7 @@ void func_8001531c(void)
 
 /* Waits for the next vsync tick, then consumes it. */
 ADDRESS(0x8001535c, 0x58)
-void func_8001535c(void)
+void vsync_wait_tick(void)
 {
     while (cd_state.unkC == 0)
         VSync(0);
@@ -41,7 +41,7 @@ void func_8001535c(void)
 }
 
 ADDRESS(0x800153b4, 0x78)
-void func_800153b4(void)
+void vsync_handler(void)
 {
     cd_state.unk4++;
     cd_state.unkC++;
@@ -53,7 +53,7 @@ void func_800153b4(void)
 }
 
 ADDRESS(0x8001542c, 0xbc)
-void func_8001542c(u_char status, u_char *result)
+void cd_request_read_callback(u_char status, u_char *result)
 {
     StCdRequest *request = cd_state.unk9D8;
     u_char param[8]; /* unused */
@@ -87,7 +87,7 @@ void func_8001542c(u_char status, u_char *result)
 
 /* CdReadyCallback of a read: copies each sector's data into the request. */
 ADDRESS(0x800154e8, 0x134)
-void func_800154e8(u_char status, u_char *result)
+void cd_request_ready_callback(u_char status, u_char *result)
 {
     StCdRequest *request = cd_state.unk9D8;
     u_char param[8]; /* unused */
@@ -110,7 +110,7 @@ void func_800154e8(u_char status, u_char *result)
             if (--request->unk24 == 0) {
                 CdReadyCallback(0);
                 request->unk1 = STEP_DONE;
-                func_8001561c(CdlComplete, 0);
+                cd_request_sync_callback(CdlComplete, 0);
             }
             break;
         }
@@ -124,7 +124,7 @@ void func_800154e8(u_char status, u_char *result)
             request->unk24 = -1;
             CdReadyCallback(0);
             request->unk1 = STEP_DONE;
-            func_8001561c(CdlComplete, 0);
+            cd_request_sync_callback(CdlComplete, 0);
             break;
         }
     }
@@ -132,7 +132,7 @@ void func_800154e8(u_char status, u_char *result)
 
 /* CdSyncCallback of the request ring: seek, read, check, finish. */
 ADDRESS(0x8001561c, 0x22c)
-void func_8001561c(u_char status, u_char *result)
+void cd_request_sync_callback(u_char status, u_char *result)
 {
     StCdRequest *request = cd_state.unk9D8;
 
@@ -149,8 +149,8 @@ void func_8001561c(u_char status, u_char *result)
                 request->unk1 = STEP_READ;
                 request->unk24 = request->unk28;
                 request->unk1C = request->unk20;
-                CdReadyCallback(func_800154e8);
-                CdSyncCallback(func_8001561c);
+                CdReadyCallback(cd_request_ready_callback);
+                CdSyncCallback(cd_request_sync_callback);
                 while (CdControlF(CdlReadN, 0) == 0)
                     ;
                 break;
@@ -162,14 +162,14 @@ void func_8001561c(u_char status, u_char *result)
                         request->unk1 = STEP_SEEK;
                         while (CdControl(CdlSeekL, (u_char *)&request->unk18, 0) == 0)
                             ;
-                    } else if (func_80015b78((u32 *)request->unk20, request->unk28) != 0) {
+                    } else if (cd_checksum_mismatch((u32 *)request->unk20, request->unk28) != 0) {
                         request->unk1 = STEP_SEEK;
                         while (CdControl(CdlSeekL, (u_char *)&request->unk18, 0) == 0)
                             ;
                     } else {
                         if (request->done != NULL)
                             request->done(request->unk20);
-                        func_80015848(request);
+                        cd_request_retire(request);
                     }
                 } else if (request->done != NULL) {
                     request->done(request);
@@ -199,7 +199,7 @@ void func_8001561c(u_char status, u_char *result)
 
 /* Retires a request and starts the next one in the ring, or pauses. */
 ADDRESS(0x80015848, 0xac)
-void func_80015848(StCdRequest *request)
+void cd_request_retire(StCdRequest *request)
 {
     request->unk0 = 0;
     request->unk1 = STEP_SEEK;
@@ -208,7 +208,7 @@ void func_80015848(StCdRequest *request)
     cd_state.unk9D8 = request;
     if (request->unk0 != 0) {
         CdReadyCallback(0);
-        CdSyncCallback(func_8001561c);
+        CdSyncCallback(cd_request_sync_callback);
         while (CdControl(CdlSeekL, (u_char *)&request->unk18, 0) == 0)
             ;
     } else {
@@ -219,25 +219,25 @@ void func_80015848(StCdRequest *request)
 }
 
 ADDRESS(0x800158f4, 0x20)
-int func_800158f4(u8 bcd)
+int bcd_to_int(u8 bcd)
 {
     return (bcd >> 4) * 10 + (bcd & 0xf);
 }
 
 ADDRESS(0x80015914, 0x3c)
-int func_80015914(u8 value)
+int int_to_bcd(u8 value)
 {
     return ((value / 10) << 4) | (value % 10);
 }
 
 /* Sector number of a CD position (no 150-sector lead-in offset). */
 ADDRESS(0x80015950, 0x84)
-u32 func_80015950(CdlLOC *pos)
+u32 cd_loc_to_sector(CdlLOC *pos)
 {
-    int minute = func_800158f4(pos->minute);
-    int second = func_800158f4(pos->second);
+    int minute = bcd_to_int(pos->minute);
+    int second = bcd_to_int(pos->second);
 
-    return minute * 60 * 75 + second * 75 + func_800158f4(pos->sector);
+    return minute * 60 * 75 + second * 75 + bcd_to_int(pos->sector);
 }
 
 /* Writes a sector count as a BCD CD position without a lead-in offset.
@@ -245,12 +245,12 @@ u32 func_80015950(CdlLOC *pos)
  * retail leaves the last call's delay slot empty behind the store of the
  * second, which reorg only does for a volatile store. */
 ADDRESS(0x800159d4, 0xc0)
-void func_800159d4(volatile CdlLOC *pos, u32 sector)
+void cd_sector_to_loc(volatile CdlLOC *pos, u32 sector)
 {
-    pos->minute = func_80015914(sector / (60 * 75));
+    pos->minute = int_to_bcd(sector / (60 * 75));
     sector %= 60 * 75;
-    pos->second = func_80015914(sector / 75);
+    pos->second = int_to_bcd(sector / 75);
     sector %= 75;
-    pos->sector = func_80015914(sector);
+    pos->sector = int_to_bcd(sector);
     pos->track = 0;
 }

@@ -33,9 +33,9 @@ extern char DAT_801175a8[];
 extern char DAT_80117580[24];
 
 /* src/vs/card_8001c8b8.c: the menu sound effects (SsUtKeyOn tones 11-14). */
-void func_8001c8b8(void);
-void func_8001c8f8(void);
-void func_8001c938(void);
-void func_8001c978(void);
+void play_cursor_sound(void);
+void play_cancel_sound(void);
+void play_refuse_sound(void);
+void play_confirm_sound(void);
 
 #endif

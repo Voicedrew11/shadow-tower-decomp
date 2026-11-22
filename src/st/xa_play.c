@@ -32,8 +32,8 @@ int func_800541f4(void)
     /* Retail keeps both positions in stack slots and reloads them. */
     volatile int pos[2];
 
-    pos[1] = func_80015950((CdlLOC *)&viewer.unk1DC);
-    pos[0] = func_80015950(&viewer.unk1D8);
+    pos[1] = cd_loc_to_sector((CdlLOC *)&viewer.unk1DC);
+    pos[0] = cd_loc_to_sector(&viewer.unk1D8);
     if (viewer.unk1E8 + 3600 < cd_state.unk4)
         return 1;
     return pos[1] - pos[0] >= viewer.unk1E0 * 2;
@@ -58,7 +58,7 @@ void func_800542d0(int id, int full)
     DVECTOR pix;
     DVECTOR clut;
 
-    func_80015ad4();
+    cd_wait_idle();
     if (full == 0) {
         pix.vx = 960;
         pix.vy = 256;
@@ -70,7 +70,7 @@ void func_800542d0(int id, int full)
         clut.vx = 0;
         clut.vy = 511;
     }
-    func_80016030(8, id, DAT_80088c88);
+    cd_read_member(8, id, DAT_80088c88);
     func_8003ec5c(DAT_80088c88, &pix, &clut, 1);
 }
 

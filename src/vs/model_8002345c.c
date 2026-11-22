@@ -265,7 +265,7 @@ void func_8002392c(void)
 }
 
 /* The C library's malloc, or NULL when the result is not in main RAM: a
- * second copy of func_8002e690 (src/vs/cd_8002e5e4.c). */
+ * second copy of mem_alloc_checked (src/vs/cd_8002e5e4.c). */
 ADDRESS(0x8002398c, 0x44)
 void *func_8002398c(u32 size)
 {

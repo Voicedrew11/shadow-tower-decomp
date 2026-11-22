@@ -22,17 +22,17 @@
 #define STEP_DONE 2
 
 ADDRESS(0x8002e5e4, 0x4c)
-void func_8002e5e4(void)
+void loading_screen_step(void)
 {
     if (vs_gfx_state.unk2C974) {
-        func_8001d1b8();
-        func_8001d374();
+        gfx_begin_frame();
+        gfx_end_frame();
     }
 }
 
 /* Returns the end of the source. */
 ADDRESS(0x8002e630, 0x30)
-u32 *func_8002e630(u32 *dst, u32 *src, int count)
+u32 *copy_words(u32 *dst, u32 *src, int count)
 {
     int left;
 
@@ -42,7 +42,7 @@ u32 *func_8002e630(u32 *dst, u32 *src, int count)
 }
 
 ADDRESS(0x8002e660, 0x30)
-u16 *func_8002e660(u16 *dst, u16 *src, int count)
+u16 *copy_halfwords(u16 *dst, u16 *src, int count)
 {
     int left;
 
@@ -54,7 +54,7 @@ u16 *func_8002e660(u16 *dst, u16 *src, int count)
 /* The C library's malloc, or NULL when the result is not in main RAM
  * (ST.EXE's copy calls malloc3). */
 ADDRESS(0x8002e690, 0x44)
-void *func_8002e690(u32 size)
+void *mem_alloc_checked(u32 size)
 {
     u8 *p = malloc(size);
 
@@ -64,14 +64,14 @@ void *func_8002e690(u32 size)
 }
 
 ADDRESS(0x8002e6d4, 0x28)
-void *func_8002e6d4(u32 size)
+void *mem_alloc(u32 size)
 {
-    return func_8002e690((size + 7) & ~7);
+    return mem_alloc_checked((size + 7) & ~7);
 }
 
 /* free3 of a non-NULL pointer (the shape of LIBSN's _OP_DELE, as in ST.EXE). */
 ADDRESS(0x8002e6fc, 0x24)
-void func_8002e6fc(void *p)
+void mem_free(void *p)
 {
     if (p != NULL)
         free3(p);
@@ -83,7 +83,7 @@ void func_8002e6fc(void *p)
  * the sync callback.
  */
 ADDRESS(0x8002e720, 0x148)
-void func_8002e720(u_char status, u_char *result)
+void cd_request_ready_callback(u_char status, u_char *result)
 {
     StCdRequest *request = DAT_801a4590.unkDC;
     u_char param[8]; /* unused */
@@ -130,7 +130,7 @@ void func_8002e720(u_char status, u_char *result)
 
 /* CdSyncCallback of the request ring: seek, read, check, finish. */
 ADDRESS(0x8002e868, 0x22c)
-void func_8002e868(u_char status, u_char *result)
+void cd_request_sync_callback(u_char status, u_char *result)
 {
     StCdRequest *request = DAT_801a4590.unkDC;
 
@@ -147,8 +147,8 @@ void func_8002e868(u_char status, u_char *result)
                 request->unk1 = STEP_READ;
                 request->unk24 = request->unk28;
                 request->unk1C = request->unk20;
-                CdReadyCallback(func_8002e720);
-                CdSyncCallback(func_8002e868);
+                CdReadyCallback(cd_request_ready_callback);
+                CdSyncCallback(cd_request_sync_callback);
                 while (CdControlF(CdlReadN, 0) == 0)
                     ;
                 break;
@@ -160,14 +160,14 @@ void func_8002e868(u_char status, u_char *result)
                         request->unk1 = STEP_SEEK;
                         while (CdControl(CdlSeekL, (u_char *)&request->unk18, 0) == 0)
                             ;
-                    } else if (func_8002ed20((u32 *)request->unk20, request->unk28) != 0) {
+                    } else if (cd_checksum_mismatch((u32 *)request->unk20, request->unk28) != 0) {
                         request->unk1 = STEP_SEEK;
                         while (CdControl(CdlSeekL, (u_char *)&request->unk18, 0) == 0)
                             ;
                     } else {
                         if (request->done != NULL)
                             request->done(request->unk20);
-                        func_8002ea94(request);
+                        cd_request_retire(request);
                     }
                 } else if (request->done != NULL) {
                     request->done(request);
@@ -197,7 +197,7 @@ void func_8002e868(u_char status, u_char *result)
 
 /* Retires a request and starts the next one in the ring, or pauses. */
 ADDRESS(0x8002ea94, 0xac)
-void func_8002ea94(StCdRequest *request)
+void cd_request_retire(StCdRequest *request)
 {
     request->unk0 = 0;
     request->unk1 = STEP_SEEK;
@@ -206,7 +206,7 @@ void func_8002ea94(StCdRequest *request)
     DAT_801a4590.unkDC = request;
     if (request->unk0 != 0) {
         CdReadyCallback(0);
-        CdSyncCallback(func_8002e868);
+        CdSyncCallback(cd_request_sync_callback);
         while (CdControl(CdlSeekL, (u_char *)&request->unk18, 0) == 0)
             ;
     } else {
@@ -217,50 +217,50 @@ void func_8002ea94(StCdRequest *request)
 }
 
 ADDRESS(0x8002eb40, 0x20)
-int func_8002eb40(u8 bcd)
+int bcd_to_int(u8 bcd)
 {
     return (bcd >> 4) * 10 + (bcd & 0xf);
 }
 
 ADDRESS(0x8002eb60, 0x3c)
-int func_8002eb60(u8 value)
+int int_to_bcd(u8 value)
 {
     return ((value / 10) << 4) | (value % 10);
 }
 
 /* Sector number of a CD position (no 150-sector lead-in offset). */
 ADDRESS(0x8002eb9c, 0x84)
-u32 func_8002eb9c(CdlLOC *pos)
+u32 cd_loc_to_sector(CdlLOC *pos)
 {
-    int minute = func_8002eb40(pos->minute);
-    int second = func_8002eb40(pos->second);
+    int minute = bcd_to_int(pos->minute);
+    int second = bcd_to_int(pos->second);
 
-    return minute * 60 * 75 + second * 75 + func_8002eb40(pos->sector);
+    return minute * 60 * 75 + second * 75 + bcd_to_int(pos->sector);
 }
 
 /*
  * Writes a sector number as a BCD CD position. The stores go through a
  * volatile view: retail keeps the second-field store out of the last
- * call's delay slot (the ST.EXE twin func_800159d4 shows the same nop).
+ * call's delay slot (the ST.EXE twin cd_sector_to_loc shows the same nop).
  */
 ADDRESS(0x8002ec20, 0xc0)
-void func_8002ec20(volatile CdlLOC *pos, u32 sector)
+void cd_sector_to_loc(volatile CdlLOC *pos, u32 sector)
 {
-    pos->minute = func_8002eb60(sector / (60 * 75));
+    pos->minute = int_to_bcd(sector / (60 * 75));
     sector %= 60 * 75;
-    pos->second = func_8002eb60(sector / 75);
-    pos->sector = func_8002eb60(sector % 75);
+    pos->second = int_to_bcd(sector / 75);
+    pos->sector = int_to_bcd(sector % 75);
     pos->track = 0;
 }
 
 ADDRESS(0x8002ece0, 0x40)
-void func_8002ece0(CdlLOC *pos, int offset, CdlLOC *out)
+void cd_loc_add_sectors(CdlLOC *pos, int offset, CdlLOC *out)
 {
-    func_8002ec20(out, func_8002eb9c(pos) + offset);
+    cd_sector_to_loc(out, cd_loc_to_sector(pos) + offset);
 }
 
 ADDRESS(0x8002ed20, 0x54)
-int func_8002ed20(u32 *data, int sectors)
+int cd_checksum_mismatch(u32 *data, int sectors)
 {
     u32 sum = 0x12345678;
     int last = (sectors << 9) - 1;
@@ -275,7 +275,7 @@ int func_8002ed20(u32 *data, int sectors)
 /* Reads sectors at double speed until a read completes (no wait for the
  * request ring, unlike ST.EXE's copy). */
 ADDRESS(0x8002ed74, 0xe0)
-void func_8002ed74(CdlLOC *loc, u_long *buf, int sectors)
+void cd_read_sectors(CdlLOC *loc, u_long *buf, int sectors)
 {
     u_char result[8];
     int n;
@@ -291,7 +291,7 @@ void func_8002ed74(CdlLOC *loc, u_long *buf, int sectors)
             continue;
         }
         while ((n = CdReadSync(1, result)) > 0)
-            func_8002e5e4();
+            loading_screen_step();
         CdControl(CdlPause, 0, 0);
         if (n == 0)
             break;
@@ -299,17 +299,17 @@ void func_8002ed74(CdlLOC *loc, u_long *buf, int sectors)
 }
 
 ADDRESS(0x8002ee54, 0x3c)
-void func_8002ee54(u_long *buf, StFileExtent *file, u32 size)
+void cd_read_file_extent(u_long *buf, StFileExtent *file, u32 size)
 {
     if (size == 0)
         size = file->size;
-    func_8002ed74(&file->pos, buf, (size + 2047) >> 11);
+    cd_read_sectors(&file->pos, buf, (size + 2047) >> 11);
 }
 
 /* Reads an archive member whole, rereading until its checksum holds;
  * returns its sector count (0 for an empty member, which VS skips). */
 ADDRESS(0x8002ee90, 0xac)
-int func_8002ee90(u16 archive, u16 member, u_long *buf)
+int cd_read_member(u16 archive, u16 member, u_long *buf)
 {
     VsArchive *a = &DAT_801a4590.archives[archive];
     u16 start = a->sectors[member];
@@ -318,10 +318,10 @@ int func_8002ee90(u16 archive, u16 member, u_long *buf)
 
     if (sectors == 0)
         return 0;
-    func_8002ece0(&a->file.pos, start, &loc);
+    cd_loc_add_sectors(&a->file.pos, start, &loc);
     do
-        func_8002ed74(&loc, buf, sectors);
-    while (func_8002ed20(buf, sectors));
+        cd_read_sectors(&loc, buf, sectors);
+    while (cd_checksum_mismatch(buf, sectors));
     return sectors;
 }
 
@@ -330,7 +330,7 @@ int func_8002ee90(u16 archive, u16 member, u_long *buf)
  * the drive until the search succeeds; returns 0.
  */
 ADDRESS(0x8002ef3c, 0x90)
-int func_8002ef3c(u_long *buf, char *name, u32 size)
+int load_file(u_long *buf, char *name, u32 size)
 {
     char path[64]; /* unused */
     CdlFILE file;
@@ -344,6 +344,6 @@ retry:
     }
     if (size == 0)
         size = file.size;
-    func_8002ed74(&entry->pos, buf, (size + 2047) >> 11);
+    cd_read_sectors(&entry->pos, buf, (size + 2047) >> 11);
     return 0;
 }

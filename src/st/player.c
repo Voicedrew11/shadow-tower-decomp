@@ -347,9 +347,9 @@ void player_update_status(int apply)
 ADDRESS(0x8003c95c, 0x188)
 void func_8003c95c(int r, int g, int b, int arg3, int arg4, int arg5)
 {
-    func_80015ad4();
+    cd_wait_idle();
     do {
-        func_8001531c();
+        cd_wait_frame();
         func_800456f8();
     } while (area_state.unk0 != 0);
     area_state.unk4 = 99;
@@ -359,17 +359,17 @@ void func_8003c95c(int r, int g, int b, int arg3, int arg4, int arg5)
     area_state.unk8 = 99;
     func_80045044(r, g, b, 255, 255, 127, 127, 127, 0, 0, 0);
     do {
-        func_8001531c();
+        cd_wait_frame();
         func_800456f8();
     } while (area_state.unk0 != 0);
-    func_80015ad4();
+    cd_wait_idle();
     VSync(2);
     func_8003eaf8();
     lighting_load_defaults();
-    func_80016508();
+    fade_reset();
     lighting_build_matrices();
     func_800500ac(130, 4096, 4096, 0);
-    func_80015ad4();
+    cd_wait_idle();
     area_state.unk18 = cd_state.unk4;
     func_80045044(255, 255, 255, arg3, arg4, 127, 127, 127, 0, 0, 0);
     lighting_clear_requests();
@@ -1451,7 +1451,7 @@ void func_8003ee38(u16 id, u8 slot)
     viewer.unk14C[slot] = item;
     if (item != 255) {
         viewer.unk118[slot] = &effects.defs[item];
-        func_80016030(1, item * 4 + 740, (u_long *)viewer.unk120[slot]);
+        cd_read_member(1, item * 4 + 740, (u_long *)viewer.unk120[slot]);
         p = viewer.unk120[slot];
         n = *(u16 *)p;
         p += 4;
@@ -1465,7 +1465,7 @@ void func_8003ee38(u16 id, u8 slot)
             p += size;
             part++;
         }
-        func_80016030(1, item * 4 + 741, DAT_80088c88);
+        cd_read_member(1, item * 4 + 741, DAT_80088c88);
         func_8003ec5c(DAT_80088c88, &pix[slot], &clut[slot], 0);
         DrawSync(0);
         func_80058a0c(1, item * 4 + 742, slot + 6);
@@ -1476,7 +1476,7 @@ void func_8003ee38(u16 id, u8 slot)
     viewer.unk13C[slot] = -1;
     viewer.unk128[slot] = 0;
     viewer.unk155[slot] = 255;
-    func_80015ad4();
+    cd_wait_idle();
 }
 
 /* Loads equipment `id`'s model and textures into model slot `slot` (0xffff:
@@ -1507,7 +1507,7 @@ void func_8003f12c(u16 id, u8 slot, u8 reload)
     viewer.unk17E = 0;
     viewer.unk180 = 0;
     if (model != 255 && (cur = viewer.unk148[slot]) == model && reload) {
-        func_80016030(1, cur * 4 + 485, DAT_80088c88);
+        cd_read_member(1, cur * 4 + 485, DAT_80088c88);
         func_8003ec5c(DAT_80088c88, &pix[slot], &clut[slot], 0);
         DrawSync(0);
     }
@@ -1521,17 +1521,17 @@ void func_8003f12c(u16 id, u8 slot, u8 reload)
         if (paired) {
             pair = slot ^ 1;
             viewer.unkE8[pair] = &DAT_801b5220[other];
-            func_80016030(1, model * 4 + 484, viewer.unkF8[slot]);
-            func_80016030(1, other * 4 + 484, viewer.unkF8[pair]);
+            cd_read_member(1, model * 4 + 484, viewer.unkF8[slot]);
+            cd_read_member(1, other * 4 + 484, viewer.unkF8[pair]);
             anim_register(slot + 32, viewer.unkF8[slot]);
             func_800177a0((Model *)sp->model, &pix[slot], &clut[slot], 0);
             anim_register(pair + 32, viewer.unkF8[pair]);
         } else {
-            func_80016030(1, model * 4 + 484, viewer.unkF8[slot]);
+            cd_read_member(1, model * 4 + 484, viewer.unkF8[slot]);
             anim_register(slot + 32, viewer.unkF8[slot]);
             func_800177a0((Model *)sp->model, &pix[slot], &clut[slot], 1);
         }
-        func_80016030(1, model * 4 + 485, DAT_80088c88);
+        cd_read_member(1, model * 4 + 485, DAT_80088c88);
         func_8003ec5c(DAT_80088c88, &pix[slot], &clut[slot], 0);
         DrawSync(0);
         func_80058a0c(1, model * 4 + 486, viewer.unk1D4[slot] - 22);
@@ -1546,7 +1546,7 @@ void func_8003f12c(u16 id, u8 slot, u8 reload)
     viewer.unk2E0 = 0;
     viewer.unk2E2 = 0;
     viewer.unk189 = 0;
-    func_80015ad4();
+    cd_wait_idle();
 }
 
 /* Starts model slot `slot`'s action animation when it is idle. */
@@ -2985,11 +2985,11 @@ void func_80042d74(void)
                 func_8003e840();
                 func_80057a3c();
                 DAT_801cd180.unk10 = 1;
-                func_80016508();
+                fade_reset();
                 viewer.unk2D6 = viewer.unk2D8 = viewer.unk2DA = viewer.unk2DC = 0;
                 func_800500ac(2, 4096, 4096, 0);
                 func_800500ac(2, 4096, 4096, 0);
-                func_80015ad4();
+                cd_wait_idle();
                 func_8003c0e0();
                 vis_table_a.unk6168 = 254;
                 vis_table_a.unk6158[0] = vis_table_a.unk6158[1] = vis_table_a.unk6158[2] =
@@ -3003,21 +3003,21 @@ void func_80042d74(void)
                 }
                 func_8003c95c(area_state.unk4, area_state.unk4, area_state.unk4, area_state.unk7,
                               area_state.unk8, 255);
-                func_80015ad4();
+                cd_wait_idle();
                 func_8003ead0();
             } else {
                 if (viewer.unk21D) {
                     while (i--) {
                         anim_get_file(i + 128, &file);
                         if (file) {
-                            func_80015230(file);
+                            heap_free(file);
                         }
                     }
                     i = 128;
                     while (i--) {
                         anim_get_file(i + 588, &file);
                         if (file) {
-                            func_80015230(file);
+                            heap_free(file);
                         }
                     }
                 }
@@ -3037,7 +3037,7 @@ void func_80042d74(void)
                     player_update_status(0);
                     func_80026afc(0, 0);
                     player_update_status(0);
-                    func_80015ad4();
+                    cd_wait_idle();
                     world_state.draw[0].clip.w = 320;
                     world_state.draw[0].clip.h = 240;
                     world_state.draw[1].clip.w = 320;
@@ -3216,7 +3216,7 @@ void func_80042d74(void)
                             Vis88 *b;
 
                             b = vis_table_b.entries;
-                            func_80016508();
+                            fade_reset();
                             viewer.unk2D6 = viewer.unk2D8 = viewer.unk2DA = viewer.unk2DC = 0;
                             func_800500ac(2, 4096, 4096, 256);
                             n = 240;
@@ -3249,10 +3249,10 @@ void func_80042d74(void)
                             }
                             func_80057a3c();
                             func_80058ed4();
-                            func_80016508();
+                            fade_reset();
                             viewer.unk2D6 = viewer.unk2D8 = viewer.unk2DA = viewer.unk2DC = 0;
                             func_800500ac(2, 0, 4096, 256);
-                            func_80015ad4();
+                            cd_wait_idle();
                             func_8003c0e0();
                             vis_table_a.unk6168 = 254;
                             vis_table_a.unk6158[0] = vis_table_a.unk6158[1] =
@@ -3260,7 +3260,7 @@ void func_80042d74(void)
                             func_80057a68(0);
                             func_8003c95c(area_state.unk4, area_state.unk4, area_state.unk4,
                                           area_state.unk7, area_state.unk8, 255);
-                            func_80015ad4();
+                            cd_wait_idle();
                             func_8003ead0();
                             break;
                         }

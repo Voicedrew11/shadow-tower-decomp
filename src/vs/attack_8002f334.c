@@ -25,7 +25,7 @@ RODATA(0x80011588, 0x33c)
  * the fighter's facing, or the direct hit. VS's form of
  * ST.EXE's func_8004cee8 (src/st/vis_attack.c).
  */
-void func_8002f174(SVECTOR *offset, VECTOR *out, VECTOR *pos, short dy, short height);
+void effect_random_offset(SVECTOR *offset, VECTOR *out, VECTOR *pos, short dy, short height);
 void func_8002f264(SVECTOR *off, VECTOR *out, VECTOR *base);
 /* src/vs/fighter_8002e114.c's hit, called without a prototype (retail
  * passes the fighter number unconverted). */
@@ -195,7 +195,7 @@ void func_8002f334(int n, VsAttack *a)
     case 0x6a:
         ORIGIN(q);
         for (i = 0; i < 4; i++) {
-            func_8002f174(&dir, &p, &q, -data->unk1B6, -48);
+            effect_random_offset(&dir, &p, &q, -data->unk1B6, -48);
             func_80032404(n, INDEX(), 0x81, a->unk0, &p, &dir, 0x600, i & 1);
         }
         break;
@@ -205,7 +205,7 @@ void func_8002f334(int n, VsAttack *a)
     case 0xa3:
         ORIGIN(q);
         for (i = 0; i < 4; i++) {
-            func_8002f174(&dir, &p, &q, 0, -48);
+            effect_random_offset(&dir, &p, &q, 0, -48);
             func_80032404(n, INDEX(), 0x81, a->unk0, &p, &dir, 0x600, i & 1);
         }
         break;

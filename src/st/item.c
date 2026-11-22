@@ -189,7 +189,7 @@ void func_80055374(long *pos, SVECTOR *rot)
         case 14:
             if (area_state.unk0 != 1 && area_state.unk18 == -1) {
                 lighting.unkA = 1;
-                func_80015ad4();
+                cd_wait_idle();
                 func_80055cf4(area_state.unk4);
                 func_80057cc8();
                 func_80042cfc();

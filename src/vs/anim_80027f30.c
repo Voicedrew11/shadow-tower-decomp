@@ -34,7 +34,7 @@ void func_80027fec(u16 id, StAnimFile *file)
 
 /* Frees a slot: clears its state and its owner's pointer and frees its
  * delta buffer (ST.EXE's anim_slot_free checks the slot first and uses
- * func_800152f8). */
+ * mem_free). */
 ADDRESS(0x80028028, 0x4c)
 void func_80028028(StAnimSlot *slot)
 {
@@ -151,7 +151,7 @@ int func_800281d4(StAnimSlot **slotp, int id, int clip, int frame)
         slot->unk2 = id;
         slot->unk14 = slotp;
     retry:
-        slot->unk10 = func_8002e690(sp->header->n_vertices * sizeof(SVECTOR));
+        slot->unk10 = mem_alloc_checked(sp->header->n_vertices * sizeof(SVECTOR));
         if (slot->unk10 == NULL) {
             func_8002811c();
             goto retry;

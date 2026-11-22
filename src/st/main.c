@@ -4,7 +4,7 @@
  * reader follow (WIP module). The unit is -G8: the "FN." file name is an
  * .sdata literal, and the heap words, defined elsewhere, get the absolute
  * lui pairs ASPSX gives small data it does not own. It ends at
- * func_80014544; the game loop follows in its own unit (src/st/loop.c).
+ * game_load_start_file; the game loop follows in its own unit (src/st/loop.c).
  */
 #include <kf/lib/address.h>
 #include <kf/lib/types.h>
@@ -59,14 +59,14 @@ int main(void)
     _bu_init();
     func_80057684();
     ExitCriticalSection();
-    func_80014a30();
+    game_loop();
 }
 
 ADDRESS(0x80014410, 0x40)
-void func_80014410(void)
+void game_shutdown(void)
 {
     func_80057f3c();
-    func_80016454();
+    cd_shutdown();
     PadStopCom();
     ResetGraph(3);
     StopCallback();
@@ -77,7 +77,7 @@ void func_80014410(void)
  * at *cursor, then moves *cursor past the end of the line.
  */
 ADDRESS(0x80014450, 0xf4)
-int func_80014450(u8 **cursor, int digits)
+int text_read_number(u8 **cursor, int digits)
 {
     int value = 0;
     int scale = 1;
@@ -107,7 +107,7 @@ int func_80014450(u8 **cursor, int digits)
  * 999. Rows 970..990 fill viewer.unk38; other ids set an id's count.
  */
 ADDRESS(0x80014544, 0x4ec)
-void func_80014544(void)
+void game_load_start_file(void)
 {
     u8 *buf;
     u8 *cursor;
@@ -121,20 +121,20 @@ void func_80014544(void)
     int x;
     int y;
 
-    buf = func_800152d0(0x4000);
-    func_8001618c(buf, "FN.", 0x4000);
+    buf = mem_alloc(0x4000);
+    load_st_file(buf, "FN.", 0x4000);
     cursor = buf;
     area_state.unk4 = area_state.unk5 = area_state.unk6 = area_state.unk7 =
-        area_state.unk8 = area_state.area = func_80014450(&cursor, 3);
-    viewer.position.vx = (func_80014450(&cursor, 7) + 64) << 12;
-    viewer.position.vy = ((func_80014450(&cursor, 7) + 64) << 12) - 1600;
-    viewer.position.vz = (func_80014450(&cursor, 7) + 64) << 12;
-    x = func_80014450(&cursor, 5);
-    y = func_80014450(&cursor, 5);
+        area_state.unk8 = area_state.area = text_read_number(&cursor, 3);
+    viewer.position.vx = (text_read_number(&cursor, 7) + 64) << 12;
+    viewer.position.vy = ((text_read_number(&cursor, 7) + 64) << 12) - 1600;
+    viewer.position.vz = (text_read_number(&cursor, 7) + 64) << 12;
+    x = text_read_number(&cursor, 5);
+    y = text_read_number(&cursor, 5);
     for (;;) {
         second = cursor + 4;
-        id = func_80014450(&cursor, 3);
-        value = func_80014450(&second, 3);
+        id = text_read_number(&cursor, 3);
+        value = text_read_number(&second, 3);
         if (id == FN_END)
             break;
         if (id == FN_SKIP && value != FN_END)
@@ -174,7 +174,7 @@ void func_80014544(void)
         viewer.unk0 = viewer.unk2 = x;
     if (y != 0)
         viewer.unk4 = viewer.unk6 = y;
-    func_800152f8(buf);
+    mem_free(buf);
     if (all_items) {
         for (i = 0; i < 314; i++) {
             if (vis_table_c.unk0118[i].unk4 != 0xff)
@@ -261,7 +261,7 @@ StHudSprite hud_sprites[46] = {
 
 /*
  * The default lighting environments (lighting_load_defaults); 0..47 are
- * zero until an area loads its own (func_80014cfc copies them in).
+ * zero until an area loads its own (copy_words copies them in).
  */
 DATA(0x8007f78c, 0xc00, ".data")
 StLightInit DAT_8007f78c[64] = {

@@ -168,14 +168,14 @@ void func_8004e324(void)
             while (n--) {
                 anim_get_file(n + 128, &file);
                 if (file)
-                    func_80015230(file);
+                    heap_free(file);
             }
             func_8004e2d8();
             n = 16;
             while (n--) {
                 anim_get_file(n + 112, &file);
                 if (file)
-                    func_80015230(file);
+                    heap_free(file);
             }
             e = vis_table_a.entries;
             for (vis_table_a.unk6144 = 0; vis_table_a.unk6144 < 64; vis_table_a.unk6144++, e++) {

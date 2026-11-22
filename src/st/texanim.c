@@ -4226,10 +4226,10 @@ void func_80023288(void *data)
 {
     DVECTOR a[4] = {{0, 0}, {64, 0}, {128, 0}, {192, 0}};
     DVECTOR b[4] = {{0, 0}, {0, 3}, {0, 6}, {0, 9}};
-    u8 n = func_8001526c(data);
+    u8 n = heap_get_tag(data);
 
     func_800177a0((Model *)((u8 *)data + ((u32 *)data)[2]), &a[n], &b[n], 0);
-    func_80015250(data, ST_BLOCK_USED);
+    heap_set_state(data, ST_BLOCK_USED);
 }
 
 ADDRESS(0x80023388, 0xe8)
@@ -4237,7 +4237,7 @@ void func_80023388(void *data)
 {
     DVECTOR a[4] = {{0, 0}, {64, 0}, {128, 0}, {192, 0}};
     DVECTOR b[4] = {{0, 0}, {0, 3}, {0, 6}, {0, 9}};
-    u8 n = func_8001526c(data);
+    u8 n = heap_get_tag(data);
 
     func_8003ec5c(data, &a[n], &b[n], 0);
 }
@@ -4253,10 +4253,10 @@ void func_80023470(void *data)
         {0, 0}, {0, 1}, {0, 2},  {0, 3},  {0, 4},  {0, 5},  {0, 6},  {0, 7},
         {0, 8}, {0, 9}, {0, 10}, {0, 11}, {0, 12}, {0, 13}, {0, 14}, {0, 15},
     };
-    u8 n = func_8001526c(data);
+    u8 n = heap_get_tag(data);
 
     func_800177a0((Model *)((u8 *)data + ((u32 *)data)[2]), &a[n], &b[n], 0);
-    func_80015250(data, ST_BLOCK_USED);
+    heap_set_state(data, ST_BLOCK_USED);
 }
 
 ADDRESS(0x80023604, 0x184)
@@ -4270,7 +4270,7 @@ void func_80023604(void *data)
         {0, 0}, {0, 1}, {0, 2},  {0, 3},  {0, 4},  {0, 5},  {0, 6},  {0, 7},
         {0, 8}, {0, 9}, {0, 10}, {0, 11}, {0, 12}, {0, 13}, {0, 14}, {0, 15},
     };
-    u8 n = func_8001526c(data);
+    u8 n = heap_get_tag(data);
 
     func_8003ec5c(data, &a[n], &b[n], 0);
 }
@@ -4278,7 +4278,7 @@ void func_80023604(void *data)
 ADDRESS(0x80023788, 0x20)
 void func_80023788(void *data)
 {
-    func_80015250(data, ST_BLOCK_USED);
+    heap_set_state(data, ST_BLOCK_USED);
 }
 
 /*
@@ -4304,20 +4304,20 @@ u8 tag;
     int bank;
     int i;
 
-    second = func_80015ec8(archive, index + 1);
-    size = func_80015ec8(archive, index);
+    second = cd_archive_member_size(archive, index + 1);
+    size = cd_archive_member_size(archive, index);
     if (size < second)
         size = second;
-    data = func_80015164(DAT_8009c888, size, &world_state.unk834C[slot]);
+    data = heap_alloc(DAT_8009c888, size, &world_state.unk834C[slot]);
     if (data == NULL)
         return;
-    func_80015250(data, ST_BLOCK_LOADING);
-    func_80015278(data, slot);
-    func_80015264(data, tag);
+    heap_set_state(data, ST_BLOCK_LOADING);
+    heap_set_slot(data, slot);
+    heap_set_tag(data, tag);
     if (second != 0)
-        func_80015d54(archive, index + 1, data, func_80023388);
-    func_80015d54(archive, index, data, func_80023288);
-    if (func_80015ec8(archive, index + 2) == 0)
+        cd_queue_read_member(archive, index + 1, data, func_80023388);
+    cd_queue_read_member(archive, index, data, func_80023288);
+    if (cd_archive_member_size(archive, index + 2) == 0)
         return;
     bank = index / 5;
     self = &DAT_801dd1c0.slots[8 + bank];
@@ -4329,7 +4329,7 @@ u8 tag;
         }
         if (p->block != NULL) {
             while (p->block[2] == ST_BLOCK_LOADING)
-                func_8001531c();
+                cd_wait_frame();
             SsVabClose(p->vab);
             p->vab = -1;
             p->block = NULL;
@@ -4358,16 +4358,16 @@ u8 tag;
     void *data;
 
     member = index + 4;
-    size = func_80015ec8(archive, member);
+    size = cd_archive_member_size(archive, member);
     if (size == 0)
         return;
-    data = func_80015164(DAT_8009c888, size, &world_state.unk834C[slot - 16]);
+    data = heap_alloc(DAT_8009c888, size, &world_state.unk834C[slot - 16]);
     if (data == NULL)
         return;
-    func_80015250(data, ST_BLOCK_LOADING);
-    func_80015278(data, slot - 16);
-    func_80015264(data, tag);
-    func_80015d54(archive, member, data, func_80023288);
+    heap_set_state(data, ST_BLOCK_LOADING);
+    heap_set_slot(data, slot - 16);
+    heap_set_tag(data, tag);
+    cd_queue_read_member(archive, member, data, func_80023288);
 }
 
 /* Loads members `index` and `index + 1` of `archive` into one heap block (the larger size). */
@@ -4382,18 +4382,18 @@ u8 tag;
     u32 size;
     void *data;
 
-    second = func_80015ec8(archive, index + 1);
-    size = func_80015ec8(archive, index);
+    second = cd_archive_member_size(archive, index + 1);
+    size = cd_archive_member_size(archive, index);
     if (size < second)
         size = second;
-    data = func_80015164(DAT_8009c888, size, &world_state.unk834C[slot]);
+    data = heap_alloc(DAT_8009c888, size, &world_state.unk834C[slot]);
     if (data == NULL)
         return;
-    func_80015250(data, ST_BLOCK_LOADING);
-    func_80015278(data, slot);
-    func_80015264(data, tag);
-    func_80015d54(archive, index + 1, data, func_80023604);
-    func_80015d54(archive, index, data, func_80023470);
+    heap_set_state(data, ST_BLOCK_LOADING);
+    heap_set_slot(data, slot);
+    heap_set_tag(data, tag);
+    cd_queue_read_member(archive, index + 1, data, func_80023604);
+    cd_queue_read_member(archive, index, data, func_80023470);
 }
 
 ADDRESS(0x80023bc4, 0xa8)
@@ -4401,11 +4401,11 @@ void func_80023bc4(int archive, int index, int slot)
 {
     void *data;
 
-    data = func_80015164(DAT_8009c888, func_80015ec8(archive, index), &world_state.unk834C[slot]);
+    data = heap_alloc(DAT_8009c888, cd_archive_member_size(archive, index), &world_state.unk834C[slot]);
     if (data != NULL) {
-        func_80015250(data, ST_BLOCK_LOADING);
-        func_80015278(data, slot);
-        func_80015d54(archive, index, data, func_80023788);
+        heap_set_state(data, ST_BLOCK_LOADING);
+        heap_set_slot(data, slot);
+        cd_queue_read_member(archive, index, data, func_80023788);
     }
 }
 
@@ -4429,29 +4429,29 @@ void func_80023c6c(int archive, int first, int slot, int count)
         if (*flags++) {
             if (a == NULL) {
                 func_800237a8(archive, i * 5, id, sp->unkC8[slot & 0xf]);
-            } else if (func_80015258(a) == ST_BLOCK_RELEASABLE) {
-                if (func_8001526c(a) != sp->unkC8[slot & 0xf]) {
-                    func_80015230(a);
+            } else if (heap_get_state(a) == ST_BLOCK_RELEASABLE) {
+                if (heap_get_tag(a) != sp->unkC8[slot & 0xf]) {
+                    heap_free(a);
                     func_800237a8(archive, i * 5, id, sp->unkC8[slot & 0xf]);
                 } else {
-                    func_80015250(a, ST_BLOCK_USED);
+                    heap_set_state(a, ST_BLOCK_USED);
                 }
             }
             if (b == NULL) {
                 func_800239ec(archive, i * 5, (u16)slot, sp->unkC8[slot & 0xf]);
-            } else if (func_80015258(b) == ST_BLOCK_RELEASABLE) {
-                if (func_8001526c(b) != sp->unkC8[slot & 0xf]) {
-                    func_80015230(b);
+            } else if (heap_get_state(b) == ST_BLOCK_RELEASABLE) {
+                if (heap_get_tag(b) != sp->unkC8[slot & 0xf]) {
+                    heap_free(b);
                     func_800239ec(archive, i * 5, (u16)slot, sp->unkC8[slot & 0xf]);
                 } else {
-                    func_80015250(b, ST_BLOCK_USED);
+                    heap_set_state(b, ST_BLOCK_USED);
                 }
             }
         } else {
-            if (a != NULL && func_80015258(a) != ST_BLOCK_LOADING)
-                func_80015250(a, ST_BLOCK_RELEASABLE);
-            if (b != NULL && func_80015258(b) != ST_BLOCK_LOADING)
-                func_80015250(b, ST_BLOCK_RELEASABLE);
+            if (a != NULL && heap_get_state(a) != ST_BLOCK_LOADING)
+                heap_set_state(a, ST_BLOCK_RELEASABLE);
+            if (b != NULL && heap_get_state(b) != ST_BLOCK_LOADING)
+                heap_set_state(b, ST_BLOCK_RELEASABLE);
             vslot = &DAT_801dd1c0.slots[i + 8];
             vab = vslot->block;
             if (vab != NULL && vab[2] == 1)
@@ -4473,10 +4473,10 @@ void func_80023ed8(int archive, int first, int slot, int count)
         if (*flags++) {
             if (p == NULL)
                 func_80023abc(archive, i * 2, (u16)slot, vis_table_c.unk0000[slot - 440]);
-            else if (func_80015258(p) == ST_BLOCK_RELEASABLE)
-                func_80015250(p, ST_BLOCK_USED);
-        } else if (p != NULL && func_80015258(p) != ST_BLOCK_LOADING) {
-            func_80015250(p, ST_BLOCK_RELEASABLE);
+            else if (heap_get_state(p) == ST_BLOCK_RELEASABLE)
+                heap_set_state(p, ST_BLOCK_USED);
+        } else if (p != NULL && heap_get_state(p) != ST_BLOCK_LOADING) {
+            heap_set_state(p, ST_BLOCK_RELEASABLE);
         }
     }
 }
@@ -4496,9 +4496,9 @@ void func_80024004(int archive, int first, int slot, int count)
         if (*flags++) {
             if (p == NULL)
                 func_80023bc4(archive, i * 3, slot);
-            else if (func_80015258(p) == ST_BLOCK_RELEASABLE)
-                func_80015250(p, ST_BLOCK_USED);
-            if (func_80015ec8(archive, i * 3 + 1)) {
+            else if (heap_get_state(p) == ST_BLOCK_RELEASABLE)
+                heap_set_state(p, ST_BLOCK_USED);
+            if (cd_archive_member_size(archive, i * 3 + 1)) {
                 vslot = &DAT_801dd1c0.slots[i + 24];
                 if (vslot->block == NULL) {
                     func_80058a0c(archive, i * 3 + 1, i + 24);
@@ -4509,8 +4509,8 @@ void func_80024004(int archive, int first, int slot, int count)
                 }
             }
         } else {
-            if (p != NULL && func_80015258(p) != ST_BLOCK_LOADING)
-                func_80015250(p, ST_BLOCK_RELEASABLE);
+            if (p != NULL && heap_get_state(p) != ST_BLOCK_LOADING)
+                heap_set_state(p, ST_BLOCK_RELEASABLE);
             vslot = &DAT_801dd1c0.slots[i + 24];
             if (vslot->block != NULL) {
                 vab = vslot->block;
@@ -4919,7 +4919,7 @@ void func_800255f0(void)
             continue;
         *(VECTOR *)&sp->unkE0 = o->unk20;
         at = &o->unk20;
-        if (mode != 2 && !func_80016554())
+        if (mode != 2 && !view_point_in_near_cone())
             continue;
         sp->clut_base = o->unkE;
         anim_get_file(o->unkA + 96, &model);
@@ -4971,7 +4971,7 @@ void func_800255f0(void)
         } else {
             *(VECTOR *)&sp->unkE0 = f->unk8;
             at = &f->unk8;
-            if (func_80016554()) {
+            if (view_point_in_near_cone()) {
                 kind = f->unk2 & 0x3f;
                 if (kind == 1) {
                     sp->unkD8.vy = (f->unk2 & 0xc0) << 4;
@@ -5399,7 +5399,7 @@ void func_80026afc(VECTOR *pos, SVECTOR *rot)
     if (world_state.unk1EE16 != 0)
         func_80028784();
     func_80017680();
-    func_8001535c();
+    vsync_wait_tick();
     world_state.unk1ECC0++;
 }
 
@@ -9246,7 +9246,7 @@ void anim_get_file(u16 id, StAnimFile **out)
         if (file == NULL) {
             *out = NULL;
         } else {
-            state = func_80015258(file);
+            state = heap_get_state(file);
             if (state != ST_BLOCK_RELEASABLE && state != ST_BLOCK_USED)
                 *out = NULL;
         }
@@ -9371,7 +9371,7 @@ void anim_slot_free(StAnimSlot *slot)
         slot->unk0 = 4;
         *slot->unk14 = NULL;
         if (slot->unk10 != NULL) {
-            func_800152f8(slot->unk10);
+            mem_free(slot->unk10);
             slot->unk10 = NULL;
         }
     }
@@ -9460,10 +9460,10 @@ int anim_pose(StAnimSlot **slotp, int id, int clip, int frame)
         slot->unk2 = id;
         slot->unk14 = slotp;
         if (slot->unk10 != NULL) {
-            func_800152f8(slot->unk10);
+            mem_free(slot->unk10);
             slot->unk10 = NULL;
         }
-        slot->unk10 = func_800152d0(sp->header->n_vertices * sizeof(SVECTOR));
+        slot->unk10 = mem_alloc(sp->header->n_vertices * sizeof(SVECTOR));
         if (slot->unk10 == NULL) {
             anim_slots_free_idle();
             anim_sets_free_idle();

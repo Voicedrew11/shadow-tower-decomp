@@ -385,7 +385,7 @@ void func_800500ac(int mode, int start, int end, int delta)
         if (c > 255)
             c = 255;
         func_80021994(c, c, c, 4096, mode);
-        func_80015ad4();
+        cd_wait_idle();
         func_80058620();
         func_80045ffc();
         func_8003e734(&pos, &rot);
@@ -1080,7 +1080,7 @@ void func_80050768(void)
             if (vis_table_a.unk6169 == 1) {
                 a = &vis_table_a.entries[56];
                 rising = 0;
-                func_80015ad4();
+                cd_wait_idle();
                 viewer.unk21E = 1;
                 for (j = 7; j != -1; a++, j--) {
                     a->unk2A = 0;
@@ -1182,7 +1182,7 @@ void func_80050768(void)
             lit = area;
             lit2 = area;
             do {
-                func_8001531c();
+                cd_wait_frame();
                 func_800456f8();
             } while (area_state.unk0 != 0);
             viewer.unk278.vy = e->unk4A.door.unk4F << 10;
@@ -1221,7 +1221,7 @@ void func_80050768(void)
             viewer.unk1CE = 0;
             viewer.unk1CC = 0;
             do {
-                func_8001531c();
+                cd_wait_frame();
                 func_800456f8();
             } while (area_state.unk0 != 0);
             vis_lists.n_sources = 0;
@@ -1230,7 +1230,7 @@ void func_80050768(void)
                 viewer.unk174 = &vis_records[vis_lists.sources[0]];
             func_8004e324();
             func_800500ac(2, 0x1000, 0x1000, 0);
-            func_80015ad4();
+            cd_wait_idle();
             func_80057c54();
             func_800500ac(2, 0x1000, 0, -0x100);
             if (area < 44)
@@ -1290,7 +1290,7 @@ void func_80052894(to, keep)
     func_800500ac(2, 0, 0x1000, 0x100);
     area = to->area;
     do {
-        func_8001531c();
+        cd_wait_frame();
         func_800456f8();
     } while (area_state.unk0 != 0);
     viewer.unk278.vy = to->yaw;
@@ -1332,7 +1332,7 @@ void func_80052894(to, keep)
         f++;
     }
     do {
-        func_8001531c();
+        cd_wait_frame();
         func_800456f8();
     } while (area_state.unk0 != 0);
     if (!keep) {
@@ -1343,7 +1343,7 @@ void func_80052894(to, keep)
         func_8004e324();
     }
     func_800500ac(2, 0x1000, 0x1000, 0);
-    func_80015ad4();
+    cd_wait_idle();
     func_80057c54();
     func_800500ac(2, 0x1000, 0, -0x100);
     if (!keep) {

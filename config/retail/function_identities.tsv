@@ -25,64 +25,64 @@ STR.EXE	0x80013014	load_tims			void	u_long *addr;VramOffset *pixel_offset;VramOf
 STR.EXE	0x800131f0	show_logo			void		supported	proven	asm;callers;src/str/main.c str.main	fades the STR\FLOGO320.TIM logo in and out
 STR.EXE	0x800133f4	main			int		supported	proven	asm;callers;src/str/main.c str.main	called by NONE3 startup; boot movie sequence
 ST.EXE	0x8001435c	main			int		supported	proven	asm;callers;src/st/main.c st.main	called by NONE3 startup; sets up the heap, CD and memory card, runs the game loop
-ST.EXE	0x80014410	func_80014410			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-ST.EXE	0x80014450	func_80014450			unknown	unknown *object;unknown arg1	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-ST.EXE	0x80014544	func_80014544			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-ST.EXE	0x80014a30	func_80014a30			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-ST.EXE	0x80014cfc	func_80014cfc			unknown	unknown *object;unknown *pointer1;unknown arg2	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-ST.EXE	0x80014d2c	func_80014d2c			unknown	unknown *object;unknown *pointer1;unknown arg2	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-ST.EXE	0x80014d5c	fill_words			u32 *	u32 *dst;u32 value;int count	candidate	candidate	asm;callers;src/st/memory.c st.memory	stores value into count words from dst and returns the end; called by vis_build_visible and func_80014544
-ST.EXE	0x80014d80	func_80014d80			unknown	unknown *object;unknown arg1;unknown arg2	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-ST.EXE	0x80014da4	func_80014da4			unknown	unknown *object	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-ST.EXE	0x80014e20	func_80014e20			unknown	unknown *object	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-ST.EXE	0x80014e4c	func_80014e4c			unknown	unknown *object;unknown arg1	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-ST.EXE	0x80014f90	func_80014f90			unknown	unknown arg0	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-ST.EXE	0x80015024	func_80015024			unknown	unknown *object	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-ST.EXE	0x80015144	func_80015144			unknown	unknown *object;unknown arg1	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-ST.EXE	0x80015164	func_80015164			unknown	unknown arg0;unknown arg1;unknown arg2	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-ST.EXE	0x80015230	func_80015230			void	unknown arg0	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-ST.EXE	0x80015250	func_80015250			void	unknown *object;unknown arg1	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-ST.EXE	0x80015258	func_80015258			unknown	unknown *object	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-ST.EXE	0x80015264	func_80015264			void	unknown *object;unknown arg1	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-ST.EXE	0x8001526c	func_8001526c			unknown	unknown *object	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-ST.EXE	0x80015278	func_80015278			void	unknown *object;unknown arg1	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-ST.EXE	0x80015280	func_80015280			unknown	unknown *object	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-ST.EXE	0x8001528c	func_8001528c			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-ST.EXE	0x800152d0	func_800152d0			unknown	unknown arg0	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-ST.EXE	0x800152f8	func_800152f8			void	unknown arg0	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-ST.EXE	0x8001531c	func_8001531c			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-ST.EXE	0x8001535c	func_8001535c			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-ST.EXE	0x800153b4	func_800153b4			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-ST.EXE	0x8001542c	func_8001542c			unknown	unknown arg0	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-ST.EXE	0x800154e8	func_800154e8			unknown	unknown arg0	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-ST.EXE	0x8001561c	func_8001561c			unknown	unknown arg0	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-ST.EXE	0x80015848	func_80015848			unknown	unknown arg0	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-ST.EXE	0x800158f4	func_800158f4			unknown	unknown arg0	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-ST.EXE	0x80015914	func_80015914			unknown	unknown arg0	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-ST.EXE	0x80015950	func_80015950			unknown	unknown arg0	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-ST.EXE	0x800159d4	func_800159d4			unknown	unknown arg0;unknown arg1	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-ST.EXE	0x80015a94	func_80015a94			void	unknown arg0;unknown arg1;unknown arg2	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-ST.EXE	0x80015ad4	func_80015ad4			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-ST.EXE	0x80015b2c	func_80015b2c			unknown	unknown arg0	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-ST.EXE	0x80015b78	func_80015b78			unknown	unknown arg0;unknown arg1	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-ST.EXE	0x80015bcc	func_80015bcc			unknown	unknown arg0;unknown arg1;unknown arg2;unknown arg3	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-ST.EXE	0x80015cd0	func_80015cd0			unknown	unknown arg0;unknown arg1;unknown arg2	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-ST.EXE	0x80015d54	func_80015d54			void	unknown arg0;unknown arg1;unknown arg2;unknown arg3	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-ST.EXE	0x80015da8	func_80015da8			void	unknown arg0;unknown arg1;unknown arg2;unknown arg3	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-ST.EXE	0x80015dfc	func_80015dfc			unknown	unknown arg0;unknown arg1;unknown arg2;unknown arg3	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-ST.EXE	0x80015ec8	func_80015ec8			unknown	unknown arg0;unknown *pointer1	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-ST.EXE	0x80015f0c	func_80015f0c			unknown	unknown arg0;unknown arg1;unknown arg2	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-ST.EXE	0x80015ff4	func_80015ff4			unknown	unknown *object;unknown arg1;unknown arg2	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-ST.EXE	0x80016030	func_80016030			unknown	unknown arg0;unknown arg1;unknown arg2	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-ST.EXE	0x800160c8	func_800160c8			unknown	unknown arg0	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-ST.EXE	0x8001618c	func_8001618c			unknown	unknown arg0;unknown arg1;unknown arg2	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-ST.EXE	0x8001624c	func_8001624c			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-ST.EXE	0x80016294	func_80016294			unknown	unknown arg0	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-ST.EXE	0x80016374	func_80016374			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-ST.EXE	0x80016454	func_80016454			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-ST.EXE	0x800164b4	func_800164b4			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-ST.EXE	0x80016508	func_80016508			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-ST.EXE	0x80016554	func_80016554			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+ST.EXE	0x80014410	game_shutdown			void		supported	candidate	callees:func_80057f3c(close banks, SsEnd/SsQuit),cd_shutdown,PadStopCom,ResetGraph,StopCallback; callers:game_loop exit paths	Stops sound, CD state, pads and graphics before ST.EXE returns to PSX.EXE (title or ending).
+ST.EXE	0x80014450	text_read_number			unknown	unknown *object;unknown arg1	supported	candidate	asm; callers:game_load_start_file only	Parses a fixed-width decimal field (optional '-') at *cursor, then moves *cursor to the start of the next line.
+ST.EXE	0x80014544	game_load_start_file			unknown		supported	candidate	string "FN."; callees:load_st_file,text_read_number; callers:game_loop (no Continue, or Continue load fails)	Reads the start-up table file FN.: start area, viewer position, two optional values that set viewer.unk0/unk2 and unk4/unk6 (the two numbers hud_update shows), starting item counts/equipment, optional all-items and flag-clear markers.
+ST.EXE	0x80014a30	game_loop			unknown		supported	candidate	callers:main; writes NEXT_PROGRAM_BYTE/MAILBOX; callees:cd_init,lighting_start,heap_init	Initialises the game (CD, sound, graphics, new game or Continue), runs the per-frame loop until DAT_800881a4 asks to exit, then picks the next PSX.EXE program (title or ending).
+ST.EXE	0x80014cfc	copy_words			unknown	unknown *object;unknown *pointer1;unknown arg2	supported	candidate	asm; neighbour fill_words	Copies `count` 32-bit words; returns the end of the source.
+ST.EXE	0x80014d2c	copy_halfwords			unknown	unknown *object;unknown *pointer1;unknown arg2	supported	candidate	asm	Copies `count` 16-bit halfwords; returns the end of the source.
+ST.EXE	0x80014d5c	fill_words			u32 *	u32 *dst;u32 value;int count	candidate	candidate	asm;callers;src/st/memory.c st.memory	stores value into count words from dst and returns the end; called by vis_build_visible and game_load_start_file
+ST.EXE	0x80014d80	fill_halfwords			unknown	unknown *object;unknown arg1;unknown arg2	supported	candidate	asm; neighbour fill_words	Fills `count` halfwords with a value; returns the end of the destination. Uncalled in ST.
+ST.EXE	0x80014da4	heap_merge_free			unknown	unknown *object	supported	candidate	asm; StBlock; callers:heap_find_free	Merges the free blocks that directly follow a free block into it.
+ST.EXE	0x80014e20	heap_block_release			unknown	unknown *object	supported	candidate	asm; StBlock; callers:heap_find_free,heap_compact,heap_free	Marks a block header free and clears its owner's pointer to the data.
+ST.EXE	0x80014e4c	heap_find_free			unknown	unknown *object;unknown arg1	supported	candidate	asm; StBlock; callers:heap_alloc	Finds a free block of at least `size` bytes, else releases and merges the first run of releasable blocks that is large enough; NULL when none.
+ST.EXE	0x80014f90	heap_wait_loading			unknown	unknown arg0	supported	candidate	asm; ST_BLOCK_LOADING; callees:cd_wait_idle; callers:heap_compact	Waits (on the CD ring) until no block of the heap is still loading.
+ST.EXE	0x80015024	heap_compact			unknown	unknown *object	supported	candidate	asm; StBlock; callers:heap_alloc	Waits for loads, releases releasable blocks and slides used blocks down over free space, updating their owners; leaves one free block at the end.
+ST.EXE	0x80015144	heap_init			unknown	unknown *object;unknown arg1	supported	candidate	asm; callers:game_loop(DAT_8009c888,0x56400)	Formats a heap region as one free block closed by an end header.
+ST.EXE	0x80015164	heap_alloc			unknown	unknown arg0;unknown arg1;unknown arg2	supported	candidate	asm; callees:heap_find_free,heap_compact; callers:texanim (file loads)	Allocates `size` bytes in a block heap (compacting once if needed), records the owner pointer and stores the data address through it; NULL when full.
+ST.EXE	0x80015230	heap_free			void	unknown arg0	supported	candidate	asm; callees:heap_block_release; callers:texanim,area_a,player,vis_a	Releases the block whose data pointer is given.
+ST.EXE	0x80015250	heap_set_state			void	unknown *object;unknown arg1	supported	candidate	asm; StBlock.state; callers pass ST_BLOCK_*	Sets the state byte of a data pointer's block header.
+ST.EXE	0x80015258	heap_get_state			unknown	unknown *object	supported	candidate	asm; StBlock.state; callers compare ST_BLOCK_*	Returns the state byte of a data pointer's block header.
+ST.EXE	0x80015264	heap_set_tag			void	unknown *object;unknown arg1	candidate	candidate	asm; StBlock.unk1; callers:texanim pass a `tag` and later compare it	Sets header byte 1 of a data pointer's block; texanim stores an id there and compares it to decide reuse. "tag" is a reading of that one caller.
+ST.EXE	0x8001526c	heap_get_tag			unknown	unknown *object	candidate	candidate	asm; StBlock.unk1; callers:texanim	Returns header byte 1 of a data pointer's block (see heap_set_tag).
+ST.EXE	0x80015278	heap_set_slot			void	unknown *object;unknown arg1	candidate	candidate	asm; StBlock.unk2; callers:texanim pass the world_state.unk834C slot index	Sets header halfword 2 of a data pointer's block; texanim stores the owner slot index there.
+ST.EXE	0x80015280	heap_get_slot			unknown	unknown *object	candidate	candidate	asm; StBlock.unk2; uncalled	Returns header halfword 2 of a data pointer's block (pair of heap_set_slot). Uncalled.
+ST.EXE	0x8001528c	mem_alloc_checked			unknown		supported	candidate	callees:malloc3; asm range check 0x80000000..0x801fffff	malloc3, returning NULL when the result is outside main RAM.
+ST.EXE	0x800152d0	mem_alloc			unknown	unknown arg0	supported	candidate	callees:mem_alloc_checked; many callers (menu, cd, anim)	Allocates `size` rounded up to 8 bytes from the malloc3 heap.
+ST.EXE	0x800152f8	mem_free			void	unknown arg0	supported	candidate	callees:free3; callers pair with mem_alloc	free3 of a non-NULL pointer.
+ST.EXE	0x8001531c	cd_wait_frame			void		supported	candidate	callees:func_80058620(bank body transfer, kind 4),func_80045ffc(image stream, kind 3),func_800214cc(loading display),DrawSync,VSync; callers:cd_wait_idle,cd_request_wait_free	One step of every CD wait: services the current streamed/bank request, steps the loading display, then waits for drawing and a vsync.
+ST.EXE	0x8001535c	vsync_wait_tick			unknown		supported	candidate	asm; cd_state.unkC set by vsync_handler; callers:frame draw func_80026afc	Waits until the vsync handler has counted a tick since the last call, then clears the count.
+ST.EXE	0x800153b4	vsync_handler			unknown		supported	candidate	hook: OpenEvent(RCntCNT3) handler in cd_init; data.h viewer.unk33 "incremented every vsync"; callees:func_80057744(pad read)	Root counter 3 (vsync) event handler: counts ticks, keeps the play-time frame/second counters (viewer.unk33/unk34, saved by save_io) and reads the pads.
+ST.EXE	0x8001542c	cd_request_read_callback			unknown	unknown arg0	candidate	candidate	asm (CdlComplete/CdlDiskError, CdReadCallback(0)); uncalled	CdReadCallback-shaped handler for read requests (kinds 2-4): records success or failure and marks the step done. Never installed in ST.
+ST.EXE	0x800154e8	cd_request_ready_callback			unknown	unknown arg0	supported	candidate	installed by cd_request_sync_callback via CdReadyCallback; callees:CdGetSector	CdReadyCallback of a ring read: copies each sector's 2048 data bytes to the request's destination; on the last sector (or a disk error) ends the read through the sync callback.
+ST.EXE	0x8001561c	cd_request_sync_callback			unknown	unknown arg0	supported	candidate	installed via CdSyncCallback by cd_request_queue/cd_request_retire; callees:cd_checksum_mismatch,cd_request_retire,CdControl(SeekL/ReadN)	CdSyncCallback driving the current ring request: seek, start ReadN, then on completion re-read on error or bad checksum, call `done` and retire (kind 2) or call `done` (kinds 3/4).
+ST.EXE	0x80015848	cd_request_retire			unknown	unknown arg0	supported	candidate	asm; callers:cd_request_sync_callback,sound_bank,area_cd	Frees a request, advances the current ring pointer and seeks for the next request, or pauses the drive when the ring is empty.
+ST.EXE	0x800158f4	bcd_to_int			unknown	unknown arg0	supported	candidate	asm	Converts a BCD byte to an integer.
+ST.EXE	0x80015914	int_to_bcd			unknown	unknown arg0	supported	candidate	asm	Converts 0..99 to a BCD byte.
+ST.EXE	0x80015950	cd_loc_to_sector			unknown	unknown arg0	supported	candidate	asm; CdlLOC	Sector number of a BCD CD position (no 150-sector lead-in offset, unlike CdPosToInt).
+ST.EXE	0x800159d4	cd_sector_to_loc			unknown	unknown arg0;unknown arg1	supported	candidate	asm; CdlLOC	Writes a sector number as a BCD CD position (no lead-in offset, unlike CdIntToPos).
+ST.EXE	0x80015a94	cd_loc_add_sectors			void	unknown arg0;unknown arg1;unknown arg2	supported	candidate	callees:cd_loc_to_sector,cd_sector_to_loc	Writes the CD position `offset` sectors after `pos`.
+ST.EXE	0x80015ad4	cd_wait_idle			unknown		supported	candidate	asm (ring pointers equal and entry free); callees:cd_wait_frame; ~35 callers	Waits until the CD request ring is empty.
+ST.EXE	0x80015b2c	cd_request_wait_free			unknown	unknown arg0	supported	candidate	asm; callers:cd_request_queue,cd_queue_stream_member,sound_bank	Waits until a ring entry is free.
+ST.EXE	0x80015b78	cd_checksum_mismatch			unknown	unknown arg0;unknown arg1	supported	candidate	asm (sum seeded 0x12345678 vs last word); callers:cd_request_sync_callback,cd_read_member,sound_bank	Nonzero when the word sum of `sectors` sectors does not match the data's last word.
+ST.EXE	0x80015bcc	cd_request_queue			unknown	unknown arg0;unknown arg1;unknown arg2;unknown arg3	supported	candidate	asm; StCdRequest; callers:cd_queue_read_member,cd_queue_read_member_unchecked,cd_queue_stream_member	Fills the next ring entry (kind, position, sector count, destination, done callback) and starts the seek when the ring was idle.
+ST.EXE	0x80015cd0	cd_archive_member_locate			unknown	unknown arg0;unknown arg1;unknown arg2	supported	candidate	asm; StArchive.sectors	Returns an archive member's byte size and, when asked, its CD position.
+ST.EXE	0x80015d54	cd_queue_read_member			void	unknown arg0;unknown arg1;unknown arg2;unknown arg3	supported	candidate	callees:cd_archive_member_locate,cd_request_queue(kind 2); callers:area_a,texanim,equip_menu	Queues a checksum-verified read of an archive member; the ring calls `done` with the destination and retires the request.
+ST.EXE	0x80015da8	cd_queue_read_member_unchecked			void	unknown arg0;unknown arg1;unknown arg2;unknown arg3	supported	candidate	callees:cd_request_queue(kind 4); callers:sound_bank only (its done checks the checksum and retires)	Queues a read of an archive member whose `done` callback does the checking and retiring itself (kind 4; used for sound banks).
+ST.EXE	0x80015dfc	cd_queue_stream_member			unknown	unknown arg0;unknown arg1;unknown arg2;unknown arg3	supported	candidate	callees:cd_request_queue(kind 3); callers:func_80045f90 (area image stream)	Queues a streamed read of an archive member in runs of at most 16 sectors (32 KiB), recording the total and remaining sector counts.
+ST.EXE	0x80015ec8	cd_archive_member_size			unknown	unknown arg0;unknown *pointer1	supported	candidate	asm; StArchive.sectors; callers:texanim,area_a	Returns an archive member's byte size.
+ST.EXE	0x80015f0c	cd_read_sectors			unknown	unknown arg0;unknown arg1;unknown arg2	supported	candidate	callees:CdControl(Setloc),CdRead,CdReadSync,cd_wait_idle	Blocking double-speed read of `sectors` sectors at a position (waits for the ring first, retries until a read succeeds).
+ST.EXE	0x80015ff4	cd_read_file_extent			unknown	unknown *object;unknown arg1;unknown arg2	supported	candidate	callees:cd_read_sectors; StFileExtent	Reads the first `size` bytes (0 = all) of a file extent.
+ST.EXE	0x80016030	cd_read_member			unknown	unknown arg0;unknown arg1;unknown arg2	supported	candidate	callees:cd_read_sectors,cd_checksum_mismatch; many callers	Blocking read of a whole archive member, re-reading until its checksum holds; returns its sector count.
+ST.EXE	0x800160c8	load_st_file_alloc			unknown	unknown arg0	supported	candidate	string "\\ST\\" ";1"; callees:CdSearchFile,mem_alloc,cd_read_sectors; uncalled	Finds \ST\<name>;1, allocates a buffer for it and reads it whole; returns the buffer. Uncalled.
+ST.EXE	0x8001618c	load_st_file			unknown	unknown arg0;unknown arg1;unknown arg2	supported	candidate	string "\\ST\\" ";1"; callees:CdSearchFile,cd_read_sectors; callers:game_load_start_file; same body as title/str/optxt/end load_st_file (plus a ring wait)	Reads \ST\<name>;1 (or its first `size` bytes) into a buffer.
+ST.EXE	0x8001624c	cd_stop_drive			unknown		supported	candidate	callees:CdControl(CdlStop),CdControlB(CdlSetmode, ModeSpeed),VSync	Stops the drive and sets double-speed mode.
+ST.EXE	0x80016294	cd_archive_open			unknown	unknown arg0	supported	candidate	string "\\ST\\"; callees:CdSearchFile,cd_read_file_extent,mem_alloc,copy_halfwords; callers:area_a	Opens archive file \ST\<name>;1: records its extent and loads its member start-sector table.
+ST.EXE	0x80016374	cd_init			unknown		supported	candidate	callees:OpenEvent(RCntCNT3, vsync_handler),SetRCnt,StartRCnt,CdSyncCallback/CdReadyCallback/CdReadCallback(0),cd_stop_drive; callers:game_loop	Installs the vsync handler, clears the tick counters, empties the request ring, clears the CD callbacks and stops the drive.
+ST.EXE	0x80016454	cd_shutdown			void		supported	candidate	callees:CloseEvent,mem_free; callers:game_shutdown	Closes the vsync event and frees the three archive sector tables.
+ST.EXE	0x800164b4	frame_rate_update			unknown		supported	candidate	asm; world_state.unk1ECC0 incremented once per drawn frame (func_80026afc); cd_state.unk4 = vsync ticks	Once a second (60 ticks) copies the frames-drawn count to world_state.unk1ECC1, restarts it and counts the second.
+ST.EXE	0x80016508	fade_reset			unknown		supported	candidate	asm; world_state.fade fields	Resets both screen fade channels (mode 1, inactive, black) and sets world_state.unk1ECD2 to 255.
+ST.EXE	0x80016554	view_point_in_near_cone			unknown		supported	candidate	asm (rcos/rsin wedge, distance < 12 units); callers:texanim (two per-object draw loops skip objects that fail it)	Nonzero when the scratchpad position (sp->unkE0) is inside the wedge in front of the viewer (widened by pitch) and within about 12 units of 2048.
 ST.EXE	0x80016878	func_80016878			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
 ST.EXE	0x800168a4	func_800168a4			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
 ST.EXE	0x800168e0	func_800168e0			unknown	unknown arg0;unknown arg1;unknown *pointer2;unknown arg3	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
@@ -786,28 +786,28 @@ VS.EXE	0x8001bb48	func_8001bb48			unknown	unknown *object;unknown *pointer1	addr
 VS.EXE	0x8001c378	func_8001c378			unknown	unknown arg0	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
 VS.EXE	0x8001c530	func_8001c530			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
 VS.EXE	0x8001c5e0	func_8001c5e0			unknown	unknown *object;unknown *pointer1	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-VS.EXE	0x8001c8b8	func_8001c8b8			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-VS.EXE	0x8001c8f8	func_8001c8f8			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-VS.EXE	0x8001c938	func_8001c938			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-VS.EXE	0x8001c978	func_8001c978			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-VS.EXE	0x8001c9b8	func_8001c9b8			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+VS.EXE	0x8001c8b8	play_cursor_sound			unknown		supported	candidate	callees:SsUtKeyOn(menu bank, tone 11); callers:menu_80016f10 on up/down/left/right repeat; title.exe play_cursor_sound uses the same tone 11	Plays the menu cursor-move sound.
+VS.EXE	0x8001c8f8	play_cancel_sound			unknown		supported	candidate	callees:SsUtKeyOn(tone 13); callers:menu_80016f10 on circle (0x2000), leaving a page	Plays the menu cancel/back sound.
+VS.EXE	0x8001c938	play_refuse_sound			unknown		candidate	candidate	callees:SsUtKeyOn(tone 14); callers:menu_80016f10 on rejected choices (label "buzz")	Plays the sound for a choice that is not allowed. The "buzz" reading comes from the decomp's label.
+VS.EXE	0x8001c978	play_confirm_sound			unknown		supported	candidate	callees:SsUtKeyOn(tone 12); callers:menu_80016f10 on cross (0x4000) accepting a choice; title.exe play_confirm_sound uses the same tone 12	Plays the menu confirm sound.
+VS.EXE	0x8001c9b8	load_menu_sound_bank			unknown		supported	candidate	callees:SsVabOpenHead,SsVabTransBody,SsVabTransCompleted; callers:vs main	Opens the menu sound bank and transfers its body to SPU memory.
 VS.EXE	0x8001ca10	func_8001ca10			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-VS.EXE	0x8001ca18	func_8001ca18			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-VS.EXE	0x8001ca74	func_8001ca74			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-VS.EXE	0x8001cac0	func_8001cac0			unknown	unknown arg0;unknown arg1;unknown arg2;unknown arg3	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-VS.EXE	0x8001cb34	func_8001cb34			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-VS.EXE	0x8001cb5c	func_8001cb5c			unknown	unknown arg0	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-VS.EXE	0x8001cc18	func_8001cc18			unknown	unknown arg0	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-VS.EXE	0x8001cd60	func_8001cd60			unknown	unknown arg0	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-VS.EXE	0x8001cf8c	func_8001cf8c			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-VS.EXE	0x8001cfe4	func_8001cfe4			unknown	unknown arg0	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-VS.EXE	0x8001d030	func_8001d030			unknown	unknown arg0;unknown arg1;unknown arg2;unknown arg3	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-VS.EXE	0x8001d134	func_8001d134			unknown	unknown arg0;unknown arg1;unknown arg2	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-VS.EXE	0x8001d1b8	func_8001d1b8			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-VS.EXE	0x8001d298	func_8001d298			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-VS.EXE	0x8001d328	func_8001d328			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-VS.EXE	0x8001d374	func_8001d374			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-VS.EXE	0x8001d39c	func_8001d39c			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+VS.EXE	0x8001ca18	cd_queue_busy			unknown		supported	candidate	asm; DAT_801a4590 ring pointers; callers:menu_80016f10,ui_80021cfc	Nonzero while the CD request ring holds or runs a request (checked in a critical section).
+VS.EXE	0x8001ca74	tim_load_member_done			unknown		supported	candidate	done callback passed by tim_load_member_async (indirect-control M3); callees:func_80012c2c(TIM upload),DrawSync	Completion callback of the queued picture read: uploads the TIM data from the read buffer to the saved VRAM position.
+VS.EXE	0x8001cac0	tim_load_member_async			unknown	unknown arg0;unknown arg1;unknown arg2;unknown arg3	supported	candidate	callees:cd_archive_member_locate,cd_request_queue(kind 2, done=tim_load_member_done); callers:menu_80016f10	Queues the read of an archive member into the shared buffer, to be uploaded at (x, y) when it completes.
+VS.EXE	0x8001cb34	cd_wait_frame			void		supported	candidate	callees:DrawSync,VSync; callers:cd_wait_idle,cd_request_wait_free	One step of every CD wait: waits for drawing and a vsync (ST's copy also services streams and the loading display).
+VS.EXE	0x8001cb5c	cd_request_read_callback			unknown	unknown arg0	candidate	candidate	twin ST.EXE 0x8001542c (same body, DAT_801a4590 ring); uncalled	Uncalled copy of the read-request CdReadCallback handler.
+VS.EXE	0x8001cc18	cd_queue_ready_callback			unknown	unknown arg0	supported	candidate	installed only by cd_queue_sync_callback; body = cd_request_ready_callback; twin ST.EXE 0x800154e8 (CdlNop end instead of calling the sync callback)	CdReadyCallback of a ring read (the copy used by requests started from cd_request_queue): copies sector data, ends the read with CdlNop.
+VS.EXE	0x8001cd60	cd_queue_sync_callback			unknown	unknown arg0	supported	candidate	installed by cd_request_queue only; same body as cd_request_sync_callback; twin ST.EXE 0x8001561c	CdSyncCallback driving the current ring request (the copy installed by cd_request_queue; VS's other copy is installed by cd_request_retire).
+VS.EXE	0x8001cf8c	cd_wait_idle			unknown		supported	candidate	twin ST.EXE 0x80015ad4 (same body)	Waits until the CD request ring is empty. Uncalled in VS.
+VS.EXE	0x8001cfe4	cd_request_wait_free			unknown	unknown arg0	supported	candidate	twin ST.EXE 0x80015b2c	Waits until a ring entry is free.
+VS.EXE	0x8001d030	cd_request_queue			unknown	unknown arg0;unknown arg1;unknown arg2;unknown arg3	supported	candidate	twin ST.EXE 0x80015bcc; callers:tim_load_member_async	Fills the next ring entry and starts the seek when the ring was idle.
+VS.EXE	0x8001d134	cd_archive_member_locate			unknown	unknown arg0;unknown arg1;unknown arg2	supported	candidate	twin ST.EXE 0x80015cd0	Returns an archive member's byte size and, when asked, its CD position.
+VS.EXE	0x8001d1b8	gfx_begin_frame			unknown		supported	candidate	twin ST.EXE 0x800174c4; asm (toggle frame, reset packet cursor, ClearOTagR both OTs)	Switches to the other frame buffer: resets its primitive buffer and clears its two ordering tables.
+VS.EXE	0x8001d298	gfx_flip			unknown		supported	candidate	twin ST.EXE 0x800175a4; callees:DrawSync,VSync(3),PutDispEnv,PutDrawEnv	Waits for drawing and vsync, then puts the current frame's display and draw environments.
+VS.EXE	0x8001d328	gfx_draw_ot			unknown		supported	candidate	twin ST.EXE 0x80017634; callees:AddPrims,DrawOTag	Links the second ordering table into the first and draws it.
+VS.EXE	0x8001d374	gfx_end_frame			void		supported	candidate	twin ST.EXE 0x80017680; callees:gfx_flip,gfx_draw_ot	Flips the environments and draws the frame's ordering tables.
+VS.EXE	0x8001d39c	clear_vram			unknown		supported	candidate	twin ST.EXE 0x80031cfc; callees:ClearImage; title/str/optxt/end name their whole-VRAM clear clear_vram	Clears the 640x480 VRAM area at the origin to black.
 VS.EXE	0x8001d3f0	func_8001d3f0			unknown	unknown *object;unknown arg1;unknown arg2;unknown *pointer3	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
 VS.EXE	0x8001d8b8	func_8001d8b8			unknown	unknown arg0;unknown arg1;unknown arg2;unknown arg3	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
 VS.EXE	0x8001d9cc	func_8001d9cc			unknown	unknown *object;unknown arg1;unknown arg2;unknown arg3	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
@@ -927,29 +927,29 @@ VS.EXE	0x8002dec4	func_8002dec4			unknown	unknown arg0;unknown *pointer1;unknown
 VS.EXE	0x8002e114	func_8002e114			unknown	unknown arg0;unknown *pointer1	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
 VS.EXE	0x8002e314	func_8002e314			unknown	unknown arg0;unknown arg1	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
 VS.EXE	0x8002e510	func_8002e510			unknown	unknown arg0	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-VS.EXE	0x8002e5e4	func_8002e5e4			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-VS.EXE	0x8002e630	func_8002e630			unknown	unknown *object;unknown *pointer1;unknown arg2	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-VS.EXE	0x8002e660	func_8002e660			unknown	unknown *object;unknown *pointer1;unknown arg2	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-VS.EXE	0x8002e690	func_8002e690			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-VS.EXE	0x8002e6d4	func_8002e6d4			unknown	unknown arg0	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-VS.EXE	0x8002e6fc	func_8002e6fc			void	unknown arg0	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-VS.EXE	0x8002e720	func_8002e720			unknown	unknown arg0	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-VS.EXE	0x8002e868	func_8002e868			unknown	unknown arg0	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-VS.EXE	0x8002ea94	func_8002ea94			unknown	unknown arg0	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-VS.EXE	0x8002eb40	func_8002eb40			unknown	unknown arg0	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-VS.EXE	0x8002eb60	func_8002eb60			unknown	unknown arg0	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-VS.EXE	0x8002eb9c	func_8002eb9c			unknown	unknown arg0	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-VS.EXE	0x8002ec20	func_8002ec20			unknown	unknown arg0;unknown arg1	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-VS.EXE	0x8002ece0	func_8002ece0			void	unknown arg0;unknown arg1;unknown arg2	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-VS.EXE	0x8002ed20	func_8002ed20			unknown	unknown arg0;unknown arg1	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-VS.EXE	0x8002ed74	func_8002ed74			unknown	unknown arg0;unknown arg1;unknown arg2	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-VS.EXE	0x8002ee54	func_8002ee54			unknown	unknown *object;unknown arg1;unknown arg2	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-VS.EXE	0x8002ee90	func_8002ee90			unknown	unknown arg0;unknown *pointer1;unknown arg2	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-VS.EXE	0x8002ef3c	func_8002ef3c			unknown	unknown arg0;unknown arg1;unknown arg2	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-VS.EXE	0x8002efcc	func_8002efcc			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-VS.EXE	0x8002f014	func_8002f014			unknown	unknown arg0	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-VS.EXE	0x8002f0f4	func_8002f0f4			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-VS.EXE	0x8002f174	func_8002f174			unknown	unknown arg0;unknown arg1;unknown arg2;unknown arg3	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+VS.EXE	0x8002e5e4	loading_screen_step			unknown		supported	candidate	twin ST.EXE 0x800214cc; vs_gfx_state.unk2C974 "set while the loading display runs"; callers:cd_read_sectors	While the loading display runs, starts and ends one frame (called from the blocking CD read loop).
+VS.EXE	0x8002e630	copy_words			unknown	unknown *object;unknown *pointer1;unknown arg2	supported	candidate	twin ST.EXE 0x80014cfc	Copies `count` 32-bit words; returns the end of the source.
+VS.EXE	0x8002e660	copy_halfwords			unknown	unknown *object;unknown *pointer1;unknown arg2	supported	candidate	twin ST.EXE 0x80014d2c	Copies `count` 16-bit halfwords; returns the end of the source.
+VS.EXE	0x8002e690	mem_alloc_checked			unknown		supported	candidate	twin ST.EXE 0x8001528c (calls malloc, not malloc3)	malloc, returning NULL when the result is outside main RAM.
+VS.EXE	0x8002e6d4	mem_alloc			unknown	unknown arg0	supported	candidate	twin ST.EXE 0x800152d0	Allocates `size` rounded up to 8 bytes.
+VS.EXE	0x8002e6fc	mem_free			void	unknown arg0	supported	candidate	twin ST.EXE 0x800152f8; callees:free3	free3 of a non-NULL pointer. Uncalled in VS.
+VS.EXE	0x8002e720	cd_request_ready_callback			unknown	unknown arg0	supported	candidate	installed only by cd_request_sync_callback; twin ST.EXE 0x800154e8 (CdlNop end instead of calling the sync callback)	CdReadyCallback of a ring read (the copy used after cd_request_retire): copies sector data, ends the read with CdlNop.
+VS.EXE	0x8002e868	cd_request_sync_callback			unknown	unknown arg0	supported	candidate	installed by cd_request_retire; twin ST.EXE 0x8001561c	CdSyncCallback driving the current ring request (the copy installed by cd_request_retire).
+VS.EXE	0x8002ea94	cd_request_retire			unknown	unknown arg0	supported	candidate	twin ST.EXE 0x80015848	Frees a request, advances the ring and seeks for the next request, or pauses the drive.
+VS.EXE	0x8002eb40	bcd_to_int			unknown	unknown arg0	supported	candidate	twin ST.EXE 0x800158f4	Converts a BCD byte to an integer.
+VS.EXE	0x8002eb60	int_to_bcd			unknown	unknown arg0	supported	candidate	twin ST.EXE 0x80015914	Converts 0..99 to a BCD byte.
+VS.EXE	0x8002eb9c	cd_loc_to_sector			unknown	unknown arg0	supported	candidate	twin ST.EXE 0x80015950	Sector number of a BCD CD position (no lead-in offset).
+VS.EXE	0x8002ec20	cd_sector_to_loc			unknown	unknown arg0;unknown arg1	supported	candidate	twin ST.EXE 0x800159d4	Writes a sector number as a BCD CD position (no lead-in offset).
+VS.EXE	0x8002ece0	cd_loc_add_sectors			void	unknown arg0;unknown arg1;unknown arg2	supported	candidate	twin ST.EXE 0x80015a94	Writes the CD position `offset` sectors after `pos`.
+VS.EXE	0x8002ed20	cd_checksum_mismatch			unknown	unknown arg0;unknown arg1	supported	candidate	twin ST.EXE 0x80015b78	Nonzero when the word sum of the sectors does not match the data's last word.
+VS.EXE	0x8002ed74	cd_read_sectors			unknown	unknown arg0;unknown arg1;unknown arg2	supported	candidate	twin ST.EXE 0x80015f0c (no ring wait, VSync(3))	Blocking double-speed read of sectors at a position, retrying until a read succeeds.
+VS.EXE	0x8002ee54	cd_read_file_extent			unknown	unknown *object;unknown arg1;unknown arg2	supported	candidate	twin ST.EXE 0x80015ff4	Reads the first `size` bytes (0 = all) of a file extent.
+VS.EXE	0x8002ee90	cd_read_member			unknown	unknown arg0;unknown *pointer1;unknown arg2	supported	candidate	twin ST.EXE 0x80016030 (adds an empty-member check); callers:vs main,menu	Blocking read of a whole archive member, re-reading until its checksum holds; returns its sector count (0 for an empty member).
+VS.EXE	0x8002ef3c	load_file			unknown	unknown arg0;unknown arg1;unknown arg2	supported	candidate	port of ST.EXE 0x8001618c load_st_file without the \ST\ prefix (callers pass "\LOAD02.TIM;1"); callees:CdSearchFile,cd_read_sectors; callers:vs main	Reads a file by full CD path (or its first `size` bytes) into a buffer.
+VS.EXE	0x8002efcc	cd_stop_drive			unknown		supported	candidate	twin ST.EXE 0x8001624c	Stops the drive and sets double-speed mode.
+VS.EXE	0x8002f014	cd_archive_open			unknown	unknown arg0	supported	candidate	twin ST.EXE 0x80016294; callers:vs main	Opens archive file \ST\<name>;1: records its extent and loads its member start-sector table.
+VS.EXE	0x8002f0f4	cd_init			unknown		supported	candidate	twin ST.EXE 0x80016374 (without the vsync event and tick counters); callers:vs main	Empties the request ring, clears the CD callbacks and stops the drive.
+VS.EXE	0x8002f174	effect_random_offset			unknown	unknown arg0;unknown arg1;unknown arg2;unknown arg3	candidate	candidate	asm (rand); callers:vs attack_8002f334 before func_80032404 (effect spawn); port of ST.EXE 0x8004ca90 (b6)	Picks a random offset (x, z within +-8, y below `height`) and writes `pos` minus it, raised by `dy`; the attack code spawns effects there.
 VS.EXE	0x8002f264	func_8002f264			unknown	unknown arg0;unknown arg1;unknown arg2	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
 VS.EXE	0x8002f334	func_8002f334			unknown	unknown arg0;unknown arg1	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
 VS.EXE	0x80030620	func_80030620			unknown	unknown arg0;unknown arg1;unknown arg2	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
@@ -959,7 +959,7 @@ VS.EXE	0x80030ce8	func_80030ce8			unknown	unknown arg0;unknown arg1;unknown arg2
 VS.EXE	0x80031178	func_80031178			unknown	unknown arg0;unknown arg1;unknown arg2	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
 VS.EXE	0x80031478	func_80031478			unknown	unknown *object	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
 VS.EXE	0x80032108	func_80032108			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-VS.EXE	0x80032110	func_80032110			unknown	unknown *object	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+VS.EXE	0x80032110	effect_reaches_opponent			unknown	unknown *object	supported	candidate	asm; callers:vs effect_80032404; source comment contrasts ST effect_attack	Whether the current effect is within `reach` plus the opponent's hit radius of its owner's opponent (never when the opponent is in state 3 or 4).
 VS.EXE	0x80032200	func_80032200			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
 VS.EXE	0x80032208	func_80032208			unknown	unknown *object	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
 VS.EXE	0x80032228	func_80032228			unknown	unknown arg0;unknown arg1;unknown arg2	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
