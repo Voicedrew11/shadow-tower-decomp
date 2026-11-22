@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import contextlib
+import io
 import json
 import os
 import shutil
@@ -9,7 +11,7 @@ from pathlib import Path
 from unittest import mock
 
 from scripts.kf import graph, progress
-from scripts.kf.cli import _bank_functions
+from scripts.kf.cli import _bank_functions, main as cli_main
 from scripts.kf.delink import Function
 from scripts.kf.graph import _build_line, _script_inputs, _write_generator
 from scripts.kf.manifest import Unit, load as load_manifest
@@ -377,6 +379,144 @@ class ProgressTests(unittest.TestCase):
     def test_bank_function_selector_rejects_missing_image(self) -> None:
         with self.assertRaisesRegex(ValueError, "expected IMAGE:VA"):
             _bank_functions(["0x80010000"])
+
+
+def neighbour_current(percent: float | None) -> Current:
+    """A second GAME.EXE function in its own unit, beside `sample_current`."""
+    function = Function(
+        "GAME.EXE", 0x80010010, 16, 16, 1, "neighbour", "test", "test"
+    )
+    unit = Unit(
+        "game_neighbour",
+        "GAME.EXE",
+        "src/game/neighbour.c",
+        "probe-gcc272cdk-o2-g0",
+        (function,),
+    )
+    return Current(
+        Target("GAME.EXE", function.va, function.symbol, function.body_size),
+        unit,
+        "c" * 64,
+        percent,
+        percent is not None,
+        percent is not None,
+    )
+
+
+def banked_row(row: Current, *, image: str | None = None, va: int | None = None,
+               ) -> dict[str, str]:
+    return {
+        "image": image or row.target.image,
+        "va": hex(row.target.va if va is None else va),
+        "unit": row.unit.unit,
+        "name": row.target.name,
+        "input_sha256": row.input_sha256,
+        "best_pct": "100.000000000",
+        "hist_pct": "100.000000000",
+        "banked_pct": "100.000000000",
+        "code_size": "16",
+    }
+
+
+class BankLedgerTests(unittest.TestCase):
+    """`kf bank` end to end: the ledger file, the README refresh, the exit code.
+
+    A script that builds its `--function` list from stale output and finds it
+    empty runs a bare `kf bank`, which rewrites the whole ledger from current
+    scores. Without scores that used to empty the ledger and exit 0.
+    """
+
+    def _run(self, rows, baseline, argv, *, universe_extra=()):
+        universe = {(row.target.image, row.target.va): row.target for row in rows}
+        universe.update({identity: None for identity in universe_extra})
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            path = root / "config" / "match_baseline.tsv"
+            path.parent.mkdir()
+            progress.write_tsv(path, progress.BASELINE_FIELDS, baseline, ("fixture",))
+            before = path.read_bytes()
+            stdout, stderr = io.StringIO(), io.StringIO()
+            with (
+                mock.patch.object(progress, "REPO", root),
+                mock.patch.object(progress, "BASELINE", path),
+                mock.patch.object(progress, "_dirty_inputs", return_value=[]),
+                mock.patch.object(progress, "current_state",
+                                  return_value=(STARTED_GAME, universe, rows, [])),
+                mock.patch("scripts.kf.readme.refresh", return_value=True) as refresh,
+                contextlib.redirect_stdout(stdout),
+                contextlib.redirect_stderr(stderr),
+            ):
+                code = cli_main(["bank", *argv])
+            after = path.read_bytes()
+            _fields, written = progress.read_tsv(path)
+        return SimpleNamespace(
+            code=code, unchanged=before == after, refreshed=refresh.called,
+            rows={(row["image"], int(row["va"], 16)): row for row in written},
+            stdout=stdout.getvalue(), stderr=stderr.getvalue(),
+        )
+
+    def test_bare_bank_without_scores_refuses_and_keeps_the_ledger(self) -> None:
+        rows = [sample_current(None), neighbour_current(None)]
+        result = self._run(rows, [banked_row(row) for row in rows], [])
+        self.assertEqual(result.code, 1)
+        self.assertTrue(result.unchanged)
+        self.assertFalse(result.refreshed)
+        self.assertIn("no function has a current score", result.stderr)
+        self.assertIn("2 banked row(s)", result.stderr)
+
+    @kf2_images
+    def test_bare_bank_refuses_to_drop_a_manifested_unscored_row(self) -> None:
+        exact, unscored = sample_current(100.0), neighbour_current(None)
+        result = self._run(
+            [exact, unscored], [banked_row(exact), banked_row(unscored)], [])
+        self.assertEqual(result.code, 1)
+        self.assertTrue(result.unchanged)
+        self.assertFalse(result.refreshed)
+        self.assertIn("1 banked function(s)", result.stderr)
+        self.assertIn("game:0x80010010", result.stderr)
+
+    @kf2_images
+    def test_bare_bank_rewrites_every_scored_row(self) -> None:
+        exact, partial = sample_current(100.0), neighbour_current(90.0)
+        old = banked_row(exact)
+        old["input_sha256"] = "b" * 64
+        # A banked function no longer in the manifest is still dropped: that
+        # is a real loss, not a missing score.
+        gone = banked_row(exact, image="OPEN.EXE", va=0x80020000)
+        result = self._run(
+            [exact, partial], [old, gone], [],
+            universe_extra=[("OPEN.EXE", 0x80020000)],
+        )
+        self.assertEqual(result.code, 0, result.stderr)
+        self.assertTrue(result.refreshed)
+        self.assertEqual(set(result.rows), {
+            ("GAME.EXE", 0x80010000), ("GAME.EXE", 0x80010010),
+        })
+        self.assertEqual(result.rows[("GAME.EXE", 0x80010000)]["input_sha256"], "a" * 64)
+        self.assertEqual(result.rows[("GAME.EXE", 0x80010010)]["banked_pct"], "90.000000000")
+        self.assertIn("banked 2 scored function(s)", result.stdout)
+
+    @kf2_images
+    def test_function_bank_beside_unscored_rows_keeps_them(self) -> None:
+        exact, unscored = sample_current(100.0), neighbour_current(None)
+        kept = banked_row(unscored)
+        result = self._run(
+            [exact, unscored], [kept], ["--function", "game:0x80010000"])
+        self.assertEqual(result.code, 0, result.stderr)
+        self.assertTrue(result.refreshed)
+        self.assertEqual(result.rows[("GAME.EXE", 0x80010010)], kept)
+        self.assertEqual(
+            result.rows[("GAME.EXE", 0x80010000)]["banked_pct"], "100.000000000")
+        self.assertIn("banked 1 selected exact function(s)", result.stdout)
+
+    @kf2_images
+    def test_unmatched_function_selection_refuses_and_keeps_the_ledger(self) -> None:
+        exact, unscored = sample_current(100.0), neighbour_current(None)
+        result = self._run(
+            [exact, unscored], [banked_row(unscored)], ["--function", "game:0x80030000"])
+        self.assertEqual(result.code, 1)
+        self.assertTrue(result.unchanged)
+        self.assertIn("unknown bank function(s)", result.stderr)
 
 
 class AnalyzeKeepsGoingTests(unittest.TestCase):

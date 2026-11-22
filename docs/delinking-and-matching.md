@@ -224,7 +224,7 @@ incremental Ninja graph. The normal commands are:
 | [`kf resources census FILE --offset N --length N --stride N --field-offset N --encoding E [--json]`](resource-census.md) | count an explicitly identified binary record field with row and byte references |
 | `kf check [--strict]` | fail on data mismatches/incomplete comparisons, known-reference ownership gaps, unfaithful target relink/placement, non-exact vendored source verification, unchanged-input regressions, banked-exact functions that are no longer exact (whatever their inputs), lost banked rows, or invalid/stale reports |
 | `kf verify roundtrip [--image I] [--unit ID] [--output PATH]` | relink manifested target ELF sections at claim-derived addresses with pinned GNU ld and compare all initialized bytes with verified retail |
-| `kf bank [--unit ID] [--dirty]` | manually update all fresh scores, or only selected units when every selected function is exactly 100% |
+| `kf bank [--unit ID] [--function IMAGE:VA] [--dirty]` | manually update all fresh scores, or only selected units/functions when every selected function is exactly 100%; with no selection it refuses (leaving the ledger untouched) when nothing is scored or when a banked function still in the manifest has no current score |
 
 Status separates eligible, manifested, compiled, scored, and exact functions.
 The default exact threshold is strictly `100%`. `--loose` is available on

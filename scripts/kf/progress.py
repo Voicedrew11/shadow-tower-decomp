@@ -583,6 +583,44 @@ def _bank_record(row: Current, previous: dict[str, str] | None) -> dict[str, str
     }
 
 
+def _refuse_unscored_rebank(
+    rows: list[Current], old: dict[tuple[str, int], dict[str, str]],
+) -> None:
+    """Refuse a bare bank whose rewrite would drop rows only for want of scores.
+
+    A bare `kf bank` rewrites the whole ledger from the current scores. A
+    manifested function without a score has not been built or analyzed (its
+    unit is absent from the objdiff report), so dropping its banked row would
+    record a loss that never happened. An empty selection list in a script
+    (`kf bank` with no `--unit`/`--function`) is exactly this bare bank.
+    """
+    hint = (
+        "run a full `kf build` (or `kf analyze`) first; to bank chosen functions "
+        "pass --unit ID or --function IMAGE:VA (an empty selection list is a bare "
+        "`kf bank`, which rewrites every row)"
+    )
+    if not any(row.scored for row in rows):
+        raise ValueError(
+            "refusing to bank: no function has a current score (no objdiff report "
+            "covers a built unit), so there is nothing to bank and a bare `kf bank` "
+            f"would empty {BASELINE.name} ({len(old)} banked row(s)); {hint}"
+        )
+    manifested = {(row.target.image, row.target.va): row for row in rows}
+    unscored = sorted(
+        identity for identity in old
+        if identity in manifested and not manifested[identity].scored
+    )
+    if unscored:
+        shown = ", ".join(
+            f"{image_key(image)}:{format_hex(va)}" for image, va in unscored[:8]
+        ) + (", ..." if len(unscored) > 8 else "")
+        raise ValueError(
+            f"refusing to bank: {len(unscored)} banked function(s) still in the "
+            f"manifest have no current score ({shown}); a bare `kf bank` would "
+            f"drop them from {BASELINE.name}; {hint}"
+        )
+
+
 def _bank_rows(
     rows: list[Current],
     old: dict[tuple[str, int], dict[str, str]],
@@ -592,6 +630,7 @@ def _bank_rows(
     requested_units = set(selected_units or ())
     requested_functions = set(selected_functions or ())
     if not requested_units and not requested_functions:
+        _refuse_unscored_rebank(rows, old)
         output = {
             (row.target.image, row.target.va): _bank_record(row, old.get(
                 (row.target.image, row.target.va)
