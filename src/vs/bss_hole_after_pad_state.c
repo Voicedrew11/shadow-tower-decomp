@@ -1,6 +1,6 @@
 /*
  * VS.EXE: a data-only module (WIP) owning an unreferenced .bss hole between
- * pad_state (0x801603c0, 0x48) and DAT_801604b0. Nothing references it, but PSYLINK leaves no hole between
+ * vs_pad_state (0x801603c0, 0x48) and sound_banks. Nothing references it, but PSYLINK leaves no hole between
  * objects' COMMON beyond each request's alignment, so some object allocated
  * these bytes; its identity is admitted from the layout alone and its unit
  * stays unresolved until the linked .SYM confirms the placement.

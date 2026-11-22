@@ -23,7 +23,7 @@ typedef struct {
 /* Layout check: the offset the code proves. */
 typedef char VsEffectsCurAt0x3504[offsetof(VsEffects, cur) == 0x3504 ? 1 : -1];
 
-extern VsEffects DAT_801ce698;
+extern VsEffects vs_effects;
 
 /* src/vs/effect.c: a free effect slot, or NULL */
 StEffect *effect_alloc(void);

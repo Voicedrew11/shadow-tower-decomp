@@ -11,7 +11,7 @@
 ADDRESS(0x8002d710, 0x28)
 void sparks_clear_all(void)
 {
-    VsRecord20 *rec = DAT_801c4a58;
+    VsRecord20 *rec = sparks;
     int i = 2000;
 
     while (i--) {

@@ -42,7 +42,7 @@ void cd_archive_open(u16 archive, char *name)
     } header;
     CdlFILE file;
     char path[64];
-    VsArchive *a = &DAT_801a4590.archives[archive];
+    VsArchive *a = &vs_cd_state.archives[archive];
     u16 *sectors;
     int count;
     u16 *source;
@@ -70,7 +70,7 @@ void cd_init(void)
     int i;
 
     EnterCriticalSection();
-    r = DAT_801a4590.unk8;
+    r = vs_cd_state.unk8;
     i = 0;
     do {
         i++;
@@ -78,8 +78,8 @@ void cd_init(void)
         r->unk1 = 0;
         r++;
     } while (i < VS_CD_REQUESTS);
-    DAT_801a4590.unkD8 = DAT_801a4590.unk8;
-    DAT_801a4590.unkDC = DAT_801a4590.unk8;
+    vs_cd_state.unkD8 = vs_cd_state.unk8;
+    vs_cd_state.unkDC = vs_cd_state.unk8;
     CdSyncCallback(0);
     CdReadyCallback(0);
     CdReadCallback(0);

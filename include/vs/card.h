@@ -91,15 +91,15 @@ typedef char VsSaveInventoryBoundary[offsetof(VsSave, unk18BC) + sizeof(VsSaveSu
 typedef char VsSavePairSize[sizeof(VsSave[2]) == 0x3b10 ? 1 : -1];
 
 /* The two players' card file names (0x801a0a30, bss). */
-extern char DAT_801a0a30[2][40];
-extern VsSave DAT_801a0a80[2];
+extern char save_file_names[2][40];
+extern VsSave saves[2];
 
 /* The file list rows the two players' saves were loaded from
  * (card_screen_run; bss). */
 extern u16 DAT_80063328[2];
 
 /* The card file headers of the two players' saves (0x8015ffc0, bss). */
-extern VsCardHeader DAT_8015ffc0[2];
+extern VsCardHeader save_headers[2];
 
 /* LIBC's itoa (Psy-Q's headers do not declare it): the decimal text of
  * value in a static buffer. */

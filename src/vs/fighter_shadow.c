@@ -18,7 +18,7 @@
 ADDRESS(0x8002bfe8, 0x2dc)
 void fighter_draw_shadow(int n, int scale)
 {
-    VsFighter *base = DAT_800633b0.fighter;
+    VsFighter *base = shared_buffer.fighter;
     VsFighter *f = base + n;
     int r = f->unk4DF18.unk1B4 * scale / 4096;
     MATRIX m;

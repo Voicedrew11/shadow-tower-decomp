@@ -61,7 +61,7 @@ typedef char VsCdCurrentAt0xdc[(offsetof(VsCdState, unkDC) == 0xdc) ? 1 : -1];
 typedef char VsCdStateArchivesAt0xE0[offsetof(VsCdState, archives) == 0xe0 ? 1 : -1];
 typedef char VsCdStateUnk4A4At0x4A4[offsetof(VsCdState, unk4A4) == 0x4a4 ? 1 : -1];
 
-extern VsCdState DAT_801a4590;
+extern VsCdState vs_cd_state;
 
 /*
  * The graphics state at 0x801624d0 (bss): laid out as ST.EXE's WorldState
@@ -122,11 +122,11 @@ typedef struct {
     u8 unk12[2];
 } VsRecord20;
 
-extern VsRecord20 DAT_801c4a58[2000];
+extern VsRecord20 sparks[2000];
 
 /* A flag the two-choice dialog menu_vs_setup_draw_choice compares with its page
  * (0x80063228, .sdata, initially 1). */
-extern s32 DAT_80063228;
+extern s32 round_count;
 
 /* The VRAM position tim_load_member_async saves for its read's completion
  * callback tim_load_member_done (bss). */
@@ -223,7 +223,7 @@ typedef char VsFighterDataSize[sizeof(VsFighterData) == 0x1ce ? 1 : -1];
 
 /* The fighters' data blocks by character, copied into VsFighter.unk4DF18
  * when a round loads (.data, src/vs/data_fighters.c). */
-extern VsFighterData DAT_8004a224[151];
+extern VsFighterData fighter_data[151];
 
 /*
  * The two fighters at 0x800633b0 (bss), 0x4e0e8 bytes each (the code
@@ -261,28 +261,28 @@ typedef struct {
 typedef char VsFighterSize[sizeof(VsFighter) == 0x4e0e8 ? 1 : -1];
 typedef char VsFighterDataAt0x4DF18[offsetof(VsFighter, unk4DF18) == 0x4df18 ? 1 : -1];
 
-/* The fighters live in DAT_800633b0 (vs/buffer.h VsBuffer.fighter). */
+/* The fighters live in shared_buffer (vs/buffer.h VsBuffer.fighter). */
 
 /* A movement scale the fighters' walking steps multiply by (.sdata,
  * unowned; read absolutely by the -G8 moves). */
-extern s32 DAT_80063220;
+extern s32 frames_per_draw;
 
 /* Nonzero (1) while the fighters may hit each other (bss, unowned). */
-extern s32 DAT_80063324;
+extern s32 round_phase;
 
 /* Renderer switches (unowned): a fixed OT depth for every face (.sdata),
  * semi-transparent faces and mirrored winding (bss). */
-extern s32 DAT_80063224;
-extern s32 DAT_80063350;
-extern s32 DAT_80063360;
+extern s32 mesh_fixed_depth;
+extern s32 mesh_semi_trans;
+extern s32 mesh_mirror;
 
-/* DAT_80063220 (declared above) is also the animation step the sound
+/* frames_per_draw (declared above) is also the animation step the sound
  * triggers scale a fighter's frame step by. */
 
 
 /* VS's copy of ST.EXE's vis_table_c (bss, 0x80191d00): the 44-byte item
  * records from +0x118; only those are used so far. */
-extern VisTableC DAT_80191d00;
+extern VisTableC vis_table_c;
 
 /* A switch menu_item_request_draw_details sets around its count list and ui_draw_number
  * reads (bss). */
@@ -302,54 +302,54 @@ typedef struct {
 } VsLights;
 
 /* The fighter being drawn (bss, unowned). */
-extern VsFighter *DAT_80063300;
+extern VsFighter *current_fighter;
 
 /* Rotation offsets added to the drawn fighter's x and y angles (.sdata,
  * src/vs/main.c; read absolutely elsewhere). */
-extern s32 DAT_80063218;
-extern s32 DAT_8006321c;
+extern s32 light_rot_x;
+extern s32 light_rot_y;
 
 /* The model renderers' scale (4096, 4096, 4096; .data, src/vs/main.c). */
-extern VECTOR DAT_8005b2a8;
+extern VECTOR light_scale;
 
-/* The column of DAT_801624b8 hud_draw_fighter_names shows (bss, unowned). */
-extern s32 DAT_80063338;
+/* The column of teams hud_draw_fighter_names shows (bss, unowned). */
+extern s32 round_index;
 
-/* Each fighter's three ids hud_draw_fighter_names names are DAT_801624b8, both
+/* Each fighter's three ids hud_draw_fighter_names names are teams, both
  * players' teams (vs/menu.h VsTeam.slot). */
 
 /* A 5000-byte file buffer (archive 5 member 3, match_load_resources): the guard
  * flash's mesh model, a centre vertex and three rings of 16 (bss). */
-extern u8 DAT_8015ec38[5000];
+extern u8 guard_flash_model[5000];
 
 /* Rounds won per fighter (bss, unowned): src/vs/main.c proves the first
- * word its own symbol (the second, DAT_80063374, is read absolutely where
+ * word its own symbol (the second, round_wins_2p, is read absolutely where
  * the first is $gp-relative); hud_draw_round_wins still walks both from it. */
-extern s32 DAT_80063370[1];
+extern s32 round_wins[1];
 
 /* VS band 6: the text scroll switch and the two scroll offsets
  * ui_draw_glyph picks between (ST.EXE's DAT_800881ac/a0/a2; bss, unowned). */
-extern u16 DAT_80063378;
+extern u16 text_scroll_mode;
 extern u16 DAT_8006333e;
-extern u16 DAT_80063340;
+extern u16 text_scroll;
 
 /* VS band 6: the two 0x20000-byte GPU packet buffers gfx_init hands
  * the graphics state (bss; ST.EXE's DAT_8011c488). */
-extern u_long DAT_8011c528[];
+extern u_long packet_buffers[];
 
 /* VS band 6: seven words and seven halfwords card_draw_port_choice clears, and the
  * two players' requested item ids, -1 for none (bss, unowned). */
-extern s32 DAT_801c4a38[7];
+extern s32 file_row_clipped[7];
 extern u16 DAT_80117598[7];
 /* The two players' requested item ids (0..265), -1 for none. Retail's translation units
  * see two sizes: the team, pick and setup screens read both words
  * $gp-relative through an 8-byte array (define VS_PICKED_PAIR before
  * including this header), while the main module and the card screen see
- * only the first word here and the second as DAT_80063334 (vs/main.h). */
+ * only the first word here and the second as requested_item_2p (vs/main.h). */
 #ifdef VS_PICKED_PAIR
-extern s32 DAT_80063330[2];
+extern s32 requested_items[2];
 #else
-extern s32 DAT_80063330[1];
+extern s32 requested_items[1];
 #endif
 
 /* Read-only words the first-pass round sequence and effect code read

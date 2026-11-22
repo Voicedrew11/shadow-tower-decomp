@@ -69,14 +69,14 @@ void model_draw_mirrored(void)
 {
     VsScratchPad *sp = VS_SCRATCHPAD;
 
-    if (DAT_80063360) {
+    if (mesh_mirror) {
         MIRROR_PROJECT(sp, 0);
-        DAT_80063360 = 0;
-        DAT_80063350 = 0;
+        mesh_mirror = 0;
+        mesh_semi_trans = 0;
         mesh_draw_part_nccs(0);
         MIRROR_PROJECT(sp, 1);
-        DAT_80063360 = 1;
-        DAT_80063350 = 1;
+        mesh_mirror = 1;
+        mesh_semi_trans = 1;
         mesh_draw_part_nccs(0);
     } else {
         MIRROR_PROJECT(sp, 0);

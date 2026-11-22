@@ -16,8 +16,8 @@
  * definitions ahead of vs/data.h, whose shared declarations leave the
  * extent open (lineup_screen_draw and hud_draw_round_wins index both sides from
  * them), so that ASPSX addresses them $gp-relative. */
-s32 DAT_80063330[1];
-s32 DAT_80063370[1];
+s32 requested_items[1];
+s32 round_wins[1];
 
 #include <psyq/libc.h>
 #include <LIBGTE.H>
@@ -51,7 +51,7 @@ RODATA(0x80011000, 0x110)
 /* The model renderers' light scale (fighter_draw_skeletal, fighter_draw_vertex_anim and
  * model_draw_part_at scale their light matrix by it). */
 DATA(0x8005b2a8, 0x10, ".data")
-VECTOR DAT_8005b2a8 = {ONE, ONE, ONE};
+VECTOR light_scale = {ONE, ONE, ONE};
 
 /*
  * An identity matrix nothing references (retail keeps it after the scale).
@@ -61,41 +61,41 @@ VECTOR DAT_8005b2a8 = {ONE, ONE, ONE};
  * instead, which leaves this one unused.
  */
 DATA(0x8005b2b8, 0x20, ".data")
-MATRIX DAT_8005b2b8 = {{{ONE, 0, 0}, {0, ONE, 0}, {0, 0, ONE}}, {0, 0, 0}};
+MATRIX identity_matrix = {{{ONE, 0, 0}, {0, ONE, 0}, {0, 0, ONE}}, {0, 0, 0}};
 
 /* Rotation offsets the model draw adds to the fighter's x and y angles
  * (the model renderers read them absolutely: they are not theirs). */
 DATA(0x80063218, 0x4, ".sdata")
-s32 DAT_80063218 = 0;
+s32 light_rot_x = 0;
 DATA(0x8006321c, 0x4, ".sdata")
-s32 DAT_8006321c = 0;
+s32 light_rot_y = 0;
 
 /* The module's initialized small data. */
 DATA(0x80063220, 0x4, ".sdata")
-s32 DAT_80063220 = 0;
+s32 frames_per_draw = 0;
 DATA(0x80063224, 0x4, ".sdata")
-s32 DAT_80063224 = 0;
+s32 mesh_fixed_depth = 0;
 DATA(0x80063228, 0x4, ".sdata")
-s32 DAT_80063228 = 1;
+s32 round_count = 1;
 
 /* The module's RECT initializer. */
 SDATA(0x8006322c, 0x8)
 
 /* Tentative definitions: ASPSX needs the size to address these $gp-relative.
  * An earlier object allocates them (docs/executable-linking.md). */
-VsFighter *DAT_80063300;
+VsFighter *current_fighter;
 s32 DAT_80063310;
-u32 DAT_80063314;
-s32 DAT_8006331c;
-s32 DAT_80063320;
-s32 DAT_80063324;
-s32 DAT_80063338;
-s32 DAT_80063350;
-s32 DAT_80063354;
+u32 screen_start_frame;
+s32 fight_banner;
+s32 both_items_requested;
+s32 round_phase;
+s32 round_index;
+s32 mesh_semi_trans;
+s32 camera_speed;
 s16 DAT_8006335a;
-s32 DAT_80063360;
+s32 mesh_mirror;
 u32 DAT_80063364;
-s32 DAT_8006336c;
+s32 choice_slider;
 
 /* Loads archive member `member` into `buf`, nonzero on success
  * (src/vs/cd_read.c). Declared without a prototype: the callers pass
@@ -139,11 +139,11 @@ void xa_cue_bgm(int channel)
 ADDRESS(0x80012a70, 0xe0)
 void sound_bank_open(int bank)
 {
-    VsSoundBank *b = &DAT_801604b0[bank];
+    VsSoundBank *b = &sound_banks[bank];
 
     b->vab = SsVabOpenHeadSticky(b->head, -1, bank * 0xa000 + 0x3e400);
     if (b->vab != -1) {
-        b->unk1002 = SsVabTransBodyPartly(DAT_800633b0.bank[bank], 0x12c00, b->vab);
+        b->unk1002 = SsVabTransBodyPartly(shared_buffer.bank[bank], 0x12c00, b->vab);
         if (b->unk1002 == b->vab)
             SsVabTransCompleted(SS_WAIT_COMPLETED);
     }
@@ -261,7 +261,7 @@ void fighter_offset_textures(int id)
     int n;
     int k;
 
-    switch (DAT_800633b0.fighter[id].unk4DF10) {
+    switch (shared_buffer.fighter[id].unk4DF10) {
     case 1:
         sp->header = MODEL_PARTS(sp->model);
         for (n = ((u_long *)sp->model)[2]; n-- != 0; sp->header++) {
@@ -275,8 +275,8 @@ void fighter_offset_textures(int id)
         VS_PART_ALL_FACES(VS_SHIFT_TEXTURE);
         break;
     }
-    if (DAT_800633b0.fighter[id].unk4B000[0] != 0) {
-        sp->model = (u8 *)DAT_800633b0.fighter[id].unk4B000;
+    if (shared_buffer.fighter[id].unk4B000[0] != 0) {
+        sp->model = (u8 *)shared_buffer.fighter[id].unk4B000;
         sp->header = MODEL_PARTS(sp->model);
         for (n = ((u_long *)sp->model)[2]; n-- != 0; sp->header++) {
             sp->faces = sp->model + (sp->header->faces + 12);
@@ -292,12 +292,12 @@ ADDRESS(0x8001336c, 0x374)
 void fighter_set_semi_trans(int id, int mode)
 {
     VsScratchPad *sp = VS_SCRATCHPAD;
-    StAnimFile *file = (StAnimFile *)DAT_800633b0.fighter[id].file;
+    StAnimFile *file = (StAnimFile *)shared_buffer.fighter[id].file;
     int n;
     int k;
 
     mode <<= 5;
-    switch (DAT_800633b0.fighter[id].unk4DF10) {
+    switch (shared_buffer.fighter[id].unk4DF10) {
     case 1:
         sp->model = ANIM_MODEL(file);
         sp->header = MODEL_PARTS(sp->model);
@@ -320,70 +320,70 @@ void fighter_set_semi_trans(int id, int mode)
 ADDRESS(0x800136e0, 0x13c)
 void pad_update_buttons(void)
 {
-    if (DAT_801961e0[0].status == 0) {
-        pad_state.pads[0].unk0 = ~DAT_801961e0[0].buttons;
-        if (pad_state.pads[0].unk0 != pad_state.pads[0].unk4) {
-            pad_state.pads[0].unk10 = 30;
-            pad_state.pads[0].unk8 |= pad_state.pads[0].unk0 & ~pad_state.pads[0].unk4;
-            pad_state.pads[0].unkC |= pad_state.pads[0].unk0 & ~pad_state.pads[0].unk4;
-        } else if (pad_state.pads[0].unk10 != 0) {
-            if (--pad_state.pads[0].unk10 == 0) {
-                pad_state.pads[0].unk10 = 5;
-                pad_state.pads[0].unkC |= pad_state.pads[0].unk0;
+    if (pad_buffers[0].status == 0) {
+        vs_pad_state.pads[0].unk0 = ~pad_buffers[0].buttons;
+        if (vs_pad_state.pads[0].unk0 != vs_pad_state.pads[0].unk4) {
+            vs_pad_state.pads[0].unk10 = 30;
+            vs_pad_state.pads[0].unk8 |= vs_pad_state.pads[0].unk0 & ~vs_pad_state.pads[0].unk4;
+            vs_pad_state.pads[0].unkC |= vs_pad_state.pads[0].unk0 & ~vs_pad_state.pads[0].unk4;
+        } else if (vs_pad_state.pads[0].unk10 != 0) {
+            if (--vs_pad_state.pads[0].unk10 == 0) {
+                vs_pad_state.pads[0].unk10 = 5;
+                vs_pad_state.pads[0].unkC |= vs_pad_state.pads[0].unk0;
             }
         }
     }
-    if (DAT_801961e0[1].status == 0) {
-        pad_state.pads[1].unk0 = ~DAT_801961e0[1].buttons;
-        if (pad_state.pads[1].unk0 != pad_state.pads[1].unk4) {
-            pad_state.pads[1].unk10 = 30;
-            pad_state.pads[1].unk8 |= pad_state.pads[1].unk0 & ~pad_state.pads[1].unk4;
-            pad_state.pads[1].unkC |= pad_state.pads[1].unk0 & ~pad_state.pads[1].unk4;
-        } else if (pad_state.pads[1].unk10 != 0) {
-            if (--pad_state.pads[1].unk10 == 0) {
-                pad_state.pads[1].unk10 = 5;
-                pad_state.pads[1].unkC |= pad_state.pads[1].unk0;
+    if (pad_buffers[1].status == 0) {
+        vs_pad_state.pads[1].unk0 = ~pad_buffers[1].buttons;
+        if (vs_pad_state.pads[1].unk0 != vs_pad_state.pads[1].unk4) {
+            vs_pad_state.pads[1].unk10 = 30;
+            vs_pad_state.pads[1].unk8 |= vs_pad_state.pads[1].unk0 & ~vs_pad_state.pads[1].unk4;
+            vs_pad_state.pads[1].unkC |= vs_pad_state.pads[1].unk0 & ~vs_pad_state.pads[1].unk4;
+        } else if (vs_pad_state.pads[1].unk10 != 0) {
+            if (--vs_pad_state.pads[1].unk10 == 0) {
+                vs_pad_state.pads[1].unk10 = 5;
+                vs_pad_state.pads[1].unkC |= vs_pad_state.pads[1].unk0;
             }
         }
     }
-    pad_state.pads[0].unk4 = pad_state.pads[0].unk0;
-    pad_state.pads[1].unk4 = pad_state.pads[1].unk0;
+    vs_pad_state.pads[0].unk4 = vs_pad_state.pads[0].unk0;
+    vs_pad_state.pads[1].unk4 = vs_pad_state.pads[1].unk0;
 }
 
 /* Clears both controller records. */
 ADDRESS(0x8001381c, 0x2c)
 void pad_clear_input(void)
 {
-    pad_state.pads[1].unkC = 0;
-    pad_state.pads[0].unkC = 0;
-    pad_state.pads[1].unk8 = 0;
-    pad_state.pads[0].unk8 = 0;
-    pad_state.pads[1].unk4 = 0;
-    pad_state.pads[0].unk4 = 0;
-    pad_state.pads[1].unk0 = 0;
-    pad_state.pads[0].unk0 = 0;
+    vs_pad_state.pads[1].unkC = 0;
+    vs_pad_state.pads[0].unkC = 0;
+    vs_pad_state.pads[1].unk8 = 0;
+    vs_pad_state.pads[0].unk8 = 0;
+    vs_pad_state.pads[1].unk4 = 0;
+    vs_pad_state.pads[0].unk4 = 0;
+    vs_pad_state.pads[1].unk0 = 0;
+    vs_pad_state.pads[0].unk0 = 0;
 }
 
 /* A frame callback: counts. */
 ADDRESS(0x80013848, 0x20)
 void rcnt2_handler(void)
 {
-    pad_state.unk30++;
+    vs_pad_state.unk30++;
 }
 
 /* A frame callback: counts and decodes the controllers. */
 ADDRESS(0x80013868, 0x38)
 void vsync_handler(void)
 {
-    pad_state.unk3C++;
+    vs_pad_state.unk3C++;
     pad_update_buttons();
 }
 
 /* Controller 1's buttons as the debug adjust reads them: the buffer's
  * second halfword, a constant address (retail shares one %hi of
- * DAT_801961e0 + 2 between the reads; a member access forms the buffer
+ * pad_buffers + 2 between the reads; a member access forms the buffer
  * address first). */
-#define VS_PAD0_BUTTONS (((volatile s16 *)DAT_801961e0)[1])
+#define VS_PAD0_BUTTONS (((volatile s16 *)pad_buffers)[1])
 
 /*
  * A debug display adjust: flips to the other frame, then until START is
@@ -443,7 +443,7 @@ void sound_init(void)
 {
     SsInit();
     SsSetMVol(0, 0);
-    SsSetTableSize(DAT_801175a8, 2, 1);
+    SsSetTableSize(seq_attr_table, 2, 1);
     SsSetTickMode(SS_TICK60);
     SsStart2();
     SsUtSetReverbType(SS_REV_TYPE_STUDIO_C);
@@ -465,10 +465,10 @@ short sound_play_tone(u_char tone, int note, int bank)
         note = 0;
     else if (note >= 128)
         note = 127;
-    SpuGetAllKeysStatus(DAT_80117580);
+    SpuGetAllKeysStatus(voice_status);
     for (i = 23; i != -1; i--) {
-        if (DAT_80117580[i - 1] == SPU_OFF)
-            return SsUtKeyOn(DAT_801604b0[bank].vab, 0, tone, note, 0, 32, 32);
+        if (voice_status[i - 1] == SPU_OFF)
+            return SsUtKeyOn(sound_banks[bank].vab, 0, tone, note, 0, 32, 32);
     }
     return -1;
 }
@@ -498,7 +498,7 @@ void fighters_play_anim_sounds(void)
     int kind;
 
     for (i = 0; i < 2; i++) {
-        f = &DAT_800633b0.fighter[i];
+        f = &shared_buffer.fighter[i];
         d = &f->unk4DF18;
         switch (f->unk4DF0E) {
         case 0:
@@ -541,13 +541,13 @@ void fighters_play_anim_sounds(void)
                 int frame = f->unk4DEEA;
                 u16 at = operand;
 
-                if (at >= frame - f->unk4DEEC * DAT_80063220 && at < frame)
+                if (at >= frame - f->unk4DEEC * frames_per_draw && at < frame)
                     KEY_ON_TONE();
             } else {
                 int frame = f->unk4DEEA;
                 u16 at = operand;
 
-                if (frame - f->unk4DEEC * DAT_80063220 >= at && frame < at)
+                if (frame - f->unk4DEEC * frames_per_draw >= at && frame < at)
                     KEY_ON_TONE();
             }
             break;
@@ -556,13 +556,13 @@ void fighters_play_anim_sounds(void)
                 int at = trigger & 0x7ff;
                 int frame = f->unk4DEEA & 0x7ff;
 
-                if (at >= frame - f->unk4DEEC * DAT_80063220 && at < frame)
+                if (at >= frame - f->unk4DEEC * frames_per_draw && at < frame)
                     KEY_ON_TONE();
             } else {
                 int at = trigger & 0x7ff;
                 int frame = f->unk4DEEA & 0x7ff;
 
-                if (frame - f->unk4DEEC * DAT_80063220 >= at && frame < at)
+                if (frame - f->unk4DEEC * frames_per_draw >= at && frame < at)
                     KEY_ON_TONE();
             }
             break;
@@ -571,20 +571,20 @@ void fighters_play_anim_sounds(void)
                 int frame = f->unk4DEEA;
                 u16 at = operand;
 
-                if (at >= frame - f->unk4DEEC * DAT_80063220 && at < frame && (rand() >> 3) < at)
+                if (at >= frame - f->unk4DEEC * frames_per_draw && at < frame && (rand() >> 3) < at)
                     KEY_ON_TONE();
             } else {
                 int frame = f->unk4DEEA;
                 u16 at = operand;
 
-                if (frame - f->unk4DEEC * DAT_80063220 >= at && frame < at && (rand() >> 3) < at)
+                if (frame - f->unk4DEEC * frames_per_draw >= at && frame < at && (rand() >> 3) < at)
                     KEY_ON_TONE();
             }
             break;
         case 0x4000: {
             u16 at = operand;
 
-            if (at != 0 && pad_state.unk40 / 20 % at == 0)
+            if (at != 0 && vs_pad_state.unk40 / 20 % at == 0)
                 KEY_ON_TONE();
             break;
         }
@@ -604,7 +604,7 @@ void cd_open_vs_archives(void)
 }
 
 /* The fighter being loaded. */
-#define FIGHTER (DAT_800633b0.fighter[i])
+#define FIGHTER (shared_buffer.fighter[i])
 
 /* Loads both fighters of the current round: each one's model, sound bank,
  * animations and second model from archive 0 (five members per
@@ -617,7 +617,7 @@ void cd_open_vs_archives(void)
  * area (a call with seven or eight arguments that left no code) or an
  * unused 16-byte local; nothing in the image names either, so none is
  * invented. The code itself is retail's once the fighter is indexed as
- * DAT_800633b0.fighter[i] at every use and the page and palette row are
+ * shared_buffer.fighter[i] at every use and the page and palette row are
  * i * 4 and i * 12 at the call.
  */
 ADDRESS(0x800140d8, 0x3a8)
@@ -627,11 +627,11 @@ void fighters_load_round(void)
     int i;
 
     for (i = 0; i < 2; i++) {
-        member = DAT_801624b8[i].slot[DAT_80063338] * 5;
+        member = teams[i].slot[round_index] * 5;
         cd_read_member(0, member + 1, (u_long *)&FIGHTER);
         tim_load_images_shifted((u_long *)&FIGHTER, i * 4, i * 12);
         DrawSync(0);
-        cd_read_member(0, member + 2, (u_long *)DAT_801604b0[i].head);
+        cd_read_member(0, member + 2, (u_long *)sound_banks[i].head);
         cd_read_member(0, member + 3, (u_long *)&FIGHTER);
         sound_bank_open(i);
         if (cd_read_member(0, member + 4, FIGHTER.unk4B000))
@@ -647,7 +647,7 @@ void fighters_load_round(void)
             anim_register(i, (StAnimFile *)FIGHTER.file);
         }
         fighter_offset_textures(i);
-        FIGHTER.unk4DF18 = DAT_8004a224[DAT_801624b8[i].slot[DAT_80063338]];
+        FIGHTER.unk4DF18 = fighter_data[teams[i].slot[round_index]];
         FIGHTER.unk4DF0E = 0;
         FIGHTER.unk4DEEA = 0;
         FIGHTER.unk4DEF0.vz = 0;
@@ -665,13 +665,13 @@ void fighters_load_round(void)
         FIGHTER.unk4DF14 = 0;
         FIGHTER.unk4DF0C = 0;
     }
-    if (DAT_800633b0.fighter[0].unk4DF18.unk1B4 >= 1400
-        || DAT_800633b0.fighter[1].unk4DF18.unk1B4 >= 1400) {
-        DAT_800633b0.fighter[0].unk4DEF0.vx = -3072;
-        DAT_800633b0.fighter[1].unk4DEF0.vx = 3072;
+    if (shared_buffer.fighter[0].unk4DF18.unk1B4 >= 1400
+        || shared_buffer.fighter[1].unk4DF18.unk1B4 >= 1400) {
+        shared_buffer.fighter[0].unk4DEF0.vx = -3072;
+        shared_buffer.fighter[1].unk4DEF0.vx = 3072;
     } else {
-        DAT_800633b0.fighter[0].unk4DEF0.vx = -2048;
-        DAT_800633b0.fighter[1].unk4DEF0.vx = 2048;
+        shared_buffer.fighter[0].unk4DEF0.vx = -2048;
+        shared_buffer.fighter[1].unk4DEF0.vx = 2048;
     }
 }
 
@@ -707,7 +707,7 @@ void gfx_init(void)
     gte_SetBackColor(80, 80, 80);
     gte_SetFarColor(5, 5, 5);
     vs_gfx_state.frame = 255;
-    vs_gfx_state.unkE0 = DAT_8011c528;
+    vs_gfx_state.unkE0 = packet_buffers;
     vs_gfx_state.packets[0].start = vs_gfx_state.unkE0;
     vs_gfx_state.packets[0].end = vs_gfx_state.packets[0].start + PACKET_WORDS;
     vs_gfx_state.packets[1].start = vs_gfx_state.packets[0].end;
@@ -717,10 +717,10 @@ void gfx_init(void)
 
 /*
  * Moves the camera: after a round it circles the winner (fighter
- * DAT_80063324 & 1), framed by its height; otherwise it looks at the
+ * round_phase & 1), framed by its height; otherwise it looks at the
  * fighters' midpoint from the side, from a distance that follows their
  * separation, sweeping in during the round start. The camera eases toward
- * its target at DAT_80063354 units per frame, keeps within +-32767 on x
+ * its target at camera_speed units per frame, keeps within +-32767 on x
  * and z, and faces the target.
  */
 ADDRESS(0x80014634, 0x9ec)
@@ -737,8 +737,8 @@ void camera_update(void)
     int y;
     int z;
 
-    if (DAT_80063324 & 8) {
-        f = &DAT_800633b0.fighter[DAT_80063324 & 1];
+    if (round_phase & 8) {
+        f = &shared_buffer.fighter[round_phase & 1];
         height = f->unk4DF18.unk1B6 + f->unk4DF18.unk1B2;
         if (height > 3000) {
             look.vx = f->unk4DEF0.vx;
@@ -769,7 +769,7 @@ void camera_update(void)
             eye.vy = -500;
             eye.vz = f->unk4DEF0.vz + rcos(f->unk4DF02 + 1536) * 3 / 4;
         }
-        if (pad_state.unk3C < DAT_80063314 + 5) {
+        if (vs_pad_state.unk3C < screen_start_frame + 5) {
             vs_gfx_state.unk2CA78.vx = f->unk4DEF0.vx + rsin(f->unk4DF02 + 3072) * 2;
             vs_gfx_state.unk2CA78.vy = -7000;
             vs_gfx_state.unk2CA78.vz = f->unk4DEF0.vz + rcos(f->unk4DF02 + 3072) * 2;
@@ -778,31 +778,31 @@ void camera_update(void)
         int delta_x;
         int delta_z;
 
-        look.vx = (DAT_800633b0.fighter[0].unk4DEF0.vx + DAT_800633b0.fighter[1].unk4DEF0.vx) / 2;
-        delta_x = DAT_800633b0.fighter[1].unk4DEF0.vx - look.vx;
-        look.vz = (DAT_800633b0.fighter[0].unk4DEF0.vz + DAT_800633b0.fighter[1].unk4DEF0.vz) / 2;
-        delta_z = DAT_800633b0.fighter[1].unk4DEF0.vz - look.vz;
-        look.vy = (DAT_800633b0.fighter[0].unk4DEF0.vy + DAT_800633b0.fighter[1].unk4DEF0.vy) / 2;
+        look.vx = (shared_buffer.fighter[0].unk4DEF0.vx + shared_buffer.fighter[1].unk4DEF0.vx) / 2;
+        delta_x = shared_buffer.fighter[1].unk4DEF0.vx - look.vx;
+        look.vz = (shared_buffer.fighter[0].unk4DEF0.vz + shared_buffer.fighter[1].unk4DEF0.vz) / 2;
+        delta_z = shared_buffer.fighter[1].unk4DEF0.vz - look.vz;
+        look.vy = (shared_buffer.fighter[0].unk4DEF0.vy + shared_buffer.fighter[1].unk4DEF0.vy) / 2;
         dist = SquareRoot0(delta_z * delta_z + delta_x * delta_x) + 1;
         near = CAMERA_NEAR;
         far = CAMERA_FAR;
-        if (DAT_800633b0.fighter[0].unk4DF18.unk1B6 > 2500
-            || DAT_800633b0.fighter[1].unk4DF18.unk1B6 > 2500)
+        if (shared_buffer.fighter[0].unk4DF18.unk1B6 > 2500
+            || shared_buffer.fighter[1].unk4DF18.unk1B6 > 2500)
             near = CAMERA_NEAR_TALL;
         if (dist < near) {
             eye.vy = -near * 2;
-            eye.vx = look.vx + (DAT_800633b0.fighter[1].unk4DEF0.vz - look.vz) * near * 3 / dist;
-            eye.vz = look.vz + (look.vx - DAT_800633b0.fighter[1].unk4DEF0.vx) * near * 3 / dist;
+            eye.vx = look.vx + (shared_buffer.fighter[1].unk4DEF0.vz - look.vz) * near * 3 / dist;
+            eye.vz = look.vz + (look.vx - shared_buffer.fighter[1].unk4DEF0.vx) * near * 3 / dist;
         } else if (dist > far) {
             eye.vy = -far * 2;
-            eye.vx = look.vx + (DAT_800633b0.fighter[1].unk4DEF0.vz - look.vz) * far * 3 / dist;
-            eye.vz = look.vz + (look.vx - DAT_800633b0.fighter[1].unk4DEF0.vx) * far * 3 / dist;
+            eye.vx = look.vx + (shared_buffer.fighter[1].unk4DEF0.vz - look.vz) * far * 3 / dist;
+            eye.vz = look.vz + (look.vx - shared_buffer.fighter[1].unk4DEF0.vx) * far * 3 / dist;
         } else {
-            eye.vx = look.vx + (DAT_800633b0.fighter[1].unk4DEF0.vz - look.vz) * 3;
+            eye.vx = look.vx + (shared_buffer.fighter[1].unk4DEF0.vz - look.vz) * 3;
             eye.vy = -dist * 2;
-            eye.vz = look.vz + (look.vx - DAT_800633b0.fighter[1].unk4DEF0.vx) * 3;
+            eye.vz = look.vz + (look.vx - shared_buffer.fighter[1].unk4DEF0.vx) * 3;
         }
-        if (DAT_80063324 == 0) {
+        if (round_phase == 0) {
             if ((s32)DAT_80063364 < 34) {
                 look.vx = 0;
                 look.vz = DAT_80063364 * 300 - 10000;
@@ -817,26 +817,26 @@ void camera_update(void)
     eye.vz -= vs_gfx_state.unk2CA78.vz;
     dist = SquareRoot0(eye.vx * eye.vx + eye.vy * eye.vy + eye.vz * eye.vz) + 1;
     if (dist < 200) {
-        DAT_80063354 = 0;
+        camera_speed = 0;
     } else if (dist < 1000) {
-        if (DAT_80063354 > 100)
-            DAT_80063354 -= 20;
-        else if (DAT_80063354 < 100)
-            DAT_80063354 += 20;
+        if (camera_speed > 100)
+            camera_speed -= 20;
+        else if (camera_speed < 100)
+            camera_speed += 20;
     } else if (dist < 3000) {
-        if (DAT_80063354 > 200)
-            DAT_80063354 -= 20;
-        else if (DAT_80063354 < 200)
-            DAT_80063354 += 20;
+        if (camera_speed > 200)
+            camera_speed -= 20;
+        else if (camera_speed < 200)
+            camera_speed += 20;
     } else {
-        if (DAT_80063354 > 500)
-            DAT_80063354 -= 20;
-        else if (DAT_80063354 < 500)
-            DAT_80063354 += 20;
+        if (camera_speed > 500)
+            camera_speed -= 20;
+        else if (camera_speed < 500)
+            camera_speed += 20;
     }
-    x = eye.vx * DAT_80063354 / dist;
-    y = eye.vy * DAT_80063354 / dist;
-    z = eye.vz * DAT_80063354 / dist;
+    x = eye.vx * camera_speed / dist;
+    y = eye.vy * camera_speed / dist;
+    z = eye.vz * camera_speed / dist;
     vs_gfx_state.unk2CA78.vx += x;
     vs_gfx_state.unk2CA78.vy += y;
     vs_gfx_state.unk2CA78.vz += z;
@@ -863,7 +863,7 @@ void camera_update(void)
                                           look.vz - vs_gfx_state.unk2CA78.vz);
     look.vx -= vs_gfx_state.unk2CA78.vx;
     look.vz -= vs_gfx_state.unk2CA78.vz;
-    if (DAT_80063324 & 8)
+    if (round_phase & 8)
         vs_gfx_state.unk2CA88.vx = ratan2(vs_gfx_state.unk2CA78.vy - look.vy,
                                           SquareRoot0(look.vx * look.vx + look.vz * look.vz));
     else
@@ -899,8 +899,8 @@ void effects_draw(void);
 void model_draw_part_at(u_long *model, int flags, SVECTOR *a, SVECTOR *b, SVECTOR *c);
 
 /* The callback's frame clock and the current screen's starting frame. */
-#define FRAME_CLOCK() (pad_state.unk3C)
-#define SCREEN_START() (DAT_80063314)
+#define FRAME_CLOCK() (vs_pad_state.unk3C)
+#define SCREEN_START() (screen_start_frame)
 #define ELAPSED() (FRAME_CLOCK() - SCREEN_START())
 
 /* Arena pieces beyond this distance from the centre are hidden. */
@@ -908,10 +908,10 @@ void model_draw_part_at(u_long *model, int flags, SVECTOR *a, SVECTOR *b, SVECTO
 
 /*
  * Draws one frame of the round: swaps the buffers, runs the round start
- * and the screen of the current phase (DAT_80063324: the captions and
+ * and the screen of the current phase (round_phase: the captions and
  * menus hud_draw_banner fades by level), the clock, both fighters, their
  * gauges and the arena (the pieces past the camera hidden), then shows the
- * frame and measures its length in fields (DAT_80063220, at most 5).
+ * frame and measures its length in fields (frames_per_draw, at most 5).
  */
 ADDRESS(0x80015020, 0xe30)
 void round_draw_frame(void)
@@ -943,18 +943,18 @@ void round_draw_frame(void)
     vs_gfx_state.unk8338[4] = 0;
     anim_sets_retire();
     anim_slots_retire();
-    if (DAT_80063324 == 0 && round_draw_opening(DAT_80063364++)) {
-        DAT_8006331c = 3;
-        DAT_80063324 = 1;
-        DAT_80063364 = pad_state.unk3C + 1800;
-        DAT_80063314 = pad_state.unk3C;
+    if (round_phase == 0 && round_draw_opening(DAT_80063364++)) {
+        fight_banner = 3;
+        round_phase = 1;
+        DAT_80063364 = vs_pad_state.unk3C + 1800;
+        screen_start_frame = vs_pad_state.unk3C;
         while (!CdRead2(CdlModeSpeed | CdlModeRT | CdlModeSF))
             ;
         cd_audio_set_volume(64);
     }
-    if (DAT_80063324 != 0)
+    if (round_phase != 0)
         hud_draw_fighter_names(32);
-    switch (DAT_80063324) {
+    switch (round_phase) {
     case 1: {
         u32 end;
 
@@ -962,13 +962,13 @@ void round_draw_frame(void)
             u32 fade = SCREEN_START();
 
             fade += 16;
-            hud_draw_banner(DAT_8006331c, fade - FRAME_CLOCK());
-            if (DAT_8006331c == 12) {
+            hud_draw_banner(fight_banner, fade - FRAME_CLOCK());
+            if (fight_banner == 12) {
                 u32 left;
                 u32 rest = 16 - ELAPSED();
 
-                hud_draw_banner(17, rest - DAT_8006336c + 2);
-                hud_draw_banner(18, DAT_8006336c - ELAPSED() + 6);
+                hud_draw_banner(17, rest - choice_slider + 2);
+                hud_draw_banner(18, choice_slider - ELAPSED() + 6);
                 left = SCREEN_START();
                 left += 16;
                 hud_draw_dialog_box(left - FRAME_CLOCK(), 0);
@@ -989,8 +989,8 @@ void round_draw_frame(void)
             hud_draw_dialog_box(ELAPSED(), 0);
         } else {
             hud_draw_banner(12, 16);
-            hud_draw_banner(17, 16 - DAT_8006336c);
-            hud_draw_banner(18, DAT_8006336c + 6);
+            hud_draw_banner(17, 16 - choice_slider);
+            hud_draw_banner(18, choice_slider + 6);
             hud_draw_dialog_box(16, 0);
         }
         hud_draw_clock(DAT_80063364);
@@ -1000,7 +1000,7 @@ void round_draw_frame(void)
         if (ELAPSED() <= 200)
             hud_draw_banner(0, ELAPSED());
         if (ELAPSED() > 200) {
-            if (DAT_80063338 == DAT_80063228 - 1)
+            if (round_index == round_count - 1)
                 hud_draw_banner(0, 216 - ELAPSED());
             else
                 hud_draw_banner(0, 16);
@@ -1021,19 +1021,19 @@ void round_draw_frame(void)
             hud_draw_clock(0);
             break;
         }
-        a = (DAT_800633b0.fighter[0].unk4DF08 << 12) / DAT_800633b0.fighter[0].unk4DF18.unk1B8;
-        b = (DAT_800633b0.fighter[1].unk4DF08 << 12) / DAT_800633b0.fighter[1].unk4DF18.unk1B8;
+        a = (shared_buffer.fighter[0].unk4DF08 << 12) / shared_buffer.fighter[0].unk4DF18.unk1B8;
+        b = (shared_buffer.fighter[1].unk4DF08 << 12) / shared_buffer.fighter[1].unk4DF18.unk1B8;
         DAT_80063364 = 0;
-        DAT_80063314 = pad_state.unk3C;
+        screen_start_frame = vs_pad_state.unk3C;
         if (a == b) {
-            DAT_80063324 = 4;
+            round_phase = 4;
             goto draw;
         }
         if (b < a) {
-            DAT_80063324 = 8;
+            round_phase = 8;
             fighter_set_semi_trans(1, 1);
         } else {
-            DAT_80063324 = 9;
+            round_phase = 9;
             fighter_set_semi_trans(0, 1);
         }
         goto result;
@@ -1050,9 +1050,9 @@ void round_draw_frame(void)
             left2 = SCREEN_START() + 46;
             hud_draw_banner(4, left2 - FRAME_CLOCK());
         } else {
-            DAT_80063314 = pad_state.unk3C;
-            DAT_80063324 += 2;
-            fighter_set_semi_trans(9 - DAT_80063324, 1);
+            screen_start_frame = vs_pad_state.unk3C;
+            round_phase += 2;
+            fighter_set_semi_trans(9 - round_phase, 1);
             goto result;
         }
         hud_draw_clock(DAT_80063364);
@@ -1061,12 +1061,12 @@ void round_draw_frame(void)
     case 9:
     result:
         if (ELAPSED() > 30 && ELAPSED() < 159)
-            DAT_800633b0.fighter[~DAT_80063324 & 1].unk4DF12 =
-                DAT_80063314 - (pad_state.unk3C - 158);
+            shared_buffer.fighter[~round_phase & 1].unk4DF12 =
+                screen_start_frame - (vs_pad_state.unk3C - 158);
         if (ELAPSED() > 100 && ELAPSED() <= 200)
             hud_draw_banner(2, ELAPSED() - 100);
         if (ELAPSED() > 200) {
-            if (DAT_80063338 == DAT_80063228 - 1)
+            if (round_index == round_count - 1)
                 hud_draw_banner(2, 216 - ELAPSED());
             else
                 hud_draw_banner(2, 16);
@@ -1108,9 +1108,9 @@ void round_draw_frame(void)
         {
             u32 rest = 16 - ELAPSED();
 
-            hud_draw_banner(17, rest - DAT_8006336c + 2);
+            hud_draw_banner(17, rest - choice_slider + 2);
         }
-        hud_draw_banner(18, DAT_8006336c - ELAPSED() + 6);
+        hud_draw_banner(18, choice_slider - ELAPSED() + 6);
         hud_draw_banner(19, ELAPSED() - 4);
         hud_draw_banner(9, ELAPSED() - 4);
         hud_draw_dialog_box(16, 1);
@@ -1131,35 +1131,35 @@ void round_draw_frame(void)
             hud_draw_banner(10, 16);
             hud_draw_banner(16, 16);
             hud_draw_banner(13, 16);
-            hud_draw_banner(17, 16 - DAT_8006336c);
-            hud_draw_banner(18, DAT_8006336c + 6);
+            hud_draw_banner(17, 16 - choice_slider);
+            hud_draw_banner(18, choice_slider + 6);
         }
         hud_draw_dialog_box(16, 1);
         hud_draw_clock(DAT_80063364);
         break;
     }
-    if (DAT_80063324 != 0) {
+    if (round_phase != 0) {
         for (i = 0; i < 2; i++) {
-            DAT_80063300 = &DAT_800633b0.fighter[i];
-            switch (DAT_80063300->unk4DF10) {
+            current_fighter = &shared_buffer.fighter[i];
+            switch (current_fighter->unk4DF10) {
             case 1:
                 fighter_draw_skeletal();
                 break;
             case 2:
-                DAT_80063360 = 0;
+                mesh_mirror = 0;
                 fighter_draw_vertex_anim();
                 break;
             }
-            if (DAT_80063300->unk4DF14) {
+            if (current_fighter->unk4DF14) {
                 fighter_draw_guard_flash(i);
-                DAT_80063300->unk4DF14--;
+                current_fighter->unk4DF14--;
             }
             fighter_draw_shadow(i, 4096);
         }
         hud_draw_gauges(32);
-        hud_draw_round_wins((u32)pad_state.unk3C % 96, 32);
+        hud_draw_round_wins((u32)vs_pad_state.unk3C % 96, 32);
     }
-    round_draw_backdrop(DAT_80063324 == 2 || DAT_80063324 >= 16);
+    round_draw_backdrop(round_phase == 2 || round_phase >= 16);
     rot.vz = 0;
     rot.vy = 0;
     rot.vx = 0;
@@ -1171,11 +1171,11 @@ void round_draw_frame(void)
     scale.vx = 4;
     effects_draw();
     sparks_update();
-    DAT_80063224 = 2;
-    model_draw_part_at(DAT_80117708, 0, &rot, &rot, &scale);
-    DAT_80063224 = 4;
-    model_draw_part_at((u_long *)DAT_8015c528, 0, &rot, &rot, &scale);
-    DAT_80063224 = 3;
+    mesh_fixed_depth = 2;
+    model_draw_part_at(arena_model_0, 0, &rot, &rot, &scale);
+    mesh_fixed_depth = 4;
+    model_draw_part_at((u_long *)arena_model_1, 0, &rot, &rot, &scale);
+    mesh_fixed_depth = 3;
     mask = 0;
     if (vs_gfx_state.unk2CA78.vz > ARENA_EDGE)
         mask = 0x83;
@@ -1186,15 +1186,15 @@ void round_draw_frame(void)
     if (vs_gfx_state.unk2CA78.vx < -ARENA_EDGE)
         mask |= 0xe0;
     for (i = 0; i < 8; i++) {
-        DAT_80063350 = mask & (1 << i);
-        model_draw_part_at((u_long *)DAT_8015d8b0, 0, &rot, &pos, &scale);
+        mesh_semi_trans = mask & (1 << i);
+        model_draw_part_at((u_long *)arena_model_2, 0, &rot, &pos, &scale);
         pos.vy += 512;
     }
-    DAT_80063224 = 0;
+    mesh_fixed_depth = 0;
     DrawSync(0);
-    DAT_80063220 = VSync(0) / 256 + 1;
-    if (DAT_80063220 >= 6)
-        DAT_80063220 = 5;
+    frames_per_draw = VSync(0) / 256 + 1;
+    if (frames_per_draw >= 6)
+        frames_per_draw = 5;
     FntFlush(-1);
     PutDispEnv(&vs_gfx_state.disp[vs_gfx_state.frame]);
     PutDrawEnv(&vs_gfx_state.draw[vs_gfx_state.frame]);
@@ -1213,14 +1213,14 @@ void round_draw_frame(void)
 /* Frames each screen fades over. */
 #define FADE_FRAMES 20
 
-/* DAT_80063324: the round loop's screens (round_draw_frame draws them). */
+/* round_phase: the round loop's screens (round_draw_frame draws them). */
 #define SCREEN_FADE_IN 16
 #define SCREEN_SAVE_ASK 17
 #define SCREEN_RETRY_ASK 18
 #define SCREEN_FADE_OUT 19
 #define SCREEN_SAVE 20
 
-/* DAT_80063324: the round's phase. */
+/* round_phase: the round's phase. */
 #define PHASE_START 0
 #define PHASE_FIGHT 1
 #define PHASE_PAUSE 2
@@ -1248,13 +1248,13 @@ void round_play(void)
     int ko;
     int side;
 
-    DAT_80063354 = 100;
-    DAT_80063324 = PHASE_START;
+    camera_speed = 100;
+    round_phase = PHASE_START;
     DAT_80063364 = 0;
-    if (DAT_80063330[0] != -1 && DAT_80063334 != -1)
-        DAT_80063320 = 1;
+    if (requested_items[0] != -1 && requested_item_2p != -1)
+        both_items_requested = 1;
     else
-        DAT_80063320 = 0;
+        both_items_requested = 0;
     DAT_80063310 = 0;
     fighters_load_round();
     effects_clear();
@@ -1265,141 +1265,141 @@ void round_play(void)
     vs_gfx_state.unk2CA88.vx = 0;
     vs_gfx_state.unk2CA88.vy = 0;
     vs_gfx_state.unk2CA88.vz = 0;
-    if (DAT_80063338 == 0) {
+    if (round_index == 0) {
         gfx_setup_320x240();
         DrawSync(0);
     }
-    xa_cue_bgm(DAT_80063338);
+    xa_cue_bgm(round_index);
     for (;;) {
         camera_update();
-        if (DAT_80063324 == PHASE_PAUSE) {
+        if (round_phase == PHASE_PAUSE) {
             choice = 0;
-            DAT_8006336c = 0;
+            choice_slider = 0;
             for (;;) {
-                if ((pad_state.pads[0].unk8 | pad_state.pads[1].unk8) & 0x10)
+                if ((vs_pad_state.pads[0].unk8 | vs_pad_state.pads[1].unk8) & 0x10)
                     choice = 0;
-                if ((pad_state.pads[0].unk8 | pad_state.pads[1].unk8) & 0x40)
+                if ((vs_pad_state.pads[0].unk8 | vs_pad_state.pads[1].unk8) & 0x40)
                     choice = 1;
-                if ((pad_state.pads[0].unk8 | pad_state.pads[1].unk8) & 9) {
-                    DAT_80063364 += pad_state.unk3C;
-                    DAT_80063324 = PHASE_FIGHT;
-                    DAT_80063314 = pad_state.unk3C;
+                if ((vs_pad_state.pads[0].unk8 | vs_pad_state.pads[1].unk8) & 9) {
+                    DAT_80063364 += vs_pad_state.unk3C;
+                    round_phase = PHASE_FIGHT;
+                    screen_start_frame = vs_pad_state.unk3C;
                     while (!CdRead2(CdlModeSpeed | CdlModeRT | CdlModeSF))
                         ;
                     break;
                 }
-                if ((pad_state.pads[0].unk8 | pad_state.pads[1].unk8) & 0x4000) {
+                if ((vs_pad_state.pads[0].unk8 | vs_pad_state.pads[1].unk8) & 0x4000) {
                     if (choice == 0) {
-                        DAT_80063364 += pad_state.unk3C;
-                        DAT_80063324 = PHASE_FIGHT;
-                        DAT_80063314 = pad_state.unk3C;
+                        DAT_80063364 += vs_pad_state.unk3C;
+                        round_phase = PHASE_FIGHT;
+                        screen_start_frame = vs_pad_state.unk3C;
                         while (!CdRead2(CdlModeSpeed | CdlModeRT | CdlModeSF))
                             ;
                         break;
                     }
-                    DAT_80063338 = DAT_80063228;
-                    DAT_80063370[0] = 0;
-                    DAT_80063374 = 0;
+                    round_index = round_count;
+                    round_wins[0] = 0;
+                    round_wins_2p = 0;
                     return;
                 }
                 if (choice) {
-                    if (++DAT_8006336c > 10)
-                        DAT_8006336c = 10;
+                    if (++choice_slider > 10)
+                        choice_slider = 10;
                 } else {
-                    if (--DAT_8006336c < 0)
-                        DAT_8006336c = 0;
+                    if (--choice_slider < 0)
+                        choice_slider = 0;
                 }
-                pad_state.pads[0].unk8 = 0;
-                pad_state.pads[1].unk8 = 0;
+                vs_pad_state.pads[0].unk8 = 0;
+                vs_pad_state.pads[1].unk8 = 0;
                 round_draw_frame();
             }
-        } else if (DAT_80063324 == PHASE_FIGHT
-                   && ((pad_state.pads[0].unk8 | pad_state.pads[1].unk8) & 9)) {
+        } else if (round_phase == PHASE_FIGHT
+                   && ((vs_pad_state.pads[0].unk8 | vs_pad_state.pads[1].unk8) & 9)) {
             while (!CdControl(CdlPause, 0, 0))
                 ;
-            DAT_8006331c = 12;
-            DAT_80063324 = PHASE_PAUSE;
-            DAT_80063364 -= pad_state.unk3C;
-            DAT_80063314 = pad_state.unk3C;
+            fight_banner = 12;
+            round_phase = PHASE_PAUSE;
+            DAT_80063364 -= vs_pad_state.unk3C;
+            screen_start_frame = vs_pad_state.unk3C;
         }
-        if ((pad_state.pads[0].unk8 & 1) && (pad_state.pads[0].unk0 & 8))
-            pad_state.unk28 = 1 - pad_state.unk28;
-        if (pad_state.pads[0].unk0 & 1) {
-            if (++pad_state.unk2C >= 60)
+        if ((vs_pad_state.pads[0].unk8 & 1) && (vs_pad_state.pads[0].unk0 & 8))
+            vs_pad_state.unk28 = 1 - vs_pad_state.unk28;
+        if (vs_pad_state.pads[0].unk0 & 1) {
+            if (++vs_pad_state.unk2C >= 60)
                 debug_pan_display();
         } else {
-            pad_state.unk2C = 0;
+            vs_pad_state.unk2C = 0;
         }
-        if (DAT_80063324 == PHASE_FIGHT) {
-            if (DAT_80063364 <= pad_state.unk3C) {
-                DAT_80063324 = PHASE_TIME_UP;
-                DAT_80063314 = pad_state.unk3C;
+        if (round_phase == PHASE_FIGHT) {
+            if (DAT_80063364 <= vs_pad_state.unk3C) {
+                round_phase = PHASE_TIME_UP;
+                screen_start_frame = vs_pad_state.unk3C;
             } else {
-                if (DAT_800633b0.fighter[0].unk4DF08 == 0) {
-                    if (DAT_800633b0.fighter[1].unk4DF08 == 0) {
-                        DAT_80063324 = PHASE_DRAW;
-                        DAT_80063364 -= pad_state.unk3C;
-                        DAT_80063314 = pad_state.unk3C;
+                if (shared_buffer.fighter[0].unk4DF08 == 0) {
+                    if (shared_buffer.fighter[1].unk4DF08 == 0) {
+                        round_phase = PHASE_DRAW;
+                        DAT_80063364 -= vs_pad_state.unk3C;
+                        screen_start_frame = vs_pad_state.unk3C;
                     } else {
                         ko = 0;
                         side = 1;
-                        DAT_80063324 = PHASE_SECOND_WINS;
-                        DAT_80063364 -= pad_state.unk3C;
-                        DAT_80063314 = pad_state.unk3C;
+                        round_phase = PHASE_SECOND_WINS;
+                        DAT_80063364 -= vs_pad_state.unk3C;
+                        screen_start_frame = vs_pad_state.unk3C;
                         fighter_set_semi_trans(ko, side);
                     }
-                } else if (DAT_800633b0.fighter[1].unk4DF08 == 0) {
+                } else if (shared_buffer.fighter[1].unk4DF08 == 0) {
                     ko = 1;
                     side = 1;
-                    DAT_80063324 = PHASE_FIRST_WINS;
-                    DAT_80063364 -= pad_state.unk3C;
-                    DAT_80063314 = pad_state.unk3C;
+                    round_phase = PHASE_FIRST_WINS;
+                    DAT_80063364 -= vs_pad_state.unk3C;
+                    screen_start_frame = vs_pad_state.unk3C;
                     fighter_set_semi_trans(ko, side);
                 }
                 if (fighter_is_out_of_bounds(0)) {
-                    DAT_80063324 = PHASE_KO_FIRST;
-                    DAT_80063364 -= pad_state.unk3C;
-                    DAT_80063314 = pad_state.unk3C;
+                    round_phase = PHASE_KO_FIRST;
+                    DAT_80063364 -= vs_pad_state.unk3C;
+                    screen_start_frame = vs_pad_state.unk3C;
                 }
                 if (fighter_is_out_of_bounds(1)) {
-                    DAT_80063324 = PHASE_KO_SECOND;
-                    DAT_80063364 -= pad_state.unk3C;
-                    DAT_80063314 = pad_state.unk3C;
+                    round_phase = PHASE_KO_SECOND;
+                    DAT_80063364 -= vs_pad_state.unk3C;
+                    screen_start_frame = vs_pad_state.unk3C;
                 }
             }
-        } else if (DAT_80063324 == PHASE_DRAW || DAT_80063324 == PHASE_FIRST_WINS
-                   || DAT_80063324 == PHASE_SECOND_WINS) {
+        } else if (round_phase == PHASE_DRAW || round_phase == PHASE_FIRST_WINS
+                   || round_phase == PHASE_SECOND_WINS) {
             pad_clear_input();
-            if (pad_state.unk3C - DAT_80063314 > RESULT_FRAMES) {
-                if (DAT_80063324 == PHASE_FIRST_WINS)
-                    DAT_80063370[0]++;
-                else if (DAT_80063324 == PHASE_SECOND_WINS)
-                    DAT_80063374++;
-                DAT_80063338++;
+            if (vs_pad_state.unk3C - screen_start_frame > RESULT_FRAMES) {
+                if (round_phase == PHASE_FIRST_WINS)
+                    round_wins[0]++;
+                else if (round_phase == PHASE_SECOND_WINS)
+                    round_wins_2p++;
+                round_index++;
                 return;
             }
         }
         effects_run();
-        if (DAT_80063324 != PHASE_START && DAT_80063324 != PHASE_PAUSE) {
+        if (round_phase != PHASE_START && round_phase != PHASE_PAUSE) {
             fighter_update(DAT_80063364 & 1);
             fighter_update(1 - (DAT_80063364 & 1));
             fighters_push_apart();
         }
-        pad_state.pads[0].unk8 = 0;
-        pad_state.pads[1].unk8 = 0;
+        vs_pad_state.pads[0].unk8 = 0;
+        vs_pad_state.pads[1].unk8 = 0;
         round_draw_frame();
         fighters_play_anim_sounds();
         vs_gfx_state.unk831C[1] = 0;
         vs_gfx_state.unk8324 = 0;
-        if (pad_state.unk40 + 59 < pad_state.unk3C) {
+        if (vs_pad_state.unk40 + 59 < vs_pad_state.unk3C) {
             vs_gfx_state.unk2C971 = vs_gfx_state.unk2C970 * 60
-                                    / (pad_state.unk3C - pad_state.unk40);
+                                    / (vs_pad_state.unk3C - vs_pad_state.unk40);
             vs_gfx_state.unk2C970 = 0;
-            pad_state.unk40 = pad_state.unk3C;
+            vs_pad_state.unk40 = vs_pad_state.unk3C;
         }
-        if (pad_state.unk28 == 1) {
+        if (vs_pad_state.unk28 == 1) {
             FntPrint("frm      =%d\n", vs_gfx_state.unk2C971);
-            FntPrint("frm/draw =%d\n", DAT_80063220);
+            FntPrint("frm/draw =%d\n", frames_per_draw);
             FntPrint("calc_poly=%d\n", vs_gfx_state.unk831C[1]);
             FntPrint("draw_poly=%d\n", vs_gfx_state.unk8324);
         }
@@ -1422,33 +1422,33 @@ void match_load_resources(void)
     pos.y = 0;
     clut.x = 640;
     clut.y = 480;
-    p = DAT_80117708;
+    p = arena_model_0;
     cd_read_member(8, 2, p);
-    copy_words((u32 *)DAT_80196230[1].offsets, (u32 *)(p + 1), 0x1500);
+    copy_words((u32 *)vs_menu_messages[1].offsets, (u32 *)(p + 1), 0x1500);
     p = (u_long *)((u8 *)p + (p[0] + 4));
     tim_load_images_at(p + 1, (DVECTOR *)&pos, (DVECTOR *)&clut);
     DrawSync(0);
-    cd_read_member(5, 10, DAT_80117708);
-    tim_load_images_shifted(DAT_80117708, 0, 0);
+    cd_read_member(5, 10, arena_model_0);
+    tim_load_images_shifted(arena_model_0, 0, 0);
     DrawSync(0);
-    cd_read_member(5, 0, DAT_80117708);
-    model_fixup_face_indices((ModelFile *)DAT_80117708);
-    cd_read_member(5, 1, (u_long *)DAT_8015c528);
-    model_fixup_face_indices((ModelFile *)DAT_8015c528);
-    cd_read_member(5, 2, (u_long *)DAT_8015d8b0);
-    model_fixup_face_indices((ModelFile *)DAT_8015d8b0);
-    cd_read_member(5, 3, (u_long *)DAT_8015ec38);
-    model_fixup_face_indices((ModelFile *)DAT_8015ec38);
-    DAT_80063370[0] = 0;
-    DAT_80063374 = 0;
-    DAT_80063338 = 0;
+    cd_read_member(5, 0, arena_model_0);
+    model_fixup_face_indices((ModelFile *)arena_model_0);
+    cd_read_member(5, 1, (u_long *)arena_model_1);
+    model_fixup_face_indices((ModelFile *)arena_model_1);
+    cd_read_member(5, 2, (u_long *)arena_model_2);
+    model_fixup_face_indices((ModelFile *)arena_model_2);
+    cd_read_member(5, 3, (u_long *)guard_flash_model);
+    model_fixup_face_indices((ModelFile *)guard_flash_model);
+    round_wins[0] = 0;
+    round_wins_2p = 0;
+    round_index = 0;
 }
 
 /*
  * The end of a match: fades in, then asks whether to save (when a card is
  * ready; the winner side passed) or to retry, and repeats until the
  * player picks retry or the save is done. Left/right (0x10/0x40) move the
- * choice, 0x4000 confirms; the choice also slides DAT_8006336c (0..10).
+ * choice, 0x4000 confirms; the choice also slides choice_slider (0..10).
  */
 ADDRESS(0x800165f4, 0x248)
 void match_end_screen_run(void)
@@ -1461,45 +1461,45 @@ void match_end_screen_run(void)
     StartCARD();
     _bu_init();
     pad_clear_input();
-    DAT_80063324 = SCREEN_FADE_IN;
-    DAT_80063338--;
-    DAT_80063314 = pad_state.unk3C;
+    round_phase = SCREEN_FADE_IN;
+    round_index--;
+    screen_start_frame = vs_pad_state.unk3C;
     for (i = FADE_FRAMES - 1; i != -1; i--) {
         round_draw_frame();
         DrawSync(0);
     }
     for (;;) {
         if (card_check_saves_changed() == 0) {
-            DAT_80063324 = SCREEN_SAVE_ASK;
+            round_phase = SCREEN_SAVE_ASK;
         } else {
             choice = 0;
-            DAT_80063324 = SCREEN_RETRY_ASK;
-            DAT_8006336c = 0;
+            round_phase = SCREEN_RETRY_ASK;
+            choice_slider = 0;
         }
-        DAT_80063314 = pad_state.unk3C;
+        screen_start_frame = vs_pad_state.unk3C;
         for (i = FADE_FRAMES - 1; i != -1; i--) {
             round_draw_frame();
             DrawSync(0);
         }
-        if (DAT_80063324 == SCREEN_SAVE_ASK) {
-            if (match_award_requested_item(DAT_80063370[0] < DAT_80063374, asked) == 0) {
+        if (round_phase == SCREEN_SAVE_ASK) {
+            if (match_award_requested_item(round_wins[0] < round_wins_2p, asked) == 0) {
                 DrawSync(0);
                 return;
             }
             asked = 1;
             choice = 0;
-            DAT_80063324 = SCREEN_SAVE;
-            DAT_8006336c = 0;
-            DAT_80063314 = pad_state.unk3C;
+            round_phase = SCREEN_SAVE;
+            choice_slider = 0;
+            screen_start_frame = vs_pad_state.unk3C;
             for (i = FADE_FRAMES - 1; i != -1; i--) {
                 round_draw_frame();
                 DrawSync(0);
             }
         }
-        pad_state.pads[0].unk8 = 0;
-        pad_state.pads[1].unk8 = 0;
+        vs_pad_state.pads[0].unk8 = 0;
+        vs_pad_state.pads[1].unk8 = 0;
         for (;;) {
-            bits = pad_state.pads[0].unk8 | pad_state.pads[1].unk8;
+            bits = vs_pad_state.pads[0].unk8 | vs_pad_state.pads[1].unk8;
             if (bits & 0x10)
                 choice = 0;
             if (bits & 0x40)
@@ -1512,19 +1512,19 @@ void match_end_screen_run(void)
                 break;
             }
             if (choice) {
-                if (++DAT_8006336c > 10)
-                    DAT_8006336c = 10;
+                if (++choice_slider > 10)
+                    choice_slider = 10;
             } else {
-                if (--DAT_8006336c < 0)
-                    DAT_8006336c = 0;
+                if (--choice_slider < 0)
+                    choice_slider = 0;
             }
-            pad_state.pads[0].unk8 = 0;
-            pad_state.pads[1].unk8 = 0;
+            vs_pad_state.pads[0].unk8 = 0;
+            vs_pad_state.pads[1].unk8 = 0;
             round_draw_frame();
             DrawSync(0);
         }
-        DAT_80063324 = SCREEN_FADE_OUT;
-        DAT_80063314 = pad_state.unk3C;
+        round_phase = SCREEN_FADE_OUT;
+        screen_start_frame = vs_pad_state.unk3C;
         for (i = FADE_FRAMES - 1; i != -1; i--) {
             round_draw_frame();
             DrawSync(0);
@@ -1550,29 +1550,29 @@ int main(void)
     u_long *picture;
 
     ResetCallback();
-    heap = DAT_80011f40 + ((DAT_80011f48 - DAT_80011f40 + HEAP_ALIGN - 1) & ~(HEAP_ALIGN - 1));
-    DAT_80011f4c = heap;
+    heap = heap_align_base + ((heap_floor - heap_align_base + HEAP_ALIGN - 1) & ~(HEAP_ALIGN - 1));
+    heap_base = heap;
     InitHeap((unsigned long *)heap, HEAP_TOP - heap);
-    InitPAD((char *)&DAT_801961e0[0], 16, (char *)&DAT_801961e0[1], 16);
+    InitPAD((char *)&pad_buffers[0], 16, (char *)&pad_buffers[1], 16);
     StartPAD();
     while (CdInit() == 0)
         CdSync(0, result);
     CdSetDebug(0);
     InitCARD(1);
     ExitCriticalSection();
-    pad_state.unk44 = OpenEvent(RCntCNT3, EvSpINT, EvMdINTR, vsync_handler);
-    EnableEvent(pad_state.unk44);
+    vs_pad_state.unk44 = OpenEvent(RCntCNT3, EvSpINT, EvMdINTR, vsync_handler);
+    EnableEvent(vs_pad_state.unk44);
     SetRCnt(RCntCNT3, 60000, RCntMdINTR);
     StartRCnt(RCntCNT3);
-    pad_state.unk38 = OpenEvent(RCntCNT2, EvSpINT, EvMdINTR, rcnt2_handler);
-    EnableEvent(pad_state.unk38);
+    vs_pad_state.unk38 = OpenEvent(RCntCNT2, EvSpINT, EvMdINTR, rcnt2_handler);
+    EnableEvent(vs_pad_state.unk38);
     SetRCnt(RCntCNT2, 60000, RCntMdINTR);
     StartRCnt(RCntCNT2);
-    pad_state.unk28 = 0;
+    vs_pad_state.unk28 = 0;
     cd_init();
     gfx_init();
     {
-        u_long *loading_picture = (u_long *)&DAT_800633b0;
+        u_long *loading_picture = (u_long *)&shared_buffer;
 
         pos.vx = 0;
         pos.vy = 300;
@@ -1583,38 +1583,38 @@ int main(void)
     DrawSync(0);
     sound_init();
     cd_open_vs_archives();
-    cd_read_member(5, 4, DAT_80116580);
-    cd_read_member(5, 5, DAT_800ff580);
+    cd_read_member(5, 4, menu_vab_head);
+    cd_read_member(5, 5, menu_vab_body);
     load_menu_sound_bank();
-    cd_read_member(5, 20, (u_long *)DAT_80191d00.unk0118);
-    DAT_801624b8[0].slot[0] = -1;
-    DAT_801624b8[0].slot[1] = -1;
-    DAT_801624b8[0].slot[2] = -1;
-    DAT_801624b8[1].slot[0] = -1;
-    DAT_801624b8[1].slot[1] = -1;
-    DAT_801624b8[1].slot[2] = -1;
-    DAT_80063330[0] = -1;
-    DAT_80063334 = -1;
-    DAT_80063380 = 0;
-    DAT_80063381 = 0;
+    cd_read_member(5, 20, (u_long *)vis_table_c.unk0118);
+    teams[0].slot[0] = -1;
+    teams[0].slot[1] = -1;
+    teams[0].slot[2] = -1;
+    teams[1].slot[0] = -1;
+    teams[1].slot[1] = -1;
+    teams[1].slot[2] = -1;
+    requested_items[0] = -1;
+    requested_item_2p = -1;
+    save_loaded_1p = 0;
+    save_loaded_2p = 0;
     while (menu_vs_setup_run()) {
         match_load_resources();
         do {
             round_play();
             DrawSync(0);
-            SsVabClose(DAT_801604b0[0].vab);
-            SsVabClose(DAT_801604b0[1].vab);
-        } while (DAT_80063338 < DAT_80063228 && DAT_80063370[0] < 2 && DAT_80063374 < 2);
+            SsVabClose(sound_banks[0].vab);
+            SsVabClose(sound_banks[1].vab);
+        } while (round_index < round_count && round_wins[0] < 2 && round_wins_2p < 2);
         while (CdControl(CdlStop, 0, 0) == 0)
             ;
-        if (DAT_80063320 != 0 && DAT_80063370[0] != DAT_80063374) {
+        if (both_items_requested != 0 && round_wins[0] != round_wins_2p) {
             match_end_screen_run();
-            DAT_80063330[0] = -1;
-            DAT_80063334 = -1;
+            requested_items[0] = -1;
+            requested_item_2p = -1;
         }
     }
     DrawSync(0);
-    picture = (u_long *)&DAT_800633b0;
+    picture = (u_long *)&shared_buffer;
     pos2.vx = 0;
     pos2.vy = 60;
     memset(&clut2, 0, sizeof(clut2));
@@ -1630,7 +1630,7 @@ int main(void)
     PadStop();
     ResetGraph(3);
     EnterCriticalSection();
-    CloseEvent(pad_state.unk44);
+    CloseEvent(vs_pad_state.unk44);
     ExitCriticalSection();
     StopCallback();
 }

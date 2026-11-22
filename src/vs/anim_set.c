@@ -417,11 +417,11 @@ int anim_set_pose(StAnimSet **setp, int id, int clip, u_long frame)
  */
 /* The renderers' default NCCS colour (128, 128, 128). */
 SDATA(0x800632d0, 0x4)
-u_long DAT_800632d0 = 0x808080;
+u_long fighter_skeletal_rgb = 0x808080;
 
 /* The frame slot of the model list's every-nth parts. */
 DATA(0x800632d4, 0x4, ".sdata")
-static s32 DAT_800632d4 = 0;
+static s32 model_list_slot = 0;
 
 /* Projects the current part's vertices: RTPT in threes, the first group
  * ahead of the loop so each pass stores one group and starts the next, then
@@ -460,7 +460,7 @@ static s32 DAT_800632d4 = 0;
 /*
  * Draws each entry of the scratchpad's model list: kind 2 turns its parent
  * matrix to face the camera first, kinds 1, 3 and 4 draw scaled and only
- * on the entry whose index matches DAT_800632d4's slot (every 6th, 4th,
+ * on the entry whose index matches model_list_slot's slot (every 6th, 4th,
  * 8th), stepping it.
  */
 ADDRESS(0x80024b5c, 0x6a8)
@@ -487,9 +487,9 @@ void model_draw_list(void)
                 MATRIX face = {{{ONE, 0, 0}, {0, ONE, 0}, {0, 0, ONE}}, {0, 0, 0}};
                 SVECTOR angle;
 
-                angle.vx = -DAT_80063300->unk4DF00 + vs_gfx_state.unk2CA88.vx;
-                angle.vy = -DAT_80063300->unk4DF02 + vs_gfx_state.unk2CA88.vy;
-                angle.vz = -DAT_80063300->unk4DF04 + vs_gfx_state.unk2CA88.vz;
+                angle.vx = -current_fighter->unk4DF00 + vs_gfx_state.unk2CA88.vx;
+                angle.vy = -current_fighter->unk4DF02 + vs_gfx_state.unk2CA88.vy;
+                angle.vz = -current_fighter->unk4DF04 + vs_gfx_state.unk2CA88.vz;
                 RotMatrixX(angle.vx, &face);
                 RotMatrixY(angle.vy, &face);
                 RotMatrixZ(angle.vz, &face);
@@ -501,40 +501,40 @@ void model_draw_list(void)
             }
             anim_record_compose(e->obj);
             if (e->kind == 1) {
-                if (DAT_800632d4 >= 6)
-                    DAT_800632d4 = 0;
+                if (model_list_slot >= 6)
+                    model_list_slot = 0;
                 ScaleMatrix(&scale, &e->obj->unk44->scale);
                 gte_SetRotMatrix(&scale);
-                if (i % 6 != DAT_800632d4) {
+                if (i % 6 != model_list_slot) {
                     e++;
                     continue;
                 }
-                DAT_800632d4 = i % 6 + 1;
+                model_list_slot = i % 6 + 1;
             } else if (e->kind == 3) {
-                if (DAT_800632d4 >= 4)
-                    DAT_800632d4 = 0;
+                if (model_list_slot >= 4)
+                    model_list_slot = 0;
                 ScaleMatrix(&scale, &e->obj->unk44->scale);
                 gte_SetRotMatrix(&scale);
-                if (i % 4 != DAT_800632d4) {
+                if (i % 4 != model_list_slot) {
                     e++;
                     continue;
                 }
-                DAT_800632d4 = i % 4 + 1;
+                model_list_slot = i % 4 + 1;
             } else if (e->kind == 4) {
-                if (DAT_800632d4 >= 8)
-                    DAT_800632d4 = 0;
+                if (model_list_slot >= 8)
+                    model_list_slot = 0;
                 ScaleMatrix(&scale, &e->obj->unk44->scale);
                 gte_SetRotMatrix(&scale);
-                if (i % 8 != DAT_800632d4) {
+                if (i % 8 != model_list_slot) {
                     e++;
                     continue;
                 }
-                DAT_800632d4 = i % 8 + 1;
+                model_list_slot = i % 8 + 1;
             }
             sp->header = (MeshHeader *)(sp->model + 12) + e->part;
             sp->local_vertices = sp->model + 12 + sp->header->vertices;
             PROJECT(sp, out, in, n);
-            DAT_80063360 = 0;
+            mesh_mirror = 0;
             mesh_draw_part_nccs(e->part);
         }
         e++;
@@ -542,7 +542,7 @@ void model_draw_list(void)
 }
 
 /*
- * Draws the current fighter (DAT_80063300) unless it has no animation
+ * Draws the current fighter (current_fighter) unless it has no animation
  * frame: lights it, places it at its position turned by its rotation and
  * the camera, poses its model and draws it (dimmed by its brightness
  * below 128) with its object parts.
@@ -550,7 +550,7 @@ void model_draw_list(void)
 ADDRESS(0x80025204, 0x46c)
 void fighter_draw_skeletal(void)
 {
-    if (DAT_80063300->unk4DEEA != -1) {
+    if (current_fighter->unk4DEEA != -1) {
     VsScratchPad *sp = VS_SCRATCHPAD;
     VsLights lights = {
         {{3000, 3700, -1500}, {-2000, 3700, -3000}, {-1300, -1000, 1024}}, 0,
@@ -563,9 +563,9 @@ void fighter_draw_skeletal(void)
     int ry;
     int n;
 
-    rx = DAT_80063218 + DAT_80063300->unk4DF00;
-    ry = DAT_8006321c + DAT_80063300->unk4DF02;
-    ScaleMatrix(&m, &DAT_8005b2a8);
+    rx = light_rot_x + current_fighter->unk4DF00;
+    ry = light_rot_y + current_fighter->unk4DF02;
+    ScaleMatrix(&m, &light_scale);
     RotMatrixX(rx, &m);
     RotMatrixY(ry, &m);
     MulMatrix((MATRIX *)&lights.l, &m);
@@ -574,27 +574,27 @@ void fighter_draw_skeletal(void)
     sp->unk68 = lights.dq[0];
     sp->unk6C = lights.dq[1];
     gte_SetBackColor(lights.bk.r, lights.bk.g, lights.bk.b);
-    sp->matrix.t[0] = DAT_80063300->unk4DEF0.vx - vs_gfx_state.unk2CA78.vx;
-    sp->matrix.t[1] = DAT_80063300->unk4DEF0.vy - vs_gfx_state.unk2CA78.vy;
-    sp->matrix.t[2] = DAT_80063300->unk4DEF0.vz - vs_gfx_state.unk2CA78.vz;
-    RotMatrix((SVECTOR *)&DAT_80063300->unk4DF00, &sp->matrix);
+    sp->matrix.t[0] = current_fighter->unk4DEF0.vx - vs_gfx_state.unk2CA78.vx;
+    sp->matrix.t[1] = current_fighter->unk4DEF0.vy - vs_gfx_state.unk2CA78.vy;
+    sp->matrix.t[2] = current_fighter->unk4DEF0.vz - vs_gfx_state.unk2CA78.vz;
+    RotMatrix((SVECTOR *)&current_fighter->unk4DF00, &sp->matrix);
     CompMatrix(&vs_gfx_state.unk2C998, &sp->matrix, &sp->matrix);
-    n = DAT_80063300 - DAT_800633b0.fighter;
+    n = current_fighter - shared_buffer.fighter;
     sp->model = (u8 *)vs_gfx_state.unk834C[n] + ((ModelFile *)vs_gfx_state.unk834C[n])->unk8;
-    if (anim_set_pose(&DAT_80063300->unk4DEE0, n, DAT_80063300->unk4DEE8,
-                      DAT_80063300->unk4DEEA) == 0)
+    if (anim_set_pose(&current_fighter->unk4DEE0, n, current_fighter->unk4DEE8,
+                      current_fighter->unk4DEEA) == 0)
         return;
     sp->ot = vs_gfx_state.ot_cur;
     sp->far_z = 4096;
-    if (DAT_80063300->unk4DF12 < 128) {
-        sp->rgb.r = DAT_80063300->unk4DF12;
-        sp->rgb.g = DAT_80063300->unk4DF12;
-        sp->rgb.b = DAT_80063300->unk4DF12;
+    if (current_fighter->unk4DF12 < 128) {
+        sp->rgb.r = current_fighter->unk4DF12;
+        sp->rgb.g = current_fighter->unk4DF12;
+        sp->rgb.b = current_fighter->unk4DF12;
         sp->rgb.cd = 0;
-        DAT_80063350 = 1;
+        mesh_semi_trans = 1;
     } else {
-        *(u_long *)&sp->rgb = DAT_800632d0;
-        DAT_80063350 = 0;
+        *(u_long *)&sp->rgb = fighter_skeletal_rgb;
+        mesh_semi_trans = 0;
     }
     sp->face_count = vs_gfx_state.unk831C[1];
     sp->prim_count = vs_gfx_state.unk8324;
@@ -603,7 +603,7 @@ void fighter_draw_skeletal(void)
     sp->prim_end = vs_gfx_state.packet->end;
     sp->vertices = vs_gfx_state.unkA7EC;
     sp->clut_base = 0;
-    if (DAT_80063300->unk4DEEA != -1)
+    if (current_fighter->unk4DEEA != -1)
         model_draw_list();
     vs_gfx_state.packet->cur = sp->prim;
     vs_gfx_state.packet->end = sp->prim_end;
@@ -631,8 +631,8 @@ ADDRESS(0x800256bc, 0x1bc)
 void anim_set_node_vertex(int id, int node, int index, VECTOR *out)
 {
     MATRIX unused;
-    StAnimSet *set = DAT_800633b0.fighter[id].unk4DEE0;
-    StAnimFile *file = (StAnimFile *)DAT_800633b0.fighter[id].file;
+    StAnimSet *set = shared_buffer.fighter[id].unk4DEE0;
+    StAnimFile *file = (StAnimFile *)shared_buffer.fighter[id].file;
     MATRIX identity = {{{4096, 0, 0}, {0, 4096, 0}, {0, 0, 4096}}};
     StAnimNode *n;
     StAnimRecord *rec;

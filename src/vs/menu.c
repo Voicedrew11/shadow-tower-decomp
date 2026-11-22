@@ -12,18 +12,12 @@
 #include <kf/lib/types.h>
 #include <sys/types.h>
 
-/* Whether each player's memory card holds a usable save (the "record
- * loaded" bytes), read and set $gp-relative here; main reads them
- * absolutely. This module's small COMMON follows the first .sbss run. */
-DATA(0x80063380, 0x1, ".sbss")
-u8 DAT_80063380;
-DATA(0x80063381, 0x1, ".sbss")
-u8 DAT_80063381;
-
-/* Unreferenced (layout evidence only): the eight bytes before the next
- * module's .sbss statics (0x80063390). */
-DATA(0x80063388, 0x8, ".sbss")
-u8 DAT_80063388[8];
+/* Whether each player's memory card holds a usable save, read and set
+ * $gp-relative here (main reads them absolutely): these tentative
+ * definitions merge into vs.sbss_save_loaded's, which a first-linked
+ * object allocates at the end of the first .sbss run. */
+u8 save_loaded_1p;
+u8 save_loaded_2p;
 
 /* The setup, team and pick screens index both requested items. */
 #define VS_PICKED_PAIR
@@ -69,9 +63,9 @@ void pad_clear_input(void);
 void menu_vs_setup_draw(int page);
 
 /* The CD state's reusable menu-file buffer. */
-#define LOAD_BUFFER (DAT_801a4590.unk4A4)
+#define LOAD_BUFFER (vs_cd_state.unk4A4)
 
-#define PAD(n) (pad_state.pads[(n)])
+#define PAD(n) (vs_pad_state.pads[(n)])
 #define PRESSED (PAD(0).unk8 | PAD(1).unk8)
 #define REPEAT (PAD(0).unkC | PAD(1).unkC)
 
@@ -87,7 +81,7 @@ void menu_vs_setup_draw(int page);
 /* Likewise the team page and the save page of each player. */
 #define TEAM_PAGE(player)                       sp->unk1D5 = 1;                            menu_creature_select_run(player);                      sp->unk1CC = 0
 
-#define SAVE_PAGE(player)                                          if (DAT_801a0a80[0].unk0 == DAT_801a0a80[1].unk0) {                sp->unk1CC = 9;                                           } else if (item_request_any_available(player) == 0) {                           sp->unk1CC = 99;                                          } else {                                                           sp->unk1D5 = 1;                                               menu_item_request_run(player);                                         sp->unk1CC = 0;                                           }
+#define SAVE_PAGE(player)                                          if (saves[0].unk0 == saves[1].unk0) {                sp->unk1CC = 9;                                           } else if (item_request_any_available(player) == 0) {                           sp->unk1CC = 99;                                          } else {                                                           sp->unk1D5 = 1;                                               menu_item_request_run(player);                                         sp->unk1CC = 0;                                           }
 
 ADDRESS(0x80016f10, 0x98c)
 int menu_vs_setup_run(void)
@@ -118,13 +112,13 @@ int menu_vs_setup_run(void)
         u_long *message = LOAD_BUFFER;
 
         cd_read_member(8, 4, message);
-        copy_words((u32 *)&DAT_80196230[1], (u32 *)&message[1], 0x1500);
+        copy_words((u32 *)&vs_menu_messages[1], (u32 *)&message[1], 0x1500);
         message = (u_long *)((message[0] + sizeof(*message)) + (u8 *)message);
         tim_load_images_at(message + 1, &sp->unk1E0, &sp->unk1E4);
         DrawSync(0);
         message = LOAD_BUFFER;
         cd_read_member(8, 8, message);
-        copy_words((u32 *)&DAT_80196230[0], (u32 *)&message[1], 0x1500);
+        copy_words((u32 *)&vs_menu_messages[0], (u32 *)&message[1], 0x1500);
         message = (u_long *)((message[0] + sizeof(*message)) + (u8 *)message);
         tim_load_images_at(message + 1, &sp->unk1D8, &sp->unk1DC);
         DrawSync(0);
@@ -136,14 +130,14 @@ int menu_vs_setup_run(void)
     cd_read_member(8, 7, buf);
     tim_load_images_at(buf, &tex, &clut);
     DrawSync(0);
-    if (DAT_80063330[0] != -1) {
-        cd_read_member(11, DAT_80191d00.unk0118[DAT_80063330[0]].unk5[0], buf);
+    if (requested_items[0] != -1) {
+        cd_read_member(11, vis_table_c.unk0118[requested_items[0]].unk5[0], buf);
         tim_load_images_at(buf, &pos, NULL);
         DrawSync(0);
     }
     pos.vy += 28;
-    if (DAT_80063334 != -1) {
-        cd_read_member(11, DAT_80191d00.unk0118[DAT_80063334].unk5[0], buf);
+    if (requested_item_2p != -1) {
+        cd_read_member(11, vis_table_c.unk0118[requested_item_2p].unk5[0], buf);
         tim_load_images_at(buf, &pos, NULL);
         DrawSync(1);
     }
@@ -156,12 +150,12 @@ int menu_vs_setup_run(void)
             if (PRESSED & 0x4000) {
                 switch (sp->unk1CE) {
                 case 0:
-                    if (DAT_80063330[0] != -1) {
-                        if (DAT_80063334 != -1)
+                    if (requested_items[0] != -1) {
+                        if (requested_item_2p != -1)
                             goto start;
                         sp->unk1CC = 4;
                     } else {
-                        if (DAT_80063334 == -1)
+                        if (requested_item_2p == -1)
                             goto start;
                         sp->unk1CC = 3;
                     }
@@ -171,66 +165,66 @@ int menu_vs_setup_run(void)
                     sp->unk1CC = 1;
                     break;
                 case 1:
-                    if (!(pad_state.pads[0].unk8 & 0x4000))
+                    if (!(vs_pad_state.pads[0].unk8 & 0x4000))
                         goto buzz;
                     play_confirm_sound();
-                    pad_state.pads[0].unk8 = 0;
+                    vs_pad_state.pads[0].unk8 = 0;
                     CARD_PAGE(0);
                     break;
                 case 2:
-                    if (pad_state.pads[1].unk8 & 0x4000) {
+                    if (vs_pad_state.pads[1].unk8 & 0x4000) {
                         play_confirm_sound();
-                        pad_state.pads[1].unk8 = 0;
+                        vs_pad_state.pads[1].unk8 = 0;
                         CARD_PAGE(1);
                         break;
                     }
                     goto buzz;
                 case 3:
-                    if (!(pad_state.pads[0].unk8 & 0x4000) || !DAT_80063380)
+                    if (!(vs_pad_state.pads[0].unk8 & 0x4000) || !save_loaded_1p)
                         goto buzz;
                     play_confirm_sound();
-                    pad_state.pads[0].unk8 = 0;
+                    vs_pad_state.pads[0].unk8 = 0;
                     TEAM_PAGE(0);
                     break;
                 case 4:
-                    if ((pad_state.pads[1].unk8 & 0x4000) && DAT_80063381) {
+                    if ((vs_pad_state.pads[1].unk8 & 0x4000) && save_loaded_2p) {
                         play_confirm_sound();
-                        pad_state.pads[1].unk8 = 0;
+                        vs_pad_state.pads[1].unk8 = 0;
                         TEAM_PAGE(1);
                         break;
                     }
                     goto buzz;
                 case 5:
-                    if (!(pad_state.pads[0].unk8 & 0x4000) || !DAT_80063380 || !DAT_80063381)
+                    if (!(vs_pad_state.pads[0].unk8 & 0x4000) || !save_loaded_1p || !save_loaded_2p)
                         goto buzz;
                     play_confirm_sound();
-                    pad_state.pads[0].unk8 = 0;
+                    vs_pad_state.pads[0].unk8 = 0;
                     SAVE_PAGE(0);
                     break;
                 case 6:
-                    if (!(pad_state.pads[1].unk8 & 0x4000) || !DAT_80063380 || !DAT_80063381)
+                    if (!(vs_pad_state.pads[1].unk8 & 0x4000) || !save_loaded_1p || !save_loaded_2p)
                         goto buzz;
                     play_confirm_sound();
-                    pad_state.pads[1].unk8 = 0;
+                    vs_pad_state.pads[1].unk8 = 0;
                     SAVE_PAGE(1);
                     break;
                 buzz:
                     play_refuse_sound();
                     break;
                 }
-                pad_state.pads[0].unk8 = 0;
-                pad_state.pads[1].unk8 = 0;
+                vs_pad_state.pads[0].unk8 = 0;
+                vs_pad_state.pads[1].unk8 = 0;
             }
             if (REPEAT & 0x10) {
                 play_cursor_sound();
-                pad_state.pads[0].unkC = 0;
-                pad_state.pads[1].unkC = 0;
+                vs_pad_state.pads[0].unkC = 0;
+                vs_pad_state.pads[1].unkC = 0;
                 sp->unk1CE = (sp->unk1CE + 6) % 7;
             }
             if (REPEAT & 0x40) {
                 play_cursor_sound();
-                pad_state.pads[0].unkC = 0;
-                pad_state.pads[1].unkC = 0;
+                vs_pad_state.pads[0].unkC = 0;
+                vs_pad_state.pads[1].unkC = 0;
                 sp->unk1CE = (sp->unk1CE + 1) % 7;
             }
             if (PRESSED & 0x2000) {
@@ -239,12 +233,12 @@ int menu_vs_setup_run(void)
             }
             if (PRESSED & 8) {
                 sp->unk1CE = 0;
-                if (DAT_80063330[0] != -1) {
-                    if (DAT_80063334 != -1)
+                if (requested_items[0] != -1) {
+                    if (requested_item_2p != -1)
                         goto ready;
                     sp->unk1CC = 4;
                 } else {
-                    if (DAT_80063334 == -1)
+                    if (requested_item_2p == -1)
                         goto ready;
                     sp->unk1CC = 3;
                 }
@@ -260,14 +254,14 @@ int menu_vs_setup_run(void)
             }
         } else if (sp->unk1CC == 1) {
             if (PRESSED & 0x4000) {
-                if (DAT_80063228 == 1) {
-                    if (DAT_801624b8[0].slot[0] == -1 || DAT_801624b8[1].slot[0] == -1)
+                if (round_count == 1) {
+                    if (teams[0].slot[0] == -1 || teams[1].slot[0] == -1)
                         sp->unk1CC = 2;
-                } else if (DAT_801624b8[0].slot[2] == -1 || DAT_801624b8[1].slot[2] == -1) {
+                } else if (teams[0].slot[2] == -1 || teams[1].slot[2] == -1) {
                     sp->unk1CC = 2;
                 }
                 if (sp->unk1CC == 1) {
-                    if (DAT_80063330[0] != -1 && DAT_80063334 != -1) {
+                    if (requested_items[0] != -1 && requested_item_2p != -1) {
                         menu_vs_setup_draw(11);
                         menu_vs_setup_draw(11);
                         if (card_check_saves_changed()) {
@@ -288,14 +282,14 @@ int menu_vs_setup_run(void)
                 sp->unk1CC = 0;
             b = PRESSED;
             if (b & 0x20)
-                DAT_80063228 = 3;
+                round_count = 3;
             if (b & 0x80)
-                DAT_80063228 = 1;
+                round_count = 1;
         } else if (sp->unk1CC == 5 || sp->unk1CC == 6) {
             if (PRESSED & 0x4000) {
                 if (sp->unk1CC == 5) {
-                    pad_state.pads[0].unk8 = 0;
-                    pad_state.pads[1].unk8 = 0;
+                    vs_pad_state.pads[0].unk8 = 0;
+                    vs_pad_state.pads[1].unk8 = 0;
                     return 0;
                 }
                 sp->unk1CC = 0;
@@ -310,10 +304,10 @@ int menu_vs_setup_run(void)
             sp->unk1CC = 0;
         }
     next:
-        pad_state.pads[0].unk8 = 0;
-        pad_state.pads[1].unk8 = 0;
-        pad_state.pads[0].unkC = 0;
-        pad_state.pads[1].unkC = 0;
+        vs_pad_state.pads[0].unk8 = 0;
+        vs_pad_state.pads[1].unk8 = 0;
+        vs_pad_state.pads[0].unkC = 0;
+        vs_pad_state.pads[1].unkC = 0;
         menu_vs_setup_draw(sp->unk1CC);
         sp->unk1D4 = (sp->unk1D4 + 1) % 32;
     }
@@ -366,8 +360,8 @@ void lineup_screen_show(void)
     sp->unk0.team.pos[8].vy = 200;
     sp->unk0.team.pos[15].vx = 640;
     sp->unk0.team.pos[15].vy = 0;
-    DAT_801a4590.unk4A0 = DAT_801a4590.unk4A4;
-    buf = DAT_801a4590.unk4A0;
+    vs_cd_state.unk4A0 = vs_cd_state.unk4A4;
+    buf = vs_cd_state.unk4A0;
 
     for (n = 0, x = 320; n < 5; n++, x += 64) {
         cd_read_member(5, n + 31, buf);
@@ -376,7 +370,7 @@ void lineup_screen_show(void)
         tim_load_images_at(buf, &pos, NULL);
         DrawSync(0);
     }
-    id = DAT_801624b8[0].slot;
+    id = teams[0].slot;
     for (i = 0; i < 6; i++) {
         slot = *id++;
         if (slot == -1) {
@@ -386,25 +380,25 @@ void lineup_screen_show(void)
             r2.h = 48;
             ClearImage(&r2, 0, 0, 0);
         } else {
-            int size = cd_read_member(10, slot, DAT_801a4590.unk4A0) * 2048;
+            int size = cd_read_member(10, slot, vs_cd_state.unk4A0) * 2048;
 
-            tim_load_images_at(DAT_801a4590.unk4A0, &sp->unk0.team.pos[i], NULL);
-            DAT_801a4590.unk4A0 = (u_long *)((u8 *)DAT_801a4590.unk4A0 + size);
+            tim_load_images_at(vs_cd_state.unk4A0, &sp->unk0.team.pos[i], NULL);
+            vs_cd_state.unk4A0 = (u_long *)((u8 *)vs_cd_state.unk4A0 + size);
         }
     }
     for (i = 0; i < 2; i++) {
-        if (DAT_80063330[i] == -1) {
+        if (requested_items[i] == -1) {
             r.x = sp->unk0.team.pos[6 + i].vx;
             r.y = sp->unk0.team.pos[6 + i].vy;
             r.w = 56;
             r.h = 28;
             ClearImage(&r, 0, 0, 0);
         } else {
-            int size = cd_read_member(11, DAT_80191d00.unk0118[DAT_80063330[i]].unk5[0],
-                                     DAT_801a4590.unk4A0) * 2048;
+            int size = cd_read_member(11, vis_table_c.unk0118[requested_items[i]].unk5[0],
+                                     vs_cd_state.unk4A0) * 2048;
 
-            tim_load_images_at(DAT_801a4590.unk4A0, &sp->unk0.team.pos[6 + i], NULL);
-            DAT_801a4590.unk4A0 = (u_long *)((u8 *)DAT_801a4590.unk4A0 + size);
+            tim_load_images_at(vs_cd_state.unk4A0, &sp->unk0.team.pos[6 + i], NULL);
+            vs_cd_state.unk4A0 = (u_long *)((u8 *)vs_cd_state.unk4A0 + size);
         }
     }
     r.x = sp->unk0.team.pos[8].vx;
@@ -467,9 +461,9 @@ void menu_creature_select_pick_up_slot(VsMenuScratch *sp, int player, VsTeamEdit
     r.h = 48;
     MoveImage2(&r, 832, 96);
     DrawSync(0);
-    edit->team.slot[0] = DAT_801624b8[player].slot[0];
-    edit->team.slot[1] = DAT_801624b8[player].slot[1];
-    edit->team.slot[2] = DAT_801624b8[player].slot[2];
+    edit->team.slot[0] = teams[player].slot[0];
+    edit->team.slot[1] = teams[player].slot[1];
+    edit->team.slot[2] = teams[player].slot[2];
 }
 
 /* Stores the edit record as `player`'s team with the picked slot and the
@@ -482,11 +476,11 @@ void menu_creature_select_swap_slots(VsMenuScratch *sp, int player, VsTeamEdit *
     int cursor = ~sp->unk1D0;
     int dest_x, dest_y;
 
-    DAT_801624b8[player].slot[0] = edit->team.slot[0];
-    DAT_801624b8[player].slot[1] = edit->team.slot[1];
-    DAT_801624b8[player].slot[2] = edit->team.slot[2];
-    DAT_801624b8[player].slot[picked] = edit->team.slot[cursor];
-    DAT_801624b8[player].slot[cursor] = edit->team.slot[picked];
+    teams[player].slot[0] = edit->team.slot[0];
+    teams[player].slot[1] = edit->team.slot[1];
+    teams[player].slot[2] = edit->team.slot[2];
+    teams[player].slot[picked] = edit->team.slot[cursor];
+    teams[player].slot[cursor] = edit->team.slot[picked];
     r.x = 832;
     r.y = 0;
     r.w = 96;
@@ -541,11 +535,11 @@ void menu_creature_select_remove_slot(VsMenuScratch *sp, int player, VsTeamEdit 
 {
     RECT r;
 
-    DAT_801624b8[player].slot[0] = edit->team.slot[0];
-    DAT_801624b8[player].slot[1] = edit->team.slot[1];
-    DAT_801624b8[player].slot[2] = edit->team.slot[2];
-    DAT_801624b8[player].slot[edit->unk4] = -1;
-    if (DAT_801624b8[player].slot[0] == -1) {
+    teams[player].slot[0] = edit->team.slot[0];
+    teams[player].slot[1] = edit->team.slot[1];
+    teams[player].slot[2] = edit->team.slot[2];
+    teams[player].slot[edit->unk4] = -1;
+    if (teams[player].slot[0] == -1) {
         r.x = 832;
         r.y = 48;
         r.w = 96;
@@ -558,9 +552,9 @@ void menu_creature_select_remove_slot(VsMenuScratch *sp, int player, VsTeamEdit 
         r.h = 48;
         MoveImage2(&r, sp->unk0.team.pos[13].vx, sp->unk0.team.pos[13].vy);
         DrawSync(0);
-        DAT_801624b8[player].slot[0] = DAT_801624b8[player].slot[1];
-        DAT_801624b8[player].slot[1] = DAT_801624b8[player].slot[2];
-    } else if (DAT_801624b8[player].slot[1] == -1) {
+        teams[player].slot[0] = teams[player].slot[1];
+        teams[player].slot[1] = teams[player].slot[2];
+    } else if (teams[player].slot[1] == -1) {
         r.x = 832;
         r.y = 0;
         r.w = 96;
@@ -573,9 +567,9 @@ void menu_creature_select_remove_slot(VsMenuScratch *sp, int player, VsTeamEdit 
         r.h = 48;
         MoveImage2(&r, sp->unk0.team.pos[13].vx, sp->unk0.team.pos[13].vy);
         DrawSync(0);
-        DAT_801624b8[player].slot[0] = DAT_801624b8[player].slot[0];
-        DAT_801624b8[player].slot[1] = DAT_801624b8[player].slot[2];
-    } else if (DAT_801624b8[player].slot[2] == -1) {
+        teams[player].slot[0] = teams[player].slot[0];
+        teams[player].slot[1] = teams[player].slot[2];
+    } else if (teams[player].slot[2] == -1) {
         r.x = 832;
         r.y = 0;
         r.w = 96;
@@ -588,8 +582,8 @@ void menu_creature_select_remove_slot(VsMenuScratch *sp, int player, VsTeamEdit 
         r.h = 48;
         MoveImage2(&r, sp->unk0.team.pos[13].vx, sp->unk0.team.pos[13].vy);
         DrawSync(0);
-        DAT_801624b8[player].slot[0] = DAT_801624b8[player].slot[0];
-        DAT_801624b8[player].slot[1] = DAT_801624b8[player].slot[1];
+        teams[player].slot[0] = teams[player].slot[0];
+        teams[player].slot[1] = teams[player].slot[1];
     }
     r.x = sp->unk0.team.pos[14].vx;
     r.y = sp->unk0.team.pos[14].vy;
@@ -597,7 +591,7 @@ void menu_creature_select_remove_slot(VsMenuScratch *sp, int player, VsTeamEdit 
     r.h = 48;
     ClearImage2(&r, 0, 0, 0);
     DrawSync(0);
-    DAT_801624b8[player].slot[2] = -1;
+    teams[player].slot[2] = -1;
 }
 
 /*
@@ -653,10 +647,10 @@ void menu_creature_select_draw(int page);
 
 /* The detail page toggle: the attribute figures when nonzero (bss, unowned). */
 
-#define HELD (pad_state.pads[0].unk0 | pad_state.pads[1].unk0)
+#define HELD (vs_pad_state.pads[0].unk0 | vs_pad_state.pads[1].unk0)
 
 /* The team being edited: the three ids of `player`. */
-#define TEAM (DAT_801624b8[player].slot)
+#define TEAM (teams[player].slot)
 
 ADDRESS(0x800182ec, 0x998)
 void menu_creature_select_loop(VsMenuScratch *sp, int player)
@@ -680,13 +674,13 @@ void menu_creature_select_loop(VsMenuScratch *sp, int player)
     edit.unk0 = 0;
     for (;;) {
         if (player) {
-            pad_state.pads[0].unk8 = 0;
-            pad_state.pads[0].unkC = 0;
-            pad_state.pads[0].unk0 = 0;
+            vs_pad_state.pads[0].unk8 = 0;
+            vs_pad_state.pads[0].unkC = 0;
+            vs_pad_state.pads[0].unk0 = 0;
         } else {
-            pad_state.pads[1].unk8 = 0;
-            pad_state.pads[1].unkC = 0;
-            pad_state.pads[1].unk0 = 0;
+            vs_pad_state.pads[1].unk8 = 0;
+            vs_pad_state.pads[1].unkC = 0;
+            vs_pad_state.pads[1].unk0 = 0;
         }
         top = sp->unk1D2;
         if (sp->unk1CC == 1) {
@@ -864,7 +858,7 @@ void menu_creature_select_loop(VsMenuScratch *sp, int player)
                 }
                 if (idx < sp->unk0.team.count && idx != -1) {
                     if (idx != shown) {
-                        buf = DAT_801a4590.unk4A4;
+                        buf = vs_cd_state.unk4A4;
                         cd_read_member(10, sp->unk0.team.kinds[idx] + 200, buf);
                         shown = idx;
                         tim_load_images_at(&buf[1], &sp->unk0.team.pos[15], NULL);
@@ -888,13 +882,13 @@ void menu_creature_select_loop(VsMenuScratch *sp, int player)
                     n = (top - sp->unk1D2) * 4;
                     slot = sp->unk1D2 * 4;
                 }
-                DAT_801a4590.unk4A0 = DAT_801a4590.unk4A4;
+                vs_cd_state.unk4A0 = vs_cd_state.unk4A4;
                 for (j = 0; j < n; j++, slot++) {
                     if (slot < sp->unk0.team.count) {
                         size = cd_read_member(10, sp->unk0.team.kinds[slot],
-                                             DAT_801a4590.unk4A0) * 2048;
-                        tim_load_images_at(DAT_801a4590.unk4A0, &sp->unk0.team.pos[slot % 12], NULL);
-                        DAT_801a4590.unk4A0 = (u_long *)((u8 *)DAT_801a4590.unk4A0 + size);
+                                             vs_cd_state.unk4A0) * 2048;
+                        tim_load_images_at(vs_cd_state.unk4A0, &sp->unk0.team.pos[slot % 12], NULL);
+                        vs_cd_state.unk4A0 = (u_long *)((u8 *)vs_cd_state.unk4A0 + size);
                     }
                 }
                 DrawSync(0);
@@ -907,10 +901,10 @@ void menu_creature_select_loop(VsMenuScratch *sp, int player)
         } else if (PRESSED & 0x400) {
             DAT_8006335c = 0;
         }
-        pad_state.pads[0].unk8 = 0;
-        pad_state.pads[1].unk8 = 0;
-        pad_state.pads[0].unkC = 0;
-        pad_state.pads[1].unkC = 0;
+        vs_pad_state.pads[0].unk8 = 0;
+        vs_pad_state.pads[1].unk8 = 0;
+        vs_pad_state.pads[0].unkC = 0;
+        vs_pad_state.pads[1].unkC = 0;
         menu_creature_select_draw(player);
         sp->unk1D4 = (sp->unk1D4 + 1) % 32;
     }
@@ -982,7 +976,7 @@ void menu_creature_select_run(int player)
     sp->unk0.team.count = 0;
     for (i = 0; i < 151; i++)
         sp->unk0.team.kinds[i] = 0xff;
-    owned = DAT_801a0a80[player].unk18BC.unk0;
+    owned = saves[player].unk18BC.unk0;
     for (i = 0; i < 151; i++) {
         mask = 1;
         word = owned[i / 32];
@@ -1004,38 +998,38 @@ void menu_creature_select_run(int player)
     }
     sp->unk0.team.items = mem_alloc_main_ram(0x2000);
     cd_read_member(10, 400, (u_long *)sp->unk0.team.items);
-    buf = DAT_801a4590.unk4A4;
+    buf = vs_cd_state.unk4A4;
     cd_read_member(8, 2, buf);
-    copy_words((u32 *)&DAT_80196230[1], (u32 *)&buf[1], 0x1500);
+    copy_words((u32 *)&vs_menu_messages[1], (u32 *)&buf[1], 0x1500);
     buf = (u_long *)((buf[0] + sizeof(*buf)) + (u8 *)buf);
     tim_load_images_at(buf + 1, &sp->unk1E0, &sp->unk1E4);
     DrawSync(0);
-    buf = DAT_801a4590.unk4A4;
+    buf = vs_cd_state.unk4A4;
     cd_read_member(8, 1, buf);
-    copy_words((u32 *)&DAT_80196230[0], (u32 *)&buf[1], 0x1500);
+    copy_words((u32 *)&vs_menu_messages[0], (u32 *)&buf[1], 0x1500);
     buf = (u_long *)((buf[0] + sizeof(*buf)) + (u8 *)buf);
     tim_load_images_at(buf + 1, &sp->unk1D8, &sp->unk1DC);
     DrawSync(0);
-    cd_read_member(8, 7, DAT_801a4590.unk4A4);
-    tim_load_images_at(DAT_801a4590.unk4A4, &tex, &clut);
+    cd_read_member(8, 7, vs_cd_state.unk4A4);
+    tim_load_images_at(vs_cd_state.unk4A4, &tex, &clut);
     DrawSync(0);
-    DAT_801a4590.unk4A0 = DAT_801a4590.unk4A4;
+    vs_cd_state.unk4A0 = vs_cd_state.unk4A4;
     n = 12;
     if (sp->unk0.team.count < 13)
         n = sp->unk0.team.count;
     for (i = 0; i < n; i++) {
-        size = cd_read_member(10, sp->unk0.team.kinds[i], DAT_801a4590.unk4A0) * 2048;
-        tim_load_images_at(DAT_801a4590.unk4A0, &sp->unk0.team.pos[i], NULL);
-        DAT_801a4590.unk4A0 = (u_long *)((u8 *)DAT_801a4590.unk4A0 + size);
+        size = cd_read_member(10, sp->unk0.team.kinds[i], vs_cd_state.unk4A0) * 2048;
+        tim_load_images_at(vs_cd_state.unk4A0, &sp->unk0.team.pos[i], NULL);
+        vs_cd_state.unk4A0 = (u_long *)((u8 *)vs_cd_state.unk4A0 + size);
     }
     if (DrawSync(1) > 8)
         DrawSync(0);
-    DAT_801a4590.unk4A0 = DAT_801a4590.unk4A4;
+    vs_cd_state.unk4A0 = vs_cd_state.unk4A4;
     for (i = 0; i < 3; i++) {
-        if (DAT_801624b8[player].slot[i] != -1) {
-            size = cd_read_member(10, DAT_801624b8[player].slot[i], DAT_801a4590.unk4A0) * 2048;
-            tim_load_images_at(DAT_801a4590.unk4A0, &sp->unk0.team.pos[12 + i], NULL);
-            DAT_801a4590.unk4A0 = (u_long *)((u8 *)DAT_801a4590.unk4A0 + size);
+        if (teams[player].slot[i] != -1) {
+            size = cd_read_member(10, teams[player].slot[i], vs_cd_state.unk4A0) * 2048;
+            tim_load_images_at(vs_cd_state.unk4A0, &sp->unk0.team.pos[12 + i], NULL);
+            vs_cd_state.unk4A0 = (u_long *)((u8 *)vs_cd_state.unk4A0 + size);
         }
     }
     clear_vram();
@@ -1048,28 +1042,28 @@ void menu_creature_select_run(int player)
     free(sp->unk0.team.items);
     pos.vx = 640;
     pos.vy = 124;
-    DAT_801a4590.unk4A0 = buf = DAT_801a4590.unk4A4;
+    vs_cd_state.unk4A0 = buf = vs_cd_state.unk4A4;
     cd_read_member(8, 4, buf);
-    copy_words((u32 *)&DAT_80196230[1], (u32 *)&buf[1], 0x1500);
-    tim = (u_long *)((u8 *)buf + DAT_801a4590.unk4A4[0]);
+    copy_words((u32 *)&vs_menu_messages[1], (u32 *)&buf[1], 0x1500);
+    tim = (u_long *)((u8 *)buf + vs_cd_state.unk4A4[0]);
     tim_load_images_at(tim + 2, &sp->unk1E0, &sp->unk1E4);
     DrawSync(0);
     cd_read_member(8, 8, buf);
-    copy_words((u32 *)&DAT_80196230[0], (u32 *)&buf[1], 0x1500);
-    tim = (u_long *)((u8 *)buf + DAT_801a4590.unk4A4[0]);
+    copy_words((u32 *)&vs_menu_messages[0], (u32 *)&buf[1], 0x1500);
+    tim = (u_long *)((u8 *)buf + vs_cd_state.unk4A4[0]);
     tim_load_images_at(tim + 2, &sp->unk1D8, &sp->unk1DC);
     DrawSync(0);
     cd_read_member(8, 7, buf);
     tim_load_images_at(buf, &tex, &clut);
     DrawSync(0);
-    if (DAT_80063330[0] != -1) {
-        cd_read_member(11, DAT_80191d00.unk0118[DAT_80063330[0]].unk5[0], buf);
+    if (requested_items[0] != -1) {
+        cd_read_member(11, vis_table_c.unk0118[requested_items[0]].unk5[0], buf);
         tim_load_images_at(buf, &pos, NULL);
         DrawSync(0);
     }
     pos.vy += 28;
-    if (DAT_80063334 != -1) {
-        cd_read_member(11, DAT_80191d00.unk0118[DAT_80063334].unk5[0], buf);
+    if (requested_item_2p != -1) {
+        cd_read_member(11, vis_table_c.unk0118[requested_item_2p].unk5[0], buf);
         tim_load_images_at(buf, &pos, NULL);
         DrawSync(1);
     }
@@ -1089,8 +1083,8 @@ ADDRESS(0x800193e8, 0x224)
 int item_request_any_available(int player)
 {
     int found = 0;
-    VsSaveSub *mine = &DAT_801a0a80[player].unk18BC;
-    VsSaveSub *other = &DAT_801a0a80[~player & 1].unk18BC;
+    VsSaveSub *mine = &saves[player].unk18BC;
+    VsSaveSub *other = &saves[~player & 1].unk18BC;
     int i;
 
     for (i = 0; i < 266; i++) {
@@ -1100,7 +1094,7 @@ int item_request_any_available(int player)
         if (mine->unk150[i] != 0 || other->unk150[i] == 0)
             continue;
         mask = 1;
-        word = DAT_801a0a80[player].unk14CC[i / 32];
+        word = saves[player].unk14CC[i / 32];
         mask <<= i % 32;
         if (word & mask) {
             if (mine->unk14[i] == 0)
@@ -1123,7 +1117,7 @@ int item_request_any_available(int player)
  * The item request list (ITEM SELECT): lists the item ids `player` may
  * request from the opponent's save, lets the player scroll it (showing the
  * icon of the item under the cursor) and stores the requested item in
- * DAT_80063330[player].
+ * requested_items[player].
  */
 
 int cd_read_member(int archive, int member, u_long *buf);
@@ -1165,8 +1159,8 @@ void menu_item_request_run(int player)
     if (IDS == NULL)
         exit(1);
     memset((u8 *)IDS, 0xff, 0x276);
-    mine = &DAT_801a0a80[player].unk18BC;
-    other = &DAT_801a0a80[~player & 1].unk18BC;
+    mine = &saves[player].unk18BC;
+    other = &saves[~player & 1].unk18BC;
     COUNT = 1;
     IDS[0] = -2;
     for (i = 0; i < 266; i++) {
@@ -1176,7 +1170,7 @@ void menu_item_request_run(int player)
         if (mine->unk150[i] != 0 || other->unk150[i] == 0)
             continue;
         mask = 1;
-        word = DAT_801a0a80[player].unk14CC[i / 32];
+        word = saves[player].unk14CC[i / 32];
         mask <<= i % 32;
         if ((word & mask) && mine->unk14[i] == 0)
             continue;
@@ -1193,10 +1187,10 @@ void menu_item_request_run(int player)
     sp->unk1CC = 2;
     sp->unk1D0 = 0;
     TOP = 0;
-    if (DAT_80063330[player] != -1) {
+    if (requested_items[player] != -1) {
         /* The count is never stepped: the search ends only by its match. */
         for (j = 0; COUNT != 0; j++) {
-            if (DAT_80063330[player] == IDS[j])
+            if (requested_items[player] == IDS[j])
                 break;
         }
         if (COUNT < 12 || j < 6) {
@@ -1214,13 +1208,13 @@ void menu_item_request_run(int player)
     DrawSync(0);
     for (;;) {
         if (player) {
-            pad_state.pads[0].unk8 = 0;
-            pad_state.pads[0].unkC = 0;
-            pad_state.pads[0].unk0 = 0;
+            vs_pad_state.pads[0].unk8 = 0;
+            vs_pad_state.pads[0].unkC = 0;
+            vs_pad_state.pads[0].unk0 = 0;
         } else {
-            pad_state.pads[1].unk8 = 0;
-            pad_state.pads[1].unkC = 0;
-            pad_state.pads[1].unk0 = 0;
+            vs_pad_state.pads[1].unk8 = 0;
+            vs_pad_state.pads[1].unkC = 0;
+            vs_pad_state.pads[1].unk0 = 0;
         }
         if (PRESSED & 0x2000) {
             play_cancel_sound();
@@ -1239,7 +1233,7 @@ void menu_item_request_run(int player)
 
                 if (chosen == -2)
                     chosen = -1;
-                DAT_80063330[player] = chosen;
+                requested_items[player] = chosen;
                 while ((s16)cd_queue_busy() != 0)
                     ;
                 break;
@@ -1250,7 +1244,7 @@ void menu_item_request_run(int player)
         if (!(sp->unk1CC & 0x8000)) {
             if (REPEAT & 0x10) {
                 play_cursor_sound();
-                if (pad_state.pads[0].unk0 & 0x8000) {
+                if (vs_pad_state.pads[0].unk0 & 0x8000) {
                     if (COUNT < 11) {
                         sp->unk1D0 = 0;
                     } else {
@@ -1269,11 +1263,11 @@ void menu_item_request_run(int player)
                     TOP = 0;
                     sp->unk1D0 = 0;
                 }
-                pad_state.pads[0].unkC = 0;
+                vs_pad_state.pads[0].unkC = 0;
             }
             if (REPEAT & 0x40) {
                 play_cursor_sound();
-                if ((pad_state.pads[0].unk0 | pad_state.pads[1].unk0) & 0x8000) {
+                if ((vs_pad_state.pads[0].unk0 | vs_pad_state.pads[1].unk0) & 0x8000) {
                     if (COUNT >= 11) {
                         TOP += 11;
                         if (TOP > COUNT - 11) {
@@ -1323,30 +1317,30 @@ void menu_item_request_run(int player)
             if (sp->unk1CC == 2 && (s16)cd_queue_busy() == 0) {
                 id = IDS[TOP + sp->unk1D0];
                 if (shown != id && id != -1 && id != -2) {
-                    tim_load_member_async(11, DAT_80191d00.unk0118[id].unk5[0] + 200, 640, 0);
+                    tim_load_member_async(11, vis_table_c.unk0118[id].unk5[0] + 200, 640, 0);
                     shown = id;
                 }
             }
         }
-        pad_state.pads[0].unk8 = 0;
-        pad_state.pads[1].unk8 = 0;
-        pad_state.pads[0].unkC = 0;
-        pad_state.pads[1].unkC = 0;
+        vs_pad_state.pads[0].unk8 = 0;
+        vs_pad_state.pads[1].unk8 = 0;
+        vs_pad_state.pads[0].unkC = 0;
+        vs_pad_state.pads[1].unkC = 0;
         menu_item_request_draw(player);
         sp->unk1D4 = (sp->unk1D4 + 1) % 32;
     }
     free(IDS);
     pos.vx = 640;
     pos.vy = 124;
-    if (DAT_80063330[0] != -1) {
-        cd_read_member(11, DAT_80191d00.unk0118[DAT_80063330[0]].unk5[0], DAT_801a4590.unk4A4);
-        tim_load_images_at(DAT_801a4590.unk4A4, &pos, NULL);
+    if (requested_items[0] != -1) {
+        cd_read_member(11, vis_table_c.unk0118[requested_items[0]].unk5[0], vs_cd_state.unk4A4);
+        tim_load_images_at(vs_cd_state.unk4A4, &pos, NULL);
         DrawSync(0);
     }
     pos.vy += 28;
-    if (DAT_80063334 != -1) {
-        cd_read_member(11, DAT_80191d00.unk0118[DAT_80063334].unk5[0], DAT_801a4590.unk4A4);
-        tim_load_images_at(DAT_801a4590.unk4A4, &pos, NULL);
+    if (requested_item_2p != -1) {
+        cd_read_member(11, vis_table_c.unk0118[requested_item_2p].unk5[0], vs_cd_state.unk4A4);
+        tim_load_images_at(vs_cd_state.unk4A4, &pos, NULL);
         DrawSync(1);
     }
 }
@@ -1497,7 +1491,7 @@ void card_check_player_save(int port)
     strcpy(path, "bu");
     strcat(path, itoa(port));
     strcat(path, "0:");
-    strcat(path, DAT_801a0a30[port]);
+    strcat(path, save_file_names[port]);
     fd = open(path, O_RDONLY);
     if (fd == -1) {
         sp->unk1B8->status = 4;
@@ -1506,7 +1500,7 @@ void card_check_player_save(int port)
     lseek(fd, 512, SEEK_SET);
     read(fd, buf, 128);
     close(fd);
-    if (DAT_801a0a80[port].unk0 != buf[0])
+    if (saves[port].unk0 != buf[0])
         sp->unk1B8->status = 4;
     else
         sp->unk1B8->status = 0;
@@ -1646,15 +1640,15 @@ s16 card_ask_yes_no(int first)
     sp->unk1C6 = 0;
     for (;;) {
         if (first) {
-            pad_state.pads[0].unk8 = 0;
-            pad_state.pads[0].unkC = 0;
-            pad_state.pads[0].unk0 = 0;
+            vs_pad_state.pads[0].unk8 = 0;
+            vs_pad_state.pads[0].unkC = 0;
+            vs_pad_state.pads[0].unk0 = 0;
         } else {
-            pad_state.pads[1].unk8 = 0;
-            pad_state.pads[1].unkC = 0;
-            pad_state.pads[1].unk0 = 0;
+            vs_pad_state.pads[1].unk8 = 0;
+            vs_pad_state.pads[1].unkC = 0;
+            vs_pad_state.pads[1].unk0 = 0;
         }
-        buttons = pad_state.pads[0].unk8 | pad_state.pads[1].unk8;
+        buttons = vs_pad_state.pads[0].unk8 | vs_pad_state.pads[1].unk8;
         if (buttons & 0x4000) {
             play_confirm_sound();
             break;
@@ -1668,12 +1662,12 @@ s16 card_ask_yes_no(int first)
             play_cursor_sound();
             sp->unk1C6 = 1;
         }
-        if ((pad_state.pads[0].unk8 | pad_state.pads[1].unk8) & 0x20) {
+        if ((vs_pad_state.pads[0].unk8 | vs_pad_state.pads[1].unk8) & 0x20) {
             play_cursor_sound();
             sp->unk1C6 = 0;
         }
-        pad_state.pads[0].unk8 = 0;
-        pad_state.pads[1].unk8 = 0;
+        vs_pad_state.pads[0].unk8 = 0;
+        vs_pad_state.pads[1].unk8 = 0;
         card_screen_draw();
     }
     return sp->unk1C6;
@@ -1689,15 +1683,15 @@ int card_choose_port(int first)
     sp->unk1D4 = 0;
     for (;;) {
         if (first) {
-            pad_state.pads[0].unk8 = 0;
-            pad_state.pads[0].unkC = 0;
-            pad_state.pads[0].unk0 = 0;
+            vs_pad_state.pads[0].unk8 = 0;
+            vs_pad_state.pads[0].unkC = 0;
+            vs_pad_state.pads[0].unk0 = 0;
         } else {
-            pad_state.pads[1].unk8 = 0;
-            pad_state.pads[1].unkC = 0;
-            pad_state.pads[1].unk0 = 0;
+            vs_pad_state.pads[1].unk8 = 0;
+            vs_pad_state.pads[1].unkC = 0;
+            vs_pad_state.pads[1].unk0 = 0;
         }
-        buttons = pad_state.pads[0].unk8 | pad_state.pads[1].unk8;
+        buttons = vs_pad_state.pads[0].unk8 | vs_pad_state.pads[1].unk8;
         if (buttons & 0x4000) {
             play_confirm_sound();
             sp->unk1CC <<= 1;
@@ -1708,18 +1702,18 @@ int card_choose_port(int first)
             sp->unk1CC = 0;
             break;
         }
-        if ((pad_state.pads[0].unkC | pad_state.pads[1].unkC) & 0x10) {
+        if ((vs_pad_state.pads[0].unkC | vs_pad_state.pads[1].unkC) & 0x10) {
             play_cursor_sound();
             sp->unk1CC = 2;
         }
-        if ((pad_state.pads[0].unkC | pad_state.pads[1].unkC) & 0x40) {
+        if ((vs_pad_state.pads[0].unkC | vs_pad_state.pads[1].unkC) & 0x40) {
             play_cursor_sound();
             sp->unk1CC = 512;
         }
-        pad_state.pads[0].unk8 = 0;
-        pad_state.pads[1].unk8 = 0;
-        pad_state.pads[0].unkC = 0;
-        pad_state.pads[1].unkC = 0;
+        vs_pad_state.pads[0].unk8 = 0;
+        vs_pad_state.pads[1].unk8 = 0;
+        vs_pad_state.pads[0].unkC = 0;
+        vs_pad_state.pads[1].unkC = 0;
         card_screen_draw();
         sp->unk1D4 = (sp->unk1D4 + 1) % 32;
     }
@@ -1769,18 +1763,18 @@ int card_choose_file(int first)
     sp->unk1D4 = 0;
     for (;;) {
         if (first) {
-            pad_state.pads[0].unk8 = 0;
-            pad_state.pads[0].unkC = 0;
-            pad_state.pads[0].unk0 = 0;
+            vs_pad_state.pads[0].unk8 = 0;
+            vs_pad_state.pads[0].unkC = 0;
+            vs_pad_state.pads[0].unk0 = 0;
         } else {
-            pad_state.pads[1].unk8 = 0;
-            pad_state.pads[1].unkC = 0;
-            pad_state.pads[1].unk0 = 0;
+            vs_pad_state.pads[1].unk8 = 0;
+            vs_pad_state.pads[1].unkC = 0;
+            vs_pad_state.pads[1].unk0 = 0;
         }
-        if ((sp->unk1CC & 0xff00) || ((pad_state.pads[0].unk8 | pad_state.pads[1].unk8) & 0x4000)) {
+        if ((sp->unk1CC & 0xff00) || ((vs_pad_state.pads[0].unk8 | vs_pad_state.pads[1].unk8) & 0x4000)) {
             play_confirm_sound();
-            pad_state.pads[0].unk8 = 0;
-            pad_state.pads[1].unk8 = 0;
+            vs_pad_state.pads[0].unk8 = 0;
+            vs_pad_state.pads[1].unk8 = 0;
             sp->unk0.menu.half[1] = 1;
             sp->unk1D4 = 32;
             sp->unk1C6 = 1;
@@ -1788,15 +1782,15 @@ int card_choose_file(int first)
                 u32 buttons;
 
                 if (first) {
-                    pad_state.pads[0].unk8 = 0;
-                    pad_state.pads[0].unkC = 0;
-                    pad_state.pads[0].unk0 = 0;
+                    vs_pad_state.pads[0].unk8 = 0;
+                    vs_pad_state.pads[0].unkC = 0;
+                    vs_pad_state.pads[0].unk0 = 0;
                 } else {
-                    pad_state.pads[1].unk8 = 0;
-                    pad_state.pads[1].unkC = 0;
-                    pad_state.pads[1].unk0 = 0;
+                    vs_pad_state.pads[1].unk8 = 0;
+                    vs_pad_state.pads[1].unkC = 0;
+                    vs_pad_state.pads[1].unk0 = 0;
                 }
-                buttons = pad_state.pads[0].unk8 | pad_state.pads[1].unk8;
+                buttons = vs_pad_state.pads[0].unk8 | vs_pad_state.pads[1].unk8;
                 if (buttons & 0x4000) {
                     play_confirm_sound();
                     break;
@@ -1810,16 +1804,16 @@ int card_choose_file(int first)
                     play_cursor_sound();
                     sp->unk1C6 = 1;
                 }
-                if ((pad_state.pads[0].unk8 | pad_state.pads[1].unk8) & 0x20) {
+                if ((vs_pad_state.pads[0].unk8 | vs_pad_state.pads[1].unk8) & 0x20) {
                     play_cursor_sound();
                     sp->unk1C6 = 0;
                 }
-                pad_state.pads[0].unk8 = 0;
-                pad_state.pads[1].unk8 = 0;
+                vs_pad_state.pads[0].unk8 = 0;
+                vs_pad_state.pads[1].unk8 = 0;
                 card_screen_draw();
             }
-            pad_state.pads[0].unk8 = 0;
-            pad_state.pads[1].unk8 = 0;
+            vs_pad_state.pads[0].unk8 = 0;
+            vs_pad_state.pads[1].unk8 = 0;
             if (sp->unk1C6)
                 goto done;
             if (sp->unk1CC & 0xff00) {
@@ -1829,12 +1823,12 @@ int card_choose_file(int first)
             sp->unk0.menu.half[1] = 0;
             continue;
         }
-        if ((pad_state.pads[0].unk8 | pad_state.pads[1].unk8) & 0x2000) {
+        if ((vs_pad_state.pads[0].unk8 | vs_pad_state.pads[1].unk8) & 0x2000) {
             play_cancel_sound();
             sp->unk1C2 = -1;
             goto done;
         }
-        if ((pad_state.pads[0].unkC | pad_state.pads[1].unkC) & 0x10) {
+        if ((vs_pad_state.pads[0].unkC | vs_pad_state.pads[1].unkC) & 0x10) {
             play_cursor_sound();
             if (sp->unk1C2 == 0) {
                 if (sp->unk1C4 > 0)
@@ -1843,7 +1837,7 @@ int card_choose_file(int first)
                 sp->unk1C2--;
             }
         }
-        if ((pad_state.pads[0].unkC | pad_state.pads[1].unkC) & 0x40) {
+        if ((vs_pad_state.pads[0].unkC | vs_pad_state.pads[1].unkC) & 0x40) {
             play_cursor_sound();
             if (sp->unk1C2 == 2) {
                 if (sp->unk1C4 < sp->unk1BE - 3)
@@ -1852,10 +1846,10 @@ int card_choose_file(int first)
                 sp->unk1C2++;
             }
         }
-        pad_state.pads[0].unk8 = 0;
-        pad_state.pads[1].unk8 = 0;
-        pad_state.pads[0].unkC = 0;
-        pad_state.pads[1].unkC = 0;
+        vs_pad_state.pads[0].unk8 = 0;
+        vs_pad_state.pads[1].unk8 = 0;
+        vs_pad_state.pads[0].unkC = 0;
+        vs_pad_state.pads[1].unkC = 0;
         card_screen_draw();
         sp->unk1D4 = (sp->unk1D4 + 1) % 32;
         }
@@ -1941,10 +1935,10 @@ int card_load_game(VsSave *save)
     int fd, sum, i;
     u16 count;
 
-    if (save == &DAT_801a0a80[0])
-        dst = &DAT_8015ffc0[0];
+    if (save == &saves[0])
+        dst = &save_headers[0];
     else
-        dst = &DAT_8015ffc0[1];
+        dst = &save_headers[1];
 open:
     strcpy(path, "bu");
     strcat(path, itoa(sp->unk1BC));
@@ -1969,7 +1963,7 @@ read:
         tries--;
         goto read;
     }
-    loaded = &DAT_800633b0.save;
+    loaded = &shared_buffer.save;
     sum = card_read_blocks(fd, 512, (u8 *)loaded, 7560);
     if (sum == -1) {
         if (!tries) {
@@ -2019,10 +2013,10 @@ int card_save_game(VsSave *save)
     int create;
     int fd, sum;
 
-    if (save == &DAT_801a0a80[0])
-        header = &DAT_8015ffc0[0];
+    if (save == &saves[0])
+        header = &save_headers[0];
     else
-        header = &DAT_8015ffc0[1];
+        header = &save_headers[1];
     create = 0;
 open:
     strcpy(path, "bu");
@@ -2146,22 +2140,22 @@ int card_screen_run(int mode, int port)
     clear_vram();
     DrawSync(0);
     gfx_setup_320x240();
-    buf = DAT_801a4590.unk4A4;
+    buf = vs_cd_state.unk4A4;
     cd_read_member(8, 0, buf);
-    copy_words((u32 *)DAT_80196230[0].offsets, (u32 *)(buf + 1), 0x1500);
+    copy_words((u32 *)vs_menu_messages[0].offsets, (u32 *)(buf + 1), 0x1500);
     buf = (u_long *)((u8 *)buf + (buf[0] + 4));
     tim_load_images_at(buf + 1, &sp->unk1D8, &sp->unk1DC);
     DrawSync(0);
-    cd_read_member(8, 6, DAT_801a4590.unk4A4);
-    tim_load_images_at(DAT_801a4590.unk4A4, &pos, &clut);
+    cd_read_member(8, 6, vs_cd_state.unk4A4);
+    tim_load_images_at(vs_cd_state.unk4A4, &pos, &clut);
     DrawSync(0);
     sp->unk0.menu.half[0] = 0;
     sp->unk0.menu.half[1] = 0;
     sp->unk1CA = mode;
-    pad_state.pads[0].unk8 = 0;
-    pad_state.pads[1].unk8 = 0;
-    pad_state.pads[0].unkC = 0;
-    pad_state.pads[1].unkC = 0;
+    vs_pad_state.pads[0].unk8 = 0;
+    vs_pad_state.pads[1].unk8 = 0;
+    vs_pad_state.pads[0].unkC = 0;
+    vs_pad_state.pads[1].unkC = 0;
 again:
     sp->unk1BC = port;
     sp->unk1B8 = &sp->unk0.card.ports[sp->unk1BC];
@@ -2172,13 +2166,13 @@ again:
     result = 0;
     if (sp->unk1CC & 0xff00) {
         if (port == 0) {
-            if (!DAT_80063380) {
+            if (!save_loaded_1p) {
                 sp->unk0.menu.half[0] = MSG_NOT_LOADED;
                 sp->unk1CC <<= 5;
                 goto wait;
             }
         } else {
-            if (!DAT_80063381) {
+            if (!save_loaded_2p) {
                 sp->unk0.menu.half[0] = MSG_NOT_LOADED;
                 sp->unk1CC <<= 5;
                 goto wait;
@@ -2199,14 +2193,14 @@ again:
         goto wait;
     }
     sp->unk1CC <<= 2;
-    pad_state.pads[0].unk8 = 0;
-    pad_state.pads[1].unk8 = 0;
-    pad_state.pads[0].unkC = 0;
-    pad_state.pads[1].unkC = 0;
+    vs_pad_state.pads[0].unk8 = 0;
+    vs_pad_state.pads[1].unk8 = 0;
+    vs_pad_state.pads[0].unkC = 0;
+    vs_pad_state.pads[1].unkC = 0;
     if (sp->unk1CC & 0xff00) {
         card_check_player_save(sp->unk1BC);
         if (sp->unk1B8->status == 0) {
-            strcpy(sp->unk1B8->files[0].name, DAT_801a0a30[port]);
+            strcpy(sp->unk1B8->files[0].name, save_file_names[port]);
             sp->unk1B8->count = 1;
             sp->unk1B8->unkC8 = 0;
         } else {
@@ -2251,12 +2245,12 @@ again:
         goto wait;
     }
     if (sp->unk1CC & 0xff00) {
-        DAT_801a0a80[port].unk18BC.unk2E0[0] = DAT_801624b8[port].slot[0];
-        DAT_801a0a80[port].unk18BC.unk2E0[1] = DAT_801624b8[port].slot[1];
-        DAT_801a0a80[port].unk18BC.unk2E0[2] = DAT_801624b8[port].slot[2];
-        result = card_overwrite_player_save(&DAT_801a0a80[port]);
+        saves[port].unk18BC.unk2E0[0] = teams[port].slot[0];
+        saves[port].unk18BC.unk2E0[1] = teams[port].slot[1];
+        saves[port].unk18BC.unk2E0[2] = teams[port].slot[2];
+        result = card_overwrite_player_save(&saves[port]);
     } else {
-        result = card_load_game(&DAT_801a0a80[port]);
+        result = card_load_game(&saves[port]);
     }
     if (!result) {
         if (sp->unk0.menu.half[0] == 0) {
@@ -2269,26 +2263,26 @@ again:
         goto wait;
     }
     if (!(sp->unk1CC & 0xff00)) {
-        DAT_801624b8[port].slot[0] = DAT_801a0a80[port].unk18BC.unk2E0[0];
-        DAT_801624b8[port].slot[1] = DAT_801a0a80[port].unk18BC.unk2E0[1];
-        DAT_801624b8[port].slot[2] = DAT_801a0a80[port].unk18BC.unk2E0[2];
-        DAT_80063334 = -1;
-        DAT_80063330[0] = -1;
-        strcpy(DAT_801a0a30[port], sp->unk1B8->files[sp->unk1C2].name);
+        teams[port].slot[0] = saves[port].unk18BC.unk2E0[0];
+        teams[port].slot[1] = saves[port].unk18BC.unk2E0[1];
+        teams[port].slot[2] = saves[port].unk18BC.unk2E0[2];
+        requested_item_2p = -1;
+        requested_items[0] = -1;
+        strcpy(save_file_names[port], sp->unk1B8->files[sp->unk1C2].name);
         DAT_80063328[port] = sp->unk1C2;
         if (port == 0)
-            DAT_80063380 = 1;
+            save_loaded_1p = 1;
         else
-            DAT_80063381 = 1;
+            save_loaded_2p = 1;
     }
     sp->unk1CC <<= 1;
 wait:
     card_screen_draw();
     card_screen_draw();
     if (port)
-        WAIT_PRESS(pad_state.pads[1]);
+        WAIT_PRESS(vs_pad_state.pads[1]);
     else
-        WAIT_PRESS(pad_state.pads[0]);
+        WAIT_PRESS(vs_pad_state.pads[0]);
     play_cancel_sound();
     if (sp->unk1CC & 0x80) {
         sp->unk1CC = 2;
@@ -2309,28 +2303,28 @@ done:
         gfx_setup_640x240();
         face.vx = 640;
         face.vy = 124;
-        DAT_801a4590.unk4A0 = menu_buf = DAT_801a4590.unk4A4;
+        vs_cd_state.unk4A0 = menu_buf = vs_cd_state.unk4A4;
         cd_read_member(8, 4, menu_buf);
-        copy_words((u32 *)DAT_80196230[1].offsets, (u32 *)&menu_buf[1], 0x1500);
-        tim = (u_long *)((u8 *)menu_buf + DAT_801a4590.unk4A4[0]);
+        copy_words((u32 *)vs_menu_messages[1].offsets, (u32 *)&menu_buf[1], 0x1500);
+        tim = (u_long *)((u8 *)menu_buf + vs_cd_state.unk4A4[0]);
         tim_load_images_at(tim + 2, &sp->unk1E0, &sp->unk1E4);
         DrawSync(0);
         cd_read_member(8, 8, menu_buf);
-        copy_words((u32 *)DAT_80196230[0].offsets, (u32 *)&menu_buf[1], 0x1500);
-        tim = (u_long *)((u8 *)menu_buf + DAT_801a4590.unk4A4[0]);
+        copy_words((u32 *)vs_menu_messages[0].offsets, (u32 *)&menu_buf[1], 0x1500);
+        tim = (u_long *)((u8 *)menu_buf + vs_cd_state.unk4A4[0]);
         tim_load_images_at(tim + 2, &sp->unk1D8, &sp->unk1DC);
         DrawSync(0);
         cd_read_member(8, 7, menu_buf);
         tim_load_images_at(menu_buf, &pos, &clut);
         DrawSync(0);
-        if (DAT_80063330[0] != -1) {
-            cd_read_member(11, DAT_80191d00.unk0118[DAT_80063330[0]].unk5[0], menu_buf);
+        if (requested_items[0] != -1) {
+            cd_read_member(11, vis_table_c.unk0118[requested_items[0]].unk5[0], menu_buf);
             tim_load_images_at(menu_buf, &face, NULL);
             DrawSync(0);
         }
         face.vy += 28;
-        if (DAT_80063334 != -1) {
-            cd_read_member(11, DAT_80191d00.unk0118[DAT_80063334].unk5[0], menu_buf);
+        if (requested_item_2p != -1) {
+            cd_read_member(11, vis_table_c.unk0118[requested_item_2p].unk5[0], menu_buf);
             tim_load_images_at(menu_buf, &face, NULL);
             DrawSync(1);
         }
@@ -2338,7 +2332,7 @@ done:
     }
 }
 
-/* Writes `save` over its player's card file (named in DAT_801a0a30): 1 on
+/* Writes `save` over its player's card file (named in save_file_names): 1 on
  * success, 0 on failure.
  *
  * card_save_game without its create branch: `number` (the new file's digits
@@ -2355,12 +2349,12 @@ int card_overwrite_player_save(VsSave *save)
     int tries = 3;
     int fd, sum;
 
-    if (save == &DAT_801a0a80[0]) {
-        header = &DAT_8015ffc0[0];
-        name = DAT_801a0a30[0];
+    if (save == &saves[0]) {
+        header = &save_headers[0];
+        name = save_file_names[0];
     } else {
-        header = &DAT_8015ffc0[1];
-        name = DAT_801a0a30[1];
+        header = &save_headers[1];
+        name = save_file_names[1];
     }
 open:
     strcpy(path, "bu");
@@ -2433,7 +2427,7 @@ int card_check_saves_changed(void)
 
 /*
  * Banks a won match: unless `again`, gives the winner (side `side`) the
- * item it requested (DAT_80063330[side]): marks it held in its save
+ * item it requested (requested_items[side]): marks it held in its save
  * record (and collected, bumping the header's three-digit count the
  * first time), moves the loser's durability of it over and takes it
  * from the loser; then writes both records back. Returns a bit per
@@ -2451,32 +2445,32 @@ int match_award_requested_item(int side, int again)
 {
     VsMenuScratch *sp = VS_MENU_SCRATCH;
     int failed = 0;
-    u16 id = DAT_80063330[side];
+    u16 id = requested_items[side];
     char zero[2] = "\x82\x4f";
-    VsSaveSub *win = &DAT_801a0a80[side].unk18BC;
-    VsSaveSub *lose = &DAT_801a0a80[1 - side].unk18BC;
+    VsSaveSub *win = &saves[side].unk18BC;
+    VsSaveSub *lose = &saves[1 - side].unk18BC;
     int started = failed;
     u16 count;
     int i;
 
     if (!again) {
-        if (!(DAT_801a0a80[side].unk14CC[id / 32] & (1 << (id % 32)))) {
+        if (!(saves[side].unk14CC[id / 32] & (1 << (id % 32)))) {
             /* The count is reached through its own address (header + 0x40),
              * not as a member of the header element. */
-            count = *(u16 *)&DAT_8015ffc0[side].unk40 + 1;
-            DAT_801a0a80[side].unk1802 = count;
+            count = *(u16 *)&save_headers[side].unk40 + 1;
+            saves[side].unk1802 = count;
             if (count >= 100) {
-                DAT_8015ffc0[side].unk34[0] = zero[0];
-                DAT_8015ffc0[side].unk34[1] = zero[1] + count / 100 % 10;
+                save_headers[side].unk34[0] = zero[0];
+                save_headers[side].unk34[1] = zero[1] + count / 100 % 10;
             }
             if (count >= 10) {
-                DAT_8015ffc0[side].unk34[2] = zero[0];
-                DAT_8015ffc0[side].unk34[3] = zero[1] + count / 10 % 10;
+                save_headers[side].unk34[2] = zero[0];
+                save_headers[side].unk34[3] = zero[1] + count / 10 % 10;
             }
-            DAT_8015ffc0[side].unk34[4] = zero[0];
-            DAT_8015ffc0[side].unk34[5] = zero[1] + count % 10;
-            *(u16 *)&DAT_8015ffc0[side].unk40 = count;
-            DAT_801a0a80[side].unk14CC[id / 32] |= 1 << (id % 32);
+            save_headers[side].unk34[4] = zero[0];
+            save_headers[side].unk34[5] = zero[1] + count % 10;
+            *(u16 *)&save_headers[side].unk40 = count;
+            saves[side].unk14CC[id / 32] |= 1 << (id % 32);
         }
         win->unk150[id] = 1;
         win->unk2EC[id] = lose->unk2EC[id];
@@ -2498,7 +2492,7 @@ int match_award_requested_item(int side, int again)
     for (i = 0; i < 2; i++) {
         sp->unk1BC = i;
         sp->unk1B8 = &sp->unk0.card.ports[sp->unk1BC];
-        if (!card_overwrite_player_save(&DAT_801a0a80[i]))
+        if (!card_overwrite_player_save(&saves[i]))
             failed |= 1 << i;
     }
     return failed;

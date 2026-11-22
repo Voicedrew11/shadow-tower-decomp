@@ -20,7 +20,7 @@ RODATA(0x80011290, 0x18)
 SDATA(0x800632c8, 0x8)
 
 /* A two-choice dialog: its caption and the two choices, the chosen one red
- * (page 5, or page 1 when DAT_80063228 is 1). */
+ * (page 5, or page 1 when round_count is 1). */
 ADDRESS(0x80022f14, 0x200)
 void menu_vs_setup_draw_choice(int page)
 {
@@ -46,7 +46,7 @@ void menu_vs_setup_draw_choice(int page)
     sp->style[0].g = sp->style[3].g = 60;
     sp->style[0].b = sp->style[3].b = 60;
     ui_draw_text(VS_MESSAGE(msg[0]), 128, 104, &light);
-    if (page == 5 || (page == 1 && DAT_80063228 == page)) {
+    if (page == 5 || (page == 1 && round_count == page)) {
         ui_draw_text(VS_MESSAGE(msg[1]), 200, 122, &red);
         ui_draw_text(VS_MESSAGE(msg[2]), 320, 122, &light);
     } else {

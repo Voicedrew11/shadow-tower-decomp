@@ -187,7 +187,7 @@ void menu_item_request_draw_details(int page)
         }
         n = 0;
         k = 2;
-        count = DAT_80191d00.unk0118[id].unk10;
+        count = vis_table_c.unk0118[id].unk10;
         DAT_8006337a = 1;
         for (i = 0, name_x = count_x; i < 4; i++) {
             int label_x;
@@ -212,10 +212,10 @@ void menu_item_request_draw_details(int page)
         DAT_8006337a = 0;
         text_y += 60;
         ui_draw_text(VS_MESSAGE(501), count_x, text_y, &sp->style[0]);
-        ui_draw_number(DAT_801a0a80[1 - page].unk18BC.unk2EC[id] | 0x3000000, count_x + 70, text_y, &sp->style[3]);
+        ui_draw_number(saves[1 - page].unk18BC.unk2EC[id] | 0x3000000, count_x + 70, text_y, &sp->style[3]);
         ui_draw_text(VS_MESSAGE(502), count_x + 114, text_y, &sp->style[0]);
-        ui_draw_number(DAT_80191d00.unk0118[id].unk27 | 0x3000000, count_x + 138, text_y, &sp->style[3]);
-        weight = DAT_80191d00.unk0118[id].unk24;
+        ui_draw_number(vis_table_c.unk0118[id].unk27 | 0x3000000, count_x + 138, text_y, &sp->style[3]);
+        weight = vis_table_c.unk0118[id].unk24;
         whole = weight * 100 / 454;
         tenths = weight * 1000 / 454 % 10;
         text_y += 15;

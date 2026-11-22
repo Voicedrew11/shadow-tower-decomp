@@ -430,13 +430,13 @@ OPTXT.EXE	0x8001f7e8	0xefe8	0x4	bss	proven	frame	int	asm;src/optxt/main.c optxt.
 OPTXT.EXE	0x8001f7ec	0xefec	0x4	bss	proven	opening_state	int	asm;src/optxt/state.c optxt.state	.sbss; absolute lui pairs
 OPTXT.EXE	0x8001f7f0	0xeff0	0x10	unclassified	coverage-gap			payload-complement	MALLOC.OBJ .bss
 VS.EXE	0x80011000	0x800	0xf34	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
-VS.EXE	0x80011f34	0x1734	0x4	defined	candidate	DAT_80011f34	u8 *	retail-word;src/vs/rdata_bss_bounds.c vs.rdata_bss_bounds	unreferenced read-only word: the bss group start (_bss_org = .sbss start 0x80063300)
-VS.EXE	0x80011f38	0x1738	0x4	defined	candidate	DAT_80011f38	u8 *	retail-word;src/vs/rdata_bss_bounds.c vs.rdata_bss_bounds	unreferenced read-only word: the bss group end (_bss_orgend 0x801dbaa8)
+VS.EXE	0x80011f34	0x1734	0x4	defined	candidate	bss_start	u8 *	retail-word;src/vs/rdata_bss_bounds.c vs.rdata_bss_bounds	unreferenced read-only word: the bss group start (_bss_org = .sbss start 0x80063300)
+VS.EXE	0x80011f38	0x1738	0x4	defined	candidate	bss_end	u8 *	retail-word;src/vs/rdata_bss_bounds.c vs.rdata_bss_bounds	unreferenced read-only word: the bss group end (_bss_orgend 0x801dbaa8)
 VS.EXE	0x80011f3c	0x173c	0x4	defined	candidate	DAT_80011f3c	u8 *	retail-word;src/vs/rdata_bss_bounds.c vs.rdata_bss_bounds	unreferenced read-only word: the bss group end (_bss_orgend 0x801dbaa8)
-VS.EXE	0x80011f40	0x1740	0x4	defined	candidate	DAT_80011f40	u8 *	asm;src/vs/main.c vs.main	end of the game .rdata: a heap bound main reads
+VS.EXE	0x80011f40	0x1740	0x4	defined	candidate	heap_align_base	u8 *	asm;src/vs/main.c vs.main	end of the game .rdata: a heap bound main reads
 VS.EXE	0x80011f44	0x1744	0x4	defined	candidate	DAT_80011f44	u8 *	retail-word;src/vs/rdata_bss_bounds.c vs.rdata_bss_bounds	unreferenced read-only word: the bss group end (_bss_orgend 0x801dbaa8)
-VS.EXE	0x80011f48	0x1748	0x4	defined	candidate	DAT_80011f48	u8 *	asm;src/vs/main.c vs.main	end of the game .rdata: a heap bound main reads
-VS.EXE	0x80011f4c	0x174c	0x4	defined	candidate	DAT_80011f4c	u8 *	asm;src/vs/main.c vs.main	end of the game .rdata: main stores the heap base here
+VS.EXE	0x80011f48	0x1748	0x4	defined	candidate	heap_floor	u8 *	asm;src/vs/main.c vs.main	end of the game .rdata: a heap bound main reads
+VS.EXE	0x80011f4c	0x174c	0x4	defined	candidate	heap_base	u8 *	asm;src/vs/main.c vs.main	end of the game .rdata: main stores the heap base here
 VS.EXE	0x80011f50	0x1750	0xa30	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 VS.EXE	0x80035d78	0x25578	0x4	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 VS.EXE	0x80035d88	0x25588	0x4	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
@@ -593,29 +593,29 @@ VS.EXE	0x8004a1b8	0x399b8	0xc	unclassified	coverage-gap			payload-complement	may
 VS.EXE	0x8004a1d8	0x399d8	0xc	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 VS.EXE	0x8004a1f8	0x399f8	0xc	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 VS.EXE	0x8004a218	0x39a18	0xc	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
-VS.EXE	0x8004a224	0x39a24	0x11082	defined	candidate	DAT_8004a224	VsFighterData[]	asm;src/vs/main.c vs.main	the fighters' data blocks: 151 VsFighterData records (0x1ce bytes each) fighters_load_round indexes by character; src/vs/data_fighters.c
+VS.EXE	0x8004a224	0x39a24	0x11082	defined	candidate	fighter_data	VsFighterData[]	asm;src/vs/main.c vs.main	the fighters' data blocks: 151 VsFighterData records (0x1ce bytes each) fighters_load_round indexes by character; src/vs/data_fighters.c
 VS.EXE	0x8005b2a6	0x4aaa6	0x2	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
-VS.EXE	0x8005b2a8	0x4aaa8	0x10	defined	candidate	DAT_8005b2a8	VECTOR	asm;src/vs/anim_set.c vs.anim_set	.data VECTOR (4096, 4096, 4096): the scale fighter_draw_skeletal/fighter_draw_vertex_anim/model_draw_part_at apply to their light matrix
-VS.EXE	0x8005b2b8	0x4aab8	0x20	defined	candidate	DAT_8005b2b8	MATRIX	retail bytes: identity rotation, zero translation; follows the VECTOR	unreferenced identity MATRIX after the light-scale VECTOR (ST.EXE keeps a referenced identity MATRIX in its .data, DAT_8008040c)
+VS.EXE	0x8005b2a8	0x4aaa8	0x10	defined	candidate	light_scale	VECTOR	asm;src/vs/anim_set.c vs.anim_set	.data VECTOR (4096, 4096, 4096): the scale fighter_draw_skeletal/fighter_draw_vertex_anim/model_draw_part_at apply to their light matrix
+VS.EXE	0x8005b2b8	0x4aab8	0x20	defined	candidate	identity_matrix	MATRIX	retail bytes: identity rotation, zero translation; follows the VECTOR	unreferenced identity MATRIX after the light-scale VECTOR (ST.EXE keeps a referenced identity MATRIX in its .data, DAT_8008040c)
 VS.EXE	0x8005b2d8	0x4aad8	0x7f40	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
-VS.EXE	0x80063218	0x52a18	0x4	defined	candidate	DAT_80063218	s32	asm;src/vs/anim_set.c vs.anim_set	.sdata word (0) read absolutely by the -G8 model renderers: an x angle added to the light rotation
-VS.EXE	0x8006321c	0x52a1c	0x4	defined	candidate	DAT_8006321c	s32	asm;src/vs/anim_set.c vs.anim_set	.sdata word (0) read absolutely by the -G8 model renderers: a y angle added to the light rotation
-VS.EXE	0x80063220	0x52a20	0x4	defined	candidate	DAT_80063220	s32	asm;src/vs/main.c vs.main;src/vs/fighter_control.c vs.fighter_control	.sdata word (0), read $gp-relative by fighters_play_anim_sounds, round_draw_frame, round_play and others; read absolutely by the -G8 walking moves (src/vs/fighter_control.c)
-VS.EXE	0x80063224	0x52a24	0x4	defined	candidate	DAT_80063224	s32	asm;src/vs/mesh.c vs.mesh	.sdata word read absolutely by the -G8 renderers; fixed-OT-depth switch (0 in the image)
-VS.EXE	0x80063228	0x52a28	0x4	defined	candidate	DAT_80063228	s32	asm;src/vs/menu_vs_setup_draw.c vs.menu_vs_setup_draw	.sdata word (1), read $gp-relative by round_draw_frame/round_play/func_8001683c and through lui by menu_vs_setup_draw_choice
+VS.EXE	0x80063218	0x52a18	0x4	defined	candidate	light_rot_x	s32	asm;src/vs/anim_set.c vs.anim_set	.sdata word (0) read absolutely by the -G8 model renderers: an x angle added to the light rotation
+VS.EXE	0x8006321c	0x52a1c	0x4	defined	candidate	light_rot_y	s32	asm;src/vs/anim_set.c vs.anim_set	.sdata word (0) read absolutely by the -G8 model renderers: a y angle added to the light rotation
+VS.EXE	0x80063220	0x52a20	0x4	defined	candidate	frames_per_draw	s32	asm;src/vs/main.c vs.main;src/vs/fighter_control.c vs.fighter_control	.sdata word (0), read $gp-relative by fighters_play_anim_sounds, round_draw_frame, round_play and others; read absolutely by the -G8 walking moves (src/vs/fighter_control.c)
+VS.EXE	0x80063224	0x52a24	0x4	defined	candidate	mesh_fixed_depth	s32	asm;src/vs/mesh.c vs.mesh	.sdata word read absolutely by the -G8 renderers; fixed-OT-depth switch (0 in the image)
+VS.EXE	0x80063228	0x52a28	0x4	defined	candidate	round_count	s32	asm;src/vs/menu_vs_setup_draw.c vs.menu_vs_setup_draw	.sdata word (1), read $gp-relative by round_draw_frame/round_play/func_8001683c and through lui by menu_vs_setup_draw_choice
 VS.EXE	0x8006322c	0x52a2c	0xa4	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
-VS.EXE	0x800632d0	0x52ad0	0x4	defined	candidate	DAT_800632d0	u_long	asm;src/vs/anim_set.c vs.anim_set	$gp+0xb8 .sdata word 0x808080: fighter_draw_skeletal's default NCCS colour
-VS.EXE	0x800632d4	0x52ad4	0x4	defined	candidate	DAT_800632d4	s32	asm;src/vs/anim_set.c vs.anim_set	$gp+0xbc .sdata word (0): model_draw_list's every-nth part slot
-VS.EXE	0x800632d8	0x52ad8	0x4	defined	candidate	DAT_800632d8	u_long	asm;src/vs/fighter_vertex_anim.c vs.fighter_vertex_anim	$gp+0xc0 .sdata word 0x808080: fighter_draw_vertex_anim's default NCCS colour
-VS.EXE	0x800632dc	0x52adc	0x4	defined	candidate	DAT_800632dc	u_long	asm;src/vs/round_hud.c vs.round_hud	$gp+0xc4 .sdata word 0x808080: model_draw_part_at's default NCCS colour
-VS.EXE	0x800632e0	0x52ae0	0x4	defined	candidate	DAT_800632e0	s32	asm;src/vs/round_hud.c vs.round_hud	$gp+0xc8 .sdata word; round_draw_backdrop's texture-window step
-VS.EXE	0x800632e4	0x52ae4	0x1	defined	candidate	DAT_800632e4	u8	asm;src/vs/round_hud.c vs.round_hud	$gp .sdata byte, hud_draw_gauges's blink toggle (0 in the image)
+VS.EXE	0x800632d0	0x52ad0	0x4	defined	candidate	fighter_skeletal_rgb	u_long	asm;src/vs/anim_set.c vs.anim_set	$gp+0xb8 .sdata word 0x808080: fighter_draw_skeletal's default NCCS colour
+VS.EXE	0x800632d4	0x52ad4	0x4	defined	candidate	model_list_slot	s32	asm;src/vs/anim_set.c vs.anim_set	$gp+0xbc .sdata word (0): model_draw_list's every-nth part slot
+VS.EXE	0x800632d8	0x52ad8	0x4	defined	candidate	fighter_vertex_anim_rgb	u_long	asm;src/vs/fighter_vertex_anim.c vs.fighter_vertex_anim	$gp+0xc0 .sdata word 0x808080: fighter_draw_vertex_anim's default NCCS colour
+VS.EXE	0x800632dc	0x52adc	0x4	defined	candidate	model_part_rgb	u_long	asm;src/vs/round_hud.c vs.round_hud	$gp+0xc4 .sdata word 0x808080: model_draw_part_at's default NCCS colour
+VS.EXE	0x800632e0	0x52ae0	0x4	defined	candidate	backdrop_frame	s32	asm;src/vs/round_hud.c vs.round_hud	$gp+0xc8 .sdata word; round_draw_backdrop's texture-window step
+VS.EXE	0x800632e4	0x52ae4	0x1	defined	candidate	gauge_blink	u8	asm;src/vs/round_hud.c vs.round_hud	$gp .sdata byte, hud_draw_gauges's blink toggle (0 in the image)
 VS.EXE	0x800632e5	0x52ae5	0xf	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 VS.EXE	0x800632f4	0x52af4	0x4	defined	candidate	DAT_800632f4	s32	retail-layout;src/vs/sdata_zero_words.c vs.sdata_zero_words	unreferenced zero .sdata word: the bss group starts at 0x80063300, so initialized small data runs past 0x800632f8
 VS.EXE	0x800632f8	0x52af8	0x4	defined	candidate	DAT_800632f8	s32	retail-layout;src/vs/sdata_zero_words.c vs.sdata_zero_words	unreferenced zero .sdata word: the bss group starts at 0x80063300, so initialized small data runs past 0x800632f8
 VS.EXE	0x800632fc	0x52afc	0xa0	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 VS.EXE	0x8006339c	0x52b9c	0x4	bss	proven	DAT_8006339c	s32	layout;src/vs/ui.c vs.ui	.sbss; unreferenced word in vs.ui's .sbss run: the clip window statics around it are 2-aligned at +0 and +2 and word-aligned at +4, +8 and +0x10
-VS.EXE	0x800633a0	0x52ba0	0x4	bss	proven	DAT_800633a0	s32	asm;src/vs/ui.c vs.ui	.sbss; the clip window statics' last word ($gp-relative, ui_draw_glyph/card_draw_file_list)
+VS.EXE	0x800633a0	0x52ba0	0x4	bss	proven	text_clip_dropped	s32	asm;src/vs/ui.c vs.ui	.sbss; the clip window statics' last word ($gp-relative, ui_draw_glyph/card_draw_file_list)
 VS.EXE	0x800633a4	0x52ba4	0x45c	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 END.EXE	0x80011000	0x800	0x960	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 END.EXE	0x80013138	0x2938	0x4	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data

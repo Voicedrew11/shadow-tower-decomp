@@ -67,7 +67,7 @@ void menu_creature_select_draw_grid(int player)
     ui_add_draw_mode(1, 0, 0);
     c = sp->unk1D0;
     if (c < 0) {
-        id = DAT_801624b8[player].slot[-c - 1];
+        id = teams[player].slot[-c - 1];
         if (id != -1) {
             for (k = 0; k < sp->unk0.team.count; k++) {
                 if (id == sp->unk0.team.kinds[k]) {
@@ -82,7 +82,7 @@ void menu_creature_select_draw_grid(int player)
         idx = sp->unk1D2 * 4 + c;
         id = sp->unk0.team.kinds[idx];
         for (k = 0; k < 3; k++) {
-            if (id == DAT_801624b8[player].slot[k])
+            if (id == teams[player].slot[k])
                 idx = -1;
         }
     }
@@ -110,7 +110,7 @@ void menu_creature_select_draw_grid(int player)
                 ui_draw_rect_outline(&sp->unk238, &frame, 513, 0);
                 id = sp->unk0.team.kinds[idx];
                 for (k = 0; k < 3; k++) {
-                    if (DAT_801624b8[player].slot[k] == id) {
+                    if (teams[player].slot[k] == id) {
                         black.r = 0;
                         black.g = 0;
                         black.b = 0;
@@ -129,7 +129,7 @@ void menu_creature_select_draw_grid(int player)
     sp->unk238.y = 48;
     for (i = 0; i < 3; i++) {
         ui_draw_number((i + 1) | DIGITS(3), 110, i * 56 + 85, &sp->style[3]);
-        if (DAT_801624b8[player].slot[i] == -1) {
+        if (teams[player].slot[i] == -1) {
             black.r = 0;
             black.g = 0;
             black.b = 0;

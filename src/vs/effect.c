@@ -15,14 +15,14 @@
 ADDRESS(0x80032228, 0x3c)
 void effect_emit_current(u_long flags, int arg, VECTOR *pos)
 {
-    effect_emit(flags, DAT_801ce698.cur->unk0, DAT_801ce698.def, arg, pos);
+    effect_emit(flags, vs_effects.cur->unk0, vs_effects.def, arg, pos);
 }
 
 /* effect_emit_current from a point behind the current effect along its velocity. */
 ADDRESS(0x80032264, 0x8c)
 void effect_emit_behind(u_long flags)
 {
-    StEffect *e = DAT_801ce698.cur;
+    StEffect *e = vs_effects.cur;
     VECTOR pos;
 
     pos.vx = e->unk20.vx - e->unk40.vx * 8;
@@ -35,7 +35,7 @@ void effect_emit_behind(u_long flags)
 ADDRESS(0x800322f0, 0x44)
 StEffect *effect_alloc(void)
 {
-    StEffect *e = DAT_801ce698.slots;
+    StEffect *e = vs_effects.slots;
     u16 i;
 
     i = ST_EFFECT_SLOTS;

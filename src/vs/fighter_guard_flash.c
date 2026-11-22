@@ -136,7 +136,7 @@ ADDRESS(0x8002c2c4, 0x144c)
 void fighter_draw_guard_flash(int id)
 {
     VsScratchPad *sp = VS_SCRATCHPAD;
-    VsFighter *f = &DAT_800633b0.fighter[id];
+    VsFighter *f = &shared_buffer.fighter[id];
     VsFighterData *d = &f->unk4DF18;
     CVECTOR c[4];
     SVECTOR rot;
@@ -240,9 +240,9 @@ void fighter_draw_guard_flash(int id)
     m.m[2][2] = m.m[2][2] * d->unk1B4 / 1000;
     gte_SetRotMatrix(&m);
     gte_SetTransMatrix(&m);
-    sp->model = DAT_8015ec38;
-    sp->header = (MeshHeader *)(DAT_8015ec38 + 12);
-    sp->local_vertices = DAT_8015ec38 + 12 + sp->header->vertices;
+    sp->model = guard_flash_model;
+    sp->header = (MeshHeader *)(guard_flash_model + 12);
+    sp->local_vertices = guard_flash_model + 12 + sp->header->vertices;
     PROJECT(sp, out, in, n);
     for (i = 1; i < 16; i++) {
         FLASH_G3(sp, 0, i, i + 1, c[0], c[1]);

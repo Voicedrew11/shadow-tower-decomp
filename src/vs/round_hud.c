@@ -35,15 +35,15 @@ void mesh_draw_part_nccs();
 
 /* model_draw_part_at's default NCCS colour (128, 128, 128). */
 SDATA(0x800632dc, 0x4)
-u_long DAT_800632dc = 0x808080;
+u_long model_part_rgb = 0x808080;
 
 /* The overlay's texture quarter, stepped 0..5 by each frame that asks. */
 DATA(0x800632e0, 0x4, ".sdata")
-static s32 DAT_800632e0 = 0;
+static s32 backdrop_frame = 0;
 
 /*
  * Adds a 320x240 semi-transparent textured quad at the back of the frame's
- * ordering table, its texture window chosen by DAT_800632e0; advances that
+ * ordering table, its texture window chosen by backdrop_frame; advances that
  * when `hold` is 0.
  */
 ADDRESS(0x80028fcc, 0x208)
@@ -56,7 +56,7 @@ void round_draw_backdrop(int hold)
     SetPolyFT4(p);
     setXY4(p, 0, 0, 320, 0, 0, 240, 320, 240);
     setSemiTrans(p, 1);
-    switch (DAT_800632e0) {
+    switch (backdrop_frame) {
     case 0:
     case 1:
         setUV4(p, 0, 0, 127, 0, 0, 127, 127, 127);
@@ -82,8 +82,8 @@ void round_draw_backdrop(int hold)
     setRGB0(p, 100, 100, 100);
     addPrim(&vs_gfx_state.ot_cur[VS_OT_LENGTH - 1], p);
     if (hold == 0) {
-        if (++DAT_800632e0 >= 6)
-            DAT_800632e0 = 0;
+        if (++backdrop_frame >= 6)
+            backdrop_frame = 0;
     }
 }
 
@@ -139,9 +139,9 @@ void model_draw_part_at(u8 *model, int part, SVECTOR *pos, SVECTOR *rot, SVECTOR
     SVECTOR *in;
     int n;
 
-    ScaleMatrix(&m, &DAT_8005b2a8);
-    RotMatrixX(DAT_80063218, &m);
-    RotMatrixY(DAT_8006321c, &m);
+    ScaleMatrix(&m, &light_scale);
+    RotMatrixX(light_rot_x, &m);
+    RotMatrixY(light_rot_y, &m);
     MulMatrix((MATRIX *)&lights.l, &m);
     gte_SetColorMatrix(&lights.lc);
     gte_SetLightMatrix(&lights.l);
@@ -178,11 +178,11 @@ void model_draw_part_at(u8 *model, int part, SVECTOR *pos, SVECTOR *rot, SVECTOR
     sp->local_vertices = model + (sp->header->vertices + 12);
     sp->normals = model + (sp->header->normals + 12);
     sp->faces = model + (sp->header->faces + 12);
-    *(u_long *)&sp->rgb = DAT_800632dc;
+    *(u_long *)&sp->rgb = model_part_rgb;
     PROJECT(sp, out, in, n);
-    DAT_80063360 = 0;
-    if (DAT_80063224 != 3)
-        DAT_80063350 = 0;
+    mesh_mirror = 0;
+    if (mesh_fixed_depth != 3)
+        mesh_semi_trans = 0;
     mesh_draw_part_nccs(part);
     vs_gfx_state.packet->cur = sp->prim;
     vs_gfx_state.packet->end = sp->prim_end;
@@ -271,7 +271,7 @@ void hud_draw_clock(int time)
  */
 /* Flips every frame; a low hit-point bar blinks with it. */
 DATA(0x800632e4, 0x1, ".sdata")
-static u8 DAT_800632e4 = 0;
+static u8 gauge_blink = 0;
 
 /*
  * Draws each fighter's hit-point bar (growing outwards from the screen
@@ -287,11 +287,11 @@ void hud_draw_gauges(int level)
     POLY_G4 *p;
     StPacketBuffer *packet;
 
-    DAT_800632e4 = 1 - DAT_800632e4;
+    gauge_blink = 1 - gauge_blink;
     if (level > 32)
         level = 32;
     for (; i < 2; i++) {
-        f = &DAT_800633b0.fighter[i];
+        f = &shared_buffer.fighter[i];
         packet = vs_gfx_state.packet;
         p = (POLY_G4 *)packet->cur;
         packet->cur = (u_long *)(p + 1);
@@ -304,7 +304,7 @@ void hud_draw_gauges(int level)
             setXY4(p, w + 205, 20, 205, 20, w + 200, 25, 200, 25);
         setRGB0(p, 0, 0, 0);
         setRGB1(p, 0, 0, 0);
-        if (w >= 31 || DAT_800632e4 != 0) {
+        if (w >= 31 || gauge_blink != 0) {
             setRGB3(p, level * 250 / 32, 0, 0);
             setRGB2(p, 250 - w * 5 / 2, w * 5 / 2 * level / 32, 0);
         } else {
@@ -314,7 +314,7 @@ void hud_draw_gauges(int level)
         addPrim(&vs_gfx_state.ot_cur[1], p);
     }
     for (i = 0; i < 2; i++) {
-        f = &DAT_800633b0.fighter[i];
+        f = &shared_buffer.fighter[i];
         if (f->unk4DF18.unk1BA != 0) {
             packet = vs_gfx_state.packet;
             p = (POLY_G4 *)packet->cur;
@@ -342,7 +342,7 @@ void hud_draw_gauges(int level)
  */
 
 /*
- * One pulsing red marker per round won (DAT_80063370) for each fighter,
+ * One pulsing red marker per round won (round_wins) for each fighter,
  * left to right for the first and right to left for the second; `phase`
  * (0..95) cycles the gradient, `scale` its brightness.
  */
@@ -367,7 +367,7 @@ void hud_draw_round_wins(int phase, int scale)
         top = 192 - (phase - 64) * 4;
     }
     for (j = 0; j < 2; j++) {
-        for (i = 0; i < DAT_80063370[j]; i++) {
+        for (i = 0; i < round_wins[j]; i++) {
             p = (POLY_G4 *)vs_gfx_state.packet->cur;
             vs_gfx_state.packet->cur = (u_long *)(p + 1);
             setlen(p, 8);
@@ -616,7 +616,7 @@ void hud_draw_dialog_box(int level, int wide)
  * Drawing the fighters' names.
  */
 /*
- * Draws both fighters' names (item names DAT_801624b8[n].slot[DAT_80063338]) in
+ * Draws both fighters' names (item names teams[n].slot[round_index]) in
  * 11-pixel glyphs from the font page at VRAM (640, 0): the first on the
  * left, the second on the right, wrapping to a second line at glyph 49;
  * `bright` sets their green tint.
@@ -636,7 +636,7 @@ void hud_draw_fighter_names(int bright)
     u16 glyph;
 
     for (n = 0; n < 2;) {
-        s = VS_ITEM_NAME(DAT_801624b8[n].slot[DAT_80063338]);
+        s = VS_ITEM_NAME(teams[n].slot[round_index]);
         glyph = *s;
         if (glyph == 0xffff || glyph == 0)
             goto next;
@@ -800,18 +800,18 @@ int round_draw_opening(int frame)
         hud_draw_banner(3, (frame - 100) * 2);
         hud_draw_clock_value(30, 32);
         hud_draw_gauges(32);
-        hud_draw_round_wins((u32)pad_state.unk3C % 96, 32);
+        hud_draw_round_wins((u32)vs_pad_state.unk3C % 96, 32);
         hud_draw_fighter_names(32);
     } else if (frame > 70) {
         hud_draw_banner(7, (frame - 70) * 2);
         hud_draw_clock_value(30, frame - 70);
         hud_draw_gauges((frame - 70) * 2);
-        hud_draw_round_wins((u32)pad_state.unk3C % 96, (frame - 70) * 2);
+        hud_draw_round_wins((u32)vs_pad_state.unk3C % 96, (frame - 70) * 2);
         hud_draw_fighter_names(frame - 70);
     } else if (frame > 40) {
-        hud_draw_round_banner(DAT_80063338 + 16, (48 - frame) * 2, 50 - frame);
+        hud_draw_round_banner(round_index + 16, (48 - frame) * 2, 50 - frame);
     } else {
-        hud_draw_round_banner(DAT_80063338 + 16, (frame - 10) * 2, 50 - frame);
+        hud_draw_round_banner(round_index + 16, (frame - 10) * 2, 50 - frame);
     }
     if (frame >= 20 && frame <= 76) {
         if (frame < 45) {
@@ -828,7 +828,7 @@ int round_draw_opening(int frame)
             ring[1].r = ring[1].g = ring[1].b = FLOOR0(255 - (frame - 61) * 16);
         }
         for (n = 0; n < 2; n++) {
-            RADIUS(DAT_800633b0.fighter[n].unk4DF18.unk1B4, 500, 1000, 1500, 2000);
+            RADIUS(shared_buffer.fighter[n].unk4DF18.unk1B4, 500, 1000, 1500, 2000);
             for (i = 0; i < 16; i++) {
                 v[i].vx = r * coss[i] * open / 409600;
                 v[i].vy = 0;
@@ -837,7 +837,7 @@ int round_draw_opening(int frame)
                 v[i + 16].vy = vs_gfx_state.unk2CA78.vy;
                 v[i + 16].vz = r * sins[i] * open / 409600;
             }
-            PLACE(m, DAT_800633b0.fighter[n]);
+            PLACE(m, shared_buffer.fighter[n]);
             for (i = 0; i < 30; i += 3) {
                 gte_ldv3c(&v[i]);
                 gte_rtpt();
@@ -894,7 +894,7 @@ int round_draw_opening(int frame)
     }
     if (frame < 100) {
         for (i = 0; i < 2; i++) {
-            RADIUS(DAT_800633b0.fighter[i].unk4DF18.unk1B4, 625, 1250, 1875, 2500);
+            RADIUS(shared_buffer.fighter[i].unk4DF18.unk1B4, 625, 1250, 1875, 2500);
             v[i].vx = -r;
             v[i].vy = 0;
             v[i].vz = -r;
@@ -907,7 +907,7 @@ int round_draw_opening(int frame)
             v[i + 3].vx = r;
             v[i + 3].vy = 0;
             v[i + 3].vz = r;
-            PLACE(m, DAT_800633b0.fighter[i]);
+            PLACE(m, shared_buffer.fighter[i]);
             gte_ldv3c(&v[i]);
             gte_rtpt();
             gte_stsxy3(&v[i], &v[i + 1], &v[i + 2]);
@@ -939,18 +939,18 @@ int round_draw_opening(int frame)
     }
     if (frame > 45) {
         for (i = 0; i < 2; i++) {
-            DAT_80063300 = &DAT_800633b0.fighter[i];
-            switch (DAT_800633b0.fighter[i].unk4DF10) {
+            current_fighter = &shared_buffer.fighter[i];
+            switch (shared_buffer.fighter[i].unk4DF10) {
             case 1:
                 fighter_draw_skeletal();
                 break;
             case 2:
-                DAT_80063360 = 0;
+                mesh_mirror = 0;
                 fighter_draw_vertex_anim();
                 break;
             }
-            DAT_80063300->unk4DEEA =
-                (DAT_80063300->unk4DEEA + DAT_80063300->unk4DEEC * DAT_80063220) & 0xfff;
+            current_fighter->unk4DEEA =
+                (current_fighter->unk4DEEA + current_fighter->unk4DEEC * frames_per_draw) & 0xfff;
             fighter_draw_shadow(i, 4096);
         }
     }

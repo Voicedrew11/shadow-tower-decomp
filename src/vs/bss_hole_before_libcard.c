@@ -1,6 +1,6 @@
 /*
  * VS.EXE: a data-only module (WIP) owning an unreferenced .bss hole between
- * the last game object (DAT_801ce698's end) and LIBCARD's .bss (0x801d24a8). Nothing references it, but PSYLINK leaves no hole between
+ * the last game object (vs_effects's end) and LIBCARD's .bss (0x801d24a8). Nothing references it, but PSYLINK leaves no hole between
  * objects' COMMON beyond each request's alignment, so some object allocated
  * these bytes; its identity is admitted from the layout alone and its unit
  * stays unresolved until the linked .SYM confirms the placement.

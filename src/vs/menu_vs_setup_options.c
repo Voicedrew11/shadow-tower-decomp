@@ -49,20 +49,20 @@ void menu_vs_setup_draw_options(void)
     for (i = 0; i < 7; i++) {
         switch (i) {
         case 3:
-            if (DAT_80063380)
+            if (save_loaded_1p)
                 ui_draw_text(VS_MESSAGE(i), 59, i * 20 + 56, &sp->style[0]);
             else
                 ui_draw_text(VS_MESSAGE(i), 59, i * 20 + 56, &DAT_800632c4);
             break;
         case 4:
-            if (DAT_80063381)
+            if (save_loaded_2p)
                 ui_draw_text(VS_MESSAGE(i), 59, i * 20 + 56, &sp->style[0]);
             else
                 ui_draw_text(VS_MESSAGE(i), 59, i * 20 + 56, &DAT_800632c4);
             break;
         case 5:
         case 6:
-            if (DAT_80063380 && DAT_80063381)
+            if (save_loaded_1p && save_loaded_2p)
                 ui_draw_text(VS_MESSAGE(i), 84, i * 20 + 56, &sp->style[0]);
             else
                 ui_draw_text(VS_MESSAGE(i), 84, i * 20 + 56, &DAT_800632c4);
@@ -86,9 +86,9 @@ void menu_vs_setup_draw_options(void)
     sp->unk238.y = 84;
     sp->unk238.w = 56;
     sp->unk238.h = 28;
-    if (DAT_80063330[0] != -1) {
+    if (requested_items[0] != -1) {
         sp->style[0].cd |= 0x80;
-        ui_draw_text(VS_ITEM_NAME(DAT_80063330[0]), 294, 116, &sp->style[0]);
+        ui_draw_text(VS_ITEM_NAME(requested_items[0]), 294, 116, &sp->style[0]);
         sp->style[0].cd &= 0x7f;
         ui_draw_image(&sp->unk238, &tex, NULL, NULL, 16);
     }
@@ -104,9 +104,9 @@ void menu_vs_setup_draw_options(void)
     ui_draw_text(VS_MESSAGE(9), 296, 144, &sp->style[0]);
     sp->unk238.y = 164;
     tex.vy += 28;
-    if (DAT_80063334 != -1) {
+    if (requested_item_2p != -1) {
         sp->style[0].cd |= 0x80;
-        ui_draw_text(VS_ITEM_NAME(DAT_80063334), 294, 196, &sp->style[0]);
+        ui_draw_text(VS_ITEM_NAME(requested_item_2p), 294, 196, &sp->style[0]);
         sp->style[0].cd &= 0x7f;
         ui_draw_image(&sp->unk238, &tex, NULL, NULL, 16);
     }

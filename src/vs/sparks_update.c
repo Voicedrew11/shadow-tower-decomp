@@ -18,7 +18,7 @@
 ADDRESS(0x8002d998, 0x340)
 void sparks_update(void)
 {
-    VsRecord20 *rec = DAT_801c4a58;
+    VsRecord20 *rec = sparks;
     int count = 0;
     int i = 2000;
     MATRIX m;
@@ -61,7 +61,7 @@ void sparks_update(void)
     CompMatrix(&vs_gfx_state.unk2C998, &m, &m);
     gte_SetRotMatrix(&m);
     gte_SetTransMatrix(&m);
-    rec = DAT_801c4a58;
+    rec = sparks;
     i = 2000;
     while (i--) {
         if (rec->unk10 != 0) {

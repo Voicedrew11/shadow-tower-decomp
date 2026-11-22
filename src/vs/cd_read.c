@@ -85,7 +85,7 @@ void mem_free(void *p)
 ADDRESS(0x8002e720, 0x148)
 void cd_request_ready_callback(u_char status, u_char *result)
 {
-    StCdRequest *request = DAT_801a4590.unkDC;
+    StCdRequest *request = vs_cd_state.unkDC;
     u_char param[8]; /* unused */
     u_long rest[70];
 
@@ -132,7 +132,7 @@ void cd_request_ready_callback(u_char status, u_char *result)
 ADDRESS(0x8002e868, 0x22c)
 void cd_request_sync_callback(u_char status, u_char *result)
 {
-    StCdRequest *request = DAT_801a4590.unkDC;
+    StCdRequest *request = vs_cd_state.unkDC;
 
     if (status == CdlComplete) {
         switch (request->unk0) {
@@ -201,9 +201,9 @@ void cd_request_retire(StCdRequest *request)
 {
     request->unk0 = 0;
     request->unk1 = STEP_SEEK;
-    if (++request == &DAT_801a4590.unk8[VS_CD_REQUESTS])
+    if (++request == &vs_cd_state.unk8[VS_CD_REQUESTS])
         request -= VS_CD_REQUESTS;
-    DAT_801a4590.unkDC = request;
+    vs_cd_state.unkDC = request;
     if (request->unk0 != 0) {
         CdReadyCallback(0);
         CdSyncCallback(cd_request_sync_callback);
@@ -311,7 +311,7 @@ void cd_read_file_extent(u_long *buf, StFileExtent *file, u32 size)
 ADDRESS(0x8002ee90, 0xac)
 int cd_read_member(u16 archive, u16 member, u_long *buf)
 {
-    VsArchive *a = &DAT_801a4590.archives[archive];
+    VsArchive *a = &vs_cd_state.archives[archive];
     u16 start = a->sectors[member];
     CdlLOC loc;
     int sectors = -start + a->sectors[member + 1];

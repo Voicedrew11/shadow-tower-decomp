@@ -13,6 +13,6 @@
 #include <vs/sound.h>
 
 DATA(0x800633b0, 0x9c1d0, ".bss")
-VsBuffer DAT_800633b0;
+VsBuffer shared_buffer;
 DATA(0x800ff580, 0x17000, ".bss")
-u_char DAT_800ff580[0x17000];
+u_char menu_vab_body[0x17000];

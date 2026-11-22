@@ -34,7 +34,7 @@ typedef struct {
 typedef char VsPadSize[sizeof(VsPad) == 0x14 ? 1 : -1];
 typedef char VsPadStateSize[sizeof(VsPadState) == 0x48 ? 1 : -1];
 
-extern VsPadState pad_state;
+extern VsPadState vs_pad_state;
 
 /* One controller's 34-byte Psy-Q receive buffer, filled by the pad
  * interrupt (volatile: the decode rereads it each frame). */
@@ -45,6 +45,6 @@ typedef struct {
     u8 unk4[34 - 4];
 } VsPadBuffer;
 
-extern VsPadBuffer DAT_801961e0[2];
+extern VsPadBuffer pad_buffers[2];
 
 #endif

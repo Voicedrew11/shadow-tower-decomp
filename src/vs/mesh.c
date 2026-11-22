@@ -614,14 +614,14 @@ void mesh_draw_ft3_nccs(int count, MeshFaceFT3 *face, u_long *ot)
         gte_nclip();
         code = face->code;
         sp->rgb.cd = code | 0x24;
-        if (DAT_80063350)
+        if (mesh_semi_trans)
             sp->rgb.cd = code | 0x26;
         gte_stopz(&sp->nclip);
-        if (DAT_80063360)
+        if (mesh_mirror)
             sp->nclip = -sp->nclip;
         if (sp->nclip > 0) {
             z = ((v0->z + v1->z + v2->z) >> 5) / 3 + face->depth_bias;
-            if ((z < sp->far_z && z > (short)sp->near_z) || DAT_80063224) {
+            if ((z < sp->far_z && z > (short)sp->near_z) || mesh_fixed_depth) {
                 p = (POLY_FT3 *)sp->prim;
                 sp->prim = (u_long *)(p + 1);
                 gte_stsxy3_ft3(p);
@@ -631,8 +631,8 @@ void mesh_draw_ft3_nccs(int count, MeshFaceFT3 *face, u_long *ot)
                 gte_nccs_b();
                 *(u_long *)&p->u1 = face->uv1_tpage;
                 *(u_short *)&p->u2 = face->uv2;
-                if (DAT_80063224)
-                    z = sp->far_z - DAT_80063224;
+                if (mesh_fixed_depth)
+                    z = sp->far_z - mesh_fixed_depth;
                 mesh_add_prim(ot + z, p, 7);
                 gte_strgb(&p->r0);
             }
@@ -670,15 +670,15 @@ void mesh_draw_ft4_nccs(int count, MeshFaceFT4 *face, u_long *ot)
         gte_nclip();
         code = face->code;
         sp->rgb.cd = code | 0x2c;
-        if (DAT_80063350)
+        if (mesh_semi_trans)
             sp->rgb.cd = code | 0x2e;
         gte_stopz(&sp->nclip);
-        if (DAT_80063360)
+        if (mesh_mirror)
             sp->nclip = -sp->nclip;
         if (sp->nclip > 0) {
             v3 = (MeshVertex *)(sp->vertices + face->i3);
             z = ((v0->z + v1->z + v2->z + v3->z) >> 7) + face->depth_bias;
-            if ((z < sp->far_z && z > (short)sp->near_z) || DAT_80063224) {
+            if ((z < sp->far_z && z > (short)sp->near_z) || mesh_fixed_depth) {
                 p = (POLY_FT4 *)sp->prim;
                 sp->prim = (u_long *)(p + 1);
                 gte_stsxy3_ft4(p);
@@ -690,8 +690,8 @@ void mesh_draw_ft4_nccs(int count, MeshFaceFT4 *face, u_long *ot)
                 *(u_long *)&p->u1 = face->uv1_tpage;
                 *(u_short *)&p->u2 = face->uv2;
                 *(u_short *)&p->u3 = face->uv3;
-                if (DAT_80063224)
-                    z = sp->far_z - DAT_80063224;
+                if (mesh_fixed_depth)
+                    z = sp->far_z - mesh_fixed_depth;
                 mesh_add_prim(ot + z, p, 9);
                 gte_strgb(&p->r0);
             }
@@ -728,10 +728,10 @@ void mesh_draw_gt3_nccs(int count, MeshFaceGT3 *face, u_long *ot)
         gte_nclip();
         code = face->code;
         sp->rgb.cd = code | 0x34;
-        if (DAT_80063350)
+        if (mesh_semi_trans)
             sp->rgb.cd = code | 0x36;
         gte_stopz(&sp->nclip);
-        if (DAT_80063360)
+        if (mesh_mirror)
             sp->nclip = -sp->nclip;
         if (sp->nclip > 0) {
             z = ((v0->z + v1->z + v2->z) >> 5) / 3 + face->depth_bias;
@@ -782,10 +782,10 @@ void mesh_draw_gt4_nccs(int count, MeshFaceGT4 *face, u_long *ot)
         gte_nclip();
         code = face->code;
         sp->rgb.cd = code | 0x3c;
-        if (DAT_80063350)
+        if (mesh_semi_trans)
             sp->rgb.cd = code | 0x3e;
         gte_stopz(&sp->nclip);
-        if (DAT_80063360)
+        if (mesh_mirror)
             sp->nclip = -sp->nclip;
         if (sp->nclip > 0) {
             v3 = (MeshVertex *)(sp->vertices + face->i3);

@@ -37,7 +37,7 @@ void cd_wait_frame(void)
 ADDRESS(0x8001cb5c, 0xbc)
 void cd_request_read_callback(u_char status, u_char *result)
 {
-    StCdRequest *request = DAT_801a4590.unkDC;
+    StCdRequest *request = vs_cd_state.unkDC;
     u_char param[8]; /* unused */
 
     if (status == CdlComplete) {
@@ -72,7 +72,7 @@ void cd_request_read_callback(u_char status, u_char *result)
 ADDRESS(0x8001cc18, 0x148)
 void cd_queue_ready_callback(u_char status, u_char *result)
 {
-    StCdRequest *request = DAT_801a4590.unkDC;
+    StCdRequest *request = vs_cd_state.unkDC;
     u_char param[8]; /* unused */
     u_long rest[70];
 
@@ -119,7 +119,7 @@ void cd_queue_ready_callback(u_char status, u_char *result)
 ADDRESS(0x8001cd60, 0x22c)
 void cd_queue_sync_callback(u_char status, u_char *result)
 {
-    StCdRequest *request = DAT_801a4590.unkDC;
+    StCdRequest *request = vs_cd_state.unkDC;
 
     if (status == CdlComplete) {
         switch (request->unk0) {
@@ -186,7 +186,7 @@ void cd_queue_sync_callback(u_char status, u_char *result)
 ADDRESS(0x8001cf8c, 0x58)
 void cd_wait_idle(void)
 {
-    while (DAT_801a4590.unkDC != DAT_801a4590.unkD8 || DAT_801a4590.unkDC->unk0 != 0)
+    while (vs_cd_state.unkDC != vs_cd_state.unkD8 || vs_cd_state.unkDC->unk0 != 0)
         cd_wait_frame();
 }
 
@@ -200,7 +200,7 @@ void cd_request_wait_free(StCdRequest *request)
 ADDRESS(0x8001d030, 0x104)
 StCdRequest *cd_request_queue(int kind, CdlLOC *loc, u32 size, u8 *dest, void (*done)())
 {
-    StCdRequest *req = DAT_801a4590.unkD8;
+    StCdRequest *req = vs_cd_state.unkD8;
 
     cd_request_wait_free(req);
     req->unk0 = kind;
@@ -209,9 +209,9 @@ StCdRequest *cd_request_queue(int kind, CdlLOC *loc, u32 size, u8 *dest, void (*
     req->unk20 = dest;
     req->unk28 = (size + 2047) >> 11;
     req->done = done;
-    if (++DAT_801a4590.unkD8 == &DAT_801a4590.unk8[VS_CD_REQUESTS])
-        DAT_801a4590.unkD8 = DAT_801a4590.unk8;
-    if (DAT_801a4590.unkDC == req) {
+    if (++vs_cd_state.unkD8 == &vs_cd_state.unk8[VS_CD_REQUESTS])
+        vs_cd_state.unkD8 = vs_cd_state.unk8;
+    if (vs_cd_state.unkDC == req) {
         CdReadyCallback(0);
         CdSyncCallback(cd_queue_sync_callback);
         while (!CdControl(CdlSeekL, (u_char *)loc, 0))
@@ -223,7 +223,7 @@ StCdRequest *cd_request_queue(int kind, CdlLOC *loc, u32 size, u8 *dest, void (*
 ADDRESS(0x8001d134, 0x84)
 int cd_archive_member_locate(int archive, int member, CdlLOC *loc)
 {
-    VsArchive *a = &DAT_801a4590.archives[archive];
+    VsArchive *a = &vs_cd_state.archives[archive];
     u16 start = a->sectors[member];
 
     if (loc)

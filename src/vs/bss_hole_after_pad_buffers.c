@@ -1,6 +1,6 @@
 /*
  * VS.EXE: a data-only module (WIP) owning an unreferenced .bss hole between
- * DAT_801961e0's end (0x80196224, then 8-aligned) and DAT_80196230. Nothing references it, but PSYLINK leaves no hole between
+ * pad_buffers's end (0x80196224, then 8-aligned) and vs_menu_messages. Nothing references it, but PSYLINK leaves no hole between
  * objects' COMMON beyond each request's alignment, so some object allocated
  * these bytes; its identity is admitted from the layout alone and its unit
  * stays unresolved until the linked .SYM confirms the placement.

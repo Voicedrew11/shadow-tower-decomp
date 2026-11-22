@@ -26,8 +26,8 @@ void func_80032108(void)
 ADDRESS(0x80032110, 0xf0)
 int effect_reaches_opponent(int reach, u_long height)
 {
-    StEffect *e = DAT_801ce698.cur;
-    VsFighter *f = &DAT_800633b0.fighter[1 - e->unk4C];
+    StEffect *e = vs_effects.cur;
+    VsFighter *f = &shared_buffer.fighter[1 - e->unk4C];
     SVECTOR d;
     int r;
 

@@ -14,7 +14,7 @@
 #include <vs/funcs.h>
 
 /*
- * Starts a frame and draws, in team mode (DAT_80063228 == 3), the six
+ * Starts a frame and draws, in team mode (round_count == 3), the six
  * slot pictures in two columns of three (black for an empty slot),
  * otherwise each player's first slot; then each player's fighter
  * picture over the shared frame tile, and the two background strips.
@@ -23,7 +23,7 @@ ADDRESS(0x80021984, 0x290)
 void lineup_screen_draw(void)
 {
     VsMenuScratch *sp = VS_MENU_SCRATCH;
-    s32 *slot = DAT_801624b8[0].slot;
+    s32 *slot = teams[0].slot;
     CVECTOR black;
     int i;
 
@@ -32,7 +32,7 @@ void lineup_screen_draw(void)
     sp->unk238.h = 48;
     sp->unk238.y = 48;
     sp->unk238.x = 56;
-    if (DAT_80063228 == 3) {
+    if (round_count == 3) {
         for (i = 0; i < 6; i++) {
             if (*slot++ == -1) {
                 black.r = 0;
@@ -61,7 +61,7 @@ void lineup_screen_draw(void)
     sp->unk238.x = 20;
     sp->unk238.y = 164;
     for (i = 0; i < 2; i++) {
-        if (DAT_80063330[i] == -1) {
+        if (requested_items[i] == -1) {
             black.r = 0;
             black.g = 0;
             black.b = 0;

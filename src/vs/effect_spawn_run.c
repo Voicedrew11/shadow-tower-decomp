@@ -283,9 +283,9 @@ StEffect *effect_spawn(int n, u8 attack, u8 flags, u8 kind, VECTOR *pos, SVECTOR
             REACH(e, e->unk38.vx);
             e->unk1C = (StEffect *)args[3];
             if (e->unk1 == 0x7e || e->unk1 == 0x81)
-                e->unk20.vy = DAT_800633b0.fighter[e->unk4C].unk4DF18.unk1B6 + 1600;
+                e->unk20.vy = shared_buffer.fighter[e->unk4C].unk4DF18.unk1B6 + 1600;
             else
-                e->unk20.vy = DAT_800633b0.fighter[e->unk4C].unk4DF18.unk1B6;
+                e->unk20.vy = shared_buffer.fighter[e->unk4C].unk4DF18.unk1B6;
             e->unk30.vy = 0;
             e->unk40.vx = 0;
             e->unk40.vy = 0;
@@ -591,7 +591,7 @@ StEffect *effect_spawn(int n, u8 attack, u8 flags, u8 kind, VECTOR *pos, SVECTOR
 ADDRESS(0x8003333c, 0x78)
 int effect_attack_move(int arg0, u_long height, int spin)
 {
-    StEffect *e = DAT_801ce698.cur;
+    StEffect *e = vs_effects.cur;
     int result = effect_reaches_opponent(arg0, height);
 
     e->unk20.vx += e->unk40.vx;
@@ -605,7 +605,7 @@ int effect_attack_move(int arg0, u_long height, int spin)
 ADDRESS(0x800333b4, 0x40)
 void effect_step_back(void)
 {
-    StEffect *e = DAT_801ce698.cur;
+    StEffect *e = vs_effects.cur;
 
     e->unk20.vx -= e->unk40.vx;
     e->unk20.vy -= e->unk40.vy;
@@ -616,7 +616,7 @@ void effect_step_back(void)
 ADDRESS(0x800333f4, 0x7c)
 void effect_step_back_half(void)
 {
-    StEffect *e = DAT_801ce698.cur;
+    StEffect *e = vs_effects.cur;
 
     e->unk20.vx -= e->unk40.vx / 2;
     e->unk20.vy -= e->unk40.vy / 2;
@@ -662,7 +662,7 @@ void effect_step_back_half(void)
     SPAWN(e, second), &(e)->unk20, &(e)->unk40, (e)->unk38.vx, &(e)->unk30, e)
 
 /*
- * Runs the current effect (DAT_801ce698.cur) for one frame.
+ * Runs the current effect (vs_effects.cur) for one frame.
  *
  * `unused` stands for 32 bytes of locals that retail's frame has ahead of
  * the first block's and that nothing reads or writes (ST.EXE's
@@ -674,7 +674,7 @@ void effect_step_back_half(void)
 ADDRESS(0x800335e8, 0x1ce4)
 void effect_update(void)
 {
-    StEffect *e = DAT_801ce698.cur;
+    StEffect *e = vs_effects.cur;
     int kind = e->unk1;
     VECTOR unused[2];
     StEffect *child;
@@ -865,7 +865,7 @@ void effect_update(void)
     case 0xeb:
         e->unk30.vz = (e->unk30.vz - 128) & 0xfff;
         {
-            VsFighter *f = &DAT_800633b0.fighter[e->unk4C];
+            VsFighter *f = &shared_buffer.fighter[e->unk4C];
             SVECTOR v;
             MATRIX m;
             SVECTOR rot;
@@ -942,10 +942,10 @@ void effect_update(void)
         if (e->unk50.h >= -128)
             e->unk50.h = -128;
         if (e->unk1 == 0x7e || e->unk1 == 0x81)
-            len = (DAT_80063300->unk4DEF0.vy + DAT_80063300->unk4DF18.unk1B2 - e->unk1C->unk20.vy)
+            len = (current_fighter->unk4DEF0.vy + current_fighter->unk4DF18.unk1B2 - e->unk1C->unk20.vy)
                 * rcos(e->unk50.h) / rsin(e->unk50.h);
         else
-            len = (DAT_80063300->unk4DEF0.vy - e->unk1C->unk20.vy) * rcos(e->unk50.h)
+            len = (current_fighter->unk4DEF0.vy - e->unk1C->unk20.vy) * rcos(e->unk50.h)
                 / rsin(e->unk50.h);
         e->unk20.vx = e->unk1C->unk20.vx - len * rcos(e->unk1C->unk30.vy + 1024) / 4096;
         e->unk20.vz = e->unk1C->unk20.vz + len * rsin(e->unk1C->unk30.vy + 1024) / 4096;
@@ -998,15 +998,15 @@ void effect_update(void)
             int len;
 
             if (e->unk1 == 0xdf || e->unk1 == 0xe2) {
-                len = (DAT_80063300->unk4DEF0.vy + DAT_80063300->unk4DF18.unk1B2
+                len = (current_fighter->unk4DEF0.vy + current_fighter->unk4DF18.unk1B2
                        - e->unk1C->unk20.vy)
                       * rcos(e->unk50.h) / rsin(e->unk50.h);
-                dy = DAT_80063300->unk4DEF0.vy + DAT_80063300->unk4DF18.unk1B2
+                dy = current_fighter->unk4DEF0.vy + current_fighter->unk4DF18.unk1B2
                      - e->unk1C->unk20.vy;
             } else {
-                len = (DAT_80063300->unk4DEF0.vy - e->unk1C->unk20.vy) * rcos(e->unk50.h)
+                len = (current_fighter->unk4DEF0.vy - e->unk1C->unk20.vy) * rcos(e->unk50.h)
                       / rsin(e->unk50.h);
-                dy = DAT_80063300->unk4DEF0.vy - e->unk1C->unk20.vy;
+                dy = current_fighter->unk4DEF0.vy - e->unk1C->unk20.vy;
             }
             e->unk38.vz = SquareRoot0(len * len + dy * dy);
         }
@@ -1231,7 +1231,7 @@ void effect_update(void)
 ADDRESS(0x800352cc, 0x30)
 void effects_clear(void)
 {
-    StEffect *e = DAT_801ce698.slots;
+    StEffect *e = vs_effects.slots;
     u16 i;
 
     for (i = 0; i < ST_EFFECT_SLOTS; i++) {
@@ -1245,12 +1245,12 @@ void effects_clear(void)
 ADDRESS(0x800352fc, 0xd4)
 void effects_run(void)
 {
-    StEffect *e = DAT_801ce698.slots;
+    StEffect *e = vs_effects.slots;
 
-    for (DAT_801ce698.index = 0; DAT_801ce698.index < ST_EFFECT_SLOTS; DAT_801ce698.index++) {
+    for (vs_effects.index = 0; vs_effects.index < ST_EFFECT_SLOTS; vs_effects.index++) {
         if (e->unk0 != ST_EFFECT_FREE) {
-            DAT_801ce698.cur = e;
-            DAT_801ce698.def = &DAT_801ce698.defs[e->unk1];
+            vs_effects.cur = e;
+            vs_effects.def = &vs_effects.defs[e->unk1];
             if (--e->unk10 == -1)
                 e->unk0 = ST_EFFECT_FREE;
             else
@@ -1379,7 +1379,7 @@ ADDRESS(0x80035b68, 0x204)
 void effects_draw(void)
 {
     VsScratchPad *sp = VS_SCRATCHPAD;
-    StEffect *o = DAT_801ce698.slots;
+    StEffect *o = vs_effects.slots;
     MATRIX unit = {{{ONE, 0, 0}, {0, ONE, 0}, {0, 0, ONE}}};
     int i;
 
@@ -1395,14 +1395,14 @@ void effects_draw(void)
             sp->near_z = 11;
             sp->far_z = 4103;
             sp->ot = vs_gfx_state.ot_cur - 7;
-            effect_draw_model_part((u8 *)DAT_800633b0.fighter[o->unk4C].unk4B000, &o->unk20, &o->unk30,
+            effect_draw_model_part((u8 *)shared_buffer.fighter[o->unk4C].unk4B000, &o->unk20, &o->unk30,
                           &o->unk38, &vs_gfx_state.unk2C998, o->unk2 & 0x7f, o->unk12, o->unk7, 0);
             break;
         case 4:
             sp->near_z = 11;
             sp->far_z = 4103;
             sp->ot = vs_gfx_state.ot_cur - 7;
-            effect_draw_model_part((u8 *)DAT_800633b0.fighter[o->unk4C].unk4B000, &o->unk20, &o->unk30,
+            effect_draw_model_part((u8 *)shared_buffer.fighter[o->unk4C].unk4B000, &o->unk20, &o->unk30,
                           &o->unk38, &unit, o->unk2 & 0x7f, o->unk12, o->unk7, 0);
             break;
         case 8:

@@ -479,6 +479,14 @@ defines = ["VS_EXE"]
 link = "first"
 
 [[unit]]
+unit = "vs.sbss_fight_banner"
+image = "VS.EXE"
+source = "src/vs/sbss_fight_banner.c"
+profile = "probe-gcc272cdk-o2-g8"
+defines = ["VS_EXE"]
+link = "first"
+
+[[unit]]
 unit = "vs.sbss_match_flags"
 image = "VS.EXE"
 source = "src/vs/sbss_match_flags.c"
@@ -487,9 +495,17 @@ defines = ["VS_EXE"]
 link = "first"
 
 [[unit]]
-unit = "vs.sbss_picks_round"
+unit = "vs.sbss_requested_items"
 image = "VS.EXE"
-source = "src/vs/sbss_picks_round.c"
+source = "src/vs/sbss_requested_items.c"
+profile = "probe-gcc272cdk-o2-g8"
+defines = ["VS_EXE"]
+link = "first"
+
+[[unit]]
+unit = "vs.sbss_round_index"
+image = "VS.EXE"
+source = "src/vs/sbss_round_index.c"
 profile = "probe-gcc272cdk-o2-g8"
 defines = ["VS_EXE"]
 link = "first"
@@ -503,9 +519,17 @@ defines = ["VS_EXE"]
 link = "first"
 
 [[unit]]
-unit = "vs.sbss_semi_trans_sound"
+unit = "vs.sbss_semi_trans_camera"
 image = "VS.EXE"
-source = "src/vs/sbss_semi_trans_sound.c"
+source = "src/vs/sbss_semi_trans_camera.c"
+profile = "probe-gcc272cdk-o2-g8"
+defines = ["VS_EXE"]
+link = "first"
+
+[[unit]]
+unit = "vs.sbss_menu_vab_page"
+image = "VS.EXE"
+source = "src/vs/sbss_menu_vab_page.c"
 profile = "probe-gcc272cdk-o2-g8"
 defines = ["VS_EXE"]
 link = "first"
@@ -522,6 +546,30 @@ link = "first"
 unit = "vs.sbss_round_wins"
 image = "VS.EXE"
 source = "src/vs/sbss_round_wins.c"
+profile = "probe-gcc272cdk-o2-g8"
+defines = ["VS_EXE"]
+link = "first"
+
+[[unit]]
+unit = "vs.sbss_text_scroll_mode"
+image = "VS.EXE"
+source = "src/vs/sbss_text_scroll_mode.c"
+profile = "probe-gcc272cdk-o2-g8"
+defines = ["VS_EXE"]
+link = "first"
+
+[[unit]]
+unit = "vs.sbss_save_loaded"
+image = "VS.EXE"
+source = "src/vs/sbss_save_loaded.c"
+profile = "probe-gcc272cdk-o2-g8"
+defines = ["VS_EXE"]
+link = "first"
+
+[[unit]]
+unit = "vs.sbss_hole_after_save_loaded"
+image = "VS.EXE"
+source = "src/vs/sbss_hole_after_save_loaded.c"
 profile = "probe-gcc272cdk-o2-g8"
 defines = ["VS_EXE"]
 link = "first"
@@ -844,9 +892,23 @@ profile = "probe-gcc272cdk-o2-g0"
 defines = ["VS_EXE"]
 
 [[unit]]
-unit = "vs.bss_vab_header_seq"
+unit = "vs.bss_menu_vab_head"
 image = "VS.EXE"
-source = "src/vs/bss_vab_header_seq.c"
+source = "src/vs/bss_menu_vab_head.c"
+profile = "probe-gcc272cdk-o2-g0"
+defines = ["VS_EXE"]
+
+[[unit]]
+unit = "vs.bss_voice_status"
+image = "VS.EXE"
+source = "src/vs/bss_voice_status.c"
+profile = "probe-gcc272cdk-o2-g0"
+defines = ["VS_EXE"]
+
+[[unit]]
+unit = "vs.bss_seq_attr_table"
+image = "VS.EXE"
+source = "src/vs/bss_seq_attr_table.c"
 profile = "probe-gcc272cdk-o2-g0"
 defines = ["VS_EXE"]
 
@@ -858,9 +920,37 @@ profile = "probe-gcc272cdk-o2-g0"
 defines = ["VS_EXE"]
 
 [[unit]]
+unit = "vs.bss_arena_models"
+image = "VS.EXE"
+source = "src/vs/bss_arena_models.c"
+profile = "probe-gcc272cdk-o2-g0"
+defines = ["VS_EXE"]
+
+[[unit]]
+unit = "vs.bss_guard_flash_model"
+image = "VS.EXE"
+source = "src/vs/bss_guard_flash_model.c"
+profile = "probe-gcc272cdk-o2-g0"
+defines = ["VS_EXE"]
+
+[[unit]]
+unit = "vs.bss_save_headers"
+image = "VS.EXE"
+source = "src/vs/bss_save_headers.c"
+profile = "probe-gcc272cdk-o2-g0"
+defines = ["VS_EXE"]
+
+[[unit]]
 unit = "vs.bss_hole_after_pad_state"
 image = "VS.EXE"
 source = "src/vs/bss_hole_after_pad_state.c"
+profile = "probe-gcc272cdk-o2-g0"
+defines = ["VS_EXE"]
+
+[[unit]]
+unit = "vs.bss_sound_banks"
+image = "VS.EXE"
+source = "src/vs/bss_sound_banks.c"
 profile = "probe-gcc272cdk-o2-g0"
 defines = ["VS_EXE"]
 
@@ -907,16 +997,44 @@ profile = "probe-gcc272cdk-o2-g0"
 defines = ["VS_EXE"]
 
 [[unit]]
-unit = "vs.bss_messages_saves"
+unit = "vs.bss_menu_messages"
 image = "VS.EXE"
-source = "src/vs/bss_messages_saves.c"
+source = "src/vs/bss_menu_messages.c"
 profile = "probe-gcc272cdk-o2-g0"
 defines = ["VS_EXE"]
 
 [[unit]]
-unit = "vs.bss_cd_sparks_effects"
+unit = "vs.bss_save_file_names"
 image = "VS.EXE"
-source = "src/vs/bss_cd_sparks_effects.c"
+source = "src/vs/bss_save_file_names.c"
+profile = "probe-gcc272cdk-o2-g0"
+defines = ["VS_EXE"]
+
+[[unit]]
+unit = "vs.bss_saves"
+image = "VS.EXE"
+source = "src/vs/bss_saves.c"
+profile = "probe-gcc272cdk-o2-g0"
+defines = ["VS_EXE"]
+
+[[unit]]
+unit = "vs.bss_cd_state"
+image = "VS.EXE"
+source = "src/vs/bss_cd_state.c"
+profile = "probe-gcc272cdk-o2-g0"
+defines = ["VS_EXE"]
+
+[[unit]]
+unit = "vs.bss_sparks"
+image = "VS.EXE"
+source = "src/vs/bss_sparks.c"
+profile = "probe-gcc272cdk-o2-g0"
+defines = ["VS_EXE"]
+
+[[unit]]
+unit = "vs.bss_effects"
+image = "VS.EXE"
+source = "src/vs/bss_effects.c"
 profile = "probe-gcc272cdk-o2-g0"
 defines = ["VS_EXE"]
 

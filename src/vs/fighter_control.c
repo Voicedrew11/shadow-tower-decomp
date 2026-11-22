@@ -56,7 +56,7 @@ void effect_spawn_attack(int n, VsAttack *a)
     int c;
     int i;
 
-    f = &DAT_800633b0.fighter[n];
+    f = &shared_buffer.fighter[n];
     data = &f->unk4DF18;
     switch ((s16)a->unk0) {
     case 0x30:
@@ -291,12 +291,12 @@ void effect_spawn_attack(int n, VsAttack *a)
  */
 /* The buttons the moves test (0x10 forward, 0x40 back). */
 DATA(0x800633a8, 0x4, ".sbss")
-static s32 DAT_800633a8;
+static s32 fighter_pad_held;
 
 /* The buttons newly pressed this frame (fighter_update: 0x1000 and 0x8000
  * start attacks, 0x2000 and 0x4000 chain them). */
 DATA(0x800633ac, 0x4, ".sbss")
-static s32 DAT_800633ac;
+static s32 fighter_pad_pressed;
 
 /* Called without prototypes (retail passes int arguments unconverted):
  * src/vs/fighter_hit_test.c's reach test, src/vs/fighter_damage.c's hit
@@ -308,8 +308,8 @@ void effect_spawn_attack();
 /* Moves the fighter a step along its facing, forward or back. */
 #define VS_WALK_ANGLE(f, d, op, angle)                                         \
     do {                                                                        \
-        (f)->unk4DEF0.vx op rsin((angle) + 2048) * (d)->unk1AC * DAT_80063220 / 4096; \
-        (f)->unk4DEF0.vz op rcos((f)->unk4DF02 + 2048) * (d)->unk1AC * DAT_80063220 / 4096; \
+        (f)->unk4DEF0.vx op rsin((angle) + 2048) * (d)->unk1AC * frames_per_draw / 4096; \
+        (f)->unk4DEF0.vz op rcos((f)->unk4DF02 + 2048) * (d)->unk1AC * frames_per_draw / 4096; \
     } while (0)
 #define VS_WALK(f, d, op) VS_WALK_ANGLE(f, d, op, (f)->unk4DF02)
 
@@ -324,7 +324,7 @@ void fighter_walk_reversible(VsFighter *f, s16 from, s16 to)
     VsFighterData *d = &f->unk4DF18;
 
     f->unk4DEEA &= 0xfff;
-    if (DAT_800633a8 & 0x10) {
+    if (fighter_pad_held & 0x10) {
         f->unk4DF0E = 1;
         if (f->unk4DEE8 == d->unk0[0].unk0) {
             f->unk4DEE8 = d->unk0[1].unk0;
@@ -334,7 +334,7 @@ void fighter_walk_reversible(VsFighter *f, s16 from, s16 to)
         if (from != 0 && (f->unk4DEEA < from || to < f->unk4DEEA))
             return;
         VS_WALK(f, d, +=);
-    } else if (DAT_800633a8 & 0x40) {
+    } else if (fighter_pad_held & 0x40) {
         f->unk4DF0E = 1;
         if (f->unk4DEE8 == d->unk0[0].unk0) {
             f->unk4DEE8 = d->unk0[1].unk0;
@@ -361,7 +361,7 @@ void fighter_walk_back_anim(VsFighter *f, s16 from, s16 to)
     VsFighterData *d = &f->unk4DF18;
 
     f->unk4DEEA &= 0xfff;
-    if (DAT_800633a8 & 0x10) {
+    if (fighter_pad_held & 0x10) {
         f->unk4DF0E = 1;
         if (f->unk4DEE8 != d->unk0[1].unk0) {
             f->unk4DEE8 = d->unk0[1].unk0;
@@ -371,7 +371,7 @@ void fighter_walk_back_anim(VsFighter *f, s16 from, s16 to)
         if (from != 0 && (f->unk4DEEA < from || to < f->unk4DEEA))
             return;
         VS_WALK(f, d, +=);
-    } else if (DAT_800633a8 & 0x40) {
+    } else if (fighter_pad_held & 0x40) {
         f->unk4DF0E = 1;
         if (f->unk4DEE8 != d->unk0[12].unk0) {
             f->unk4DEE8 = d->unk0[12].unk0;
@@ -398,12 +398,12 @@ void fighter_slide(VsFighter *f)
     VsFighterData *d = &f->unk4DF18;
 
     f->unk4DEEA &= 0xfff;
-    if (DAT_800633a8 & 0x10) {
+    if (fighter_pad_held & 0x10) {
         int angle = f->unk4DF02;
 
         f->unk4DF0E = 1;
         VS_WALK_ANGLE(f, d, +=, angle);
-    } else if (DAT_800633a8 & 0x40) {
+    } else if (fighter_pad_held & 0x40) {
         int angle = f->unk4DF02;
 
         f->unk4DF0E = 1;
@@ -421,7 +421,7 @@ void fighter_walk_with_start(VsFighter *f, s16 from, s16 to)
     VsFighterData *d = &f->unk4DF18;
     s16 kind;
 
-    if (DAT_800633a8 & 0x10) {
+    if (fighter_pad_held & 0x10) {
         f->unk4DF0E = 1;
         if (f->unk4DEE8 == d->unk0[1].unk0) {
             f->unk4DEEC = d->unk0[1].unk2;
@@ -441,7 +441,7 @@ void fighter_walk_with_start(VsFighter *f, s16 from, s16 to)
             f->unk4DEEC = d->unk0[10].unk2;
             f->unk4DEEA = 0;
         }
-    } else if (DAT_800633a8 & 0x40) {
+    } else if (fighter_pad_held & 0x40) {
         f->unk4DF0E = 1;
         kind = d->unk1AA;
         if (kind == 3 || kind == 5 || kind == 13) {
@@ -501,7 +501,7 @@ void fighter_walk_start_back_anim(VsFighter *f, s16 from, s16 to)
 {
     VsFighterData *d = &f->unk4DF18;
 
-    if (DAT_800633a8 & 0x10) {
+    if (fighter_pad_held & 0x10) {
         f->unk4DF0E = 1;
         if (f->unk4DEE8 == d->unk0[1].unk0) {
             if (VS_IN_FRAMES(f, from, to))
@@ -519,7 +519,7 @@ void fighter_walk_start_back_anim(VsFighter *f, s16 from, s16 to)
             f->unk4DEEC = d->unk0[10].unk2;
             f->unk4DEEA = 0;
         }
-    } else if (DAT_800633a8 & 0x40) {
+    } else if (fighter_pad_held & 0x40) {
         f->unk4DF0E = 1;
         if (f->unk4DEE8 == d->unk0[12].unk0) {
             if (VS_IN_FRAMES(f, from, to))
@@ -550,7 +550,7 @@ void fighter_walk_start_back_anim(VsFighter *f, s16 from, s16 to)
 ADDRESS(0x80031478, 0xc90)
 void fighter_update(int n)
 {
-    VsFighter *f = &DAT_800633b0.fighter[n];
+    VsFighter *f = &shared_buffer.fighter[n];
     VsFighterData *d = &f->unk4DF18;
     VsHitRecord *h;
     VsAttack *a;
@@ -558,39 +558,39 @@ void fighter_update(int n)
     int step;
 
     if (n == 0) {
-        DAT_800633a8 = pad_state.pads[0].unk0;
-        DAT_800633ac = pad_state.pads[0].unk8;
+        fighter_pad_held = vs_pad_state.pads[0].unk0;
+        fighter_pad_pressed = vs_pad_state.pads[0].unk8;
     } else {
-        DAT_800633a8 = pad_state.pads[1].unk0;
-        DAT_800633ac = pad_state.pads[1].unk8;
+        fighter_pad_held = vs_pad_state.pads[1].unk0;
+        fighter_pad_pressed = vs_pad_state.pads[1].unk8;
     }
-    f->unk4DEEA += f->unk4DEEC * DAT_80063220;
+    f->unk4DEEA += f->unk4DEEC * frames_per_draw;
     if (f->unk4DF0A < d->unk1BA) {
-        f->unk4DF0A += DAT_80063220;
+        f->unk4DF0A += frames_per_draw;
         if (d->unk1BA < f->unk4DF0A)
             f->unk4DF0A = d->unk1BA;
     }
-    if (f->unk4DF0E != 5 && (DAT_800633a8 & 0x800)) {
-        VsFighter *base = DAT_800633b0.fighter;
+    if (f->unk4DF0E != 5 && (fighter_pad_held & 0x800)) {
+        VsFighter *base = shared_buffer.fighter;
         VsFighter *o = base + (1 - n);
         s16 target;
 
         target = ratan2(f->unk4DEF0.vx - o->unk4DEF0.vx, f->unk4DEF0.vz - o->unk4DEF0.vz) & 0xfff;
         if (target < f->unk4DF02) {
             if (f->unk4DF02 - target < 2048) {
-                f->unk4DF02 -= d->unk1AE * DAT_80063220 * 2;
+                f->unk4DF02 -= d->unk1AE * frames_per_draw * 2;
                 if (f->unk4DF02 < target)
                     f->unk4DF02 = target;
             } else {
-                f->unk4DF02 = (f->unk4DF02 + d->unk1AE * DAT_80063220 * 2) & 0xfff;
+                f->unk4DF02 = (f->unk4DF02 + d->unk1AE * frames_per_draw * 2) & 0xfff;
             }
         } else {
             if (target - f->unk4DF02 < 2048) {
-                f->unk4DF02 += d->unk1AE * DAT_80063220 * 2;
+                f->unk4DF02 += d->unk1AE * frames_per_draw * 2;
                 if (target < f->unk4DF02)
                     f->unk4DF02 = target;
             } else {
-                f->unk4DF02 = (f->unk4DF02 - d->unk1AE * DAT_80063220 * 2) & 0xfff;
+                f->unk4DF02 = (f->unk4DF02 - d->unk1AE * frames_per_draw * 2) & 0xfff;
             }
         }
         f->unk4DF02 &= 0xfff;
@@ -601,14 +601,14 @@ void fighter_update(int n)
         if (f->unk4DEE8 == d->unk0[2].unk0) {
             h = &d->unk78[0];
             if (f->unk4DEEA / f->unk4DEEC < 20) {
-                if (d->unk0[3].unk0 != 255 && (DAT_800633ac & 0x2000)) {
+                if (d->unk0[3].unk0 != 255 && (fighter_pad_pressed & 0x2000)) {
                     f->unk4DEE8 = d->unk0[3].unk0;
                     f->unk4DEEC = d->unk0[3].unk2;
                     f->unk4DEEA = 0;
                     f->unk4DF16 = 1;
                     break;
                 }
-                if (d->unk0[4].unk0 != 255 && (DAT_800633ac & 0x4000)) {
+                if (d->unk0[4].unk0 != 255 && (fighter_pad_pressed & 0x4000)) {
                     f->unk4DEE8 = d->unk0[4].unk0;
                     f->unk4DEEC = d->unk0[4].unk2;
                     f->unk4DEEA = 0;
@@ -629,7 +629,7 @@ void fighter_update(int n)
             }
         } else {
             for (i--; i != -1; i--) {
-                if (f->unk4DEEA - f->unk4DEEC * DAT_80063220 < h->hits[i].frame &&
+                if (f->unk4DEEA - f->unk4DEEC * frames_per_draw < h->hits[i].frame &&
                     f->unk4DEEA >= h->hits[i].frame &&
                     fighter_hit_test(n, h->hits[i].range + d->unk1B4, h->hits[i].arc))
                     fighter_apply_hit(n, &h->hits[i].hit);
@@ -638,7 +638,7 @@ void fighter_update(int n)
         i = h->count2;
         while (i--) {
             if (f->unk4DEEA > h->moves[i].from && f->unk4DEEA < h->moves[i].to) {
-                step = h->moves[i].speed * f->unk4DEEC * DAT_80063220 /
+                step = h->moves[i].speed * f->unk4DEEC * frames_per_draw /
                        (h->moves[i].to - h->moves[i].from);
                 f->unk4DEF0.vx += rsin(f->unk4DF02 + 2048) * step / 4096;
                 f->unk4DEF0.vz += rcos(f->unk4DF02 + 2048) * step / 4096;
@@ -656,13 +656,13 @@ void fighter_update(int n)
         if (f->unk4DEE8 == d->unk0[5].unk0) {
             a = &d->unk14A[0];
             if (f->unk4DEEA / f->unk4DEEC < 20) {
-                if (d->unk0[6].unk0 != 255 && (DAT_800633ac & 0x2000)) {
+                if (d->unk0[6].unk0 != 255 && (fighter_pad_pressed & 0x2000)) {
                     f->unk4DEE8 = d->unk0[6].unk0;
                     f->unk4DEEC = d->unk0[6].unk2;
                     f->unk4DEEA = 0;
                     break;
                 }
-                if (d->unk0[7].unk0 != 255 && (DAT_800633ac & 0x4000)) {
+                if (d->unk0[7].unk0 != 255 && (fighter_pad_pressed & 0x4000)) {
                     f->unk4DEE8 = d->unk0[7].unk0;
                     f->unk4DEEC = d->unk0[7].unk2;
                     f->unk4DEEA = 0;
@@ -674,7 +674,7 @@ void fighter_update(int n)
         } else if (f->unk4DEE8 == d->unk0[7].unk0) {
             a = &d->unk14A[2];
         }
-        if (f->unk4DEEA - f->unk4DEEC * DAT_80063220 < a->unkA && f->unk4DEEA >= a->unkA) {
+        if (f->unk4DEEA - f->unk4DEEC * frames_per_draw < a->unkA && f->unk4DEEA >= a->unkA) {
             effect_spawn_attack(n, a);
             f->unk4DF0A = d->unk1BA - a->unkC;
         }
@@ -715,7 +715,7 @@ void fighter_update(int n)
     case 0:
     case 1:
     case 5:
-        if (DAT_800633a8 & 0x2000) {
+        if (fighter_pad_held & 0x2000) {
             f->unk4DF0E = 5;
             f->unk4DEEA &= 0xfff;
             if (f->unk4DEE8 != d->unk0[0].unk0) {
@@ -761,20 +761,20 @@ void fighter_update(int n)
             f->unk4DEEA &= 0xfff;
             break;
         }
-        if (!(DAT_800633a8 & 0x800)) {
-            if (DAT_800633a8 & 0x80)
-                f->unk4DF02 = (f->unk4DF02 - d->unk1AE * DAT_80063220) & 0xfff;
-            if (DAT_800633a8 & 0x20)
-                f->unk4DF02 = (f->unk4DF02 + d->unk1AE * DAT_80063220) & 0xfff;
+        if (!(fighter_pad_held & 0x800)) {
+            if (fighter_pad_held & 0x80)
+                f->unk4DF02 = (f->unk4DF02 - d->unk1AE * frames_per_draw) & 0xfff;
+            if (fighter_pad_held & 0x20)
+                f->unk4DF02 = (f->unk4DF02 + d->unk1AE * frames_per_draw) & 0xfff;
         }
-        if ((DAT_800633ac & 0x1000) && d->unk0[2].unk0 != 255) {
+        if ((fighter_pad_pressed & 0x1000) && d->unk0[2].unk0 != 255) {
             f->unk4DF0E = 2;
             f->unk4DEE8 = d->unk0[2].unk0;
             f->unk4DEEC = d->unk0[2].unk2;
             f->unk4DEEA = 0;
             f->unk4DF16 = 1;
         }
-        if ((DAT_800633ac & 0x8000) && d->unk0[5].unk0 != 255 && f->unk4DF0A == d->unk1BA) {
+        if ((fighter_pad_pressed & 0x8000) && d->unk0[5].unk0 != 255 && f->unk4DF0A == d->unk1BA) {
             f->unk4DF0E = 6;
             f->unk4DEE8 = d->unk0[5].unk0;
             f->unk4DEEC = d->unk0[5].unk2;

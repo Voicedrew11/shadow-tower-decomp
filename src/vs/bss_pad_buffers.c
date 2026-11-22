@@ -12,4 +12,4 @@
 #include <vs/pad.h>
 
 DATA(0x801961e0, 0x44, ".bss")
-VsPadBuffer DAT_801961e0[2];
+VsPadBuffer pad_buffers[2];

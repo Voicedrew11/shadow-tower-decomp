@@ -1,12 +1,14 @@
 /*
- * VS.EXE: a data-only module (WIP) defining the 0x80063310-0x8006331f block of the
+ * VS.EXE: a data-only module (WIP) defining the 0x80063310-0x80063317 block of the
  * first .sbss run. It links before the code (link = "first"): the start-up
  * module reads part of the run with lui pairs, so it cannot have allocated
- * it, and an earlier object did (docs/executable-linking.md). PSYLINK
- * allocates each object's small COMMON after the previous object's, in
- * symbol-hash bucket order; the run splits into 16-byte blocks whose
- * address names ascend in bucket, one object each. Every code unit that
- * reads a word $gp-relative keeps a tentative definition, which merges here.
+ * it, and an earlier object did (docs/executable-linking.md).
+ * PSYLINK allocates each object's small COMMON after the previous
+ * object's, starting eight-aligned, in symbol-hash bucket order
+ * (docs/executable-linking.md); the run splits at eight-byte boundaries
+ * into blocks whose spellings ascend in bucket, one object each.
+ * A code unit that reads a word $gp-relative keeps a tentative
+ * definition, which merges here.
  */
 #include <kf/lib/address.h>
 #include <kf/lib/types.h>
@@ -18,13 +20,5 @@
 
 DATA(0x80063310, 0x4, ".sbss")
 s32 DAT_80063310;
-
 DATA(0x80063314, 0x4, ".sbss")
-u32 DAT_80063314;
-
-/* Unreferenced (layout evidence only). */
-DATA(0x80063318, 0x4, ".sbss")
-s32 DAT_80063318;
-
-DATA(0x8006331c, 0x4, ".sbss")
-s32 DAT_8006331c;
+u32 screen_start_frame;

@@ -17,9 +17,9 @@
 ADDRESS(0x8002d738, 0x260)
 void sparks_start_burst(int n)
 {
-    VsFighter *f = &DAT_800633b0.fighter[n];
-    VsFighter *o = &DAT_800633b0.fighter[1 - n];
-    VsRecord20 *rec = DAT_801c4a58;
+    VsFighter *f = &shared_buffer.fighter[n];
+    VsFighter *o = &shared_buffer.fighter[1 - n];
+    VsRecord20 *rec = sparks;
     SVECTOR off;
     int count = 0;
     int i = 2000;

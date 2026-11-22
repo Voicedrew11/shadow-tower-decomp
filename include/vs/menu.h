@@ -29,7 +29,7 @@ typedef struct {
 } VsTeamEdit;
 
 /* Both players' teams (bss, 0x801624b8). */
-extern VsTeam DAT_801624b8[2];
+extern VsTeam teams[2];
 
 /* The menu screens' scratchpad block; only proven fields are spelled. */
 typedef struct {
@@ -102,10 +102,10 @@ typedef char VsMessagesSize[sizeof(VsMessages) == 0x5400 ? 1 : -1];
 
 /* The two message tables at 0x80196230 (bss): the menus' and the item
  * names'. */
-extern VsMessages DAT_80196230[2];
+extern VsMessages vs_menu_messages[2];
 
-#define VS_MESSAGE(i) ((u16 *)(DAT_80196230[0].text + DAT_80196230[0].offsets[i]))
-#define VS_ITEM_NAME(i) ((u16 *)(DAT_80196230[1].text + DAT_80196230[1].offsets[i]))
+#define VS_MESSAGE(i) ((u16 *)(vs_menu_messages[0].text + vs_menu_messages[0].offsets[i]))
+#define VS_ITEM_NAME(i) ((u16 *)(vs_menu_messages[1].text + vs_menu_messages[1].offsets[i]))
 
 /* VS's copies of ST.EXE's text and primitive helpers (src/st/render.c,
  * src/st/text.c), not reconstructed yet. */

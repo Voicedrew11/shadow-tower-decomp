@@ -13,8 +13,8 @@
 ADDRESS(0x8002dcd8, 0x1ec)
 int fighters_push_apart(void)
 {
-    VsFighter *a = &DAT_800633b0.fighter[0];
-    VsFighter *b = &DAT_800633b0.fighter[1];
+    VsFighter *a = &shared_buffer.fighter[0];
+    VsFighter *b = &shared_buffer.fighter[1];
     SVECTOR d;
     long dist;
     long reach;

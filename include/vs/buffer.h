@@ -21,6 +21,6 @@ typedef union {
     VsFighter fighter[2];             /* the two fighters (src/vs/fighter_*.c) */
 } VsBuffer;
 
-extern VsBuffer DAT_800633b0;
+extern VsBuffer shared_buffer;
 
 #endif

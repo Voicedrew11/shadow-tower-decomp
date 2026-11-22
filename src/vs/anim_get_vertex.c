@@ -27,7 +27,7 @@
 ADDRESS(0x80028d94, 0x238)
 int anim_get_vertex(int id, int part, int frame, int index, SVECTOR *out)
 {
-    StAnimFile *file = (StAnimFile *)DAT_800633b0.fighter[id].file;
+    StAnimFile *file = (StAnimFile *)shared_buffer.fighter[id].file;
     u8 *model;
     SVECTOR *verts;
 

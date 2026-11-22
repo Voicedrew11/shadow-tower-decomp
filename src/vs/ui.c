@@ -16,18 +16,18 @@
 
 /* The text clip window (ST.EXE's DAT_800881ba..DAT_800881c8). */
 DATA(0x80063390, 0x2, ".sbss")
-static s16 DAT_80063390;
+static s16 text_clip_left;
 DATA(0x80063392, 0x2, ".sbss")
-static s16 DAT_80063392;
+static s16 text_clip_right;
 DATA(0x80063394, 0x4, ".sbss")
-static s32 DAT_80063394;
+static s32 text_clip_advance;
 DATA(0x80063398, 0x4, ".sbss")
-static s32 DAT_80063398;
+static s32 text_clip_on;
 /* Unreferenced. */
 DATA(0x8006339c, 0x4, ".sbss")
 static s32 DAT_8006339c;
 DATA(0x800633a0, 0x4, ".sbss")
-static s32 DAT_800633a0;
+static s32 text_clip_dropped;
 
 /* card_draw_file_list's fighter picture table (the module's constant pool) and
  * its two RECT initializers (8 bytes each, so .sdata under -G8). */
@@ -85,17 +85,17 @@ void ui_draw_glyph(u16 c, u16 x, u16 y, CVECTOR *color)
         v = ch * q;
         NEW_PRIM(buf, p, POLY_FT4);
         setUV4(p, u, v, half + u, v, u, ch + v, half + u, ch + v);
-        if (DAT_80063398) {
-            if (DAT_80063378 == 1)
+        if (text_clip_on) {
+            if (text_scroll_mode == 1)
                 x -= DAT_8006333e * (half + 1);
             else
-                x -= DAT_80063340 * (half + 1);
-            DAT_80063394 += half + 1;
-            if (DAT_80063392 < x) {
-                DAT_800633a0++;
+                x -= text_scroll * (half + 1);
+            text_clip_advance += half + 1;
+            if (text_clip_right < x) {
+                text_clip_dropped++;
                 return;
             }
-            if (x < DAT_80063390)
+            if (x < text_clip_left)
                 return;
         }
         p->x1 = p->x3 = x + half;
@@ -116,17 +116,17 @@ void ui_draw_glyph(u16 c, u16 x, u16 y, CVECTOR *color)
         v = ch * q;
         NEW_PRIM(buf, p, POLY_FT4);
         setUV4(p, u, v, fw + u, v, u, ch + v, fw + u, ch + v);
-        if (DAT_80063398) {
-            if (DAT_80063378 == 1)
+        if (text_clip_on) {
+            if (text_scroll_mode == 1)
                 x -= DAT_8006333e * (half + 1);
             else
-                x -= DAT_80063340 * (half + 1);
-            DAT_80063394 += fw;
-            if (DAT_80063392 < x) {
-                DAT_800633a0++;
+                x -= text_scroll * (half + 1);
+            text_clip_advance += fw;
+            if (text_clip_right < x) {
+                text_clip_dropped++;
                 return;
             }
-            if (x < DAT_80063390)
+            if (x < text_clip_left)
                 return;
         }
         p->x1 = p->x3 = x + qw;
@@ -750,7 +750,7 @@ void card_draw_port_choice(void)
     ui_draw_rect_outline(&sp->unk218, &sp->unk214, 257, 1);
     ui_add_draw_mode(1, 0, 0);
     for (i = 0; i < 7; i++) {
-        DAT_801c4a38[i] = 0;
+        file_row_clipped[i] = 0;
         DAT_80117598[i] = 0;
     }
     sp->unk240.vx = 896;
@@ -801,7 +801,7 @@ void card_draw_format_prompt(void)
  * save/load question with its two choices, then the scroll arrows, the
  * cursor bar and up to three rows (file number, the fighter of the save
  * and its won count), each framed; the clipped text advance of each row
- * goes to DAT_801c4a38.
+ * goes to file_row_clipped.
  *
  * The three RECT locals are never used. The first is the one ST.EXE's copy
  * (card_draw_file_list, src/st/render.c) also keeps right after its table; VS added
@@ -893,10 +893,10 @@ void card_draw_file_list(void)
                 ui_draw_number_fixed(0x2000000 | (u16)(sp->unk1C4 + i + 1), 38,
                               sp->unk218.y + 6, &sp->style[0]);
             ui_draw_text(VS_MESSAGE(328), 218, sp->unk218.y + 6, &sp->style[0]);
-            DAT_80063378 = 1;
-            DAT_80063398 = 0;
-            DAT_80063390 = 0;
-            DAT_80063392 = 280;
+            text_scroll_mode = 1;
+            text_clip_on = 0;
+            text_clip_left = 0;
+            text_clip_right = 280;
             file = &sp->unk1B8->files[i + sp->unk1C4];
             if (picture[file->unk15] == -1)
                 goto no_picture;
@@ -904,17 +904,17 @@ void card_draw_file_list(void)
                           &sp->style[0]);
             file = &sp->unk1B8->files[i + sp->unk1C4];
             if (picture[file->unk15] != -1)
-                ui_draw_text(VS_MESSAGE(700 + file->unk15), DAT_80063394 + 64,
+                ui_draw_text(VS_MESSAGE(700 + file->unk15), text_clip_advance + 64,
                               sp->unk218.y + 22, &sp->style[0]);
             else {
             no_picture:
                 ui_draw_text(VS_MESSAGE(700 + sp->unk1B8->files[i + sp->unk1C4].unk15),
-                              DAT_80063394 + 64, sp->unk218.y + 6, &sp->style[0]);
+                              text_clip_advance + 64, sp->unk218.y + 6, &sp->style[0]);
             }
             ui_draw_number_fixed(0x4000000 | sp->unk1B8->files[i + sp->unk1C4].unk16, 248,
                           sp->unk218.y + 6, &sp->style[0]);
         }
-        DAT_801c4a38[i + sp->unk1C4] = DAT_800633a0;
+        file_row_clipped[i + sp->unk1C4] = text_clip_dropped;
         ui_draw_rect_outline(&sp->unk218, &sp->unk220, 257, 1);
         sp->unk218.y += 48;
     }

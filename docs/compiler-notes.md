@@ -470,7 +470,7 @@ differs. Forms that changed the count:
   6, so three viewer addresses are hoisted and the fourth stays, as in
   retail).
 - the reverse: a global expression written at each use (VS `0x800182ec`, VS
-  `0x800140d8`, `DAT_800633b0.fighter[i]`) makes its 6-insn chain the first
+  `0x800140d8`, `shared_buffer.fighter[i]`) makes its 6-insn chain the first
   movable, which uses up the budget before a later constant.
 - the order of two subexpressions: `X[area][i / 32] & BIT(i)` forms the row
   address before the division, lengthens its life, gets it hoisted, and leaves
@@ -1124,7 +1124,7 @@ means cc1 saw an object larger than 8 bytes, a member of a bigger struct (ST
 `0x80042d74`, where `DAT_801cd0e0` is spelled as the member
 `DAT_801cba08.unk16D8` by a macro in `include/st/menu.h`). An `extern s32
 X[];` has no size: declare `X[1]` or the scalar (VS `0x80029f28`,
-`DAT_80063370[1]`, after its unit moved to the `-G8` profile). In `-G0` units
+`round_wins[1]`, after its unit moved to the `-G8` profile). In `-G0` units
 both spellings give the same bytes.
 
 **Small initialised locals.** cc1 puts any constant of at most 8 bytes in

@@ -12,8 +12,8 @@
 extern s16 DAT_8006335a;
 
 /* The bank's VAB body and header buffers (bss). */
-extern u_char DAT_800ff580[];
-extern u_char DAT_80116580[];
+extern u_char menu_vab_body[];
+extern u_char menu_vab_head[];
 
 /* A sound bank record: its VAB header, VAB id and body transfer result. */
 typedef struct {
@@ -25,12 +25,12 @@ typedef struct {
 typedef char VsSoundBankSize[sizeof(VsSoundBank) == 0x1004 ? 1 : -1];
 
 /* The two sound banks (0x801604b0, bss). */
-extern VsSoundBank DAT_801604b0[2];
+extern VsSoundBank sound_banks[2];
 
 /* libsnd's SEQ attribute table (0x801175a8, bss) and SpuGetAllKeysStatus's
  * 24 voice states (0x80117580, bss). */
-extern char DAT_801175a8[];
-extern char DAT_80117580[24];
+extern char seq_attr_table[];
+extern char voice_status[24];
 
 /* src/vs/menu_sound.c: the menu sound effects (SsUtKeyOn tones 11-14). */
 void play_cursor_sound(void);

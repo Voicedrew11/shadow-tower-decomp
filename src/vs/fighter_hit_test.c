@@ -18,8 +18,8 @@
 ADDRESS(0x8002dec4, 0x250)
 int fighter_hit_test(int n, s16 reach, s16 arc)
 {
-    VsFighter *f = &DAT_800633b0.fighter[n];
-    VsFighter *o = &DAT_800633b0.fighter[1 - n];
+    VsFighter *f = &shared_buffer.fighter[n];
+    VsFighter *o = &shared_buffer.fighter[1 - n];
     SVECTOR d;
     s16 angle;
     int lo;
@@ -29,7 +29,7 @@ int fighter_hit_test(int n, s16 reach, s16 arc)
 
     if (o->unk4DF0E == 4)
         goto miss;
-    if (DAT_80063324 != 1)
+    if (round_phase != 1)
         goto miss;
     d.vx = f->unk4DEF0.vx - o->unk4DEF0.vx;
     d.vz = f->unk4DEF0.vz - o->unk4DEF0.vz;

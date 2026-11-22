@@ -35,8 +35,8 @@ void play_confirm_sound(void)
 ADDRESS(0x8001c9b8, 0x58)
 void load_menu_sound_bank(void)
 {
-    u_char *body = DAT_800ff580;
+    u_char *body = menu_vab_body;
 
-    SsVabTransBody(body, DAT_8006335a = SsVabOpenHead(DAT_80116580, -1));
+    SsVabTransBody(body, DAT_8006335a = SsVabOpenHead(menu_vab_head, -1));
     SsVabTransCompleted(SS_WAIT_COMPLETED);
 }
