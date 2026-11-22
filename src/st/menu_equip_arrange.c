@@ -951,7 +951,7 @@ void menu_arrange_list_open(void)
     cd_read_member(ARCHIVE_STAT, STAT_BACKGROUND, cd_file_buffer);
     tim_load_images_at(cd_file_buffer, &sp->image_vram[4], NULL, 1);
     DrawSync(0);
-    cd_read_member(ARCHIVE_STAT, STAT_HEADER_IMAGES, cd_file_buffer);
+    cd_read_member(ARCHIVE_STAT, STAT_SCREEN_IMAGES, cd_file_buffer);
     tim_load_images_at(cd_file_buffer, &tex, &clut, 1);
     DrawSync(0);
     sp->state.grid.hand_count = 0;

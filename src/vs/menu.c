@@ -127,7 +127,7 @@ int menu_vs_setup_run(void)
     cd_read_member(VS_ARCHIVE_STAT, STAT_BACKGROUND, buf);
     tim_load_images_at(buf, &sp->picture_vram, NULL);
     DrawSync(0);
-    cd_read_member(VS_ARCHIVE_STAT, STAT_HEADER_IMAGES, buf);
+    cd_read_member(VS_ARCHIVE_STAT, STAT_SCREEN_IMAGES, buf);
     tim_load_images_at(buf, &tex, &clut);
     DrawSync(0);
     if (requested_items[0] != -1) {
@@ -1012,7 +1012,7 @@ void menu_creature_select_run(int player)
     buf = (u_long *)((buf[0] + sizeof(*buf)) + (u8 *)buf);
     tim_load_images_at(buf + 1, &sp->message_font_vram, &sp->message_font_clut);
     DrawSync(0);
-    cd_read_member(VS_ARCHIVE_STAT, STAT_HEADER_IMAGES, vs_cd_state.load_buffer);
+    cd_read_member(VS_ARCHIVE_STAT, STAT_SCREEN_IMAGES, vs_cd_state.load_buffer);
     tim_load_images_at(vs_cd_state.load_buffer, &tex, &clut);
     DrawSync(0);
     vs_cd_state.load_cursor = vs_cd_state.load_buffer;
@@ -1056,7 +1056,7 @@ void menu_creature_select_run(int player)
     tim = (u_long *)((u8 *)buf + vs_cd_state.load_buffer[0]);
     tim_load_images_at(tim + 2, &sp->message_font_vram, &sp->message_font_clut);
     DrawSync(0);
-    cd_read_member(VS_ARCHIVE_STAT, STAT_HEADER_IMAGES, buf);
+    cd_read_member(VS_ARCHIVE_STAT, STAT_SCREEN_IMAGES, buf);
     tim_load_images_at(buf, &tex, &clut);
     DrawSync(0);
     if (requested_items[0] != -1) {
@@ -2324,7 +2324,7 @@ done:
         tim = (u_long *)((u8 *)menu_buf + vs_cd_state.load_buffer[0]);
         tim_load_images_at(tim + 2, &sp->message_font_vram, &sp->message_font_clut);
         DrawSync(0);
-        cd_read_member(VS_ARCHIVE_STAT, STAT_HEADER_IMAGES, menu_buf);
+        cd_read_member(VS_ARCHIVE_STAT, STAT_SCREEN_IMAGES, menu_buf);
         tim_load_images_at(menu_buf, &pos, &clut);
         DrawSync(0);
         if (requested_items[0] != -1) {

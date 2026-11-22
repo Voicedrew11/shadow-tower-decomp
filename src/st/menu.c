@@ -878,7 +878,7 @@ void menu_equip_info_run(void)
     cd_read_member(ARCHIVE_STAT, STAT_BACKGROUND, CD_BUFFER);
     tim_load_images_at(CD_BUFFER, &sp->image_vram[4], NULL, 1);
     DrawSync(0);
-    cd_read_member(ARCHIVE_STAT, STAT_HEADER_IMAGES, CD_BUFFER);
+    cd_read_member(ARCHIVE_STAT, STAT_SCREEN_IMAGES, CD_BUFFER);
     tim_load_images_at(CD_BUFFER, &image, &clut, 1);
     DrawSync(0);
     sp->state.vram[0].vx = 640;
@@ -1562,7 +1562,7 @@ void menu_creature_book_run(void)
     cd_read_member(ARCHIVE_STAT, STAT_BACKGROUND, CD_BUFFER);
     tim_load_images_at(CD_BUFFER, &sp->image_vram[4], NULL, 1);
     DrawSync(0);
-    cd_read_member(ARCHIVE_STAT, STAT_HEADER_IMAGES, CD_BUFFER);
+    cd_read_member(ARCHIVE_STAT, STAT_SCREEN_IMAGES, CD_BUFFER);
     tim_load_images_at(CD_BUFFER, &image, &clut, 1);
     DrawSync(0);
     cd_read_member(ARCHIVE_CRT, 400, CD_BUFFER);
@@ -1781,7 +1781,7 @@ void menu_arrange_icons_run(void)
     cd_read_member(ARCHIVE_STAT, STAT_BACKGROUND, cd_file_buffer);
     tim_load_images_at(cd_file_buffer, &sp->image_vram[4], NULL, 1);
     DrawSync(0);
-    cd_read_member(ARCHIVE_STAT, STAT_HEADER_IMAGES, cd_file_buffer);
+    cd_read_member(ARCHIVE_STAT, STAT_SCREEN_IMAGES, cd_file_buffer);
     tim_load_images_at(cd_file_buffer, &image, &clut, 1);
     DrawSync(0);
     sp->state.grid.hand_count = 0;

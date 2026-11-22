@@ -5,7 +5,7 @@
 #ifndef ST_ARCHIVES_H
 #define ST_ARCHIVES_H
 
-#define ARCHIVE_MO 0           /* COM\MO.T: object models and area sounds */
+#define ARCHIVE_MO 0           /* COM\MO.T: object models and their sound banks */
 #define ARCHIVE_FDAT 1         /* COM\FDAT.T: area files, overlays, player models, magic */
 #define ARCHIVE_CHR 2          /* CHR0\M00.T: the area's creatures (reopened by area) */
 #define ARCHIVE_STAT 3         /* COM\STAT.T: menu messages, fonts and pictures */
@@ -23,6 +23,6 @@
 #define STAT_ITEM_NAMES 3      /* item names, low-resolution font */
 #define STAT_ITEM_NAMES_HIGH_RES 4 /* item names, 640x240 font */
 #define STAT_BACKGROUND 5      /* the 640x240 screens' background */
-#define STAT_HEADER_IMAGES 7
+#define STAT_SCREEN_IMAGES 7   /* images the 640x240 screens load after the background */
 
 #endif
