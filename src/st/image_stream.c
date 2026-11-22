@@ -61,7 +61,7 @@ void image_stream_update(void)
     u16 h;
     s16 rows;
 
-    if (request->kind != 3 || request->status != 1)
+    if (request->kind != CD_REQUEST_STREAM || request->status != 1)
         return;
     used = 0;
     p = (u16 *)request->dest;

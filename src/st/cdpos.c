@@ -24,7 +24,7 @@ void cd_loc_add_sectors(CdlLOC *pos, int offset, CdlLOC *out)
 ADDRESS(0x80015ad4, 0x58)
 void cd_wait_idle(void)
 {
-    while (cd_state.current != cd_state.next_free || cd_state.current->kind != 0)
+    while (cd_state.current != cd_state.next_free || cd_state.current->kind != CD_REQUEST_NONE)
         cd_wait_frame();
 }
 

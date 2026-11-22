@@ -17,11 +17,6 @@
 #include <st/scratch.h>
 #include <st/funcs.h>
 
-/* CD request kinds queued by cd_request_queue. */
-#define CD_REQUEST_READ 2
-#define CD_REQUEST_STREAM 3
-#define CD_REQUEST_READ_4 4
-
 /* Root counter 3 interval: 60000 vertical-sync ticks with target 1. */
 #define TICK_TARGET 60000
 
@@ -91,7 +86,7 @@ void cd_queue_read_member_unchecked(int archive, int member, u8 *dest, void (*do
     int size = cd_archive_member_locate(archive, member, &loc);
 
     if (size)
-        cd_request_queue(CD_REQUEST_READ_4, &loc, size, dest, done);
+        cd_request_queue(CD_REQUEST_READ_UNCHECKED, &loc, size, dest, done);
 }
 
 ADDRESS(0x80015dfc, 0xcc)
@@ -267,7 +262,7 @@ void cd_init(void)
     cd_state.vsync_count = 0;
     req = cd_state.requests;
     for (i = 0; i < ST_CD_REQUESTS; i++, req++) {
-        req->kind = 0;
+        req->kind = CD_REQUEST_NONE;
         req->step = 0;
     }
     cd_state.current = cd_state.next_free = cd_state.requests;

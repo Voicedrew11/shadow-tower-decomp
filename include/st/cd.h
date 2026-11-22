@@ -15,6 +15,7 @@
 #include <LIBGPU.H>
 #include <LIBCD.H>
 #include <st/archives.h>
+#include <st/cd_requests.h>
 
 #define ST_CD_REQUESTS 48
 #define ST_ARCHIVES 3

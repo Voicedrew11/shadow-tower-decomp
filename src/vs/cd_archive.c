@@ -74,7 +74,7 @@ void cd_init(void)
     i = 0;
     do {
         i++;
-        r->kind = 0;
+        r->kind = CD_REQUEST_NONE;
         r->step = 0;
         r++;
     } while (i < VS_CD_REQUESTS);

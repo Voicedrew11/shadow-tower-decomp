@@ -68,7 +68,7 @@ void sound_bank_transfer_body(void)
     StVabSlot *slot;
     int r;
 
-    if (request->kind != 4)
+    if (request->kind != CD_REQUEST_READ_UNCHECKED)
         return;
     if (request->bank_step != 2)
         return;
