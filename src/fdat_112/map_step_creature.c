@@ -36,10 +36,10 @@ void map_step_creature(void)
     VECTOR v;
 
     if (e->type == 10) {
-        if (!(game_progress.unk1440.word >> 6 & 1)) {
-            if (game_progress.unk1448[r->talk_id] == 3) {
+        if (!(game_progress.event_flags.word >> 6 & 1)) {
+            if (game_progress.talk_counts[r->talk_id] == 3) {
                 e->flags &= ~0x2000000;
-                game_progress.unk1440.word |= 0x40;
+                game_progress.event_flags.word |= 0x40;
                 e->status.bytes[0] = 0;
                 e->status.bytes[3] = 1;
                 goto next;
@@ -48,20 +48,20 @@ void map_step_creature(void)
             creature_despawn(e);
             goto next;
         }
-        if (!(game_progress.unk1440.word >> 7 & 1) && e->hit != 0) {
+        if (!(game_progress.event_flags.word >> 7 & 1) && e->hit != 0) {
             viewer.unk190[4][1] = 6000;
             viewer.unk190[4][0] = 0;
-            game_progress.unk1440.word |= 0x80;
+            game_progress.event_flags.word |= 0x80;
             viewer.status_flags |= 0x100;
             e->status.bytes[3] = 0;
             e->flags &= ~0x2000000;
         } else if (e->state == 5) {
-            game_progress.unk1440.word |= 0x20000000;
+            game_progress.event_flags.word |= 0x20000000;
         }
     }
 next:
     if (e->type == 5) {
-        if (e->status.bytes[0] == 0 && game_progress.unk1448[r->talk_id] == 1) {
+        if (e->status.bytes[0] == 0 && game_progress.talk_counts[r->talk_id] == 1) {
             e->status.bytes[0] = 1;
             creature_start_script(e, 6);
             viewer.state = 5;
@@ -89,9 +89,9 @@ next:
     if (e->anim_step >= 0 ? (short)e->anim_frame >= 4096 : (short)e->anim_frame <= 0) {
         e->script_state = 0xff;
         if (e->type == 10) {
-            if (game_progress.unk1440.word >> 7 & 1) {
+            if (game_progress.event_flags.word >> 7 & 1) {
                 creature_pick_move();
-            } else if (game_progress.unk1440.word >> 6 & 1) {
+            } else if (game_progress.event_flags.word >> 6 & 1) {
                 if (e->status.bytes[0] == 0) {
                     creature_start_script(e, 9);
                     e->status.bytes[0] = 1;

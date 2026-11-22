@@ -65,9 +65,9 @@ int creature_take_damage(e, kind, power, levels, crit)
             e->state = 5;
             creature_roll_drops(e);
             creature_award_kill_bonuses(e);
-            game_progress.unk14A8[5 + (t->kind >> 5)] |= 1 << (t->kind & 0x1f);
+            game_progress.creature_bits_and_vs_data[5 + (t->kind >> 5)] |= 1 << (t->kind & 0x1f);
             if (e < &vis_table_a.entries[48]) {
-                game_progress.unk16E4[area_state.area]++;
+                game_progress.area_kills[area_state.area]++;
                 viewer.creatures_killed++;
             }
             e->hp = 0;

@@ -10,17 +10,17 @@
 /*
  * The 512-byte header of a save file (the memory card block format): the
  * "SC" magic, the icon type and block count, the Shift-JIS title, the
- * game's own bytes in the title's tail (copied into the file's MenuRecord),
+ * game's own bytes in the title's tail (copied into the file's CardFileEntry),
  * then the icon CLUT and frames.
  */
 /* The header's 64-byte title: Shift-JIS text, then the game's own bytes,
- * which card_read_file_headers copies into the file's MenuRecord. */
+ * which card_read_file_headers copies into the file's CardFileEntry. */
 typedef struct {
     u8 text[0x39];       /* 0x00 */
-    u8 kind;             /* 0x39: the area saved in */
-    u16 unk3A;           /* 0x3a: viewer.sp_total */
-    u16 unk3C;           /* 0x3c: viewer.items_found */
-    u8 unk3E;            /* 0x3e: the sum of the data frames' sums */
+    u8 area;             /* 0x39: the area saved in */
+    u16 sp_total;        /* 0x3a: viewer.sp_total */
+    u16 items_found;     /* 0x3c: viewer.items_found */
+    u8 data_sum;         /* 0x3e: the sum of the data frames' sums */
     u8 unk3F;
 } CardTitle;
 

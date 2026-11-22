@@ -21,7 +21,7 @@ RODATA(0x8001274c, 0x108)
 
 /* The use result: whether the item was used (1) or not (2), a member of
  * the save-game state block. */
-#define USE_RESULT game_progress.unk16D8
+#define USE_RESULT game_progress.item_use_result
 
 /* Uses item `id` and leaves the use result. */
 ADDRESS(0x80054a54, 0x848)

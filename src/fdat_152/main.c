@@ -63,7 +63,7 @@ void map_restore_progress(void)
     AreaObject *d = &vis_table_b.entries[5];
     GroundItem *item = &vis_table_c.entries[11];
 
-    if (!game_progress.unk1440.bit.f15) {
+    if (!game_progress.event_flags.bit.f15) {
         item->state = 4;
         d[0].visibility = d[1].visibility = d[2].visibility = d[3].visibility = d[4].visibility = 2;
         fdat_801edb84 = 0;
@@ -85,7 +85,7 @@ void map_update_events(void)
     if (fdat_801edb84 == 1) {
         map_slide_ground_item();
         d[0].visibility = d[1].visibility = d[2].visibility = d[3].visibility = d[4].visibility = 0;
-        if (!game_progress.unk1440.bit.f16) {
+        if (!game_progress.event_flags.bit.f16) {
             lighting.area_mode[11] = 0x24;
             lighting.area_mode[27] = 0x24;
             lighting.area_mode[12] = 0x24;
@@ -94,7 +94,7 @@ void map_update_events(void)
             lighting.area_mode[33] = 0x24;
         }
         fdat_801edb84 = 2;
-        game_progress.unk1440.bit.f15 = 1;
+        game_progress.event_flags.bit.f15 = 1;
     }
 }
 

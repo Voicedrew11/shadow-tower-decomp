@@ -100,7 +100,7 @@ void map_restore_progress(void)
     Creature *e39 = &vis_table_a.entries[39];
     Creature *e38 = &vis_table_a.entries[38];
 
-    if (game_progress.unk1444.bit.f12 == 1) {
+    if (game_progress.event_flags2.bit.f12 == 1) {
         vis_table_a.entries[40].spawn_chance = 100;
         c5->state = 4;
         fdat_801edf54 = 0xff;
@@ -109,14 +109,14 @@ void map_restore_progress(void)
         c5->state = 4;
         e48->status.bytes[3] = 1;
     }
-    if (game_progress.unk1444.bit.f13 == 1) {
+    if (game_progress.event_flags2.bit.f13 == 1) {
         d8->visibility = 2;
         d7->visibility = 2;
         fdat_801edf5c = 0xff;
     } else {
         fdat_801edf5c = 0;
     }
-    if (game_progress.unk1444.bit.f14 == 1) {
+    if (game_progress.event_flags2.bit.f14 == 1) {
         d6->visibility = 2;
         d5->visibility = 2;
         fdat_801edf58 = 0xff;
@@ -128,7 +128,7 @@ void map_restore_progress(void)
     else
         fdat_801edf60 = 0;
     if (e39->state != 3) {
-        if (game_progress.unk1444.bit.f16 == 1) {
+        if (game_progress.event_flags2.bit.f16 == 1) {
             e39->spawn_chance = 100;
             fdat_801edf64 = 0xff;
         } else {
@@ -138,7 +138,7 @@ void map_restore_progress(void)
         }
     }
     if (e38->state != 3) {
-        if (game_progress.unk1444.bit.f17 == 1) {
+        if (game_progress.event_flags2.bit.f17 == 1) {
             e38->spawn_chance = 100;
             fdat_801edf68 = 0xff;
         } else {
@@ -172,7 +172,7 @@ void map_update_events(void)
     AreaObject *d14 = &vis_table_b.entries[14];
     AreaObject *d17 = &vis_table_b.entries[17];
 
-    if (fdat_801edf54 == 0 && game_progress.unk1448[r14->talk_id] == 1) {
+    if (fdat_801edf54 == 0 && game_progress.talk_counts[r14->talk_id] == 1) {
         viewer.state = 5;
         map_play_creature_script();
         if (!(vis_table_c.collected_bits[1] & 0x10000))
@@ -190,13 +190,13 @@ void map_update_events(void)
         viewer.state = 0;
         fdat_801edf54 = 0xff;
         e40->flags &= ~0x2000000;
-        game_progress.unk1444.word |= 0x1000;
+        game_progress.event_flags2.word |= 0x1000;
     }
     if (fdat_801edf5c == 0 && e32->hp == 0) {
         d8->visibility = 2;
         d7->visibility = 2;
         fdat_801edf5c = 0xff;
-        game_progress.unk1444.word |= 0x2000;
+        game_progress.event_flags2.word |= 0x2000;
         if (fdat_801edf58 == 0xff)
             fdat_801edf60 = 1;
     }
@@ -204,12 +204,12 @@ void map_update_events(void)
         d6->visibility = 2;
         d5->visibility = 2;
         fdat_801edf58 = 0xff;
-        game_progress.unk1444.word |= 0x4000;
+        game_progress.event_flags2.word |= 0x4000;
         if (fdat_801edf5c == 0xff)
             fdat_801edf60 = 1;
     }
     if (fdat_801edf60 == 1) {
-        if (!game_progress.unk1440.bit.f24)
+        if (!game_progress.event_flags.bit.f24)
             lighting.area_mode[9] = 0x41;
         fdat_801edf60 = 0xff;
     }
@@ -223,7 +223,7 @@ void map_update_events(void)
         e39->status.bytes[3] = 1;
         e39->zone = vis_table_a.prev_zone;
         fdat_801edf64 = 1;
-        game_progress.unk1444.word |= 0x10000;
+        game_progress.event_flags2.word |= 0x10000;
     }
     if (fdat_801edf68 == 0 && d17->state == 1) {
         creature_spawn_now(e38);
@@ -235,7 +235,7 @@ void map_update_events(void)
         e38->status.bytes[3] = 1;
         e38->zone = vis_table_a.prev_zone;
         fdat_801edf68 = 1;
-        game_progress.unk1444.word |= 0x20000;
+        game_progress.event_flags2.word |= 0x20000;
     }
     if (fdat_801edf64 == 1 && d14->anim_frame > 0xc00)
         fdat_801edf64 = 2;

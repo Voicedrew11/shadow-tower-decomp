@@ -44,7 +44,7 @@ typedef struct {
             s16 last;    /* 0x0c: items on the last row */
             u8 unk0E[2];
             DVECTOR pos[16]; /* 0x10: VRAM positions; [12..14] the team slot pictures, [15] the detail image */
-            MenuStoredItem *items; /* 0x50: item records by kind (menu_creature_book_draw_entry) */
+            CreatureBookEntry *items; /* 0x50: item records by kind (menu_creature_book_draw_entry) */
         } team;          /* the team screen (menu_creature_select_pick_up_slot) */
     } unk0;              /* 0x000 */
     VsCardPort *unk1B8;  /* 0x1b8: the card slot being scanned */
@@ -53,7 +53,7 @@ typedef struct {
     u16 unk1C0;          /* 0x1c0 */
     s16 unk1C2;          /* 0x1c2: the file list cursor row, -1 on cancel */
     s16 unk1C4;          /* 0x1c4: the file list scroll */
-    u16 unk1C6;          /* 0x1c6 (ST MenuScratch.unk202) */
+    u16 unk1C6;          /* 0x1c6 (ST MenuScratch.dialog_choice) */
     s16 unk1C8;          /* 0x1c8: the first free save number */
     s16 unk1CA;          /* 0x1ca: card_screen_run's mode (menu_vs_setup_run clears it) */
     u16 unk1CC;          /* 0x1cc (ST unk2DC); card_screen_run shifts its step bit through it */

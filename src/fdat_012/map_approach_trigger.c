@@ -29,5 +29,5 @@ ADDRESS(0x801edf88, 0x24)
 void map_mark_scene_done(void)
 {
     fdat_801edfac = 3;
-    game_progress.unk1440.bit.f0 = 1;
+    game_progress.event_flags.bit.f0 = 1;
 }

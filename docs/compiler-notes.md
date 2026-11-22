@@ -1122,7 +1122,7 @@ $3,X`, `la $5,S`) that ASPSX expands with the destination as its own temporary
 (`lui a1; addiu a1,a1,lo`). A separate temporary (`lui v0; lw v1,lo(v0)`)
 means cc1 saw an object larger than 8 bytes, a member of a bigger struct (ST
 `0x80042d74`, where `DAT_801cd0e0` is spelled as the member
-`game_progress.unk16D8` by a macro in `include/st/menu.h`). An `extern s32
+`game_progress.item_use_result` by a macro in `include/st/menu.h`). An `extern s32
 X[];` has no size: declare `X[1]` or the scalar (VS `0x80029f28`,
 `round_wins[1]`, after its unit moved to the `-G8` profile). In `-G0` units
 both spellings give the same bytes.

@@ -19,4 +19,4 @@
 DATA(0x801dd1c0, 0x3b28, ".bss")
 SoundState sound_state;
 DATA(0x801e0ce8, 0x20, ".bss")
-Data801e0ce8 equip_menu_state;
+EquipMenuState equip_menu_state;

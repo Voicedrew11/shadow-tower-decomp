@@ -72,7 +72,7 @@ void menu_load_main_messages(void)
     cd_read_member(3, 0, image);
     copy_words((u32 *)&menu_messages, (u32 *)(image + 1), 5376);
     image = (u_long *)((u8 *)image + (cd_file_buffer[0] + 4));
-    tim_load_images_at(image + 1, &MENU_SCRATCH->unk2E6[0], &MENU_SCRATCH->unk2E6[1], 1);
+    tim_load_images_at(image + 1, &MENU_SCRATCH->image_vram[0], &MENU_SCRATCH->image_vram[1], 1);
 }
 
 ADDRESS(0x80058cc8, 0x68)
@@ -109,29 +109,29 @@ void card_screen_open(int arg0, int arg1)
     MenuScratch *sp = MENU_SCRATCH;
     u_long *image;
 
-    sp->unk2E6[0].vx = 960;
-    sp->unk2E6[0].vy = 256;
-    sp->unk2E6[1].vx = 560;
-    sp->unk2E6[1].vy = 495;
-    sp->unk2E6[2].vx = 896;
-    sp->unk2E6[2].vy = 256;
-    sp->unk2E6[3].vx = 560;
-    sp->unk2E6[3].vy = 497;
-    sp->unk2E6[4].vx = 768;
-    sp->unk2E6[4].vy = 256;
+    sp->image_vram[0].vx = 960;
+    sp->image_vram[0].vy = 256;
+    sp->image_vram[1].vx = 560;
+    sp->image_vram[1].vy = 495;
+    sp->image_vram[2].vx = 896;
+    sp->image_vram[2].vy = 256;
+    sp->image_vram[3].vx = 560;
+    sp->image_vram[3].vy = 497;
+    sp->image_vram[4].vx = 768;
+    sp->image_vram[4].vy = 256;
     cd_wait_idle();
     image = cd_file_buffer;
     cd_read_member(3, 0, image);
     copy_words((u32 *)&menu_messages, (u32 *)(image + 1), 5376);
     image = (u_long *)((u8 *)image + (cd_file_buffer[0] + 4));
-    tim_load_images_at(image + 1, &sp->unk2E6[0], &sp->unk2E6[1], 1);
+    tim_load_images_at(image + 1, &sp->image_vram[0], &sp->image_vram[1], 1);
     menu_store_screen();
-    sp->unk2E5 = 0;
+    sp->font_mode = 0;
     SCRATCHPAD->unk208 = 0;
     if (arg0)
-        sp->unk2DC = 256;
+        sp->mode = 256;
     else
-        sp->unk2DC = 1;
+        sp->mode = 1;
     DrawSync(0);
 }
 
@@ -148,24 +148,24 @@ void menu_main_run(void)
     MenuScratch *sp = MENU_SCRATCH;
     u_long *image;
 
-    sp->unk2E6[0].vx = 960;
-    sp->unk2E6[0].vy = 256;
-    sp->unk2E6[1].vx = 560;
-    sp->unk2E6[1].vy = 495;
-    sp->unk2E6[2].vx = 896;
-    sp->unk2E6[2].vy = 256;
-    sp->unk2E6[3].vx = 560;
-    sp->unk2E6[3].vy = 497;
-    sp->unk2E6[4].vx = 768;
-    sp->unk2E6[4].vy = 256;
+    sp->image_vram[0].vx = 960;
+    sp->image_vram[0].vy = 256;
+    sp->image_vram[1].vx = 560;
+    sp->image_vram[1].vy = 495;
+    sp->image_vram[2].vx = 896;
+    sp->image_vram[2].vy = 256;
+    sp->image_vram[3].vx = 560;
+    sp->image_vram[3].vy = 497;
+    sp->image_vram[4].vx = 768;
+    sp->image_vram[4].vy = 256;
     cd_wait_idle();
     image = cd_file_buffer;
     cd_read_member(3, 0, image);
     copy_words((u32 *)&menu_messages, (u32 *)(image + 1), 5376);
     image = (u_long *)((u8 *)image + (cd_file_buffer[0] + 4));
-    tim_load_images_at(image + 1, &sp->unk2E6[0], &sp->unk2E6[1], 1);
+    tim_load_images_at(image + 1, &sp->image_vram[0], &sp->image_vram[1], 1);
     menu_store_screen();
-    sp->unk2DE = 0;
+    sp->main_row = 0;
     pad_clear_input();
     DrawSync(0);
     for (;;) {
@@ -177,45 +177,45 @@ void menu_main_run(void)
         if (pad_state.pressed & 0x1000) {
             play_confirm_sound();
             pad_state.pressed = 0;
-            sp->unk2E5 = 0;
+            sp->font_mode = 0;
             menu_area_info_run();
         }
         if (pad_state.pressed & 0x4000) {
             play_confirm_sound();
             pad_state.pressed = 0;
-            if ((s16)sp->unk2DE == 0) {
-                sp->unk2E5 = 0;
+            if ((s16)sp->main_row == 0) {
+                sp->font_mode = 0;
                 if (menu_use_item_run() == 1)
                     break;
-            } else if ((s16)sp->unk2DE == 1) {
-                sp->unk2E5 = 0;
+            } else if ((s16)sp->main_row == 1) {
+                sp->font_mode = 0;
                 menu_equip_run();
-            } else if ((s16)sp->unk2DE == 2) {
+            } else if ((s16)sp->main_row == 2) {
                 viewer.free_anims_after_menu = 1;
-                sp->unk2E5 = 1;
+                sp->font_mode = 1;
                 if (pad_state.held & 0x800)
                     menu_arrange_icons_run();
                 else
                     menu_arrange_list_run();
-            } else if ((s16)sp->unk2DE == 3) {
+            } else if ((s16)sp->main_row == 3) {
                 viewer.free_anims_after_menu = 1;
-                sp->unk2E5 = 1;
+                sp->font_mode = 1;
                 menu_creature_book_run();
-            } else if ((s16)sp->unk2DE == 4) {
+            } else if ((s16)sp->main_row == 4) {
                 viewer.free_anims_after_menu = 1;
-                sp->unk2E5 = 1;
+                sp->font_mode = 1;
                 menu_equip_info_run();
-            } else if ((s16)sp->unk2DE == 5) {
-                sp->unk2E5 = 0;
+            } else if ((s16)sp->main_row == 5) {
+                sp->font_mode = 0;
                 menu_options_run();
-            } else if ((s16)sp->unk2DE == 6) {
-                sp->unk2DC = 1;
-                sp->unk2E5 = 0;
-                sp->unk206 = 1;
+            } else if ((s16)sp->main_row == 6) {
+                sp->mode = 1;
+                sp->font_mode = 0;
+                sp->show_backdrop = 1;
                 if (card_screen_run(1) == 1)
                     break;
-            } else if ((s16)sp->unk2DE == 7) {
-                sp->unk2E5 = 0;
+            } else if ((s16)sp->main_row == 7) {
+                sp->font_mode = 0;
                 if (menu_end_game_run() == 1)
                     break;
             }
@@ -223,18 +223,18 @@ void menu_main_run(void)
         if (pad_state.pressed_repeat & 0x40) {
             play_cursor_sound();
             pad_state.pressed_repeat = 0;
-            sp->unk2DE++;
-            if ((s16)sp->unk2DE >= 8)
-                sp->unk2DE = 0;
+            sp->main_row++;
+            if ((s16)sp->main_row >= 8)
+                sp->main_row = 0;
         }
         if (pad_state.pressed_repeat & 0x10) {
             play_cursor_sound();
             pad_state.pressed_repeat = 0;
-            sp->unk2DE--;
-            if ((s16)sp->unk2DE < 0)
-                sp->unk2DE = 7;
+            sp->main_row--;
+            if ((s16)sp->main_row < 0)
+                sp->main_row = 7;
         }
-        sp->unk2E5 = 0;
+        sp->font_mode = 0;
         frame_rate_update();
         menu_main_draw();
     }
@@ -422,10 +422,10 @@ void equip_apply_slot_change(int redraw)
     MenuScratch *sp = MENU_SCRATCH;
 
     if (redraw == 0)
-        *(MenuSlots *)sp->unk292 = *MENU_SLOTS;
+        *(EquipmentSlots *)sp->saved_equipment = *MENU_SLOTS;
     if (viewer.equipment[9] != 0xffff && vis_table_c.types[viewer.equipment[9]].category == 10) {
-        if (sp->unk2E0 == 2 || sp->unk2E0 == 16 || sp->unk2E0 == 9 || sp->unk2E0 == 10
-            || sp->unk2E0 == 11) {
+        if (sp->cursor == 2 || sp->cursor == 16 || sp->cursor == 9 || sp->cursor == 10
+            || sp->cursor == 11) {
             viewer.equipment[2] = 0xffff;
             viewer.equipment[9] = 0xffff;
             viewer.equipment[10] = 0xffff;
@@ -437,7 +437,7 @@ void equip_apply_slot_change(int redraw)
         }
     }
     if (viewer.equipment[3] != 0xffff && vis_table_c.types[viewer.equipment[3]].category == 9) {
-        if (sp->unk2E0 == 3 || sp->unk2E0 == 17) {
+        if (sp->cursor == 3 || sp->cursor == 17) {
             viewer.equipment[3] = 0xffff;
             viewer.equipment[16] = 0xffff;
             if (redraw == 1) {
@@ -447,7 +447,7 @@ void equip_apply_slot_change(int redraw)
         }
     }
     if (viewer.equipment[4] != 0xffff && vis_table_c.types[viewer.equipment[4]].category == 9) {
-        if (sp->unk2E0 == 4 || sp->unk2E0 == 18) {
+        if (sp->cursor == 4 || sp->cursor == 18) {
             viewer.equipment[4] = 0xffff;
             viewer.equipment[17] = 0xffff;
             if (redraw == 1) {
@@ -456,8 +456,8 @@ void equip_apply_slot_change(int redraw)
             }
         }
     }
-    if (sp->unk2C0 != -1) {
-        if (vis_table_c.types[sp->unk2C0].category == 10) {
+    if (sp->choice_id != -1) {
+        if (vis_table_c.types[sp->choice_id].category == 10) {
             viewer.equipment[2] = 0xffff;
             viewer.equipment[10] = 0xffff;
             if (redraw == 1) {
@@ -465,53 +465,53 @@ void equip_apply_slot_change(int redraw)
                 equip_load_slot_picture(10);
             }
         }
-        if (vis_table_c.types[sp->unk2C0].category == 9) {
-            if (sp->unk2E0 == 3) {
+        if (vis_table_c.types[sp->choice_id].category == 9) {
+            if (sp->cursor == 3) {
                 viewer.equipment[16] = 0xffff;
                 if (redraw == 1)
                     equip_load_slot_picture(16);
-            } else if (sp->unk2E0 == 4) {
+            } else if (sp->cursor == 4) {
                 viewer.equipment[17] = 0xffff;
                 if (redraw == 1)
                     equip_load_slot_picture(17);
             }
         }
     }
-    if (sp->unk2E0 == 2 || sp->unk2E0 == 16) {
-        if (sp->unk2C0 == -1) {
+    if (sp->cursor == 2 || sp->cursor == 16) {
+        if (sp->choice_id == -1) {
             u16 *hand = &viewer.equipment[2];
 
             *hand = 0xffff;
             hand[13] = 0xffff;
         } else {
-            viewer.equipment[2] = sp->unk2C0;
+            viewer.equipment[2] = sp->choice_id;
         }
         if (redraw == 1)
             equip_load_slot_picture(2);
-    } else if (sp->unk2E0 < 10) {
-        if (sp->unk2C0 == -1)
-            MENU_SLOTS->ids[sp->unk2E0] = 0xffff;
+    } else if (sp->cursor < 10) {
+        if (sp->choice_id == -1)
+            MENU_SLOTS->ids[sp->cursor] = 0xffff;
         else
-            MENU_SLOTS->ids[sp->unk2E0] = sp->unk2C0;
+            MENU_SLOTS->ids[sp->cursor] = sp->choice_id;
         if (redraw == 1)
-            equip_load_slot_picture(sp->unk2E0);
+            equip_load_slot_picture(sp->cursor);
     } else {
-        if (sp->unk2C0 == -1)
-            *(MENU_SLOTS->ids - 1 + sp->unk2E0) = 0xffff;
+        if (sp->choice_id == -1)
+            *(MENU_SLOTS->ids - 1 + sp->cursor) = 0xffff;
         else
-            *(MENU_SLOTS->ids - 1 + sp->unk2E0) = sp->unk2C0;
+            *(MENU_SLOTS->ids - 1 + sp->cursor) = sp->choice_id;
         if (redraw == 1)
-            equip_load_slot_picture(sp->unk2E0 - 1);
+            equip_load_slot_picture(sp->cursor - 1);
     }
-    if (sp->unk2E0 != 0 && sp->unk2E0 != 14)
+    if (sp->cursor != 0 && sp->cursor != 14)
         return;
-    if (sp->unk2E0 == 0)
+    if (sp->cursor == 0)
         viewer.equipment[6] = 0xffff;
     else
         viewer.equipment[12] = 0xffff;
     if (redraw == 1) {
         DrawSync(0);
-        equip_load_slot_picture(sp->unk2E0 == 0 ? 6 : 12);
+        equip_load_slot_picture(sp->cursor == 0 ? 6 : 12);
     }
 }
 
@@ -519,7 +519,7 @@ void equip_apply_slot_change(int redraw)
 ADDRESS(0x80059cec, 0xd4)
 void equip_restore_slots(void)
 {
-    *MENU_SLOTS = *(MenuSlots *)MENU_SCRATCH->unk292;
+    *MENU_SLOTS = *(EquipmentSlots *)MENU_SCRATCH->saved_equipment;
 }
 
 /*
@@ -536,16 +536,16 @@ void player_total_attributes(void)
     int j;
 
     for (i = 0; i < 14; i++) {
-        at->unk25C[i] = 0;
-        at->unk240[i] = viewer.base_attributes[i];
-        at->unk224[i] = viewer.attribute_bonuses[i];
-        at->unk208[i] = 0;
+        at->bonus_changes[i] = 0;
+        at->base_attributes[i] = viewer.base_attributes[i];
+        at->prev_attribute_bonuses[i] = viewer.attribute_bonuses[i];
+        at->attribute_bonuses[i] = 0;
     }
     id = viewer.equipment;
     for (i = 0; i < 11; i++) {
         if (*id != 0xffff) {
             for (j = 0; j < 14; j++)
-                at->unk208[j] += vis_table_c.types[*id].attributes[j];
+                at->attribute_bonuses[j] += vis_table_c.types[*id].attributes[j];
         }
         if (i == 3)
             id += 4;
@@ -557,77 +557,77 @@ void player_total_attributes(void)
             id += 1;
     }
     if (viewer.status_flags & 0x80) {
-        at->unk208[1] >>= 1;
-        at->unk240[1] >>= 1;
+        at->attribute_bonuses[1] >>= 1;
+        at->base_attributes[1] >>= 1;
     }
     for (i = 0; i < 14; i++)
-        at->unk25C[i] = at->unk208[i] - at->unk224[i];
+        at->bonus_changes[i] = at->attribute_bonuses[i] - at->prev_attribute_bonuses[i];
     for (i = 0; i < 14; i++) {
-        at->unk1EC[i] = at->unk240[i] + at->unk208[i];
-        if (at->unk1EC[i] >= 1000)
-            at->unk1EC[i] = 999;
-        if (at->unk1EC[i] < 0)
-            at->unk1B4[i] = 0;
+        at->attributes[i] = at->base_attributes[i] + at->attribute_bonuses[i];
+        if (at->attributes[i] >= 1000)
+            at->attributes[i] = 999;
+        if (at->attributes[i] < 0)
+            at->attributes_clamped[i] = 0;
         else
-            at->unk1B4[i] = at->unk1EC[i];
-        if (at->unk208[i] < 0)
-            at->unk1D0[i] = 0;
+            at->attributes_clamped[i] = at->attributes[i];
+        if (at->attribute_bonuses[i] < 0)
+            at->attribute_bonuses_clamped[i] = 0;
         else
-            at->unk1D0[i] = at->unk208[i];
+            at->attribute_bonuses_clamped[i] = at->attribute_bonuses[i];
     }
     id = viewer.equipment;
-    at->unk168 = at->recs;
-    at->unk2BC = 0;
+    at->next_rec = at->recs;
+    at->equip_weight = 0;
     for (i = 0; i < 21; i++, id++) {
         if ((u32)(i - 4) < 3 || i == 11 || i == 12 || i == 15 || i >= 17)
             continue;
         if (*id == 0xffff) {
-            fill_words((u32 *)at->unk168, 0, 8);
+            fill_words((u32 *)at->next_rec, 0, 8);
         } else {
             rec = &vis_table_c.types[*id];
-            at->unk168->unk0 = rec->weight;
+            at->next_rec->weight = rec->weight;
             for (j = 0; j < 14; j++)
-                at->unk168->unk4[j] = rec->attributes[j];
-            at->unk168->unk2 = 0;
-            at->unk168->unk1 = 0;
+                at->next_rec->attributes[j] = rec->attributes[j];
+            at->next_rec->element_amount = 0;
+            at->next_rec->element = 0;
             if (rec->kind2 >= 9) {
-                at->unk168->unk1 = rec->kind2 - 9;
-                at->unk168->unk2 = rec->amount2;
+                at->next_rec->element = rec->kind2 - 9;
+                at->next_rec->element_amount = rec->amount2;
             }
             if (i != 4 && i != 17)
-                at->unk2BC += rec->weight;
+                at->equip_weight += rec->weight;
         }
-        at->unk168++;
+        at->next_rec++;
     }
     if (viewer.equipment[6] != 0xffff) {
-        at->unk16C = viewer.equipment[6] / 3;
-        at->unk16E = *(at->unk16C + effects.defs[viewer.equipment[6]].unkA);
+        at->right_magic_attr = viewer.equipment[6] / 3;
+        at->right_magic_bonus = *(at->right_magic_attr + effects.defs[viewer.equipment[6]].unkA);
     } else {
-        at->unk16C = 0xffff;
-        at->unk16E = 0;
+        at->right_magic_attr = 0xffff;
+        at->right_magic_bonus = 0;
     }
     if (viewer.equipment[12] != 0xffff) {
-        at->unk170 = viewer.equipment[12] / 3;
-        at->unk172 = *(at->unk170 + effects.defs[viewer.equipment[12]].unkA);
+        at->left_magic_attr = viewer.equipment[12] / 3;
+        at->left_magic_bonus = *(at->left_magic_attr + effects.defs[viewer.equipment[12]].unkA);
     } else {
-        at->unk170 = 0xffff;
-        at->unk172 = 0;
+        at->left_magic_attr = 0xffff;
+        at->left_magic_bonus = 0;
     }
     for (i = 0; i < 6; i++) {
-        at->unk286[i] = 0;
-        at->unk27A[i] = 0;
+        at->armour_elements[i] = 0;
+        at->accessory_elements[i] = 0;
     }
-    at->unk27A[at->recs[0].unk1] += at->recs[0].unk2;
-    at->unk27A[at->recs[8].unk1] += at->recs[8].unk2;
-    at->unk27A[at->recs[1].unk1] += at->recs[1].unk2;
-    at->unk27A[at->recs[9].unk1] += at->recs[9].unk2;
-    at->unk27A[at->recs[4].unk1] += at->recs[4].unk2;
-    at->unk286[at->recs[5].unk1] += at->recs[5].unk2;
-    at->unk286[at->recs[6].unk1] += at->recs[6].unk2;
-    at->unk286[at->recs[2].unk1] += at->recs[2].unk2;
-    at->unk286[at->recs[7].unk1] += at->recs[7].unk2;
-    at->unk286[at->recs[1].unk1] += at->recs[1].unk2;
-    at->unk286[at->recs[9].unk1] += at->recs[9].unk2;
+    at->accessory_elements[at->recs[0].element] += at->recs[0].element_amount;
+    at->accessory_elements[at->recs[8].element] += at->recs[8].element_amount;
+    at->accessory_elements[at->recs[1].element] += at->recs[1].element_amount;
+    at->accessory_elements[at->recs[9].element] += at->recs[9].element_amount;
+    at->accessory_elements[at->recs[4].element] += at->recs[4].element_amount;
+    at->armour_elements[at->recs[5].element] += at->recs[5].element_amount;
+    at->armour_elements[at->recs[6].element] += at->recs[6].element_amount;
+    at->armour_elements[at->recs[2].element] += at->recs[2].element_amount;
+    at->armour_elements[at->recs[7].element] += at->recs[7].element_amount;
+    at->armour_elements[at->recs[1].element] += at->recs[1].element_amount;
+    at->armour_elements[at->recs[9].element] += at->recs[9].element_amount;
 }
 
 /* Copies the two recomputed figure rows into the viewer. */
@@ -638,8 +638,8 @@ void player_store_attributes(void)
     int i;
 
     for (i = 0; i < 14; i++) {
-        viewer.attributes[i] = sp->unk1EC[i];
-        viewer.attribute_bonuses[i] = sp->unk208[i];
+        viewer.attributes[i] = sp->attributes[i];
+        viewer.attribute_bonuses[i] = sp->attribute_bonuses[i];
     }
 }
 
@@ -663,10 +663,10 @@ void player_compute_derived_stats(int apply)
     if (apply)
         equip_apply_slot_change(0);
     player_total_attributes();
-    viewer.max_hp = at->unk1B4[0] * 5 + at->unk1B4[1] + at->unk1B4[2] + at->unk1B4[3]
-                  + at->unk1B4[4] + at->unk1B4[5] + at->unk1B4[6];
-    viewer.max_mp = at->unk1B4[7] * 5 + at->unk1B4[8] + at->unk1B4[9] + at->unk1B4[10]
-                  + at->unk1B4[11] + at->unk1B4[12] + at->unk1B4[13];
+    viewer.max_hp = at->attributes_clamped[0] * 5 + at->attributes_clamped[1] + at->attributes_clamped[2] + at->attributes_clamped[3]
+                  + at->attributes_clamped[4] + at->attributes_clamped[5] + at->attributes_clamped[6];
+    viewer.max_mp = at->attributes_clamped[7] * 5 + at->attributes_clamped[8] + at->attributes_clamped[9] + at->attributes_clamped[10]
+                  + at->attributes_clamped[11] + at->attributes_clamped[12] + at->attributes_clamped[13];
     viewer.physical_base = viewer.max_hp / 80;
     viewer.magic_base = viewer.max_mp / 80;
     if (viewer.status_flags & 0x100) {
@@ -684,17 +684,17 @@ void player_compute_derived_stats(int apply)
     if (viewer.magic_base == 0)
         viewer.magic_base = 1;
     if (viewer.equipment[3] != 0xffff) {
-        viewer.weapon_attack[0] = viewer.physical_base + (at->unk1D0[4] >> 1);
-        viewer.weapon_attack[1] = viewer.physical_base + (at->unk1D0[5] >> 1);
-        viewer.weapon_attack[2] = viewer.physical_base + (at->unk1D0[6] >> 1);
+        viewer.weapon_attack[0] = viewer.physical_base + (at->attribute_bonuses_clamped[4] >> 1);
+        viewer.weapon_attack[1] = viewer.physical_base + (at->attribute_bonuses_clamped[5] >> 1);
+        viewer.weapon_attack[2] = viewer.physical_base + (at->attribute_bonuses_clamped[6] >> 1);
         p = viewer.weapon_element_attack;
         for (i = 0; i < 6; i++) {
-            if (at->recs[3].unk1 == i) {
-                *p = viewer.magic_base + (at->recs[3].unk2 >> 1);
-                if (at->recs[1].unk1 == i)
-                    *p += at->recs[1].unk2 >> 2;
-                if (at->recs[9].unk1 == i)
-                    *p += at->recs[9].unk2 >> 2;
+            if (at->recs[3].element == i) {
+                *p = viewer.magic_base + (at->recs[3].element_amount >> 1);
+                if (at->recs[1].element == i)
+                    *p += at->recs[1].element_amount >> 2;
+                if (at->recs[9].element == i)
+                    *p += at->recs[9].element_amount >> 2;
             } else {
                 *p = 0;
             }
@@ -703,37 +703,37 @@ void player_compute_derived_stats(int apply)
         viewer.weapon_attack[0] = viewer.weapon_attack[1] = viewer.weapon_attack[2] = viewer.weapon_element_attack[0] = viewer.weapon_element_attack[1]
             = viewer.weapon_element_attack[2] = viewer.weapon_element_attack[3] = viewer.weapon_element_attack[4] = viewer.weapon_element_attack[5] = 0;
     }
-    if (at->unk16C != 0xffff)
-        viewer.magic_attack_right = viewer.magic_base + at->unk16E + at->unk1B4[at->unk16C + 11] / 6;
+    if (at->right_magic_attr != 0xffff)
+        viewer.magic_attack_right = viewer.magic_base + at->right_magic_bonus + at->attributes_clamped[at->right_magic_attr + 11] / 6;
     else
         viewer.magic_attack_right = 0;
-    if (at->unk170 != 0xffff)
-        viewer.magic_attack_left = viewer.magic_base + at->unk172 + at->unk1B4[at->unk170 + 11] / 6;
+    if (at->left_magic_attr != 0xffff)
+        viewer.magic_attack_left = viewer.magic_base + at->left_magic_bonus + at->attributes_clamped[at->left_magic_attr + 11] / 6;
     else
         viewer.magic_attack_left = 0;
-    viewer.armour_defence = viewer.physical_base + ((at->unk1B4[2] - at->recs[10].unk4[2]) >> 2);
-    viewer.magic_defence = viewer.magic_base + ((at->unk1B4[9] - at->recs[10].unk4[9]) >> 2);
-    viewer.shield_defence = at->recs[10].unk4[2];
-    viewer.shield_magic_defence = at->recs[10].unk4[9];
-    viewer.impact_resistance = (at->unk1B4[3] >> 4) + 50;
-    viewer.status_recovery = (at->unk1B4[10] >> 4) + 50;
-    viewer.attack_speed = (at->unk1B4[1] >> 3) + 100;
-    viewer.magic_speed = (at->unk1B4[8] >> 3) + 100;
-    viewer.accessory_element_bonus[0] = at->unk27A[0] / 5;
-    viewer.accessory_element_bonus[1] = at->unk27A[1] / 5;
-    viewer.accessory_element_bonus[2] = at->unk27A[2] / 5;
-    viewer.accessory_element_bonus[3] = at->unk27A[3] / 5;
-    viewer.accessory_element_bonus[4] = at->unk27A[4] / 5;
-    viewer.accessory_element_bonus[5] = at->unk27A[5] / 5;
-    viewer.element_defence[0] = ((at->unk1B4[11] >> 2) + at->unk286[0]) / 7;
-    viewer.element_defence[1] = ((at->unk1B4[11] >> 2) + at->unk286[1]) / 7;
-    viewer.element_defence[2] = ((at->unk1B4[12] >> 2) + at->unk286[2]) / 7;
-    viewer.element_defence[3] = ((at->unk1B4[12] >> 2) + at->unk286[3]) / 7;
-    viewer.element_defence[4] = ((at->unk1B4[13] >> 2) + at->unk286[4]) / 7;
-    viewer.element_defence[5] = ((at->unk1B4[13] >> 2) + at->unk286[5]) / 7;
+    viewer.armour_defence = viewer.physical_base + ((at->attributes_clamped[2] - at->recs[10].attributes[2]) >> 2);
+    viewer.magic_defence = viewer.magic_base + ((at->attributes_clamped[9] - at->recs[10].attributes[9]) >> 2);
+    viewer.shield_defence = at->recs[10].attributes[2];
+    viewer.shield_magic_defence = at->recs[10].attributes[9];
+    viewer.impact_resistance = (at->attributes_clamped[3] >> 4) + 50;
+    viewer.status_recovery = (at->attributes_clamped[10] >> 4) + 50;
+    viewer.attack_speed = (at->attributes_clamped[1] >> 3) + 100;
+    viewer.magic_speed = (at->attributes_clamped[8] >> 3) + 100;
+    viewer.accessory_element_bonus[0] = at->accessory_elements[0] / 5;
+    viewer.accessory_element_bonus[1] = at->accessory_elements[1] / 5;
+    viewer.accessory_element_bonus[2] = at->accessory_elements[2] / 5;
+    viewer.accessory_element_bonus[3] = at->accessory_elements[3] / 5;
+    viewer.accessory_element_bonus[4] = at->accessory_elements[4] / 5;
+    viewer.accessory_element_bonus[5] = at->accessory_elements[5] / 5;
+    viewer.element_defence[0] = ((at->attributes_clamped[11] >> 2) + at->armour_elements[0]) / 7;
+    viewer.element_defence[1] = ((at->attributes_clamped[11] >> 2) + at->armour_elements[1]) / 7;
+    viewer.element_defence[2] = ((at->attributes_clamped[12] >> 2) + at->armour_elements[2]) / 7;
+    viewer.element_defence[3] = ((at->attributes_clamped[12] >> 2) + at->armour_elements[3]) / 7;
+    viewer.element_defence[4] = ((at->attributes_clamped[13] >> 2) + at->armour_elements[4]) / 7;
+    viewer.element_defence[5] = ((at->attributes_clamped[13] >> 2) + at->armour_elements[5]) / 7;
     for (i = 0; i < 6; i++) {
-        if (at->recs[10].unk1 == i)
-            viewer.shield_element_defence = at->unk1B4[i / 2 + 11] + (at->recs[10].unk2 >> 1);
+        if (at->recs[10].element == i)
+            viewer.shield_element_defence = at->attributes_clamped[i / 2 + 11] + (at->recs[10].element_amount >> 1);
     }
     min = 0xffff;
     max = 0;
@@ -751,7 +751,7 @@ void player_compute_derived_stats(int apply)
         min = viewer.weapon_attack[2];
     viewer.weapon_attack_min = min;
     viewer.weapon_attack_max = max;
-    viewer.equip_weight = at->unk2BC;
+    viewer.equip_weight = at->equip_weight;
     viewer.equip_weight_limit = viewer.max_hp / 12 + 120;
     if (apply)
         equip_restore_slots();
@@ -858,60 +858,60 @@ void menu_equip_info_run(void)
     CdControl(CdlSetloc, (u_char *)&loc, NULL);
     ResetGraph(1);
     fade_screen_to_black();
-    sp->unk2CC = mem_alloc(21504);
-    sp->unk2D0 = mem_alloc(144);
+    sp->item_messages = mem_alloc(21504);
+    sp->ring_magic_bits = mem_alloc(144);
     p = CD_BUFFER;
     cd_read_member(3, 1, p);
     copy_words((u32 *)&menu_messages, (u32 *)(p + 1), 5376);
     p = (u_long *)((u8 *)p + (*p + 4));
-    tim_load_images_at(p + 1, &sp->unk2E6[0], &sp->unk2E6[1], 1);
+    tim_load_images_at(p + 1, &sp->image_vram[0], &sp->image_vram[1], 1);
     p = (u_long *)((u8 *)p + (*p + 4));
-    copy_words(sp->unk2D0, (u32 *)(p + 1), 36);
+    copy_words(sp->ring_magic_bits, (u32 *)(p + 1), 36);
     p = CD_BUFFER;
     cd_read_member(3, 4, p);
-    copy_words((u32 *)sp->unk2CC, (u32 *)(p + 1), 5376);
+    copy_words((u32 *)sp->item_messages, (u32 *)(p + 1), 5376);
     p = (u_long *)((u8 *)p + (*p + 4));
-    tim_load_images_at(p + 1, &sp->unk2E6[2], &sp->unk2E6[3], 1);
+    tim_load_images_at(p + 1, &sp->image_vram[2], &sp->image_vram[3], 1);
     cd_read_member(3, 5, CD_BUFFER);
-    tim_load_images_at(CD_BUFFER, &sp->unk2E6[4], NULL, 1);
+    tim_load_images_at(CD_BUFFER, &sp->image_vram[4], NULL, 1);
     DrawSync(0);
     cd_read_member(3, 7, CD_BUFFER);
     tim_load_images_at(CD_BUFFER, &image, &clut, 1);
     DrawSync(0);
-    sp->unk0.vram[0].vx = 640;
-    sp->unk0.vram[0].vy = 256;
-    sp->unk0.vram[1].vx = 560;
-    sp->unk0.vram[1].vy = 498;
-    sp->unk174[0] = mem_alloc(40);
-    sp->unk174[1] = mem_alloc(60);
-    sp->unk174[2] = mem_alloc(40);
-    sp->unk174[3] = mem_alloc(40);
-    sp->unk174[4] = mem_alloc(70);
-    sp->unk174[5] = mem_alloc(30);
-    sp->unk174[6] = mem_alloc(140);
-    sp->unk174[7] = mem_alloc(70);
-    sp->unk174[8] = mem_alloc(40);
-    sp->unk174[9] = mem_alloc(92);
-    sp->unk1B0 = mem_alloc(140);
-    sp->unk19C[0] = sp->unk19C[1] = sp->unk19C[2] = sp->unk19C[3] = sp->unk19C[4]
-        = sp->unk19C[5] = sp->unk19C[6] = sp->unk19C[7] = sp->unk19C[8] = sp->unk19C[9] = 0;
+    sp->state.vram[0].vx = 640;
+    sp->state.vram[0].vy = 256;
+    sp->state.vram[1].vx = 560;
+    sp->state.vram[1].vy = 498;
+    sp->category_lists[0] = mem_alloc(40);
+    sp->category_lists[1] = mem_alloc(60);
+    sp->category_lists[2] = mem_alloc(40);
+    sp->category_lists[3] = mem_alloc(40);
+    sp->category_lists[4] = mem_alloc(70);
+    sp->category_lists[5] = mem_alloc(30);
+    sp->category_lists[6] = mem_alloc(140);
+    sp->category_lists[7] = mem_alloc(70);
+    sp->category_lists[8] = mem_alloc(40);
+    sp->category_lists[9] = mem_alloc(92);
+    sp->choices = mem_alloc(140);
+    sp->category_counts[0] = sp->category_counts[1] = sp->category_counts[2] = sp->category_counts[3] = sp->category_counts[4]
+        = sp->category_counts[5] = sp->category_counts[6] = sp->category_counts[7] = sp->category_counts[8] = sp->category_counts[9] = 0;
     for (i = 0; i < 314; i++) {
         if (inventory.counts[i].count == 0 || inventory.counts[i].in_bag)
             continue;
         if (vis_table_c.types[i].category == 0xff)
             continue;
         if (vis_table_c.types[i].category == 9) {
-            sp->unk174[6][sp->unk19C[6]++] = i;
+            sp->category_lists[6][sp->category_counts[6]++] = i;
         } else if (vis_table_c.types[i].category == 10) {
-            sp->unk174[1][sp->unk19C[1]++] = i;
+            sp->category_lists[1][sp->category_counts[1]++] = i;
         } else if (vis_table_c.types[i].category == 20 || vis_table_c.types[i].category == 30) {
             if (i == 266 || i == 310 || i == 311 || i == 312 || i == 313)
                 continue;
-            sp->unk174[9][sp->unk19C[9]++] = i;
+            sp->category_lists[9][sp->category_counts[9]++] = i;
         } else {
             {
-            s16 *list = sp->unk174[vis_table_c.types[i].category];
-            s16 *len = &sp->unk19C[vis_table_c.types[i].category];
+            s16 *list = sp->category_lists[vis_table_c.types[i].category];
+            s16 *len = &sp->category_counts[vis_table_c.types[i].category];
             list[(*len)++] = i;
             }
         }
@@ -919,18 +919,18 @@ void menu_equip_info_run(void)
     clear_vram();
     DrawSync(0);
     gfx_setup_640x240();
-    sp->unk2C4 = -1;
+    sp->bar_scale = -1;
     for (i = 0; i < 14; i++) {
-        if (sp->unk2C4 < viewer.attributes[i])
-            sp->unk2C4 = viewer.attributes[i];
+        if (sp->bar_scale < viewer.attributes[i])
+            sp->bar_scale = viewer.attributes[i];
     }
     prev = 0;
-    sp->unk2DC = 1;
-    sp->unk2C6 = 0;
-    sp->unk2E0 = 0;
+    sp->mode = 1;
+    sp->show_item_values = 0;
+    sp->cursor = 0;
     debounce = 0;
-    sp->unk2D8 = viewer.hp;
-    sp->unk2DA = viewer.mp;
+    sp->hp_before = viewer.hp;
+    sp->mp_before = viewer.mp;
     player_compute_derived_stats(0);
     pad_clear_input();
     menu_second_page = 0;
@@ -967,17 +967,17 @@ void menu_equip_info_run(void)
             pad_state.pressed_repeat = 0;
             debounce--;
         }
-        if (sp->unk2DC == 1) {
+        if (sp->mode == 1) {
             if (pad_state.pressed & 0x800)
                 menu_second_page = 1;
             else if (pad_state.pressed & 0x400)
                 menu_second_page = 0;
             if (pad_state.held & 0x1000) {
-                if (sp->unk2C6 == 0)
+                if (sp->show_item_values == 0)
                     play_confirm_sound();
-                sp->unk2C6 = 1;
+                sp->show_item_values = 1;
             } else {
-                sp->unk2C6 = 0;
+                sp->show_item_values = 0;
             }
             if (pad_state.pressed & 0x2000) {
                 play_cancel_sound();
@@ -986,112 +986,112 @@ void menu_equip_info_run(void)
             }
             if (pad_state.pressed & 0x4000) {
                 pad_state.pressed = 0;
-                sp->unk2DC = 2;
-                held = sp->unk2E0;
+                sp->mode = 2;
+                held = sp->cursor;
                 if (held == 16)
                     cur = *(viewer.equipment + 2);
                 else if (held < 10)
                     cur = *(viewer.equipment + held);
                 else
                     cur = *(viewer.equipment + held - 1);
-                sp->unk2C2 = 0;
-                switch (sp->unk2E0) {
+                sp->choice_count = 0;
+                switch (sp->cursor) {
                 case 3:
                 case 4:
-                    n = sp->unk19C[6];
+                    n = sp->category_counts[6];
                     for (k = 0; k < n; k++) {
-                        if ((sp->unk2E0 == 3 && sp->unk174[6][k] != viewer.equipment[4])
-                            || (sp->unk2E0 == 4 && sp->unk174[6][k] != viewer.equipment[3]))
-                            sp->unk1B0[sp->unk2C2++] = sp->unk174[6][k];
+                        if ((sp->cursor == 3 && sp->category_lists[6][k] != viewer.equipment[4])
+                            || (sp->cursor == 4 && sp->category_lists[6][k] != viewer.equipment[3]))
+                            sp->choices[sp->choice_count++] = sp->category_lists[6][k];
                     }
                     play_confirm_sound();
-                    sp->unk2C7 = 6;
+                    sp->list_kind = 6;
                     base = 0;
                     offset = 1;
                     break;
                 case 17:
                 case 18:
-                    n = sp->unk19C[7];
+                    n = sp->category_counts[7];
                     for (k = 0; k < n; k++) {
-                        if ((sp->unk2E0 == 17 && sp->unk174[7][k] != viewer.equipment[17])
-                            || (sp->unk2E0 == 18 && sp->unk174[7][k] != viewer.equipment[16]))
-                            sp->unk1B0[sp->unk2C2++] = sp->unk174[7][k];
+                        if ((sp->cursor == 17 && sp->category_lists[7][k] != viewer.equipment[17])
+                            || (sp->cursor == 18 && sp->category_lists[7][k] != viewer.equipment[16]))
+                            sp->choices[sp->choice_count++] = sp->category_lists[7][k];
                     }
                     play_confirm_sound();
-                    sp->unk2C7 = 7;
+                    sp->list_kind = 7;
                     base = 166;
                     offset = 6;
                     break;
                 case 8:
-                    n = sp->unk19C[0];
+                    n = sp->category_counts[0];
                     for (k = 0; k < n; k++)
-                        sp->unk1B0[sp->unk2C2++] = sp->unk174[0][k];
+                        sp->choices[sp->choice_count++] = sp->category_lists[0][k];
                     play_confirm_sound();
-                    sp->unk2C7 = 0;
+                    sp->list_kind = 0;
                     base = 72;
                     offset = 2;
                     break;
                 case 9:
                 case 10:
-                    n = sp->unk19C[1];
+                    n = sp->category_counts[1];
                     for (k = 0; k < n; k++)
-                        sp->unk1B0[sp->unk2C2++] = sp->unk174[1][k];
+                        sp->choices[sp->choice_count++] = sp->category_lists[1][k];
                     play_confirm_sound();
-                    sp->unk2C7 = 1;
+                    sp->list_kind = 1;
                     offset = 3;
                     base = 93;
                     break;
                 case 2:
                 case 16:
-                    n = sp->unk19C[2];
+                    n = sp->category_counts[2];
                     for (k = 0; k < n; k++)
-                        sp->unk1B0[sp->unk2C2++] = sp->unk174[2][k];
+                        sp->choices[sp->choice_count++] = sp->category_lists[2][k];
                     play_confirm_sound();
-                    sp->unk2C7 = 2;
+                    sp->list_kind = 2;
                     offset = 4;
                     base = 124;
                     break;
                 case 11:
-                    n = sp->unk19C[3];
+                    n = sp->category_counts[3];
                     for (k = 0; k < n; k++)
-                        sp->unk1B0[sp->unk2C2++] = sp->unk174[3][k];
+                        sp->choices[sp->choice_count++] = sp->category_lists[3][k];
                     play_confirm_sound();
-                    sp->unk2C7 = 3;
+                    sp->list_kind = 3;
                     offset = 5;
                     base = 145;
                     break;
                 case 0:
                 case 14:
-                    n = sp->unk19C[4];
+                    n = sp->category_counts[4];
                     for (k = 0; k < n; k++) {
-                        if ((sp->unk2E0 == 0 && sp->unk174[4][k] != viewer.equipment[13])
-                            || (sp->unk2E0 == 14 && sp->unk174[4][k] != viewer.equipment[0]))
-                            sp->unk1B0[sp->unk2C2++] = sp->unk174[4][k];
+                        if ((sp->cursor == 0 && sp->category_lists[4][k] != viewer.equipment[13])
+                            || (sp->cursor == 14 && sp->category_lists[4][k] != viewer.equipment[0]))
+                            sp->choices[sp->choice_count++] = sp->category_lists[4][k];
                     }
                     play_confirm_sound();
-                    sp->unk2C7 = 4;
+                    sp->list_kind = 4;
                     offset = 7;
                     base = 202;
                     break;
                 case 1:
                 case 15:
-                    n = sp->unk19C[8];
+                    n = sp->category_counts[8];
                     for (k = 0; k < n; k++) {
-                        if ((sp->unk2E0 == 1 && sp->unk174[8][k] != viewer.equipment[14])
-                            || (sp->unk2E0 == 15 && sp->unk174[8][k] != viewer.equipment[1]))
-                            sp->unk1B0[sp->unk2C2++] = sp->unk174[8][k];
+                        if ((sp->cursor == 1 && sp->category_lists[8][k] != viewer.equipment[14])
+                            || (sp->cursor == 15 && sp->category_lists[8][k] != viewer.equipment[1]))
+                            sp->choices[sp->choice_count++] = sp->category_lists[8][k];
                     }
                     play_confirm_sound();
-                    sp->unk2C7 = 8;
+                    sp->list_kind = 8;
                     offset = 8;
                     base = 238;
                     break;
                 case 7:
-                    n = sp->unk19C[5];
+                    n = sp->category_counts[5];
                     for (k = 0; k < n; k++)
-                        sp->unk1B0[sp->unk2C2++] = sp->unk174[5][k];
+                        sp->choices[sp->choice_count++] = sp->category_lists[5][k];
                     play_confirm_sound();
-                    sp->unk2C7 = 5;
+                    sp->list_kind = 5;
                     offset = 9;
                     base = 259;
                     break;
@@ -1100,42 +1100,42 @@ void menu_equip_info_run(void)
                 case 19:
                 case 20:
                 case 21:
-                    n = sp->unk19C[9];
+                    n = sp->category_counts[9];
                     for (k = 0; k < n; k++) {
-                        if ((sp->unk174[9][k] != viewer.equipment[5] && sp->unk174[9][k] != viewer.equipment[19]
-                             && sp->unk174[9][k] != viewer.equipment[11]
-                             && sp->unk174[9][k] != viewer.equipment[20]
-                             && sp->unk174[9][k] != viewer.equipment[18])
-                            || (sp->unk2E0 == 5 && sp->unk174[9][k] == viewer.equipment[5])
-                            || (sp->unk2E0 == 20 && sp->unk174[9][k] == viewer.equipment[19])
-                            || (sp->unk2E0 == 12 && sp->unk174[9][k] == viewer.equipment[11])
-                            || (sp->unk2E0 == 21 && sp->unk174[9][k] == viewer.equipment[20])
-                            || (sp->unk2E0 == 19 && sp->unk174[9][k] == viewer.equipment[18]))
-                            sp->unk1B0[sp->unk2C2++] = sp->unk174[9][k];
+                        if ((sp->category_lists[9][k] != viewer.equipment[5] && sp->category_lists[9][k] != viewer.equipment[19]
+                             && sp->category_lists[9][k] != viewer.equipment[11]
+                             && sp->category_lists[9][k] != viewer.equipment[20]
+                             && sp->category_lists[9][k] != viewer.equipment[18])
+                            || (sp->cursor == 5 && sp->category_lists[9][k] == viewer.equipment[5])
+                            || (sp->cursor == 20 && sp->category_lists[9][k] == viewer.equipment[19])
+                            || (sp->cursor == 12 && sp->category_lists[9][k] == viewer.equipment[11])
+                            || (sp->cursor == 21 && sp->category_lists[9][k] == viewer.equipment[20])
+                            || (sp->cursor == 19 && sp->category_lists[9][k] == viewer.equipment[18]))
+                            sp->choices[sp->choice_count++] = sp->category_lists[9][k];
                     }
                     play_confirm_sound();
-                    sp->unk2C7 = 9;
+                    sp->list_kind = 9;
                     offset = 10;
                     base = 275;
                     break;
                 case 6:
                 case 13:
-                    if ((sp->unk2E0 == 6 && viewer.equipment[0] != 0xffff)
-                        || (sp->unk2E0 == 13 && viewer.equipment[13] != 0xffff)) {
+                    if ((sp->cursor == 6 && viewer.equipment[0] != 0xffff)
+                        || (sp->cursor == 13 && viewer.equipment[13] != 0xffff)) {
                         play_confirm_sound();
                     } else {
                         play_refuse_sound();
-                        sp->unk2DC = 1;
+                        sp->mode = 1;
                         goto next;
                     }
-                    sp->unk2C7 = 10;
+                    sp->list_kind = 10;
                     if (cur == 0xffff)
-                        sp->unk2BE = 0;
+                        sp->choice_index = 0;
                     else
-                        sp->unk2BE = cur;
+                        sp->choice_index = cur;
                     offset = 977;
                     base = 976;
-                    sp->unk2C0 = sp->unk2BE;
+                    sp->choice_id = sp->choice_index;
                     player_compute_derived_stats(1);
                     break;
                 default:
@@ -1143,38 +1143,38 @@ void menu_equip_info_run(void)
                     base = 0;
                     break;
                 }
-                if (sp->unk2C7 == 10) {
-                    sp->unk358.vx = 640;
-                    sp->unk358.vy = 0;
-                    if (sp->unk2E0 == 6)
-                        sp->unk2D4 = sp->unk2D0 + (viewer.equipment[0] - 196);
+                if (sp->list_kind == 10) {
+                    sp->tex_pos.vx = 640;
+                    sp->tex_pos.vy = 0;
+                    if (sp->cursor == 6)
+                        sp->ring_magic = sp->ring_magic_bits + (viewer.equipment[0] - 196);
                     else
-                        sp->unk2D4 = sp->unk2D0 + (viewer.equipment[13] - 196);
+                        sp->ring_magic = sp->ring_magic_bits + (viewer.equipment[13] - 196);
                     cd_read_member(7, 975, CD_BUFFER);
-                    tim_load_images_at(CD_BUFFER, &sp->unk358, NULL, 1);
-                    cd_read_member(7, sp->unk2BE + 995, CD_BUFFER);
-                    tim_load_images_at(CD_BUFFER, &sp->unk0.vram[0], &sp->unk0.vram[1], 1);
+                    tim_load_images_at(CD_BUFFER, &sp->tex_pos, NULL, 1);
+                    cd_read_member(7, sp->choice_index + 995, CD_BUFFER);
+                    tim_load_images_at(CD_BUFFER, &sp->state.vram[0], &sp->state.vram[1], 1);
                 } else {
                     if (cur == 0xffff) {
-                        sp->unk2BE = -1;
+                        sp->choice_index = -1;
                     } else {
-                        for (i = 0; i < sp->unk2C2; i++) {
-                            if (sp->unk1B0[i] == cur) {
-                                sp->unk2BE = i;
+                        for (i = 0; i < sp->choice_count; i++) {
+                            if (sp->choices[i] == cur) {
+                                sp->choice_index = i;
                                 break;
                             }
                         }
                     }
-                    sel = sp->unk2BE;
+                    sel = sp->choice_index;
                     if (sel == -1) {
-                        sp->unk2C0 = sel;
+                        sp->choice_id = sel;
                         file = base;
                     } else {
-                        sp->unk2C0 = sp->unk1B0[sel];
-                        file = sp->unk2C0 + offset;
+                        sp->choice_id = sp->choices[sel];
+                        file = sp->choice_id + offset;
                     }
                     cd_read_member(7, file * 3, CD_BUFFER);
-                    tim_load_images_at(CD_BUFFER, &sp->unk0.vram[0], &sp->unk0.vram[1], 1);
+                    tim_load_images_at(CD_BUFFER, &sp->state.vram[0], &sp->state.vram[1], 1);
                     DrawSync(0);
                     cd_read_member(7, file * 3 + 1, CD_BUFFER);
                     tim_load_images_at(CD_BUFFER, &picture, NULL, 1);
@@ -1185,118 +1185,118 @@ void menu_equip_info_run(void)
             }
             if (pad_state.pressed_repeat & 0x20) {
                 debounce = 1;
-                switch (sp->unk2E0) {
+                switch (sp->cursor) {
                 case 0:
-                    sp->unk2E0 = 6;
+                    sp->cursor = 6;
                     break;
                 case 6:
-                    sp->unk2E0 = 7;
+                    sp->cursor = 7;
                     break;
                 case 7:
-                    sp->unk2E0 = 13;
+                    sp->cursor = 13;
                     break;
                 case 13:
-                    sp->unk2E0 = 14;
+                    sp->cursor = 14;
                     break;
                 case 5:
-                    sp->unk2E0 = 20;
+                    sp->cursor = 20;
                     break;
                 case 20:
-                    sp->unk2E0 = 12;
+                    sp->cursor = 12;
                     break;
                 case 12:
-                    sp->unk2E0 = 21;
+                    sp->cursor = 21;
                     break;
                 case 21:
-                    sp->unk2E0 = 19;
+                    sp->cursor = 19;
                     break;
                 default:
-                    if (sp->unk2E0 < 14)
-                        sp->unk2E0 += 7;
+                    if (sp->cursor < 14)
+                        sp->cursor += 7;
                     break;
                 }
             } else if (pad_state.pressed_repeat & 0x80) {
                 debounce = 1;
-                switch (sp->unk2E0) {
+                switch (sp->cursor) {
                 case 14:
-                    sp->unk2E0 = 13;
+                    sp->cursor = 13;
                     break;
                 case 13:
-                    sp->unk2E0 = 7;
+                    sp->cursor = 7;
                     break;
                 case 7:
-                    sp->unk2E0 = 6;
+                    sp->cursor = 6;
                     break;
                 case 6:
-                    sp->unk2E0 = 0;
+                    sp->cursor = 0;
                     break;
                 case 19:
-                    sp->unk2E0 = 21;
+                    sp->cursor = 21;
                     break;
                 case 21:
-                    sp->unk2E0 = 12;
+                    sp->cursor = 12;
                     break;
                 case 12:
-                    sp->unk2E0 = 20;
+                    sp->cursor = 20;
                     break;
                 case 20:
-                    sp->unk2E0 = 5;
+                    sp->cursor = 5;
                     break;
                 default:
-                    if (sp->unk2E0 > 5)
-                        sp->unk2E0 -= 7;
+                    if (sp->cursor > 5)
+                        sp->cursor -= 7;
                     break;
                 }
             } else if (pad_state.pressed_repeat & 0x40) {
                 debounce = 1;
-                switch (sp->unk2E0) {
+                switch (sp->cursor) {
                 case 9:
-                    sp->unk2E0 = 11;
+                    sp->cursor = 11;
                     break;
                 case 6:
-                    sp->unk2E0 = 1;
+                    sp->cursor = 1;
                     break;
                 case 13:
-                    sp->unk2E0 = 15;
+                    sp->cursor = 15;
                     break;
                 default:
-                    if (sp->unk2E0 != 5 && sp->unk2E0 != 20 && sp->unk2E0 != 12 && sp->unk2E0 != 21
-                        && sp->unk2E0 != 19)
-                        sp->unk2E0++;
+                    if (sp->cursor != 5 && sp->cursor != 20 && sp->cursor != 12 && sp->cursor != 21
+                        && sp->cursor != 19)
+                        sp->cursor++;
                     break;
                 }
             } else if (pad_state.pressed_repeat & 0x10) {
                 debounce = 1;
-                switch (sp->unk2E0) {
+                switch (sp->cursor) {
                 case 10:
-                    sp->unk2E0 = 8;
+                    sp->cursor = 8;
                     break;
                 case 20:
                 case 21:
-                    sp->unk2E0 = 11;
+                    sp->cursor = 11;
                     break;
                 default:
-                    if (sp->unk2E0 != 0 && sp->unk2E0 != 6 && sp->unk2E0 != 7 && sp->unk2E0 != 13
-                        && sp->unk2E0 != 14)
-                        sp->unk2E0--;
+                    if (sp->cursor != 0 && sp->cursor != 6 && sp->cursor != 7 && sp->cursor != 13
+                        && sp->cursor != 14)
+                        sp->cursor--;
                     break;
                 }
             } else {
                 goto idle;
             }
             pad_state.pressed_repeat = 0;
-            sp->unk2E4 = 0;
+            sp->blink_phase = 0;
     idle:
             pad_state.pressed = 0;
     moved:
-            if (sp->unk2E0 != prev) {
+            if (sp->cursor != prev) {
                 play_cursor_sound();
-                prev = sp->unk2E0;
+                prev = sp->cursor;
             }
         } else {
-            if (sp->unk2C7 != 10) {
+            if (sp->list_kind != 10) {
                 if (pad_state.pressed & 0x4000) {
-                    sel = sp->unk2C0;
+                    sel = sp->choice_id;
                     if (sel != -1 && vis_table_c.types[sel].max_durability != 0
                         && vis_table_c.types[sel].durability == 0
                         && vis_table_c.types[sel].category != 4) {
@@ -1306,101 +1306,101 @@ void menu_equip_info_run(void)
                         play_confirm_sound();
                         equip_apply_slot_change(1);
                         player_compute_derived_stats(0);
-                        if (viewer.max_hp < sp->unk2D8)
+                        if (viewer.max_hp < sp->hp_before)
                             viewer.hp = viewer.max_hp;
-                        if (viewer.max_mp < sp->unk2DA)
+                        if (viewer.max_mp < sp->mp_before)
                             viewer.mp = viewer.max_mp;
-                        sp->unk2DC = 1;
+                        sp->mode = 1;
                         pad_state.pressed = 0;
                     }
                 } else if (pad_state.pressed_repeat & 0x20) {
                     play_cursor_sound();
-                    if (sp->unk2BE < sp->unk2C2 - 1) {
-                        sp->unk2BE++;
-                        sp->unk2C0 = sp->unk1B0[sp->unk2BE];
+                    if (sp->choice_index < sp->choice_count - 1) {
+                        sp->choice_index++;
+                        sp->choice_id = sp->choices[sp->choice_index];
                     } else {
-                        sp->unk2BE = -1;
-                        sp->unk2C0 = -1;
+                        sp->choice_index = -1;
+                        sp->choice_id = -1;
                     }
                 } else if (pad_state.pressed_repeat & 0x80) {
                     play_cursor_sound();
-                    if (sp->unk2BE >= 0)
-                        sp->unk2BE--;
+                    if (sp->choice_index >= 0)
+                        sp->choice_index--;
                     else
-                        sp->unk2BE = sp->unk2C2 - 1;
+                        sp->choice_index = sp->choice_count - 1;
                     {
-                        int at = sp->unk2BE;
+                        int at = sp->choice_index;
 
                         if (at == -1)
-                            sp->unk2C0 = at;
+                            sp->choice_id = at;
                         else
-                            sp->unk2C0 = sp->unk1B0[at];
+                            sp->choice_id = sp->choices[at];
                     }
                 }
                 if (pad_state.pressed_repeat & 0xa0) {
                     debounce = 3;
-                    if (sp->unk2BE == -1)
+                    if (sp->choice_index == -1)
                         file = base;
                     else
-                        file = sp->unk2C0 + offset;
+                        file = sp->choice_id + offset;
                     cd_read_member(7, file * 3, CD_BUFFER);
-                    tim_load_images_at(CD_BUFFER, &sp->unk0.vram[0], &sp->unk0.vram[1], 1);
+                    tim_load_images_at(CD_BUFFER, &sp->state.vram[0], &sp->state.vram[1], 1);
                     cd_read_member(7, file * 3 + 1, CD_BUFFER);
                     tim_load_images_at(CD_BUFFER, &picture, NULL, 1);
                     player_compute_derived_stats(1);
                     pad_state.pressed_repeat = 0;
                 }
             } else {
-                row = sp->unk2BE;
+                row = sp->choice_index;
                 if (pad_state.pressed_repeat & 0x20) {
                     debounce = 1;
                     play_cursor_sound();
                     pad_state.pressed_repeat = 0;
-                    if (sp->unk2BE < 15)
-                        sp->unk2BE += 3;
+                    if (sp->choice_index < 15)
+                        sp->choice_index += 3;
                 } else if (pad_state.pressed_repeat & 0x80) {
                     debounce = 1;
                     play_cursor_sound();
                     pad_state.pressed_repeat = 0;
-                    if (sp->unk2BE > 1)
-                        sp->unk2BE -= 3;
+                    if (sp->choice_index > 1)
+                        sp->choice_index -= 3;
                 } else if (pad_state.pressed_repeat & 0x10) {
                     debounce = 1;
                     play_cursor_sound();
                     pad_state.pressed_repeat = 0;
-                    if (sp->unk2BE % 3 != 0)
-                        sp->unk2BE--;
+                    if (sp->choice_index % 3 != 0)
+                        sp->choice_index--;
                 } else if (pad_state.pressed_repeat & 0x40) {
                     debounce = 1;
                     play_cursor_sound();
                     pad_state.pressed_repeat = 0;
-                    if (sp->unk2BE % 3 != 1)
-                        sp->unk2BE++;
+                    if (sp->choice_index % 3 != 1)
+                        sp->choice_index++;
                 } else if (pad_state.pressed & 0x4000) {
                     pad_state.pressed = 0;
-                    if (*sp->unk2D4 & (1 << sp->unk2BE)) {
+                    if (*sp->ring_magic & (1 << sp->choice_index)) {
                         play_confirm_sound();
-                        sp->unk33C.x = (s16)(sp->unk2BE / 3) * 48 + 640;
-                        sp->unk33C.y = (s16)(sp->unk2BE % 3) * 24;
-                        sp->unk33C.w = 48;
-                        sp->unk33C.h = 24;
-                        if (sp->unk2E0 == 6) {
-                            viewer.equipment[6] = sp->unk2BE;
-                            MoveImage(&sp->unk33C, 740, 124);
+                        sp->rect.x = (s16)(sp->choice_index / 3) * 48 + 640;
+                        sp->rect.y = (s16)(sp->choice_index % 3) * 24;
+                        sp->rect.w = 48;
+                        sp->rect.h = 24;
+                        if (sp->cursor == 6) {
+                            viewer.equipment[6] = sp->choice_index;
+                            MoveImage(&sp->rect, 740, 124);
                         } else {
-                            viewer.equipment[12] = sp->unk2BE;
-                            MoveImage(&sp->unk33C, 788, 124);
+                            viewer.equipment[12] = sp->choice_index;
+                            MoveImage(&sp->rect, 788, 124);
                         }
-                        sp->unk2DC = 1;
+                        sp->mode = 1;
                         player_compute_derived_stats(0);
                     } else {
                         play_refuse_sound();
                     }
                 }
-                if (row != sp->unk2BE) {
-                    cd_read_member(7, sp->unk2BE + 995, CD_BUFFER);
-                    tim_load_images_at(CD_BUFFER, &sp->unk0.vram[0], &sp->unk0.vram[1], 1);
-                    sp->unk2C0 = sp->unk2BE;
+                if (row != sp->choice_index) {
+                    cd_read_member(7, sp->choice_index + 995, CD_BUFFER);
+                    tim_load_images_at(CD_BUFFER, &sp->state.vram[0], &sp->state.vram[1], 1);
+                    sp->choice_id = sp->choice_index;
                     player_compute_derived_stats(1);
                 }
             }
@@ -1408,14 +1408,14 @@ void menu_equip_info_run(void)
                 play_cancel_sound();
                 pad_state.pressed = 0;
                 player_compute_derived_stats(0);
-                sp->unk2DC = 1;
-            } else if (sp->unk2C7 != 10) {
+                sp->mode = 1;
+            } else if (sp->list_kind != 10) {
                 if (pad_state.held & 0x1000) {
-                    if (sp->unk2C6 == 0)
+                    if (sp->show_item_values == 0)
                         play_confirm_sound();
-                    sp->unk2C6 = 1;
+                    sp->show_item_values = 1;
                 } else {
-                    sp->unk2C6 = 0;
+                    sp->show_item_values = 0;
                 }
             }
         }
@@ -1423,21 +1423,21 @@ void menu_equip_info_run(void)
         DAT_80088192 = 1;
         frame_rate_update();
         menu_equip_info_draw();
-        sp->unk2E4 = (sp->unk2E4 + 1) % 32;
+        sp->blink_phase = (sp->blink_phase + 1) % 32;
     }
-    mem_free(sp->unk174[0]);
-    mem_free(sp->unk174[1]);
-    mem_free(sp->unk174[2]);
-    mem_free(sp->unk174[3]);
-    mem_free(sp->unk174[4]);
-    mem_free(sp->unk174[5]);
-    mem_free(sp->unk174[6]);
-    mem_free(sp->unk174[7]);
-    mem_free(sp->unk174[8]);
-    mem_free(sp->unk174[9]);
-    mem_free(sp->unk2CC);
-    mem_free(sp->unk2D0);
-    mem_free(sp->unk1B0);
+    mem_free(sp->category_lists[0]);
+    mem_free(sp->category_lists[1]);
+    mem_free(sp->category_lists[2]);
+    mem_free(sp->category_lists[3]);
+    mem_free(sp->category_lists[4]);
+    mem_free(sp->category_lists[5]);
+    mem_free(sp->category_lists[6]);
+    mem_free(sp->category_lists[7]);
+    mem_free(sp->category_lists[8]);
+    mem_free(sp->category_lists[9]);
+    mem_free(sp->item_messages);
+    mem_free(sp->ring_magic_bits);
+    mem_free(sp->choices);
     menu_reload_assets();
     pad_clear_input();
 }
@@ -1474,42 +1474,42 @@ void menu_creature_book_run(void)
     int i;
 
     menu_show_loading_screen();
-    sp->unk0.store.messages = mem_alloc(21504);
-    sp->unk0.store.items = mem_alloc(6644);
-    sp->unk0.store.tex[0].vx = 640;
-    sp->unk0.store.tex[0].vy = 144;
-    sp->unk0.store.tex[1].vx = 640;
-    sp->unk0.store.tex[1].vy = 192;
-    sp->unk0.store.tex[2].vx = 736;
-    sp->unk0.store.tex[2].vy = 144;
-    sp->unk0.store.tex[3].vx = 736;
-    sp->unk0.store.tex[3].vy = 192;
-    sp->unk0.store.tex[4].vx = 832;
-    sp->unk0.store.tex[4].vy = 144;
-    sp->unk0.store.tex[5].vx = 928;
-    sp->unk0.store.tex[5].vy = 0;
-    sp->unk0.store.tex[6].vx = 928;
-    sp->unk0.store.tex[6].vy = 48;
-    sp->unk0.store.tex[7].vx = 928;
-    sp->unk0.store.tex[7].vy = 96;
-    sp->unk0.store.tex[8].vx = 928;
-    sp->unk0.store.tex[8].vy = 144;
-    sp->unk0.store.tex[9].vx = 928;
-    sp->unk0.store.tex[9].vy = 192;
-    sp->unk0.store.tex[10].vx = 640;
-    sp->unk0.store.tex[10].vy = 256;
-    sp->unk0.store.tex[11].vx = 640;
-    sp->unk0.store.tex[11].vy = 304;
-    sp->unk0.store.tex[12].vx = 640;
-    sp->unk0.store.tex[12].vy = 352;
-    sp->unk0.store.tex[13].vx = 640;
-    sp->unk0.store.tex[13].vy = 400;
-    sp->unk0.store.tex[14].vx = 640;
-    sp->unk0.store.tex[14].vy = 448;
-    sp->unk0.store.image.vx = 640;
-    sp->unk0.store.image.vy = 0;
-    sp->unk0.store.kinds = mem_alloc(151);
-    sp->unk0.store.count = 0;
+    sp->state.book.names = mem_alloc(21504);
+    sp->state.book.entries = mem_alloc(6644);
+    sp->state.book.cell_tex[0].vx = 640;
+    sp->state.book.cell_tex[0].vy = 144;
+    sp->state.book.cell_tex[1].vx = 640;
+    sp->state.book.cell_tex[1].vy = 192;
+    sp->state.book.cell_tex[2].vx = 736;
+    sp->state.book.cell_tex[2].vy = 144;
+    sp->state.book.cell_tex[3].vx = 736;
+    sp->state.book.cell_tex[3].vy = 192;
+    sp->state.book.cell_tex[4].vx = 832;
+    sp->state.book.cell_tex[4].vy = 144;
+    sp->state.book.cell_tex[5].vx = 928;
+    sp->state.book.cell_tex[5].vy = 0;
+    sp->state.book.cell_tex[6].vx = 928;
+    sp->state.book.cell_tex[6].vy = 48;
+    sp->state.book.cell_tex[7].vx = 928;
+    sp->state.book.cell_tex[7].vy = 96;
+    sp->state.book.cell_tex[8].vx = 928;
+    sp->state.book.cell_tex[8].vy = 144;
+    sp->state.book.cell_tex[9].vx = 928;
+    sp->state.book.cell_tex[9].vy = 192;
+    sp->state.book.cell_tex[10].vx = 640;
+    sp->state.book.cell_tex[10].vy = 256;
+    sp->state.book.cell_tex[11].vx = 640;
+    sp->state.book.cell_tex[11].vy = 304;
+    sp->state.book.cell_tex[12].vx = 640;
+    sp->state.book.cell_tex[12].vy = 352;
+    sp->state.book.cell_tex[13].vx = 640;
+    sp->state.book.cell_tex[13].vy = 400;
+    sp->state.book.cell_tex[14].vx = 640;
+    sp->state.book.cell_tex[14].vy = 448;
+    sp->state.book.image.vx = 640;
+    sp->state.book.image.vy = 0;
+    sp->state.book.kinds = mem_alloc(151);
+    sp->state.book.count = 0;
     n = 0;
     bits = DAT_801cceb0[0];
     bit = 1;
@@ -1520,51 +1520,51 @@ void menu_creature_book_run(void)
             bits++;
         }
         if (*bits & bit)
-            sp->unk0.store.kinds[sp->unk0.store.count++] = i;
+            sp->state.book.kinds[sp->state.book.count++] = i;
         bit <<= 1;
         n++;
     }
-    sp->unk0.store.rows = sp->unk0.store.count / 5;
-    sp->unk0.store.last = sp->unk0.store.count % 5;
-    sp->unk2E2 = sp->unk0.store.rows - 2;
-    if (sp->unk2E2 < 0)
-        sp->unk2E2 = 0;
+    sp->state.book.rows = sp->state.book.count / 5;
+    sp->state.book.last = sp->state.book.count % 5;
+    sp->scroll = sp->state.book.rows - 2;
+    if (sp->scroll < 0)
+        sp->scroll = 0;
     p = CD_BUFFER;
     cd_read_member(3, 1, p);
     copy_words((u32 *)&menu_messages, (u32 *)(p + 1), 5376);
     p = (u_long *)((u8 *)p + (*p + 4));
-    tim_load_images_at(p + 1, &sp->unk2E6[0], &sp->unk2E6[1], 1);
+    tim_load_images_at(p + 1, &sp->image_vram[0], &sp->image_vram[1], 1);
     p = CD_BUFFER;
     cd_read_member(3, 2, p);
-    copy_words((u32 *)sp->unk0.store.messages, (u32 *)(p + 1), 5376);
+    copy_words((u32 *)sp->state.book.names, (u32 *)(p + 1), 5376);
     p = (u_long *)((u8 *)p + (*p + 4));
-    tim_load_images_at(p + 1, &sp->unk2E6[2], &sp->unk2E6[3], 1);
+    tim_load_images_at(p + 1, &sp->image_vram[2], &sp->image_vram[3], 1);
     cd_read_member(3, 5, CD_BUFFER);
-    tim_load_images_at(CD_BUFFER, &sp->unk2E6[4], NULL, 1);
+    tim_load_images_at(CD_BUFFER, &sp->image_vram[4], NULL, 1);
     DrawSync(0);
     cd_read_member(3, 7, CD_BUFFER);
     tim_load_images_at(CD_BUFFER, &image, &clut, 1);
     DrawSync(0);
     cd_read_member(4, 400, CD_BUFFER);
-    copy_words((u32 *)sp->unk0.store.items, (u32 *)CD_BUFFER, 1661);
+    copy_words((u32 *)sp->state.book.entries, (u32 *)CD_BUFFER, 1661);
     cd_state.unkA84 = CD_BUFFER;
     n = 15;
-    if (sp->unk0.store.count < 16)
-        n = sp->unk0.store.count;
+    if (sp->state.book.count < 16)
+        n = sp->state.book.count;
     used = 0;
     for (i = 0; i < n; i++) {
-        int k = sp->unk2E2 * 5 + i;
+        int k = sp->scroll * 5 + i;
 
-        if (k < sp->unk0.store.count) {
+        if (k < sp->state.book.count) {
             if (used + 0x2800 > 0x12000) {
                 DrawSync(0);
                 cd_state.unkA84 = CD_BUFFER;
                 used = 0;
             }
             {
-                int size = cd_read_member(4, sp->unk0.store.kinds[k], cd_state.unkA84) << 11;
+                int size = cd_read_member(4, sp->state.book.kinds[k], cd_state.unkA84) << 11;
 
-                tim_load_images_at(cd_state.unkA84, &sp->unk0.store.tex[k % 15], NULL, 1);
+                tim_load_images_at(cd_state.unkA84, &sp->state.book.cell_tex[k % 15], NULL, 1);
                 used += size;
                 cd_state.unkA84 = (u_long *)((u8 *)cd_state.unkA84 + size);
             }
@@ -1573,14 +1573,14 @@ void menu_creature_book_run(void)
     clear_vram();
     DrawSync(0);
     gfx_setup_640x240();
-    sp->unk2DC = 1;
-    sp->unk2E0 = 0;
+    sp->mode = 1;
+    sp->cursor = 0;
     pad_clear_input();
     for (;;) {
-        first = sp->unk2E2;
-        if (sp->unk2DC == 1) {
-            col = (s16)(sp->unk2E0 % 5);
-            row = (s16)(sp->unk2E0 / 5);
+        first = sp->scroll;
+        if (sp->mode == 1) {
+            col = (s16)(sp->cursor % 5);
+            row = (s16)(sp->cursor / 5);
             if (pad_state.pressed & 0x2000) {
                 play_cancel_sound();
                 pad_state.pressed = 0;
@@ -1590,57 +1590,57 @@ void menu_creature_book_run(void)
                 play_cursor_sound();
                 pad_state.pressed_repeat = 0;
                 if (col < 4)
-                    sp->unk2E0++;
+                    sp->cursor++;
             }
             if (pad_state.pressed_repeat & 0x80) {
                 play_cursor_sound();
                 pad_state.pressed_repeat = 0;
                 if (col != 0)
-                    sp->unk2E0--;
+                    sp->cursor--;
             }
             if (pad_state.pressed_repeat & 0x10) {
                 play_cursor_sound();
                 if (pad_state.held & 0x8000) {
-                    sp->unk2E2 -= 3;
-                    if (sp->unk2E2 < 0)
-                        sp->unk2E2 = 0;
+                    sp->scroll -= 3;
+                    if (sp->scroll < 0)
+                        sp->scroll = 0;
                 } else if (row > 0) {
-                    sp->unk2E0 -= 5;
-                } else if (sp->unk2E2 > 0) {
-                    sp->unk2E2--;
+                    sp->cursor -= 5;
+                } else if (sp->scroll > 0) {
+                    sp->scroll--;
                 }
                 pad_state.pressed_repeat = 0;
             }
             if (pad_state.pressed_repeat & 0x40) {
                 play_cursor_sound();
                 if (pad_state.held & 0x8000) {
-                    if (sp->unk0.store.rows > 2) {
-                        sp->unk2E2 += 3;
-                        if (sp->unk2E2 > sp->unk0.store.rows - 2)
-                            sp->unk2E2 = sp->unk0.store.rows - 2;
+                    if (sp->state.book.rows > 2) {
+                        sp->scroll += 3;
+                        if (sp->scroll > sp->state.book.rows - 2)
+                            sp->scroll = sp->state.book.rows - 2;
                     }
-                } else if (sp->unk2E2 + row < sp->unk0.store.rows) {
+                } else if (sp->scroll + row < sp->state.book.rows) {
                     if (row < 2)
-                        sp->unk2E0 += 5;
-                    else if (sp->unk2E2 <= sp->unk0.store.rows - 3)
-                        sp->unk2E2++;
+                        sp->cursor += 5;
+                    else if (sp->scroll <= sp->state.book.rows - 3)
+                        sp->scroll++;
                 }
                 pad_state.pressed_repeat = 0;
             }
             if (pad_state.pressed_repeat & 0x800) {
                 play_cursor_sound();
                 pad_state.pressed_repeat = 0;
-                sp->unk2E2 -= 3;
-                if (sp->unk2E2 < 0)
-                    sp->unk2E2 = 0;
+                sp->scroll -= 3;
+                if (sp->scroll < 0)
+                    sp->scroll = 0;
             }
             if (pad_state.pressed_repeat & 0x200) {
                 play_cursor_sound();
                 pad_state.pressed_repeat = 0;
-                if (sp->unk0.store.rows > 2) {
-                    sp->unk2E2 += 3;
-                    if (sp->unk2E2 > sp->unk0.store.rows - 2)
-                        sp->unk2E2 = sp->unk0.store.rows - 2;
+                if (sp->state.book.rows > 2) {
+                    sp->scroll += 3;
+                    if (sp->scroll > sp->state.book.rows - 2)
+                        sp->scroll = sp->state.book.rows - 2;
                 }
             }
             if (pad_state.pressed & 0x5000) {
@@ -1648,35 +1648,35 @@ void menu_creature_book_run(void)
 
                 play_confirm_sound();
                 pad_state.pressed = 0;
-                k = sp->unk2E2 * 5 + sp->unk2E0;
-                if (k < sp->unk0.store.count) {
+                k = sp->scroll * 5 + sp->cursor;
+                if (k < sp->state.book.count) {
                     if (k != shown) {
                         u_long *p = CD_BUFFER;
 
 
-                        cd_read_member(4, sp->unk0.store.kinds[k] + 200, p);
-                        tim_load_images_at(p + 1, &sp->unk0.store.image, NULL, 1);
+                        cd_read_member(4, sp->state.book.kinds[k] + 200, p);
+                        tim_load_images_at(p + 1, &sp->state.book.image, NULL, 1);
                         p = (u_long *)((u8 *)p + (*p + 4));
                         tim_load_images_at(p + 1, &detail, &detail_clut, 1);
                     }
-                    sp->unk2DC = 2;
+                    sp->mode = 2;
                 }
             }
-            if (sp->unk2E2 != first) {
+            if (sp->scroll != first) {
                 int count;
                 int k;
 
-                if (first < sp->unk2E2) {
-                    count = (sp->unk2E2 - first) * 5;
+                if (first < sp->scroll) {
+                    count = (sp->scroll - first) * 5;
                     k = (first + 3) * 5;
                 } else {
-                    count = (first - sp->unk2E2) * 5;
-                    k = sp->unk2E2 * 5;
+                    count = (first - sp->scroll) * 5;
+                    k = sp->scroll * 5;
                 }
                 cd_state.unkA84 = CD_BUFFER;
                 used = 0;
                 for (i = 0; i < count; i++, k++) {
-                    if (k < sp->unk0.store.count) {
+                    if (k < sp->state.book.count) {
                         if (used + 0x2800 > 0x12000) {
                             DrawSync(0);
                             cd_state.unkA84 = CD_BUFFER;
@@ -1684,9 +1684,9 @@ void menu_creature_book_run(void)
                         }
                         {
                             int size =
-                                cd_read_member(4, sp->unk0.store.kinds[k], cd_state.unkA84) << 11;
+                                cd_read_member(4, sp->state.book.kinds[k], cd_state.unkA84) << 11;
 
-                            tim_load_images_at(cd_state.unkA84, &sp->unk0.store.tex[k % 15], NULL, 1);
+                            tim_load_images_at(cd_state.unkA84, &sp->state.book.cell_tex[k % 15], NULL, 1);
                             used += size;
                             cd_state.unkA84 = (u_long *)((u8 *)cd_state.unkA84 + size);
                         }
@@ -1696,23 +1696,23 @@ void menu_creature_book_run(void)
         } else if (pad_state.pressed & 0x2000) {
             play_cancel_sound();
             pad_state.pressed = 0;
-            sp->unk2DC = 1;
+            sp->mode = 1;
         }
         frame_rate_update();
         menu_creature_book_draw();
-        sp->unk2E4 = (sp->unk2E4 + 1) % 32;
+        sp->blink_phase = (sp->blink_phase + 1) % 32;
     }
-    mem_free(sp->unk0.store.messages);
-    mem_free(sp->unk0.store.kinds);
-    mem_free(sp->unk0.store.items);
+    mem_free(sp->state.book.names);
+    mem_free(sp->state.book.kinds);
+    mem_free(sp->state.book.entries);
     menu_load_main_messages();
     menu_reload_assets();
     pad_clear_input();
 }
 
 /* The storage page's cursor: eight columns (four per grid) by five rows. */
-#define CURSOR_COL ((s16)(sp->unk2E0 % 8))
-#define CURSOR_ROW (sp->unk2E0 / 8)
+#define CURSOR_COL ((s16)(sp->cursor % 8))
+#define CURSOR_ROW (sp->cursor / 8)
 
 /*
  * The arrange items icon view: the items carried (ids0) and stored (ids1, the
@@ -1746,33 +1746,33 @@ void menu_arrange_icons_run(void)
     int empty;
 
     menu_show_loading_screen();
-    sp->unk0.grid.messages = mem_alloc(21504);
+    sp->state.grid.messages = mem_alloc(21504);
     p = cd_file_buffer;
     cd_read_member(3, 1, p);
     copy_words((u32 *)&menu_messages, (u32 *)(p + 1), 5376);
     p = (u_long *)((u8 *)p + (*p + 4));
-    tim_load_images_at(p + 1, &sp->unk2E6[0], &sp->unk2E6[1], 1);
+    tim_load_images_at(p + 1, &sp->image_vram[0], &sp->image_vram[1], 1);
     p = cd_file_buffer;
     cd_read_member(3, 4, p);
-    copy_words((u32 *)sp->unk0.grid.messages, (u32 *)(p + 1), 5376);
+    copy_words((u32 *)sp->state.grid.messages, (u32 *)(p + 1), 5376);
     p = (u_long *)((u8 *)p + (*p + 4));
-    tim_load_images_at(p + 1, &sp->unk2E6[2], &sp->unk2E6[3], 1);
+    tim_load_images_at(p + 1, &sp->image_vram[2], &sp->image_vram[3], 1);
     cd_read_member(3, 5, cd_file_buffer);
-    tim_load_images_at(cd_file_buffer, &sp->unk2E6[4], NULL, 1);
+    tim_load_images_at(cd_file_buffer, &sp->image_vram[4], NULL, 1);
     DrawSync(0);
     cd_read_member(3, 7, cd_file_buffer);
     tim_load_images_at(cd_file_buffer, &image, &clut, 1);
     DrawSync(0);
-    sp->unk0.grid.count0 = 0;
-    sp->unk0.grid.count1 = 0;
-    sp->unk0.grid.ids0 = mem_alloc(628);
-    sp->unk0.grid.ids1 = mem_alloc(628);
-    if (sp->unk0.grid.ids0 == NULL || sp->unk0.grid.ids1 == NULL)
+    sp->state.grid.hand_count = 0;
+    sp->state.grid.bag_count = 0;
+    sp->state.grid.hand_ids = mem_alloc(628);
+    sp->state.grid.bag_ids = mem_alloc(628);
+    if (sp->state.grid.hand_ids == NULL || sp->state.grid.bag_ids == NULL)
         exit(1);
-    fill_words((u32 *)sp->unk0.grid.ids0, -1, 157);
-    fill_words((u32 *)sp->unk0.grid.ids1, -1, 157);
-    sp->unk0.grid.count0 = 0;
-    sp->unk0.grid.count1 = 0;
+    fill_words((u32 *)sp->state.grid.hand_ids, -1, 157);
+    fill_words((u32 *)sp->state.grid.bag_ids, -1, 157);
+    sp->state.grid.hand_count = 0;
+    sp->state.grid.bag_count = 0;
     for (i = 0; i < 314; i++) {
         if (vis_table_c.types[i].unk5[0] != 0xff && i < 314 && i != 266
             && inventory.counts[i].count != 0 && i != viewer.equipment[0] && i != viewer.equipment[1]
@@ -1783,25 +1783,25 @@ void menu_arrange_icons_run(void)
             && i != viewer.equipment[16] && i != viewer.equipment[17] && i != viewer.equipment[18]
             && i != viewer.equipment[19] && i != viewer.equipment[20]) {
             if (!inventory.counts[i].in_bag)
-                sp->unk0.grid.ids0[sp->unk0.grid.count0++] = i;
+                sp->state.grid.hand_ids[sp->state.grid.hand_count++] = i;
             else
-                sp->unk0.grid.ids1[sp->unk0.grid.count1++] = i;
+                sp->state.grid.bag_ids[sp->state.grid.bag_count++] = i;
         }
     }
-    sp->unk0.grid.tex = mem_alloc(160);
-    if (sp->unk0.grid.tex == NULL)
+    sp->state.grid.cell_tex = mem_alloc(160);
+    if (sp->state.grid.cell_tex == NULL)
         exit(1);
     for (i = 0; i < 20; i++) {
-        sp->unk0.grid.tex[i].vx = i / 4 * 56 + 640;
-        sp->unk0.grid.tex[i].vy = i % 4 * 28 + 124;
+        sp->state.grid.cell_tex[i].vx = i / 4 * 56 + 640;
+        sp->state.grid.cell_tex[i].vy = i % 4 * 28 + 124;
     }
     for (i = 20; i < 29; i++) {
-        sp->unk0.grid.tex[i].vx = 960;
-        sp->unk0.grid.tex[i].vy = (i - 20) * 28;
+        sp->state.grid.cell_tex[i].vx = 960;
+        sp->state.grid.cell_tex[i].vy = (i - 20) * 28;
     }
     for (i = 29; i < 40; i++) {
-        sp->unk0.grid.tex[i].vx = (i - 29) / 9 * 56 + 640;
-        sp->unk0.grid.tex[i].vy = (i - 29) % 9 * 28 + 256;
+        sp->state.grid.cell_tex[i].vx = (i - 29) / 9 * 56 + 640;
+        sp->state.grid.cell_tex[i].vy = (i - 29) % 9 * 28 + 256;
     }
     i = 0;
     total = 0;
@@ -1816,45 +1816,45 @@ void menu_arrange_icons_run(void)
             cd_state.unkA84 = CD_BUFFER;
             total = 0;
         }
-        if (i < 20 && i < sp->unk0.grid.count0) {
-            size = cd_read_member(6, vis_table_c.types[sp->unk0.grid.ids0[i]].unk5[0],
+        if (i < 20 && i < sp->state.grid.hand_count) {
+            size = cd_read_member(6, vis_table_c.types[sp->state.grid.hand_ids[i]].unk5[0],
                                  cd_state.unkA84) << 11;
 
-            tim_load_images_at(cd_state.unkA84, &sp->unk0.grid.tex[i], NULL, 1);
+            tim_load_images_at(cd_state.unkA84, &sp->state.grid.cell_tex[i], NULL, 1);
             total += size;
             cd_state.unkA84 = (u_long *)((u8 *)cd_state.unkA84 + size);
-        } else if (i >= 20 && i - 20 < sp->unk0.grid.count1) {
-            size = cd_read_member(6, vis_table_c.types[sp->unk0.grid.ids1[i - 20]].unk5[0],
+        } else if (i >= 20 && i - 20 < sp->state.grid.bag_count) {
+            size = cd_read_member(6, vis_table_c.types[sp->state.grid.bag_ids[i - 20]].unk5[0],
                                  cd_state.unkA84) << 11;
 
-            tim_load_images_at(cd_state.unkA84, &sp->unk0.grid.tex[i], NULL, 1);
+            tim_load_images_at(cd_state.unkA84, &sp->state.grid.cell_tex[i], NULL, 1);
             total += size;
             cd_state.unkA84 = (u_long *)((u8 *)cd_state.unkA84 + size);
         } else {
-            clear.x = sp->unk0.grid.tex[i].vx;
-            clear.y = sp->unk0.grid.tex[i].vy;
+            clear.x = sp->state.grid.cell_tex[i].vx;
+            clear.y = sp->state.grid.cell_tex[i].vy;
             ClearImage(&clear, 0, 0, 0);
         }
     }
     shown = -1;
-    sp->unk2E0 = 0;
-    sp->unk0.grid.row0 = 0;
-    sp->unk0.grid.row1 = 0;
-    sp->unk2DC = 1;
+    sp->cursor = 0;
+    sp->state.grid.hand_row = 0;
+    sp->state.grid.bag_row = 0;
+    sp->mode = 1;
     clear_vram();
     DrawSync(0);
     gfx_setup_640x240();
     pad_clear_input();
     for (;;) {
-        r0 = sp->unk0.grid.row0;
-        r1 = sp->unk0.grid.row1;
+        r0 = sp->state.grid.hand_row;
+        r1 = sp->state.grid.bag_row;
         if (pad_state.pressed & 0x2000) {
             play_cancel_sound();
             pad_state.pressed = 0;
-            if (sp->unk2DC & 0x8000) {
-                sp->unk2DC &= 0x7fff;
-            } else if (sp->unk2DC == 2) {
-                sp->unk2DC = 1;
+            if (sp->mode & 0x8000) {
+                sp->mode &= 0x7fff;
+            } else if (sp->mode == 2) {
+                sp->mode = 1;
             } else {
                 break;
             }
@@ -1862,113 +1862,113 @@ void menu_arrange_icons_run(void)
         if (pad_state.pressed & 0x4000) {
             play_confirm_sound();
             pad_state.pressed = 0;
-            if (sp->unk2DC & 0x8000) {
+            if (sp->mode & 0x8000) {
                 if (CURSOR_COL < 4) {
-                    idx = CURSOR_ROW * 4 + CURSOR_COL + sp->unk0.grid.row0 * 4;
-                    k = sp->unk0.grid.count1;
-                    for (hole = 0; hole < sp->unk0.grid.count1; hole++) {
-                        if (sp->unk0.grid.ids1[hole] == -1) {
+                    idx = CURSOR_ROW * 4 + CURSOR_COL + sp->state.grid.hand_row * 4;
+                    k = sp->state.grid.bag_count;
+                    for (hole = 0; hole < sp->state.grid.bag_count; hole++) {
+                        if (sp->state.grid.bag_ids[hole] == -1) {
                             k = hole;
                             break;
                         }
                     }
-                    sp->unk0.grid.ids1[k] = sp->unk0.grid.ids0[idx];
-                    sp->unk0.grid.ids0[idx] = -1;
+                    sp->state.grid.bag_ids[k] = sp->state.grid.hand_ids[idx];
+                    sp->state.grid.hand_ids[idx] = -1;
                     idx %= 20;
-                    move.x = sp->unk0.grid.tex[idx].vx;
-                    move.y = sp->unk0.grid.tex[idx].vy;
+                    move.x = sp->state.grid.cell_tex[idx].vx;
+                    move.y = sp->state.grid.cell_tex[idx].vy;
                     move.w = 56;
                     move.h = 28;
-                    if (k >= sp->unk0.grid.row1 * 4 && k < sp->unk0.grid.row1 * 4 + 20) {
+                    if (k >= sp->state.grid.bag_row * 4 && k < sp->state.grid.bag_row * 4 + 20) {
                         k %= 20;
-                        MoveImage(&move, sp->unk0.grid.tex[k + 20].vx,
-                                  sp->unk0.grid.tex[k + 20].vy);
+                        MoveImage(&move, sp->state.grid.cell_tex[k + 20].vx,
+                                  sp->state.grid.cell_tex[k + 20].vy);
                     }
                     ClearImage(&move, 0, 0, 0);
-                    sp->unk0.grid.count1++;
-                    sp->unk0.grid.count0--;
+                    sp->state.grid.bag_count++;
+                    sp->state.grid.hand_count--;
                 } else {
-                    idx = CURSOR_ROW * 4 + CURSOR_COL + (sp->unk0.grid.row1 * 4 - 4);
-                    k = sp->unk0.grid.count0;
-                    for (hole = 0; hole < sp->unk0.grid.count0; hole++) {
-                        if (sp->unk0.grid.ids0[hole] == -1) {
+                    idx = CURSOR_ROW * 4 + CURSOR_COL + (sp->state.grid.bag_row * 4 - 4);
+                    k = sp->state.grid.hand_count;
+                    for (hole = 0; hole < sp->state.grid.hand_count; hole++) {
+                        if (sp->state.grid.hand_ids[hole] == -1) {
                             k = hole;
                             break;
                         }
                     }
-                    sp->unk0.grid.ids0[k] = sp->unk0.grid.ids1[idx];
-                    sp->unk0.grid.ids1[idx] = -1;
+                    sp->state.grid.hand_ids[k] = sp->state.grid.bag_ids[idx];
+                    sp->state.grid.bag_ids[idx] = -1;
                     idx %= 20;
-                    move.x = sp->unk0.grid.tex[idx + 20].vx;
-                    move.y = sp->unk0.grid.tex[idx + 20].vy;
+                    move.x = sp->state.grid.cell_tex[idx + 20].vx;
+                    move.y = sp->state.grid.cell_tex[idx + 20].vy;
                     move.w = 56;
                     move.h = 28;
-                    if (k >= sp->unk0.grid.row0 * 4 && k < sp->unk0.grid.row0 * 4 + 20) {
+                    if (k >= sp->state.grid.hand_row * 4 && k < sp->state.grid.hand_row * 4 + 20) {
                         k %= 20;
-                        MoveImage(&move, sp->unk0.grid.tex[k].vx, sp->unk0.grid.tex[k].vy);
+                        MoveImage(&move, sp->state.grid.cell_tex[k].vx, sp->state.grid.cell_tex[k].vy);
                     }
                     ClearImage(&move, 0, 0, 0);
-                    sp->unk0.grid.count0++;
-                    sp->unk0.grid.count1--;
+                    sp->state.grid.hand_count++;
+                    sp->state.grid.bag_count--;
                 }
-                sp->unk2DC &= 0x7fff;
+                sp->mode &= 0x7fff;
             } else {
                 empty = 0;
                 if (CURSOR_COL < 4) {
-                    int cell = (sp->unk0.grid.row0 + CURSOR_ROW) * 4;
+                    int cell = (sp->state.grid.hand_row + CURSOR_ROW) * 4;
 
-                    if (sp->unk0.grid.ids0[cell + CURSOR_COL] == -1)
+                    if (sp->state.grid.hand_ids[cell + CURSOR_COL] == -1)
                         empty = 1;
                 } else {
-                    int cell = (sp->unk0.grid.row1 + CURSOR_ROW) * 4 - 4;
+                    int cell = (sp->state.grid.bag_row + CURSOR_ROW) * 4 - 4;
 
-                    if (sp->unk0.grid.ids1[cell + CURSOR_COL] == -1)
+                    if (sp->state.grid.bag_ids[cell + CURSOR_COL] == -1)
                         empty = 1;
                 }
                 if (!empty)
-                    sp->unk2DC |= 0x8000;
+                    sp->mode |= 0x8000;
             }
         }
-        if (!(sp->unk2DC & 0x8000)) {
+        if (!(sp->mode & 0x8000)) {
             if (pad_state.pressed & 0x1000) {
                 play_confirm_sound();
                 pad_state.pressed = 0;
-                if (sp->unk2DC == 1)
-                    sp->unk2DC = 2;
-                else if (sp->unk2DC == 2)
-                    sp->unk2DC = 1;
+                if (sp->mode == 1)
+                    sp->mode = 2;
+                else if (sp->mode == 2)
+                    sp->mode = 1;
             }
             if (pad_state.pressed_repeat & 0x20) {
                 play_cursor_sound();
                 pad_state.pressed_repeat = 0;
-                if (sp->unk2E0 % 8 != 7)
-                    sp->unk2E0++;
+                if (sp->cursor % 8 != 7)
+                    sp->cursor++;
             }
             if (pad_state.pressed_repeat & 0x80) {
                 play_cursor_sound();
                 pad_state.pressed_repeat = 0;
-                if (sp->unk2E0 & 7)
-                    sp->unk2E0--;
+                if (sp->cursor & 7)
+                    sp->cursor--;
             }
             if (pad_state.pressed_repeat & 0x10) {
                 play_cursor_sound();
                 if (pad_state.held & 0x8000) {
                     if (CURSOR_COL < 4) {
-                        sp->unk0.grid.row0 -= 5;
-                        if (sp->unk0.grid.row0 < 0)
-                            sp->unk0.grid.row0 = 0;
+                        sp->state.grid.hand_row -= 5;
+                        if (sp->state.grid.hand_row < 0)
+                            sp->state.grid.hand_row = 0;
                     } else {
-                        sp->unk0.grid.row1 -= 5;
-                        if (sp->unk0.grid.row1 < 0)
-                            sp->unk0.grid.row1 = 0;
+                        sp->state.grid.bag_row -= 5;
+                        if (sp->state.grid.bag_row < 0)
+                            sp->state.grid.bag_row = 0;
                     }
-                } else if (sp->unk2E0 >= 8) {
-                    sp->unk2E0 -= 8;
+                } else if (sp->cursor >= 8) {
+                    sp->cursor -= 8;
                 } else if (CURSOR_COL < 4) {
-                    if (sp->unk0.grid.row0 > 0)
-                        sp->unk0.grid.row0--;
-                } else if (sp->unk0.grid.row1 > 0) {
-                    sp->unk0.grid.row1--;
+                    if (sp->state.grid.hand_row > 0)
+                        sp->state.grid.hand_row--;
+                } else if (sp->state.grid.bag_row > 0) {
+                    sp->state.grid.bag_row--;
                 }
                 pad_state.pressed_repeat = 0;
             }
@@ -1976,70 +1976,70 @@ void menu_arrange_icons_run(void)
                 play_cursor_sound();
                 if (pad_state.held & 0x8000) {
                     if (CURSOR_COL < 4) {
-                        sp->unk0.grid.row0 += 5;
-                        if (sp->unk0.grid.row0 > 73)
-                            sp->unk0.grid.row0 = 73;
+                        sp->state.grid.hand_row += 5;
+                        if (sp->state.grid.hand_row > 73)
+                            sp->state.grid.hand_row = 73;
                     } else {
-                        sp->unk0.grid.row1 += 5;
-                        if (sp->unk0.grid.row1 > 73)
-                            sp->unk0.grid.row1 = 73;
+                        sp->state.grid.bag_row += 5;
+                        if (sp->state.grid.bag_row > 73)
+                            sp->state.grid.bag_row = 73;
                     }
-                } else if (sp->unk2E0 < 32) {
-                    sp->unk2E0 += 8;
+                } else if (sp->cursor < 32) {
+                    sp->cursor += 8;
                 } else if (CURSOR_COL < 4) {
-                    if (sp->unk0.grid.row0 < 73)
-                        sp->unk0.grid.row0++;
-                } else if (sp->unk0.grid.row1 < 73) {
-                    sp->unk0.grid.row1++;
+                    if (sp->state.grid.hand_row < 73)
+                        sp->state.grid.hand_row++;
+                } else if (sp->state.grid.bag_row < 73) {
+                    sp->state.grid.bag_row++;
                 }
                 pad_state.pressed_repeat = 0;
             }
             if (pad_state.pressed_repeat & 0x400) {
                 play_cursor_sound();
                 pad_state.pressed_repeat = 0;
-                sp->unk0.grid.row0 -= 5;
-                if (sp->unk0.grid.row0 < 0)
-                    sp->unk0.grid.row0 = 0;
+                sp->state.grid.hand_row -= 5;
+                if (sp->state.grid.hand_row < 0)
+                    sp->state.grid.hand_row = 0;
             }
             if (pad_state.pressed_repeat & 0x100) {
                 play_cursor_sound();
                 pad_state.pressed_repeat = 0;
-                sp->unk0.grid.row0 += 5;
-                if (sp->unk0.grid.row0 > 73)
-                    sp->unk0.grid.row0 = 73;
+                sp->state.grid.hand_row += 5;
+                if (sp->state.grid.hand_row > 73)
+                    sp->state.grid.hand_row = 73;
             }
             if (pad_state.pressed_repeat & 0x800) {
                 play_cursor_sound();
                 pad_state.pressed_repeat = 0;
-                sp->unk0.grid.row1 -= 5;
-                if (sp->unk0.grid.row1 < 0)
-                    sp->unk0.grid.row1 = 0;
+                sp->state.grid.bag_row -= 5;
+                if (sp->state.grid.bag_row < 0)
+                    sp->state.grid.bag_row = 0;
             }
             if (pad_state.pressed_repeat & 0x200) {
                 play_cursor_sound();
                 pad_state.pressed_repeat = 0;
-                sp->unk0.grid.row1 += 5;
-                if (sp->unk0.grid.row1 > 73)
-                    sp->unk0.grid.row1 = 73;
+                sp->state.grid.bag_row += 5;
+                if (sp->state.grid.bag_row > 73)
+                    sp->state.grid.bag_row = 73;
             }
-            if (sp->unk2DC == 2) {
+            if (sp->mode == 2) {
                 if (CURSOR_COL < 4)
-                    id = sp->unk0.grid.ids0[sp->unk0.grid.row0 * 4 + (CURSOR_ROW * 4 + CURSOR_COL)];
+                    id = sp->state.grid.hand_ids[sp->state.grid.hand_row * 4 + (CURSOR_ROW * 4 + CURSOR_COL)];
                 else
-                    id = sp->unk0.grid.ids1[sp->unk0.grid.row1 * 4 + (CURSOR_ROW * 4 + CURSOR_COL) - 4];
+                    id = sp->state.grid.bag_ids[sp->state.grid.bag_row * 4 + (CURSOR_ROW * 4 + CURSOR_COL) - 4];
                 if (shown != id && id != -1) {
                     cd_read_member(6, vis_table_c.types[id].unk5[0] + 200, cd_file_buffer);
                     tim_load_images_at(cd_file_buffer, &picture, NULL, 1);
                     shown = id;
                 }
             }
-            if (sp->unk0.grid.row0 != r0) {
-                if (r0 < sp->unk0.grid.row0) {
-                    n = (sp->unk0.grid.row0 - r0) * 4;
-                    i = sp->unk0.grid.row0 * 4 + 20 - n;
+            if (sp->state.grid.hand_row != r0) {
+                if (r0 < sp->state.grid.hand_row) {
+                    n = (sp->state.grid.hand_row - r0) * 4;
+                    i = sp->state.grid.hand_row * 4 + 20 - n;
                 } else {
-                    n = (r0 - sp->unk0.grid.row0) * 4;
-                    i = sp->unk0.grid.row0 * 4;
+                    n = (r0 - sp->state.grid.hand_row) * 4;
+                    i = sp->state.grid.hand_row * 4;
                 }
                 used = 0;
                 clear.w = 56;
@@ -2051,28 +2051,28 @@ void menu_arrange_icons_run(void)
                         cd_state.unkA84 = CD_BUFFER;
                         used = 0;
                     }
-                    if (sp->unk0.grid.ids0[i] != -1) {
+                    if (sp->state.grid.hand_ids[i] != -1) {
                         int size = cd_read_member(
-                            6, vis_table_c.types[sp->unk0.grid.ids0[i]].unk5[0], cd_state.unkA84) << 11;
+                            6, vis_table_c.types[sp->state.grid.hand_ids[i]].unk5[0], cd_state.unkA84) << 11;
 
-                        tim_load_images_at(cd_state.unkA84, &sp->unk0.grid.tex[i % 20], NULL, 1);
+                        tim_load_images_at(cd_state.unkA84, &sp->state.grid.cell_tex[i % 20], NULL, 1);
                         used += size;
                         cd_state.unkA84 = (u_long *)((u8 *)cd_state.unkA84 + size);
                     } else {
-                        clear.x = sp->unk0.grid.tex[i % 20].vx;
-                        clear.y = sp->unk0.grid.tex[i % 20].vy;
+                        clear.x = sp->state.grid.cell_tex[i % 20].vx;
+                        clear.y = sp->state.grid.cell_tex[i % 20].vy;
                         ClearImage(&clear, 0, 0, 0);
                     }
                     i++;
                 }
             }
-            if (sp->unk0.grid.row1 != r1) {
-                if (r1 < sp->unk0.grid.row1) {
-                    n = (sp->unk0.grid.row1 - r1) * 4;
-                    i = sp->unk0.grid.row1 * 4 + 20 - n;
+            if (sp->state.grid.bag_row != r1) {
+                if (r1 < sp->state.grid.bag_row) {
+                    n = (sp->state.grid.bag_row - r1) * 4;
+                    i = sp->state.grid.bag_row * 4 + 20 - n;
                 } else {
-                    n = (r1 - sp->unk0.grid.row1) * 4;
-                    i = sp->unk0.grid.row1 * 4;
+                    n = (r1 - sp->state.grid.bag_row) * 4;
+                    i = sp->state.grid.bag_row * 4;
                 }
                 used = 0;
                 clear.w = 56;
@@ -2084,16 +2084,16 @@ void menu_arrange_icons_run(void)
                         cd_state.unkA84 = CD_BUFFER;
                         used = 0;
                     }
-                    if (sp->unk0.grid.ids1[i] != -1) {
+                    if (sp->state.grid.bag_ids[i] != -1) {
                         int size = cd_read_member(
-                            6, vis_table_c.types[sp->unk0.grid.ids1[i]].unk5[0], cd_state.unkA84) << 11;
+                            6, vis_table_c.types[sp->state.grid.bag_ids[i]].unk5[0], cd_state.unkA84) << 11;
 
-                        tim_load_images_at(cd_state.unkA84, &sp->unk0.grid.tex[i % 20 + 20], NULL, 1);
+                        tim_load_images_at(cd_state.unkA84, &sp->state.grid.cell_tex[i % 20 + 20], NULL, 1);
                         used += size;
                         cd_state.unkA84 = (u_long *)((u8 *)cd_state.unkA84 + size);
                     } else {
-                        clear.x = sp->unk0.grid.tex[i % 20 + 20].vx;
-                        clear.y = sp->unk0.grid.tex[i % 20 + 20].vy;
+                        clear.x = sp->state.grid.cell_tex[i % 20 + 20].vx;
+                        clear.y = sp->state.grid.cell_tex[i % 20 + 20].vy;
                         ClearImage(&clear, 0, 0, 0);
                     }
                     i++;
@@ -2102,27 +2102,27 @@ void menu_arrange_icons_run(void)
         }
         frame_rate_update();
         menu_arrange_icons_draw();
-        sp->unk2E4 = (sp->unk2E4 + 1) % 32;
+        sp->blink_phase = (sp->blink_phase + 1) % 32;
     }
-    for (i = 0, n = sp->unk0.grid.count0; n;) {
-        if (sp->unk0.grid.ids0[i] != -1) {
-            inventory.counts[sp->unk0.grid.ids0[i]].in_bag = 0;
+    for (i = 0, n = sp->state.grid.hand_count; n;) {
+        if (sp->state.grid.hand_ids[i] != -1) {
+            inventory.counts[sp->state.grid.hand_ids[i]].in_bag = 0;
             n--;
         }
         i++;
     }
-    for (i = 0, n = sp->unk0.grid.count1; n;) {
-        if (sp->unk0.grid.ids1[i] != -1) {
-            inventory.counts[sp->unk0.grid.ids1[i]].in_bag = 1;
+    for (i = 0, n = sp->state.grid.bag_count; n;) {
+        if (sp->state.grid.bag_ids[i] != -1) {
+            inventory.counts[sp->state.grid.bag_ids[i]].in_bag = 1;
             n--;
         }
         i++;
     }
     menu_load_main_messages();
-    mem_free(sp->unk0.grid.ids0);
-    mem_free(sp->unk0.grid.ids1);
-    mem_free(sp->unk0.grid.tex);
-    mem_free(sp->unk0.grid.messages);
+    mem_free(sp->state.grid.hand_ids);
+    mem_free(sp->state.grid.bag_ids);
+    mem_free(sp->state.grid.cell_tex);
+    mem_free(sp->state.grid.messages);
     menu_reload_assets();
     pad_clear_input();
 }
@@ -2142,11 +2142,11 @@ int menu_attribute_points_run(int points)
     int result;
     int i;
 
-    sp->unk0.stats.value = points;
-    sp->unk0.stats.selected = 0;
+    sp->state.stats.value = points;
+    sp->state.stats.selected = 0;
     for (i = 0; i < 14; i++) {
-        sp->unk0.stats.base[0][i] = viewer.base_attributes[i];
-        sp->unk0.stats.bonus[0][i] = 0;
+        sp->state.stats.base[0][i] = viewer.base_attributes[i];
+        sp->state.stats.bonus[0][i] = 0;
     }
     pad_clear_input();
     do {
@@ -2159,37 +2159,37 @@ int menu_attribute_points_run(int points)
         if (pad_state.pressed_repeat & 0x10) {
             pad_state.pressed_repeat = 0;
             play_cursor_sound();
-            if (sp->unk0.stats.selected % 7 == 0)
-                sp->unk0.stats.selected += 6;
+            if (sp->state.stats.selected % 7 == 0)
+                sp->state.stats.selected += 6;
             else
-                sp->unk0.stats.selected--;
+                sp->state.stats.selected--;
         }
         if (pad_state.pressed_repeat & 0x40) {
             pad_state.pressed_repeat = 0;
             play_cursor_sound();
-            if (sp->unk0.stats.selected % 7 == 6)
-                sp->unk0.stats.selected -= 6;
+            if (sp->state.stats.selected % 7 == 6)
+                sp->state.stats.selected -= 6;
             else
-                sp->unk0.stats.selected++;
+                sp->state.stats.selected++;
         }
         if (pad_state.pressed_repeat & 0xa0) {
             pad_state.pressed_repeat = 0;
             play_cursor_sound();
-            if (sp->unk0.stats.selected < 7)
-                sp->unk0.stats.selected += 7;
+            if (sp->state.stats.selected < 7)
+                sp->state.stats.selected += 7;
             else
-                sp->unk0.stats.selected -= 7;
+                sp->state.stats.selected -= 7;
         }
         if (pad_state.pressed_repeat & 0x4000) {
             pad_state.pressed_repeat = 0;
-            if (sp->unk0.stats.value > 0) {
-                if (sp->unk0.stats.base[0][sp->unk0.stats.selected]
-                        + sp->unk0.stats.bonus[0][sp->unk0.stats.selected]
+            if (sp->state.stats.value > 0) {
+                if (sp->state.stats.base[0][sp->state.stats.selected]
+                        + sp->state.stats.bonus[0][sp->state.stats.selected]
                     < 999) {
-                    if (sp->unk0.stats.value >= 2)
+                    if (sp->state.stats.value >= 2)
                         play_confirm_sound();
-                    sp->unk0.stats.bonus[0][sp->unk0.stats.selected]++;
-                    sp->unk0.stats.value--;
+                    sp->state.stats.bonus[0][sp->state.stats.selected]++;
+                    sp->state.stats.value--;
                 } else {
                     play_refuse_sound();
                 }
@@ -2197,11 +2197,11 @@ int menu_attribute_points_run(int points)
         }
         frame_rate_update();
         menu_attribute_points_draw();
-    } while (sp->unk0.stats.value > 0);
+    } while (sp->state.stats.value > 0);
     menu_attribute_points_draw();
     for (i = 0; i < 14; i++) {
-        viewer.base_attributes[i] += sp->unk0.stats.bonus[0][i];
-        viewer.sp_total += sp->unk0.stats.bonus[0][i];
+        viewer.base_attributes[i] += sp->state.stats.bonus[0][i];
+        viewer.sp_total += sp->state.stats.bonus[0][i];
     }
     result = 1;
 done:
@@ -2212,7 +2212,7 @@ done:
 /*
  * The item use page: lists the usable items held (table C ids 268..313
  * of kind 20 or 30), five rows with their icons, and uses the confirmed
- * one (item_use). Returns the use result (game_progress.unk16D8), 0 when
+ * one (item_use). Returns the use result (game_progress.item_use_result), 0 when
  * cancelled; items from 310 and item 288 recompute the viewer's figures.
  */
 ADDRESS(0x8005ec10, 0x77c)
@@ -2239,66 +2239,66 @@ int menu_use_item_run(void)
     int k;
     s16 id;
 
-    sp->unk0.page_list.icons[0].vx = 896;
-    sp->unk0.page_list.icons[0].vy = 440;
-    sp->unk0.page_list.icons[1].vx = 920;
-    sp->unk0.page_list.icons[1].vy = 440;
-    sp->unk0.page_list.icons[2].vx = 896;
-    sp->unk0.page_list.icons[2].vy = 464;
-    sp->unk0.page_list.icons[3].vx = 920;
-    sp->unk0.page_list.icons[3].vy = 464;
-    sp->unk0.page_list.icons[4].vx = 896;
-    sp->unk0.page_list.icons[4].vy = 488;
-    sp->unk0.block = mem_alloc(21504);
+    sp->state.page_list.icons[0].vx = 896;
+    sp->state.page_list.icons[0].vy = 440;
+    sp->state.page_list.icons[1].vx = 920;
+    sp->state.page_list.icons[1].vy = 440;
+    sp->state.page_list.icons[2].vx = 896;
+    sp->state.page_list.icons[2].vy = 464;
+    sp->state.page_list.icons[3].vx = 920;
+    sp->state.page_list.icons[3].vy = 464;
+    sp->state.page_list.icons[4].vx = 896;
+    sp->state.page_list.icons[4].vy = 488;
+    sp->state.block = mem_alloc(21504);
     image = (u8 *)CD_BUFFER;
     cd_read_member(3, 3, (u_long *)image);
-    copy_words(sp->unk0.block, (u32 *)(image + 4), 5376);
+    copy_words(sp->state.block, (u32 *)(image + 4), 5376);
     image += *(u32 *)image + 4;
-    tim_load_images_at(image + 4, &sp->unk2E6[2], &sp->unk2E6[3], 1);
+    tim_load_images_at(image + 4, &sp->image_vram[2], &sp->image_vram[3], 1);
     cd_state.unkA84 = CD_BUFFER;
     cd_read_member(6, 800, cd_state.unkA84);
-    sp->unk0.page_list.entries = mem_alloc(92);
-    sp->unk0.page_list.count = 0;
+    sp->state.page_list.entries = mem_alloc(92);
+    sp->state.page_list.count = 0;
     for (i = 268; i < 314; i++) {
         if ((vis_table_c.types[i].category == 20 || vis_table_c.types[i].category == 30)
             && inventory.counts[i].count != 0 && inventory.counts[i].in_bag == 0)
-            sp->unk0.page_list.entries[sp->unk0.page_list.count++] = i;
+            sp->state.page_list.entries[sp->state.page_list.count++] = i;
     }
     n = 5;
-    if (sp->unk0.page_list.count < 5)
-        n = sp->unk0.page_list.count;
+    if (sp->state.page_list.count < 5)
+        n = sp->state.page_list.count;
     for (i = 0; i < n; i++) {
-        k = icons[sp->unk0.page_list.entries[i] - 266];
+        k = icons[sp->state.page_list.entries[i] - 266];
         p = CD_BUFFER;
         while (k--)
             p = (u_long *)((u8 *)p + (*p + 4));
-        rect.x = sp->unk0.page_list.icons[i].vx;
-        rect.y = sp->unk0.page_list.icons[i].vy;
+        rect.x = sp->state.page_list.icons[i].vx;
+        rect.y = sp->state.page_list.icons[i].vy;
         rect.w = rect.h = 24;
         LoadImage(&rect, p + 6);
     }
-    sp->unk2E2 = 0;
-    sp->unk2E0 = 0;
+    sp->scroll = 0;
+    sp->cursor = 0;
     pad_clear_input();
     reload = 0;
     for (;;) {
-        first = sp->unk2E2;
+        first = sp->scroll;
         if (pad_state.pressed & 0x4000) {
             pad_state.pressed = 0;
-            if (sp->unk2E2 + sp->unk2E0 < sp->unk0.page_list.count)
-                item_use(sp->unk0.page_list.entries[sp->unk2E2 + sp->unk2E0]);
+            if (sp->scroll + sp->cursor < sp->state.page_list.count)
+                item_use(sp->state.page_list.entries[sp->scroll + sp->cursor]);
             else
-                game_progress.unk16D8 = 2;
-            if (game_progress.unk16D8 == 1)
+                game_progress.item_use_result = 2;
+            if (game_progress.item_use_result == 1)
                 play_confirm_sound();
-            else if (game_progress.unk16D8 == 2)
+            else if (game_progress.item_use_result == 2)
                 play_refuse_sound();
             else
                 play_cancel_sound();
-            if (game_progress.unk16D8 != 2) {
-                result = game_progress.unk16D8;
-                if (game_progress.unk16D8 == 1) {
-                    id = sp->unk0.page_list.entries[sp->unk2E2 + sp->unk2E0];
+            if (game_progress.item_use_result != 2) {
+                result = game_progress.item_use_result;
+                if (game_progress.item_use_result == 1) {
+                    id = sp->state.page_list.entries[sp->scroll + sp->cursor];
                     if (id >= 310 || id == 288)
                         reload = 1;
                 }
@@ -2313,71 +2313,71 @@ int menu_use_item_run(void)
         if (pad_state.pressed_repeat & 0x10) {
             play_cursor_sound();
             pad_state.pressed_repeat = 0;
-            if (sp->unk2E0 == 0) {
-                if (sp->unk2E2 > 0)
-                    sp->unk2E2--;
+            if (sp->cursor == 0) {
+                if (sp->scroll > 0)
+                    sp->scroll--;
             } else {
-                sp->unk2E0--;
+                sp->cursor--;
             }
-            sp->unk2E4 = 0;
+            sp->blink_phase = 0;
         }
         if (pad_state.pressed_repeat & 0x40) {
             play_cursor_sound();
             pad_state.pressed_repeat = 0;
-            if (sp->unk2E0 == 4) {
-                if (sp->unk2E2 < sp->unk0.page_list.count - 5)
-                    sp->unk2E2++;
+            if (sp->cursor == 4) {
+                if (sp->scroll < sp->state.page_list.count - 5)
+                    sp->scroll++;
             } else {
-                sp->unk2E0++;
+                sp->cursor++;
             }
-            sp->unk2E4 = 0;
+            sp->blink_phase = 0;
         }
         if (pad_state.pressed_repeat & 0x20) {
             play_cursor_sound();
             pad_state.pressed_repeat = 0;
-            sp->unk2E2 += 5;
-            if (sp->unk2E2 > sp->unk0.page_list.count - 5) {
-                if (sp->unk0.page_list.count < 5)
-                    sp->unk2E2 = 0;
+            sp->scroll += 5;
+            if (sp->scroll > sp->state.page_list.count - 5) {
+                if (sp->state.page_list.count < 5)
+                    sp->scroll = 0;
                 else
-                    sp->unk2E2 = sp->unk0.page_list.count - 5;
+                    sp->scroll = sp->state.page_list.count - 5;
             }
-            sp->unk2E4 = 0;
+            sp->blink_phase = 0;
         }
         if (pad_state.pressed_repeat & 0x80) {
             play_cursor_sound();
             pad_state.pressed_repeat = 0;
-            sp->unk2E2 -= 5;
-            if (sp->unk2E2 < 0)
-                sp->unk2E2 = 0;
-            sp->unk2E4 = 0;
+            sp->scroll -= 5;
+            if (sp->scroll < 0)
+                sp->scroll = 0;
+            sp->blink_phase = 0;
         }
-        if (sp->unk2E2 != first) {
-            if (first < sp->unk2E2) {
+        if (sp->scroll != first) {
+            if (first < sp->scroll) {
                 from = first + 5;
-                to = sp->unk2E2 + 5;
+                to = sp->scroll + 5;
             } else {
-                from = sp->unk2E2;
+                from = sp->scroll;
                 to = first;
             }
             for (i = from; i < to; i++) {
-                k = icons[sp->unk0.page_list.entries[i] - 266];
+                k = icons[sp->state.page_list.entries[i] - 266];
                 p = CD_BUFFER;
                 while (k--)
                     p = (u_long *)((u8 *)p + (*p + 4));
-                row.x = sp->unk0.page_list.icons[i % 5].vx;
-                row.y = sp->unk0.page_list.icons[i % 5].vy;
+                row.x = sp->state.page_list.icons[i % 5].vx;
+                row.y = sp->state.page_list.icons[i % 5].vy;
                 row.w = row.h = 24;
                 LoadImage(&row, p + 6);
             }
         }
         frame_rate_update();
         menu_use_item_draw();
-        sp->unk2E4 = (sp->unk2E4 + 1) % 32;
+        sp->blink_phase = (sp->blink_phase + 1) % 32;
     }
     pad_clear_input();
-    mem_free(sp->unk0.block);
-    mem_free(sp->unk0.page_list.entries);
+    mem_free(sp->state.block);
+    mem_free(sp->state.page_list.entries);
     if (reload)
         player_compute_derived_stats(0);
     {
@@ -2402,27 +2402,27 @@ void shop_open(void)
     RECT page = {896, 256, 64, 256};
     u8 *p;
 
-    sp->unk2E6[0].vx = 960;
-    sp->unk2E6[0].vy = 256;
-    sp->unk2E6[1].vx = 560;
-    sp->unk2E6[1].vy = 495;
-    sp->unk2E6[2].vx = 896;
-    sp->unk2E6[2].vy = 256;
-    sp->unk2E6[3].vx = 560;
-    sp->unk2E6[3].vy = 497;
-    sp->unk0.block = mem_alloc(21504);
+    sp->image_vram[0].vx = 960;
+    sp->image_vram[0].vy = 256;
+    sp->image_vram[1].vx = 560;
+    sp->image_vram[1].vy = 495;
+    sp->image_vram[2].vx = 896;
+    sp->image_vram[2].vy = 256;
+    sp->image_vram[3].vx = 560;
+    sp->image_vram[3].vy = 497;
+    sp->state.block = mem_alloc(21504);
     MoveImage(&page, 896, 0);
     cd_wait_idle();
     p = (u8 *)cd_file_buffer;
     cd_read_member(3, 0, (u_long *)p);
     copy_words((u32 *)&menu_messages, (u32 *)(p + 4), 5376);
     p += *(u32 *)p + 4;
-    tim_load_images_at(p + 4, &sp->unk2E6[0], &sp->unk2E6[1], 1);
+    tim_load_images_at(p + 4, &sp->image_vram[0], &sp->image_vram[1], 1);
     p = (u8 *)cd_file_buffer;
     cd_read_member(3, 3, (u_long *)p);
-    copy_words(sp->unk0.block, (u32 *)(p + 4), 5376);
+    copy_words(sp->state.block, (u32 *)(p + 4), 5376);
     p += *(u32 *)p + 4;
-    tim_load_images_at(p + 4, &sp->unk2E6[2], &sp->unk2E6[3], 1);
+    tim_load_images_at(p + 4, &sp->image_vram[2], &sp->image_vram[3], 1);
     menu_store_screen();
     pad_clear_input();
 }
@@ -2461,18 +2461,18 @@ void shop_run(void)
     int i;
 
     shop_open();
-    sp->unk2E2 = 0;
-    sp->unk2E0 = 0;
-    if (sp->unk2DC & 1) {
-        sp->unk0.list.ids = mem_alloc(28);
-        sp->unk0.list.count = 0;
+    sp->scroll = 0;
+    sp->cursor = 0;
+    if (sp->mode & 1) {
+        sp->state.list.ids = mem_alloc(28);
+        sp->state.list.count = 0;
         for (i = 0; i < 14; i++) {
             if (inventory.shop_stock[i] != 0 && item_is_uncollected(inventory.shop_ids[i]) != 0)
-                sp->unk0.list.ids[sp->unk0.list.count++] = i;
+                sp->state.list.ids[sp->state.list.count++] = i;
         }
-    } else if ((sp->unk2DC & 2) || (sp->unk2DC & 4)) {
-        sp->unk0.list.ids = mem_alloc(530);
-        sp->unk0.list.count = 0;
+    } else if ((sp->mode & 2) || (sp->mode & 4)) {
+        sp->state.list.ids = mem_alloc(530);
+        sp->state.list.count = 0;
         for (i = 0; i < 266; i++) {
             if (inventory.counts[i].count != 0 && i != viewer.equipment[0] && i != viewer.equipment[1]
                 && i != viewer.equipment[2] && i != viewer.equipment[3] && i != viewer.equipment[4]
@@ -2481,31 +2481,31 @@ void shop_run(void)
                 && i != viewer.equipment[13] && i != viewer.equipment[14] && i != viewer.equipment[15]
                 && i != viewer.equipment[16] && i != viewer.equipment[17] && i != viewer.equipment[18]
                 && i != viewer.equipment[19] && i != viewer.equipment[20])
-                sp->unk0.list.ids[sp->unk0.list.count++] = i;
+                sp->state.list.ids[sp->state.list.count++] = i;
         }
     } else {
-        sp->unk0.list.ids = mem_alloc(530);
-        sp->unk0.list.count = 0;
+        sp->state.list.ids = mem_alloc(530);
+        sp->state.list.count = 0;
         for (i = 0; i < 266; i++) {
             if (inventory.counts[i].count != 0
                 && vis_table_c.types[i].max_durability != vis_table_c.types[i].durability)
-                sp->unk0.list.ids[sp->unk0.list.count++] = i;
+                sp->state.list.ids[sp->state.list.count++] = i;
         }
     }
     shown = -1;
     for (;;) {
-        if (sp->unk2DC & 0x8000) {
+        if (sp->mode & 0x8000) {
             if (pad_state.pressed & 0x2000) {
                 play_cancel_sound();
                 pad_state.pressed = 0;
-                sp->unk2DC &= ~0x8000;
+                sp->mode &= ~0x8000;
             }
             if (pad_state.pressed & 0x4000) {
                 pad_state.pressed = 0;
-                if ((s16)sp->unk0.list.unkA == 1) {
+                if ((s16)sp->state.list.confirm_choice == 1) {
                     done = 1;
-                    if (sp->unk2DC & 1) {
-                        int id = inventory.shop_ids[sp->unk0.list.ids[sp->unk2E2 + sp->unk2E0]];
+                    if (sp->mode & 1) {
+                        int id = inventory.shop_ids[sp->state.list.ids[sp->scroll + sp->cursor]];
 
                         if (inventory.counts[266].count < vis_table_c.types[id].price) {
                             done = 0;
@@ -2513,30 +2513,30 @@ void shop_run(void)
                         } else {
                             inventory.counts[266].count -= vis_table_c.types[id].price;
                             inventory.counts[id].count++;
-                            inventory.shop_stock[sp->unk0.list.ids[sp->unk2E2 + sp->unk2E0]]--;
-                            if (inventory.shop_stock[sp->unk0.list.ids[sp->unk2E2 + sp->unk2E0]] == 0) {
-                                for (i = sp->unk2E2 + sp->unk2E0; i < sp->unk0.list.count - 1; i++)
-                                    sp->unk0.list.ids[i] = sp->unk0.list.ids[i + 1];
-                                sp->unk0.list.count--;
+                            inventory.shop_stock[sp->state.list.ids[sp->scroll + sp->cursor]]--;
+                            if (inventory.shop_stock[sp->state.list.ids[sp->scroll + sp->cursor]] == 0) {
+                                for (i = sp->scroll + sp->cursor; i < sp->state.list.count - 1; i++)
+                                    sp->state.list.ids[i] = sp->state.list.ids[i + 1];
+                                sp->state.list.count--;
                             }
                             play_confirm_sound();
-                            sp->unk2DC &= ~0x8000;
+                            sp->mode &= ~0x8000;
                         }
-                    } else if ((sp->unk2DC & 2) || (sp->unk2DC & 4)) {
+                    } else if ((sp->mode & 2) || (sp->mode & 4)) {
                         int exchange = 285;
                         int j;
 
-                        if (sp->unk2DC & 2)
+                        if (sp->mode & 2)
                             exchange = 284;
-                        inventory.counts[sp->unk0.list.ids[sp->unk2E2 + sp->unk2E0]].count--;
+                        inventory.counts[sp->state.list.ids[sp->scroll + sp->cursor]].count--;
                         inventory.counts[exchange].count++;
-                        for (j = sp->unk2E2 + sp->unk2E0; j < sp->unk0.list.count - 1; j++)
-                            sp->unk0.list.ids[j] = sp->unk0.list.ids[j + 1];
-                        sp->unk0.list.count--;
+                        for (j = sp->scroll + sp->cursor; j < sp->state.list.count - 1; j++)
+                            sp->state.list.ids[j] = sp->state.list.ids[j + 1];
+                        sp->state.list.count--;
                         play_confirm_sound();
-                        sp->unk2DC &= ~0x8000;
+                        sp->mode &= ~0x8000;
                     } else {
-                        int id = sp->unk0.list.ids[sp->unk2E2 + sp->unk2E0];
+                        int id = sp->state.list.ids[sp->scroll + sp->cursor];
                         int j;
 
                         cost = vis_table_c.types[id].repair_price * 2 / 3
@@ -2546,39 +2546,39 @@ void shop_run(void)
                         if (cost < viewer.hp) {
                             viewer.hp -= cost;
                             vis_table_c.types[id].durability = vis_table_c.types[id].max_durability;
-                            for (j = sp->unk2E2 + sp->unk2E0; j < sp->unk0.list.count - 1; j++)
-                                sp->unk0.list.ids[j] = sp->unk0.list.ids[j + 1];
-                            sp->unk0.list.count--;
+                            for (j = sp->scroll + sp->cursor; j < sp->state.list.count - 1; j++)
+                                sp->state.list.ids[j] = sp->state.list.ids[j + 1];
+                            sp->state.list.count--;
                             play_confirm_sound();
-                            sp->unk2DC &= ~0x8000;
+                            sp->mode &= ~0x8000;
                         } else {
                             done = 0;
                             play_refuse_sound();
                         }
                     }
-                    if (done && sp->unk2E2 + 4 >= sp->unk0.list.count) {
-                        if (sp->unk2E2 > 0)
-                            sp->unk2E2--;
-                        else if (sp->unk2E0 > 0)
-                            sp->unk2E0--;
+                    if (done && sp->scroll + 4 >= sp->state.list.count) {
+                        if (sp->scroll > 0)
+                            sp->scroll--;
+                        else if (sp->cursor > 0)
+                            sp->cursor--;
                     }
                 } else {
                     play_cancel_sound();
                     pad_state.pressed = 0;
-                    sp->unk2DC &= ~0x8000;
+                    sp->mode &= ~0x8000;
                 }
             }
             if (pad_state.pressed_repeat & 0x80) {
                 play_cursor_sound();
                 pad_state.pressed_repeat = 0;
-                sp->unk2E4 = 0;
-                sp->unk0.list.unkA = 1;
+                sp->blink_phase = 0;
+                sp->state.list.confirm_choice = 1;
             }
             if (pad_state.pressed_repeat & 0x20) {
                 play_cursor_sound();
                 pad_state.pressed_repeat = 0;
-                sp->unk2E4 = 0;
-                sp->unk0.list.unkA = 0;
+                sp->blink_phase = 0;
+                sp->state.list.confirm_choice = 0;
             }
         } else {
             if (pad_state.pressed & 0x2000) {
@@ -2589,35 +2589,35 @@ void shop_run(void)
             if (pad_state.pressed_repeat & 0x10) {
                 play_cursor_sound();
                 pad_state.pressed_repeat = 0;
-                if (sp->unk2E0 == 0) {
-                    if (sp->unk2E2 > 0)
-                        sp->unk2E2--;
+                if (sp->cursor == 0) {
+                    if (sp->scroll > 0)
+                        sp->scroll--;
                 } else {
-                    sp->unk2E0--;
+                    sp->cursor--;
                 }
             }
             if (pad_state.pressed_repeat & 0x40) {
                 play_cursor_sound();
                 pad_state.pressed_repeat = 0;
-                if (sp->unk2E0 == 4) {
-                    if (sp->unk2E2 < sp->unk0.list.count - 5)
-                        sp->unk2E2++;
+                if (sp->cursor == 4) {
+                    if (sp->scroll < sp->state.list.count - 5)
+                        sp->scroll++;
                 } else {
-                    sp->unk2E0++;
+                    sp->cursor++;
                 }
             }
             if (pad_state.pressed & 0x4000) {
                 pad_state.pressed = 0;
-                if (sp->unk2E2 + sp->unk2E0 >= sp->unk0.list.count) {
+                if (sp->scroll + sp->cursor >= sp->state.list.count) {
                     play_refuse_sound();
                 } else {
-                    if (sp->unk2DC & 1)
-                        kind = vis_table_c.types[inventory.shop_ids[sp->unk0.list.ids[sp->unk2E2 + sp->unk2E0]]].unk5[0];
+                    if (sp->mode & 1)
+                        kind = vis_table_c.types[inventory.shop_ids[sp->state.list.ids[sp->scroll + sp->cursor]]].unk5[0];
                     else
-                        kind = vis_table_c.types[sp->unk0.list.ids[sp->unk2E2 + sp->unk2E0]].unk5[0];
+                        kind = vis_table_c.types[sp->state.list.ids[sp->scroll + sp->cursor]].unk5[0];
                     play_confirm_sound();
-                    sp->unk0.list.unkA = 1;
-                    sp->unk2DC |= 0x8000;
+                    sp->state.list.confirm_choice = 1;
+                    sp->mode |= 0x8000;
                     if (kind != shown) {
                         cd_read_member(6, kind + 600, cd_file_buffer);
                         tim_load_images_at(cd_file_buffer, &pos, NULL, 1);
@@ -2628,12 +2628,12 @@ void shop_run(void)
         }
         frame_rate_update();
         shop_draw();
-        sp->unk2E4 = (sp->unk2E4 + 1) % 32;
+        sp->blink_phase = (sp->blink_phase + 1) % 32;
     }
     shop_restore_texture_page();
     pad_clear_input();
-    mem_free(sp->unk0.list.ids);
-    mem_free(sp->unk0.block);
+    mem_free(sp->state.list.ids);
+    mem_free(sp->state.block);
     menu_restore_screen();
 }
 
@@ -2658,8 +2658,8 @@ void menu_area_info_run(void)
     head = NULL;
     pad_clear_input();
     seen = 0;
-    sp->unk0.map.unk00 = 0;
-    sp->unk0.map.current = -1;
+    sp->state.map.scroll = 0;
+    sp->state.map.current = -1;
     for (i = 0; i < 35; i++) {
         if (areas[i] >= 90) {
             if (head != NULL && !seen)
@@ -2668,17 +2668,17 @@ void menu_area_info_run(void)
             seen = 0;
             continue;
         }
-        if (game_progress.unk1478[areas[i]] & 1)
+        if (game_progress.areas_visited[areas[i]] & 1)
             seen = 1;
         else
             areas[i] = 89;
-        if (sp->unk0.map.current == -1 && areas[i] == area_state.area)
-            sp->unk0.map.current = *head;
+        if (sp->state.map.current == -1 && areas[i] == area_state.area)
+            sp->state.map.current = *head;
     }
     if (!seen)
         *head = 99;
     for (i = 0; i < 10; i++)
-        sp->unk0.map.ids[i] = areas[i];
+        sp->state.map.ids[i] = areas[i];
     for (;;) {
         moved = 0;
         if (pad_state.pressed & 0x2000) {
@@ -2690,27 +2690,27 @@ void menu_area_info_run(void)
         if (area_info_list_shown == 1) {
             if (pad_state.pressed_repeat & 0x10) {
                 pad_state.pressed_repeat = 0;
-                if (sp->unk0.map.unk00 > 0) {
+                if (sp->state.map.scroll > 0) {
                     play_cursor_sound();
                     moved = 1;
-                    sp->unk0.map.unk00--;
+                    sp->state.map.scroll--;
                 }
             }
             if (pad_state.pressed_repeat & 0x40) {
                 pad_state.pressed_repeat = 0;
-                if (sp->unk0.map.unk00 < 25) {
+                if (sp->state.map.scroll < 25) {
                     play_cursor_sound();
                     moved = 1;
-                    sp->unk0.map.unk00++;
+                    sp->state.map.scroll++;
                 }
             }
-            DAT_8008818c = sp->unk0.map.unk00;
+            DAT_8008818c = sp->state.map.scroll;
         } else {
             DAT_8008818c = 0;
         }
         if (moved) {
             for (i = 0; i < 10; i++)
-                sp->unk0.map.ids[i] = areas[sp->unk0.map.unk00 + i];
+                sp->state.map.ids[i] = areas[sp->state.map.scroll + i];
         }
         if (pad_state.pressed_repeat & 0x400) {
             pad_state.pressed_repeat = 0;
@@ -2742,11 +2742,11 @@ void menu_options_run(void)
 
     u16 *key;
 
-    sp->unk2E0 = 0;
-    sp->unk2DC = 1;
+    sp->cursor = 0;
+    sp->mode = 1;
     pad_clear_input();
     while (1) {
-        if (sp->unk2DC == 1) {
+        if (sp->mode == 1) {
             if (pad_state.pressed & 0x2000) {
                 play_cancel_sound();
                 pad_state.pressed = 0;
@@ -2755,56 +2755,56 @@ void menu_options_run(void)
             if (pad_state.pressed_repeat & 0x10) {
                 play_cursor_sound();
                 pad_state.pressed_repeat = 0;
-                if (sp->unk2E0 == 0)
-                    sp->unk2E0 = 5;
+                if (sp->cursor == 0)
+                    sp->cursor = 5;
                 else
-                    sp->unk2E0--;
+                    sp->cursor--;
             }
             if (pad_state.pressed_repeat & 0x40) {
                 play_cursor_sound();
                 pad_state.pressed_repeat = 0;
-                if (sp->unk2E0 == 5)
-                    sp->unk2E0 = 0;
+                if (sp->cursor == 5)
+                    sp->cursor = 0;
                 else
-                    sp->unk2E0++;
+                    sp->cursor++;
             }
             if (pad_state.pressed & 0x4000) {
                 pad_state.pressed = 0;
-                if (sp->unk2E0 == 5) {
+                if (sp->cursor == 5) {
                     const u16 *decode = pad_state.buttons;
                     int i;
 
                     play_confirm_sound();
                     for (i = 0; i < 12; i++, decode++) {
                         if (*decode & 0x1000)
-                            sp->unk0.levels.level[i] = 0;
+                            sp->state.levels.level[i] = 0;
                         else if (*decode & 0x2000)
-                            sp->unk0.levels.level[i] = 1;
+                            sp->state.levels.level[i] = 1;
                         else if (*decode & 0x8000)
-                            sp->unk0.levels.level[i] = 2;
+                            sp->state.levels.level[i] = 2;
                         else if (*decode & 0x4000)
-                            sp->unk0.levels.level[i] = 3;
+                            sp->state.levels.level[i] = 3;
                         else if (*decode & 0x80)
-                            sp->unk0.levels.level[i] = 4;
+                            sp->state.levels.level[i] = 4;
                         else if (*decode & 0x10)
-                            sp->unk0.levels.level[i] = 5;
+                            sp->state.levels.level[i] = 5;
                         else if (*decode & 0x20)
-                            sp->unk0.levels.level[i] = 6;
+                            sp->state.levels.level[i] = 6;
                         else if (*decode & 0x40)
-                            sp->unk0.levels.level[i] = 7;
+                            sp->state.levels.level[i] = 7;
                         else if (*decode & 0x400)
-                            sp->unk0.levels.level[i] = 8;
+                            sp->state.levels.level[i] = 8;
                         else if (*decode & 0x100)
-                            sp->unk0.levels.level[i] = 9;
+                            sp->state.levels.level[i] = 9;
                         else if (*decode & 0x800)
-                            sp->unk0.levels.level[i] = 10;
+                            sp->state.levels.level[i] = 10;
                         else if (*decode & 0x200)
-                            sp->unk0.levels.level[i] = 11;
+                            sp->state.levels.level[i] = 11;
                     }
-                    sp->unk2E0 = 0;
-                    sp->unk2DC = 2;
-                    sp->unk2E2 = 0;
-                    sp->unk0.levels.flags = 0;
+                    sp->cursor = 0;
+                    sp->mode = 2;
+                    sp->scroll = 0;
+                    sp->state.levels.flags = 0;
                 }
             }
             if (pad_state.pressed_repeat & 0x20) {
@@ -2812,11 +2812,11 @@ void menu_options_run(void)
 
                 play_cursor_sound();
                 pad_state.pressed_repeat = 0;
-                if (sp->unk2E0 <= 0) {
-                    if (option[sp->unk2E0] < 63)
-                        option[sp->unk2E0]++;
-                } else if (sp->unk2E0 < 5) {
-                    option[sp->unk2E0] = 0;
+                if (sp->cursor <= 0) {
+                    if (option[sp->cursor] < 63)
+                        option[sp->cursor]++;
+                } else if (sp->cursor < 5) {
+                    option[sp->cursor] = 0;
                 }
             }
             if (pad_state.pressed_repeat & 0x80) {
@@ -2824,21 +2824,21 @@ void menu_options_run(void)
 
                 play_cursor_sound();
                 pad_state.pressed_repeat = 0;
-                if (sp->unk2E0 <= 0) {
-                    if (option[sp->unk2E0] != 0)
-                        option[sp->unk2E0]--;
-                } else if (sp->unk2E0 < 5) {
-                    option[sp->unk2E0] = 1;
+                if (sp->cursor <= 0) {
+                    if (option[sp->cursor] != 0)
+                        option[sp->cursor]--;
+                } else if (sp->cursor < 5) {
+                    option[sp->cursor] = 1;
                 }
             }
-        } else if (sp->unk2E2 == 0) {
+        } else if (sp->scroll == 0) {
             if (pad_state.pressed & 0x2000) {
-                if (sp->unk0.levels.flags == 0) {
+                if (sp->state.levels.flags == 0) {
                     pad_update_action_mask();
                     play_confirm_sound();
                     pad_state.pressed = 0;
-                    sp->unk2DC = 1;
-                    sp->unk2E0 = 5;
+                    sp->mode = 1;
+                    sp->cursor = 5;
                 } else {
                     play_refuse_sound();
                     pad_state.pressed = 0;
@@ -2846,33 +2846,33 @@ void menu_options_run(void)
             }
             if (pad_state.pressed & 0x4000) {
                 pad_state.pressed = 0;
-                if (sp->unk2E0 < 12) {
+                if (sp->cursor < 12) {
                     play_confirm_sound();
-                    sp->unk2E4 = 0;
-                    sp->unk2E2 = 1;
-                } else if (sp->unk2E0 == 12) {
+                    sp->blink_phase = 0;
+                    sp->scroll = 1;
+                } else if (sp->cursor == 12) {
                     play_confirm_sound();
                     pad_set_default_buttons();
                     pad_update_action_mask();
-                    sp->unk0.levels.level[0] = 5;
-                    sp->unk0.levels.level[1] = 7;
-                    sp->unk0.levels.level[2] = 4;
-                    sp->unk0.levels.level[3] = 6;
-                    sp->unk0.levels.level[4] = 8;
-                    sp->unk0.levels.level[5] = 10;
-                    sp->unk0.levels.level[6] = 9;
-                    sp->unk0.levels.level[7] = 11;
-                    sp->unk0.levels.level[9] = 2;
-                    sp->unk0.levels.flags = 0;
-                    sp->unk0.levels.level[8] = 0;
-                    sp->unk0.levels.level[11] = 1;
-                    sp->unk0.levels.level[10] = 3;
-                } else if (sp->unk0.levels.flags == 0) {
+                    sp->state.levels.level[0] = 5;
+                    sp->state.levels.level[1] = 7;
+                    sp->state.levels.level[2] = 4;
+                    sp->state.levels.level[3] = 6;
+                    sp->state.levels.level[4] = 8;
+                    sp->state.levels.level[5] = 10;
+                    sp->state.levels.level[6] = 9;
+                    sp->state.levels.level[7] = 11;
+                    sp->state.levels.level[9] = 2;
+                    sp->state.levels.flags = 0;
+                    sp->state.levels.level[8] = 0;
+                    sp->state.levels.level[11] = 1;
+                    sp->state.levels.level[10] = 3;
+                } else if (sp->state.levels.flags == 0) {
                     pad_update_action_mask();
                     play_confirm_sound();
                     pad_state.pressed = 0;
-                    sp->unk2DC = 1;
-                    sp->unk2E0 = 5;
+                    sp->mode = 1;
+                    sp->cursor = 5;
                 } else {
                     play_refuse_sound();
                     pad_state.pressed = 0;
@@ -2881,97 +2881,97 @@ void menu_options_run(void)
             if (pad_state.pressed & 8) {
                 play_cursor_sound();
                 pad_state.pressed = 0;
-                sp->unk2E0 = 13;
+                sp->cursor = 13;
             }
             if (pad_state.pressed_repeat & 0x10) {
                 play_cursor_sound();
                 pad_state.pressed_repeat = 0;
-                if (sp->unk2E0 == 0)
-                    sp->unk2E0 = 12;
-                else if (sp->unk2E0 == 6)
-                    sp->unk2E0 = 13;
-                else if (sp->unk2E0 == 12)
-                    sp->unk2E0 = 5;
-                else if (sp->unk2E0 == 13)
-                    sp->unk2E0 = 11;
+                if (sp->cursor == 0)
+                    sp->cursor = 12;
+                else if (sp->cursor == 6)
+                    sp->cursor = 13;
+                else if (sp->cursor == 12)
+                    sp->cursor = 5;
+                else if (sp->cursor == 13)
+                    sp->cursor = 11;
                 else
-                    sp->unk2E0--;
+                    sp->cursor--;
             }
             if (pad_state.pressed_repeat & 0x40) {
                 play_cursor_sound();
                 pad_state.pressed_repeat = 0;
-                if (sp->unk2E0 == 12)
-                    sp->unk2E0 = 0;
-                else if (sp->unk2E0 == 5)
-                    sp->unk2E0 = 12;
-                else if (sp->unk2E0 == 11)
-                    sp->unk2E0 = 13;
-                else if (sp->unk2E0 == 13)
-                    sp->unk2E0 = 6;
+                if (sp->cursor == 12)
+                    sp->cursor = 0;
+                else if (sp->cursor == 5)
+                    sp->cursor = 12;
+                else if (sp->cursor == 11)
+                    sp->cursor = 13;
+                else if (sp->cursor == 13)
+                    sp->cursor = 6;
                 else
-                    sp->unk2E0++;
+                    sp->cursor++;
             }
             if (pad_state.pressed_repeat & 0x20) {
                 play_cursor_sound();
                 pad_state.pressed_repeat = 0;
-                if (sp->unk2E0 < 6)
-                    sp->unk2E0 += 6;
-                else if (sp->unk2E0 == 12)
-                    sp->unk2E0 = 13;
-                else if (sp->unk2E0 == 13)
-                    sp->unk2E0 = 12;
+                if (sp->cursor < 6)
+                    sp->cursor += 6;
+                else if (sp->cursor == 12)
+                    sp->cursor = 13;
+                else if (sp->cursor == 13)
+                    sp->cursor = 12;
                 else
-                    sp->unk2E0 -= 6;
+                    sp->cursor -= 6;
             }
             if (pad_state.pressed_repeat & 0x80) {
                 play_cursor_sound();
                 pad_state.pressed_repeat = 0;
-                if (sp->unk2E0 < 7)
-                    sp->unk2E0 += 6;
-                else if (sp->unk2E0 == 12)
-                    sp->unk2E0 = 13;
-                else if (sp->unk2E0 == 13)
-                    sp->unk2E0 = 12;
+                if (sp->cursor < 7)
+                    sp->cursor += 6;
+                else if (sp->cursor == 12)
+                    sp->cursor = 13;
+                else if (sp->cursor == 13)
+                    sp->cursor = 12;
                 else
-                    sp->unk2E0 -= 6;
+                    sp->cursor -= 6;
             }
         } else if (pad_state.pressed) {
-            key = &pad_state.buttons[sp->unk2E0];
+            key = &pad_state.buttons[sp->cursor];
             if (pad_state.pressed & 0x1000) {
-                sp->unk0.levels.level[sp->unk2E0] = 0;
+                sp->state.levels.level[sp->cursor] = 0;
                 *key = 0x1000;
             } else if (pad_state.pressed & 0x2000) {
-                sp->unk0.levels.level[sp->unk2E0] = 1;
+                sp->state.levels.level[sp->cursor] = 1;
                 *key = 0x2000;
             } else if (pad_state.pressed & 0x8000) {
-                sp->unk0.levels.level[sp->unk2E0] = 2;
+                sp->state.levels.level[sp->cursor] = 2;
                 *key = 0x8000;
             } else if (pad_state.pressed & 0x4000) {
-                sp->unk0.levels.level[sp->unk2E0] = 3;
+                sp->state.levels.level[sp->cursor] = 3;
                 *key = 0x4000;
             } else if (pad_state.pressed & 0x80) {
-                sp->unk0.levels.level[sp->unk2E0] = 4;
+                sp->state.levels.level[sp->cursor] = 4;
                 *key = 0x80;
             } else if (pad_state.pressed & 0x10) {
-                sp->unk0.levels.level[sp->unk2E0] = 5;
+                sp->state.levels.level[sp->cursor] = 5;
                 *key = 0x10;
             } else if (pad_state.pressed & 0x20) {
-                sp->unk0.levels.level[sp->unk2E0] = 6;
+                sp->state.levels.level[sp->cursor] = 6;
                 *key = 0x20;
             } else if (pad_state.pressed & 0x40) {
-                sp->unk0.levels.level[sp->unk2E0] = 7;
+                sp->state.levels.level[sp->cursor] = 7;
                 *key = 0x40;
             } else if (pad_state.pressed & 0x400) {
-                sp->unk0.levels.level[sp->unk2E0] = 8;
+                sp->state.levels.level[sp->cursor] = 8;
                 *key = 0x400;
             } else if (pad_state.pressed & 0x100) {
-                sp->unk0.levels.level[sp->unk2E0] = 9;
+                sp->state.levels.level[sp->cursor] = 9;
                 *key = 0x100;
             } else if (pad_state.pressed & 0x800) {
-                sp->unk0.levels.level[sp->unk2E0] = 10;
+                sp->state.levels.level[sp->cursor] = 10;
                 *key = 0x800;
             } else if (pad_state.pressed & 0x200) {
-                sp->unk0.levels.level[sp->unk2E0] = 11;
+                sp->state.levels.level[sp->cursor] = 11;
                 *key = 0x200;
             }
             {
@@ -2979,24 +2979,24 @@ void menu_options_run(void)
                 int used = 15;
                 int i;
 
-                sp->unk0.levels.flags = 0;
+                sp->state.levels.flags = 0;
                 for (i = 0; i < 12; i++, scan++) {
                     if (*scan & used)
-                        sp->unk0.levels.flags |= *scan;
+                        sp->state.levels.flags |= *scan;
                     else
                         used |= *scan;
                 }
             }
             pad_state.pressed = 0;
             pad_state.pressed_repeat = 0;
-            sp->unk2E2 = 0;
+            sp->scroll = 0;
         }
         frame_rate_update();
-        if (sp->unk2DC == 2)
+        if (sp->mode == 2)
             menu_button_config_draw();
         else
             menu_options_draw();
-        sp->unk2E4 = (sp->unk2E4 + 1) % 32;
+        sp->blink_phase = (sp->blink_phase + 1) % 32;
     }
     pad_clear_input();
 }
@@ -3123,7 +3123,7 @@ int card_wait_hw_event(void)
 }
 
 /*
- * Reads port's directory into its MenuCard: when unk2DC's high byte is set
+ * Reads port's directory into its CardDirectory: when unk2DC's high byte is set
  * it first measures the space all files use, then lists this game's files
  * and records the lowest unused file number in unk204.
  */
@@ -3137,68 +3137,68 @@ void card_read_directory(int port)
     int used[8];
     int total, i, n;
 
-    sp->unk1F4 = &cs->cards[port];
-    if (sp->unk2DC & 0xff00) {
+    sp->card = &cs->cards[port];
+    if (sp->mode & 0xff00) {
         strcpy(path, "bu");
         strcat(path, itoa(port));
         strcat(path, "0:*");
-        sp->unk1F4->count = 0;
-        if (firstfile(path, &dir[sp->unk1F4->count])) {
+        sp->card->count = 0;
+        if (firstfile(path, &dir[sp->card->count])) {
             do {
-                sp->unk1F4->count++;
-            } while (nextfile(&dir[sp->unk1F4->count]));
+                sp->card->count++;
+            } while (nextfile(&dir[sp->card->count]));
         }
         total = 0;
-        for (i = 0; i < sp->unk1F4->count; i++)
+        for (i = 0; i < sp->card->count; i++)
             total += dir[i].size;
         if (total > 0x1a000)
-            sp->unk1F4->unkE4 = 0;
+            sp->card->has_room = 0;
         else
-            sp->unk1F4->unkE4 = 1;
+            sp->card->has_room = 1;
     }
     strcpy(path, "bu");
     strcat(path, itoa(port));
     strcat(path, "0:");
     strcat(path, "BASLUS-00863FS_ST");
     strcat(path, "*");
-    sp->unk1F4->count = 0;
-    if (firstfile(path, &dir[sp->unk1F4->count])) {
+    sp->card->count = 0;
+    if (firstfile(path, &dir[sp->card->count])) {
         do {
-            sp->unk1F4->count++;
-        } while (nextfile(&dir[sp->unk1F4->count]));
+            sp->card->count++;
+        } while (nextfile(&dir[sp->card->count]));
     }
-    if (sp->unk1F4->count == 0) {
-        sp->unk204 = 1;
-        if (sp->unk2DC & 0xff00) {
-            if (sp->unk1F4->unkE4 == 0)
-                sp->unk1F4->status = 5;
+    if (sp->card->count == 0) {
+        sp->free_file_number = 1;
+        if (sp->mode & 0xff00) {
+            if (sp->card->has_room == 0)
+                sp->card->status = 5;
             else
-                sp->unk1F4->status = 0;
+                sp->card->status = 0;
         } else {
-            sp->unk1F4->status = 4;
+            sp->card->status = 4;
         }
         return;
     }
     for (i = 7; i >= 0; i--)
         used[i] = 0;
-    for (i = 0; i < sp->unk1F4->count; i++) {
-        strcpy(sp->unk1F4->files[i].name, dir[i].name);
+    for (i = 0; i < sp->card->count; i++) {
+        strcpy(sp->card->files[i].name, dir[i].name);
         n = (dir[i].name[17] - '0') * 10 + (dir[i].name[18] - '0');
         used[n] = -1;
-        sp->unk1F4->files[i].unk14 = n;
+        sp->card->files[i].number = n;
     }
     for (i = 1; i < 8; i++) {
         if (used[i] != -1)
             break;
     }
-    sp->unk204 = i;
-    sp->unk1F4->status = 0;
+    sp->free_file_number = i;
+    sp->card->status = 0;
 }
 
 /*
  * Probes port with _card_info (and, for mode 1, clears and loads it with
  * _card_clear/_card_load), retrying up to ten times, and leaves the result
- * in the port's MenuCard status.
+ * in the port's CardDirectory status.
  */
 ADDRESS(0x800613e8, 0x190)
 void card_probe(int port, int mode)
@@ -3265,10 +3265,10 @@ int card_check_inserted(int port)
     MenuScratch *sp = MENU_SCRATCH;
 
     card_probe(port, 0);
-    if (sp->unk1F4->status == 1) {
-        sp->unk0.half[0] = 351;
-    } else if (sp->unk1F4->status == 2) {
-        sp->unk0.half[0] = 350;
+    if (sp->card->status == 1) {
+        sp->state.half[0] = 351;
+    } else if (sp->card->status == 2) {
+        sp->state.half[0] = 350;
     } else {
         return 1;
     }
@@ -3285,12 +3285,12 @@ int card_ask_yes_no(void)
     MenuScratch *sp = MENU_SCRATCH;
     int n = 0;
 
-    sp->unk2E4 = 0;
-    sp->unk202 = 0;
+    sp->blink_phase = 0;
+    sp->dialog_choice = 0;
     pad_clear_input();
     while (1) {
         if (n == 0) {
-            if (card_check_inserted(sp->unk1F8) == 0)
+            if (card_check_inserted(sp->port) == 0)
                 return -1;
             n = 3;
         }
@@ -3302,24 +3302,24 @@ int card_ask_yes_no(void)
         if (pad_state.pressed & 0x2000) {
             play_cancel_sound();
             pad_state.pressed = 0;
-            sp->unk202 = 0;
+            sp->dialog_choice = 0;
             break;
         }
         if (pad_state.pressed & 0x80) {
             play_cursor_sound();
             pad_state.pressed = 0;
-            sp->unk202 = 1;
+            sp->dialog_choice = 1;
         }
         if (pad_state.pressed & 0x20) {
             play_cursor_sound();
             pad_state.pressed = 0;
-            sp->unk202 = 0;
+            sp->dialog_choice = 0;
         }
         n--;
         card_screen_draw();
     }
     pad_clear_input();
-    return sp->unk202;
+    return sp->dialog_choice;
 }
 
 /* The port choice: 1 with unk1F4 set to the chosen port, 0 when cancelled. */
@@ -3328,43 +3328,43 @@ int card_choose_port(void)
 {
     MenuScratch *sp = MENU_SCRATCH;
 
-    sp->unk1F8 = 0;
-    sp->unk2E4 = 0;
+    sp->port = 0;
+    sp->blink_phase = 0;
     pad_clear_input();
     while (1) {
         if (pad_state.pressed & 0x4000) {
             play_confirm_sound();
             pad_state.pressed = 0;
-            sp->unk1F4 = &((MenuCardScratch *)sp)->cards[sp->unk1F8];
+            sp->card = &((MenuCardScratch *)sp)->cards[sp->port];
             break;
         }
         if (pad_state.pressed & 0x2000) {
             play_cancel_sound();
             pad_state.pressed = 0;
-            sp->unk1F8 = -1;
+            sp->port = -1;
             break;
         }
         if (pad_state.pressed_repeat & 0x10) {
             play_cursor_sound();
             pad_state.pressed_repeat = 0;
-            sp->unk1F8 = 0;
-            sp->unk2E4 = 0;
+            sp->port = 0;
+            sp->blink_phase = 0;
         }
         if (pad_state.pressed_repeat & 0x40) {
             play_cursor_sound();
             pad_state.pressed_repeat = 0;
-            sp->unk1F8 = 1;
-            sp->unk2E4 = 0;
+            sp->port = 1;
+            sp->blink_phase = 0;
         }
         card_screen_draw();
-        sp->unk2E4 = (sp->unk2E4 + 1) % 32;
+        sp->blink_phase = (sp->blink_phase + 1) % 32;
     }
     pad_clear_input();
-    return sp->unk1F8 != -1;
+    return sp->port != -1;
 }
 
 /*
- * Reads each listed file's header bytes into its MenuRecord.
+ * Reads each listed file's header bytes into its CardFileEntry.
  */
 ADDRESS(0x8006184c, 0x1bc)
 int card_read_file_headers(void)
@@ -3376,17 +3376,17 @@ int card_read_file_headers(void)
     int i, fd;
 
     retry = 3;
-    i = sp->unk1F4->count;
+    i = sp->card->count;
     while (i--) {
-        if (card_check_inserted(sp->unk1F8) == 0)
+        if (card_check_inserted(sp->port) == 0)
             return -1;
         strcpy(path, "bu");
-        strcat(path, itoa(sp->unk1F8));
+        strcat(path, itoa(sp->port));
         strcat(path, "0:");
-        strcat(path, sp->unk1F4->files[i].name);
+        strcat(path, sp->card->files[i].name);
         fd = open(path, O_RDONLY);
         if (fd == -1) {
-            sp->unk0.half[0] = 354;
+            sp->state.half[0] = 354;
             return 0;
         }
     read:
@@ -3400,10 +3400,10 @@ int card_read_file_headers(void)
             lseek(fd, 0, SEEK_SET);
             goto read;
         }
-        (i + sp->unk1F4->files)->kind = header.title.kind;
-        (i + sp->unk1F4->files)->unk1A = header.title.unk3A;
-        (i + sp->unk1F4->files)->unk1C = header.title.unk3C;
-        (i + sp->unk1F4->files)->unk1E = header.title.unk3E;
+        (i + sp->card->files)->area = header.title.area;
+        (i + sp->card->files)->sp_total = header.title.sp_total;
+        (i + sp->card->files)->items_found = header.title.items_found;
+        (i + sp->card->files)->data_sum = header.title.data_sum;
         close(fd);
     }
     return 1;
@@ -3420,30 +3420,30 @@ int card_choose_file(void)
     MenuScratch *sp = MENU_SCRATCH;
     int n = 0;
 
-    if ((sp->unk2DC & 0xff00) && sp->unk1F4->unkE4) {
-        sp->unk1FA = sp->unk1F4->count + 1;
-        sp->unk1FC = 1;
+    if ((sp->mode & 0xff00) && sp->card->has_room) {
+        sp->row_count = sp->card->count + 1;
+        sp->has_new_row = 1;
     } else {
-        sp->unk1FA = sp->unk1F4->count;
-        sp->unk1FC = 0;
+        sp->row_count = sp->card->count;
+        sp->has_new_row = 0;
     }
-    sp->unk0.half[1] = 0;
-    sp->unk1FE = 0;
-    sp->unk200 = 0;
-    sp->unk2E4 = 0;
+    sp->state.half[1] = 0;
+    sp->file_row = 0;
+    sp->first_row = 0;
+    sp->blink_phase = 0;
     pad_clear_input();
     while (1) {
         if (n == 0) {
-            if (card_check_inserted(sp->unk1F8) == 0)
+            if (card_check_inserted(sp->port) == 0)
                 return -1;
             n = 20;
         }
         if (pad_state.pressed & 0x4000) {
             play_confirm_sound();
             pad_state.pressed = 0;
-            sp->unk0.half[1] = 1;
-            sp->unk2E4 = 32;
-            sp->unk202 = 1;
+            sp->state.half[1] = 1;
+            sp->blink_phase = 32;
+            sp->dialog_choice = 1;
             while (1) {
                 if (pad_state.pressed & 0x4000) {
                     play_confirm_sound();
@@ -3453,62 +3453,62 @@ int card_choose_file(void)
                 if (pad_state.pressed & 0x2000) {
                     play_cancel_sound();
                     pad_state.pressed = 0;
-                    sp->unk202 = 0;
+                    sp->dialog_choice = 0;
                     break;
                 }
                 if (pad_state.pressed & 0x80) {
                     play_cursor_sound();
                     pad_state.pressed = 0;
-                    sp->unk202 = 1;
+                    sp->dialog_choice = 1;
                 }
                 if (pad_state.pressed & 0x20) {
                     play_cursor_sound();
                     pad_state.pressed = 0;
-                    sp->unk202 = 0;
+                    sp->dialog_choice = 0;
                 }
                 card_screen_draw();
             }
-            if (sp->unk202)
+            if (sp->dialog_choice)
                 break;
-            sp->unk0.half[1] = 0;
+            sp->state.half[1] = 0;
             continue;
         }
         if (pad_state.pressed & 0x2000) {
             play_cancel_sound();
             pad_state.pressed = 0;
-            sp->unk1FE = -1;
+            sp->file_row = -1;
             break;
         }
         if (pad_state.pressed_repeat & 0x10) {
             play_cursor_sound();
             pad_state.pressed_repeat = 0;
-            if (sp->unk1FE == 0) {
-                if (sp->unk200 > 0)
-                    sp->unk200--;
+            if (sp->file_row == 0) {
+                if (sp->first_row > 0)
+                    sp->first_row--;
             } else {
-                sp->unk1FE--;
+                sp->file_row--;
             }
-            sp->unk2E4 = 0;
+            sp->blink_phase = 0;
         }
         if (pad_state.pressed_repeat & 0x40) {
             play_cursor_sound();
             pad_state.pressed_repeat = 0;
-            if (sp->unk1FE == 2) {
-                if (sp->unk200 < sp->unk1FA - 3)
-                    sp->unk200++;
-            } else if (sp->unk1FE + sp->unk200 < sp->unk1FA - 1) {
-                sp->unk1FE++;
+            if (sp->file_row == 2) {
+                if (sp->first_row < sp->row_count - 3)
+                    sp->first_row++;
+            } else if (sp->file_row + sp->first_row < sp->row_count - 1) {
+                sp->file_row++;
             }
-            sp->unk2E4 = 0;
+            sp->blink_phase = 0;
         }
         card_screen_draw();
-        sp->unk2E4 = (sp->unk2E4 + 1) % 32;
+        sp->blink_phase = (sp->blink_phase + 1) % 32;
         n--;
     }
     pad_clear_input();
-    if (sp->unk1FE == -1)
+    if (sp->file_row == -1)
         return 0;
-    sp->unk1FE += sp->unk200;
+    sp->file_row += sp->first_row;
     return 1;
 }
 
@@ -3543,12 +3543,12 @@ int card_write_blocks(int fd, int offset, u8 *data, int size)
             frame[127] = ~frame[127];
         again:
             if (n == 0) {
-                if (card_check_inserted(sp->unk1F8) == 0)
+                if (card_check_inserted(sp->port) == 0)
                     return -1;
                 n = 3;
             }
             if (retry >= 3) {
-                sp->unk0.half[0] = 355;
+                sp->state.half[0] = 355;
                 return -1;
             }
             retry++;
@@ -3593,7 +3593,7 @@ int card_read_blocks(int fd, int offset, u8 *data, int size)
         do {
         again:
             if (n == 0) {
-                if (card_check_inserted(sp->unk1F8) == 0)
+                if (card_check_inserted(sp->port) == 0)
                     return -1;
                 n = 3;
             }
@@ -3602,14 +3602,14 @@ int card_read_blocks(int fd, int offset, u8 *data, int size)
             retry++;
             lseek(fd, offset + block * 128, SEEK_SET);
             if (read(fd, frame, 128) == -1) {
-                sp->unk0.half[0] = 354;
+                sp->state.half[0] = 354;
                 goto again;
             }
             for (i = 0, sum = 0; i < 127; i++)
                 sum += frame[i];
             sum = ~sum;
             if (sum != frame[127]) {
-                sp->unk0.half[0] = 349;
+                sp->state.half[0] = 349;
                 goto again;
             }
             for (i = 0; i < 127; i++)
@@ -3639,16 +3639,16 @@ int card_load_game(u8 *data)
 
 open:
     strcpy(path, "bu");
-    strcat(path, itoa(sp->unk1F8));
+    strcat(path, itoa(sp->port));
     strcat(path, "0:");
-    strcat(path, sp->unk1F4->files[sp->unk1FE].name);
+    strcat(path, sp->card->files[sp->file_row].name);
     fd = open(path, O_WRONLY);
     if (fd == -1) {
         if (retry) {
             retry--;
             goto open;
         }
-        sp->unk0.half[0] = 354;
+        sp->state.half[0] = 354;
         return 0;
     }
 read:
@@ -3659,14 +3659,14 @@ read:
             lseek(fd, 0, SEEK_SET);
             goto read;
         }
-        sp->unk0.half[0] = 354;
+        sp->state.half[0] = 354;
         close(fd);
         return 0;
     }
     sum = card_read_blocks(fd, sizeof(header), data, 7560);
-    if (sum == -1 || sum != sp->unk1F4->files[sp->unk1FE].unk1E) {
-        if (sum != sp->unk1F4->files[sp->unk1FE].unk1E)
-            sp->unk0.half[0] = 349;
+    if (sum == -1 || sum != sp->card->files[sp->file_row].data_sum) {
+        if (sum != sp->card->files[sp->file_row].data_sum)
+            sp->state.half[0] = 349;
         if (retry == 0) {
             pad_clear_input();
             close(fd);
@@ -4033,15 +4033,15 @@ int card_save_game(u8 *data)
     };
     int new_file, n, fd, sum;
 
-    new_file = sp->unk1FE == sp->unk1F4->count;
+    new_file = sp->file_row == sp->card->count;
     strcpy(header.magic, "SC");
     header.icon = 0x12;
     header.blocks = blocks;
     memset(header.unk44, 0, sizeof(header.unk44));
     if (new_file)
-        n = sp->unk204;
+        n = sp->free_file_number;
     else
-        n = sp->unk1F4->files[sp->unk1FE].unk14;
+        n = sp->card->files[sp->file_row].number;
     memcpy(header.clut, cluts[n % 7], sizeof(header.clut));
     memcpy(header.icons, icons[n % 7], sizeof(header.icons));
     title[6] = zero[0];
@@ -4063,24 +4063,24 @@ int card_save_game(u8 *data)
     }
     title[52] = zero[0];
     title[53] = zero[1] + viewer.sp_total % 10;
-    ((CardTitle *)title)->kind = area_state.area;
-    ((CardTitle *)title)->unk3A = viewer.sp_total;
-    ((CardTitle *)title)->unk3C = viewer.items_found;
+    ((CardTitle *)title)->area = area_state.area;
+    ((CardTitle *)title)->sp_total = viewer.sp_total;
+    ((CardTitle *)title)->items_found = viewer.items_found;
     memcpy(&header.title, title, sizeof(title));
 open:
     strcpy(path, "bu");
-    strcat(path, itoa(sp->unk1F8));
+    strcat(path, itoa(sp->port));
     strcat(path, "0:");
     if (new_file) {
         strcat(path, "BASLUS-00863FS_ST");
-        num[0] = sp->unk204 / 10 + '0';
-        num[1] = sp->unk204 % 10 + '0';
+        num[0] = sp->free_file_number / 10 + '0';
+        num[1] = sp->free_file_number % 10 + '0';
         num[2] = '\0';
         strcat(path, num);
         fd = open(path, O_CREAT | (2 << 16));
         if (fd == -1) {
             if (retry == 0) {
-                sp->unk0.half[0] = 355;
+                sp->state.half[0] = 355;
                 return 0;
             }
             retry--;
@@ -4088,12 +4088,12 @@ open:
         }
         close(fd);
     } else {
-        strcat(path, sp->unk1F4->files[sp->unk1FE].name);
+        strcat(path, sp->card->files[sp->file_row].name);
     }
     fd = open(path, O_RDWR);
     if (fd == -1) {
         if (retry == 0) {
-            sp->unk0.half[0] = 355;
+            sp->state.half[0] = 355;
             return 0;
         }
         retry--;
@@ -4103,7 +4103,7 @@ write:
     lseek(fd, 0, SEEK_SET);
     if (write(fd, &header, sizeof(header)) == -1) {
         if (retry == 0) {
-            sp->unk0.half[0] = 355;
+            sp->state.half[0] = 355;
             close(fd);
             return 0;
         }
@@ -4122,11 +4122,11 @@ write:
         lseek(fd, 0, SEEK_SET);
         goto write;
     }
-    header.title.unk3E = sum;
+    header.title.data_sum = sum;
     lseek(fd, 0, SEEK_SET);
     if (write(fd, &header, sizeof(header)) == -1) {
         if (retry == 0) {
-            sp->unk0.half[0] = 355;
+            sp->state.half[0] = 355;
             close(fd);
             return 0;
         }
@@ -4176,99 +4176,99 @@ int card_screen_run(int arg)
     int result;
     u8 *buf;
 
-    sp->unk0.half[0] = 0;
-    sp->unk0.half[1] = 0;
-    sp->unk206 = arg;
+    sp->state.half[0] = 0;
+    sp->state.half[1] = 0;
+    sp->show_backdrop = arg;
     pad_clear_input();
     card_screen_draw();
     card_screen_draw();
-    sp->unk2DC <<= 1;
+    sp->mode <<= 1;
 select:
     if (card_choose_port() == 0)
         return 0;
-    sp->unk2DC <<= 1;
+    sp->mode <<= 1;
     card_screen_draw();
     card_screen_draw();
-    card_probe(sp->unk1F8, 1);
-    if ((sp->unk2DC & 0xff00) && sp->unk1F4->status == 3) {
-        sp->unk2DC <<= 1;
-        sp->unk0.half[1] = 0;
+    card_probe(sp->port, 1);
+    if ((sp->mode & 0xff00) && sp->card->status == 3) {
+        sp->mode <<= 1;
+        sp->state.half[1] = 0;
         result = card_ask_yes_no();
         if (result == 0) {
-            sp->unk2DC >>= 2;
+            sp->mode >>= 2;
             goto select;
         }
         if (result == -1) {
-            sp->unk2DC <<= 4;
+            sp->mode <<= 4;
             goto done;
         }
-        sp->unk0.half[1] = 1;
+        sp->state.half[1] = 1;
         card_screen_draw();
         card_screen_draw();
-        if (card_format(sp->unk1F8) == 0) {
-            sp->unk0.half[0] = 356;
-            sp->unk2DC <<= 4;
+        if (card_format(sp->port) == 0) {
+            sp->state.half[0] = 356;
+            sp->mode <<= 4;
             goto done;
         }
-        sp->unk2DC <<= 1;
+        sp->mode <<= 1;
     } else {
-        if (sp->unk1F4->status == 2) {
-            sp->unk0.half[0] = 350;
-            sp->unk2DC <<= 5;
+        if (sp->card->status == 2) {
+            sp->state.half[0] = 350;
+            sp->mode <<= 5;
             goto done;
         }
-        sp->unk2DC <<= 2;
+        sp->mode <<= 2;
     }
-    card_read_directory(sp->unk1F8);
-    if (sp->unk1F4->status != 0) {
-        if (sp->unk1F4->status == 4)
-            sp->unk0.half[0] = 352;
-        else if (sp->unk1F4->status == 5)
-            sp->unk0.half[0] = 353;
-        sp->unk2DC <<= 3;
+    card_read_directory(sp->port);
+    if (sp->card->status != 0) {
+        if (sp->card->status == 4)
+            sp->state.half[0] = 352;
+        else if (sp->card->status == 5)
+            sp->state.half[0] = 353;
+        sp->mode <<= 3;
         goto done;
     }
     result = card_read_file_headers();
     if (result == 0) {
-        sp->unk0.half[0] = 352;
-        sp->unk2DC <<= 3;
+        sp->state.half[0] = 352;
+        sp->mode <<= 3;
         goto done;
     }
     if (result == -1) {
-        sp->unk2DC <<= 3;
+        sp->mode <<= 3;
         goto done;
     }
     result = card_choose_file();
     if (result == 0) {
-        sp->unk2DC >>= 3;
+        sp->mode >>= 3;
         goto select;
     }
     if (result == -1) {
-        sp->unk2DC <<= 3;
+        sp->mode <<= 3;
         goto done;
     }
-    sp->unk0.half[0] = 0;
-    sp->unk2DC <<= 1;
+    sp->state.half[0] = 0;
+    sp->mode <<= 1;
     card_screen_draw();
     card_screen_draw();
-    card_probe(sp->unk1F8, 0);
-    if (sp->unk1F4->status == 1) {
-        sp->unk0.half[0] = 351;
-        sp->unk2DC <<= 2;
+    card_probe(sp->port, 0);
+    if (sp->card->status == 1) {
+        sp->state.half[0] = 351;
+        sp->mode <<= 2;
         goto done;
     }
-    if (sp->unk1F4->status == 2) {
-        sp->unk0.half[0] = 350;
-        sp->unk2DC <<= 2;
+    if (sp->card->status == 2) {
+        sp->state.half[0] = 350;
+        sp->mode <<= 2;
         goto done;
     }
     buf = mem_alloc(7686);
     if (buf == NULL) {
-        sp->unk2DC <<= 2;
+        sp->mode <<= 2;
         goto done;
     }
-    if (sp->unk2DC & 0xff00) {
-        save_pack_data((StSaveData *)buf, sp->unk208);
+    if (sp->mode & 0xff00) {
+        save_pack_data((StSaveData *)buf, sp->save_fresh);
         result = card_save_game(buf);
     } else {
         result = card_load_game(buf);
@@ -4277,35 +4277,35 @@ select:
     }
     mem_free(buf);
     if (result == 0) {
-        if (sp->unk0.half[0] == 0)
-            if (sp->unk2DC & 0xff00)
-                sp->unk0.half[0] = 355;
+        if (sp->state.half[0] == 0)
+            if (sp->mode & 0xff00)
+                sp->state.half[0] = 355;
             else
-                sp->unk0.half[0] = 354;
-        sp->unk2DC <<= 2;
+                sp->state.half[0] = 354;
+        sp->mode <<= 2;
         goto done;
     }
-    sp->unk2DC <<= 1;
+    sp->mode <<= 1;
 done:
     card_screen_draw();
     card_screen_draw();
-    if (sp->unk2DC & 0x80) {
+    if (sp->mode & 0x80) {
         while (PRESSED_NOW == 0)
             ;
         play_cancel_sound();
         pad_state.pressed = 0;
-        sp->unk2DC = 2;
+        sp->mode = 2;
         goto select;
     }
-    if (sp->unk2DC & 0x8000) {
+    if (sp->mode & 0x8000) {
         while (PRESSED_NOW == 0)
             ;
         play_cancel_sound();
         pad_state.pressed = 0;
-        sp->unk2DC = 0x200;
+        sp->mode = 0x200;
         goto select;
     }
-    if (sp->unk2DC & 0xff00) {
+    if (sp->mode & 0xff00) {
         while (PRESSED_NOW == 0)
             ;
         play_cancel_sound();
@@ -4325,7 +4325,7 @@ int menu_end_game_run(void)
 {
     MenuScratch *sp = MENU_SCRATCH;
 
-    sp->unk2E0 = 1;
+    sp->cursor = 1;
     pad_clear_input();
     while (1) {
         if (pad_state.pressed & 0x2000) {
@@ -4336,24 +4336,24 @@ int menu_end_game_run(void)
         if (pad_state.pressed_repeat & 0x80) {
             play_cursor_sound();
             pad_state.pressed_repeat = 0;
-            sp->unk2E0 = 0;
+            sp->cursor = 0;
         }
         if (pad_state.pressed_repeat & 0x20) {
             play_cursor_sound();
             pad_state.pressed_repeat = 0;
-            sp->unk2E0 = 1;
+            sp->cursor = 1;
         }
         if (pad_state.pressed & 0x4000) {
             play_confirm_sound();
             pad_state.pressed = 0;
-            if (sp->unk2E0 != 0)
+            if (sp->cursor != 0)
                 break;
             game_exit_request = 2;
             return 1;
         }
         frame_rate_update();
         menu_end_game_draw();
-        sp->unk2E4 = (sp->unk2E4 + 1) % 32;
+        sp->blink_phase = (sp->blink_phase + 1) % 32;
     }
     pad_clear_input();
     return 0;
@@ -4400,18 +4400,18 @@ int menu_game_over_run(void)
     MenuScratch *sp = MENU_SCRATCH;
     u8 *p;
 
-    sp->unk2E6[0].vx = 960;
-    sp->unk2E6[0].vy = 256;
-    sp->unk2E6[1].vx = 560;
-    sp->unk2E6[1].vy = 495;
+    sp->image_vram[0].vx = 960;
+    sp->image_vram[0].vy = 256;
+    sp->image_vram[1].vx = 560;
+    sp->image_vram[1].vy = 495;
     cd_wait_idle();
     p = (u8 *)cd_file_buffer;
     cd_read_member(3, 0, (u_long *)p);
     copy_words((u32 *)&menu_messages, (u32 *)(p + 4), 5376);
     p += *(u32 *)p + 4;
-    tim_load_images_at(p + 4, &sp->unk2E6[0], &sp->unk2E6[1], 1);
-    sp->unk0.word = 0;
-    sp->unk2E4 = 0;
+    tim_load_images_at(p + 4, &sp->image_vram[0], &sp->image_vram[1], 1);
+    sp->state.word = 0;
+    sp->blink_phase = 0;
     pad_clear_input();
     while (1) {
         if (pad_state.pressed & 0x4000) {
@@ -4422,20 +4422,20 @@ int menu_game_over_run(void)
         if (pad_state.pressed_repeat & 0x40) {
             play_cursor_sound();
             pad_state.pressed_repeat = 0;
-            sp->unk0.word = 1;
+            sp->state.word = 1;
         }
         if (pad_state.pressed_repeat & 0x10) {
             play_cursor_sound();
             pad_state.pressed_repeat = 0;
-            sp->unk0.word = 0;
+            sp->state.word = 0;
         }
-        sp->unk2E5 = 0;
+        sp->font_mode = 0;
         frame_rate_update();
         menu_game_over_draw();
-        sp->unk2E4 = (sp->unk2E4 + 1) % 32;
+        sp->blink_phase = (sp->blink_phase + 1) % 32;
     }
     pad_clear_input();
-    return sp->unk0.word;
+    return sp->state.word;
 }
 
 /*
@@ -4451,29 +4451,29 @@ void menu_save_prompt_run(void)
     u_long *image;
     int result;
 
-    sp->unk2E6[0].vx = 960;
-    sp->unk2E6[0].vy = 256;
-    sp->unk2E6[1].vx = 560;
-    sp->unk2E6[1].vy = 495;
+    sp->image_vram[0].vx = 960;
+    sp->image_vram[0].vy = 256;
+    sp->image_vram[1].vx = 560;
+    sp->image_vram[1].vy = 495;
     cd_wait_idle();
     image = cd_file_buffer;
     cd_read_member(3, 0, image);
     copy_words((u32 *)&menu_messages, (u32 *)(image + 1), 5376);
     image = (u_long *)((u8 *)image + (cd_file_buffer[0] + 4));
-    tim_load_images_at(image + 1, &sp->unk2E6[0], &sp->unk2E6[1], 1);
+    tim_load_images_at(image + 1, &sp->image_vram[0], &sp->image_vram[1], 1);
     ClearImage(&clear, 0, 0, 0);
-    sp->unk2DE = 0;
-    sp->unk2E4 = 0;
+    sp->main_row = 0;
+    sp->blink_phase = 0;
     pad_clear_input();
-    sp->unk33C.x = 0;
-    sp->unk33C.y = 0;
-    sp->unk33C.w = 320;
-    sp->unk33C.h = 240;
+    sp->rect.x = 0;
+    sp->rect.y = 0;
+    sp->rect.w = 320;
+    sp->rect.h = 240;
     for (;;) {
         if (pad_state.pressed & 0x4000) {
             pad_state.pressed = 0;
             play_confirm_sound();
-            if (sp->unk2DE != 0)
+            if (sp->main_row != 0)
                 break;
             ClearImage(&clear, 0, 0, 0);
             cd_wait_idle();
@@ -4482,7 +4482,7 @@ void menu_save_prompt_run(void)
             pad_clear_input();
             pad_vibrate(0);
             card_screen_open(1, 0);
-            sp->unk208 = 1;
+            sp->save_fresh = 1;
             result = card_screen_run(0);
             pad_clear_input();
             card_screen_close();
@@ -4492,17 +4492,17 @@ void menu_save_prompt_run(void)
         if (pad_state.pressed_repeat & 0x80) {
             play_cursor_sound();
             pad_state.pressed_repeat = 0;
-            sp->unk2DE = 0;
+            sp->main_row = 0;
         }
         if (pad_state.pressed_repeat & 0x20) {
             play_cursor_sound();
             pad_state.pressed_repeat = 0;
-            sp->unk2DE = 1;
+            sp->main_row = 1;
         }
-        sp->unk2E5 = 0;
+        sp->font_mode = 0;
         frame_rate_update();
         menu_save_prompt_draw();
-        sp->unk2E4 = (sp->unk2E4 + 1) % 32;
+        sp->blink_phase = (sp->blink_phase + 1) % 32;
     }
     pad_clear_input();
     ClearImage(&clear, 0, 0, 0);

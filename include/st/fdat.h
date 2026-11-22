@@ -15,7 +15,7 @@
 /* The table at the overlay's first byte (WIP layout). */
 typedef struct {
     s32 id;              /* 0x00: the overlay's id (0x37 in FDAT_002.BIN) */
-    void (*unk04[32])(); /* 0x04: handlers */
+    void (*hooks[32])(); /* 0x04: handlers */
     s32 unk84;           /* 0x84: id + 0x33 in every overlay */
 } FdatHeader;
 

@@ -33,12 +33,12 @@ void save_reset_new_game(void)
 {
     u8 unused[128];
 
-    fill_words((u32 *)game_progress.unk1448, 0, 12);
+    fill_words((u32 *)game_progress.talk_counts, 0, 12);
     fill_words((u32 *)&inventory, 0, 89);
-    fill_words(&game_progress.unk14A8[10], 0, 79);
-    game_progress.unk14A8[89] = -1;
-    game_progress.unk14A8[90] = -1;
-    game_progress.unk14A8[91] = -1;
+    fill_words(&game_progress.creature_bits_and_vs_data[10], 0, 79);
+    game_progress.creature_bits_and_vs_data[89] = -1;
+    game_progress.creature_bits_and_vs_data[90] = -1;
+    game_progress.creature_bits_and_vs_data[91] = -1;
     lighting.area_mode[0] = 0x11;
     lighting.area_mode[40] = 0x11;
     lighting.area_mode[41] = 0x11;
@@ -75,7 +75,7 @@ void save_reset_new_game(void)
     lighting.area_mode[45] = 0x11;
     lighting.area_mode[46] = 0x11;
     lighting.area_mode[47] = 0x11;
-    game_progress.unk16DC = 0;
+    game_progress.warp_back_request = 0;
     inventory.shop_ids[0] = 268;
     inventory.shop_stock[0] = 3;
     inventory.shop_ids[1] = 270;
@@ -96,26 +96,26 @@ void save_reset_new_game(void)
     inventory.shop_stock[8] = 2;
     inventory.shop_ids[9] = 18;
     inventory.shop_stock[9] = 1;
-    game_progress.unk1444.word &= ~0x60;
-    game_progress.unk1444.word &= ~0x18;
-    game_progress.unk1444.word &= ~0x6;
-    game_progress.unk1440.word &= ~0x80000000;
-    game_progress.unk1444.word &= ~0x1;
-    game_progress.unk1440.word &= 0x80000000;
-    game_progress.unk1444.word &= ~0x20000;
-    game_progress.unk1444.word &= ~0x20000;
-    game_progress.unk1444.word &= ~0x10000;
-    game_progress.unk1444.word &= ~0x10000;
-    game_progress.unk1444.word &= ~0x8000;
-    game_progress.unk1444.word &= ~0x8000;
-    game_progress.unk1444.word &= ~0x4000;
-    game_progress.unk1444.word &= ~0x2000;
-    game_progress.unk1444.word &= ~0x1000;
-    game_progress.unk1444.word &= ~0x800;
-    game_progress.unk1444.word &= ~0x400;
-    game_progress.unk1444.word &= ~0x200;
-    game_progress.unk1444.word &= ~0x100;
-    game_progress.unk1444.word &= ~0x80;
+    game_progress.event_flags2.word &= ~0x60;
+    game_progress.event_flags2.word &= ~0x18;
+    game_progress.event_flags2.word &= ~0x6;
+    game_progress.event_flags.word &= ~0x80000000;
+    game_progress.event_flags2.word &= ~0x1;
+    game_progress.event_flags.word &= 0x80000000;
+    game_progress.event_flags2.word &= ~0x20000;
+    game_progress.event_flags2.word &= ~0x20000;
+    game_progress.event_flags2.word &= ~0x10000;
+    game_progress.event_flags2.word &= ~0x10000;
+    game_progress.event_flags2.word &= ~0x8000;
+    game_progress.event_flags2.word &= ~0x8000;
+    game_progress.event_flags2.word &= ~0x4000;
+    game_progress.event_flags2.word &= ~0x2000;
+    game_progress.event_flags2.word &= ~0x1000;
+    game_progress.event_flags2.word &= ~0x800;
+    game_progress.event_flags2.word &= ~0x400;
+    game_progress.event_flags2.word &= ~0x200;
+    game_progress.event_flags2.word &= ~0x100;
+    game_progress.event_flags2.word &= ~0x80;
     inventory.shop_ids[10] = 28;
     inventory.shop_ids[11] = 88;
     inventory.shop_ids[12] = 243;
@@ -124,16 +124,16 @@ void save_reset_new_game(void)
     inventory.shop_stock[12] = 1;
     inventory.shop_ids[13] = 133;
     inventory.shop_stock[13] = 1;
-    fill_words(game_progress.unk180[0], 0, 48);
-    fill_words(game_progress.unk0[0], 0, 96);
-    fill_words(game_progress.unk240[0], 0, 384);
-    fill_words(game_progress.unk840[0], 0, 384);
-    fill_words(game_progress.unkE40[0], 0, 384);
-    fill_words((u32 *)game_progress.unk1478, 0, 12);
-    fill_words(game_progress.unk14A8, 0, 5);
-    fill_words(&game_progress.unk14A8[5], 0, 5);
-    fill_words((u32 *)game_progress.unk16E4, 0, 12);
-    game_progress.unk16E0 = -1;
+    fill_words(game_progress.ground_items_gone[0], 0, 48);
+    fill_words(game_progress.creatures_gone[0], 0, 96);
+    fill_words(game_progress.objects_removed[0], 0, 384);
+    fill_words(game_progress.objects_unlocked[0], 0, 384);
+    fill_words(game_progress.objects_finished[0], 0, 384);
+    fill_words((u32 *)game_progress.areas_visited, 0, 12);
+    fill_words(game_progress.creature_bits_and_vs_data, 0, 5);
+    fill_words(&game_progress.creature_bits_and_vs_data[5], 0, 5);
+    fill_words((u32 *)game_progress.area_kills, 0, 12);
+    game_progress.save_id = -1;
 }
 
 /* Records area `area`'s entry states: live table A entries in state 3 or 5,
@@ -150,32 +150,32 @@ void area_save_snapshot(int area)
 
     n = 2;
     for (i = 0; i < n; i++)
-        game_progress.unk0[area][i] = 0;
+        game_progress.creatures_gone[area][i] = 0;
     for (i = 0; i < 64; i++, a++) {
         if (a->spawn_chance != 0xff && (a->state == 3 || a->state == 5))
-            game_progress.unk0[area][i / 32] |= BIT(i);
+            game_progress.creatures_gone[area][i / 32] |= BIT(i);
     }
     n = 1;
     for (i = 0; i < n; i++)
-        game_progress.unk180[area][i] = 0;
+        game_progress.ground_items_gone[area][i] = 0;
     for (i = 0; i < 32; i++, c++) {
         if (c->state == 0)
-            game_progress.unk180[area][i / 32] |= BIT(i);
+            game_progress.ground_items_gone[area][i / 32] |= BIT(i);
     }
     n = 8;
     for (i = 0; i < n; i++) {
-        game_progress.unk240[area][i] = 0;
-        game_progress.unk840[area][i] = 0;
-        game_progress.unkE40[area][i] = 0;
+        game_progress.objects_removed[area][i] = 0;
+        game_progress.objects_unlocked[area][i] = 0;
+        game_progress.objects_finished[area][i] = 0;
     }
     for (i = 0; i < 240; i++, b++) {
         if (b->type == 0xffff) {
-            game_progress.unk240[area][i / 32] |= BIT(i);
+            game_progress.objects_removed[area][i / 32] |= BIT(i);
         } else {
             if (b->params.door.lock == 0xff)
-                game_progress.unk840[area][i / 32] |= BIT(i);
+                game_progress.objects_unlocked[area][i / 32] |= BIT(i);
             if (b->state == 0xff)
-                game_progress.unkE40[area][i / 32] |= BIT(i);
+                game_progress.objects_finished[area][i / 32] |= BIT(i);
         }
     }
 }
@@ -192,29 +192,29 @@ void area_restore_snapshot(int area)
     u8 t;
 
     for (i = 0; i < 64; i++, a++) {
-        if (game_progress.unk0[area][i / 32] & BIT(i))
+        if (game_progress.creatures_gone[area][i / 32] & BIT(i))
             a->state = 3;
     }
     for (i = 0; i < 32; i++, c++) {
-        if (game_progress.unk180[area][i / 32] & BIT(i))
+        if (game_progress.ground_items_gone[area][i / 32] & BIT(i))
             c->state = 0;
     }
     for (i = 0; i < 240; b++, i++) {
-        if (game_progress.unk240[area][i / 32] & BIT(i)) {
+        if (game_progress.objects_removed[area][i / 32] & BIT(i)) {
             b->type = 0xffff;
         } else {
             switch (b->kind) {
             default:
-                if (game_progress.unk840[area][i / 32] & BIT(i))
+                if (game_progress.objects_unlocked[area][i / 32] & BIT(i))
                     b->params.door.lock = 255;
-                if (game_progress.unkE40[area][i / 32] & BIT(i))
+                if (game_progress.objects_finished[area][i / 32] & BIT(i))
                     b->state = 255;
                 break;
             case 0:
             case 1:
-                if (game_progress.unk840[area][i / 32] & BIT(i))
+                if (game_progress.objects_unlocked[area][i / 32] & BIT(i))
                     b->params.door.lock = 255;
-                if (game_progress.unkE40[area][i / 32] & BIT(i)) {
+                if (game_progress.objects_finished[area][i / 32] & BIT(i)) {
                     n = b->params.door.n_blocks;
                     while (n--) {
                         t = vis_records[b->params.door.block_b + n].part;
@@ -231,9 +231,9 @@ void area_restore_snapshot(int area)
                 }
                 break;
             case 52:
-                if (game_progress.unk840[area][i / 32] & BIT(i))
+                if (game_progress.objects_unlocked[area][i / 32] & BIT(i))
                     b->params.door.lock = 255;
-                if (game_progress.unkE40[area][i / 32] & BIT(i)) {
+                if (game_progress.objects_finished[area][i / 32] & BIT(i)) {
                     b->state = 255;
                     b->anim_frame = 0;
                     b->anim = 1;

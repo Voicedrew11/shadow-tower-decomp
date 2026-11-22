@@ -42,7 +42,7 @@ void menu_creature_book_draw_entry(int player)
     VsMenuScratch *sp = VS_MENU_SCRATCH;
     u16 kind_w[17] = {113, 58, 36, 36, 58, 135, 168, 157, 69, 135, 80, 0, 58, 0, 69, 113, 0};
 
-    MenuStoredItem *item;
+    CreatureBookEntry *item;
     int kind;
     int col;
     int i;
@@ -81,24 +81,24 @@ void menu_creature_book_draw_entry(int player)
     if (DAT_8006335c) {
         for (i = 0; i < 14; i++) {
             ui_draw_text(VS_MESSAGE(100 + i), 336, i * 15 + 16, &sp->style[0]);
-            ui_draw_number((u16)item->figures[i] | DIGITS(2), 582, i * 15 + 16, &sp->style[3]);
+            ui_draw_number((u16)item->attributes[i] | DIGITS(2), 582, i * 15 + 16, &sp->style[3]);
         }
     } else {
         for (i = 0; i < 10; i++)
             ui_draw_text(VS_MESSAGE(117 + i), 336, i * 15 + 16, &sp->style[0]);
-        if (item->kind < 17)
-            ui_draw_text(VS_MESSAGE(150 + item->kind), 606 - kind_w[item->kind], 16,
+        if (item->category < 17)
+            ui_draw_text(VS_MESSAGE(150 + item->category), 606 - kind_w[item->category], 16,
                           &sp->style[0]);
-        ui_draw_number(item->unk2 | DIGITS(4), 558, 31, &sp->style[3]);
-        ui_draw_number(item->unk1 | DIGITS(2), 582, 46, &sp->style[3]);
-        a = item->unk4 * 10 / 3048;
+        ui_draw_number(item->hp | DIGITS(4), 558, 31, &sp->style[3]);
+        ui_draw_number(item->sp_gain | DIGITS(2), 582, 46, &sp->style[3]);
+        a = item->height * 10 / 3048;
         ui_draw_number(a | DIGITS(3), 522, 61, &sp->style[3]);
         ui_draw_glyph(55, 559, 61, &sp->style[3]);
-        ui_draw_number((u16)((item->unk4 * 10 - a * 3048) / 254) | DIGITS(2), 570, 61,
+        ui_draw_number((u16)((item->height * 10 - a * 3048) / 254) | DIGITS(2), 570, 61,
                       &sp->style[3]);
         ui_draw_glyph(54, 595, 61, &sp->style[3]);
-        a = item->unk6 * 100 / 454;
-        b = item->unk6 * 1000 / 454;
+        a = item->weight * 100 / 454;
+        b = item->weight * 1000 / 454;
         ui_draw_number(a | DIGITS(4), 522, 76, &sp->style[3]);
         ui_draw_glyph(18, 574, 76, &sp->style[3]);
         ui_draw_number((u16)(b - a * 10) | DIGITS(1), 582, 76, &sp->style[3]);
@@ -123,12 +123,12 @@ void menu_creature_book_draw_entry(int player)
             ui_draw_glyph(15, 558, 136, &sp->style[3]);
         }
         ui_draw_number((u16)item->pairs[3][0] | DIGITS(3), 570, 136, &sp->style[3]);
-        if (item->traits & 0xf)
-            ui_draw_text(VS_MESSAGE(129 + (item->traits & 0xf)), 336, 181, &sp->style[0]);
-        if (item->traits >> 8 & 0xf)
-            ui_draw_text(VS_MESSAGE(129 + (item->traits >> 8 & 0xf)), 336, 196, &sp->style[0]);
-        if (item->traits >> 16 & 0xf)
-            ui_draw_text(VS_MESSAGE(129 + (item->traits >> 16 & 0xf)), 336, 211, &sp->style[0]);
+        if (item->abilities & 0xf)
+            ui_draw_text(VS_MESSAGE(129 + (item->abilities & 0xf)), 336, 181, &sp->style[0]);
+        if (item->abilities >> 8 & 0xf)
+            ui_draw_text(VS_MESSAGE(129 + (item->abilities >> 8 & 0xf)), 336, 196, &sp->style[0]);
+        if (item->abilities >> 16 & 0xf)
+            ui_draw_text(VS_MESSAGE(129 + (item->abilities >> 16 & 0xf)), 336, 211, &sp->style[0]);
     }
     sp->unk238.x = 55;
     sp->unk238.y = 32;

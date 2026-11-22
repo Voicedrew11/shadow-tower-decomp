@@ -66,7 +66,7 @@ void map_spawn_rising_creature(void)
     e->fade = -1;
     fdat_801ed970 = 1;
     e->status.bytes[2] &= 0xf2;
-    game_progress.unk1440.word |= 2;
+    game_progress.event_flags.word |= 2;
     creature_start_script(e, 2);
     e->move_mode = 1;
     e->status.bytes[3] = 1;

@@ -67,19 +67,19 @@ void map_restore_progress(void)
 {
     CreatureType *r = &vis_table_a.types[12];
 
-    if (!(game_progress.unk1440.word >> 28 & 1))
+    if (!(game_progress.event_flags.word >> 28 & 1))
         fdat_801edb94 = 0;
     else
         fdat_801edb94 = 0xff;
-    if (game_progress.unk1448[r->talk_id] >= 2)
+    if (game_progress.talk_counts[r->talk_id] >= 2)
         r->actions &= ~0x180;
-    if (game_progress.unk1448[r->talk_id] == 0) {
+    if (game_progress.talk_counts[r->talk_id] == 0) {
         viewer.state = 5;
         fdat_801edb9c = 0;
     } else {
         fdat_801edb9c = 0xff;
     }
-    if (game_progress.unk1448[r->talk_id] != 0 && !(game_progress.unk1440.word >> 28 & 1))
+    if (game_progress.talk_counts[r->talk_id] != 0 && !(game_progress.event_flags.word >> 28 & 1))
         fdat_801edb98 = 1;
     else
         fdat_801edb98 = 0;
@@ -111,7 +111,7 @@ void map_update_events(void)
         viewer.magic_gauge_delay = 30;
         viewer.magic_gauge = 0;
     }
-    n = game_progress.unk1448[r->talk_id];
+    n = game_progress.talk_counts[r->talk_id];
     if (n == 1 && viewer.position.vx > 0x4c000 && viewer.position.vz > 0x55000) {
         viewer.state = 5;
         creature_force_talk(e, 0, 0);
@@ -122,7 +122,7 @@ void map_update_events(void)
     }
     if (fdat_801edb94 == 0 && e->hp == 0) {
         fdat_801edb94 = 1;
-        game_progress.unk1440.word |= 0x10000000;
+        game_progress.event_flags.word |= 0x10000000;
     }
     if (fdat_801edb94 == 1 && e->state == 3) {
         viewer.state = 5;
@@ -153,7 +153,7 @@ void map_pick_creature_move(void)
     if (e->script_state == 0xf0 || e->script_state == 0)
         return;
     creature_choose_action();
-    if (e->type == 12 && game_progress.unk1448[r->talk_id] < 2)
+    if (e->type == 12 && game_progress.talk_counts[r->talk_id] < 2)
         e->action = 128;
     creature_pick_weighted_script();
     switch (e->action) {
@@ -211,9 +211,9 @@ void map_talk_on_player_death(void)
     e = &vis_table_a.entries[32];
     r = &vis_table_a.types[12];
 
-    if (game_progress.unk1448[r->talk_id] >= 2 && !(game_progress.unk1440.word >> 28 & 1)
+    if (game_progress.talk_counts[r->talk_id] >= 2 && !(game_progress.event_flags.word >> 28 & 1)
         && vis_table_a.zone == 3) {
-        game_progress.unk1448[r->talk_id] = 3;
+        game_progress.talk_counts[r->talk_id] = 3;
         e->flags |= 0x2000000;
         creature_force_talk(e, 1, 1);
     }

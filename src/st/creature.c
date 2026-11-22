@@ -94,7 +94,7 @@ void creature_despawn(Creature *e)
         vis_table_a.zone_history[0] = vis_table_a.zone_history[1] = vis_table_a.zone_history[2] =
             vis_table_a.zone_history[3] = 255;
     } else if (e < &vis_table_a.entries[48]) {
-        game_progress.unk16E4[area_state.area]++;
+        game_progress.area_kills[area_state.area]++;
         viewer.creatures_killed++;
     }
     e->state = 3;

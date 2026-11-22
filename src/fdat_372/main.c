@@ -61,11 +61,11 @@ void map_restore_progress(void)
 {
     CreatureType *r = &vis_table_a.types[5];
 
-    if (!game_progress.unk1440.bit.f20)
+    if (!game_progress.event_flags.bit.f20)
         fdat_801eda3c = 0;
     else
         fdat_801eda3c = 0xff;
-    if (game_progress.unk1448[r->talk_id] != 0)
+    if (game_progress.talk_counts[r->talk_id] != 0)
         r->actions &= ~0x180;
 }
 
@@ -78,7 +78,7 @@ void map_update_events(void)
     Creature *e = &vis_table_a.entries[32];
     CreatureType *r = &vis_table_a.types[5];
 
-    if (game_progress.unk1448[r->talk_id] == 0 && viewer.position.vz > 0x4c000) {
+    if (game_progress.talk_counts[r->talk_id] == 0 && viewer.position.vz > 0x4c000) {
         viewer.state = 5;
         creature_force_talk(e, 0, 0);
         e->hit = 1;
@@ -92,7 +92,7 @@ void map_update_events(void)
         lighting.area_mode[21] = 0x11;
         lighting.area_mode[32] = 0x11;
         lighting.area_mode[37] = 0x11;
-        game_progress.unk1440.word |= 0x100000;
+        game_progress.event_flags.word |= 0x100000;
     }
     if (fdat_801eda3c == 1 && e->state == 3) {
         viewer.state = 5;
@@ -122,7 +122,7 @@ void map_pick_creature_move(void)
     if (e->script_state == 0xf0 || e->script_state == 0)
         return;
     creature_choose_action();
-    if (e->type == 5 && game_progress.unk1448[r->talk_id] == 0)
+    if (e->type == 5 && game_progress.talk_counts[r->talk_id] == 0)
         e->action = 128;
     creature_pick_weighted_script();
     switch (e->action) {
@@ -180,9 +180,9 @@ void map_talk_on_player_death(void)
     e = &vis_table_a.entries[32];
     r = &vis_table_a.types[5];
 
-    if (game_progress.unk1448[r->talk_id] != 0
-        && !(game_progress.unk1440.word >> 20 & 1) && vis_table_a.zone == 1) {
-        game_progress.unk1448[r->talk_id] = 2;
+    if (game_progress.talk_counts[r->talk_id] != 0
+        && !(game_progress.event_flags.word >> 20 & 1) && vis_table_a.zone == 1) {
+        game_progress.talk_counts[r->talk_id] = 2;
         e->flags |= 0x2000000;
         creature_force_talk(e, 1, 1);
     }

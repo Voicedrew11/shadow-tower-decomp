@@ -81,7 +81,7 @@ void map_restore_progress(void)
     AreaObject *d2 = &vis_table_b.entries[2];
     int n;
 
-    if (game_progress.unk1440.word >> 17 & 1) {
+    if (game_progress.event_flags.word >> 17 & 1) {
         fdat_801ee0bc = 2;
         e48->state = 3;
         fdat_801ee0b4 = 4;
@@ -92,11 +92,11 @@ void map_restore_progress(void)
         e48->status.bytes[3] = 2;
         vis_table_a.entries[33].spawn_chance = 0;
     }
-    n = game_progress.unk1448[13];
+    n = game_progress.talk_counts[13];
     if (n == 0)
         fdat_801ee0b8 = 0;
     else if (n == 1) {
-        if (game_progress.unk1448[12] == 0)
+        if (game_progress.talk_counts[12] == 0)
             fdat_801ee0b8 = n;
         else
             fdat_801ee0b8 = 2;
@@ -106,15 +106,15 @@ void map_restore_progress(void)
         fdat_801ee0b8 = 4;
         d2->params.door.lock = 0xff;
     }
-    if (game_progress.unk1448[13] >= 2)
+    if (game_progress.talk_counts[13] >= 2)
         e50->flags &= ~0x2000000;
-    if (game_progress.unk1448[13] == 3)
+    if (game_progress.talk_counts[13] == 3)
         e49->flags &= ~0x2000000;
-    if (game_progress.unk1448[12] == 1)
+    if (game_progress.talk_counts[12] == 1)
         e48->flags &= ~0x2000000;
     if (fdat_801ee0b8 == 2) {
         fdat_801ee0b8 = 3;
-        game_progress.unk1448[13]++;
+        game_progress.talk_counts[13]++;
     }
     switch (fdat_801ee0b8) {
     case 0:
@@ -157,7 +157,7 @@ void map_update_events(void)
     if (fdat_801ee0b4 == 0 && d4->state == 0xff) {
         d3->state = 12;
         fdat_801ee0b4 = 1;
-        game_progress.unk1440.word |= 0x20000;
+        game_progress.event_flags.word |= 0x20000;
     }
     if (fdat_801ee0b4 == 1 && d3->state == 0xff)
         fdat_801ee0b4 = 2;
@@ -225,7 +225,7 @@ void map_use_item_advance_scene(short id)
         e->state = 3;
         vis_table_a.entries[49].spawn_chance = 100;
         e->flags &= ~0x2000000;
-        game_progress.unk1448[13]++;
+        game_progress.talk_counts[13]++;
     }
 }
 
@@ -244,7 +244,7 @@ void map_step_creature(void)
     if (creature_step_hurt_timer(e) == 1)
         return;
     if (e->anim_step >= 0 ? (short)e->anim_frame >= 4096 : (short)e->anim_frame <= 0) {
-        if (e->type == 0 && game_progress.unk1448[12] == 0) {
+        if (e->type == 0 && game_progress.talk_counts[12] == 0) {
             creature_start_script(e, 0);
         } else {
             e->script_state = 0xff;
@@ -268,9 +268,9 @@ void map_talk_on_player_death(void)
     e = &vis_table_a.entries[48];
     r = &vis_table_a.types[0];
 
-    if (game_progress.unk1448[r->talk_id] != 0 && fdat_801ee0b4 != 4
+    if (game_progress.talk_counts[r->talk_id] != 0 && fdat_801ee0b4 != 4
         && vis_table_a.zone == 0) {
-        game_progress.unk1448[r->talk_id] = 1;
+        game_progress.talk_counts[r->talk_id] = 1;
         e->flags |= 0x2000000;
         creature_force_talk(e, 1, 1);
     }

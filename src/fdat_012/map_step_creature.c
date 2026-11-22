@@ -36,7 +36,7 @@ void map_step_creature(void)
     int offset;
 
     if (e->type == 4) {
-        if (game_progress.unk1448[r->talk_id] == 4 && e->status.bytes[0] == 0)
+        if (game_progress.talk_counts[r->talk_id] == 4 && e->status.bytes[0] == 0)
             map_start_creature_fall(e);
         if (e->command == 0x80) {
             map_step_falling_creature(e);

@@ -78,7 +78,7 @@ void map_restore_progress(void)
     a49->status.bytes[3] = 2;
     a50->status.bytes[3] = 2;
     a48->status.bytes[3] = 2;
-    game_progress.unk1448[r->talk_id] = 3;
+    game_progress.talk_counts[r->talk_id] = 3;
 }
 
 #include "../lib/fdat_creature_pick_move.inc"

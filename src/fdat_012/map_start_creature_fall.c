@@ -84,7 +84,7 @@ void map_start_creature_fall(Creature *e)
     e->vertical_speed = 0;
     e->flags = range & ~0x2000000;
     e->collision_tests = collision & ~0x80;
-    if (game_progress.unk1448[r->talk_id] != 4)
+    if (game_progress.talk_counts[r->talk_id] != 4)
         return;
     if (vis_table_c.ground_item_counts[3] == 16) {
         c = &vis_table_c.entries[48];

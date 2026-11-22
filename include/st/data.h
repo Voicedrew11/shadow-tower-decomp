@@ -305,7 +305,7 @@ extern Viewer viewer;
  * compared with.
  */
 /* The current area's handlers (area_state.hooks): 32 slots, the handler
- * table an overlay starts with after its id (FdatHeader.unk04, st/fdat.h);
+ * table an overlay starts with after its id (FdatHeader.hooks, st/fdat.h);
  * called without arguments unless noted. area_state.hooks is set only by
  * the area loader area_load_update: to area_hooks_default (every slot
  * area_hook_none) while an area loads, then to the loaded overlay's table

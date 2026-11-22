@@ -65,16 +65,16 @@ void menu_equip_open(void)
     u8 *p;
 
     menu_equip_save_vram();
-    sp->unk2DC = 1;
-    sp->unk2E6[0].vx = 960;
-    sp->unk2E6[0].vy = 256;
-    sp->unk2E6[1].vx = 560;
-    sp->unk2E6[1].vy = 495;
-    sp->unk2E6[2].vx = 896;
-    sp->unk2E6[2].vy = 256;
-    sp->unk2E6[3].vx = 560;
-    sp->unk2E6[3].vy = 497;
-    sp->unk0.block = mem_alloc(21504);
+    sp->mode = 1;
+    sp->image_vram[0].vx = 960;
+    sp->image_vram[0].vy = 256;
+    sp->image_vram[1].vx = 560;
+    sp->image_vram[1].vy = 495;
+    sp->image_vram[2].vx = 896;
+    sp->image_vram[2].vy = 256;
+    sp->image_vram[3].vx = 560;
+    sp->image_vram[3].vy = 497;
+    sp->state.block = mem_alloc(21504);
     equip_magic_list.bits = mem_alloc(144);
     p = (u8 *)cd_file_buffer;
     cd_read_member(3, 1, (u_long *)p);
@@ -83,9 +83,9 @@ void menu_equip_open(void)
     copy_words(equip_magic_list.bits, (u32 *)(p + 4), 36);
     p = (u8 *)cd_file_buffer;
     cd_read_member(3, 3, (u_long *)p);
-    copy_words(sp->unk0.block, (u32 *)(p + 4), 5376);
+    copy_words(sp->state.block, (u32 *)(p + 4), 5376);
     p += *(u32 *)p + 4;
-    tim_load_images_at(p + 4, &sp->unk2E6[2], &sp->unk2E6[3], 1);
+    tim_load_images_at(p + 4, &sp->image_vram[2], &sp->image_vram[3], 1);
     equip_menu_saved_ids[0] = viewer.equipment[3];
     equip_menu_saved_ids[1] = viewer.equipment[4];
     equip_menu_saved_ids[2] = viewer.equipment[16];
@@ -108,7 +108,7 @@ void menu_equip_close(void)
     RECT d = {296, 130, 16, 8};
 
     menu_equip_restore_vram();
-    mem_free(MENU_SCRATCH->unk0.block);
+    mem_free(MENU_SCRATCH->state.block);
     mem_free(equip_magic_list.bits);
     if ((equip_menu_saved_ids[0] != viewer.equipment[3] && viewer.equipment[3] != 0xffff)
         || (equip_menu_saved_ids[2] != viewer.equipment[16] && viewer.equipment[16] != 0xffff)

@@ -15,7 +15,7 @@ typedef struct {
     u32 *bits;
     s32 count;
     u8 entries[0x10];
-} EquipSubList;
+} EquipMagicList;
 
 /*
  * The state block at 0x801e0ce8: the id shown and the one whose image is
@@ -27,23 +27,23 @@ typedef struct {
  * addresses it apart from this block).
  */
 typedef struct {
-    s32 unk0;            /* 0x00: id shown, -1 for none */
-    s32 unk4;            /* 0x04: id whose image is loaded */
-    s32 unk8;            /* 0x08: index in the list, -1 for none */
-    s32 unkC;            /* 0x0c: frames the paging input stays cleared */
-    u16 *unk10;          /* 0x10: the viewer.equipment slot being changed */
+    s32 shown_id;        /* 0x00: id shown, -1 for none */
+    s32 loaded_id;       /* 0x04: id whose image is loaded */
+    s32 list_index;      /* 0x08: index in the list, -1 for none */
+    s32 input_hold;      /* 0x0c: frames the paging input stays cleared */
+    u16 *slot;           /* 0x10: the viewer.equipment slot being changed */
     u8 unk14[0xc];
-} Data801e0ce8;
+} EquipMenuState;
 
 /* 0x801e0d08: the slot sub-list. menu_equip_open allocates its 144-byte bit
  * table (src/st/menu_equip_open.c) and menu_equip_close frees it. */
-extern EquipSubList equip_magic_list;
+extern EquipMagicList equip_magic_list;
 
 /* The equipment ids menu_equip_open records (viewer.equipment[3], [4], [16],
  * [17], [6], [12]) for menu_equip_close to compare. */
 extern u16 equip_menu_saved_ids[6];
 
-extern Data801e0ce8 equip_menu_state;
+extern EquipMenuState equip_menu_state;
 
 /* 0x8008092c: per effect definition id (the magic sub-list's entries), the
  * number of its name message counted from 916; 255 for none (load data,

@@ -59,7 +59,7 @@ void map_restore_progress(void)
 {
     CreatureType *r = &vis_table_a.types[8];
 
-    if (game_progress.unk1448[r->talk_id] == 1) {
+    if (game_progress.talk_counts[r->talk_id] == 1) {
         fdat_801ed8cc = 1;
         r->actions &= ~0x180;
     } else {

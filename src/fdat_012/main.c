@@ -67,7 +67,7 @@ void map_restore_progress(void)
 {
     Creature *e = &vis_table_a.entries[48];
 
-    if (game_progress.unk1440.bit.f0)
+    if (game_progress.event_flags.bit.f0)
         fdat_801edfac = 3;
     else
         fdat_801edfac = 0;

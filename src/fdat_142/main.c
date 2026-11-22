@@ -75,11 +75,11 @@ void map_restore_progress(void)
 
     fdat_801edaf4 = 0;
     fdat_801edaf8 = 0;
-    if (game_progress.unk1448[r0->talk_id] != 0)
+    if (game_progress.talk_counts[r0->talk_id] != 0)
         fdat_801edafc = 0xff;
     else
         fdat_801edafc = 0;
-    if (game_progress.unk1448[r4->talk_id] == 2) {
+    if (game_progress.talk_counts[r4->talk_id] == 2) {
         fdat_801edb00 = 0xff;
     } else {
         e7->spawn_chance = 0;

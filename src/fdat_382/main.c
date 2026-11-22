@@ -72,7 +72,7 @@ void map_restore_progress(void)
     Creature *e32 = &a->entries[32];
     CreatureType *r1 = &a->types[1];
 
-    if ((game_progress.unk1440.word & 0xe00000) == 0xe00000) {
+    if ((game_progress.event_flags.word & 0xe00000) == 0xe00000) {
         vis_table_a.entries[32].spawn_chance = 100;
         vis_table_a.entries[2].spawn_chance = 100;
         vis_table_a.entries[1].spawn_chance = 100;
@@ -87,11 +87,11 @@ void map_restore_progress(void)
         vis_table_a.entries[0].spawn_chance = 0;
         fdat_801edafc = 0;
     }
-    if (!game_progress.unk1440.bit.f24)
+    if (!game_progress.event_flags.bit.f24)
         fdat_801edb04 = 0;
     else
         fdat_801edb04 = 0xff;
-    if (game_progress.unk1448[r1->talk_id] >= 2)
+    if (game_progress.talk_counts[r1->talk_id] >= 2)
         fdat_801edb00 = 0xff;
     else
         fdat_801edb00 = 0;
@@ -109,11 +109,11 @@ void map_update_events(void)
 
     if (fdat_801edb00 == 0 && viewer.position.vz < 0x3a800) {
         if (fdat_801edafc == 0) {
-            game_progress.unk1448[r1->talk_id] = 0;
+            game_progress.talk_counts[r1->talk_id] = 0;
             creature_force_talk(e32, 1, 0);
             e32->flags &= ~0x2000000;
         } else {
-            game_progress.unk1448[r1->talk_id] = 1;
+            game_progress.talk_counts[r1->talk_id] = 1;
             creature_force_talk(e32, 0, 0);
             e32->flags &= ~0x2000000;
             e32->status.bytes[3] = 0;
@@ -127,12 +127,12 @@ void map_update_events(void)
         lighting.area_mode[8] = 0x11;
         lighting.area_mode[13] = 0x11;
         lighting.area_mode[38] = 0x11;
-        game_progress.unk1440.word |= 0x1000000;
+        game_progress.event_flags.word |= 0x1000000;
     }
     if (fdat_801edb04 == 1 && e32->state == 3) {
         viewer.state = 5;
         e32->flags |= 0x2000000;
-        game_progress.unk1448[r1->talk_id] = 2;
+        game_progress.talk_counts[r1->talk_id] = 2;
         creature_force_talk(e32, 1, 0);
         fdat_801edb04 = 0xff;
         viewer.state = 0;
@@ -232,9 +232,9 @@ void map_talk_on_player_death(void)
     e = &vis_table_a.entries[32];
     r = &vis_table_a.types[1];
 
-    if (game_progress.unk1448[r->talk_id] >= 2 && !(game_progress.unk1440.word >> 24 & 1)
+    if (game_progress.talk_counts[r->talk_id] >= 2 && !(game_progress.event_flags.word >> 24 & 1)
         && vis_table_a.zone == 0) {
-        game_progress.unk1448[r->talk_id] = 3;
+        game_progress.talk_counts[r->talk_id] = 3;
         e->flags |= 0x2000000;
         creature_force_talk(e, 1, 1);
     }

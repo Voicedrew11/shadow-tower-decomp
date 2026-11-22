@@ -99,11 +99,11 @@ void map_restore_progress(void)
     GroundItem *c10 = &vis_table_c.entries[10];
     AreaObject *d0 = &vis_table_b.entries[0];
 
-    if (e48->state == 3 || game_progress.unk1440.bit.f29 == 1) {
+    if (e48->state == 3 || game_progress.event_flags.bit.f29 == 1) {
         e48->spawn_chance = 0;
         fdat_801ee370 = 0xff;
-    } else if (game_progress.unk1440.bit.f14) {
-        if (game_progress.unk1440.bit.f30 == 1) {
+    } else if (game_progress.event_flags.bit.f14) {
+        if (game_progress.event_flags.bit.f30 == 1) {
             fdat_801ee370 = 0xfe;
             e48->flags &= ~0x2000000;
         } else {
@@ -118,7 +118,7 @@ void map_restore_progress(void)
     }
     if (e50->state != 3)
         e50->status.bytes[3] = 2;
-    if (game_progress.unk1448[r13->talk_id] == 1)
+    if (game_progress.talk_counts[r13->talk_id] == 1)
         fdat_801ee374 = 0xff;
     else
         fdat_801ee374 = 0;
@@ -126,7 +126,7 @@ void map_restore_progress(void)
         e33->status.bytes[3] = 3;
         d0->state = 11;
     }
-    if (game_progress.unk1448[r4->talk_id] == 1) {
+    if (game_progress.talk_counts[r4->talk_id] == 1) {
         fdat_801ee378 = 0xff;
         e33->flags &= ~0x2000000;
         r4->actions &= ~0x180;
@@ -137,7 +137,7 @@ void map_restore_progress(void)
         fdat_801ee37c = 0xff;
     else
         fdat_801ee37c = 0;
-    if (!(game_progress.unk1444.word >> 10 & 1)) {
+    if (!(game_progress.event_flags2.word >> 10 & 1)) {
         c9->state = 4;
         c7->state = 4;
         c28->state = 4;
@@ -148,7 +148,7 @@ void map_restore_progress(void)
         c28->position.vx -= 0x200;
         c28->depth_bias -= 1;
     }
-    if (!(game_progress.unk1444.word >> 11 & 1)) {
+    if (!(game_progress.event_flags2.word >> 11 & 1)) {
         c10->state = 4;
         c8->state = 4;
         c29->state = 4;
@@ -180,7 +180,7 @@ void map_update_events(void)
     AreaObject *d0 = &vis_table_b.entries[0];
 
     if (fdat_801ee370 == 0) {
-        if (game_progress.unk1448[r1->talk_id] == 2) {
+        if (game_progress.talk_counts[r1->talk_id] == 2) {
             map_hand_over_item();
             creature_fade_out_despawn(e48);
             viewer.state = 0;
@@ -190,11 +190,11 @@ void map_update_events(void)
             fdat_801ee370 = 0xfd;
             e48->status.bytes[2] &= 0xea;
             e48->flags &= ~0x2000000;
-            game_progress.unk1440.word |= 0x40000000;
+            game_progress.event_flags.word |= 0x40000000;
         }
     }
     if (fdat_801ee370 == 0xfd && e48->hurt_timer == -1) {
-        game_progress.unk1448[r1->talk_id] = 2;
+        game_progress.talk_counts[r1->talk_id] = 2;
         r1->scripts[13]->command = 0x80;
         r1->scripts[14]->command = 0x72;
         e48->flags |= 0x2000000;
@@ -204,8 +204,8 @@ void map_update_events(void)
         e48->flags &= ~0x2000000;
     }
     if (e48->hp == 0)
-        game_progress.unk1440.word |= 0x20000000;
-    if (fdat_801ee374 != 0xff && game_progress.unk1448[r13->talk_id] == 1) {
+        game_progress.event_flags.word |= 0x20000000;
+    if (fdat_801ee374 != 0xff && game_progress.talk_counts[r13->talk_id] == 1) {
         creature_fade_out_despawn(e50);
         fdat_801ee374 = 0xff;
     }
@@ -231,7 +231,7 @@ void map_update_events(void)
     if (fdat_801ee37c == 0 && e49->hp == 0) {
         creature_despawn(e33);
         fdat_801ee37c = 0xff;
-        game_progress.unk1448[r4->talk_id] = 1;
+        game_progress.talk_counts[r4->talk_id] = 1;
         fdat_801ee378 = 0xff;
         d0->state = 0;
     } else if (fdat_801ee37c != 0xff) {
@@ -241,13 +241,13 @@ void map_update_events(void)
         map_slide_ground_item(0);
         map_redrop_ground_item(0);
         fdat_801ee380 = 0xff;
-        game_progress.unk1444.word |= 0x400;
+        game_progress.event_flags2.word |= 0x400;
     }
     if (fdat_801ee384 == 1) {
         map_slide_ground_item(1);
         map_redrop_ground_item(1);
         fdat_801ee384 = 0xff;
-        game_progress.unk1444.word |= 0x800;
+        game_progress.event_flags2.word |= 0x800;
     }
 }
 

@@ -128,11 +128,11 @@ void creature_talk(Creature *e, int fixed, int arg2)
         e->anim_step = a->anim_step;
     }
     if (game_settings.subtitles == 1)
-        talk_load_image(r->talk_id * 6 + game_progress.unk1448[r->talk_id], 0);
+        talk_load_image(r->talk_id * 6 + game_progress.talk_counts[r->talk_id], 0);
     talk_stream_file = r->talk_id;
     i = 0;
-    xa_start_stream(r->talk_id, game_progress.unk1448[r->talk_id]);
-    game_progress.unk1448[r->talk_id]++;
+    xa_start_stream(r->talk_id, game_progress.talk_counts[r->talk_id]);
+    game_progress.talk_counts[r->talk_id]++;
     SsSetSerialVol(0, 64, 64);
     world_state.unk1EE16 = 2;
     world_state.unk1EE19 = 0;

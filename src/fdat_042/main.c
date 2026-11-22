@@ -60,7 +60,7 @@ void map_update_events(void)
 {
     AreaObject *door = &vis_table_b.entries[19];
 
-    if (!game_progress.unk1440.bit.f1 && door->anim_frame > 0xa00 && fdat_801ed96c == -1)
+    if (!game_progress.event_flags.bit.f1 && door->anim_frame > 0xa00 && fdat_801ed96c == -1)
         map_spawn_rising_creature();
 }
 
@@ -74,7 +74,7 @@ void map_restore_progress(void)
         fdat_801ed96c = 0;
         return;
     }
-    if (!game_progress.unk1440.bit.f1) {
+    if (!game_progress.event_flags.bit.f1) {
         e->spawn_chance = 0;
         fdat_801ed970 = 0;
     } else {

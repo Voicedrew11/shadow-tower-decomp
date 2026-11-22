@@ -53,9 +53,9 @@ void map_step_creature(void)
     if (e == a19) {
         if (e->hit != 0) {
             e->status.bytes[3] = 0;
-            game_progress.unk1448[r->talk_id]++;
+            game_progress.talk_counts[r->talk_id]++;
         }
-        if (game_progress.unk1448[r->talk_id] == 4)
+        if (game_progress.talk_counts[r->talk_id] == 4)
             e->flags &= ~0x2000000;
     }
     if (e == a49 && viewer.block == 0x61) {
@@ -71,7 +71,7 @@ void map_step_creature(void)
             creature_start_script(e, 0);
         else if (e == a50)
             creature_start_script(e, 4);
-        else if (e == a19 && game_progress.unk1448[r->talk_id] == 3)
+        else if (e == a19 && game_progress.talk_counts[r->talk_id] == 3)
             creature_start_script(e, 0);
         else {
             e->script_state = 0xff;
@@ -149,9 +149,9 @@ void map_talk_then_open_door(int id)
     }
     r = &vis_table_a.types[e->type];
     if (id == 0x55)
-        game_progress.unk1448[r->talk_id] = 0;
+        game_progress.talk_counts[r->talk_id] = 0;
     else
-        game_progress.unk1448[r->talk_id] = 1;
+        game_progress.talk_counts[r->talk_id] = 1;
     step = door->unk48 * 4;
     r->scripts[0]->command = 0x70;
     r->scripts[1]->command = 0x71;
@@ -160,7 +160,7 @@ void map_talk_then_open_door(int id)
     r->scripts[6]->command = 0x80;
     r->scripts[7]->command = 0x80;
     creature_force_talk(e, 0, 0);
-    game_progress.unk1448[r->talk_id] = 3;
+    game_progress.talk_counts[r->talk_id] = 3;
     creature_start_script(e, 3);
     do {
         e->anim_frame += e->anim_step;
@@ -213,7 +213,7 @@ void map_open_door_then_play_script(void)
     r->scripts[5]->command = 0x70;
     r->scripts[6]->command = 0x71;
     r->scripts[7]->command = 0x72;
-    game_progress.unk1448[r->talk_id] = 2;
+    game_progress.talk_counts[r->talk_id] = 2;
     creature_force_talk(e, 0, 0);
     n = door->params.door.n_blocks;
     while (n--) {
@@ -240,5 +240,5 @@ gate_raised:
             e->anim_frame = 0xfff;
         world_run_frame(NULL, NULL, 0);
     } while ((short)e->anim_frame != 0xfff);
-    game_progress.unk1448[r->talk_id] = 3;
+    game_progress.talk_counts[r->talk_id] = 3;
 }

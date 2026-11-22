@@ -112,29 +112,29 @@ void map_update_events(void)
     int i;
     u32 flags;
 
-    if (game_progress.unk1440.field.gate == 0 && d5->anim_frame != 0) {
-        game_progress.unk1440.field.gate = 1;
+    if (game_progress.event_flags.field.gate == 0 && d5->anim_frame != 0) {
+        game_progress.event_flags.field.gate = 1;
         creature_spawn_now(e32);
         e32->fade = -1;
         e32->visibility = 1;
         e32->status.bytes[2] &= 0xf2;
-    } else if (game_progress.unk1440.field.gate == 1 && d5->anim_frame > 0x800) {
-        game_progress.unk1440.field.gate = 2;
+    } else if (game_progress.event_flags.field.gate == 1 && d5->anim_frame > 0x800) {
+        game_progress.event_flags.field.gate = 2;
     }
     if (fdat_801ef938 == 0 && area_state.loading == 0)
         fdat_801ef938 = 1;
-    if (!game_progress.unk1440.bit.f13 && fdat_801ef938 == 1) {
-        game_progress.unk1440.bit.f13 = 1;
+    if (!game_progress.event_flags.bit.f13 && fdat_801ef938 == 1) {
+        game_progress.event_flags.bit.f13 = 1;
         for (i = 0; i < 6; i++) {
             u8 state = vis_table_a.entries[fdat_801ef504[i]].state;
 
             if (state != 3 && state != 5) {
-                game_progress.unk1440.bit.f13 = 0;
+                game_progress.event_flags.bit.f13 = 0;
                 break;
             }
         }
     }
-    if (game_progress.unk1440.bit.f13 == 1 && fdat_801ef930 >= 0) {
+    if (game_progress.event_flags.bit.f13 == 1 && fdat_801ef930 >= 0) {
         if (fdat_801ef930 == 0) {
             map_fade_palette_row();
             fdat_801ef938 = 0xff;
@@ -176,7 +176,7 @@ void map_restore_progress(void)
     int stage;
     u8 part;
 
-    if (game_progress.unk1440.bit.f14 == 1) {
+    if (game_progress.event_flags.bit.f14 == 1) {
         c29->state = 5;
         fdat_801ef93c = 2;
         d15->kind = 50;
@@ -194,13 +194,13 @@ void map_restore_progress(void)
         e49->flags &= ~0x2000000;
     }
     e48->status.bytes[3] = 1;
-    if (game_progress.unk1440.word >> 29 & 1) {
+    if (game_progress.event_flags.word >> 29 & 1) {
         part = vis_records[38].part;
         vis_records[38].turn = 3;
         vis_records[38].part = vis_records[330].part;
         vis_records[330].part = part;
     }
-    if ((int)(game_progress.unk1440.word >> 10 & 7) >= 3) {
+    if ((int)(game_progress.event_flags.word >> 10 & 7) >= 3) {
         e32->facing = 0x400;
         e32->home_block = 0x31;
         e32->home_offset_x = 0x800;
@@ -212,9 +212,9 @@ void map_restore_progress(void)
     } else {
         e32->spawn_chance = 0;
     }
-    if (game_progress.unk1440.word >> 29 & 1)
+    if (game_progress.event_flags.word >> 29 & 1)
         e32->drop_chance0 = 0;
-    stage = game_progress.unk1440.word >> 8 & 3;
+    stage = game_progress.event_flags.word >> 8 & 3;
     fdat_801ef928 = 0;
     if (stage == 1) {
         creature_start_script(e50, 1);
@@ -251,7 +251,7 @@ void map_restore_progress(void)
         fdat_801ef920 = 400;
         fdat_801ef92c = 0;
     }
-    if (game_progress.unk1440.bit.f13 == 1) {
+    if (game_progress.event_flags.bit.f13 == 1) {
         fdat_801ef934 = 1;
         fdat_801ef930 = -1;
         fdat_801ef938 = 0xff;
@@ -366,10 +366,10 @@ void map_step_creature(void)
         creature_fade_out_despawn(e);
         fdat_801ef93c = 2;
         viewer.state = 0;
-        game_progress.unk1440.word |= 0x4000;
+        game_progress.event_flags.word |= 0x4000;
     }
     if (e->type == 0) {
-        switch (game_progress.unk1440.word >> 10 & 7) {
+        switch (game_progress.event_flags.word >> 10 & 7) {
         case 2:
             viewer.state = 5;
             creature_force_talk(e, 0, 0);
@@ -387,30 +387,30 @@ void map_step_creature(void)
             e->home_offset_y = 0;
             e->home_offset_z = -0x800;
             e->region = part;
-            game_progress.unk1440.word = (game_progress.unk1440.word & ~0x1c00) | 0xc00;
+            game_progress.event_flags.word = (game_progress.event_flags.word & ~0x1c00) | 0xc00;
             break;
         case 3:
             if (viewer.block == 0x2f) {
                 creature_force_talk(e, 0, 0);
-                game_progress.unk1440.word = (game_progress.unk1440.word & ~0x1c00) | 0x1000;
+                game_progress.event_flags.word = (game_progress.event_flags.word & ~0x1c00) | 0x1000;
             } else if (viewer.block == 0x16) {
-                game_progress.unk1448[r->talk_id]++;
-                game_progress.unk1440.word = (game_progress.unk1440.word & ~0x1c00) | 0x1400;
+                game_progress.talk_counts[r->talk_id]++;
+                game_progress.event_flags.word = (game_progress.event_flags.word & ~0x1c00) | 0x1400;
             }
             break;
         case 4:
             if (viewer.block == 0x16)
-                game_progress.unk1440.word = (game_progress.unk1440.word & ~0x1c00) | 0x1400;
+                game_progress.event_flags.word = (game_progress.event_flags.word & ~0x1c00) | 0x1400;
             break;
         case 5:
-            if (game_progress.unk1440.word >> 29 & 1) {
-                game_progress.unk1448[r->talk_id]++;
-                game_progress.unk1440.word = (game_progress.unk1440.word & ~0x1c00) | 0x1800;
+            if (game_progress.event_flags.word >> 29 & 1) {
+                game_progress.talk_counts[r->talk_id]++;
+                game_progress.event_flags.word = (game_progress.event_flags.word & ~0x1c00) | 0x1800;
             } else {
                 e->flags |= 0x2000000;
                 creature_force_talk(e, 0, 0);
                 e->status.bytes[3] = 2;
-                game_progress.unk1440.word = (game_progress.unk1440.word & ~0x1c00) | 0x1800;
+                game_progress.event_flags.word = (game_progress.event_flags.word & ~0x1c00) | 0x1800;
                 e->flags &= ~0x2000000;
             }
             break;
@@ -424,7 +424,7 @@ void map_step_creature(void)
                 e->status.bytes[2] &= 0xe2;
                 if (e->hp == 0)
                     e->hp = 1;
-                game_progress.unk1440.word |= 0x1c00;
+                game_progress.event_flags.word |= 0x1c00;
                 e->flags &= ~0x2000000;
             }
             break;
@@ -446,7 +446,7 @@ void map_step_creature(void)
                 creature_force_talk(e, 0, 0);
                 fdat_801ef924 = 1;
                 e->flags &= ~0x2000000;
-                game_progress.unk1440.word = (game_progress.unk1440.word & ~0x300) | 0x100;
+                game_progress.event_flags.word = (game_progress.event_flags.word & ~0x300) | 0x100;
             }
             break;
         case 1:
@@ -488,7 +488,7 @@ void map_step_creature(void)
             e->anim_step = 0;
         }
         if (e->type == 0) {
-            if ((game_progress.unk1440.word >> 10 & 7) == 1) {
+            if ((game_progress.event_flags.word >> 10 & 7) == 1) {
                 creature_start_script(e, 0);
             } else {
                 e->script_state = 0xff;
@@ -550,7 +550,7 @@ void map_object_take_equipment(void)
         viewer.state = 0;
         fdat_801ef924 = 2;
         fdat_801ef92c = 2;
-        game_progress.unk1440.word = (game_progress.unk1440.word & ~0x300) | 0x200;
+        game_progress.event_flags.word = (game_progress.event_flags.word & ~0x300) | 0x200;
     }
 }
 
@@ -686,7 +686,7 @@ void map_talk_then_remove_creatures(void)
     Creature *e = &vis_table_a.entries[51];
     CreatureType *r = &vis_table_a.types[10];
 
-    game_progress.unk1448[r->talk_id]++;
+    game_progress.talk_counts[r->talk_id]++;
     e->flags |= 0x2000000;
     r->scripts[0]->command = 0x80;
     r->scripts[1]->command = 0x80;
@@ -720,7 +720,7 @@ void map_start_creature_pair_scene(void)
         r->radius = 0x200;
         r->height = 0x800;
         fdat_801ef928 = 1;
-        game_progress.unk1440.word = (game_progress.unk1440.word & ~0x300) | 0x100;
+        game_progress.event_flags.word = (game_progress.event_flags.word & ~0x300) | 0x100;
     }
 }
 

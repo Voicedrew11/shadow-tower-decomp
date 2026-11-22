@@ -15,7 +15,7 @@ int item_is_held(int id);
 int item_take(int id);
 int item_add(int id);
 /* player_examine is declared in st/player.h. */
-/* Uses item `id`, leaving the result in game_progress.unk16D8 (src/st/item_use.c;
+/* Uses item `id`, leaving the result in game_progress.item_use_result (src/st/item_use.c;
  * src/st/menu.c's item page calls it). */
 void item_use(int id);
 

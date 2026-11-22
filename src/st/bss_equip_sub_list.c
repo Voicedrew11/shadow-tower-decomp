@@ -12,4 +12,4 @@
 #include <st/equip_menu.h>
 
 DATA(0x801e0d08, 0x18, ".bss")
-EquipSubList equip_magic_list;
+EquipMagicList equip_magic_list;

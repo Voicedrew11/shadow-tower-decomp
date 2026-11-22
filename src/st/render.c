@@ -4561,7 +4561,7 @@ void world_draw_creatures(void)
             depth = e->fade;
         if (t->kind != 0xffff) {
             bit = t->kind;
-            game_progress.unk14A8[bit >> 5] |= 1 << (bit & 0x1f);
+            game_progress.creature_bits_and_vs_data[bit >> 5] |= 1 << (bit & 0x1f);
         }
         if (model != NULL) {
         at = &e->position;
@@ -5501,7 +5501,7 @@ void ui_draw_glyph(u16 c, u16 x, u16 y, CVECTOR *color)
     u16 q, r;
     int n;
 
-    if (MENU_SCRATCH->unk2E5 == 0) {
+    if (MENU_SCRATCH->font_mode == 0) {
         ch = 12;
         fw = ch;
         qh = fw;
@@ -5599,7 +5599,7 @@ void ui_draw_text(u16 *s, u16 x, u16 y, CVECTOR *color)
     u_int split;
     u_int half;
 
-    if (MENU_SCRATCH->unk2E5 == 0) {
+    if (MENU_SCRATCH->font_mode == 0) {
         line = 14;
         split = 64;
     } else {
@@ -5653,7 +5653,7 @@ void ui_draw_number(u32 num, u16 x, u16 y, CVECTOR *color)
 
     if (number_narrow)
         width -= 4;
-    if (MENU_SCRATCH->unk2E5 == 0)
+    if (MENU_SCRATCH->font_mode == 0)
         base = 64;
     else
         base = 4;
@@ -6165,23 +6165,23 @@ void menu_draw_backdrop(void)
 ADDRESS(0x80029548, 0xd0)
 void ui_draw_panel(int x, int y, int w, int h)
 {
-    MENU_SCRATCH->unk338.g = 80;
-    MENU_SCRATCH->unk338.r = 80;
-    MENU_SCRATCH->unk338.b = 96;
-    MENU_SCRATCH->unk344.g = 40;
-    MENU_SCRATCH->unk344.r = 40;
-    MENU_SCRATCH->unk33C.x = x;
-    MENU_SCRATCH->unk33C.y = y;
-    MENU_SCRATCH->unk33C.w = w;
-    MENU_SCRATCH->unk33C.h = h;
-    MENU_SCRATCH->unk344.b = 48;
-    MENU_SCRATCH->unk348.x = x + 2;
-    MENU_SCRATCH->unk348.y = y + 1;
-    MENU_SCRATCH->unk348.w = w - 4;
-    MENU_SCRATCH->unk348.h = h - 2;
-    ui_fill_rect(&MENU_SCRATCH->unk348, &MENU_SCRATCH->unk344, 1);
+    MENU_SCRATCH->border_color.g = 80;
+    MENU_SCRATCH->border_color.r = 80;
+    MENU_SCRATCH->border_color.b = 96;
+    MENU_SCRATCH->fill_color.g = 40;
+    MENU_SCRATCH->fill_color.r = 40;
+    MENU_SCRATCH->rect.x = x;
+    MENU_SCRATCH->rect.y = y;
+    MENU_SCRATCH->rect.w = w;
+    MENU_SCRATCH->rect.h = h;
+    MENU_SCRATCH->fill_color.b = 48;
+    MENU_SCRATCH->inner_rect.x = x + 2;
+    MENU_SCRATCH->inner_rect.y = y + 1;
+    MENU_SCRATCH->inner_rect.w = w - 4;
+    MENU_SCRATCH->inner_rect.h = h - 2;
+    ui_fill_rect(&MENU_SCRATCH->inner_rect, &MENU_SCRATCH->fill_color, 1);
     ui_add_draw_mode(2, 0, 0);
-    ui_fill_rect(&MENU_SCRATCH->unk33C, &MENU_SCRATCH->unk338, 1);
+    ui_fill_rect(&MENU_SCRATCH->rect, &MENU_SCRATCH->border_color, 1);
     ui_add_draw_mode(0, 0, 0);
 }
 
@@ -6202,78 +6202,78 @@ void ui_draw_window(short x, short y, short w, short h)
     CVECTOR wash = {48, 48, 48};
     int rows, columns;
 
-    sp->unk33C.w = 16;
-    sp->unk33C.h = 16;
-    sp->unk35C.vx = 544;
-    sp->unk35C.vy = 504;
-    sp->unk358.vx = 612;
-    sp->unk33C.x = x;
-    sp->unk33C.y = y;
-    sp->unk358.vy = 400;
-    ui_draw_image(&sp->unk33C, &sp->unk358, &sp->unk35C, NULL, TILE);
-    sp->unk33C.y = y + h - 16;
-    ui_draw_image(&sp->unk33C, &sp->unk358, &sp->unk35C, NULL, TILE_VFLIP);
-    sp->unk33C.x = x + w - 16;
-    sp->unk33C.y = y;
-    sp->unk358.vx = 620;
-    ui_draw_image(&sp->unk33C, &sp->unk358, &sp->unk35C, NULL, TILE);
-    sp->unk33C.y = y + h - 16;
-    ui_draw_image(&sp->unk33C, &sp->unk358, &sp->unk35C, NULL, TILE_VFLIP);
-    sp->unk33C.x = x;
-    sp->unk33C.y = y + 16;
-    sp->unk358.vx = 604;
-    ui_draw_image(&sp->unk33C, &sp->unk358, &sp->unk35C, NULL, TILE);
-    sp->unk33C.y = y + h - 32;
-    ui_draw_image(&sp->unk33C, &sp->unk358, &sp->unk35C, NULL, TILE_VFLIP);
-    sp->unk33C.x = x + w - 16;
-    sp->unk33C.y = y + 16;
-    sp->unk358.vx = 596;
-    ui_draw_image(&sp->unk33C, &sp->unk358, &sp->unk35C, NULL, TILE);
-    sp->unk33C.y = y + h - 32;
-    ui_draw_image(&sp->unk33C, &sp->unk358, &sp->unk35C, NULL, TILE_VFLIP);
+    sp->rect.w = 16;
+    sp->rect.h = 16;
+    sp->clut_pos.vx = 544;
+    sp->clut_pos.vy = 504;
+    sp->tex_pos.vx = 612;
+    sp->rect.x = x;
+    sp->rect.y = y;
+    sp->tex_pos.vy = 400;
+    ui_draw_image(&sp->rect, &sp->tex_pos, &sp->clut_pos, NULL, TILE);
+    sp->rect.y = y + h - 16;
+    ui_draw_image(&sp->rect, &sp->tex_pos, &sp->clut_pos, NULL, TILE_VFLIP);
+    sp->rect.x = x + w - 16;
+    sp->rect.y = y;
+    sp->tex_pos.vx = 620;
+    ui_draw_image(&sp->rect, &sp->tex_pos, &sp->clut_pos, NULL, TILE);
+    sp->rect.y = y + h - 16;
+    ui_draw_image(&sp->rect, &sp->tex_pos, &sp->clut_pos, NULL, TILE_VFLIP);
+    sp->rect.x = x;
+    sp->rect.y = y + 16;
+    sp->tex_pos.vx = 604;
+    ui_draw_image(&sp->rect, &sp->tex_pos, &sp->clut_pos, NULL, TILE);
+    sp->rect.y = y + h - 32;
+    ui_draw_image(&sp->rect, &sp->tex_pos, &sp->clut_pos, NULL, TILE_VFLIP);
+    sp->rect.x = x + w - 16;
+    sp->rect.y = y + 16;
+    sp->tex_pos.vx = 596;
+    ui_draw_image(&sp->rect, &sp->tex_pos, &sp->clut_pos, NULL, TILE);
+    sp->rect.y = y + h - 32;
+    ui_draw_image(&sp->rect, &sp->tex_pos, &sp->clut_pos, NULL, TILE_VFLIP);
 
-    sp->unk33C.y = y + 32;
-    sp->unk33C.x = x;
-    sp->unk358.vx = 624;
+    sp->rect.y = y + 32;
+    sp->rect.x = x;
+    sp->tex_pos.vx = 624;
     rows = h / 16 - 4;
     while (rows--) {
-        sp->unk33C.x = x;
-        ui_draw_image(&sp->unk33C, &sp->unk358, &sp->unk35C, NULL, TILE_HFLIP);
-        sp->unk33C.x = x + w - 16;
-        ui_draw_image(&sp->unk33C, &sp->unk358, &sp->unk35C, NULL, TILE);
-        sp->unk33C.y += 16;
+        sp->rect.x = x;
+        ui_draw_image(&sp->rect, &sp->tex_pos, &sp->clut_pos, NULL, TILE_HFLIP);
+        sp->rect.x = x + w - 16;
+        ui_draw_image(&sp->rect, &sp->tex_pos, &sp->clut_pos, NULL, TILE);
+        sp->rect.y += 16;
     }
-    sp->unk33C.x = x + 16;
-    sp->unk358.vx = 616;
+    sp->rect.x = x + 16;
+    sp->tex_pos.vx = 616;
     columns = w / 16 - 2;
     while (columns--) {
-        sp->unk33C.y = y;
-        ui_draw_image(&sp->unk33C, &sp->unk358, &sp->unk35C, NULL, TILE);
-        sp->unk33C.y = y + h - 16;
-        ui_draw_image(&sp->unk33C, &sp->unk358, &sp->unk35C, NULL, TILE_VFLIP);
-        sp->unk33C.x += 16;
+        sp->rect.y = y;
+        ui_draw_image(&sp->rect, &sp->tex_pos, &sp->clut_pos, NULL, TILE);
+        sp->rect.y = y + h - 16;
+        ui_draw_image(&sp->rect, &sp->tex_pos, &sp->clut_pos, NULL, TILE_VFLIP);
+        sp->rect.x += 16;
     }
-    sp->unk33C.x = x + 16;
-    sp->unk358.vx = 608;
+    sp->rect.x = x + 16;
+    sp->tex_pos.vx = 608;
     columns = w / 16 - 2;
     while (columns--) {
-        sp->unk33C.y = y + 16;
-        ui_draw_image(&sp->unk33C, &sp->unk358, &sp->unk35C, NULL, TILE);
-        sp->unk33C.y = y + h - 32;
-        ui_draw_image(&sp->unk33C, &sp->unk358, &sp->unk35C, NULL, TILE_VFLIP);
-        sp->unk33C.x += 16;
+        sp->rect.y = y + 16;
+        ui_draw_image(&sp->rect, &sp->tex_pos, &sp->clut_pos, NULL, TILE);
+        sp->rect.y = y + h - 32;
+        ui_draw_image(&sp->rect, &sp->tex_pos, &sp->clut_pos, NULL, TILE_VFLIP);
+        sp->rect.x += 16;
     }
-    sp->unk33C.y = y + 32;
-    sp->unk358.vx = 600;
+    sp->rect.y = y + 32;
+    sp->tex_pos.vx = 600;
     rows = h / 16 - 4;
     while (rows--) {
-        sp->unk33C.x = x + 16;
+        sp->rect.x = x + 16;
         columns = w / 16 - 2;
         while (columns--) {
-            ui_draw_image(&sp->unk33C, &sp->unk358, &sp->unk35C, NULL, TILE);
-            sp->unk33C.x += 16;
+            ui_draw_image(&sp->rect, &sp->tex_pos, &sp->clut_pos, NULL, TILE);
+            sp->rect.x += 16;
         }
-        sp->unk33C.y += 16;
+        sp->rect.y += 16;
     }
     r.x = x;
     r.y = y;
@@ -6367,17 +6367,17 @@ void menu_main_draw(void)
     ui_draw_number_fixed(viewer.weapon_attack[0] | DIGITS(3), 127, 160, &sp->style[0]);
     ui_draw_number_fixed(viewer.weapon_attack[1] | DIGITS(3), 127, 176, &sp->style[0]);
     ui_draw_number_fixed(viewer.weapon_attack[2] | DIGITS(3), 127, 192, &sp->style[0]);
-    sp->unk358.vx = 622;
-    sp->unk358.vy = 416;
-    sp->unk35C.vx = 544;
-    sp->unk35C.vy = 511;
-    sp->unk33C.x = 196;
-    sp->unk33C.y = 54;
-    sp->unk33C.w = 72;
-    sp->unk33C.h = 24;
-    ui_draw_image(&sp->unk33C, &sp->unk358, &sp->unk35C, NULL, 1);
+    sp->tex_pos.vx = 622;
+    sp->tex_pos.vy = 416;
+    sp->clut_pos.vx = 544;
+    sp->clut_pos.vy = 511;
+    sp->rect.x = 196;
+    sp->rect.y = 54;
+    sp->rect.w = 72;
+    sp->rect.h = 24;
+    ui_draw_image(&sp->rect, &sp->tex_pos, &sp->clut_pos, NULL, 1);
     for (; i < 8; i++) {
-        if (i == (s16)sp->unk2DE)
+        if (i == (s16)sp->main_row)
             ui_draw_gouraud_quad(row, lit, 1);
         else
             ui_draw_gouraud_quad(row, dim, 1);
@@ -6395,7 +6395,7 @@ ADDRESS(0x8002a1d0, 0x3d4)
 void menu_use_item_draw(void)
 {
     MenuScratch *sp = MENU_SCRATCH;
-    int id = sp->unk0.page_list.entries[sp->unk2E2 + sp->unk2E0];
+    int id = sp->state.page_list.entries[sp->scroll + sp->cursor];
     int entry;
     int rows;
     int i;
@@ -6411,53 +6411,53 @@ void menu_use_item_draw(void)
     sp->style[2].cd = 57;
     sp->style[0].cd = 57;
     sp->style[4].cd = 41;
-    if (sp->unk2E4 < 16)
-        sp->unk360 = 8 - sp->unk2E4;
+    if (sp->blink_phase < 16)
+        sp->blink_level = 8 - sp->blink_phase;
     else
-        sp->unk360 = sp->unk2E4 - 24;
-    sp->unk330.x = 23;
-    sp->unk330.w = 276;
-    red = (u8)sp->unk360 * 4 + 96;
-    sp->unk32C.b = 0;
-    green = (u8)sp->unk360 * 2 + 48;
-    sp->unk330.h = 26;
-    sp->unk32C.r = red;
-    sp->unk32C.g = green;
-    sp->unk330.y = sp->unk2E0 * 26 + 69;
-    ui_draw_rect_outline(&sp->unk330, &sp->unk32C, 257, 1);
+        sp->blink_level = sp->blink_phase - 24;
+    sp->cursor_rect.x = 23;
+    sp->cursor_rect.w = 276;
+    red = (u8)sp->blink_level * 4 + 96;
+    sp->cursor_color.b = 0;
+    green = (u8)sp->blink_level * 2 + 48;
+    sp->cursor_rect.h = 26;
+    sp->cursor_color.r = red;
+    sp->cursor_color.g = green;
+    sp->cursor_rect.y = sp->cursor * 26 + 69;
+    ui_draw_rect_outline(&sp->cursor_rect, &sp->cursor_color, 257, 1);
     ui_add_draw_mode(1, 0, 0);
-    sp->unk350.x = 24;
-    sp->unk350.y = 70;
-    sp->unk350.w = 24;
-    sp->unk350.h = 24;
+    sp->image_rect.x = 24;
+    sp->image_rect.y = 70;
+    sp->image_rect.w = 24;
+    sp->image_rect.h = 24;
     rows = 5;
-    if (sp->unk0.page_list.count < 6)
-        rows = sp->unk0.page_list.count;
+    if (sp->state.page_list.count < 6)
+        rows = sp->state.page_list.count;
     sp->style[0].cd |= 0x80;
-    if (sp->unk2E0 < rows)
-        ui_draw_text(MESSAGE_IN(sp->unk0.page_list.messages, 0x176 + id), 32, 208, &sp->style[0]);
+    if (sp->cursor < rows)
+        ui_draw_text(MESSAGE_IN(sp->state.page_list.messages, 0x176 + id), 32, 208, &sp->style[0]);
     for (i = 0; i < rows; i++) {
-        entry = sp->unk0.page_list.entries[sp->unk2E2 + i];
-        ui_draw_text(MESSAGE_IN(sp->unk0.page_list.messages, entry), 54, i * 26 + 76, &sp->style[0]);
+        entry = sp->state.page_list.entries[sp->scroll + i];
+        ui_draw_text(MESSAGE_IN(sp->state.page_list.messages, entry), 54, i * 26 + 76, &sp->style[0]);
         ui_draw_number(inventory.counts[entry].count | DIGITS(2), 274, i * 26 + 76, &sp->style[4]);
-        ui_draw_image(&sp->unk350, &sp->unk0.icons[(sp->unk2E2 + i) % 5 + 1], NULL, NULL, 16);
-        sp->unk350.y += 26;
+        ui_draw_image(&sp->image_rect, &sp->state.icons[(sp->scroll + i) % 5 + 1], NULL, NULL, 16);
+        sp->image_rect.y += 26;
     }
-    sp->unk35C.vx = 544;
-    sp->unk35C.vy = 511;
-    sp->unk33C.x = 70;
-    sp->unk33C.y = 44;
-    sp->unk33C.w = 35;
-    sp->unk33C.h = 16;
-    sp->unk358.vx = 624;
-    sp->unk358.vy = 448;
+    sp->clut_pos.vx = 544;
+    sp->clut_pos.vy = 511;
+    sp->rect.x = 70;
+    sp->rect.y = 44;
+    sp->rect.w = 35;
+    sp->rect.h = 16;
+    sp->tex_pos.vx = 624;
+    sp->tex_pos.vy = 448;
     sp->style[0].cd &= 0x7f;
-    ui_draw_image(&sp->unk33C, &sp->unk358, &sp->unk35C, NULL, 3);
-    sp->unk358.vx = 633;
-    sp->unk33C.x = 32;
-    sp->unk358.vy = 448;
-    sp->unk33C.w = 30;
-    ui_draw_image(&sp->unk33C, &sp->unk358, &sp->unk35C, NULL, 3);
+    ui_draw_image(&sp->rect, &sp->tex_pos, &sp->clut_pos, NULL, 3);
+    sp->tex_pos.vx = 633;
+    sp->rect.x = 32;
+    sp->tex_pos.vy = 448;
+    sp->rect.w = 30;
+    ui_draw_image(&sp->rect, &sp->tex_pos, &sp->clut_pos, NULL, 3);
     PAGE_END();
 }
 
@@ -6481,22 +6481,22 @@ void menu_attribute_points_draw(void)
     sp->style[0].cd = 57;
     sp->style[6].cd = 41;
     sp->style[4].cd = 41;
-    sp->unk33C.y = 70;
-    sp->unk33C.w = 10;
-    sp->unk33C.h = 10;
-    sp->unk358.vx = 597;
-    sp->unk358.vy = 433;
-    sp->unk35C.vx = 544;
-    sp->unk35C.vy = 502;
+    sp->rect.y = 70;
+    sp->rect.w = 10;
+    sp->rect.h = 10;
+    sp->tex_pos.vx = 597;
+    sp->tex_pos.vy = 433;
+    sp->clut_pos.vx = 544;
+    sp->clut_pos.vy = 502;
     for (i = 0; i < 7; i++) {
-        if (sp->unk0.stats.selected == i) {
+        if (sp->state.stats.selected == i) {
             left = &sp->style[2];
             left_num = &sp->style[6];
         } else {
             left = &sp->style[0];
             left_num = &sp->style[4];
         }
-        if (sp->unk0.stats.selected == i + 7) {
+        if (sp->state.stats.selected == i + 7) {
             right = &sp->style[2];
             right_num = &sp->style[6];
         } else {
@@ -6505,33 +6505,33 @@ void menu_attribute_points_draw(void)
         }
         ui_draw_text(MESSAGE(0x212 + i), 46, i * 20 + 68, left);
         ui_draw_text(MESSAGE(0x219 + i), 170, i * 20 + 68, right);
-        ui_draw_number((sp->unk0.stats.base[0][i] + sp->unk0.stats.bonus[0][i]) | DIGITS(3), 108, i * 20 + 68, left_num);
-        ui_draw_number((sp->unk0.stats.base[1][i] + sp->unk0.stats.bonus[1][i]) | DIGITS(3), 232, i * 20 + 68, right_num);
-        sp->unk33C.x = 141;
-        ui_draw_image(&sp->unk33C, &sp->unk358, &sp->unk35C, left, 3);
-        sp->unk33C.x = 265;
-        ui_draw_image(&sp->unk33C, &sp->unk358, &sp->unk35C, right, 3);
-        sp->unk33C.y += 20;
+        ui_draw_number((sp->state.stats.base[0][i] + sp->state.stats.bonus[0][i]) | DIGITS(3), 108, i * 20 + 68, left_num);
+        ui_draw_number((sp->state.stats.base[1][i] + sp->state.stats.bonus[1][i]) | DIGITS(3), 232, i * 20 + 68, right_num);
+        sp->rect.x = 141;
+        ui_draw_image(&sp->rect, &sp->tex_pos, &sp->clut_pos, left, 3);
+        sp->rect.x = 265;
+        ui_draw_image(&sp->rect, &sp->tex_pos, &sp->clut_pos, right, 3);
+        sp->rect.y += 20;
     }
     sp->style[0].r = sp->style[4].r = 72;
     sp->style[0].g = sp->style[4].g = 72;
     sp->style[0].b = sp->style[4].b = 72;
     ui_draw_text(MESSAGE(0x220), 56, 208, &sp->style[0]);
-    ui_draw_number(sp->unk0.stats.value | DIGITS(2), 242, 208, &sp->style[4]);
-    sp->unk35C.vx = 544;
-    sp->unk35C.vy = 511;
-    sp->unk33C.x = 70;
-    sp->unk33C.y = 44;
-    sp->unk33C.w = 76;
-    sp->unk33C.h = 16;
-    sp->unk358.vx = 621;
-    sp->unk358.vy = 480;
-    ui_draw_image(&sp->unk33C, &sp->unk358, &sp->unk35C, NULL, 3);
-    sp->unk358.vx = 633;
-    sp->unk358.vy = 448;
-    sp->unk33C.x = 32;
-    sp->unk33C.w = 30;
-    ui_draw_image(&sp->unk33C, &sp->unk358, &sp->unk35C, NULL, 3);
+    ui_draw_number(sp->state.stats.value | DIGITS(2), 242, 208, &sp->style[4]);
+    sp->clut_pos.vx = 544;
+    sp->clut_pos.vy = 511;
+    sp->rect.x = 70;
+    sp->rect.y = 44;
+    sp->rect.w = 76;
+    sp->rect.h = 16;
+    sp->tex_pos.vx = 621;
+    sp->tex_pos.vy = 480;
+    ui_draw_image(&sp->rect, &sp->tex_pos, &sp->clut_pos, NULL, 3);
+    sp->tex_pos.vx = 633;
+    sp->tex_pos.vy = 448;
+    sp->rect.x = 32;
+    sp->rect.w = 30;
+    ui_draw_image(&sp->rect, &sp->tex_pos, &sp->clut_pos, NULL, 3);
     PAGE_END();
 }
 
@@ -6564,9 +6564,9 @@ void menu_area_info_draw(void)
 
     gfx_begin_frame();
     if (area_info_blink < 16)
-        sp->unk360 = 8 - area_info_blink;
+        sp->blink_level = 8 - area_info_blink;
     else
-        sp->unk360 = area_info_blink - 24;
+        sp->blink_level = area_info_blink - 24;
     sp->style[0].r = sp->style[4].r = 72;
     sp->style[0].g = sp->style[4].g = 72;
     sp->style[0].b = sp->style[4].b = 72;
@@ -6577,16 +6577,16 @@ void menu_area_info_draw(void)
     sp->style[0].cd = 57;
     sp->style[6].cd = 41;
     sp->style[4].cd = 41;
-    sp->unk32C.b = 0;
-    sp->unk32C.r = (u8)sp->unk360 * 4 + 96;
-    sp->unk32C.g = (u8)sp->unk360 * 4 + 48;
+    sp->cursor_color.b = 0;
+    sp->cursor_color.r = (u8)sp->blink_level * 4 + 96;
+    sp->cursor_color.g = (u8)sp->blink_level * 4 + 48;
     if (area_info_list_shown != 0) {
         for (i = 0; i < 10; i++) {
-            id = sp->unk0.map.ids[i];
+            id = sp->state.map.ids[i];
             if (id >= 90) {
                 if (id == 99)
                     ui_draw_text(MESSAGE(0x269), 53, i * 16 + 54, &sp->style[0]);
-                else if (id == sp->unk0.map.current)
+                else if (id == sp->state.map.current)
                     ui_draw_text(MESSAGE(0x208 + id), 53, i * 16 + 54, &sp->style[2]);
                 else
                     ui_draw_text(MESSAGE(0x208 + id), 53, i * 16 + 54, &sp->style[0]);
@@ -6594,12 +6594,12 @@ void menu_area_info_draw(void)
                 ui_draw_text(MESSAGE(0x26a), 67, i * 16 + 54, &sp->style[0]);
             } else if (id == area_state.area) {
                 ui_draw_text(MESSAGE(0x2bc + id), 67, i * 16 + 54, &sp->style[2]);
-                ui_draw_number(game_progress.unk16E4[sp->unk0.map.ids[i]] * 100 / total[sp->unk0.map.ids[i]] | DIGITS(3),
+                ui_draw_number(game_progress.area_kills[sp->state.map.ids[i]] * 100 / total[sp->state.map.ids[i]] | DIGITS(3),
                               223, i * 16 + 54, &sp->style[6]);
                 ui_draw_glyph(80, 256, i * 16 + 54, &sp->style[2]);
             } else {
                 ui_draw_text(MESSAGE(0x2bc + id), 67, i * 16 + 54, &sp->style[0]);
-                ui_draw_number(game_progress.unk16E4[sp->unk0.map.ids[i]] * 100 / total[sp->unk0.map.ids[i]] | DIGITS(3),
+                ui_draw_number(game_progress.area_kills[sp->state.map.ids[i]] * 100 / total[sp->state.map.ids[i]] | DIGITS(3),
                               223, i * 16 + 54, &sp->style[4]);
                 ui_draw_glyph(80, 256, i * 16 + 54, &sp->style[0]);
             }
@@ -6608,8 +6608,8 @@ void menu_area_info_draw(void)
         ui_draw_text(MESSAGE(0x258), 72, 53, &sp->style[2]);
         for (i = 1; i < 5; i++)
             ui_draw_text(MESSAGE(0x258 + i), 72, i * 30 + 63, &sp->style[2]);
-        if (sp->unk0.map.current != -1) {
-            ui_draw_text(MESSAGE(0x208 + sp->unk0.map.current), 86, 66, &sp->style[0]);
+        if (sp->state.map.current != -1) {
+            ui_draw_text(MESSAGE(0x208 + sp->state.map.current), 86, 66, &sp->style[0]);
             ui_draw_text(MESSAGE(0x2bc + area_state.area), name_x[area_state.area] + 100, 79,
                           &sp->style[0]);
         } else {
@@ -6641,33 +6641,33 @@ void menu_area_info_draw(void)
     arrow.b = arrow.g = arrow.r = level * 4 + 96;
     if (area_info_list_shown != 0) {
         if (DAT_8008818c != 0) {
-            sp->unk33C.x = 160;
-            sp->unk33C.y = 43;
-            sp->unk33C.w = 16;
-            sp->unk33C.h = 8;
-            ui_draw_arrow(&sp->unk33C, &sp->unk32C, 3072);
+            sp->rect.x = 160;
+            sp->rect.y = 43;
+            sp->rect.w = 16;
+            sp->rect.h = 8;
+            ui_draw_arrow(&sp->rect, &sp->cursor_color, 3072);
         }
         if (DAT_8008818c != 25) {
-            sp->unk33C.x = 160;
-            sp->unk33C.y = 220;
-            sp->unk33C.w = 16;
-            sp->unk33C.h = 8;
-            ui_draw_arrow(&sp->unk33C, &sp->unk32C, 1024);
+            sp->rect.x = 160;
+            sp->rect.y = 220;
+            sp->rect.w = 16;
+            sp->rect.h = 8;
+            ui_draw_arrow(&sp->rect, &sp->cursor_color, 1024);
         }
     }
-    sp->unk33C.x = 28;
-    sp->unk33C.y = 48;
-    sp->unk33C.w = 264;
-    sp->unk33C.h = 168;
-    sp->unk338.r = 80;
-    sp->unk338.g = 88;
-    sp->unk338.b = 96;
+    sp->rect.x = 28;
+    sp->rect.y = 48;
+    sp->rect.w = 264;
+    sp->rect.h = 168;
+    sp->border_color.r = 80;
+    sp->border_color.g = 88;
+    sp->border_color.b = 96;
     if (area_info_list_shown != 0)
-        ui_draw_arrow(&prev, &sp->unk32C, 2048);
+        ui_draw_arrow(&prev, &sp->cursor_color, 2048);
     else
-        ui_draw_arrow(&next, &sp->unk32C, 0);
+        ui_draw_arrow(&next, &sp->cursor_color, 0);
     ui_add_draw_mode(1, 0, 0);
-    ui_draw_rect_outline(&sp->unk33C, &sp->unk338, 257, 1);
+    ui_draw_rect_outline(&sp->rect, &sp->border_color, 257, 1);
     PAGE_END();
 }
 
@@ -6706,22 +6706,22 @@ void menu_options_draw(void)
     sp->style[3].cd = 57;
     sp->style[2].cd = 57;
     sp->style[0].cd = 57;
-    sp->unk358.vx = 600;
-    sp->unk358.vy = 416;
-    sp->unk35C.vx = 544;
-    sp->unk35C.vy = 511;
-    sp->unk33C.y = 83;
-    sp->unk33C.w = 5;
-    sp->unk33C.h = 5;
-    sp->unk33C.x = game_settings.sfx_volume * 83 / 63 + 180;
-    ui_draw_image(&sp->unk33C, &sp->unk358, &sp->unk35C, NULL, 0);
-    sp->unk358.vx = 576;
-    sp->unk33C.x = 176;
-    sp->unk33C.y = 78;
-    sp->unk33C.w = 96;
-    sp->unk33C.h = 14;
-    sp->unk358.vy = 416;
-    ui_draw_image(&sp->unk33C, &sp->unk358, &sp->unk35C, NULL, 1);
+    sp->tex_pos.vx = 600;
+    sp->tex_pos.vy = 416;
+    sp->clut_pos.vx = 544;
+    sp->clut_pos.vy = 511;
+    sp->rect.y = 83;
+    sp->rect.w = 5;
+    sp->rect.h = 5;
+    sp->rect.x = game_settings.sfx_volume * 83 / 63 + 180;
+    ui_draw_image(&sp->rect, &sp->tex_pos, &sp->clut_pos, NULL, 0);
+    sp->tex_pos.vx = 576;
+    sp->rect.x = 176;
+    sp->rect.y = 78;
+    sp->rect.w = 96;
+    sp->rect.h = 14;
+    sp->tex_pos.vy = 416;
+    ui_draw_image(&sp->rect, &sp->tex_pos, &sp->clut_pos, NULL, 1);
     for (i = 0; i < 6; y += 20, i++)
         ui_draw_text(MESSAGE(0xc9 + i), label_x[i] + 32, y, &sp->style[2]);
     for (on = &game_settings.walk_bob, i = 1; i < 5; on++, i++) {
@@ -6734,18 +6734,18 @@ void menu_options_draw(void)
         }
     }
     ui_draw_number_fixed(game_settings.sfx_volume | DIGITS(2), 280, 80, &sp->style[0]);
-    ui_draw_text(MESSAGE(0xe0 + sp->unk2E0), 64, 208, &sp->style[0]);
-    sp->unk358.vx = 596;
-    sp->unk358.vy = 448;
-    sp->unk35C.vx = 544;
-    sp->unk35C.vy = 511;
-    sp->unk33C.x = 32;
-    sp->unk33C.y = 44;
-    sp->unk33C.w = 70;
-    sp->unk33C.h = 16;
-    ui_draw_image(&sp->unk33C, &sp->unk358, &sp->unk35C, NULL, 3);
+    ui_draw_text(MESSAGE(0xe0 + sp->cursor), 64, 208, &sp->style[0]);
+    sp->tex_pos.vx = 596;
+    sp->tex_pos.vy = 448;
+    sp->clut_pos.vx = 544;
+    sp->clut_pos.vy = 511;
+    sp->rect.x = 32;
+    sp->rect.y = 44;
+    sp->rect.w = 70;
+    sp->rect.h = 16;
+    ui_draw_image(&sp->rect, &sp->tex_pos, &sp->clut_pos, NULL, 3);
     for (i = 0; i < 6; i++) {
-        if (i == sp->unk2E0)
+        if (i == sp->cursor)
             ui_draw_gouraud_quad(row, lit, 1);
         else
             ui_draw_gouraud_quad(row, dim, 1);
@@ -6786,77 +6786,77 @@ void menu_button_config_draw(void)
     sp->style[3].r = 96;
     sp->style[3].b = sp->style[3].g = 32;
     sp->style[0].cd = sp->style[2].cd = sp->style[3].cd = 57;
-    if (sp->unk2E4 < 16)
-        sp->unk360 = 8 - sp->unk2E4;
+    if (sp->blink_phase < 16)
+        sp->blink_level = 8 - sp->blink_phase;
     else
-        sp->unk360 = sp->unk2E4 - 24;
-    if (sp->unk2E2 == 1) {
-        sp->unk32C.b = 0;
-        lit[2].r += (u8)sp->unk360 * 8;
-        lit[2].g += (u8)sp->unk360 * 4;
-        lit[3].r += (u8)sp->unk360 * 8;
-        lit[3].g += (u8)sp->unk360 * 4;
-        sp->unk32C.r = (u8)sp->unk360 * 4 + 96;
-        sp->unk32C.g = (u8)sp->unk360 * 2 + 48;
+        sp->blink_level = sp->blink_phase - 24;
+    if (sp->scroll == 1) {
+        sp->cursor_color.b = 0;
+        lit[2].r += (u8)sp->blink_level * 8;
+        lit[2].g += (u8)sp->blink_level * 4;
+        lit[3].r += (u8)sp->blink_level * 8;
+        lit[3].g += (u8)sp->blink_level * 4;
+        sp->cursor_color.r = (u8)sp->blink_level * 4 + 96;
+        sp->cursor_color.g = (u8)sp->blink_level * 2 + 48;
     } else {
-        sp->unk32C = sp->style[2];
+        sp->cursor_color = sp->style[2];
     }
     mask = pad_state.buttons;
     for (i = 0; i < 6; i++) {
-        if (mask[i] & sp->unk0.levels.flags)
+        if (mask[i] & sp->state.levels.flags)
             ui_draw_text(MESSAGE(209 + i), label_x[i] + 32, i * 18 + 80, &sp->style[3]);
         else
             ui_draw_text(MESSAGE(209 + i), label_x[i] + 32, i * 18 + 80, &sp->style[2]);
     }
     mask = &pad_state.buttons[6];
     for (i = 0; i < 6; i++) {
-        if (mask[i] & sp->unk0.levels.flags)
+        if (mask[i] & sp->state.levels.flags)
             ui_draw_text(MESSAGE(215 + i), label_x[i + 6] + 168, i * 18 + 80, &sp->style[3]);
         else
             ui_draw_text(MESSAGE(215 + i), label_x[i + 6] + 168, i * 18 + 80, &sp->style[2]);
     }
-    sp->unk358.vy = 384;
-    sp->unk35C.vx = 544;
+    sp->tex_pos.vy = 384;
+    sp->clut_pos.vx = 544;
     for (i = 0; i < 12; i++) {
-        sp->unk33C.x = i < 6 ? 138 : 274;
-        sp->unk33C.y = i % 6 * 18 + 79;
-        if (sp->unk0.levels.level[i] >= 8) {
-            sp->unk358.vx = sp->unk0.levels.level[i] * 8 + 544;
-            sp->unk33C.w = 32;
-            sp->unk35C.vy = 506;
-            sp->unk33C.x -= 8;
+        sp->rect.x = i < 6 ? 138 : 274;
+        sp->rect.y = i % 6 * 18 + 79;
+        if (sp->state.levels.level[i] >= 8) {
+            sp->tex_pos.vx = sp->state.levels.level[i] * 8 + 544;
+            sp->rect.w = 32;
+            sp->clut_pos.vy = 506;
+            sp->rect.x -= 8;
         } else {
-            sp->unk358.vx = sp->unk0.levels.level[i] * 4 + 576;
-            sp->unk33C.w = 16;
-            if (sp->unk0.levels.level[i] < 4)
-                sp->unk35C.vy = 510 - sp->unk0.levels.level[i];
+            sp->tex_pos.vx = sp->state.levels.level[i] * 4 + 576;
+            sp->rect.w = 16;
+            if (sp->state.levels.level[i] < 4)
+                sp->clut_pos.vy = 510 - sp->state.levels.level[i];
             else
-                sp->unk35C.vy = 506;
+                sp->clut_pos.vy = 506;
         }
-        sp->unk338.r = sp->unk338.g = sp->unk338.b = (u8)sp->unk360 * 4 - 128;
-        if (i == sp->unk2E0 && sp->unk2E2 == 1)
-            ui_draw_image(&sp->unk33C, &sp->unk358, &sp->unk35C, &sp->unk338, 0);
+        sp->border_color.r = sp->border_color.g = sp->border_color.b = (u8)sp->blink_level * 4 - 128;
+        if (i == sp->cursor && sp->scroll == 1)
+            ui_draw_image(&sp->rect, &sp->tex_pos, &sp->clut_pos, &sp->border_color, 0);
         else
-            ui_draw_image(&sp->unk33C, &sp->unk358, &sp->unk35C, NULL, 0);
+            ui_draw_image(&sp->rect, &sp->tex_pos, &sp->clut_pos, NULL, 0);
     }
-    sp->unk358.vx = 576;
-    sp->unk358.vy = 432;
-    sp->unk35C.vx = 544;
-    sp->unk35C.vy = 511;
-    sp->unk33C.x = 32;
-    sp->unk33C.y = 44;
-    sp->unk33C.w = 60;
-    sp->unk33C.h = 16;
-    ui_draw_image(&sp->unk33C, &sp->unk358, &sp->unk35C, NULL, 3);
-    sp->unk358.vx = 590;
-    sp->unk358.vy = 480;
-    sp->unk35C.vx = 544;
-    sp->unk35C.vy = 511;
-    sp->unk33C.x = 96;
-    sp->unk33C.y = 44;
-    sp->unk33C.w = 120;
-    sp->unk33C.h = 16;
-    ui_draw_image(&sp->unk33C, &sp->unk358, &sp->unk35C, NULL, 3);
+    sp->tex_pos.vx = 576;
+    sp->tex_pos.vy = 432;
+    sp->clut_pos.vx = 544;
+    sp->clut_pos.vy = 511;
+    sp->rect.x = 32;
+    sp->rect.y = 44;
+    sp->rect.w = 60;
+    sp->rect.h = 16;
+    ui_draw_image(&sp->rect, &sp->tex_pos, &sp->clut_pos, NULL, 3);
+    sp->tex_pos.vx = 590;
+    sp->tex_pos.vy = 480;
+    sp->clut_pos.vx = 544;
+    sp->clut_pos.vy = 511;
+    sp->rect.x = 96;
+    sp->rect.y = 44;
+    sp->rect.w = 120;
+    sp->rect.h = 16;
+    ui_draw_image(&sp->rect, &sp->tex_pos, &sp->clut_pos, NULL, 3);
     ui_draw_text(MESSAGE(221), label_x[12] + 48, 204, &sp->style[2]);
     ui_draw_text(MESSAGE(222), label_x[13] + 152, 204, &sp->style[2]);
     for (i = 0; i < 12; i++) {
@@ -6868,7 +6868,7 @@ void menu_button_config_draw(void)
             row[3].vx = 266;
             row[2].vy = row[3].vy = 94;
         }
-        if (i == sp->unk2E0)
+        if (i == sp->cursor)
             ui_draw_gouraud_quad(row, lit, 1);
         else
             ui_draw_gouraud_quad(row, dim, 1);
@@ -6883,7 +6883,7 @@ void menu_button_config_draw(void)
     row[2].vx = 48;
     row[3].vx = 146;
     row[2].vy = row[3].vy = 218;
-    if (sp->unk2E0 == 12)
+    if (sp->cursor == 12)
         ui_draw_gouraud_quad(row, lit, 1);
     else
         ui_draw_gouraud_quad(row, dim, 1);
@@ -6894,7 +6894,7 @@ void menu_button_config_draw(void)
     row[2].vx = 152;
     row[3].vx = 250;
     row[2].vy = row[3].vy = 218;
-    if (sp->unk2E0 == 13)
+    if (sp->cursor == 13)
         ui_draw_gouraud_quad(row, lit, 1);
     else
         ui_draw_gouraud_quad(row, dim, 1);
@@ -6921,14 +6921,14 @@ void card_draw_port_choice(void)
     MenuScratch *sp = MENU_SCRATCH;
     short i;
 
-    sp->unk330.x = 94;
-    sp->unk330.w = 138;
-    sp->unk330.h = 17;
-    if (sp->unk1F8 == 0)
-        sp->unk330.y = 108;
+    sp->cursor_rect.x = 94;
+    sp->cursor_rect.w = 138;
+    sp->cursor_rect.h = 17;
+    if (sp->port == 0)
+        sp->cursor_rect.y = 108;
     else
-        sp->unk330.y = 132;
-    ui_draw_rect_outline(&sp->unk330, &sp->unk32C, 257, 1);
+        sp->cursor_rect.y = 132;
+    ui_draw_rect_outline(&sp->cursor_rect, &sp->cursor_color, 257, 1);
     ui_add_draw_mode(1, 0, 0);
     for (i = 0; i < 7; i++) {
         file_row_clipped[i] = 0;
@@ -6943,9 +6943,9 @@ void card_draw_format_prompt(void)
 {
     MenuScratch *sp = MENU_SCRATCH;
 
-    if (sp->unk0.half[1] == 0) {
+    if (sp->state.half[1] == 0) {
         ui_draw_text(MESSAGE(311), 32, 74, &sp->style[0]);
-        if (sp->unk202) {
+        if (sp->dialog_choice) {
             ui_draw_text(MESSAGE(325), 121, 160, &sp->style[2]);
             ui_draw_text(MESSAGE(326), 191, 160, &sp->style[0]);
         } else {
@@ -6977,12 +6977,12 @@ void card_draw_file_list(void)
     int id;
     int n, i;
 
-    sp->unk338.r = sp->unk338.g = sp->unk338.b = 64;
-    if (sp->unk0.half[1] == 1) {
-        id = (sp->unk2DC & 0xff) ? 323 : 324;
+    sp->border_color.r = sp->border_color.g = sp->border_color.b = 64;
+    if (sp->state.half[1] == 1) {
+        id = (sp->mode & 0xff) ? 323 : 324;
         ui_draw_text(MESSAGE(id), 68, 128, &sp->style[0]);
         sp->style[0].b = sp->style[0].g = sp->style[0].r = 24;
-        if (sp->unk202) {
+        if (sp->dialog_choice) {
             ui_draw_text(MESSAGE(325), 120, 150, &sp->style[2]);
             ui_draw_text(MESSAGE(326), 190, 150, &sp->style[0]);
         } else {
@@ -6990,73 +6990,73 @@ void card_draw_file_list(void)
             ui_draw_text(MESSAGE(326), 190, 150, &sp->style[2]);
         }
         sp->style[0].b = sp->style[0].g = sp->style[0].r = 72;
-        sp->unk33C.x = 60;
-        sp->unk33C.y = 120;
-        sp->unk33C.w = 200;
-        sp->unk33C.h = 50;
-        sp->unk348.x = 61;
-        sp->unk348.y = 121;
-        sp->unk348.w = 198;
-        sp->unk348.h = 48;
-        sp->unk344.r = sp->unk344.g = sp->unk344.b = 32;
-        ui_fill_rect(&sp->unk348, &sp->unk344, 1);
+        sp->rect.x = 60;
+        sp->rect.y = 120;
+        sp->rect.w = 200;
+        sp->rect.h = 50;
+        sp->inner_rect.x = 61;
+        sp->inner_rect.y = 121;
+        sp->inner_rect.w = 198;
+        sp->inner_rect.h = 48;
+        sp->fill_color.r = sp->fill_color.g = sp->fill_color.b = 32;
+        ui_fill_rect(&sp->inner_rect, &sp->fill_color, 1);
         ui_add_draw_mode(2, 0, 0);
-        ui_fill_rect(&sp->unk33C, &sp->unk338, 0);
+        ui_fill_rect(&sp->rect, &sp->border_color, 0);
     }
-    if (sp->unk1FA >= 4) {
-        if (sp->unk200 > 0) {
-            sp->unk33C.x = 156;
-            sp->unk33C.y = 68;
-            sp->unk33C.w = 16;
-            sp->unk33C.h = 8;
-            ui_draw_arrow(&sp->unk33C, &sp->unk32C, 3072);
+    if (sp->row_count >= 4) {
+        if (sp->first_row > 0) {
+            sp->rect.x = 156;
+            sp->rect.y = 68;
+            sp->rect.w = 16;
+            sp->rect.h = 8;
+            ui_draw_arrow(&sp->rect, &sp->cursor_color, 3072);
             ui_add_draw_mode(1, 0, 0);
         }
-        if (sp->unk200 < sp->unk1FA - 3) {
-            sp->unk33C.x = 156;
-            sp->unk33C.y = 215;
-            sp->unk33C.w = 16;
-            sp->unk33C.h = 8;
-            ui_draw_arrow(&sp->unk33C, &sp->unk32C, 1024);
+        if (sp->first_row < sp->row_count - 3) {
+            sp->rect.x = 156;
+            sp->rect.y = 215;
+            sp->rect.w = 16;
+            sp->rect.h = 8;
+            ui_draw_arrow(&sp->rect, &sp->cursor_color, 1024);
             ui_add_draw_mode(1, 0, 0);
         }
     }
-    sp->unk330.x = 32;
-    sp->unk330.w = 256;
-    sp->unk330.h = 40;
-    sp->unk330.y = sp->unk1FE * 48 + 74;
-    ui_draw_rect_outline(&sp->unk330, &sp->unk32C, 257, 1);
+    sp->cursor_rect.x = 32;
+    sp->cursor_rect.w = 256;
+    sp->cursor_rect.h = 40;
+    sp->cursor_rect.y = sp->file_row * 48 + 74;
+    ui_draw_rect_outline(&sp->cursor_rect, &sp->cursor_color, 257, 1);
     n = 3;
     ui_add_draw_mode(1, 0, 0);
-    sp->unk330.y = 74;
-    if (sp->unk1FA < 3)
-        n = sp->unk1FA;
+    sp->cursor_rect.y = 74;
+    if (sp->row_count < 3)
+        n = sp->row_count;
     for (i = 0; i < n; i++) {
-        if (sp->unk1FC == 1 && i + sp->unk200 == sp->unk1FA - 1) {
-            ui_draw_text(MESSAGE(322), 64, sp->unk330.y + 6, &sp->style[0]);
+        if (sp->has_new_row == 1 && i + sp->first_row == sp->row_count - 1) {
+            ui_draw_text(MESSAGE(322), 64, sp->cursor_rect.y + 6, &sp->style[0]);
         } else {
-            ui_draw_number_fixed((u16)(sp->unk200 + i + 1) | DIGITS(2), 38, sp->unk330.y + 6,
+            ui_draw_number_fixed((u16)(sp->first_row + i + 1) | DIGITS(2), 38, sp->cursor_rect.y + 6,
                           &sp->style[0]);
-            ui_draw_text(MESSAGE(328), 218, sp->unk330.y + 6, &sp->style[0]);
+            ui_draw_text(MESSAGE(328), 218, sp->cursor_rect.y + 6, &sp->style[0]);
             text_scroll_mode = 1;
             text_clip_right = 280;
             text_clip_on = 0;
             text_clip_left = 0;
-            if (titles[sp->unk1F4->files[i + sp->unk200].kind] != -1)
-                ui_draw_text(MESSAGE(610 + titles[sp->unk1F4->files[i + sp->unk200].kind]), 64,
-                              sp->unk330.y + 6, &sp->style[0]);
-            if (titles[sp->unk1F4->files[i + sp->unk200].kind] != -1)
-                ui_draw_text(MESSAGE(700 + sp->unk1F4->files[i + sp->unk200].kind), 64,
-                              sp->unk330.y + 22, &sp->style[0]);
+            if (titles[sp->card->files[i + sp->first_row].area] != -1)
+                ui_draw_text(MESSAGE(610 + titles[sp->card->files[i + sp->first_row].area]), 64,
+                              sp->cursor_rect.y + 6, &sp->style[0]);
+            if (titles[sp->card->files[i + sp->first_row].area] != -1)
+                ui_draw_text(MESSAGE(700 + sp->card->files[i + sp->first_row].area), 64,
+                              sp->cursor_rect.y + 22, &sp->style[0]);
             else
-                ui_draw_text(MESSAGE(700 + sp->unk1F4->files[i + sp->unk200].kind), 64,
-                              sp->unk330.y + 6, &sp->style[0]);
-            ui_draw_number_fixed(sp->unk1F4->files[i + sp->unk200].unk1A | DIGITS(4), 248, sp->unk330.y + 6,
+                ui_draw_text(MESSAGE(700 + sp->card->files[i + sp->first_row].area), 64,
+                              sp->cursor_rect.y + 6, &sp->style[0]);
+            ui_draw_number_fixed(sp->card->files[i + sp->first_row].sp_total | DIGITS(4), 248, sp->cursor_rect.y + 6,
                           &sp->style[0]);
         }
-        file_row_clipped[i + sp->unk200] = text_clip_dropped;
-        ui_draw_rect_outline(&sp->unk330, &sp->unk338, 257, 1);
-        sp->unk330.y += 48;
+        file_row_clipped[i + sp->first_row] = text_clip_dropped;
+        ui_draw_rect_outline(&sp->cursor_rect, &sp->border_color, 257, 1);
+        sp->cursor_rect.y += 48;
     }
     ui_add_draw_mode(1, 0, 0);
 }
@@ -7071,7 +7071,7 @@ void card_draw_transfer(void)
 {
     MenuScratch *sp = MENU_SCRATCH;
 
-    if (sp->unk2DC & 0xff)
+    if (sp->mode & 0xff)
         ui_draw_text(MESSAGE(330), 32, 74, &sp->style[0]);
     else
         ui_draw_text(MESSAGE(331), 32, 74, &sp->style[0]);
@@ -7091,7 +7091,7 @@ void card_draw_message(void)
 {
     MenuScratch *sp = MENU_SCRATCH;
 
-    ui_draw_text(MESSAGE(sp->unk0.half[0]), 60, 114, &sp->style[0]);
+    ui_draw_text(MESSAGE(sp->state.half[0]), 60, 114, &sp->style[0]);
 }
 
 ADDRESS(0x8002c9e8, 0x9c)
@@ -7100,16 +7100,16 @@ void menu_draw_background(void)
     MenuScratch *sp = MENU_SCRATCH;
     int n;
 
-    sp->unk350.w = 128;
-    sp->unk350.h = 240;
-    sp->unk358.vx = 768;
-    sp->unk350.y = 0;
-    sp->unk350.x = 0;
-    sp->unk358.vy = 256;
+    sp->image_rect.w = 128;
+    sp->image_rect.h = 240;
+    sp->tex_pos.vx = 768;
+    sp->image_rect.y = 0;
+    sp->image_rect.x = 0;
+    sp->tex_pos.vy = 256;
     n = 5;
     while (n--) {
-        ui_draw_image(&sp->unk350, &sp->unk358, 0, 0, 16);
-        sp->unk350.x += 128;
+        ui_draw_image(&sp->image_rect, &sp->tex_pos, 0, 0, 16);
+        sp->image_rect.x += 128;
     }
 }
 
@@ -7126,31 +7126,31 @@ void card_screen_draw(void)
     sp->style[3].r = 96;
     sp->style[3].b = sp->style[3].g = 32;
     sp->style[0].cd = sp->style[2].cd = sp->style[3].cd = 57;
-    if (sp->unk2E4 < 16)
-        sp->unk360 = 8 - sp->unk2E4;
+    if (sp->blink_phase < 16)
+        sp->blink_level = 8 - sp->blink_phase;
     else
-        sp->unk360 = sp->unk2E4 - 24;
-    sp->unk358.vx = 576;
-    sp->unk358.vy = 448;
-    sp->unk35C.vx = 544;
-    sp->unk35C.vy = 511;
-    sp->unk33C.x = 81;
-    sp->unk33C.y = 45;
-    sp->unk33C.w = 40;
-    sp->unk33C.h = 16;
-    sp->unk32C.b = 0;
-    sp->unk32C.r = (u8)sp->unk360 * 4 + 96;
-    sp->unk32C.g = (u8)sp->unk360 * 2 + 48;
-    ui_draw_image(&sp->unk33C, &sp->unk358, &sp->unk35C, 0, 3);
-    sp->unk33C.y = 44;
-    if (sp->unk2DC & 0xff)
-        sp->unk358.vx = 586;
+        sp->blink_level = sp->blink_phase - 24;
+    sp->tex_pos.vx = 576;
+    sp->tex_pos.vy = 448;
+    sp->clut_pos.vx = 544;
+    sp->clut_pos.vy = 511;
+    sp->rect.x = 81;
+    sp->rect.y = 45;
+    sp->rect.w = 40;
+    sp->rect.h = 16;
+    sp->cursor_color.b = 0;
+    sp->cursor_color.r = (u8)sp->blink_level * 4 + 96;
+    sp->cursor_color.g = (u8)sp->blink_level * 2 + 48;
+    ui_draw_image(&sp->rect, &sp->tex_pos, &sp->clut_pos, 0, 3);
+    sp->rect.y = 44;
+    if (sp->mode & 0xff)
+        sp->tex_pos.vx = 586;
     else
-        sp->unk358.vx = 613;
-    sp->unk33C.x = 32;
-    sp->unk33C.w = 40;
-    ui_draw_image(&sp->unk33C, &sp->unk358, &sp->unk35C, 0, 3);
-    switch (sp->unk2DC) {
+        sp->tex_pos.vx = 613;
+    sp->rect.x = 32;
+    sp->rect.w = 40;
+    ui_draw_image(&sp->rect, &sp->tex_pos, &sp->clut_pos, 0, 3);
+    switch (sp->mode) {
     case 0x2:
     case 0x200:
         card_draw_port_choice();
@@ -7182,7 +7182,7 @@ void card_screen_draw(void)
     }
     ui_draw_panel(16, 36, 288, 192);
     gfx_flip();
-    if (sp->unk206 == 1)
+    if (sp->show_backdrop == 1)
         menu_draw_backdrop();
     gfx_draw_ot();
 }
@@ -7194,7 +7194,7 @@ void menu_end_game_draw_dialog(void)
 
     ui_draw_text(MESSAGE(400), 76, 92, &sp->style[0]);
     sp->style[0].b = sp->style[0].g = sp->style[0].r = 24;
-    if (sp->unk2E0 == 0) {
+    if (sp->cursor == 0) {
         ui_draw_text(MESSAGE(401), 121, 136, &sp->style[2]);
         ui_draw_text(MESSAGE(402), 189, 136, &sp->style[0]);
     } else {
@@ -7230,18 +7230,18 @@ void menu_game_over_draw(void)
     gfx_begin_frame();
     sp->style[0].b = sp->style[0].g = sp->style[0].r = 96;
     sp->style[0].cd = 49;
-    if (sp->unk2E4 < 16)
-        sp->unk360 = 8 - sp->unk2E4;
+    if (sp->blink_phase < 16)
+        sp->blink_level = 8 - sp->blink_phase;
     else
-        sp->unk360 = sp->unk2E4 - 24;
-    sp->unk32C.r = (u8)sp->unk360 * 4 + 96;
-    sp->unk32C.g = (u8)sp->unk360 * 2 + 48;
-    sp->unk32C.b = 0;
-    sp->unk330.x = 93;
-    sp->unk330.y = sp->unk0.word * 24 + 118;
-    sp->unk330.w = 134;
-    sp->unk330.h = 16;
-    ui_draw_rect_outline(&sp->unk330, &sp->unk32C, 257, 1);
+        sp->blink_level = sp->blink_phase - 24;
+    sp->cursor_color.r = (u8)sp->blink_level * 4 + 96;
+    sp->cursor_color.g = (u8)sp->blink_level * 2 + 48;
+    sp->cursor_color.b = 0;
+    sp->cursor_rect.x = 93;
+    sp->cursor_rect.y = sp->state.word * 24 + 118;
+    sp->cursor_rect.w = 134;
+    sp->cursor_rect.h = 16;
+    ui_draw_rect_outline(&sp->cursor_rect, &sp->cursor_color, 257, 1);
     ui_add_draw_mode(1, 0, 0);
     ui_draw_text(MESSAGE(800), x[0] + 97, 120, &sp->style[0]);
     ui_draw_text(MESSAGE(801), x[1] + 97, 144, &sp->style[0]);
@@ -7263,7 +7263,7 @@ void menu_save_prompt_draw(void)
     sp->style[2].b = 48;
     sp->style[0].cd = sp->style[2].cd = 57;
     ui_draw_text(MESSAGE(850), 92, 120, &sp->style[0]);
-    if (sp->unk2DE == 0) {
+    if (sp->main_row == 0) {
         ui_draw_text(MESSAGE(851), 127, 152, &sp->style[2]);
         ui_draw_text(MESSAGE(852), 183, 152, &sp->style[0]);
     } else {
@@ -7284,64 +7284,64 @@ void shop_draw_header(void)
 {
     MenuScratch *sp = MENU_SCRATCH;
 
-    sp->unk33C.x = 34;
-    sp->unk33C.y = 24;
-    sp->unk33C.h = 16;
-    sp->unk35C.vx = 544;
-    sp->unk35C.vy = 511;
-    if (sp->unk2DC & 0x1) {
-        sp->unk33C.w = 30;
-        sp->unk358.vx = 631;
-        sp->unk358.vy = 464;
-        ui_draw_image(&sp->unk33C, &sp->unk358, &sp->unk35C, NULL, 3);
-        sp->unk33C.w = 35;
-        sp->unk358.vx = 624;
-        sp->unk358.vy = 448;
-        sp->unk33C.x += 37;
-        ui_draw_image(&sp->unk33C, &sp->unk358, &sp->unk35C, NULL, 3);
-    } else if (sp->unk2DC & 0x2) {
-        sp->unk33C.w = 90;
-        sp->unk358.vx = 588;
-        sp->unk358.vy = 464;
-        ui_draw_image(&sp->unk33C, &sp->unk358, &sp->unk35C, NULL, 3);
-        sp->unk33C.x = 153;
-        sp->unk33C.w = 54;
-        sp->unk358.vx = 617;
-        sp->unk358.vy = 464;
-        ui_draw_image(&sp->unk33C, &sp->unk358, &sp->unk35C, NULL, 3);
-        sp->unk33C.x = 131;
-        sp->unk33C.w = 20;
-        sp->unk358.vx = 612;
-        sp->unk358.vy = 464;
-        ui_draw_image(&sp->unk33C, &sp->unk358, &sp->unk35C, NULL, 3);
-    } else if (sp->unk2DC & 0x4) {
-        sp->unk33C.w = 90;
-        sp->unk358.vx = 588;
-        sp->unk358.vy = 464;
-        ui_draw_image(&sp->unk33C, &sp->unk358, &sp->unk35C, NULL, 3);
-        sp->unk33C.x = 153;
-        sp->unk33C.w = 54;
-        sp->unk358.vx = 617;
-        sp->unk358.vy = 464;
-        ui_draw_image(&sp->unk33C, &sp->unk358, &sp->unk35C, NULL, 3);
-        sp->unk33C.x = 130;
-        sp->unk33C.w = 20;
-        sp->unk358.vx = 591;
-        sp->unk358.vy = 432;
-        ui_draw_image(&sp->unk33C, &sp->unk358, &sp->unk35C, NULL, 3);
-    } else if (sp->unk2DC & 0x8) {
-        sp->unk33C.w = 60;
-        sp->unk358.vx = 576;
-        sp->unk358.vy = 480;
-        ui_draw_image(&sp->unk33C, &sp->unk358, &sp->unk35C, NULL, 3);
-        sp->unk33C.w = 36;
-        sp->unk358.vx = 624;
-        sp->unk358.vy = 448;
-        sp->unk33C.x += 63;
-        ui_draw_image(&sp->unk33C, &sp->unk358, &sp->unk35C, NULL, 3);
+    sp->rect.x = 34;
+    sp->rect.y = 24;
+    sp->rect.h = 16;
+    sp->clut_pos.vx = 544;
+    sp->clut_pos.vy = 511;
+    if (sp->mode & 0x1) {
+        sp->rect.w = 30;
+        sp->tex_pos.vx = 631;
+        sp->tex_pos.vy = 464;
+        ui_draw_image(&sp->rect, &sp->tex_pos, &sp->clut_pos, NULL, 3);
+        sp->rect.w = 35;
+        sp->tex_pos.vx = 624;
+        sp->tex_pos.vy = 448;
+        sp->rect.x += 37;
+        ui_draw_image(&sp->rect, &sp->tex_pos, &sp->clut_pos, NULL, 3);
+    } else if (sp->mode & 0x2) {
+        sp->rect.w = 90;
+        sp->tex_pos.vx = 588;
+        sp->tex_pos.vy = 464;
+        ui_draw_image(&sp->rect, &sp->tex_pos, &sp->clut_pos, NULL, 3);
+        sp->rect.x = 153;
+        sp->rect.w = 54;
+        sp->tex_pos.vx = 617;
+        sp->tex_pos.vy = 464;
+        ui_draw_image(&sp->rect, &sp->tex_pos, &sp->clut_pos, NULL, 3);
+        sp->rect.x = 131;
+        sp->rect.w = 20;
+        sp->tex_pos.vx = 612;
+        sp->tex_pos.vy = 464;
+        ui_draw_image(&sp->rect, &sp->tex_pos, &sp->clut_pos, NULL, 3);
+    } else if (sp->mode & 0x4) {
+        sp->rect.w = 90;
+        sp->tex_pos.vx = 588;
+        sp->tex_pos.vy = 464;
+        ui_draw_image(&sp->rect, &sp->tex_pos, &sp->clut_pos, NULL, 3);
+        sp->rect.x = 153;
+        sp->rect.w = 54;
+        sp->tex_pos.vx = 617;
+        sp->tex_pos.vy = 464;
+        ui_draw_image(&sp->rect, &sp->tex_pos, &sp->clut_pos, NULL, 3);
+        sp->rect.x = 130;
+        sp->rect.w = 20;
+        sp->tex_pos.vx = 591;
+        sp->tex_pos.vy = 432;
+        ui_draw_image(&sp->rect, &sp->tex_pos, &sp->clut_pos, NULL, 3);
+    } else if (sp->mode & 0x8) {
+        sp->rect.w = 60;
+        sp->tex_pos.vx = 576;
+        sp->tex_pos.vy = 480;
+        ui_draw_image(&sp->rect, &sp->tex_pos, &sp->clut_pos, NULL, 3);
+        sp->rect.w = 36;
+        sp->tex_pos.vx = 624;
+        sp->tex_pos.vy = 448;
+        sp->rect.x += 63;
+        ui_draw_image(&sp->rect, &sp->tex_pos, &sp->clut_pos, NULL, 3);
     }
     ui_draw_window(16, 16, 288, 208);
-    if (sp->unk2DC & 0x1) {
+    if (sp->mode & 0x1) {
         RECT screen = {0, 0, 320, 240};
         /* Four initializers: GCC keeps it apart from menu_draw_backdrop's {32, 32, 32}. */
         CVECTOR shade = {32, 32, 32, 0};
@@ -7361,7 +7361,7 @@ void shop_draw_header(void)
 #define LIST_ROWS 5
 
 #define LIST_TEXT(sp, id) \
-    ((u16 *)((sp)->unk0.list.messages->text + (sp)->unk0.list.messages->offsets[id]))
+    ((u16 *)((sp)->state.list.messages->text + (sp)->state.list.messages->offsets[id]))
 
 ADDRESS(0x8002d574, 0x98)
 void shop_draw_cursor(void)
@@ -7369,17 +7369,17 @@ void shop_draw_cursor(void)
     MenuScratch *sp = MENU_SCRATCH;
     int x, w;
 
-    if (sp->unk2DC & 0x6) {
+    if (sp->mode & 0x6) {
         x = 54;
-        sp->unk330.w = 218;
+        sp->cursor_rect.w = 218;
     } else {
         x = 28;
-        sp->unk330.w = 272;
+        sp->cursor_rect.w = 272;
     }
-    sp->unk330.x = x - 4;
-    sp->unk330.h = 34;
-    sp->unk330.y = sp->unk2E0 * 36 + 44;
-    ui_draw_rect_outline(&sp->unk330, &sp->unk32C, 257, 1);
+    sp->cursor_rect.x = x - 4;
+    sp->cursor_rect.h = 34;
+    sp->cursor_rect.y = sp->cursor * 36 + 44;
+    ui_draw_rect_outline(&sp->cursor_rect, &sp->cursor_color, 257, 1);
     ui_add_draw_mode(1, 0, 0);
 }
 
@@ -7393,12 +7393,12 @@ void shop_draw_buy_list(void)
     CVECTOR *text, *figure;
 
     rows = LIST_ROWS;
-    if (sp->unk0.list.count < LIST_ROWS + 1)
-        rows = sp->unk0.list.count;
+    if (sp->state.list.count < LIST_ROWS + 1)
+        rows = sp->state.list.count;
     ui_draw_number(inventory.counts[266].count | 0x3000000, 244, 27, &sp->style[6]);
     ui_draw_text(MESSAGE(100), 160, 27, &sp->style[2]);
     for (i = 0; i < rows; i++) {
-        id = inventory.shop_ids[sp->unk0.list.ids[sp->unk2E2 + i]];
+        id = inventory.shop_ids[sp->state.list.ids[sp->scroll + i]];
         if (inventory.counts[266].count >= vis_table_c.types[id].price) {
             text = &sp->style[0];
             figure = &sp->style[4];
@@ -7431,10 +7431,10 @@ void shop_draw_trade_list(void)
     int id;
 
     rows = LIST_ROWS;
-    if (sp->unk0.list.count < LIST_ROWS + 1)
-        rows = sp->unk0.list.count;
+    if (sp->state.list.count < LIST_ROWS + 1)
+        rows = sp->state.list.count;
     for (i = 0; i < rows; i++) {
-        id = sp->unk0.list.ids[sp->unk2E2 + i];
+        id = sp->state.list.ids[sp->scroll + i];
         sp->style[0].cd |= 0x80;
         ui_draw_text(LIST_TEXT(sp, id), 54, i * 36 + 48, &sp->style[0]);
         sp->style[0].cd &= 0x7f;
@@ -7462,10 +7462,10 @@ void shop_draw_repair_list(void)
     ui_draw_number(viewer.hp | 0x4000000, 244, 27, &sp->style[6]);
     ui_draw_text(MESSAGE(101), 176, 27, &sp->style[2]);
     rows = LIST_ROWS;
-    if (sp->unk0.list.count < LIST_ROWS + 1)
-        rows = sp->unk0.list.count;
+    if (sp->state.list.count < LIST_ROWS + 1)
+        rows = sp->state.list.count;
     for (i = 0; i < rows; i++) {
-        id = sp->unk0.list.ids[sp->unk2E2 + i];
+        id = sp->state.list.ids[sp->scroll + i];
         price = vis_table_c.types[id].repair_price * 2 / 3 *
                 (vis_table_c.types[id].max_durability - vis_table_c.types[id].durability);
         if (vis_table_c.types[id].durability == 0)
@@ -7502,24 +7502,24 @@ void shop_draw_confirm(void)
     int y;
     int flag;
 
-    flag = sp->unk0.list.unkA;
+    flag = sp->state.list.confirm_choice;
     if (flag == 0)
-        sp->unk33C.x = 167;
+        sp->rect.x = 167;
     else
-        sp->unk33C.x = 105;
-    sp->unk33C.y = 206;
-    sp->unk33C.w = 50;
-    sp->unk33C.h = 16;
-    ui_draw_rect_outline(&sp->unk33C, &sp->unk32C, 257, 1);
+        sp->rect.x = 105;
+    sp->rect.y = 206;
+    sp->rect.w = 50;
+    sp->rect.h = 16;
+    ui_draw_rect_outline(&sp->rect, &sp->cursor_color, 257, 1);
     ui_add_draw_mode(1, 0, 0);
-    if (sp->unk2DC & 0x1) {
-        id = inventory.shop_ids[sp->unk0.list.ids[sp->unk2E2 + sp->unk2E0]];
+    if (sp->mode & 0x1) {
+        id = inventory.shop_ids[sp->state.list.ids[sp->scroll + sp->cursor]];
         ui_draw_text(MESSAGE(105), 120, 208, &sp->style[0]);
-    } else if (sp->unk2DC & 0x8) {
-        id = sp->unk0.list.ids[sp->unk2E2 + sp->unk2E0];
+    } else if (sp->mode & 0x8) {
+        id = sp->state.list.ids[sp->scroll + sp->cursor];
         ui_draw_text(MESSAGE(106), 110, 208, &sp->style[0]);
     } else {
-        id = sp->unk0.list.ids[sp->unk2E2 + sp->unk2E0];
+        id = sp->state.list.ids[sp->scroll + sp->cursor];
         ui_draw_text(MESSAGE(107), 113, 208, &sp->style[0]);
     }
     ui_draw_text(MESSAGE(108), 172, 208, &sp->style[0]);
@@ -7532,10 +7532,10 @@ void shop_draw_confirm(void)
         ui_draw_glyph(74, 136, 190, &sp->style[0]);
         ui_draw_number(vis_table_c.types[id].max_durability | 0x3000000, 148, 190, &sp->style[4]);
     }
-    if (sp->unk2DC & 0x1) {
+    if (sp->mode & 0x1) {
         ui_draw_number(vis_table_c.types[id].price | 0x3000000, 244, 190, &sp->style[4]);
         ui_draw_text(MESSAGE(102), 216, 190, &sp->style[0]);
-    } else if (sp->unk2DC & 0x8) {
+    } else if (sp->mode & 0x8) {
         price = vis_table_c.types[id].repair_price * 2 / 3 *
                 (vis_table_c.types[id].max_durability - vis_table_c.types[id].durability);
         if (vis_table_c.types[id].durability == 0)
@@ -7560,13 +7560,13 @@ void shop_draw_confirm(void)
                       &sp->style[4]);
         ui_draw_glyph(108, 281, 156, &sp->style[0]);
     }
-    sp->unk350.x = 20;
-    sp->unk350.y = 40;
-    sp->unk350.w = 128;
-    sp->unk350.h = 128;
-    sp->unk358.vx = 448;
-    sp->unk358.vy = 256;
-    ui_draw_image(&sp->unk350, &sp->unk358, 0, 0, 16);
+    sp->image_rect.x = 20;
+    sp->image_rect.y = 40;
+    sp->image_rect.w = 128;
+    sp->image_rect.h = 128;
+    sp->tex_pos.vx = 448;
+    sp->tex_pos.vy = 256;
+    ui_draw_image(&sp->image_rect, &sp->tex_pos, 0, 0, 16);
 }
 
 ADDRESS(0x8002e310, 0x180)
@@ -7584,20 +7584,20 @@ void shop_draw(void)
     sp->style[2].b = sp->style[6].b = 48;
     sp->style[0].cd = sp->style[2].cd = sp->style[3].cd = 57;
     sp->style[4].cd = sp->style[6].cd = sp->style[7].cd = 41;
-    if (sp->unk2E4 < 16)
-        sp->unk360 = 8 - sp->unk2E4;
+    if (sp->blink_phase < 16)
+        sp->blink_level = 8 - sp->blink_phase;
     else
-        sp->unk360 = sp->unk2E4 - 24;
-    sp->unk32C.b = 0;
-    sp->unk32C.r = (u8)sp->unk360 * 4 + 96;
-    sp->unk32C.g = (u8)sp->unk360 * 2 + 48;
-    if (!(sp->unk2DC & 0x8000))
+        sp->blink_level = sp->blink_phase - 24;
+    sp->cursor_color.b = 0;
+    sp->cursor_color.r = (u8)sp->blink_level * 4 + 96;
+    sp->cursor_color.g = (u8)sp->blink_level * 2 + 48;
+    if (!(sp->mode & 0x8000))
         shop_draw_cursor();
-    if (sp->unk2DC & 0x8000)
+    if (sp->mode & 0x8000)
         shop_draw_confirm();
-    else if (sp->unk2DC & 0x1)
+    else if (sp->mode & 0x1)
         shop_draw_buy_list();
-    else if (sp->unk2DC & 0x8)
+    else if (sp->mode & 0x8)
         shop_draw_repair_list();
     else
         shop_draw_trade_list();
@@ -7653,15 +7653,15 @@ void menu_equip_info_draw_slots(void)
     u16 *equip;
 
     sp = MENU_SCRATCH;
-    if (sp->unk2E0 < 10)
-        slot = sp->unk2E0;
+    if (sp->cursor < 10)
+        slot = sp->cursor;
     else
-        slot = sp->unk2E0 - 1;
-    sp->unk330.x = rects[slot].x - 2;
-    sp->unk330.y = rects[slot].y - 1;
-    sp->unk330.w = rects[slot].w + 4;
-    sp->unk330.h = rects[slot].h + 2;
-    ui_draw_rect_outline(&sp->unk330, &sp->unk32C, 513, 1);
+        slot = sp->cursor - 1;
+    sp->cursor_rect.x = rects[slot].x - 2;
+    sp->cursor_rect.y = rects[slot].y - 1;
+    sp->cursor_rect.w = rects[slot].w + 4;
+    sp->cursor_rect.h = rects[slot].h + 2;
+    ui_draw_rect_outline(&sp->cursor_rect, &sp->cursor_color, 513, 1);
     ui_add_draw_mode(1, 0, 0);
     sp->style[7].r = 192;
     sp->style[7].g = 158;
@@ -7676,7 +7676,7 @@ void menu_equip_info_draw_slots(void)
             mode = 48;
         else
             mode = 16;
-        if (i != 6 && i != 12 && sp->unk2C6 == 1 && *equip != 0xffff &&
+        if (i != 6 && i != 12 && sp->show_item_values == 1 && *equip != 0xffff &&
             vis_table_c.types[*equip].max_durability) {
             sp->style[7].r = 200;
             sp->style[7].g = 164;
@@ -7725,53 +7725,53 @@ void menu_equip_info_draw_attributes(void)
     sp->style[7].b = 40;
     sp->style[7].cd = 49;
     sp->style[6].cd = 49;
-    if (sp->unk2DC == 1) {
-        sp->unk320 = sp->unk324 = sp->unk328 = &sp->style[0];
+    if (sp->mode == 1) {
+        sp->value_style = sp->increase_style = sp->decrease_style = &sp->style[0];
     } else {
-        sp->unk320 = &sp->style[0];
-        sp->unk324 = &sp->style[2];
-        sp->unk328 = &sp->style[3];
+        sp->value_style = &sp->style[0];
+        sp->increase_style = &sp->style[2];
+        sp->decrease_style = &sp->style[3];
     }
     for (i = 0; i < STATUS_ROWS; i++)
-        ui_draw_text(MESSAGE(14 + i), xoff[i] + 316, i * 15 + 16, sp->unk320);
-    if (sp->unk2DC == 1) {
-        sp->unk320 = sp->unk324 = sp->unk328 = &sp->style[4];
+        ui_draw_text(MESSAGE(14 + i), xoff[i] + 316, i * 15 + 16, sp->value_style);
+    if (sp->mode == 1) {
+        sp->value_style = sp->increase_style = sp->decrease_style = &sp->style[4];
     } else {
-        sp->unk320 = &sp->style[4];
-        sp->unk324 = &sp->style[6];
-        sp->unk328 = &sp->style[7];
+        sp->value_style = &sp->style[4];
+        sp->increase_style = &sp->style[6];
+        sp->decrease_style = &sp->style[7];
     }
-    if (sp->unk2DC == 2 && sp->unk2C6) {
-        if (sp->unk2BE != -1) {
-            count = vis_table_c.types[sp->unk2C0].attributes;
+    if (sp->mode == 2 && sp->show_item_values) {
+        if (sp->choice_index != -1) {
+            count = vis_table_c.types[sp->choice_id].attributes;
             for (i = 0; i < STATUS_ROWS; count++, i++)
-                ui_draw_number(*count | 0x13000000, 590, i * 15 + 16, sp->unk320);
+                ui_draw_number(*count | 0x13000000, 590, i * 15 + 16, sp->value_style);
         }
         return;
     }
     figure = viewer.attributes;
     for (i = 0; i < STATUS_ROWS; figure++, i++) {
-        if (sp->unk2DC == 2) {
-            if (sp->unk25C[i] > 0) {
-                ui_draw_number(sp->unk1B4[i] | 0x3000000, 590, i * 15 + 16, sp->unk320);
-                ui_draw_glyph(19, 544, i * 15 + 16, sp->unk324);
-                ui_draw_number(sp->unk25C[i] | 0x3000000, 508, i * 15 + 16, sp->unk324);
-            } else if (sp->unk25C[i] < 0) {
-                ui_draw_number(sp->unk1B4[i] | 0x3000000, 590, i * 15 + 16, sp->unk320);
-                ui_draw_glyph(20, 544, i * 15 + 16, sp->unk328);
-                ui_draw_number(-sp->unk25C[i] | 0x3000000, 508, i * 15 + 16, sp->unk328);
+        if (sp->mode == 2) {
+            if (sp->bonus_changes[i] > 0) {
+                ui_draw_number(sp->attributes_clamped[i] | 0x3000000, 590, i * 15 + 16, sp->value_style);
+                ui_draw_glyph(19, 544, i * 15 + 16, sp->increase_style);
+                ui_draw_number(sp->bonus_changes[i] | 0x3000000, 508, i * 15 + 16, sp->increase_style);
+            } else if (sp->bonus_changes[i] < 0) {
+                ui_draw_number(sp->attributes_clamped[i] | 0x3000000, 590, i * 15 + 16, sp->value_style);
+                ui_draw_glyph(20, 544, i * 15 + 16, sp->decrease_style);
+                ui_draw_number(-sp->bonus_changes[i] | 0x3000000, 508, i * 15 + 16, sp->decrease_style);
             } else {
-                ui_draw_number(sp->unk1B4[i] | 0x3000000, 590, i * 15 + 16, sp->unk320);
+                ui_draw_number(sp->attributes_clamped[i] | 0x3000000, 590, i * 15 + 16, sp->value_style);
             }
         } else if (*figure < 0) {
-            ui_draw_number(0x3000000, 590, i * 15 + 16, sp->unk320);
+            ui_draw_number(0x3000000, 590, i * 15 + 16, sp->value_style);
         } else {
-            ui_draw_number((u16)*figure | 0x3000000, 590, i * 15 + 16, sp->unk320);
+            ui_draw_number((u16)*figure | 0x3000000, 590, i * 15 + 16, sp->value_style);
         }
     }
     bar.h = 4;
     for (i = 0; i < STATUS_ROWS; i++) {
-        bar.w = sp->unk1B4[i] * 50 / sp->unk2C4;
+        bar.w = sp->attributes_clamped[i] * 50 / sp->bar_scale;
         if (bar.w > 100)
             bar.w = 100;
         bar.y = i * 15 + 27;
@@ -7817,14 +7817,14 @@ void menu_equip_info_draw_stats(void)
     p = (s16 *)&viewer;
     for (i = 0; i < 2; i++) {
         if (p[1] < p[0] / 2)
-            sp->unk320 = &sp->style[7];
+            sp->value_style = &sp->style[7];
         else if (p[1] < (short)(p[0] / 5))
-            sp->unk320 = &sp->style[6];
+            sp->value_style = &sp->style[6];
         else
-            sp->unk320 = &sp->style[4];
-        ui_draw_number((u16)*p++ | 0x5000000, 566, i * 15 + 16, sp->unk320);
-        ui_draw_glyph(14, 554, i * 15 + 16, sp->unk320);
-        ui_draw_number((u16)*p++ | 0x5000000, 494, i * 15 + 16, sp->unk320);
+            sp->value_style = &sp->style[4];
+        ui_draw_number((u16)*p++ | 0x5000000, 566, i * 15 + 16, sp->value_style);
+        ui_draw_glyph(14, 554, i * 15 + 16, sp->value_style);
+        ui_draw_number((u16)*p++ | 0x5000000, 494, i * 15 + 16, sp->value_style);
     }
     p++;
     ui_draw_number((u16)*p++ | 0x3000000, 542, 46, &sp->style[4]);
@@ -7833,22 +7833,22 @@ void menu_equip_info_draw_stats(void)
     for (i = 3; i < 13; i++)
         ui_draw_number((u16)*p++ | 0x3000000, 590, i * 15 + 16, &sp->style[4]);
     if ((short)(p[0] / 10) > (short)(p[1] / 10))
-        sp->unk320 = &sp->style[6];
+        sp->value_style = &sp->style[6];
     else
-        sp->unk320 = &sp->style[4];
+        sp->value_style = &sp->style[4];
     w = *p++;
     menu_figure_whole = w * 100 / 454;
     DAT_80088188 = w * 1000 / 454;
-    ui_draw_number(menu_figure_whole | 0x3000000, 494, 211, sp->unk320);
-    ui_draw_glyph(18, 534, 211, sp->unk320);
-    ui_draw_number((u16)(DAT_80088188 - menu_figure_whole * 10) | 0x1000000, 542, 211, sp->unk320);
-    ui_draw_glyph(14, 554, 211, sp->unk320);
+    ui_draw_number(menu_figure_whole | 0x3000000, 494, 211, sp->value_style);
+    ui_draw_glyph(18, 534, 211, sp->value_style);
+    ui_draw_number((u16)(DAT_80088188 - menu_figure_whole * 10) | 0x1000000, 542, 211, sp->value_style);
+    ui_draw_glyph(14, 554, 211, sp->value_style);
     w = *p;
     menu_figure_whole = w * 100 / 454;
     DAT_80088188 = w * 1000 / 454;
-    ui_draw_number(menu_figure_whole | 0x3000000, 566, 211, sp->unk320);
-    ui_draw_glyph(18, 606, 211, sp->unk320);
-    ui_draw_number((u16)(DAT_80088188 - menu_figure_whole * 10) | 0x1000000, 614, 211, sp->unk320);
+    ui_draw_number(menu_figure_whole | 0x3000000, 566, 211, sp->value_style);
+    ui_draw_glyph(18, 606, 211, sp->value_style);
+    ui_draw_number((u16)(DAT_80088188 - menu_figure_whole * 10) | 0x1000000, 614, 211, sp->value_style);
 }
 
 /*
@@ -7914,30 +7914,30 @@ void menu_equip_info_draw_item(void)
     sp->style[2].g = sp->style[6].g = 48;
     sp->style[2].cd = 73;
     sp->style[6].cd = 49;
-    ui_draw_arrow(&down, &sp->unk32C, 0);
-    ui_draw_arrow(&up, &sp->unk32C, 2048);
+    ui_draw_arrow(&down, &sp->cursor_color, 0);
+    ui_draw_arrow(&up, &sp->cursor_color, 2048);
     ui_add_draw_mode(1, 0, 0);
-    sp->unk350.x = 12;
-    sp->unk350.y = 10;
-    sp->unk350.w = 192;
-    sp->unk350.h = 124;
-    sp->unk358.vx = 640;
-    sp->unk358.vy = 0;
-    ui_draw_image(&sp->unk350, &sp->unk358, 0, 0, 16);
-    sp->unk350.x = 204;
-    sp->unk350.w = 100;
-    sp->unk358.vx = 832;
-    ui_draw_image(&sp->unk350, &sp->unk358, 0, 0, 16);
-    if (sp->unk2BE == -1)
+    sp->image_rect.x = 12;
+    sp->image_rect.y = 10;
+    sp->image_rect.w = 192;
+    sp->image_rect.h = 124;
+    sp->tex_pos.vx = 640;
+    sp->tex_pos.vy = 0;
+    ui_draw_image(&sp->image_rect, &sp->tex_pos, 0, 0, 16);
+    sp->image_rect.x = 204;
+    sp->image_rect.w = 100;
+    sp->tex_pos.vx = 832;
+    ui_draw_image(&sp->image_rect, &sp->tex_pos, 0, 0, 16);
+    if (sp->choice_index == -1)
         return;
     sp->style[0].cd |= 0x80;
-    ui_draw_text((u16 *)(sp->unk2CC->text + sp->unk2CC->offsets[sp->unk2C0]), 14, 136,
+    ui_draw_text((u16 *)(sp->item_messages->text + sp->item_messages->offsets[sp->choice_id]), 14, 136,
                   &sp->style[0]);
     sp->style[0].cd &= 0x7f;
-    ui_draw_cell_grid(&pos, &sp->unk0.vram[0], &sp->unk0.vram[1], &sp->style[0], 0xf0004);
-    if (vis_table_c.types[sp->unk2C0].weight) {
-        menu_figure_whole = vis_table_c.types[sp->unk2C0].weight * 100 / 454;
-        DAT_80088188 = vis_table_c.types[sp->unk2C0].weight * 1000 / 454;
+    ui_draw_cell_grid(&pos, &sp->state.vram[0], &sp->state.vram[1], &sp->style[0], 0xf0004);
+    if (vis_table_c.types[sp->choice_id].weight) {
+        menu_figure_whole = vis_table_c.types[sp->choice_id].weight * 100 / 454;
+        DAT_80088188 = vis_table_c.types[sp->choice_id].weight * 1000 / 454;
         ui_draw_text(MESSAGE(28), 188, 217, &sp->style[0]);
         ui_draw_number(menu_figure_whole | 0x3000000, 224, 217, &sp->style[4]);
         ui_draw_glyph(18, 264, 217, &sp->style[0]);
@@ -7945,19 +7945,19 @@ void menu_equip_info_draw_item(void)
                       &sp->style[4]);
         ui_draw_glyph(53, 287, 217, &sp->style[0]);
     }
-    if (vis_table_c.types[sp->unk2C0].max_durability) {
+    if (vis_table_c.types[sp->choice_id].max_durability) {
         ui_draw_text(MESSAGE(29), 16, 216, &sp->style[0]);
-        if (vis_table_c.types[sp->unk2C0].durability < 4) {
-            ui_draw_number(vis_table_c.types[sp->unk2C0].durability | 0x3000000, 80, 217,
+        if (vis_table_c.types[sp->choice_id].durability < 4) {
+            ui_draw_number(vis_table_c.types[sp->choice_id].durability | 0x3000000, 80, 217,
                           &sp->style[6]);
             ui_draw_glyph(14, 120, 217, &sp->style[2]);
-            ui_draw_number(vis_table_c.types[sp->unk2C0].max_durability | 0x3000000, 136, 217,
+            ui_draw_number(vis_table_c.types[sp->choice_id].max_durability | 0x3000000, 136, 217,
                           &sp->style[6]);
         } else {
-            ui_draw_number(vis_table_c.types[sp->unk2C0].durability | 0x3000000, 80, 217,
+            ui_draw_number(vis_table_c.types[sp->choice_id].durability | 0x3000000, 80, 217,
                           &sp->style[4]);
             ui_draw_glyph(14, 120, 217, &sp->style[0]);
-            ui_draw_number(vis_table_c.types[sp->unk2C0].max_durability | 0x3000000, 136, 217,
+            ui_draw_number(vis_table_c.types[sp->choice_id].max_durability | 0x3000000, 136, 217,
                           &sp->style[4]);
         }
     }
@@ -7973,41 +7973,41 @@ void menu_equip_info_draw_magic(void)
     int row, col, bit;
 
     sp->style[0].cd |= 0x80;
-    ui_draw_text((u16 *)(sp->unk2CC->text + sp->unk2CC->offsets[512 + sp->unk2BE]), 14, 136,
+    ui_draw_text((u16 *)(sp->item_messages->text + sp->item_messages->offsets[512 + sp->choice_index]), 14, 136,
                   &sp->style[0]);
     sp->style[0].cd &= 0x7f;
-    ui_draw_cell_grid(&pos, &sp->unk0.vram[0], &sp->unk0.vram[1], &sp->style[0], 0xf0004);
-    sp->unk330.w = 48;
-    sp->unk330.h = 24;
-    sp->unk330.x = (short)(sp->unk2BE / 3) * 49 + 11;
-    sp->unk330.y = (short)(sp->unk2BE % 3) * 25 + 12;
-    ui_draw_rect_outline(&sp->unk330, &grey, 513, 0);
-    sp->unk330.x += 2;
-    sp->unk330.y += 1;
-    sp->unk330.w -= 4;
-    sp->unk330.h -= 2;
-    ui_fill_rect(&sp->unk330, &grey, 1);
+    ui_draw_cell_grid(&pos, &sp->state.vram[0], &sp->state.vram[1], &sp->style[0], 0xf0004);
+    sp->cursor_rect.w = 48;
+    sp->cursor_rect.h = 24;
+    sp->cursor_rect.x = (short)(sp->choice_index / 3) * 49 + 11;
+    sp->cursor_rect.y = (short)(sp->choice_index % 3) * 25 + 12;
+    ui_draw_rect_outline(&sp->cursor_rect, &grey, 513, 0);
+    sp->cursor_rect.x += 2;
+    sp->cursor_rect.y += 1;
+    sp->cursor_rect.w -= 4;
+    sp->cursor_rect.h -= 2;
+    ui_fill_rect(&sp->cursor_rect, &grey, 1);
     ui_add_draw_mode(1, 0, 0);
-    sp->unk350.w = 48;
-    sp->unk350.h = 24;
-    sp->unk350.y = 12;
-    sp->unk358.vy = 0;
+    sp->image_rect.w = 48;
+    sp->image_rect.h = 24;
+    sp->image_rect.y = 12;
+    sp->tex_pos.vy = 0;
     for (row = 0; row < 2; row++) {
         CVECTOR dim = {64, 64, 64, 0};
 
-        sp->unk350.x = 11;
-        sp->unk358.vx = 640;
+        sp->image_rect.x = 11;
+        sp->tex_pos.vx = 640;
         for (col = 0, bit = row; col < 6; bit += 3, col++) {
-            if (!(*sp->unk2D4 & (1 << bit))) {
-                ui_fill_rect(&sp->unk350, &dim, 1);
+            if (!(*sp->ring_magic & (1 << bit))) {
+                ui_fill_rect(&sp->image_rect, &dim, 1);
                 ui_add_draw_mode(2, 0, 0);
             }
-            ui_draw_image(&sp->unk350, &sp->unk358, 0, 0, 16);
-            sp->unk350.x += 49;
-            sp->unk358.vx += 48;
+            ui_draw_image(&sp->image_rect, &sp->tex_pos, 0, 0, 16);
+            sp->image_rect.x += 49;
+            sp->tex_pos.vx += 48;
         }
-        sp->unk350.y += 25;
-        sp->unk358.vy += 24;
+        sp->image_rect.y += 25;
+        sp->tex_pos.vy += 24;
     }
     ui_add_draw_mode(1, 0, 0);
 }
@@ -8040,21 +8040,21 @@ void menu_equip_info_draw(void)
     sp->style[0].b = sp->style[4].b = 80;
     sp->style[0].cd = 73;
     sp->style[4].cd = 49;
-    if (sp->unk2E4 < 16)
-        sp->unk360 = 8 - sp->unk2E4;
+    if (sp->blink_phase < 16)
+        sp->blink_level = 8 - sp->blink_phase;
     else
-        sp->unk360 = sp->unk2E4 - 24;
-    sp->unk32C.b = 0;
-    sp->unk32C.r = (u8)sp->unk360 * 4 + 96;
-    sp->unk32C.g = (u8)sp->unk360 * 2 + 48;
+        sp->blink_level = sp->blink_phase - 24;
+    sp->cursor_color.b = 0;
+    sp->cursor_color.r = (u8)sp->blink_level * 4 + 96;
+    sp->cursor_color.g = (u8)sp->blink_level * 2 + 48;
     if (DAT_80088192) {
         if (menu_second_page == 0)
-            ui_draw_arrow(&right, &sp->unk32C, 0);
+            ui_draw_arrow(&right, &sp->cursor_color, 0);
         else
-            ui_draw_arrow(&left, &sp->unk32C, 2048);
+            ui_draw_arrow(&left, &sp->cursor_color, 2048);
     }
-    if (sp->unk2DC == 2) {
-        if (sp->unk2C7 != 10)
+    if (sp->mode == 2) {
+        if (sp->list_kind != 10)
             menu_equip_info_draw_item();
         else
             menu_equip_info_draw_magic();
@@ -8090,48 +8090,48 @@ void menu_creature_book_draw_grid(void)
     int row, col, cols;
 
     menu_second_page = 0;
-    sp->unk330.w = 96;
-    sp->unk330.h = 48;
-    sp->unk330.x = (short)(sp->unk2E0 % STORE_COLUMNS) * 112 + 48;
-    sp->unk330.y = (short)(sp->unk2E0 / STORE_COLUMNS) * 56 + 32;
-    ui_draw_rect_outline(&sp->unk330, &sp->unk32C, 513, 1);
+    sp->cursor_rect.w = 96;
+    sp->cursor_rect.h = 48;
+    sp->cursor_rect.x = (short)(sp->cursor % STORE_COLUMNS) * 112 + 48;
+    sp->cursor_rect.y = (short)(sp->cursor / STORE_COLUMNS) * 56 + 32;
+    ui_draw_rect_outline(&sp->cursor_rect, &sp->cursor_color, 513, 1);
     ui_add_draw_mode(1, 0, 0);
-    if (sp->unk2E2 > 0)
-        ui_draw_arrow(&up, &sp->unk32C, 3072);
-    if (sp->unk2E2 <= sp->unk0.store.rows - 3)
-        ui_draw_arrow(&down, &sp->unk32C, 1024);
+    if (sp->scroll > 0)
+        ui_draw_arrow(&up, &sp->cursor_color, 3072);
+    if (sp->scroll <= sp->state.book.rows - 3)
+        ui_draw_arrow(&down, &sp->cursor_color, 1024);
     ui_add_draw_mode(1, 0, 0);
-    index = sp->unk2E2 * STORE_COLUMNS + sp->unk2E0;
-    kind = sp->unk0.store.kinds[index];
+    index = sp->scroll * STORE_COLUMNS + sp->cursor;
+    kind = sp->state.book.kinds[index];
     ui_draw_number((u16)(index + 1) | 0x3000000, 486, 214, &sp->style[4]);
     ui_draw_glyph(14, 531, 214, &sp->style[0]);
     ui_draw_number(150 | 0x3000000, 551, 214, &sp->style[4]);
-    if (index < sp->unk0.store.count) {
+    if (index < sp->state.book.count) {
         sp->style[0].cd |= 0x80;
-        ui_draw_text((u16 *)(sp->unk0.store.messages->text +
-                              sp->unk0.store.messages->offsets[kind]),
+        ui_draw_text((u16 *)(sp->state.book.names->text +
+                              sp->state.book.names->offsets[kind]),
                       40, 214, &sp->style[0]);
         sp->style[0].cd &= 0x7f;
     }
     ui_draw_panel(32, 210, 576, 22);
-    sp->unk350.w = 96;
-    sp->unk350.h = 48;
-    sp->unk350.y = 32;
-    index = sp->unk2E2 * STORE_COLUMNS;
+    sp->image_rect.w = 96;
+    sp->image_rect.h = 48;
+    sp->image_rect.y = 32;
+    index = sp->scroll * STORE_COLUMNS;
     for (row = 0; row < STORE_ROWS; row++) {
-        if (sp->unk2E2 + row == sp->unk0.store.rows)
-            cols = sp->unk0.store.last;
+        if (sp->scroll + row == sp->state.book.rows)
+            cols = sp->state.book.last;
         else
             cols = STORE_COLUMNS;
-        sp->unk350.x = 48;
+        sp->image_rect.x = 48;
         for (col = 0; col < cols; index++, col++) {
-            if (index < sp->unk0.store.count) {
-                ui_draw_rect_outline(&sp->unk350, &sp->style[0], 513, 1);
-                ui_draw_image(&sp->unk350, &sp->unk0.store.tex[index % 15], 0, 0, 16);
+            if (index < sp->state.book.count) {
+                ui_draw_rect_outline(&sp->image_rect, &sp->style[0], 513, 1);
+                ui_draw_image(&sp->image_rect, &sp->state.book.cell_tex[index % 15], 0, 0, 16);
             }
-            sp->unk350.x += 112;
+            sp->image_rect.x += 112;
         }
-        sp->unk350.y += 56;
+        sp->image_rect.y += 56;
     }
     ui_add_draw_mode(0, 0, 0);
     ui_draw_panel(32, 24, 576, 176);
@@ -8152,47 +8152,47 @@ void menu_creature_book_draw_entry(void)
     RECT right = {621, 119, 16, 8};
     MenuScratch *sp = MENU_SCRATCH;
     u16 kind_w[17] = {113, 58, 36, 36, 58, 135, 168, 157, 69, 168, 80, 0, 58, 0, 69, 113, 0};
-    MenuStoredItem *item;
+    CreatureBookEntry *item;
     int kind;
     int i;
 
-    kind = sp->unk0.store.kinds[sp->unk2E2 * 5 + sp->unk2E0];
-    item = &sp->unk0.store.items[kind];
+    kind = sp->state.book.kinds[sp->scroll * 5 + sp->cursor];
+    item = &sp->state.book.entries[kind];
     if (pad_state.pressed & 0x800)
         menu_second_page = 1;
     if (pad_state.pressed & 0x400)
         menu_second_page = 0;
     pad_state.pressed = 0;
     if (menu_second_page == 0)
-        ui_draw_arrow(&right, &sp->unk32C, 0);
+        ui_draw_arrow(&right, &sp->cursor_color, 0);
     else
-        ui_draw_arrow(&left, &sp->unk32C, 2048);
+        ui_draw_arrow(&left, &sp->cursor_color, 2048);
     ui_add_draw_mode(1, 0, 0);
     sp->style[0].cd |= 0x80;
-    ui_draw_text(MESSAGE_IN(sp->unk0.store.messages, kind), 32, 16, &sp->style[0]);
+    ui_draw_text(MESSAGE_IN(sp->state.book.names, kind), 32, 16, &sp->style[0]);
     sp->style[0].cd &= 0x7f;
     ui_draw_cell_grid(&pos, &tex, &clut, &sp->style[0], 0xf0005);
     if (menu_second_page) {
         for (i = 0; i < 14; i++) {
             ui_draw_text(MESSAGE(100 + i), 336, i * 15 + 16, &sp->style[0]);
-            ui_draw_number((u16)item->figures[i] | DIGITS(2), 582, i * 15 + 16, &sp->style[4]);
+            ui_draw_number((u16)item->attributes[i] | DIGITS(2), 582, i * 15 + 16, &sp->style[4]);
         }
     } else {
         for (i = 0; i < 10; i++)
             ui_draw_text(MESSAGE(117 + i), 336, i * 15 + 16, &sp->style[0]);
-        if (item->kind < 17)
-            ui_draw_text(MESSAGE(150 + item->kind), 606 - kind_w[item->kind], 16,
+        if (item->category < 17)
+            ui_draw_text(MESSAGE(150 + item->category), 606 - kind_w[item->category], 16,
                           &sp->style[0]);
-        ui_draw_number(item->unk2 | DIGITS(4), 558, 31, &sp->style[4]);
-        ui_draw_number(item->unk1 | DIGITS(2), 582, 46, &sp->style[4]);
-        menu_figure_whole = item->unk4 * 10 / 3048;
+        ui_draw_number(item->hp | DIGITS(4), 558, 31, &sp->style[4]);
+        ui_draw_number(item->sp_gain | DIGITS(2), 582, 46, &sp->style[4]);
+        menu_figure_whole = item->height * 10 / 3048;
         ui_draw_number(menu_figure_whole | DIGITS(3), 522, 61, &sp->style[4]);
         ui_draw_glyph(55, 559, 61, &sp->style[4]);
-        ui_draw_number((u16)((u16)(item->unk4 * 10 - menu_figure_whole * 3048) / 254) | DIGITS(2), 570,
+        ui_draw_number((u16)((u16)(item->height * 10 - menu_figure_whole * 3048) / 254) | DIGITS(2), 570,
                       61, &sp->style[4]);
         ui_draw_glyph(54, 595, 61, &sp->style[4]);
-        menu_figure_whole = item->unk6 * 100 / 454;
-        DAT_80088188 = item->unk6 * 1000 / 454;
+        menu_figure_whole = item->weight * 100 / 454;
+        DAT_80088188 = item->weight * 1000 / 454;
         ui_draw_number(menu_figure_whole | DIGITS(4), 522, 76, &sp->style[4]);
         ui_draw_glyph(18, 574, 76, &sp->style[4]);
         ui_draw_number((u16)(DAT_80088188 - menu_figure_whole * 10) | DIGITS(1), 582, 76, &sp->style[4]);
@@ -8217,20 +8217,20 @@ void menu_creature_book_draw_entry(void)
             ui_draw_glyph(15, 558, 136, &sp->style[4]);
         }
         ui_draw_number((u16)item->pairs[3][0] | DIGITS(3), 570, 136, &sp->style[4]);
-        if (item->traits & 0xf)
-            ui_draw_text(MESSAGE(129 + (item->traits & 0xf)), 336, 181, &sp->style[0]);
-        if (item->traits >> 8 & 0xf)
-            ui_draw_text(MESSAGE(129 + (item->traits >> 8 & 0xf)), 336, 196, &sp->style[0]);
-        if (item->traits >> 16 & 0xf)
-            ui_draw_text(MESSAGE(129 + (item->traits >> 16 & 0xf)), 336, 211, &sp->style[0]);
+        if (item->abilities & 0xf)
+            ui_draw_text(MESSAGE(129 + (item->abilities & 0xf)), 336, 181, &sp->style[0]);
+        if (item->abilities >> 8 & 0xf)
+            ui_draw_text(MESSAGE(129 + (item->abilities >> 8 & 0xf)), 336, 196, &sp->style[0]);
+        if (item->abilities >> 16 & 0xf)
+            ui_draw_text(MESSAGE(129 + (item->abilities >> 16 & 0xf)), 336, 211, &sp->style[0]);
     }
-    sp->unk350.x = 55;
-    sp->unk350.y = 32;
-    sp->unk350.w = 230;
-    sp->unk350.h = 115;
-    ui_draw_rect_outline(&sp->unk350, &sp->style[0], 513, 1);
+    sp->image_rect.x = 55;
+    sp->image_rect.y = 32;
+    sp->image_rect.w = 230;
+    sp->image_rect.h = 115;
+    ui_draw_rect_outline(&sp->image_rect, &sp->style[0], 513, 1);
     ui_add_draw_mode(0, 0, 0);
-    ui_draw_image(&sp->unk350, &sp->unk0.store.image, NULL, NULL, 16);
+    ui_draw_image(&sp->image_rect, &sp->state.book.image, NULL, NULL, 16);
     ui_draw_panel(24, 12, 292, 216);
     ui_draw_panel(324, 12, 292, 216);
 }
@@ -8254,14 +8254,14 @@ void menu_creature_book_draw(void)
     sp->style[0].b = sp->style[4].b = 80;
     sp->style[0].cd = 73;
     sp->style[4].cd = 49;
-    if (sp->unk2E4 < 16)
-        sp->unk360 = 8 - sp->unk2E4;
+    if (sp->blink_phase < 16)
+        sp->blink_level = 8 - sp->blink_phase;
     else
-        sp->unk360 = sp->unk2E4 - 24;
-    sp->unk32C.b = 0;
-    sp->unk32C.r = (u8)sp->unk360 * 4 + 96;
-    sp->unk32C.g = (u8)sp->unk360 * 2 + 48;
-    if (sp->unk2DC == 2)
+        sp->blink_level = sp->blink_phase - 24;
+    sp->cursor_color.b = 0;
+    sp->cursor_color.r = (u8)sp->blink_level * 4 + 96;
+    sp->cursor_color.g = (u8)sp->blink_level * 2 + 48;
+    if (sp->mode == 2)
         menu_creature_book_draw_entry();
     else
         menu_creature_book_draw_grid();
@@ -8292,19 +8292,19 @@ void menu_arrange_icons_draw_hand(void)
     int cell;
     int row, col;
 
-    column = sp->unk2E0 % 8;
+    column = sp->cursor % 8;
     if (column < 4) {
-        sp->unk330.x = column * 64 + 50;
-        sp->unk330.y = sp->unk2E0 / 8 * 32 + 35;
-        sp->unk330.w = 56;
-        sp->unk330.h = 28;
-        ui_draw_rect_outline(&sp->unk330, &sp->unk32C, 513, 1);
+        sp->cursor_rect.x = column * 64 + 50;
+        sp->cursor_rect.y = sp->cursor / 8 * 32 + 35;
+        sp->cursor_rect.w = 56;
+        sp->cursor_rect.h = 28;
+        ui_draw_rect_outline(&sp->cursor_rect, &sp->cursor_color, 513, 1);
     }
-    if (sp->unk0.grid.row0 > 0)
-        ui_draw_arrow(&up, &sp->unk32C, 3072);
-    if (sp->unk0.grid.row0 < 73)
-        ui_draw_arrow(&down, &sp->unk32C, 1024);
-    bar.y = sp->unk0.grid.row0 * 136 / 74 + 47;
+    if (sp->state.grid.hand_row > 0)
+        ui_draw_arrow(&up, &sp->cursor_color, 3072);
+    if (sp->state.grid.hand_row < 73)
+        ui_draw_arrow(&down, &sp->cursor_color, 1024);
+    bar.y = sp->state.grid.hand_row * 136 / 74 + 47;
     ui_fill_rect(&bar, &shade, 1);
     ui_add_draw_mode(1, 0, 0);
     edge.x = bar.x - 2;
@@ -8313,27 +8313,27 @@ void menu_arrange_icons_draw_hand(void)
     edge.h = bar.h;
     ui_fill_rect(&edge, &shade, 1);
     ui_add_draw_mode(2, 0, 0);
-    sp->unk33C.x = 60;
-    sp->unk33C.y = 12;
-    sp->unk33C.w = 196;
-    sp->unk33C.h = 16;
-    sp->unk358.vx = 896;
-    sp->unk358.vy = 448;
-    sp->unk35C.vx = 544;
-    sp->unk35C.vy = 502;
-    ui_draw_image(&sp->unk33C, &sp->unk358, &sp->unk35C, NULL, 3);
-    cell = sp->unk0.grid.row0 * 4 % 20;
-    sp->unk350.y = 35;
-    sp->unk350.w = 56;
-    sp->unk350.h = 28;
+    sp->rect.x = 60;
+    sp->rect.y = 12;
+    sp->rect.w = 196;
+    sp->rect.h = 16;
+    sp->tex_pos.vx = 896;
+    sp->tex_pos.vy = 448;
+    sp->clut_pos.vx = 544;
+    sp->clut_pos.vy = 502;
+    ui_draw_image(&sp->rect, &sp->tex_pos, &sp->clut_pos, NULL, 3);
+    cell = sp->state.grid.hand_row * 4 % 20;
+    sp->image_rect.y = 35;
+    sp->image_rect.w = 56;
+    sp->image_rect.h = 28;
     for (row = 0; row < 5; row++) {
-        sp->unk350.x = 50;
+        sp->image_rect.x = 50;
         for (col = 0; col < 4; col++) {
-            ui_draw_image(&sp->unk350, &sp->unk0.grid.tex[cell], NULL, NULL, 16);
+            ui_draw_image(&sp->image_rect, &sp->state.grid.cell_tex[cell], NULL, NULL, 16);
             cell = (cell + 1) % 20;
-            sp->unk350.x += step_x;
+            sp->image_rect.x += step_x;
         }
-        sp->unk350.y += step_y;
+        sp->image_rect.y += step_y;
     }
     ui_draw_panel(10, 9, 296, 188);
 }
@@ -8357,19 +8357,19 @@ void menu_arrange_icons_draw_bag(void)
     int cell;
     int row, col;
 
-    column = sp->unk2E0 % 8;
+    column = sp->cursor % 8;
     if (column >= 4) {
-        sp->unk330.x = column * 64 + 82;
-        sp->unk330.y = sp->unk2E0 / 8 * 32 + 35;
-        sp->unk330.w = 56;
-        sp->unk330.h = 28;
-        ui_draw_rect_outline(&sp->unk330, &sp->unk32C, 513, 1);
+        sp->cursor_rect.x = column * 64 + 82;
+        sp->cursor_rect.y = sp->cursor / 8 * 32 + 35;
+        sp->cursor_rect.w = 56;
+        sp->cursor_rect.h = 28;
+        ui_draw_rect_outline(&sp->cursor_rect, &sp->cursor_color, 513, 1);
     }
-    if (sp->unk0.grid.row1 > 0)
-        ui_draw_arrow(&up, &sp->unk32C, 3072);
-    if (sp->unk0.grid.row1 < 73)
-        ui_draw_arrow(&down, &sp->unk32C, 1024);
-    bar.y = sp->unk0.grid.row1 * 136 / 74 + 47;
+    if (sp->state.grid.bag_row > 0)
+        ui_draw_arrow(&up, &sp->cursor_color, 3072);
+    if (sp->state.grid.bag_row < 73)
+        ui_draw_arrow(&down, &sp->cursor_color, 1024);
+    bar.y = sp->state.grid.bag_row * 136 / 74 + 47;
     ui_fill_rect(&bar, &shade, 1);
     ui_add_draw_mode(1, 0, 0);
     edge.x = bar.x - 2;
@@ -8378,27 +8378,27 @@ void menu_arrange_icons_draw_bag(void)
     edge.h = bar.h;
     ui_fill_rect(&edge, &shade, 1);
     ui_add_draw_mode(2, 0, 0);
-    sp->unk33C.x = 384;
-    sp->unk33C.y = 12;
-    sp->unk33C.w = 196;
-    sp->unk33C.h = 16;
-    sp->unk358.vx = 896;
-    sp->unk358.vy = 464;
-    sp->unk35C.vx = 544;
-    sp->unk35C.vy = 502;
-    ui_draw_image(&sp->unk33C, &sp->unk358, &sp->unk35C, NULL, 3);
-    cell = sp->unk0.grid.row1 * 4 % 20;
-    sp->unk350.y = 35;
-    sp->unk350.w = 56;
-    sp->unk350.h = 28;
+    sp->rect.x = 384;
+    sp->rect.y = 12;
+    sp->rect.w = 196;
+    sp->rect.h = 16;
+    sp->tex_pos.vx = 896;
+    sp->tex_pos.vy = 464;
+    sp->clut_pos.vx = 544;
+    sp->clut_pos.vy = 502;
+    ui_draw_image(&sp->rect, &sp->tex_pos, &sp->clut_pos, NULL, 3);
+    cell = sp->state.grid.bag_row * 4 % 20;
+    sp->image_rect.y = 35;
+    sp->image_rect.w = 56;
+    sp->image_rect.h = 28;
     for (row = 0; row < 5; row++) {
-        sp->unk350.x = 338;
+        sp->image_rect.x = 338;
         for (col = 0; col < 4; col++) {
-            ui_draw_image(&sp->unk350, &sp->unk0.grid.tex[cell + 20], NULL, NULL, 16);
+            ui_draw_image(&sp->image_rect, &sp->state.grid.cell_tex[cell + 20], NULL, NULL, 16);
             cell = (cell + 1) % 20;
-            sp->unk350.x += step_x;
+            sp->image_rect.x += step_x;
         }
-        sp->unk350.y += step_y;
+        sp->image_rect.y += step_y;
     }
     ui_draw_panel(334, 9, 296, 188);
 }
@@ -8415,14 +8415,14 @@ void menu_arrange_icons_draw_caption(void)
     int id;
     short column;
 
-    column = sp->unk2E0 % 8;
+    column = sp->cursor % 8;
     if (column < 4)
-        id = sp->unk0.grid.ids0[(sp->unk0.grid.row0 + sp->unk2E0 / 8) * 4 + column];
+        id = sp->state.grid.hand_ids[(sp->state.grid.hand_row + sp->cursor / 8) * 4 + column];
     else
-        id = sp->unk0.grid.ids1[(sp->unk0.grid.row1 + sp->unk2E0 / 8) * 4 + column - 4];
+        id = sp->state.grid.bag_ids[(sp->state.grid.bag_row + sp->cursor / 8) * 4 + column - 4];
     sp->style[0].cd |= 0x80;
     if (id != -1)
-        ui_draw_text((u16 *)(sp->unk0.grid.messages->text + sp->unk0.grid.messages->offsets[id]),
+        ui_draw_text((u16 *)(sp->state.grid.messages->text + sp->state.grid.messages->offsets[id]),
                       18, 202, &sp->style[0]);
     sp->style[0].cd &= 0x7f;
     if (id != -1) {
@@ -8467,49 +8467,49 @@ void menu_arrange_icons_draw_details(void)
     u8 *count;
     int n, k, j;
 
-    if ((short)(sp->unk2E0 % 8) < 4) {
+    if ((short)(sp->cursor % 8) < 4) {
         x = 334;
         y = 9;
         text_y = 135;
         count_x = 342;
-        sp->unk350.x = x;
-        sp->unk350.y = y;
-        sp->unk350.w = 192;
-        sp->unk350.h = 124;
+        sp->image_rect.x = x;
+        sp->image_rect.y = y;
+        sp->image_rect.w = 192;
+        sp->image_rect.h = 124;
     } else {
         x = 10;
         y = 9;
         text_y = 135;
         count_x = 18;
-        sp->unk350.x = x;
-        sp->unk350.y = y;
-        sp->unk350.w = 192;
-        sp->unk350.h = 124;
+        sp->image_rect.x = x;
+        sp->image_rect.y = y;
+        sp->image_rect.w = 192;
+        sp->image_rect.h = 124;
     }
     none = 0;
-    column = sp->unk2E0 % 8;
+    column = sp->cursor % 8;
     if (column < 4) {
-        index = (sp->unk0.grid.row0 + sp->unk2E0 / 8) * 4;
+        index = (sp->state.grid.hand_row + sp->cursor / 8) * 4;
         index += column;
-        id = sp->unk0.grid.ids0[index];
-        if (sp->unk0.grid.ids0[index] == -1)
+        id = sp->state.grid.hand_ids[index];
+        if (sp->state.grid.hand_ids[index] == -1)
             none = 1;
     } else {
-        index = (sp->unk0.grid.row1 + sp->unk2E0 / 8) * 4 - 4;
+        index = (sp->state.grid.bag_row + sp->cursor / 8) * 4 - 4;
         index += column;
-        id = sp->unk0.grid.ids1[index];
-        if (sp->unk0.grid.ids1[index] == -1)
+        id = sp->state.grid.bag_ids[index];
+        if (sp->state.grid.bag_ids[index] == -1)
             none = 1;
     }
     /* The flag is tested as a short (retail copies it to a temporary first). */
     if (!(short)none) {
-        sp->unk358.vx = 640;
-        sp->unk358.vy = 0;
-        ui_draw_image(&sp->unk350, &sp->unk358, 0, 0, 16);
-        sp->unk350.w = 100;
-        sp->unk358.vx = 832;
-        sp->unk350.x += 192;
-        ui_draw_image(&sp->unk350, &sp->unk358, 0, 0, 16);
+        sp->tex_pos.vx = 640;
+        sp->tex_pos.vy = 0;
+        ui_draw_image(&sp->image_rect, &sp->tex_pos, 0, 0, 16);
+        sp->image_rect.w = 100;
+        sp->tex_pos.vx = 832;
+        sp->image_rect.x += 192;
+        ui_draw_image(&sp->image_rect, &sp->tex_pos, 0, 0, 16);
         n = 0;
         k = 2;
         count = vis_table_c.types[id].attributes;
@@ -8544,20 +8544,20 @@ void menu_draw_button_prompt(void)
     CVECTOR grey = {80, 80, 80};
     MenuScratch *sp = MENU_SCRATCH;
 
-    sp->unk358.vx = 896;
-    sp->unk358.vy = 480;
-    sp->unk35C.vx = 544;
-    sp->unk35C.vy = 503;
-    sp->unk350.w = 32;
-    sp->unk350.h = 16;
-    sp->unk350.x = 353;
-    sp->unk350.y = 168;
-    ui_draw_image(&sp->unk350, &sp->unk358, &sp->unk35C, NULL, 0);
-    sp->unk358.vx = 904;
-    sp->unk35C.vy = 504;
-    sp->unk350.x = 232;
-    sp->unk350.y = 168;
-    ui_draw_image(&sp->unk350, &sp->unk358, &sp->unk35C, NULL, 0);
+    sp->tex_pos.vx = 896;
+    sp->tex_pos.vy = 480;
+    sp->clut_pos.vx = 544;
+    sp->clut_pos.vy = 503;
+    sp->image_rect.w = 32;
+    sp->image_rect.h = 16;
+    sp->image_rect.x = 353;
+    sp->image_rect.y = 168;
+    ui_draw_image(&sp->image_rect, &sp->tex_pos, &sp->clut_pos, NULL, 0);
+    sp->tex_pos.vx = 904;
+    sp->clut_pos.vy = 504;
+    sp->image_rect.x = 232;
+    sp->image_rect.y = 168;
+    ui_draw_image(&sp->image_rect, &sp->tex_pos, &sp->clut_pos, NULL, 0);
     ui_draw_text(MESSAGE(216), 188, 150, &sp->style[0]);
     ui_draw_panel(168, 144, 319, 44);
 }
@@ -8583,28 +8583,28 @@ void menu_arrange_icons_draw(void)
     sp->style[0].b = sp->style[4].b = 96;
     sp->style[0].cd = 73;
     sp->style[4].cd = 49;
-    if (sp->unk2E4 < 16)
-        sp->unk360 = 8 - sp->unk2E4;
+    if (sp->blink_phase < 16)
+        sp->blink_level = 8 - sp->blink_phase;
     else
-        sp->unk360 = sp->unk2E4 - 24;
-    sp->unk32C.b = 0;
-    sp->unk32C.r = (u8)sp->unk360 * 4 + 96;
-    sp->unk32C.g = (u8)sp->unk360 * 2 + 48;
-    if (sp->unk2DC & 0x8000)
+        sp->blink_level = sp->blink_phase - 24;
+    sp->cursor_color.b = 0;
+    sp->cursor_color.r = (u8)sp->blink_level * 4 + 96;
+    sp->cursor_color.g = (u8)sp->blink_level * 2 + 48;
+    if (sp->mode & 0x8000)
         menu_draw_button_prompt();
     number_narrow = 1;
-    if (sp->unk2DC & 0x1) {
+    if (sp->mode & 0x1) {
         menu_arrange_icons_draw_hand();
         menu_arrange_icons_draw_bag();
     } else {
-        if ((short)(sp->unk2E0 % 8) < 4)
+        if ((short)(sp->cursor % 8) < 4)
             menu_arrange_icons_draw_hand();
         else
             menu_arrange_icons_draw_bag();
         menu_arrange_icons_draw_details();
     }
     number_narrow = 0;
-    if ((short)(sp->unk2E0 % 8) < 4)
+    if ((short)(sp->cursor % 8) < 4)
         ui_draw_arrow(&arrow, &color, 0);
     else
         ui_draw_arrow(&arrow, &color, 2048);

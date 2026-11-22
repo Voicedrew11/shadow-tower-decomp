@@ -92,7 +92,7 @@ void map_restore_progress(void)
     AreaObject *d9 = &vis_table_b.entries[9];
     Creature *e4 = &vis_table_a.entries[4];
     Creature *e5 = &vis_table_a.entries[5];
-    u32 w = game_progress.unk1440.word;
+    u32 w = game_progress.event_flags.word;
 
     fdat_801ee46c = 1;
     if (!(w >> 16 & 1)) {
@@ -202,7 +202,7 @@ void map_update_events(void)
         creature_force_talk(e5, 1, 0);
         fdat_801ee480 = 0xff;
         game_exit_request = 3;
-        game_progress.unk1444.word |= 0x80;
+        game_progress.event_flags2.word |= 0x80;
     }
     if (fdat_801ee47c == 1 && viewer.position.vz > 0x41000) {
         viewer.state = 5;
@@ -325,7 +325,7 @@ void map_warp_player(void)
     play_warp_sound();
     fade_run_frames(2, 0x1000, 0, -0x100);
     pad_clear_input();
-    if (game_progress.unk1448[r->talk_id] == 0) {
+    if (game_progress.talk_counts[r->talk_id] == 0) {
         creature_force_talk(e, 0, 0);
         e->flags &= ~0x2000000;
     }
@@ -425,20 +425,20 @@ void map_talk_on_player_death(void)
     CreatureType *r3 = &vis_table_a.types[3];
     Creature *e5 = &vis_table_a.entries[5];
     CreatureType *r8 = &vis_table_a.types[8];
-    Data801cba08 *story = &game_progress;
+    GameProgress *story = &game_progress;
 
-    if (story->unk1448[vis_table_a.types[0].talk_id] == 0)
+    if (story->talk_counts[vis_table_a.types[0].talk_id] == 0)
         return;
     if (fdat_801ee474 != 0xff) {
-        story->unk1448[vis_table_a.types[0].talk_id] = 2;
+        story->talk_counts[vis_table_a.types[0].talk_id] = 2;
         e0->flags |= 0x2000000;
         creature_force_talk(e0, 1, 1);
     } else if (fdat_801ee478 != 0xff) {
-        story->unk1448[r3->talk_id] = 1;
+        story->talk_counts[r3->talk_id] = 1;
         e3->flags |= 0x2000000;
         creature_force_talk(e3, 1, 1);
-    } else if (story->unk1448[r8->talk_id] != 0 && fdat_801ee480 != 0xff) {
-        story->unk1448[r8->talk_id] = 3;
+    } else if (story->talk_counts[r8->talk_id] != 0 && fdat_801ee480 != 0xff) {
+        story->talk_counts[r8->talk_id] = 3;
         e5->flags |= 0x2000000;
         creature_force_talk(e5, 1, 1);
     } else {

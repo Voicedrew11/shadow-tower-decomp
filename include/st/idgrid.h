@@ -14,17 +14,17 @@
  * entries and its anchor. WIP extent.
  */
 typedef struct {
-    u8 unk0;             /* 0x00: 104 or 98 */
+    u8 grid;             /* 0x00: 104 or 98 */
     u8 unk1;
-    s16 unk2;            /* 0x02: -1 when unset */
-    u8 unk4;             /* 0x04: nonzero while a range is held */
+    s16 shown_id;        /* 0x02: -1 when unset */
+    u8 range_held;       /* 0x04: nonzero while a range is held */
     u8 unk5[3];
-    s32 unk8;            /* 0x08: range start, -1 when unset */
-    s32 unkC;            /* 0x0c: range end */
-    s32 unk10;           /* 0x10 */
-} IdGridState;
+    s32 range_start;     /* 0x08: range start, -1 when unset */
+    s32 range_end;       /* 0x0c: range end */
+    s32 range_anchor;    /* 0x10 */
+} ArrangeListState;
 
-extern IdGridState arrange_list_state;
+extern ArrangeListState arrange_list_state;
 
 /* Raw controller bits (active low), owner unknown; debug_pan_display polls them,
  * so they change under the code. */

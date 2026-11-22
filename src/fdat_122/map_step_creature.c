@@ -29,11 +29,11 @@ void map_step_creature(void)
     u32 flags;
 
     if (e->type == 0 && e->state == 5) {
-        Data801cba08 *story = &game_progress;
+        GameProgress *story = &game_progress;
 
-        flags = story->unk1444.word;
+        flags = story->event_flags2.word;
         fdat_801ed938 = 1;
-        story->unk1444.word = flags | 0x8000;
+        story->event_flags2.word = flags | 0x8000;
     }
     e->anim_frame += e->anim_step;
     if (creature_step_hurt_timer(e) == 1)

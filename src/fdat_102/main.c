@@ -67,11 +67,11 @@ void map_restore_progress(void)
 
     if (e->state != 3)
         e->status.bytes[3] = 2;
-    if (game_progress.unk1448[r->talk_id] == 2)
+    if (game_progress.talk_counts[r->talk_id] == 2)
         fdat_801eda78 = 0xff;
     else
         fdat_801eda78 = 0;
-    if (!game_progress.unk1440.bit.f19) {
+    if (!game_progress.event_flags.bit.f19) {
         d39->type = d40->type = d41->type = d42->type = 0xffff;
         fdat_801eda7c = 0;
     } else {
@@ -98,7 +98,7 @@ void map_update_events(void)
     AreaObject *d41 = &vis_table_b.entries[41];
     AreaObject *d42 = &vis_table_b.entries[42];
 
-    if (state != 0xff && game_progress.unk1448[r0->talk_id] == 2) {
+    if (state != 0xff && game_progress.talk_counts[r0->talk_id] == 2) {
         creature_drop_item(e48, 0x127);
         creature_fade_out_despawn(e48);
         fdat_801eda78 = 0xff;
@@ -108,8 +108,8 @@ void map_update_events(void)
         creature_fade_out_despawn(e48);
         fdat_801eda78 = 0xff;
     }
-    if (game_progress.unk1448[r4->talk_id] >= 2)
-        game_progress.unk1448[r4->talk_id] = 1;
+    if (game_progress.talk_counts[r4->talk_id] >= 2)
+        game_progress.talk_counts[r4->talk_id] = 1;
     if (fdat_801eda7c == 1) {
         creature_fade_out_despawn(e49);
         d42->type = 250;
@@ -117,7 +117,7 @@ void map_update_events(void)
         d40->type = 250;
         d39->type = 250;
         fdat_801eda7c = 0xff;
-        game_progress.unk1440.word |= 0x80000;
+        game_progress.event_flags.word |= 0x80000;
     }
 }
 

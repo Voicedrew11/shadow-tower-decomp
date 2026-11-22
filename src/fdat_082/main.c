@@ -57,7 +57,7 @@ void map_restore_progress(void)
     Creature *e = &vis_table_a.entries[48];
     CreatureType *r = &vis_table_a.types[0];
 
-    if (e->state != 3 && game_progress.unk1448[r->talk_id] == 0)
+    if (e->state != 3 && game_progress.talk_counts[r->talk_id] == 0)
         fdat_801ed87c = 0;
     else
         fdat_801ed87c = 0xff;
@@ -74,7 +74,7 @@ void map_update_events(void)
     if (fdat_801ed87c == 0) {
         if (e->hp == 0)
             fdat_801ed87c = 0xff;
-        if (game_progress.unk1448[r->talk_id] == 1) {
+        if (game_progress.talk_counts[r->talk_id] == 1) {
             creature_drop_item(e, 0x116);
             creature_fade_out_despawn(e);
             fdat_801ed87c = 0xff;

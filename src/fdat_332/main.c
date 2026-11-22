@@ -70,7 +70,7 @@ void map_update_events(void)
         e33->status.bytes[3] = 1;
         e33->hurt_timer = -1;
         fdat_801edb3c = 1;
-        game_progress.unk1440.word |= 0x10000;
+        game_progress.event_flags.word |= 0x10000;
         e33->status.bytes[2] &= 0xea;
         if (e4->state == 1) {
             e4->state = state;
@@ -107,7 +107,7 @@ void map_restore_progress(void)
     AreaObject *b = &vis_table_b.entries[3];
     Creature *e = &vis_table_a.entries[33];
 
-    if (game_progress.unk1440.bit.f16) {
+    if (game_progress.event_flags.bit.f16) {
         if (e->state != 3) {
             e->drop_chance0 = 20;
             e->drop_chance1 = 30;

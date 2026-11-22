@@ -44,11 +44,11 @@ void menu_item_request_draw_list(void)
     sp->unk218.h = 16;
     sp->unk218.y = sp->unk1D0 * 16 + 35;
     ui_draw_rect_outline(&sp->unk218, &sp->unk214, 513, 1);
-    if (sp->unk0.menu.grid.row0 > 0)
+    if (sp->unk0.menu.half[0] > 0)
         ui_draw_arrow(&up, &sp->unk214, 3072);
-    if (sp->unk0.menu.grid.row0 < sp->unk0.menu.grid.row1 - 11)
+    if (sp->unk0.menu.half[0] < sp->unk0.menu.half[1] - 11)
         ui_draw_arrow(&down, &sp->unk214, 1024);
-    thumb.y = sp->unk0.menu.grid.row0 * 190 / sp->unk0.menu.grid.row1 + 31;
+    thumb.y = sp->unk0.menu.half[0] * 190 / sp->unk0.menu.half[1] + 31;
     ui_fill_rect(&thumb, &dark, 1);
     ui_add_draw_mode(1, 0, 0);
     edge.x = thumb.x - 2;
@@ -71,7 +71,7 @@ void menu_item_request_draw_list(void)
     sp->unk238.w = 196;
     sp->unk238.h = 16;
     for (i = 0; i < 11; i++) {
-        int id = sp->unk0.menu.grid.ids0[sp->unk0.menu.grid.row0 + i];
+        int id = sp->unk0.menu.list.ids[sp->unk0.menu.half[0] + i];
         if (id == -2)
             id = 500;
         if (id != -1) {
@@ -91,7 +91,7 @@ void menu_item_request_draw_list(void)
     sp->unk238.w = 14;
     sp->unk238.h = 13;
     for (i = 0; i < 11; i++) {
-        int id = sp->unk0.menu.grid.ids0[sp->unk0.menu.grid.row0 + i];
+        int id = sp->unk0.menu.list.ids[sp->unk0.menu.half[0] + i];
         if (id < 70)
             kind = 0;
         else if (id < 91)
@@ -129,7 +129,7 @@ ADDRESS(0x80022228, 0xb0)
 void menu_arrange_icons_draw_caption(void)
 {
     VsMenuScratch *sp = VS_MENU_SCRATCH;
-    int id = sp->unk0.menu.grid.ids0[sp->unk0.menu.grid.row0 * 4 + sp->unk1D0];
+    int id = sp->unk0.menu.list.ids[sp->unk0.menu.half[0] * 4 + sp->unk1D0];
 
     sp->style[0].cd |= 0x80;
     if (id != -1)
@@ -174,7 +174,7 @@ void menu_item_request_draw_details(int page)
     sp->unk238.y = y;
     sp->unk238.w = 192;
     sp->unk238.h = 124;
-    id = sp->unk0.menu.grid.ids0[(s16)(sp->unk0.menu.grid.row0 + sp->unk1D0)];
+    id = sp->unk0.menu.list.ids[(s16)(sp->unk0.menu.half[0] + sp->unk1D0)];
     if (id != -1 && id != -2) {
         if ((s16)cd_queue_busy() == 0) {
             sp->unk240.vx = 640;

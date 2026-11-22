@@ -21,4 +21,4 @@
 DATA(0x801e0d28, 0xc, ".bss")
 u16 equip_menu_saved_ids[6];
 DATA(0x801e0d38, 0x14, ".bss")
-IdGridState arrange_list_state;
+ArrangeListState arrange_list_state;

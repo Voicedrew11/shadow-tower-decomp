@@ -103,10 +103,10 @@ void map_pick_shopkeeper_line(void)
     if (none) {
         fdat_801ed988 = 1;
         creature_start_script(e, 1);
-    } else if ((game_progress.unk1444.word >> 1 & 3) == 0) {
+    } else if ((game_progress.event_flags2.word >> 1 & 3) == 0) {
         fdat_801ed988 = 0;
         creature_start_script(e, 0);
-        game_progress.unk1444.word = (game_progress.unk1444.word & ~6) | 2;
+        game_progress.event_flags2.word = (game_progress.event_flags2.word & ~6) | 2;
     } else if (viewer.hp < viewer.max_hp >> 3) {
         fdat_801ed988 = 2;
         creature_start_script(e, 2);
@@ -176,8 +176,8 @@ void map_run_shop_visit(void)
             fdat_801ed8c4 = 4;
     } else if (fdat_801ed8c4 == 4) {
         pad_state.pressed = 0;
-        menu->unk2DC = 2;
-        menu->unk2E5 = 0;
+        menu->mode = 2;
+        menu->font_mode = 0;
         shop_run();
         fdat_801ed8c4 = 5;
     } else if (fdat_801ed8c4 == 5) {

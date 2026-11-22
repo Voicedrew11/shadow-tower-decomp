@@ -66,15 +66,15 @@ void xa_start_stream(u8 file, int channel)
     viewer.xa_length = xa_stream_lengths[file][byte_channel];
     /* the file's position, by byte offset from the start of the save data */
     save = (u8 *)&game_progress;
-    memcpy((CdlLOC *)&viewer.xa_pos, save + file * 4 + offsetof(Data801cba08, unk1618), 4);
+    memcpy((CdlLOC *)&viewer.xa_pos, save + file * 4 + offsetof(GameProgress, xa_positions), 4);
     memcpy(&viewer.xa_start, (CdlLOC *)&viewer.xa_pos, 4);
-    while (CdControl(CdlSetloc, (u8 *)&game_progress.unk1618[file], NULL) == 0)
+    while (CdControl(CdlSetloc, (u8 *)&game_progress.xa_positions[file], NULL) == 0)
         ;
     filter.file = 1;
     filter.chan = byte_channel;
     while (CdControl(CdlSetfilter, (u8 *)&filter, NULL) == 0)
         ;
     viewer.xa_start_tick = cd_state.unk4;
-    while (CdControlB(CdlReadS, (u8 *)&game_progress.unk1618[file], NULL) == 0)
+    while (CdControlB(CdlReadS, (u8 *)&game_progress.xa_positions[file], NULL) == 0)
         ;
 }

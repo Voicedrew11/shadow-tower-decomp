@@ -58,7 +58,7 @@ MATRIX quarter_turn_matrices[4] = {
 /*
  * The XA stream lengths in units of two sectors (xa_stream_finished
  * compares the sectors played with twice the length), per stream file and
- * channel: 48 files, the file count of the save block's per-file arrays (game_progress.unk1448,
+ * channel: 48 files, the file count of the save block's per-file arrays (game_progress.talk_counts,
  * unk1478); game_load_common_data locates files 0..39, the last eight rows are empty.
  */
 DATA(0x800804ac, 0x480, ".data")

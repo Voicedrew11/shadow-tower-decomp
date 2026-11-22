@@ -74,11 +74,11 @@ void map_restore_progress(void)
             b++;
         }
         fdat_801eda08 = 0xff;
-        if (!game_progress.unk1440.bit.f18)
+        if (!game_progress.event_flags.bit.f18)
             lighting.area_mode[20] = 0x41;
     } else {
         fdat_801eda08 = 0;
-        if (!game_progress.unk1440.bit.f18)
+        if (!game_progress.event_flags.bit.f18)
             lighting.area_mode[20] = 0x22;
     }
 }
@@ -117,7 +117,7 @@ void map_update_switch_objects(void)
             }
         }
         fdat_801eda08 = 0xff;
-        if (!(game_progress.unk1440.word >> 18 & 1))
+        if (!(game_progress.event_flags.word >> 18 & 1))
             lighting.area_mode[20] = 0x41;
     } else if (fdat_801eda08 == 0xff && sw->state == 0) {
         AreaObject *b;
@@ -139,7 +139,7 @@ void map_update_switch_objects(void)
             }
         }
         fdat_801eda08 = 0;
-        if (!(game_progress.unk1440.word >> 18 & 1))
+        if (!(game_progress.event_flags.word >> 18 & 1))
             lighting.area_mode[20] = 0x22;
     }
 }
