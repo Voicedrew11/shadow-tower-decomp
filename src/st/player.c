@@ -418,7 +418,7 @@ void player_reset_stats(void)
  * 11, 12 and 15) into the viewer's derived stats.
  */
 ADDRESS(0x8003cb88, 0x354)
-void player_equipment_bonuses(void)
+void player_sum_equipment_bonuses(void)
 {
     int kind[4];
     int amount[3];
@@ -547,7 +547,7 @@ void player_equipment_bonuses(void)
 ADDRESS(0x8003cedc, 0x4c)
 void player_recalc_stats(void)
 {
-    player_equipment_bonuses();
+    player_sum_equipment_bonuses();
     player_compute_derived_stats(0);
     PLAYER_CLAMP_HP();
 }
@@ -648,7 +648,7 @@ void player_wear_item(int amount, u16 *slot)
         } else if (slot == &viewer.unk38[17]) {
             player_load_equipment_model(0xffff, 3, 0);
         }
-        player_equipment_bonuses();
+        player_sum_equipment_bonuses();
         player_compute_derived_stats(0);
         PLAYER_CLAMP_HP();
     } else {
@@ -3021,7 +3021,7 @@ void player_update(void)
                         }
                     }
                 }
-                player_equipment_bonuses();
+                player_sum_equipment_bonuses();
                 player_update_durability_warning();
                 {
                     world_state.draw[0].clip.w = 0;

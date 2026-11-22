@@ -139,9 +139,9 @@ ST.EXE	0x8001c4c8	vis_measure_position			int		supported	proven	asm;callers;src/s
 ST.EXE	0x8001c60c	vis_cull_by_range			void		supported	proven	asm;callers;src/st band C	drops far visible ids and flags near ones
 ST.EXE	0x8001c800	vis_record_is_visible			int	int a;int b;int c	supported	proven	asm;callers;src/st band C	whether a visible id record has the three byte keys
 ST.EXE	0x8001c88c	vis_id_is_visible			int	u16 id	supported	proven	asm;callers;src/st band C	whether id is in the visible id list
-ST.EXE	0x8001c8e0	vis_collect_table_a			void		supported	proven	asm;callers;src/st band C	collects visible entries of vis_table_a
-ST.EXE	0x8001c9c8	vis_collect_table_b			void		supported	proven	asm;callers;src/st band C	collects visible entries of vis_table_b
-ST.EXE	0x8001cab8	vis_collect_table_c			void		supported	proven	asm;callers;src/st band C	collects visible entries of vis_table_c
+ST.EXE	0x8001c8e0	vis_collect_creatures			void		supported	proven	asm;callers;src/st band C	collects visible entries of vis_table_a
+ST.EXE	0x8001c9c8	vis_collect_objects			void		supported	proven	asm;callers;src/st band C	collects visible entries of vis_table_b
+ST.EXE	0x8001cab8	vis_collect_ground_items			void		supported	proven	asm;callers;src/st band C	collects visible entries of vis_table_c
 ST.EXE	0x8001cb88	world_transform_parts			void	VECTOR *trans	supported	proven	asm;callers;src/st leftovers	writes each visible record camera-space translation (RTV0TR, scaled to fit 16 bits)
 ST.EXE	0x8001cdf8	world_project_parts			void	VECTOR *trans	supported	proven	asm;callers;src/st leftovers	projects each visible record part vertices (RTPT/RTPS) with depth-cue values
 ST.EXE	0x8001d224	world_ft3_tint_a			void	CVECTOR *rgb	supported	proven	asm;callers;src/st leftovers	tint callback of world_draw_ft3_near
@@ -355,8 +355,8 @@ ST.EXE	0x8003c17c	player_step_status_timer			short	short *level;short *peak;int 
 ST.EXE	0x8003c24c	player_update_status			void	int apply	candidate	candidate	asm;callers;src/st/player.c st.player	steps the status timers and damage fades once per frame
 ST.EXE	0x8003c95c	area_load_set_blocking			void	int r;int g;int b;int arg3;int arg4	supported	candidate	asm;callees:area_request_load x2,area_load_update,cd_wait_frame;callers:player_update (load from pause menu / after death)	Waits for the loader, marks the current areas unloaded (99), loads areas a0..a2 synchronously, resets the view and lighting, then requests a3/a4
 ST.EXE	0x8003cae4	player_reset_stats			void		supported	candidate	asm;callers:player_reset_new_game	Clears the player's figures (unk62/unk9A to 50, unk7E to 0), max HP/MP and every equipment slot (0xffff)
-ST.EXE	0x8003cb88	player_equipment_bonuses			void		candidate	candidate	asm;callers;src/st/player.c st.player	totals the equipped items' bonuses into viewer.unk1C4..unk1CB
-ST.EXE	0x8003cedc	player_recalc_stats			void		supported	candidate	asm;callees:player_equipment_bonuses,player_compute_derived_stats;callers:main.c,player_swap_hand_items,player_reset_new_game,player_reload_equipment	Recomputes the equipment bonuses and the derived stats, then clamps HP to its maximum
+ST.EXE	0x8003cb88	player_sum_equipment_bonuses			void		candidate	candidate	asm;callers;src/st/player.c st.player	totals the equipped items' bonuses into viewer.unk1C4..unk1CB
+ST.EXE	0x8003cedc	player_recalc_stats			void		supported	candidate	asm;callees:player_sum_equipment_bonuses,player_compute_derived_stats;callers:main.c,player_swap_hand_items,player_reset_new_game,player_reload_equipment	Recomputes the equipment bonuses and the derived stats, then clamps HP to its maximum
 ST.EXE	0x8003cf28	player_add_hp			void	int delta	candidate	candidate	asm;callers;src/st/player.c st.player	adds to the hit points, clamped to 0..max; kills at 0
 ST.EXE	0x8003cf94	player_add_mp			void	int delta	candidate	candidate	asm;callers;src/st/player.c st.player	adds to the magic points, clamped to 0..max
 ST.EXE	0x8003cfdc	player_check_item_durability			void	int id	supported	candidate	asm;callers:player_update_durability_warning	Sets the durability-warning flag (viewer.unk2C 0x1000000) when item `id`'s durability (unk28) is 1..3

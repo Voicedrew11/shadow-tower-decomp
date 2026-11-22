@@ -2099,7 +2099,7 @@ int vis_id_is_visible(u16 id)
 }
 
 ADDRESS(0x8001c8e0, 0xe8)
-void vis_collect_table_a(void)
+void vis_collect_creatures(void)
 {
     Vis212 *e;
     int i;
@@ -2123,7 +2123,7 @@ void vis_collect_table_a(void)
 }
 
 ADDRESS(0x8001c9c8, 0xf0)
-void vis_collect_table_b(void)
+void vis_collect_objects(void)
 {
     Vis88 *e;
     int i;
@@ -2150,7 +2150,7 @@ void vis_collect_table_b(void)
 }
 
 ADDRESS(0x8001cab8, 0xd0)
-void vis_collect_table_c(void)
+void vis_collect_ground_items(void)
 {
     Vis48 *e;
     int i;
@@ -5389,9 +5389,9 @@ void world_render_frame(VECTOR *pos, SVECTOR *rot)
     player_draw_equipment_model(0);
     player_draw_equipment_model(1);
     world_draw();
-    vis_collect_table_a();
-    vis_collect_table_b();
-    vis_collect_table_c();
+    vis_collect_creatures();
+    vis_collect_objects();
+    vis_collect_ground_items();
     world_draw_creatures();
     world_draw_objects();
     world_draw_ground_items();

@@ -61,7 +61,7 @@ void player_reset_state(void);
 short player_step_status_timer(short *level, short *peak, int ramp, int max, int apply);
 void area_load_set_blocking(int r, int g, int b, int arg3, int arg4, int arg5);
 void player_reset_stats(void);
-void player_equipment_bonuses(void);
+void player_sum_equipment_bonuses(void);
 void player_add_hp(int delta);
 void player_add_mp(int delta);
 void player_check_item_durability(int id);

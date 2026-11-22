@@ -498,7 +498,7 @@ typedef struct {
     u8 unk5[0xb];
     u8 unk10[14];        /* 0x10: counts menu_arrange_icons_draw_details lists */
     u16 unk1E;           /* 0x1e */
-    /* 0x20: three bonuses (kind, amount) player_equipment_bonuses sums */
+    /* 0x20: three bonuses (kind, amount) player_sum_equipment_bonuses sums */
     u32 kind0 : 4;
     u32 amount0 : 4;
     u32 kind1 : 4;
@@ -558,9 +558,9 @@ int vis_measure_position(void);
 void vis_cull_by_range(void);
 int vis_record_is_visible(int a, int b, int c);
 int vis_id_is_visible(u16 id);
-void vis_collect_table_a(void);
-void vis_collect_table_b(void);
-void vis_collect_table_c(void);
+void vis_collect_creatures(void);
+void vis_collect_objects(void);
+void vis_collect_ground_items(void);
 
 /* src/st/vis_request.c */
 void collision_locate_hit_body(VECTOR *pos);
