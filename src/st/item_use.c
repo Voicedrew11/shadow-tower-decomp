@@ -136,7 +136,7 @@ void item_use(int id)
             sound_play(SOUND_RECOVER, 128);
         }
         break;
-    case 0x120:
+    case ITEM_DIVINE_SYMBOL:
         if (viewer.status_flags & STATUS_CURSED) {
             viewer.unk190[4][1] = 0;
             viewer.unk190[4][0] = 0;

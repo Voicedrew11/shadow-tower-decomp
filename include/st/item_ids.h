@@ -8,6 +8,6 @@
 
 #define ITEM_CUNES 266           /* the money the shops take (shop_run) */
 #define ITEM_SACRED_FEATHER 270  /* item_use: warps back to the save point */
-#define ITEM_DIVINE_SYMBOL 288   /* item_use changes the stats: callers recompute them */
+#define ITEM_DIVINE_SYMBOL 288   /* item_use lifts STATUS_CURSED: callers recompute the stats */
 
 #endif
