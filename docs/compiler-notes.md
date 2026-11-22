@@ -666,7 +666,8 @@ and `mflo`, for example). Examples: ST `0x80062228`, FDAT_012 `0x801eda38`.
 - A load through a varying in-struct pointer may pass a store to a
   fixed-address scalar, but not a store to a fixed-address aggregate member,
   and an in-struct read stays ahead of a later store. So the old scalar
-  `DAT_801cd0e0 = 1` spelled as the member `game_progress.item_use_result` keeps retail's order where the scalar extern reorders
+  `DAT_801cd0e0 = 1` spelled as the member `game_progress.item_use_result`
+  keeps retail's order where the scalar extern reorders
   (ST `0x80054a54`, ST `0x80055374`: re-run every function that stores to a
   word after it is folded into an aggregate), an extern read as `X[0]` of
   `extern u8 *X[1]` stays ahead of a store (ST `0x800456f8`), and a tag store
