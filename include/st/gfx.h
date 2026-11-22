@@ -7,6 +7,7 @@
 #define ST_GFX_H
 
 #include <kf/lib/types.h>
+#include <kf/lib/offsetof.h>
 #include <sys/types.h>
 #include <LIBGTE.H>
 #include <LIBGPU.H>
@@ -160,11 +161,10 @@ typedef struct {
     /* 0x834c: heap block owners and model files by id: creature_model_load's bank
      * slots (by slot), creature_second_model_load and src/st/slots.c (by slot - 16), the
      * viewer models at 32.. (player_draw_equipment_model), model_draw's model blocks, the
-     * animation model files (src/st/anim.c); area_load_update frees 128..143;
-     * one array indexed up to 715 (objects from 256, items from 588: item_model_files). */
-    void *model_files[144];
-    u8 unk858C[0x8c7c - 0x858c];
-    void *item_model_files[128]; /* 0x8c7c: heap blocks area_load_update frees on an area change */
+     * animation model files (src/st/anim.c); area_load_update frees the creature
+     * models 128..143 and the item models 588..715 on an area change; objects
+     * start at 256. */
+    void *model_files[716];
     u8 unk8E7C[0xa5fc - 0x8e7c];
     StAnimSlot anim_slots[16]; /* 0xa5fc */
     StAnimSet anim_sets[16]; /* 0xa77c */
@@ -212,6 +212,10 @@ typedef struct {
     u8 talk_fade_length;
     u8 talk_frame;
 } WorldState;
+
+typedef char WorldStateModelFilesAt0x834C[offsetof(WorldState, model_files) == 0x834c ? 1 : -1];
+typedef char WorldStateUnk8E7CAt0x8E7C[offsetof(WorldState, unk8E7C) == 0x8e7c ? 1 : -1];
+typedef char WorldStateAnimSlotsAt0xA5FC[offsetof(WorldState, anim_slots) == 0xa5fc ? 1 : -1];
 
 extern WorldState world_state;
 

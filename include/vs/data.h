@@ -25,6 +25,8 @@
 
 /* The CD request ring holds 4 entries in VS (ST.EXE: 48). */
 #define VS_CD_REQUESTS 4
+/* VS.EXE's archive tables (WIP count; ST.EXE has nine, ST_ARCHIVES). */
+#define VS_ARCHIVES 3
 
 /* An archive table: its start-sector table and file extent like ST.EXE's
  * StArchive, in an 80-byte record (the rest is unmodeled). */
@@ -44,7 +46,7 @@ typedef struct {
     StCdRequest requests[VS_CD_REQUESTS];
     StCdRequest *next_free; /* 0xd8: the next free entry (ST: unk9D4) */
     StCdRequest *current; /* 0xdc: the entry being read (ST: unk9D8) */
-    VsArchive archives[ST_ARCHIVES]; /* 0xe0: count as in ST.EXE (WIP) */
+    VsArchive archives[VS_ARCHIVES]; /* 0xe0 */
     u8 unk1D0[0x4a0 - 0x1d0];
     u_long *load_cursor; /* 0x4a0: load cursor in load_buffer (lineup_screen_show); the menu file buffer (card_screen_run) */
     u_long load_buffer[0x8000]; /* 0x4a4: the 0x20000-byte load buffer */

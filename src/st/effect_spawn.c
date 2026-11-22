@@ -353,7 +353,7 @@ StEffect *effect_spawn(u8 type, u8 flags, u8 kind, VECTOR *pos, SVECTOR *dir, ..
             SCALE(e, args[1]);
             e->rotation = *(SVECTOR *)args[2];
             REACH(e, e->scale.vx / 8);
-            ST_EFFECT_ENTRY(e) = (Creature *)args[4];
+            e->owner.entry = (Creature *)args[4];
             break;
         case 0xc9:
         case 0xd4:
@@ -405,9 +405,9 @@ StEffect *effect_spawn(u8 type, u8 flags, u8 kind, VECTOR *pos, SVECTOR *dir, ..
             SCALE(e, args[1]);
             e->rotation = *(SVECTOR *)args[2];
             REACH(e, e->scale.vx / 8);
-            ST_EFFECT_ENTRY(e) = (Creature *)args[4];
-            e->state.h = ST_EFFECT_ENTRY(e)->script->arg.u[6];
-            e->state2.h = ST_EFFECT_ENTRY(e)->script->arg.u[9];
+            e->owner.entry = (Creature *)args[4];
+            e->state.h = e->owner.entry->script->arg.u[6];
+            e->state2.h = e->owner.entry->script->arg.u[9];
             break;
         case 0x3d:
         case 0x46:
@@ -426,8 +426,8 @@ StEffect *effect_spawn(u8 type, u8 flags, u8 kind, VECTOR *pos, SVECTOR *dir, ..
             e->state.h = -896;
             REACH(e, e->scale.vx);
             e->parent = (StEffect *)args[4];
-            ST_EFFECT_ENTRY(e) = ST_EFFECT_ENTRY(e->parent);
-            e->position.vy = ST_EFFECT_ENTRY(e)->position.vy;
+            e->owner.entry = e->parent->owner.entry;
+            e->position.vy = e->owner.entry->position.vy;
             e->rotation.vy = 0;
             e->velocity.vx = 0;
             e->velocity.vy = 0;
@@ -447,7 +447,7 @@ StEffect *effect_spawn(u8 type, u8 flags, u8 kind, VECTOR *pos, SVECTOR *dir, ..
             e->state.h = -896;
             REACH(e, e->scale.vx);
             e->parent = (StEffect *)args[4];
-            ST_EFFECT_ENTRY(e) = ST_EFFECT_ENTRY(e->parent);
+            e->owner.entry = e->parent->owner.entry;
             e->position.vy = viewer.position.vy + 1600;
             e->rotation.vy = 0;
             e->velocity.vx = 0;
@@ -474,7 +474,7 @@ StEffect *effect_spawn(u8 type, u8 flags, u8 kind, VECTOR *pos, SVECTOR *dir, ..
             REACH(e, e->scale.vx / 8);
             e->state.h = -896;
             e->parent = (StEffect *)args[4];
-            ST_EFFECT_ENTRY(e) = ST_EFFECT_ENTRY(e->parent);
+            e->owner.entry = e->parent->owner.entry;
             break;
         case 0xcc:
         case 0xcf:
@@ -532,7 +532,7 @@ StEffect *effect_spawn(u8 type, u8 flags, u8 kind, VECTOR *pos, SVECTOR *dir, ..
             owner = (Creature *)args[1];
             entry = owner;
         mark_owner:
-            ST_EFFECT_ENTRY(e) = owner;
+            e->owner.entry = owner;
             entry->unk24 = 4096;
             entry->status.bytes[2] = 13;
             entry->fade = 4095;
@@ -1623,7 +1623,7 @@ void effect_update(void)
     case 0xeb:
         e->rotation.vz = (e->rotation.vz - 128) & 0xfff;
         {
-            Creature *owner = ST_EFFECT_ENTRY(e);
+            Creature *owner = e->owner.entry;
             SVECTOR v;
             MATRIX m;
             SVECTOR rot;
@@ -1701,7 +1701,7 @@ void effect_update(void)
         int model;
 
         SCALE(e, rcos(e->life << 11) / 4);
-        entry = ST_EFFECT_ENTRY(e);
+        entry = e->owner.entry;
         e->state.h += 32;
         if (e->state.h >= -128)
             e->state.h = -128;
@@ -1806,7 +1806,7 @@ void effect_update(void)
         e->position.vx = e->parent->position.vx;
         e->position.vy = e->parent->position.vy;
         e->position.vz = e->parent->position.vz;
-        entry = ST_EFFECT_ENTRY(e);
+        entry = e->owner.entry;
         e->state.h += 32;
         if (e->state.h >= -128)
             e->state.h = -128;
@@ -1893,12 +1893,12 @@ void effect_update(void)
         n = 8;
     drain:
         if (e->life < 16) {
-            Creature *owner = ST_EFFECT_ENTRY(e);
+            Creature *owner = e->owner.entry;
 
             owner->fade = e->life * 256;
             owner->status.bytes[2] |= 0xd;
         } else if (e->life <= 0) {
-            Creature *owner = ST_EFFECT_ENTRY(e);
+            Creature *owner = e->owner.entry;
 
             owner->fade = 0;
             if (owner->status.bytes[2] & 0x10)
@@ -1927,13 +1927,13 @@ void effect_update(void)
         n = 8;
     wound:
         if (e->life < 16) {
-            Creature *owner = ST_EFFECT_ENTRY(e);
+            Creature *owner = e->owner.entry;
 
             owner->fade = e->life * 256;
             owner->status.bytes[2] |= 0xd;
         }
         if (e->life <= 0) {
-            Creature *owner = ST_EFFECT_ENTRY(e);
+            Creature *owner = e->owner.entry;
 
             owner->fade = 0;
             if (owner->status.bytes[2] & 0x10)

@@ -96,7 +96,7 @@ void pad_clear_input(void);                                /* src/vs/main.c */
 int card_check_saves_changed(void);                                 /* src/vs/menu.c */
 void anim_set_register(u16 id, StAnimFile *file);            /* src/vs/anim_set.c */
 void anim_register(u16 id, StAnimFile *file);            /* src/vs/anim_slots.c */
-void model_fixup_face_indices(ModelFile *file);                     /* src/vs/anim_set.c */
+void model_fixup_face_indices(Model *model);                       /* src/vs/anim_set.c */
 int load_file(u_long *buf, char *name, u32 size);    /* src/vs/cd_read.c */
 void rcnt2_handler(void);                                /* src/vs/main.c */
 void vsync_handler(void);                                /* src/vs/main.c */

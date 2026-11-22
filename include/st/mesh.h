@@ -155,14 +155,10 @@ void world_draw(void);
 
 /*
  * The model renderers (src/st/model_draw.c). A model block (a
- * world_state.model_files slot) holds its part data at the offset in word +8;
- * halfword +6 selects which of anim_prepare / anim_prepare_any prepares it.
+ * world_state.model_files slot) is a StAnimFile (st/anim.h): its part data is
+ * at the offset `model`; node_count selects which of anim_prepare /
+ * anim_prepare_any prepares it.
  */
-typedef struct {
-    u8 unk0[6];
-    u16 node_count;
-    u32 model;
-} ModelFile;
 
 /* One entry of the scratchpad's model list: a part of the current model
  * drawn for an object. */

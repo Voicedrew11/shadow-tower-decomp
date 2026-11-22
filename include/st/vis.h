@@ -235,7 +235,7 @@ typedef struct {
     } arg;
 } CreatureScript;
 
-typedef struct {
+typedef struct Creature {
     u8 spawn_chance;     /* 0x00: 0xff when free (creatures_clear) */
     u8 kind;
     u8 type;             /* 0x02: index of its 192-byte CreatureType record */

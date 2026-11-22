@@ -3853,7 +3853,7 @@ void fade_add_color(int r, int g, int b, int scale, int mode)
 #define MODEL_POS(sp) ((VECTOR *)&(sp)->vertex_pos)
 
 /* A model block's part data. */
-#define MODEL_DATA(block) ((u8 *)(block) + ((ModelFile *)(block))->model)
+#define MODEL_DATA(block) ((u8 *)(block) + ((StAnimFile *)(block))->model)
 
 /*
  * Projects the current part's model-space vertices (RTPS) into the
@@ -3950,7 +3950,7 @@ void player_draw_equipment_model(u8 slot)
     sp->vertices = world_state.world_vertices;
     sp->clut_base = 0;
     *(u_long *)&sp->rgb = equipment_model_rgb;
-    if (((ModelFile *)viewer.slot_model_files[slot])->node_count == 0) {
+    if (viewer.slot_model_files[slot]->node_count == 0) {
         gte_SetRotMatrix(SCRATCH_MATRIX(sp));
         gte_SetTransMatrix(SCRATCH_MATRIX(sp));
         sp->model = MODEL_DATA(world_state.model_files[slot + 32]);
@@ -4137,7 +4137,7 @@ void model_draw(int unused0, u16 model, VECTOR *pos, SVECTOR *rot, SVECTOR *scal
     }
     gte_SetRotMatrix(SCRATCH_MATRIX(sp));
     gte_SetTransMatrix(SCRATCH_MATRIX(sp));
-    if (((ModelFile *)world_state.model_files[model])->node_count == 0) {
+    if (((StAnimFile *)world_state.model_files[model])->node_count == 0) {
         sp->model = MODEL_DATA(world_state.model_files[model]);
         if (part < 128) {
             i = 0;

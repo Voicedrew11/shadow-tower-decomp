@@ -37,7 +37,7 @@ RODATA(0x800112a8, 0x134)
 #define PART_VERTICES(model, part) ((SVECTOR *)((model) + (MODEL_PARTS(model)[part].vertices + 12)))
 
 /*
- * A loaded model file's primitive fix-up: every
+ * A loaded mesh model's primitive fix-up (its part count at +8): every
  * part's tagged face records get their vertex and normal indices turned
  * into byte offsets (8 bytes an entry).
  */
@@ -48,16 +48,16 @@ RODATA(0x800112a8, 0x134)
  * semi-transparency bit is ignored for the switch.
  */
 ADDRESS(0x8002345c, 0x308)
-void model_fixup_face_indices(ModelFile *file)
+void model_fixup_face_indices(Model *model)
 {
-    VsModelPart *part = (VsModelPart *)((u8 *)file + 12);
-    int n = file->model;
+    VsModelPart *part = (VsModelPart *)((u8 *)model + 12);
+    int n = model->parts_count;
     int count;
     u32 *p;
     VsFaceTag tag;
 
     while (n--) {
-        p = (u32 *)((u8 *)file + (part->faces + 12));
+        p = (u32 *)((u8 *)model + (part->faces + 12));
         count = part->n_faces;
         while (count--) {
             tag = *(VsFaceTag *)p++;
@@ -580,7 +580,7 @@ void fighter_draw_skeletal(void)
     RotMatrix((SVECTOR *)&current_fighter->rot_x, &sp->matrix);
     CompMatrix(&vs_gfx_state.view_matrix, &sp->matrix, &sp->matrix);
     n = current_fighter - shared_buffer.fighter;
-    sp->model = (u8 *)vs_gfx_state.model_files[n] + ((ModelFile *)vs_gfx_state.model_files[n])->model;
+    sp->model = (u8 *)vs_gfx_state.model_files[n] + ((StAnimFile *)vs_gfx_state.model_files[n])->model;
     if (anim_set_pose(&current_fighter->anim_set, n, current_fighter->anim,
                       current_fighter->anim_frame) == 0)
         return;

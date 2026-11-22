@@ -9,9 +9,12 @@
 #define ST_EFFECT_H
 
 #include <kf/lib/types.h>
+#include <kf/lib/offsetof.h>
 #include <sys/types.h>
 #include <LIBGTE.H>
 #include <st/gfx.h>
+
+struct Creature; /* st/vis.h */
 
 /* One 24-byte effect definition (viewer.magic_defs points at the ones the
  * hands cast). */
@@ -50,9 +53,14 @@ typedef struct StEffect {
     SVECTOR scale;       /* 0x38: scale */
     SVECTOR velocity;    /* 0x40: velocity */
     StAnimState anim_slot; /* 0x48: its animation state (model_draw) */
-    u8 owner;            /* 0x4c: VS.EXE: the owner fighter's number; ST.EXE: a word, ST_EFFECT_ENTRY */
-    u8 attack_index;     /* 0x4d: VS.EXE: the attack's index among the fighter's */
-    u8 unk4E[2];
+    union {
+        struct {
+            u8 fighter;  /* 0x4c: VS.EXE: the owner fighter's number */
+            u8 attack_index; /* 0x4d: VS.EXE: the attack's index among the fighter's */
+            u8 unk4E[2];
+        } vs;
+        struct Creature *entry; /* 0x4c: ST.EXE: the table A entry the effect belongs to */
+    } owner;
     union {
         s16 h;
         s8 b[2];
@@ -63,11 +71,15 @@ typedef struct StEffect {
         s8 b[2];
         u8 ub[2];
     } state2;            /* 0x52: more of it */
-    void *hit_target;    /* 0x54: ST.EXE: the table A entry (Creature) a bolt hit */
+    struct Creature *hit_target; /* 0x54: ST.EXE: the table A entry a bolt hit */
 } StEffect;
 
-/* ST.EXE: the table A entry (Creature, st/vis.h) the effect belongs to. */
-#define ST_EFFECT_ENTRY(e) (*(Creature **)&(e)->owner)
+typedef char StEffectAnimSlotAt0x48[offsetof(StEffect, anim_slot) == 0x48 ? 1 : -1];
+typedef char StEffectOwnerAt0x4C[offsetof(StEffect, owner) == 0x4c ? 1 : -1];
+typedef char StEffectAttackIndexAt0x4D[offsetof(StEffect, owner.vs.attack_index) == 0x4d ? 1 : -1];
+typedef char StEffectStateAt0x50[offsetof(StEffect, state) == 0x50 ? 1 : -1];
+typedef char StEffectHitTargetAt0x54[offsetof(StEffect, hit_target) == 0x54 ? 1 : -1];
+typedef char StEffectSize[sizeof(StEffect) == 88 ? 1 : -1];
 
 #define ST_EFFECT_FREE 255
 #define ST_EFFECT_SLOTS 128

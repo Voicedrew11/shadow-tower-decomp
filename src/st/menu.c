@@ -853,7 +853,7 @@ void menu_equip_info_run(void)
 
     base = 0;
     offset = 0;
-    arc = &cd_state.stat_archive;
+    arc = &cd_state.archives[3];
     cd_loc_add_sectors(&arc->file.pos, arc->sectors[1], &loc);
     CdControl(CdlSetloc, (u_char *)&loc, NULL);
     ResetGraph(1);

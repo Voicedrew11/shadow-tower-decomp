@@ -608,8 +608,8 @@ void area_load_update(void)
                     heap_free(world_state.model_files[128 + i]);
             }
             for (i = 127; i != -1; i--) {
-                if (world_state.item_model_files[i])
-                    heap_free(world_state.item_model_files[i]);
+                if (world_state.model_files[588 + i])
+                    heap_free(world_state.model_files[588 + i]);
             }
             copy_words((u32 *)vis_table_a.types, (u32 *)(p + 1), 2816);
             creature_types_link_scripts();

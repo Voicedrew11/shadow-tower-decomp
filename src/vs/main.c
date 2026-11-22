@@ -635,7 +635,7 @@ void fighters_load_round(void)
         cd_read_member(0, member + 3, (u_long *)&FIGHTER);
         sound_bank_open(i);
         if (cd_read_member(0, member + 4, FIGHTER.effect_model))
-            model_fixup_face_indices((ModelFile *)FIGHTER.effect_model);
+            model_fixup_face_indices((Model *)FIGHTER.effect_model);
         else
             FIGHTER.effect_model[0] = 0;
         cd_read_member(0, member, (u_long *)&FIGHTER);
@@ -1432,13 +1432,13 @@ void match_load_resources(void)
     tim_load_images_shifted(arena_model_0, 0, 0);
     DrawSync(0);
     cd_read_member(5, 0, arena_model_0);
-    model_fixup_face_indices((ModelFile *)arena_model_0);
+    model_fixup_face_indices((Model *)arena_model_0);
     cd_read_member(5, 1, (u_long *)arena_model_1);
-    model_fixup_face_indices((ModelFile *)arena_model_1);
+    model_fixup_face_indices((Model *)arena_model_1);
     cd_read_member(5, 2, (u_long *)arena_model_2);
-    model_fixup_face_indices((ModelFile *)arena_model_2);
+    model_fixup_face_indices((Model *)arena_model_2);
     cd_read_member(5, 3, (u_long *)guard_flash_model);
-    model_fixup_face_indices((ModelFile *)guard_flash_model);
+    model_fixup_face_indices((Model *)guard_flash_model);
     round_wins[0] = 0;
     round_wins_2p = 0;
     round_index = 0;
