@@ -390,7 +390,10 @@ void menu_equip_info_draw_slots(void);
 void menu_equip_info_draw_attributes(void);
 
 void menu_equip_info_draw_stats(void);
+/* VS.EXE has its own port under this name, with another signature; VS units define VS_EXE. */
+#ifndef VS_EXE
 void ui_draw_cell_grid(DVECTOR *pos, DVECTOR *tex, DVECTOR *clut, CVECTOR *color, int arg4);
+#endif
 void menu_equip_info_draw_item(void);
 void menu_equip_info_draw_magic(void);
 
@@ -398,7 +401,10 @@ void menu_equip_info_draw(void);
 
 /* the stored-item screens */
 void menu_creature_book_draw_grid(void);
+/* VS.EXE has its own port under this name, with another signature; VS units define VS_EXE. */
+#ifndef VS_EXE
 void menu_creature_book_draw_entry(void);
+#endif
 
 void menu_creature_book_draw(void);
 void menu_arrange_icons_draw_hand(void);

@@ -43,27 +43,27 @@ typedef char VsCardStateSize[sizeof(VsCardState) == 0x1b8 ? 1 : -1];
 /* The 512-byte card file header; only the values the code reads. */
 typedef struct {
     u8 unk0[0x34];
-    u8 unk34[6];         /* 0x34: the title's three SJIS digits (func_8001c5e0) */
+    u8 unk34[6];         /* 0x34: the title's three SJIS digits (match_award_requested_item) */
     u8 unk3A[0x3d - 0x3a];
     u8 unk3D;
     u16 unk3E;
     u16 unk40;
-    u8 unk42;            /* 0x42: func_8001b314's sum of the save record */
+    u8 unk42;            /* 0x42: card_write_blocks's sum of the save record */
     u8 unk43[0x200 - 0x43];
 } VsCardHeader;
 
 /* Inventory portion of a player's save record; only proven fields. */
-/* Per-item marks func_800193e8 compares between the two saves (VS band 6):
+/* Per-item marks item_request_any_available compares between the two saves (VS band 6):
  * item ids 0..265 index the byte arrays. */
 typedef struct {
-    u32 unk0[5];         /* 0x000: one bit per fighter id owned (func_80018c84) */
+    u32 unk0[5];         /* 0x000: one bit per fighter id owned (menu_creature_select_run) */
     u8 unk14[266];       /* 0x014: a second mark, needed when the item's flag bit is set */
     u8 unk11E[0x150 - 0x11e];
     u8 unk150[266];      /* 0x150: the item is held */
     u8 unk25A[0x2b4 - 0x25a];
     u16 unk2B4[21];      /* 0x2b4: listed item ids */
     u8 unk2DE[0x2e0 - 0x2de];
-    s32 unk2E0[3];       /* 0x2e0: the player's team (VsTeam.slot, func_8001bb48) */
+    s32 unk2E0[3];       /* 0x2e0: the player's team (VsTeam.slot, card_screen_run) */
     u8 unk2EC[314];      /* 0x2ec: per-item counts, shared with ST's save format */
 } VsSaveSub;
 
@@ -74,7 +74,7 @@ typedef struct {
     u8 unk4[0x14cc - 4];
     u32 unk14CC[9];      /* 0x14cc: 266 flag bits, counted into the header */
     u8 unk14F0[0x1802 - 0x14f0];
-    u8 unk1802;          /* 0x1802: the count of items won (func_8001c5e0) */
+    u8 unk1802;          /* 0x1802: the count of items won (match_award_requested_item) */
     u8 unk1803[0x18bc - 0x1803];
     VsSaveSub unk18BC;   /* 0x18bc (VS band 6) */
     u8 unk1CE4[0x1d88 - 0x1ce4]; /* remaining save payload */
@@ -95,7 +95,7 @@ extern char DAT_801a0a30[2][40];
 extern VsSave DAT_801a0a80[2];
 
 /* The file list rows the two players' saves were loaded from
- * (func_8001bb48; bss). */
+ * (card_screen_run; bss). */
 extern u16 DAT_80063328[2];
 
 /* The card file headers of the two players' saves (0x8015ffc0, bss). */
@@ -106,7 +106,7 @@ extern VsCardHeader DAT_8015ffc0[2];
 extern char *itoa(int value);
 
 /* src/vs/menu_80016f10.c */
-void func_8001a5b4(int port);
-int func_8001b314(int fd, int offset, u8 *buf, int size);
+void card_check_player_save(int port);
+int card_write_blocks(int fd, int offset, u8 *buf, int size);
 
 #endif

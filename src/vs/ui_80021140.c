@@ -20,7 +20,7 @@ RODATA(0x8001123c, 0x22)
 /* The page arrows' initializers: 8 bytes each, so .sdata under -G8. */
 SDATA(0x80063280, 0x10)
 
-/* Number-width flag for func_8001d9cc (ST.EXE's DIGITS, src/st/ui.c). */
+/* Number-width flag for ui_draw_number (ST.EXE's DIGITS, src/st/ui.c). */
 #define DIGITS(n) ((n) << 24)
 
 /*
@@ -30,12 +30,12 @@ SDATA(0x80063280, 0x10)
  * (`mfhi v1`), which it only does when some call in the function has a
  * value. The result is not used.
  */
-int func_800207d4();
+int ui_draw_cell_grid();
 
 /* The detail page toggle: the attribute figures when nonzero (bss, unowned). */
 
 ADDRESS(0x80021140, 0x844)
-void func_80021140(int player)
+void menu_creature_book_draw_entry(int player)
 {
     RECT left = {319, 119, 16, 8};
     RECT right = {621, 119, 16, 8};
@@ -64,79 +64,79 @@ void func_80021140(int player)
         pad_state.pads[1].unk0 = 0;
     }
     if (DAT_8006335c == 0)
-        func_8001eef4(&right, &sp->unk214, 0);
+        ui_draw_arrow(&right, &sp->unk214, 0);
     else
-        func_8001eef4(&left, &sp->unk214, 2048);
-    func_8001e890(1, 0, 0);
+        ui_draw_arrow(&left, &sp->unk214, 2048);
+    ui_add_draw_mode(1, 0, 0);
     sp->style[0].cd |= 0x80;
-    func_8001d8b8(VS_ITEM_NAME(kind), 32, 16, &sp->style[0]);
+    ui_draw_text(VS_ITEM_NAME(kind), 32, 16, &sp->style[0]);
     {
         DVECTOR tex = {960, 446};
         DVECTOR clut = {560, 497};
         DVECTOR pos = {32, 150};
 
         sp->style[0].cd &= 0x7f;
-        func_800207d4(&pos, &tex, &clut, &sp->style[0], 0xf0005);
+        ui_draw_cell_grid(&pos, &tex, &clut, &sp->style[0], 0xf0005);
     }
     if (DAT_8006335c) {
         for (i = 0; i < 14; i++) {
-            func_8001d8b8(VS_MESSAGE(100 + i), 336, i * 15 + 16, &sp->style[0]);
-            func_8001d9cc((u16)item->figures[i] | DIGITS(2), 582, i * 15 + 16, &sp->style[3]);
+            ui_draw_text(VS_MESSAGE(100 + i), 336, i * 15 + 16, &sp->style[0]);
+            ui_draw_number((u16)item->figures[i] | DIGITS(2), 582, i * 15 + 16, &sp->style[3]);
         }
     } else {
         for (i = 0; i < 10; i++)
-            func_8001d8b8(VS_MESSAGE(117 + i), 336, i * 15 + 16, &sp->style[0]);
+            ui_draw_text(VS_MESSAGE(117 + i), 336, i * 15 + 16, &sp->style[0]);
         if (item->kind < 17)
-            func_8001d8b8(VS_MESSAGE(150 + item->kind), 606 - kind_w[item->kind], 16,
+            ui_draw_text(VS_MESSAGE(150 + item->kind), 606 - kind_w[item->kind], 16,
                           &sp->style[0]);
-        func_8001d9cc(item->unk2 | DIGITS(4), 558, 31, &sp->style[3]);
-        func_8001d9cc(item->unk1 | DIGITS(2), 582, 46, &sp->style[3]);
+        ui_draw_number(item->unk2 | DIGITS(4), 558, 31, &sp->style[3]);
+        ui_draw_number(item->unk1 | DIGITS(2), 582, 46, &sp->style[3]);
         a = item->unk4 * 10 / 3048;
-        func_8001d9cc(a | DIGITS(3), 522, 61, &sp->style[3]);
-        func_8001d3f0(55, 559, 61, &sp->style[3]);
-        func_8001d9cc((u16)((item->unk4 * 10 - a * 3048) / 254) | DIGITS(2), 570, 61,
+        ui_draw_number(a | DIGITS(3), 522, 61, &sp->style[3]);
+        ui_draw_glyph(55, 559, 61, &sp->style[3]);
+        ui_draw_number((u16)((item->unk4 * 10 - a * 3048) / 254) | DIGITS(2), 570, 61,
                       &sp->style[3]);
-        func_8001d3f0(54, 595, 61, &sp->style[3]);
+        ui_draw_glyph(54, 595, 61, &sp->style[3]);
         a = item->unk6 * 100 / 454;
         b = item->unk6 * 1000 / 454;
-        func_8001d9cc(a | DIGITS(4), 522, 76, &sp->style[3]);
-        func_8001d3f0(18, 574, 76, &sp->style[3]);
-        func_8001d9cc((u16)(b - a * 10) | DIGITS(1), 582, 76, &sp->style[3]);
-        func_8001d3f0(53, 594, 76, &sp->style[3]);
+        ui_draw_number(a | DIGITS(4), 522, 76, &sp->style[3]);
+        ui_draw_glyph(18, 574, 76, &sp->style[3]);
+        ui_draw_number((u16)(b - a * 10) | DIGITS(1), 582, 76, &sp->style[3]);
+        ui_draw_glyph(53, 594, 76, &sp->style[3]);
         if (item->pairs[0][1]) {
-            func_8001d9cc((u16)item->pairs[0][1] | DIGITS(3), 522, 91, &sp->style[3]);
-            func_8001d3f0(15, 558, 91, &sp->style[3]);
+            ui_draw_number((u16)item->pairs[0][1] | DIGITS(3), 522, 91, &sp->style[3]);
+            ui_draw_glyph(15, 558, 91, &sp->style[3]);
         }
-        func_8001d9cc((u16)item->pairs[0][0] | DIGITS(3), 570, 91, &sp->style[3]);
+        ui_draw_number((u16)item->pairs[0][0] | DIGITS(3), 570, 91, &sp->style[3]);
         if (item->pairs[1][1]) {
-            func_8001d9cc((u16)item->pairs[1][1] | DIGITS(3), 522, 106, &sp->style[3]);
-            func_8001d3f0(15, 558, 106, &sp->style[3]);
+            ui_draw_number((u16)item->pairs[1][1] | DIGITS(3), 522, 106, &sp->style[3]);
+            ui_draw_glyph(15, 558, 106, &sp->style[3]);
         }
-        func_8001d9cc((u16)item->pairs[1][0] | DIGITS(3), 570, 106, &sp->style[3]);
+        ui_draw_number((u16)item->pairs[1][0] | DIGITS(3), 570, 106, &sp->style[3]);
         if (item->pairs[2][1]) {
-            func_8001d9cc((u16)item->pairs[2][1] | DIGITS(3), 522, 121, &sp->style[3]);
-            func_8001d3f0(15, 558, 121, &sp->style[3]);
+            ui_draw_number((u16)item->pairs[2][1] | DIGITS(3), 522, 121, &sp->style[3]);
+            ui_draw_glyph(15, 558, 121, &sp->style[3]);
         }
-        func_8001d9cc((u16)item->pairs[2][0] | DIGITS(3), 570, 121, &sp->style[3]);
+        ui_draw_number((u16)item->pairs[2][0] | DIGITS(3), 570, 121, &sp->style[3]);
         if (item->pairs[3][1]) {
-            func_8001d9cc((u16)item->pairs[3][1] | DIGITS(3), 522, 136, &sp->style[3]);
-            func_8001d3f0(15, 558, 136, &sp->style[3]);
+            ui_draw_number((u16)item->pairs[3][1] | DIGITS(3), 522, 136, &sp->style[3]);
+            ui_draw_glyph(15, 558, 136, &sp->style[3]);
         }
-        func_8001d9cc((u16)item->pairs[3][0] | DIGITS(3), 570, 136, &sp->style[3]);
+        ui_draw_number((u16)item->pairs[3][0] | DIGITS(3), 570, 136, &sp->style[3]);
         if (item->traits & 0xf)
-            func_8001d8b8(VS_MESSAGE(129 + (item->traits & 0xf)), 336, 181, &sp->style[0]);
+            ui_draw_text(VS_MESSAGE(129 + (item->traits & 0xf)), 336, 181, &sp->style[0]);
         if (item->traits >> 8 & 0xf)
-            func_8001d8b8(VS_MESSAGE(129 + (item->traits >> 8 & 0xf)), 336, 196, &sp->style[0]);
+            ui_draw_text(VS_MESSAGE(129 + (item->traits >> 8 & 0xf)), 336, 196, &sp->style[0]);
         if (item->traits >> 16 & 0xf)
-            func_8001d8b8(VS_MESSAGE(129 + (item->traits >> 16 & 0xf)), 336, 211, &sp->style[0]);
+            ui_draw_text(VS_MESSAGE(129 + (item->traits >> 16 & 0xf)), 336, 211, &sp->style[0]);
     }
     sp->unk238.x = 55;
     sp->unk238.y = 32;
     sp->unk238.w = 230;
     sp->unk238.h = 115;
-    func_8001de8c(&sp->unk238, &sp->style[0], 513, 1);
-    func_8001e890(0, 0, 0);
-    func_8001e530(&sp->unk238, &sp->unk0.team.pos[15], NULL, NULL, 16);
-    func_8001f23c(24, 12, 292, 216);
-    func_8001f23c(324, 12, 292, 216);
+    ui_draw_rect_outline(&sp->unk238, &sp->style[0], 513, 1);
+    ui_add_draw_mode(0, 0, 0);
+    ui_draw_image(&sp->unk238, &sp->unk0.team.pos[15], NULL, NULL, 16);
+    ui_draw_panel(24, 12, 292, 216);
+    ui_draw_panel(324, 12, 292, 216);
 }

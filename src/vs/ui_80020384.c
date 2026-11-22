@@ -13,38 +13,38 @@
 #include <vs/funcs.h>
 
 ADDRESS(0x80020384, 0x9c)
-void func_80020384(void)
+void card_draw_transfer(void)
 {
     VsMenuScratch *sp = VS_MENU_SCRATCH;
 
     if (sp->unk1CC & 0xff)
-        func_8001d8b8(VS_MESSAGE(330), 32, 74, &sp->style[0]);
+        ui_draw_text(VS_MESSAGE(330), 32, 74, &sp->style[0]);
     else
-        func_8001d8b8(VS_MESSAGE(331), 32, 74, &sp->style[0]);
-    func_8001d8b8(VS_MESSAGE(332), 40, 100, &sp->style[0]);
+        ui_draw_text(VS_MESSAGE(331), 32, 74, &sp->style[0]);
+    ui_draw_text(VS_MESSAGE(332), 40, 100, &sp->style[0]);
 }
 
 ADDRESS(0x80020420, 0x40)
-void func_80020420(void)
+void card_draw_finished(void)
 {
     VsMenuScratch *sp = VS_MENU_SCRATCH;
 
-    func_8001d8b8(VS_MESSAGE(340), 32, 74, &sp->style[0]);
+    ui_draw_text(VS_MESSAGE(340), 32, 74, &sp->style[0]);
 }
 
 ADDRESS(0x80020460, 0x50)
-void func_80020460(void)
+void card_draw_message(void)
 {
     VsMenuScratch *sp = VS_MENU_SCRATCH;
 
-    func_8001d8b8(VS_MESSAGE(sp->unk0.menu.half[0]), 60, 114, &sp->style[0]);
+    ui_draw_text(VS_MESSAGE(sp->unk0.menu.half[0]), 60, 114, &sp->style[0]);
 }
 
 /* The menu page frame: title tabs, the page body by page bit, the frame.
  * Unlike ST.EXE's copy it skips the tabs on the first page and always
  * draws the trailing panel. */
 ADDRESS(0x800204b0, 0x324)
-void func_800204b0(void)
+void card_screen_draw(void)
 {
     VsMenuScratch *sp = VS_MENU_SCRATCH;
 
@@ -72,7 +72,7 @@ void func_800204b0(void)
         sp->unk224.w = 40;
         sp->unk224.h = 16;
         sp->unk240.vy = 512;
-        func_8001e530(&sp->unk224, &sp->unk240, &sp->unk244, NULL, 3);
+        ui_draw_image(&sp->unk224, &sp->unk240, &sp->unk244, NULL, 3);
         sp->unk224.y = 44;
         if (sp->unk1CC & 0xff) {
             sp->unk240.vx = 906;
@@ -82,41 +82,41 @@ void func_800204b0(void)
             sp->unk224.x = 32;
         }
         sp->unk224.w = 40;
-        func_8001e530(&sp->unk224, &sp->unk240, &sp->unk244, NULL, 3);
+        ui_draw_image(&sp->unk224, &sp->unk240, &sp->unk244, NULL, 3);
     }
     switch (sp->unk1CC) {
     case 0x2:
     case 0x200:
-        func_8001f9a0();
+        card_draw_port_choice();
         break;
     case 0x4:
     case 0x400:
-        func_8001f960();
+        card_draw_checking();
         break;
     case 0x8:
     case 0x800:
-        func_8001fb98();
+        card_draw_format_prompt();
         break;
     case 0x10:
     case 0x1000:
-        func_8001fcac();
+        card_draw_file_list();
         break;
     case 0x20:
     case 0x2000:
-        func_80020384();
+        card_draw_transfer();
         break;
     case 0x40:
     case 0x4000:
-        func_80020420();
+        card_draw_finished();
         break;
     case 0x80:
     case 0x8000:
-        func_80020460();
+        card_draw_message();
         break;
     }
-    func_8001f23c(16, 36, 288, 192);
-    func_8001f30c(16, 36, 288, 192);
-    func_8001f8c4();
+    ui_draw_panel(16, 36, 288, 192);
+    ui_draw_window(16, 36, 288, 192);
+    menu_draw_background_lowres();
     gfx_flip();
     gfx_draw_ot();
 }

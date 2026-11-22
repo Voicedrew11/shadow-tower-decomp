@@ -21,12 +21,12 @@ typedef struct {
 
 typedef struct {
     VsPad pads[2];       /* 0x00 */
-    s32 unk28;           /* 0x28: frame statistics shown when 1 (func_80015e50 toggles it) */
-    s32 unk2C;           /* 0x2c: frames button 1 has been held (func_80015e50) */
-    volatile s32 unk30;  /* 0x30: frames, counted by the func_80013848 callback */
+    s32 unk28;           /* 0x28: frame statistics shown when 1 (round_play toggles it) */
+    s32 unk2C;           /* 0x2c: frames button 1 has been held (round_play) */
+    volatile s32 unk30;  /* 0x30: frames, counted by the rcnt2_handler callback */
     u8 unk34[4];
     s32 unk38;           /* 0x38: main's root counter 2 event */
-    volatile s32 unk3C;  /* 0x3c: frames, counted by the func_80013868 callback */
+    volatile s32 unk3C;  /* 0x3c: frames, counted by the vsync_handler callback */
     u32 unk40;           /* 0x40: a frame count the periodic sound triggers divide */
     s32 unk44;           /* 0x44: main's root counter 3 event */
 } VsPadState;

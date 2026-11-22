@@ -879,7 +879,7 @@ a callee declared `int` in that file (an old-style `int f();`, no prototype,
 or a real `int` result that is ignored). A `return x;` in the function also
 makes `v0` explicit; a valueless `int` return type does not. Check with
 `.greg`: "Spilling reg 64. Register N now in R" with `R` = 2 means `v0` was
-not forbidden. Examples: VS `0x80021140` (`int func_800207d4();`), FDAT_272
+not forbidden. Examples: VS `0x80021140` (`int ui_draw_cell_grid();`), FDAT_272
 `0x801eec74`, ST `0x8005335c`. Changing a callee's type changes only
 reload-register choices, but in every caller.
 

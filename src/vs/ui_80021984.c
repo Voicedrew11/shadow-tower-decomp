@@ -20,7 +20,7 @@
  * picture over the shared frame tile, and the two background strips.
  */
 ADDRESS(0x80021984, 0x290)
-void func_80021984(void)
+void lineup_screen_draw(void)
 {
     VsMenuScratch *sp = VS_MENU_SCRATCH;
     s32 *slot = DAT_801624b8[0].slot;
@@ -38,9 +38,9 @@ void func_80021984(void)
                 black.r = 0;
                 black.g = 0;
                 black.b = 0;
-                func_8001e3d8(&sp->unk238, &black, 0);
+                ui_fill_rect(&sp->unk238, &black, 0);
             } else {
-                func_8001e530(&sp->unk238, &sp->unk0.team.pos[i], NULL, NULL, 272);
+                ui_draw_image(&sp->unk238, &sp->unk0.team.pos[i], NULL, NULL, 272);
             }
             sp->unk238.y += 48;
             if (i == 2) {
@@ -51,10 +51,10 @@ void func_80021984(void)
     } else {
         sp->unk238.x = 56;
         sp->unk238.y = 96;
-        func_8001e530(&sp->unk238, &sp->unk0.team.pos[0], NULL, NULL, 272);
+        ui_draw_image(&sp->unk238, &sp->unk0.team.pos[0], NULL, NULL, 272);
         sp->unk238.x = 216;
         sp->unk238.y = 96;
-        func_8001e530(&sp->unk238, &sp->unk0.team.pos[3], NULL, NULL, 272);
+        ui_draw_image(&sp->unk238, &sp->unk0.team.pos[3], NULL, NULL, 272);
     }
     sp->unk238.w = 28;
     sp->unk238.h = 28;
@@ -65,11 +65,11 @@ void func_80021984(void)
             black.r = 0;
             black.g = 0;
             black.b = 0;
-            func_8001e3d8(&sp->unk238, &black, 0);
+            ui_fill_rect(&sp->unk238, &black, 0);
         } else {
-            func_8001e530(&sp->unk238, &sp->unk0.team.pos[6 + i], NULL, NULL, 272);
+            ui_draw_image(&sp->unk238, &sp->unk0.team.pos[6 + i], NULL, NULL, 272);
         }
-        func_8001e530(&sp->unk238, &sp->unk0.team.pos[8], NULL, NULL, 272);
+        ui_draw_image(&sp->unk238, &sp->unk0.team.pos[8], NULL, NULL, 272);
         sp->unk238.x = 272;
     }
     sp->unk238.w = 160;
@@ -78,10 +78,10 @@ void func_80021984(void)
     sp->unk238.y = 0;
     sp->unk240.vx = 320;
     sp->unk240.vy = 0;
-    func_8001e530(&sp->unk238, &sp->unk240, NULL, NULL, 16);
+    ui_draw_image(&sp->unk238, &sp->unk240, NULL, NULL, 16);
     sp->unk238.x = 160;
     sp->unk240.vx = 480;
-    func_8001e530(&sp->unk238, &sp->unk240, NULL, NULL, 16);
-    func_8001e890(0, 0, 0);
+    ui_draw_image(&sp->unk238, &sp->unk240, NULL, NULL, 16);
+    ui_add_draw_mode(0, 0, 0);
     gfx_end_frame();
 }

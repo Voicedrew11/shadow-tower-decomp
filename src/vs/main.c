@@ -4,7 +4,7 @@
  * camera, the round's frame and loop, the end-of-match screens and main.
  * One translation unit: retail lays out its constants (0x80011000, the
  * file names here and main's strings) before its switch tables
- * (0x800110a0, func_80013c5c's and then func_80015020's), the order cc1
+ * (0x800110a0, fighters_play_anim_sounds's and then round_draw_frame's), the order cc1
  * writes one object's read-only data in. $gp-relative accesses to the
  * round state, so -G8.
  */
@@ -14,7 +14,7 @@
 
 /* The first side's picked fighter and rounds won: one-word tentative
  * definitions ahead of vs/data.h, whose shared declarations leave the
- * extent open (func_80021984 and func_80029f28 index both sides from
+ * extent open (lineup_screen_draw and hud_draw_round_wins index both sides from
  * them), so that ASPSX addresses them $gp-relative. */
 s32 DAT_80063330[1];
 s32 DAT_80063370[1];
@@ -45,11 +45,11 @@ s32 DAT_80063370[1];
 
 /* The module's constants (the archive and music file names, the frame
  * statistics' format strings and main's file name), then its switch tables
- * (func_80013c5c's and func_80015020's phase table). */
+ * (fighters_play_anim_sounds's and round_draw_frame's phase table). */
 RODATA(0x80011000, 0x110)
 
 /* The model renderers' light scale (fighter_draw_skeletal, fighter_draw_vertex_anim and
- * func_800291d4 scale their light matrix by it). */
+ * model_draw_part_at scale their light matrix by it). */
 DATA(0x8005b2a8, 0x10, ".data")
 VECTOR DAT_8005b2a8 = {ONE, ONE, ONE};
 
@@ -111,14 +111,14 @@ int cd_read_member();
 
 /* Sets the CD (serial A) mixing volume, both channels. */
 ADDRESS(0x800129bc, 0x2c)
-void func_800129bc(short volume)
+void cd_audio_set_volume(short volume)
 {
     SsSetSerialVol(SS_SERIAL_A, volume, volume);
 }
 
 /* Selects XA channel `channel` of the music file and seeks to it, muted. */
 ADDRESS(0x800129e8, 0x88)
-void func_800129e8(int channel)
+void xa_cue_bgm(int channel)
 {
     CdlFILTER filter;
     CdlFILE file;
@@ -127,7 +127,7 @@ void func_800129e8(int channel)
         ;
     filter.file = 1;
     filter.chan = channel;
-    func_800129bc(0);
+    cd_audio_set_volume(0);
     while (!CdControl(CdlSetfilter, (u_char *)&filter, 0))
         ;
     while (!CdControl(CdlSetloc, (u_char *)&file.pos, 0))
@@ -137,7 +137,7 @@ void func_800129e8(int channel)
 /* Opens sound bank `bank`'s VAB header and transfers its body to SPU
  * memory at 0x3e400 + bank * 0xa000. */
 ADDRESS(0x80012a70, 0xe0)
-void func_80012a70(int bank)
+void sound_bank_open(int bank)
 {
     VsSoundBank *b = &DAT_801604b0[bank];
 
@@ -152,7 +152,7 @@ void func_80012a70(int bank)
 /* Uploads a run of TIM images, shifting each image `page` texture pages
  * right and each CLUT `clut_y` lines down. */
 ADDRESS(0x80012b50, 0xdc)
-void func_80012b50(u_long *data, int page, int clut_y)
+void tim_load_images_shifted(u_long *data, int page, int clut_y)
 {
     u_long *tim = data;
     u_long flags;
@@ -187,7 +187,7 @@ void func_80012b50(u_long *data, int page, int clut_y)
 
 /* Uploads a run of TIM images to the given image and CLUT positions. */
 ADDRESS(0x80012c2c, 0xe4)
-void func_80012c2c(u_long *data, DVECTOR *pos, DVECTOR *clut_pos)
+void tim_load_images_at(u_long *data, DVECTOR *pos, DVECTOR *clut_pos)
 {
     u_long *tim = data;
     u_long flags;
@@ -238,12 +238,12 @@ void func_80012c2c(u_long *data, DVECTOR *pos, DVECTOR *clut_pos)
     VS_PART_FACES(n_gt3, MeshFaceGT3, op(MeshFaceGT3));                      \
     VS_PART_FACES(n_gt4, MeshFaceGT4, op(MeshFaceGT4))
 
-/* func_80012d10's shift: texture page and CLUT line. */
+/* fighter_offset_textures's shift: texture page and CLUT line. */
 #define VS_SHIFT_TEXTURE(type)                                               \
     MESH_WORD_HI(face_of(type)->uv1_tpage) += page;                          \
     MESH_WORD_HI(face_of(type)->uv0_clut) += clut_y << 6
 
-/* func_8001336c's semi-transparency mode (tpage bits 5-6). */
+/* fighter_set_semi_trans's semi-transparency mode (tpage bits 5-6). */
 #define VS_SET_BLEND(type)                                                   \
     MESH_WORD_HI(face_of(type)->uv1_tpage) =                                 \
         (MESH_WORD_HI(face_of(type)->uv1_tpage) & ~0x60) | mode
@@ -253,7 +253,7 @@ void func_80012c2c(u_long *data, DVECTOR *pos, DVECTOR *clut_pos)
  * one is loaded. Kind 1 models walk every part of the model the caller
  * put in sp->model, kind 2 only its first. */
 ADDRESS(0x80012d10, 0x65c)
-void func_80012d10(int id)
+void fighter_offset_textures(int id)
 {
     VsScratchPad *sp = VS_SCRATCHPAD;
     int page = id * 4;
@@ -289,7 +289,7 @@ void func_80012d10(int id)
  * fighter `id`'s model to `mode`: every part for a kind 1 model, the
  * first for kind 2. */
 ADDRESS(0x8001336c, 0x374)
-void func_8001336c(int id, int mode)
+void fighter_set_semi_trans(int id, int mode)
 {
     VsScratchPad *sp = VS_SCRATCHPAD;
     StAnimFile *file = (StAnimFile *)DAT_800633b0.fighter[id].file;
@@ -318,7 +318,7 @@ void func_8001336c(int id, int mode)
 /* Decodes both pad buffers: held buttons, newly pressed ones, and a
  * repeat after 30 frames, then every 5. */
 ADDRESS(0x800136e0, 0x13c)
-void func_800136e0(void)
+void pad_update_buttons(void)
 {
     if (DAT_801961e0[0].status == 0) {
         pad_state.pads[0].unk0 = ~DAT_801961e0[0].buttons;
@@ -352,7 +352,7 @@ void func_800136e0(void)
 
 /* Clears both controller records. */
 ADDRESS(0x8001381c, 0x2c)
-void func_8001381c(void)
+void pad_clear_input(void)
 {
     pad_state.pads[1].unkC = 0;
     pad_state.pads[0].unkC = 0;
@@ -366,17 +366,17 @@ void func_8001381c(void)
 
 /* A frame callback: counts. */
 ADDRESS(0x80013848, 0x20)
-void func_80013848(void)
+void rcnt2_handler(void)
 {
     pad_state.unk30++;
 }
 
 /* A frame callback: counts and decodes the controllers. */
 ADDRESS(0x80013868, 0x38)
-void func_80013868(void)
+void vsync_handler(void)
 {
     pad_state.unk3C++;
-    func_800136e0();
+    pad_update_buttons();
 }
 
 /* Controller 1's buttons as the debug adjust reads them: the buffer's
@@ -391,7 +391,7 @@ void func_80013868(void)
  * (polling the host debugger each frame); restores the area afterwards.
  */
 ADDRESS(0x800138a0, 0x24c)
-void func_800138a0(void)
+void debug_pan_display(void)
 {
     RECT saved;
     DRAWENV *draw;
@@ -439,7 +439,7 @@ void func_800138a0(void)
 /* Starts libsnd: the SEQ attribute table, 60 Hz ticks, studio reverb at
  * depth 40, CD audio mixed in, full master volume. */
 ADDRESS(0x80013aec, 0x88)
-void func_80013aec(void)
+void sound_init(void)
 {
     SsInit();
     SsSetMVol(0, 0);
@@ -457,7 +457,7 @@ void func_80013aec(void)
  * voice is free; returns the voice SsUtKeyOn picked, or -1. The scan reads
  * the states one entry low (status[22] down to status[-1]), as retail does. */
 ADDRESS(0x80013b74, 0xe8)
-short func_80013b74(u_char tone, int note, int bank)
+short sound_play_tone(u_char tone, int note, int bank)
 {
     int i;
 
@@ -475,7 +475,7 @@ short func_80013b74(u_char tone, int note, int bank)
 
 /* Keys the entry's tone on for fighter i, at a random note from 58 to 62.
  * Every trigger test ends in its own copy of this call. */
-#define KEY_ON_TONE() func_80013b74(tone, (rand() * 5 >> 15) + 58, i)
+#define KEY_ON_TONE() sound_play_tone(tone, (rand() * 5 >> 15) + 58, i)
 
 /*
  * Plays both fighters' animation sound effects. The fighter's state (and
@@ -486,7 +486,7 @@ short func_80013b74(u_char tone, int note, int bank)
  * keyed on at a random note from 58 to 62.
  */
 ADDRESS(0x80013c5c, 0x414)
-void func_80013c5c(void)
+void fighters_play_anim_sounds(void)
 {
     int i;
     int entry;
@@ -594,7 +594,7 @@ void func_80013c5c(void)
 
 /* Opens the five archives versus mode reads. */
 ADDRESS(0x80014070, 0x68)
-void func_80014070(void)
+void cd_open_vs_archives(void)
 {
     cd_archive_open(0, "VS\\VS_CRT.T");
     cd_archive_open(5, "VS\\VS_ETC.T");
@@ -621,7 +621,7 @@ void func_80014070(void)
  * i * 4 and i * 12 at the call.
  */
 ADDRESS(0x800140d8, 0x3a8)
-void func_800140d8(void)
+void fighters_load_round(void)
 {
     int member;
     int i;
@@ -629,11 +629,11 @@ void func_800140d8(void)
     for (i = 0; i < 2; i++) {
         member = DAT_801624b8[i].slot[DAT_80063338] * 5;
         cd_read_member(0, member + 1, (u_long *)&FIGHTER);
-        func_80012b50((u_long *)&FIGHTER, i * 4, i * 12);
+        tim_load_images_shifted((u_long *)&FIGHTER, i * 4, i * 12);
         DrawSync(0);
         cd_read_member(0, member + 2, (u_long *)DAT_801604b0[i].head);
         cd_read_member(0, member + 3, (u_long *)&FIGHTER);
-        func_80012a70(i);
+        sound_bank_open(i);
         if (cd_read_member(0, member + 4, FIGHTER.unk4B000))
             model_fixup_face_indices((ModelFile *)FIGHTER.unk4B000);
         else
@@ -646,7 +646,7 @@ void func_800140d8(void)
             FIGHTER.unk4DF10 = 2;
             anim_register(i, (StAnimFile *)FIGHTER.file);
         }
-        func_80012d10(i);
+        fighter_offset_textures(i);
         FIGHTER.unk4DF18 = DAT_8004a224[DAT_801624b8[i].slot[DAT_80063338]];
         FIGHTER.unk4DF0E = 0;
         FIGHTER.unk4DEEA = 0;
@@ -685,7 +685,7 @@ void func_800140d8(void)
  * (src/st/gfx.c): the 320x240 double buffer, the GTE offset, screen, back
  * and far colours, and the two packet buffers. */
 ADDRESS(0x80014480, 0x1b4)
-void func_80014480(void)
+void gfx_init(void)
 {
     ResetGraph(0);
     SetGraphDebug(0);
@@ -724,7 +724,7 @@ void func_80014480(void)
  * and z, and faces the target.
  */
 ADDRESS(0x80014634, 0x9ec)
-void func_80014634(void)
+void camera_update(void)
 {
     SVECTOR look;
     SVECTOR eye;
@@ -877,26 +877,26 @@ void func_80014634(void)
 }
 
 /* Not reconstructed callees (src/vs/hud_80029f28.c and others). */
-void func_8002a360(int kind, int level);
-void func_8002ab58(int level, int wide);
-void func_800297fc(int time);
-void func_80029b10(int level);
-void func_80029f28(int phase, int scale);
-void func_80028fcc(int hold);
+void hud_draw_banner(int kind, int level);
+void hud_draw_dialog_box(int level, int wide);
+void hud_draw_clock(int time);
+void hud_draw_gauges(int level);
+void hud_draw_round_wins(int phase, int scale);
+void round_draw_backdrop(int hold);
 void fighter_draw_shadow(int n, int scale);
 void func_8002d998(void);
 void anim_sets_retire(void);
 void anim_sets_free_idle(void);
 void anim_slots_free_idle(void);
 void anim_slots_retire(void);
-void func_800129bc(short volume);
-int func_8002b078(int frame);
-void func_8002ad40(int level);
+void cd_audio_set_volume(short volume);
+int round_draw_opening(int frame);
+void hud_draw_fighter_names(int level);
 void fighter_draw_skeletal(void);
 void fighter_draw_vertex_anim(void);
 void func_8002c2c4(int n);
 void func_80035b68(void);
-void func_800291d4(u_long *model, int flags, SVECTOR *a, SVECTOR *b, SVECTOR *c);
+void model_draw_part_at(u_long *model, int flags, SVECTOR *a, SVECTOR *b, SVECTOR *c);
 
 /* The callback's frame clock and the current screen's starting frame. */
 #define FRAME_CLOCK() (pad_state.unk3C)
@@ -909,12 +909,12 @@ void func_800291d4(u_long *model, int flags, SVECTOR *a, SVECTOR *b, SVECTOR *c)
 /*
  * Draws one frame of the round: swaps the buffers, runs the round start
  * and the screen of the current phase (DAT_80063324: the captions and
- * menus func_8002a360 fades by level), the clock, both fighters, their
+ * menus hud_draw_banner fades by level), the clock, both fighters, their
  * gauges and the arena (the pieces past the camera hidden), then shows the
  * frame and measures its length in fields (DAT_80063220, at most 5).
  */
 ADDRESS(0x80015020, 0xe30)
-void func_80015020(void)
+void round_draw_frame(void)
 {
     SVECTOR rot;
     SVECTOR pos;
@@ -943,17 +943,17 @@ void func_80015020(void)
     vs_gfx_state.unk8338[4] = 0;
     anim_sets_retire();
     anim_slots_retire();
-    if (DAT_80063324 == 0 && func_8002b078(DAT_80063364++)) {
+    if (DAT_80063324 == 0 && round_draw_opening(DAT_80063364++)) {
         DAT_8006331c = 3;
         DAT_80063324 = 1;
         DAT_80063364 = pad_state.unk3C + 1800;
         DAT_80063314 = pad_state.unk3C;
         while (!CdRead2(CdlModeSpeed | CdlModeRT | CdlModeSF))
             ;
-        func_800129bc(64);
+        cd_audio_set_volume(64);
     }
     if (DAT_80063324 != 0)
-        func_8002ad40(32);
+        hud_draw_fighter_names(32);
     switch (DAT_80063324) {
     case 1: {
         u32 end;
@@ -962,63 +962,63 @@ void func_80015020(void)
             u32 fade = SCREEN_START();
 
             fade += 16;
-            func_8002a360(DAT_8006331c, fade - FRAME_CLOCK());
+            hud_draw_banner(DAT_8006331c, fade - FRAME_CLOCK());
             if (DAT_8006331c == 12) {
                 u32 left;
                 u32 rest = 16 - ELAPSED();
 
-                func_8002a360(17, rest - DAT_8006336c + 2);
-                func_8002a360(18, DAT_8006336c - ELAPSED() + 6);
+                hud_draw_banner(17, rest - DAT_8006336c + 2);
+                hud_draw_banner(18, DAT_8006336c - ELAPSED() + 6);
                 left = SCREEN_START();
                 left += 16;
-                func_8002ab58(left - FRAME_CLOCK(), 0);
+                hud_draw_dialog_box(left - FRAME_CLOCK(), 0);
             }
         }
         end = DAT_80063364;
         if (FRAME_CLOCK() < end)
-            func_800297fc(end - FRAME_CLOCK());
+            hud_draw_clock(end - FRAME_CLOCK());
         else
-            func_800297fc(0);
+            hud_draw_clock(0);
         break;
     }
     case 2:
         if (ELAPSED() < 16) {
-            func_8002a360(12, ELAPSED());
-            func_8002a360(17, ELAPSED());
-            func_8002a360(18, ELAPSED() / 3);
-            func_8002ab58(ELAPSED(), 0);
+            hud_draw_banner(12, ELAPSED());
+            hud_draw_banner(17, ELAPSED());
+            hud_draw_banner(18, ELAPSED() / 3);
+            hud_draw_dialog_box(ELAPSED(), 0);
         } else {
-            func_8002a360(12, 16);
-            func_8002a360(17, 16 - DAT_8006336c);
-            func_8002a360(18, DAT_8006336c + 6);
-            func_8002ab58(16, 0);
+            hud_draw_banner(12, 16);
+            hud_draw_banner(17, 16 - DAT_8006336c);
+            hud_draw_banner(18, DAT_8006336c + 6);
+            hud_draw_dialog_box(16, 0);
         }
-        func_800297fc(DAT_80063364);
+        hud_draw_clock(DAT_80063364);
         break;
     case 4:
     draw:
         if (ELAPSED() <= 200)
-            func_8002a360(0, ELAPSED());
+            hud_draw_banner(0, ELAPSED());
         if (ELAPSED() > 200) {
             if (DAT_80063338 == DAT_80063228 - 1)
-                func_8002a360(0, 216 - ELAPSED());
+                hud_draw_banner(0, 216 - ELAPSED());
             else
-                func_8002a360(0, 16);
+                hud_draw_banner(0, 16);
         }
-        func_800297fc(DAT_80063364);
+        hud_draw_clock(DAT_80063364);
         break;
     case 5:
         if (ELAPSED() < 30) {
-            func_8002a360(5, ELAPSED());
-            func_800297fc(0);
+            hud_draw_banner(5, ELAPSED());
+            hud_draw_clock(0);
             break;
         }
         if (ELAPSED() < 46) {
             u32 left = SCREEN_START();
 
             left += 46;
-            func_8002a360(5, left - FRAME_CLOCK());
-            func_800297fc(0);
+            hud_draw_banner(5, left - FRAME_CLOCK());
+            hud_draw_clock(0);
             break;
         }
         a = (DAT_800633b0.fighter[0].unk4DF08 << 12) / DAT_800633b0.fighter[0].unk4DF18.unk1B8;
@@ -1031,31 +1031,31 @@ void func_80015020(void)
         }
         if (b < a) {
             DAT_80063324 = 8;
-            func_8001336c(1, 1);
+            fighter_set_semi_trans(1, 1);
         } else {
             DAT_80063324 = 9;
-            func_8001336c(0, 1);
+            fighter_set_semi_trans(0, 1);
         }
         goto result;
     case 6:
     case 7:
         if (ELAPSED() < 30) {
-            func_8002a360(1, ELAPSED());
-            func_8002a360(4, ELAPSED());
+            hud_draw_banner(1, ELAPSED());
+            hud_draw_banner(4, ELAPSED());
         } else if (ELAPSED() < 46) {
             u32 left = SCREEN_START() + 46;
             u32 left2;
 
-            func_8002a360(1, left - FRAME_CLOCK());
+            hud_draw_banner(1, left - FRAME_CLOCK());
             left2 = SCREEN_START() + 46;
-            func_8002a360(4, left2 - FRAME_CLOCK());
+            hud_draw_banner(4, left2 - FRAME_CLOCK());
         } else {
             DAT_80063314 = pad_state.unk3C;
             DAT_80063324 += 2;
-            func_8001336c(9 - DAT_80063324, 1);
+            fighter_set_semi_trans(9 - DAT_80063324, 1);
             goto result;
         }
-        func_800297fc(DAT_80063364);
+        hud_draw_clock(DAT_80063364);
         break;
     case 8:
     case 9:
@@ -1064,78 +1064,78 @@ void func_80015020(void)
             DAT_800633b0.fighter[~DAT_80063324 & 1].unk4DF12 =
                 DAT_80063314 - (pad_state.unk3C - 158);
         if (ELAPSED() > 100 && ELAPSED() <= 200)
-            func_8002a360(2, ELAPSED() - 100);
+            hud_draw_banner(2, ELAPSED() - 100);
         if (ELAPSED() > 200) {
             if (DAT_80063338 == DAT_80063228 - 1)
-                func_8002a360(2, 216 - ELAPSED());
+                hud_draw_banner(2, 216 - ELAPSED());
             else
-                func_8002a360(2, 16);
+                hud_draw_banner(2, 16);
         }
-        func_800297fc(DAT_80063364);
+        hud_draw_clock(DAT_80063364);
         break;
     case 16:
-        func_8002a360(9, ELAPSED());
-        func_8002a360(19, ELAPSED());
-        func_8002ab58(ELAPSED(), 1);
-        func_800297fc(DAT_80063364);
+        hud_draw_banner(9, ELAPSED());
+        hud_draw_banner(19, ELAPSED());
+        hud_draw_dialog_box(ELAPSED(), 1);
+        hud_draw_clock(DAT_80063364);
         break;
     case 17:
-        func_8002a360(19, 16 - ELAPSED());
-        func_8002a360(9, 16 - ELAPSED());
-        func_8002a360(15, ELAPSED());
-        func_8002a360(14, ELAPSED());
-        func_8002a360(11, ELAPSED());
-        func_8002ab58(11, 1);
-        func_800297fc(DAT_80063364);
+        hud_draw_banner(19, 16 - ELAPSED());
+        hud_draw_banner(9, 16 - ELAPSED());
+        hud_draw_banner(15, ELAPSED());
+        hud_draw_banner(14, ELAPSED());
+        hud_draw_banner(11, ELAPSED());
+        hud_draw_dialog_box(11, 1);
+        hud_draw_clock(DAT_80063364);
         break;
     case 18:
         if (ELAPSED() >= 20)
             goto menu;
-        func_8002a360(19, 16 - ELAPSED());
-        func_8002a360(9, 16 - ELAPSED());
-        func_8002a360(10, ELAPSED() - 4);
-        func_8002a360(16, ELAPSED() - 4);
-        func_8002a360(13, ELAPSED() - 4);
-        func_8002a360(17, ELAPSED() - 4);
-        func_8002a360(18, ELAPSED() / 3);
-        func_8002ab58(16, 1);
-        func_800297fc(DAT_80063364);
+        hud_draw_banner(19, 16 - ELAPSED());
+        hud_draw_banner(9, 16 - ELAPSED());
+        hud_draw_banner(10, ELAPSED() - 4);
+        hud_draw_banner(16, ELAPSED() - 4);
+        hud_draw_banner(13, ELAPSED() - 4);
+        hud_draw_banner(17, ELAPSED() - 4);
+        hud_draw_banner(18, ELAPSED() / 3);
+        hud_draw_dialog_box(16, 1);
+        hud_draw_clock(DAT_80063364);
         break;
     case 19:
-        func_8002a360(10, 16 - ELAPSED());
-        func_8002a360(16, 16 - ELAPSED());
-        func_8002a360(13, 16 - ELAPSED());
+        hud_draw_banner(10, 16 - ELAPSED());
+        hud_draw_banner(16, 16 - ELAPSED());
+        hud_draw_banner(13, 16 - ELAPSED());
         {
             u32 rest = 16 - ELAPSED();
 
-            func_8002a360(17, rest - DAT_8006336c + 2);
+            hud_draw_banner(17, rest - DAT_8006336c + 2);
         }
-        func_8002a360(18, DAT_8006336c - ELAPSED() + 6);
-        func_8002a360(19, ELAPSED() - 4);
-        func_8002a360(9, ELAPSED() - 4);
-        func_8002ab58(16, 1);
-        func_800297fc(DAT_80063364);
+        hud_draw_banner(18, DAT_8006336c - ELAPSED() + 6);
+        hud_draw_banner(19, ELAPSED() - 4);
+        hud_draw_banner(9, ELAPSED() - 4);
+        hud_draw_dialog_box(16, 1);
+        hud_draw_clock(DAT_80063364);
         break;
     case 20:
         if (ELAPSED() < 20) {
-            func_8002a360(11, 16 - ELAPSED());
-            func_8002a360(15, 16 - ELAPSED());
-            func_8002a360(14, 16 - ELAPSED());
-            func_8002a360(10, ELAPSED() - 4);
-            func_8002a360(16, ELAPSED() - 4);
-            func_8002a360(13, ELAPSED() - 4);
-            func_8002a360(17, ELAPSED() - 4);
-            func_8002a360(18, ELAPSED() / 3);
+            hud_draw_banner(11, 16 - ELAPSED());
+            hud_draw_banner(15, 16 - ELAPSED());
+            hud_draw_banner(14, 16 - ELAPSED());
+            hud_draw_banner(10, ELAPSED() - 4);
+            hud_draw_banner(16, ELAPSED() - 4);
+            hud_draw_banner(13, ELAPSED() - 4);
+            hud_draw_banner(17, ELAPSED() - 4);
+            hud_draw_banner(18, ELAPSED() / 3);
         } else {
         menu:
-            func_8002a360(10, 16);
-            func_8002a360(16, 16);
-            func_8002a360(13, 16);
-            func_8002a360(17, 16 - DAT_8006336c);
-            func_8002a360(18, DAT_8006336c + 6);
+            hud_draw_banner(10, 16);
+            hud_draw_banner(16, 16);
+            hud_draw_banner(13, 16);
+            hud_draw_banner(17, 16 - DAT_8006336c);
+            hud_draw_banner(18, DAT_8006336c + 6);
         }
-        func_8002ab58(16, 1);
-        func_800297fc(DAT_80063364);
+        hud_draw_dialog_box(16, 1);
+        hud_draw_clock(DAT_80063364);
         break;
     }
     if (DAT_80063324 != 0) {
@@ -1156,10 +1156,10 @@ void func_80015020(void)
             }
             fighter_draw_shadow(i, 4096);
         }
-        func_80029b10(32);
-        func_80029f28((u32)pad_state.unk3C % 96, 32);
+        hud_draw_gauges(32);
+        hud_draw_round_wins((u32)pad_state.unk3C % 96, 32);
     }
-    func_80028fcc(DAT_80063324 == 2 || DAT_80063324 >= 16);
+    round_draw_backdrop(DAT_80063324 == 2 || DAT_80063324 >= 16);
     rot.vz = 0;
     rot.vy = 0;
     rot.vx = 0;
@@ -1172,9 +1172,9 @@ void func_80015020(void)
     func_80035b68();
     func_8002d998();
     DAT_80063224 = 2;
-    func_800291d4(DAT_80117708, 0, &rot, &rot, &scale);
+    model_draw_part_at(DAT_80117708, 0, &rot, &rot, &scale);
     DAT_80063224 = 4;
-    func_800291d4((u_long *)DAT_8015c528, 0, &rot, &rot, &scale);
+    model_draw_part_at((u_long *)DAT_8015c528, 0, &rot, &rot, &scale);
     DAT_80063224 = 3;
     mask = 0;
     if (vs_gfx_state.unk2CA78.vz > ARENA_EDGE)
@@ -1187,7 +1187,7 @@ void func_80015020(void)
         mask |= 0xe0;
     for (i = 0; i < 8; i++) {
         DAT_80063350 = mask & (1 << i);
-        func_800291d4((u_long *)DAT_8015d8b0, 0, &rot, &pos, &scale);
+        model_draw_part_at((u_long *)DAT_8015d8b0, 0, &rot, &pos, &scale);
         pos.vy += 512;
     }
     DAT_80063224 = 0;
@@ -1213,7 +1213,7 @@ void func_80015020(void)
 /* Frames each screen fades over. */
 #define FADE_FRAMES 20
 
-/* DAT_80063324: the round loop's screens (func_80015020 draws them). */
+/* DAT_80063324: the round loop's screens (round_draw_frame draws them). */
 #define SCREEN_FADE_IN 16
 #define SCREEN_SAVE_ASK 17
 #define SCREEN_RETRY_ASK 18
@@ -1239,10 +1239,10 @@ void func_80015020(void)
  * round's music, then runs the frame loop: the pause menu (resume or
  * quit), the round clock, knock-outs and the result, until the result has
  * shown for RESULT_FRAMES frames. Button 1 with 8 held toggles the frame
- * statistics, button 1 held for a second calls func_800138a0.
+ * statistics, button 1 held for a second calls debug_pan_display.
  */
 ADDRESS(0x80015e50, 0x638)
-void func_80015e50(void)
+void round_play(void)
 {
     int choice;
     int ko;
@@ -1256,7 +1256,7 @@ void func_80015e50(void)
     else
         DAT_80063320 = 0;
     DAT_80063310 = 0;
-    func_800140d8();
+    fighters_load_round();
     func_800352cc();
     sparks_clear_all();
     vs_gfx_state.unk2CA78.vy = -14000;
@@ -1269,9 +1269,9 @@ void func_80015e50(void)
         gfx_setup_320x240();
         DrawSync(0);
     }
-    func_800129e8(DAT_80063338);
+    xa_cue_bgm(DAT_80063338);
     for (;;) {
-        func_80014634();
+        camera_update();
         if (DAT_80063324 == PHASE_PAUSE) {
             choice = 0;
             DAT_8006336c = 0;
@@ -1311,7 +1311,7 @@ void func_80015e50(void)
                 }
                 pad_state.pads[0].unk8 = 0;
                 pad_state.pads[1].unk8 = 0;
-                func_80015020();
+                round_draw_frame();
             }
         } else if (DAT_80063324 == PHASE_FIGHT
                    && ((pad_state.pads[0].unk8 | pad_state.pads[1].unk8) & 9)) {
@@ -1326,7 +1326,7 @@ void func_80015e50(void)
             pad_state.unk28 = 1 - pad_state.unk28;
         if (pad_state.pads[0].unk0 & 1) {
             if (++pad_state.unk2C >= 60)
-                func_800138a0();
+                debug_pan_display();
         } else {
             pad_state.unk2C = 0;
         }
@@ -1346,7 +1346,7 @@ void func_80015e50(void)
                         DAT_80063324 = PHASE_SECOND_WINS;
                         DAT_80063364 -= pad_state.unk3C;
                         DAT_80063314 = pad_state.unk3C;
-                        func_8001336c(ko, side);
+                        fighter_set_semi_trans(ko, side);
                     }
                 } else if (DAT_800633b0.fighter[1].unk4DF08 == 0) {
                     ko = 1;
@@ -1354,7 +1354,7 @@ void func_80015e50(void)
                     DAT_80063324 = PHASE_FIRST_WINS;
                     DAT_80063364 -= pad_state.unk3C;
                     DAT_80063314 = pad_state.unk3C;
-                    func_8001336c(ko, side);
+                    fighter_set_semi_trans(ko, side);
                 }
                 if (func_8002e510(0)) {
                     DAT_80063324 = PHASE_KO_FIRST;
@@ -1369,7 +1369,7 @@ void func_80015e50(void)
             }
         } else if (DAT_80063324 == PHASE_DRAW || DAT_80063324 == PHASE_FIRST_WINS
                    || DAT_80063324 == PHASE_SECOND_WINS) {
-            func_8001381c();
+            pad_clear_input();
             if (pad_state.unk3C - DAT_80063314 > RESULT_FRAMES) {
                 if (DAT_80063324 == PHASE_FIRST_WINS)
                     DAT_80063370[0]++;
@@ -1387,8 +1387,8 @@ void func_80015e50(void)
         }
         pad_state.pads[0].unk8 = 0;
         pad_state.pads[1].unk8 = 0;
-        func_80015020();
-        func_80013c5c();
+        round_draw_frame();
+        fighters_play_anim_sounds();
         vs_gfx_state.unk831C[1] = 0;
         vs_gfx_state.unk8324 = 0;
         if (pad_state.unk40 + 59 < pad_state.unk3C) {
@@ -1410,7 +1410,7 @@ void func_80015e50(void)
  * with the picture behind them, the font pages (archive 5 member 10) and
  * the four files model_fixup_face_indices sets up, then clears the round state. */
 ADDRESS(0x80016488, 0x16c)
-void func_80016488(void)
+void match_load_resources(void)
 {
     RECT pos;
     RECT clut;
@@ -1425,10 +1425,10 @@ void func_80016488(void)
     cd_read_member(8, 2, p);
     copy_words((u32 *)DAT_80196230[1].offsets, (u32 *)(p + 1), 0x1500);
     p = (u_long *)((u8 *)p + (p[0] + 4));
-    func_80012c2c(p + 1, (DVECTOR *)&pos, (DVECTOR *)&clut);
+    tim_load_images_at(p + 1, (DVECTOR *)&pos, (DVECTOR *)&clut);
     DrawSync(0);
     cd_read_member(5, 10, DAT_80117708);
-    func_80012b50(DAT_80117708, 0, 0);
+    tim_load_images_shifted(DAT_80117708, 0, 0);
     DrawSync(0);
     cd_read_member(5, 0, DAT_80117708);
     model_fixup_face_indices((ModelFile *)DAT_80117708);
@@ -1450,7 +1450,7 @@ void func_80016488(void)
  * choice, 0x4000 confirms; the choice also slides DAT_8006336c (0..10).
  */
 ADDRESS(0x800165f4, 0x248)
-void func_800165f4(void)
+void match_end_screen_run(void)
 {
     int asked = 0;
     int choice;
@@ -1459,16 +1459,16 @@ void func_800165f4(void)
 
     StartCARD();
     _bu_init();
-    func_8001381c();
+    pad_clear_input();
     DAT_80063324 = SCREEN_FADE_IN;
     DAT_80063338--;
     DAT_80063314 = pad_state.unk3C;
     for (i = FADE_FRAMES - 1; i != -1; i--) {
-        func_80015020();
+        round_draw_frame();
         DrawSync(0);
     }
     for (;;) {
-        if (func_8001c530() == 0) {
+        if (card_check_saves_changed() == 0) {
             DAT_80063324 = SCREEN_SAVE_ASK;
         } else {
             choice = 0;
@@ -1477,11 +1477,11 @@ void func_800165f4(void)
         }
         DAT_80063314 = pad_state.unk3C;
         for (i = FADE_FRAMES - 1; i != -1; i--) {
-            func_80015020();
+            round_draw_frame();
             DrawSync(0);
         }
         if (DAT_80063324 == SCREEN_SAVE_ASK) {
-            if (func_8001c5e0(DAT_80063370[0] < DAT_80063374, asked) == 0) {
+            if (match_award_requested_item(DAT_80063370[0] < DAT_80063374, asked) == 0) {
                 DrawSync(0);
                 return;
             }
@@ -1491,7 +1491,7 @@ void func_800165f4(void)
             DAT_8006336c = 0;
             DAT_80063314 = pad_state.unk3C;
             for (i = FADE_FRAMES - 1; i != -1; i--) {
-                func_80015020();
+                round_draw_frame();
                 DrawSync(0);
             }
         }
@@ -1519,13 +1519,13 @@ void func_800165f4(void)
             }
             pad_state.pads[0].unk8 = 0;
             pad_state.pads[1].unk8 = 0;
-            func_80015020();
+            round_draw_frame();
             DrawSync(0);
         }
         DAT_80063324 = SCREEN_FADE_OUT;
         DAT_80063314 = pad_state.unk3C;
         for (i = FADE_FRAMES - 1; i != -1; i--) {
-            func_80015020();
+            round_draw_frame();
             DrawSync(0);
         }
     }
@@ -1534,7 +1534,7 @@ void func_800165f4(void)
 /*
  * VS.EXE's main: the heap, controllers, CD and memory card, the two root
  * counter events, the graphics, the loading picture and the menu sound
- * bank; then the character select / match loop until func_80016f10
+ * bank; then the character select / match loop until menu_vs_setup_run
  * declines, and the shutdown back to TITLE.EXE (next program 1).
  */
 ADDRESS(0x8001683c, 0x40c)
@@ -1559,17 +1559,17 @@ int main(void)
     CdSetDebug(0);
     InitCARD(1);
     ExitCriticalSection();
-    pad_state.unk44 = OpenEvent(RCntCNT3, EvSpINT, EvMdINTR, func_80013868);
+    pad_state.unk44 = OpenEvent(RCntCNT3, EvSpINT, EvMdINTR, vsync_handler);
     EnableEvent(pad_state.unk44);
     SetRCnt(RCntCNT3, 60000, RCntMdINTR);
     StartRCnt(RCntCNT3);
-    pad_state.unk38 = OpenEvent(RCntCNT2, EvSpINT, EvMdINTR, func_80013848);
+    pad_state.unk38 = OpenEvent(RCntCNT2, EvSpINT, EvMdINTR, rcnt2_handler);
     EnableEvent(pad_state.unk38);
     SetRCnt(RCntCNT2, 60000, RCntMdINTR);
     StartRCnt(RCntCNT2);
     pad_state.unk28 = 0;
     cd_init();
-    func_80014480();
+    gfx_init();
     {
         u_long *loading_picture = (u_long *)&DAT_800633b0;
 
@@ -1577,11 +1577,11 @@ int main(void)
         pos.vy = 300;
         memset(&clut, 0, sizeof(clut));
         load_file(loading_picture, "\\LOAD02.TIM;1", 0);
-        func_80012c2c(loading_picture, &pos, &clut);
+        tim_load_images_at(loading_picture, &pos, &clut);
     }
     DrawSync(0);
-    func_80013aec();
-    func_80014070();
+    sound_init();
+    cd_open_vs_archives();
     cd_read_member(5, 4, DAT_80116580);
     cd_read_member(5, 5, DAT_800ff580);
     load_menu_sound_bank();
@@ -1596,10 +1596,10 @@ int main(void)
     DAT_80063334 = -1;
     DAT_80063380 = 0;
     DAT_80063381 = 0;
-    while (func_80016f10()) {
-        func_80016488();
+    while (menu_vs_setup_run()) {
+        match_load_resources();
         do {
-            func_80015e50();
+            round_play();
             DrawSync(0);
             SsVabClose(DAT_801604b0[0].vab);
             SsVabClose(DAT_801604b0[1].vab);
@@ -1607,7 +1607,7 @@ int main(void)
         while (CdControl(CdlStop, 0, 0) == 0)
             ;
         if (DAT_80063320 != 0 && DAT_80063370[0] != DAT_80063374) {
-            func_800165f4();
+            match_end_screen_run();
             DAT_80063330[0] = -1;
             DAT_80063334 = -1;
         }
@@ -1619,7 +1619,7 @@ int main(void)
     memset(&clut2, 0, sizeof(clut2));
     gfx_setup_320x240();
     load_file(picture, "\\LOAD02.TIM;1", 0);
-    func_80012c2c(picture, &pos2, &clut2);
+    tim_load_images_at(picture, &pos2, &clut2);
     DrawSync(0);
     *NEXT_PROGRAM_BYTE = 1;
     SsSetMVol(0, 0);

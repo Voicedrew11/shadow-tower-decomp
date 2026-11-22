@@ -46,7 +46,7 @@ typedef struct {
     StCdRequest *unkDC; /* 0xdc: the entry being read (ST: unk9D8) */
     VsArchive archives[ST_ARCHIVES]; /* 0xe0: count as in ST.EXE (WIP) */
     u8 unk1D0[0x4a0 - 0x1d0];
-    u_long *unk4A0;      /* 0x4a0: load cursor in unk4A4 (func_8001789c); the menu file buffer (func_8001bb48) */
+    u_long *unk4A0;      /* 0x4a0: load cursor in unk4A4 (lineup_screen_show); the menu file buffer (card_screen_run) */
     u_long unk4A4[0x8000]; /* 0x4a4: the 0x20000-byte load buffer */
 } VsCdState;
 
@@ -94,8 +94,8 @@ typedef struct {
     u8 unkA7EC[0xc7f0 - 0xa7ec];
     SVECTOR unkC7F0[0x2000]; /* 0xc7f0: the vertices anim_pose interpolates (ST: unkEB40) */
     u8 unk1C7F0[0x2c970 - 0x1c7f0];
-    u8 unk2C970;         /* 0x2c970: frames drawn since the last rate update (func_80015e50) */
-    u8 unk2C971;         /* 0x2c971: the frame rate func_80015e50 shows */
+    u8 unk2C970;         /* 0x2c970: frames drawn since the last rate update (round_play) */
+    u8 unk2C971;         /* 0x2c971: the frame rate round_play shows */
     u8 frame;            /* 0x2c972: index of the current DRAWENV and buffers (ST: 0x1ecc2) */
     u8 unk2C973;
     u8 unk2C974;         /* 0x2c974: set while the loading display runs (ST: unk1ECC4) */
@@ -124,7 +124,7 @@ typedef struct {
 
 extern VsRecord20 DAT_801c4a58[2000];
 
-/* A flag the two-choice dialog func_80022f14 compares with its page
+/* A flag the two-choice dialog menu_vs_setup_draw_choice compares with its page
  * (0x80063228, .sdata, initially 1). */
 extern s32 DAT_80063228;
 
@@ -186,7 +186,7 @@ typedef struct {
     u16 unk2;                /* frame step */
 } VsAnimRef;
 
-/* A fighter's animation sound effect (func_80013c5c): the tone keyed on
+/* A fighter's animation sound effect (fighters_play_anim_sounds): the tone keyed on
  * and a trigger word (kind in the top nibble: 1 at a frame, 2 at a frame on
  * 11 bits, 8 at a frame by chance, 4 when the frame count / 20 is a
  * multiple of the period; the frame or period below). Tone 255 with
@@ -203,14 +203,14 @@ typedef struct {
  */
 typedef struct {
     VsAnimRef unk0[15];      /* 0x000: animations (13 and 14: id 255 in every record) */
-    VsFighterSound sounds[15]; /* 0x03c: the sound of each animation (func_80013c5c plays 0-9; 2-7 go with unk0[2..7]) */
+    VsFighterSound sounds[15]; /* 0x03c: the sound of each animation (fighters_play_anim_sounds plays 0-9; 2-7 go with unk0[2..7]) */
     VsHitRecord unk78[3];    /* 0x078: hit records of the three combo animations (func_80031478) */
     VsAttack unk14A[3];      /* 0x14a: attacks (count WIP) */
     s16 unk1AA;              /* 0x1aa: movement kind */
     s16 unk1AC;              /* 0x1ac: walking speed */
     s16 unk1AE;              /* 0x1ae: turning speed */
     u8 unk1B0[0x1b2 - 0x1b0];
-    s16 unk1B2;              /* 0x1b2: the start height, negated (func_800140d8) */
+    s16 unk1B2;              /* 0x1b2: the start height, negated (fighters_load_round) */
     s16 unk1B4;              /* 0x1b4: hit radius */
     s16 unk1B6;              /* 0x1b6: height */
     s16 unk1B8;              /* 0x1b8: full hit points */
@@ -218,7 +218,7 @@ typedef struct {
     u16 unk1BC[9];           /* 0x1bc: resistance per damage kind */
 } VsFighterData;
 
-/* func_800140d8 copies a whole record (0x1ce bytes, halfword aligned). */
+/* fighters_load_round copies a whole record (0x1ce bytes, halfword aligned). */
 typedef char VsFighterDataSize[sizeof(VsFighterData) == 0x1ce ? 1 : -1];
 
 /* The fighters' data blocks by character, copied into VsFighter.unk4DF18
@@ -236,7 +236,7 @@ typedef struct {
     u_long unk4B000[(0x4dee0 - 0x4b000) / 4]; /* 0x4b000: a second mesh model, absent when its first word is 0 */
     StAnimSet *unk4DEE0;     /* 0x4dee0: the fighter's skeletal-animation slot */
     StAnimSlot *unk4DEE4;    /* 0x4dee4: the fighter's vertex-animation slot (fighter_draw_vertex_anim) */
-    u8 unk4DEE8;             /* 0x4dee8: animation playing (VsAnimRef.unk0); func_80013c5c matches it against the sound keys */
+    u8 unk4DEE8;             /* 0x4dee8: animation playing (VsAnimRef.unk0); fighters_play_anim_sounds matches it against the sound keys */
     u8 unk4DEE9;
     s16 unk4DEEA;            /* 0x4deea: animation frame */
     s16 unk4DEEC;            /* 0x4deec */
@@ -284,7 +284,7 @@ extern s32 DAT_80063360;
  * records from +0x118; only those are used so far. */
 extern VisTableC DAT_80191d00;
 
-/* A switch func_800222d8 sets around its count list and func_8001d9cc
+/* A switch menu_item_request_draw_details sets around its count list and ui_draw_number
  * reads (bss). */
 extern u16 DAT_8006337a;
 
@@ -312,32 +312,32 @@ extern s32 DAT_8006321c;
 /* The model renderers' scale (4096, 4096, 4096; .data, src/vs/main.c). */
 extern VECTOR DAT_8005b2a8;
 
-/* The column of DAT_801624b8 func_8002ad40 shows (bss, unowned). */
+/* The column of DAT_801624b8 hud_draw_fighter_names shows (bss, unowned). */
 extern s32 DAT_80063338;
 
-/* Each fighter's three ids func_8002ad40 names are DAT_801624b8, both
+/* Each fighter's three ids hud_draw_fighter_names names are DAT_801624b8, both
  * players' teams (vs/menu.h VsTeam.slot). */
 
-/* A 5000-byte file buffer (archive 5 member 3, func_80016488): the guard
+/* A 5000-byte file buffer (archive 5 member 3, match_load_resources): the guard
  * flash's mesh model, a centre vertex and three rings of 16 (bss). */
 extern u8 DAT_8015ec38[5000];
 
 /* Rounds won per fighter (bss, unowned): src/vs/main.c proves the first
  * word its own symbol (the second, DAT_80063374, is read absolutely where
- * the first is $gp-relative); func_80029f28 still walks both from it. */
+ * the first is $gp-relative); hud_draw_round_wins still walks both from it. */
 extern s32 DAT_80063370[1];
 
 /* VS band 6: the text scroll switch and the two scroll offsets
- * func_8001d3f0 picks between (ST.EXE's DAT_800881ac/a0/a2; bss, unowned). */
+ * ui_draw_glyph picks between (ST.EXE's DAT_800881ac/a0/a2; bss, unowned). */
 extern u16 DAT_80063378;
 extern u16 DAT_8006333e;
 extern u16 DAT_80063340;
 
-/* VS band 6: the two 0x20000-byte GPU packet buffers func_80014480 hands
+/* VS band 6: the two 0x20000-byte GPU packet buffers gfx_init hands
  * the graphics state (bss; ST.EXE's DAT_8011c488). */
 extern u_long DAT_8011c528[];
 
-/* VS band 6: seven words and seven halfwords func_8001f9a0 clears, and the
+/* VS band 6: seven words and seven halfwords card_draw_port_choice clears, and the
  * two players' picked fighters, -1 for none (bss, unowned). */
 extern s32 DAT_801c4a38[7];
 extern u16 DAT_80117598[7];

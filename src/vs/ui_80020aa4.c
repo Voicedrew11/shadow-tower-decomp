@@ -17,11 +17,11 @@
 /* The scroll arrows' initializers: 8 bytes each, so .sdata under -G8. */
 SDATA(0x80063270, 0x10)
 
-/* Number-width flag for func_8001d9cc (ST.EXE's DIGITS, src/st/ui.c). */
+/* Number-width flag for ui_draw_number (ST.EXE's DIGITS, src/st/ui.c). */
 #define DIGITS(n) ((n) << 24)
 
 ADDRESS(0x80020aa4, 0x69c)
-void func_80020aa4(int player)
+void menu_creature_select_draw_grid(int player)
 {
     RECT up = {392, 32, 32, 12};
     RECT down = {392, 224, 32, 12};
@@ -36,8 +36,8 @@ void func_80020aa4(int player)
     int i, j, k;
     int x, y;
 
-    func_8001d8b8(VS_MESSAGE(180), 44, 21, &sp->style[0]);
-    func_8001f23c(16, 16, 138, 22);
+    ui_draw_text(VS_MESSAGE(180), 44, 21, &sp->style[0]);
+    ui_draw_panel(16, 16, 138, 22);
     c = sp->unk1D0;
     row = c >> 2;
     if (c < 0) {
@@ -58,13 +58,13 @@ void func_80020aa4(int player)
     }
     sp->unk218.w = 96;
     sp->unk218.h = 48;
-    func_8001de8c(&sp->unk218, &sp->unk214, 513, 1);
-    func_8001e890(1, 0, 0);
+    ui_draw_rect_outline(&sp->unk218, &sp->unk214, 513, 1);
+    ui_add_draw_mode(1, 0, 0);
     if (sp->unk1D2 > 0)
-        func_8001eef4(&up, &sp->unk214, 3072);
+        ui_draw_arrow(&up, &sp->unk214, 3072);
     if (sp->unk1D2 <= sp->unk0.team.rows - 3)
-        func_8001eef4(&down, &sp->unk214, 1024);
-    func_8001e890(1, 0, 0);
+        ui_draw_arrow(&down, &sp->unk214, 1024);
+    ui_add_draw_mode(1, 0, 0);
     c = sp->unk1D0;
     if (c < 0) {
         id = DAT_801624b8[player].slot[-c - 1];
@@ -88,10 +88,10 @@ void func_80020aa4(int player)
     }
     if (idx < sp->unk0.team.count && idx != -1) {
         sp->style[0].cd |= 0x80;
-        func_8001d8b8(VS_ITEM_NAME(id), 428, 21, &sp->style[0]);
+        ui_draw_text(VS_ITEM_NAME(id), 428, 21, &sp->style[0]);
         sp->style[0].cd &= 0x7f;
     }
-    func_8001f23c(420, 16, 200, 22);
+    ui_draw_panel(420, 16, 200, 22);
     sp->unk238.w = 96;
     sp->unk238.h = 48;
     sp->unk238.y = 48;
@@ -107,19 +107,19 @@ void func_80020aa4(int player)
         sp->unk238.x = 176;
         for (j = 0; j < n; idx++, j++) {
             if (idx < sp->unk0.team.count) {
-                func_8001de8c(&sp->unk238, &frame, 513, 0);
+                ui_draw_rect_outline(&sp->unk238, &frame, 513, 0);
                 id = sp->unk0.team.kinds[idx];
                 for (k = 0; k < 3; k++) {
                     if (DAT_801624b8[player].slot[k] == id) {
                         black.r = 0;
                         black.g = 0;
                         black.b = 0;
-                        func_8001e3d8(&sp->unk238, &black, 0);
+                        ui_fill_rect(&sp->unk238, &black, 0);
                         break;
                     }
                 }
                 if (k == 3)
-                    func_8001e530(&sp->unk238, &sp->unk0.team.pos[idx % 12], NULL, NULL, 16);
+                    ui_draw_image(&sp->unk238, &sp->unk0.team.pos[idx % 12], NULL, NULL, 16);
             }
             sp->unk238.x += 112;
         }
@@ -128,12 +128,12 @@ void func_80020aa4(int player)
     sp->unk238.x = 32;
     sp->unk238.y = 48;
     for (i = 0; i < 3; i++) {
-        func_8001d9cc((i + 1) | DIGITS(3), 110, i * 56 + 85, &sp->style[3]);
+        ui_draw_number((i + 1) | DIGITS(3), 110, i * 56 + 85, &sp->style[3]);
         if (DAT_801624b8[player].slot[i] == -1) {
             black.r = 0;
             black.g = 0;
             black.b = 0;
-            func_8001e3d8(&sp->unk238, &black, 0);
+            ui_fill_rect(&sp->unk238, &black, 0);
         } else {
             x = sp->unk238.x;
             y = sp->unk238.y;
@@ -141,14 +141,14 @@ void func_80020aa4(int player)
                 sp->unk238.x -= 6;
                 sp->unk238.y -= 4;
             }
-            func_8001e530(&sp->unk238, &sp->unk0.team.pos[12 + i], NULL, NULL, 16);
+            ui_draw_image(&sp->unk238, &sp->unk0.team.pos[12 + i], NULL, NULL, 16);
             sp->unk238.x = x;
             sp->unk238.y = y;
         }
-        func_8001de8c(&sp->unk238, &frame, 513, 0);
+        ui_draw_rect_outline(&sp->unk238, &frame, 513, 0);
         sp->unk238.y += 56;
     }
-    func_8001e890(0, 0, 0);
-    func_8001f23c(160, 40, 464, 176);
-    func_8001f23c(16, 40, 138, 176);
+    ui_add_draw_mode(0, 0, 0);
+    ui_draw_panel(160, 40, 464, 176);
+    ui_draw_panel(16, 40, 138, 176);
 }

@@ -5,7 +5,7 @@
  * fighters' names and the round's opening sequence. One translation unit:
  * retail lays out its constants (0x8001142c, the overlay's initializers
  * and the opening's tables) before its switch tables (0x8001150c,
- * func_80028fcc's and func_8002a360's), the order cc1 writes one object's
+ * round_draw_backdrop's and hud_draw_banner's), the order cc1 writes one object's
  * read-only data in. -G8: the gauges' blink toggle and the overlay's
  * texture step are $gp-relative.
  */
@@ -33,7 +33,7 @@ RODATA(0x8001142c, 0x148)
  * prototype: retail passes the int part number unconverted. */
 void mesh_draw_part_nccs();
 
-/* func_800291d4's default NCCS colour (128, 128, 128). */
+/* model_draw_part_at's default NCCS colour (128, 128, 128). */
 SDATA(0x800632dc, 0x4)
 u_long DAT_800632dc = 0x808080;
 
@@ -47,7 +47,7 @@ static s32 DAT_800632e0 = 0;
  * when `hold` is 0.
  */
 ADDRESS(0x80028fcc, 0x208)
-void func_80028fcc(int hold)
+void round_draw_backdrop(int hold)
 {
     StPacketBuffer *packet = vs_gfx_state.packet;
     POLY_FT4 *p = (POLY_FT4 *)packet->cur;
@@ -126,7 +126,7 @@ void func_80028fcc(int hold)
  * with rotation `rot` scaled by `scale` (4096ths), lit like the fighters.
  */
 ADDRESS(0x800291d4, 0x628)
-void func_800291d4(u8 *model, int part, SVECTOR *pos, SVECTOR *rot, SVECTOR *scale)
+void model_draw_part_at(u8 *model, int part, SVECTOR *pos, SVECTOR *rot, SVECTOR *scale)
 {
     VsScratchPad *sp = VS_SCRATCHPAD;
     VsLights lights = {
@@ -199,7 +199,7 @@ void func_800291d4(u8 *model, int part, SVECTOR *pos, SVECTOR *rot, SVECTOR *sca
  * of each second, reddening over the last 14 seconds.
  */
 ADDRESS(0x800297fc, 0x314)
-void func_800297fc(int time)
+void hud_draw_clock(int time)
 {
     int frame;
     int warn;
@@ -279,7 +279,7 @@ static u8 DAT_800632e4 = 0;
  * one, its second gauge under it; `level` (at most 32) scales the colours.
  */
 ADDRESS(0x80029b10, 0x418)
-void func_80029b10(int level)
+void hud_draw_gauges(int level)
 {
     int i = 0;
     int w;
@@ -347,7 +347,7 @@ void func_80029b10(int level)
  * (0..95) cycles the gradient, `scale` its brightness.
  */
 ADDRESS(0x80029f28, 0x1fc)
-void func_80029f28(int phase, int scale)
+void hud_draw_round_wins(int phase, int scale)
 {
     POLY_G4 *p;
     int i;
@@ -391,7 +391,7 @@ void func_80029f28(int phase, int scale)
  * cases for value - 1 are unused.
  */
 ADDRESS(0x8002a124, 0x23c)
-void func_8002a124(int value, int level)
+void hud_draw_clock_value(int value, int level)
 {
     POLY_FT4 *p;
     int i;
@@ -441,7 +441,7 @@ void func_8002a124(int value, int level)
  * and 18, else red).
  */
 ADDRESS(0x8002a360, 0x660)
-void func_8002a360(int kind, int level)
+void hud_draw_banner(int kind, int level)
 {
     POLY_FT4 *p;
 
@@ -546,7 +546,7 @@ void func_8002a360(int kind, int level)
  * `level` (0..15); `kind` 16, 17 or 18 picks its texture row.
  */
 ADDRESS(0x8002a9c0, 0x198)
-void func_8002a9c0(int kind, int level, int size)
+void hud_draw_round_banner(int kind, int level, int size)
 {
     POLY_FT4 *p;
 
@@ -582,7 +582,7 @@ void func_8002a9c0(int kind, int level, int size)
  * empty textured triangle that sets the draw mode for it.
  */
 ADDRESS(0x8002ab58, 0x1e8)
-void func_8002ab58(int level, int wide)
+void hud_draw_dialog_box(int level, int wide)
 {
     POLY_F4 *p;
     POLY_FT3 *t;
@@ -627,7 +627,7 @@ void func_8002ab58(int level, int wide)
  * sums into stepped registers, initialises them after the constants it
  * hoists and sets them again next to the `col = 0`. */
 ADDRESS(0x8002ad40, 0x338)
-void func_8002ad40(int bright)
+void hud_draw_fighter_names(int bright)
 {
     u16 *s;
     int line = 0;
@@ -703,12 +703,12 @@ void func_8002ad40(int bright)
  * The round's opening sequence.
  */
 
-void func_8002a360(int kind, int level);                 /* src/vs/hud_80029f28.c */
-void func_8002a124(int value, int level);
-void func_8002a9c0(int kind, int level, int size);
-void func_80029b10(int level);                           /* src/vs/gauge_80029b10.c */
-void func_80029f28(int phase, int scale);
-void func_8002ad40(int level);                           /* src/vs/name_8002ad40.c */
+void hud_draw_banner(int kind, int level);                 /* src/vs/hud_80029f28.c */
+void hud_draw_clock_value(int value, int level);
+void hud_draw_round_banner(int kind, int level, int size);
+void hud_draw_gauges(int level);                           /* src/vs/gauge_80029b10.c */
+void hud_draw_round_wins(int phase, int scale);
+void hud_draw_fighter_names(int level);                           /* src/vs/name_8002ad40.c */
 void fighter_draw_skeletal(void);                                /* src/vs/model_80024b5c.c */
 void fighter_draw_vertex_anim(void);                                /* src/vs/model_80028914.c */
 void fighter_draw_shadow(int n, int scale);                    /* src/vs/shadow_8002bfe8.c */
@@ -771,7 +771,7 @@ void fighter_draw_shadow(int n, int scale);                    /* src/vs/shadow_
  * fighters themselves. Returns 1 once the sequence is over.
  */
 ADDRESS(0x8002b078, 0xf70)
-int func_8002b078(int frame)
+int round_draw_opening(int frame)
 {
     SVECTOR v[32];
     u8 fade[16] = { 100, 50, 20, 10, 0, 10, 20, 50, 100, 50, 20, 10, 0, 10, 20, 50 };
@@ -796,22 +796,22 @@ int func_8002b078(int frame)
     if (frame > 120)
         return 1;
     if (frame > 90) {
-        func_8002a360(7, (106 - frame) * 2);
-        func_8002a360(3, (frame - 100) * 2);
-        func_8002a124(30, 32);
-        func_80029b10(32);
-        func_80029f28((u32)pad_state.unk3C % 96, 32);
-        func_8002ad40(32);
+        hud_draw_banner(7, (106 - frame) * 2);
+        hud_draw_banner(3, (frame - 100) * 2);
+        hud_draw_clock_value(30, 32);
+        hud_draw_gauges(32);
+        hud_draw_round_wins((u32)pad_state.unk3C % 96, 32);
+        hud_draw_fighter_names(32);
     } else if (frame > 70) {
-        func_8002a360(7, (frame - 70) * 2);
-        func_8002a124(30, frame - 70);
-        func_80029b10((frame - 70) * 2);
-        func_80029f28((u32)pad_state.unk3C % 96, (frame - 70) * 2);
-        func_8002ad40(frame - 70);
+        hud_draw_banner(7, (frame - 70) * 2);
+        hud_draw_clock_value(30, frame - 70);
+        hud_draw_gauges((frame - 70) * 2);
+        hud_draw_round_wins((u32)pad_state.unk3C % 96, (frame - 70) * 2);
+        hud_draw_fighter_names(frame - 70);
     } else if (frame > 40) {
-        func_8002a9c0(DAT_80063338 + 16, (48 - frame) * 2, 50 - frame);
+        hud_draw_round_banner(DAT_80063338 + 16, (48 - frame) * 2, 50 - frame);
     } else {
-        func_8002a9c0(DAT_80063338 + 16, (frame - 10) * 2, 50 - frame);
+        hud_draw_round_banner(DAT_80063338 + 16, (frame - 10) * 2, 50 - frame);
     }
     if (frame >= 20 && frame <= 76) {
         if (frame < 45) {

@@ -17,7 +17,7 @@
  * darkened by (12, 6, 6).
  */
 ADDRESS(0x800207d4, 0x2d0)
-void func_800207d4(DVECTOR *pos, DVECTOR *tex, DVECTOR *clut, CVECTOR *color, int arg4)
+void ui_draw_cell_grid(DVECTOR *pos, DVECTOR *tex, DVECTOR *clut, CVECTOR *color, int arg4)
 {
     int row, col;
     int cols, rows; /* tiles across and down */

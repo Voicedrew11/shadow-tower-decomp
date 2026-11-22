@@ -1,6 +1,6 @@
 /*
  * VS.EXE: globals of the start-up, round loop and main module
- * (func_800140d8..main, src/vs/main.c).
+ * (fighters_load_round..main, src/vs/main.c).
  */
 #ifndef VS_MAIN_H
 #define VS_MAIN_H
@@ -18,7 +18,7 @@ extern u8 *DAT_80011f40;
 extern u8 *DAT_80011f48;
 extern u8 *DAT_80011f4c;
 
-/* A file load buffer (bss; WIP extent: the item name file func_80016488
+/* A file load buffer (bss; WIP extent: the item name file match_load_resources
  * reads, a word then the 0x5400-byte table). */
 extern u_long DAT_80117708[];
 

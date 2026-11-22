@@ -44,7 +44,7 @@ void tim_load_member_done(void)
 
     pos.vx = DAT_80063304;
     pos.vy = DAT_80063308;
-    func_80012c2c((u_long *)&DAT_800633b0, &pos, NULL);
+    tim_load_images_at((u_long *)&DAT_800633b0, &pos, NULL);
     DrawSync(0);
 }
 

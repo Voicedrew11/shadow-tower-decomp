@@ -70,7 +70,7 @@ void cd_stop_drive(void);                 /* ST cd_stop_drive */
 void cd_archive_open(u16 archive, char *name); /* ST cd_archive_open */
 
 /* src/vs/snd_80012a70.c */
-void func_80012c2c(u_long *data, DVECTOR *pos, DVECTOR *clut_pos);
+void tim_load_images_at(u_long *data, DVECTOR *pos, DVECTOR *clut_pos);
 
 /* src/vs/model_8002345c.c */
 void *mem_alloc_main_ram(u32 size);            /* malloc, NULL outside main RAM */
@@ -89,35 +89,35 @@ void mesh_draw_part_nccs(u_short part);
 
 /* VS main module callees (src/vs/main.c). */
 u32 *copy_words(u32 *dst, u32 *src, int count);       /* src/vs/cd_8002e5e4.c */
-void func_80012a70(int bank);                            /* src/vs/main.c */
-void func_80012b50(u_long *data, int page, int clut_y);  /* src/vs/main.c */
-void func_80012d10(int id);                              /* src/vs/main.c */
-void func_8001381c(void);                                /* src/vs/main.c */
-int func_8001c530(void);                                 /* src/vs/card_8001c530.c */
+void sound_bank_open(int bank);                            /* src/vs/main.c */
+void tim_load_images_shifted(u_long *data, int page, int clut_y);  /* src/vs/main.c */
+void fighter_offset_textures(int id);                              /* src/vs/main.c */
+void pad_clear_input(void);                                /* src/vs/main.c */
+int card_check_saves_changed(void);                                 /* src/vs/card_8001c530.c */
 void anim_set_register(u16 id, StAnimFile *file);            /* src/vs/model_8002345c.c */
 void anim_register(u16 id, StAnimFile *file);            /* src/vs/anim_80027f30.c */
 void model_fixup_face_indices(ModelFile *file);                     /* src/vs/model_8002345c.c */
 int load_file(u_long *buf, char *name, u32 size);    /* src/vs/cd_8002e5e4.c */
-void func_80013848(void);                                /* src/vs/main.c */
-void func_80013868(void);                                /* src/vs/main.c */
-void func_80013aec(void);                                /* src/vs/main.c */
-void func_80014070(void);                                /* src/vs/main.c */
+void rcnt2_handler(void);                                /* src/vs/main.c */
+void vsync_handler(void);                                /* src/vs/main.c */
+void sound_init(void);                                /* src/vs/main.c */
+void cd_open_vs_archives(void);                                /* src/vs/main.c */
 void load_menu_sound_bank(void);                                /* src/vs/card_8001c8b8.c */
 void gfx_setup_320x240(void);                                /* src/vs/gfx_80016ca8.c */
 void gfx_setup_640x240(void);                                /* src/vs/gfx_80016ca8.c */
-int func_80016f10(void);                                 /* not reconstructed */
-int func_8001c5e0(int won, int again);                   /* not reconstructed */
-void func_80014480(void);                                /* src/vs/main.c */
-void func_80015020(void);                                /* src/vs/main.c */
-void func_80015e50(void);                                /* src/vs/main.c */
-void func_80016488(void);                                /* src/vs/main.c */
-void func_800165f4(void);                                /* src/vs/main.c */
-void func_80014634(void);                                /* src/vs/main.c */
-void func_800140d8(void);                                /* src/vs/main.c */
-void func_800129e8(int channel);                         /* src/vs/main.c */
-void func_8001336c(int id, int mode);                    /* src/vs/main.c */
-void func_800138a0(void);                                /* src/vs/main.c */
-void func_80013c5c(void);                                /* src/vs/main.c */
+int menu_vs_setup_run(void);                                 /* not reconstructed */
+int match_award_requested_item(int won, int again);                   /* not reconstructed */
+void gfx_init(void);                                /* src/vs/main.c */
+void round_draw_frame(void);                                /* src/vs/main.c */
+void round_play(void);                                /* src/vs/main.c */
+void match_load_resources(void);                                /* src/vs/main.c */
+void match_end_screen_run(void);                                /* src/vs/main.c */
+void camera_update(void);                                /* src/vs/main.c */
+void fighters_load_round(void);                                /* src/vs/main.c */
+void xa_cue_bgm(int channel);                         /* src/vs/main.c */
+void fighter_set_semi_trans(int id, int mode);                    /* src/vs/main.c */
+void debug_pan_display(void);                                /* src/vs/main.c */
+void fighters_play_anim_sounds(void);                                /* src/vs/main.c */
 void sparks_clear_all(void);                                /* src/vs/texanim_8002d710.c */
 int func_8002dcd8(void);                                 /* src/vs/fighter_8002dcd8.c */
 int func_8002e510(int id);                               /* src/vs/fighter_8002e114.c */

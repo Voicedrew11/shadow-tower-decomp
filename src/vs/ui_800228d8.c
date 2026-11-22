@@ -15,7 +15,7 @@
 SDATA(0x800632b8, 0xc)
 
 ADDRESS(0x800228d8, 0x128)
-void func_800228d8(int page)
+void menu_item_request_draw(int page)
 {
     RECT unused = {319, 110, 24, 16};
     CVECTOR unused2 = {16, 48, 16};
@@ -35,9 +35,9 @@ void func_800228d8(int page)
     sp->unk214.r = (u8)sp->unk248 * 4 + 96;
     sp->unk214.g = (u8)sp->unk248 * 2 + 48;
     if (sp->unk1CC & 0x8000)
-        func_80022794();
-    func_80021cfc();
-    func_800222d8(page);
-    func_8001f828();
+        menu_draw_button_prompt();
+    menu_item_request_draw_list();
+    menu_item_request_draw_details(page);
+    menu_draw_background();
     gfx_end_frame();
 }

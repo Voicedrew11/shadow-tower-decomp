@@ -12,7 +12,7 @@
 #include <vs/funcs.h>
 
 ADDRESS(0x80021c14, 0xe8)
-void func_80021c14(int page)
+void menu_creature_select_draw(int page)
 {
     VsMenuScratch *sp = VS_MENU_SCRATCH;
 
@@ -30,9 +30,9 @@ void func_80021c14(int page)
     sp->unk214.r = (u8)sp->unk248 * 4 + 96;
     sp->unk214.g = (u8)sp->unk248 * 2 + 48;
     if (sp->unk1CC == 1)
-        func_80020aa4(page);
+        menu_creature_select_draw_grid(page);
     else
-        func_80021140(page);
-    func_8001f828();
+        menu_creature_book_draw_entry(page);
+    menu_draw_background();
     gfx_end_frame();
 }

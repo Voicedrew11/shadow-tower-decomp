@@ -19,10 +19,10 @@ typedef struct {
     s32 slot[3];
 } VsTeam;
 
-/* The team screen's edit record (a local of func_800182ec): the slot picked
+/* The team screen's edit record (a local of menu_creature_select_loop): the slot picked
  * (unk4) and a copy of the team being edited. */
 typedef struct {
-    u8 unk0;             /* 0x00: a slot is held (func_800182ec) */
+    u8 unk0;             /* 0x00: a slot is held (menu_creature_select_loop) */
     u8 unk1[3];
     s32 unk4;            /* 0x04: the picked slot */
     VsTeam team;         /* 0x08 */
@@ -38,14 +38,14 @@ typedef struct {
         VsCardState card; /* the memory card screens' state (vs/card.h) */
         struct {
             u8 unk00[4];
-            u8 *kinds;   /* 0x04: the item grid, four per row (func_80021140) */
-            s16 count;   /* 0x08: items in the grid (func_80020aa4) */
+            u8 *kinds;   /* 0x04: the item grid, four per row (menu_creature_book_draw_entry) */
+            s16 count;   /* 0x08: items in the grid (menu_creature_select_draw_grid) */
             s16 rows;    /* 0x0a: its last row */
             s16 last;    /* 0x0c: items on the last row */
             u8 unk0E[2];
             DVECTOR pos[16]; /* 0x10: VRAM positions; [12..14] the team slot pictures, [15] the detail image */
-            MenuStoredItem *items; /* 0x50: item records by kind (func_80021140) */
-        } team;          /* the team screen (func_80017c84) */
+            MenuStoredItem *items; /* 0x50: item records by kind (menu_creature_book_draw_entry) */
+        } team;          /* the team screen (menu_creature_select_pick_up_slot) */
     } unk0;              /* 0x000 */
     VsCardPort *unk1B8;  /* 0x1b8: the card slot being scanned */
     s16 unk1BC;          /* 0x1bc: its card port */
@@ -55,20 +55,20 @@ typedef struct {
     s16 unk1C4;          /* 0x1c4: the file list scroll */
     u16 unk1C6;          /* 0x1c6 (ST MenuScratch.unk202) */
     s16 unk1C8;          /* 0x1c8: the first free save number */
-    s16 unk1CA;          /* 0x1ca: func_8001bb48's mode (func_80016f10 clears it) */
+    s16 unk1CA;          /* 0x1ca: card_screen_run's mode (menu_vs_setup_run clears it) */
     u16 unk1CC;          /* 0x1cc (ST unk2DC); func_8001bb48 shifts its step bit through it */
-    s16 unk1CE;          /* 0x1ce: the versus setup cursor line (func_80022a00) */
+    s16 unk1CE;          /* 0x1ce: the versus setup cursor line (menu_vs_setup_draw_options) */
     s16 unk1D0;          /* 0x1d0: the list cursor row (ST unk2E0) */
-    s16 unk1D2;          /* 0x1d2: the item grid row (func_80021140) */
+    s16 unk1D2;          /* 0x1d2: the item grid row (menu_creature_book_draw_entry) */
     u8 unk1D4;           /* 0x1d4: cursor blink phase (ST unk2E4) */
     u8 unk1D5;           /* 0x1d5: font mode (ST unk2E5) */
-    u8 unk1D6;           /* 0x1d6: a team slot is picked up (func_80020aa4) */
+    u8 unk1D6;           /* 0x1d6: a team slot is picked up (menu_creature_select_draw_grid) */
     u8 unk1D7;
-    DVECTOR unk1D8;      /* 0x1d8: the message/menu font page's VRAM position (func_8001bb48, func_80018c84) */
+    DVECTOR unk1D8;      /* 0x1d8: the message/menu font page's VRAM position (card_screen_run, menu_creature_select_run) */
     DVECTOR unk1DC;      /* 0x1dc: its CLUT position */
-    DVECTOR unk1E0;      /* 0x1e0: the item name page's VRAM position (func_8001bb48) */
+    DVECTOR unk1E0;      /* 0x1e0: the item name page's VRAM position (card_screen_run) */
     DVECTOR unk1E4;      /* 0x1e4: its CLUT position */
-    DVECTOR unk1E8;      /* 0x1e8: the setup page picture's VRAM position (func_80016f10) */
+    DVECTOR unk1E8;      /* 0x1e8: the setup page picture's VRAM position (menu_vs_setup_run) */
     u8 unk1EC[0x1f0 - 0x1ec];
     CVECTOR style[8];    /* 0x1f0: text colours (ST 0x300) */
     u8 unk210[4];
@@ -109,35 +109,35 @@ extern VsMessages DAT_80196230[2];
 
 /* VS's copies of ST.EXE's text and primitive helpers (src/st/ui.c,
  * src/st/text.c), not reconstructed yet. */
-void func_8001d8b8(u16 *s, u16 x, u16 y, CVECTOR *color); /* ST ui_draw_text */
-void func_800204b0(void);                                /* the menu screens' frame: draws and flips */
-void func_8001e3d8(RECT *r, CVECTOR *color, u16 semi);   /* ST ui_fill_rect */
-void func_8001e530(RECT *r, DVECTOR *tex, DVECTOR *clut, CVECTOR *color, int mode); /* ST ui_draw_image */
-void func_8001e890(int abr, int x, int y);               /* ST ui_add_draw_mode */
-void func_8001f23c(int x, int y, int w, int h);          /* ST ui_draw_panel */
-void func_8001de8c(RECT *r, CVECTOR *color, u16 border, u16 semi); /* ST ui_draw_rect_outline */
-void func_8001eef4(RECT *r, CVECTOR *color, u16 dir);    /* ST ui_draw_arrow */
-void func_8001d3f0(u16 c, u16 x, u16 y, CVECTOR *color);  /* ST ui_draw_glyph */
-void func_8001d9cc(u32 num, u16 x, u16 y, CVECTOR *color); /* ST ui_draw_number */
-void func_8001f30c(short x, short y, short w, short h); /* ST ui_draw_window */
-void func_8001f828(void);                                /* ST menu_draw_background */
-void func_8001f8c4(void);
-void func_8001f960(void);                                /* ST card_draw_checking */
-void func_8001f9a0(void);
-void func_8001fb98(void);                                /* ST card_draw_format_prompt */
-void func_8001fcac(void);
-void func_80020384(void);                                /* ST card_draw_transfer */
-void func_80020420(void);                                /* ST card_draw_finished */
-void func_80020460(void);                                /* ST card_draw_message */
-void func_80020aa4(int page);
-void func_80021140(int page);                            /* ST menu_creature_book_draw_entry */
-void func_80021cfc(void);
-void func_80022228(void);
-void func_800222d8(int page);
-void func_80022794(void);                                /* ST menu_draw_button_prompt */
-void func_80022a00(void);
-void func_80022f14(int page);
-void func_80023114(int page);
-void func_8002326c(void);
+void ui_draw_text(u16 *s, u16 x, u16 y, CVECTOR *color); /* ST ui_draw_text */
+void card_screen_draw(void);                                /* the menu screens' frame: draws and flips */
+void ui_fill_rect(RECT *r, CVECTOR *color, u16 semi);   /* ST ui_fill_rect */
+void ui_draw_image(RECT *r, DVECTOR *tex, DVECTOR *clut, CVECTOR *color, int mode); /* ST ui_draw_image */
+void ui_add_draw_mode(int abr, int x, int y);               /* ST ui_add_draw_mode */
+void ui_draw_panel(int x, int y, int w, int h);          /* ST ui_draw_panel */
+void ui_draw_rect_outline(RECT *r, CVECTOR *color, u16 border, u16 semi); /* ST ui_draw_rect_outline */
+void ui_draw_arrow(RECT *r, CVECTOR *color, u16 dir);    /* ST ui_draw_arrow */
+void ui_draw_glyph(u16 c, u16 x, u16 y, CVECTOR *color);  /* ST ui_draw_glyph */
+void ui_draw_number(u32 num, u16 x, u16 y, CVECTOR *color); /* ST ui_draw_number */
+void ui_draw_window(short x, short y, short w, short h); /* ST ui_draw_window */
+void menu_draw_background(void);                                /* ST menu_draw_background */
+void menu_draw_background_lowres(void);
+void card_draw_checking(void);                                /* ST card_draw_checking */
+void card_draw_port_choice(void);
+void card_draw_format_prompt(void);                                /* ST card_draw_format_prompt */
+void card_draw_file_list(void);
+void card_draw_transfer(void);                                /* ST card_draw_transfer */
+void card_draw_finished(void);                                /* ST card_draw_finished */
+void card_draw_message(void);                                /* ST card_draw_message */
+void menu_creature_select_draw_grid(int page);
+void menu_creature_book_draw_entry(int page);                            /* ST menu_creature_book_draw_entry */
+void menu_item_request_draw_list(void);
+void menu_arrange_icons_draw_caption(void);
+void menu_item_request_draw_details(int page);
+void menu_draw_button_prompt(void);                                /* ST menu_draw_button_prompt */
+void menu_vs_setup_draw_options(void);
+void menu_vs_setup_draw_choice(int page);
+void menu_vs_setup_draw_notice(int page);
+void menu_vs_setup_draw_no_item_notice(void);
 
 #endif

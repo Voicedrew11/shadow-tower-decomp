@@ -313,7 +313,7 @@ equals retail. The link confirmed the END.EXE rules above and these:
 ## VS.EXE
 
 VS.EXE links natively; 38 bytes differ from retail, all inside the two
-non-exact functions `func_800140d8` and `func_8001c5e0` (frame size
+non-exact functions `fighters_load_round` and `match_award_requested_item` (frame size
 only). The read-only data, `.data`, `.sdata` and every `.sbss`/`.bss`
 placement equal retail. The link established:
 

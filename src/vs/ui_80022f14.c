@@ -13,7 +13,7 @@
 #include <vs/menu.h>
 #include <vs/funcs.h>
 
-/* func_80023114's box widths. */
+/* menu_vs_setup_draw_notice's box widths. */
 RODATA(0x80011290, 0x18)
 /* The red and light text colours: 4-byte initializers, so .sdata under
  * -G8 (the light one is merged across the three dialogs). */
@@ -22,7 +22,7 @@ SDATA(0x800632c8, 0x8)
 /* A two-choice dialog: its caption and the two choices, the chosen one red
  * (page 5, or page 1 when DAT_80063228 is 1). */
 ADDRESS(0x80022f14, 0x200)
-void func_80022f14(int page)
+void menu_vs_setup_draw_choice(int page)
 {
     CVECTOR red = {200, 50, 50, 73};
     CVECTOR light = {96, 96, 96, 73};
@@ -45,21 +45,21 @@ void func_80022f14(int page)
     sp->style[0].r = sp->style[3].r = 60;
     sp->style[0].g = sp->style[3].g = 60;
     sp->style[0].b = sp->style[3].b = 60;
-    func_8001d8b8(VS_MESSAGE(msg[0]), 128, 104, &light);
+    ui_draw_text(VS_MESSAGE(msg[0]), 128, 104, &light);
     if (page == 5 || (page == 1 && DAT_80063228 == page)) {
-        func_8001d8b8(VS_MESSAGE(msg[1]), 200, 122, &red);
-        func_8001d8b8(VS_MESSAGE(msg[2]), 320, 122, &light);
+        ui_draw_text(VS_MESSAGE(msg[1]), 200, 122, &red);
+        ui_draw_text(VS_MESSAGE(msg[2]), 320, 122, &light);
     } else {
-        func_8001d8b8(VS_MESSAGE(msg[1]), 200, 122, &light);
-        func_8001d8b8(VS_MESSAGE(msg[2]), 320, 122, &red);
+        ui_draw_text(VS_MESSAGE(msg[1]), 200, 122, &light);
+        ui_draw_text(VS_MESSAGE(msg[2]), 320, 122, &red);
     }
-    func_8001f23c(120, 100, 346, 40);
-    func_8001e890(1, 0, 0);
+    ui_draw_panel(120, 100, 346, 40);
+    ui_add_draw_mode(1, 0, 0);
 }
 
 /* A one-line dialog: message 21 + page in a box sized for it. */
 ADDRESS(0x80023114, 0x158)
-void func_80023114(int page)
+void menu_vs_setup_draw_notice(int page)
 {
     CVECTOR light = {96, 96, 96, 73};
     int h = 0;
@@ -71,16 +71,16 @@ void func_80023114(int page)
     sp->style[0].b = sp->style[3].b = 60;
     if (page == 10)
         h = 15;
-    func_8001d8b8(VS_MESSAGE(21 + page), 128, 115, &light);
+    ui_draw_text(VS_MESSAGE(21 + page), 128, 115, &light);
     if (page == 10)
         h = 20;
-    func_8001f23c(120, 110, widths[page], h + 20);
-    func_8001e890(1, 0, 0);
+    ui_draw_panel(120, 110, widths[page], h + 20);
+    ui_add_draw_mode(1, 0, 0);
 }
 
 /* A one-line dialog: message 26. */
 ADDRESS(0x8002326c, 0x9c)
-void func_8002326c(void)
+void menu_vs_setup_draw_no_item_notice(void)
 {
     CVECTOR light = {96, 96, 96, 73};
     VsMenuScratch *sp = VS_MENU_SCRATCH;
@@ -88,14 +88,14 @@ void func_8002326c(void)
     sp->style[0].r = sp->style[3].r = 60;
     sp->style[0].g = sp->style[3].g = 60;
     sp->style[0].b = sp->style[3].b = 60;
-    func_8001d8b8(VS_MESSAGE(26), 108, 115, &light);
-    func_8001f23c(100, 110, 214, 20);
-    func_8001e890(1, 0, 0);
+    ui_draw_text(VS_MESSAGE(26), 108, 115, &light);
+    ui_draw_panel(100, 110, 214, 20);
+    ui_add_draw_mode(1, 0, 0);
 }
 
 /* The page frame: dispatches the dialog bodies by page number. */
 ADDRESS(0x80023308, 0x154)
-void func_80023308(int page)
+void menu_vs_setup_draw(int page)
 {
     VsMenuScratch *sp = VS_MENU_SCRATCH;
 
@@ -116,7 +116,7 @@ void func_80023308(int page)
     case 1:
     case 5:
     case 6:
-        func_80022f14(page);
+        menu_vs_setup_draw_choice(page);
         break;
     case 2:
     case 3:
@@ -124,14 +124,14 @@ void func_80023308(int page)
     case 9:
     case 10:
     case 11:
-        func_80023114(page);
+        menu_vs_setup_draw_notice(page);
         break;
     case 99:
-        func_8002326c();
+        menu_vs_setup_draw_no_item_notice();
         break;
     }
-    func_80022a00();
-    func_8001f23c(24, 16, 592, 208);
-    func_8001f828();
+    menu_vs_setup_draw_options();
+    ui_draw_panel(24, 16, 592, 208);
+    menu_draw_background();
     gfx_end_frame();
 }
