@@ -27,14 +27,14 @@ void menu_item_request_draw(int page)
     sp->style[0].b = sp->style[3].b = 96;
     sp->style[0].cd = 73;
     sp->style[3].cd = 49;
-    if (sp->unk1D4 < 16)
-        sp->unk248 = 8 - sp->unk1D4;
+    if (sp->blink_phase < 16)
+        sp->blink_level = 8 - sp->blink_phase;
     else
-        sp->unk248 = sp->unk1D4 - 24;
-    sp->unk214.b = 0;
-    sp->unk214.r = (u8)sp->unk248 * 4 + 96;
-    sp->unk214.g = (u8)sp->unk248 * 2 + 48;
-    if (sp->unk1CC & 0x8000)
+        sp->blink_level = sp->blink_phase - 24;
+    sp->cursor_color.b = 0;
+    sp->cursor_color.r = (u8)sp->blink_level * 4 + 96;
+    sp->cursor_color.g = (u8)sp->blink_level * 2 + 48;
+    if (sp->mode & 0x8000)
         menu_draw_button_prompt();
     menu_item_request_draw_list();
     menu_item_request_draw_details(page);

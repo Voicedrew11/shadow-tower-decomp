@@ -145,12 +145,12 @@ void model_draw_part_at(u8 *model, int part, SVECTOR *pos, SVECTOR *rot, SVECTOR
     MulMatrix((MATRIX *)&lights.l, &m);
     gte_SetColorMatrix(&lights.lc);
     gte_SetLightMatrix(&lights.l);
-    sp->unk68 = lights.dq[0];
-    sp->unk6C = lights.dq[1];
+    sp->depth_cue_near = lights.dq[0];
+    sp->depth_cue_far = lights.dq[1];
     gte_SetBackColor(lights.bk.r, lights.bk.g, lights.bk.b);
-    sp->matrix.t[0] = pos->vx - vs_gfx_state.unk2CA78.vx;
-    sp->matrix.t[1] = pos->vy - vs_gfx_state.unk2CA78.vy;
-    sp->matrix.t[2] = pos->vz - vs_gfx_state.unk2CA78.vz;
+    sp->matrix.t[0] = pos->vx - vs_gfx_state.camera_pos.vx;
+    sp->matrix.t[1] = pos->vy - vs_gfx_state.camera_pos.vy;
+    sp->matrix.t[2] = pos->vz - vs_gfx_state.camera_pos.vz;
     RotMatrixZYX(rot, &sp->matrix);
     sp->matrix.m[0][0] *= scale->vx;
     sp->matrix.m[0][1] *= scale->vx;
@@ -161,17 +161,17 @@ void model_draw_part_at(u8 *model, int part, SVECTOR *pos, SVECTOR *rot, SVECTOR
     sp->matrix.m[2][0] *= scale->vz;
     sp->matrix.m[2][1] *= scale->vz;
     sp->matrix.m[2][2] *= scale->vz;
-    CompMatrix(&vs_gfx_state.unk2C998, &sp->matrix, &sp->matrix);
+    CompMatrix(&vs_gfx_state.view_matrix, &sp->matrix, &sp->matrix);
     gte_SetRotMatrix(&sp->matrix);
     gte_SetTransMatrix(&sp->matrix);
     sp->far_z = 4096;
     sp->ot = vs_gfx_state.ot_cur;
     sp->near_z = 4;
-    sp->face_count = vs_gfx_state.unk831C[1];
-    sp->prim_count = vs_gfx_state.unk8324;
+    sp->face_count = vs_gfx_state.vertex_face_counts[1];
+    sp->prim_count = vs_gfx_state.prim_count;
     sp->prim = vs_gfx_state.packet->cur;
     sp->prim_end = vs_gfx_state.packet->end;
-    sp->vertices = vs_gfx_state.unkA7EC;
+    sp->vertices = vs_gfx_state.projected_vertices;
     sp->clut_base = 0;
     sp->model = model;
     sp->header = (MeshHeader *)(model + 12) + part;
@@ -186,8 +186,8 @@ void model_draw_part_at(u8 *model, int part, SVECTOR *pos, SVECTOR *rot, SVECTOR
     mesh_draw_part_nccs(part);
     vs_gfx_state.packet->cur = sp->prim;
     vs_gfx_state.packet->end = sp->prim_end;
-    vs_gfx_state.unk831C[1] = sp->face_count;
-    vs_gfx_state.unk8324 = sp->prim_count;
+    vs_gfx_state.vertex_face_counts[1] = sp->face_count;
+    vs_gfx_state.prim_count = sp->prim_count;
 }
 
 /*
@@ -297,7 +297,7 @@ void hud_draw_gauges(int level)
         packet->cur = (u_long *)(p + 1);
         setPolyG4(p);
         setSemiTrans(p, 1);
-        w = f->unk4DF08 * 100 / f->unk4DF18.unk1B8;
+        w = f->hp * 100 / f->data.max_hp;
         if (i == 0)
             setXY4(p, 115 - w, 20, 115, 20, 120 - w, 25, 120, 25);
         else
@@ -315,13 +315,13 @@ void hud_draw_gauges(int level)
     }
     for (i = 0; i < 2; i++) {
         f = &shared_buffer.fighter[i];
-        if (f->unk4DF18.unk1BA != 0) {
+        if (f->data.max_gauge != 0) {
             packet = vs_gfx_state.packet;
             p = (POLY_G4 *)packet->cur;
             packet->cur = (u_long *)(p + 1);
             setPolyG4(p);
             setSemiTrans(p, 1);
-            w = f->unk4DF0A * 100 / f->unk4DF18.unk1BA;
+            w = f->gauge * 100 / f->data.max_gauge;
             if (i == 0)
                 setXY4(p, 118 - w, 25, 118, 25, 120 - w, 28, 120, 28);
             else
@@ -616,7 +616,7 @@ void hud_draw_dialog_box(int level, int wide)
  * Drawing the fighters' names.
  */
 /*
- * Draws both fighters' names (item names teams[n].slot[round_index]) in
+ * Draws both fighters' names (item names lineups[n].slot[round_index]) in
  * 11-pixel glyphs from the font page at VRAM (640, 0): the first on the
  * left, the second on the right, wrapping to a second line at glyph 49;
  * `bright` sets their green tint.
@@ -636,7 +636,7 @@ void hud_draw_fighter_names(int bright)
     u16 glyph;
 
     for (n = 0; n < 2;) {
-        s = VS_ITEM_NAME(teams[n].slot[round_index]);
+        s = VS_ITEM_NAME(lineups[n].slot[round_index]);
         glyph = *s;
         if (glyph == 0xffff || glyph == 0)
             goto next;
@@ -729,9 +729,9 @@ void fighter_draw_shadow(int n, int scale);                    /* src/vs/fighter
 
 /* The fighter's place seen from the camera, unrotated. */
 #define PLACE(m, f)                                                            \
-    (m).t[0] = (f).unk4DEF0.vx - vs_gfx_state.unk2CA78.vx;                    \
-    (m).t[1] = -vs_gfx_state.unk2CA78.vy;                                      \
-    (m).t[2] = (f).unk4DEF0.vz - vs_gfx_state.unk2CA78.vz;                    \
+    (m).t[0] = (f).position.vx - vs_gfx_state.camera_pos.vx;                    \
+    (m).t[1] = -vs_gfx_state.camera_pos.vy;                                      \
+    (m).t[2] = (f).position.vz - vs_gfx_state.camera_pos.vz;                    \
     (m).m[0][0] = 4096;                                                        \
     (m).m[0][1] = 0;                                                           \
     (m).m[0][2] = 0;                                                           \
@@ -741,7 +741,7 @@ void fighter_draw_shadow(int n, int scale);                    /* src/vs/fighter
     (m).m[2][0] = 0;                                                           \
     (m).m[2][1] = 0;                                                           \
     (m).m[2][2] = 4096;                                                        \
-    CompMatrix(&vs_gfx_state.unk2C998, &(m), &(m));                            \
+    CompMatrix(&vs_gfx_state.view_matrix, &(m), &(m));                            \
     gte_SetRotMatrix(&(m));                                                    \
     gte_SetTransMatrix(&(m))
 
@@ -800,13 +800,13 @@ int round_draw_opening(int frame)
         hud_draw_banner(3, (frame - 100) * 2);
         hud_draw_clock_value(30, 32);
         hud_draw_gauges(32);
-        hud_draw_round_wins((u32)vs_pad_state.unk3C % 96, 32);
+        hud_draw_round_wins((u32)vs_pad_state.vsync_count % 96, 32);
         hud_draw_fighter_names(32);
     } else if (frame > 70) {
         hud_draw_banner(7, (frame - 70) * 2);
         hud_draw_clock_value(30, frame - 70);
         hud_draw_gauges((frame - 70) * 2);
-        hud_draw_round_wins((u32)vs_pad_state.unk3C % 96, (frame - 70) * 2);
+        hud_draw_round_wins((u32)vs_pad_state.vsync_count % 96, (frame - 70) * 2);
         hud_draw_fighter_names(frame - 70);
     } else if (frame > 40) {
         hud_draw_round_banner(round_index + 16, (48 - frame) * 2, 50 - frame);
@@ -828,13 +828,13 @@ int round_draw_opening(int frame)
             ring[1].r = ring[1].g = ring[1].b = FLOOR0(255 - (frame - 61) * 16);
         }
         for (n = 0; n < 2; n++) {
-            RADIUS(shared_buffer.fighter[n].unk4DF18.unk1B4, 500, 1000, 1500, 2000);
+            RADIUS(shared_buffer.fighter[n].data.radius, 500, 1000, 1500, 2000);
             for (i = 0; i < 16; i++) {
                 v[i].vx = r * coss[i] * open / 409600;
                 v[i].vy = 0;
                 v[i].vz = r * sins[i] * open / 409600;
                 v[i + 16].vx = r * coss[i] * open / 409600;
-                v[i + 16].vy = vs_gfx_state.unk2CA78.vy;
+                v[i + 16].vy = vs_gfx_state.camera_pos.vy;
                 v[i + 16].vz = r * sins[i] * open / 409600;
             }
             PLACE(m, shared_buffer.fighter[n]);
@@ -894,7 +894,7 @@ int round_draw_opening(int frame)
     }
     if (frame < 100) {
         for (i = 0; i < 2; i++) {
-            RADIUS(shared_buffer.fighter[i].unk4DF18.unk1B4, 625, 1250, 1875, 2500);
+            RADIUS(shared_buffer.fighter[i].data.radius, 625, 1250, 1875, 2500);
             v[i].vx = -r;
             v[i].vy = 0;
             v[i].vz = -r;
@@ -940,7 +940,7 @@ int round_draw_opening(int frame)
     if (frame > 45) {
         for (i = 0; i < 2; i++) {
             current_fighter = &shared_buffer.fighter[i];
-            switch (shared_buffer.fighter[i].unk4DF10) {
+            switch (shared_buffer.fighter[i].model_kind) {
             case 1:
                 fighter_draw_skeletal();
                 break;
@@ -949,8 +949,8 @@ int round_draw_opening(int frame)
                 fighter_draw_vertex_anim();
                 break;
             }
-            current_fighter->unk4DEEA =
-                (current_fighter->unk4DEEA + current_fighter->unk4DEEC * frames_per_draw) & 0xfff;
+            current_fighter->anim_frame =
+                (current_fighter->anim_frame + current_fighter->anim_step * frames_per_draw) & 0xfff;
             fighter_draw_shadow(i, 4096);
         }
     }

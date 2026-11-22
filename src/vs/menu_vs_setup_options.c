@@ -37,15 +37,15 @@ void menu_vs_setup_draw_options(void)
 
     tex.vx = 640;
     tex.vy = 124;
-    sp->unk240.vx = 896;
-    sp->unk240.vy = 496;
-    sp->unk244.vx = 544;
-    sp->unk244.vy = 505;
-    sp->unk224.x = 48;
-    sp->unk224.y = 20;
-    sp->unk224.w = 255;
-    sp->unk224.h = 16;
-    ui_draw_image(&sp->unk224, &sp->unk240, &sp->unk244, NULL, 3);
+    sp->tex_pos.vx = 896;
+    sp->tex_pos.vy = 496;
+    sp->clut_pos.vx = 544;
+    sp->clut_pos.vy = 505;
+    sp->rect.x = 48;
+    sp->rect.y = 20;
+    sp->rect.w = 255;
+    sp->rect.h = 16;
+    ui_draw_image(&sp->rect, &sp->tex_pos, &sp->clut_pos, NULL, 3);
     for (i = 0; i < 7; i++) {
         switch (i) {
         case 3:
@@ -71,7 +71,7 @@ void menu_vs_setup_draw_options(void)
             ui_draw_text(VS_MESSAGE(i), 94, i * 20 + 56, &sp->style[0]);
             break;
         }
-        if (i == sp->unk1CE)
+        if (i == sp->main_row)
             ui_draw_gouraud_quad(bar, lit, 1);
         else
             ui_draw_gouraud_quad(bar, dim, 1);
@@ -82,35 +82,35 @@ void menu_vs_setup_draw_options(void)
         bar[3].vy += 20;
     }
     ui_draw_text(VS_MESSAGE(8), 296, 64, &sp->style[0]);
-    sp->unk238.x = 396;
-    sp->unk238.y = 84;
-    sp->unk238.w = 56;
-    sp->unk238.h = 28;
+    sp->image_rect.x = 396;
+    sp->image_rect.y = 84;
+    sp->image_rect.w = 56;
+    sp->image_rect.h = 28;
     if (requested_items[0] != -1) {
         sp->style[0].cd |= 0x80;
         ui_draw_text(VS_ITEM_NAME(requested_items[0]), 294, 116, &sp->style[0]);
         sp->style[0].cd &= 0x7f;
-        ui_draw_image(&sp->unk238, &tex, NULL, NULL, 16);
+        ui_draw_image(&sp->image_rect, &tex, NULL, NULL, 16);
     }
-    sp->unk224.x = 280;
-    sp->unk224.y = 60;
-    sp->unk224.w = 292;
-    sp->unk224.h = 74;
-    sp->unk220.r = 48;
-    sp->unk220.g = 48;
-    sp->unk220.b = 48;
-    ui_draw_rect_outline(&sp->unk224, &sp->unk220, 513, 1);
+    sp->rect.x = 280;
+    sp->rect.y = 60;
+    sp->rect.w = 292;
+    sp->rect.h = 74;
+    sp->border_color.r = 48;
+    sp->border_color.g = 48;
+    sp->border_color.b = 48;
+    ui_draw_rect_outline(&sp->rect, &sp->border_color, 513, 1);
     ui_add_draw_mode(1, 0, 0);
     ui_draw_text(VS_MESSAGE(9), 296, 144, &sp->style[0]);
-    sp->unk238.y = 164;
+    sp->image_rect.y = 164;
     tex.vy += 28;
     if (requested_item_2p != -1) {
         sp->style[0].cd |= 0x80;
         ui_draw_text(VS_ITEM_NAME(requested_item_2p), 294, 196, &sp->style[0]);
         sp->style[0].cd &= 0x7f;
-        ui_draw_image(&sp->unk238, &tex, NULL, NULL, 16);
+        ui_draw_image(&sp->image_rect, &tex, NULL, NULL, 16);
     }
-    sp->unk224.y = 140;
-    ui_draw_rect_outline(&sp->unk224, &sp->unk220, 513, 1);
+    sp->rect.y = 140;
+    ui_draw_rect_outline(&sp->rect, &sp->border_color, 513, 1);
     ui_add_draw_mode(1, 0, 0);
 }

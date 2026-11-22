@@ -19,35 +19,35 @@ void sparks_start_burst(int n)
 {
     VsFighter *f = &shared_buffer.fighter[n];
     VsFighter *o = &shared_buffer.fighter[1 - n];
-    VsRecord20 *rec = sparks;
+    VsSpark *rec = sparks;
     SVECTOR off;
     int count = 0;
     int i = 2000;
 
-    off.vy = ratan2(f->unk4DEF0.vx - o->unk4DEF0.vx, f->unk4DEF0.vz - o->unk4DEF0.vz);
-    off.vx = f->unk4DF18.unk1B4 * rsin(off.vy - 2048) / 16384;
-    off.vz = f->unk4DF18.unk1B4 * rcos(off.vy - 2048) / 16384;
+    off.vy = ratan2(f->position.vx - o->position.vx, f->position.vz - o->position.vz);
+    off.vx = f->data.radius * rsin(off.vy - 2048) / 16384;
+    off.vz = f->data.radius * rcos(off.vy - 2048) / 16384;
     while (i--) {
-        if (rec->unk10 == 0) {
+        if (rec->life == 0) {
             int vx;
             int vz;
 
-            rec->unk10 = rand() & 0x7f;
-            rec->unk0.vx = f->unk4DEF0.vx + off.vx;
-            rec->unk0.vy = f->unk4DEF0.vy - f->unk4DF18.unk1B6 / 2;
-            rec->unk0.vz = f->unk4DEF0.vz + off.vz;
-            rec->unk8.vx = (rand() & 0x7f) - 63;
-            rec->unk8.vy = (rand() & 0x7f) - 63;
+            rec->life = rand() & 0x7f;
+            rec->position.vx = f->position.vx + off.vx;
+            rec->position.vy = f->position.vy - f->data.height / 2;
+            rec->position.vz = f->position.vz + off.vz;
+            rec->velocity.vx = (rand() & 0x7f) - 63;
+            rec->velocity.vy = (rand() & 0x7f) - 63;
             vz = (rand() & 0x7f) - 63;
-            vx = rec->unk8.vx;
-            rec->unk8.vz = vz;
+            vx = rec->velocity.vx;
+            rec->velocity.vz = vz;
             if (vx >= 48 && (vz >= 48 || vz < -47))
-                rec->unk10 = 0;
+                rec->life = 0;
             else if (vx < -47) {
                 if ((short)vz >= 48)
-                    rec->unk10 = 0;
+                    rec->life = 0;
                 else if ((short)vz < -47)
-                    rec->unk10 = 0;
+                    rec->life = 0;
             }
             if (++count == 200)
                 break;

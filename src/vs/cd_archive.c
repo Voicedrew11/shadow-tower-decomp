@@ -70,7 +70,7 @@ void cd_init(void)
     int i;
 
     EnterCriticalSection();
-    r = vs_cd_state.unk8;
+    r = vs_cd_state.requests;
     i = 0;
     do {
         i++;
@@ -78,8 +78,8 @@ void cd_init(void)
         r->step = 0;
         r++;
     } while (i < VS_CD_REQUESTS);
-    vs_cd_state.unkD8 = vs_cd_state.unk8;
-    vs_cd_state.unkDC = vs_cd_state.unk8;
+    vs_cd_state.next_free = vs_cd_state.requests;
+    vs_cd_state.current = vs_cd_state.requests;
     CdSyncCallback(0);
     CdReadyCallback(0);
     CdReadCallback(0);

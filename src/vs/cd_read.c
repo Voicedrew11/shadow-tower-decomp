@@ -24,7 +24,7 @@
 ADDRESS(0x8002e5e4, 0x4c)
 void loading_screen_step(void)
 {
-    if (vs_gfx_state.unk2C974) {
+    if (vs_gfx_state.loading_screen_active) {
         gfx_begin_frame();
         gfx_end_frame();
     }
@@ -85,7 +85,7 @@ void mem_free(void *p)
 ADDRESS(0x8002e720, 0x148)
 void cd_request_ready_callback(u_char status, u_char *result)
 {
-    StCdRequest *request = vs_cd_state.unkDC;
+    StCdRequest *request = vs_cd_state.current;
     u_char param[8]; /* unused */
     u_long rest[70];
 
@@ -132,7 +132,7 @@ void cd_request_ready_callback(u_char status, u_char *result)
 ADDRESS(0x8002e868, 0x22c)
 void cd_request_sync_callback(u_char status, u_char *result)
 {
-    StCdRequest *request = vs_cd_state.unkDC;
+    StCdRequest *request = vs_cd_state.current;
 
     if (status == CdlComplete) {
         switch (request->kind) {
@@ -201,9 +201,9 @@ void cd_request_retire(StCdRequest *request)
 {
     request->kind = 0;
     request->step = STEP_SEEK;
-    if (++request == &vs_cd_state.unk8[VS_CD_REQUESTS])
+    if (++request == &vs_cd_state.requests[VS_CD_REQUESTS])
         request -= VS_CD_REQUESTS;
-    vs_cd_state.unkDC = request;
+    vs_cd_state.current = request;
     if (request->kind != 0) {
         CdReadyCallback(0);
         CdSyncCallback(cd_request_sync_callback);

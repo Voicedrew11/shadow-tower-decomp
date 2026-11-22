@@ -26,32 +26,32 @@ typedef struct {
     MeshHeader *header;  /* 0x24 (ST 0x20) */
     u8 *normals;         /* 0x28 (ST 0x24) */
     u8 unk2C[0x30 - 0x2c];
-    u_long *unk30;       /* 0x30: mesh_nclip_triangle's three screen-point words (ST 0x2c) */
-    u_long *unk34;
-    u_long *unk38;
+    u_long *sxy0;        /* 0x30: mesh_nclip_triangle's three screen-point words (ST 0x2c) */
+    u_long *sxy1;
+    u_long *sxy2;
     u8 unk3C[8];
     u8 *vertices;        /* 0x44: transformed vertices, by byte offset (ST 0x40) */
     u8 *unk48;           /* 0x48: a second vertex cursor (effect_draw_model_part) */
     u8 *local_vertices;  /* 0x4c: SVECTOR model-space vertices (ST 0x48) */
     u8 unk50[0x64 - 0x50];
     CVECTOR rgb;         /* 0x64: the renderers' NCCS input colour; .cd carries the GPU code (ST 0x60) */
-    s32 unk68;           /* 0x68: the depth-cue near depth (fighter_draw_skeletal) */
-    s32 unk6C;           /* 0x6c: and far depth */
+    s32 depth_cue_near;  /* 0x68: the depth-cue near depth (fighter_draw_skeletal) */
+    s32 depth_cue_far;   /* 0x6c: and far depth */
     long opz;            /* 0x70: NCLIP result */
     long nclip;          /* 0x74: the renderers' NCLIP result */
     u8 unk78[0x82 - 0x78];
     u_short near_z;      /* 0x82: faces at or before this OT depth are culled */
     u8 unk84[0x88 - 0x84];
-    int z_ot;            /* 0x88: the model renderers' first per-frame counter */
+    int vertex_count;    /* 0x88: the model renderers' first per-frame counter */
     int face_count;      /* 0x8c: faces submitted */
     int prim_count;      /* 0x90: primitives emitted */
-    s32 unk94;           /* 0x94: their fourth per-frame counter */
+    s32 prim_alloc_count; /* 0x94: their fourth per-frame counter */
     u_short clut_base;   /* 0x98 (effects_draw) */
     u8 unk9A[0xa4 - 0x9a];
     struct StAnimList *anims; /* 0xa4: the node list anim_list_compose composes */
     MATRIX matrix;       /* 0xa8: the model matrix effect_draw_model_part draws with */
     u8 unkC8[0x13c - 0xc8];
-    VECTOR unk13C;       /* 0x13c: an effect's position (effects_draw) */
+    VECTOR effect_pos;   /* 0x13c: an effect's position (effects_draw) */
 } VsScratchPad;
 
 /* Layout check: the offset the code proves. */

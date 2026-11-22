@@ -13,4 +13,4 @@
 #include <vs/effect.h>
 
 DATA(0x801c4a58, 0x9c40, ".bss")
-VsRecord20 sparks[2000];
+VsSpark sparks[2000];

@@ -173,7 +173,7 @@ void model_fixup_face_indices(ModelFile *file)
 ADDRESS(0x80023764, 0x3c)
 void anim_set_register(u16 id, StAnimFile *file)
 {
-    vs_gfx_state.unk834C[id] = file;
+    vs_gfx_state.model_files[id] = file;
     SCRATCHPAD->model = ANIM_MODEL(file);
 }
 
@@ -328,7 +328,7 @@ void debug_print_matrix(MATRIX *m)
 ADDRESS(0x800246d8, 0x484)
 int anim_set_pose(StAnimSet **setp, int id, int clip, u_long frame)
 {
-    StAnimFile *file = vs_gfx_state.unk834C[id];
+    StAnimFile *file = vs_gfx_state.model_files[id];
     StAnimSet *set = *setp;
     VsScratchPad *sp = VS_SCRATCHPAD;
     StAnimFile *still;
@@ -339,7 +339,7 @@ int anim_set_pose(StAnimSet **setp, int id, int clip, u_long frame)
     if (file->animated == 0) {
         if (set != NULL)
             anim_set_free(set);
-        still = vs_gfx_state.unk834C[id];
+        still = vs_gfx_state.model_files[id];
         model = ANIM_MODEL(still);
         sp->model = model;
         sp->header = MODEL_PARTS(model);
@@ -487,9 +487,9 @@ void model_draw_list(void)
                 MATRIX face = {{{ONE, 0, 0}, {0, ONE, 0}, {0, 0, ONE}}, {0, 0, 0}};
                 SVECTOR angle;
 
-                angle.vx = -current_fighter->unk4DF00 + vs_gfx_state.unk2CA88.vx;
-                angle.vy = -current_fighter->unk4DF02 + vs_gfx_state.unk2CA88.vy;
-                angle.vz = -current_fighter->unk4DF04 + vs_gfx_state.unk2CA88.vz;
+                angle.vx = -current_fighter->rot_x + vs_gfx_state.camera_rot.vx;
+                angle.vy = -current_fighter->facing + vs_gfx_state.camera_rot.vy;
+                angle.vz = -current_fighter->rot_z + vs_gfx_state.camera_rot.vz;
                 RotMatrixX(angle.vx, &face);
                 RotMatrixY(angle.vy, &face);
                 RotMatrixZ(angle.vz, &face);
@@ -550,7 +550,7 @@ void model_draw_list(void)
 ADDRESS(0x80025204, 0x46c)
 void fighter_draw_skeletal(void)
 {
-    if (current_fighter->unk4DEEA != -1) {
+    if (current_fighter->anim_frame != -1) {
     VsScratchPad *sp = VS_SCRATCHPAD;
     VsLights lights = {
         {{3000, 3700, -1500}, {-2000, 3700, -3000}, {-1300, -1000, 1024}}, 0,
@@ -563,53 +563,53 @@ void fighter_draw_skeletal(void)
     int ry;
     int n;
 
-    rx = light_rot_x + current_fighter->unk4DF00;
-    ry = light_rot_y + current_fighter->unk4DF02;
+    rx = light_rot_x + current_fighter->rot_x;
+    ry = light_rot_y + current_fighter->facing;
     ScaleMatrix(&m, &light_scale);
     RotMatrixX(rx, &m);
     RotMatrixY(ry, &m);
     MulMatrix((MATRIX *)&lights.l, &m);
     gte_SetColorMatrix(&lights.lc);
     gte_SetLightMatrix(&lights.l);
-    sp->unk68 = lights.dq[0];
-    sp->unk6C = lights.dq[1];
+    sp->depth_cue_near = lights.dq[0];
+    sp->depth_cue_far = lights.dq[1];
     gte_SetBackColor(lights.bk.r, lights.bk.g, lights.bk.b);
-    sp->matrix.t[0] = current_fighter->unk4DEF0.vx - vs_gfx_state.unk2CA78.vx;
-    sp->matrix.t[1] = current_fighter->unk4DEF0.vy - vs_gfx_state.unk2CA78.vy;
-    sp->matrix.t[2] = current_fighter->unk4DEF0.vz - vs_gfx_state.unk2CA78.vz;
-    RotMatrix((SVECTOR *)&current_fighter->unk4DF00, &sp->matrix);
-    CompMatrix(&vs_gfx_state.unk2C998, &sp->matrix, &sp->matrix);
+    sp->matrix.t[0] = current_fighter->position.vx - vs_gfx_state.camera_pos.vx;
+    sp->matrix.t[1] = current_fighter->position.vy - vs_gfx_state.camera_pos.vy;
+    sp->matrix.t[2] = current_fighter->position.vz - vs_gfx_state.camera_pos.vz;
+    RotMatrix((SVECTOR *)&current_fighter->rot_x, &sp->matrix);
+    CompMatrix(&vs_gfx_state.view_matrix, &sp->matrix, &sp->matrix);
     n = current_fighter - shared_buffer.fighter;
-    sp->model = (u8 *)vs_gfx_state.unk834C[n] + ((ModelFile *)vs_gfx_state.unk834C[n])->model;
-    if (anim_set_pose(&current_fighter->unk4DEE0, n, current_fighter->unk4DEE8,
-                      current_fighter->unk4DEEA) == 0)
+    sp->model = (u8 *)vs_gfx_state.model_files[n] + ((ModelFile *)vs_gfx_state.model_files[n])->model;
+    if (anim_set_pose(&current_fighter->anim_set, n, current_fighter->anim,
+                      current_fighter->anim_frame) == 0)
         return;
     sp->ot = vs_gfx_state.ot_cur;
     sp->far_z = 4096;
-    if (current_fighter->unk4DF12 < 128) {
-        sp->rgb.r = current_fighter->unk4DF12;
-        sp->rgb.g = current_fighter->unk4DF12;
-        sp->rgb.b = current_fighter->unk4DF12;
+    if (current_fighter->brightness < 128) {
+        sp->rgb.r = current_fighter->brightness;
+        sp->rgb.g = current_fighter->brightness;
+        sp->rgb.b = current_fighter->brightness;
         sp->rgb.cd = 0;
         mesh_semi_trans = 1;
     } else {
         *(u_long *)&sp->rgb = fighter_skeletal_rgb;
         mesh_semi_trans = 0;
     }
-    sp->face_count = vs_gfx_state.unk831C[1];
-    sp->prim_count = vs_gfx_state.unk8324;
-    sp->unk94 = vs_gfx_state.unk8328;
+    sp->face_count = vs_gfx_state.vertex_face_counts[1];
+    sp->prim_count = vs_gfx_state.prim_count;
+    sp->prim_alloc_count = vs_gfx_state.prim_alloc_count;
     sp->prim = vs_gfx_state.packet->cur;
     sp->prim_end = vs_gfx_state.packet->end;
-    sp->vertices = vs_gfx_state.unkA7EC;
+    sp->vertices = vs_gfx_state.projected_vertices;
     sp->clut_base = 0;
-    if (current_fighter->unk4DEEA != -1)
+    if (current_fighter->anim_frame != -1)
         model_draw_list();
     vs_gfx_state.packet->cur = sp->prim;
     vs_gfx_state.packet->end = sp->prim_end;
-    vs_gfx_state.unk831C[1] = sp->face_count;
-    vs_gfx_state.unk8328 = sp->unk94;
-    vs_gfx_state.unk8324 = sp->prim_count;
+    vs_gfx_state.vertex_face_counts[1] = sp->face_count;
+    vs_gfx_state.prim_alloc_count = sp->prim_alloc_count;
+    vs_gfx_state.prim_count = sp->prim_count;
     }
 }
 
@@ -631,7 +631,7 @@ ADDRESS(0x800256bc, 0x1bc)
 void anim_set_node_vertex(int id, int node, int index, VECTOR *out)
 {
     MATRIX unused;
-    StAnimSet *set = shared_buffer.fighter[id].unk4DEE0;
+    StAnimSet *set = shared_buffer.fighter[id].anim_set;
     StAnimFile *file = (StAnimFile *)shared_buffer.fighter[id].file;
     MATRIX identity = {{{4096, 0, 0}, {0, 4096, 0}, {0, 0, 4096}}};
     StAnimNode *n;

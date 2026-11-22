@@ -19,7 +19,7 @@ extern u_char menu_vab_head[];
 typedef struct {
     u_char head[4096];   /* 0x0000: the VAB header */
     s16 vab;             /* 0x1000: SsVabOpenHeadSticky's id, -1 on failure */
-    s16 unk1002;         /* 0x1002: SsVabTransBodyPartly's result */
+    s16 trans_result;    /* 0x1002: SsVabTransBodyPartly's result */
 } VsSoundBank;
 
 typedef char VsSoundBankSize[sizeof(VsSoundBank) == 0x1004 ? 1 : -1];

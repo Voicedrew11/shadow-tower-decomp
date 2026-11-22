@@ -137,7 +137,7 @@ void fighter_draw_guard_flash(int id)
 {
     VsScratchPad *sp = VS_SCRATCHPAD;
     VsFighter *f = &shared_buffer.fighter[id];
-    VsFighterData *d = &f->unk4DF18;
+    VsFighterData *d = &f->data;
     CVECTOR c[4];
     SVECTOR rot;
     MATRIX m;
@@ -149,7 +149,7 @@ void fighter_draw_guard_flash(int id)
     POLY_FT3 *t;
     int i;
 
-    switch (f->unk4DF14) {
+    switch (f->guard_flash) {
     case 5:
         c[0].r = 255;
         c[0].g = 255;
@@ -221,23 +221,23 @@ void fighter_draw_guard_flash(int id)
         c[3].b = 0;
         break;
     }
-    m.t[0] = f->unk4DEF0.vx + rsin(f->unk4DF02 - 2048) * d->unk1B4 / 4096 - vs_gfx_state.unk2CA78.vx;
-    m.t[1] = f->unk4DEF0.vy - d->unk1B6 / 2 - vs_gfx_state.unk2CA78.vy;
-    m.t[2] = f->unk4DEF0.vz + rcos(f->unk4DF02 - 2048) * d->unk1B4 / 4096 - vs_gfx_state.unk2CA78.vz;
-    rot.vx = f->unk4DF00;
-    rot.vy = f->unk4DF02;
-    rot.vz = f->unk4DF04;
+    m.t[0] = f->position.vx + rsin(f->facing - 2048) * d->radius / 4096 - vs_gfx_state.camera_pos.vx;
+    m.t[1] = f->position.vy - d->height / 2 - vs_gfx_state.camera_pos.vy;
+    m.t[2] = f->position.vz + rcos(f->facing - 2048) * d->radius / 4096 - vs_gfx_state.camera_pos.vz;
+    rot.vx = f->rot_x;
+    rot.vy = f->facing;
+    rot.vz = f->rot_z;
     RotMatrix(&rot, &m);
-    CompMatrix(&vs_gfx_state.unk2C998, &m, &m);
-    m.m[0][0] = m.m[0][0] * d->unk1B4 / 500;
-    m.m[0][1] = m.m[0][1] * d->unk1B4 / 500;
-    m.m[0][2] = m.m[0][2] * d->unk1B4 / 500;
-    m.m[1][0] = m.m[1][0] * d->unk1B6 / 1000;
-    m.m[1][1] = m.m[1][1] * d->unk1B6 / 1000;
-    m.m[1][2] = m.m[1][2] * d->unk1B6 / 1000;
-    m.m[2][0] = m.m[2][0] * d->unk1B4 / 1000;
-    m.m[2][1] = m.m[2][1] * d->unk1B4 / 1000;
-    m.m[2][2] = m.m[2][2] * d->unk1B4 / 1000;
+    CompMatrix(&vs_gfx_state.view_matrix, &m, &m);
+    m.m[0][0] = m.m[0][0] * d->radius / 500;
+    m.m[0][1] = m.m[0][1] * d->radius / 500;
+    m.m[0][2] = m.m[0][2] * d->radius / 500;
+    m.m[1][0] = m.m[1][0] * d->height / 1000;
+    m.m[1][1] = m.m[1][1] * d->height / 1000;
+    m.m[1][2] = m.m[1][2] * d->height / 1000;
+    m.m[2][0] = m.m[2][0] * d->radius / 1000;
+    m.m[2][1] = m.m[2][1] * d->radius / 1000;
+    m.m[2][2] = m.m[2][2] * d->radius / 1000;
     gte_SetRotMatrix(&m);
     gte_SetTransMatrix(&m);
     sp->model = guard_flash_model;

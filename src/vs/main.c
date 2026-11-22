@@ -143,8 +143,8 @@ void sound_bank_open(int bank)
 
     b->vab = SsVabOpenHeadSticky(b->head, -1, bank * 0xa000 + 0x3e400);
     if (b->vab != -1) {
-        b->unk1002 = SsVabTransBodyPartly(shared_buffer.bank[bank], 0x12c00, b->vab);
-        if (b->unk1002 == b->vab)
+        b->trans_result = SsVabTransBodyPartly(shared_buffer.bank[bank], 0x12c00, b->vab);
+        if (b->trans_result == b->vab)
             SsVabTransCompleted(SS_WAIT_COMPLETED);
     }
 }
@@ -261,7 +261,7 @@ void fighter_offset_textures(int id)
     int n;
     int k;
 
-    switch (shared_buffer.fighter[id].unk4DF10) {
+    switch (shared_buffer.fighter[id].model_kind) {
     case 1:
         sp->header = MODEL_PARTS(sp->model);
         for (n = ((u_long *)sp->model)[2]; n-- != 0; sp->header++) {
@@ -275,8 +275,8 @@ void fighter_offset_textures(int id)
         VS_PART_ALL_FACES(VS_SHIFT_TEXTURE);
         break;
     }
-    if (shared_buffer.fighter[id].unk4B000[0] != 0) {
-        sp->model = (u8 *)shared_buffer.fighter[id].unk4B000;
+    if (shared_buffer.fighter[id].effect_model[0] != 0) {
+        sp->model = (u8 *)shared_buffer.fighter[id].effect_model;
         sp->header = MODEL_PARTS(sp->model);
         for (n = ((u_long *)sp->model)[2]; n-- != 0; sp->header++) {
             sp->faces = sp->model + (sp->header->faces + 12);
@@ -297,7 +297,7 @@ void fighter_set_semi_trans(int id, int mode)
     int k;
 
     mode <<= 5;
-    switch (shared_buffer.fighter[id].unk4DF10) {
+    switch (shared_buffer.fighter[id].model_kind) {
     case 1:
         sp->model = ANIM_MODEL(file);
         sp->header = MODEL_PARTS(sp->model);
@@ -321,61 +321,61 @@ ADDRESS(0x800136e0, 0x13c)
 void pad_update_buttons(void)
 {
     if (pad_buffers[0].status == 0) {
-        vs_pad_state.pads[0].unk0 = ~pad_buffers[0].buttons;
-        if (vs_pad_state.pads[0].unk0 != vs_pad_state.pads[0].unk4) {
-            vs_pad_state.pads[0].unk10 = 30;
-            vs_pad_state.pads[0].unk8 |= vs_pad_state.pads[0].unk0 & ~vs_pad_state.pads[0].unk4;
-            vs_pad_state.pads[0].unkC |= vs_pad_state.pads[0].unk0 & ~vs_pad_state.pads[0].unk4;
-        } else if (vs_pad_state.pads[0].unk10 != 0) {
-            if (--vs_pad_state.pads[0].unk10 == 0) {
-                vs_pad_state.pads[0].unk10 = 5;
-                vs_pad_state.pads[0].unkC |= vs_pad_state.pads[0].unk0;
+        vs_pad_state.pads[0].held = ~pad_buffers[0].buttons;
+        if (vs_pad_state.pads[0].held != vs_pad_state.pads[0].prev_held) {
+            vs_pad_state.pads[0].repeat_timer = 30;
+            vs_pad_state.pads[0].pressed |= vs_pad_state.pads[0].held & ~vs_pad_state.pads[0].prev_held;
+            vs_pad_state.pads[0].pressed_repeat |= vs_pad_state.pads[0].held & ~vs_pad_state.pads[0].prev_held;
+        } else if (vs_pad_state.pads[0].repeat_timer != 0) {
+            if (--vs_pad_state.pads[0].repeat_timer == 0) {
+                vs_pad_state.pads[0].repeat_timer = 5;
+                vs_pad_state.pads[0].pressed_repeat |= vs_pad_state.pads[0].held;
             }
         }
     }
     if (pad_buffers[1].status == 0) {
-        vs_pad_state.pads[1].unk0 = ~pad_buffers[1].buttons;
-        if (vs_pad_state.pads[1].unk0 != vs_pad_state.pads[1].unk4) {
-            vs_pad_state.pads[1].unk10 = 30;
-            vs_pad_state.pads[1].unk8 |= vs_pad_state.pads[1].unk0 & ~vs_pad_state.pads[1].unk4;
-            vs_pad_state.pads[1].unkC |= vs_pad_state.pads[1].unk0 & ~vs_pad_state.pads[1].unk4;
-        } else if (vs_pad_state.pads[1].unk10 != 0) {
-            if (--vs_pad_state.pads[1].unk10 == 0) {
-                vs_pad_state.pads[1].unk10 = 5;
-                vs_pad_state.pads[1].unkC |= vs_pad_state.pads[1].unk0;
+        vs_pad_state.pads[1].held = ~pad_buffers[1].buttons;
+        if (vs_pad_state.pads[1].held != vs_pad_state.pads[1].prev_held) {
+            vs_pad_state.pads[1].repeat_timer = 30;
+            vs_pad_state.pads[1].pressed |= vs_pad_state.pads[1].held & ~vs_pad_state.pads[1].prev_held;
+            vs_pad_state.pads[1].pressed_repeat |= vs_pad_state.pads[1].held & ~vs_pad_state.pads[1].prev_held;
+        } else if (vs_pad_state.pads[1].repeat_timer != 0) {
+            if (--vs_pad_state.pads[1].repeat_timer == 0) {
+                vs_pad_state.pads[1].repeat_timer = 5;
+                vs_pad_state.pads[1].pressed_repeat |= vs_pad_state.pads[1].held;
             }
         }
     }
-    vs_pad_state.pads[0].unk4 = vs_pad_state.pads[0].unk0;
-    vs_pad_state.pads[1].unk4 = vs_pad_state.pads[1].unk0;
+    vs_pad_state.pads[0].prev_held = vs_pad_state.pads[0].held;
+    vs_pad_state.pads[1].prev_held = vs_pad_state.pads[1].held;
 }
 
 /* Clears both controller records. */
 ADDRESS(0x8001381c, 0x2c)
 void pad_clear_input(void)
 {
-    vs_pad_state.pads[1].unkC = 0;
-    vs_pad_state.pads[0].unkC = 0;
-    vs_pad_state.pads[1].unk8 = 0;
-    vs_pad_state.pads[0].unk8 = 0;
-    vs_pad_state.pads[1].unk4 = 0;
-    vs_pad_state.pads[0].unk4 = 0;
-    vs_pad_state.pads[1].unk0 = 0;
-    vs_pad_state.pads[0].unk0 = 0;
+    vs_pad_state.pads[1].pressed_repeat = 0;
+    vs_pad_state.pads[0].pressed_repeat = 0;
+    vs_pad_state.pads[1].pressed = 0;
+    vs_pad_state.pads[0].pressed = 0;
+    vs_pad_state.pads[1].prev_held = 0;
+    vs_pad_state.pads[0].prev_held = 0;
+    vs_pad_state.pads[1].held = 0;
+    vs_pad_state.pads[0].held = 0;
 }
 
 /* A frame callback: counts. */
 ADDRESS(0x80013848, 0x20)
 void rcnt2_handler(void)
 {
-    vs_pad_state.unk30++;
+    vs_pad_state.rcnt2_count++;
 }
 
 /* A frame callback: counts and decodes the controllers. */
 ADDRESS(0x80013868, 0x38)
 void vsync_handler(void)
 {
-    vs_pad_state.unk3C++;
+    vs_pad_state.vsync_count++;
     pad_update_buttons();
 }
 
@@ -499,8 +499,8 @@ void fighters_play_anim_sounds(void)
 
     for (i = 0; i < 2; i++) {
         f = &shared_buffer.fighter[i];
-        d = &f->unk4DF18;
-        switch (f->unk4DF0E) {
+        d = &f->data;
+        switch (f->state) {
         case 0:
         case 5:
             entry = 0;
@@ -509,19 +509,19 @@ void fighters_play_anim_sounds(void)
             entry = 1;
             break;
         case 2:
-            if (f->unk4DEE8 == d->unk0[2].unk0)
+            if (f->anim == d->anims[2].anim)
                 entry = 2;
-            else if (f->unk4DEE8 == d->unk0[3].unk0)
+            else if (f->anim == d->anims[3].anim)
                 entry = 3;
-            else if (f->unk4DEE8 == d->unk0[4].unk0)
+            else if (f->anim == d->anims[4].anim)
                 entry = 4;
             break;
         case 6:
-            if (f->unk4DEE8 == d->unk0[5].unk0)
+            if (f->anim == d->anims[5].anim)
                 entry = 5;
-            else if (f->unk4DEE8 == d->unk0[6].unk0)
+            else if (f->anim == d->anims[6].anim)
                 entry = 6;
-            else if (f->unk4DEE8 == d->unk0[7].unk0)
+            else if (f->anim == d->anims[7].anim)
                 entry = 7;
             break;
         case 3:
@@ -537,54 +537,54 @@ void fighters_play_anim_sounds(void)
         operand = trigger & 0xfff;
         switch (kind) {
         case 0x1000:
-            if (f->unk4DEEC > 0) {
-                int frame = f->unk4DEEA;
+            if (f->anim_step > 0) {
+                int frame = f->anim_frame;
                 u16 at = operand;
 
-                if (at >= frame - f->unk4DEEC * frames_per_draw && at < frame)
+                if (at >= frame - f->anim_step * frames_per_draw && at < frame)
                     KEY_ON_TONE();
             } else {
-                int frame = f->unk4DEEA;
+                int frame = f->anim_frame;
                 u16 at = operand;
 
-                if (frame - f->unk4DEEC * frames_per_draw >= at && frame < at)
+                if (frame - f->anim_step * frames_per_draw >= at && frame < at)
                     KEY_ON_TONE();
             }
             break;
         case 0x2000:
-            if (f->unk4DEEC > 0) {
+            if (f->anim_step > 0) {
                 int at = trigger & 0x7ff;
-                int frame = f->unk4DEEA & 0x7ff;
+                int frame = f->anim_frame & 0x7ff;
 
-                if (at >= frame - f->unk4DEEC * frames_per_draw && at < frame)
+                if (at >= frame - f->anim_step * frames_per_draw && at < frame)
                     KEY_ON_TONE();
             } else {
                 int at = trigger & 0x7ff;
-                int frame = f->unk4DEEA & 0x7ff;
+                int frame = f->anim_frame & 0x7ff;
 
-                if (frame - f->unk4DEEC * frames_per_draw >= at && frame < at)
+                if (frame - f->anim_step * frames_per_draw >= at && frame < at)
                     KEY_ON_TONE();
             }
             break;
         case 0x8000:
-            if (f->unk4DEEC > 0) {
-                int frame = f->unk4DEEA;
+            if (f->anim_step > 0) {
+                int frame = f->anim_frame;
                 u16 at = operand;
 
-                if (at >= frame - f->unk4DEEC * frames_per_draw && at < frame && (rand() >> 3) < at)
+                if (at >= frame - f->anim_step * frames_per_draw && at < frame && (rand() >> 3) < at)
                     KEY_ON_TONE();
             } else {
-                int frame = f->unk4DEEA;
+                int frame = f->anim_frame;
                 u16 at = operand;
 
-                if (frame - f->unk4DEEC * frames_per_draw >= at && frame < at && (rand() >> 3) < at)
+                if (frame - f->anim_step * frames_per_draw >= at && frame < at && (rand() >> 3) < at)
                     KEY_ON_TONE();
             }
             break;
         case 0x4000: {
             u16 at = operand;
 
-            if (at != 0 && vs_pad_state.unk40 / 20 % at == 0)
+            if (at != 0 && vs_pad_state.rate_vsync / 20 % at == 0)
                 KEY_ON_TONE();
             break;
         }
@@ -627,51 +627,51 @@ void fighters_load_round(void)
     int i;
 
     for (i = 0; i < 2; i++) {
-        member = teams[i].slot[round_index] * 5;
+        member = lineups[i].slot[round_index] * 5;
         cd_read_member(0, member + 1, (u_long *)&FIGHTER);
         tim_load_images_shifted((u_long *)&FIGHTER, i * 4, i * 12);
         DrawSync(0);
         cd_read_member(0, member + 2, (u_long *)sound_banks[i].head);
         cd_read_member(0, member + 3, (u_long *)&FIGHTER);
         sound_bank_open(i);
-        if (cd_read_member(0, member + 4, FIGHTER.unk4B000))
-            model_fixup_face_indices((ModelFile *)FIGHTER.unk4B000);
+        if (cd_read_member(0, member + 4, FIGHTER.effect_model))
+            model_fixup_face_indices((ModelFile *)FIGHTER.effect_model);
         else
-            FIGHTER.unk4B000[0] = 0;
+            FIGHTER.effect_model[0] = 0;
         cd_read_member(0, member, (u_long *)&FIGHTER);
         if (((StAnimFile *)FIGHTER.file)->node_count) {
-            FIGHTER.unk4DF10 = 1;
+            FIGHTER.model_kind = 1;
             anim_set_register(i, (StAnimFile *)FIGHTER.file);
         } else {
-            FIGHTER.unk4DF10 = 2;
+            FIGHTER.model_kind = 2;
             anim_register(i, (StAnimFile *)FIGHTER.file);
         }
         fighter_offset_textures(i);
-        FIGHTER.unk4DF18 = fighter_data[teams[i].slot[round_index]];
-        FIGHTER.unk4DF0E = 0;
-        FIGHTER.unk4DEEA = 0;
-        FIGHTER.unk4DEF0.vz = 0;
-        FIGHTER.unk4DF00 = 0;
-        FIGHTER.unk4DEE8 = FIGHTER.unk4DF18.unk0[0].unk0;
-        FIGHTER.unk4DEEC = FIGHTER.unk4DF18.unk0[0].unk2;
-        FIGHTER.unk4DF08 = FIGHTER.unk4DF18.unk1B8;
-        FIGHTER.unk4DF0A = FIGHTER.unk4DF18.unk1BA;
-        FIGHTER.unk4DEF0.vy = -FIGHTER.unk4DF18.unk1B2;
-        FIGHTER.unk4DF02 = i == 0 ? 3072 : 1024;
-        FIGHTER.unk4DF12 = 128;
-        FIGHTER.unk4DF04 = 0;
-        FIGHTER.unk4DEE0 = 0;
-        FIGHTER.unk4DEE4 = 0;
-        FIGHTER.unk4DF14 = 0;
-        FIGHTER.unk4DF0C = 0;
+        FIGHTER.data = fighter_data[lineups[i].slot[round_index]];
+        FIGHTER.state = 0;
+        FIGHTER.anim_frame = 0;
+        FIGHTER.position.vz = 0;
+        FIGHTER.rot_x = 0;
+        FIGHTER.anim = FIGHTER.data.anims[0].anim;
+        FIGHTER.anim_step = FIGHTER.data.anims[0].anim_step;
+        FIGHTER.hp = FIGHTER.data.max_hp;
+        FIGHTER.gauge = FIGHTER.data.max_gauge;
+        FIGHTER.position.vy = -FIGHTER.data.origin_height;
+        FIGHTER.facing = i == 0 ? 3072 : 1024;
+        FIGHTER.brightness = 128;
+        FIGHTER.rot_z = 0;
+        FIGHTER.anim_set = 0;
+        FIGHTER.anim_slot = 0;
+        FIGHTER.guard_flash = 0;
+        FIGHTER.hp_target = 0;
     }
-    if (shared_buffer.fighter[0].unk4DF18.unk1B4 >= 1400
-        || shared_buffer.fighter[1].unk4DF18.unk1B4 >= 1400) {
-        shared_buffer.fighter[0].unk4DEF0.vx = -3072;
-        shared_buffer.fighter[1].unk4DEF0.vx = 3072;
+    if (shared_buffer.fighter[0].data.radius >= 1400
+        || shared_buffer.fighter[1].data.radius >= 1400) {
+        shared_buffer.fighter[0].position.vx = -3072;
+        shared_buffer.fighter[1].position.vx = 3072;
     } else {
-        shared_buffer.fighter[0].unk4DEF0.vx = -2048;
-        shared_buffer.fighter[1].unk4DEF0.vx = 2048;
+        shared_buffer.fighter[0].position.vx = -2048;
+        shared_buffer.fighter[1].position.vx = 2048;
     }
 }
 
@@ -707,8 +707,8 @@ void gfx_init(void)
     gte_SetBackColor(80, 80, 80);
     gte_SetFarColor(5, 5, 5);
     vs_gfx_state.frame = 255;
-    vs_gfx_state.unkE0 = packet_buffers;
-    vs_gfx_state.packets[0].start = vs_gfx_state.unkE0;
+    vs_gfx_state.packet_base = packet_buffers;
+    vs_gfx_state.packets[0].start = vs_gfx_state.packet_base;
     vs_gfx_state.packets[0].end = vs_gfx_state.packets[0].start + PACKET_WORDS;
     vs_gfx_state.packets[1].start = vs_gfx_state.packets[0].end;
     vs_gfx_state.packets[1].end = vs_gfx_state.packets[1].start + PACKET_WORDS;
@@ -739,68 +739,68 @@ void camera_update(void)
 
     if (round_phase & 8) {
         f = &shared_buffer.fighter[round_phase & 1];
-        height = f->unk4DF18.unk1B6 + f->unk4DF18.unk1B2;
+        height = f->data.height + f->data.origin_height;
         if (height > 3000) {
-            look.vx = f->unk4DEF0.vx;
-            look.vz = f->unk4DEF0.vz;
+            look.vx = f->position.vx;
+            look.vz = f->position.vz;
             look.vy = -1800;
-            eye.vx = f->unk4DEF0.vx + rsin(f->unk4DF02 + 1536) * 3 / 2;
+            eye.vx = f->position.vx + rsin(f->facing + 1536) * 3 / 2;
             eye.vy = -800;
-            eye.vz = f->unk4DEF0.vz + rcos(f->unk4DF02 + 1536) * 3 / 2;
+            eye.vz = f->position.vz + rcos(f->facing + 1536) * 3 / 2;
         } else if (height > 2000) {
-            look.vx = f->unk4DEF0.vx;
-            look.vz = f->unk4DEF0.vz;
+            look.vx = f->position.vx;
+            look.vz = f->position.vz;
             look.vy = -1500;
-            eye.vx = f->unk4DEF0.vx + rsin(f->unk4DF02 + 1536);
+            eye.vx = f->position.vx + rsin(f->facing + 1536);
             eye.vy = -500;
-            eye.vz = f->unk4DEF0.vz + rcos(f->unk4DF02 + 1536);
+            eye.vz = f->position.vz + rcos(f->facing + 1536);
         } else if (height < 1000) {
-            look.vx = f->unk4DEF0.vx;
-            look.vz = f->unk4DEF0.vz;
+            look.vx = f->position.vx;
+            look.vz = f->position.vz;
             look.vy = -1000;
-            eye.vx = f->unk4DEF0.vx + rsin(f->unk4DF02 + 1536);
+            eye.vx = f->position.vx + rsin(f->facing + 1536);
             eye.vy = -1000;
-            eye.vz = f->unk4DEF0.vz + rcos(f->unk4DF02 + 1536);
+            eye.vz = f->position.vz + rcos(f->facing + 1536);
         } else {
-            look.vx = f->unk4DEF0.vx;
-            look.vz = f->unk4DEF0.vz;
+            look.vx = f->position.vx;
+            look.vz = f->position.vz;
             look.vy = -1200;
-            eye.vx = f->unk4DEF0.vx + rsin(f->unk4DF02 + 1536) * 3 / 4;
+            eye.vx = f->position.vx + rsin(f->facing + 1536) * 3 / 4;
             eye.vy = -500;
-            eye.vz = f->unk4DEF0.vz + rcos(f->unk4DF02 + 1536) * 3 / 4;
+            eye.vz = f->position.vz + rcos(f->facing + 1536) * 3 / 4;
         }
-        if (vs_pad_state.unk3C < screen_start_frame + 5) {
-            vs_gfx_state.unk2CA78.vx = f->unk4DEF0.vx + rsin(f->unk4DF02 + 3072) * 2;
-            vs_gfx_state.unk2CA78.vy = -7000;
-            vs_gfx_state.unk2CA78.vz = f->unk4DEF0.vz + rcos(f->unk4DF02 + 3072) * 2;
+        if (vs_pad_state.vsync_count < screen_start_frame + 5) {
+            vs_gfx_state.camera_pos.vx = f->position.vx + rsin(f->facing + 3072) * 2;
+            vs_gfx_state.camera_pos.vy = -7000;
+            vs_gfx_state.camera_pos.vz = f->position.vz + rcos(f->facing + 3072) * 2;
         }
     } else {
         int delta_x;
         int delta_z;
 
-        look.vx = (shared_buffer.fighter[0].unk4DEF0.vx + shared_buffer.fighter[1].unk4DEF0.vx) / 2;
-        delta_x = shared_buffer.fighter[1].unk4DEF0.vx - look.vx;
-        look.vz = (shared_buffer.fighter[0].unk4DEF0.vz + shared_buffer.fighter[1].unk4DEF0.vz) / 2;
-        delta_z = shared_buffer.fighter[1].unk4DEF0.vz - look.vz;
-        look.vy = (shared_buffer.fighter[0].unk4DEF0.vy + shared_buffer.fighter[1].unk4DEF0.vy) / 2;
+        look.vx = (shared_buffer.fighter[0].position.vx + shared_buffer.fighter[1].position.vx) / 2;
+        delta_x = shared_buffer.fighter[1].position.vx - look.vx;
+        look.vz = (shared_buffer.fighter[0].position.vz + shared_buffer.fighter[1].position.vz) / 2;
+        delta_z = shared_buffer.fighter[1].position.vz - look.vz;
+        look.vy = (shared_buffer.fighter[0].position.vy + shared_buffer.fighter[1].position.vy) / 2;
         dist = SquareRoot0(delta_z * delta_z + delta_x * delta_x) + 1;
         near = CAMERA_NEAR;
         far = CAMERA_FAR;
-        if (shared_buffer.fighter[0].unk4DF18.unk1B6 > 2500
-            || shared_buffer.fighter[1].unk4DF18.unk1B6 > 2500)
+        if (shared_buffer.fighter[0].data.height > 2500
+            || shared_buffer.fighter[1].data.height > 2500)
             near = CAMERA_NEAR_TALL;
         if (dist < near) {
             eye.vy = -near * 2;
-            eye.vx = look.vx + (shared_buffer.fighter[1].unk4DEF0.vz - look.vz) * near * 3 / dist;
-            eye.vz = look.vz + (look.vx - shared_buffer.fighter[1].unk4DEF0.vx) * near * 3 / dist;
+            eye.vx = look.vx + (shared_buffer.fighter[1].position.vz - look.vz) * near * 3 / dist;
+            eye.vz = look.vz + (look.vx - shared_buffer.fighter[1].position.vx) * near * 3 / dist;
         } else if (dist > far) {
             eye.vy = -far * 2;
-            eye.vx = look.vx + (shared_buffer.fighter[1].unk4DEF0.vz - look.vz) * far * 3 / dist;
-            eye.vz = look.vz + (look.vx - shared_buffer.fighter[1].unk4DEF0.vx) * far * 3 / dist;
+            eye.vx = look.vx + (shared_buffer.fighter[1].position.vz - look.vz) * far * 3 / dist;
+            eye.vz = look.vz + (look.vx - shared_buffer.fighter[1].position.vx) * far * 3 / dist;
         } else {
-            eye.vx = look.vx + (shared_buffer.fighter[1].unk4DEF0.vz - look.vz) * 3;
+            eye.vx = look.vx + (shared_buffer.fighter[1].position.vz - look.vz) * 3;
             eye.vy = -dist * 2;
-            eye.vz = look.vz + (look.vx - shared_buffer.fighter[1].unk4DEF0.vx) * 3;
+            eye.vz = look.vz + (look.vx - shared_buffer.fighter[1].position.vx) * 3;
         }
         if (round_phase == 0) {
             if ((s32)DAT_80063364 < 34) {
@@ -812,9 +812,9 @@ void camera_update(void)
             }
         }
     }
-    eye.vx -= vs_gfx_state.unk2CA78.vx;
-    eye.vy -= vs_gfx_state.unk2CA78.vy;
-    eye.vz -= vs_gfx_state.unk2CA78.vz;
+    eye.vx -= vs_gfx_state.camera_pos.vx;
+    eye.vy -= vs_gfx_state.camera_pos.vy;
+    eye.vz -= vs_gfx_state.camera_pos.vz;
     dist = SquareRoot0(eye.vx * eye.vx + eye.vy * eye.vy + eye.vz * eye.vz) + 1;
     if (dist < 200) {
         camera_speed = 0;
@@ -837,43 +837,43 @@ void camera_update(void)
     x = eye.vx * camera_speed / dist;
     y = eye.vy * camera_speed / dist;
     z = eye.vz * camera_speed / dist;
-    vs_gfx_state.unk2CA78.vx += x;
-    vs_gfx_state.unk2CA78.vy += y;
-    vs_gfx_state.unk2CA78.vz += z;
-    if (vs_gfx_state.unk2CA78.vx > 32767) {
-        vs_gfx_state.unk2CA78.vy += 32767 - vs_gfx_state.unk2CA78.vx;
-        vs_gfx_state.unk2CA78.vx = 32767;
+    vs_gfx_state.camera_pos.vx += x;
+    vs_gfx_state.camera_pos.vy += y;
+    vs_gfx_state.camera_pos.vz += z;
+    if (vs_gfx_state.camera_pos.vx > 32767) {
+        vs_gfx_state.camera_pos.vy += 32767 - vs_gfx_state.camera_pos.vx;
+        vs_gfx_state.camera_pos.vx = 32767;
     }
-    if (vs_gfx_state.unk2CA78.vx < -32767) {
-        vs_gfx_state.unk2CA78.vy += 32767 + vs_gfx_state.unk2CA78.vx;
-        vs_gfx_state.unk2CA78.vx = -32767;
+    if (vs_gfx_state.camera_pos.vx < -32767) {
+        vs_gfx_state.camera_pos.vy += 32767 + vs_gfx_state.camera_pos.vx;
+        vs_gfx_state.camera_pos.vx = -32767;
     }
-    if (vs_gfx_state.unk2CA78.vz > 32767) {
-        vs_gfx_state.unk2CA78.vy += 32767 - vs_gfx_state.unk2CA78.vz;
-        vs_gfx_state.unk2CA78.vz = 32767;
+    if (vs_gfx_state.camera_pos.vz > 32767) {
+        vs_gfx_state.camera_pos.vy += 32767 - vs_gfx_state.camera_pos.vz;
+        vs_gfx_state.camera_pos.vz = 32767;
     }
-    if (vs_gfx_state.unk2CA78.vz < -32767) {
-        vs_gfx_state.unk2CA78.vy += 32767 + vs_gfx_state.unk2CA78.vz;
-        vs_gfx_state.unk2CA78.vz = -32767;
+    if (vs_gfx_state.camera_pos.vz < -32767) {
+        vs_gfx_state.camera_pos.vy += 32767 + vs_gfx_state.camera_pos.vz;
+        vs_gfx_state.camera_pos.vz = -32767;
     }
-    if (look.vz == vs_gfx_state.unk2CA78.vz)
-        vs_gfx_state.unk2CA88.vy = 2048;
+    if (look.vz == vs_gfx_state.camera_pos.vz)
+        vs_gfx_state.camera_rot.vy = 2048;
     else
-        vs_gfx_state.unk2CA88.vy = ratan2(look.vx - vs_gfx_state.unk2CA78.vx,
-                                          look.vz - vs_gfx_state.unk2CA78.vz);
-    look.vx -= vs_gfx_state.unk2CA78.vx;
-    look.vz -= vs_gfx_state.unk2CA78.vz;
+        vs_gfx_state.camera_rot.vy = ratan2(look.vx - vs_gfx_state.camera_pos.vx,
+                                          look.vz - vs_gfx_state.camera_pos.vz);
+    look.vx -= vs_gfx_state.camera_pos.vx;
+    look.vz -= vs_gfx_state.camera_pos.vz;
     if (round_phase & 8)
-        vs_gfx_state.unk2CA88.vx = ratan2(vs_gfx_state.unk2CA78.vy - look.vy,
+        vs_gfx_state.camera_rot.vx = ratan2(vs_gfx_state.camera_pos.vy - look.vy,
                                           SquareRoot0(look.vx * look.vx + look.vz * look.vz));
     else
-        vs_gfx_state.unk2CA88.vx = ratan2((vs_gfx_state.unk2CA78.vy - look.vy) * 2 / 3,
+        vs_gfx_state.camera_rot.vx = ratan2((vs_gfx_state.camera_pos.vy - look.vy) * 2 / 3,
                                           SquareRoot0(look.vx * look.vx + look.vz * look.vz));
-    RotMatrixZYX(&vs_gfx_state.unk2CA88, &vs_gfx_state.unk2C998);
-    TransposeMatrix(&vs_gfx_state.unk2C998, &vs_gfx_state.unk2C998);
-    vs_gfx_state.unk2C998.t[0] = 0;
-    vs_gfx_state.unk2C998.t[1] = 0;
-    vs_gfx_state.unk2C998.t[2] = 0;
+    RotMatrixZYX(&vs_gfx_state.camera_rot, &vs_gfx_state.view_matrix);
+    TransposeMatrix(&vs_gfx_state.view_matrix, &vs_gfx_state.view_matrix);
+    vs_gfx_state.view_matrix.t[0] = 0;
+    vs_gfx_state.view_matrix.t[1] = 0;
+    vs_gfx_state.view_matrix.t[2] = 0;
 }
 
 /* Callees in src/vs/round_hud.c. */
@@ -899,7 +899,7 @@ void effects_draw(void);
 void model_draw_part_at(u_long *model, int flags, SVECTOR *a, SVECTOR *b, SVECTOR *c);
 
 /* The callback's frame clock and the current screen's starting frame. */
-#define FRAME_CLOCK() (vs_pad_state.unk3C)
+#define FRAME_CLOCK() (vs_pad_state.vsync_count)
 #define SCREEN_START() (screen_start_frame)
 #define ELAPSED() (FRAME_CLOCK() - SCREEN_START())
 
@@ -931,9 +931,9 @@ void round_draw_frame(void)
     packet->cur = packet->start;
     vs_gfx_state.ot_cur = vs_gfx_state.ot[vs_gfx_state.frame];
     ClearOTagR(vs_gfx_state.ot_cur, VS_OT_LENGTH);
-    vs_gfx_state.unk8328 = 0;
-    vs_gfx_state.unk8324 = 0;
-    vs_gfx_state.unk831C[1] = 0;
+    vs_gfx_state.prim_alloc_count = 0;
+    vs_gfx_state.prim_count = 0;
+    vs_gfx_state.vertex_face_counts[1] = 0;
     vs_gfx_state.unk832C = 0;
     vs_gfx_state.unk8330 = 0;
     vs_gfx_state.unk8338[0] = 0;
@@ -946,8 +946,8 @@ void round_draw_frame(void)
     if (round_phase == 0 && round_draw_opening(DAT_80063364++)) {
         fight_banner = 3;
         round_phase = 1;
-        DAT_80063364 = vs_pad_state.unk3C + 1800;
-        screen_start_frame = vs_pad_state.unk3C;
+        DAT_80063364 = vs_pad_state.vsync_count + 1800;
+        screen_start_frame = vs_pad_state.vsync_count;
         while (!CdRead2(CdlModeSpeed | CdlModeRT | CdlModeSF))
             ;
         cd_audio_set_volume(64);
@@ -1021,10 +1021,10 @@ void round_draw_frame(void)
             hud_draw_clock(0);
             break;
         }
-        a = (shared_buffer.fighter[0].unk4DF08 << 12) / shared_buffer.fighter[0].unk4DF18.unk1B8;
-        b = (shared_buffer.fighter[1].unk4DF08 << 12) / shared_buffer.fighter[1].unk4DF18.unk1B8;
+        a = (shared_buffer.fighter[0].hp << 12) / shared_buffer.fighter[0].data.max_hp;
+        b = (shared_buffer.fighter[1].hp << 12) / shared_buffer.fighter[1].data.max_hp;
         DAT_80063364 = 0;
-        screen_start_frame = vs_pad_state.unk3C;
+        screen_start_frame = vs_pad_state.vsync_count;
         if (a == b) {
             round_phase = 4;
             goto draw;
@@ -1050,7 +1050,7 @@ void round_draw_frame(void)
             left2 = SCREEN_START() + 46;
             hud_draw_banner(4, left2 - FRAME_CLOCK());
         } else {
-            screen_start_frame = vs_pad_state.unk3C;
+            screen_start_frame = vs_pad_state.vsync_count;
             round_phase += 2;
             fighter_set_semi_trans(9 - round_phase, 1);
             goto result;
@@ -1061,8 +1061,8 @@ void round_draw_frame(void)
     case 9:
     result:
         if (ELAPSED() > 30 && ELAPSED() < 159)
-            shared_buffer.fighter[~round_phase & 1].unk4DF12 =
-                screen_start_frame - (vs_pad_state.unk3C - 158);
+            shared_buffer.fighter[~round_phase & 1].brightness =
+                screen_start_frame - (vs_pad_state.vsync_count - 158);
         if (ELAPSED() > 100 && ELAPSED() <= 200)
             hud_draw_banner(2, ELAPSED() - 100);
         if (ELAPSED() > 200) {
@@ -1141,7 +1141,7 @@ void round_draw_frame(void)
     if (round_phase != 0) {
         for (i = 0; i < 2; i++) {
             current_fighter = &shared_buffer.fighter[i];
-            switch (current_fighter->unk4DF10) {
+            switch (current_fighter->model_kind) {
             case 1:
                 fighter_draw_skeletal();
                 break;
@@ -1150,14 +1150,14 @@ void round_draw_frame(void)
                 fighter_draw_vertex_anim();
                 break;
             }
-            if (current_fighter->unk4DF14) {
+            if (current_fighter->guard_flash) {
                 fighter_draw_guard_flash(i);
-                current_fighter->unk4DF14--;
+                current_fighter->guard_flash--;
             }
             fighter_draw_shadow(i, 4096);
         }
         hud_draw_gauges(32);
-        hud_draw_round_wins((u32)vs_pad_state.unk3C % 96, 32);
+        hud_draw_round_wins((u32)vs_pad_state.vsync_count % 96, 32);
     }
     round_draw_backdrop(round_phase == 2 || round_phase >= 16);
     rot.vz = 0;
@@ -1177,13 +1177,13 @@ void round_draw_frame(void)
     model_draw_part_at((u_long *)arena_model_1, 0, &rot, &rot, &scale);
     mesh_fixed_depth = 3;
     mask = 0;
-    if (vs_gfx_state.unk2CA78.vz > ARENA_EDGE)
+    if (vs_gfx_state.camera_pos.vz > ARENA_EDGE)
         mask = 0x83;
-    if (vs_gfx_state.unk2CA78.vx > ARENA_EDGE)
+    if (vs_gfx_state.camera_pos.vx > ARENA_EDGE)
         mask |= 0x0e;
-    if (vs_gfx_state.unk2CA78.vz < -ARENA_EDGE)
+    if (vs_gfx_state.camera_pos.vz < -ARENA_EDGE)
         mask |= 0x38;
-    if (vs_gfx_state.unk2CA78.vx < -ARENA_EDGE)
+    if (vs_gfx_state.camera_pos.vx < -ARENA_EDGE)
         mask |= 0xe0;
     for (i = 0; i < 8; i++) {
         mesh_semi_trans = mask & (1 << i);
@@ -1201,7 +1201,7 @@ void round_draw_frame(void)
     DrawOTag(vs_gfx_state.ot_cur + VS_OT_LENGTH - 1);
     anim_sets_free_idle();
     anim_slots_free_idle();
-    vs_gfx_state.unk2C970++;
+    vs_gfx_state.drawn_frames++;
 }
 
 /* Top of the heap: main RAM below the 8 KB stack. */
@@ -1259,12 +1259,12 @@ void round_play(void)
     fighters_load_round();
     effects_clear();
     sparks_clear_all();
-    vs_gfx_state.unk2CA78.vy = -14000;
-    vs_gfx_state.unk2CA78.vx = 0;
-    vs_gfx_state.unk2CA78.vz = -15000;
-    vs_gfx_state.unk2CA88.vx = 0;
-    vs_gfx_state.unk2CA88.vy = 0;
-    vs_gfx_state.unk2CA88.vz = 0;
+    vs_gfx_state.camera_pos.vy = -14000;
+    vs_gfx_state.camera_pos.vx = 0;
+    vs_gfx_state.camera_pos.vz = -15000;
+    vs_gfx_state.camera_rot.vx = 0;
+    vs_gfx_state.camera_rot.vy = 0;
+    vs_gfx_state.camera_rot.vz = 0;
     if (round_index == 0) {
         gfx_setup_320x240();
         DrawSync(0);
@@ -1276,23 +1276,23 @@ void round_play(void)
             choice = 0;
             choice_slider = 0;
             for (;;) {
-                if ((vs_pad_state.pads[0].unk8 | vs_pad_state.pads[1].unk8) & 0x10)
+                if ((vs_pad_state.pads[0].pressed | vs_pad_state.pads[1].pressed) & 0x10)
                     choice = 0;
-                if ((vs_pad_state.pads[0].unk8 | vs_pad_state.pads[1].unk8) & 0x40)
+                if ((vs_pad_state.pads[0].pressed | vs_pad_state.pads[1].pressed) & 0x40)
                     choice = 1;
-                if ((vs_pad_state.pads[0].unk8 | vs_pad_state.pads[1].unk8) & 9) {
-                    DAT_80063364 += vs_pad_state.unk3C;
+                if ((vs_pad_state.pads[0].pressed | vs_pad_state.pads[1].pressed) & 9) {
+                    DAT_80063364 += vs_pad_state.vsync_count;
                     round_phase = PHASE_FIGHT;
-                    screen_start_frame = vs_pad_state.unk3C;
+                    screen_start_frame = vs_pad_state.vsync_count;
                     while (!CdRead2(CdlModeSpeed | CdlModeRT | CdlModeSF))
                         ;
                     break;
                 }
-                if ((vs_pad_state.pads[0].unk8 | vs_pad_state.pads[1].unk8) & 0x4000) {
+                if ((vs_pad_state.pads[0].pressed | vs_pad_state.pads[1].pressed) & 0x4000) {
                     if (choice == 0) {
-                        DAT_80063364 += vs_pad_state.unk3C;
+                        DAT_80063364 += vs_pad_state.vsync_count;
                         round_phase = PHASE_FIGHT;
-                        screen_start_frame = vs_pad_state.unk3C;
+                        screen_start_frame = vs_pad_state.vsync_count;
                         while (!CdRead2(CdlModeSpeed | CdlModeRT | CdlModeSF))
                             ;
                         break;
@@ -1309,68 +1309,68 @@ void round_play(void)
                     if (--choice_slider < 0)
                         choice_slider = 0;
                 }
-                vs_pad_state.pads[0].unk8 = 0;
-                vs_pad_state.pads[1].unk8 = 0;
+                vs_pad_state.pads[0].pressed = 0;
+                vs_pad_state.pads[1].pressed = 0;
                 round_draw_frame();
             }
         } else if (round_phase == PHASE_FIGHT
-                   && ((vs_pad_state.pads[0].unk8 | vs_pad_state.pads[1].unk8) & 9)) {
+                   && ((vs_pad_state.pads[0].pressed | vs_pad_state.pads[1].pressed) & 9)) {
             while (!CdControl(CdlPause, 0, 0))
                 ;
             fight_banner = 12;
             round_phase = PHASE_PAUSE;
-            DAT_80063364 -= vs_pad_state.unk3C;
-            screen_start_frame = vs_pad_state.unk3C;
+            DAT_80063364 -= vs_pad_state.vsync_count;
+            screen_start_frame = vs_pad_state.vsync_count;
         }
-        if ((vs_pad_state.pads[0].unk8 & 1) && (vs_pad_state.pads[0].unk0 & 8))
-            vs_pad_state.unk28 = 1 - vs_pad_state.unk28;
-        if (vs_pad_state.pads[0].unk0 & 1) {
-            if (++vs_pad_state.unk2C >= 60)
+        if ((vs_pad_state.pads[0].pressed & 1) && (vs_pad_state.pads[0].held & 8))
+            vs_pad_state.show_frame_stats = 1 - vs_pad_state.show_frame_stats;
+        if (vs_pad_state.pads[0].held & 1) {
+            if (++vs_pad_state.pan_hold_frames >= 60)
                 debug_pan_display();
         } else {
-            vs_pad_state.unk2C = 0;
+            vs_pad_state.pan_hold_frames = 0;
         }
         if (round_phase == PHASE_FIGHT) {
-            if (DAT_80063364 <= vs_pad_state.unk3C) {
+            if (DAT_80063364 <= vs_pad_state.vsync_count) {
                 round_phase = PHASE_TIME_UP;
-                screen_start_frame = vs_pad_state.unk3C;
+                screen_start_frame = vs_pad_state.vsync_count;
             } else {
-                if (shared_buffer.fighter[0].unk4DF08 == 0) {
-                    if (shared_buffer.fighter[1].unk4DF08 == 0) {
+                if (shared_buffer.fighter[0].hp == 0) {
+                    if (shared_buffer.fighter[1].hp == 0) {
                         round_phase = PHASE_DRAW;
-                        DAT_80063364 -= vs_pad_state.unk3C;
-                        screen_start_frame = vs_pad_state.unk3C;
+                        DAT_80063364 -= vs_pad_state.vsync_count;
+                        screen_start_frame = vs_pad_state.vsync_count;
                     } else {
                         ko = 0;
                         side = 1;
                         round_phase = PHASE_SECOND_WINS;
-                        DAT_80063364 -= vs_pad_state.unk3C;
-                        screen_start_frame = vs_pad_state.unk3C;
+                        DAT_80063364 -= vs_pad_state.vsync_count;
+                        screen_start_frame = vs_pad_state.vsync_count;
                         fighter_set_semi_trans(ko, side);
                     }
-                } else if (shared_buffer.fighter[1].unk4DF08 == 0) {
+                } else if (shared_buffer.fighter[1].hp == 0) {
                     ko = 1;
                     side = 1;
                     round_phase = PHASE_FIRST_WINS;
-                    DAT_80063364 -= vs_pad_state.unk3C;
-                    screen_start_frame = vs_pad_state.unk3C;
+                    DAT_80063364 -= vs_pad_state.vsync_count;
+                    screen_start_frame = vs_pad_state.vsync_count;
                     fighter_set_semi_trans(ko, side);
                 }
                 if (fighter_is_out_of_bounds(0)) {
                     round_phase = PHASE_KO_FIRST;
-                    DAT_80063364 -= vs_pad_state.unk3C;
-                    screen_start_frame = vs_pad_state.unk3C;
+                    DAT_80063364 -= vs_pad_state.vsync_count;
+                    screen_start_frame = vs_pad_state.vsync_count;
                 }
                 if (fighter_is_out_of_bounds(1)) {
                     round_phase = PHASE_KO_SECOND;
-                    DAT_80063364 -= vs_pad_state.unk3C;
-                    screen_start_frame = vs_pad_state.unk3C;
+                    DAT_80063364 -= vs_pad_state.vsync_count;
+                    screen_start_frame = vs_pad_state.vsync_count;
                 }
             }
         } else if (round_phase == PHASE_DRAW || round_phase == PHASE_FIRST_WINS
                    || round_phase == PHASE_SECOND_WINS) {
             pad_clear_input();
-            if (vs_pad_state.unk3C - screen_start_frame > RESULT_FRAMES) {
+            if (vs_pad_state.vsync_count - screen_start_frame > RESULT_FRAMES) {
                 if (round_phase == PHASE_FIRST_WINS)
                     round_wins[0]++;
                 else if (round_phase == PHASE_SECOND_WINS)
@@ -1385,23 +1385,23 @@ void round_play(void)
             fighter_update(1 - (DAT_80063364 & 1));
             fighters_push_apart();
         }
-        vs_pad_state.pads[0].unk8 = 0;
-        vs_pad_state.pads[1].unk8 = 0;
+        vs_pad_state.pads[0].pressed = 0;
+        vs_pad_state.pads[1].pressed = 0;
         round_draw_frame();
         fighters_play_anim_sounds();
-        vs_gfx_state.unk831C[1] = 0;
-        vs_gfx_state.unk8324 = 0;
-        if (vs_pad_state.unk40 + 59 < vs_pad_state.unk3C) {
-            vs_gfx_state.unk2C971 = vs_gfx_state.unk2C970 * 60
-                                    / (vs_pad_state.unk3C - vs_pad_state.unk40);
-            vs_gfx_state.unk2C970 = 0;
-            vs_pad_state.unk40 = vs_pad_state.unk3C;
+        vs_gfx_state.vertex_face_counts[1] = 0;
+        vs_gfx_state.prim_count = 0;
+        if (vs_pad_state.rate_vsync + 59 < vs_pad_state.vsync_count) {
+            vs_gfx_state.frame_rate = vs_gfx_state.drawn_frames * 60
+                                    / (vs_pad_state.vsync_count - vs_pad_state.rate_vsync);
+            vs_gfx_state.drawn_frames = 0;
+            vs_pad_state.rate_vsync = vs_pad_state.vsync_count;
         }
-        if (vs_pad_state.unk28 == 1) {
-            FntPrint("frm      =%d\n", vs_gfx_state.unk2C971);
+        if (vs_pad_state.show_frame_stats == 1) {
+            FntPrint("frm      =%d\n", vs_gfx_state.frame_rate);
             FntPrint("frm/draw =%d\n", frames_per_draw);
-            FntPrint("calc_poly=%d\n", vs_gfx_state.unk831C[1]);
-            FntPrint("draw_poly=%d\n", vs_gfx_state.unk8324);
+            FntPrint("calc_poly=%d\n", vs_gfx_state.vertex_face_counts[1]);
+            FntPrint("draw_poly=%d\n", vs_gfx_state.prim_count);
         }
     }
 }
@@ -1463,7 +1463,7 @@ void match_end_screen_run(void)
     pad_clear_input();
     round_phase = SCREEN_FADE_IN;
     round_index--;
-    screen_start_frame = vs_pad_state.unk3C;
+    screen_start_frame = vs_pad_state.vsync_count;
     for (i = FADE_FRAMES - 1; i != -1; i--) {
         round_draw_frame();
         DrawSync(0);
@@ -1476,7 +1476,7 @@ void match_end_screen_run(void)
             round_phase = SCREEN_RETRY_ASK;
             choice_slider = 0;
         }
-        screen_start_frame = vs_pad_state.unk3C;
+        screen_start_frame = vs_pad_state.vsync_count;
         for (i = FADE_FRAMES - 1; i != -1; i--) {
             round_draw_frame();
             DrawSync(0);
@@ -1490,16 +1490,16 @@ void match_end_screen_run(void)
             choice = 0;
             round_phase = SCREEN_SAVE;
             choice_slider = 0;
-            screen_start_frame = vs_pad_state.unk3C;
+            screen_start_frame = vs_pad_state.vsync_count;
             for (i = FADE_FRAMES - 1; i != -1; i--) {
                 round_draw_frame();
                 DrawSync(0);
             }
         }
-        vs_pad_state.pads[0].unk8 = 0;
-        vs_pad_state.pads[1].unk8 = 0;
+        vs_pad_state.pads[0].pressed = 0;
+        vs_pad_state.pads[1].pressed = 0;
         for (;;) {
-            bits = vs_pad_state.pads[0].unk8 | vs_pad_state.pads[1].unk8;
+            bits = vs_pad_state.pads[0].pressed | vs_pad_state.pads[1].pressed;
             if (bits & 0x10)
                 choice = 0;
             if (bits & 0x40)
@@ -1518,13 +1518,13 @@ void match_end_screen_run(void)
                 if (--choice_slider < 0)
                     choice_slider = 0;
             }
-            vs_pad_state.pads[0].unk8 = 0;
-            vs_pad_state.pads[1].unk8 = 0;
+            vs_pad_state.pads[0].pressed = 0;
+            vs_pad_state.pads[1].pressed = 0;
             round_draw_frame();
             DrawSync(0);
         }
         round_phase = SCREEN_FADE_OUT;
-        screen_start_frame = vs_pad_state.unk3C;
+        screen_start_frame = vs_pad_state.vsync_count;
         for (i = FADE_FRAMES - 1; i != -1; i--) {
             round_draw_frame();
             DrawSync(0);
@@ -1560,15 +1560,15 @@ int main(void)
     CdSetDebug(0);
     InitCARD(1);
     ExitCriticalSection();
-    vs_pad_state.unk44 = OpenEvent(RCntCNT3, EvSpINT, EvMdINTR, vsync_handler);
-    EnableEvent(vs_pad_state.unk44);
+    vs_pad_state.vsync_event = OpenEvent(RCntCNT3, EvSpINT, EvMdINTR, vsync_handler);
+    EnableEvent(vs_pad_state.vsync_event);
     SetRCnt(RCntCNT3, 60000, RCntMdINTR);
     StartRCnt(RCntCNT3);
-    vs_pad_state.unk38 = OpenEvent(RCntCNT2, EvSpINT, EvMdINTR, rcnt2_handler);
-    EnableEvent(vs_pad_state.unk38);
+    vs_pad_state.rcnt2_event = OpenEvent(RCntCNT2, EvSpINT, EvMdINTR, rcnt2_handler);
+    EnableEvent(vs_pad_state.rcnt2_event);
     SetRCnt(RCntCNT2, 60000, RCntMdINTR);
     StartRCnt(RCntCNT2);
-    vs_pad_state.unk28 = 0;
+    vs_pad_state.show_frame_stats = 0;
     cd_init();
     gfx_init();
     {
@@ -1587,12 +1587,12 @@ int main(void)
     cd_read_member(5, 5, menu_vab_body);
     load_menu_sound_bank();
     cd_read_member(5, 20, (u_long *)vis_table_c.types);
-    teams[0].slot[0] = -1;
-    teams[0].slot[1] = -1;
-    teams[0].slot[2] = -1;
-    teams[1].slot[0] = -1;
-    teams[1].slot[1] = -1;
-    teams[1].slot[2] = -1;
+    lineups[0].slot[0] = -1;
+    lineups[0].slot[1] = -1;
+    lineups[0].slot[2] = -1;
+    lineups[1].slot[0] = -1;
+    lineups[1].slot[1] = -1;
+    lineups[1].slot[2] = -1;
     requested_items[0] = -1;
     requested_item_2p = -1;
     save_loaded_1p = 0;
@@ -1630,7 +1630,7 @@ int main(void)
     PadStop();
     ResetGraph(3);
     EnterCriticalSection();
-    CloseEvent(vs_pad_state.unk44);
+    CloseEvent(vs_pad_state.vsync_event);
     ExitCriticalSection();
     StopCallback();
 }

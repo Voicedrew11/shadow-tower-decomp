@@ -30,7 +30,7 @@ u_long fighter_vertex_anim_rgb = 0x808080;
 ADDRESS(0x80028914, 0x480)
 void fighter_draw_vertex_anim(void)
 {
-    if (current_fighter->unk4DEEA != -1) {
+    if (current_fighter->anim_frame != -1) {
     VsScratchPad *sp = VS_SCRATCHPAD;
     VsLights lights = {
         {{3000, 3700, -1500}, {-2000, 3700, -3000}, {-1300, -1000, 1024}}, 0,
@@ -47,28 +47,28 @@ void fighter_draw_vertex_anim(void)
     MulMatrix((MATRIX *)&lights.l, &m);
     gte_SetColorMatrix(&lights.lc);
     gte_SetLightMatrix(&lights.l);
-    sp->unk68 = lights.dq[0];
-    sp->unk6C = lights.dq[1];
+    sp->depth_cue_near = lights.dq[0];
+    sp->depth_cue_far = lights.dq[1];
     gte_SetBackColor(lights.bk.r, lights.bk.g, lights.bk.b);
-    sp->matrix.t[0] = current_fighter->unk4DEF0.vx - vs_gfx_state.unk2CA78.vx;
-    sp->matrix.t[1] = current_fighter->unk4DEF0.vy - vs_gfx_state.unk2CA78.vy;
-    sp->matrix.t[2] = current_fighter->unk4DEF0.vz - vs_gfx_state.unk2CA78.vz;
-    RotMatrix((SVECTOR *)&current_fighter->unk4DF00, &sp->matrix);
-    CompMatrix(&vs_gfx_state.unk2C998, &sp->matrix, &sp->matrix);
+    sp->matrix.t[0] = current_fighter->position.vx - vs_gfx_state.camera_pos.vx;
+    sp->matrix.t[1] = current_fighter->position.vy - vs_gfx_state.camera_pos.vy;
+    sp->matrix.t[2] = current_fighter->position.vz - vs_gfx_state.camera_pos.vz;
+    RotMatrix((SVECTOR *)&current_fighter->rot_x, &sp->matrix);
+    CompMatrix(&vs_gfx_state.view_matrix, &sp->matrix, &sp->matrix);
     gte_SetRotMatrix(&sp->matrix);
     gte_SetTransMatrix(&sp->matrix);
     n = current_fighter - shared_buffer.fighter;
-    sp->model = (u8 *)vs_gfx_state.unk834C[n] + ((ModelFile *)vs_gfx_state.unk834C[n])->model;
+    sp->model = (u8 *)vs_gfx_state.model_files[n] + ((ModelFile *)vs_gfx_state.model_files[n])->model;
     sp->header = (MeshHeader *)(sp->model + 12);
-    if (anim_pose(&current_fighter->unk4DEE4, n, current_fighter->unk4DEE8,
-                      current_fighter->unk4DEEA) == 0)
+    if (anim_pose(&current_fighter->anim_slot, n, current_fighter->anim,
+                      current_fighter->anim_frame) == 0)
         return;
     sp->ot = vs_gfx_state.ot_cur;
     sp->far_z = 4096;
-    if (current_fighter->unk4DF12 < 128) {
-        sp->rgb.r = current_fighter->unk4DF12;
-        sp->rgb.g = current_fighter->unk4DF12;
-        sp->rgb.b = current_fighter->unk4DF12;
+    if (current_fighter->brightness < 128) {
+        sp->rgb.r = current_fighter->brightness;
+        sp->rgb.g = current_fighter->brightness;
+        sp->rgb.b = current_fighter->brightness;
         sp->rgb.cd = 0;
         mesh_semi_trans = 1;
     } else {
@@ -76,17 +76,17 @@ void fighter_draw_vertex_anim(void)
         mesh_semi_trans = 0;
     }
     sp->near_z = 4;
-    sp->face_count = vs_gfx_state.unk831C[1];
-    sp->prim_count = vs_gfx_state.unk8324;
+    sp->face_count = vs_gfx_state.vertex_face_counts[1];
+    sp->prim_count = vs_gfx_state.prim_count;
     sp->prim = vs_gfx_state.packet->cur;
     sp->prim_end = vs_gfx_state.packet->end;
-    sp->vertices = vs_gfx_state.unkA7EC;
+    sp->vertices = vs_gfx_state.projected_vertices;
     sp->clut_base = 0;
-    if (current_fighter->unk4DEEA != -1)
+    if (current_fighter->anim_frame != -1)
         model_draw_mirrored();
     vs_gfx_state.packet->cur = sp->prim;
     vs_gfx_state.packet->end = sp->prim_end;
-    vs_gfx_state.unk831C[1] = sp->face_count;
-    vs_gfx_state.unk8324 = sp->prim_count;
+    vs_gfx_state.vertex_face_counts[1] = sp->face_count;
+    vs_gfx_state.prim_count = sp->prim_count;
     }
 }

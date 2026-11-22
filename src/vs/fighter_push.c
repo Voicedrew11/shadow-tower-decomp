@@ -19,10 +19,10 @@ int fighters_push_apart(void)
     long dist;
     long reach;
 
-    d.vx = a->unk4DEF0.vx - b->unk4DEF0.vx;
-    d.vz = a->unk4DEF0.vz - b->unk4DEF0.vz;
+    d.vx = a->position.vx - b->position.vx;
+    d.vz = a->position.vz - b->position.vz;
     dist = d.vx * d.vx + d.vz * d.vz;
-    reach = (a->unk4DF18.unk1B4 + b->unk4DF18.unk1B4) * (a->unk4DF18.unk1B4 + b->unk4DF18.unk1B4);
+    reach = (a->data.radius + b->data.radius) * (a->data.radius + b->data.radius);
     if (dist < reach) {
         dist = SquareRoot0(dist);
         reach = SquareRoot0(reach);
@@ -33,10 +33,10 @@ int fighters_push_apart(void)
             d.vx = reach / 2;
             d.vz = 0;
         }
-        a->unk4DEF0.vx += d.vx;
-        a->unk4DEF0.vz += d.vz;
-        b->unk4DEF0.vx -= d.vx;
-        b->unk4DEF0.vz -= d.vz;
+        a->position.vx += d.vx;
+        a->position.vz += d.vz;
+        b->position.vx -= d.vx;
+        b->position.vz -= d.vz;
         return 1;
     }
     return 0;

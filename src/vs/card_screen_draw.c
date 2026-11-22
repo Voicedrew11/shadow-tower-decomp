@@ -17,7 +17,7 @@ void card_draw_transfer(void)
 {
     VsMenuScratch *sp = VS_MENU_SCRATCH;
 
-    if (sp->unk1CC & 0xff)
+    if (sp->mode & 0xff)
         ui_draw_text(VS_MESSAGE(330), 32, 74, &sp->style[0]);
     else
         ui_draw_text(VS_MESSAGE(331), 32, 74, &sp->style[0]);
@@ -37,7 +37,7 @@ void card_draw_message(void)
 {
     VsMenuScratch *sp = VS_MENU_SCRATCH;
 
-    ui_draw_text(VS_MESSAGE(sp->unk0.menu.half[0]), 60, 114, &sp->style[0]);
+    ui_draw_text(VS_MESSAGE(sp->state.menu.half[0]), 60, 114, &sp->style[0]);
 }
 
 /* The menu page frame: title tabs, the page body by page bit, the frame.
@@ -56,35 +56,35 @@ void card_screen_draw(void)
     sp->style[2].r = 96;
     sp->style[2].b = sp->style[2].g = 32;
     sp->style[0].cd = sp->style[1].cd = sp->style[2].cd = 57;
-    if (sp->unk1D4 < 16)
-        sp->unk248 = 8 - sp->unk1D4;
+    if (sp->blink_phase < 16)
+        sp->blink_level = 8 - sp->blink_phase;
     else
-        sp->unk248 = sp->unk1D4 - 24;
-    sp->unk214.b = 0;
-    sp->unk214.r = (u8)sp->unk248 * 4 + 96;
-    sp->unk214.g = (u8)sp->unk248 * 2 + 48;
-    if (sp->unk1CC != 0x2 && sp->unk1CC != 0x200) {
-        sp->unk240.vx = 896;
-        sp->unk244.vx = 544;
-        sp->unk244.vy = 511;
-        sp->unk224.x = 80;
-        sp->unk224.y = 45;
-        sp->unk224.w = 40;
-        sp->unk224.h = 16;
-        sp->unk240.vy = 512;
-        ui_draw_image(&sp->unk224, &sp->unk240, &sp->unk244, NULL, 3);
-        sp->unk224.y = 44;
-        if (sp->unk1CC & 0xff) {
-            sp->unk240.vx = 906;
-            sp->unk224.x = 32;
+        sp->blink_level = sp->blink_phase - 24;
+    sp->cursor_color.b = 0;
+    sp->cursor_color.r = (u8)sp->blink_level * 4 + 96;
+    sp->cursor_color.g = (u8)sp->blink_level * 2 + 48;
+    if (sp->mode != 0x2 && sp->mode != 0x200) {
+        sp->tex_pos.vx = 896;
+        sp->clut_pos.vx = 544;
+        sp->clut_pos.vy = 511;
+        sp->rect.x = 80;
+        sp->rect.y = 45;
+        sp->rect.w = 40;
+        sp->rect.h = 16;
+        sp->tex_pos.vy = 512;
+        ui_draw_image(&sp->rect, &sp->tex_pos, &sp->clut_pos, NULL, 3);
+        sp->rect.y = 44;
+        if (sp->mode & 0xff) {
+            sp->tex_pos.vx = 906;
+            sp->rect.x = 32;
         } else {
-            sp->unk240.vx = 934;
-            sp->unk224.x = 32;
+            sp->tex_pos.vx = 934;
+            sp->rect.x = 32;
         }
-        sp->unk224.w = 40;
-        ui_draw_image(&sp->unk224, &sp->unk240, &sp->unk244, NULL, 3);
+        sp->rect.w = 40;
+        ui_draw_image(&sp->rect, &sp->tex_pos, &sp->clut_pos, NULL, 3);
     }
-    switch (sp->unk1CC) {
+    switch (sp->mode) {
     case 0x2:
     case 0x200:
         card_draw_port_choice();

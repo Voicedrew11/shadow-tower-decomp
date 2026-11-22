@@ -18,7 +18,7 @@
 ADDRESS(0x8002d998, 0x340)
 void sparks_update(void)
 {
-    VsRecord20 *rec = sparks;
+    VsSpark *rec = sparks;
     int count = 0;
     int i = 2000;
     MATRIX m;
@@ -28,19 +28,19 @@ void sparks_update(void)
     TILE_1 *dot;
 
     while (i--) {
-        if (rec->unk10 != 0) {
-            rec->unk10--;
-            rec->unk0.vx += rec->unk8.vx;
-            rec->unk0.vy += rec->unk8.vy;
-            if (rec->unk0.vy > 0) {
-                rec->unk0.vy = 0;
-                rec->unk8.vx = 0;
-                rec->unk8.vy = 0;
-                rec->unk8.vz = 0;
+        if (rec->life != 0) {
+            rec->life--;
+            rec->position.vx += rec->velocity.vx;
+            rec->position.vy += rec->velocity.vy;
+            if (rec->position.vy > 0) {
+                rec->position.vy = 0;
+                rec->velocity.vx = 0;
+                rec->velocity.vy = 0;
+                rec->velocity.vz = 0;
             }
             count++;
-            rec->unk0.vz += rec->unk8.vz;
-            rec->unk8.vy += 20;
+            rec->position.vz += rec->velocity.vz;
+            rec->velocity.vy += 20;
         }
         rec++;
     }
@@ -55,18 +55,18 @@ void sparks_update(void)
     m.m[2][0] = 0;
     m.m[2][1] = 0;
     m.m[2][2] = 4096;
-    m.t[0] = -vs_gfx_state.unk2CA78.vx;
-    m.t[1] = -vs_gfx_state.unk2CA78.vy;
-    m.t[2] = -vs_gfx_state.unk2CA78.vz;
-    CompMatrix(&vs_gfx_state.unk2C998, &m, &m);
+    m.t[0] = -vs_gfx_state.camera_pos.vx;
+    m.t[1] = -vs_gfx_state.camera_pos.vy;
+    m.t[2] = -vs_gfx_state.camera_pos.vz;
+    CompMatrix(&vs_gfx_state.view_matrix, &m, &m);
     gte_SetRotMatrix(&m);
     gte_SetTransMatrix(&m);
     rec = sparks;
     i = 2000;
     while (i--) {
-        if (rec->unk10 != 0) {
-            if (rec->unk0.vy == 0) {
-                gte_ldv0(&rec->unk0);
+        if (rec->life != 0) {
+            if (rec->position.vy == 0) {
+                gte_ldv0(&rec->position);
                 gte_rtps();
                 packet = vs_gfx_state.packet;
                 tile = (TILE *)packet->cur;
@@ -76,15 +76,15 @@ void sparks_update(void)
                 tile->h = 2;
                 gte_stsxy(&tile->x0);
                 gte_stsz(&z);
-                if (rec->unk10 < 32)
-                    tile->r0 = rec->unk10 * 100 / 32;
+                if (rec->life < 32)
+                    tile->r0 = rec->life * 100 / 32;
                 else
                     tile->r0 = 100;
                 tile->g0 = 0;
                 tile->b0 = 0;
                 addPrim(&vs_gfx_state.ot_cur[4091], tile);
             } else {
-                gte_ldv0(&rec->unk0);
+                gte_ldv0(&rec->position);
                 gte_rtps();
                 packet = vs_gfx_state.packet;
                 dot = (TILE_1 *)packet->cur;

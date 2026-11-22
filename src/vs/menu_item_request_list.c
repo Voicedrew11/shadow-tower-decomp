@@ -39,16 +39,16 @@ void menu_item_request_draw_list(void)
     int i;
     u8 kind;
 
-    sp->unk218.x = 48;
-    sp->unk218.w = 270;
-    sp->unk218.h = 16;
-    sp->unk218.y = sp->unk1D0 * 16 + 35;
-    ui_draw_rect_outline(&sp->unk218, &sp->unk214, 513, 1);
-    if (sp->unk0.menu.half[0] > 0)
-        ui_draw_arrow(&up, &sp->unk214, 3072);
-    if (sp->unk0.menu.half[0] < sp->unk0.menu.half[1] - 11)
-        ui_draw_arrow(&down, &sp->unk214, 1024);
-    thumb.y = sp->unk0.menu.half[0] * 190 / sp->unk0.menu.half[1] + 31;
+    sp->cursor_rect.x = 48;
+    sp->cursor_rect.w = 270;
+    sp->cursor_rect.h = 16;
+    sp->cursor_rect.y = sp->cursor * 16 + 35;
+    ui_draw_rect_outline(&sp->cursor_rect, &sp->cursor_color, 513, 1);
+    if (sp->state.menu.half[0] > 0)
+        ui_draw_arrow(&up, &sp->cursor_color, 3072);
+    if (sp->state.menu.half[0] < sp->state.menu.half[1] - 11)
+        ui_draw_arrow(&down, &sp->cursor_color, 1024);
+    thumb.y = sp->state.menu.half[0] * 190 / sp->state.menu.half[1] + 31;
     ui_fill_rect(&thumb, &dark, 1);
     ui_add_draw_mode(1, 0, 0);
     edge.x = thumb.x - 2;
@@ -57,41 +57,41 @@ void menu_item_request_draw_list(void)
     edge.h = thumb.h;
     ui_fill_rect(&edge, &dark, 1);
     ui_add_draw_mode(2, 0, 0);
-    sp->unk224.x = 60;
-    sp->unk224.y = 12;
-    sp->unk224.w = 196;
-    sp->unk224.h = 16;
-    sp->unk240.vx = 896;
-    sp->unk240.vy = 448;
-    sp->unk244.vx = 544;
-    sp->unk244.vy = 502;
-    ui_draw_image(&sp->unk224, &sp->unk240, &sp->unk244, NULL, 3);
-    sp->unk238.x = 50;
-    sp->unk238.y = 35;
-    sp->unk238.w = 196;
-    sp->unk238.h = 16;
+    sp->rect.x = 60;
+    sp->rect.y = 12;
+    sp->rect.w = 196;
+    sp->rect.h = 16;
+    sp->tex_pos.vx = 896;
+    sp->tex_pos.vy = 448;
+    sp->clut_pos.vx = 544;
+    sp->clut_pos.vy = 502;
+    ui_draw_image(&sp->rect, &sp->tex_pos, &sp->clut_pos, NULL, 3);
+    sp->image_rect.x = 50;
+    sp->image_rect.y = 35;
+    sp->image_rect.w = 196;
+    sp->image_rect.h = 16;
     for (i = 0; i < 11; i++) {
-        int id = sp->unk0.menu.list.ids[sp->unk0.menu.half[0] + i];
+        int id = sp->state.menu.list.ids[sp->state.menu.half[0] + i];
         if (id == -2)
             id = 500;
         if (id != -1) {
             if (id != 500) {
                 sp->style[0].cd |= 0x80;
-                ui_draw_text(VS_ITEM_NAME(id), sp->unk238.x, sp->unk238.y + 2, &sp->style[0]);
+                ui_draw_text(VS_ITEM_NAME(id), sp->image_rect.x, sp->image_rect.y + 2, &sp->style[0]);
                 sp->style[0].cd &= 0x7f;
             } else {
-                ui_draw_text(VS_MESSAGE(500), sp->unk238.x + 39, sp->unk238.y + 2,
+                ui_draw_text(VS_MESSAGE(500), sp->image_rect.x + 39, sp->image_rect.y + 2,
                               &sp->style[0]);
             }
         }
-        sp->unk238.y += 16;
+        sp->image_rect.y += 16;
     }
-    sp->unk238.x = 34;
-    sp->unk238.y = 35;
-    sp->unk238.w = 14;
-    sp->unk238.h = 13;
+    sp->image_rect.x = 34;
+    sp->image_rect.y = 35;
+    sp->image_rect.w = 14;
+    sp->image_rect.h = 13;
     for (i = 0; i < 11; i++) {
-        int id = sp->unk0.menu.list.ids[sp->unk0.menu.half[0] + i];
+        int id = sp->state.menu.list.ids[sp->state.menu.half[0] + i];
         if (id < 70)
             kind = 0;
         else if (id < 91)
@@ -111,15 +111,15 @@ void menu_item_request_draw_list(void)
         else if (id < 266)
             kind = 4;
         if (kind >= 5) {
-            sp->unk240.vx = (kind - 5) * 14 + 640;
-            sp->unk240.vy = 256;
+            sp->tex_pos.vx = (kind - 5) * 14 + 640;
+            sp->tex_pos.vy = 256;
         } else {
-            sp->unk240.vx = kind * 14 + 640;
-            sp->unk240.vy = 240;
+            sp->tex_pos.vx = kind * 14 + 640;
+            sp->tex_pos.vy = 240;
         }
         if (id != -1 && id != -2)
-            ui_draw_image(&sp->unk238, &sp->unk240, NULL, NULL, 16);
-        sp->unk238.y += 16;
+            ui_draw_image(&sp->image_rect, &sp->tex_pos, NULL, NULL, 16);
+        sp->image_rect.y += 16;
     }
     ui_draw_panel(10, 9, 312, 222);
 }
@@ -129,7 +129,7 @@ ADDRESS(0x80022228, 0xb0)
 void menu_arrange_icons_draw_caption(void)
 {
     VsMenuScratch *sp = VS_MENU_SCRATCH;
-    int id = sp->unk0.menu.list.ids[sp->unk0.menu.half[0] * 4 + sp->unk1D0];
+    int id = sp->state.menu.list.ids[sp->state.menu.half[0] * 4 + sp->cursor];
 
     sp->style[0].cd |= 0x80;
     if (id != -1)
@@ -170,20 +170,20 @@ void menu_item_request_draw_details(int page)
     y = 9;
     text_y = 135;
     count_x = 342;
-    sp->unk238.x = x;
-    sp->unk238.y = y;
-    sp->unk238.w = 192;
-    sp->unk238.h = 124;
-    id = sp->unk0.menu.list.ids[(s16)(sp->unk0.menu.half[0] + sp->unk1D0)];
+    sp->image_rect.x = x;
+    sp->image_rect.y = y;
+    sp->image_rect.w = 192;
+    sp->image_rect.h = 124;
+    id = sp->state.menu.list.ids[(s16)(sp->state.menu.half[0] + sp->cursor)];
     if (id != -1 && id != -2) {
         if ((s16)cd_queue_busy() == 0) {
-            sp->unk240.vx = 640;
-            sp->unk240.vy = 0;
-            ui_draw_image(&sp->unk238, &sp->unk240, NULL, NULL, 16);
-            sp->unk238.w = 100;
-            sp->unk240.vx = 832;
-            sp->unk238.x += 192;
-            ui_draw_image(&sp->unk238, &sp->unk240, NULL, NULL, 16);
+            sp->tex_pos.vx = 640;
+            sp->tex_pos.vy = 0;
+            ui_draw_image(&sp->image_rect, &sp->tex_pos, NULL, NULL, 16);
+            sp->image_rect.w = 100;
+            sp->tex_pos.vx = 832;
+            sp->image_rect.x += 192;
+            ui_draw_image(&sp->image_rect, &sp->tex_pos, NULL, NULL, 16);
         }
         n = 0;
         k = 2;
@@ -212,7 +212,7 @@ void menu_item_request_draw_details(int page)
         DAT_8006337a = 0;
         text_y += 60;
         ui_draw_text(VS_MESSAGE(501), count_x, text_y, &sp->style[0]);
-        ui_draw_number(saves[1 - page].unk18BC.unk2EC[id] | 0x3000000, count_x + 70, text_y, &sp->style[3]);
+        ui_draw_number(saves[1 - page].versus.item_durability[id] | 0x3000000, count_x + 70, text_y, &sp->style[3]);
         ui_draw_text(VS_MESSAGE(502), count_x + 114, text_y, &sp->style[0]);
         ui_draw_number(vis_table_c.types[id].max_durability | 0x3000000, count_x + 138, text_y, &sp->style[3]);
         weight = vis_table_c.types[id].weight;
@@ -236,20 +236,20 @@ void menu_draw_button_prompt(void)
     CVECTOR grey = {80, 80, 80};
     VsMenuScratch *sp = VS_MENU_SCRATCH;
 
-    sp->unk240.vx = 896;
-    sp->unk240.vy = 480;
-    sp->unk244.vx = 544;
-    sp->unk244.vy = 503;
-    sp->unk238.w = 32;
-    sp->unk238.h = 16;
-    sp->unk238.x = 353;
-    sp->unk238.y = 168;
-    ui_draw_image(&sp->unk238, &sp->unk240, &sp->unk244, NULL, 0);
-    sp->unk240.vx = 904;
-    sp->unk244.vy = 504;
-    sp->unk238.x = 232;
-    sp->unk238.y = 168;
-    ui_draw_image(&sp->unk238, &sp->unk240, &sp->unk244, NULL, 0);
+    sp->tex_pos.vx = 896;
+    sp->tex_pos.vy = 480;
+    sp->clut_pos.vx = 544;
+    sp->clut_pos.vy = 503;
+    sp->image_rect.w = 32;
+    sp->image_rect.h = 16;
+    sp->image_rect.x = 353;
+    sp->image_rect.y = 168;
+    ui_draw_image(&sp->image_rect, &sp->tex_pos, &sp->clut_pos, NULL, 0);
+    sp->tex_pos.vx = 904;
+    sp->clut_pos.vy = 504;
+    sp->image_rect.x = 232;
+    sp->image_rect.y = 168;
+    ui_draw_image(&sp->image_rect, &sp->tex_pos, &sp->clut_pos, NULL, 0);
     ui_draw_text(VS_MESSAGE(216), 188, 150, &sp->style[0]);
     ui_draw_panel(168, 144, 319, 44);
 }

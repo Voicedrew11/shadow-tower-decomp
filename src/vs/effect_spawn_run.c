@@ -283,9 +283,9 @@ StEffect *effect_spawn(int n, u8 attack, u8 flags, u8 kind, VECTOR *pos, SVECTOR
             REACH(e, e->scale.vx);
             e->parent = (StEffect *)args[3];
             if (e->kind == 0x7e || e->kind == 0x81)
-                e->position.vy = shared_buffer.fighter[e->owner].unk4DF18.unk1B6 + 1600;
+                e->position.vy = shared_buffer.fighter[e->owner].data.height + 1600;
             else
-                e->position.vy = shared_buffer.fighter[e->owner].unk4DF18.unk1B6;
+                e->position.vy = shared_buffer.fighter[e->owner].data.height;
             e->rotation.vy = 0;
             e->velocity.vx = 0;
             e->velocity.vy = 0;
@@ -871,25 +871,25 @@ void effect_update(void)
             SVECTOR rot;
             VECTOR vec;
 
-            if (f->unk4DF18.unk14A[e->attack_index].unk2 == -32768) {
-                if (f->unk4DF10 == 2) {
-                    anim_get_vertex(e->owner, f->unk4DEE8, f->unk4DEEA,
-                                  f->unk4DF18.unk14A[e->attack_index].unk6, &v);
+            if (f->data.attacks[e->attack_index].offset_x == -32768) {
+                if (f->model_kind == 2) {
+                    anim_get_vertex(e->owner, f->anim, f->anim_frame,
+                                  f->data.attacks[e->attack_index].offset_z, &v);
                 } else {
-                    anim_set_node_vertex(e->owner, f->unk4DF18.unk14A[e->attack_index].unk4,
-                                  f->unk4DF18.unk14A[e->attack_index].unk6, &vec);
+                    anim_set_node_vertex(e->owner, f->data.attacks[e->attack_index].offset_y,
+                                  f->data.attacks[e->attack_index].offset_z, &vec);
                     v.vx = vec.vx;
                     v.vy = vec.vy;
                     v.vz = vec.vz;
                 }
                 rot.vx = 0;
-                rot.vy = f->unk4DF02;
+                rot.vy = f->facing;
                 rot.vz = 0;
                 RotMatrix(&rot, &m);
                 ApplyMatrixSV(&m, &v, &v);
-                e->position.vx = f->unk4DEF0.vx + v.vx;
-                e->position.vy = f->unk4DEF0.vy + v.vy;
-                e->position.vz = f->unk4DEF0.vz + v.vz;
+                e->position.vx = f->position.vx + v.vx;
+                e->position.vy = f->position.vy + v.vy;
+                e->position.vz = f->position.vz + v.vz;
             }
         }
         if (e->life == 33) {
@@ -942,10 +942,10 @@ void effect_update(void)
         if (e->state.h >= -128)
             e->state.h = -128;
         if (e->kind == 0x7e || e->kind == 0x81)
-            len = (current_fighter->unk4DEF0.vy + current_fighter->unk4DF18.unk1B2 - e->parent->position.vy)
+            len = (current_fighter->position.vy + current_fighter->data.origin_height - e->parent->position.vy)
                 * rcos(e->state.h) / rsin(e->state.h);
         else
-            len = (current_fighter->unk4DEF0.vy - e->parent->position.vy) * rcos(e->state.h)
+            len = (current_fighter->position.vy - e->parent->position.vy) * rcos(e->state.h)
                 / rsin(e->state.h);
         e->position.vx = e->parent->position.vx - len * rcos(e->parent->rotation.vy + 1024) / 4096;
         e->position.vz = e->parent->position.vz + len * rsin(e->parent->rotation.vy + 1024) / 4096;
@@ -998,15 +998,15 @@ void effect_update(void)
             int len;
 
             if (e->kind == 0xdf || e->kind == 0xe2) {
-                len = (current_fighter->unk4DEF0.vy + current_fighter->unk4DF18.unk1B2
+                len = (current_fighter->position.vy + current_fighter->data.origin_height
                        - e->parent->position.vy)
                       * rcos(e->state.h) / rsin(e->state.h);
-                dy = current_fighter->unk4DEF0.vy + current_fighter->unk4DF18.unk1B2
+                dy = current_fighter->position.vy + current_fighter->data.origin_height
                      - e->parent->position.vy;
             } else {
-                len = (current_fighter->unk4DEF0.vy - e->parent->position.vy) * rcos(e->state.h)
+                len = (current_fighter->position.vy - e->parent->position.vy) * rcos(e->state.h)
                       / rsin(e->state.h);
-                dy = current_fighter->unk4DEF0.vy - e->parent->position.vy;
+                dy = current_fighter->position.vy - e->parent->position.vy;
             }
             e->scale.vz = SquareRoot0(len * len + dy * dy);
         }
@@ -1050,7 +1050,7 @@ void effect_update(void)
         }
         shake = (rand() - 16384) >> ((64 - e->life) / 8 + 9);
         if (shake < -2 || shake > 2)
-            vs_gfx_state.unk2CA78.vy += shake * 10;
+            vs_gfx_state.camera_pos.vy += shake * 10;
         break;
     case 0x57:
     case 0x58:
@@ -1268,7 +1268,7 @@ void effects_run(void)
  * RTPS for the rest. */
 #define PROJECT(sp, out, in, n)                                                \
     {                                                                          \
-        (sp)->z_ot += (sp)->header->n_vertices;                                \
+        (sp)->vertex_count += (sp)->header->n_vertices;                                \
         out = (MeshVertex *)(sp)->vertices;                                    \
         in = (SVECTOR *)(sp)->local_vertices;                                  \
         n = (sp)->header->n_vertices / 3;                                      \
@@ -1317,20 +1317,20 @@ void effect_draw_model_part(u8 *model, VECTOR *pos, SVECTOR *rot, SVECTOR *scale
     SVECTOR *in;
     int n;
 
-    sp->vertices = vs_gfx_state.unkA7EC;
-    sp->unk48 = vs_gfx_state.unkA7EC;
-    sp->z_ot = vs_gfx_state.unk831C[0];
-    sp->face_count = vs_gfx_state.unk831C[1];
-    sp->prim_count = vs_gfx_state.unk8324;
-    sp->unk94 = vs_gfx_state.unk8328;
+    sp->vertices = vs_gfx_state.projected_vertices;
+    sp->unk48 = vs_gfx_state.projected_vertices;
+    sp->vertex_count = vs_gfx_state.vertex_face_counts[0];
+    sp->face_count = vs_gfx_state.vertex_face_counts[1];
+    sp->prim_count = vs_gfx_state.prim_count;
+    sp->prim_alloc_count = vs_gfx_state.prim_alloc_count;
     sp->prim = vs_gfx_state.packet->cur;
     sp->prim_end = vs_gfx_state.packet->end;
-    gte_SetRotMatrix(&vs_gfx_state.unk2C998);
-    SetTransMatrix(&vs_gfx_state.unk2C998);
+    gte_SetRotMatrix(&vs_gfx_state.view_matrix);
+    SetTransMatrix(&vs_gfx_state.view_matrix);
     if (view) {
-        rel.vx = pos->vx - vs_gfx_state.unk2CA78.vx;
-        rel.vy = pos->vy - vs_gfx_state.unk2CA78.vy;
-        rel.vz = pos->vz - vs_gfx_state.unk2CA78.vz;
+        rel.vx = pos->vx - vs_gfx_state.camera_pos.vx;
+        rel.vy = pos->vy - vs_gfx_state.camera_pos.vy;
+        rel.vz = pos->vz - vs_gfx_state.camera_pos.vz;
         gte_RotTrans(&rel, (VECTOR *)sp->matrix.t, &flag);
     } else {
         sp->matrix.t[0] = pos->vx;
@@ -1366,10 +1366,10 @@ void effect_draw_model_part(u8 *model, VECTOR *pos, SVECTOR *rot, SVECTOR *scale
     mesh_draw_part_nccs(part);
     vs_gfx_state.packet->cur = sp->prim;
     vs_gfx_state.packet->end = sp->prim_end;
-    vs_gfx_state.unk831C[0] = sp->z_ot;
-    vs_gfx_state.unk831C[1] = sp->face_count;
-    vs_gfx_state.unk8324 = sp->prim_count;
-    vs_gfx_state.unk8328 = sp->unk94;
+    vs_gfx_state.vertex_face_counts[0] = sp->vertex_count;
+    vs_gfx_state.vertex_face_counts[1] = sp->face_count;
+    vs_gfx_state.prim_count = sp->prim_count;
+    vs_gfx_state.prim_alloc_count = sp->prim_alloc_count;
 }
 
 /* Draws every live effect with a model (VS's copy of ST.EXE's
@@ -1388,21 +1388,21 @@ void effects_draw(void)
             continue;
         if ((o->draw_mode & 3) == 0)
             continue;
-        sp->unk13C = o->position;
+        sp->effect_pos = o->position;
         sp->clut_base = o->clut_base;
         switch (o->draw_mode & 0xc) {
         case 0:
             sp->near_z = 11;
             sp->far_z = 4103;
             sp->ot = vs_gfx_state.ot_cur - 7;
-            effect_draw_model_part((u8 *)shared_buffer.fighter[o->owner].unk4B000, &o->position, &o->rotation,
-                          &o->scale, &vs_gfx_state.unk2C998, o->part & 0x7f, o->light, o->draw_flags, 0);
+            effect_draw_model_part((u8 *)shared_buffer.fighter[o->owner].effect_model, &o->position, &o->rotation,
+                          &o->scale, &vs_gfx_state.view_matrix, o->part & 0x7f, o->light, o->draw_flags, 0);
             break;
         case 4:
             sp->near_z = 11;
             sp->far_z = 4103;
             sp->ot = vs_gfx_state.ot_cur - 7;
-            effect_draw_model_part((u8 *)shared_buffer.fighter[o->owner].unk4B000, &o->position, &o->rotation,
+            effect_draw_model_part((u8 *)shared_buffer.fighter[o->owner].effect_model, &o->position, &o->rotation,
                           &o->scale, &unit, o->part & 0x7f, o->light, o->draw_flags, 0);
             break;
         case 8:

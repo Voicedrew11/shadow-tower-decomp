@@ -29,8 +29,8 @@ int cd_queue_busy(void)
 
     EnterCriticalSection();
     busy = 1;
-    if (vs_cd_state.unkDC == vs_cd_state.unkD8)
-        busy = vs_cd_state.unkDC->kind != 0;
+    if (vs_cd_state.current == vs_cd_state.next_free)
+        busy = vs_cd_state.current->kind != 0;
     ExitCriticalSection();
     return busy;
 }

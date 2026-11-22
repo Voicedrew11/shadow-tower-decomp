@@ -20,7 +20,7 @@ void fighter_draw_shadow(int n, int scale)
 {
     VsFighter *base = shared_buffer.fighter;
     VsFighter *f = base + n;
-    int r = f->unk4DF18.unk1B4 * scale / 4096;
+    int r = f->data.radius * scale / 4096;
     MATRIX m;
     SVECTOR v[4];
     StPacketBuffer *packet;
@@ -38,9 +38,9 @@ void fighter_draw_shadow(int n, int scale)
     v[3].vx = r;
     v[3].vy = 0;
     v[3].vz = r;
-    m.t[0] = f->unk4DEF0.vx - vs_gfx_state.unk2CA78.vx;
-    m.t[1] = -vs_gfx_state.unk2CA78.vy;
-    m.t[2] = f->unk4DEF0.vz - vs_gfx_state.unk2CA78.vz;
+    m.t[0] = f->position.vx - vs_gfx_state.camera_pos.vx;
+    m.t[1] = -vs_gfx_state.camera_pos.vy;
+    m.t[2] = f->position.vz - vs_gfx_state.camera_pos.vz;
     m.m[0][0] = 4096;
     m.m[0][1] = 0;
     m.m[0][2] = 0;
@@ -50,7 +50,7 @@ void fighter_draw_shadow(int n, int scale)
     m.m[2][0] = 0;
     m.m[2][1] = 0;
     m.m[2][2] = 4096;
-    CompMatrix(&vs_gfx_state.unk2C998, &m, &m);
+    CompMatrix(&vs_gfx_state.view_matrix, &m, &m);
     gte_SetRotMatrix(&m);
     gte_SetTransMatrix(&m);
     gte_ldv3c(&v[0]);

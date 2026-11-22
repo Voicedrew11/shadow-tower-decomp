@@ -38,39 +38,39 @@ void menu_creature_select_draw_grid(int player)
 
     ui_draw_text(VS_MESSAGE(180), 44, 21, &sp->style[0]);
     ui_draw_panel(16, 16, 138, 22);
-    c = sp->unk1D0;
+    c = sp->cursor;
     row = c >> 2;
     if (c < 0) {
         int slot = ~c;
 
-        if (sp->unk1D6) {
-            sp->unk218.x = 26;
-            sp->unk218.y = slot * 56 + 44;
+        if (sp->holding) {
+            sp->cursor_rect.x = 26;
+            sp->cursor_rect.y = slot * 56 + 44;
         } else {
-            sp->unk218.x = 32;
-            sp->unk218.y = slot * 56 + 48;
+            sp->cursor_rect.x = 32;
+            sp->cursor_rect.y = slot * 56 + 48;
         }
     } else {
         s16 col = c - row * 4;
 
-        sp->unk218.x = col * 112 + 176;
-        sp->unk218.y = row * 56 + 48;
+        sp->cursor_rect.x = col * 112 + 176;
+        sp->cursor_rect.y = row * 56 + 48;
     }
-    sp->unk218.w = 96;
-    sp->unk218.h = 48;
-    ui_draw_rect_outline(&sp->unk218, &sp->unk214, 513, 1);
+    sp->cursor_rect.w = 96;
+    sp->cursor_rect.h = 48;
+    ui_draw_rect_outline(&sp->cursor_rect, &sp->cursor_color, 513, 1);
     ui_add_draw_mode(1, 0, 0);
-    if (sp->unk1D2 > 0)
-        ui_draw_arrow(&up, &sp->unk214, 3072);
-    if (sp->unk1D2 <= sp->unk0.team.rows - 3)
-        ui_draw_arrow(&down, &sp->unk214, 1024);
+    if (sp->scroll > 0)
+        ui_draw_arrow(&up, &sp->cursor_color, 3072);
+    if (sp->scroll <= sp->state.creature_select.rows - 3)
+        ui_draw_arrow(&down, &sp->cursor_color, 1024);
     ui_add_draw_mode(1, 0, 0);
-    c = sp->unk1D0;
+    c = sp->cursor;
     if (c < 0) {
-        id = teams[player].slot[-c - 1];
+        id = lineups[player].slot[-c - 1];
         if (id != -1) {
-            for (k = 0; k < sp->unk0.team.count; k++) {
-                if (id == sp->unk0.team.kinds[k]) {
+            for (k = 0; k < sp->state.creature_select.count; k++) {
+                if (id == sp->state.creature_select.kinds[k]) {
                     idx = k;
                     break;
                 }
@@ -79,74 +79,74 @@ void menu_creature_select_draw_grid(int player)
             idx = -1;
         }
     } else {
-        idx = sp->unk1D2 * 4 + c;
-        id = sp->unk0.team.kinds[idx];
+        idx = sp->scroll * 4 + c;
+        id = sp->state.creature_select.kinds[idx];
         for (k = 0; k < 3; k++) {
-            if (id == teams[player].slot[k])
+            if (id == lineups[player].slot[k])
                 idx = -1;
         }
     }
-    if (idx < sp->unk0.team.count && idx != -1) {
+    if (idx < sp->state.creature_select.count && idx != -1) {
         sp->style[0].cd |= 0x80;
         ui_draw_text(VS_ITEM_NAME(id), 428, 21, &sp->style[0]);
         sp->style[0].cd &= 0x7f;
     }
     ui_draw_panel(420, 16, 200, 22);
-    sp->unk238.w = 96;
-    sp->unk238.h = 48;
-    sp->unk238.y = 48;
+    sp->image_rect.w = 96;
+    sp->image_rect.h = 48;
+    sp->image_rect.y = 48;
     frame.r = 50;
     frame.g = 50;
     frame.b = 50;
-    idx = sp->unk1D2 * 4;
+    idx = sp->scroll * 4;
     for (i = 0; i < 3; i++) {
-        if (sp->unk1D2 + i == sp->unk0.team.rows)
-            n = sp->unk0.team.last;
+        if (sp->scroll + i == sp->state.creature_select.rows)
+            n = sp->state.creature_select.last;
         else
             n = 4;
-        sp->unk238.x = 176;
+        sp->image_rect.x = 176;
         for (j = 0; j < n; idx++, j++) {
-            if (idx < sp->unk0.team.count) {
-                ui_draw_rect_outline(&sp->unk238, &frame, 513, 0);
-                id = sp->unk0.team.kinds[idx];
+            if (idx < sp->state.creature_select.count) {
+                ui_draw_rect_outline(&sp->image_rect, &frame, 513, 0);
+                id = sp->state.creature_select.kinds[idx];
                 for (k = 0; k < 3; k++) {
-                    if (teams[player].slot[k] == id) {
+                    if (lineups[player].slot[k] == id) {
                         black.r = 0;
                         black.g = 0;
                         black.b = 0;
-                        ui_fill_rect(&sp->unk238, &black, 0);
+                        ui_fill_rect(&sp->image_rect, &black, 0);
                         break;
                     }
                 }
                 if (k == 3)
-                    ui_draw_image(&sp->unk238, &sp->unk0.team.pos[idx % 12], NULL, NULL, 16);
+                    ui_draw_image(&sp->image_rect, &sp->state.creature_select.pos[idx % 12], NULL, NULL, 16);
             }
-            sp->unk238.x += 112;
+            sp->image_rect.x += 112;
         }
-        sp->unk238.y += 56;
+        sp->image_rect.y += 56;
     }
-    sp->unk238.x = 32;
-    sp->unk238.y = 48;
+    sp->image_rect.x = 32;
+    sp->image_rect.y = 48;
     for (i = 0; i < 3; i++) {
         ui_draw_number((i + 1) | DIGITS(3), 110, i * 56 + 85, &sp->style[3]);
-        if (teams[player].slot[i] == -1) {
+        if (lineups[player].slot[i] == -1) {
             black.r = 0;
             black.g = 0;
             black.b = 0;
-            ui_fill_rect(&sp->unk238, &black, 0);
+            ui_fill_rect(&sp->image_rect, &black, 0);
         } else {
-            x = sp->unk238.x;
-            y = sp->unk238.y;
-            if (sp->unk1D6 && ~sp->unk1D0 == i) {
-                sp->unk238.x -= 6;
-                sp->unk238.y -= 4;
+            x = sp->image_rect.x;
+            y = sp->image_rect.y;
+            if (sp->holding && ~sp->cursor == i) {
+                sp->image_rect.x -= 6;
+                sp->image_rect.y -= 4;
             }
-            ui_draw_image(&sp->unk238, &sp->unk0.team.pos[12 + i], NULL, NULL, 16);
-            sp->unk238.x = x;
-            sp->unk238.y = y;
+            ui_draw_image(&sp->image_rect, &sp->state.creature_select.pos[12 + i], NULL, NULL, 16);
+            sp->image_rect.x = x;
+            sp->image_rect.y = y;
         }
-        ui_draw_rect_outline(&sp->unk238, &frame, 513, 0);
-        sp->unk238.y += 56;
+        ui_draw_rect_outline(&sp->image_rect, &frame, 513, 0);
+        sp->image_rect.y += 56;
     }
     ui_add_draw_mode(0, 0, 0);
     ui_draw_panel(160, 40, 464, 176);

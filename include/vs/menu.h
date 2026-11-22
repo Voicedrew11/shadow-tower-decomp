@@ -17,19 +17,19 @@
 /* A fighter team: three character slots, -1 for an empty one (VS band 6). */
 typedef struct {
     s32 slot[3];
-} VsTeam;
+} VsLineup;
 
 /* The team screen's edit record (a local of menu_creature_select_loop): the slot picked
  * (unk4) and a copy of the team being edited. */
 typedef struct {
-    u8 unk0;             /* 0x00: a slot is held (menu_creature_select_loop) */
+    u8 holding;          /* 0x00: a slot is held (menu_creature_select_loop) */
     u8 unk1[3];
-    s32 unk4;            /* 0x04: the picked slot */
-    VsTeam team;         /* 0x08 */
-} VsTeamEdit;
+    s32 held_slot;       /* 0x04: the picked slot */
+    VsLineup lineup;     /* 0x08 */
+} VsLineupEdit;
 
-/* Both players' teams (bss, 0x801624b8). */
-extern VsTeam teams[2];
+/* Both players' lineups (bss, 0x801624b8). */
+extern VsLineup lineups[2];
 
 /* The menu screens' scratchpad block; only proven fields are spelled. */
 typedef struct {
@@ -44,50 +44,50 @@ typedef struct {
             s16 last;    /* 0x0c: items on the last row */
             u8 unk0E[2];
             DVECTOR pos[16]; /* 0x10: VRAM positions; [12..14] the team slot pictures, [15] the detail image */
-            CreatureBookEntry *items; /* 0x50: item records by kind (menu_creature_book_draw_entry) */
-        } team;          /* the team screen (menu_creature_select_pick_up_slot) */
-    } unk0;              /* 0x000 */
-    VsCardPort *unk1B8;  /* 0x1b8: the card slot being scanned */
-    s16 unk1BC;          /* 0x1bc: its card port */
-    s16 unk1BE;          /* 0x1be: the save file count, for the file list */
-    u16 unk1C0;          /* 0x1c0 */
-    s16 unk1C2;          /* 0x1c2: the file list cursor row, -1 on cancel */
-    s16 unk1C4;          /* 0x1c4: the file list scroll */
-    u16 unk1C6;          /* 0x1c6 (ST MenuScratch.dialog_choice) */
-    s16 unk1C8;          /* 0x1c8: the first free save number */
-    s16 unk1CA;          /* 0x1ca: card_screen_run's mode (menu_vs_setup_run clears it) */
-    u16 unk1CC;          /* 0x1cc (ST unk2DC); card_screen_run shifts its step bit through it */
-    s16 unk1CE;          /* 0x1ce: the versus setup cursor line (menu_vs_setup_draw_options) */
-    s16 unk1D0;          /* 0x1d0: the list cursor row (ST unk2E0) */
-    s16 unk1D2;          /* 0x1d2: the item grid row (menu_creature_book_draw_entry) */
-    u8 unk1D4;           /* 0x1d4: cursor blink phase (ST unk2E4) */
-    u8 unk1D5;           /* 0x1d5: font mode (ST unk2E5) */
-    u8 unk1D6;           /* 0x1d6: a team slot is picked up (menu_creature_select_draw_grid) */
+            CreatureBookEntry *entries; /* 0x50: item records by kind (menu_creature_book_draw_entry) */
+        } creature_select; /* the team screen (menu_creature_select_pick_up_slot) */
+    } state;             /* 0x000 */
+    VsCardDirectory *card; /* 0x1b8: the card slot being scanned */
+    s16 port;            /* 0x1bc: its card port */
+    s16 row_count;       /* 0x1be: the save file count, for the file list */
+    u16 has_new_row;     /* 0x1c0 */
+    s16 file_row;        /* 0x1c2: the file list cursor row, -1 on cancel */
+    s16 first_row;       /* 0x1c4: the file list scroll */
+    u16 dialog_choice;   /* 0x1c6 (ST MenuScratch.dialog_choice) */
+    s16 free_file_number; /* 0x1c8: the first free save number */
+    s16 show_backdrop;   /* 0x1ca: card_screen_run's mode (menu_vs_setup_run clears it) */
+    u16 mode;            /* 0x1cc (ST unk2DC); card_screen_run shifts its step bit through it */
+    s16 main_row;        /* 0x1ce: the versus setup cursor line (menu_vs_setup_draw_options) */
+    s16 cursor;          /* 0x1d0: the list cursor row (ST unk2E0) */
+    s16 scroll;          /* 0x1d2: the item grid row (menu_creature_book_draw_entry) */
+    u8 blink_phase;      /* 0x1d4: cursor blink phase (ST unk2E4) */
+    u8 font_mode;        /* 0x1d5: font mode (ST unk2E5) */
+    u8 holding;          /* 0x1d6: a team slot is picked up (menu_creature_select_draw_grid) */
     u8 unk1D7;
-    DVECTOR unk1D8;      /* 0x1d8: the message/menu font page's VRAM position (card_screen_run, menu_creature_select_run) */
-    DVECTOR unk1DC;      /* 0x1dc: its CLUT position */
-    DVECTOR unk1E0;      /* 0x1e0: the item name page's VRAM position (card_screen_run) */
-    DVECTOR unk1E4;      /* 0x1e4: its CLUT position */
-    DVECTOR unk1E8;      /* 0x1e8: the setup page picture's VRAM position (menu_vs_setup_run) */
+    DVECTOR message_font_vram; /* 0x1d8: the message/menu font page's VRAM position (card_screen_run, menu_creature_select_run) */
+    DVECTOR message_font_clut; /* 0x1dc: its CLUT position */
+    DVECTOR item_font_vram; /* 0x1e0: the item name page's VRAM position (card_screen_run) */
+    DVECTOR item_font_clut; /* 0x1e4: its CLUT position */
+    DVECTOR picture_vram; /* 0x1e8: the setup page picture's VRAM position (menu_vs_setup_run) */
     u8 unk1EC[0x1f0 - 0x1ec];
     CVECTOR style[8];    /* 0x1f0: text colours (ST 0x300) */
     u8 unk210[4];
-    CVECTOR unk214;      /* 0x214: highlight colour (ST unk32C) */
-    RECT unk218;         /* 0x218: highlight bar (ST unk330) */
-    CVECTOR unk220;      /* 0x220 (ST unk338) */
-    RECT unk224;         /* 0x224 (ST unk33C) */
-    CVECTOR unk22C;      /* 0x22c (ST unk344) */
-    RECT unk230;         /* 0x230 (ST unk348) */
-    RECT unk238;         /* 0x238 (ST unk350) */
-    DVECTOR unk240;      /* 0x240: texture position in VRAM (ST unk358) */
-    DVECTOR unk244;      /* 0x244: CLUT position in VRAM (ST unk35C) */
-    u16 unk248;          /* 0x248: blink offset (ST unk360) */
+    CVECTOR cursor_color; /* 0x214: highlight colour (ST unk32C) */
+    RECT cursor_rect;    /* 0x218: highlight bar (ST unk330) */
+    CVECTOR border_color; /* 0x220 (ST unk338) */
+    RECT rect;           /* 0x224 (ST unk33C) */
+    CVECTOR fill_color;  /* 0x22c (ST unk344) */
+    RECT inner_rect;     /* 0x230 (ST unk348) */
+    RECT image_rect;     /* 0x238 (ST unk350) */
+    DVECTOR tex_pos;     /* 0x240: texture position in VRAM (ST unk358) */
+    DVECTOR clut_pos;    /* 0x244: CLUT position in VRAM (ST unk35C) */
+    u16 blink_level;     /* 0x248: blink offset (ST unk360) */
 } VsMenuScratch;
 
 /* Layout check: the offset the code proves. */
-typedef char VsMenuScratchUnk1B8At0x1B8[offsetof(VsMenuScratch, unk1B8) == 0x1b8 ? 1 : -1];
+typedef char VsMenuScratchUnk1B8At0x1B8[offsetof(VsMenuScratch, card) == 0x1b8 ? 1 : -1];
 typedef char VsMenuScratchStyleAt0x1F0[offsetof(VsMenuScratch, style) == 0x1f0 ? 1 : -1];
-typedef char VsMenuScratchUnk244At0x244[offsetof(VsMenuScratch, unk244) == 0x244 ? 1 : -1];
+typedef char VsMenuScratchUnk244At0x244[offsetof(VsMenuScratch, clut_pos) == 0x244 ? 1 : -1];
 
 #define VS_MENU_SCRATCH ((VsMenuScratch *)0x1f800000)
 

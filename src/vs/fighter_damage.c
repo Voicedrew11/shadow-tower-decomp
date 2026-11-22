@@ -21,7 +21,7 @@ void fighter_apply_hit(int id, VsHit *hit)
     u16 damage[9];
     VsFighter *base = shared_buffer.fighter;
     VsFighter *f = base + (1 - id);
-    u16 *resist = f->unk4DF18.unk1BC;
+    u16 *resist = f->data.resistances;
     int total = 0;
     int i;
 
@@ -39,15 +39,15 @@ void fighter_apply_hit(int id, VsHit *hit)
         }
         resist++;
     }
-    if (total < f->unk4DF08) {
-        f->unk4DF0C = f->unk4DF08 - total;
-        f->unk4DF0E = 3;
+    if (total < f->hp) {
+        f->hp_target = f->hp - total;
+        f->state = 3;
     } else {
-        f->unk4DF0C = 0;
-        f->unk4DF0E = 4;
+        f->hp_target = 0;
+        f->state = 4;
     }
-    f->unk4DEEC = 0;
-    f->unk4DEEA = 0;
+    f->anim_step = 0;
+    f->anim_frame = 0;
 }
 
 /* Damages the opponent of fighter `id` with that fighter's attack
@@ -56,9 +56,9 @@ ADDRESS(0x8002e314, 0x1fc)
 void fighter_apply_attack_hit(u8 id, u8 attack)
 {
     VsFighter *self = &shared_buffer.fighter[id];
-    u16 *damage = self->unk4DF18.unk14A[attack].damage;
+    u16 *damage = self->data.attacks[attack].damage;
     VsFighter *f = &shared_buffer.fighter[1 - id];
-    u16 *resist = f->unk4DF18.unk1BC;
+    u16 *resist = f->data.resistances;
     int total = 0;
     int i;
 
@@ -72,15 +72,15 @@ void fighter_apply_attack_hit(u8 id, u8 attack)
         damage++;
         resist++;
     }
-    if (total < f->unk4DF08) {
-        f->unk4DF0C = f->unk4DF08 - total;
-        f->unk4DF0E = 3;
+    if (total < f->hp) {
+        f->hp_target = f->hp - total;
+        f->state = 3;
     } else {
-        f->unk4DF0C = 0;
-        f->unk4DF0E = 4;
+        f->hp_target = 0;
+        f->state = 4;
     }
-    f->unk4DEEC = 0;
-    f->unk4DEEA = 0;
+    f->anim_step = 0;
+    f->anim_frame = 0;
 }
 
 /* 1 when fighter `id` is outside the central 20000-unit square and its
@@ -90,9 +90,9 @@ int fighter_is_out_of_bounds(int id)
 {
     VsFighter *f = &shared_buffer.fighter[id];
 
-    if (f->unk4DEF0.vx < -10000 || f->unk4DEF0.vx > 10000 || f->unk4DEF0.vz < -10000 ||
-        f->unk4DEF0.vz > 10000) {
-        if (f->unk4DEF0.vx * f->unk4DEF0.vx + f->unk4DEF0.vz * f->unk4DEF0.vz + f->unk4DF18.unk1B4 >
+    if (f->position.vx < -10000 || f->position.vx > 10000 || f->position.vz < -10000 ||
+        f->position.vz > 10000) {
+        if (f->position.vx * f->position.vx + f->position.vz * f->position.vz + f->data.radius >
             15500 * 15500)
             return 1;
     }

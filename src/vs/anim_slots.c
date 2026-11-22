@@ -28,7 +28,7 @@
 ADDRESS(0x80027fec, 0x3c)
 void anim_register(u16 id, StAnimFile *file)
 {
-    vs_gfx_state.unk834C[id] = file;
+    vs_gfx_state.model_files[id] = file;
     SCRATCHPAD->model = ANIM_MODEL(file);
 }
 
@@ -116,13 +116,13 @@ void anim_slot_alloc(StAnimSlot **out)
  * model (returns 1); otherwise poses model `id` at `frame` of `clip`
  * through the slot at *slotp, claiming one and its delta buffer first
  * (freeing every slot until the buffer fits). The posed vertices go to
- * vs_gfx_state.unkC7F0 and the scratchpad's model-space vertex pointer.
+ * vs_gfx_state.posed_vertices and the scratchpad's model-space vertex pointer.
  * Returns the slot, or 0 when none is free.
  */
 ADDRESS(0x800281d4, 0x2a0)
 int anim_pose(StAnimSlot **slotp, int id, int clip, int frame)
 {
-    StAnimFile *file = vs_gfx_state.unk834C[id];
+    StAnimFile *file = vs_gfx_state.model_files[id];
     StAnimSlot *slot = *slotp;
     VsScratchPad *sp = VS_SCRATCHPAD;
     StAnimFile *still;
@@ -136,7 +136,7 @@ int anim_pose(StAnimSlot **slotp, int id, int clip, int frame)
 
         if (slot != NULL)
             anim_slot_free(slot);
-        still = vs_gfx_state.unk834C[id];
+        still = vs_gfx_state.model_files[id];
         model = ANIM_MODEL(still);
         sp->model = model;
         sp->header = MODEL_PARTS(model);
@@ -175,10 +175,10 @@ int anim_pose(StAnimSlot **slotp, int id, int clip, int frame)
         slot->clip = clip;
         slot->key = key;
     }
-    vertices_add(vs_gfx_state.unkC7F0, (SVECTOR *)(sp->model + (sp->header->vertices + 12)),
+    vertices_add(vs_gfx_state.posed_vertices, (SVECTOR *)(sp->model + (sp->header->vertices + 12)),
                  slot->from_keyframe, sp->header->n_vertices);
-    gteMIMefunc(vs_gfx_state.unkC7F0, slot->deltas, sp->header->n_vertices, frac);
-    sp->local_vertices = (u8 *)vs_gfx_state.unkC7F0;
+    gteMIMefunc(vs_gfx_state.posed_vertices, slot->deltas, sp->header->n_vertices, frac);
+    sp->local_vertices = (u8 *)vs_gfx_state.posed_vertices;
     slot->state = 2;
     return (int)slot;
 }

@@ -49,7 +49,7 @@ void ui_draw_cell_grid(DVECTOR *pos, DVECTOR *tex, DVECTOR *clut, CVECTOR *color
             buf->cur = (u_long *)(p + 1);
             if (vs_gfx_state.packet->cur > vs_gfx_state.packet->end)
                 return;
-            vs_gfx_state.unk8328++;
+            vs_gfx_state.prim_alloc_count++;
             setUV4(p, u, v, u + tw, v, u, v + th, u + tw, v + th);
             p->x0 = p->x2 = pos->vx + col * dx;
             p->x1 = p->x3 = pos->vx + col * dx + w;

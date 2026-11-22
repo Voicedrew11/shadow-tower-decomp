@@ -27,21 +27,21 @@ int fighter_hit_test(int n, s16 reach, s16 arc)
     int t;
     int state;
 
-    if (o->unk4DF0E == 4)
+    if (o->state == 4)
         goto miss;
     if (round_phase != 1)
         goto miss;
-    d.vx = f->unk4DEF0.vx - o->unk4DEF0.vx;
-    d.vz = f->unk4DEF0.vz - o->unk4DEF0.vz;
-    if (d.vx * d.vx + d.vz * d.vz > (reach + o->unk4DF18.unk1B4) * (reach + o->unk4DF18.unk1B4))
+    d.vx = f->position.vx - o->position.vx;
+    d.vz = f->position.vz - o->position.vz;
+    if (d.vx * d.vx + d.vz * d.vz > (reach + o->data.radius) * (reach + o->data.radius))
         goto miss;
     angle = ratan2(d.vx, d.vz) & 0xfff;
-    lo = f->unk4DF02 - arc;
+    lo = f->facing - arc;
     if (lo < 0) {
-        if (lo + 4096 > angle && f->unk4DF02 + arc < angle)
+        if (lo + 4096 > angle && f->facing + arc < angle)
             goto miss;
     } else {
-        hi = f->unk4DF02 + arc;
+        hi = f->facing + arc;
         if (hi >= 4096) {
             if (hi - 4096 < angle && angle < lo)
                 goto miss;
@@ -52,22 +52,22 @@ int fighter_hit_test(int n, s16 reach, s16 arc)
                 goto miss;
         }
     }
-    state = o->unk4DF0E;
+    state = o->state;
     if (state != 5)
         goto hit;
     t = (angle + 2046) & 0xfff;
-    if (t < o->unk4DF02) {
-        if (o->unk4DF02 - t < 256 || o->unk4DF02 - t > 3840)
+    if (t < o->facing) {
+        if (o->facing - t < 256 || o->facing - t > 3840)
             goto blocked;
         goto hit;
     }
-    if (t - o->unk4DF02 >= 256 && t - o->unk4DF02 <= 3840)
+    if (t - o->facing >= 256 && t - o->facing <= 3840)
         goto hit;
-    o->unk4DF14 = state;
+    o->guard_flash = state;
 miss:
     return 0;
 blocked:
-    o->unk4DF14 = state;
+    o->guard_flash = state;
     return 0;
 hit:
     sparks_start_burst(1 - n);

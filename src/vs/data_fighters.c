@@ -1,7 +1,7 @@
 /*
  * VS.EXE: a data-only module (WIP) defining the fighters' data blocks, one
  * VsFighterData record (include/vs/data.h) per character, which
- * fighters_load_round copies into VsFighter.unk4DF18 when a round loads. It links
+ * fighters_load_round copies into VsFighter.data when a round loads. It links
  * before the code (link = "first"): retail's .data opens with this table
  * (0x8004a224), and the start-up module's light-scale VECTOR follows it
  * (0x8005b2a8, after two bytes of alignment).

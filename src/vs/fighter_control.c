@@ -33,14 +33,14 @@ void fighter_apply_attack_hit();
 
 /* The attack's origin: its offset turned by the fighter's facing. */
 #define ORIGIN(o)                                                              \
-    s = rsin(f->unk4DF02 - 0x800);                                             \
-    c = rcos(f->unk4DF02 - 0x800);                                             \
-    (o).vx = f->unk4DEF0.vx + (a->unk2 * c + a->unk6 * s) / 4096;              \
-    (o).vy = f->unk4DEF0.vy + a->unk4;                                         \
-    (o).vz = f->unk4DEF0.vz + (a->unk6 * c - a->unk2 * s) / 4096
+    s = rsin(f->facing - 0x800);                                             \
+    c = rcos(f->facing - 0x800);                                             \
+    (o).vx = f->position.vx + (a->offset_x * c + a->offset_z * s) / 4096;              \
+    (o).vy = f->position.vy + a->offset_y;                                         \
+    (o).vz = f->position.vz + (a->offset_z * c - a->offset_x * s) / 4096
 
 /* The attack's index among the fighter's attacks. */
-#define INDEX() ((u8)(a - data->unk14A))
+#define INDEX() ((u8)(a - data->attacks))
 
 /* Fighter n attacks with attack record a. */
 ADDRESS(0x8002f334, 0x12ec)
@@ -57,33 +57,33 @@ void effect_spawn_attack(int n, VsAttack *a)
     int i;
 
     f = &shared_buffer.fighter[n];
-    data = &f->unk4DF18;
-    switch ((s16)a->unk0) {
+    data = &f->data;
+    switch ((s16)a->effect) {
     case 0x30:
     case 0x38:
     case 0x66:
     case 0x7d:
     case 0xa1:
         ORIGIN(p);
-        step.vx = rsin(f->unk4DF02 - 0x800) / 16;
-        step.vz = rcos(f->unk4DF02 - 0x800) / 16;
+        step.vx = rsin(f->facing - 0x800) / 16;
+        step.vz = rcos(f->facing - 0x800) / 16;
         for (i = 0; i < 3; i++) {
             dir.vx = step.vx * (256 + i * 64) / 256;
             dir.vy = 0;
             dir.vz = step.vz * (256 + i * 64) / 256;
-            effect_spawn(n, INDEX(), 0x81, a->unk0, &p, &dir, 256, (SVECTOR *)&f->unk4DF00, i == 2);
+            effect_spawn(n, INDEX(), 0x81, a->effect, &p, &dir, 256, (SVECTOR *)&f->rot_x, i == 2);
         }
         break;
     case 0x3a:
         ORIGIN(q);
-        step.vx = rsin(f->unk4DF02 - 0x800) / 16;
-        step.vz = rcos(f->unk4DF02 - 0x800) / 16;
+        step.vx = rsin(f->facing - 0x800) / 16;
+        step.vz = rcos(f->facing - 0x800) / 16;
         for (i = 0; i < 3; i++) {
             dir.vx = step.vx * (512 + i * 128) / 512;
             dir.vy = 0;
             dir.vz = step.vz * (512 + i * 128) / 512;
             effect_jitter_offset(&dir, &p, &q);
-            effect_spawn(n, INDEX(), 0x81, a->unk0, &p, &dir, 0x1000, (SVECTOR *)&f->unk4DF00);
+            effect_spawn(n, INDEX(), 0x81, a->effect, &p, &dir, 0x1000, (SVECTOR *)&f->rot_x);
         }
         break;
     case 0x3e:
@@ -95,24 +95,24 @@ void effect_spawn_attack(int n, VsAttack *a)
     case 0x89:
     case 0x93:
         ORIGIN(q);
-        dir.vx = rsin(f->unk4DF02 - 0x800) / 16;
+        dir.vx = rsin(f->facing - 0x800) / 16;
         dir.vy = 0;
-        dir.vz = rcos(f->unk4DF02 - 0x800) / 16;
+        dir.vz = rcos(f->facing - 0x800) / 16;
         effect_jitter_offset(&dir, &p, &q);
-        effect_spawn(n, INDEX(), 0x81, a->unk0, &p, &dir, 0x200, (SVECTOR *)&f->unk4DF00);
+        effect_spawn(n, INDEX(), 0x81, a->effect, &p, &dir, 0x200, (SVECTOR *)&f->rot_x);
         break;
     case 0x57:
     case 0x61:
     case 0x68:
     case 0x74:
         ORIGIN(p);
-        dir.vx = rsin(f->unk4DF02 - 0x800) * 0x180 / 4096;
-        if ((s16)a->unk0 == 0x74)
+        dir.vx = rsin(f->facing - 0x800) * 0x180 / 4096;
+        if ((s16)a->effect == 0x74)
             dir.vy = 200;
         else
             dir.vy = 0;
-        dir.vz = rcos(f->unk4DF02 - 0x800) * 0x180 / 4096;
-        effect_spawn(n, INDEX(), 0x81, a->unk0, &p, &dir, 0x400);
+        dir.vz = rcos(f->facing - 0x800) * 0x180 / 4096;
+        effect_spawn(n, INDEX(), 0x81, a->effect, &p, &dir, 0x400);
         break;
     case 0x40:
     case 0x5d:
@@ -131,13 +131,13 @@ void effect_spawn_attack(int n, VsAttack *a)
     case 0xa6:
     case 0xa8:
         ORIGIN(p);
-        dir.vx = rsin(f->unk4DF02 - 0x800) * 0x180 / 4096;
-        if ((s16)a->unk0 == 0xa6)
+        dir.vx = rsin(f->facing - 0x800) * 0x180 / 4096;
+        if ((s16)a->effect == 0xa6)
             dir.vy = 200;
         else
             dir.vy = 0;
-        dir.vz = rcos(f->unk4DF02 - 0x800) * 0x180 / 4096;
-        effect_spawn(n, INDEX(), 0x81, a->unk0, &p, &dir, 0x1000, (SVECTOR *)&f->unk4DF00);
+        dir.vz = rcos(f->facing - 0x800) * 0x180 / 4096;
+        effect_spawn(n, INDEX(), 0x81, a->effect, &p, &dir, 0x1000, (SVECTOR *)&f->rot_x);
         break;
     case 0x7c:
     case 0x83:
@@ -149,10 +149,10 @@ void effect_spawn_attack(int n, VsAttack *a)
     case 0xa7:
     case 0xa9:
         ORIGIN(p);
-        dir.vx = rsin(f->unk4DF02 - 0x800) * 0x180 / 4096;
+        dir.vx = rsin(f->facing - 0x800) * 0x180 / 4096;
         dir.vy = 0;
-        dir.vz = rcos(f->unk4DF02 - 0x800) * 0x180 / 4096;
-        effect_spawn(n, INDEX(), 0x81, a->unk0, &p, &dir, 0x200, 1);
+        dir.vz = rcos(f->facing - 0x800) * 0x180 / 4096;
+        effect_spawn(n, INDEX(), 0x81, a->effect, &p, &dir, 0x200, 1);
         break;
     case 0x58:
     case 0x5c:
@@ -164,39 +164,39 @@ void effect_spawn_attack(int n, VsAttack *a)
     case 0x9c:
     case 0x9e:
         ORIGIN(p);
-        dir.vx = rsin(f->unk4DF02 - 0x800) / 8;
+        dir.vx = rsin(f->facing - 0x800) / 8;
         dir.vy = 0;
-        dir.vz = rcos(f->unk4DF02 - 0x800) / 8;
-        effect_spawn(n, INDEX(), 0x81, a->unk0, &p, &dir, 0x200);
+        dir.vz = rcos(f->facing - 0x800) / 8;
+        effect_spawn(n, INDEX(), 0x81, a->effect, &p, &dir, 0x200);
         break;
     case 0x56:
     case 0x5f:
     case 0x70:
         ORIGIN(q);
-        dir.vx = rsin(f->unk4DF02 - 0x800) / 8;
+        dir.vx = rsin(f->facing - 0x800) / 8;
         dir.vy = 0;
-        dir.vz = rcos(f->unk4DF02 - 0x800) / 8;
+        dir.vz = rcos(f->facing - 0x800) / 8;
         for (i = 0; i < 4; i++) {
             effect_jitter_offset(&dir, &p, &q);
-            effect_spawn(n, INDEX(), 0x81, a->unk0, &q, &dir, 0x400, 1);
+            effect_spawn(n, INDEX(), 0x81, a->effect, &q, &dir, 0x400, 1);
         }
         break;
     case 0x55:
     case 0x59:
     case 0x97:
         ORIGIN(p);
-        dir.vx = rsin(f->unk4DF02 - 0x800) / 16;
+        dir.vx = rsin(f->facing - 0x800) / 16;
         dir.vy = 0;
-        dir.vz = rcos(f->unk4DF02 - 0x800) / 16;
-        effect_spawn(n, INDEX(), 0x81, a->unk0, &p, &dir, 0x200);
+        dir.vz = rcos(f->facing - 0x800) / 16;
+        effect_spawn(n, INDEX(), 0x81, a->effect, &p, &dir, 0x200);
         break;
     case 0x31:
     case 0x32:
     case 0x6a:
         ORIGIN(q);
         for (i = 0; i < 4; i++) {
-            effect_random_offset(&dir, &p, &q, -data->unk1B6, -48);
-            effect_spawn(n, INDEX(), 0x81, a->unk0, &p, &dir, 0x600, i & 1);
+            effect_random_offset(&dir, &p, &q, -data->height, -48);
+            effect_spawn(n, INDEX(), 0x81, a->effect, &p, &dir, 0x600, i & 1);
         }
         break;
     case 0x47:
@@ -206,7 +206,7 @@ void effect_spawn_attack(int n, VsAttack *a)
         ORIGIN(q);
         for (i = 0; i < 4; i++) {
             effect_random_offset(&dir, &p, &q, 0, -48);
-            effect_spawn(n, INDEX(), 0x81, a->unk0, &p, &dir, 0x600, i & 1);
+            effect_spawn(n, INDEX(), 0x81, a->effect, &p, &dir, 0x600, i & 1);
         }
         break;
     case 0x33:
@@ -238,12 +238,12 @@ void effect_spawn_attack(int n, VsAttack *a)
     case 0x9f:
     case 0xa5:
         ORIGIN(q);
-        dir.vx = rsin(f->unk4DF02 - 0x800) / 64;
+        dir.vx = rsin(f->facing - 0x800) / 64;
         dir.vy = 0;
-        dir.vz = rcos(f->unk4DF02 - 0x800) / 64;
+        dir.vz = rcos(f->facing - 0x800) / 64;
         for (i = 0; i < 4; i++) {
             effect_jitter_offset(&dir, &p, &q);
-            effect_spawn(n, INDEX(), 0x81, a->unk0, &p, &dir, 0x400, i & 1);
+            effect_spawn(n, INDEX(), 0x81, a->effect, &p, &dir, 0x400, i & 1);
         }
         break;
     case 0xc8:
@@ -260,10 +260,10 @@ void effect_spawn_attack(int n, VsAttack *a)
     case 0xeb:
     case 0xee:
         ORIGIN(p);
-        dir.vx = rsin(f->unk4DF02 - 0x800) * 0x300 / 4096;
+        dir.vx = rsin(f->facing - 0x800) * 0x300 / 4096;
         dir.vy = 0;
-        dir.vz = rcos(f->unk4DF02 - 0x800) * 0x300 / 4096;
-        effect_spawn(n, INDEX(), 0x81, a->unk0, &p, &dir, 0x800, (SVECTOR *)&f->unk4DF00);
+        dir.vz = rcos(f->facing - 0x800) * 0x300 / 4096;
+        effect_spawn(n, INDEX(), 0x81, a->effect, &p, &dir, 0x800, (SVECTOR *)&f->rot_x);
         break;
     case 0x3b:
     case 0x44:
@@ -308,48 +308,48 @@ void effect_spawn_attack();
 /* Moves the fighter a step along its facing, forward or back. */
 #define VS_WALK_ANGLE(f, d, op, angle)                                         \
     do {                                                                        \
-        (f)->unk4DEF0.vx op rsin((angle) + 2048) * (d)->unk1AC * frames_per_draw / 4096; \
-        (f)->unk4DEF0.vz op rcos((f)->unk4DF02 + 2048) * (d)->unk1AC * frames_per_draw / 4096; \
+        (f)->position.vx op rsin((angle) + 2048) * (d)->walk_speed * frames_per_draw / 4096; \
+        (f)->position.vz op rcos((f)->facing + 2048) * (d)->walk_speed * frames_per_draw / 4096; \
     } while (0)
-#define VS_WALK(f, d, op) VS_WALK_ANGLE(f, d, op, (f)->unk4DF02)
+#define VS_WALK(f, d, op) VS_WALK_ANGLE(f, d, op, (f)->facing)
 
 /* Nonzero when from is 0 or the animation frame lies in [from, to]. */
-#define VS_IN_FRAMES(f, from, to)     ((from) == 0 || ((f)->unk4DEEA >= (from) && (to) >= (f)->unk4DEEA))
+#define VS_IN_FRAMES(f, from, to)     ((from) == 0 || ((f)->anim_frame >= (from) && (to) >= (f)->anim_frame))
 
 /* Walks with the start/loop animation pair 0/1; the step only moves the
  * fighter inside frames [from, to] when from is nonzero. */
 ADDRESS(0x80030620, 0x29c)
 void fighter_walk_reversible(VsFighter *f, s16 from, s16 to)
 {
-    VsFighterData *d = &f->unk4DF18;
+    VsFighterData *d = &f->data;
 
-    f->unk4DEEA &= 0xfff;
+    f->anim_frame &= 0xfff;
     if (fighter_pad_held & 0x10) {
-        f->unk4DF0E = 1;
-        if (f->unk4DEE8 == d->unk0[0].unk0) {
-            f->unk4DEE8 = d->unk0[1].unk0;
-            f->unk4DEEA = 0;
+        f->state = 1;
+        if (f->anim == d->anims[0].anim) {
+            f->anim = d->anims[1].anim;
+            f->anim_frame = 0;
         }
-        f->unk4DEEC = d->unk0[1].unk2;
-        if (from != 0 && (f->unk4DEEA < from || to < f->unk4DEEA))
+        f->anim_step = d->anims[1].anim_step;
+        if (from != 0 && (f->anim_frame < from || to < f->anim_frame))
             return;
         VS_WALK(f, d, +=);
     } else if (fighter_pad_held & 0x40) {
-        f->unk4DF0E = 1;
-        if (f->unk4DEE8 == d->unk0[0].unk0) {
-            f->unk4DEE8 = d->unk0[1].unk0;
-            f->unk4DEEA = 4095;
+        f->state = 1;
+        if (f->anim == d->anims[0].anim) {
+            f->anim = d->anims[1].anim;
+            f->anim_frame = 4095;
         }
-        f->unk4DEEC = -d->unk0[1].unk2;
-        if (from != 0 && (f->unk4DEEA < from || to < f->unk4DEEA))
+        f->anim_step = -d->anims[1].anim_step;
+        if (from != 0 && (f->anim_frame < from || to < f->anim_frame))
             return;
         VS_WALK(f, d, -=);
     } else {
-        f->unk4DF0E = 0;
-        if (f->unk4DEE8 == d->unk0[1].unk0) {
-            f->unk4DEE8 = d->unk0[0].unk0;
-            f->unk4DEEC = d->unk0[0].unk2;
-            f->unk4DEEA = 0;
+        f->state = 0;
+        if (f->anim == d->anims[1].anim) {
+            f->anim = d->anims[0].anim;
+            f->anim_step = d->anims[0].anim_step;
+            f->anim_frame = 0;
         }
     }
 }
@@ -358,35 +358,35 @@ void fighter_walk_reversible(VsFighter *f, s16 from, s16 to)
 ADDRESS(0x800308bc, 0x280)
 void fighter_walk_back_anim(VsFighter *f, s16 from, s16 to)
 {
-    VsFighterData *d = &f->unk4DF18;
+    VsFighterData *d = &f->data;
 
-    f->unk4DEEA &= 0xfff;
+    f->anim_frame &= 0xfff;
     if (fighter_pad_held & 0x10) {
-        f->unk4DF0E = 1;
-        if (f->unk4DEE8 != d->unk0[1].unk0) {
-            f->unk4DEE8 = d->unk0[1].unk0;
-            f->unk4DEEC = d->unk0[1].unk2;
-            f->unk4DEEA = 0;
+        f->state = 1;
+        if (f->anim != d->anims[1].anim) {
+            f->anim = d->anims[1].anim;
+            f->anim_step = d->anims[1].anim_step;
+            f->anim_frame = 0;
         }
-        if (from != 0 && (f->unk4DEEA < from || to < f->unk4DEEA))
+        if (from != 0 && (f->anim_frame < from || to < f->anim_frame))
             return;
         VS_WALK(f, d, +=);
     } else if (fighter_pad_held & 0x40) {
-        f->unk4DF0E = 1;
-        if (f->unk4DEE8 != d->unk0[12].unk0) {
-            f->unk4DEE8 = d->unk0[12].unk0;
-            f->unk4DEEC = d->unk0[12].unk2;
-            f->unk4DEEA = 0;
+        f->state = 1;
+        if (f->anim != d->anims[12].anim) {
+            f->anim = d->anims[12].anim;
+            f->anim_step = d->anims[12].anim_step;
+            f->anim_frame = 0;
         }
-        if (from != 0 && (f->unk4DEEA < from || to < f->unk4DEEA))
+        if (from != 0 && (f->anim_frame < from || to < f->anim_frame))
             return;
         VS_WALK(f, d, -=);
     } else {
-        f->unk4DF0E = 0;
-        if (f->unk4DEE8 != d->unk0[0].unk0) {
-            f->unk4DEE8 = d->unk0[0].unk0;
-            f->unk4DEEC = d->unk0[0].unk2;
-            f->unk4DEEA = 0;
+        f->state = 0;
+        if (f->anim != d->anims[0].anim) {
+            f->anim = d->anims[0].anim;
+            f->anim_step = d->anims[0].anim_step;
+            f->anim_frame = 0;
         }
     }
 }
@@ -395,21 +395,21 @@ void fighter_walk_back_anim(VsFighter *f, s16 from, s16 to)
 ADDRESS(0x80030b3c, 0x1ac)
 void fighter_slide(VsFighter *f)
 {
-    VsFighterData *d = &f->unk4DF18;
+    VsFighterData *d = &f->data;
 
-    f->unk4DEEA &= 0xfff;
+    f->anim_frame &= 0xfff;
     if (fighter_pad_held & 0x10) {
-        int angle = f->unk4DF02;
+        int angle = f->facing;
 
-        f->unk4DF0E = 1;
+        f->state = 1;
         VS_WALK_ANGLE(f, d, +=, angle);
     } else if (fighter_pad_held & 0x40) {
-        int angle = f->unk4DF02;
+        int angle = f->facing;
 
-        f->unk4DF0E = 1;
+        f->state = 1;
         VS_WALK_ANGLE(f, d, -=, angle);
     } else {
-        f->unk4DF0E = 0;
+        f->state = 0;
     }
 }
 
@@ -418,80 +418,80 @@ void fighter_slide(VsFighter *f)
 ADDRESS(0x80030ce8, 0x490)
 void fighter_walk_with_start(VsFighter *f, s16 from, s16 to)
 {
-    VsFighterData *d = &f->unk4DF18;
+    VsFighterData *d = &f->data;
     s16 kind;
 
     if (fighter_pad_held & 0x10) {
-        f->unk4DF0E = 1;
-        if (f->unk4DEE8 == d->unk0[1].unk0) {
-            f->unk4DEEC = d->unk0[1].unk2;
+        f->state = 1;
+        if (f->anim == d->anims[1].anim) {
+            f->anim_step = d->anims[1].anim_step;
             if (VS_IN_FRAMES(f, from, to))
                 VS_WALK(f, d, +=);
-        } else if (f->unk4DEE8 == d->unk0[10].unk0) {
-            f->unk4DEEC = d->unk0[10].unk2;
-            if (f->unk4DEEA >= 4096) {
-                f->unk4DEE8 = d->unk0[1].unk0;
-                f->unk4DEEC = d->unk0[1].unk2;
-                f->unk4DEEA = 0;
+        } else if (f->anim == d->anims[10].anim) {
+            f->anim_step = d->anims[10].anim_step;
+            if (f->anim_frame >= 4096) {
+                f->anim = d->anims[1].anim;
+                f->anim_step = d->anims[1].anim_step;
+                f->anim_frame = 0;
             }
-            if (d->unk1AA == 5 || d->unk1AA == 6 || d->unk1AA == 13)
+            if (d->move_kind == 5 || d->move_kind == 6 || d->move_kind == 13)
                 VS_WALK(f, d, +=);
         } else {
-            f->unk4DEE8 = d->unk0[10].unk0;
-            f->unk4DEEC = d->unk0[10].unk2;
-            f->unk4DEEA = 0;
+            f->anim = d->anims[10].anim;
+            f->anim_step = d->anims[10].anim_step;
+            f->anim_frame = 0;
         }
     } else if (fighter_pad_held & 0x40) {
-        f->unk4DF0E = 1;
-        kind = d->unk1AA;
+        f->state = 1;
+        kind = d->move_kind;
         if (kind == 3 || kind == 5 || kind == 13) {
-            if (f->unk4DEE8 == d->unk0[1].unk0) {
-                f->unk4DEEC = -d->unk0[1].unk2;
+            if (f->anim == d->anims[1].anim) {
+                f->anim_step = -d->anims[1].anim_step;
                 if (VS_IN_FRAMES(f, from, to))
                     VS_WALK(f, d, -=);
-            } else if (f->unk4DEE8 == d->unk0[11].unk0) {
-                f->unk4DEEC = -d->unk0[11].unk2;
-                if (f->unk4DEEA <= 0) {
-                    f->unk4DEE8 = d->unk0[1].unk0;
-                    f->unk4DEEC = -d->unk0[1].unk2;
-                    f->unk4DEEA = 4095;
+            } else if (f->anim == d->anims[11].anim) {
+                f->anim_step = -d->anims[11].anim_step;
+                if (f->anim_frame <= 0) {
+                    f->anim = d->anims[1].anim;
+                    f->anim_step = -d->anims[1].anim_step;
+                    f->anim_frame = 4095;
                 }
-                if (d->unk1AA == 5 || d->unk1AA == 13)
+                if (d->move_kind == 5 || d->move_kind == 13)
                     VS_WALK(f, d, -=);
             } else {
-                f->unk4DEE8 = d->unk0[11].unk0;
-                f->unk4DEEC = -d->unk0[11].unk2;
-                f->unk4DEEA = 4095;
+                f->anim = d->anims[11].anim;
+                f->anim_step = -d->anims[11].anim_step;
+                f->anim_frame = 4095;
             }
         } else {
-            if (f->unk4DEE8 == d->unk0[1].unk0) {
-                f->unk4DEEC = -d->unk0[1].unk2;
+            if (f->anim == d->anims[1].anim) {
+                f->anim_step = -d->anims[1].anim_step;
                 if (VS_IN_FRAMES(f, from, to))
                     VS_WALK(f, d, -=);
-            } else if (f->unk4DEE8 == d->unk0[10].unk0) {
-                f->unk4DEEC = d->unk0[10].unk2;
-                if (f->unk4DEEA >= 4096) {
-                    f->unk4DEE8 = d->unk0[1].unk0;
-                    f->unk4DEEC = -d->unk0[1].unk2;
-                    f->unk4DEEA = 4095;
+            } else if (f->anim == d->anims[10].anim) {
+                f->anim_step = d->anims[10].anim_step;
+                if (f->anim_frame >= 4096) {
+                    f->anim = d->anims[1].anim;
+                    f->anim_step = -d->anims[1].anim_step;
+                    f->anim_frame = 4095;
                 }
-                if (d->unk1AA == 6)
+                if (d->move_kind == 6)
                     VS_WALK(f, d, -=);
             } else {
-                f->unk4DEE8 = d->unk0[10].unk0;
-                f->unk4DEEC = d->unk0[10].unk2;
-                f->unk4DEEA = 0;
+                f->anim = d->anims[10].anim;
+                f->anim_step = d->anims[10].anim_step;
+                f->anim_frame = 0;
             }
         }
     } else {
-        f->unk4DF0E = 0;
-        if (f->unk4DEE8 != d->unk0[0].unk0) {
-            f->unk4DEE8 = d->unk0[0].unk0;
-            f->unk4DEEC = d->unk0[0].unk2;
-            f->unk4DEEA = 0;
+        f->state = 0;
+        if (f->anim != d->anims[0].anim) {
+            f->anim = d->anims[0].anim;
+            f->anim_step = d->anims[0].anim_step;
+            f->anim_frame = 0;
         }
     }
-    f->unk4DEEA &= 0xfff;
+    f->anim_frame &= 0xfff;
 }
 
 /* Walks forward through the start animation 10 (moving only for movement
@@ -499,45 +499,45 @@ void fighter_walk_with_start(VsFighter *f, s16 from, s16 to)
 ADDRESS(0x80031178, 0x300)
 void fighter_walk_start_back_anim(VsFighter *f, s16 from, s16 to)
 {
-    VsFighterData *d = &f->unk4DF18;
+    VsFighterData *d = &f->data;
 
     if (fighter_pad_held & 0x10) {
-        f->unk4DF0E = 1;
-        if (f->unk4DEE8 == d->unk0[1].unk0) {
+        f->state = 1;
+        if (f->anim == d->anims[1].anim) {
             if (VS_IN_FRAMES(f, from, to))
                 VS_WALK(f, d, +=);
-        } else if (f->unk4DEE8 == d->unk0[10].unk0) {
-            if (f->unk4DEEA >= 4096) {
-                f->unk4DEE8 = d->unk0[1].unk0;
-                f->unk4DEEC = d->unk0[1].unk2;
-                f->unk4DEEA = 0;
+        } else if (f->anim == d->anims[10].anim) {
+            if (f->anim_frame >= 4096) {
+                f->anim = d->anims[1].anim;
+                f->anim_step = d->anims[1].anim_step;
+                f->anim_frame = 0;
             }
-            if (d->unk1AA == 5 || d->unk1AA == 6)
+            if (d->move_kind == 5 || d->move_kind == 6)
                 VS_WALK(f, d, +=);
         } else {
-            f->unk4DEE8 = d->unk0[10].unk0;
-            f->unk4DEEC = d->unk0[10].unk2;
-            f->unk4DEEA = 0;
+            f->anim = d->anims[10].anim;
+            f->anim_step = d->anims[10].anim_step;
+            f->anim_frame = 0;
         }
     } else if (fighter_pad_held & 0x40) {
-        f->unk4DF0E = 1;
-        if (f->unk4DEE8 == d->unk0[12].unk0) {
+        f->state = 1;
+        if (f->anim == d->anims[12].anim) {
             if (VS_IN_FRAMES(f, from, to))
                 VS_WALK(f, d, -=);
         } else {
-            f->unk4DEE8 = d->unk0[12].unk0;
-            f->unk4DEEC = d->unk0[12].unk2;
-            f->unk4DEEA = 0;
+            f->anim = d->anims[12].anim;
+            f->anim_step = d->anims[12].anim_step;
+            f->anim_frame = 0;
         }
     } else {
-        f->unk4DF0E = 0;
-        if (f->unk4DEE8 != d->unk0[0].unk0) {
-            f->unk4DEE8 = d->unk0[0].unk0;
-            f->unk4DEEC = d->unk0[0].unk2;
-            f->unk4DEEA = 0;
+        f->state = 0;
+        if (f->anim != d->anims[0].anim) {
+            f->anim = d->anims[0].anim;
+            f->anim_step = d->anims[0].anim_step;
+            f->anim_frame = 0;
         }
     }
-    f->unk4DEEA &= 0xfff;
+    f->anim_frame &= 0xfff;
 }
 
 /*
@@ -551,186 +551,186 @@ ADDRESS(0x80031478, 0xc90)
 void fighter_update(int n)
 {
     VsFighter *f = &shared_buffer.fighter[n];
-    VsFighterData *d = &f->unk4DF18;
+    VsFighterData *d = &f->data;
     VsHitRecord *h;
     VsAttack *a;
     int i;
     int step;
 
     if (n == 0) {
-        fighter_pad_held = vs_pad_state.pads[0].unk0;
-        fighter_pad_pressed = vs_pad_state.pads[0].unk8;
+        fighter_pad_held = vs_pad_state.pads[0].held;
+        fighter_pad_pressed = vs_pad_state.pads[0].pressed;
     } else {
-        fighter_pad_held = vs_pad_state.pads[1].unk0;
-        fighter_pad_pressed = vs_pad_state.pads[1].unk8;
+        fighter_pad_held = vs_pad_state.pads[1].held;
+        fighter_pad_pressed = vs_pad_state.pads[1].pressed;
     }
-    f->unk4DEEA += f->unk4DEEC * frames_per_draw;
-    if (f->unk4DF0A < d->unk1BA) {
-        f->unk4DF0A += frames_per_draw;
-        if (d->unk1BA < f->unk4DF0A)
-            f->unk4DF0A = d->unk1BA;
+    f->anim_frame += f->anim_step * frames_per_draw;
+    if (f->gauge < d->max_gauge) {
+        f->gauge += frames_per_draw;
+        if (d->max_gauge < f->gauge)
+            f->gauge = d->max_gauge;
     }
-    if (f->unk4DF0E != 5 && (fighter_pad_held & 0x800)) {
+    if (f->state != 5 && (fighter_pad_held & 0x800)) {
         VsFighter *base = shared_buffer.fighter;
         VsFighter *o = base + (1 - n);
         s16 target;
 
-        target = ratan2(f->unk4DEF0.vx - o->unk4DEF0.vx, f->unk4DEF0.vz - o->unk4DEF0.vz) & 0xfff;
-        if (target < f->unk4DF02) {
-            if (f->unk4DF02 - target < 2048) {
-                f->unk4DF02 -= d->unk1AE * frames_per_draw * 2;
-                if (f->unk4DF02 < target)
-                    f->unk4DF02 = target;
+        target = ratan2(f->position.vx - o->position.vx, f->position.vz - o->position.vz) & 0xfff;
+        if (target < f->facing) {
+            if (f->facing - target < 2048) {
+                f->facing -= d->turn_speed * frames_per_draw * 2;
+                if (f->facing < target)
+                    f->facing = target;
             } else {
-                f->unk4DF02 = (f->unk4DF02 + d->unk1AE * frames_per_draw * 2) & 0xfff;
+                f->facing = (f->facing + d->turn_speed * frames_per_draw * 2) & 0xfff;
             }
         } else {
-            if (target - f->unk4DF02 < 2048) {
-                f->unk4DF02 += d->unk1AE * frames_per_draw * 2;
-                if (target < f->unk4DF02)
-                    f->unk4DF02 = target;
+            if (target - f->facing < 2048) {
+                f->facing += d->turn_speed * frames_per_draw * 2;
+                if (target < f->facing)
+                    f->facing = target;
             } else {
-                f->unk4DF02 = (f->unk4DF02 - d->unk1AE * frames_per_draw * 2) & 0xfff;
+                f->facing = (f->facing - d->turn_speed * frames_per_draw * 2) & 0xfff;
             }
         }
-        f->unk4DF02 &= 0xfff;
+        f->facing &= 0xfff;
     }
-    switch (f->unk4DF0E) {
+    switch (f->state) {
     case 2:
-        if (f->unk4DEEA < 4096) {
-        if (f->unk4DEE8 == d->unk0[2].unk0) {
-            h = &d->unk78[0];
-            if (f->unk4DEEA / f->unk4DEEC < 20) {
-                if (d->unk0[3].unk0 != 255 && (fighter_pad_pressed & 0x2000)) {
-                    f->unk4DEE8 = d->unk0[3].unk0;
-                    f->unk4DEEC = d->unk0[3].unk2;
-                    f->unk4DEEA = 0;
-                    f->unk4DF16 = 1;
+        if (f->anim_frame < 4096) {
+        if (f->anim == d->anims[2].anim) {
+            h = &d->combo_hits[0];
+            if (f->anim_frame / f->anim_step < 20) {
+                if (d->anims[3].anim != 255 && (fighter_pad_pressed & 0x2000)) {
+                    f->anim = d->anims[3].anim;
+                    f->anim_step = d->anims[3].anim_step;
+                    f->anim_frame = 0;
+                    f->hits_left = 1;
                     break;
                 }
-                if (d->unk0[4].unk0 != 255 && (fighter_pad_pressed & 0x4000)) {
-                    f->unk4DEE8 = d->unk0[4].unk0;
-                    f->unk4DEEC = d->unk0[4].unk2;
-                    f->unk4DEEA = 0;
-                    f->unk4DF16 = 1;
+                if (d->anims[4].anim != 255 && (fighter_pad_pressed & 0x4000)) {
+                    f->anim = d->anims[4].anim;
+                    f->anim_step = d->anims[4].anim_step;
+                    f->anim_frame = 0;
+                    f->hits_left = 1;
                     break;
                 }
             }
-        } else if (f->unk4DEE8 == d->unk0[3].unk0) {
-            h = &d->unk78[1];
-        } else if (f->unk4DEE8 == d->unk0[4].unk0) {
-            h = &d->unk78[2];
+        } else if (f->anim == d->anims[3].anim) {
+            h = &d->combo_hits[1];
+        } else if (f->anim == d->anims[4].anim) {
+            h = &d->combo_hits[2];
         }
-        i = h->count;
+        i = h->hit_count;
         if (i == 3 && h->hits[0].frame == 0 && h->hits[1].frame == 0 && h->hits[2].frame == 0) {
-            if (f->unk4DF16 != 0 && fighter_hit_test(n, d->unk1B4, 2048)) {
+            if (f->hits_left != 0 && fighter_hit_test(n, d->radius, 2048)) {
                 fighter_apply_hit(n, &h->hits[0].hit);
-                f->unk4DF16--;
+                f->hits_left--;
             }
         } else {
             for (i--; i != -1; i--) {
-                if (f->unk4DEEA - f->unk4DEEC * frames_per_draw < h->hits[i].frame &&
-                    f->unk4DEEA >= h->hits[i].frame &&
-                    fighter_hit_test(n, h->hits[i].range + d->unk1B4, h->hits[i].arc))
+                if (f->anim_frame - f->anim_step * frames_per_draw < h->hits[i].frame &&
+                    f->anim_frame >= h->hits[i].frame &&
+                    fighter_hit_test(n, h->hits[i].range + d->radius, h->hits[i].arc))
                     fighter_apply_hit(n, &h->hits[i].hit);
             }
         }
-        i = h->count2;
+        i = h->move_count;
         while (i--) {
-            if (f->unk4DEEA > h->moves[i].from && f->unk4DEEA < h->moves[i].to) {
-                step = h->moves[i].speed * f->unk4DEEC * frames_per_draw /
+            if (f->anim_frame > h->moves[i].from && f->anim_frame < h->moves[i].to) {
+                step = h->moves[i].speed * f->anim_step * frames_per_draw /
                        (h->moves[i].to - h->moves[i].from);
-                f->unk4DEF0.vx += rsin(f->unk4DF02 + 2048) * step / 4096;
-                f->unk4DEF0.vz += rcos(f->unk4DF02 + 2048) * step / 4096;
+                f->position.vx += rsin(f->facing + 2048) * step / 4096;
+                f->position.vz += rcos(f->facing + 2048) * step / 4096;
             }
         }
         } else {
-            f->unk4DF0E = 0;
-            f->unk4DEE8 = d->unk0[0].unk0;
-            f->unk4DEEC = d->unk0[0].unk2;
-            f->unk4DEEA = 0;
+            f->state = 0;
+            f->anim = d->anims[0].anim;
+            f->anim_step = d->anims[0].anim_step;
+            f->anim_frame = 0;
         }
         break;
     case 6:
-        if (f->unk4DEEA < 4096) {
-        if (f->unk4DEE8 == d->unk0[5].unk0) {
-            a = &d->unk14A[0];
-            if (f->unk4DEEA / f->unk4DEEC < 20) {
-                if (d->unk0[6].unk0 != 255 && (fighter_pad_pressed & 0x2000)) {
-                    f->unk4DEE8 = d->unk0[6].unk0;
-                    f->unk4DEEC = d->unk0[6].unk2;
-                    f->unk4DEEA = 0;
+        if (f->anim_frame < 4096) {
+        if (f->anim == d->anims[5].anim) {
+            a = &d->attacks[0];
+            if (f->anim_frame / f->anim_step < 20) {
+                if (d->anims[6].anim != 255 && (fighter_pad_pressed & 0x2000)) {
+                    f->anim = d->anims[6].anim;
+                    f->anim_step = d->anims[6].anim_step;
+                    f->anim_frame = 0;
                     break;
                 }
-                if (d->unk0[7].unk0 != 255 && (fighter_pad_pressed & 0x4000)) {
-                    f->unk4DEE8 = d->unk0[7].unk0;
-                    f->unk4DEEC = d->unk0[7].unk2;
-                    f->unk4DEEA = 0;
+                if (d->anims[7].anim != 255 && (fighter_pad_pressed & 0x4000)) {
+                    f->anim = d->anims[7].anim;
+                    f->anim_step = d->anims[7].anim_step;
+                    f->anim_frame = 0;
                     break;
                 }
             }
-        } else if (f->unk4DEE8 == d->unk0[6].unk0) {
-            a = &d->unk14A[1];
-        } else if (f->unk4DEE8 == d->unk0[7].unk0) {
-            a = &d->unk14A[2];
+        } else if (f->anim == d->anims[6].anim) {
+            a = &d->attacks[1];
+        } else if (f->anim == d->anims[7].anim) {
+            a = &d->attacks[2];
         }
-        if (f->unk4DEEA - f->unk4DEEC * frames_per_draw < a->unkA && f->unk4DEEA >= a->unkA) {
+        if (f->anim_frame - f->anim_step * frames_per_draw < a->strike_frame && f->anim_frame >= a->strike_frame) {
             effect_spawn_attack(n, a);
-            f->unk4DF0A = d->unk1BA - a->unkC;
+            f->gauge = d->max_gauge - a->gauge_cost;
         }
         } else {
-            f->unk4DF0E = 0;
-            f->unk4DEE8 = d->unk0[0].unk0;
-            f->unk4DEEC = d->unk0[0].unk2;
-            f->unk4DEEA = 0;
+            f->state = 0;
+            f->anim = d->anims[0].anim;
+            f->anim_step = d->anims[0].anim_step;
+            f->anim_frame = 0;
         }
         break;
     case 3:
-        if (f->unk4DEEA < 4096) {
-            f->unk4DEE8 = d->unk0[8].unk0;
-            f->unk4DEEC = d->unk0[8].unk2;
-            f->unk4DF08 -= d->unk1B8 >> 4;
-            if (f->unk4DF08 < f->unk4DF0C)
-                f->unk4DF08 = f->unk4DF0C;
+        if (f->anim_frame < 4096) {
+            f->anim = d->anims[8].anim;
+            f->anim_step = d->anims[8].anim_step;
+            f->hp -= d->max_hp >> 4;
+            if (f->hp < f->hp_target)
+                f->hp = f->hp_target;
         } else {
-            f->unk4DF08 = f->unk4DF0C;
-            f->unk4DF0E = 0;
-            f->unk4DEE8 = d->unk0[0].unk0;
-            f->unk4DEEC = d->unk0[0].unk2;
-            f->unk4DEEA = 0;
+            f->hp = f->hp_target;
+            f->state = 0;
+            f->anim = d->anims[0].anim;
+            f->anim_step = d->anims[0].anim_step;
+            f->anim_frame = 0;
         }
         break;
     case 4:
-        if (f->unk4DEEA < 4096) {
-            f->unk4DEE8 = d->unk0[9].unk0;
-            f->unk4DEEC = d->unk0[9].unk2;
-            f->unk4DF08 -= d->unk1B8 >> 4;
-            if (f->unk4DF08 < 0)
-                f->unk4DF08 = 0;
+        if (f->anim_frame < 4096) {
+            f->anim = d->anims[9].anim;
+            f->anim_step = d->anims[9].anim_step;
+            f->hp -= d->max_hp >> 4;
+            if (f->hp < 0)
+                f->hp = 0;
         } else {
-            f->unk4DF08 = 0;
-            f->unk4DEEA = 4095;
+            f->hp = 0;
+            f->anim_frame = 4095;
         }
         break;
     case 0:
     case 1:
     case 5:
         if (fighter_pad_held & 0x2000) {
-            f->unk4DF0E = 5;
-            f->unk4DEEA &= 0xfff;
-            if (f->unk4DEE8 != d->unk0[0].unk0) {
-                f->unk4DEE8 = d->unk0[0].unk0;
+            f->state = 5;
+            f->anim_frame &= 0xfff;
+            if (f->anim != d->anims[0].anim) {
+                f->anim = d->anims[0].anim;
                 /* retail sets the step from the animation id */
-                f->unk4DEEC = d->unk0[0].unk0;
-                f->unk4DEEA = 0;
+                f->anim_step = d->anims[0].anim;
+                f->anim_frame = 0;
             }
             break;
         }
-        switch (d->unk1AA) {
+        switch (d->move_kind) {
         case 1:
-            if (f->unk4DF10 == 1)
+            if (f->model_kind == 1)
                 fighter_walk_back_anim(f, 0, 0);
-            else if (f->unk4DF10 == 2)
+            else if (f->model_kind == 2)
                 fighter_walk_reversible(f, 0, 0);
             break;
         case 2:
@@ -740,9 +740,9 @@ void fighter_update(int n)
         case 4:
         case 5:
         case 6:
-            if (f->unk4DF10 == 1)
+            if (f->model_kind == 1)
                 fighter_walk_start_back_anim(f, 0, 0);
-            else if (f->unk4DF10 == 2)
+            else if (f->model_kind == 2)
                 fighter_walk_with_start(f, 0, 0);
             break;
         case 10:
@@ -758,27 +758,27 @@ void fighter_update(int n)
             fighter_walk_with_start(f, 2048, 4096);
             break;
         case 99:
-            f->unk4DEEA &= 0xfff;
+            f->anim_frame &= 0xfff;
             break;
         }
         if (!(fighter_pad_held & 0x800)) {
             if (fighter_pad_held & 0x80)
-                f->unk4DF02 = (f->unk4DF02 - d->unk1AE * frames_per_draw) & 0xfff;
+                f->facing = (f->facing - d->turn_speed * frames_per_draw) & 0xfff;
             if (fighter_pad_held & 0x20)
-                f->unk4DF02 = (f->unk4DF02 + d->unk1AE * frames_per_draw) & 0xfff;
+                f->facing = (f->facing + d->turn_speed * frames_per_draw) & 0xfff;
         }
-        if ((fighter_pad_pressed & 0x1000) && d->unk0[2].unk0 != 255) {
-            f->unk4DF0E = 2;
-            f->unk4DEE8 = d->unk0[2].unk0;
-            f->unk4DEEC = d->unk0[2].unk2;
-            f->unk4DEEA = 0;
-            f->unk4DF16 = 1;
+        if ((fighter_pad_pressed & 0x1000) && d->anims[2].anim != 255) {
+            f->state = 2;
+            f->anim = d->anims[2].anim;
+            f->anim_step = d->anims[2].anim_step;
+            f->anim_frame = 0;
+            f->hits_left = 1;
         }
-        if ((fighter_pad_pressed & 0x8000) && d->unk0[5].unk0 != 255 && f->unk4DF0A == d->unk1BA) {
-            f->unk4DF0E = 6;
-            f->unk4DEE8 = d->unk0[5].unk0;
-            f->unk4DEEC = d->unk0[5].unk2;
-            f->unk4DEEA = 0;
+        if ((fighter_pad_pressed & 0x8000) && d->anims[5].anim != 255 && f->gauge == d->max_gauge) {
+            f->state = 6;
+            f->anim = d->anims[5].anim;
+            f->anim_step = d->anims[5].anim_step;
+            f->anim_frame = 0;
         }
         break;
     }

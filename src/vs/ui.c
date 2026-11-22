@@ -44,7 +44,7 @@ SDATA(0x80063260, 0x10)
     (buf)->cur = (u_long *)((p) + 1);                                \
     if (vs_gfx_state.packet->cur > vs_gfx_state.packet->end)         \
         return;                                                      \
-    vs_gfx_state.unk8328++
+    vs_gfx_state.prim_alloc_count++
 
 /* Draws glyph `c` at (x, y): half-width codes below the split, full-width
  * codes after it. */
@@ -59,7 +59,7 @@ void ui_draw_glyph(u16 c, u16 x, u16 y, CVECTOR *color)
     u16 q, r;
     int n;
 
-    if (VS_MENU_SCRATCH->unk1D5 == 0) {
+    if (VS_MENU_SCRATCH->font_mode == 0) {
         ch = 12;
         fw = ch;
         qh = fw;
@@ -161,7 +161,7 @@ void ui_draw_text(u16 *s, u16 x, u16 y, CVECTOR *color)
     u_int split;
     u_int half;
 
-    if (VS_MENU_SCRATCH->unk1D5 == 0) {
+    if (VS_MENU_SCRATCH->font_mode == 0) {
         line = 14;
         split = 64;
     } else {
@@ -215,7 +215,7 @@ void ui_draw_number(u32 num, u16 x, u16 y, CVECTOR *color)
 
     if (DAT_8006337a)
         width -= 4;
-    if (VS_MENU_SCRATCH->unk1D5 == 0)
+    if (VS_MENU_SCRATCH->font_mode == 0)
         base = 64;
     else
         base = 4;
@@ -571,23 +571,23 @@ void ui_draw_arrow(RECT *r, CVECTOR *color, u16 dir)
 ADDRESS(0x8001f23c, 0xd0)
 void ui_draw_panel(int x, int y, int w, int h)
 {
-    VS_MENU_SCRATCH->unk220.g = 80;
-    VS_MENU_SCRATCH->unk220.r = 80;
-    VS_MENU_SCRATCH->unk220.b = 96;
-    VS_MENU_SCRATCH->unk22C.g = 40;
-    VS_MENU_SCRATCH->unk22C.r = 40;
-    VS_MENU_SCRATCH->unk224.x = x;
-    VS_MENU_SCRATCH->unk224.y = y;
-    VS_MENU_SCRATCH->unk224.w = w;
-    VS_MENU_SCRATCH->unk224.h = h;
-    VS_MENU_SCRATCH->unk22C.b = 48;
-    VS_MENU_SCRATCH->unk230.x = x + 2;
-    VS_MENU_SCRATCH->unk230.y = y + 1;
-    VS_MENU_SCRATCH->unk230.w = w - 4;
-    VS_MENU_SCRATCH->unk230.h = h - 2;
-    ui_fill_rect(&VS_MENU_SCRATCH->unk230, &VS_MENU_SCRATCH->unk22C, 1);
+    VS_MENU_SCRATCH->border_color.g = 80;
+    VS_MENU_SCRATCH->border_color.r = 80;
+    VS_MENU_SCRATCH->border_color.b = 96;
+    VS_MENU_SCRATCH->fill_color.g = 40;
+    VS_MENU_SCRATCH->fill_color.r = 40;
+    VS_MENU_SCRATCH->rect.x = x;
+    VS_MENU_SCRATCH->rect.y = y;
+    VS_MENU_SCRATCH->rect.w = w;
+    VS_MENU_SCRATCH->rect.h = h;
+    VS_MENU_SCRATCH->fill_color.b = 48;
+    VS_MENU_SCRATCH->inner_rect.x = x + 2;
+    VS_MENU_SCRATCH->inner_rect.y = y + 1;
+    VS_MENU_SCRATCH->inner_rect.w = w - 4;
+    VS_MENU_SCRATCH->inner_rect.h = h - 2;
+    ui_fill_rect(&VS_MENU_SCRATCH->inner_rect, &VS_MENU_SCRATCH->fill_color, 1);
     ui_add_draw_mode(2, 0, 0);
-    ui_fill_rect(&VS_MENU_SCRATCH->unk224, &VS_MENU_SCRATCH->unk220, 1);
+    ui_fill_rect(&VS_MENU_SCRATCH->rect, &VS_MENU_SCRATCH->border_color, 1);
     ui_add_draw_mode(0, 0, 0);
 }
 
@@ -606,78 +606,78 @@ void ui_draw_window(short x, short y, short w, short h)
     VsMenuScratch *sp = VS_MENU_SCRATCH;
     int rows, columns;
 
-    sp->unk224.w = 16;
-    sp->unk224.h = 16;
-    sp->unk244.vx = 544;
-    sp->unk244.vy = 504;
-    sp->unk240.vx = 612;
-    sp->unk224.x = x;
-    sp->unk224.y = y;
-    sp->unk240.vy = 400;
-    ui_draw_image(&sp->unk224, &sp->unk240, &sp->unk244, NULL, TILE);
-    sp->unk224.y = y + h - 16;
-    ui_draw_image(&sp->unk224, &sp->unk240, &sp->unk244, NULL, TILE_VFLIP);
-    sp->unk224.x = x + w - 16;
-    sp->unk224.y = y;
-    sp->unk240.vx = 620;
-    ui_draw_image(&sp->unk224, &sp->unk240, &sp->unk244, NULL, TILE);
-    sp->unk224.y = y + h - 16;
-    ui_draw_image(&sp->unk224, &sp->unk240, &sp->unk244, NULL, TILE_VFLIP);
-    sp->unk224.x = x;
-    sp->unk224.y = y + 16;
-    sp->unk240.vx = 604;
-    ui_draw_image(&sp->unk224, &sp->unk240, &sp->unk244, NULL, TILE);
-    sp->unk224.y = y + h - 32;
-    ui_draw_image(&sp->unk224, &sp->unk240, &sp->unk244, NULL, TILE_VFLIP);
-    sp->unk224.x = x + w - 16;
-    sp->unk224.y = y + 16;
-    sp->unk240.vx = 596;
-    ui_draw_image(&sp->unk224, &sp->unk240, &sp->unk244, NULL, TILE);
-    sp->unk224.y = y + h - 32;
-    ui_draw_image(&sp->unk224, &sp->unk240, &sp->unk244, NULL, TILE_VFLIP);
+    sp->rect.w = 16;
+    sp->rect.h = 16;
+    sp->clut_pos.vx = 544;
+    sp->clut_pos.vy = 504;
+    sp->tex_pos.vx = 612;
+    sp->rect.x = x;
+    sp->rect.y = y;
+    sp->tex_pos.vy = 400;
+    ui_draw_image(&sp->rect, &sp->tex_pos, &sp->clut_pos, NULL, TILE);
+    sp->rect.y = y + h - 16;
+    ui_draw_image(&sp->rect, &sp->tex_pos, &sp->clut_pos, NULL, TILE_VFLIP);
+    sp->rect.x = x + w - 16;
+    sp->rect.y = y;
+    sp->tex_pos.vx = 620;
+    ui_draw_image(&sp->rect, &sp->tex_pos, &sp->clut_pos, NULL, TILE);
+    sp->rect.y = y + h - 16;
+    ui_draw_image(&sp->rect, &sp->tex_pos, &sp->clut_pos, NULL, TILE_VFLIP);
+    sp->rect.x = x;
+    sp->rect.y = y + 16;
+    sp->tex_pos.vx = 604;
+    ui_draw_image(&sp->rect, &sp->tex_pos, &sp->clut_pos, NULL, TILE);
+    sp->rect.y = y + h - 32;
+    ui_draw_image(&sp->rect, &sp->tex_pos, &sp->clut_pos, NULL, TILE_VFLIP);
+    sp->rect.x = x + w - 16;
+    sp->rect.y = y + 16;
+    sp->tex_pos.vx = 596;
+    ui_draw_image(&sp->rect, &sp->tex_pos, &sp->clut_pos, NULL, TILE);
+    sp->rect.y = y + h - 32;
+    ui_draw_image(&sp->rect, &sp->tex_pos, &sp->clut_pos, NULL, TILE_VFLIP);
 
-    sp->unk224.y = y + 32;
-    sp->unk224.x = x;
-    sp->unk240.vx = 624;
+    sp->rect.y = y + 32;
+    sp->rect.x = x;
+    sp->tex_pos.vx = 624;
     rows = h / 16 - 4;
     while (rows--) {
-        sp->unk224.x = x;
-        ui_draw_image(&sp->unk224, &sp->unk240, &sp->unk244, NULL, TILE_HFLIP);
-        sp->unk224.x = x + w - 16;
-        ui_draw_image(&sp->unk224, &sp->unk240, &sp->unk244, NULL, TILE);
-        sp->unk224.y += 16;
+        sp->rect.x = x;
+        ui_draw_image(&sp->rect, &sp->tex_pos, &sp->clut_pos, NULL, TILE_HFLIP);
+        sp->rect.x = x + w - 16;
+        ui_draw_image(&sp->rect, &sp->tex_pos, &sp->clut_pos, NULL, TILE);
+        sp->rect.y += 16;
     }
-    sp->unk224.x = x + 16;
-    sp->unk240.vx = 616;
+    sp->rect.x = x + 16;
+    sp->tex_pos.vx = 616;
     columns = w / 16 - 2;
     while (columns--) {
-        sp->unk224.y = y;
-        ui_draw_image(&sp->unk224, &sp->unk240, &sp->unk244, NULL, TILE);
-        sp->unk224.y = y + h - 16;
-        ui_draw_image(&sp->unk224, &sp->unk240, &sp->unk244, NULL, TILE_VFLIP);
-        sp->unk224.x += 16;
+        sp->rect.y = y;
+        ui_draw_image(&sp->rect, &sp->tex_pos, &sp->clut_pos, NULL, TILE);
+        sp->rect.y = y + h - 16;
+        ui_draw_image(&sp->rect, &sp->tex_pos, &sp->clut_pos, NULL, TILE_VFLIP);
+        sp->rect.x += 16;
     }
-    sp->unk224.x = x + 16;
-    sp->unk240.vx = 608;
+    sp->rect.x = x + 16;
+    sp->tex_pos.vx = 608;
     columns = w / 16 - 2;
     while (columns--) {
-        sp->unk224.y = y + 16;
-        ui_draw_image(&sp->unk224, &sp->unk240, &sp->unk244, NULL, TILE);
-        sp->unk224.y = y + h - 32;
-        ui_draw_image(&sp->unk224, &sp->unk240, &sp->unk244, NULL, TILE_VFLIP);
-        sp->unk224.x += 16;
+        sp->rect.y = y + 16;
+        ui_draw_image(&sp->rect, &sp->tex_pos, &sp->clut_pos, NULL, TILE);
+        sp->rect.y = y + h - 32;
+        ui_draw_image(&sp->rect, &sp->tex_pos, &sp->clut_pos, NULL, TILE_VFLIP);
+        sp->rect.x += 16;
     }
-    sp->unk224.y = y + 32;
-    sp->unk240.vx = 600;
+    sp->rect.y = y + 32;
+    sp->tex_pos.vx = 600;
     rows = h / 16 - 4;
     while (rows--) {
-        sp->unk224.x = x + 16;
+        sp->rect.x = x + 16;
         columns = w / 16 - 2;
         while (columns--) {
-            ui_draw_image(&sp->unk224, &sp->unk240, &sp->unk244, NULL, TILE);
-            sp->unk224.x += 16;
+            ui_draw_image(&sp->rect, &sp->tex_pos, &sp->clut_pos, NULL, TILE);
+            sp->rect.x += 16;
         }
-        sp->unk224.y += 16;
+        sp->rect.y += 16;
     }
 }
 
@@ -687,16 +687,16 @@ void menu_draw_background(void)
     VsMenuScratch *sp = VS_MENU_SCRATCH;
     int n;
 
-    sp->unk238.w = 128;
-    sp->unk238.h = 240;
-    sp->unk240.vx = 768;
-    sp->unk238.y = 0;
-    sp->unk238.x = 0;
-    sp->unk240.vy = 256;
+    sp->image_rect.w = 128;
+    sp->image_rect.h = 240;
+    sp->tex_pos.vx = 768;
+    sp->image_rect.y = 0;
+    sp->image_rect.x = 0;
+    sp->tex_pos.vy = 256;
     n = 5;
     while (n--) {
-        ui_draw_image(&sp->unk238, &sp->unk240, 0, 0, 16);
-        sp->unk238.x += 128;
+        ui_draw_image(&sp->image_rect, &sp->tex_pos, 0, 0, 16);
+        sp->image_rect.x += 128;
     }
 }
 
@@ -707,16 +707,16 @@ void menu_draw_background_lowres(void)
     VsMenuScratch *sp = VS_MENU_SCRATCH;
     int n;
 
-    sp->unk238.w = 128;
-    sp->unk238.h = 240;
-    sp->unk240.vx = 768;
-    sp->unk238.y = 0;
-    sp->unk238.x = 0;
-    sp->unk240.vy = 256;
+    sp->image_rect.w = 128;
+    sp->image_rect.h = 240;
+    sp->tex_pos.vx = 768;
+    sp->image_rect.y = 0;
+    sp->image_rect.x = 0;
+    sp->tex_pos.vy = 256;
     n = 3;
     while (n--) {
-        ui_draw_image(&sp->unk238, &sp->unk240, 0, 0, 16);
-        sp->unk238.x += 128;
+        ui_draw_image(&sp->image_rect, &sp->tex_pos, 0, 0, 16);
+        sp->image_rect.x += 128;
     }
 }
 
@@ -739,41 +739,41 @@ void card_draw_port_choice(void)
     VsMenuScratch *sp = VS_MENU_SCRATCH;
     int i;
 
-    ui_draw_text(VS_MESSAGE(370 + sp->unk1BC), 50, 60, &sp->style[0]);
-    sp->unk218.x = 112;
-    sp->unk218.w = 100;
-    sp->unk218.h = 18;
-    if (sp->unk1CC == 2)
-        sp->unk218.y = 140;
+    ui_draw_text(VS_MESSAGE(370 + sp->port), 50, 60, &sp->style[0]);
+    sp->cursor_rect.x = 112;
+    sp->cursor_rect.w = 100;
+    sp->cursor_rect.h = 18;
+    if (sp->mode == 2)
+        sp->cursor_rect.y = 140;
     else
-        sp->unk218.y = 164;
-    ui_draw_rect_outline(&sp->unk218, &sp->unk214, 257, 1);
+        sp->cursor_rect.y = 164;
+    ui_draw_rect_outline(&sp->cursor_rect, &sp->cursor_color, 257, 1);
     ui_add_draw_mode(1, 0, 0);
     for (i = 0; i < 7; i++) {
         file_row_clipped[i] = 0;
         DAT_80117598[i] = 0;
     }
-    sp->unk240.vx = 896;
-    sp->unk240.vy = 512;
-    sp->unk244.vx = 544;
-    sp->unk244.vy = 511;
-    sp->unk224.x = 166;
-    sp->unk224.y = 142;
-    sp->unk224.w = 40;
-    sp->unk224.h = 16;
-    ui_draw_image(&sp->unk224, &sp->unk240, &sp->unk244, NULL, 3);
-    sp->unk224.y = 166;
-    ui_draw_image(&sp->unk224, &sp->unk240, &sp->unk244, NULL, 3);
-    sp->unk240.vx = 906;
-    sp->unk224.x = 118;
-    sp->unk224.y = 141;
-    sp->unk224.w = 40;
-    ui_draw_image(&sp->unk224, &sp->unk240, &sp->unk244, NULL, 3);
-    sp->unk240.vx = 934;
-    sp->unk224.x = 118;
-    sp->unk224.y = 165;
-    sp->unk224.w = 40;
-    ui_draw_image(&sp->unk224, &sp->unk240, &sp->unk244, NULL, 3);
+    sp->tex_pos.vx = 896;
+    sp->tex_pos.vy = 512;
+    sp->clut_pos.vx = 544;
+    sp->clut_pos.vy = 511;
+    sp->rect.x = 166;
+    sp->rect.y = 142;
+    sp->rect.w = 40;
+    sp->rect.h = 16;
+    ui_draw_image(&sp->rect, &sp->tex_pos, &sp->clut_pos, NULL, 3);
+    sp->rect.y = 166;
+    ui_draw_image(&sp->rect, &sp->tex_pos, &sp->clut_pos, NULL, 3);
+    sp->tex_pos.vx = 906;
+    sp->rect.x = 118;
+    sp->rect.y = 141;
+    sp->rect.w = 40;
+    ui_draw_image(&sp->rect, &sp->tex_pos, &sp->clut_pos, NULL, 3);
+    sp->tex_pos.vx = 934;
+    sp->rect.x = 118;
+    sp->rect.y = 165;
+    sp->rect.w = 40;
+    ui_draw_image(&sp->rect, &sp->tex_pos, &sp->clut_pos, NULL, 3);
 }
 
 ADDRESS(0x8001fb98, 0x114)
@@ -781,9 +781,9 @@ void card_draw_format_prompt(void)
 {
     VsMenuScratch *sp = VS_MENU_SCRATCH;
 
-    if (sp->unk0.menu.half[1] == 0) {
+    if (sp->state.menu.half[1] == 0) {
         ui_draw_text(VS_MESSAGE(311), 32, 74, &sp->style[0]);
-        if (sp->unk1C6) {
+        if (sp->dialog_choice) {
             ui_draw_text(VS_MESSAGE(325), 100, 160, &sp->style[1]);
             ui_draw_text(VS_MESSAGE(326), 170, 160, &sp->style[0]);
         } else {
@@ -819,20 +819,20 @@ void card_draw_file_list(void)
     RECT unused;
     RECT unused_left = {25, 93, 16, 8};
     RECT unused_right = {294, 93, 16, 8};
-    VsCardFile *file;
+    VsCardFileEntry *file;
     int rows;
     int i;
 
-    if (sp->unk0.menu.half[1] == 1) {
+    if (sp->state.menu.half[1] == 1) {
         int message;
 
-        if (sp->unk1CC & 0xff)
+        if (sp->mode & 0xff)
             message = 323;
         else
             message = 324;
         ui_draw_text(VS_MESSAGE(message), 68, 128, &sp->style[0]);
         sp->style[0].b = sp->style[0].g = sp->style[0].r = 24;
-        if (sp->unk1C6) {
+        if (sp->dialog_choice) {
             ui_draw_text(VS_MESSAGE(325), 120, 150, &sp->style[1]);
             ui_draw_text(VS_MESSAGE(326), 190, 150, &sp->style[0]);
         } else {
@@ -840,83 +840,83 @@ void card_draw_file_list(void)
             ui_draw_text(VS_MESSAGE(326), 190, 150, &sp->style[1]);
         }
         sp->style[0].b = sp->style[0].g = sp->style[0].r = 72;
-        sp->unk224.x = 60;
-        sp->unk224.y = 120;
-        sp->unk224.w = 200;
-        sp->unk224.h = 50;
-        sp->unk230.x = 61;
-        sp->unk230.y = 121;
-        sp->unk230.w = 198;
-        sp->unk230.h = 48;
-        sp->unk220.r = sp->unk220.g = sp->unk220.b = 64;
-        sp->unk22C.r = sp->unk22C.g = sp->unk22C.b = 32;
-        ui_fill_rect(&sp->unk230, &sp->unk22C, 1);
+        sp->rect.x = 60;
+        sp->rect.y = 120;
+        sp->rect.w = 200;
+        sp->rect.h = 50;
+        sp->inner_rect.x = 61;
+        sp->inner_rect.y = 121;
+        sp->inner_rect.w = 198;
+        sp->inner_rect.h = 48;
+        sp->border_color.r = sp->border_color.g = sp->border_color.b = 64;
+        sp->fill_color.r = sp->fill_color.g = sp->fill_color.b = 32;
+        ui_fill_rect(&sp->inner_rect, &sp->fill_color, 1);
         ui_add_draw_mode(2, 0, 0);
-        ui_fill_rect(&sp->unk224, &sp->unk220, 0);
+        ui_fill_rect(&sp->rect, &sp->border_color, 0);
     }
-    if (sp->unk1BE >= 4) {
-        if (sp->unk1C4 > 0) {
-            sp->unk224.x = 152;
-            sp->unk224.y = 68;
-            sp->unk224.w = 16;
-            sp->unk224.h = 8;
-            ui_draw_arrow(&sp->unk224, &sp->unk214, 3072);
+    if (sp->row_count >= 4) {
+        if (sp->first_row > 0) {
+            sp->rect.x = 152;
+            sp->rect.y = 68;
+            sp->rect.w = 16;
+            sp->rect.h = 8;
+            ui_draw_arrow(&sp->rect, &sp->cursor_color, 3072);
             ui_add_draw_mode(1, 0, 0);
         }
-        if (sp->unk1C4 < sp->unk1BE - 3) {
-            sp->unk224.x = 152;
-            sp->unk224.y = 215;
-            sp->unk224.w = 16;
-            sp->unk224.h = 8;
-            ui_draw_arrow(&sp->unk224, &sp->unk214, 1024);
+        if (sp->first_row < sp->row_count - 3) {
+            sp->rect.x = 152;
+            sp->rect.y = 215;
+            sp->rect.w = 16;
+            sp->rect.h = 8;
+            ui_draw_arrow(&sp->rect, &sp->cursor_color, 1024);
             ui_add_draw_mode(1, 0, 0);
         }
     }
-    sp->unk218.x = 32;
-    sp->unk218.w = 256;
-    sp->unk218.h = 40;
-    sp->unk218.y = sp->unk1C2 * 48 + 74;
-    ui_draw_rect_outline(&sp->unk218, &sp->unk214, 257, 1);
+    sp->cursor_rect.x = 32;
+    sp->cursor_rect.w = 256;
+    sp->cursor_rect.h = 40;
+    sp->cursor_rect.y = sp->file_row * 48 + 74;
+    ui_draw_rect_outline(&sp->cursor_rect, &sp->cursor_color, 257, 1);
     ui_add_draw_mode(1, 0, 0);
-    sp->unk218.y = 74;
+    sp->cursor_rect.y = 74;
     rows = 3;
-    if (sp->unk1BE < 3)
-        rows = sp->unk1BE;
+    if (sp->row_count < 3)
+        rows = sp->row_count;
     for (i = 0; i < rows; i++) {
-        if ((s16)sp->unk1C0 == 1 && i + sp->unk1C4 == sp->unk1BE - 1) {
-            ui_draw_text(VS_MESSAGE(322), 64, sp->unk218.y + 6, &sp->style[0]);
+        if ((s16)sp->has_new_row == 1 && i + sp->first_row == sp->row_count - 1) {
+            ui_draw_text(VS_MESSAGE(322), 64, sp->cursor_rect.y + 6, &sp->style[0]);
         } else {
-            if (sp->unk1CC & 0xff00)
-                ui_draw_number_fixed(0x2000000 | ((s16)DAT_80063328[sp->unk1BC] + 1), 38,
-                              sp->unk218.y + 6, &sp->style[0]);
+            if (sp->mode & 0xff00)
+                ui_draw_number_fixed(0x2000000 | ((s16)DAT_80063328[sp->port] + 1), 38,
+                              sp->cursor_rect.y + 6, &sp->style[0]);
             else
-                ui_draw_number_fixed(0x2000000 | (u16)(sp->unk1C4 + i + 1), 38,
-                              sp->unk218.y + 6, &sp->style[0]);
-            ui_draw_text(VS_MESSAGE(328), 218, sp->unk218.y + 6, &sp->style[0]);
+                ui_draw_number_fixed(0x2000000 | (u16)(sp->first_row + i + 1), 38,
+                              sp->cursor_rect.y + 6, &sp->style[0]);
+            ui_draw_text(VS_MESSAGE(328), 218, sp->cursor_rect.y + 6, &sp->style[0]);
             text_scroll_mode = 1;
             text_clip_on = 0;
             text_clip_left = 0;
             text_clip_right = 280;
-            file = &sp->unk1B8->files[i + sp->unk1C4];
-            if (picture[file->unk15] == -1)
+            file = &sp->card->files[i + sp->first_row];
+            if (picture[file->area] == -1)
                 goto no_picture;
-            ui_draw_text(VS_MESSAGE(610 + picture[file->unk15]), 64, sp->unk218.y + 6,
+            ui_draw_text(VS_MESSAGE(610 + picture[file->area]), 64, sp->cursor_rect.y + 6,
                           &sp->style[0]);
-            file = &sp->unk1B8->files[i + sp->unk1C4];
-            if (picture[file->unk15] != -1)
-                ui_draw_text(VS_MESSAGE(700 + file->unk15), text_clip_advance + 64,
-                              sp->unk218.y + 22, &sp->style[0]);
+            file = &sp->card->files[i + sp->first_row];
+            if (picture[file->area] != -1)
+                ui_draw_text(VS_MESSAGE(700 + file->area), text_clip_advance + 64,
+                              sp->cursor_rect.y + 22, &sp->style[0]);
             else {
             no_picture:
-                ui_draw_text(VS_MESSAGE(700 + sp->unk1B8->files[i + sp->unk1C4].unk15),
-                              text_clip_advance + 64, sp->unk218.y + 6, &sp->style[0]);
+                ui_draw_text(VS_MESSAGE(700 + sp->card->files[i + sp->first_row].area),
+                              text_clip_advance + 64, sp->cursor_rect.y + 6, &sp->style[0]);
             }
-            ui_draw_number_fixed(0x4000000 | sp->unk1B8->files[i + sp->unk1C4].unk16, 248,
-                          sp->unk218.y + 6, &sp->style[0]);
+            ui_draw_number_fixed(0x4000000 | sp->card->files[i + sp->first_row].sp_total, 248,
+                          sp->cursor_rect.y + 6, &sp->style[0]);
         }
-        file_row_clipped[i + sp->unk1C4] = text_clip_dropped;
-        ui_draw_rect_outline(&sp->unk218, &sp->unk220, 257, 1);
-        sp->unk218.y += 48;
+        file_row_clipped[i + sp->first_row] = text_clip_dropped;
+        ui_draw_rect_outline(&sp->cursor_rect, &sp->border_color, 257, 1);
+        sp->cursor_rect.y += 48;
     }
     ui_add_draw_mode(1, 0, 0);
 }

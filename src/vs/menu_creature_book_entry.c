@@ -48,25 +48,25 @@ void menu_creature_book_draw_entry(int player)
     int i;
     u16 a, b;
 
-    col = sp->unk1D0;
+    col = sp->cursor;
     if (col < 0)
-        kind = teams[player].slot[-col - 1];
+        kind = lineups[player].slot[-col - 1];
     else
-        kind = sp->unk0.team.kinds[sp->unk1D2 * 4 + col];
-    item = &sp->unk0.team.items[kind];
+        kind = sp->state.creature_select.kinds[sp->scroll * 4 + col];
+    item = &sp->state.creature_select.entries[kind];
     if (player) {
-        vs_pad_state.pads[0].unk8 = 0;
-        vs_pad_state.pads[0].unkC = 0;
-        vs_pad_state.pads[0].unk0 = 0;
+        vs_pad_state.pads[0].pressed = 0;
+        vs_pad_state.pads[0].pressed_repeat = 0;
+        vs_pad_state.pads[0].held = 0;
     } else {
-        vs_pad_state.pads[1].unk8 = 0;
-        vs_pad_state.pads[1].unkC = 0;
-        vs_pad_state.pads[1].unk0 = 0;
+        vs_pad_state.pads[1].pressed = 0;
+        vs_pad_state.pads[1].pressed_repeat = 0;
+        vs_pad_state.pads[1].held = 0;
     }
     if (DAT_8006335c == 0)
-        ui_draw_arrow(&right, &sp->unk214, 0);
+        ui_draw_arrow(&right, &sp->cursor_color, 0);
     else
-        ui_draw_arrow(&left, &sp->unk214, 2048);
+        ui_draw_arrow(&left, &sp->cursor_color, 2048);
     ui_add_draw_mode(1, 0, 0);
     sp->style[0].cd |= 0x80;
     ui_draw_text(VS_ITEM_NAME(kind), 32, 16, &sp->style[0]);
@@ -130,13 +130,13 @@ void menu_creature_book_draw_entry(int player)
         if (item->abilities >> 16 & 0xf)
             ui_draw_text(VS_MESSAGE(129 + (item->abilities >> 16 & 0xf)), 336, 211, &sp->style[0]);
     }
-    sp->unk238.x = 55;
-    sp->unk238.y = 32;
-    sp->unk238.w = 230;
-    sp->unk238.h = 115;
-    ui_draw_rect_outline(&sp->unk238, &sp->style[0], 513, 1);
+    sp->image_rect.x = 55;
+    sp->image_rect.y = 32;
+    sp->image_rect.w = 230;
+    sp->image_rect.h = 115;
+    ui_draw_rect_outline(&sp->image_rect, &sp->style[0], 513, 1);
     ui_add_draw_mode(0, 0, 0);
-    ui_draw_image(&sp->unk238, &sp->unk0.team.pos[15], NULL, NULL, 16);
+    ui_draw_image(&sp->image_rect, &sp->state.creature_select.pos[15], NULL, NULL, 16);
     ui_draw_panel(24, 12, 292, 216);
     ui_draw_panel(324, 12, 292, 216);
 }

@@ -63,25 +63,25 @@ void pad_clear_input(void);
 void menu_vs_setup_draw(int page);
 
 /* The CD state's reusable menu-file buffer. */
-#define LOAD_BUFFER (vs_cd_state.unk4A4)
+#define LOAD_BUFFER (vs_cd_state.load_buffer)
 
 #define PAD(n) (vs_pad_state.pads[(n)])
-#define PRESSED (PAD(0).unk8 | PAD(1).unk8)
-#define REPEAT (PAD(0).unkC | PAD(1).unkC)
+#define PRESSED (PAD(0).pressed | PAD(1).pressed)
+#define REPEAT (PAD(0).pressed_repeat | PAD(1).pressed_repeat)
 
 /* Both card entries run the same page transition with a literal port. */
 #define CARD_PAGE(port)                     \
-    sp->unk1CC = 2;                        \
-    sp->unk1D5 = 0;                        \
-    sp->unk1CA = 0;                        \
+    sp->mode = 2;                        \
+    sp->font_mode = 0;                        \
+    sp->show_backdrop = 0;                        \
     card_screen_run(0, port);                 \
-    sp->unk1D5 = 1;                        \
-    sp->unk1CC = 0
+    sp->font_mode = 1;                        \
+    sp->mode = 0
 
 /* Likewise the team page and the save page of each player. */
-#define TEAM_PAGE(player)                       sp->unk1D5 = 1;                            menu_creature_select_run(player);                      sp->unk1CC = 0
+#define TEAM_PAGE(player)                       sp->font_mode = 1;                            menu_creature_select_run(player);                      sp->mode = 0
 
-#define SAVE_PAGE(player)                                          if (saves[0].unk0 == saves[1].unk0) {                sp->unk1CC = 9;                                           } else if (item_request_any_available(player) == 0) {                           sp->unk1CC = 99;                                          } else {                                                           sp->unk1D5 = 1;                                               menu_item_request_run(player);                                         sp->unk1CC = 0;                                           }
+#define SAVE_PAGE(player)                                          if (saves[0].save_id == saves[1].save_id) {                sp->mode = 9;                                           } else if (item_request_any_available(player) == 0) {                           sp->mode = 99;                                          } else {                                                           sp->font_mode = 1;                                               menu_item_request_run(player);                                         sp->mode = 0;                                           }
 
 ADDRESS(0x80016f10, 0x98c)
 int menu_vs_setup_run(void)
@@ -96,16 +96,16 @@ int menu_vs_setup_run(void)
     clear_vram();
     DrawSync(0);
     gfx_setup_640x240();
-    sp->unk1D8.vx = 960;
-    sp->unk1D8.vy = 256;
-    sp->unk1DC.vx = 560;
-    sp->unk1DC.vy = 495;
-    sp->unk1E0.vx = 896;
-    sp->unk1E0.vy = 256;
-    sp->unk1E4.vx = 560;
-    sp->unk1E4.vy = 496;
-    sp->unk1E8.vx = 768;
-    sp->unk1E8.vy = 256;
+    sp->message_font_vram.vx = 960;
+    sp->message_font_vram.vy = 256;
+    sp->message_font_clut.vx = 560;
+    sp->message_font_clut.vy = 495;
+    sp->item_font_vram.vx = 896;
+    sp->item_font_vram.vy = 256;
+    sp->item_font_clut.vx = 560;
+    sp->item_font_clut.vy = 496;
+    sp->picture_vram.vx = 768;
+    sp->picture_vram.vy = 256;
     pos.vx = 640;
     pos.vy = 124;
     {
@@ -114,18 +114,18 @@ int menu_vs_setup_run(void)
         cd_read_member(8, 4, message);
         copy_words((u32 *)&vs_menu_messages[1], (u32 *)&message[1], 0x1500);
         message = (u_long *)((message[0] + sizeof(*message)) + (u8 *)message);
-        tim_load_images_at(message + 1, &sp->unk1E0, &sp->unk1E4);
+        tim_load_images_at(message + 1, &sp->item_font_vram, &sp->item_font_clut);
         DrawSync(0);
         message = LOAD_BUFFER;
         cd_read_member(8, 8, message);
         copy_words((u32 *)&vs_menu_messages[0], (u32 *)&message[1], 0x1500);
         message = (u_long *)((message[0] + sizeof(*message)) + (u8 *)message);
-        tim_load_images_at(message + 1, &sp->unk1D8, &sp->unk1DC);
+        tim_load_images_at(message + 1, &sp->message_font_vram, &sp->message_font_clut);
         DrawSync(0);
     }
     buf = LOAD_BUFFER;
     cd_read_member(8, 5, buf);
-    tim_load_images_at(buf, &sp->unk1E8, NULL);
+    tim_load_images_at(buf, &sp->picture_vram, NULL);
     DrawSync(0);
     cd_read_member(8, 7, buf);
     tim_load_images_at(buf, &tex, &clut);
@@ -141,135 +141,135 @@ int menu_vs_setup_run(void)
         tim_load_images_at(buf, &pos, NULL);
         DrawSync(1);
     }
-    sp->unk1CE = 0;
-    sp->unk1CC = 0;
+    sp->main_row = 0;
+    sp->mode = 0;
     pad_clear_input();
-    sp->unk1D5 = 1;
+    sp->font_mode = 1;
     for (;;) {
-        if (sp->unk1CC == 0) {
+        if (sp->mode == 0) {
             if (PRESSED & 0x4000) {
-                switch (sp->unk1CE) {
+                switch (sp->main_row) {
                 case 0:
                     if (requested_items[0] != -1) {
                         if (requested_item_2p != -1)
                             goto start;
-                        sp->unk1CC = 4;
+                        sp->mode = 4;
                     } else {
                         if (requested_item_2p == -1)
                             goto start;
-                        sp->unk1CC = 3;
+                        sp->mode = 3;
                     }
                     goto buzz;
                 start:
                     play_confirm_sound();
-                    sp->unk1CC = 1;
+                    sp->mode = 1;
                     break;
                 case 1:
-                    if (!(vs_pad_state.pads[0].unk8 & 0x4000))
+                    if (!(vs_pad_state.pads[0].pressed & 0x4000))
                         goto buzz;
                     play_confirm_sound();
-                    vs_pad_state.pads[0].unk8 = 0;
+                    vs_pad_state.pads[0].pressed = 0;
                     CARD_PAGE(0);
                     break;
                 case 2:
-                    if (vs_pad_state.pads[1].unk8 & 0x4000) {
+                    if (vs_pad_state.pads[1].pressed & 0x4000) {
                         play_confirm_sound();
-                        vs_pad_state.pads[1].unk8 = 0;
+                        vs_pad_state.pads[1].pressed = 0;
                         CARD_PAGE(1);
                         break;
                     }
                     goto buzz;
                 case 3:
-                    if (!(vs_pad_state.pads[0].unk8 & 0x4000) || !save_loaded_1p)
+                    if (!(vs_pad_state.pads[0].pressed & 0x4000) || !save_loaded_1p)
                         goto buzz;
                     play_confirm_sound();
-                    vs_pad_state.pads[0].unk8 = 0;
+                    vs_pad_state.pads[0].pressed = 0;
                     TEAM_PAGE(0);
                     break;
                 case 4:
-                    if ((vs_pad_state.pads[1].unk8 & 0x4000) && save_loaded_2p) {
+                    if ((vs_pad_state.pads[1].pressed & 0x4000) && save_loaded_2p) {
                         play_confirm_sound();
-                        vs_pad_state.pads[1].unk8 = 0;
+                        vs_pad_state.pads[1].pressed = 0;
                         TEAM_PAGE(1);
                         break;
                     }
                     goto buzz;
                 case 5:
-                    if (!(vs_pad_state.pads[0].unk8 & 0x4000) || !save_loaded_1p || !save_loaded_2p)
+                    if (!(vs_pad_state.pads[0].pressed & 0x4000) || !save_loaded_1p || !save_loaded_2p)
                         goto buzz;
                     play_confirm_sound();
-                    vs_pad_state.pads[0].unk8 = 0;
+                    vs_pad_state.pads[0].pressed = 0;
                     SAVE_PAGE(0);
                     break;
                 case 6:
-                    if (!(vs_pad_state.pads[1].unk8 & 0x4000) || !save_loaded_1p || !save_loaded_2p)
+                    if (!(vs_pad_state.pads[1].pressed & 0x4000) || !save_loaded_1p || !save_loaded_2p)
                         goto buzz;
                     play_confirm_sound();
-                    vs_pad_state.pads[1].unk8 = 0;
+                    vs_pad_state.pads[1].pressed = 0;
                     SAVE_PAGE(1);
                     break;
                 buzz:
                     play_refuse_sound();
                     break;
                 }
-                vs_pad_state.pads[0].unk8 = 0;
-                vs_pad_state.pads[1].unk8 = 0;
+                vs_pad_state.pads[0].pressed = 0;
+                vs_pad_state.pads[1].pressed = 0;
             }
             if (REPEAT & 0x10) {
                 play_cursor_sound();
-                vs_pad_state.pads[0].unkC = 0;
-                vs_pad_state.pads[1].unkC = 0;
-                sp->unk1CE = (sp->unk1CE + 6) % 7;
+                vs_pad_state.pads[0].pressed_repeat = 0;
+                vs_pad_state.pads[1].pressed_repeat = 0;
+                sp->main_row = (sp->main_row + 6) % 7;
             }
             if (REPEAT & 0x40) {
                 play_cursor_sound();
-                vs_pad_state.pads[0].unkC = 0;
-                vs_pad_state.pads[1].unkC = 0;
-                sp->unk1CE = (sp->unk1CE + 1) % 7;
+                vs_pad_state.pads[0].pressed_repeat = 0;
+                vs_pad_state.pads[1].pressed_repeat = 0;
+                sp->main_row = (sp->main_row + 1) % 7;
             }
             if (PRESSED & 0x2000) {
                 play_cursor_sound();
-                sp->unk1CC = 6;
+                sp->mode = 6;
             }
             if (PRESSED & 8) {
-                sp->unk1CE = 0;
+                sp->main_row = 0;
                 if (requested_items[0] != -1) {
                     if (requested_item_2p != -1)
                         goto ready;
-                    sp->unk1CC = 4;
+                    sp->mode = 4;
                 } else {
                     if (requested_item_2p == -1)
                         goto ready;
-                    sp->unk1CC = 3;
+                    sp->mode = 3;
                 }
                 play_refuse_sound();
                 goto ready_done;
             ready:
                 play_confirm_sound();
-                sp->unk1CC = 1;
+                sp->mode = 1;
             ready_done:
-                PAD(0).unk8 = 0;
-                PAD(1).unk8 = 0;
+                PAD(0).pressed = 0;
+                PAD(1).pressed = 0;
                 goto next;
             }
-        } else if (sp->unk1CC == 1) {
+        } else if (sp->mode == 1) {
             if (PRESSED & 0x4000) {
                 if (round_count == 1) {
-                    if (teams[0].slot[0] == -1 || teams[1].slot[0] == -1)
-                        sp->unk1CC = 2;
-                } else if (teams[0].slot[2] == -1 || teams[1].slot[2] == -1) {
-                    sp->unk1CC = 2;
+                    if (lineups[0].slot[0] == -1 || lineups[1].slot[0] == -1)
+                        sp->mode = 2;
+                } else if (lineups[0].slot[2] == -1 || lineups[1].slot[2] == -1) {
+                    sp->mode = 2;
                 }
-                if (sp->unk1CC == 1) {
+                if (sp->mode == 1) {
                     if (requested_items[0] != -1 && requested_item_2p != -1) {
                         menu_vs_setup_draw(11);
                         menu_vs_setup_draw(11);
                         if (card_check_saves_changed()) {
-                            sp->unk1CC = 10;
+                            sp->mode = 10;
                             play_refuse_sound();
                         }
                     }
-                    if (sp->unk1CC == 1) {
+                    if (sp->mode == 1) {
                         clear_vram();
                         DrawSync(0);
                         gfx_setup_320x240();
@@ -279,37 +279,37 @@ int menu_vs_setup_run(void)
                 }
             }
             if (PRESSED & 0x2000)
-                sp->unk1CC = 0;
+                sp->mode = 0;
             b = PRESSED;
             if (b & 0x20)
                 round_count = 3;
             if (b & 0x80)
                 round_count = 1;
-        } else if (sp->unk1CC == 5 || sp->unk1CC == 6) {
+        } else if (sp->mode == 5 || sp->mode == 6) {
             if (PRESSED & 0x4000) {
-                if (sp->unk1CC == 5) {
-                    vs_pad_state.pads[0].unk8 = 0;
-                    vs_pad_state.pads[1].unk8 = 0;
+                if (sp->mode == 5) {
+                    vs_pad_state.pads[0].pressed = 0;
+                    vs_pad_state.pads[1].pressed = 0;
                     return 0;
                 }
-                sp->unk1CC = 0;
+                sp->mode = 0;
             }
             if (PRESSED & 0x2000)
-                sp->unk1CC = 0;
+                sp->mode = 0;
             if (PRESSED & 0x20)
-                sp->unk1CC = 6;
+                sp->mode = 6;
             if (PRESSED & 0x80)
-                sp->unk1CC = 5;
+                sp->mode = 5;
         } else if (PRESSED & 0x6000) {
-            sp->unk1CC = 0;
+            sp->mode = 0;
         }
     next:
-        vs_pad_state.pads[0].unk8 = 0;
-        vs_pad_state.pads[1].unk8 = 0;
-        vs_pad_state.pads[0].unkC = 0;
-        vs_pad_state.pads[1].unkC = 0;
-        menu_vs_setup_draw(sp->unk1CC);
-        sp->unk1D4 = (sp->unk1D4 + 1) % 32;
+        vs_pad_state.pads[0].pressed = 0;
+        vs_pad_state.pads[1].pressed = 0;
+        vs_pad_state.pads[0].pressed_repeat = 0;
+        vs_pad_state.pads[1].pressed_repeat = 0;
+        menu_vs_setup_draw(sp->mode);
+        sp->blink_phase = (sp->blink_phase + 1) % 32;
     }
 }
 
@@ -340,28 +340,28 @@ void lineup_screen_show(void)
     int i;
     u_long *buf;
 
-    sp->unk0.team.pos[0].vx = 640;
-    sp->unk0.team.pos[0].vy = 144;
-    sp->unk0.team.pos[1].vx = 640;
-    sp->unk0.team.pos[1].vy = 192;
-    sp->unk0.team.pos[2].vx = 736;
-    sp->unk0.team.pos[2].vy = 144;
-    sp->unk0.team.pos[3].vx = 736;
-    sp->unk0.team.pos[3].vy = 192;
-    sp->unk0.team.pos[4].vx = 832;
-    sp->unk0.team.pos[4].vy = 144;
-    sp->unk0.team.pos[5].vx = 832;
-    sp->unk0.team.pos[5].vy = 192;
-    sp->unk0.team.pos[6].vx = 928;
-    sp->unk0.team.pos[6].vy = 144;
-    sp->unk0.team.pos[7].vx = 928;
-    sp->unk0.team.pos[7].vy = 172;
-    sp->unk0.team.pos[8].vx = 928;
-    sp->unk0.team.pos[8].vy = 200;
-    sp->unk0.team.pos[15].vx = 640;
-    sp->unk0.team.pos[15].vy = 0;
-    vs_cd_state.unk4A0 = vs_cd_state.unk4A4;
-    buf = vs_cd_state.unk4A0;
+    sp->state.creature_select.pos[0].vx = 640;
+    sp->state.creature_select.pos[0].vy = 144;
+    sp->state.creature_select.pos[1].vx = 640;
+    sp->state.creature_select.pos[1].vy = 192;
+    sp->state.creature_select.pos[2].vx = 736;
+    sp->state.creature_select.pos[2].vy = 144;
+    sp->state.creature_select.pos[3].vx = 736;
+    sp->state.creature_select.pos[3].vy = 192;
+    sp->state.creature_select.pos[4].vx = 832;
+    sp->state.creature_select.pos[4].vy = 144;
+    sp->state.creature_select.pos[5].vx = 832;
+    sp->state.creature_select.pos[5].vy = 192;
+    sp->state.creature_select.pos[6].vx = 928;
+    sp->state.creature_select.pos[6].vy = 144;
+    sp->state.creature_select.pos[7].vx = 928;
+    sp->state.creature_select.pos[7].vy = 172;
+    sp->state.creature_select.pos[8].vx = 928;
+    sp->state.creature_select.pos[8].vy = 200;
+    sp->state.creature_select.pos[15].vx = 640;
+    sp->state.creature_select.pos[15].vy = 0;
+    vs_cd_state.load_cursor = vs_cd_state.load_buffer;
+    buf = vs_cd_state.load_cursor;
 
     for (n = 0, x = 320; n < 5; n++, x += 64) {
         cd_read_member(5, n + 31, buf);
@@ -370,39 +370,39 @@ void lineup_screen_show(void)
         tim_load_images_at(buf, &pos, NULL);
         DrawSync(0);
     }
-    id = teams[0].slot;
+    id = lineups[0].slot;
     for (i = 0; i < 6; i++) {
         slot = *id++;
         if (slot == -1) {
-            r2.x = sp->unk0.team.pos[i].vx;
-            r2.y = sp->unk0.team.pos[i].vy;
+            r2.x = sp->state.creature_select.pos[i].vx;
+            r2.y = sp->state.creature_select.pos[i].vy;
             r2.w = 96;
             r2.h = 48;
             ClearImage(&r2, 0, 0, 0);
         } else {
-            int size = cd_read_member(10, slot, vs_cd_state.unk4A0) * 2048;
+            int size = cd_read_member(10, slot, vs_cd_state.load_cursor) * 2048;
 
-            tim_load_images_at(vs_cd_state.unk4A0, &sp->unk0.team.pos[i], NULL);
-            vs_cd_state.unk4A0 = (u_long *)((u8 *)vs_cd_state.unk4A0 + size);
+            tim_load_images_at(vs_cd_state.load_cursor, &sp->state.creature_select.pos[i], NULL);
+            vs_cd_state.load_cursor = (u_long *)((u8 *)vs_cd_state.load_cursor + size);
         }
     }
     for (i = 0; i < 2; i++) {
         if (requested_items[i] == -1) {
-            r.x = sp->unk0.team.pos[6 + i].vx;
-            r.y = sp->unk0.team.pos[6 + i].vy;
+            r.x = sp->state.creature_select.pos[6 + i].vx;
+            r.y = sp->state.creature_select.pos[6 + i].vy;
             r.w = 56;
             r.h = 28;
             ClearImage(&r, 0, 0, 0);
         } else {
             int size = cd_read_member(11, vis_table_c.types[requested_items[i]].unk5[0],
-                                     vs_cd_state.unk4A0) * 2048;
+                                     vs_cd_state.load_cursor) * 2048;
 
-            tim_load_images_at(vs_cd_state.unk4A0, &sp->unk0.team.pos[6 + i], NULL);
-            vs_cd_state.unk4A0 = (u_long *)((u8 *)vs_cd_state.unk4A0 + size);
+            tim_load_images_at(vs_cd_state.load_cursor, &sp->state.creature_select.pos[6 + i], NULL);
+            vs_cd_state.load_cursor = (u_long *)((u8 *)vs_cd_state.load_cursor + size);
         }
     }
-    r.x = sp->unk0.team.pos[8].vx;
-    r.y = sp->unk0.team.pos[8].vy;
+    r.x = sp->state.creature_select.pos[8].vx;
+    r.y = sp->state.creature_select.pos[8].vy;
     r.w = 56;
     r.h = 28;
     ClearImage(&r, 10, 10, 10);
@@ -439,75 +439,75 @@ void menu_creature_select_clear_parked(void)
 /* Parks the three slot pictures at x 832 and takes a copy of `player`'s
  * team into the edit record. */
 ADDRESS(0x80017c84, 0x120)
-void menu_creature_select_pick_up_slot(VsMenuScratch *sp, int player, VsTeamEdit *edit)
+void menu_creature_select_pick_up_slot(VsMenuScratch *sp, int player, VsLineupEdit *edit)
 {
     RECT r;
 
-    r.x = sp->unk0.team.pos[12].vx;
-    r.y = sp->unk0.team.pos[12].vy;
+    r.x = sp->state.creature_select.pos[12].vx;
+    r.y = sp->state.creature_select.pos[12].vy;
     r.w = 96;
     r.h = 48;
     MoveImage2(&r, 832, 0);
     DrawSync(0);
-    r.x = sp->unk0.team.pos[13].vx;
-    r.y = sp->unk0.team.pos[13].vy;
+    r.x = sp->state.creature_select.pos[13].vx;
+    r.y = sp->state.creature_select.pos[13].vy;
     r.w = 96;
     r.h = 48;
     MoveImage2(&r, 832, 48);
     DrawSync(0);
-    r.x = sp->unk0.team.pos[14].vx;
-    r.y = sp->unk0.team.pos[14].vy;
+    r.x = sp->state.creature_select.pos[14].vx;
+    r.y = sp->state.creature_select.pos[14].vy;
     r.w = 96;
     r.h = 48;
     MoveImage2(&r, 832, 96);
     DrawSync(0);
-    edit->team.slot[0] = teams[player].slot[0];
-    edit->team.slot[1] = teams[player].slot[1];
-    edit->team.slot[2] = teams[player].slot[2];
+    edit->lineup.slot[0] = lineups[player].slot[0];
+    edit->lineup.slot[1] = lineups[player].slot[1];
+    edit->lineup.slot[2] = lineups[player].slot[2];
 }
 
 /* Stores the edit record as `player`'s team with the picked slot and the
  * cursor's slot swapped, and puts the pictures back swapped too. */
 ADDRESS(0x80017da4, 0x244)
-void menu_creature_select_swap_slots(VsMenuScratch *sp, int player, VsTeamEdit *edit)
+void menu_creature_select_swap_slots(VsMenuScratch *sp, int player, VsLineupEdit *edit)
 {
     RECT r;
-    int picked = edit->unk4;
-    int cursor = ~sp->unk1D0;
+    int picked = edit->held_slot;
+    int cursor = ~sp->cursor;
     int dest_x, dest_y;
 
-    teams[player].slot[0] = edit->team.slot[0];
-    teams[player].slot[1] = edit->team.slot[1];
-    teams[player].slot[2] = edit->team.slot[2];
-    teams[player].slot[picked] = edit->team.slot[cursor];
-    teams[player].slot[cursor] = edit->team.slot[picked];
+    lineups[player].slot[0] = edit->lineup.slot[0];
+    lineups[player].slot[1] = edit->lineup.slot[1];
+    lineups[player].slot[2] = edit->lineup.slot[2];
+    lineups[player].slot[picked] = edit->lineup.slot[cursor];
+    lineups[player].slot[cursor] = edit->lineup.slot[picked];
     r.x = 832;
     r.y = 0;
     r.w = 96;
     r.h = 48;
-    MoveImage2(&r, sp->unk0.team.pos[12].vx, sp->unk0.team.pos[12].vy);
+    MoveImage2(&r, sp->state.creature_select.pos[12].vx, sp->state.creature_select.pos[12].vy);
     DrawSync(0);
     r.x = 832;
     r.y = 48;
     r.w = 96;
     r.h = 48;
-    MoveImage2(&r, sp->unk0.team.pos[13].vx, sp->unk0.team.pos[13].vy);
+    MoveImage2(&r, sp->state.creature_select.pos[13].vx, sp->state.creature_select.pos[13].vy);
     DrawSync(0);
     r.x = 832;
     r.y = 96;
     r.w = 96;
     r.h = 48;
-    MoveImage2(&r, sp->unk0.team.pos[14].vx, sp->unk0.team.pos[14].vy);
+    MoveImage2(&r, sp->state.creature_select.pos[14].vx, sp->state.creature_select.pos[14].vy);
     DrawSync(0);
-    r.x = sp->unk0.team.pos[-sp->unk1D0 + 11].vx;
-    r.y = sp->unk0.team.pos[-sp->unk1D0 + 11].vy;
-    dest_x = sp->unk0.team.pos[edit->unk4 + 12].vx;
-    dest_y = sp->unk0.team.pos[edit->unk4 + 12].vy;
+    r.x = sp->state.creature_select.pos[-sp->cursor + 11].vx;
+    r.y = sp->state.creature_select.pos[-sp->cursor + 11].vy;
+    dest_x = sp->state.creature_select.pos[edit->held_slot + 12].vx;
+    dest_y = sp->state.creature_select.pos[edit->held_slot + 12].vy;
     r.w = 96;
     r.h = 48;
     MoveImage2(&r, dest_x, dest_y);
     DrawSync(0);
-    switch (edit->unk4) {
+    switch (edit->held_slot) {
     case 0:
         r.x = 832;
         r.y = 0;
@@ -523,7 +523,7 @@ void menu_creature_select_swap_slots(VsMenuScratch *sp, int player, VsTeamEdit *
     }
     r.w = 96;
     r.h = 48;
-    MoveImage2(&r, sp->unk0.team.pos[-sp->unk1D0 + 11].vx, sp->unk0.team.pos[-sp->unk1D0 + 11].vy);
+    MoveImage2(&r, sp->state.creature_select.pos[-sp->cursor + 11].vx, sp->state.creature_select.pos[-sp->cursor + 11].vy);
     DrawSync(0);
 }
 
@@ -531,67 +531,67 @@ void menu_creature_select_swap_slots(VsMenuScratch *sp, int player, VsTeamEdit *
  * later slots and their pictures move up and the last picture is
  * cleared. */
 ADDRESS(0x80017fe8, 0x258)
-void menu_creature_select_remove_slot(VsMenuScratch *sp, int player, VsTeamEdit *edit)
+void menu_creature_select_remove_slot(VsMenuScratch *sp, int player, VsLineupEdit *edit)
 {
     RECT r;
 
-    teams[player].slot[0] = edit->team.slot[0];
-    teams[player].slot[1] = edit->team.slot[1];
-    teams[player].slot[2] = edit->team.slot[2];
-    teams[player].slot[edit->unk4] = -1;
-    if (teams[player].slot[0] == -1) {
+    lineups[player].slot[0] = edit->lineup.slot[0];
+    lineups[player].slot[1] = edit->lineup.slot[1];
+    lineups[player].slot[2] = edit->lineup.slot[2];
+    lineups[player].slot[edit->held_slot] = -1;
+    if (lineups[player].slot[0] == -1) {
         r.x = 832;
         r.y = 48;
         r.w = 96;
         r.h = 48;
-        MoveImage2(&r, sp->unk0.team.pos[12].vx, sp->unk0.team.pos[12].vy);
+        MoveImage2(&r, sp->state.creature_select.pos[12].vx, sp->state.creature_select.pos[12].vy);
         DrawSync(0);
         r.x = 832;
         r.y = 96;
         r.w = 96;
         r.h = 48;
-        MoveImage2(&r, sp->unk0.team.pos[13].vx, sp->unk0.team.pos[13].vy);
+        MoveImage2(&r, sp->state.creature_select.pos[13].vx, sp->state.creature_select.pos[13].vy);
         DrawSync(0);
-        teams[player].slot[0] = teams[player].slot[1];
-        teams[player].slot[1] = teams[player].slot[2];
-    } else if (teams[player].slot[1] == -1) {
+        lineups[player].slot[0] = lineups[player].slot[1];
+        lineups[player].slot[1] = lineups[player].slot[2];
+    } else if (lineups[player].slot[1] == -1) {
         r.x = 832;
         r.y = 0;
         r.w = 96;
         r.h = 48;
-        MoveImage2(&r, sp->unk0.team.pos[12].vx, sp->unk0.team.pos[12].vy);
+        MoveImage2(&r, sp->state.creature_select.pos[12].vx, sp->state.creature_select.pos[12].vy);
         DrawSync(0);
         r.x = 832;
         r.y = 96;
         r.w = 96;
         r.h = 48;
-        MoveImage2(&r, sp->unk0.team.pos[13].vx, sp->unk0.team.pos[13].vy);
+        MoveImage2(&r, sp->state.creature_select.pos[13].vx, sp->state.creature_select.pos[13].vy);
         DrawSync(0);
-        teams[player].slot[0] = teams[player].slot[0];
-        teams[player].slot[1] = teams[player].slot[2];
-    } else if (teams[player].slot[2] == -1) {
+        lineups[player].slot[0] = lineups[player].slot[0];
+        lineups[player].slot[1] = lineups[player].slot[2];
+    } else if (lineups[player].slot[2] == -1) {
         r.x = 832;
         r.y = 0;
         r.w = 96;
         r.h = 48;
-        MoveImage2(&r, sp->unk0.team.pos[12].vx, sp->unk0.team.pos[12].vy);
+        MoveImage2(&r, sp->state.creature_select.pos[12].vx, sp->state.creature_select.pos[12].vy);
         DrawSync(0);
         r.x = 832;
         r.y = 48;
         r.w = 96;
         r.h = 48;
-        MoveImage2(&r, sp->unk0.team.pos[13].vx, sp->unk0.team.pos[13].vy);
+        MoveImage2(&r, sp->state.creature_select.pos[13].vx, sp->state.creature_select.pos[13].vy);
         DrawSync(0);
-        teams[player].slot[0] = teams[player].slot[0];
-        teams[player].slot[1] = teams[player].slot[1];
+        lineups[player].slot[0] = lineups[player].slot[0];
+        lineups[player].slot[1] = lineups[player].slot[1];
     }
-    r.x = sp->unk0.team.pos[14].vx;
-    r.y = sp->unk0.team.pos[14].vy;
+    r.x = sp->state.creature_select.pos[14].vx;
+    r.y = sp->state.creature_select.pos[14].vy;
     r.w = 96;
     r.h = 48;
     ClearImage2(&r, 0, 0, 0);
     DrawSync(0);
-    teams[player].slot[2] = -1;
+    lineups[player].slot[2] = -1;
 }
 
 /*
@@ -639,23 +639,23 @@ void tim_load_image_at(u_long *tim, DVECTOR *pos, DVECTOR *clut_pos)
  */
 int cd_read_member(int archive, int member, u_long *buf);
 void menu_creature_select_clear_parked(void);
-void menu_creature_select_pick_up_slot(VsMenuScratch *sp, int player, VsTeamEdit *edit);
-void menu_creature_select_swap_slots(VsMenuScratch *sp, int player, VsTeamEdit *edit);
-void menu_creature_select_remove_slot(VsMenuScratch *sp, int player, VsTeamEdit *edit);
+void menu_creature_select_pick_up_slot(VsMenuScratch *sp, int player, VsLineupEdit *edit);
+void menu_creature_select_swap_slots(VsMenuScratch *sp, int player, VsLineupEdit *edit);
+void menu_creature_select_remove_slot(VsMenuScratch *sp, int player, VsLineupEdit *edit);
 void tim_load_image_at(u_long *tim, DVECTOR *pos, DVECTOR *clut_pos);
 void menu_creature_select_draw(int page);
 
 /* The detail page toggle: the attribute figures when nonzero (bss, unowned). */
 
-#define HELD (vs_pad_state.pads[0].unk0 | vs_pad_state.pads[1].unk0)
+#define HELD (vs_pad_state.pads[0].held | vs_pad_state.pads[1].held)
 
 /* The team being edited: the three ids of `player`. */
-#define TEAM (teams[player].slot)
+#define TEAM (lineups[player].slot)
 
 ADDRESS(0x800182ec, 0x998)
 void menu_creature_select_loop(VsMenuScratch *sp, int player)
 {
-    VsTeamEdit edit;
+    VsLineupEdit edit;
     int shown = -1;
     u_long *buf;
     int top;
@@ -671,20 +671,20 @@ void menu_creature_select_loop(VsMenuScratch *sp, int player)
     int j;
     int k;
 
-    edit.unk0 = 0;
+    edit.holding = 0;
     for (;;) {
         if (player) {
-            vs_pad_state.pads[0].unk8 = 0;
-            vs_pad_state.pads[0].unkC = 0;
-            vs_pad_state.pads[0].unk0 = 0;
+            vs_pad_state.pads[0].pressed = 0;
+            vs_pad_state.pads[0].pressed_repeat = 0;
+            vs_pad_state.pads[0].held = 0;
         } else {
-            vs_pad_state.pads[1].unk8 = 0;
-            vs_pad_state.pads[1].unkC = 0;
-            vs_pad_state.pads[1].unk0 = 0;
+            vs_pad_state.pads[1].pressed = 0;
+            vs_pad_state.pads[1].pressed_repeat = 0;
+            vs_pad_state.pads[1].held = 0;
         }
-        top = sp->unk1D2;
-        if (sp->unk1CC == 1) {
-            int cursor = sp->unk1D0;
+        top = sp->scroll;
+        if (sp->mode == 1) {
+            int cursor = sp->cursor;
 
             if (cursor < 0) {
                 col = -1;
@@ -694,111 +694,111 @@ void menu_creature_select_loop(VsMenuScratch *sp, int player)
                 row = cursor >> 2;
             }
             if (PRESSED & 0x2000) {
-                if (!edit.unk0) {
+                if (!edit.holding) {
                     play_cancel_sound();
                     return;
                 }
                 play_cancel_sound();
                 menu_creature_select_remove_slot(sp, player, &edit);
-                edit.unk0 = 0;
-                sp->unk1D6 = 0;
+                edit.holding = 0;
+                sp->holding = 0;
                 menu_creature_select_clear_parked();
             }
-            if (!edit.unk0) {
+            if (!edit.holding) {
                 if (REPEAT & 0x20) {
                     play_cursor_sound();
-                    if (col < 0 && !edit.unk0)
-                        sp->unk1D0 = row << 2;
+                    if (col < 0 && !edit.holding)
+                        sp->cursor = row << 2;
                     else if (col < 3)
-                        sp->unk1D0++;
+                        sp->cursor++;
                 }
-                if (!edit.unk0 && (REPEAT & 0x80)) {
+                if (!edit.holding && (REPEAT & 0x80)) {
                     play_cursor_sound();
                     if (col > 0)
-                        sp->unk1D0--;
+                        sp->cursor--;
                     else if (col == 0)
-                        sp->unk1D0 = ~row;
+                        sp->cursor = ~row;
                 }
             }
             if (REPEAT & 0x10) {
                 play_cursor_sound();
-                if (edit.unk0) {
+                if (edit.holding) {
                     if (row > 0) {
-                        sp->unk1D0++;
+                        sp->cursor++;
                         menu_creature_select_swap_slots(sp, player, &edit);
                     }
                 } else if (HELD & 0x8000) {
-                    sp->unk1D2 -= 3;
-                    if (sp->unk1D2 < 0)
-                        sp->unk1D2 = 0;
-                } else if (sp->unk1D0 < 0) {
+                    sp->scroll -= 3;
+                    if (sp->scroll < 0)
+                        sp->scroll = 0;
+                } else if (sp->cursor < 0) {
                     if (row > 0)
-                        sp->unk1D0++;
+                        sp->cursor++;
                 } else if (row > 0) {
-                    sp->unk1D0 -= 4;
-                } else if (sp->unk1D2 > 0) {
-                    sp->unk1D2--;
+                    sp->cursor -= 4;
+                } else if (sp->scroll > 0) {
+                    sp->scroll--;
                 }
             } else if (REPEAT & 0x40) {
                 play_cursor_sound();
-                if (edit.unk0) {
+                if (edit.holding) {
                     if (row < 2 && TEAM[row + 1] != -1) {
-                        sp->unk1D0--;
+                        sp->cursor--;
                         menu_creature_select_swap_slots(sp, player, &edit);
                     }
                 } else if (HELD & 0x8000) {
-                    if (sp->unk0.team.rows > 2) {
-                        sp->unk1D2 += 3;
-                        if (sp->unk1D2 > sp->unk0.team.rows - 2)
-                            sp->unk1D2 = sp->unk0.team.rows - 2;
+                    if (sp->state.creature_select.rows > 2) {
+                        sp->scroll += 3;
+                        if (sp->scroll > sp->state.creature_select.rows - 2)
+                            sp->scroll = sp->state.creature_select.rows - 2;
                     }
-                } else if (sp->unk1D0 < 0) {
+                } else if (sp->cursor < 0) {
                     if (row < 2)
-                        sp->unk1D0--;
-                } else if (sp->unk1D2 + row < sp->unk0.team.rows) {
+                        sp->cursor--;
+                } else if (sp->scroll + row < sp->state.creature_select.rows) {
                     if (row < 2)
-                        sp->unk1D0 += 4;
-                    else if (sp->unk1D2 <= sp->unk0.team.rows - 3)
-                        sp->unk1D2++;
+                        sp->cursor += 4;
+                    else if (sp->scroll <= sp->state.creature_select.rows - 3)
+                        sp->scroll++;
                 }
             } else if (REPEAT & 0x800) {
                 play_cursor_sound();
-                sp->unk1D2 -= 3;
-                if (sp->unk1D2 < 0)
-                    sp->unk1D2 = 0;
+                sp->scroll -= 3;
+                if (sp->scroll < 0)
+                    sp->scroll = 0;
             } else if (REPEAT & 0x200) {
                 play_cursor_sound();
-                if (sp->unk0.team.rows > 2) {
-                    sp->unk1D2 += 3;
-                    if (sp->unk1D2 > sp->unk0.team.rows - 2)
-                        sp->unk1D2 = sp->unk0.team.rows - 2;
+                if (sp->state.creature_select.rows > 2) {
+                    sp->scroll += 3;
+                    if (sp->scroll > sp->state.creature_select.rows - 2)
+                        sp->scroll = sp->state.creature_select.rows - 2;
                 }
             } else if (PRESSED & 0x4000) {
-                if (edit.unk0) {
+                if (edit.holding) {
                     play_confirm_sound();
-                    edit.unk0 = 0;
-                    sp->unk1D6 = 0;
+                    edit.holding = 0;
+                    sp->holding = 0;
                     menu_creature_select_clear_parked();
                 } else {
-                    pick = sp->unk1D2 * 4 + sp->unk1D0;
-                    edit.unk0 = 1;
-                    sp->unk1D6 = 1;
-                    if (sp->unk1D0 < 0) {
-                        edit.unk4 = ~sp->unk1D0;
-                        if (TEAM[edit.unk4] != -1) {
+                    pick = sp->scroll * 4 + sp->cursor;
+                    edit.holding = 1;
+                    sp->holding = 1;
+                    if (sp->cursor < 0) {
+                        edit.held_slot = ~sp->cursor;
+                        if (TEAM[edit.held_slot] != -1) {
                             play_confirm_sound();
                             menu_creature_select_pick_up_slot(sp, player, &edit);
                             goto scrolled;
                         }
                     } else if (TEAM[2] == -1) {
-                        if (sp->unk0.team.kinds[pick] == 0xff) {
+                        if (sp->state.creature_select.kinds[pick] == 0xff) {
                             play_refuse_sound();
-                            edit.unk0 = 0;
-                            sp->unk1D6 = 0;
+                            edit.holding = 0;
+                            sp->holding = 0;
                             goto scrolled;
                         }
                         for (i = 0; i < 3; i++) {
-                            if (TEAM[i] == sp->unk0.team.kinds[pick])
+                            if (TEAM[i] == sp->state.creature_select.kinds[pick])
                                 break;
                         }
                         if (i == 3) {
@@ -806,39 +806,39 @@ void menu_creature_select_loop(VsMenuScratch *sp, int player)
                                 if (TEAM[i] == -1) {
                                     RECT r;
 
-                                    TEAM[i] = sp->unk0.team.kinds[pick];
-                                    r.x = sp->unk0.team.pos[pick % 12].vx;
-                                    r.y = sp->unk0.team.pos[pick % 12].vy;
+                                    TEAM[i] = sp->state.creature_select.kinds[pick];
+                                    r.x = sp->state.creature_select.pos[pick % 12].vx;
+                                    r.y = sp->state.creature_select.pos[pick % 12].vy;
                                     r.w = 96;
                                     r.h = 48;
-                                    MoveImage2(&r, sp->unk0.team.pos[12 + i].vx,
-                                               sp->unk0.team.pos[12 + i].vy);
+                                    MoveImage2(&r, sp->state.creature_select.pos[12 + i].vx,
+                                               sp->state.creature_select.pos[12 + i].vy);
                                     DrawSync(0);
                                     break;
                                 }
                             }
                             if (i != 3) {
                                 play_confirm_sound();
-                                sp->unk1D0 = ~i;
-                                edit.unk4 = i;
+                                sp->cursor = ~i;
+                                edit.held_slot = i;
                                 menu_creature_select_pick_up_slot(sp, player, &edit);
                                 goto scrolled;
                             }
                         }
                     }
                     play_refuse_sound();
-                    edit.unk0 = 0;
-                    sp->unk1D6 = 0;
+                    edit.holding = 0;
+                    sp->holding = 0;
                 }
-            } else if ((PRESSED & 0x1000) && !edit.unk0) {
+            } else if ((PRESSED & 0x1000) && !edit.holding) {
                 DAT_8006335c = 0;
                 play_confirm_sound();
-                if (sp->unk1D0 < 0) {
-                    id = TEAM[-sp->unk1D0 - 1];
+                if (sp->cursor < 0) {
+                    id = TEAM[-sp->cursor - 1];
                     if (id != -1) {
                         /* Retail only updates idx when a kind matches. */
-                        for (k = 0; k < sp->unk0.team.count; k++) {
-                            if (id == sp->unk0.team.kinds[k]) {
+                        for (k = 0; k < sp->state.creature_select.count; k++) {
+                            if (id == sp->state.creature_select.kinds[k]) {
                                 idx = k;
                                 break;
                             }
@@ -847,8 +847,8 @@ void menu_creature_select_loop(VsMenuScratch *sp, int player)
                         idx = -1;
                     }
                 } else {
-                    idx = sp->unk1D2 * 4 + sp->unk1D0;
-                    id = sp->unk0.team.kinds[idx];
+                    idx = sp->scroll * 4 + sp->cursor;
+                    id = sp->state.creature_select.kinds[idx];
                     for (k = 0; k < 3; k++) {
                         if (id == TEAM[k]) {
                             idx = -1;
@@ -856,12 +856,12 @@ void menu_creature_select_loop(VsMenuScratch *sp, int player)
                         }
                     }
                 }
-                if (idx < sp->unk0.team.count && idx != -1) {
+                if (idx < sp->state.creature_select.count && idx != -1) {
                     if (idx != shown) {
-                        buf = vs_cd_state.unk4A4;
-                        cd_read_member(10, sp->unk0.team.kinds[idx] + 200, buf);
+                        buf = vs_cd_state.load_buffer;
+                        cd_read_member(10, sp->state.creature_select.kinds[idx] + 200, buf);
                         shown = idx;
-                        tim_load_images_at(&buf[1], &sp->unk0.team.pos[15], NULL);
+                        tim_load_images_at(&buf[1], &sp->state.creature_select.pos[15], NULL);
                         {
                             DVECTOR tex = {960, 446};
                             DVECTOR clut = {560, 497};
@@ -870,43 +870,43 @@ void menu_creature_select_loop(VsMenuScratch *sp, int player)
                             tim_load_image_at(buf + 1, &tex, &clut);
                         }
                     }
-                    sp->unk1CC = 2;
+                    sp->mode = 2;
                 }
             }
         scrolled:
-            if (sp->unk1D2 != top) {
-                if (top < sp->unk1D2) {
-                    n = (sp->unk1D2 - top) * 4;
+            if (sp->scroll != top) {
+                if (top < sp->scroll) {
+                    n = (sp->scroll - top) * 4;
                     slot = (top + 3) * 4;
                 } else {
-                    n = (top - sp->unk1D2) * 4;
-                    slot = sp->unk1D2 * 4;
+                    n = (top - sp->scroll) * 4;
+                    slot = sp->scroll * 4;
                 }
-                vs_cd_state.unk4A0 = vs_cd_state.unk4A4;
+                vs_cd_state.load_cursor = vs_cd_state.load_buffer;
                 for (j = 0; j < n; j++, slot++) {
-                    if (slot < sp->unk0.team.count) {
-                        size = cd_read_member(10, sp->unk0.team.kinds[slot],
-                                             vs_cd_state.unk4A0) * 2048;
-                        tim_load_images_at(vs_cd_state.unk4A0, &sp->unk0.team.pos[slot % 12], NULL);
-                        vs_cd_state.unk4A0 = (u_long *)((u8 *)vs_cd_state.unk4A0 + size);
+                    if (slot < sp->state.creature_select.count) {
+                        size = cd_read_member(10, sp->state.creature_select.kinds[slot],
+                                             vs_cd_state.load_cursor) * 2048;
+                        tim_load_images_at(vs_cd_state.load_cursor, &sp->state.creature_select.pos[slot % 12], NULL);
+                        vs_cd_state.load_cursor = (u_long *)((u8 *)vs_cd_state.load_cursor + size);
                     }
                 }
                 DrawSync(0);
             }
         } else if (PRESSED & 0x2000) {
             play_cancel_sound();
-            sp->unk1CC = 1;
+            sp->mode = 1;
         } else if (PRESSED & 0x800) {
             DAT_8006335c = 1;
         } else if (PRESSED & 0x400) {
             DAT_8006335c = 0;
         }
-        vs_pad_state.pads[0].unk8 = 0;
-        vs_pad_state.pads[1].unk8 = 0;
-        vs_pad_state.pads[0].unkC = 0;
-        vs_pad_state.pads[1].unkC = 0;
+        vs_pad_state.pads[0].pressed = 0;
+        vs_pad_state.pads[1].pressed = 0;
+        vs_pad_state.pads[0].pressed_repeat = 0;
+        vs_pad_state.pads[1].pressed_repeat = 0;
         menu_creature_select_draw(player);
-        sp->unk1D4 = (sp->unk1D4 + 1) % 32;
+        sp->blink_phase = (sp->blink_phase + 1) % 32;
     }
 }
 
@@ -939,44 +939,44 @@ void menu_creature_select_run(int player)
     u32 mask;
     u32 word;
 
-    sp->unk1D6 = 0;
-    sp->unk0.team.pos[0].vx = 640;
-    sp->unk0.team.pos[0].vy = 144;
-    sp->unk0.team.pos[1].vx = 640;
-    sp->unk0.team.pos[1].vy = 192;
-    sp->unk0.team.pos[2].vx = 736;
-    sp->unk0.team.pos[2].vy = 144;
-    sp->unk0.team.pos[3].vx = 736;
-    sp->unk0.team.pos[3].vy = 192;
-    sp->unk0.team.pos[4].vx = 832;
-    sp->unk0.team.pos[4].vy = 144;
-    sp->unk0.team.pos[5].vx = 928;
-    sp->unk0.team.pos[5].vy = 0;
-    sp->unk0.team.pos[6].vx = 928;
-    sp->unk0.team.pos[6].vy = 48;
-    sp->unk0.team.pos[7].vx = 928;
-    sp->unk0.team.pos[7].vy = 96;
-    sp->unk0.team.pos[8].vx = 928;
-    sp->unk0.team.pos[8].vy = 144;
-    sp->unk0.team.pos[9].vx = 928;
-    sp->unk0.team.pos[9].vy = 192;
-    sp->unk0.team.pos[10].vx = 640;
-    sp->unk0.team.pos[10].vy = 256;
-    sp->unk0.team.pos[11].vx = 640;
-    sp->unk0.team.pos[11].vy = 304;
-    sp->unk0.team.pos[12].vx = 640;
-    sp->unk0.team.pos[12].vy = 352;
-    sp->unk0.team.pos[13].vx = 640;
-    sp->unk0.team.pos[13].vy = 400;
-    sp->unk0.team.pos[14].vx = 640;
-    sp->unk0.team.pos[14].vy = 448;
-    sp->unk0.team.pos[15].vx = 640;
-    sp->unk0.team.pos[15].vy = 0;
-    sp->unk0.team.kinds = mem_alloc_main_ram(151);
-    sp->unk0.team.count = 0;
+    sp->holding = 0;
+    sp->state.creature_select.pos[0].vx = 640;
+    sp->state.creature_select.pos[0].vy = 144;
+    sp->state.creature_select.pos[1].vx = 640;
+    sp->state.creature_select.pos[1].vy = 192;
+    sp->state.creature_select.pos[2].vx = 736;
+    sp->state.creature_select.pos[2].vy = 144;
+    sp->state.creature_select.pos[3].vx = 736;
+    sp->state.creature_select.pos[3].vy = 192;
+    sp->state.creature_select.pos[4].vx = 832;
+    sp->state.creature_select.pos[4].vy = 144;
+    sp->state.creature_select.pos[5].vx = 928;
+    sp->state.creature_select.pos[5].vy = 0;
+    sp->state.creature_select.pos[6].vx = 928;
+    sp->state.creature_select.pos[6].vy = 48;
+    sp->state.creature_select.pos[7].vx = 928;
+    sp->state.creature_select.pos[7].vy = 96;
+    sp->state.creature_select.pos[8].vx = 928;
+    sp->state.creature_select.pos[8].vy = 144;
+    sp->state.creature_select.pos[9].vx = 928;
+    sp->state.creature_select.pos[9].vy = 192;
+    sp->state.creature_select.pos[10].vx = 640;
+    sp->state.creature_select.pos[10].vy = 256;
+    sp->state.creature_select.pos[11].vx = 640;
+    sp->state.creature_select.pos[11].vy = 304;
+    sp->state.creature_select.pos[12].vx = 640;
+    sp->state.creature_select.pos[12].vy = 352;
+    sp->state.creature_select.pos[13].vx = 640;
+    sp->state.creature_select.pos[13].vy = 400;
+    sp->state.creature_select.pos[14].vx = 640;
+    sp->state.creature_select.pos[14].vy = 448;
+    sp->state.creature_select.pos[15].vx = 640;
+    sp->state.creature_select.pos[15].vy = 0;
+    sp->state.creature_select.kinds = mem_alloc_main_ram(151);
+    sp->state.creature_select.count = 0;
     for (i = 0; i < 151; i++)
-        sp->unk0.team.kinds[i] = 0xff;
-    owned = saves[player].unk18BC.unk0;
+        sp->state.creature_select.kinds[i] = 0xff;
+    owned = saves[player].versus.creature_killed_bits;
     for (i = 0; i < 151; i++) {
         mask = 1;
         word = owned[i / 32];
@@ -988,70 +988,70 @@ void menu_creature_select_run(int player)
             i != 89 && i != 90 && i != 91 && i != 92 && i != 106 && i != 108 && i != 109 &&
             i != 116 && i != 118 && i != 131 && i != 132 && i != 133 && i != 135 &&
             i != 140 && i != 142 && i != 150)
-            sp->unk0.team.kinds[sp->unk0.team.count++] = i;
+            sp->state.creature_select.kinds[sp->state.creature_select.count++] = i;
     }
-    sp->unk0.team.rows = sp->unk0.team.count / 4;
-    sp->unk0.team.last = sp->unk0.team.count % 4;
-    if (sp->unk0.team.last == 0) {
-        sp->unk0.team.last = 4;
-        sp->unk0.team.rows--;
+    sp->state.creature_select.rows = sp->state.creature_select.count / 4;
+    sp->state.creature_select.last = sp->state.creature_select.count % 4;
+    if (sp->state.creature_select.last == 0) {
+        sp->state.creature_select.last = 4;
+        sp->state.creature_select.rows--;
     }
-    sp->unk0.team.items = mem_alloc_main_ram(0x2000);
-    cd_read_member(10, 400, (u_long *)sp->unk0.team.items);
-    buf = vs_cd_state.unk4A4;
+    sp->state.creature_select.entries = mem_alloc_main_ram(0x2000);
+    cd_read_member(10, 400, (u_long *)sp->state.creature_select.entries);
+    buf = vs_cd_state.load_buffer;
     cd_read_member(8, 2, buf);
     copy_words((u32 *)&vs_menu_messages[1], (u32 *)&buf[1], 0x1500);
     buf = (u_long *)((buf[0] + sizeof(*buf)) + (u8 *)buf);
-    tim_load_images_at(buf + 1, &sp->unk1E0, &sp->unk1E4);
+    tim_load_images_at(buf + 1, &sp->item_font_vram, &sp->item_font_clut);
     DrawSync(0);
-    buf = vs_cd_state.unk4A4;
+    buf = vs_cd_state.load_buffer;
     cd_read_member(8, 1, buf);
     copy_words((u32 *)&vs_menu_messages[0], (u32 *)&buf[1], 0x1500);
     buf = (u_long *)((buf[0] + sizeof(*buf)) + (u8 *)buf);
-    tim_load_images_at(buf + 1, &sp->unk1D8, &sp->unk1DC);
+    tim_load_images_at(buf + 1, &sp->message_font_vram, &sp->message_font_clut);
     DrawSync(0);
-    cd_read_member(8, 7, vs_cd_state.unk4A4);
-    tim_load_images_at(vs_cd_state.unk4A4, &tex, &clut);
+    cd_read_member(8, 7, vs_cd_state.load_buffer);
+    tim_load_images_at(vs_cd_state.load_buffer, &tex, &clut);
     DrawSync(0);
-    vs_cd_state.unk4A0 = vs_cd_state.unk4A4;
+    vs_cd_state.load_cursor = vs_cd_state.load_buffer;
     n = 12;
-    if (sp->unk0.team.count < 13)
-        n = sp->unk0.team.count;
+    if (sp->state.creature_select.count < 13)
+        n = sp->state.creature_select.count;
     for (i = 0; i < n; i++) {
-        size = cd_read_member(10, sp->unk0.team.kinds[i], vs_cd_state.unk4A0) * 2048;
-        tim_load_images_at(vs_cd_state.unk4A0, &sp->unk0.team.pos[i], NULL);
-        vs_cd_state.unk4A0 = (u_long *)((u8 *)vs_cd_state.unk4A0 + size);
+        size = cd_read_member(10, sp->state.creature_select.kinds[i], vs_cd_state.load_cursor) * 2048;
+        tim_load_images_at(vs_cd_state.load_cursor, &sp->state.creature_select.pos[i], NULL);
+        vs_cd_state.load_cursor = (u_long *)((u8 *)vs_cd_state.load_cursor + size);
     }
     if (DrawSync(1) > 8)
         DrawSync(0);
-    vs_cd_state.unk4A0 = vs_cd_state.unk4A4;
+    vs_cd_state.load_cursor = vs_cd_state.load_buffer;
     for (i = 0; i < 3; i++) {
-        if (teams[player].slot[i] != -1) {
-            size = cd_read_member(10, teams[player].slot[i], vs_cd_state.unk4A0) * 2048;
-            tim_load_images_at(vs_cd_state.unk4A0, &sp->unk0.team.pos[12 + i], NULL);
-            vs_cd_state.unk4A0 = (u_long *)((u8 *)vs_cd_state.unk4A0 + size);
+        if (lineups[player].slot[i] != -1) {
+            size = cd_read_member(10, lineups[player].slot[i], vs_cd_state.load_cursor) * 2048;
+            tim_load_images_at(vs_cd_state.load_cursor, &sp->state.creature_select.pos[12 + i], NULL);
+            vs_cd_state.load_cursor = (u_long *)((u8 *)vs_cd_state.load_cursor + size);
         }
     }
     clear_vram();
     DrawSync(0);
-    sp->unk1CC = 1;
-    sp->unk1D0 = 0;
-    sp->unk1D2 = 0;
+    sp->mode = 1;
+    sp->cursor = 0;
+    sp->scroll = 0;
     menu_creature_select_loop(sp, player);
-    free(sp->unk0.team.kinds);
-    free(sp->unk0.team.items);
+    free(sp->state.creature_select.kinds);
+    free(sp->state.creature_select.entries);
     pos.vx = 640;
     pos.vy = 124;
-    vs_cd_state.unk4A0 = buf = vs_cd_state.unk4A4;
+    vs_cd_state.load_cursor = buf = vs_cd_state.load_buffer;
     cd_read_member(8, 4, buf);
     copy_words((u32 *)&vs_menu_messages[1], (u32 *)&buf[1], 0x1500);
-    tim = (u_long *)((u8 *)buf + vs_cd_state.unk4A4[0]);
-    tim_load_images_at(tim + 2, &sp->unk1E0, &sp->unk1E4);
+    tim = (u_long *)((u8 *)buf + vs_cd_state.load_buffer[0]);
+    tim_load_images_at(tim + 2, &sp->item_font_vram, &sp->item_font_clut);
     DrawSync(0);
     cd_read_member(8, 8, buf);
     copy_words((u32 *)&vs_menu_messages[0], (u32 *)&buf[1], 0x1500);
-    tim = (u_long *)((u8 *)buf + vs_cd_state.unk4A4[0]);
-    tim_load_images_at(tim + 2, &sp->unk1D8, &sp->unk1DC);
+    tim = (u_long *)((u8 *)buf + vs_cd_state.load_buffer[0]);
+    tim_load_images_at(tim + 2, &sp->message_font_vram, &sp->message_font_clut);
     DrawSync(0);
     cd_read_member(8, 7, buf);
     tim_load_images_at(buf, &tex, &clut);
@@ -1067,7 +1067,7 @@ void menu_creature_select_run(int player)
         tim_load_images_at(buf, &pos, NULL);
         DrawSync(1);
     }
-    sp->unk1D6 = 0;
+    sp->holding = 0;
 }
 
 /*
@@ -1083,30 +1083,30 @@ ADDRESS(0x800193e8, 0x224)
 int item_request_any_available(int player)
 {
     int found = 0;
-    VsSaveSub *mine = &saves[player].unk18BC;
-    VsSaveSub *other = &saves[~player & 1].unk18BC;
+    VsSaveVersus *mine = &saves[player].versus;
+    VsSaveVersus *other = &saves[~player & 1].versus;
     int i;
 
     for (i = 0; i < 266; i++) {
         u32 mask;
         u32 word;
 
-        if (mine->unk150[i] != 0 || other->unk150[i] == 0)
+        if (mine->inventory_counts[i] != 0 || other->inventory_counts[i] == 0)
             continue;
         mask = 1;
-        word = saves[player].unk14CC[i / 32];
+        word = saves[player].collected_bits[i / 32];
         mask <<= i % 32;
         if (word & mask) {
-            if (mine->unk14[i] == 0)
+            if (mine->items_lost[i] == 0)
                 continue;
         }
-        if (other->unk2B4[0] == i || other->unk2B4[1] == i || other->unk2B4[2] == i
-            || other->unk2B4[3] == i || other->unk2B4[4] == i || other->unk2B4[5] == i
-            || other->unk2B4[6] == i || other->unk2B4[7] == i || other->unk2B4[8] == i
-            || other->unk2B4[9] == i || other->unk2B4[10] == i || other->unk2B4[11] == i
-            || other->unk2B4[12] == i || other->unk2B4[13] == i || other->unk2B4[14] == i
-            || other->unk2B4[15] == i || other->unk2B4[16] == i || other->unk2B4[17] == i
-            || other->unk2B4[18] == i || other->unk2B4[19] == i || other->unk2B4[20] == i)
+        if (other->equipment[0] == i || other->equipment[1] == i || other->equipment[2] == i
+            || other->equipment[3] == i || other->equipment[4] == i || other->equipment[5] == i
+            || other->equipment[6] == i || other->equipment[7] == i || other->equipment[8] == i
+            || other->equipment[9] == i || other->equipment[10] == i || other->equipment[11] == i
+            || other->equipment[12] == i || other->equipment[13] == i || other->equipment[14] == i
+            || other->equipment[15] == i || other->equipment[16] == i || other->equipment[17] == i
+            || other->equipment[18] == i || other->equipment[19] == i || other->equipment[20] == i)
             continue;
         found = 1;
     }
@@ -1126,9 +1126,9 @@ void tim_load_member_async(int archive, int member, int x, int y);
 void menu_item_request_draw(int page);
 void exit(int code);
 
-#define TOP (sp->unk0.menu.half[0])
-#define COUNT (sp->unk0.menu.half[1])
-#define IDS (sp->unk0.menu.list.ids)
+#define TOP (sp->state.menu.half[0])
+#define COUNT (sp->state.menu.half[1])
+#define IDS (sp->state.menu.list.ids)
 
 ADDRESS(0x8001960c, 0xb18)
 void menu_item_request_run(int player)
@@ -1141,8 +1141,8 @@ void menu_item_request_run(int player)
     DVECTOR clut = {544, 502};
     DVECTOR pos;
     VsMenuScratch *sp = VS_MENU_SCRATCH;
-    VsSaveSub *mine;
-    VsSaveSub *other;
+    VsSaveVersus *mine;
+    VsSaveVersus *other;
     u_long *buf;
     s16 shown;
     s16 id;
@@ -1159,33 +1159,33 @@ void menu_item_request_run(int player)
     if (IDS == NULL)
         exit(1);
     memset((u8 *)IDS, 0xff, 0x276);
-    mine = &saves[player].unk18BC;
-    other = &saves[~player & 1].unk18BC;
+    mine = &saves[player].versus;
+    other = &saves[~player & 1].versus;
     COUNT = 1;
     IDS[0] = -2;
     for (i = 0; i < 266; i++) {
         u32 mask;
         u32 word;
 
-        if (mine->unk150[i] != 0 || other->unk150[i] == 0)
+        if (mine->inventory_counts[i] != 0 || other->inventory_counts[i] == 0)
             continue;
         mask = 1;
-        word = saves[player].unk14CC[i / 32];
+        word = saves[player].collected_bits[i / 32];
         mask <<= i % 32;
-        if ((word & mask) && mine->unk14[i] == 0)
+        if ((word & mask) && mine->items_lost[i] == 0)
             continue;
-        if (other->unk2B4[0] == i || other->unk2B4[1] == i || other->unk2B4[2] == i
-            || other->unk2B4[3] == i || other->unk2B4[4] == i || other->unk2B4[5] == i
-            || other->unk2B4[6] == i || other->unk2B4[7] == i || other->unk2B4[8] == i
-            || other->unk2B4[9] == i || other->unk2B4[10] == i || other->unk2B4[11] == i
-            || other->unk2B4[12] == i || other->unk2B4[13] == i || other->unk2B4[14] == i
-            || other->unk2B4[15] == i || other->unk2B4[16] == i || other->unk2B4[17] == i
-            || other->unk2B4[18] == i || other->unk2B4[19] == i || other->unk2B4[20] == i)
+        if (other->equipment[0] == i || other->equipment[1] == i || other->equipment[2] == i
+            || other->equipment[3] == i || other->equipment[4] == i || other->equipment[5] == i
+            || other->equipment[6] == i || other->equipment[7] == i || other->equipment[8] == i
+            || other->equipment[9] == i || other->equipment[10] == i || other->equipment[11] == i
+            || other->equipment[12] == i || other->equipment[13] == i || other->equipment[14] == i
+            || other->equipment[15] == i || other->equipment[16] == i || other->equipment[17] == i
+            || other->equipment[18] == i || other->equipment[19] == i || other->equipment[20] == i)
             continue;
         IDS[COUNT++] = i;
     }
-    sp->unk1CC = 2;
-    sp->unk1D0 = 0;
+    sp->mode = 2;
+    sp->cursor = 0;
     TOP = 0;
     if (requested_items[player] != -1) {
         /* The count is never stepped: the search ends only by its match. */
@@ -1194,13 +1194,13 @@ void menu_item_request_run(int player)
                 break;
         }
         if (COUNT < 12 || j < 6) {
-            sp->unk1D0 = j;
+            sp->cursor = j;
         } else if (j > COUNT - 5) {
             TOP = COUNT - 11;
-            sp->unk1D0 = j - TOP;
+            sp->cursor = j - TOP;
         } else {
             TOP = j - 5;
-            sp->unk1D0 = 5;
+            sp->cursor = 5;
         }
     }
     shown = -1;
@@ -1208,18 +1208,18 @@ void menu_item_request_run(int player)
     DrawSync(0);
     for (;;) {
         if (player) {
-            vs_pad_state.pads[0].unk8 = 0;
-            vs_pad_state.pads[0].unkC = 0;
-            vs_pad_state.pads[0].unk0 = 0;
+            vs_pad_state.pads[0].pressed = 0;
+            vs_pad_state.pads[0].pressed_repeat = 0;
+            vs_pad_state.pads[0].held = 0;
         } else {
-            vs_pad_state.pads[1].unk8 = 0;
-            vs_pad_state.pads[1].unkC = 0;
-            vs_pad_state.pads[1].unk0 = 0;
+            vs_pad_state.pads[1].pressed = 0;
+            vs_pad_state.pads[1].pressed_repeat = 0;
+            vs_pad_state.pads[1].held = 0;
         }
         if (PRESSED & 0x2000) {
             play_cancel_sound();
-            if (sp->unk1CC & 0x8000) {
-                sp->unk1CC &= 0x7fff;
+            if (sp->mode & 0x8000) {
+                sp->mode &= 0x7fff;
             } else {
                 while ((s16)cd_queue_busy() != 0)
                     ;
@@ -1228,8 +1228,8 @@ void menu_item_request_run(int player)
         }
         if (PRESSED & 0x4000) {
             play_confirm_sound();
-            if (sp->unk1CC & 0x8000) {
-                s16 chosen = IDS[TOP + sp->unk1D0];
+            if (sp->mode & 0x8000) {
+                s16 chosen = IDS[TOP + sp->cursor];
 
                 if (chosen == -2)
                     chosen = -1;
@@ -1238,54 +1238,54 @@ void menu_item_request_run(int player)
                     ;
                 break;
             }
-            if (IDS[(s16)(TOP + sp->unk1D0)] != -1)
-                sp->unk1CC |= 0x8000;
+            if (IDS[(s16)(TOP + sp->cursor)] != -1)
+                sp->mode |= 0x8000;
         }
-        if (!(sp->unk1CC & 0x8000)) {
+        if (!(sp->mode & 0x8000)) {
             if (REPEAT & 0x10) {
                 play_cursor_sound();
-                if (vs_pad_state.pads[0].unk0 & 0x8000) {
+                if (vs_pad_state.pads[0].held & 0x8000) {
                     if (COUNT < 11) {
-                        sp->unk1D0 = 0;
+                        sp->cursor = 0;
                     } else {
                         TOP -= 11;
                         if (TOP < 0) {
                             if (TOP + 10 < 0)
-                                sp->unk1D0 = 0;
+                                sp->cursor = 0;
                             TOP = 0;
                         }
                     }
-                } else if (sp->unk1D0 > 0) {
-                    sp->unk1D0--;
+                } else if (sp->cursor > 0) {
+                    sp->cursor--;
                 } else if (TOP > 0) {
                     TOP--;
                 } else {
                     TOP = 0;
-                    sp->unk1D0 = 0;
+                    sp->cursor = 0;
                 }
-                vs_pad_state.pads[0].unkC = 0;
+                vs_pad_state.pads[0].pressed_repeat = 0;
             }
             if (REPEAT & 0x40) {
                 play_cursor_sound();
-                if ((vs_pad_state.pads[0].unk0 | vs_pad_state.pads[1].unk0) & 0x8000) {
+                if ((vs_pad_state.pads[0].held | vs_pad_state.pads[1].held) & 0x8000) {
                     if (COUNT >= 11) {
                         TOP += 11;
                         if (TOP > COUNT - 11) {
                             if (TOP >= COUNT)
-                                sp->unk1D0 = 10;
+                                sp->cursor = 10;
                             TOP = COUNT - 11;
                         }
                     } else {
-                        sp->unk1D0 = COUNT - 1;
+                        sp->cursor = COUNT - 1;
                     }
-                } else if (COUNT - 1 > sp->unk1D0 + TOP) {
-                    if (sp->unk1D0 < 10) {
-                        sp->unk1D0++;
+                } else if (COUNT - 1 > sp->cursor + TOP) {
+                    if (sp->cursor < 10) {
+                        sp->cursor++;
                     } else if (TOP < COUNT - 11) {
                         TOP++;
                     } else {
                         TOP = COUNT - 11;
-                        sp->unk1D0 = COUNT - TOP - 1;
+                        sp->cursor = COUNT - TOP - 1;
                     }
                 }
             }
@@ -1295,11 +1295,11 @@ void menu_item_request_run(int player)
                     TOP -= 11;
                     if (TOP < 0) {
                         if (TOP + 10 < 0)
-                            sp->unk1D0 = 0;
+                            sp->cursor = 0;
                         TOP = 0;
                     }
                 } else {
-                    sp->unk1D0 = 0;
+                    sp->cursor = 0;
                     if (REPEAT & 0x200)
                         play_cursor_sound();
                 }
@@ -1307,40 +1307,40 @@ void menu_item_request_run(int player)
                     TOP += 11;
                     if (TOP > COUNT - 11) {
                         if (TOP >= COUNT)
-                            sp->unk1D0 = 10;
+                            sp->cursor = 10;
                         TOP = COUNT - 11;
                     }
                 } else {
-                    sp->unk1D0 = COUNT - 1;
+                    sp->cursor = COUNT - 1;
                 }
             }
-            if (sp->unk1CC == 2 && (s16)cd_queue_busy() == 0) {
-                id = IDS[TOP + sp->unk1D0];
+            if (sp->mode == 2 && (s16)cd_queue_busy() == 0) {
+                id = IDS[TOP + sp->cursor];
                 if (shown != id && id != -1 && id != -2) {
                     tim_load_member_async(11, vis_table_c.types[id].unk5[0] + 200, 640, 0);
                     shown = id;
                 }
             }
         }
-        vs_pad_state.pads[0].unk8 = 0;
-        vs_pad_state.pads[1].unk8 = 0;
-        vs_pad_state.pads[0].unkC = 0;
-        vs_pad_state.pads[1].unkC = 0;
+        vs_pad_state.pads[0].pressed = 0;
+        vs_pad_state.pads[1].pressed = 0;
+        vs_pad_state.pads[0].pressed_repeat = 0;
+        vs_pad_state.pads[1].pressed_repeat = 0;
         menu_item_request_draw(player);
-        sp->unk1D4 = (sp->unk1D4 + 1) % 32;
+        sp->blink_phase = (sp->blink_phase + 1) % 32;
     }
     free(IDS);
     pos.vx = 640;
     pos.vy = 124;
     if (requested_items[0] != -1) {
-        cd_read_member(11, vis_table_c.types[requested_items[0]].unk5[0], vs_cd_state.unk4A4);
-        tim_load_images_at(vs_cd_state.unk4A4, &pos, NULL);
+        cd_read_member(11, vis_table_c.types[requested_items[0]].unk5[0], vs_cd_state.load_buffer);
+        tim_load_images_at(vs_cd_state.load_buffer, &pos, NULL);
         DrawSync(0);
     }
     pos.vy += 28;
     if (requested_item_2p != -1) {
-        cd_read_member(11, vis_table_c.types[requested_item_2p].unk5[0], vs_cd_state.unk4A4);
-        tim_load_images_at(vs_cd_state.unk4A4, &pos, NULL);
+        cd_read_member(11, vis_table_c.types[requested_item_2p].unk5[0], vs_cd_state.load_buffer);
+        tim_load_images_at(vs_cd_state.load_buffer, &pos, NULL);
         DrawSync(1);
     }
 }
@@ -1363,10 +1363,10 @@ void card_clear_sw_events(void)
 {
     VsMenuScratch *sp = VS_MENU_SCRATCH;
 
-    TestEvent(sp->unk0.card.sw_events[0]);
-    TestEvent(sp->unk0.card.sw_events[1]);
-    TestEvent(sp->unk0.card.sw_events[2]);
-    TestEvent(sp->unk0.card.sw_events[3]);
+    TestEvent(sp->state.card.sw_events[0]);
+    TestEvent(sp->state.card.sw_events[1]);
+    TestEvent(sp->state.card.sw_events[2]);
+    TestEvent(sp->state.card.sw_events[3]);
 }
 
 /* Clears the four hardware card events. */
@@ -1375,10 +1375,10 @@ void card_clear_hw_events(void)
 {
     VsMenuScratch *sp = VS_MENU_SCRATCH;
 
-    TestEvent(sp->unk0.card.hw_events[0]);
-    TestEvent(sp->unk0.card.hw_events[1]);
-    TestEvent(sp->unk0.card.hw_events[2]);
-    TestEvent(sp->unk0.card.hw_events[3]);
+    TestEvent(sp->state.card.hw_events[0]);
+    TestEvent(sp->state.card.hw_events[1]);
+    TestEvent(sp->state.card.hw_events[2]);
+    TestEvent(sp->state.card.hw_events[3]);
 }
 
 /* Opens and enables the eight card events. */
@@ -1388,22 +1388,22 @@ void card_open_events(void)
     VsMenuScratch *sp = VS_MENU_SCRATCH;
 
     EnterCriticalSection();
-    sp->unk0.card.sw_events[0] = OpenEvent(SwCARD, EvSpIOE, EvMdNOINTR, NULL);
-    sp->unk0.card.sw_events[1] = OpenEvent(SwCARD, EvSpERROR, EvMdNOINTR, NULL);
-    sp->unk0.card.sw_events[2] = OpenEvent(SwCARD, EvSpTIMOUT, EvMdNOINTR, NULL);
-    sp->unk0.card.sw_events[3] = OpenEvent(SwCARD, EvSpNEW, EvMdNOINTR, NULL);
-    sp->unk0.card.hw_events[0] = OpenEvent(HwCARD, EvSpIOE, EvMdNOINTR, NULL);
-    sp->unk0.card.hw_events[1] = OpenEvent(HwCARD, EvSpERROR, EvMdNOINTR, NULL);
-    sp->unk0.card.hw_events[2] = OpenEvent(HwCARD, EvSpTIMOUT, EvMdNOINTR, NULL);
-    sp->unk0.card.hw_events[3] = OpenEvent(HwCARD, EvSpNEW, EvMdNOINTR, NULL);
-    EnableEvent(sp->unk0.card.sw_events[0]);
-    EnableEvent(sp->unk0.card.sw_events[1]);
-    EnableEvent(sp->unk0.card.sw_events[2]);
-    EnableEvent(sp->unk0.card.sw_events[3]);
-    EnableEvent(sp->unk0.card.hw_events[0]);
-    EnableEvent(sp->unk0.card.hw_events[1]);
-    EnableEvent(sp->unk0.card.hw_events[2]);
-    EnableEvent(sp->unk0.card.hw_events[3]);
+    sp->state.card.sw_events[0] = OpenEvent(SwCARD, EvSpIOE, EvMdNOINTR, NULL);
+    sp->state.card.sw_events[1] = OpenEvent(SwCARD, EvSpERROR, EvMdNOINTR, NULL);
+    sp->state.card.sw_events[2] = OpenEvent(SwCARD, EvSpTIMOUT, EvMdNOINTR, NULL);
+    sp->state.card.sw_events[3] = OpenEvent(SwCARD, EvSpNEW, EvMdNOINTR, NULL);
+    sp->state.card.hw_events[0] = OpenEvent(HwCARD, EvSpIOE, EvMdNOINTR, NULL);
+    sp->state.card.hw_events[1] = OpenEvent(HwCARD, EvSpERROR, EvMdNOINTR, NULL);
+    sp->state.card.hw_events[2] = OpenEvent(HwCARD, EvSpTIMOUT, EvMdNOINTR, NULL);
+    sp->state.card.hw_events[3] = OpenEvent(HwCARD, EvSpNEW, EvMdNOINTR, NULL);
+    EnableEvent(sp->state.card.sw_events[0]);
+    EnableEvent(sp->state.card.sw_events[1]);
+    EnableEvent(sp->state.card.sw_events[2]);
+    EnableEvent(sp->state.card.sw_events[3]);
+    EnableEvent(sp->state.card.hw_events[0]);
+    EnableEvent(sp->state.card.hw_events[1]);
+    EnableEvent(sp->state.card.hw_events[2]);
+    EnableEvent(sp->state.card.hw_events[3]);
     ExitCriticalSection();
 }
 
@@ -1414,22 +1414,22 @@ void card_close_events(void)
     VsMenuScratch *sp = VS_MENU_SCRATCH;
 
     EnterCriticalSection();
-    DisableEvent(sp->unk0.card.sw_events[0]);
-    DisableEvent(sp->unk0.card.sw_events[1]);
-    DisableEvent(sp->unk0.card.sw_events[2]);
-    DisableEvent(sp->unk0.card.sw_events[3]);
-    DisableEvent(sp->unk0.card.hw_events[0]);
-    DisableEvent(sp->unk0.card.hw_events[1]);
-    DisableEvent(sp->unk0.card.hw_events[2]);
-    DisableEvent(sp->unk0.card.hw_events[3]);
-    CloseEvent(sp->unk0.card.sw_events[0]);
-    CloseEvent(sp->unk0.card.sw_events[1]);
-    CloseEvent(sp->unk0.card.sw_events[2]);
-    CloseEvent(sp->unk0.card.sw_events[3]);
-    CloseEvent(sp->unk0.card.hw_events[0]);
-    CloseEvent(sp->unk0.card.hw_events[1]);
-    CloseEvent(sp->unk0.card.hw_events[2]);
-    CloseEvent(sp->unk0.card.hw_events[3]);
+    DisableEvent(sp->state.card.sw_events[0]);
+    DisableEvent(sp->state.card.sw_events[1]);
+    DisableEvent(sp->state.card.sw_events[2]);
+    DisableEvent(sp->state.card.sw_events[3]);
+    DisableEvent(sp->state.card.hw_events[0]);
+    DisableEvent(sp->state.card.hw_events[1]);
+    DisableEvent(sp->state.card.hw_events[2]);
+    DisableEvent(sp->state.card.hw_events[3]);
+    CloseEvent(sp->state.card.sw_events[0]);
+    CloseEvent(sp->state.card.sw_events[1]);
+    CloseEvent(sp->state.card.sw_events[2]);
+    CloseEvent(sp->state.card.sw_events[3]);
+    CloseEvent(sp->state.card.hw_events[0]);
+    CloseEvent(sp->state.card.hw_events[1]);
+    CloseEvent(sp->state.card.hw_events[2]);
+    CloseEvent(sp->state.card.hw_events[3]);
     ExitCriticalSection();
 }
 
@@ -1441,10 +1441,10 @@ int card_wait_sw_event(void)
     long ioe, error, timeout, new;
 
     for (;;) {
-        ioe = TestEvent(sp->unk0.card.sw_events[0]);
-        error = TestEvent(sp->unk0.card.sw_events[1]);
-        timeout = TestEvent(sp->unk0.card.sw_events[2]);
-        new = TestEvent(sp->unk0.card.sw_events[3]);
+        ioe = TestEvent(sp->state.card.sw_events[0]);
+        error = TestEvent(sp->state.card.sw_events[1]);
+        timeout = TestEvent(sp->state.card.sw_events[2]);
+        new = TestEvent(sp->state.card.sw_events[3]);
         if (ioe == 1)
             return 0;
         if (error == 1)
@@ -1464,10 +1464,10 @@ int card_wait_hw_event(void)
     long ioe, error, timeout, new;
 
     for (;;) {
-        ioe = TestEvent(sp->unk0.card.hw_events[0]);
-        error = TestEvent(sp->unk0.card.hw_events[1]);
-        timeout = TestEvent(sp->unk0.card.hw_events[2]);
-        new = TestEvent(sp->unk0.card.hw_events[3]);
+        ioe = TestEvent(sp->state.card.hw_events[0]);
+        error = TestEvent(sp->state.card.hw_events[1]);
+        timeout = TestEvent(sp->state.card.hw_events[2]);
+        new = TestEvent(sp->state.card.hw_events[3]);
         if (ioe == 1)
             return 0;
         if (error == 1)
@@ -1494,16 +1494,16 @@ void card_check_player_save(int port)
     strcat(path, save_file_names[port]);
     fd = open(path, O_RDONLY);
     if (fd == -1) {
-        sp->unk1B8->status = 4;
+        sp->card->status = 4;
         return;
     }
     lseek(fd, 512, SEEK_SET);
     read(fd, buf, 128);
     close(fd);
-    if (saves[port].unk0 != buf[0])
-        sp->unk1B8->status = 4;
+    if (saves[port].save_id != buf[0])
+        sp->card->status = 4;
     else
-        sp->unk1B8->status = 0;
+        sp->card->status = 0;
 }
 
 /* Scans card `port`: free space when unformatted space is asked for, then
@@ -1517,52 +1517,52 @@ void card_read_directory(int port)
     long used[8];
     int i, n, total;
 
-    sp->unk1B8 = &sp->unk0.card.ports[port];
-    if (sp->unk1CC & 0xff00) {
+    sp->card = &sp->state.card.ports[port];
+    if (sp->mode & 0xff00) {
         strcpy(path, "bu");
         strcat(path, itoa(port));
         strcat(path, "0:*");
-        sp->unk1B8->count = 0;
-        if (firstfile(path, &dir[sp->unk1B8->count])) {
+        sp->card->count = 0;
+        if (firstfile(path, &dir[sp->card->count])) {
             do {
-                sp->unk1B8->count++;
-            } while (nextfile(&dir[sp->unk1B8->count]));
+                sp->card->count++;
+            } while (nextfile(&dir[sp->card->count]));
         }
         total = 0;
-        for (i = 0; i < sp->unk1B8->count; i++)
+        for (i = 0; i < sp->card->count; i++)
             total += dir[i].size;
         if (total > 0x1a000)
-            sp->unk1B8->unkC8 = 0;
+            sp->card->has_room = 0;
         else
-            sp->unk1B8->unkC8 = 1;
+            sp->card->has_room = 1;
     }
     strcpy(path, "bu");
     strcat(path, itoa(port));
     strcat(path, "0:");
     strcat(path, "BASLUS-00863FS_ST");
     strcat(path, "*");
-    sp->unk1B8->count = 0;
-    if (firstfile(path, &dir[sp->unk1B8->count])) {
+    sp->card->count = 0;
+    if (firstfile(path, &dir[sp->card->count])) {
         do {
-            sp->unk1B8->count++;
-        } while (nextfile(&dir[sp->unk1B8->count]));
+            sp->card->count++;
+        } while (nextfile(&dir[sp->card->count]));
     }
-    if (sp->unk1B8->count == 0) {
-        sp->unk1C8 = 1;
-        if (sp->unk1CC & 0xff00) {
-            if (sp->unk1B8->unkC8 == 0)
-                sp->unk1B8->status = 5;
+    if (sp->card->count == 0) {
+        sp->free_file_number = 1;
+        if (sp->mode & 0xff00) {
+            if (sp->card->has_room == 0)
+                sp->card->status = 5;
             else
-                sp->unk1B8->status = 0;
+                sp->card->status = 0;
         } else {
-            sp->unk1B8->status = 4;
+            sp->card->status = 4;
         }
         return;
     }
     for (i = 0; i < 8; i++)
         used[i] = 0;
-    for (i = 0; i < sp->unk1B8->count; i++) {
-        strcpy(sp->unk1B8->files[i].name, dir[i].name);
+    for (i = 0; i < sp->card->count; i++) {
+        strcpy(sp->card->files[i].name, dir[i].name);
         n = (((u_char *)dir[i].name)[19] - '0') * 10 + (((u_char *)dir[i].name)[20] - '0');
         used[n] = -1;
     }
@@ -1570,8 +1570,8 @@ void card_read_directory(int port)
         if (used[i] != -1)
             break;
     }
-    sp->unk1C8 = i;
-    sp->unk1B8->status = 0;
+    sp->free_file_number = i;
+    sp->card->status = 0;
 }
 
 /* Reads card `port`'s state through the BIOS card events, three tries. */
@@ -1589,26 +1589,26 @@ void card_probe(int port, int new_ok)
         _card_info(port << 4);
         result = card_wait_sw_event();
         if (result == 0) {
-            sp->unk0.card.ports[port].status = 0;
+            sp->state.card.ports[port].status = 0;
         } else if (result == 1) {
             if (tries)
                 continue;
-            sp->unk0.card.ports[port].status = 2;
+            sp->state.card.ports[port].status = 2;
             break;
         } else if (result == 2) {
             if (tries)
                 continue;
-            sp->unk0.card.ports[port].status = result;
+            sp->state.card.ports[port].status = result;
             break;
         } else if (result == 3) {
-            sp->unk0.card.ports[port].status = 1;
+            sp->state.card.ports[port].status = 1;
             if (!new_ok)
                 break;
         }
         card_clear_hw_events();
         _card_clear(port << 4);
         if (card_wait_hw_event()) {
-            sp->unk0.card.ports[port].status = 2;
+            sp->state.card.ports[port].status = 2;
             continue;
         }
         card_clear_sw_events();
@@ -1617,13 +1617,13 @@ void card_probe(int port, int new_ok)
         if (result == 1 || result == 2) {
             if (tries)
                 continue;
-            sp->unk0.card.ports[port].status = 2;
+            sp->state.card.ports[port].status = 2;
             break;
         }
         if (result == 0)
-            sp->unk0.card.ports[port].status = 0;
+            sp->state.card.ports[port].status = 0;
         else if (result == 3)
-            sp->unk0.card.ports[port].status = result;
+            sp->state.card.ports[port].status = result;
         break;
     } while (tries--);
     card_close_events();
@@ -1636,41 +1636,41 @@ s16 card_ask_yes_no(int first)
     VsMenuScratch *sp = VS_MENU_SCRATCH;
     u32 buttons;
 
-    sp->unk1D4 = 0;
-    sp->unk1C6 = 0;
+    sp->blink_phase = 0;
+    sp->dialog_choice = 0;
     for (;;) {
         if (first) {
-            vs_pad_state.pads[0].unk8 = 0;
-            vs_pad_state.pads[0].unkC = 0;
-            vs_pad_state.pads[0].unk0 = 0;
+            vs_pad_state.pads[0].pressed = 0;
+            vs_pad_state.pads[0].pressed_repeat = 0;
+            vs_pad_state.pads[0].held = 0;
         } else {
-            vs_pad_state.pads[1].unk8 = 0;
-            vs_pad_state.pads[1].unkC = 0;
-            vs_pad_state.pads[1].unk0 = 0;
+            vs_pad_state.pads[1].pressed = 0;
+            vs_pad_state.pads[1].pressed_repeat = 0;
+            vs_pad_state.pads[1].held = 0;
         }
-        buttons = vs_pad_state.pads[0].unk8 | vs_pad_state.pads[1].unk8;
+        buttons = vs_pad_state.pads[0].pressed | vs_pad_state.pads[1].pressed;
         if (buttons & 0x4000) {
             play_confirm_sound();
             break;
         }
         if (buttons & 0x2000) {
             play_cancel_sound();
-            sp->unk1C6 = 0;
+            sp->dialog_choice = 0;
             break;
         }
         if (buttons & 0x80) {
             play_cursor_sound();
-            sp->unk1C6 = 1;
+            sp->dialog_choice = 1;
         }
-        if ((vs_pad_state.pads[0].unk8 | vs_pad_state.pads[1].unk8) & 0x20) {
+        if ((vs_pad_state.pads[0].pressed | vs_pad_state.pads[1].pressed) & 0x20) {
             play_cursor_sound();
-            sp->unk1C6 = 0;
+            sp->dialog_choice = 0;
         }
-        vs_pad_state.pads[0].unk8 = 0;
-        vs_pad_state.pads[1].unk8 = 0;
+        vs_pad_state.pads[0].pressed = 0;
+        vs_pad_state.pads[1].pressed = 0;
         card_screen_draw();
     }
-    return sp->unk1C6;
+    return sp->dialog_choice;
 }
 
 /* Picks a card slot: returns nonzero when one was chosen. */
@@ -1680,44 +1680,44 @@ int card_choose_port(int first)
     VsMenuScratch *sp = VS_MENU_SCRATCH;
     u32 buttons;
 
-    sp->unk1D4 = 0;
+    sp->blink_phase = 0;
     for (;;) {
         if (first) {
-            vs_pad_state.pads[0].unk8 = 0;
-            vs_pad_state.pads[0].unkC = 0;
-            vs_pad_state.pads[0].unk0 = 0;
+            vs_pad_state.pads[0].pressed = 0;
+            vs_pad_state.pads[0].pressed_repeat = 0;
+            vs_pad_state.pads[0].held = 0;
         } else {
-            vs_pad_state.pads[1].unk8 = 0;
-            vs_pad_state.pads[1].unkC = 0;
-            vs_pad_state.pads[1].unk0 = 0;
+            vs_pad_state.pads[1].pressed = 0;
+            vs_pad_state.pads[1].pressed_repeat = 0;
+            vs_pad_state.pads[1].held = 0;
         }
-        buttons = vs_pad_state.pads[0].unk8 | vs_pad_state.pads[1].unk8;
+        buttons = vs_pad_state.pads[0].pressed | vs_pad_state.pads[1].pressed;
         if (buttons & 0x4000) {
             play_confirm_sound();
-            sp->unk1CC <<= 1;
+            sp->mode <<= 1;
             break;
         }
         if (buttons & 0x2000) {
             play_cancel_sound();
-            sp->unk1CC = 0;
+            sp->mode = 0;
             break;
         }
-        if ((vs_pad_state.pads[0].unkC | vs_pad_state.pads[1].unkC) & 0x10) {
+        if ((vs_pad_state.pads[0].pressed_repeat | vs_pad_state.pads[1].pressed_repeat) & 0x10) {
             play_cursor_sound();
-            sp->unk1CC = 2;
+            sp->mode = 2;
         }
-        if ((vs_pad_state.pads[0].unkC | vs_pad_state.pads[1].unkC) & 0x40) {
+        if ((vs_pad_state.pads[0].pressed_repeat | vs_pad_state.pads[1].pressed_repeat) & 0x40) {
             play_cursor_sound();
-            sp->unk1CC = 512;
+            sp->mode = 512;
         }
-        vs_pad_state.pads[0].unk8 = 0;
-        vs_pad_state.pads[1].unk8 = 0;
-        vs_pad_state.pads[0].unkC = 0;
-        vs_pad_state.pads[1].unkC = 0;
+        vs_pad_state.pads[0].pressed = 0;
+        vs_pad_state.pads[1].pressed = 0;
+        vs_pad_state.pads[0].pressed_repeat = 0;
+        vs_pad_state.pads[1].pressed_repeat = 0;
         card_screen_draw();
-        sp->unk1D4 = (sp->unk1D4 + 1) % 32;
+        sp->blink_phase = (sp->blink_phase + 1) % 32;
     }
-    return sp->unk1CC != 0;
+    return sp->mode != 0;
 }
 
 /* Reads the three header values of each listed save file; -1 on a read
@@ -1730,19 +1730,19 @@ int card_read_file_headers(void)
     VsCardHeader header;
     int i, fd;
 
-    i = sp->unk1B8->count;
+    i = sp->card->count;
     while (--i != -1) {
         strcpy(path, "bu");
-        strcat(path, itoa(sp->unk1BC));
+        strcat(path, itoa(sp->port));
         strcat(path, "0:");
-        strcat(path, sp->unk1B8->files[i].name);
+        strcat(path, sp->card->files[i].name);
         fd = open(path, O_RDONLY);
         lseek(fd, 0, SEEK_SET);
         if (read(fd, &header, 512) == -1)
             return -1;
-        (i + sp->unk1B8->files)->unk15 = header.unk3D;
-        (i + sp->unk1B8->files)->unk16 = header.unk3E;
-        (i + sp->unk1B8->files)->unk18 = header.unk40;
+        (i + sp->card->files)->area = header.area;
+        (i + sp->card->files)->sp_total = header.sp_total;
+        (i + sp->card->files)->items_found = header.items_found;
         close(fd);
     }
     return 1;
@@ -1755,108 +1755,108 @@ int card_choose_file(int first)
 {
     VsMenuScratch *sp = VS_MENU_SCRATCH;
 
-    sp->unk1BE = sp->unk1B8->count;
-    sp->unk1C0 = 0;
-    sp->unk0.menu.half[1] = 0;
-    sp->unk1C2 = 0;
-    sp->unk1C4 = 0;
-    sp->unk1D4 = 0;
+    sp->row_count = sp->card->count;
+    sp->has_new_row = 0;
+    sp->state.menu.half[1] = 0;
+    sp->file_row = 0;
+    sp->first_row = 0;
+    sp->blink_phase = 0;
     for (;;) {
         if (first) {
-            vs_pad_state.pads[0].unk8 = 0;
-            vs_pad_state.pads[0].unkC = 0;
-            vs_pad_state.pads[0].unk0 = 0;
+            vs_pad_state.pads[0].pressed = 0;
+            vs_pad_state.pads[0].pressed_repeat = 0;
+            vs_pad_state.pads[0].held = 0;
         } else {
-            vs_pad_state.pads[1].unk8 = 0;
-            vs_pad_state.pads[1].unkC = 0;
-            vs_pad_state.pads[1].unk0 = 0;
+            vs_pad_state.pads[1].pressed = 0;
+            vs_pad_state.pads[1].pressed_repeat = 0;
+            vs_pad_state.pads[1].held = 0;
         }
-        if ((sp->unk1CC & 0xff00) || ((vs_pad_state.pads[0].unk8 | vs_pad_state.pads[1].unk8) & 0x4000)) {
+        if ((sp->mode & 0xff00) || ((vs_pad_state.pads[0].pressed | vs_pad_state.pads[1].pressed) & 0x4000)) {
             play_confirm_sound();
-            vs_pad_state.pads[0].unk8 = 0;
-            vs_pad_state.pads[1].unk8 = 0;
-            sp->unk0.menu.half[1] = 1;
-            sp->unk1D4 = 32;
-            sp->unk1C6 = 1;
+            vs_pad_state.pads[0].pressed = 0;
+            vs_pad_state.pads[1].pressed = 0;
+            sp->state.menu.half[1] = 1;
+            sp->blink_phase = 32;
+            sp->dialog_choice = 1;
             for (;;) {
                 u32 buttons;
 
                 if (first) {
-                    vs_pad_state.pads[0].unk8 = 0;
-                    vs_pad_state.pads[0].unkC = 0;
-                    vs_pad_state.pads[0].unk0 = 0;
+                    vs_pad_state.pads[0].pressed = 0;
+                    vs_pad_state.pads[0].pressed_repeat = 0;
+                    vs_pad_state.pads[0].held = 0;
                 } else {
-                    vs_pad_state.pads[1].unk8 = 0;
-                    vs_pad_state.pads[1].unkC = 0;
-                    vs_pad_state.pads[1].unk0 = 0;
+                    vs_pad_state.pads[1].pressed = 0;
+                    vs_pad_state.pads[1].pressed_repeat = 0;
+                    vs_pad_state.pads[1].held = 0;
                 }
-                buttons = vs_pad_state.pads[0].unk8 | vs_pad_state.pads[1].unk8;
+                buttons = vs_pad_state.pads[0].pressed | vs_pad_state.pads[1].pressed;
                 if (buttons & 0x4000) {
                     play_confirm_sound();
                     break;
                 }
                 if (buttons & 0x2000) {
                     play_cancel_sound();
-                    sp->unk1C6 = 0;
+                    sp->dialog_choice = 0;
                     break;
                 }
                 if (buttons & 0x80) {
                     play_cursor_sound();
-                    sp->unk1C6 = 1;
+                    sp->dialog_choice = 1;
                 }
-                if ((vs_pad_state.pads[0].unk8 | vs_pad_state.pads[1].unk8) & 0x20) {
+                if ((vs_pad_state.pads[0].pressed | vs_pad_state.pads[1].pressed) & 0x20) {
                     play_cursor_sound();
-                    sp->unk1C6 = 0;
+                    sp->dialog_choice = 0;
                 }
-                vs_pad_state.pads[0].unk8 = 0;
-                vs_pad_state.pads[1].unk8 = 0;
+                vs_pad_state.pads[0].pressed = 0;
+                vs_pad_state.pads[1].pressed = 0;
                 card_screen_draw();
             }
-            vs_pad_state.pads[0].unk8 = 0;
-            vs_pad_state.pads[1].unk8 = 0;
-            if (sp->unk1C6)
+            vs_pad_state.pads[0].pressed = 0;
+            vs_pad_state.pads[1].pressed = 0;
+            if (sp->dialog_choice)
                 goto done;
-            if (sp->unk1CC & 0xff00) {
-                sp->unk1C2 = -1;
+            if (sp->mode & 0xff00) {
+                sp->file_row = -1;
                 goto done;
             }
-            sp->unk0.menu.half[1] = 0;
+            sp->state.menu.half[1] = 0;
             continue;
         }
-        if ((vs_pad_state.pads[0].unk8 | vs_pad_state.pads[1].unk8) & 0x2000) {
+        if ((vs_pad_state.pads[0].pressed | vs_pad_state.pads[1].pressed) & 0x2000) {
             play_cancel_sound();
-            sp->unk1C2 = -1;
+            sp->file_row = -1;
             goto done;
         }
-        if ((vs_pad_state.pads[0].unkC | vs_pad_state.pads[1].unkC) & 0x10) {
+        if ((vs_pad_state.pads[0].pressed_repeat | vs_pad_state.pads[1].pressed_repeat) & 0x10) {
             play_cursor_sound();
-            if (sp->unk1C2 == 0) {
-                if (sp->unk1C4 > 0)
-                    sp->unk1C4--;
+            if (sp->file_row == 0) {
+                if (sp->first_row > 0)
+                    sp->first_row--;
             } else {
-                sp->unk1C2--;
+                sp->file_row--;
             }
         }
-        if ((vs_pad_state.pads[0].unkC | vs_pad_state.pads[1].unkC) & 0x40) {
+        if ((vs_pad_state.pads[0].pressed_repeat | vs_pad_state.pads[1].pressed_repeat) & 0x40) {
             play_cursor_sound();
-            if (sp->unk1C2 == 2) {
-                if (sp->unk1C4 < sp->unk1BE - 3)
-                    sp->unk1C4++;
-            } else if (sp->unk1C2 + sp->unk1C4 < sp->unk1BE - 1) {
-                sp->unk1C2++;
+            if (sp->file_row == 2) {
+                if (sp->first_row < sp->row_count - 3)
+                    sp->first_row++;
+            } else if (sp->file_row + sp->first_row < sp->row_count - 1) {
+                sp->file_row++;
             }
         }
-        vs_pad_state.pads[0].unk8 = 0;
-        vs_pad_state.pads[1].unk8 = 0;
-        vs_pad_state.pads[0].unkC = 0;
-        vs_pad_state.pads[1].unkC = 0;
+        vs_pad_state.pads[0].pressed = 0;
+        vs_pad_state.pads[1].pressed = 0;
+        vs_pad_state.pads[0].pressed_repeat = 0;
+        vs_pad_state.pads[1].pressed_repeat = 0;
         card_screen_draw();
-        sp->unk1D4 = (sp->unk1D4 + 1) % 32;
+        sp->blink_phase = (sp->blink_phase + 1) % 32;
         }
 done:
-    if (sp->unk1C2 == -1)
+    if (sp->file_row == -1)
         return 0;
-    sp->unk1C2 += sp->unk1C4;
+    sp->file_row += sp->first_row;
     return 1;
 }
 
@@ -1941,9 +1941,9 @@ int card_load_game(VsSave *save)
         dst = &save_headers[1];
 open:
     strcpy(path, "bu");
-    strcat(path, itoa(sp->unk1BC));
+    strcat(path, itoa(sp->port));
     strcat(path, "0:");
-    strcat(path, sp->unk1B8->files[sp->unk1C2].name);
+    strcat(path, sp->card->files[sp->file_row].name);
     fd = open(path, O_WRONLY);
     if (fd == -1) {
         if (!tries)
@@ -1973,10 +1973,10 @@ read:
         tries--;
         goto read;
     }
-    if (sum != header->unk42) {
+    if (sum != header->data_sum) {
         if (!tries) {
             close(fd);
-            sp->unk0.menu.half[0] = 349;
+            sp->state.menu.half[0] = 349;
             return 0;
         }
         tries--;
@@ -1990,11 +1990,11 @@ read:
         char zero[2] = "\x82\x4f";
 
         for (i = 0; i < 266; i++) {
-            if (save->unk14CC[i / 32] & (1 << (i % 32)))
+            if (save->collected_bits[i / 32] & (1 << (i % 32)))
                 count++;
         }
     }
-    dst->unk40 = count;
+    dst->items_found = count;
     free(header);
     return 1;
 }
@@ -2020,12 +2020,12 @@ int card_save_game(VsSave *save)
     create = 0;
 open:
     strcpy(path, "bu");
-    strcat(path, itoa(sp->unk1BC));
+    strcat(path, itoa(sp->port));
     strcat(path, "0:");
     if (create) {
         strcat(path, "BASLUS-00863FS_ST");
-        number[0] = sp->unk1C8 / 10 + '0';
-        number[1] = sp->unk1C8 % 10 + '0';
+        number[0] = sp->free_file_number / 10 + '0';
+        number[1] = sp->free_file_number % 10 + '0';
         number[2] = 0;
         strcat(path, number);
         fd = open(path, (blocks << 16) | O_CREAT);
@@ -2033,7 +2033,7 @@ open:
             goto retry;
         close(fd);
     } else {
-        strcat(path, sp->unk1B8->files[sp->unk1C2].name);
+        strcat(path, sp->card->files[sp->file_row].name);
     }
     fd = open(path, O_WRONLY);
     if (fd == -1) {
@@ -2065,7 +2065,7 @@ write:
         lseek(fd, 0, SEEK_SET);
         goto write;
     }
-    header->unk42 = sum;
+    header->data_sum = sum;
     lseek(fd, 0, SEEK_SET);
     if (write(fd, header, 512) == -1) {
         if (!tries) {
@@ -2097,10 +2097,10 @@ void card_format(int port)
  * volatile view (retail rereads the halfword after its own store). */
 #define WAIT_PRESS(pad)                                         \
     do {                                                        \
-        (pad).unk8 = 0;                                         \
-        while (!*(volatile u16 *)&(pad).unk8)                   \
+        (pad).pressed = 0;                                         \
+        while (!*(volatile u16 *)&(pad).pressed)                   \
             ;                                                   \
-        (pad).unk8 = 0;                                         \
+        (pad).pressed = 0;                                         \
     } while (0)
 
 /* Messages card_screen_run shows. */
@@ -2140,41 +2140,41 @@ int card_screen_run(int mode, int port)
     clear_vram();
     DrawSync(0);
     gfx_setup_320x240();
-    buf = vs_cd_state.unk4A4;
+    buf = vs_cd_state.load_buffer;
     cd_read_member(8, 0, buf);
     copy_words((u32 *)vs_menu_messages[0].offsets, (u32 *)(buf + 1), 0x1500);
     buf = (u_long *)((u8 *)buf + (buf[0] + 4));
-    tim_load_images_at(buf + 1, &sp->unk1D8, &sp->unk1DC);
+    tim_load_images_at(buf + 1, &sp->message_font_vram, &sp->message_font_clut);
     DrawSync(0);
-    cd_read_member(8, 6, vs_cd_state.unk4A4);
-    tim_load_images_at(vs_cd_state.unk4A4, &pos, &clut);
+    cd_read_member(8, 6, vs_cd_state.load_buffer);
+    tim_load_images_at(vs_cd_state.load_buffer, &pos, &clut);
     DrawSync(0);
-    sp->unk0.menu.half[0] = 0;
-    sp->unk0.menu.half[1] = 0;
-    sp->unk1CA = mode;
-    vs_pad_state.pads[0].unk8 = 0;
-    vs_pad_state.pads[1].unk8 = 0;
-    vs_pad_state.pads[0].unkC = 0;
-    vs_pad_state.pads[1].unkC = 0;
+    sp->state.menu.half[0] = 0;
+    sp->state.menu.half[1] = 0;
+    sp->show_backdrop = mode;
+    vs_pad_state.pads[0].pressed = 0;
+    vs_pad_state.pads[1].pressed = 0;
+    vs_pad_state.pads[0].pressed_repeat = 0;
+    vs_pad_state.pads[1].pressed_repeat = 0;
 again:
-    sp->unk1BC = port;
-    sp->unk1B8 = &sp->unk0.card.ports[sp->unk1BC];
+    sp->port = port;
+    sp->card = &sp->state.card.ports[sp->port];
     if (!card_choose_port(port)) {
         result = 0;
         goto done;
     }
     result = 0;
-    if (sp->unk1CC & 0xff00) {
+    if (sp->mode & 0xff00) {
         if (port == 0) {
             if (!save_loaded_1p) {
-                sp->unk0.menu.half[0] = MSG_NOT_LOADED;
-                sp->unk1CC <<= 5;
+                sp->state.menu.half[0] = MSG_NOT_LOADED;
+                sp->mode <<= 5;
                 goto wait;
             }
         } else {
             if (!save_loaded_2p) {
-                sp->unk0.menu.half[0] = MSG_NOT_LOADED;
-                sp->unk1CC <<= 5;
+                sp->state.menu.half[0] = MSG_NOT_LOADED;
+                sp->mode <<= 5;
                 goto wait;
             }
         }
@@ -2186,96 +2186,96 @@ again:
         started = 1;
         _bu_init();
     }
-    card_probe(sp->unk1BC, 1);
-    if (sp->unk1B8->status == 2) {
-        sp->unk0.menu.half[0] = MSG_CARD_ERROR;
-        sp->unk1CC <<= 5;
+    card_probe(sp->port, 1);
+    if (sp->card->status == 2) {
+        sp->state.menu.half[0] = MSG_CARD_ERROR;
+        sp->mode <<= 5;
         goto wait;
     }
-    sp->unk1CC <<= 2;
-    vs_pad_state.pads[0].unk8 = 0;
-    vs_pad_state.pads[1].unk8 = 0;
-    vs_pad_state.pads[0].unkC = 0;
-    vs_pad_state.pads[1].unkC = 0;
-    if (sp->unk1CC & 0xff00) {
-        card_check_player_save(sp->unk1BC);
-        if (sp->unk1B8->status == 0) {
-            strcpy(sp->unk1B8->files[0].name, save_file_names[port]);
-            sp->unk1B8->count = 1;
-            sp->unk1B8->unkC8 = 0;
+    sp->mode <<= 2;
+    vs_pad_state.pads[0].pressed = 0;
+    vs_pad_state.pads[1].pressed = 0;
+    vs_pad_state.pads[0].pressed_repeat = 0;
+    vs_pad_state.pads[1].pressed_repeat = 0;
+    if (sp->mode & 0xff00) {
+        card_check_player_save(sp->port);
+        if (sp->card->status == 0) {
+            strcpy(sp->card->files[0].name, save_file_names[port]);
+            sp->card->count = 1;
+            sp->card->has_room = 0;
         } else {
-            sp->unk0.menu.half[0] = MSG_NO_SAVE;
-            sp->unk1CC <<= 3;
+            sp->state.menu.half[0] = MSG_NO_SAVE;
+            sp->mode <<= 3;
             goto wait;
         }
     } else {
-        card_read_directory(sp->unk1BC);
-        status = sp->unk1B8->status;
+        card_read_directory(sp->port);
+        status = sp->card->status;
         if (status != 0) {
             if (status == 4)
-                sp->unk0.menu.half[0] = MSG_NO_FILE;
+                sp->state.menu.half[0] = MSG_NO_FILE;
             else if (status == 5)
-                sp->unk0.menu.half[0] = MSG_CARD_FULL;
-            sp->unk1CC <<= 3;
+                sp->state.menu.half[0] = MSG_CARD_FULL;
+            sp->mode <<= 3;
             goto wait;
         }
     }
     if (card_read_file_headers() == -1) {
-        sp->unk0.menu.half[0] = MSG_CARD_ERROR;
-        sp->unk1CC <<= 3;
+        sp->state.menu.half[0] = MSG_CARD_ERROR;
+        sp->mode <<= 3;
         goto wait;
     }
     if (!card_choose_file(port)) {
-        sp->unk1CC >>= 3;
+        sp->mode >>= 3;
         goto again;
     }
-    sp->unk1CC <<= 1;
+    sp->mode <<= 1;
     card_screen_draw();
     card_screen_draw();
-    card_probe(sp->unk1BC, 0);
-    status = sp->unk1B8->status;
+    card_probe(sp->port, 0);
+    status = sp->card->status;
     if (status == 1) {
-        sp->unk0.menu.half[0] = MSG_NEW_CARD;
-        sp->unk1CC <<= 2;
+        sp->state.menu.half[0] = MSG_NEW_CARD;
+        sp->mode <<= 2;
         goto wait;
     }
     if (status == 2) {
-        sp->unk0.menu.half[0] = MSG_CARD_ERROR;
-        sp->unk1CC <<= 2;
+        sp->state.menu.half[0] = MSG_CARD_ERROR;
+        sp->mode <<= 2;
         goto wait;
     }
-    if (sp->unk1CC & 0xff00) {
-        saves[port].unk18BC.unk2E0[0] = teams[port].slot[0];
-        saves[port].unk18BC.unk2E0[1] = teams[port].slot[1];
-        saves[port].unk18BC.unk2E0[2] = teams[port].slot[2];
+    if (sp->mode & 0xff00) {
+        saves[port].versus.lineup[0] = lineups[port].slot[0];
+        saves[port].versus.lineup[1] = lineups[port].slot[1];
+        saves[port].versus.lineup[2] = lineups[port].slot[2];
         result = card_overwrite_player_save(&saves[port]);
     } else {
         result = card_load_game(&saves[port]);
     }
     if (!result) {
-        if (sp->unk0.menu.half[0] == 0) {
-            if (sp->unk1CC & 0xff00)
-                sp->unk0.menu.half[0] = MSG_SAVE_FAILED;
+        if (sp->state.menu.half[0] == 0) {
+            if (sp->mode & 0xff00)
+                sp->state.menu.half[0] = MSG_SAVE_FAILED;
             else
-                sp->unk0.menu.half[0] = MSG_LOAD_FAILED;
+                sp->state.menu.half[0] = MSG_LOAD_FAILED;
         }
-        sp->unk1CC <<= 2;
+        sp->mode <<= 2;
         goto wait;
     }
-    if (!(sp->unk1CC & 0xff00)) {
-        teams[port].slot[0] = saves[port].unk18BC.unk2E0[0];
-        teams[port].slot[1] = saves[port].unk18BC.unk2E0[1];
-        teams[port].slot[2] = saves[port].unk18BC.unk2E0[2];
+    if (!(sp->mode & 0xff00)) {
+        lineups[port].slot[0] = saves[port].versus.lineup[0];
+        lineups[port].slot[1] = saves[port].versus.lineup[1];
+        lineups[port].slot[2] = saves[port].versus.lineup[2];
         requested_item_2p = -1;
         requested_items[0] = -1;
-        strcpy(save_file_names[port], sp->unk1B8->files[sp->unk1C2].name);
-        DAT_80063328[port] = sp->unk1C2;
+        strcpy(save_file_names[port], sp->card->files[sp->file_row].name);
+        DAT_80063328[port] = sp->file_row;
         if (port == 0)
             save_loaded_1p = 1;
         else
             save_loaded_2p = 1;
     }
-    sp->unk1CC <<= 1;
+    sp->mode <<= 1;
 wait:
     card_screen_draw();
     card_screen_draw();
@@ -2284,12 +2284,12 @@ wait:
     else
         WAIT_PRESS(vs_pad_state.pads[0]);
     play_cancel_sound();
-    if (sp->unk1CC & 0x80) {
-        sp->unk1CC = 2;
+    if (sp->mode & 0x80) {
+        sp->mode = 2;
         goto again;
     }
-    if (sp->unk1CC & 0x8000) {
-        sp->unk1CC = 512;
+    if (sp->mode & 0x8000) {
+        sp->mode = 512;
         goto again;
     }
     result = 1;
@@ -2303,16 +2303,16 @@ done:
         gfx_setup_640x240();
         face.vx = 640;
         face.vy = 124;
-        vs_cd_state.unk4A0 = menu_buf = vs_cd_state.unk4A4;
+        vs_cd_state.load_cursor = menu_buf = vs_cd_state.load_buffer;
         cd_read_member(8, 4, menu_buf);
         copy_words((u32 *)vs_menu_messages[1].offsets, (u32 *)&menu_buf[1], 0x1500);
-        tim = (u_long *)((u8 *)menu_buf + vs_cd_state.unk4A4[0]);
-        tim_load_images_at(tim + 2, &sp->unk1E0, &sp->unk1E4);
+        tim = (u_long *)((u8 *)menu_buf + vs_cd_state.load_buffer[0]);
+        tim_load_images_at(tim + 2, &sp->item_font_vram, &sp->item_font_clut);
         DrawSync(0);
         cd_read_member(8, 8, menu_buf);
         copy_words((u32 *)vs_menu_messages[0].offsets, (u32 *)&menu_buf[1], 0x1500);
-        tim = (u_long *)((u8 *)menu_buf + vs_cd_state.unk4A4[0]);
-        tim_load_images_at(tim + 2, &sp->unk1D8, &sp->unk1DC);
+        tim = (u_long *)((u8 *)menu_buf + vs_cd_state.load_buffer[0]);
+        tim_load_images_at(tim + 2, &sp->message_font_vram, &sp->message_font_clut);
         DrawSync(0);
         cd_read_member(8, 7, menu_buf);
         tim_load_images_at(menu_buf, &pos, &clut);
@@ -2358,7 +2358,7 @@ int card_overwrite_player_save(VsSave *save)
     }
 open:
     strcpy(path, "bu");
-    strcat(path, itoa(sp->unk1BC));
+    strcat(path, itoa(sp->port));
     strcat(path, "0:");
     strcat(path, name);
     fd = open(path, O_WRONLY);
@@ -2389,7 +2389,7 @@ write:
         lseek(fd, 0, SEEK_SET);
         goto write;
     }
-    header->unk42 = sum;
+    header->data_sum = sum;
     lseek(fd, 0, SEEK_SET);
     if (write(fd, header, 512) == -1) {
         if (!tries) {
@@ -2412,14 +2412,14 @@ int card_check_saves_changed(void)
     VsMenuScratch *sp = VS_MENU_SCRATCH;
     int i;
 
-    sp->unk0.menu.half[0] = 0;
+    sp->state.menu.half[0] = 0;
     StartCARD();
     _bu_init();
     for (i = 0; i < 2; i++) {
-        sp->unk1BC = i;
-        sp->unk1B8 = &sp->unk0.card.ports[sp->unk1BC];
-        card_check_player_save(sp->unk1BC);
-        if (sp->unk1B8->status)
+        sp->port = i;
+        sp->card = &sp->state.card.ports[sp->port];
+        card_check_player_save(sp->port);
+        if (sp->card->status)
             return 1;
     }
     return 0;
@@ -2447,51 +2447,51 @@ int match_award_requested_item(int side, int again)
     int failed = 0;
     u16 id = requested_items[side];
     char zero[2] = "\x82\x4f";
-    VsSaveSub *win = &saves[side].unk18BC;
-    VsSaveSub *lose = &saves[1 - side].unk18BC;
+    VsSaveVersus *win = &saves[side].versus;
+    VsSaveVersus *lose = &saves[1 - side].versus;
     int started = failed;
     u16 count;
     int i;
 
     if (!again) {
-        if (!(saves[side].unk14CC[id / 32] & (1 << (id % 32)))) {
+        if (!(saves[side].collected_bits[id / 32] & (1 << (id % 32)))) {
             /* The count is reached through its own address (header + 0x40),
              * not as a member of the header element. */
-            count = *(u16 *)&save_headers[side].unk40 + 1;
-            saves[side].unk1802 = count;
+            count = *(u16 *)&save_headers[side].items_found + 1;
+            saves[side].items_found = count;
             if (count >= 100) {
-                save_headers[side].unk34[0] = zero[0];
-                save_headers[side].unk34[1] = zero[1] + count / 100 % 10;
+                save_headers[side].items_found_text[0] = zero[0];
+                save_headers[side].items_found_text[1] = zero[1] + count / 100 % 10;
             }
             if (count >= 10) {
-                save_headers[side].unk34[2] = zero[0];
-                save_headers[side].unk34[3] = zero[1] + count / 10 % 10;
+                save_headers[side].items_found_text[2] = zero[0];
+                save_headers[side].items_found_text[3] = zero[1] + count / 10 % 10;
             }
-            save_headers[side].unk34[4] = zero[0];
-            save_headers[side].unk34[5] = zero[1] + count % 10;
-            *(u16 *)&save_headers[side].unk40 = count;
-            saves[side].unk14CC[id / 32] |= 1 << (id % 32);
+            save_headers[side].items_found_text[4] = zero[0];
+            save_headers[side].items_found_text[5] = zero[1] + count % 10;
+            *(u16 *)&save_headers[side].items_found = count;
+            saves[side].collected_bits[id / 32] |= 1 << (id % 32);
         }
-        win->unk150[id] = 1;
-        win->unk2EC[id] = lose->unk2EC[id];
-        win->unk14[id] = 0;
+        win->inventory_counts[id] = 1;
+        win->item_durability[id] = lose->item_durability[id];
+        win->items_lost[id] = 0;
         {
             /* Retail loads this 1 on its own: an int-typed value, not the
              * byte constant stored above. */
             int on = 1;
 
-            lose->unk14[id] = on;
+            lose->items_lost[id] = on;
         }
-        lose->unk150[id] = 0;
-        lose->unk2EC[id] = 0;
+        lose->inventory_counts[id] = 0;
+        lose->item_durability[id] = 0;
     }
     if (!started) {
         StartCARD();
         _bu_init();
     }
     for (i = 0; i < 2; i++) {
-        sp->unk1BC = i;
-        sp->unk1B8 = &sp->unk0.card.ports[sp->unk1BC];
+        sp->port = i;
+        sp->card = &sp->state.card.ports[sp->port];
         if (!card_overwrite_player_save(&saves[i]))
             failed |= 1 << i;
     }

@@ -31,10 +31,10 @@ int effect_reaches_opponent(int reach, u_long height)
     SVECTOR d;
     int r;
 
-    if ((u16)(f->unk4DF0E - 3) < 2)
+    if ((u16)(f->state - 3) < 2)
         return 0;
-    d.vx = f->unk4DEF0.vx - e->position.vx;
-    d.vz = f->unk4DEF0.vz - e->position.vz;
-    r = reach + f->unk4DF18.unk1B4;
+    d.vx = f->position.vx - e->position.vx;
+    d.vz = f->position.vz - e->position.vz;
+    r = reach + f->data.radius;
     return d.vx * d.vx + d.vz * d.vz <= r * r;
 }

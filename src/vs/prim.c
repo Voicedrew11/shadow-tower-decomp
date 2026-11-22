@@ -22,10 +22,10 @@ void mesh_nclip_triangle(u16 i0, u16 i1, u16 i2)
     VsScratchPad *sp = VS_SCRATCHPAD;
     u_char *base = sp->vertices;
 
-    sp->unk30 = (u_long *)(base + i0);
-    sp->unk34 = (u_long *)(base + i1);
-    sp->unk38 = (u_long *)(base + i2);
-    gte_ldsxy3(*sp->unk30, *sp->unk34, *sp->unk38);
+    sp->sxy0 = (u_long *)(base + i0);
+    sp->sxy1 = (u_long *)(base + i1);
+    sp->sxy2 = (u_long *)(base + i2);
+    gte_ldsxy3(*sp->sxy0, *sp->sxy1, *sp->sxy2);
     gte_nclip();
     gte_stopz(&VS_SCRATCHPAD->opz);
 }
