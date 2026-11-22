@@ -124,8 +124,8 @@ typedef struct {
 
 extern VsRecord20 sparks[2000];
 
-/* A flag the two-choice dialog menu_vs_setup_draw_choice compares with its page
- * (0x80063228, .sdata, initially 1). */
+/* The number of sets in a match, 1 or 3 (0x80063228, .sdata, initially 1);
+ * the two-choice dialog menu_vs_setup_draw_choice compares it with its page. */
 extern s32 round_count;
 
 /* The VRAM position tim_load_member_async saves for its read's completion
@@ -263,11 +263,14 @@ typedef char VsFighterDataAt0x4DF18[offsetof(VsFighter, unk4DF18) == 0x4df18 ? 1
 
 /* The fighters live in shared_buffer (vs/buffer.h VsBuffer.fighter). */
 
-/* A movement scale the fighters' walking steps multiply by (.sdata,
- * unowned; read absolutely by the -G8 moves). */
+/* The frame's length in fields, which movement and animation multiply by
+ * (the debug text's "frm/draw"; .sdata, unowned; read absolutely by the
+ * -G8 moves). */
 extern s32 frames_per_draw;
 
-/* Nonzero (1) while the fighters may hit each other (bss, unowned). */
+/* The round phase (round_play): the fighters can hit each other only in
+ * phase 1, the fight; the other phases are the opening, pause, draw, time
+ * up, ring-out, win and end screens (bss, unowned). */
 extern s32 round_phase;
 
 /* Renderer switches (unowned): a fixed OT depth for every face (.sdata),

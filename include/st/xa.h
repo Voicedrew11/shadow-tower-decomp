@@ -10,7 +10,9 @@
 #include <st/vis.h>
 
 /*
- * The XA sector counts per stream file (game_progress.unk1618) and channel:
+ * The XA stream lengths in units of two sectors (xa_stream_finished
+ * compares the sectors played with twice the length) per stream file
+ * (game_progress.unk1618) and channel:
  * 48 rows of 6 words, the file count of the save block's per-file arrays
  * (load data, owner unknown).
  */

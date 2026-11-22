@@ -14,7 +14,7 @@
 #include <vs/funcs.h>
 
 /*
- * Starts a frame and draws, in team mode (round_count == 3), the six
+ * Starts a frame and draws, in 3-set mode (round_count == 3), the six
  * slot pictures in two columns of three (black for an empty slot),
  * otherwise each player's first slot; then each player's fighter
  * picture over the shared frame tile, and the two background strips.

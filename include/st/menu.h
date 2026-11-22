@@ -324,7 +324,8 @@ typedef char Data801cba08Size[sizeof(Data801cba08) == 0x1714 ? 1 : -1];
 #define DAT_801cd0e4 game_progress.unk16DC
 
 
-/* .sbss words the map page reads with lui; their owner is unknown. */
+/* .sbss words the area list page (menu_area_info_*) reads with lui; their
+ * owner is unknown. */
 extern s32 DAT_8008818c;
 extern u16 area_info_list_shown;
 
@@ -337,7 +338,9 @@ extern MenuMessages menu_messages;
 /* A message of another table (a list's own). */
 #define MESSAGE_IN(table, i) ((u16 *)((table)->text + (table)->offsets[i]))
 
-/* Item stat figures that menu_arrange_icons_draw_caption formats (whole and tenths). */
+/* Display scratch for figures shown in imperial units (weight / 4.54 in
+ * pounds, heights in feet): the whole part and the tenths. The shop, the
+ * equipment info, the creature book and the arrange screens use them. */
 extern u16 menu_figure_whole;
 extern u16 DAT_80088188;
 

@@ -1,8 +1,8 @@
 /*
- * VS.EXE: the team screen's item detail page (WIP module), VS's copy of
- * ST.EXE's creature book detail page menu_creature_book_draw_entry (src/st/render.c): the item
- * comes from the team slot or the item grid under the cursor, and the
- * page toggle is DAT_8006335c.
+ * VS.EXE: the creature entry page (WIP module), VS's copy of ST.EXE's
+ * creature book entry page menu_creature_book_draw_entry (src/st/render.c):
+ * the creature comes from the team slot or the grid under the cursor, and
+ * the page toggle is DAT_8006335c (ST.EXE's menu_second_page).
  */
 #include <kf/lib/address.h>
 #include <kf/lib/null.h>

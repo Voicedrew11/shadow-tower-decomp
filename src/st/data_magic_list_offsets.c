@@ -1,6 +1,6 @@
 /*
- * ST.EXE: a data-only module (WIP) defining game .data: the ring sub-list
- * message offsets.
+ * ST.EXE: a data-only module (WIP) defining game .data: the magic list's
+ * name messages, by effect definition id.
  * No code unit but st.main contributes .data, and retail keeps these after
  * st.main's run, so a module linked after the code defines them; every user
  * declares them extern.

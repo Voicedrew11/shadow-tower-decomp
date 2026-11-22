@@ -1,7 +1,7 @@
 /*
  * ST.EXE: the equipment screen and an id grid screen (WIP module, one
  * translation unit): the slot list, the candidate list of one slot, the
- * ring sub-list and their panels, then two four-column grids of table C ids
+ * magic sub-list and their panels, then two four-column grids of table C ids
  * the player moves between, its frame and its CD loads (sharing the id grid
  * layout and panels of src/st/render.c, MenuGrid). The screen's open and close
  * (0x800637c0, 0x80063954) sit in band P's range. Retail keeps the id grid's
@@ -38,7 +38,8 @@
 RODATA(0x80013880, 0xf4)
 SDATA(0x8008810c, 0x7c)
 
-/* The list row and column saved while the ring sub-list is open. */
+/* The list's scroll top (sp->unk2E2) and cursor offset (sp->unk2E0), saved
+ * while the magic sub-list is open. */
 DATA(0x800881e8, 0x4, ".sbss")
 static s16 equip_saved_list_cursor[2];
 
@@ -168,7 +169,7 @@ void menu_equip_pick_item(void)
 
 /*
  * The slot list: moves the cursor; on confirm lists the held ids that fit
- * the slot (or, for the two ring slots, opens the ring sub-list) and loads
+ * the slot (or, for the two ring slots, opens the magic sub-list) and loads
  * the equipped id's image. Returns 1 on cancel.
  *
  * The list loop reaches the item records through a pointer to the table
@@ -423,7 +424,7 @@ int menu_equip_pick_slot(int *sel)
     return 0;
 }
 
-/* The ring sub-list: moves the cursor in its entries and equips one. */
+/* The magic sub-list: moves the cursor in its entries and equips one. */
 ADDRESS(0x80064ba8, 0x33c)
 void menu_equip_pick_magic(void)
 {
@@ -783,7 +784,7 @@ void menu_equip_draw_slots(void)
     }
 }
 
-/* The ring sub-list: five entries with their names and effect figures. */
+/* The magic sub-list: five entries with their names and effect figures. */
 /* The text base is added as an integer after the offset, and the name table
  * pointer is assigned inside the loop: retail adds in that operand order
  * and keeps the table address in the loop. */

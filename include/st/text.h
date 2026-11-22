@@ -15,7 +15,8 @@ extern u16 DAT_800881a2;
 extern u16 text_scroll_mode;
 extern u16 number_narrow; /* set by menu_arrange_icons_draw around the grid columns */
 
-/* Read by the title-card overlay; owners unknown. */
+/* The XA stream file of the talk being played (xa_talk.c); talk_draw_overlay
+ * draws the talk picture opaque for files 5, 25 and 30. Owner unknown. */
 extern u16 talk_stream_file;
 
 void ui_draw_glyph(u16 c, u16 x, u16 y, CVECTOR *color);

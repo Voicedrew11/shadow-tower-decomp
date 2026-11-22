@@ -8,8 +8,9 @@
 #include <kf/lib/types.h>
 #include <sys/types.h>
 
-/* The ring sub-list: a bit word per id from 196, the entries listed and
- * the entries, 255 when unused. */
+/* The magic sub-list (opened from the ring slots): a bit word per id from
+ * 196, the number of entries listed and the entries (effect definition
+ * ids), 255 when unused. */
 typedef struct {
     u32 *bits;
     s32 count;
@@ -21,8 +22,9 @@ typedef struct {
  * loaded, the list index, a frame count that holds the input, the
  * viewer.unk38 slot being changed, and the slot sub-list (its bit table,
  * entry count and entries). WIP extent: the slot sub-list follows as its
- * own global equip_magic_list, whose bit table is the 144-byte block the option
- * screens load (src/st/menu_equip_open.c addresses it apart from this block).
+ * own global equip_magic_list (the magic sub-list), whose 144-byte bit
+ * table menu_equip_open allocates and loads (src/st/menu_equip_open.c
+ * addresses it apart from this block).
  */
 typedef struct {
     s32 unk0;            /* 0x00: id shown, -1 for none */
@@ -43,7 +45,8 @@ extern u16 equip_menu_saved_ids[6];
 
 extern Data801e0ce8 equip_menu_state;
 
-/* 0x8008092c: message offsets from 916 by sub-list entry (load data,
+/* 0x8008092c: per effect definition id (the magic sub-list's entries), the
+ * number of its name message counted from 916; 255 for none (load data,
  * owner unknown). */
 extern u8 magic_name_messages[18];
 

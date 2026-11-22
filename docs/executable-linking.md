@@ -243,7 +243,7 @@ all inside the one non-exact function `world_project_parts` (`0x8001cee8`-
   four only, so an object with constants
   and no tables ends four-aligned: `st.area_load` claims its pool at its raw
   size, `RODATA(0x80011f18, 0x39b)`.
-- The first `.sbss` run `0x80088188`-`0x800881b7` belongs to four
+- The first `.sbss` run `0x80088188`-`0x800881b7` belongs to five
   data-only units linked before the code (`link = "first"`); the `.data`
   tables from `0x8008038c` and every `.bss` object to data-only units
   linked after the code. Unreferenced holes are unused statics (`.data`, `.sdata`)
@@ -322,7 +322,7 @@ placement equal retail. The link established:
   (`read_only = "together"`, as in the FDAT overlays), so a VS unit claims
   one `RODATA()` run; the minimal translation units this forces are in the
   units' header comments.
-- The `.sbss` run `0x80063300`-`0x80063381` and the first `.data`/`.sdata`
+- The `.sbss` run `0x80063300`-`0x8006338f` and the first `.data`/`.sdata`
   belong to data-only units linked before the start-up module
   (`link = "first"`); the `.bss` objects to data-only units after the code,
   with layout-evidenced holes confirmed by the linked `.SYM`.
@@ -400,6 +400,17 @@ ASPSX 2.79D and PSYLINK 2.73D chain:
   (so it requests them as COMMON) with words it reads only absolutely
   (`0x80063334`, `0x80063374`, so it does not request them), so an earlier
   object allocated that run and `vs.main`'s requests merge into it.
+- An object's COMMON batch starts eight-aligned even when the object has
+  no statics: a controlled ST.EXE link that gave `0x8008818c` an object of
+  its own placed it at `0x80088190`. A data-only unit can therefore be cut
+  only at an eight-aligned address, and every request inside one
+  eight-byte window belongs to the object that allocates the window's
+  first request. Where the semantic spellings in such a window do not
+  ascend in bucket, the identities keep their address names (their
+  `data_identities.tsv` notes give the reviewed name), as at ST.EXE
+  `0x80088188`, `0x8008818c`, `0x80088192`, `0x800881a2`, `0x800881d8` and
+  `0x800881dc`, and VS.EXE `0x80063304`, `0x80063308`, `0x80063328`,
+  `0x8006333e`, `0x8006335a`, `0x8006335c`, `0x80063364` and `0x8006337a`.
 - `kf verify data` accepts a unit's COMMON placement only when the current
   link's `.SYM` (`scripts/kf/linked_symbols.py`) puts every request at its
   claim, and the link report's input hashes all match the working tree.

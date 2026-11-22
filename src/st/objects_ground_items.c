@@ -517,7 +517,9 @@ void object_spawn_side_parts_alt(e, arg)
 
 /* objects_update's switch table (a door's swing side). */
 
-/* The shake (x, z) a kind 224 entry gives the view while its entries rise. */
+/* The (x, z) push a kind 224 entry gives the player while its entries rise:
+ * written to the object push words vis_table_b.unk71A4/unk71A8, which
+ * player_update_walk adds to the viewer's push (viewer.unk1CC/unk1D0). */
 DATA(0x800881e0, 0x8, ".sbss")
 static SVECTOR object_sequence_push;
 

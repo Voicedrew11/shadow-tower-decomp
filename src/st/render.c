@@ -6289,7 +6289,7 @@ void ui_draw_window(short x, short y, short w, short h)
  * frames itself with ui_draw_window and darkens the world behind it.
  */
 
-/* Blink phase of the map page's arrows (0..31). */
+/* Blink phase of the area list page's arrows (0..31). */
 DATA(0x80087f34, 0x4, ".sdata")
 static s32 area_info_blink = 0;
 
@@ -6535,7 +6535,7 @@ void menu_attribute_points_draw(void)
     PAGE_END();
 }
 
-/* The map page: visited areas and their completion, or the area summary. */
+/* The area list page: visited areas and their completion, or the area summary. */
 ADDRESS(0x8002a954, 0x994)
 void menu_area_info_draw(void)
 {
