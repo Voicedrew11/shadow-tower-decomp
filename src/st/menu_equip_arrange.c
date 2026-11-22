@@ -628,15 +628,15 @@ void menu_equip_draw_item_panel(void)
                 label = &sp->style[0];
                 value = &sp->style[4];
             }
-            ui_draw_text(MESSAGE(109), 48, 190, label);
+            ui_draw_text(MESSAGE(MSG_DURABILITY), 48, 190, label);
             ui_draw_number(vis_table_c.types[id].durability | 0x3000000, 104, 190, value);
             ui_draw_glyph(74, 136, 190, label);
             ui_draw_number(vis_table_c.types[id].max_durability | 0x3000000, 148, 190, value);
         }
     }
-    ui_draw_text(MESSAGE(103), 165, 46, &sp->style[0]);
+    ui_draw_text(MESSAGE(MSG_ATTRIBUTE_COLUMNS), 165, 46, &sp->style[0]);
     y = 46;
-    ui_draw_text(MESSAGE(103), 165, y, &sp->style[0]);
+    ui_draw_text(MESSAGE(MSG_ATTRIBUTE_COLUMNS), 165, y, &sp->style[0]);
     for (i = 0; i < 7; i++) {
         if (id == -1) {
             ui_draw_number_fixed(0x13000000, 207, y, &sp->style[4]);
@@ -651,7 +651,7 @@ void menu_equip_draw_item_panel(void)
         if (vis_table_c.types[id].weight) {
             menu_figure_whole = vis_table_c.types[id].weight * 100 / 454;
             DAT_80088188 = vis_table_c.types[id].weight * 1000 / 454;
-            ui_draw_text(MESSAGE(104), 221, 156, &sp->style[0]);
+            ui_draw_text(MESSAGE(MSG_WEIGHT), 221, 156, &sp->style[0]);
             ui_draw_number_fixed(menu_figure_whole | 0x3000000, 249, 156, &sp->style[4]);
             ui_draw_glyph(78, 269, 156, &sp->style[0]);
             ui_draw_number_fixed((u16)(DAT_80088188 - menu_figure_whole * 10) | 0x1000000, 275, 156,
@@ -697,7 +697,7 @@ void menu_equip_draw_slots(void)
     }
     menu_figure_whole = viewer.equip_weight * 100 / 454;
     DAT_80088188 = viewer.equip_weight * 1000 / 454;
-    ui_draw_text(MESSAGE(915), 113, 26, label);
+    ui_draw_text(MESSAGE(MSG_EQUIP_WEIGHT), 113, 26, label);
     ui_draw_number(menu_figure_whole | 0x3000000, 181, 26, value);
     ui_draw_glyph(78, 212, 26, label);
     ui_draw_number((u16)(DAT_80088188 - menu_figure_whole * 10) | 0x1000000, 217, 26, value);
@@ -710,7 +710,7 @@ void menu_equip_draw_slots(void)
     for (i = 0; i < 5; i++) {
         y = 48 + i * 36;
         y2 = 64 + i * 36;
-        ui_draw_text(MESSAGE(sp->scroll + i + 900), 28, y, &sp->style[0]);
+        ui_draw_text(MESSAGE(sp->scroll + i + MSG_EQUIP_SLOT_NAMES), 28, y, &sp->style[0]);
         switch (sp->scroll + i) {
         case 0:
             cur = viewer.equipment[EQUIP_SLOT_HELMET];
@@ -766,9 +766,9 @@ void menu_equip_draw_slots(void)
             if (cur != 0xffff) {
                 u8 entries[] = {0, 1, 255, 2, 3, 255, 4, 5, 255, 6, 7, 255, 8, 9, 255, 10, 11, 255};
 
-                ui_draw_text(MESSAGE(916 + entries[cur]), 92, y, &sp->style[0]);
+                ui_draw_text(MESSAGE(MSG_MAGIC_NAMES + entries[cur]), 92, y, &sp->style[0]);
             } else {
-                ui_draw_text(MESSAGE(935), 92, y, &sp->style[0]);
+                ui_draw_text(MESSAGE(MSG_NO_SELECT), 92, y, &sp->style[0]);
             }
         } else if (cur != 0xffff) {
             sp->style[0].cd |= 0x80;
@@ -777,7 +777,7 @@ void menu_equip_draw_slots(void)
             sp->style[0].cd &= 0x7f;
             sp->style[3].cd &= 0x7f;
         } else {
-            ui_draw_text(MESSAGE(934), 92, y, &sp->style[0]);
+            ui_draw_text(MESSAGE(MSG_NO_EQUIP), 92, y, &sp->style[0]);
         }
         row = sp->scroll + i;
         if (row != 12 && row != 14 && cur != 0xffff && vis_table_c.types[cur].max_durability) {
@@ -788,7 +788,7 @@ void menu_equip_draw_slots(void)
                 label2 = &sp->style[0];
                 value2 = &sp->style[4];
             }
-            ui_draw_text(MESSAGE(109), 92, y2, label2);
+            ui_draw_text(MESSAGE(MSG_DURABILITY), 92, y2, label2);
             ui_draw_number(vis_table_c.types[cur].durability | 0x3000000, 172, y2, value2);
             ui_draw_glyph(74, 204, y2, label2);
             ui_draw_number(vis_table_c.types[cur].max_durability | 0x3000000, 220, y2, value2);
@@ -818,9 +818,9 @@ void menu_equip_draw_magic_list(void)
         if (*(list->entries + (sp->scroll + i)) != 255) {
             names = magic_name_messages;
             ui_draw_text(
-                (u16 *)(offsets[916 + names[*(list->entries + (sp->scroll + i))]] + text), 28, y,
+                (u16 *)(offsets[MSG_MAGIC_NAMES + names[*(list->entries + (sp->scroll + i))]] + text), 28, y,
                 label);
-            ui_draw_text((u16 *)(offsets[936] + text), 140, y2, label);
+            ui_draw_text((u16 *)(offsets[MSG_MP_USED] + text), 140, y2, label);
             ui_draw_number(effects.defs[*(list->entries + (sp->scroll + i))].mp_cost | 0x3000000,
                           204, y2, &sp->style[4]);
             y2 += 36;
@@ -1423,7 +1423,8 @@ void menu_arrange_list_draw_details(void)
                     goto done;
                 n++;
                 if (*count) {
-                    ui_draw_text(MESSAGE(200 + k), text_x - 4 + i * 72, text_y + j * 15, &sp->style[0]);
+                    ui_draw_text(MESSAGE(MSG_HI_HAND + k), text_x - 4 + i * 72, text_y + j * 15,
+                        &sp->style[0]);
                     ui_draw_number(*count | 0x13000000, text_x + i * 72 + 40, text_y + j * 15,
                                   &sp->style[4]);
                 }
@@ -1444,7 +1445,7 @@ void menu_arrange_list_draw_details(void)
                 label = &sp->style[0];
                 value = &sp->style[4];
             }
-            ui_draw_text(MESSAGE(29), text_x, text_y, label);
+            ui_draw_text(MESSAGE(MSG_HI_DURABILITY), text_x, text_y, label);
             ui_draw_number(vis_table_c.types[id].durability | 0x3000000, text_x + 70, text_y, value);
             ui_draw_glyph(14, text_x + 106, text_y, label);
             ui_draw_number(vis_table_c.types[id].max_durability | 0x3000000, text_x + 122, text_y, value);
@@ -1453,7 +1454,7 @@ void menu_arrange_list_draw_details(void)
         if (vis_table_c.types[id].weight) {
             whole = vis_table_c.types[id].weight * 100 / 454;
             tenths = vis_table_c.types[id].weight * 1000 / 454 - whole * 10;
-            ui_draw_text(MESSAGE(28), text_x, text_y, &sp->style[0]);
+            ui_draw_text(MESSAGE(MSG_HI_WEIGHT), text_x, text_y, &sp->style[0]);
             ui_draw_number(whole | 0x3000000, text_x + 70, text_y, &sp->style[4]);
             ui_draw_glyph(18, text_x + 109, text_y, &sp->style[0]);
             ui_draw_number(tenths | 0x1000000, text_x + 116, text_y, &sp->style[4]);

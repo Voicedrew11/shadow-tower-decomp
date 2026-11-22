@@ -126,7 +126,7 @@ void card_screen_open(int arg0, int arg1)
     image = (u_long *)((u8 *)image + (cd_file_buffer[0] + 4));
     tim_load_images_at(image + 1, &sp->image_vram[0], &sp->image_vram[1], 1);
     menu_store_screen();
-    sp->font_mode = 0;
+    sp->font_mode = MENU_FONT_LOW_RES;
     SCRATCHPAD->pitch_sin = 0;
     if (arg0)
         sp->mode = 256;
@@ -165,7 +165,7 @@ void menu_main_run(void)
     image = (u_long *)((u8 *)image + (cd_file_buffer[0] + 4));
     tim_load_images_at(image + 1, &sp->image_vram[0], &sp->image_vram[1], 1);
     menu_store_screen();
-    sp->main_row = 0;
+    sp->main_row = MENU_ROW_USE_ITEM;
     pad_clear_input();
     DrawSync(0);
     for (;;) {
@@ -177,45 +177,45 @@ void menu_main_run(void)
         if (pad_state.pressed & PAD_BUTTON_TRIANGLE) {
             play_confirm_sound();
             pad_state.pressed = 0;
-            sp->font_mode = 0;
+            sp->font_mode = MENU_FONT_LOW_RES;
             menu_area_info_run();
         }
         if (pad_state.pressed & PAD_BUTTON_CROSS) {
             play_confirm_sound();
             pad_state.pressed = 0;
-            if ((s16)sp->main_row == 0) {
-                sp->font_mode = 0;
+            if ((s16)sp->main_row == MENU_ROW_USE_ITEM) {
+                sp->font_mode = MENU_FONT_LOW_RES;
                 if (menu_use_item_run() == 1)
                     break;
-            } else if ((s16)sp->main_row == 1) {
-                sp->font_mode = 0;
+            } else if ((s16)sp->main_row == MENU_ROW_EQUIP) {
+                sp->font_mode = MENU_FONT_LOW_RES;
                 menu_equip_run();
-            } else if ((s16)sp->main_row == 2) {
+            } else if ((s16)sp->main_row == MENU_ROW_ARRANGE_ITEMS) {
                 viewer.free_anims_after_menu = 1;
-                sp->font_mode = 1;
+                sp->font_mode = MENU_FONT_HIGH_RES;
                 if (pad_state.held & PAD_BUTTON_R1)
                     menu_arrange_icons_run();
                 else
                     menu_arrange_list_run();
-            } else if ((s16)sp->main_row == 3) {
+            } else if ((s16)sp->main_row == MENU_ROW_CREATURE_BOOK) {
                 viewer.free_anims_after_menu = 1;
-                sp->font_mode = 1;
+                sp->font_mode = MENU_FONT_HIGH_RES;
                 menu_creature_book_run();
-            } else if ((s16)sp->main_row == 4) {
+            } else if ((s16)sp->main_row == MENU_ROW_EQUIP_INFO) {
                 viewer.free_anims_after_menu = 1;
-                sp->font_mode = 1;
+                sp->font_mode = MENU_FONT_HIGH_RES;
                 menu_equip_info_run();
-            } else if ((s16)sp->main_row == 5) {
-                sp->font_mode = 0;
+            } else if ((s16)sp->main_row == MENU_ROW_OPTIONS) {
+                sp->font_mode = MENU_FONT_LOW_RES;
                 menu_options_run();
-            } else if ((s16)sp->main_row == 6) {
+            } else if ((s16)sp->main_row == MENU_ROW_LOAD_DATA) {
                 sp->mode = 1;
-                sp->font_mode = 0;
+                sp->font_mode = MENU_FONT_LOW_RES;
                 sp->show_backdrop = 1;
                 if (card_screen_run(1) == 1)
                     break;
-            } else if ((s16)sp->main_row == 7) {
-                sp->font_mode = 0;
+            } else if ((s16)sp->main_row == MENU_ROW_END_GAME) {
+                sp->font_mode = MENU_FONT_LOW_RES;
                 if (menu_end_game_run() == 1)
                     break;
             }
@@ -224,17 +224,17 @@ void menu_main_run(void)
             play_cursor_sound();
             pad_state.pressed_repeat = 0;
             sp->main_row++;
-            if ((s16)sp->main_row >= 8)
-                sp->main_row = 0;
+            if ((s16)sp->main_row >= MENU_ROWS)
+                sp->main_row = MENU_ROW_USE_ITEM;
         }
         if (pad_state.pressed_repeat & PAD_BUTTON_UP) {
             play_cursor_sound();
             pad_state.pressed_repeat = 0;
             sp->main_row--;
             if ((s16)sp->main_row < 0)
-                sp->main_row = 7;
+                sp->main_row = MENU_ROW_END_GAME;
         }
-        sp->font_mode = 0;
+        sp->font_mode = MENU_FONT_LOW_RES;
         frame_rate_update();
         menu_main_draw();
     }
@@ -3300,9 +3300,9 @@ int card_check_inserted(int port)
 
     card_probe(port, 0);
     if (sp->card->status == 1) {
-        sp->state.half[0] = 351;
+        sp->state.half[0] = MSG_CARD_SWITCHED;
     } else if (sp->card->status == 2) {
-        sp->state.half[0] = 350;
+        sp->state.half[0] = MSG_CARD_NOT_INSERTED;
     } else {
         return 1;
     }
@@ -3420,7 +3420,7 @@ int card_read_file_headers(void)
         strcat(path, sp->card->files[i].name);
         fd = open(path, O_RDONLY);
         if (fd == -1) {
-            sp->state.half[0] = 354;
+            sp->state.half[0] = MSG_CARD_LOAD_FAILED;
             return 0;
         }
     read:
@@ -3582,7 +3582,7 @@ int card_write_blocks(int fd, int offset, u8 *data, int size)
                 n = 3;
             }
             if (retry >= 3) {
-                sp->state.half[0] = 355;
+                sp->state.half[0] = MSG_CARD_SAVE_FAILED;
                 return -1;
             }
             retry++;
@@ -3636,14 +3636,14 @@ int card_read_blocks(int fd, int offset, u8 *data, int size)
             retry++;
             lseek(fd, offset + block * 128, SEEK_SET);
             if (read(fd, frame, 128) == -1) {
-                sp->state.half[0] = 354;
+                sp->state.half[0] = MSG_CARD_LOAD_FAILED;
                 goto again;
             }
             for (i = 0, sum = 0; i < 127; i++)
                 sum += frame[i];
             sum = ~sum;
             if (sum != frame[127]) {
-                sp->state.half[0] = 349;
+                sp->state.half[0] = MSG_CARD_CORRUPTED;
                 goto again;
             }
             for (i = 0; i < 127; i++)
@@ -3682,7 +3682,7 @@ open:
             retry--;
             goto open;
         }
-        sp->state.half[0] = 354;
+        sp->state.half[0] = MSG_CARD_LOAD_FAILED;
         return 0;
     }
 read:
@@ -3693,14 +3693,14 @@ read:
             lseek(fd, 0, SEEK_SET);
             goto read;
         }
-        sp->state.half[0] = 354;
+        sp->state.half[0] = MSG_CARD_LOAD_FAILED;
         close(fd);
         return 0;
     }
     sum = card_read_blocks(fd, sizeof(header), data, 7560);
     if (sum == -1 || sum != sp->card->files[sp->file_row].data_sum) {
         if (sum != sp->card->files[sp->file_row].data_sum)
-            sp->state.half[0] = 349;
+            sp->state.half[0] = MSG_CARD_CORRUPTED;
         if (retry == 0) {
             pad_clear_input();
             close(fd);
@@ -4114,7 +4114,7 @@ open:
         fd = open(path, O_CREAT | (2 << 16));
         if (fd == -1) {
             if (retry == 0) {
-                sp->state.half[0] = 355;
+                sp->state.half[0] = MSG_CARD_SAVE_FAILED;
                 return 0;
             }
             retry--;
@@ -4127,7 +4127,7 @@ open:
     fd = open(path, O_RDWR);
     if (fd == -1) {
         if (retry == 0) {
-            sp->state.half[0] = 355;
+            sp->state.half[0] = MSG_CARD_SAVE_FAILED;
             return 0;
         }
         retry--;
@@ -4137,7 +4137,7 @@ write:
     lseek(fd, 0, SEEK_SET);
     if (write(fd, &header, sizeof(header)) == -1) {
         if (retry == 0) {
-            sp->state.half[0] = 355;
+            sp->state.half[0] = MSG_CARD_SAVE_FAILED;
             close(fd);
             return 0;
         }
@@ -4160,7 +4160,7 @@ write:
     lseek(fd, 0, SEEK_SET);
     if (write(fd, &header, sizeof(header)) == -1) {
         if (retry == 0) {
-            sp->state.half[0] = 355;
+            sp->state.half[0] = MSG_CARD_SAVE_FAILED;
             close(fd);
             return 0;
         }
@@ -4240,14 +4240,14 @@ select:
         card_screen_draw();
         card_screen_draw();
         if (card_format(sp->port) == 0) {
-            sp->state.half[0] = 356;
+            sp->state.half[0] = MSG_CARD_FORMAT_FAILED;
             sp->mode <<= 4;
             goto done;
         }
         sp->mode <<= 1;
     } else {
         if (sp->card->status == 2) {
-            sp->state.half[0] = 350;
+            sp->state.half[0] = MSG_CARD_NOT_INSERTED;
             sp->mode <<= 5;
             goto done;
         }
@@ -4256,15 +4256,15 @@ select:
     card_read_directory(sp->port);
     if (sp->card->status != 0) {
         if (sp->card->status == 4)
-            sp->state.half[0] = 352;
+            sp->state.half[0] = MSG_CARD_NO_DATA;
         else if (sp->card->status == 5)
-            sp->state.half[0] = 353;
+            sp->state.half[0] = MSG_CARD_NO_ROOM;
         sp->mode <<= 3;
         goto done;
     }
     result = card_read_file_headers();
     if (result == 0) {
-        sp->state.half[0] = 352;
+        sp->state.half[0] = MSG_CARD_NO_DATA;
         sp->mode <<= 3;
         goto done;
     }
@@ -4287,12 +4287,12 @@ select:
     card_screen_draw();
     card_probe(sp->port, 0);
     if (sp->card->status == 1) {
-        sp->state.half[0] = 351;
+        sp->state.half[0] = MSG_CARD_SWITCHED;
         sp->mode <<= 2;
         goto done;
     }
     if (sp->card->status == 2) {
-        sp->state.half[0] = 350;
+        sp->state.half[0] = MSG_CARD_NOT_INSERTED;
         sp->mode <<= 2;
         goto done;
     }
@@ -4313,9 +4313,9 @@ select:
     if (result == 0) {
         if (sp->state.half[0] == 0)
             if (sp->mode & 0xff00)
-                sp->state.half[0] = 355;
+                sp->state.half[0] = MSG_CARD_SAVE_FAILED;
             else
-                sp->state.half[0] = 354;
+                sp->state.half[0] = MSG_CARD_LOAD_FAILED;
         sp->mode <<= 2;
         goto done;
     }
@@ -4463,7 +4463,7 @@ int menu_game_over_run(void)
             pad_state.pressed_repeat = 0;
             sp->state.word = 0;
         }
-        sp->font_mode = 0;
+        sp->font_mode = MENU_FONT_LOW_RES;
         frame_rate_update();
         menu_game_over_draw();
         sp->blink_phase = (sp->blink_phase + 1) % 32;
@@ -4533,7 +4533,7 @@ void menu_save_prompt_run(void)
             pad_state.pressed_repeat = 0;
             sp->main_row = 1;
         }
-        sp->font_mode = 0;
+        sp->font_mode = MENU_FONT_LOW_RES;
         frame_rate_update();
         menu_save_prompt_draw();
         sp->blink_phase = (sp->blink_phase + 1) % 32;

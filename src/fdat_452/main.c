@@ -183,7 +183,7 @@ void map_run_shop_visit(void)
     } else if (fdat_801ed8c4 == 4) {
         pad_state.pressed = 0;
         menu->mode = 2;
-        menu->font_mode = 0;
+        menu->font_mode = MENU_FONT_LOW_RES;
         shop_run();
         fdat_801ed8c4 = 5;
     } else if (fdat_801ed8c4 == 5) {

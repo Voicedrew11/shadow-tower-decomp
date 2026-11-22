@@ -5501,7 +5501,7 @@ void ui_draw_glyph(u16 c, u16 x, u16 y, CVECTOR *color)
     u16 q, r;
     int n;
 
-    if (MENU_SCRATCH->font_mode == 0) {
+    if (MENU_SCRATCH->font_mode == MENU_FONT_LOW_RES) {
         ch = 12;
         fw = ch;
         qh = fw;
@@ -5599,7 +5599,7 @@ void ui_draw_text(u16 *s, u16 x, u16 y, CVECTOR *color)
     u_int split;
     u_int half;
 
-    if (MENU_SCRATCH->font_mode == 0) {
+    if (MENU_SCRATCH->font_mode == MENU_FONT_LOW_RES) {
         line = 14;
         split = 64;
     } else {
@@ -5653,7 +5653,7 @@ void ui_draw_number(u32 num, u16 x, u16 y, CVECTOR *color)
 
     if (number_narrow)
         width -= 4;
-    if (MENU_SCRATCH->font_mode == 0)
+    if (MENU_SCRATCH->font_mode == MENU_FONT_LOW_RES)
         base = 64;
     else
         base = 4;
@@ -6329,29 +6329,29 @@ void menu_main_draw(void)
     for (i = 0; i < 11; i++)
         ui_draw_text(MESSAGE(i), 24, i * 16 + 48, &sp->style[0]);
     if (viewer.status_flags & 7)
-        ui_draw_text(MESSAGE(20), 106, 112, &sp->style[0]);
+        ui_draw_text(MESSAGE(MSG_STATUS_POISON), 106, 112, &sp->style[0]);
     else if (viewer.status_flags & 0x18)
-        ui_draw_text(MESSAGE(21), 93, 112, &sp->style[0]);
+        ui_draw_text(MESSAGE(MSG_STATUS_PARALYZE), 93, 112, &sp->style[0]);
     else if (viewer.status_flags & 0x60)
-        ui_draw_text(MESSAGE(22), 119, 112, &sp->style[0]);
+        ui_draw_text(MESSAGE(MSG_STATUS_DARK), 119, 112, &sp->style[0]);
     else if (viewer.status_flags & 0x80)
-        ui_draw_text(MESSAGE(23), 119, 112, &sp->style[0]);
+        ui_draw_text(MESSAGE(MSG_STATUS_SLOW), 119, 112, &sp->style[0]);
     else if (viewer.status_flags & 0x100)
-        ui_draw_text(MESSAGE(24), 106, 112, &sp->style[0]);
+        ui_draw_text(MESSAGE(MSG_STATUS_CURSED), 106, 112, &sp->style[0]);
     else
-        ui_draw_text(MESSAGE(19), 106, 112, &sp->style[0]);
+        ui_draw_text(MESSAGE(MSG_STATUS_NORMAL), 106, 112, &sp->style[0]);
     if (viewer.equipment[EQUIP_SLOT_LEFT_HAND] != EQUIP_NONE
         && vis_table_c.types[viewer.equipment[EQUIP_SLOT_LEFT_HAND]].unk5[0x1d] >= 9) {
         kind = vis_table_c.types[viewer.equipment[EQUIP_SLOT_LEFT_HAND]].unk5[0x1d];
         n = 0;
         if (kind - 9 == 2)
             n = 14;
-        ui_draw_text(MESSAGE(17 + kind), 119 - n, 208, &sp->style[0]);
+        ui_draw_text(MESSAGE(MSG_ELEMENTS - 9 + kind), 119 - n, 208, &sp->style[0]);
     } else {
-        ui_draw_text(MESSAGE(25), 119, 208, &sp->style[0]);
+        ui_draw_text(MESSAGE(MSG_ELEMENT_NONE), 119, 208, &sp->style[0]);
     }
     for (i = 0; i < 8; i++)
-        ui_draw_text(MESSAGE(11 + i), label_x[i] + 172, i * 16 + 90, &sp->style[2]);
+        ui_draw_text(MESSAGE(MSG_PAUSE_ROWS + i), label_x[i] + 172, i * 16 + 90, &sp->style[2]);
     ui_draw_number_fixed(viewer.hp | DIGITS(4), 78, 48, &sp->style[0]);
     i = 0;
     ui_draw_glyph(15, 106, 48, &sp->style[0]);
@@ -6504,8 +6504,8 @@ void menu_attribute_points_draw(void)
             right = &sp->style[0];
             right_num = &sp->style[4];
         }
-        ui_draw_text(MESSAGE(0x212 + i), 46, i * 20 + 68, left);
-        ui_draw_text(MESSAGE(0x219 + i), 170, i * 20 + 68, right);
+        ui_draw_text(MESSAGE(MSG_ATTR_STRENGTH + i), 46, i * 20 + 68, left);
+        ui_draw_text(MESSAGE(MSG_ATTR_SPIRIT + i), 170, i * 20 + 68, right);
         ui_draw_number((sp->state.stats.base[0][i] + sp->state.stats.bonus[0][i]) | DIGITS(3), 108, i * 20 + 68, left_num);
         ui_draw_number((sp->state.stats.base[1][i] + sp->state.stats.bonus[1][i]) | DIGITS(3), 232, i * 20 + 68, right_num);
         sp->rect.x = 141;
@@ -6517,7 +6517,7 @@ void menu_attribute_points_draw(void)
     sp->style[0].r = sp->style[4].r = 72;
     sp->style[0].g = sp->style[4].g = 72;
     sp->style[0].b = sp->style[4].b = 72;
-    ui_draw_text(MESSAGE(0x220), 56, 208, &sp->style[0]);
+    ui_draw_text(MESSAGE(MSG_REMAINING_SP), 56, 208, &sp->style[0]);
     ui_draw_number(sp->state.stats.value | DIGITS(2), 242, 208, &sp->style[4]);
     sp->clut_pos.vx = 544;
     sp->clut_pos.vy = 511;
@@ -6586,35 +6586,35 @@ void menu_area_info_draw(void)
             id = sp->state.map.ids[i];
             if (id >= 90) {
                 if (id == 99)
-                    ui_draw_text(MESSAGE(0x269), 53, i * 16 + 54, &sp->style[0]);
+                    ui_draw_text(MESSAGE(MSG_WORLD_UNKNOWN), 53, i * 16 + 54, &sp->style[0]);
                 else if (id == sp->state.map.current)
-                    ui_draw_text(MESSAGE(0x208 + id), 53, i * 16 + 54, &sp->style[2]);
+                    ui_draw_text(MESSAGE(MSG_WORLD_NAMES - 90 + id), 53, i * 16 + 54, &sp->style[2]);
                 else
-                    ui_draw_text(MESSAGE(0x208 + id), 53, i * 16 + 54, &sp->style[0]);
+                    ui_draw_text(MESSAGE(MSG_WORLD_NAMES - 90 + id), 53, i * 16 + 54, &sp->style[0]);
             } else if (id == 89) {
-                ui_draw_text(MESSAGE(0x26a), 67, i * 16 + 54, &sp->style[0]);
+                ui_draw_text(MESSAGE(MSG_AREA_UNKNOWN), 67, i * 16 + 54, &sp->style[0]);
             } else if (id == area_state.area) {
-                ui_draw_text(MESSAGE(0x2bc + id), 67, i * 16 + 54, &sp->style[2]);
+                ui_draw_text(MESSAGE(MSG_AREA_NAMES + id), 67, i * 16 + 54, &sp->style[2]);
                 ui_draw_number(game_progress.area_kills[sp->state.map.ids[i]] * 100 / total[sp->state.map.ids[i]] | DIGITS(3),
                               223, i * 16 + 54, &sp->style[6]);
                 ui_draw_glyph(80, 256, i * 16 + 54, &sp->style[2]);
             } else {
-                ui_draw_text(MESSAGE(0x2bc + id), 67, i * 16 + 54, &sp->style[0]);
+                ui_draw_text(MESSAGE(MSG_AREA_NAMES + id), 67, i * 16 + 54, &sp->style[0]);
                 ui_draw_number(game_progress.area_kills[sp->state.map.ids[i]] * 100 / total[sp->state.map.ids[i]] | DIGITS(3),
                               223, i * 16 + 54, &sp->style[4]);
                 ui_draw_glyph(80, 256, i * 16 + 54, &sp->style[0]);
             }
         }
     } else {
-        ui_draw_text(MESSAGE(0x258), 72, 53, &sp->style[2]);
+        ui_draw_text(MESSAGE(MSG_AREA_INFO_LABELS), 72, 53, &sp->style[2]);
         for (i = 1; i < 5; i++)
-            ui_draw_text(MESSAGE(0x258 + i), 72, i * 30 + 63, &sp->style[2]);
+            ui_draw_text(MESSAGE(MSG_AREA_INFO_LABELS + i), 72, i * 30 + 63, &sp->style[2]);
         if (sp->state.map.current != -1) {
-            ui_draw_text(MESSAGE(0x208 + sp->state.map.current), 86, 66, &sp->style[0]);
-            ui_draw_text(MESSAGE(0x2bc + area_state.area), name_x[area_state.area] + 100, 79,
+            ui_draw_text(MESSAGE(MSG_WORLD_NAMES - 90 + sp->state.map.current), 86, 66, &sp->style[0]);
+            ui_draw_text(MESSAGE(MSG_AREA_NAMES + area_state.area), name_x[area_state.area] + 100, 79,
                           &sp->style[0]);
         } else {
-            ui_draw_text(MESSAGE(0x2bc + area_state.area), 100, 73, &sp->style[0]);
+            ui_draw_text(MESSAGE(MSG_AREA_NAMES + area_state.area), 100, 73, &sp->style[0]);
         }
         ui_draw_number(viewer.cunes_found | DIGITS(3), 179, 107, &sp->style[4]);
         ui_draw_glyph(15, 213, 107, &sp->style[0]);
@@ -6724,18 +6724,18 @@ void menu_options_draw(void)
     sp->tex_pos.vy = 416;
     ui_draw_image(&sp->rect, &sp->tex_pos, &sp->clut_pos, NULL, 1);
     for (i = 0; i < 6; y += 20, i++)
-        ui_draw_text(MESSAGE(0xc9 + i), label_x[i] + 32, y, &sp->style[2]);
+        ui_draw_text(MESSAGE(MSG_OPTION_LABELS + i), label_x[i] + 32, y, &sp->style[2]);
     for (on = &game_settings.walk_bob, i = 1; i < 5; on++, i++) {
         if (*on == 1) {
-            ui_draw_text(MESSAGE(0xcf), 193, i * 20 + 80, &sp->style[2]);
-            ui_draw_text(MESSAGE(0xd0), 241, i * 20 + 80, &sp->style[3]);
+            ui_draw_text(MESSAGE(MSG_ON), 193, i * 20 + 80, &sp->style[2]);
+            ui_draw_text(MESSAGE(MSG_OFF), 241, i * 20 + 80, &sp->style[3]);
         } else {
-            ui_draw_text(MESSAGE(0xcf), 193, i * 20 + 80, &sp->style[3]);
-            ui_draw_text(MESSAGE(0xd0), 241, i * 20 + 80, &sp->style[2]);
+            ui_draw_text(MESSAGE(MSG_ON), 193, i * 20 + 80, &sp->style[3]);
+            ui_draw_text(MESSAGE(MSG_OFF), 241, i * 20 + 80, &sp->style[2]);
         }
     }
     ui_draw_number_fixed(game_settings.sfx_volume | DIGITS(2), 280, 80, &sp->style[0]);
-    ui_draw_text(MESSAGE(0xe0 + sp->cursor), 64, 208, &sp->style[0]);
+    ui_draw_text(MESSAGE(MSG_OPTION_HELP + sp->cursor), 64, 208, &sp->style[0]);
     sp->tex_pos.vx = 596;
     sp->tex_pos.vy = 448;
     sp->clut_pos.vx = 544;
@@ -6805,16 +6805,16 @@ void menu_button_config_draw(void)
     mask = pad_state.buttons;
     for (i = 0; i < 6; i++) {
         if (mask[i] & sp->state.levels.flags)
-            ui_draw_text(MESSAGE(209 + i), label_x[i] + 32, i * 18 + 80, &sp->style[3]);
+            ui_draw_text(MESSAGE(MSG_BUTTON_FORWARD + i), label_x[i] + 32, i * 18 + 80, &sp->style[3]);
         else
-            ui_draw_text(MESSAGE(209 + i), label_x[i] + 32, i * 18 + 80, &sp->style[2]);
+            ui_draw_text(MESSAGE(MSG_BUTTON_FORWARD + i), label_x[i] + 32, i * 18 + 80, &sp->style[2]);
     }
     mask = &pad_state.buttons[PAD_ACTION_LOOK_UP];
     for (i = 0; i < 6; i++) {
         if (mask[i] & sp->state.levels.flags)
-            ui_draw_text(MESSAGE(215 + i), label_x[i + 6] + 168, i * 18 + 80, &sp->style[3]);
+            ui_draw_text(MESSAGE(MSG_BUTTON_LOOK_UP + i), label_x[i + 6] + 168, i * 18 + 80, &sp->style[3]);
         else
-            ui_draw_text(MESSAGE(215 + i), label_x[i + 6] + 168, i * 18 + 80, &sp->style[2]);
+            ui_draw_text(MESSAGE(MSG_BUTTON_LOOK_UP + i), label_x[i + 6] + 168, i * 18 + 80, &sp->style[2]);
     }
     sp->tex_pos.vy = 384;
     sp->clut_pos.vx = 544;
@@ -6858,8 +6858,8 @@ void menu_button_config_draw(void)
     sp->rect.w = 120;
     sp->rect.h = 16;
     ui_draw_image(&sp->rect, &sp->tex_pos, &sp->clut_pos, NULL, 3);
-    ui_draw_text(MESSAGE(221), label_x[12] + 48, 204, &sp->style[2]);
-    ui_draw_text(MESSAGE(222), label_x[13] + 152, 204, &sp->style[2]);
+    ui_draw_text(MESSAGE(MSG_STANDARD_SET), label_x[12] + 48, 204, &sp->style[2]);
+    ui_draw_text(MESSAGE(MSG_DONE), label_x[13] + 152, 204, &sp->style[2]);
     for (i = 0; i < 12; i++) {
         if (i == 6) {
             row[0].vx = 184;
@@ -6913,7 +6913,7 @@ void card_draw_checking(void)
 {
     MenuScratch *sp = MENU_SCRATCH;
 
-    ui_draw_text(MESSAGE(310), 32, 74, &sp->style[0]);
+    ui_draw_text(MESSAGE(MSG_CARD_CHECKING), 32, 74, &sp->style[0]);
 }
 
 ADDRESS(0x8002c090, 0x114)
@@ -6935,8 +6935,8 @@ void card_draw_port_choice(void)
         file_row_clipped[i] = 0;
         DAT_800881f0[i] = 0;
     }
-    ui_draw_text(MESSAGE(320), 102, 110, &sp->style[0]);
-    ui_draw_text(MESSAGE(321), 102, 134, &sp->style[0]);
+    ui_draw_text(MESSAGE(MSG_CARD_SLOT_1), 102, 110, &sp->style[0]);
+    ui_draw_text(MESSAGE(MSG_CARD_SLOT_2), 102, 134, &sp->style[0]);
 }
 
 ADDRESS(0x8002c1a4, 0x114)
@@ -6945,17 +6945,17 @@ void card_draw_format_prompt(void)
     MenuScratch *sp = MENU_SCRATCH;
 
     if (sp->state.half[1] == 0) {
-        ui_draw_text(MESSAGE(311), 32, 74, &sp->style[0]);
+        ui_draw_text(MESSAGE(MSG_CARD_UNFORMATTED), 32, 74, &sp->style[0]);
         if (sp->dialog_choice) {
-            ui_draw_text(MESSAGE(325), 121, 160, &sp->style[2]);
-            ui_draw_text(MESSAGE(326), 191, 160, &sp->style[0]);
+            ui_draw_text(MESSAGE(MSG_CARD_YES), 121, 160, &sp->style[2]);
+            ui_draw_text(MESSAGE(MSG_CARD_NO), 191, 160, &sp->style[0]);
         } else {
-            ui_draw_text(MESSAGE(325), 121, 160, &sp->style[0]);
-            ui_draw_text(MESSAGE(326), 191, 160, &sp->style[2]);
+            ui_draw_text(MESSAGE(MSG_CARD_YES), 121, 160, &sp->style[0]);
+            ui_draw_text(MESSAGE(MSG_CARD_NO), 191, 160, &sp->style[2]);
         }
     } else {
-        ui_draw_text(MESSAGE(312), 32, 74, &sp->style[0]);
-        ui_draw_text(MESSAGE(332), 40, 100, &sp->style[0]);
+        ui_draw_text(MESSAGE(MSG_CARD_FORMATTING), 32, 74, &sp->style[0]);
+        ui_draw_text(MESSAGE(MSG_CARD_DO_NOT_REMOVE), 40, 100, &sp->style[0]);
     }
 }
 
@@ -6980,15 +6980,15 @@ void card_draw_file_list(void)
 
     sp->border_color.r = sp->border_color.g = sp->border_color.b = 64;
     if (sp->state.half[1] == 1) {
-        id = (sp->mode & 0xff) ? 323 : 324;
+        id = (sp->mode & 0xff) ? MSG_CARD_LOAD_PROMPT : MSG_CARD_SAVE_PROMPT;
         ui_draw_text(MESSAGE(id), 68, 128, &sp->style[0]);
         sp->style[0].b = sp->style[0].g = sp->style[0].r = 24;
         if (sp->dialog_choice) {
-            ui_draw_text(MESSAGE(325), 120, 150, &sp->style[2]);
-            ui_draw_text(MESSAGE(326), 190, 150, &sp->style[0]);
+            ui_draw_text(MESSAGE(MSG_CARD_YES), 120, 150, &sp->style[2]);
+            ui_draw_text(MESSAGE(MSG_CARD_NO), 190, 150, &sp->style[0]);
         } else {
-            ui_draw_text(MESSAGE(325), 120, 150, &sp->style[0]);
-            ui_draw_text(MESSAGE(326), 190, 150, &sp->style[2]);
+            ui_draw_text(MESSAGE(MSG_CARD_YES), 120, 150, &sp->style[0]);
+            ui_draw_text(MESSAGE(MSG_CARD_NO), 190, 150, &sp->style[2]);
         }
         sp->style[0].b = sp->style[0].g = sp->style[0].r = 72;
         sp->rect.x = 60;
@@ -7034,23 +7034,23 @@ void card_draw_file_list(void)
         n = sp->row_count;
     for (i = 0; i < n; i++) {
         if (sp->has_new_row == 1 && i + sp->first_row == sp->row_count - 1) {
-            ui_draw_text(MESSAGE(322), 64, sp->cursor_rect.y + 6, &sp->style[0]);
+            ui_draw_text(MESSAGE(MSG_CARD_NEW_DATA), 64, sp->cursor_rect.y + 6, &sp->style[0]);
         } else {
             ui_draw_number_fixed((u16)(sp->first_row + i + 1) | DIGITS(2), 38, sp->cursor_rect.y + 6,
                           &sp->style[0]);
-            ui_draw_text(MESSAGE(328), 218, sp->cursor_rect.y + 6, &sp->style[0]);
+            ui_draw_text(MESSAGE(MSG_CARD_SP), 218, sp->cursor_rect.y + 6, &sp->style[0]);
             text_scroll_mode = 1;
             text_clip_right = 280;
             text_clip_on = 0;
             text_clip_left = 0;
             if (titles[sp->card->files[i + sp->first_row].area] != -1)
-                ui_draw_text(MESSAGE(610 + titles[sp->card->files[i + sp->first_row].area]), 64,
+                ui_draw_text(MESSAGE(MSG_WORLD_NAMES + titles[sp->card->files[i + sp->first_row].area]), 64,
                               sp->cursor_rect.y + 6, &sp->style[0]);
             if (titles[sp->card->files[i + sp->first_row].area] != -1)
-                ui_draw_text(MESSAGE(700 + sp->card->files[i + sp->first_row].area), 64,
+                ui_draw_text(MESSAGE(MSG_AREA_NAMES + sp->card->files[i + sp->first_row].area), 64,
                               sp->cursor_rect.y + 22, &sp->style[0]);
             else
-                ui_draw_text(MESSAGE(700 + sp->card->files[i + sp->first_row].area), 64,
+                ui_draw_text(MESSAGE(MSG_AREA_NAMES + sp->card->files[i + sp->first_row].area), 64,
                               sp->cursor_rect.y + 6, &sp->style[0]);
             ui_draw_number_fixed(sp->card->files[i + sp->first_row].sp_total | DIGITS(4), 248, sp->cursor_rect.y + 6,
                           &sp->style[0]);
@@ -7073,10 +7073,10 @@ void card_draw_transfer(void)
     MenuScratch *sp = MENU_SCRATCH;
 
     if (sp->mode & 0xff)
-        ui_draw_text(MESSAGE(330), 32, 74, &sp->style[0]);
+        ui_draw_text(MESSAGE(MSG_CARD_LOADING), 32, 74, &sp->style[0]);
     else
-        ui_draw_text(MESSAGE(331), 32, 74, &sp->style[0]);
-    ui_draw_text(MESSAGE(332), 40, 100, &sp->style[0]);
+        ui_draw_text(MESSAGE(MSG_CARD_SAVING), 32, 74, &sp->style[0]);
+    ui_draw_text(MESSAGE(MSG_CARD_DO_NOT_REMOVE), 40, 100, &sp->style[0]);
 }
 
 ADDRESS(0x8002c958, 0x40)
@@ -7084,7 +7084,7 @@ void card_draw_finished(void)
 {
     MenuScratch *sp = MENU_SCRATCH;
 
-    ui_draw_text(MESSAGE(340), 32, 74, &sp->style[0]);
+    ui_draw_text(MESSAGE(MSG_CARD_FINISHED), 32, 74, &sp->style[0]);
 }
 
 ADDRESS(0x8002c998, 0x50)
@@ -7193,14 +7193,14 @@ void menu_end_game_draw_dialog(void)
 {
     MenuScratch *sp = MENU_SCRATCH;
 
-    ui_draw_text(MESSAGE(400), 76, 92, &sp->style[0]);
+    ui_draw_text(MESSAGE(MSG_END_GAME_PROMPT), 76, 92, &sp->style[0]);
     sp->style[0].b = sp->style[0].g = sp->style[0].r = 24;
     if (sp->cursor == 0) {
-        ui_draw_text(MESSAGE(401), 121, 136, &sp->style[2]);
-        ui_draw_text(MESSAGE(402), 189, 136, &sp->style[0]);
+        ui_draw_text(MESSAGE(MSG_END_GAME_YES), 121, 136, &sp->style[2]);
+        ui_draw_text(MESSAGE(MSG_END_GAME_NO), 189, 136, &sp->style[0]);
     } else {
-        ui_draw_text(MESSAGE(401), 121, 136, &sp->style[0]);
-        ui_draw_text(MESSAGE(402), 189, 136, &sp->style[2]);
+        ui_draw_text(MESSAGE(MSG_END_GAME_YES), 121, 136, &sp->style[0]);
+        ui_draw_text(MESSAGE(MSG_END_GAME_NO), 189, 136, &sp->style[2]);
     }
     ui_draw_window(40, 80, 240, 80);
 }
@@ -7244,8 +7244,8 @@ void menu_game_over_draw(void)
     sp->cursor_rect.h = 16;
     ui_draw_rect_outline(&sp->cursor_rect, &sp->cursor_color, 257, 1);
     ui_add_draw_mode(1, 0, 0);
-    ui_draw_text(MESSAGE(800), x[0] + 97, 120, &sp->style[0]);
-    ui_draw_text(MESSAGE(801), x[1] + 97, 144, &sp->style[0]);
+    ui_draw_text(MESSAGE(MSG_NEW_GAME), x[0] + 97, 120, &sp->style[0]);
+    ui_draw_text(MESSAGE(MSG_LOAD_GAME), x[1] + 97, 144, &sp->style[0]);
     ui_draw_window(72, 100, 176, 80);
     gfx_flip();
     ClearImage(&world_state.draw[world_state.frame].clip, 0, 0, 0);
@@ -7263,13 +7263,13 @@ void menu_save_prompt_draw(void)
     sp->style[2].g = 66;
     sp->style[2].b = 48;
     sp->style[0].cd = sp->style[2].cd = 57;
-    ui_draw_text(MESSAGE(850), 92, 120, &sp->style[0]);
+    ui_draw_text(MESSAGE(MSG_SAVE_PROMPT), 92, 120, &sp->style[0]);
     if (sp->main_row == 0) {
-        ui_draw_text(MESSAGE(851), 127, 152, &sp->style[2]);
-        ui_draw_text(MESSAGE(852), 183, 152, &sp->style[0]);
+        ui_draw_text(MESSAGE(MSG_SAVE_YES), 127, 152, &sp->style[2]);
+        ui_draw_text(MESSAGE(MSG_SAVE_NO), 183, 152, &sp->style[0]);
     } else {
-        ui_draw_text(MESSAGE(851), 127, 152, &sp->style[0]);
-        ui_draw_text(MESSAGE(852), 183, 152, &sp->style[2]);
+        ui_draw_text(MESSAGE(MSG_SAVE_YES), 127, 152, &sp->style[0]);
+        ui_draw_text(MESSAGE(MSG_SAVE_NO), 183, 152, &sp->style[2]);
     }
     ui_draw_window(72, 100, 176, 80);
     gfx_flip();
@@ -7397,7 +7397,7 @@ void shop_draw_buy_list(void)
     if (sp->state.list.count < LIST_ROWS + 1)
         rows = sp->state.list.count;
     ui_draw_number(inventory.counts[266].count | 0x3000000, 244, 27, &sp->style[6]);
-    ui_draw_text(MESSAGE(100), 160, 27, &sp->style[2]);
+    ui_draw_text(MESSAGE(MSG_SHOP_CUNES), 160, 27, &sp->style[2]);
     for (i = 0; i < rows; i++) {
         id = inventory.shop_ids[sp->state.list.ids[sp->scroll + i]];
         if (inventory.counts[266].count >= vis_table_c.types[id].price) {
@@ -7413,13 +7413,13 @@ void shop_draw_buy_list(void)
         sp->style[0].cd &= 0x7f;
         sp->style[3].cd &= 0x7f;
         if (vis_table_c.types[id].max_durability) {
-            ui_draw_text(MESSAGE(109), 72, i * 36 + 62, text);
+            ui_draw_text(MESSAGE(MSG_DURABILITY), 72, i * 36 + 62, text);
             ui_draw_number(vis_table_c.types[id].durability | 0x3000000, 128, i * 36 + 62, figure);
             ui_draw_glyph(74, 160, i * 36 + 62, text);
             ui_draw_number(vis_table_c.types[id].max_durability | 0x3000000, 172, i * 36 + 62, figure);
         }
         ui_draw_number(vis_table_c.types[id].price | 0x3000000, 244, i * 36 + 62, figure);
-        ui_draw_text(MESSAGE(102), 216, i * 36 + 62, text);
+        ui_draw_text(MESSAGE(MSG_CUNES_SIGN), 216, i * 36 + 62, text);
     }
 }
 
@@ -7440,7 +7440,7 @@ void shop_draw_trade_list(void)
         ui_draw_text(LIST_TEXT(sp, id), 54, i * 36 + 48, &sp->style[0]);
         sp->style[0].cd &= 0x7f;
         if (vis_table_c.types[id].max_durability) {
-            ui_draw_text(MESSAGE(109), 131, i * 36 + 62, &sp->style[0]);
+            ui_draw_text(MESSAGE(MSG_DURABILITY), 131, i * 36 + 62, &sp->style[0]);
             ui_draw_number(vis_table_c.types[id].durability | 0x3000000, 187, i * 36 + 62,
                           &sp->style[4]);
             ui_draw_glyph(74, 219, i * 36 + 62, &sp->style[0]);
@@ -7461,7 +7461,7 @@ void shop_draw_repair_list(void)
     CVECTOR *text, *figure;
 
     ui_draw_number(viewer.hp | 0x4000000, 244, 27, &sp->style[6]);
-    ui_draw_text(MESSAGE(101), 176, 27, &sp->style[2]);
+    ui_draw_text(MESSAGE(MSG_SHOP_HP_LEFT), 176, 27, &sp->style[2]);
     rows = LIST_ROWS;
     if (sp->state.list.count < LIST_ROWS + 1)
         rows = sp->state.list.count;
@@ -7484,7 +7484,7 @@ void shop_draw_repair_list(void)
         sp->style[0].cd &= 0x7f;
         sp->style[3].cd &= 0x7f;
         if (vis_table_c.types[id].max_durability) {
-            ui_draw_text(MESSAGE(109), 77, i * 36 + 62, text);
+            ui_draw_text(MESSAGE(MSG_DURABILITY), 77, i * 36 + 62, text);
             ui_draw_number(vis_table_c.types[id].durability | 0x3000000, 133, i * 36 + 62, figure);
             ui_draw_glyph(74, 165, i * 36 + 62, text);
             ui_draw_number(vis_table_c.types[id].max_durability | 0x3000000, 177, i * 36 + 62, figure);
@@ -7515,27 +7515,27 @@ void shop_draw_confirm(void)
     ui_add_draw_mode(1, 0, 0);
     if (sp->mode & 0x1) {
         id = inventory.shop_ids[sp->state.list.ids[sp->scroll + sp->cursor]];
-        ui_draw_text(MESSAGE(105), 120, 208, &sp->style[0]);
+        ui_draw_text(MESSAGE(MSG_SHOP_BUY), 120, 208, &sp->style[0]);
     } else if (sp->mode & 0x8) {
         id = sp->state.list.ids[sp->scroll + sp->cursor];
-        ui_draw_text(MESSAGE(106), 110, 208, &sp->style[0]);
+        ui_draw_text(MESSAGE(MSG_SHOP_REPAIR), 110, 208, &sp->style[0]);
     } else {
         id = sp->state.list.ids[sp->scroll + sp->cursor];
-        ui_draw_text(MESSAGE(107), 113, 208, &sp->style[0]);
+        ui_draw_text(MESSAGE(MSG_SHOP_TRADE), 113, 208, &sp->style[0]);
     }
-    ui_draw_text(MESSAGE(108), 172, 208, &sp->style[0]);
+    ui_draw_text(MESSAGE(MSG_SHOP_CANCEL), 172, 208, &sp->style[0]);
     sp->style[0].cd |= 0x80;
     ui_draw_text(LIST_TEXT(sp, id), 24, 176, &sp->style[0]);
     sp->style[0].cd &= 0x7f;
     if (vis_table_c.types[id].max_durability) {
-        ui_draw_text(MESSAGE(109), 48, 190, &sp->style[0]);
+        ui_draw_text(MESSAGE(MSG_DURABILITY), 48, 190, &sp->style[0]);
         ui_draw_number(vis_table_c.types[id].durability | 0x3000000, 104, 190, &sp->style[4]);
         ui_draw_glyph(74, 136, 190, &sp->style[0]);
         ui_draw_number(vis_table_c.types[id].max_durability | 0x3000000, 148, 190, &sp->style[4]);
     }
     if (sp->mode & 0x1) {
         ui_draw_number(vis_table_c.types[id].price | 0x3000000, 244, 190, &sp->style[4]);
-        ui_draw_text(MESSAGE(102), 216, 190, &sp->style[0]);
+        ui_draw_text(MESSAGE(MSG_CUNES_SIGN), 216, 190, &sp->style[0]);
     } else if (sp->mode & 0x8) {
         price = vis_table_c.types[id].repair_price * 2 / 3 *
                 (vis_table_c.types[id].max_durability - vis_table_c.types[id].durability);
@@ -7543,9 +7543,9 @@ void shop_draw_confirm(void)
             price *= 2;
         ui_draw_number((u16)price | 0x4000000, 244, 190, &sp->style[4]);
     }
-    ui_draw_text(MESSAGE(103), 165, 46, &sp->style[0]);
+    ui_draw_text(MESSAGE(MSG_ATTRIBUTE_COLUMNS), 165, 46, &sp->style[0]);
     y = 46;
-    ui_draw_text(MESSAGE(103), 165, y, &sp->style[0]);
+    ui_draw_text(MESSAGE(MSG_ATTRIBUTE_COLUMNS), 165, y, &sp->style[0]);
     for (i = 0; i < 7; i++) {
         ui_draw_number_fixed(vis_table_c.types[id].attributes[i] | 0x13000000, 207, y, &sp->style[4]);
         ui_draw_number_fixed(vis_table_c.types[id].attributes[i + 7] | 0x13000000, 273, y, &sp->style[4]);
@@ -7554,7 +7554,7 @@ void shop_draw_confirm(void)
     if (vis_table_c.types[id].weight) {
         menu_figure_whole = vis_table_c.types[id].weight * 100 / 454;
         DAT_80088188 = vis_table_c.types[id].weight * 1000 / 454;
-        ui_draw_text(MESSAGE(104), 220, 156, &sp->style[0]);
+        ui_draw_text(MESSAGE(MSG_WEIGHT), 220, 156, &sp->style[0]);
         ui_draw_number_fixed(menu_figure_whole | 0x3000000, 248, 156, &sp->style[4]);
         ui_draw_glyph(78, 269, 156, &sp->style[0]);
         ui_draw_number_fixed((u16)(DAT_80088188 - menu_figure_whole * 10) | 0x1000000, 275, 156,
@@ -7732,7 +7732,7 @@ void menu_equip_info_draw_attributes(void)
         sp->decrease_style = &sp->style[3];
     }
     for (i = 0; i < STATUS_ROWS; i++)
-        ui_draw_text(MESSAGE(14 + i), xoff[i] + 316, i * 15 + 16, sp->value_style);
+        ui_draw_text(MESSAGE(MSG_HI_ATTRIBUTES + i), xoff[i] + 316, i * 15 + 16, sp->value_style);
     if (sp->mode == 1) {
         sp->value_style = sp->increase_style = sp->decrease_style = &sp->style[4];
     } else {
@@ -7937,7 +7937,7 @@ void menu_equip_info_draw_item(void)
     if (vis_table_c.types[sp->choice_id].weight) {
         menu_figure_whole = vis_table_c.types[sp->choice_id].weight * 100 / 454;
         DAT_80088188 = vis_table_c.types[sp->choice_id].weight * 1000 / 454;
-        ui_draw_text(MESSAGE(28), 188, 217, &sp->style[0]);
+        ui_draw_text(MESSAGE(MSG_HI_WEIGHT), 188, 217, &sp->style[0]);
         ui_draw_number(menu_figure_whole | 0x3000000, 224, 217, &sp->style[4]);
         ui_draw_glyph(18, 264, 217, &sp->style[0]);
         ui_draw_number((u16)(DAT_80088188 - menu_figure_whole * 10) | 0x1000000, 272, 217,
@@ -7945,7 +7945,7 @@ void menu_equip_info_draw_item(void)
         ui_draw_glyph(53, 287, 217, &sp->style[0]);
     }
     if (vis_table_c.types[sp->choice_id].max_durability) {
-        ui_draw_text(MESSAGE(29), 16, 216, &sp->style[0]);
+        ui_draw_text(MESSAGE(MSG_HI_DURABILITY), 16, 216, &sp->style[0]);
         if (vis_table_c.types[sp->choice_id].durability < 4) {
             ui_draw_number(vis_table_c.types[sp->choice_id].durability | 0x3000000, 80, 217,
                           &sp->style[6]);
@@ -8173,14 +8173,14 @@ void menu_creature_book_draw_entry(void)
     ui_draw_cell_grid(&pos, &tex, &clut, &sp->style[0], 0xf0005);
     if (menu_second_page) {
         for (i = 0; i < 14; i++) {
-            ui_draw_text(MESSAGE(100 + i), 336, i * 15 + 16, &sp->style[0]);
+            ui_draw_text(MESSAGE(MSG_HI_BOOK_ATTRIBUTES + i), 336, i * 15 + 16, &sp->style[0]);
             ui_draw_number((u16)item->attributes[i] | DIGITS(2), 582, i * 15 + 16, &sp->style[4]);
         }
     } else {
         for (i = 0; i < 10; i++)
-            ui_draw_text(MESSAGE(117 + i), 336, i * 15 + 16, &sp->style[0]);
+            ui_draw_text(MESSAGE(MSG_HI_BOOK_LABELS + i), 336, i * 15 + 16, &sp->style[0]);
         if (item->category < 17)
-            ui_draw_text(MESSAGE(150 + item->category), 606 - kind_w[item->category], 16,
+            ui_draw_text(MESSAGE(MSG_HI_CREATURE_TYPES + item->category), 606 - kind_w[item->category], 16,
                           &sp->style[0]);
         ui_draw_number(item->hp | DIGITS(4), 558, 31, &sp->style[4]);
         ui_draw_number(item->sp_gain | DIGITS(2), 582, 46, &sp->style[4]);
@@ -8217,11 +8217,11 @@ void menu_creature_book_draw_entry(void)
         }
         ui_draw_number((u16)item->pairs[3][0] | DIGITS(3), 570, 136, &sp->style[4]);
         if (item->abilities & 0xf)
-            ui_draw_text(MESSAGE(129 + (item->abilities & 0xf)), 336, 181, &sp->style[0]);
+            ui_draw_text(MESSAGE(MSG_HI_ABILITIES + (item->abilities & 0xf)), 336, 181, &sp->style[0]);
         if (item->abilities >> 8 & 0xf)
-            ui_draw_text(MESSAGE(129 + (item->abilities >> 8 & 0xf)), 336, 196, &sp->style[0]);
+            ui_draw_text(MESSAGE(MSG_HI_ABILITIES + (item->abilities >> 8 & 0xf)), 336, 196, &sp->style[0]);
         if (item->abilities >> 16 & 0xf)
-            ui_draw_text(MESSAGE(129 + (item->abilities >> 16 & 0xf)), 336, 211, &sp->style[0]);
+            ui_draw_text(MESSAGE(MSG_HI_ABILITIES + (item->abilities >> 16 & 0xf)), 336, 211, &sp->style[0]);
     }
     sp->image_rect.x = 55;
     sp->image_rect.y = 32;
@@ -8426,13 +8426,13 @@ void menu_arrange_icons_draw_caption(void)
     sp->style[0].cd &= 0x7f;
     if (id != -1) {
         if (vis_table_c.types[id].max_durability) {
-            ui_draw_text(MESSAGE(29), 74, 215, &sp->style[0]);
+            ui_draw_text(MESSAGE(MSG_HI_DURABILITY), 74, 215, &sp->style[0]);
             ui_draw_number(vis_table_c.types[id].durability | 0x3000000, 138, 215, &sp->style[4]);
             ui_draw_glyph(14, 174, 215, &sp->style[0]);
             ui_draw_number(vis_table_c.types[id].max_durability | 0x3000000, 190, 215, &sp->style[4]);
         }
         if (vis_table_c.types[id].weight) {
-            ui_draw_text(MESSAGE(28), 250, 215, &sp->style[0]);
+            ui_draw_text(MESSAGE(MSG_HI_WEIGHT), 250, 215, &sp->style[0]);
             menu_figure_whole = vis_table_c.types[id].weight * 100 / 454;
             DAT_80088188 = vis_table_c.types[id].weight * 1000 / 454;
             ui_draw_number(menu_figure_whole | 0x3000000, 300, 215, &sp->style[4]);
@@ -8520,7 +8520,7 @@ void menu_arrange_icons_draw_details(void)
                     goto done;
                 n++;
                 if (*count) {
-                    ui_draw_text(MESSAGE(200 + k), label_x, text_y + j * 15, &sp->style[0]);
+                    ui_draw_text(MESSAGE(MSG_HI_HAND + k), label_x, text_y + j * 15, &sp->style[0]);
                     ui_draw_number(*count | 0x13000000, value_x, text_y + j * 15, &sp->style[4]);
                 }
                 count++;
@@ -8557,7 +8557,7 @@ void menu_draw_button_prompt(void)
     sp->image_rect.x = 232;
     sp->image_rect.y = 168;
     ui_draw_image(&sp->image_rect, &sp->tex_pos, &sp->clut_pos, NULL, 0);
-    ui_draw_text(MESSAGE(216), 188, 150, &sp->style[0]);
+    ui_draw_text(MESSAGE(MSG_HI_MOVE_PROMPT), 188, 150, &sp->style[0]);
     ui_draw_panel(168, 144, 319, 44);
 }
 

@@ -59,7 +59,7 @@ void ui_draw_glyph(u16 c, u16 x, u16 y, CVECTOR *color)
     u16 q, r;
     int n;
 
-    if (VS_MENU_SCRATCH->font_mode == 0) {
+    if (VS_MENU_SCRATCH->font_mode == MENU_FONT_LOW_RES) {
         ch = 12;
         fw = ch;
         qh = fw;
@@ -161,7 +161,7 @@ void ui_draw_text(u16 *s, u16 x, u16 y, CVECTOR *color)
     u_int split;
     u_int half;
 
-    if (VS_MENU_SCRATCH->font_mode == 0) {
+    if (VS_MENU_SCRATCH->font_mode == MENU_FONT_LOW_RES) {
         line = 14;
         split = 64;
     } else {
@@ -215,7 +215,7 @@ void ui_draw_number(u32 num, u16 x, u16 y, CVECTOR *color)
 
     if (DAT_8006337a)
         width -= 4;
-    if (VS_MENU_SCRATCH->font_mode == 0)
+    if (VS_MENU_SCRATCH->font_mode == MENU_FONT_LOW_RES)
         base = 64;
     else
         base = 4;

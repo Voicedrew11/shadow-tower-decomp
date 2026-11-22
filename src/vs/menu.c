@@ -72,16 +72,16 @@ void menu_vs_setup_draw(int page);
 /* Both card entries run the same page transition with a literal port. */
 #define CARD_PAGE(port)                     \
     sp->mode = 2;                        \
-    sp->font_mode = 0;                        \
+    sp->font_mode = MENU_FONT_LOW_RES;                        \
     sp->show_backdrop = 0;                        \
     card_screen_run(0, port);                 \
-    sp->font_mode = 1;                        \
+    sp->font_mode = MENU_FONT_HIGH_RES;                        \
     sp->mode = 0
 
 /* Likewise the team page and the save page of each player. */
-#define TEAM_PAGE(player)                       sp->font_mode = 1;                            menu_creature_select_run(player);                      sp->mode = 0
+#define TEAM_PAGE(player)                       sp->font_mode = MENU_FONT_HIGH_RES;                            menu_creature_select_run(player);                      sp->mode = 0
 
-#define SAVE_PAGE(player)                                          if (saves[0].save_id == saves[1].save_id) {                sp->mode = 9;                                           } else if (item_request_any_available(player) == 0) {                           sp->mode = 99;                                          } else {                                                           sp->font_mode = 1;                                               menu_item_request_run(player);                                         sp->mode = 0;                                           }
+#define SAVE_PAGE(player)                                          if (saves[0].save_id == saves[1].save_id) {                sp->mode = 9;                                           } else if (item_request_any_available(player) == 0) {                           sp->mode = 99;                                          } else {                                                           sp->font_mode = MENU_FONT_HIGH_RES;                                               menu_item_request_run(player);                                         sp->mode = 0;                                           }
 
 ADDRESS(0x80016f10, 0x98c)
 int menu_vs_setup_run(void)
@@ -144,7 +144,7 @@ int menu_vs_setup_run(void)
     sp->main_row = 0;
     sp->mode = 0;
     pad_clear_input();
-    sp->font_mode = 1;
+    sp->font_mode = MENU_FONT_HIGH_RES;
     for (;;) {
         if (sp->mode == 0) {
             if (PRESSED & PAD_BUTTON_CROSS) {
