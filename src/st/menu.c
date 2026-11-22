@@ -9,7 +9,7 @@
  * switch tables (0x80013738..0x80013880) follow, and GCC merged the screen
  * RECT {0, 0, 320, 480} (.sdata 0x800880ac) between fade_screen_to_black and
  * menu_save_prompt_run. The pool starts after st.sound_bank's switch table, so
- * the unit starts at 0x80058c04; src/st/menu_vram.c is a unit of its own
+ * the unit starts at 0x80058c04; src/st/menu_equip_open.c is a unit of its own
  * (its RECT literals repeat this unit's instead of merging with them).
  */
 #include <kf/lib/address.h>

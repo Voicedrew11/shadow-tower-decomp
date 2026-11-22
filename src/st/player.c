@@ -735,11 +735,11 @@ DATA(0x800881d0, 0x4, ".sbss")
 static short shake[2];
 
 /*
- * The area module's overlay pointers (st.area_a sets both from
+ * The area module's overlay pointers (st.area_load sets both from
  * DAT_80013980) and the unreferenced word before them: retail allocates
  * the three as one small COMMON batch right after shake, in hash-bucket
  * order. They are this object's: another object's small data would start
- * eight-aligned, and st.area_a reads DAT_800881dc with lui pairs, so it
+ * eight-aligned, and st.area_load reads DAT_800881dc with lui pairs, so it
  * does not request it (its tentative DAT_800881d8 merges into this one).
  */
 DATA(0x800881d4, 0x4, ".sbss")

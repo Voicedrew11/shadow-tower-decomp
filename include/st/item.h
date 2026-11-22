@@ -1,6 +1,6 @@
 /*
  * ST.EXE item counts, the examine action and item use (src/st/item.c,
- * src/st/item_spawn.c). Field names stay address-derived.
+ * src/st/creature_object.c). Field names stay address-derived.
  */
 #ifndef ST_ITEM_H
 #define ST_ITEM_H

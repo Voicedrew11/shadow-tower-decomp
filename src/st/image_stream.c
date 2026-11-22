@@ -1,9 +1,9 @@
 /*
  * ST.EXE: reading an area file into the small-file buffer, and the CD
  * completion callback that streams a read buffer of image blocks into VRAM
- * (WIP module). It is its own object, apart from st.area_a: retail places
- * its .sdata vector 0x8008809c right after st.area_a's SDATA, and it can be
- * neither st.area_a's own nor st.math's, which reads it with a lui pair (a
+ * (WIP module). It is its own object, apart from st.area_load: retail places
+ * its .sdata vector 0x8008809c right after st.area_load's SDATA, and it can be
+ * neither st.area_load's own nor st.math's, which reads it with a lui pair (a
  * -G8 unit reaches its own small data through $gp).
  */
 #include <kf/lib/address.h>

@@ -1,7 +1,7 @@
 /*
  * VS.EXE: three dialog bodies and a screen frame dispatching on its page
  * number (WIP module); the frame is shaped as ST.EXE's menu_creature_book_draw
- * (src/st/ui.c).
+ * (src/st/render.c).
  */
 #include <kf/lib/address.h>
 #include <kf/lib/null.h>

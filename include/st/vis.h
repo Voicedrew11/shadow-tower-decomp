@@ -17,7 +17,7 @@
  * list vis_build_visible builds from it; vis_record_is_visible/vis_id_is_visible search the
  * visible list. */
 /* The request fields VisLists starts with, as a stack request (src/st/item.c,
- * ground_items_update in src/st/vis_b.c). */
+ * ground_items_update in src/st/objects_ground_items.c). */
 typedef struct {
     s32 unk0;
     VECTOR unk4;
@@ -69,7 +69,7 @@ typedef struct {
     SVECTOR unkA4;
     VECTOR unkAC;        /* 0xac: the resolved source's position */
     s32 unkBC;           /* 0xbc: its horizontal distance */
-    VECTOR unkC0[272];   /* 0xc0: collision vertices in world space (src/st/vis_hit.c) */
+    VECTOR unkC0[272];   /* 0xc0: collision vertices in world space (src/st/collision.c) */
     VECTOR unk11C0[272]; /* 0x11c0..: the same relative to the three test points */
     VECTOR unk22C0[272];
     VECTOR unk33C0[272];
@@ -154,7 +154,7 @@ typedef struct {
     u16 pad;
 } VisHitQuad;
 
-/* The scratchpad while a request is tested (src/st/vis_hit.c). */
+/* The scratchpad while a request is tested (src/st/collision.c). */
 typedef struct {
     u8 *base;            /* 0x000: the collision file */
     VisHitPart *part;    /* 0x004 */
@@ -563,10 +563,10 @@ void vis_collect_creatures(void);
 void vis_collect_objects(void);
 void vis_collect_ground_items(void);
 
-/* src/st/vis_request.c */
+/* src/st/collision_query.c */
 void collision_locate_hit_body(VECTOR *pos);
 int collision_query(VisLists *req);
-/* src/st/vis_hit.c */
+/* src/st/collision.c */
 void collision_transform_vertices(VECTOR *pos);
 void collision_test_triangles(VECTOR *pos, int kind);
 void collision_test_quads(VECTOR *pos, int kind);
@@ -575,7 +575,7 @@ int creature_find_in_reach(VisLists *req, int arg1);
 int creature_find_touching(VisLists *req);
 int object_find_in_reach(VisLists *req);
 
-/* src/st/vis_entry.c */
+/* src/st/creature.c */
 void creature_return_home(Vis212 *e);
 void creature_reset_facing(Vis212 *e);
 int creature_vertex_offset(Vis212 *e, int index, VECTOR *out);
@@ -610,7 +610,7 @@ void effect_random_offset(SVECTOR *off, VECTOR *out, VECTOR *base, int arg3, sho
 #endif
 void effect_jitter_offset(SVECTOR *off, VECTOR *out, VECTOR *base);
 
-/* src/st/vis_item.c */
+/* src/st/creature_damage.c */
 int creature_sound_note(Vis212 *e);
 void creature_play_script_sound(Vis212 *e);
 void func_8004d7fc(void);
@@ -637,20 +637,20 @@ typedef struct {
     s16 unk16;
 } VisAFileEntry;
 
-/* src/st/vis_a.c */
+/* src/st/creatures.c */
 int creature_take_damage(Vis212 *e, int kind, int power, u16 *levels, int crit);
 void creatures_bind_previous_area(void);
 void creature_types_link_scripts(void);
 void creatures_load(VisAFileEntry *src);
 
-/* src/st/vis_b_init.c (objects_clear: st/funcs.h) */
+/* src/st/object_init.c (objects_clear: st/funcs.h) */
 void object_reset(Vis88 *e);
 void ground_item_set_hidden(int index, int mode);
 
-/* src/st/vis_b_load.c */
+/* src/st/object_load.c */
 void objects_load(u8 *src);
 
-/* src/st/vis_b.c (player_in_cell_rect, player_in_centred_rect, fade_run_frames: st/funcs.h) */
+/* src/st/objects_ground_items.c (player_in_cell_rect, player_in_centred_rect, fade_run_frames: st/funcs.h) */
 int object_find_usable(int i, VisLists *req);
 void object_start_kind(Vis88 *e, int kind);
 Vis88 *object_alloc(int start, int n, int now);
@@ -684,7 +684,7 @@ typedef struct {
     u16 unk16;
 } VisCFileEntry;
 
-/* src/st/vis_b.c (ground_items_clear: st/funcs.h; item_model_slots_clear: st/area.h) */
+/* src/st/objects_ground_items.c (ground_items_clear: st/funcs.h; item_model_slots_clear: st/area.h) */
 void ground_items_load(VisCFileEntry *src);
 void player_warp(StWarp *to, int keep);
 void player_warp_to_save_point(void);

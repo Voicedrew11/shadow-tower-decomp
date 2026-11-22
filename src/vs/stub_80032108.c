@@ -1,5 +1,5 @@
 /*
- * VS.EXE: an empty function, like ST.EXE's func_800443ec (src/st/area_a.c),
+ * VS.EXE: an empty function, like ST.EXE's func_800443ec (src/st/area_load.c),
  * and the effect hit test (WIP module).
  */
 #include <kf/lib/address.h>

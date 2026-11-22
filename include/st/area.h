@@ -18,7 +18,7 @@ extern u8 *DAT_800881dc[1];
 /* Tables game_load_common_data fills from its pack; WIP extents. */
 extern u8 DAT_8009b088[];
 
-/* src/st/area_a.c */
+/* src/st/area_load.c */
 extern u8 *DAT_800881d8;
 void area_hook_none(void);
 void image_stream_set_ready(StCdRequest *request);
@@ -48,7 +48,7 @@ void area_stream_set_ready(StCdRequest *request);
 void func_80045664(void);
 void area_request_commit(void);
 
-/* src/st/area_cd.c */
+/* src/st/image_stream.c */
 void image_stream_next_run(StCdRequest *request);
 void image_stream_update(void);
 

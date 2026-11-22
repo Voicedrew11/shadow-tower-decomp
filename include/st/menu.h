@@ -1,5 +1,5 @@
 /*
- * ST.EXE menu screens (src/st/ui.c): the scratchpad
+ * ST.EXE menu screens (src/st/render.c): the scratchpad
  * layout they use, the message table they draw from and their functions. The screens share
  * one scratchpad block at 0x1f800000 that differs from the renderer's
  * (st/scratch.h): screen state words at the start, the list fields around
@@ -194,7 +194,7 @@ typedef struct {
     MenuMessages *unk2CC; /* 0x2cc */
     u32 *unk2D0;         /* 0x2d0: 36 words of grid cell bits (menu_equip_info_run) */
     u32 *unk2D4;         /* 0x2d4: one bit per grid cell */
-    s16 unk2D8;          /* 0x2d8: viewer.unk2 when the equip info page opened (src/st/equip_menu.c, src/st/menu.c) */
+    s16 unk2D8;          /* 0x2d8: viewer.unk2 when the equip info page opened (src/st/menu_equip_arrange.c, src/st/menu.c) */
     s16 unk2DA;          /* 0x2da: viewer.unk6 */
     u16 unk2DC;          /* 0x2dc */
     u16 unk2DE;          /* 0x2de: selected row of the item and stats menus */
@@ -350,7 +350,7 @@ extern u16 DAT_80088192;
 extern s32 DAT_8017beb0[7];
 extern s16 DAT_800881f0[7];
 
-/* src/st/ui.c: the pause menu pages */
+/* src/st/render.c: the pause menu pages */
 void menu_main_draw(void);
 void menu_use_item_draw(void);
 void menu_attribute_points_draw(void);

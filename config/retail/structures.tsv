@@ -9,5 +9,5 @@ StAnimSet	0x3c	candidate	asm;src/st/anim_set.c st.anim_set	skeletal-animation sl
 StAnimSlot	0x18	candidate	asm;src/st/anim.c st.anim	vertex-animation slot; world_state.anim_slots[16] at +0xa5fc
 StAnimSubRecord	0x28	candidate	asm;src/st/anim.c st.anim	skeletal node scale, rotation and translation
 StCdBankPayload	0x8	supported	asm;ST.EXE 0x80058bbc/0x80058bc0/0x80058bcc;src/st/sound_bank.c st.sound_bank;target layout guards	Current eight-byte bank payload: signed slot/member and buffer pointer; original typedef spelling unknown.
-StCdPayload	0x8	supported	asm;ST.EXE 0x800460c0/0x800460e4/0x80058bbc;src/st/area_cd.c st.area_cd;src/st/sound_bank.c st.sound_bank;target layout guards	Shared request bytes +4..+0xb: SDK image RECT or bank payload; no additional storage.
+StCdPayload	0x8	supported	asm;ST.EXE 0x800460c0/0x800460e4/0x80058bbc;src/st/image_stream.c st.image_stream;src/st/sound_bank.c st.sound_bank;target layout guards	Shared request bytes +4..+0xb: SDK image RECT or bank payload; no additional storage.
 StSoundBuf	0x8	supported	asm;ST.EXE 0x8005873c/0x80058744/0x80058bd0;src/st/sound_bank.c st.sound_bank;include/st/data.h;target layout guards	Existing eight-byte sound bank buffer record; adding a tag preserves its layout and visibility.

@@ -99,7 +99,7 @@ void play_confirm_sound(void);
 void play_unlock_sound(void);
 void play_locked_sound(void);
 
-/* Called by the band Q screens (src/st/equip_menu.c, src/st/idgrid.c). */
+/* Called by the band Q screens (src/st/menu_equip_arrange.c, src/st/idgrid.c). */
 
 /* 0x8008809c: the unit z vector vector_from_angles_zyx turns (load data, owner unknown). */
 extern SVECTOR DAT_8008809c;

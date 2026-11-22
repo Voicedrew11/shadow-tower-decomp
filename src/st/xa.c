@@ -1,6 +1,6 @@
 /*
  * ST.EXE: XA voice stream start (WIP module, 0x80054000..0x800541f4; the
- * stream wait, still images and talk sequence continue in src/st/xa_play.c,
+ * stream wait, still images and talk sequence continue in src/st/xa_talk.c,
  * split off because xa_start_stream is not exact and 4 bytes short).
  */
 #include <kf/lib/address.h>

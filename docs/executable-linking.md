@@ -236,11 +236,12 @@ all inside the one non-exact function `world_project_parts` (`0x8001cee8`-
   that object's own tables (the world renderer's pools at `0x80011000`,
   then its tables from `0x800113b0`; the two player modules' pools, then
   both modules' tables from `0x80011cfc`), which forced the minimal
-  translation units named in the units' header comments (`st.texanim`,
-  `st.effect_spawn`, `st.player`, `st.vis_b`, `st.equip_menu`). A table
-  is eight-aligned relative to its object's read-only start, and PSYLINK
-  aligns an object's `.rdata` to four only, so an object with constants
-  and no tables ends four-aligned: `st.area_a` claims its pool at its raw
+  translation units named in the units' header comments (`st.render`,
+  `st.effect_spawn`, `st.player`, `st.objects_ground_items`,
+  `st.menu_equip_arrange`). A table is eight-aligned relative to its
+  object's read-only start, and PSYLINK aligns an object's `.rdata` to
+  four only, so an object with constants
+  and no tables ends four-aligned: `st.area_load` claims its pool at its raw
   size, `RODATA(0x80011f18, 0x39b)`.
 - The first `.sbss` run `0x80088188`-`0x800881b7` belongs to four
   data-only units linked before the code (`link = "first"`); the `.data`
@@ -252,11 +253,11 @@ all inside the one non-exact function `world_project_parts` (`0x8001cee8`-
   after the same object's statics does not: retail's `0x800881d4`-
   `0x800881df` is one COMMON batch right after `st.player`'s static
   `shake`, so `st.player` allocates all three words (the first is
-  unreferenced), although `st.area_a` is the module that uses the other
+  unreferenced), although `st.area_load` is the module that uses the other
   two.
 - Seven read-only words after the last unit's switch tables
   (`0x80013974`-`0x8001398f`) are defined by a data-only unit linked last
-  (`src/st/rdata_80013974.c`) as `const` pointers: `_bss_org`,
+  (`src/st/rdata_bss_bounds.c`) as `const` pointers: `_bss_org`,
   `_bss_orgend` three times, `_bss_orgend + 0x84` (past the overlay's id
   word and handler table) and `_bss_orgend + 0x43e0` twice (the extent of
   `FDAT_272.BIN` with its bss, the largest overlay). `main` places the heap

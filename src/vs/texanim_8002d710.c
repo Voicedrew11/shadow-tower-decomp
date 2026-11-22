@@ -1,6 +1,6 @@
 /*
  * VS.EXE: clearing the 2000 hit-spark particles (WIP module), shaped as
- * ST.EXE's texanim_clear_all (src/st/texanim.c), which frees the 16
+ * ST.EXE's texanim_clear_all (src/st/render.c), which frees the 16
  * animated-texture slots.
  */
 #include <kf/lib/address.h>

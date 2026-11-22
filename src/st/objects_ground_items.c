@@ -4,10 +4,10 @@
  * translation unit (WIP module, -G8: the two shake amounts are
  * $gp-relative statics): loading and running table B, the per-frame pass
  * objects_update, warps, table C and its pick-ups, 0x8004f53c..0x80053d38.
- * Retail's switch tables of vis_b (0x800125d0), objects_update and
- * ground_items_update follow one another, each 8-aligned relative to
- * 0x800125d0, which is 4 mod 8 relative to vis_attack's tables before
- * them: one object's read-only data.
+ * Retail's switch tables of the table B code (0x800125d0), objects_update
+ * and ground_items_update follow one another, each 8-aligned relative to
+ * 0x800125d0, which is 4 mod 8 relative to st.creature_attack's tables
+ * before them: one object's read-only data.
  */
 /* The area request's prototype is not in scope before vis_c's code: the
  * calls in objects_update pass its last three arguments as sign-extended
@@ -1258,7 +1258,7 @@ void objects_update(void)
         vis_table_b.unk71A8 = 0;
 }
 
-/* src/st/area_a.c: from here on its calls see the prototype. */
+/* src/st/area_load.c: from here on its calls see the prototype. */
 KF_VALUELESS_S32 area_request_load(u8 a0, u8 a1, u8 a2, u8 a3, u8 a4, s8 f0, s8 f1, s8 f2, u8 f3, u8 f4,
                    u8 f5);
 

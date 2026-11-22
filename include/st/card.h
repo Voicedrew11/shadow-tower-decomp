@@ -68,7 +68,7 @@ void shop_restore_texture_page(void);
 /* src/st/menu.c */
 void menu_options_run(void);
 
-/* src/st/menu_vram.c */
+/* src/st/menu_equip_open.c */
 void menu_equip_save_vram(void);
 void menu_equip_restore_vram(void);
 void menu_equip_open(void);

@@ -1,6 +1,6 @@
 /*
  * ST.EXE graphics state at 0x8015d090 (world_state) and the functions of
- * src/st/view.c, texanim.c, gfx.c, prim.c, quad.c and fade.c. Unmodeled ranges stay opaque;
+ * src/st/view.c, render.c, gfx.c, prim.c, quad.c and fade.c. Unmodeled ranges stay opaque;
  * address-derived names stay until behaviour is proven.
  */
 #ifndef ST_GFX_H
@@ -11,7 +11,7 @@
 #include <LIBGTE.H>
 #include <LIBGPU.H>
 
-/* One animated-texture slot (see src/st/texanim.c). */
+/* One animated-texture slot (see src/st/render.c). */
 typedef struct {
     u8 type;
     u8 period;
@@ -196,7 +196,7 @@ typedef struct {
     u8 unk1EE14;         /* 0x1ee14: the light-select flags last requested */
     u8 unk1EE15;
     u8 unk1EE16;
-    /* 0x1ee16..0x1ee19 (src/st/ui.c): title-card state, mode, fade length, frame counter */
+    /* 0x1ee16..0x1ee19 (src/st/render.c): title-card state, mode, fade length, frame counter */
     u8 unk1EE17;
     u8 unk1EE18;
     u8 unk1EE19;
@@ -233,7 +233,7 @@ extern u16 DAT_8009ac88[16];
 /* src/st/view.c */
 int view_point_in_near_cone(void);
 
-/* src/st/texanim.c */
+/* src/st/render.c */
 void texanim_clear_all(void);
 StTexAnim *texanim_find_free(void);
 int texanim_start(RECT *rect, int period, int step, int type, short area);

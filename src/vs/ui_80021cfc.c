@@ -1,7 +1,7 @@
 /*
  * VS.EXE: the item list page, its caption bar and detail panel, and the
  * two-tile emblem panel (WIP module). menu_draw_button_prompt is VS's copy of
- * ST.EXE's menu_draw_button_prompt (src/st/ui.c).
+ * ST.EXE's menu_draw_button_prompt (src/st/render.c).
  */
 #include <kf/lib/address.h>
 #include <kf/lib/null.h>

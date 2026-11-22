@@ -1,5 +1,5 @@
 /*
- * ST.EXE font glyphs, text and 2D menu primitives (src/st/ui.c, WIP).
+ * ST.EXE font glyphs, text and 2D menu primitives (src/st/render.c, WIP).
  */
 #ifndef ST_TEXT_H
 #define ST_TEXT_H

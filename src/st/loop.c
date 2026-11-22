@@ -39,7 +39,8 @@ SDATA(0x80087ec4, 0x8)
 /*
  * Read by the game loop; other modules set it to end the game. A tentative
  * definition, so that ASPSX reaches it through $gp: the word lies inside
- * the .sbss run st.sbss_800881a0 allocates, and the request merges there.
+ * the .sbss run st.sbss_glyph_game_exit allocates, and the request merges
+ * there.
  */
 s32 DAT_800881a4;
 

@@ -38,30 +38,30 @@ source = "src/str/main.c"
 profile = "probe-gcc272cdk-o2-g8"
 
 [[unit]]
-unit = "st.sbss_80088188"
+unit = "st.sbss_figure_tenths"
 image = "ST.EXE"
-source = "src/st/sbss_80088188.c"
+source = "src/st/sbss_figure_tenths.c"
 profile = "probe-gcc272cdk-o2-g8"
 link = "first"
 
 [[unit]]
-unit = "st.sbss_80088190"
+unit = "st.sbss_page_arrows"
 image = "ST.EXE"
-source = "src/st/sbss_80088190.c"
+source = "src/st/sbss_page_arrows.c"
 profile = "probe-gcc272cdk-o2-g8"
 link = "first"
 
 [[unit]]
-unit = "st.sbss_800881a0"
+unit = "st.sbss_glyph_game_exit"
 image = "ST.EXE"
-source = "src/st/sbss_800881a0.c"
+source = "src/st/sbss_glyph_game_exit.c"
 profile = "probe-gcc272cdk-o2-g8"
 link = "first"
 
 [[unit]]
-unit = "st.sbss_800881b0"
+unit = "st.sbss_hole_before_render"
 image = "ST.EXE"
-source = "src/st/sbss_800881b0.c"
+source = "src/st/sbss_hole_before_render.c"
 profile = "probe-gcc272cdk-o2-g8"
 link = "first"
 
@@ -114,9 +114,9 @@ source = "src/st/view.c"
 profile = "probe-gcc272cdk-o2-g8"
 
 [[unit]]
-unit = "st.texanim"
+unit = "st.render"
 image = "ST.EXE"
-source = "src/st/texanim.c"
+source = "src/st/render.c"
 profile = "probe-gcc272cdk-o2-g8"
 
 [[unit]]
@@ -150,15 +150,15 @@ source = "src/st/player.c"
 profile = "probe-gcc272cdk-o2-g8"
 
 [[unit]]
-unit = "st.area_a"
+unit = "st.area_load"
 image = "ST.EXE"
-source = "src/st/area_a.c"
+source = "src/st/area_load.c"
 profile = "probe-gcc272cdk-o2-g8"
 
 [[unit]]
-unit = "st.area_cd"
+unit = "st.image_stream"
 image = "ST.EXE"
-source = "src/st/area_cd.c"
+source = "src/st/image_stream.c"
 profile = "probe-gcc272cdk-o2-g8"
 
 [[unit]]
@@ -168,15 +168,15 @@ source = "src/st/vis_src.c"
 profile = "probe-gcc272cdk-o2-g0"
 
 [[unit]]
-unit = "st.vis_hit"
+unit = "st.collision"
 image = "ST.EXE"
-source = "src/st/vis_hit.c"
+source = "src/st/collision.c"
 profile = "probe-gcc272cdk-o2-g0"
 
 [[unit]]
-unit = "st.vis_request"
+unit = "st.collision_query"
 image = "ST.EXE"
-source = "src/st/vis_request.c"
+source = "src/st/collision_query.c"
 profile = "probe-gcc272cdk-o2-g0"
 
 [[unit]]
@@ -186,51 +186,51 @@ source = "src/st/math.c"
 profile = "probe-gcc272cdk-o2-g0"
 
 [[unit]]
-unit = "st.vis_entry"
+unit = "st.creature"
 image = "ST.EXE"
-source = "src/st/vis_entry.c"
+source = "src/st/creature.c"
 profile = "probe-gcc272cdk-o2-g0"
 
 [[unit]]
-unit = "st.vis_attack"
+unit = "st.creature_attack"
 image = "ST.EXE"
-source = "src/st/vis_attack.c"
+source = "src/st/creature_attack.c"
 profile = "probe-gcc272cdk-o2-g0"
 
 [[unit]]
-unit = "st.vis_item"
+unit = "st.creature_damage"
 image = "ST.EXE"
-source = "src/st/vis_item.c"
+source = "src/st/creature_damage.c"
 profile = "probe-gcc272cdk-o2-g0"
 
 [[unit]]
-unit = "st.vis_a"
+unit = "st.creatures"
 image = "ST.EXE"
-source = "src/st/vis_a.c"
+source = "src/st/creatures.c"
 profile = "probe-gcc272cdk-o2-g0"
 
 [[unit]]
-unit = "st.vis_b_init"
+unit = "st.object_init"
 image = "ST.EXE"
-source = "src/st/vis_b_init.c"
+source = "src/st/object_init.c"
 profile = "probe-gcc272cdk-o2-g0"
 
 [[unit]]
-unit = "st.vis_b_load"
+unit = "st.object_load"
 image = "ST.EXE"
-source = "src/st/vis_b_load.c"
+source = "src/st/object_load.c"
 profile = "probe-gcc272cdk-o2-g0"
 
 [[unit]]
-unit = "st.vis_b"
+unit = "st.objects_ground_items"
 image = "ST.EXE"
-source = "src/st/vis_b.c"
+source = "src/st/objects_ground_items.c"
 profile = "probe-gcc272cdk-o2-g8"
 
 [[unit]]
-unit = "st.vis_move"
+unit = "st.object_lerp"
 image = "ST.EXE"
-source = "src/st/vis_move.c"
+source = "src/st/object_lerp.c"
 profile = "probe-gcc272cdk-o2-g0"
 
 [[unit]]
@@ -240,15 +240,15 @@ source = "src/st/xa.c"
 profile = "probe-gcc272cdk-o2-g0"
 
 [[unit]]
-unit = "st.xa_play"
+unit = "st.xa_talk"
 image = "ST.EXE"
-source = "src/st/xa_play.c"
+source = "src/st/xa_talk.c"
 profile = "probe-gcc272cdk-o2-g8"
 
 [[unit]]
-unit = "st.item_spawn"
+unit = "st.creature_object"
 image = "ST.EXE"
-source = "src/st/item_spawn.c"
+source = "src/st/creature_object.c"
 profile = "probe-gcc272cdk-o2-g0"
 
 [[unit]]
@@ -264,9 +264,9 @@ source = "src/st/item.c"
 profile = "probe-gcc272cdk-o2-g0"
 
 [[unit]]
-unit = "st.save_counts"
+unit = "st.item_counts"
 image = "ST.EXE"
-source = "src/st/save_counts.c"
+source = "src/st/item_counts.c"
 profile = "probe-gcc272cdk-o2-g0"
 
 [[unit]]
@@ -306,130 +306,130 @@ source = "src/st/menu.c"
 profile = "probe-gcc272cdk-o2-g8"
 
 [[unit]]
-unit = "st.menu_vram"
+unit = "st.menu_equip_open"
 image = "ST.EXE"
-source = "src/st/menu_vram.c"
+source = "src/st/menu_equip_open.c"
 profile = "probe-gcc272cdk-o2-g8"
 
 [[unit]]
-unit = "st.equip_menu"
+unit = "st.menu_equip_arrange"
 image = "ST.EXE"
-source = "src/st/equip_menu.c"
+source = "src/st/menu_equip_arrange.c"
 profile = "probe-gcc272cdk-o2-g8"
 
 [[unit]]
-unit = "st.rdata_80013974"
+unit = "st.rdata_bss_bounds"
 image = "ST.EXE"
-source = "src/st/rdata_80013974.c"
+source = "src/st/rdata_bss_bounds.c"
 profile = "probe-gcc272cdk-o2-g0"
 link = "last"
 
 [[unit]]
-unit = "st.data_8008038c"
+unit = "st.data_hooks_matrices_xa"
 image = "ST.EXE"
-source = "src/st/data_8008038c.c"
+source = "src/st/data_hooks_matrices_xa.c"
 profile = "probe-gcc272cdk-o2-g0"
 
 [[unit]]
-unit = "st.data_8008092c"
+unit = "st.data_magic_list_offsets"
 image = "ST.EXE"
-source = "src/st/data_8008092c.c"
+source = "src/st/data_magic_list_offsets.c"
 profile = "probe-gcc272cdk-o2-g0"
 
 [[unit]]
-unit = "st.bss_800881f0"
+unit = "st.bss_cd_state"
 image = "ST.EXE"
-source = "src/st/bss_800881f0.c"
+source = "src/st/bss_cd_state.c"
 profile = "probe-gcc272cdk-o2-g0"
 
 [[unit]]
-unit = "st.bss_80088c88"
+unit = "st.bss_cd_file_buffer"
 image = "ST.EXE"
-source = "src/st/bss_80088c88.c"
+source = "src/st/bss_cd_file_buffer.c"
 profile = "probe-gcc272cdk-o2-g0"
 
 [[unit]]
-unit = "st.bss_8009b088"
+unit = "st.bss_heap_arena"
 image = "ST.EXE"
-source = "src/st/bss_8009b088.c"
+source = "src/st/bss_heap_arena.c"
 profile = "probe-gcc272cdk-o2-g0"
 
 [[unit]]
-unit = "st.bss_8011c488"
+unit = "st.bss_packet_buffers"
 image = "ST.EXE"
-source = "src/st/bss_8011c488.c"
+source = "src/st/bss_packet_buffers.c"
 profile = "probe-gcc272cdk-o2-g0"
 
 [[unit]]
-unit = "st.bss_8015d090"
+unit = "st.bss_world_state"
 image = "ST.EXE"
-source = "src/st/bss_8015d090.c"
+source = "src/st/bss_world_state.c"
 profile = "probe-gcc272cdk-o2-g0"
 
 [[unit]]
-unit = "st.bss_8017bed0"
+unit = "st.bss_vis_sources_lighting"
 image = "ST.EXE"
-source = "src/st/bss_8017bed0.c"
+source = "src/st/bss_vis_sources_lighting.c"
 profile = "probe-gcc272cdk-o2-g0"
 
 [[unit]]
-unit = "st.bss_8018d240"
+unit = "st.bss_hole_after_lighting"
 image = "ST.EXE"
-source = "src/st/bss_8018d240.c"
+source = "src/st/bss_hole_after_lighting.c"
 profile = "probe-gcc272cdk-o2-g0"
 
 [[unit]]
-unit = "st.bss_8018d298"
+unit = "st.bss_effects"
 image = "ST.EXE"
-source = "src/st/bss_8018d298.c"
+source = "src/st/bss_effects.c"
 profile = "probe-gcc272cdk-o2-g0"
 
 [[unit]]
-unit = "st.bss_80198f28"
+unit = "st.bss_viewer"
 image = "ST.EXE"
-source = "src/st/bss_80198f28.c"
+source = "src/st/bss_viewer.c"
 profile = "probe-gcc272cdk-o2-g0"
 
 [[unit]]
-unit = "st.bss_801b5920"
+unit = "st.bss_area_state_vis_lists"
 image = "ST.EXE"
-source = "src/st/bss_801b5920.c"
+source = "src/st/bss_area_state_vis_lists.c"
 profile = "probe-gcc272cdk-o2-g0"
 
 [[unit]]
-unit = "st.bss_801ba138"
+unit = "st.bss_creatures_objects"
 image = "ST.EXE"
-source = "src/st/bss_801ba138.c"
+source = "src/st/bss_creatures_objects.c"
 profile = "probe-gcc272cdk-o2-g0"
 
 [[unit]]
-unit = "st.bss_801c76f8"
+unit = "st.bss_ground_items_save"
 image = "ST.EXE"
-source = "src/st/bss_801c76f8.c"
+source = "src/st/bss_ground_items_save.c"
 profile = "probe-gcc272cdk-o2-g0"
 
 [[unit]]
-unit = "st.bss_801cd120"
+unit = "st.bss_settings_pad"
 image = "ST.EXE"
-source = "src/st/bss_801cd120.c"
+source = "src/st/bss_settings_pad.c"
 profile = "probe-gcc272cdk-o2-g0"
 
 [[unit]]
-unit = "st.bss_801d01c0"
+unit = "st.bss_sound"
 image = "ST.EXE"
-source = "src/st/bss_801d01c0.c"
+source = "src/st/bss_sound.c"
 profile = "probe-gcc272cdk-o2-g0"
 
 [[unit]]
-unit = "st.bss_801e0d08"
+unit = "st.bss_equip_sub_list"
 image = "ST.EXE"
-source = "src/st/bss_801e0d08.c"
+source = "src/st/bss_equip_sub_list.c"
 profile = "probe-gcc272cdk-o2-g0"
 
 [[unit]]
-unit = "st.bss_801e0d20"
+unit = "st.bss_menu_messages"
 image = "ST.EXE"
-source = "src/st/bss_801e0d20.c"
+source = "src/st/bss_menu_messages.c"
 profile = "probe-gcc272cdk-o2-g0"
 
 [[unit]]

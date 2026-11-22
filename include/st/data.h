@@ -22,7 +22,7 @@
 /*
  * Words at the end of the game .rdata, before LIBCD's: 0x80013974 holds the
  * bss start, 0x80013978..0x80013980 the overlay area 0x801eb560, 0x80013988
- * its end. main stores the heap base at 0x8001398c. src/st/rdata_80013974.c
+ * its end. main stores the heap base at 0x8001398c. src/st/rdata_bss_bounds.c
  * defines them (const there); main addresses each with its own lui pair, as
  * separate scalars.
  */
@@ -459,7 +459,7 @@ typedef struct {
  * The sound state block at 0x801dd1c0 (bss): the listener's position and
  * rotation, the 322 VAB bank slots, the SPU key status bytes and the sound
  * playing on each voice, the 1232-entry sound table (loaded from an area
- * pack, src/st/area_a.c) and the 16 bank buffers. WIP extent up to
+ * pack, src/st/area_load.c) and the 16 bank buffers. WIP extent up to
  * DAT_801e0ce8 (band Q).
  */
 typedef struct {

@@ -5,7 +5,7 @@
  * area that starts there: past the overlay header's id and handler table,
  * and the end of the largest overlay (twice). main rounds the heap up from
  * DAT_80013980 past DAT_80013988 and stores the base into DAT_8001398c;
- * st.area_a takes the overlay's handler table from DAT_80013980 (st/data.h
+ * st.area_load takes the overlay's handler table from DAT_80013980 (st/data.h
  * declares those three writable, so this file does not include it).
  *
  * No Psy-Q kit object holds such a table (NONE3 from 4.5, 2MBYTE, 8MBYTE,

@@ -3,7 +3,7 @@
  * translation unit): the slot list, the candidate list of one slot, the
  * ring sub-list and their panels, then two four-column grids of table C ids
  * the player moves between, its frame and its CD loads (sharing the id grid
- * layout and panels of src/st/ui.c, MenuGrid). The screen's open and close
+ * layout and panels of src/st/render.c, MenuGrid). The screen's open and close
  * (0x800637c0, 0x80063954) sit in band P's range. Retail keeps the id grid's
  * constants (0x800138a0) between the equipment screen's (0x80013880) and the
  * equipment screen's switch tables (0x800138d8), which only one -G8 object

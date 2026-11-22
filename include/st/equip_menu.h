@@ -1,6 +1,6 @@
 /*
- * ST.EXE equipment screen (src/st/equip_menu.c, WIP): its state block and
- * functions. Field names stay address-derived until behaviour is proven.
+ * ST.EXE equipment screen (src/st/menu_equip_arrange.c, WIP): its state block
+ * and functions. Field names stay address-derived until behaviour is proven.
  */
 #ifndef ST_EQUIP_MENU_H
 #define ST_EQUIP_MENU_H
@@ -22,7 +22,7 @@ typedef struct {
  * viewer.unk38 slot being changed, and the slot sub-list (its bit table,
  * entry count and entries). WIP extent: the slot sub-list follows as its
  * own global DAT_801e0d08, whose bit table is the 144-byte block the option
- * screens load (src/st/menu_vram.c addresses it apart from this block).
+ * screens load (src/st/menu_equip_open.c addresses it apart from this block).
  */
 typedef struct {
     s32 unk0;            /* 0x00: id shown, -1 for none */
@@ -34,7 +34,7 @@ typedef struct {
 } Data801e0ce8;
 
 /* 0x801e0d08: the slot sub-list. menu_equip_open allocates its 144-byte bit
- * table (src/st/menu_vram.c) and menu_equip_close frees it. */
+ * table (src/st/menu_equip_open.c) and menu_equip_close frees it. */
 extern EquipSubList DAT_801e0d08;
 
 /* The equipment ids menu_equip_open records (viewer.unk38[3], [4], [16],

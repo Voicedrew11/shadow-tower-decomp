@@ -1,6 +1,6 @@
 /*
  * VS.EXE: a picture drawn as a grid of semi-transparent tiles (WIP
- * module), VS's copy of ST.EXE's ui_draw_cell_grid (src/st/ui.c): VS
+ * module), VS's copy of ST.EXE's ui_draw_cell_grid (src/st/render.c): VS
  * advances the packet cursor before its bounds check and darkens the
  * colour.
  */

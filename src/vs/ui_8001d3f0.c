@@ -804,7 +804,7 @@ void card_draw_format_prompt(void)
  * goes to DAT_801c4a38.
  *
  * The three RECT locals are never used. The first is the one ST.EXE's copy
- * (card_draw_file_list, src/st/ui.c) also keeps right after its table; VS added
+ * (card_draw_file_list, src/st/render.c) also keeps right after its table; VS added
  * the two arrow rectangles behind it.
  */
 ADDRESS(0x8001fcac, 0x6d8)

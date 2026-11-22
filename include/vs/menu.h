@@ -107,7 +107,7 @@ extern VsMessages DAT_80196230[2];
 #define VS_MESSAGE(i) ((u16 *)(DAT_80196230[0].text + DAT_80196230[0].offsets[i]))
 #define VS_ITEM_NAME(i) ((u16 *)(DAT_80196230[1].text + DAT_80196230[1].offsets[i]))
 
-/* VS's copies of ST.EXE's text and primitive helpers (src/st/ui.c,
+/* VS's copies of ST.EXE's text and primitive helpers (src/st/render.c,
  * src/st/text.c), not reconstructed yet. */
 void ui_draw_text(u16 *s, u16 x, u16 y, CVECTOR *color); /* ST ui_draw_text */
 void card_screen_draw(void);                                /* the menu screens' frame: draws and flips */

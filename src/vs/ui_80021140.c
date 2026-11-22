@@ -1,6 +1,6 @@
 /*
  * VS.EXE: the team screen's item detail page (WIP module), VS's copy of
- * ST.EXE's creature book detail page menu_creature_book_draw_entry (src/st/ui.c): the item
+ * ST.EXE's creature book detail page menu_creature_book_draw_entry (src/st/render.c): the item
  * comes from the team slot or the item grid under the cursor, and the
  * page toggle is DAT_8006335c.
  */
@@ -20,7 +20,7 @@ RODATA(0x8001123c, 0x22)
 /* The page arrows' initializers: 8 bytes each, so .sdata under -G8. */
 SDATA(0x80063280, 0x10)
 
-/* Number-width flag for ui_draw_number (ST.EXE's DIGITS, src/st/ui.c). */
+/* Number-width flag for ui_draw_number (ST.EXE's DIGITS, src/st/render.c). */
 #define DIGITS(n) ((n) << 24)
 
 /*
