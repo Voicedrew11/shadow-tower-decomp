@@ -18,7 +18,7 @@ AreaObject *creature_alloc_object(Creature *e, int id)
 {
     AreaObject *b = object_alloc(150, 10, -1);
 
-    e->spawned_object = b - vis_table_b.entries + 106;
+    e->unk48.b.spawned_object = b - vis_table_b.entries + 106;
     b->type = id;
     b->unk48 = 0;
     return b;

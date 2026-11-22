@@ -86,7 +86,7 @@ void map_pick_shopkeeper_line(void)
         return;
     fdat_801ed8c4 = 1;
     items = &inventory;
-    if (!(*(u16 *)&items->counts[266] & 0x7f)) {
+    if (!(*(u16 *)&items->counts[ITEM_CUNES] & 0x7f)) {
         fdat_801ed8c8 = 1;
         creature_start_script(e, 1);
     } else {
@@ -136,7 +136,7 @@ void map_run_shop_visit(void)
 
     e->status.bytes[2] &= 0xf2;
     e->fade = -1;
-    if (e->anim_slot == 0)
+    if (e->anim_slot.slot == NULL)
         return;
     if (fdat_801ed8c4 == 2 && xa_stream_finished()) {
         if (world_state.talk_overlay_state == 3) {
@@ -175,7 +175,7 @@ void map_run_shop_visit(void)
     } else if (fdat_801ed8c4 == 4) {
         pad_state.pressed = 0;
         menu->mode = 1;
-        menu->font_mode = 0;
+        menu->font_mode = MENU_FONT_LOW_RES;
         shop_run();
         fdat_801ed8c4 = 5;
     } else if (fdat_801ed8c4 == 5) {
@@ -183,6 +183,6 @@ void map_run_shop_visit(void)
             game_progress.event_flags.word &= 0x7fffffff;
             game_progress.event_flags2.word |= 1;
         }
-        DAT_801cd0e4 = 1;
+        game_progress.warp_back_request = 1;
     }
 }

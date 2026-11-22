@@ -40,7 +40,7 @@ void objects_load(u8 *src)
             e->type = 0xffff;
         else
             e->type = *(u16 *)(src + 4);
-        e->kind = 0xff;
+        e->kind = OBJECT_KIND_NONE;
         if (e->type != 0xffff) {
             u16 parameter = *(u16 *)(src + 14);
             u16 yaw;
@@ -50,14 +50,14 @@ void objects_load(u8 *src)
             e->anim = 0x80;
             e->anim_frame = 0;
             e->draw_flags = 0;
-            e->rot_z = 0;
-            e->rot_x = 0;
+            e->rotation.vz = 0;
+            e->rotation.vx = 0;
             e->block = parameter;
             yaw = *(u16 *)(src + 6);
             e->scale.vz = 0x1000;
             e->scale.vy = 0x1000;
             e->scale.vx = 0x1000;
-            e->facing = yaw & 0xfff;
+            e->rotation.vy = yaw & 0xfff;
             rec = &vis_table_b.types[e->type];
             e->visibility = 0;
             e->flags = rec->flags;
@@ -74,11 +74,11 @@ void objects_load(u8 *src)
             e->position.vy = src[1] * 4096 + *(s16 *)(src + 10);
             e->position.vz = src[2] * 4096 + *(s16 *)(src + 12);
             copy_words((u32 *)&e->unk48, (u32 *)(src + 16), 2);
-            fill_words((u32 *)&e->unk50, 0xff, 2);
-            kind = rec->unk00[0];
+            fill_words(e->kind_data.words, 0xff, 2);
+            kind = rec->kind;
             switch (kind) {
-            case 0:
-            case 1:
+            case OBJECT_KIND_DOOR:
+            case OBJECT_KIND_MODEL_DOOR:
                 n = e->params.door.n_blocks;
                 while (n--) {
                     u8 t = vis_records[e->params.door.block_b + n].part;
@@ -87,7 +87,7 @@ void objects_load(u8 *src)
                         vis_records[e->params.door.block_a + n].part;
                     vis_records[e->params.door.block_a + n].part = t;
                 }
-                e->kind = rec->unk00[0];
+                e->kind = rec->kind;
                 if (!(e->unk49 & 0x80))
                     e->anim = e->unk49;
                 else
@@ -100,8 +100,8 @@ void objects_load(u8 *src)
                 else
                     e->state = 0;
                 break;
-            case 50:
-            case 51:
+            case OBJECT_KIND_GATE:
+            case OBJECT_KIND_ITEM_GATE:
                 e->kind = kind;
                 if (!(e->unk49 & 0x80))
                     e->anim = e->unk49;
@@ -121,10 +121,10 @@ void objects_load(u8 *src)
                     e->state = 11;
                 else
                     e->state = 0;
-                *(u16 *)&e->unk50 = 0;
+                e->kind_data.part.h50 = 0;
                 break;
-            case 52:
-                e->kind = 52;
+            case OBJECT_KIND_GROUP_GATE:
+                e->kind = OBJECT_KIND_GROUP_GATE;
                 e->state = 0;
                 e->anim_frame = 0;
                 e->anim = 0;
@@ -136,51 +136,51 @@ void objects_load(u8 *src)
                 e->scale.vy = 0;
                 e->scale.vz = 0;
                 e->draw_flags = 5;
-                ((u8 *)&e->unk50)[0] = 0;
+                e->kind_data.b[0] = 0;
                 e->flags |= 0x40;
                 break;
             case 7:
                 e->kind = 7;
                 e->visibility = 2;
                 break;
-            case 0xe0:
-                e->facing = 0;
-                e->kind = 0xe0;
+            case OBJECT_KIND_SEQUENCE:
+                e->rotation.vy = 0;
+                e->kind = OBJECT_KIND_SEQUENCE;
                 e->unk01 = 0;
                 if ((*(u32 *)&e->unk48 & 0xffffff) == 0xffffff) {
                     e->position.vx = src[0] * 4096 + *(s16 *)(src + 8) + 0x800;
                     e->position.vy = src[1] * 4096 + *(s16 *)(src + 10);
                     e->position.vz = src[2] * 4096 + *(s16 *)(src + 12) + 0x800;
-                    ((u8 *)&e->unk50)[2] = 127;
-                    ((u8 *)&e->unk50)[1] = 127;
-                    ((u8 *)&e->unk50)[0] = 127;
+                    e->kind_data.b[2] = 127;
+                    e->kind_data.b[1] = 127;
+                    e->kind_data.b[0] = 127;
                 } else {
                     e->position.vx = src[0] * 4096 + *(s16 *)(src + 8) + 0x800;
                     e->position.vy = src[1] * 4096 + *(s16 *)(src + 10);
                     e->position.vz = src[2] * 4096 + *(s16 *)(src + 12) + 0x800;
-                    ((u8 *)&e->unk50)[0] = e->unk48 - (u8)(src[0] - 64);
-                    ((u8 *)&e->unk50)[1] = e->unk49 - (u8)(src[1] - 64);
-                    ((u8 *)&e->unk50)[2] = e->params.snd.sound - (u8)(src[2] - 64);
+                    e->kind_data.b[0] = e->unk48 - (u8)(src[0] - 64);
+                    e->kind_data.b[1] = e->unk49 - (u8)(src[1] - 64);
+                    e->kind_data.b[2] = e->params.snd.sound - (u8)(src[2] - 64);
                     e->params.door.lock -= *(s16 *)(src + 10) / 128;
                 }
                 break;
-            case 0xed:
-            case 0xef:
+            case OBJECT_KIND_WARP:
+            case OBJECT_KIND_WALK_IN_WARP:
                 e->kind = kind;
-                ((u8 *)&e->unk50)[0] = 1;
+                e->kind_data.b[0] = 1;
                 break;
-            case 0xec:
+            case OBJECT_KIND_SOUND:
                 secs = e->params.snd.period;
-                e->kind = 0xec;
-                e->unk54 = -1;
-                e->unk50 = now + secs * 60;
+                e->kind = OBJECT_KIND_SOUND;
+                e->kind_data.snd.voice = -1;
+                e->kind_data.snd.next_tick = now + secs * 60;
                 break;
             case 31:
                 secs = e->params.snd.period;
                 e->unk01 = 0;
-                e->unk54 = -1;
+                e->kind_data.snd.voice = -1;
                 e->kind = 31;
-                e->unk50 = now + secs * 60;
+                e->kind_data.snd.next_tick = now + secs * 60;
                 break;
             case 0xfe:
                 e->kind = 0xfe;
@@ -188,11 +188,11 @@ void objects_load(u8 *src)
                 break;
             case 3:
             case 5:
-            case 14:
-            case 0xe1:
+            case OBJECT_KIND_SAVE_POINT:
+            case OBJECT_KIND_MESSAGE:
                 e->kind = kind;
                 break;
-            case 0xff:
+            case OBJECT_KIND_NONE:
                 break;
             default:
                 area_state.hooks->load_object(e, rec);

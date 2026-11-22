@@ -60,11 +60,11 @@ void cd_request_read_callback(u_char status, u_char *result)
 
     if (status == CdlComplete) {
         switch (request->kind) {
-        case 0:
+        case CD_REQUEST_NONE:
             break;
-        case 2:
-        case 3:
-        case 4:
+        case CD_REQUEST_READ:
+        case CD_REQUEST_STREAM:
+        case CD_REQUEST_READ_UNCHECKED:
             request->sectors_left = 0;
             CdReadCallback(0);
             request->step = STEP_DONE;
@@ -72,11 +72,11 @@ void cd_request_read_callback(u_char status, u_char *result)
         }
     } else if (status == CdlDiskError) {
         switch (request->kind) {
-        case 0:
+        case CD_REQUEST_NONE:
             break;
-        case 2:
-        case 3:
-        case 4:
+        case CD_REQUEST_READ:
+        case CD_REQUEST_STREAM:
+        case CD_REQUEST_READ_UNCHECKED:
             request->sectors_left = -1;
             CdReadCallback(0);
             request->step = STEP_DONE;
@@ -95,11 +95,11 @@ void cd_request_ready_callback(u_char status, u_char *result)
 
     if (status == CdlDataReady) {
         switch (request->kind) {
-        case 0:
+        case CD_REQUEST_NONE:
             break;
-        case 2:
-        case 3:
-        case 4:
+        case CD_REQUEST_READ:
+        case CD_REQUEST_STREAM:
+        case CD_REQUEST_READ_UNCHECKED:
             while (CdGetSector(request->read_cursor, 3) == 0)
                 ;
             while (CdGetSector(request->read_cursor, 512) == 0)
@@ -116,11 +116,11 @@ void cd_request_ready_callback(u_char status, u_char *result)
         }
     } else if (status == CdlDiskError) {
         switch (request->kind) {
-        case 0:
+        case CD_REQUEST_NONE:
             break;
-        case 2:
-        case 3:
-        case 4:
+        case CD_REQUEST_READ:
+        case CD_REQUEST_STREAM:
+        case CD_REQUEST_READ_UNCHECKED:
             request->sectors_left = -1;
             CdReadyCallback(0);
             request->step = STEP_DONE;
@@ -138,11 +138,11 @@ void cd_request_sync_callback(u_char status, u_char *result)
 
     if (status == CdlComplete) {
         switch (request->kind) {
-        case 0:
+        case CD_REQUEST_NONE:
             break;
-        case 2:
-        case 3:
-        case 4:
+        case CD_REQUEST_READ:
+        case CD_REQUEST_STREAM:
+        case CD_REQUEST_READ_UNCHECKED:
             switch (request->step) {
             case STEP_SEEK:
                 request->read_loc = request->loc;
@@ -157,7 +157,7 @@ void cd_request_sync_callback(u_char status, u_char *result)
             case STEP_READ:
                 break;
             case STEP_DONE:
-                if (request->kind == 2) {
+                if (request->kind == CD_REQUEST_READ) {
                     if (request->sectors_left != 0) {
                         request->step = STEP_SEEK;
                         while (CdControl(CdlSeekL, (u_char *)&request->loc, 0) == 0)
@@ -184,11 +184,11 @@ void cd_request_sync_callback(u_char status, u_char *result)
         }
     } else if (status == CdlDiskError) {
         switch (request->kind) {
-        case 0:
+        case CD_REQUEST_NONE:
             break;
-        case 2:
-        case 3:
-        case 4:
+        case CD_REQUEST_READ:
+        case CD_REQUEST_STREAM:
+        case CD_REQUEST_READ_UNCHECKED:
             request->step = STEP_SEEK;
             while (CdControl(CdlSeekL, (u_char *)&request->loc, 0) == 0)
                 ;
@@ -201,12 +201,12 @@ void cd_request_sync_callback(u_char status, u_char *result)
 ADDRESS(0x80015848, 0xac)
 void cd_request_retire(StCdRequest *request)
 {
-    request->kind = 0;
+    request->kind = CD_REQUEST_NONE;
     request->step = STEP_SEEK;
     if (++request == &cd_state.requests[ST_CD_REQUESTS])
         request -= ST_CD_REQUESTS;
     cd_state.current = request;
-    if (request->kind != 0) {
+    if (request->kind != CD_REQUEST_NONE) {
         CdReadyCallback(0);
         CdSyncCallback(cd_request_sync_callback);
         while (CdControl(CdlSeekL, (u_char *)&request->loc, 0) == 0)

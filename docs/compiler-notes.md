@@ -665,8 +665,9 @@ and `mflo`, for example). Examples: ST `0x80062228`, FDAT_012 `0x801eda38`.
 
 - A load through a varying in-struct pointer may pass a store to a
   fixed-address scalar, but not a store to a fixed-address aggregate member,
-  and an in-struct read stays ahead of a later store. So `DAT_801cd0e0 = 1`
-  spelled as a member keeps retail's order where the scalar extern reorders
+  and an in-struct read stays ahead of a later store. So the old scalar
+  `DAT_801cd0e0 = 1` spelled as the member `game_progress.item_use_result`
+  keeps retail's order where the scalar extern reorders
   (ST `0x80054a54`, ST `0x80055374`: re-run every function that stores to a
   word after it is folded into an aggregate), an extern read as `X[0]` of
   `extern u8 *X[1]` stays ahead of a store (ST `0x800456f8`), and a tag store
@@ -1121,8 +1122,8 @@ size is known and at most 8 bytes, and then emits one macro instruction (`lw
 $3,X`, `la $5,S`) that ASPSX expands with the destination as its own temporary
 (`lui a1; addiu a1,a1,lo`). A separate temporary (`lui v0; lw v1,lo(v0)`)
 means cc1 saw an object larger than 8 bytes, a member of a bigger struct (ST
-`0x80042d74`, where `DAT_801cd0e0` is spelled as the member
-`game_progress.item_use_result` by a macro in `include/st/menu.h`). An `extern s32
+`0x80042d74`, where the old `DAT_801cd0e0` is spelled as the member
+`game_progress.item_use_result`). An `extern s32
 X[];` has no size: declare `X[1]` or the scalar (VS `0x80029f28`,
 `round_wins[1]`, after its unit moved to the `-G8` profile). In `-G0` units
 both spellings give the same bytes.

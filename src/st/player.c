@@ -30,6 +30,7 @@
 #include <st/scratch.h>
 #include <st/sound.h>
 #include <st/vis.h>
+#include <st/tim.h>
 #include <st/card.h>
 #include <st/item.h>
 #include <st/menu_main.h>
@@ -43,14 +44,14 @@ SDATA(0x80088054, 0x10)
 ADDRESS(0x8003bd14, 0x9c)
 void player_kill(int unused)
 {
-    if (viewer.state != 4) {
-        viewer.state = 4;
+    if (viewer.state != VIEWER_STATE_DYING) {
+        viewer.state = VIEWER_STATE_DYING;
         viewer.hp = 0;
         play_death_sound();
         world_state.no_plane_test = 1;
         viewer.death_timer = 0;
         viewer.unk17C = 170;
-        viewer.death_pitch_step = (-1024 - (viewer.pitch & 0x7ff)) / 24;
+        viewer.death_pitch_step = (-1024 - (viewer.rotation.vx & 0x7ff)) / 24;
     }
 }
 
@@ -87,9 +88,8 @@ void player_update_submersion(void)
 
 /* The viewer's distance to `t` when it is within t's reach, else -1. */
 ADDRESS(0x8003beb4, 0x14c)
-int player_distance_in_reach(void *request)
+int player_distance_in_reach(CollisionState *t)
 {
-    PlayerTarget *t = request;
     int dx;
     int dz;
     int dist;
@@ -128,7 +128,7 @@ void player_reset_state(void)
     viewer.unk2D2 = 0;
     viewer.unk239 = 0;
     viewer.vertical_speed = 0;
-    viewer.state = 0;
+    viewer.state = VIEWER_STATE_NORMAL;
     viewer.unk294 = 0;
     viewer.unk292 = 0;
     viewer.fall_pitch = 0;
@@ -138,7 +138,7 @@ void player_reset_state(void)
     viewer.roll_offset = 0;
     viewer.rot_offset.halves[1] = 0;
     viewer.rot_offset.halves[0] = 0;
-    *(SVECTOR *)&viewer.pitch = viewer.view_rot;
+    viewer.rotation = viewer.view_rot;
     viewer.shot_magic[0] = 255;
     viewer.shot_magic[1] = 255;
     viewer.submerged_acid = 0;
@@ -150,12 +150,12 @@ void player_reset_state(void)
 ADDRESS(0x8003c0e0, 0x9c)
 void player_reload_equipment(void)
 {
-    player_load_equipment_model(viewer.equipment[3], 0, 0);
-    player_load_equipment_model(viewer.equipment[16], 1, 0);
-    player_load_equipment_model(viewer.equipment[4], 2, 0);
-    player_load_equipment_model(viewer.equipment[17], 3, 0);
-    player_load_magic(viewer.equipment[6], 0);
-    player_load_magic(viewer.equipment[12], 1);
+    player_load_equipment_model(viewer.equipment[EQUIP_SLOT_RIGHT_HAND], 0, 0);
+    player_load_equipment_model(viewer.equipment[EQUIP_SLOT_LEFT_HAND], 1, 0);
+    player_load_equipment_model(viewer.equipment[EQUIP_SLOT_RIGHT_RESERVE], 2, 0);
+    player_load_equipment_model(viewer.equipment[EQUIP_SLOT_LEFT_RESERVE], 3, 0);
+    player_load_magic(viewer.equipment[EQUIP_SLOT_RIGHT_MAGIC], 0);
+    player_load_magic(viewer.equipment[EQUIP_SLOT_LEFT_MAGIC], 1);
     player_reset_state();
     player_recalc_stats();
     lighting.last_area = 255;
@@ -233,16 +233,16 @@ void player_update_status(int apply)
         fade_add_color(60, 60, 0, level, 1);
     }
 
-    level = player_step_status_timer(&viewer.unk190[0][0], &viewer.unk190[0][1], 20, 4096, apply);
+    level = player_step_status_timer(&viewer.timers.halves[0][0], &viewer.timers.halves[0][1], 20, 4096, apply);
     if (level != -1) {
         fade_add_color(0, 40, 0, level, 1);
         if (viewer.timers.words[0] == 0) {
-            viewer.status_flags &= ~7;
+            viewer.status_flags &= ~STATUS_POISON;
         }
     }
-    level = player_step_status_timer(&viewer.unk190[1][0], &viewer.unk190[1][1], 20, 4096, apply);
+    level = player_step_status_timer(&viewer.timers.halves[1][0], &viewer.timers.halves[1][1], 20, 4096, apply);
     if (level != -1) {
-        if ((viewer.unk190[1][0] & 3) == 3) {
+        if ((viewer.timers.halves[1][0] & 3) == 3) {
             level = 4096;
         } else {
             level -= 512;
@@ -254,30 +254,30 @@ void player_update_status(int apply)
         viewer.push_x = viewer.push_y = viewer.push_z = vis_table_a.push_x = vis_table_a.push_y =
             vis_table_a.push_z = 0;
         if (viewer.timers.words[1] == 0) {
-            viewer.status_flags &= ~0x18;
+            viewer.status_flags &= ~STATUS_PARALYZE;
         }
     }
-    level = player_step_status_timer(&viewer.unk190[2][0], &viewer.unk190[2][1], 0, 4096, apply);
+    level = player_step_status_timer(&viewer.timers.halves[2][0], &viewer.timers.halves[2][1], 0, 4096, apply);
     if (level != -1) {
         fade_add_color(20, 20, 20, level, 2);
         if (viewer.timers.words[2] == 0) {
-            viewer.status_flags &= ~0x60;
+            viewer.status_flags &= ~STATUS_DARK;
             lighting.row_request |= 4;
         }
     }
-    level = player_step_status_timer(&viewer.unk190[3][0], &viewer.unk190[3][1], 20, 4096, apply);
+    level = player_step_status_timer(&viewer.timers.halves[3][0], &viewer.timers.halves[3][1], 20, 4096, apply);
     if (level != -1) {
         if (viewer.timers.words[3] == 0) {
-            viewer.status_flags &= ~0x80;
+            viewer.status_flags &= ~STATUS_SLOW;
             player_compute_derived_stats(0);
             PLAYER_CLAMP_HP();
         }
     }
-    level = player_step_status_timer(&viewer.unk190[4][0], &viewer.unk190[4][1], 20, 4096, apply);
+    level = player_step_status_timer(&viewer.timers.halves[4][0], &viewer.timers.halves[4][1], 20, 4096, apply);
     if (level != -1) {
         fade_add_color(40, 0, 20, level, 1);
         if (viewer.timers.words[4] == 0) {
-            viewer.status_flags &= ~0x100;
+            viewer.status_flags &= ~STATUS_CURSED;
             player_compute_derived_stats(0);
             PLAYER_CLAMP_HP();
         }
@@ -288,7 +288,7 @@ void player_update_status(int apply)
     if (viewer.submerged_acid) {
         fade_add_color(40, 40, 0, 4096, 1);
     }
-    level = player_step_status_timer(&viewer.unk190[5][0], &viewer.unk190[5][1], 0, 4096, apply);
+    level = player_step_status_timer(&viewer.timers.halves[5][0], &viewer.timers.halves[5][1], 0, 4096, apply);
     if (level != -1) {
         lighting.row_request |= 0x10;
         lighting.column_request |= 2;
@@ -297,31 +297,31 @@ void player_update_status(int apply)
             viewer.status_flags &= ~0x10000;
         }
     }
-    level = player_step_status_timer(&viewer.unk190[6][0], &viewer.unk190[6][1], 0, 4096, apply);
+    level = player_step_status_timer(&viewer.timers.halves[6][0], &viewer.timers.halves[6][1], 0, 4096, apply);
     if (level != -1) {
         if (viewer.timers.words[6] == 0) {
             viewer.status_flags &= ~0x40000;
         }
     }
-    level = player_step_status_timer(&viewer.unk190[7][0], &viewer.unk190[7][1], 0, 4096, apply);
+    level = player_step_status_timer(&viewer.timers.halves[7][0], &viewer.timers.halves[7][1], 0, 4096, apply);
     if (level != -1) {
         if (viewer.timers.words[7] == 0) {
-            viewer.status_flags &= ~0x80000;
+            viewer.status_flags &= ~STATUS_FIRE_WARD;
         }
     }
-    level = player_step_status_timer(&viewer.unk190[8][0], &viewer.unk190[8][1], 0, 4096, apply);
+    level = player_step_status_timer(&viewer.timers.halves[8][0], &viewer.timers.halves[8][1], 0, 4096, apply);
     if (level != -1) {
         if (viewer.timers.words[8] == 0) {
-            viewer.status_flags &= ~0x100000;
+            viewer.status_flags &= ~STATUS_POISON_WARD;
         }
     }
-    level = player_step_status_timer(&viewer.unk190[9][0], &viewer.unk190[9][1], 0, 4096, apply);
+    level = player_step_status_timer(&viewer.timers.halves[9][0], &viewer.timers.halves[9][1], 0, 4096, apply);
     if (level != -1) {
         if (viewer.timers.words[9] == 0) {
-            viewer.status_flags &= ~0x200000;
+            viewer.status_flags &= ~STATUS_ATTACK_BOOST;
         }
     }
-    level = player_step_status_timer(&viewer.unk190[10][0], &viewer.unk190[10][1], 0, 4096, apply);
+    level = player_step_status_timer(&viewer.timers.halves[10][0], &viewer.timers.halves[10][1], 0, 4096, apply);
     if (level != -1) {
         lighting.force_first_column = 1;
         lighting.row_request |= 0x20;
@@ -330,13 +330,13 @@ void player_update_status(int apply)
             viewer.status_flags &= ~0x400000;
         }
     }
-    level = player_step_status_timer(&viewer.unk190[11][0], &viewer.unk190[11][1], 0, 4096, apply);
+    level = player_step_status_timer(&viewer.timers.halves[11][0], &viewer.timers.halves[11][1], 0, 4096, apply);
     if (level != -1) {
         if (viewer.timers.words[11] == 0) {
-            viewer.status_flags &= ~0x800000;
+            viewer.status_flags &= ~STATUS_ACID_WARD;
         }
     }
-    level = player_step_status_timer(&viewer.unk190[12][0], &viewer.unk190[12][1], 0, 4096, apply);
+    level = player_step_status_timer(&viewer.timers.halves[12][0], &viewer.timers.halves[12][1], 0, 4096, apply);
     if (level != -1) {
         if (viewer.timers.words[12] == 0) {
             viewer.status_flags &= ~0x800;
@@ -390,27 +390,27 @@ void player_reset_stats(void)
     viewer.unk26 = 0;
     viewer.max_mp = 0;
     viewer.max_hp = 0;
-    viewer.equipment[20] = 0xffff;
-    viewer.equipment[19] = 0xffff;
-    viewer.equipment[18] = 0xffff;
-    viewer.equipment[4] = 0xffff;
-    viewer.equipment[3] = 0xffff;
-    viewer.equipment[2] = 0xffff;
-    viewer.equipment[1] = 0xffff;
-    viewer.equipment[0] = 0xffff;
-    viewer.equipment[6] = 0xffff;
-    viewer.equipment[11] = 0xffff;
-    viewer.equipment[10] = 0xffff;
-    viewer.equipment[9] = 0xffff;
-    viewer.equipment[8] = 0xffff;
-    viewer.equipment[7] = 0xffff;
-    viewer.equipment[12] = 0xffff;
-    viewer.equipment[5] = 0xffff;
-    viewer.equipment[17] = 0xffff;
-    viewer.equipment[16] = 0xffff;
-    viewer.equipment[15] = 0xffff;
-    viewer.equipment[14] = 0xffff;
-    viewer.equipment[13] = 0xffff;
+    viewer.equipment[EQUIP_SLOT_QUICK_4] = EQUIP_NONE;
+    viewer.equipment[EQUIP_SLOT_QUICK_2] = EQUIP_NONE;
+    viewer.equipment[EQUIP_SLOT_QUICK_5] = EQUIP_NONE;
+    viewer.equipment[EQUIP_SLOT_RIGHT_RESERVE] = EQUIP_NONE;
+    viewer.equipment[EQUIP_SLOT_RIGHT_HAND] = EQUIP_NONE;
+    viewer.equipment[EQUIP_SLOT_GLOVES] = EQUIP_NONE;
+    viewer.equipment[EQUIP_SLOT_RIGHT_BRACELET] = EQUIP_NONE;
+    viewer.equipment[EQUIP_SLOT_RIGHT_RING] = EQUIP_NONE;
+    viewer.equipment[EQUIP_SLOT_RIGHT_MAGIC] = EQUIP_NONE;
+    viewer.equipment[EQUIP_SLOT_QUICK_3] = EQUIP_NONE;
+    viewer.equipment[EQUIP_SLOT_BOOTS] = EQUIP_NONE;
+    viewer.equipment[EQUIP_SLOT_ARMOR] = EQUIP_NONE;
+    viewer.equipment[EQUIP_SLOT_HELMET] = EQUIP_NONE;
+    viewer.equipment[EQUIP_SLOT_AMULET] = EQUIP_NONE;
+    viewer.equipment[EQUIP_SLOT_LEFT_MAGIC] = EQUIP_NONE;
+    viewer.equipment[EQUIP_SLOT_QUICK_1] = EQUIP_NONE;
+    viewer.equipment[EQUIP_SLOT_LEFT_RESERVE] = EQUIP_NONE;
+    viewer.equipment[EQUIP_SLOT_LEFT_HAND] = EQUIP_NONE;
+    viewer.equipment[EQUIP_SLOT_GLOVES_MIRROR] = EQUIP_NONE;
+    viewer.equipment[EQUIP_SLOT_LEFT_BRACELET] = EQUIP_NONE;
+    viewer.equipment[EQUIP_SLOT_LEFT_RING] = EQUIP_NONE;
 }
 
 /*
@@ -589,7 +589,7 @@ void player_check_item_durability(int id)
     v = vis_table_c.types[id].durability;
     if (v != 0) {
         if (v < 4) {
-            viewer.status_flags |= 0x1000000;
+            viewer.status_flags |= STATUS_DURABILITY_WARNING;
         }
     }
 }
@@ -600,13 +600,15 @@ ADDRESS(0x8003d030, 0xd4)
 void player_update_durability_warning(void)
 {
     u16 *slots[10] = {
-        &viewer.equipment[0], &viewer.equipment[2],  &viewer.equipment[3],  &viewer.equipment[8],
-        &viewer.equipment[9], &viewer.equipment[10], &viewer.equipment[13], &viewer.equipment[16],
+        &viewer.equipment[EQUIP_SLOT_RIGHT_RING], &viewer.equipment[EQUIP_SLOT_GLOVES],
+            &viewer.equipment[EQUIP_SLOT_RIGHT_HAND],  &viewer.equipment[EQUIP_SLOT_HELMET],
+        &viewer.equipment[EQUIP_SLOT_ARMOR], &viewer.equipment[EQUIP_SLOT_BOOTS],
+            &viewer.equipment[EQUIP_SLOT_LEFT_RING], &viewer.equipment[EQUIP_SLOT_LEFT_HAND],
     };
     u16 **p;
 
     p = slots;
-    viewer.status_flags &= ~0x1000000;
+    viewer.status_flags &= ~STATUS_DURABILITY_WARNING;
     for (; *p; p++) {
         if (**p != 0xffff) {
             player_check_item_durability(**p);
@@ -631,21 +633,22 @@ void player_wear_item(int amount, u16 *slot)
     }
     left -= amount;
     if (left <= 0) {
-        sound_play(4, 128);
+        sound_play(SOUND_ITEM_BROKEN, 128);
         vis_table_c.types[*slot].durability = 0;
-        if (slot != &viewer.equipment[0] && slot != &viewer.equipment[13]) {
+        if (slot != &viewer.equipment[EQUIP_SLOT_RIGHT_RING]
+            && slot != &viewer.equipment[EQUIP_SLOT_LEFT_RING]) {
             *slot = 0xffff;
         }
-        if (slot == &viewer.equipment[3]) {
+        if (slot == &viewer.equipment[EQUIP_SLOT_RIGHT_HAND]) {
             if (viewer.slot_model_ids[0] >= 31 && viewer.slot_model_ids[0] <= 34) {
                 player_load_equipment_model(0xffff, 1, 0);
             }
             player_load_equipment_model(0xffff, 0, 0);
-        } else if (slot == &viewer.equipment[16]) {
+        } else if (slot == &viewer.equipment[EQUIP_SLOT_LEFT_HAND]) {
             player_load_equipment_model(0xffff, 1, 0);
-        } else if (slot == &viewer.equipment[4]) {
+        } else if (slot == &viewer.equipment[EQUIP_SLOT_RIGHT_RESERVE]) {
             player_load_equipment_model(0xffff, 2, 0);
-        } else if (slot == &viewer.equipment[17]) {
+        } else if (slot == &viewer.equipment[EQUIP_SLOT_LEFT_RESERVE]) {
             player_load_equipment_model(0xffff, 3, 0);
         }
         player_sum_equipment_bonuses();
@@ -661,7 +664,8 @@ void player_wear_item(int amount, u16 *slot)
 ADDRESS(0x8003d288, 0x30c)
 void player_wear_armour(int damage, u16 flags)
 {
-    u16 *armour[4] = {&viewer.equipment[8], &viewer.equipment[9], &viewer.equipment[10], &viewer.equipment[2]};
+    u16 *armour[4] = {&viewer.equipment[EQUIP_SLOT_HELMET], &viewer.equipment[EQUIP_SLOT_ARMOR],
+        &viewer.equipment[EQUIP_SLOT_BOOTS], &viewer.equipment[EQUIP_SLOT_GLOVES]};
     int wear;
     int n;
     int shield;
@@ -670,7 +674,7 @@ void player_wear_armour(int damage, u16 flags)
     u8 a;
     u8 b;
 
-    if (viewer.shield_raised != 0 && viewer.equipment[16] != 0xffff) {
+    if (viewer.shield_raised != 0 && viewer.equipment[EQUIP_SLOT_LEFT_HAND] != EQUIP_NONE) {
         if (damage * 20 < viewer.max_hp) {
             viewer.shield_wear++;
         } else {
@@ -687,7 +691,7 @@ void player_wear_armour(int damage, u16 flags)
         wear = b / 5;
         viewer.shield_wear = a - shield * 5;
         viewer.armour_wear = b - wear * 5;
-        if ((flags & 0x400) && !(viewer.status_flags & 0x800000)) {
+        if ((flags & 0x400) && !(viewer.status_flags & STATUS_ACID_WARD)) {
             shield <<= 1;
             wear <<= 1;
         }
@@ -695,7 +699,7 @@ void player_wear_armour(int damage, u16 flags)
             shield *= 5;
             wear *= 5;
         }
-        player_wear_item(shield, &viewer.equipment[16]);
+        player_wear_item(shield, &viewer.equipment[EQUIP_SLOT_LEFT_HAND]);
         pick = -1;
     } else {
         if (damage * 20 < viewer.max_hp) {
@@ -708,7 +712,7 @@ void player_wear_armour(int damage, u16 flags)
         viewer.armour_wear += n * 2;
         wear = viewer.armour_wear / 5;
         viewer.armour_wear -= wear * 5;
-        if ((flags & 0x400) && !(viewer.status_flags & 0x800000)) {
+        if ((flags & 0x400) && !(viewer.status_flags & STATUS_ACID_WARD)) {
             wear <<= 1;
         }
         if (flags & 0x1000) {
@@ -799,7 +803,7 @@ void player_take_damage(int damage, int flags, long *from)
     int shake_amount;
     short time;
 
-    if (viewer.state == 4 || damage == 0) {
+    if (viewer.state == VIEWER_STATE_DYING || damage == 0) {
         return;
     }
     player_wear_armour(damage, flags);
@@ -865,7 +869,7 @@ void player_take_damage(int damage, int flags, long *from)
         viewer.red_fade = 3500;
         viewer.red_fade_step = time;
     } else {
-        switch ((dir.vy - viewer.yaw + 256) >> 9 & 7) {
+        switch ((dir.vy - viewer.rotation.vy + 256) >> 9 & 7) {
         case 0:
             dir.vx = -scaled;
             dir.vz = 0;
@@ -937,20 +941,20 @@ void player_hit(u16 *damage, u16 scale, u16 effect, long *from)
     extra = bonus;
     if (effect != 0) {
         switch (effect) {
-        case 8:
-        case 16:
-        case 24:
+        case STATUS_PARALYZE_1:
+        case STATUS_PARALYZE_2:
+        case STATUS_PARALYZE:
         case 32:
         case 64:
-        case 96:
-        case 128:
-        case 256:
+        case STATUS_DARK:
+        case STATUS_SLOW:
+        case STATUS_CURSED:
             resist = (u16)(viewer.physical_base / 20) + viewer.attributes[13] * 3 / 80 + viewer.element_defence[5] * 60 / 255;
             if (101 - resist < rand() * 100 / 32768) {
                 goto limits;
             }
             break;
-        case 7:
+        case STATUS_POISON:
             resist = (u16)(viewer.physical_base / 20) + viewer.attributes[12] * 3 / 80 + viewer.element_defence[2] * 60 / 255;
             if (101 - resist < rand() * 100 / 32768) {
                 goto limits;
@@ -958,89 +962,89 @@ void player_hit(u16 *damage, u16 scale, u16 effect, long *from)
             break;
         }
         switch (effect) {
-        case 128:
-            if (!(viewer.status_flags & 0x80)) {
-                viewer.unk190[3][1] = 300;
-                viewer.unk190[3][0] = 0;
-                viewer.status_flags |= 0x80;
+        case STATUS_SLOW:
+            if (!(viewer.status_flags & STATUS_SLOW)) {
+                viewer.timers.halves[3][1] = 300;
+                viewer.timers.halves[3][0] = 0;
+                viewer.status_flags |= STATUS_SLOW;
                 player_compute_derived_stats(0);
                 PLAYER_CLAMP_HP();
             } else {
-                viewer.unk190[3][0] = 20;
-                viewer.unk190[3][1] = 300;
+                viewer.timers.halves[3][0] = 20;
+                viewer.timers.halves[3][1] = 300;
             }
             break;
-        case 8:
-        case 16:
-        case 24:
-            if (!(viewer.status_flags & 0x18)) {
-                viewer.unk190[1][1] = 75;
-                viewer.unk190[1][0] = 0;
-                viewer.status_flags |= 8;
-            } else if (viewer.status_flags & 8) {
-                viewer.unk190[1][1] = 75;
-                viewer.unk190[1][0] = 0;
-                viewer.status_flags |= 0x10;
+        case STATUS_PARALYZE_1:
+        case STATUS_PARALYZE_2:
+        case STATUS_PARALYZE:
+            if (!(viewer.status_flags & STATUS_PARALYZE)) {
+                viewer.timers.halves[1][1] = 75;
+                viewer.timers.halves[1][0] = 0;
+                viewer.status_flags |= STATUS_PARALYZE_1;
+            } else if (viewer.status_flags & STATUS_PARALYZE_1) {
+                viewer.timers.halves[1][1] = 75;
+                viewer.timers.halves[1][0] = 0;
+                viewer.status_flags |= STATUS_PARALYZE_2;
             } else {
-                viewer.unk190[1][0] = 20;
-                viewer.unk190[1][1] = 75;
+                viewer.timers.halves[1][0] = 20;
+                viewer.timers.halves[1][1] = 75;
             }
             break;
         case 32:
         case 64:
-        case 96:
-            if (!(viewer.status_flags & 0x60)) {
-                viewer.unk190[2][1] = 600;
-                viewer.unk190[2][0] = 0;
-                viewer.status_flags |= 0x60;
+        case STATUS_DARK:
+            if (!(viewer.status_flags & STATUS_DARK)) {
+                viewer.timers.halves[2][1] = 600;
+                viewer.timers.halves[2][0] = 0;
+                viewer.status_flags |= STATUS_DARK;
             } else {
-                viewer.unk190[2][0] = 20;
-                viewer.unk190[2][1] = 600;
+                viewer.timers.halves[2][0] = 20;
+                viewer.timers.halves[2][1] = 600;
             }
             break;
         case 512:
             player_add_hp(-(rand() / 256));
             sound_play(9, 128);
             break;
-        case 256:
-            if (!(viewer.status_flags & 0x100)) {
-                viewer.unk190[4][1] = 6000;
-                viewer.unk190[4][0] = 0;
-                viewer.status_flags |= 0x100;
+        case STATUS_CURSED:
+            if (!(viewer.status_flags & STATUS_CURSED)) {
+                viewer.timers.halves[4][1] = 6000;
+                viewer.timers.halves[4][0] = 0;
+                viewer.status_flags |= STATUS_CURSED;
                 player_compute_derived_stats(0);
                 PLAYER_CLAMP_HP();
             } else {
-                viewer.unk190[4][0] = 20;
-                viewer.unk190[4][1] = 6000;
+                viewer.timers.halves[4][0] = 20;
+                viewer.timers.halves[4][1] = 6000;
             }
             break;
-        case 1:
-        case 2:
-        case 4:
-        case 7:
-            if (!(viewer.status_flags & 0x100000)) {
-                if (viewer.status_flags & 7) {
-                    if (viewer.unk190[0][0] >= 220 && viewer.unk190[0][1] != 0) {
-                        viewer.unk190[0][0] = 20;
-                        viewer.unk190[0][1] = 600;
-                        if (viewer.status_flags & 2) {
-                            viewer.status_flags |= 4;
+        case STATUS_POISON_1:
+        case STATUS_POISON_2:
+        case STATUS_POISON_3:
+        case STATUS_POISON:
+            if (!(viewer.status_flags & STATUS_POISON_WARD)) {
+                if (viewer.status_flags & STATUS_POISON) {
+                    if (viewer.timers.halves[0][0] >= 220 && viewer.timers.halves[0][1] != 0) {
+                        viewer.timers.halves[0][0] = 20;
+                        viewer.timers.halves[0][1] = 600;
+                        if (viewer.status_flags & STATUS_POISON_2) {
+                            viewer.status_flags |= STATUS_POISON_3;
                         }
-                        if (viewer.status_flags & 1) {
-                            viewer.status_flags |= 2;
+                        if (viewer.status_flags & STATUS_POISON_1) {
+                            viewer.status_flags |= STATUS_POISON_2;
                         }
                     }
                 } else {
-                    viewer.unk190[0][1] = 600;
-                    viewer.unk190[0][0] = 0;
-                    viewer.status_flags |= 1;
+                    viewer.timers.halves[0][1] = 600;
+                    viewer.timers.halves[0][0] = 0;
+                    viewer.status_flags |= STATUS_POISON_1;
                 }
             }
             break;
-        case 1024:
-            viewer.status_flags |= 0x400;
+        case STATUS_FLOOR_HIT:
+            viewer.status_flags |= STATUS_FLOOR_HIT;
             if (viewer.frame_count % 40 == 0) {
-                sound_play(7, 128);
+                sound_play(SOUND_FLOOR_DAMAGE, 128);
             }
             viewer.yellow_fade = 3500;
             viewer.yellow_fade_step = 128;
@@ -1062,22 +1066,22 @@ void player_hit(u16 *damage, u16 scale, u16 effect, long *from)
         limit75 = limit75 * viewer.status_time_scale / 100;
         limit600 = limit600 * viewer.status_time_scale / 100;
         limit0 = limit600;
-        if (limit300 < viewer.unk190[3][1]) {
-            viewer.unk190[3][1] = limit300;
+        if (limit300 < viewer.timers.halves[3][1]) {
+            viewer.timers.halves[3][1] = limit300;
         }
-        if (limit75 < viewer.unk190[1][1]) {
-            viewer.unk190[1][1] = limit75;
+        if (limit75 < viewer.timers.halves[1][1]) {
+            viewer.timers.halves[1][1] = limit75;
         }
-        if (limit600 < viewer.unk190[2][1]) {
-            viewer.unk190[2][1] = limit600;
+        if (limit600 < viewer.timers.halves[2][1]) {
+            viewer.timers.halves[2][1] = limit600;
         }
-        if (limit0 < viewer.unk190[0][1]) {
-            viewer.unk190[0][1] = limit0;
+        if (limit0 < viewer.timers.halves[0][1]) {
+            viewer.timers.halves[0][1] = limit0;
         }
     }
-    if (viewer.shield_raised != 0 && viewer.equipment[16] != 0xffff) {
+    if (viewer.shield_raised != 0 && viewer.equipment[EQUIP_SLOT_LEFT_HAND] != EQUIP_NONE) {
         attack = viewer.armour_defence + viewer.shield_defence;
-        shield = &vis_table_c.types[viewer.equipment[16]];
+        shield = &vis_table_c.types[viewer.equipment[EQUIP_SLOT_LEFT_HAND]];
         magic = viewer.magic_defence + viewer.shield_magic_defence;
         if (shield->kind2 >= 9) {
             bonus[shield->kind2 - 9] = shield->amount2 >> 1;
@@ -1098,13 +1102,13 @@ void player_hit(u16 *damage, u16 scale, u16 effect, long *from)
             continue;
         }
         d = *damage;
-        if ((viewer.status_flags & 0x80000) && i == 0) {
+        if ((viewer.status_flags & STATUS_FIRE_WARD) && i == 0) {
             d >>= 2;
         }
-        if ((viewer.status_flags & 0x800000) && i == 3) {
+        if ((viewer.status_flags & STATUS_ACID_WARD) && i == 3) {
             d >>= 2;
         }
-        if ((viewer.status_flags & 0x100000) && i == 2) {
+        if ((viewer.status_flags & STATUS_POISON_WARD) && i == 2) {
             continue;
         }
         k = magic + *defence + *extra;
@@ -1153,24 +1157,24 @@ void player_get_camera(VECTOR *pos, SVECTOR *rot)
     pos->vx = viewer.position.vx;
     pos->vz = viewer.position.vz;
     pos->vy = viewer.position.vy + viewer.bob_offset + viewer.unk2D2 - 1600;
-    rot->vx = viewer.pitch;
-    rot->vy = viewer.yaw;
-    rot->vz = viewer.roll;
+    rot->vx = viewer.rotation.vx;
+    rot->vy = viewer.rotation.vy;
+    rot->vz = viewer.rotation.vz;
 }
 
 /* Clears the status timers and restores the hit and magic points. */
 ADDRESS(0x8003e794, 0xac)
 void player_recover_all(void)
 {
-    viewer.unk190[0][0] = viewer.unk190[0][1] = viewer.unk190[1][0] = viewer.unk190[1][1] =
-        viewer.unk190[2][0] = viewer.unk190[2][1] = viewer.unk190[3][0] = viewer.unk190[3][1] =
-            viewer.unk190[4][0] = viewer.unk190[4][1] = viewer.unk190[5][0] =
-                viewer.unk190[5][1] = viewer.unk190[6][0] = viewer.unk190[6][1] =
-                    viewer.unk190[7][0] = viewer.unk190[7][1] = viewer.unk190[8][0] =
-                        viewer.unk190[8][1] = viewer.unk190[9][0] = viewer.unk190[9][1] =
-                            viewer.unk190[10][0] = viewer.unk190[10][1] =
-                                viewer.unk190[11][0] = viewer.unk190[11][1] =
-                                    viewer.unk190[12][0] = viewer.unk190[12][1] = 0;
+    viewer.timers.halves[0][0] = viewer.timers.halves[0][1] = viewer.timers.halves[1][0] = viewer.timers.halves[1][1] =
+        viewer.timers.halves[2][0] = viewer.timers.halves[2][1] = viewer.timers.halves[3][0] = viewer.timers.halves[3][1] =
+            viewer.timers.halves[4][0] = viewer.timers.halves[4][1] = viewer.timers.halves[5][0] =
+                viewer.timers.halves[5][1] = viewer.timers.halves[6][0] = viewer.timers.halves[6][1] =
+                    viewer.timers.halves[7][0] = viewer.timers.halves[7][1] = viewer.timers.halves[8][0] =
+                        viewer.timers.halves[8][1] = viewer.timers.halves[9][0] = viewer.timers.halves[9][1] =
+                            viewer.timers.halves[10][0] = viewer.timers.halves[10][1] =
+                                viewer.timers.halves[11][0] = viewer.timers.halves[11][1] =
+                                    viewer.timers.halves[12][0] = viewer.timers.halves[12][1] = 0;
     viewer.fall_death = 0;
     viewer.hp = viewer.hud_hp = viewer.max_hp;
     viewer.mp = viewer.hud_mp = viewer.max_mp;
@@ -1214,7 +1218,7 @@ void player_reset_new_game(void)
     viewer.slot_sounds[1] = 25;
     viewer.slot_sounds[2] = 26;
     viewer.slot_sounds[3] = 27;
-    viewer.equipment[3] = 0;
+    viewer.equipment[EQUIP_SLOT_RIGHT_HAND] = 0;
     player_load_equipment_model(0, 0, 0);
     item_counts_clear();
     viewer.items_found = 0;
@@ -1231,14 +1235,14 @@ void player_reset_new_game(void)
     viewer.push_x = viewer.push_y = viewer.push_z = 0;
     player_recover_all();
     equip_load_item_slot_pictures();
-    viewer.save_x = 61;
-    viewer.save_y = 64;
-    viewer.save_z = 63;
-    viewer.save_area = 0;
-    viewer.save_dx = 0;
-    viewer.save_dy = 1472;
-    viewer.save_dz = 0;
-    viewer.save_yaw = 3072;
+    viewer.save_point.x = 61;
+    viewer.save_point.y = 64;
+    viewer.save_point.z = 63;
+    viewer.save_point.area = 0;
+    viewer.save_point.dx = 0;
+    viewer.save_point.dy = 1472;
+    viewer.save_point.dz = 0;
+    viewer.save_point.yaw = 3072;
     hud_clear_damage_numbers();
 }
 
@@ -1247,10 +1251,10 @@ void player_init(void)
 {
     viewer.magic_buffers[0] = magic_model_buffers[0];
     viewer.magic_buffers[1] = magic_model_buffers[1];
-    viewer.slot_model_files[0] = equipment_model_buffers[0];
-    viewer.slot_model_files[1] = equipment_model_buffers[1];
-    viewer.slot_model_files[2] = equipment_model_buffers[2];
-    viewer.slot_model_files[3] = equipment_model_buffers[3];
+    viewer.slot_model_files[0] = (StAnimFile *)equipment_model_buffers[0];
+    viewer.slot_model_files[1] = (StAnimFile *)equipment_model_buffers[1];
+    viewer.slot_model_files[2] = (StAnimFile *)equipment_model_buffers[2];
+    viewer.slot_model_files[3] = (StAnimFile *)equipment_model_buffers[3];
     player_reset_new_game();
     game_settings.sfx_volume = 63;
     game_settings.bgm_volume = 63;
@@ -1282,7 +1286,7 @@ void player_reset_motion(void)
     viewer.update_all_spawns = 1;
     viewer.unk239 = 0;
     viewer.vertical_speed = 0;
-    viewer.state = 0;
+    viewer.state = VIEWER_STATE_NORMAL;
     player_stop_motion();
 }
 
@@ -1338,9 +1342,8 @@ void tim_load_images_at(void *data, DVECTOR *pix, DVECTOR *clut, int absolute)
     } block;
     typedef char HeaderWordSize[sizeof(u_long) == 4 ? 1 : -1];
     typedef char HeaderSize[sizeof(TimBlock) == 12 ? 1 : -1];
-    typedef char HeaderLengthAt0[offsetof(TimBlock, len) == 0 ? 1 : -1];
-    typedef char HeaderRectAt4[offsetof(TimBlock, rect) == 4 ? 1 : -1];
-    typedef char HeaderRectSize[sizeof(RECT) == 8 ? 1 : -1];
+    typedef char HeaderLengthAt0[offsetof(TimBlock, bnum) == 0 ? 1 : -1];
+    typedef char HeaderRectAt4[offsetof(TimBlock, x) == 4 ? 1 : -1];
     typedef char HeaderWordsSize[sizeof(TimBlockWords) == 12 ? 1 : -1];
     typedef char HeaderPositionAt4[offsetof(TimBlockWords, position) == 4 ? 1 : -1];
     typedef char HeaderDimensionsAt8[offsetof(TimBlockWords, dimensions) == 8 ? 1 : -1];
@@ -1377,16 +1380,16 @@ next:
             block.words.byte_count = length_word;
             block.words.dimensions = dimensions_word;
             if (!absolute) {
-                rect.x = block.header.rect.x + cp->vx;
-                rect.y = block.header.rect.y + cp->vy;
+                rect.x = block.header.x + cp->vx;
+                rect.y = block.header.y + cp->vy;
             } else {
                 rect.x = cp->vx;
                 rect.y = cp->vy;
             }
-            rect.w = block.header.rect.w;
-            rect.h = block.header.rect.h;
+            rect.w = block.header.w;
+            rect.h = block.header.h;
             LoadImage(&rect, p);
-            p = (u_long *)((u8 *)p + (block.header.len - 12));
+            p = (u_long *)((u8 *)p + (block.header.bnum - 12));
         }
         position_word = p[1];
         length_word = p[0];
@@ -1396,16 +1399,16 @@ next:
         block.words.byte_count = length_word;
         block.words.dimensions = dimensions_word;
         if (!absolute) {
-            rect.x = block.header.rect.x + pp->vx;
-            rect.y = block.header.rect.y + pp->vy;
+            rect.x = block.header.x + pp->vx;
+            rect.y = block.header.y + pp->vy;
         } else {
             rect.x = pp->vx;
             rect.y = pp->vy;
         }
-        rect.w = block.header.rect.w;
-        rect.h = block.header.rect.h;
+        rect.w = block.header.w;
+        rect.h = block.header.h;
         LoadImage(&rect, p);
-        p = (u_long *)((u8 *)p + (block.header.len - 12));
+        p = (u_long *)((u8 *)p + (block.header.bnum - 12));
         goto next;
     }
 }
@@ -1430,18 +1433,18 @@ void player_load_magic(u16 id, u8 slot)
     }
     if (viewer.magic_ids[slot] != 255) {
         rec = effects.slots;
-        i = 128;
+        i = ST_EFFECT_SLOTS;
         while (i--) {
             int side = rec->flags;
 
-            if (side != 255) {
+            if (side != ST_EFFECT_FREE) {
                 side &= 0x20;
                 if ((side != 0) == slot) {
                     if (rec->kind < 44) {
-                        rec->flags = 255;
+                        rec->flags = ST_EFFECT_FREE;
                     }
                     if (rec->kind >= 170 && rec->kind < 180) {
-                        rec->flags = 255;
+                        rec->flags = ST_EFFECT_FREE;
                     }
                 }
             }
@@ -1451,7 +1454,7 @@ void player_load_magic(u16 id, u8 slot)
     viewer.magic_ids[slot] = item;
     if (item != 255) {
         viewer.magic_defs[slot] = &effects.defs[item];
-        cd_read_member(1, item * 4 + 740, (u_long *)viewer.magic_buffers[slot]);
+        cd_read_member(ARCHIVE_FDAT, item * 4 + 740, (u_long *)viewer.magic_buffers[slot]);
         p = viewer.magic_buffers[slot];
         n = *(u16 *)p;
         p += 4;
@@ -1465,10 +1468,10 @@ void player_load_magic(u16 id, u8 slot)
             p += size;
             part++;
         }
-        cd_read_member(1, item * 4 + 741, cd_file_buffer);
+        cd_read_member(ARCHIVE_FDAT, item * 4 + 741, cd_file_buffer);
         tim_load_images_at(cd_file_buffer, &pix[slot], &clut[slot], 0);
         DrawSync(0);
-        sound_bank_load(1, item * 4 + 742, slot + 6);
+        sound_bank_load(ARCHIVE_FDAT, item * 4 + 742, slot + 6);
     }
     viewer.magic_gauge_delay = 30;
     viewer.magic_gauge = 0;
@@ -1507,7 +1510,7 @@ void player_load_equipment_model(u16 id, u8 slot, u8 reload)
     viewer.weapon_gauge = 0;
     viewer.swing_gauge = 0;
     if (model != 255 && (cur = viewer.slot_model_ids[slot]) == model && reload) {
-        cd_read_member(1, cur * 4 + 485, cd_file_buffer);
+        cd_read_member(ARCHIVE_FDAT, cur * 4 + 485, cd_file_buffer);
         tim_load_images_at(cd_file_buffer, &pix[slot], &clut[slot], 0);
         DrawSync(0);
     }
@@ -1521,25 +1524,25 @@ void player_load_equipment_model(u16 id, u8 slot, u8 reload)
         if (paired) {
             pair = slot ^ 1;
             viewer.slot_model_info[pair] = &equipment_model_placements[other];
-            cd_read_member(1, model * 4 + 484, viewer.slot_model_files[slot]);
-            cd_read_member(1, other * 4 + 484, viewer.slot_model_files[pair]);
+            cd_read_member(ARCHIVE_FDAT, model * 4 + 484, (u_long *)viewer.slot_model_files[slot]);
+            cd_read_member(ARCHIVE_FDAT, other * 4 + 484, (u_long *)viewer.slot_model_files[pair]);
             anim_register(slot + 32, viewer.slot_model_files[slot]);
             model_offset_textures((Model *)sp->model, &pix[slot], &clut[slot], 0);
             anim_register(pair + 32, viewer.slot_model_files[pair]);
         } else {
-            cd_read_member(1, model * 4 + 484, viewer.slot_model_files[slot]);
+            cd_read_member(ARCHIVE_FDAT, model * 4 + 484, (u_long *)viewer.slot_model_files[slot]);
             anim_register(slot + 32, viewer.slot_model_files[slot]);
             model_offset_textures((Model *)sp->model, &pix[slot], &clut[slot], 1);
         }
-        cd_read_member(1, model * 4 + 485, cd_file_buffer);
+        cd_read_member(ARCHIVE_FDAT, model * 4 + 485, cd_file_buffer);
         tim_load_images_at(cd_file_buffer, &pix[slot], &clut[slot], 0);
         DrawSync(0);
-        sound_bank_load(1, model * 4 + 486, viewer.slot_sounds[slot] - 22);
+        sound_bank_load(ARCHIVE_FDAT, model * 4 + 486, viewer.slot_sounds[slot] - 22);
     }
     if (slot < 2) {
         viewer.action_timers.halves[slot] = -1;
     }
-    viewer.slot_anims[slot] = 0;
+    viewer.slot_anims[slot].slot = NULL;
     viewer.action_recoil = 0;
     viewer.shield_lowering = 0;
     viewer.hand_rot_x = 0;
@@ -1563,13 +1566,13 @@ void player_start_hand_action(u8 value, u8 slot)
         if (viewer.slot_model_ids[0] == 255) {
             return;
         }
-        if (viewer.unk190[1][0] != 0) {
+        if (viewer.timers.halves[1][0] != 0) {
             return;
         }
         viewer.slot_anim_ids[0] = value;
         viewer.action_timers.halves[0] = 0;
         viewer.action_started = 1;
-        pad_state.pressed &= ~pad_state.buttons[8];
+        pad_state.pressed &= ~pad_state.buttons[PAD_ACTION_RIGHT_HAND];
         viewer.action_timers.halves[2] = viewer.slot_model_info[0]->hit_time;
         viewer.action_sound_time[0] = viewer.slot_model_info[0]->sound_time;
         viewer.weapon_gauge_delay = 15;
@@ -1583,10 +1586,10 @@ void player_start_hand_action(u8 value, u8 slot)
         if (viewer.slot_model_ids[slot] == 255) {
             return;
         }
-        if (viewer.unk190[1][0] != 0) {
+        if (viewer.timers.halves[1][0] != 0) {
             return;
         }
-        pad_state.pressed &= ~pad_state.buttons[9];
+        pad_state.pressed &= ~pad_state.buttons[PAD_ACTION_LEFT_HAND];
         viewer.slot_anim_ids[slot] = value;
         viewer.action_timers.halves[slot] = 0;
         viewer.action_started = 1;
@@ -1603,7 +1606,7 @@ void player_start_cast(u8 unused, u8 slot)
 
     v = &viewer;
     if (*(s32 *)v->cast_request == -1 && v->action_timers.word == -1 && v->magic_ids[slot] != 255 &&
-        !(v->status_flags & 0x10) && (!v->blocks_magic || v->unk190[12][0] != 0)) {
+        !(v->status_flags & STATUS_PARALYZE_2) && (!v->blocks_magic || v->timers.halves[12][0] != 0)) {
         v->cast_request[slot] = 0;
         v->cast_gauge = v->magic_gauge;
         v->magic_gauge = 0;
@@ -1683,19 +1686,19 @@ void player_fire_magic_shot(int kind, int slot, ...)
     sp = SCRATCHPAD;
     count = viewer.shots_left[slot] - 1;
     switch (kind) {
-    case 0:
+    case EFFECT_KIND_EXPLOSIVE:
         speed = 4096;
         goto shoot;
-    case 10:
+    case EFFECT_KIND_CORROSIVE_ELEMENTS:
         speed = 2048;
     shoot:
         rot.vx = viewer.camera_rot.vx;
         rot.vy = viewer.camera_rot.vy;
         rot.vz = viewer.camera_rot.vz;
         player_get_launch_vector(700, &pos, &dir, &rot, slot);
-        effect_spawn(10, side | 0x42, kind, &pos, &dir, speed, &viewer.pitch);
+        effect_spawn(10, side | 0x42, kind, &pos, &dir, speed, &viewer.rotation);
         break;
-    case 7:
+    case EFFECT_KIND_DUAL_POISON:
         i = 2;
         while (i--) {
             length = i * 32 - 16;
@@ -1703,51 +1706,51 @@ void player_fire_magic_shot(int kind, int slot, ...)
             aim.vy = viewer.camera_rot.vy + length;
             aim.vz = viewer.camera_rot.vz;
             player_get_launch_vector(700, &pos, &dir, &aim, slot);
-            effect_spawn(10, side | 0x42, kind, &pos, &dir, 1024, &viewer.pitch);
+            effect_spawn(10, side | 0x42, kind, &pos, &dir, 1024, &viewer.rotation);
             viewer.shot_offsets[slot].vx += 1024;
         }
         break;
-    case 1:
+    case EFFECT_KIND_BLAZE:
         length = 256;
         turn = 0;
         speed = 1024;
         goto spray;
-    case 3:
+    case EFFECT_KIND_FROZEN_HORNET:
         length = 384;
         turn = count * 32 - 80;
         speed = 512;
         goto spray;
-    case 9:
+    case EFFECT_KIND_BUBBLE_SHOWER:
         length = 256;
         turn = 128 - rand() / 128;
         speed = 768;
         goto spray;
-    case 6:
+    case EFFECT_KIND_QUEEN_EYES:
         length = 512;
         turn = 0;
         speed = 3072;
         goto spray;
-    case 4:
+    case EFFECT_KIND_ICE_SABRE:
         length = 384;
         turn = 0;
         speed = 8192;
         goto spray;
-    case 12:
+    case EFFECT_KIND_JUDGEMENT:
         length = 384;
         turn = 0;
         speed = 2048;
         goto spray;
-    case 13:
+    case EFFECT_KIND_CLEANSING_RAY:
         length = 320;
         turn = 0;
         speed = 8192;
         goto spray;
-    case 15:
+    case EFFECT_KIND_SLAYER:
         length = 768;
         turn = 0;
         speed = 1024;
         goto spray;
-    case 16:
+    case EFFECT_KIND_UNHOLY_SPIRITS:
         length = 320;
         turn = 0;
         speed = 1024;
@@ -1761,10 +1764,10 @@ void player_fire_magic_shot(int kind, int slot, ...)
         rot.vz = -viewer.camera_rot.vz;
         effect_spawn(10, side | 0x42, kind, &pos, &dir, speed, &rot, count);
         break;
-    case 44:
-    case 45:
-    case 46:
-    case 47:
+    case EFFECT_KIND_BOW_SHOT_0:
+    case EFFECT_KIND_BOW_SHOT_1:
+    case EFFECT_KIND_BOW_SHOT_2:
+    case EFFECT_KIND_BOW_SHOT_3:
         anim_get_vertex(32, viewer.slot_anim_ids[0], viewer.slot_model_info[0]->hit_time, viewer.slot_model_info[0]->shot_vertex, &dir);
         sp->model_t[0] = viewer.slot_model_info[slot]->pos_x;
         sp->model_t[1] = viewer.slot_model_info[slot]->pos_y;
@@ -1813,7 +1816,7 @@ void player_fire_magic_shot(int kind, int slot, ...)
         gte_stlvnl(&pos2);
         vector_to_angles_ratan2(pos.vx - pos2.vx, pos.vy - pos2.vy, pos.vz - pos2.vz, &rot);
         vector_from_angles_zyx(&rot, &dir);
-        if (kind == 44) {
+        if (kind == EFFECT_KIND_BOW_SHOT_0) {
             vector_scale(viewer.swing_gauge * 768 / 5120, &dir);
         } else {
             vector_scale(viewer.swing_gauge * 1024 / 5120, &dir);
@@ -1836,14 +1839,14 @@ void player_update_cast(u8 hand)
 
     if (viewer.cast_request[hand] != -1) {
         if (hand) {
-            if (viewer.equipment[13] != 0xffff) {
-                item = &vis_table_c.types[viewer.equipment[13]];
+            if (viewer.equipment[EQUIP_SLOT_LEFT_RING] != EQUIP_NONE) {
+                item = &vis_table_c.types[viewer.equipment[EQUIP_SLOT_LEFT_RING]];
                 if (item->durability)
                     player_cast_magic(viewer.magic_ids[hand], hand);
             }
         } else {
-            if (viewer.equipment[0] != 0xffff) {
-                item = &vis_table_c.types[viewer.equipment[0]];
+            if (viewer.equipment[EQUIP_SLOT_RIGHT_RING] != EQUIP_NONE) {
+                item = &vis_table_c.types[viewer.equipment[EQUIP_SLOT_RIGHT_RING]];
                 if (item->durability)
                     player_cast_magic(viewer.magic_ids[0], 0);
             }
@@ -1852,17 +1855,17 @@ void player_update_cast(u8 hand)
         return;
     }
     active = 0;
-    if (viewer.equipment[0] != 0xffff) {
-        item = &vis_table_c.types[viewer.equipment[0]];
+    if (viewer.equipment[EQUIP_SLOT_RIGHT_RING] != EQUIP_NONE) {
+        item = &vis_table_c.types[viewer.equipment[EQUIP_SLOT_RIGHT_RING]];
         if (item->durability)
-            active = viewer.equipment[6] != 0xffff;
+            active = viewer.equipment[EQUIP_SLOT_RIGHT_MAGIC] != EQUIP_NONE;
     }
-    if (viewer.equipment[13] != 0xffff) {
-        item = &vis_table_c.types[viewer.equipment[13]];
-        if (item->durability && viewer.equipment[12] != 0xffff)
+    if (viewer.equipment[EQUIP_SLOT_LEFT_RING] != EQUIP_NONE) {
+        item = &vis_table_c.types[viewer.equipment[EQUIP_SLOT_LEFT_RING]];
+        if (item->durability && viewer.equipment[EQUIP_SLOT_LEFT_MAGIC] != EQUIP_NONE)
             active = 1;
     }
-    if (!viewer.blocks_magic || viewer.unk190[12][0] != 0) {
+    if (!viewer.blocks_magic || viewer.timers.halves[12][0] != 0) {
         if (!active)
             return;
         if (viewer.magic_gauge_delay == 0) {
@@ -1943,8 +1946,8 @@ void player_update_hand_action(u8 hand)
         }
         if (viewer.shield_lowering) {
             viewer.action_timers.halves[hand] -= cost;
-        } else if ((!(pad_state.held & pad_state.buttons[8]) && hand == 0) ||
-                   (!(pad_state.held & pad_state.buttons[9]) && hand != 0)) {
+        } else if ((!(pad_state.held & pad_state.buttons[PAD_ACTION_RIGHT_HAND]) && hand == 0) ||
+                   (!(pad_state.held & pad_state.buttons[PAD_ACTION_LEFT_HAND]) && hand != 0)) {
             viewer.action_timers.halves[hand] -= cost;
             viewer.shield_raised = 0;
         } else if (viewer.action_timers.halves[hand + 2] - cost < viewer.action_timers.halves[hand] &&
@@ -1972,7 +1975,7 @@ void player_update_hand_action(u8 hand)
                 req.height = 1024;
                 r = creature_find_in_reach((CollisionState *)&req, 4);
                 if (r != -1) {
-                    d = viewer.yaw - (short)vis_table_a.entries[r].player_heading;
+                    d = viewer.rotation.vy - (short)vis_table_a.entries[r].player_heading;
                     if (d > 2048) {
                         d -= 4096;
                     }
@@ -2017,8 +2020,8 @@ void player_update_hand_action(u8 hand)
                         viewer.action_timers.halves[hand] += cost;
                     }
                 }
-            } else if ((!(pad_state.held & pad_state.buttons[8]) && hand == 0) ||
-                       (!(pad_state.held & pad_state.buttons[9]) && hand != 0)) {
+            } else if ((!(pad_state.held & pad_state.buttons[PAD_ACTION_RIGHT_HAND]) && hand == 0) ||
+                       (!(pad_state.held & pad_state.buttons[PAD_ACTION_LEFT_HAND]) && hand != 0)) {
                 viewer.bow_released = 1;
                 viewer.swing_gauge = viewer.weapon_gauge;
                 viewer.weapon_gauge = 0;
@@ -2046,7 +2049,7 @@ void player_update_hand_action(u8 hand)
                 if (viewer.action_timers.halves[hand] > viewer.action_sound_time[hand] - cost &&
                     viewer.action_timers.halves[hand] <= viewer.action_sound_time[hand]) {
                     sound_play(viewer.slot_sounds[hand], 128);
-                    player_wear_item(1, &viewer.equipment[3]);
+                    player_wear_item(1, &viewer.equipment[EQUIP_SLOT_RIGHT_HAND]);
                 }
             }
             if ((u16)viewer.action_timers.halves[hand] > 4095) {
@@ -2071,8 +2074,8 @@ void player_update_hand_action(u8 hand)
             } while (0);
             pad = &pad_state;
             max = rec->sound_time;
-            if (pad->pressed & pad->buttons[8]) {
-                pad->pressed &= ~pad->buttons[8];
+            if (pad->pressed & pad->buttons[PAD_ACTION_RIGHT_HAND]) {
+                pad->pressed &= ~pad->buttons[PAD_ACTION_RIGHT_HAND];
             }
             if (viewer.action_recoil && !(viewer.action_timers.halves[hand + 2] - cost < viewer.action_timers.halves[hand])) {
                 viewer.action_timers.halves[hand] -= cost;
@@ -2105,7 +2108,7 @@ void player_update_hand_action(u8 hand)
                     for (vis_table_a.current_index = 0; vis_table_a.current_index < 64; vis_table_a.current_index++, e++) {
                         if (e->spawn_chance != 255) {
                             creature_set_current(e);
-                            if (e->state == 1 && e->status.bytes[3] != 1 && e->hp != 0 &&
+                            if (e->state == CREATURE_STATE_ACTIVE && e->status.bytes[3] != 1 && e->hp != 0 &&
                                 (side = creature_test_player_aim(e, reach)) != 0 && e->player_dist_sq < best) {
                                 best = e->player_dist_sq;
                                 hit = e;
@@ -2128,7 +2131,7 @@ void player_update_hand_action(u8 hand)
                         }
                         if (viewer.weapon_wear >= 7) {
                             viewer.weapon_wear -= 7;
-                            player_wear_item(1, &viewer.equipment[3]);
+                            player_wear_item(1, &viewer.equipment[EQUIP_SLOT_RIGHT_HAND]);
                         }
                     }
                 }
@@ -2139,11 +2142,12 @@ void player_update_hand_action(u8 hand)
             }
         } else {
             viewer.action_recoil = 0;
-            if (!(pad_state.held & pad_state.buttons[8])) {
+            if (!(pad_state.held & pad_state.buttons[PAD_ACTION_RIGHT_HAND])) {
                 if (viewer.weapon_gauge_delay == 0) {
                     inc = 96;
                     inc += viewer.attributes[1] / (viewer.attributes[1] + 1000) * inc;
-                    if (viewer.equipment[16] != 0xffff && viewer.action_timers.halves[1] >= 0) {
+                    if (viewer.equipment[EQUIP_SLOT_LEFT_HAND] != EQUIP_NONE
+                        && viewer.action_timers.halves[1] >= 0) {
                         inc >>= 1;
                     }
                     viewer.weapon_gauge += inc * 2;
@@ -2169,14 +2173,14 @@ void player_update_hand_action(u8 hand)
 ADDRESS(0x80040f04, 0x24c)
 void player_cast_magic(u8 magic, u8 hand)
 {
-    StMagic *rec;
+    StEffectDef *rec;
     int cost;
     SVECTOR unused;
 
     if (viewer.shot_magic[hand] != 255 || magic == 255) {
         return;
     }
-    rec = (StMagic *)&effects.defs[magic];
+    rec = &effects.defs[magic];
     cost = rec->mp_cost;
     if (viewer.mp < cost) {
         return;
@@ -2184,8 +2188,8 @@ void player_cast_magic(u8 magic, u8 hand)
     viewer.mp -= cost;
     viewer.shot_magic[hand] = magic;
     switch (magic) {
-    case 0:
-    case 10:
+    case EFFECT_KIND_EXPLOSIVE:
+    case EFFECT_KIND_CORROSIVE_ELEMENTS:
         viewer.shot_countdown[hand] = 1;
         viewer.shots_left[hand] = 1;
         viewer.shot_interval[hand] = 1;
@@ -2193,7 +2197,7 @@ void player_cast_magic(u8 magic, u8 hand)
         viewer.shot_offsets[hand].vy = 50;
         viewer.shot_offsets[hand].vz = 0;
         break;
-    case 7:
+    case EFFECT_KIND_DUAL_POISON:
         viewer.shot_countdown[hand] = 1;
         viewer.shots_left[hand] = 1;
         viewer.shot_interval[hand] = 1;
@@ -2201,33 +2205,33 @@ void player_cast_magic(u8 magic, u8 hand)
         viewer.shot_offsets[hand].vy = -1024;
         viewer.shot_offsets[hand].vz = 0;
         break;
-    case 3:
+    case EFFECT_KIND_FROZEN_HORNET:
         viewer.shots_left[hand] = 4;
         viewer.shot_interval[hand] = 8;
         viewer.shot_offsets[hand].vx = 0;
         viewer.shot_offsets[hand].vy = 200;
         viewer.shot_offsets[hand].vz = 0;
         goto fire;
-    case 9:
+    case EFFECT_KIND_BUBBLE_SHOWER:
         viewer.shots_left[hand] = 3;
         viewer.shot_interval[hand] = 4;
         viewer.shot_offsets[hand].vx = 0;
         viewer.shot_offsets[hand].vy = 200;
         viewer.shot_offsets[hand].vz = 0;
         goto fire;
-    case 12:
+    case EFFECT_KIND_JUDGEMENT:
         viewer.shots_left[hand] = 2;
         viewer.shot_interval[hand] = 4;
         viewer.shot_offsets[hand].vx = 0;
         viewer.shot_offsets[hand].vy = 200;
         viewer.shot_offsets[hand].vz = 0;
         goto fire;
-    case 1:
-    case 4:
-    case 6:
-    case 13:
-    case 15:
-    case 16:
+    case EFFECT_KIND_BLAZE:
+    case EFFECT_KIND_ICE_SABRE:
+    case EFFECT_KIND_QUEEN_EYES:
+    case EFFECT_KIND_CLEANSING_RAY:
+    case EFFECT_KIND_SLAYER:
+    case EFFECT_KIND_UNHOLY_SPIRITS:
         viewer.shots_left[hand] = 1;
         viewer.shot_interval[hand] = 1;
         viewer.shot_offsets[hand].vx = 0;
@@ -2236,10 +2240,10 @@ void player_cast_magic(u8 magic, u8 hand)
     fire:
         viewer.shot_countdown[hand] = 1;
         break;
-    case 44:
-    case 45:
-    case 46:
-    case 47:
+    case EFFECT_KIND_BOW_SHOT_0:
+    case EFFECT_KIND_BOW_SHOT_1:
+    case EFFECT_KIND_BOW_SHOT_2:
+    case EFFECT_KIND_BOW_SHOT_3:
         viewer.shot_countdown[hand] = 1;
         viewer.shots_left[hand] = 1;
         viewer.shot_interval[hand] = 1;
@@ -2247,16 +2251,16 @@ void player_cast_magic(u8 magic, u8 hand)
     }
     viewer.magic_defs[hand] = rec;
     switch (magic) {
-    case 44:
-    case 45:
-    case 46:
-    case 47:
+    case EFFECT_KIND_BOW_SHOT_0:
+    case EFFECT_KIND_BOW_SHOT_1:
+    case EFFECT_KIND_BOW_SHOT_2:
+    case EFFECT_KIND_BOW_SHOT_3:
         break;
     default:
         if (hand) {
-            player_wear_item(1, &viewer.equipment[13]);
+            player_wear_item(1, &viewer.equipment[EQUIP_SLOT_LEFT_RING]);
         } else {
-            player_wear_item(1, &viewer.equipment[0]);
+            player_wear_item(1, &viewer.equipment[EQUIP_SLOT_RIGHT_RING]);
         }
     }
 }
@@ -2321,24 +2325,24 @@ loop:
         }
     }
     if (hits & 2) {
-        vel.vx = (1 - (vis_lists.wall_dist - 256)) * vis_lists.wall_normal_x / 4096;
-        vel.vz = (1 - (vis_lists.wall_dist - 256)) * vis_lists.wall_normal_z / 4096;
+        vel.vx = (1 - (vis_lists.wall_dist - 256)) * vis_lists.wall_normal.vx / 4096;
+        vel.vz = (1 - (vis_lists.wall_dist - 256)) * vis_lists.wall_normal.vz / 4096;
         if (slid_a) {
             goto move;
         }
         slid_a = 1;
-        ang = ratan2(vis_lists.wall_normal_z, vis_lists.wall_normal_x);
+        ang = ratan2(vis_lists.wall_normal.vz, vis_lists.wall_normal.vx);
         vis_lists.hit_normal_heading = (short)ang;
         hits = speed * rcos(angle - (ang + 1024)) / 4096;
         vis_lists.slide_speed = hits;
     } else if (hits & 8) {
-        vel.vx = (1 - (vis_lists.low_wall_dist - 256)) * vis_lists.low_wall_normal_x / 4096;
-        vel.vz = (1 - (vis_lists.low_wall_dist - 256)) * vis_lists.low_wall_normal_z / 4096;
+        vel.vx = (1 - (vis_lists.low_wall_dist - 256)) * vis_lists.low_wall_normal.vx / 4096;
+        vel.vz = (1 - (vis_lists.low_wall_dist - 256)) * vis_lists.low_wall_normal.vz / 4096;
         if (slid_b) {
             goto move;
         }
         slid_b = 1;
-        ang = ratan2(vis_lists.low_wall_normal_z, vis_lists.low_wall_normal_x);
+        ang = ratan2(vis_lists.low_wall_normal.vz, vis_lists.low_wall_normal.vx);
         vis_lists.hit_normal_heading = (short)ang;
         hits = speed * rcos(angle - (ang + 1024)) / 4096;
         vis_lists.slide_speed = hits;
@@ -2440,24 +2444,24 @@ void player_update_motion(void)
             viewer.position.vz += vel.vz;
         }
         if (hits & 2) {
-            vel.vx = (1 - (vis_lists.wall_dist - 256)) * vis_lists.wall_normal_x / 4096;
-            vel.vz = (1 - (vis_lists.wall_dist - 256)) * vis_lists.wall_normal_z / 4096;
+            vel.vx = (1 - (vis_lists.wall_dist - 256)) * vis_lists.wall_normal.vx / 4096;
+            vel.vz = (1 - (vis_lists.wall_dist - 256)) * vis_lists.wall_normal.vz / 4096;
             if (slid_a) {
                 goto move;
             }
             slid_a = 1;
-            ang = ratan2(vis_lists.wall_normal_z, vis_lists.wall_normal_x);
+            ang = ratan2(vis_lists.wall_normal.vz, vis_lists.wall_normal.vx);
             vis_lists.hit_normal_heading = ang;
             push = speed * rcos(heading - (ang + 1024)) / 4096;
             vis_lists.slide_speed = push;
         } else if (hits & 8) {
-            vel.vx = (1 - (vis_lists.low_wall_dist - 256)) * vis_lists.low_wall_normal_x / 4096;
-            vel.vz = (1 - (vis_lists.low_wall_dist - 256)) * vis_lists.low_wall_normal_z / 4096;
+            vel.vx = (1 - (vis_lists.low_wall_dist - 256)) * vis_lists.low_wall_normal.vx / 4096;
+            vel.vz = (1 - (vis_lists.low_wall_dist - 256)) * vis_lists.low_wall_normal.vz / 4096;
             if (slid_b) {
                 goto move;
             }
             slid_b = 1;
-            ang = ratan2(vis_lists.low_wall_normal_z, vis_lists.low_wall_normal_x);
+            ang = ratan2(vis_lists.low_wall_normal.vz, vis_lists.low_wall_normal.vx);
             vis_lists.hit_normal_heading = ang;
             push = speed * rcos(heading - (ang + 1024)) / 4096;
             vis_lists.slide_speed = push;
@@ -2564,11 +2568,11 @@ void player_update_motion(void)
 ADDRESS(0x80041d4c, 0x354)
 void player_update_look(void)
 {
-    if (pad_state.held & pad_state.buttons[2]) {
+    if (pad_state.held & pad_state.buttons[PAD_ACTION_TURN_LEFT]) {
         viewer.yaw_speed += viewer.yaw_speed_max >> 2;
         if (viewer.yaw_speed_max < viewer.yaw_speed)
             viewer.yaw_speed = viewer.yaw_speed_max;
-    } else if (pad_state.held & pad_state.buttons[3]) {
+    } else if (pad_state.held & pad_state.buttons[PAD_ACTION_TURN_RIGHT]) {
         viewer.yaw_speed -= viewer.yaw_speed_max >> 2;
         if (viewer.yaw_speed < -viewer.yaw_speed_max)
             viewer.yaw_speed = -viewer.yaw_speed_max;
@@ -2582,8 +2586,8 @@ void player_update_look(void)
             viewer.yaw_speed = 0;
     }
     viewer.view_rot.vy = (viewer.view_rot.vy + viewer.yaw_speed) & 0xfff;
-    if (pad_state.held & pad_state.buttons[6]) {
-        if (pad_state.held & pad_state.buttons[7]) {
+    if (pad_state.held & pad_state.buttons[PAD_ACTION_LOOK_UP]) {
+        if (pad_state.held & pad_state.buttons[PAD_ACTION_LOOK_DOWN]) {
             if (viewer.view_rot.vx > 2048) {
                 int limit = (4224 - viewer.view_rot.vx) >> 2;
 
@@ -2611,7 +2615,7 @@ void player_update_look(void)
             if (viewer.pitch_speed < -32)
                 viewer.pitch_speed = -32;
         }
-    } else if (pad_state.held & pad_state.buttons[7]) {
+    } else if (pad_state.held & pad_state.buttons[PAD_ACTION_LOOK_DOWN]) {
         viewer.pitch_speed += 3;
         if (viewer.pitch_speed > 32)
             viewer.pitch_speed = 32;
@@ -2649,14 +2653,14 @@ void player_update_walk(void)
     SVECTOR rot;
     int ang;
 
-    if (pad_state.held & pad_state.buttons[0]) {
+    if (pad_state.held & pad_state.buttons[PAD_ACTION_FORWARD]) {
         v.vz = viewer.walk_velocity.vz + (viewer.walk_speed_max >> 2);
         if (v.vz <= viewer.walk_speed_max) {
             viewer.walk_velocity.vz = v.vz;
         } else {
             viewer.walk_velocity.vz = viewer.walk_speed_max;
         }
-    } else if (pad_state.held & pad_state.buttons[1]) {
+    } else if (pad_state.held & pad_state.buttons[PAD_ACTION_BACK]) {
         v.vz = viewer.walk_velocity.vz - (viewer.walk_speed_max >> 2);
         if (v.vz >= -viewer.walk_speed_max) {
             viewer.walk_velocity.vz = v.vz;
@@ -2674,14 +2678,16 @@ void player_update_walk(void)
             viewer.walk_velocity.vz = 0;
         }
     }
-    if ((pad_state.held & pad_state.buttons[5]) && !(pad_state.held & pad_state.buttons[4])) {
+    if ((pad_state.held & pad_state.buttons[PAD_ACTION_MOVE_RIGHT])
+        && !(pad_state.held & pad_state.buttons[PAD_ACTION_MOVE_LEFT])) {
         v.vx = viewer.walk_velocity.vx + (viewer.walk_speed_max >> 2);
         if (v.vx <= viewer.walk_speed_max) {
             viewer.walk_velocity.vx = v.vx;
         } else {
             viewer.walk_velocity.vx = viewer.walk_speed_max;
         }
-    } else if ((pad_state.held & pad_state.buttons[4]) && !(pad_state.held & pad_state.buttons[5])) {
+    } else if ((pad_state.held & pad_state.buttons[PAD_ACTION_MOVE_LEFT])
+        && !(pad_state.held & pad_state.buttons[PAD_ACTION_MOVE_RIGHT])) {
         v.vx = viewer.walk_velocity.vx - (viewer.walk_speed_max >> 2);
         if (v.vx >= -viewer.walk_speed_max) {
             viewer.walk_velocity.vx = v.vx;
@@ -2766,18 +2772,20 @@ void player_swap_hand_items(u8 a, u8 b)
     u8 model_id_a;
     u8 sound_a;
 
-    if ((viewer.equipment[3] != 0xffff && vis_table_c.types[viewer.equipment[3]].category == 9) ||
-        (viewer.equipment[4] != 0xffff && vis_table_c.types[viewer.equipment[4]].category == 9))
+    if ((viewer.equipment[EQUIP_SLOT_RIGHT_HAND] != EQUIP_NONE
+        && vis_table_c.types[viewer.equipment[EQUIP_SLOT_RIGHT_HAND]].category == 9) ||
+        (viewer.equipment[EQUIP_SLOT_RIGHT_RESERVE] != EQUIP_NONE
+            && vis_table_c.types[viewer.equipment[EQUIP_SLOT_RIGHT_RESERVE]].category == 9))
         n = 2;
     do {
         if (a == 0) {
-            id = viewer.equipment[3];
-            viewer.equipment[3] = viewer.equipment[4];
-            viewer.equipment[4] = id;
+            id = viewer.equipment[EQUIP_SLOT_RIGHT_HAND];
+            viewer.equipment[EQUIP_SLOT_RIGHT_HAND] = viewer.equipment[EQUIP_SLOT_RIGHT_RESERVE];
+            viewer.equipment[EQUIP_SLOT_RIGHT_RESERVE] = id;
         } else {
-            id = viewer.equipment[16];
-            viewer.equipment[16] = viewer.equipment[17];
-            viewer.equipment[17] = id;
+            id = viewer.equipment[EQUIP_SLOT_LEFT_HAND];
+            viewer.equipment[EQUIP_SLOT_LEFT_HAND] = viewer.equipment[EQUIP_SLOT_LEFT_RESERVE];
+            viewer.equipment[EQUIP_SLOT_LEFT_RESERVE] = id;
         }
         model_a = viewer.slot_model_info[a];
         viewer.slot_model_info[a] = viewer.slot_model_info[b];
@@ -2792,10 +2800,10 @@ void player_swap_hand_items(u8 a, u8 b)
             anim_register(a + 32, viewer.slot_model_files[a]);
         if (viewer.slot_model_ids[b] != 0xff)
             anim_register(b + 32, viewer.slot_model_files[b]);
-        if (viewer.slot_anims[a])
-            ((StAnimSlot *)viewer.slot_anims[a])->model_id = 0xffff;
-        if (viewer.slot_anims[b])
-            ((StAnimSlot *)viewer.slot_anims[b])->model_id = 0xffff;
+        if (viewer.slot_anims[a].slot)
+            viewer.slot_anims[a].slot->model_id = 0xffff;
+        if (viewer.slot_anims[b].slot)
+            viewer.slot_anims[b].slot->model_id = 0xffff;
         sound_a = viewer.slot_sounds[a];
         viewer.slot_sounds[a] = viewer.slot_sounds[b];
         viewer.slot_sounds[b] = sound_a;
@@ -2812,10 +2820,10 @@ void player_swap_hand_items(u8 a, u8 b)
         anim_register(33, viewer.slot_model_files[1]);
     if (viewer.slot_model_ids[2] >= 31 && viewer.slot_model_ids[2] < 35)
         anim_register(35, viewer.slot_model_files[3]);
-    viewer.slot_anims[0] = 0;
-    viewer.slot_anims[1] = 0;
-    viewer.slot_anims[2] = 0;
-    viewer.slot_anims[3] = 0;
+    viewer.slot_anims[0].slot = NULL;
+    viewer.slot_anims[1].slot = NULL;
+    viewer.slot_anims[2].slot = NULL;
+    viewer.slot_anims[3].slot = NULL;
     player_recalc_stats();
     viewer.hud_hp = 0xffff;
 }
@@ -2827,27 +2835,27 @@ void player_swap_hand_items(u8 a, u8 b)
 ADDRESS(0x80042900, 0x29c)
 void player_update_hands(void)
 {
-    if (pad_state.combo == 2) {
-        pad_state.combo = 0;
-        if (viewer.action_timers.word == -1 && viewer.equipment[4] != 0xffff) {
+    if (pad_state.combo == PAD_COMBO_SWAP_RIGHT) {
+        pad_state.combo = PAD_COMBO_NONE;
+        if (viewer.action_timers.word == -1 && viewer.equipment[EQUIP_SLOT_RIGHT_RESERVE] != EQUIP_NONE) {
             player_swap_hand_items(0, 2);
             player_update_durability_warning();
         }
     }
-    if (pad_state.combo == 3) {
-        pad_state.combo = 0;
-        if (viewer.action_timers.word == -1 && viewer.equipment[17] != 0xffff) {
+    if (pad_state.combo == PAD_COMBO_SWAP_LEFT) {
+        pad_state.combo = PAD_COMBO_NONE;
+        if (viewer.action_timers.word == -1 && viewer.equipment[EQUIP_SLOT_LEFT_RESERVE] != EQUIP_NONE) {
             player_swap_hand_items(1, 3);
             player_update_durability_warning();
         }
     }
-    if (pad_state.combo == 4) {
-        pad_state.combo = 0;
+    if (pad_state.combo == PAD_COMBO_CAST_RIGHT) {
+        pad_state.combo = PAD_COMBO_NONE;
         if (viewer.magic_gauge >= 0x1400)
             player_start_cast(0, 0);
     }
-    if (pad_state.combo == 5) {
-        pad_state.combo = 0;
+    if (pad_state.combo == PAD_COMBO_CAST_LEFT) {
+        pad_state.combo = PAD_COMBO_NONE;
         if (viewer.magic_gauge >= 0x1400)
             player_start_cast(0, 1);
     }
@@ -2865,10 +2873,10 @@ void player_update_hands(void)
         else
             viewer.shot_countdown[1] = viewer.shot_interval[1];
     }
-    if (viewer.state != 1) {
-        if (viewer.weapon_gauge_delay == 0 && (pad_state.pressed & pad_state.buttons[8]))
+    if (viewer.state != VIEWER_STATE_QUICK_ITEM) {
+        if (viewer.weapon_gauge_delay == 0 && (pad_state.pressed & pad_state.buttons[PAD_ACTION_RIGHT_HAND]))
             player_start_hand_action(0, 0);
-        if (pad_state.pressed & pad_state.buttons[9])
+        if (pad_state.pressed & pad_state.buttons[PAD_ACTION_LEFT_HAND])
             player_start_hand_action(0, 1);
     }
 }
@@ -2878,9 +2886,10 @@ void player_handle_examine(void)
 {
     u8 mode = viewer.state;
 
-    if (mode != 4 && (pad_state.pressed & pad_state.buttons[10]) && !pad_state.combo_timer) {
-        pad_state.pressed &= ~pad_state.buttons[10];
-        if (mode == 0)
+    if (mode != VIEWER_STATE_DYING && (pad_state.pressed & pad_state.buttons[PAD_ACTION_EVENT])
+        && !pad_state.combo_timer) {
+        pad_state.pressed &= ~pad_state.buttons[PAD_ACTION_EVENT];
+        if (mode == VIEWER_STATE_NORMAL)
             player_examine(&viewer.position.vx, &viewer.view_rot);
     }
 }
@@ -2888,7 +2897,7 @@ void player_handle_examine(void)
 ADDRESS(0x80042c10, 0x34)
 void player_enter_normal_state(void)
 {
-    viewer.state = 0;
+    viewer.state = VIEWER_STATE_NORMAL;
     viewer.rot_offset.halves[0] = viewer.rot_offset.halves[1] = viewer.roll_offset = 0;
     viewer.shake_pitch = viewer.shake_yaw = viewer.shake_roll = 0;
     viewer.fall_pitch = viewer.unk292 = viewer.unk294 = 0;
@@ -2900,12 +2909,13 @@ static s32 guard_sound_frame = 0;
 ADDRESS(0x80042c44, 0xa8)
 void player_enter_hurt_state(SVECTOR *arg0, SVECTOR *arg1, s16 arg2, int arg3)
 {
-    viewer.state = 16;
+    viewer.state = VIEWER_STATE_HURT;
     viewer.red_fade = 3500;
     viewer.red_fade_step = arg2;
     if (viewer.max_hp < arg3 * 10)
         viewer.action_recoil = 1;
-    if (viewer.equipment[16] != 0xffff && viewer.shield_raised && guard_sound_frame != viewer.frame_count) {
+    if (viewer.equipment[EQUIP_SLOT_LEFT_HAND] != EQUIP_NONE && viewer.shield_raised
+        && guard_sound_frame != viewer.frame_count) {
         sound_play(viewer.slot_sounds[1], 128);
         guard_sound_frame = viewer.frame_count;
     }
@@ -2914,7 +2924,7 @@ void player_enter_hurt_state(SVECTOR *arg0, SVECTOR *arg1, s16 arg2, int arg3)
 ADDRESS(0x80042cec, 0x10)
 void player_enter_frozen_state(void)
 {
-    viewer.state = 2;
+    viewer.state = VIEWER_STATE_FROZEN;
 }
 
 /* Frees the animation slots and objects with two state bytes held. */
@@ -2952,9 +2962,12 @@ void player_update(void)
     int d;
 
     player_update_status(1);
-    if (viewer.state == 0 || viewer.state == 4 || viewer.state == 16 || viewer.state == 1) {
-        if (((pad_state.pressed & 1) || pad_state.combo == 1) && viewer.action_timers.word == -1 &&
-            viewer.state != 1 && viewer.state != 4 && !(viewer.status_flags & 0x10) &&
+    if (viewer.state == VIEWER_STATE_NORMAL || viewer.state == VIEWER_STATE_DYING
+        || viewer.state == VIEWER_STATE_HURT || viewer.state == VIEWER_STATE_QUICK_ITEM) {
+        if (((pad_state.pressed & PAD_BUTTON_SELECT) || pad_state.combo == PAD_COMBO_MENU)
+            && viewer.action_timers.word == -1 &&
+            viewer.state != VIEWER_STATE_QUICK_ITEM && viewer.state != VIEWER_STATE_DYING
+                && !(viewer.status_flags & STATUS_PARALYZE_2) &&
             area_state.loading == 0 && vis_table_a.object_sequence_state == 0 && area_state.entry_fade_start == -1) {
             AreaObject *entry;
             int left;
@@ -2968,9 +2981,9 @@ void player_update(void)
             entry = vis_table_b.entries;
             left = 240;
             while (left--) {
-                if (entry->kind == 236 && entry->unk54 != -1) {
-                    sound_stop(entry->unk54, entry->params.snd.sound + 1108);
-                    entry->unk54 = -1;
+                if (entry->kind == OBJECT_KIND_SOUND && entry->kind_data.snd.voice != -1) {
+                    sound_stop(entry->kind_data.snd.voice, entry->params.snd.sound + 1108);
+                    entry->kind_data.snd.voice = -1;
                 }
                 entry++;
             }
@@ -2996,9 +3009,9 @@ void player_update(void)
                     vis_table_a.zone_history[3] = 255;
                 pad_vibrate(0);
                 fx = effects.slots;
-                k = 128;
+                k = ST_EFFECT_SLOTS;
                 while (k--) {
-                    fx->flags = 255;
+                    fx->flags = ST_EFFECT_FREE;
                     fx++;
                 }
                 area_load_set_blocking(area_state.loaded_area, area_state.loaded_area, area_state.loaded_area, area_state.loaded_sound_bank,
@@ -3008,14 +3021,14 @@ void player_update(void)
             } else {
                 if (viewer.free_anims_after_menu) {
                     while (i--) {
-                        anim_get_file(i + 128, &file);
+                        anim_get_file(i + MODEL_SLOT_CREATURES, &file);
                         if (file) {
                             heap_free(file);
                         }
                     }
                     i = 128;
                     while (i--) {
-                        anim_get_file(i + 588, &file);
+                        anim_get_file(i + MODEL_SLOT_ITEMS, &file);
                         if (file) {
                             heap_free(file);
                         }
@@ -3050,11 +3063,12 @@ void player_update(void)
         if (viewer.save_warp_request) {
             player_warp_to_save_point();
         }
-        if ((pad_state.pressed & 8) && viewer.state != 4 && area_state.loading == 0 &&
+        if ((pad_state.pressed & PAD_BUTTON_START) && viewer.state != VIEWER_STATE_DYING
+            && area_state.loading == 0 &&
             vis_table_a.object_sequence_state == 0 && area_state.entry_fade_start == -1) {
             lighting.paused = 1;
             play_confirm_sound();
-            pad_state.pressed &= ~8;
+            pad_state.pressed &= ~PAD_BUTTON_START;
             pad_clear_input();
             pad_vibrate(0);
             pause_screen_run();
@@ -3063,19 +3077,19 @@ void player_update(void)
         }
         viewer.walk_speed_max = 192;
         viewer.yaw_speed_max = 32;
-        if (!(pad_state.held & (pad_state.buttons[0] | pad_state.buttons[1]))) {
+        if (!(pad_state.held & (pad_state.buttons[PAD_ACTION_FORWARD] | pad_state.buttons[PAD_ACTION_BACK]))) {
             viewer.yaw_speed_max = 40;
         }
-        if (viewer.unk190[3][0] != 0) {
+        if (viewer.timers.halves[3][0] != 0) {
             viewer.walk_speed_max = 96;
         }
-        if (viewer.unk190[1][0] != 0) {
+        if (viewer.timers.halves[1][0] != 0) {
             viewer.walk_speed_max = 0;
-            if (viewer.status_flags & 0x10) {
+            if (viewer.status_flags & STATUS_PARALYZE_2) {
                 viewer.yaw_speed_max = 0;
             }
-            if (viewer.unk190[1][0] % 20 == 0) {
-                sound_play(6, 128);
+            if (viewer.timers.halves[1][0] % 20 == 0) {
+                sound_play(SOUND_PARALYSIS_TICK, 128);
             }
         }
         if (viewer.equip_weight > viewer.equip_weight_limit) {
@@ -3088,26 +3102,29 @@ void player_update(void)
             }
         }
         switch (viewer.state) {
-        case 0:
+        case VIEWER_STATE_NORMAL:
             player_update_hands();
             if (area_state.loading != 1 && vis_table_a.object_sequence_state == 0) {
                 player_update_look();
                 player_update_walk();
                 player_update_motion();
                 viewer.motion_stopped = 0;
-                if ((pad_state.pressed & pad_state.buttons[11]) && pad_state.combo_timer == 0 &&
-                    (viewer.equipment[5] != 0xffff || viewer.equipment[19] != 0xffff ||
-                     viewer.equipment[11] != 0xffff || viewer.equipment[20] != 0xffff ||
-                     viewer.equipment[18] != 0xffff)) {
+                if ((pad_state.pressed & pad_state.buttons[PAD_ACTION_MAGIC_MENU])
+                    && pad_state.combo_timer == 0 &&
+                    (viewer.equipment[EQUIP_SLOT_QUICK_1] != EQUIP_NONE
+                        || viewer.equipment[EQUIP_SLOT_QUICK_2] != EQUIP_NONE ||
+                     viewer.equipment[EQUIP_SLOT_QUICK_3] != EQUIP_NONE
+                         || viewer.equipment[EQUIP_SLOT_QUICK_4] != EQUIP_NONE ||
+                     viewer.equipment[EQUIP_SLOT_QUICK_5] != EQUIP_NONE)) {
                     play_confirm_sound();
-                    pad_state.pressed &= pad_state.buttons[11];
-                    viewer.state = 1;
+                    pad_state.pressed &= pad_state.buttons[PAD_ACTION_MAGIC_MENU];
+                    viewer.state = VIEWER_STATE_QUICK_ITEM;
                     pad_clear_input();
                 }
             }
             player_handle_examine();
             break;
-        case 1:
+        case VIEWER_STATE_QUICK_ITEM:
             player_update_hands();
             if (area_state.loading == 1 || vis_table_a.object_sequence_state) {
                 goto status;
@@ -3116,39 +3133,42 @@ void player_update(void)
             player_update_walk();
             player_update_motion();
             viewer.motion_stopped = 0;
-            if (pad_state.pressed & pad_state.buttons[8]) {
+            if (pad_state.pressed & pad_state.buttons[PAD_ACTION_RIGHT_HAND]) {
                 play_cursor_sound();
-                pad_state.pressed &= ~pad_state.buttons[8];
+                pad_state.pressed &= ~pad_state.buttons[PAD_ACTION_RIGHT_HAND];
                 if (++viewer.quick_item_index >= 5) {
                     viewer.quick_item_index = 0;
                 }
-            } else if (pad_state.pressed & pad_state.buttons[9]) {
+            } else if (pad_state.pressed & pad_state.buttons[PAD_ACTION_LEFT_HAND]) {
                 play_cursor_sound();
-                pad_state.pressed &= ~pad_state.buttons[9];
+                pad_state.pressed &= ~pad_state.buttons[PAD_ACTION_LEFT_HAND];
                 if (--viewer.quick_item_index < 0) {
                     viewer.quick_item_index = 4;
                 }
             } else {
-                if ((pad_state.pressed & pad_state.buttons[11]) && pad_state.combo_timer == 0) {
+                if ((pad_state.pressed & pad_state.buttons[PAD_ACTION_MAGIC_MENU])
+                    && pad_state.combo_timer == 0) {
                     play_cancel_sound();
-                    viewer.state = 0;
-                    pad_state.pressed &= ~pad_state.buttons[11];
-                    pad_state.pressed &= ~pad_state.buttons[10];
-                } else if ((pad_state.pressed & pad_state.buttons[10]) && pad_state.combo_timer == 0) {
-                    int ids[5] = {viewer.equipment[5], viewer.equipment[19], viewer.equipment[11],
-                                  viewer.equipment[20], viewer.equipment[18]};
+                    viewer.state = VIEWER_STATE_NORMAL;
+                    pad_state.pressed &= ~pad_state.buttons[PAD_ACTION_MAGIC_MENU];
+                    pad_state.pressed &= ~pad_state.buttons[PAD_ACTION_EVENT];
+                } else if ((pad_state.pressed & pad_state.buttons[PAD_ACTION_EVENT])
+                    && pad_state.combo_timer == 0) {
+                    int ids[5] = {viewer.equipment[EQUIP_SLOT_QUICK_1],
+                        viewer.equipment[EQUIP_SLOT_QUICK_2], viewer.equipment[EQUIP_SLOT_QUICK_3],
+                                  viewer.equipment[EQUIP_SLOT_QUICK_4], viewer.equipment[EQUIP_SLOT_QUICK_5]};
 
-                    viewer.state = 0;
-                    pad_state.pressed &= ~pad_state.buttons[8];
-                    pad_state.pressed &= ~pad_state.buttons[11];
-                    pad_state.pressed &= ~pad_state.buttons[9];
-                    pad_state.pressed &= ~pad_state.buttons[10];
+                    viewer.state = VIEWER_STATE_NORMAL;
+                    pad_state.pressed &= ~pad_state.buttons[PAD_ACTION_RIGHT_HAND];
+                    pad_state.pressed &= ~pad_state.buttons[PAD_ACTION_MAGIC_MENU];
+                    pad_state.pressed &= ~pad_state.buttons[PAD_ACTION_LEFT_HAND];
+                    pad_state.pressed &= ~pad_state.buttons[PAD_ACTION_EVENT];
                     if (ids[viewer.quick_item_index] != 0xffff) {
                         viewer.save_warp_request = 0;
                         item_use(ids[viewer.quick_item_index]);
-                        if (DAT_801cd0e0 == 1) {
+                        if (game_progress.item_use_result == 1) {
                             play_confirm_sound();
-                            if (ids[viewer.quick_item_index] == 288) {
+                            if (ids[viewer.quick_item_index] == ITEM_DIVINE_SYMBOL) {
                                 player_compute_derived_stats(0);
                             }
                             if (inventory.counts[ids[viewer.quick_item_index]].count == 0) {
@@ -3156,25 +3176,25 @@ void player_update(void)
 
                                 switch (viewer.quick_item_index) {
                                 case 0:
-                                    viewer.equipment[5] = 0xffff;
+                                    viewer.equipment[EQUIP_SLOT_QUICK_1] = EQUIP_NONE;
                                     break;
                                 case 1:
-                                    viewer.equipment[19] = 0xffff;
+                                    viewer.equipment[EQUIP_SLOT_QUICK_2] = EQUIP_NONE;
                                     break;
                                 case 2:
-                                    viewer.equipment[11] = 0xffff;
+                                    viewer.equipment[EQUIP_SLOT_QUICK_3] = EQUIP_NONE;
                                     break;
                                 case 3:
-                                    viewer.equipment[20] = 0xffff;
+                                    viewer.equipment[EQUIP_SLOT_QUICK_4] = EQUIP_NONE;
                                     break;
                                 case 4:
-                                    viewer.equipment[18] = 0xffff;
+                                    viewer.equipment[EQUIP_SLOT_QUICK_5] = EQUIP_NONE;
                                     break;
                                 }
                                 icon.y = viewer.quick_item_index * 24 + 256;
                                 ClearImage(&icon, 0, 0, 0);
                             }
-                        } else if (DAT_801cd0e0 == 2) {
+                        } else if (game_progress.item_use_result == 2) {
                             play_refuse_sound();
                         }
                     } else {
@@ -3188,7 +3208,7 @@ void player_update(void)
         status:
             player_handle_examine();
             break;
-        case 4:
+        case VIEWER_STATE_DYING:
             if (viewer.death_timer < 17) {
                 fade_add_color(255, 255, 255, viewer.death_timer << 8, 2);
                 viewer.rot_offset.halves[0] += viewer.death_pitch_step;
@@ -3206,9 +3226,9 @@ void player_update(void)
                     anim_slots_free_all();
                     anim_sets_free_all();
                     fx = effects.slots;
-                    k = 128;
+                    k = ST_EFFECT_SLOTS;
                     while (k--) {
-                        fx->flags = 255;
+                        fx->flags = ST_EFFECT_FREE;
                         fx++;
                     }
                     for (;;) {
@@ -3221,9 +3241,9 @@ void player_update(void)
                             fade_run_frames(2, 4096, 4096, 256);
                             n = 240;
                             while (n--) {
-                                if (b->kind == 236 && b->unk54 != -1) {
-                                    sound_stop(b->unk54, b->params.snd.sound + 1108);
-                                    b->unk54 = -1;
+                                if (b->kind == OBJECT_KIND_SOUND && b->kind_data.snd.voice != -1) {
+                                    sound_stop(b->kind_data.snd.voice, b->params.snd.sound + 1108);
+                                    b->kind_data.snd.voice = -1;
                                 }
                                 b++;
                             }
@@ -3241,9 +3261,9 @@ void player_update(void)
                             b = vis_table_b.entries;
                             n = 240;
                             while (n--) {
-                                if (b->kind == 236 && b->unk54 != -1) {
-                                    sound_stop(b->unk54, b->params.snd.sound + 1108);
-                                    b->unk54 = -1;
+                                if (b->kind == OBJECT_KIND_SOUND && b->kind_data.snd.voice != -1) {
+                                    sound_stop(b->kind_data.snd.voice, b->params.snd.sound + 1108);
+                                    b->kind_data.snd.voice = -1;
                                 }
                                 b++;
                             }
@@ -3273,7 +3293,7 @@ void player_update(void)
             }
             viewer.death_timer++;
             break;
-        case 16:
+        case VIEWER_STATE_HURT:
             player_update_hands();
             player_update_look();
             player_update_walk();
@@ -3284,8 +3304,8 @@ void player_update(void)
             viewer.motion_stopped = 0;
             player_handle_examine();
             break;
-        case 5:
-        case 6:
+        case VIEWER_STATE_SCRIPTED:
+        case VIEWER_STATE_SHOP:
             player_stop_motion();
             vis_table_b.push_x = vis_table_b.push_y = vis_table_b.push_z = 0;
             vis_lists.floor_push_x = vis_lists.floor_push_y = vis_lists.floor_push_z = 0;
@@ -3304,12 +3324,12 @@ void player_update(void)
             if ((vis_lists.floor_kinds & 0x10) && vis_lists.floor_dist < 1601) {
                 memset(hit, 0, sizeof(hit));
                 memset(from, 0, sizeof(from));
-                player_hit(hit, 4096, 7, from);
+                player_hit(hit, 4096, STATUS_POISON, from);
             }
             if ((vis_lists.floor_kinds & 0x20) && vis_lists.floor_dist < 1601) {
                 memset(hit2, 0, sizeof(hit2));
                 memset(from2, 0, sizeof(from2));
-                player_hit(hit2, 4096, 1024, from2);
+                player_hit(hit2, 4096, STATUS_FLOOR_HIT, from2);
             }
             if ((vis_lists.floor_kinds & 8) && vis_lists.floor_dist < 1601) {
                 memset(hit3, 0, sizeof(hit3));
@@ -3317,46 +3337,50 @@ void player_update(void)
                 memset(from3, 0, sizeof(from3));
                 player_hit(hit3, 4096, 0, from3);
             }
-            if (viewer.unk190[0][0] != 0) {
+            if (viewer.timers.halves[0][0] != 0) {
                 d = 0;
-                if (viewer.status_flags & 4) {
+                if (viewer.status_flags & STATUS_POISON_3) {
                     d = -256;
-                } else if (viewer.status_flags & 2) {
+                } else if (viewer.status_flags & STATUS_POISON_2) {
                     d = -64;
-                } else if (viewer.status_flags & 1) {
+                } else if (viewer.status_flags & STATUS_POISON_1) {
                     d = -16;
                 }
-                if (viewer.unk190[0][0] % 20 == 0) {
+                if (viewer.timers.halves[0][0] % 20 == 0) {
                     player_add_hp(d);
-                    sound_play(5, 128);
+                    sound_play(SOUND_POISON_TICK, 128);
                 }
             }
-            if (viewer.unk190[4][0] != 0 && viewer.unk190[4][0] % 20 == 0) {
+            if (viewer.timers.halves[4][0] != 0 && viewer.timers.halves[4][0] % 20 == 0) {
                 player_add_hp(-1);
                 player_add_mp(-1);
             }
             if (viewer.equip_weight > viewer.equip_weight_limit && viewer.frame_count % 20 == 0) {
                 player_add_hp(viewer.equip_weight_limit / 10 - viewer.equip_weight / 10);
             }
-            if ((viewer.status_flags & 0x400) || viewer.submerged_acid) {
+            if ((viewer.status_flags & STATUS_FLOOR_HIT) || viewer.submerged_acid) {
                 if (viewer.frame_count % 20 == 0) {
                     int heal = (viewer.element_defence[3] - 256) / 4;
 
-                    if (viewer.status_flags & 0x800000) {
+                    if (viewer.status_flags & STATUS_ACID_WARD) {
                         player_add_hp(heal / 2);
                     } else {
                         player_add_hp(heal);
                     }
                 }
                 if (viewer.frame_count % 60 == 0) {
-                    u16 *slots[9] = {&viewer.equipment[8], &viewer.equipment[9], &viewer.equipment[10],
-                                     &viewer.equipment[3], &viewer.equipment[16], &viewer.equipment[2],
-                                     &viewer.equipment[0], &viewer.equipment[13], NULL};
+                    u16 *slots[9] = {&viewer.equipment[EQUIP_SLOT_HELMET],
+                        &viewer.equipment[EQUIP_SLOT_ARMOR], &viewer.equipment[EQUIP_SLOT_BOOTS],
+                                     &viewer.equipment[EQUIP_SLOT_RIGHT_HAND],
+                                         &viewer.equipment[EQUIP_SLOT_LEFT_HAND],
+                                             &viewer.equipment[EQUIP_SLOT_GLOVES],
+                                     &viewer.equipment[EQUIP_SLOT_RIGHT_RING],
+                                         &viewer.equipment[EQUIP_SLOT_LEFT_RING], NULL};
 
                     if (viewer.submerged_acid) {
                         int j;
 
-                        if (viewer.status_flags & 0x800000) {
+                        if (viewer.status_flags & STATUS_ACID_WARD) {
                             for (j = 0; j < 8; j++) {
                                 if (*slots[j] != 0xffff) {
                                     player_wear_item(1, slots[j]);
@@ -3369,7 +3393,7 @@ void player_update(void)
                                 }
                             }
                         }
-                    } else if (viewer.status_flags & 0x800000) {
+                    } else if (viewer.status_flags & STATUS_ACID_WARD) {
                         if (*slots[2] != 0xffff) {
                             player_wear_item(1, slots[2]);
                         }
@@ -3377,16 +3401,16 @@ void player_update(void)
                         player_wear_item(2, slots[2]);
                     }
                 }
-                viewer.status_flags &= ~0x400;
+                viewer.status_flags &= ~STATUS_FLOOR_HIT;
             }
             player_update_shake();
-            viewer.pitch = viewer.view_rot.vx + viewer.rot_offset.halves[0] + viewer.shake_pitch + viewer.fall_pitch;
-            viewer.yaw = viewer.view_rot.vy + viewer.rot_offset.halves[1] + viewer.shake_yaw + viewer.unk292;
-            viewer.roll = viewer.view_rot.vz + viewer.roll_offset + viewer.shake_roll + viewer.unk294;
+            viewer.rotation.vx = viewer.view_rot.vx + viewer.rot_offset.halves[0] + viewer.shake_pitch + viewer.fall_pitch;
+            viewer.rotation.vy = viewer.view_rot.vy + viewer.rot_offset.halves[1] + viewer.shake_yaw + viewer.unk292;
+            viewer.rotation.vz = viewer.view_rot.vz + viewer.roll_offset + viewer.shake_roll + viewer.unk294;
             viewer.shake_pitch = viewer.shake_yaw = viewer.shake_roll = 0;
-            viewer.camera_rot.vx = 4096 - viewer.pitch;
-            viewer.camera_rot.vy = 4096 - viewer.yaw;
-            viewer.camera_rot.vz = 4096 - viewer.roll;
+            viewer.camera_rot.vx = 4096 - viewer.rotation.vx;
+            viewer.camera_rot.vy = 4096 - viewer.rotation.vy;
+            viewer.camera_rot.vz = 4096 - viewer.rotation.vz;
             RotMatrixZYX(&viewer.camera_rot, &viewer.camera_matrix);
             vis_lists.floor_push_x /= 2;
             vis_lists.floor_push_y /= 2;
@@ -3404,7 +3428,7 @@ void player_update(void)
             player_update_hand_action(1);
             player_update_cast(0);
             player_update_cast(1);
-            if (viewer.state != 4) {
+            if (viewer.state != VIEWER_STATE_DYING) {
                 if (viewer.hp * 2 < viewer.max_hp && viewer.hp_regen_interval && viewer.frame_count % viewer.hp_regen_interval == 0) {
                     player_add_hp(1);
                 }

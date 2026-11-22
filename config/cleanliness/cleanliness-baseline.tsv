@@ -4,9 +4,9 @@
 # Data inventory counts are informational and have no floors.
 # Never hand-edit to raise a floor - reconstruct/name the symbol instead.
 src func_ refs	38
-src DAT_ refs	197
+src DAT_ refs	169
 GAME extern decls	0
 source-local extern decls	0
-void* views	45
+void* views	35
 .c-local aggregates	0
 unresolved func_ identities	24

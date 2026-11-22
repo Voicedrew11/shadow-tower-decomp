@@ -78,8 +78,8 @@ void map_restore_progress(void)
     AreaObject *b;
     int i;
 
-    c28[1].state = 4;
-    c28->state = 4;
+    c28[1].state = GROUND_ITEM_HIDDEN;
+    c28->state = GROUND_ITEM_HIDDEN;
     if (game_progress.event_flags2.bit.f8 == 1)
         fdat_801edcd4 = 0xff;
     else
@@ -126,7 +126,7 @@ void map_update_events(void)
         d46->anim = 0;
         game_progress.event_flags2.word |= 0x100;
     } else if (fdat_801edcd4 == 2) {
-        anim_set_node_vertex(*(StAnimSet **)d46->anim_slot, object_model_slot(d46->type), 0, 0x23, &v1);
+        anim_set_node_vertex(d46->anim_slot.set, object_model_slot(d46->type), 0, 0x23, &v1);
         c28->position.vx = d46->position.vx + v1.vx;
         c28->position.vy = d46->position.vy + v1.vy;
         c28->position.vz = d46->position.vz + v1.vz - 0x12;
@@ -140,7 +140,7 @@ void map_update_events(void)
         d2->anim = 0;
         game_progress.event_flags2.word |= 0x200;
     } else if (fdat_801edcd8 == 2) {
-        anim_set_node_vertex(*(StAnimSet **)d2->anim_slot, object_model_slot(d2->type), 0, 0x23, &v2);
+        anim_set_node_vertex(d2->anim_slot.set, object_model_slot(d2->type), 0, 0x23, &v2);
         c29->position.vx = d2->position.vx + v2.vx;
         c29->position.vy = d2->position.vy + v2.vy;
         c29->position.vz = d2->position.vz + v2.vz - 0x12;
@@ -204,7 +204,7 @@ void map_slide_ground_item(int which)
         item = &vis_table_c.entries[28];
     else
         item = &vis_table_c.entries[29];
-    item->state = 5;
+    item->state = GROUND_ITEM_SCRIPTED;
     kind = &vis_table_c.types[item->item];
     end = item->position.vz + 0x200;
     item->depth_bias -= 12;
@@ -213,7 +213,7 @@ void map_slide_ground_item(int which)
 
         if (item->position.vz == end)
             break;
-        anim_get_file(kind->model + 588, &file);
+        anim_get_file(kind->model + MODEL_SLOT_ITEMS, &file);
         if (file != NULL)
             item->position.vz += step;
         if (item->position.vz > end)

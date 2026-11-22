@@ -1962,8 +1962,8 @@ void vis_build_planes(void)
     short rx;
     short rz;
 
-    yaw = cam->yaw + 1024;
-    pitch = cam->pitch;
+    yaw = cam->rotation.vy + 1024;
+    pitch = cam->rotation.vx;
     if (pitch > 2048) {
         half = 4096 - pitch;
     } else {
@@ -2108,7 +2108,7 @@ void vis_collect_creatures(void)
     e = vis_table_a.entries;
     i = 64;
     while (i--) {
-        if (e->visibility != 2 && (e->state == 1 || e->state == 5)
+        if (e->visibility != 2 && (e->state == CREATURE_STATE_ACTIVE || e->state == CREATURE_STATE_DYING)
             && (e->visibility == 1 || vis_id_is_visible(e->block))) {
             if (vis_table_a.count >= 12) {
                 return;
@@ -2134,7 +2134,7 @@ void vis_collect_objects(void)
     while (i--) {
         if (e->type < 280) {
             e->flags &= 0x7f;
-            if (vis_id_is_visible(e->block) || e->kind == 236) {
+            if (vis_id_is_visible(e->block) || e->kind == OBJECT_KIND_SOUND) {
                 if (vis_table_b.count >= 96) {
                     return;
                 }
@@ -3853,7 +3853,7 @@ void fade_add_color(int r, int g, int b, int scale, int mode)
 #define MODEL_POS(sp) ((VECTOR *)&(sp)->vertex_pos)
 
 /* A model block's part data. */
-#define MODEL_DATA(block) ((u8 *)(block) + ((ModelFile *)(block))->model)
+#define MODEL_DATA(block) ((u8 *)(block) + ((StAnimFile *)(block))->model)
 
 /*
  * Projects the current part's model-space vertices (RTPS) into the
@@ -3930,7 +3930,7 @@ void player_draw_equipment_model(u8 slot)
     sp->model_t[0] = viewer.slot_model_info[slot]->pos_x;
     sp->model_t[1] = viewer.slot_model_info[slot]->pos_y;
     sp->model_t[2] = viewer.slot_model_info[slot]->pos_z;
-    if (viewer.equipment[16] != 0xffff && slot != 0) {
+    if (viewer.equipment[EQUIP_SLOT_LEFT_HAND] != EQUIP_NONE && slot != 0) {
         rot.vx = viewer.slot_model_info[slot]->rotation.vx + viewer.hand_rot_x;
         rot.vy = viewer.slot_model_info[slot]->rotation.vy + viewer.hand_rot_y;
         rot.vz = viewer.slot_model_info[slot]->rotation.vz + viewer.hand_rot_z;
@@ -3947,15 +3947,15 @@ void player_draw_equipment_model(u8 slot)
     sp->prim_alloc_count = world_state.prim_alloc_count;
     sp->prim = world_state.packet->cur;
     sp->prim_end = world_state.packet->end;
-    sp->vertices = world_state.world_vertices;
+    sp->vertices = (u8 *)world_state.world_vertices;
     sp->clut_base = 0;
     *(u_long *)&sp->rgb = equipment_model_rgb;
-    if (((ModelFile *)viewer.slot_model_files[slot])->node_count == 0) {
+    if (viewer.slot_model_files[slot]->node_count == 0) {
         gte_SetRotMatrix(SCRATCH_MATRIX(sp));
         gte_SetTransMatrix(SCRATCH_MATRIX(sp));
         sp->model = MODEL_DATA(world_state.model_files[slot + 32]);
         sp->header = (MeshHeader *)(sp->model + 12);
-        if (anim_prepare((StAnimSlot **)&viewer.slot_anims[slot], slot + 32, viewer.slot_anim_ids[slot],
+        if (anim_prepare(&viewer.slot_anims[slot].slot, slot + 32, viewer.slot_anim_ids[slot],
                           viewer.action_timers.halves[slot])) {
             sp->z_ot += sp->header->n_vertices;
             out = (MeshVertex *)sp->vertices;
@@ -3988,8 +3988,8 @@ ADDRESS(0x80022010, 0x668)
 void model_draw_list(u8 flags, SVECTOR *rot)
 {
     ScratchPad *sp = SCRATCHPAD;
-    ModelEntry *e = sp->list.models->entries;
-    int i = sp->list.models->count;
+    StAnimNode *e = sp->anims->nodes;
+    int i = sp->anims->count;
     MATRIX work;         /* unused: retail reserves its frame slot */
     MATRIX scale = {{{ONE, 0, 0}, {0, ONE, 0}, {0, 0, ONE}}, {0, 0, 0}};
     MeshVertex *out;
@@ -3997,13 +3997,13 @@ void model_draw_list(u8 flags, SVECTOR *rot)
     int n;
 
     while (i--) {
-        e->obj->composed = 0;
+        e->record->composed = 0;
         e++;
     }
-    e = sp->list.models->entries;
-    i = sp->list.models->count;
+    e = sp->anims->nodes;
+    i = sp->anims->count;
     while (i--) {
-        e->obj->composed = 0;
+        e->record->composed = 0;
         if (e->key == -1 || e->part == 0xffff) {
             e++;
             continue;
@@ -4012,39 +4012,39 @@ void model_draw_list(u8 flags, SVECTOR *rot)
             MATRIX face = {{{ONE, 0, 0}, {0, ONE, 0}, {0, 0, ONE}}, {0, 0, 0}};
             SVECTOR angle;
 
-            angle.vx = -viewer.pitch;
-            angle.vy = -viewer.yaw;
-            angle.vz = -viewer.roll;
+            angle.vx = -viewer.rotation.vx;
+            angle.vy = -viewer.rotation.vy;
+            angle.vz = -viewer.rotation.vz;
             RotMatrixX(angle.vx, &face);
             RotMatrixY(angle.vy + rot->vy, &face);
             RotMatrixZ(angle.vz, &face);
-            if (e->obj->parent->relative_set == 0) {
-                RotMatrix(&e->obj->parent->transform->rot, &e->obj->parent->local_matrix);
+            if (e->record->parent->relative_set == 0) {
+                RotMatrix(&e->record->parent->transform->rot, &e->record->parent->local_matrix);
             }
-            gte_MulMatrix0(&e->obj->parent->local_matrix, &face, &e->obj->parent->local_matrix);
-            e->obj->parent->relative_set = 0;
+            gte_MulMatrix0(&e->record->parent->local_matrix, &face, &e->record->parent->local_matrix);
+            e->record->parent->relative_set = 0;
         }
-        anim_record_compose(e->obj);
+        anim_record_compose(e->record);
         if (e->kind == 1) {
             if (i % 6 != world_state.drawn_frames % 6) {
                 e++;
                 continue;
             }
-            ScaleMatrix(&scale, &e->obj->transform->scale);
+            ScaleMatrix(&scale, &e->record->transform->scale);
             gte_SetRotMatrix(&scale);
         } else if (e->kind == 3) {
             if (i % 4 != world_state.drawn_frames % 4) {
                 e++;
                 continue;
             }
-            ScaleMatrix(&scale, &e->obj->transform->scale);
+            ScaleMatrix(&scale, &e->record->transform->scale);
             gte_SetRotMatrix(&scale);
         } else if (e->kind == 4) {
             if (i % 8 != world_state.drawn_frames % 8) {
                 e++;
                 continue;
             }
-            ScaleMatrix(&scale, &e->obj->transform->scale);
+            ScaleMatrix(&scale, &e->record->transform->scale);
             gte_SetRotMatrix(&scale);
         }
         sp->header = (MeshHeader *)(sp->model + 12) + e->part;
@@ -4074,7 +4074,7 @@ void model_draw_list(u8 flags, SVECTOR *rot)
  * the depth-cued ones; part numbers from 128 select a part directly.
  */
 ADDRESS(0x80022678, 0xb90)
-void model_draw(int unused0, u16 model, VECTOR *pos, SVECTOR *rot, SVECTOR *scale, void *anim,
+void model_draw(int unused0, u16 model, VECTOR *pos, SVECTOR *rot, SVECTOR *scale, StAnimState *anim,
                 MATRIX *view, u16 part, u16 arg8, short light, short unused10, u8 flags,
                 int z)
 {
@@ -4091,9 +4091,9 @@ void model_draw(int unused0, u16 model, VECTOR *pos, SVECTOR *rot, SVECTOR *scal
     u_int i;
     int n;
 
-    sp->vertices = world_state.world_vertices;
+    sp->vertices = (u8 *)world_state.world_vertices;
     /* 0x44 holds a second vertex cursor in this phase. */
-    (&sp->vertices)[1] = world_state.world_vertices;
+    (&sp->vertices)[1] = (u8 *)world_state.world_vertices;
     sp->z_ot = world_state.vertex_face_counts[0];
     sp->face_count = world_state.vertex_face_counts[1];
     sp->prim_count.count = world_state.prim_count;
@@ -4137,12 +4137,12 @@ void model_draw(int unused0, u16 model, VECTOR *pos, SVECTOR *rot, SVECTOR *scal
     }
     gte_SetRotMatrix(SCRATCH_MATRIX(sp));
     gte_SetTransMatrix(SCRATCH_MATRIX(sp));
-    if (((ModelFile *)world_state.model_files[model])->node_count == 0) {
+    if (((StAnimFile *)world_state.model_files[model])->node_count == 0) {
         sp->model = MODEL_DATA(world_state.model_files[model]);
         if (part < 128) {
             i = 0;
             sp->header = (MeshHeader *)(sp->model + 12);
-            if (anim_prepare(anim, model, part, arg8) == 0) {
+            if (anim_prepare(&anim->slot, model, part, arg8) == 0) {
                 sp->header = (MeshHeader *)(sp->model + 12);
                 sp->local_vertices = sp->model + 12 + sp->header->vertices;
             }
@@ -4222,28 +4222,28 @@ u16 object_model_slot(u16 id)
 }
 
 ADDRESS(0x80023288, 0x100)
-void creature_model_loaded(void *data)
+void creature_model_loaded(StAnimFile *file)
 {
     DVECTOR a[4] = {{0, 0}, {64, 0}, {128, 0}, {192, 0}};
     DVECTOR b[4] = {{0, 0}, {0, 3}, {0, 6}, {0, 9}};
-    u8 n = heap_get_tag(data);
+    u8 n = heap_get_tag(file);
 
-    model_offset_textures((Model *)((u8 *)data + ((u32 *)data)[2]), &a[n], &b[n], 0);
-    heap_set_state(data, ST_BLOCK_USED);
+    model_offset_textures((Model *)((u8 *)file + file->model), &a[n], &b[n], 0);
+    heap_set_state(file, ST_BLOCK_USED);
 }
 
 ADDRESS(0x80023388, 0xe8)
-void creature_tim_loaded(void *data)
+void creature_tim_loaded(u_long *tim)
 {
     DVECTOR a[4] = {{0, 0}, {64, 0}, {128, 0}, {192, 0}};
     DVECTOR b[4] = {{0, 0}, {0, 3}, {0, 6}, {0, 9}};
-    u8 n = heap_get_tag(data);
+    u8 n = heap_get_tag(tim);
 
-    tim_load_images_at(data, &a[n], &b[n], 0);
+    tim_load_images_at(tim, &a[n], &b[n], 0);
 }
 
 ADDRESS(0x80023470, 0x194)
-void item_model_loaded(void *data)
+void item_model_loaded(StAnimFile *file)
 {
     DVECTOR a[16] = {
         {0, 0},   {0, 32},   {0, 64},   {0, 96},   {0, 128},  {0, 160},  {0, 192},  {0, 224},
@@ -4253,14 +4253,14 @@ void item_model_loaded(void *data)
         {0, 0}, {0, 1}, {0, 2},  {0, 3},  {0, 4},  {0, 5},  {0, 6},  {0, 7},
         {0, 8}, {0, 9}, {0, 10}, {0, 11}, {0, 12}, {0, 13}, {0, 14}, {0, 15},
     };
-    u8 n = heap_get_tag(data);
+    u8 n = heap_get_tag(file);
 
-    model_offset_textures((Model *)((u8 *)data + ((u32 *)data)[2]), &a[n], &b[n], 0);
-    heap_set_state(data, ST_BLOCK_USED);
+    model_offset_textures((Model *)((u8 *)file + file->model), &a[n], &b[n], 0);
+    heap_set_state(file, ST_BLOCK_USED);
 }
 
 ADDRESS(0x80023604, 0x184)
-void item_tim_loaded(void *data)
+void item_tim_loaded(u_long *tim)
 {
     DVECTOR a[16] = {
         {0, 0},   {0, 32},   {0, 64},   {0, 96},   {0, 128},  {0, 160},  {0, 192},  {0, 224},
@@ -4270,15 +4270,15 @@ void item_tim_loaded(void *data)
         {0, 0}, {0, 1}, {0, 2},  {0, 3},  {0, 4},  {0, 5},  {0, 6},  {0, 7},
         {0, 8}, {0, 9}, {0, 10}, {0, 11}, {0, 12}, {0, 13}, {0, 14}, {0, 15},
     };
-    u8 n = heap_get_tag(data);
+    u8 n = heap_get_tag(tim);
 
-    tim_load_images_at(data, &a[n], &b[n], 0);
+    tim_load_images_at(tim, &a[n], &b[n], 0);
 }
 
 ADDRESS(0x80023788, 0x20)
-void object_model_loaded(void *data)
+void object_model_loaded(StAnimFile *file)
 {
-    heap_set_state(data, ST_BLOCK_USED);
+    heap_set_state(file, ST_BLOCK_USED);
 }
 
 /*
@@ -4472,7 +4472,7 @@ void item_models_sync(int archive, int first, int slot, int count)
         p = world_state.model_files[slot];
         if (*flags++) {
             if (p == NULL)
-                item_model_load(archive, i * 2, (u16)slot, vis_table_c.ground_item_counts[slot - 440]);
+                item_model_load(archive, i * 2, (u16)slot, vis_table_c.model_slots[slot - 588]);
             else if (heap_get_state(p) == ST_BLOCK_RELEASABLE)
                 heap_set_state(p, ST_BLOCK_USED);
         } else if (p != NULL && heap_get_state(p) != ST_BLOCK_LOADING) {
@@ -4521,9 +4521,6 @@ void object_models_sync(int archive, int first, int slot, int count)
     }
 }
 
-/* Table A model slots start at 128 (table B: 256, table C: 588). */
-#define SLOT_A 128
-
 ADDRESS(0x800241d0, 0x514)
 void world_draw_creatures(void)
 {
@@ -4547,7 +4544,7 @@ void world_draw_creatures(void)
     while (--i != -1) {
         e = &vis_table_a.entries[vis_table_a.list[i]];
         t = &vis_table_a.types[e->type];
-        anim_get_file(e->model_slot + SLOT_A, &model);
+        anim_get_file(e->model_slot + MODEL_SLOT_CREATURES, &model);
         e->draw_state = 0;
         flags = e->status.bytes[2] & 0x3f;
         e->status.bytes[2] = flags;
@@ -4561,7 +4558,7 @@ void world_draw_creatures(void)
             depth = e->fade;
         if (t->kind != 0xffff) {
             bit = t->kind;
-            game_progress.creature_bits_and_vs_data[bit >> 5] |= 1 << (bit & 0x1f);
+            game_progress.creature_kind_bits[0][bit >> 5] |= 1 << (bit & 0x1f);
         }
         if (model != NULL) {
         at = &e->position;
@@ -4570,7 +4567,7 @@ void world_draw_creatures(void)
             sp->ot = world_state.ot_cur + e->depth_bias;
             sp->near_z = 4 - e->depth_bias;
             sp->far_z = 4096 - e->depth_bias;
-            model_draw(0, e->model_slot + SLOT_A, at, &sp->model_rot, &e->scale, &e->anim_slot,
+            model_draw(0, e->model_slot + MODEL_SLOT_CREATURES, at, &sp->model_rot, &e->scale, &e->anim_slot,
                           &identity_matrix, e->anim, e->anim_frame, 4096 - depth, e->unk24,
                           e->status.bytes[2], 0);
         } else {
@@ -4578,14 +4575,15 @@ void world_draw_creatures(void)
             SVECTOR scale = {4096, 4096, 4096, 0};
 
             e->draw_state = 1;
-            sp->model_rot.vx = e->rot_x;
-            sp->model_rot.vy = e->facing;
-            sp->model_rot.vz = e->rot_z;
+            sp->model_rot.vx = e->rotation.vx;
+            sp->model_rot.vy = e->rotation.vy;
+            sp->model_rot.vz = e->rotation.vz;
             if (e->visibility != 3) {
                 sp->ot = world_state.ot_cur + e->depth_bias;
                 sp->near_z = 4 - e->depth_bias;
                 sp->far_z = 4096 - e->depth_bias;
-                model_draw(0, e->model_slot + SLOT_A, at, &sp->model_rot, &e->scale, &e->anim_slot,
+                model_draw(0, e->model_slot + MODEL_SLOT_CREATURES, at, &sp->model_rot, &e->scale,
+                    &e->anim_slot,
                               &world_state.view_matrix, e->anim, e->anim_frame, 4096 - depth, e->unk24,
                               e->status.bytes[2], 0);
             }
@@ -4612,7 +4610,7 @@ void world_draw_creatures(void)
         sp->vram_tags[e->model_slot] = e->vram_tag;
     }
     if (area_state.skip_model_sync == 0)
-        creature_models_sync(2, 0, 128, 16);
+        creature_models_sync(ARCHIVE_CHR, 0, MODEL_SLOT_CREATURES, 16);
 }
 
 /* Steps the visible table B entries: the two kinds of area sound (over a
@@ -4652,21 +4650,21 @@ void world_draw_objects(void)
             e->draw_flags = flags | 0x80;
         switch (e->kind) {
         case 37:
-        case 226:
+        case OBJECT_KIND_HEALING:
         case 229:
         case 233:
             continue;
         case 31:
             /* A sound over a rectangle of the floor. */
             if (player_in_cell_rect(e->position.vx >> 12, e->position.vz >> 12, e->unk48, e->unk49, 0x8000)) {
-                if ((s32)(e->unk50 - now) >= 0)
+                if ((s32)(e->kind_data.snd.next_tick - now) >= 0)
                     continue;
                 if (e->params.snd.sound_flags & 2)
-                    e->unk50 = now + (e->params.snd.period * 6 + (rand() >> 8));
+                    e->kind_data.snd.next_tick = now + (e->params.snd.period * 6 + (rand() >> 8));
                 if (e->params.snd.sound_flags & 4)
-                    e->unk50 = now + (e->params.snd.period * 6 + (rand() >> 6));
+                    e->kind_data.snd.next_tick = now + (e->params.snd.period * 6 + (rand() >> 6));
                 else
-                    e->unk50 = now + e->params.snd.period * 6;
+                    e->kind_data.snd.next_tick = now + e->params.snd.period * 6;
                 range = e->unk48 << 11;
                 d = viewer.position.vx - (e->position.vx + range);
                 if (d < 0)
@@ -4697,30 +4695,30 @@ void world_draw_objects(void)
                 }
                 if (volume < 20)
                     continue;
-                if (e->unk54 != -1) {
-                    sound_stop(e->unk54, e->params.snd.sound + 208);
-                    e->unk54 = -1;
+                if (e->kind_data.snd.voice != -1) {
+                    sound_stop(e->kind_data.snd.voice, e->params.snd.sound + 208);
+                    e->kind_data.snd.voice = -1;
                 }
-                e->unk54 = sound_play(e->params.snd.sound + 208, volume);
+                e->kind_data.snd.voice = sound_play(e->params.snd.sound + 208, volume);
             } else {
-                e->unk50 = now + e->params.snd.period * 6;
-                if (e->unk54 == -1)
+                e->kind_data.snd.next_tick = now + e->params.snd.period * 6;
+                if (e->kind_data.snd.voice == -1)
                     continue;
-                sound_stop(e->unk54, e->params.snd.sound + 208);
-                e->unk54 = -1;
+                sound_stop(e->kind_data.snd.voice, e->params.snd.sound + 208);
+                e->kind_data.snd.voice = -1;
             }
             break;
-        case 236:
+        case OBJECT_KIND_SOUND:
             /* A sound around a point. */
             if (player_in_centred_rect(e->position.vx, e->position.vz, e->unk48 << 8, e->unk49 << 8, 0x8000)) {
-                if ((s32)(e->unk50 - now) >= 0)
+                if ((s32)(e->kind_data.snd.next_tick - now) >= 0)
                     continue;
                 if (e->params.snd.sound_flags & 2)
-                    e->unk50 = now + (e->params.snd.period * 60 + (rand() >> 11));
+                    e->kind_data.snd.next_tick = now + (e->params.snd.period * 60 + (rand() >> 11));
                 if (e->params.snd.sound_flags & 4)
-                    e->unk50 = now + (e->params.snd.period * 60 + (rand() >> 9));
+                    e->kind_data.snd.next_tick = now + (e->params.snd.period * 60 + (rand() >> 9));
                 else
-                    e->unk50 = now + e->params.snd.period * 60;
+                    e->kind_data.snd.next_tick = now + e->params.snd.period * 60;
                 {
                     int inner = (e->unk48 << 7) - (e->params.snd.fade_range << 7);
 
@@ -4740,17 +4738,17 @@ void world_draw_objects(void)
                 }
                 if (volume < 20)
                     continue;
-                if (e->unk54 != -1) {
-                    sound_stop(e->unk54, e->params.snd.sound + 1108);
-                    e->unk54 = -1;
+                if (e->kind_data.snd.voice != -1) {
+                    sound_stop(e->kind_data.snd.voice, e->params.snd.sound + 1108);
+                    e->kind_data.snd.voice = -1;
                 }
-                e->unk54 = sound_play(e->params.snd.sound + 1108, volume);
+                e->kind_data.snd.voice = sound_play(e->params.snd.sound + 1108, volume);
             } else {
-                e->unk50 = now + e->params.snd.period * 60;
-                if (e->unk54 == -1)
+                e->kind_data.snd.next_tick = now + e->params.snd.period * 60;
+                if (e->kind_data.snd.voice == -1)
                     continue;
-                sound_stop(e->unk54, e->params.snd.sound + 1108);
-                e->unk54 = -1;
+                sound_stop(e->kind_data.snd.voice, e->params.snd.sound + 1108);
+                e->kind_data.snd.voice = -1;
             }
             break;
         case 38:
@@ -4760,13 +4758,13 @@ void world_draw_objects(void)
             anim_get_file(id, &model);
             if (model == NULL)
                 continue;
-            sp->model_rot.vx = e->rot_x;
-            sp->model_rot.vy = e->facing;
-            sp->model_rot.vz = e->rot_z;
+            sp->model_rot.vx = e->rotation.vx;
+            sp->model_rot.vy = e->rotation.vy;
+            sp->model_rot.vz = e->rotation.vz;
             sp->ot = world_state.ot_cur + e->depth_bias;
             sp->near_z = 4 - e->depth_bias;
             sp->far_z = 4096 - e->depth_bias;
-            model_draw(0, id, &e->position, &sp->model_rot, size, e->anim_slot,
+            model_draw(0, id, &e->position, &sp->model_rot, size, &e->anim_slot,
                           &world_state.view_matrix, e->anim, e->anim_frame, 0, e->light, e->draw_flags, 0);
             break;
         default:
@@ -4777,17 +4775,17 @@ void world_draw_objects(void)
             size = &e->scale;
             if (model == NULL)
                 continue;
-            sp->model_rot.vx = e->rot_x;
-            sp->model_rot.vy = e->facing;
-            sp->model_rot.vz = e->rot_z;
+            sp->model_rot.vx = e->rotation.vx;
+            sp->model_rot.vy = e->rotation.vy;
+            sp->model_rot.vz = e->rotation.vz;
             if (e->flags & 0x40) {
-                sp->model_rot.vx = e->rot_x;
+                sp->model_rot.vx = e->rotation.vx;
                 sp->model_rot.vy = 0;
-                sp->model_rot.vz = e->rot_z;
+                sp->model_rot.vz = e->rotation.vz;
                 sp->ot = world_state.ot_cur + e->depth_bias;
                 sp->near_z = 4 - e->depth_bias;
                 sp->far_z = 4096 - e->depth_bias;
-                model_draw(0, id, &e->position, &sp->model_rot, size, e->anim_slot,
+                model_draw(0, id, &e->position, &sp->model_rot, size, &e->anim_slot,
                               &world_state.pitch_matrix, e->anim, e->anim_frame, e->light, e->light,
                               e->draw_flags, 0);
                 break;
@@ -4800,7 +4798,7 @@ void world_draw_objects(void)
                 sp->ot = world_state.ot_cur + e->depth_bias;
                 sp->near_z = 4 - e->depth_bias;
                 sp->far_z = 4096 - e->depth_bias;
-                model_draw(0, id, &e->position, &sp->model_rot, size, e->anim_slot,
+                model_draw(0, id, &e->position, &sp->model_rot, size, &e->anim_slot,
                               &world_state.view_matrix, e->anim, e->anim_frame, e->light, e->light, e->draw_flags, 0);
                 if (e->flags & 1)
                     continue;
@@ -4815,18 +4813,16 @@ void world_draw_objects(void)
                 sp->ot = world_state.ot_cur + e->depth_bias - 5;
                 sp->near_z = 9 - e->depth_bias;
                 sp->far_z = 4101 - e->depth_bias;
-                model_draw(0, (r->flags >> 2 & 1) | 44, &pos, &sp->model_rot, &scale, e->anim_slot,
+                model_draw(0, (r->flags >> 2 & 1) | 44, &pos, &sp->model_rot, &scale, &e->anim_slot,
                               &world_state.view_matrix, 128, 0, e->light, 4096, 4, 0);
             }
             break;
         }
     }
     if (area_state.skip_model_sync == 0)
-        object_models_sync(0, 0, 256, 249);
+        object_models_sync(ARCHIVE_MO, 0, MODEL_SLOT_OBJECTS, 249);
     sp->model_needed_cur = &sp->model_needed[300];
 }
-
-#define SLOT_C 588
 
 ADDRESS(0x800251c8, 0x428)
 void world_draw_ground_items(void)
@@ -4849,53 +4845,54 @@ void world_draw_ground_items(void)
         if (e->player_dist_xz >= (s32)world_state.range_near)
             e->draw_flags |= 0x80;
         switch (e->state) {
-        case 0:
-        case 4:
+        case GROUND_ITEM_NONE:
+        case GROUND_ITEM_HIDDEN:
             continue;
-        case 1:
-        case 2:
-        case 3:
-        case 5:
+        case GROUND_ITEM_FALLING:
+        case GROUND_ITEM_RESTING:
+        case GROUND_ITEM_PICKED_UP:
+        case GROUND_ITEM_SCRIPTED:
             break;
         }
         {
             SVECTOR scale = {4096, 4096, 4096};
 
             sp->model_needed[r->model] = 1;
-            anim_get_file(r->model + SLOT_C, &model);
+            anim_get_file(r->model + MODEL_SLOT_ITEMS, &model);
             if (model == NULL)
                 continue;
-            sp->model_rot.vx = e->rot_x;
-            sp->model_rot.vy = e->facing;
-            sp->model_rot.vz = e->rot_z;
+            sp->model_rot.vx = e->rotation.vx;
+            sp->model_rot.vy = e->rotation.vy;
+            sp->model_rot.vz = e->rotation.vz;
             if (r->flags & 0x40) {
                 MATRIX m;
 
                 sp->ot = world_state.ot_cur + e->depth_bias;
                 sp->near_z = 4 - e->depth_bias;
                 sp->far_z = 4096 - e->depth_bias;
-                model_draw(0, r->model + SLOT_C, &e->position, &sp->model_rot, &scale, e->anim_slot,
+                model_draw(0, r->model + MODEL_SLOT_ITEMS, &e->position, &sp->model_rot, &scale, &e->anim_slot,
                               &world_state.view_matrix, 128, 0, 0, 4096, e->draw_flags, 0);
                 sp->model_rot.vx = sp->model_rot.vy = sp->model_rot.vz = 0;
                 sp->ot = world_state.ot_cur + e->depth_bias;
                 sp->near_z = 4 - e->depth_bias;
                 sp->far_z = 4096 - e->depth_bias;
                 m = world_state.pitch_matrix;
-                if (e->state != 2)
-                    RotMatrixX(e->rot_x, &m);
-                model_draw(0, r->model + SLOT_C, &e->position, &sp->model_rot, &scale, e->anim_slot, &m, 129,
+                if (e->state != GROUND_ITEM_RESTING)
+                    RotMatrixX(e->rotation.vx, &m);
+                model_draw(0, r->model + MODEL_SLOT_ITEMS, &e->position, &sp->model_rot, &scale,
+                    &e->anim_slot, &m, 129,
                               0, 0, 4096, e->draw_flags, 0);
             } else {
                 sp->ot = world_state.ot_cur + e->depth_bias;
                 sp->near_z = 4 - e->depth_bias;
                 sp->far_z = 4096 - e->depth_bias;
-                model_draw(0, r->model + SLOT_C, &e->position, &sp->model_rot, &scale, e->anim_slot,
+                model_draw(0, r->model + MODEL_SLOT_ITEMS, &e->position, &sp->model_rot, &scale, &e->anim_slot,
                               &world_state.view_matrix, 128, 0, 0, 4096, e->draw_flags, 0);
             }
         }
     }
     if (area_state.skip_model_sync == 0)
-        item_models_sync(5, 0, SLOT_C, 128);
+        item_models_sync(ARCHIVE_ITEM, 0, MODEL_SLOT_ITEMS, 128);
     sp->model_needed_cur = &sp->model_needed[128];
 }
 
@@ -4912,7 +4909,7 @@ void world_draw_effects_placements(void)
     int i;
 
     for (o = effects.slots, i = 127; i != -1; o++, i--) {
-        if (o->flags == 0xff)
+        if (o->flags == ST_EFFECT_FREE)
             continue;
         mode = o->draw_mode & 3;
         if (mode == 0)
@@ -4933,28 +4930,28 @@ void world_draw_effects_placements(void)
             sp->ot = world_state.ot_cur - 7;
             sp->near_z = 11;
             sp->far_z = 4103;
-            model_draw(0, o->model + 96, at, &sp->model_rot, &o->scale, o->anim_slot,
+            model_draw(0, o->model + 96, at, &sp->model_rot, &o->scale, &o->anim_slot,
                           &world_state.view_matrix, o->part, o->anim_frame, o->light, o->light, o->draw_flags, 0);
             break;
         case 4:
             sp->near_z = 11;
             sp->far_z = 4103;
             sp->ot = world_state.ot_cur - 7;
-            model_draw(0, o->model + 96, at, &o->rotation, &o->scale, o->anim_slot,
+            model_draw(0, o->model + 96, at, &o->rotation, &o->scale, &o->anim_slot,
                           &identity_matrix, o->part, o->anim_frame, o->light, o->light, o->draw_flags, 0);
             break;
         case 8:
             sp->near_z = 11;
             sp->far_z = 4103;
             sp->ot = world_state.ot_cur - 7;
-            model_draw(0, o->model + 96, at, &o->rotation, &o->scale, o->anim_slot,
+            model_draw(0, o->model + 96, at, &o->rotation, &o->scale, &o->anim_slot,
                           &world_state.pitch_matrix, o->part, o->anim_frame, o->light, o->light, o->draw_flags, 0);
             break;
         case 12:
             sp->near_z = -16;
             sp->far_z = 4076;
             sp->ot = world_state.ot_cur + 20;
-            model_draw(0, o->model + 96, at, &o->rotation, &o->scale, o->anim_slot,
+            model_draw(0, o->model + 96, at, &o->rotation, &o->scale, &o->anim_slot,
                           NULL, o->part, o->anim_frame, o->light, o->light, o->draw_flags, 0);
             break;
         }
@@ -5223,67 +5220,67 @@ void hud_update(void)
             hud_sprites[1].r.w = v->magic_gauge * 112 / 5120;
             hud_sprites[1].r.x = 307 - hud_sprites[1].r.w;
         }
-        if (v->status_flags & 7) {
+        if (v->status_flags & STATUS_POISON) {
             hud_sprites[4].flags = 1;
-            if (v->status_flags & 4)
+            if (v->status_flags & STATUS_POISON_3)
                 hud_sprites[4].flags = 9;
-            else if (v->status_flags & 2)
+            else if (v->status_flags & STATUS_POISON_2)
                 hud_sprites[4].flags = 5;
         } else {
             hud_sprites[4].flags = 0;
         }
     }
-    if (viewer.status_flags & 0x18) {
+    if (viewer.status_flags & STATUS_PARALYZE) {
         hud_sprites[7].flags = 1;
-        if (viewer.status_flags & 0x10)
+        if (viewer.status_flags & STATUS_PARALYZE_2)
             hud_sprites[7].flags = 9;
     } else {
         hud_sprites[7].flags = 0;
     }
-    if (viewer.status_flags & 0x60) {
+    if (viewer.status_flags & STATUS_DARK) {
         hud_sprites[9].flags = 1;
         if (viewer.status_flags & 0x40)
             hud_sprites[9].flags = 9;
     } else {
         hud_sprites[9].flags = 0;
     }
-    if (viewer.status_flags & 0x80)
+    if (viewer.status_flags & STATUS_SLOW)
         hud_sprites[11].flags |= 1;
     else
         hud_sprites[11].flags = 0;
-    if (viewer.status_flags & 0x100)
+    if (viewer.status_flags & STATUS_CURSED)
         hud_sprites[12].flags |= 1;
     else
         hud_sprites[12].flags = 0;
-    if (*(s32 *)viewer.unk190[5] == 0)
+    if (viewer.timers.words[5] == 0)
         hud_sprites[37].flags = 0;
     else
         hud_sprites[37].flags |= 1;
-    if (*(s32 *)viewer.unk190[12] == 0)
+    if (viewer.timers.words[12] == 0)
         hud_sprites[38].flags = 0;
     else
         hud_sprites[38].flags |= 1;
-    if (*(s32 *)viewer.unk190[7] == 0)
+    if (viewer.timers.words[7] == 0)
         hud_sprites[39].flags = 0;
     else
         hud_sprites[39].flags |= 1;
-    if (*(s32 *)viewer.unk190[8] == 0)
+    if (viewer.timers.words[8] == 0)
         hud_sprites[40].flags = 0;
     else
         hud_sprites[40].flags |= 1;
-    if (*(s32 *)viewer.unk190[9] == 0)
+    if (viewer.timers.words[9] == 0)
         hud_sprites[41].flags = 0;
     else
         hud_sprites[41].flags |= 1;
-    if (*(s32 *)viewer.unk190[10] == 0)
+    if (viewer.timers.words[10] == 0)
         hud_sprites[42].flags = 0;
     else
         hud_sprites[42].flags |= 1;
-    if (*(s32 *)viewer.unk190[11] == 0)
+    if (viewer.timers.words[11] == 0)
         hud_sprites[43].flags = 0;
     else
         hud_sprites[43].flags |= 1;
-    if (viewer.status_flags & 0x1000000)
+    if (viewer.status_flags & STATUS_DURABILITY_WARNING)
         hud_sprites[44].flags |= 1;
     else
         hud_sprites[44].flags = 0;
@@ -5350,13 +5347,14 @@ void world_render_frame(VECTOR *pos, SVECTOR *rot)
     pad_update_vibration();
     gfx_set_camera(pos, rot);
     texanim_update();
-    if (viewer.state == 0 || viewer.state == 5 || viewer.state == 6 || viewer.state == 1)
+    if (viewer.state == VIEWER_STATE_NORMAL || viewer.state == VIEWER_STATE_SCRIPTED
+        || viewer.state == VIEWER_STATE_SHOP || viewer.state == VIEWER_STATE_QUICK_ITEM)
         lighting_update();
     gfx_begin_frame();
     anim_slots_retire();
     anim_sets_retire();
     world_state.vertex_face_counts[1] = 0;
-    if (viewer.state == 1) {
+    if (viewer.state == VIEWER_STATE_QUICK_ITEM) {
         frame = &hud_sprites[26 + viewer.quick_item_index];
         hud_selection_blink = (hud_selection_blink + 1) % 32;
         if (hud_selection_blink < 16)
@@ -5501,7 +5499,7 @@ void ui_draw_glyph(u16 c, u16 x, u16 y, CVECTOR *color)
     u16 q, r;
     int n;
 
-    if (MENU_SCRATCH->font_mode == 0) {
+    if (MENU_SCRATCH->font_mode == MENU_FONT_LOW_RES) {
         ch = 12;
         fw = ch;
         qh = fw;
@@ -5599,7 +5597,7 @@ void ui_draw_text(u16 *s, u16 x, u16 y, CVECTOR *color)
     u_int split;
     u_int half;
 
-    if (MENU_SCRATCH->font_mode == 0) {
+    if (MENU_SCRATCH->font_mode == MENU_FONT_LOW_RES) {
         line = 14;
         split = 64;
     } else {
@@ -5625,14 +5623,6 @@ void ui_draw_text(u16 *s, u16 x, u16 y, CVECTOR *color)
     }
 }
 
-/*
- * Number words: the value in the low halfword (signed), the digit count in
- * bits 24-27 and, in bits 28-31, flags that ask for a plus sign. Leading
- * zeros are blank; a value too wide for the digit count shows as nines.
- */
-#define NUMBER_DIGITS(num) (((num) >> 24) & 0xf)
-#define NUMBER_SIGNED 0xf0000000
-
 /* Draws a number with the proportional font: digit glyphs follow the
  * half-width codes. */
 ADDRESS(0x80027440, 0x27c)
@@ -5653,7 +5643,7 @@ void ui_draw_number(u32 num, u16 x, u16 y, CVECTOR *color)
 
     if (number_narrow)
         width -= 4;
-    if (MENU_SCRATCH->font_mode == 0)
+    if (MENU_SCRATCH->font_mode == MENU_FONT_LOW_RES)
         base = 64;
     else
         base = 4;
@@ -6293,9 +6283,6 @@ void ui_draw_window(short x, short y, short w, short h)
 DATA(0x80087f34, 0x4, ".sdata")
 static s32 area_info_blink = 0;
 
-/* ui_draw_number/ui_draw_number_fixed take the digit count in the top byte. */
-#define DIGITS(n) ((n) << 24)
-
 /* Closes a page: its frame, the end of the frame and the darkened world. */
 #define PAGE_END()                     \
     ui_draw_window(16, 36, 288, 192);   \
@@ -6328,29 +6315,30 @@ void menu_main_draw(void)
     sp->style[0].cd = 57;
     for (i = 0; i < 11; i++)
         ui_draw_text(MESSAGE(i), 24, i * 16 + 48, &sp->style[0]);
-    if (viewer.status_flags & 7)
-        ui_draw_text(MESSAGE(20), 106, 112, &sp->style[0]);
-    else if (viewer.status_flags & 0x18)
-        ui_draw_text(MESSAGE(21), 93, 112, &sp->style[0]);
-    else if (viewer.status_flags & 0x60)
-        ui_draw_text(MESSAGE(22), 119, 112, &sp->style[0]);
-    else if (viewer.status_flags & 0x80)
-        ui_draw_text(MESSAGE(23), 119, 112, &sp->style[0]);
-    else if (viewer.status_flags & 0x100)
-        ui_draw_text(MESSAGE(24), 106, 112, &sp->style[0]);
+    if (viewer.status_flags & STATUS_POISON)
+        ui_draw_text(MESSAGE(MSG_STATUS_POISON), 106, 112, &sp->style[0]);
+    else if (viewer.status_flags & STATUS_PARALYZE)
+        ui_draw_text(MESSAGE(MSG_STATUS_PARALYZE), 93, 112, &sp->style[0]);
+    else if (viewer.status_flags & STATUS_DARK)
+        ui_draw_text(MESSAGE(MSG_STATUS_DARK), 119, 112, &sp->style[0]);
+    else if (viewer.status_flags & STATUS_SLOW)
+        ui_draw_text(MESSAGE(MSG_STATUS_SLOW), 119, 112, &sp->style[0]);
+    else if (viewer.status_flags & STATUS_CURSED)
+        ui_draw_text(MESSAGE(MSG_STATUS_CURSED), 106, 112, &sp->style[0]);
     else
-        ui_draw_text(MESSAGE(19), 106, 112, &sp->style[0]);
-    if (viewer.equipment[16] != 0xffff && vis_table_c.types[viewer.equipment[16]].unk5[0x1d] >= 9) {
-        kind = vis_table_c.types[viewer.equipment[16]].unk5[0x1d];
+        ui_draw_text(MESSAGE(MSG_STATUS_NORMAL), 106, 112, &sp->style[0]);
+    if (viewer.equipment[EQUIP_SLOT_LEFT_HAND] != EQUIP_NONE
+        && vis_table_c.types[viewer.equipment[EQUIP_SLOT_LEFT_HAND]].kind2 >= 9) {
+        kind = vis_table_c.types[viewer.equipment[EQUIP_SLOT_LEFT_HAND]].kind2;
         n = 0;
         if (kind - 9 == 2)
             n = 14;
-        ui_draw_text(MESSAGE(17 + kind), 119 - n, 208, &sp->style[0]);
+        ui_draw_text(MESSAGE(MSG_ELEMENTS - 9 + kind), 119 - n, 208, &sp->style[0]);
     } else {
-        ui_draw_text(MESSAGE(25), 119, 208, &sp->style[0]);
+        ui_draw_text(MESSAGE(MSG_ELEMENT_NONE), 119, 208, &sp->style[0]);
     }
     for (i = 0; i < 8; i++)
-        ui_draw_text(MESSAGE(11 + i), label_x[i] + 172, i * 16 + 90, &sp->style[2]);
+        ui_draw_text(MESSAGE(MSG_PAUSE_ROWS + i), label_x[i] + 172, i * 16 + 90, &sp->style[2]);
     ui_draw_number_fixed(viewer.hp | DIGITS(4), 78, 48, &sp->style[0]);
     i = 0;
     ui_draw_glyph(15, 106, 48, &sp->style[0]);
@@ -6503,8 +6491,8 @@ void menu_attribute_points_draw(void)
             right = &sp->style[0];
             right_num = &sp->style[4];
         }
-        ui_draw_text(MESSAGE(0x212 + i), 46, i * 20 + 68, left);
-        ui_draw_text(MESSAGE(0x219 + i), 170, i * 20 + 68, right);
+        ui_draw_text(MESSAGE(MSG_ATTR_STRENGTH + i), 46, i * 20 + 68, left);
+        ui_draw_text(MESSAGE(MSG_ATTR_SPIRIT + i), 170, i * 20 + 68, right);
         ui_draw_number((sp->state.stats.base[0][i] + sp->state.stats.bonus[0][i]) | DIGITS(3), 108, i * 20 + 68, left_num);
         ui_draw_number((sp->state.stats.base[1][i] + sp->state.stats.bonus[1][i]) | DIGITS(3), 232, i * 20 + 68, right_num);
         sp->rect.x = 141;
@@ -6516,7 +6504,7 @@ void menu_attribute_points_draw(void)
     sp->style[0].r = sp->style[4].r = 72;
     sp->style[0].g = sp->style[4].g = 72;
     sp->style[0].b = sp->style[4].b = 72;
-    ui_draw_text(MESSAGE(0x220), 56, 208, &sp->style[0]);
+    ui_draw_text(MESSAGE(MSG_REMAINING_SP), 56, 208, &sp->style[0]);
     ui_draw_number(sp->state.stats.value | DIGITS(2), 242, 208, &sp->style[4]);
     sp->clut_pos.vx = 544;
     sp->clut_pos.vy = 511;
@@ -6585,35 +6573,35 @@ void menu_area_info_draw(void)
             id = sp->state.map.ids[i];
             if (id >= 90) {
                 if (id == 99)
-                    ui_draw_text(MESSAGE(0x269), 53, i * 16 + 54, &sp->style[0]);
+                    ui_draw_text(MESSAGE(MSG_WORLD_UNKNOWN), 53, i * 16 + 54, &sp->style[0]);
                 else if (id == sp->state.map.current)
-                    ui_draw_text(MESSAGE(0x208 + id), 53, i * 16 + 54, &sp->style[2]);
+                    ui_draw_text(MESSAGE(MSG_WORLD_NAMES - 90 + id), 53, i * 16 + 54, &sp->style[2]);
                 else
-                    ui_draw_text(MESSAGE(0x208 + id), 53, i * 16 + 54, &sp->style[0]);
+                    ui_draw_text(MESSAGE(MSG_WORLD_NAMES - 90 + id), 53, i * 16 + 54, &sp->style[0]);
             } else if (id == 89) {
-                ui_draw_text(MESSAGE(0x26a), 67, i * 16 + 54, &sp->style[0]);
+                ui_draw_text(MESSAGE(MSG_AREA_UNKNOWN), 67, i * 16 + 54, &sp->style[0]);
             } else if (id == area_state.area) {
-                ui_draw_text(MESSAGE(0x2bc + id), 67, i * 16 + 54, &sp->style[2]);
+                ui_draw_text(MESSAGE(MSG_AREA_NAMES + id), 67, i * 16 + 54, &sp->style[2]);
                 ui_draw_number(game_progress.area_kills[sp->state.map.ids[i]] * 100 / total[sp->state.map.ids[i]] | DIGITS(3),
                               223, i * 16 + 54, &sp->style[6]);
                 ui_draw_glyph(80, 256, i * 16 + 54, &sp->style[2]);
             } else {
-                ui_draw_text(MESSAGE(0x2bc + id), 67, i * 16 + 54, &sp->style[0]);
+                ui_draw_text(MESSAGE(MSG_AREA_NAMES + id), 67, i * 16 + 54, &sp->style[0]);
                 ui_draw_number(game_progress.area_kills[sp->state.map.ids[i]] * 100 / total[sp->state.map.ids[i]] | DIGITS(3),
                               223, i * 16 + 54, &sp->style[4]);
                 ui_draw_glyph(80, 256, i * 16 + 54, &sp->style[0]);
             }
         }
     } else {
-        ui_draw_text(MESSAGE(0x258), 72, 53, &sp->style[2]);
+        ui_draw_text(MESSAGE(MSG_AREA_INFO_LABELS), 72, 53, &sp->style[2]);
         for (i = 1; i < 5; i++)
-            ui_draw_text(MESSAGE(0x258 + i), 72, i * 30 + 63, &sp->style[2]);
+            ui_draw_text(MESSAGE(MSG_AREA_INFO_LABELS + i), 72, i * 30 + 63, &sp->style[2]);
         if (sp->state.map.current != -1) {
-            ui_draw_text(MESSAGE(0x208 + sp->state.map.current), 86, 66, &sp->style[0]);
-            ui_draw_text(MESSAGE(0x2bc + area_state.area), name_x[area_state.area] + 100, 79,
+            ui_draw_text(MESSAGE(MSG_WORLD_NAMES - 90 + sp->state.map.current), 86, 66, &sp->style[0]);
+            ui_draw_text(MESSAGE(MSG_AREA_NAMES + area_state.area), name_x[area_state.area] + 100, 79,
                           &sp->style[0]);
         } else {
-            ui_draw_text(MESSAGE(0x2bc + area_state.area), 100, 73, &sp->style[0]);
+            ui_draw_text(MESSAGE(MSG_AREA_NAMES + area_state.area), 100, 73, &sp->style[0]);
         }
         ui_draw_number(viewer.cunes_found | DIGITS(3), 179, 107, &sp->style[4]);
         ui_draw_glyph(15, 213, 107, &sp->style[0]);
@@ -6723,18 +6711,18 @@ void menu_options_draw(void)
     sp->tex_pos.vy = 416;
     ui_draw_image(&sp->rect, &sp->tex_pos, &sp->clut_pos, NULL, 1);
     for (i = 0; i < 6; y += 20, i++)
-        ui_draw_text(MESSAGE(0xc9 + i), label_x[i] + 32, y, &sp->style[2]);
+        ui_draw_text(MESSAGE(MSG_OPTION_LABELS + i), label_x[i] + 32, y, &sp->style[2]);
     for (on = &game_settings.walk_bob, i = 1; i < 5; on++, i++) {
         if (*on == 1) {
-            ui_draw_text(MESSAGE(0xcf), 193, i * 20 + 80, &sp->style[2]);
-            ui_draw_text(MESSAGE(0xd0), 241, i * 20 + 80, &sp->style[3]);
+            ui_draw_text(MESSAGE(MSG_ON), 193, i * 20 + 80, &sp->style[2]);
+            ui_draw_text(MESSAGE(MSG_OFF), 241, i * 20 + 80, &sp->style[3]);
         } else {
-            ui_draw_text(MESSAGE(0xcf), 193, i * 20 + 80, &sp->style[3]);
-            ui_draw_text(MESSAGE(0xd0), 241, i * 20 + 80, &sp->style[2]);
+            ui_draw_text(MESSAGE(MSG_ON), 193, i * 20 + 80, &sp->style[3]);
+            ui_draw_text(MESSAGE(MSG_OFF), 241, i * 20 + 80, &sp->style[2]);
         }
     }
     ui_draw_number_fixed(game_settings.sfx_volume | DIGITS(2), 280, 80, &sp->style[0]);
-    ui_draw_text(MESSAGE(0xe0 + sp->cursor), 64, 208, &sp->style[0]);
+    ui_draw_text(MESSAGE(MSG_OPTION_HELP + sp->cursor), 64, 208, &sp->style[0]);
     sp->tex_pos.vx = 596;
     sp->tex_pos.vy = 448;
     sp->clut_pos.vx = 544;
@@ -6804,16 +6792,16 @@ void menu_button_config_draw(void)
     mask = pad_state.buttons;
     for (i = 0; i < 6; i++) {
         if (mask[i] & sp->state.levels.flags)
-            ui_draw_text(MESSAGE(209 + i), label_x[i] + 32, i * 18 + 80, &sp->style[3]);
+            ui_draw_text(MESSAGE(MSG_BUTTON_FORWARD + i), label_x[i] + 32, i * 18 + 80, &sp->style[3]);
         else
-            ui_draw_text(MESSAGE(209 + i), label_x[i] + 32, i * 18 + 80, &sp->style[2]);
+            ui_draw_text(MESSAGE(MSG_BUTTON_FORWARD + i), label_x[i] + 32, i * 18 + 80, &sp->style[2]);
     }
-    mask = &pad_state.buttons[6];
+    mask = &pad_state.buttons[PAD_ACTION_LOOK_UP];
     for (i = 0; i < 6; i++) {
         if (mask[i] & sp->state.levels.flags)
-            ui_draw_text(MESSAGE(215 + i), label_x[i + 6] + 168, i * 18 + 80, &sp->style[3]);
+            ui_draw_text(MESSAGE(MSG_BUTTON_LOOK_UP + i), label_x[i + 6] + 168, i * 18 + 80, &sp->style[3]);
         else
-            ui_draw_text(MESSAGE(215 + i), label_x[i + 6] + 168, i * 18 + 80, &sp->style[2]);
+            ui_draw_text(MESSAGE(MSG_BUTTON_LOOK_UP + i), label_x[i + 6] + 168, i * 18 + 80, &sp->style[2]);
     }
     sp->tex_pos.vy = 384;
     sp->clut_pos.vx = 544;
@@ -6857,8 +6845,8 @@ void menu_button_config_draw(void)
     sp->rect.w = 120;
     sp->rect.h = 16;
     ui_draw_image(&sp->rect, &sp->tex_pos, &sp->clut_pos, NULL, 3);
-    ui_draw_text(MESSAGE(221), label_x[12] + 48, 204, &sp->style[2]);
-    ui_draw_text(MESSAGE(222), label_x[13] + 152, 204, &sp->style[2]);
+    ui_draw_text(MESSAGE(MSG_STANDARD_SET), label_x[12] + 48, 204, &sp->style[2]);
+    ui_draw_text(MESSAGE(MSG_DONE), label_x[13] + 152, 204, &sp->style[2]);
     for (i = 0; i < 12; i++) {
         if (i == 6) {
             row[0].vx = 184;
@@ -6912,7 +6900,7 @@ void card_draw_checking(void)
 {
     MenuScratch *sp = MENU_SCRATCH;
 
-    ui_draw_text(MESSAGE(310), 32, 74, &sp->style[0]);
+    ui_draw_text(MESSAGE(MSG_CARD_CHECKING), 32, 74, &sp->style[0]);
 }
 
 ADDRESS(0x8002c090, 0x114)
@@ -6934,8 +6922,8 @@ void card_draw_port_choice(void)
         file_row_clipped[i] = 0;
         DAT_800881f0[i] = 0;
     }
-    ui_draw_text(MESSAGE(320), 102, 110, &sp->style[0]);
-    ui_draw_text(MESSAGE(321), 102, 134, &sp->style[0]);
+    ui_draw_text(MESSAGE(MSG_CARD_SLOT_1), 102, 110, &sp->style[0]);
+    ui_draw_text(MESSAGE(MSG_CARD_SLOT_2), 102, 134, &sp->style[0]);
 }
 
 ADDRESS(0x8002c1a4, 0x114)
@@ -6944,17 +6932,17 @@ void card_draw_format_prompt(void)
     MenuScratch *sp = MENU_SCRATCH;
 
     if (sp->state.half[1] == 0) {
-        ui_draw_text(MESSAGE(311), 32, 74, &sp->style[0]);
+        ui_draw_text(MESSAGE(MSG_CARD_UNFORMATTED), 32, 74, &sp->style[0]);
         if (sp->dialog_choice) {
-            ui_draw_text(MESSAGE(325), 121, 160, &sp->style[2]);
-            ui_draw_text(MESSAGE(326), 191, 160, &sp->style[0]);
+            ui_draw_text(MESSAGE(MSG_CARD_YES), 121, 160, &sp->style[2]);
+            ui_draw_text(MESSAGE(MSG_CARD_NO), 191, 160, &sp->style[0]);
         } else {
-            ui_draw_text(MESSAGE(325), 121, 160, &sp->style[0]);
-            ui_draw_text(MESSAGE(326), 191, 160, &sp->style[2]);
+            ui_draw_text(MESSAGE(MSG_CARD_YES), 121, 160, &sp->style[0]);
+            ui_draw_text(MESSAGE(MSG_CARD_NO), 191, 160, &sp->style[2]);
         }
     } else {
-        ui_draw_text(MESSAGE(312), 32, 74, &sp->style[0]);
-        ui_draw_text(MESSAGE(332), 40, 100, &sp->style[0]);
+        ui_draw_text(MESSAGE(MSG_CARD_FORMATTING), 32, 74, &sp->style[0]);
+        ui_draw_text(MESSAGE(MSG_CARD_DO_NOT_REMOVE), 40, 100, &sp->style[0]);
     }
 }
 
@@ -6979,15 +6967,15 @@ void card_draw_file_list(void)
 
     sp->border_color.r = sp->border_color.g = sp->border_color.b = 64;
     if (sp->state.half[1] == 1) {
-        id = (sp->mode & 0xff) ? 323 : 324;
+        id = (sp->mode & 0xff) ? MSG_CARD_LOAD_PROMPT : MSG_CARD_SAVE_PROMPT;
         ui_draw_text(MESSAGE(id), 68, 128, &sp->style[0]);
         sp->style[0].b = sp->style[0].g = sp->style[0].r = 24;
         if (sp->dialog_choice) {
-            ui_draw_text(MESSAGE(325), 120, 150, &sp->style[2]);
-            ui_draw_text(MESSAGE(326), 190, 150, &sp->style[0]);
+            ui_draw_text(MESSAGE(MSG_CARD_YES), 120, 150, &sp->style[2]);
+            ui_draw_text(MESSAGE(MSG_CARD_NO), 190, 150, &sp->style[0]);
         } else {
-            ui_draw_text(MESSAGE(325), 120, 150, &sp->style[0]);
-            ui_draw_text(MESSAGE(326), 190, 150, &sp->style[2]);
+            ui_draw_text(MESSAGE(MSG_CARD_YES), 120, 150, &sp->style[0]);
+            ui_draw_text(MESSAGE(MSG_CARD_NO), 190, 150, &sp->style[2]);
         }
         sp->style[0].b = sp->style[0].g = sp->style[0].r = 72;
         sp->rect.x = 60;
@@ -7033,23 +7021,23 @@ void card_draw_file_list(void)
         n = sp->row_count;
     for (i = 0; i < n; i++) {
         if (sp->has_new_row == 1 && i + sp->first_row == sp->row_count - 1) {
-            ui_draw_text(MESSAGE(322), 64, sp->cursor_rect.y + 6, &sp->style[0]);
+            ui_draw_text(MESSAGE(MSG_CARD_NEW_DATA), 64, sp->cursor_rect.y + 6, &sp->style[0]);
         } else {
             ui_draw_number_fixed((u16)(sp->first_row + i + 1) | DIGITS(2), 38, sp->cursor_rect.y + 6,
                           &sp->style[0]);
-            ui_draw_text(MESSAGE(328), 218, sp->cursor_rect.y + 6, &sp->style[0]);
+            ui_draw_text(MESSAGE(MSG_CARD_SP), 218, sp->cursor_rect.y + 6, &sp->style[0]);
             text_scroll_mode = 1;
             text_clip_right = 280;
             text_clip_on = 0;
             text_clip_left = 0;
             if (titles[sp->card->files[i + sp->first_row].area] != -1)
-                ui_draw_text(MESSAGE(610 + titles[sp->card->files[i + sp->first_row].area]), 64,
+                ui_draw_text(MESSAGE(MSG_WORLD_NAMES + titles[sp->card->files[i + sp->first_row].area]), 64,
                               sp->cursor_rect.y + 6, &sp->style[0]);
             if (titles[sp->card->files[i + sp->first_row].area] != -1)
-                ui_draw_text(MESSAGE(700 + sp->card->files[i + sp->first_row].area), 64,
+                ui_draw_text(MESSAGE(MSG_AREA_NAMES + sp->card->files[i + sp->first_row].area), 64,
                               sp->cursor_rect.y + 22, &sp->style[0]);
             else
-                ui_draw_text(MESSAGE(700 + sp->card->files[i + sp->first_row].area), 64,
+                ui_draw_text(MESSAGE(MSG_AREA_NAMES + sp->card->files[i + sp->first_row].area), 64,
                               sp->cursor_rect.y + 6, &sp->style[0]);
             ui_draw_number_fixed(sp->card->files[i + sp->first_row].sp_total | DIGITS(4), 248, sp->cursor_rect.y + 6,
                           &sp->style[0]);
@@ -7072,10 +7060,10 @@ void card_draw_transfer(void)
     MenuScratch *sp = MENU_SCRATCH;
 
     if (sp->mode & 0xff)
-        ui_draw_text(MESSAGE(330), 32, 74, &sp->style[0]);
+        ui_draw_text(MESSAGE(MSG_CARD_LOADING), 32, 74, &sp->style[0]);
     else
-        ui_draw_text(MESSAGE(331), 32, 74, &sp->style[0]);
-    ui_draw_text(MESSAGE(332), 40, 100, &sp->style[0]);
+        ui_draw_text(MESSAGE(MSG_CARD_SAVING), 32, 74, &sp->style[0]);
+    ui_draw_text(MESSAGE(MSG_CARD_DO_NOT_REMOVE), 40, 100, &sp->style[0]);
 }
 
 ADDRESS(0x8002c958, 0x40)
@@ -7083,7 +7071,7 @@ void card_draw_finished(void)
 {
     MenuScratch *sp = MENU_SCRATCH;
 
-    ui_draw_text(MESSAGE(340), 32, 74, &sp->style[0]);
+    ui_draw_text(MESSAGE(MSG_CARD_FINISHED), 32, 74, &sp->style[0]);
 }
 
 ADDRESS(0x8002c998, 0x50)
@@ -7192,14 +7180,14 @@ void menu_end_game_draw_dialog(void)
 {
     MenuScratch *sp = MENU_SCRATCH;
 
-    ui_draw_text(MESSAGE(400), 76, 92, &sp->style[0]);
+    ui_draw_text(MESSAGE(MSG_END_GAME_PROMPT), 76, 92, &sp->style[0]);
     sp->style[0].b = sp->style[0].g = sp->style[0].r = 24;
     if (sp->cursor == 0) {
-        ui_draw_text(MESSAGE(401), 121, 136, &sp->style[2]);
-        ui_draw_text(MESSAGE(402), 189, 136, &sp->style[0]);
+        ui_draw_text(MESSAGE(MSG_END_GAME_YES), 121, 136, &sp->style[2]);
+        ui_draw_text(MESSAGE(MSG_END_GAME_NO), 189, 136, &sp->style[0]);
     } else {
-        ui_draw_text(MESSAGE(401), 121, 136, &sp->style[0]);
-        ui_draw_text(MESSAGE(402), 189, 136, &sp->style[2]);
+        ui_draw_text(MESSAGE(MSG_END_GAME_YES), 121, 136, &sp->style[0]);
+        ui_draw_text(MESSAGE(MSG_END_GAME_NO), 189, 136, &sp->style[2]);
     }
     ui_draw_window(40, 80, 240, 80);
 }
@@ -7243,8 +7231,8 @@ void menu_game_over_draw(void)
     sp->cursor_rect.h = 16;
     ui_draw_rect_outline(&sp->cursor_rect, &sp->cursor_color, 257, 1);
     ui_add_draw_mode(1, 0, 0);
-    ui_draw_text(MESSAGE(800), x[0] + 97, 120, &sp->style[0]);
-    ui_draw_text(MESSAGE(801), x[1] + 97, 144, &sp->style[0]);
+    ui_draw_text(MESSAGE(MSG_NEW_GAME), x[0] + 97, 120, &sp->style[0]);
+    ui_draw_text(MESSAGE(MSG_LOAD_GAME), x[1] + 97, 144, &sp->style[0]);
     ui_draw_window(72, 100, 176, 80);
     gfx_flip();
     ClearImage(&world_state.draw[world_state.frame].clip, 0, 0, 0);
@@ -7262,13 +7250,13 @@ void menu_save_prompt_draw(void)
     sp->style[2].g = 66;
     sp->style[2].b = 48;
     sp->style[0].cd = sp->style[2].cd = 57;
-    ui_draw_text(MESSAGE(850), 92, 120, &sp->style[0]);
+    ui_draw_text(MESSAGE(MSG_SAVE_PROMPT), 92, 120, &sp->style[0]);
     if (sp->main_row == 0) {
-        ui_draw_text(MESSAGE(851), 127, 152, &sp->style[2]);
-        ui_draw_text(MESSAGE(852), 183, 152, &sp->style[0]);
+        ui_draw_text(MESSAGE(MSG_SAVE_YES), 127, 152, &sp->style[2]);
+        ui_draw_text(MESSAGE(MSG_SAVE_NO), 183, 152, &sp->style[0]);
     } else {
-        ui_draw_text(MESSAGE(851), 127, 152, &sp->style[0]);
-        ui_draw_text(MESSAGE(852), 183, 152, &sp->style[2]);
+        ui_draw_text(MESSAGE(MSG_SAVE_YES), 127, 152, &sp->style[0]);
+        ui_draw_text(MESSAGE(MSG_SAVE_NO), 183, 152, &sp->style[2]);
     }
     ui_draw_window(72, 100, 176, 80);
     gfx_flip();
@@ -7395,11 +7383,11 @@ void shop_draw_buy_list(void)
     rows = LIST_ROWS;
     if (sp->state.list.count < LIST_ROWS + 1)
         rows = sp->state.list.count;
-    ui_draw_number(inventory.counts[266].count | 0x3000000, 244, 27, &sp->style[6]);
-    ui_draw_text(MESSAGE(100), 160, 27, &sp->style[2]);
+    ui_draw_number(inventory.counts[ITEM_CUNES].count | DIGITS(3), 244, 27, &sp->style[6]);
+    ui_draw_text(MESSAGE(MSG_SHOP_CUNES), 160, 27, &sp->style[2]);
     for (i = 0; i < rows; i++) {
         id = inventory.shop_ids[sp->state.list.ids[sp->scroll + i]];
-        if (inventory.counts[266].count >= vis_table_c.types[id].price) {
+        if (inventory.counts[ITEM_CUNES].count >= vis_table_c.types[id].price) {
             text = &sp->style[0];
             figure = &sp->style[4];
         } else {
@@ -7412,13 +7400,13 @@ void shop_draw_buy_list(void)
         sp->style[0].cd &= 0x7f;
         sp->style[3].cd &= 0x7f;
         if (vis_table_c.types[id].max_durability) {
-            ui_draw_text(MESSAGE(109), 72, i * 36 + 62, text);
-            ui_draw_number(vis_table_c.types[id].durability | 0x3000000, 128, i * 36 + 62, figure);
+            ui_draw_text(MESSAGE(MSG_DURABILITY), 72, i * 36 + 62, text);
+            ui_draw_number(vis_table_c.types[id].durability | DIGITS(3), 128, i * 36 + 62, figure);
             ui_draw_glyph(74, 160, i * 36 + 62, text);
-            ui_draw_number(vis_table_c.types[id].max_durability | 0x3000000, 172, i * 36 + 62, figure);
+            ui_draw_number(vis_table_c.types[id].max_durability | DIGITS(3), 172, i * 36 + 62, figure);
         }
-        ui_draw_number(vis_table_c.types[id].price | 0x3000000, 244, i * 36 + 62, figure);
-        ui_draw_text(MESSAGE(102), 216, i * 36 + 62, text);
+        ui_draw_number(vis_table_c.types[id].price | DIGITS(3), 244, i * 36 + 62, figure);
+        ui_draw_text(MESSAGE(MSG_CUNES_SIGN), 216, i * 36 + 62, text);
     }
 }
 
@@ -7439,11 +7427,11 @@ void shop_draw_trade_list(void)
         ui_draw_text(LIST_TEXT(sp, id), 54, i * 36 + 48, &sp->style[0]);
         sp->style[0].cd &= 0x7f;
         if (vis_table_c.types[id].max_durability) {
-            ui_draw_text(MESSAGE(109), 131, i * 36 + 62, &sp->style[0]);
-            ui_draw_number(vis_table_c.types[id].durability | 0x3000000, 187, i * 36 + 62,
+            ui_draw_text(MESSAGE(MSG_DURABILITY), 131, i * 36 + 62, &sp->style[0]);
+            ui_draw_number(vis_table_c.types[id].durability | DIGITS(3), 187, i * 36 + 62,
                           &sp->style[4]);
             ui_draw_glyph(74, 219, i * 36 + 62, &sp->style[0]);
-            ui_draw_number(vis_table_c.types[id].max_durability | 0x3000000, 231, i * 36 + 62,
+            ui_draw_number(vis_table_c.types[id].max_durability | DIGITS(3), 231, i * 36 + 62,
                           &sp->style[4]);
         }
     }
@@ -7459,8 +7447,8 @@ void shop_draw_repair_list(void)
     int price;
     CVECTOR *text, *figure;
 
-    ui_draw_number(viewer.hp | 0x4000000, 244, 27, &sp->style[6]);
-    ui_draw_text(MESSAGE(101), 176, 27, &sp->style[2]);
+    ui_draw_number(viewer.hp | DIGITS(4), 244, 27, &sp->style[6]);
+    ui_draw_text(MESSAGE(MSG_SHOP_HP_LEFT), 176, 27, &sp->style[2]);
     rows = LIST_ROWS;
     if (sp->state.list.count < LIST_ROWS + 1)
         rows = sp->state.list.count;
@@ -7483,12 +7471,12 @@ void shop_draw_repair_list(void)
         sp->style[0].cd &= 0x7f;
         sp->style[3].cd &= 0x7f;
         if (vis_table_c.types[id].max_durability) {
-            ui_draw_text(MESSAGE(109), 77, i * 36 + 62, text);
-            ui_draw_number(vis_table_c.types[id].durability | 0x3000000, 133, i * 36 + 62, figure);
+            ui_draw_text(MESSAGE(MSG_DURABILITY), 77, i * 36 + 62, text);
+            ui_draw_number(vis_table_c.types[id].durability | DIGITS(3), 133, i * 36 + 62, figure);
             ui_draw_glyph(74, 165, i * 36 + 62, text);
-            ui_draw_number(vis_table_c.types[id].max_durability | 0x3000000, 177, i * 36 + 62, figure);
+            ui_draw_number(vis_table_c.types[id].max_durability | DIGITS(3), 177, i * 36 + 62, figure);
         }
-        ui_draw_number((u16)price | 0x4000000, 244, i * 36 + 62, figure);
+        ui_draw_number((u16)price | DIGITS(4), 244, i * 36 + 62, figure);
     }
 }
 
@@ -7514,49 +7502,51 @@ void shop_draw_confirm(void)
     ui_add_draw_mode(1, 0, 0);
     if (sp->mode & 0x1) {
         id = inventory.shop_ids[sp->state.list.ids[sp->scroll + sp->cursor]];
-        ui_draw_text(MESSAGE(105), 120, 208, &sp->style[0]);
+        ui_draw_text(MESSAGE(MSG_SHOP_BUY), 120, 208, &sp->style[0]);
     } else if (sp->mode & 0x8) {
         id = sp->state.list.ids[sp->scroll + sp->cursor];
-        ui_draw_text(MESSAGE(106), 110, 208, &sp->style[0]);
+        ui_draw_text(MESSAGE(MSG_SHOP_REPAIR), 110, 208, &sp->style[0]);
     } else {
         id = sp->state.list.ids[sp->scroll + sp->cursor];
-        ui_draw_text(MESSAGE(107), 113, 208, &sp->style[0]);
+        ui_draw_text(MESSAGE(MSG_SHOP_TRADE), 113, 208, &sp->style[0]);
     }
-    ui_draw_text(MESSAGE(108), 172, 208, &sp->style[0]);
+    ui_draw_text(MESSAGE(MSG_SHOP_CANCEL), 172, 208, &sp->style[0]);
     sp->style[0].cd |= 0x80;
     ui_draw_text(LIST_TEXT(sp, id), 24, 176, &sp->style[0]);
     sp->style[0].cd &= 0x7f;
     if (vis_table_c.types[id].max_durability) {
-        ui_draw_text(MESSAGE(109), 48, 190, &sp->style[0]);
-        ui_draw_number(vis_table_c.types[id].durability | 0x3000000, 104, 190, &sp->style[4]);
+        ui_draw_text(MESSAGE(MSG_DURABILITY), 48, 190, &sp->style[0]);
+        ui_draw_number(vis_table_c.types[id].durability | DIGITS(3), 104, 190, &sp->style[4]);
         ui_draw_glyph(74, 136, 190, &sp->style[0]);
-        ui_draw_number(vis_table_c.types[id].max_durability | 0x3000000, 148, 190, &sp->style[4]);
+        ui_draw_number(vis_table_c.types[id].max_durability | DIGITS(3), 148, 190, &sp->style[4]);
     }
     if (sp->mode & 0x1) {
-        ui_draw_number(vis_table_c.types[id].price | 0x3000000, 244, 190, &sp->style[4]);
-        ui_draw_text(MESSAGE(102), 216, 190, &sp->style[0]);
+        ui_draw_number(vis_table_c.types[id].price | DIGITS(3), 244, 190, &sp->style[4]);
+        ui_draw_text(MESSAGE(MSG_CUNES_SIGN), 216, 190, &sp->style[0]);
     } else if (sp->mode & 0x8) {
         price = vis_table_c.types[id].repair_price * 2 / 3 *
                 (vis_table_c.types[id].max_durability - vis_table_c.types[id].durability);
         if (vis_table_c.types[id].durability == 0)
             price *= 2;
-        ui_draw_number((u16)price | 0x4000000, 244, 190, &sp->style[4]);
+        ui_draw_number((u16)price | DIGITS(4), 244, 190, &sp->style[4]);
     }
-    ui_draw_text(MESSAGE(103), 165, 46, &sp->style[0]);
+    ui_draw_text(MESSAGE(MSG_ATTRIBUTE_COLUMNS), 165, 46, &sp->style[0]);
     y = 46;
-    ui_draw_text(MESSAGE(103), 165, y, &sp->style[0]);
+    ui_draw_text(MESSAGE(MSG_ATTRIBUTE_COLUMNS), 165, y, &sp->style[0]);
     for (i = 0; i < 7; i++) {
-        ui_draw_number_fixed(vis_table_c.types[id].attributes[i] | 0x13000000, 207, y, &sp->style[4]);
-        ui_draw_number_fixed(vis_table_c.types[id].attributes[i + 7] | 0x13000000, 273, y, &sp->style[4]);
+        ui_draw_number_fixed(vis_table_c.types[id].attributes[i] | NUMBER_PLUS | DIGITS(3), 207, y,
+            &sp->style[4]);
+        ui_draw_number_fixed(vis_table_c.types[id].attributes[i + 7] | NUMBER_PLUS | DIGITS(3), 273, y,
+            &sp->style[4]);
         y += 14;
     }
     if (vis_table_c.types[id].weight) {
         menu_figure_whole = vis_table_c.types[id].weight * 100 / 454;
         DAT_80088188 = vis_table_c.types[id].weight * 1000 / 454;
-        ui_draw_text(MESSAGE(104), 220, 156, &sp->style[0]);
-        ui_draw_number_fixed(menu_figure_whole | 0x3000000, 248, 156, &sp->style[4]);
+        ui_draw_text(MESSAGE(MSG_WEIGHT), 220, 156, &sp->style[0]);
+        ui_draw_number_fixed(menu_figure_whole | DIGITS(3), 248, 156, &sp->style[4]);
         ui_draw_glyph(78, 269, 156, &sp->style[0]);
-        ui_draw_number_fixed((u16)(DAT_80088188 - menu_figure_whole * 10) | 0x1000000, 275, 156,
+        ui_draw_number_fixed((u16)(DAT_80088188 - menu_figure_whole * 10) | DIGITS(1), 275, 156,
                       &sp->style[4]);
         ui_draw_glyph(108, 281, 156, &sp->style[0]);
     }
@@ -7612,8 +7602,6 @@ void shop_draw(void)
  * equipment slot grid and the attribute table with its bars.
  */
 
-/* The slots of the equipment grid. */
-#define EQUIP_SLOTS 21
 /* Attribute rows. */
 #define STATUS_ROWS 14
 
@@ -7671,8 +7659,8 @@ void menu_equip_info_draw_slots(void)
     for (i = 0; i < EQUIP_SLOTS; equip++, i++) {
         if (i == 2)
             mode = 48;
-        else if ((i == 3 && vis_table_c.types[viewer.equipment[16]].category == 9) ||
-                 (i == 4 && vis_table_c.types[viewer.equipment[17]].category == 9))
+        else if ((i == 3 && vis_table_c.types[viewer.equipment[EQUIP_SLOT_LEFT_HAND]].category == 9) ||
+                 (i == 4 && vis_table_c.types[viewer.equipment[EQUIP_SLOT_LEFT_RESERVE]].category == 9))
             mode = 48;
         else
             mode = 16;
@@ -7681,11 +7669,11 @@ void menu_equip_info_draw_slots(void)
             sp->style[7].r = 200;
             sp->style[7].g = 164;
             sp->style[7].b = 96;
-            ui_draw_number(vis_table_c.types[*equip].durability | 0x2000000, rects[i].x + 8,
+            ui_draw_number(vis_table_c.types[*equip].durability | DIGITS(2), rects[i].x + 8,
                           rects[i].y + 4, &sp->style[7]);
             sp->style[7].g = sp->style[7].r = 8;
             sp->style[7].b = 0;
-            ui_draw_number(vis_table_c.types[*equip].durability | 0x2000000, rects[i].x + 9,
+            ui_draw_number(vis_table_c.types[*equip].durability | DIGITS(2), rects[i].x + 9,
                           rects[i].y + 5, &sp->style[7]);
         }
         ui_draw_image(&rects[i], &tex[i], &clut, 0, mode);
@@ -7733,7 +7721,7 @@ void menu_equip_info_draw_attributes(void)
         sp->decrease_style = &sp->style[3];
     }
     for (i = 0; i < STATUS_ROWS; i++)
-        ui_draw_text(MESSAGE(14 + i), xoff[i] + 316, i * 15 + 16, sp->value_style);
+        ui_draw_text(MESSAGE(MSG_HI_ATTRIBUTES + i), xoff[i] + 316, i * 15 + 16, sp->value_style);
     if (sp->mode == 1) {
         sp->value_style = sp->increase_style = sp->decrease_style = &sp->style[4];
     } else {
@@ -7745,7 +7733,7 @@ void menu_equip_info_draw_attributes(void)
         if (sp->choice_index != -1) {
             count = vis_table_c.types[sp->choice_id].attributes;
             for (i = 0; i < STATUS_ROWS; count++, i++)
-                ui_draw_number(*count | 0x13000000, 590, i * 15 + 16, sp->value_style);
+                ui_draw_number(*count | NUMBER_PLUS | DIGITS(3), 590, i * 15 + 16, sp->value_style);
         }
         return;
     }
@@ -7753,20 +7741,20 @@ void menu_equip_info_draw_attributes(void)
     for (i = 0; i < STATUS_ROWS; figure++, i++) {
         if (sp->mode == 2) {
             if (sp->bonus_changes[i] > 0) {
-                ui_draw_number(sp->attributes_clamped[i] | 0x3000000, 590, i * 15 + 16, sp->value_style);
+                ui_draw_number(sp->attributes_clamped[i] | DIGITS(3), 590, i * 15 + 16, sp->value_style);
                 ui_draw_glyph(19, 544, i * 15 + 16, sp->increase_style);
-                ui_draw_number(sp->bonus_changes[i] | 0x3000000, 508, i * 15 + 16, sp->increase_style);
+                ui_draw_number(sp->bonus_changes[i] | DIGITS(3), 508, i * 15 + 16, sp->increase_style);
             } else if (sp->bonus_changes[i] < 0) {
-                ui_draw_number(sp->attributes_clamped[i] | 0x3000000, 590, i * 15 + 16, sp->value_style);
+                ui_draw_number(sp->attributes_clamped[i] | DIGITS(3), 590, i * 15 + 16, sp->value_style);
                 ui_draw_glyph(20, 544, i * 15 + 16, sp->decrease_style);
-                ui_draw_number(-sp->bonus_changes[i] | 0x3000000, 508, i * 15 + 16, sp->decrease_style);
+                ui_draw_number(-sp->bonus_changes[i] | DIGITS(3), 508, i * 15 + 16, sp->decrease_style);
             } else {
-                ui_draw_number(sp->attributes_clamped[i] | 0x3000000, 590, i * 15 + 16, sp->value_style);
+                ui_draw_number(sp->attributes_clamped[i] | DIGITS(3), 590, i * 15 + 16, sp->value_style);
             }
         } else if (*figure < 0) {
-            ui_draw_number(0x3000000, 590, i * 15 + 16, sp->value_style);
+            ui_draw_number(DIGITS(3), 590, i * 15 + 16, sp->value_style);
         } else {
-            ui_draw_number((u16)*figure | 0x3000000, 590, i * 15 + 16, sp->value_style);
+            ui_draw_number((u16)*figure | DIGITS(3), 590, i * 15 + 16, sp->value_style);
         }
     }
     bar.h = 4;
@@ -7822,16 +7810,16 @@ void menu_equip_info_draw_stats(void)
             sp->value_style = &sp->style[6];
         else
             sp->value_style = &sp->style[4];
-        ui_draw_number((u16)*p++ | 0x5000000, 566, i * 15 + 16, sp->value_style);
+        ui_draw_number((u16)*p++ | DIGITS(5), 566, i * 15 + 16, sp->value_style);
         ui_draw_glyph(14, 554, i * 15 + 16, sp->value_style);
-        ui_draw_number((u16)*p++ | 0x5000000, 494, i * 15 + 16, sp->value_style);
+        ui_draw_number((u16)*p++ | DIGITS(5), 494, i * 15 + 16, sp->value_style);
     }
     p++;
-    ui_draw_number((u16)*p++ | 0x3000000, 542, 46, &sp->style[4]);
+    ui_draw_number((u16)*p++ | DIGITS(3), 542, 46, &sp->style[4]);
     ui_draw_glyph(15, 578, 46, &sp->style[4]);
-    ui_draw_number((u16)*p++ | 0x3000000, 590, 46, &sp->style[4]);
+    ui_draw_number((u16)*p++ | DIGITS(3), 590, 46, &sp->style[4]);
     for (i = 3; i < 13; i++)
-        ui_draw_number((u16)*p++ | 0x3000000, 590, i * 15 + 16, &sp->style[4]);
+        ui_draw_number((u16)*p++ | DIGITS(3), 590, i * 15 + 16, &sp->style[4]);
     if ((short)(p[0] / 10) > (short)(p[1] / 10))
         sp->value_style = &sp->style[6];
     else
@@ -7839,16 +7827,16 @@ void menu_equip_info_draw_stats(void)
     w = *p++;
     menu_figure_whole = w * 100 / 454;
     DAT_80088188 = w * 1000 / 454;
-    ui_draw_number(menu_figure_whole | 0x3000000, 494, 211, sp->value_style);
+    ui_draw_number(menu_figure_whole | DIGITS(3), 494, 211, sp->value_style);
     ui_draw_glyph(18, 534, 211, sp->value_style);
-    ui_draw_number((u16)(DAT_80088188 - menu_figure_whole * 10) | 0x1000000, 542, 211, sp->value_style);
+    ui_draw_number((u16)(DAT_80088188 - menu_figure_whole * 10) | DIGITS(1), 542, 211, sp->value_style);
     ui_draw_glyph(14, 554, 211, sp->value_style);
     w = *p;
     menu_figure_whole = w * 100 / 454;
     DAT_80088188 = w * 1000 / 454;
-    ui_draw_number(menu_figure_whole | 0x3000000, 566, 211, sp->value_style);
+    ui_draw_number(menu_figure_whole | DIGITS(3), 566, 211, sp->value_style);
     ui_draw_glyph(18, 606, 211, sp->value_style);
-    ui_draw_number((u16)(DAT_80088188 - menu_figure_whole * 10) | 0x1000000, 614, 211, sp->value_style);
+    ui_draw_number((u16)(DAT_80088188 - menu_figure_whole * 10) | DIGITS(1), 614, 211, sp->value_style);
 }
 
 /*
@@ -7938,26 +7926,26 @@ void menu_equip_info_draw_item(void)
     if (vis_table_c.types[sp->choice_id].weight) {
         menu_figure_whole = vis_table_c.types[sp->choice_id].weight * 100 / 454;
         DAT_80088188 = vis_table_c.types[sp->choice_id].weight * 1000 / 454;
-        ui_draw_text(MESSAGE(28), 188, 217, &sp->style[0]);
-        ui_draw_number(menu_figure_whole | 0x3000000, 224, 217, &sp->style[4]);
+        ui_draw_text(MESSAGE(MSG_HI_WEIGHT), 188, 217, &sp->style[0]);
+        ui_draw_number(menu_figure_whole | DIGITS(3), 224, 217, &sp->style[4]);
         ui_draw_glyph(18, 264, 217, &sp->style[0]);
-        ui_draw_number((u16)(DAT_80088188 - menu_figure_whole * 10) | 0x1000000, 272, 217,
+        ui_draw_number((u16)(DAT_80088188 - menu_figure_whole * 10) | DIGITS(1), 272, 217,
                       &sp->style[4]);
         ui_draw_glyph(53, 287, 217, &sp->style[0]);
     }
     if (vis_table_c.types[sp->choice_id].max_durability) {
-        ui_draw_text(MESSAGE(29), 16, 216, &sp->style[0]);
+        ui_draw_text(MESSAGE(MSG_HI_DURABILITY), 16, 216, &sp->style[0]);
         if (vis_table_c.types[sp->choice_id].durability < 4) {
-            ui_draw_number(vis_table_c.types[sp->choice_id].durability | 0x3000000, 80, 217,
+            ui_draw_number(vis_table_c.types[sp->choice_id].durability | DIGITS(3), 80, 217,
                           &sp->style[6]);
             ui_draw_glyph(14, 120, 217, &sp->style[2]);
-            ui_draw_number(vis_table_c.types[sp->choice_id].max_durability | 0x3000000, 136, 217,
+            ui_draw_number(vis_table_c.types[sp->choice_id].max_durability | DIGITS(3), 136, 217,
                           &sp->style[6]);
         } else {
-            ui_draw_number(vis_table_c.types[sp->choice_id].durability | 0x3000000, 80, 217,
+            ui_draw_number(vis_table_c.types[sp->choice_id].durability | DIGITS(3), 80, 217,
                           &sp->style[4]);
             ui_draw_glyph(14, 120, 217, &sp->style[0]);
-            ui_draw_number(vis_table_c.types[sp->choice_id].max_durability | 0x3000000, 136, 217,
+            ui_draw_number(vis_table_c.types[sp->choice_id].max_durability | DIGITS(3), 136, 217,
                           &sp->style[4]);
         }
     }
@@ -8030,9 +8018,9 @@ void menu_equip_info_draw(void)
     RECT right = {630, 119, 16, 8};
 
     gfx_begin_frame();
-    if (pad_state.pressed & 0x800)
+    if (pad_state.pressed & PAD_BUTTON_R1)
         menu_second_page = 1;
-    else if (pad_state.pressed & 0x400)
+    else if (pad_state.pressed & PAD_BUTTON_L1)
         menu_second_page = 0;
     pad_state.pressed = 0;
     sp->style[0].r = sp->style[4].r = 80;
@@ -8103,9 +8091,9 @@ void menu_creature_book_draw_grid(void)
     ui_add_draw_mode(1, 0, 0);
     index = sp->scroll * STORE_COLUMNS + sp->cursor;
     kind = sp->state.book.kinds[index];
-    ui_draw_number((u16)(index + 1) | 0x3000000, 486, 214, &sp->style[4]);
+    ui_draw_number((u16)(index + 1) | DIGITS(3), 486, 214, &sp->style[4]);
     ui_draw_glyph(14, 531, 214, &sp->style[0]);
-    ui_draw_number(150 | 0x3000000, 551, 214, &sp->style[4]);
+    ui_draw_number(150 | DIGITS(3), 551, 214, &sp->style[4]);
     if (index < sp->state.book.count) {
         sp->style[0].cd |= 0x80;
         ui_draw_text((u16 *)(sp->state.book.names->text +
@@ -8158,9 +8146,9 @@ void menu_creature_book_draw_entry(void)
 
     kind = sp->state.book.kinds[sp->scroll * 5 + sp->cursor];
     item = &sp->state.book.entries[kind];
-    if (pad_state.pressed & 0x800)
+    if (pad_state.pressed & PAD_BUTTON_R1)
         menu_second_page = 1;
-    if (pad_state.pressed & 0x400)
+    if (pad_state.pressed & PAD_BUTTON_L1)
         menu_second_page = 0;
     pad_state.pressed = 0;
     if (menu_second_page == 0)
@@ -8174,14 +8162,14 @@ void menu_creature_book_draw_entry(void)
     ui_draw_cell_grid(&pos, &tex, &clut, &sp->style[0], 0xf0005);
     if (menu_second_page) {
         for (i = 0; i < 14; i++) {
-            ui_draw_text(MESSAGE(100 + i), 336, i * 15 + 16, &sp->style[0]);
+            ui_draw_text(MESSAGE(MSG_HI_BOOK_ATTRIBUTES + i), 336, i * 15 + 16, &sp->style[0]);
             ui_draw_number((u16)item->attributes[i] | DIGITS(2), 582, i * 15 + 16, &sp->style[4]);
         }
     } else {
         for (i = 0; i < 10; i++)
-            ui_draw_text(MESSAGE(117 + i), 336, i * 15 + 16, &sp->style[0]);
+            ui_draw_text(MESSAGE(MSG_HI_BOOK_LABELS + i), 336, i * 15 + 16, &sp->style[0]);
         if (item->category < 17)
-            ui_draw_text(MESSAGE(150 + item->category), 606 - kind_w[item->category], 16,
+            ui_draw_text(MESSAGE(MSG_HI_CREATURE_TYPES + item->category), 606 - kind_w[item->category], 16,
                           &sp->style[0]);
         ui_draw_number(item->hp | DIGITS(4), 558, 31, &sp->style[4]);
         ui_draw_number(item->sp_gain | DIGITS(2), 582, 46, &sp->style[4]);
@@ -8218,11 +8206,11 @@ void menu_creature_book_draw_entry(void)
         }
         ui_draw_number((u16)item->pairs[3][0] | DIGITS(3), 570, 136, &sp->style[4]);
         if (item->abilities & 0xf)
-            ui_draw_text(MESSAGE(129 + (item->abilities & 0xf)), 336, 181, &sp->style[0]);
+            ui_draw_text(MESSAGE(MSG_HI_ABILITIES + (item->abilities & 0xf)), 336, 181, &sp->style[0]);
         if (item->abilities >> 8 & 0xf)
-            ui_draw_text(MESSAGE(129 + (item->abilities >> 8 & 0xf)), 336, 196, &sp->style[0]);
+            ui_draw_text(MESSAGE(MSG_HI_ABILITIES + (item->abilities >> 8 & 0xf)), 336, 196, &sp->style[0]);
         if (item->abilities >> 16 & 0xf)
-            ui_draw_text(MESSAGE(129 + (item->abilities >> 16 & 0xf)), 336, 211, &sp->style[0]);
+            ui_draw_text(MESSAGE(MSG_HI_ABILITIES + (item->abilities >> 16 & 0xf)), 336, 211, &sp->style[0]);
     }
     sp->image_rect.x = 55;
     sp->image_rect.y = 32;
@@ -8427,18 +8415,18 @@ void menu_arrange_icons_draw_caption(void)
     sp->style[0].cd &= 0x7f;
     if (id != -1) {
         if (vis_table_c.types[id].max_durability) {
-            ui_draw_text(MESSAGE(29), 74, 215, &sp->style[0]);
-            ui_draw_number(vis_table_c.types[id].durability | 0x3000000, 138, 215, &sp->style[4]);
+            ui_draw_text(MESSAGE(MSG_HI_DURABILITY), 74, 215, &sp->style[0]);
+            ui_draw_number(vis_table_c.types[id].durability | DIGITS(3), 138, 215, &sp->style[4]);
             ui_draw_glyph(14, 174, 215, &sp->style[0]);
-            ui_draw_number(vis_table_c.types[id].max_durability | 0x3000000, 190, 215, &sp->style[4]);
+            ui_draw_number(vis_table_c.types[id].max_durability | DIGITS(3), 190, 215, &sp->style[4]);
         }
         if (vis_table_c.types[id].weight) {
-            ui_draw_text(MESSAGE(28), 250, 215, &sp->style[0]);
+            ui_draw_text(MESSAGE(MSG_HI_WEIGHT), 250, 215, &sp->style[0]);
             menu_figure_whole = vis_table_c.types[id].weight * 100 / 454;
             DAT_80088188 = vis_table_c.types[id].weight * 1000 / 454;
-            ui_draw_number(menu_figure_whole | 0x3000000, 300, 215, &sp->style[4]);
+            ui_draw_number(menu_figure_whole | DIGITS(3), 300, 215, &sp->style[4]);
             ui_draw_glyph(18, 339, 215, &sp->style[0]);
-            ui_draw_number((u16)(DAT_80088188 - menu_figure_whole * 10) | 0x1000000, 346, 215,
+            ui_draw_number((u16)(DAT_80088188 - menu_figure_whole * 10) | DIGITS(1), 346, 215,
                           &sp->style[4]);
             ui_draw_glyph(53, 362, 215, &sp->style[0]);
         }
@@ -8521,8 +8509,8 @@ void menu_arrange_icons_draw_details(void)
                     goto done;
                 n++;
                 if (*count) {
-                    ui_draw_text(MESSAGE(200 + k), label_x, text_y + j * 15, &sp->style[0]);
-                    ui_draw_number(*count | 0x13000000, value_x, text_y + j * 15, &sp->style[4]);
+                    ui_draw_text(MESSAGE(MSG_HI_HAND + k), label_x, text_y + j * 15, &sp->style[0]);
+                    ui_draw_number(*count | NUMBER_PLUS | DIGITS(3), value_x, text_y + j * 15, &sp->style[4]);
                 }
                 count++;
                 k++;
@@ -8558,7 +8546,7 @@ void menu_draw_button_prompt(void)
     sp->image_rect.x = 232;
     sp->image_rect.y = 168;
     ui_draw_image(&sp->image_rect, &sp->tex_pos, &sp->clut_pos, NULL, 0);
-    ui_draw_text(MESSAGE(216), 188, 150, &sp->style[0]);
+    ui_draw_text(MESSAGE(MSG_HI_MOVE_PROMPT), 188, 150, &sp->style[0]);
     ui_draw_panel(168, 144, 319, 44);
 }
 
@@ -9094,7 +9082,7 @@ void lighting_update(void)
         lighting.last_area = area_state.area;
         world_state.light_blend = 0;
     }
-    if (lighting.entry_step == 2 && viewer.state == 6) {
+    if (lighting.entry_step == 2 && viewer.state == VIEWER_STATE_SHOP) {
         lighting.column_request = 0;
         lighting.row_request = 0;
     }

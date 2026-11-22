@@ -70,7 +70,7 @@ void talk_load_image(int id, int full)
         clut.vx = 0;
         clut.vy = 511;
     }
-    cd_read_member(8, id, cd_file_buffer);
+    cd_read_member(ARCHIVE_TALKMSG, id, cd_file_buffer);
     tim_load_images_at(cd_file_buffer, &pix, &clut, 1);
 }
 
@@ -81,7 +81,7 @@ ADDRESS(0x80054368, 0x4f0)
 void creature_talk(Creature *e, int fixed, int arg2)
 {
     CreatureType *r = &vis_table_a.types[e->type];
-    CreatureTalkScript *a;
+    CreatureScript *a;
     int i;
 
     if (!(e->flags & 0x2000000))
@@ -89,7 +89,7 @@ void creature_talk(Creature *e, int fixed, int arg2)
     if (!fixed) {
         if (e->fade != -1)
             return;
-        a = (CreatureTalkScript *)creature_type_find_script(r, 0x70);
+        a = creature_type_find_script(r, 0x70);
         if (a == NULL)
             return;
         e->anim = a->anim;
@@ -122,7 +122,7 @@ void creature_talk(Creature *e, int fixed, int arg2)
         }
         world_run_frame(NULL, NULL, 0);
     }
-    if (!fixed && (a = (CreatureTalkScript *)creature_type_find_script(r, 0x71)) != NULL) {
+    if (!fixed && (a = creature_type_find_script(r, 0x71)) != NULL) {
         e->anim = a->anim;
         e->anim_frame = 0;
         e->anim_step = a->anim_step;
@@ -151,7 +151,7 @@ void creature_talk(Creature *e, int fixed, int arg2)
         world_run_frame(NULL, NULL, 0);
     } while (world_state.talk_overlay_state != 5);
     if (!fixed) {
-        a = (CreatureTalkScript *)creature_type_find_script(r, 0x72);
+        a = creature_type_find_script(r, 0x72);
         if (a != NULL) {
             e->anim = a->anim;
             e->anim_step = a->anim_step;

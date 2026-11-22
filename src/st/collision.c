@@ -658,9 +658,9 @@ heights:
     vis_lists.ceiling_normal = sp->ceiling_normal;
     vis_lists.floor_normal = sp->floor_normal;
     /* the wall normals: SVECTORs over vis_lists' unk8C and unk9C fields */
-    *(SVECTOR *)&vis_lists.wall_normal_x = sp->wall_normal;
+    vis_lists.wall_normal = sp->wall_normal;
     vis_lists.reach_wall_normal = sp->reach_wall_normal;
-    *(SVECTOR *)&vis_lists.low_wall_normal_x = sp->low_wall_normal;
+    vis_lists.low_wall_normal = sp->low_wall_normal;
     vis_lists.low_reach_wall_normal = sp->low_reach_wall_normal;
     vis_lists.hit_block = sp->hit;
     vis_lists.floor_kinds = sp->flags;

@@ -42,11 +42,11 @@ void cd_request_read_callback(u_char status, u_char *result)
 
     if (status == CdlComplete) {
         switch (request->kind) {
-        case 0:
+        case CD_REQUEST_NONE:
             break;
-        case 2:
-        case 3:
-        case 4:
+        case CD_REQUEST_READ:
+        case CD_REQUEST_STREAM:
+        case CD_REQUEST_READ_UNCHECKED:
             request->sectors_left = 0;
             CdReadCallback(0);
             request->step = STEP_DONE;
@@ -54,11 +54,11 @@ void cd_request_read_callback(u_char status, u_char *result)
         }
     } else if (status == CdlDiskError) {
         switch (request->kind) {
-        case 0:
+        case CD_REQUEST_NONE:
             break;
-        case 2:
-        case 3:
-        case 4:
+        case CD_REQUEST_READ:
+        case CD_REQUEST_STREAM:
+        case CD_REQUEST_READ_UNCHECKED:
             request->sectors_left = -1;
             CdReadCallback(0);
             request->step = STEP_DONE;
@@ -78,11 +78,11 @@ void cd_queue_ready_callback(u_char status, u_char *result)
 
     if (status == CdlDataReady) {
         switch (request->kind) {
-        case 0:
+        case CD_REQUEST_NONE:
             break;
-        case 2:
-        case 3:
-        case 4:
+        case CD_REQUEST_READ:
+        case CD_REQUEST_STREAM:
+        case CD_REQUEST_READ_UNCHECKED:
             while (CdGetSector(request->read_cursor, 3) == 0)
                 ;
             while (CdGetSector(request->read_cursor, 512) == 0)
@@ -100,11 +100,11 @@ void cd_queue_ready_callback(u_char status, u_char *result)
         }
     } else if (status == CdlDiskError) {
         switch (request->kind) {
-        case 0:
+        case CD_REQUEST_NONE:
             break;
-        case 2:
-        case 3:
-        case 4:
+        case CD_REQUEST_READ:
+        case CD_REQUEST_STREAM:
+        case CD_REQUEST_READ_UNCHECKED:
             request->sectors_left = -1;
             CdReadyCallback(0);
             request->step = STEP_DONE;
@@ -123,11 +123,11 @@ void cd_queue_sync_callback(u_char status, u_char *result)
 
     if (status == CdlComplete) {
         switch (request->kind) {
-        case 0:
+        case CD_REQUEST_NONE:
             break;
-        case 2:
-        case 3:
-        case 4:
+        case CD_REQUEST_READ:
+        case CD_REQUEST_STREAM:
+        case CD_REQUEST_READ_UNCHECKED:
             switch (request->step) {
             case STEP_SEEK:
                 request->read_loc = request->loc;
@@ -142,7 +142,7 @@ void cd_queue_sync_callback(u_char status, u_char *result)
             case STEP_READ:
                 break;
             case STEP_DONE:
-                if (request->kind == 2) {
+                if (request->kind == CD_REQUEST_READ) {
                     if (request->sectors_left != 0) {
                         request->step = STEP_SEEK;
                         while (CdControl(CdlSeekL, (u_char *)&request->loc, 0) == 0)
@@ -169,11 +169,11 @@ void cd_queue_sync_callback(u_char status, u_char *result)
         }
     } else if (status == CdlDiskError) {
         switch (request->kind) {
-        case 0:
+        case CD_REQUEST_NONE:
             break;
-        case 2:
-        case 3:
-        case 4:
+        case CD_REQUEST_READ:
+        case CD_REQUEST_STREAM:
+        case CD_REQUEST_READ_UNCHECKED:
             request->step = STEP_SEEK;
             while (CdControl(CdlSeekL, (u_char *)&request->loc, 0) == 0)
                 ;
@@ -186,7 +186,7 @@ void cd_queue_sync_callback(u_char status, u_char *result)
 ADDRESS(0x8001cf8c, 0x58)
 void cd_wait_idle(void)
 {
-    while (vs_cd_state.current != vs_cd_state.next_free || vs_cd_state.current->kind != 0)
+    while (vs_cd_state.current != vs_cd_state.next_free || vs_cd_state.current->kind != CD_REQUEST_NONE)
         cd_wait_frame();
 }
 

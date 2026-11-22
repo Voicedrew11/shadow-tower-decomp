@@ -58,7 +58,7 @@ void fighter_draw_vertex_anim(void)
     gte_SetRotMatrix(&sp->matrix);
     gte_SetTransMatrix(&sp->matrix);
     n = current_fighter - shared_buffer.fighter;
-    sp->model = (u8 *)vs_gfx_state.model_files[n] + ((ModelFile *)vs_gfx_state.model_files[n])->model;
+    sp->model = (u8 *)vs_gfx_state.model_files[n] + ((StAnimFile *)vs_gfx_state.model_files[n])->model;
     sp->header = (MeshHeader *)(sp->model + 12);
     if (anim_pose(&current_fighter->anim_slot, n, current_fighter->anim,
                       current_fighter->anim_frame) == 0)
@@ -80,7 +80,7 @@ void fighter_draw_vertex_anim(void)
     sp->prim_count = vs_gfx_state.prim_count;
     sp->prim = vs_gfx_state.packet->cur;
     sp->prim_end = vs_gfx_state.packet->end;
-    sp->vertices = vs_gfx_state.projected_vertices;
+    sp->vertices = (u8 *)vs_gfx_state.projected_vertices;
     sp->clut_base = 0;
     if (current_fighter->anim_frame != -1)
         model_draw_mirrored();

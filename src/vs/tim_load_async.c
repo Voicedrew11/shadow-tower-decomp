@@ -30,7 +30,7 @@ int cd_queue_busy(void)
     EnterCriticalSection();
     busy = 1;
     if (vs_cd_state.current == vs_cd_state.next_free)
-        busy = vs_cd_state.current->kind != 0;
+        busy = vs_cd_state.current->kind != CD_REQUEST_NONE;
     ExitCriticalSection();
     return busy;
 }
@@ -59,5 +59,5 @@ void tim_load_member_async(u16 archive, u16 member, s32 x, s32 y)
     size = cd_archive_member_locate(archive, member, &loc);
     DAT_80063304 = x;
     DAT_80063308 = y;
-    cd_request_queue(2, &loc, size, (u8 *)&shared_buffer, tim_load_member_done);
+    cd_request_queue(CD_REQUEST_READ, &loc, size, (u8 *)&shared_buffer, tim_load_member_done);
 }

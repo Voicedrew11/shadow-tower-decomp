@@ -95,7 +95,7 @@ int creature_step_hurt_timer(Creature *e)
         }
         e->hurt_timer = -1;
         e->status.bytes[2] &= 0xdf;
-    } else if ((short)e->anim_frame >= 4096 && e->state == 5) {
+    } else if ((short)e->anim_frame >= 4096 && e->state == CREATURE_STATE_DYING) {
         e->anim_frame = 4095;
     }
     return 0;
@@ -111,7 +111,7 @@ void creature_fade_out_despawn(Creature *e)
         e->fade += 128;
         if (e->fade > 4096)
             break;
-        world_run_frame(NULL, (SVECTOR *)&viewer.pitch, 0);
+        world_run_frame(NULL, &viewer.rotation, 0);
     }
     creature_despawn(e);
 }
@@ -146,9 +146,9 @@ void player_glide_to_pose(VECTOR *pos, SVECTOR *rot)
         viewer.position.vz = (from.vz * n + to.vz * (16 - n)) >> 4;
         viewer.view_rot.vx = (a.vx * n + b.vx * (16 - n)) >> 4;
         viewer.view_rot.vy = (a.vy * n + b.vy * (16 - n)) >> 4;
-        viewer.pitch = viewer.view_rot.vx + viewer.rot_offset.halves[0] + viewer.shake_pitch + viewer.fall_pitch;
-        viewer.yaw = viewer.view_rot.vy + viewer.rot_offset.halves[1] + viewer.shake_yaw + viewer.unk292;
-        world_run_frame(NULL, (SVECTOR *)&viewer.pitch, 0);
+        viewer.rotation.vx = viewer.view_rot.vx + viewer.rot_offset.halves[0] + viewer.shake_pitch + viewer.fall_pitch;
+        viewer.rotation.vy = viewer.view_rot.vy + viewer.rot_offset.halves[1] + viewer.shake_yaw + viewer.unk292;
+        world_run_frame(NULL, &viewer.rotation, 0);
     }
 }
 
@@ -180,8 +180,8 @@ void player_turn_to_creature(Creature *e)
     step = turn / n;
     while (n--) {
         viewer.view_rot.vy += step;
-        viewer.yaw = viewer.view_rot.vy + viewer.rot_offset.halves[1] + viewer.shake_yaw + viewer.unk292;
-        world_run_frame(NULL, (SVECTOR *)&viewer.pitch, 0);
+        viewer.rotation.vy = viewer.view_rot.vy + viewer.rot_offset.halves[1] + viewer.shake_yaw + viewer.unk292;
+        world_run_frame(NULL, &viewer.rotation, 0);
     }
 }
 
@@ -194,7 +194,7 @@ void creature_finish_fade_in(Creature *e)
     if (e->fade == -1)
         return;
     do
-        anim_get_file(e->model_slot + 128, &file);
+        anim_get_file(e->model_slot + MODEL_SLOT_CREATURES, &file);
     while (file == NULL);
     while (1) {
         e->fade -= 128;

@@ -171,7 +171,7 @@ void model_draw_part_at(u8 *model, int part, SVECTOR *pos, SVECTOR *rot, SVECTOR
     sp->prim_count = vs_gfx_state.prim_count;
     sp->prim = vs_gfx_state.packet->cur;
     sp->prim_end = vs_gfx_state.packet->end;
-    sp->vertices = vs_gfx_state.projected_vertices;
+    sp->vertices = (u8 *)vs_gfx_state.projected_vertices;
     sp->clut_base = 0;
     sp->model = model;
     sp->header = (MeshHeader *)(model + 12) + part;

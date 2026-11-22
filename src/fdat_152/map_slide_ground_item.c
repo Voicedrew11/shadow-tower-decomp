@@ -22,7 +22,7 @@ void map_slide_ground_item(void)
     ItemType *kind;
     int end;
 
-    item->state = 5;
+    item->state = GROUND_ITEM_SCRIPTED;
     kind = &vis_table_c.types[item->item];
     end = item->position.vx + 0x1e0;
     item->depth_bias -= 2;
@@ -31,7 +31,7 @@ void map_slide_ground_item(void)
 
         if (item->position.vx == end)
             break;
-        anim_get_file(kind->model + 588, &file);
+        anim_get_file(kind->model + MODEL_SLOT_ITEMS, &file);
         if (file != NULL)
             item->position.vx += step;
         if (item->position.vx > end)

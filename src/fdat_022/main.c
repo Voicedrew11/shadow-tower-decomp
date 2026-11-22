@@ -88,10 +88,10 @@ void map_update_events(void)
         fdat_801edad0 = 1;
     }
     if (fdat_801edad0 == 1 && game_progress.talk_counts[r->talk_id] == 3) {
-        viewer.state = 5;
+        viewer.state = VIEWER_STATE_SCRIPTED;
         map_hand_over_item();
         fdat_801edad0 = 0xff;
-        viewer.state = 0;
+        viewer.state = VIEWER_STATE_NORMAL;
     }
 }
 
@@ -128,13 +128,13 @@ void map_hand_over_item(void)
         c->position.vz = e->position.vz + v.vx;
         world_run_frame(NULL, &viewer.view_rot, 0);
     } while ((s16)e->anim_frame != 0xfff);
-    c->state = 2;
-    viewer.pitch = viewer.view_rot.vx + viewer.rot_offset.halves[0] + viewer.shake_pitch + viewer.fall_pitch;
-    viewer.yaw = viewer.view_rot.vy + viewer.rot_offset.halves[1] + viewer.shake_yaw + viewer.unk292;
-    viewer.roll = viewer.view_rot.vz + viewer.roll_offset + viewer.shake_roll + viewer.unk294;
-    viewer.camera_rot.vx = 4096 - viewer.pitch;
-    viewer.camera_rot.vy = 4096 - viewer.yaw;
-    viewer.camera_rot.vz = 4096 - viewer.roll;
+    c->state = GROUND_ITEM_RESTING;
+    viewer.rotation.vx = viewer.view_rot.vx + viewer.rot_offset.halves[0] + viewer.shake_pitch + viewer.fall_pitch;
+    viewer.rotation.vy = viewer.view_rot.vy + viewer.rot_offset.halves[1] + viewer.shake_yaw + viewer.unk292;
+    viewer.rotation.vz = viewer.view_rot.vz + viewer.roll_offset + viewer.shake_roll + viewer.unk294;
+    viewer.camera_rot.vx = 4096 - viewer.rotation.vx;
+    viewer.camera_rot.vy = 4096 - viewer.rotation.vy;
+    viewer.camera_rot.vz = 4096 - viewer.rotation.vz;
     RotMatrixZYX(&viewer.camera_rot, &viewer.camera_matrix);
     creature_fade_out_despawn(e);
     ground_item_pick_up(c, 1);

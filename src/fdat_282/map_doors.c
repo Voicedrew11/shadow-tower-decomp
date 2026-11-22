@@ -39,9 +39,9 @@ void map_step_creature(void)
             return;
         }
         if (viewer.block == 0x3b)
-            e->facing = 0x800;
+            e->rotation.vy = 0x800;
         else if (viewer.block == 0x13d)
-            e->facing = 0;
+            e->rotation.vy = 0;
     }
     if (e == a50 && viewer.block == 0x65) {
         map_open_door_then_play_script();
@@ -101,7 +101,7 @@ void map_open_object_drop_item(void)
     AreaObject *door = &vis_table_b.entries[26];
     GroundItem *item = &vis_table_c.entries[2];
 
-    viewer.state = 5;
+    viewer.state = VIEWER_STATE_SCRIPTED;
     rot.vy = -1024;
     rot.vx = 0;
     pos.vx = door->position.vx - 3072;
@@ -114,15 +114,15 @@ void map_open_object_drop_item(void)
         door->anim_frame += step;
         if (door->anim_frame >= 0x1000)
             door->anim_frame = 0xfff;
-        if (door->anim_frame > 0x400 && item->state == 4)
-            item->state = 2;
-        if (door->anim_frame > 0xf00 && item->state == 2)
-            item->state = 1;
+        if (door->anim_frame > 0x400 && item->state == GROUND_ITEM_HIDDEN)
+            item->state = GROUND_ITEM_RESTING;
+        if (door->anim_frame > 0xf00 && item->state == GROUND_ITEM_RESTING)
+            item->state = GROUND_ITEM_FALLING;
         ground_items_update();
         world_run_frame(NULL, NULL, 0);
     } while (door->anim_frame != 0xfff);
     door->state = 0xff;
-    viewer.state = 0;
+    viewer.state = VIEWER_STATE_NORMAL;
 }
 
 /*
@@ -167,9 +167,9 @@ void map_talk_then_open_door(int id)
         if ((short)e->anim_frame >= 0x1000)
             e->anim_frame = 0xfff;
         if ((short)e->anim_frame + e->anim_step >= 0x800 && (short)e->anim_frame < 0x800) {
-            viewer.unk190[4][0] = 0;
-            viewer.unk190[4][1] = 6000;
-            viewer.status_flags |= 0x100;
+            viewer.timers.halves[4][0] = 0;
+            viewer.timers.halves[4][1] = 6000;
+            viewer.status_flags |= STATUS_CURSED;
         }
         world_run_frame(NULL, NULL, 0);
     } while ((short)e->anim_frame != 0xfff);

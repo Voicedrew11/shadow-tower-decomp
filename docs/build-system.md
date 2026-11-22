@@ -251,10 +251,17 @@ last analysis, not the current sources. `kf check` and `kf bank` treat the
 same condition as a failure.
 
 Only `kf bank` mutates the ledger. It refuses stale reports and dirty build
-inputs unless `--dirty` is explicit. `kf bank --unit ID` updates only the
-selected unit, requires every selected function to be exactly 100%, and
-preserves all unrelated baseline rows. Normal builds never update committed
-progress automatically.
+inputs unless `--dirty` is explicit. `kf bank --unit ID` (or
+`--function IMAGE:VA`) updates only the selected unit or function, requires
+every selected function to be exactly 100%, and preserves all unrelated
+baseline rows; a selector that matches nothing is an error. A bare `kf bank`
+rewrites the ledger from the current scores, so it refuses, leaving the ledger
+and README untouched, when no function has a score (no build or report) or
+when a banked function still in the manifest has none (its unit was not built
+or analyzed). A script whose selection list comes out empty runs that bare
+bank, so it hits the same refusal instead of emptying the ledger. A banked
+function removed from the manifest is still dropped by a bare bank. Normal
+builds never update committed progress automatically.
 
 ## Generated README status
 

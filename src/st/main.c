@@ -185,19 +185,19 @@ void game_load_start_file(void)
         }
     }
     if (clear_flags) {
-        u32 (*row)[5] = &DAT_801cceb0[1];
+        u32 (*row)[5] = &game_progress.creature_kind_bits[1];
 
         fill_words(row[0], -1, 5);
         fill_words(row[-1], -1, 5);
         row[0][4] &= ~0x4000;
         row[-1][4] &= ~0x4000;
     }
-    player_load_equipment_model(viewer.equipment[3], 0, 0);
-    player_load_equipment_model(viewer.equipment[16], 1, 0);
-    player_load_equipment_model(viewer.equipment[4], 2, 0);
-    player_load_equipment_model(viewer.equipment[17], 3, 0);
-    player_load_magic(viewer.equipment[6], 0);
-    player_load_magic(viewer.equipment[12], 1);
+    player_load_equipment_model(viewer.equipment[EQUIP_SLOT_RIGHT_HAND], 0, 0);
+    player_load_equipment_model(viewer.equipment[EQUIP_SLOT_LEFT_HAND], 1, 0);
+    player_load_equipment_model(viewer.equipment[EQUIP_SLOT_RIGHT_RESERVE], 2, 0);
+    player_load_equipment_model(viewer.equipment[EQUIP_SLOT_LEFT_RESERVE], 3, 0);
+    player_load_magic(viewer.equipment[EQUIP_SLOT_RIGHT_MAGIC], 0);
+    player_load_magic(viewer.equipment[EQUIP_SLOT_LEFT_MAGIC], 1);
 }
 
 /*

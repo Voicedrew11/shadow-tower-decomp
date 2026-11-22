@@ -79,7 +79,7 @@ void menu_equip_pick_item(void)
     MenuScratch *sp = MENU_SCRATCH;
     DVECTOR pos = {448, 256};
 
-    if (PAD.pressed_repeat & 0x20) {
+    if (PAD.pressed_repeat & PAD_BUTTON_RIGHT) {
         play_cursor_sound();
         if (EQ.list_index == sp->state.list.count - 1) {
             EQ.list_index = -1;
@@ -89,7 +89,7 @@ void menu_equip_pick_item(void)
             EQ.shown_id = sp->state.list.ids[EQ.list_index];
         }
         EQ.input_hold = 1;
-    } else if (PAD.pressed_repeat & 0x80) {
+    } else if (PAD.pressed_repeat & PAD_BUTTON_LEFT) {
         play_cursor_sound();
         if (EQ.list_index == -1)
             EQ.list_index = sp->state.list.count - 1;
@@ -100,68 +100,78 @@ void menu_equip_pick_item(void)
         else
             EQ.shown_id = sp->state.list.ids[EQ.list_index];
         EQ.input_hold = 1;
-    } else if (PAD.pressed & 0x2000) {
+    } else if (PAD.pressed & PAD_BUTTON_CIRCLE) {
         play_cancel_sound();
         PAD.pressed = 0;
-        sp->mode &= ~0x8;
+        sp->mode &= ~EQUIP_MENU_ITEM_LIST;
         mem_free(sp->state.list.ids);
-    } else if (PAD.pressed & 0x4000) {
+    } else if (PAD.pressed & PAD_BUTTON_CROSS) {
         if (EQ.shown_id != -1) {
-            if (EQ.slot != SLOT(0) && EQ.slot != SLOT(13) && vis_table_c.types[EQ.shown_id].max_durability &&
+            if (EQ.slot != SLOT(EQUIP_SLOT_RIGHT_RING) && EQ.slot != SLOT(EQUIP_SLOT_LEFT_RING)
+                && vis_table_c.types[EQ.shown_id].max_durability &&
                 !vis_table_c.types[EQ.shown_id].durability) {
                 play_refuse_sound();
             } else {
                 play_confirm_sound();
                 PAD.pressed = 0;
-                sp->mode &= ~0x8;
+                sp->mode &= ~EQUIP_MENU_ITEM_LIST;
                 mem_free(sp->state.list.ids);
-                if (EQ.slot == SLOT(0) && EQ.shown_id != viewer.equipment[0])
-                    viewer.equipment[6] = 0xffff;
-                if (EQ.slot == SLOT(13) && EQ.shown_id != viewer.equipment[13])
-                    viewer.equipment[12] = 0xffff;
+                if (EQ.slot == SLOT(EQUIP_SLOT_RIGHT_RING)
+                    && EQ.shown_id != viewer.equipment[EQUIP_SLOT_RIGHT_RING])
+                    viewer.equipment[EQUIP_SLOT_RIGHT_MAGIC] = EQUIP_NONE;
+                if (EQ.slot == SLOT(EQUIP_SLOT_LEFT_RING)
+                    && EQ.shown_id != viewer.equipment[EQUIP_SLOT_LEFT_RING])
+                    viewer.equipment[EQUIP_SLOT_LEFT_MAGIC] = EQUIP_NONE;
                 *EQ.slot = EQ.shown_id;
-                if (EQ.slot == SLOT(2))
-                    viewer.equipment[15] = EQ.shown_id;
-                if (EQ.slot == SLOT(9) && viewer.equipment[9] != 0xffff &&
-                    vis_table_c.types[viewer.equipment[9]].category == 10) {
-                    viewer.equipment[2] = 0xffff;
-                    viewer.equipment[10] = 0xffff;
+                if (EQ.slot == SLOT(EQUIP_SLOT_GLOVES))
+                    viewer.equipment[EQUIP_SLOT_GLOVES_MIRROR] = EQ.shown_id;
+                if (EQ.slot == SLOT(EQUIP_SLOT_ARMOR) && viewer.equipment[EQUIP_SLOT_ARMOR] != EQUIP_NONE &&
+                    vis_table_c.types[viewer.equipment[EQUIP_SLOT_ARMOR]].category == 10) {
+                    viewer.equipment[EQUIP_SLOT_GLOVES] = EQUIP_NONE;
+                    viewer.equipment[EQUIP_SLOT_BOOTS] = EQUIP_NONE;
                 }
-                if ((EQ.slot == SLOT(10) || EQ.slot == SLOT(2)) && viewer.equipment[9] != 0xffff &&
-                    *EQ.slot != 0xffff && vis_table_c.types[viewer.equipment[9]].category == 10)
-                    viewer.equipment[9] = 0xffff;
-                if (EQ.slot == SLOT(3) && viewer.equipment[3] != 0xffff &&
-                    vis_table_c.types[viewer.equipment[3]].category == 9)
-                    viewer.equipment[16] = 0xffff;
-                if (EQ.slot == SLOT(4) && viewer.equipment[4] != 0xffff &&
-                    vis_table_c.types[viewer.equipment[4]].category == 9)
-                    viewer.equipment[17] = 0xffff;
-                if (EQ.slot == SLOT(16) && viewer.equipment[3] != 0xffff && viewer.equipment[16] != 0xffff &&
-                    vis_table_c.types[viewer.equipment[3]].category == 9)
-                    viewer.equipment[3] = 0xffff;
-                if (EQ.slot == SLOT(17) && viewer.equipment[4] != 0xffff && viewer.equipment[17] != 0xffff &&
-                    vis_table_c.types[viewer.equipment[4]].category == 9)
-                    viewer.equipment[4] = 0xffff;
+                if ((EQ.slot == SLOT(EQUIP_SLOT_BOOTS) || EQ.slot == SLOT(EQUIP_SLOT_GLOVES))
+                    && viewer.equipment[EQUIP_SLOT_ARMOR] != EQUIP_NONE &&
+                    *EQ.slot != 0xffff && vis_table_c.types[viewer.equipment[EQUIP_SLOT_ARMOR]].category == 10)
+                    viewer.equipment[EQUIP_SLOT_ARMOR] = EQUIP_NONE;
+                if (EQ.slot == SLOT(EQUIP_SLOT_RIGHT_HAND)
+                    && viewer.equipment[EQUIP_SLOT_RIGHT_HAND] != EQUIP_NONE &&
+                    vis_table_c.types[viewer.equipment[EQUIP_SLOT_RIGHT_HAND]].category == 9)
+                    viewer.equipment[EQUIP_SLOT_LEFT_HAND] = EQUIP_NONE;
+                if (EQ.slot == SLOT(EQUIP_SLOT_RIGHT_RESERVE)
+                    && viewer.equipment[EQUIP_SLOT_RIGHT_RESERVE] != EQUIP_NONE &&
+                    vis_table_c.types[viewer.equipment[EQUIP_SLOT_RIGHT_RESERVE]].category == 9)
+                    viewer.equipment[EQUIP_SLOT_LEFT_RESERVE] = EQUIP_NONE;
+                if (EQ.slot == SLOT(EQUIP_SLOT_LEFT_HAND)
+                    && viewer.equipment[EQUIP_SLOT_RIGHT_HAND] != EQUIP_NONE
+                    && viewer.equipment[EQUIP_SLOT_LEFT_HAND] != EQUIP_NONE &&
+                    vis_table_c.types[viewer.equipment[EQUIP_SLOT_RIGHT_HAND]].category == 9)
+                    viewer.equipment[EQUIP_SLOT_RIGHT_HAND] = EQUIP_NONE;
+                if (EQ.slot == SLOT(EQUIP_SLOT_LEFT_RESERVE)
+                    && viewer.equipment[EQUIP_SLOT_RIGHT_RESERVE] != EQUIP_NONE
+                    && viewer.equipment[EQUIP_SLOT_LEFT_RESERVE] != EQUIP_NONE &&
+                    vis_table_c.types[viewer.equipment[EQUIP_SLOT_RIGHT_RESERVE]].category == 9)
+                    viewer.equipment[EQUIP_SLOT_RIGHT_RESERVE] = EQUIP_NONE;
             }
         } else {
             play_confirm_sound();
             PAD.pressed = 0;
-            sp->mode &= ~0x8;
+            sp->mode &= ~EQUIP_MENU_ITEM_LIST;
             mem_free(sp->state.list.ids);
             *EQ.slot = 0xffff;
-            if (EQ.slot == SLOT(0))
-                viewer.equipment[6] = 0xffff;
-            if (EQ.slot == SLOT(13))
-                viewer.equipment[12] = 0xffff;
+            if (EQ.slot == SLOT(EQUIP_SLOT_RIGHT_RING))
+                viewer.equipment[EQUIP_SLOT_RIGHT_MAGIC] = EQUIP_NONE;
+            if (EQ.slot == SLOT(EQUIP_SLOT_LEFT_RING))
+                viewer.equipment[EQUIP_SLOT_LEFT_MAGIC] = EQUIP_NONE;
         }
         menu_equip_recalc_stats();
         PAD.pressed = 0;
     }
     if (EQ.shown_id != EQ.loaded_id) {
         if (EQ.shown_id == -1)
-            cd_read_member(6, 801, cd_file_buffer);
+            cd_read_member(ARCHIVE_ICON, 801, cd_file_buffer);
         else
-            cd_read_member(6, vis_table_c.types[EQ.shown_id].unk5[0] + 600, cd_file_buffer);
+            cd_read_member(ARCHIVE_ICON, vis_table_c.types[EQ.shown_id].icon + 600, cd_file_buffer);
         tim_load_images_at(cd_file_buffer, &pos, NULL, 1);
         EQ.loaded_id = EQ.shown_id;
     }
@@ -189,12 +199,12 @@ int menu_equip_pick_slot(int *sel)
     int i;
     ItemTable *table;
 
-    if (PAD.pressed & 0x2000) {
+    if (PAD.pressed & PAD_BUTTON_CIRCLE) {
         play_cancel_sound();
         PAD.pressed = 0;
         return 1;
     }
-    if (PAD.pressed_repeat & 0x10) {
+    if (PAD.pressed_repeat & PAD_BUTTON_UP) {
         play_cursor_sound();
         PAD.pressed_repeat = 0;
         if (sp->cursor == 0) {
@@ -203,7 +213,7 @@ int menu_equip_pick_slot(int *sel)
         } else {
             sp->cursor--;
         }
-    } else if (PAD.pressed_repeat & 0x40) {
+    } else if (PAD.pressed_repeat & PAD_BUTTON_DOWN) {
         play_cursor_sound();
         PAD.pressed_repeat = 0;
         if (sp->cursor == 4) {
@@ -212,7 +222,7 @@ int menu_equip_pick_slot(int *sel)
         } else {
             sp->cursor++;
         }
-    } else if (PAD.pressed_repeat & 0x800) {
+    } else if (PAD.pressed_repeat & PAD_BUTTON_R1) {
         play_cursor_sound();
         PAD.pressed_repeat = 0;
         if (sp->scroll == 0)
@@ -221,7 +231,7 @@ int menu_equip_pick_slot(int *sel)
             sp->scroll -= 5;
         else
             sp->scroll = 0;
-    } else if (PAD.pressed_repeat & 0x200) {
+    } else if (PAD.pressed_repeat & PAD_BUTTON_R2) {
         play_cursor_sound();
         PAD.pressed_repeat = 0;
         if (sp->scroll == 10)
@@ -230,83 +240,83 @@ int menu_equip_pick_slot(int *sel)
             sp->scroll += 5;
         else
             sp->scroll = 10;
-    } else if (PAD.pressed & 0x4000) {
+    } else if (PAD.pressed & PAD_BUTTON_CROSS) {
         PAD.pressed = 0;
         switch (sp->scroll + sp->cursor) {
         case 0:
             kind = 0;
-            cur = viewer.equipment[8];
-            EQ.slot = SLOT(8);
+            cur = viewer.equipment[EQUIP_SLOT_HELMET];
+            EQ.slot = SLOT(EQUIP_SLOT_HELMET);
             break;
         case 1:
             kind = 1;
-            cur = viewer.equipment[9];
-            EQ.slot = SLOT(9);
+            cur = viewer.equipment[EQUIP_SLOT_ARMOR];
+            EQ.slot = SLOT(EQUIP_SLOT_ARMOR);
             break;
         case 2:
             kind = 2;
-            cur = viewer.equipment[2];
-            EQ.slot = SLOT(2);
+            cur = viewer.equipment[EQUIP_SLOT_GLOVES];
+            EQ.slot = SLOT(EQUIP_SLOT_GLOVES);
             break;
         case 3:
             kind = 3;
-            cur = viewer.equipment[10];
-            EQ.slot = SLOT(10);
+            cur = viewer.equipment[EQUIP_SLOT_BOOTS];
+            EQ.slot = SLOT(EQUIP_SLOT_BOOTS);
             break;
         case 4:
             kind = 6;
-            cur = viewer.equipment[3];
-            EQ.slot = SLOT(3);
+            cur = viewer.equipment[EQUIP_SLOT_RIGHT_HAND];
+            EQ.slot = SLOT(EQUIP_SLOT_RIGHT_HAND);
             break;
         case 5:
             kind = 6;
-            cur = viewer.equipment[4];
-            EQ.slot = SLOT(4);
+            cur = viewer.equipment[EQUIP_SLOT_RIGHT_RESERVE];
+            EQ.slot = SLOT(EQUIP_SLOT_RIGHT_RESERVE);
             break;
         case 6:
             kind = 7;
-            cur = viewer.equipment[16];
-            EQ.slot = SLOT(16);
+            cur = viewer.equipment[EQUIP_SLOT_LEFT_HAND];
+            EQ.slot = SLOT(EQUIP_SLOT_LEFT_HAND);
             break;
         case 7:
             kind = 7;
-            cur = viewer.equipment[17];
-            EQ.slot = SLOT(17);
+            cur = viewer.equipment[EQUIP_SLOT_LEFT_RESERVE];
+            EQ.slot = SLOT(EQUIP_SLOT_LEFT_RESERVE);
             break;
         case 8:
             kind = 8;
-            cur = viewer.equipment[1];
-            EQ.slot = SLOT(1);
+            cur = viewer.equipment[EQUIP_SLOT_RIGHT_BRACELET];
+            EQ.slot = SLOT(EQUIP_SLOT_RIGHT_BRACELET);
             break;
         case 9:
             kind = 8;
-            cur = viewer.equipment[14];
-            EQ.slot = SLOT(14);
+            cur = viewer.equipment[EQUIP_SLOT_LEFT_BRACELET];
+            EQ.slot = SLOT(EQUIP_SLOT_LEFT_BRACELET);
             break;
         case 10:
             kind = 5;
-            cur = viewer.equipment[7];
-            EQ.slot = SLOT(7);
+            cur = viewer.equipment[EQUIP_SLOT_AMULET];
+            EQ.slot = SLOT(EQUIP_SLOT_AMULET);
             break;
         case 11:
             kind = 4;
-            cur = viewer.equipment[0];
-            EQ.slot = SLOT(0);
+            cur = viewer.equipment[EQUIP_SLOT_RIGHT_RING];
+            EQ.slot = SLOT(EQUIP_SLOT_RIGHT_RING);
             break;
         case 12:
             kind = -1;
-            cur = viewer.equipment[6];
-            EQ.slot = SLOT(6);
+            cur = viewer.equipment[EQUIP_SLOT_RIGHT_MAGIC];
+            EQ.slot = SLOT(EQUIP_SLOT_RIGHT_MAGIC);
             break;
         case 13:
             kind = 4;
-            cur = viewer.equipment[13];
-            EQ.slot = SLOT(13);
+            cur = viewer.equipment[EQUIP_SLOT_LEFT_RING];
+            EQ.slot = SLOT(EQUIP_SLOT_LEFT_RING);
             break;
         case 14:
             kind = -1;
-            cur = viewer.equipment[12];
-            EQ.slot = SLOT(12);
+            cur = viewer.equipment[EQUIP_SLOT_LEFT_MAGIC];
+            EQ.slot = SLOT(EQUIP_SLOT_LEFT_MAGIC);
             break;
         default:
             cur = 0xffff;
@@ -315,15 +325,17 @@ int menu_equip_pick_slot(int *sel)
             break;
         }
         if (kind == -1) {
-            if ((EQ.slot == SLOT(6) && viewer.equipment[0] != 0xffff) ||
-                (EQ.slot == SLOT(12) && viewer.equipment[13] != 0xffff)) {
+            if ((EQ.slot == SLOT(EQUIP_SLOT_RIGHT_MAGIC)
+                && viewer.equipment[EQUIP_SLOT_RIGHT_RING] != EQUIP_NONE) ||
+                (EQ.slot == SLOT(EQUIP_SLOT_LEFT_MAGIC)
+                    && viewer.equipment[EQUIP_SLOT_LEFT_RING] != EQUIP_NONE)) {
                 u8 entries[] = {0, 1, 3, 4, 6, 7, 9, 10, 12, 13, 15, 16};
                 u32 *bits;
 
-                if (EQ.slot == SLOT(6))
-                    bits = &equip_magic_list.bits[viewer.equipment[0] - 196];
+                if (EQ.slot == SLOT(EQUIP_SLOT_RIGHT_MAGIC))
+                    bits = &equip_magic_list.bits[viewer.equipment[EQUIP_SLOT_RIGHT_RING] - 196];
                 else
-                    bits = &equip_magic_list.bits[viewer.equipment[13] - 196];
+                    bits = &equip_magic_list.bits[viewer.equipment[EQUIP_SLOT_LEFT_RING] - 196];
                 equip_magic_list.count = 0;
                 for (i = 0; i < 12; i++)
                     equip_magic_list.entries[i] = 255;
@@ -333,7 +345,7 @@ int menu_equip_pick_slot(int *sel)
                 }
                 if (equip_magic_list.count) {
                     play_confirm_sound();
-                    sp->mode = (sp->mode | 0x2) & ~0x1;
+                    sp->mode = (sp->mode | EQUIP_MENU_MAGIC_LIST) & ~EQUIP_MENU_SLOT_LIST;
                     equip_saved_list_cursor[0] = sp->scroll;
                     equip_saved_list_cursor[1] = sp->cursor;
                     sp->scroll = 0;
@@ -356,21 +368,21 @@ int menu_equip_pick_slot(int *sel)
                 continue;
             switch (kind) {
             case 8:
-                if (i == (EQ.slot == SLOT(1) ? viewer.equipment[14] : viewer.equipment[1]))
+                if (i == (EQ.slot == SLOT(EQUIP_SLOT_RIGHT_BRACELET) ? viewer.equipment[EQUIP_SLOT_LEFT_BRACELET] : viewer.equipment[EQUIP_SLOT_RIGHT_BRACELET]))
                     continue;
                 if (table->types[i].category == kind)
                     sp->state.list.ids[sp->state.list.count++] = i;
                 break;
             case 4:
-                if (i == (EQ.slot == SLOT(0) ? viewer.equipment[13] : viewer.equipment[0]))
+                if (i == (EQ.slot == SLOT(EQUIP_SLOT_RIGHT_RING) ? viewer.equipment[EQUIP_SLOT_LEFT_RING] : viewer.equipment[EQUIP_SLOT_RIGHT_RING]))
                     continue;
                 if (table->types[i].category == kind)
                     sp->state.list.ids[sp->state.list.count++] = i;
                 break;
             case 6:
-                if (EQ.slot == SLOT(3) && i == viewer.equipment[4])
+                if (EQ.slot == SLOT(EQUIP_SLOT_RIGHT_HAND) && i == viewer.equipment[EQUIP_SLOT_RIGHT_RESERVE])
                     continue;
-                if (EQ.slot == SLOT(4) && i == viewer.equipment[3])
+                if (EQ.slot == SLOT(EQUIP_SLOT_RIGHT_RESERVE) && i == viewer.equipment[EQUIP_SLOT_RIGHT_HAND])
                     continue;
                 if (table->types[i].category == 6 || table->types[i].category == 9)
                     sp->state.list.ids[sp->state.list.count++] = i;
@@ -380,9 +392,9 @@ int menu_equip_pick_slot(int *sel)
                     sp->state.list.ids[sp->state.list.count++] = i;
                 break;
             case 7:
-                if (EQ.slot == SLOT(16) && i == viewer.equipment[17])
+                if (EQ.slot == SLOT(EQUIP_SLOT_LEFT_HAND) && i == viewer.equipment[EQUIP_SLOT_LEFT_RESERVE])
                     continue;
-                if (EQ.slot == SLOT(17) && i == viewer.equipment[16])
+                if (EQ.slot == SLOT(EQUIP_SLOT_LEFT_RESERVE) && i == viewer.equipment[EQUIP_SLOT_LEFT_HAND])
                     continue;
                 if (table->types[i].category == kind)
                     sp->state.list.ids[sp->state.list.count++] = i;
@@ -405,16 +417,16 @@ int menu_equip_pick_slot(int *sel)
             EQ.list_index = i;
         }
         if (cur != 0xffff)
-            i = vis_table_c.types[cur].unk5[0];
+            i = vis_table_c.types[cur].icon;
         else
             i = -1;
-        sp->mode |= 0x8;
+        sp->mode |= EQUIP_MENU_ITEM_LIST;
         if (cur == 0xffff) {
-            cd_read_member(6, 801, cd_file_buffer);
+            cd_read_member(ARCHIVE_ICON, 801, cd_file_buffer);
             EQ.shown_id = -1;
             EQ.loaded_id = -1;
         } else {
-            cd_read_member(6, i + 600, cd_file_buffer);
+            cd_read_member(ARCHIVE_ICON, i + 600, cd_file_buffer);
             EQ.shown_id = cur;
             EQ.loaded_id = cur;
         }
@@ -433,13 +445,13 @@ void menu_equip_pick_magic(void)
     EquipMagicList *list;
     u32 *bits;
 
-    if (PAD.pressed & 0x2000) {
+    if (PAD.pressed & PAD_BUTTON_CIRCLE) {
         play_cancel_sound();
         PAD.pressed = 0;
-        sp->mode = (sp->mode & ~0x2) | 0x1;
+        sp->mode = (sp->mode & ~EQUIP_MENU_MAGIC_LIST) | EQUIP_MENU_SLOT_LIST;
         sp->scroll = equip_saved_list_cursor[0];
         sp->cursor = equip_saved_list_cursor[1];
-    } else if (PAD.pressed_repeat & 0x10) {
+    } else if (PAD.pressed_repeat & PAD_BUTTON_UP) {
         play_cursor_sound();
         PAD.pressed_repeat = 0;
         if (sp->cursor == 0) {
@@ -448,7 +460,7 @@ void menu_equip_pick_magic(void)
         } else {
             sp->cursor--;
         }
-    } else if (PAD.pressed_repeat & 0x40) {
+    } else if (PAD.pressed_repeat & PAD_BUTTON_DOWN) {
         play_cursor_sound();
         PAD.pressed_repeat = 0;
         if (sp->cursor == 4) {
@@ -457,7 +469,7 @@ void menu_equip_pick_magic(void)
         } else if (sp->scroll + sp->cursor < equip_magic_list.count - 1) {
             sp->cursor++;
         }
-    } else if (PAD.pressed_repeat & 0x800) {
+    } else if (PAD.pressed_repeat & PAD_BUTTON_R1) {
         play_cursor_sound();
         PAD.pressed_repeat = 0;
         if (sp->scroll == 0)
@@ -466,7 +478,7 @@ void menu_equip_pick_magic(void)
             sp->scroll -= 5;
         else
             sp->scroll = 0;
-    } else if (PAD.pressed_repeat & 0x200) {
+    } else if (PAD.pressed_repeat & PAD_BUTTON_R2) {
         play_cursor_sound();
         PAD.pressed_repeat = 0;
         if (sp->scroll + 5 >= equip_magic_list.count)
@@ -475,19 +487,19 @@ void menu_equip_pick_magic(void)
             sp->scroll += 5;
         else
             sp->scroll = equip_magic_list.count - 5;
-    } else if (PAD.pressed & 0x4000) {
+    } else if (PAD.pressed & PAD_BUTTON_CROSS) {
         PAD.pressed = 0;
-        if (EQ.slot == SLOT(6))
-            bits = &equip_magic_list.bits[viewer.equipment[0] - 196];
+        if (EQ.slot == SLOT(EQUIP_SLOT_RIGHT_MAGIC))
+            bits = &equip_magic_list.bits[viewer.equipment[EQUIP_SLOT_RIGHT_RING] - 196];
         else
-            bits = &equip_magic_list.bits[viewer.equipment[13] - 196];
+            bits = &equip_magic_list.bits[viewer.equipment[EQUIP_SLOT_LEFT_RING] - 196];
         list = &equip_magic_list;
         if (!(*bits & (1 << list->entries[sp->scroll + sp->cursor]))) {
             play_refuse_sound();
         } else {
             play_confirm_sound();
             *EQ.slot = list->entries[sp->scroll + sp->cursor];
-            sp->mode = (sp->mode & ~0x2) | 0x1;
+            sp->mode = (sp->mode & ~EQUIP_MENU_MAGIC_LIST) | EQUIP_MENU_SLOT_LIST;
             sp->scroll = equip_saved_list_cursor[0];
             sp->cursor = equip_saved_list_cursor[1];
             menu_equip_recalc_stats();
@@ -512,12 +524,12 @@ void menu_equip_loop(void)
             PAD.pressed_repeat = 0;
             EQ.input_hold--;
         }
-        if (sp->mode & 0x8) {
+        if (sp->mode & EQUIP_MENU_ITEM_LIST) {
             menu_equip_pick_item();
-        } else if (sp->mode & 0x1) {
+        } else if (sp->mode & EQUIP_MENU_SLOT_LIST) {
             if (menu_equip_pick_slot(&sel))
                 break;
-        } else if (sp->mode & 0x2) {
+        } else if (sp->mode & EQUIP_MENU_MAGIC_LIST) {
             menu_equip_pick_magic();
         }
         frame_rate_update();
@@ -563,7 +575,7 @@ void menu_equip_draw_frame(void)
     MENU_SCRATCH->tex_pos.vy = 464;
     ui_draw_image(&MENU_SCRATCH->rect, &MENU_SCRATCH->tex_pos, &MENU_SCRATCH->clut_pos, NULL, 3);
     ui_draw_window(16, 16, 288, 208);
-    if (MENU_SCRATCH->mode & 0x1) {
+    if (MENU_SCRATCH->mode & EQUIP_MENU_SLOT_LIST) {
         RECT r = {0, 0, 320, 240};
         CVECTOR c = {32, 32, 32, 0};
 
@@ -616,22 +628,24 @@ void menu_equip_draw_item_panel(void)
                 label = &sp->style[0];
                 value = &sp->style[4];
             }
-            ui_draw_text(MESSAGE(109), 48, 190, label);
-            ui_draw_number(vis_table_c.types[id].durability | 0x3000000, 104, 190, value);
+            ui_draw_text(MESSAGE(MSG_DURABILITY), 48, 190, label);
+            ui_draw_number(vis_table_c.types[id].durability | DIGITS(3), 104, 190, value);
             ui_draw_glyph(74, 136, 190, label);
-            ui_draw_number(vis_table_c.types[id].max_durability | 0x3000000, 148, 190, value);
+            ui_draw_number(vis_table_c.types[id].max_durability | DIGITS(3), 148, 190, value);
         }
     }
-    ui_draw_text(MESSAGE(103), 165, 46, &sp->style[0]);
+    ui_draw_text(MESSAGE(MSG_ATTRIBUTE_COLUMNS), 165, 46, &sp->style[0]);
     y = 46;
-    ui_draw_text(MESSAGE(103), 165, y, &sp->style[0]);
+    ui_draw_text(MESSAGE(MSG_ATTRIBUTE_COLUMNS), 165, y, &sp->style[0]);
     for (i = 0; i < 7; i++) {
         if (id == -1) {
-            ui_draw_number_fixed(0x13000000, 207, y, &sp->style[4]);
-            ui_draw_number_fixed(0x13000000, 273, y, &sp->style[4]);
+            ui_draw_number_fixed(NUMBER_PLUS | DIGITS(3), 207, y, &sp->style[4]);
+            ui_draw_number_fixed(NUMBER_PLUS | DIGITS(3), 273, y, &sp->style[4]);
         } else {
-            ui_draw_number_fixed(vis_table_c.types[id].attributes[i] | 0x13000000, 207, y, &sp->style[4]);
-            ui_draw_number_fixed(vis_table_c.types[id].attributes[i + 7] | 0x13000000, 273, y, &sp->style[4]);
+            ui_draw_number_fixed(vis_table_c.types[id].attributes[i] | NUMBER_PLUS | DIGITS(3), 207, y,
+                &sp->style[4]);
+            ui_draw_number_fixed(vis_table_c.types[id].attributes[i + 7] | NUMBER_PLUS | DIGITS(3), 273, y,
+                &sp->style[4]);
         }
         y += 14;
     }
@@ -639,10 +653,10 @@ void menu_equip_draw_item_panel(void)
         if (vis_table_c.types[id].weight) {
             menu_figure_whole = vis_table_c.types[id].weight * 100 / 454;
             DAT_80088188 = vis_table_c.types[id].weight * 1000 / 454;
-            ui_draw_text(MESSAGE(104), 221, 156, &sp->style[0]);
-            ui_draw_number_fixed(menu_figure_whole | 0x3000000, 249, 156, &sp->style[4]);
+            ui_draw_text(MESSAGE(MSG_WEIGHT), 221, 156, &sp->style[0]);
+            ui_draw_number_fixed(menu_figure_whole | DIGITS(3), 249, 156, &sp->style[4]);
             ui_draw_glyph(78, 269, 156, &sp->style[0]);
-            ui_draw_number_fixed((u16)(DAT_80088188 - menu_figure_whole * 10) | 0x1000000, 275, 156,
+            ui_draw_number_fixed((u16)(DAT_80088188 - menu_figure_whole * 10) | DIGITS(1), 275, 156,
                           &sp->style[4]);
             ui_draw_glyph(108, 281, 156, &sp->style[0]);
         }
@@ -685,65 +699,65 @@ void menu_equip_draw_slots(void)
     }
     menu_figure_whole = viewer.equip_weight * 100 / 454;
     DAT_80088188 = viewer.equip_weight * 1000 / 454;
-    ui_draw_text(MESSAGE(915), 113, 26, label);
-    ui_draw_number(menu_figure_whole | 0x3000000, 181, 26, value);
+    ui_draw_text(MESSAGE(MSG_EQUIP_WEIGHT), 113, 26, label);
+    ui_draw_number(menu_figure_whole | DIGITS(3), 181, 26, value);
     ui_draw_glyph(78, 212, 26, label);
-    ui_draw_number((u16)(DAT_80088188 - menu_figure_whole * 10) | 0x1000000, 217, 26, value);
+    ui_draw_number((u16)(DAT_80088188 - menu_figure_whole * 10) | DIGITS(1), 217, 26, value);
     ui_draw_glyph(74, 230, 26, label);
     menu_figure_whole = viewer.equip_weight_limit * 100 / 454;
     DAT_80088188 = viewer.equip_weight_limit * 1000 / 454;
-    ui_draw_number(menu_figure_whole | 0x3000000, 243, 26, value);
+    ui_draw_number(menu_figure_whole | DIGITS(3), 243, 26, value);
     ui_draw_glyph(78, 274, 26, label);
-    ui_draw_number((u16)(DAT_80088188 - menu_figure_whole * 10) | 0x1000000, 279, 26, value);
+    ui_draw_number((u16)(DAT_80088188 - menu_figure_whole * 10) | DIGITS(1), 279, 26, value);
     for (i = 0; i < 5; i++) {
         y = 48 + i * 36;
         y2 = 64 + i * 36;
-        ui_draw_text(MESSAGE(sp->scroll + i + 900), 28, y, &sp->style[0]);
+        ui_draw_text(MESSAGE(sp->scroll + i + MSG_EQUIP_SLOT_NAMES), 28, y, &sp->style[0]);
         switch (sp->scroll + i) {
         case 0:
-            cur = viewer.equipment[8];
+            cur = viewer.equipment[EQUIP_SLOT_HELMET];
             break;
         case 1:
-            cur = viewer.equipment[9];
+            cur = viewer.equipment[EQUIP_SLOT_ARMOR];
             break;
         case 2:
-            cur = viewer.equipment[2];
+            cur = viewer.equipment[EQUIP_SLOT_GLOVES];
             break;
         case 3:
-            cur = viewer.equipment[10];
+            cur = viewer.equipment[EQUIP_SLOT_BOOTS];
             break;
         case 4:
-            cur = viewer.equipment[3];
+            cur = viewer.equipment[EQUIP_SLOT_RIGHT_HAND];
             break;
         case 5:
-            cur = viewer.equipment[4];
+            cur = viewer.equipment[EQUIP_SLOT_RIGHT_RESERVE];
             break;
         case 6:
-            cur = viewer.equipment[16];
+            cur = viewer.equipment[EQUIP_SLOT_LEFT_HAND];
             break;
         case 7:
-            cur = viewer.equipment[17];
+            cur = viewer.equipment[EQUIP_SLOT_LEFT_RESERVE];
             break;
         case 8:
-            cur = viewer.equipment[1];
+            cur = viewer.equipment[EQUIP_SLOT_RIGHT_BRACELET];
             break;
         case 9:
-            cur = viewer.equipment[14];
+            cur = viewer.equipment[EQUIP_SLOT_LEFT_BRACELET];
             break;
         case 10:
-            cur = viewer.equipment[7];
+            cur = viewer.equipment[EQUIP_SLOT_AMULET];
             break;
         case 11:
-            cur = viewer.equipment[0];
+            cur = viewer.equipment[EQUIP_SLOT_RIGHT_RING];
             break;
         case 12:
-            cur = viewer.equipment[6];
+            cur = viewer.equipment[EQUIP_SLOT_RIGHT_MAGIC];
             break;
         case 13:
-            cur = viewer.equipment[13];
+            cur = viewer.equipment[EQUIP_SLOT_LEFT_RING];
             break;
         case 14:
-            cur = viewer.equipment[12];
+            cur = viewer.equipment[EQUIP_SLOT_LEFT_MAGIC];
             break;
         default:
             cur = 0xffff;
@@ -754,9 +768,9 @@ void menu_equip_draw_slots(void)
             if (cur != 0xffff) {
                 u8 entries[] = {0, 1, 255, 2, 3, 255, 4, 5, 255, 6, 7, 255, 8, 9, 255, 10, 11, 255};
 
-                ui_draw_text(MESSAGE(916 + entries[cur]), 92, y, &sp->style[0]);
+                ui_draw_text(MESSAGE(MSG_MAGIC_NAMES + entries[cur]), 92, y, &sp->style[0]);
             } else {
-                ui_draw_text(MESSAGE(935), 92, y, &sp->style[0]);
+                ui_draw_text(MESSAGE(MSG_NO_SELECT), 92, y, &sp->style[0]);
             }
         } else if (cur != 0xffff) {
             sp->style[0].cd |= 0x80;
@@ -765,7 +779,7 @@ void menu_equip_draw_slots(void)
             sp->style[0].cd &= 0x7f;
             sp->style[3].cd &= 0x7f;
         } else {
-            ui_draw_text(MESSAGE(934), 92, y, &sp->style[0]);
+            ui_draw_text(MESSAGE(MSG_NO_EQUIP), 92, y, &sp->style[0]);
         }
         row = sp->scroll + i;
         if (row != 12 && row != 14 && cur != 0xffff && vis_table_c.types[cur].max_durability) {
@@ -776,10 +790,10 @@ void menu_equip_draw_slots(void)
                 label2 = &sp->style[0];
                 value2 = &sp->style[4];
             }
-            ui_draw_text(MESSAGE(109), 92, y2, label2);
-            ui_draw_number(vis_table_c.types[cur].durability | 0x3000000, 172, y2, value2);
+            ui_draw_text(MESSAGE(MSG_DURABILITY), 92, y2, label2);
+            ui_draw_number(vis_table_c.types[cur].durability | DIGITS(3), 172, y2, value2);
             ui_draw_glyph(74, 204, y2, label2);
-            ui_draw_number(vis_table_c.types[cur].max_durability | 0x3000000, 220, y2, value2);
+            ui_draw_number(vis_table_c.types[cur].max_durability | DIGITS(3), 220, y2, value2);
         }
     }
 }
@@ -806,10 +820,10 @@ void menu_equip_draw_magic_list(void)
         if (*(list->entries + (sp->scroll + i)) != 255) {
             names = magic_name_messages;
             ui_draw_text(
-                (u16 *)(offsets[916 + names[*(list->entries + (sp->scroll + i))]] + text), 28, y,
+                (u16 *)(offsets[MSG_MAGIC_NAMES + names[*(list->entries + (sp->scroll + i))]] + text), 28, y,
                 label);
-            ui_draw_text((u16 *)(offsets[936] + text), 140, y2, label);
-            ui_draw_number(effects.defs[*(list->entries + (sp->scroll + i))].mp_cost | 0x3000000,
+            ui_draw_text((u16 *)(offsets[MSG_MP_USED] + text), 140, y2, label);
+            ui_draw_number(effects.defs[*(list->entries + (sp->scroll + i))].mp_cost | DIGITS(3),
                           204, y2, &sp->style[4]);
             y2 += 36;
             y += 36;
@@ -855,11 +869,11 @@ void menu_equip_draw(void)
     sp->cursor_color.b = 0;
     sp->cursor_color.r = (u8)sp->blink_level * 4 + 96;
     sp->cursor_color.g = (u8)sp->blink_level * 2 + 48;
-    if (!(sp->mode & 0x8))
+    if (!(sp->mode & EQUIP_MENU_ITEM_LIST))
         menu_equip_draw_cursor();
-    if (sp->mode & 0x8)
+    if (sp->mode & EQUIP_MENU_ITEM_LIST)
         menu_equip_draw_item_panel();
-    else if (sp->mode & 0x1)
+    else if (sp->mode & EQUIP_MENU_SLOT_LIST)
         menu_equip_draw_slots();
     else
         menu_equip_draw_magic_list();
@@ -924,20 +938,20 @@ void menu_arrange_list_open(void)
     menu_show_loading_screen();
     MENU_SCRATCH->state.grid.messages = mem_alloc(21504);
     tim = cd_file_buffer;
-    cd_read_member(3, 1, tim);
+    cd_read_member(ARCHIVE_STAT, STAT_SCREEN_MESSAGES, tim);
     copy_words((u32 *)&menu_messages, (u32 *)(tim + 1), 5376);
     tim = (u_long *)((u8 *)tim + (*tim + sizeof(*tim)));
     tim_load_images_at(tim + 1, &MENU_SCRATCH->image_vram[0], &MENU_SCRATCH->image_vram[1], 1);
     tim = cd_file_buffer;
-    cd_read_member(3, 4, tim);
+    cd_read_member(ARCHIVE_STAT, STAT_ITEM_NAMES_HIGH_RES, tim);
     sp = MENU_SCRATCH;
     copy_words((u32 *)sp->state.grid.messages, (u32 *)(tim + 1), 5376);
     tim = (u_long *)((u8 *)tim + (*tim + sizeof(*tim)));
     tim_load_images_at(tim + 1, &sp->image_vram[2], &sp->image_vram[3], 1);
-    cd_read_member(3, 5, cd_file_buffer);
+    cd_read_member(ARCHIVE_STAT, STAT_BACKGROUND, cd_file_buffer);
     tim_load_images_at(cd_file_buffer, &sp->image_vram[4], NULL, 1);
     DrawSync(0);
-    cd_read_member(3, 7, cd_file_buffer);
+    cd_read_member(ARCHIVE_STAT, STAT_SCREEN_IMAGES, cd_file_buffer);
     tim_load_images_at(cd_file_buffer, &tex, &clut, 1);
     DrawSync(0);
     sp->state.grid.hand_count = 0;
@@ -951,14 +965,20 @@ void menu_arrange_list_open(void)
     sp->state.grid.hand_count = 0;
     sp->state.grid.bag_count = 0;
     for (i = 0; i < 314; i++) {
-        if (vis_table_c.types[i].unk5[0] != 255 && i < 314 && i != 266 &&
-            inventory.counts[i].count && i != viewer.equipment[0] && i != viewer.equipment[1] &&
-            i != viewer.equipment[2] && i != viewer.equipment[3] && i != viewer.equipment[4] &&
-            i != viewer.equipment[5] && i != viewer.equipment[7] && i != viewer.equipment[8] &&
-            i != viewer.equipment[9] && i != viewer.equipment[10] && i != viewer.equipment[11] &&
-            i != viewer.equipment[13] && i != viewer.equipment[14] &&
-            i != viewer.equipment[15] && i != viewer.equipment[16] && i != viewer.equipment[17] &&
-            i != viewer.equipment[18] && i != viewer.equipment[19] && i != viewer.equipment[20]) {
+        if (vis_table_c.types[i].icon != 255 && i < 314 && i != 266 &&
+            inventory.counts[i].count && i != viewer.equipment[EQUIP_SLOT_RIGHT_RING]
+                && i != viewer.equipment[EQUIP_SLOT_RIGHT_BRACELET] &&
+            i != viewer.equipment[EQUIP_SLOT_GLOVES] && i != viewer.equipment[EQUIP_SLOT_RIGHT_HAND]
+                && i != viewer.equipment[EQUIP_SLOT_RIGHT_RESERVE] &&
+            i != viewer.equipment[EQUIP_SLOT_QUICK_1] && i != viewer.equipment[EQUIP_SLOT_AMULET]
+                && i != viewer.equipment[EQUIP_SLOT_HELMET] &&
+            i != viewer.equipment[EQUIP_SLOT_ARMOR] && i != viewer.equipment[EQUIP_SLOT_BOOTS]
+                && i != viewer.equipment[EQUIP_SLOT_QUICK_3] &&
+            i != viewer.equipment[EQUIP_SLOT_LEFT_RING] && i != viewer.equipment[EQUIP_SLOT_LEFT_BRACELET] &&
+            i != viewer.equipment[EQUIP_SLOT_GLOVES_MIRROR] && i != viewer.equipment[EQUIP_SLOT_LEFT_HAND]
+                && i != viewer.equipment[EQUIP_SLOT_LEFT_RESERVE] &&
+            i != viewer.equipment[EQUIP_SLOT_QUICK_5] && i != viewer.equipment[EQUIP_SLOT_QUICK_2]
+                && i != viewer.equipment[EQUIP_SLOT_QUICK_4]) {
             if (!inventory.counts[i].in_bag)
                 sp->state.grid.hand_ids[sp->state.grid.hand_count++] = i;
             else
@@ -1013,7 +1033,7 @@ void menu_arrange_list_loop(void)
 
     pad_clear_input();
     for (;;) {
-        if (PAD.pressed & 0x2000) {
+        if (PAD.pressed & PAD_BUTTON_CIRCLE) {
             play_cancel_sound();
             PAD.pressed = 0;
             if (sp->mode & 0x8000)
@@ -1023,7 +1043,7 @@ void menu_arrange_list_loop(void)
             else
                 break;
         }
-        if (PAD.pressed & 0x4000) {
+        if (PAD.pressed & PAD_BUTTON_CROSS) {
             play_confirm_sound();
             PAD.pressed = 0;
             if (sp->mode & 0x8000) {
@@ -1102,7 +1122,7 @@ void menu_arrange_list_loop(void)
             }
         }
         if (!(sp->mode & 0x8000)) {
-            if (PAD.pressed & 0x1) {
+            if (PAD.pressed & PAD_BUTTON_SELECT) {
                 play_confirm_sound();
                 PAD.pressed = 0;
                 if (ST.grid == 104) {
@@ -1131,7 +1151,7 @@ void menu_arrange_list_loop(void)
                     }
                 }
             }
-            if (PAD.pressed & 0x8000) {
+            if (PAD.pressed & PAD_BUTTON_SQUARE) {
                 play_confirm_sound();
                 PAD.pressed = 0;
                 if (ST.range_held) {
@@ -1145,7 +1165,7 @@ void menu_arrange_list_loop(void)
                     ST.range_anchor = ST.range_start = ST.range_end = cur;
                 }
             }
-            if (PAD.pressed & 0x1000) {
+            if (PAD.pressed & PAD_BUTTON_TRIANGLE) {
                 play_confirm_sound();
                 PAD.pressed = 0;
                 if (sp->mode == 1)
@@ -1153,7 +1173,7 @@ void menu_arrange_list_loop(void)
                 else if (sp->mode == 2)
                     sp->mode = 1;
             }
-            if (PAD.pressed_repeat & 0x20) {
+            if (PAD.pressed_repeat & PAD_BUTTON_RIGHT) {
                 play_cursor_sound();
                 PAD.pressed_repeat = 0;
                 if (ST.grid == 104) {
@@ -1161,7 +1181,7 @@ void menu_arrange_list_loop(void)
                     RANGE_CLEAR();
                 }
             }
-            if (PAD.pressed_repeat & 0x80) {
+            if (PAD.pressed_repeat & PAD_BUTTON_LEFT) {
                 play_cursor_sound();
                 PAD.pressed_repeat = 0;
                 if (ST.grid == 98) {
@@ -1169,9 +1189,9 @@ void menu_arrange_list_loop(void)
                     RANGE_CLEAR();
                 }
             }
-            if (PAD.pressed_repeat & 0x10) {
+            if (PAD.pressed_repeat & PAD_BUTTON_UP) {
                 play_cursor_sound();
-                if (PAD.held & 0x8000) {
+                if (PAD.held & PAD_BUTTON_SQUARE) {
                     if (ST.grid == 104) {
                         if (GRID->hand_row == 0)
                             sp->cursor = 0;
@@ -1196,9 +1216,9 @@ void menu_arrange_list_loop(void)
                 }
                 PAD.pressed_repeat = 0;
             }
-            if (PAD.pressed_repeat & 0x40) {
+            if (PAD.pressed_repeat & PAD_BUTTON_DOWN) {
                 play_cursor_sound();
-                if (PAD.held & 0x8000) {
+                if (PAD.held & PAD_BUTTON_SQUARE) {
                     if (ST.grid == 104) {
                         if (GRID->hand_row == 303)
                             sp->cursor = 10;
@@ -1224,7 +1244,7 @@ void menu_arrange_list_loop(void)
                 PAD.pressed_repeat = 0;
             }
             if ((sp->mode == 2 && ST.grid == 104) || sp->mode != 2) {
-                if (PAD.pressed_repeat & 0x400) {
+                if (PAD.pressed_repeat & PAD_BUTTON_L1) {
                     play_cursor_sound();
                     PAD.pressed_repeat = 0;
                     if (ST.grid == 104 && GRID->hand_row == 0)
@@ -1233,7 +1253,7 @@ void menu_arrange_list_loop(void)
                     if (GRID->hand_row < 0)
                         GRID->hand_row = 0;
                 }
-                if (PAD.pressed_repeat & 0x100) {
+                if (PAD.pressed_repeat & PAD_BUTTON_L2) {
                     play_cursor_sound();
                     PAD.pressed_repeat = 0;
                     if (ST.grid == 104 && GRID->hand_row == 303)
@@ -1244,7 +1264,7 @@ void menu_arrange_list_loop(void)
                 }
             }
             if ((sp->mode == 2 && ST.grid == 98) || sp->mode != 2) {
-                if (PAD.pressed_repeat & 0x800) {
+                if (PAD.pressed_repeat & PAD_BUTTON_R1) {
                     play_cursor_sound();
                     PAD.pressed_repeat = 0;
                     if (ST.grid == 98 && GRID->bag_row == 0)
@@ -1253,7 +1273,7 @@ void menu_arrange_list_loop(void)
                     if (GRID->bag_row < 0)
                         GRID->bag_row = 0;
                 }
-                if (PAD.pressed_repeat & 0x200) {
+                if (PAD.pressed_repeat & PAD_BUTTON_R2) {
                     play_cursor_sound();
                     PAD.pressed_repeat = 0;
                     if (ST.grid == 98 && GRID->bag_row == 303)
@@ -1286,7 +1306,7 @@ void menu_arrange_list_loop(void)
                 else
                     id = GRID->bag_ids[GRID->bag_row + sp->cursor];
                 if (ST.shown_id != id && id != -1) {
-                    menu_arrange_list_queue_image(6, vis_table_c.types[id].unk5[0] + 200);
+                    menu_arrange_list_queue_image(ARCHIVE_ICON, vis_table_c.types[id].icon + 200);
                     ST.shown_id = id;
                 }
             }
@@ -1405,8 +1425,9 @@ void menu_arrange_list_draw_details(void)
                     goto done;
                 n++;
                 if (*count) {
-                    ui_draw_text(MESSAGE(200 + k), text_x - 4 + i * 72, text_y + j * 15, &sp->style[0]);
-                    ui_draw_number(*count | 0x13000000, text_x + i * 72 + 40, text_y + j * 15,
+                    ui_draw_text(MESSAGE(MSG_HI_HAND + k), text_x - 4 + i * 72, text_y + j * 15,
+                        &sp->style[0]);
+                    ui_draw_number(*count | NUMBER_PLUS | DIGITS(3), text_x + i * 72 + 40, text_y + j * 15,
                                   &sp->style[4]);
                 }
                 count++;
@@ -1426,19 +1447,19 @@ void menu_arrange_list_draw_details(void)
                 label = &sp->style[0];
                 value = &sp->style[4];
             }
-            ui_draw_text(MESSAGE(29), text_x, text_y, label);
-            ui_draw_number(vis_table_c.types[id].durability | 0x3000000, text_x + 70, text_y, value);
+            ui_draw_text(MESSAGE(MSG_HI_DURABILITY), text_x, text_y, label);
+            ui_draw_number(vis_table_c.types[id].durability | DIGITS(3), text_x + 70, text_y, value);
             ui_draw_glyph(14, text_x + 106, text_y, label);
-            ui_draw_number(vis_table_c.types[id].max_durability | 0x3000000, text_x + 122, text_y, value);
+            ui_draw_number(vis_table_c.types[id].max_durability | DIGITS(3), text_x + 122, text_y, value);
         }
         text_y += 15;
         if (vis_table_c.types[id].weight) {
             whole = vis_table_c.types[id].weight * 100 / 454;
             tenths = vis_table_c.types[id].weight * 1000 / 454 - whole * 10;
-            ui_draw_text(MESSAGE(28), text_x, text_y, &sp->style[0]);
-            ui_draw_number(whole | 0x3000000, text_x + 70, text_y, &sp->style[4]);
+            ui_draw_text(MESSAGE(MSG_HI_WEIGHT), text_x, text_y, &sp->style[0]);
+            ui_draw_number(whole | DIGITS(3), text_x + 70, text_y, &sp->style[4]);
             ui_draw_glyph(18, text_x + 109, text_y, &sp->style[0]);
-            ui_draw_number(tenths | 0x1000000, text_x + 116, text_y, &sp->style[4]);
+            ui_draw_number(tenths | DIGITS(1), text_x + 116, text_y, &sp->style[4]);
             ui_draw_glyph(53, text_x + 132, text_y, &sp->style[0]);
         }
     }

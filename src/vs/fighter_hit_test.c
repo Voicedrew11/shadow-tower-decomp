@@ -27,7 +27,7 @@ int fighter_hit_test(int n, s16 reach, s16 arc)
     int t;
     int state;
 
-    if (o->state == 4)
+    if (o->state == FIGHTER_STATE_DOWN)
         goto miss;
     if (round_phase != 1)
         goto miss;

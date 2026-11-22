@@ -61,7 +61,7 @@ ADDRESS_AT("ST", 0x80035604, 0x98)
 ADDRESS_AT("VS", 0x80024640, 0x98)
 void anim_list_compose(void)
 {
-    StAnimList *list = SCRATCHPAD->list.anims;
+    StAnimList *list = SCRATCHPAD->anims;
     int i = list->count;
     StAnimNode *node = list->nodes;
 

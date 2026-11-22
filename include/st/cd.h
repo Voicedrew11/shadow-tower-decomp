@@ -14,9 +14,11 @@
 #include <LIBGTE.H>
 #include <LIBGPU.H>
 #include <LIBCD.H>
+#include <st/archives.h>
+#include <st/cd_requests.h>
 
 #define ST_CD_REQUESTS 48
-#define ST_ARCHIVES 3
+#define ST_ARCHIVES 9
 
 /* The request's eight-byte image/bank payload. */
 struct StSoundBuf;
@@ -118,9 +120,11 @@ typedef struct {
     StCdRequest requests[ST_CD_REQUESTS];
     StCdRequest *next_free;
     StCdRequest *current;
+    /* 0x9dc: the archives game_load_common_data opens: 0 MO, 1 FDAT, 2 CHR0\M00,
+     * 3 STAT (menu_equip_info_run seeks to member 1), 4 CRT, 5 ITEM, 6 ICON,
+     * 7 EQUIP, 8 TALKMSG */
     StArchive archives[ST_ARCHIVES];
-    StArchive stat_archive; /* 0xa00: a fourth archive table (menu_equip_info_run seeks to member 1) */
-    u8 unkA0C[0xa6c - 0xa0c];
+    u8 unkA48[0xa6c - 0xa48];
     CdlFILE loading_file; /* \LOAD02.TIM;1, searched by loading_screen_find_file, read by loading_screen_show */
     u_long *load_cursor; /* 0xa84: load cursor into cd_file_buffer, which follows this block (src/st/menu.c) */
 } StCdState;
@@ -131,6 +135,8 @@ typedef char StCdRequestRingAt0x14[(offsetof(StCdState, requests) == 0x14) ? 1 :
 typedef char StCdFreeAt0x9d4[(offsetof(StCdState, next_free) == 0x9d4) ? 1 : -1];
 typedef char StCdCurrentAt0x9d8[(offsetof(StCdState, current) == 0x9d8) ? 1 : -1];
 typedef char StCdArchivesAt0x9dc[(offsetof(StCdState, archives) == 0x9dc) ? 1 : -1];
+typedef char StCdUnkA48At0xa48[(offsetof(StCdState, unkA48) == 0xa48) ? 1 : -1];
+typedef char StCdLoadingFileAt0xa6c[(offsetof(StCdState, loading_file) == 0xa6c) ? 1 : -1];
 
 
 extern StCdState cd_state;

@@ -64,11 +64,11 @@ void map_restore_progress(void)
     GroundItem *item = &vis_table_c.entries[11];
 
     if (!game_progress.event_flags.bit.f15) {
-        item->state = 4;
+        item->state = GROUND_ITEM_HIDDEN;
         d[0].visibility = d[1].visibility = d[2].visibility = d[3].visibility = d[4].visibility = 2;
         fdat_801edb84 = 0;
     } else {
-        item->state = 5;
+        item->state = GROUND_ITEM_SCRIPTED;
         d[0].visibility = d[1].visibility = d[2].visibility = d[3].visibility = d[4].visibility = 0;
         fdat_801edb84 = 2;
         item->position.vx += 0x1e0;
@@ -127,9 +127,9 @@ void map_use_item_on_object(short id)
     if (id == 0x130) {
         if (object_find_in_reach((CollisionState *)&req) == 4) {
             fdat_801edb84 = 1;
-            DAT_801cd0e0 = 1;
+            game_progress.item_use_result = 1;
         } else {
-            DAT_801cd0e0 = 2;
+            game_progress.item_use_result = 2;
         }
     }
 }

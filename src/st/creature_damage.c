@@ -71,13 +71,13 @@ void creature_drop_item(Creature *e, int id)
     }
     slot->item = id;
     slot->block = e->block;
-    *(u32 *)slot->anim_slot = 0;
+    slot->anim_slot.slot = NULL;
     slot->position = e->position;
     slot->position.vy -= e->height >> 1;
     /* One 8-byte copy of the rotation (rot_x..unk92) over the item's (rot_x..unk1E). */
-    *(SVECTOR *)&slot->rot_x = *(SVECTOR *)&e->rot_x;
+    slot->rotation = e->rotation;
     slot->unk20 = rec->flags;
-    slot->state = 1;
+    slot->state = GROUND_ITEM_FALLING;
     slot->prev_state = 1;
     slot->draw_flags = 0;
     slot->player_dist_xz = e->player_dist_xz;
@@ -131,8 +131,8 @@ int creature_test_player_aim(Creature *e, short reach)
     short half;
     int ay;
 
-    yaw = (viewer.yaw - e->player_heading) & 0xfff;
-    pitch = viewer.pitch & 0xfff;
+    yaw = (viewer.rotation.vy - e->player_heading) & 0xfff;
+    pitch = viewer.rotation.vx & 0xfff;
     if (reach + e->radius < e->player_dist_xz)
         return 0;
     dy = e->position.vy - viewer.position.vy;

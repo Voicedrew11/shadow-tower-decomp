@@ -74,7 +74,7 @@ void map_restore_progress(void)
     CreatureType *r4 = &vis_table_a.types[4];
     CreatureType *r8 = &vis_table_a.types[8];
 
-    if (e48->state != 3)
+    if (e48->state != CREATURE_STATE_GONE)
         e48->status.bytes[3] = 2;
     if (game_progress.talk_counts[r2->talk_id] == 1)
         fdat_801eda30 = 0xff;

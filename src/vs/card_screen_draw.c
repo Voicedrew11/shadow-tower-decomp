@@ -18,10 +18,10 @@ void card_draw_transfer(void)
     VsMenuScratch *sp = VS_MENU_SCRATCH;
 
     if (sp->mode & 0xff)
-        ui_draw_text(VS_MESSAGE(330), 32, 74, &sp->style[0]);
+        ui_draw_text(VS_MESSAGE(MSG_CARD_LOADING), 32, 74, &sp->style[0]);
     else
-        ui_draw_text(VS_MESSAGE(331), 32, 74, &sp->style[0]);
-    ui_draw_text(VS_MESSAGE(332), 40, 100, &sp->style[0]);
+        ui_draw_text(VS_MESSAGE(MSG_CARD_SAVING), 32, 74, &sp->style[0]);
+    ui_draw_text(VS_MESSAGE(MSG_CARD_DO_NOT_REMOVE), 40, 100, &sp->style[0]);
 }
 
 ADDRESS(0x80020420, 0x40)
@@ -29,7 +29,7 @@ void card_draw_finished(void)
 {
     VsMenuScratch *sp = VS_MENU_SCRATCH;
 
-    ui_draw_text(VS_MESSAGE(340), 32, 74, &sp->style[0]);
+    ui_draw_text(VS_MESSAGE(MSG_CARD_FINISHED), 32, 74, &sp->style[0]);
 }
 
 ADDRESS(0x80020460, 0x50)

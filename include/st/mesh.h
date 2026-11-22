@@ -16,13 +16,7 @@
 #include <st/gfx.h>
 #include <st/anim.h>
 
-/* A transformed vertex: its screen XY, then the depth and depth-cue values
- * the face loops average. Faces index vertices by byte offset. */
-typedef struct {
-    DVECTOR sxy;
-    short z;
-    short p;
-} MeshVertex;
+/* MeshVertex, the transformed vertex: st/gfx.h. */
 
 /*
  * Face records. Vertex (i*) and normal (n*) fields are byte offsets into the
@@ -155,39 +149,17 @@ void world_draw(void);
 
 /*
  * The model renderers (src/st/model_draw.c). A model block (a
- * world_state.model_files slot) holds its part data at the offset in word +8;
- * halfword +6 selects which of anim_prepare / anim_prepare_any prepares it.
+ * world_state.model_files slot) is a StAnimFile (st/anim.h): its part data is
+ * at the offset `model`; node_count selects which of anim_prepare /
+ * anim_prepare_any prepares it.
  */
-typedef struct {
-    u8 unk0[6];
-    u16 node_count;
-    u32 model;
-} ModelFile;
-
-/* One entry of the scratchpad's model list: a part of the current model
- * drawn for an object. */
-typedef struct {
-    u32 flags;
-    StAnimRecord *obj;   /* 0x04: its node record (st/anim.h); model_draw_list clears
-                          * flags every frame, scales kinds 1, 3 and 4 by transform->scale and
-                          * turns kind 2's parent matrix (parent->local_matrix) to face the viewer */
-    u16 part;            /* 0x08: 0xffff: none */
-    u8 kind;             /* 0x0a: 1, 3, 4: scaled, every 6th, 4th, 8th entry per frame */
-    u8 unk0B;
-    s32 key;             /* -1: skipped */
-} ModelEntry;
-
-typedef struct {
-    ModelEntry *entries;
-    s32 count;
-} ModelList;
 
 void player_draw_equipment_model(u8 slot);
 /* VS.EXE has its own port under this name, with another signature; VS units define VS_EXE. */
 #ifndef VS_EXE
 void model_draw_list(u8 flags, SVECTOR *rot);
 #endif
-void model_draw(int unused0, u16 model, VECTOR *pos, SVECTOR *rot, SVECTOR *scale, void *anim,
+void model_draw(int unused0, u16 model, VECTOR *pos, SVECTOR *rot, SVECTOR *scale, StAnimState *anim,
                 MATRIX *view, u16 part, u16 arg8, short light, short unused10, u8 flags,
                 int z);
 

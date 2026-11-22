@@ -13,6 +13,14 @@
 #include <LIBCD.H>
 #include <st/memory.h>
 #include <st/gfx.h>
+#include <st/equip_slots.h>
+#include <st/pad_buttons.h>
+#include <st/player_ids.h>
+
+/* Tags of objects other headers define (st/vis.h, st/anim.h, st/effect.h). */
+struct MapBlock;
+struct StAnimFile;
+struct StEffectDef;
 
 /* PSX.EXE's next-program byte and the two mailbox bytes after it. */
 #define NEXT_PROGRAM_BYTE ((u8 *)0x800103f0)
@@ -75,7 +83,7 @@ typedef union {
     s16 halves[2];
 } ViewerAnglePair;
 
-/* A warp destination (viewer.warp_return, viewer.save_area): area, cell and offset,
+/* A warp destination (viewer.warp_return, viewer.save_point): area, cell and offset,
  * yaw (player_warp). */
 typedef struct {
     u8 area;
@@ -140,10 +148,10 @@ typedef struct {
     u16 shield_element_defence; /* 0xe4: player_compute_derived_stats */
     u8 unkE6[2];
     EquipmentModel *slot_model_info[4]; /* 0xe8: player_draw_equipment_model's slot positions and rotations */
-    void *slot_model_files[4]; /* 0xf8: its slot model blocks (ModelFile, st/mesh.h) */
-    void *slot_anims[4]; /* 0x108: its slot animation state: a StAnimSlot (anim_prepare) or
+    struct StAnimFile *slot_model_files[4]; /* 0xf8: its slot model files (equipment_model_buffers) */
+    StAnimState slot_anims[4]; /* 0x108: its slot animation state: a StAnimSlot (anim_prepare) or
                           * a node set (anim_prepare_any), by the model file's halfword +6 */
-    void *magic_defs[2]; /* 0x118: player_load_magic's effects.defs record per slot */
+    struct StEffectDef *magic_defs[2]; /* 0x118: player_load_magic's effects.defs record per slot */
     u8 *magic_buffers[2]; /* 0x120: its load buffers (magic_model_buffers) */
     s32 unk128[2];
     ActionTimers action_timers; /* 0x130..0x137: timers and hit windows */
@@ -164,8 +172,8 @@ typedef struct {
     s8 quick_item_index; /* 0x15e: quick-item cursor; the HUD frame offset (world_render_frame) */
     u8 unk15F;
     SVECTOR shot_offsets[2]; /* 0x160: player_get_launch_vector's offsets per slot */
-    void *prev_block_record; /* 0x170: block_record before the last move (player_update_motion) */
-    void *block_record;  /* 0x174: the MapBlock the viewer stands in (st/vis.h) */
+    struct MapBlock *prev_block_record; /* 0x170: block_record before the last move (player_update_motion) */
+    struct MapBlock *block_record; /* 0x174: the MapBlock the viewer stands in (st/vis.h) */
     s16 block;
     s16 death_pitch_step;
     s16 unk17C;
@@ -185,8 +193,6 @@ typedef struct {
         s32 words[13];     /* both at once: zero when the status is over; the HUD
                             * shows an icon while timer 5.. is nonzero */
     } timers;            /* 0x190: status timers */
-/* The halfword view under its first name. */
-#define unk190 timers.halves
     u8 hp_regen_interval;
     u8 mp_regen_interval;
     u8 double_damage_chance;
@@ -221,18 +227,8 @@ typedef struct {
     u8 free_anims_after_menu;
     u8 motion_stopped;
     u8 bow_released;
-    union {
-        u8 bytes[0xc];
-        StWarp warp;
-    } warp_return;       /* 0x220: the place a warp was entered from (player_warp_back) */
-    u8 save_area;
-    u8 save_x;
-    u8 save_y;
-    u8 save_z;
-    s16 save_dx;
-    s16 save_dy;
-    s16 save_dz;
-    s16 save_yaw;
+    StWarp warp_return;  /* 0x220: the place a warp was entered from (player_warp_back) */
+    StWarp save_point;   /* 0x22c: the save point player_warp_to_save_point returns to; area 0xff: none */
     u8 fall_death;
     u8 unk239;
     u8 unk23A[2];
@@ -242,12 +238,10 @@ typedef struct {
     VECTOR position;     /* 0x248..0x257: includes the copied pad word */
     u8 unk258[8];
     SVECTOR velocity;    /* 0x260: motion (creature_aim_shot leads targets by it) */
-    short pitch;         /* 0x268: pitch in view_point_in_near_cone */
-    short yaw;           /* 0x26a: yaw in view_point_in_near_cone */
-    short roll;          /* 0x26c: roll; model_draw_list turns kind-2 parts by all three */
-    short unk26E;
+    SVECTOR rotation;    /* 0x268: pitch (vx) and yaw (vy) in view_point_in_near_cone, roll (vz);
+                          * model_draw_list turns kind-2 parts by all three */
     SVECTOR camera_rot;  /* 0x270 */
-    SVECTOR view_rot;    /* 0x278: player_reset_state copies it to 0x268; view pitch (vx) and yaw (vy) player_update_look turns
+    SVECTOR view_rot;    /* 0x278: player_reset_state copies it to rotation; view pitch (vx) and yaw (vy) player_update_look turns
                           * (band L reads the yaw, view_rot.vy) */
     ViewerAnglePair rot_offset; /* 0x280: view pitch/yaw offsets */
     s16 roll_offset;
@@ -296,6 +290,18 @@ typedef char ViewerAnglePairEndsAt0x284[offsetof(Viewer, roll_offset) == 0x284 ?
 typedef char ViewerPositionAt0x248[offsetof(Viewer, position) == 0x248 ? 1 : -1];
 typedef char ViewerPositionEndsAt0x258[offsetof(Viewer, unk258) == 0x258 ? 1 : -1];
 
+typedef char ViewerSlotModelFilesAt0xF8[offsetof(Viewer, slot_model_files) == 0xf8 ? 1 : -1];
+typedef char ViewerSlotAnimsAt0x108[offsetof(Viewer, slot_anims) == 0x108 ? 1 : -1];
+typedef char ViewerMagicDefsAt0x118[offsetof(Viewer, magic_defs) == 0x118 ? 1 : -1];
+typedef char ViewerBlockRecordAt0x174[offsetof(Viewer, block_record) == 0x174 ? 1 : -1];
+typedef char ViewerWarpReturnAt0x220[offsetof(Viewer, warp_return) == 0x220 ? 1 : -1];
+typedef char ViewerSavePointAt0x22C[offsetof(Viewer, save_point) == 0x22c ? 1 : -1];
+typedef char ViewerFallDeathAt0x238[offsetof(Viewer, fall_death) == 0x238 ? 1 : -1];
+typedef char ViewerRotationAt0x268[offsetof(Viewer, rotation) == 0x268 ? 1 : -1];
+typedef char ViewerCameraRotAt0x270[offsetof(Viewer, camera_rot) == 0x270 ? 1 : -1];
+typedef char ViewerSize[sizeof(Viewer) == 0x2f8 ? 1 : -1];
+typedef char StWarpSize[sizeof(StWarp) == 12 ? 1 : -1];
+
 extern Viewer viewer;
 
 /*
@@ -318,9 +324,9 @@ typedef struct {
     void (*unk0C)();
     void (*unk10)();
     void (*loaded)(void); /* 0x14: called once the area is loaded (area_load_update) */
-    void (*item_added)(int); /* 0x18: item id rose by one (item_add) */
+    void (*item_added)(); /* 0x18: item id rose by one, (id) (item_add) */
     void (*unk1C)();
-    void (*load_object)(void *entry, void *record); /* 0x20: a table B entry kind objects_load does not know */
+    void (*load_object)(); /* 0x20: a table B entry kind objects_load does not know, (entry, record) */
     void (*update_object)(void); /* 0x24: a table B entry kind objects_update does not handle */
     void (*unk28)();
     void (*unk2C)();

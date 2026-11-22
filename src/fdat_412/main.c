@@ -51,7 +51,7 @@ void map_restore_progress(void)
     AreaObject *b = &vis_table_b.entries[21];
 
     if (game_progress.event_flags2.bit.f7)
-        b->kind = 0xff;
+        b->kind = OBJECT_KIND_NONE;
 }
 
 #include "../lib/fdat_creature_pick_move.inc"

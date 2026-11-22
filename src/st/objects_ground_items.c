@@ -111,12 +111,12 @@ int object_find_usable(int start, CollisionState *req)
         if (e->position.vy < req->position.vy ? e->position.vy < req->position.vy - req->height
                                        : req->position.vy < e->position.vy - (e->height + 0x300))
             continue;
-        d = (viewer.yaw - e->player_heading) & 0xfff;
+        d = (viewer.rotation.vy - e->player_heading) & 0xfff;
         if (d > 0x800)
             d |= 0xf000;
         if ((r->flags & 8) && (u16)(d + 400) > 800)
             continue;
-        k = r->unk00[0];
+        k = r->kind;
         if ((k >= 50 && k <= 52) || k == 1 || k == 0 || k == 254 || k == 225 || k == 226
             || k == 14)
             return i;
@@ -130,7 +130,7 @@ void object_start_kind(e, kind)
     AreaObject *e;
     u8 kind;
 {
-    if (e->kind == 0xff) {
+    if (e->kind == OBJECT_KIND_NONE) {
         e->kind = kind;
         e->state = 0;
     }
@@ -220,16 +220,16 @@ ADDRESS(0x8004fb88, 0x84)
 int object_try_key(AreaObject *e, int id)
 {
     switch (e->kind) {
-    case 0:
-    case 1:
-    case 50:
-    case 51:
-    case 52:
+    case OBJECT_KIND_DOOR:
+    case OBJECT_KIND_MODEL_DOOR:
+    case OBJECT_KIND_GATE:
+    case OBJECT_KIND_ITEM_GATE:
+    case OBJECT_KIND_GROUP_GATE:
         if (e->state != 0)
             return 0;
         if (((u8 *)&e->params.snd.period)[1] >= 0xfe)
             return 2;
-        if (((u8 *)&e->params.snd.period)[1] == id - 272) {
+        if (((u8 *)&e->params.snd.period)[1] == id - DOOR_KEY_ITEM_BASE) {
             ((u8 *)&e->params.snd.period)[1] = 0xff;
             return 1;
         }
@@ -315,16 +315,16 @@ int object_move_child(AreaObject *src, AreaObject *e, SVECTOR *from, SVECTOR *to
         if (src->unk48 == 0xff)
             return 0;
         if (e->unk48 == 0)
-            *(u8 *)&src->unk50 = 0;
+            src->kind_data.b[0] = 0;
         else
-            *(u8 *)&src->unk50 = steps - 1;
+            src->kind_data.b[0] = steps - 1;
         src->state = 1;
         object_reset(e);
         e->kind = 112;
         e->unk01 = src->unk01;
         switch (e->type) {
         case 136:
-            e->rot_x = 0x400;
+            e->rotation.vx = 0x400;
             e->depth_bias = 100;
             break;
         case 133:
@@ -335,12 +335,12 @@ int object_move_child(AreaObject *src, AreaObject *e, SVECTOR *from, SVECTOR *to
             e->anim = 0;
         else
             e->anim = 0x80;
-        vector_rotate((SVECTOR *)&src->rot_x, from, &e->position);
+        vector_rotate(&src->rotation, from, &e->position);
         e->position.vx += src->position.vx;
         e->position.vy += src->position.vy;
         e->position.vz += src->position.vz;
-        e->facing = src->facing;
-        *(s16 *)&e->unk50 = src - vis_table_b.entries;
+        e->rotation.vy = src->rotation.vy;
+        e->kind_data.part.h50 = src - vis_table_b.entries;
     case 1:
         break;
     default:
@@ -351,14 +351,14 @@ int object_move_child(AreaObject *src, AreaObject *e, SVECTOR *from, SVECTOR *to
         if (e->anim_frame >= 4096)
             e->anim_frame = 4095;
     }
-    vector_rotate((SVECTOR *)&src->rot_x, from, &a);
-    vector_rotate((SVECTOR *)&src->rot_x, to, &b);
-    (*(u8 *)&src->unk50)++;
-    t = (*(u8 *)&src->unk50 << 12) / steps;
+    vector_rotate(&src->rotation, from, &a);
+    vector_rotate(&src->rotation, to, &b);
+    (src->kind_data.b[0])++;
+    t = (src->kind_data.b[0] << 12) / steps;
     e->position.vx = src->position.vx + math_lerp(a.vx, b.vx, t);
     e->position.vy = src->position.vy + math_lerp(a.vy, b.vy, t);
     e->position.vz = src->position.vz + math_lerp(a.vz, b.vz, t);
-    if (*(u8 *)&src->unk50 >= steps) {
+    if (src->kind_data.b[0] >= steps) {
         if (fade)
             e->anim_frame = 4095;
         if (area_state.loading == 0)
@@ -452,27 +452,27 @@ AreaObject *object_spawn_part(src, kind, state, arg3, size, angle, ox, oy, oz)
     e->unk48 = 0;
     e->block = src->block;
     e->kind = state;
-    *(s16 *)&e->unk50 = arg3;
+    e->kind_data.part.h50 = arg3;
     e->state = size;
-    c = rcos(src->facing - angle) / 16;
-    e->unk56 = rsin(src->facing - angle) / 16;
+    c = rcos(src->rotation.vy - angle) / 16;
+    e->kind_data.part.motion[2] = rsin(src->rotation.vy - angle) / 16;
     e->flags = 0x40;
-    ((s16 *)&e->unk50)[1] = c;
-    e->unk54 = 0;
+    e->kind_data.part.motion[0] = c;
+    e->kind_data.part.motion[1] = 0;
     e->visibility = 0;
     e->anim = 0x80;
-    e->rot_x = 0;
-    e->rot_z = rand() / 8;
-    e->facing = src->facing;
+    e->rotation.vx = 0;
+    e->rotation.vz = rand() / 8;
+    e->rotation.vy = src->rotation.vy;
     e->depth_bias = src->depth_bias;
     e->draw_flags = 15;
     e->unk06 = 0xff;
     e->light = 0x800;
     n = size;
     e->scale.vx = e->scale.vy = e->scale.vz = n << 10;
-    e->position.vx = src->position.vx + (n * 256 - ox) * rcos(src->facing) / 4096;
+    e->position.vx = src->position.vx + (n * 256 - ox) * rcos(src->rotation.vy) / 4096;
     e->position.vy = src->position.vy - oy;
-    e->position.vz = src->position.vz + (n * 256 - oz) * rsin(src->facing) / 4096;
+    e->position.vz = src->position.vz + (n * 256 - oz) * rsin(src->rotation.vy) / 4096;
     return e;
 }
 
@@ -486,7 +486,7 @@ void object_spawn_side_parts(e, arg)
     object_spawn_part(e, 175, 4, arg, 3, 0x400, 0, 0x500, 0);
     object_spawn_part(e, 175, 4, arg, 2, 0x400, 0, 0x500, 0);
     object_spawn_part(e, 175, 4, arg, 1, 0x400, 0, 0x500, 0);
-    e->kind = 0xff;
+    e->kind = OBJECT_KIND_NONE;
 }
 
 /* The same with state 6, offset pieces. */
@@ -499,7 +499,7 @@ void object_spawn_forward_parts(e, arg)
     object_spawn_part(e, 175, 6, arg, 3, 0x400, 0x500, 2000, 0x500);
     object_spawn_part(e, 175, 6, arg, 2, 0x400, 0x500, 2000, 0x500);
     object_spawn_part(e, 175, 6, arg, 1, 0x400, 0x500, 2000, 0x500);
-    e->kind = 0xff;
+    e->kind = OBJECT_KIND_NONE;
 }
 
 /* Four kind-171 pieces with state 8. */
@@ -512,7 +512,7 @@ void object_spawn_side_parts_alt(e, arg)
     object_spawn_part(e, 171, 8, arg, 3, 0x400, 0, 0x500, 0);
     object_spawn_part(e, 171, 8, arg, 2, 0x400, 0, 0x500, 0);
     object_spawn_part(e, 171, 8, arg, 1, 0x400, 0, 0x500, 0);
-    e->kind = 0xff;
+    e->kind = OBJECT_KIND_NONE;
 }
 
 /* objects_update's switch table (a door's swing side). */
@@ -523,16 +523,16 @@ void object_spawn_side_parts_alt(e, arg)
 DATA(0x800881e0, 0x8, ".sbss")
 static SVECTOR object_sequence_push;
 
-/* The halfwords and bytes other kinds keep from 0x50. */
-#define H50(e) (*(s16 *)&(e)->unk50)
-#define H52(e) (((s16 *)&(e)->unk50)[1])
-#define B50(e) (*(u8 *)&(e)->unk50)
-#define B51(e) (((s8 *)&(e)->unk50)[1])
-#define B52(e) (((s8 *)&(e)->unk50)[2])
+/* The halfwords and bytes other kinds keep from 0x50 (AreaObject.kind_data). */
+#define H50(e) ((e)->kind_data.part.h50)
+#define H52(e) ((e)->kind_data.part.motion[0])
+#define B50(e) ((e)->kind_data.b[0])
+#define B51(e) ((e)->kind_data.sb[1])
+#define B52(e) ((e)->kind_data.sb[2])
 
 /* The three bytes from 0x48 and from 0x50, 0xffffff when unset. */
 #define W48(e) (*(u_long *)&(e)->unk48 & 0xffffff)
-#define W50(e) (*(u_long *)&(e)->unk50 & 0xffffff)
+#define W50(e) ((e)->kind_data.words[0] & 0xffffff)
 
 /* Starts the entry's sound n (its record's sounds start at 208). */
 #define SOUND(e, n) object_play_sound(e, (e)->type * 3 + (n))
@@ -580,23 +580,23 @@ void objects_update(void)
         }
         angle = (ratan2(dz, dx) - 1024) & 0xfff;
         e->player_heading = angle;
-        off = ((u16)e->facing - angle) & 0xfff;
+        off = ((u16)e->rotation.vy - angle) & 0xfff;
         e->player_bearing = off;
         if (off > 2048)
             e->player_bearing = 4096 - off;
-        if (e->kind == 255)
+        if (e->kind == OBJECT_KIND_NONE)
             continue;
         switch (e->kind) {
-        case 0:
-        case 1: {
+        case OBJECT_KIND_DOOR:
+        case OBJECT_KIND_MODEL_DOOR: {
             int step = e->unk48;
             short speed = step;
 
             speed *= 4;
             switch (e->state) {
             case 0:
-                if (e->kind == 1) {
-                    if (world_state.model_files[e->type + 256] == NULL)
+                if (e->kind == OBJECT_KIND_MODEL_DOOR) {
+                    if (world_state.model_files[e->type + MODEL_SLOT_OBJECTS] == NULL)
                         e->visibility = 0;
                     else
                         e->visibility = 2;
@@ -607,7 +607,7 @@ void objects_update(void)
             case 1:
                 if (e->anim_frame == 0 && e->anim_frame + step * 4 > 0) {
                     SWAP_RECORDS(e);
-                    if (e->kind == 1)
+                    if (e->kind == OBJECT_KIND_MODEL_DOOR)
                         e->visibility = 1;
                     SOUND(e, 208);
                 }
@@ -695,7 +695,7 @@ void objects_update(void)
                 SOUND(e, 209);
                 break;
             case 7:
-                if (e->kind == 1)
+                if (e->kind == OBJECT_KIND_MODEL_DOOR)
                     e->visibility = 2;
                 break;
             case 8:
@@ -726,15 +726,15 @@ void objects_update(void)
             }
             break;
         }
-        case 50:
-        case 51: {
+        case OBJECT_KIND_GATE:
+        case OBJECT_KIND_ITEM_GATE: {
             int step = e->unk48;
             short speed = step;
 
             speed *= 4;
             switch (e->state) {
             case 0:
-                if (e->kind == 51)
+                if (e->kind == OBJECT_KIND_ITEM_GATE)
                     ground_item_set_hidden(e->params.snd.fade_range, 0);
                 if (e->unk49 >= 249 && e->unk49 <= 250 && e->player_dist_xz <= 8192)
                     e->state = 1;
@@ -742,7 +742,7 @@ void objects_update(void)
             case 1:
                 if (e->anim_frame == 0 && e->anim_frame + step * 4 > 0) {
                     SOUND(e, 208);
-                    if (e->kind == 51)
+                    if (e->kind == OBJECT_KIND_ITEM_GATE)
                         ground_item_set_hidden(e->params.snd.fade_range, 1);
                 }
                 if (e->anim_frame < 3072 && speed + e->anim_frame >= 3072)
@@ -854,7 +854,7 @@ void objects_update(void)
             }
             break;
         }
-        case 52: {
+        case OBJECT_KIND_GROUP_GATE: {
             int step = e->unk48;
             short speed = step;
             AreaObject *o;
@@ -880,7 +880,8 @@ void objects_update(void)
                     break;
                 group = e->params.snd.volume;
                 for (o = vis_table_b.entries, j = 0; j < 240; j++, o++) {
-                    if ((o->kind == 0 || o->kind == 50) && o->params.door.lock == group) {
+                    if ((o->kind == OBJECT_KIND_DOOR || o->kind == OBJECT_KIND_GATE)
+                        && o->params.door.lock == group) {
                         if (o->state == 0) {
                             o->unk49 = 252;
                             o->state = 1;
@@ -905,7 +906,7 @@ void objects_update(void)
                         break;
                     group = e->params.snd.volume;
                     for (o = vis_table_b.entries, j = 0; j < 240; j++, o++) {
-                        if (o->kind == 0 && o->params.door.lock == group) {
+                        if (o->kind == OBJECT_KIND_DOOR && o->params.door.lock == group) {
                             if (o->state == 0) {
                                 o->unk49 = 252;
                                 o->state = 1;
@@ -984,30 +985,30 @@ void objects_update(void)
                 e->position = vis_table_b.entries[H50(e)].position;
                 e->position.vy -= 1280;
                 e->scale.vx = e->scale.vy = e->scale.vz = 0;
-                H52(e) = rcos(e->facing - 1024) * 384 / 4096;
-                e->unk54 = 0;
-                e->unk56 = rsin(e->facing - 1024) * 384 / 4096;
+                H52(e) = rcos(e->rotation.vy - 1024) * 384 / 4096;
+                e->kind_data.part.motion[1] = 0;
+                e->kind_data.part.motion[2] = rsin(e->rotation.vy - 1024) * 384 / 4096;
                 e->position.vx += H52(e);
-                e->position.vz += e->unk56;
+                e->position.vz += e->kind_data.part.motion[2];
                 e->state = 0;
             } else if (e->state >= 3) {
-                H52(e) = e->state * (rcos(e->facing - 1024) << 7) / 4096;
-                e->unk54 = e->state << 5;
-                e->unk56 = e->state * (rsin(e->facing - 1024) << 7) / 4096;
+                H52(e) = e->state * (rcos(e->rotation.vy - 1024) << 7) / 4096;
+                e->kind_data.part.motion[1] = e->state << 5;
+                e->kind_data.part.motion[2] = e->state * (rsin(e->rotation.vy - 1024) << 7) / 4096;
                 e->position.vx += H52(e) - rand() / 256;
-                e->position.vy += e->unk54 + rand() / 2048;
-                e->position.vz += e->unk56 - rand() / 256;
+                e->position.vy += e->kind_data.part.motion[1] + rand() / 2048;
+                e->position.vz += e->kind_data.part.motion[2] - rand() / 256;
                 e->scale.vx += 1024;
                 e->scale.vy += 1024;
                 e->scale.vz += 1024;
                 e->state++;
             } else {
-                H52(e) = e->state * (rcos(e->facing - 1024) << 7) / 4096;
-                e->unk54 = e->state << 6;
-                e->unk56 = e->state * (rsin(e->facing - 1024) << 7) / 4096;
+                H52(e) = e->state * (rcos(e->rotation.vy - 1024) << 7) / 4096;
+                e->kind_data.part.motion[1] = e->state << 6;
+                e->kind_data.part.motion[2] = e->state * (rsin(e->rotation.vy - 1024) << 7) / 4096;
                 e->position.vx += H52(e) + rand() / 256;
-                e->position.vy += e->unk54 + rand() / 2048;
-                e->position.vz += e->unk56 + rand() / 256;
+                e->position.vy += e->kind_data.part.motion[1] + rand() / 2048;
+                e->position.vz += e->kind_data.part.motion[2] + rand() / 256;
                 e->scale.vx += 1024;
                 e->scale.vy += 1024;
                 e->scale.vz += 1024;
@@ -1028,34 +1029,34 @@ void objects_update(void)
             }
             if (e->state >= 5) {
                 e->position = vis_table_b.entries[H50(e)].position;
-                e->position.vx -= rcos(e->facing) * 1280 / 4096;
+                e->position.vx -= rcos(e->rotation.vy) * 1280 / 4096;
                 e->position.vy -= 2000;
-                e->position.vz -= rsin(e->facing) * 1280 / 4096;
+                e->position.vz -= rsin(e->rotation.vy) * 1280 / 4096;
                 e->scale.vx = e->scale.vy = e->scale.vz = 0;
-                H52(e) = rcos(e->facing) * 384 / 4096;
-                e->unk54 = 128;
-                e->unk56 = rsin(e->facing) * 384 / 4096;
+                H52(e) = rcos(e->rotation.vy) * 384 / 4096;
+                e->kind_data.part.motion[1] = 128;
+                e->kind_data.part.motion[2] = rsin(e->rotation.vy) * 384 / 4096;
                 e->position.vx += H52(e);
-                e->position.vz += e->unk56;
+                e->position.vz += e->kind_data.part.motion[2];
                 e->state = 0;
             } else if (e->state >= 3) {
-                H52(e) = e->state * (rcos(e->facing) << 7) / 4096;
-                e->unk54 = e->state << 6;
-                e->unk56 = e->state * (rsin(e->facing) << 7) / 4096;
+                H52(e) = e->state * (rcos(e->rotation.vy) << 7) / 4096;
+                e->kind_data.part.motion[1] = e->state << 6;
+                e->kind_data.part.motion[2] = e->state * (rsin(e->rotation.vy) << 7) / 4096;
                 e->position.vx += H52(e) - rand() / 256;
-                e->position.vy += e->unk54 + rand() / 2048;
-                e->position.vz += e->unk56 - rand() / 256;
+                e->position.vy += e->kind_data.part.motion[1] + rand() / 2048;
+                e->position.vz += e->kind_data.part.motion[2] - rand() / 256;
                 e->scale.vx += 1024;
                 e->scale.vy += 1024;
                 e->scale.vz += 1024;
                 e->state++;
             } else {
-                H52(e) = e->state * (rcos(e->facing) << 7) / 4096;
-                e->unk54 = e->state << 7;
-                e->unk56 = e->state * (rsin(e->facing) << 7) / 4096;
+                H52(e) = e->state * (rcos(e->rotation.vy) << 7) / 4096;
+                e->kind_data.part.motion[1] = e->state << 7;
+                e->kind_data.part.motion[2] = e->state * (rsin(e->rotation.vy) << 7) / 4096;
                 e->position.vx += H52(e) + rand() / 256;
-                e->position.vy += e->unk54 + rand() / 2048;
-                e->position.vz += e->unk56 + rand() / 256;
+                e->position.vy += e->kind_data.part.motion[1] + rand() / 2048;
+                e->position.vz += e->kind_data.part.motion[2] + rand() / 256;
                 e->scale.vx += 1024;
                 e->scale.vy += 1024;
                 e->scale.vz += 1024;
@@ -1065,7 +1066,7 @@ void objects_update(void)
         case 7:
             object_spawn_side_parts_alt(e, (u16)(240 - i));
             break;
-        case 224: {
+        case OBJECT_KIND_SEQUENCE: {
             Creature *a;
             int j;
             int rising;
@@ -1073,7 +1074,8 @@ void objects_update(void)
             if (player_in_cell_rect(e->position.vx >> 12, e->position.vz >> 12, 1, 1, e->position.vy) == 0
                 && area_state.loading == 0)
                 break;
-            if ((pad_state.held & pad_state.buttons[10]) && vis_table_a.object_sequence_state == 0
+            if ((pad_state.held & pad_state.buttons[PAD_ACTION_EVENT])
+                && vis_table_a.object_sequence_state == 0
                 && W50(e) != 0xffffff && W48(e) != 0xffffff) {
                 vis_table_a.object_sequence_state = 1;
                 player_stop_motion();
@@ -1139,10 +1141,10 @@ void objects_update(void)
             }
             break;
         }
-        case 225:
+        case OBJECT_KIND_MESSAGE:
             break;
-        case 237:
-        case 239: {
+        case OBJECT_KIND_WARP:
+        case OBJECT_KIND_WALK_IN_WARP: {
             AreaObject *o;
             int j;
             short turn;
@@ -1155,22 +1157,22 @@ void objects_update(void)
 
             if (player_in_centred_rect(e->position.vx, e->position.vz, 3072, 3072, e->position.vy) == 0)
                 goto away;
-            turn = (viewer.yaw - e->player_heading) & 0xfff;
+            turn = (viewer.rotation.vy - e->player_heading) & 0xfff;
             if (turn > 2048)
                 turn |= 0xf000;
-            if (!((pad_state.held & pad_state.buttons[10]) && turn > -400 && turn < 400)
-                && e->kind != 239)
+            if (!((pad_state.held & pad_state.buttons[PAD_ACTION_EVENT]) && turn > -400 && turn < 400)
+                && e->kind != OBJECT_KIND_WALK_IN_WARP)
                 goto away;
             if (B50(e))
                 break;
-            viewer.warp_return.warp.x = viewer.position.vx >> 12;
-            viewer.warp_return.warp.area = area_state.loaded_area;
-            viewer.warp_return.warp.y = viewer.position.vy >> 12;
-            viewer.warp_return.warp.z = viewer.position.vz >> 12;
-            viewer.warp_return.warp.dx = viewer.position.vx - (viewer.warp_return.warp.x << 12);
-            viewer.warp_return.warp.dy = viewer.position.vy - (viewer.warp_return.warp.y << 12);
-            viewer.warp_return.warp.dz = viewer.position.vz - (viewer.warp_return.warp.z << 12);
-            viewer.warp_return.warp.yaw = e->facing + 2048;
+            viewer.warp_return.x = viewer.position.vx >> 12;
+            viewer.warp_return.area = area_state.loaded_area;
+            viewer.warp_return.y = viewer.position.vy >> 12;
+            viewer.warp_return.z = viewer.position.vz >> 12;
+            viewer.warp_return.dx = viewer.position.vx - (viewer.warp_return.x << 12);
+            viewer.warp_return.dy = viewer.position.vy - (viewer.warp_return.y << 12);
+            viewer.warp_return.dz = viewer.position.vz - (viewer.warp_return.z << 12);
+            viewer.warp_return.yaw = e->rotation.vy + 2048;
             for (j = 240, o = vis_table_b.entries; j != 0; j--, o++) {
                 if (o->kind == e->kind)
                     B50(o) = 1;
@@ -1194,16 +1196,16 @@ void objects_update(void)
             } else {
                 area_request_load(0xff, 0xff, area, 0xff, 0xff, 127, 127, 127, 0, 0, 0);
                 viewer.update_all_spawns = 1;
-                creatures_bind_previous_area();
+                creatures_bind_previous_zone();
                 vis_table_a.zone_history[0] = vis_table_a.zone_history[1] = vis_table_a.zone_history[2] =
                     vis_table_a.zone_history[3] = 0xff;
                 vis_table_a.prev_zone = 0xff;
             }
-            viewer.state = 0;
+            viewer.state = VIEWER_STATE_NORMAL;
             viewer.shake_roll = 0;
             viewer.shake_yaw = 0;
             viewer.shake_pitch = 0;
-            *(SVECTOR *)&viewer.pitch = viewer.view_rot;
+            viewer.rotation = viewer.view_rot;
             viewer.position.vx = (x << 12) + ((s8)e->params.snd.fade_range << 7);
             viewer.position.vz = (z << 12) + ((s8)e->params.door.n_blocks << 7);
             viewer.position.vy = (y << 12) + ((s8)e->params.snd.sound_flags << 7) - 1600;
@@ -1281,8 +1283,8 @@ void player_warp(to, keep)
     int j;
 
     for (i = 240; i != 0; i--) {
-        if (e->kind == 237)
-            *(u8 *)&e->unk50 = 1;
+        if (e->kind == OBJECT_KIND_WARP)
+            e->kind_data.b[0] = 1;
         e++;
     }
     x = to->x;
@@ -1302,15 +1304,15 @@ void player_warp(to, keep)
     } else {
         area_request_load(0xff, 0xff, area, 0xff, 0xff, 127, 127, 127, 0, 0, 0);
         viewer.update_all_spawns = 1;
-        creatures_bind_previous_area();
+        creatures_bind_previous_zone();
         vis_table_a.zone_history[0] = vis_table_a.zone_history[1] = vis_table_a.zone_history[2] = vis_table_a.zone_history[3] = 0xff;
         vis_table_a.prev_zone = 0xff;
     }
-    viewer.state = 0;
+    viewer.state = VIEWER_STATE_NORMAL;
     viewer.shake_roll = 0;
     viewer.shake_yaw = 0;
     viewer.shake_pitch = 0;
-    *(SVECTOR *)&viewer.pitch = viewer.view_rot;
+    viewer.rotation = viewer.view_rot;
     viewer.position.vx = (x << 12) + to->dx;
     viewer.position.vz = (z << 12) + to->dz;
     viewer.position.vy = (y << 12) + to->dy;
@@ -1356,11 +1358,11 @@ void player_warp(to, keep)
     player_enter_normal_state();
 }
 
-/* Warps to viewer.save_area. */
+/* Warps to viewer.save_point. */
 ADDRESS(0x80052c24, 0x38)
 void player_warp_to_save_point(void)
 {
-    player_warp((StWarp *)&viewer.save_area, 0);
+    player_warp(&viewer.save_point, 0);
     viewer.save_warp_request = 0;
 }
 
@@ -1368,10 +1370,10 @@ void player_warp_to_save_point(void)
 ADDRESS(0x80052c5c, 0x48)
 void player_warp_back(void)
 {
-    viewer.state = 5;
+    viewer.state = VIEWER_STATE_SCRIPTED;
     player_update_durability_warning();
-    player_warp(&viewer.warp_return.warp, 1);
-    DAT_801cd0e4 = 0;
+    player_warp(&viewer.warp_return, 1);
+    game_progress.warp_back_request = 0;
 }
 
 /* Frees every table C entry and clears the group counts and id bits. */
@@ -1388,7 +1390,7 @@ void ground_items_clear(void)
     i = 64;
     while (i--) {
         c->item = 0xffff;
-        c->state = 0;
+        c->state = GROUND_ITEM_NONE;
         c++;
     }
     /* Ten words each; the tenth of unk0070 is the first of unk0094. */
@@ -1426,7 +1428,7 @@ ADDRESS(0x80052d98, 0xb8)
 void item_record_pickup(u16 *id)
 {
     inventory.counts[*id].count++;
-    if (*id == 266)
+    if (*id == ITEM_CUNES)
         viewer.cunes_found++;
     if (*id < 266) {
         viewer.items_found++;
@@ -1456,7 +1458,7 @@ void ground_item_remove(GroundItem *c)
             c++;
         }
     }
-    c->state = 0;
+    c->state = GROUND_ITEM_NONE;
 }
 
 /* Loads the first 32 entries from an area file, then drops the collected
@@ -1475,27 +1477,27 @@ void ground_items_load(GroundItemFileEntry *src)
         c->position.vx = (src->cell_x << 12) + src->offset_x;
         c->position.vy = (src->cell_y << 12) + src->offset_y;
         c->position.vz = (src->cell_z << 12) + src->offset_z;
-        c->rot_x = src->rot_x & 0xfff;
-        c->facing = src->facing & 0xfff;
-        c->rot_z = src->rot_z & 0xfff;
+        c->rotation.vx = src->rot_x & 0xfff;
+        c->rotation.vy = src->facing & 0xfff;
+        c->rotation.vz = src->rot_z & 0xfff;
         c->unk20 = src->unk02;
         c->vertical_speed = 0;
         if (c->item == 0xffff) {
-            c->state = 0;
+            c->state = GROUND_ITEM_NONE;
             continue;
         }
         rec = &vis_table_c.types[c->item];
         c->area = area_state.area;
-        c->depth_bias = rec->unk5[1];
+        c->depth_bias = rec->ground_depth_bias;
         vis_table_c.placed_bits[c->item >> 5] |= 1 << (c->item & 0x1f);
         vis_table_c.ground_item_counts[1]++;
         vis_table_c.ground_item_counts[0]++;
         if (vis_table_c.model_slots[rec->model] == 0xff)
             vis_table_c.model_slots[rec->model] = vis_table_c.next_model_slot++;
         if (i >= 28 || item_is_uncollected(c->item))
-            c->state = 2;
+            c->state = GROUND_ITEM_RESTING;
         else
-            c->state = 0;
+            c->state = GROUND_ITEM_NONE;
     }
     c = &vis_table_c.entries[32];
     for (i = 0; i < 16; i++) {
@@ -1522,12 +1524,12 @@ int ground_item_find_in_reach(CollisionState *req, int unused)
 
     c = vis_table_c.entries;
     for (i = 0; i < 64; i++, c++) {
-        if (c->state != 1 && c->state != 2)
+        if (c->state != GROUND_ITEM_FALLING && c->state != GROUND_ITEM_RESTING)
             continue;
         if (c->area != area_state.area)
             continue;
         rec = &vis_table_c.types[c->item];
-        if (rec->unk0[1] == 0)
+        if (rec->pickup_radius == 0)
             continue;
         if (c->position.vy < viewer.position.vy - 0x400 || c->position.vy > viewer.position.vy + 0xa40)
             continue;
@@ -1541,7 +1543,7 @@ int ground_item_find_in_reach(CollisionState *req, int unused)
         if (dz < -0x2800 || dz > 0x2800)
             continue;
         dist = SquareRoot0(dx * dx + dz * dz);
-        if (dist < rec->unk0[1] * 256 + req->radius && dist < nearest) {
+        if (dist < rec->pickup_radius * 256 + req->radius && dist < nearest) {
             nearest = dist;
             best = i;
         }
@@ -1571,9 +1573,9 @@ void ground_item_pick_up(GroundItem *c, int forced)
 
     info = &vis_table_c.types[c->item];
     save = *c;
-    viewer.state = 3;
+    viewer.state = VIEWER_STATE_PICK_UP;
     gte_SetRotMatrix(&viewer.camera_matrix);
-    gte_ldv0((SVECTOR *)&info->unk5[3]);
+    gte_ldv0((SVECTOR *)info->hold_offset);
     gte_rtv0();
     gte_stlvnl(&a);
     {
@@ -1583,52 +1585,52 @@ void ground_item_pick_up(GroundItem *c, int forced)
         a.vy += position->vy;
         a.vz += position->vz;
     }
-    switch (info->unk5[2]) {
+    switch (info->pickup_pose) {
     case 0:
-        r.vx = -viewer.pitch;
+        r.vx = -viewer.rotation.vx;
         r.vy = r.vz = 0;
         break;
     case 1:
-        r.vx = 1024 - viewer.pitch;
+        r.vx = 1024 - viewer.rotation.vx;
         r.vy = r.vz = 0;
         break;
     case 2:
-        r.vx = -1024 - viewer.pitch;
+        r.vx = -1024 - viewer.rotation.vx;
         r.vy = r.vz = 0;
         break;
     case 3:
         r.vx = 0;
         r.vy = 1024;
-        r.vz = viewer.pitch - 256;
+        r.vz = viewer.rotation.vx - 256;
         break;
     }
-    r.vy += viewer.yaw;
-    if (r.vx - c->rot_x > 2048)
+    r.vy += viewer.rotation.vy;
+    if (r.vx - c->rotation.vx > 2048)
         r.vx -= 4096;
-    if (r.vx - c->rot_x < -2048)
+    if (r.vx - c->rotation.vx < -2048)
         r.vx += 4096;
-    if (r.vy - c->facing > 2048)
+    if (r.vy - c->rotation.vy > 2048)
         r.vy -= 4096;
-    if (r.vy - c->facing < -2048)
+    if (r.vy - c->rotation.vy < -2048)
         r.vy += 4096;
     i = 16;
     c->depth_bias -= 8;
     while (1) {
-        if (forced == 0 && (pad_state.pressed & pad_state.buttons[11])) {
+        if (forced == 0 && (pad_state.pressed & pad_state.buttons[PAD_ACTION_MAGIC_MENU])) {
             take = 0;
             a = c->position;
             b = save.position;
-            r = *(SVECTOR *)&c->rot_x;
-            r2 = *(SVECTOR *)&save.rot_x;
+            r = c->rotation;
+            r2 = save.rotation;
             i = 16 - i;
             break;
         }
-        if ((pad_state.pressed & pad_state.buttons[10]) && !pad_state.combo_timer) {
+        if ((pad_state.pressed & pad_state.buttons[PAD_ACTION_EVENT]) && !pad_state.combo_timer) {
             take = 1;
             a = c->position;
             b = viewer.position;
             b.vy += 800;
-            r = *(SVECTOR *)&c->rot_x;
+            r = c->rotation;
             r2 = r;
             i = 16;
             break;
@@ -1638,13 +1640,13 @@ void ground_item_pick_up(GroundItem *c, int forced)
         c->position.vy = (i * save.position.vy + j * a.vy) >> 4;
         c->position.vz = (i * save.position.vz + j * a.vz) >> 4;
         if (i >= 9) {
-            c->rot_x = save.rot_x;
-            c->facing = ((i - 8) * save.facing + j * r.vy) >> 3;
-            c->rot_z = save.rot_z;
+            c->rotation.vx = save.rotation.vx;
+            c->rotation.vy = ((i - 8) * save.rotation.vy + j * r.vy) >> 3;
+            c->rotation.vz = save.rotation.vz;
         } else {
-            c->rot_x = (i * save.rot_x + (8 - i) * r.vx) >> 3;
-            c->facing = r.vy;
-            c->rot_z = (i * save.rot_z + (8 - i) * r.vz) >> 3;
+            c->rotation.vx = (i * save.rotation.vx + (8 - i) * r.vx) >> 3;
+            c->rotation.vy = r.vy;
+            c->rotation.vz = (i * save.rotation.vz + (8 - i) * r.vz) >> 3;
         }
         world_render_frame(0, 0);
         player_update_status(0);
@@ -1658,13 +1660,13 @@ void ground_item_pick_up(GroundItem *c, int forced)
         c->position.vy = (i * a.vy + j * b.vy) >> 4;
         c->position.vz = (i * a.vz + j * b.vz) >> 4;
         if (i >= 9) {
-            c->rot_x = ((i - 8) * r.vx + j * r2.vx) >> 3;
-            c->facing = r.vy;
-            c->rot_z = ((i - 8) * r.vz + j * r2.vz) >> 3;
+            c->rotation.vx = ((i - 8) * r.vx + j * r2.vx) >> 3;
+            c->rotation.vy = r.vy;
+            c->rotation.vz = ((i - 8) * r.vz + j * r2.vz) >> 3;
         } else {
-            c->rot_x = r2.vx;
-            c->facing = (i * r.vy + (8 - i) * r2.vy) >> 3;
-            c->rot_z = r2.vz;
+            c->rotation.vx = r2.vx;
+            c->rotation.vy = (i * r.vy + (8 - i) * r2.vy) >> 3;
+            c->rotation.vz = r2.vz;
         }
         world_render_frame(0, 0);
         player_update_status(0);
@@ -1699,14 +1701,14 @@ void ground_items_update(void)
         c->player_dist_xz = SquareRoot0((c->position.vx - viewer.position.vx) * (c->position.vx - viewer.position.vx)
                                + (c->position.vz - viewer.position.vz) * (c->position.vz - viewer.position.vz));
         switch (c->state) {
-        case 0:
-        case 2:
-        case 4:
+        case GROUND_ITEM_NONE:
+        case GROUND_ITEM_RESTING:
+        case GROUND_ITEM_HIDDEN:
             break;
-        case 1:
+        case GROUND_ITEM_FALLING:
             if (c->bounces < 4) {
                 req.position = c->position;
-                req.radius = *(u16 *)&rec->unk5[9];
+                req.radius = rec->fall_radius;
                 req.height = 0x200;
                 req.tests = 2;
                 req.velocity.vz = 0;
@@ -1730,15 +1732,15 @@ void ground_items_update(void)
                 if (viewer.position.vy + 0x8000 < c->position.vy)
                     ground_item_remove(c);
                 if (c->item < 71)
-                    c->rot_x = h;
+                    c->rotation.vx = h;
             } else if (c->bounces == 4) {
-                c->state = 2;
-                c->rot_x = 0;
+                c->state = GROUND_ITEM_RESTING;
+                c->rotation.vx = 0;
             }
             break;
-        case 3:
+        case GROUND_ITEM_PICKED_UP:
             ground_item_pick_up(c, 0);
-            viewer.state = 0;
+            viewer.state = VIEWER_STATE_NORMAL;
             break;
         }
         c++;

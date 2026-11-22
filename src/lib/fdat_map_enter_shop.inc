@@ -9,8 +9,8 @@
 ADDRESS(0x801ed420, 0x34)
 void map_enter_shop(void)
 {
-    DAT_801cd0e4 = 0;
-    viewer.state = 6;
+    game_progress.warp_back_request = 0;
+    viewer.state = VIEWER_STATE_SHOP;
     viewer.view_rot.vx = 0;
     viewer.action_timers.halves[0] = -1;
     viewer.action_timers.halves[1] = -1;

@@ -199,7 +199,7 @@ void menu_item_request_draw_details(int page)
                 n++;
                 if (*count) {
                     ui_draw_text(VS_MESSAGE(200 + k), label_x, text_y + j * 15, &sp->style[0]);
-                    ui_draw_number(*count | 0x13000000, value_x, text_y + j * 15, &sp->style[3]);
+                    ui_draw_number(*count | NUMBER_PLUS | DIGITS(3), value_x, text_y + j * 15, &sp->style[3]);
                 }
                 count++;
                 k++;
@@ -212,17 +212,19 @@ void menu_item_request_draw_details(int page)
         DAT_8006337a = 0;
         text_y += 60;
         ui_draw_text(VS_MESSAGE(501), count_x, text_y, &sp->style[0]);
-        ui_draw_number(saves[1 - page].versus.item_durability[id] | 0x3000000, count_x + 70, text_y, &sp->style[3]);
+        ui_draw_number(saves[1 - page].versus.item_durability[id] | DIGITS(3), count_x + 70, text_y,
+            &sp->style[3]);
         ui_draw_text(VS_MESSAGE(502), count_x + 114, text_y, &sp->style[0]);
-        ui_draw_number(vis_table_c.types[id].max_durability | 0x3000000, count_x + 138, text_y, &sp->style[3]);
+        ui_draw_number(vis_table_c.types[id].max_durability | DIGITS(3), count_x + 138, text_y,
+            &sp->style[3]);
         weight = vis_table_c.types[id].weight;
         whole = weight * 100 / 454;
         tenths = weight * 1000 / 454 % 10;
         text_y += 15;
         ui_draw_text(VS_MESSAGE(503), count_x, text_y, &sp->style[0]);
-        ui_draw_number(whole | 0x3000000, count_x + 70, text_y, &sp->style[3]);
+        ui_draw_number(whole | DIGITS(3), count_x + 70, text_y, &sp->style[3]);
         ui_draw_glyph(18, count_x + 109, text_y, &sp->style[0]);
-        ui_draw_number(tenths | 0x1000000, count_x + 115, text_y, &sp->style[3]);
+        ui_draw_number(tenths | DIGITS(1), count_x + 115, text_y, &sp->style[3]);
         ui_draw_glyph(53, count_x + 132, text_y, &sp->style[0]);
     }
     ui_draw_panel(x, y, 296, 222);

@@ -84,8 +84,8 @@ StEffect *effect_spawn(int n, u8 attack, u8 flags, u8 kind, VECTOR *pos, SVECTOR
         e->life = -1;
         e->clut_base = 0;
         e->parent = NULL;
-        e->owner = n;
-        e->attack_index = attack;
+        e->owner.vs.fighter = n;
+        e->owner.vs.attack_index = attack;
         switch (e->kind) {
         case 0x30:
         case 0x38:
@@ -283,9 +283,9 @@ StEffect *effect_spawn(int n, u8 attack, u8 flags, u8 kind, VECTOR *pos, SVECTOR
             REACH(e, e->scale.vx);
             e->parent = (StEffect *)args[3];
             if (e->kind == 0x7e || e->kind == 0x81)
-                e->position.vy = shared_buffer.fighter[e->owner].data.height + 1600;
+                e->position.vy = shared_buffer.fighter[e->owner.vs.fighter].data.height + 1600;
             else
-                e->position.vy = shared_buffer.fighter[e->owner].data.height;
+                e->position.vy = shared_buffer.fighter[e->owner.vs.fighter].data.height;
             e->rotation.vy = 0;
             e->velocity.vx = 0;
             e->velocity.vy = 0;
@@ -398,7 +398,7 @@ StEffect *effect_spawn(int n, u8 attack, u8 flags, u8 kind, VECTOR *pos, SVECTOR
             e->light = 4096;
             SCALE(e, args[1]);
             REACH(e, e->scale.vx * 1536 / 4096);
-            effect_spawn(e->owner, e->attack_index, e->flags, 0xd6, &e->position, &e->velocity, e->scale.vx, e);
+            effect_spawn(e->owner.vs.fighter, e->owner.vs.attack_index, e->flags, 0xd6, &e->position, &e->velocity, e->scale.vx, e);
             e->attack_delay = 1;
             break;
         case 0xd6:
@@ -559,8 +559,8 @@ StEffect *effect_spawn(int n, u8 attack, u8 flags, u8 kind, VECTOR *pos, SVECTOR
             a.vy = e->position.vy + e->scale.vx * rsin(e->rotation.vz) / 4096;
             b.vx = e->position.vx + e->scale.vx * rcos(e->rotation.vz + 2048) / 4096;
             b.vy = e->position.vy + e->scale.vx * rsin(e->rotation.vz + 2048) / 4096;
-            effect_spawn(e->owner, e->attack_index, e->flags, 0xe9, &e->position, &e->velocity, e->scale.vx, e);
-            effect_spawn(e->owner, e->attack_index, e->flags, 0xea, &e->position, &e->velocity, e->scale.vx, e);
+            effect_spawn(e->owner.vs.fighter, e->owner.vs.attack_index, e->flags, 0xe9, &e->position, &e->velocity, e->scale.vx, e);
+            effect_spawn(e->owner.vs.fighter, e->owner.vs.attack_index, e->flags, 0xea, &e->position, &e->velocity, e->scale.vx, e);
             e->attack_delay = 1;
             break;
         case 0xe9:
@@ -637,7 +637,7 @@ void effect_step_back_half(void)
         (e)->light = (e)->life * 128
 
 /* The owner's attack hits its opponent. */
-#define HIT(e) fighter_apply_attack_hit((e)->owner, (e)->attack_index)
+#define HIT(e) fighter_apply_attack_hit((e)->owner.vs.fighter, (e)->owner.vs.attack_index)
 
 /* A hit, while the effect has hits left. */
 #define HIT_COUNTED(e, reached)                                                \
@@ -654,7 +654,7 @@ void effect_step_back_half(void)
     }
 
 /* Spawns an effect of kind `kind` for the current effect's owner. */
-#define SPAWN(e, kind) effect_spawn((e)->owner, (e)->attack_index, (e)->flags, kind
+#define SPAWN(e, kind) effect_spawn((e)->owner.vs.fighter, (e)->owner.vs.attack_index, (e)->flags, kind
 
 /* The two effects a kind turns into, at its place. */
 #define SPAWN_PAIR(e, first, second)                                           \
@@ -865,19 +865,19 @@ void effect_update(void)
     case 0xeb:
         e->rotation.vz = (e->rotation.vz - 128) & 0xfff;
         {
-            VsFighter *f = &shared_buffer.fighter[e->owner];
+            VsFighter *f = &shared_buffer.fighter[e->owner.vs.fighter];
             SVECTOR v;
             MATRIX m;
             SVECTOR rot;
             VECTOR vec;
 
-            if (f->data.attacks[e->attack_index].offset_x == -32768) {
+            if (f->data.attacks[e->owner.vs.attack_index].offset_x == -32768) {
                 if (f->model_kind == 2) {
-                    anim_get_vertex(e->owner, f->anim, f->anim_frame,
-                                  f->data.attacks[e->attack_index].offset_z, &v);
+                    anim_get_vertex(e->owner.vs.fighter, f->anim, f->anim_frame,
+                                  f->data.attacks[e->owner.vs.attack_index].offset_z, &v);
                 } else {
-                    anim_set_node_vertex(e->owner, f->data.attacks[e->attack_index].offset_y,
-                                  f->data.attacks[e->attack_index].offset_z, &vec);
+                    anim_set_node_vertex(e->owner.vs.fighter, f->data.attacks[e->owner.vs.attack_index].offset_y,
+                                  f->data.attacks[e->owner.vs.attack_index].offset_z, &vec);
                     v.vx = vec.vx;
                     v.vy = vec.vy;
                     v.vz = vec.vz;
@@ -1317,8 +1317,8 @@ void effect_draw_model_part(u8 *model, VECTOR *pos, SVECTOR *rot, SVECTOR *scale
     SVECTOR *in;
     int n;
 
-    sp->vertices = vs_gfx_state.projected_vertices;
-    sp->unk48 = vs_gfx_state.projected_vertices;
+    sp->vertices = (u8 *)vs_gfx_state.projected_vertices;
+    sp->unk48 = (u8 *)vs_gfx_state.projected_vertices;
     sp->vertex_count = vs_gfx_state.vertex_face_counts[0];
     sp->face_count = vs_gfx_state.vertex_face_counts[1];
     sp->prim_count = vs_gfx_state.prim_count;
@@ -1384,7 +1384,7 @@ void effects_draw(void)
     int i;
 
     for (i = 127; i != -1; o++, i--) {
-        if (o->flags == 0xff)
+        if (o->flags == ST_EFFECT_FREE)
             continue;
         if ((o->draw_mode & 3) == 0)
             continue;
@@ -1395,14 +1395,14 @@ void effects_draw(void)
             sp->near_z = 11;
             sp->far_z = 4103;
             sp->ot = vs_gfx_state.ot_cur - 7;
-            effect_draw_model_part((u8 *)shared_buffer.fighter[o->owner].effect_model, &o->position, &o->rotation,
+            effect_draw_model_part((u8 *)shared_buffer.fighter[o->owner.vs.fighter].effect_model, &o->position, &o->rotation,
                           &o->scale, &vs_gfx_state.view_matrix, o->part & 0x7f, o->light, o->draw_flags, 0);
             break;
         case 4:
             sp->near_z = 11;
             sp->far_z = 4103;
             sp->ot = vs_gfx_state.ot_cur - 7;
-            effect_draw_model_part((u8 *)shared_buffer.fighter[o->owner].effect_model, &o->position, &o->rotation,
+            effect_draw_model_part((u8 *)shared_buffer.fighter[o->owner.vs.fighter].effect_model, &o->position, &o->rotation,
                           &o->scale, &unit, o->part & 0x7f, o->light, o->draw_flags, 0);
             break;
         case 8:

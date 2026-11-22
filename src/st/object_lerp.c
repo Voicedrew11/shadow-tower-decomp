@@ -64,9 +64,9 @@ void object_lerp_pose(AreaObject *e, VECTOR *from, VECTOR *to, SVECTOR *rfrom, S
         e->position.vz = math_lerp(from->vz, to->vz, t);
     }
     if (rfrom) {
-        e->rot_x = angle_lerp(rfrom->vx, rto->vx, t);
-        e->rot_z = angle_lerp(rfrom->vz, rto->vz, t);
-        e->facing = angle_lerp(rfrom->vy, rto->vy, t);
+        e->rotation.vx = angle_lerp(rfrom->vx, rto->vx, t);
+        e->rotation.vz = angle_lerp(rfrom->vz, rto->vz, t);
+        e->rotation.vy = angle_lerp(rfrom->vy, rto->vy, t);
     }
 }
 
@@ -84,8 +84,8 @@ ADDRESS(0x80053f78, 0x88)
 void object_lerp_rotation(AreaObject *e, SVECTOR *rfrom, SVECTOR *rto, int t)
 {
     if (rfrom) {
-        e->rot_x = angle_lerp(rfrom->vx, rto->vx, t);
-        e->rot_z = angle_lerp(rfrom->vz, rto->vz, t);
-        e->facing = angle_lerp(rfrom->vy, rto->vy, t);
+        e->rotation.vx = angle_lerp(rfrom->vx, rto->vx, t);
+        e->rotation.vz = angle_lerp(rfrom->vz, rto->vz, t);
+        e->rotation.vy = angle_lerp(rfrom->vy, rto->vy, t);
     }
 }

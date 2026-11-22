@@ -49,7 +49,7 @@ void map_warp_player(int gate)
 
     play_warp_sound();
     fade_run_frames(2, 0, 0x1000, 0x100);
-    creatures_bind_previous_area();
+    creatures_bind_previous_zone();
     if (gate == 0) {
         viewer.position.vx = 0x50800;
         viewer.position.vy = 0x425c0;
@@ -61,21 +61,21 @@ void map_warp_player(int gate)
         viewer.position.vz = 0x37000;
         viewer.view_rot.vy = 0;
     }
-    viewer.state = 0;
+    viewer.state = VIEWER_STATE_NORMAL;
     viewer.shake_roll = 0;
     viewer.shake_yaw = 0;
     viewer.shake_pitch = 0;
     viewer.view_rot.vx = 0;
-    *(SVECTOR *)&viewer.pitch = viewer.view_rot;
-    viewer.state = 5;
+    viewer.rotation = viewer.view_rot;
+    viewer.state = VIEWER_STATE_SCRIPTED;
     fade_run_frames(2, 0x1000, 0x1000, 0);
     creatures_update();
-    if (gate == 0 && e->state != 3 && e->state != 1) {
+    if (gate == 0 && e->state != CREATURE_STATE_GONE && e->state != CREATURE_STATE_ACTIVE) {
         index = e->type;
         slot = e->model_slot + 128;
         creature_spawn_now(e);
         if (world_state.model_files[slot] == NULL)
-            creature_model_load(2, index * 5, slot, e->vram_tag & 0xf);
+            creature_model_load(ARCHIVE_CHR, index * 5, slot, e->vram_tag & 0xf);
         e->fade = -1;
         e->status.bytes[2] &= 0xf2;
         creature_start_script(e, 9);
@@ -89,7 +89,7 @@ void map_warp_player(int gate)
         creature_force_talk(e, 0, 0);
         e->flags &= ~0x2000000;
     } else {
-        e->action = 0x80;
+        e->action = CREATURE_ACTION_DORMANT;
     }
     vis_table_a.current = e;
     vis_table_a.current_type = r;

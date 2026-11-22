@@ -49,13 +49,13 @@ void map_step_creature(void)
             goto next;
         }
         if (!(game_progress.event_flags.word >> 7 & 1) && e->hit != 0) {
-            viewer.unk190[4][1] = 6000;
-            viewer.unk190[4][0] = 0;
+            viewer.timers.halves[4][1] = 6000;
+            viewer.timers.halves[4][0] = 0;
             game_progress.event_flags.word |= 0x80;
-            viewer.status_flags |= 0x100;
+            viewer.status_flags |= STATUS_CURSED;
             e->status.bytes[3] = 0;
             e->flags &= ~0x2000000;
-        } else if (e->state == 5) {
+        } else if (e->state == CREATURE_STATE_DYING) {
             game_progress.event_flags.word |= 0x20000000;
         }
     }
@@ -64,22 +64,22 @@ next:
         if (e->status.bytes[0] == 0 && game_progress.talk_counts[r->talk_id] == 1) {
             e->status.bytes[0] = 1;
             creature_start_script(e, 6);
-            viewer.state = 5;
-            c7->state = 2;
+            viewer.state = VIEWER_STATE_SCRIPTED;
+            c7->state = GROUND_ITEM_RESTING;
         }
         if (e->status.bytes[0] == 1) {
             if ((short)e->anim_frame > 0xa00) {
-                anim_set_node_vertex((StAnimSet *)e->anim_slot, e->model_slot + 128, 7, 13, &v);
+                anim_set_node_vertex(e->anim_slot.set, e->model_slot + 128, 7, 13, &v);
                 c7->position.vx = e->position.vx + v.vx;
                 c7->position.vy = e->position.vy + v.vy - 0x80;
                 c7->position.vz = e->position.vz + v.vz;
             }
         } else if (e->status.bytes[0] == 2) {
-            viewer.state = 5;
+            viewer.state = VIEWER_STATE_SCRIPTED;
             map_step_leaving_creature(e);
             return;
         } else if (e->hit != 0) {
-            c7->state = 2;
+            c7->state = GROUND_ITEM_RESTING;
             c7->depth_bias += 0x20;
         }
     }

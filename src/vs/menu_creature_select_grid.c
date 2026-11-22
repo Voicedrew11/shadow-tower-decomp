@@ -17,9 +17,6 @@
 /* The scroll arrows' initializers: 8 bytes each, so .sdata under -G8. */
 SDATA(0x80063270, 0x10)
 
-/* Number-width flag for ui_draw_number (ST.EXE's DIGITS, src/st/render.c). */
-#define DIGITS(n) ((n) << 24)
-
 ADDRESS(0x80020aa4, 0x69c)
 void menu_creature_select_draw_grid(int player)
 {

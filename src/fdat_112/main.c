@@ -52,10 +52,10 @@ void map_restore_progress(void)
 {
     Creature *e;
 
-    vis_table_c.entries[7].state = 4;
+    vis_table_c.entries[7].state = GROUND_ITEM_HIDDEN;
     e = &vis_table_a.entries[48];
     if (game_progress.event_flags.bit.f14 == 1 || inventory.counts[303].count == 1)
-        e->state = 3;
+        e->state = CREATURE_STATE_GONE;
     if (game_progress.event_flags.bit.f7 == 1) {
         e->status.bytes[3] = 0;
         e->flags &= ~0x2000000;

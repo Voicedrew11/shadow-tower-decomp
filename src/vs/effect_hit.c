@@ -27,7 +27,7 @@ ADDRESS(0x80032110, 0xf0)
 int effect_reaches_opponent(int reach, u_long height)
 {
     StEffect *e = vs_effects.cur;
-    VsFighter *f = &shared_buffer.fighter[1 - e->owner];
+    VsFighter *f = &shared_buffer.fighter[1 - e->owner.vs.fighter];
     SVECTOR d;
     int r;
 

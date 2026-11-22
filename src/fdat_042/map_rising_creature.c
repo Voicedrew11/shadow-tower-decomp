@@ -32,7 +32,7 @@ void map_step_creature(void)
 {
     Creature *e = vis_table_a.current;
 
-    if (fdat_801ed970 == 1 && e == &vis_table_a.entries[32] && e->anim_slot != 0) {
+    if (fdat_801ed970 == 1 && e == &vis_table_a.entries[32] && e->anim_slot.slot != NULL) {
         e->anim_frame += e->anim_step;
         if (e->position.vy > 0x3ffff) {
             e->position.vy -= 0x180;

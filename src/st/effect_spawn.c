@@ -86,8 +86,8 @@ StEffect *effect_spawn(u8 type, u8 flags, u8 kind, VECTOR *pos, SVECTOR *dir, ..
         e->clut_base = 0;
         e->parent = NULL;
         switch (e->kind) {
-        case 0x00:
-        case 0x0a:
+        case EFFECT_KIND_EXPLOSIVE:
+        case EFFECT_KIND_CORROSIVE_ELEMENTS:
             EFFECT_SOUND(e);
             e->life = 50;
             e->state.ub[0] = 0;
@@ -118,7 +118,7 @@ StEffect *effect_spawn(u8 type, u8 flags, u8 kind, VECTOR *pos, SVECTOR *dir, ..
             e->state2.h = args[5];
             e->rotation = *(SVECTOR *)args[7];
             break;
-        case 0x07:
+        case EFFECT_KIND_DUAL_POISON:
             EFFECT_SOUND(e);
             e->rotation = *(SVECTOR *)args[2];
             e->life = 50;
@@ -160,37 +160,37 @@ StEffect *effect_spawn(u8 type, u8 flags, u8 kind, VECTOR *pos, SVECTOR *dir, ..
             e->state.h = args[2];
             e->life = args[3];
             break;
-        case 0x03:
+        case EFFECT_KIND_FROZEN_HORNET:
             e->state.ub[0] = 16;
             e->reach = e->scale.vx / 16;
             e->attack_height = (e->scale.vy / 16) | 0x80000000;
             goto bolt;
-        case 0x09:
+        case EFFECT_KIND_BUBBLE_SHOWER:
             e->state.ub[0] = 8;
             e->reach = e->scale.vx / 16;
             e->attack_height = (e->scale.vy / 16) | 0x80000000;
             e->state2.h = rand() / 128;
             goto bolt;
-        case 0x0c:
+        case EFFECT_KIND_JUDGEMENT:
             e->draw_flags = 15;
             e->state.ub[0] = 0;
             e->reach = e->scale.vx * 384 / 4096;
             e->attack_height = (e->scale.vy * 384 / 4096) | 0x80000000;
             goto bolt;
-        case 0x06:
+        case EFFECT_KIND_QUEEN_EYES:
             e->state.ub[0] = 0;
             e->reach = e->scale.vx / 16;
             e->attack_height = (e->scale.vy / 64) | 0x80000000;
             goto bolt;
-        case 0x0f:
+        case EFFECT_KIND_SLAYER:
             e->state.ub[0] = 0;
             e->reach = e->scale.vx / 16;
             e->attack_height = (e->scale.vy / 256) | 0x80000000;
             goto bolt;
-        case 0x01:
-        case 0x04:
-        case 0x0d:
-        case 0x10:
+        case EFFECT_KIND_BLAZE:
+        case EFFECT_KIND_ICE_SABRE:
+        case EFFECT_KIND_CLEANSING_RAY:
+        case EFFECT_KIND_UNHOLY_SPIRITS:
             e->state.ub[0] = 0;
             e->reach = e->scale.vx / 16;
             e->attack_height = (e->scale.vy / 16) | 0x80000000;
@@ -212,10 +212,10 @@ StEffect *effect_spawn(u8 type, u8 flags, u8 kind, VECTOR *pos, SVECTOR *dir, ..
             e->state.ub[0] = 0;
             e->parent = (StEffect *)args[2];
             break;
-        case 0x2c:
-        case 0x2d:
-        case 0x2e:
-        case 0x2f:
+        case EFFECT_KIND_BOW_SHOT_0:
+        case EFFECT_KIND_BOW_SHOT_1:
+        case EFFECT_KIND_BOW_SHOT_2:
+        case EFFECT_KIND_BOW_SHOT_3:
             e->rotation = *(SVECTOR *)args[1];
             e->life = 50;
             e->part = 128;
@@ -353,7 +353,7 @@ StEffect *effect_spawn(u8 type, u8 flags, u8 kind, VECTOR *pos, SVECTOR *dir, ..
             SCALE(e, args[1]);
             e->rotation = *(SVECTOR *)args[2];
             REACH(e, e->scale.vx / 8);
-            ST_EFFECT_ENTRY(e) = (Creature *)args[4];
+            e->owner.entry = (Creature *)args[4];
             break;
         case 0xc9:
         case 0xd4:
@@ -405,9 +405,9 @@ StEffect *effect_spawn(u8 type, u8 flags, u8 kind, VECTOR *pos, SVECTOR *dir, ..
             SCALE(e, args[1]);
             e->rotation = *(SVECTOR *)args[2];
             REACH(e, e->scale.vx / 8);
-            ST_EFFECT_ENTRY(e) = (Creature *)args[4];
-            e->state.h = ST_EFFECT_ENTRY(e)->script->arg.u[6];
-            e->state2.h = ST_EFFECT_ENTRY(e)->script->arg.u[9];
+            e->owner.entry = (Creature *)args[4];
+            e->state.h = e->owner.entry->script->arg.u[6];
+            e->state2.h = e->owner.entry->script->arg.u[9];
             break;
         case 0x3d:
         case 0x46:
@@ -426,8 +426,8 @@ StEffect *effect_spawn(u8 type, u8 flags, u8 kind, VECTOR *pos, SVECTOR *dir, ..
             e->state.h = -896;
             REACH(e, e->scale.vx);
             e->parent = (StEffect *)args[4];
-            ST_EFFECT_ENTRY(e) = ST_EFFECT_ENTRY(e->parent);
-            e->position.vy = ST_EFFECT_ENTRY(e)->position.vy;
+            e->owner.entry = e->parent->owner.entry;
+            e->position.vy = e->owner.entry->position.vy;
             e->rotation.vy = 0;
             e->velocity.vx = 0;
             e->velocity.vy = 0;
@@ -447,7 +447,7 @@ StEffect *effect_spawn(u8 type, u8 flags, u8 kind, VECTOR *pos, SVECTOR *dir, ..
             e->state.h = -896;
             REACH(e, e->scale.vx);
             e->parent = (StEffect *)args[4];
-            ST_EFFECT_ENTRY(e) = ST_EFFECT_ENTRY(e->parent);
+            e->owner.entry = e->parent->owner.entry;
             e->position.vy = viewer.position.vy + 1600;
             e->rotation.vy = 0;
             e->velocity.vx = 0;
@@ -474,7 +474,7 @@ StEffect *effect_spawn(u8 type, u8 flags, u8 kind, VECTOR *pos, SVECTOR *dir, ..
             REACH(e, e->scale.vx / 8);
             e->state.h = -896;
             e->parent = (StEffect *)args[4];
-            ST_EFFECT_ENTRY(e) = ST_EFFECT_ENTRY(e->parent);
+            e->owner.entry = e->parent->owner.entry;
             break;
         case 0xcc:
         case 0xcf:
@@ -532,7 +532,7 @@ StEffect *effect_spawn(u8 type, u8 flags, u8 kind, VECTOR *pos, SVECTOR *dir, ..
             owner = (Creature *)args[1];
             entry = owner;
         mark_owner:
-            ST_EFFECT_ENTRY(e) = owner;
+            e->owner.entry = owner;
             entry->unk24 = 4096;
             entry->status.bytes[2] = 13;
             entry->fade = 4095;
@@ -1013,8 +1013,8 @@ void effect_update(void)
     int n;
 
     switch (kind) {
-    case 0x00:
-    case 0x0a: {
+    case EFFECT_KIND_EXPLOSIVE:
+    case EFFECT_KIND_CORROSIVE_ELEMENTS: {
         VECTOR pos;
         SVECTOR rot;
         SVECTOR dir;
@@ -1036,7 +1036,7 @@ void effect_update(void)
             rot.vy = 0;
             rot.vz = 0;
         } else if (r & 2) {
-            r = ratan2(vis_lists.wall_normal_z, vis_lists.wall_normal_x) + 1024;
+            r = ratan2(vis_lists.wall_normal.vz, vis_lists.wall_normal.vx) + 1024;
             c = rcos(ratan2(dir.vz, dir.vx) - r) * 300 / 4096;
             dir.vx = c * rcos(r) / 4096;
             dir.vz = c * rsin(r) / 4096;
@@ -1125,7 +1125,7 @@ void effect_update(void)
         if (e->life < 8)
             e->light = e->life * 512;
         break;
-    case 0x07: {
+    case EFFECT_KIND_DUAL_POISON: {
         RECT strip = { 768, 352, 16, 64 };
         DVECTOR to;
 
@@ -1271,32 +1271,32 @@ void effect_update(void)
         if (e->life < 8)
             e->light = e->life * 512;
         break;
-    case 0x03:
+    case EFFECT_KIND_FROZEN_HORNET:
         if ((e->life >> 3) & 1)
             e->scale.vx -= 64;
         else
             e->scale.vx += 64;
-    case 0x06:
+    case EFFECT_KIND_QUEEN_EYES:
         r = 0;
         goto bolt;
-    case 0x09:
+    case EFFECT_KIND_BUBBLE_SHOWER:
         e->rotation.vy += e->state2.h;
         e->velocity.vx += 32 - rand() / 512;
         e->velocity.vy += 16 - rand() / 1024;
         e->velocity.vz += 32 - rand() / 512;
         goto bolt;
-    case 0x04:
+    case EFFECT_KIND_ICE_SABRE:
         r = 128;
         i = 1;
         goto bolt;
-    case 0x0c:
+    case EFFECT_KIND_JUDGEMENT:
         r = 384;
         goto bolt;
-    case 0x0d:
+    case EFFECT_KIND_CLEANSING_RAY:
         r = 384;
         i = 1;
         goto bolt;
-    case 0x0f:
+    case EFFECT_KIND_SLAYER:
         e->rotation.vx = 0;
         e->rotation.vy += 384;
     bolt:
@@ -1322,8 +1322,8 @@ void effect_update(void)
         }
         FADE_IN(e);
         break;
-    case 0x01:
-    case 0x10:
+    case EFFECT_KIND_BLAZE:
+    case EFFECT_KIND_UNHOLY_SPIRITS:
         e->rotation.vx = 0;
         e->rotation.vy += 128;
         if (e->step != 0) {
@@ -1385,10 +1385,10 @@ void effect_update(void)
         if (e->life < 16)
             e->light = e->life * 256;
         break;
-    case 0x2c:
-    case 0x2d:
-    case 0x2e:
-    case 0x2f:
+    case EFFECT_KIND_BOW_SHOT_0:
+    case EFFECT_KIND_BOW_SHOT_1:
+    case EFFECT_KIND_BOW_SHOT_2:
+    case EFFECT_KIND_BOW_SHOT_3:
         r = effect_attack_move(e->reach, e->attack_height, 0);
         if (r != 0) {
             EMIT_LIVE(r);
@@ -1623,7 +1623,7 @@ void effect_update(void)
     case 0xeb:
         e->rotation.vz = (e->rotation.vz - 128) & 0xfff;
         {
-            Creature *owner = ST_EFFECT_ENTRY(e);
+            Creature *owner = e->owner.entry;
             SVECTOR v;
             MATRIX m;
             SVECTOR rot;
@@ -1636,14 +1636,14 @@ void effect_update(void)
                     anim_get_vertex(owner->model_slot + 128, owner->anim, (s16)owner->anim_frame, e->state.h,
                                     &v);
                 } else if (kind == 0xcd || kind == 0xeb || kind == 0xd8) {
-                    anim_set_node_vertex((StAnimSet *)owner->anim_slot, owner->model_slot + 128,
+                    anim_set_node_vertex(owner->anim_slot.set, owner->model_slot + 128,
                                          e->state2.h, e->state.h, &vec);
                     v.vx = vec.vx;
                     v.vy = vec.vy;
                     v.vz = vec.vz;
                 }
                 rot.vx = 0;
-                rot.vy = -owner->facing;
+                rot.vy = -owner->rotation.vy;
                 rot.vz = 0;
                 RotMatrix(&rot, &m);
                 ApplyMatrixSV(&m, &v, &v);
@@ -1701,7 +1701,7 @@ void effect_update(void)
         int model;
 
         SCALE(e, rcos(e->life << 11) / 4);
-        entry = ST_EFFECT_ENTRY(e);
+        entry = e->owner.entry;
         e->state.h += 32;
         if (e->state.h >= -128)
             e->state.h = -128;
@@ -1806,7 +1806,7 @@ void effect_update(void)
         e->position.vx = e->parent->position.vx;
         e->position.vy = e->parent->position.vy;
         e->position.vz = e->parent->position.vz;
-        entry = ST_EFFECT_ENTRY(e);
+        entry = e->owner.entry;
         e->state.h += 32;
         if (e->state.h >= -128)
             e->state.h = -128;
@@ -1893,12 +1893,12 @@ void effect_update(void)
         n = 8;
     drain:
         if (e->life < 16) {
-            Creature *owner = ST_EFFECT_ENTRY(e);
+            Creature *owner = e->owner.entry;
 
             owner->fade = e->life * 256;
             owner->status.bytes[2] |= 0xd;
         } else if (e->life <= 0) {
-            Creature *owner = ST_EFFECT_ENTRY(e);
+            Creature *owner = e->owner.entry;
 
             owner->fade = 0;
             if (owner->status.bytes[2] & 0x10)
@@ -1927,13 +1927,13 @@ void effect_update(void)
         n = 8;
     wound:
         if (e->life < 16) {
-            Creature *owner = ST_EFFECT_ENTRY(e);
+            Creature *owner = e->owner.entry;
 
             owner->fade = e->life * 256;
             owner->status.bytes[2] |= 0xd;
         }
         if (e->life <= 0) {
-            Creature *owner = ST_EFFECT_ENTRY(e);
+            Creature *owner = e->owner.entry;
 
             owner->fade = 0;
             if (owner->status.bytes[2] & 0x10)

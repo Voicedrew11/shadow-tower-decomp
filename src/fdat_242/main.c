@@ -83,7 +83,7 @@ void map_restore_progress(void)
 
     if (game_progress.event_flags.word >> 17 & 1) {
         fdat_801ee0bc = 2;
-        e48->state = 3;
+        e48->state = CREATURE_STATE_GONE;
         fdat_801ee0b4 = 4;
     } else {
         fdat_801ee0bc = 1;
@@ -104,7 +104,7 @@ void map_restore_progress(void)
         fdat_801ee0b8 = 3;
     else {
         fdat_801ee0b8 = 4;
-        d2->params.door.lock = 0xff;
+        d2->params.door.lock = DOOR_UNLOCKED;
     }
     if (game_progress.talk_counts[13] >= 2)
         e50->flags &= ~0x2000000;
@@ -163,7 +163,7 @@ void map_update_events(void)
         fdat_801ee0b4 = 2;
     if (fdat_801ee0b4 == 2)
         map_wind_down_texanims();
-    if (fdat_801ee0b4 == 3 && ((MapBlock *)viewer.block_record)->zone != 3) {
+    if (fdat_801ee0b4 == 3 && viewer.block_record->zone != 3) {
         map_move_texture_pages();
         creature_despawn(e48);
         e33->spawn_chance = 100;
@@ -172,7 +172,7 @@ void map_update_events(void)
         creature_force_talk(e50, 0, 0);
         creature_start_script(e50, 0);
         creature_fade_out_despawn(e50);
-        e50->state = 0;
+        e50->state = CREATURE_STATE_WAITING;
         e50->spawn_chance = 0;
         fdat_801ee0b8 = 1;
         e50->home_facing = (e50->home_facing + 0x800) & 0xfff;
@@ -195,7 +195,7 @@ void map_update_events(void)
         creature_force_talk(e49, 0, 0);
         creature_start_script(e49, 0);
         play_unlock_sound();
-        d2->params.door.lock = 0xff;
+        d2->params.door.lock = DOOR_UNLOCKED;
         creature_fade_out_despawn(e49);
         fdat_801ee0b8 = 4;
         e49->flags &= ~0x2000000;
@@ -220,9 +220,9 @@ void map_use_item_advance_scene(short id)
 {
     Creature *e = &vis_table_a.entries[50];
 
-    if (id == 0x10e && fdat_801ee0b8 == 2) {
+    if (id == ITEM_SACRED_FEATHER && fdat_801ee0b8 == 2) {
         fdat_801ee0b8 = 3;
-        e->state = 3;
+        e->state = CREATURE_STATE_GONE;
         vis_table_a.entries[49].spawn_chance = 100;
         e->flags &= ~0x2000000;
         game_progress.talk_counts[13]++;

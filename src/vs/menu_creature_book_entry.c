@@ -20,9 +20,6 @@ RODATA(0x8001123c, 0x22)
 /* The page arrows' initializers: 8 bytes each, so .sdata under -G8. */
 SDATA(0x80063280, 0x10)
 
-/* Number-width flag for ui_draw_number (ST.EXE's DIGITS, src/st/render.c). */
-#define DIGITS(n) ((n) << 24)
-
 /*
  * The cell grid (src/vs/ui_cell_grid.c) has no prototype in a header, and
  * retail's page saw it as returning int (an implicit declaration, written

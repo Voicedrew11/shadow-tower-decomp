@@ -59,7 +59,7 @@ void ui_draw_glyph(u16 c, u16 x, u16 y, CVECTOR *color)
     u16 q, r;
     int n;
 
-    if (VS_MENU_SCRATCH->font_mode == 0) {
+    if (VS_MENU_SCRATCH->font_mode == MENU_FONT_LOW_RES) {
         ch = 12;
         fw = ch;
         qh = fw;
@@ -161,7 +161,7 @@ void ui_draw_text(u16 *s, u16 x, u16 y, CVECTOR *color)
     u_int split;
     u_int half;
 
-    if (VS_MENU_SCRATCH->font_mode == 0) {
+    if (VS_MENU_SCRATCH->font_mode == MENU_FONT_LOW_RES) {
         line = 14;
         split = 64;
     } else {
@@ -187,14 +187,6 @@ void ui_draw_text(u16 *s, u16 x, u16 y, CVECTOR *color)
     }
 }
 
-/*
- * Number words: the value in the low halfword (signed), the digit count in
- * bits 24-27 and, in bits 28-31, flags that ask for a plus sign. Leading
- * zeros are blank; a value too wide for the digit count shows as nines.
- */
-#define NUMBER_DIGITS(num) (((num) >> 24) & 0xf)
-#define NUMBER_SIGNED 0xf0000000
-
 /* Draws a number with the proportional font: digit glyphs follow the
  * half-width codes. */
 ADDRESS(0x8001d9cc, 0x27c)
@@ -215,7 +207,7 @@ void ui_draw_number(u32 num, u16 x, u16 y, CVECTOR *color)
 
     if (DAT_8006337a)
         width -= 4;
-    if (VS_MENU_SCRATCH->font_mode == 0)
+    if (VS_MENU_SCRATCH->font_mode == MENU_FONT_LOW_RES)
         base = 64;
     else
         base = 4;
@@ -725,7 +717,7 @@ void card_draw_checking(void)
 {
     VsMenuScratch *sp = VS_MENU_SCRATCH;
 
-    ui_draw_text(VS_MESSAGE(310), 32, 74, &sp->style[0]);
+    ui_draw_text(VS_MESSAGE(MSG_CARD_CHECKING), 32, 74, &sp->style[0]);
 }
 
 /*
@@ -739,7 +731,7 @@ void card_draw_port_choice(void)
     VsMenuScratch *sp = VS_MENU_SCRATCH;
     int i;
 
-    ui_draw_text(VS_MESSAGE(370 + sp->port), 50, 60, &sp->style[0]);
+    ui_draw_text(VS_MESSAGE(MSG_CARD_INSERT_1P + sp->port), 50, 60, &sp->style[0]);
     sp->cursor_rect.x = 112;
     sp->cursor_rect.w = 100;
     sp->cursor_rect.h = 18;
@@ -782,17 +774,17 @@ void card_draw_format_prompt(void)
     VsMenuScratch *sp = VS_MENU_SCRATCH;
 
     if (sp->state.menu.half[1] == 0) {
-        ui_draw_text(VS_MESSAGE(311), 32, 74, &sp->style[0]);
+        ui_draw_text(VS_MESSAGE(MSG_CARD_UNFORMATTED), 32, 74, &sp->style[0]);
         if (sp->dialog_choice) {
-            ui_draw_text(VS_MESSAGE(325), 100, 160, &sp->style[1]);
-            ui_draw_text(VS_MESSAGE(326), 170, 160, &sp->style[0]);
+            ui_draw_text(VS_MESSAGE(MSG_CARD_YES), 100, 160, &sp->style[1]);
+            ui_draw_text(VS_MESSAGE(MSG_CARD_NO), 170, 160, &sp->style[0]);
         } else {
-            ui_draw_text(VS_MESSAGE(325), 100, 160, &sp->style[0]);
-            ui_draw_text(VS_MESSAGE(326), 170, 160, &sp->style[1]);
+            ui_draw_text(VS_MESSAGE(MSG_CARD_YES), 100, 160, &sp->style[0]);
+            ui_draw_text(VS_MESSAGE(MSG_CARD_NO), 170, 160, &sp->style[1]);
         }
     } else {
-        ui_draw_text(VS_MESSAGE(312), 32, 74, &sp->style[0]);
-        ui_draw_text(VS_MESSAGE(332), 40, 100, &sp->style[0]);
+        ui_draw_text(VS_MESSAGE(MSG_CARD_FORMATTING), 32, 74, &sp->style[0]);
+        ui_draw_text(VS_MESSAGE(MSG_CARD_DO_NOT_REMOVE), 40, 100, &sp->style[0]);
     }
 }
 
@@ -827,17 +819,17 @@ void card_draw_file_list(void)
         int message;
 
         if (sp->mode & 0xff)
-            message = 323;
+            message = MSG_CARD_LOAD_PROMPT;
         else
-            message = 324;
+            message = MSG_CARD_SAVE_PROMPT;
         ui_draw_text(VS_MESSAGE(message), 68, 128, &sp->style[0]);
         sp->style[0].b = sp->style[0].g = sp->style[0].r = 24;
         if (sp->dialog_choice) {
-            ui_draw_text(VS_MESSAGE(325), 120, 150, &sp->style[1]);
-            ui_draw_text(VS_MESSAGE(326), 190, 150, &sp->style[0]);
+            ui_draw_text(VS_MESSAGE(MSG_CARD_YES), 120, 150, &sp->style[1]);
+            ui_draw_text(VS_MESSAGE(MSG_CARD_NO), 190, 150, &sp->style[0]);
         } else {
-            ui_draw_text(VS_MESSAGE(325), 120, 150, &sp->style[0]);
-            ui_draw_text(VS_MESSAGE(326), 190, 150, &sp->style[1]);
+            ui_draw_text(VS_MESSAGE(MSG_CARD_YES), 120, 150, &sp->style[0]);
+            ui_draw_text(VS_MESSAGE(MSG_CARD_NO), 190, 150, &sp->style[1]);
         }
         sp->style[0].b = sp->style[0].g = sp->style[0].r = 72;
         sp->rect.x = 60;
@@ -884,7 +876,7 @@ void card_draw_file_list(void)
         rows = sp->row_count;
     for (i = 0; i < rows; i++) {
         if ((s16)sp->has_new_row == 1 && i + sp->first_row == sp->row_count - 1) {
-            ui_draw_text(VS_MESSAGE(322), 64, sp->cursor_rect.y + 6, &sp->style[0]);
+            ui_draw_text(VS_MESSAGE(MSG_CARD_NEW_DATA), 64, sp->cursor_rect.y + 6, &sp->style[0]);
         } else {
             if (sp->mode & 0xff00)
                 ui_draw_number_fixed(0x2000000 | ((s16)DAT_80063328[sp->port] + 1), 38,
@@ -892,7 +884,7 @@ void card_draw_file_list(void)
             else
                 ui_draw_number_fixed(0x2000000 | (u16)(sp->first_row + i + 1), 38,
                               sp->cursor_rect.y + 6, &sp->style[0]);
-            ui_draw_text(VS_MESSAGE(328), 218, sp->cursor_rect.y + 6, &sp->style[0]);
+            ui_draw_text(VS_MESSAGE(MSG_CARD_SP), 218, sp->cursor_rect.y + 6, &sp->style[0]);
             text_scroll_mode = 1;
             text_clip_on = 0;
             text_clip_left = 0;

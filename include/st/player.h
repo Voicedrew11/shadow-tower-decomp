@@ -5,9 +5,9 @@
  * slots, and the equipment effects. The viewer block itself is st/data.h's
  * Viewer. Address-derived names stay until behaviour is proven; the band's
  * functions that other modules already call keep their st/funcs.h
- * prototypes (player_distance_in_reach, player_update_status, player_hit,
- * player_distance_in_arc, player_load_magic, player_load_equipment_model),
- * as do st.math's (st/funcs.h), st.light's (st/light.h) and st.anim's
+ * prototypes (player_update_status, player_hit, player_distance_in_arc,
+ * player_load_magic, player_load_equipment_model; player_distance_in_reach,
+ * which takes a CollisionState, is declared in st/vis.h), as do st.math's (st/funcs.h), st.light's (st/light.h) and st.anim's
  * (st/anim.h). The held items and magic follow in the same unit.
  */
 #ifndef ST_PLAYER_H
@@ -23,23 +23,6 @@
     if (viewer.max_hp < viewer.hp) {                                           \
         viewer.hp = viewer.max_hp;                                             \
     }
-
-/* What player_distance_in_reach measures the viewer against: a position and a reach. */
-typedef struct {
-    s32 tests;
-    VECTOR position;     /* 0x04 */
-    SVECTOR velocity;
-    u16 radius;          /* 0x1c: added to the reach */
-    u16 height;          /* 0x1e: height below position.vy */
-    s16 heading;         /* 0x20: heading */
-    s16 speed;           /* 0x22: reach along the heading */
-} PlayerTarget;
-
-/* One TIM block header (the bytes after the flags word). */
-typedef struct {
-    u_long len;
-    RECT rect;
-} TimBlock;
 
 /* Not reconstructed yet. */
 void play_death_sound(void);
@@ -84,14 +67,6 @@ int player_get_launch_vector(int length, VECTOR *pos, SVECTOR *dir, SVECTOR *rot
 
 /* Not reconstructed exactly yet (0x8003f910); called with two arguments. */
 void player_fire_magic_shot(int kind, int slot, ...);
-
-/* A view of one 24-byte effects.defs record (StEffectDef, st/effect.h) as
- * a magic record: viewer.magic_defs holds the one each hand casts. */
-typedef struct {
-    u8 unk0[2];
-    u16 mp_cost;         /* 0x02: cost, taken from viewer.mp */
-    u8 unk4[0x14];
-} StMagic;
 
 /* src/st/player.c: held items, magic, view, hand swaps */
 void player_update_cast(u8 hand);

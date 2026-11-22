@@ -37,7 +37,7 @@ RODATA(0x800112a8, 0x134)
 #define PART_VERTICES(model, part) ((SVECTOR *)((model) + (MODEL_PARTS(model)[part].vertices + 12)))
 
 /*
- * A loaded model file's primitive fix-up: every
+ * A loaded mesh model's primitive fix-up (its part count at +8): every
  * part's tagged face records get their vertex and normal indices turned
  * into byte offsets (8 bytes an entry).
  */
@@ -48,16 +48,16 @@ RODATA(0x800112a8, 0x134)
  * semi-transparency bit is ignored for the switch.
  */
 ADDRESS(0x8002345c, 0x308)
-void model_fixup_face_indices(ModelFile *file)
+void model_fixup_face_indices(Model *model)
 {
-    VsModelPart *part = (VsModelPart *)((u8 *)file + 12);
-    int n = file->model;
+    VsModelPart *part = (VsModelPart *)((u8 *)model + 12);
+    int n = model->parts_count;
     int count;
     u32 *p;
     VsFaceTag tag;
 
     while (n--) {
-        p = (u32 *)((u8 *)file + (part->faces + 12));
+        p = (u32 *)((u8 *)model + (part->faces + 12));
         count = part->n_faces;
         while (count--) {
             tag = *(VsFaceTag *)p++;
@@ -467,21 +467,21 @@ ADDRESS(0x80024b5c, 0x6a8)
 void model_draw_list(void)
 {
     VsScratchPad *sp = VS_SCRATCHPAD;
-    ModelEntry *e = ((ModelList *)sp->anims)->entries;
-    int i = ((ModelList *)sp->anims)->count;
+    StAnimNode *e = sp->anims->nodes;
+    int i = sp->anims->count;
     MATRIX scale = {{{ONE, 0, 0}, {0, ONE, 0}, {0, 0, ONE}}, {0, 0, 0}};
     MeshVertex *out;
     SVECTOR *in;
     int n;
 
     while (i--) {
-        e->obj->composed = 0;
+        e->record->composed = 0;
         e++;
     }
-    i = ((ModelList *)sp->anims)->count;
-    e = ((ModelList *)sp->anims)->entries;
+    i = sp->anims->count;
+    e = sp->anims->nodes;
     while (i--) {
-        e->obj->composed = 0;
+        e->record->composed = 0;
         if (e->key != -1 && e->part != 0xffff) {
             if (e->kind == 2) {
                 MATRIX face = {{{ONE, 0, 0}, {0, ONE, 0}, {0, 0, ONE}}, {0, 0, 0}};
@@ -493,17 +493,17 @@ void model_draw_list(void)
                 RotMatrixX(angle.vx, &face);
                 RotMatrixY(angle.vy, &face);
                 RotMatrixZ(angle.vz, &face);
-                if (e->obj->parent->relative_set == 0) {
-                    RotMatrix(&e->obj->parent->transform->rot, &e->obj->parent->local_matrix);
+                if (e->record->parent->relative_set == 0) {
+                    RotMatrix(&e->record->parent->transform->rot, &e->record->parent->local_matrix);
                 }
-                gte_MulMatrix0(&e->obj->parent->local_matrix, &face, &e->obj->parent->local_matrix);
-                e->obj->parent->relative_set = 0;
+                gte_MulMatrix0(&e->record->parent->local_matrix, &face, &e->record->parent->local_matrix);
+                e->record->parent->relative_set = 0;
             }
-            anim_record_compose(e->obj);
+            anim_record_compose(e->record);
             if (e->kind == 1) {
                 if (model_list_slot >= 6)
                     model_list_slot = 0;
-                ScaleMatrix(&scale, &e->obj->transform->scale);
+                ScaleMatrix(&scale, &e->record->transform->scale);
                 gte_SetRotMatrix(&scale);
                 if (i % 6 != model_list_slot) {
                     e++;
@@ -513,7 +513,7 @@ void model_draw_list(void)
             } else if (e->kind == 3) {
                 if (model_list_slot >= 4)
                     model_list_slot = 0;
-                ScaleMatrix(&scale, &e->obj->transform->scale);
+                ScaleMatrix(&scale, &e->record->transform->scale);
                 gte_SetRotMatrix(&scale);
                 if (i % 4 != model_list_slot) {
                     e++;
@@ -523,7 +523,7 @@ void model_draw_list(void)
             } else if (e->kind == 4) {
                 if (model_list_slot >= 8)
                     model_list_slot = 0;
-                ScaleMatrix(&scale, &e->obj->transform->scale);
+                ScaleMatrix(&scale, &e->record->transform->scale);
                 gte_SetRotMatrix(&scale);
                 if (i % 8 != model_list_slot) {
                     e++;
@@ -580,7 +580,7 @@ void fighter_draw_skeletal(void)
     RotMatrix((SVECTOR *)&current_fighter->rot_x, &sp->matrix);
     CompMatrix(&vs_gfx_state.view_matrix, &sp->matrix, &sp->matrix);
     n = current_fighter - shared_buffer.fighter;
-    sp->model = (u8 *)vs_gfx_state.model_files[n] + ((ModelFile *)vs_gfx_state.model_files[n])->model;
+    sp->model = (u8 *)vs_gfx_state.model_files[n] + ((StAnimFile *)vs_gfx_state.model_files[n])->model;
     if (anim_set_pose(&current_fighter->anim_set, n, current_fighter->anim,
                       current_fighter->anim_frame) == 0)
         return;
@@ -601,7 +601,7 @@ void fighter_draw_skeletal(void)
     sp->prim_alloc_count = vs_gfx_state.prim_alloc_count;
     sp->prim = vs_gfx_state.packet->cur;
     sp->prim_end = vs_gfx_state.packet->end;
-    sp->vertices = vs_gfx_state.projected_vertices;
+    sp->vertices = (u8 *)vs_gfx_state.projected_vertices;
     sp->clut_base = 0;
     if (current_fighter->anim_frame != -1)
         model_draw_list();

@@ -35,10 +35,10 @@ void map_step_leaving_creature(Creature *e)
         e->move_mode = 1;
         e->collision_tests &= ~0x82;
         creature_turn_toward(0x800, 0x40);
-        creature_set_velocity(e->facing - 0x400, 0x40);
+        creature_set_velocity(e->rotation.vy - 0x400, 0x40);
         if (e->position.vz > 0x4f000) {
             creature_despawn(e);
-            viewer.state = 0;
+            viewer.state = VIEWER_STATE_NORMAL;
         }
     }
 }

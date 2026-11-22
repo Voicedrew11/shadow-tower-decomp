@@ -74,7 +74,7 @@ void map_restore_progress(void)
     a49 = &vis_table_a.entries[49];
 
     if (vis_table_b.entries[26].state != 0xff)
-        item->state = 4;
+        item->state = GROUND_ITEM_HIDDEN;
     a49->status.bytes[3] = 2;
     a50->status.bytes[3] = 2;
     a48->status.bytes[3] = 2;

@@ -77,7 +77,7 @@ void map_update_events(void)
     else if (fdat_801edc50 == 2)
         map_warp_player(1);
     if (!(game_progress.event_flags.word >> 18 & 1) && e->hp == 0) {
-        viewer.state = 5;
+        viewer.state = VIEWER_STATE_SCRIPTED;
         game_progress.event_flags.word |= 0x40000;
         lighting.area_mode[3] = 0x11;
         lighting.area_mode[20] = 0x11;
@@ -88,12 +88,12 @@ void map_update_events(void)
     if (fdat_801edc54 == 1) {
         player_update_hand_action(0);
         player_update_hand_action(1);
-        if (fdat_801edc54 == 1 && e->state == 3) {
-            viewer.state = 5;
+        if (fdat_801edc54 == 1 && e->state == CREATURE_STATE_GONE) {
+            viewer.state = VIEWER_STATE_SCRIPTED;
             e->flags |= 0x2000000;
             creature_force_talk(e, 1, 0);
             fdat_801edc54 = 0xff;
-            viewer.state = 0;
+            viewer.state = VIEWER_STATE_NORMAL;
         }
     }
 }
@@ -103,11 +103,11 @@ ADDRESS(0x801ed604, 0x58)
 void map_use_item_request_warp(short id)
 {
     if (id == 0x131 && fdat_801edc50 == 0) {
-        if (((MapBlock *)viewer.block_record)->zone == 3)
+        if (viewer.block_record->zone == 3)
             fdat_801edc50 = 2;
         else
             fdat_801edc50 = 1;
-        DAT_801cd0e0 = 1;
+        game_progress.item_use_result = 1;
     }
 }
 

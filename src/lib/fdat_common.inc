@@ -41,14 +41,14 @@ void creature_run_script_command(Creature *e)
     case 22:
         e->anim = s->anim;
         creature_turn_toward(e->target_heading, s->arg.s[1] * speed >> 12);
-        creature_set_velocity(e->facing + s->arg.u[2] - 1024, s->arg.s[0] * speed >> 12);
+        creature_set_velocity(e->rotation.vy + s->arg.u[2] - 1024, s->arg.s[0] * speed >> 12);
         break;
     case 16:
     case 17:
     case 18:
         e->anim = s->anim;
         if ((((short)e->anim_frame - s->arg.s[3] + 4096) & 0x7ff) < 1024)
-            creature_set_velocity(e->facing + s->arg.u[2] - 1024, s->arg.s[0] * speed >> 11);
+            creature_set_velocity(e->rotation.vy + s->arg.u[2] - 1024, s->arg.s[0] * speed >> 11);
         else
             creature_turn_toward(e->target_heading, s->arg.s[1] * speed >> 11);
         break;
@@ -60,7 +60,7 @@ void creature_run_script_command(Creature *e)
             turn = s->arg.s[1] * speed / s->arg.s[5];
             move = s->arg.s[0] * speed / s->arg.s[5];
             creature_turn_toward(e->target_heading, turn);
-            creature_set_velocity(e->facing + s->arg.u[3] - 1024, move);
+            creature_set_velocity(e->rotation.vy + s->arg.u[3] - 1024, move);
         } else {
             creature_turn_toward(e->target_heading, s->arg.s[2] * speed / (4096 - s->arg.s[5]));
         }
@@ -73,12 +73,12 @@ void creature_run_script_command(Creature *e)
         if (s->arg.u[11] != 0xffff && (frame = (short)e->anim_frame) >= (outer = s->arg.u[11])
             && (inner = s->arg.u[12]) >= frame) {
             push = s->arg.s[10] * speed / (inner - outer);
-            creature_set_velocity(e->facing - 1024, push);
+            creature_set_velocity(e->rotation.vy - 1024, push);
         }
         if (s->arg.u[14] != 0xffff && (frame = (short)e->anim_frame) >= (inner = s->arg.u[14])
             && frame <= (outer = s->arg.u[15])) {
             push = s->arg.s[13] * speed / (outer - inner);
-            creature_set_velocity(e->facing + 1024, push);
+            creature_set_velocity(e->rotation.vy + 1024, push);
         }
         if (s->arg.w[1] == -1 && s->arg.u[4] == 0xffff) {
             if (e->contact_hit == 0 && e->touched_player == 1 && push != 0
@@ -146,17 +146,17 @@ void creature_choose_action(void)
     u16 state;
 
     creature_clear_contact_hit(e);
-    if (e->action == 128) {
+    if (e->action == CREATURE_ACTION_DORMANT) {
         int reach = e->script->wake_range * e->script->wake_range;
 
         e->status.bytes[3] = 2;
         if (e->player_dist_sq < reach << 16 || e->hit != 0)
-            e->action = 256;
+            e->action = CREATURE_ACTION_WAKING;
         e->hit = 0;
         return;
     }
     e->hit = 0;
-    if (e->action == 256)
+    if (e->action == CREATURE_ACTION_WAKING)
         e->status.bytes[3] = 0;
     range = (r->alert_range * r->alert_range) << 16;
     if (e->status.bytes[1] == 0) {
@@ -210,7 +210,7 @@ void creature_choose_action(void)
         state &= 0xfffb;
     e->attack_miss = 0;
     if (!(state & 1)) {
-        e->action = 1;
+        e->action = CREATURE_ACTION_DEFAULT;
     } else if (state & 2) {
         if (state & 4) {
             if (r->actions & 0x10) {
@@ -218,36 +218,36 @@ void creature_choose_action(void)
                     if (rand() < 24576)
                         e->action = 16;
                     else
-                        e->action = 1;
-                } else if (!(r->actions & 8)) {
+                        e->action = CREATURE_ACTION_DEFAULT;
+                } else if (!(r->actions & CREATURE_ACTION_TURN_AWAY)) {
                     e->action = 16;
                 } else if (rand() < 4096) {
                     e->action = 16;
                 } else {
-                    e->action = 8;
+                    e->action = CREATURE_ACTION_TURN_AWAY;
                 }
-            } else if (r->actions & 8) {
-                e->action = 8;
+            } else if (r->actions & CREATURE_ACTION_TURN_AWAY) {
+                e->action = CREATURE_ACTION_TURN_AWAY;
             } else {
-                e->action = 1;
+                e->action = CREATURE_ACTION_DEFAULT;
             }
         } else if (r->actions & 2) {
-            if (!(r->actions & 8)) {
+            if (!(r->actions & CREATURE_ACTION_TURN_AWAY)) {
                 e->action = 2;
             } else if (e->aggressive) {
                 if (rand() < 4096)
-                    e->action = 8;
+                    e->action = CREATURE_ACTION_TURN_AWAY;
                 else
                     e->action = 2;
             } else if (rand() < 4096) {
                 e->action = 2;
             } else {
-                e->action = 8;
+                e->action = CREATURE_ACTION_TURN_AWAY;
             }
-        } else if (r->actions & 8) {
-            e->action = 8;
+        } else if (r->actions & CREATURE_ACTION_TURN_AWAY) {
+            e->action = CREATURE_ACTION_TURN_AWAY;
         } else {
-            e->action = 1;
+            e->action = CREATURE_ACTION_DEFAULT;
         }
     } else if (state & 4) {
         if (e->aggressive) {
@@ -261,26 +261,26 @@ void creature_choose_action(void)
             } else if (r->actions & 4) {
                 e->action = 4;
             } else {
-                e->action = 1;
+                e->action = CREATURE_ACTION_DEFAULT;
             }
-        } else if (r->actions & 8) {
-            e->action = 8;
+        } else if (r->actions & CREATURE_ACTION_TURN_AWAY) {
+            e->action = CREATURE_ACTION_TURN_AWAY;
         } else {
-            e->action = 1;
+            e->action = CREATURE_ACTION_DEFAULT;
         }
     } else if (r->actions & 2) {
-        if (!(r->actions & 8))
+        if (!(r->actions & CREATURE_ACTION_TURN_AWAY))
             e->action = 2;
         else if (e->aggressive)
             e->action = 2;
         else if (rand() < 16384)
             e->action = 2;
         else
-            e->action = 8;
-    } else if (r->actions & 8) {
-        e->action = 8;
+            e->action = CREATURE_ACTION_TURN_AWAY;
+    } else if (r->actions & CREATURE_ACTION_TURN_AWAY) {
+        e->action = CREATURE_ACTION_TURN_AWAY;
     } else {
-        e->action = 1;
+        e->action = CREATURE_ACTION_DEFAULT;
     }
     e->range_bits = state;
 }

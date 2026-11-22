@@ -15,9 +15,12 @@
 /* The table at the overlay's first byte (WIP layout). */
 typedef struct {
     s32 id;              /* 0x00: the overlay's id (0x37 in FDAT_002.BIN) */
-    void (*hooks[32])(); /* 0x04: handlers */
+    AreaHooks hooks;     /* 0x04: the area's handlers (area_state.hooks points here) */
     s32 unk84;           /* 0x84: id + 0x33 in every overlay */
 } FdatHeader;
+
+typedef char FdatHeaderHooksAt4[offsetof(FdatHeader, hooks) == 4 ? 1 : -1];
+typedef char FdatHeaderUnk84At0x84[offsetof(FdatHeader, unk84) == 0x84 ? 1 : -1];
 
 /* ST.EXE, no source yet. */
 void effect_spawn_attack(Creature *e, int arg, VECTOR *pos);

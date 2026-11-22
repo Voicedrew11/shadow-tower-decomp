@@ -43,13 +43,13 @@ void map_step_creature(void)
     speed = abs(e->anim_step);
     switch (e->command) {
     case 0x17:
-        *(s32 *)&e->unk48 = viewer.position.vy - 0x640;
+        e->unk48.fly_height = viewer.position.vy - 0x640;
         break;
     }
     if (e->command == 0x17) {
         e->anim = s->anim;
         creature_turn_toward(e->target_heading, s->arg.s[1] * speed >> 12);
-        creature_set_velocity(e->facing + s->arg.u[2] - 0x400, s->arg.s[0] * speed >> 12);
+        creature_set_velocity(e->rotation.vy + s->arg.u[2] - 0x400, s->arg.s[0] * speed >> 12);
         creature_steer_height(viewer.position.vy + s->arg.s[4], s->arg.s[3] * speed >> 12);
         e->script_state = 0xf0;
     } else {

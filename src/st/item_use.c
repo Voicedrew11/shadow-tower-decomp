@@ -35,27 +35,27 @@ void item_use(int id)
     USE_RESULT = 2;
     pos.vy += 1600;
     switch (id) {
-    case 0x10a:
+    case ITEM_CUNES:
     case 0x10b:
         break;
     case 0x10c:
         if (!(viewer.status_flags & 0x30000)) {
             USE_RESULT = 1;
-            viewer.unk190[5][1] = 3000;
-            viewer.unk190[5][0] = 0;
+            viewer.timers.halves[5][1] = 3000;
+            viewer.timers.halves[5][0] = 0;
             viewer.status_flags |= 0x10000;
         }
         break;
     case 0x10d:
         if (!(viewer.status_flags & 0x30000)) {
             USE_RESULT = 1;
-            viewer.unk190[5][1] = 18000;
-            viewer.unk190[5][0] = 0;
+            viewer.timers.halves[5][1] = 18000;
+            viewer.timers.halves[5][0] = 0;
             viewer.status_flags |= 0x20000;
         }
         break;
-    case 0x10e:
-        if (area_state.area != 30 && viewer.save_area != 0xff) {
+    case ITEM_SACRED_FEATHER:
+        if (area_state.area != 30 && viewer.save_point.area != 0xff) {
             viewer.save_warp_request = 1;
             viewer.submerged_acid = 0;
             viewer.submerged = 0;
@@ -108,104 +108,107 @@ void item_use(int id)
         if (viewer.hp < viewer.max_hp) {
             viewer.hp = viewer.max_hp;
             USE_RESULT = 1;
-            sound_play(8, 128);
+            sound_play(SOUND_RECOVER, 128);
         }
         break;
     case 0x11d:
         if (viewer.mp < viewer.max_mp) {
             viewer.mp = viewer.max_mp;
             USE_RESULT = 1;
-            sound_play(8, 128);
+            sound_play(SOUND_RECOVER, 128);
         }
         break;
     case 0x11e:
-        if (viewer.status_flags & 7) {
-            viewer.unk190[0][1] = 0;
-            viewer.unk190[0][0] = 0;
-            viewer.status_flags &= ~7;
+        if (viewer.status_flags & STATUS_POISON) {
+            viewer.timers.halves[0][1] = 0;
+            viewer.timers.halves[0][0] = 0;
+            viewer.status_flags &= ~STATUS_POISON;
             USE_RESULT = 1;
-            sound_play(8, 128);
+            sound_play(SOUND_RECOVER, 128);
         }
         break;
     case 0x11f:
-        if (viewer.status_flags & 0x18) {
-            viewer.unk190[1][1] = 0;
-            viewer.unk190[1][0] = 0;
-            viewer.status_flags &= ~0x18;
+        if (viewer.status_flags & STATUS_PARALYZE) {
+            viewer.timers.halves[1][1] = 0;
+            viewer.timers.halves[1][0] = 0;
+            viewer.status_flags &= ~STATUS_PARALYZE;
             USE_RESULT = 1;
-            sound_play(8, 128);
+            sound_play(SOUND_RECOVER, 128);
         }
         break;
-    case 0x120:
-        if (viewer.status_flags & 0x100) {
-            viewer.unk190[4][1] = 0;
-            viewer.unk190[4][0] = 0;
-            viewer.status_flags &= ~0x100;
+    case ITEM_DIVINE_SYMBOL:
+        if (viewer.status_flags & STATUS_CURSED) {
+            viewer.timers.halves[4][1] = 0;
+            viewer.timers.halves[4][0] = 0;
+            viewer.status_flags &= ~STATUS_CURSED;
             USE_RESULT = 1;
-            sound_play(8, 128);
+            sound_play(SOUND_RECOVER, 128);
         }
         break;
     case 0x122:
         if (!(viewer.status_flags & 0x40000)) {
-            viewer.unk190[6][1] = 300;
-            viewer.unk190[6][0] = 0;
+            viewer.timers.halves[6][1] = 300;
+            viewer.timers.halves[6][0] = 0;
             viewer.status_flags |= 0x40000;
             USE_RESULT = 1;
         }
         break;
     case 0x123:
-        if (!(viewer.status_flags & 0x80000)) {
-            viewer.unk190[7][1] = 3000;
-            viewer.unk190[7][0] = 0;
-            viewer.status_flags |= 0x80000;
+        if (!(viewer.status_flags & STATUS_FIRE_WARD)) {
+            viewer.timers.halves[7][1] = 3000;
+            viewer.timers.halves[7][0] = 0;
+            viewer.status_flags |= STATUS_FIRE_WARD;
             USE_RESULT = 1;
         }
         break;
     case 0x124:
-        if (!(viewer.status_flags & 0x100000)) {
-            viewer.unk190[8][1] = 600;
-            viewer.unk190[8][0] = 0;
-            viewer.status_flags |= 0x100000;
+        if (!(viewer.status_flags & STATUS_POISON_WARD)) {
+            viewer.timers.halves[8][1] = 600;
+            viewer.timers.halves[8][0] = 0;
+            viewer.status_flags |= STATUS_POISON_WARD;
             USE_RESULT = 1;
         }
         break;
     case 0x125:
-        if (!(viewer.status_flags & 0x200000)) {
-            viewer.unk190[9][1] = 300;
-            viewer.unk190[9][0] = 0;
-            viewer.status_flags |= 0x200000;
+        if (!(viewer.status_flags & STATUS_ATTACK_BOOST)) {
+            viewer.timers.halves[9][1] = 300;
+            viewer.timers.halves[9][0] = 0;
+            viewer.status_flags |= STATUS_ATTACK_BOOST;
             USE_RESULT = 1;
         }
         break;
     case 0x126:
         if (!(viewer.status_flags & 0x400000)) {
-            viewer.unk190[10][1] = 6000;
-            viewer.unk190[10][0] = 0;
+            viewer.timers.halves[10][1] = 6000;
+            viewer.timers.halves[10][0] = 0;
             viewer.status_flags |= 0x400000;
             USE_RESULT = 1;
         }
         break;
     case 0x127:
-        if (!(viewer.status_flags & 0x800000)) {
-            viewer.unk190[11][1] = 3000;
-            viewer.unk190[11][0] = 0;
-            viewer.status_flags |= 0x800000;
+        if (!(viewer.status_flags & STATUS_ACID_WARD)) {
+            viewer.timers.halves[11][1] = 3000;
+            viewer.timers.halves[11][0] = 0;
+            viewer.status_flags |= STATUS_ACID_WARD;
             USE_RESULT = 1;
         }
         break;
     case 0x128:
         if (!(viewer.status_flags & 0x800)) {
-            viewer.unk190[12][1] = 6000;
-            viewer.unk190[12][0] = 0;
+            viewer.timers.halves[12][1] = 6000;
+            viewer.timers.halves[12][0] = 0;
             viewer.status_flags |= 0x800;
             USE_RESULT = 1;
         }
         break;
     case 0x12e: {
         u16 *ids[12] = {
-            &viewer.equipment[0], &viewer.equipment[2], &viewer.equipment[3], &viewer.equipment[4],
-            &viewer.equipment[8], &viewer.equipment[9], &viewer.equipment[10], &viewer.equipment[13],
-            &viewer.equipment[15], &viewer.equipment[16], &viewer.equipment[17], NULL,
+            &viewer.equipment[EQUIP_SLOT_RIGHT_RING], &viewer.equipment[EQUIP_SLOT_GLOVES],
+                &viewer.equipment[EQUIP_SLOT_RIGHT_HAND], &viewer.equipment[EQUIP_SLOT_RIGHT_RESERVE],
+            &viewer.equipment[EQUIP_SLOT_HELMET], &viewer.equipment[EQUIP_SLOT_ARMOR],
+                &viewer.equipment[EQUIP_SLOT_BOOTS], &viewer.equipment[EQUIP_SLOT_LEFT_RING],
+            &viewer.equipment[EQUIP_SLOT_GLOVES_MIRROR], &viewer.equipment[EQUIP_SLOT_LEFT_HAND],
+                &viewer.equipment[EQUIP_SLOT_LEFT_RESERVE], NULL,
         };
         u16 **p;
         ItemType *c;
@@ -266,8 +269,9 @@ done:
     {
         /* the quick-use slots drop an item used up */
         u16 *slots[5] = {
-            &viewer.equipment[5], &viewer.equipment[19], &viewer.equipment[11], &viewer.equipment[20],
-            &viewer.equipment[18],
+            &viewer.equipment[EQUIP_SLOT_QUICK_1], &viewer.equipment[EQUIP_SLOT_QUICK_2],
+                &viewer.equipment[EQUIP_SLOT_QUICK_3], &viewer.equipment[EQUIP_SLOT_QUICK_4],
+            &viewer.equipment[EQUIP_SLOT_QUICK_5],
         };
         int slot;
 

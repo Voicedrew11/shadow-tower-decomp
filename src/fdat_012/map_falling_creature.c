@@ -79,7 +79,7 @@ void map_step_falling_creature(Creature *e)
             break;
         }
         creature_turn_toward(ratan2(e->position.vz - target_z, e->position.vx - target_x) + 0xc00, 0x20);
-        creature_set_velocity(e->facing - 0x400, 0x40);
+        creature_set_velocity(e->rotation.vy - 0x400, 0x40);
         e->anim_frame += e->anim_step;
         if ((short)e->anim_frame >= 0x1000)
             e->anim_frame = 0;

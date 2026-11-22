@@ -57,7 +57,7 @@ void map_remove_fallen_creature(void)
 {
     Creature *e = &vis_table_a.entries[48];
 
-    if (e->status.bytes[0] != 0 && e->state == 0)
+    if (e->status.bytes[0] != 0 && e->state == CREATURE_STATE_WAITING)
         creature_despawn(e);
 }
 

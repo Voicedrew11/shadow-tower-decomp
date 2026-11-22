@@ -70,10 +70,7 @@ typedef struct {
     u_short clut_base;   /* 0x98: added to subdivided faces' CLUT */
     u8 unk9A[2];         /* 0x9a */
     SVECTOR node_trans;  /* 0x9c: a node translation anim_record_compose transforms */
-    union {
-        ModelList *models;       /* the entries model_draw_list draws */
-        struct StAnimList *anims; /* the node list anim_list_compose composes */
-    } list;              /* 0xa4 */
+    struct StAnimList *anims; /* 0xa4: the node list anim_list_compose composes and model_draw_list draws */
     VECTOR part_pos;     /* 0xa8: a record's camera-space position (RTV0TR result);
                           * model_draw and the anim sets use 0xa8..0xc8 as a MATRIX
                           * (SCRATCH_MATRIX) */
@@ -128,6 +125,7 @@ typedef struct {
 
 typedef char ScratchPrimitiveCountAt0x90[offsetof(ScratchPad, prim_count) == 0x90 ? 1 : -1];
 typedef char ScratchPrimitiveCountEndsAt0x94[offsetof(ScratchPad, prim_alloc_count) == 0x94 ? 1 : -1];
+typedef char ScratchPadAnimsAt0xA4[offsetof(ScratchPad, anims) == 0xa4 ? 1 : -1];
 
 #define SCRATCHPAD ((ScratchPad *)0x1f800000)
 /* The MATRIX model_draw and the anim sets build at 0xa8..0xc8. */

@@ -13,7 +13,7 @@
 #include <LIBGTE.H>
 #include <st/gfx.h>
 
-typedef struct {
+typedef struct StAnimFile {
     u_long size;         /* 0x00: bytes, header included */
     u16 animated;        /* 0x04: 0 for a model without animation */
     u16 node_count;
@@ -59,15 +59,20 @@ typedef struct StAnimRecord {
     u8 unk4C[4];
 } StAnimRecord;
 
-/* A 16-byte list node and the list of them anim_list_init builds. */
+/* A 16-byte list node and the list of them anim_list_init builds; a node
+ * is a part of the current model model_draw_list draws. */
 typedef struct StAnimNode {
     u_long flags;
-    StAnimRecord *record; /* 0x04 */
-    u16 part;            /* 0x08: id anim_list_find_id searches */
-    u8 kind;
+    StAnimRecord *record; /* 0x04: its node record; model_draw_list clears its composed
+                          * flag every frame, scales kinds 1, 3 and 4 by transform->scale and
+                          * turns kind 2's parent matrix (parent->local_matrix) to face the viewer */
+    u16 part;            /* 0x08: id anim_list_find_id searches; 0xffff: none */
+    u8 kind;             /* 0x0a: 1, 3, 4: scaled, every 6th, 4th, 8th node per frame */
     u8 unkB;
-    s32 key;             /* 0x0c: key anim_list_find_key searches, -1 when free */
+    s32 key;             /* 0x0c: key anim_list_find_key searches, -1 when free (not drawn) */
 } StAnimNode;
+
+typedef char StAnimNodeSize[sizeof(StAnimNode) == 16 ? 1 : -1];
 
 typedef struct StAnimList {
     StAnimNode *nodes;
@@ -126,7 +131,7 @@ void anim_set_alloc(StAnimSet **out);
 void anim_record_compose(StAnimRecord *rec);
 void anim_list_compose(void);
 int anim_set_pose(StAnimSet **setp, int id, int clip, u_long frame);
-int anim_prepare_any(void **slotp, int id, int clip, int frame);
+int anim_prepare_any(StAnimState *slotp, int id, int clip, int frame);
 /* VS.EXE has its own port under this name, with another signature; VS units define VS_EXE. */
 #ifndef VS_EXE
 void anim_set_node_vertex(StAnimSet *set, int id, int node, int index, VECTOR *out);
