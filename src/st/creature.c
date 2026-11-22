@@ -15,70 +15,70 @@
 
 /* Moves the entry to the cell of record unk28, offset by unk6A..unk6E. */
 ADDRESS(0x8004ac38, 0x64)
-void creature_return_home(Vis212 *e)
+void creature_return_home(Creature *e)
 {
     VisRecord *r;
-    u16 i = e->unk28;
+    u16 i = e->home_block;
 
-    e->unk26 = i;
+    e->block = i;
     r = &vis_records[i];
-    e->unk74.vx = (r->unk08 << 12) + e->unk6A;
-    e->unk74.vy = (r->unk09 << 12) + e->unk6C;
-    e->unk74.vz = (r->unk0a << 12) + e->unk6E;
+    e->position.vx = (r->unk08 << 12) + e->home_offset_x;
+    e->position.vy = (r->unk09 << 12) + e->home_offset_y;
+    e->position.vz = (r->unk0a << 12) + e->home_offset_z;
 }
 
 /* Clears the rotation and sets the facing to unk68, or a random one when
  * unk68 is 0xffff. */
 ADDRESS(0x8004ac9c, 0x50)
-void creature_reset_facing(Vis212 *e)
+void creature_reset_facing(Creature *e)
 {
-    e->unk90 = 0;
-    e->unk8C = 0;
-    if (e->unk68 == 0xffff)
-        e->unk8E = rand() >> 3;
+    e->rot_z = 0;
+    e->rot_x = 0;
+    if (e->home_facing == 0xffff)
+        e->facing = rand() >> 3;
     else
-        e->unk8E = e->unk68;
+        e->facing = e->home_facing;
 }
 
 /* Copies the entry's settings from its record and resets its scale. */
 ADDRESS(0x8004acec, 0x84)
-void creature_copy_type_stats(Vis212 *e)
+void creature_copy_type_stats(Creature *e)
 {
-    Vis192 *r = &vis_table_a.unk3500[e->unk02];
+    CreatureType *r = &vis_table_a.types[e->type];
 
-    e->unk01 = r->unk10;
-    e->unk2C = r->unk32;
-    e->unk2E = r->unk16;
-    e->unk30 = r->unk18;
-    e->unk32 = r->unk1A;
-    e->unk70 = r->unk20;
-    e->unk34 = -1;
-    e->unk36 = -1;
-    e->unk94.vx = e->unk94.vy = e->unk94.vz = 4096;
+    e->kind = r->kind;
+    e->hp = r->max_hp;
+    e->radius = r->radius;
+    e->height = r->height;
+    e->shadow_size = r->shadow_size;
+    e->flags = r->flags;
+    e->hurt_timer = -1;
+    e->fade = -1;
+    e->scale.vx = e->scale.vy = e->scale.vz = 4096;
 }
 
 /* Resets the entry's state for a fresh start. */
 ADDRESS(0x8004ad70, 0xc8)
-void creature_reset_for_spawn(Vis212 *e)
+void creature_reset_for_spawn(Creature *e)
 {
-    Vis192 *r = &vis_table_a.unk3500[e->unk02];
+    CreatureType *r = &vis_table_a.types[e->type];
 
-    e->unk05 = 1;
-    e->unk08 = 0;
-    e->unk2A = 0;
+    e->state = 1;
+    e->anim = 0;
+    e->anim_frame = 0;
     e->unk1B = 0;
-    e->unk0E = r->unk05;
-    e->unk0F = 2;
-    e->unk1A = 255;
-    e->unk22 = -1;
-    e->unk36 = 4095;
-    e->unk1C.bytes[2] = 13;
-    e->unkA8 = NULL;
+    e->move_mode = r->move_mode;
+    e->command = 2;
+    e->script_state = 255;
+    e->voice = -1;
+    e->fade = 4095;
+    e->status.bytes[2] = 13;
+    e->script = NULL;
     e->unk23 = 1;
-    if (e->unk68 == 0xffff)
-        e->unk8E = rand() >> 3;
+    if (e->home_facing == 0xffff)
+        e->facing = rand() >> 3;
     e->unk20 = 55;
-    e->unk9C.vx = e->unk9C.vy = e->unk9C.vz = 0;
+    e->velocity.vx = e->velocity.vy = e->velocity.vz = 0;
     e->unkB2 = 0;
     e->unk24 = 2048;
 }
@@ -86,77 +86,77 @@ void creature_reset_for_spawn(Vis212 *e)
 /* Retires the entry: counts a kill unless it is state 5, then frees its
  * share of the totals and puts it back in its cell. */
 ADDRESS(0x8004ae38, 0xec)
-void creature_despawn(Vis212 *e)
+void creature_despawn(Creature *e)
 {
-    Vis192 *r = &vis_table_a.unk3500[e->unk02];
+    CreatureType *r = &vis_table_a.types[e->type];
 
-    if (e->unk05 == 5) {
-        vis_table_a.unk6158[0] = vis_table_a.unk6158[1] = vis_table_a.unk6158[2] =
-            vis_table_a.unk6158[3] = 255;
+    if (e->state == 5) {
+        vis_table_a.zone_history[0] = vis_table_a.zone_history[1] = vis_table_a.zone_history[2] =
+            vis_table_a.zone_history[3] = 255;
     } else if (e < &vis_table_a.entries[48]) {
         game_progress.unk16E4[area_state.area]++;
         viewer.unk30++;
     }
-    e->unk05 = 3;
+    e->state = 3;
     vis_table_a.unk612C -= r->unk12;
-    vis_table_a.unk6128 -= e->unk0D;
+    vis_table_a.spawn_cost_total -= e->spawn_cost;
     creature_return_home(e);
 }
 
 ADDRESS(0x8004af24, 0x58)
-void creature_spawn(Vis212 *e, Vis192 *r)
+void creature_spawn(Creature *e, CreatureType *r)
 {
     creature_return_home(e);
     creature_reset_facing(e);
     creature_reset_for_spawn(e);
     if (r->unk00 == 2)
-        e->unk03 = 2;
+        e->visibility = 2;
 }
 
 ADDRESS(0x8004af7c, 0x60)
 void creature_spawn_by_index(u16 i)
 {
-    Vis212 *e = &vis_table_a.entries[i];
+    Creature *e = &vis_table_a.entries[i];
 
-    creature_spawn(e, &vis_table_a.unk3500[e->unk02]);
+    creature_spawn(e, &vis_table_a.types[e->type]);
 }
 
 /* Frees every entry and clears the totals. */
 ADDRESS(0x8004afdc, 0x7c)
 void creatures_clear(void)
 {
-    Vis212 *e;
+    Creature *e;
     u16 i;
 
-    vis_table_a.unk6150 = 0;
+    vis_table_a.frame = 0;
     e = vis_table_a.entries;
     for (i = 0; i < 64; i++, e++) {
-        e->unk00 = 255;
-        e->unk05 = 0;
-        e->unkA4 = 0;
+        e->spawn_chance = 255;
+        e->state = 0;
+        e->anim_slot = 0;
     }
-    vis_table_a.unk6168 = 254;
-    vis_table_a.unk6101 = 0;
-    vis_table_a.unk6158[0] = vis_table_a.unk6158[1] = vis_table_a.unk6158[2] =
-        vis_table_a.unk6158[3] = 255;
-    vis_table_a.unk6103 = 255;
+    vis_table_a.zone = 254;
+    vis_table_a.skip_flags = 0;
+    vis_table_a.zone_history[0] = vis_table_a.zone_history[1] = vis_table_a.zone_history[2] =
+        vis_table_a.zone_history[3] = 255;
+    vis_table_a.prev_zone = 255;
     vis_table_a.unk6130 = 0;
     vis_table_a.unk612C = 0;
-    vis_table_a.unk6128 = 0;
+    vis_table_a.spawn_cost_total = 0;
 }
 
 ADDRESS(0x8004b058, 0x38)
-void creature_set_script(Vis212 *e, u8 *p)
+void creature_set_script(Creature *e, u8 *p)
 {
-    e->unk19 = e->unk0F;
+    e->prev_command = e->command;
     if (p != NULL) {
-        e->unkA8 = (VisScript *)p;
-        e->unk0F = *p;
-        e->unk1A = 0;
+        e->script = (CreatureScript *)p;
+        e->command = *p;
+        e->script_state = 0;
     } else {
-        e->unkA8 = NULL;
-        e->unk0F = 255;
-        e->unk1A = 255;
+        e->script = NULL;
+        e->command = 255;
+        e->script_state = 255;
     }
 }
 
@@ -171,8 +171,8 @@ int creature_score_script(u8 *p, int arg)
 ADDRESS(0x8004b098, 0x104)
 void creature_pick_script(int arg)
 {
-    Vis212 *e = vis_table_a.unk6138;
-    Vis192 *r = vis_table_a.unk6134;
+    Creature *e = vis_table_a.current;
+    CreatureType *r = vis_table_a.current_type;
     u8 **list;
     u8 *p;
     u8 *best;
@@ -180,9 +180,9 @@ void creature_pick_script(int arg)
     int max;
     int n;
 
-    if (e->unk1A == 240 || e->unk1A == 0)
+    if (e->script_state == 240 || e->script_state == 0)
         return;
-    list = (u8 **)r->unk60;
+    list = (u8 **)r->scripts;
     max = -2;
     best = NULL;
     n = 24;
@@ -196,22 +196,22 @@ void creature_pick_script(int arg)
             best = p;
         }
     }
-    if (best != NULL && (best != (u8 *)e->unkA8 || e->unk1A == 255))
+    if (best != NULL && (best != (u8 *)e->script || e->script_state == 255))
         creature_set_script(e, best);
 }
 
 ADDRESS(0x8004b19c, 0x4c)
 void creature_pick_script_by_distance(void)
 {
-    creature_pick_script(vector_length_xz(vis_table_a.unk6138->unk74.vx - viewer.position.vx,
-                                vis_table_a.unk6138->unk74.vz - viewer.position.vz));
+    creature_pick_script(vector_length_xz(vis_table_a.current->position.vx - viewer.position.vx,
+                                vis_table_a.current->position.vz - viewer.position.vz));
 }
 
 /* Finds the entry of r's list whose first byte is id. */
 ADDRESS(0x8004b1e8, 0x48)
-u8 *creature_type_find_script(Vis192 *r, u8 id)
+u8 *creature_type_find_script(CreatureType *r, u8 id)
 {
-    u8 **list = (u8 **)r->unk60;
+    u8 **list = (u8 **)r->scripts;
     u8 *p;
     int n = 24;
 
@@ -226,27 +226,27 @@ u8 *creature_type_find_script(Vis192 *r, u8 id)
 }
 
 ADDRESS(0x8004b230, 0x40)
-void creature_set_script_by_id(Vis212 *e, u8 id)
+void creature_set_script_by_id(Creature *e, u8 id)
 {
-    creature_set_script(e, creature_type_find_script(vis_table_a.unk3500, id));
+    creature_set_script(e, creature_type_find_script(vis_table_a.types, id));
 }
 
 ADDRESS(0x8004b270, 0x44)
 void creature_end_script(void)
 {
-    vis_table_a.unk6138->unk1A = 255;
+    vis_table_a.current->script_state = 255;
     area_state.hooks->unk40();
 }
 
 ADDRESS(0x8004b2b4, 0x28)
 void creature_set_anim(u8 v)
 {
-    Vis212 *e;
+    Creature *e;
 
     if (v != 255) {
-        e = vis_table_a.unk6138;
-        e->unk08 = v;
-        e->unk2A = 0;
+        e = vis_table_a.current;
+        e->anim = v;
+        e->anim_frame = 0;
     }
 }
 
@@ -254,58 +254,58 @@ void creature_set_anim(u8 v)
 ADDRESS(0x8004b2dc, 0x2fc)
 void creature_update_spawn(void)
 {
-    Vis212 *e = vis_table_a.unk6138;
-    Vis192 *r = vis_table_a.unk6134;
+    Creature *e = vis_table_a.current;
+    CreatureType *r = vis_table_a.current_type;
     u8 cur;
 
-    switch (e->unk05) {
+    switch (e->state) {
     case 0:
-        if (e->unk07 != 255 || e->unk40 >= 28672) {
-            cur = vis_table_a.unk6168;
-            if (cur == vis_table_a.unk6158[0] && cur == vis_table_a.unk6158[1] &&
-                cur == vis_table_a.unk6158[2] && cur == vis_table_a.unk6158[3])
+        if (e->zone != 255 || e->player_dist_xz >= 28672) {
+            cur = vis_table_a.zone;
+            if (cur == vis_table_a.zone_history[0] && cur == vis_table_a.zone_history[1] &&
+                cur == vis_table_a.zone_history[2] && cur == vis_table_a.zone_history[3])
                 return;
-            if (vis_table_a.unk6168 == 255 || vis_table_a.unk6168 != e->unk07)
+            if (vis_table_a.zone == 255 || vis_table_a.zone != e->zone)
                 return;
         }
-        if (vis_table_a.unk6128 + e->unk0D > 100 && vis_table_a.unk6144 < 32)
+        if (vis_table_a.spawn_cost_total + e->spawn_cost > 100 && vis_table_a.current_index < 32)
             return;
-        if (e->unk40 < 4096 && vis_table_a.unk6144 < 56)
+        if (e->player_dist_xz < 4096 && vis_table_a.current_index < 56)
             return;
-        if (e->unk00 != 0 && e->unk00 >= rand() / 327) {
+        if (e->spawn_chance != 0 && e->spawn_chance >= rand() / 327) {
             vis_table_a.unk612C += r->unk12;
-            vis_table_a.unk6128 += e->unk0D;
-            creature_spawn(vis_table_a.unk6138, vis_table_a.unk6134);
+            vis_table_a.spawn_cost_total += e->spawn_cost;
+            creature_spawn(vis_table_a.current, vis_table_a.current_type);
             e->unk1B = 255;
-            e->unk54 = e->unk60 = 0xffff;
-            e->unk44 = 0;
-            if (r->unk1C & 0x80)
-                e->unk44 = 128;
+            e->aggressive = e->range_bits = 0xffff;
+            e->action = 0;
+            if (r->actions & 0x80)
+                e->action = 128;
             area_state.hooks->unk40();
-        } else if (e->unk00 != 0 && vis_table_a.unk6144 < 32) {
-            e->unk07 = 253;
+        } else if (e->spawn_chance != 0 && vis_table_a.current_index < 32) {
+            e->zone = 253;
         }
         return;
     case 1:
-        cur = vis_table_a.unk6168;
-        if (cur == 255 || cur == e->unk07)
+        cur = vis_table_a.zone;
+        if (cur == 255 || cur == e->zone)
             return;
-        if (e->unk07 == 255 && e->unk40 < 28672)
+        if (e->zone == 255 && e->player_dist_xz < 28672)
             return;
         vis_table_a.unk612C -= r->unk12;
-        vis_table_a.unk6128 -= e->unk0D;
-        e->unk05 = 0;
+        vis_table_a.spawn_cost_total -= e->spawn_cost;
+        e->state = 0;
         creature_return_home(e);
         return;
     case 2:
-        if (e->unk40 < 28672) {
-            cur = vis_table_a.unk6168;
-            if (cur == 255 || cur == e->unk07)
+        if (e->player_dist_xz < 28672) {
+            cur = vis_table_a.zone;
+            if (cur == 255 || cur == e->zone)
                 return;
         }
         vis_table_a.unk612C -= r->unk12;
-        vis_table_a.unk6128 -= e->unk0D;
-        e->unk05 = 0;
+        vis_table_a.spawn_cost_total -= e->spawn_cost;
+        e->state = 0;
         creature_return_home(e);
         return;
     }
@@ -337,8 +337,8 @@ ADDRESS(0x8004b658, 0x294)
 void *creature_find_in_cone(VECTOR *pos, short yaw, short pitch, int range, int arg4, int arg5, int *dist,
                     int arg7)
 {
-    Vis212 *e;
-    Vis212 *best;
+    Creature *e;
+    Creature *best;
     VECTOR v;
     SVECTOR dir;
     int r;
@@ -354,16 +354,16 @@ void *creature_find_in_cone(VECTOR *pos, short yaw, short pitch, int range, int 
     e = vis_table_a.entries;
     n = 64;
     while (n--) {
-        if (e->unk05 == 1 && e != vis_table_a.unk6138) {
+        if (e->state == 1 && e != vis_table_a.current) {
             r = range;
-            if (e->unk70 & 0x20000)
+            if (e->flags & 0x20000)
                 r <<= 1;
-            v.vx = e->unk74.vx;
-            v.vy = e->unk74.vy - e->unk30;
-            v.vz = e->unk74.vz;
-            d = vector_distance_xz_within(&e->unk74, pos->vx, 0xffff, pos->vz, r, 0, 0);
+            v.vx = e->position.vx;
+            v.vy = e->position.vy - e->height;
+            v.vz = e->position.vz;
+            d = vector_distance_xz_within(&e->position, pos->vx, 0xffff, pos->vz, r, 0, 0);
             if (d != -1) {
-                vector_to_angles(e->unk74.vx - pos->vx, e->unk74.vy - pos->vy, e->unk74.vz - pos->vz,
+                vector_to_angles(e->position.vx - pos->vx, e->position.vy - pos->vy, e->position.vz - pos->vz,
                               &dir);
                 dir.vy = (dir.vy - yaw) & 0xfff;
                 if (dir.vy >= 2048)
@@ -371,7 +371,7 @@ void *creature_find_in_cone(VECTOR *pos, short yaw, short pitch, int range, int 
                 dir.vx = (dir.vx - pitch) & 0xfff;
                 if (dir.vx >= 2048)
                     dir.vx = 4096 - dir.vx;
-                if ((e->unk70 & 0x20000) && arg7 >= 0) {
+                if ((e->flags & 0x20000) && arg7 >= 0) {
                     d >>= 2;
                     dir.vx -= 512;
                     dir.vy -= 512;
@@ -447,8 +447,8 @@ int vector_point_segment_distance(int x, int y, int z, int r, VECTOR *a, VECTOR 
 ADDRESS(0x8004bb88, 0x2f8)
 int creature_find_in_reach(VisLists *req, int arg1)
 {
-    Vis212 *e;
-    Vis192 *r;
+    Creature *e;
+    CreatureType *r;
     int mode;
     int i;
     int best;
@@ -464,46 +464,46 @@ int creature_find_in_reach(VisLists *req, int arg1)
     best = -1;
     mode = arg1 & 5;
     for (e = vis_table_a.entries, i = 0; i < 64; i++, e++) {
-        if (e->unk05 != 1)
+        if (e->state != 1)
             continue;
-        if (e->unk70 & vis_table_a.unk6101)
+        if (e->flags & vis_table_a.skip_flags)
             continue;
-        if (e == vis_table_a.unk6138)
+        if (e == vis_table_a.current)
             continue;
-        r = &vis_table_a.unk3500[e->unk02];
+        r = &vis_table_a.types[e->type];
         if (mode == 1 &&
             !angle_within(viewer.unk278.vy,
-                           (short)angle_from_xz(e->unk74.vx - viewer.position.vx, e->unk74.vz - viewer.position.vz),
+                           (short)angle_from_xz(e->position.vx - viewer.position.vx, e->position.vz - viewer.position.vz),
                            256))
             continue;
         if (mode == 4 &&
             !angle_within(viewer.unk278.vy,
-                           (short)angle_from_xz(e->unk74.vx - viewer.position.vx, e->unk74.vz - viewer.position.vz),
+                           (short)angle_from_xz(e->position.vx - viewer.position.vx, e->position.vz - viewer.position.vz),
                            384))
             continue;
-        if (r->unk16 == 0)
+        if (r->radius == 0)
             continue;
-        dx = e->unk74.vx - req->unk4.vx;
+        dx = e->position.vx - req->unk4.vx;
         if (dx < -10240 || dx > 10240)
             continue;
-        dz = e->unk74.vz - req->unk4.vz;
+        dz = e->position.vz - req->unk4.vz;
         if (dz < -10240 || dz > 10240)
             continue;
         dist = SquareRoot0(dx * dx + dz * dz);
         fwd = req->unk22 * rcos(req->unk20 - (short)ratan2(dz, dx)) / 4096;
         if (arg1 & 2)
-            lim = e->unk2E + req->unk1C + 512;
+            lim = e->radius + req->unk1C + 512;
         else
-            lim = e->unk2E + req->unk1C;
+            lim = e->radius + req->unk1C;
         if (dist - fwd >= lim)
             continue;
-        if (e->unk74.vy < req->unk4.vy) {
-            if (e->unk74.vy < req->unk4.vy - req->unk1E) {
+        if (e->position.vy < req->unk4.vy) {
+            if (e->position.vy < req->unk4.vy - req->unk1E) {
                 if (mode == 0)
                     return -1;
                 continue;
             }
-        } else if (req->unk4.vy < e->unk74.vy - e->unk30) {
+        } else if (req->unk4.vy < e->position.vy - e->height) {
             if (mode == 0)
                 return -1;
             continue;
@@ -524,41 +524,41 @@ int creature_find_in_reach(VisLists *req, int arg1)
 ADDRESS(0x8004be80, 0x1bc)
 int creature_find_touching(VisLists *req)
 {
-    Vis212 *e;
+    Creature *e;
     VECTOR v;
     int i;
 
     e = vis_table_a.entries;
     for (i = 0; i < 64; i++, e++) {
-        if (e->unk05 != 1)
+        if (e->state != 1)
             continue;
-        if (e->unk70 & vis_table_a.unk6101)
+        if (e->flags & vis_table_a.skip_flags)
             continue;
-        if (e == vis_table_a.unk6138)
+        if (e == vis_table_a.current)
             continue;
-        if (e->unk70 & 0x10) {
-            if (e->unk6A == vis_table_a.unk6144)
+        if (e->flags & 0x10) {
+            if (e->home_offset_x == vis_table_a.current_index)
                 continue;
-            v.vx = e->unk74.vx;
-            v.vz = e->unk74.vz;
-            v.vy = e->unk74.vy - e->unk30 + e->unk6E;
-            if (vector_distance_xz_within(&v, req->unk4.vx, req->unk4.vy, req->unk4.vz, e->unk2E + req->unk1C,
-                              e->unk30, req->unk1E) != -1)
+            v.vx = e->position.vx;
+            v.vz = e->position.vz;
+            v.vy = e->position.vy - e->height + e->home_offset_z;
+            if (vector_distance_xz_within(&v, req->unk4.vx, req->unk4.vy, req->unk4.vz, e->radius + req->unk1C,
+                              e->height, req->unk1E) != -1)
                 return i;
-        } else if (e->unk70 & 0x400000) {
+        } else if (e->flags & 0x400000) {
             creature_vertex_offset(e, 0, &v);
-            v.vx += e->unk74.vx;
-            v.vz += e->unk74.vz;
-            v.vy += e->unk74.vy;
-            if (vector_distance_xz_within(&v, req->unk4.vx, req->unk4.vy, req->unk4.vz, e->unk2E + req->unk1C,
-                              e->unk30, req->unk1E) != -1)
+            v.vx += e->position.vx;
+            v.vz += e->position.vz;
+            v.vy += e->position.vy;
+            if (vector_distance_xz_within(&v, req->unk4.vx, req->unk4.vy, req->unk4.vz, e->radius + req->unk1C,
+                              e->height, req->unk1E) != -1)
                 return i;
         } else {
-            v.vx = e->unk74.vx;
-            v.vz = e->unk74.vz;
-            v.vy = e->unk74.vy;
-            if (vector_distance_xz_within(&v, req->unk4.vx, req->unk4.vy, req->unk4.vz, e->unk2E + req->unk1C,
-                              e->unk30, req->unk1E) != -1)
+            v.vx = e->position.vx;
+            v.vz = e->position.vz;
+            v.vy = e->position.vy;
+            if (vector_distance_xz_within(&v, req->unk4.vx, req->unk4.vy, req->unk4.vz, e->radius + req->unk1C,
+                              e->height, req->unk1E) != -1)
                 return i;
         }
     }
@@ -568,64 +568,64 @@ int creature_find_touching(VisLists *req)
 /* Makes e the current entry (unk6138) and caches its record, and for a
  * follower the entry it follows. */
 ADDRESS(0x8004c03c, 0xb8)
-void creature_set_current(Vis212 *e)
+void creature_set_current(Creature *e)
 {
-    Vis192 *r;
-    Vis212 *t;
+    CreatureType *r;
+    Creature *t;
 
     if (e != NULL) {
-        vis_table_a.unk6138 = e;
-        vis_table_a.unk6134 = r = &vis_table_a.unk3500[e->unk02];
-        vis_table_a.unk6148 = e->unk02;
-        if (r->unk20 & 0x10) {
-            vis_table_a.unk6140 = t = &vis_table_a.entries[e->unk6A];
-            vis_table_a.unk613C = &vis_table_a.unk3500[t->unk02];
+        vis_table_a.current = e;
+        vis_table_a.current_type = r = &vis_table_a.types[e->type];
+        vis_table_a.current_type_index = e->type;
+        if (r->flags & 0x10) {
+            vis_table_a.leader = t = &vis_table_a.entries[e->home_offset_x];
+            vis_table_a.leader_type = &vis_table_a.types[t->type];
         }
     } else {
-        vis_table_a.unk6138 = NULL;
-        vis_table_a.unk6134 = NULL;
-        vis_table_a.unk6148 = 0;
-        vis_table_a.unk6140 = NULL;
-        vis_table_a.unk613C = NULL;
+        vis_table_a.current = NULL;
+        vis_table_a.current_type = NULL;
+        vis_table_a.current_type_index = 0;
+        vis_table_a.leader = NULL;
+        vis_table_a.leader_type = NULL;
     }
 }
 
 ADDRESS(0x8004c0f4, 0x34)
-void creature_anim_step_wrap(Vis212 *e, short step)
+void creature_anim_step_wrap(Creature *e, short step)
 {
     if (step < 0)
-        e->unkB0 = -step;
+        e->anim_step = -step;
     else
-        e->unkB0 = step;
-    e->unk2A = (e->unk2A + step) & 0xfff;
+        e->anim_step = step;
+    e->anim_frame = (e->anim_frame + step) & 0xfff;
 }
 
 ADDRESS(0x8004c128, 0x5c)
-void creature_anim_step_clamp(Vis212 *e, short step)
+void creature_anim_step_clamp(Creature *e, short step)
 {
     if (step < 0)
-        e->unkB0 = -step;
+        e->anim_step = -step;
     else
-        e->unkB0 = step;
-    e->unk2A += step;
-    if ((short)e->unk2A >= 4096)
-        e->unk2A = 4095;
-    else if ((short)e->unk2A < 0)
-        e->unk2A = 0;
+        e->anim_step = step;
+    e->anim_frame += step;
+    if ((short)e->anim_frame >= 4096)
+        e->anim_frame = 4095;
+    else if ((short)e->anim_frame < 0)
+        e->anim_frame = 0;
 }
 
 ADDRESS(0x8004c184, 0x30)
-int creature_anim_passed_frame(Vis212 *e, u16 v)
+int creature_anim_passed_frame(Creature *e, u16 v)
 {
-    return v < (short)e->unk2A && v >= (short)e->unk2A - e->unkB0;
+    return v < (short)e->anim_frame && v >= (short)e->anim_frame - e->anim_step;
 }
 
 /* Moves the entry by its velocity, sliding along up to three walls the
  * request hits, then settles it on the floor. */
 ADDRESS(0x8004c1b4, 0x654)
-void creature_move(Vis212 *e)
+void creature_move(Creature *e)
 {
-    Vis192 *r;
+    CreatureType *r;
     SVECTOR vel;
     VECTOR d;
     SVECTOR n;
@@ -644,34 +644,34 @@ void creature_move(Vis212 *e)
     wall1 = 0;
     slid = 0;
     tries = 0;
-    r = &vis_table_a.unk3500[e->unk02];
-    speed = SquareRoot0(e->unk9C.vx * e->unk9C.vx + e->unk9C.vz * e->unk9C.vz);
-    heading = ratan2(e->unk9C.vz, e->unk9C.vx);
-    vel = e->unk9C;
-    if (e->unk0E != 2)
-        vel.vy = e->unk16;
-    vis_lists.unk4 = e->unk74;
-    vis_lists.unk4.vy -= e->unk30;
-    vis_lists.unk1C = e->unk2E;
-    vis_lists.unk1E = e->unk30;
-    vis_lists.unk0 = e->unk50 | 0x800;
+    r = &vis_table_a.types[e->type];
+    speed = SquareRoot0(e->velocity.vx * e->velocity.vx + e->velocity.vz * e->velocity.vz);
+    heading = ratan2(e->velocity.vz, e->velocity.vx);
+    vel = e->velocity;
+    if (e->move_mode != 2)
+        vel.vy = e->vertical_speed;
+    vis_lists.unk4 = e->position;
+    vis_lists.unk4.vy -= e->height;
+    vis_lists.unk1C = e->radius;
+    vis_lists.unk1E = e->height;
+    vis_lists.unk0 = e->collision_tests | 0x800;
 loop:
-    e->unk9C.vx = vel.vx;
-    e->unk9C.vy = vel.vy;
-    e->unk9C.vz = vel.vz;
-    vis_lists.unk14 = e->unk9C;
-    vis_lists.unk20 = ratan2(e->unk9C.vz, e->unk9C.vx);
+    e->velocity.vx = vel.vx;
+    e->velocity.vy = vel.vy;
+    e->velocity.vz = vel.vz;
+    vis_lists.unk14 = e->velocity;
+    vis_lists.unk20 = ratan2(e->velocity.vz, e->velocity.vx);
     vis_lists.unk22 = SquareRoot0(vel.vx * vel.vx + vel.vz * vel.vz);
     hits = collision_query(&vis_lists);
     if (tries == 0) {
         if (vis_lists.n_sources != 0) {
-            if (e->unk03 == 1)
-                e->unk03 = 0;
-            e->unk26 = vis_lists.unk47D8;
-        } else if (e->unk03 == 0) {
-            e->unk03 = 1;
+            if (e->visibility == 1)
+                e->visibility = 0;
+            e->block = vis_lists.unk47D8;
+        } else if (e->visibility == 0) {
+            e->visibility = 1;
         }
-        if (vis_records[e->unk26].unk01 != e->unk06) {
+        if (vis_records[e->block].unk01 != e->region) {
             vel.vx = vel.vz = 0;
             goto done;
         }
@@ -679,7 +679,7 @@ loop:
     if (hits == 0 || tries++ >= 3)
         goto done;
     if (hits & 2) {
-        depth = 1 - (vis_lists.unk3C - e->unk2E);
+        depth = 1 - (vis_lists.unk3C - e->radius);
         vel.vx = depth * vis_lists.unk8C / 4096;
         vel.vz = depth * vis_lists.unk90 / 4096;
         if (wall0)
@@ -687,11 +687,11 @@ loop:
         wall0 = 1;
         vis_lists.unk78 = ratan2(vis_lists.unk90, vis_lists.unk8C);
         ang = vis_lists.unk78 + 1024;
-        e->unk5E = ang & 0xfff;
+        e->wall_heading = ang & 0xfff;
         push = speed * rcos(heading - (ang & 0xfff)) / 4096;
         vis_lists.unk44C6 = push;
     } else if (hits & 8) {
-        depth = 1 - (vis_lists.unk44 - e->unk2E);
+        depth = 1 - (vis_lists.unk44 - e->radius);
         vel.vx = depth * vis_lists.unk9C / 4096;
         vel.vz = depth * vis_lists.unkA0 / 4096;
         if (wall1)
@@ -699,16 +699,16 @@ loop:
         wall1 = 1;
         vis_lists.unk78 = ratan2(vis_lists.unkA0, vis_lists.unk9C);
         ang = vis_lists.unk78 + 1024;
-        e->unk5E = ang & 0xfff;
+        e->wall_heading = ang & 0xfff;
         push = speed * rcos(heading - (ang & 0xfff)) / 4096;
         vis_lists.unk44C6 = push;
     } else if (hits & 0xd0) {
         if (hits & 0x80)
-            e->unk39 = 1;
-        collision_locate_hit_body(&e->unk74);
-        d.vx = e->unk74.vx - vis_lists.unkAC.vx;
+            e->touched_player = 1;
+        collision_locate_hit_body(&e->position);
+        d.vx = e->position.vx - vis_lists.unkAC.vx;
         d.vy = 0;
-        d.vz = e->unk74.vz - vis_lists.unkAC.vz;
+        d.vz = e->position.vz - vis_lists.unkAC.vz;
         VectorNormalS(&d, &n);
         vel.vx = 0;
         vel.vz = 0;
@@ -730,49 +730,49 @@ loop:
 done:
     if (hits & 4) {
         dy = vis_lists.unk2C;
-        vel.vy += dy - e->unk30;
+        vel.vy += dy - e->height;
     }
-    dy = vis_lists.unk2C - e->unk30;
-    e->unk4C = dy;
-    if (e->unk0E == 1 || e->unk0E == 2) {
+    dy = vis_lists.unk2C - e->height;
+    e->height_above_floor = dy;
+    if (e->move_mode == 1 || e->move_mode == 2) {
         vel.vy = 0;
-    } else if (dy > 0 && e->unk0E != 4) {
-        if (e->unk30 < dy && e->unk0E != 8) {
+    } else if (dy > 0 && e->move_mode != 4) {
+        if (e->height < dy && e->move_mode != 8) {
             vel.vx = vel.vz = 0;
-        } else if (e->unk16 > 0) {
+        } else if (e->vertical_speed > 0) {
             if (dy < vel.vy) {
                 vel.vy = dy;
-                e->unk16 = 0;
+                e->vertical_speed = 0;
             } else {
-                e->unk16 += r->unk0E;
+                e->vertical_speed += r->gravity;
             }
-        } else if (e->unk16 < 0) {
-            if (dy < e->unk16) {
+        } else if (e->vertical_speed < 0) {
+            if (dy < e->vertical_speed) {
                 vel.vy += dy;
-                e->unk16 = 0;
+                e->vertical_speed = 0;
             } else {
-                e->unk16 += r->unk0E;
+                e->vertical_speed += r->gravity;
             }
-        } else if (dy < r->unk0E) {
+        } else if (dy < r->gravity) {
             vel.vy += dy;
-            e->unk16 = 0;
+            e->vertical_speed = 0;
         } else {
-            e->unk16 += r->unk0E;
+            e->vertical_speed += r->gravity;
         }
     } else if (dy < 0) {
-        if (-dy < e->unk30 >> 1) {
+        if (-dy < e->height >> 1) {
             vel.vy += dy;
-            e->unk16 = 0;
+            e->vertical_speed = 0;
         } else {
             vel.vx = vel.vz = 0;
         }
     } else {
         vel.vy = 0;
-        e->unk16 = 0;
+        e->vertical_speed = 0;
     }
-    e->unk9C.vx = vel.vx;
-    e->unk9C.vy = vel.vy;
-    e->unk9C.vz = vel.vz;
+    e->velocity.vx = vel.vx;
+    e->velocity.vy = vel.vy;
+    e->velocity.vz = vel.vz;
 }
 
 /* Moves the current entry vertically, clamped between the floor and the
@@ -780,69 +780,69 @@ done:
 ADDRESS(0x8004c808, 0x12c)
 void creature_move_vertical(void)
 {
-    Vis212 *e = vis_table_a.unk6138;
+    Creature *e = vis_table_a.current;
 
-    vis_lists.unk4 = e->unk74;
-    vis_lists.unk4.vy += e->unk9C.vy - e->unk30;
-    vis_lists.unk1C = e->unk2E;
-    vis_lists.unk1E = e->unk30;
-    vis_lists.unk14 = e->unk9C;
-    vis_lists.unk20 = ratan2(e->unk9C.vz, e->unk9C.vx);
+    vis_lists.unk4 = e->position;
+    vis_lists.unk4.vy += e->velocity.vy - e->height;
+    vis_lists.unk1C = e->radius;
+    vis_lists.unk1E = e->height;
+    vis_lists.unk14 = e->velocity;
+    vis_lists.unk20 = ratan2(e->velocity.vz, e->velocity.vx);
     vis_lists.unk0 = 2;
     collision_test_map(&vis_lists);
-    if (vis_lists.unk47E4 < e->unk74.vy) {
-        e->unk74.vy = vis_lists.unk47E4;
-        e->unk9C.vy = 0;
-    } else if (e->unk74.vy - e->unk30 < vis_lists.unk47E8) {
-        e->unk74.vy = vis_lists.unk47E8 + e->unk30;
-        e->unk9C.vy = 0;
+    if (vis_lists.unk47E4 < e->position.vy) {
+        e->position.vy = vis_lists.unk47E4;
+        e->velocity.vy = 0;
+    } else if (e->position.vy - e->height < vis_lists.unk47E8) {
+        e->position.vy = vis_lists.unk47E8 + e->height;
+        e->velocity.vy = 0;
     } else {
-        e->unk74.vy += e->unk9C.vy;
+        e->position.vy += e->velocity.vy;
     }
 }
 
 /* The world position of vertex `index` of the entry's model, or of its
  * centre when the model has none. */
 ADDRESS(0x8004c934, 0x100)
-int creature_vertex_offset(Vis212 *e, int index, VECTOR *out)
+int creature_vertex_offset(Creature *e, int index, VECTOR *out)
 {
     SVECTOR rot;
     SVECTOR v;
 
-    if (anim_get_vertex(e->unk0B + 128, e->unk08, (short)e->unk2A, index, &v)) {
+    if (anim_get_vertex(e->model_slot + 128, e->anim, (short)e->anim_frame, index, &v)) {
         v.vx = 0;
-        v.vy = -e->unk30 >> 1;
-        v.vz = -e->unk2E;
+        v.vy = -e->height >> 1;
+        v.vz = -e->radius;
     } else {
-        v.vx = v.vx * e->unk94.vx >> 12;
-        v.vy = v.vy * e->unk94.vy >> 12;
-        v.vz = v.vz * e->unk94.vz >> 12;
+        v.vx = v.vx * e->scale.vx >> 12;
+        v.vy = v.vy * e->scale.vy >> 12;
+        v.vz = v.vz * e->scale.vz >> 12;
     }
-    rot.vx = e->unk8C;
-    rot.vy = e->unk8E + 2048;
-    rot.vz = e->unk90;
+    rot.vx = e->rot_x;
+    rot.vy = e->facing + 2048;
+    rot.vz = e->rot_z;
     vector_rotate(&rot, &v, out);
     return 1;
 }
 
 ADDRESS(0x8004ca34, 0x5c)
-VECTOR *creature_get_position(Vis212 *e, VECTOR *out)
+VECTOR *creature_get_position(Creature *e, VECTOR *out)
 {
-    switch (e->unk70 & 3) {
+    switch (e->flags & 3) {
     case 0:
-        return &e->unk74;
+        return &e->position;
     case 1:
-        out->vx = e->unk74.vx;
-        out->vy = e->unk74.vy;
-        out->vz = e->unk74.vz;
+        out->vx = e->position.vx;
+        out->vy = e->position.vy;
+        out->vz = e->position.vz;
         return out;
     case 2:
-        out->vx = e->unk74.vx;
-        out->vy = e->unk74.vy;
-        out->vz = e->unk74.vz;
+        out->vx = e->position.vx;
+        out->vy = e->position.vy;
+        out->vz = e->position.vz;
         return out;
     }
-    return &e->unk74;
+    return &e->position;
 }
 
 /* A random offset around base: +-8 across, up to 31 below `up`; out is base
@@ -878,7 +878,7 @@ void effect_jitter_offset(SVECTOR *off, VECTOR *out, VECTOR *base)
  * rotation (facing the other way) in out and returns its yaw. */
 ADDRESS(0x8004cc70, 0x278)
 int creature_aim_shot(e, pos, speed, target, dir, out, pitch, turn, n)
-Vis212 *e;
+Creature *e;
 VECTOR *pos;
 int speed;
 VECTOR *target;
@@ -899,21 +899,21 @@ int n;
     p.vy += 800;
     for (;;) {
         vector_to_angles(p.vx - target->vx, p.vy - target->vy, p.vz - target->vz, &rot);
-        d = (rot.vy - e->unk8E + 2048) & 0xfff;
+        d = (rot.vy - e->facing + 2048) & 0xfff;
         if (d >= 2048)
             d = 4096 - d;
         if (d != 0)
             d = k / d;
         if (d > 4096)
             d = 4096;
-        t = angle_lerp(rot.vy, e->unk8E + 2048, d);
+        t = angle_lerp(rot.vy, e->facing + 2048, d);
         rot.vy = t;
         t = pitch;
         if (t == -1) {
-            d = (rot.vx - (short)e->unk8C) & 0xfff;
+            d = (rot.vx - (short)e->rot_x) & 0xfff;
             if (d >= 2048)
                 d = 4096 - d;
-            rot.vx = angle_lerp(rot.vx, (short)e->unk8C, d);
+            rot.vx = angle_lerp(rot.vx, (short)e->rot_x, d);
         } else {
             rot.vx = pitch;
         }

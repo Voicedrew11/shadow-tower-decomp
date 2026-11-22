@@ -70,13 +70,13 @@ void map_reset_scene_state(void)
 ADDRESS(0x801ed4b4, 0x150)
 void map_update_events(void)
 {
-    Vis212 *e = &vis_table_a.entries[32];
+    Creature *e = &vis_table_a.entries[32];
 
     if (fdat_801edc50 == 1)
         map_warp_player(0);
     else if (fdat_801edc50 == 2)
         map_warp_player(1);
-    if (!(game_progress.unk1440.word >> 18 & 1) && e->unk2C == 0) {
+    if (!(game_progress.unk1440.word >> 18 & 1) && e->hp == 0) {
         viewer.unk218 = 5;
         game_progress.unk1440.word |= 0x40000;
         lighting.area_mode[3] = 0x11;
@@ -88,9 +88,9 @@ void map_update_events(void)
     if (fdat_801edc54 == 1) {
         player_update_hand_action(0);
         player_update_hand_action(1);
-        if (fdat_801edc54 == 1 && e->unk05 == 3) {
+        if (fdat_801edc54 == 1 && e->state == 3) {
             viewer.unk218 = 5;
-            e->unk70 |= 0x2000000;
+            e->flags |= 0x2000000;
             creature_force_talk(e, 1, 0);
             fdat_801edc54 = 0xff;
             viewer.unk218 = 0;

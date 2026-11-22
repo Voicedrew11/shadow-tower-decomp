@@ -68,15 +68,15 @@ static int fdat_801eda3c;
 ADDRESS(0x801ed4a0, 0x11c)
 void map_restore_progress(void)
 {
-    Vis212 *e48 = &vis_table_a.entries[48];
-    Vis192 *r2 = &vis_table_a.unk3500[2];
-    Vis192 *r1 = &vis_table_a.unk3500[1];
-    Vis192 *r4 = &vis_table_a.unk3500[4];
-    Vis192 *r8 = &vis_table_a.unk3500[8];
+    Creature *e48 = &vis_table_a.entries[48];
+    CreatureType *r2 = &vis_table_a.types[2];
+    CreatureType *r1 = &vis_table_a.types[1];
+    CreatureType *r4 = &vis_table_a.types[4];
+    CreatureType *r8 = &vis_table_a.types[8];
 
-    if (e48->unk05 != 3)
-        e48->unk1C.bytes[3] = 2;
-    if (game_progress.unk1448[r2->unk09] == 1)
+    if (e48->state != 3)
+        e48->status.bytes[3] = 2;
+    if (game_progress.unk1448[r2->talk_id] == 1)
         fdat_801eda30 = 0xff;
     else
         fdat_801eda30 = 0;
@@ -92,9 +92,9 @@ void map_restore_progress(void)
         fdat_801eda3c = 0;
     else
         fdat_801eda3c = 0xff;
-    r1->unk1C &= ~0x180;
-    r4->unk1C &= ~0x180;
-    r8->unk1C &= ~0x180;
+    r1->actions &= ~0x180;
+    r4->actions &= ~0x180;
+    r8->actions &= ~0x180;
 }
 
 /* Runs the area: entry 48 leaves once record 2's stream counter is 1 or
@@ -102,30 +102,30 @@ void map_restore_progress(void)
 ADDRESS(0x801ed5bc, 0x180)
 void map_update_events(void)
 {
-    Vis212 *e48 = &vis_table_a.entries[48];
-    Vis192 *r2 = &vis_table_a.unk3500[2];
-    Vis212 *e34 = &vis_table_a.entries[34];
-    Vis212 *e33 = &vis_table_a.entries[33];
-    Vis212 *e35 = &vis_table_a.entries[35];
+    Creature *e48 = &vis_table_a.entries[48];
+    CreatureType *r2 = &vis_table_a.types[2];
+    Creature *e34 = &vis_table_a.entries[34];
+    Creature *e33 = &vis_table_a.entries[33];
+    Creature *e35 = &vis_table_a.entries[35];
 
-    if (fdat_801eda30 != 0xff && game_progress.unk1448[r2->unk09] == 1) {
+    if (fdat_801eda30 != 0xff && game_progress.unk1448[r2->talk_id] == 1) {
         creature_fade_out_despawn(e48);
         fdat_801eda30 = 0xff;
     }
-    if (e48->unk64 != 0) {
-        e48->unk64 = 0;
+    if (e48->hit != 0) {
+        e48->hit = 0;
         creature_fade_out_despawn(e48);
         fdat_801eda30 = 0xff;
     }
-    if (fdat_801eda34 == 0 && e34->unk2C == 0) {
+    if (fdat_801eda34 == 0 && e34->hp == 0) {
         fdat_801eda34 = 1;
         game_progress.unk1440.word |= 0x200000;
     }
-    if (fdat_801eda38 == 0 && e33->unk2C == 0) {
+    if (fdat_801eda38 == 0 && e33->hp == 0) {
         fdat_801eda38 = 1;
         game_progress.unk1440.word |= 0x400000;
     }
-    if (fdat_801eda3c == 0 && e35->unk2C == 0) {
+    if (fdat_801eda3c == 0 && e35->hp == 0) {
         fdat_801eda3c = 1;
         game_progress.unk1440.word |= 0x800000;
     }

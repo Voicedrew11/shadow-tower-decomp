@@ -29,7 +29,7 @@
 ADDRESS(0x801ed9e8, 0x154)
 void map_kill_creature_open_warp(void)
 {
-    Vis212 *e;
+    Creature *e;
     Vis88 *d3;
 
     viewer.unk218 = 5;
@@ -37,33 +37,33 @@ void map_kill_creature_open_warp(void)
     d3 = &vis_table_b.entries[3];
     player_turn_to_creature(e);
     for (;;) {
-        e->unk2A += e->unkB0;
-        if ((short)e->unk2A >= 0x1000)
+        e->anim_frame += e->anim_step;
+        if ((short)e->anim_frame >= 0x1000)
             goto animation_done;
         world_run_frame(NULL, NULL, 0);
     }
 animation_done:
     creature_force_talk(e, 0, 0);
     creature_force_talk(e, 0, 0);
-    vis_table_a.unk6158[3] = 0xff;
-    vis_table_a.unk6158[2] = 0xff;
-    vis_table_a.unk6158[1] = 0xff;
-    vis_table_a.unk6158[0] = 0xff;
-    e->unk65 = 20;
-    e->unk66 = 30;
-    e->unk67 = 100;
+    vis_table_a.zone_history[3] = 0xff;
+    vis_table_a.zone_history[2] = 0xff;
+    vis_table_a.zone_history[1] = 0xff;
+    vis_table_a.zone_history[0] = 0xff;
+    e->drop_chance0 = 20;
+    e->drop_chance1 = 30;
+    e->drop_chance2 = 100;
     creature_roll_drops(e);
     creature_award_kill_bonuses(e);
     creature_start_script(e, 12);
-    e->unk05 = 5;
-    e->unk34 = 0xfff;
-    e->unk1A = 0xf0;
-    e->unk2A = 0;
-    e->unk2C = 0;
+    e->state = 5;
+    e->hurt_timer = 0xfff;
+    e->script_state = 0xf0;
+    e->anim_frame = 0;
+    e->hp = 0;
     d3->unk05 = 0xed;
     viewer.unk218 = 0;
     fdat_801edb3c = 2;
     vis_table_a.unk612C = 0;
-    vis_table_a.unk6128 = 10;
-    e->unk1C.bytes[2] |= 0x15;
+    vis_table_a.spawn_cost_total = 10;
+    e->status.bytes[2] |= 0x15;
 }

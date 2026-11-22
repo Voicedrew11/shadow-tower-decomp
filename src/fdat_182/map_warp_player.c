@@ -42,8 +42,8 @@ void player_enter_normal_state(void);
 ADDRESS(0x801ed9cc, 0x284)
 void map_warp_player(int gate)
 {
-    Vis212 *e = &vis_table_a.entries[32];
-    Vis192 *r = &vis_table_a.unk3500[12];
+    Creature *e = &vis_table_a.entries[32];
+    CreatureType *r = &vis_table_a.types[12];
     int index;
     int slot;
 
@@ -70,29 +70,29 @@ void map_warp_player(int gate)
     viewer.unk218 = 5;
     fade_run_frames(2, 0x1000, 0x1000, 0);
     creatures_update();
-    if (gate == 0 && e->unk05 != 3 && e->unk05 != 1) {
-        index = e->unk02;
-        slot = e->unk0B + 128;
+    if (gate == 0 && e->state != 3 && e->state != 1) {
+        index = e->type;
+        slot = e->model_slot + 128;
         creature_spawn_now(e);
         if (world_state.unk834C[slot] == NULL)
-            creature_model_load(2, index * 5, slot, e->unk0C & 0xf);
-        e->unk36 = -1;
-        e->unk1C.bytes[2] &= 0xf2;
+            creature_model_load(2, index * 5, slot, e->vram_tag & 0xf);
+        e->fade = -1;
+        e->status.bytes[2] &= 0xf2;
         creature_start_script(e, 9);
-        vis_table_a.unk6168 = 3;
+        vis_table_a.zone = 3;
     }
     cd_wait_idle();
     play_warp_sound();
     fade_run_frames(2, 0x1000, 0, -0x100);
     pad_clear_input();
-    if (gate == 0 && game_progress.unk1448[r->unk09] == 0) {
+    if (gate == 0 && game_progress.unk1448[r->talk_id] == 0) {
         creature_force_talk(e, 0, 0);
-        e->unk70 &= ~0x2000000;
+        e->flags &= ~0x2000000;
     } else {
-        e->unk44 = 0x80;
+        e->action = 0x80;
     }
-    vis_table_a.unk6138 = e;
-    vis_table_a.unk6134 = r;
+    vis_table_a.current = e;
+    vis_table_a.current_type = r;
     creature_pick_move();
     player_enter_normal_state();
     fdat_801edc50 = 0;

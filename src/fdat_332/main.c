@@ -54,10 +54,10 @@ const FdatHeader fdat_header = {
 ADDRESS(0x801ed4a0, 0x174)
 void map_update_events(void)
 {
-    Vis212 *e33 = &vis_table_a.entries[33];
-    Vis212 *e4 = &vis_table_a.entries[4];
-    Vis212 *e5 = &vis_table_a.entries[5];
-    int state = e33->unk05;
+    Creature *e33 = &vis_table_a.entries[33];
+    Creature *e4 = &vis_table_a.entries[4];
+    Creature *e5 = &vis_table_a.entries[5];
+    int state = e33->state;
 
     if (state == 5 && fdat_801edb3c == 0) {
         lighting.area_mode[11] = 0x11;
@@ -66,30 +66,30 @@ void map_update_events(void)
         lighting.area_mode[28] = 0x11;
         lighting.area_mode[15] = 0x11;
         lighting.area_mode[33] = 0x11;
-        e33->unk05 = 1;
-        e33->unk1C.bytes[3] = 1;
-        e33->unk34 = -1;
+        e33->state = 1;
+        e33->status.bytes[3] = 1;
+        e33->hurt_timer = -1;
         fdat_801edb3c = 1;
         game_progress.unk1440.word |= 0x10000;
-        e33->unk1C.bytes[2] &= 0xea;
-        if (e4->unk05 == 1) {
-            e4->unk05 = state;
-            e4->unk2C = 0;
-            e4->unk1C.bytes[2] |= 0x15;
+        e33->status.bytes[2] &= 0xea;
+        if (e4->state == 1) {
+            e4->state = state;
+            e4->hp = 0;
+            e4->status.bytes[2] |= 0x15;
             creature_start_script(e4, 5);
             creature_roll_drops(e4);
             creature_award_kill_bonuses(e4);
-            e4->unk34 = 0x1000;
+            e4->hurt_timer = 0x1000;
             viewer.unk30++;
         }
-        if (e5->unk05 == 1) {
-            e5->unk05 = state;
-            e5->unk2C = 0;
-            e5->unk1C.bytes[2] |= 0x15;
+        if (e5->state == 1) {
+            e5->state = state;
+            e5->hp = 0;
+            e5->status.bytes[2] |= 0x15;
             creature_start_script(e5, 5);
             creature_roll_drops(e5);
             creature_award_kill_bonuses(e5);
-            e5->unk34 = 0x1000;
+            e5->hurt_timer = 0x1000;
             viewer.unk30++;
         }
     }
@@ -105,14 +105,14 @@ ADDRESS(0x801ed614, 0xac)
 void map_restore_progress(void)
 {
     Vis88 *b = &vis_table_b.entries[3];
-    Vis212 *e = &vis_table_a.entries[33];
+    Creature *e = &vis_table_a.entries[33];
 
     if (game_progress.unk1440.bit.f16) {
-        if (e->unk05 != 3) {
-            e->unk65 = 20;
-            e->unk66 = 30;
-            e->unk05 = 3;
-            e->unk67 = 100;
+        if (e->state != 3) {
+            e->drop_chance0 = 20;
+            e->drop_chance1 = 30;
+            e->state = 3;
+            e->drop_chance2 = 100;
             creature_roll_drops(e);
             creature_award_kill_bonuses(e);
         }
@@ -120,7 +120,7 @@ void map_restore_progress(void)
     } else {
         fdat_801edb3c = 0;
         b->unk05 = 0xff;
-        e->unk70 &= ~0x2000000;
+        e->flags &= ~0x2000000;
     }
 }
 

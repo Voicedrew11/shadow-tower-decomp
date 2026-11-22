@@ -12,21 +12,21 @@
 #include <st/data.h>
 
 ADDRESS(0x8004d75c, 0x8)
-int creature_sound_note(Vis212 *e)
+int creature_sound_note(Creature *e)
 {
     return 0;
 }
 
 /* Plays the entry's sound from its current list entry at its position. */
 ADDRESS(0x8004d764, 0x98)
-void creature_play_script_sound(Vis212 *e)
+void creature_play_script_sound(Creature *e)
 {
-    u8 *p = (u8 *)e->unkA8;
+    u8 *p = (u8 *)e->script;
 
-    if (e->unk70 & 0x800000)
-        sound_play_at_range(p[5] + 48, &e->unk74, 127, 24576, 30720, creature_sound_note(e));
+    if (e->flags & 0x800000)
+        sound_play_at_range(p[5] + 48, &e->position, 127, 24576, 30720, creature_sound_note(e));
     else
-        sound_play_at(p[5] + 48, &e->unk74, 127, creature_sound_note(e));
+        sound_play_at(p[5] + 48, &e->position, 127, creature_sound_note(e));
 }
 
 ADDRESS(0x8004d7fc, 0x8)
@@ -37,7 +37,7 @@ void func_8004d7fc(void)
 /* Drops item `id` where the entry stands: a slot of table C's group 48
  * (kind 30) or group 32, the oldest slot giving way when the group is full. */
 ADDRESS(0x8004d804, 0x228)
-void creature_drop_item(Vis212 *e, int id)
+void creature_drop_item(Creature *e, int id)
 {
     Vis44 *rec = &vis_table_c.unk0118[id];
     Vis48 *slot;
@@ -70,17 +70,17 @@ void creature_drop_item(Vis212 *e, int id)
         vis_table_c.unk0000[2]++;
     }
     slot->unk00 = id;
-    slot->unk02 = e->unk26;
+    slot->unk02 = e->block;
     *(u32 *)slot->unk04 = 0;
-    slot->unk08 = e->unk74;
-    slot->unk08.vy -= e->unk30 >> 1;
+    slot->unk08 = e->position;
+    slot->unk08.vy -= e->height >> 1;
     /* One 8-byte copy of the rotation (unk8C..unk92) over unk18..unk1E. */
-    *(SVECTOR *)&slot->unk18 = *(SVECTOR *)&e->unk8C;
+    *(SVECTOR *)&slot->unk18 = *(SVECTOR *)&e->rot_x;
     slot->unk20 = rec->unk1E;
     slot->unk22 = 1;
     slot->unk23 = 1;
     slot->unk24 = 0;
-    slot->unk28 = e->unk40;
+    slot->unk28 = e->player_dist_xz;
     slot->unk26 = 0;
     slot->unk25 = 0;
     slot->unk2c = area_state.area;
@@ -91,28 +91,28 @@ void creature_drop_item(Vis212 *e, int id)
 /* Drops one of the entry's three items, each by its percent chance when
  * item_is_uncollected allows it. */
 ADDRESS(0x8004da2c, 0xe0)
-void creature_roll_drops(Vis212 *e)
+void creature_roll_drops(Creature *e)
 {
     int r = rand() * 100 >> 15;
 
-    if (item_is_uncollected(e->unk10) && r < e->unk65)
-        creature_drop_item(e, e->unk10);
-    else if (item_is_uncollected(e->unk12) && r < e->unk66)
-        creature_drop_item(e, e->unk12);
-    else if (item_is_uncollected(e->unk14) && r < e->unk67)
-        creature_drop_item(e, e->unk14);
+    if (item_is_uncollected(e->drop_item0) && r < e->drop_chance0)
+        creature_drop_item(e, e->drop_item0);
+    else if (item_is_uncollected(e->drop_item1) && r < e->drop_chance1)
+        creature_drop_item(e, e->drop_item1);
+    else if (item_is_uncollected(e->drop_item2) && r < e->drop_chance2)
+        creature_drop_item(e, e->drop_item2);
 }
 
 /* Adds the entry's record bonuses to the viewer's 14 figures and total. */
 ADDRESS(0x8004db0c, 0x90)
-void creature_award_kill_bonuses(Vis212 *e)
+void creature_award_kill_bonuses(Creature *e)
 {
-    Vis192 *r = &vis_table_a.unk3500[e->unk02];
+    CreatureType *r = &vis_table_a.types[e->type];
     int i;
 
     for (i = 0; i < 14; i++) {
-        viewer.unk9A[i] += r->unk24[i];
-        viewer.unk8 += r->unk24[i];
+        viewer.unk9A[i] += r->kill_bonus[i];
+        viewer.unk8 += r->kill_bonus[i];
     }
     player_compute_derived_stats(0);
 }
@@ -120,7 +120,7 @@ void creature_award_kill_bonuses(Vis212 *e)
 /* Whether the viewer looks at the entry within reach: 0 no, 1 yes, 2 dead
  * centre and close. */
 ADDRESS(0x8004db9c, 0x288)
-int creature_test_player_aim(Vis212 *e, short reach)
+int creature_test_player_aim(Creature *e, short reach)
 {
     short yaw;
     short pitch;
@@ -131,23 +131,23 @@ int creature_test_player_aim(Vis212 *e, short reach)
     short half;
     int ay;
 
-    yaw = (viewer.unk26A - e->unk56) & 0xfff;
+    yaw = (viewer.unk26A - e->player_heading) & 0xfff;
     pitch = viewer.unk268 & 0xfff;
-    if (reach + e->unk2E < e->unk40)
+    if (reach + e->radius < e->player_dist_xz)
         return 0;
-    dy = e->unk74.vy - viewer.position.vy;
-    dy2 = e->unk74.vy - e->unk30 - viewer.position.vy;
+    dy = e->position.vy - viewer.position.vy;
+    dy2 = e->position.vy - e->height - viewer.position.vy;
     if (dy > 0 && dy2 > 0) {
-        lo = ratan2(dy, e->unk40 - e->unk2E);
-        hi = ratan2(dy2, e->unk40 + e->unk2E);
+        lo = ratan2(dy, e->player_dist_xz - e->radius);
+        hi = ratan2(dy2, e->player_dist_xz + e->radius);
     } else if (dy < 0 && dy2 < 0) {
-        lo = ratan2(dy, e->unk40 + e->unk2E);
-        hi = ratan2(dy2, e->unk40 - e->unk2E);
+        lo = ratan2(dy, e->player_dist_xz + e->radius);
+        hi = ratan2(dy2, e->player_dist_xz - e->radius);
     } else {
-        lo = ratan2(dy, e->unk40);
-        hi = ratan2(dy2, e->unk40);
+        lo = ratan2(dy, e->player_dist_xz);
+        hi = ratan2(dy2, e->player_dist_xz);
     }
-    half = ratan2(e->unk2E, e->unk40);
+    half = ratan2(e->radius, e->player_dist_xz);
     if (yaw > 2048)
         yaw -= 4096;
     if (pitch > 2048)
@@ -159,10 +159,10 @@ int creature_test_player_aim(Vis212 *e, short reach)
     if (pitch < hi || lo < pitch)
         return 0;
     ay = abs(yaw);
-    if (ay < half && e->unk40 < e->unk2E + reach) {
+    if (ay < half && e->player_dist_xz < e->radius + reach) {
         if (pitch < hi >> 1 || lo >> 1 < pitch)
             return 1;
-        if (ay < half >> 1 && e->unk40 < (e->unk2E >> 1) + reach)
+        if (ay < half >> 1 && e->player_dist_xz < (e->radius >> 1) + reach)
             return 2;
         return 1;
     }
@@ -171,9 +171,9 @@ int creature_test_player_aim(Vis212 *e, short reach)
 
 /* Sums the record's weights over the 9 levels (arg 0 only). */
 ADDRESS(0x8004de24, 0xd4)
-int creature_calc_damage(Vis212 *e, int arg, u16 *levels)
+int creature_calc_damage(Creature *e, int arg, u16 *levels)
 {
-    Vis192 *r = &vis_table_a.unk3500[e->unk02];
+    CreatureType *r = &vis_table_a.types[e->type];
     u16 *w;
     int l;
     int m;
@@ -182,7 +182,7 @@ int creature_calc_damage(Vis212 *e, int arg, u16 *levels)
 
     sum = 0;
     if (arg == 0) {
-        w = r->unk4A;
+        w = r->resistances;
         for (i = 0; i < 9; i++, levels++, w++) {
             l = *levels;
             if (l != 0) {

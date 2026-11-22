@@ -75,22 +75,22 @@ void map_move_texture_pages(void);
 ADDRESS(0x801ed4e0, 0x23c)
 void map_restore_progress(void)
 {
-    Vis212 *e48 = &vis_table_a.entries[48];
-    Vis212 *e50 = &vis_table_a.entries[50];
-    Vis212 *e49 = &vis_table_a.entries[49];
+    Creature *e48 = &vis_table_a.entries[48];
+    Creature *e50 = &vis_table_a.entries[50];
+    Creature *e49 = &vis_table_a.entries[49];
     Vis88 *d2 = &vis_table_b.entries[2];
     int n;
 
     if (game_progress.unk1440.word >> 17 & 1) {
         fdat_801ee0bc = 2;
-        e48->unk05 = 3;
+        e48->state = 3;
         fdat_801ee0b4 = 4;
     } else {
         fdat_801ee0bc = 1;
         texanim_clear_all();
         fdat_801ee0b4 = 0;
-        e48->unk1C.bytes[3] = 2;
-        vis_table_a.entries[33].unk00 = 0;
+        e48->status.bytes[3] = 2;
+        vis_table_a.entries[33].spawn_chance = 0;
     }
     n = game_progress.unk1448[13];
     if (n == 0)
@@ -107,33 +107,33 @@ void map_restore_progress(void)
         d2->unk4A.door.unk4F = 0xff;
     }
     if (game_progress.unk1448[13] >= 2)
-        e50->unk70 &= ~0x2000000;
+        e50->flags &= ~0x2000000;
     if (game_progress.unk1448[13] == 3)
-        e49->unk70 &= ~0x2000000;
+        e49->flags &= ~0x2000000;
     if (game_progress.unk1448[12] == 1)
-        e48->unk70 &= ~0x2000000;
+        e48->flags &= ~0x2000000;
     if (fdat_801ee0b8 == 2) {
         fdat_801ee0b8 = 3;
         game_progress.unk1448[13]++;
     }
     switch (fdat_801ee0b8) {
     case 0:
-        e50->unk00 = 100;
-        e49->unk00 = 0;
+        e50->spawn_chance = 100;
+        e49->spawn_chance = 0;
         break;
     case 3:
-        e50->unk00 = 0;
-        e49->unk00 = 100;
+        e50->spawn_chance = 0;
+        e49->spawn_chance = 100;
         break;
     case 1:
-        e50->unk68 = (e50->unk68 + 0x800) & 0xfff;
+        e50->home_facing = (e50->home_facing + 0x800) & 0xfff;
     case 4:
-        e50->unk00 = 0;
-        e49->unk00 = 0;
+        e50->spawn_chance = 0;
+        e49->spawn_chance = 0;
         break;
     }
-    e49->unk1C.bytes[3] = 1;
-    e50->unk1C.bytes[3] = 1;
+    e49->status.bytes[3] = 1;
+    e50->status.bytes[3] = 1;
 }
 
 /*
@@ -147,11 +147,11 @@ ADDRESS(0x801ed71c, 0x388)
 void map_update_events(void)
 {
     Vis88 *d4 = &vis_table_b.entries[4];
-    Vis212 *e48 = &vis_table_a.entries[48];
+    Creature *e48 = &vis_table_a.entries[48];
     Vis88 *d3 = &vis_table_b.entries[3];
-    Vis212 *e33 = &vis_table_a.entries[33];
-    Vis212 *e50 = &vis_table_a.entries[50];
-    Vis212 *e49 = &vis_table_a.entries[49];
+    Creature *e33 = &vis_table_a.entries[33];
+    Creature *e50 = &vis_table_a.entries[50];
+    Creature *e49 = &vis_table_a.entries[49];
     Vis88 *d2 = &vis_table_b.entries[2];
 
     if (fdat_801ee0b4 == 0 && d4->unk0C == 0xff) {
@@ -166,30 +166,30 @@ void map_update_events(void)
     if (fdat_801ee0b4 == 3 && ((VisRecord *)viewer.unk174)->unk07 != 3) {
         map_move_texture_pages();
         creature_despawn(e48);
-        e33->unk00 = 100;
+        e33->spawn_chance = 100;
     }
     if (fdat_801ee0b8 == 0 && viewer.unk178 == 0x126) {
         creature_force_talk(e50, 0, 0);
         creature_start_script(e50, 0);
         creature_fade_out_despawn(e50);
-        e50->unk05 = 0;
-        e50->unk00 = 0;
+        e50->state = 0;
+        e50->spawn_chance = 0;
         fdat_801ee0b8 = 1;
-        e50->unk68 = (e50->unk68 + 0x800) & 0xfff;
+        e50->home_facing = (e50->home_facing + 0x800) & 0xfff;
     }
     if (fdat_801ee0b8 == 1 && viewer.unk178 == 0xa0) {
         creature_force_talk(e48, 0, 0);
         fdat_801ee0b8 = 2;
-        e50->unk00 = 100;
-        e48->unk70 &= ~0x2000000;
+        e50->spawn_chance = 100;
+        e48->flags &= ~0x2000000;
     }
     if (fdat_801ee0b8 == 2 && viewer.unk178 == 0x124) {
         creature_force_talk(e50, 0, 0);
         creature_start_script(e50, 0);
         creature_fade_out_despawn(e50);
         fdat_801ee0b8 = 3;
-        e49->unk00 = 100;
-        e50->unk70 &= ~0x2000000;
+        e49->spawn_chance = 100;
+        e50->flags &= ~0x2000000;
     }
     if (fdat_801ee0b8 == 3 && viewer.unk178 == 0x146) {
         creature_force_talk(e49, 0, 0);
@@ -198,7 +198,7 @@ void map_update_events(void)
         d2->unk4A.door.unk4F = 0xff;
         creature_fade_out_despawn(e49);
         fdat_801ee0b8 = 4;
-        e49->unk70 &= ~0x2000000;
+        e49->flags &= ~0x2000000;
     }
     if (fdat_801ee0bc == 1) {
         RECT a = {480, 64, 64, 96};
@@ -218,13 +218,13 @@ void map_update_events(void)
 ADDRESS(0x801edaa4, 0x6c)
 void map_use_item_advance_scene(short id)
 {
-    Vis212 *e = &vis_table_a.entries[50];
+    Creature *e = &vis_table_a.entries[50];
 
     if (id == 0x10e && fdat_801ee0b8 == 2) {
         fdat_801ee0b8 = 3;
-        e->unk05 = 3;
-        vis_table_a.entries[49].unk00 = 100;
-        e->unk70 &= ~0x2000000;
+        e->state = 3;
+        vis_table_a.entries[49].spawn_chance = 100;
+        e->flags &= ~0x2000000;
         game_progress.unk1448[13]++;
     }
 }
@@ -238,22 +238,22 @@ void map_use_item_advance_scene(short id)
 ADDRESS(0x801edd54, 0xe8)
 void map_step_creature(void)
 {
-    Vis212 *e = vis_table_a.unk6138;
+    Creature *e = vis_table_a.current;
 
-    e->unk2A += e->unkB0;
+    e->anim_frame += e->anim_step;
     if (creature_step_hurt_timer(e) == 1)
         return;
-    if (e->unkB0 >= 0 ? (short)e->unk2A >= 4096 : (short)e->unk2A <= 0) {
-        if (e->unk02 == 0 && game_progress.unk1448[12] == 0) {
+    if (e->anim_step >= 0 ? (short)e->anim_frame >= 4096 : (short)e->anim_frame <= 0) {
+        if (e->type == 0 && game_progress.unk1448[12] == 0) {
             creature_start_script(e, 0);
         } else {
-            e->unk1A = 0xff;
+            e->script_state = 0xff;
             creature_pick_move();
         }
     }
-    if (e->unkA8 != NULL) {
+    if (e->script != NULL) {
         creature_run_script_command(e);
-        e->unk1A = 0xf0;
+        e->script_state = 0xf0;
     }
 }
 
@@ -262,16 +262,16 @@ void map_step_creature(void)
 ADDRESS(0x801ede3c, 0x80)
 void map_talk_on_player_death(void)
 {
-    Vis212 *e;
-    Vis192 *r;
+    Creature *e;
+    CreatureType *r;
 
     e = &vis_table_a.entries[48];
-    r = &vis_table_a.unk3500[0];
+    r = &vis_table_a.types[0];
 
-    if (game_progress.unk1448[r->unk09] != 0 && fdat_801ee0b4 != 4
-        && vis_table_a.unk6168 == 0) {
-        game_progress.unk1448[r->unk09] = 1;
-        e->unk70 |= 0x2000000;
+    if (game_progress.unk1448[r->talk_id] != 0 && fdat_801ee0b4 != 4
+        && vis_table_a.zone == 0) {
+        game_progress.unk1448[r->talk_id] = 1;
+        e->flags |= 0x2000000;
         creature_force_talk(e, 1, 1);
     }
 }

@@ -20,7 +20,7 @@ typedef struct {
 } FdatHeader;
 
 /* ST.EXE, no source yet. */
-void effect_spawn_attack(Vis212 *e, int arg, VECTOR *pos);
+void effect_spawn_attack(Creature *e, int arg, VECTOR *pos);
 void object_play_sound(Vis88 *e, int sound);
 
 /* ST.EXE functions declared in st/funcs.h, which the overlay units do not
@@ -34,7 +34,7 @@ void player_update_durability_warning(void);
 /*
  * ST.EXE's positional sound starters and player_hit (src/st/sound.c,
  * src/st/player_damage.c). The overlays keep the voice the starters return
- * (Vis212.unk22, stored from $v0 after the call), which ST.EXE's own
+ * (Creature.voice, stored from $v0 after the call), which ST.EXE's own
  * st/funcs.h declares void; the overlay units therefore declare these here
  * and do not include st/funcs.h.
  */
@@ -43,26 +43,26 @@ int sound_play_at(int id, VECTOR *pos, short volume, int note);
 void player_hit(u16 *damage, u16 scale, u16 effect, long *from);
 
 /* src/lib/fdat_common.inc */
-void creature_clear_contact_hit(Vis212 *e);
-void creature_start_script(Vis212 *e, int id);
+void creature_clear_contact_hit(Creature *e);
+void creature_start_script(Creature *e, int id);
 void creature_turn_toward(short angle, int step);
 void creature_set_velocity(short angle, int speed);
 void creature_steer_height(int y, int step);
-int creature_random_note(Vis212 *e);
-void creature_emit_script_sound(Vis212 *e);
-void creature_update_script_sound(Vis212 *e);
-void creature_hit_player(Vis212 *e, VisScript *s);
-void creature_spawn_attack_hits(Vis212 *e, VisScript *s);
-void creature_run_script_command(Vis212 *e);
+int creature_random_note(Creature *e);
+void creature_emit_script_sound(Creature *e);
+void creature_update_script_sound(Creature *e);
+void creature_hit_player(Creature *e, CreatureScript *s);
+void creature_spawn_attack_hits(Creature *e, CreatureScript *s);
+void creature_run_script_command(Creature *e);
 void creature_choose_action(void);
 int creature_pick_weighted_script(void);
-int creature_step_hurt_timer(Vis212 *e);
-void creature_fade_out_despawn(Vis212 *e);
+int creature_step_hurt_timer(Creature *e);
+void creature_fade_out_despawn(Creature *e);
 void player_glide_to_pose(VECTOR *pos, SVECTOR *rot);
-void player_turn_to_creature(Vis212 *e);
-void creature_finish_fade_in(Vis212 *e);
-void creature_force_talk(Vis212 *e, int fixed, int arg2);
-void creature_spawn_now(Vis212 *e);
+void player_turn_to_creature(Creature *e);
+void creature_finish_fade_in(Creature *e);
+void creature_force_talk(Creature *e, int fixed, int arg2);
+void creature_spawn_now(Creature *e);
 void map_hook_none(void);
 
 /* The map handlers several overlays share (src/lib/fdat_creature_pick_move.inc

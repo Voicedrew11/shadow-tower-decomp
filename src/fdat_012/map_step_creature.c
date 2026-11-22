@@ -17,9 +17,9 @@
 #include <st/xa.h>
 #include <st/fdat.h>
 
-void map_start_creature_fall(Vis212 *e);
-void map_step_falling_creature(Vis212 *e);
-void map_trigger_on_approach(Vis212 *e);
+void map_start_creature_fall(Creature *e);
+void map_step_falling_creature(Creature *e);
+void map_trigger_on_approach(Creature *e);
 
 /*
  * The current entry's handler: kind 4 drops once record's stream counter
@@ -30,69 +30,69 @@ void map_trigger_on_approach(Vis212 *e);
 ADDRESS(0x801ed76c, 0x274)
 void map_step_creature(void)
 {
-    Vis212 *e = vis_table_a.unk6138;
-    Vis192 *r = vis_table_a.unk6134;
+    Creature *e = vis_table_a.current;
+    CreatureType *r = vis_table_a.current_type;
     int a;
     int offset;
 
-    if (e->unk02 == 4) {
-        if (game_progress.unk1448[r->unk09] == 4 && e->unk1C.bytes[0] == 0)
+    if (e->type == 4) {
+        if (game_progress.unk1448[r->talk_id] == 4 && e->status.bytes[0] == 0)
             map_start_creature_fall(e);
-        if (e->unk0F == 0x80) {
+        if (e->command == 0x80) {
             map_step_falling_creature(e);
             return;
         }
-        if (e->unk64 != 0)
+        if (e->hit != 0)
             map_start_creature_fall(e);
-    } else if (e->unk02 == 10) {
+    } else if (e->type == 10) {
         if ((unsigned)fdat_801edfac < 2) {
             creature_start_script(e, 8);
-            e->unkB0 = 0;
-            e->unk1C.bytes[3] = 1;
+            e->anim_step = 0;
+            e->status.bytes[3] = 1;
             map_trigger_on_approach(e);
             return;
         }
         if (fdat_801edfac == 2) {
-            e->unk2A += e->unkB0;
+            e->anim_frame += e->anim_step;
             creature_update_script_sound(e);
-            if (0xfff - e->unkB0 < (short)e->unk2A) {
+            if (0xfff - e->anim_step < (short)e->anim_frame) {
                 fdat_801edfac = 3;
-                e->unk1C.bytes[3] = 0;
+                e->status.bytes[3] = 0;
             }
             return;
         }
-    } else if (e->unk02 == 1 || e->unk02 == 9) {
-        if (e->unk0F == 0x20) {
+    } else if (e->type == 1 || e->type == 9) {
+        if (e->command == 0x20) {
             /* The phase is sign-extended in the variable itself (retail
              * loads it with LH and halves that register); through a (short)
              * cast cse merges the halving into the extension's shift. */
-            a = e->unk2A << 16;
+            a = e->anim_frame << 16;
             a >>= 16;
             if (a < 0x400) {
                 a >>= 1;
-                e->unk74.vy = e->unk84 - a;
+                e->position.vy = e->spawn_y - a;
             } else if (a < 0x800) {
                 offset = (a - 0x400) * 5 >> 2;
                 offset -= 0x200;
-                e->unk74.vy = e->unk84 + offset;
+                e->position.vy = e->spawn_y + offset;
             } else {
                 offset = (a - 0x800) * 3 >> 3;
                 offset -= 0x300;
-                e->unk74.vy = e->unk84 - offset;
+                e->position.vy = e->spawn_y - offset;
             }
         } else {
-            e->unk74.vy = e->unk84;
+            e->position.vy = e->spawn_y;
         }
     }
-    e->unk2A += e->unkB0;
+    e->anim_frame += e->anim_step;
     if (creature_step_hurt_timer(e) == 1)
         return;
-    if (e->unkB0 >= 0 ? (short)e->unk2A >= 4096 : (short)e->unk2A <= 0) {
-        e->unk1A = 0xff;
+    if (e->anim_step >= 0 ? (short)e->anim_frame >= 4096 : (short)e->anim_frame <= 0) {
+        e->script_state = 0xff;
         creature_pick_move();
     }
-    if (e->unkA8 != NULL) {
+    if (e->script != NULL) {
         creature_run_script_command(e);
-        e->unk1A = 0xf0;
+        e->script_state = 0xf0;
     }
 }

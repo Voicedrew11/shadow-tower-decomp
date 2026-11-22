@@ -55,9 +55,9 @@ int fdat_801edfac;
 ADDRESS(0x801ed4a0, 0x48)
 void map_remove_fallen_creature(void)
 {
-    Vis212 *e = &vis_table_a.entries[48];
+    Creature *e = &vis_table_a.entries[48];
 
-    if (e->unk1C.bytes[0] != 0 && e->unk05 == 0)
+    if (e->status.bytes[0] != 0 && e->state == 0)
         creature_despawn(e);
 }
 
@@ -65,13 +65,13 @@ void map_remove_fallen_creature(void)
 ADDRESS(0x801ed4e8, 0x40)
 void map_restore_progress(void)
 {
-    Vis212 *e = &vis_table_a.entries[48];
+    Creature *e = &vis_table_a.entries[48];
 
     if (game_progress.unk1440.bit.f0)
         fdat_801edfac = 3;
     else
         fdat_801edfac = 0;
-    e->unk1C.bytes[3] = 2;
+    e->status.bytes[3] = 2;
 }
 
 #include "../lib/fdat_creature_pick_move.inc"

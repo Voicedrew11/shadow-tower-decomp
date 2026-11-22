@@ -26,34 +26,34 @@
 ADDRESS(0x801ed8f4, 0x198)
 void map_step_creature(void)
 {
-    Vis212 *e = vis_table_a.unk6138;
-    VisScript *s;
+    Creature *e = vis_table_a.current;
+    CreatureScript *s;
     int speed;
 
-    e->unk2A += e->unkB0;
+    e->anim_frame += e->anim_step;
     if (creature_step_hurt_timer(e) == 1)
         return;
-    if (e->unkB0 >= 0 ? (short)e->unk2A >= 4096 : (short)e->unk2A <= 0) {
-        e->unk1A = 0xff;
+    if (e->anim_step >= 0 ? (short)e->anim_frame >= 4096 : (short)e->anim_frame <= 0) {
+        e->script_state = 0xff;
         creature_pick_move();
     }
-    s = e->unkA8;
+    s = e->script;
     if (s == NULL)
         return;
-    speed = abs(e->unkB0);
-    switch (e->unk0F) {
+    speed = abs(e->anim_step);
+    switch (e->command) {
     case 0x17:
         *(s32 *)&e->unk48 = viewer.position.vy - 0x640;
         break;
     }
-    if (e->unk0F == 0x17) {
-        e->unk08 = s->unk01;
-        creature_turn_toward(e->unk5C, s->arg.s[1] * speed >> 12);
-        creature_set_velocity(e->unk8E + s->arg.u[2] - 0x400, s->arg.s[0] * speed >> 12);
+    if (e->command == 0x17) {
+        e->anim = s->anim;
+        creature_turn_toward(e->target_heading, s->arg.s[1] * speed >> 12);
+        creature_set_velocity(e->facing + s->arg.u[2] - 0x400, s->arg.s[0] * speed >> 12);
         creature_steer_height(viewer.position.vy + s->arg.s[4], s->arg.s[3] * speed >> 12);
-        e->unk1A = 0xf0;
+        e->script_state = 0xf0;
     } else {
         creature_run_script_command(e);
-        e->unk1A = 0xf0;
+        e->script_state = 0xf0;
     }
 }

@@ -18,79 +18,79 @@
 #include <st/fdat.h>
 
 /*
- * The falling entry's stages (Vis212.unk1C byte 0): 1 falls and pushes the
+ * The falling entry's stages (Creature.status byte 0): 1 falls and pushes the
  * viewer away while near, 2 lands (animation 6), 3 walks off (animation
  * 7) until x 0x3c800. Its hit flash (unk34) runs down meanwhile.
  */
 ADDRESS(0x801edbec, 0x320)
-void map_step_falling_creature(Vis212 *e)
+void map_step_falling_creature(Creature *e)
 {
-    Vis192 *r = &vis_table_a.unk3500[e->unk02];
+    CreatureType *r = &vis_table_a.types[e->type];
     VECTOR pos;
     int d;
 
-    e->unk2A += e->unkB0;
-    switch (e->unk1C.bytes[0]) {
+    e->anim_frame += e->anim_step;
+    switch (e->status.bytes[0]) {
     case 1:
-        if (e->unk4C == 0 && (short)e->unk2A > 0x800) {
-            e->unk08 = 6;
-            e->unk2A = 0;
-            e->unkB0 = 0x100;
-            e->unk1C.bytes[0] = 2;
+        if (e->height_above_floor == 0 && (short)e->anim_frame > 0x800) {
+            e->anim = 6;
+            e->anim_frame = 0;
+            e->anim_step = 0x100;
+            e->status.bytes[0] = 2;
             break;
         }
-        if ((short)e->unk2A < 0x400) {
-            e->unk2A += e->unkB0;
+        if ((short)e->anim_frame < 0x400) {
+            e->anim_frame += e->anim_step;
         } else {
-            if ((short)e->unk2A < 0x680)
-                e->unk16 -= r->unk0E;
-            e->unk2A += e->unkB0;
-            if ((short)e->unk2A >= 0x1000)
-                e->unk2A = 0xfff;
+            if ((short)e->anim_frame < 0x680)
+                e->vertical_speed -= r->gravity;
+            e->anim_frame += e->anim_step;
+            if ((short)e->anim_frame >= 0x1000)
+                e->anim_frame = 0xfff;
             creature_set_velocity(0xc00, 0x80);
         }
-        pos.vx = e->unk74.vx + e->unk9C.vx;
-        pos.vz = e->unk74.vz + e->unk9C.vz;
-        d = e->unk40;
-        if (d < e->unk2E + 0x420) {
+        pos.vx = e->position.vx + e->velocity.vx;
+        pos.vz = e->position.vz + e->velocity.vz;
+        d = e->player_dist_xz;
+        if (d < e->radius + 0x420) {
             d -= 0x420;
-            d = e->unk2E - d;
-            viewer.position.vx += d * rcos((short)e->unk56 - 0x400) >> 12;
-            viewer.position.vz += d * rsin((short)e->unk56 - 0x400) >> 12;
+            d = e->radius - d;
+            viewer.position.vx += d * rcos((short)e->player_heading - 0x400) >> 12;
+            viewer.position.vz += d * rsin((short)e->player_heading - 0x400) >> 12;
         }
         break;
     case 2:
-        e->unk2A += e->unkB0;
-        if ((short)e->unk2A >= 0x1000) {
-            e->unk08 = 7;
-            e->unkB0 = 0xa0;
-            e->unk1C.bytes[0] = 3;
-            e->unk0E = 1;
-            e->unk2A = 0;
-            e->unk50 &= ~2;
+        e->anim_frame += e->anim_step;
+        if ((short)e->anim_frame >= 0x1000) {
+            e->anim = 7;
+            e->anim_step = 0xa0;
+            e->status.bytes[0] = 3;
+            e->move_mode = 1;
+            e->anim_frame = 0;
+            e->collision_tests &= ~2;
         }
         break;
     case 3: {
         int target_x = 0x3c800;
         int target_z = 0x47000;
 
-        if (e->unk74.vx < target_x) {
+        if (e->position.vx < target_x) {
             creature_despawn(e);
             break;
         }
-        creature_turn_toward(ratan2(e->unk74.vz - target_z, e->unk74.vx - target_x) + 0xc00, 0x20);
-        creature_set_velocity(e->unk8E - 0x400, 0x40);
-        e->unk2A += e->unkB0;
-        if ((short)e->unk2A >= 0x1000)
-            e->unk2A = 0;
+        creature_turn_toward(ratan2(e->position.vz - target_z, e->position.vx - target_x) + 0xc00, 0x20);
+        creature_set_velocity(e->facing - 0x400, 0x40);
+        e->anim_frame += e->anim_step;
+        if ((short)e->anim_frame >= 0x1000)
+            e->anim_frame = 0;
         break;
     }
     }
-    if (e->unk34 >= 0) {
-        e->unk34 -= abs(e->unkB0);
-        if (e->unk34 >= 0)
+    if (e->hurt_timer >= 0) {
+        e->hurt_timer -= abs(e->anim_step);
+        if (e->hurt_timer >= 0)
             return;
     }
-    e->unk34 = -1;
-    e->unk1C.bytes[2] &= 0xdf;
+    e->hurt_timer = -1;
+    e->status.bytes[2] &= 0xdf;
 }

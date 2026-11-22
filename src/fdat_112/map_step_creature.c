@@ -17,7 +17,7 @@
 #include <st/xa.h>
 #include <st/fdat.h>
 
-void map_step_leaving_creature(Vis212 *e);
+void map_step_leaving_creature(Creature *e);
 
 /*
  * The current entry's handler: kind 10 wakes once its record's stream
@@ -29,99 +29,99 @@ void map_step_leaving_creature(Vis212 *e);
 ADDRESS(0x801ed770, 0x420)
 void map_step_creature(void)
 {
-    VisTableA *a = &vis_table_a;
+    CreatureTable *a = &vis_table_a;
     Vis48 *c7 = &vis_table_c.entries[7];
-    Vis212 *e = a->unk6138;
-    Vis192 *r = a->unk6134;
+    Creature *e = a->current;
+    CreatureType *r = a->current_type;
     VECTOR v;
 
-    if (e->unk02 == 10) {
+    if (e->type == 10) {
         if (!(game_progress.unk1440.word >> 6 & 1)) {
-            if (game_progress.unk1448[r->unk09] == 3) {
-                e->unk70 &= ~0x2000000;
+            if (game_progress.unk1448[r->talk_id] == 3) {
+                e->flags &= ~0x2000000;
                 game_progress.unk1440.word |= 0x40;
-                e->unk1C.bytes[0] = 0;
-                e->unk1C.bytes[3] = 1;
+                e->status.bytes[0] = 0;
+                e->status.bytes[3] = 1;
                 goto next;
             }
-        } else if (e->unk04 == 0) {
+        } else if (e->draw_state == 0) {
             creature_despawn(e);
             goto next;
         }
-        if (!(game_progress.unk1440.word >> 7 & 1) && e->unk64 != 0) {
+        if (!(game_progress.unk1440.word >> 7 & 1) && e->hit != 0) {
             viewer.unk190[4][1] = 6000;
             viewer.unk190[4][0] = 0;
             game_progress.unk1440.word |= 0x80;
             viewer.unk2C |= 0x100;
-            e->unk1C.bytes[3] = 0;
-            e->unk70 &= ~0x2000000;
-        } else if (e->unk05 == 5) {
+            e->status.bytes[3] = 0;
+            e->flags &= ~0x2000000;
+        } else if (e->state == 5) {
             game_progress.unk1440.word |= 0x20000000;
         }
     }
 next:
-    if (e->unk02 == 5) {
-        if (e->unk1C.bytes[0] == 0 && game_progress.unk1448[r->unk09] == 1) {
-            e->unk1C.bytes[0] = 1;
+    if (e->type == 5) {
+        if (e->status.bytes[0] == 0 && game_progress.unk1448[r->talk_id] == 1) {
+            e->status.bytes[0] = 1;
             creature_start_script(e, 6);
             viewer.unk218 = 5;
             c7->unk22 = 2;
         }
-        if (e->unk1C.bytes[0] == 1) {
-            if ((short)e->unk2A > 0xa00) {
-                anim_set_node_vertex((StAnimSet *)e->unkA4, e->unk0B + 128, 7, 13, &v);
-                c7->unk08.vx = e->unk74.vx + v.vx;
-                c7->unk08.vy = e->unk74.vy + v.vy - 0x80;
-                c7->unk08.vz = e->unk74.vz + v.vz;
+        if (e->status.bytes[0] == 1) {
+            if ((short)e->anim_frame > 0xa00) {
+                anim_set_node_vertex((StAnimSet *)e->anim_slot, e->model_slot + 128, 7, 13, &v);
+                c7->unk08.vx = e->position.vx + v.vx;
+                c7->unk08.vy = e->position.vy + v.vy - 0x80;
+                c7->unk08.vz = e->position.vz + v.vz;
             }
-        } else if (e->unk1C.bytes[0] == 2) {
+        } else if (e->status.bytes[0] == 2) {
             viewer.unk218 = 5;
             map_step_leaving_creature(e);
             return;
-        } else if (e->unk64 != 0) {
+        } else if (e->hit != 0) {
             c7->unk22 = 2;
             c7->unk2D += 0x20;
         }
     }
-    e->unk2A += e->unkB0;
+    e->anim_frame += e->anim_step;
     if (creature_step_hurt_timer(e) == 1)
         return;
-    if (e->unkB0 >= 0 ? (short)e->unk2A >= 4096 : (short)e->unk2A <= 0) {
-        e->unk1A = 0xff;
-        if (e->unk02 == 10) {
+    if (e->anim_step >= 0 ? (short)e->anim_frame >= 4096 : (short)e->anim_frame <= 0) {
+        e->script_state = 0xff;
+        if (e->type == 10) {
             if (game_progress.unk1440.word >> 7 & 1) {
                 creature_pick_move();
             } else if (game_progress.unk1440.word >> 6 & 1) {
-                if (e->unk1C.bytes[0] == 0) {
+                if (e->status.bytes[0] == 0) {
                     creature_start_script(e, 9);
-                    e->unk1C.bytes[0] = 1;
-                } else if (e->unk1C.bytes[0] == 1) {
-                    e->unk2A = 0xfff;
-                    e->unkB0 = 0;
+                    e->status.bytes[0] = 1;
+                } else if (e->status.bytes[0] == 1) {
+                    e->anim_frame = 0xfff;
+                    e->anim_step = 0;
                 }
             } else {
                 creature_start_script(e, 0);
-                e->unk1C.bytes[3] = 3;
+                e->status.bytes[3] = 3;
             }
-        } else if (e->unk02 == 5) {
-            switch (e->unk1C.bytes[0]) {
+        } else if (e->type == 5) {
+            switch (e->status.bytes[0]) {
             case 0:
                 creature_start_script(e, 0);
                 break;
             case 1:
                 creature_start_script(e, 6);
-                e->unk2A = 0xfff;
+                e->anim_frame = 0xfff;
                 ground_item_pick_up(c7, 1);
                 creature_start_script(e, 7);
-                e->unk1C.bytes[0] = 2;
+                e->status.bytes[0] = 2;
                 break;
             }
         } else {
             creature_pick_move();
         }
     }
-    if (e->unkA8 != NULL) {
+    if (e->script != NULL) {
         creature_run_script_command(e);
-        e->unk1A = 0xf0;
+        e->script_state = 0xf0;
     }
 }

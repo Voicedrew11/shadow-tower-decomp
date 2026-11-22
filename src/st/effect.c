@@ -89,7 +89,7 @@ void effect_emit(u_long flags, int kind, StEffectDef *def, int arg, VECTOR *pos)
     u16 value;
     int result;
     int i;
-    Vis212 *target;
+    Creature *target;
 
     memset(bias, 0, sizeof(bias));
     second = (kind & 0x20) >> 5;
@@ -101,8 +101,8 @@ void effect_emit(u_long flags, int kind, StEffectDef *def, int arg, VECTOR *pos)
         return;
     target = &vis_table_a.entries[vis_lists.unk5C];
     if (pos != NULL) {
-        if (!angle_within(target->unk8E,
-                           angle_from_xz(target->unk74.vx - pos->vx, target->unk74.vz - pos->vz) + 2048,
+        if (!angle_within(target->facing,
+                           angle_from_xz(target->position.vx - pos->vx, target->position.vz - pos->vz) + 2048,
                            2048))
             return;
     }
@@ -140,7 +140,7 @@ void effect_emit(u_long flags, int kind, StEffectDef *def, int arg, VECTOR *pos)
     if (kind & 0x40)
         hud_queue_damage_number(result);
     if (options & 0x10000)
-        target->unk70 |= 0x800;
+        target->flags |= 0x800;
 }
 
 /* effect_emit for the current effect. */

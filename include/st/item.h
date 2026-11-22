@@ -10,7 +10,7 @@
 #include <LIBGTE.H>
 #include <st/vis.h>
 
-Vis88 *creature_alloc_object(Vis212 *e, int id);
+Vis88 *creature_alloc_object(Creature *e, int id);
 int item_is_held(int id);
 int item_take(int id);
 int item_add(int id);

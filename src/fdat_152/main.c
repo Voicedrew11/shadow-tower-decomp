@@ -110,20 +110,20 @@ ADDRESS(0x801ed5e8, 0xc8)
 void map_use_item_on_object(short id)
 {
     VECTOR p;
-    VisRequest req;
+    CollisionRequest req;
 
     p.vx = viewer.position.vx;
     p.vy = viewer.position.vy + 1600;
     p.vz = viewer.position.vz;
-    req.unk0 = 0;
-    req.unk4 = p;
-    req.unk1C = 1056;
-    req.unk1E = 1600;
-    req.unk14.vx = 0;
-    req.unk14.vy = 0;
-    req.unk14.vz = 0;
-    req.unk22 = 0;
-    req.unk20 = 0;
+    req.tests = 0;
+    req.position = p;
+    req.radius = 1056;
+    req.height = 1600;
+    req.velocity.vx = 0;
+    req.velocity.vy = 0;
+    req.velocity.vz = 0;
+    req.speed = 0;
+    req.heading = 0;
     if (id == 0x130) {
         if (object_find_in_reach((VisLists *)&req) == 4) {
             fdat_801edb84 = 1;

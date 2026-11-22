@@ -56,7 +56,7 @@ void map_spawn_creature_group(void);
 ADDRESS(0x801ed4a0, 0x44)
 void map_restore_progress(void)
 {
-    vis_table_a.entries[32].unk00 = vis_table_a.entries[33].unk00 = vis_table_a.entries[34].unk00 = 0;
+    vis_table_a.entries[32].spawn_chance = vis_table_a.entries[33].spawn_chance = vis_table_a.entries[34].spawn_chance = 0;
     if (game_progress.unk1444.bit.f15 == 1)
         fdat_801ed938 = 1;
     else

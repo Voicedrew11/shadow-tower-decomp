@@ -17,7 +17,7 @@
 #include <st/xa.h>
 #include <st/fdat.h>
 
-void map_restart_script_on_block(Vis212 *e);
+void map_restart_script_on_block(Creature *e);
 
 /* The current entry's handler: kind 0 dying sets fdat_801ed938 and the
  * second flag word's bit 15; then the animation steps as creature_step_script
@@ -25,27 +25,27 @@ void map_restart_script_on_block(Vis212 *e);
 ADDRESS(0x801ed77c, 0x104)
 void map_step_creature(void)
 {
-    Vis212 *e = vis_table_a.unk6138;
+    Creature *e = vis_table_a.current;
     u32 flags;
 
-    if (e->unk02 == 0 && e->unk05 == 5) {
+    if (e->type == 0 && e->state == 5) {
         Data801cba08 *story = &game_progress;
 
         flags = story->unk1444.word;
         fdat_801ed938 = 1;
         story->unk1444.word = flags | 0x8000;
     }
-    e->unk2A += e->unkB0;
+    e->anim_frame += e->anim_step;
     if (creature_step_hurt_timer(e) == 1)
         return;
-    if (e->unkB0 >= 0 ? (short)e->unk2A >= 4096 : (short)e->unk2A <= 0) {
-        e->unk1A = 0xff;
+    if (e->anim_step >= 0 ? (short)e->anim_frame >= 4096 : (short)e->anim_frame <= 0) {
+        e->script_state = 0xff;
         creature_pick_move();
-        if (e->unk02 == 2)
+        if (e->type == 2)
             map_restart_script_on_block(e);
     }
-    if (e->unkA8 != NULL) {
+    if (e->script != NULL) {
         creature_run_script_command(e);
-        e->unk1A = 0xf0;
+        e->script_state = 0xf0;
     }
 }

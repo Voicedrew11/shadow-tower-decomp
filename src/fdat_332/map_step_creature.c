@@ -19,21 +19,21 @@ void map_kill_creature_open_warp(void);
 ADDRESS(0x801ed904, 0xe4)
 void map_step_creature(void)
 {
-    Vis212 *e = vis_table_a.unk6138;
+    Creature *e = vis_table_a.current;
 
-    e->unk2A += e->unkB0;
+    e->anim_frame += e->anim_step;
     if (creature_step_hurt_timer(e) == 1)
         return;
-    if (e->unkB0 >= 0 ? (short)e->unk2A >= 4096 : (short)e->unk2A <= 0) {
-        if (e->unk02 == 4 && fdat_801edb3c == 1) {
+    if (e->anim_step >= 0 ? (short)e->anim_frame >= 4096 : (short)e->anim_frame <= 0) {
+        if (e->type == 4 && fdat_801edb3c == 1) {
             map_kill_creature_open_warp();
             return;
         }
-        e->unk1A = 0xff;
+        e->script_state = 0xff;
         creature_pick_move();
     }
-    if (e->unkA8 != NULL) {
+    if (e->script != NULL) {
         creature_run_script_command(e);
-        e->unk1A = 0xf0;
+        e->script_state = 0xf0;
     }
 }

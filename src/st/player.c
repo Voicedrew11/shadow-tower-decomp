@@ -251,8 +251,8 @@ void player_update_status(int apply)
         player_stop_motion();
         vis_table_b.unk71A4 = vis_table_b.unk71A6 = vis_table_b.unk71A8 = 0;
         vis_lists.unk47CE = vis_lists.unk47D0 = vis_lists.unk47D2 = 0;
-        viewer.unk1CC = viewer.unk1CE = viewer.unk1D0 = vis_table_a.unk6160 = vis_table_a.unk6162 =
-            vis_table_a.unk6164 = 0;
+        viewer.unk1CC = viewer.unk1CE = viewer.unk1D0 = vis_table_a.push_x = vis_table_a.push_y =
+            vis_table_a.push_z = 0;
         if (viewer.timers.words[1] == 0) {
             viewer.unk2C &= ~0x18;
         }
@@ -1904,11 +1904,11 @@ void player_update_hand_action(u8 hand)
     SVECTOR unused2;
     VECTOR v;
     MATRIX unused3;
-    VisRequest req;
+    CollisionRequest req;
     VECTOR p;
     SVECTOR unused4;
-    Vis212 *e;
-    Vis212 *hit;
+    Creature *e;
+    Creature *hit;
     int d;
     int i;
     int r;
@@ -1918,7 +1918,7 @@ void player_update_hand_action(u8 hand)
     int reach;
     int inc;
     int kind;
-    Vis192 *def;
+    CreatureType *def;
 
     rec = viewer.unkE8[hand];
     switch (viewer.unk148[hand]) {
@@ -1967,12 +1967,12 @@ void player_update_hand_action(u8 hand)
                 p.vx += v.vx;
                 p.vy += v.vy;
                 p.vz += v.vz;
-                req.unk4 = p;
-                req.unk1C = 1024;
-                req.unk1E = 1024;
+                req.position = p;
+                req.radius = 1024;
+                req.height = 1024;
                 r = creature_find_in_reach((VisLists *)&req, 4);
                 if (r != -1) {
-                    d = viewer.unk26A - (short)vis_table_a.entries[r].unk56;
+                    d = viewer.unk26A - (short)vis_table_a.entries[r].player_heading;
                     if (d > 2048) {
                         d -= 4096;
                     }
@@ -2102,12 +2102,12 @@ void player_update_hand_action(u8 hand)
                     hr = 0;
                     dmg = 0;
                     reach = viewer.unkE8[hand]->unk2;
-                    for (vis_table_a.unk6144 = 0; vis_table_a.unk6144 < 64; vis_table_a.unk6144++, e++) {
-                        if (e->unk00 != 255) {
+                    for (vis_table_a.current_index = 0; vis_table_a.current_index < 64; vis_table_a.current_index++, e++) {
+                        if (e->spawn_chance != 255) {
                             creature_set_current(e);
-                            if (e->unk05 == 1 && e->unk1C.bytes[3] != 1 && e->unk2C != 0 &&
-                                (side = creature_test_player_aim(e, reach)) != 0 && e->unk3C < best) {
-                                best = e->unk3C;
+                            if (e->state == 1 && e->status.bytes[3] != 1 && e->hp != 0 &&
+                                (side = creature_test_player_aim(e, reach)) != 0 && e->player_dist_sq < best) {
+                                best = e->player_dist_sq;
                                 hit = e;
                                 hr = side;
                             }
@@ -2118,12 +2118,12 @@ void player_update_hand_action(u8 hand)
                         hud_queue_damage_number(dmg);
                     }
                     if (hr != 0 && dmg != -1) {
-                        def = &vis_table_a.unk3500[hit->unk02];
-                        if (dmg * 4 < def->unk32) {
+                        def = &vis_table_a.types[hit->type];
+                        if (dmg * 4 < def->max_hp) {
                             viewer.unk21B += 3;
-                        } else if (dmg * 2 < def->unk32) {
+                        } else if (dmg * 2 < def->max_hp) {
                             viewer.unk21B += 2;
-                        } else if (dmg < def->unk32) {
+                        } else if (dmg < def->max_hp) {
                             viewer.unk21B += 1;
                         }
                         if (viewer.unk21B >= 7) {
@@ -2746,8 +2746,8 @@ void player_update_walk(void)
     }
     viewer.unk1CC += vis_table_b.unk71A4 / 4;
     viewer.unk1D0 += vis_table_b.unk71A8 / 4;
-    viewer.unk1CC += vis_table_a.unk6160 / 2;
-    viewer.unk1D0 += vis_table_a.unk6164 / 2;
+    viewer.unk1CC += vis_table_a.push_x / 2;
+    viewer.unk1D0 += vis_table_a.push_z / 2;
     if (viewer.unk2C8 != 0 && viewer.unk21E == 0) {
         player_move(ang, viewer.unk2C8);
     }
@@ -2955,7 +2955,7 @@ void player_update(void)
     if (viewer.unk218 == 0 || viewer.unk218 == 4 || viewer.unk218 == 16 || viewer.unk218 == 1) {
         if (((pad_state.unk4 & 1) || pad_state.unk14 == 1) && viewer.unk130.word == -1 &&
             viewer.unk218 != 1 && viewer.unk218 != 4 && !(viewer.unk2C & 0x10) &&
-            area_state.unk0 == 0 && vis_table_a.unk6169 == 0 && area_state.unk18 == -1) {
+            area_state.unk0 == 0 && vis_table_a.object_sequence_state == 0 && area_state.unk18 == -1) {
             Vis88 *entry;
             int left;
 
@@ -2991,9 +2991,9 @@ void player_update(void)
                 fade_run_frames(2, 4096, 4096, 0);
                 cd_wait_idle();
                 player_reload_equipment();
-                vis_table_a.unk6168 = 254;
-                vis_table_a.unk6158[0] = vis_table_a.unk6158[1] = vis_table_a.unk6158[2] =
-                    vis_table_a.unk6158[3] = 255;
+                vis_table_a.zone = 254;
+                vis_table_a.zone_history[0] = vis_table_a.zone_history[1] = vis_table_a.zone_history[2] =
+                    vis_table_a.zone_history[3] = 255;
                 pad_vibrate(0);
                 fx = effects.slots;
                 k = 128;
@@ -3051,7 +3051,7 @@ void player_update(void)
             player_warp_to_save_point();
         }
         if ((pad_state.unk4 & 8) && viewer.unk218 != 4 && area_state.unk0 == 0 &&
-            vis_table_a.unk6169 == 0 && area_state.unk18 == -1) {
+            vis_table_a.object_sequence_state == 0 && area_state.unk18 == -1) {
             lighting.unkA = 1;
             play_confirm_sound();
             pad_state.unk4 &= ~8;
@@ -3090,7 +3090,7 @@ void player_update(void)
         switch (viewer.unk218) {
         case 0:
             player_update_hands();
-            if (area_state.unk0 != 1 && vis_table_a.unk6169 == 0) {
+            if (area_state.unk0 != 1 && vis_table_a.object_sequence_state == 0) {
                 player_update_look();
                 player_update_walk();
                 player_update_motion();
@@ -3109,7 +3109,7 @@ void player_update(void)
             break;
         case 1:
             player_update_hands();
-            if (area_state.unk0 == 1 || vis_table_a.unk6169) {
+            if (area_state.unk0 == 1 || vis_table_a.object_sequence_state) {
                 goto status;
             }
             player_update_look();
@@ -3254,9 +3254,9 @@ void player_update(void)
                             fade_run_frames(2, 0, 4096, 256);
                             cd_wait_idle();
                             player_reload_equipment();
-                            vis_table_a.unk6168 = 254;
-                            vis_table_a.unk6158[0] = vis_table_a.unk6158[1] =
-                                vis_table_a.unk6158[2] = vis_table_a.unk6158[3] = 255;
+                            vis_table_a.zone = 254;
+                            vis_table_a.zone_history[0] = vis_table_a.zone_history[1] =
+                                vis_table_a.zone_history[2] = vis_table_a.zone_history[3] = 255;
                             pad_vibrate(0);
                             area_load_set_blocking(area_state.unk4, area_state.unk4, area_state.unk4,
                                           area_state.unk7, area_state.unk8, 255);
@@ -3289,7 +3289,7 @@ void player_update(void)
             player_stop_motion();
             vis_table_b.unk71A4 = vis_table_b.unk71A6 = vis_table_b.unk71A8 = 0;
             vis_lists.unk47CE = vis_lists.unk47D0 = vis_lists.unk47D2 = 0;
-            vis_table_a.unk6160 = vis_table_a.unk6162 = vis_table_a.unk6164 = 0;
+            vis_table_a.push_x = vis_table_a.push_y = vis_table_a.push_z = 0;
             viewer.unk1CC = viewer.unk1CE = viewer.unk1D0 = 0;
             break;
         }

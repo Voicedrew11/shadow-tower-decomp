@@ -30,28 +30,28 @@ void map_pick_creature_move(void);
 ADDRESS(0x801ed7b4, 0x11c)
 void map_step_creature(void)
 {
-    Vis212 *e = vis_table_a.unk6138;
+    Creature *e = vis_table_a.current;
 
-    if (fdat_801ed970 == 1 && e == &vis_table_a.entries[32] && e->unkA4 != 0) {
-        e->unk2A += e->unkB0;
-        if (e->unk74.vy > 0x3ffff) {
-            e->unk74.vy -= 0x180;
+    if (fdat_801ed970 == 1 && e == &vis_table_a.entries[32] && e->anim_slot != 0) {
+        e->anim_frame += e->anim_step;
+        if (e->position.vy > 0x3ffff) {
+            e->position.vy -= 0x180;
             return;
         }
-        e->unk0E = 0;
-        e->unk1C.bytes[3] = 0;
+        e->move_mode = 0;
+        e->status.bytes[3] = 0;
         fdat_801ed970 = 0xff;
     }
-    e->unk2A += e->unkB0;
+    e->anim_frame += e->anim_step;
     if (creature_step_hurt_timer(e) == 1)
         return;
-    if (e->unkB0 >= 0 ? (short)e->unk2A >= 4096 : (short)e->unk2A <= 0) {
-        e->unk1A = 0xff;
+    if (e->anim_step >= 0 ? (short)e->anim_frame >= 4096 : (short)e->anim_frame <= 0) {
+        e->script_state = 0xff;
         map_pick_creature_move();
     }
-    if (e->unkA8 != NULL) {
+    if (e->script != NULL) {
         creature_run_script_command(e);
-        e->unk1A = 0xf0;
+        e->script_state = 0xf0;
     }
 }
 
@@ -60,17 +60,17 @@ void map_step_creature(void)
 ADDRESS(0x801ed8d0, 0x9c)
 void map_spawn_rising_creature(void)
 {
-    Vis212 *e = &vis_table_a.entries[32];
+    Creature *e = &vis_table_a.entries[32];
 
     creature_spawn_now(e);
-    e->unk36 = -1;
+    e->fade = -1;
     fdat_801ed970 = 1;
-    e->unk1C.bytes[2] &= 0xf2;
+    e->status.bytes[2] &= 0xf2;
     game_progress.unk1440.word |= 2;
     creature_start_script(e, 2);
-    e->unk0E = 1;
-    e->unk1C.bytes[3] = 1;
+    e->move_mode = 1;
+    e->status.bytes[3] = 1;
     fdat_801ed96c = 0;
-    e->unk74.vy += 0xc00;
-    e->unk07 = vis_table_a.unk6103;
+    e->position.vy += 0xc00;
+    e->zone = vis_table_a.prev_zone;
 }

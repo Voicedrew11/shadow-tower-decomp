@@ -91,23 +91,23 @@ void map_offer_item_at_player(void);
 ADDRESS(0x801ed4a0, 0x1e0)
 void map_restore_progress(void)
 {
-    Vis212 *e48 = &vis_table_a.entries[48];
+    Creature *e48 = &vis_table_a.entries[48];
     Vis88 *d5 = &vis_table_b.entries[5];
     Vis88 *d6 = &vis_table_b.entries[6];
     Vis88 *d7 = &vis_table_b.entries[7];
     Vis88 *d8 = &vis_table_b.entries[8];
     Vis48 *c5 = &vis_table_c.entries[5];
-    Vis212 *e39 = &vis_table_a.entries[39];
-    Vis212 *e38 = &vis_table_a.entries[38];
+    Creature *e39 = &vis_table_a.entries[39];
+    Creature *e38 = &vis_table_a.entries[38];
 
     if (game_progress.unk1444.bit.f12 == 1) {
-        vis_table_a.entries[40].unk00 = 100;
+        vis_table_a.entries[40].spawn_chance = 100;
         c5->unk22 = 4;
         fdat_801edf54 = 0xff;
     } else {
         fdat_801edf54 = 0;
         c5->unk22 = 4;
-        e48->unk1C.bytes[3] = 1;
+        e48->status.bytes[3] = 1;
     }
     if (game_progress.unk1444.bit.f13 == 1) {
         d8->unk00 = 2;
@@ -127,24 +127,24 @@ void map_restore_progress(void)
         fdat_801edf60 = 0xff;
     else
         fdat_801edf60 = 0;
-    if (e39->unk05 != 3) {
+    if (e39->state != 3) {
         if (game_progress.unk1444.bit.f16 == 1) {
-            e39->unk00 = 100;
+            e39->spawn_chance = 100;
             fdat_801edf64 = 0xff;
         } else {
             fdat_801edf64 = 0;
-            fdat_801edf6c = e39->unk74.vy;
-            e39->unk74.vy += 0xc00;
+            fdat_801edf6c = e39->position.vy;
+            e39->position.vy += 0xc00;
         }
     }
-    if (e38->unk05 != 3) {
+    if (e38->state != 3) {
         if (game_progress.unk1444.bit.f17 == 1) {
-            e38->unk00 = 100;
+            e38->spawn_chance = 100;
             fdat_801edf68 = 0xff;
         } else {
             fdat_801edf68 = 0;
-            fdat_801edf70 = e38->unk74.vy;
-            e38->unk74.vy += 0xa00;
+            fdat_801edf70 = e38->position.vy;
+            e38->position.vy += 0xa00;
         }
     }
 }
@@ -158,41 +158,41 @@ void map_restore_progress(void)
 ADDRESS(0x801ed680, 0x4a0)
 void map_update_events(void)
 {
-    Vis212 *e48 = &vis_table_a.entries[48];
+    Creature *e48 = &vis_table_a.entries[48];
     Vis88 *d5 = &vis_table_b.entries[5];
-    Vis192 *r14 = &vis_table_a.unk3500[14];
-    Vis212 *e40 = &vis_table_a.entries[40];
-    Vis212 *e39 = &vis_table_a.entries[39];
-    Vis212 *e38 = &vis_table_a.entries[38];
-    Vis212 *e32 = &vis_table_a.entries[32];
-    Vis212 *e35 = &vis_table_a.entries[35];
+    CreatureType *r14 = &vis_table_a.types[14];
+    Creature *e40 = &vis_table_a.entries[40];
+    Creature *e39 = &vis_table_a.entries[39];
+    Creature *e38 = &vis_table_a.entries[38];
+    Creature *e32 = &vis_table_a.entries[32];
+    Creature *e35 = &vis_table_a.entries[35];
     Vis88 *d6 = &vis_table_b.entries[6];
     Vis88 *d7 = &vis_table_b.entries[7];
     Vis88 *d8 = &vis_table_b.entries[8];
     Vis88 *d14 = &vis_table_b.entries[14];
     Vis88 *d17 = &vis_table_b.entries[17];
 
-    if (fdat_801edf54 == 0 && game_progress.unk1448[r14->unk09] == 1) {
+    if (fdat_801edf54 == 0 && game_progress.unk1448[r14->talk_id] == 1) {
         viewer.unk218 = 5;
         map_play_creature_script();
         if (!(vis_table_c.unk0070[1] & 0x10000))
             map_offer_item_at_player();
         creature_fade_out_despawn(e48);
         creature_spawn_now(e40);
-        e40->unk36 = -1;
-        e40->unk03 = 1;
-        e40->unk1C.bytes[2] &= 0xf2;
-        e40->unk70 |= 0x2000000;
+        e40->fade = -1;
+        e40->visibility = 1;
+        e40->status.bytes[2] &= 0xf2;
+        e40->flags |= 0x2000000;
         creature_force_talk(e40, 1, 0);
         player_turn_to_creature(e40);
         creature_force_talk(e40, 0, 0);
-        e40->unk00 = 100;
+        e40->spawn_chance = 100;
         viewer.unk218 = 0;
         fdat_801edf54 = 0xff;
-        e40->unk70 &= ~0x2000000;
+        e40->flags &= ~0x2000000;
         game_progress.unk1444.word |= 0x1000;
     }
-    if (fdat_801edf5c == 0 && e32->unk2C == 0) {
+    if (fdat_801edf5c == 0 && e32->hp == 0) {
         d8->unk00 = 2;
         d7->unk00 = 2;
         fdat_801edf5c = 0xff;
@@ -200,7 +200,7 @@ void map_update_events(void)
         if (fdat_801edf58 == 0xff)
             fdat_801edf60 = 1;
     }
-    if (fdat_801edf58 == 0 && e35->unk2C == 0) {
+    if (fdat_801edf58 == 0 && e35->hp == 0) {
         d6->unk00 = 2;
         d5->unk00 = 2;
         fdat_801edf58 = 0xff;
@@ -215,25 +215,25 @@ void map_update_events(void)
     }
     if (fdat_801edf64 == 0 && d14->unk0C == 1) {
         creature_spawn_now(e39);
-        e39->unk36 = -1;
-        e39->unk1C.bytes[2] &= 0xf2;
+        e39->fade = -1;
+        e39->status.bytes[2] &= 0xf2;
         creature_start_script(e39, 0);
-        e39->unk00 = 100;
-        e39->unk74.vy += 0xa00;
-        e39->unk1C.bytes[3] = 1;
-        e39->unk07 = vis_table_a.unk6103;
+        e39->spawn_chance = 100;
+        e39->position.vy += 0xa00;
+        e39->status.bytes[3] = 1;
+        e39->zone = vis_table_a.prev_zone;
         fdat_801edf64 = 1;
         game_progress.unk1444.word |= 0x10000;
     }
     if (fdat_801edf68 == 0 && d17->unk0C == 1) {
         creature_spawn_now(e38);
-        e38->unk36 = -1;
-        e38->unk1C.bytes[2] &= 0xf2;
+        e38->fade = -1;
+        e38->status.bytes[2] &= 0xf2;
         creature_start_script(e38, 0);
-        e38->unk00 = 100;
-        e38->unk74.vy += 0xa00;
-        e38->unk1C.bytes[3] = 1;
-        e38->unk07 = vis_table_a.unk6103;
+        e38->spawn_chance = 100;
+        e38->position.vy += 0xa00;
+        e38->status.bytes[3] = 1;
+        e38->zone = vis_table_a.prev_zone;
         fdat_801edf68 = 1;
         game_progress.unk1444.word |= 0x20000;
     }
@@ -242,19 +242,19 @@ void map_update_events(void)
     if (fdat_801edf68 == 1 && d17->unk10 > 0xc00)
         fdat_801edf68 = 2;
     if (fdat_801edf64 == 2) {
-        if (e39->unk74.vy <= fdat_801edf6c) {
-            e39->unk1C.bytes[3] = 0;
+        if (e39->position.vy <= fdat_801edf6c) {
+            e39->status.bytes[3] = 0;
             fdat_801edf64 = 0xff;
         } else {
-            e39->unk74.vy -= 0x100;
+            e39->position.vy -= 0x100;
         }
     }
     if (fdat_801edf68 == 2) {
-        if (e38->unk74.vy <= fdat_801edf70) {
-            e38->unk1C.bytes[3] = 0;
+        if (e38->position.vy <= fdat_801edf70) {
+            e38->status.bytes[3] = 0;
             fdat_801edf68 = 0xff;
         } else {
-            e38->unk74.vy -= 0x100;
+            e38->position.vy -= 0x100;
         }
     }
 }
@@ -266,16 +266,16 @@ void map_update_events(void)
 ADDRESS(0x801ede14, 0x90)
 void map_play_creature_script(void)
 {
-    Vis212 *e = &vis_table_a.entries[48];
+    Creature *e = &vis_table_a.entries[48];
 
     creature_start_script(e, 1);
     do {
         creature_update_script_sound(e);
-        e->unk2A += e->unkB0;
-        if ((short)e->unk2A >= 0x1000)
-            e->unk2A = 0xfff;
+        e->anim_frame += e->anim_step;
+        if ((short)e->anim_frame >= 0x1000)
+            e->anim_frame = 0xfff;
         world_run_frame(NULL, NULL, 0);
-    } while ((short)e->unk2A != 0xfff);
+    } while ((short)e->anim_frame != 0xfff);
 }
 
 /*

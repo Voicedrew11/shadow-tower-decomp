@@ -122,7 +122,7 @@ void game_load_common_data(void)
     area_state.unk8 = 0;
     area_state.area = 0;
     area_state.unk2 = 0;
-    vis_table_a.unk6169 = 0;
+    vis_table_a.object_sequence_state = 0;
     DAT_800881d8 = overlay_area_start + 4;
     DAT_800881dc[0] = overlay_area_start;
     cd_archive_open(2, "CHR0\\M00.T");
@@ -483,7 +483,7 @@ void func_80045664(void)
 ADDRESS(0x8004567c, 0x7c)
 void area_request_commit(void)
 {
-    vis_table_a.unk6169 = 0;
+    vis_table_a.object_sequence_state = 0;
     area_state.unk1E = 0;
     if (area_state.unk10 != 0xff)
         area_state.unk4 = area_state.unk10;
@@ -506,7 +506,7 @@ void area_request_commit(void)
 ADDRESS(0x800456f8, 0x898)
 void area_load_update(void)
 {
-    Vis212 *a;
+    Creature *a;
     Vis88 *b;
     Vis48 *c;
     StVabSlot *slot;
@@ -575,12 +575,12 @@ void area_load_update(void)
             p = cd_file_buffer;
             a = vis_table_a.entries;
             for (i = 63; i != -1; i--) {
-                if (a->unkA4) {
-                    anim_slot_free((StAnimSlot *)a->unkA4);
-                    if (a->unkA4)
-                        anim_set_free((StAnimSet *)a->unkA4);
+                if (a->anim_slot) {
+                    anim_slot_free((StAnimSlot *)a->anim_slot);
+                    if (a->anim_slot)
+                        anim_set_free((StAnimSet *)a->anim_slot);
                 }
-                a->unk00 = 0xff;
+                a->spawn_chance = 0xff;
                 a++;
             }
             b = vis_table_b.entries;
@@ -611,10 +611,10 @@ void area_load_update(void)
                 if (world_state.unk8C7C[i])
                     heap_free(world_state.unk8C7C[i]);
             }
-            copy_words((u32 *)vis_table_a.unk3500, (u32 *)(p + 1), 2816);
+            copy_words((u32 *)vis_table_a.types, (u32 *)(p + 1), 2816);
             creature_types_link_scripts();
             p = (u_long *)((u8 *)p + (*p + 4));
-            creatures_load((VisAFileEntry *)(p + 1));
+            creatures_load((CreatureFileEntry *)(p + 1));
             p = (u_long *)((u8 *)p + (*p + 4));
             copy_words((u32 *)&vis_table_b.unk0000[300], (u32 *)(p + 1), 192);
             p = (u_long *)((u8 *)p + (*p + 4));
@@ -628,11 +628,11 @@ void area_load_update(void)
             area_state.hooks = (AreaHooks *)DAT_800881d8;
             texanim_clear_all();
             area_state.hooks->loaded();
-            vis_table_a.unk6168 = 254;
-            vis_table_a.unk6158[3] = 0xff;
-            vis_table_a.unk6158[2] = 0xff;
-            vis_table_a.unk6158[1] = 0xff;
-            vis_table_a.unk6158[0] = 0xff;
+            vis_table_a.zone = 254;
+            vis_table_a.zone_history[3] = 0xff;
+            vis_table_a.zone_history[2] = 0xff;
+            vis_table_a.zone_history[1] = 0xff;
+            vis_table_a.zone_history[0] = 0xff;
             slot = &sound_state.slots[8];
             for (j = 15; j != -1; j--) {
                 if (slot->block) {

@@ -25,12 +25,12 @@ void map_open_door_then_play_script(void);
 ADDRESS(0x801ed7a4, 0x274)
 void map_step_creature(void)
 {
-    Vis212 *e = vis_table_a.unk6138;
-    Vis192 *r = vis_table_a.unk6134;
-    Vis212 *a48 = &vis_table_a.entries[48];
-    Vis212 *a50 = &vis_table_a.entries[50];
-    Vis212 *a19 = &vis_table_a.entries[19];
-    Vis212 *a49 = &vis_table_a.entries[49];
+    Creature *e = vis_table_a.current;
+    CreatureType *r = vis_table_a.current_type;
+    Creature *a48 = &vis_table_a.entries[48];
+    Creature *a50 = &vis_table_a.entries[50];
+    Creature *a19 = &vis_table_a.entries[19];
+    Creature *a49 = &vis_table_a.entries[49];
 
     if (e == a48) {
         if (viewer.unk178 == 0x55 || viewer.unk178 == 0x29) {
@@ -39,9 +39,9 @@ void map_step_creature(void)
             return;
         }
         if (viewer.unk178 == 0x3b)
-            e->unk8E = 0x800;
+            e->facing = 0x800;
         else if (viewer.unk178 == 0x13d)
-            e->unk8E = 0;
+            e->facing = 0;
     }
     if (e == a50 && viewer.unk178 == 0x65) {
         map_open_door_then_play_script();
@@ -51,36 +51,36 @@ void map_step_creature(void)
         return;
     }
     if (e == a19) {
-        if (e->unk64 != 0) {
-            e->unk1C.bytes[3] = 0;
-            game_progress.unk1448[r->unk09]++;
+        if (e->hit != 0) {
+            e->status.bytes[3] = 0;
+            game_progress.unk1448[r->talk_id]++;
         }
-        if (game_progress.unk1448[r->unk09] == 4)
-            e->unk70 &= ~0x2000000;
+        if (game_progress.unk1448[r->talk_id] == 4)
+            e->flags &= ~0x2000000;
     }
     if (e == a49 && viewer.unk178 == 0x61) {
         map_talk_then_open_door(0x61);
         creature_despawn(e);
         return;
     }
-    e->unk2A += e->unkB0;
+    e->anim_frame += e->anim_step;
     if (creature_step_hurt_timer(e) == 1)
         return;
-    if (e->unkB0 >= 0 ? (short)e->unk2A >= 4096 : (short)e->unk2A <= 0) {
+    if (e->anim_step >= 0 ? (short)e->anim_frame >= 4096 : (short)e->anim_frame <= 0) {
         if (e == a48 || e == a49)
             creature_start_script(e, 0);
         else if (e == a50)
             creature_start_script(e, 4);
-        else if (e == a19 && game_progress.unk1448[r->unk09] == 3)
+        else if (e == a19 && game_progress.unk1448[r->talk_id] == 3)
             creature_start_script(e, 0);
         else {
-            e->unk1A = 0xff;
+            e->script_state = 0xff;
             creature_pick_move();
         }
     }
-    if (e->unkA8 != NULL) {
+    if (e->script != NULL) {
         creature_run_script_command(e);
-        e->unk1A = 0xf0;
+        e->script_state = 0xf0;
     }
 }
 
@@ -133,9 +133,9 @@ void map_open_object_drop_item(void)
 ADDRESS(0x801edba4, 0x2e4)
 void map_talk_then_open_door(int id)
 {
-    Vis212 *e;
+    Creature *e;
     Vis88 *door;
-    Vis192 *r;
+    CreatureType *r;
     u16 step;
     u16 n;
     u8 t;
@@ -147,32 +147,32 @@ void map_talk_then_open_door(int id)
         e = &vis_table_a.entries[49];
         door = &vis_table_b.entries[1];
     }
-    r = &vis_table_a.unk3500[e->unk02];
+    r = &vis_table_a.types[e->type];
     if (id == 0x55)
-        game_progress.unk1448[r->unk09] = 0;
+        game_progress.unk1448[r->talk_id] = 0;
     else
-        game_progress.unk1448[r->unk09] = 1;
+        game_progress.unk1448[r->talk_id] = 1;
     step = door->unk48 * 4;
-    r->unk60[0]->unk00 = 0x70;
-    r->unk60[1]->unk00 = 0x71;
-    r->unk60[2]->unk00 = 0x72;
-    r->unk60[5]->unk00 = 0x80;
-    r->unk60[6]->unk00 = 0x80;
-    r->unk60[7]->unk00 = 0x80;
+    r->scripts[0]->command = 0x70;
+    r->scripts[1]->command = 0x71;
+    r->scripts[2]->command = 0x72;
+    r->scripts[5]->command = 0x80;
+    r->scripts[6]->command = 0x80;
+    r->scripts[7]->command = 0x80;
     creature_force_talk(e, 0, 0);
-    game_progress.unk1448[r->unk09] = 3;
+    game_progress.unk1448[r->talk_id] = 3;
     creature_start_script(e, 3);
     do {
-        e->unk2A += e->unkB0;
-        if ((short)e->unk2A >= 0x1000)
-            e->unk2A = 0xfff;
-        if ((short)e->unk2A + e->unkB0 >= 0x800 && (short)e->unk2A < 0x800) {
+        e->anim_frame += e->anim_step;
+        if ((short)e->anim_frame >= 0x1000)
+            e->anim_frame = 0xfff;
+        if ((short)e->anim_frame + e->anim_step >= 0x800 && (short)e->anim_frame < 0x800) {
             viewer.unk190[4][0] = 0;
             viewer.unk190[4][1] = 6000;
             viewer.unk2C |= 0x100;
         }
         world_run_frame(NULL, NULL, 0);
-    } while ((short)e->unk2A != 0xfff);
+    } while ((short)e->anim_frame != 0xfff);
     for (;;) {
         if (door->unk10 < 1 && door->unk10 + step >= 1)
             object_play_sound(door, door->unk0a * 3 + 208);
@@ -200,20 +200,20 @@ ADDRESS(0x801ede88, 0x228)
 void map_open_door_then_play_script(void)
 {
     int raising_step;
-    Vis212 *e = &vis_table_a.entries[50];
-    Vis192 *r = &vis_table_a.unk3500[e->unk02];
+    Creature *e = &vis_table_a.entries[50];
+    CreatureType *r = &vis_table_a.types[e->type];
     Vis88 *door = &vis_table_b.entries[3];
     u16 step = door->unk48 * 4;
     u16 n;
     u8 t;
 
-    r->unk60[0]->unk00 = 0x80;
-    r->unk60[1]->unk00 = 0x80;
-    r->unk60[2]->unk00 = 0x80;
-    r->unk60[5]->unk00 = 0x70;
-    r->unk60[6]->unk00 = 0x71;
-    r->unk60[7]->unk00 = 0x72;
-    game_progress.unk1448[r->unk09] = 2;
+    r->scripts[0]->command = 0x80;
+    r->scripts[1]->command = 0x80;
+    r->scripts[2]->command = 0x80;
+    r->scripts[5]->command = 0x70;
+    r->scripts[6]->command = 0x71;
+    r->scripts[7]->command = 0x72;
+    game_progress.unk1448[r->talk_id] = 2;
     creature_force_talk(e, 0, 0);
     n = door->unk4A.door.unk4E;
     while (n--) {
@@ -235,10 +235,10 @@ gate_raised:
     door->unk0C = 0xff;
     creature_start_script(e, 8);
     do {
-        e->unk2A += e->unkB0;
-        if ((short)e->unk2A >= 0x1000)
-            e->unk2A = 0xfff;
+        e->anim_frame += e->anim_step;
+        if ((short)e->anim_frame >= 0x1000)
+            e->anim_frame = 0xfff;
         world_run_frame(NULL, NULL, 0);
-    } while ((short)e->unk2A != 0xfff);
-    game_progress.unk1448[r->unk09] = 3;
+    } while ((short)e->anim_frame != 0xfff);
+    game_progress.unk1448[r->talk_id] = 3;
 }

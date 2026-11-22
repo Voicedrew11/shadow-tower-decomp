@@ -54,10 +54,10 @@ int fdat_801ed87c;
 ADDRESS(0x801ed4a0, 0x58)
 void map_restore_progress(void)
 {
-    Vis212 *e = &vis_table_a.entries[48];
-    Vis192 *r = &vis_table_a.unk3500[0];
+    Creature *e = &vis_table_a.entries[48];
+    CreatureType *r = &vis_table_a.types[0];
 
-    if (e->unk05 != 3 && game_progress.unk1448[r->unk09] == 0)
+    if (e->state != 3 && game_progress.unk1448[r->talk_id] == 0)
         fdat_801ed87c = 0;
     else
         fdat_801ed87c = 0xff;
@@ -68,13 +68,13 @@ void map_restore_progress(void)
 ADDRESS(0x801ed4f8, 0x90)
 void map_update_events(void)
 {
-    Vis212 *e = &vis_table_a.entries[48];
-    Vis192 *r = &vis_table_a.unk3500[0];
+    Creature *e = &vis_table_a.entries[48];
+    CreatureType *r = &vis_table_a.types[0];
 
     if (fdat_801ed87c == 0) {
-        if (e->unk2C == 0)
+        if (e->hp == 0)
             fdat_801ed87c = 0xff;
-        if (game_progress.unk1448[r->unk09] == 1) {
+        if (game_progress.unk1448[r->talk_id] == 1) {
             creature_drop_item(e, 0x116);
             creature_fade_out_despawn(e);
             fdat_801ed87c = 0xff;

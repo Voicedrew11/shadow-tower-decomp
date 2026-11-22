@@ -78,27 +78,27 @@ void talk_load_image(int id, int full)
  * record plays, then the 0x72 animation fades out. `fixed` runs 24-frame
  * fades without animations. */
 ADDRESS(0x80054368, 0x4f0)
-void creature_talk(Vis212 *e, int fixed, int arg2)
+void creature_talk(Creature *e, int fixed, int arg2)
 {
-    Vis192 *r = &vis_table_a.unk3500[e->unk02];
-    VisAnim *a;
+    CreatureType *r = &vis_table_a.types[e->type];
+    CreatureTalkScript *a;
     int i;
 
-    if (!(e->unk70 & 0x2000000))
+    if (!(e->flags & 0x2000000))
         return;
     if (!fixed) {
-        if (e->unk36 != -1)
+        if (e->fade != -1)
             return;
-        a = (VisAnim *)creature_type_find_script(r, 0x70);
+        a = (CreatureTalkScript *)creature_type_find_script(r, 0x70);
         if (a == NULL)
             return;
-        e->unk08 = a->unk1;
-        e->unkB0 = a->unkC;
-        if (e->unkB0 > 0)
-            e->unk2A = 0;
+        e->anim = a->anim;
+        e->anim_step = a->anim_step;
+        if (e->anim_step > 0)
+            e->anim_frame = 0;
         else
-            e->unk2A = 4096;
-        world_state.unk1EE18 = 4096 / a->unkC;
+            e->anim_frame = 4096;
+        world_state.unk1EE18 = 4096 / a->anim_step;
     } else {
         world_state.unk1EE18 = 24;
     }
@@ -111,10 +111,10 @@ void creature_talk(Vis212 *e, int fixed, int arg2)
     i = 0;
     for (;;) {
         if (!fixed) {
-            e->unk2A += e->unkB0;
-            if ((e->unkB0 > 0 && (short)e->unk2A >= 4096) ||
-                (e->unkB0 < 0 && (short)e->unk2A < 0)) {
-                e->unk2A = 4096;
+            e->anim_frame += e->anim_step;
+            if ((e->anim_step > 0 && (short)e->anim_frame >= 4096) ||
+                (e->anim_step < 0 && (short)e->anim_frame < 0)) {
+                e->anim_frame = 4096;
                 break;
             }
         } else if (++i == world_state.unk1EE18) {
@@ -122,17 +122,17 @@ void creature_talk(Vis212 *e, int fixed, int arg2)
         }
         world_run_frame(NULL, NULL, 0);
     }
-    if (!fixed && (a = (VisAnim *)creature_type_find_script(r, 0x71)) != NULL) {
-        e->unk08 = a->unk1;
-        e->unk2A = 0;
-        e->unkB0 = a->unkC;
+    if (!fixed && (a = (CreatureTalkScript *)creature_type_find_script(r, 0x71)) != NULL) {
+        e->anim = a->anim;
+        e->anim_frame = 0;
+        e->anim_step = a->anim_step;
     }
     if (game_settings.unk4 == 1)
-        talk_load_image(r->unk09 * 6 + game_progress.unk1448[r->unk09], 0);
-    talk_stream_file = r->unk09;
+        talk_load_image(r->talk_id * 6 + game_progress.unk1448[r->talk_id], 0);
+    talk_stream_file = r->talk_id;
     i = 0;
-    xa_start_stream(r->unk09, game_progress.unk1448[r->unk09]);
-    game_progress.unk1448[r->unk09]++;
+    xa_start_stream(r->talk_id, game_progress.unk1448[r->talk_id]);
+    game_progress.unk1448[r->talk_id]++;
     SsSetSerialVol(0, 64, 64);
     world_state.unk1EE16 = 2;
     world_state.unk1EE19 = 0;
@@ -144,23 +144,23 @@ void creature_talk(Vis212 *e, int fixed, int arg2)
             world_state.unk1EE16 = 4;
         }
         if (!fixed) {
-            e->unk2A += e->unkB0;
-            if ((short)e->unk2A >= 4096)
-                e->unk2A = 0;
+            e->anim_frame += e->anim_step;
+            if ((short)e->anim_frame >= 4096)
+                e->anim_frame = 0;
         }
         world_run_frame(NULL, NULL, 0);
     } while (world_state.unk1EE16 != 5);
     if (!fixed) {
-        a = (VisAnim *)creature_type_find_script(r, 0x72);
+        a = (CreatureTalkScript *)creature_type_find_script(r, 0x72);
         if (a != NULL) {
-            e->unk08 = a->unk1;
-            e->unkB0 = a->unkC;
-            if (e->unkB0 > 0)
-                e->unk2A = 0;
+            e->anim = a->anim;
+            e->anim_step = a->anim_step;
+            if (e->anim_step > 0)
+                e->anim_frame = 0;
             else
-                e->unk2A = 4096;
+                e->anim_frame = 4096;
         }
-        world_state.unk1EE18 = 4096 / abs(a->unkC);
+        world_state.unk1EE18 = 4096 / abs(a->anim_step);
     } else {
         world_state.unk1EE18 = 24;
     }
@@ -168,13 +168,13 @@ void creature_talk(Vis212 *e, int fixed, int arg2)
     world_state.unk1EE19 = 0;
     while (1) {
         if (!fixed) {
-            e->unk2A += e->unkB0;
-            if (e->unkB0 > 0 && (short)e->unk2A >= 4096) {
-                e->unk2A = 4096;
+            e->anim_frame += e->anim_step;
+            if (e->anim_step > 0 && (short)e->anim_frame >= 4096) {
+                e->anim_frame = 4096;
                 break;
             }
-            if (e->unkB0 < 0 && (short)e->unk2A < 0) {
-                e->unk2A = 0;
+            if (e->anim_step < 0 && (short)e->anim_frame < 0) {
+                e->anim_frame = 0;
                 break;
             }
         } else if (++i == world_state.unk1EE18) {

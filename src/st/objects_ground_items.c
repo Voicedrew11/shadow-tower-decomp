@@ -402,7 +402,7 @@ ADDRESS(0x80050170, 0x118)
 void world_shift_position(int dx, int dy, int dz)
 {
     StEffect *f = effects.slots;
-    Vis212 *e;
+    Creature *e;
     u16 i;
     u16 j;
 
@@ -421,10 +421,10 @@ void world_shift_position(int dx, int dy, int dz)
     e = vis_table_a.entries;
     j = 64;
     while (j--) {
-        if (e->unk00 != 0xff) {
-            e->unk74.vx += dx;
-            e->unk74.vz += dz;
-            e->unk74.vy += dy;
+        if (e->spawn_chance != 0xff) {
+            e->position.vx += dx;
+            e->position.vz += dz;
+            e->position.vy += dy;
         }
         e++;
     }
@@ -1066,60 +1066,60 @@ void objects_update(void)
             object_spawn_side_parts_alt(e, (u16)(240 - i));
             break;
         case 224: {
-            Vis212 *a;
+            Creature *a;
             int j;
             int rising;
 
             if (player_in_cell_rect(e->unk24.vx >> 12, e->unk24.vz >> 12, 1, 1, e->unk24.vy) == 0
                 && area_state.unk0 == 0)
                 break;
-            if ((pad_state.unk2 & pad_state.unk22[10]) && vis_table_a.unk6169 == 0
+            if ((pad_state.unk2 & pad_state.unk22[10]) && vis_table_a.object_sequence_state == 0
                 && W50(e) != 0xffffff && W48(e) != 0xffffff) {
-                vis_table_a.unk6169 = 1;
+                vis_table_a.object_sequence_state = 1;
                 player_stop_motion();
                 pad_clear_input();
             }
-            if (vis_table_a.unk6169 == 1) {
+            if (vis_table_a.object_sequence_state == 1) {
                 a = &vis_table_a.entries[56];
                 rising = 0;
                 cd_wait_idle();
                 viewer.unk21E = 1;
                 for (j = 7; j != -1; a++, j--) {
-                    a->unk2A = 0;
-                    if (a->unk00 != 255) {
-                        sound_play_at(a->unk0B * 10 + 48, &a->unk74, 127, (rand() * 5 >> 15) - 2);
-                        a->unkB0 = 128;
-                        object_sequence_push.vx = rcos((s16)a->unk56 - 1024) / 256;
-                        object_sequence_push.vz = rsin((s16)a->unk56 - 1024) / 256;
+                    a->anim_frame = 0;
+                    if (a->spawn_chance != 255) {
+                        sound_play_at(a->model_slot * 10 + 48, &a->position, 127, (rand() * 5 >> 15) - 2);
+                        a->anim_step = 128;
+                        object_sequence_push.vx = rcos((s16)a->player_heading - 1024) / 256;
+                        object_sequence_push.vz = rsin((s16)a->player_heading - 1024) / 256;
                         rising = 1;
                     }
                 }
                 if (rising)
-                    vis_table_a.unk6169 = 2;
+                    vis_table_a.object_sequence_state = 2;
             }
-            if (vis_table_a.unk6169 == 2) {
+            if (vis_table_a.object_sequence_state == 2) {
                 a = &vis_table_a.entries[56];
                 player_stop_motion();
                 vis_table_b.unk71A4 = object_sequence_push.vx;
                 vis_table_b.unk71A8 = object_sequence_push.vz;
                 for (rising = 7; rising != -1; a++, rising--) {
-                    if (a->unk00 != 255 && (s16)a->unk2A + a->unkB0 > 3584) {
-                        a->unkB0 = 0;
-                        a->unk2A = 4095;
-                        vis_table_a.unk6169 = 3;
+                    if (a->spawn_chance != 255 && (s16)a->anim_frame + a->anim_step > 3584) {
+                        a->anim_step = 0;
+                        a->anim_frame = 4095;
+                        vis_table_a.object_sequence_state = 3;
                         pad_clear_input();
                     }
                 }
                 break;
             }
-            if (vis_table_a.unk6169 != 3) {
+            if (vis_table_a.object_sequence_state != 3) {
                 if (W50(e) != 0xffffff)
                     break;
             } else {
                 object_sequence_push.vx = 0;
                 object_sequence_push.vz = 0;
             }
-            vis_table_a.unk6169 = 4;
+            vis_table_a.object_sequence_state = 4;
             area_request_load(e->unk4A.snd.unk4D, e->unk4A.snd.unk4D, e->unk4A.snd.unk4D, e->unk4A.snd.unk4D,
                           e->unk4A.snd.unk4D, (s8)B50(e), B52(e), B51(e), (s8)e->unk4A.snd.unk4B,
                           (s8)e->unk4A.door.unk4F, (s8)e->unk4A.snd.unk4C);
@@ -1195,9 +1195,9 @@ void objects_update(void)
                 area_request_load(0xff, 0xff, area, 0xff, 0xff, 127, 127, 127, 0, 0, 0);
                 viewer.unk21C = 1;
                 creatures_bind_previous_area();
-                vis_table_a.unk6158[0] = vis_table_a.unk6158[1] = vis_table_a.unk6158[2] =
-                    vis_table_a.unk6158[3] = 0xff;
-                vis_table_a.unk6103 = 0xff;
+                vis_table_a.zone_history[0] = vis_table_a.zone_history[1] = vis_table_a.zone_history[2] =
+                    vis_table_a.zone_history[3] = 0xff;
+                vis_table_a.prev_zone = 0xff;
             }
             viewer.unk218 = 0;
             viewer.unk28C = 0;
@@ -1216,9 +1216,9 @@ void objects_update(void)
             vis_lists.unk47D2 = 0;
             vis_lists.unk47D0 = 0;
             vis_lists.unk47CE = 0;
-            vis_table_a.unk6164 = 0;
-            vis_table_a.unk6162 = 0;
-            vis_table_a.unk6160 = 0;
+            vis_table_a.push_z = 0;
+            vis_table_a.push_y = 0;
+            vis_table_a.push_x = 0;
             viewer.unk1D0 = 0;
             viewer.unk1CE = 0;
             viewer.unk1CC = 0;
@@ -1303,8 +1303,8 @@ void player_warp(to, keep)
         area_request_load(0xff, 0xff, area, 0xff, 0xff, 127, 127, 127, 0, 0, 0);
         viewer.unk21C = 1;
         creatures_bind_previous_area();
-        vis_table_a.unk6158[0] = vis_table_a.unk6158[1] = vis_table_a.unk6158[2] = vis_table_a.unk6158[3] = 0xff;
-        vis_table_a.unk6103 = 0xff;
+        vis_table_a.zone_history[0] = vis_table_a.zone_history[1] = vis_table_a.zone_history[2] = vis_table_a.zone_history[3] = 0xff;
+        vis_table_a.prev_zone = 0xff;
     }
     viewer.unk218 = 0;
     viewer.unk28C = 0;
@@ -1322,9 +1322,9 @@ void player_warp(to, keep)
     vis_lists.unk47D2 = 0;
     vis_lists.unk47D0 = 0;
     vis_lists.unk47CE = 0;
-    vis_table_a.unk6164 = 0;
-    vis_table_a.unk6162 = 0;
-    vis_table_a.unk6160 = 0;
+    vis_table_a.push_z = 0;
+    vis_table_a.push_y = 0;
+    vis_table_a.push_x = 0;
     viewer.unk1D0 = 0;
     viewer.unk1CE = 0;
     viewer.unk1CC = 0;
@@ -1683,7 +1683,7 @@ void ground_item_pick_up(Vis48 *c, int forced)
 ADDRESS(0x80053aa4, 0x294)
 void ground_items_update(void)
 {
-    VisRequest req;
+    CollisionRequest req;
     Vis48 *c = vis_table_c.entries;
     Vis44 *rec;
     int i = 64;
@@ -1705,16 +1705,16 @@ void ground_items_update(void)
             break;
         case 1:
             if (c->unk25 < 4) {
-                req.unk4 = c->unk08;
-                req.unk1C = *(u16 *)&rec->unk5[9];
-                req.unk1E = 0x200;
-                req.unk0 = 2;
-                req.unk14.vz = 0;
-                req.unk14.vx = 0;
-                req.unk4.vy -= 0x200;
-                req.unk14.vy = c->unk26;
-                req.unk22 = 0;
-                req.unk20 = 0;
+                req.position = c->unk08;
+                req.radius = *(u16 *)&rec->unk5[9];
+                req.height = 0x200;
+                req.tests = 2;
+                req.velocity.vz = 0;
+                req.velocity.vx = 0;
+                req.position.vy -= 0x200;
+                req.velocity.vy = c->unk26;
+                req.speed = 0;
+                req.heading = 0;
                 collision_test_map((VisLists *)&req);
                 h = vis_lists.unk2C - 0x200;
                 if (h > 0) {

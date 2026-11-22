@@ -15,7 +15,7 @@
 #include <st/vis.h>
 
 DATA(0x801ba138, 0x61d8, ".bss")
-VisTableA vis_table_a;
+CreatureTable vis_table_a;
 DATA(0x801c0310, 0x727c, ".bss")
 VisTableB vis_table_b;
 DATA(0x801c7590, 0x168, ".bss")

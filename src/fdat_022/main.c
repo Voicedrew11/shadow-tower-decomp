@@ -56,17 +56,17 @@ void map_hand_over_item(void);
 ADDRESS(0x801ed4a0, 0x74)
 void map_restore_progress(void)
 {
-    Vis212 *e48 = &vis_table_a.entries[48];
-    Vis212 *e49 = &vis_table_a.entries[49];
-    Vis192 *r = &vis_table_a.unk3500[6];
+    Creature *e48 = &vis_table_a.entries[48];
+    Creature *e49 = &vis_table_a.entries[49];
+    CreatureType *r = &vis_table_a.types[6];
 
     if (game_progress.unk1440.bit.f25 == 1) {
         fdat_801edad0 = 0xff;
-    } else if (game_progress.unk1448[r->unk09] == 2) {
+    } else if (game_progress.unk1448[r->talk_id] == 2) {
         fdat_801edad0 = 1;
     } else {
-        e49->unk1C.bytes[3] = 1;
-        e48->unk00 = 0;
+        e49->status.bytes[3] = 1;
+        e48->spawn_chance = 0;
         fdat_801edad0 = 0;
     }
 }
@@ -76,18 +76,18 @@ void map_restore_progress(void)
 ADDRESS(0x801ed514, 0xe8)
 void map_update_events(void)
 {
-    Vis212 *e48 = &vis_table_a.entries[48];
-    Vis192 *r = &vis_table_a.unk3500[2];
-    Vis212 *e49 = &vis_table_a.entries[49];
+    Creature *e48 = &vis_table_a.entries[48];
+    CreatureType *r = &vis_table_a.types[2];
+    Creature *e49 = &vis_table_a.entries[49];
 
     if (fdat_801edad0 == 0 && viewer.unk178 == 0x27) {
         creature_force_talk(e49, 0, 0);
         creature_force_talk(e49, 0, 0);
         creature_fade_out_despawn(e49);
-        e48->unk00 = 100;
+        e48->spawn_chance = 100;
         fdat_801edad0 = 1;
     }
-    if (fdat_801edad0 == 1 && game_progress.unk1448[r->unk09] == 3) {
+    if (fdat_801edad0 == 1 && game_progress.unk1448[r->talk_id] == 3) {
         viewer.unk218 = 5;
         map_hand_over_item();
         fdat_801edad0 = 0xff;
@@ -107,7 +107,7 @@ void map_update_events(void)
 ADDRESS(0x801ed8f0, 0x1e0)
 void map_hand_over_item(void)
 {
-    Vis212 *e = &vis_table_a.entries[48];
+    Creature *e = &vis_table_a.entries[48];
     Vis48 *c5 = &vis_table_c.entries[5];
     Vis48 *c6 = &vis_table_c.entries[6];
     Vis48 *c;
@@ -119,15 +119,15 @@ void map_hand_over_item(void)
     if (vis_table_c.unk0070[c5->unk00 / 32] & (1 << (c5->unk00 % 32)))
         c = c6;
     do {
-        e->unk2A += e->unkB0;
-        if ((s16)e->unk2A >= 0x1000)
-            e->unk2A = 0xfff;
-        anim_get_vertex(e->unk0B + 128, e->unk08, (s16)e->unk2A, 0x15a, &v);
-        c->unk08.vx = e->unk74.vx - v.vz;
-        c->unk08.vy = e->unk74.vy + v.vy;
-        c->unk08.vz = e->unk74.vz + v.vx;
+        e->anim_frame += e->anim_step;
+        if ((s16)e->anim_frame >= 0x1000)
+            e->anim_frame = 0xfff;
+        anim_get_vertex(e->model_slot + 128, e->anim, (s16)e->anim_frame, 0x15a, &v);
+        c->unk08.vx = e->position.vx - v.vz;
+        c->unk08.vy = e->position.vy + v.vy;
+        c->unk08.vz = e->position.vz + v.vx;
         world_run_frame(NULL, &viewer.unk278, 0);
-    } while ((s16)e->unk2A != 0xfff);
+    } while ((s16)e->anim_frame != 0xfff);
     c->unk22 = 2;
     viewer.unk268 = viewer.unk278.vx + viewer.unk280.halves[0] + viewer.unk288 + viewer.unk290;
     viewer.unk26A = viewer.unk278.vy + viewer.unk280.halves[1] + viewer.unk28A + viewer.unk292;

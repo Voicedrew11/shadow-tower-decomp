@@ -66,26 +66,26 @@ static int fdat_801edb00;
 ADDRESS(0x801ed4a0, 0xac)
 void map_restore_progress(void)
 {
-    Vis192 *r0 = &vis_table_a.unk3500[0];
-    Vis212 *e49 = &vis_table_a.entries[49];
-    Vis192 *r4 = &vis_table_a.unk3500[4];
-    Vis212 *e5 = &vis_table_a.entries[5];
-    Vis212 *e6 = &vis_table_a.entries[6];
-    Vis212 *e7 = &vis_table_a.entries[7];
+    CreatureType *r0 = &vis_table_a.types[0];
+    Creature *e49 = &vis_table_a.entries[49];
+    CreatureType *r4 = &vis_table_a.types[4];
+    Creature *e5 = &vis_table_a.entries[5];
+    Creature *e6 = &vis_table_a.entries[6];
+    Creature *e7 = &vis_table_a.entries[7];
 
     fdat_801edaf4 = 0;
     fdat_801edaf8 = 0;
-    if (game_progress.unk1448[r0->unk09] != 0)
+    if (game_progress.unk1448[r0->talk_id] != 0)
         fdat_801edafc = 0xff;
     else
         fdat_801edafc = 0;
-    if (game_progress.unk1448[r4->unk09] == 2) {
+    if (game_progress.unk1448[r4->talk_id] == 2) {
         fdat_801edb00 = 0xff;
     } else {
-        e7->unk00 = 0;
-        e6->unk00 = 0;
-        e5->unk00 = 0;
-        e49->unk1C.bytes[3] = 2;
+        e7->spawn_chance = 0;
+        e6->spawn_chance = 0;
+        e5->spawn_chance = 0;
+        e49->status.bytes[3] = 2;
         fdat_801edb00 = 0;
     }
 }
@@ -100,11 +100,11 @@ void map_restore_progress(void)
 ADDRESS(0x801ed54c, 0x26c)
 void map_update_events(void)
 {
-    Vis212 *e48 = &vis_table_a.entries[48];
-    Vis212 *e49 = &vis_table_a.entries[49];
-    Vis212 *e5 = &vis_table_a.entries[5];
-    Vis212 *e6 = &vis_table_a.entries[6];
-    Vis212 *e7 = &vis_table_a.entries[7];
+    Creature *e48 = &vis_table_a.entries[48];
+    Creature *e49 = &vis_table_a.entries[49];
+    Creature *e5 = &vis_table_a.entries[5];
+    Creature *e6 = &vis_table_a.entries[6];
+    Creature *e7 = &vis_table_a.entries[7];
 
     if (fdat_801edaf8 == 0) {
         if (viewer.unk178 == 0x1f2) {
@@ -116,11 +116,11 @@ void map_update_events(void)
         }
     }
     if (fdat_801edaf4 == 1 && fdat_801edaf8 == 1)
-        e48->unk00 = 0;
+        e48->spawn_chance = 0;
     if (fdat_801edaf4 == 0) {
         if (fdat_801edaf8 == 1)
-            e49->unk00 = 0;
-        if (fdat_801edaf4 == 0 && e48->unk05 == 1) {
+            e49->spawn_chance = 0;
+        if (fdat_801edaf4 == 0 && e48->state == 1) {
             fdat_801edafc = 1;
             viewer.unk218 = 5;
         }
@@ -156,7 +156,7 @@ void map_update_events(void)
 ADDRESS(0x801ed7b8, 0x28c)
 void map_pick_creature_move(void)
 {
-    Vis212 *e = vis_table_a.unk6138;
+    Creature *e = vis_table_a.current;
     u16 wall;
     int d;
     short x;
@@ -164,49 +164,49 @@ void map_pick_creature_move(void)
     short dx;
     short dz;
 
-    if (e->unk1A == 0xf0 || e->unk1A == 0)
+    if (e->script_state == 0xf0 || e->script_state == 0)
         return;
     creature_choose_action();
-    if (e->unk02 == 0 && fdat_801edafc == 0xff)
-        e->unk44 = 128;
-    if (e->unk02 == 4 && fdat_801edb00 == 0xff)
-        e->unk44 = 128;
+    if (e->type == 0 && fdat_801edafc == 0xff)
+        e->action = 128;
+    if (e->type == 4 && fdat_801edb00 == 0xff)
+        e->action = 128;
     creature_pick_weighted_script();
-    switch (e->unk44) {
+    switch (e->action) {
     case 8:
-        wall = e->unk5E;
+        wall = e->wall_heading;
         if ((short)wall == 0x7fff) {
-            e->unk5A = e->unk5C = (e->unk56 + 2048) & 0xfff;
+            e->unk5A = e->target_heading = (e->player_heading + 2048) & 0xfff;
         } else {
-            d = (((e->unk56 + 2048) & 0xfff) - wall + 1024) & 0xfff;
+            d = (((e->player_heading + 2048) & 0xfff) - wall + 1024) & 0xfff;
             if (d < 1024 || d > 3072)
-                e->unk5A = e->unk5C = (wall + 3072) & 0xfff;
+                e->unk5A = e->target_heading = (wall + 3072) & 0xfff;
             else
-                e->unk5A = e->unk5C = (wall + 1024) & 0xfff;
+                e->unk5A = e->target_heading = (wall + 1024) & 0xfff;
         }
         break;
     case 2:
     case 4:
     case 16:
     case 32:
-        e->unk5A = e->unk5C = e->unk56;
+        e->unk5A = e->target_heading = e->player_heading;
         break;
     default:
-        e->unk5A = e->unk5C = e->unk8E;
+        e->unk5A = e->target_heading = e->facing;
         break;
     }
-    if (e->unk44 != 8)
-        e->unk5E = 0x7fff;
-    if (vis_records[e->unk26].unk05 != 0 || vis_records[e->unk26].unk06 != 0) {
-        x = rcos(e->unk5C - 1024) >> 5;
-        z = rsin(e->unk5C - 1024) >> 5;
-        dx = x + vis_records[e->unk26].unk05;
-        dz = z + vis_records[e->unk26].unk06;
-        e->unk5C = (ratan2(dz, dx) + 1024) & 0xfff;
+    if (e->action != 8)
+        e->wall_heading = 0x7fff;
+    if (vis_records[e->block].unk05 != 0 || vis_records[e->block].unk06 != 0) {
+        x = rcos(e->target_heading - 1024) >> 5;
+        z = rsin(e->target_heading - 1024) >> 5;
+        dx = x + vis_records[e->block].unk05;
+        dz = z + vis_records[e->block].unk06;
+        e->target_heading = (ratan2(dz, dx) + 1024) & 0xfff;
         x = rcos(e->unk5A) >> 5;
         z = rsin(e->unk5A) >> 5;
-        dx = x + vis_records[e->unk26].unk05;
-        dz = z + vis_records[e->unk26].unk06;
+        dx = x + vis_records[e->block].unk05;
+        dz = z + vis_records[e->block].unk06;
         e->unk5A = ratan2(dz, dx);
     }
 }

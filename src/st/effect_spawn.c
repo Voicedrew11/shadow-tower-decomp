@@ -55,8 +55,8 @@ StEffect *effect_spawn(u8 type, u8 flags, u8 kind, VECTOR *pos, SVECTOR *dir, ..
     int *args = (int *)&dir;
     u8 second = (flags & 0x20) >> 5;
     StEffect *e;
-    Vis212 *entry;
-    Vis212 *owner;
+    Creature *entry;
+    Creature *owner;
     VECTOR a;
     VECTOR b;
     u8 frame;
@@ -353,7 +353,7 @@ StEffect *effect_spawn(u8 type, u8 flags, u8 kind, VECTOR *pos, SVECTOR *dir, ..
             SCALE(e, args[1]);
             e->unk30 = *(SVECTOR *)args[2];
             REACH(e, e->unk38.vx / 8);
-            ST_EFFECT_ENTRY(e) = (Vis212 *)args[4];
+            ST_EFFECT_ENTRY(e) = (Creature *)args[4];
             break;
         case 0xc9:
         case 0xd4:
@@ -405,9 +405,9 @@ StEffect *effect_spawn(u8 type, u8 flags, u8 kind, VECTOR *pos, SVECTOR *dir, ..
             SCALE(e, args[1]);
             e->unk30 = *(SVECTOR *)args[2];
             REACH(e, e->unk38.vx / 8);
-            ST_EFFECT_ENTRY(e) = (Vis212 *)args[4];
-            e->unk50.h = ST_EFFECT_ENTRY(e)->unkA8->arg.u[6];
-            e->unk52.h = ST_EFFECT_ENTRY(e)->unkA8->arg.u[9];
+            ST_EFFECT_ENTRY(e) = (Creature *)args[4];
+            e->unk50.h = ST_EFFECT_ENTRY(e)->script->arg.u[6];
+            e->unk52.h = ST_EFFECT_ENTRY(e)->script->arg.u[9];
             break;
         case 0x3d:
         case 0x46:
@@ -427,7 +427,7 @@ StEffect *effect_spawn(u8 type, u8 flags, u8 kind, VECTOR *pos, SVECTOR *dir, ..
             REACH(e, e->unk38.vx);
             e->unk1C = (StEffect *)args[4];
             ST_EFFECT_ENTRY(e) = ST_EFFECT_ENTRY(e->unk1C);
-            e->unk20.vy = ST_EFFECT_ENTRY(e)->unk74.vy;
+            e->unk20.vy = ST_EFFECT_ENTRY(e)->position.vy;
             e->unk30.vy = 0;
             e->unk40.vx = 0;
             e->unk40.vy = 0;
@@ -529,13 +529,13 @@ StEffect *effect_spawn(u8 type, u8 flags, u8 kind, VECTOR *pos, SVECTOR *dir, ..
         case 0xf2:
             e->unk10 = 16;
             e->unk6 = 0;
-            owner = (Vis212 *)args[1];
+            owner = (Creature *)args[1];
             entry = owner;
         mark_owner:
             ST_EFFECT_ENTRY(e) = owner;
             entry->unk24 = 4096;
-            entry->unk1C.bytes[2] = 13;
-            entry->unk36 = 4095;
+            entry->status.bytes[2] = 13;
+            entry->fade = 4095;
             break;
         case 0xf3:
         case 0xf4:
@@ -548,7 +548,7 @@ StEffect *effect_spawn(u8 type, u8 flags, u8 kind, VECTOR *pos, SVECTOR *dir, ..
              */
             e->unk10 = 16;
             e->unk6 = 0;
-            owner = (Vis212 *)args[1];
+            owner = (Creature *)args[1];
             entry = owner;
             goto mark_owner;
         case 0xd5:
@@ -812,15 +812,15 @@ int effect_home(int limit, int scale, int turn, int attack, int height, int near
     SVECTOR dir;
     SVECTOR v;
     int dist;
-    Vis212 *t;
+    Creature *t;
 
     if (e->unk0 & 0x40) {
         t = creature_find_in_cone(&e->unk20, e->unk30.vy, e->unk30.vx, 24000, range, range, &dist, 0);
         if (t == NULL)
             goto move;
-        target.vx = t->unk74.vx;
-        target.vy = t->unk74.vy - (t->unk30 >> 1);
-        target.vz = t->unk74.vz;
+        target.vx = t->position.vx;
+        target.vy = t->position.vy - (t->height >> 1);
+        target.vz = t->position.vz;
     aim:
         vector_to_angles(target.vx - e->unk20.vx, target.vy - e->unk20.vy,
                       target.vz - e->unk20.vz, &dir);
@@ -926,9 +926,9 @@ void effect_step_back_half(void)
 /* Emits for a hit `r`, unless it hit an entry that is dead or in state 1. */
 #define EMIT_LIVE(r)                                                           \
     if ((r) & 0x10) {                                                          \
-        Vis212 *t = HIT_ENTRY();                                               \
+        Creature *t = HIT_ENTRY();                                               \
                                                                                \
-        if (t->unk2C != 0 && t->unk1C.bytes[3] != 1)                           \
+        if (t->hp != 0 && t->status.bytes[3] != 1)                           \
             effect_emit_behind(r);                                             \
     } else {                                                                   \
         effect_emit_behind(r);                                                 \
@@ -1303,9 +1303,9 @@ void effect_update(void)
         r = effect_attack_move(e->unkC, e->unk18, r);
         if (r != 0) {
             if (r & 0x10) {
-                Vis212 *t = HIT_ENTRY();
+                Creature *t = HIT_ENTRY();
 
-                if (t->unk2C != 0 && t->unk1C.bytes[3] != 1) {
+                if (t->hp != 0 && t->status.bytes[3] != 1) {
                     effect_emit_behind(r);
                     e->unk5 = 1;
                     e->unk54 = t;
@@ -1346,9 +1346,9 @@ void effect_update(void)
             if (r != 0) {
                 SPELL_SOUND(e);
                 if (r & 0x10) {
-                    Vis212 *t = HIT_ENTRY();
+                    Creature *t = HIT_ENTRY();
 
-                    if (t->unk2C != 0 && t->unk1C.bytes[3] != 1) {
+                    if (t->hp != 0 && t->status.bytes[3] != 1) {
                         effect_emit_behind(r);
                         if (e->unk10 >= 32)
                             e->unk10 = 32;
@@ -1623,7 +1623,7 @@ void effect_update(void)
     case 0xeb:
         e->unk30.vz = (e->unk30.vz - 128) & 0xfff;
         {
-            Vis212 *owner = ST_EFFECT_ENTRY(e);
+            Creature *owner = ST_EFFECT_ENTRY(e);
             SVECTOR v;
             MATRIX m;
             SVECTOR rot;
@@ -1633,27 +1633,27 @@ void effect_update(void)
             if (e->unk50.h != -1) {
                 if (kind == 0xca || kind == 0xe1 || kind == 0xd0 || kind == 0xe6 || kind == 0xdb
                     || kind == 0xde) {
-                    anim_get_vertex(owner->unk0B + 128, owner->unk08, (s16)owner->unk2A, e->unk50.h,
+                    anim_get_vertex(owner->model_slot + 128, owner->anim, (s16)owner->anim_frame, e->unk50.h,
                                     &v);
                 } else if (kind == 0xcd || kind == 0xeb || kind == 0xd8) {
-                    anim_set_node_vertex((StAnimSet *)owner->unkA4, owner->unk0B + 128,
+                    anim_set_node_vertex((StAnimSet *)owner->anim_slot, owner->model_slot + 128,
                                          e->unk52.h, e->unk50.h, &vec);
                     v.vx = vec.vx;
                     v.vy = vec.vy;
                     v.vz = vec.vz;
                 }
                 rot.vx = 0;
-                rot.vy = -owner->unk8E;
+                rot.vy = -owner->facing;
                 rot.vz = 0;
                 RotMatrix(&rot, &m);
                 ApplyMatrixSV(&m, &v, &v);
-                e->unk20.vx = owner->unk74.vx + v.vx;
-                e->unk20.vy = owner->unk74.vy + v.vy;
-                e->unk20.vz = owner->unk74.vz + v.vz;
+                e->unk20.vx = owner->position.vx + v.vx;
+                e->unk20.vy = owner->position.vy + v.vy;
+                e->unk20.vz = owner->position.vz + v.vz;
             } else {
-                e->unk20.vx = owner->unk74.vx;
-                e->unk20.vy = owner->unk74.vy;
-                e->unk20.vz = owner->unk74.vz;
+                e->unk20.vx = owner->position.vx;
+                e->unk20.vy = owner->position.vy;
+                e->unk20.vz = owner->position.vz;
             }
         }
         if (e->unk10 == 33) {
@@ -1696,7 +1696,7 @@ void effect_update(void)
     case 0x86: {
         SVECTOR dir;
         VECTOR pos;
-        Vis212 *entry;
+        Creature *entry;
         int len;
         int model;
 
@@ -1705,7 +1705,7 @@ void effect_update(void)
         e->unk50.h += 32;
         if (e->unk50.h >= -128)
             e->unk50.h = -128;
-        len = (entry->unk74.vy - e->unk1C->unk20.vy) * rcos(e->unk50.h) / rsin(e->unk50.h);
+        len = (entry->position.vy - e->unk1C->unk20.vy) * rcos(e->unk50.h) / rsin(e->unk50.h);
         e->unk20.vx = e->unk1C->unk20.vx + len * rcos(e->unk1C->unk30.vy + 1024) / 4096;
         e->unk20.vz = e->unk1C->unk20.vz + len * rsin(e->unk1C->unk30.vy + 1024) / 4096;
         FADE_IN(e);
@@ -1797,7 +1797,7 @@ void effect_update(void)
     case 0xd9:
     case 0xdc:
     case 0xe7: {
-        Vis212 *entry;
+        Creature *entry;
         int cosine;
         int sine;
         int dy;
@@ -1812,7 +1812,7 @@ void effect_update(void)
             e->unk50.h = -128;
         cosine = rcos(e->unk50.h);
         sine = rsin(e->unk50.h);
-        dy = entry->unk74.vy - e->unk1C->unk20.vy;
+        dy = entry->position.vy - e->unk1C->unk20.vy;
         len = dy * cosine / sine;
         e->unk38.vz = SquareRoot0(len * len + dy * dy);
         e->unk30.vx = -e->unk50.h;
@@ -1893,18 +1893,18 @@ void effect_update(void)
         n = 8;
     drain:
         if (e->unk10 < 16) {
-            Vis212 *owner = ST_EFFECT_ENTRY(e);
+            Creature *owner = ST_EFFECT_ENTRY(e);
 
-            owner->unk36 = e->unk10 * 256;
-            owner->unk1C.bytes[2] |= 0xd;
+            owner->fade = e->unk10 * 256;
+            owner->status.bytes[2] |= 0xd;
         } else if (e->unk10 <= 0) {
-            Vis212 *owner = ST_EFFECT_ENTRY(e);
+            Creature *owner = ST_EFFECT_ENTRY(e);
 
-            owner->unk36 = 0;
-            if (owner->unk1C.bytes[2] & 0x10)
-                owner->unk1C.bytes[2] &= 0xf7;
+            owner->fade = 0;
+            if (owner->status.bytes[2] & 0x10)
+                owner->status.bytes[2] &= 0xf7;
             else
-                owner->unk1C.bytes[2] &= 0xf2;
+                owner->status.bytes[2] &= 0xf2;
         }
         if (e->unk8 != 0) {
             e->unk8--;
@@ -1927,19 +1927,19 @@ void effect_update(void)
         n = 8;
     wound:
         if (e->unk10 < 16) {
-            Vis212 *owner = ST_EFFECT_ENTRY(e);
+            Creature *owner = ST_EFFECT_ENTRY(e);
 
-            owner->unk36 = e->unk10 * 256;
-            owner->unk1C.bytes[2] |= 0xd;
+            owner->fade = e->unk10 * 256;
+            owner->status.bytes[2] |= 0xd;
         }
         if (e->unk10 <= 0) {
-            Vis212 *owner = ST_EFFECT_ENTRY(e);
+            Creature *owner = ST_EFFECT_ENTRY(e);
 
-            owner->unk36 = 0;
-            if (owner->unk1C.bytes[2] & 0x10)
-                owner->unk1C.bytes[2] &= 0xf7;
+            owner->fade = 0;
+            if (owner->status.bytes[2] & 0x10)
+                owner->status.bytes[2] &= 0xf7;
             else
-                owner->unk1C.bytes[2] &= 0xf2;
+                owner->status.bytes[2] &= 0xf2;
         }
         if (e->unk8 != 0) {
             e->unk8--;

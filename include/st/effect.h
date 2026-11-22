@@ -61,11 +61,11 @@ typedef struct StEffect {
         s8 b[2];
         u8 ub[2];
     } unk52;             /* 0x52: more of it */
-    void *unk54;         /* 0x54: ST.EXE: the table A entry (Vis212) a bolt hit */
+    void *unk54;         /* 0x54: ST.EXE: the table A entry (Creature) a bolt hit */
 } StEffect;
 
-/* ST.EXE: the table A entry (Vis212, st/vis.h) the effect belongs to. */
-#define ST_EFFECT_ENTRY(e) (*(Vis212 **)&(e)->unk4C)
+/* ST.EXE: the table A entry (Creature, st/vis.h) the effect belongs to. */
+#define ST_EFFECT_ENTRY(e) (*(Creature **)&(e)->unk4C)
 
 #define ST_EFFECT_FREE 255
 #define ST_EFFECT_SLOTS 128

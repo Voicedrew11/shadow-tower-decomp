@@ -24,7 +24,7 @@ void xa_start_stream(u8 file, int channel);
 int xa_stream_finished(void);
 void xa_stop_stream(void);
 void talk_load_image(int id, int full);
-void creature_talk(Vis212 *e, int fixed, int arg2);
+void creature_talk(Creature *e, int fixed, int arg2);
 void talk_show_message(int id);
 
 #endif

@@ -57,7 +57,7 @@ ADDRESS(0x80055374, 0x61c)
 void player_examine(long *pos, SVECTOR *rot)
 {
     VECTOR p;
-    VisRequest req;
+    CollisionRequest req;
     int i;
     int first_result;
     int up;
@@ -67,7 +67,7 @@ void player_examine(long *pos, SVECTOR *rot)
     int n;
     int d;
     Vis48 *c;
-    Vis212 *a;
+    Creature *a;
     Vis88 *b;
     Vis24 *def;
 
@@ -75,15 +75,15 @@ void player_examine(long *pos, SVECTOR *rot)
     p.vy = pos[1] + 1600;
     p.vz = pos[2];
     DAT_801cd0e0 = 0;
-    req.unk0 = 0;
-    req.unk4 = p;
-    req.unk1C = 1056;
-    req.unk14.vx = 0;
-    req.unk14.vy = 0;
-    req.unk14.vz = 0;
-    req.unk22 = 0;
-    req.unk1E = 1600;
-    req.unk20 = 0;
+    req.tests = 0;
+    req.position = p;
+    req.radius = 1056;
+    req.velocity.vx = 0;
+    req.velocity.vy = 0;
+    req.velocity.vz = 0;
+    req.speed = 0;
+    req.height = 1600;
+    req.heading = 0;
     i = ground_item_find_in_reach((VisLists *)&req, 1);
     first_result = i;
     if (i != -1) {
@@ -96,8 +96,8 @@ void player_examine(long *pos, SVECTOR *rot)
     i = creature_find_in_reach((VisLists *)&req, 1);
     if (i != first_result) {
         a = &vis_table_a.entries[i];
-        up = ratan2(a->unk74.vy - a->unk30 - viewer.position.vy, a->unk40);
-        down = ratan2(a->unk74.vy - (a->unk30 >> 1) - viewer.position.vy, a->unk40);
+        up = ratan2(a->position.vy - a->height - viewer.position.vy, a->player_dist_xz);
+        down = ratan2(a->position.vy - (a->height >> 1) - viewer.position.vy, a->player_dist_xz);
         if (up > 2048)
             up -= 2048;
         if (down > 2048)
@@ -107,13 +107,13 @@ void player_examine(long *pos, SVECTOR *rot)
         if (down < 160)
             down = 160;
         if (angle_is_after((short)down, rot->vx) && angle_is_after(rot->vx, (short)up)) {
-            if (angle_within(rot->vy, a->unk8E, 512))
+            if (angle_within(rot->vy, a->facing, 512))
                 creature_talk(a, 0, 0);
             return;
         }
     }
     i = 0;
-    req.unk1C = 256;
+    req.radius = 256;
     vis_lists.unk4 = p;
     vis_lists.unk1C = 256;
     vis_lists.unk1E = 1600;

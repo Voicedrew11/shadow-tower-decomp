@@ -142,7 +142,7 @@ void save_reset_new_game(void)
 ADDRESS(0x80055cf4, 0x2a8)
 void area_save_snapshot(int area)
 {
-    Vis212 *a = vis_table_a.entries;
+    Creature *a = vis_table_a.entries;
     Vis48 *c = vis_table_c.entries;
     Vis88 *b = vis_table_b.entries;
     int i;
@@ -152,7 +152,7 @@ void area_save_snapshot(int area)
     for (i = 0; i < n; i++)
         game_progress.unk0[area][i] = 0;
     for (i = 0; i < 64; i++, a++) {
-        if (a->unk00 != 0xff && (a->unk05 == 3 || a->unk05 == 5))
+        if (a->spawn_chance != 0xff && (a->state == 3 || a->state == 5))
             game_progress.unk0[area][i / 32] |= BIT(i);
     }
     n = 1;
@@ -184,7 +184,7 @@ void area_save_snapshot(int area)
 ADDRESS(0x80055f9c, 0x338)
 void area_restore_snapshot(int area)
 {
-    Vis212 *a = vis_table_a.entries;
+    Creature *a = vis_table_a.entries;
     Vis48 *c = vis_table_c.entries;
     Vis88 *b = vis_table_b.entries;
     int i;
@@ -193,7 +193,7 @@ void area_restore_snapshot(int area)
 
     for (i = 0; i < 64; i++, a++) {
         if (game_progress.unk0[area][i / 32] & BIT(i))
-            a->unk05 = 3;
+            a->state = 3;
     }
     for (i = 0; i < 32; i++, c++) {
         if (game_progress.unk180[area][i / 32] & BIT(i))

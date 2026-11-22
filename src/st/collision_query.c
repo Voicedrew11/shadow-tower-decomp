@@ -19,7 +19,7 @@ ADDRESS(0x800492f4, 0x250)
 void collision_locate_hit_body(VECTOR *pos)
 {
     VisLists *v = &vis_lists;
-    Vis212 *a;
+    Creature *a;
     Vis88 *b;
     Vis24 *r;
     int dx, dz;
@@ -34,12 +34,12 @@ void collision_locate_hit_body(VECTOR *pos)
         v->unk44C2 = 1000;
     } else if (v->unk5C != -1) {
         a = &vis_table_a.entries[v->unk5C];
-        dx = pos->vx - a->unk74.vx;
-        dz = pos->vz - a->unk74.vz;
+        dx = pos->vx - a->position.vx;
+        dz = pos->vz - a->position.vz;
         v->unkBC = SquareRoot0(dx * dx + dz * dz);
-        v->unkAC = a->unk74;
-        v->unk44C0 = a->unk2E;
-        v->unk44C2 = a->unk30;
+        v->unkAC = a->position;
+        v->unk44C0 = a->radius;
+        v->unk44C2 = a->height;
     } else if ((n = v->unk64) != -1) {
         b = &vis_table_b.entries[n];
         dx = pos->vx - b->unk24.vx;

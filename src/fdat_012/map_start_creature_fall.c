@@ -25,7 +25,7 @@
  * The block is the plain statements in this order,
  *     e->unk70 &= ~0x2000000; e->unk0F = 0x80; e->unk08 = 9; e->unkB0 = 0x40;
  *     e->unk0E = 8; e->unk50 &= ~0x80; e->unk1C.bytes[0] = 1;
- *     e->unk1C.bytes[3] = 1; r = &vis_table_a.unk3500[e->unk02];
+ *     e->unk1C.bytes[3] = 1; r = &vis_table_a.types[e->unk02];
  *     e->unk2A = 0; e->unk16 = 0;
  * and it comes out as retail's, instruction for instruction, once two of its
  * pseudos are allocated by global-alloc instead of local-alloc: the mask
@@ -58,10 +58,10 @@
  * 48..63 (the oldest drops out when all 16 are used).
  */
 ADDRESS(0x801eda38, 0x1b4)
-void map_start_creature_fall(Vis212 *e)
+void map_start_creature_fall(Creature *e)
 {
     Vis48 *c;
-    Vis192 *r;
+    CreatureType *r;
     u16 info;
     u32 range;
     u32 collision;
@@ -69,22 +69,22 @@ void map_start_creature_fall(Vis212 *e)
     int record;
     int i;
 
-    range = e->unk70;
-    e->unk0F = 0x80;
-    e->unk08 = 9;
-    e->unkB0 = 0x40;
-    e->unk0E = 8;
-    collision = e->unk50;
+    range = e->flags;
+    e->command = 0x80;
+    e->anim = 9;
+    e->anim_step = 0x40;
+    e->move_mode = 8;
+    collision = e->collision_tests;
     record = 1;
-    e->unk1C.bytes[0] = record;
-    e->unk1C.bytes[3] = record;
-    record = e->unk02;
-    r = &vis_table_a.unk3500[record];
-    e->unk2A = 0;
-    e->unk16 = 0;
-    e->unk70 = range & ~0x2000000;
-    e->unk50 = collision & ~0x80;
-    if (game_progress.unk1448[r->unk09] != 4)
+    e->status.bytes[0] = record;
+    e->status.bytes[3] = record;
+    record = e->type;
+    r = &vis_table_a.types[record];
+    e->anim_frame = 0;
+    e->vertical_speed = 0;
+    e->flags = range & ~0x2000000;
+    e->collision_tests = collision & ~0x80;
+    if (game_progress.unk1448[r->talk_id] != 4)
         return;
     if (vis_table_c.unk0000[3] == 16) {
         c = &vis_table_c.entries[48];
@@ -98,17 +98,17 @@ void map_start_creature_fall(Vis212 *e)
         vis_table_c.unk0000[3]++;
     }
     c->unk00 = 0x10a;
-    c->unk02 = e->unk26;
+    c->unk02 = e->block;
     *(u32 *)c->unk04 = 0;
-    c->unk08 = e->unk74;
-    *(SVECTOR *)&c->unk18 = *(SVECTOR *)&e->unk8C;
+    c->unk08 = e->position;
+    *(SVECTOR *)&c->unk18 = *(SVECTOR *)&e->rot_x;
     info = vis_table_c.unk0118[266].unk1E;
     c->unk22 = 2;
     c->unk23 = 2;
     c->unk2c = 1;
     c->unk24 = 0;
     c->unk20 = info;
-    distance = e->unk40;
+    distance = e->player_dist_xz;
     c->unk26 = 0;
     c->unk25 = 0;
     c->unk28 = distance;

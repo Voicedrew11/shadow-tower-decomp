@@ -18,15 +18,15 @@
 ADDRESS(0x801ed950, 0x7c)
 void map_talk_on_player_death(void)
 {
-    Vis212 *e;
-    Vis192 *r;
+    Creature *e;
+    CreatureType *r;
 
     e = &vis_table_a.entries[32];
-    r = &vis_table_a.unk3500[12];
+    r = &vis_table_a.types[12];
 
-    if (!(game_progress.unk1440.word >> 18 & 1) && vis_table_a.unk6168 == 3) {
-        game_progress.unk1448[r->unk09] = 2;
-        e->unk70 |= 0x2000000;
+    if (!(game_progress.unk1440.word >> 18 & 1) && vis_table_a.zone == 3) {
+        game_progress.unk1448[r->talk_id] = 2;
+        e->flags |= 0x2000000;
         creature_force_talk(e, 1, 1);
     }
 }

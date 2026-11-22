@@ -34,7 +34,7 @@
 ADDRESS(0x80046604, 0x2bc)
 void collision_transform_vertices(VECTOR *pos)
 {
-    VisHitScratch *sp = VIS_HIT_SCRATCH;
+    CollisionScratch *sp = COLLISION_SCRATCH;
     VisRecord *rec;
     SVECTOR *v;
     VECTOR *o;
@@ -48,14 +48,14 @@ void collision_transform_vertices(VECTOR *pos)
     i = vis_lists.n_sources;
     while (i--) {
         rec = &vis_records[vis_lists.sources[i]];
-        sp->unk20 = (u8)(rec->unk03 & 3);
-        gte_SetRotMatrix(&quarter_turn_matrices[sp->unk20]);
+        sp->turn = (u8)(rec->unk03 & 3);
+        gte_SetRotMatrix(&quarter_turn_matrices[sp->turn]);
         gte_SetTransVector(&pos[i]);
         o = sp->world;
         o0 = sp->rel[0];
         o1 = sp->rel[1];
         o2 = sp->rel[2];
-        sp->part = (VisHitPart *)HIT_DATA(sp, rec->part * 40);
+        sp->part = (CollisionPart *)HIT_DATA(sp, rec->part * 40);
         sp->vertices = HIT_DATA(sp, sp->part->vertices);
         v = (SVECTOR *)sp->vertices;
         n = sp->part->n_vertices;
@@ -93,12 +93,12 @@ void collision_transform_vertices(VECTOR *pos)
 ADDRESS(0x800468c0, 0xfc4)
 void collision_test_triangles(VECTOR *pos, int kind)
 {
-    VisHitScratch *sp = VIS_HIT_SCRATCH;
+    CollisionScratch *sp = COLLISION_SCRATCH;
     SVECTOR nrm;
     SVECTOR *nv = &nrm;
     SVECTOR *fn;
     VisRecord *rec;
-    VisHitTri *f;
+    CollisionTri *f;
     int i;
     MATRIX *m;
     VECTOR *w;
@@ -120,15 +120,15 @@ void collision_test_triangles(VECTOR *pos, int kind)
     i = vis_lists.n_sources;
     while (i--) {
         rec = &vis_records[vis_lists.sources[i]];
-        sp->part = (VisHitPart *)HIT_DATA(sp, rec->part * 40);
+        sp->part = (CollisionPart *)HIT_DATA(sp, rec->part * 40);
         sp->vertices = HIT_DATA(sp, sp->part->vertices);
         sp->normals = HIT_DATA(sp, sp->part->normals);
         n = sp->part->n_tris;
-        f = (VisHitTri *)HIT_DATA(sp, sp->part->faces);
-        f = (VisHitTri *)((u8 *)f + sp->part->n18 * 20);
-        f = (VisHitTri *)((u8 *)f + sp->part->n1c * 28);
-        f = (VisHitTri *)((u8 *)f + sp->part->n1a * 24);
-        f = (VisHitTri *)((u8 *)f + sp->part->n1e * 32);
+        f = (CollisionTri *)HIT_DATA(sp, sp->part->faces);
+        f = (CollisionTri *)((u8 *)f + sp->part->n18 * 20);
+        f = (CollisionTri *)((u8 *)f + sp->part->n1c * 28);
+        f = (CollisionTri *)((u8 *)f + sp->part->n1a * 24);
+        f = (CollisionTri *)((u8 *)f + sp->part->n1e * 32);
         m = &quarter_turn_matrices[rec->unk03 & 3];
         while (n-- > 0) {
             fn = (SVECTOR *)(sp->normals + f->normal);
@@ -193,18 +193,18 @@ void collision_test_triangles(VECTOR *pos, int kind)
             gte_stlvnl(&sp->e[2][2]);
             if (f->flags & 4) {
                 if (DOWN(sp->e[0][0]) && DOWN(sp->e[0][1]) && DOWN(sp->e[0][2]) &&
-                    h0 < sp->h120) {
-                    sp->h120 = h0;
-                    COPY_NORMAL(sp->n150, nv);
+                    h0 < sp->ceiling_dist) {
+                    sp->ceiling_dist = h0;
+                    COPY_NORMAL(sp->ceiling_normal, nv);
                 }
                 if (h1 < -256)
                     { f++; continue; }
                 if (DOWN(sp->e[1][0]) && DOWN(sp->e[1][1]) && DOWN(sp->e[1][2]) &&
-                    h1 < sp->h124)
-                    sp->h124 = h1;
+                    h1 < sp->next_ceiling_dist)
+                    sp->next_ceiling_dist = h1;
             }
             if (f->flags & 1) {
-                if (UP(sp->e[0][0]) && UP(sp->e[0][1]) && UP(sp->e[0][2]) && h0 < sp->h114) {
+                if (UP(sp->e[0][0]) && UP(sp->e[0][1]) && UP(sp->e[0][2]) && h0 < sp->floor_dist) {
                     if ((f->flags & 0x800) && !(vis_lists.unk47E0 & 1)) {
                         sp->flags &= ~0x10;
                         sp->flags &= ~0x8;
@@ -216,7 +216,7 @@ void collision_test_triangles(VECTOR *pos, int kind)
                         sp->flags = 2;
                     if ((f->flags & 0x40) && !((vis_lists.unk47E0 >> 2) & 1)) {
                         sp->flags |= 4;
-                        sp->h138 = a0->vy + sp->pos[0].vy;
+                        sp->surface_y = a0->vy + sp->pos[0].vy;
                     }
                     if ((f->flags & 0x80) && !((vis_lists.unk47E0 >> 3) & 1))
                         sp->flags = 8;
@@ -224,30 +224,30 @@ void collision_test_triangles(VECTOR *pos, int kind)
                         sp->flags = 16;
                     if ((f->flags & 0x200) && !((vis_lists.unk47E0 >> 5) & 1)) {
                         sp->flags |= 0x20;
-                        sp->h144 = a0->vy + sp->pos[0].vy;
+                        sp->acid_surface_y = a0->vy + sp->pos[0].vy;
                     }
                     if (f->flags & 0x400)
                         { f++; continue; }
                     sp->hit = vis_lists.sources[i];
-                    sp->h114 = h0;
-                    COPY_NORMAL(sp->n158, nv);
-                    sp->v190.vx = (s8)f->x;
-                    sp->v190.vy = 0;
-                    sp->v190.vz = (s8)f->z;
+                    sp->floor_dist = h0;
+                    COPY_NORMAL(sp->floor_normal, nv);
+                    sp->push.vx = (s8)f->push_x;
+                    sp->push.vy = 0;
+                    sp->push.vz = (s8)f->push_z;
                     gte_SetRotMatrix(m);
-                    gte_ldv0(&sp->v190);
+                    gte_ldv0(&sp->push);
                     gte_rtv0();
-                    gte_stsv(&sp->v190);
-                    vis_lists.unk47CE += sp->v190.vx;
-                    vis_lists.unk47D0 += sp->v190.vy;
-                    vis_lists.unk47D2 += sp->v190.vz;
+                    gte_stsv(&sp->push);
+                    vis_lists.unk47CE += sp->push.vx;
+                    vis_lists.unk47D0 += sp->push.vy;
+                    vis_lists.unk47D2 += sp->push.vz;
                 }
                 if (h1 < -256)
                     { f++; continue; }
-                if (UP(sp->e[1][0]) && UP(sp->e[1][1]) && UP(sp->e[1][2]) && h1 < sp->h118) {
-                    sp->h118 = h1;
+                if (UP(sp->e[1][0]) && UP(sp->e[1][1]) && UP(sp->e[1][2]) && h1 < sp->next_floor_dist) {
+                    sp->next_floor_dist = h1;
                     vis_lists.unk47D8 = vis_lists.sources[i];
-                    COPY_NORMAL(sp->n160, nv);
+                    COPY_NORMAL(sp->next_floor_normal, nv);
                 }
             }
             if (!(f->flags & 2))
@@ -255,34 +255,34 @@ void collision_test_triangles(VECTOR *pos, int kind)
             if (DOT(*nv, sp->e[0][0]) > 0 || DOT(*nv, sp->e[0][1]) > 0 ||
                 DOT(*nv, sp->e[0][2]) > 0) {
                 if (DOT(sp->dir, sp->e[0][0]) >= 0 && DOT(sp->dir, sp->e[0][1]) >= 0 &&
-                    DOT(sp->dir, sp->e[0][2]) >= 0 && h0 < sp->h12c) {
-                    sp->h12c = h0;
-                    COPY_NORMAL(sp->n178, nv);
+                    DOT(sp->dir, sp->e[0][2]) >= 0 && h0 < sp->reach_wall_dist) {
+                    sp->reach_wall_dist = h0;
+                    COPY_NORMAL(sp->reach_wall_normal, nv);
                 }
-            } else if (h0 < sp->h128) {
+            } else if (h0 < sp->wall_dist) {
                 sp->hit = vis_lists.sources[i];
-                sp->h128 = h0;
-                COPY_NORMAL(sp->n170, nv);
+                sp->wall_dist = h0;
+                COPY_NORMAL(sp->wall_normal, nv);
             }
             if (h1 < -256)
                 { f++; continue; }
-            if (UP(sp->e[1][0]) && UP(sp->e[1][1]) && UP(sp->e[1][2]) && h1 < sp->h11c) {
+            if (UP(sp->e[1][0]) && UP(sp->e[1][1]) && UP(sp->e[1][2]) && h1 < sp->wall_floor_dist) {
                 sp->hit = vis_lists.sources[i];
-                sp->h11c = h1;
-                COPY_NORMAL(sp->n168, nv);
+                sp->wall_floor_dist = h1;
+                COPY_NORMAL(sp->wall_floor_normal, nv);
             }
             if (h2 < -256)
                 { f++; continue; }
             if (DOT(*nv, sp->e[2][0]) > 0 || DOT(*nv, sp->e[2][1]) > 0 ||
                 DOT(*nv, sp->e[2][2]) > 0) {
                 if (DOT(sp->dir, sp->e[2][0]) >= 0 && DOT(sp->dir, sp->e[2][1]) >= 0 &&
-                    DOT(sp->dir, sp->e[2][2]) >= 0 && h2 < sp->h134) {
-                    sp->h134 = h2;
-                    COPY_NORMAL(sp->n188, nv);
+                    DOT(sp->dir, sp->e[2][2]) >= 0 && h2 < sp->low_reach_wall_dist) {
+                    sp->low_reach_wall_dist = h2;
+                    COPY_NORMAL(sp->low_reach_wall_normal, nv);
                 }
-            } else if (h2 < sp->h130) {
-                sp->h130 = h2;
-                COPY_NORMAL(sp->n180, nv);
+            } else if (h2 < sp->low_wall_dist) {
+                sp->low_wall_dist = h2;
+                COPY_NORMAL(sp->low_wall_normal, nv);
             }
             f++;
         }
@@ -298,12 +298,12 @@ void collision_test_triangles(VECTOR *pos, int kind)
 ADDRESS(0x80047884, 0x124c)
 void collision_test_quads(VECTOR *pos, int kind)
 {
-    VisHitScratch *sp = VIS_HIT_SCRATCH;
+    CollisionScratch *sp = COLLISION_SCRATCH;
     SVECTOR nrm;
     SVECTOR *nv = &nrm;
     SVECTOR *fn;
     VisRecord *rec;
-    VisHitQuad *f;
+    CollisionQuad *f;
     int i;
     MATRIX *m;
     VECTOR *w;
@@ -328,16 +328,16 @@ void collision_test_quads(VECTOR *pos, int kind)
     i = vis_lists.n_sources;
     while (i--) {
         rec = &vis_records[vis_lists.sources[i]];
-        sp->part = (VisHitPart *)HIT_DATA(sp, rec->part * 40);
+        sp->part = (CollisionPart *)HIT_DATA(sp, rec->part * 40);
         sp->vertices = HIT_DATA(sp, sp->part->vertices);
         sp->normals = HIT_DATA(sp, sp->part->normals);
         n = sp->part->n_quads;
-        f = (VisHitQuad *)HIT_DATA(sp, sp->part->faces);
-        f = (VisHitQuad *)((u8 *)f + sp->part->n18 * 20);
-        f = (VisHitQuad *)((u8 *)f + sp->part->n1c * 28);
-        f = (VisHitQuad *)((u8 *)f + sp->part->n1a * 24);
-        f = (VisHitQuad *)((u8 *)f + sp->part->n1e * 32);
-        f = (VisHitQuad *)((u8 *)f + sp->part->n_tris * 12);
+        f = (CollisionQuad *)HIT_DATA(sp, sp->part->faces);
+        f = (CollisionQuad *)((u8 *)f + sp->part->n18 * 20);
+        f = (CollisionQuad *)((u8 *)f + sp->part->n1c * 28);
+        f = (CollisionQuad *)((u8 *)f + sp->part->n1a * 24);
+        f = (CollisionQuad *)((u8 *)f + sp->part->n1e * 32);
+        f = (CollisionQuad *)((u8 *)f + sp->part->n_tris * 12);
         m = &quarter_turn_matrices[rec->unk03 & 3];
         while (n-- > 0) {
             fn = (SVECTOR *)(sp->normals + f->normal);
@@ -417,19 +417,19 @@ void collision_test_quads(VECTOR *pos, int kind)
             gte_stlvnl(&sp->e[2][3]);
             if (f->flags & 4) {
                 if (DOWN(sp->e[0][0]) && DOWN(sp->e[0][1]) && DOWN(sp->e[0][2]) &&
-                    DOWN(sp->e[0][3]) && h0 < sp->h120) {
-                    sp->h120 = h0;
-                    COPY_NORMAL(sp->n150, nv);
+                    DOWN(sp->e[0][3]) && h0 < sp->ceiling_dist) {
+                    sp->ceiling_dist = h0;
+                    COPY_NORMAL(sp->ceiling_normal, nv);
                 }
                 if (h1 < -256)
                     { f++; continue; }
                 if (DOWN(sp->e[1][0]) && DOWN(sp->e[1][1]) && DOWN(sp->e[1][2]) &&
-                    DOWN(sp->e[1][3]) && h1 < sp->h124)
-                    sp->h124 = h1;
+                    DOWN(sp->e[1][3]) && h1 < sp->next_ceiling_dist)
+                    sp->next_ceiling_dist = h1;
             }
             if (f->flags & 1) {
                 if (UP(sp->e[0][0]) && UP(sp->e[0][1]) && UP(sp->e[0][2]) && UP(sp->e[0][3]) &&
-                    h0 < sp->h114) {
+                    h0 < sp->floor_dist) {
                     if ((f->flags & 0x800) && !((vis_lists.unk47E0 >> 6) & 1)) {
                         sp->flags &= ~0x10;
                         sp->flags &= ~0x8;
@@ -441,7 +441,7 @@ void collision_test_quads(VECTOR *pos, int kind)
                         sp->flags = 2;
                     if ((f->flags & 0x40) && !((vis_lists.unk47E0 >> 2) & 1)) {
                         sp->flags |= 4;
-                        sp->h138 = a0->vy + sp->pos[0].vy;
+                        sp->surface_y = a0->vy + sp->pos[0].vy;
                     }
                     if ((f->flags & 0x80) && !((vis_lists.unk47E0 >> 3) & 1))
                         sp->flags = 8;
@@ -449,31 +449,31 @@ void collision_test_quads(VECTOR *pos, int kind)
                         sp->flags = 16;
                     if ((f->flags & 0x200) && !((vis_lists.unk47E0 >> 5) & 1)) {
                         sp->flags |= 0x20;
-                        sp->h144 = a0->vy + sp->pos[0].vy;
+                        sp->acid_surface_y = a0->vy + sp->pos[0].vy;
                     }
                     if (f->flags & 0x400)
                         { f++; continue; }
                     sp->hit = vis_lists.sources[i];
-                    sp->h114 = h0;
-                    COPY_NORMAL(sp->n158, nv);
-                    sp->v190.vx = (s8)f->x;
-                    sp->v190.vy = 0;
-                    sp->v190.vz = (s8)f->z;
+                    sp->floor_dist = h0;
+                    COPY_NORMAL(sp->floor_normal, nv);
+                    sp->push.vx = (s8)f->push_x;
+                    sp->push.vy = 0;
+                    sp->push.vz = (s8)f->push_z;
                     gte_SetRotMatrix(m);
-                    gte_ldv0(&sp->v190);
+                    gte_ldv0(&sp->push);
                     gte_rtv0();
-                    gte_stsv(&sp->v190);
-                    vis_lists.unk47CE += sp->v190.vx;
-                    vis_lists.unk47D0 += sp->v190.vy;
-                    vis_lists.unk47D2 += sp->v190.vz;
+                    gte_stsv(&sp->push);
+                    vis_lists.unk47CE += sp->push.vx;
+                    vis_lists.unk47D0 += sp->push.vy;
+                    vis_lists.unk47D2 += sp->push.vz;
                 }
                 if (h1 < -256)
                     { f++; continue; }
                 if (UP(sp->e[1][0]) && UP(sp->e[1][1]) && UP(sp->e[1][2]) && UP(sp->e[1][3]) &&
-                    h1 < sp->h118) {
-                    sp->h118 = h1;
+                    h1 < sp->next_floor_dist) {
+                    sp->next_floor_dist = h1;
                     vis_lists.unk47D8 = vis_lists.sources[i];
-                    COPY_NORMAL(sp->n160, nv);
+                    COPY_NORMAL(sp->next_floor_normal, nv);
                 }
             }
             if (!(f->flags & 2))
@@ -482,22 +482,22 @@ void collision_test_quads(VECTOR *pos, int kind)
                 DOT(*nv, sp->e[0][2]) > 0 || DOT(*nv, sp->e[0][3]) > 0) {
                 if (DOT(sp->dir, sp->e[0][0]) >= 0 && DOT(sp->dir, sp->e[0][1]) >= 0 &&
                     DOT(sp->dir, sp->e[0][2]) >= 0 && DOT(sp->dir, sp->e[0][3]) >= 0 &&
-                    h0 < sp->h12c) {
-                    sp->h12c = h0;
-                    COPY_NORMAL(sp->n178, nv);
+                    h0 < sp->reach_wall_dist) {
+                    sp->reach_wall_dist = h0;
+                    COPY_NORMAL(sp->reach_wall_normal, nv);
                 }
-            } else if (h0 < sp->h128) {
+            } else if (h0 < sp->wall_dist) {
                 sp->hit = vis_lists.sources[i];
-                sp->h128 = h0;
-                COPY_NORMAL(sp->n170, nv);
+                sp->wall_dist = h0;
+                COPY_NORMAL(sp->wall_normal, nv);
             }
             if (h1 < -256)
                 { f++; continue; }
             if (UP(sp->e[1][0]) && UP(sp->e[1][1]) && UP(sp->e[1][2]) && UP(sp->e[1][3]) &&
-                h1 < sp->h11c) {
+                h1 < sp->wall_floor_dist) {
                 sp->hit = vis_lists.sources[i];
-                sp->h11c = h1;
-                COPY_NORMAL(sp->n168, nv);
+                sp->wall_floor_dist = h1;
+                COPY_NORMAL(sp->wall_floor_normal, nv);
             }
             if (h2 < -256)
                 { f++; continue; }
@@ -505,13 +505,13 @@ void collision_test_quads(VECTOR *pos, int kind)
                 DOT(*nv, sp->e[2][2]) > 0 || DOT(*nv, sp->e[2][3]) > 0) {
                 if (DOT(sp->dir, sp->e[2][0]) >= 0 && DOT(sp->dir, sp->e[2][1]) >= 0 &&
                     DOT(sp->dir, sp->e[2][2]) >= 0 && DOT(sp->dir, sp->e[2][3]) >= 0 &&
-                    h2 < sp->h134) {
-                    sp->h134 = h2;
-                    COPY_NORMAL(sp->n188, nv);
+                    h2 < sp->low_reach_wall_dist) {
+                    sp->low_reach_wall_dist = h2;
+                    COPY_NORMAL(sp->low_reach_wall_normal, nv);
                 }
-            } else if (h2 < sp->h130) {
-                sp->h130 = h2;
-                COPY_NORMAL(sp->n180, nv);
+            } else if (h2 < sp->low_wall_dist) {
+                sp->low_wall_dist = h2;
+                COPY_NORMAL(sp->low_wall_normal, nv);
             }
             f++;
         }
@@ -529,7 +529,7 @@ void collision_test_quads(VECTOR *pos, int kind)
 ADDRESS(0x80048ad0, 0x824)
 int collision_test_map(VisLists *req)
 {
-    VisHitScratch *sp = VIS_HIT_SCRATCH;
+    CollisionScratch *sp = COLLISION_SCRATCH;
     VECTOR pos[384];
     VisLists *lists;
     int hits;
@@ -579,17 +579,17 @@ int collision_test_map(VisLists *req)
     }
 heights:
     lists = &vis_lists;
-    sp->h124 = 0x80000;
-    sp->h144 = 0x80000;
-    sp->h138 = 0x80000;
-    sp->h120 = 0x80000;
-    sp->h11c = 0x80000;
-    sp->h118 = 0x80000;
-    sp->h114 = 0x80000;
-    sp->h128 = 0x80000;
-    sp->h12c = 0x80000;
-    sp->h130 = 0x80000;
-    sp->h134 = 0x80000;
+    sp->next_ceiling_dist = 0x80000;
+    sp->acid_surface_y = 0x80000;
+    sp->surface_y = 0x80000;
+    sp->ceiling_dist = 0x80000;
+    sp->wall_floor_dist = 0x80000;
+    sp->next_floor_dist = 0x80000;
+    sp->floor_dist = 0x80000;
+    sp->wall_dist = 0x80000;
+    sp->reach_wall_dist = 0x80000;
+    sp->low_wall_dist = 0x80000;
+    sp->low_reach_wall_dist = 0x80000;
     sp->hit = -1;
     sp->flags = 0;
     sp->world = lists->unkC0;
@@ -603,65 +603,65 @@ heights:
     sp->rel[1] = vis_lists.unk22C0;
     sp->rel[2] = vis_lists.unk33C0;
     collision_test_quads(pos, req->unk0);
-    if (sp->h128 == 0x80000) {
-        sp->n170 = sp->n178;
-        sp->h128 = sp->h12c;
+    if (sp->wall_dist == 0x80000) {
+        sp->wall_normal = sp->reach_wall_normal;
+        sp->wall_dist = sp->reach_wall_dist;
     }
-    if (sp->h130 == 0x80000) {
-        sp->n180 = sp->n188;
-        sp->h130 = sp->h134;
+    if (sp->low_wall_dist == 0x80000) {
+        sp->low_wall_normal = sp->low_reach_wall_normal;
+        sp->low_wall_dist = sp->low_reach_wall_dist;
     }
-    if (sp->h114 == 0x80000) {
-        sp->n158 = sp->n168;
-        sp->h114 = sp->h11c;
+    if (sp->floor_dist == 0x80000) {
+        sp->floor_normal = sp->wall_floor_normal;
+        sp->floor_dist = sp->wall_floor_dist;
     }
-    if (sp->h118 == 0x80000) {
-        sp->n160 = sp->n158;
-        sp->h118 = sp->h114;
+    if (sp->next_floor_dist == 0x80000) {
+        sp->next_floor_normal = sp->floor_normal;
+        sp->next_floor_dist = sp->floor_dist;
     }
-    if (sp->h114 != 0x80000 && sp->n158.vy != 0) {
-        r = SquareRoot0(sp->n158.vx * sp->n158.vx + sp->n158.vz * sp->n158.vz);
-        ang = ratan2(-sp->n158.vy, r);
+    if (sp->floor_dist != 0x80000 && sp->floor_normal.vy != 0) {
+        r = SquareRoot0(sp->floor_normal.vx * sp->floor_normal.vx + sp->floor_normal.vz * sp->floor_normal.vz);
+        ang = ratan2(-sp->floor_normal.vy, r);
         if (r != 0)
-            sp->h114 = (sp->h114 << 12) / rsin(ang);
+            sp->floor_dist = (sp->floor_dist << 12) / rsin(ang);
     }
-    if (sp->h118 != 0x80000 && sp->n160.vy != 0) {
+    if (sp->next_floor_dist != 0x80000 && sp->next_floor_normal.vy != 0) {
         /* retail squares the second normal's z with the first's */
-        r = SquareRoot0(sp->n160.vx * sp->n160.vx + sp->n160.vz * sp->n158.vz);
-        ang = ratan2(-sp->n160.vy, r);
+        r = SquareRoot0(sp->next_floor_normal.vx * sp->next_floor_normal.vx + sp->next_floor_normal.vz * sp->floor_normal.vz);
+        ang = ratan2(-sp->next_floor_normal.vy, r);
         if (r != 0)
-            sp->h118 = (sp->h118 << 12) / rsin(ang);
+            sp->next_floor_dist = (sp->next_floor_dist << 12) / rsin(ang);
     }
-    if (sp->h120 < 256 - req->unk14.vy)
+    if (sp->ceiling_dist < 256 - req->unk14.vy)
         hits |= 4;
     floor_motion = req->unk14.vy * -4096 / 4096;
-    if (sp->h114 < req->unk1E - floor_motion)
+    if (sp->floor_dist < req->unk1E - floor_motion)
         hits |= 1;
-    t = DOT(req->unk14, sp->n170) / 4096;
-    if (sp->h128 < req->unk1C - t)
+    t = DOT(req->unk14, sp->wall_normal) / 4096;
+    if (sp->wall_dist < req->unk1C - t)
         hits |= 2;
-    t = DOT(req->unk14, sp->n180) / 4096;
-    if (sp->h130 < req->unk1C - t)
+    t = DOT(req->unk14, sp->low_wall_normal) / 4096;
+    if (sp->low_wall_dist < req->unk1C - t)
         hits |= 8;
-    vis_lists.unk38 = sp->h120;
-    vis_lists.unk34 = sp->h124;
-    vis_lists.unk30 = sp->h114;
-    vis_lists.unk2C = sp->h118;
-    vis_lists.unk3C = sp->h128;
-    vis_lists.unk40 = sp->h12c;
-    vis_lists.unk44 = sp->h130;
-    vis_lists.unk48 = sp->h134;
-    vis_lists.unk4C = sp->h138;
+    vis_lists.unk38 = sp->ceiling_dist;
+    vis_lists.unk34 = sp->next_ceiling_dist;
+    vis_lists.unk30 = sp->floor_dist;
+    vis_lists.unk2C = sp->next_floor_dist;
+    vis_lists.unk3C = sp->wall_dist;
+    vis_lists.unk40 = sp->reach_wall_dist;
+    vis_lists.unk44 = sp->low_wall_dist;
+    vis_lists.unk48 = sp->low_reach_wall_dist;
+    vis_lists.unk4C = sp->surface_y;
     vis_lists.unk50 = sp->h13c;
     vis_lists.unk54 = sp->h140;
-    vis_lists.unk58 = sp->h144;
-    vis_lists.unk7C = sp->n150;
-    vis_lists.unk84 = sp->n158;
+    vis_lists.unk58 = sp->acid_surface_y;
+    vis_lists.unk7C = sp->ceiling_normal;
+    vis_lists.unk84 = sp->floor_normal;
     /* the wall normals: SVECTORs over vis_lists' unk8C and unk9C fields */
-    *(SVECTOR *)&vis_lists.unk8C = sp->n170;
-    vis_lists.unk94 = sp->n178;
-    *(SVECTOR *)&vis_lists.unk9C = sp->n180;
-    vis_lists.unkA4 = sp->n188;
+    *(SVECTOR *)&vis_lists.unk8C = sp->wall_normal;
+    vis_lists.unk94 = sp->reach_wall_normal;
+    *(SVECTOR *)&vis_lists.unk9C = sp->low_wall_normal;
+    vis_lists.unkA4 = sp->low_reach_wall_normal;
     vis_lists.unk44C8 = sp->hit;
     vis_lists.unk47DC = sp->flags;
     return hits;

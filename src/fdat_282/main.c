@@ -63,22 +63,22 @@ void map_update_events(void)
 ADDRESS(0x801ed4e8, 0x78)
 void map_restore_progress(void)
 {
-    Vis212 *a48 = &vis_table_a.entries[48];
-    Vis212 *a50 = &vis_table_a.entries[50];
+    Creature *a48 = &vis_table_a.entries[48];
+    Creature *a50 = &vis_table_a.entries[50];
     Vis48 *item;
-    Vis192 *r;
-    Vis212 *a49;
+    CreatureType *r;
+    Creature *a49;
 
-    r = &vis_table_a.unk3500[vis_table_a.entries[19].unk02];
+    r = &vis_table_a.types[vis_table_a.entries[19].type];
     item = &vis_table_c.entries[2];
     a49 = &vis_table_a.entries[49];
 
     if (vis_table_b.entries[26].unk0C != 0xff)
         item->unk22 = 4;
-    a49->unk1C.bytes[3] = 2;
-    a50->unk1C.bytes[3] = 2;
-    a48->unk1C.bytes[3] = 2;
-    game_progress.unk1448[r->unk09] = 3;
+    a49->status.bytes[3] = 2;
+    a50->status.bytes[3] = 2;
+    a48->status.bytes[3] = 2;
+    game_progress.unk1448[r->talk_id] = 3;
 }
 
 #include "../lib/fdat_creature_pick_move.inc"

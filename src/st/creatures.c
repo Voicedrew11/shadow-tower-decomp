@@ -22,23 +22,23 @@
  * script. Returns the damage dealt, or -1 for an entry in state 2. */
 ADDRESS(0x8004def8, 0x3e0)
 int creature_take_damage(e, kind, power, levels, crit)
-    Vis212 *e;
+    Creature *e;
     int kind;
     short power;
     u16 *levels;
     u8 crit;
 {
-    Vis192 *t;
-    VisScript **p;
-    VisScript *script = NULL;
+    CreatureType *t;
+    CreatureScript **p;
+    CreatureScript *script = NULL;
     int dmg;
     int found;
     u8 index;
     int luck;
     int i;
 
-    e->unk64 = 1;
-    if (e->unk1C.bytes[3] == 2)
+    e->hit = 1;
+    if (e->status.bytes[3] == 2)
         return -1;
     dmg = creature_calc_damage(e, 0, levels);
     if (crit)
@@ -46,7 +46,7 @@ int creature_take_damage(e, kind, power, levels, crit)
     dmg = dmg * power / 5120;
     if (dmg == 0)
         return 0;
-    t = &vis_table_a.unk3500[e->unk02];
+    t = &vis_table_a.types[e->type];
     if (viewer.unk2C & 0x200000)
         dmg = dmg * 3 / 2;
     luck = viewer.unk1C6;
@@ -58,26 +58,26 @@ int creature_take_damage(e, kind, power, levels, crit)
     if (kind == 2)
         dmg <<= 1;
     found = 0;
-    e->unk1C.bytes[2] &= 0xca;
+    e->status.bytes[2] &= 0xca;
     index = 0;
-    if (dmg >= e->unk2C) {
-        if (e->unk1C.bytes[3] != 3) {
-            e->unk05 = 5;
+    if (dmg >= e->hp) {
+        if (e->status.bytes[3] != 3) {
+            e->state = 5;
             creature_roll_drops(e);
             creature_award_kill_bonuses(e);
-            game_progress.unk14A8[5 + (t->unk10 >> 5)] |= 1 << (t->unk10 & 0x1f);
+            game_progress.unk14A8[5 + (t->kind >> 5)] |= 1 << (t->kind & 0x1f);
             if (e < &vis_table_a.entries[48]) {
                 game_progress.unk16E4[area_state.area]++;
                 viewer.unk30++;
             }
-            e->unk2C = 0;
-            e->unk1C.bytes[2] |= 0x15;
-            p = t->unk60;
+            e->hp = 0;
+            e->status.bytes[2] |= 0x15;
+            p = t->scripts;
             while (i--) {
                 script = *p++;
                 if (script == NULL)
                     break;
-                if (script->unk00 == 'P') {
+                if (script->command == 'P') {
                     found = 1;
                     break;
                 }
@@ -85,17 +85,17 @@ int creature_take_damage(e, kind, power, levels, crit)
             }
             goto done;
         }
-    } else if (e->unk1C.bytes[3] != 3) {
-        e->unk2C -= dmg;
+    } else if (e->status.bytes[3] != 3) {
+        e->hp -= dmg;
     }
-    e->unk1C.bytes[2] |= 0x20;
-    if (dmg >= e->unk2C * 15 / 100) {
-        p = t->unk60;
+    e->status.bytes[2] |= 0x20;
+    if (dmg >= e->hp * 15 / 100) {
+        p = t->scripts;
         while (i--) {
             script = *p++;
             if (script == NULL)
                 break;
-            if (script->unk00 == '@') {
+            if (script->command == '@') {
                 found = 1;
                 break;
             }
@@ -104,14 +104,14 @@ int creature_take_damage(e, kind, power, levels, crit)
     }
 done:
     if (found) {
-        e->unk18 = index;
-        e->unkA8 = script;
-        e->unk0F = script->unk00;
-        e->unk1A = 0;
-        e->unk2A = 0;
-        e->unkB0 = script->unk0C;
+        e->script_index = index;
+        e->script = script;
+        e->command = script->command;
+        e->script_state = 0;
+        e->anim_frame = 0;
+        e->anim_step = script->anim_step;
     }
-    e->unk34 = 0xfff;
+    e->hurt_timer = 0xfff;
     if (viewer.unk218 != 4) {
         if (viewer.unk1C9)
             player_add_hp(dmg * viewer.unk1C9 / 100);
@@ -126,12 +126,12 @@ done:
 ADDRESS(0x8004e2d8, 0x4c)
 void creatures_bind_previous_area(void)
 {
-    Vis212 *e = vis_table_a.entries;
+    Creature *e = vis_table_a.entries;
     int i = 32;
 
     while (i--) {
-        if (e->unk07 == 0xfd)
-            e->unk07 = vis_table_a.unk6103;
+        if (e->zone == 0xfd)
+            e->zone = vis_table_a.prev_zone;
         e++;
     }
 }
@@ -143,8 +143,8 @@ ADDRESS(0x8004e324, 0x5c8)
 void creatures_update(void)
 {
     VisRecord *r = viewer.unk174;
-    Vis212 *e;
-    Vis192 *t;
+    Creature *e;
+    CreatureType *t;
     StAnimFile *file;
     StAnimFile *anim;
     int n;
@@ -155,11 +155,11 @@ void creatures_update(void)
     u16 h;
 
     if (r != NULL && r->unk07 != 0xff) {
-        u8 prev = vis_table_a.unk6168;
+        u8 prev = vis_table_a.zone;
 
-        vis_table_a.unk6103 = prev;
-        vis_table_a.unk6168 = r->unk07;
-        if (prev != vis_table_a.unk6168) {
+        vis_table_a.prev_zone = prev;
+        vis_table_a.zone = r->unk07;
+        if (prev != vis_table_a.zone) {
             anim_slots_free_idle();
             anim_sets_free_idle();
             anim_slots_free_all();
@@ -178,94 +178,94 @@ void creatures_update(void)
                     heap_free(file);
             }
             e = vis_table_a.entries;
-            for (vis_table_a.unk6144 = 0; vis_table_a.unk6144 < 64; vis_table_a.unk6144++, e++) {
-                t = &vis_table_a.unk3500[e->unk02];
-                if (e->unk05 == 1) {
-                    if (vis_table_a.unk6168 == 0xff)
+            for (vis_table_a.current_index = 0; vis_table_a.current_index < 64; vis_table_a.current_index++, e++) {
+                t = &vis_table_a.types[e->type];
+                if (e->state == 1) {
+                    if (vis_table_a.zone == 0xff)
                         break;
-                    if (vis_table_a.unk6168 != e->unk07) {
-                        if (e->unk07 == 0xff && e->unk40 < 0x7000)
+                    if (vis_table_a.zone != e->zone) {
+                        if (e->zone == 0xff && e->player_dist_xz < 0x7000)
                             break;
                         vis_table_a.unk612C -= t->unk12;
-                        vis_table_a.unk6128 -= e->unk0D;
-                        e->unk05 = 0;
+                        vis_table_a.spawn_cost_total -= e->spawn_cost;
+                        e->state = 0;
                         creature_return_home(e);
                     }
                 }
             }
         }
     }
-    vis_table_a.unk614C = 0;
-    for (e = vis_table_a.entries, vis_table_a.unk6144 = 0; vis_table_a.unk6144 < 64;
-         e++, vis_table_a.unk6144++) {
-        if (e->unk00 != 0xff) {
+    vis_table_a.active_count = 0;
+    for (e = vis_table_a.entries, vis_table_a.current_index = 0; vis_table_a.current_index < 64;
+         e++, vis_table_a.current_index++) {
+        if (e->spawn_chance != 0xff) {
             creature_set_current(e);
-            dx = e->unk74.vx - viewer.position.vx;
-            dy = e->unk74.vy - viewer.position.vy;
-            dz = e->unk74.vz - viewer.position.vz;
+            dx = e->position.vx - viewer.position.vx;
+            dy = e->position.vy - viewer.position.vy;
+            dz = e->position.vz - viewer.position.vz;
             if (dx < -0x8000 || dx > 0x8000 || dy > 0x8000 || dy < -0x8000 || dz > 0x8000
                 || dz < -0x8000) {
-                e->unk3C = 0x40000000;
-                e->unk40 = 0x8000;
+                e->player_dist_sq = 0x40000000;
+                e->player_dist_xz = 0x8000;
             } else {
-                e->unk3C = dx * dx + dy * dy + dz * dz;
-                e->unk40 = SquareRoot0(dx * dx + dz * dz);
+                e->player_dist_sq = dx * dx + dy * dy + dz * dz;
+                e->player_dist_xz = SquareRoot0(dx * dx + dz * dz);
             }
             h = (ratan2(dz, dx) - 0x400) & 0xfff;
-            e->unk56 = h;
-            d = ((u16)e->unk8E - h) & 0xfff;
-            e->unk58 = d;
+            e->player_heading = h;
+            d = ((u16)e->facing - h) & 0xfff;
+            e->player_bearing = d;
             if (d > 0x800)
-                e->unk58 = 0x1000 - d;
-            e->unk9C.vz = 0;
-            e->unk9C.vy = 0;
-            e->unk9C.vx = 0;
-            if ((vis_table_a.unk6150 & 3) == (e->unk07 & 3) || viewer.unk21C)
+                e->player_bearing = 0x1000 - d;
+            e->velocity.vz = 0;
+            e->velocity.vy = 0;
+            e->velocity.vx = 0;
+            if ((vis_table_a.frame & 3) == (e->zone & 3) || viewer.unk21C)
                 creature_update_spawn();
-            if (e->unk05 == 1) {
-                if ((vis_table_a.unk6150 & 3) == (vis_table_a.unk614C & 3))
+            if (e->state == 1) {
+                if ((vis_table_a.frame & 3) == (vis_table_a.active_count & 3))
                     area_state.hooks->unk40();
                 area_state.hooks->unk44();
-                if (e->unk36 != -1) {
-                    anim_get_file(e->unk0B + 128, &anim);
+                if (e->fade != -1) {
+                    anim_get_file(e->model_slot + 128, &anim);
                     if (anim) {
-                        e->unk36 -= 128;
-                        if (e->unk36 < 0) {
-                            e->unk36 = -1;
-                            e->unk1C.bytes[2] &= 0xf2;
+                        e->fade -= 128;
+                        if (e->fade < 0) {
+                            e->fade = -1;
+                            e->status.bytes[2] &= 0xf2;
                         }
                     }
                 }
-                e->unk39 = 0;
-                if (*(s32 *)&e->unk9C != 0 || e->unk9C.vz != 0 || e->unk16 != 0) {
+                e->touched_player = 0;
+                if (*(s32 *)&e->velocity != 0 || e->velocity.vz != 0 || e->vertical_speed != 0) {
                     creature_move(e);
                     if (!(viewer.unk2C & 0x40000)) {
-                        e->unk74.vx += e->unk9C.vx;
-                        e->unk74.vy += e->unk9C.vy;
-                        e->unk74.vz += e->unk9C.vz;
+                        e->position.vx += e->velocity.vx;
+                        e->position.vy += e->velocity.vy;
+                        e->position.vz += e->velocity.vz;
                     }
                 }
-                vis_table_a.unk614C++;
-            } else if (e->unk05 == 5) {
+                vis_table_a.active_count++;
+            } else if (e->state == 5) {
                 area_state.hooks->unk44();
             }
         }
         e->unk23 = 0;
     }
-    vis_table_a.unk6158[3] = vis_table_a.unk6158[2];
-    vis_table_a.unk6158[2] = vis_table_a.unk6158[1];
-    vis_table_a.unk6158[1] = vis_table_a.unk6158[0];
-    vis_table_a.unk6158[0] = vis_table_a.unk6168;
-    vis_table_a.unk6150++;
-    vis_table_a.unk6160 >>= 1;
-    vis_table_a.unk6162 >>= 1;
-    vis_table_a.unk6164 >>= 1;
-    if (abs(vis_table_a.unk6160) < 4)
-        vis_table_a.unk6160 = 0;
-    if (abs(vis_table_a.unk6162) < 4)
-        vis_table_a.unk6162 = 0;
-    if (abs(vis_table_a.unk6164) < 4)
-        vis_table_a.unk6164 = 0;
+    vis_table_a.zone_history[3] = vis_table_a.zone_history[2];
+    vis_table_a.zone_history[2] = vis_table_a.zone_history[1];
+    vis_table_a.zone_history[1] = vis_table_a.zone_history[0];
+    vis_table_a.zone_history[0] = vis_table_a.zone;
+    vis_table_a.frame++;
+    vis_table_a.push_x >>= 1;
+    vis_table_a.push_y >>= 1;
+    vis_table_a.push_z >>= 1;
+    if (abs(vis_table_a.push_x) < 4)
+        vis_table_a.push_x = 0;
+    if (abs(vis_table_a.push_y) < 4)
+        vis_table_a.push_y = 0;
+    if (abs(vis_table_a.push_z) < 4)
+        vis_table_a.push_z = 0;
     creature_set_current(NULL);
     if (DAT_801cd0e4)
         player_warp_back();
@@ -275,101 +275,101 @@ void creatures_update(void)
 ADDRESS(0x8004e8ec, 0x74)
 void creature_types_link_scripts(void)
 {
-    Vis192 *t = vis_table_a.unk3500;
-    VisScript **p;
+    CreatureType *t = vis_table_a.types;
+    CreatureScript **p;
     int i;
     int j;
 
     for (i = 0; i < 16; i++, t++) {
         if (t->unk00 == 0xff)
             return;
-        p = t->unk60;
+        p = t->scripts;
         for (j = 0; j < 24; j++, p++) {
             if ((s32)*p == -1)
                 *p = NULL;
             else
-                *p = (VisScript *)((u8 *)&vis_table_a.unk3500[16] + (s32)*p);
+                *p = (CreatureScript *)((u8 *)&vis_table_a.types[16] + (s32)*p);
         }
     }
 }
 
 /* Loads the 64 table A entries from an area file. */
 ADDRESS(0x8004e960, 0x3f4)
-void creatures_load(VisAFileEntry *src)
+void creatures_load(CreatureFileEntry *src)
 {
     u8 cnt[4];
     u8 map[16];
     u32 ids[3];
-    Vis212 *e;
-    Vis192 *t;
+    Creature *e;
+    CreatureType *t;
     Vis44 *c;
     u16 i;
     u8 k;
     int j;
 
-    vis_table_a.unk6164 = 0;
-    vis_table_a.unk6162 = 0;
-    vis_table_a.unk6160 = 0;
+    vis_table_a.push_z = 0;
+    vis_table_a.push_y = 0;
+    vis_table_a.push_x = 0;
     fill_words((u32 *)cnt, 0, 1);
     fill_words((u32 *)map, -1, 4);
     e = vis_table_a.entries;
     i = 64;
     while (i--) {
-        e->unk00 = src->unk00;
-        e->unk05 = 0;
-        if (e->unk00 == 0xff)
+        e->spawn_chance = src->spawn_chance;
+        e->state = 0;
+        if (e->spawn_chance == 0xff)
             goto next;
-        e->unk02 = src->unk01;
-        t = &vis_table_a.unk3500[e->unk02];
-        k = src->unk01;
+        e->type = src->type;
+        t = &vis_table_a.types[e->type];
+        k = src->type;
         if (map[k] == 0xff) {
-            map[k] = e->unk0C = cnt[k >> 2];
+            map[k] = e->vram_tag = cnt[k >> 2];
             k >>= 2;
-            cnt[k] = (cnt[k] + t->unk04) & 3;
+            cnt[k] = (cnt[k] + t->vram_tag_count) & 3;
         } else {
-            e->unk0C = map[k];
+            e->vram_tag = map[k];
         }
-        e->unk28 = src->unk02;
-        e->unk06 = vis_records[e->unk28].unk01;
-        e->unk07 = vis_records[e->unk28].unk07;
-        e->unk09 = t->unk04;
-        e->unk0B = e->unk02;
-        e->unk03 = 0;
-        e->unk10 = ids[0] = src->unk04[0];
-        e->unk12 = ids[1] = src->unk04[1];
-        e->unk14 = ids[2] = src->unk04[2];
-        e->unk65 = src->unk0B;
-        e->unk66 = src->unk0C;
-        e->unk67 = src->unk0D;
-        e->unk68 = src->unk10 & 0xfff;
-        e->unk6A = src->unk12;
-        e->unk6C = src->unk14;
-        e->unk6E = src->unk16;
+        e->home_block = src->home_block;
+        e->region = vis_records[e->home_block].unk01;
+        e->zone = vis_records[e->home_block].unk07;
+        e->unk09 = t->vram_tag_count;
+        e->model_slot = e->type;
+        e->visibility = 0;
+        e->drop_item0 = ids[0] = src->drop_items[0];
+        e->drop_item1 = ids[1] = src->drop_items[1];
+        e->drop_item2 = ids[2] = src->drop_items[2];
+        e->drop_chance0 = src->drop_chance0;
+        e->drop_chance1 = src->drop_chance1;
+        e->drop_chance2 = src->drop_chance2;
+        e->home_facing = src->home_facing & 0xfff;
+        e->home_offset_x = src->home_offset_x;
+        e->home_offset_y = src->home_offset_y;
+        e->home_offset_z = src->home_offset_z;
         creature_copy_type_stats(e);
-        e->unk08 = 0;
-        e->unk2A = 0;
+        e->anim = 0;
+        e->anim_frame = 0;
         e->unk1B = 0;
-        e->unkAC = 0;
-        e->unk0D = src->unk0A;
-        e->unk0E = t->unk05;
-        e->unk0F = 2;
-        e->unk16 = 0;
-        e->unk1A = 0xff;
-        e->unkA8 = NULL;
-        e->unk22 = -1;
-        e->unk21 = t->unk03;
-        e->unk0A = t->unk10;
-        e->unk2E = t->unk16;
-        e->unk30 = t->unk18;
-        e->unk50 = 178;
+        e->chain_script = 0;
+        e->spawn_cost = src->spawn_cost;
+        e->move_mode = t->move_mode;
+        e->command = 2;
+        e->vertical_speed = 0;
+        e->script_state = 0xff;
+        e->script = NULL;
+        e->voice = -1;
+        e->depth_bias = t->depth_bias;
+        e->unk0A = t->kind;
+        e->radius = t->radius;
+        e->height = t->height;
+        e->collision_tests = 178;
         if (63 - i >= 56)
-            e->unk1C.bytes[3] = 1;
+            e->status.bytes[3] = 1;
         else
-            e->unk1C.bytes[3] = 0;
-        e->unk1C.bytes[0] = 0;
-        e->unk64 = 0;
+            e->status.bytes[3] = 0;
+        e->status.bytes[0] = 0;
+        e->hit = 0;
         creature_return_home(e);
-        e->unk84 = e->unk74.vy;
+        e->spawn_y = e->position.vy;
         for (j = 0; j < 3; j++) {
             if (ids[j] != 0xffff) {
                 c = &vis_table_c.unk0118[ids[j]];
@@ -377,15 +377,15 @@ void creatures_load(VisAFileEntry *src)
                     vis_table_c.unk0094[c->unk4] = vis_table_c.unk0114++;
             }
         }
-        if (e->unk70 & 0x10) {
+        if (e->flags & 0x10) {
             if (t->unk00 == 2) {
-                if (e->unk6C == -1)
-                    e->unk6C = t->unk32;
-                if (e->unk6E == -1)
-                    e->unk6E = t->unk08;
+                if (e->home_offset_y == -1)
+                    e->home_offset_y = t->max_hp;
+                if (e->home_offset_z == -1)
+                    e->home_offset_z = t->unk08;
             } else {
                 t->unk00 = 1;
-                e->unk6E = 0;
+                e->home_offset_z = 0;
             }
         }
     next:
@@ -394,5 +394,5 @@ void creatures_load(VisAFileEntry *src)
     }
     vis_table_a.unk6130 = 0;
     vis_table_a.unk612C = 0;
-    vis_table_a.unk6128 = 0;
+    vis_table_a.spawn_cost_total = 0;
 }

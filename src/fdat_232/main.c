@@ -65,21 +65,21 @@ static int fdat_801edb9c;
 ADDRESS(0x801ed4a0, 0xfc)
 void map_restore_progress(void)
 {
-    Vis192 *r = &vis_table_a.unk3500[12];
+    CreatureType *r = &vis_table_a.types[12];
 
     if (!(game_progress.unk1440.word >> 28 & 1))
         fdat_801edb94 = 0;
     else
         fdat_801edb94 = 0xff;
-    if (game_progress.unk1448[r->unk09] >= 2)
-        r->unk1C &= ~0x180;
-    if (game_progress.unk1448[r->unk09] == 0) {
+    if (game_progress.unk1448[r->talk_id] >= 2)
+        r->actions &= ~0x180;
+    if (game_progress.unk1448[r->talk_id] == 0) {
         viewer.unk218 = 5;
         fdat_801edb9c = 0;
     } else {
         fdat_801edb9c = 0xff;
     }
-    if (game_progress.unk1448[r->unk09] != 0 && !(game_progress.unk1440.word >> 28 & 1))
+    if (game_progress.unk1448[r->talk_id] != 0 && !(game_progress.unk1440.word >> 28 & 1))
         fdat_801edb98 = 1;
     else
         fdat_801edb98 = 0;
@@ -94,14 +94,14 @@ void map_restore_progress(void)
 ADDRESS(0x801ed59c, 0x23c)
 void map_update_events(void)
 {
-    Vis212 *e = &vis_table_a.entries[32];
-    Vis192 *r = &vis_table_a.unk3500[12];
+    Creature *e = &vis_table_a.entries[32];
+    CreatureType *r = &vis_table_a.types[12];
     int n;
 
     if (fdat_801edb9c == 0 && area_state.unk18 == -1 && area_state.unk2 != 0)
         fdat_801edb9c = 1;
     if (fdat_801edb9c == 1) {
-        e->unk70 |= 0x2000000;
+        e->flags |= 0x2000000;
         creature_force_talk(e, 1, 0);
         fdat_801edb98 = 1;
         fdat_801edb9c = 0xff;
@@ -111,22 +111,22 @@ void map_update_events(void)
         viewer.unk188 = 30;
         viewer.unk182 = 0;
     }
-    n = game_progress.unk1448[r->unk09];
+    n = game_progress.unk1448[r->talk_id];
     if (n == 1 && viewer.position.vx > 0x4c000 && viewer.position.vz > 0x55000) {
         viewer.unk218 = 5;
         creature_force_talk(e, 0, 0);
-        e->unk64 = n;
+        e->hit = n;
         viewer.unk218 = 0;
-        e->unk70 &= ~0x2000000;
-        r->unk1C &= ~0x180;
+        e->flags &= ~0x2000000;
+        r->actions &= ~0x180;
     }
-    if (fdat_801edb94 == 0 && e->unk2C == 0) {
+    if (fdat_801edb94 == 0 && e->hp == 0) {
         fdat_801edb94 = 1;
         game_progress.unk1440.word |= 0x10000000;
     }
-    if (fdat_801edb94 == 1 && e->unk05 == 3) {
+    if (fdat_801edb94 == 1 && e->state == 3) {
         viewer.unk218 = 5;
-        e->unk70 |= 0x2000000;
+        e->flags |= 0x2000000;
         creature_force_talk(e, 1, 0);
         fdat_801edb94 = 0xff;
         fdat_801edb98 = 0;
@@ -141,8 +141,8 @@ void map_update_events(void)
 ADDRESS(0x801ed7d8, 0x280)
 void map_pick_creature_move(void)
 {
-    Vis212 *e = vis_table_a.unk6138;
-    Vis192 *r = vis_table_a.unk6134;
+    Creature *e = vis_table_a.current;
+    CreatureType *r = vis_table_a.current_type;
     u16 wall;
     int d;
     short x;
@@ -150,47 +150,47 @@ void map_pick_creature_move(void)
     short dx;
     short dz;
 
-    if (e->unk1A == 0xf0 || e->unk1A == 0)
+    if (e->script_state == 0xf0 || e->script_state == 0)
         return;
     creature_choose_action();
-    if (e->unk02 == 12 && game_progress.unk1448[r->unk09] < 2)
-        e->unk44 = 128;
+    if (e->type == 12 && game_progress.unk1448[r->talk_id] < 2)
+        e->action = 128;
     creature_pick_weighted_script();
-    switch (e->unk44) {
+    switch (e->action) {
     case 8:
-        wall = e->unk5E;
+        wall = e->wall_heading;
         if ((short)wall == 0x7fff) {
-            e->unk5A = e->unk5C = (e->unk56 + 2048) & 0xfff;
+            e->unk5A = e->target_heading = (e->player_heading + 2048) & 0xfff;
         } else {
-            d = (((e->unk56 + 2048) & 0xfff) - wall + 1024) & 0xfff;
+            d = (((e->player_heading + 2048) & 0xfff) - wall + 1024) & 0xfff;
             if (d < 1024 || d > 3072)
-                e->unk5A = e->unk5C = (wall + 3072) & 0xfff;
+                e->unk5A = e->target_heading = (wall + 3072) & 0xfff;
             else
-                e->unk5A = e->unk5C = (wall + 1024) & 0xfff;
+                e->unk5A = e->target_heading = (wall + 1024) & 0xfff;
         }
         break;
     case 2:
     case 4:
     case 16:
     case 32:
-        e->unk5A = e->unk5C = e->unk56;
+        e->unk5A = e->target_heading = e->player_heading;
         break;
     default:
-        e->unk5A = e->unk5C = e->unk8E;
+        e->unk5A = e->target_heading = e->facing;
         break;
     }
-    if (e->unk44 != 8)
-        e->unk5E = 0x7fff;
-    if (vis_records[e->unk26].unk05 != 0 || vis_records[e->unk26].unk06 != 0) {
-        x = rcos(e->unk5C - 1024) >> 5;
-        z = rsin(e->unk5C - 1024) >> 5;
-        dx = x + vis_records[e->unk26].unk05;
-        dz = z + vis_records[e->unk26].unk06;
-        e->unk5C = (ratan2(dz, dx) + 1024) & 0xfff;
+    if (e->action != 8)
+        e->wall_heading = 0x7fff;
+    if (vis_records[e->block].unk05 != 0 || vis_records[e->block].unk06 != 0) {
+        x = rcos(e->target_heading - 1024) >> 5;
+        z = rsin(e->target_heading - 1024) >> 5;
+        dx = x + vis_records[e->block].unk05;
+        dz = z + vis_records[e->block].unk06;
+        e->target_heading = (ratan2(dz, dx) + 1024) & 0xfff;
         x = rcos(e->unk5A) >> 5;
         z = rsin(e->unk5A) >> 5;
-        dx = x + vis_records[e->unk26].unk05;
-        dz = z + vis_records[e->unk26].unk06;
+        dx = x + vis_records[e->block].unk05;
+        dz = z + vis_records[e->block].unk06;
         e->unk5A = ratan2(dz, dx);
     }
 }
@@ -205,16 +205,16 @@ void map_pick_creature_move(void);
 ADDRESS(0x801edb08, 0x8c)
 void map_talk_on_player_death(void)
 {
-    Vis212 *e;
-    Vis192 *r;
+    Creature *e;
+    CreatureType *r;
 
     e = &vis_table_a.entries[32];
-    r = &vis_table_a.unk3500[12];
+    r = &vis_table_a.types[12];
 
-    if (game_progress.unk1448[r->unk09] >= 2 && !(game_progress.unk1440.word >> 28 & 1)
-        && vis_table_a.unk6168 == 3) {
-        game_progress.unk1448[r->unk09] = 3;
-        e->unk70 |= 0x2000000;
+    if (game_progress.unk1448[r->talk_id] >= 2 && !(game_progress.unk1440.word >> 28 & 1)
+        && vis_table_a.zone == 3) {
+        game_progress.unk1448[r->talk_id] = 3;
+        e->flags |= 0x2000000;
         creature_force_talk(e, 1, 1);
     }
 }

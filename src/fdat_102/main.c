@@ -58,16 +58,16 @@ const FdatHeader fdat_header = {
 ADDRESS(0x801ed4a0, 0xb4)
 void map_restore_progress(void)
 {
-    Vis212 *e = &vis_table_a.entries[48];
-    Vis192 *r = &vis_table_a.unk3500[0];
+    Creature *e = &vis_table_a.entries[48];
+    CreatureType *r = &vis_table_a.types[0];
     Vis88 *d39 = &vis_table_b.entries[39];
     Vis88 *d40 = &vis_table_b.entries[40];
     Vis88 *d41 = &vis_table_b.entries[41];
     Vis88 *d42 = &vis_table_b.entries[42];
 
-    if (e->unk05 != 3)
-        e->unk1C.bytes[3] = 2;
-    if (game_progress.unk1448[r->unk09] == 2)
+    if (e->state != 3)
+        e->status.bytes[3] = 2;
+    if (game_progress.unk1448[r->talk_id] == 2)
         fdat_801eda78 = 0xff;
     else
         fdat_801eda78 = 0;
@@ -88,28 +88,28 @@ void map_restore_progress(void)
 ADDRESS(0x801ed554, 0x164)
 void map_update_events(void)
 {
-    Vis212 *e48 = &vis_table_a.entries[48];
+    Creature *e48 = &vis_table_a.entries[48];
     Vis88 *d39 = &vis_table_b.entries[39];
-    Vis192 *r0 = &vis_table_a.unk3500[0];
-    Vis212 *e49 = &vis_table_a.entries[49];
+    CreatureType *r0 = &vis_table_a.types[0];
+    Creature *e49 = &vis_table_a.entries[49];
     int state = fdat_801eda78;
-    Vis192 *r4 = &vis_table_a.unk3500[4];
+    CreatureType *r4 = &vis_table_a.types[4];
     Vis88 *d40 = &vis_table_b.entries[40];
     Vis88 *d41 = &vis_table_b.entries[41];
     Vis88 *d42 = &vis_table_b.entries[42];
 
-    if (state != 0xff && game_progress.unk1448[r0->unk09] == 2) {
+    if (state != 0xff && game_progress.unk1448[r0->talk_id] == 2) {
         creature_drop_item(e48, 0x127);
         creature_fade_out_despawn(e48);
         fdat_801eda78 = 0xff;
     }
-    if (e48->unk64 != 0) {
-        e48->unk64 = 0;
+    if (e48->hit != 0) {
+        e48->hit = 0;
         creature_fade_out_despawn(e48);
         fdat_801eda78 = 0xff;
     }
-    if (game_progress.unk1448[r4->unk09] >= 2)
-        game_progress.unk1448[r4->unk09] = 1;
+    if (game_progress.unk1448[r4->talk_id] >= 2)
+        game_progress.unk1448[r4->talk_id] = 1;
     if (fdat_801eda7c == 1) {
         creature_fade_out_despawn(e49);
         d42->unk0a = 250;
@@ -127,20 +127,20 @@ ADDRESS(0x801ed6b8, 0xcc)
 void map_use_item_on_creature(short id)
 {
     VECTOR p;
-    VisRequest req;
+    CollisionRequest req;
 
     p.vx = viewer.position.vx;
     p.vy = viewer.position.vy + 1600;
     p.vz = viewer.position.vz;
-    req.unk0 = 0;
-    req.unk4 = p;
-    req.unk1C = 1056;
-    req.unk1E = 1600;
-    req.unk14.vx = 0;
-    req.unk14.vy = 0;
-    req.unk14.vz = 0;
-    req.unk22 = 0;
-    req.unk20 = 0;
+    req.tests = 0;
+    req.position = p;
+    req.radius = 1056;
+    req.height = 1600;
+    req.velocity.vx = 0;
+    req.velocity.vy = 0;
+    req.velocity.vz = 0;
+    req.speed = 0;
+    req.heading = 0;
     if (id == 0x12b) {
         if (creature_find_in_reach((VisLists *)&req, 1) == 0x31) {
             fdat_801eda7c = 1;

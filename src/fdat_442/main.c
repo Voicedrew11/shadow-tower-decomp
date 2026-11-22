@@ -75,8 +75,8 @@ void shop_run(void);
 ADDRESS(0x801ed454, 0x1e8)
 void map_pick_shopkeeper_line(void)
 {
-    Vis212 *e = vis_table_a.unk6138;
-    Vis192 *r = &vis_table_a.unk3500[e->unk02];
+    Creature *e = vis_table_a.current;
+    CreatureType *r = &vis_table_a.types[e->type];
     int sum;
     u32 flag31;
     int i;
@@ -118,7 +118,7 @@ void map_pick_shopkeeper_line(void)
     }
     if (fdat_801ed8c8 != 5) {
         cd_wait_idle();
-        talk_load_image(r->unk09 * 6 + fdat_801ed8c8, 1);
+        talk_load_image(r->talk_id * 6 + fdat_801ed8c8, 1);
     }
 }
 
@@ -130,13 +130,13 @@ void map_pick_shopkeeper_line(void)
 ADDRESS(0x801ed63c, 0x284)
 void map_run_shop_visit(void)
 {
-    Vis212 *e = vis_table_a.unk6138;
-    Vis192 *r = vis_table_a.unk6134;
+    Creature *e = vis_table_a.current;
+    CreatureType *r = vis_table_a.current_type;
     MenuScratch *menu = MENU_SCRATCH;
 
-    e->unk1C.bytes[2] &= 0xf2;
-    e->unk36 = -1;
-    if (e->unkA4 == 0)
+    e->status.bytes[2] &= 0xf2;
+    e->fade = -1;
+    if (e->anim_slot == 0)
         return;
     if (fdat_801ed8c4 == 2 && xa_stream_finished()) {
         if (world_state.unk1EE16 == 3) {
@@ -149,17 +149,17 @@ void map_run_shop_visit(void)
         fdat_801ed8c4 = 3;
         world_state.unk1EE16 = 0;
     }
-    e->unk2A += e->unkB0;
-    if ((short)e->unk2A >= 0x1000) {
-        e->unk2A = 0;
+    e->anim_frame += e->anim_step;
+    if ((short)e->anim_frame >= 0x1000) {
+        e->anim_frame = 0;
         if (fdat_801ed8c4 == 2 && fdat_801ed8c8 == 0)
             creature_start_script(e, 1);
     }
     if (fdat_801ed8c4 == 1) {
         int ending = fdat_801ed8c8;
-        if (ending != 0 || (short)e->unk2A >= 0x600) {
+        if (ending != 0 || (short)e->anim_frame >= 0x600) {
             viewer.unk1E4 = 0;
-            xa_start_stream(r->unk09, ending);
+            xa_start_stream(r->talk_id, ending);
             SsSetSerialVol(0, 0x40, 0x40);
             world_state.unk1EE16 = 2;
             world_state.unk1EE17 = 1;

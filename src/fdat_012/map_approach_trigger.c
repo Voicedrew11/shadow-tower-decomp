@@ -13,12 +13,12 @@
 /* Arms the scene when the entry comes within 0xc00, then plays script 8
  * once it is defeated or beyond 0x1000. */
 ADDRESS(0x801edf0c, 0x7c)
-void map_trigger_on_approach(Vis212 *e)
+void map_trigger_on_approach(Creature *e)
 {
     if (fdat_801edfac == 0) {
-        if (e->unk40 < 0xc00)
+        if (e->player_dist_xz < 0xc00)
             fdat_801edfac = 1;
-    } else if (fdat_801edfac == 1 && (e->unk04 == 0 || e->unk40 > 0x1000)) {
+    } else if (fdat_801edfac == 1 && (e->draw_state == 0 || e->player_dist_xz > 0x1000)) {
         fdat_801edfac = 2;
         creature_start_script(e, 8);
     }

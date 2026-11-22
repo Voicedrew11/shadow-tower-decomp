@@ -2101,22 +2101,22 @@ int vis_id_is_visible(u16 id)
 ADDRESS(0x8001c8e0, 0xe8)
 void vis_collect_creatures(void)
 {
-    Vis212 *e;
+    Creature *e;
     int i;
 
     vis_table_a.count = 0;
     e = vis_table_a.entries;
     i = 64;
     while (i--) {
-        if (e->unk03 != 2 && (e->unk05 == 1 || e->unk05 == 5)
-            && (e->unk03 == 1 || vis_id_is_visible(e->unk26))) {
+        if (e->visibility != 2 && (e->state == 1 || e->state == 5)
+            && (e->visibility == 1 || vis_id_is_visible(e->block))) {
             if (vis_table_a.count >= 12) {
                 return;
             }
             vis_table_a.list[vis_table_a.count] = 63 - i;
             vis_table_a.count++;
         } else {
-            e->unk04 = 0;
+            e->draw_state = 0;
         }
         e++;
     }
@@ -4528,8 +4528,8 @@ ADDRESS(0x800241d0, 0x514)
 void world_draw_creatures(void)
 {
     ScratchPad *sp = SCRATCHPAD;
-    Vis212 *e;
-    Vis192 *t;
+    Creature *e;
+    CreatureType *t;
     VECTOR unused;
     StAnimFile *model;
     VECTOR *at;
@@ -4546,70 +4546,70 @@ void world_draw_creatures(void)
     sp->clut_base = 0;
     while (--i != -1) {
         e = &vis_table_a.entries[vis_table_a.list[i]];
-        t = &vis_table_a.unk3500[e->unk02];
-        anim_get_file(e->unk0B + SLOT_A, &model);
-        e->unk04 = 0;
-        flags = e->unk1C.bytes[2] & 0x3f;
-        e->unk1C.bytes[2] = flags;
-        if (e->unk3C <= world_state.unk1EE04 * world_state.unk1EE04)
-            e->unk1C.bytes[2] = flags | 0x40;
-        else if (e->unk3C >= world_state.unk1EE00 * world_state.unk1EE00)
-            e->unk1C.bytes[2] = flags | 0x80;
-        if (e->unk1C.word & 0x300000)
-            depth = e->unk34;
+        t = &vis_table_a.types[e->type];
+        anim_get_file(e->model_slot + SLOT_A, &model);
+        e->draw_state = 0;
+        flags = e->status.bytes[2] & 0x3f;
+        e->status.bytes[2] = flags;
+        if (e->player_dist_sq <= world_state.unk1EE04 * world_state.unk1EE04)
+            e->status.bytes[2] = flags | 0x40;
+        else if (e->player_dist_sq >= world_state.unk1EE00 * world_state.unk1EE00)
+            e->status.bytes[2] = flags | 0x80;
+        if (e->status.word & 0x300000)
+            depth = e->hurt_timer;
         else
-            depth = e->unk36;
-        if (t->unk10 != 0xffff) {
-            bit = t->unk10;
+            depth = e->fade;
+        if (t->kind != 0xffff) {
+            bit = t->kind;
             game_progress.unk14A8[bit >> 5] |= 1 << (bit & 0x1f);
         }
         if (model != NULL) {
-        at = &e->unk74;
-        if (e->unk70 & 0x20) {
+        at = &e->position;
+        if (e->flags & 0x20) {
             sp->unkD8.vx = sp->unkD8.vy = sp->unkD8.vz = 0;
-            sp->ot = world_state.ot_cur + e->unk21;
-            sp->near_z = 4 - e->unk21;
-            sp->far_z = 4096 - e->unk21;
-            model_draw(0, e->unk0B + SLOT_A, at, &sp->unkD8, &e->unk94, &e->unkA4,
-                          &identity_matrix, e->unk08, e->unk2A, 4096 - depth, e->unk24,
-                          e->unk1C.bytes[2], 0);
+            sp->ot = world_state.ot_cur + e->depth_bias;
+            sp->near_z = 4 - e->depth_bias;
+            sp->far_z = 4096 - e->depth_bias;
+            model_draw(0, e->model_slot + SLOT_A, at, &sp->unkD8, &e->scale, &e->anim_slot,
+                          &identity_matrix, e->anim, e->anim_frame, 4096 - depth, e->unk24,
+                          e->status.bytes[2], 0);
         } else {
             VECTOR pos;
             SVECTOR scale = {4096, 4096, 4096, 0};
 
-            e->unk04 = 1;
-            sp->unkD8.vx = e->unk8C;
-            sp->unkD8.vy = e->unk8E;
-            sp->unkD8.vz = e->unk90;
-            if (e->unk03 != 3) {
-                sp->ot = world_state.ot_cur + e->unk21;
-                sp->near_z = 4 - e->unk21;
-                sp->far_z = 4096 - e->unk21;
-                model_draw(0, e->unk0B + SLOT_A, at, &sp->unkD8, &e->unk94, &e->unkA4,
-                              &world_state.unk1ECE8, e->unk08, e->unk2A, 4096 - depth, e->unk24,
-                              e->unk1C.bytes[2], 0);
+            e->draw_state = 1;
+            sp->unkD8.vx = e->rot_x;
+            sp->unkD8.vy = e->facing;
+            sp->unkD8.vz = e->rot_z;
+            if (e->visibility != 3) {
+                sp->ot = world_state.ot_cur + e->depth_bias;
+                sp->near_z = 4 - e->depth_bias;
+                sp->far_z = 4096 - e->depth_bias;
+                model_draw(0, e->model_slot + SLOT_A, at, &sp->unkD8, &e->scale, &e->anim_slot,
+                              &world_state.unk1ECE8, e->anim, e->anim_frame, 4096 - depth, e->unk24,
+                              e->status.bytes[2], 0);
             }
-            if (e->unk32 != 0) {
-                pos = e->unk74;
-                scale.vx = e->unk32 * 2 + 1024;
-                scale.vz = e->unk32 * 2 + 1024;
-                sp->ot = world_state.ot_cur + e->unk21 - 4;
-                sp->near_z = 8 - e->unk21;
-                sp->far_z = 4100 - e->unk21;
+            if (e->shadow_size != 0) {
+                pos = e->position;
+                scale.vx = e->shadow_size * 2 + 1024;
+                scale.vz = e->shadow_size * 2 + 1024;
+                sp->ot = world_state.ot_cur + e->depth_bias - 4;
+                sp->near_z = 8 - e->depth_bias;
+                sp->far_z = 4100 - e->depth_bias;
                 model_draw(0, 44, &pos, &sp->unkD8, &scale, NULL, &world_state.unk1ECE8, 128, 0,
                               0, 0, 4, 0);
             }
         }
         } else {
-            e->unk04 = 2;
+            e->draw_state = 2;
         }
-        if (e->unk22 != -1) {
+        if (e->voice != -1) {
             SpuGetAllKeysStatus(sound_state.keys);
-            if (sound_state.keys[e->unk22] == 0)
-                e->unk22 = -1;
+            if (sound_state.keys[e->voice] == 0)
+                e->voice = -1;
         }
-        sp->unkF8[e->unk0B] = 1;
-        sp->unkC8[e->unk0B] = e->unk0C;
+        sp->unkF8[e->model_slot] = 1;
+        sp->unkC8[e->model_slot] = e->vram_tag;
     }
     if (area_state.unk1F == 0)
         creature_models_sync(2, 0, 128, 16);

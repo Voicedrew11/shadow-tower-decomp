@@ -108,16 +108,16 @@ ADDRESS(0x801ed4d0, 0x290)
 void map_update_events(void)
 {
     Vis88 *d5 = &vis_table_b.entries[5];
-    Vis212 *e32 = &vis_table_a.entries[32];
+    Creature *e32 = &vis_table_a.entries[32];
     int i;
     u32 flags;
 
     if (game_progress.unk1440.field.gate == 0 && d5->unk10 != 0) {
         game_progress.unk1440.field.gate = 1;
         creature_spawn_now(e32);
-        e32->unk36 = -1;
-        e32->unk03 = 1;
-        e32->unk1C.bytes[2] &= 0xf2;
+        e32->fade = -1;
+        e32->visibility = 1;
+        e32->status.bytes[2] &= 0xf2;
     } else if (game_progress.unk1440.field.gate == 1 && d5->unk10 > 0x800) {
         game_progress.unk1440.field.gate = 2;
     }
@@ -126,7 +126,7 @@ void map_update_events(void)
     if (!game_progress.unk1440.bit.f13 && fdat_801ef938 == 1) {
         game_progress.unk1440.bit.f13 = 1;
         for (i = 0; i < 6; i++) {
-            u8 state = vis_table_a.entries[fdat_801ef504[i]].unk05;
+            u8 state = vis_table_a.entries[fdat_801ef504[i]].state;
 
             if (state != 3 && state != 5) {
                 game_progress.unk1440.bit.f13 = 0;
@@ -161,12 +161,12 @@ void map_update_events(void)
 ADDRESS(0x801ed760, 0x378)
 void map_restore_progress(void)
 {
-    Vis212 *e49 = &vis_table_a.entries[49];
-    Vis212 *e48 = &vis_table_a.entries[48];
-    Vis212 *e32 = &vis_table_a.entries[32];
-    Vis212 *e51 = &vis_table_a.entries[51];
-    Vis212 *e50 = &vis_table_a.entries[50];
-    Vis192 *r11 = &vis_table_a.unk3500[11];
+    Creature *e49 = &vis_table_a.entries[49];
+    Creature *e48 = &vis_table_a.entries[48];
+    Creature *e32 = &vis_table_a.entries[32];
+    Creature *e51 = &vis_table_a.entries[51];
+    Creature *e50 = &vis_table_a.entries[50];
+    CreatureType *r11 = &vis_table_a.types[11];
     Vis48 *c28 = &vis_table_c.entries[28];
     Vis48 *c29 = &vis_table_c.entries[29];
     Vis48 *c10 = &vis_table_c.entries[10];
@@ -186,14 +186,14 @@ void map_restore_progress(void)
         c29->unk08.vx += 0x1ea;
     } else {
         fdat_801ef93c = 0;
-        e49->unk1C.bytes[3] = 1;
+        e49->status.bytes[3] = 1;
         c29->unk22 = 4;
         c11->unk22 = 5;
         c10->unk22 = 5;
         fdat_801ef93c = 0;
-        e49->unk70 &= ~0x2000000;
+        e49->flags &= ~0x2000000;
     }
-    e48->unk1C.bytes[3] = 1;
+    e48->status.bytes[3] = 1;
     if (game_progress.unk1440.word >> 29 & 1) {
         part = vis_records[38].part;
         vis_records[38].unk03 = 3;
@@ -201,33 +201,33 @@ void map_restore_progress(void)
         vis_records[330].part = part;
     }
     if ((int)(game_progress.unk1440.word >> 10 & 7) >= 3) {
-        e32->unk8E = 0x400;
-        e32->unk28 = 0x31;
-        e32->unk6A = 0x800;
-        e32->unk6E = -0x800;
-        e32->unk6C = 0;
-        e32->unk00 = 100;
-        e32->unk06 = vis_records[49].unk01;
-        e32->unk70 &= ~0x2000000;
+        e32->facing = 0x400;
+        e32->home_block = 0x31;
+        e32->home_offset_x = 0x800;
+        e32->home_offset_z = -0x800;
+        e32->home_offset_y = 0;
+        e32->spawn_chance = 100;
+        e32->region = vis_records[49].unk01;
+        e32->flags &= ~0x2000000;
     } else {
-        e32->unk00 = 0;
+        e32->spawn_chance = 0;
     }
     if (game_progress.unk1440.word >> 29 & 1)
-        e32->unk65 = 0;
+        e32->drop_chance0 = 0;
     stage = game_progress.unk1440.word >> 8 & 3;
     fdat_801ef928 = 0;
     if (stage == 1) {
         creature_start_script(e50, 1);
-        e50->unk1C.bytes[3] = 2;
-        r11->unk16 = 0x200;
-        r11->unk18 = 0x800;
-        e51->unk05 = 3;
+        e50->status.bytes[3] = 2;
+        r11->radius = 0x200;
+        r11->height = 0x800;
+        e51->state = 3;
         fdat_801ef92c = stage;
         c28->unk22 = 4;
         fdat_801ef924 = 4;
     } else if (stage == 2) {
-        e50->unk05 = 3;
-        e51->unk05 = 3;
+        e50->state = 3;
+        e51->state = 3;
         fdat_801ef92c = 2;
         c28->unk22 = 5;
         c28->unk08.vz = 0x41b88;
@@ -238,13 +238,13 @@ void map_restore_progress(void)
         fdat_801ef924 = 4;
         c28->unk2D += 3;
     } else {
-        vis_table_a.unk3500[10].unk60[0]->unk00 = 0x70;
-        vis_table_a.unk3500[10].unk60[1]->unk00 = 0x71;
-        vis_table_a.unk3500[10].unk60[2]->unk00 = 0x72;
-        e51->unk1C.bytes[3] = 2;
+        vis_table_a.types[10].scripts[0]->command = 0x70;
+        vis_table_a.types[10].scripts[1]->command = 0x71;
+        vis_table_a.types[10].scripts[2]->command = 0x72;
+        e51->status.bytes[3] = 2;
         creature_start_script(e50, 1);
-        e50->unkB0 = 0;
-        e50->unk1C.bytes[3] = 2;
+        e50->anim_step = 0;
+        e50->status.bytes[3] = 2;
         creature_start_script(e51, 0);
         c28->unk22 = 4;
         fdat_801ef924 = 0;
@@ -269,7 +269,7 @@ void map_restore_progress(void)
 ADDRESS(0x801edad8, 0x24c)
 void map_pick_creature_move(void)
 {
-    Vis212 *e = vis_table_a.unk6138;
+    Creature *e = vis_table_a.current;
     u16 wall;
     int d;
     short x;
@@ -277,46 +277,46 @@ void map_pick_creature_move(void)
     short dx;
     short dz;
 
-    if (e->unk1A == 0xf0 || e->unk1A == 0)
+    if (e->script_state == 0xf0 || e->script_state == 0)
         return;
     creature_choose_action();
     if (!creature_pick_weighted_script())
         return;
-    switch (e->unk44) {
+    switch (e->action) {
     case 8:
-        wall = e->unk5E;
+        wall = e->wall_heading;
         if ((short)wall == 0x7fff) {
-            e->unk5A = e->unk5C = (e->unk56 + 2048) & 0xfff;
+            e->unk5A = e->target_heading = (e->player_heading + 2048) & 0xfff;
         } else {
-            d = (((e->unk56 + 2048) & 0xfff) - wall + 1024) & 0xfff;
+            d = (((e->player_heading + 2048) & 0xfff) - wall + 1024) & 0xfff;
             if (d < 1024 || d > 3072)
-                e->unk5A = e->unk5C = (wall + 3072) & 0xfff;
+                e->unk5A = e->target_heading = (wall + 3072) & 0xfff;
             else
-                e->unk5A = e->unk5C = (wall + 1024) & 0xfff;
+                e->unk5A = e->target_heading = (wall + 1024) & 0xfff;
         }
         break;
     case 2:
     case 4:
     case 16:
     case 32:
-        e->unk5A = e->unk5C = e->unk56;
+        e->unk5A = e->target_heading = e->player_heading;
         break;
     default:
-        e->unk5A = e->unk5C = e->unk8E;
+        e->unk5A = e->target_heading = e->facing;
         break;
     }
-    if (e->unk44 != 8)
-        e->unk5E = 0x7fff;
-    if (vis_records[e->unk26].unk05 != 0 || vis_records[e->unk26].unk06 != 0) {
-        x = rcos(e->unk5C - 1024) >> 5;
-        z = rsin(e->unk5C - 1024) >> 5;
-        dx = x + vis_records[e->unk26].unk05;
-        dz = z + vis_records[e->unk26].unk06;
-        e->unk5C = (ratan2(dz, dx) + 1024) & 0xfff;
+    if (e->action != 8)
+        e->wall_heading = 0x7fff;
+    if (vis_records[e->block].unk05 != 0 || vis_records[e->block].unk06 != 0) {
+        x = rcos(e->target_heading - 1024) >> 5;
+        z = rsin(e->target_heading - 1024) >> 5;
+        dx = x + vis_records[e->block].unk05;
+        dz = z + vis_records[e->block].unk06;
+        e->target_heading = (ratan2(dz, dx) + 1024) & 0xfff;
         x = rcos(e->unk5A) >> 5;
         z = rsin(e->unk5A) >> 5;
-        dx = x + vis_records[e->unk26].unk05;
-        dz = z + vis_records[e->unk26].unk06;
+        dx = x + vis_records[e->block].unk05;
+        dz = z + vis_records[e->block].unk06;
         e->unk5A = ratan2(dz, dx);
     }
 }
@@ -339,21 +339,21 @@ void map_walk_creature_off(void);
 ADDRESS(0x801edd24, 0x718)
 void map_step_creature(void)
 {
-    VisTableA *a = &vis_table_a;
-    Vis212 *e48 = &a->entries[48];
-    Vis212 *e50 = &a->entries[50];
-    Vis212 *e = a->unk6138;
-    Vis192 *r = a->unk6134;
+    CreatureTable *a = &vis_table_a;
+    Creature *e48 = &a->entries[48];
+    Creature *e50 = &a->entries[50];
+    Creature *e = a->current;
+    CreatureType *r = a->current_type;
     VECTOR pos;
     SVECTOR rot;
     u8 part;
 
-    if (e->unk02 == 4 && fdat_801ef93c == 1) {
+    if (e->type == 4 && fdat_801ef93c == 1) {
         rot.vx = 0;
         rot.vy = -0x400;
         viewer.unk218 = 5;
-        pos.vx = e48->unk74.vx - 0xa00;
-        pos.vz = e48->unk74.vz;
+        pos.vx = e48->position.vx - 0xa00;
+        pos.vz = e48->position.vz;
         player_glide_to_pose(&pos, &rot);
         map_slide_ground_item();
         rot.vx = 0xc0;
@@ -368,7 +368,7 @@ void map_step_creature(void)
         viewer.unk218 = 0;
         game_progress.unk1440.word |= 0x4000;
     }
-    if (e->unk02 == 0) {
+    if (e->type == 0) {
         switch (game_progress.unk1440.word >> 10 & 7) {
         case 2:
             viewer.unk218 = 5;
@@ -376,17 +376,17 @@ void map_step_creature(void)
             player_turn_to_creature(e);
             map_walk_creature_off();
             viewer.unk218 = 0;
-            e->unk00 = 100;
-            e->unk8E = 0x400;
-            e->unk28 = 0x31;
-            e->unk74.vx = 0x40800;
-            e->unk74.vy = 0x41000;
-            e->unk74.vz = 0x38800;
+            e->spawn_chance = 100;
+            e->facing = 0x400;
+            e->home_block = 0x31;
+            e->position.vx = 0x40800;
+            e->position.vy = 0x41000;
+            e->position.vz = 0x38800;
             part = vis_records[49].unk01;
-            e->unk6A = 0x800;
-            e->unk6C = 0;
-            e->unk6E = -0x800;
-            e->unk06 = part;
+            e->home_offset_x = 0x800;
+            e->home_offset_y = 0;
+            e->home_offset_z = -0x800;
+            e->region = part;
             game_progress.unk1440.word = (game_progress.unk1440.word & ~0x1c00) | 0xc00;
             break;
         case 3:
@@ -394,7 +394,7 @@ void map_step_creature(void)
                 creature_force_talk(e, 0, 0);
                 game_progress.unk1440.word = (game_progress.unk1440.word & ~0x1c00) | 0x1000;
             } else if (viewer.unk178 == 0x16) {
-                game_progress.unk1448[r->unk09]++;
+                game_progress.unk1448[r->talk_id]++;
                 game_progress.unk1440.word = (game_progress.unk1440.word & ~0x1c00) | 0x1400;
             }
             break;
@@ -404,28 +404,28 @@ void map_step_creature(void)
             break;
         case 5:
             if (game_progress.unk1440.word >> 29 & 1) {
-                game_progress.unk1448[r->unk09]++;
+                game_progress.unk1448[r->talk_id]++;
                 game_progress.unk1440.word = (game_progress.unk1440.word & ~0x1c00) | 0x1800;
             } else {
-                e->unk70 |= 0x2000000;
+                e->flags |= 0x2000000;
                 creature_force_talk(e, 0, 0);
-                e->unk1C.bytes[3] = 2;
+                e->status.bytes[3] = 2;
                 game_progress.unk1440.word = (game_progress.unk1440.word & ~0x1c00) | 0x1800;
-                e->unk70 &= ~0x2000000;
+                e->flags &= ~0x2000000;
             }
             break;
         case 6:
-            if (e->unk64 != 0) {
-                e->unk70 |= 0x2000000;
+            if (e->hit != 0) {
+                e->flags |= 0x2000000;
                 creature_talk(e, 0, 0);
-                e->unk36 = -1;
-                e->unk34 = -1;
-                e->unk1C.bytes[3] = 0;
-                e->unk1C.bytes[2] &= 0xe2;
-                if (e->unk2C == 0)
-                    e->unk2C = 1;
+                e->fade = -1;
+                e->hurt_timer = -1;
+                e->status.bytes[3] = 0;
+                e->status.bytes[2] &= 0xe2;
+                if (e->hp == 0)
+                    e->hp = 1;
                 game_progress.unk1440.word |= 0x1c00;
-                e->unk70 &= ~0x2000000;
+                e->flags &= ~0x2000000;
             }
             break;
         case 1:
@@ -433,19 +433,19 @@ void map_step_creature(void)
             break;
         }
     }
-    if (e->unk02 == 10) {
-        if (e->unk64 != 0) {
+    if (e->type == 10) {
+        if (e->hit != 0) {
             map_start_creature_pair_scene();
             fdat_801ef924 = 3;
         }
         switch (fdat_801ef924) {
         case 0:
             if (viewer.unk178 == 0xa4) {
-                e50->unk36 = -1;
-                e50->unk1C.bytes[2] &= 0xf2;
+                e50->fade = -1;
+                e50->status.bytes[2] &= 0xf2;
                 creature_force_talk(e, 0, 0);
                 fdat_801ef924 = 1;
-                e->unk70 &= ~0x2000000;
+                e->flags &= ~0x2000000;
                 game_progress.unk1440.word = (game_progress.unk1440.word & ~0x300) | 0x100;
             }
             break;
@@ -458,66 +458,66 @@ void map_step_creature(void)
             }
             break;
         case 3:
-            if ((short)e->unk2A + e->unkB0 >= 0x1000) {
+            if ((short)e->anim_frame + e->anim_step >= 0x1000) {
                 creature_despawn(e);
                 fdat_801ef924 = 4;
             }
             break;
         }
     }
-    if (e->unk02 == 11) {
-        if (fdat_801ef924 == 3 && (short)e->unk2A + e->unkB0 >= 0x1000) {
-            e->unk2A = 0xfff;
-            e->unkB0 = 0;
+    if (e->type == 11) {
+        if (fdat_801ef924 == 3 && (short)e->anim_frame + e->anim_step >= 0x1000) {
+            e->anim_frame = 0xfff;
+            e->anim_step = 0;
         }
         if (fdat_801ef924 == 4) {
             if (fdat_801ef92c == 2)
                 creature_start_script(e, 0);
             else
                 creature_start_script(e, 1);
-            e->unk2A = 0xfff;
-            e->unkB0 = 0;
+            e->anim_frame = 0xfff;
+            e->anim_step = 0;
         }
     }
-    e->unk2A += e->unkB0;
+    e->anim_frame += e->anim_step;
     if (creature_step_hurt_timer(e) == 1)
         return;
-    if (e->unkB0 >= 0 ? (short)e->unk2A >= 4096 : (short)e->unk2A <= 0) {
-        if (e->unk02 == 4 && fdat_801ef93c == 0) {
+    if (e->anim_step >= 0 ? (short)e->anim_frame >= 4096 : (short)e->anim_frame <= 0) {
+        if (e->type == 4 && fdat_801ef93c == 0) {
             creature_start_script(e, 0);
-            e->unkB0 = 0;
+            e->anim_step = 0;
         }
-        if (e->unk02 == 0) {
+        if (e->type == 0) {
             if ((game_progress.unk1440.word >> 10 & 7) == 1) {
                 creature_start_script(e, 0);
             } else {
-                e->unk1A = 0xff;
+                e->script_state = 0xff;
                 map_pick_creature_move();
             }
-        } else if (e->unk02 == 10) {
+        } else if (e->type == 10) {
             if (fdat_801ef924 < 2) {
                 if (fdat_801ef924 < 0)
                     goto repeat_current_script;
                 creature_start_script(e, 0);
             } else {
 repeat_current_script:
-                creature_start_script(e, e->unk18);
+                creature_start_script(e, e->script_index);
                 return;
             }
-        } else if (e->unk02 == 11) {
+        } else if (e->type == 11) {
             if (fdat_801ef92c == 2)
                 creature_start_script(e, 0);
             else
                 creature_start_script(e, 1);
-            e->unkB0 = 0;
+            e->anim_step = 0;
         } else {
-            e->unk1A = 0xff;
+            e->script_state = 0xff;
             map_pick_creature_move();
         }
     }
-    if (e->unkA8 != NULL) {
+    if (e->script != NULL) {
         creature_run_script_command(e);
-        e->unk1A = 0xf0;
+        e->script_state = 0xf0;
     }
 }
 
@@ -531,7 +531,7 @@ ADDRESS(0x801ee43c, 0x108)
 void map_object_take_equipment(void)
 {
     Vis88 *d = vis_table_b.unk71B0;
-    Vis212 *e51 = &vis_table_a.entries[51];
+    Creature *e51 = &vis_table_a.entries[51];
     VECTOR pos;
     SVECTOR rot;
 
@@ -560,20 +560,20 @@ ADDRESS(0x801ee544, 0xcc)
 void map_use_item_on_creature(short id)
 {
     VECTOR p;
-    VisRequest req;
+    CollisionRequest req;
 
     p.vx = viewer.position.vx;
     p.vy = viewer.position.vy + 1600;
     p.vz = viewer.position.vz;
-    req.unk0 = 0;
-    req.unk4 = p;
-    req.unk1C = 1056;
-    req.unk1E = 1600;
-    req.unk14.vx = 0;
-    req.unk14.vy = 0;
-    req.unk14.vz = 0;
-    req.unk22 = 0;
-    req.unk20 = 0;
+    req.tests = 0;
+    req.position = p;
+    req.radius = 1056;
+    req.height = 1600;
+    req.velocity.vx = 0;
+    req.velocity.vy = 0;
+    req.velocity.vz = 0;
+    req.speed = 0;
+    req.heading = 0;
     if (id == 0x12f) {
         if (creature_find_in_reach((VisLists *)&req, 1) == 0x30) {
             fdat_801ef93c = 1;
@@ -646,28 +646,28 @@ item_placed:
 ADDRESS(0x801ee7d4, 0x174)
 void map_play_two_creature_scripts(void)
 {
-    Vis212 *e51 = &vis_table_a.entries[51];
+    Creature *e51 = &vis_table_a.entries[51];
     Vis88 *d19 = &vis_table_b.entries[19];
-    Vis212 *e50;
+    Creature *e50;
     int n;
 
     creature_start_script(e51, 3);
     e50 = e51 - 1;
     creature_start_script(e50, 0);
-    e51->unk2A = 0;
-    e50->unk2A = 0;
+    e51->anim_frame = 0;
+    e50->anim_frame = 0;
     do {
         creature_update_script_sound(e50);
         creature_update_script_sound(e51);
-        e50->unk2A += e50->unkB0;
-        if ((short)e50->unk2A > 0x800)
-            e51->unk2A += e51->unkB0;
-        if ((short)e51->unk2A >= 0x1000)
-            e51->unk2A = 0xfff;
-        if ((short)e50->unk2A >= 0x1000)
-            e50->unk2A = 0xfff;
+        e50->anim_frame += e50->anim_step;
+        if ((short)e50->anim_frame > 0x800)
+            e51->anim_frame += e51->anim_step;
+        if ((short)e51->anim_frame >= 0x1000)
+            e51->anim_frame = 0xfff;
+        if ((short)e50->anim_frame >= 0x1000)
+            e50->anim_frame = 0xfff;
         world_run_frame(NULL, NULL, 0);
-    } while ((short)e51->unk2A != 0xfff);
+    } while ((short)e51->anim_frame != 0xfff);
     if (d19->unk0C == 11)
         d19->unk0C = 12;
     n = 16;
@@ -683,17 +683,17 @@ void map_play_two_creature_scripts(void)
 ADDRESS(0x801ee948, 0xcc)
 void map_talk_then_remove_creatures(void)
 {
-    Vis212 *e = &vis_table_a.entries[51];
-    Vis192 *r = &vis_table_a.unk3500[10];
+    Creature *e = &vis_table_a.entries[51];
+    CreatureType *r = &vis_table_a.types[10];
 
-    game_progress.unk1448[r->unk09]++;
-    e->unk70 |= 0x2000000;
-    r->unk60[0]->unk00 = 0x80;
-    r->unk60[1]->unk00 = 0x80;
-    r->unk60[2]->unk00 = 0x80;
-    r->unk60[5]->unk00 = 0x70;
-    r->unk60[6]->unk00 = 0x71;
-    r->unk60[7]->unk00 = 0x72;
+    game_progress.unk1448[r->talk_id]++;
+    e->flags |= 0x2000000;
+    r->scripts[0]->command = 0x80;
+    r->scripts[1]->command = 0x80;
+    r->scripts[2]->command = 0x80;
+    r->scripts[5]->command = 0x70;
+    r->scripts[6]->command = 0x71;
+    r->scripts[7]->command = 0x72;
     creature_talk(e, 0, 0);
     creature_fade_out_despawn(e);
     e--;
@@ -706,19 +706,19 @@ void map_talk_then_remove_creatures(void)
 ADDRESS(0x801eea14, 0xc4)
 void map_start_creature_pair_scene(void)
 {
-    Vis212 *e51 = &vis_table_a.entries[51];
-    Vis212 *e50 = e51 - 1;
-    Vis192 *r = &vis_table_a.unk3500[11];
+    Creature *e51 = &vis_table_a.entries[51];
+    Creature *e50 = e51 - 1;
+    CreatureType *r = &vis_table_a.types[11];
 
     if (fdat_801ef928 == 0) {
-        e51->unk1C.bytes[3] = 1;
+        e51->status.bytes[3] = 1;
         fdat_801ef920 = -1;
-        e51->unk70 &= ~0x2000000;
+        e51->flags &= ~0x2000000;
         creature_start_script(e51, 8);
         creature_start_script(e50, 1);
         fdat_801ef92c = 1;
-        r->unk16 = 0x200;
-        r->unk18 = 0x800;
+        r->radius = 0x200;
+        r->height = 0x800;
         fdat_801ef928 = 1;
         game_progress.unk1440.word = (game_progress.unk1440.word & ~0x300) | 0x100;
     }
@@ -780,7 +780,7 @@ void map_turn_view_during_script(void)
 {
     SVECTOR from;
     SVECTOR to;
-    Vis212 *e;
+    Creature *e;
     int n;
     int total;
 
@@ -793,21 +793,21 @@ void map_turn_view_during_script(void)
     if (from.vy > 2048)
         from.vy -= 4096;
     creature_start_script(e, 0);
-    n = 0x1000 / e->unkB0;
+    n = 0x1000 / e->anim_step;
     total = n;
     do {
         creature_update_script_sound(e);
-        e->unk2A += e->unkB0;
-        if ((short)e->unk2A >= 0x1000)
-            e->unk2A = 0xfff;
+        e->anim_frame += e->anim_step;
+        if ((short)e->anim_frame >= 0x1000)
+            e->anim_frame = 0xfff;
         viewer.unk278.vx = (from.vx * n + to.vx * (total - n)) / total;
         viewer.unk268 = viewer.unk278.vx + viewer.unk280.halves[0] + viewer.unk288 + viewer.unk290;
         viewer.unk278.vy = (from.vy * n + to.vy * (total - n)) / total;
         viewer.unk26A = viewer.unk278.vy + viewer.unk280.halves[1] + viewer.unk28A + viewer.unk292;
         world_run_frame(NULL, (SVECTOR *)&viewer.unk268, 0);
         n--;
-    } while ((short)e->unk2A != 0xfff);
-    e->unk70 |= 0x2000000;
+    } while ((short)e->anim_frame != 0xfff);
+    e->flags |= 0x2000000;
 }
 
 /*
@@ -818,7 +818,7 @@ void map_turn_view_during_script(void)
 ADDRESS(0x801eeeb4, 0x1c8)
 void map_hand_over_item(void)
 {
-    Vis212 *e = &vis_table_a.entries[49];
+    Creature *e = &vis_table_a.entries[49];
     Vis48 *c10 = &vis_table_c.entries[10];
     Vis48 *c11 = &vis_table_c.entries[11];
     Vis48 *c;
@@ -831,15 +831,15 @@ void map_hand_over_item(void)
         c = c11;
     do {
         creature_update_script_sound(e);
-        e->unk2A += e->unkB0;
-        if ((s16)e->unk2A >= 0x1000)
-            e->unk2A = 0xfff;
-        anim_get_vertex(e->unk0B + 128, e->unk08, (s16)e->unk2A, 0x160, &v);
-        c->unk08.vx = e->unk74.vx - v.vx;
-        c->unk08.vy = e->unk74.vy + v.vy;
-        c->unk08.vz = e->unk74.vz - v.vz;
+        e->anim_frame += e->anim_step;
+        if ((s16)e->anim_frame >= 0x1000)
+            e->anim_frame = 0xfff;
+        anim_get_vertex(e->model_slot + 128, e->anim, (s16)e->anim_frame, 0x160, &v);
+        c->unk08.vx = e->position.vx - v.vx;
+        c->unk08.vy = e->position.vy + v.vy;
+        c->unk08.vz = e->position.vz - v.vz;
         world_run_frame(NULL, &viewer.unk278, 0);
-    } while ((s16)e->unk2A != 0xfff);
+    } while ((s16)e->anim_frame != 0xfff);
     c->unk22 = 2;
     viewer.unk268 = viewer.unk278.vx + viewer.unk280.halves[0] + viewer.unk288 + viewer.unk290;
     viewer.unk26A = viewer.unk278.vy + viewer.unk280.halves[1] + viewer.unk28A + viewer.unk292;
@@ -856,29 +856,29 @@ void map_hand_over_item(void)
 ADDRESS(0x801ef07c, 0x144)
 void map_walk_creature_off(void)
 {
-    Vis212 *e = &vis_table_a.entries[32];
+    Creature *e = &vis_table_a.entries[32];
 
     creature_start_script(e, 9);
     do {
         creature_update_script_sound(e);
-        e->unk2A += e->unkB0;
-        if ((short)e->unk2A >= 0x1000)
-            e->unk2A = 0xfff;
-        if (e->unk2A > 0xa00 && e->unk2A < 0xdfc)
+        e->anim_frame += e->anim_step;
+        if ((short)e->anim_frame >= 0x1000)
+            e->anim_frame = 0xfff;
+        if (e->anim_frame > 0xa00 && e->anim_frame < 0xdfc)
             creature_turn_toward(0x400, 0x80);
-        if ((short)e->unk2A > 0xdfc)
-            e->unk74.vx += 0x40;
+        if ((short)e->anim_frame > 0xdfc)
+            e->position.vx += 0x40;
         world_run_frame(NULL, NULL, 0);
-    } while ((short)e->unk2A != 0xfff);
+    } while ((short)e->anim_frame != 0xfff);
     creature_start_script(e, 1);
     do {
         creature_update_script_sound(e);
-        e->unk2A += e->unkB0;
-        if ((short)e->unk2A > 0x1000)
-            e->unk2A = 0;
-        e->unk74.vx += 0x40;
+        e->anim_frame += e->anim_step;
+        if ((short)e->anim_frame > 0x1000)
+            e->anim_frame = 0;
+        e->position.vx += 0x40;
         world_run_frame(NULL, NULL, 0);
-    } while (e->unk74.vx <= 0x3f000);
+    } while (e->position.vx <= 0x3f000);
 }
 
 /*
