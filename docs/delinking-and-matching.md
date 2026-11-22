@@ -372,7 +372,7 @@ an argument, a handler table an overlay brings) has no value chain inside the
 caller. Its evidence is curated in two tables, checked by
 `scripts/kf/indirect_pointers.py`: `config/retail/indirect_pointers.tsv`
 lists every value source the review found for one typed member
-(`AreaHooks.unk40`): a `table-word` (a code pointer in a data word, which needs
+(`AreaHooks.creature_pick_move`): a `table-word` (a code pointer in a data word, which needs
 a reviewed `mips32_candidate` row matching the bytes; `source_image`
 `FDAT_*.BIN` means the same word in every overlay of the program) or an
 `address` (a `lui`/low pair in the audited image's code taking a function's

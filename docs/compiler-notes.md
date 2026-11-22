@@ -168,11 +168,11 @@ Cause: a member access (`obj.field`, also a constant index) expands as `R =
 &obj; mem(R + 16)`; a dereference of a constant address expression
 (`(&obj.first)[2]`, `*(int *)((char *)&obj + 16)`) expands as `R = obj+16;
 mem(R)`, which loop.c folds back into the load. A struct `VAR_DECL` is
-`BLKmode`, so `viewer.unk38[i]` forces its address into a register, while
-`*(viewer.unk38 + i)` goes through `ADDR_EXPR` and yields the constant
+`BLKmode`, so `viewer.equipment[i]` forces its address into a register, while
+`*(viewer.equipment + i)` goes through `ADDR_EXPR` and yields the constant
 `sym+56`. Outside loops the two spellings usually give the same code.
 Examples: OPTXT `0x80012d04` (`(&pad.trigger)[2]`), ST `0x8005ad00`
-(`*(viewer.unk38 + 2)`), ST `player_update_status` (`0x8003c24c`): `addiu
+(`*(viewer.equipment + 2)`), ST `player_update_status` (`0x8003c24c`): `addiu
 a0,s0,-400; lw v0,400(a0)` (a base re-derived from a pointer into the object)
 is a member access that cse rewrote through a related register, which needed
 the member to exist in the type.
@@ -367,8 +367,8 @@ value and give another allocation); a narrowed `HImode` sum is not equated
 with the `SImode` one, so `addu v0,s0,v1 ... addu v0,v1,s0` (one sum formed
 twice) means one operand is a 16-bit variable (ST `0x80050768`); `x >> 2` on a
 `u8` and the same value read back from a `u8` variable differ (ST
-`0x8004e960`); cse never looks inside `zero_extend(mem)`, so `viewer.unkB6 /=
-2` reloads while `b6 = viewer.unkB6; viewer.unkB6 = b6 / 2;` copies the stored
+`0x8004e960`); cse never looks inside `zero_extend(mem)`, so `viewer.physical_base /=
+2` reloads while `b6 = viewer.physical_base; viewer.physical_base = b6 / 2;` copies the stored
 register (ST `0x8005a3a8`).
 
 **cse follows jumps only into single-use labels.** A conditional jump is
@@ -465,7 +465,7 @@ differs. Forms that changed the count:
 - `s++; s++;` instead of `s += 2` adds one RTL insn (combine merges them
   later): ST `0x8002732c`.
 - reaching a table through a pointer set before the loop removes two movables:
-  ST `0x8002b84c` (`mask = pad_state.unk22;`, which let the frame address
+  ST `0x8002b84c` (`mask = pad_state.buttons;`, which let the frame address
   be hoisted), ST `0x800642e8` (`table = &vis_table_c;` lifts the threshold by
   6, so three viewer addresses are hoisted and the fourth stays, as in
   retail).
@@ -491,7 +491,7 @@ literal is not (VS `0x8002ad40`).
 **Loads and aliasing.** loop.c hoists a load only if no store in the loop can
 alias it. Its test (`init_alias_analysis` in `sched.c`) knows a pointer's
 value only when the pseudo has a `REG_EQUAL` constant note and exactly one
-set. `u16 *p = NULL; ... p = viewer.unkC0;` has two sets at loop time, so `*p`
+set. `u16 *p = NULL; ... p = viewer.weapon_element_attack;` has two sets at loop time, so `*p`
 may alias everything and a load retail repeats every pass stays in the loop
 (ST `0x8005a3a8`). A load that retail does before a loop with a call is a
 statement before the loop (VS `0x80020aa4`).

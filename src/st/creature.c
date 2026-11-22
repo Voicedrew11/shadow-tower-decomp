@@ -95,7 +95,7 @@ void creature_despawn(Creature *e)
             vis_table_a.zone_history[3] = 255;
     } else if (e < &vis_table_a.entries[48]) {
         game_progress.unk16E4[area_state.area]++;
-        viewer.unk30++;
+        viewer.creatures_killed++;
     }
     e->state = 3;
     vis_table_a.unk612C -= r->unk12;
@@ -235,7 +235,7 @@ ADDRESS(0x8004b270, 0x44)
 void creature_end_script(void)
 {
     vis_table_a.current->script_state = 255;
-    area_state.hooks->unk40();
+    area_state.hooks->creature_pick_move();
 }
 
 ADDRESS(0x8004b2b4, 0x28)
@@ -281,7 +281,7 @@ void creature_update_spawn(void)
             e->action = 0;
             if (r->actions & 0x80)
                 e->action = 128;
-            area_state.hooks->unk40();
+            area_state.hooks->creature_pick_move();
         } else if (e->spawn_chance != 0 && vis_table_a.current_index < 32) {
             e->zone = 253;
         }
@@ -472,12 +472,12 @@ int creature_find_in_reach(CollisionState *req, int arg1)
             continue;
         r = &vis_table_a.types[e->type];
         if (mode == 1 &&
-            !angle_within(viewer.unk278.vy,
+            !angle_within(viewer.view_rot.vy,
                            (short)angle_from_xz(e->position.vx - viewer.position.vx, e->position.vz - viewer.position.vz),
                            256))
             continue;
         if (mode == 4 &&
-            !angle_within(viewer.unk278.vy,
+            !angle_within(viewer.view_rot.vy,
                            (short)angle_from_xz(e->position.vx - viewer.position.vx, e->position.vz - viewer.position.vz),
                            384))
             continue;
@@ -874,7 +874,7 @@ void effect_jitter_offset(SVECTOR *off, VECTOR *out, VECTOR *base)
  * `pos` is the aim point (raised 800; its callers pass the player) and
  * `target` the shot's origin. Turns from the entry's facing by at most
  * `turn` per step; with pitch -1 the pitch turns too. n > 1 steps lead
- * the aim point by the player's motion (viewer.unk260). Stores the final
+ * the aim point by the player's motion (viewer.velocity). Stores the final
  * rotation (facing the other way) in out and returns its yaw. */
 ADDRESS(0x8004cc70, 0x278)
 int creature_aim_shot(e, pos, speed, target, dir, out, pitch, turn, n)
@@ -921,7 +921,7 @@ int n;
         vector_scale((short)speed, dir);
         if (--n == 0)
             break;
-        vector_add_scaled(&p, &viewer.unk260,
+        vector_add_scaled(&p, &viewer.velocity,
                       vector_length_xyz(target->vx - p.vx, target->vy - p.vy, target->vz - p.vz) / speed,
                       &p);
     }

@@ -80,7 +80,7 @@ void map_update_events(void)
             creature_roll_drops(e4);
             creature_award_kill_bonuses(e4);
             e4->hurt_timer = 0x1000;
-            viewer.unk30++;
+            viewer.creatures_killed++;
         }
         if (e5->state == 1) {
             e5->state = state;
@@ -90,7 +90,7 @@ void map_update_events(void)
             creature_roll_drops(e5);
             creature_award_kill_bonuses(e5);
             e5->hurt_timer = 0x1000;
-            viewer.unk30++;
+            viewer.creatures_killed++;
         }
     }
 }

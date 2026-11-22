@@ -107,10 +107,10 @@ void map_update_events(void)
     Creature *e7 = &vis_table_a.entries[7];
 
     if (fdat_801edaf8 == 0) {
-        if (viewer.unk178 == 0x1f2) {
+        if (viewer.block == 0x1f2) {
             fdat_801edaf4 = 1;
             fdat_801edaf8 = 1;
-        } else if (viewer.unk178 == 0x63) {
+        } else if (viewer.block == 0x63) {
             fdat_801edaf4 = 0;
             fdat_801edaf8 = 1;
         }
@@ -122,22 +122,22 @@ void map_update_events(void)
             e49->spawn_chance = 0;
         if (fdat_801edaf4 == 0 && e48->state == 1) {
             fdat_801edafc = 1;
-            viewer.unk218 = 5;
+            viewer.state = 5;
         }
     }
-    if (fdat_801edafc == 1 && area_state.unk18 == -1 && (short)area_state.unk2 >= 2)
+    if (fdat_801edafc == 1 && area_state.entry_fade_start == -1 && (short)area_state.load_step >= 2)
         fdat_801edafc = 2;
     if (fdat_801edafc == 2) {
         creature_force_talk(e48, 0, 0);
         creature_fade_out_despawn(e48);
         fdat_801edafc = 0xff;
-        viewer.unk218 = 0;
+        viewer.state = 0;
     }
-    if (fdat_801edafc == 0xff && !(viewer.unk2C & 0x800)) {
-        viewer.unk188 = 30;
-        viewer.unk182 = 0;
+    if (fdat_801edafc == 0xff && !(viewer.status_flags & 0x800)) {
+        viewer.magic_gauge_delay = 30;
+        viewer.magic_gauge = 0;
     }
-    if (fdat_801edb00 == 0 && viewer.unk178 == 0x10e && fdat_801edaf4 == 1
+    if (fdat_801edb00 == 0 && viewer.block == 0x10e && fdat_801edaf4 == 1
         && fdat_801edaf8 == 1) {
         creature_force_talk(e49, 0, 0);
         creature_force_talk(e49, 0, 0);

@@ -13,4 +13,4 @@
 #include <st/pad.h>
 
 DATA(0x801cd120, 0x9, ".bss")
-Data801cd120 game_settings;
+GameSettings game_settings;

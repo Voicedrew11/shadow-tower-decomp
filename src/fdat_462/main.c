@@ -89,13 +89,13 @@ void map_pick_shopkeeper_line(void)
     for (i = 0; i < 266; i++) {
         if (inventory.counts[i].count == 0)
             continue;
-        if (i == viewer.unk38[0] || i == viewer.unk38[1] || i == viewer.unk38[2]
-            || i == viewer.unk38[3] || i == viewer.unk38[4] || i == viewer.unk38[5]
-            || i == viewer.unk38[7] || i == viewer.unk38[8] || i == viewer.unk38[9]
-            || i == viewer.unk38[10] || i == viewer.unk38[11] || i == viewer.unk38[13]
-            || i == viewer.unk38[14] || i == viewer.unk38[15] || i == viewer.unk38[16]
-            || i == viewer.unk38[17] || i == viewer.unk38[18] || i == viewer.unk38[19]
-            || i == viewer.unk38[20])
+        if (i == viewer.equipment[0] || i == viewer.equipment[1] || i == viewer.equipment[2]
+            || i == viewer.equipment[3] || i == viewer.equipment[4] || i == viewer.equipment[5]
+            || i == viewer.equipment[7] || i == viewer.equipment[8] || i == viewer.equipment[9]
+            || i == viewer.equipment[10] || i == viewer.equipment[11] || i == viewer.equipment[13]
+            || i == viewer.equipment[14] || i == viewer.equipment[15] || i == viewer.equipment[16]
+            || i == viewer.equipment[17] || i == viewer.equipment[18] || i == viewer.equipment[19]
+            || i == viewer.equipment[20])
             continue;
         none = 0;
         break;
@@ -179,7 +179,7 @@ void map_run_shop_visit(void)
         else
             fdat_801ed8c4 = 4;
     } else if (fdat_801ed8c4 == 4) {
-        pad_state.unk4 = 0;
+        pad_state.pressed = 0;
         menu->unk2DC = 4;
         menu->unk2E5 = 0;
         shop_run();

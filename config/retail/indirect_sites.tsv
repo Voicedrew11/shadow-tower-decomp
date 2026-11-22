@@ -7,13 +7,13 @@ VS.EXE	0x8002e9e0	0x8002e868	cd_request_sync_callback	StCdRequest.done	0x2c	twin
 VS.EXE	0x8002ea08	0x8002e868	cd_request_sync_callback	StCdRequest.done	0x2c	twin of cd_queue_sync_callback; request->done(request)
 ST.EXE	0x800438b4	0x80042d74	player_update	AreaHooks.player_died	0x34	area_state.hooks->player_died()
 ST.EXE	0x80045d48	0x800456f8	area_load_update	AreaHooks.loaded	0x14	area_state.hooks->loaded() after the overlay table is installed
-ST.EXE	0x8004b29c	0x8004b270	creature_end_script	AreaHooks.unk40	0x40	area_state.hooks->unk40()
-ST.EXE	0x8004b4d4	0x8004b2dc	creature_update_spawn	AreaHooks.unk40	0x40	area_state.hooks->unk40()
-ST.EXE	0x8004e698	0x8004e324	creatures_update	AreaHooks.unk40	0x40	area_state.hooks->unk40(), every fourth frame
-ST.EXE	0x8004e6b0	0x8004e324	creatures_update	AreaHooks.unk44	0x44	area_state.hooks->unk44()
-ST.EXE	0x8004e7b8	0x8004e324	creatures_update	AreaHooks.unk44	0x44	area_state.hooks->unk44()
-ST.EXE	0x8004f4e8	0x8004eebc	objects_load	AreaHooks.unk20	0x20	area_state.hooks->unk20(entry, record) for an unknown table B kind
-ST.EXE	0x80052794	0x80050768	objects_update	AreaHooks.unk24	0x24	area_state.hooks->unk24() for an unhandled table B kind
+ST.EXE	0x8004b29c	0x8004b270	creature_end_script	AreaHooks.creature_pick_move	0x40	area_state.hooks->unk40()
+ST.EXE	0x8004b4d4	0x8004b2dc	creature_update_spawn	AreaHooks.creature_pick_move	0x40	area_state.hooks->unk40()
+ST.EXE	0x8004e698	0x8004e324	creatures_update	AreaHooks.creature_pick_move	0x40	area_state.hooks->unk40(), every fourth frame
+ST.EXE	0x8004e6b0	0x8004e324	creatures_update	AreaHooks.creature_step_script	0x44	area_state.hooks->unk44()
+ST.EXE	0x8004e7b8	0x8004e324	creatures_update	AreaHooks.creature_step_script	0x44	area_state.hooks->unk44()
+ST.EXE	0x8004f4e8	0x8004eebc	objects_load	AreaHooks.load_object	0x20	area_state.hooks->unk20(entry, record) for an unknown table B kind
+ST.EXE	0x80052794	0x80050768	objects_update	AreaHooks.update_object	0x24	area_state.hooks->unk24() for an unhandled table B kind
 ST.EXE	0x80054cac	0x80054a54	item_use	AreaHooks.item_used	0x30	area_state.hooks->item_used(id)
 ST.EXE	0x80055150	0x80054a54	item_use	AreaHooks.item_used	0x30	area_state.hooks->item_used(...) (item_use has four source calls on three sites)
 ST.EXE	0x80055174	0x80054a54	item_use	AreaHooks.item_used	0x30	area_state.hooks->item_used(id)

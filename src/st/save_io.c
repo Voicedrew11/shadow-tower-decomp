@@ -75,20 +75,20 @@ void save_pack_data(StSaveData *save, int fresh)
             save->unk14F0[16 + i].unk17 = e48->area;
         }
     }
-    save->unk17F0 = viewer.unk2C;
-    save->unk17F4 = viewer.unk34;
-    save->unk17F8 = viewer.unk2;
-    save->unk17FA = viewer.unk6;
-    save->unk17FC = viewer.unk8;
-    save->unk17FE = viewer.unk30;
+    save->unk17F0 = viewer.status_flags;
+    save->unk17F4 = viewer.play_seconds;
+    save->unk17F8 = viewer.hp;
+    save->unk17FA = viewer.mp;
+    save->unk17FC = viewer.sp_total;
+    save->unk17FE = viewer.creatures_killed;
     save->unk1800 = viewer.unk26;
-    save->unk1801 = viewer.unk27;
-    save->unk1802 = viewer.unk28;
+    save->unk1801 = viewer.cunes_found;
+    save->unk1802 = viewer.items_found;
     save->unk1803 = viewer.unk32;
-    copy_halfwords((u16 *)save->unk1804, (u16 *)viewer.unk62, 14);
-    copy_halfwords((u16 *)save->unk1820, (u16 *)viewer.unk7E, 14);
-    copy_halfwords(save->unk183C, viewer.unk9A, 14);
-    copy_words(save->unk1870, (u32 *)&viewer.unk22C, 3);
+    copy_halfwords((u16 *)save->unk1804, (u16 *)viewer.attributes, 14);
+    copy_halfwords((u16 *)save->unk1820, (u16 *)viewer.attribute_bonuses, 14);
+    copy_halfwords(save->unk183C, viewer.base_attributes, 14);
+    copy_words(save->unk1870, (u32 *)&viewer.save_area, 3);
     save->unk187C[0][0] = viewer.unk190[0][0];
     save->unk187C[0][1] = viewer.unk190[0][1];
     save->unk187C[1][0] = viewer.unk190[1][0];
@@ -115,9 +115,9 @@ void save_pack_data(StSaveData *save, int fresh)
     save->unk187C[11][1] = viewer.unk190[11][1];
     save->unk187C[12][0] = viewer.unk190[12][0];
     save->unk187C[12][1] = viewer.unk190[12][1];
-    save->unk18B0[0] = viewer.unk219;
-    save->unk18B0[1] = viewer.unk21A;
-    save->unk18B0[2] = viewer.unk21B;
+    save->unk18B0[0] = viewer.shield_wear;
+    save->unk18B0[1] = viewer.armour_wear;
+    save->unk18B0[2] = viewer.weapon_wear;
     if (fresh) {
         save->unk1858.vx = 0x3d000;
         save->unk1858.vy = 0x405c0;
@@ -127,14 +127,14 @@ void save_pack_data(StSaveData *save, int fresh)
         save->unk1868.vz = 0;
     } else {
         save->unk1858 = *(VECTOR *)&viewer.position.vx;
-        save->unk1868 = viewer.unk278;
+        save->unk1868 = viewer.view_rot;
     }
-    save->unk18B4[0] = game_settings.unk0;
-    save->unk18B4[1] = game_settings.unk1;
-    save->unk18B4[2] = game_settings.unk2;
-    save->unk18B4[3] = game_settings.unk3;
-    save->unk18B4[4] = game_settings.unk4;
-    save->unk18B4[5] = game_settings.unk5;
+    save->unk18B4[0] = game_settings.bgm_volume;
+    save->unk18B4[1] = game_settings.sfx_volume;
+    save->unk18B4[2] = game_settings.walk_bob;
+    save->unk18B4[3] = game_settings.show_status;
+    save->unk18B4[4] = game_settings.subtitles;
+    save->unk18B4[5] = game_settings.vibration;
     if (game_progress.unk16E0 == -1) {
         /* A save id from the vsync counter (low half) and rand() (high). */
         ((u16 *)&game_progress.unk16E0)[0] = VSync(-1);
@@ -145,27 +145,27 @@ void save_pack_data(StSaveData *save, int fresh)
     copy_words(save->unk18D0, &game_progress.unk14A8[10], 0x4f);
     copy_words(save->unk1A0C, (u32 *)&inventory, 0x4f);
     copy_words(save->unk1B48, vis_table_c.placed_bits, 10);
-    save->unk1B70[0] = viewer.unk38[0];
-    save->unk1B70[1] = viewer.unk38[1];
-    save->unk1B70[2] = viewer.unk38[2];
-    save->unk1B70[3] = viewer.unk38[3];
-    save->unk1B70[4] = viewer.unk38[4];
-    save->unk1B70[5] = viewer.unk38[5];
-    save->unk1B70[6] = viewer.unk38[6];
-    save->unk1B70[7] = viewer.unk38[7];
-    save->unk1B70[8] = viewer.unk38[8];
-    save->unk1B70[9] = viewer.unk38[9];
-    save->unk1B70[10] = viewer.unk38[10];
-    save->unk1B70[11] = viewer.unk38[11];
-    save->unk1B70[12] = viewer.unk38[12];
-    save->unk1B70[13] = viewer.unk38[13];
-    save->unk1B70[14] = viewer.unk38[14];
-    save->unk1B70[15] = viewer.unk38[15];
-    save->unk1B70[16] = viewer.unk38[16];
-    save->unk1B70[17] = viewer.unk38[17];
-    save->unk1B70[18] = viewer.unk38[18];
-    save->unk1B70[19] = viewer.unk38[19];
-    save->unk1B70[20] = viewer.unk38[20];
+    save->unk1B70[0] = viewer.equipment[0];
+    save->unk1B70[1] = viewer.equipment[1];
+    save->unk1B70[2] = viewer.equipment[2];
+    save->unk1B70[3] = viewer.equipment[3];
+    save->unk1B70[4] = viewer.equipment[4];
+    save->unk1B70[5] = viewer.equipment[5];
+    save->unk1B70[6] = viewer.equipment[6];
+    save->unk1B70[7] = viewer.equipment[7];
+    save->unk1B70[8] = viewer.equipment[8];
+    save->unk1B70[9] = viewer.equipment[9];
+    save->unk1B70[10] = viewer.equipment[10];
+    save->unk1B70[11] = viewer.equipment[11];
+    save->unk1B70[12] = viewer.equipment[12];
+    save->unk1B70[13] = viewer.equipment[13];
+    save->unk1B70[14] = viewer.equipment[14];
+    save->unk1B70[15] = viewer.equipment[15];
+    save->unk1B70[16] = viewer.equipment[16];
+    save->unk1B70[17] = viewer.equipment[17];
+    save->unk1B70[18] = viewer.equipment[18];
+    save->unk1B70[19] = viewer.equipment[19];
+    save->unk1B70[20] = viewer.equipment[20];
     save->unk1B9C[0] = game_progress.unk14A8[89];
     save->unk1B9C[1] = game_progress.unk14A8[90];
     save->unk1B9C[2] = game_progress.unk14A8[91];
@@ -173,9 +173,9 @@ void save_pack_data(StSaveData *save, int fresh)
     for (i = 0; i < 314; i++, r++)
         save->unk1BA8[i] = r->durability;
     copy_words(save->unk1CE4, (u32 *)lighting.area_mode, 24);
-    copy_halfwords(save->unk1D44, inventory.unk13A, 14);
-    *(StHalves7 *)save->unk1D60 = *(StHalves7 *)inventory.unk156;
-    copy_halfwords(save->unk1D6E, pad_state.unk22, 12);
+    copy_halfwords(save->unk1D44, inventory.shop_ids, 14);
+    *(StHalves7 *)save->unk1D60 = *(StHalves7 *)inventory.shop_stock;
+    copy_halfwords(save->unk1D6E, pad_state.buttons, 12);
 }
 
 /* Restores the state save_pack_data saved. */
@@ -262,24 +262,24 @@ void save_unpack_data(StSaveData *save)
             entry->state = 0;
         }
     }
-    viewer.unk2C = save->unk17F0;
-    viewer.unk34 = save->unk17F4;
-    viewer.unk2 = save->unk17F8;
-    viewer.unk6 = save->unk17FA;
-    viewer.unk8 = save->unk17FC;
-    viewer.unk30 = save->unk17FE;
+    viewer.status_flags = save->unk17F0;
+    viewer.play_seconds = save->unk17F4;
+    viewer.hp = save->unk17F8;
+    viewer.mp = save->unk17FA;
+    viewer.sp_total = save->unk17FC;
+    viewer.creatures_killed = save->unk17FE;
     viewer.unk26 = save->unk1800;
-    viewer.unk27 = save->unk1801;
-    viewer.unk28 = 0;
+    viewer.cunes_found = save->unk1801;
+    viewer.items_found = 0;
     for (bit = 0; bit < 266; bit++) {
         if (vis_table_c.collected_bits[bit / 32] & BIT(bit))
-            viewer.unk28++;
+            viewer.items_found++;
     }
     viewer.unk32 = save->unk1803;
-    copy_halfwords((u16 *)viewer.unk62, (u16 *)save->unk1804, 14);
-    copy_halfwords((u16 *)viewer.unk7E, (u16 *)save->unk1820, 14);
-    copy_halfwords(viewer.unk9A, save->unk183C, 14);
-    copy_words((u32 *)&viewer.unk22C, save->unk1870, 3);
+    copy_halfwords((u16 *)viewer.attributes, (u16 *)save->unk1804, 14);
+    copy_halfwords((u16 *)viewer.attribute_bonuses, (u16 *)save->unk1820, 14);
+    copy_halfwords(viewer.base_attributes, save->unk183C, 14);
+    copy_words((u32 *)&viewer.save_area, save->unk1870, 3);
     viewer.unk190[0][0] = save->unk187C[0][0];
     viewer.unk190[0][1] = save->unk187C[0][1];
     viewer.unk190[1][0] = save->unk187C[1][0];
@@ -306,43 +306,43 @@ void save_unpack_data(StSaveData *save)
     viewer.unk190[11][1] = save->unk187C[11][1];
     viewer.unk190[12][0] = save->unk187C[12][0];
     viewer.unk190[12][1] = save->unk187C[12][1];
-    viewer.unk219 = save->unk18B0[0];
-    viewer.unk21A = save->unk18B0[1];
-    viewer.unk21B = save->unk18B0[2];
+    viewer.shield_wear = save->unk18B0[0];
+    viewer.armour_wear = save->unk18B0[1];
+    viewer.weapon_wear = save->unk18B0[2];
     viewer.position = save->unk1858;
-    viewer.unk278 = save->unk1868;
-    game_settings.unk0 = save->unk18B4[0];
-    game_settings.unk1 = save->unk18B4[1];
-    game_settings.unk2 = save->unk18B4[2];
-    game_settings.unk3 = save->unk18B4[3];
-    game_settings.unk4 = save->unk18B4[4];
-    game_settings.unk5 = save->unk18B4[5];
+    viewer.view_rot = save->unk1868;
+    game_settings.bgm_volume = save->unk18B4[0];
+    game_settings.sfx_volume = save->unk18B4[1];
+    game_settings.walk_bob = save->unk18B4[2];
+    game_settings.show_status = save->unk18B4[3];
+    game_settings.subtitles = save->unk18B4[4];
+    game_settings.vibration = save->unk18B4[5];
     game_progress.unk16E0 = save->unk0;
     copy_words(&game_progress.unk14A8[5], save->unk18BC, 5);
     copy_words(&game_progress.unk14A8[10], save->unk18D0, 0x4f);
     copy_words((u32 *)&inventory, save->unk1A0C, 0x4f);
     copy_words(vis_table_c.placed_bits, save->unk1B48, 10);
-    viewer.unk38[0] = save->unk1B70[0];
-    viewer.unk38[1] = save->unk1B70[1];
-    viewer.unk38[2] = save->unk1B70[2];
-    viewer.unk38[3] = save->unk1B70[3];
-    viewer.unk38[4] = save->unk1B70[4];
-    viewer.unk38[5] = save->unk1B70[5];
-    viewer.unk38[6] = save->unk1B70[6];
-    viewer.unk38[7] = save->unk1B70[7];
-    viewer.unk38[8] = save->unk1B70[8];
-    viewer.unk38[9] = save->unk1B70[9];
-    viewer.unk38[10] = save->unk1B70[10];
-    viewer.unk38[11] = save->unk1B70[11];
-    viewer.unk38[12] = save->unk1B70[12];
-    viewer.unk38[13] = save->unk1B70[13];
-    viewer.unk38[14] = save->unk1B70[14];
-    viewer.unk38[15] = save->unk1B70[15];
-    viewer.unk38[16] = save->unk1B70[16];
-    viewer.unk38[17] = save->unk1B70[17];
-    viewer.unk38[18] = save->unk1B70[18];
-    viewer.unk38[19] = save->unk1B70[19];
-    viewer.unk38[20] = save->unk1B70[20];
+    viewer.equipment[0] = save->unk1B70[0];
+    viewer.equipment[1] = save->unk1B70[1];
+    viewer.equipment[2] = save->unk1B70[2];
+    viewer.equipment[3] = save->unk1B70[3];
+    viewer.equipment[4] = save->unk1B70[4];
+    viewer.equipment[5] = save->unk1B70[5];
+    viewer.equipment[6] = save->unk1B70[6];
+    viewer.equipment[7] = save->unk1B70[7];
+    viewer.equipment[8] = save->unk1B70[8];
+    viewer.equipment[9] = save->unk1B70[9];
+    viewer.equipment[10] = save->unk1B70[10];
+    viewer.equipment[11] = save->unk1B70[11];
+    viewer.equipment[12] = save->unk1B70[12];
+    viewer.equipment[13] = save->unk1B70[13];
+    viewer.equipment[14] = save->unk1B70[14];
+    viewer.equipment[15] = save->unk1B70[15];
+    viewer.equipment[16] = save->unk1B70[16];
+    viewer.equipment[17] = save->unk1B70[17];
+    viewer.equipment[18] = save->unk1B70[18];
+    viewer.equipment[19] = save->unk1B70[19];
+    viewer.equipment[20] = save->unk1B70[20];
     game_progress.unk14A8[89] = save->unk1B9C[0];
     game_progress.unk14A8[90] = save->unk1B9C[1];
     game_progress.unk14A8[91] = save->unk1B9C[2];
@@ -350,9 +350,9 @@ void save_unpack_data(StSaveData *save)
     for (i = 0; i < 314; i++, r++)
         r->durability = save->unk1BA8[i];
     copy_words((u32 *)lighting.area_mode, save->unk1CE4, 24);
-    copy_halfwords(inventory.unk13A, save->unk1D44, 14);
-    *(StHalves7 *)inventory.unk156 = *(StHalves7 *)save->unk1D60;
-    copy_halfwords(pad_state.unk22, save->unk1D6E, 12);
+    copy_halfwords(inventory.shop_ids, save->unk1D44, 14);
+    *(StHalves7 *)inventory.shop_stock = *(StHalves7 *)save->unk1D60;
+    copy_halfwords(pad_state.buttons, save->unk1D6E, 12);
 }
 
 ADDRESS(0x8005735c, 0x30)

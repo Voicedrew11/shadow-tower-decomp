@@ -111,8 +111,8 @@ void creature_award_kill_bonuses(Creature *e)
     int i;
 
     for (i = 0; i < 14; i++) {
-        viewer.unk9A[i] += r->kill_bonus[i];
-        viewer.unk8 += r->kill_bonus[i];
+        viewer.base_attributes[i] += r->kill_bonus[i];
+        viewer.sp_total += r->kill_bonus[i];
     }
     player_compute_derived_stats(0);
 }
@@ -131,8 +131,8 @@ int creature_test_player_aim(Creature *e, short reach)
     short half;
     int ay;
 
-    yaw = (viewer.unk26A - e->player_heading) & 0xfff;
-    pitch = viewer.unk268 & 0xfff;
+    yaw = (viewer.yaw - e->player_heading) & 0xfff;
+    pitch = viewer.pitch & 0xfff;
     if (reach + e->radius < e->player_dist_xz)
         return 0;
     dy = e->position.vy - viewer.position.vy;

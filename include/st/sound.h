@@ -2,7 +2,7 @@
  * ST.EXE sound functions (src/st/sound.c, WIP module): the sound system's
  * start and stop, the one-shot and positional sound players, the listener,
  * and the VAB bank loads through the CD request ring. The sound state block
- * itself is st/data.h's Data801dd1c0. The band's functions that other
+ * itself is st/data.h's SoundState. The band's functions that other
  * modules already call keep their st/funcs.h and st/player.h prototypes.
  */
 #ifndef ST_SOUND_H

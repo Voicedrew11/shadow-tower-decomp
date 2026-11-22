@@ -52,7 +52,7 @@ void map_step_creature(void)
             viewer.unk190[4][1] = 6000;
             viewer.unk190[4][0] = 0;
             game_progress.unk1440.word |= 0x80;
-            viewer.unk2C |= 0x100;
+            viewer.status_flags |= 0x100;
             e->status.bytes[3] = 0;
             e->flags &= ~0x2000000;
         } else if (e->state == 5) {
@@ -64,7 +64,7 @@ next:
         if (e->status.bytes[0] == 0 && game_progress.unk1448[r->talk_id] == 1) {
             e->status.bytes[0] = 1;
             creature_start_script(e, 6);
-            viewer.unk218 = 5;
+            viewer.state = 5;
             c7->state = 2;
         }
         if (e->status.bytes[0] == 1) {
@@ -75,7 +75,7 @@ next:
                 c7->position.vz = e->position.vz + v.vz;
             }
         } else if (e->status.bytes[0] == 2) {
-            viewer.unk218 = 5;
+            viewer.state = 5;
             map_step_leaving_creature(e);
             return;
         } else if (e->hit != 0) {

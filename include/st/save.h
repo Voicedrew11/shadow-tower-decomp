@@ -20,7 +20,7 @@ typedef struct {
     u8 unk17;
 } StSaveSlot;
 
-/* Five bytes copied as one block (area_state.unk4..unk8). */
+/* Five bytes copied as one block (area_state.loaded_area..unk8). */
 typedef struct {
     u8 unk[5];
 } StBytes5;
@@ -39,7 +39,7 @@ typedef struct {
 /* The save-data image save_pack_data fills and save_unpack_data reads. */
 typedef struct {
     u32 unk0;            /* 0x0000: game_progress.unk16E0 */
-    u8 unk4[5];          /* 0x0004: area_state.unk4..unk8 */
+    u8 unk4[5];          /* 0x0004: area_state.loaded_area..unk8 */
     u8 unk9[3];
     u32 unkC[0x60];      /* 0x000c: game_progress.unk0 */
     u32 unk18C[0x30];
@@ -67,7 +67,7 @@ typedef struct {
     s16 unk1820[14];
     u16 unk183C[14];
     VECTOR unk1858;      /* 0x1858: viewer position */
-    SVECTOR unk1868;     /* 0x1868: viewer rotation (viewer.unk278) */
+    SVECTOR unk1868;     /* 0x1868: viewer rotation (viewer.view_rot) */
     u32 unk1870[3];
     s16 unk187C[13][2];
     u8 unk18B0[3];
@@ -86,7 +86,7 @@ typedef struct {
     u32 unk1CE4[24];     /* 0x1ce4: lighting.area_mode */
     u16 unk1D44[14];
     u8 unk1D60[14];
-    u16 unk1D6E[12];     /* 0x1d6e: the button masks (pad_state.unk22) */
+    u16 unk1D6E[12];     /* 0x1d6e: the button masks (pad_state.buttons) */
 } StSaveData;
 
 void item_counts_clear(void);

@@ -183,14 +183,14 @@ void player_examine(long *pos, SVECTOR *rot)
                 talk_show_message(b->unk48);
             break;
         case 226:
-            viewer.unk2 = viewer.unk0;
+            viewer.hp = viewer.max_hp;
             sound_play(8, 128);
             break;
         case 14:
-            if (area_state.unk0 != 1 && area_state.unk18 == -1) {
+            if (area_state.loading != 1 && area_state.entry_fade_start == -1) {
                 lighting.unkA = 1;
                 cd_wait_idle();
-                area_save_snapshot(area_state.unk4);
+                area_save_snapshot(area_state.loaded_area);
                 play_confirm_sound();
                 anim_free_all_for_menu();
                 pad_clear_input();

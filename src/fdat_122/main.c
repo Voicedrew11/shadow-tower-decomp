@@ -67,7 +67,7 @@ void map_restore_progress(void)
 ADDRESS(0x801ed4e4, 0x54)
 void map_update_events(void)
 {
-    if (fdat_801ed938 == 1 && viewer.unk178 == 0x35) {
+    if (fdat_801ed938 == 1 && viewer.block == 0x35) {
         map_spawn_creature_group();
         fdat_801ed938 = 2;
     }

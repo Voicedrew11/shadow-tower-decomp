@@ -19,8 +19,8 @@ ADDRESS(0x80016554, 0x324)
 int view_point_in_near_cone(void)
 {
     ScratchPad *sp = SCRATCHPAD;
-    int pitch = viewer.unk268;
-    int yaw = viewer.unk26A + 1024;
+    int pitch = viewer.pitch;
+    int yaw = viewer.yaw + 1024;
     int half;
     int cos0, sin0, cos1, sin1, cos2, sin2, cosp;
     int back, side, front;

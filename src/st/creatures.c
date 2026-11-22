@@ -47,9 +47,9 @@ int creature_take_damage(e, kind, power, levels, crit)
     if (dmg == 0)
         return 0;
     t = &vis_table_a.types[e->type];
-    if (viewer.unk2C & 0x200000)
+    if (viewer.status_flags & 0x200000)
         dmg = dmg * 3 / 2;
-    luck = viewer.unk1C6;
+    luck = viewer.double_damage_chance;
     if (rand() * 100 / 32768 < luck) {
         sound_play(21, 128);
         dmg <<= 1;
@@ -68,7 +68,7 @@ int creature_take_damage(e, kind, power, levels, crit)
             game_progress.unk14A8[5 + (t->kind >> 5)] |= 1 << (t->kind & 0x1f);
             if (e < &vis_table_a.entries[48]) {
                 game_progress.unk16E4[area_state.area]++;
-                viewer.unk30++;
+                viewer.creatures_killed++;
             }
             e->hp = 0;
             e->status.bytes[2] |= 0x15;
@@ -112,11 +112,11 @@ done:
         e->anim_step = script->anim_step;
     }
     e->hurt_timer = 0xfff;
-    if (viewer.unk218 != 4) {
-        if (viewer.unk1C9)
-            player_add_hp(dmg * viewer.unk1C9 / 100);
-        if (viewer.unk1CA)
-            player_add_mp(dmg * viewer.unk1CA / 100);
+    if (viewer.state != 4) {
+        if (viewer.hp_drain_percent)
+            player_add_hp(dmg * viewer.hp_drain_percent / 100);
+        if (viewer.mp_drain_percent)
+            player_add_mp(dmg * viewer.mp_drain_percent / 100);
     }
     return (short)dmg;
 }
@@ -142,7 +142,7 @@ void creatures_bind_previous_area(void)
 ADDRESS(0x8004e324, 0x5c8)
 void creatures_update(void)
 {
-    MapBlock *r = viewer.unk174;
+    MapBlock *r = viewer.block_record;
     Creature *e;
     CreatureType *t;
     StAnimFile *file;
@@ -220,12 +220,12 @@ void creatures_update(void)
             e->velocity.vz = 0;
             e->velocity.vy = 0;
             e->velocity.vx = 0;
-            if ((vis_table_a.frame & 3) == (e->zone & 3) || viewer.unk21C)
+            if ((vis_table_a.frame & 3) == (e->zone & 3) || viewer.update_all_spawns)
                 creature_update_spawn();
             if (e->state == 1) {
                 if ((vis_table_a.frame & 3) == (vis_table_a.active_count & 3))
-                    area_state.hooks->unk40();
-                area_state.hooks->unk44();
+                    area_state.hooks->creature_pick_move();
+                area_state.hooks->creature_step_script();
                 if (e->fade != -1) {
                     anim_get_file(e->model_slot + 128, &anim);
                     if (anim) {
@@ -239,7 +239,7 @@ void creatures_update(void)
                 e->touched_player = 0;
                 if (*(s32 *)&e->velocity != 0 || e->velocity.vz != 0 || e->vertical_speed != 0) {
                     creature_move(e);
-                    if (!(viewer.unk2C & 0x40000)) {
+                    if (!(viewer.status_flags & 0x40000)) {
                         e->position.vx += e->velocity.vx;
                         e->position.vy += e->velocity.vy;
                         e->position.vz += e->velocity.vz;
@@ -247,7 +247,7 @@ void creatures_update(void)
                 }
                 vis_table_a.active_count++;
             } else if (e->state == 5) {
-                area_state.hooks->unk44();
+                area_state.hooks->creature_step_script();
             }
         }
         e->unk23 = 0;

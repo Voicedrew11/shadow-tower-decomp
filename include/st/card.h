@@ -18,8 +18,8 @@
 typedef struct {
     u8 text[0x39];       /* 0x00 */
     u8 kind;             /* 0x39: the area saved in */
-    u16 unk3A;           /* 0x3a: viewer.unk8 */
-    u16 unk3C;           /* 0x3c: viewer.unk28 */
+    u16 unk3A;           /* 0x3a: viewer.sp_total */
+    u16 unk3C;           /* 0x3c: viewer.items_found */
     u8 unk3E;            /* 0x3e: the sum of the data frames' sums */
     u8 unk3F;
 } CardTitle;

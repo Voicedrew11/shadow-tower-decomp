@@ -33,17 +33,17 @@ void map_step_creature(void)
     Creature *a49 = &vis_table_a.entries[49];
 
     if (e == a48) {
-        if (viewer.unk178 == 0x55 || viewer.unk178 == 0x29) {
+        if (viewer.block == 0x55 || viewer.block == 0x29) {
             map_talk_then_open_door(0x55);
             creature_despawn(e);
             return;
         }
-        if (viewer.unk178 == 0x3b)
+        if (viewer.block == 0x3b)
             e->facing = 0x800;
-        else if (viewer.unk178 == 0x13d)
+        else if (viewer.block == 0x13d)
             e->facing = 0;
     }
-    if (e == a50 && viewer.unk178 == 0x65) {
+    if (e == a50 && viewer.block == 0x65) {
         map_open_door_then_play_script();
         creature_despawn(e);
         creature_despawn(a48);
@@ -58,7 +58,7 @@ void map_step_creature(void)
         if (game_progress.unk1448[r->talk_id] == 4)
             e->flags &= ~0x2000000;
     }
-    if (e == a49 && viewer.unk178 == 0x61) {
+    if (e == a49 && viewer.block == 0x61) {
         map_talk_then_open_door(0x61);
         creature_despawn(e);
         return;
@@ -101,7 +101,7 @@ void map_open_object_drop_item(void)
     AreaObject *door = &vis_table_b.entries[26];
     GroundItem *item = &vis_table_c.entries[2];
 
-    viewer.unk218 = 5;
+    viewer.state = 5;
     rot.vy = -1024;
     rot.vx = 0;
     pos.vx = door->position.vx - 3072;
@@ -122,7 +122,7 @@ void map_open_object_drop_item(void)
         world_run_frame(NULL, NULL, 0);
     } while (door->anim_frame != 0xfff);
     door->state = 0xff;
-    viewer.unk218 = 0;
+    viewer.state = 0;
 }
 
 /*
@@ -169,7 +169,7 @@ void map_talk_then_open_door(int id)
         if ((short)e->anim_frame + e->anim_step >= 0x800 && (short)e->anim_frame < 0x800) {
             viewer.unk190[4][0] = 0;
             viewer.unk190[4][1] = 6000;
-            viewer.unk2C |= 0x100;
+            viewer.status_flags |= 0x100;
         }
         world_run_frame(NULL, NULL, 0);
     } while ((short)e->anim_frame != 0xfff);

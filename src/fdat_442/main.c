@@ -80,7 +80,7 @@ void map_pick_shopkeeper_line(void)
     int sum;
     u32 flag31;
     int i;
-    Data801c7590 *items;
+    Inventory *items;
 
     if (fdat_801ed8c4 != 0)
         return;
@@ -99,11 +99,11 @@ void map_pick_shopkeeper_line(void)
         } else {
             sum = 0;
             for (i = 0; i < 14; i++)
-                sum += inventory.unk156[i];
+                sum += inventory.shop_stock[i];
             if (sum == 0) {
                 fdat_801ed8c8 = 2;
                 creature_start_script(e, 2);
-            } else if (viewer.unk2 < viewer.unk0 >> 3) {
+            } else if (viewer.hp < viewer.max_hp >> 3) {
                 fdat_801ed8c8 = 3;
                 creature_start_script(e, 3);
             } else if (rand() < 0x2000) {
@@ -173,7 +173,7 @@ void map_run_shop_visit(void)
         else
             fdat_801ed8c4 = 4;
     } else if (fdat_801ed8c4 == 4) {
-        pad_state.unk4 = 0;
+        pad_state.pressed = 0;
         menu->unk2DC = 1;
         menu->unk2E5 = 0;
         shop_run();

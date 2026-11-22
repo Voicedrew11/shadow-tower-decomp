@@ -111,7 +111,7 @@ int object_find_usable(int start, CollisionState *req)
         if (e->position.vy < req->position.vy ? e->position.vy < req->position.vy - req->height
                                        : req->position.vy < e->position.vy - (e->height + 0x300))
             continue;
-        d = (viewer.unk26A - e->player_heading) & 0xfff;
+        d = (viewer.yaw - e->player_heading) & 0xfff;
         if (d > 0x800)
             d |= 0xf000;
         if ((r->flags & 8) && (u16)(d + 400) > 800)
@@ -361,7 +361,7 @@ int object_move_child(AreaObject *src, AreaObject *e, SVECTOR *from, SVECTOR *to
     if (*(u8 *)&src->unk50 >= steps) {
         if (fade)
             e->anim_frame = 4095;
-        if (area_state.unk0 == 0)
+        if (area_state.loading == 0)
             e->unk48 = 0xff;
         src->state = 99;
         return 1;
@@ -519,7 +519,7 @@ void object_spawn_side_parts_alt(e, arg)
 
 /* The (x, z) push a kind 224 entry gives the player while its entries rise:
  * written to the object push words vis_table_b.push_x/unk71A8, which
- * player_update_walk adds to the viewer's push (viewer.unk1CC/unk1D0). */
+ * player_update_walk adds to the viewer's push (viewer.push_x/unk1D0). */
 DATA(0x800881e0, 0x8, ".sbss")
 static SVECTOR object_sequence_push;
 
@@ -1071,9 +1071,9 @@ void objects_update(void)
             int rising;
 
             if (player_in_cell_rect(e->position.vx >> 12, e->position.vz >> 12, 1, 1, e->position.vy) == 0
-                && area_state.unk0 == 0)
+                && area_state.loading == 0)
                 break;
-            if ((pad_state.unk2 & pad_state.unk22[10]) && vis_table_a.object_sequence_state == 0
+            if ((pad_state.held & pad_state.buttons[10]) && vis_table_a.object_sequence_state == 0
                 && W50(e) != 0xffffff && W48(e) != 0xffffff) {
                 vis_table_a.object_sequence_state = 1;
                 player_stop_motion();
@@ -1083,7 +1083,7 @@ void objects_update(void)
                 a = &vis_table_a.entries[56];
                 rising = 0;
                 cd_wait_idle();
-                viewer.unk21E = 1;
+                viewer.motion_stopped = 1;
                 for (j = 7; j != -1; a++, j--) {
                     a->anim_frame = 0;
                     if (a->spawn_chance != 255) {
@@ -1129,13 +1129,13 @@ void objects_update(void)
                 viewer.position.vx = e->position.vx - 2048;
                 viewer.position.vy = e->position.vy - 1600;
                 viewer.position.vz = e->position.vz - 2048;
-                viewer.unk2B8.vx = 0;
-                viewer.unk2B8.vz = 0;
+                viewer.walk_velocity.vx = 0;
+                viewer.walk_velocity.vz = 0;
             }
             if (e->params.door.n_blocks != 255) {
                 int yaw = e->params.door.n_blocks << 10;
 
-                viewer.unk278.vy += yaw;
+                viewer.view_rot.vy += yaw;
             }
             break;
         }
@@ -1155,22 +1155,22 @@ void objects_update(void)
 
             if (player_in_centred_rect(e->position.vx, e->position.vz, 3072, 3072, e->position.vy) == 0)
                 goto away;
-            turn = (viewer.unk26A - e->player_heading) & 0xfff;
+            turn = (viewer.yaw - e->player_heading) & 0xfff;
             if (turn > 2048)
                 turn |= 0xf000;
-            if (!((pad_state.unk2 & pad_state.unk22[10]) && turn > -400 && turn < 400)
+            if (!((pad_state.held & pad_state.buttons[10]) && turn > -400 && turn < 400)
                 && e->kind != 239)
                 goto away;
             if (B50(e))
                 break;
-            viewer.unk220.warp.x = viewer.position.vx >> 12;
-            viewer.unk220.warp.area = area_state.unk4;
-            viewer.unk220.warp.y = viewer.position.vy >> 12;
-            viewer.unk220.warp.z = viewer.position.vz >> 12;
-            viewer.unk220.warp.dx = viewer.position.vx - (viewer.unk220.warp.x << 12);
-            viewer.unk220.warp.dy = viewer.position.vy - (viewer.unk220.warp.y << 12);
-            viewer.unk220.warp.dz = viewer.position.vz - (viewer.unk220.warp.z << 12);
-            viewer.unk220.warp.yaw = e->facing + 2048;
+            viewer.warp_return.warp.x = viewer.position.vx >> 12;
+            viewer.warp_return.warp.area = area_state.loaded_area;
+            viewer.warp_return.warp.y = viewer.position.vy >> 12;
+            viewer.warp_return.warp.z = viewer.position.vz >> 12;
+            viewer.warp_return.warp.dx = viewer.position.vx - (viewer.warp_return.warp.x << 12);
+            viewer.warp_return.warp.dy = viewer.position.vy - (viewer.warp_return.warp.y << 12);
+            viewer.warp_return.warp.dz = viewer.position.vz - (viewer.warp_return.warp.z << 12);
+            viewer.warp_return.warp.yaw = e->facing + 2048;
             for (j = 240, o = vis_table_b.entries; j != 0; j--, o++) {
                 if (o->kind == e->kind)
                     B50(o) = 1;
@@ -1186,29 +1186,29 @@ void objects_update(void)
             do {
                 cd_wait_frame();
                 area_load_update();
-            } while (area_state.unk0 != 0);
-            viewer.unk278.vy = e->params.door.lock << 10;
-            viewer.unk278.vx = 0;
-            if (area != area_state.unk4) {
+            } while (area_state.loading != 0);
+            viewer.view_rot.vy = e->params.door.lock << 10;
+            viewer.view_rot.vx = 0;
+            if (area != area_state.loaded_area) {
                 area_request_load(area, area, area, 0xff, 0xff, 127, 127, 127, 0, 0, 0);
             } else {
                 area_request_load(0xff, 0xff, area, 0xff, 0xff, 127, 127, 127, 0, 0, 0);
-                viewer.unk21C = 1;
+                viewer.update_all_spawns = 1;
                 creatures_bind_previous_area();
                 vis_table_a.zone_history[0] = vis_table_a.zone_history[1] = vis_table_a.zone_history[2] =
                     vis_table_a.zone_history[3] = 0xff;
                 vis_table_a.prev_zone = 0xff;
             }
-            viewer.unk218 = 0;
-            viewer.unk28C = 0;
-            viewer.unk28A = 0;
-            viewer.unk288 = 0;
-            *(SVECTOR *)&viewer.unk268 = viewer.unk278;
+            viewer.state = 0;
+            viewer.shake_roll = 0;
+            viewer.shake_yaw = 0;
+            viewer.shake_pitch = 0;
+            *(SVECTOR *)&viewer.pitch = viewer.view_rot;
             viewer.position.vx = (x << 12) + ((s8)e->params.snd.fade_range << 7);
             viewer.position.vz = (z << 12) + ((s8)e->params.door.n_blocks << 7);
             viewer.position.vy = (y << 12) + ((s8)e->params.snd.sound_flags << 7) - 1600;
-            viewer.unk2F0 = 0;
-            viewer.unk2EC = 0;
+            viewer.submerged_acid = 0;
+            viewer.submerged = 0;
             player_stop_motion();
             vis_table_b.push_z = 0;
             vis_table_b.push_y = 0;
@@ -1219,17 +1219,17 @@ void objects_update(void)
             vis_table_a.push_z = 0;
             vis_table_a.push_y = 0;
             vis_table_a.push_x = 0;
-            viewer.unk1D0 = 0;
-            viewer.unk1CE = 0;
-            viewer.unk1CC = 0;
+            viewer.push_z = 0;
+            viewer.push_y = 0;
+            viewer.push_x = 0;
             do {
                 cd_wait_frame();
                 area_load_update();
-            } while (area_state.unk0 != 0);
+            } while (area_state.loading != 0);
             vis_lists.n_sources = 0;
             vis_collect_sources((VECTOR *)&viewer.position.vx, NULL, NULL);
             if (vis_lists.n_sources)
-                viewer.unk174 = &vis_records[vis_lists.sources[0]];
+                viewer.block_record = &vis_records[vis_lists.sources[0]];
             creatures_update();
             fade_run_frames(2, 0x1000, 0x1000, 0);
             cd_wait_idle();
@@ -1244,7 +1244,7 @@ void objects_update(void)
             break;
         }
         default:
-            area_state.hooks->unk24();
+            area_state.hooks->update_object();
             break;
         }
     }
@@ -1294,23 +1294,23 @@ void player_warp(to, keep)
     do {
         cd_wait_frame();
         area_load_update();
-    } while (area_state.unk0 != 0);
-    viewer.unk278.vy = to->yaw;
-    viewer.unk278.vx = 0;
-    if (area != area_state.unk4) {
+    } while (area_state.loading != 0);
+    viewer.view_rot.vy = to->yaw;
+    viewer.view_rot.vx = 0;
+    if (area != area_state.loaded_area) {
         area_request_load(area, area, area, 0xff, 0xff, 127, 127, 127, 0, 0, 0);
     } else {
         area_request_load(0xff, 0xff, area, 0xff, 0xff, 127, 127, 127, 0, 0, 0);
-        viewer.unk21C = 1;
+        viewer.update_all_spawns = 1;
         creatures_bind_previous_area();
         vis_table_a.zone_history[0] = vis_table_a.zone_history[1] = vis_table_a.zone_history[2] = vis_table_a.zone_history[3] = 0xff;
         vis_table_a.prev_zone = 0xff;
     }
-    viewer.unk218 = 0;
-    viewer.unk28C = 0;
-    viewer.unk28A = 0;
-    viewer.unk288 = 0;
-    *(SVECTOR *)&viewer.unk268 = viewer.unk278;
+    viewer.state = 0;
+    viewer.shake_roll = 0;
+    viewer.shake_yaw = 0;
+    viewer.shake_pitch = 0;
+    *(SVECTOR *)&viewer.pitch = viewer.view_rot;
     viewer.position.vx = (x << 12) + to->dx;
     viewer.position.vz = (z << 12) + to->dz;
     viewer.position.vy = (y << 12) + to->dy;
@@ -1325,9 +1325,9 @@ void player_warp(to, keep)
     vis_table_a.push_z = 0;
     vis_table_a.push_y = 0;
     vis_table_a.push_x = 0;
-    viewer.unk1D0 = 0;
-    viewer.unk1CE = 0;
-    viewer.unk1CC = 0;
+    viewer.push_z = 0;
+    viewer.push_y = 0;
+    viewer.push_x = 0;
     j = 128;
     while (j--) {
         f->unk0 = ST_EFFECT_FREE;
@@ -1336,12 +1336,12 @@ void player_warp(to, keep)
     do {
         cd_wait_frame();
         area_load_update();
-    } while (area_state.unk0 != 0);
+    } while (area_state.loading != 0);
     if (!keep) {
         vis_lists.n_sources = 0;
         vis_collect_sources((VECTOR *)&viewer.position.vx, NULL, NULL);
         if (vis_lists.n_sources)
-            viewer.unk174 = &vis_records[vis_lists.sources[0]];
+            viewer.block_record = &vis_records[vis_lists.sources[0]];
         creatures_update();
     }
     fade_run_frames(2, 0x1000, 0x1000, 0);
@@ -1356,21 +1356,21 @@ void player_warp(to, keep)
     player_enter_normal_state();
 }
 
-/* Warps to viewer.unk22C. */
+/* Warps to viewer.save_area. */
 ADDRESS(0x80052c24, 0x38)
 void player_warp_to_save_point(void)
 {
-    player_warp((StWarp *)&viewer.unk22C, 0);
-    viewer.unk2B = 0;
+    player_warp((StWarp *)&viewer.save_area, 0);
+    viewer.save_warp_request = 0;
 }
 
-/* Warps to viewer.unk220 keeping the current sources. */
+/* Warps to viewer.warp_return keeping the current sources. */
 ADDRESS(0x80052c5c, 0x48)
 void player_warp_back(void)
 {
-    viewer.unk218 = 5;
+    viewer.state = 5;
     player_update_durability_warning();
-    player_warp(&viewer.unk220.warp, 1);
+    player_warp(&viewer.warp_return.warp, 1);
     DAT_801cd0e4 = 0;
 }
 
@@ -1427,9 +1427,9 @@ void item_record_pickup(u16 *id)
 {
     inventory.counts[*id].count++;
     if (*id == 266)
-        viewer.unk27++;
+        viewer.cunes_found++;
     if (*id < 266) {
-        viewer.unk28++;
+        viewer.items_found++;
         vis_table_c.collected_bits[*id >> 5] |= 1 << (*id & 0x1f);
     }
 }
@@ -1531,7 +1531,7 @@ int ground_item_find_in_reach(CollisionState *req, int unused)
             continue;
         if (c->position.vy < viewer.position.vy - 0x400 || c->position.vy > viewer.position.vy + 0xa40)
             continue;
-        if (!angle_within(viewer.unk278.vy,
+        if (!angle_within(viewer.view_rot.vy,
                            angle_from_xz(c->position.vx - viewer.position.vx, c->position.vz - viewer.position.vz), 300))
             continue;
         dx = c->position.vx - req->position.vx;
@@ -1571,8 +1571,8 @@ void ground_item_pick_up(GroundItem *c, int forced)
 
     info = &vis_table_c.types[c->item];
     save = *c;
-    viewer.unk218 = 3;
-    gte_SetRotMatrix(&viewer.unk298);
+    viewer.state = 3;
+    gte_SetRotMatrix(&viewer.camera_matrix);
     gte_ldv0((SVECTOR *)&info->unk5[3]);
     gte_rtv0();
     gte_stlvnl(&a);
@@ -1585,24 +1585,24 @@ void ground_item_pick_up(GroundItem *c, int forced)
     }
     switch (info->unk5[2]) {
     case 0:
-        r.vx = -viewer.unk268;
+        r.vx = -viewer.pitch;
         r.vy = r.vz = 0;
         break;
     case 1:
-        r.vx = 1024 - viewer.unk268;
+        r.vx = 1024 - viewer.pitch;
         r.vy = r.vz = 0;
         break;
     case 2:
-        r.vx = -1024 - viewer.unk268;
+        r.vx = -1024 - viewer.pitch;
         r.vy = r.vz = 0;
         break;
     case 3:
         r.vx = 0;
         r.vy = 1024;
-        r.vz = viewer.unk268 - 256;
+        r.vz = viewer.pitch - 256;
         break;
     }
-    r.vy += viewer.unk26A;
+    r.vy += viewer.yaw;
     if (r.vx - c->rot_x > 2048)
         r.vx -= 4096;
     if (r.vx - c->rot_x < -2048)
@@ -1614,7 +1614,7 @@ void ground_item_pick_up(GroundItem *c, int forced)
     i = 16;
     c->depth_bias -= 8;
     while (1) {
-        if (forced == 0 && (pad_state.unk4 & pad_state.unk22[11])) {
+        if (forced == 0 && (pad_state.pressed & pad_state.buttons[11])) {
             take = 0;
             a = c->position;
             b = save.position;
@@ -1623,7 +1623,7 @@ void ground_item_pick_up(GroundItem *c, int forced)
             i = 16 - i;
             break;
         }
-        if ((pad_state.unk4 & pad_state.unk22[10]) && !pad_state.unk12) {
+        if ((pad_state.pressed & pad_state.buttons[10]) && !pad_state.combo_timer) {
             take = 1;
             a = c->position;
             b = viewer.position;
@@ -1651,7 +1651,7 @@ void ground_item_pick_up(GroundItem *c, int forced)
         if (i > 0)
             i--;
     }
-    pad_state.unk4 = 0;
+    pad_state.pressed = 0;
     while (i--) {
         j = 16 - i;
         c->position.vx = (i * a.vx + j * b.vx) >> 4;
@@ -1690,7 +1690,7 @@ void ground_items_update(void)
     int h;
 
     while (i--) {
-        if (c->item == 0xffff || c->area != area_state.unk4) {
+        if (c->item == 0xffff || c->area != area_state.loaded_area) {
             c++;
             continue;
         }
@@ -1738,7 +1738,7 @@ void ground_items_update(void)
             break;
         case 3:
             ground_item_pick_up(c, 0);
-            viewer.unk218 = 0;
+            viewer.state = 0;
             break;
         }
         c++;

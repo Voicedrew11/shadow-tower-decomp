@@ -112,18 +112,18 @@ void effect_emit(u_long flags, int kind, StEffectDef *def, int arg, VECTOR *pos)
     else
         kind |= 0x20;
     if (second)
-        value = viewer.unk38[12];
+        value = viewer.equipment[12];
     else
-        value = viewer.unk38[6];
+        value = viewer.equipment[6];
     level = value / 6;
     if (level < 6) {
         /* As retail: levels 3-5 write past the six bias entries. */
-        bias[level * 2] = bias[level * 2 + 1] = (u16)viewer.unk62[level + 11];
-        base = viewer.unkB8;
+        bias[level * 2] = bias[level * 2 + 1] = (u16)viewer.attributes[level + 11];
+        base = viewer.magic_base;
     } else {
         base = 0;
     }
-    src = level < 6 ? def->unk4 : viewer.unkBA;
+    src = level < 6 ? def->unk4 : viewer.weapon_attack;
     for (i = 0; i < 3; i++, src++)
         levels[i] = *src;
     src = def->unkA;

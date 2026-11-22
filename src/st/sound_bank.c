@@ -37,7 +37,7 @@ void sound_key_off(short voice, int id, int note)
 
     if (id == 255)
         return;
-    if (game_settings.unk1 == 0)
+    if (game_settings.sfx_volume == 0)
         return;
     snd = &sound_state.sounds[id & 0x7ff];
     if (snd->slot == -1)

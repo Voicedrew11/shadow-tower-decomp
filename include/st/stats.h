@@ -11,8 +11,8 @@
 
 typedef struct {
     u8 unk0[0x1ec];
-    u16 unk1EC[14];      /* 0x1ec: copied to viewer.unk62 */
-    u16 unk208[14];      /* 0x208: copied to viewer.unk7E */
+    u16 unk1EC[14];      /* 0x1ec: copied to viewer.attributes */
+    u16 unk208[14];      /* 0x208: copied to viewer.attribute_bonuses */
 } StatsScratch;
 
 #define STATS_SCRATCH ((StatsScratch *)0x1f800000)

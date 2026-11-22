@@ -195,7 +195,7 @@ void objects_load(u8 *src)
             case 0xff:
                 break;
             default:
-                area_state.hooks->unk20(e, rec);
+                area_state.hooks->load_object(e, rec);
                 break;
             }
         }

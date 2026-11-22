@@ -72,13 +72,13 @@ void game_loop(void)
         pad_enable();
         if (card_screen_run(0) == 1) {
             pad_clear_input();
-            pad_state.unk10 = 1;
+            pad_state.disabled = 1;
             card_screen_close();
             loading_screen_show();
             player_reload_equipment();
         } else {
             pad_clear_input();
-            pad_state.unk10 = 1;
+            pad_state.disabled = 1;
             card_screen_close();
             loading_screen_show();
             game_load_start_file();
@@ -105,7 +105,7 @@ void game_loop(void)
         creatures_update();
         ground_items_update();
         effects_run();
-        viewer.unk21C = 0;
+        viewer.update_all_spawns = 0;
         area_run_frame_hook();
         area_load_update();
         player_get_camera(&a, &b);

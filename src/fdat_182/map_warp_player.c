@@ -54,20 +54,20 @@ void map_warp_player(int gate)
         viewer.position.vx = 0x50800;
         viewer.position.vy = 0x425c0;
         viewer.position.vz = 0x3bc00;
-        viewer.unk278.vy = 0x800;
+        viewer.view_rot.vy = 0x800;
     } else {
         viewer.position.vx = 0x41800;
         viewer.position.vy = 0x401c0;
         viewer.position.vz = 0x37000;
-        viewer.unk278.vy = 0;
+        viewer.view_rot.vy = 0;
     }
-    viewer.unk218 = 0;
-    viewer.unk28C = 0;
-    viewer.unk28A = 0;
-    viewer.unk288 = 0;
-    viewer.unk278.vx = 0;
-    *(SVECTOR *)&viewer.unk268 = viewer.unk278;
-    viewer.unk218 = 5;
+    viewer.state = 0;
+    viewer.shake_roll = 0;
+    viewer.shake_yaw = 0;
+    viewer.shake_pitch = 0;
+    viewer.view_rot.vx = 0;
+    *(SVECTOR *)&viewer.pitch = viewer.view_rot;
+    viewer.state = 5;
     fade_run_frames(2, 0x1000, 0x1000, 0);
     creatures_update();
     if (gate == 0 && e->state != 3 && e->state != 1) {

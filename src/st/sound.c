@@ -20,7 +20,7 @@
 #include <st/player.h>
 #include <st/sound.h>
 
-/* On a landing speed (`damage`; its only caller passes viewer.unk2D4) of
+/* On a landing speed (`damage`; its only caller passes viewer.vertical_speed) of
  * 256 or more, plays the hit sound and shakes the pad by it. */
 ADDRESS(0x80057b48, 0x64)
 void play_landing_sound(int damage)
@@ -286,7 +286,7 @@ s16 sound_play(int sound, int volume)
 ADDRESS(0x80058318, 0x1f4)
 s16 sound_key_on(int id, int left, int right, int note)
 {
-    Data801cd120 *opt;
+    GameSettings *opt;
     StSound *snd;
     StVabSlot *slot;
     s16 voice;
@@ -295,7 +295,7 @@ s16 sound_key_on(int id, int left, int right, int note)
     if (id == 255)
         return -1;
     opt = &game_settings;
-    if (opt->unk1 == 0)
+    if (opt->sfx_volume == 0)
         return -1;
     snd = &sound_state.sounds[id & 0x7ff];
     if (snd->slot == -1)
@@ -305,8 +305,8 @@ s16 sound_key_on(int id, int left, int right, int note)
         return -1;
     if (slot->block[2] == 3)
         return -1;
-    left = left * opt->unk1 >> 7;
-    right = right * opt->unk1 >> 7;
+    left = left * opt->sfx_volume >> 7;
+    right = right * opt->sfx_volume >> 7;
     note += snd->note;
     if (note < 0)
         note = 0;

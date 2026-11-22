@@ -43,23 +43,23 @@ SDATA(0x80088054, 0x10)
 ADDRESS(0x8003bd14, 0x9c)
 void player_kill(int unused)
 {
-    if (viewer.unk218 != 4) {
-        viewer.unk218 = 4;
-        viewer.unk2 = 0;
+    if (viewer.state != 4) {
+        viewer.state = 4;
+        viewer.hp = 0;
         play_death_sound();
         world_state.unk1EE15 = 1;
-        viewer.unk286 = 0;
+        viewer.death_timer = 0;
         viewer.unk17C = 170;
-        viewer.unk17A = (-1024 - (viewer.unk268 & 0x7ff)) / 24;
+        viewer.death_pitch_step = (-1024 - (viewer.pitch & 0x7ff)) / 24;
     }
 }
 
 ADDRESS(0x8003bdb0, 0x60)
 void player_check_fall_death(void)
 {
-    if (viewer.unk2D4 >= 1152 && vis_lists.floor_dist >= 1600) {
+    if (viewer.vertical_speed >= 1152 && vis_lists.floor_dist >= 1600) {
         player_kill(0);
-        viewer.unk238 = 1;
+        viewer.fall_death = 1;
     }
 }
 
@@ -68,20 +68,20 @@ void player_update_submersion(void)
 {
     if (vis_lists.surface_y != 0x80000) {
         if (vis_lists.surface_y < viewer.position.vy) {
-            viewer.unk2EC = 1;
+            viewer.submerged = 1;
         } else {
-            viewer.unk2EC = 0;
+            viewer.submerged = 0;
         }
     }
     if (vis_lists.acid_surface_y != 0x80000) {
         if (vis_lists.acid_surface_y < viewer.position.vy) {
-            viewer.unk2F0 = 1;
+            viewer.submerged_acid = 1;
         } else {
-            viewer.unk2F0 = 0;
+            viewer.submerged_acid = 0;
         }
     }
-    if (area_state.unk4 == 10 && viewer.unk178 == 327) {
-        viewer.unk2F0 = 0;
+    if (area_state.loaded_area == 10 && viewer.block == 327) {
+        viewer.submerged_acid = 0;
     }
 }
 
@@ -123,39 +123,39 @@ int func_8003c000(int x, int y, int z, int range, int kind)
 ADDRESS(0x8003c054, 0x8c)
 void player_reset_state(void)
 {
-    viewer.unk2CE = 0;
-    viewer.unk2D0 = 0;
+    viewer.bob_offset = 0;
+    viewer.bob_phase = 0;
     viewer.unk2D2 = 0;
     viewer.unk239 = 0;
-    viewer.unk2D4 = 0;
-    viewer.unk218 = 0;
+    viewer.vertical_speed = 0;
+    viewer.state = 0;
     viewer.unk294 = 0;
     viewer.unk292 = 0;
-    viewer.unk290 = 0;
-    viewer.unk28C = 0;
-    viewer.unk28A = 0;
-    viewer.unk288 = 0;
-    viewer.unk284 = 0;
-    viewer.unk280.halves[1] = 0;
-    viewer.unk280.halves[0] = 0;
-    *(SVECTOR *)&viewer.unk268 = viewer.unk278;
-    viewer.unk155[0] = 255;
-    viewer.unk155[1] = 255;
-    viewer.unk2F0 = 0;
-    viewer.unk2EC = 0;
+    viewer.fall_pitch = 0;
+    viewer.shake_roll = 0;
+    viewer.shake_yaw = 0;
+    viewer.shake_pitch = 0;
+    viewer.roll_offset = 0;
+    viewer.rot_offset.halves[1] = 0;
+    viewer.rot_offset.halves[0] = 0;
+    *(SVECTOR *)&viewer.pitch = viewer.view_rot;
+    viewer.shot_magic[0] = 255;
+    viewer.shot_magic[1] = 255;
+    viewer.submerged_acid = 0;
+    viewer.submerged = 0;
     vis_lists.floor_kinds = 0;
-    viewer.unk2F4 = -1;
+    viewer.shake_timer = -1;
 }
 
 ADDRESS(0x8003c0e0, 0x9c)
 void player_reload_equipment(void)
 {
-    player_load_equipment_model(viewer.unk38[3], 0, 0);
-    player_load_equipment_model(viewer.unk38[16], 1, 0);
-    player_load_equipment_model(viewer.unk38[4], 2, 0);
-    player_load_equipment_model(viewer.unk38[17], 3, 0);
-    player_load_magic(viewer.unk38[6], 0);
-    player_load_magic(viewer.unk38[12], 1);
+    player_load_equipment_model(viewer.equipment[3], 0, 0);
+    player_load_equipment_model(viewer.equipment[16], 1, 0);
+    player_load_equipment_model(viewer.equipment[4], 2, 0);
+    player_load_equipment_model(viewer.equipment[17], 3, 0);
+    player_load_magic(viewer.equipment[6], 0);
+    player_load_magic(viewer.equipment[12], 1);
     player_reset_state();
     player_recalc_stats();
     lighting.unk7 = 255;
@@ -208,27 +208,27 @@ void player_update_status(int apply)
 {
     short level;
 
-    if (viewer.unk2D6 != 0) {
-        viewer.unk2D6 -= viewer.unk2D8;
-        if (viewer.unk2D6 < 0) {
-            viewer.unk2D6 = 0;
+    if (viewer.red_fade != 0) {
+        viewer.red_fade -= viewer.red_fade_step;
+        if (viewer.red_fade < 0) {
+            viewer.red_fade = 0;
         }
-        if (viewer.unk2D6 >= 4096) {
+        if (viewer.red_fade >= 4096) {
             level = 4096;
         } else {
-            level = viewer.unk2D6;
+            level = viewer.red_fade;
         }
         fade_add_color(60, 0, 0, level, 1);
     }
-    if (viewer.unk2DA != 0) {
-        viewer.unk2DA -= viewer.unk2DC;
-        if (viewer.unk2DA < 0) {
-            viewer.unk2DA = 0;
+    if (viewer.yellow_fade != 0) {
+        viewer.yellow_fade -= viewer.yellow_fade_step;
+        if (viewer.yellow_fade < 0) {
+            viewer.yellow_fade = 0;
         }
-        if (viewer.unk2DA >= 4096) {
+        if (viewer.yellow_fade >= 4096) {
             level = 4096;
         } else {
-            level = viewer.unk2DA;
+            level = viewer.yellow_fade;
         }
         fade_add_color(60, 60, 0, level, 1);
     }
@@ -237,7 +237,7 @@ void player_update_status(int apply)
     if (level != -1) {
         fade_add_color(0, 40, 0, level, 1);
         if (viewer.timers.words[0] == 0) {
-            viewer.unk2C &= ~7;
+            viewer.status_flags &= ~7;
         }
     }
     level = player_step_status_timer(&viewer.unk190[1][0], &viewer.unk190[1][1], 20, 4096, apply);
@@ -251,24 +251,24 @@ void player_update_status(int apply)
         player_stop_motion();
         vis_table_b.push_x = vis_table_b.push_y = vis_table_b.push_z = 0;
         vis_lists.floor_push_x = vis_lists.floor_push_y = vis_lists.floor_push_z = 0;
-        viewer.unk1CC = viewer.unk1CE = viewer.unk1D0 = vis_table_a.push_x = vis_table_a.push_y =
+        viewer.push_x = viewer.push_y = viewer.push_z = vis_table_a.push_x = vis_table_a.push_y =
             vis_table_a.push_z = 0;
         if (viewer.timers.words[1] == 0) {
-            viewer.unk2C &= ~0x18;
+            viewer.status_flags &= ~0x18;
         }
     }
     level = player_step_status_timer(&viewer.unk190[2][0], &viewer.unk190[2][1], 0, 4096, apply);
     if (level != -1) {
         fade_add_color(20, 20, 20, level, 2);
         if (viewer.timers.words[2] == 0) {
-            viewer.unk2C &= ~0x60;
+            viewer.status_flags &= ~0x60;
             lighting.unk4 |= 4;
         }
     }
     level = player_step_status_timer(&viewer.unk190[3][0], &viewer.unk190[3][1], 20, 4096, apply);
     if (level != -1) {
         if (viewer.timers.words[3] == 0) {
-            viewer.unk2C &= ~0x80;
+            viewer.status_flags &= ~0x80;
             player_compute_derived_stats(0);
             PLAYER_CLAMP_HP();
         }
@@ -277,15 +277,15 @@ void player_update_status(int apply)
     if (level != -1) {
         fade_add_color(40, 0, 20, level, 1);
         if (viewer.timers.words[4] == 0) {
-            viewer.unk2C &= ~0x100;
+            viewer.status_flags &= ~0x100;
             player_compute_derived_stats(0);
             PLAYER_CLAMP_HP();
         }
     }
-    if (viewer.unk2EC) {
+    if (viewer.submerged) {
         fade_add_color(0, 0, 40, 4096, 1);
     }
-    if (viewer.unk2F0) {
+    if (viewer.submerged_acid) {
         fade_add_color(40, 40, 0, 4096, 1);
     }
     level = player_step_status_timer(&viewer.unk190[5][0], &viewer.unk190[5][1], 0, 4096, apply);
@@ -293,32 +293,32 @@ void player_update_status(int apply)
         lighting.unk4 |= 0x10;
         lighting.unk3 |= 2;
         if (viewer.timers.words[5] == 0) {
-            viewer.unk2C &= ~0x20000;
-            viewer.unk2C &= ~0x10000;
+            viewer.status_flags &= ~0x20000;
+            viewer.status_flags &= ~0x10000;
         }
     }
     level = player_step_status_timer(&viewer.unk190[6][0], &viewer.unk190[6][1], 0, 4096, apply);
     if (level != -1) {
         if (viewer.timers.words[6] == 0) {
-            viewer.unk2C &= ~0x40000;
+            viewer.status_flags &= ~0x40000;
         }
     }
     level = player_step_status_timer(&viewer.unk190[7][0], &viewer.unk190[7][1], 0, 4096, apply);
     if (level != -1) {
         if (viewer.timers.words[7] == 0) {
-            viewer.unk2C &= ~0x80000;
+            viewer.status_flags &= ~0x80000;
         }
     }
     level = player_step_status_timer(&viewer.unk190[8][0], &viewer.unk190[8][1], 0, 4096, apply);
     if (level != -1) {
         if (viewer.timers.words[8] == 0) {
-            viewer.unk2C &= ~0x100000;
+            viewer.status_flags &= ~0x100000;
         }
     }
     level = player_step_status_timer(&viewer.unk190[9][0], &viewer.unk190[9][1], 0, 4096, apply);
     if (level != -1) {
         if (viewer.timers.words[9] == 0) {
-            viewer.unk2C &= ~0x200000;
+            viewer.status_flags &= ~0x200000;
         }
     }
     level = player_step_status_timer(&viewer.unk190[10][0], &viewer.unk190[10][1], 0, 4096, apply);
@@ -327,19 +327,19 @@ void player_update_status(int apply)
         lighting.unk4 |= 0x20;
         lighting.unk3 |= 1;
         if (viewer.timers.words[10] == 0) {
-            viewer.unk2C &= ~0x400000;
+            viewer.status_flags &= ~0x400000;
         }
     }
     level = player_step_status_timer(&viewer.unk190[11][0], &viewer.unk190[11][1], 0, 4096, apply);
     if (level != -1) {
         if (viewer.timers.words[11] == 0) {
-            viewer.unk2C &= ~0x800000;
+            viewer.status_flags &= ~0x800000;
         }
     }
     level = player_step_status_timer(&viewer.unk190[12][0], &viewer.unk190[12][1], 0, 4096, apply);
     if (level != -1) {
         if (viewer.timers.words[12] == 0) {
-            viewer.unk2C &= ~0x800;
+            viewer.status_flags &= ~0x800;
         }
     }
 }
@@ -351,17 +351,17 @@ void area_load_set_blocking(int r, int g, int b, int arg3, int arg4, int arg5)
     do {
         cd_wait_frame();
         area_load_update();
-    } while (area_state.unk0 != 0);
-    area_state.unk4 = 99;
-    area_state.unk5 = 99;
-    area_state.unk6 = 99;
-    area_state.unk7 = 99;
+    } while (area_state.loading != 0);
+    area_state.loaded_area = 99;
+    area_state.loaded_world = 99;
+    area_state.loaded_images = 99;
+    area_state.loaded_sound_bank = 99;
     area_state.unk8 = 99;
     area_request_load(r, g, b, 255, 255, 127, 127, 127, 0, 0, 0);
     do {
         cd_wait_frame();
         area_load_update();
-    } while (area_state.unk0 != 0);
+    } while (area_state.loading != 0);
     cd_wait_idle();
     VSync(2);
     player_reset_motion();
@@ -370,7 +370,7 @@ void area_load_set_blocking(int r, int g, int b, int arg3, int arg4, int arg5)
     lighting_build_matrices();
     fade_run_frames(130, 4096, 4096, 0);
     cd_wait_idle();
-    area_state.unk18 = cd_state.unk4;
+    area_state.entry_fade_start = cd_state.unk4;
     area_request_load(255, 255, 255, arg3, arg4, 127, 127, 127, 0, 0, 0);
     lighting_clear_requests();
 }
@@ -380,37 +380,37 @@ void player_reset_stats(void)
 {
     int i;
 
-    viewer.unk8 = 0;
+    viewer.sp_total = 0;
     i = 14;
     while (i--) {
-        viewer.unk9A[i] = 50;
-        viewer.unk62[i] = 50;
-        viewer.unk7E[i] = 0;
+        viewer.base_attributes[i] = 50;
+        viewer.attributes[i] = 50;
+        viewer.attribute_bonuses[i] = 0;
     }
     viewer.unk26 = 0;
-    viewer.unk4 = 0;
-    viewer.unk0 = 0;
-    viewer.unk38[20] = 0xffff;
-    viewer.unk38[19] = 0xffff;
-    viewer.unk38[18] = 0xffff;
-    viewer.unk38[4] = 0xffff;
-    viewer.unk38[3] = 0xffff;
-    viewer.unk38[2] = 0xffff;
-    viewer.unk38[1] = 0xffff;
-    viewer.unk38[0] = 0xffff;
-    viewer.unk38[6] = 0xffff;
-    viewer.unk38[11] = 0xffff;
-    viewer.unk38[10] = 0xffff;
-    viewer.unk38[9] = 0xffff;
-    viewer.unk38[8] = 0xffff;
-    viewer.unk38[7] = 0xffff;
-    viewer.unk38[12] = 0xffff;
-    viewer.unk38[5] = 0xffff;
-    viewer.unk38[17] = 0xffff;
-    viewer.unk38[16] = 0xffff;
-    viewer.unk38[15] = 0xffff;
-    viewer.unk38[14] = 0xffff;
-    viewer.unk38[13] = 0xffff;
+    viewer.max_mp = 0;
+    viewer.max_hp = 0;
+    viewer.equipment[20] = 0xffff;
+    viewer.equipment[19] = 0xffff;
+    viewer.equipment[18] = 0xffff;
+    viewer.equipment[4] = 0xffff;
+    viewer.equipment[3] = 0xffff;
+    viewer.equipment[2] = 0xffff;
+    viewer.equipment[1] = 0xffff;
+    viewer.equipment[0] = 0xffff;
+    viewer.equipment[6] = 0xffff;
+    viewer.equipment[11] = 0xffff;
+    viewer.equipment[10] = 0xffff;
+    viewer.equipment[9] = 0xffff;
+    viewer.equipment[8] = 0xffff;
+    viewer.equipment[7] = 0xffff;
+    viewer.equipment[12] = 0xffff;
+    viewer.equipment[5] = 0xffff;
+    viewer.equipment[17] = 0xffff;
+    viewer.equipment[16] = 0xffff;
+    viewer.equipment[15] = 0xffff;
+    viewer.equipment[14] = 0xffff;
+    viewer.equipment[13] = 0xffff;
 }
 
 /*
@@ -435,7 +435,7 @@ void player_sum_equipment_bonuses(void)
     u16 *slot;
     ItemType *item;
 
-    slot = viewer.unk38;
+    slot = viewer.equipment;
     a1 = 0;
     a2 = 0;
     a3 = 0;
@@ -521,27 +521,27 @@ void player_sum_equipment_bonuses(void)
         }
     }
     if (a1) {
-        viewer.unk1C4 = 100 / a1;
+        viewer.hp_regen_interval = 100 / a1;
     } else {
-        viewer.unk1C4 = 0;
+        viewer.hp_regen_interval = 0;
     }
     if (a2) {
-        viewer.unk1C5 = 100 / a2;
+        viewer.mp_regen_interval = 100 / a2;
     } else {
-        viewer.unk1C5 = 0;
+        viewer.mp_regen_interval = 0;
     }
-    viewer.unk1C6 = a3 * 5;
+    viewer.double_damage_chance = a3 * 5;
     if (a4 < 0) {
-        viewer.unk1C7 = -1;
+        viewer.equipment_light = -1;
     } else if (a4 > 0) {
-        viewer.unk1C7 = 1;
+        viewer.equipment_light = 1;
     } else {
-        viewer.unk1C7 = 0;
+        viewer.equipment_light = 0;
     }
-    viewer.unk1C8 = 100 - a5 * 80 / 100;
-    viewer.unk1C9 = a6;
-    viewer.unk1CA = a7;
-    viewer.unk1CB = a8;
+    viewer.status_time_scale = 100 - a5 * 80 / 100;
+    viewer.hp_drain_percent = a6;
+    viewer.mp_drain_percent = a7;
+    viewer.blocks_magic = a8;
 }
 
 ADDRESS(0x8003cedc, 0x4c)
@@ -557,14 +557,14 @@ void player_add_hp(int delta)
 {
     int hp;
 
-    hp = viewer.unk2 + delta;
+    hp = viewer.hp + delta;
     if (hp <= 0) {
         hp = 0;
         player_kill(hp);
-    } else if (viewer.unk0 < hp) {
-        hp = viewer.unk0;
+    } else if (viewer.max_hp < hp) {
+        hp = viewer.max_hp;
     }
-    viewer.unk2 = hp;
+    viewer.hp = hp;
 }
 
 ADDRESS(0x8003cf94, 0x48)
@@ -572,13 +572,13 @@ void player_add_mp(int delta)
 {
     int mp;
 
-    mp = viewer.unk6 + delta;
+    mp = viewer.mp + delta;
     if (mp <= 0) {
         mp = 0;
-    } else if (viewer.unk4 < mp) {
-        mp = viewer.unk4;
+    } else if (viewer.max_mp < mp) {
+        mp = viewer.max_mp;
     }
-    viewer.unk6 = mp;
+    viewer.mp = mp;
 }
 
 ADDRESS(0x8003cfdc, 0x54)
@@ -589,7 +589,7 @@ void player_check_item_durability(int id)
     v = vis_table_c.types[id].durability;
     if (v != 0) {
         if (v < 4) {
-            viewer.unk2C |= 0x1000000;
+            viewer.status_flags |= 0x1000000;
         }
     }
 }
@@ -600,13 +600,13 @@ ADDRESS(0x8003d030, 0xd4)
 void player_update_durability_warning(void)
 {
     u16 *slots[10] = {
-        &viewer.unk38[0], &viewer.unk38[2],  &viewer.unk38[3],  &viewer.unk38[8],
-        &viewer.unk38[9], &viewer.unk38[10], &viewer.unk38[13], &viewer.unk38[16],
+        &viewer.equipment[0], &viewer.equipment[2],  &viewer.equipment[3],  &viewer.equipment[8],
+        &viewer.equipment[9], &viewer.equipment[10], &viewer.equipment[13], &viewer.equipment[16],
     };
     u16 **p;
 
     p = slots;
-    viewer.unk2C &= ~0x1000000;
+    viewer.status_flags &= ~0x1000000;
     for (; *p; p++) {
         if (**p != 0xffff) {
             player_check_item_durability(**p);
@@ -633,19 +633,19 @@ void player_wear_item(int amount, u16 *slot)
     if (left <= 0) {
         sound_play(4, 128);
         vis_table_c.types[*slot].durability = 0;
-        if (slot != &viewer.unk38[0] && slot != &viewer.unk38[13]) {
+        if (slot != &viewer.equipment[0] && slot != &viewer.equipment[13]) {
             *slot = 0xffff;
         }
-        if (slot == &viewer.unk38[3]) {
-            if (viewer.unk148[0] >= 31 && viewer.unk148[0] <= 34) {
+        if (slot == &viewer.equipment[3]) {
+            if (viewer.slot_model_ids[0] >= 31 && viewer.slot_model_ids[0] <= 34) {
                 player_load_equipment_model(0xffff, 1, 0);
             }
             player_load_equipment_model(0xffff, 0, 0);
-        } else if (slot == &viewer.unk38[16]) {
+        } else if (slot == &viewer.equipment[16]) {
             player_load_equipment_model(0xffff, 1, 0);
-        } else if (slot == &viewer.unk38[4]) {
+        } else if (slot == &viewer.equipment[4]) {
             player_load_equipment_model(0xffff, 2, 0);
-        } else if (slot == &viewer.unk38[17]) {
+        } else if (slot == &viewer.equipment[17]) {
             player_load_equipment_model(0xffff, 3, 0);
         }
         player_sum_equipment_bonuses();
@@ -661,7 +661,7 @@ void player_wear_item(int amount, u16 *slot)
 ADDRESS(0x8003d288, 0x30c)
 void player_wear_armour(int damage, u16 flags)
 {
-    u16 *armour[4] = {&viewer.unk38[8], &viewer.unk38[9], &viewer.unk38[10], &viewer.unk38[2]};
+    u16 *armour[4] = {&viewer.equipment[8], &viewer.equipment[9], &viewer.equipment[10], &viewer.equipment[2]};
     int wear;
     int n;
     int shield;
@@ -670,24 +670,24 @@ void player_wear_armour(int damage, u16 flags)
     u8 a;
     u8 b;
 
-    if (viewer.unk189 != 0 && viewer.unk38[16] != 0xffff) {
-        if (damage * 20 < viewer.unk0) {
-            viewer.unk219++;
+    if (viewer.shield_raised != 0 && viewer.equipment[16] != 0xffff) {
+        if (damage * 20 < viewer.max_hp) {
+            viewer.shield_wear++;
         } else {
-            n = damage * 10 / viewer.unk0 + 1;
+            n = damage * 10 / viewer.max_hp + 1;
             if (n <= 0) {
                 return;
             }
-            viewer.unk219 += n * 2;
-            viewer.unk21A += n;
+            viewer.shield_wear += n * 2;
+            viewer.armour_wear += n;
         }
-        a = viewer.unk219;
-        b = viewer.unk21A;
+        a = viewer.shield_wear;
+        b = viewer.armour_wear;
         shield = a / 5;
         wear = b / 5;
-        viewer.unk219 = a - shield * 5;
-        viewer.unk21A = b - wear * 5;
-        if ((flags & 0x400) && !(viewer.unk2C & 0x800000)) {
+        viewer.shield_wear = a - shield * 5;
+        viewer.armour_wear = b - wear * 5;
+        if ((flags & 0x400) && !(viewer.status_flags & 0x800000)) {
             shield <<= 1;
             wear <<= 1;
         }
@@ -695,20 +695,20 @@ void player_wear_armour(int damage, u16 flags)
             shield *= 5;
             wear *= 5;
         }
-        player_wear_item(shield, &viewer.unk38[16]);
+        player_wear_item(shield, &viewer.equipment[16]);
         pick = -1;
     } else {
-        if (damage * 20 < viewer.unk0) {
+        if (damage * 20 < viewer.max_hp) {
             return;
         }
-        n = damage * 10 / viewer.unk0 + 1;
+        n = damage * 10 / viewer.max_hp + 1;
         if (n <= 0) {
             return;
         }
-        viewer.unk21A += n * 2;
-        wear = viewer.unk21A / 5;
-        viewer.unk21A -= wear * 5;
-        if ((flags & 0x400) && !(viewer.unk2C & 0x800000)) {
+        viewer.armour_wear += n * 2;
+        wear = viewer.armour_wear / 5;
+        viewer.armour_wear -= wear * 5;
+        if ((flags & 0x400) && !(viewer.status_flags & 0x800000)) {
             wear <<= 1;
         }
         if (flags & 0x1000) {
@@ -753,35 +753,35 @@ u8 *DAT_800881dc[1];
 ADDRESS(0x8003d594, 0x1f4)
 void player_update_shake(void)
 {
-    if (viewer.unk2F4 < 0) {
+    if (viewer.shake_timer < 0) {
         return;
     }
-    if (viewer.unk2F4 % 3 == 0) {
-        shake[0] = (rand() - 16384) >> ((30 - viewer.unk2F4) / 5 + 5);
-        shake[1] = (rand() - 16384) >> ((30 - viewer.unk2F4) / 5 + 5);
+    if (viewer.shake_timer % 3 == 0) {
+        shake[0] = (rand() - 16384) >> ((30 - viewer.shake_timer) / 5 + 5);
+        shake[1] = (rand() - 16384) >> ((30 - viewer.shake_timer) / 5 + 5);
     } else {
         shake[0] >>= 1;
         shake[1] >>= 1;
     }
     if (shake[0] < -2 || shake[0] > 2) {
-        viewer.unk288 += shake[0];
+        viewer.shake_pitch += shake[0];
     }
     if (shake[1] < -2 || shake[1] > 2) {
-        viewer.unk28C += shake[1];
+        viewer.shake_roll += shake[1];
     }
-    if (viewer.unk288 > 2048 && viewer.unk288 < 4032) {
-        viewer.unk288 = 4032;
+    if (viewer.shake_pitch > 2048 && viewer.shake_pitch < 4032) {
+        viewer.shake_pitch = 4032;
     }
-    if (viewer.unk288 > 64 && viewer.unk288 < 2048) {
-        viewer.unk288 = 64;
+    if (viewer.shake_pitch > 64 && viewer.shake_pitch < 2048) {
+        viewer.shake_pitch = 64;
     }
-    if (viewer.unk28C > 2048 && viewer.unk28C < 4032) {
-        viewer.unk28C = 4032;
+    if (viewer.shake_roll > 2048 && viewer.shake_roll < 4032) {
+        viewer.shake_roll = 4032;
     }
-    if (viewer.unk28C > 64 && viewer.unk28C < 2048) {
-        viewer.unk28C = 64;
+    if (viewer.shake_roll > 64 && viewer.shake_roll < 2048) {
+        viewer.shake_roll = 64;
     }
-    viewer.unk2F4--;
+    viewer.shake_timer--;
 }
 
 /* Takes `damage` hit points, pushes the viewer away from `from` and starts
@@ -799,17 +799,17 @@ void player_take_damage(int damage, int flags, long *from)
     int shake_amount;
     short time;
 
-    if (viewer.unk218 == 4 || damage == 0) {
+    if (viewer.state == 4 || damage == 0) {
         return;
     }
     player_wear_armour(damage, flags);
-    hp = viewer.unk2 - damage;
+    hp = viewer.hp - damage;
     if (hp <= 0) {
         hp = 0;
     }
-    viewer.unk2 = hp;
+    viewer.hp = hp;
     PLAYER_CLAMP_HP();
-    scaled = (damage << 12) / viewer.unk0;
+    scaled = (damage << 12) / viewer.max_hp;
     if (scaled > 950) {
         scaled = 950;
     }
@@ -836,36 +836,36 @@ void player_take_damage(int damage, int flags, long *from)
     if (time < 71) {
         time = 70;
     }
-    if (viewer.unk1E) {
-        viewer.unk2F4 = (damage * 5000 / viewer.unk0 + 500) / viewer.unk1E;
+    if (viewer.impact_resistance) {
+        viewer.shake_timer = (damage * 5000 / viewer.max_hp + 500) / viewer.impact_resistance;
     } else {
-        viewer.unk2F4 = 30;
+        viewer.shake_timer = 30;
     }
-    if (viewer.unk2F4 < 0) {
-        viewer.unk2F4 = -1;
+    if (viewer.shake_timer < 0) {
+        viewer.shake_timer = -1;
     }
-    if (viewer.unk2F4 > 30) {
-        viewer.unk2F4 = 30;
+    if (viewer.shake_timer > 30) {
+        viewer.shake_timer = 30;
     }
-    pad_vibrate(damage * 255 / viewer.unk0);
-    amount = damage * 255 / viewer.unk0 + 32;
+    pad_vibrate(damage * 255 / viewer.max_hp);
+    amount = damage * 255 / viewer.max_hp + 32;
     if (amount > 128) {
         amount = 128;
     }
     random = rand();
     shake_amount = amount - 16384;
     shake_amount += random;
-    viewer.unk2E2 = shake_amount >> 9;
-    viewer.unk2DE += amount + (rand() >> 9);
+    viewer.hand_rot_z = shake_amount >> 9;
+    viewer.hand_rot_x += amount + (rand() >> 9);
     if (hp == 0) {
         player_kill((int)&push);
-        viewer.unk2D6 = 3500;
-        viewer.unk2D8 = time;
+        viewer.red_fade = 3500;
+        viewer.red_fade_step = time;
     } else if (from == NULL) {
-        viewer.unk2D6 = 3500;
-        viewer.unk2D8 = time;
+        viewer.red_fade = 3500;
+        viewer.red_fade_step = time;
     } else {
-        switch ((dir.vy - viewer.unk26A + 256) >> 9 & 7) {
+        switch ((dir.vy - viewer.yaw + 256) >> 9 & 7) {
         case 0:
             dir.vx = -scaled;
             dir.vz = 0;
@@ -932,7 +932,7 @@ void player_hit(u16 *damage, u16 scale, u16 effect, long *from)
     int i;
 
     elemental = physical = 0;
-    defence = viewer.unkD8;
+    defence = viewer.element_defence;
     memset(bonus, 0, sizeof(bonus));
     extra = bonus;
     if (effect != 0) {
@@ -945,13 +945,13 @@ void player_hit(u16 *damage, u16 scale, u16 effect, long *from)
         case 96:
         case 128:
         case 256:
-            resist = (u16)(viewer.unkB6 / 20) + viewer.unk62[13] * 3 / 80 + viewer.unkD8[5] * 60 / 255;
+            resist = (u16)(viewer.physical_base / 20) + viewer.attributes[13] * 3 / 80 + viewer.element_defence[5] * 60 / 255;
             if (101 - resist < rand() * 100 / 32768) {
                 goto limits;
             }
             break;
         case 7:
-            resist = (u16)(viewer.unkB6 / 20) + viewer.unk62[12] * 3 / 80 + viewer.unkD8[2] * 60 / 255;
+            resist = (u16)(viewer.physical_base / 20) + viewer.attributes[12] * 3 / 80 + viewer.element_defence[2] * 60 / 255;
             if (101 - resist < rand() * 100 / 32768) {
                 goto limits;
             }
@@ -959,10 +959,10 @@ void player_hit(u16 *damage, u16 scale, u16 effect, long *from)
         }
         switch (effect) {
         case 128:
-            if (!(viewer.unk2C & 0x80)) {
+            if (!(viewer.status_flags & 0x80)) {
                 viewer.unk190[3][1] = 300;
                 viewer.unk190[3][0] = 0;
-                viewer.unk2C |= 0x80;
+                viewer.status_flags |= 0x80;
                 player_compute_derived_stats(0);
                 PLAYER_CLAMP_HP();
             } else {
@@ -973,14 +973,14 @@ void player_hit(u16 *damage, u16 scale, u16 effect, long *from)
         case 8:
         case 16:
         case 24:
-            if (!(viewer.unk2C & 0x18)) {
+            if (!(viewer.status_flags & 0x18)) {
                 viewer.unk190[1][1] = 75;
                 viewer.unk190[1][0] = 0;
-                viewer.unk2C |= 8;
-            } else if (viewer.unk2C & 8) {
+                viewer.status_flags |= 8;
+            } else if (viewer.status_flags & 8) {
                 viewer.unk190[1][1] = 75;
                 viewer.unk190[1][0] = 0;
-                viewer.unk2C |= 0x10;
+                viewer.status_flags |= 0x10;
             } else {
                 viewer.unk190[1][0] = 20;
                 viewer.unk190[1][1] = 75;
@@ -989,10 +989,10 @@ void player_hit(u16 *damage, u16 scale, u16 effect, long *from)
         case 32:
         case 64:
         case 96:
-            if (!(viewer.unk2C & 0x60)) {
+            if (!(viewer.status_flags & 0x60)) {
                 viewer.unk190[2][1] = 600;
                 viewer.unk190[2][0] = 0;
-                viewer.unk2C |= 0x60;
+                viewer.status_flags |= 0x60;
             } else {
                 viewer.unk190[2][0] = 20;
                 viewer.unk190[2][1] = 600;
@@ -1003,10 +1003,10 @@ void player_hit(u16 *damage, u16 scale, u16 effect, long *from)
             sound_play(9, 128);
             break;
         case 256:
-            if (!(viewer.unk2C & 0x100)) {
+            if (!(viewer.status_flags & 0x100)) {
                 viewer.unk190[4][1] = 6000;
                 viewer.unk190[4][0] = 0;
-                viewer.unk2C |= 0x100;
+                viewer.status_flags |= 0x100;
                 player_compute_derived_stats(0);
                 PLAYER_CLAMP_HP();
             } else {
@@ -1018,49 +1018,49 @@ void player_hit(u16 *damage, u16 scale, u16 effect, long *from)
         case 2:
         case 4:
         case 7:
-            if (!(viewer.unk2C & 0x100000)) {
-                if (viewer.unk2C & 7) {
+            if (!(viewer.status_flags & 0x100000)) {
+                if (viewer.status_flags & 7) {
                     if (viewer.unk190[0][0] >= 220 && viewer.unk190[0][1] != 0) {
                         viewer.unk190[0][0] = 20;
                         viewer.unk190[0][1] = 600;
-                        if (viewer.unk2C & 2) {
-                            viewer.unk2C |= 4;
+                        if (viewer.status_flags & 2) {
+                            viewer.status_flags |= 4;
                         }
-                        if (viewer.unk2C & 1) {
-                            viewer.unk2C |= 2;
+                        if (viewer.status_flags & 1) {
+                            viewer.status_flags |= 2;
                         }
                     }
                 } else {
                     viewer.unk190[0][1] = 600;
                     viewer.unk190[0][0] = 0;
-                    viewer.unk2C |= 1;
+                    viewer.status_flags |= 1;
                 }
             }
             break;
         case 1024:
-            viewer.unk2C |= 0x400;
-            if (viewer.unk23C % 40 == 0) {
+            viewer.status_flags |= 0x400;
+            if (viewer.frame_count % 40 == 0) {
                 sound_play(7, 128);
             }
-            viewer.unk2DA = 3500;
-            viewer.unk2DC = 128;
+            viewer.yellow_fade = 3500;
+            viewer.yellow_fade_step = 128;
             break;
         case 16384:
-            viewer.unk189 = 0;
-            viewer.unk14F = 1;
+            viewer.shield_raised = 0;
+            viewer.shield_lowering = 1;
             break;
         }
     limits:
         limit300 = 300;
         limit75 = 75;
         limit600 = 600;
-        base = (112 - viewer.unk20) * 50 / 59 + 50;
+        base = (112 - viewer.status_recovery) * 50 / 59 + 50;
         limit300 = base * limit300 / 100;
         limit75 = base * limit75 / 100;
         limit600 = base * limit600 / 100;
-        limit300 = limit300 * viewer.unk1C8 / 100;
-        limit75 = limit75 * viewer.unk1C8 / 100;
-        limit600 = limit600 * viewer.unk1C8 / 100;
+        limit300 = limit300 * viewer.status_time_scale / 100;
+        limit75 = limit75 * viewer.status_time_scale / 100;
+        limit600 = limit600 * viewer.status_time_scale / 100;
         limit0 = limit600;
         if (limit300 < viewer.unk190[3][1]) {
             viewer.unk190[3][1] = limit300;
@@ -1075,16 +1075,16 @@ void player_hit(u16 *damage, u16 scale, u16 effect, long *from)
             viewer.unk190[0][1] = limit0;
         }
     }
-    if (viewer.unk189 != 0 && viewer.unk38[16] != 0xffff) {
-        attack = viewer.unk12 + viewer.unk16;
-        shield = &vis_table_c.types[viewer.unk38[16]];
-        magic = viewer.unk14 + viewer.unk18;
+    if (viewer.shield_raised != 0 && viewer.equipment[16] != 0xffff) {
+        attack = viewer.armour_defence + viewer.shield_defence;
+        shield = &vis_table_c.types[viewer.equipment[16]];
+        magic = viewer.magic_defence + viewer.shield_magic_defence;
         if (shield->kind2 >= 9) {
             bonus[shield->kind2 - 9] = shield->amount2 >> 1;
         }
     } else {
-        attack = viewer.unk12;
-        magic = viewer.unk14;
+        attack = viewer.armour_defence;
+        magic = viewer.magic_defence;
     }
     k = attack ? attack : 1;
     for (i = 0; i < 3; i++, damage++) {
@@ -1098,13 +1098,13 @@ void player_hit(u16 *damage, u16 scale, u16 effect, long *from)
             continue;
         }
         d = *damage;
-        if ((viewer.unk2C & 0x80000) && i == 0) {
+        if ((viewer.status_flags & 0x80000) && i == 0) {
             d >>= 2;
         }
-        if ((viewer.unk2C & 0x800000) && i == 3) {
+        if ((viewer.status_flags & 0x800000) && i == 3) {
             d >>= 2;
         }
-        if ((viewer.unk2C & 0x100000) && i == 2) {
+        if ((viewer.status_flags & 0x100000) && i == 2) {
             continue;
         }
         k = magic + *defence + *extra;
@@ -1152,10 +1152,10 @@ void player_get_camera(VECTOR *pos, SVECTOR *rot)
 {
     pos->vx = viewer.position.vx;
     pos->vz = viewer.position.vz;
-    pos->vy = viewer.position.vy + viewer.unk2CE + viewer.unk2D2 - 1600;
-    rot->vx = viewer.unk268;
-    rot->vy = viewer.unk26A;
-    rot->vz = viewer.unk26C;
+    pos->vy = viewer.position.vy + viewer.bob_offset + viewer.unk2D2 - 1600;
+    rot->vx = viewer.pitch;
+    rot->vy = viewer.yaw;
+    rot->vz = viewer.roll;
 }
 
 /* Clears the status timers and restores the hit and magic points. */
@@ -1171,10 +1171,10 @@ void player_recover_all(void)
                             viewer.unk190[10][0] = viewer.unk190[10][1] =
                                 viewer.unk190[11][0] = viewer.unk190[11][1] =
                                     viewer.unk190[12][0] = viewer.unk190[12][1] = 0;
-    viewer.unk238 = 0;
-    viewer.unk2 = viewer.unk18A = viewer.unk0;
-    viewer.unk6 = viewer.unk18C = viewer.unk4;
-    viewer.unk2C = 0;
+    viewer.fall_death = 0;
+    viewer.hp = viewer.hud_hp = viewer.max_hp;
+    viewer.mp = viewer.hud_mp = viewer.max_mp;
+    viewer.status_flags = 0;
     player_reset_state();
 }
 
@@ -1184,8 +1184,8 @@ void hud_clear_damage_numbers(void)
     int i;
 
     for (i = 0; i < 5; i++) {
-        viewer.unk1EC[i] = 0;
-        viewer.unk20C[i] = 0;
+        viewer.damage_number_timers[i] = 0;
+        viewer.damage_numbers[i] = 0;
     }
 }
 
@@ -1194,95 +1194,95 @@ ADDRESS(0x8003e874, 0x1ac)
 void player_reset_new_game(void)
 {
     player_reset_stats();
-    viewer.unk244 = 2048;
-    viewer.unk34 = 0;
-    viewer.unk2D6 = viewer.unk2D8 = viewer.unk2DA = viewer.unk2DC = 0;
-    viewer.unk186 = 2;
-    viewer.unk15E = 0;
+    viewer.footstep_timer = 2048;
+    viewer.play_seconds = 0;
+    viewer.red_fade = viewer.red_fade_step = viewer.yellow_fade = viewer.yellow_fade_step = 0;
+    viewer.hud_redraw = 2;
+    viewer.quick_item_index = 0;
     viewer.unk1E4 = 0;
-    viewer.unk21E = 0;
-    viewer.unk219 = viewer.unk21A = viewer.unk21B = 0;
-    viewer.unk118[0] = viewer.unk118[1] = 0;
+    viewer.motion_stopped = 0;
+    viewer.shield_wear = viewer.armour_wear = viewer.weapon_wear = 0;
+    viewer.magic_defs[0] = viewer.magic_defs[1] = 0;
     player_load_magic(0xffff, 0);
     player_load_magic(0xffff, 1);
-    viewer.unkE8[0] = viewer.unkE8[1] = viewer.unkE8[2] = viewer.unkE8[3] = 0;
+    viewer.slot_model_info[0] = viewer.slot_model_info[1] = viewer.slot_model_info[2] = viewer.slot_model_info[3] = 0;
     player_load_equipment_model(0xffff, 0, 0);
     player_load_equipment_model(0xffff, 1, 0);
     player_load_equipment_model(0xffff, 2, 0);
     player_load_equipment_model(0xffff, 3, 0);
-    viewer.unk1D4[0] = 24;
-    viewer.unk1D4[1] = 25;
-    viewer.unk1D4[2] = 26;
-    viewer.unk1D4[3] = 27;
-    viewer.unk38[3] = 0;
+    viewer.slot_sounds[0] = 24;
+    viewer.slot_sounds[1] = 25;
+    viewer.slot_sounds[2] = 26;
+    viewer.slot_sounds[3] = 27;
+    viewer.equipment[3] = 0;
     player_load_equipment_model(0, 0, 0);
     item_counts_clear();
-    viewer.unk28 = 0;
-    viewer.unk33 = 0;
-    viewer.unk34 = 0;
-    viewer.unk30 = 0;
+    viewer.items_found = 0;
+    viewer.play_frames = 0;
+    viewer.play_seconds = 0;
+    viewer.creatures_killed = 0;
     player_recalc_stats();
-    viewer.unk278.vx = 0;
-    viewer.unk278.vy = 3072;
-    viewer.unk278.vz = 0;
+    viewer.view_rot.vx = 0;
+    viewer.view_rot.vy = 3072;
+    viewer.view_rot.vz = 0;
     viewer.position.vx = 0x3d000;
     viewer.position.vy = 0x405c0;
     viewer.position.vz = 0x3f000;
-    viewer.unk1CC = viewer.unk1CE = viewer.unk1D0 = 0;
+    viewer.push_x = viewer.push_y = viewer.push_z = 0;
     player_recover_all();
     equip_load_item_slot_pictures();
-    viewer.unk22D = 61;
-    viewer.unk22E = 64;
-    viewer.unk22F = 63;
-    viewer.unk22C = 0;
-    viewer.unk230 = 0;
-    viewer.unk232 = 1472;
-    viewer.unk234 = 0;
-    viewer.unk236 = 3072;
+    viewer.save_x = 61;
+    viewer.save_y = 64;
+    viewer.save_z = 63;
+    viewer.save_area = 0;
+    viewer.save_dx = 0;
+    viewer.save_dy = 1472;
+    viewer.save_dz = 0;
+    viewer.save_yaw = 3072;
     hud_clear_damage_numbers();
 }
 
 ADDRESS(0x8003ea20, 0xb0)
 void player_init(void)
 {
-    viewer.unk120[0] = magic_model_buffers[0];
-    viewer.unk120[1] = magic_model_buffers[1];
-    viewer.unkF8[0] = equipment_model_buffers[0];
-    viewer.unkF8[1] = equipment_model_buffers[1];
-    viewer.unkF8[2] = equipment_model_buffers[2];
-    viewer.unkF8[3] = equipment_model_buffers[3];
+    viewer.magic_buffers[0] = magic_model_buffers[0];
+    viewer.magic_buffers[1] = magic_model_buffers[1];
+    viewer.slot_model_files[0] = equipment_model_buffers[0];
+    viewer.slot_model_files[1] = equipment_model_buffers[1];
+    viewer.slot_model_files[2] = equipment_model_buffers[2];
+    viewer.slot_model_files[3] = equipment_model_buffers[3];
     player_reset_new_game();
-    game_settings.unk1 = 63;
-    game_settings.unk0 = 63;
-    game_settings.unk3 = 1;
-    game_settings.unk2 = 1;
-    game_settings.unk4 = 1;
-    game_settings.unk5 = 1;
-    game_settings.unk6 = 5;
-    game_settings.unk7 = 30;
-    game_settings.unk8 = 20;
-    viewer.unk21C = 0;
+    game_settings.sfx_volume = 63;
+    game_settings.bgm_volume = 63;
+    game_settings.show_status = 1;
+    game_settings.walk_bob = 1;
+    game_settings.subtitles = 1;
+    game_settings.vibration = 1;
+    game_settings.repeat_interval = 5;
+    game_settings.repeat_delay = 30;
+    game_settings.combo_window = 20;
+    viewer.update_all_spawns = 0;
 }
 
 ADDRESS(0x8003ead0, 0x28)
 void player_stop_motion(void)
 {
-    viewer.unk2E4 = 0;
-    viewer.unk2E8 = 0;
-    viewer.unk2CA = 0;
-    viewer.unk2CC = 0;
-    viewer.unk2C8 = 0;
-    viewer.unk21E = 1;
+    viewer.walk_speed_max = 0;
+    viewer.yaw_speed_max = 0;
+    viewer.yaw_speed = 0;
+    viewer.pitch_speed = 0;
+    viewer.walk_speed = 0;
+    viewer.motion_stopped = 1;
 }
 
 ADDRESS(0x8003eaf8, 0x3c)
 void player_reset_motion(void)
 {
-    viewer.unk23C = 0;
-    viewer.unk21C = 1;
+    viewer.frame_count = 0;
+    viewer.update_all_spawns = 1;
     viewer.unk239 = 0;
-    viewer.unk2D4 = 0;
-    viewer.unk218 = 0;
+    viewer.vertical_speed = 0;
+    viewer.state = 0;
     player_stop_motion();
 }
 
@@ -1428,7 +1428,7 @@ void player_load_magic(u16 id, u8 slot)
     if (id != 0xffff) {
         item = id;
     }
-    if (viewer.unk14C[slot] != 255) {
+    if (viewer.magic_ids[slot] != 255) {
         rec = effects.slots;
         i = 128;
         while (i--) {
@@ -1448,11 +1448,11 @@ void player_load_magic(u16 id, u8 slot)
             rec++;
         }
     }
-    viewer.unk14C[slot] = item;
+    viewer.magic_ids[slot] = item;
     if (item != 255) {
-        viewer.unk118[slot] = &effects.defs[item];
-        cd_read_member(1, item * 4 + 740, (u_long *)viewer.unk120[slot]);
-        p = viewer.unk120[slot];
+        viewer.magic_defs[slot] = &effects.defs[item];
+        cd_read_member(1, item * 4 + 740, (u_long *)viewer.magic_buffers[slot]);
+        p = viewer.magic_buffers[slot];
         n = *(u16 *)p;
         p += 4;
         part = slot * 8 + 96;
@@ -1470,12 +1470,12 @@ void player_load_magic(u16 id, u8 slot)
         DrawSync(0);
         sound_bank_load(1, item * 4 + 742, slot + 6);
     }
-    viewer.unk188 = 30;
-    viewer.unk182 = 0;
-    viewer.unk184 = 0;
-    viewer.unk13C[slot] = -1;
+    viewer.magic_gauge_delay = 30;
+    viewer.magic_gauge = 0;
+    viewer.cast_gauge = 0;
+    viewer.cast_request[slot] = -1;
     viewer.unk128[slot] = 0;
-    viewer.unk155[slot] = 255;
+    viewer.shot_magic[slot] = 255;
     cd_wait_idle();
 }
 
@@ -1503,49 +1503,49 @@ void player_load_equipment_model(u16 id, u8 slot, u8 reload)
     } else {
         model = 255;
     }
-    viewer.unk187 = 15;
-    viewer.unk17E = 0;
-    viewer.unk180 = 0;
-    if (model != 255 && (cur = viewer.unk148[slot]) == model && reload) {
+    viewer.weapon_gauge_delay = 15;
+    viewer.weapon_gauge = 0;
+    viewer.swing_gauge = 0;
+    if (model != 255 && (cur = viewer.slot_model_ids[slot]) == model && reload) {
         cd_read_member(1, cur * 4 + 485, cd_file_buffer);
         tim_load_images_at(cd_file_buffer, &pix[slot], &clut[slot], 0);
         DrawSync(0);
     }
-    viewer.unk148[slot] = model;
+    viewer.slot_model_ids[slot] = model;
     if (model >= 31 && model <= 34) {
         paired = 1;
         other = model + 29;
     }
     if (model != 255) {
-        viewer.unkE8[slot] = &equipment_model_placements[model];
+        viewer.slot_model_info[slot] = &equipment_model_placements[model];
         if (paired) {
             pair = slot ^ 1;
-            viewer.unkE8[pair] = &equipment_model_placements[other];
-            cd_read_member(1, model * 4 + 484, viewer.unkF8[slot]);
-            cd_read_member(1, other * 4 + 484, viewer.unkF8[pair]);
-            anim_register(slot + 32, viewer.unkF8[slot]);
+            viewer.slot_model_info[pair] = &equipment_model_placements[other];
+            cd_read_member(1, model * 4 + 484, viewer.slot_model_files[slot]);
+            cd_read_member(1, other * 4 + 484, viewer.slot_model_files[pair]);
+            anim_register(slot + 32, viewer.slot_model_files[slot]);
             model_offset_textures((Model *)sp->model, &pix[slot], &clut[slot], 0);
-            anim_register(pair + 32, viewer.unkF8[pair]);
+            anim_register(pair + 32, viewer.slot_model_files[pair]);
         } else {
-            cd_read_member(1, model * 4 + 484, viewer.unkF8[slot]);
-            anim_register(slot + 32, viewer.unkF8[slot]);
+            cd_read_member(1, model * 4 + 484, viewer.slot_model_files[slot]);
+            anim_register(slot + 32, viewer.slot_model_files[slot]);
             model_offset_textures((Model *)sp->model, &pix[slot], &clut[slot], 1);
         }
         cd_read_member(1, model * 4 + 485, cd_file_buffer);
         tim_load_images_at(cd_file_buffer, &pix[slot], &clut[slot], 0);
         DrawSync(0);
-        sound_bank_load(1, model * 4 + 486, viewer.unk1D4[slot] - 22);
+        sound_bank_load(1, model * 4 + 486, viewer.slot_sounds[slot] - 22);
     }
     if (slot < 2) {
-        viewer.unk130.halves[slot] = -1;
+        viewer.action_timers.halves[slot] = -1;
     }
-    viewer.unk108[slot] = 0;
-    viewer.unk14E = 0;
-    viewer.unk14F = 0;
-    viewer.unk2DE = 0;
-    viewer.unk2E0 = 0;
-    viewer.unk2E2 = 0;
-    viewer.unk189 = 0;
+    viewer.slot_anims[slot] = 0;
+    viewer.action_recoil = 0;
+    viewer.shield_lowering = 0;
+    viewer.hand_rot_x = 0;
+    viewer.hand_rot_y = 0;
+    viewer.hand_rot_z = 0;
+    viewer.shield_raised = 0;
     cd_wait_idle();
 }
 
@@ -1554,44 +1554,44 @@ ADDRESS(0x8003f4ec, 0x184)
 void player_start_hand_action(u8 value, u8 slot)
 {
     if (slot == 0) {
-        if (viewer.unk130.halves[0] != -1) {
+        if (viewer.action_timers.halves[0] != -1) {
             return;
         }
-        if (viewer.unk130.halves[1] >= 2048 && !viewer.unk14F) {
+        if (viewer.action_timers.halves[1] >= 2048 && !viewer.shield_lowering) {
             return;
         }
-        if (viewer.unk148[0] == 255) {
+        if (viewer.slot_model_ids[0] == 255) {
             return;
         }
         if (viewer.unk190[1][0] != 0) {
             return;
         }
-        viewer.unk150[0] = value;
-        viewer.unk130.halves[0] = 0;
-        viewer.unk154 = 1;
-        pad_state.unk4 &= ~pad_state.unk22[8];
-        viewer.unk130.halves[2] = viewer.unkE8[0]->unk6;
-        viewer.unk138[0] = viewer.unkE8[0]->unk8;
-        viewer.unk187 = 15;
+        viewer.slot_anim_ids[0] = value;
+        viewer.action_timers.halves[0] = 0;
+        viewer.action_started = 1;
+        pad_state.pressed &= ~pad_state.buttons[8];
+        viewer.action_timers.halves[2] = viewer.slot_model_info[0]->hit_time;
+        viewer.action_sound_time[0] = viewer.slot_model_info[0]->sound_time;
+        viewer.weapon_gauge_delay = 15;
     } else {
-        if (viewer.unk130.halves[slot] != -1 || viewer.unk130.halves[0] != -1) {
+        if (viewer.action_timers.halves[slot] != -1 || viewer.action_timers.halves[0] != -1) {
             return;
         }
-        if (viewer.unk13C[slot] != -1 || viewer.unk13C[0] != -1) {
+        if (viewer.cast_request[slot] != -1 || viewer.cast_request[0] != -1) {
             return;
         }
-        if (viewer.unk148[slot] == 255) {
+        if (viewer.slot_model_ids[slot] == 255) {
             return;
         }
         if (viewer.unk190[1][0] != 0) {
             return;
         }
-        pad_state.unk4 &= ~pad_state.unk22[9];
-        viewer.unk150[slot] = value;
-        viewer.unk130.halves[slot] = 0;
-        viewer.unk154 = 1;
-        viewer.unk130.halves[slot + 2] = viewer.unkE8[slot]->unk6;
-        viewer.unk138[slot] = viewer.unkE8[slot]->unk8;
+        pad_state.pressed &= ~pad_state.buttons[9];
+        viewer.slot_anim_ids[slot] = value;
+        viewer.action_timers.halves[slot] = 0;
+        viewer.action_started = 1;
+        viewer.action_timers.halves[slot + 2] = viewer.slot_model_info[slot]->hit_time;
+        viewer.action_sound_time[slot] = viewer.slot_model_info[slot]->sound_time;
     }
 }
 
@@ -1602,12 +1602,12 @@ void player_start_cast(u8 unused, u8 slot)
     Viewer *v;
 
     v = &viewer;
-    if (*(s32 *)v->unk13C == -1 && v->unk130.word == -1 && v->unk14C[slot] != 255 &&
-        !(v->unk2C & 0x10) && (!v->unk1CB || v->unk190[12][0] != 0)) {
-        v->unk13C[slot] = 0;
-        v->unk184 = v->unk182;
-        v->unk182 = 0;
-        v->unk188 = 30;
+    if (*(s32 *)v->cast_request == -1 && v->action_timers.word == -1 && v->magic_ids[slot] != 255 &&
+        !(v->status_flags & 0x10) && (!v->blocks_magic || v->unk190[12][0] != 0)) {
+        v->cast_request[slot] = 0;
+        v->cast_gauge = v->magic_gauge;
+        v->magic_gauge = 0;
+        v->magic_gauge_delay = 30;
     }
 }
 
@@ -1620,8 +1620,8 @@ ADDRESS(0x8003f704, 0x20c)
 int player_get_launch_vector(int length, VECTOR *pos, SVECTOR *dir, SVECTOR *rot, int slot)
 {
     if (pos) {
-        gte_SetRotMatrix(&viewer.unk298);
-        gte_ldv0(&viewer.unk160[slot]);
+        gte_SetRotMatrix(&viewer.camera_matrix);
+        gte_ldv0(&viewer.shot_offsets[slot]);
         gte_rtv0();
         gte_stlvnl(pos);
         pos->vx += viewer.position.vx;
@@ -1647,7 +1647,7 @@ int player_get_launch_vector(int length, VECTOR *pos, SVECTOR *dir, SVECTOR *rot
 
         memset(&v, 0, sizeof(v));
         v.vz = 4096;
-        gte_SetRotMatrix(&viewer.unk298);
+        gte_SetRotMatrix(&viewer.camera_matrix);
         gte_ldv0(&v);
         gte_rtv0();
         gte_stsv(dir);
@@ -1681,7 +1681,7 @@ void player_fire_magic_shot(int kind, int slot, ...)
     va_start(ap, kind);
     side = slot << 5;
     sp = SCRATCHPAD;
-    count = viewer.unk157[slot] - 1;
+    count = viewer.shots_left[slot] - 1;
     switch (kind) {
     case 0:
         speed = 4096;
@@ -1689,22 +1689,22 @@ void player_fire_magic_shot(int kind, int slot, ...)
     case 10:
         speed = 2048;
     shoot:
-        rot.vx = viewer.unk270.vx;
-        rot.vy = viewer.unk270.vy;
-        rot.vz = viewer.unk270.vz;
+        rot.vx = viewer.camera_rot.vx;
+        rot.vy = viewer.camera_rot.vy;
+        rot.vz = viewer.camera_rot.vz;
         player_get_launch_vector(700, &pos, &dir, &rot, slot);
-        effect_spawn(10, side | 0x42, kind, &pos, &dir, speed, &viewer.unk268);
+        effect_spawn(10, side | 0x42, kind, &pos, &dir, speed, &viewer.pitch);
         break;
     case 7:
         i = 2;
         while (i--) {
             length = i * 32 - 16;
-            aim.vx = viewer.unk270.vx - 512;
-            aim.vy = viewer.unk270.vy + length;
-            aim.vz = viewer.unk270.vz;
+            aim.vx = viewer.camera_rot.vx - 512;
+            aim.vy = viewer.camera_rot.vy + length;
+            aim.vz = viewer.camera_rot.vz;
             player_get_launch_vector(700, &pos, &dir, &aim, slot);
-            effect_spawn(10, side | 0x42, kind, &pos, &dir, 1024, &viewer.unk268);
-            viewer.unk160[slot].vx += 1024;
+            effect_spawn(10, side | 0x42, kind, &pos, &dir, 1024, &viewer.pitch);
+            viewer.shot_offsets[slot].vx += 1024;
         }
         break;
     case 1:
@@ -1752,24 +1752,24 @@ void player_fire_magic_shot(int kind, int slot, ...)
         turn = 0;
         speed = 1024;
     spray:
-        rot.vx = viewer.unk270.vx;
-        rot.vy = viewer.unk270.vy + turn;
-        rot.vz = viewer.unk270.vz;
+        rot.vx = viewer.camera_rot.vx;
+        rot.vy = viewer.camera_rot.vy + turn;
+        rot.vz = viewer.camera_rot.vz;
         player_get_launch_vector(length, &pos, &dir, &rot, slot);
-        rot.vx = viewer.unk270.vx;
-        rot.vy = -viewer.unk270.vy;
-        rot.vz = -viewer.unk270.vz;
+        rot.vx = viewer.camera_rot.vx;
+        rot.vy = -viewer.camera_rot.vy;
+        rot.vz = -viewer.camera_rot.vz;
         effect_spawn(10, side | 0x42, kind, &pos, &dir, speed, &rot, count);
         break;
     case 44:
     case 45:
     case 46:
     case 47:
-        anim_get_vertex(32, viewer.unk150[0], viewer.unkE8[0]->unk6, viewer.unkE8[0]->unk12, &dir);
-        sp->model_t[0] = viewer.unkE8[slot]->unkC;
-        sp->model_t[1] = viewer.unkE8[slot]->unkE;
-        sp->model_t[2] = viewer.unkE8[slot]->unk10;
-        RotMatrix(&viewer.unkE8[slot]->unk14, PLAYER_MATRIX(sp));
+        anim_get_vertex(32, viewer.slot_anim_ids[0], viewer.slot_model_info[0]->hit_time, viewer.slot_model_info[0]->shot_vertex, &dir);
+        sp->model_t[0] = viewer.slot_model_info[slot]->pos_x;
+        sp->model_t[1] = viewer.slot_model_info[slot]->pos_y;
+        sp->model_t[2] = viewer.slot_model_info[slot]->pos_z;
+        RotMatrix(&viewer.slot_model_info[slot]->rotation, PLAYER_MATRIX(sp));
         gte_SetRotMatrix(PLAYER_MATRIX(sp));
         gte_SetTransMatrix(PLAYER_MATRIX(sp));
         gte_ldv0(&dir);
@@ -1778,7 +1778,7 @@ void player_fire_magic_shot(int kind, int slot, ...)
         dir.vx = pos.vx;
         dir.vy = pos.vy;
         dir.vz = pos.vz;
-        rot = viewer.unk270;
+        rot = viewer.camera_rot;
         sp->model_t[0] = viewer.position.vx;
         sp->model_t[1] = viewer.position.vy;
         sp->model_t[2] = viewer.position.vz;
@@ -1788,11 +1788,11 @@ void player_fire_magic_shot(int kind, int slot, ...)
         gte_ldv0(&dir);
         gte_rt();
         gte_stlvnl(&pos);
-        anim_get_vertex(32, viewer.unk150[0], viewer.unkE8[0]->unk6, viewer.unkE8[0]->unk14.pad, &dir);
-        sp->model_t[0] = viewer.unkE8[slot]->unkC;
-        sp->model_t[1] = viewer.unkE8[slot]->unkE;
-        sp->model_t[2] = viewer.unkE8[slot]->unk10;
-        RotMatrix(&viewer.unkE8[slot]->unk14, PLAYER_MATRIX(sp));
+        anim_get_vertex(32, viewer.slot_anim_ids[0], viewer.slot_model_info[0]->hit_time, viewer.slot_model_info[0]->rotation.pad, &dir);
+        sp->model_t[0] = viewer.slot_model_info[slot]->pos_x;
+        sp->model_t[1] = viewer.slot_model_info[slot]->pos_y;
+        sp->model_t[2] = viewer.slot_model_info[slot]->pos_z;
+        RotMatrix(&viewer.slot_model_info[slot]->rotation, PLAYER_MATRIX(sp));
         gte_SetRotMatrix(PLAYER_MATRIX(sp));
         gte_SetTransMatrix(PLAYER_MATRIX(sp));
         gte_ldv0(&dir);
@@ -1801,7 +1801,7 @@ void player_fire_magic_shot(int kind, int slot, ...)
         dir.vx = pos2.vx;
         dir.vy = pos2.vy;
         dir.vz = pos2.vz;
-        rot = viewer.unk270;
+        rot = viewer.camera_rot;
         sp->model_t[0] = viewer.position.vx;
         sp->model_t[1] = viewer.position.vy;
         sp->model_t[2] = viewer.position.vz;
@@ -1814,14 +1814,14 @@ void player_fire_magic_shot(int kind, int slot, ...)
         vector_to_angles_ratan2(pos.vx - pos2.vx, pos.vy - pos2.vy, pos.vz - pos2.vz, &rot);
         vector_from_angles_zyx(&rot, &dir);
         if (kind == 44) {
-            vector_scale(viewer.unk180 * 768 / 5120, &dir);
+            vector_scale(viewer.swing_gauge * 768 / 5120, &dir);
         } else {
-            vector_scale(viewer.unk180 * 1024 / 5120, &dir);
+            vector_scale(viewer.swing_gauge * 1024 / 5120, &dir);
         }
         pos.vx = pos2.vx;
-        pos.vy = pos2.vy + viewer.unk2CE + viewer.unk2D2;
+        pos.vy = pos2.vy + viewer.bob_offset + viewer.unk2D2;
         pos.vz = pos2.vz;
-        effect_spawn(10, side | 0x42, kind, &pos, &dir, &rot, viewer.unk180);
+        effect_spawn(10, side | 0x42, kind, &pos, &dir, &rot, viewer.swing_gauge);
         break;
     }
 }
@@ -1834,55 +1834,55 @@ void player_update_cast(u8 hand)
     int active;
     int rate = 36;
 
-    if (viewer.unk13C[hand] != -1) {
+    if (viewer.cast_request[hand] != -1) {
         if (hand) {
-            if (viewer.unk38[13] != 0xffff) {
-                item = &vis_table_c.types[viewer.unk38[13]];
+            if (viewer.equipment[13] != 0xffff) {
+                item = &vis_table_c.types[viewer.equipment[13]];
                 if (item->durability)
-                    player_cast_magic(viewer.unk14C[hand], hand);
+                    player_cast_magic(viewer.magic_ids[hand], hand);
             }
         } else {
-            if (viewer.unk38[0] != 0xffff) {
-                item = &vis_table_c.types[viewer.unk38[0]];
+            if (viewer.equipment[0] != 0xffff) {
+                item = &vis_table_c.types[viewer.equipment[0]];
                 if (item->durability)
-                    player_cast_magic(viewer.unk14C[0], 0);
+                    player_cast_magic(viewer.magic_ids[0], 0);
             }
         }
-        viewer.unk13C[hand] = -1;
+        viewer.cast_request[hand] = -1;
         return;
     }
     active = 0;
-    if (viewer.unk38[0] != 0xffff) {
-        item = &vis_table_c.types[viewer.unk38[0]];
+    if (viewer.equipment[0] != 0xffff) {
+        item = &vis_table_c.types[viewer.equipment[0]];
         if (item->durability)
-            active = viewer.unk38[6] != 0xffff;
+            active = viewer.equipment[6] != 0xffff;
     }
-    if (viewer.unk38[13] != 0xffff) {
-        item = &vis_table_c.types[viewer.unk38[13]];
-        if (item->durability && viewer.unk38[12] != 0xffff)
+    if (viewer.equipment[13] != 0xffff) {
+        item = &vis_table_c.types[viewer.equipment[13]];
+        if (item->durability && viewer.equipment[12] != 0xffff)
             active = 1;
     }
-    if (!viewer.unk1CB || viewer.unk190[12][0] != 0) {
+    if (!viewer.blocks_magic || viewer.unk190[12][0] != 0) {
         if (!active)
             return;
-        if (viewer.unk188 == 0) {
-            viewer.unk182 += (viewer.unk62[8] / (viewer.unk62[8] + 1000) * rate + 36) << 1;
-            if (viewer.unk182 > 5120)
-                viewer.unk182 = 5120;
+        if (viewer.magic_gauge_delay == 0) {
+            viewer.magic_gauge += (viewer.attributes[8] / (viewer.attributes[8] + 1000) * rate + 36) << 1;
+            if (viewer.magic_gauge > 5120)
+                viewer.magic_gauge = 5120;
         } else {
-            viewer.unk188--;
+            viewer.magic_gauge_delay--;
         }
     } else {
-        if (viewer.unk182 - 128 > 0)
-            viewer.unk182 -= 128;
+        if (viewer.magic_gauge - 128 > 0)
+            viewer.magic_gauge -= 128;
         else
-            viewer.unk182 = 0;
+            viewer.magic_gauge = 0;
     }
 }
 
 /* Steps hand `hand`'s swing or cast for its held item kind: the swing
- * timer viewer.unk130.halves[hand] against its hit window (unk130[hand + 2]) and
- * its end (unk138[hand]), the stamina bar viewer.unk17E, the hit search
+ * timer viewer.action_timers.halves[hand] against its hit window (unk130[hand + 2]) and
+ * its end (unk138[hand]), the stamina bar viewer.weapon_gauge, the hit search
  * over vis_table_a's entries and the item wear.
  *
  * The step and the stamina gain are loaded and then scaled in place
@@ -1898,7 +1898,7 @@ void player_update_cast(u8 hand)
 ADDRESS(0x800402ac, 0xc58)
 void player_update_hand_action(u8 hand)
 {
-    ViewerModel *rec;
+    EquipmentModel *rec;
     SVECTOR sv;
     VECTOR unused1;
     SVECTOR unused2;
@@ -1920,41 +1920,41 @@ void player_update_hand_action(u8 hand)
     int kind;
     CreatureType *def;
 
-    rec = viewer.unkE8[hand];
-    switch (viewer.unk148[hand]) {
+    rec = viewer.slot_model_info[hand];
+    switch (viewer.slot_model_ids[hand]) {
     case 36 ... 54: {
         int cost;
-        if (viewer.unk2DE != 0) {
-            viewer.unk2DE >>= 1;
+        if (viewer.hand_rot_x != 0) {
+            viewer.hand_rot_x >>= 1;
         }
-        if (viewer.unk2E2 != 0) {
-            viewer.unk2E2 >>= 1;
+        if (viewer.hand_rot_z != 0) {
+            viewer.hand_rot_z >>= 1;
         }
-        if (viewer.unk2E0 != 0) {
-            viewer.unk2E0 -= viewer.unk2E0 / 20;
+        if (viewer.hand_rot_y != 0) {
+            viewer.hand_rot_y -= viewer.hand_rot_y / 20;
         }
-        if (viewer.unk130.halves[hand] == -1) {
+        if (viewer.action_timers.halves[hand] == -1) {
             break;
         }
-        cost = rec->unk4;
-        cost += cost * viewer.unk62[1] / 1600;
-        if (viewer.unk130.halves[hand ^ 1] != -1) {
-            viewer.unk14F = 1;
+        cost = rec->action_step;
+        cost += cost * viewer.attributes[1] / 1600;
+        if (viewer.action_timers.halves[hand ^ 1] != -1) {
+            viewer.shield_lowering = 1;
         }
-        if (viewer.unk14F) {
-            viewer.unk130.halves[hand] -= cost;
-        } else if ((!(pad_state.unk2 & pad_state.unk22[8]) && hand == 0) ||
-                   (!(pad_state.unk2 & pad_state.unk22[9]) && hand != 0)) {
-            viewer.unk130.halves[hand] -= cost;
-            viewer.unk189 = 0;
-        } else if (viewer.unk130.halves[hand + 2] - cost < viewer.unk130.halves[hand] &&
-                   viewer.unk130.halves[hand] <= viewer.unk130.halves[hand + 2]) {
-            viewer.unk189 = 1;
+        if (viewer.shield_lowering) {
+            viewer.action_timers.halves[hand] -= cost;
+        } else if ((!(pad_state.held & pad_state.buttons[8]) && hand == 0) ||
+                   (!(pad_state.held & pad_state.buttons[9]) && hand != 0)) {
+            viewer.action_timers.halves[hand] -= cost;
+            viewer.shield_raised = 0;
+        } else if (viewer.action_timers.halves[hand + 2] - cost < viewer.action_timers.halves[hand] &&
+                   viewer.action_timers.halves[hand] <= viewer.action_timers.halves[hand + 2]) {
+            viewer.shield_raised = 1;
             sv.vx = 0;
             sv.vy = 0;
-            sv.vz = rec->unk2 << 1;
-            ApplyMatrix(&viewer.unk298, &sv, &v);
-            v.vy = v.vy * (3600 - rec->unk2) / 1800;
+            sv.vz = rec->reach << 1;
+            ApplyMatrix(&viewer.camera_matrix, &sv, &v);
+            v.vy = v.vy * (3600 - rec->reach) / 1800;
             v.vx /= 4;
             v.vy /= 4;
             v.vz /= 4;
@@ -1972,7 +1972,7 @@ void player_update_hand_action(u8 hand)
                 req.height = 1024;
                 r = creature_find_in_reach((CollisionState *)&req, 4);
                 if (r != -1) {
-                    d = viewer.unk26A - (short)vis_table_a.entries[r].player_heading;
+                    d = viewer.yaw - (short)vis_table_a.entries[r].player_heading;
                     if (d > 2048) {
                         d -= 4096;
                     }
@@ -1982,126 +1982,126 @@ void player_update_hand_action(u8 hand)
                 }
             }
             if (d != 0xffff) {
-                viewer.unk2E0 += (d - viewer.unk2E0) / 4;
+                viewer.hand_rot_y += (d - viewer.hand_rot_y) / 4;
             }
-        } else if (viewer.unk154) {
-            viewer.unk154 = 0;
+        } else if (viewer.action_started) {
+            viewer.action_started = 0;
         } else {
-            viewer.unk130.halves[hand] += cost;
+            viewer.action_timers.halves[hand] += cost;
         }
-        if ((u16)viewer.unk130.halves[hand] > 4095) {
-            viewer.unk130.halves[hand] = -1;
-            viewer.unk14F = 0;
-            viewer.unk2DE = 0;
-            viewer.unk2E0 = 0;
-            viewer.unk2E2 = 0;
+        if ((u16)viewer.action_timers.halves[hand] > 4095) {
+            viewer.action_timers.halves[hand] = -1;
+            viewer.shield_lowering = 0;
+            viewer.hand_rot_x = 0;
+            viewer.hand_rot_y = 0;
+            viewer.hand_rot_z = 0;
         }
         break;
     }
     case 31 ... 34: {
         int cost;
-        if (viewer.unk130.halves[hand] != -1) {
-            cost = rec->unk4;
-            cost += cost * viewer.unk62[1] / 1600;
-            if (viewer.unk21F) {
-                if (viewer.unk138[hand] - cost >= viewer.unk130.halves[hand]) {
-                    viewer.unk130.halves[hand] -= cost;
+        if (viewer.action_timers.halves[hand] != -1) {
+            cost = rec->action_step;
+            cost += cost * viewer.attributes[1] / 1600;
+            if (viewer.bow_released) {
+                if (viewer.action_sound_time[hand] - cost >= viewer.action_timers.halves[hand]) {
+                    viewer.action_timers.halves[hand] -= cost;
                 } else {
-                    viewer.unk130.halves[hand] += cost;
-                    if (viewer.unk130.halves[hand] > viewer.unk130.halves[hand + 2] &&
-                        viewer.unk130.halves[hand] <= viewer.unk130.halves[hand + 2] + cost) {
-                        kind = viewer.unk148[hand] + 13;
-                        sound_play((viewer.unk1D4[hand] - 24) / 2 + 22, 128);
-                        viewer.unk130.halves[hand] -= cost;
+                    viewer.action_timers.halves[hand] += cost;
+                    if (viewer.action_timers.halves[hand] > viewer.action_timers.halves[hand + 2] &&
+                        viewer.action_timers.halves[hand] <= viewer.action_timers.halves[hand + 2] + cost) {
+                        kind = viewer.slot_model_ids[hand] + 13;
+                        sound_play((viewer.slot_sounds[hand] - 24) / 2 + 22, 128);
+                        viewer.action_timers.halves[hand] -= cost;
                         player_cast_magic(kind, hand);
-                        viewer.unk130.halves[hand] += cost;
+                        viewer.action_timers.halves[hand] += cost;
                     }
                 }
-            } else if ((!(pad_state.unk2 & pad_state.unk22[8]) && hand == 0) ||
-                       (!(pad_state.unk2 & pad_state.unk22[9]) && hand != 0)) {
-                viewer.unk21F = 1;
-                viewer.unk180 = viewer.unk17E;
-                viewer.unk17E = 0;
-            } else if (viewer.unk130.halves[hand + 2] - cost < viewer.unk130.halves[hand] &&
-                       viewer.unk130.halves[hand] <= viewer.unk130.halves[hand + 2]) {
+            } else if ((!(pad_state.held & pad_state.buttons[8]) && hand == 0) ||
+                       (!(pad_state.held & pad_state.buttons[9]) && hand != 0)) {
+                viewer.bow_released = 1;
+                viewer.swing_gauge = viewer.weapon_gauge;
+                viewer.weapon_gauge = 0;
+            } else if (viewer.action_timers.halves[hand + 2] - cost < viewer.action_timers.halves[hand] &&
+                       viewer.action_timers.halves[hand] <= viewer.action_timers.halves[hand + 2]) {
                 inc = 96;
-                inc += viewer.unk62[1] * inc / 800;
-                viewer.unk17E += inc * 2;
-                if (viewer.unk17E > 5120) {
-                    viewer.unk17E = 5120;
+                inc += viewer.attributes[1] * inc / 800;
+                viewer.weapon_gauge += inc * 2;
+                if (viewer.weapon_gauge > 5120) {
+                    viewer.weapon_gauge = 5120;
                 }
-            } else if (viewer.unk130.halves[hand] == 0 && viewer.unk154) {
-                viewer.unk154 = 0;
-                viewer.unk21F = 0;
+            } else if (viewer.action_timers.halves[hand] == 0 && viewer.action_started) {
+                viewer.action_started = 0;
+                viewer.bow_released = 0;
             } else {
                 {
                 int gain = 96;
-                gain += viewer.unk62[1] * gain / 800;
-                viewer.unk17E += gain;
+                gain += viewer.attributes[1] * gain / 800;
+                viewer.weapon_gauge += gain;
                 }
-                if (viewer.unk17E > 5120) {
-                    viewer.unk17E = 5120;
+                if (viewer.weapon_gauge > 5120) {
+                    viewer.weapon_gauge = 5120;
                 }
-                viewer.unk130.halves[hand] += cost;
-                if (viewer.unk130.halves[hand] > viewer.unk138[hand] - cost &&
-                    viewer.unk130.halves[hand] <= viewer.unk138[hand]) {
-                    sound_play(viewer.unk1D4[hand], 128);
-                    player_wear_item(1, &viewer.unk38[3]);
+                viewer.action_timers.halves[hand] += cost;
+                if (viewer.action_timers.halves[hand] > viewer.action_sound_time[hand] - cost &&
+                    viewer.action_timers.halves[hand] <= viewer.action_sound_time[hand]) {
+                    sound_play(viewer.slot_sounds[hand], 128);
+                    player_wear_item(1, &viewer.equipment[3]);
                 }
             }
-            if ((u16)viewer.unk130.halves[hand] > 4095) {
-                viewer.unk130.halves[hand] = -1;
-                viewer.unk14E = 0;
-                viewer.unk21F = 0;
+            if ((u16)viewer.action_timers.halves[hand] > 4095) {
+                viewer.action_timers.halves[hand] = -1;
+                viewer.action_recoil = 0;
+                viewer.bow_released = 0;
             }
-            viewer.unk130.halves[hand ^ 1] = viewer.unk130.halves[hand];
+            viewer.action_timers.halves[hand ^ 1] = viewer.action_timers.halves[hand];
         } else {
-            viewer.unk187 = 0;
+            viewer.weapon_gauge_delay = 0;
         }
         break;
     }
     case 0 ... 30: {
         int cost;
         int max;
-        Data801cd180 *pad;
-        if (viewer.unk130.halves[hand] != -1) {
+        PadState *pad;
+        if (viewer.action_timers.halves[hand] != -1) {
             do {
-                cost = rec->unk4;
-                cost += cost * viewer.unk62[1] / 1600;
+                cost = rec->action_step;
+                cost += cost * viewer.attributes[1] / 1600;
             } while (0);
             pad = &pad_state;
-            max = rec->unk8;
-            if (pad->unk4 & pad->unk22[8]) {
-                pad->unk4 &= ~pad->unk22[8];
+            max = rec->sound_time;
+            if (pad->pressed & pad->buttons[8]) {
+                pad->pressed &= ~pad->buttons[8];
             }
-            if (viewer.unk14E && !(viewer.unk130.halves[hand + 2] - cost < viewer.unk130.halves[hand])) {
-                viewer.unk130.halves[hand] -= cost;
-            } else if (viewer.unk154) {
-                viewer.unk180 = viewer.unk17E;
-                viewer.unk17E = 0;
-                viewer.unk154 = 0;
+            if (viewer.action_recoil && !(viewer.action_timers.halves[hand + 2] - cost < viewer.action_timers.halves[hand])) {
+                viewer.action_timers.halves[hand] -= cost;
+            } else if (viewer.action_started) {
+                viewer.swing_gauge = viewer.weapon_gauge;
+                viewer.weapon_gauge = 0;
+                viewer.action_started = 0;
             } else {
-                viewer.unk130.halves[hand] += cost;
+                viewer.action_timers.halves[hand] += cost;
             }
-            if (viewer.unk138[hand] - cost < viewer.unk130.halves[hand] &&
-                viewer.unk130.halves[hand] <= viewer.unk138[hand]) {
-                sound_play(viewer.unk1D4[hand], 128);
-                if (viewer.unk138[hand] >= max) {
-                    viewer.unk138[hand] = 5000;
+            if (viewer.action_sound_time[hand] - cost < viewer.action_timers.halves[hand] &&
+                viewer.action_timers.halves[hand] <= viewer.action_sound_time[hand]) {
+                sound_play(viewer.slot_sounds[hand], 128);
+                if (viewer.action_sound_time[hand] >= max) {
+                    viewer.action_sound_time[hand] = 5000;
                 } else {
-                    viewer.unk138[hand] = viewer.unk138[hand];
+                    viewer.action_sound_time[hand] = viewer.action_sound_time[hand];
                 }
             }
-            if (viewer.unk148[hand] < 36 || viewer.unk148[hand] > 254) {
-                if (viewer.unk130.halves[hand + 2] - cost < viewer.unk130.halves[hand] &&
-                    viewer.unk130.halves[hand] <= viewer.unk130.halves[hand + 2]) {
+            if (viewer.slot_model_ids[hand] < 36 || viewer.slot_model_ids[hand] > 254) {
+                if (viewer.action_timers.halves[hand + 2] - cost < viewer.action_timers.halves[hand] &&
+                    viewer.action_timers.halves[hand] <= viewer.action_timers.halves[hand + 2]) {
                     int side;
                     e = vis_table_a.entries;
                     best = -1;
                     hit = NULL;
                     hr = 0;
                     dmg = 0;
-                    reach = viewer.unkE8[hand]->unk2;
+                    reach = viewer.slot_model_info[hand]->reach;
                     for (vis_table_a.current_index = 0; vis_table_a.current_index < 64; vis_table_a.current_index++, e++) {
                         if (e->spawn_chance != 255) {
                             creature_set_current(e);
@@ -2114,44 +2114,44 @@ void player_update_hand_action(u8 hand)
                         }
                     }
                     if (hit != NULL) {
-                        dmg = creature_take_damage(hit, hr, viewer.unk180, viewer.unkBA, 0);
+                        dmg = creature_take_damage(hit, hr, viewer.swing_gauge, viewer.weapon_attack, 0);
                         hud_queue_damage_number(dmg);
                     }
                     if (hr != 0 && dmg != -1) {
                         def = &vis_table_a.types[hit->type];
                         if (dmg * 4 < def->max_hp) {
-                            viewer.unk21B += 3;
+                            viewer.weapon_wear += 3;
                         } else if (dmg * 2 < def->max_hp) {
-                            viewer.unk21B += 2;
+                            viewer.weapon_wear += 2;
                         } else if (dmg < def->max_hp) {
-                            viewer.unk21B += 1;
+                            viewer.weapon_wear += 1;
                         }
-                        if (viewer.unk21B >= 7) {
-                            viewer.unk21B -= 7;
-                            player_wear_item(1, &viewer.unk38[3]);
+                        if (viewer.weapon_wear >= 7) {
+                            viewer.weapon_wear -= 7;
+                            player_wear_item(1, &viewer.equipment[3]);
                         }
                     }
                 }
-                if ((u16)viewer.unk130.halves[hand] > 4095) {
-                    viewer.unk130.halves[hand] = -1;
-                    viewer.unk14E = 0;
+                if ((u16)viewer.action_timers.halves[hand] > 4095) {
+                    viewer.action_timers.halves[hand] = -1;
+                    viewer.action_recoil = 0;
                 }
             }
         } else {
-            viewer.unk14E = 0;
-            if (!(pad_state.unk2 & pad_state.unk22[8])) {
-                if (viewer.unk187 == 0) {
+            viewer.action_recoil = 0;
+            if (!(pad_state.held & pad_state.buttons[8])) {
+                if (viewer.weapon_gauge_delay == 0) {
                     inc = 96;
-                    inc += viewer.unk62[1] / (viewer.unk62[1] + 1000) * inc;
-                    if (viewer.unk38[16] != 0xffff && viewer.unk130.halves[1] >= 0) {
+                    inc += viewer.attributes[1] / (viewer.attributes[1] + 1000) * inc;
+                    if (viewer.equipment[16] != 0xffff && viewer.action_timers.halves[1] >= 0) {
                         inc >>= 1;
                     }
-                    viewer.unk17E += inc * 2;
-                    if (viewer.unk17E > 5120) {
-                        viewer.unk17E = 5120;
+                    viewer.weapon_gauge += inc * 2;
+                    if (viewer.weapon_gauge > 5120) {
+                        viewer.weapon_gauge = 5120;
                     }
                 } else {
-                    viewer.unk187--;
+                    viewer.weapon_gauge_delay--;
                 }
             }
         }
@@ -2173,54 +2173,54 @@ void player_cast_magic(u8 magic, u8 hand)
     int cost;
     SVECTOR unused;
 
-    if (viewer.unk155[hand] != 255 || magic == 255) {
+    if (viewer.shot_magic[hand] != 255 || magic == 255) {
         return;
     }
     rec = (StMagic *)&effects.defs[magic];
     cost = rec->unk2;
-    if (viewer.unk6 < cost) {
+    if (viewer.mp < cost) {
         return;
     }
-    viewer.unk6 -= cost;
-    viewer.unk155[hand] = magic;
+    viewer.mp -= cost;
+    viewer.shot_magic[hand] = magic;
     switch (magic) {
     case 0:
     case 10:
-        viewer.unk15B[hand] = 1;
-        viewer.unk157[hand] = 1;
-        viewer.unk159[hand] = 1;
-        viewer.unk160[hand].vx = 0;
-        viewer.unk160[hand].vy = 50;
-        viewer.unk160[hand].vz = 0;
+        viewer.shot_countdown[hand] = 1;
+        viewer.shots_left[hand] = 1;
+        viewer.shot_interval[hand] = 1;
+        viewer.shot_offsets[hand].vx = 0;
+        viewer.shot_offsets[hand].vy = 50;
+        viewer.shot_offsets[hand].vz = 0;
         break;
     case 7:
-        viewer.unk15B[hand] = 1;
-        viewer.unk157[hand] = 1;
-        viewer.unk159[hand] = 1;
-        viewer.unk160[hand].vx = -512;
-        viewer.unk160[hand].vy = -1024;
-        viewer.unk160[hand].vz = 0;
+        viewer.shot_countdown[hand] = 1;
+        viewer.shots_left[hand] = 1;
+        viewer.shot_interval[hand] = 1;
+        viewer.shot_offsets[hand].vx = -512;
+        viewer.shot_offsets[hand].vy = -1024;
+        viewer.shot_offsets[hand].vz = 0;
         break;
     case 3:
-        viewer.unk157[hand] = 4;
-        viewer.unk159[hand] = 8;
-        viewer.unk160[hand].vx = 0;
-        viewer.unk160[hand].vy = 200;
-        viewer.unk160[hand].vz = 0;
+        viewer.shots_left[hand] = 4;
+        viewer.shot_interval[hand] = 8;
+        viewer.shot_offsets[hand].vx = 0;
+        viewer.shot_offsets[hand].vy = 200;
+        viewer.shot_offsets[hand].vz = 0;
         goto fire;
     case 9:
-        viewer.unk157[hand] = 3;
-        viewer.unk159[hand] = 4;
-        viewer.unk160[hand].vx = 0;
-        viewer.unk160[hand].vy = 200;
-        viewer.unk160[hand].vz = 0;
+        viewer.shots_left[hand] = 3;
+        viewer.shot_interval[hand] = 4;
+        viewer.shot_offsets[hand].vx = 0;
+        viewer.shot_offsets[hand].vy = 200;
+        viewer.shot_offsets[hand].vz = 0;
         goto fire;
     case 12:
-        viewer.unk157[hand] = 2;
-        viewer.unk159[hand] = 4;
-        viewer.unk160[hand].vx = 0;
-        viewer.unk160[hand].vy = 200;
-        viewer.unk160[hand].vz = 0;
+        viewer.shots_left[hand] = 2;
+        viewer.shot_interval[hand] = 4;
+        viewer.shot_offsets[hand].vx = 0;
+        viewer.shot_offsets[hand].vy = 200;
+        viewer.shot_offsets[hand].vz = 0;
         goto fire;
     case 1:
     case 4:
@@ -2228,24 +2228,24 @@ void player_cast_magic(u8 magic, u8 hand)
     case 13:
     case 15:
     case 16:
-        viewer.unk157[hand] = 1;
-        viewer.unk159[hand] = 1;
-        viewer.unk160[hand].vx = 0;
-        viewer.unk160[hand].vy = 200;
-        viewer.unk160[hand].vz = 0;
+        viewer.shots_left[hand] = 1;
+        viewer.shot_interval[hand] = 1;
+        viewer.shot_offsets[hand].vx = 0;
+        viewer.shot_offsets[hand].vy = 200;
+        viewer.shot_offsets[hand].vz = 0;
     fire:
-        viewer.unk15B[hand] = 1;
+        viewer.shot_countdown[hand] = 1;
         break;
     case 44:
     case 45:
     case 46:
     case 47:
-        viewer.unk15B[hand] = 1;
-        viewer.unk157[hand] = 1;
-        viewer.unk159[hand] = 1;
+        viewer.shot_countdown[hand] = 1;
+        viewer.shots_left[hand] = 1;
+        viewer.shot_interval[hand] = 1;
         break;
     }
-    viewer.unk118[hand] = rec;
+    viewer.magic_defs[hand] = rec;
     switch (magic) {
     case 44:
     case 45:
@@ -2254,16 +2254,16 @@ void player_cast_magic(u8 magic, u8 hand)
         break;
     default:
         if (hand) {
-            player_wear_item(1, &viewer.unk38[13]);
+            player_wear_item(1, &viewer.equipment[13]);
         } else {
-            player_wear_item(1, &viewer.unk38[0]);
+            player_wear_item(1, &viewer.equipment[0]);
         }
     }
 }
 
 /* Moves the viewer `speed` units along heading `angle`, sliding along the
  * walls collision_query reports (at most three tries), and keeps the motion
- * in viewer.unk260.
+ * in viewer.velocity.
  */
 ADDRESS(0x80041150, 0x4dc)
 void player_move(int angle, int speed)
@@ -2292,14 +2292,14 @@ void player_move(int angle, int speed)
     vel.vz = initial_z;
     vis_lists.radius = 256;
     vis_lists.height = 1600;
-    vel.vy = source->unk2D4;
+    vel.vy = source->vertical_speed;
     vis_lists.tests = 1074;
 loop:
-    viewer.unk260.vz = vel.vz + viewer.unk1D0;
-    viewer.unk260.vx = vel.vx + viewer.unk1CC;
-    viewer.unk260.vy = vel.vy;
-    vis_lists.velocity = viewer.unk260;
-    vis_lists.heading = ratan2(viewer.unk260.vz, viewer.unk260.vx);
+    viewer.velocity.vz = vel.vz + viewer.push_z;
+    viewer.velocity.vx = vel.vx + viewer.push_x;
+    viewer.velocity.vy = vel.vy;
+    vis_lists.velocity = viewer.velocity;
+    vis_lists.heading = ratan2(viewer.velocity.vz, viewer.velocity.vx);
     vis_lists.speed = SquareRoot0(vel.vx * vel.vx + vel.vz * vel.vz);
     vis_lists.floor_push_x = 0;
     vis_lists.floor_push_y = 0;
@@ -2372,11 +2372,11 @@ loop:
     }
     goto loop;
 done:
-    viewer.unk1CC += vis_lists.floor_push_x / 4;
-    viewer.unk1D0 += vis_lists.floor_push_z / 4;
-    viewer.unk260.vx = vel.vx;
-    viewer.unk260.vy = vel.vy;
-    viewer.unk260.vz = vel.vz;
+    viewer.push_x += vis_lists.floor_push_x / 4;
+    viewer.push_z += vis_lists.floor_push_z / 4;
+    viewer.velocity.vx = vel.vx;
+    viewer.velocity.vy = vel.vy;
+    viewer.velocity.vz = vel.vz;
 }
 
 /* The coasting vertical offset player_update_motion halves each frame. */
@@ -2405,15 +2405,15 @@ void player_update_motion(void)
     memset(&vel, 0, sizeof(vel));
     slid_b = 0;
     slid_a = 0;
-    if (viewer.unk2C8 == 0 || viewer.unk21E != 0) {
-        int initial_x = viewer.unk1CC;
-        int initial_z = viewer.unk1D0;
+    if (viewer.walk_speed == 0 || viewer.motion_stopped != 0) {
+        int initial_x = viewer.push_x;
+        int initial_z = viewer.push_z;
         vis_lists.position = viewer.position;
         vis_lists.radius = 256;
         vis_lists.height = 1600;
         vis_lists.tests = 1074;
         vel.vx = initial_x;
-        vel.vy = viewer.unk2D4;
+        vel.vy = viewer.vertical_speed;
         vel.vz = initial_z;
         speed = SquareRoot0(initial_x * initial_x + initial_z * initial_z);
         heading = ratan2(vel.vz, vel.vx);
@@ -2470,175 +2470,175 @@ void player_update_motion(void)
         }
         goto loop;
     done:
-        viewer.unk1CC += vis_lists.floor_push_x / 4;
-        viewer.unk1D0 += vis_lists.floor_push_z / 4;
-        viewer.unk260.vx = vel.vx;
-        viewer.unk260.vy = vel.vy;
-        viewer.unk260.vz = vel.vz;
+        viewer.push_x += vis_lists.floor_push_x / 4;
+        viewer.push_z += vis_lists.floor_push_z / 4;
+        viewer.velocity.vx = vel.vx;
+        viewer.velocity.vy = vel.vy;
+        viewer.velocity.vz = vel.vz;
     }
     player_check_fall_death();
     d = vis_lists.next_floor_dist - 1600;
     if (d < 0) {
-        if (viewer.unk2D4 > 0) {
-            play_landing_sound(viewer.unk2D4);
-            viewer.unk2D4 >>= 2;
-        } else if (viewer.unk2D4 < 0) {
+        if (viewer.vertical_speed > 0) {
+            play_landing_sound(viewer.vertical_speed);
+            viewer.vertical_speed >>= 2;
+        } else if (viewer.vertical_speed < 0) {
             if (d >= -1024) {
-                viewer.unk2E4 = 0;
+                viewer.walk_speed_max = 0;
             }
-            viewer.unk2D4 -= 48;
-            if (vis_lists.next_floor_dist - viewer.unk2D4 > 1600) {
-                viewer.unk2D4 = vis_lists.next_floor_dist - 1600;
+            viewer.vertical_speed -= 48;
+            if (vis_lists.next_floor_dist - viewer.vertical_speed > 1600) {
+                viewer.vertical_speed = vis_lists.next_floor_dist - 1600;
             }
         } else if (d >= -31) {
-            viewer.unk2D4 -= d;
+            viewer.vertical_speed -= d;
         } else {
             if (d >= -1024) {
-                viewer.unk2E4 = 0;
+                viewer.walk_speed_max = 0;
             }
-            viewer.unk2D4 -= 16;
+            viewer.vertical_speed -= 16;
         }
     } else if (d > 0) {
-        if (viewer.unk2D4 > 0) {
+        if (viewer.vertical_speed > 0) {
             if (d < 1025) {
-                viewer.unk2E4 = 0;
+                viewer.walk_speed_max = 0;
             }
             if ((vis_lists.hits & ~15) == 0) {
-                viewer.unk2D4 += 48;
+                viewer.vertical_speed += 48;
             }
-        } else if (viewer.unk2D4 < 0) {
-            viewer.unk2D4 /= 2;
+        } else if (viewer.vertical_speed < 0) {
+            viewer.vertical_speed /= 2;
         } else if (d < 32) {
-            viewer.unk2D4 += d;
+            viewer.vertical_speed += d;
         } else {
             if (d < 1025) {
-                viewer.unk2E4 = 0;
+                viewer.walk_speed_max = 0;
             }
-            viewer.unk2D4 += 16;
+            viewer.vertical_speed += 16;
         }
     } else {
         viewer.unk239 = 0;
-        viewer.unk2D4 = 0;
+        viewer.vertical_speed = 0;
     }
-    if (viewer.unk2D4 > 128) {
-        vertical_speed_pitch = (viewer.unk2D4 - 128) / 2;
-    } else if (viewer.unk2D4 < -128) {
-        vertical_speed_pitch = (viewer.unk2D4 + 128) / 2;
+    if (viewer.vertical_speed > 128) {
+        vertical_speed_pitch = (viewer.vertical_speed - 128) / 2;
+    } else if (viewer.vertical_speed < -128) {
+        vertical_speed_pitch = (viewer.vertical_speed + 128) / 2;
     } else {
         vertical_speed_pitch /= 2;
     }
-    viewer.unk290 = vertical_speed_pitch;
+    viewer.fall_pitch = vertical_speed_pitch;
     if (viewer.unk239 == 0) {
-        if (game_settings.unk2) {
-            viewer.unk2D0 = (viewer.unk2D0 + viewer.unk2C8) & 0xfff;
-            s = rsin(viewer.unk2D0) >> 5;
+        if (game_settings.walk_bob) {
+            viewer.bob_phase = (viewer.bob_phase + viewer.walk_speed) & 0xfff;
+            s = rsin(viewer.bob_phase) >> 5;
             if (s < 0) {
                 s = -s;
             }
-            viewer.unk2CE = s - (s >> 2);
+            viewer.bob_offset = s - (s >> 2);
         } else {
-            viewer.unk2CE = 0;
+            viewer.bob_offset = 0;
         }
-        if (viewer.unk239 == 0 && viewer.unk2D4 < 256) {
-            if (viewer.unk2C8 < viewer.unk2E4 >> 2) {
-                viewer.unk244 -= viewer.unk2C8 * 3;
-            } else if (viewer.unk2C8 < viewer.unk2E4 >> 1) {
-                viewer.unk244 -= viewer.unk2C8 * 3 / 2;
+        if (viewer.unk239 == 0 && viewer.vertical_speed < 256) {
+            if (viewer.walk_speed < viewer.walk_speed_max >> 2) {
+                viewer.footstep_timer -= viewer.walk_speed * 3;
+            } else if (viewer.walk_speed < viewer.walk_speed_max >> 1) {
+                viewer.footstep_timer -= viewer.walk_speed * 3 / 2;
             } else {
-                viewer.unk244 -= viewer.unk2C8;
+                viewer.footstep_timer -= viewer.walk_speed;
             }
-            if (viewer.unk244 < 0) {
-                viewer.unk244 = 2048;
-                play_footstep_sound(viewer.unk2C8);
+            if (viewer.footstep_timer < 0) {
+                viewer.footstep_timer = 2048;
+                play_footstep_sound(viewer.walk_speed);
             }
         }
     }
     player_update_submersion();
     if (vis_lists.hit_block != -1) {
-        viewer.unk170 = viewer.unk174;
-        viewer.unk174 = &vis_records[vis_lists.hit_block];
-        viewer.unk178 = vis_lists.hit_block;
+        viewer.prev_block_record = viewer.block_record;
+        viewer.block_record = &vis_records[vis_lists.hit_block];
+        viewer.block = vis_lists.hit_block;
     }
 }
 
 ADDRESS(0x80041d4c, 0x354)
 void player_update_look(void)
 {
-    if (pad_state.unk2 & pad_state.unk22[2]) {
-        viewer.unk2CA += viewer.unk2E8 >> 2;
-        if (viewer.unk2E8 < viewer.unk2CA)
-            viewer.unk2CA = viewer.unk2E8;
-    } else if (pad_state.unk2 & pad_state.unk22[3]) {
-        viewer.unk2CA -= viewer.unk2E8 >> 2;
-        if (viewer.unk2CA < -viewer.unk2E8)
-            viewer.unk2CA = -viewer.unk2E8;
-    } else if (viewer.unk2CA > 0) {
-        viewer.unk2CA -= viewer.unk2E8 >> 2;
-        if (viewer.unk2CA < 0)
-            viewer.unk2CA = 0;
-    } else if (viewer.unk2CA < 0) {
-        viewer.unk2CA += viewer.unk2E8 >> 2;
-        if (viewer.unk2CA > 0)
-            viewer.unk2CA = 0;
+    if (pad_state.held & pad_state.buttons[2]) {
+        viewer.yaw_speed += viewer.yaw_speed_max >> 2;
+        if (viewer.yaw_speed_max < viewer.yaw_speed)
+            viewer.yaw_speed = viewer.yaw_speed_max;
+    } else if (pad_state.held & pad_state.buttons[3]) {
+        viewer.yaw_speed -= viewer.yaw_speed_max >> 2;
+        if (viewer.yaw_speed < -viewer.yaw_speed_max)
+            viewer.yaw_speed = -viewer.yaw_speed_max;
+    } else if (viewer.yaw_speed > 0) {
+        viewer.yaw_speed -= viewer.yaw_speed_max >> 2;
+        if (viewer.yaw_speed < 0)
+            viewer.yaw_speed = 0;
+    } else if (viewer.yaw_speed < 0) {
+        viewer.yaw_speed += viewer.yaw_speed_max >> 2;
+        if (viewer.yaw_speed > 0)
+            viewer.yaw_speed = 0;
     }
-    viewer.unk278.vy = (viewer.unk278.vy + viewer.unk2CA) & 0xfff;
-    if (pad_state.unk2 & pad_state.unk22[6]) {
-        if (pad_state.unk2 & pad_state.unk22[7]) {
-            if (viewer.unk278.vx > 2048) {
-                int limit = (4224 - viewer.unk278.vx) >> 2;
+    viewer.view_rot.vy = (viewer.view_rot.vy + viewer.yaw_speed) & 0xfff;
+    if (pad_state.held & pad_state.buttons[6]) {
+        if (pad_state.held & pad_state.buttons[7]) {
+            if (viewer.view_rot.vx > 2048) {
+                int limit = (4224 - viewer.view_rot.vx) >> 2;
 
-                viewer.unk2CC += 8;
-                if (limit < viewer.unk2CC) {
-                    viewer.unk2CC = limit;
+                viewer.pitch_speed += 8;
+                if (limit < viewer.pitch_speed) {
+                    viewer.pitch_speed = limit;
                     if (limit == 0)
-                        viewer.unk2CC = 4224 - viewer.unk278.vx;
+                        viewer.pitch_speed = 4224 - viewer.view_rot.vx;
                 }
-            } else if (viewer.unk278.vx < 2048) {
-                int limit = -((viewer.unk278.vx - 128) >> 2);
+            } else if (viewer.view_rot.vx < 2048) {
+                int limit = -((viewer.view_rot.vx - 128) >> 2);
 
-                viewer.unk2CC -= 8;
-                if (viewer.unk2CC < limit) {
-                    viewer.unk2CC = limit;
+                viewer.pitch_speed -= 8;
+                if (viewer.pitch_speed < limit) {
+                    viewer.pitch_speed = limit;
                     if (limit == 0) {
-                        s16 offset = viewer.unk278.vx - 128;
+                        s16 offset = viewer.view_rot.vx - 128;
 
-                        viewer.unk2CC = -offset;
+                        viewer.pitch_speed = -offset;
                     }
                 }
             }
         } else {
-            viewer.unk2CC -= 3;
-            if (viewer.unk2CC < -32)
-                viewer.unk2CC = -32;
+            viewer.pitch_speed -= 3;
+            if (viewer.pitch_speed < -32)
+                viewer.pitch_speed = -32;
         }
-    } else if (pad_state.unk2 & pad_state.unk22[7]) {
-        viewer.unk2CC += 3;
-        if (viewer.unk2CC > 32)
-            viewer.unk2CC = 32;
-    } else if (viewer.unk2CC > 0) {
-        viewer.unk2CC -= 3;
-        if (viewer.unk2CC < 0)
-            viewer.unk2CC = 0;
-    } else if (viewer.unk2CC < 0) {
-        viewer.unk2CC += 3;
-        if (viewer.unk2CC > 0)
-            viewer.unk2CC = 0;
+    } else if (pad_state.held & pad_state.buttons[7]) {
+        viewer.pitch_speed += 3;
+        if (viewer.pitch_speed > 32)
+            viewer.pitch_speed = 32;
+    } else if (viewer.pitch_speed > 0) {
+        viewer.pitch_speed -= 3;
+        if (viewer.pitch_speed < 0)
+            viewer.pitch_speed = 0;
+    } else if (viewer.pitch_speed < 0) {
+        viewer.pitch_speed += 3;
+        if (viewer.pitch_speed > 0)
+            viewer.pitch_speed = 0;
     }
-    if (viewer.unk2CC > 0) {
-        viewer.unk278.vx = (viewer.unk278.vx + viewer.unk2CC) & 0xfff;
-        if (angle_signed_greater(viewer.unk278.vx, 700))
-            viewer.unk278.vx = 700;
-    } else if (viewer.unk2CC < 0) {
-        viewer.unk278.vx = (viewer.unk278.vx + viewer.unk2CC) & 0xfff;
-        if (angle_signed_greater(3396, viewer.unk278.vx))
-            viewer.unk278.vx = 3396;
+    if (viewer.pitch_speed > 0) {
+        viewer.view_rot.vx = (viewer.view_rot.vx + viewer.pitch_speed) & 0xfff;
+        if (angle_signed_greater(viewer.view_rot.vx, 700))
+            viewer.view_rot.vx = 700;
+    } else if (viewer.pitch_speed < 0) {
+        viewer.view_rot.vx = (viewer.view_rot.vx + viewer.pitch_speed) & 0xfff;
+        if (angle_signed_greater(3396, viewer.view_rot.vx))
+            viewer.view_rot.vx = 3396;
     }
 }
 
 /* Walks the viewer from the held buttons: accelerates the walk velocity
- * (viewer.unk2B8) towards viewer.unk2E4 or lets it decay, turns it by the
+ * (viewer.walk_velocity) towards viewer.walk_speed_max or lets it decay, turns it by the
  * yaw and moves the viewer along it (player_move); eases the push
- * offsets viewer.unk1CC..unk1D0 back and adds the area's drift. */
+ * offsets viewer.push_x..unk1D0 back and adds the area's drift. */
 ADDRESS(0x800420a0, 0x580)
 void player_update_walk(void)
 {
@@ -2649,76 +2649,76 @@ void player_update_walk(void)
     SVECTOR rot;
     int ang;
 
-    if (pad_state.unk2 & pad_state.unk22[0]) {
-        v.vz = viewer.unk2B8.vz + (viewer.unk2E4 >> 2);
-        if (v.vz <= viewer.unk2E4) {
-            viewer.unk2B8.vz = v.vz;
+    if (pad_state.held & pad_state.buttons[0]) {
+        v.vz = viewer.walk_velocity.vz + (viewer.walk_speed_max >> 2);
+        if (v.vz <= viewer.walk_speed_max) {
+            viewer.walk_velocity.vz = v.vz;
         } else {
-            viewer.unk2B8.vz = viewer.unk2E4;
+            viewer.walk_velocity.vz = viewer.walk_speed_max;
         }
-    } else if (pad_state.unk2 & pad_state.unk22[1]) {
-        v.vz = viewer.unk2B8.vz - (viewer.unk2E4 >> 2);
-        if (v.vz >= -viewer.unk2E4) {
-            viewer.unk2B8.vz = v.vz;
+    } else if (pad_state.held & pad_state.buttons[1]) {
+        v.vz = viewer.walk_velocity.vz - (viewer.walk_speed_max >> 2);
+        if (v.vz >= -viewer.walk_speed_max) {
+            viewer.walk_velocity.vz = v.vz;
         } else {
-            viewer.unk2B8.vz = -viewer.unk2E4;
+            viewer.walk_velocity.vz = -viewer.walk_speed_max;
         }
-    } else if (viewer.unk2B8.vz > 0) {
-        viewer.unk2B8.vz -= viewer.unk2E4 >> 3;
-        if (viewer.unk2B8.vz < 0) {
-            viewer.unk2B8.vz = 0;
+    } else if (viewer.walk_velocity.vz > 0) {
+        viewer.walk_velocity.vz -= viewer.walk_speed_max >> 3;
+        if (viewer.walk_velocity.vz < 0) {
+            viewer.walk_velocity.vz = 0;
         }
-    } else if (viewer.unk2B8.vz < 0) {
-        viewer.unk2B8.vz += viewer.unk2E4 >> 3;
-        if (viewer.unk2B8.vz > 0) {
-            viewer.unk2B8.vz = 0;
+    } else if (viewer.walk_velocity.vz < 0) {
+        viewer.walk_velocity.vz += viewer.walk_speed_max >> 3;
+        if (viewer.walk_velocity.vz > 0) {
+            viewer.walk_velocity.vz = 0;
         }
     }
-    if ((pad_state.unk2 & pad_state.unk22[5]) && !(pad_state.unk2 & pad_state.unk22[4])) {
-        v.vx = viewer.unk2B8.vx + (viewer.unk2E4 >> 2);
-        if (v.vx <= viewer.unk2E4) {
-            viewer.unk2B8.vx = v.vx;
+    if ((pad_state.held & pad_state.buttons[5]) && !(pad_state.held & pad_state.buttons[4])) {
+        v.vx = viewer.walk_velocity.vx + (viewer.walk_speed_max >> 2);
+        if (v.vx <= viewer.walk_speed_max) {
+            viewer.walk_velocity.vx = v.vx;
         } else {
-            viewer.unk2B8.vx = viewer.unk2E4;
+            viewer.walk_velocity.vx = viewer.walk_speed_max;
         }
-    } else if ((pad_state.unk2 & pad_state.unk22[4]) && !(pad_state.unk2 & pad_state.unk22[5])) {
-        v.vx = viewer.unk2B8.vx - (viewer.unk2E4 >> 2);
-        if (v.vx >= -viewer.unk2E4) {
-            viewer.unk2B8.vx = v.vx;
+    } else if ((pad_state.held & pad_state.buttons[4]) && !(pad_state.held & pad_state.buttons[5])) {
+        v.vx = viewer.walk_velocity.vx - (viewer.walk_speed_max >> 2);
+        if (v.vx >= -viewer.walk_speed_max) {
+            viewer.walk_velocity.vx = v.vx;
         } else {
-            viewer.unk2B8.vx = -viewer.unk2E4;
+            viewer.walk_velocity.vx = -viewer.walk_speed_max;
         }
-    } else if (viewer.unk2B8.vx > 0) {
-        viewer.unk2B8.vx -= viewer.unk2E4 >> 3;
-        if (viewer.unk2B8.vx < 0) {
-            viewer.unk2B8.vx = 0;
+    } else if (viewer.walk_velocity.vx > 0) {
+        viewer.walk_velocity.vx -= viewer.walk_speed_max >> 3;
+        if (viewer.walk_velocity.vx < 0) {
+            viewer.walk_velocity.vx = 0;
         }
-    } else if (viewer.unk2B8.vx < 0) {
-        viewer.unk2B8.vx += viewer.unk2E4 >> 3;
-        if (viewer.unk2B8.vx > 0) {
-            viewer.unk2B8.vx = 0;
+    } else if (viewer.walk_velocity.vx < 0) {
+        viewer.walk_velocity.vx += viewer.walk_speed_max >> 3;
+        if (viewer.walk_velocity.vx > 0) {
+            viewer.walk_velocity.vx = 0;
         }
     }
-    gte_ldlvl(&viewer.unk2B8);
+    gte_ldlvl(&viewer.walk_velocity);
     gte_sqr0();
     gte_stlvnl(&sq);
-    viewer.unk2C8 = SquareRoot0(sq.vx + sq.vz);
-    if (viewer.unk2C8 == 0) {
+    viewer.walk_speed = SquareRoot0(sq.vx + sq.vz);
+    if (viewer.walk_speed == 0) {
         v.vz = 0;
         v.vx = 0;
     } else {
-        if (viewer.unk2B8.vx < 0) {
+        if (viewer.walk_velocity.vx < 0) {
             sq.vx = -sq.vx;
         }
-        if (viewer.unk2B8.vz < 0) {
+        if (viewer.walk_velocity.vz < 0) {
             sq.vz = -sq.vz;
         }
-        v.vx = sq.vx / viewer.unk2C8;
-        v.vz = sq.vz / viewer.unk2C8;
+        v.vx = sq.vx / viewer.walk_speed;
+        v.vz = sq.vz / viewer.walk_speed;
     }
     rot.vx = 0;
     rot.vz = 0;
-    rot.vy = -viewer.unk278.vy;
+    rot.vy = -viewer.view_rot.vy;
     RotMatrix(&rot, &m);
     sv.vx = v.vx;
     sv.vy = v.vy;
@@ -2731,25 +2731,25 @@ void player_update_walk(void)
     gte_ldlvl(&v);
     gte_sqr0();
     gte_stlvnl(&sq);
-    viewer.unk2C8 = SquareRoot0(sq.vx + sq.vz);
-    viewer.unk1CC -= viewer.unk1CC / 4;
-    viewer.unk1CE -= viewer.unk1CE / 4;
-    viewer.unk1D0 -= viewer.unk1D0 / 4;
-    if (viewer.unk1CC > -4 && viewer.unk1CC < 4) {
-        viewer.unk1CC = 0;
+    viewer.walk_speed = SquareRoot0(sq.vx + sq.vz);
+    viewer.push_x -= viewer.push_x / 4;
+    viewer.push_y -= viewer.push_y / 4;
+    viewer.push_z -= viewer.push_z / 4;
+    if (viewer.push_x > -4 && viewer.push_x < 4) {
+        viewer.push_x = 0;
     }
-    if (viewer.unk1CE > -4 && viewer.unk1CE < 4) {
-        viewer.unk1CE = 0;
+    if (viewer.push_y > -4 && viewer.push_y < 4) {
+        viewer.push_y = 0;
     }
-    if (viewer.unk1D0 > -4 && viewer.unk1D0 < 4) {
-        viewer.unk1D0 = 0;
+    if (viewer.push_z > -4 && viewer.push_z < 4) {
+        viewer.push_z = 0;
     }
-    viewer.unk1CC += vis_table_b.push_x / 4;
-    viewer.unk1D0 += vis_table_b.push_z / 4;
-    viewer.unk1CC += vis_table_a.push_x / 2;
-    viewer.unk1D0 += vis_table_a.push_z / 2;
-    if (viewer.unk2C8 != 0 && viewer.unk21E == 0) {
-        player_move(ang, viewer.unk2C8);
+    viewer.push_x += vis_table_b.push_x / 4;
+    viewer.push_z += vis_table_b.push_z / 4;
+    viewer.push_x += vis_table_a.push_x / 2;
+    viewer.push_z += vis_table_a.push_z / 2;
+    if (viewer.walk_speed != 0 && viewer.motion_stopped == 0) {
+        player_move(ang, viewer.walk_speed);
     }
 }
 
@@ -2761,46 +2761,46 @@ void player_swap_hand_items(u8 a, u8 b)
     SVECTOR unused0 = {0, 128, 0, -128};
     SVECTOR unused1 = {0, 4, 0, -4};
     u16 id;
-    ViewerModel *model_a;
+    EquipmentModel *model_a;
     StAnimFile *block_a;
     u8 model_id_a;
     u8 sound_a;
 
-    if ((viewer.unk38[3] != 0xffff && vis_table_c.types[viewer.unk38[3]].category == 9) ||
-        (viewer.unk38[4] != 0xffff && vis_table_c.types[viewer.unk38[4]].category == 9))
+    if ((viewer.equipment[3] != 0xffff && vis_table_c.types[viewer.equipment[3]].category == 9) ||
+        (viewer.equipment[4] != 0xffff && vis_table_c.types[viewer.equipment[4]].category == 9))
         n = 2;
     do {
         if (a == 0) {
-            id = viewer.unk38[3];
-            viewer.unk38[3] = viewer.unk38[4];
-            viewer.unk38[4] = id;
+            id = viewer.equipment[3];
+            viewer.equipment[3] = viewer.equipment[4];
+            viewer.equipment[4] = id;
         } else {
-            id = viewer.unk38[16];
-            viewer.unk38[16] = viewer.unk38[17];
-            viewer.unk38[17] = id;
+            id = viewer.equipment[16];
+            viewer.equipment[16] = viewer.equipment[17];
+            viewer.equipment[17] = id;
         }
-        model_a = viewer.unkE8[a];
-        viewer.unkE8[a] = viewer.unkE8[b];
-        viewer.unkE8[b] = model_a;
-        block_a = viewer.unkF8[a];
-        viewer.unkF8[a] = viewer.unkF8[b];
-        viewer.unkF8[b] = block_a;
-        model_id_a = viewer.unk148[a];
-        viewer.unk148[a] = viewer.unk148[b];
-        viewer.unk148[b] = model_id_a;
-        if (viewer.unk148[a] != 0xff)
-            anim_register(a + 32, viewer.unkF8[a]);
-        if (viewer.unk148[b] != 0xff)
-            anim_register(b + 32, viewer.unkF8[b]);
-        if (viewer.unk108[a])
-            ((StAnimSlot *)viewer.unk108[a])->unk2 = 0xffff;
-        if (viewer.unk108[b])
-            ((StAnimSlot *)viewer.unk108[b])->unk2 = 0xffff;
-        sound_a = viewer.unk1D4[a];
-        viewer.unk1D4[a] = viewer.unk1D4[b];
-        viewer.unk1D4[b] = sound_a;
+        model_a = viewer.slot_model_info[a];
+        viewer.slot_model_info[a] = viewer.slot_model_info[b];
+        viewer.slot_model_info[b] = model_a;
+        block_a = viewer.slot_model_files[a];
+        viewer.slot_model_files[a] = viewer.slot_model_files[b];
+        viewer.slot_model_files[b] = block_a;
+        model_id_a = viewer.slot_model_ids[a];
+        viewer.slot_model_ids[a] = viewer.slot_model_ids[b];
+        viewer.slot_model_ids[b] = model_id_a;
+        if (viewer.slot_model_ids[a] != 0xff)
+            anim_register(a + 32, viewer.slot_model_files[a]);
+        if (viewer.slot_model_ids[b] != 0xff)
+            anim_register(b + 32, viewer.slot_model_files[b]);
+        if (viewer.slot_anims[a])
+            ((StAnimSlot *)viewer.slot_anims[a])->unk2 = 0xffff;
+        if (viewer.slot_anims[b])
+            ((StAnimSlot *)viewer.slot_anims[b])->unk2 = 0xffff;
+        sound_a = viewer.slot_sounds[a];
+        viewer.slot_sounds[a] = viewer.slot_sounds[b];
+        viewer.slot_sounds[b] = sound_a;
         if (a == 0) {
-            viewer.unk17E = 0;
+            viewer.weapon_gauge = 0;
             a = 1;
             b = 3;
         } else {
@@ -2808,16 +2808,16 @@ void player_swap_hand_items(u8 a, u8 b)
             b = 2;
         }
     } while (--n);
-    if (viewer.unk148[0] >= 31 && viewer.unk148[0] < 35)
-        anim_register(33, viewer.unkF8[1]);
-    if (viewer.unk148[2] >= 31 && viewer.unk148[2] < 35)
-        anim_register(35, viewer.unkF8[3]);
-    viewer.unk108[0] = 0;
-    viewer.unk108[1] = 0;
-    viewer.unk108[2] = 0;
-    viewer.unk108[3] = 0;
+    if (viewer.slot_model_ids[0] >= 31 && viewer.slot_model_ids[0] < 35)
+        anim_register(33, viewer.slot_model_files[1]);
+    if (viewer.slot_model_ids[2] >= 31 && viewer.slot_model_ids[2] < 35)
+        anim_register(35, viewer.slot_model_files[3]);
+    viewer.slot_anims[0] = 0;
+    viewer.slot_anims[1] = 0;
+    viewer.slot_anims[2] = 0;
+    viewer.slot_anims[3] = 0;
     player_recalc_stats();
-    viewer.unk18A = 0xffff;
+    viewer.hud_hp = 0xffff;
 }
 
 /*
@@ -2827,48 +2827,48 @@ void player_swap_hand_items(u8 a, u8 b)
 ADDRESS(0x80042900, 0x29c)
 void player_update_hands(void)
 {
-    if (pad_state.unk14 == 2) {
-        pad_state.unk14 = 0;
-        if (viewer.unk130.word == -1 && viewer.unk38[4] != 0xffff) {
+    if (pad_state.combo == 2) {
+        pad_state.combo = 0;
+        if (viewer.action_timers.word == -1 && viewer.equipment[4] != 0xffff) {
             player_swap_hand_items(0, 2);
             player_update_durability_warning();
         }
     }
-    if (pad_state.unk14 == 3) {
-        pad_state.unk14 = 0;
-        if (viewer.unk130.word == -1 && viewer.unk38[17] != 0xffff) {
+    if (pad_state.combo == 3) {
+        pad_state.combo = 0;
+        if (viewer.action_timers.word == -1 && viewer.equipment[17] != 0xffff) {
             player_swap_hand_items(1, 3);
             player_update_durability_warning();
         }
     }
-    if (pad_state.unk14 == 4) {
-        pad_state.unk14 = 0;
-        if (viewer.unk182 >= 0x1400)
+    if (pad_state.combo == 4) {
+        pad_state.combo = 0;
+        if (viewer.magic_gauge >= 0x1400)
             player_start_cast(0, 0);
     }
-    if (pad_state.unk14 == 5) {
-        pad_state.unk14 = 0;
-        if (viewer.unk182 >= 0x1400)
+    if (pad_state.combo == 5) {
+        pad_state.combo = 0;
+        if (viewer.magic_gauge >= 0x1400)
             player_start_cast(0, 1);
     }
-    if (viewer.unk155[0] != 0xff && --viewer.unk15B[0] == 0) {
-        player_fire_magic_shot(viewer.unk155[0], 0);
-        if (--viewer.unk157[0] == 0)
-            viewer.unk155[0] = 0xff;
+    if (viewer.shot_magic[0] != 0xff && --viewer.shot_countdown[0] == 0) {
+        player_fire_magic_shot(viewer.shot_magic[0], 0);
+        if (--viewer.shots_left[0] == 0)
+            viewer.shot_magic[0] = 0xff;
         else
-            viewer.unk15B[0] = viewer.unk159[0];
+            viewer.shot_countdown[0] = viewer.shot_interval[0];
     }
-    if (viewer.unk155[1] != 0xff && --viewer.unk15B[1] == 0) {
-        player_fire_magic_shot(viewer.unk155[1], 1);
-        if (--viewer.unk157[1] == 0)
-            viewer.unk155[1] = 0xff;
+    if (viewer.shot_magic[1] != 0xff && --viewer.shot_countdown[1] == 0) {
+        player_fire_magic_shot(viewer.shot_magic[1], 1);
+        if (--viewer.shots_left[1] == 0)
+            viewer.shot_magic[1] = 0xff;
         else
-            viewer.unk15B[1] = viewer.unk159[1];
+            viewer.shot_countdown[1] = viewer.shot_interval[1];
     }
-    if (viewer.unk218 != 1) {
-        if (viewer.unk187 == 0 && (pad_state.unk4 & pad_state.unk22[8]))
+    if (viewer.state != 1) {
+        if (viewer.weapon_gauge_delay == 0 && (pad_state.pressed & pad_state.buttons[8]))
             player_start_hand_action(0, 0);
-        if (pad_state.unk4 & pad_state.unk22[9])
+        if (pad_state.pressed & pad_state.buttons[9])
             player_start_hand_action(0, 1);
     }
 }
@@ -2876,22 +2876,22 @@ void player_update_hands(void)
 ADDRESS(0x80042b9c, 0x74)
 void player_handle_examine(void)
 {
-    u8 mode = viewer.unk218;
+    u8 mode = viewer.state;
 
-    if (mode != 4 && (pad_state.unk4 & pad_state.unk22[10]) && !pad_state.unk12) {
-        pad_state.unk4 &= ~pad_state.unk22[10];
+    if (mode != 4 && (pad_state.pressed & pad_state.buttons[10]) && !pad_state.combo_timer) {
+        pad_state.pressed &= ~pad_state.buttons[10];
         if (mode == 0)
-            player_examine(&viewer.position.vx, &viewer.unk278);
+            player_examine(&viewer.position.vx, &viewer.view_rot);
     }
 }
 
 ADDRESS(0x80042c10, 0x34)
 void player_enter_normal_state(void)
 {
-    viewer.unk218 = 0;
-    viewer.unk280.halves[0] = viewer.unk280.halves[1] = viewer.unk284 = 0;
-    viewer.unk288 = viewer.unk28A = viewer.unk28C = 0;
-    viewer.unk290 = viewer.unk292 = viewer.unk294 = 0;
+    viewer.state = 0;
+    viewer.rot_offset.halves[0] = viewer.rot_offset.halves[1] = viewer.roll_offset = 0;
+    viewer.shake_pitch = viewer.shake_yaw = viewer.shake_roll = 0;
+    viewer.fall_pitch = viewer.unk292 = viewer.unk294 = 0;
 }
 
 DATA(0x80088050, 0x4, ".sdata")
@@ -2900,21 +2900,21 @@ static s32 guard_sound_frame = 0;
 ADDRESS(0x80042c44, 0xa8)
 void player_enter_hurt_state(SVECTOR *arg0, SVECTOR *arg1, s16 arg2, int arg3)
 {
-    viewer.unk218 = 16;
-    viewer.unk2D6 = 3500;
-    viewer.unk2D8 = arg2;
-    if (viewer.unk0 < arg3 * 10)
-        viewer.unk14E = 1;
-    if (viewer.unk38[16] != 0xffff && viewer.unk189 && guard_sound_frame != viewer.unk23C) {
-        sound_play(viewer.unk1D4[1], 128);
-        guard_sound_frame = viewer.unk23C;
+    viewer.state = 16;
+    viewer.red_fade = 3500;
+    viewer.red_fade_step = arg2;
+    if (viewer.max_hp < arg3 * 10)
+        viewer.action_recoil = 1;
+    if (viewer.equipment[16] != 0xffff && viewer.shield_raised && guard_sound_frame != viewer.frame_count) {
+        sound_play(viewer.slot_sounds[1], 128);
+        guard_sound_frame = viewer.frame_count;
     }
 }
 
 ADDRESS(0x80042cec, 0x10)
 void player_enter_frozen_state(void)
 {
-    viewer.unk218 = 2;
+    viewer.state = 2;
 }
 
 /* Frees the animation slots and objects with two state bytes held. */
@@ -2937,7 +2937,7 @@ void anim_free_all_for_menu(void)
 
 /* The per-frame player update: the status timers, opening the pause menu
  * and the map, the walk and stamina limits, the state machine of
- * viewer.unk218 (walking, using an item, dying, falling into a pit), the
+ * viewer.state (walking, using an item, dying, falling into a pit), the
  * floor damage and the status damage over time, the view angles, the
  * swings and the hit/magic point recovery. */
 ADDRESS(0x80042d74, 0x1678)
@@ -2952,10 +2952,10 @@ void player_update(void)
     int d;
 
     player_update_status(1);
-    if (viewer.unk218 == 0 || viewer.unk218 == 4 || viewer.unk218 == 16 || viewer.unk218 == 1) {
-        if (((pad_state.unk4 & 1) || pad_state.unk14 == 1) && viewer.unk130.word == -1 &&
-            viewer.unk218 != 1 && viewer.unk218 != 4 && !(viewer.unk2C & 0x10) &&
-            area_state.unk0 == 0 && vis_table_a.object_sequence_state == 0 && area_state.unk18 == -1) {
+    if (viewer.state == 0 || viewer.state == 4 || viewer.state == 16 || viewer.state == 1) {
+        if (((pad_state.pressed & 1) || pad_state.combo == 1) && viewer.action_timers.word == -1 &&
+            viewer.state != 1 && viewer.state != 4 && !(viewer.status_flags & 0x10) &&
+            area_state.loading == 0 && vis_table_a.object_sequence_state == 0 && area_state.entry_fade_start == -1) {
             AreaObject *entry;
             int left;
 
@@ -2974,19 +2974,19 @@ void player_update(void)
                 }
                 entry++;
             }
-            viewer.unk21D = 0;
-            viewer.unk2B = 0;
-            viewer.unk2A = 0;
+            viewer.free_anims_after_menu = 0;
+            viewer.save_warp_request = 0;
+            viewer.card_screen_done = 0;
             menu_main_run();
-            if (game_settings.unk3 == 0) {
+            if (game_settings.show_status == 0) {
                 hud_clear_damage_numbers();
             }
-            if (viewer.unk2A) {
+            if (viewer.card_screen_done) {
                 hud_clear_damage_numbers();
                 pad_clear_input();
-                pad_state.unk10 = 1;
+                pad_state.disabled = 1;
                 fade_reset();
-                viewer.unk2D6 = viewer.unk2D8 = viewer.unk2DA = viewer.unk2DC = 0;
+                viewer.red_fade = viewer.red_fade_step = viewer.yellow_fade = viewer.yellow_fade_step = 0;
                 fade_run_frames(2, 4096, 4096, 0);
                 fade_run_frames(2, 4096, 4096, 0);
                 cd_wait_idle();
@@ -3001,12 +3001,12 @@ void player_update(void)
                     fx->unk0 = 255;
                     fx++;
                 }
-                area_load_set_blocking(area_state.unk4, area_state.unk4, area_state.unk4, area_state.unk7,
+                area_load_set_blocking(area_state.loaded_area, area_state.loaded_area, area_state.loaded_area, area_state.loaded_sound_bank,
                               area_state.unk8, 255);
                 cd_wait_idle();
                 player_stop_motion();
             } else {
-                if (viewer.unk21D) {
+                if (viewer.free_anims_after_menu) {
                     while (i--) {
                         anim_get_file(i + 128, &file);
                         if (file) {
@@ -3047,61 +3047,61 @@ void player_update(void)
             pad_clear_input();
             lighting.unkA = 2;
         }
-        if (viewer.unk2B) {
+        if (viewer.save_warp_request) {
             player_warp_to_save_point();
         }
-        if ((pad_state.unk4 & 8) && viewer.unk218 != 4 && area_state.unk0 == 0 &&
-            vis_table_a.object_sequence_state == 0 && area_state.unk18 == -1) {
+        if ((pad_state.pressed & 8) && viewer.state != 4 && area_state.loading == 0 &&
+            vis_table_a.object_sequence_state == 0 && area_state.entry_fade_start == -1) {
             lighting.unkA = 1;
             play_confirm_sound();
-            pad_state.unk4 &= ~8;
+            pad_state.pressed &= ~8;
             pad_clear_input();
             pad_vibrate(0);
             pause_screen_run();
             pad_clear_input();
             lighting.unkA = 2;
         }
-        viewer.unk2E4 = 192;
-        viewer.unk2E8 = 32;
-        if (!(pad_state.unk2 & (pad_state.unk22[0] | pad_state.unk22[1]))) {
-            viewer.unk2E8 = 40;
+        viewer.walk_speed_max = 192;
+        viewer.yaw_speed_max = 32;
+        if (!(pad_state.held & (pad_state.buttons[0] | pad_state.buttons[1]))) {
+            viewer.yaw_speed_max = 40;
         }
         if (viewer.unk190[3][0] != 0) {
-            viewer.unk2E4 = 96;
+            viewer.walk_speed_max = 96;
         }
         if (viewer.unk190[1][0] != 0) {
-            viewer.unk2E4 = 0;
-            if (viewer.unk2C & 0x10) {
-                viewer.unk2E8 = 0;
+            viewer.walk_speed_max = 0;
+            if (viewer.status_flags & 0x10) {
+                viewer.yaw_speed_max = 0;
             }
             if (viewer.unk190[1][0] % 20 == 0) {
                 sound_play(6, 128);
             }
         }
-        if (viewer.unk22 > viewer.unk24) {
-            int limit = viewer.unk2E4 - (viewer.unk22 - viewer.unk24) / 5;
+        if (viewer.equip_weight > viewer.equip_weight_limit) {
+            int limit = viewer.walk_speed_max - (viewer.equip_weight - viewer.equip_weight_limit) / 5;
 
             if (limit < 0) {
-                viewer.unk2E4 = 0;
+                viewer.walk_speed_max = 0;
             } else {
-                viewer.unk2E4 = limit;
+                viewer.walk_speed_max = limit;
             }
         }
-        switch (viewer.unk218) {
+        switch (viewer.state) {
         case 0:
             player_update_hands();
-            if (area_state.unk0 != 1 && vis_table_a.object_sequence_state == 0) {
+            if (area_state.loading != 1 && vis_table_a.object_sequence_state == 0) {
                 player_update_look();
                 player_update_walk();
                 player_update_motion();
-                viewer.unk21E = 0;
-                if ((pad_state.unk4 & pad_state.unk22[11]) && pad_state.unk12 == 0 &&
-                    (viewer.unk38[5] != 0xffff || viewer.unk38[19] != 0xffff ||
-                     viewer.unk38[11] != 0xffff || viewer.unk38[20] != 0xffff ||
-                     viewer.unk38[18] != 0xffff)) {
+                viewer.motion_stopped = 0;
+                if ((pad_state.pressed & pad_state.buttons[11]) && pad_state.combo_timer == 0 &&
+                    (viewer.equipment[5] != 0xffff || viewer.equipment[19] != 0xffff ||
+                     viewer.equipment[11] != 0xffff || viewer.equipment[20] != 0xffff ||
+                     viewer.equipment[18] != 0xffff)) {
                     play_confirm_sound();
-                    pad_state.unk4 &= pad_state.unk22[11];
-                    viewer.unk218 = 1;
+                    pad_state.pressed &= pad_state.buttons[11];
+                    viewer.state = 1;
                     pad_clear_input();
                 }
             }
@@ -3109,69 +3109,69 @@ void player_update(void)
             break;
         case 1:
             player_update_hands();
-            if (area_state.unk0 == 1 || vis_table_a.object_sequence_state) {
+            if (area_state.loading == 1 || vis_table_a.object_sequence_state) {
                 goto status;
             }
             player_update_look();
             player_update_walk();
             player_update_motion();
-            viewer.unk21E = 0;
-            if (pad_state.unk4 & pad_state.unk22[8]) {
+            viewer.motion_stopped = 0;
+            if (pad_state.pressed & pad_state.buttons[8]) {
                 play_cursor_sound();
-                pad_state.unk4 &= ~pad_state.unk22[8];
-                if (++viewer.unk15E >= 5) {
-                    viewer.unk15E = 0;
+                pad_state.pressed &= ~pad_state.buttons[8];
+                if (++viewer.quick_item_index >= 5) {
+                    viewer.quick_item_index = 0;
                 }
-            } else if (pad_state.unk4 & pad_state.unk22[9]) {
+            } else if (pad_state.pressed & pad_state.buttons[9]) {
                 play_cursor_sound();
-                pad_state.unk4 &= ~pad_state.unk22[9];
-                if (--viewer.unk15E < 0) {
-                    viewer.unk15E = 4;
+                pad_state.pressed &= ~pad_state.buttons[9];
+                if (--viewer.quick_item_index < 0) {
+                    viewer.quick_item_index = 4;
                 }
             } else {
-                if ((pad_state.unk4 & pad_state.unk22[11]) && pad_state.unk12 == 0) {
+                if ((pad_state.pressed & pad_state.buttons[11]) && pad_state.combo_timer == 0) {
                     play_cancel_sound();
-                    viewer.unk218 = 0;
-                    pad_state.unk4 &= ~pad_state.unk22[11];
-                    pad_state.unk4 &= ~pad_state.unk22[10];
-                } else if ((pad_state.unk4 & pad_state.unk22[10]) && pad_state.unk12 == 0) {
-                    int ids[5] = {viewer.unk38[5], viewer.unk38[19], viewer.unk38[11],
-                                  viewer.unk38[20], viewer.unk38[18]};
+                    viewer.state = 0;
+                    pad_state.pressed &= ~pad_state.buttons[11];
+                    pad_state.pressed &= ~pad_state.buttons[10];
+                } else if ((pad_state.pressed & pad_state.buttons[10]) && pad_state.combo_timer == 0) {
+                    int ids[5] = {viewer.equipment[5], viewer.equipment[19], viewer.equipment[11],
+                                  viewer.equipment[20], viewer.equipment[18]};
 
-                    viewer.unk218 = 0;
-                    pad_state.unk4 &= ~pad_state.unk22[8];
-                    pad_state.unk4 &= ~pad_state.unk22[11];
-                    pad_state.unk4 &= ~pad_state.unk22[9];
-                    pad_state.unk4 &= ~pad_state.unk22[10];
-                    if (ids[viewer.unk15E] != 0xffff) {
-                        viewer.unk2B = 0;
-                        item_use(ids[viewer.unk15E]);
+                    viewer.state = 0;
+                    pad_state.pressed &= ~pad_state.buttons[8];
+                    pad_state.pressed &= ~pad_state.buttons[11];
+                    pad_state.pressed &= ~pad_state.buttons[9];
+                    pad_state.pressed &= ~pad_state.buttons[10];
+                    if (ids[viewer.quick_item_index] != 0xffff) {
+                        viewer.save_warp_request = 0;
+                        item_use(ids[viewer.quick_item_index]);
                         if (DAT_801cd0e0 == 1) {
                             play_confirm_sound();
-                            if (ids[viewer.unk15E] == 288) {
+                            if (ids[viewer.quick_item_index] == 288) {
                                 player_compute_derived_stats(0);
                             }
-                            if (inventory.counts[ids[viewer.unk15E]].count == 0) {
+                            if (inventory.counts[ids[viewer.quick_item_index]].count == 0) {
                                 RECT icon = {896, 256, 24, 24};
 
-                                switch (viewer.unk15E) {
+                                switch (viewer.quick_item_index) {
                                 case 0:
-                                    viewer.unk38[5] = 0xffff;
+                                    viewer.equipment[5] = 0xffff;
                                     break;
                                 case 1:
-                                    viewer.unk38[19] = 0xffff;
+                                    viewer.equipment[19] = 0xffff;
                                     break;
                                 case 2:
-                                    viewer.unk38[11] = 0xffff;
+                                    viewer.equipment[11] = 0xffff;
                                     break;
                                 case 3:
-                                    viewer.unk38[20] = 0xffff;
+                                    viewer.equipment[20] = 0xffff;
                                     break;
                                 case 4:
-                                    viewer.unk38[18] = 0xffff;
+                                    viewer.equipment[18] = 0xffff;
                                     break;
                                 }
-                                icon.y = viewer.unk15E * 24 + 256;
+                                icon.y = viewer.quick_item_index * 24 + 256;
                                 ClearImage(&icon, 0, 0, 0);
                             }
                         } else if (DAT_801cd0e0 == 2) {
@@ -3189,16 +3189,16 @@ void player_update(void)
             player_handle_examine();
             break;
         case 4:
-            if (viewer.unk286 < 17) {
-                fade_add_color(255, 255, 255, viewer.unk286 << 8, 2);
-                viewer.unk280.halves[0] += viewer.unk17A;
-                if (viewer.unk286 == 16) {
+            if (viewer.death_timer < 17) {
+                fade_add_color(255, 255, 255, viewer.death_timer << 8, 2);
+                viewer.rot_offset.halves[0] += viewer.death_pitch_step;
+                if (viewer.death_timer == 16) {
                     area_state.hooks->player_died();
-                    fade_add_color(255, 255, 255, viewer.unk286 << 8, 2);
+                    fade_add_color(255, 255, 255, viewer.death_timer << 8, 2);
                 }
             } else {
                 fade_add_color(255, 255, 255, 4096, 2);
-                if (viewer.unk286 == 20) {
+                if (viewer.death_timer == 20) {
                     RECT clear = {0, 0, 320, 480};
 
                     anim_slots_free_idle();
@@ -3217,7 +3217,7 @@ void player_update(void)
 
                             b = vis_table_b.entries;
                             fade_reset();
-                            viewer.unk2D6 = viewer.unk2D8 = viewer.unk2DA = viewer.unk2DC = 0;
+                            viewer.red_fade = viewer.red_fade_step = viewer.yellow_fade = viewer.yellow_fade_step = 0;
                             fade_run_frames(2, 4096, 4096, 256);
                             n = 240;
                             while (n--) {
@@ -3250,7 +3250,7 @@ void player_update(void)
                             pad_clear_input();
                             card_screen_close();
                             fade_reset();
-                            viewer.unk2D6 = viewer.unk2D8 = viewer.unk2DA = viewer.unk2DC = 0;
+                            viewer.red_fade = viewer.red_fade_step = viewer.yellow_fade = viewer.yellow_fade_step = 0;
                             fade_run_frames(2, 0, 4096, 256);
                             cd_wait_idle();
                             player_reload_equipment();
@@ -3258,8 +3258,8 @@ void player_update(void)
                             vis_table_a.zone_history[0] = vis_table_a.zone_history[1] =
                                 vis_table_a.zone_history[2] = vis_table_a.zone_history[3] = 255;
                             pad_vibrate(0);
-                            area_load_set_blocking(area_state.unk4, area_state.unk4, area_state.unk4,
-                                          area_state.unk7, area_state.unk8, 255);
+                            area_load_set_blocking(area_state.loaded_area, area_state.loaded_area, area_state.loaded_area,
+                                          area_state.loaded_sound_bank, area_state.unk8, 255);
                             cd_wait_idle();
                             player_stop_motion();
                             break;
@@ -3271,17 +3271,17 @@ void player_update(void)
                     }
                 }
             }
-            viewer.unk286++;
+            viewer.death_timer++;
             break;
         case 16:
             player_update_hands();
             player_update_look();
             player_update_walk();
-            if (viewer.unk280.word == 0 && viewer.unk284 == 0) {
+            if (viewer.rot_offset.word == 0 && viewer.roll_offset == 0) {
                 player_enter_normal_state();
             }
             player_update_motion();
-            viewer.unk21E = 0;
+            viewer.motion_stopped = 0;
             player_handle_examine();
             break;
         case 5:
@@ -3290,7 +3290,7 @@ void player_update(void)
             vis_table_b.push_x = vis_table_b.push_y = vis_table_b.push_z = 0;
             vis_lists.floor_push_x = vis_lists.floor_push_y = vis_lists.floor_push_z = 0;
             vis_table_a.push_x = vis_table_a.push_y = vis_table_a.push_z = 0;
-            viewer.unk1CC = viewer.unk1CE = viewer.unk1D0 = 0;
+            viewer.push_x = viewer.push_y = viewer.push_z = 0;
             break;
         }
         {
@@ -3319,11 +3319,11 @@ void player_update(void)
             }
             if (viewer.unk190[0][0] != 0) {
                 d = 0;
-                if (viewer.unk2C & 4) {
+                if (viewer.status_flags & 4) {
                     d = -256;
-                } else if (viewer.unk2C & 2) {
+                } else if (viewer.status_flags & 2) {
                     d = -64;
-                } else if (viewer.unk2C & 1) {
+                } else if (viewer.status_flags & 1) {
                     d = -16;
                 }
                 if (viewer.unk190[0][0] % 20 == 0) {
@@ -3335,28 +3335,28 @@ void player_update(void)
                 player_add_hp(-1);
                 player_add_mp(-1);
             }
-            if (viewer.unk22 > viewer.unk24 && viewer.unk23C % 20 == 0) {
-                player_add_hp(viewer.unk24 / 10 - viewer.unk22 / 10);
+            if (viewer.equip_weight > viewer.equip_weight_limit && viewer.frame_count % 20 == 0) {
+                player_add_hp(viewer.equip_weight_limit / 10 - viewer.equip_weight / 10);
             }
-            if ((viewer.unk2C & 0x400) || viewer.unk2F0) {
-                if (viewer.unk23C % 20 == 0) {
-                    int heal = (viewer.unkD8[3] - 256) / 4;
+            if ((viewer.status_flags & 0x400) || viewer.submerged_acid) {
+                if (viewer.frame_count % 20 == 0) {
+                    int heal = (viewer.element_defence[3] - 256) / 4;
 
-                    if (viewer.unk2C & 0x800000) {
+                    if (viewer.status_flags & 0x800000) {
                         player_add_hp(heal / 2);
                     } else {
                         player_add_hp(heal);
                     }
                 }
-                if (viewer.unk23C % 60 == 0) {
-                    u16 *slots[9] = {&viewer.unk38[8], &viewer.unk38[9], &viewer.unk38[10],
-                                     &viewer.unk38[3], &viewer.unk38[16], &viewer.unk38[2],
-                                     &viewer.unk38[0], &viewer.unk38[13], NULL};
+                if (viewer.frame_count % 60 == 0) {
+                    u16 *slots[9] = {&viewer.equipment[8], &viewer.equipment[9], &viewer.equipment[10],
+                                     &viewer.equipment[3], &viewer.equipment[16], &viewer.equipment[2],
+                                     &viewer.equipment[0], &viewer.equipment[13], NULL};
 
-                    if (viewer.unk2F0) {
+                    if (viewer.submerged_acid) {
                         int j;
 
-                        if (viewer.unk2C & 0x800000) {
+                        if (viewer.status_flags & 0x800000) {
                             for (j = 0; j < 8; j++) {
                                 if (*slots[j] != 0xffff) {
                                     player_wear_item(1, slots[j]);
@@ -3369,7 +3369,7 @@ void player_update(void)
                                 }
                             }
                         }
-                    } else if (viewer.unk2C & 0x800000) {
+                    } else if (viewer.status_flags & 0x800000) {
                         if (*slots[2] != 0xffff) {
                             player_wear_item(1, slots[2]);
                         }
@@ -3377,17 +3377,17 @@ void player_update(void)
                         player_wear_item(2, slots[2]);
                     }
                 }
-                viewer.unk2C &= ~0x400;
+                viewer.status_flags &= ~0x400;
             }
             player_update_shake();
-            viewer.unk268 = viewer.unk278.vx + viewer.unk280.halves[0] + viewer.unk288 + viewer.unk290;
-            viewer.unk26A = viewer.unk278.vy + viewer.unk280.halves[1] + viewer.unk28A + viewer.unk292;
-            viewer.unk26C = viewer.unk278.vz + viewer.unk284 + viewer.unk28C + viewer.unk294;
-            viewer.unk288 = viewer.unk28A = viewer.unk28C = 0;
-            viewer.unk270.vx = 4096 - viewer.unk268;
-            viewer.unk270.vy = 4096 - viewer.unk26A;
-            viewer.unk270.vz = 4096 - viewer.unk26C;
-            RotMatrixZYX(&viewer.unk270, &viewer.unk298);
+            viewer.pitch = viewer.view_rot.vx + viewer.rot_offset.halves[0] + viewer.shake_pitch + viewer.fall_pitch;
+            viewer.yaw = viewer.view_rot.vy + viewer.rot_offset.halves[1] + viewer.shake_yaw + viewer.unk292;
+            viewer.roll = viewer.view_rot.vz + viewer.roll_offset + viewer.shake_roll + viewer.unk294;
+            viewer.shake_pitch = viewer.shake_yaw = viewer.shake_roll = 0;
+            viewer.camera_rot.vx = 4096 - viewer.pitch;
+            viewer.camera_rot.vy = 4096 - viewer.yaw;
+            viewer.camera_rot.vz = 4096 - viewer.roll;
+            RotMatrixZYX(&viewer.camera_rot, &viewer.camera_matrix);
             vis_lists.floor_push_x /= 2;
             vis_lists.floor_push_y /= 2;
             vis_lists.floor_push_z /= 2;
@@ -3404,15 +3404,15 @@ void player_update(void)
             player_update_hand_action(1);
             player_update_cast(0);
             player_update_cast(1);
-            if (viewer.unk218 != 4) {
-                if (viewer.unk2 * 2 < viewer.unk0 && viewer.unk1C4 && viewer.unk23C % viewer.unk1C4 == 0) {
+            if (viewer.state != 4) {
+                if (viewer.hp * 2 < viewer.max_hp && viewer.hp_regen_interval && viewer.frame_count % viewer.hp_regen_interval == 0) {
                     player_add_hp(1);
                 }
-                if (viewer.unk6 * 2 < viewer.unk4 && viewer.unk1C5 && viewer.unk23C % viewer.unk1C5 == 0) {
+                if (viewer.mp * 2 < viewer.max_mp && viewer.mp_regen_interval && viewer.frame_count % viewer.mp_regen_interval == 0) {
                     player_add_mp(1);
                 }
             }
-            viewer.unk23C++;
+            viewer.frame_count++;
         }
     }
 }

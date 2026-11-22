@@ -20,7 +20,7 @@ typedef struct {
 /*
  * The state block at 0x801e0ce8: the id shown and the one whose image is
  * loaded, the list index, a frame count that holds the input, the
- * viewer.unk38 slot being changed, and the slot sub-list (its bit table,
+ * viewer.equipment slot being changed, and the slot sub-list (its bit table,
  * entry count and entries). WIP extent: the slot sub-list follows as its
  * own global equip_magic_list (the magic sub-list), whose 144-byte bit
  * table menu_equip_open allocates and loads (src/st/menu_equip_open.c
@@ -31,7 +31,7 @@ typedef struct {
     s32 unk4;            /* 0x04: id whose image is loaded */
     s32 unk8;            /* 0x08: index in the list, -1 for none */
     s32 unkC;            /* 0x0c: frames the paging input stays cleared */
-    u16 *unk10;          /* 0x10: the viewer.unk38 slot being changed */
+    u16 *unk10;          /* 0x10: the viewer.equipment slot being changed */
     u8 unk14[0xc];
 } Data801e0ce8;
 
@@ -39,7 +39,7 @@ typedef struct {
  * table (src/st/menu_equip_open.c) and menu_equip_close frees it. */
 extern EquipSubList equip_magic_list;
 
-/* The equipment ids menu_equip_open records (viewer.unk38[3], [4], [16],
+/* The equipment ids menu_equip_open records (viewer.equipment[3], [4], [16],
  * [17], [6], [12]) for menu_equip_close to compare. */
 extern u16 equip_menu_saved_ids[6];
 

@@ -114,7 +114,7 @@ typedef union {
         s32 ids[10];     /* 0x08 */
     } map;
     struct {
-        s16 flags;       /* 0x00: tested against pad_state.unk22 */
+        s16 flags;       /* 0x00: tested against pad_state.buttons */
         u8 level[12];    /* 0x02 */
     } levels;            /* menu_button_config_draw */
 } MenuState;
@@ -182,7 +182,7 @@ typedef struct {
     u8 unk20C[0x50];     /* 0x20c */
     s16 unk25C[14];      /* 0x25c: attribute changes */
     u8 unk278[0x292 - 0x278]; /* 0x278 */
-    u16 unk292[21];      /* 0x292: copy of viewer.unk38 (equip_apply_slot_change, equip_restore_slots) */
+    u16 unk292[21];      /* 0x292: copy of viewer.equipment (equip_apply_slot_change, equip_restore_slots) */
     s16 unk2BC;          /* 0x2bc */
     s16 unk2BE;          /* 0x2be */
     s16 unk2C0;          /* 0x2c0 */
@@ -194,8 +194,8 @@ typedef struct {
     MenuMessages *unk2CC; /* 0x2cc */
     u32 *unk2D0;         /* 0x2d0: 36 words of grid cell bits (menu_equip_info_run) */
     u32 *unk2D4;         /* 0x2d4: one bit per grid cell */
-    s16 unk2D8;          /* 0x2d8: viewer.unk2 when the equip info page opened (src/st/menu_equip_arrange.c, src/st/menu.c) */
-    s16 unk2DA;          /* 0x2da: viewer.unk6 */
+    s16 unk2D8;          /* 0x2d8: viewer.hp when the equip info page opened (src/st/menu_equip_arrange.c, src/st/menu.c) */
+    s16 unk2DA;          /* 0x2da: viewer.mp */
     u16 unk2DC;          /* 0x2dc */
     u16 unk2DE;          /* 0x2de: selected row of the item and stats menus */
     s16 unk2E0;          /* 0x2e0 */
@@ -240,17 +240,17 @@ typedef struct {
     u8 unk0[8];
     MenuAttrRecord recs[11]; /* 0x008: one per shown equipment slot */
     MenuAttrRecord *unk168; /* 0x168: next record player_total_attributes fills */
-    u16 unk16C;          /* 0x16c: viewer.unk38[6] / 3, 0xffff: none */
+    u16 unk16C;          /* 0x16c: viewer.equipment[6] / 3, 0xffff: none */
     u16 unk16E;          /* 0x16e */
-    u16 unk170;          /* 0x170: viewer.unk38[12] / 3, 0xffff: none */
+    u16 unk170;          /* 0x170: viewer.equipment[12] / 3, 0xffff: none */
     u16 unk172;          /* 0x172 */
     u8 unk174[0x1b4 - 0x174];
     s16 unk1B4[14];      /* 0x1b4: shown values, clamped at 0 */
     s16 unk1D0[14];      /* 0x1d0: equipment sums, clamped at 0 */
     s16 unk1EC[14];      /* 0x1ec: totals, at most 999 */
     s16 unk208[14];      /* 0x208: equipment sums */
-    s16 unk224[14];      /* 0x224: viewer.unk7E */
-    s16 unk240[14];      /* 0x240: viewer.unk9A */
+    s16 unk224[14];      /* 0x224: viewer.attribute_bonuses */
+    s16 unk240[14];      /* 0x240: viewer.base_attributes */
     s16 unk25C[14];      /* 0x25c: unk208 - unk224 */
     u8 unk278[2];
     u16 unk27A[6];       /* 0x27a: per kind sums of the records' unk2 */
@@ -261,13 +261,13 @@ typedef struct {
 
 #define MENU_ATTR ((MenuAttrScratch *)0x1f800000)
 
-/* The viewer's 21 equipment slots (viewer.unk38, st/data.h) as one block:
+/* The viewer's 21 equipment slots (viewer.equipment, st/data.h) as one block:
  * the status screens copy it whole and index it through this view. */
 typedef struct {
     u16 ids[21];
 } MenuSlots;
 
-#define MENU_SLOTS ((MenuSlots *)viewer.unk38)
+#define MENU_SLOTS ((MenuSlots *)viewer.equipment)
 
 #define MENU_SCRATCH ((MenuScratch *)0x1f800000)
 

@@ -111,7 +111,7 @@ void creature_fade_out_despawn(Creature *e)
         e->fade += 128;
         if (e->fade > 4096)
             break;
-        world_run_frame(NULL, (SVECTOR *)&viewer.unk268, 0);
+        world_run_frame(NULL, (SVECTOR *)&viewer.pitch, 0);
     }
     creature_despawn(e);
 }
@@ -131,7 +131,7 @@ void player_glide_to_pose(VECTOR *pos, SVECTOR *rot)
     to = *pos;
     b = *rot;
     from = viewer.position;
-    a = viewer.unk278;
+    a = viewer.view_rot;
     if (a.vx > 2048)
         a.vx -= 4096;
     if (a.vy > 2048)
@@ -144,11 +144,11 @@ void player_glide_to_pose(VECTOR *pos, SVECTOR *rot)
     while (n--) {
         viewer.position.vx = (from.vx * n + to.vx * (16 - n)) >> 4;
         viewer.position.vz = (from.vz * n + to.vz * (16 - n)) >> 4;
-        viewer.unk278.vx = (a.vx * n + b.vx * (16 - n)) >> 4;
-        viewer.unk278.vy = (a.vy * n + b.vy * (16 - n)) >> 4;
-        viewer.unk268 = viewer.unk278.vx + viewer.unk280.halves[0] + viewer.unk288 + viewer.unk290;
-        viewer.unk26A = viewer.unk278.vy + viewer.unk280.halves[1] + viewer.unk28A + viewer.unk292;
-        world_run_frame(NULL, (SVECTOR *)&viewer.unk268, 0);
+        viewer.view_rot.vx = (a.vx * n + b.vx * (16 - n)) >> 4;
+        viewer.view_rot.vy = (a.vy * n + b.vy * (16 - n)) >> 4;
+        viewer.pitch = viewer.view_rot.vx + viewer.rot_offset.halves[0] + viewer.shake_pitch + viewer.fall_pitch;
+        viewer.yaw = viewer.view_rot.vy + viewer.rot_offset.halves[1] + viewer.shake_yaw + viewer.unk292;
+        world_run_frame(NULL, (SVECTOR *)&viewer.pitch, 0);
     }
 }
 
@@ -171,7 +171,7 @@ void player_turn_to_creature(Creature *e)
     dz = e->position.vz - viewer.position.vz;
     angle = ratan2(dz, dx) - 1024;
     to.vy = angle;
-    yaw = viewer.unk278.vy;
+    yaw = viewer.view_rot.vy;
     from.vy = yaw;
     d = (angle - yaw) & 0xfff;
     turn = d;
@@ -179,9 +179,9 @@ void player_turn_to_creature(Creature *e)
         turn = d | 0xf000;
     step = turn / n;
     while (n--) {
-        viewer.unk278.vy += step;
-        viewer.unk26A = viewer.unk278.vy + viewer.unk280.halves[1] + viewer.unk28A + viewer.unk292;
-        world_run_frame(NULL, (SVECTOR *)&viewer.unk268, 0);
+        viewer.view_rot.vy += step;
+        viewer.yaw = viewer.view_rot.vy + viewer.rot_offset.halves[1] + viewer.shake_yaw + viewer.unk292;
+        world_run_frame(NULL, (SVECTOR *)&viewer.pitch, 0);
     }
 }
 

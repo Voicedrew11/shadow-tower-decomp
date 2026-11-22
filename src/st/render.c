@@ -1921,7 +1921,7 @@ void vis_build_visible(u8 *arg)
     for (id = j = 0; j < 16; j++) {
         for (k = 0; k < 32; k++) {
             if (mask[j] & 1) {
-                if (area_state.unk0 != 1 || area_state.unk1D == 0) {
+                if (area_state.loading != 1 || area_state.loading_world == 0) {
                     vis_lists.visible[vis_lists.n_visible] = id;
                     vis_lists.n_visible++;
                 }
@@ -1962,8 +1962,8 @@ void vis_build_planes(void)
     short rx;
     short rz;
 
-    yaw = cam->unk26A + 1024;
-    pitch = cam->unk268;
+    yaw = cam->yaw + 1024;
+    pitch = cam->pitch;
     if (pitch > 2048) {
         half = 4096 - pitch;
     } else {
@@ -2186,7 +2186,7 @@ void world_transform_parts(VECTOR *trans)
         sp->y = (rec->cell_y << 12) + ((rec->y_offset - 128) << 7);
         sp->z = rec->cell_z << 12;
         sp->x = sp->x - viewer.position.vx;
-        sp->y = sp->y - (viewer.position.vy + viewer.unk2CE + viewer.unk2D2);
+        sp->y = sp->y - (viewer.position.vy + viewer.bob_offset + viewer.unk2D2);
         sp->z = sp->z - viewer.position.vz;
         sp->part_shift = 0;
         while (sp->x > 32767 || sp->x < -32768 || sp->y > 32767 || sp->y < -32768
@@ -3753,19 +3753,19 @@ int depth;
 }
 
 /*
- * Fades the screen in from black over 120 ticks after area_state.unk18 is
+ * Fades the screen in from black over 120 ticks after area_state.entry_fade_start is
  * set, then out.
  */
 ADDRESS(0x80021654, 0x1c8)
 void area_draw_entry_fade(void)
 {
-    int elapsed = cd_state.unk4 - area_state.unk18;
+    int elapsed = cd_state.unk4 - area_state.entry_fade_start;
     int early;
 
-    if (area_state.unk0 == 0 && area_state.unk18 == -1)
+    if (area_state.loading == 0 && area_state.entry_fade_start == -1)
         return;
-    if ((s16)area_state.unk2 < 2) {
-        area_state.unk18 = cd_state.unk4;
+    if ((s16)area_state.load_step < 2) {
+        area_state.entry_fade_start = cd_state.unk4;
         return;
     }
     if (elapsed < 120) {
@@ -3776,20 +3776,20 @@ void area_draw_entry_fade(void)
         return;
     }
     early = elapsed < 240;
-    if (early || area_state.unk0 != 0) {
+    if (early || area_state.loading != 0) {
         u8 level = (elapsed - 120) * 2;
 
         quad_add_at_depth(32, 0, 288, 256, 0, 0, 255, 255, 1, getTPage(0, 1, 960, 256),
                       getClut(560, 495), level, level, level, 0);
         if (!early)
-            area_state.unk18 = cd_state.unk4 - 240;
+            area_state.entry_fade_start = cd_state.unk4 - 240;
     } else if (elapsed < 360) {
         u8 level = (360 - elapsed) * 2;
 
         quad_add_at_depth(32, 0, 288, 256, 0, 0, 255, 255, 1, getTPage(0, 1, 960, 256),
                       getClut(560, 495), level, level, level, 0);
     } else {
-        area_state.unk18 = -1;
+        area_state.entry_fade_start = -1;
     }
 }
 
@@ -3920,23 +3920,23 @@ void player_draw_equipment_model(u8 slot)
     SVECTOR *in;
     int n;
 
-    if (viewer.unk130.halves[slot] == -1) {
+    if (viewer.action_timers.halves[slot] == -1) {
         return;
     }
     lighting_load_gte(0, 0);
     sp = SCRATCHPAD;
     gte_MulMatrix0((MATRIX *)&sp->unk394->light[3], &world_state.unk1ECE8, &light);
     gte_SetLightMatrix(&light);
-    sp->model_t[0] = viewer.unkE8[slot]->unkC;
-    sp->model_t[1] = viewer.unkE8[slot]->unkE;
-    sp->model_t[2] = viewer.unkE8[slot]->unk10;
-    if (viewer.unk38[16] != 0xffff && slot != 0) {
-        rot.vx = viewer.unkE8[slot]->unk14.vx + viewer.unk2DE;
-        rot.vy = viewer.unkE8[slot]->unk14.vy + viewer.unk2E0;
-        rot.vz = viewer.unkE8[slot]->unk14.vz + viewer.unk2E2;
+    sp->model_t[0] = viewer.slot_model_info[slot]->pos_x;
+    sp->model_t[1] = viewer.slot_model_info[slot]->pos_y;
+    sp->model_t[2] = viewer.slot_model_info[slot]->pos_z;
+    if (viewer.equipment[16] != 0xffff && slot != 0) {
+        rot.vx = viewer.slot_model_info[slot]->rotation.vx + viewer.hand_rot_x;
+        rot.vy = viewer.slot_model_info[slot]->rotation.vy + viewer.hand_rot_y;
+        rot.vz = viewer.slot_model_info[slot]->rotation.vz + viewer.hand_rot_z;
         RotMatrix(&rot, SCRATCH_MATRIX(sp));
     } else {
-        RotMatrix(&viewer.unkE8[slot]->unk14, SCRATCH_MATRIX(sp));
+        RotMatrix(&viewer.slot_model_info[slot]->rotation, SCRATCH_MATRIX(sp));
     }
     sp->far_z = 64;
     sp->near_z = 4;
@@ -3950,13 +3950,13 @@ void player_draw_equipment_model(u8 slot)
     sp->vertices = world_state.world_vertices;
     sp->clut_base = 0;
     *(u_long *)&sp->rgb = equipment_model_rgb;
-    if (((ModelFile *)viewer.unkF8[slot])->unk6 == 0) {
+    if (((ModelFile *)viewer.slot_model_files[slot])->unk6 == 0) {
         gte_SetRotMatrix(SCRATCH_MATRIX(sp));
         gte_SetTransMatrix(SCRATCH_MATRIX(sp));
         sp->model = MODEL_DATA(world_state.unk834C[slot + 32]);
         sp->header = (MeshHeader *)(sp->model + 12);
-        if (anim_prepare((StAnimSlot **)&viewer.unk108[slot], slot + 32, viewer.unk150[slot],
-                          viewer.unk130.halves[slot])) {
+        if (anim_prepare((StAnimSlot **)&viewer.slot_anims[slot], slot + 32, viewer.slot_anim_ids[slot],
+                          viewer.action_timers.halves[slot])) {
             sp->z_ot += sp->header->n_vertices;
             out = (MeshVertex *)sp->vertices;
             in = (SVECTOR *)sp->local_vertices;
@@ -3966,8 +3966,8 @@ void player_draw_equipment_model(u8 slot)
         }
     } else {
         sp->model = MODEL_DATA(world_state.unk834C[slot + 32]);
-        if (anim_prepare_any(&viewer.unk108[slot], slot + 32, viewer.unk150[slot],
-                          viewer.unk130.halves[slot])) {
+        if (anim_prepare_any(&viewer.slot_anims[slot], slot + 32, viewer.slot_anim_ids[slot],
+                          viewer.action_timers.halves[slot])) {
             model_draw_list(0x80, 0);
         }
     }
@@ -4012,9 +4012,9 @@ void model_draw_list(u8 flags, SVECTOR *rot)
             MATRIX face = {{{ONE, 0, 0}, {0, ONE, 0}, {0, 0, ONE}}, {0, 0, 0}};
             SVECTOR angle;
 
-            angle.vx = -viewer.unk268;
-            angle.vy = -viewer.unk26A;
-            angle.vz = -viewer.unk26C;
+            angle.vx = -viewer.pitch;
+            angle.vy = -viewer.yaw;
+            angle.vz = -viewer.roll;
             RotMatrixX(angle.vx, &face);
             RotMatrixY(angle.vy + rot->vy, &face);
             RotMatrixZ(angle.vz, &face);
@@ -4111,10 +4111,10 @@ void model_draw(int unused0, u16 model, VECTOR *pos, SVECTOR *rot, SVECTOR *scal
     gte_SetTransMatrix(&world_state.unk1ECE8);
     if (view) {
         rel_l.vx = pos->vx - viewer.position.vx;
-        rel_l.vy = pos->vy - (viewer.position.vy + viewer.unk2CE + viewer.unk2D2);
+        rel_l.vy = pos->vy - (viewer.position.vy + viewer.bob_offset + viewer.unk2D2);
         rel_l.vz = pos->vz - viewer.position.vz;
         rel.vx = pos->vx - viewer.position.vx;
-        rel.vy = pos->vy - (viewer.position.vy + viewer.unk2CE + viewer.unk2D2);
+        rel.vy = pos->vy - (viewer.position.vy + viewer.bob_offset + viewer.unk2D2);
         rel.vz = pos->vz - viewer.position.vz;
         gte_RotTrans(&rel, sp->model_t, &flag);
     } else {
@@ -4216,9 +4216,9 @@ u16 object_model_slot(u16 id)
 {
     if (id < 300)
         return id + 256;
-    if (area_state.unk0 == 1 && area_state.unk1E == 1 && area_state.unk10 != 0xff)
-        return area_state.unk10 * 32 + 256 + id;
-    return area_state.unk4 * 32 + 256 + id;
+    if (area_state.loading == 1 && area_state.tables_loaded == 1 && area_state.request_area != 0xff)
+        return area_state.request_area * 32 + 256 + id;
+    return area_state.loaded_area * 32 + 256 + id;
 }
 
 ADDRESS(0x80023288, 0x100)
@@ -4611,7 +4611,7 @@ void world_draw_creatures(void)
         sp->unkF8[e->model_slot] = 1;
         sp->unkC8[e->model_slot] = e->vram_tag;
     }
-    if (area_state.unk1F == 0)
+    if (area_state.skip_model_sync == 0)
         creature_models_sync(2, 0, 128, 16);
 }
 
@@ -4821,7 +4821,7 @@ void world_draw_objects(void)
             break;
         }
     }
-    if (area_state.unk1F == 0)
+    if (area_state.skip_model_sync == 0)
         object_models_sync(0, 0, 256, 249);
     sp->unkF0 = &sp->unkF8[300];
 }
@@ -4894,7 +4894,7 @@ void world_draw_ground_items(void)
             }
         }
     }
-    if (area_state.unk1F == 0)
+    if (area_state.skip_model_sync == 0)
         item_models_sync(5, 0, SLOT_C, 128);
     sp->unkF0 = &sp->unkF8[128];
 }
@@ -5197,61 +5197,61 @@ void hud_set_number(int value, int first, u8 width)
 ADDRESS(0x80026508, 0x45c)
 void hud_update(void)
 {
-    if (viewer.unk2 != viewer.unk18A || viewer.unk6 != viewer.unk18C) {
-        viewer.unk186 = 2;
-        viewer.unk18A = viewer.unk2;
-        viewer.unk18C = viewer.unk6;
+    if (viewer.hp != viewer.hud_hp || viewer.mp != viewer.hud_mp) {
+        viewer.hud_redraw = 2;
+        viewer.hud_hp = viewer.hp;
+        viewer.hud_mp = viewer.mp;
     }
-    if (viewer.unk186 != 0) {
-        if (viewer.unk186 == 2) {
+    if (viewer.hud_redraw != 0) {
+        if (viewer.hud_redraw == 2) {
             hud_sprites[23].flags = HUD_END;
             hud_sprites[0].flags |= 1;
             hud_sprites[1].flags |= 1;
             hud_sprites[2].flags |= 2;
             hud_sprites[3].flags |= 2;
             hud_sprites[13].flags |= 1;
-            hud_set_number(viewer.unk2, 14, 16);
-            hud_set_number(viewer.unk6, 19, 16);
-            viewer.unk186 = 0;
+            hud_set_number(viewer.hp, 14, 16);
+            hud_set_number(viewer.mp, 19, 16);
+            viewer.hud_redraw = 0;
         }
     }
     {
         Viewer *v = &viewer;
 
-        if (v->unk186 == 0) {
-            hud_sprites[0].r.w = v->unk17E * 112 / 5120;
-            hud_sprites[1].r.w = v->unk182 * 112 / 5120;
+        if (v->hud_redraw == 0) {
+            hud_sprites[0].r.w = v->weapon_gauge * 112 / 5120;
+            hud_sprites[1].r.w = v->magic_gauge * 112 / 5120;
             hud_sprites[1].r.x = 307 - hud_sprites[1].r.w;
         }
-        if (v->unk2C & 7) {
+        if (v->status_flags & 7) {
             hud_sprites[4].flags = 1;
-            if (v->unk2C & 4)
+            if (v->status_flags & 4)
                 hud_sprites[4].flags = 9;
-            else if (v->unk2C & 2)
+            else if (v->status_flags & 2)
                 hud_sprites[4].flags = 5;
         } else {
             hud_sprites[4].flags = 0;
         }
     }
-    if (viewer.unk2C & 0x18) {
+    if (viewer.status_flags & 0x18) {
         hud_sprites[7].flags = 1;
-        if (viewer.unk2C & 0x10)
+        if (viewer.status_flags & 0x10)
             hud_sprites[7].flags = 9;
     } else {
         hud_sprites[7].flags = 0;
     }
-    if (viewer.unk2C & 0x60) {
+    if (viewer.status_flags & 0x60) {
         hud_sprites[9].flags = 1;
-        if (viewer.unk2C & 0x40)
+        if (viewer.status_flags & 0x40)
             hud_sprites[9].flags = 9;
     } else {
         hud_sprites[9].flags = 0;
     }
-    if (viewer.unk2C & 0x80)
+    if (viewer.status_flags & 0x80)
         hud_sprites[11].flags |= 1;
     else
         hud_sprites[11].flags = 0;
-    if (viewer.unk2C & 0x100)
+    if (viewer.status_flags & 0x100)
         hud_sprites[12].flags |= 1;
     else
         hud_sprites[12].flags = 0;
@@ -5283,7 +5283,7 @@ void hud_update(void)
         hud_sprites[43].flags = 0;
     else
         hud_sprites[43].flags |= 1;
-    if (viewer.unk2C & 0x1000000)
+    if (viewer.status_flags & 0x1000000)
         hud_sprites[44].flags |= 1;
     else
         hud_sprites[44].flags = 0;
@@ -5323,11 +5323,11 @@ void hud_queue_damage_number(short value)
 {
     int i;
 
-    if (value != -1 && game_settings.unk3 != 0) {
+    if (value != -1 && game_settings.show_status != 0) {
         for (i = 4; i != -1; i--) {
-            if (viewer.unk1EC[i] == 0) {
-                viewer.unk1EC[i] = 60;
-                viewer.unk20C[i] = value;
+            if (viewer.damage_number_timers[i] == 0) {
+                viewer.damage_number_timers[i] = 60;
+                viewer.damage_numbers[i] = value;
                 break;
             }
         }
@@ -5350,14 +5350,14 @@ void world_render_frame(VECTOR *pos, SVECTOR *rot)
     pad_update_vibration();
     gfx_set_camera(pos, rot);
     texanim_update();
-    if (viewer.unk218 == 0 || viewer.unk218 == 5 || viewer.unk218 == 6 || viewer.unk218 == 1)
+    if (viewer.state == 0 || viewer.state == 5 || viewer.state == 6 || viewer.state == 1)
         lighting_update();
     gfx_begin_frame();
     anim_slots_retire();
     anim_sets_retire();
     world_state.unk831C[1] = 0;
-    if (viewer.unk218 == 1) {
-        frame = &hud_sprites[26 + viewer.unk15E];
+    if (viewer.state == 1) {
+        frame = &hud_sprites[26 + viewer.quick_item_index];
         hud_selection_blink = (hud_selection_blink + 1) % 32;
         if (hud_selection_blink < 16)
             level = 8 - (u16)hud_selection_blink;
@@ -5367,18 +5367,18 @@ void world_render_frame(VECTOR *pos, SVECTOR *rot)
         ui_draw_rect_outline(&frame->r, &color, 257, 1);
         hud_draw_records(26);
     }
-    if (game_settings.unk3 != 0 && area_state.area < 44) {
+    if (game_settings.show_status != 0 && area_state.area < 44) {
         hud_update();
         hud_draw_records(0);
         for (i = 4; i != -1; i--) {
-            if (viewer.unk1EC[i] != 0) {
+            if (viewer.damage_number_timers[i] != 0) {
                 hud_sprites[35].r.y = i * 16 + 144;
                 hud_sprites[34].r.y = i * 16 + 144;
                 hud_sprites[33].r.y = i * 16 + 144;
                 hud_sprites[32].r.y = i * 16 + 144;
-                hud_set_number(viewer.unk20C[i], 32, 8);
+                hud_set_number(viewer.damage_numbers[i], 32, 8);
                 hud_draw_records(32);
-                viewer.unk1EC[i]--;
+                viewer.damage_number_timers[i]--;
             }
         }
         hud_draw_records(37);
@@ -5985,7 +5985,7 @@ void talk_draw_overlay(void)
         ui_add_draw_mode(2, 0, 0);
         break;
     case CARD_SHOW_IN:
-        if (game_settings.unk4 == 1 || world_state.unk1EE17 == 2) {
+        if (game_settings.subtitles == 1 || world_state.unk1EE17 == 2) {
             tint.r = tint.g = tint.b = world_state.unk1EE19 << 3;
             ui_draw_image(&card, &tex, &clut, &tint, 3);
             if (world_state.unk1EE19 >= 16)
@@ -5995,7 +5995,7 @@ void talk_draw_overlay(void)
         }
         break;
     case CARD_SHOW:
-        if (game_settings.unk4 == 1 || world_state.unk1EE17 == 2) {
+        if (game_settings.subtitles == 1 || world_state.unk1EE17 == 2) {
             tint.r = tint.g = tint.b = 128;
             if (talk_stream_file == 25 || talk_stream_file == 30 || talk_stream_file == 5)
                 ui_draw_image(&card, &tex, &clut, &tint, 2);
@@ -6004,7 +6004,7 @@ void talk_draw_overlay(void)
         }
         break;
     case CARD_SHOW_OUT:
-        if (game_settings.unk4 == 1 || world_state.unk1EE17 == 2) {
+        if (game_settings.subtitles == 1 || world_state.unk1EE17 == 2) {
             tint.r = tint.g = tint.b = (16 - world_state.unk1EE19) << 3;
             ui_draw_image(&card, &tex, &clut, &tint, 3);
             if (world_state.unk1EE19 >= 16)
@@ -6328,20 +6328,20 @@ void menu_main_draw(void)
     sp->style[0].cd = 57;
     for (i = 0; i < 11; i++)
         ui_draw_text(MESSAGE(i), 24, i * 16 + 48, &sp->style[0]);
-    if (viewer.unk2C & 7)
+    if (viewer.status_flags & 7)
         ui_draw_text(MESSAGE(20), 106, 112, &sp->style[0]);
-    else if (viewer.unk2C & 0x18)
+    else if (viewer.status_flags & 0x18)
         ui_draw_text(MESSAGE(21), 93, 112, &sp->style[0]);
-    else if (viewer.unk2C & 0x60)
+    else if (viewer.status_flags & 0x60)
         ui_draw_text(MESSAGE(22), 119, 112, &sp->style[0]);
-    else if (viewer.unk2C & 0x80)
+    else if (viewer.status_flags & 0x80)
         ui_draw_text(MESSAGE(23), 119, 112, &sp->style[0]);
-    else if (viewer.unk2C & 0x100)
+    else if (viewer.status_flags & 0x100)
         ui_draw_text(MESSAGE(24), 106, 112, &sp->style[0]);
     else
         ui_draw_text(MESSAGE(19), 106, 112, &sp->style[0]);
-    if (viewer.unk38[16] != 0xffff && vis_table_c.types[viewer.unk38[16]].unk5[0x1d] >= 9) {
-        kind = vis_table_c.types[viewer.unk38[16]].unk5[0x1d];
+    if (viewer.equipment[16] != 0xffff && vis_table_c.types[viewer.equipment[16]].unk5[0x1d] >= 9) {
+        kind = vis_table_c.types[viewer.equipment[16]].unk5[0x1d];
         n = 0;
         if (kind - 9 == 2)
             n = 14;
@@ -6351,22 +6351,22 @@ void menu_main_draw(void)
     }
     for (i = 0; i < 8; i++)
         ui_draw_text(MESSAGE(11 + i), label_x[i] + 172, i * 16 + 90, &sp->style[2]);
-    ui_draw_number_fixed(viewer.unk2 | DIGITS(4), 78, 48, &sp->style[0]);
+    ui_draw_number_fixed(viewer.hp | DIGITS(4), 78, 48, &sp->style[0]);
     i = 0;
     ui_draw_glyph(15, 106, 48, &sp->style[0]);
-    ui_draw_number_fixed(viewer.unk0 | DIGITS(4), 120, 48, &sp->style[0]);
-    ui_draw_number_fixed(viewer.unk6 | DIGITS(4), 78, 64, &sp->style[0]);
+    ui_draw_number_fixed(viewer.max_hp | DIGITS(4), 120, 48, &sp->style[0]);
+    ui_draw_number_fixed(viewer.mp | DIGITS(4), 78, 64, &sp->style[0]);
     ui_draw_glyph(15, 106, 64, &sp->style[0]);
-    ui_draw_number_fixed(viewer.unk4 | DIGITS(4), 120, 64, &sp->style[0]);
-    ui_draw_number_fixed(viewer.unk8 | DIGITS(4), 78, 80, &sp->style[0]);
+    ui_draw_number_fixed(viewer.max_mp | DIGITS(4), 120, 64, &sp->style[0]);
+    ui_draw_number_fixed(viewer.sp_total | DIGITS(4), 78, 80, &sp->style[0]);
     ui_draw_glyph(15, 106, 80, &sp->style[0]);
     ui_draw_number_fixed(4921 | DIGITS(4), 120, 80, &sp->style[0]);
     ui_draw_number_fixed(inventory.counts[0x10a].count | DIGITS(3), 127, 96, &sp->style[0]);
-    ui_draw_number_fixed(viewer.unk10 | DIGITS(3), 127, 128, &sp->style[0]);
-    ui_draw_number_fixed(viewer.unkE | DIGITS(3), 127, 144, &sp->style[0]);
-    ui_draw_number_fixed(viewer.unkBA[0] | DIGITS(3), 127, 160, &sp->style[0]);
-    ui_draw_number_fixed(viewer.unkBA[1] | DIGITS(3), 127, 176, &sp->style[0]);
-    ui_draw_number_fixed(viewer.unkBA[2] | DIGITS(3), 127, 192, &sp->style[0]);
+    ui_draw_number_fixed(viewer.magic_attack_left | DIGITS(3), 127, 128, &sp->style[0]);
+    ui_draw_number_fixed(viewer.magic_attack_right | DIGITS(3), 127, 144, &sp->style[0]);
+    ui_draw_number_fixed(viewer.weapon_attack[0] | DIGITS(3), 127, 160, &sp->style[0]);
+    ui_draw_number_fixed(viewer.weapon_attack[1] | DIGITS(3), 127, 176, &sp->style[0]);
+    ui_draw_number_fixed(viewer.weapon_attack[2] | DIGITS(3), 127, 192, &sp->style[0]);
     sp->unk358.vx = 622;
     sp->unk358.vy = 416;
     sp->unk35C.vx = 544;
@@ -6615,16 +6615,16 @@ void menu_area_info_draw(void)
         } else {
             ui_draw_text(MESSAGE(0x2bc + area_state.area), 100, 73, &sp->style[0]);
         }
-        ui_draw_number(viewer.unk27 | DIGITS(3), 179, 107, &sp->style[4]);
+        ui_draw_number(viewer.cunes_found | DIGITS(3), 179, 107, &sp->style[4]);
         ui_draw_glyph(15, 213, 107, &sp->style[0]);
         ui_draw_number(99 | DIGITS(3), 221, 107, &sp->style[4]);
-        ui_draw_number(viewer.unk28 | DIGITS(3), 179, 138, &sp->style[4]);
+        ui_draw_number(viewer.items_found | DIGITS(3), 179, 138, &sp->style[4]);
         ui_draw_glyph(15, 213, 138, &sp->style[0]);
         ui_draw_number(265 | DIGITS(3), 221, 138, &sp->style[4]);
-        ui_draw_number(viewer.unk30 | DIGITS(3), 179, 168, &sp->style[4]);
+        ui_draw_number(viewer.creatures_killed | DIGITS(3), 179, 168, &sp->style[4]);
         ui_draw_glyph(15, 213, 168, &sp->style[0]);
         ui_draw_number(630 | DIGITS(3), 221, 168, &sp->style[4]);
-        time = (u32)viewer.unk34 / 60;
+        time = (u32)viewer.play_seconds / 60;
         minutes = time / 60;
         hours = minutes;
         minutes = time - hours * 60;
@@ -6713,7 +6713,7 @@ void menu_options_draw(void)
     sp->unk33C.y = 83;
     sp->unk33C.w = 5;
     sp->unk33C.h = 5;
-    sp->unk33C.x = game_settings.unk1 * 83 / 63 + 180;
+    sp->unk33C.x = game_settings.sfx_volume * 83 / 63 + 180;
     ui_draw_image(&sp->unk33C, &sp->unk358, &sp->unk35C, NULL, 0);
     sp->unk358.vx = 576;
     sp->unk33C.x = 176;
@@ -6724,7 +6724,7 @@ void menu_options_draw(void)
     ui_draw_image(&sp->unk33C, &sp->unk358, &sp->unk35C, NULL, 1);
     for (i = 0; i < 6; y += 20, i++)
         ui_draw_text(MESSAGE(0xc9 + i), label_x[i] + 32, y, &sp->style[2]);
-    for (on = &game_settings.unk2, i = 1; i < 5; on++, i++) {
+    for (on = &game_settings.walk_bob, i = 1; i < 5; on++, i++) {
         if (*on == 1) {
             ui_draw_text(MESSAGE(0xcf), 193, i * 20 + 80, &sp->style[2]);
             ui_draw_text(MESSAGE(0xd0), 241, i * 20 + 80, &sp->style[3]);
@@ -6733,7 +6733,7 @@ void menu_options_draw(void)
             ui_draw_text(MESSAGE(0xd0), 241, i * 20 + 80, &sp->style[2]);
         }
     }
-    ui_draw_number_fixed(game_settings.unk1 | DIGITS(2), 280, 80, &sp->style[0]);
+    ui_draw_number_fixed(game_settings.sfx_volume | DIGITS(2), 280, 80, &sp->style[0]);
     ui_draw_text(MESSAGE(0xe0 + sp->unk2E0), 64, 208, &sp->style[0]);
     sp->unk358.vx = 596;
     sp->unk358.vy = 448;
@@ -6759,7 +6759,7 @@ void menu_options_draw(void)
 }
 
 /*
- * A settings page: two columns of six labels (lit while their pad_state.unk22
+ * A settings page: two columns of six labels (lit while their pad_state.buttons
  * bit is set in the page flags), twelve level gauges and two buttons
  * below them.
  * The button masks are read through a pointer set before each column's
@@ -6801,14 +6801,14 @@ void menu_button_config_draw(void)
     } else {
         sp->unk32C = sp->style[2];
     }
-    mask = pad_state.unk22;
+    mask = pad_state.buttons;
     for (i = 0; i < 6; i++) {
         if (mask[i] & sp->unk0.levels.flags)
             ui_draw_text(MESSAGE(209 + i), label_x[i] + 32, i * 18 + 80, &sp->style[3]);
         else
             ui_draw_text(MESSAGE(209 + i), label_x[i] + 32, i * 18 + 80, &sp->style[2]);
     }
-    mask = &pad_state.unk22[6];
+    mask = &pad_state.buttons[6];
     for (i = 0; i < 6; i++) {
         if (mask[i] & sp->unk0.levels.flags)
             ui_draw_text(MESSAGE(215 + i), label_x[i + 6] + 168, i * 18 + 80, &sp->style[3]);
@@ -7398,7 +7398,7 @@ void shop_draw_buy_list(void)
     ui_draw_number(inventory.counts[266].count | 0x3000000, 244, 27, &sp->style[6]);
     ui_draw_text(MESSAGE(100), 160, 27, &sp->style[2]);
     for (i = 0; i < rows; i++) {
-        id = inventory.unk13A[sp->unk0.list.ids[sp->unk2E2 + i]];
+        id = inventory.shop_ids[sp->unk0.list.ids[sp->unk2E2 + i]];
         if (inventory.counts[266].count >= vis_table_c.types[id].price) {
             text = &sp->style[0];
             figure = &sp->style[4];
@@ -7459,7 +7459,7 @@ void shop_draw_repair_list(void)
     int price;
     CVECTOR *text, *figure;
 
-    ui_draw_number(viewer.unk2 | 0x4000000, 244, 27, &sp->style[6]);
+    ui_draw_number(viewer.hp | 0x4000000, 244, 27, &sp->style[6]);
     ui_draw_text(MESSAGE(101), 176, 27, &sp->style[2]);
     rows = LIST_ROWS;
     if (sp->unk0.list.count < LIST_ROWS + 1)
@@ -7470,7 +7470,7 @@ void shop_draw_repair_list(void)
                 (vis_table_c.types[id].max_durability - vis_table_c.types[id].durability);
         if (vis_table_c.types[id].durability == 0)
             price *= 2;
-        if (price < viewer.unk2) {
+        if (price < viewer.hp) {
             text = &sp->style[0];
             figure = &sp->style[4];
         } else {
@@ -7513,7 +7513,7 @@ void shop_draw_confirm(void)
     ui_draw_rect_outline(&sp->unk33C, &sp->unk32C, 257, 1);
     ui_add_draw_mode(1, 0, 0);
     if (sp->unk2DC & 0x1) {
-        id = inventory.unk13A[sp->unk0.list.ids[sp->unk2E2 + sp->unk2E0]];
+        id = inventory.shop_ids[sp->unk0.list.ids[sp->unk2E2 + sp->unk2E0]];
         ui_draw_text(MESSAGE(105), 120, 208, &sp->style[0]);
     } else if (sp->unk2DC & 0x8) {
         id = sp->unk0.list.ids[sp->unk2E2 + sp->unk2E0];
@@ -7667,12 +7667,12 @@ void menu_equip_info_draw_slots(void)
     sp->style[7].g = 158;
     sp->style[7].b = 96;
     sp->style[7].cd = 48;
-    equip = viewer.unk38;
+    equip = viewer.equipment;
     for (i = 0; i < EQUIP_SLOTS; equip++, i++) {
         if (i == 2)
             mode = 48;
-        else if ((i == 3 && vis_table_c.types[viewer.unk38[16]].category == 9) ||
-                 (i == 4 && vis_table_c.types[viewer.unk38[17]].category == 9))
+        else if ((i == 3 && vis_table_c.types[viewer.equipment[16]].category == 9) ||
+                 (i == 4 && vis_table_c.types[viewer.equipment[17]].category == 9))
             mode = 48;
         else
             mode = 16;
@@ -7749,7 +7749,7 @@ void menu_equip_info_draw_attributes(void)
         }
         return;
     }
-    figure = viewer.unk62;
+    figure = viewer.attributes;
     for (i = 0; i < STATUS_ROWS; figure++, i++) {
         if (sp->unk2DC == 2) {
             if (sp->unk25C[i] > 0) {
@@ -8030,11 +8030,11 @@ void menu_equip_info_draw(void)
     RECT right = {630, 119, 16, 8};
 
     gfx_begin_frame();
-    if (pad_state.unk4 & 0x800)
+    if (pad_state.pressed & 0x800)
         menu_second_page = 1;
-    else if (pad_state.unk4 & 0x400)
+    else if (pad_state.pressed & 0x400)
         menu_second_page = 0;
-    pad_state.unk4 = 0;
+    pad_state.pressed = 0;
     sp->style[0].r = sp->style[4].r = 80;
     sp->style[0].g = sp->style[4].g = 80;
     sp->style[0].b = sp->style[4].b = 80;
@@ -8158,11 +8158,11 @@ void menu_creature_book_draw_entry(void)
 
     kind = sp->unk0.store.kinds[sp->unk2E2 * 5 + sp->unk2E0];
     item = &sp->unk0.store.items[kind];
-    if (pad_state.unk4 & 0x800)
+    if (pad_state.pressed & 0x800)
         menu_second_page = 1;
-    if (pad_state.unk4 & 0x400)
+    if (pad_state.pressed & 0x400)
         menu_second_page = 0;
-    pad_state.unk4 = 0;
+    pad_state.pressed = 0;
     if (menu_second_page == 0)
         ui_draw_arrow(&right, &sp->unk32C, 0);
     else
@@ -9076,10 +9076,10 @@ void lighting_update(void)
         lighting.unk9 = 0;
         lighting.unk4 &= ~0x20;
     }
-    if (viewer.unk1C7 < 0) {
+    if (viewer.equipment_light < 0) {
         lighting.unk3 |= 1;
         lighting.unk4 |= 4;
-    } else if (viewer.unk1C7 > 0) {
+    } else if (viewer.equipment_light > 0) {
         lighting.unk3 |= 1;
         lighting.unk4 |= 0x10;
     }
@@ -9094,7 +9094,7 @@ void lighting_update(void)
         lighting.unk7 = area_state.area;
         world_state.unk1EDFE = 0;
     }
-    if (lighting.unk8 == 2 && viewer.unk218 == 6) {
+    if (lighting.unk8 == 2 && viewer.state == 6) {
         lighting.unk3 = 0;
         lighting.unk4 = 0;
     }
@@ -9131,7 +9131,7 @@ void lighting_update(void)
             lighting.unk6 = rows;
         }
     }
-    if (lighting.unk8 == 1 && (short)area_state.unk2 >= 7)
+    if (lighting.unk8 == 1 && (short)area_state.load_step >= 7)
         lighting.unk8 = 2;
     else if (lighting.unk8 == 2)
         lighting.unk8 = 0;

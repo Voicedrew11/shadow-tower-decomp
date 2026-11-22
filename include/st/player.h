@@ -20,8 +20,8 @@
 
 /* Clamps the hit points to their maximum. */
 #define PLAYER_CLAMP_HP()                                                      \
-    if (viewer.unk0 < viewer.unk2) {                                           \
-        viewer.unk2 = viewer.unk0;                                             \
+    if (viewer.max_hp < viewer.hp) {                                           \
+        viewer.hp = viewer.max_hp;                                             \
     }
 
 /* What player_distance_in_reach measures the viewer against: a position and a reach. */
@@ -86,10 +86,10 @@ int player_get_launch_vector(int length, VECTOR *pos, SVECTOR *dir, SVECTOR *rot
 void player_fire_magic_shot(int kind, int slot, ...);
 
 /* A view of one 24-byte effects.defs record (StEffectDef, st/effect.h) as
- * a magic record: viewer.unk118 holds the one each hand casts. */
+ * a magic record: viewer.magic_defs holds the one each hand casts. */
 typedef struct {
     u8 unk0[2];
-    u16 unk2;            /* 0x02: cost, taken from viewer.unk6 */
+    u16 unk2;            /* 0x02: cost, taken from viewer.mp */
     u8 unk4[0x14];
 } StMagic;
 

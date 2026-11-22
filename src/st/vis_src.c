@@ -46,7 +46,7 @@ void vis_collect_sources(VECTOR *a, VECTOR *b, VECTOR *c)
     }
     for (id = i = 0; i < 16; i++) {
         for (j = 0; j < 32; j++) {
-            if ((mask[i] & 1) && (area_state.unk0 != 1 || !area_state.unk1D ||
+            if ((mask[i] & 1) && (area_state.loading != 1 || !area_state.loading_world ||
                              vis_records[id].part < ((u_long *)world_state.unk8308[1])[1] >> 1)) {
                 vis_lists.sources[vis_lists.n_sources] = id;
                 vis_lists.n_sources++;

@@ -80,7 +80,7 @@ void map_update_events(void)
     CreatureType *r = &vis_table_a.types[2];
     Creature *e49 = &vis_table_a.entries[49];
 
-    if (fdat_801edad0 == 0 && viewer.unk178 == 0x27) {
+    if (fdat_801edad0 == 0 && viewer.block == 0x27) {
         creature_force_talk(e49, 0, 0);
         creature_force_talk(e49, 0, 0);
         creature_fade_out_despawn(e49);
@@ -88,10 +88,10 @@ void map_update_events(void)
         fdat_801edad0 = 1;
     }
     if (fdat_801edad0 == 1 && game_progress.unk1448[r->talk_id] == 3) {
-        viewer.unk218 = 5;
+        viewer.state = 5;
         map_hand_over_item();
         fdat_801edad0 = 0xff;
-        viewer.unk218 = 0;
+        viewer.state = 0;
     }
 }
 
@@ -126,16 +126,16 @@ void map_hand_over_item(void)
         c->position.vx = e->position.vx - v.vz;
         c->position.vy = e->position.vy + v.vy;
         c->position.vz = e->position.vz + v.vx;
-        world_run_frame(NULL, &viewer.unk278, 0);
+        world_run_frame(NULL, &viewer.view_rot, 0);
     } while ((s16)e->anim_frame != 0xfff);
     c->state = 2;
-    viewer.unk268 = viewer.unk278.vx + viewer.unk280.halves[0] + viewer.unk288 + viewer.unk290;
-    viewer.unk26A = viewer.unk278.vy + viewer.unk280.halves[1] + viewer.unk28A + viewer.unk292;
-    viewer.unk26C = viewer.unk278.vz + viewer.unk284 + viewer.unk28C + viewer.unk294;
-    viewer.unk270.vx = 4096 - viewer.unk268;
-    viewer.unk270.vy = 4096 - viewer.unk26A;
-    viewer.unk270.vz = 4096 - viewer.unk26C;
-    RotMatrixZYX(&viewer.unk270, &viewer.unk298);
+    viewer.pitch = viewer.view_rot.vx + viewer.rot_offset.halves[0] + viewer.shake_pitch + viewer.fall_pitch;
+    viewer.yaw = viewer.view_rot.vy + viewer.rot_offset.halves[1] + viewer.shake_yaw + viewer.unk292;
+    viewer.roll = viewer.view_rot.vz + viewer.roll_offset + viewer.shake_roll + viewer.unk294;
+    viewer.camera_rot.vx = 4096 - viewer.pitch;
+    viewer.camera_rot.vy = 4096 - viewer.yaw;
+    viewer.camera_rot.vz = 4096 - viewer.roll;
+    RotMatrixZYX(&viewer.camera_rot, &viewer.camera_matrix);
     creature_fade_out_despawn(e);
     ground_item_pick_up(c, 1);
     game_progress.unk1440.word |= 0x2000000;

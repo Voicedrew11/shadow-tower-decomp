@@ -45,9 +45,9 @@ void vsync_handler(void)
 {
     cd_state.unk4++;
     cd_state.unkC++;
-    if (++viewer.unk33 == 60) {
-        viewer.unk33 = 0;
-        viewer.unk34++;
+    if (++viewer.play_frames == 60) {
+        viewer.play_frames = 0;
+        viewer.play_seconds++;
     }
     pad_read();
 }

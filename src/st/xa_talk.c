@@ -32,11 +32,11 @@ int xa_stream_finished(void)
     /* Retail keeps both positions in stack slots and reloads them. */
     volatile int pos[2];
 
-    pos[1] = cd_loc_to_sector((CdlLOC *)&viewer.unk1DC);
-    pos[0] = cd_loc_to_sector(&viewer.unk1D8);
-    if (viewer.unk1E8 + 3600 < cd_state.unk4)
+    pos[1] = cd_loc_to_sector((CdlLOC *)&viewer.xa_pos);
+    pos[0] = cd_loc_to_sector(&viewer.xa_start);
+    if (viewer.xa_start_tick + 3600 < cd_state.unk4)
         return 1;
-    return pos[1] - pos[0] >= viewer.unk1E0 * 2;
+    return pos[1] - pos[0] >= viewer.xa_length * 2;
 }
 
 ADDRESS(0x80054278, 0x58)
@@ -127,7 +127,7 @@ void creature_talk(Creature *e, int fixed, int arg2)
         e->anim_frame = 0;
         e->anim_step = a->anim_step;
     }
-    if (game_settings.unk4 == 1)
+    if (game_settings.subtitles == 1)
         talk_load_image(r->talk_id * 6 + game_progress.unk1448[r->talk_id], 0);
     talk_stream_file = r->talk_id;
     i = 0;
@@ -204,7 +204,7 @@ void talk_show_message(int id)
     world_state.unk1EE19 = 0;
     pad_clear_input();
     do {
-        if (pad_state.unk4) {
+        if (pad_state.pressed) {
             if (world_state.unk1EE16 == 3)
                 world_state.unk1EE19 = 0;
             world_state.unk1EE16 = 4;

@@ -130,12 +130,12 @@ void map_update_events(void)
         game_progress.unk1440.word |= 0x1000000;
     }
     if (fdat_801edb04 == 1 && e32->state == 3) {
-        viewer.unk218 = 5;
+        viewer.state = 5;
         e32->flags |= 0x2000000;
         game_progress.unk1448[r1->talk_id] = 2;
         creature_force_talk(e32, 1, 0);
         fdat_801edb04 = 0xff;
-        viewer.unk218 = 0;
+        viewer.state = 0;
     }
 }
 

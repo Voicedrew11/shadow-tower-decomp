@@ -79,10 +79,10 @@ void map_update_events(void)
     CreatureType *r = &vis_table_a.types[5];
 
     if (game_progress.unk1448[r->talk_id] == 0 && viewer.position.vz > 0x4c000) {
-        viewer.unk218 = 5;
+        viewer.state = 5;
         creature_force_talk(e, 0, 0);
         e->hit = 1;
-        viewer.unk218 = 0;
+        viewer.state = 0;
         e->flags &= ~0x2000000;
         r->actions &= ~0x180;
     }
@@ -95,11 +95,11 @@ void map_update_events(void)
         game_progress.unk1440.word |= 0x100000;
     }
     if (fdat_801eda3c == 1 && e->state == 3) {
-        viewer.unk218 = 5;
+        viewer.state = 5;
         e->flags |= 0x2000000;
         creature_force_talk(e, 1, 0);
         fdat_801eda3c = 0xff;
-        viewer.unk218 = 0;
+        viewer.state = 0;
     }
 }
 

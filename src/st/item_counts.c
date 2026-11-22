@@ -26,5 +26,5 @@ void item_counts_clear(void)
 
     for (i = 0; i < 314; i++)
         *(u8 *)&inventory.counts[i] = 0;
-    viewer.unk27 = 0;
+    viewer.cunes_found = 0;
 }

@@ -163,12 +163,12 @@ void map_update_events(void)
         fdat_801ee0b4 = 2;
     if (fdat_801ee0b4 == 2)
         map_wind_down_texanims();
-    if (fdat_801ee0b4 == 3 && ((MapBlock *)viewer.unk174)->zone != 3) {
+    if (fdat_801ee0b4 == 3 && ((MapBlock *)viewer.block_record)->zone != 3) {
         map_move_texture_pages();
         creature_despawn(e48);
         e33->spawn_chance = 100;
     }
-    if (fdat_801ee0b8 == 0 && viewer.unk178 == 0x126) {
+    if (fdat_801ee0b8 == 0 && viewer.block == 0x126) {
         creature_force_talk(e50, 0, 0);
         creature_start_script(e50, 0);
         creature_fade_out_despawn(e50);
@@ -177,13 +177,13 @@ void map_update_events(void)
         fdat_801ee0b8 = 1;
         e50->home_facing = (e50->home_facing + 0x800) & 0xfff;
     }
-    if (fdat_801ee0b8 == 1 && viewer.unk178 == 0xa0) {
+    if (fdat_801ee0b8 == 1 && viewer.block == 0xa0) {
         creature_force_talk(e48, 0, 0);
         fdat_801ee0b8 = 2;
         e50->spawn_chance = 100;
         e48->flags &= ~0x2000000;
     }
-    if (fdat_801ee0b8 == 2 && viewer.unk178 == 0x124) {
+    if (fdat_801ee0b8 == 2 && viewer.block == 0x124) {
         creature_force_talk(e50, 0, 0);
         creature_start_script(e50, 0);
         creature_fade_out_despawn(e50);
@@ -191,7 +191,7 @@ void map_update_events(void)
         e49->spawn_chance = 100;
         e50->flags &= ~0x2000000;
     }
-    if (fdat_801ee0b8 == 3 && viewer.unk178 == 0x146) {
+    if (fdat_801ee0b8 == 3 && viewer.block == 0x146) {
         creature_force_talk(e49, 0, 0);
         creature_start_script(e49, 0);
         play_unlock_sound();
@@ -207,7 +207,7 @@ void map_update_events(void)
         texanim_start(&a, 0, 4, 2, 24);
         texanim_start(&b, 2, 1, 0x31, 24);
         fdat_801ee0bc = 0;
-    } else if (fdat_801ee0bc == 2 && area_state.unk0 == 0) {
+    } else if (fdat_801ee0bc == 2 && area_state.loading == 0) {
         map_move_texture_pages();
         fdat_801ee0bc = 0;
     }

@@ -45,29 +45,29 @@ extern StBlock model_heap[];
 /* A viewer model slot's position (+0xc) and rotation (+0x14). */
 typedef struct {
     u8 unk0[2];
-    u16 unk2;            /* 0x02: reach (player_update_hand_action) */
-    u16 unk4;            /* 0x04: swing cost, scaled by viewer.unk62[1] (player_update_hand_action) */
-    u16 unk6;            /* 0x06: player_start_hand_action copies it to viewer.unk134 */
-    u16 unk8;            /* 0x08: and this one to viewer.unk138 */
+    u16 reach;           /* 0x02: reach (player_update_hand_action) */
+    u16 action_step;     /* 0x04: swing cost, scaled by viewer.attributes[1] (player_update_hand_action) */
+    u16 hit_time;        /* 0x06: player_start_hand_action copies it to viewer.unk134 */
+    u16 sound_time;      /* 0x08: and this one to viewer.action_sound_time */
     u8 unkA[2];
-    short unkC;
-    short unkE;
-    short unk10;
-    short unk12;
-    SVECTOR unk14;
-} ViewerModel;
+    short pos_x;
+    short pos_y;
+    short pos_z;
+    short shot_vertex;
+    SVECTOR rotation;
+} EquipmentModel;
 
 /* The first two halfwords are the hand timers; the next two are their
  * hit-window values. Retail also tests the timers together as one word. */
 typedef union {
     s32 word;
     s16 halves[4];
-} ViewerHandState;
+} ActionTimers;
 
-typedef char ViewerHandStateSize[sizeof(ViewerHandState) == 8 ? 1 : -1];
-typedef char ViewerHandStateWordWidth[sizeof(((ViewerHandState *)0)->word) == 4 ? 1 : -1];
-typedef char ViewerHandStateWordAt0[offsetof(ViewerHandState, word) == 0 ? 1 : -1];
-typedef char ViewerHandStateHalvesAt0[offsetof(ViewerHandState, halves) == 0 ? 1 : -1];
+typedef char ActionTimersSize[sizeof(ActionTimers) == 8 ? 1 : -1];
+typedef char ActionTimersWordWidth[sizeof(((ActionTimers *)0)->word) == 4 ? 1 : -1];
+typedef char ActionTimersWordAt0[offsetof(ActionTimers, word) == 0 ? 1 : -1];
+typedef char ActionTimersHalvesAt0[offsetof(ActionTimers, halves) == 0 ? 1 : -1];
 
 /* Pitch and yaw offsets also tested together by the per-frame update. */
 typedef union {
@@ -75,7 +75,7 @@ typedef union {
     s16 halves[2];
 } ViewerAnglePair;
 
-/* A warp destination (viewer.unk220, viewer.unk22C): area, cell and offset,
+/* A warp destination (viewer.warp_return, viewer.save_area): area, cell and offset,
  * yaw (player_warp). */
 typedef struct {
     u8 area;
@@ -95,90 +95,90 @@ typedef char ViewerAnglePairWordAt0[offsetof(ViewerAnglePair, word) == 0 ? 1 : -
 typedef char ViewerAnglePairHalvesAt0[offsetof(ViewerAnglePair, halves) == 0 ? 1 : -1];
 
 typedef struct {
-    u16 unk0;
-    u16 unk2;
-    u16 unk4;
-    u16 unk6;
-    u16 unk8;            /* 0x8: shown by the status menu */
-    u16 unkA;            /* 0xa: least of unkBA[0..2] (player_compute_derived_stats) */
-    u16 unkC;            /* 0xc: greatest of unkBA[0..2] */
-    u16 unkE;            /* 0xe: shown by the stats menu */
-    u16 unk10;           /* 0x10 */
-    u16 unk12;           /* 0x12..0x18: player_hit's defence terms */
-    u16 unk14;
-    u16 unk16;
-    u16 unk18;
-    u16 unk1A;           /* 0x1a: player_compute_derived_stats */
-    u16 unk1C;
-    u16 unk1E;           /* 0x1e: divides player_take_damage's shake time */
-    u16 unk20;           /* 0x20: scales player_hit's status-time limits */
-    u16 unk22;           /* 0x22: compared with unk24 by the equipment screen; player_compute_derived_stats */
-    u16 unk24;           /* 0x24 */
+    u16 max_hp;
+    u16 hp;
+    u16 max_mp;
+    u16 mp;
+    u16 sp_total;        /* 0x8: shown by the status menu */
+    u16 weapon_attack_min; /* 0xa: least of weapon_attack[0..2] (player_compute_derived_stats) */
+    u16 weapon_attack_max; /* 0xc: greatest of weapon_attack[0..2] */
+    u16 magic_attack_right; /* 0xe: shown by the stats menu */
+    u16 magic_attack_left; /* 0x10 */
+    u16 armour_defence;  /* 0x12..0x18: player_hit's defence terms */
+    u16 magic_defence;
+    u16 shield_defence;
+    u16 shield_magic_defence;
+    u16 attack_speed;    /* 0x1a: player_compute_derived_stats */
+    u16 magic_speed;
+    u16 impact_resistance; /* 0x1e: divides player_take_damage's shake time */
+    u16 status_recovery; /* 0x20: scales player_hit's status-time limits */
+    u16 equip_weight;    /* 0x22: compared with equip_weight_limit by the equipment screen; player_compute_derived_stats */
+    u16 equip_weight_limit; /* 0x24 */
     u8 unk26;
-    u8 unk27;            /* 0x27: shown by the map menu */
-    u16 unk28;
-    u8 unk2A;
-    u8 unk2B;            /* 0x2b: cleared after the warp player_warp_to_save_point runs */
-    u32 unk2C;           /* 0x2c: flag bits the HUD shows (hud_update); status flags (src/st/player.c) */
-    u16 unk30;           /* 0x30 */
+    u8 cunes_found;      /* 0x27: shown by the map menu */
+    u16 items_found;
+    u8 card_screen_done;
+    u8 save_warp_request; /* 0x2b: cleared after the warp player_warp_to_save_point runs */
+    u32 status_flags;    /* 0x2c: flag bits the HUD shows (hud_update); status flags (src/st/player.c) */
+    u16 creatures_killed; /* 0x30 */
     u8 unk32;
-    u8 unk33; /* incremented every vsync, wraps at 60 */
-    s32 unk34; /* incremented when unk33 wraps */
-    u16 unk38[21]; /* set from FN. ids 970..990 */
-    /* Three parallel 14-entry figure arrays (player_reset_stats sets unk62 and
-     * unk9A to 50 and clears unk7E). menu_equip_info_draw_attributes lists unk62; effect_play
-     * reads six u16s from 0x78 (unk62[11]..unk7E[2]) by its level. */
-    s16 unk62[14];       /* 0x62 */
-    s16 unk7E[14];       /* 0x7e */
-    u16 unk9A[14];       /* 0x9a: figures creature_award_kill_bonuses adds bonuses to */
-    u16 unkB6;           /* 0xb6: player_hit's resistance terms */
-    u16 unkB8;           /* 0xb8 */
-    u16 unkBA[3];        /* 0xba: shown by the stats menu; effect_play reads them as a row */
-    u16 unkC0[6];        /* 0xc0: player_compute_derived_stats writes [0] only */
-    u16 unkCC[6];        /* 0xcc: player_compute_derived_stats */
-    u16 unkD8[6];        /* 0xd8: player_hit's per-kind defence */
-    u16 unkE4;           /* 0xe4: player_compute_derived_stats */
+    u8 play_frames; /* incremented every vsync, wraps at 60 */
+    s32 play_seconds; /* incremented when play_frames wraps */
+    u16 equipment[21]; /* set from FN. ids 970..990 */
+    /* Three parallel 14-entry figure arrays (player_reset_stats sets attributes and
+     * base_attributes to 50 and clears attribute_bonuses). menu_equip_info_draw_attributes lists attributes; effect_play
+     * reads six u16s from 0x78 (attributes[11]..attribute_bonuses[2]) by its level. */
+    s16 attributes[14];  /* 0x62 */
+    s16 attribute_bonuses[14]; /* 0x7e */
+    u16 base_attributes[14]; /* 0x9a: figures creature_award_kill_bonuses adds bonuses to */
+    u16 physical_base;   /* 0xb6: player_hit's resistance terms */
+    u16 magic_base;      /* 0xb8 */
+    u16 weapon_attack[3]; /* 0xba: shown by the stats menu; effect_play reads them as a row */
+    u16 weapon_element_attack[6]; /* 0xc0: player_compute_derived_stats writes [0] only */
+    u16 accessory_element_bonus[6]; /* 0xcc: player_compute_derived_stats */
+    u16 element_defence[6]; /* 0xd8: player_hit's per-kind defence */
+    u16 shield_element_defence; /* 0xe4: player_compute_derived_stats */
     u8 unkE6[2];
-    ViewerModel *unkE8[4]; /* 0xe8: player_draw_equipment_model's slot positions and rotations */
-    void *unkF8[4];      /* 0xf8: its slot model blocks (ModelFile, st/mesh.h) */
-    void *unk108[4];     /* 0x108: its slot animation state: a StAnimSlot (anim_prepare) or
+    EquipmentModel *slot_model_info[4]; /* 0xe8: player_draw_equipment_model's slot positions and rotations */
+    void *slot_model_files[4]; /* 0xf8: its slot model blocks (ModelFile, st/mesh.h) */
+    void *slot_anims[4]; /* 0x108: its slot animation state: a StAnimSlot (anim_prepare) or
                           * a node set (anim_prepare_any), by the model file's halfword +6 */
-    void *unk118[2];     /* 0x118: player_load_magic's effects.defs record per slot */
-    u8 *unk120[2];       /* 0x120: its load buffers (magic_model_buffers) */
+    void *magic_defs[2]; /* 0x118: player_load_magic's effects.defs record per slot */
+    u8 *magic_buffers[2]; /* 0x120: its load buffers (magic_model_buffers) */
     s32 unk128[2];
-    ViewerHandState unk130; /* 0x130..0x137: timers and hit windows */
-    s16 unk138[2];       /* 0x138 */
-    s16 unk13C[2];       /* 0x13c: per hand, -1 when idle */
+    ActionTimers action_timers; /* 0x130..0x137: timers and hit windows */
+    s16 action_sound_time[2]; /* 0x138 */
+    s16 cast_request[2]; /* 0x13c: per hand, -1 when idle */
     u8 unk140[0x148 - 0x140];
-    u8 unk148[4];        /* 0x148: player_load_equipment_model's item model per slot (255: none); per hand: held item kind */
-    u8 unk14C[2];        /* 0x14c: player_load_magic's item per slot (255: none); per hand: magic id */
-    u8 unk14E;
-    u8 unk14F;
-    u8 unk150[4];        /* 0x150 */
-    u8 unk154;
-    u8 unk155[2];        /* 0x155: player_fire_magic_shot's kind per slot (255: none): the magic cast */
-    u8 unk157[2];
-    u8 unk159[2];        /* 0x159: per hand: reload for unk15B */
-    u8 unk15B[2];        /* 0x15b: per hand: countdown to the next player_fire_magic_shot */
+    u8 slot_model_ids[4]; /* 0x148: player_load_equipment_model's item model per slot (255: none); per hand: held item kind */
+    u8 magic_ids[2];     /* 0x14c: player_load_magic's item per slot (255: none); per hand: magic id */
+    u8 action_recoil;
+    u8 shield_lowering;
+    u8 slot_anim_ids[4]; /* 0x150 */
+    u8 action_started;
+    u8 shot_magic[2];    /* 0x155: player_fire_magic_shot's kind per slot (255: none): the magic cast */
+    u8 shots_left[2];
+    u8 shot_interval[2]; /* 0x159: per hand: reload for shot_countdown */
+    u8 shot_countdown[2]; /* 0x15b: per hand: countdown to the next player_fire_magic_shot */
     u8 unk15D;
-    s8 unk15E;           /* 0x15e: HUD frame offset (world_render_frame) */
+    s8 quick_item_index; /* 0x15e: HUD frame offset (world_render_frame) */
     u8 unk15F;
-    SVECTOR unk160[2];   /* 0x160: player_get_launch_vector's offsets per slot */
-    void *unk170;        /* 0x170: unk174 before the last move (player_update_motion) */
-    void *unk174;        /* 0x174: the MapBlock the viewer stands in (st/vis.h) */
-    s16 unk178;
-    s16 unk17A;
+    SVECTOR shot_offsets[2]; /* 0x160: player_get_launch_vector's offsets per slot */
+    void *prev_block_record; /* 0x170: block_record before the last move (player_update_motion) */
+    void *block_record;  /* 0x174: the MapBlock the viewer stands in (st/vis.h) */
+    s16 block;
+    s16 death_pitch_step;
     s16 unk17C;
-    u16 unk17E;          /* 0x17e: HUD bar 0 value */
-    u16 unk180;
-    u16 unk182;          /* 0x182: HUD bar 1 value */
-    u16 unk184;
-    u8 unk186;           /* 0x186: 2 when the HUD numbers need redrawing */
-    u8 unk187;
-    u8 unk188;
-    u8 unk189;
-    u16 unk18A;          /* 0x18a: unk2 as last shown */
-    u16 unk18C;          /* 0x18c: unk6 as last shown */
+    u16 weapon_gauge;    /* 0x17e: HUD bar 0 value */
+    u16 swing_gauge;
+    u16 magic_gauge;     /* 0x182: HUD bar 1 value */
+    u16 cast_gauge;
+    u8 hud_redraw;       /* 0x186: 2 when the HUD numbers need redrawing */
+    u8 weapon_gauge_delay;
+    u8 magic_gauge_delay;
+    u8 shield_raised;
+    u16 hud_hp;          /* 0x18a: hp as last shown */
+    u16 hud_mp;          /* 0x18c: mp as last shown */
     u8 unk18E[2];
     union {
         s16 halves[13][2]; /* level, peak (player_step_status_timer) */
@@ -187,111 +187,111 @@ typedef struct {
     } timers;            /* 0x190: status timers */
 /* The halfword view under its first name. */
 #define unk190 timers.halves
-    u8 unk1C4;
-    u8 unk1C5;
-    u8 unk1C6;
-    s8 unk1C7;           /* 0x1c7: lighting_update picks lighting rows by its sign */
-    u8 unk1C8;
-    u8 unk1C9;
-    u8 unk1CA;
-    u8 unk1CB;
-    s16 unk1CC;
-    s16 unk1CE;
-    s16 unk1D0;
+    u8 hp_regen_interval;
+    u8 mp_regen_interval;
+    u8 double_damage_chance;
+    s8 equipment_light;  /* 0x1c7: lighting_update picks lighting rows by its sign */
+    u8 status_time_scale;
+    u8 hp_drain_percent;
+    u8 mp_drain_percent;
+    u8 blocks_magic;
+    s16 push_x;
+    s16 push_y;
+    s16 push_z;
     u8 unk1D2[2];
-    u8 unk1D4[4];        /* 0x1d4: per slot/hand: sound id */
-    CdlLOC unk1D8;       /* 0x1d8: XA stream start position (src/st/xa.c) */
+    u8 slot_sounds[4];   /* 0x1d4: per slot/hand: sound id */
+    CdlLOC xa_start;     /* 0x1d8: XA stream start position (src/st/xa.c) */
     /* 0x1dc: its current position. Volatile: the CD ready callback
      * (xa_ready_callback) writes it, and retail keeps its three byte stores in
      * source order where the scheduler would otherwise reorder them. */
-    volatile CdlLOC unk1DC;
-    s32 unk1E0;          /* 0x1e0: its length in sectors */
+    volatile CdlLOC xa_pos;
+    s32 xa_length;       /* 0x1e0: its length in sectors */
     u8 unk1E4;
     u8 unk1E5[3];
-    u32 unk1E8;          /* 0x1e8: cd_state.unk4 when the stream started */
-    s32 unk1EC[5];       /* 0x1ec: frames left to show unk20C[i] */
+    u32 xa_start_tick;   /* 0x1e8: cd_state.unk4 when the stream started */
+    s32 damage_number_timers[5]; /* 0x1ec: frames left to show damage_numbers[i] */
     u8 unk200[0x20c - 0x200];
-    s16 unk20C[5];       /* 0x20c: numbers hud_queue_damage_number queues */
+    s16 damage_numbers[5]; /* 0x20c: numbers hud_queue_damage_number queues */
     u8 unk216[2];
-    u8 unk218;           /* 0x218 */
-    u8 unk219;
-    u8 unk21A;
-    u8 unk21B;
-    u8 unk21C;
-    u8 unk21D;
-    u8 unk21E;
-    u8 unk21F;
+    u8 state;            /* 0x218 */
+    u8 shield_wear;
+    u8 armour_wear;
+    u8 weapon_wear;
+    u8 update_all_spawns;
+    u8 free_anims_after_menu;
+    u8 motion_stopped;
+    u8 bow_released;
     union {
         u8 bytes[0xc];
         StWarp warp;
-    } unk220;            /* 0x220: the place a warp was entered from (player_warp_back) */
-    u8 unk22C;
-    u8 unk22D;
-    u8 unk22E;
-    u8 unk22F;
-    s16 unk230;
-    s16 unk232;
-    s16 unk234;
-    s16 unk236;
-    u8 unk238;
+    } warp_return;       /* 0x220: the place a warp was entered from (player_warp_back) */
+    u8 save_area;
+    u8 save_x;
+    u8 save_y;
+    u8 save_z;
+    s16 save_dx;
+    s16 save_dy;
+    s16 save_dz;
+    s16 save_yaw;
+    u8 fall_death;
     u8 unk239;
     u8 unk23A[2];
-    u32 unk23C;
+    u32 frame_count;
     u8 unk240[4];
-    s32 unk244;
+    s32 footstep_timer;
     VECTOR position;     /* 0x248..0x257: includes the copied pad word */
     u8 unk258[8];
-    SVECTOR unk260;      /* 0x260: motion (creature_aim_shot leads targets by it) */
-    short unk268;        /* 0x268: pitch in view_point_in_near_cone */
-    short unk26A;        /* 0x26a: yaw in view_point_in_near_cone */
-    short unk26C;        /* 0x26c: roll; model_draw_list turns kind-2 parts by all three */
+    SVECTOR velocity;    /* 0x260: motion (creature_aim_shot leads targets by it) */
+    short pitch;         /* 0x268: pitch in view_point_in_near_cone */
+    short yaw;           /* 0x26a: yaw in view_point_in_near_cone */
+    short roll;          /* 0x26c: roll; model_draw_list turns kind-2 parts by all three */
     short unk26E;
-    SVECTOR unk270;      /* 0x270 */
-    SVECTOR unk278;      /* 0x278: player_reset_state copies it to 0x268; view pitch (vx) and yaw (vy) player_update_look turns
-                          * (band L reads the yaw, unk278.vy) */
-    ViewerAnglePair unk280; /* 0x280: view pitch/yaw offsets */
-    s16 unk284;
-    s16 unk286;
-    u16 unk288;          /* 0x288, 0x28c: player_update_shake adds its offsets */
-    u16 unk28A;
-    u16 unk28C;
+    SVECTOR camera_rot;  /* 0x270 */
+    SVECTOR view_rot;    /* 0x278: player_reset_state copies it to 0x268; view pitch (vx) and yaw (vy) player_update_look turns
+                          * (band L reads the yaw, view_rot.vy) */
+    ViewerAnglePair rot_offset; /* 0x280: view pitch/yaw offsets */
+    s16 roll_offset;
+    s16 death_timer;
+    u16 shake_pitch;     /* 0x288, 0x28c: player_update_shake adds its offsets */
+    u16 shake_yaw;
+    u16 shake_roll;
     u8 unk28E[2];
-    s16 unk290;
+    s16 fall_pitch;
     s16 unk292;
     s16 unk294;
     u8 unk296[2];
-    MATRIX unk298;       /* 0x298: player_get_launch_vector's rotation */
-    VECTOR unk2B8;       /* 0x2b8: walk velocity: vx strafes, vz moves ahead (player_update_walk) */
-    s16 unk2C8;
-    s16 unk2CA;          /* 0x2ca: yaw speed */
-    s16 unk2CC;          /* 0x2cc: pitch speed */
-    short unk2CE;        /* 0x2ce: added to y by world_transform_parts */
-    short unk2D0;
+    MATRIX camera_matrix; /* 0x298: player_get_launch_vector's rotation */
+    VECTOR walk_velocity; /* 0x2b8: walk velocity: vx strafes, vz moves ahead (player_update_walk) */
+    s16 walk_speed;
+    s16 yaw_speed;       /* 0x2ca: yaw speed */
+    s16 pitch_speed;     /* 0x2cc: pitch speed */
+    short bob_offset;    /* 0x2ce: added to y by world_transform_parts */
+    short bob_phase;
     short unk2D2;        /* 0x2d2: added to y by world_transform_parts */
-    s16 unk2D4;
-    s16 unk2D6;          /* 0x2d6: red fade level, falls by unk2D8 */
-    s16 unk2D8;
-    s16 unk2DA;          /* 0x2da: yellow fade level, falls by unk2DC */
-    s16 unk2DC;
-    short unk2DE;        /* 0x2de..0x2e2: added to player_draw_equipment_model's slot rotations */
-    short unk2E0;
-    short unk2E2;
-    s32 unk2E4;
-    s32 unk2E8;          /* 0x2e8: top yaw speed */
-    s32 unk2EC;
-    s32 unk2F0;
-    s32 unk2F4;          /* 0x2f4: player_update_shake's countdown, -1 when idle */
+    s16 vertical_speed;
+    s16 red_fade;        /* 0x2d6: red fade level, falls by red_fade_step */
+    s16 red_fade_step;
+    s16 yellow_fade;     /* 0x2da: yellow fade level, falls by yellow_fade_step */
+    s16 yellow_fade_step;
+    short hand_rot_x;    /* 0x2de..0x2e2: added to player_draw_equipment_model's slot rotations */
+    short hand_rot_y;
+    short hand_rot_z;
+    s32 walk_speed_max;
+    s32 yaw_speed_max;   /* 0x2e8: top yaw speed */
+    s32 submerged;
+    s32 submerged_acid;
+    s32 shake_timer;     /* 0x2f4: player_update_shake's countdown, -1 when idle */
 } Viewer;
 
-typedef char ViewerHandStateAt0x130[offsetof(Viewer, unk130) == 0x130 ? 1 : -1];
-typedef char ViewerHandStateEndsAt0x138[offsetof(Viewer, unk138) == 0x138 ? 1 : -1];
+typedef char ViewerActionTimersAt0x130[offsetof(Viewer, action_timers) == 0x130 ? 1 : -1];
+typedef char ViewerActionTimersEndAt0x138[offsetof(Viewer, action_sound_time) == 0x138 ? 1 : -1];
 
 typedef char ViewerTimersAt0x190[offsetof(Viewer, timers) == 0x190 ? 1 : -1];
-typedef char ViewerTimersEndAt0x1C4[offsetof(Viewer, unk1C4) == 0x1c4 ? 1 : -1];
+typedef char ViewerTimersEndAt0x1C4[offsetof(Viewer, hp_regen_interval) == 0x1c4 ? 1 : -1];
 
-typedef char ViewerAnglePairAt0x280[offsetof(Viewer, unk280) == 0x280 ? 1 : -1];
-typedef char ViewerAnglePairSecondAt0x282[offsetof(Viewer, unk280) + sizeof(s16) == 0x282 ? 1 : -1];
-typedef char ViewerAnglePairEndsAt0x284[offsetof(Viewer, unk284) == 0x284 ? 1 : -1];
+typedef char ViewerAnglePairAt0x280[offsetof(Viewer, rot_offset) == 0x280 ? 1 : -1];
+typedef char ViewerAnglePairSecondAt0x282[offsetof(Viewer, rot_offset) + sizeof(s16) == 0x282 ? 1 : -1];
+typedef char ViewerAnglePairEndsAt0x284[offsetof(Viewer, roll_offset) == 0x284 ? 1 : -1];
 
 typedef char ViewerPositionAt0x248[offsetof(Viewer, position) == 0x248 ? 1 : -1];
 typedef char ViewerPositionEndsAt0x258[offsetof(Viewer, unk258) == 0x258 ? 1 : -1];
@@ -320,8 +320,8 @@ typedef struct {
     void (*loaded)(void); /* 0x14: called once the area is loaded (area_load_update) */
     void (*item_added)(int); /* 0x18: item id rose by one (item_add) */
     void (*unk1C)();
-    void (*unk20)(void *entry, void *record); /* 0x20: a table B entry kind objects_load does not know */
-    void (*unk24)(void); /* 0x24: a table B entry kind objects_update does not handle */
+    void (*load_object)(void *entry, void *record); /* 0x20: a table B entry kind objects_load does not know */
+    void (*update_object)(void); /* 0x24: a table B entry kind objects_update does not handle */
     void (*unk28)();
     void (*unk2C)();
     void (*item_used)(); /* 0x30: item use (item id, or 0x4000 | the table B index when key
@@ -329,41 +329,41 @@ typedef struct {
     void (*player_died)(void); /* 0x34: the player died (player_update) */
     void (*unk38)();
     void (*unk3C)();
-    void (*unk40)(void); /* 0x40: per table A entry, every fourth frame (creatures_update) */
-    void (*unk44)(void); /* 0x44: per table A entry, every frame */
+    void (*creature_pick_move)(void); /* 0x40: per table A entry, every fourth frame (creatures_update) */
+    void (*creature_step_script)(void); /* 0x44: per table A entry, every frame */
     void (*unk48[14])();
 } AreaHooks;
 
 typedef char AreaHooksSize[sizeof(AreaHooks) == 0x80 ? 1 : -1];
 
 typedef struct {
-    s16 unk0;
-    volatile u16 unk2; /* area_draw_entry_fade reads it zero-extended, then as a short */
-    u8 unk4;
-    u8 unk5;
-    u8 unk6;
-    u8 unk7;
+    s16 loading;
+    volatile u16 load_step; /* area_draw_entry_fade reads it zero-extended, then as a short */
+    u8 loaded_area;
+    u8 loaded_world;
+    u8 loaded_images;
+    u8 loaded_sound_bank;
     u8 unk8;
     u8 area;             /* 0x09 */
     u8 unkA[2];
     AreaHooks *hooks;    /* 0x0c: the area's handlers */
-    u8 unk10;            /* 0x10: 0xff when unset */
-    u8 unk11;
-    u8 unk12;            /* 0x12 */
-    u8 unk13;            /* 0x13 */
+    u8 request_area;     /* 0x10: 0xff when unset */
+    u8 request_world;
+    u8 request_images;   /* 0x12 */
+    u8 request_sound_bank; /* 0x13 */
     u8 unk14;            /* 0x14 */
     u8 unk15[3];
-    s32 unk18;           /* 0x18: tick area_draw_entry_fade times its fade from, -1 when idle */
-    u8 unk1C;
-    u8 unk1D;
-    u8 unk1E;
-    u8 unk1F;            /* 0x1f: nonzero skips the block refresh (band E object passes) */
-    u8 unk20;            /* 0x20 */
-    u8 unk21;
-    u8 unk22;
-    u8 unk23;
-    u8 unk24;
-    u8 unk25;
+    s32 entry_fade_start; /* 0x18: tick area_draw_entry_fade times its fade from, -1 when idle */
+    u8 shift_applied;
+    u8 loading_world;
+    u8 tables_loaded;
+    u8 skip_model_sync;  /* 0x1f: nonzero skips the block refresh (band E object passes) */
+    u8 shift_x;          /* 0x20 */
+    u8 shift_z;
+    u8 shift_y;
+    u8 shift_x_fine;
+    u8 shift_y_fine;
+    u8 shift_z_fine;
     u16 unk26;           /* 0x26 */
 } AreaState;
 
@@ -372,53 +372,53 @@ extern AreaState area_state;
 /* One count per id: a 7-bit count under a flag bit. */
 typedef struct {
     u8 count : 7;
-    u8 flag : 1;
-} Count801c7590;
+    u8 in_bag : 1;
+} ItemCount;
 
 /* The counts of the 314 table C ids, then a halfword id table. */
 typedef struct {
-    Count801c7590 counts[314];
-    u16 unk13A[14];      /* 0x13a: ids the item list screens show */
-    u8 unk156[14];       /* 0x156: their stock (src/st/save.c) */
+    ItemCount counts[314];
+    u16 shop_ids[14];    /* 0x13a: ids the item list screens show */
+    u8 shop_stock[14];   /* 0x156: their stock (src/st/save.c) */
     u8 unk164[4];
-} Data801c7590;
-extern Data801c7590 inventory;
+} Inventory;
+extern Inventory inventory;
 
 
 typedef struct {
-    u16 unk0;            /* 0x00: unk2 of the previous frame (src/st/pad.c) */
-    u16 unk2;            /* 0x02: held bits */
-    u16 unk4;            /* 0x04: page bits menu_equip_info_draw consumes; request bits player_start_hand_action clears */
-    u16 unk6;            /* 0x06..0x0c: src/st/pad.c's repeat and combination words */
-    u16 unk8;
-    u16 unkA;
-    u16 unkC;            /* 0x0c: bits the menu loop menu_main_run consumes; the memory card
+    u16 prev_held;       /* 0x00: held of the previous frame (src/st/pad.c) */
+    u16 held;            /* 0x02: held bits */
+    u16 pressed;         /* 0x04: page bits menu_equip_info_draw consumes; request bits player_start_hand_action clears */
+    u16 repeat_held;     /* 0x06..0x0c: src/st/pad.c's repeat and combination words */
+    u16 combo_first;
+    u16 combo_second;
+    u16 pressed_repeat;  /* 0x0c: bits the menu loop menu_main_run consumes; the memory card
                           * screens' port-select bits (src/st/menu.c); the id grid screen's
                           * pressed bits (src/st/idgrid.c) */
-    u8 unkE;             /* 0x0e: 1 while the controller is disconnected */
+    u8 no_input;         /* 0x0e: 1 while the controller is disconnected */
     u8 unkF;
-    u8 unk10;
-    u8 unk11;
-    u8 unk12;            /* 0x12 */
-    u8 unk13;
-    u8 unk14;            /* 0x14: request player_update_hands consumes */
+    u8 disabled;
+    u8 repeat_timer;
+    u8 combo_timer;      /* 0x12 */
+    u8 held_changed;
+    u8 combo;            /* 0x14: request player_update_hands consumes */
     /* 0x15..0x17: written by the vsync-time pad update; every access reloads them */
-    volatile u8 unk15;   /* 0x15: last PadGetState(0) */
-    volatile u8 unk16;   /* 0x16: disconnected since the last stable state */
-    volatile u8 unk17;   /* 0x17: PadStateFindPad seen; actuator alignment pending */
-    u8 unk18;            /* 0x18: PadInfoAct(0, -1, 0) */
-    u8 unk19;            /* 0x19: frames of vibration left */
-    u8 unk1A[6];         /* 0x1a: PadSetActAlign data */
+    volatile u8 port_state; /* 0x15: last PadGetState(0) */
+    volatile u8 disconnected; /* 0x16: disconnected since the last stable state */
+    volatile u8 align_pending; /* 0x17: PadStateFindPad seen; actuator alignment pending */
+    u8 actuator_count;   /* 0x18: PadInfoAct(0, -1, 0) */
+    u8 vibration_frames; /* 0x19: frames of vibration left */
+    u8 act_align[6];     /* 0x1a: PadSetActAlign data */
     u8 unk20[2];
-    /* 0x22: twelve button masks tested against unk2 (held) / unk4 (pressed),
+    /* 0x22: twelve button masks tested against held / pressed,
      * set by pad_set_default_buttons: the settings page lists them in two columns of
      * six (menu_button_config_draw). [2]/[3] and [6]/[7] turn the view (player_update_look);
      * [8] is slot 0's request bit, [9] the other slots' (player_start_hand_action);
      * [10] the examine and quick-item use button (player_handle_examine). */
-    u16 unk22[12];
-    u16 unk3A;           /* 0x3a: unk22[8] | unk22[9] | unk22[10] | unk22[11] */
-} Data801cd180;
-extern Data801cd180 pad_state;
+    u16 buttons[12];
+    u16 action_mask;     /* 0x3a: buttons[8] | buttons[9] | buttons[10] | buttons[11] */
+} PadState;
+extern PadState pad_state;
 
 /*
  * One sound bank slot: the loaded bank's data (its state halfword at +4)
@@ -475,8 +475,8 @@ typedef struct {
     StSound sounds[1232]; /* 0xa84 */
     StSoundBuf bufs[16]; /* 0x3aa4 */
     u8 unk3B24[0x3b28 - 0x3b24];
-} Data801dd1c0;
-extern Data801dd1c0 sound_state;
+} SoundState;
+extern SoundState sound_state;
 
 /* The 16 sound bank buffers (StSoundBuf.data): two, one, four, four, one
  * and four 0x1000-byte blocks below the sound state block. */
@@ -491,25 +491,25 @@ extern u8 sound_buffers_equipment[4][0x1000];
  * up to texanim_clut_buffer). */
 extern u_long cd_file_buffer[];
 
-/* Two 0x4000-byte load buffers (viewer.unk120). */
+/* Two 0x4000-byte load buffers (viewer.magic_buffers). */
 extern u8 magic_model_buffers[2][0x4000];
-/* Four 0x7000-byte model blocks (viewer.unkF8). */
+/* Four 0x7000-byte model blocks (viewer.slot_model_files). */
 extern u8 equipment_model_buffers[4][0x7000];
-/* The 64 equipment model placements viewer.unkE8 points into. */
-extern ViewerModel equipment_model_placements[64];
+/* The 64 equipment model placements viewer.slot_model_info points into. */
+extern EquipmentModel equipment_model_placements[64];
 
 /* Settings bytes player_init initializes (WIP extent). */
 typedef struct {
-    u8 unk0;
-    u8 unk1;             /* option page level, shown as a slider and a number (menu.c) */
-    u8 unk2;             /* 0x02..0x05: option page on/off bytes */
-    u8 unk3;             /* nonzero while the HUD is drawn (hud_queue_damage_number, world_render_frame) */
-    u8 unk4;             /* 1: the talk picture (TALKMSG.T) is drawn whatever the picture mode (text.c) */
-    u8 unk5;
-    u8 unk6;
-    u8 unk7;
-    u8 unk8;
-} Data801cd120;
-extern Data801cd120 game_settings;
+    u8 bgm_volume;
+    u8 sfx_volume;       /* option page level, shown as a slider and a number (menu.c) */
+    u8 walk_bob;         /* 0x02..0x05: option page on/off bytes */
+    u8 show_status;      /* nonzero while the HUD is drawn (hud_queue_damage_number, world_render_frame) */
+    u8 subtitles;        /* 1: the talk picture (TALKMSG.T) is drawn whatever the picture mode (text.c) */
+    u8 vibration;
+    u8 repeat_interval;
+    u8 repeat_delay;
+    u8 combo_window;
+} GameSettings;
+extern GameSettings game_settings;
 
 #endif

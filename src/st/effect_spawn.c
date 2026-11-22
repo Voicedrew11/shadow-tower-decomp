@@ -1875,11 +1875,11 @@ void effect_update(void)
         }
         shake = (rand() - 16384) >> ((64 - e->unk10) / 8 + 9);
         if (shake < -2 || shake > 2)
-            viewer.unk28C += shake;
-        if (viewer.unk28C > 2048 && viewer.unk28C < 4032)
-            viewer.unk28C = 4032;
-        if (viewer.unk28C > 64 && viewer.unk28C < 2048)
-            viewer.unk28C = 64;
+            viewer.shake_roll += shake;
+        if (viewer.shake_roll > 2048 && viewer.shake_roll < 4032)
+            viewer.shake_roll = 4032;
+        if (viewer.shake_roll > 64 && viewer.shake_roll < 2048)
+            viewer.shake_roll = 64;
         break;
     }
     case 0xf0:
@@ -1909,12 +1909,12 @@ void effect_update(void)
         if (e->unk8 != 0) {
             e->unk8--;
         } else {
-            s16 left = viewer.unk6;
+            s16 left = viewer.mp;
 
             left -= n;
             if (left < 0)
                 left = 0;
-            viewer.unk6 = left;
+            viewer.mp = left;
         }
         break;
     case 0xf3:
@@ -1944,14 +1944,14 @@ void effect_update(void)
         if (e->unk8 != 0) {
             e->unk8--;
         } else {
-            s16 left = viewer.unk2;
+            s16 left = viewer.hp;
 
             left -= n;
             if (left <= 0) {
                 left = 0;
                 player_kill(0);
             }
-            viewer.unk2 = left;
+            viewer.hp = left;
         }
         break;
     case 0x57:

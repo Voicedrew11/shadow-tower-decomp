@@ -19,4 +19,4 @@ CreatureTable vis_table_a;
 DATA(0x801c0310, 0x727c, ".bss")
 AreaObjectTable vis_table_b;
 DATA(0x801c7590, 0x168, ".bss")
-Data801c7590 inventory;
+Inventory inventory;

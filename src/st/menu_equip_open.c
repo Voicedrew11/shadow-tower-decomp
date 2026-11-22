@@ -86,12 +86,12 @@ void menu_equip_open(void)
     copy_words(sp->unk0.block, (u32 *)(p + 4), 5376);
     p += *(u32 *)p + 4;
     tim_load_images_at(p + 4, &sp->unk2E6[2], &sp->unk2E6[3], 1);
-    equip_menu_saved_ids[0] = viewer.unk38[3];
-    equip_menu_saved_ids[1] = viewer.unk38[4];
-    equip_menu_saved_ids[2] = viewer.unk38[16];
-    equip_menu_saved_ids[3] = viewer.unk38[17];
-    equip_menu_saved_ids[4] = viewer.unk38[6];
-    equip_menu_saved_ids[5] = viewer.unk38[12];
+    equip_menu_saved_ids[0] = viewer.equipment[3];
+    equip_menu_saved_ids[1] = viewer.equipment[4];
+    equip_menu_saved_ids[2] = viewer.equipment[16];
+    equip_menu_saved_ids[3] = viewer.equipment[17];
+    equip_menu_saved_ids[4] = viewer.equipment[6];
+    equip_menu_saved_ids[5] = viewer.equipment[12];
     pad_clear_input();
 }
 
@@ -110,25 +110,25 @@ void menu_equip_close(void)
     menu_equip_restore_vram();
     mem_free(MENU_SCRATCH->unk0.block);
     mem_free(equip_magic_list.bits);
-    if ((equip_menu_saved_ids[0] != viewer.unk38[3] && viewer.unk38[3] != 0xffff)
-        || (equip_menu_saved_ids[2] != viewer.unk38[16] && viewer.unk38[16] != 0xffff)
-        || (equip_menu_saved_ids[1] != viewer.unk38[4] && viewer.unk38[4] != 0xffff)
-        || (equip_menu_saved_ids[3] != viewer.unk38[17] && viewer.unk38[17] != 0xffff)
-        || (equip_menu_saved_ids[4] != viewer.unk38[6] && viewer.unk38[6] != 0xffff)
-        || (equip_menu_saved_ids[5] != viewer.unk38[12] && viewer.unk38[12] != 0xffff))
+    if ((equip_menu_saved_ids[0] != viewer.equipment[3] && viewer.equipment[3] != 0xffff)
+        || (equip_menu_saved_ids[2] != viewer.equipment[16] && viewer.equipment[16] != 0xffff)
+        || (equip_menu_saved_ids[1] != viewer.equipment[4] && viewer.equipment[4] != 0xffff)
+        || (equip_menu_saved_ids[3] != viewer.equipment[17] && viewer.equipment[17] != 0xffff)
+        || (equip_menu_saved_ids[4] != viewer.equipment[6] && viewer.equipment[6] != 0xffff)
+        || (equip_menu_saved_ids[5] != viewer.equipment[12] && viewer.equipment[12] != 0xffff))
         loading_screen_show();
-    if (equip_menu_saved_ids[0] != viewer.unk38[3] || equip_menu_saved_ids[1] != viewer.unk38[4]) {
-        player_load_equipment_model(viewer.unk38[3], 0, 1);
-        player_load_equipment_model(viewer.unk38[4], 2, 1);
+    if (equip_menu_saved_ids[0] != viewer.equipment[3] || equip_menu_saved_ids[1] != viewer.equipment[4]) {
+        player_load_equipment_model(viewer.equipment[3], 0, 1);
+        player_load_equipment_model(viewer.equipment[4], 2, 1);
     }
-    if (equip_menu_saved_ids[2] != viewer.unk38[16] || equip_menu_saved_ids[3] != viewer.unk38[17]) {
-        player_load_equipment_model(viewer.unk38[16], 1, 1);
-        player_load_equipment_model(viewer.unk38[17], 3, 1);
+    if (equip_menu_saved_ids[2] != viewer.equipment[16] || equip_menu_saved_ids[3] != viewer.equipment[17]) {
+        player_load_equipment_model(viewer.equipment[16], 1, 1);
+        player_load_equipment_model(viewer.equipment[17], 3, 1);
     }
-    if (equip_menu_saved_ids[4] != viewer.unk38[6])
-        player_load_magic(viewer.unk38[6], 0);
-    if (equip_menu_saved_ids[5] != viewer.unk38[12])
-        player_load_magic(viewer.unk38[12], 1);
+    if (equip_menu_saved_ids[4] != viewer.equipment[6])
+        player_load_magic(viewer.equipment[6], 0);
+    if (equip_menu_saved_ids[5] != viewer.equipment[12])
+        player_load_magic(viewer.equipment[12], 1);
     loading_screen_end();
-    viewer.unk38[15] = 0xffff;
+    viewer.equipment[15] = 0xffff;
 }

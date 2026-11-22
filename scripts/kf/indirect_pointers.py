@@ -6,7 +6,7 @@ overlay brings), so no value chain inside the calling function proves the
 target. Two manually curated tables state the evidence instead:
 
 * `config/retail/indirect_pointers.tsv`: every value source the review found
-  for one pointer (a typed member path such as `AreaHooks.unk40`). A source
+  for one pointer (a typed member path such as `AreaHooks.creature_pick_move`). A source
   is either `table-word`, a code pointer stored in a data word (a handler
   table slot), or `address`, an address-taking `lui`/low pair in the audited
   image's code that hands a function's address on (an argument, a store).

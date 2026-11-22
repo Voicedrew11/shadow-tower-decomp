@@ -121,7 +121,7 @@ void map_update_events(void)
     } else if (game_progress.unk1440.field.gate == 1 && d5->anim_frame > 0x800) {
         game_progress.unk1440.field.gate = 2;
     }
-    if (fdat_801ef938 == 0 && area_state.unk0 == 0)
+    if (fdat_801ef938 == 0 && area_state.loading == 0)
         fdat_801ef938 = 1;
     if (!game_progress.unk1440.bit.f13 && fdat_801ef938 == 1) {
         game_progress.unk1440.bit.f13 = 1;
@@ -142,7 +142,7 @@ void map_update_events(void)
             fdat_801ef930--;
         }
     }
-    if (fdat_801ef934 == 1 && area_state.unk0 == 0) {
+    if (fdat_801ef934 == 1 && area_state.loading == 0) {
         RECT rect = {0, 487, 256, 1};
 
         MoveImage(&rect, 0, 489);
@@ -351,7 +351,7 @@ void map_step_creature(void)
     if (e->type == 4 && fdat_801ef93c == 1) {
         rot.vx = 0;
         rot.vy = -0x400;
-        viewer.unk218 = 5;
+        viewer.state = 5;
         pos.vx = e48->position.vx - 0xa00;
         pos.vz = e48->position.vz;
         player_glide_to_pose(&pos, &rot);
@@ -365,17 +365,17 @@ void map_step_creature(void)
         map_hand_over_item();
         creature_fade_out_despawn(e);
         fdat_801ef93c = 2;
-        viewer.unk218 = 0;
+        viewer.state = 0;
         game_progress.unk1440.word |= 0x4000;
     }
     if (e->type == 0) {
         switch (game_progress.unk1440.word >> 10 & 7) {
         case 2:
-            viewer.unk218 = 5;
+            viewer.state = 5;
             creature_force_talk(e, 0, 0);
             player_turn_to_creature(e);
             map_walk_creature_off();
-            viewer.unk218 = 0;
+            viewer.state = 0;
             e->spawn_chance = 100;
             e->facing = 0x400;
             e->home_block = 0x31;
@@ -390,16 +390,16 @@ void map_step_creature(void)
             game_progress.unk1440.word = (game_progress.unk1440.word & ~0x1c00) | 0xc00;
             break;
         case 3:
-            if (viewer.unk178 == 0x2f) {
+            if (viewer.block == 0x2f) {
                 creature_force_talk(e, 0, 0);
                 game_progress.unk1440.word = (game_progress.unk1440.word & ~0x1c00) | 0x1000;
-            } else if (viewer.unk178 == 0x16) {
+            } else if (viewer.block == 0x16) {
                 game_progress.unk1448[r->talk_id]++;
                 game_progress.unk1440.word = (game_progress.unk1440.word & ~0x1c00) | 0x1400;
             }
             break;
         case 4:
-            if (viewer.unk178 == 0x16)
+            if (viewer.block == 0x16)
                 game_progress.unk1440.word = (game_progress.unk1440.word & ~0x1c00) | 0x1400;
             break;
         case 5:
@@ -440,7 +440,7 @@ void map_step_creature(void)
         }
         switch (fdat_801ef924) {
         case 0:
-            if (viewer.unk178 == 0xa4) {
+            if (viewer.block == 0xa4) {
                 e50->fade = -1;
                 e50->status.bytes[2] &= 0xf2;
                 creature_force_talk(e, 0, 0);
@@ -535,19 +535,19 @@ void map_object_take_equipment(void)
     VECTOR pos;
     SVECTOR rot;
 
-    if (d == &vis_table_b.entries[16] && viewer.unk38[3] < 50 && d->state == 1
+    if (d == &vis_table_b.entries[16] && viewer.equipment[3] < 50 && d->state == 1
         && fdat_801ef92c == 0) {
         pos.vx = d->position.vx;
         pos.vz = d->position.vz - 0x600;
         rot.vx = 0;
         rot.vy = 0;
-        viewer.unk218 = 5;
+        viewer.state = 5;
         player_glide_to_pose(&pos, &rot);
         map_take_equipment_raise_object();
         player_turn_to_creature(e51);
         map_play_two_creature_scripts();
         map_talk_then_remove_creatures();
-        viewer.unk218 = 0;
+        viewer.state = 0;
         fdat_801ef924 = 2;
         fdat_801ef92c = 2;
         game_progress.unk1440.word = (game_progress.unk1440.word & ~0x300) | 0x200;
@@ -592,17 +592,17 @@ void map_take_equipment_raise_object(void)
     AreaObject *d16 = &vis_table_b.entries[16];
     u8 *speed = &d16->unk48;
     GroundItem *c28 = &vis_table_c.entries[28];
-    Data801c7590 *items = &inventory;
+    Inventory *items = &inventory;
     ItemType *kind;
     int step;
 
     kind = &vis_table_c.types[c28->item];
-    *(u8 *)&items->counts[viewer.unk38[3]] = 0;
-    viewer.unk38[3] = 0xffff;
+    *(u8 *)&items->counts[viewer.equipment[3]] = 0;
+    viewer.equipment[3] = 0xffff;
     player_compute_derived_stats(0);
     player_update_durability_warning();
-    player_load_equipment_model(viewer.unk38[3], 0, 0);
-    player_load_equipment_model(viewer.unk38[16], 1, 0);
+    player_load_equipment_model(viewer.equipment[3], 0, 0);
+    player_load_equipment_model(viewer.equipment[16], 1, 0);
     d16->kind = 50;
     d16->anim = 0;
     d16->anim_frame = 0;
@@ -672,9 +672,9 @@ void map_play_two_creature_scripts(void)
         d19->state = 12;
     n = 16;
     while (n--) {
-        viewer.unk278.vx += 16;
-        viewer.unk268 = viewer.unk278.vx + viewer.unk280.halves[0] + viewer.unk288 + viewer.unk290;
-        world_run_frame(NULL, (SVECTOR *)&viewer.unk268, 0);
+        viewer.view_rot.vx += 16;
+        viewer.pitch = viewer.view_rot.vx + viewer.rot_offset.halves[0] + viewer.shake_pitch + viewer.fall_pitch;
+        world_run_frame(NULL, (SVECTOR *)&viewer.pitch, 0);
     }
 }
 
@@ -784,7 +784,7 @@ void map_turn_view_during_script(void)
     int n;
     int total;
 
-    from = viewer.unk278;
+    from = viewer.view_rot;
     e = &vis_table_a.entries[49];
     to.vy = -0x400;
     to.vx = 0;
@@ -800,11 +800,11 @@ void map_turn_view_during_script(void)
         e->anim_frame += e->anim_step;
         if ((short)e->anim_frame >= 0x1000)
             e->anim_frame = 0xfff;
-        viewer.unk278.vx = (from.vx * n + to.vx * (total - n)) / total;
-        viewer.unk268 = viewer.unk278.vx + viewer.unk280.halves[0] + viewer.unk288 + viewer.unk290;
-        viewer.unk278.vy = (from.vy * n + to.vy * (total - n)) / total;
-        viewer.unk26A = viewer.unk278.vy + viewer.unk280.halves[1] + viewer.unk28A + viewer.unk292;
-        world_run_frame(NULL, (SVECTOR *)&viewer.unk268, 0);
+        viewer.view_rot.vx = (from.vx * n + to.vx * (total - n)) / total;
+        viewer.pitch = viewer.view_rot.vx + viewer.rot_offset.halves[0] + viewer.shake_pitch + viewer.fall_pitch;
+        viewer.view_rot.vy = (from.vy * n + to.vy * (total - n)) / total;
+        viewer.yaw = viewer.view_rot.vy + viewer.rot_offset.halves[1] + viewer.shake_yaw + viewer.unk292;
+        world_run_frame(NULL, (SVECTOR *)&viewer.pitch, 0);
         n--;
     } while ((short)e->anim_frame != 0xfff);
     e->flags |= 0x2000000;
@@ -838,16 +838,16 @@ void map_hand_over_item(void)
         c->position.vx = e->position.vx - v.vx;
         c->position.vy = e->position.vy + v.vy;
         c->position.vz = e->position.vz - v.vz;
-        world_run_frame(NULL, &viewer.unk278, 0);
+        world_run_frame(NULL, &viewer.view_rot, 0);
     } while ((s16)e->anim_frame != 0xfff);
     c->state = 2;
-    viewer.unk268 = viewer.unk278.vx + viewer.unk280.halves[0] + viewer.unk288 + viewer.unk290;
-    viewer.unk26A = viewer.unk278.vy + viewer.unk280.halves[1] + viewer.unk28A + viewer.unk292;
-    viewer.unk26C = viewer.unk278.vz + viewer.unk284 + viewer.unk28C + viewer.unk294;
-    viewer.unk270.vx = 4096 - viewer.unk268;
-    viewer.unk270.vy = 4096 - viewer.unk26A;
-    viewer.unk270.vz = 4096 - viewer.unk26C;
-    RotMatrixZYX(&viewer.unk270, &viewer.unk298);
+    viewer.pitch = viewer.view_rot.vx + viewer.rot_offset.halves[0] + viewer.shake_pitch + viewer.fall_pitch;
+    viewer.yaw = viewer.view_rot.vy + viewer.rot_offset.halves[1] + viewer.shake_yaw + viewer.unk292;
+    viewer.roll = viewer.view_rot.vz + viewer.roll_offset + viewer.shake_roll + viewer.unk294;
+    viewer.camera_rot.vx = 4096 - viewer.pitch;
+    viewer.camera_rot.vy = 4096 - viewer.yaw;
+    viewer.camera_rot.vz = 4096 - viewer.roll;
+    RotMatrixZYX(&viewer.camera_rot, &viewer.camera_matrix);
     ground_item_pick_up(c, 1);
 }
 

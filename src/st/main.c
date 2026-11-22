@@ -104,7 +104,7 @@ int text_read_number(u8 **cursor, int digits)
 /*
  * Loads the start-up table file FN.: six bytes of area_state, three
  * viewer positions and two optional values, then id/value rows until
- * 999. Rows 970..990 fill viewer.unk38; other ids set an id's count.
+ * 999. Rows 970..990 fill viewer.equipment; other ids set an id's count.
  */
 ADDRESS(0x80014544, 0x4ec)
 void game_load_start_file(void)
@@ -124,7 +124,7 @@ void game_load_start_file(void)
     buf = mem_alloc(0x4000);
     load_st_file(buf, "FN.", 0x4000);
     cursor = buf;
-    area_state.unk4 = area_state.unk5 = area_state.unk6 = area_state.unk7 =
+    area_state.loaded_area = area_state.loaded_world = area_state.loaded_images = area_state.loaded_sound_bank =
         area_state.unk8 = area_state.area = text_read_number(&cursor, 3);
     viewer.position.vx = (text_read_number(&cursor, 7) + 64) << 12;
     viewer.position.vy = ((text_read_number(&cursor, 7) + 64) << 12) - 1600;
@@ -149,14 +149,14 @@ void game_load_start_file(void)
         }
         slot = id - FN_SLOT_FIRST;
         if (slot < FN_SLOTS) {
-            u16 *equipment = viewer.unk38;
+            u16 *equipment = viewer.equipment;
 
             if (value == FN_END)
                 continue;
             equipment[slot] = value;
             inventory.counts[value].count++;
             if (value < 266 && !(vis_table_c.collected_bits[value / 32] & (1 << (value % 32))))
-                viewer.unk28++;
+                viewer.items_found++;
             vis_table_c.collected_bits[value / 32] |= 1 << (value % 32);
         } else {
             if (value == FN_END)
@@ -165,22 +165,22 @@ void game_load_start_file(void)
                 continue;
             inventory.counts[id].count = value;
             if (id < 266 && !(vis_table_c.collected_bits[id / 32] & (1 << (id % 32))))
-                viewer.unk28++;
+                viewer.items_found++;
             vis_table_c.collected_bits[id / 32] |= 1 << (id % 32);
         }
     }
     player_recalc_stats();
     if (x != 0)
-        viewer.unk0 = viewer.unk2 = x;
+        viewer.max_hp = viewer.hp = x;
     if (y != 0)
-        viewer.unk4 = viewer.unk6 = y;
+        viewer.max_mp = viewer.mp = y;
     mem_free(buf);
     if (all_items) {
         for (i = 0; i < 314; i++) {
             if (vis_table_c.types[i].model != 0xff)
                 inventory.counts[i].count++;
             if (i < 266 && !(vis_table_c.collected_bits[i / 32] & (1 << (i % 32))))
-                viewer.unk28++;
+                viewer.items_found++;
             vis_table_c.collected_bits[i / 32] |= 1 << (i % 32);
         }
     }
@@ -192,12 +192,12 @@ void game_load_start_file(void)
         row[0][4] &= ~0x4000;
         row[-1][4] &= ~0x4000;
     }
-    player_load_equipment_model(viewer.unk38[3], 0, 0);
-    player_load_equipment_model(viewer.unk38[16], 1, 0);
-    player_load_equipment_model(viewer.unk38[4], 2, 0);
-    player_load_equipment_model(viewer.unk38[17], 3, 0);
-    player_load_magic(viewer.unk38[6], 0);
-    player_load_magic(viewer.unk38[12], 1);
+    player_load_equipment_model(viewer.equipment[3], 0, 0);
+    player_load_equipment_model(viewer.equipment[16], 1, 0);
+    player_load_equipment_model(viewer.equipment[4], 2, 0);
+    player_load_equipment_model(viewer.equipment[17], 3, 0);
+    player_load_magic(viewer.equipment[6], 0);
+    player_load_magic(viewer.equipment[12], 1);
 }
 
 /*

@@ -109,12 +109,12 @@ void map_update_events(void)
         e1->spawn_chance = 100;
         game_progress.unk1440.word |= 0x10;
     }
-    if (!game_progress.unk1440.bit.f5 && viewer.unk178 == 57 && e0->state == 0) {
+    if (!game_progress.unk1440.bit.f5 && viewer.block == 57 && e0->state == 0) {
         creature_spawn_now(e0);
         e0->spawn_chance = 100;
         game_progress.unk1440.word |= 0x20;
     }
-    if (viewer.unk218 != 4 && viewer.unk178 == 68)
+    if (viewer.state != 4 && viewer.block == 68)
         player_kill(0);
 }
 

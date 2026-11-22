@@ -99,7 +99,7 @@ void map_pick_shopkeeper_line(void)
                 none = 0;
         }
     }
-    if (least != 0xffff && least >= viewer.unk2) {
+    if (least != 0xffff && least >= viewer.hp) {
         fdat_801ed8cc = 1;
         creature_start_script(e, 1);
     } else if (none) {
@@ -174,7 +174,7 @@ void map_run_shop_visit(void)
         else
             fdat_801ed8c4 = 4;
     } else if (fdat_801ed8c4 == 4) {
-        pad_state.unk4 = 0;
+        pad_state.pressed = 0;
         menu->unk2DC = 8;
         menu->unk2E5 = 0;
         shop_run();

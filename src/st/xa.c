@@ -36,14 +36,14 @@ void xa_ready_callback(u8 intr, u8 *result)
 
     while (CdControl(CdlGetlocL, NULL, loc) == 0)
         ;
-    viewer.unk1DC.minute = loc[0];
-    viewer.unk1DC.second = loc[1];
-    viewer.unk1DC.sector = loc[2];
+    viewer.xa_pos.minute = loc[0];
+    viewer.xa_pos.second = loc[1];
+    viewer.xa_pos.sector = loc[2];
     switch (intr) {
     case CdlDataReady:
         break;
     case CdlDiskError:
-        while (CdControlB(CdlReadS, (u8 *)&viewer.unk1D8, NULL) == 0)
+        while (CdControlB(CdlReadS, (u8 *)&viewer.xa_start, NULL) == 0)
             ;
         break;
     }
@@ -63,18 +63,18 @@ void xa_start_stream(u8 file, int channel)
     param[0] = CdlModeSpeed | CdlModeRT | CdlModeSF | CdlModeRept;
     CdControlB(CdlSetmode, param, NULL);
     VSync(4);
-    viewer.unk1E0 = xa_stream_lengths[file][byte_channel];
+    viewer.xa_length = xa_stream_lengths[file][byte_channel];
     /* the file's position, by byte offset from the start of the save data */
     save = (u8 *)&game_progress;
-    memcpy((CdlLOC *)&viewer.unk1DC, save + file * 4 + offsetof(Data801cba08, unk1618), 4);
-    memcpy(&viewer.unk1D8, (CdlLOC *)&viewer.unk1DC, 4);
+    memcpy((CdlLOC *)&viewer.xa_pos, save + file * 4 + offsetof(Data801cba08, unk1618), 4);
+    memcpy(&viewer.xa_start, (CdlLOC *)&viewer.xa_pos, 4);
     while (CdControl(CdlSetloc, (u8 *)&game_progress.unk1618[file], NULL) == 0)
         ;
     filter.file = 1;
     filter.chan = byte_channel;
     while (CdControl(CdlSetfilter, (u8 *)&filter, NULL) == 0)
         ;
-    viewer.unk1E8 = cd_state.unk4;
+    viewer.xa_start_tick = cd_state.unk4;
     while (CdControlB(CdlReadS, (u8 *)&game_progress.unk1618[file], NULL) == 0)
         ;
 }

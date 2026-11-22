@@ -77,12 +77,12 @@ void map_update_events(void)
     CreatureType *r = &vis_table_a.types[8];
 
     if (fdat_801ed8cc == 0) {
-        if (viewer.unk178 == 0x33 || viewer.unk178 == 0x36) {
-            viewer.unk218 = 5;
+        if (viewer.block == 0x33 || viewer.block == 0x36) {
+            viewer.state = 5;
             creature_force_talk(e, 0, 0);
             e->hit = 1;
             fdat_801ed8cc = 1;
-            viewer.unk218 = 0;
+            viewer.state = 0;
             e->flags &= ~0x2000000;
             r->actions &= ~0x180;
         } else {

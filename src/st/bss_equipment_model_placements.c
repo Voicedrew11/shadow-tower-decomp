@@ -15,4 +15,4 @@
 #include <st/data.h>
 
 DATA(0x801b5220, 0x700, ".bss")
-ViewerModel equipment_model_placements[64];
+EquipmentModel equipment_model_placements[64];
