@@ -1384,7 +1384,7 @@ void effects_draw(void)
     int i;
 
     for (i = 127; i != -1; o++, i--) {
-        if (o->flags == 0xff)
+        if (o->flags == ST_EFFECT_FREE)
             continue;
         if ((o->draw_mode & 3) == 0)
             continue;

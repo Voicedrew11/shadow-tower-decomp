@@ -86,8 +86,8 @@ StEffect *effect_spawn(u8 type, u8 flags, u8 kind, VECTOR *pos, SVECTOR *dir, ..
         e->clut_base = 0;
         e->parent = NULL;
         switch (e->kind) {
-        case 0x00:
-        case 0x0a:
+        case EFFECT_KIND_EXPLOSIVE:
+        case EFFECT_KIND_CORROSIVE_ELEMENTS:
             EFFECT_SOUND(e);
             e->life = 50;
             e->state.ub[0] = 0;
@@ -118,7 +118,7 @@ StEffect *effect_spawn(u8 type, u8 flags, u8 kind, VECTOR *pos, SVECTOR *dir, ..
             e->state2.h = args[5];
             e->rotation = *(SVECTOR *)args[7];
             break;
-        case 0x07:
+        case EFFECT_KIND_DUAL_POISON:
             EFFECT_SOUND(e);
             e->rotation = *(SVECTOR *)args[2];
             e->life = 50;
@@ -160,37 +160,37 @@ StEffect *effect_spawn(u8 type, u8 flags, u8 kind, VECTOR *pos, SVECTOR *dir, ..
             e->state.h = args[2];
             e->life = args[3];
             break;
-        case 0x03:
+        case EFFECT_KIND_FROZEN_HORNET:
             e->state.ub[0] = 16;
             e->reach = e->scale.vx / 16;
             e->attack_height = (e->scale.vy / 16) | 0x80000000;
             goto bolt;
-        case 0x09:
+        case EFFECT_KIND_BUBBLE_SHOWER:
             e->state.ub[0] = 8;
             e->reach = e->scale.vx / 16;
             e->attack_height = (e->scale.vy / 16) | 0x80000000;
             e->state2.h = rand() / 128;
             goto bolt;
-        case 0x0c:
+        case EFFECT_KIND_JUDGEMENT:
             e->draw_flags = 15;
             e->state.ub[0] = 0;
             e->reach = e->scale.vx * 384 / 4096;
             e->attack_height = (e->scale.vy * 384 / 4096) | 0x80000000;
             goto bolt;
-        case 0x06:
+        case EFFECT_KIND_QUEEN_EYES:
             e->state.ub[0] = 0;
             e->reach = e->scale.vx / 16;
             e->attack_height = (e->scale.vy / 64) | 0x80000000;
             goto bolt;
-        case 0x0f:
+        case EFFECT_KIND_SLAYER:
             e->state.ub[0] = 0;
             e->reach = e->scale.vx / 16;
             e->attack_height = (e->scale.vy / 256) | 0x80000000;
             goto bolt;
-        case 0x01:
-        case 0x04:
-        case 0x0d:
-        case 0x10:
+        case EFFECT_KIND_BLAZE:
+        case EFFECT_KIND_ICE_SABRE:
+        case EFFECT_KIND_CLEANSING_RAY:
+        case EFFECT_KIND_UNHOLY_SPIRITS:
             e->state.ub[0] = 0;
             e->reach = e->scale.vx / 16;
             e->attack_height = (e->scale.vy / 16) | 0x80000000;
@@ -212,10 +212,10 @@ StEffect *effect_spawn(u8 type, u8 flags, u8 kind, VECTOR *pos, SVECTOR *dir, ..
             e->state.ub[0] = 0;
             e->parent = (StEffect *)args[2];
             break;
-        case 0x2c:
-        case 0x2d:
-        case 0x2e:
-        case 0x2f:
+        case EFFECT_KIND_BOW_SHOT_0:
+        case EFFECT_KIND_BOW_SHOT_1:
+        case EFFECT_KIND_BOW_SHOT_2:
+        case EFFECT_KIND_BOW_SHOT_3:
             e->rotation = *(SVECTOR *)args[1];
             e->life = 50;
             e->part = 128;
@@ -1013,8 +1013,8 @@ void effect_update(void)
     int n;
 
     switch (kind) {
-    case 0x00:
-    case 0x0a: {
+    case EFFECT_KIND_EXPLOSIVE:
+    case EFFECT_KIND_CORROSIVE_ELEMENTS: {
         VECTOR pos;
         SVECTOR rot;
         SVECTOR dir;
@@ -1125,7 +1125,7 @@ void effect_update(void)
         if (e->life < 8)
             e->light = e->life * 512;
         break;
-    case 0x07: {
+    case EFFECT_KIND_DUAL_POISON: {
         RECT strip = { 768, 352, 16, 64 };
         DVECTOR to;
 
@@ -1271,32 +1271,32 @@ void effect_update(void)
         if (e->life < 8)
             e->light = e->life * 512;
         break;
-    case 0x03:
+    case EFFECT_KIND_FROZEN_HORNET:
         if ((e->life >> 3) & 1)
             e->scale.vx -= 64;
         else
             e->scale.vx += 64;
-    case 0x06:
+    case EFFECT_KIND_QUEEN_EYES:
         r = 0;
         goto bolt;
-    case 0x09:
+    case EFFECT_KIND_BUBBLE_SHOWER:
         e->rotation.vy += e->state2.h;
         e->velocity.vx += 32 - rand() / 512;
         e->velocity.vy += 16 - rand() / 1024;
         e->velocity.vz += 32 - rand() / 512;
         goto bolt;
-    case 0x04:
+    case EFFECT_KIND_ICE_SABRE:
         r = 128;
         i = 1;
         goto bolt;
-    case 0x0c:
+    case EFFECT_KIND_JUDGEMENT:
         r = 384;
         goto bolt;
-    case 0x0d:
+    case EFFECT_KIND_CLEANSING_RAY:
         r = 384;
         i = 1;
         goto bolt;
-    case 0x0f:
+    case EFFECT_KIND_SLAYER:
         e->rotation.vx = 0;
         e->rotation.vy += 384;
     bolt:
@@ -1322,8 +1322,8 @@ void effect_update(void)
         }
         FADE_IN(e);
         break;
-    case 0x01:
-    case 0x10:
+    case EFFECT_KIND_BLAZE:
+    case EFFECT_KIND_UNHOLY_SPIRITS:
         e->rotation.vx = 0;
         e->rotation.vy += 128;
         if (e->step != 0) {
@@ -1385,10 +1385,10 @@ void effect_update(void)
         if (e->life < 16)
             e->light = e->life * 256;
         break;
-    case 0x2c:
-    case 0x2d:
-    case 0x2e:
-    case 0x2f:
+    case EFFECT_KIND_BOW_SHOT_0:
+    case EFFECT_KIND_BOW_SHOT_1:
+    case EFFECT_KIND_BOW_SHOT_2:
+    case EFFECT_KIND_BOW_SHOT_3:
         r = effect_attack_move(e->reach, e->attack_height, 0);
         if (r != 0) {
             EMIT_LIVE(r);

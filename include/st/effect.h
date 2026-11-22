@@ -11,6 +11,7 @@
 #include <kf/lib/types.h>
 #include <sys/types.h>
 #include <LIBGTE.H>
+#include <st/effect_kinds.h>
 
 /* One 24-byte effect definition. */
 typedef struct {

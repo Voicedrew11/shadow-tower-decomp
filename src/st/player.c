@@ -1434,18 +1434,18 @@ void player_load_magic(u16 id, u8 slot)
     }
     if (viewer.magic_ids[slot] != 255) {
         rec = effects.slots;
-        i = 128;
+        i = ST_EFFECT_SLOTS;
         while (i--) {
             int side = rec->flags;
 
-            if (side != 255) {
+            if (side != ST_EFFECT_FREE) {
                 side &= 0x20;
                 if ((side != 0) == slot) {
                     if (rec->kind < 44) {
-                        rec->flags = 255;
+                        rec->flags = ST_EFFECT_FREE;
                     }
                     if (rec->kind >= 170 && rec->kind < 180) {
-                        rec->flags = 255;
+                        rec->flags = ST_EFFECT_FREE;
                     }
                 }
             }
@@ -1687,10 +1687,10 @@ void player_fire_magic_shot(int kind, int slot, ...)
     sp = SCRATCHPAD;
     count = viewer.shots_left[slot] - 1;
     switch (kind) {
-    case 0:
+    case EFFECT_KIND_EXPLOSIVE:
         speed = 4096;
         goto shoot;
-    case 10:
+    case EFFECT_KIND_CORROSIVE_ELEMENTS:
         speed = 2048;
     shoot:
         rot.vx = viewer.camera_rot.vx;
@@ -1699,7 +1699,7 @@ void player_fire_magic_shot(int kind, int slot, ...)
         player_get_launch_vector(700, &pos, &dir, &rot, slot);
         effect_spawn(10, side | 0x42, kind, &pos, &dir, speed, &viewer.pitch);
         break;
-    case 7:
+    case EFFECT_KIND_DUAL_POISON:
         i = 2;
         while (i--) {
             length = i * 32 - 16;
@@ -1711,47 +1711,47 @@ void player_fire_magic_shot(int kind, int slot, ...)
             viewer.shot_offsets[slot].vx += 1024;
         }
         break;
-    case 1:
+    case EFFECT_KIND_BLAZE:
         length = 256;
         turn = 0;
         speed = 1024;
         goto spray;
-    case 3:
+    case EFFECT_KIND_FROZEN_HORNET:
         length = 384;
         turn = count * 32 - 80;
         speed = 512;
         goto spray;
-    case 9:
+    case EFFECT_KIND_BUBBLE_SHOWER:
         length = 256;
         turn = 128 - rand() / 128;
         speed = 768;
         goto spray;
-    case 6:
+    case EFFECT_KIND_QUEEN_EYES:
         length = 512;
         turn = 0;
         speed = 3072;
         goto spray;
-    case 4:
+    case EFFECT_KIND_ICE_SABRE:
         length = 384;
         turn = 0;
         speed = 8192;
         goto spray;
-    case 12:
+    case EFFECT_KIND_JUDGEMENT:
         length = 384;
         turn = 0;
         speed = 2048;
         goto spray;
-    case 13:
+    case EFFECT_KIND_CLEANSING_RAY:
         length = 320;
         turn = 0;
         speed = 8192;
         goto spray;
-    case 15:
+    case EFFECT_KIND_SLAYER:
         length = 768;
         turn = 0;
         speed = 1024;
         goto spray;
-    case 16:
+    case EFFECT_KIND_UNHOLY_SPIRITS:
         length = 320;
         turn = 0;
         speed = 1024;
@@ -1765,10 +1765,10 @@ void player_fire_magic_shot(int kind, int slot, ...)
         rot.vz = -viewer.camera_rot.vz;
         effect_spawn(10, side | 0x42, kind, &pos, &dir, speed, &rot, count);
         break;
-    case 44:
-    case 45:
-    case 46:
-    case 47:
+    case EFFECT_KIND_BOW_SHOT_0:
+    case EFFECT_KIND_BOW_SHOT_1:
+    case EFFECT_KIND_BOW_SHOT_2:
+    case EFFECT_KIND_BOW_SHOT_3:
         anim_get_vertex(32, viewer.slot_anim_ids[0], viewer.slot_model_info[0]->hit_time, viewer.slot_model_info[0]->shot_vertex, &dir);
         sp->model_t[0] = viewer.slot_model_info[slot]->pos_x;
         sp->model_t[1] = viewer.slot_model_info[slot]->pos_y;
@@ -1817,7 +1817,7 @@ void player_fire_magic_shot(int kind, int slot, ...)
         gte_stlvnl(&pos2);
         vector_to_angles_ratan2(pos.vx - pos2.vx, pos.vy - pos2.vy, pos.vz - pos2.vz, &rot);
         vector_from_angles_zyx(&rot, &dir);
-        if (kind == 44) {
+        if (kind == EFFECT_KIND_BOW_SHOT_0) {
             vector_scale(viewer.swing_gauge * 768 / 5120, &dir);
         } else {
             vector_scale(viewer.swing_gauge * 1024 / 5120, &dir);
@@ -2189,8 +2189,8 @@ void player_cast_magic(u8 magic, u8 hand)
     viewer.mp -= cost;
     viewer.shot_magic[hand] = magic;
     switch (magic) {
-    case 0:
-    case 10:
+    case EFFECT_KIND_EXPLOSIVE:
+    case EFFECT_KIND_CORROSIVE_ELEMENTS:
         viewer.shot_countdown[hand] = 1;
         viewer.shots_left[hand] = 1;
         viewer.shot_interval[hand] = 1;
@@ -2198,7 +2198,7 @@ void player_cast_magic(u8 magic, u8 hand)
         viewer.shot_offsets[hand].vy = 50;
         viewer.shot_offsets[hand].vz = 0;
         break;
-    case 7:
+    case EFFECT_KIND_DUAL_POISON:
         viewer.shot_countdown[hand] = 1;
         viewer.shots_left[hand] = 1;
         viewer.shot_interval[hand] = 1;
@@ -2206,33 +2206,33 @@ void player_cast_magic(u8 magic, u8 hand)
         viewer.shot_offsets[hand].vy = -1024;
         viewer.shot_offsets[hand].vz = 0;
         break;
-    case 3:
+    case EFFECT_KIND_FROZEN_HORNET:
         viewer.shots_left[hand] = 4;
         viewer.shot_interval[hand] = 8;
         viewer.shot_offsets[hand].vx = 0;
         viewer.shot_offsets[hand].vy = 200;
         viewer.shot_offsets[hand].vz = 0;
         goto fire;
-    case 9:
+    case EFFECT_KIND_BUBBLE_SHOWER:
         viewer.shots_left[hand] = 3;
         viewer.shot_interval[hand] = 4;
         viewer.shot_offsets[hand].vx = 0;
         viewer.shot_offsets[hand].vy = 200;
         viewer.shot_offsets[hand].vz = 0;
         goto fire;
-    case 12:
+    case EFFECT_KIND_JUDGEMENT:
         viewer.shots_left[hand] = 2;
         viewer.shot_interval[hand] = 4;
         viewer.shot_offsets[hand].vx = 0;
         viewer.shot_offsets[hand].vy = 200;
         viewer.shot_offsets[hand].vz = 0;
         goto fire;
-    case 1:
-    case 4:
-    case 6:
-    case 13:
-    case 15:
-    case 16:
+    case EFFECT_KIND_BLAZE:
+    case EFFECT_KIND_ICE_SABRE:
+    case EFFECT_KIND_QUEEN_EYES:
+    case EFFECT_KIND_CLEANSING_RAY:
+    case EFFECT_KIND_SLAYER:
+    case EFFECT_KIND_UNHOLY_SPIRITS:
         viewer.shots_left[hand] = 1;
         viewer.shot_interval[hand] = 1;
         viewer.shot_offsets[hand].vx = 0;
@@ -2241,10 +2241,10 @@ void player_cast_magic(u8 magic, u8 hand)
     fire:
         viewer.shot_countdown[hand] = 1;
         break;
-    case 44:
-    case 45:
-    case 46:
-    case 47:
+    case EFFECT_KIND_BOW_SHOT_0:
+    case EFFECT_KIND_BOW_SHOT_1:
+    case EFFECT_KIND_BOW_SHOT_2:
+    case EFFECT_KIND_BOW_SHOT_3:
         viewer.shot_countdown[hand] = 1;
         viewer.shots_left[hand] = 1;
         viewer.shot_interval[hand] = 1;
@@ -2252,10 +2252,10 @@ void player_cast_magic(u8 magic, u8 hand)
     }
     viewer.magic_defs[hand] = rec;
     switch (magic) {
-    case 44:
-    case 45:
-    case 46:
-    case 47:
+    case EFFECT_KIND_BOW_SHOT_0:
+    case EFFECT_KIND_BOW_SHOT_1:
+    case EFFECT_KIND_BOW_SHOT_2:
+    case EFFECT_KIND_BOW_SHOT_3:
         break;
     default:
         if (hand) {
@@ -3010,9 +3010,9 @@ void player_update(void)
                     vis_table_a.zone_history[3] = 255;
                 pad_vibrate(0);
                 fx = effects.slots;
-                k = 128;
+                k = ST_EFFECT_SLOTS;
                 while (k--) {
-                    fx->flags = 255;
+                    fx->flags = ST_EFFECT_FREE;
                     fx++;
                 }
                 area_load_set_blocking(area_state.loaded_area, area_state.loaded_area, area_state.loaded_area, area_state.loaded_sound_bank,
@@ -3227,9 +3227,9 @@ void player_update(void)
                     anim_slots_free_all();
                     anim_sets_free_all();
                     fx = effects.slots;
-                    k = 128;
+                    k = ST_EFFECT_SLOTS;
                     while (k--) {
-                        fx->flags = 255;
+                        fx->flags = ST_EFFECT_FREE;
                         fx++;
                     }
                     for (;;) {

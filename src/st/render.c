@@ -4912,7 +4912,7 @@ void world_draw_effects_placements(void)
     int i;
 
     for (o = effects.slots, i = 127; i != -1; o++, i--) {
-        if (o->flags == 0xff)
+        if (o->flags == ST_EFFECT_FREE)
             continue;
         mode = o->draw_mode & 3;
         if (mode == 0)
