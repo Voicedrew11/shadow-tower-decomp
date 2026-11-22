@@ -43,18 +43,18 @@ int cd_checksum_mismatch(u32 *data, int sectors)
 ADDRESS(0x80015bcc, 0x104)
 StCdRequest *cd_request_queue(int kind, CdlLOC *loc, u32 size, u8 *dest, void (*done)())
 {
-    StCdRequest *req = cd_state.unk9D4;
+    StCdRequest *req = cd_state.next_free;
 
     cd_request_wait_free(req);
-    req->unk0 = kind;
-    req->unk1 = 0;
-    req->unk18 = *loc;
-    req->unk20 = dest;
-    req->unk28 = (size + 2047) >> 11;
+    req->kind = kind;
+    req->step = 0;
+    req->loc = *loc;
+    req->dest = dest;
+    req->sectors = (size + 2047) >> 11;
     req->done = done;
-    if (++cd_state.unk9D4 == &cd_state.unk14[ST_CD_REQUESTS])
-        cd_state.unk9D4 = cd_state.unk14;
-    if (cd_state.unk9D8 == req) {
+    if (++cd_state.next_free == &cd_state.requests[ST_CD_REQUESTS])
+        cd_state.next_free = cd_state.requests;
+    if (cd_state.current == req) {
         CdReadyCallback(0);
         CdSyncCallback(cd_request_sync_callback);
         while (!CdControl(CdlSeekL, (u_char *)loc, 0))
@@ -97,20 +97,20 @@ void cd_queue_read_member_unchecked(int archive, int member, u8 *dest, void (*do
 ADDRESS(0x80015dfc, 0xcc)
 void cd_queue_stream_member(int archive, int member, u8 *dest, void (*done)())
 {
-    StCdRequest *req = cd_state.unk9D4;
+    StCdRequest *req = cd_state.next_free;
     CdlLOC loc;
     u32 size;
 
     cd_request_wait_free(req);
-    req->unk4.image.h = 0;
-    req->unk10 = 0;
+    req->payload.image.h = 0;
+    req->status = 0;
     size = cd_archive_member_locate(archive, member, &loc);
-    req->unkC = req->unkE = size >> 11;
-    if (req->unkE > 16) {
-        req->unkE -= 16;
+    req->stream_sectors = req->stream_left = size >> 11;
+    if (req->stream_left > 16) {
+        req->stream_left -= 16;
         cd_request_queue(CD_REQUEST_STREAM, &loc, 0x8000, dest, done);
     } else {
-        req->unkE = 0;
+        req->stream_left = 0;
         cd_request_queue(CD_REQUEST_STREAM, &loc, size, dest, done);
     }
 }
@@ -257,20 +257,20 @@ void cd_init(void)
     StCdRequest *req;
 
     EnterCriticalSection();
-    cd_state.unk0 = OpenEvent(RCntCNT3, EvSpINT, EvMdINTR, vsync_handler);
-    EnableEvent(cd_state.unk0);
+    cd_state.vsync_event = OpenEvent(RCntCNT3, EvSpINT, EvMdINTR, vsync_handler);
+    EnableEvent(cd_state.vsync_event);
     SetRCnt(RCntCNT3, TICK_TARGET, RCntMdINTR);
     StartRCnt(RCntCNT3);
-    cd_state.unk10 = 0;
-    cd_state.unkC = 0;
-    cd_state.unk8 = 0;
-    cd_state.unk4 = 0;
-    req = cd_state.unk14;
+    cd_state.seconds = 0;
+    cd_state.pending_ticks = 0;
+    cd_state.rate_vsync = 0;
+    cd_state.vsync_count = 0;
+    req = cd_state.requests;
     for (i = 0; i < ST_CD_REQUESTS; i++, req++) {
-        req->unk0 = 0;
-        req->unk1 = 0;
+        req->kind = 0;
+        req->step = 0;
     }
-    cd_state.unk9D8 = cd_state.unk9D4 = cd_state.unk14;
+    cd_state.current = cd_state.next_free = cd_state.requests;
     CdSyncCallback(0);
     CdReadyCallback(0);
     CdReadCallback(0);
@@ -282,7 +282,7 @@ ADDRESS(0x80016454, 0x60)
 void cd_shutdown(void)
 {
     EnterCriticalSection();
-    CloseEvent(cd_state.unk0);
+    CloseEvent(cd_state.vsync_event);
     ExitCriticalSection();
     mem_free(cd_state.archives[2].sectors);
     mem_free(cd_state.archives[1].sectors);
@@ -292,13 +292,13 @@ void cd_shutdown(void)
 ADDRESS(0x800164b4, 0x54)
 void frame_rate_update(void)
 {
-    if (cd_state.unk8 + 59 < cd_state.unk4) {
-        u8 value = world_state.unk1ECC0;
+    if (cd_state.rate_vsync + 59 < cd_state.vsync_count) {
+        u8 value = world_state.drawn_frames;
 
-        world_state.unk1ECC0 = 0;
-        cd_state.unk8 = cd_state.unk4;
-        world_state.unk1ECC1 = value;
-        cd_state.unk10++;
+        world_state.drawn_frames = 0;
+        cd_state.rate_vsync = cd_state.vsync_count;
+        world_state.frame_rate = value;
+        cd_state.seconds++;
     }
 }
 

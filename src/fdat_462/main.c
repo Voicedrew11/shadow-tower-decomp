@@ -145,15 +145,15 @@ void map_run_shop_visit(void)
     if (e->anim_slot == 0)
         return;
     if (fdat_801ed8c4 == 2 && xa_stream_finished()) {
-        if (world_state.unk1EE16 == 3) {
+        if (world_state.talk_overlay_state == 3) {
             xa_stop_stream();
-            world_state.unk1EE19 = 0;
-            world_state.unk1EE16 = 4;
+            world_state.talk_frame = 0;
+            world_state.talk_overlay_state = 4;
         }
     }
-    if (world_state.unk1EE16 == 5) {
+    if (world_state.talk_overlay_state == 5) {
         fdat_801ed8c4 = 3;
-        world_state.unk1EE16 = 0;
+        world_state.talk_overlay_state = 0;
     }
     e->anim_frame += e->anim_step;
     if ((short)e->anim_frame >= 0x1000) {
@@ -167,9 +167,9 @@ void map_run_shop_visit(void)
             viewer.unk1E4 = 0;
             xa_start_stream(r->talk_id, ending);
             SsSetSerialVol(0, 0x40, 0x40);
-            world_state.unk1EE16 = 2;
-            world_state.unk1EE17 = 1;
-            world_state.unk1EE19 = 0;
+            world_state.talk_overlay_state = 2;
+            world_state.talk_overlay_mode = 1;
+            world_state.talk_frame = 0;
             fdat_801ed8c4 = 2;
             player_enter_frozen_state();
         }

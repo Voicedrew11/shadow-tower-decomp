@@ -65,8 +65,8 @@ void heap_compact(StBlock *heap)
     if (dst->state != ST_BLOCK_END) {
         dst->state = ST_BLOCK_FREE;
         dst->size = (u8 *)p - (u8 *)dst - sizeof(StBlock);
-        dst->unk1 = 0;
-        dst->unk2 = 0;
+        dst->tag = 0;
+        dst->slot = 0;
         dst->owner = NULL;
     }
 }
@@ -105,16 +105,16 @@ void *heap_alloc(StBlock *heap, int size, void **owner)
         rest = (StBlock *)((u8 *)block + size + sizeof(StBlock));
         rest->state = ST_BLOCK_FREE;
         rest->size = left;
-        rest->unk1 = 0;
-        rest->unk2 = 0;
+        rest->tag = 0;
+        rest->slot = 0;
         rest->owner = NULL;
     } else {
         size = block->size;
     }
     block->state = ST_BLOCK_USED;
     block->size = size;
-    block->unk1 = 0;
-    block->unk2 = 0;
+    block->tag = 0;
+    block->slot = 0;
     block->owner = owner;
     data = block + 1;
     if (owner != NULL)
@@ -143,25 +143,25 @@ u8 heap_get_state(void *data)
 ADDRESS(0x80015264, 0x8)
 void heap_set_tag(void *data, u8 value)
 {
-    DATA_BLOCK(data)->unk1 = value;
+    DATA_BLOCK(data)->tag = value;
 }
 
 ADDRESS(0x8001526c, 0xc)
 u8 heap_get_tag(void *data)
 {
-    return DATA_BLOCK(data)->unk1;
+    return DATA_BLOCK(data)->tag;
 }
 
 ADDRESS(0x80015278, 0x8)
 void heap_set_slot(void *data, u16 value)
 {
-    DATA_BLOCK(data)->unk2 = value;
+    DATA_BLOCK(data)->slot = value;
 }
 
 ADDRESS(0x80015280, 0xc)
 u16 heap_get_slot(void *data)
 {
-    return DATA_BLOCK(data)->unk2;
+    return DATA_BLOCK(data)->slot;
 }
 
 /* malloc3, or NULL when the result is not in main RAM. */

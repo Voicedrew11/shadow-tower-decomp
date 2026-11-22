@@ -639,7 +639,7 @@ void fighters_load_round(void)
         else
             FIGHTER.unk4B000[0] = 0;
         cd_read_member(0, member, (u_long *)&FIGHTER);
-        if (((StAnimFile *)FIGHTER.file)->unk6) {
+        if (((StAnimFile *)FIGHTER.file)->node_count) {
             FIGHTER.unk4DF10 = 1;
             anim_set_register(i, (StAnimFile *)FIGHTER.file);
         } else {

@@ -42,7 +42,7 @@ int anim_get_vertex(int id, int part, int frame, int index, SVECTOR *out)
     part_vertex:
         verts = PART_VERTICES(model, part & 0x7f);
         *out = verts[index];
-    } else if (file->unk4 == 0) {
+    } else if (file->animated == 0) {
         part = 0;
         goto part_vertex;
     } else {

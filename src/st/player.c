@@ -47,7 +47,7 @@ void player_kill(int unused)
         viewer.state = 4;
         viewer.hp = 0;
         play_death_sound();
-        world_state.unk1EE15 = 1;
+        world_state.no_plane_test = 1;
         viewer.death_timer = 0;
         viewer.unk17C = 170;
         viewer.death_pitch_step = (-1024 - (viewer.pitch & 0x7ff)) / 24;
@@ -94,17 +94,17 @@ int player_distance_in_reach(void *request)
     int dz;
     int dist;
 
-    dx = viewer.position.vx - t->pos.vx;
+    dx = viewer.position.vx - t->position.vx;
     if (dx >= -10240 && dx <= 10240) {
-        dz = viewer.position.vz - t->pos.vz;
+        dz = viewer.position.vz - t->position.vz;
         if (dz >= -10240 && dz <= 10240) {
             dist = SquareRoot0(dx * dx + dz * dz);
-            if (dist - t->unk22 * rcos(t->unk20 - (short)ratan2(dz, dx)) / 4096 < t->unk1C + 256) {
-                if (viewer.position.vy + 1600 < t->pos.vy) {
-                    if (viewer.position.vy + 1600 < t->pos.vy - t->unk1E) {
+            if (dist - t->speed * rcos(t->heading - (short)ratan2(dz, dx)) / 4096 < t->radius + 256) {
+                if (viewer.position.vy + 1600 < t->position.vy) {
+                    if (viewer.position.vy + 1600 < t->position.vy - t->height) {
                         return -1;
                     }
-                } else if (t->pos.vy < viewer.position.vy) {
+                } else if (t->position.vy < viewer.position.vy) {
                     return -1;
                 }
                 return dist;
@@ -158,7 +158,7 @@ void player_reload_equipment(void)
     player_load_magic(viewer.equipment[12], 1);
     player_reset_state();
     player_recalc_stats();
-    lighting.unk7 = 255;
+    lighting.last_area = 255;
 }
 
 /*
@@ -262,7 +262,7 @@ void player_update_status(int apply)
         fade_add_color(20, 20, 20, level, 2);
         if (viewer.timers.words[2] == 0) {
             viewer.status_flags &= ~0x60;
-            lighting.unk4 |= 4;
+            lighting.row_request |= 4;
         }
     }
     level = player_step_status_timer(&viewer.unk190[3][0], &viewer.unk190[3][1], 20, 4096, apply);
@@ -290,8 +290,8 @@ void player_update_status(int apply)
     }
     level = player_step_status_timer(&viewer.unk190[5][0], &viewer.unk190[5][1], 0, 4096, apply);
     if (level != -1) {
-        lighting.unk4 |= 0x10;
-        lighting.unk3 |= 2;
+        lighting.row_request |= 0x10;
+        lighting.column_request |= 2;
         if (viewer.timers.words[5] == 0) {
             viewer.status_flags &= ~0x20000;
             viewer.status_flags &= ~0x10000;
@@ -323,9 +323,9 @@ void player_update_status(int apply)
     }
     level = player_step_status_timer(&viewer.unk190[10][0], &viewer.unk190[10][1], 0, 4096, apply);
     if (level != -1) {
-        lighting.unk9 = 1;
-        lighting.unk4 |= 0x20;
-        lighting.unk3 |= 1;
+        lighting.force_first_column = 1;
+        lighting.row_request |= 0x20;
+        lighting.column_request |= 1;
         if (viewer.timers.words[10] == 0) {
             viewer.status_flags &= ~0x400000;
         }
@@ -370,7 +370,7 @@ void area_load_set_blocking(int r, int g, int b, int arg3, int arg4, int arg5)
     lighting_build_matrices();
     fade_run_frames(130, 4096, 4096, 0);
     cd_wait_idle();
-    area_state.entry_fade_start = cd_state.unk4;
+    area_state.entry_fade_start = cd_state.vsync_count;
     area_request_load(255, 255, 255, arg3, arg4, 127, 127, 127, 0, 0, 0);
     lighting_clear_requests();
 }
@@ -1432,16 +1432,16 @@ void player_load_magic(u16 id, u8 slot)
         rec = effects.slots;
         i = 128;
         while (i--) {
-            int side = rec->unk0;
+            int side = rec->flags;
 
             if (side != 255) {
                 side &= 0x20;
                 if ((side != 0) == slot) {
-                    if (rec->unk1 < 44) {
-                        rec->unk0 = 255;
+                    if (rec->kind < 44) {
+                        rec->flags = 255;
                     }
-                    if (rec->unk1 >= 170 && rec->unk1 < 180) {
-                        rec->unk0 = 255;
+                    if (rec->kind >= 170 && rec->kind < 180) {
+                        rec->flags = 255;
                     }
                 }
             }
@@ -1459,7 +1459,7 @@ void player_load_magic(u16 id, u8 slot)
         while (n--) {
             size = *(u_long *)p;
             if (size >= 5) {
-                world_state.unk834C[part] = p;
+                world_state.model_files[part] = p;
                 model_offset_textures((Model *)(p + ((u_long *)p)[2]), &pix[slot], &clut[slot], 0);
             }
             p += size;
@@ -2177,7 +2177,7 @@ void player_cast_magic(u8 magic, u8 hand)
         return;
     }
     rec = (StMagic *)&effects.defs[magic];
-    cost = rec->unk2;
+    cost = rec->mp_cost;
     if (viewer.mp < cost) {
         return;
     }
@@ -2793,9 +2793,9 @@ void player_swap_hand_items(u8 a, u8 b)
         if (viewer.slot_model_ids[b] != 0xff)
             anim_register(b + 32, viewer.slot_model_files[b]);
         if (viewer.slot_anims[a])
-            ((StAnimSlot *)viewer.slot_anims[a])->unk2 = 0xffff;
+            ((StAnimSlot *)viewer.slot_anims[a])->model_id = 0xffff;
         if (viewer.slot_anims[b])
-            ((StAnimSlot *)viewer.slot_anims[b])->unk2 = 0xffff;
+            ((StAnimSlot *)viewer.slot_anims[b])->model_id = 0xffff;
         sound_a = viewer.slot_sounds[a];
         viewer.slot_sounds[a] = viewer.slot_sounds[b];
         viewer.slot_sounds[b] = sound_a;
@@ -2960,7 +2960,7 @@ void player_update(void)
             int left;
 
             i = 16;
-            lighting.unkA = 1;
+            lighting.paused = 1;
             play_confirm_sound();
             anim_free_all_for_menu();
             pad_clear_input();
@@ -2998,7 +2998,7 @@ void player_update(void)
                 fx = effects.slots;
                 k = 128;
                 while (k--) {
-                    fx->unk0 = 255;
+                    fx->flags = 255;
                     fx++;
                 }
                 area_load_set_blocking(area_state.loaded_area, area_state.loaded_area, area_state.loaded_area, area_state.loaded_sound_bank,
@@ -3045,21 +3045,21 @@ void player_update(void)
                 }
             }
             pad_clear_input();
-            lighting.unkA = 2;
+            lighting.paused = 2;
         }
         if (viewer.save_warp_request) {
             player_warp_to_save_point();
         }
         if ((pad_state.pressed & 8) && viewer.state != 4 && area_state.loading == 0 &&
             vis_table_a.object_sequence_state == 0 && area_state.entry_fade_start == -1) {
-            lighting.unkA = 1;
+            lighting.paused = 1;
             play_confirm_sound();
             pad_state.pressed &= ~8;
             pad_clear_input();
             pad_vibrate(0);
             pause_screen_run();
             pad_clear_input();
-            lighting.unkA = 2;
+            lighting.paused = 2;
         }
         viewer.walk_speed_max = 192;
         viewer.yaw_speed_max = 32;
@@ -3208,7 +3208,7 @@ void player_update(void)
                     fx = effects.slots;
                     k = 128;
                     while (k--) {
-                        fx->unk0 = 255;
+                        fx->flags = 255;
                         fx++;
                     }
                     for (;;) {
@@ -3228,7 +3228,7 @@ void player_update(void)
                                 b++;
                             }
                             game_exit_request = 2;
-                            world_state.unk1EE15 = 0;
+                            world_state.no_plane_test = 0;
                             break;
                         }
                         hud_clear_damage_numbers();

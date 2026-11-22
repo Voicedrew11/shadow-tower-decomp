@@ -46,7 +46,7 @@ RODATA(0x800128d0, 0xfb0)
 SDATA(0x800880a4, 0x3f)
 
 /* The CD file buffer (cd_file_buffer) follows cd_state; these screens spell
- * it from cd_state's base, which GCC then shares with cd_state.unkA84. */
+ * it from cd_state's base, which GCC then shares with cd_state.load_cursor. */
 #define CD_BUFFER ((u_long *)(&cd_state + 1))
 
 ADDRESS(0x80058c04, 0x20)
@@ -127,7 +127,7 @@ void card_screen_open(int arg0, int arg1)
     tim_load_images_at(image + 1, &sp->image_vram[0], &sp->image_vram[1], 1);
     menu_store_screen();
     sp->font_mode = 0;
-    SCRATCHPAD->unk208 = 0;
+    SCRATCHPAD->pitch_sin = 0;
     if (arg0)
         sp->mode = 256;
     else
@@ -263,7 +263,7 @@ void equip_load_slot_picture(int slot)
     u_long *image;
     u_long *data;
 
-    cd_state.unkA84 = (u_long *)(&cd_state + 1);
+    cd_state.load_cursor = (u_long *)(&cd_state + 1);
     switch (slot) {
     case 0:
     case 13:
@@ -338,8 +338,8 @@ void equip_load_slot_picture(int slot)
         file = *id != 0xffff ? *id + first : none;
     else
         file = (*id != 0xffff ? *id + first : none) * 3 + 2;
-    cd_read_member(7, file, cd_state.unkA84);
-    image = cd_state.unkA84;
+    cd_read_member(7, file, cd_state.load_cursor);
+    image = cd_state.load_cursor;
     if (part != -1) {
         if (part == 1)
             image = (u_long *)((u8 *)image + (image[0] + 4));
@@ -387,19 +387,19 @@ void equip_load_item_slot_pictures(void)
     ids[2] = viewer.equipment[11];
     ids[3] = viewer.equipment[20];
     ids[4] = viewer.equipment[18];
-    cd_state.unkA84 = (u_long *)(&cd_state + 1);
+    cd_state.load_cursor = (u_long *)(&cd_state + 1);
     for (i = 0; i < 5; i++) {
         if (used + 2048 > 0x12000) {
             DrawSync(0);
-            cd_state.unkA84 = (u_long *)(&cd_state + 1);
+            cd_state.load_cursor = (u_long *)(&cd_state + 1);
             used = 0;
         }
         if (ids[i] != 0xffff) {
-            size = cd_read_member(6, vis_table_c.types[ids[i]].unk5[0] + 400, cd_state.unkA84)
+            size = cd_read_member(6, vis_table_c.types[ids[i]].unk5[0] + 400, cd_state.load_cursor)
                    << 11;
-            tim_load_images_at(cd_state.unkA84, &pos, NULL, 1);
+            tim_load_images_at(cd_state.load_cursor, &pos, NULL, 1);
             used += size;
-            cd_state.unkA84 = (u_long *)((u8 *)cd_state.unkA84 + size);
+            cd_state.load_cursor = (u_long *)((u8 *)cd_state.load_cursor + size);
         } else {
             rect.x = pos.vx;
             rect.y = pos.vy;
@@ -601,14 +601,14 @@ void player_total_attributes(void)
     }
     if (viewer.equipment[6] != 0xffff) {
         at->right_magic_attr = viewer.equipment[6] / 3;
-        at->right_magic_bonus = *(at->right_magic_attr + effects.defs[viewer.equipment[6]].unkA);
+        at->right_magic_bonus = *(at->right_magic_attr + effects.defs[viewer.equipment[6]].element_damage);
     } else {
         at->right_magic_attr = 0xffff;
         at->right_magic_bonus = 0;
     }
     if (viewer.equipment[12] != 0xffff) {
         at->left_magic_attr = viewer.equipment[12] / 3;
-        at->left_magic_bonus = *(at->left_magic_attr + effects.defs[viewer.equipment[12]].unkA);
+        at->left_magic_bonus = *(at->left_magic_attr + effects.defs[viewer.equipment[12]].element_damage);
     } else {
         at->left_magic_attr = 0xffff;
         at->left_magic_bonus = 0;
@@ -853,7 +853,7 @@ void menu_equip_info_run(void)
 
     base = 0;
     offset = 0;
-    arc = &cd_state.unkA00;
+    arc = &cd_state.stat_archive;
     cd_loc_add_sectors(&arc->file.pos, arc->sectors[1], &loc);
     CdControl(CdlSetloc, (u_char *)&loc, NULL);
     ResetGraph(1);
@@ -1547,7 +1547,7 @@ void menu_creature_book_run(void)
     DrawSync(0);
     cd_read_member(4, 400, CD_BUFFER);
     copy_words((u32 *)sp->state.book.entries, (u32 *)CD_BUFFER, 1661);
-    cd_state.unkA84 = CD_BUFFER;
+    cd_state.load_cursor = CD_BUFFER;
     n = 15;
     if (sp->state.book.count < 16)
         n = sp->state.book.count;
@@ -1558,15 +1558,15 @@ void menu_creature_book_run(void)
         if (k < sp->state.book.count) {
             if (used + 0x2800 > 0x12000) {
                 DrawSync(0);
-                cd_state.unkA84 = CD_BUFFER;
+                cd_state.load_cursor = CD_BUFFER;
                 used = 0;
             }
             {
-                int size = cd_read_member(4, sp->state.book.kinds[k], cd_state.unkA84) << 11;
+                int size = cd_read_member(4, sp->state.book.kinds[k], cd_state.load_cursor) << 11;
 
-                tim_load_images_at(cd_state.unkA84, &sp->state.book.cell_tex[k % 15], NULL, 1);
+                tim_load_images_at(cd_state.load_cursor, &sp->state.book.cell_tex[k % 15], NULL, 1);
                 used += size;
-                cd_state.unkA84 = (u_long *)((u8 *)cd_state.unkA84 + size);
+                cd_state.load_cursor = (u_long *)((u8 *)cd_state.load_cursor + size);
             }
         }
     }
@@ -1673,22 +1673,22 @@ void menu_creature_book_run(void)
                     count = (first - sp->scroll) * 5;
                     k = sp->scroll * 5;
                 }
-                cd_state.unkA84 = CD_BUFFER;
+                cd_state.load_cursor = CD_BUFFER;
                 used = 0;
                 for (i = 0; i < count; i++, k++) {
                     if (k < sp->state.book.count) {
                         if (used + 0x2800 > 0x12000) {
                             DrawSync(0);
-                            cd_state.unkA84 = CD_BUFFER;
+                            cd_state.load_cursor = CD_BUFFER;
                             used = 0;
                         }
                         {
                             int size =
-                                cd_read_member(4, sp->state.book.kinds[k], cd_state.unkA84) << 11;
+                                cd_read_member(4, sp->state.book.kinds[k], cd_state.load_cursor) << 11;
 
-                            tim_load_images_at(cd_state.unkA84, &sp->state.book.cell_tex[k % 15], NULL, 1);
+                            tim_load_images_at(cd_state.load_cursor, &sp->state.book.cell_tex[k % 15], NULL, 1);
                             used += size;
-                            cd_state.unkA84 = (u_long *)((u8 *)cd_state.unkA84 + size);
+                            cd_state.load_cursor = (u_long *)((u8 *)cd_state.load_cursor + size);
                         }
                     }
                 }
@@ -1807,29 +1807,29 @@ void menu_arrange_icons_run(void)
     total = 0;
     clear.w = 56;
     clear.h = 28;
-    cd_state.unkA84 = CD_BUFFER;
+    cd_state.load_cursor = CD_BUFFER;
     for (n = 40; n--; i++) {
         int size;
 
         if (total + 0x1000 > 0x12000) {
             DrawSync(0);
-            cd_state.unkA84 = CD_BUFFER;
+            cd_state.load_cursor = CD_BUFFER;
             total = 0;
         }
         if (i < 20 && i < sp->state.grid.hand_count) {
             size = cd_read_member(6, vis_table_c.types[sp->state.grid.hand_ids[i]].unk5[0],
-                                 cd_state.unkA84) << 11;
+                                 cd_state.load_cursor) << 11;
 
-            tim_load_images_at(cd_state.unkA84, &sp->state.grid.cell_tex[i], NULL, 1);
+            tim_load_images_at(cd_state.load_cursor, &sp->state.grid.cell_tex[i], NULL, 1);
             total += size;
-            cd_state.unkA84 = (u_long *)((u8 *)cd_state.unkA84 + size);
+            cd_state.load_cursor = (u_long *)((u8 *)cd_state.load_cursor + size);
         } else if (i >= 20 && i - 20 < sp->state.grid.bag_count) {
             size = cd_read_member(6, vis_table_c.types[sp->state.grid.bag_ids[i - 20]].unk5[0],
-                                 cd_state.unkA84) << 11;
+                                 cd_state.load_cursor) << 11;
 
-            tim_load_images_at(cd_state.unkA84, &sp->state.grid.cell_tex[i], NULL, 1);
+            tim_load_images_at(cd_state.load_cursor, &sp->state.grid.cell_tex[i], NULL, 1);
             total += size;
-            cd_state.unkA84 = (u_long *)((u8 *)cd_state.unkA84 + size);
+            cd_state.load_cursor = (u_long *)((u8 *)cd_state.load_cursor + size);
         } else {
             clear.x = sp->state.grid.cell_tex[i].vx;
             clear.y = sp->state.grid.cell_tex[i].vy;
@@ -2044,20 +2044,20 @@ void menu_arrange_icons_run(void)
                 used = 0;
                 clear.w = 56;
                 clear.h = 28;
-                cd_state.unkA84 = CD_BUFFER;
+                cd_state.load_cursor = CD_BUFFER;
                 while (n--) {
                     if (used + 0x1000 > 0x12000) {
                         DrawSync(0);
-                        cd_state.unkA84 = CD_BUFFER;
+                        cd_state.load_cursor = CD_BUFFER;
                         used = 0;
                     }
                     if (sp->state.grid.hand_ids[i] != -1) {
                         int size = cd_read_member(
-                            6, vis_table_c.types[sp->state.grid.hand_ids[i]].unk5[0], cd_state.unkA84) << 11;
+                            6, vis_table_c.types[sp->state.grid.hand_ids[i]].unk5[0], cd_state.load_cursor) << 11;
 
-                        tim_load_images_at(cd_state.unkA84, &sp->state.grid.cell_tex[i % 20], NULL, 1);
+                        tim_load_images_at(cd_state.load_cursor, &sp->state.grid.cell_tex[i % 20], NULL, 1);
                         used += size;
-                        cd_state.unkA84 = (u_long *)((u8 *)cd_state.unkA84 + size);
+                        cd_state.load_cursor = (u_long *)((u8 *)cd_state.load_cursor + size);
                     } else {
                         clear.x = sp->state.grid.cell_tex[i % 20].vx;
                         clear.y = sp->state.grid.cell_tex[i % 20].vy;
@@ -2077,20 +2077,20 @@ void menu_arrange_icons_run(void)
                 used = 0;
                 clear.w = 56;
                 clear.h = 28;
-                cd_state.unkA84 = CD_BUFFER;
+                cd_state.load_cursor = CD_BUFFER;
                 while (n--) {
                     if (used + 0x1000 > 0x12000) {
                         DrawSync(0);
-                        cd_state.unkA84 = CD_BUFFER;
+                        cd_state.load_cursor = CD_BUFFER;
                         used = 0;
                     }
                     if (sp->state.grid.bag_ids[i] != -1) {
                         int size = cd_read_member(
-                            6, vis_table_c.types[sp->state.grid.bag_ids[i]].unk5[0], cd_state.unkA84) << 11;
+                            6, vis_table_c.types[sp->state.grid.bag_ids[i]].unk5[0], cd_state.load_cursor) << 11;
 
-                        tim_load_images_at(cd_state.unkA84, &sp->state.grid.cell_tex[i % 20 + 20], NULL, 1);
+                        tim_load_images_at(cd_state.load_cursor, &sp->state.grid.cell_tex[i % 20 + 20], NULL, 1);
                         used += size;
-                        cd_state.unkA84 = (u_long *)((u8 *)cd_state.unkA84 + size);
+                        cd_state.load_cursor = (u_long *)((u8 *)cd_state.load_cursor + size);
                     } else {
                         clear.x = sp->state.grid.cell_tex[i % 20 + 20].vx;
                         clear.y = sp->state.grid.cell_tex[i % 20 + 20].vy;
@@ -2255,8 +2255,8 @@ int menu_use_item_run(void)
     copy_words(sp->state.block, (u32 *)(image + 4), 5376);
     image += *(u32 *)image + 4;
     tim_load_images_at(image + 4, &sp->image_vram[2], &sp->image_vram[3], 1);
-    cd_state.unkA84 = CD_BUFFER;
-    cd_read_member(6, 800, cd_state.unkA84);
+    cd_state.load_cursor = CD_BUFFER;
+    cd_read_member(6, 800, cd_state.load_cursor);
     sp->state.page_list.entries = mem_alloc(92);
     sp->state.page_list.count = 0;
     for (i = 268; i < 314; i++) {

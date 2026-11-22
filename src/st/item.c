@@ -188,7 +188,7 @@ void player_examine(long *pos, SVECTOR *rot)
             break;
         case 14:
             if (area_state.loading != 1 && area_state.entry_fade_start == -1) {
-                lighting.unkA = 1;
+                lighting.paused = 1;
                 cd_wait_idle();
                 area_save_snapshot(area_state.loaded_area);
                 play_confirm_sound();
@@ -206,7 +206,7 @@ void player_examine(long *pos, SVECTOR *rot)
                 }
                 card_screen_open(1, 1);
                 card_screen_run(1);
-                lighting.unkA = 2;
+                lighting.paused = 2;
                 pad_clear_input();
                 card_screen_close();
             }

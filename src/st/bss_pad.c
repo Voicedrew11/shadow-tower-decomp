@@ -17,7 +17,7 @@
 #include <st/pad.h>
 
 DATA(0x801cd130, 0x4c, ".bss")
-volatile StPadData pad_buffers;
+volatile PadBuffers pad_buffers;
 DATA(0x801cd180, 0x3c, ".bss")
 PadState pad_state;
 DATA(0x801cd1c0, 0x2000, ".bss")

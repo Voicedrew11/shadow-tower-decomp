@@ -124,7 +124,7 @@ void creature_update_script_sound(Creature *e)
             creature_emit_script_sound(e);
         break;
     case 0x4000:
-        if (cd_state.unk8 / 20 % at == 0)
+        if (cd_state.rate_vsync / 20 % at == 0)
             creature_emit_script_sound(e);
         break;
     }
@@ -170,10 +170,10 @@ void creature_spawn_attack_hits(Creature *e, CreatureScript *s)
     int i;
     int plain;
 
-    file = world_state.unk834C[id];
+    file = world_state.model_files[id];
     if (file == NULL)
         return;
-    plain = file->unk6 == 0;
+    plain = file->node_count == 0;
     for (i = 2; i != -1; i--) {
         if (s->arg.hit.frame[i] == 0xffff)
             continue;

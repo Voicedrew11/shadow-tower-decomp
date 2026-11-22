@@ -208,7 +208,7 @@ typedef struct {
     s32 xa_length;       /* 0x1e0: its length in sectors */
     u8 unk1E4;
     u8 unk1E5[3];
-    u32 xa_start_tick;   /* 0x1e8: cd_state.unk4 when the stream started */
+    u32 xa_start_tick;   /* 0x1e8: cd_state.vsync_count when the stream started */
     s32 damage_number_timers[5]; /* 0x1ec: frames left to show damage_numbers[i] */
     u8 unk200[0x20c - 0x200];
     s16 damage_numbers[5]; /* 0x20c: numbers hud_queue_damage_number queues */

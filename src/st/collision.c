@@ -538,7 +538,7 @@ int collision_test_map(CollisionState *req)
     int t;
     int floor_motion;
 
-    sp->base = (u8 *)world_state.unk8308[1];
+    sp->base = (u8 *)world_state.area_geometry[1];
     sp->pos[0].vx = req->position.vx;
     sp->pos[0].vy = req->position.vy;
     sp->pos[0].vz = req->position.vz;

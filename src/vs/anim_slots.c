@@ -38,11 +38,11 @@ void anim_register(u16 id, StAnimFile *file)
 ADDRESS(0x80028028, 0x4c)
 void anim_slot_free(StAnimSlot *slot)
 {
-    slot->unk0 = 0;
-    *slot->unk14 = NULL;
-    if (slot->unk10 != NULL) {
-        free(slot->unk10);
-        slot->unk10 = NULL;
+    slot->state = 0;
+    *slot->owner = NULL;
+    if (slot->deltas != NULL) {
+        free(slot->deltas);
+        slot->deltas = NULL;
     }
 }
 
@@ -55,7 +55,7 @@ void anim_slots_free_idle(void)
 
     i = 12;
     do {
-        if (slot->unk0 == 1)
+        if (slot->state == 1)
             anim_slot_free(slot);
         slot++;
     } while (--i);
@@ -70,8 +70,8 @@ void anim_slots_retire(void)
 
     i = 12;
     do {
-        if (slot->unk0)
-            slot->unk0 = 1;
+        if (slot->state)
+            slot->state = 1;
         slot++;
     } while (--i);
 }
@@ -85,7 +85,7 @@ void anim_slots_free_all(void)
 
     i = 12;
     do {
-        if (slot->unk0)
+        if (slot->state)
             anim_slot_free(slot);
         slot++;
     } while (--i);
@@ -101,8 +101,8 @@ void anim_slot_alloc(StAnimSlot **out)
     *out = vs_gfx_state.anim_slots;
     i = 12;
     do {
-        if (!(*out)->unk0) {
-            (*out)->unk4 = 255;
+        if (!(*out)->state) {
+            (*out)->clip = 255;
             return;
         }
         (*out)++;
@@ -131,7 +131,7 @@ int anim_pose(StAnimSlot **slotp, int id, int clip, int frame)
     int frac;
     u_long *frames;
 
-    if (file->unk4 == 0) {
+    if (file->animated == 0) {
         u8 *model;
 
         if (slot != NULL)
@@ -148,37 +148,37 @@ int anim_pose(StAnimSlot **slotp, int id, int clip, int frame)
         if (slot == NULL)
             return 0;
     claim:
-        slot->unk2 = id;
-        slot->unk14 = slotp;
+        slot->model_id = id;
+        slot->owner = slotp;
     retry:
-        slot->unk10 = mem_alloc_checked(sp->header->n_vertices * sizeof(SVECTOR));
-        if (slot->unk10 == NULL) {
+        slot->deltas = mem_alloc_checked(sp->header->n_vertices * sizeof(SVECTOR));
+        if (slot->deltas == NULL) {
             anim_slots_free_all();
             goto retry;
         }
         *slotp = slot;
-    } else if (slot->unk2 != id) {
+    } else if (slot->model_id != id) {
         anim_slot_free(slot);
-        slot->unk4 = 255;
+        slot->clip = 255;
         goto claim;
     }
     k = anim_find_key(file, clip, frame, &key, &frac);
-    if (slot->unk4 != clip || slot->unk6 != key) {
+    if (slot->clip != clip || slot->key != key) {
         u8 *model = sp->model;
 
         sp->header = MODEL_PARTS(model);
         sp->local_vertices = model + (MODEL_PARTS(model)->vertices + 12);
         frames = (u_long *)((u8 *)file + file->frames);
-        slot->unk8 = (SVECTOR *)((u8 *)file + frames[k->from]);
-        slot->unkC = (SVECTOR *)((u8 *)file + frames[k->to]);
-        vertices_sub(slot->unk10, slot->unk8, slot->unkC, sp->header->n_vertices);
-        slot->unk4 = clip;
-        slot->unk6 = key;
+        slot->from_keyframe = (SVECTOR *)((u8 *)file + frames[k->from]);
+        slot->to_keyframe = (SVECTOR *)((u8 *)file + frames[k->to]);
+        vertices_sub(slot->deltas, slot->from_keyframe, slot->to_keyframe, sp->header->n_vertices);
+        slot->clip = clip;
+        slot->key = key;
     }
     vertices_add(vs_gfx_state.unkC7F0, (SVECTOR *)(sp->model + (sp->header->vertices + 12)),
-                 slot->unk8, sp->header->n_vertices);
-    gteMIMefunc(vs_gfx_state.unkC7F0, slot->unk10, sp->header->n_vertices, frac);
+                 slot->from_keyframe, sp->header->n_vertices);
+    gteMIMefunc(vs_gfx_state.unkC7F0, slot->deltas, sp->header->n_vertices, frac);
     sp->local_vertices = (u8 *)vs_gfx_state.unkC7F0;
-    slot->unk0 = 2;
+    slot->state = 2;
     return (int)slot;
 }

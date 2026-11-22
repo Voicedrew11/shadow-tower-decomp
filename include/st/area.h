@@ -28,7 +28,7 @@ void player_init(void);
 void item_model_slots_clear(void);
 
 /* 0x800f2c88 (after the block heap) and 0x800fc488: the buffers
- * area_load_current_blocking puts in world_state.unk8308[1] and [0]; WIP extents. */
+ * area_load_current_blocking puts in world_state.area_geometry[1] and [0]; WIP extents. */
 extern u_long area_collision_buffer[];
 extern u_long area_world_buffer[];
 

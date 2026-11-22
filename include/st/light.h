@@ -15,11 +15,11 @@
 /* One 0x30-byte default environment (lighting_load_defaults expands it to an
  * StLight); lighting_blend blends the parts its flags select. */
 typedef struct {
-    StLightMatrix unk0;
+    StLightMatrix light;
     StLightMatrix color;
     CVECTOR back;
-    s16 unk2C;
-    s16 unk2E;
+    s16 depth_cue_near;
+    s16 depth_cue_far;
 } StLightInit;
 
 /*
@@ -32,15 +32,15 @@ typedef struct {
 typedef struct {
     u8 unk0;
     u8 unk1;
-    u8 unk2;             /* 0x02: set when the light matrices need rebuilding */
-    u8 unk3;
-    u8 unk4;
-    u8 unk5;             /* 0x05: column flags last applied */
-    u8 unk6;             /* 0x06: row flags last applied */
-    u8 unk7;             /* 0x07: area last seen */
-    u8 unk8;
-    u8 unk9;
-    u8 unkA;
+    u8 rebuild_matrices; /* 0x02: set when the light matrices need rebuilding */
+    u8 column_request;
+    u8 row_request;
+    u8 columns;          /* 0x05: column flags last applied */
+    u8 rows;             /* 0x06: row flags last applied */
+    u8 last_area;        /* 0x07: area last seen */
+    u8 entry_step;
+    u8 force_first_column;
+    u8 paused;
     u8 unkB;
     s16 area_mode[48];   /* 0x0c */
     StLight light[64];   /* 0x6c */

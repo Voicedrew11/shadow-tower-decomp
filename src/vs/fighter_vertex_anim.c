@@ -58,7 +58,7 @@ void fighter_draw_vertex_anim(void)
     gte_SetRotMatrix(&sp->matrix);
     gte_SetTransMatrix(&sp->matrix);
     n = current_fighter - shared_buffer.fighter;
-    sp->model = (u8 *)vs_gfx_state.unk834C[n] + ((ModelFile *)vs_gfx_state.unk834C[n])->unk8;
+    sp->model = (u8 *)vs_gfx_state.unk834C[n] + ((ModelFile *)vs_gfx_state.unk834C[n])->model;
     sp->header = (MeshHeader *)(sp->model + 12);
     if (anim_pose(&current_fighter->unk4DEE4, n, current_fighter->unk4DEE8,
                       current_fighter->unk4DEEA) == 0)

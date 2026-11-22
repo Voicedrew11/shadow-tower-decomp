@@ -29,7 +29,7 @@ void objects_load(u8 *src)
     {
         AreaObjectTable *table = &vis_table_b;
 
-        now = cd_state.unk4;
+        now = cd_state.vsync_count;
         e = table->entries;
         table->push_z = 0;
         table->push_y = 0;

@@ -117,7 +117,7 @@ typedef struct {
 } MapBlockMask;
 
 /* One 40-byte collision part header in the area's collision file
- * (world_state.unk8308[1]); offsets are from the file start + 12. */
+ * (world_state.area_geometry[1]); offsets are from the file start + 12. */
 typedef struct {
     s32 vertices;        /* 0x00: SVECTOR vertices */
     s32 n_vertices;      /* 0x04 */

@@ -809,7 +809,7 @@ void menu_equip_draw_magic_list(void)
                 (u16 *)(offsets[916 + names[*(list->entries + (sp->scroll + i))]] + text), 28, y,
                 label);
             ui_draw_text((u16 *)(offsets[936] + text), 140, y2, label);
-            ui_draw_number(effects.defs[*(list->entries + (sp->scroll + i))].unk2 | 0x3000000,
+            ui_draw_number(effects.defs[*(list->entries + (sp->scroll + i))].mp_cost | 0x3000000,
                           204, y2, &sp->style[4]);
             y2 += 36;
             y += 36;
@@ -877,8 +877,8 @@ s16 cd_queue_busy(void)
 
     EnterCriticalSection();
     busy = 1;
-    if (cd_state.unk9D8 == cd_state.unk9D4)
-        busy = cd_state.unk9D8->unk0 != 0;
+    if (cd_state.current == cd_state.next_free)
+        busy = cd_state.current->kind != 0;
     ExitCriticalSection();
     return busy;
 }
@@ -1628,7 +1628,7 @@ void menu_arrange_list_draw(void)
 
 /* The pad's button word (active low) read as one volatile halfword at its
  * own address; retail forms that address directly in each load. */
-#define RAW_BUTTONS (*(volatile s16 *)&pad_buffers.unk2)
+#define RAW_BUTTONS (*(volatile s16 *)&pad_buffers.buttons)
 
 /*
  * Unreferenced debug tool: shows the other frame buffer and moves the

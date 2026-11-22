@@ -16,16 +16,16 @@
  * is volatile.
  */
 typedef struct {
-    u8 unk0;             /* 0x00: receive status, 0 when the data is valid */
+    u8 status;           /* 0x00: receive status, 0 when the data is valid */
     u8 unk1;
-    u16 unk2;            /* 0x02: button bits, active low */
+    u16 buttons;         /* 0x02: button bits, active low */
     u8 unk4[0x22 - 0x4];
-    u8 unk22[0x22];      /* 0x22: port 2 receive buffer */
-    u8 unk44[4];         /* 0x44: actuator data PadSetAct reads (+1 small motor, +3 large) */
+    u8 port2[0x22];      /* 0x22: port 2 receive buffer */
+    u8 actuators[4];     /* 0x44: actuator data PadSetAct reads (+1 small motor, +3 large) */
     u8 unk48[4];
-} StPadData;
+} PadBuffers;
 
-extern volatile StPadData pad_buffers;
+extern volatile PadBuffers pad_buffers;
 
 void pad_update_action_mask(void);
 void pad_set_default_buttons(void);

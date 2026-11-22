@@ -51,7 +51,7 @@ ADDRESS(0x8002345c, 0x308)
 void model_fixup_face_indices(ModelFile *file)
 {
     VsModelPart *part = (VsModelPart *)((u8 *)file + 12);
-    int n = file->unk8;
+    int n = file->model;
     int count;
     u32 *p;
     VsFaceTag tag;
@@ -185,11 +185,11 @@ void anim_sets_init(void)
 
     i = 12;
     do {
-        set->unk0 = 0;
-        set->unk28 = NULL;
-        set->unk2C = NULL;
-        set->unk30 = NULL;
-        set->unk34 = NULL;
+        set->state = 0;
+        set->nodes = NULL;
+        set->records = NULL;
+        set->sub_records = NULL;
+        set->list = NULL;
         set++;
     } while (--i);
 }
@@ -203,8 +203,8 @@ void anim_sets_retire(void)
 
     i = 12;
     do {
-        if (set->unk0)
-            set->unk0 = 1;
+        if (set->state)
+            set->state = 1;
         set++;
     } while (--i);
 }
@@ -214,23 +214,23 @@ void anim_sets_retire(void)
 ADDRESS(0x80023820, 0xa0)
 void anim_set_free(StAnimSet *set)
 {
-    set->unk0 = 0;
-    *set->unk38 = NULL;
-    if (set->unk28 != NULL) {
-        free(set->unk28);
-        set->unk28 = NULL;
+    set->state = 0;
+    *set->owner = NULL;
+    if (set->nodes != NULL) {
+        free(set->nodes);
+        set->nodes = NULL;
     }
-    if (set->unk2C != NULL) {
-        free(set->unk2C);
-        set->unk2C = NULL;
+    if (set->records != NULL) {
+        free(set->records);
+        set->records = NULL;
     }
-    if (set->unk30 != NULL) {
-        free(set->unk30);
-        set->unk30 = NULL;
+    if (set->sub_records != NULL) {
+        free(set->sub_records);
+        set->sub_records = NULL;
     }
-    if (set->unk34 != NULL) {
-        free(set->unk34);
-        set->unk34 = NULL;
+    if (set->list != NULL) {
+        free(set->list);
+        set->list = NULL;
     }
 }
 
@@ -243,7 +243,7 @@ void anim_sets_free_idle(void)
 
     i = 12;
     do {
-        if (set->unk0 == 1)
+        if (set->state == 1)
             anim_set_free(set);
         set++;
     } while (--i);
@@ -258,7 +258,7 @@ void anim_sets_free_all(void)
 
     i = 12;
     do {
-        if (set->unk0)
+        if (set->state)
             anim_set_free(set);
         set++;
     } while (--i);
@@ -290,8 +290,8 @@ void anim_set_alloc(StAnimSet **out)
     *out = vs_gfx_state.anim_sets;
     i = 12;
     do {
-        if (!(*out)->unk0) {
-            (*out)->unk4 = 255;
+        if (!(*out)->state) {
+            (*out)->clip = 255;
             return;
         }
         (*out)++;
@@ -336,7 +336,7 @@ int anim_set_pose(StAnimSet **setp, int id, int clip, u_long frame)
     u_long *data;
     u8 *model;
 
-    if (file->unk4 == 0) {
+    if (file->animated == 0) {
         if (set != NULL)
             anim_set_free(set);
         still = vs_gfx_state.unk834C[id];
@@ -351,62 +351,62 @@ int anim_set_pose(StAnimSet **setp, int id, int clip, u_long frame)
         if (set == NULL)
             return 0;
     claim:
-        set->unk2 = id;
-        set->unk38 = setp;
+        set->model_id = id;
+        set->owner = setp;
     retry:
-        set->unk28 = mem_alloc_main_ram(file->unk6 * sizeof(StAnimNode));
-        set->unk2C = mem_alloc_main_ram(file->unk6 * sizeof(StAnimRecord));
-        set->unk30 = mem_alloc_main_ram(file->unk6 * sizeof(StAnimSubRecord));
-        set->unk34 = mem_alloc_main_ram(file->unk6 * sizeof(StAnimList));
-        if (set->unk28 == NULL || set->unk2C == NULL || set->unk30 == NULL ||
-            set->unk34 == NULL) {
+        set->nodes = mem_alloc_main_ram(file->node_count * sizeof(StAnimNode));
+        set->records = mem_alloc_main_ram(file->node_count * sizeof(StAnimRecord));
+        set->sub_records = mem_alloc_main_ram(file->node_count * sizeof(StAnimSubRecord));
+        set->list = mem_alloc_main_ram(file->node_count * sizeof(StAnimList));
+        if (set->nodes == NULL || set->records == NULL || set->sub_records == NULL ||
+            set->list == NULL) {
             anim_sets_free_all();
             goto retry;
         }
         *setp = set;
-        anim_list_init(set, file->unk6);
-        set->unk8 = (u_long *)((u8 *)file + file->frames);
-        set->unkC = (u8 *)file + file->clips;
-    } else if (set->unk2 != id) {
+        anim_list_init(set, file->node_count);
+        set->node_ids = (u_long *)((u8 *)file + file->frames);
+        set->node_table = (u8 *)file + file->clips;
+    } else if (set->model_id != id) {
         anim_set_free(set);
-        set->unk4 = 255;
+        set->clip = 255;
         goto claim;
     }
-    if (set->unk4 != clip) {
-        data = (u_long *)((u8 *)file + ((u_long *)((u8 *)file + file->unk14))[clip]);
-        set->unk10 = (StAnimBlock *)(data + 1);
-        set->unk18 = *(u_long *)set->unk10;
-        set->unk10 = (StAnimBlock *)(data + 2);
-        set->unk24 = set->unk10;
-        set->unk14 = set->unk18 - 1;
-        while (set->unk14--)
-            set->unk24 = (StAnimBlock *)((u_long *)set->unk24 + set->unk24->length);
-        set->unk1C = set->unk24->frame;
-        set->unk24 = set->unk10;
-        set->unk14 = 0;
-        set->unk20 = -1;
+    if (set->clip != clip) {
+        data = (u_long *)((u8 *)file + ((u_long *)((u8 *)file + file->skeletal_clips))[clip]);
+        set->first_block = (StAnimBlock *)(data + 1);
+        set->block_count = *(u_long *)set->first_block;
+        set->first_block = (StAnimBlock *)(data + 2);
+        set->next_block = set->first_block;
+        set->blocks_run = set->block_count - 1;
+        while (set->blocks_run--)
+            set->next_block = (StAnimBlock *)((u_long *)set->next_block + set->next_block->length);
+        set->length = set->next_block->frame;
+        set->next_block = set->first_block;
+        set->blocks_run = 0;
+        set->posed_frame = -1;
     }
-    t = (set->unk1C * frame) >> 12;
-    set->unk4 = clip;
-    if (t < set->unk20 && set->unk20 != -1) {
-        while (set->unk14++ < set->unk18) {
-            set->unk24 = anim_block_run(set->unk24->frame, set->unk24, set->unk34, set->unk8,
-                                        set->unkC, (u_long *)(ANIM_MODEL(file) + 4));
+    t = (set->length * frame) >> 12;
+    set->clip = clip;
+    if (t < set->posed_frame && set->posed_frame != -1) {
+        while (set->blocks_run++ < set->block_count) {
+            set->next_block = anim_block_run(set->next_block->frame, set->next_block, set->list, set->node_ids,
+                                        set->node_table, (u_long *)(ANIM_MODEL(file) + 4));
         }
-        set->unk14 = 0;
-        set->unk24 = set->unk10;
+        set->blocks_run = 0;
+        set->next_block = set->first_block;
     }
-    sp->anims = set->unk34;
-    if (set->unk20 != t) {
-        while (t >= set->unk24->frame) {
-            set->unk24 = anim_block_run(t, set->unk24, set->unk34, set->unk8, set->unkC,
+    sp->anims = set->list;
+    if (set->posed_frame != t) {
+        while (t >= set->next_block->frame) {
+            set->next_block = anim_block_run(t, set->next_block, set->list, set->node_ids, set->node_table,
                                         (u_long *)(ANIM_MODEL(file) + 4));
             anim_list_compose();
-            set->unk14++;
+            set->blocks_run++;
         }
     }
-    set->unk20 = t;
-    set->unk0 = 2;
+    set->posed_frame = t;
+    set->state = 2;
     return (int)set;
 }
 
@@ -475,14 +475,14 @@ void model_draw_list(void)
     int n;
 
     while (i--) {
-        e->obj->unk0 = 0;
+        e->obj->composed = 0;
         e++;
     }
     i = ((ModelList *)sp->anims)->count;
     e = ((ModelList *)sp->anims)->entries;
     while (i--) {
-        e->obj->unk0 = 0;
-        if (e->unk0C != -1 && e->part != 0xffff) {
+        e->obj->composed = 0;
+        if (e->key != -1 && e->part != 0xffff) {
             if (e->kind == 2) {
                 MATRIX face = {{{ONE, 0, 0}, {0, ONE, 0}, {0, 0, ONE}}, {0, 0, 0}};
                 SVECTOR angle;
@@ -493,17 +493,17 @@ void model_draw_list(void)
                 RotMatrixX(angle.vx, &face);
                 RotMatrixY(angle.vy, &face);
                 RotMatrixZ(angle.vz, &face);
-                if (e->obj->unk48->unk2 == 0) {
-                    RotMatrix(&e->obj->unk48->unk44->rot, &e->obj->unk48->unk4);
+                if (e->obj->parent->relative_set == 0) {
+                    RotMatrix(&e->obj->parent->transform->rot, &e->obj->parent->local_matrix);
                 }
-                gte_MulMatrix0(&e->obj->unk48->unk4, &face, &e->obj->unk48->unk4);
-                e->obj->unk48->unk2 = 0;
+                gte_MulMatrix0(&e->obj->parent->local_matrix, &face, &e->obj->parent->local_matrix);
+                e->obj->parent->relative_set = 0;
             }
             anim_record_compose(e->obj);
             if (e->kind == 1) {
                 if (model_list_slot >= 6)
                     model_list_slot = 0;
-                ScaleMatrix(&scale, &e->obj->unk44->scale);
+                ScaleMatrix(&scale, &e->obj->transform->scale);
                 gte_SetRotMatrix(&scale);
                 if (i % 6 != model_list_slot) {
                     e++;
@@ -513,7 +513,7 @@ void model_draw_list(void)
             } else if (e->kind == 3) {
                 if (model_list_slot >= 4)
                     model_list_slot = 0;
-                ScaleMatrix(&scale, &e->obj->unk44->scale);
+                ScaleMatrix(&scale, &e->obj->transform->scale);
                 gte_SetRotMatrix(&scale);
                 if (i % 4 != model_list_slot) {
                     e++;
@@ -523,7 +523,7 @@ void model_draw_list(void)
             } else if (e->kind == 4) {
                 if (model_list_slot >= 8)
                     model_list_slot = 0;
-                ScaleMatrix(&scale, &e->obj->unk44->scale);
+                ScaleMatrix(&scale, &e->obj->transform->scale);
                 gte_SetRotMatrix(&scale);
                 if (i % 8 != model_list_slot) {
                     e++;
@@ -580,7 +580,7 @@ void fighter_draw_skeletal(void)
     RotMatrix((SVECTOR *)&current_fighter->unk4DF00, &sp->matrix);
     CompMatrix(&vs_gfx_state.unk2C998, &sp->matrix, &sp->matrix);
     n = current_fighter - shared_buffer.fighter;
-    sp->model = (u8 *)vs_gfx_state.unk834C[n] + ((ModelFile *)vs_gfx_state.unk834C[n])->unk8;
+    sp->model = (u8 *)vs_gfx_state.unk834C[n] + ((ModelFile *)vs_gfx_state.unk834C[n])->model;
     if (anim_set_pose(&current_fighter->unk4DEE0, n, current_fighter->unk4DEE8,
                       current_fighter->unk4DEEA) == 0)
         return;
@@ -645,13 +645,13 @@ void anim_set_node_vertex(int id, int node, int index, VECTOR *out)
         return;
     }
     v = &PART_VERTICES(ANIM_MODEL(file), node)[index];
-    n = anim_list_find_id(set->unk34, node);
+    n = anim_list_find_id(set->list, node);
     if (n == NULL)
         return;
-    for (rec = n->unk4; rec != NULL; rec = rec->unk48)
-        rec->unk0 = 0;
+    for (rec = n->record; rec != NULL; rec = rec->parent)
+        rec->composed = 0;
     *SCRATCH_MATRIX(SCRATCHPAD) = identity;
-    anim_record_compose(n->unk4);
+    anim_record_compose(n->record);
     gte_ldv0(v);
     gte_rt();
     gte_stlvnl(out);

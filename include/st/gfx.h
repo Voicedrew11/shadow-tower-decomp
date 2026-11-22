@@ -43,8 +43,8 @@ typedef struct {
     StLightMatrix light[4]; /* 0x00: the world renderers pick one per part */
     StLightMatrix color;
     CVECTOR back;
-    s16 unk68;
-    s16 unk6A; /* also vis_cull_by_range's far range (/ 2048) */
+    s16 depth_cue_near;
+    s16 depth_cue_far; /* also vis_cull_by_range's far range (/ 2048) */
 } StLight;
 
 /* One packet buffer: its start, its end and the next free word (primitives
@@ -94,55 +94,55 @@ typedef struct {
 /* One vertex-animation slot (src/st/anim.c): the clip key it blends and
  * the per-vertex deltas it allocated. Tagged for its owner back-pointer. */
 typedef struct StAnimSlot {
-    s16 unk0;            /* 0x00: state; bit 2 is set on every slot */
-    u16 unk2;            /* 0x02: model file id, 0xffff when unset */
-    u16 unk4;            /* 0x04: clip, 255 when unset */
-    u16 unk6;            /* 0x06: key */
-    SVECTOR *unk8;       /* 0x08: the key's start keyframe */
-    SVECTOR *unkC;       /* 0x0c: its end keyframe */
-    SVECTOR *unk10;      /* 0x10: end minus start, from mem_alloc */
-    struct StAnimSlot **unk14; /* 0x14: the owner's slot pointer */
+    s16 state;           /* 0x00: state; bit 2 is set on every slot */
+    u16 model_id;        /* 0x02: model file id, 0xffff when unset */
+    u16 clip;            /* 0x04: clip, 255 when unset */
+    u16 key;             /* 0x06: key */
+    SVECTOR *from_keyframe; /* 0x08: the key's start keyframe */
+    SVECTOR *to_keyframe; /* 0x0c: its end keyframe */
+    SVECTOR *deltas;     /* 0x10: end minus start, from mem_alloc */
+    struct StAnimSlot **owner; /* 0x14: the owner's slot pointer */
 } StAnimSlot;
 
 /* One skeletal-animation slot (src/st/anim_set.c): its model file, the
  * clip block it has run up to and the node buffer it allocated (node,
  * record and sub-record arrays and the node list, types in st/anim.h). */
 typedef struct StAnimSet {
-    s16 unk0;            /* 0x00: state; bit 3 is set on every slot */
-    u16 unk2;            /* 0x02: model file id, 0xffff when unset */
-    u16 unk4;            /* 0x04: clip, 255 when unset */
+    s16 state;           /* 0x00: state; bit 3 is set on every slot */
+    u16 model_id;        /* 0x02: model file id, 0xffff when unset */
+    u16 clip;            /* 0x04: clip, 255 when unset */
     u16 unk6;
-    u_long *unk8;        /* 0x08: the file's id table */
-    u8 *unkC;            /* 0x0c: the file's 4-byte record table */
-    struct StAnimBlock *unk10; /* 0x10: the clip's first block */
-    u_long unk14;        /* 0x14: blocks run */
-    u_long unk18;        /* 0x18: the clip's block count */
-    u_long unk1C;        /* 0x1c: the clip's length in frames */
-    u_long unk20;        /* 0x20: the frame last posed, -1 when unset */
-    struct StAnimBlock *unk24; /* 0x24: the next block to run */
-    struct StAnimNode *unk28; /* 0x28: the node buffer, from mem_alloc */
-    struct StAnimRecord *unk2C;
-    struct StAnimSubRecord *unk30;
-    struct StAnimList *unk34;
-    struct StAnimSet **unk38; /* 0x38: the owner's slot pointer */
+    u_long *node_ids;    /* 0x08: the file's id table */
+    u8 *node_table;      /* 0x0c: the file's 4-byte record table */
+    struct StAnimBlock *first_block; /* 0x10: the clip's first block */
+    u_long blocks_run;   /* 0x14: blocks run */
+    u_long block_count;  /* 0x18: the clip's block count */
+    u_long length;       /* 0x1c: the clip's length in frames */
+    u_long posed_frame;  /* 0x20: the frame last posed, -1 when unset */
+    struct StAnimBlock *next_block; /* 0x24: the next block to run */
+    struct StAnimNode *nodes; /* 0x28: the node buffer, from mem_alloc */
+    struct StAnimRecord *records;
+    struct StAnimSubRecord *sub_records;
+    struct StAnimList *list;
+    struct StAnimSet **owner; /* 0x38: the owner's slot pointer */
 } StAnimSet;
 
 typedef struct {
     DRAWENV draw[2];
     DISPENV disp[2];
-    u_long *unkE0;       /* 0xe0: CD load buffer, also a primitive work area */
+    u_long *packet_base; /* 0xe0: CD load buffer, also a primitive work area */
     u_long ot[2][4096];
     u_long *ot_cur;      /* 0x80e4 */
     u_long ot2[2][64];
     u_long *ot2_cur;
     StPacketBuffer packets[2];
     StPacketBuffer *packet; /* 0x8304 */
-    void *unk8308[4];    /* 0x8308: primitive-pointer slots (func_80017c5c) */
+    void *area_geometry[4]; /* 0x8308: primitive-pointer slots (func_80017c5c) */
     void *unk8318;
-    s32 unk831C[2];
-    s32 unk8324;         /* 0x8324: primitives added by quad_add_at_depth */
-    s32 unk8328;         /* 0x8328: primitives allocated by quad_add_at_depth */
-    s32 unk832C;
+    s32 vertex_face_counts[2];
+    s32 prim_count;      /* 0x8324: primitives added by quad_add_at_depth */
+    s32 prim_alloc_count; /* 0x8328: primitives allocated by quad_add_at_depth */
+    s32 div_prim_count;
     s32 unk8330;
     s32 unk8334;
     s32 unk8338[5];
@@ -151,20 +151,20 @@ typedef struct {
      * viewer models at 32.. (player_draw_equipment_model), model_draw's model blocks, the
      * animation model files (src/st/anim.c); area_load_update frees 128..143,
      * the highest index evidenced (WIP extent). */
-    void *unk834C[144];
+    void *model_files[144];
     u8 unk858C[0x8c7c - 0x858c];
-    void *unk8C7C[128];  /* 0x8c7c: heap blocks area_load_update frees on an area change */
+    void *item_model_files[128]; /* 0x8c7c: heap blocks area_load_update frees on an area change */
     u8 unk8E7C[0xa5fc - 0x8e7c];
     StAnimSlot anim_slots[16]; /* 0xa5fc */
     StAnimSet anim_sets[16]; /* 0xa77c */
     u8 world_vertices[0xeb40 - 0xab3c]; /* 0xab3c: the world parts' transformed vertices (MeshVertex); WIP extent */
-    SVECTOR unkEB40[0x2000]; /* 0xeb40: the vertices anim_pose interpolates */
+    SVECTOR posed_vertices[0x2000]; /* 0xeb40: the vertices anim_pose interpolates */
     StTexAnim texanim[ST_TEXANIM_SLOTS];
-    u8 unk1ECC0;
-    u8 unk1ECC1;
+    u8 drawn_frames;
+    u8 frame_rate;
     u8 frame;            /* 0x1ecc2: index of the current DRAWENV and buffers */
     u8 unk1ECC3;
-    u8 unk1ECC4;         /* 0x1ecc4: set while the loading display runs */
+    u8 loading_screen_active; /* 0x1ecc4: set while the loading display runs */
     u8 unk1ECC5[8];
     u8 unk1ECCD;
     u8 unk1ECCE;
@@ -174,32 +174,32 @@ typedef struct {
     u8 unk1ECD3[3];
     StFade fade;         /* 0x1ecd6 */
     u8 unk1ECE6[2];
-    MATRIX unk1ECE8;
+    MATRIX view_matrix;
     u8 unk1ED08[0x20];
-    MATRIX unk1ED28[4];  /* 0x1ed28: the view matrix turned 0..3 quarter turns (ScratchPad.light_index) */
-    MATRIX unk1EDA8;
-    VECTOR unk1EDC8;
-    SVECTOR unk1EDD8;
+    MATRIX view_quarter_turns[4]; /* 0x1ed28: the view matrix turned 0..3 quarter turns (ScratchPad.turn) */
+    MATRIX pitch_matrix;
+    VECTOR camera_pos;
+    SVECTOR camera_rot;
     u8 unk1EDE0[0x10];
     s32 unk1EDF0;
-    s32 unk1EDF4;
+    s32 draw_collision;
     int tint_level;      /* 0x1edf8: the mesh renderers' tint strength */
     u8 render_mode;      /* 0x1edfc: MESH_* bits (st/mesh.h) */
-    u8 unk1EDFD;
-    u8 unk1EDFE;
+    u8 selected_light;
+    u8 light_blend;
     u8 unk1EDFF;
-    u_long unk1EE00;     /* 0x1ee00: vis_cull_by_range's near range (<< 11) */
-    u_long unk1EE04;     /* 0x1ee04: its middle range (<< 11) */
+    u_long range_near;   /* 0x1ee00: vis_cull_by_range's near range (<< 11) */
+    u_long range_mid;    /* 0x1ee04: its middle range (<< 11) */
     StLight *light;      /* 0x1ee08: the current lighting environment */
-    StLight *unk1EE0C;   /* 0x1ee0c: the environment a blend starts from */
-    StLight *unk1EE10;   /* 0x1ee10: the environment a blend ends at */
-    u8 unk1EE14;         /* 0x1ee14: the light-select flags last requested */
-    u8 unk1EE15;
-    u8 unk1EE16;
+    StLight *light_from; /* 0x1ee0c: the environment a blend starts from */
+    StLight *light_to;   /* 0x1ee10: the environment a blend ends at */
+    u8 next_render_mode; /* 0x1ee14: the light-select flags last requested */
+    u8 no_plane_test;
+    u8 talk_overlay_state;
     /* 0x1ee16..0x1ee19 (src/st/render.c): talk picture overlay state, mode, fade length, frame counter */
-    u8 unk1EE17;
-    u8 unk1EE18;
-    u8 unk1EE19;
+    u8 talk_overlay_mode;
+    u8 talk_fade_length;
+    u8 talk_frame;
 } WorldState;
 
 extern WorldState world_state;
@@ -208,14 +208,14 @@ extern WorldState world_state;
 extern u_long packet_buffers[];
 /* 128 animated objects of 24 bytes; id 0xffff marks a free one. */
 typedef struct {
-    u16 unk0;            /* 0x00: model id - 40; bit 15 hides it */
-    u8 unk2;             /* 0x02: bits 0-5 kind, bits 6-7 a rotation */
-    u8 unk3;             /* 0x03: frame count */
-    u8 unk4;             /* 0x04: frame period, 0 still */
-    u8 unk5;             /* 0x05: frame (placements_expand starts it at random below unk3) */
+    u16 model;           /* 0x00: model id - 40; bit 15 hides it */
+    u8 kind;             /* 0x02: bits 0-5 kind, bits 6-7 a rotation */
+    u8 frame_count;      /* 0x03: frame count */
+    u8 frame_period;     /* 0x04: frame period, 0 still */
+    u8 frame;            /* 0x05: frame (placements_expand starts it at random below frame_count) */
     u8 unk6[2];
-    VECTOR unk8;         /* 0x08: position */
-} StObject24;
+    VECTOR position;     /* 0x08: position */
+} PlacedObject;
 
 /*
  * The frame counter gfx_init clears and world_draw_effects_placements advances, then
@@ -224,9 +224,9 @@ typedef struct {
  */
 typedef struct {
     s32 frame;
-    StObject24 objects[128];
-} StAnimObjects;
-extern StAnimObjects placement_objects;
+    PlacedObject objects[128];
+} PlacementObjects;
+extern PlacementObjects placement_objects;
 /* The CLUT a type-49 texture slot cycles (entries 1-14 rotate). */
 extern u16 texanim_clut_buffer[16];
 

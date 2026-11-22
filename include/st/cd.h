@@ -45,24 +45,24 @@ typedef char StCdBankBufferWidth[(sizeof(((StCdBankPayload *)0)->buffer) == 4) ?
 
 /* One 0x34-byte entry of the CD read-request ring. */
 typedef struct {
-    volatile u8 unk0; /* request kind, 0 when free; switch reads keep a separate zero-extension */
-    volatile u8 unk1;
+    volatile u8 kind; /* request kind, 0 when free; switch reads keep a separate zero-extension */
+    volatile u8 step;
     u8 unk2[2];
-    StCdPayload unk4; /* 0x04..0x0b: image rectangle or bank arguments */
-    s16 unkC;
-    s16 unkE;
-    volatile u8 unk10; /* completion state the callbacks set; stores keep their own slot */
-    volatile u8 unk11; /* bank requests (src/st/sound.c): load step; stores keep their own slot */
+    StCdPayload payload; /* 0x04..0x0b: image rectangle or bank arguments */
+    s16 stream_sectors;
+    s16 stream_left;
+    volatile u8 status; /* completion state the callbacks set; stores keep their own slot */
+    volatile u8 bank_step; /* bank requests (src/st/sound.c): load step; stores keep their own slot */
     u8 unk12[2];
-    CdlLOC unk14; /* copied from unk18 as a read starts */
-    CdlLOC unk18;
-    u8 *unk1C; /* CdGetSector destination, advanced 2048 per sector */
-    u8 *unk20; /* destination queued by cd_request_queue; copied to unk1C as a read starts */
-    s32 unk24;
-    s32 unk28; /* sector count */
+    CdlLOC read_loc; /* copied from loc as a read starts */
+    CdlLOC loc;
+    u8 *read_cursor; /* CdGetSector destination, advanced 2048 per sector */
+    u8 *dest; /* destination queued by cd_request_queue; copied to read_cursor as a read starts */
+    s32 sectors_left;
+    s32 sectors; /* sector count */
     /* 0x2c: completion callback, set only by the request builder (ST
      * cd_request_queue, VS cd_request_queue) from its argument; called with the
-     * destination (unk20) when a checked read (kind 2) completes, else
+     * destination (dest) when a checked read (kind 2) completes, else
      * with the request. Its value sources: config/retail/indirect_pointers.tsv
      * (StCdRequest.done). */
     void (*done)();
@@ -70,21 +70,21 @@ typedef struct {
 } StCdRequest;
 
 typedef char StCdRequestSize[(sizeof(StCdRequest) == 0x34) ? 1 : -1];
-typedef char StCdRequestunk0Offset[(offsetof(StCdRequest, unk0) == 0x0) ? 1 : -1];
-typedef char StCdRequestunk1Offset[(offsetof(StCdRequest, unk1) == 0x1) ? 1 : -1];
+typedef char StCdRequestunk0Offset[(offsetof(StCdRequest, kind) == 0x0) ? 1 : -1];
+typedef char StCdRequestunk1Offset[(offsetof(StCdRequest, step) == 0x1) ? 1 : -1];
 typedef char StCdRequestunk2Offset[(offsetof(StCdRequest, unk2) == 0x2) ? 1 : -1];
-typedef char StCdRequestunk4Offset[(offsetof(StCdRequest, unk4) == 0x4) ? 1 : -1];
-typedef char StCdRequestunkCOffset[(offsetof(StCdRequest, unkC) == 0xc) ? 1 : -1];
-typedef char StCdRequestunkEOffset[(offsetof(StCdRequest, unkE) == 0xe) ? 1 : -1];
-typedef char StCdRequestunk10Offset[(offsetof(StCdRequest, unk10) == 0x10) ? 1 : -1];
-typedef char StCdRequestunk11Offset[(offsetof(StCdRequest, unk11) == 0x11) ? 1 : -1];
+typedef char StCdRequestunk4Offset[(offsetof(StCdRequest, payload) == 0x4) ? 1 : -1];
+typedef char StCdRequestunkCOffset[(offsetof(StCdRequest, stream_sectors) == 0xc) ? 1 : -1];
+typedef char StCdRequestunkEOffset[(offsetof(StCdRequest, stream_left) == 0xe) ? 1 : -1];
+typedef char StCdRequestunk10Offset[(offsetof(StCdRequest, status) == 0x10) ? 1 : -1];
+typedef char StCdRequestunk11Offset[(offsetof(StCdRequest, bank_step) == 0x11) ? 1 : -1];
 typedef char StCdRequestunk12Offset[(offsetof(StCdRequest, unk12) == 0x12) ? 1 : -1];
-typedef char StCdRequestunk14Offset[(offsetof(StCdRequest, unk14) == 0x14) ? 1 : -1];
-typedef char StCdRequestunk18Offset[(offsetof(StCdRequest, unk18) == 0x18) ? 1 : -1];
-typedef char StCdRequestunk1COffset[(offsetof(StCdRequest, unk1C) == 0x1c) ? 1 : -1];
-typedef char StCdRequestunk20Offset[(offsetof(StCdRequest, unk20) == 0x20) ? 1 : -1];
-typedef char StCdRequestunk24Offset[(offsetof(StCdRequest, unk24) == 0x24) ? 1 : -1];
-typedef char StCdRequestunk28Offset[(offsetof(StCdRequest, unk28) == 0x28) ? 1 : -1];
+typedef char StCdRequestunk14Offset[(offsetof(StCdRequest, read_loc) == 0x14) ? 1 : -1];
+typedef char StCdRequestunk18Offset[(offsetof(StCdRequest, loc) == 0x18) ? 1 : -1];
+typedef char StCdRequestunk1COffset[(offsetof(StCdRequest, read_cursor) == 0x1c) ? 1 : -1];
+typedef char StCdRequestunk20Offset[(offsetof(StCdRequest, dest) == 0x20) ? 1 : -1];
+typedef char StCdRequestunk24Offset[(offsetof(StCdRequest, sectors_left) == 0x24) ? 1 : -1];
+typedef char StCdRequestunk28Offset[(offsetof(StCdRequest, sectors) == 0x28) ? 1 : -1];
 typedef char StCdRequestDoneOffset[(offsetof(StCdRequest, done) == 0x2c) ? 1 : -1];
 typedef char StCdRequestunk30Offset[(offsetof(StCdRequest, unk30) == 0x30) ? 1 : -1];
 
@@ -110,26 +110,26 @@ typedef struct {
  * tables, and the loading screen file at +0xa6c. WIP extent ends with it.
  */
 typedef struct {
-    s32 unk0;
-    u32 unk4;
-    u32 unk8;
-    s32 unkC;
-    s32 unk10;
-    StCdRequest unk14[ST_CD_REQUESTS];
-    StCdRequest *unk9D4;
-    StCdRequest *unk9D8;
+    s32 vsync_event;
+    u32 vsync_count;
+    u32 rate_vsync;
+    s32 pending_ticks;
+    s32 seconds;
+    StCdRequest requests[ST_CD_REQUESTS];
+    StCdRequest *next_free;
+    StCdRequest *current;
     StArchive archives[ST_ARCHIVES];
-    StArchive unkA00;    /* 0xa00: a fourth archive table (menu_equip_info_run seeks to member 1) */
+    StArchive stat_archive; /* 0xa00: a fourth archive table (menu_equip_info_run seeks to member 1) */
     u8 unkA0C[0xa6c - 0xa0c];
-    CdlFILE unkA6C; /* \LOAD02.TIM;1, searched by loading_screen_find_file, read by loading_screen_show */
-    u_long *unkA84;      /* 0xa84: load cursor into cd_file_buffer, which follows this block (src/st/menu.c) */
+    CdlFILE loading_file; /* \LOAD02.TIM;1, searched by loading_screen_find_file, read by loading_screen_show */
+    u_long *load_cursor; /* 0xa84: load cursor into cd_file_buffer, which follows this block (src/st/menu.c) */
 } StCdState;
 
-typedef char StCdRequestRingStride[(sizeof(((StCdState *)0)->unk14[0]) == 0x34) ? 1 : -1];
-typedef char StCdRequestRingCount[(sizeof(((StCdState *)0)->unk14) == 48 * 0x34) ? 1 : -1];
-typedef char StCdRequestRingAt0x14[(offsetof(StCdState, unk14) == 0x14) ? 1 : -1];
-typedef char StCdFreeAt0x9d4[(offsetof(StCdState, unk9D4) == 0x9d4) ? 1 : -1];
-typedef char StCdCurrentAt0x9d8[(offsetof(StCdState, unk9D8) == 0x9d8) ? 1 : -1];
+typedef char StCdRequestRingStride[(sizeof(((StCdState *)0)->requests[0]) == 0x34) ? 1 : -1];
+typedef char StCdRequestRingCount[(sizeof(((StCdState *)0)->requests) == 48 * 0x34) ? 1 : -1];
+typedef char StCdRequestRingAt0x14[(offsetof(StCdState, requests) == 0x14) ? 1 : -1];
+typedef char StCdFreeAt0x9d4[(offsetof(StCdState, next_free) == 0x9d4) ? 1 : -1];
+typedef char StCdCurrentAt0x9d8[(offsetof(StCdState, current) == 0x9d8) ? 1 : -1];
 typedef char StCdArchivesAt0x9dc[(offsetof(StCdState, archives) == 0x9dc) ? 1 : -1];
 
 

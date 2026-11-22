@@ -297,8 +297,8 @@ void gfx_init(void)
     PutDrawEnv(&world_state.draw[0]);
     gte_SetBackColor(80, 80, 80);
     world_state.frame = 255;
-    world_state.unkE0 = packet_buffers;
-    world_state.packets[0].start = world_state.unkE0;
+    world_state.packet_base = packet_buffers;
+    world_state.packets[0].start = world_state.packet_base;
     world_state.packets[0].end = world_state.packets[0].start + PACKET_WORDS;
     world_state.packets[1].start = world_state.packets[0].end;
     world_state.packets[1].end = world_state.packets[1].start + PACKET_WORDS;
@@ -312,16 +312,16 @@ void gfx_init(void)
     texanim_clear_all();
     world_state.unk1ECD2 = 255;
     world_state.unk1ECC3 = 13;
-    world_state.unk1EE15 = 0;
+    world_state.no_plane_test = 0;
     world_state.unk1EDF0 = 0;
-    world_state.unk1EDF4 = 0;
+    world_state.draw_collision = 0;
     placement_objects.frame = 0;
     anim_slots_init();
     anim_sets_init();
     world_state.render_mode = 17;
-    world_state.unk1EDFD = 0;
-    world_state.unk1EDFE = 0;
-    world_state.unk1EE16 = 0;
+    world_state.selected_light = 0;
+    world_state.light_blend = 0;
+    world_state.talk_overlay_state = 0;
 }
 
 ADDRESS(0x800171c8, 0xf4)
@@ -395,9 +395,9 @@ void gfx_begin_frame(void)
     ClearOTagR(world_state.ot_cur, OT_LENGTH);
     world_state.ot2_cur = world_state.ot2[world_state.frame];
     ClearOTagR(world_state.ot2_cur, OT2_LENGTH);
-    world_state.unk831C[0] = world_state.unk831C[1] =
-        world_state.unk8324 = world_state.unk8328 = 0;
-    world_state.unk832C = 0;
+    world_state.vertex_face_counts[0] = world_state.vertex_face_counts[1] =
+        world_state.prim_count = world_state.prim_alloc_count = 0;
+    world_state.div_prim_count = 0;
     world_state.unk8330 = 0;
     world_state.unk8338[0] = 0;
     world_state.unk8338[1] = 0;
@@ -436,15 +436,15 @@ void gfx_set_camera(VECTOR *pos, SVECTOR *rot)
     SVECTOR angle;
 
     if (pos)
-        world_state.unk1EDC8 = *pos;
+        world_state.camera_pos = *pos;
     if (rot)
-        world_state.unk1EDD8 = *rot;
-    angle.vx = world_state.unk1EDD8.vx;
-    angle.vz = world_state.unk1EDD8.vz;
-    angle.vy = world_state.unk1EDD8.vy;
-    RotMatrix(&angle, &world_state.unk1ECE8);
-    matrix_rot_x(angle.vx, &world_state.unk1EDA8);
-    matrix_quarter_turns_y(&world_state.unk1ECE8, world_state.unk1ED28);
+        world_state.camera_rot = *rot;
+    angle.vx = world_state.camera_rot.vx;
+    angle.vz = world_state.camera_rot.vz;
+    angle.vy = world_state.camera_rot.vy;
+    RotMatrix(&angle, &world_state.view_matrix);
+    matrix_rot_x(angle.vx, &world_state.pitch_matrix);
+    matrix_quarter_turns_y(&world_state.view_matrix, world_state.view_quarter_turns);
 }
 
 /* Texture fields shared by the textured primitive kinds. */
@@ -538,14 +538,14 @@ void model_offset_textures(Model *model, DVECTOR *uv, DVECTOR *clut, u8 count)
 ADDRESS(0x80017c5c, 0x30)
 void func_80017c5c(u16 index, void *p)
 {
-    world_state.unk8308[index] = p;
+    world_state.area_geometry[index] = p;
     world_state.unk8318 = p;
 }
 
 ADDRESS(0x80017c8c, 0x24)
 void func_80017c8c(u16 index, void *p)
 {
-    world_state.unk8308[index] = p;
+    world_state.area_geometry[index] = p;
 }
 
 ADDRESS(0x80017cb0, 0x14)
@@ -563,8 +563,8 @@ void mesh_nclip_triangle(u16 i0, u16 i1, u16 i2)
 
     sp->unk2C = (u_long *)(base + i0);
     sp->unk30 = (u_long *)(base + i1);
-    sp->unk34 = (u_long *)(base + i2);
-    gte_ldsxy3(*sp->unk2C, *sp->unk30, *sp->unk34);
+    sp->vertex_out = (u_long *)(base + i2);
+    gte_ldsxy3(*sp->unk2C, *sp->unk30, *sp->vertex_out);
     gte_nclip();
     gte_stopz(&SCRATCHPAD->opz);
 }
@@ -590,14 +590,14 @@ void lighting_load_gte(u32 t, int flags)
     u32 to_g, current_g;
     u32 to_b, current_b;
 
-    sp->unk394 = cur;
+    sp->model_light = cur;
     if (flags & 0x20) {
         StLight *to = &lighting.light[47];
         u32 s = 4096 - t;
         to_00 = to->color.m[0][0] * s;
-        sp->unk64 = cur->unk68;
-        sp->unk68 = cur->unk6A;
-        sp->unk394 = to;
+        sp->depth_cue_near = cur->depth_cue_near;
+        sp->depth_cue_far = cur->depth_cue_far;
+        sp->model_light = to;
         current_00 = cur->color.m[0][0] * t;
         to_01 = to->color.m[0][1] * s;
         m[0][0] = (to_00 + current_00) >> 12;
@@ -637,9 +637,9 @@ void lighting_load_gte(u32 t, int flags)
         gte_SetBackColor(back1.r, back1.g, back1.b);
     } else if (flags & 0x10) {
         StLight *to = &lighting.light[46];
-        sp->unk64 = cur->unk68;
-        sp->unk68 = cur->unk6A;
-        sp->unk394 = to;
+        sp->depth_cue_near = cur->depth_cue_near;
+        sp->depth_cue_far = cur->depth_cue_far;
+        sp->model_light = to;
         m[0][0] = ((to->color.m[0][0] + cur->color.m[0][0]) * (4096 - t)) >> 13;
         m[0][1] = ((to->color.m[0][1] + cur->color.m[0][1]) * (4096 - t)) >> 13;
         m[0][2] = ((to->color.m[0][2] + cur->color.m[0][2]) * (4096 - t)) >> 13;
@@ -656,9 +656,9 @@ void lighting_load_gte(u32 t, int flags)
         gte_SetBackColor(back2.r, back2.g, back2.b);
     } else if (flags & 0x8) {
         StLight *to = &lighting.light[45];
-        sp->unk64 = cur->unk68;
-        sp->unk68 = cur->unk6A;
-        sp->unk394 = to;
+        sp->depth_cue_near = cur->depth_cue_near;
+        sp->depth_cue_far = cur->depth_cue_far;
+        sp->model_light = to;
         m[0][0] = ((to->color.m[0][0] + cur->color.m[0][0]) * t) >> 13;
         m[0][1] = ((to->color.m[0][1] + cur->color.m[0][1]) * t) >> 13;
         m[0][2] = ((to->color.m[0][2] + cur->color.m[0][2]) * t) >> 13;
@@ -676,8 +676,8 @@ void lighting_load_gte(u32 t, int flags)
     } else {
         gte_SetBackColor(cur->back.r, cur->back.g, cur->back.b);
         gte_SetColorMatrix(cur->color.m);
-        sp->unk64 = cur->unk68;
-        sp->unk68 = cur->unk6A;
+        sp->depth_cue_near = cur->depth_cue_near;
+        sp->depth_cue_far = cur->depth_cue_far;
     }
 }
 
@@ -1977,7 +1977,7 @@ void vis_build_planes(void)
     cr = rcos(yaw + half);
     sr = rsin(yaw + half);
     cp = rcos(pitch);
-    sp->unk208 = rsin(pitch);
+    sp->pitch_sin = rsin(pitch);
     back = cp * -11 >> 12;
     len = cp * 16 >> 12;
     near = cp * -8 >> 12;
@@ -2018,7 +2018,7 @@ int vis_measure_position(void)
     x = (sp->x - cam->position.vx) / 2048 + (ox = sp->offset_x);
     z = (sp->z - cam->position.vz) / 2048 + (oz = sp->offset_z);
     if (sp->no_plane_test) {
-        sp->unk1EC = -(sp->unk208 * 8) >> 12;
+        sp->offset_y = -(sp->pitch_sin * 8) >> 12;
         y = (sp->y - cam->position.vy) / 2048;
         return (x - ox) * (x - ox) + (z - oz) * (z - oz) + y * y;
     }
@@ -2027,7 +2027,7 @@ int vis_measure_position(void)
     if (a > 0 || c < 0) {
         return 256;
     }
-    sp->unk1EC = -(sp->unk208 * 8) >> 12;
+    sp->offset_y = -(sp->pitch_sin * 8) >> 12;
     y = (sp->y - cam->position.vy) / 2048;
     return (x - ox) * (x - ox) + (z - oz) * (z - oz) + y * y;
 }
@@ -2044,17 +2044,17 @@ void vis_cull_by_range(void)
     int i;
     int k;
 
-    range_near = (world_state.unk1EE00 >> 11) * (world_state.unk1EE00 >> 11);
-    range_mid = (world_state.unk1EE04 >> 11) * (world_state.unk1EE04 >> 11);
+    range_near = (world_state.range_near >> 11) * (world_state.range_near >> 11);
+    range_mid = (world_state.range_mid >> 11) * (world_state.range_mid >> 11);
     i = vis_lists.n_visible;
-    range_far = (world_state.light->unk6A / 2048 + 2) *
-                (world_state.light->unk6A / 2048 + 2);
+    range_far = (world_state.light->depth_cue_far / 2048 + 2) *
+                (world_state.light->depth_cue_far / 2048 + 2);
     while (i--) {
         rec = &vis_records[vis_lists.visible[i]];
         sp->x = rec->cell_x << 12;
         sp->y = (rec->cell_y << 12) + ((rec->y_offset - 128) << 7);
         sp->z = rec->cell_z << 12;
-        sp->no_plane_test = world_state.unk1EE15;
+        sp->no_plane_test = world_state.no_plane_test;
         rec->draw_flags &= 1;
         d = vis_measure_position();
         if (d > range_far) {
@@ -2216,12 +2216,12 @@ void world_transform_parts(VECTOR *trans)
 }
 
 /* A transformed vertex of the current record's part. */
-#define PART_VERTEX(sp, i) ((MeshVertex *)((u8 *)(sp)->unk34 + (i)))
+#define PART_VERTEX(sp, i) ((MeshVertex *)((u8 *)(sp)->vertex_out + (i)))
 
 /*
  * Projects each visible record's part vertices (RTPT in threes, then RTPS)
  * into the shared transformed-vertex buffer, with a depth-cue value from
- * the lighting's near/far depths (ScratchPad.unk64/unk68).
+ * the lighting's near/far depths (ScratchPad.depth_cue_near/unk68).
  */
 /*
  * Not exact (same size, same instructions): retail keeps the unk38 copy
@@ -2266,24 +2266,24 @@ void world_project_parts(VECTOR *trans)
     i = vis_lists.n_visible;
     while (i--) {
         rec = &vis_records[vis_lists.visible[i]];
-        sp->light_index = rec->turn & 3;
-        gte_SetRotMatrix(&world_state.unk1ED28[sp->light_index]);
+        sp->turn = rec->turn & 3;
+        gte_SetRotMatrix(&world_state.view_quarter_turns[sp->turn]);
         gte_SetTransVector(&trans[i]);
         sp->header = (MeshHeader *)(sp->model + 12) + rec->part;
         sp->vertices = sp->part_vertices = sp->model + 12 + sp->header->vertices;
-        sp->unk38 = sp->unk34;
+        sp->unk38 = sp->vertex_out;
         n = sp->header->n_vertices / 3;
-        out = (MeshVertex *)sp->unk34;
+        out = (MeshVertex *)sp->vertex_out;
         in = (SVECTOR *)sp->part_vertices;
         while (n--) {
             gte_ldv3c(in);
             gte_rtpt();
             gte_stsxy3(&out[0].sxy, &out[1].sxy, &out[2].sxy);
             gte_stsz3(&out[0].z, &out[1].z, &out[2].z);
-            if (sp->unk64 != sp->unk68) {
-                out[0].p = ((out[0].z - sp->unk64) << 12) / (sp->unk68 - sp->unk64);
-                out[1].p = ((out[1].z - sp->unk64) << 12) / (sp->unk68 - sp->unk64);
-                out[2].p = ((out[2].z - sp->unk64) << 12) / (sp->unk68 - sp->unk64);
+            if (sp->depth_cue_near != sp->depth_cue_far) {
+                out[0].p = ((out[0].z - sp->depth_cue_near) << 12) / (sp->depth_cue_far - sp->depth_cue_near);
+                out[1].p = ((out[1].z - sp->depth_cue_near) << 12) / (sp->depth_cue_far - sp->depth_cue_near);
+                out[2].p = ((out[2].z - sp->depth_cue_near) << 12) / (sp->depth_cue_far - sp->depth_cue_near);
             } else {
                 out[0].p = 0;
                 out[1].p = 0;
@@ -2307,8 +2307,8 @@ void world_project_parts(VECTOR *trans)
             gte_rtps();
             gte_stsxy(&out->sxy);
             gte_stsz(&out->z);
-            if (sp->unk64 != sp->unk68) {
-                out->p = ((out->z - sp->unk64) << 12) / (sp->unk68 - sp->unk64);
+            if (sp->depth_cue_near != sp->depth_cue_far) {
+                out->p = ((out->z - sp->depth_cue_near) << 12) / (sp->depth_cue_far - sp->depth_cue_near);
             } else {
                 out->p = 0;
             }
@@ -2322,7 +2322,7 @@ void world_project_parts(VECTOR *trans)
             in++;
         }
         sp->part_vertex_count += sp->header->n_vertices;
-        sp->unk34 = (u_long *)((u8 *)sp->unk34 + sp->header->n_vertices * 8);
+        sp->vertex_out = (u_long *)((u8 *)sp->vertex_out + sp->header->n_vertices * 8);
     }
 }
 
@@ -2373,10 +2373,10 @@ void world_draw_ft3_near(VECTOR *trans)
         rec = &vis_records[vis_lists.visible[i]];
         if (!(rec->draw_flags & 3)) {
             sp->header = (MeshHeader *)(sp->model + 12) + rec->part;
-            sp->unk34 = (u_long *)((u8 *)sp->unk34 + sp->header->n_vertices * 8);
+            sp->vertex_out = (u_long *)((u8 *)sp->vertex_out + sp->header->n_vertices * 8);
         } else {
-            sp->light_index = rec->turn & 3;
-            gte_SetLightMatrix(&sp->light->light[sp->light_index]);
+            sp->turn = rec->turn & 3;
+            gte_SetLightMatrix(&sp->light->light[sp->turn]);
             sp->header = (MeshHeader *)(sp->model + 12) + rec->part;
             sp->part_vertices = sp->model + 12 + sp->header->vertices;
             sp->normals = sp->model + 12 + sp->header->normals;
@@ -2445,7 +2445,7 @@ void world_draw_ft3_near(VECTOR *trans)
                         tint(&div.r1.c);
                         tint(&div.r2.c);
                     }
-                    gte_SetRotMatrix(&world_state.unk1ED28[sp->light_index]);
+                    gte_SetRotMatrix(&world_state.view_quarter_turns[sp->turn]);
                     gte_SetTransVector(&trans[i]);
                     div.rgbc = sp->part_rgb;
                     div.cr[0].r0 = &div.r0;
@@ -2501,7 +2501,7 @@ void world_draw_ft3_near(VECTOR *trans)
                     face++;
                 }
             }
-            sp->unk34 = (u_long *)((u8 *)sp->unk34 + sp->header->n_vertices * 8);
+            sp->vertex_out = (u_long *)((u8 *)sp->vertex_out + sp->header->n_vertices * 8);
         }
     }
 }
@@ -2554,10 +2554,10 @@ void world_draw_ft4_near(VECTOR *trans)
         rec = &vis_records[vis_lists.visible[i]];
         if (!(rec->draw_flags & 3)) {
             sp->header = (MeshHeader *)(sp->model + 12) + rec->part;
-            sp->unk34 = (u_long *)((u8 *)sp->unk34 + sp->header->n_vertices * 8);
+            sp->vertex_out = (u_long *)((u8 *)sp->vertex_out + sp->header->n_vertices * 8);
         } else {
-            sp->light_index = rec->turn & 3;
-            gte_SetLightMatrix(&sp->light->light[sp->light_index]);
+            sp->turn = rec->turn & 3;
+            gte_SetLightMatrix(&sp->light->light[sp->turn]);
             sp->header = (MeshHeader *)(sp->model + 12) + rec->part;
             sp->part_vertices = sp->model + 12 + sp->header->vertices;
             sp->normals = sp->model + 12 + sp->header->normals;
@@ -2639,7 +2639,7 @@ void world_draw_ft4_near(VECTOR *trans)
                         tint(&div.r2.c);
                         tint(&div.r3.c);
                     }
-                    gte_SetRotMatrix(&world_state.unk1ED28[sp->light_index]);
+                    gte_SetRotMatrix(&world_state.view_quarter_turns[sp->turn]);
                     gte_SetTransVector(&trans[i]);
                     div.rgbc = sp->part_rgb;
                     div.cr[0].r0 = &div.r0;
@@ -2705,7 +2705,7 @@ void world_draw_ft4_near(VECTOR *trans)
                     face++;
                 }
             }
-            sp->unk34 = (u_long *)((u8 *)sp->unk34 + sp->header->n_vertices * 8);
+            sp->vertex_out = (u_long *)((u8 *)sp->vertex_out + sp->header->n_vertices * 8);
         }
     }
 }
@@ -2756,10 +2756,10 @@ void world_draw_gt3_near(VECTOR *trans)
         rec = &vis_records[vis_lists.visible[i]];
         if (!(rec->draw_flags & 3)) {
             sp->header = (MeshHeader *)(sp->model + 12) + rec->part;
-            sp->unk34 = (u_long *)((u8 *)sp->unk34 + sp->header->n_vertices * 8);
+            sp->vertex_out = (u_long *)((u8 *)sp->vertex_out + sp->header->n_vertices * 8);
         } else {
-            sp->light_index = rec->turn & 3;
-            gte_SetLightMatrix(&sp->light->light[sp->light_index]);
+            sp->turn = rec->turn & 3;
+            gte_SetLightMatrix(&sp->light->light[sp->turn]);
             sp->header = (MeshHeader *)(sp->model + 12) + rec->part;
             sp->part_vertices = sp->model + 12 + sp->header->vertices;
             sp->normals = sp->model + 12 + sp->header->normals;
@@ -2830,7 +2830,7 @@ void world_draw_gt3_near(VECTOR *trans)
                         tint(&div.r1.c);
                         tint(&div.r2.c);
                     }
-                    gte_SetRotMatrix(&world_state.unk1ED28[sp->light_index]);
+                    gte_SetRotMatrix(&world_state.view_quarter_turns[sp->turn]);
                     gte_SetTransVector(&trans[i]);
                     div.rgbc = sp->part_rgb;
                     div.cr[0].r0 = &div.r0;
@@ -2885,7 +2885,7 @@ void world_draw_gt3_near(VECTOR *trans)
                     face++;
                 }
             }
-            sp->unk34 = (u_long *)((u8 *)sp->unk34 + sp->header->n_vertices * 8);
+            sp->vertex_out = (u_long *)((u8 *)sp->vertex_out + sp->header->n_vertices * 8);
         }
     }
 }
@@ -2937,10 +2937,10 @@ void world_draw_gt4_near(VECTOR *trans)
         rec = &vis_records[vis_lists.visible[i]];
         if (!(rec->draw_flags & 3)) {
             sp->header = (MeshHeader *)(sp->model + 12) + rec->part;
-            sp->unk34 = (u_long *)((u8 *)sp->unk34 + sp->header->n_vertices * 8);
+            sp->vertex_out = (u_long *)((u8 *)sp->vertex_out + sp->header->n_vertices * 8);
         } else {
-            sp->light_index = rec->turn & 3;
-            gte_SetLightMatrix(&sp->light->light[sp->light_index]);
+            sp->turn = rec->turn & 3;
+            gte_SetLightMatrix(&sp->light->light[sp->turn]);
             sp->header = (MeshHeader *)(sp->model + 12) + rec->part;
             sp->part_vertices = sp->model + 12 + sp->header->vertices;
             sp->normals = sp->model + 12 + sp->header->normals;
@@ -3028,7 +3028,7 @@ void world_draw_gt4_near(VECTOR *trans)
                         tint(&div.r2.c);
                         tint(&div.r3.c);
                     }
-                    gte_SetRotMatrix(&world_state.unk1ED28[sp->light_index]);
+                    gte_SetRotMatrix(&world_state.view_quarter_turns[sp->turn]);
                     gte_SetTransVector(&trans[i]);
                     div.rgbc = sp->part_rgb;
                     div.cr[0].r0 = &div.r0;
@@ -3094,7 +3094,7 @@ void world_draw_gt4_near(VECTOR *trans)
                     face++;
                 }
             }
-            sp->unk34 = (u_long *)((u8 *)sp->unk34 + sp->header->n_vertices * 8);
+            sp->vertex_out = (u_long *)((u8 *)sp->vertex_out + sp->header->n_vertices * 8);
         }
     }
 }
@@ -3118,10 +3118,10 @@ void world_draw_ft3_far(VECTOR *trans)
         rec = &vis_records[vis_lists.visible[i]];
         if (rec->draw_flags & 3) {
             sp->header = (MeshHeader *)(sp->model + 12) + rec->part;
-            sp->unk34 = (u_long *)((u8 *)sp->unk34 + sp->header->n_vertices * 8);
+            sp->vertex_out = (u_long *)((u8 *)sp->vertex_out + sp->header->n_vertices * 8);
         } else {
-            sp->light_index = rec->turn & 3;
-            gte_SetLightMatrix(&sp->light->light[sp->light_index]);
+            sp->turn = rec->turn & 3;
+            gte_SetLightMatrix(&sp->light->light[sp->turn]);
             sp->header = (MeshHeader *)(sp->model + 12) + rec->part;
             sp->part_vertices = sp->model + 12 + sp->header->vertices;
             sp->normals = sp->model + 12 + sp->header->normals;
@@ -3176,7 +3176,7 @@ void world_draw_ft3_far(VECTOR *trans)
                 mesh_set_ot(sp->ot + sp->z_ot, p);
                 face++;
             }
-            sp->unk34 = (u_long *)((u8 *)sp->unk34 + sp->header->n_vertices * 8);
+            sp->vertex_out = (u_long *)((u8 *)sp->vertex_out + sp->header->n_vertices * 8);
         }
     }
 }
@@ -3201,10 +3201,10 @@ void world_draw_ft4_far(VECTOR *trans)
         rec = &vis_records[vis_lists.visible[i]];
         if (rec->draw_flags & 3) {
             sp->header = (MeshHeader *)(sp->model + 12) + rec->part;
-            sp->unk34 = (u_long *)((u8 *)sp->unk34 + sp->header->n_vertices * 8);
+            sp->vertex_out = (u_long *)((u8 *)sp->vertex_out + sp->header->n_vertices * 8);
         } else {
-            sp->light_index = rec->turn & 3;
-            gte_SetLightMatrix(&sp->light->light[sp->light_index]);
+            sp->turn = rec->turn & 3;
+            gte_SetLightMatrix(&sp->light->light[sp->turn]);
             sp->header = (MeshHeader *)(sp->model + 12) + rec->part;
             sp->part_vertices = sp->model + 12 + sp->header->vertices;
             sp->normals = sp->model + 12 + sp->header->normals;
@@ -3273,7 +3273,7 @@ void world_draw_ft4_far(VECTOR *trans)
                 face++;
                 mesh_add_prim(sp->ot + sp->z_ot, p, 9);
             }
-            sp->unk34 = (u_long *)((u8 *)sp->unk34 + sp->header->n_vertices * 8);
+            sp->vertex_out = (u_long *)((u8 *)sp->vertex_out + sp->header->n_vertices * 8);
         }
     }
 }
@@ -3296,10 +3296,10 @@ void world_draw_gt3_far(VECTOR *trans)
         rec = &vis_records[vis_lists.visible[i]];
         if (rec->draw_flags & 3) {
             sp->header = (MeshHeader *)(sp->model + 12) + rec->part;
-            sp->unk34 = (u_long *)((u8 *)sp->unk34 + sp->header->n_vertices * 8);
+            sp->vertex_out = (u_long *)((u8 *)sp->vertex_out + sp->header->n_vertices * 8);
         } else {
-            sp->light_index = rec->turn & 3;
-            gte_SetLightMatrix(&sp->light->light[sp->light_index]);
+            sp->turn = rec->turn & 3;
+            gte_SetLightMatrix(&sp->light->light[sp->turn]);
             sp->header = (MeshHeader *)(sp->model + 12) + rec->part;
             sp->part_vertices = sp->model + 12 + sp->header->vertices;
             sp->normals = sp->model + 12 + sp->header->normals;
@@ -3358,7 +3358,7 @@ void world_draw_gt3_far(VECTOR *trans)
                 face++;
                 mesh_add_prim(sp->ot + sp->z_ot, p, 9);
             }
-            sp->unk34 = (u_long *)((u8 *)sp->unk34 + sp->header->n_vertices * 8);
+            sp->vertex_out = (u_long *)((u8 *)sp->vertex_out + sp->header->n_vertices * 8);
         }
     }
 }
@@ -3382,10 +3382,10 @@ void world_draw_gt4_far(VECTOR *trans)
         rec = &vis_records[vis_lists.visible[i]];
         if (rec->draw_flags & 3) {
             sp->header = (MeshHeader *)(sp->model + 12) + rec->part;
-            sp->unk34 = (u_long *)((u8 *)sp->unk34 + sp->header->n_vertices * 8);
+            sp->vertex_out = (u_long *)((u8 *)sp->vertex_out + sp->header->n_vertices * 8);
         } else {
-            sp->light_index = rec->turn & 3;
-            gte_SetLightMatrix(&sp->light->light[sp->light_index]);
+            sp->turn = rec->turn & 3;
+            gte_SetLightMatrix(&sp->light->light[sp->turn]);
             sp->header = (MeshHeader *)(sp->model + 12) + rec->part;
             sp->part_vertices = sp->model + 12 + sp->header->vertices;
             sp->normals = sp->model + 12 + sp->header->normals;
@@ -3461,7 +3461,7 @@ void world_draw_gt4_far(VECTOR *trans)
                 /* 12 words, although a POLY_GT4 is 13. */
                 mesh_add_prim(sp->ot + sp->z_ot, p, 12);
             }
-            sp->unk34 = (u_long *)((u8 *)sp->unk34 + sp->header->n_vertices * 8);
+            sp->vertex_out = (u_long *)((u8 *)sp->vertex_out + sp->header->n_vertices * 8);
         }
     }
 }
@@ -3480,10 +3480,10 @@ void world_draw(void)
     ScratchPad *sp = SCRATCHPAD;
     VECTOR trans[256];
 
-    if (world_state.unk1EDF4) {
-        sp->model = world_state.unk8308[1];
+    if (world_state.draw_collision) {
+        sp->model = world_state.area_geometry[1];
     } else {
-        sp->model = world_state.unk8308[0];
+        sp->model = world_state.area_geometry[0];
     }
     sp->face_count = 4;
     sp->far_z = 4096;
@@ -3492,11 +3492,11 @@ void world_draw(void)
     sp->prim_end = world_state.packet->end;
     sp->prim_count.halves[1] = 320;
     sp->prim_count.halves[0] = 240;
-    sp->part_vertex_count = world_state.unk831C[0];
-    sp->part_faces = world_state.unk831C[1];
-    sp->unk1B8 = world_state.unk8324;
-    sp->part_prims = world_state.unk8328;
-    sp->part_div_prims = world_state.unk832C;
+    sp->part_vertex_count = world_state.vertex_face_counts[0];
+    sp->part_faces = world_state.vertex_face_counts[1];
+    sp->unk1B8 = world_state.prim_count;
+    sp->part_prims = world_state.prim_alloc_count;
+    sp->part_div_prims = world_state.div_prim_count;
     sp->unk1C4 = world_state.unk8330;
     sp->unk1CC = world_state.unk8334;
     sp->unk1D0 = world_state.unk8338[0];
@@ -3524,38 +3524,38 @@ void world_draw(void)
     vis_build_visible((u8 *)&viewer.position.vx);
     vis_build_planes();
     vis_cull_by_range();
-    gte_SetRotMatrix(&world_state.unk1ECE8);
-    gte_SetTransMatrix(&world_state.unk1ECE8);
+    gte_SetRotMatrix(&world_state.view_matrix);
+    gte_SetTransMatrix(&world_state.view_matrix);
     world_transform_parts(trans);
     sp->light = world_state.light;
     gte_SetBackColor(sp->light->back.r, sp->light->back.g, sp->light->back.b);
     gte_SetColorMatrix(sp->light->color.m);
-    sp->unk64 = sp->light->unk68;
-    sp->unk68 = sp->light->unk6A;
-    sp->unk34 = (u_long *)world_state.world_vertices;
+    sp->depth_cue_near = sp->light->depth_cue_near;
+    sp->depth_cue_far = sp->light->depth_cue_far;
+    sp->vertex_out = (u_long *)world_state.world_vertices;
     world_project_parts(trans);
-    sp->unk34 = (u_long *)world_state.world_vertices;
+    sp->vertex_out = (u_long *)world_state.world_vertices;
     world_draw_ft3_far(trans);
-    sp->unk34 = (u_long *)world_state.world_vertices;
+    sp->vertex_out = (u_long *)world_state.world_vertices;
     world_draw_ft4_far(trans);
-    sp->unk34 = (u_long *)world_state.world_vertices;
+    sp->vertex_out = (u_long *)world_state.world_vertices;
     world_draw_gt3_far(trans);
-    sp->unk34 = (u_long *)world_state.world_vertices;
+    sp->vertex_out = (u_long *)world_state.world_vertices;
     world_draw_gt4_far(trans);
-    sp->unk34 = (u_long *)world_state.world_vertices;
+    sp->vertex_out = (u_long *)world_state.world_vertices;
     world_draw_ft3_near(trans);
-    sp->unk34 = (u_long *)world_state.world_vertices;
+    sp->vertex_out = (u_long *)world_state.world_vertices;
     world_draw_ft4_near(trans);
-    sp->unk34 = (u_long *)world_state.world_vertices;
+    sp->vertex_out = (u_long *)world_state.world_vertices;
     world_draw_gt3_near(trans);
-    sp->unk34 = (u_long *)world_state.world_vertices;
+    sp->vertex_out = (u_long *)world_state.world_vertices;
     world_draw_gt4_near(trans);
-    sp->unk34 = (u_long *)world_state.world_vertices;
-    world_state.unk831C[0] = sp->part_vertex_count;
-    world_state.unk831C[1] = sp->part_faces;
-    world_state.unk8328 = sp->part_prims;
-    world_state.unk8324 = sp->unk1B8;
-    world_state.unk832C = sp->part_div_prims;
+    sp->vertex_out = (u_long *)world_state.world_vertices;
+    world_state.vertex_face_counts[0] = sp->part_vertex_count;
+    world_state.vertex_face_counts[1] = sp->part_faces;
+    world_state.prim_alloc_count = sp->part_prims;
+    world_state.prim_count = sp->unk1B8;
+    world_state.div_prim_count = sp->part_div_prims;
     world_state.unk8330 = sp->unk1C4;
     world_state.unk8334 = sp->unk1CC;
     world_state.unk8338[0] = sp->unk1D0;
@@ -3578,9 +3578,9 @@ void quad_draw_now(int x0, int y0, int x1, int y1, u8 u, u8 v, u8 w, u8 h,
     POLY_FT4 *p;
 
     if (world_state.frame >= 2)
-        p = (POLY_FT4 *)world_state.unkE0 + 4;
+        p = (POLY_FT4 *)world_state.packet_base + 4;
     else
-        p = (POLY_FT4 *)world_state.unkE0 + world_state.frame * 4;
+        p = (POLY_FT4 *)world_state.packet_base + world_state.frame * 4;
     setRGB0(p, r, g, b);
     p->tpage = tpage;
     p->clut = clut;
@@ -3624,7 +3624,7 @@ void loading_screen_find_file(void)
     char name[64];
 
     strcpy(name, "\\LOAD02.TIM;1");
-    while (CdSearchFile(&cd_state.unkA6C, name) == NULL)
+    while (CdSearchFile(&cd_state.loading_file, name) == NULL)
         ;
 }
 
@@ -3644,7 +3644,7 @@ void loading_screen_show(void)
 
     world_state.draw[0].isbg = 0;
     world_state.draw[1].isbg = 0;
-    world_state.unk1ECC4 = 1;
+    world_state.loading_screen_active = 1;
     world_state.draw[1].dfe = 1;
     world_state.draw[0].dfe = 1;
     world_state.draw[1].isbg = 0;
@@ -3674,8 +3674,8 @@ void loading_screen_show(void)
         SetDrawMode(&mode, 0, 0, GetTPage(0, 2, 640, 0), NULL);
         addPrim(ot, &mode);
         for (i = 0; i < 50; i++) {
-            CdControl(CdlSetloc, (u_char *)&cd_state.unkA6C.pos, NULL);
-            CdRead((cd_state.unkA6C.size + 2047) >> 11, world_state.unkE0, CdlModeSpeed);
+            CdControl(CdlSetloc, (u_char *)&cd_state.loading_file.pos, NULL);
+            CdRead((cd_state.loading_file.size + 2047) >> 11, world_state.packet_base, CdlModeSpeed);
             while ((status = CdReadSync(1, result)) > 0) {
                 VSync(0);
                 DrawOTag(ot);
@@ -3686,7 +3686,7 @@ void loading_screen_show(void)
         ClearImage(&clear, 0, 0, 0);
         DrawSync(0);
         gfx_setup_320x240();
-        tim_load_images(world_state.unkE0, cd_state.unkA6C.size);
+        tim_load_images(world_state.packet_base, cd_state.loading_file.size);
         {
             RECT lower = {0, 240, 320, 240};
 
@@ -3703,13 +3703,13 @@ void loading_screen_end(void)
 {
     world_state.draw[0].isbg = 1;
     world_state.draw[1].isbg = 1;
-    world_state.unk1ECC4 = 0;
+    world_state.loading_screen_active = 0;
 }
 
 ADDRESS(0x800214cc, 0x4c)
 void loading_screen_step(void)
 {
-    if (world_state.unk1ECC4) {
+    if (world_state.loading_screen_active) {
         gfx_begin_frame();
         gfx_end_frame();
     }
@@ -3735,7 +3735,7 @@ int depth;
 
     if ((u_long *)(p + 1) <= buffer->end) {
         buffer->cur = (u_long *)(p + 1);
-        world_state.unk8328++;
+        world_state.prim_alloc_count++;
         setRGB0(p, r, g, b);
         p->tpage = tpage;
         p->clut = clut;
@@ -3748,7 +3748,7 @@ int depth;
         if (semi != OPAQUE)
             SetSemiTrans(p, 1);
         AddPrim(world_state.ot_cur + depth, p);
-        world_state.unk8324++;
+        world_state.prim_count++;
     }
 }
 
@@ -3759,13 +3759,13 @@ int depth;
 ADDRESS(0x80021654, 0x1c8)
 void area_draw_entry_fade(void)
 {
-    int elapsed = cd_state.unk4 - area_state.entry_fade_start;
+    int elapsed = cd_state.vsync_count - area_state.entry_fade_start;
     int early;
 
     if (area_state.loading == 0 && area_state.entry_fade_start == -1)
         return;
     if ((s16)area_state.load_step < 2) {
-        area_state.entry_fade_start = cd_state.unk4;
+        area_state.entry_fade_start = cd_state.vsync_count;
         return;
     }
     if (elapsed < 120) {
@@ -3782,7 +3782,7 @@ void area_draw_entry_fade(void)
         quad_add_at_depth(32, 0, 288, 256, 0, 0, 255, 255, 1, getTPage(0, 1, 960, 256),
                       getClut(560, 495), level, level, level, 0);
         if (!early)
-            area_state.entry_fade_start = cd_state.unk4 - 240;
+            area_state.entry_fade_start = cd_state.vsync_count - 240;
     } else if (elapsed < 360) {
         u8 level = (360 - elapsed) * 2;
 
@@ -3850,15 +3850,15 @@ void fade_add_color(int r, int g, int b, int scale, int mode)
 
 /* The model matrix (rotation and translation) the part renderers draw with. */
 /* A camera-space vertex (RT result). */
-#define MODEL_POS(sp) ((VECTOR *)&(sp)->unk50)
+#define MODEL_POS(sp) ((VECTOR *)&(sp)->vertex_pos)
 
 /* A model block's part data. */
-#define MODEL_DATA(block) ((u8 *)(block) + ((ModelFile *)(block))->unk8)
+#define MODEL_DATA(block) ((u8 *)(block) + ((ModelFile *)(block))->model)
 
 /*
  * Projects the current part's model-space vertices (RTPS) into the
  * transformed-vertex buffer, with a depth-cue value from the lighting's
- * near/far depths (ScratchPad.unk64/unk68).
+ * near/far depths (ScratchPad.depth_cue_near/unk68).
  */
 #define MODEL_PROJECT(sp, out, in, n)                                          \
     while (n--) {                                                              \
@@ -3866,8 +3866,8 @@ void fade_add_color(int r, int g, int b, int scale, int mode)
         gte_rtps();                                                            \
         gte_stsxy(&(out)->sxy);                                                \
         gte_stsz(&(out)->z);                                                   \
-        if ((sp)->unk64 != (sp)->unk68) {                                      \
-            (out)->p = (((out)->z - (sp)->unk64) << 12) / ((sp)->unk68 - (sp)->unk64); \
+        if ((sp)->depth_cue_near != (sp)->depth_cue_far) {                                      \
+            (out)->p = (((out)->z - (sp)->depth_cue_near) << 12) / ((sp)->depth_cue_far - (sp)->depth_cue_near); \
         } else {                                                               \
             (out)->p = 0;                                                      \
         }                                                                      \
@@ -3925,7 +3925,7 @@ void player_draw_equipment_model(u8 slot)
     }
     lighting_load_gte(0, 0);
     sp = SCRATCHPAD;
-    gte_MulMatrix0((MATRIX *)&sp->unk394->light[3], &world_state.unk1ECE8, &light);
+    gte_MulMatrix0((MATRIX *)&sp->model_light->light[3], &world_state.view_matrix, &light);
     gte_SetLightMatrix(&light);
     sp->model_t[0] = viewer.slot_model_info[slot]->pos_x;
     sp->model_t[1] = viewer.slot_model_info[slot]->pos_y;
@@ -3941,19 +3941,19 @@ void player_draw_equipment_model(u8 slot)
     sp->far_z = 64;
     sp->near_z = 4;
     sp->ot = world_state.ot2_cur;
-    sp->z_ot = world_state.unk831C[0];
-    sp->face_count = world_state.unk831C[1];
-    sp->prim_count.count = world_state.unk8324;
-    sp->unk94 = world_state.unk8328;
+    sp->z_ot = world_state.vertex_face_counts[0];
+    sp->face_count = world_state.vertex_face_counts[1];
+    sp->prim_count.count = world_state.prim_count;
+    sp->prim_alloc_count = world_state.prim_alloc_count;
     sp->prim = world_state.packet->cur;
     sp->prim_end = world_state.packet->end;
     sp->vertices = world_state.world_vertices;
     sp->clut_base = 0;
     *(u_long *)&sp->rgb = equipment_model_rgb;
-    if (((ModelFile *)viewer.slot_model_files[slot])->unk6 == 0) {
+    if (((ModelFile *)viewer.slot_model_files[slot])->node_count == 0) {
         gte_SetRotMatrix(SCRATCH_MATRIX(sp));
         gte_SetTransMatrix(SCRATCH_MATRIX(sp));
-        sp->model = MODEL_DATA(world_state.unk834C[slot + 32]);
+        sp->model = MODEL_DATA(world_state.model_files[slot + 32]);
         sp->header = (MeshHeader *)(sp->model + 12);
         if (anim_prepare((StAnimSlot **)&viewer.slot_anims[slot], slot + 32, viewer.slot_anim_ids[slot],
                           viewer.action_timers.halves[slot])) {
@@ -3965,7 +3965,7 @@ void player_draw_equipment_model(u8 slot)
             mesh_draw_part_nccs(0, 0x80);
         }
     } else {
-        sp->model = MODEL_DATA(world_state.unk834C[slot + 32]);
+        sp->model = MODEL_DATA(world_state.model_files[slot + 32]);
         if (anim_prepare_any(&viewer.slot_anims[slot], slot + 32, viewer.slot_anim_ids[slot],
                           viewer.action_timers.halves[slot])) {
             model_draw_list(0x80, 0);
@@ -3973,10 +3973,10 @@ void player_draw_equipment_model(u8 slot)
     }
     world_state.packet->cur = sp->prim;
     world_state.packet->end = sp->prim_end;
-    world_state.unk831C[0] = sp->z_ot;
-    world_state.unk831C[1] = sp->face_count;
-    world_state.unk8328 = sp->unk94;
-    world_state.unk8324 = sp->prim_count.count;
+    world_state.vertex_face_counts[0] = sp->z_ot;
+    world_state.vertex_face_counts[1] = sp->face_count;
+    world_state.prim_alloc_count = sp->prim_alloc_count;
+    world_state.prim_count = sp->prim_count.count;
 }
 
 /*
@@ -3997,14 +3997,14 @@ void model_draw_list(u8 flags, SVECTOR *rot)
     int n;
 
     while (i--) {
-        e->obj->unk0 = 0;
+        e->obj->composed = 0;
         e++;
     }
     e = sp->list.models->entries;
     i = sp->list.models->count;
     while (i--) {
-        e->obj->unk0 = 0;
-        if (e->unk0C == -1 || e->part == 0xffff) {
+        e->obj->composed = 0;
+        if (e->key == -1 || e->part == 0xffff) {
             e++;
             continue;
         }
@@ -4018,33 +4018,33 @@ void model_draw_list(u8 flags, SVECTOR *rot)
             RotMatrixX(angle.vx, &face);
             RotMatrixY(angle.vy + rot->vy, &face);
             RotMatrixZ(angle.vz, &face);
-            if (e->obj->unk48->unk2 == 0) {
-                RotMatrix(&e->obj->unk48->unk44->rot, &e->obj->unk48->unk4);
+            if (e->obj->parent->relative_set == 0) {
+                RotMatrix(&e->obj->parent->transform->rot, &e->obj->parent->local_matrix);
             }
-            gte_MulMatrix0(&e->obj->unk48->unk4, &face, &e->obj->unk48->unk4);
-            e->obj->unk48->unk2 = 0;
+            gte_MulMatrix0(&e->obj->parent->local_matrix, &face, &e->obj->parent->local_matrix);
+            e->obj->parent->relative_set = 0;
         }
         anim_record_compose(e->obj);
         if (e->kind == 1) {
-            if (i % 6 != world_state.unk1ECC0 % 6) {
+            if (i % 6 != world_state.drawn_frames % 6) {
                 e++;
                 continue;
             }
-            ScaleMatrix(&scale, &e->obj->unk44->scale);
+            ScaleMatrix(&scale, &e->obj->transform->scale);
             gte_SetRotMatrix(&scale);
         } else if (e->kind == 3) {
-            if (i % 4 != world_state.unk1ECC0 % 4) {
+            if (i % 4 != world_state.drawn_frames % 4) {
                 e++;
                 continue;
             }
-            ScaleMatrix(&scale, &e->obj->unk44->scale);
+            ScaleMatrix(&scale, &e->obj->transform->scale);
             gte_SetRotMatrix(&scale);
         } else if (e->kind == 4) {
-            if (i % 8 != world_state.unk1ECC0 % 8) {
+            if (i % 8 != world_state.drawn_frames % 8) {
                 e++;
                 continue;
             }
-            ScaleMatrix(&scale, &e->obj->unk44->scale);
+            ScaleMatrix(&scale, &e->obj->transform->scale);
             gte_SetRotMatrix(&scale);
         }
         sp->header = (MeshHeader *)(sp->model + 12) + e->part;
@@ -4094,10 +4094,10 @@ void model_draw(int unused0, u16 model, VECTOR *pos, SVECTOR *rot, SVECTOR *scal
     sp->vertices = world_state.world_vertices;
     /* 0x44 holds a second vertex cursor in this phase. */
     (&sp->vertices)[1] = world_state.world_vertices;
-    sp->z_ot = world_state.unk831C[0];
-    sp->face_count = world_state.unk831C[1];
-    sp->prim_count.count = world_state.unk8324;
-    sp->unk94 = world_state.unk8328;
+    sp->z_ot = world_state.vertex_face_counts[0];
+    sp->face_count = world_state.vertex_face_counts[1];
+    sp->prim_count.count = world_state.prim_count;
+    sp->prim_alloc_count = world_state.prim_alloc_count;
     sp->prim = world_state.packet->cur;
     sp->prim_end = world_state.packet->end;
     if ((u8 *)sp->prim_end - 0x7800 < (u8 *)sp->prim) {
@@ -4107,8 +4107,8 @@ void model_draw(int unused0, u16 model, VECTOR *pos, SVECTOR *rot, SVECTOR *scal
         player_load_equipment_model(0xffff, 0, 0);
         player_load_equipment_model(0xffff, 1, 0);
     }
-    gte_SetRotMatrix(&world_state.unk1ECE8);
-    gte_SetTransMatrix(&world_state.unk1ECE8);
+    gte_SetRotMatrix(&world_state.view_matrix);
+    gte_SetTransMatrix(&world_state.view_matrix);
     if (view) {
         rel_l.vx = pos->vx - viewer.position.vx;
         rel_l.vy = pos->vy - (viewer.position.vy + viewer.bob_offset + viewer.unk2D2);
@@ -4124,7 +4124,7 @@ void model_draw(int unused0, u16 model, VECTOR *pos, SVECTOR *rot, SVECTOR *scal
     }
     matrix_rot_yxz(rot, SCRATCH_MATRIX(sp));
     lighting_load_gte(light, flags);
-    gte_MulMatrix0((MATRIX *)sp->unk394, SCRATCH_MATRIX(sp), &lm);
+    gte_MulMatrix0((MATRIX *)sp->model_light, SCRATCH_MATRIX(sp), &lm);
     gte_SetLightMatrix(&lm);
     if (scale) {
         s.vx = scale->vx;
@@ -4137,8 +4137,8 @@ void model_draw(int unused0, u16 model, VECTOR *pos, SVECTOR *rot, SVECTOR *scal
     }
     gte_SetRotMatrix(SCRATCH_MATRIX(sp));
     gte_SetTransMatrix(SCRATCH_MATRIX(sp));
-    if (((ModelFile *)world_state.unk834C[model])->unk6 == 0) {
-        sp->model = MODEL_DATA(world_state.unk834C[model]);
+    if (((ModelFile *)world_state.model_files[model])->node_count == 0) {
+        sp->model = MODEL_DATA(world_state.model_files[model]);
         if (part < 128) {
             i = 0;
             sp->header = (MeshHeader *)(sp->model + 12);
@@ -4152,7 +4152,7 @@ void model_draw(int unused0, u16 model, VECTOR *pos, SVECTOR *rot, SVECTOR *scal
             sp->local_vertices = sp->model + 12 + sp->header->vertices;
         }
     } else {
-        sp->model = MODEL_DATA(world_state.unk834C[model]);
+        sp->model = MODEL_DATA(world_state.model_files[model]);
         if (part < 128) {
             if (anim_prepare_any(anim, model, part, arg8) == 0) {
                 sp->header = (MeshHeader *)(sp->model + 12);
@@ -4205,10 +4205,10 @@ void model_draw(int unused0, u16 model, VECTOR *pos, SVECTOR *rot, SVECTOR *scal
 done:
     world_state.packet->cur = sp->prim;
     world_state.packet->end = sp->prim_end;
-    world_state.unk831C[0] = sp->z_ot;
-    world_state.unk831C[1] = sp->face_count;
-    world_state.unk8324 = sp->prim_count.count;
-    world_state.unk8328 = sp->unk94;
+    world_state.vertex_face_counts[0] = sp->z_ot;
+    world_state.vertex_face_counts[1] = sp->face_count;
+    world_state.prim_count = sp->prim_count.count;
+    world_state.prim_alloc_count = sp->prim_alloc_count;
 }
 
 ADDRESS(0x80023208, 0x80)
@@ -4308,7 +4308,7 @@ u8 tag;
     size = cd_archive_member_size(archive, index);
     if (size < second)
         size = second;
-    data = heap_alloc(model_heap, size, &world_state.unk834C[slot]);
+    data = heap_alloc(model_heap, size, &world_state.model_files[slot]);
     if (data == NULL)
         return;
     heap_set_state(data, ST_BLOCK_LOADING);
@@ -4344,7 +4344,7 @@ u8 tag;
 
 /*
  * Loads member `index + 4` of `archive` into a heap block owned by
- * world_state.unk834C[slot - 16].
+ * world_state.model_files[slot - 16].
  */
 ADDRESS(0x800239ec, 0xd0)
 void creature_second_model_load(archive, index, slot, tag)
@@ -4361,7 +4361,7 @@ u8 tag;
     size = cd_archive_member_size(archive, member);
     if (size == 0)
         return;
-    data = heap_alloc(model_heap, size, &world_state.unk834C[slot - 16]);
+    data = heap_alloc(model_heap, size, &world_state.model_files[slot - 16]);
     if (data == NULL)
         return;
     heap_set_state(data, ST_BLOCK_LOADING);
@@ -4386,7 +4386,7 @@ u8 tag;
     size = cd_archive_member_size(archive, index);
     if (size < second)
         size = second;
-    data = heap_alloc(model_heap, size, &world_state.unk834C[slot]);
+    data = heap_alloc(model_heap, size, &world_state.model_files[slot]);
     if (data == NULL)
         return;
     heap_set_state(data, ST_BLOCK_LOADING);
@@ -4401,7 +4401,7 @@ void object_model_load(int archive, int index, int slot)
 {
     void *data;
 
-    data = heap_alloc(model_heap, cd_archive_member_size(archive, index), &world_state.unk834C[slot]);
+    data = heap_alloc(model_heap, cd_archive_member_size(archive, index), &world_state.model_files[slot]);
     if (data != NULL) {
         heap_set_state(data, ST_BLOCK_LOADING);
         heap_set_slot(data, slot);
@@ -4413,7 +4413,7 @@ ADDRESS(0x80023c6c, 0x26c)
 void creature_models_sync(int archive, int first, int slot, int count)
 {
     ScratchPad *sp = SCRATCHPAD;
-    u8 *flags = sp->unkF0;
+    u8 *flags = sp->model_needed_cur;
     int end = count + first;
     int i;
     u16 id;
@@ -4424,25 +4424,25 @@ void creature_models_sync(int archive, int first, int slot, int count)
 
     for (i = first; i < end; i++, slot++) {
         id = slot;
-        a = world_state.unk834C[id];
-        b = world_state.unk834C[id - 16];
+        a = world_state.model_files[id];
+        b = world_state.model_files[id - 16];
         if (*flags++) {
             if (a == NULL) {
-                creature_model_load(archive, i * 5, id, sp->unkC8[slot & 0xf]);
+                creature_model_load(archive, i * 5, id, sp->vram_tags[slot & 0xf]);
             } else if (heap_get_state(a) == ST_BLOCK_RELEASABLE) {
-                if (heap_get_tag(a) != sp->unkC8[slot & 0xf]) {
+                if (heap_get_tag(a) != sp->vram_tags[slot & 0xf]) {
                     heap_free(a);
-                    creature_model_load(archive, i * 5, id, sp->unkC8[slot & 0xf]);
+                    creature_model_load(archive, i * 5, id, sp->vram_tags[slot & 0xf]);
                 } else {
                     heap_set_state(a, ST_BLOCK_USED);
                 }
             }
             if (b == NULL) {
-                creature_second_model_load(archive, i * 5, (u16)slot, sp->unkC8[slot & 0xf]);
+                creature_second_model_load(archive, i * 5, (u16)slot, sp->vram_tags[slot & 0xf]);
             } else if (heap_get_state(b) == ST_BLOCK_RELEASABLE) {
-                if (heap_get_tag(b) != sp->unkC8[slot & 0xf]) {
+                if (heap_get_tag(b) != sp->vram_tags[slot & 0xf]) {
                     heap_free(b);
-                    creature_second_model_load(archive, i * 5, (u16)slot, sp->unkC8[slot & 0xf]);
+                    creature_second_model_load(archive, i * 5, (u16)slot, sp->vram_tags[slot & 0xf]);
                 } else {
                     heap_set_state(b, ST_BLOCK_USED);
                 }
@@ -4463,13 +4463,13 @@ void creature_models_sync(int archive, int first, int slot, int count)
 ADDRESS(0x80023ed8, 0x12c)
 void item_models_sync(int archive, int first, int slot, int count)
 {
-    u8 *flags = SCRATCHPAD->unkF0;
+    u8 *flags = SCRATCHPAD->model_needed_cur;
     int end = count + first;
     int i;
     void *p;
 
     for (i = first; i < end; i++, slot++) {
-        p = world_state.unk834C[slot];
+        p = world_state.model_files[slot];
         if (*flags++) {
             if (p == NULL)
                 item_model_load(archive, i * 2, (u16)slot, vis_table_c.ground_item_counts[slot - 440]);
@@ -4484,7 +4484,7 @@ void item_models_sync(int archive, int first, int slot, int count)
 ADDRESS(0x80024004, 0x1cc)
 void object_models_sync(int archive, int first, int slot, int count)
 {
-    u8 *flags = SCRATCHPAD->unkF0;
+    u8 *flags = SCRATCHPAD->model_needed_cur;
     int end = count + first;
     int i;
     void *p;
@@ -4492,7 +4492,7 @@ void object_models_sync(int archive, int first, int slot, int count)
     s16 *vab;
 
     for (i = first; i < end; i++, slot++) {
-        p = world_state.unk834C[slot];
+        p = world_state.model_files[slot];
         if (*flags++) {
             if (p == NULL)
                 object_model_load(archive, i * 3, slot);
@@ -4538,9 +4538,9 @@ void world_draw_creatures(void)
     u32 bit;
     int i;
 
-    sp->unkF0 = sp->unkF8;
+    sp->model_needed_cur = sp->model_needed;
     sp->unkF4 = sp->unk244;
-    fill_words((u32 *)sp->unkF8, 0, 32);
+    fill_words((u32 *)sp->model_needed, 0, 32);
     fill_words(sp->unk244, 0, 4);
     i = vis_table_a.count;
     sp->clut_base = 0;
@@ -4551,9 +4551,9 @@ void world_draw_creatures(void)
         e->draw_state = 0;
         flags = e->status.bytes[2] & 0x3f;
         e->status.bytes[2] = flags;
-        if (e->player_dist_sq <= world_state.unk1EE04 * world_state.unk1EE04)
+        if (e->player_dist_sq <= world_state.range_mid * world_state.range_mid)
             e->status.bytes[2] = flags | 0x40;
-        else if (e->player_dist_sq >= world_state.unk1EE00 * world_state.unk1EE00)
+        else if (e->player_dist_sq >= world_state.range_near * world_state.range_near)
             e->status.bytes[2] = flags | 0x80;
         if (e->status.word & 0x300000)
             depth = e->hurt_timer;
@@ -4566,11 +4566,11 @@ void world_draw_creatures(void)
         if (model != NULL) {
         at = &e->position;
         if (e->flags & 0x20) {
-            sp->unkD8.vx = sp->unkD8.vy = sp->unkD8.vz = 0;
+            sp->model_rot.vx = sp->model_rot.vy = sp->model_rot.vz = 0;
             sp->ot = world_state.ot_cur + e->depth_bias;
             sp->near_z = 4 - e->depth_bias;
             sp->far_z = 4096 - e->depth_bias;
-            model_draw(0, e->model_slot + SLOT_A, at, &sp->unkD8, &e->scale, &e->anim_slot,
+            model_draw(0, e->model_slot + SLOT_A, at, &sp->model_rot, &e->scale, &e->anim_slot,
                           &identity_matrix, e->anim, e->anim_frame, 4096 - depth, e->unk24,
                           e->status.bytes[2], 0);
         } else {
@@ -4578,15 +4578,15 @@ void world_draw_creatures(void)
             SVECTOR scale = {4096, 4096, 4096, 0};
 
             e->draw_state = 1;
-            sp->unkD8.vx = e->rot_x;
-            sp->unkD8.vy = e->facing;
-            sp->unkD8.vz = e->rot_z;
+            sp->model_rot.vx = e->rot_x;
+            sp->model_rot.vy = e->facing;
+            sp->model_rot.vz = e->rot_z;
             if (e->visibility != 3) {
                 sp->ot = world_state.ot_cur + e->depth_bias;
                 sp->near_z = 4 - e->depth_bias;
                 sp->far_z = 4096 - e->depth_bias;
-                model_draw(0, e->model_slot + SLOT_A, at, &sp->unkD8, &e->scale, &e->anim_slot,
-                              &world_state.unk1ECE8, e->anim, e->anim_frame, 4096 - depth, e->unk24,
+                model_draw(0, e->model_slot + SLOT_A, at, &sp->model_rot, &e->scale, &e->anim_slot,
+                              &world_state.view_matrix, e->anim, e->anim_frame, 4096 - depth, e->unk24,
                               e->status.bytes[2], 0);
             }
             if (e->shadow_size != 0) {
@@ -4596,7 +4596,7 @@ void world_draw_creatures(void)
                 sp->ot = world_state.ot_cur + e->depth_bias - 4;
                 sp->near_z = 8 - e->depth_bias;
                 sp->far_z = 4100 - e->depth_bias;
-                model_draw(0, 44, &pos, &sp->unkD8, &scale, NULL, &world_state.unk1ECE8, 128, 0,
+                model_draw(0, 44, &pos, &sp->model_rot, &scale, NULL, &world_state.view_matrix, 128, 0,
                               0, 0, 4, 0);
             }
         }
@@ -4608,8 +4608,8 @@ void world_draw_creatures(void)
             if (sound_state.keys[e->voice] == 0)
                 e->voice = -1;
         }
-        sp->unkF8[e->model_slot] = 1;
-        sp->unkC8[e->model_slot] = e->vram_tag;
+        sp->model_needed[e->model_slot] = 1;
+        sp->vram_tags[e->model_slot] = e->vram_tag;
     }
     if (area_state.skip_model_sync == 0)
         creature_models_sync(2, 0, 128, 16);
@@ -4632,13 +4632,13 @@ void world_draw_objects(void)
     int volume, range, d, dz;
     int i;
 
-    sp->unkF0 = sp->unkF8;
+    sp->model_needed_cur = sp->model_needed;
     sp->unkF4 = sp->unk244;
-    fill_words((u32 *)sp->unkF8, 0, 83);
+    fill_words((u32 *)sp->model_needed, 0, 83);
     fill_words(sp->unk244, 0, 75);
     sp->clut_base = 0;
     i = vis_table_b.count;
-    now = cd_state.unk4;
+    now = cd_state.vsync_count;
     while (--i != -1) {
         e = &vis_table_b.entries[vis_table_b.list[i]];
         e->drawn = 0;
@@ -4646,9 +4646,9 @@ void world_draw_objects(void)
             continue;
         flags = e->draw_flags & 0x3f;
         e->draw_flags = flags;
-        if (e->player_dist_sq <= world_state.unk1EE04 * world_state.unk1EE04)
+        if (e->player_dist_sq <= world_state.range_mid * world_state.range_mid)
             e->draw_flags = flags | 0x40;
-        else if (e->player_dist_sq >= world_state.unk1EE00 * world_state.unk1EE00)
+        else if (e->player_dist_sq >= world_state.range_near * world_state.range_near)
             e->draw_flags = flags | 0x80;
         switch (e->kind) {
         case 37:
@@ -4754,41 +4754,41 @@ void world_draw_objects(void)
             }
             break;
         case 38:
-            sp->unkF8[e->type] = 1;
+            sp->model_needed[e->type] = 1;
             size = &e->scale;
             id = object_model_slot(e->type);
             anim_get_file(id, &model);
             if (model == NULL)
                 continue;
-            sp->unkD8.vx = e->rot_x;
-            sp->unkD8.vy = e->facing;
-            sp->unkD8.vz = e->rot_z;
+            sp->model_rot.vx = e->rot_x;
+            sp->model_rot.vy = e->facing;
+            sp->model_rot.vz = e->rot_z;
             sp->ot = world_state.ot_cur + e->depth_bias;
             sp->near_z = 4 - e->depth_bias;
             sp->far_z = 4096 - e->depth_bias;
-            model_draw(0, id, &e->position, &sp->unkD8, size, e->anim_slot,
-                          &world_state.unk1ECE8, e->anim, e->anim_frame, 0, e->light, e->draw_flags, 0);
+            model_draw(0, id, &e->position, &sp->model_rot, size, e->anim_slot,
+                          &world_state.view_matrix, e->anim, e->anim_frame, 0, e->light, e->draw_flags, 0);
             break;
         default:
             r = &vis_table_b.types[e->type];
-            sp->unkF8[e->type] = 1;
+            sp->model_needed[e->type] = 1;
             id = object_model_slot(e->type);
             anim_get_file(id, &model);
             size = &e->scale;
             if (model == NULL)
                 continue;
-            sp->unkD8.vx = e->rot_x;
-            sp->unkD8.vy = e->facing;
-            sp->unkD8.vz = e->rot_z;
+            sp->model_rot.vx = e->rot_x;
+            sp->model_rot.vy = e->facing;
+            sp->model_rot.vz = e->rot_z;
             if (e->flags & 0x40) {
-                sp->unkD8.vx = e->rot_x;
-                sp->unkD8.vy = 0;
-                sp->unkD8.vz = e->rot_z;
+                sp->model_rot.vx = e->rot_x;
+                sp->model_rot.vy = 0;
+                sp->model_rot.vz = e->rot_z;
                 sp->ot = world_state.ot_cur + e->depth_bias;
                 sp->near_z = 4 - e->depth_bias;
                 sp->far_z = 4096 - e->depth_bias;
-                model_draw(0, id, &e->position, &sp->unkD8, size, e->anim_slot,
-                              &world_state.unk1EDA8, e->anim, e->anim_frame, e->light, e->light,
+                model_draw(0, id, &e->position, &sp->model_rot, size, e->anim_slot,
+                              &world_state.pitch_matrix, e->anim, e->anim_frame, e->light, e->light,
                               e->draw_flags, 0);
                 break;
             }
@@ -4800,8 +4800,8 @@ void world_draw_objects(void)
                 sp->ot = world_state.ot_cur + e->depth_bias;
                 sp->near_z = 4 - e->depth_bias;
                 sp->far_z = 4096 - e->depth_bias;
-                model_draw(0, id, &e->position, &sp->unkD8, size, e->anim_slot,
-                              &world_state.unk1ECE8, e->anim, e->anim_frame, e->light, e->light, e->draw_flags, 0);
+                model_draw(0, id, &e->position, &sp->model_rot, size, e->anim_slot,
+                              &world_state.view_matrix, e->anim, e->anim_frame, e->light, e->light, e->draw_flags, 0);
                 if (e->flags & 1)
                     continue;
                 pos = e->position;
@@ -4815,15 +4815,15 @@ void world_draw_objects(void)
                 sp->ot = world_state.ot_cur + e->depth_bias - 5;
                 sp->near_z = 9 - e->depth_bias;
                 sp->far_z = 4101 - e->depth_bias;
-                model_draw(0, (r->flags >> 2 & 1) | 44, &pos, &sp->unkD8, &scale, e->anim_slot,
-                              &world_state.unk1ECE8, 128, 0, e->light, 4096, 4, 0);
+                model_draw(0, (r->flags >> 2 & 1) | 44, &pos, &sp->model_rot, &scale, e->anim_slot,
+                              &world_state.view_matrix, 128, 0, e->light, 4096, 4, 0);
             }
             break;
         }
     }
     if (area_state.skip_model_sync == 0)
         object_models_sync(0, 0, 256, 249);
-    sp->unkF0 = &sp->unkF8[300];
+    sp->model_needed_cur = &sp->model_needed[300];
 }
 
 #define SLOT_C 588
@@ -4838,15 +4838,15 @@ void world_draw_ground_items(void)
     StAnimFile *model;
     int i;
 
-    sp->unkF0 = sp->unkF8;
+    sp->model_needed_cur = sp->model_needed;
     sp->unkF4 = sp->unk244;
-    fill_words((u32 *)sp->unkF8, 0, 32);
+    fill_words((u32 *)sp->model_needed, 0, 32);
     i = vis_table_c.count;
     sp->clut_base = 0;
     while (--i != -1) {
         e = &vis_table_c.entries[vis_table_c.list[i]];
         r = &vis_table_c.types[e->item];
-        if (e->player_dist_xz >= (s32)world_state.unk1EE00)
+        if (e->player_dist_xz >= (s32)world_state.range_near)
             e->draw_flags |= 0x80;
         switch (e->state) {
         case 0:
@@ -4861,42 +4861,42 @@ void world_draw_ground_items(void)
         {
             SVECTOR scale = {4096, 4096, 4096};
 
-            sp->unkF8[r->model] = 1;
+            sp->model_needed[r->model] = 1;
             anim_get_file(r->model + SLOT_C, &model);
             if (model == NULL)
                 continue;
-            sp->unkD8.vx = e->rot_x;
-            sp->unkD8.vy = e->facing;
-            sp->unkD8.vz = e->rot_z;
+            sp->model_rot.vx = e->rot_x;
+            sp->model_rot.vy = e->facing;
+            sp->model_rot.vz = e->rot_z;
             if (r->flags & 0x40) {
                 MATRIX m;
 
                 sp->ot = world_state.ot_cur + e->depth_bias;
                 sp->near_z = 4 - e->depth_bias;
                 sp->far_z = 4096 - e->depth_bias;
-                model_draw(0, r->model + SLOT_C, &e->position, &sp->unkD8, &scale, e->anim_slot,
-                              &world_state.unk1ECE8, 128, 0, 0, 4096, e->draw_flags, 0);
-                sp->unkD8.vx = sp->unkD8.vy = sp->unkD8.vz = 0;
+                model_draw(0, r->model + SLOT_C, &e->position, &sp->model_rot, &scale, e->anim_slot,
+                              &world_state.view_matrix, 128, 0, 0, 4096, e->draw_flags, 0);
+                sp->model_rot.vx = sp->model_rot.vy = sp->model_rot.vz = 0;
                 sp->ot = world_state.ot_cur + e->depth_bias;
                 sp->near_z = 4 - e->depth_bias;
                 sp->far_z = 4096 - e->depth_bias;
-                m = world_state.unk1EDA8;
+                m = world_state.pitch_matrix;
                 if (e->state != 2)
                     RotMatrixX(e->rot_x, &m);
-                model_draw(0, r->model + SLOT_C, &e->position, &sp->unkD8, &scale, e->anim_slot, &m, 129,
+                model_draw(0, r->model + SLOT_C, &e->position, &sp->model_rot, &scale, e->anim_slot, &m, 129,
                               0, 0, 4096, e->draw_flags, 0);
             } else {
                 sp->ot = world_state.ot_cur + e->depth_bias;
                 sp->near_z = 4 - e->depth_bias;
                 sp->far_z = 4096 - e->depth_bias;
-                model_draw(0, r->model + SLOT_C, &e->position, &sp->unkD8, &scale, e->anim_slot,
-                              &world_state.unk1ECE8, 128, 0, 0, 4096, e->draw_flags, 0);
+                model_draw(0, r->model + SLOT_C, &e->position, &sp->model_rot, &scale, e->anim_slot,
+                              &world_state.view_matrix, 128, 0, 0, 4096, e->draw_flags, 0);
             }
         }
     }
     if (area_state.skip_model_sync == 0)
         item_models_sync(5, 0, SLOT_C, 128);
-    sp->unkF0 = &sp->unkF8[128];
+    sp->model_needed_cur = &sp->model_needed[128];
 }
 
 ADDRESS(0x800255f0, 0x634)
@@ -4904,7 +4904,7 @@ void world_draw_effects_placements(void)
 {
     ScratchPad *sp = SCRATCHPAD;
     StEffect *o;
-    StObject24 *f;
+    PlacedObject *f;
     StAnimFile *model;
     VECTOR *at;
     int mode;
@@ -4912,101 +4912,101 @@ void world_draw_effects_placements(void)
     int i;
 
     for (o = effects.slots, i = 127; i != -1; o++, i--) {
-        if (o->unk0 == 0xff)
+        if (o->flags == 0xff)
             continue;
-        mode = o->unk6 & 3;
+        mode = o->draw_mode & 3;
         if (mode == 0)
             continue;
-        *(VECTOR *)&sp->unkE0 = o->unk20;
-        at = &o->unk20;
+        *(VECTOR *)&sp->point_x = o->position;
+        at = &o->position;
         if (mode != 2 && !view_point_in_near_cone())
             continue;
-        sp->clut_base = o->unkE;
-        anim_get_file(o->unkA + 96, &model);
+        sp->clut_base = o->clut_base;
+        anim_get_file(o->model + 96, &model);
         if (model == NULL)
             continue;
-        switch (o->unk6 & 0xc) {
+        switch (o->draw_mode & 0xc) {
         case 0:
-            sp->unkD8.vx = o->unk30.vx;
-            sp->unkD8.vy = o->unk30.vy;
-            sp->unkD8.vz = o->unk30.vz;
+            sp->model_rot.vx = o->rotation.vx;
+            sp->model_rot.vy = o->rotation.vy;
+            sp->model_rot.vz = o->rotation.vz;
             sp->ot = world_state.ot_cur - 7;
             sp->near_z = 11;
             sp->far_z = 4103;
-            model_draw(0, o->unkA + 96, at, &sp->unkD8, &o->unk38, o->unk48,
-                          &world_state.unk1ECE8, o->unk2, o->unk14, o->unk12, o->unk12, o->unk7, 0);
+            model_draw(0, o->model + 96, at, &sp->model_rot, &o->scale, o->anim_slot,
+                          &world_state.view_matrix, o->part, o->anim_frame, o->light, o->light, o->draw_flags, 0);
             break;
         case 4:
             sp->near_z = 11;
             sp->far_z = 4103;
             sp->ot = world_state.ot_cur - 7;
-            model_draw(0, o->unkA + 96, at, &o->unk30, &o->unk38, o->unk48,
-                          &identity_matrix, o->unk2, o->unk14, o->unk12, o->unk12, o->unk7, 0);
+            model_draw(0, o->model + 96, at, &o->rotation, &o->scale, o->anim_slot,
+                          &identity_matrix, o->part, o->anim_frame, o->light, o->light, o->draw_flags, 0);
             break;
         case 8:
             sp->near_z = 11;
             sp->far_z = 4103;
             sp->ot = world_state.ot_cur - 7;
-            model_draw(0, o->unkA + 96, at, &o->unk30, &o->unk38, o->unk48,
-                          &world_state.unk1EDA8, o->unk2, o->unk14, o->unk12, o->unk12, o->unk7, 0);
+            model_draw(0, o->model + 96, at, &o->rotation, &o->scale, o->anim_slot,
+                          &world_state.pitch_matrix, o->part, o->anim_frame, o->light, o->light, o->draw_flags, 0);
             break;
         case 12:
             sp->near_z = -16;
             sp->far_z = 4076;
             sp->ot = world_state.ot_cur + 20;
-            model_draw(0, o->unkA + 96, at, &o->unk30, &o->unk38, o->unk48,
-                          NULL, o->unk2, o->unk14, o->unk12, o->unk12, o->unk7, 0);
+            model_draw(0, o->model + 96, at, &o->rotation, &o->scale, o->anim_slot,
+                          NULL, o->part, o->anim_frame, o->light, o->light, o->draw_flags, 0);
             break;
         }
     }
-    sp->unkD8.vx = sp->unkD8.vy = sp->unkD8.vz = 0;
+    sp->model_rot.vx = sp->model_rot.vy = sp->model_rot.vz = 0;
     sp->clut_base = 0;
     for (f = placement_objects.objects, i = 127; i != -1; f++, i--) {
-        if (f->unk0 == 0xffff)
+        if (f->model == 0xffff)
             continue;
-        if (f->unk0 & 0x8000) {
+        if (f->model & 0x8000) {
             sp->ot = world_state.ot_cur;
             sp->near_z = 4;
             sp->far_z = 4096;
         } else {
-            *(VECTOR *)&sp->unkE0 = f->unk8;
-            at = &f->unk8;
+            *(VECTOR *)&sp->point_x = f->position;
+            at = &f->position;
             if (view_point_in_near_cone()) {
-                kind = f->unk2 & 0x3f;
+                kind = f->kind & 0x3f;
                 if (kind == 1) {
-                    sp->unkD8.vy = (f->unk2 & 0xc0) << 4;
+                    sp->model_rot.vy = (f->kind & 0xc0) << 4;
                     sp->near_z = 24;
                     sp->far_z = 4116;
                     sp->ot = world_state.ot_cur - 20;
-                    model_draw(3, f->unk0 + 40, at, &sp->unkD8, NULL, NULL,
-                                  &world_state.unk1ECE8, f->unk5 + 128, 0, 0, 4096, 7, 0);
-                    sp->unkD8.vy = 0;
-                    model_draw(3, f->unk0 + 40, at, &sp->unkD8, NULL, NULL,
-                                  &world_state.unk1EDA8, f->unk5 + 128, 0, 0, 4096, 7, 0);
+                    model_draw(3, f->model + 40, at, &sp->model_rot, NULL, NULL,
+                                  &world_state.view_matrix, f->frame + 128, 0, 0, 4096, 7, 0);
+                    sp->model_rot.vy = 0;
+                    model_draw(3, f->model + 40, at, &sp->model_rot, NULL, NULL,
+                                  &world_state.pitch_matrix, f->frame + 128, 0, 0, 4096, 7, 0);
                 } else if (kind == 2) {
                     sp->near_z = 24;
                     sp->far_z = 4116;
                     sp->ot = world_state.ot_cur - 20;
-                    model_draw(3, f->unk0 + 40, at, &sp->unkD8, NULL, NULL,
-                                  &world_state.unk1EDA8, f->unk5 + 128, 0, 0, 4096, 7, 0);
+                    model_draw(3, f->model + 40, at, &sp->model_rot, NULL, NULL,
+                                  &world_state.pitch_matrix, f->frame + 128, 0, 0, 4096, 7, 0);
                 } else if (kind == 3) {
                     sp->near_z = 24;
                     sp->far_z = 4116;
                     sp->ot = world_state.ot_cur - 20;
-                    model_draw(3, f->unk0 + 40, at, &sp->unkD8, NULL, NULL,
-                                  &world_state.unk1ECE8, f->unk5 + 128, 0, 0, 4096, 7, 0);
+                    model_draw(3, f->model + 40, at, &sp->model_rot, NULL, NULL,
+                                  &world_state.view_matrix, f->frame + 128, 0, 0, 4096, 7, 0);
                 } else {
                     sp->near_z = 4;
                     sp->far_z = 4096;
                     sp->ot = world_state.ot_cur;
-                    model_draw(3, f->unk0 + 40, at, &sp->unkD8, NULL, NULL,
-                                  &world_state.unk1EDA8, f->unk5 + 128, 0, 0, 4096, 5, 0);
+                    model_draw(3, f->model + 40, at, &sp->model_rot, NULL, NULL,
+                                  &world_state.pitch_matrix, f->frame + 128, 0, 0, 4096, 5, 0);
                 }
             }
         }
-        if (f->unk4 != 0 && placement_objects.frame % f->unk4 == 0) {
-            if (++f->unk5 >= f->unk3)
-                f->unk5 = 0;
+        if (f->frame_period != 0 && placement_objects.frame % f->frame_period == 0) {
+            if (++f->frame >= f->frame_count)
+                f->frame = 0;
         }
     }
     placement_objects.frame++;
@@ -5027,7 +5027,7 @@ void world_draw_effects_placements(void)
     if ((buf)->end < (u_long *)((p) + 1)) \
         return;                           \
     (buf)->cur = (u_long *)((p) + 1);     \
-    world_state.unk8328++
+    world_state.prim_alloc_count++
 
 /* A sprite at its texture size, behind its draw mode. */
 ADDRESS(0x80025c24, 0x1dc)
@@ -5062,7 +5062,7 @@ u8 *color;
     }
     AddPrim(world_state.ot_cur + rec->otz, p);
     AddPrim(world_state.ot_cur + rec->otz, mode);
-    world_state.unk8324 += 2;
+    world_state.prim_count += 2;
 }
 
 /* A sprite scaled to its rectangle. */
@@ -5105,7 +5105,7 @@ u8 *color;
         setSemiTrans(p, 0);
     }
     AddPrim(world_state.ot_cur + rec->otz, p);
-    world_state.unk8324++;
+    world_state.prim_count++;
 }
 
 /* An untextured rectangle, behind its draw mode. */
@@ -5142,7 +5142,7 @@ u8 *color;
     }
     AddPrim(world_state.ot_cur + rec->otz, p);
     AddPrim(world_state.ot_cur + rec->otz, mode);
-    world_state.unk8324 += 2;
+    world_state.prim_count += 2;
 }
 
 /*
@@ -5355,7 +5355,7 @@ void world_render_frame(VECTOR *pos, SVECTOR *rot)
     gfx_begin_frame();
     anim_slots_retire();
     anim_sets_retire();
-    world_state.unk831C[1] = 0;
+    world_state.vertex_face_counts[1] = 0;
     if (viewer.state == 1) {
         frame = &hud_sprites[26 + viewer.quick_item_index];
         hud_selection_blink = (hud_selection_blink + 1) % 32;
@@ -5396,11 +5396,11 @@ void world_render_frame(VECTOR *pos, SVECTOR *rot)
     world_draw_objects();
     world_draw_ground_items();
     world_draw_effects_placements();
-    if (world_state.unk1EE16 != 0)
+    if (world_state.talk_overlay_state != 0)
         talk_draw_overlay();
     gfx_end_frame();
     vsync_wait_tick();
-    world_state.unk1ECC0++;
+    world_state.drawn_frames++;
 }
 
 /* One frame of the world and the player's status; no value is returned
@@ -5470,7 +5470,7 @@ static s32 text_clip_dropped;
     if ((buf)->end < (u_long *)((p) + 1)) \
         return;                           \
     (buf)->cur = (u_long *)((p) + 1);     \
-    world_state.unk8328++
+    world_state.prim_alloc_count++
 
 /*
  * NEW_PRIM with the end of the new primitive kept in the caller's `next`:
@@ -5484,7 +5484,7 @@ static s32 text_clip_dropped;
     if ((buf)->end < (next))              \
         return;                           \
     (buf)->cur = (next);                  \
-    world_state.unk8328++
+    world_state.prim_alloc_count++
 
 /* Draws glyph `c` at (x, y): half-width codes below the split, full-width
  * codes after it. */
@@ -5944,7 +5944,7 @@ void ui_add_draw_mode(int abr, int x, int y)
     addPrim(world_state.ot_cur, p);
 }
 
-/* Card fade states in world_state.unk1EE16. */
+/* Card fade states in world_state.talk_overlay_state. */
 #define CARD_FADE_IN 1
 #define CARD_SHOW_IN 2
 #define CARD_SHOW 3
@@ -5968,34 +5968,34 @@ void talk_draw_overlay(void)
     DVECTOR tex = {960, 256};
     DVECTOR clut = {560, 495};
 
-    if (world_state.unk1EE17 == 1) {
+    if (world_state.talk_overlay_mode == 1) {
         tex.vy = 0;
         clut.vx = 0;
         clut.vy = 511;
     }
-    if (world_state.unk1EE18 == 0)
-        world_state.unk1EE18 = 1;
-    switch (world_state.unk1EE16) {
+    if (world_state.talk_fade_length == 0)
+        world_state.talk_fade_length = 1;
+    switch (world_state.talk_overlay_state) {
     case CARD_FADE_IN:
-        if (world_state.unk1EE17 != 3)
-            fill.r = fill.g = fill.b = (world_state.unk1EE19 << 4) / world_state.unk1EE18;
+        if (world_state.talk_overlay_mode != 3)
+            fill.r = fill.g = fill.b = (world_state.talk_frame << 4) / world_state.talk_fade_length;
         else
             fill.r = fill.g = fill.b = 255;
         ui_fill_rect(&screen, &fill, 1);
         ui_add_draw_mode(2, 0, 0);
         break;
     case CARD_SHOW_IN:
-        if (game_settings.subtitles == 1 || world_state.unk1EE17 == 2) {
-            tint.r = tint.g = tint.b = world_state.unk1EE19 << 3;
+        if (game_settings.subtitles == 1 || world_state.talk_overlay_mode == 2) {
+            tint.r = tint.g = tint.b = world_state.talk_frame << 3;
             ui_draw_image(&card, &tex, &clut, &tint, 3);
-            if (world_state.unk1EE19 >= 16)
-                world_state.unk1EE16 = CARD_SHOW;
+            if (world_state.talk_frame >= 16)
+                world_state.talk_overlay_state = CARD_SHOW;
         } else {
-            world_state.unk1EE16 = CARD_SHOW;
+            world_state.talk_overlay_state = CARD_SHOW;
         }
         break;
     case CARD_SHOW:
-        if (game_settings.subtitles == 1 || world_state.unk1EE17 == 2) {
+        if (game_settings.subtitles == 1 || world_state.talk_overlay_mode == 2) {
             tint.r = tint.g = tint.b = 128;
             if (talk_stream_file == 25 || talk_stream_file == 30 || talk_stream_file == 5)
                 ui_draw_image(&card, &tex, &clut, &tint, 2);
@@ -6004,19 +6004,19 @@ void talk_draw_overlay(void)
         }
         break;
     case CARD_SHOW_OUT:
-        if (game_settings.subtitles == 1 || world_state.unk1EE17 == 2) {
-            tint.r = tint.g = tint.b = (16 - world_state.unk1EE19) << 3;
+        if (game_settings.subtitles == 1 || world_state.talk_overlay_mode == 2) {
+            tint.r = tint.g = tint.b = (16 - world_state.talk_frame) << 3;
             ui_draw_image(&card, &tex, &clut, &tint, 3);
-            if (world_state.unk1EE19 >= 16)
-                world_state.unk1EE16 = CARD_DONE;
+            if (world_state.talk_frame >= 16)
+                world_state.talk_overlay_state = CARD_DONE;
         } else {
-            world_state.unk1EE16 = CARD_DONE;
+            world_state.talk_overlay_state = CARD_DONE;
         }
         break;
     case CARD_FADE_OUT:
-        if (world_state.unk1EE17 != 3)
+        if (world_state.talk_overlay_mode != 3)
             fill.r = fill.g = fill.b =
-                ((world_state.unk1EE18 - world_state.unk1EE19) << 4) / world_state.unk1EE18;
+                ((world_state.talk_fade_length - world_state.talk_frame) << 4) / world_state.talk_fade_length;
         else
             fill.r = fill.g = fill.b = 255;
         ui_fill_rect(&screen, &fill, 1);
@@ -6025,18 +6025,18 @@ void talk_draw_overlay(void)
     default:
         return;
     }
-    if (world_state.unk1EE17 == 0 && world_state.unk1EE16 >= CARD_SHOW_IN &&
-        world_state.unk1EE16 < CARD_FADE_OUT) {
+    if (world_state.talk_overlay_mode == 0 && world_state.talk_overlay_state >= CARD_SHOW_IN &&
+        world_state.talk_overlay_state < CARD_FADE_OUT) {
         fill.r = fill.g = fill.b = 16;
         ui_fill_rect(&screen, &fill, 1);
         ui_add_draw_mode(2, 0, 0);
     }
-    if (world_state.unk1EE17 == 3) {
+    if (world_state.talk_overlay_mode == 3) {
         fill.r = fill.g = fill.b = 255;
         ui_fill_rect(&screen, &fill, 1);
         ui_add_draw_mode(2, 0, 0);
     }
-    world_state.unk1EE19++;
+    world_state.talk_frame++;
 }
 
 /* Draws a Gouraud quad: corner positions and colours in setXY4 order. */
@@ -8641,23 +8641,23 @@ void pause_screen_draw(void)
 ADDRESS(0x80031de4, 0x118)
 void placements_expand(StPlacement *src)
 {
-    StObject24 *dst = placement_objects.objects;
+    PlacedObject *dst = placement_objects.objects;
     int i = 128;
     u16 id;
 
     while (i--) {
         id = src->id;
         if (id != 0xffff) {
-            dst->unk0 = id;
-            dst->unk2 = src->unk4 | (src->unk8 << 6);
-            dst->unk3 = src->unk2;
-            dst->unk4 = src->unk3;
-            dst->unk8.vx = (src->bx << 12) + src->x;
-            dst->unk8.vy = (src->by << 12) + src->y;
-            dst->unk8.vz = (src->bz << 12) + src->z;
-            dst->unk5 = (rand() * dst->unk3) >> 15;
+            dst->model = id;
+            dst->kind = src->kind | (src->turn << 6);
+            dst->frame_count = src->frame_count;
+            dst->frame_period = src->frame_period;
+            dst->position.vx = (src->bx << 12) + src->x;
+            dst->position.vy = (src->by << 12) + src->y;
+            dst->position.vz = (src->bz << 12) + src->z;
+            dst->frame = (rand() * dst->frame_count) >> 15;
         } else {
-            dst->unk0 = 0xffff;
+            dst->model = 0xffff;
         }
         dst++;
         src++;
@@ -8730,14 +8730,14 @@ void lighting_load_defaults(void)
 
     while (i--) {
         light->color = init->color;
-        light->light[0] = init->unk0;
+        light->light[0] = init->light;
         light->back = init->back;
-        light->unk68 = init->unk2C;
-        light->unk6A = init->unk2E;
+        light->depth_cue_near = init->depth_cue_near;
+        light->depth_cue_far = init->depth_cue_far;
         init++;
         light++;
     }
-    lighting.unk2 = 1;
+    lighting.rebuild_matrices = 1;
 }
 
 /* Derives every environment's light matrices 0..3 from matrix 0. */
@@ -8747,7 +8747,7 @@ void lighting_build_matrices(void)
     StLight *light;
     int i;
 
-    if (lighting.unk2) {
+    if (lighting.rebuild_matrices) {
         light = lighting.light;
         i = 64;
         while (i--) {
@@ -8757,14 +8757,14 @@ void lighting_build_matrices(void)
             lighting_quarter_turn_matrix(light, &light->light[3], 3);
             light++;
         }
-        lighting.unk2 = 0;
+        lighting.rebuild_matrices = 0;
     }
 }
 
 ADDRESS(0x80032210, 0x34)
 void lighting_blend_matrix(StLightInit *init, StLight *light, short t)
 {
-    matrix_lerp(&light->light[0], &init->unk0, &light->light[0], t);
+    matrix_lerp(&light->light[0], &init->light, &light->light[0], t);
 }
 
 ADDRESS(0x80032244, 0x38)
@@ -8785,18 +8785,18 @@ void lighting_blend_back(StLightInit *init, StLight *light, short t)
 ADDRESS(0x800322f8, 0x60)
 void lighting_blend_near(StLightInit *init, StLight *light, short t)
 {
-    light->unk68 = math_lerp(light->unk68, init->unk2C, t);
-    if (light->unk68 > light->unk6A - 4096)
-        light->unk6A = light->unk68 + 4096;
+    light->depth_cue_near = math_lerp(light->depth_cue_near, init->depth_cue_near, t);
+    if (light->depth_cue_near > light->depth_cue_far - 4096)
+        light->depth_cue_far = light->depth_cue_near + 4096;
 }
 
 /* Blends unk6A, keeping unk68 at least 4096 below it. */
 ADDRESS(0x80032358, 0x60)
 void lighting_blend_far(StLightInit *init, StLight *light, short t)
 {
-    light->unk6A = math_lerp(light->unk6A, init->unk2E, t);
-    if (light->unk6A < light->unk68 + 4096)
-        light->unk68 = light->unk6A - 4096;
+    light->depth_cue_far = math_lerp(light->depth_cue_far, init->depth_cue_far, t);
+    if (light->depth_cue_far < light->depth_cue_near + 4096)
+        light->depth_cue_near = light->depth_cue_far - 4096;
 }
 
 /*
@@ -8816,7 +8816,7 @@ void lighting_blend(int flags, StLightInit *init, short t)
             lighting_blend_matrix(init, light, t);
             light++;
         }
-        lighting.unk2 = 1;
+        lighting.rebuild_matrices = 1;
     }
     if (flags & 2) {
         light = lighting.light;
@@ -8869,11 +8869,11 @@ short t;
         init.back.b = b;
     }
     if (unk68 != 0xffff) {
-        init.unk2C = unk68;
+        init.depth_cue_near = unk68;
         flags |= 8;
     }
     if (unk6A != 0xffff) {
-        init.unk2E = unk6A;
+        init.depth_cue_far = unk6A;
         flags |= 0x10;
     }
     lighting_blend(flags, &init, t);
@@ -8905,15 +8905,15 @@ void lighting_blend_matrices(StLightMatrix color, StLightMatrix matrix, short t)
         matrix.m[1][0] != 0x7fff && matrix.m[1][1] != 0x7fff && matrix.m[1][2] != 0x7fff &&
         matrix.m[2][0] != 0x7fff && matrix.m[2][1] != 0x7fff && matrix.m[2][2] != 0x7fff) {
         flags |= 1;
-        init.unk0.m[0][0] = matrix.m[0][0];
-        init.unk0.m[0][1] = matrix.m[0][1];
-        init.unk0.m[0][2] = matrix.m[0][2];
-        init.unk0.m[1][0] = matrix.m[1][0];
-        init.unk0.m[1][1] = matrix.m[1][1];
-        init.unk0.m[1][2] = matrix.m[1][2];
-        init.unk0.m[2][0] = matrix.m[2][0];
-        init.unk0.m[2][1] = matrix.m[2][1];
-        init.unk0.m[2][2] = matrix.m[2][2];
+        init.light.m[0][0] = matrix.m[0][0];
+        init.light.m[0][1] = matrix.m[0][1];
+        init.light.m[0][2] = matrix.m[0][2];
+        init.light.m[1][0] = matrix.m[1][0];
+        init.light.m[1][1] = matrix.m[1][1];
+        init.light.m[1][2] = matrix.m[1][2];
+        init.light.m[2][0] = matrix.m[2][0];
+        init.light.m[2][1] = matrix.m[2][1];
+        init.light.m[2][2] = matrix.m[2][2];
     }
     lighting_blend(flags, &init, t);
 }
@@ -8966,13 +8966,13 @@ int blend;
     column = 0;
     for (bits = columns; !(bits & 1); column++)
         bits >>= 1;
-    world_state.unk1EE14 = rows | columns;
+    world_state.next_render_mode = rows | columns;
     if (!blend) {
         world_state.render_mode = rows | columns;
-        world_state.unk1EDFD = row * 3 + column;
+        world_state.selected_light = row * 3 + column;
         return;
     }
-    if (!(world_state.unk1EDFE & 0x80)) {
+    if (!(world_state.light_blend & 0x80)) {
         if (world_state.render_mode & 2) {
             if (world_state.render_mode & 0x10)
                 *world_state.light = lighting.light[12];
@@ -8993,29 +8993,29 @@ int blend;
             *world_state.light = lighting.light[lighting_grid_index(world_state.render_mode)];
         }
     }
-    world_state.unk1EDFD = row * 3 + column;
-    world_state.unk1EE10 = &lighting.light[world_state.unk1EDFD];
-    flags = world_state.unk1EE14;
+    world_state.selected_light = row * 3 + column;
+    world_state.light_to = &lighting.light[world_state.selected_light];
+    flags = world_state.next_render_mode;
     if (flags & 2) {
         if (flags & 0x10)
-            world_state.unk1EE10 = &lighting.light[12];
+            world_state.light_to = &lighting.light[12];
         else if (flags & 0x20)
-            world_state.unk1EE10 = &lighting.light[13];
+            world_state.light_to = &lighting.light[13];
         else if (flags & 0x40)
-            world_state.unk1EE10 = &lighting.light[15];
+            world_state.light_to = &lighting.light[15];
         else if (flags & 0x80)
-            world_state.unk1EE10 = &lighting.light[17];
+            world_state.light_to = &lighting.light[17];
     } else if (flags & 4) {
         if (flags & 0x20)
-            world_state.unk1EE10 = &lighting.light[14];
+            world_state.light_to = &lighting.light[14];
         else if (flags & 0x40)
-            world_state.unk1EE10 = &lighting.light[16];
+            world_state.light_to = &lighting.light[16];
         else if (flags & 0x80)
-            world_state.unk1EE10 = &lighting.light[18];
+            world_state.light_to = &lighting.light[18];
     }
-    *world_state.unk1EE0C = *world_state.light;
+    *world_state.light_from = *world_state.light;
     world_state.render_mode = 0;
-    world_state.unk1EDFE = 0x80;
+    world_state.light_blend = 0x80;
 }
 
 /* Points the current and blend-start environments at their table slots
@@ -9026,14 +9026,14 @@ void lighting_start(void)
     u8 mode;
 
     world_state.light = &lighting.light[43];
-    world_state.unk1EE0C = &lighting.light[44];
-    lighting.unk4 = 0;
-    lighting.unk6 = 0;
-    lighting.unk3 = 0;
-    lighting.unk5 = 0;
-    lighting.unk4 = 0;
-    lighting.unk3 = 0;
-    lighting.unk7 = 0;
+    world_state.light_from = &lighting.light[44];
+    lighting.row_request = 0;
+    lighting.rows = 0;
+    lighting.column_request = 0;
+    lighting.columns = 0;
+    lighting.row_request = 0;
+    lighting.column_request = 0;
+    lighting.last_area = 0;
     mode = lighting.area_mode[area_state.area];
     lighting_select(mode & 0xf0, mode & 0xf, 0);
 }
@@ -9041,18 +9041,18 @@ void lighting_start(void)
 ADDRESS(0x800330f0, 0x20)
 void lighting_clear_requests(void)
 {
-    lighting.unk9 = 0;
-    lighting.unk4 = 0;
-    lighting.unk3 = 0;
-    lighting.unk6 = 0;
-    lighting.unk5 = 0;
+    lighting.force_first_column = 0;
+    lighting.row_request = 0;
+    lighting.column_request = 0;
+    lighting.rows = 0;
+    lighting.columns = 0;
 }
 
 /* An environment field blended from unk1EE0C to unk1EE10 by t / 64 with
  * weight w for the start (unsigned for the colours, signed for the
  * ranges). */
 #define LIGHT_BLEND(field, w) \
-    ((world_state.unk1EE0C->field * (w) + world_state.unk1EE10->field * t) >> 6)
+    ((world_state.light_from->field * (w) + world_state.light_to->field * t) >> 6)
 
 /*
  * Per frame: picks the row and column flags for the current area and
@@ -9073,79 +9073,79 @@ void lighting_update(void)
     rows = mode & 0xf0;
     if (area_state.area == 25 || area_state.area == 26 || area_state.area == 14 ||
         area_state.area == 23) {
-        lighting.unk9 = 0;
-        lighting.unk4 &= ~0x20;
+        lighting.force_first_column = 0;
+        lighting.row_request &= ~0x20;
     }
     if (viewer.equipment_light < 0) {
-        lighting.unk3 |= 1;
-        lighting.unk4 |= 4;
+        lighting.column_request |= 1;
+        lighting.row_request |= 4;
     } else if (viewer.equipment_light > 0) {
-        lighting.unk3 |= 1;
-        lighting.unk4 |= 0x10;
+        lighting.column_request |= 1;
+        lighting.row_request |= 0x10;
     }
-    if (lighting.unkA == 1)
+    if (lighting.paused == 1)
         return;
-    if (lighting.unkA == 2) {
-        lighting.unkA = 0;
+    if (lighting.paused == 2) {
+        lighting.paused = 0;
         return;
     }
-    if (area_state.area != lighting.unk7) {
-        lighting.unk8 = 1;
-        lighting.unk7 = area_state.area;
-        world_state.unk1EDFE = 0;
+    if (area_state.area != lighting.last_area) {
+        lighting.entry_step = 1;
+        lighting.last_area = area_state.area;
+        world_state.light_blend = 0;
     }
-    if (lighting.unk8 == 2 && viewer.state == 6) {
-        lighting.unk3 = 0;
-        lighting.unk4 = 0;
+    if (lighting.entry_step == 2 && viewer.state == 6) {
+        lighting.column_request = 0;
+        lighting.row_request = 0;
     }
-    if (lighting.unk9) {
+    if (lighting.force_first_column) {
         columns = 1;
-        lighting.unk9 = 0;
+        lighting.force_first_column = 0;
     } else if (lighting.area_mode[area_state.area] == 17) {
         columns = 1;
-    } else if ((columns | lighting.unk3) & 4) {
+    } else if ((columns | lighting.column_request) & 4) {
         columns = 4;
-    } else if ((columns | lighting.unk3) & 2) {
+    } else if ((columns | lighting.column_request) & 2) {
         columns = 2;
     } else {
         columns = 1;
     }
-    if (lighting.unk4) {
-        if (lighting.unk4 & 0xe0)
+    if (lighting.row_request) {
+        if (lighting.row_request & 0xe0)
             rows = 16;
-        else if (lighting.unk4 & 0xf)
+        else if (lighting.row_request & 0xf)
             rows = 64;
         else if (lighting.area_mode[area_state.area] & 0x10)
             rows = 16;
         else
             rows = 32;
     }
-    if (columns != lighting.unk5 || rows != lighting.unk6) {
-        if (lighting.unk8 == 2) {
+    if (columns != lighting.columns || rows != lighting.rows) {
+        if (lighting.entry_step == 2) {
             lighting_select(rows, columns, 0);
-            lighting.unk5 = columns;
-            lighting.unk6 = rows;
-        } else if (lighting.unk8 == 0) {
+            lighting.columns = columns;
+            lighting.rows = rows;
+        } else if (lighting.entry_step == 0) {
             lighting_select(rows, columns, 1);
-            lighting.unk5 = columns;
-            lighting.unk6 = rows;
+            lighting.columns = columns;
+            lighting.rows = rows;
         }
     }
-    if (lighting.unk8 == 1 && (short)area_state.load_step >= 7)
-        lighting.unk8 = 2;
-    else if (lighting.unk8 == 2)
-        lighting.unk8 = 0;
-    lighting.unk4 = 0;
-    lighting.unk3 = 0;
-    if (world_state.unk1EDFE & 0x80) {
-        t = world_state.unk1EDFE & 0x7f;
+    if (lighting.entry_step == 1 && (short)area_state.load_step >= 7)
+        lighting.entry_step = 2;
+    else if (lighting.entry_step == 2)
+        lighting.entry_step = 0;
+    lighting.row_request = 0;
+    lighting.column_request = 0;
+    if (world_state.light_blend & 0x80) {
+        t = world_state.light_blend & 0x7f;
         if (t >= 64) {
-            world_state.unk1EDFE = 0;
-            world_state.render_mode = world_state.unk1EE14;
-            *world_state.light = lighting.light[world_state.unk1EDFD];
+            world_state.light_blend = 0;
+            world_state.render_mode = world_state.next_render_mode;
+            *world_state.light = lighting.light[world_state.selected_light];
         }
-        world_state.light->unk68 = LIGHT_BLEND(unk68, 64 - t);
-        world_state.light->unk6A = LIGHT_BLEND(unk6A, 64 - t);
+        world_state.light->depth_cue_near = LIGHT_BLEND(depth_cue_near, 64 - t);
+        world_state.light->depth_cue_far = LIGHT_BLEND(depth_cue_far, 64 - t);
         s = 64 - t;
         world_state.light->color.m[0][0] = LIGHT_BLEND(color.m[0][0], s);
         world_state.light->color.m[0][1] = LIGHT_BLEND(color.m[0][1], s);
@@ -9159,12 +9159,12 @@ void lighting_update(void)
         world_state.light->back.r = LIGHT_BLEND(back.r, s);
         world_state.light->back.g = LIGHT_BLEND(back.g, s);
         world_state.light->back.b = LIGHT_BLEND(back.b, s);
-        world_state.unk1EDFE++;
+        world_state.light_blend++;
     } else {
-        *world_state.light = lighting.light[world_state.unk1EDFD];
+        *world_state.light = lighting.light[world_state.selected_light];
     }
-    world_state.unk1EE00 = world_state.light->unk68 - 1024;
-    world_state.unk1EE04 = 4096;
+    world_state.range_near = world_state.light->depth_cue_near - 1024;
+    world_state.range_mid = 4096;
 }
 
 /* The file's mesh model, part headers and part vertex arrays. */
@@ -9189,7 +9189,7 @@ void anim_register_pack(u16 id, u8 *pack)
         file = (StAnimFile *)pack;
         size = file->size;
         if (size >= 5) {
-            world_state.unk834C[id] = file;
+            world_state.model_files[id] = file;
             sp->model = ANIM_MODEL(file);
         }
         pack += size;
@@ -9200,7 +9200,7 @@ void anim_register_pack(u16 id, u8 *pack)
 ADDRESS(0x80033a48, 0x3c)
 void anim_register(u16 id, StAnimFile *file)
 {
-    world_state.unk834C[id] = file;
+    world_state.model_files[id] = file;
     SCRATCHPAD->model = ANIM_MODEL(file);
 }
 
@@ -9239,7 +9239,7 @@ void vertex_list_scale_add(SVECTOR *dst, short *src, long p)
 ADDRESS(0x80033db8, 0x78)
 void anim_get_file(u16 id, StAnimFile **out)
 {
-    StAnimFile *file = world_state.unk834C[id];
+    StAnimFile *file = world_state.model_files[id];
     u8 state;
 
     *out = file;
@@ -9286,7 +9286,7 @@ int anim_get_vertex(id, part, frame, index, out)
     part_vertex:
         verts = PART_VERTICES(model, part & 0x7f);
         *out = verts[index];
-    } else if (file->unk4 == 0) {
+    } else if (file->animated == 0) {
         part = 0;
         goto part_vertex;
     } else {
@@ -9322,7 +9322,7 @@ int anim_get_vertex(id, part, frame, index, out)
 ADDRESS(0x8003405c, 0x68)
 u_long anim_vertex_count(int id, int part)
 {
-    StAnimFile *file = world_state.unk834C[id];
+    StAnimFile *file = world_state.model_files[id];
     u8 *model;
     u_long count;
 
@@ -9344,8 +9344,8 @@ void anim_slots_init(void)
 
     i = 16;
     do {
-        slot->unk0 = 4;
-        slot->unk10 = NULL;
+        slot->state = 4;
+        slot->deltas = NULL;
         slot++;
     } while (--i);
 }
@@ -9358,8 +9358,8 @@ void anim_slots_retire(void)
 
     i = 16;
     do {
-        if (slot->unk0 & ~4)
-            slot->unk0 = 5;
+        if (slot->state & ~4)
+            slot->state = 5;
         slot++;
     } while (--i);
 }
@@ -9368,12 +9368,12 @@ void anim_slots_retire(void)
 ADDRESS(0x8003413c, 0x64)
 void anim_slot_free(StAnimSlot *slot)
 {
-    if (slot != NULL && (slot->unk0 & 4)) {
-        slot->unk0 = 4;
-        *slot->unk14 = NULL;
-        if (slot->unk10 != NULL) {
-            mem_free(slot->unk10);
-            slot->unk10 = NULL;
+    if (slot != NULL && (slot->state & 4)) {
+        slot->state = 4;
+        *slot->owner = NULL;
+        if (slot->deltas != NULL) {
+            mem_free(slot->deltas);
+            slot->deltas = NULL;
         }
     }
 }
@@ -9387,7 +9387,7 @@ void anim_slots_free_idle(void)
 
     i = 16;
     do {
-        if ((slot->unk0 & ~4) == 1)
+        if ((slot->state & ~4) == 1)
             anim_slot_free(slot);
         slot++;
     } while (--i);
@@ -9401,7 +9401,7 @@ void anim_slots_free_all(void)
     s16 i;
 
     for (i = 16; i != 0; i--) {
-        if (slot->unk0 & ~4)
+        if (slot->state & ~4)
             anim_slot_free(slot);
         slot++;
     }
@@ -9416,8 +9416,8 @@ void anim_slot_alloc(StAnimSlot **out)
     *out = world_state.anim_slots;
     i = 16;
     do {
-        if (!((*out)->unk0 & ~4)) {
-            (*out)->unk4 = 255;
+        if (!((*out)->state & ~4)) {
+            (*out)->clip = 255;
             return;
         }
         (*out)++;
@@ -9426,8 +9426,8 @@ void anim_slot_alloc(StAnimSlot **out)
     *out = world_state.anim_slots;
     i = 16;
     do {
-        if (!((*out)->unk0 & ~4)) {
-            (*out)->unk4 = 255;
+        if (!((*out)->state & ~4)) {
+            (*out)->clip = 255;
             return;
         }
         (*out)++;
@@ -9437,7 +9437,7 @@ void anim_slot_alloc(StAnimSlot **out)
 
 /*
  * Poses model `id` at `frame` of `clip` through the slot at *slotp
- * (claiming one first): the posed vertices go to world_state.unkEB40 and
+ * (claiming one first): the posed vertices go to world_state.posed_vertices and
  * the scratchpad's model-space vertex pointer. Returns 0 when no slot or
  * delta buffer is available.
  */
@@ -9445,7 +9445,7 @@ ADDRESS(0x80034364, 0x2a0)
 int anim_pose(StAnimSlot **slotp, int id, int clip, int frame)
 {
     ScratchPad *sp = SCRATCHPAD;
-    StAnimFile *file = world_state.unk834C[id];
+    StAnimFile *file = world_state.model_files[id];
     StAnimSlot *slot = *slotp;
     StAnimKey *k;
     int key;
@@ -9458,47 +9458,47 @@ int anim_pose(StAnimSlot **slotp, int id, int clip, int frame)
         if (slot == NULL)
             return 0;
     claim:
-        slot->unk2 = id;
-        slot->unk14 = slotp;
-        if (slot->unk10 != NULL) {
-            mem_free(slot->unk10);
-            slot->unk10 = NULL;
+        slot->model_id = id;
+        slot->owner = slotp;
+        if (slot->deltas != NULL) {
+            mem_free(slot->deltas);
+            slot->deltas = NULL;
         }
-        slot->unk10 = mem_alloc(sp->header->n_vertices * sizeof(SVECTOR));
-        if (slot->unk10 == NULL) {
+        slot->deltas = mem_alloc(sp->header->n_vertices * sizeof(SVECTOR));
+        if (slot->deltas == NULL) {
             anim_slots_free_idle();
             anim_sets_free_idle();
             anim_slots_free_all();
             anim_sets_free_all();
-            slot->unk14 = NULL;
-            slot->unk2 = 0xffff;
+            slot->owner = NULL;
+            slot->model_id = 0xffff;
             return 0;
         }
         *slotp = slot;
-    } else if (slot->unk2 != id) {
+    } else if (slot->model_id != id) {
         anim_slot_free(slot);
-        slot->unk4 = 255;
+        slot->clip = 255;
         goto claim;
     }
     k = anim_find_key(file, clip, frame, &key, &frac);
-    if (slot->unk4 != clip || slot->unk6 != key) {
+    if (slot->clip != clip || slot->key != key) {
         model = sp->model;
         sp->header = MODEL_PARTS(model);
         sp->local_vertices = model + (MODEL_PARTS(model)->vertices + 12);
         frames = (u_long *)((u8 *)file + file->frames);
-        slot->unk8 = (SVECTOR *)((u8 *)file + frames[k->from]);
-        slot->unkC = (SVECTOR *)((u8 *)file + frames[k->to]);
-        vertices_sub(slot->unk10, slot->unk8, slot->unkC, sp->header->n_vertices);
-        slot->unk4 = clip;
-        slot->unk6 = key;
+        slot->from_keyframe = (SVECTOR *)((u8 *)file + frames[k->from]);
+        slot->to_keyframe = (SVECTOR *)((u8 *)file + frames[k->to]);
+        vertices_sub(slot->deltas, slot->from_keyframe, slot->to_keyframe, sp->header->n_vertices);
+        slot->clip = clip;
+        slot->key = key;
     }
     frames = (u_long *)((u8 *)file + file->frames);
-    slot->unk8 = (SVECTOR *)((u8 *)file + frames[k->from]);
-    vertices_add(world_state.unkEB40, (SVECTOR *)(sp->model + 12 + sp->header->vertices),
-                 slot->unk8, sp->header->n_vertices);
-    gteMIMefunc(world_state.unkEB40, slot->unk10, sp->header->n_vertices, frac);
-    sp->local_vertices = (u8 *)world_state.unkEB40;
-    slot->unk0 = 6;
+    slot->from_keyframe = (SVECTOR *)((u8 *)file + frames[k->from]);
+    vertices_add(world_state.posed_vertices, (SVECTOR *)(sp->model + 12 + sp->header->vertices),
+                 slot->from_keyframe, sp->header->n_vertices);
+    gteMIMefunc(world_state.posed_vertices, slot->deltas, sp->header->n_vertices, frac);
+    sp->local_vertices = (u8 *)world_state.posed_vertices;
+    slot->state = 6;
     return (int)slot;
 }
 
@@ -9515,19 +9515,19 @@ int anim_prepare(StAnimSlot **slotp, int id, int clip, int frame)
     StAnimFile *file;
     u8 *model;
 
-    if (((StAnimFile *)world_state.unk834C[id])->unk4 == 0) {
+    if (((StAnimFile *)world_state.model_files[id])->animated == 0) {
         if (slot != NULL) {
             anim_slot_free(slot);
             anim_set_free((StAnimSet *)slot);
         }
-        file = world_state.unk834C[id];
+        file = world_state.model_files[id];
         model = ANIM_MODEL(file);
         sp->model = model;
         sp->header = MODEL_PARTS(model);
         sp->local_vertices = model + (MODEL_PARTS(model)->vertices + 12);
         return 1;
     }
-    if (((StAnimFile *)world_state.unk834C[id])->unk6 == 0)
+    if (((StAnimFile *)world_state.model_files[id])->node_count == 0)
         return anim_pose(slotp, id, clip, frame);
     return anim_set_pose((StAnimSet **)slotp, id, clip, frame);
 }

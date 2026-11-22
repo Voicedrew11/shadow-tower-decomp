@@ -26,13 +26,13 @@
 
 /* What player_distance_in_reach measures the viewer against: a position and a reach. */
 typedef struct {
-    s32 unk0;
-    VECTOR pos;          /* 0x04 */
-    SVECTOR unk14;
-    u16 unk1C;           /* 0x1c: added to the reach */
-    u16 unk1E;           /* 0x1e: height below pos.vy */
-    s16 unk20;           /* 0x20: heading */
-    s16 unk22;           /* 0x22: reach along the heading */
+    s32 tests;
+    VECTOR position;     /* 0x04 */
+    SVECTOR velocity;
+    u16 radius;          /* 0x1c: added to the reach */
+    u16 height;          /* 0x1e: height below position.vy */
+    s16 heading;         /* 0x20: heading */
+    s16 speed;           /* 0x22: reach along the heading */
 } PlayerTarget;
 
 /* One TIM block header (the bytes after the flags word). */
@@ -89,7 +89,7 @@ void player_fire_magic_shot(int kind, int slot, ...);
  * a magic record: viewer.magic_defs holds the one each hand casts. */
 typedef struct {
     u8 unk0[2];
-    u16 unk2;            /* 0x02: cost, taken from viewer.mp */
+    u16 mp_cost;         /* 0x02: cost, taken from viewer.mp */
     u8 unk4[0x14];
 } StMagic;
 

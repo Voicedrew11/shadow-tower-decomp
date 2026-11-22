@@ -34,7 +34,7 @@ int xa_stream_finished(void)
 
     pos[1] = cd_loc_to_sector((CdlLOC *)&viewer.xa_pos);
     pos[0] = cd_loc_to_sector(&viewer.xa_start);
-    if (viewer.xa_start_tick + 3600 < cd_state.unk4)
+    if (viewer.xa_start_tick + 3600 < cd_state.vsync_count)
         return 1;
     return pos[1] - pos[0] >= viewer.xa_length * 2;
 }
@@ -98,16 +98,16 @@ void creature_talk(Creature *e, int fixed, int arg2)
             e->anim_frame = 0;
         else
             e->anim_frame = 4096;
-        world_state.unk1EE18 = 4096 / a->anim_step;
+        world_state.talk_fade_length = 4096 / a->anim_step;
     } else {
-        world_state.unk1EE18 = 24;
+        world_state.talk_fade_length = 24;
     }
-    world_state.unk1EE16 = 1;
+    world_state.talk_overlay_state = 1;
     if (arg2)
-        world_state.unk1EE17 = 3;
+        world_state.talk_overlay_mode = 3;
     else
-        world_state.unk1EE17 = 0;
-    world_state.unk1EE19 = 0;
+        world_state.talk_overlay_mode = 0;
+    world_state.talk_frame = 0;
     i = 0;
     for (;;) {
         if (!fixed) {
@@ -117,7 +117,7 @@ void creature_talk(Creature *e, int fixed, int arg2)
                 e->anim_frame = 4096;
                 break;
             }
-        } else if (++i == world_state.unk1EE18) {
+        } else if (++i == world_state.talk_fade_length) {
             break;
         }
         world_run_frame(NULL, NULL, 0);
@@ -134,14 +134,14 @@ void creature_talk(Creature *e, int fixed, int arg2)
     xa_start_stream(r->talk_id, game_progress.talk_counts[r->talk_id]);
     game_progress.talk_counts[r->talk_id]++;
     SsSetSerialVol(0, 64, 64);
-    world_state.unk1EE16 = 2;
-    world_state.unk1EE19 = 0;
+    world_state.talk_overlay_state = 2;
+    world_state.talk_frame = 0;
     do {
         if (xa_stream_finished()) {
             xa_stop_stream();
-            if (world_state.unk1EE16 == 3)
-                world_state.unk1EE19 = 0;
-            world_state.unk1EE16 = 4;
+            if (world_state.talk_overlay_state == 3)
+                world_state.talk_frame = 0;
+            world_state.talk_overlay_state = 4;
         }
         if (!fixed) {
             e->anim_frame += e->anim_step;
@@ -149,7 +149,7 @@ void creature_talk(Creature *e, int fixed, int arg2)
                 e->anim_frame = 0;
         }
         world_run_frame(NULL, NULL, 0);
-    } while (world_state.unk1EE16 != 5);
+    } while (world_state.talk_overlay_state != 5);
     if (!fixed) {
         a = (CreatureTalkScript *)creature_type_find_script(r, 0x72);
         if (a != NULL) {
@@ -160,12 +160,12 @@ void creature_talk(Creature *e, int fixed, int arg2)
             else
                 e->anim_frame = 4096;
         }
-        world_state.unk1EE18 = 4096 / abs(a->anim_step);
+        world_state.talk_fade_length = 4096 / abs(a->anim_step);
     } else {
-        world_state.unk1EE18 = 24;
+        world_state.talk_fade_length = 24;
     }
-    world_state.unk1EE16 = 6;
-    world_state.unk1EE19 = 0;
+    world_state.talk_overlay_state = 6;
+    world_state.talk_frame = 0;
     while (1) {
         if (!fixed) {
             e->anim_frame += e->anim_step;
@@ -177,12 +177,12 @@ void creature_talk(Creature *e, int fixed, int arg2)
                 e->anim_frame = 0;
                 break;
             }
-        } else if (++i == world_state.unk1EE18) {
+        } else if (++i == world_state.talk_fade_length) {
             break;
         }
         world_run_frame(NULL, NULL, 0);
     }
-    world_state.unk1EE16 = 0;
+    world_state.talk_overlay_state = 0;
     pad_clear_input();
 }
 
@@ -192,32 +192,32 @@ void talk_show_message(int id)
 {
     int n;
 
-    world_state.unk1EE18 = 16;
-    world_state.unk1EE16 = 1;
-    world_state.unk1EE17 = 2;
-    world_state.unk1EE19 = 0;
+    world_state.talk_fade_length = 16;
+    world_state.talk_overlay_state = 1;
+    world_state.talk_overlay_mode = 2;
+    world_state.talk_frame = 0;
     n = 16;
     while (n--)
         world_run_frame(NULL, NULL, 0);
     talk_load_image(id + 300, 0);
-    world_state.unk1EE16 = 2;
-    world_state.unk1EE19 = 0;
+    world_state.talk_overlay_state = 2;
+    world_state.talk_frame = 0;
     pad_clear_input();
     do {
         if (pad_state.pressed) {
-            if (world_state.unk1EE16 == 3)
-                world_state.unk1EE19 = 0;
-            world_state.unk1EE16 = 4;
+            if (world_state.talk_overlay_state == 3)
+                world_state.talk_frame = 0;
+            world_state.talk_overlay_state = 4;
         }
         world_run_frame(NULL, NULL, 0);
-    } while (world_state.unk1EE16 != 5);
-    world_state.unk1EE18 = 16;
-    world_state.unk1EE16 = 6;
-    world_state.unk1EE19 = 0;
+    } while (world_state.talk_overlay_state != 5);
+    world_state.talk_fade_length = 16;
+    world_state.talk_overlay_state = 6;
+    world_state.talk_frame = 0;
     n = 16;
     while (n--)
         world_run_frame(NULL, NULL, 0);
-    world_state.unk1EE16 = 0;
-    world_state.unk1EE17 = 0;
+    world_state.talk_overlay_state = 0;
+    world_state.talk_overlay_mode = 0;
     pad_clear_input();
 }

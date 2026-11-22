@@ -411,10 +411,10 @@ void world_shift_position(int dx, int dy, int dz)
     viewer.position.vy += dy;
     i = 128;
     while (i--) {
-        if (f->unk0 != ST_EFFECT_FREE && (f->unk6 & 0xc) != 0xc) {
-            f->unk20.vx += dx;
-            f->unk20.vz += dz;
-            f->unk20.vy += dy;
+        if (f->flags != ST_EFFECT_FREE && (f->draw_mode & 0xc) != 0xc) {
+            f->position.vx += dx;
+            f->position.vz += dz;
+            f->position.vy += dy;
         }
         f++;
     }
@@ -596,7 +596,7 @@ void objects_update(void)
             switch (e->state) {
             case 0:
                 if (e->kind == 1) {
-                    if (world_state.unk834C[e->type + 256] == NULL)
+                    if (world_state.model_files[e->type + 256] == NULL)
                         e->visibility = 0;
                     else
                         e->visibility = 2;
@@ -1330,7 +1330,7 @@ void player_warp(to, keep)
     viewer.push_x = 0;
     j = 128;
     while (j--) {
-        f->unk0 = ST_EFFECT_FREE;
+        f->flags = ST_EFFECT_FREE;
         f++;
     }
     do {

@@ -277,8 +277,8 @@ void map_shift_player_and_creatures(int up)
     }
     i = ST_EFFECT_SLOTS;
     while (i--) {
-        if (fx->unk0 != ST_EFFECT_FREE)
-            fx->unk20.vz += dz;
+        if (fx->flags != ST_EFFECT_FREE)
+            fx->position.vz += dz;
         fx++;
     }
 }
@@ -315,7 +315,7 @@ void map_warp_player(void)
     fade_run_frames(2, 0x1000, 0x1000, 0);
     creatures_update();
     creature_spawn_now(e);
-    if (world_state.unk834C[slot] == NULL)
+    if (world_state.model_files[slot] == NULL)
         creature_model_load(2, index * 5, slot, e->vram_tag & 0xf);
     e->fade = -1;
     e->status.bytes[2] &= 0xf2;

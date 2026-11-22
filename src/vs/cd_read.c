@@ -90,37 +90,37 @@ void cd_request_ready_callback(u_char status, u_char *result)
     u_long rest[70];
 
     if (status == CdlDataReady) {
-        switch (request->unk0) {
+        switch (request->kind) {
         case 0:
             break;
         case 2:
         case 3:
         case 4:
-            while (CdGetSector(request->unk1C, 3) == 0)
+            while (CdGetSector(request->read_cursor, 3) == 0)
                 ;
-            while (CdGetSector(request->unk1C, 512) == 0)
+            while (CdGetSector(request->read_cursor, 512) == 0)
                 ;
-            request->unk1C += 2048;
+            request->read_cursor += 2048;
             while (CdGetSector(rest, 70) == 0)
                 ;
-            if (--request->unk24 == 0) {
+            if (--request->sectors_left == 0) {
                 CdReadyCallback(0);
-                request->unk1 = STEP_DONE;
+                request->step = STEP_DONE;
                 while (CdControlF(CdlNop, 0) == 0)
                     ;
             }
             break;
         }
     } else if (status == CdlDiskError) {
-        switch (request->unk0) {
+        switch (request->kind) {
         case 0:
             break;
         case 2:
         case 3:
         case 4:
-            request->unk24 = -1;
+            request->sectors_left = -1;
             CdReadyCallback(0);
-            request->unk1 = STEP_DONE;
+            request->step = STEP_DONE;
             while (CdControlF(CdlNop, 0) == 0)
                 ;
             break;
@@ -135,18 +135,18 @@ void cd_request_sync_callback(u_char status, u_char *result)
     StCdRequest *request = vs_cd_state.unkDC;
 
     if (status == CdlComplete) {
-        switch (request->unk0) {
+        switch (request->kind) {
         case 0:
             break;
         case 2:
         case 3:
         case 4:
-            switch (request->unk1) {
+            switch (request->step) {
             case STEP_SEEK:
-                request->unk14 = request->unk18;
-                request->unk1 = STEP_READ;
-                request->unk24 = request->unk28;
-                request->unk1C = request->unk20;
+                request->read_loc = request->loc;
+                request->step = STEP_READ;
+                request->sectors_left = request->sectors;
+                request->read_cursor = request->dest;
                 CdReadyCallback(cd_request_ready_callback);
                 CdSyncCallback(cd_request_sync_callback);
                 while (CdControlF(CdlReadN, 0) == 0)
@@ -155,18 +155,18 @@ void cd_request_sync_callback(u_char status, u_char *result)
             case STEP_READ:
                 break;
             case STEP_DONE:
-                if (request->unk0 == 2) {
-                    if (request->unk24 != 0) {
-                        request->unk1 = STEP_SEEK;
-                        while (CdControl(CdlSeekL, (u_char *)&request->unk18, 0) == 0)
+                if (request->kind == 2) {
+                    if (request->sectors_left != 0) {
+                        request->step = STEP_SEEK;
+                        while (CdControl(CdlSeekL, (u_char *)&request->loc, 0) == 0)
                             ;
-                    } else if (cd_checksum_mismatch((u32 *)request->unk20, request->unk28) != 0) {
-                        request->unk1 = STEP_SEEK;
-                        while (CdControl(CdlSeekL, (u_char *)&request->unk18, 0) == 0)
+                    } else if (cd_checksum_mismatch((u32 *)request->dest, request->sectors) != 0) {
+                        request->step = STEP_SEEK;
+                        while (CdControl(CdlSeekL, (u_char *)&request->loc, 0) == 0)
                             ;
                     } else {
                         if (request->done != NULL)
-                            request->done(request->unk20);
+                            request->done(request->dest);
                         cd_request_retire(request);
                     }
                 } else if (request->done != NULL) {
@@ -178,17 +178,17 @@ void cd_request_sync_callback(u_char status, u_char *result)
         }
     } else if (status == CdlAcknowledge) {
         /* Reads the volatile state (retail keeps the load) and acts on no value. */
-        switch (request->unk0) {
+        switch (request->kind) {
         }
     } else if (status == CdlDiskError) {
-        switch (request->unk0) {
+        switch (request->kind) {
         case 0:
             break;
         case 2:
         case 3:
         case 4:
-            request->unk1 = STEP_SEEK;
-            while (CdControl(CdlSeekL, (u_char *)&request->unk18, 0) == 0)
+            request->step = STEP_SEEK;
+            while (CdControl(CdlSeekL, (u_char *)&request->loc, 0) == 0)
                 ;
             break;
         }
@@ -199,15 +199,15 @@ void cd_request_sync_callback(u_char status, u_char *result)
 ADDRESS(0x8002ea94, 0xac)
 void cd_request_retire(StCdRequest *request)
 {
-    request->unk0 = 0;
-    request->unk1 = STEP_SEEK;
+    request->kind = 0;
+    request->step = STEP_SEEK;
     if (++request == &vs_cd_state.unk8[VS_CD_REQUESTS])
         request -= VS_CD_REQUESTS;
     vs_cd_state.unkDC = request;
-    if (request->unk0 != 0) {
+    if (request->kind != 0) {
         CdReadyCallback(0);
         CdSyncCallback(cd_request_sync_callback);
-        while (CdControl(CdlSeekL, (u_char *)&request->unk18, 0) == 0)
+        while (CdControl(CdlSeekL, (u_char *)&request->loc, 0) == 0)
             ;
     } else {
         CdReadyCallback(0);

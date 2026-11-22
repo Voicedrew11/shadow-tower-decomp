@@ -25,7 +25,7 @@
 ADDRESS(0x80034f0c, 0x3c)
 void anim_set_register(u16 id, StAnimFile *file)
 {
-    world_state.unk834C[id] = file;
+    world_state.model_files[id] = file;
     SCRATCHPAD->model = ANIM_MODEL(file);
 }
 
@@ -37,22 +37,22 @@ void anim_sets_init(void)
 
     i = 16;
     do {
-        set->unk0 = 8;
-        set->unk2 = 0xffff;
-        set->unk4 = 255;
-        set->unk8 = NULL;
-        set->unkC = NULL;
-        set->unk10 = NULL;
-        set->unk14 = 0;
-        set->unk18 = 0;
-        set->unk1C = 0;
-        set->unk20 = 0xffff;
-        set->unk24 = NULL;
-        set->unk28 = NULL;
-        set->unk2C = NULL;
-        set->unk30 = NULL;
-        set->unk34 = NULL;
-        set->unk38 = NULL;
+        set->state = 8;
+        set->model_id = 0xffff;
+        set->clip = 255;
+        set->node_ids = NULL;
+        set->node_table = NULL;
+        set->first_block = NULL;
+        set->blocks_run = 0;
+        set->block_count = 0;
+        set->length = 0;
+        set->posed_frame = 0xffff;
+        set->next_block = NULL;
+        set->nodes = NULL;
+        set->records = NULL;
+        set->sub_records = NULL;
+        set->list = NULL;
+        set->owner = NULL;
         set++;
     } while (--i);
 }
@@ -65,8 +65,8 @@ void anim_sets_retire(void)
 
     i = 16;
     do {
-        if (set->unk0 & ~8)
-            set->unk0 = 9;
+        if (set->state & ~8)
+            set->state = 9;
         set++;
     } while (--i);
 }
@@ -75,24 +75,24 @@ void anim_sets_retire(void)
 ADDRESS(0x80035008, 0x94)
 void anim_set_free(StAnimSet *set)
 {
-    if (set != NULL && (set->unk0 & 8)) {
-        set->unk0 = 8;
-        *set->unk38 = NULL;
-        set->unk2 = 0xffff;
-        set->unk4 = 255;
-        set->unk8 = NULL;
-        set->unkC = NULL;
-        set->unk10 = NULL;
-        set->unk14 = 0;
-        set->unk18 = 0;
-        set->unk1C = 0;
-        set->unk20 = 0xffff;
-        set->unk24 = NULL;
-        if (set->unk28 != NULL) {
-            mem_free(set->unk28);
-            set->unk28 = NULL;
+    if (set != NULL && (set->state & 8)) {
+        set->state = 8;
+        *set->owner = NULL;
+        set->model_id = 0xffff;
+        set->clip = 255;
+        set->node_ids = NULL;
+        set->node_table = NULL;
+        set->first_block = NULL;
+        set->blocks_run = 0;
+        set->block_count = 0;
+        set->length = 0;
+        set->posed_frame = 0xffff;
+        set->next_block = NULL;
+        if (set->nodes != NULL) {
+            mem_free(set->nodes);
+            set->nodes = NULL;
         }
-        set->unk38 = NULL;
+        set->owner = NULL;
     }
 }
 
@@ -105,7 +105,7 @@ void anim_sets_free_idle(void)
 
     i = 16;
     do {
-        if ((set->unk0 & ~8) == 1)
+        if ((set->state & ~8) == 1)
             anim_set_free(set);
         set++;
     } while (--i);
@@ -119,7 +119,7 @@ void anim_sets_free_all(void)
     s16 i;
 
     for (i = 16; i != 0; i--) {
-        if (set->unk0 & ~8)
+        if (set->state & ~8)
             anim_set_free(set);
         set++;
     }
@@ -134,8 +134,8 @@ void anim_set_alloc(StAnimSet **out)
     *out = world_state.anim_sets;
     i = 16;
     do {
-        if (!((*out)->unk0 & ~8)) {
-            (*out)->unk4 = 255;
+        if (!((*out)->state & ~8)) {
+            (*out)->clip = 255;
             return;
         }
         (*out)++;
@@ -144,8 +144,8 @@ void anim_set_alloc(StAnimSet **out)
     *out = world_state.anim_sets;
     i = 16;
     do {
-        if (!((*out)->unk0 & ~8)) {
-            (*out)->unk4 = 255;
+        if (!((*out)->state & ~8)) {
+            (*out)->clip = 255;
             return;
         }
         (*out)++;
@@ -164,7 +164,7 @@ void anim_set_alloc(StAnimSet **out)
 ADDRESS(0x8003569c, 0x40c)
 int anim_set_pose(StAnimSet **setp, int id, int clip, u_long frame)
 {
-    StAnimFile *file = world_state.unk834C[id];
+    StAnimFile *file = world_state.model_files[id];
     StAnimSet *set = *setp;
     /* Per node: a list node, a record, a sub-record and a 12-byte list
      * (one would do; the buffer holds one per node). */
@@ -178,67 +178,67 @@ int anim_set_pose(StAnimSet **setp, int id, int clip, u_long frame)
         if (set == NULL)
             return 0;
     claim:
-        set->unk2 = id;
-        set->unk38 = setp;
-        if (set->unk28 != NULL) {
-            mem_free(set->unk28);
-            set->unk28 = NULL;
+        set->model_id = id;
+        set->owner = setp;
+        if (set->nodes != NULL) {
+            mem_free(set->nodes);
+            set->nodes = NULL;
         }
-        set->unk28 = mem_alloc(file->unk6 * size);
-        set->unk2C = (StAnimRecord *)(set->unk28 + file->unk6);
-        set->unk30 = (StAnimSubRecord *)(set->unk2C + file->unk6);
-        set->unk34 = (StAnimList *)(set->unk30 + file->unk6);
-        if (set->unk28 == NULL) {
+        set->nodes = mem_alloc(file->node_count * size);
+        set->records = (StAnimRecord *)(set->nodes + file->node_count);
+        set->sub_records = (StAnimSubRecord *)(set->records + file->node_count);
+        set->list = (StAnimList *)(set->sub_records + file->node_count);
+        if (set->nodes == NULL) {
             anim_slots_free_idle();
             anim_sets_free_idle();
             anim_slots_free_all();
             anim_sets_free_all();
-            set->unk38 = NULL;
-            set->unk2 = 0xffff;
+            set->owner = NULL;
+            set->model_id = 0xffff;
             return 0;
         }
         *setp = set;
-        anim_list_init(set, file->unk6);
-        set->unk8 = (u_long *)((u8 *)file + file->frames);
-        set->unkC = (u8 *)file + file->clips;
-    } else if (set->unk2 != id) {
+        anim_list_init(set, file->node_count);
+        set->node_ids = (u_long *)((u8 *)file + file->frames);
+        set->node_table = (u8 *)file + file->clips;
+    } else if (set->model_id != id) {
         anim_set_free(set);
-        set->unk4 = 255;
+        set->clip = 255;
         goto claim;
     }
-    if (set->unk4 != clip) {
-        data = (u_long *)((u8 *)file + ((u_long *)((u8 *)file + file->unk14))[clip]);
-        set->unk10 = (StAnimBlock *)(data + 1);
-        set->unk18 = *(u_long *)set->unk10;
-        set->unk10 = (StAnimBlock *)(data + 2);
-        set->unk24 = set->unk10;
-        set->unk14 = set->unk18 - 1;
-        while (set->unk14--)
-            set->unk24 = (StAnimBlock *)((u_long *)set->unk24 + set->unk24->length);
-        set->unk1C = set->unk24->frame;
-        set->unk24 = set->unk10;
-        set->unk14 = 0;
-        set->unk20 = -1;
+    if (set->clip != clip) {
+        data = (u_long *)((u8 *)file + ((u_long *)((u8 *)file + file->skeletal_clips))[clip]);
+        set->first_block = (StAnimBlock *)(data + 1);
+        set->block_count = *(u_long *)set->first_block;
+        set->first_block = (StAnimBlock *)(data + 2);
+        set->next_block = set->first_block;
+        set->blocks_run = set->block_count - 1;
+        while (set->blocks_run--)
+            set->next_block = (StAnimBlock *)((u_long *)set->next_block + set->next_block->length);
+        set->length = set->next_block->frame;
+        set->next_block = set->first_block;
+        set->blocks_run = 0;
+        set->posed_frame = -1;
     }
-    t = (set->unk1C * frame) >> 12;
-    set->unk4 = clip;
-    if (t < set->unk20 && set->unk20 != -1) {
-        while (set->unk14++ < set->unk18) {
-            set->unk24 = anim_block_run(set->unk24->frame, set->unk24, set->unk34, set->unk8,
-                                        set->unkC, (u_long *)(ANIM_MODEL(file) + 4));
+    t = (set->length * frame) >> 12;
+    set->clip = clip;
+    if (t < set->posed_frame && set->posed_frame != -1) {
+        while (set->blocks_run++ < set->block_count) {
+            set->next_block = anim_block_run(set->next_block->frame, set->next_block, set->list, set->node_ids,
+                                        set->node_table, (u_long *)(ANIM_MODEL(file) + 4));
         }
-        set->unk14 = 0;
-        set->unk24 = set->unk10;
+        set->blocks_run = 0;
+        set->next_block = set->first_block;
     }
-    SCRATCHPAD->list.anims = set->unk34;
-    while (t >= set->unk24->frame) {
-        set->unk24 = anim_block_run(t, set->unk24, set->unk34, set->unk8, set->unkC,
+    SCRATCHPAD->list.anims = set->list;
+    while (t >= set->next_block->frame) {
+        set->next_block = anim_block_run(t, set->next_block, set->list, set->node_ids, set->node_table,
                                     (u_long *)(ANIM_MODEL(file) + 4));
         anim_list_compose();
-        set->unk14++;
+        set->blocks_run++;
     }
-    set->unk20 = t;
-    set->unk0 = 10;
+    set->posed_frame = t;
+    set->state = 10;
     return (int)set;
 }
 
@@ -255,19 +255,19 @@ int anim_prepare_any(void **slotp, int id, int clip, int frame)
     StAnimFile *file;
     u8 *model;
 
-    if (((StAnimFile *)world_state.unk834C[id])->unk4 == 0) {
+    if (((StAnimFile *)world_state.model_files[id])->animated == 0) {
         if (slot != NULL) {
             anim_set_free(slot);
             anim_slot_free(slot);
         }
-        file = world_state.unk834C[id];
+        file = world_state.model_files[id];
         model = ANIM_MODEL(file);
         sp->model = model;
         sp->header = MODEL_PARTS(model);
         sp->local_vertices = model + (MODEL_PARTS(model)->vertices + 12);
         return 1;
     }
-    if (((StAnimFile *)world_state.unk834C[id])->unk6 == 0)
+    if (((StAnimFile *)world_state.model_files[id])->node_count == 0)
         return anim_pose((StAnimSlot **)slotp, id, clip, frame);
     return anim_set_pose((StAnimSet **)slotp, id, clip, frame);
 }
@@ -281,7 +281,7 @@ ADDRESS(0x80035b80, 0x148)
 void anim_set_node_vertex(StAnimSet *set, int id, int node, int index, VECTOR *out)
 {
     MATRIX unused;
-    StAnimFile *file = world_state.unk834C[id];
+    StAnimFile *file = world_state.model_files[id];
     StAnimNode *n;
     StAnimRecord *rec;
     SVECTOR *v;
@@ -293,13 +293,13 @@ void anim_set_node_vertex(StAnimSet *set, int id, int node, int index, VECTOR *o
         return;
     }
     v = &PART_VERTICES(ANIM_MODEL(file), node)[index];
-    n = anim_list_find_id(set->unk34, node);
+    n = anim_list_find_id(set->list, node);
     if (n == NULL)
         return;
-    for (rec = n->unk4; rec != NULL; rec = rec->unk48)
-        rec->unk0 = 0;
+    for (rec = n->record; rec != NULL; rec = rec->parent)
+        rec->composed = 0;
     *SCRATCH_MATRIX(SCRATCHPAD) = identity_matrix;
-    anim_record_compose(n->unk4);
+    anim_record_compose(n->record);
     gte_ldv0(v);
     gte_rt();
     gte_stlvnl(out);

@@ -31,16 +31,16 @@ void image_stream_queue(int archive, int member, void (*done)())
 ADDRESS(0x80045fb8, 0x44)
 void image_stream_next_run(StCdRequest *request)
 {
-    int n = request->unkE;
+    int n = request->stream_left;
 
     if (n > 16) {
-        request->unk24 = 16;
-        request->unk28 = 16;
-        request->unkE -= 16;
+        request->sectors_left = 16;
+        request->sectors = 16;
+        request->stream_left -= 16;
     } else {
-        request->unk24 = n;
-        request->unk28 = n;
-        request->unkE = 0;
+        request->sectors_left = n;
+        request->sectors = n;
+        request->stream_left = 0;
     }
 }
 
@@ -53,7 +53,7 @@ void image_stream_next_run(StCdRequest *request)
 ADDRESS(0x80045ffc, 0x274)
 void image_stream_update(void)
 {
-    StCdRequest *request = cd_state.unk9D8;
+    StCdRequest *request = cd_state.current;
     u16 *p;
     int used;
     int left;
@@ -61,65 +61,65 @@ void image_stream_update(void)
     u16 h;
     s16 rows;
 
-    if (request->unk0 != 3 || request->unk10 != 1)
+    if (request->kind != 3 || request->status != 1)
         return;
     used = 0;
-    p = (u16 *)request->unk20;
-    request->unk10 = 0;
+    p = (u16 *)request->dest;
+    request->status = 0;
     for (;;) {
         left = 0x8000 - used;
-        h = request->unk4.image.h;
-        if (request->unk4.image.h != 0) {
-            n = request->unk4.image.h * request->unk4.image.w;
+        h = request->payload.image.h;
+        if (request->payload.image.h != 0) {
+            n = request->payload.image.h * request->payload.image.w;
             if (left < n * 2) {
-                rows = left / request->unk4.image.w >> 1;
+                rows = left / request->payload.image.w >> 1;
                 if (rows != 0) {
-                    request->unk4.image.h = rows;
-                    LoadImage(&request->unk4.image, (u_long *)p);
-                    request->unk4.image.h = h - rows;
-                    request->unk4.image.y += rows;
+                    request->payload.image.h = rows;
+                    LoadImage(&request->payload.image, (u_long *)p);
+                    request->payload.image.h = h - rows;
+                    request->payload.image.y += rows;
                 }
                 break;
             }
-            request->unk4.image.h = h;
-            LoadImage(&request->unk4.image, (u_long *)p);
+            request->payload.image.h = h;
+            LoadImage(&request->payload.image, (u_long *)p);
             used += n * 2;
             p += n;
-            request->unk4.image.h = 0;
+            request->payload.image.h = 0;
             continue;
         }
         if (left < 16)
             break;
         if (p[0] != p[4] || p[1] != p[5] || p[2] != p[6] || p[3] != p[7] || p[2] == 0 ||
             p[3] == 0) {
-            request->unk4.image.h = 0;
-            request->unk10 = 0;
-            request->unkE = request->unkC;
+            request->payload.image.h = 0;
+            request->status = 0;
+            request->stream_left = request->stream_sectors;
             image_stream_next_run(request);
-            request->unk1 = 0;
-            while (!CdControl(CdlSeekL, (u_char *)&request->unk18, 0))
+            request->step = 0;
+            while (!CdControl(CdlSeekL, (u_char *)&request->loc, 0))
                 ;
             return;
         }
         used += 16;
         if (p[0] == 0xffff) {
             DrawSync(0);
-            request->unk10 = 2;
-            request->unk24 = 0;
+            request->status = 2;
+            request->sectors_left = 0;
             request->done(request);
             cd_request_retire(request);
             return;
         }
-        request->unk4.image.x = p[0];
-        request->unk4.image.y = p[1];
-        request->unk4.image.w = p[2];
-        request->unk4.image.h = p[3];
+        request->payload.image.x = p[0];
+        request->payload.image.y = p[1];
+        request->payload.image.w = p[2];
+        request->payload.image.h = p[3];
         p += 8;
     }
-    cd_loc_add_sectors(&request->unk18, request->unk28, &request->unk18);
+    cd_loc_add_sectors(&request->loc, request->sectors, &request->loc);
     image_stream_next_run(request);
-    request->unk1 = 0;
+    request->step = 0;
     DrawSync(0);
-    while (!CdControl(CdlSeekL, (u_char *)&request->unk18, 0))
+    while (!CdControl(CdlSeekL, (u_char *)&request->loc, 0))
         ;
 }

@@ -24,13 +24,13 @@ void cd_loc_add_sectors(CdlLOC *pos, int offset, CdlLOC *out)
 ADDRESS(0x80015ad4, 0x58)
 void cd_wait_idle(void)
 {
-    while (cd_state.unk9D8 != cd_state.unk9D4 || cd_state.unk9D8->unk0 != 0)
+    while (cd_state.current != cd_state.next_free || cd_state.current->kind != 0)
         cd_wait_frame();
 }
 
 ADDRESS(0x80015b2c, 0x4c)
 void cd_request_wait_free(StCdRequest *request)
 {
-    while (request->unk0)
+    while (request->kind)
         cd_wait_frame();
 }

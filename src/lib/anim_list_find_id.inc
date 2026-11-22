@@ -12,7 +12,7 @@ StAnimNode *anim_list_find_id(StAnimList *list, int id)
     int i;
 
     for (i = 0; i < list->count; i++, node++) {
-        if (id == node->unk8)
+        if (id == node->part)
             break;
     }
     if (i == list->count)

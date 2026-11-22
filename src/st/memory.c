@@ -79,8 +79,8 @@ void heap_block_release(StBlock *block)
         *block->owner = NULL;
         block->owner = NULL;
     }
-    block->unk1 = 0xff;
-    block->unk2 = 0xffff;
+    block->tag = 0xff;
+    block->slot = 0xffff;
 }
 
 /*

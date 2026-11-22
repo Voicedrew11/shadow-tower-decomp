@@ -119,16 +119,16 @@ void pad_update_state(void)
 ADDRESS(0x80057684, 0xc0)
 void pad_init(void)
 {
-    pad_buffers.unk44[0] = 0x40;
+    pad_buffers.actuators[0] = 0x40;
     pad_buffers.unk48[0] = 0x40;
-    pad_buffers.unk44[1] = 0;
+    pad_buffers.actuators[1] = 0;
     pad_buffers.unk48[1] = 0;
-    pad_buffers.unk44[2] = 0x40;
+    pad_buffers.actuators[2] = 0x40;
     pad_buffers.unk48[2] = 0x40;
-    pad_buffers.unk44[3] = 0;
+    pad_buffers.actuators[3] = 0;
     pad_buffers.unk48[3] = 0;
-    PadInitDirect((u8 *)&pad_buffers.unk0, (u8 *)pad_buffers.unk22);
-    PadSetAct(0, (u8 *)pad_buffers.unk44, 4);
+    PadInitDirect((u8 *)&pad_buffers.status, (u8 *)pad_buffers.port2);
+    PadSetAct(0, (u8 *)pad_buffers.actuators, 4);
     PadStartCom();
     pad_wait_stable();
     pad_setup_actuators_if_stable();
@@ -157,11 +157,11 @@ void pad_read(void)
     pad_update_state();
     if (pad_state.no_input)
         return;
-    if (pad_buffers.unk0)
+    if (pad_buffers.status)
         return;
 
     pad_state.prev_held = pad_state.held;
-    pad_state.held = ~pad_buffers.unk2;
+    pad_state.held = ~pad_buffers.buttons;
     if (pad_state.held != pad_state.prev_held) {
         pad_state.held_changed = 1;
         pad_state.repeat_timer = 0;
@@ -248,12 +248,12 @@ void pad_vibrate(int strength)
                 strength = 255;
             pad_state.vibration_frames = strength / 16 + 5;
             if (pad_state.actuator_count == 1)
-                pad_buffers.unk44[1] = 1;
-            pad_buffers.unk44[3] = strength;
+                pad_buffers.actuators[1] = 1;
+            pad_buffers.actuators[3] = strength;
         } else {
             if (pad_state.actuator_count == 1)
-                pad_buffers.unk44[1] = 0;
-            pad_buffers.unk44[3] = 0;
+                pad_buffers.actuators[1] = 0;
+            pad_buffers.actuators[3] = 0;
         }
     }
 }
@@ -264,7 +264,7 @@ void pad_update_vibration(void)
     if (pad_state.vibration_frames)
         pad_state.vibration_frames--;
     else {
-        pad_buffers.unk44[1] = 0;
-        pad_buffers.unk44[3] = 0;
+        pad_buffers.actuators[1] = 0;
+        pad_buffers.actuators[3] = 0;
     }
 }

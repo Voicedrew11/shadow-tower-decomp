@@ -20,7 +20,7 @@
 ADDRESS(0x80035cc8, 0x3c)
 void effect_play_sound(StEffect *e, int id)
 {
-    sound_play_at_range(id, &e->unk20, 128, 28000, 29000, 0);
+    sound_play_at_range(id, &e->position, 128, 28000, 29000, 0);
 }
 
 /*
@@ -36,18 +36,18 @@ int effect_attack(int arg0, u_long height, int drop)
     CollisionState *req;
     VECTOR pos;
 
-    if (e->unk8 == 0) {
-        pos.vx = e->unk20.vx;
-        pos.vy = e->unk20.vy - (height & 0x0fffffff) + drop;
-        pos.vz = e->unk20.vz;
+    if (e->attack_delay == 0) {
+        pos.vx = e->position.vx;
+        pos.vy = e->position.vy - (height & 0x0fffffff) + drop;
+        pos.vz = e->position.vz;
         req = &vis_lists;
         req->position = pos;
         req->radius = arg0;
         req->height = height;
-        req->velocity = e->unk40;
-        req->speed = SquareRoot0(e->unk40.vx * e->unk40.vx + e->unk40.vz * e->unk40.vz);
-        req->heading = ratan2(e->unk40.vz, e->unk40.vx);
-        switch (e->unk0 & 7) {
+        req->velocity = e->velocity;
+        req->speed = SquareRoot0(e->velocity.vx * e->velocity.vx + e->velocity.vz * e->velocity.vz);
+        req->heading = ratan2(e->velocity.vz, e->velocity.vx);
+        switch (e->flags & 7) {
         case 2:
             vis_lists.tests = 50;
             break;
@@ -65,7 +65,7 @@ int effect_attack(int arg0, u_long height, int drop)
         }
         return collision_query(req);
     }
-    e->unk8--;
+    e->attack_delay--;
     return 0;
 }
 
@@ -96,7 +96,7 @@ void effect_emit(u_long flags, int kind, StEffectDef *def, int arg, VECTOR *pos)
     options = flags & 0x000f0000;
     flags &= ~0x000f0000;
     if (flags & 0x80)
-        player_hit(def->unk4, 4096, def->unk16, (long *)pos);
+        player_hit(def->physical_damage, 4096, def->hit_effect, (long *)pos);
     if (!(flags & 0x10))
         return;
     target = &vis_table_a.entries[vis_lists.creature_in_reach];
@@ -123,10 +123,10 @@ void effect_emit(u_long flags, int kind, StEffectDef *def, int arg, VECTOR *pos)
     } else {
         base = 0;
     }
-    src = level < 6 ? def->unk4 : viewer.weapon_attack;
+    src = level < 6 ? def->physical_damage : viewer.weapon_attack;
     for (i = 0; i < 3; i++, src++)
         levels[i] = *src;
-    src = def->unkA;
+    src = def->element_damage;
     for (i = 0; i < 6; i++, src++) {
         if (*src == 0)
             levels[3 + i] = 0;
@@ -147,7 +147,7 @@ void effect_emit(u_long flags, int kind, StEffectDef *def, int arg, VECTOR *pos)
 ADDRESS(0x80036150, 0x3c)
 void effect_emit_current(u_long flags, int arg, VECTOR *pos)
 {
-    effect_emit(flags, effects.cur->unk0, effects.def, arg, pos);
+    effect_emit(flags, effects.cur->flags, effects.def, arg, pos);
 }
 
 /* effect_emit for the current effect from a point behind it along its
@@ -158,10 +158,10 @@ void effect_emit_behind(u_long flags)
     StEffect *e = effects.cur;
     VECTOR pos;
 
-    pos.vx = e->unk20.vx - e->unk40.vx * 8;
-    pos.vy = e->unk20.vy - e->unk40.vy * 8;
-    pos.vz = e->unk20.vz - e->unk40.vz * 8;
-    effect_emit_current(flags, (u8)(e->unk1 - 44) < 4 ? e->unk52.h : 5120, &pos);
+    pos.vx = e->position.vx - e->velocity.vx * 8;
+    pos.vy = e->position.vy - e->velocity.vy * 8;
+    pos.vz = e->position.vz - e->velocity.vz * 8;
+    effect_emit_current(flags, (u8)(e->kind - 44) < 4 ? e->state2.h : 5120, &pos);
 }
 
 /* Vertex `index` of the effect's model, scaled by `scale` (4096ths) and
@@ -172,13 +172,13 @@ void effect_vertex(StEffect *e, int index, VECTOR *out, SVECTOR *scale)
     SVECTOR rot;
     SVECTOR v;
 
-    anim_get_vertex(e->unkA + 40, e->unk2, e->unk14, index, &v);
+    anim_get_vertex(e->model + 40, e->part, e->anim_frame, index, &v);
     v.vx = (v.vx * scale->vx) >> 12;
     v.vy = (v.vy * scale->vy) >> 12;
     v.vz = (v.vz * scale->vz) >> 12;
-    rot.vx = e->unk30.vx;
-    rot.vy = e->unk30.vy + 2048;
-    rot.vz = e->unk30.vz;
+    rot.vx = e->rotation.vx;
+    rot.vy = e->rotation.vy + 2048;
+    rot.vz = e->rotation.vz;
     vector_rotate(&rot, &v, out);
 }
 
@@ -187,9 +187,9 @@ ADDRESS(0x80036300, 0x70)
 void effect_vertex_world(StEffect *e, int index, VECTOR *out, SVECTOR *scale)
 {
     effect_vertex(e, index, out, scale);
-    out->vx += e->unk20.vx;
-    out->vy += e->unk20.vy;
-    out->vz += e->unk20.vz;
+    out->vx += e->position.vx;
+    out->vy += e->position.vy;
+    out->vz += e->position.vz;
 }
 
 /* A free effect slot, or NULL. */
@@ -201,7 +201,7 @@ StEffect *effect_alloc(void)
 
     i = ST_EFFECT_SLOTS;
     do {
-        if (e->unk0 == ST_EFFECT_FREE)
+        if (e->flags == ST_EFFECT_FREE)
             return e;
         e++;
     } while (--i);
@@ -217,13 +217,13 @@ void effect_preset_1(e, a, scale, b)
     s16 scale;
     u8 b;
 {
-    e->unk6 = 1;
-    e->unk2 = 128;
+    e->draw_mode = 1;
+    e->part = 128;
     e->unk9 = 52;
-    e->unkA = a;
-    e->unk7 = b;
-    e->unk12 = 4096;
-    e->unk38.vx = e->unk38.vy = e->unk38.vz = scale;
+    e->model = a;
+    e->draw_flags = b;
+    e->light = 4096;
+    e->scale.vx = e->scale.vy = e->scale.vz = scale;
 }
 
 ADDRESS(0x800363ec, 0x38)
@@ -233,13 +233,13 @@ void effect_preset_5(e, a, scale, b)
     s16 scale;
     u8 b;
 {
-    e->unk6 = 5;
-    e->unk2 = 128;
+    e->draw_mode = 5;
+    e->part = 128;
     e->unk9 = 51;
-    e->unkA = a;
-    e->unk7 = b;
-    e->unk12 = 4096;
-    e->unk38.vx = e->unk38.vy = e->unk38.vz = scale;
+    e->model = a;
+    e->draw_flags = b;
+    e->light = 4096;
+    e->scale.vx = e->scale.vy = e->scale.vz = scale;
 }
 
 ADDRESS(0x80036424, 0x60)
@@ -249,16 +249,16 @@ void effect_preset_14(e, a, yaw, height)
     s16 yaw;
     int height;
 {
-    e->unk6 = 14;
-    e->unk2 = 128;
-    e->unk7 = 5;
+    e->draw_mode = 14;
+    e->part = 128;
+    e->draw_flags = 5;
     e->unk9 = 52;
-    e->unk12 = 4096;
-    e->unk38.vx = e->unk38.vz = e->unk38.vy = 256;
-    e->unkA = a;
-    e->unk20.vx = 160;
-    e->unk20.vy = height + 120;
-    e->unk20.vz = 0;
-    e->unk30.vx = yaw;
-    e->unk30.vy = e->unk30.vz = 0;
+    e->light = 4096;
+    e->scale.vx = e->scale.vz = e->scale.vy = 256;
+    e->model = a;
+    e->position.vx = 160;
+    e->position.vy = height + 120;
+    e->position.vz = 0;
+    e->rotation.vx = yaw;
+    e->rotation.vy = e->rotation.vz = 0;
 }

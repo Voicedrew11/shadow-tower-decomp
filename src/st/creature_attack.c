@@ -49,7 +49,7 @@ void effect_spawn_attack(Creature *e, int kind, VECTOR *pos)
             rot.vz = 0;
             fx = effect_spawn(r->unk08, 0x81, kind, &p, &dir, 256, &rot, e->model_slot);
             if (fx)
-                fx->unk8 = 3;
+                fx->attack_delay = 3;
         }
         break;
     case 0x3a:
@@ -58,7 +58,7 @@ void effect_spawn_attack(Creature *e, int kind, VECTOR *pos)
             effect_jitter_offset(&dir, &p, pos);
             fx = effect_spawn(r->unk08, 0x81, kind, &p, &dir, 0x1000, &rot, e->model_slot);
             if (fx)
-                fx->unk8 = 0;
+                fx->attack_delay = 0;
         }
         break;
     case 0x3e:
@@ -74,7 +74,7 @@ void effect_spawn_attack(Creature *e, int kind, VECTOR *pos)
             effect_jitter_offset(&dir, &p, pos);
             fx = effect_spawn(r->unk08, 0x81, kind, &p, &dir, 0x200, &rot, e->model_slot);
             if (fx)
-                fx->unk8 = 3;
+                fx->attack_delay = 3;
         }
         break;
     case 0x57:
@@ -84,7 +84,7 @@ void effect_spawn_attack(Creature *e, int kind, VECTOR *pos)
         creature_aim_shot(e, target, 384, &p, &dir, &rot, -1, 16, 1);
         fx = effect_spawn(r->unk08, 0x81, kind, &p, &dir, 0x400, e->model_slot);
         if (fx)
-            fx->unk8 = 0;
+            fx->attack_delay = 0;
         break;
     case 0x40:
     case 0x5d:
@@ -105,7 +105,7 @@ void effect_spawn_attack(Creature *e, int kind, VECTOR *pos)
         creature_aim_shot(e, target, 384, &p, &dir, &rot, -1, 16, 1);
         fx = effect_spawn(r->unk08, 0x81, kind, &p, &dir, 0x1000, &rot, e->model_slot);
         if (fx)
-            fx->unk8 = 0;
+            fx->attack_delay = 0;
         break;
     case 0x58:
     case 0x5c:
@@ -119,7 +119,7 @@ void effect_spawn_attack(Creature *e, int kind, VECTOR *pos)
         creature_aim_shot(e, target, 512, &p, &dir, &rot, -1, 16, 1);
         fx = effect_spawn(r->unk08, 0x81, kind, &p, &dir, 0x200, e->model_slot);
         if (fx)
-            fx->unk8 = 0;
+            fx->attack_delay = 0;
         break;
     case 0x41:
         effect_random_offset(&dir, &p, pos, (int)e, 0, 48);
@@ -128,7 +128,7 @@ void effect_spawn_attack(Creature *e, int kind, VECTOR *pos)
         rot.vz = 0;
         fx = effect_spawn(r->unk08, 0x81, kind, &p, &dir, 0x600, &rot, e->model_slot);
         if (fx)
-            fx->unk8 = 3;
+            fx->attack_delay = 3;
         break;
     case 0x56:
     case 0x5f:
@@ -138,7 +138,7 @@ void effect_spawn_attack(Creature *e, int kind, VECTOR *pos)
             effect_jitter_offset(&dir, &p, pos);
             fx = effect_spawn(r->unk08, 0x81, kind, &p, &dir, 0x400, e->model_slot);
             if (fx)
-                fx->unk8 = 0;
+                fx->attack_delay = 0;
         }
         break;
     case 0x55:
@@ -147,7 +147,7 @@ void effect_spawn_attack(Creature *e, int kind, VECTOR *pos)
         creature_aim_shot(e, target, 256, &p, &dir, &rot, -1, 16, 1);
         fx = effect_spawn(r->unk08, 0x81, kind, &p, &dir, 0x200, e->model_slot);
         if (fx)
-            fx->unk40.vy = 0;
+            fx->velocity.vy = 0;
         break;
     case 0x31:
     case 0x32:
@@ -156,7 +156,7 @@ void effect_spawn_attack(Creature *e, int kind, VECTOR *pos)
             effect_random_offset(&dir, &p, pos, (int)e, -e->height, -48);
             fx = effect_spawn(r->unk08, 0x81, kind, &p, &dir, 0x600, e->model_slot);
             if (fx)
-                fx->unk8 = 3;
+                fx->attack_delay = 3;
         }
         break;
     case 0x47:
@@ -167,7 +167,7 @@ void effect_spawn_attack(Creature *e, int kind, VECTOR *pos)
             effect_random_offset(&dir, &p, pos, (int)e, 0, -48);
             fx = effect_spawn(r->unk08, 0x81, kind, &p, &dir, 0x600, e->model_slot);
             if (fx)
-                fx->unk8 = 3;
+                fx->attack_delay = 3;
         }
         break;
     case 0x33:
@@ -203,7 +203,7 @@ void effect_spawn_attack(Creature *e, int kind, VECTOR *pos)
             effect_jitter_offset(&dir, &p, pos);
             fx = effect_spawn(r->unk08, 0x81, kind, &p, &dir, 0x400, e->model_slot);
             if (fx)
-                fx->unk8 = 3;
+                fx->attack_delay = 3;
         }
         break;
     case 0xc8:
@@ -222,7 +222,7 @@ void effect_spawn_attack(Creature *e, int kind, VECTOR *pos)
         creature_aim_shot(e, target, 768, &p, &dir, &rot, -1, 16, 1);
         fx = effect_spawn(r->unk08, 0x81, kind, &p, &dir, 0x800, &rot, e->model_slot, e);
         if (fx)
-            fx->unk8 = 3;
+            fx->attack_delay = 3;
         break;
     case 0x3b:
     case 0x50:
@@ -262,7 +262,7 @@ void effect_spawn_attack(Creature *e, int kind, VECTOR *pos)
         creature_aim_shot(e, target, 384, &p, &dir, &rot, -1, 16, 1);
         fx = effect_spawn(r->unk08, 0x81, kind, &p, &dir, 0x200, &rot, e->model_slot);
         if (fx)
-            fx->unk8 = 0;
+            fx->attack_delay = 0;
         break;
     }
 }

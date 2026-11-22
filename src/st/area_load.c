@@ -46,7 +46,7 @@ void area_hook_none(void)
 ADDRESS(0x800443f4, 0x10)
 void image_stream_set_ready(StCdRequest *request)
 {
-    request->unk10 = 1;
+    request->status = 1;
 }
 
 /*
@@ -274,8 +274,8 @@ void area_load_current_blocking(void)
             break;
     } while ((s16)area_state.load_step < 6 || (s16)area_state.load_step == 240);
     cd_wait_idle();
-    world_state.unk8308[0] = area_world_buffer;
-    world_state.unk8308[1] = area_collision_buffer;
+    world_state.area_geometry[0] = area_world_buffer;
+    world_state.area_geometry[1] = area_collision_buffer;
 }
 
 ADDRESS(0x80045010, 0x34)
@@ -367,7 +367,7 @@ start:
     area_state.shift_z_fine = f5;
     area_state.shift_applied = 0;
     if (a0 < 44)
-        area_state.entry_fade_start = cd_state.unk4;
+        area_state.entry_fade_start = cd_state.vsync_count;
     else
         area_state.entry_fade_start = -1;
     if (a1 == 0xff) {
@@ -457,9 +457,9 @@ void area_load_collision_done(void)
 ADDRESS(0x800455f4, 0x54)
 void area_load_images_done(StCdRequest *request)
 {
-    if (request->unk10 == 0) {
-        request->unk10 = 1;
-    } else if (request->unk10 == 2) {
+    if (request->status == 0) {
+        request->status = 1;
+    } else if (request->status == 2) {
         area_state.load_step = 6;
         sound_state.unkC = 0;
         area_state.unk26 = game_settings.bgm_volume;
@@ -469,8 +469,8 @@ void area_load_images_done(StCdRequest *request)
 ADDRESS(0x80045648, 0x1c)
 void area_stream_set_ready(StCdRequest *request)
 {
-    if (request->unk10 == 0)
-        request->unk10 = 1;
+    if (request->status == 0)
+        request->status = 1;
 }
 
 ADDRESS(0x80045664, 0x18)
@@ -604,12 +604,12 @@ void area_load_update(void)
             }
             item_model_slots_clear();
             for (i = 15; i != -1; i--) {
-                if (world_state.unk834C[128 + i])
-                    heap_free(world_state.unk834C[128 + i]);
+                if (world_state.model_files[128 + i])
+                    heap_free(world_state.model_files[128 + i]);
             }
             for (i = 127; i != -1; i--) {
-                if (world_state.unk8C7C[i])
-                    heap_free(world_state.unk8C7C[i]);
+                if (world_state.item_model_files[i])
+                    heap_free(world_state.item_model_files[i]);
             }
             copy_words((u32 *)vis_table_a.types, (u32 *)(p + 1), 2816);
             creature_types_link_scripts();

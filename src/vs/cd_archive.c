@@ -74,8 +74,8 @@ void cd_init(void)
     i = 0;
     do {
         i++;
-        r->unk0 = 0;
-        r->unk1 = 0;
+        r->kind = 0;
+        r->step = 0;
         r++;
     } while (i < VS_CD_REQUESTS);
     vs_cd_state.unkD8 = vs_cd_state.unk8;

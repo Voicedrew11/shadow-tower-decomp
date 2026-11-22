@@ -16,4 +16,4 @@
 #include <st/gfx.h>
 
 DATA(0x8015c488, 0xc04, ".bss")
-StAnimObjects placement_objects;
+PlacementObjects placement_objects;

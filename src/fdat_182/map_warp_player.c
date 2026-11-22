@@ -74,7 +74,7 @@ void map_warp_player(int gate)
         index = e->type;
         slot = e->model_slot + 128;
         creature_spawn_now(e);
-        if (world_state.unk834C[slot] == NULL)
+        if (world_state.model_files[slot] == NULL)
             creature_model_load(2, index * 5, slot, e->vram_tag & 0xf);
         e->fade = -1;
         e->status.bytes[2] &= 0xf2;

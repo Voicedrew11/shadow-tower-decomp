@@ -15,7 +15,7 @@
 ADDRESS(0x80032228, 0x3c)
 void effect_emit_current(u_long flags, int arg, VECTOR *pos)
 {
-    effect_emit(flags, vs_effects.cur->unk0, vs_effects.def, arg, pos);
+    effect_emit(flags, vs_effects.cur->flags, vs_effects.def, arg, pos);
 }
 
 /* effect_emit_current from a point behind the current effect along its velocity. */
@@ -25,10 +25,10 @@ void effect_emit_behind(u_long flags)
     StEffect *e = vs_effects.cur;
     VECTOR pos;
 
-    pos.vx = e->unk20.vx - e->unk40.vx * 8;
-    pos.vy = e->unk20.vy - e->unk40.vy * 8;
-    pos.vz = e->unk20.vz - e->unk40.vz * 8;
-    effect_emit_current(flags, (u8)(e->unk1 - 44) < 4 ? e->unk52.h : 5120, &pos);
+    pos.vx = e->position.vx - e->velocity.vx * 8;
+    pos.vy = e->position.vy - e->velocity.vy * 8;
+    pos.vz = e->position.vz - e->velocity.vz * 8;
+    effect_emit_current(flags, (u8)(e->kind - 44) < 4 ? e->state2.h : 5120, &pos);
 }
 
 /* A free effect slot, or NULL. */
@@ -40,7 +40,7 @@ StEffect *effect_alloc(void)
 
     i = ST_EFFECT_SLOTS;
     do {
-        if (e->unk0 == ST_EFFECT_FREE)
+        if (e->flags == ST_EFFECT_FREE)
             return e;
         e++;
     } while (--i);
@@ -51,40 +51,40 @@ StEffect *effect_alloc(void)
 ADDRESS(0x80032334, 0x38)
 void effect_preset_1(StEffect *e, s16 a, s16 scale, u8 b)
 {
-    e->unk6 = 1;
-    e->unk2 = 128;
+    e->draw_mode = 1;
+    e->part = 128;
     e->unk9 = 52;
-    e->unkA = a;
-    e->unk7 = b;
-    e->unk12 = 4096;
-    e->unk38.vx = e->unk38.vy = e->unk38.vz = scale;
+    e->model = a;
+    e->draw_flags = b;
+    e->light = 4096;
+    e->scale.vx = e->scale.vy = e->scale.vz = scale;
 }
 
 ADDRESS(0x8003236c, 0x38)
 void effect_preset_5(StEffect *e, s16 a, s16 scale, u8 b)
 {
-    e->unk6 = 5;
-    e->unk2 = 128;
+    e->draw_mode = 5;
+    e->part = 128;
     e->unk9 = 51;
-    e->unkA = a;
-    e->unk7 = b;
-    e->unk12 = 4096;
-    e->unk38.vx = e->unk38.vy = e->unk38.vz = scale;
+    e->model = a;
+    e->draw_flags = b;
+    e->light = 4096;
+    e->scale.vx = e->scale.vy = e->scale.vz = scale;
 }
 
 ADDRESS(0x800323a4, 0x60)
 void effect_preset_14(StEffect *e, s16 a, s16 yaw, int height)
 {
-    e->unk6 = 14;
-    e->unk2 = 128;
-    e->unk7 = 5;
+    e->draw_mode = 14;
+    e->part = 128;
+    e->draw_flags = 5;
     e->unk9 = 52;
-    e->unk12 = 4096;
-    e->unk38.vx = e->unk38.vz = e->unk38.vy = 256;
-    e->unkA = a;
-    e->unk20.vx = 160;
-    e->unk20.vy = height + 120;
-    e->unk20.vz = 0;
-    e->unk30.vx = yaw;
-    e->unk30.vy = e->unk30.vz = 0;
+    e->light = 4096;
+    e->scale.vx = e->scale.vz = e->scale.vy = 256;
+    e->model = a;
+    e->position.vx = 160;
+    e->position.vy = height + 120;
+    e->position.vz = 0;
+    e->rotation.vx = yaw;
+    e->rotation.vy = e->rotation.vz = 0;
 }

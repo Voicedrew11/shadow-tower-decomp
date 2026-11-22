@@ -21,7 +21,7 @@ void effect_emit(u_long flags, int kind, StEffectDef *def, int arg, VECTOR *pos)
 ADDRESS(0x80032208, 0x20)
 int func_80032208(StEffect *e)
 {
-    int kind = e->unk0 & 0x40;
+    int kind = e->flags & 0x40;
 
     if (kind)
         kind = 0;

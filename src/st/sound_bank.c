@@ -64,17 +64,17 @@ void sound_key_off(short voice, int id, int note)
 ADDRESS(0x80058620, 0x150)
 void sound_bank_transfer_body(void)
 {
-    StCdRequest *request = cd_state.unk9D8;
+    StCdRequest *request = cd_state.current;
     StVabSlot *slot;
     int r;
 
-    if (request->unk0 != 4)
+    if (request->kind != 4)
         return;
-    if (request->unk11 != 2)
+    if (request->bank_step != 2)
         return;
-    slot = &sound_state.slots[request->unk4.bank.slot];
+    slot = &sound_state.slots[request->payload.bank.slot];
     for (;;) {
-        r = SsVabTransBodyPartly(request->unk20, 0xa000, slot->vab);
+        r = SsVabTransBodyPartly(request->dest, 0xa000, slot->vab);
         if (r == -1) {
             SsVabClose(slot->vab);
             slot->vab = r;
@@ -82,14 +82,14 @@ void sound_bank_transfer_body(void)
             /* A bank request keeps its archive number in the byte the read
              * requests use for the callbacks' state; retail reads it as a
              * plain byte (one combined load, first of the three). */
-            sound_bank_load(*(u8 *)&request->unk10, request->unk4.bank.member,
-                          request->unk4.bank.slot);
+            sound_bank_load(*(u8 *)&request->status, request->payload.bank.member,
+                          request->payload.bank.slot);
         } else if (r == -2) {
-            request->unk1 = 0;
-            request->unk11 = 1;
-            cd_loc_add_sectors(&request->unk18, request->unk28, &request->unk18);
+            request->step = 0;
+            request->bank_step = 1;
+            cd_loc_add_sectors(&request->loc, request->sectors, &request->loc);
             SsVabTransCompleted(1);
-            while (CdControl(CdlSeekL, (u_char *)&request->unk18, NULL) == 0)
+            while (CdControl(CdlSeekL, (u_char *)&request->loc, NULL) == 0)
                 ;
             return;
         } else {
@@ -97,8 +97,8 @@ void sound_bank_transfer_body(void)
                 SsVabTransCompleted(1);
                 cd_request_retire(request);
                 /* The bank payload holds its typed buffer pointer at +8. */
-                request->unk4.bank.buffer->state = 1;
-                request->unk24 = 0;
+                request->payload.bank.buffer->state = 1;
+                request->sectors_left = 0;
             }
             return;
         }
@@ -163,12 +163,12 @@ void sound_bank_read_done(StCdRequest *request)
 {
     StVabSlot *slot;
 
-    switch (request->unk11) {
+    switch (request->bank_step) {
     case 0:
-        slot = &sound_state.slots[request->unk4.bank.slot];
-        if (cd_checksum_mismatch((u32 *)request->unk4.bank.buffer->data, request->unk28)) {
-            request->unk1 = 0;
-            while (CdControl(CdlSeekL, (u_char *)&request->unk18, NULL) == 0)
+        slot = &sound_state.slots[request->payload.bank.slot];
+        if (cd_checksum_mismatch((u32 *)request->payload.bank.buffer->data, request->sectors)) {
+            request->step = 0;
+            while (CdControl(CdlSeekL, (u_char *)&request->loc, NULL) == 0)
                 ;
             return;
         }
@@ -176,21 +176,21 @@ void sound_bank_read_done(StCdRequest *request)
             SsVabClose(slot->vab);
             slot->vab = -1;
         }
-        if ((slot->vab = SsVabOpenHeadSticky(request->unk4.bank.buffer->data, -1,
-                                             *(u32 *)&request->unkC)) == -1) {
+        if ((slot->vab = SsVabOpenHeadSticky(request->payload.bank.buffer->data, -1,
+                                             *(u32 *)&request->stream_sectors)) == -1) {
             cd_request_retire(request);
             return;
         }
-        cd_loc_add_sectors(&request->unk18, request->unk28, &request->unk18);
-        request->unk11 = 1;
-        request->unk20 = (u8 *)cd_file_buffer;
-        request->unk1 = 0;
-        request->unk28 = 20;
-        while (CdControl(CdlSeekL, (u_char *)&request->unk18, NULL) == 0)
+        cd_loc_add_sectors(&request->loc, request->sectors, &request->loc);
+        request->bank_step = 1;
+        request->dest = (u8 *)cd_file_buffer;
+        request->step = 0;
+        request->sectors = 20;
+        while (CdControl(CdlSeekL, (u_char *)&request->loc, NULL) == 0)
             ;
         break;
     case 1:
-        request->unk11 = 2;
+        request->bank_step = 2;
         break;
     }
 }
@@ -263,13 +263,13 @@ void sound_bank_load(int archive, int index, int slot)
     }
     s->block = (s16 *)buf;
     buf->state = 3;
-    request = cd_state.unk9D4;
+    request = cd_state.next_free;
     cd_request_wait_free(request);
-    request->unk11 = 0;
-    request->unk4.bank.buffer = buf;
-    request->unk4.bank.slot = slot;
-    *(u32 *)&request->unkC = spu;
-    request->unk10 = archive;
-    request->unk4.bank.member = index;
+    request->bank_step = 0;
+    request->payload.bank.buffer = buf;
+    request->payload.bank.slot = slot;
+    *(u32 *)&request->stream_sectors = spu;
+    request->status = archive;
+    request->payload.bank.member = index;
     cd_queue_read_member_unchecked(archive, index, buf->data, sound_bank_read_done);
 }

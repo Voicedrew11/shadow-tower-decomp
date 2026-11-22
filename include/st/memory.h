@@ -13,8 +13,8 @@
  */
 typedef struct {
     u8 state; /* ST_BLOCK_* */
-    u8 unk1;
-    u16 unk2;
+    u8 tag;
+    u16 slot;
     s32 size; /* data bytes after this header */
     void **owner; /* pointer to the data, cleared when the block is released */
 } StBlock;

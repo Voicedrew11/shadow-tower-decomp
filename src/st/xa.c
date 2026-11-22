@@ -74,7 +74,7 @@ void xa_start_stream(u8 file, int channel)
     filter.chan = byte_channel;
     while (CdControl(CdlSetfilter, (u8 *)&filter, NULL) == 0)
         ;
-    viewer.xa_start_tick = cd_state.unk4;
+    viewer.xa_start_tick = cd_state.vsync_count;
     while (CdControlB(CdlReadS, (u8 *)&game_progress.xa_positions[file], NULL) == 0)
         ;
 }
