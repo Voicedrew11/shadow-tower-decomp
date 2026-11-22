@@ -11,7 +11,7 @@
 #define SOUND_POISON_TICK 5        /* the poison timer's HP loss */
 #define SOUND_PARALYSIS_TICK 6     /* every 20 paralysed frames */
 #define SOUND_FLOOR_DAMAGE 7       /* a damaging floor, every 40 frames */
-#define SOUND_RECOVER 8            /* HP restored (item_use, healing spots) */
+#define SOUND_RECOVER 8            /* item_use's restoring and curing items, healing objects */
 #define SOUND_WARP 10
 #define SOUND_CURSOR 11
 #define SOUND_CONFIRM 12
