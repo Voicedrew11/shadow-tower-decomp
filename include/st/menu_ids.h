@@ -26,8 +26,8 @@
 #define MENU_ROWS 8
 
 /* MenuScratch.font_mode: the glyph set ui_draw_glyph uses. */
-#define MENU_FONT_LOW_RES 0      /* 6x12 half-width cells (320-wide pages) */
-#define MENU_FONT_HIGH_RES 1     /* full-width cells (640x240 screens) */
+#define MENU_FONT_LOW_RES 0      /* 12x12 cells, 6 wide when half (the 320-wide pages) */
+#define MENU_FONT_HIGH_RES 1     /* 12x10 cells, 7 wide when half (the 640x240 screens) */
 
 /* MenuScratch.mode bits of the equip screen (menu_equip_loop): which list
  * has the input. */
