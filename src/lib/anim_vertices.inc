@@ -1,7 +1,7 @@
 /*
  * Shared by ST.EXE and VS.EXE: per-vertex sum and count-prefixed vertex list
- * copy. The two images link byte-identical copies; src/st/anim.c and
- * src/vs/anim_80027c64.c include this fragment at their place in each run.
+ * copy. The two images link byte-identical copies; src/st/render.c and
+ * src/vs/anim_vertices.c include this fragment at their place in each run.
  */
 
 /* dst = a + b, per vertex. */

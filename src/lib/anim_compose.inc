@@ -1,7 +1,7 @@
 /*
  * Shared by ST.EXE and VS.EXE: animation record and list composition. The
  * two images link byte-identical copies; src/st/anim_set.c and
- * src/vs/anim_8002429c.c include this fragment at their place in each run.
+ * src/vs/anim_set.c include this fragment at their place in each run.
  */
 
 /*

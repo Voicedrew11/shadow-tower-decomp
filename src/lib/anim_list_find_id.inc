@@ -1,6 +1,6 @@
 /*
  * Shared by ST.EXE and VS.EXE: node list lookup by id. The two images link
- * byte-identical copies; src/st/anim.c and src/vs/anim_80025670.c include
+ * byte-identical copies; src/st/render.c and src/vs/anim_set.c include
  * this fragment at their place in each run.
  */
 

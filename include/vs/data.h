@@ -222,7 +222,7 @@ typedef struct {
 typedef char VsFighterDataSize[sizeof(VsFighterData) == 0x1ce ? 1 : -1];
 
 /* The fighters' data blocks by character, copied into VsFighter.unk4DF18
- * when a round loads (.data, src/vs/data_8004a224.c). */
+ * when a round loads (.data, src/vs/data_fighters.c). */
 extern VsFighterData DAT_8004a224[151];
 
 /*
@@ -353,8 +353,8 @@ extern s32 DAT_80063330[1];
 #endif
 
 /* Read-only words the first-pass round sequence and effect code read
- * directly (WIP; 0x80011934 is the start of vs.effect_80032404's
- * JUMPTABLES claim, 0x8001150c of vs.fade_80028fcc's). */
+ * directly (WIP; 0x80011934 is the start of vs.effect_spawn_run's
+ * JUMPTABLES claim, 0x8001150c of vs.round_hud's). */
 extern s32 DAT_80011934;
 extern s32 DAT_8001147c;
 extern s32 DAT_80011480;

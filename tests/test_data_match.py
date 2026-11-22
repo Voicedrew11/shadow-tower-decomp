@@ -513,7 +513,7 @@ class LayoutIdentityTests(unittest.TestCase):
 
         hole = Datum(0x8006330C, 4, "DAT_8006330c", "bss", "global", ".sbss")
         word = Datum(0x80063308, 4, "DAT_80063308", "bss", "global", ".sbss")
-        unit = Unit("vs.sbss_80063300", "VS.EXE", "src/vs/sbss_80063300.c", "p", (),
+        unit = Unit("vs.sbss_draw_fighter", "VS.EXE", "src/vs/sbss_draw_fighter.c", "p", (),
                     (word, hole))
         layout = frozenset({"DAT_8006330c"})
         for linked in (None, {"DAT_8006330c": 0x80063310}, {}):

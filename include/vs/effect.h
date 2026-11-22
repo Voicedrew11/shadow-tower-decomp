@@ -25,16 +25,16 @@ typedef char VsEffectsCurAt0x3504[offsetof(VsEffects, cur) == 0x3504 ? 1 : -1];
 
 extern VsEffects DAT_801ce698;
 
-/* src/vs/effect_80032228.c: a free effect slot, or NULL */
+/* src/vs/effect.c: a free effect slot, or NULL */
 StEffect *effect_alloc(void);
-/* src/vs/effect_80032200.c: an empty stand-in for ST.EXE's effect_emit */
+/* src/vs/effect_emit.c: an empty stand-in for ST.EXE's effect_emit */
 void effect_emit(u_long flags, int kind, StEffectDef *def, int arg, VECTOR *pos);
-/* VS's effect attack (ST effect_attack's place; not reconstructed) */
+/* VS's effect attack (ST effect_attack's place; src/vs/effect_hit.c) */
 int effect_reaches_opponent(int arg0, u_long height);
-/* src/vs/effect_spawn_80032404.c: spawns an effect for fighter n's attack
+/* src/vs/effect_spawn_run.c: spawns an effect for fighter n's attack
  * (ST.EXE's effect_spawn); the StEffect or NULL */
 StEffect *effect_spawn(int n, u8 attack, u8 flags, u8 kind, VECTOR *pos, SVECTOR *dir, ...);
-/* src/vs/effect_80032404.c: the per-kind effect update (ST effect_update's place) */
+/* src/vs/effect_spawn_run.c: the per-kind effect update (ST effect_update's place) */
 void effect_update(void);
 
 #endif

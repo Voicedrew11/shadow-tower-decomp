@@ -105,7 +105,7 @@ extern VsCardHeader DAT_8015ffc0[2];
  * value in a static buffer. */
 extern char *itoa(int value);
 
-/* src/vs/menu_80016f10.c */
+/* src/vs/menu.c */
 void card_check_player_save(int port);
 int card_write_blocks(int fd, int offset, u8 *buf, int size);
 

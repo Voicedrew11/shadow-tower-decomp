@@ -32,7 +32,7 @@ extern VsSoundBank DAT_801604b0[2];
 extern char DAT_801175a8[];
 extern char DAT_80117580[24];
 
-/* src/vs/card_8001c8b8.c: the menu sound effects (SsUtKeyOn tones 11-14). */
+/* src/vs/menu_sound.c: the menu sound effects (SsUtKeyOn tones 11-14). */
 void play_cursor_sound(void);
 void play_cancel_sound(void);
 void play_refuse_sound(void);

@@ -98,7 +98,7 @@ u32 DAT_80063364;
 s32 DAT_8006336c;
 
 /* Loads archive member `member` into `buf`, nonzero on success
- * (src/vs/cd_8002e5e4.c). Declared without a prototype: the callers pass
+ * (src/vs/cd_read.c). Declared without a prototype: the callers pass
  * the numbers as unmasked ints. */
 int cd_read_member();
 
@@ -876,7 +876,7 @@ void camera_update(void)
     vs_gfx_state.unk2C998.t[2] = 0;
 }
 
-/* Not reconstructed callees (src/vs/hud_80029f28.c and others). */
+/* Callees in src/vs/round_hud.c. */
 void hud_draw_banner(int kind, int level);
 void hud_draw_dialog_box(int level, int wide);
 void hud_draw_clock(int time);

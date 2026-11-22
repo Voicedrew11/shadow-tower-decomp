@@ -24,7 +24,7 @@ SDATA(0x80063280, 0x10)
 #define DIGITS(n) ((n) << 24)
 
 /*
- * The cell grid (src/vs/ui_800207d4.c) has no prototype in a header, and
+ * The cell grid (src/vs/ui_cell_grid.c) has no prototype in a header, and
  * retail's page saw it as returning int (an implicit declaration, written
  * out here): reload keeps the inches quotient's high word out of $v0
  * (`mfhi v1`), which it only does when some call in the function has a

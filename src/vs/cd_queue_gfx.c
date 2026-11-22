@@ -3,7 +3,7 @@
  * queue and archive member lookup, the frame buffer swap and the VRAM
  * clear (WIP module). VS's copies of ST.EXE functions from src/st/cdreq.c,
  * cdpos.c, cd.c, gfx.c and ui.c; VS keeps a second copy of the ring
- * callbacks in src/vs/cd_8002e5e4.c.
+ * callbacks in src/vs/cd_read.c.
  */
 #include <kf/lib/address.h>
 #include <kf/lib/null.h>

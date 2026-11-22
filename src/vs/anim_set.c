@@ -163,13 +163,13 @@ void model_fixup_face_indices(ModelFile *file)
  * animation node lists: initialisation, key lookup, insertion, removal,
  * the node command interpreter and the block runner. The
  * list functions are ST.EXE's (src/lib/anim_list*.inc, shared with
- * src/st/anim.c); the rest are VS's copies of ST.EXE's src/st/anim.c and
- * anim_set.c functions. VS keeps anim_list_find_id elsewhere
- * (src/vs/anim_80025670.c).
+ * src/st/render.c); the rest are VS's copies of ST.EXE's src/st/render.c
+ * and anim_set.c functions. VS keeps anim_list_find_id further on in this
+ * file.
  */
 
 /* VS's first copy of anim_register; the second is anim_register
- * (src/vs/anim_80027f30.c). */
+ * (src/vs/anim_slots.c). */
 ADDRESS(0x80023764, 0x3c)
 void anim_set_register(u16 id, StAnimFile *file)
 {
@@ -265,7 +265,7 @@ void anim_sets_free_all(void)
 }
 
 /* The C library's malloc, or NULL when the result is not in main RAM: a
- * second copy of mem_alloc_checked (src/vs/cd_8002e5e4.c). */
+ * second copy of mem_alloc_checked (src/vs/cd_read.c). */
 ADDRESS(0x8002398c, 0x44)
 void *mem_alloc_main_ram(u32 size)
 {

@@ -27,7 +27,7 @@ RODATA(0x80011588, 0x33c)
  */
 void effect_random_offset(SVECTOR *offset, VECTOR *out, VECTOR *pos, short dy, short height);
 void effect_jitter_offset(SVECTOR *off, VECTOR *out, VECTOR *base);
-/* src/vs/fighter_8002e114.c's hit, called without a prototype (retail
+/* src/vs/fighter_damage.c's hit, called without a prototype (retail
  * passes the fighter number unconverted). */
 void fighter_apply_attack_hit();
 
@@ -299,7 +299,7 @@ DATA(0x800633ac, 0x4, ".sbss")
 static s32 DAT_800633ac;
 
 /* Called without prototypes (retail passes int arguments unconverted):
- * src/vs/fighter_8002dec4.c's reach test, src/vs/fighter_8002e114.c's hit
+ * src/vs/fighter_hit_test.c's reach test, src/vs/fighter_damage.c's hit
  * and the attack effect effect_spawn_attack (not reconstructed). */
 int fighter_hit_test();
 void fighter_apply_hit();

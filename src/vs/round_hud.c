@@ -29,7 +29,7 @@ RODATA(0x8001142c, 0x148)
 /*
  * A full-screen semi-transparent overlay.
  */
-/* src/vs/mesh_800258f0.c's part renderer, called here without a
+/* src/vs/mesh.c's part renderer, called here without a
  * prototype: retail passes the int part number unconverted. */
 void mesh_draw_part_nccs();
 
@@ -703,15 +703,15 @@ void hud_draw_fighter_names(int bright)
  * The round's opening sequence.
  */
 
-void hud_draw_banner(int kind, int level);                 /* src/vs/hud_80029f28.c */
+void hud_draw_banner(int kind, int level);                 /* below */
 void hud_draw_clock_value(int value, int level);
 void hud_draw_round_banner(int kind, int level, int size);
-void hud_draw_gauges(int level);                           /* src/vs/gauge_80029b10.c */
+void hud_draw_gauges(int level);                           /* below */
 void hud_draw_round_wins(int phase, int scale);
-void hud_draw_fighter_names(int level);                           /* src/vs/name_8002ad40.c */
-void fighter_draw_skeletal(void);                                /* src/vs/model_80024b5c.c */
-void fighter_draw_vertex_anim(void);                                /* src/vs/model_80028914.c */
-void fighter_draw_shadow(int n, int scale);                    /* src/vs/shadow_8002bfe8.c */
+void hud_draw_fighter_names(int level);                           /* below */
+void fighter_draw_skeletal(void);                                /* src/vs/anim_set.c */
+void fighter_draw_vertex_anim(void);                                /* src/vs/fighter_vertex_anim.c */
+void fighter_draw_shadow(int n, int scale);                    /* src/vs/fighter_shadow.c */
 
 /* x, or 0 when it is negative. */
 #define FLOOR0(x) ((x) < 0 ? 0 : (x))

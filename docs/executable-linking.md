@@ -334,7 +334,7 @@ placement equal retail. The link established:
 - The bss group starts at `0x80063300`, the next eight-byte boundary after
   at least five more bytes of zero, unreferenced `.sdata` past the last
   literal at `0x800632f3`; a data-only unit linked last holds two zero
-  words there (`src/vs/sdata_800632f4.c`).
+  words there (`src/vs/sdata_zero_words.c`).
 
 ## PS-X EXE header
 

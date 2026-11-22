@@ -1,5 +1,5 @@
 /*
- * PSYLINK's bss group bounds as VS.EXE's heap words (src/vs/rdata_80011f34.c)
+ * PSYLINK's bss group bounds as VS.EXE's heap words (src/vs/rdata_bss_bounds.c)
  * spell them: the linker defines them, no object does. _bss_org is the first
  * byte of the group (.sbss), _bss_orgend the byte after it (after the SDK's
  * COMMON; the section symbol __bss_orgend stops before that COMMON).
