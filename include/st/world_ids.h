@@ -41,11 +41,11 @@
 #define OBJECT_KIND_WALK_IN_WARP 239 /* entered by walking in */
 #define OBJECT_KIND_NONE 255
 
-/* AreaObject.params.door.lock: a key item id - KEY_ITEM_BASE, or these. */
+/* AreaObject.params.door.lock: a key item id - DOOR_KEY_ITEM_BASE, or these. */
 #define DOOR_LOCK_OPENS_FROM_FRONT 251 /* unlocks when examined facing its front */
 #define DOOR_LOCK_OPENS_FROM_BACK 252
 #define DOOR_UNLOCKED 255
-#define KEY_ITEM_BASE 272            /* object_try_key: lock = item id - 272 */
+#define DOOR_KEY_ITEM_BASE 272       /* object_try_key: lock = item id - 272 */
 
 /* GroundItem.state (ground_items_update, world_draw_ground_items). */
 #define GROUND_ITEM_NONE 0

@@ -229,7 +229,7 @@ int object_try_key(AreaObject *e, int id)
             return 0;
         if (((u8 *)&e->params.snd.period)[1] >= 0xfe)
             return 2;
-        if (((u8 *)&e->params.snd.period)[1] == id - KEY_ITEM_BASE) {
+        if (((u8 *)&e->params.snd.period)[1] == id - DOOR_KEY_ITEM_BASE) {
             ((u8 *)&e->params.snd.period)[1] = 0xff;
             return 1;
         }
