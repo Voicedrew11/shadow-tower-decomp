@@ -613,7 +613,7 @@ void map_take_equipment_raise_object(void)
 
         if (c28->position.vz > d16->position.vz - 0x300)
             goto item_placed;
-        anim_get_file(kind->model + 588, &file);
+        anim_get_file(kind->model + MODEL_SLOT_ITEMS, &file);
         if (file != NULL)
             c28->position.vz += 36;
         world_run_frame(NULL, NULL, 0);
@@ -741,7 +741,7 @@ void map_slide_ground_item(void)
 
         if (item->position.vx == top)
             break;
-        anim_get_file(kind->model + 588, &file);
+        anim_get_file(kind->model + MODEL_SLOT_ITEMS, &file);
         if (file != NULL)
             item->position.vx += step;
         if (item->position.vx > top)

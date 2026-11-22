@@ -4521,9 +4521,6 @@ void object_models_sync(int archive, int first, int slot, int count)
     }
 }
 
-/* Table A model slots start at 128 (table B: 256, table C: 588). */
-#define SLOT_A 128
-
 ADDRESS(0x800241d0, 0x514)
 void world_draw_creatures(void)
 {
@@ -4547,7 +4544,7 @@ void world_draw_creatures(void)
     while (--i != -1) {
         e = &vis_table_a.entries[vis_table_a.list[i]];
         t = &vis_table_a.types[e->type];
-        anim_get_file(e->model_slot + SLOT_A, &model);
+        anim_get_file(e->model_slot + MODEL_SLOT_CREATURES, &model);
         e->draw_state = 0;
         flags = e->status.bytes[2] & 0x3f;
         e->status.bytes[2] = flags;
@@ -4570,7 +4567,7 @@ void world_draw_creatures(void)
             sp->ot = world_state.ot_cur + e->depth_bias;
             sp->near_z = 4 - e->depth_bias;
             sp->far_z = 4096 - e->depth_bias;
-            model_draw(0, e->model_slot + SLOT_A, at, &sp->model_rot, &e->scale, &e->anim_slot,
+            model_draw(0, e->model_slot + MODEL_SLOT_CREATURES, at, &sp->model_rot, &e->scale, &e->anim_slot,
                           &identity_matrix, e->anim, e->anim_frame, 4096 - depth, e->unk24,
                           e->status.bytes[2], 0);
         } else {
@@ -4585,7 +4582,8 @@ void world_draw_creatures(void)
                 sp->ot = world_state.ot_cur + e->depth_bias;
                 sp->near_z = 4 - e->depth_bias;
                 sp->far_z = 4096 - e->depth_bias;
-                model_draw(0, e->model_slot + SLOT_A, at, &sp->model_rot, &e->scale, &e->anim_slot,
+                model_draw(0, e->model_slot + MODEL_SLOT_CREATURES, at, &sp->model_rot, &e->scale,
+                    &e->anim_slot,
                               &world_state.view_matrix, e->anim, e->anim_frame, 4096 - depth, e->unk24,
                               e->status.bytes[2], 0);
             }
@@ -4612,7 +4610,7 @@ void world_draw_creatures(void)
         sp->vram_tags[e->model_slot] = e->vram_tag;
     }
     if (area_state.skip_model_sync == 0)
-        creature_models_sync(ARCHIVE_CHR, 0, 128, 16);
+        creature_models_sync(ARCHIVE_CHR, 0, MODEL_SLOT_CREATURES, 16);
 }
 
 /* Steps the visible table B entries: the two kinds of area sound (over a
@@ -4822,11 +4820,9 @@ void world_draw_objects(void)
         }
     }
     if (area_state.skip_model_sync == 0)
-        object_models_sync(ARCHIVE_MO, 0, 256, 249);
+        object_models_sync(ARCHIVE_MO, 0, MODEL_SLOT_OBJECTS, 249);
     sp->model_needed_cur = &sp->model_needed[300];
 }
-
-#define SLOT_C 588
 
 ADDRESS(0x800251c8, 0x428)
 void world_draw_ground_items(void)
@@ -4862,7 +4858,7 @@ void world_draw_ground_items(void)
             SVECTOR scale = {4096, 4096, 4096};
 
             sp->model_needed[r->model] = 1;
-            anim_get_file(r->model + SLOT_C, &model);
+            anim_get_file(r->model + MODEL_SLOT_ITEMS, &model);
             if (model == NULL)
                 continue;
             sp->model_rot.vx = e->rot_x;
@@ -4874,7 +4870,7 @@ void world_draw_ground_items(void)
                 sp->ot = world_state.ot_cur + e->depth_bias;
                 sp->near_z = 4 - e->depth_bias;
                 sp->far_z = 4096 - e->depth_bias;
-                model_draw(0, r->model + SLOT_C, &e->position, &sp->model_rot, &scale, e->anim_slot,
+                model_draw(0, r->model + MODEL_SLOT_ITEMS, &e->position, &sp->model_rot, &scale, e->anim_slot,
                               &world_state.view_matrix, 128, 0, 0, 4096, e->draw_flags, 0);
                 sp->model_rot.vx = sp->model_rot.vy = sp->model_rot.vz = 0;
                 sp->ot = world_state.ot_cur + e->depth_bias;
@@ -4883,19 +4879,20 @@ void world_draw_ground_items(void)
                 m = world_state.pitch_matrix;
                 if (e->state != GROUND_ITEM_RESTING)
                     RotMatrixX(e->rot_x, &m);
-                model_draw(0, r->model + SLOT_C, &e->position, &sp->model_rot, &scale, e->anim_slot, &m, 129,
+                model_draw(0, r->model + MODEL_SLOT_ITEMS, &e->position, &sp->model_rot, &scale,
+                    e->anim_slot, &m, 129,
                               0, 0, 4096, e->draw_flags, 0);
             } else {
                 sp->ot = world_state.ot_cur + e->depth_bias;
                 sp->near_z = 4 - e->depth_bias;
                 sp->far_z = 4096 - e->depth_bias;
-                model_draw(0, r->model + SLOT_C, &e->position, &sp->model_rot, &scale, e->anim_slot,
+                model_draw(0, r->model + MODEL_SLOT_ITEMS, &e->position, &sp->model_rot, &scale, e->anim_slot,
                               &world_state.view_matrix, 128, 0, 0, 4096, e->draw_flags, 0);
             }
         }
     }
     if (area_state.skip_model_sync == 0)
-        item_models_sync(ARCHIVE_ITEM, 0, SLOT_C, 128);
+        item_models_sync(ARCHIVE_ITEM, 0, MODEL_SLOT_ITEMS, 128);
     sp->model_needed_cur = &sp->model_needed[128];
 }
 

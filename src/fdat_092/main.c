@@ -292,7 +292,7 @@ void map_offer_item_at_player(void)
     item->state = GROUND_ITEM_RESTING;
     item->depth_bias -= 3;
     for (;;) {
-        anim_get_file(kind->model + 588, &file);
+        anim_get_file(kind->model + MODEL_SLOT_ITEMS, &file);
         if (file != NULL)
             break;
         world_run_frame(NULL, NULL, 0);

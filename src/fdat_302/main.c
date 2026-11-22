@@ -390,7 +390,7 @@ first_animation_done:
     do {
         e3->anim_frame = 0;
         world_run_frame(NULL, NULL, 0);
-        anim_get_file(e3->model_slot + 128, &file);
+        anim_get_file(e3->model_slot + MODEL_SLOT_CREATURES, &file);
     } while (file == NULL);
     e49->position = e3->position;
     *(SVECTOR *)&e49->rot_x = *(SVECTOR *)&e3->rot_x;

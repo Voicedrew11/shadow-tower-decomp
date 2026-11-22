@@ -166,7 +166,7 @@ void creatures_update(void)
             anim_sets_free_all();
             n = 16;
             while (n--) {
-                anim_get_file(n + 128, &file);
+                anim_get_file(n + MODEL_SLOT_CREATURES, &file);
                 if (file)
                     heap_free(file);
             }
@@ -227,7 +227,7 @@ void creatures_update(void)
                     area_state.hooks->creature_pick_move();
                 area_state.hooks->creature_step_script();
                 if (e->fade != -1) {
-                    anim_get_file(e->model_slot + 128, &anim);
+                    anim_get_file(e->model_slot + MODEL_SLOT_CREATURES, &anim);
                     if (anim) {
                         e->fade -= 128;
                         if (e->fade < 0) {

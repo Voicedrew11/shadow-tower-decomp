@@ -10,6 +10,7 @@
 #include <sys/types.h>
 #include <LIBGTE.H>
 #include <LIBGPU.H>
+#include <st/model_slots.h>
 
 /* One animated-texture slot (see src/st/render.c). */
 typedef struct {

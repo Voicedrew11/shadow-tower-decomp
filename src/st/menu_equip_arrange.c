@@ -103,7 +103,7 @@ void menu_equip_pick_item(void)
     } else if (PAD.pressed & PAD_BUTTON_CIRCLE) {
         play_cancel_sound();
         PAD.pressed = 0;
-        sp->mode &= ~0x8;
+        sp->mode &= ~EQUIP_MENU_ITEM_LIST;
         mem_free(sp->state.list.ids);
     } else if (PAD.pressed & PAD_BUTTON_CROSS) {
         if (EQ.shown_id != -1) {
@@ -114,7 +114,7 @@ void menu_equip_pick_item(void)
             } else {
                 play_confirm_sound();
                 PAD.pressed = 0;
-                sp->mode &= ~0x8;
+                sp->mode &= ~EQUIP_MENU_ITEM_LIST;
                 mem_free(sp->state.list.ids);
                 if (EQ.slot == SLOT(EQUIP_SLOT_RIGHT_RING)
                     && EQ.shown_id != viewer.equipment[EQUIP_SLOT_RIGHT_RING])
@@ -156,7 +156,7 @@ void menu_equip_pick_item(void)
         } else {
             play_confirm_sound();
             PAD.pressed = 0;
-            sp->mode &= ~0x8;
+            sp->mode &= ~EQUIP_MENU_ITEM_LIST;
             mem_free(sp->state.list.ids);
             *EQ.slot = 0xffff;
             if (EQ.slot == SLOT(EQUIP_SLOT_RIGHT_RING))
@@ -345,7 +345,7 @@ int menu_equip_pick_slot(int *sel)
                 }
                 if (equip_magic_list.count) {
                     play_confirm_sound();
-                    sp->mode = (sp->mode | 0x2) & ~0x1;
+                    sp->mode = (sp->mode | EQUIP_MENU_MAGIC_LIST) & ~EQUIP_MENU_SLOT_LIST;
                     equip_saved_list_cursor[0] = sp->scroll;
                     equip_saved_list_cursor[1] = sp->cursor;
                     sp->scroll = 0;
@@ -420,7 +420,7 @@ int menu_equip_pick_slot(int *sel)
             i = vis_table_c.types[cur].unk5[0];
         else
             i = -1;
-        sp->mode |= 0x8;
+        sp->mode |= EQUIP_MENU_ITEM_LIST;
         if (cur == 0xffff) {
             cd_read_member(ARCHIVE_ICON, 801, cd_file_buffer);
             EQ.shown_id = -1;
@@ -448,7 +448,7 @@ void menu_equip_pick_magic(void)
     if (PAD.pressed & PAD_BUTTON_CIRCLE) {
         play_cancel_sound();
         PAD.pressed = 0;
-        sp->mode = (sp->mode & ~0x2) | 0x1;
+        sp->mode = (sp->mode & ~EQUIP_MENU_MAGIC_LIST) | EQUIP_MENU_SLOT_LIST;
         sp->scroll = equip_saved_list_cursor[0];
         sp->cursor = equip_saved_list_cursor[1];
     } else if (PAD.pressed_repeat & PAD_BUTTON_UP) {
@@ -499,7 +499,7 @@ void menu_equip_pick_magic(void)
         } else {
             play_confirm_sound();
             *EQ.slot = list->entries[sp->scroll + sp->cursor];
-            sp->mode = (sp->mode & ~0x2) | 0x1;
+            sp->mode = (sp->mode & ~EQUIP_MENU_MAGIC_LIST) | EQUIP_MENU_SLOT_LIST;
             sp->scroll = equip_saved_list_cursor[0];
             sp->cursor = equip_saved_list_cursor[1];
             menu_equip_recalc_stats();
@@ -524,12 +524,12 @@ void menu_equip_loop(void)
             PAD.pressed_repeat = 0;
             EQ.input_hold--;
         }
-        if (sp->mode & 0x8) {
+        if (sp->mode & EQUIP_MENU_ITEM_LIST) {
             menu_equip_pick_item();
-        } else if (sp->mode & 0x1) {
+        } else if (sp->mode & EQUIP_MENU_SLOT_LIST) {
             if (menu_equip_pick_slot(&sel))
                 break;
-        } else if (sp->mode & 0x2) {
+        } else if (sp->mode & EQUIP_MENU_MAGIC_LIST) {
             menu_equip_pick_magic();
         }
         frame_rate_update();
@@ -575,7 +575,7 @@ void menu_equip_draw_frame(void)
     MENU_SCRATCH->tex_pos.vy = 464;
     ui_draw_image(&MENU_SCRATCH->rect, &MENU_SCRATCH->tex_pos, &MENU_SCRATCH->clut_pos, NULL, 3);
     ui_draw_window(16, 16, 288, 208);
-    if (MENU_SCRATCH->mode & 0x1) {
+    if (MENU_SCRATCH->mode & EQUIP_MENU_SLOT_LIST) {
         RECT r = {0, 0, 320, 240};
         CVECTOR c = {32, 32, 32, 0};
 
@@ -867,11 +867,11 @@ void menu_equip_draw(void)
     sp->cursor_color.b = 0;
     sp->cursor_color.r = (u8)sp->blink_level * 4 + 96;
     sp->cursor_color.g = (u8)sp->blink_level * 2 + 48;
-    if (!(sp->mode & 0x8))
+    if (!(sp->mode & EQUIP_MENU_ITEM_LIST))
         menu_equip_draw_cursor();
-    if (sp->mode & 0x8)
+    if (sp->mode & EQUIP_MENU_ITEM_LIST)
         menu_equip_draw_item_panel();
-    else if (sp->mode & 0x1)
+    else if (sp->mode & EQUIP_MENU_SLOT_LIST)
         menu_equip_draw_slots();
     else
         menu_equip_draw_magic_list();

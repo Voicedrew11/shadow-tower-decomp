@@ -194,7 +194,7 @@ void creature_finish_fade_in(Creature *e)
     if (e->fade == -1)
         return;
     do
-        anim_get_file(e->model_slot + 128, &file);
+        anim_get_file(e->model_slot + MODEL_SLOT_CREATURES, &file);
     while (file == NULL);
     while (1) {
         e->fade -= 128;

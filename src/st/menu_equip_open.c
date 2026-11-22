@@ -65,7 +65,7 @@ void menu_equip_open(void)
     u8 *p;
 
     menu_equip_save_vram();
-    sp->mode = 1;
+    sp->mode = EQUIP_MENU_SLOT_LIST;
     sp->image_vram[0].vx = 960;
     sp->image_vram[0].vy = 256;
     sp->image_vram[1].vx = 560;

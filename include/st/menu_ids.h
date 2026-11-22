@@ -29,6 +29,12 @@
 #define MENU_FONT_LOW_RES 0      /* 6x12 half-width cells (320-wide pages) */
 #define MENU_FONT_HIGH_RES 1     /* full-width cells (640x240 screens) */
 
+/* MenuScratch.mode bits of the equip screen (menu_equip_loop): which list
+ * has the input. */
+#define EQUIP_MENU_SLOT_LIST 0x1  /* the 15 slots (also set under the item list) */
+#define EQUIP_MENU_MAGIC_LIST 0x2 /* a ring's magic */
+#define EQUIP_MENU_ITEM_LIST 0x8  /* the items for one slot */
+
 /* STAT.T member 0. */
 #define MSG_PAUSE_ROWS 11        /* "use item" .. "end game" */
 #define MSG_STATUS_NORMAL 19

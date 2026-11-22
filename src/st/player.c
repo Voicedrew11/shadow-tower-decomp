@@ -3022,14 +3022,14 @@ void player_update(void)
             } else {
                 if (viewer.free_anims_after_menu) {
                     while (i--) {
-                        anim_get_file(i + 128, &file);
+                        anim_get_file(i + MODEL_SLOT_CREATURES, &file);
                         if (file) {
                             heap_free(file);
                         }
                     }
                     i = 128;
                     while (i--) {
-                        anim_get_file(i + 588, &file);
+                        anim_get_file(i + MODEL_SLOT_ITEMS, &file);
                         if (file) {
                             heap_free(file);
                         }

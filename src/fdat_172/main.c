@@ -327,7 +327,7 @@ void map_slide_ground_item(void)
 
         if (item->position.vy == top)
             break;
-        anim_get_file(kind->model + 588, &file);
+        anim_get_file(kind->model + MODEL_SLOT_ITEMS, &file);
         if (file != NULL)
             item->position.vy += step;
         if (item->position.vy > top)

@@ -596,7 +596,7 @@ void objects_update(void)
             switch (e->state) {
             case 0:
                 if (e->kind == OBJECT_KIND_MODEL_DOOR) {
-                    if (world_state.model_files[e->type + 256] == NULL)
+                    if (world_state.model_files[e->type + MODEL_SLOT_OBJECTS] == NULL)
                         e->visibility = 0;
                     else
                         e->visibility = 2;
