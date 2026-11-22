@@ -243,7 +243,7 @@ typedef struct Creature {
     u8 draw_state;
     u8 state;            /* 0x05: state (creature_update_spawn); 1 active, 5 dying (creature_take_damage) */
     u8 region;
-    u8 zone;             /* 0x07: area id, 0xfd: the previous area (creatures_bind_previous_area) */
+    u8 zone;             /* 0x07: zone, 0xfd: the previous zone (creatures_bind_previous_zone) */
     u8 anim;             /* 0x08 */
     u8 unk09;
     u8 unk0A;
@@ -671,7 +671,7 @@ typedef struct {
 
 /* src/st/creatures.c */
 int creature_take_damage(Creature *e, int kind, int power, u16 *levels, int crit);
-void creatures_bind_previous_area(void);
+void creatures_bind_previous_zone(void);
 void creature_types_link_scripts(void);
 void creatures_load(CreatureFileEntry *src);
 

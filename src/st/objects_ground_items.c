@@ -1194,7 +1194,7 @@ void objects_update(void)
             } else {
                 area_request_load(0xff, 0xff, area, 0xff, 0xff, 127, 127, 127, 0, 0, 0);
                 viewer.update_all_spawns = 1;
-                creatures_bind_previous_area();
+                creatures_bind_previous_zone();
                 vis_table_a.zone_history[0] = vis_table_a.zone_history[1] = vis_table_a.zone_history[2] =
                     vis_table_a.zone_history[3] = 0xff;
                 vis_table_a.prev_zone = 0xff;
@@ -1302,7 +1302,7 @@ void player_warp(to, keep)
     } else {
         area_request_load(0xff, 0xff, area, 0xff, 0xff, 127, 127, 127, 0, 0, 0);
         viewer.update_all_spawns = 1;
-        creatures_bind_previous_area();
+        creatures_bind_previous_zone();
         vis_table_a.zone_history[0] = vis_table_a.zone_history[1] = vis_table_a.zone_history[2] = vis_table_a.zone_history[3] = 0xff;
         vis_table_a.prev_zone = 0xff;
     }

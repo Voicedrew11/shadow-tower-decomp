@@ -49,7 +49,7 @@ void map_warp_player(int gate)
 
     play_warp_sound();
     fade_run_frames(2, 0, 0x1000, 0x100);
-    creatures_bind_previous_area();
+    creatures_bind_previous_zone();
     if (gate == 0) {
         viewer.position.vx = 0x50800;
         viewer.position.vy = 0x425c0;

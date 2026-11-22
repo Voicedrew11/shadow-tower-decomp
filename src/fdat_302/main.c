@@ -79,7 +79,7 @@ const FdatHeader fdat_header = {
 
 void map_shift_player_and_creatures(int which);
 void map_warp_player(void);
-void map_set_block_areas(u8 area);
+void map_set_block_zones(u8 zone);
 void map_transform_creature(void);
 
 /* Sets up the area: table B entries 1..6 closed unless their flags are
@@ -213,7 +213,7 @@ void map_update_events(void)
         e5->flags &= ~0x2000000;
     }
     if (fdat_801ee47c == 0 && fdat_801ee470 == 3) {
-        map_set_block_areas(2);
+        map_set_block_zones(2);
         e5->spawn_chance = 100;
         e5->status.bytes[3] = 1;
         fdat_801ee47c = 1;
@@ -300,7 +300,7 @@ void map_warp_player(void)
 
     play_warp_sound();
     fade_run_frames(2, 0, 0x1000, 0x100);
-    creatures_bind_previous_area();
+    creatures_bind_previous_zone();
     viewer.position.vx = 0x45800;
     viewer.position.vy = 0x3f9c0;
     viewer.position.vz = 0x40000;
@@ -335,15 +335,15 @@ void map_warp_player(void)
     player_enter_normal_state();
 }
 
-/* Sets the area id of all 512 map-block records (vis_records). */
+/* Sets the zone of all 512 map-block records (vis_records). */
 ADDRESS(0x801ee090, 0x28)
-void map_set_block_areas(u8 area)
+void map_set_block_zones(u8 zone)
 {
     MapBlock *r = vis_records;
     int i = 512;
 
     while (i--) {
-        r->zone = area;
+        r->zone = zone;
         r++;
     }
 }

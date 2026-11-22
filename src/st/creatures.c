@@ -121,10 +121,10 @@ done:
     return (short)dmg;
 }
 
-/* Gives every entry of the first 32 left in the previous area (0xfd) that
- * area's id. */
+/* Gives every entry of the first 32 left in the previous zone (0xfd) that
+ * zone's id. */
 ADDRESS(0x8004e2d8, 0x4c)
-void creatures_bind_previous_area(void)
+void creatures_bind_previous_zone(void)
 {
     Creature *e = vis_table_a.entries;
     int i = 32;
@@ -170,7 +170,7 @@ void creatures_update(void)
                 if (file)
                     heap_free(file);
             }
-            creatures_bind_previous_area();
+            creatures_bind_previous_zone();
             n = 16;
             while (n--) {
                 anim_get_file(n + 112, &file);
