@@ -1073,7 +1073,8 @@ void objects_update(void)
             if (player_in_cell_rect(e->position.vx >> 12, e->position.vz >> 12, 1, 1, e->position.vy) == 0
                 && area_state.loading == 0)
                 break;
-            if ((pad_state.held & pad_state.buttons[10]) && vis_table_a.object_sequence_state == 0
+            if ((pad_state.held & pad_state.buttons[PAD_ACTION_EVENT])
+                && vis_table_a.object_sequence_state == 0
                 && W50(e) != 0xffffff && W48(e) != 0xffffff) {
                 vis_table_a.object_sequence_state = 1;
                 player_stop_motion();
@@ -1158,7 +1159,7 @@ void objects_update(void)
             turn = (viewer.yaw - e->player_heading) & 0xfff;
             if (turn > 2048)
                 turn |= 0xf000;
-            if (!((pad_state.held & pad_state.buttons[10]) && turn > -400 && turn < 400)
+            if (!((pad_state.held & pad_state.buttons[PAD_ACTION_EVENT]) && turn > -400 && turn < 400)
                 && e->kind != 239)
                 goto away;
             if (B50(e))
@@ -1614,7 +1615,7 @@ void ground_item_pick_up(GroundItem *c, int forced)
     i = 16;
     c->depth_bias -= 8;
     while (1) {
-        if (forced == 0 && (pad_state.pressed & pad_state.buttons[11])) {
+        if (forced == 0 && (pad_state.pressed & pad_state.buttons[PAD_ACTION_MAGIC_MENU])) {
             take = 0;
             a = c->position;
             b = save.position;
@@ -1623,7 +1624,7 @@ void ground_item_pick_up(GroundItem *c, int forced)
             i = 16 - i;
             break;
         }
-        if ((pad_state.pressed & pad_state.buttons[10]) && !pad_state.combo_timer) {
+        if ((pad_state.pressed & pad_state.buttons[PAD_ACTION_EVENT]) && !pad_state.combo_timer) {
             take = 1;
             a = c->position;
             b = viewer.position;

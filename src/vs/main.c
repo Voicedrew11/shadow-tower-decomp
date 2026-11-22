@@ -1276,11 +1276,11 @@ void round_play(void)
             choice = 0;
             choice_slider = 0;
             for (;;) {
-                if ((vs_pad_state.pads[0].pressed | vs_pad_state.pads[1].pressed) & 0x10)
+                if ((vs_pad_state.pads[0].pressed | vs_pad_state.pads[1].pressed) & PAD_BUTTON_UP)
                     choice = 0;
-                if ((vs_pad_state.pads[0].pressed | vs_pad_state.pads[1].pressed) & 0x40)
+                if ((vs_pad_state.pads[0].pressed | vs_pad_state.pads[1].pressed) & PAD_BUTTON_DOWN)
                     choice = 1;
-                if ((vs_pad_state.pads[0].pressed | vs_pad_state.pads[1].pressed) & 9) {
+                if ((vs_pad_state.pads[0].pressed | vs_pad_state.pads[1].pressed) & (PAD_BUTTON_SELECT | PAD_BUTTON_START)) {
                     DAT_80063364 += vs_pad_state.vsync_count;
                     round_phase = PHASE_FIGHT;
                     screen_start_frame = vs_pad_state.vsync_count;
@@ -1288,7 +1288,7 @@ void round_play(void)
                         ;
                     break;
                 }
-                if ((vs_pad_state.pads[0].pressed | vs_pad_state.pads[1].pressed) & 0x4000) {
+                if ((vs_pad_state.pads[0].pressed | vs_pad_state.pads[1].pressed) & PAD_BUTTON_CROSS) {
                     if (choice == 0) {
                         DAT_80063364 += vs_pad_state.vsync_count;
                         round_phase = PHASE_FIGHT;
@@ -1314,7 +1314,7 @@ void round_play(void)
                 round_draw_frame();
             }
         } else if (round_phase == PHASE_FIGHT
-                   && ((vs_pad_state.pads[0].pressed | vs_pad_state.pads[1].pressed) & 9)) {
+                   && ((vs_pad_state.pads[0].pressed | vs_pad_state.pads[1].pressed) & (PAD_BUTTON_SELECT | PAD_BUTTON_START))) {
             while (!CdControl(CdlPause, 0, 0))
                 ;
             fight_banner = 12;
@@ -1322,9 +1322,10 @@ void round_play(void)
             DAT_80063364 -= vs_pad_state.vsync_count;
             screen_start_frame = vs_pad_state.vsync_count;
         }
-        if ((vs_pad_state.pads[0].pressed & 1) && (vs_pad_state.pads[0].held & 8))
+        if ((vs_pad_state.pads[0].pressed & PAD_BUTTON_SELECT)
+            && (vs_pad_state.pads[0].held & PAD_BUTTON_START))
             vs_pad_state.show_frame_stats = 1 - vs_pad_state.show_frame_stats;
-        if (vs_pad_state.pads[0].held & 1) {
+        if (vs_pad_state.pads[0].held & PAD_BUTTON_SELECT) {
             if (++vs_pad_state.pan_hold_frames >= 60)
                 debug_pan_display();
         } else {

@@ -147,7 +147,7 @@ int menu_vs_setup_run(void)
     sp->font_mode = 1;
     for (;;) {
         if (sp->mode == 0) {
-            if (PRESSED & 0x4000) {
+            if (PRESSED & PAD_BUTTON_CROSS) {
                 switch (sp->main_row) {
                 case 0:
                     if (requested_items[0] != -1) {
@@ -165,14 +165,14 @@ int menu_vs_setup_run(void)
                     sp->mode = 1;
                     break;
                 case 1:
-                    if (!(vs_pad_state.pads[0].pressed & 0x4000))
+                    if (!(vs_pad_state.pads[0].pressed & PAD_BUTTON_CROSS))
                         goto buzz;
                     play_confirm_sound();
                     vs_pad_state.pads[0].pressed = 0;
                     CARD_PAGE(0);
                     break;
                 case 2:
-                    if (vs_pad_state.pads[1].pressed & 0x4000) {
+                    if (vs_pad_state.pads[1].pressed & PAD_BUTTON_CROSS) {
                         play_confirm_sound();
                         vs_pad_state.pads[1].pressed = 0;
                         CARD_PAGE(1);
@@ -180,14 +180,14 @@ int menu_vs_setup_run(void)
                     }
                     goto buzz;
                 case 3:
-                    if (!(vs_pad_state.pads[0].pressed & 0x4000) || !save_loaded_1p)
+                    if (!(vs_pad_state.pads[0].pressed & PAD_BUTTON_CROSS) || !save_loaded_1p)
                         goto buzz;
                     play_confirm_sound();
                     vs_pad_state.pads[0].pressed = 0;
                     TEAM_PAGE(0);
                     break;
                 case 4:
-                    if ((vs_pad_state.pads[1].pressed & 0x4000) && save_loaded_2p) {
+                    if ((vs_pad_state.pads[1].pressed & PAD_BUTTON_CROSS) && save_loaded_2p) {
                         play_confirm_sound();
                         vs_pad_state.pads[1].pressed = 0;
                         TEAM_PAGE(1);
@@ -195,14 +195,16 @@ int menu_vs_setup_run(void)
                     }
                     goto buzz;
                 case 5:
-                    if (!(vs_pad_state.pads[0].pressed & 0x4000) || !save_loaded_1p || !save_loaded_2p)
+                    if (!(vs_pad_state.pads[0].pressed & PAD_BUTTON_CROSS) || !save_loaded_1p
+                        || !save_loaded_2p)
                         goto buzz;
                     play_confirm_sound();
                     vs_pad_state.pads[0].pressed = 0;
                     SAVE_PAGE(0);
                     break;
                 case 6:
-                    if (!(vs_pad_state.pads[1].pressed & 0x4000) || !save_loaded_1p || !save_loaded_2p)
+                    if (!(vs_pad_state.pads[1].pressed & PAD_BUTTON_CROSS) || !save_loaded_1p
+                        || !save_loaded_2p)
                         goto buzz;
                     play_confirm_sound();
                     vs_pad_state.pads[1].pressed = 0;
@@ -215,23 +217,23 @@ int menu_vs_setup_run(void)
                 vs_pad_state.pads[0].pressed = 0;
                 vs_pad_state.pads[1].pressed = 0;
             }
-            if (REPEAT & 0x10) {
+            if (REPEAT & PAD_BUTTON_UP) {
                 play_cursor_sound();
                 vs_pad_state.pads[0].pressed_repeat = 0;
                 vs_pad_state.pads[1].pressed_repeat = 0;
                 sp->main_row = (sp->main_row + 6) % 7;
             }
-            if (REPEAT & 0x40) {
+            if (REPEAT & PAD_BUTTON_DOWN) {
                 play_cursor_sound();
                 vs_pad_state.pads[0].pressed_repeat = 0;
                 vs_pad_state.pads[1].pressed_repeat = 0;
                 sp->main_row = (sp->main_row + 1) % 7;
             }
-            if (PRESSED & 0x2000) {
+            if (PRESSED & PAD_BUTTON_CIRCLE) {
                 play_cursor_sound();
                 sp->mode = 6;
             }
-            if (PRESSED & 8) {
+            if (PRESSED & PAD_BUTTON_START) {
                 sp->main_row = 0;
                 if (requested_items[0] != -1) {
                     if (requested_item_2p != -1)
@@ -253,7 +255,7 @@ int menu_vs_setup_run(void)
                 goto next;
             }
         } else if (sp->mode == 1) {
-            if (PRESSED & 0x4000) {
+            if (PRESSED & PAD_BUTTON_CROSS) {
                 if (round_count == 1) {
                     if (lineups[0].slot[0] == -1 || lineups[1].slot[0] == -1)
                         sp->mode = 2;
@@ -278,15 +280,15 @@ int menu_vs_setup_run(void)
                     }
                 }
             }
-            if (PRESSED & 0x2000)
+            if (PRESSED & PAD_BUTTON_CIRCLE)
                 sp->mode = 0;
             b = PRESSED;
-            if (b & 0x20)
+            if (b & PAD_BUTTON_RIGHT)
                 round_count = 3;
-            if (b & 0x80)
+            if (b & PAD_BUTTON_LEFT)
                 round_count = 1;
         } else if (sp->mode == 5 || sp->mode == 6) {
-            if (PRESSED & 0x4000) {
+            if (PRESSED & PAD_BUTTON_CROSS) {
                 if (sp->mode == 5) {
                     vs_pad_state.pads[0].pressed = 0;
                     vs_pad_state.pads[1].pressed = 0;
@@ -294,13 +296,13 @@ int menu_vs_setup_run(void)
                 }
                 sp->mode = 0;
             }
-            if (PRESSED & 0x2000)
+            if (PRESSED & PAD_BUTTON_CIRCLE)
                 sp->mode = 0;
-            if (PRESSED & 0x20)
+            if (PRESSED & PAD_BUTTON_RIGHT)
                 sp->mode = 6;
-            if (PRESSED & 0x80)
+            if (PRESSED & PAD_BUTTON_LEFT)
                 sp->mode = 5;
-        } else if (PRESSED & 0x6000) {
+        } else if (PRESSED & (PAD_BUTTON_CIRCLE | PAD_BUTTON_CROSS)) {
             sp->mode = 0;
         }
     next:
@@ -693,7 +695,7 @@ void menu_creature_select_loop(VsMenuScratch *sp, int player)
                 col = (s16)(cursor - (cursor >> 2) * 4);
                 row = cursor >> 2;
             }
-            if (PRESSED & 0x2000) {
+            if (PRESSED & PAD_BUTTON_CIRCLE) {
                 if (!edit.holding) {
                     play_cancel_sound();
                     return;
@@ -705,14 +707,14 @@ void menu_creature_select_loop(VsMenuScratch *sp, int player)
                 menu_creature_select_clear_parked();
             }
             if (!edit.holding) {
-                if (REPEAT & 0x20) {
+                if (REPEAT & PAD_BUTTON_RIGHT) {
                     play_cursor_sound();
                     if (col < 0 && !edit.holding)
                         sp->cursor = row << 2;
                     else if (col < 3)
                         sp->cursor++;
                 }
-                if (!edit.holding && (REPEAT & 0x80)) {
+                if (!edit.holding && (REPEAT & PAD_BUTTON_LEFT)) {
                     play_cursor_sound();
                     if (col > 0)
                         sp->cursor--;
@@ -720,14 +722,14 @@ void menu_creature_select_loop(VsMenuScratch *sp, int player)
                         sp->cursor = ~row;
                 }
             }
-            if (REPEAT & 0x10) {
+            if (REPEAT & PAD_BUTTON_UP) {
                 play_cursor_sound();
                 if (edit.holding) {
                     if (row > 0) {
                         sp->cursor++;
                         menu_creature_select_swap_slots(sp, player, &edit);
                     }
-                } else if (HELD & 0x8000) {
+                } else if (HELD & PAD_BUTTON_SQUARE) {
                     sp->scroll -= 3;
                     if (sp->scroll < 0)
                         sp->scroll = 0;
@@ -739,14 +741,14 @@ void menu_creature_select_loop(VsMenuScratch *sp, int player)
                 } else if (sp->scroll > 0) {
                     sp->scroll--;
                 }
-            } else if (REPEAT & 0x40) {
+            } else if (REPEAT & PAD_BUTTON_DOWN) {
                 play_cursor_sound();
                 if (edit.holding) {
                     if (row < 2 && TEAM[row + 1] != -1) {
                         sp->cursor--;
                         menu_creature_select_swap_slots(sp, player, &edit);
                     }
-                } else if (HELD & 0x8000) {
+                } else if (HELD & PAD_BUTTON_SQUARE) {
                     if (sp->state.creature_select.rows > 2) {
                         sp->scroll += 3;
                         if (sp->scroll > sp->state.creature_select.rows - 2)
@@ -761,19 +763,19 @@ void menu_creature_select_loop(VsMenuScratch *sp, int player)
                     else if (sp->scroll <= sp->state.creature_select.rows - 3)
                         sp->scroll++;
                 }
-            } else if (REPEAT & 0x800) {
+            } else if (REPEAT & PAD_BUTTON_R1) {
                 play_cursor_sound();
                 sp->scroll -= 3;
                 if (sp->scroll < 0)
                     sp->scroll = 0;
-            } else if (REPEAT & 0x200) {
+            } else if (REPEAT & PAD_BUTTON_R2) {
                 play_cursor_sound();
                 if (sp->state.creature_select.rows > 2) {
                     sp->scroll += 3;
                     if (sp->scroll > sp->state.creature_select.rows - 2)
                         sp->scroll = sp->state.creature_select.rows - 2;
                 }
-            } else if (PRESSED & 0x4000) {
+            } else if (PRESSED & PAD_BUTTON_CROSS) {
                 if (edit.holding) {
                     play_confirm_sound();
                     edit.holding = 0;
@@ -830,7 +832,7 @@ void menu_creature_select_loop(VsMenuScratch *sp, int player)
                     edit.holding = 0;
                     sp->holding = 0;
                 }
-            } else if ((PRESSED & 0x1000) && !edit.holding) {
+            } else if ((PRESSED & PAD_BUTTON_TRIANGLE) && !edit.holding) {
                 DAT_8006335c = 0;
                 play_confirm_sound();
                 if (sp->cursor < 0) {
@@ -893,12 +895,12 @@ void menu_creature_select_loop(VsMenuScratch *sp, int player)
                 }
                 DrawSync(0);
             }
-        } else if (PRESSED & 0x2000) {
+        } else if (PRESSED & PAD_BUTTON_CIRCLE) {
             play_cancel_sound();
             sp->mode = 1;
-        } else if (PRESSED & 0x800) {
+        } else if (PRESSED & PAD_BUTTON_R1) {
             DAT_8006335c = 1;
-        } else if (PRESSED & 0x400) {
+        } else if (PRESSED & PAD_BUTTON_L1) {
             DAT_8006335c = 0;
         }
         vs_pad_state.pads[0].pressed = 0;
@@ -1230,7 +1232,7 @@ void menu_item_request_run(int player)
             vs_pad_state.pads[1].pressed_repeat = 0;
             vs_pad_state.pads[1].held = 0;
         }
-        if (PRESSED & 0x2000) {
+        if (PRESSED & PAD_BUTTON_CIRCLE) {
             play_cancel_sound();
             if (sp->mode & 0x8000) {
                 sp->mode &= 0x7fff;
@@ -1240,7 +1242,7 @@ void menu_item_request_run(int player)
                 break;
             }
         }
-        if (PRESSED & 0x4000) {
+        if (PRESSED & PAD_BUTTON_CROSS) {
             play_confirm_sound();
             if (sp->mode & 0x8000) {
                 s16 chosen = IDS[TOP + sp->cursor];
@@ -1256,9 +1258,9 @@ void menu_item_request_run(int player)
                 sp->mode |= 0x8000;
         }
         if (!(sp->mode & 0x8000)) {
-            if (REPEAT & 0x10) {
+            if (REPEAT & PAD_BUTTON_UP) {
                 play_cursor_sound();
-                if (vs_pad_state.pads[0].held & 0x8000) {
+                if (vs_pad_state.pads[0].held & PAD_BUTTON_SQUARE) {
                     if (COUNT < 11) {
                         sp->cursor = 0;
                     } else {
@@ -1279,9 +1281,9 @@ void menu_item_request_run(int player)
                 }
                 vs_pad_state.pads[0].pressed_repeat = 0;
             }
-            if (REPEAT & 0x40) {
+            if (REPEAT & PAD_BUTTON_DOWN) {
                 play_cursor_sound();
-                if ((vs_pad_state.pads[0].held | vs_pad_state.pads[1].held) & 0x8000) {
+                if ((vs_pad_state.pads[0].held | vs_pad_state.pads[1].held) & PAD_BUTTON_SQUARE) {
                     if (COUNT >= 11) {
                         TOP += 11;
                         if (TOP > COUNT - 11) {
@@ -1303,7 +1305,7 @@ void menu_item_request_run(int player)
                     }
                 }
             }
-            if (REPEAT & 0x800) {
+            if (REPEAT & PAD_BUTTON_R1) {
                 play_cursor_sound();
                 if (COUNT >= 11) {
                     TOP -= 11;
@@ -1314,7 +1316,7 @@ void menu_item_request_run(int player)
                     }
                 } else {
                     sp->cursor = 0;
-                    if (REPEAT & 0x200)
+                    if (REPEAT & PAD_BUTTON_R2)
                         play_cursor_sound();
                 }
                 if (COUNT >= 11) {
@@ -1663,20 +1665,20 @@ s16 card_ask_yes_no(int first)
             vs_pad_state.pads[1].held = 0;
         }
         buttons = vs_pad_state.pads[0].pressed | vs_pad_state.pads[1].pressed;
-        if (buttons & 0x4000) {
+        if (buttons & PAD_BUTTON_CROSS) {
             play_confirm_sound();
             break;
         }
-        if (buttons & 0x2000) {
+        if (buttons & PAD_BUTTON_CIRCLE) {
             play_cancel_sound();
             sp->dialog_choice = 0;
             break;
         }
-        if (buttons & 0x80) {
+        if (buttons & PAD_BUTTON_LEFT) {
             play_cursor_sound();
             sp->dialog_choice = 1;
         }
-        if ((vs_pad_state.pads[0].pressed | vs_pad_state.pads[1].pressed) & 0x20) {
+        if ((vs_pad_state.pads[0].pressed | vs_pad_state.pads[1].pressed) & PAD_BUTTON_RIGHT) {
             play_cursor_sound();
             sp->dialog_choice = 0;
         }
@@ -1706,21 +1708,21 @@ int card_choose_port(int first)
             vs_pad_state.pads[1].held = 0;
         }
         buttons = vs_pad_state.pads[0].pressed | vs_pad_state.pads[1].pressed;
-        if (buttons & 0x4000) {
+        if (buttons & PAD_BUTTON_CROSS) {
             play_confirm_sound();
             sp->mode <<= 1;
             break;
         }
-        if (buttons & 0x2000) {
+        if (buttons & PAD_BUTTON_CIRCLE) {
             play_cancel_sound();
             sp->mode = 0;
             break;
         }
-        if ((vs_pad_state.pads[0].pressed_repeat | vs_pad_state.pads[1].pressed_repeat) & 0x10) {
+        if ((vs_pad_state.pads[0].pressed_repeat | vs_pad_state.pads[1].pressed_repeat) & PAD_BUTTON_UP) {
             play_cursor_sound();
             sp->mode = 2;
         }
-        if ((vs_pad_state.pads[0].pressed_repeat | vs_pad_state.pads[1].pressed_repeat) & 0x40) {
+        if ((vs_pad_state.pads[0].pressed_repeat | vs_pad_state.pads[1].pressed_repeat) & PAD_BUTTON_DOWN) {
             play_cursor_sound();
             sp->mode = 512;
         }
@@ -1785,7 +1787,8 @@ int card_choose_file(int first)
             vs_pad_state.pads[1].pressed_repeat = 0;
             vs_pad_state.pads[1].held = 0;
         }
-        if ((sp->mode & 0xff00) || ((vs_pad_state.pads[0].pressed | vs_pad_state.pads[1].pressed) & 0x4000)) {
+        if ((sp->mode & 0xff00)
+            || ((vs_pad_state.pads[0].pressed | vs_pad_state.pads[1].pressed) & PAD_BUTTON_CROSS)) {
             play_confirm_sound();
             vs_pad_state.pads[0].pressed = 0;
             vs_pad_state.pads[1].pressed = 0;
@@ -1805,20 +1808,20 @@ int card_choose_file(int first)
                     vs_pad_state.pads[1].held = 0;
                 }
                 buttons = vs_pad_state.pads[0].pressed | vs_pad_state.pads[1].pressed;
-                if (buttons & 0x4000) {
+                if (buttons & PAD_BUTTON_CROSS) {
                     play_confirm_sound();
                     break;
                 }
-                if (buttons & 0x2000) {
+                if (buttons & PAD_BUTTON_CIRCLE) {
                     play_cancel_sound();
                     sp->dialog_choice = 0;
                     break;
                 }
-                if (buttons & 0x80) {
+                if (buttons & PAD_BUTTON_LEFT) {
                     play_cursor_sound();
                     sp->dialog_choice = 1;
                 }
-                if ((vs_pad_state.pads[0].pressed | vs_pad_state.pads[1].pressed) & 0x20) {
+                if ((vs_pad_state.pads[0].pressed | vs_pad_state.pads[1].pressed) & PAD_BUTTON_RIGHT) {
                     play_cursor_sound();
                     sp->dialog_choice = 0;
                 }
@@ -1837,12 +1840,12 @@ int card_choose_file(int first)
             sp->state.menu.half[1] = 0;
             continue;
         }
-        if ((vs_pad_state.pads[0].pressed | vs_pad_state.pads[1].pressed) & 0x2000) {
+        if ((vs_pad_state.pads[0].pressed | vs_pad_state.pads[1].pressed) & PAD_BUTTON_CIRCLE) {
             play_cancel_sound();
             sp->file_row = -1;
             goto done;
         }
-        if ((vs_pad_state.pads[0].pressed_repeat | vs_pad_state.pads[1].pressed_repeat) & 0x10) {
+        if ((vs_pad_state.pads[0].pressed_repeat | vs_pad_state.pads[1].pressed_repeat) & PAD_BUTTON_UP) {
             play_cursor_sound();
             if (sp->file_row == 0) {
                 if (sp->first_row > 0)
@@ -1851,7 +1854,7 @@ int card_choose_file(int first)
                 sp->file_row--;
             }
         }
-        if ((vs_pad_state.pads[0].pressed_repeat | vs_pad_state.pads[1].pressed_repeat) & 0x40) {
+        if ((vs_pad_state.pads[0].pressed_repeat | vs_pad_state.pads[1].pressed_repeat) & PAD_BUTTON_DOWN) {
             play_cursor_sound();
             if (sp->file_row == 2) {
                 if (sp->first_row < sp->row_count - 3)

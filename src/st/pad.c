@@ -18,24 +18,24 @@ RODATA(0x80012854, 0x1c)
 ADDRESS(0x8005738c, 0x30)
 void pad_update_action_mask(void)
 {
-    pad_state.action_mask = pad_state.buttons[8] | pad_state.buttons[9] | pad_state.buttons[10] | pad_state.buttons[11];
+    pad_state.action_mask = pad_state.buttons[PAD_ACTION_RIGHT_HAND] | pad_state.buttons[PAD_ACTION_LEFT_HAND] | pad_state.buttons[PAD_ACTION_EVENT] | pad_state.buttons[PAD_ACTION_MAGIC_MENU];
 }
 
 ADDRESS(0x800573bc, 0x6c)
 void pad_set_default_buttons(void)
 {
-    pad_state.buttons[0] = 0x10;
-    pad_state.buttons[1] = 0x40;
-    pad_state.buttons[2] = 0x80;
-    pad_state.buttons[3] = 0x20;
-    pad_state.buttons[4] = 0x400;
-    pad_state.buttons[5] = 0x800;
-    pad_state.buttons[6] = 0x100;
-    pad_state.buttons[7] = 0x200;
-    pad_state.buttons[8] = 0x1000;
-    pad_state.buttons[9] = 0x8000;
-    pad_state.buttons[10] = 0x4000;
-    pad_state.buttons[11] = 0x2000;
+    pad_state.buttons[PAD_ACTION_FORWARD] = PAD_BUTTON_UP;
+    pad_state.buttons[PAD_ACTION_BACK] = PAD_BUTTON_DOWN;
+    pad_state.buttons[PAD_ACTION_TURN_LEFT] = PAD_BUTTON_LEFT;
+    pad_state.buttons[PAD_ACTION_TURN_RIGHT] = PAD_BUTTON_RIGHT;
+    pad_state.buttons[PAD_ACTION_MOVE_LEFT] = PAD_BUTTON_L1;
+    pad_state.buttons[PAD_ACTION_MOVE_RIGHT] = PAD_BUTTON_R1;
+    pad_state.buttons[PAD_ACTION_LOOK_UP] = PAD_BUTTON_L2;
+    pad_state.buttons[PAD_ACTION_LOOK_DOWN] = PAD_BUTTON_R2;
+    pad_state.buttons[PAD_ACTION_RIGHT_HAND] = PAD_BUTTON_TRIANGLE;
+    pad_state.buttons[PAD_ACTION_LEFT_HAND] = PAD_BUTTON_SQUARE;
+    pad_state.buttons[PAD_ACTION_EVENT] = PAD_BUTTON_CROSS;
+    pad_state.buttons[PAD_ACTION_MAGIC_MENU] = PAD_BUTTON_CIRCLE;
 }
 
 /* Waits (up to 60 vsyncs) for the controller in port 1 to settle. */
@@ -137,7 +137,7 @@ void pad_init(void)
     pad_state.held_changed = 0;
     pad_state.repeat_timer = 0;
     pad_state.combo_timer = 0;
-    pad_state.combo = 0;
+    pad_state.combo = PAD_COMBO_NONE;
     pad_state.actuator_count = 0;
     /* One word store clears each halfword pair. */
     *(u32 *)&pad_state.prev_held = 0;
@@ -188,25 +188,26 @@ void pad_read(void)
             pad_state.combo_timer = game_settings.combo_window;
         } else if (pad_state.combo_second == 0) {
             pad_state.combo_second = pad_state.held & ~pad_state.prev_held;
-            if ((pad_state.combo_first & pad_state.buttons[11]) && (pad_state.buttons[11] & pad_state.combo_second)) {
-                pad_state.combo = 1;
-                pad_state.pressed &= ~pad_state.buttons[11];
-            } else if ((pad_state.combo_first & pad_state.buttons[10]) &&
-                       (pad_state.combo_second & pad_state.buttons[8])) {
-                pad_state.combo = 2;
-                pad_state.pressed = pad_state.pressed & ~pad_state.buttons[8] & ~pad_state.buttons[10];
-            } else if ((pad_state.combo_first & pad_state.buttons[10]) &&
-                       (pad_state.combo_second & pad_state.buttons[9])) {
-                pad_state.combo = 3;
-                pad_state.pressed = pad_state.pressed & ~pad_state.buttons[9] & ~pad_state.buttons[10];
-            } else if ((pad_state.combo_first & pad_state.buttons[11]) &&
-                       (pad_state.combo_second & pad_state.buttons[8])) {
-                pad_state.combo = 4;
-                pad_state.pressed = pad_state.pressed & ~pad_state.buttons[8] & ~pad_state.buttons[11];
-            } else if ((pad_state.combo_first & pad_state.buttons[11]) &&
-                       (pad_state.combo_second & pad_state.buttons[9])) {
-                pad_state.combo = 5;
-                pad_state.pressed = pad_state.pressed & ~pad_state.buttons[9] & ~pad_state.buttons[11];
+            if ((pad_state.combo_first & pad_state.buttons[PAD_ACTION_MAGIC_MENU])
+                && (pad_state.buttons[PAD_ACTION_MAGIC_MENU] & pad_state.combo_second)) {
+                pad_state.combo = PAD_COMBO_MENU;
+                pad_state.pressed &= ~pad_state.buttons[PAD_ACTION_MAGIC_MENU];
+            } else if ((pad_state.combo_first & pad_state.buttons[PAD_ACTION_EVENT]) &&
+                       (pad_state.combo_second & pad_state.buttons[PAD_ACTION_RIGHT_HAND])) {
+                pad_state.combo = PAD_COMBO_SWAP_RIGHT;
+                pad_state.pressed = pad_state.pressed & ~pad_state.buttons[PAD_ACTION_RIGHT_HAND] & ~pad_state.buttons[PAD_ACTION_EVENT];
+            } else if ((pad_state.combo_first & pad_state.buttons[PAD_ACTION_EVENT]) &&
+                       (pad_state.combo_second & pad_state.buttons[PAD_ACTION_LEFT_HAND])) {
+                pad_state.combo = PAD_COMBO_SWAP_LEFT;
+                pad_state.pressed = pad_state.pressed & ~pad_state.buttons[PAD_ACTION_LEFT_HAND] & ~pad_state.buttons[PAD_ACTION_EVENT];
+            } else if ((pad_state.combo_first & pad_state.buttons[PAD_ACTION_MAGIC_MENU]) &&
+                       (pad_state.combo_second & pad_state.buttons[PAD_ACTION_RIGHT_HAND])) {
+                pad_state.combo = PAD_COMBO_CAST_RIGHT;
+                pad_state.pressed = pad_state.pressed & ~pad_state.buttons[PAD_ACTION_RIGHT_HAND] & ~pad_state.buttons[PAD_ACTION_MAGIC_MENU];
+            } else if ((pad_state.combo_first & pad_state.buttons[PAD_ACTION_MAGIC_MENU]) &&
+                       (pad_state.combo_second & pad_state.buttons[PAD_ACTION_LEFT_HAND])) {
+                pad_state.combo = PAD_COMBO_CAST_LEFT;
+                pad_state.pressed = pad_state.pressed & ~pad_state.buttons[PAD_ACTION_LEFT_HAND] & ~pad_state.buttons[PAD_ACTION_MAGIC_MENU];
             }
             pad_state.combo_second = 0;
             pad_state.combo_first = 0;
@@ -230,7 +231,7 @@ void pad_clear_input(void)
     pad_state.disabled = 1;
     pad_state.held_changed = 0;
     pad_state.combo_timer = 0;
-    pad_state.combo = 0;
+    pad_state.combo = PAD_COMBO_NONE;
     *(u32 *)&pad_state.pressed = 0;
     pad_state.pressed_repeat = 0;
     pad_state.disabled = 0;

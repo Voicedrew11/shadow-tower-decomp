@@ -324,7 +324,7 @@ void fighter_walk_reversible(VsFighter *f, s16 from, s16 to)
     VsFighterData *d = &f->data;
 
     f->anim_frame &= 0xfff;
-    if (fighter_pad_held & 0x10) {
+    if (fighter_pad_held & PAD_BUTTON_UP) {
         f->state = 1;
         if (f->anim == d->anims[0].anim) {
             f->anim = d->anims[1].anim;
@@ -334,7 +334,7 @@ void fighter_walk_reversible(VsFighter *f, s16 from, s16 to)
         if (from != 0 && (f->anim_frame < from || to < f->anim_frame))
             return;
         VS_WALK(f, d, +=);
-    } else if (fighter_pad_held & 0x40) {
+    } else if (fighter_pad_held & PAD_BUTTON_DOWN) {
         f->state = 1;
         if (f->anim == d->anims[0].anim) {
             f->anim = d->anims[1].anim;
@@ -361,7 +361,7 @@ void fighter_walk_back_anim(VsFighter *f, s16 from, s16 to)
     VsFighterData *d = &f->data;
 
     f->anim_frame &= 0xfff;
-    if (fighter_pad_held & 0x10) {
+    if (fighter_pad_held & PAD_BUTTON_UP) {
         f->state = 1;
         if (f->anim != d->anims[1].anim) {
             f->anim = d->anims[1].anim;
@@ -371,7 +371,7 @@ void fighter_walk_back_anim(VsFighter *f, s16 from, s16 to)
         if (from != 0 && (f->anim_frame < from || to < f->anim_frame))
             return;
         VS_WALK(f, d, +=);
-    } else if (fighter_pad_held & 0x40) {
+    } else if (fighter_pad_held & PAD_BUTTON_DOWN) {
         f->state = 1;
         if (f->anim != d->anims[12].anim) {
             f->anim = d->anims[12].anim;
@@ -398,12 +398,12 @@ void fighter_slide(VsFighter *f)
     VsFighterData *d = &f->data;
 
     f->anim_frame &= 0xfff;
-    if (fighter_pad_held & 0x10) {
+    if (fighter_pad_held & PAD_BUTTON_UP) {
         int angle = f->facing;
 
         f->state = 1;
         VS_WALK_ANGLE(f, d, +=, angle);
-    } else if (fighter_pad_held & 0x40) {
+    } else if (fighter_pad_held & PAD_BUTTON_DOWN) {
         int angle = f->facing;
 
         f->state = 1;
@@ -421,7 +421,7 @@ void fighter_walk_with_start(VsFighter *f, s16 from, s16 to)
     VsFighterData *d = &f->data;
     s16 kind;
 
-    if (fighter_pad_held & 0x10) {
+    if (fighter_pad_held & PAD_BUTTON_UP) {
         f->state = 1;
         if (f->anim == d->anims[1].anim) {
             f->anim_step = d->anims[1].anim_step;
@@ -441,7 +441,7 @@ void fighter_walk_with_start(VsFighter *f, s16 from, s16 to)
             f->anim_step = d->anims[10].anim_step;
             f->anim_frame = 0;
         }
-    } else if (fighter_pad_held & 0x40) {
+    } else if (fighter_pad_held & PAD_BUTTON_DOWN) {
         f->state = 1;
         kind = d->move_kind;
         if (kind == 3 || kind == 5 || kind == 13) {
@@ -501,7 +501,7 @@ void fighter_walk_start_back_anim(VsFighter *f, s16 from, s16 to)
 {
     VsFighterData *d = &f->data;
 
-    if (fighter_pad_held & 0x10) {
+    if (fighter_pad_held & PAD_BUTTON_UP) {
         f->state = 1;
         if (f->anim == d->anims[1].anim) {
             if (VS_IN_FRAMES(f, from, to))
@@ -519,7 +519,7 @@ void fighter_walk_start_back_anim(VsFighter *f, s16 from, s16 to)
             f->anim_step = d->anims[10].anim_step;
             f->anim_frame = 0;
         }
-    } else if (fighter_pad_held & 0x40) {
+    } else if (fighter_pad_held & PAD_BUTTON_DOWN) {
         f->state = 1;
         if (f->anim == d->anims[12].anim) {
             if (VS_IN_FRAMES(f, from, to))
@@ -570,7 +570,7 @@ void fighter_update(int n)
         if (d->max_gauge < f->gauge)
             f->gauge = d->max_gauge;
     }
-    if (f->state != 5 && (fighter_pad_held & 0x800)) {
+    if (f->state != 5 && (fighter_pad_held & PAD_BUTTON_R1)) {
         VsFighter *base = shared_buffer.fighter;
         VsFighter *o = base + (1 - n);
         s16 target;
@@ -601,14 +601,14 @@ void fighter_update(int n)
         if (f->anim == d->anims[2].anim) {
             h = &d->combo_hits[0];
             if (f->anim_frame / f->anim_step < 20) {
-                if (d->anims[3].anim != 255 && (fighter_pad_pressed & 0x2000)) {
+                if (d->anims[3].anim != 255 && (fighter_pad_pressed & PAD_BUTTON_CIRCLE)) {
                     f->anim = d->anims[3].anim;
                     f->anim_step = d->anims[3].anim_step;
                     f->anim_frame = 0;
                     f->hits_left = 1;
                     break;
                 }
-                if (d->anims[4].anim != 255 && (fighter_pad_pressed & 0x4000)) {
+                if (d->anims[4].anim != 255 && (fighter_pad_pressed & PAD_BUTTON_CROSS)) {
                     f->anim = d->anims[4].anim;
                     f->anim_step = d->anims[4].anim_step;
                     f->anim_frame = 0;
@@ -656,13 +656,13 @@ void fighter_update(int n)
         if (f->anim == d->anims[5].anim) {
             a = &d->attacks[0];
             if (f->anim_frame / f->anim_step < 20) {
-                if (d->anims[6].anim != 255 && (fighter_pad_pressed & 0x2000)) {
+                if (d->anims[6].anim != 255 && (fighter_pad_pressed & PAD_BUTTON_CIRCLE)) {
                     f->anim = d->anims[6].anim;
                     f->anim_step = d->anims[6].anim_step;
                     f->anim_frame = 0;
                     break;
                 }
-                if (d->anims[7].anim != 255 && (fighter_pad_pressed & 0x4000)) {
+                if (d->anims[7].anim != 255 && (fighter_pad_pressed & PAD_BUTTON_CROSS)) {
                     f->anim = d->anims[7].anim;
                     f->anim_step = d->anims[7].anim_step;
                     f->anim_frame = 0;
@@ -715,7 +715,7 @@ void fighter_update(int n)
     case 0:
     case 1:
     case 5:
-        if (fighter_pad_held & 0x2000) {
+        if (fighter_pad_held & PAD_BUTTON_CIRCLE) {
             f->state = 5;
             f->anim_frame &= 0xfff;
             if (f->anim != d->anims[0].anim) {
@@ -761,20 +761,21 @@ void fighter_update(int n)
             f->anim_frame &= 0xfff;
             break;
         }
-        if (!(fighter_pad_held & 0x800)) {
-            if (fighter_pad_held & 0x80)
+        if (!(fighter_pad_held & PAD_BUTTON_R1)) {
+            if (fighter_pad_held & PAD_BUTTON_LEFT)
                 f->facing = (f->facing - d->turn_speed * frames_per_draw) & 0xfff;
-            if (fighter_pad_held & 0x20)
+            if (fighter_pad_held & PAD_BUTTON_RIGHT)
                 f->facing = (f->facing + d->turn_speed * frames_per_draw) & 0xfff;
         }
-        if ((fighter_pad_pressed & 0x1000) && d->anims[2].anim != 255) {
+        if ((fighter_pad_pressed & PAD_BUTTON_TRIANGLE) && d->anims[2].anim != 255) {
             f->state = 2;
             f->anim = d->anims[2].anim;
             f->anim_step = d->anims[2].anim_step;
             f->anim_frame = 0;
             f->hits_left = 1;
         }
-        if ((fighter_pad_pressed & 0x8000) && d->anims[5].anim != 255 && f->gauge == d->max_gauge) {
+        if ((fighter_pad_pressed & PAD_BUTTON_SQUARE) && d->anims[5].anim != 255
+            && f->gauge == d->max_gauge) {
             f->state = 6;
             f->anim = d->anims[5].anim;
             f->anim_step = d->anims[5].anim_step;

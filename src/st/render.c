@@ -6809,7 +6809,7 @@ void menu_button_config_draw(void)
         else
             ui_draw_text(MESSAGE(209 + i), label_x[i] + 32, i * 18 + 80, &sp->style[2]);
     }
-    mask = &pad_state.buttons[6];
+    mask = &pad_state.buttons[PAD_ACTION_LOOK_UP];
     for (i = 0; i < 6; i++) {
         if (mask[i] & sp->state.levels.flags)
             ui_draw_text(MESSAGE(215 + i), label_x[i + 6] + 168, i * 18 + 80, &sp->style[3]);
@@ -8029,9 +8029,9 @@ void menu_equip_info_draw(void)
     RECT right = {630, 119, 16, 8};
 
     gfx_begin_frame();
-    if (pad_state.pressed & 0x800)
+    if (pad_state.pressed & PAD_BUTTON_R1)
         menu_second_page = 1;
-    else if (pad_state.pressed & 0x400)
+    else if (pad_state.pressed & PAD_BUTTON_L1)
         menu_second_page = 0;
     pad_state.pressed = 0;
     sp->style[0].r = sp->style[4].r = 80;
@@ -8157,9 +8157,9 @@ void menu_creature_book_draw_entry(void)
 
     kind = sp->state.book.kinds[sp->scroll * 5 + sp->cursor];
     item = &sp->state.book.entries[kind];
-    if (pad_state.pressed & 0x800)
+    if (pad_state.pressed & PAD_BUTTON_R1)
         menu_second_page = 1;
-    if (pad_state.pressed & 0x400)
+    if (pad_state.pressed & PAD_BUTTON_L1)
         menu_second_page = 0;
     pad_state.pressed = 0;
     if (menu_second_page == 0)

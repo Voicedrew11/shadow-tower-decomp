@@ -14,6 +14,7 @@
 #include <st/memory.h>
 #include <st/gfx.h>
 #include <st/equip_slots.h>
+#include <st/pad_buttons.h>
 
 /* PSX.EXE's next-program byte and the two mailbox bytes after it. */
 #define NEXT_PROGRAM_BYTE ((u8 *)0x800103f0)

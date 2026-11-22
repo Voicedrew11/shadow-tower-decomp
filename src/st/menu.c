@@ -169,18 +169,18 @@ void menu_main_run(void)
     pad_clear_input();
     DrawSync(0);
     for (;;) {
-        if (pad_state.pressed & 0x2000) {
+        if (pad_state.pressed & PAD_BUTTON_CIRCLE) {
             play_cancel_sound();
             pad_state.pressed = 0;
             break;
         }
-        if (pad_state.pressed & 0x1000) {
+        if (pad_state.pressed & PAD_BUTTON_TRIANGLE) {
             play_confirm_sound();
             pad_state.pressed = 0;
             sp->font_mode = 0;
             menu_area_info_run();
         }
-        if (pad_state.pressed & 0x4000) {
+        if (pad_state.pressed & PAD_BUTTON_CROSS) {
             play_confirm_sound();
             pad_state.pressed = 0;
             if ((s16)sp->main_row == 0) {
@@ -193,7 +193,7 @@ void menu_main_run(void)
             } else if ((s16)sp->main_row == 2) {
                 viewer.free_anims_after_menu = 1;
                 sp->font_mode = 1;
-                if (pad_state.held & 0x800)
+                if (pad_state.held & PAD_BUTTON_R1)
                     menu_arrange_icons_run();
                 else
                     menu_arrange_list_run();
@@ -220,14 +220,14 @@ void menu_main_run(void)
                     break;
             }
         }
-        if (pad_state.pressed_repeat & 0x40) {
+        if (pad_state.pressed_repeat & PAD_BUTTON_DOWN) {
             play_cursor_sound();
             pad_state.pressed_repeat = 0;
             sp->main_row++;
             if ((s16)sp->main_row >= 8)
                 sp->main_row = 0;
         }
-        if (pad_state.pressed_repeat & 0x10) {
+        if (pad_state.pressed_repeat & PAD_BUTTON_UP) {
             play_cursor_sound();
             pad_state.pressed_repeat = 0;
             sp->main_row--;
@@ -974,23 +974,23 @@ void menu_equip_info_run(void)
             debounce--;
         }
         if (sp->mode == 1) {
-            if (pad_state.pressed & 0x800)
+            if (pad_state.pressed & PAD_BUTTON_R1)
                 menu_second_page = 1;
-            else if (pad_state.pressed & 0x400)
+            else if (pad_state.pressed & PAD_BUTTON_L1)
                 menu_second_page = 0;
-            if (pad_state.held & 0x1000) {
+            if (pad_state.held & PAD_BUTTON_TRIANGLE) {
                 if (sp->show_item_values == 0)
                     play_confirm_sound();
                 sp->show_item_values = 1;
             } else {
                 sp->show_item_values = 0;
             }
-            if (pad_state.pressed & 0x2000) {
+            if (pad_state.pressed & PAD_BUTTON_CIRCLE) {
                 play_cancel_sound();
                 pad_state.pressed = 0;
                 break;
             }
-            if (pad_state.pressed & 0x4000) {
+            if (pad_state.pressed & PAD_BUTTON_CROSS) {
                 pad_state.pressed = 0;
                 sp->mode = 2;
                 held = sp->cursor;
@@ -1203,7 +1203,7 @@ void menu_equip_info_run(void)
                 pad_state.pressed = 0;
                 goto moved;
             }
-            if (pad_state.pressed_repeat & 0x20) {
+            if (pad_state.pressed_repeat & PAD_BUTTON_RIGHT) {
                 debounce = 1;
                 switch (sp->cursor) {
                 case 0:
@@ -1235,7 +1235,7 @@ void menu_equip_info_run(void)
                         sp->cursor += 7;
                     break;
                 }
-            } else if (pad_state.pressed_repeat & 0x80) {
+            } else if (pad_state.pressed_repeat & PAD_BUTTON_LEFT) {
                 debounce = 1;
                 switch (sp->cursor) {
                 case 14:
@@ -1267,7 +1267,7 @@ void menu_equip_info_run(void)
                         sp->cursor -= 7;
                     break;
                 }
-            } else if (pad_state.pressed_repeat & 0x40) {
+            } else if (pad_state.pressed_repeat & PAD_BUTTON_DOWN) {
                 debounce = 1;
                 switch (sp->cursor) {
                 case 9:
@@ -1285,7 +1285,7 @@ void menu_equip_info_run(void)
                         sp->cursor++;
                     break;
                 }
-            } else if (pad_state.pressed_repeat & 0x10) {
+            } else if (pad_state.pressed_repeat & PAD_BUTTON_UP) {
                 debounce = 1;
                 switch (sp->cursor) {
                 case 10:
@@ -1315,7 +1315,7 @@ void menu_equip_info_run(void)
             }
         } else {
             if (sp->list_kind != 10) {
-                if (pad_state.pressed & 0x4000) {
+                if (pad_state.pressed & PAD_BUTTON_CROSS) {
                     sel = sp->choice_id;
                     if (sel != -1 && vis_table_c.types[sel].max_durability != 0
                         && vis_table_c.types[sel].durability == 0
@@ -1333,7 +1333,7 @@ void menu_equip_info_run(void)
                         sp->mode = 1;
                         pad_state.pressed = 0;
                     }
-                } else if (pad_state.pressed_repeat & 0x20) {
+                } else if (pad_state.pressed_repeat & PAD_BUTTON_RIGHT) {
                     play_cursor_sound();
                     if (sp->choice_index < sp->choice_count - 1) {
                         sp->choice_index++;
@@ -1342,7 +1342,7 @@ void menu_equip_info_run(void)
                         sp->choice_index = -1;
                         sp->choice_id = -1;
                     }
-                } else if (pad_state.pressed_repeat & 0x80) {
+                } else if (pad_state.pressed_repeat & PAD_BUTTON_LEFT) {
                     play_cursor_sound();
                     if (sp->choice_index >= 0)
                         sp->choice_index--;
@@ -1357,7 +1357,7 @@ void menu_equip_info_run(void)
                             sp->choice_id = sp->choices[at];
                     }
                 }
-                if (pad_state.pressed_repeat & 0xa0) {
+                if (pad_state.pressed_repeat & (PAD_BUTTON_RIGHT | PAD_BUTTON_LEFT)) {
                     debounce = 3;
                     if (sp->choice_index == -1)
                         file = base;
@@ -1372,31 +1372,31 @@ void menu_equip_info_run(void)
                 }
             } else {
                 row = sp->choice_index;
-                if (pad_state.pressed_repeat & 0x20) {
+                if (pad_state.pressed_repeat & PAD_BUTTON_RIGHT) {
                     debounce = 1;
                     play_cursor_sound();
                     pad_state.pressed_repeat = 0;
                     if (sp->choice_index < 15)
                         sp->choice_index += 3;
-                } else if (pad_state.pressed_repeat & 0x80) {
+                } else if (pad_state.pressed_repeat & PAD_BUTTON_LEFT) {
                     debounce = 1;
                     play_cursor_sound();
                     pad_state.pressed_repeat = 0;
                     if (sp->choice_index > 1)
                         sp->choice_index -= 3;
-                } else if (pad_state.pressed_repeat & 0x10) {
+                } else if (pad_state.pressed_repeat & PAD_BUTTON_UP) {
                     debounce = 1;
                     play_cursor_sound();
                     pad_state.pressed_repeat = 0;
                     if (sp->choice_index % 3 != 0)
                         sp->choice_index--;
-                } else if (pad_state.pressed_repeat & 0x40) {
+                } else if (pad_state.pressed_repeat & PAD_BUTTON_DOWN) {
                     debounce = 1;
                     play_cursor_sound();
                     pad_state.pressed_repeat = 0;
                     if (sp->choice_index % 3 != 1)
                         sp->choice_index++;
-                } else if (pad_state.pressed & 0x4000) {
+                } else if (pad_state.pressed & PAD_BUTTON_CROSS) {
                     pad_state.pressed = 0;
                     if (*sp->ring_magic & (1 << sp->choice_index)) {
                         play_confirm_sound();
@@ -1424,13 +1424,13 @@ void menu_equip_info_run(void)
                     player_compute_derived_stats(1);
                 }
             }
-            if (pad_state.pressed & 0x2000) {
+            if (pad_state.pressed & PAD_BUTTON_CIRCLE) {
                 play_cancel_sound();
                 pad_state.pressed = 0;
                 player_compute_derived_stats(0);
                 sp->mode = 1;
             } else if (sp->list_kind != 10) {
-                if (pad_state.held & 0x1000) {
+                if (pad_state.held & PAD_BUTTON_TRIANGLE) {
                     if (sp->show_item_values == 0)
                         play_confirm_sound();
                     sp->show_item_values = 1;
@@ -1601,26 +1601,26 @@ void menu_creature_book_run(void)
         if (sp->mode == 1) {
             col = (s16)(sp->cursor % 5);
             row = (s16)(sp->cursor / 5);
-            if (pad_state.pressed & 0x2000) {
+            if (pad_state.pressed & PAD_BUTTON_CIRCLE) {
                 play_cancel_sound();
                 pad_state.pressed = 0;
                 break;
             }
-            if (pad_state.pressed_repeat & 0x20) {
+            if (pad_state.pressed_repeat & PAD_BUTTON_RIGHT) {
                 play_cursor_sound();
                 pad_state.pressed_repeat = 0;
                 if (col < 4)
                     sp->cursor++;
             }
-            if (pad_state.pressed_repeat & 0x80) {
+            if (pad_state.pressed_repeat & PAD_BUTTON_LEFT) {
                 play_cursor_sound();
                 pad_state.pressed_repeat = 0;
                 if (col != 0)
                     sp->cursor--;
             }
-            if (pad_state.pressed_repeat & 0x10) {
+            if (pad_state.pressed_repeat & PAD_BUTTON_UP) {
                 play_cursor_sound();
-                if (pad_state.held & 0x8000) {
+                if (pad_state.held & PAD_BUTTON_SQUARE) {
                     sp->scroll -= 3;
                     if (sp->scroll < 0)
                         sp->scroll = 0;
@@ -1631,9 +1631,9 @@ void menu_creature_book_run(void)
                 }
                 pad_state.pressed_repeat = 0;
             }
-            if (pad_state.pressed_repeat & 0x40) {
+            if (pad_state.pressed_repeat & PAD_BUTTON_DOWN) {
                 play_cursor_sound();
-                if (pad_state.held & 0x8000) {
+                if (pad_state.held & PAD_BUTTON_SQUARE) {
                     if (sp->state.book.rows > 2) {
                         sp->scroll += 3;
                         if (sp->scroll > sp->state.book.rows - 2)
@@ -1647,14 +1647,14 @@ void menu_creature_book_run(void)
                 }
                 pad_state.pressed_repeat = 0;
             }
-            if (pad_state.pressed_repeat & 0x800) {
+            if (pad_state.pressed_repeat & PAD_BUTTON_R1) {
                 play_cursor_sound();
                 pad_state.pressed_repeat = 0;
                 sp->scroll -= 3;
                 if (sp->scroll < 0)
                     sp->scroll = 0;
             }
-            if (pad_state.pressed_repeat & 0x200) {
+            if (pad_state.pressed_repeat & PAD_BUTTON_R2) {
                 play_cursor_sound();
                 pad_state.pressed_repeat = 0;
                 if (sp->state.book.rows > 2) {
@@ -1663,7 +1663,7 @@ void menu_creature_book_run(void)
                         sp->scroll = sp->state.book.rows - 2;
                 }
             }
-            if (pad_state.pressed & 0x5000) {
+            if (pad_state.pressed & (PAD_BUTTON_TRIANGLE | PAD_BUTTON_CROSS)) {
                 int k;
 
                 play_confirm_sound();
@@ -1713,7 +1713,7 @@ void menu_creature_book_run(void)
                     }
                 }
             }
-        } else if (pad_state.pressed & 0x2000) {
+        } else if (pad_state.pressed & PAD_BUTTON_CIRCLE) {
             play_cancel_sound();
             pad_state.pressed = 0;
             sp->mode = 1;
@@ -1875,7 +1875,7 @@ void menu_arrange_icons_run(void)
     for (;;) {
         r0 = sp->state.grid.hand_row;
         r1 = sp->state.grid.bag_row;
-        if (pad_state.pressed & 0x2000) {
+        if (pad_state.pressed & PAD_BUTTON_CIRCLE) {
             play_cancel_sound();
             pad_state.pressed = 0;
             if (sp->mode & 0x8000) {
@@ -1886,7 +1886,7 @@ void menu_arrange_icons_run(void)
                 break;
             }
         }
-        if (pad_state.pressed & 0x4000) {
+        if (pad_state.pressed & PAD_BUTTON_CROSS) {
             play_confirm_sound();
             pad_state.pressed = 0;
             if (sp->mode & 0x8000) {
@@ -1957,7 +1957,7 @@ void menu_arrange_icons_run(void)
             }
         }
         if (!(sp->mode & 0x8000)) {
-            if (pad_state.pressed & 0x1000) {
+            if (pad_state.pressed & PAD_BUTTON_TRIANGLE) {
                 play_confirm_sound();
                 pad_state.pressed = 0;
                 if (sp->mode == 1)
@@ -1965,21 +1965,21 @@ void menu_arrange_icons_run(void)
                 else if (sp->mode == 2)
                     sp->mode = 1;
             }
-            if (pad_state.pressed_repeat & 0x20) {
+            if (pad_state.pressed_repeat & PAD_BUTTON_RIGHT) {
                 play_cursor_sound();
                 pad_state.pressed_repeat = 0;
                 if (sp->cursor % 8 != 7)
                     sp->cursor++;
             }
-            if (pad_state.pressed_repeat & 0x80) {
+            if (pad_state.pressed_repeat & PAD_BUTTON_LEFT) {
                 play_cursor_sound();
                 pad_state.pressed_repeat = 0;
                 if (sp->cursor & 7)
                     sp->cursor--;
             }
-            if (pad_state.pressed_repeat & 0x10) {
+            if (pad_state.pressed_repeat & PAD_BUTTON_UP) {
                 play_cursor_sound();
-                if (pad_state.held & 0x8000) {
+                if (pad_state.held & PAD_BUTTON_SQUARE) {
                     if (CURSOR_COL < 4) {
                         sp->state.grid.hand_row -= 5;
                         if (sp->state.grid.hand_row < 0)
@@ -1999,9 +1999,9 @@ void menu_arrange_icons_run(void)
                 }
                 pad_state.pressed_repeat = 0;
             }
-            if (pad_state.pressed_repeat & 0x40) {
+            if (pad_state.pressed_repeat & PAD_BUTTON_DOWN) {
                 play_cursor_sound();
-                if (pad_state.held & 0x8000) {
+                if (pad_state.held & PAD_BUTTON_SQUARE) {
                     if (CURSOR_COL < 4) {
                         sp->state.grid.hand_row += 5;
                         if (sp->state.grid.hand_row > 73)
@@ -2021,28 +2021,28 @@ void menu_arrange_icons_run(void)
                 }
                 pad_state.pressed_repeat = 0;
             }
-            if (pad_state.pressed_repeat & 0x400) {
+            if (pad_state.pressed_repeat & PAD_BUTTON_L1) {
                 play_cursor_sound();
                 pad_state.pressed_repeat = 0;
                 sp->state.grid.hand_row -= 5;
                 if (sp->state.grid.hand_row < 0)
                     sp->state.grid.hand_row = 0;
             }
-            if (pad_state.pressed_repeat & 0x100) {
+            if (pad_state.pressed_repeat & PAD_BUTTON_L2) {
                 play_cursor_sound();
                 pad_state.pressed_repeat = 0;
                 sp->state.grid.hand_row += 5;
                 if (sp->state.grid.hand_row > 73)
                     sp->state.grid.hand_row = 73;
             }
-            if (pad_state.pressed_repeat & 0x800) {
+            if (pad_state.pressed_repeat & PAD_BUTTON_R1) {
                 play_cursor_sound();
                 pad_state.pressed_repeat = 0;
                 sp->state.grid.bag_row -= 5;
                 if (sp->state.grid.bag_row < 0)
                     sp->state.grid.bag_row = 0;
             }
-            if (pad_state.pressed_repeat & 0x200) {
+            if (pad_state.pressed_repeat & PAD_BUTTON_R2) {
                 play_cursor_sound();
                 pad_state.pressed_repeat = 0;
                 sp->state.grid.bag_row += 5;
@@ -2177,13 +2177,13 @@ int menu_attribute_points_run(int points)
     }
     pad_clear_input();
     do {
-        if (pad_state.pressed & 0x2000) {
+        if (pad_state.pressed & PAD_BUTTON_CIRCLE) {
             pad_state.pressed = 0;
             play_cancel_sound();
             result = 0;
             goto done;
         }
-        if (pad_state.pressed_repeat & 0x10) {
+        if (pad_state.pressed_repeat & PAD_BUTTON_UP) {
             pad_state.pressed_repeat = 0;
             play_cursor_sound();
             if (sp->state.stats.selected % 7 == 0)
@@ -2191,7 +2191,7 @@ int menu_attribute_points_run(int points)
             else
                 sp->state.stats.selected--;
         }
-        if (pad_state.pressed_repeat & 0x40) {
+        if (pad_state.pressed_repeat & PAD_BUTTON_DOWN) {
             pad_state.pressed_repeat = 0;
             play_cursor_sound();
             if (sp->state.stats.selected % 7 == 6)
@@ -2199,7 +2199,7 @@ int menu_attribute_points_run(int points)
             else
                 sp->state.stats.selected++;
         }
-        if (pad_state.pressed_repeat & 0xa0) {
+        if (pad_state.pressed_repeat & (PAD_BUTTON_RIGHT | PAD_BUTTON_LEFT)) {
             pad_state.pressed_repeat = 0;
             play_cursor_sound();
             if (sp->state.stats.selected < 7)
@@ -2207,7 +2207,7 @@ int menu_attribute_points_run(int points)
             else
                 sp->state.stats.selected -= 7;
         }
-        if (pad_state.pressed_repeat & 0x4000) {
+        if (pad_state.pressed_repeat & PAD_BUTTON_CROSS) {
             pad_state.pressed_repeat = 0;
             if (sp->state.stats.value > 0) {
                 if (sp->state.stats.base[0][sp->state.stats.selected]
@@ -2310,7 +2310,7 @@ int menu_use_item_run(void)
     reload = 0;
     for (;;) {
         first = sp->scroll;
-        if (pad_state.pressed & 0x4000) {
+        if (pad_state.pressed & PAD_BUTTON_CROSS) {
             pad_state.pressed = 0;
             if (sp->scroll + sp->cursor < sp->state.page_list.count)
                 item_use(sp->state.page_list.entries[sp->scroll + sp->cursor]);
@@ -2332,12 +2332,12 @@ int menu_use_item_run(void)
                 break;
             }
         }
-        if (pad_state.pressed & 0x2000) {
+        if (pad_state.pressed & PAD_BUTTON_CIRCLE) {
             play_cancel_sound();
             pad_state.pressed = 0;
             break;
         }
-        if (pad_state.pressed_repeat & 0x10) {
+        if (pad_state.pressed_repeat & PAD_BUTTON_UP) {
             play_cursor_sound();
             pad_state.pressed_repeat = 0;
             if (sp->cursor == 0) {
@@ -2348,7 +2348,7 @@ int menu_use_item_run(void)
             }
             sp->blink_phase = 0;
         }
-        if (pad_state.pressed_repeat & 0x40) {
+        if (pad_state.pressed_repeat & PAD_BUTTON_DOWN) {
             play_cursor_sound();
             pad_state.pressed_repeat = 0;
             if (sp->cursor == 4) {
@@ -2359,7 +2359,7 @@ int menu_use_item_run(void)
             }
             sp->blink_phase = 0;
         }
-        if (pad_state.pressed_repeat & 0x20) {
+        if (pad_state.pressed_repeat & PAD_BUTTON_RIGHT) {
             play_cursor_sound();
             pad_state.pressed_repeat = 0;
             sp->scroll += 5;
@@ -2371,7 +2371,7 @@ int menu_use_item_run(void)
             }
             sp->blink_phase = 0;
         }
-        if (pad_state.pressed_repeat & 0x80) {
+        if (pad_state.pressed_repeat & PAD_BUTTON_LEFT) {
             play_cursor_sound();
             pad_state.pressed_repeat = 0;
             sp->scroll -= 5;
@@ -2529,12 +2529,12 @@ void shop_run(void)
     shown = -1;
     for (;;) {
         if (sp->mode & 0x8000) {
-            if (pad_state.pressed & 0x2000) {
+            if (pad_state.pressed & PAD_BUTTON_CIRCLE) {
                 play_cancel_sound();
                 pad_state.pressed = 0;
                 sp->mode &= ~0x8000;
             }
-            if (pad_state.pressed & 0x4000) {
+            if (pad_state.pressed & PAD_BUTTON_CROSS) {
                 pad_state.pressed = 0;
                 if ((s16)sp->state.list.confirm_choice == 1) {
                     done = 1;
@@ -2602,25 +2602,25 @@ void shop_run(void)
                     sp->mode &= ~0x8000;
                 }
             }
-            if (pad_state.pressed_repeat & 0x80) {
+            if (pad_state.pressed_repeat & PAD_BUTTON_LEFT) {
                 play_cursor_sound();
                 pad_state.pressed_repeat = 0;
                 sp->blink_phase = 0;
                 sp->state.list.confirm_choice = 1;
             }
-            if (pad_state.pressed_repeat & 0x20) {
+            if (pad_state.pressed_repeat & PAD_BUTTON_RIGHT) {
                 play_cursor_sound();
                 pad_state.pressed_repeat = 0;
                 sp->blink_phase = 0;
                 sp->state.list.confirm_choice = 0;
             }
         } else {
-            if (pad_state.pressed & 0x2000) {
+            if (pad_state.pressed & PAD_BUTTON_CIRCLE) {
                 play_cancel_sound();
                 pad_state.pressed = 0;
                 break;
             }
-            if (pad_state.pressed_repeat & 0x10) {
+            if (pad_state.pressed_repeat & PAD_BUTTON_UP) {
                 play_cursor_sound();
                 pad_state.pressed_repeat = 0;
                 if (sp->cursor == 0) {
@@ -2630,7 +2630,7 @@ void shop_run(void)
                     sp->cursor--;
                 }
             }
-            if (pad_state.pressed_repeat & 0x40) {
+            if (pad_state.pressed_repeat & PAD_BUTTON_DOWN) {
                 play_cursor_sound();
                 pad_state.pressed_repeat = 0;
                 if (sp->cursor == 4) {
@@ -2640,7 +2640,7 @@ void shop_run(void)
                     sp->cursor++;
                 }
             }
-            if (pad_state.pressed & 0x4000) {
+            if (pad_state.pressed & PAD_BUTTON_CROSS) {
                 pad_state.pressed = 0;
                 if (sp->scroll + sp->cursor >= sp->state.list.count) {
                     play_refuse_sound();
@@ -2715,14 +2715,14 @@ void menu_area_info_run(void)
         sp->state.map.ids[i] = areas[i];
     for (;;) {
         moved = 0;
-        if (pad_state.pressed & 0x2000) {
+        if (pad_state.pressed & PAD_BUTTON_CIRCLE) {
             area_info_list_shown = 0;
             pad_state.pressed = 0;
             play_cancel_sound();
             break;
         }
         if (area_info_list_shown == 1) {
-            if (pad_state.pressed_repeat & 0x10) {
+            if (pad_state.pressed_repeat & PAD_BUTTON_UP) {
                 pad_state.pressed_repeat = 0;
                 if (sp->state.map.scroll > 0) {
                     play_cursor_sound();
@@ -2730,7 +2730,7 @@ void menu_area_info_run(void)
                     sp->state.map.scroll--;
                 }
             }
-            if (pad_state.pressed_repeat & 0x40) {
+            if (pad_state.pressed_repeat & PAD_BUTTON_DOWN) {
                 pad_state.pressed_repeat = 0;
                 if (sp->state.map.scroll < 25) {
                     play_cursor_sound();
@@ -2746,11 +2746,11 @@ void menu_area_info_run(void)
             for (i = 0; i < 10; i++)
                 sp->state.map.ids[i] = areas[sp->state.map.scroll + i];
         }
-        if (pad_state.pressed_repeat & 0x400) {
+        if (pad_state.pressed_repeat & PAD_BUTTON_L1) {
             pad_state.pressed_repeat = 0;
             area_info_list_shown = 0;
         }
-        if (pad_state.pressed_repeat & 0x800) {
+        if (pad_state.pressed_repeat & PAD_BUTTON_R1) {
             pad_state.pressed_repeat = 0;
             area_info_list_shown = 1;
         }
@@ -2781,12 +2781,12 @@ void menu_options_run(void)
     pad_clear_input();
     while (1) {
         if (sp->mode == 1) {
-            if (pad_state.pressed & 0x2000) {
+            if (pad_state.pressed & PAD_BUTTON_CIRCLE) {
                 play_cancel_sound();
                 pad_state.pressed = 0;
                 break;
             }
-            if (pad_state.pressed_repeat & 0x10) {
+            if (pad_state.pressed_repeat & PAD_BUTTON_UP) {
                 play_cursor_sound();
                 pad_state.pressed_repeat = 0;
                 if (sp->cursor == 0)
@@ -2794,7 +2794,7 @@ void menu_options_run(void)
                 else
                     sp->cursor--;
             }
-            if (pad_state.pressed_repeat & 0x40) {
+            if (pad_state.pressed_repeat & PAD_BUTTON_DOWN) {
                 play_cursor_sound();
                 pad_state.pressed_repeat = 0;
                 if (sp->cursor == 5)
@@ -2802,7 +2802,7 @@ void menu_options_run(void)
                 else
                     sp->cursor++;
             }
-            if (pad_state.pressed & 0x4000) {
+            if (pad_state.pressed & PAD_BUTTON_CROSS) {
                 pad_state.pressed = 0;
                 if (sp->cursor == 5) {
                     const u16 *decode = pad_state.buttons;
@@ -2841,7 +2841,7 @@ void menu_options_run(void)
                     sp->state.levels.flags = 0;
                 }
             }
-            if (pad_state.pressed_repeat & 0x20) {
+            if (pad_state.pressed_repeat & PAD_BUTTON_RIGHT) {
                 u8 *option = &game_settings.sfx_volume;
 
                 play_cursor_sound();
@@ -2853,7 +2853,7 @@ void menu_options_run(void)
                     option[sp->cursor] = 0;
                 }
             }
-            if (pad_state.pressed_repeat & 0x80) {
+            if (pad_state.pressed_repeat & PAD_BUTTON_LEFT) {
                 u8 *option = &game_settings.sfx_volume;
 
                 play_cursor_sound();
@@ -2866,7 +2866,7 @@ void menu_options_run(void)
                 }
             }
         } else if (sp->scroll == 0) {
-            if (pad_state.pressed & 0x2000) {
+            if (pad_state.pressed & PAD_BUTTON_CIRCLE) {
                 if (sp->state.levels.flags == 0) {
                     pad_update_action_mask();
                     play_confirm_sound();
@@ -2878,7 +2878,7 @@ void menu_options_run(void)
                     pad_state.pressed = 0;
                 }
             }
-            if (pad_state.pressed & 0x4000) {
+            if (pad_state.pressed & PAD_BUTTON_CROSS) {
                 pad_state.pressed = 0;
                 if (sp->cursor < 12) {
                     play_confirm_sound();
@@ -2912,12 +2912,12 @@ void menu_options_run(void)
                     pad_state.pressed = 0;
                 }
             }
-            if (pad_state.pressed & 8) {
+            if (pad_state.pressed & PAD_BUTTON_START) {
                 play_cursor_sound();
                 pad_state.pressed = 0;
                 sp->cursor = 13;
             }
-            if (pad_state.pressed_repeat & 0x10) {
+            if (pad_state.pressed_repeat & PAD_BUTTON_UP) {
                 play_cursor_sound();
                 pad_state.pressed_repeat = 0;
                 if (sp->cursor == 0)
@@ -2931,7 +2931,7 @@ void menu_options_run(void)
                 else
                     sp->cursor--;
             }
-            if (pad_state.pressed_repeat & 0x40) {
+            if (pad_state.pressed_repeat & PAD_BUTTON_DOWN) {
                 play_cursor_sound();
                 pad_state.pressed_repeat = 0;
                 if (sp->cursor == 12)
@@ -2945,7 +2945,7 @@ void menu_options_run(void)
                 else
                     sp->cursor++;
             }
-            if (pad_state.pressed_repeat & 0x20) {
+            if (pad_state.pressed_repeat & PAD_BUTTON_RIGHT) {
                 play_cursor_sound();
                 pad_state.pressed_repeat = 0;
                 if (sp->cursor < 6)
@@ -2957,7 +2957,7 @@ void menu_options_run(void)
                 else
                     sp->cursor -= 6;
             }
-            if (pad_state.pressed_repeat & 0x80) {
+            if (pad_state.pressed_repeat & PAD_BUTTON_LEFT) {
                 play_cursor_sound();
                 pad_state.pressed_repeat = 0;
                 if (sp->cursor < 7)
@@ -2971,40 +2971,40 @@ void menu_options_run(void)
             }
         } else if (pad_state.pressed) {
             key = &pad_state.buttons[sp->cursor];
-            if (pad_state.pressed & 0x1000) {
+            if (pad_state.pressed & PAD_BUTTON_TRIANGLE) {
                 sp->state.levels.level[sp->cursor] = 0;
                 *key = 0x1000;
-            } else if (pad_state.pressed & 0x2000) {
+            } else if (pad_state.pressed & PAD_BUTTON_CIRCLE) {
                 sp->state.levels.level[sp->cursor] = 1;
                 *key = 0x2000;
-            } else if (pad_state.pressed & 0x8000) {
+            } else if (pad_state.pressed & PAD_BUTTON_SQUARE) {
                 sp->state.levels.level[sp->cursor] = 2;
                 *key = 0x8000;
-            } else if (pad_state.pressed & 0x4000) {
+            } else if (pad_state.pressed & PAD_BUTTON_CROSS) {
                 sp->state.levels.level[sp->cursor] = 3;
                 *key = 0x4000;
-            } else if (pad_state.pressed & 0x80) {
+            } else if (pad_state.pressed & PAD_BUTTON_LEFT) {
                 sp->state.levels.level[sp->cursor] = 4;
                 *key = 0x80;
-            } else if (pad_state.pressed & 0x10) {
+            } else if (pad_state.pressed & PAD_BUTTON_UP) {
                 sp->state.levels.level[sp->cursor] = 5;
                 *key = 0x10;
-            } else if (pad_state.pressed & 0x20) {
+            } else if (pad_state.pressed & PAD_BUTTON_RIGHT) {
                 sp->state.levels.level[sp->cursor] = 6;
                 *key = 0x20;
-            } else if (pad_state.pressed & 0x40) {
+            } else if (pad_state.pressed & PAD_BUTTON_DOWN) {
                 sp->state.levels.level[sp->cursor] = 7;
                 *key = 0x40;
-            } else if (pad_state.pressed & 0x400) {
+            } else if (pad_state.pressed & PAD_BUTTON_L1) {
                 sp->state.levels.level[sp->cursor] = 8;
                 *key = 0x400;
-            } else if (pad_state.pressed & 0x100) {
+            } else if (pad_state.pressed & PAD_BUTTON_L2) {
                 sp->state.levels.level[sp->cursor] = 9;
                 *key = 0x100;
-            } else if (pad_state.pressed & 0x800) {
+            } else if (pad_state.pressed & PAD_BUTTON_R1) {
                 sp->state.levels.level[sp->cursor] = 10;
                 *key = 0x800;
-            } else if (pad_state.pressed & 0x200) {
+            } else if (pad_state.pressed & PAD_BUTTON_R2) {
                 sp->state.levels.level[sp->cursor] = 11;
                 *key = 0x200;
             }
@@ -3328,23 +3328,23 @@ int card_ask_yes_no(void)
                 return -1;
             n = 3;
         }
-        if (pad_state.pressed & 0x4000) {
+        if (pad_state.pressed & PAD_BUTTON_CROSS) {
             play_confirm_sound();
             pad_state.pressed = 0;
             break;
         }
-        if (pad_state.pressed & 0x2000) {
+        if (pad_state.pressed & PAD_BUTTON_CIRCLE) {
             play_cancel_sound();
             pad_state.pressed = 0;
             sp->dialog_choice = 0;
             break;
         }
-        if (pad_state.pressed & 0x80) {
+        if (pad_state.pressed & PAD_BUTTON_LEFT) {
             play_cursor_sound();
             pad_state.pressed = 0;
             sp->dialog_choice = 1;
         }
-        if (pad_state.pressed & 0x20) {
+        if (pad_state.pressed & PAD_BUTTON_RIGHT) {
             play_cursor_sound();
             pad_state.pressed = 0;
             sp->dialog_choice = 0;
@@ -3366,25 +3366,25 @@ int card_choose_port(void)
     sp->blink_phase = 0;
     pad_clear_input();
     while (1) {
-        if (pad_state.pressed & 0x4000) {
+        if (pad_state.pressed & PAD_BUTTON_CROSS) {
             play_confirm_sound();
             pad_state.pressed = 0;
             sp->card = &((MenuCardScratch *)sp)->cards[sp->port];
             break;
         }
-        if (pad_state.pressed & 0x2000) {
+        if (pad_state.pressed & PAD_BUTTON_CIRCLE) {
             play_cancel_sound();
             pad_state.pressed = 0;
             sp->port = -1;
             break;
         }
-        if (pad_state.pressed_repeat & 0x10) {
+        if (pad_state.pressed_repeat & PAD_BUTTON_UP) {
             play_cursor_sound();
             pad_state.pressed_repeat = 0;
             sp->port = 0;
             sp->blink_phase = 0;
         }
-        if (pad_state.pressed_repeat & 0x40) {
+        if (pad_state.pressed_repeat & PAD_BUTTON_DOWN) {
             play_cursor_sound();
             pad_state.pressed_repeat = 0;
             sp->port = 1;
@@ -3472,30 +3472,30 @@ int card_choose_file(void)
                 return -1;
             n = 20;
         }
-        if (pad_state.pressed & 0x4000) {
+        if (pad_state.pressed & PAD_BUTTON_CROSS) {
             play_confirm_sound();
             pad_state.pressed = 0;
             sp->state.half[1] = 1;
             sp->blink_phase = 32;
             sp->dialog_choice = 1;
             while (1) {
-                if (pad_state.pressed & 0x4000) {
+                if (pad_state.pressed & PAD_BUTTON_CROSS) {
                     play_confirm_sound();
                     pad_state.pressed = 0;
                     break;
                 }
-                if (pad_state.pressed & 0x2000) {
+                if (pad_state.pressed & PAD_BUTTON_CIRCLE) {
                     play_cancel_sound();
                     pad_state.pressed = 0;
                     sp->dialog_choice = 0;
                     break;
                 }
-                if (pad_state.pressed & 0x80) {
+                if (pad_state.pressed & PAD_BUTTON_LEFT) {
                     play_cursor_sound();
                     pad_state.pressed = 0;
                     sp->dialog_choice = 1;
                 }
-                if (pad_state.pressed & 0x20) {
+                if (pad_state.pressed & PAD_BUTTON_RIGHT) {
                     play_cursor_sound();
                     pad_state.pressed = 0;
                     sp->dialog_choice = 0;
@@ -3507,13 +3507,13 @@ int card_choose_file(void)
             sp->state.half[1] = 0;
             continue;
         }
-        if (pad_state.pressed & 0x2000) {
+        if (pad_state.pressed & PAD_BUTTON_CIRCLE) {
             play_cancel_sound();
             pad_state.pressed = 0;
             sp->file_row = -1;
             break;
         }
-        if (pad_state.pressed_repeat & 0x10) {
+        if (pad_state.pressed_repeat & PAD_BUTTON_UP) {
             play_cursor_sound();
             pad_state.pressed_repeat = 0;
             if (sp->file_row == 0) {
@@ -3524,7 +3524,7 @@ int card_choose_file(void)
             }
             sp->blink_phase = 0;
         }
-        if (pad_state.pressed_repeat & 0x40) {
+        if (pad_state.pressed_repeat & PAD_BUTTON_DOWN) {
             play_cursor_sound();
             pad_state.pressed_repeat = 0;
             if (sp->file_row == 2) {
@@ -4362,22 +4362,22 @@ int menu_end_game_run(void)
     sp->cursor = 1;
     pad_clear_input();
     while (1) {
-        if (pad_state.pressed & 0x2000) {
+        if (pad_state.pressed & PAD_BUTTON_CIRCLE) {
             play_cancel_sound();
             pad_state.pressed = 0;
             break;
         }
-        if (pad_state.pressed_repeat & 0x80) {
+        if (pad_state.pressed_repeat & PAD_BUTTON_LEFT) {
             play_cursor_sound();
             pad_state.pressed_repeat = 0;
             sp->cursor = 0;
         }
-        if (pad_state.pressed_repeat & 0x20) {
+        if (pad_state.pressed_repeat & PAD_BUTTON_RIGHT) {
             play_cursor_sound();
             pad_state.pressed_repeat = 0;
             sp->cursor = 1;
         }
-        if (pad_state.pressed & 0x4000) {
+        if (pad_state.pressed & PAD_BUTTON_CROSS) {
             play_confirm_sound();
             pad_state.pressed = 0;
             if (sp->cursor != 0)
@@ -4412,7 +4412,7 @@ void pause_screen_run(void)
     DrawSync(0);
     pad = &pad_state;
 pause_wait:
-    if (pad->pressed & 8)
+    if (pad->pressed & PAD_BUTTON_START)
         goto pause_done;
     frame_rate_update();
     pause_screen_draw();
@@ -4448,17 +4448,17 @@ int menu_game_over_run(void)
     sp->blink_phase = 0;
     pad_clear_input();
     while (1) {
-        if (pad_state.pressed & 0x4000) {
+        if (pad_state.pressed & PAD_BUTTON_CROSS) {
             play_confirm_sound();
             pad_state.pressed = 0;
             break;
         }
-        if (pad_state.pressed_repeat & 0x40) {
+        if (pad_state.pressed_repeat & PAD_BUTTON_DOWN) {
             play_cursor_sound();
             pad_state.pressed_repeat = 0;
             sp->state.word = 1;
         }
-        if (pad_state.pressed_repeat & 0x10) {
+        if (pad_state.pressed_repeat & PAD_BUTTON_UP) {
             play_cursor_sound();
             pad_state.pressed_repeat = 0;
             sp->state.word = 0;
@@ -4504,7 +4504,7 @@ void menu_save_prompt_run(void)
     sp->rect.w = 320;
     sp->rect.h = 240;
     for (;;) {
-        if (pad_state.pressed & 0x4000) {
+        if (pad_state.pressed & PAD_BUTTON_CROSS) {
             pad_state.pressed = 0;
             play_confirm_sound();
             if (sp->main_row != 0)
@@ -4523,12 +4523,12 @@ void menu_save_prompt_run(void)
             if (result == 1)
                 break;
         }
-        if (pad_state.pressed_repeat & 0x80) {
+        if (pad_state.pressed_repeat & PAD_BUTTON_LEFT) {
             play_cursor_sound();
             pad_state.pressed_repeat = 0;
             sp->main_row = 0;
         }
-        if (pad_state.pressed_repeat & 0x20) {
+        if (pad_state.pressed_repeat & PAD_BUTTON_RIGHT) {
             play_cursor_sound();
             pad_state.pressed_repeat = 0;
             sp->main_row = 1;

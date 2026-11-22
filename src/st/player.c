@@ -1573,7 +1573,7 @@ void player_start_hand_action(u8 value, u8 slot)
         viewer.slot_anim_ids[0] = value;
         viewer.action_timers.halves[0] = 0;
         viewer.action_started = 1;
-        pad_state.pressed &= ~pad_state.buttons[8];
+        pad_state.pressed &= ~pad_state.buttons[PAD_ACTION_RIGHT_HAND];
         viewer.action_timers.halves[2] = viewer.slot_model_info[0]->hit_time;
         viewer.action_sound_time[0] = viewer.slot_model_info[0]->sound_time;
         viewer.weapon_gauge_delay = 15;
@@ -1590,7 +1590,7 @@ void player_start_hand_action(u8 value, u8 slot)
         if (viewer.unk190[1][0] != 0) {
             return;
         }
-        pad_state.pressed &= ~pad_state.buttons[9];
+        pad_state.pressed &= ~pad_state.buttons[PAD_ACTION_LEFT_HAND];
         viewer.slot_anim_ids[slot] = value;
         viewer.action_timers.halves[slot] = 0;
         viewer.action_started = 1;
@@ -1947,8 +1947,8 @@ void player_update_hand_action(u8 hand)
         }
         if (viewer.shield_lowering) {
             viewer.action_timers.halves[hand] -= cost;
-        } else if ((!(pad_state.held & pad_state.buttons[8]) && hand == 0) ||
-                   (!(pad_state.held & pad_state.buttons[9]) && hand != 0)) {
+        } else if ((!(pad_state.held & pad_state.buttons[PAD_ACTION_RIGHT_HAND]) && hand == 0) ||
+                   (!(pad_state.held & pad_state.buttons[PAD_ACTION_LEFT_HAND]) && hand != 0)) {
             viewer.action_timers.halves[hand] -= cost;
             viewer.shield_raised = 0;
         } else if (viewer.action_timers.halves[hand + 2] - cost < viewer.action_timers.halves[hand] &&
@@ -2021,8 +2021,8 @@ void player_update_hand_action(u8 hand)
                         viewer.action_timers.halves[hand] += cost;
                     }
                 }
-            } else if ((!(pad_state.held & pad_state.buttons[8]) && hand == 0) ||
-                       (!(pad_state.held & pad_state.buttons[9]) && hand != 0)) {
+            } else if ((!(pad_state.held & pad_state.buttons[PAD_ACTION_RIGHT_HAND]) && hand == 0) ||
+                       (!(pad_state.held & pad_state.buttons[PAD_ACTION_LEFT_HAND]) && hand != 0)) {
                 viewer.bow_released = 1;
                 viewer.swing_gauge = viewer.weapon_gauge;
                 viewer.weapon_gauge = 0;
@@ -2075,8 +2075,8 @@ void player_update_hand_action(u8 hand)
             } while (0);
             pad = &pad_state;
             max = rec->sound_time;
-            if (pad->pressed & pad->buttons[8]) {
-                pad->pressed &= ~pad->buttons[8];
+            if (pad->pressed & pad->buttons[PAD_ACTION_RIGHT_HAND]) {
+                pad->pressed &= ~pad->buttons[PAD_ACTION_RIGHT_HAND];
             }
             if (viewer.action_recoil && !(viewer.action_timers.halves[hand + 2] - cost < viewer.action_timers.halves[hand])) {
                 viewer.action_timers.halves[hand] -= cost;
@@ -2143,7 +2143,7 @@ void player_update_hand_action(u8 hand)
             }
         } else {
             viewer.action_recoil = 0;
-            if (!(pad_state.held & pad_state.buttons[8])) {
+            if (!(pad_state.held & pad_state.buttons[PAD_ACTION_RIGHT_HAND])) {
                 if (viewer.weapon_gauge_delay == 0) {
                     inc = 96;
                     inc += viewer.attributes[1] / (viewer.attributes[1] + 1000) * inc;
@@ -2569,11 +2569,11 @@ void player_update_motion(void)
 ADDRESS(0x80041d4c, 0x354)
 void player_update_look(void)
 {
-    if (pad_state.held & pad_state.buttons[2]) {
+    if (pad_state.held & pad_state.buttons[PAD_ACTION_TURN_LEFT]) {
         viewer.yaw_speed += viewer.yaw_speed_max >> 2;
         if (viewer.yaw_speed_max < viewer.yaw_speed)
             viewer.yaw_speed = viewer.yaw_speed_max;
-    } else if (pad_state.held & pad_state.buttons[3]) {
+    } else if (pad_state.held & pad_state.buttons[PAD_ACTION_TURN_RIGHT]) {
         viewer.yaw_speed -= viewer.yaw_speed_max >> 2;
         if (viewer.yaw_speed < -viewer.yaw_speed_max)
             viewer.yaw_speed = -viewer.yaw_speed_max;
@@ -2587,8 +2587,8 @@ void player_update_look(void)
             viewer.yaw_speed = 0;
     }
     viewer.view_rot.vy = (viewer.view_rot.vy + viewer.yaw_speed) & 0xfff;
-    if (pad_state.held & pad_state.buttons[6]) {
-        if (pad_state.held & pad_state.buttons[7]) {
+    if (pad_state.held & pad_state.buttons[PAD_ACTION_LOOK_UP]) {
+        if (pad_state.held & pad_state.buttons[PAD_ACTION_LOOK_DOWN]) {
             if (viewer.view_rot.vx > 2048) {
                 int limit = (4224 - viewer.view_rot.vx) >> 2;
 
@@ -2616,7 +2616,7 @@ void player_update_look(void)
             if (viewer.pitch_speed < -32)
                 viewer.pitch_speed = -32;
         }
-    } else if (pad_state.held & pad_state.buttons[7]) {
+    } else if (pad_state.held & pad_state.buttons[PAD_ACTION_LOOK_DOWN]) {
         viewer.pitch_speed += 3;
         if (viewer.pitch_speed > 32)
             viewer.pitch_speed = 32;
@@ -2654,14 +2654,14 @@ void player_update_walk(void)
     SVECTOR rot;
     int ang;
 
-    if (pad_state.held & pad_state.buttons[0]) {
+    if (pad_state.held & pad_state.buttons[PAD_ACTION_FORWARD]) {
         v.vz = viewer.walk_velocity.vz + (viewer.walk_speed_max >> 2);
         if (v.vz <= viewer.walk_speed_max) {
             viewer.walk_velocity.vz = v.vz;
         } else {
             viewer.walk_velocity.vz = viewer.walk_speed_max;
         }
-    } else if (pad_state.held & pad_state.buttons[1]) {
+    } else if (pad_state.held & pad_state.buttons[PAD_ACTION_BACK]) {
         v.vz = viewer.walk_velocity.vz - (viewer.walk_speed_max >> 2);
         if (v.vz >= -viewer.walk_speed_max) {
             viewer.walk_velocity.vz = v.vz;
@@ -2679,14 +2679,16 @@ void player_update_walk(void)
             viewer.walk_velocity.vz = 0;
         }
     }
-    if ((pad_state.held & pad_state.buttons[5]) && !(pad_state.held & pad_state.buttons[4])) {
+    if ((pad_state.held & pad_state.buttons[PAD_ACTION_MOVE_RIGHT])
+        && !(pad_state.held & pad_state.buttons[PAD_ACTION_MOVE_LEFT])) {
         v.vx = viewer.walk_velocity.vx + (viewer.walk_speed_max >> 2);
         if (v.vx <= viewer.walk_speed_max) {
             viewer.walk_velocity.vx = v.vx;
         } else {
             viewer.walk_velocity.vx = viewer.walk_speed_max;
         }
-    } else if ((pad_state.held & pad_state.buttons[4]) && !(pad_state.held & pad_state.buttons[5])) {
+    } else if ((pad_state.held & pad_state.buttons[PAD_ACTION_MOVE_LEFT])
+        && !(pad_state.held & pad_state.buttons[PAD_ACTION_MOVE_RIGHT])) {
         v.vx = viewer.walk_velocity.vx - (viewer.walk_speed_max >> 2);
         if (v.vx >= -viewer.walk_speed_max) {
             viewer.walk_velocity.vx = v.vx;
@@ -2834,27 +2836,27 @@ void player_swap_hand_items(u8 a, u8 b)
 ADDRESS(0x80042900, 0x29c)
 void player_update_hands(void)
 {
-    if (pad_state.combo == 2) {
-        pad_state.combo = 0;
+    if (pad_state.combo == PAD_COMBO_SWAP_RIGHT) {
+        pad_state.combo = PAD_COMBO_NONE;
         if (viewer.action_timers.word == -1 && viewer.equipment[EQUIP_SLOT_RIGHT_RESERVE] != EQUIP_NONE) {
             player_swap_hand_items(0, 2);
             player_update_durability_warning();
         }
     }
-    if (pad_state.combo == 3) {
-        pad_state.combo = 0;
+    if (pad_state.combo == PAD_COMBO_SWAP_LEFT) {
+        pad_state.combo = PAD_COMBO_NONE;
         if (viewer.action_timers.word == -1 && viewer.equipment[EQUIP_SLOT_LEFT_RESERVE] != EQUIP_NONE) {
             player_swap_hand_items(1, 3);
             player_update_durability_warning();
         }
     }
-    if (pad_state.combo == 4) {
-        pad_state.combo = 0;
+    if (pad_state.combo == PAD_COMBO_CAST_RIGHT) {
+        pad_state.combo = PAD_COMBO_NONE;
         if (viewer.magic_gauge >= 0x1400)
             player_start_cast(0, 0);
     }
-    if (pad_state.combo == 5) {
-        pad_state.combo = 0;
+    if (pad_state.combo == PAD_COMBO_CAST_LEFT) {
+        pad_state.combo = PAD_COMBO_NONE;
         if (viewer.magic_gauge >= 0x1400)
             player_start_cast(0, 1);
     }
@@ -2873,9 +2875,9 @@ void player_update_hands(void)
             viewer.shot_countdown[1] = viewer.shot_interval[1];
     }
     if (viewer.state != 1) {
-        if (viewer.weapon_gauge_delay == 0 && (pad_state.pressed & pad_state.buttons[8]))
+        if (viewer.weapon_gauge_delay == 0 && (pad_state.pressed & pad_state.buttons[PAD_ACTION_RIGHT_HAND]))
             player_start_hand_action(0, 0);
-        if (pad_state.pressed & pad_state.buttons[9])
+        if (pad_state.pressed & pad_state.buttons[PAD_ACTION_LEFT_HAND])
             player_start_hand_action(0, 1);
     }
 }
@@ -2885,8 +2887,8 @@ void player_handle_examine(void)
 {
     u8 mode = viewer.state;
 
-    if (mode != 4 && (pad_state.pressed & pad_state.buttons[10]) && !pad_state.combo_timer) {
-        pad_state.pressed &= ~pad_state.buttons[10];
+    if (mode != 4 && (pad_state.pressed & pad_state.buttons[PAD_ACTION_EVENT]) && !pad_state.combo_timer) {
+        pad_state.pressed &= ~pad_state.buttons[PAD_ACTION_EVENT];
         if (mode == 0)
             player_examine(&viewer.position.vx, &viewer.view_rot);
     }
@@ -2961,7 +2963,8 @@ void player_update(void)
 
     player_update_status(1);
     if (viewer.state == 0 || viewer.state == 4 || viewer.state == 16 || viewer.state == 1) {
-        if (((pad_state.pressed & 1) || pad_state.combo == 1) && viewer.action_timers.word == -1 &&
+        if (((pad_state.pressed & PAD_BUTTON_SELECT) || pad_state.combo == PAD_COMBO_MENU)
+            && viewer.action_timers.word == -1 &&
             viewer.state != 1 && viewer.state != 4 && !(viewer.status_flags & 0x10) &&
             area_state.loading == 0 && vis_table_a.object_sequence_state == 0 && area_state.entry_fade_start == -1) {
             AreaObject *entry;
@@ -3058,11 +3061,11 @@ void player_update(void)
         if (viewer.save_warp_request) {
             player_warp_to_save_point();
         }
-        if ((pad_state.pressed & 8) && viewer.state != 4 && area_state.loading == 0 &&
+        if ((pad_state.pressed & PAD_BUTTON_START) && viewer.state != 4 && area_state.loading == 0 &&
             vis_table_a.object_sequence_state == 0 && area_state.entry_fade_start == -1) {
             lighting.paused = 1;
             play_confirm_sound();
-            pad_state.pressed &= ~8;
+            pad_state.pressed &= ~PAD_BUTTON_START;
             pad_clear_input();
             pad_vibrate(0);
             pause_screen_run();
@@ -3071,7 +3074,7 @@ void player_update(void)
         }
         viewer.walk_speed_max = 192;
         viewer.yaw_speed_max = 32;
-        if (!(pad_state.held & (pad_state.buttons[0] | pad_state.buttons[1]))) {
+        if (!(pad_state.held & (pad_state.buttons[PAD_ACTION_FORWARD] | pad_state.buttons[PAD_ACTION_BACK]))) {
             viewer.yaw_speed_max = 40;
         }
         if (viewer.unk190[3][0] != 0) {
@@ -3103,14 +3106,15 @@ void player_update(void)
                 player_update_walk();
                 player_update_motion();
                 viewer.motion_stopped = 0;
-                if ((pad_state.pressed & pad_state.buttons[11]) && pad_state.combo_timer == 0 &&
+                if ((pad_state.pressed & pad_state.buttons[PAD_ACTION_MAGIC_MENU])
+                    && pad_state.combo_timer == 0 &&
                     (viewer.equipment[EQUIP_SLOT_QUICK_1] != EQUIP_NONE
                         || viewer.equipment[EQUIP_SLOT_QUICK_2] != EQUIP_NONE ||
                      viewer.equipment[EQUIP_SLOT_QUICK_3] != EQUIP_NONE
                          || viewer.equipment[EQUIP_SLOT_QUICK_4] != EQUIP_NONE ||
                      viewer.equipment[EQUIP_SLOT_QUICK_5] != EQUIP_NONE)) {
                     play_confirm_sound();
-                    pad_state.pressed &= pad_state.buttons[11];
+                    pad_state.pressed &= pad_state.buttons[PAD_ACTION_MAGIC_MENU];
                     viewer.state = 1;
                     pad_clear_input();
                 }
@@ -3126,34 +3130,36 @@ void player_update(void)
             player_update_walk();
             player_update_motion();
             viewer.motion_stopped = 0;
-            if (pad_state.pressed & pad_state.buttons[8]) {
+            if (pad_state.pressed & pad_state.buttons[PAD_ACTION_RIGHT_HAND]) {
                 play_cursor_sound();
-                pad_state.pressed &= ~pad_state.buttons[8];
+                pad_state.pressed &= ~pad_state.buttons[PAD_ACTION_RIGHT_HAND];
                 if (++viewer.quick_item_index >= 5) {
                     viewer.quick_item_index = 0;
                 }
-            } else if (pad_state.pressed & pad_state.buttons[9]) {
+            } else if (pad_state.pressed & pad_state.buttons[PAD_ACTION_LEFT_HAND]) {
                 play_cursor_sound();
-                pad_state.pressed &= ~pad_state.buttons[9];
+                pad_state.pressed &= ~pad_state.buttons[PAD_ACTION_LEFT_HAND];
                 if (--viewer.quick_item_index < 0) {
                     viewer.quick_item_index = 4;
                 }
             } else {
-                if ((pad_state.pressed & pad_state.buttons[11]) && pad_state.combo_timer == 0) {
+                if ((pad_state.pressed & pad_state.buttons[PAD_ACTION_MAGIC_MENU])
+                    && pad_state.combo_timer == 0) {
                     play_cancel_sound();
                     viewer.state = 0;
-                    pad_state.pressed &= ~pad_state.buttons[11];
-                    pad_state.pressed &= ~pad_state.buttons[10];
-                } else if ((pad_state.pressed & pad_state.buttons[10]) && pad_state.combo_timer == 0) {
+                    pad_state.pressed &= ~pad_state.buttons[PAD_ACTION_MAGIC_MENU];
+                    pad_state.pressed &= ~pad_state.buttons[PAD_ACTION_EVENT];
+                } else if ((pad_state.pressed & pad_state.buttons[PAD_ACTION_EVENT])
+                    && pad_state.combo_timer == 0) {
                     int ids[5] = {viewer.equipment[EQUIP_SLOT_QUICK_1],
                         viewer.equipment[EQUIP_SLOT_QUICK_2], viewer.equipment[EQUIP_SLOT_QUICK_3],
                                   viewer.equipment[EQUIP_SLOT_QUICK_4], viewer.equipment[EQUIP_SLOT_QUICK_5]};
 
                     viewer.state = 0;
-                    pad_state.pressed &= ~pad_state.buttons[8];
-                    pad_state.pressed &= ~pad_state.buttons[11];
-                    pad_state.pressed &= ~pad_state.buttons[9];
-                    pad_state.pressed &= ~pad_state.buttons[10];
+                    pad_state.pressed &= ~pad_state.buttons[PAD_ACTION_RIGHT_HAND];
+                    pad_state.pressed &= ~pad_state.buttons[PAD_ACTION_MAGIC_MENU];
+                    pad_state.pressed &= ~pad_state.buttons[PAD_ACTION_LEFT_HAND];
+                    pad_state.pressed &= ~pad_state.buttons[PAD_ACTION_EVENT];
                     if (ids[viewer.quick_item_index] != 0xffff) {
                         viewer.save_warp_request = 0;
                         item_use(ids[viewer.quick_item_index]);

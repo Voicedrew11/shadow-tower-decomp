@@ -79,7 +79,7 @@ void menu_equip_pick_item(void)
     MenuScratch *sp = MENU_SCRATCH;
     DVECTOR pos = {448, 256};
 
-    if (PAD.pressed_repeat & 0x20) {
+    if (PAD.pressed_repeat & PAD_BUTTON_RIGHT) {
         play_cursor_sound();
         if (EQ.list_index == sp->state.list.count - 1) {
             EQ.list_index = -1;
@@ -89,7 +89,7 @@ void menu_equip_pick_item(void)
             EQ.shown_id = sp->state.list.ids[EQ.list_index];
         }
         EQ.input_hold = 1;
-    } else if (PAD.pressed_repeat & 0x80) {
+    } else if (PAD.pressed_repeat & PAD_BUTTON_LEFT) {
         play_cursor_sound();
         if (EQ.list_index == -1)
             EQ.list_index = sp->state.list.count - 1;
@@ -100,12 +100,12 @@ void menu_equip_pick_item(void)
         else
             EQ.shown_id = sp->state.list.ids[EQ.list_index];
         EQ.input_hold = 1;
-    } else if (PAD.pressed & 0x2000) {
+    } else if (PAD.pressed & PAD_BUTTON_CIRCLE) {
         play_cancel_sound();
         PAD.pressed = 0;
         sp->mode &= ~0x8;
         mem_free(sp->state.list.ids);
-    } else if (PAD.pressed & 0x4000) {
+    } else if (PAD.pressed & PAD_BUTTON_CROSS) {
         if (EQ.shown_id != -1) {
             if (EQ.slot != SLOT(EQUIP_SLOT_RIGHT_RING) && EQ.slot != SLOT(EQUIP_SLOT_LEFT_RING)
                 && vis_table_c.types[EQ.shown_id].max_durability &&
@@ -199,12 +199,12 @@ int menu_equip_pick_slot(int *sel)
     int i;
     ItemTable *table;
 
-    if (PAD.pressed & 0x2000) {
+    if (PAD.pressed & PAD_BUTTON_CIRCLE) {
         play_cancel_sound();
         PAD.pressed = 0;
         return 1;
     }
-    if (PAD.pressed_repeat & 0x10) {
+    if (PAD.pressed_repeat & PAD_BUTTON_UP) {
         play_cursor_sound();
         PAD.pressed_repeat = 0;
         if (sp->cursor == 0) {
@@ -213,7 +213,7 @@ int menu_equip_pick_slot(int *sel)
         } else {
             sp->cursor--;
         }
-    } else if (PAD.pressed_repeat & 0x40) {
+    } else if (PAD.pressed_repeat & PAD_BUTTON_DOWN) {
         play_cursor_sound();
         PAD.pressed_repeat = 0;
         if (sp->cursor == 4) {
@@ -222,7 +222,7 @@ int menu_equip_pick_slot(int *sel)
         } else {
             sp->cursor++;
         }
-    } else if (PAD.pressed_repeat & 0x800) {
+    } else if (PAD.pressed_repeat & PAD_BUTTON_R1) {
         play_cursor_sound();
         PAD.pressed_repeat = 0;
         if (sp->scroll == 0)
@@ -231,7 +231,7 @@ int menu_equip_pick_slot(int *sel)
             sp->scroll -= 5;
         else
             sp->scroll = 0;
-    } else if (PAD.pressed_repeat & 0x200) {
+    } else if (PAD.pressed_repeat & PAD_BUTTON_R2) {
         play_cursor_sound();
         PAD.pressed_repeat = 0;
         if (sp->scroll == 10)
@@ -240,7 +240,7 @@ int menu_equip_pick_slot(int *sel)
             sp->scroll += 5;
         else
             sp->scroll = 10;
-    } else if (PAD.pressed & 0x4000) {
+    } else if (PAD.pressed & PAD_BUTTON_CROSS) {
         PAD.pressed = 0;
         switch (sp->scroll + sp->cursor) {
         case 0:
@@ -445,13 +445,13 @@ void menu_equip_pick_magic(void)
     EquipMagicList *list;
     u32 *bits;
 
-    if (PAD.pressed & 0x2000) {
+    if (PAD.pressed & PAD_BUTTON_CIRCLE) {
         play_cancel_sound();
         PAD.pressed = 0;
         sp->mode = (sp->mode & ~0x2) | 0x1;
         sp->scroll = equip_saved_list_cursor[0];
         sp->cursor = equip_saved_list_cursor[1];
-    } else if (PAD.pressed_repeat & 0x10) {
+    } else if (PAD.pressed_repeat & PAD_BUTTON_UP) {
         play_cursor_sound();
         PAD.pressed_repeat = 0;
         if (sp->cursor == 0) {
@@ -460,7 +460,7 @@ void menu_equip_pick_magic(void)
         } else {
             sp->cursor--;
         }
-    } else if (PAD.pressed_repeat & 0x40) {
+    } else if (PAD.pressed_repeat & PAD_BUTTON_DOWN) {
         play_cursor_sound();
         PAD.pressed_repeat = 0;
         if (sp->cursor == 4) {
@@ -469,7 +469,7 @@ void menu_equip_pick_magic(void)
         } else if (sp->scroll + sp->cursor < equip_magic_list.count - 1) {
             sp->cursor++;
         }
-    } else if (PAD.pressed_repeat & 0x800) {
+    } else if (PAD.pressed_repeat & PAD_BUTTON_R1) {
         play_cursor_sound();
         PAD.pressed_repeat = 0;
         if (sp->scroll == 0)
@@ -478,7 +478,7 @@ void menu_equip_pick_magic(void)
             sp->scroll -= 5;
         else
             sp->scroll = 0;
-    } else if (PAD.pressed_repeat & 0x200) {
+    } else if (PAD.pressed_repeat & PAD_BUTTON_R2) {
         play_cursor_sound();
         PAD.pressed_repeat = 0;
         if (sp->scroll + 5 >= equip_magic_list.count)
@@ -487,7 +487,7 @@ void menu_equip_pick_magic(void)
             sp->scroll += 5;
         else
             sp->scroll = equip_magic_list.count - 5;
-    } else if (PAD.pressed & 0x4000) {
+    } else if (PAD.pressed & PAD_BUTTON_CROSS) {
         PAD.pressed = 0;
         if (EQ.slot == SLOT(EQUIP_SLOT_RIGHT_MAGIC))
             bits = &equip_magic_list.bits[viewer.equipment[EQUIP_SLOT_RIGHT_RING] - 196];
@@ -1031,7 +1031,7 @@ void menu_arrange_list_loop(void)
 
     pad_clear_input();
     for (;;) {
-        if (PAD.pressed & 0x2000) {
+        if (PAD.pressed & PAD_BUTTON_CIRCLE) {
             play_cancel_sound();
             PAD.pressed = 0;
             if (sp->mode & 0x8000)
@@ -1041,7 +1041,7 @@ void menu_arrange_list_loop(void)
             else
                 break;
         }
-        if (PAD.pressed & 0x4000) {
+        if (PAD.pressed & PAD_BUTTON_CROSS) {
             play_confirm_sound();
             PAD.pressed = 0;
             if (sp->mode & 0x8000) {
@@ -1120,7 +1120,7 @@ void menu_arrange_list_loop(void)
             }
         }
         if (!(sp->mode & 0x8000)) {
-            if (PAD.pressed & 0x1) {
+            if (PAD.pressed & PAD_BUTTON_SELECT) {
                 play_confirm_sound();
                 PAD.pressed = 0;
                 if (ST.grid == 104) {
@@ -1149,7 +1149,7 @@ void menu_arrange_list_loop(void)
                     }
                 }
             }
-            if (PAD.pressed & 0x8000) {
+            if (PAD.pressed & PAD_BUTTON_SQUARE) {
                 play_confirm_sound();
                 PAD.pressed = 0;
                 if (ST.range_held) {
@@ -1163,7 +1163,7 @@ void menu_arrange_list_loop(void)
                     ST.range_anchor = ST.range_start = ST.range_end = cur;
                 }
             }
-            if (PAD.pressed & 0x1000) {
+            if (PAD.pressed & PAD_BUTTON_TRIANGLE) {
                 play_confirm_sound();
                 PAD.pressed = 0;
                 if (sp->mode == 1)
@@ -1171,7 +1171,7 @@ void menu_arrange_list_loop(void)
                 else if (sp->mode == 2)
                     sp->mode = 1;
             }
-            if (PAD.pressed_repeat & 0x20) {
+            if (PAD.pressed_repeat & PAD_BUTTON_RIGHT) {
                 play_cursor_sound();
                 PAD.pressed_repeat = 0;
                 if (ST.grid == 104) {
@@ -1179,7 +1179,7 @@ void menu_arrange_list_loop(void)
                     RANGE_CLEAR();
                 }
             }
-            if (PAD.pressed_repeat & 0x80) {
+            if (PAD.pressed_repeat & PAD_BUTTON_LEFT) {
                 play_cursor_sound();
                 PAD.pressed_repeat = 0;
                 if (ST.grid == 98) {
@@ -1187,9 +1187,9 @@ void menu_arrange_list_loop(void)
                     RANGE_CLEAR();
                 }
             }
-            if (PAD.pressed_repeat & 0x10) {
+            if (PAD.pressed_repeat & PAD_BUTTON_UP) {
                 play_cursor_sound();
-                if (PAD.held & 0x8000) {
+                if (PAD.held & PAD_BUTTON_SQUARE) {
                     if (ST.grid == 104) {
                         if (GRID->hand_row == 0)
                             sp->cursor = 0;
@@ -1214,9 +1214,9 @@ void menu_arrange_list_loop(void)
                 }
                 PAD.pressed_repeat = 0;
             }
-            if (PAD.pressed_repeat & 0x40) {
+            if (PAD.pressed_repeat & PAD_BUTTON_DOWN) {
                 play_cursor_sound();
-                if (PAD.held & 0x8000) {
+                if (PAD.held & PAD_BUTTON_SQUARE) {
                     if (ST.grid == 104) {
                         if (GRID->hand_row == 303)
                             sp->cursor = 10;
@@ -1242,7 +1242,7 @@ void menu_arrange_list_loop(void)
                 PAD.pressed_repeat = 0;
             }
             if ((sp->mode == 2 && ST.grid == 104) || sp->mode != 2) {
-                if (PAD.pressed_repeat & 0x400) {
+                if (PAD.pressed_repeat & PAD_BUTTON_L1) {
                     play_cursor_sound();
                     PAD.pressed_repeat = 0;
                     if (ST.grid == 104 && GRID->hand_row == 0)
@@ -1251,7 +1251,7 @@ void menu_arrange_list_loop(void)
                     if (GRID->hand_row < 0)
                         GRID->hand_row = 0;
                 }
-                if (PAD.pressed_repeat & 0x100) {
+                if (PAD.pressed_repeat & PAD_BUTTON_L2) {
                     play_cursor_sound();
                     PAD.pressed_repeat = 0;
                     if (ST.grid == 104 && GRID->hand_row == 303)
@@ -1262,7 +1262,7 @@ void menu_arrange_list_loop(void)
                 }
             }
             if ((sp->mode == 2 && ST.grid == 98) || sp->mode != 2) {
-                if (PAD.pressed_repeat & 0x800) {
+                if (PAD.pressed_repeat & PAD_BUTTON_R1) {
                     play_cursor_sound();
                     PAD.pressed_repeat = 0;
                     if (ST.grid == 98 && GRID->bag_row == 0)
@@ -1271,7 +1271,7 @@ void menu_arrange_list_loop(void)
                     if (GRID->bag_row < 0)
                         GRID->bag_row = 0;
                 }
-                if (PAD.pressed_repeat & 0x200) {
+                if (PAD.pressed_repeat & PAD_BUTTON_R2) {
                     play_cursor_sound();
                     PAD.pressed_repeat = 0;
                     if (ST.grid == 98 && GRID->bag_row == 303)
