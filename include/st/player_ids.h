@@ -9,7 +9,7 @@
  * DYING and HURT; the others hold the player while something else runs. */
 #define VIEWER_STATE_NORMAL 0      /* walk, hands, examine (player_enter_normal_state) */
 #define VIEWER_STATE_QUICK_ITEM 1  /* choosing one of the five quick items */
-#define VIEWER_STATE_FROZEN 2      /* player_enter_frozen_state (the ending overlays) */
+#define VIEWER_STATE_FROZEN 2      /* player_enter_frozen_state (the shop overlays, as the talk starts) */
 #define VIEWER_STATE_PICK_UP 3     /* ground_item_pick_up holds an item in view */
 #define VIEWER_STATE_DYING 4       /* player_kill */
 #define VIEWER_STATE_SCRIPTED 5    /* warps and the overlays' door and event scenes */
