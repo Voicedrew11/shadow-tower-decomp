@@ -12,6 +12,7 @@
 #include <LIBGPU.H>
 
 struct CollisionState; /* st/vis.h */
+struct Creature;
 
 void effect_update(void); /* runs effects.cur one frame by its kind (a per-kind switch with a step counter) */
 int player_distance_in_reach(struct CollisionState *req);
@@ -63,7 +64,7 @@ void vector_add_scaled(VECTOR *p, SVECTOR *v, int s, VECTOR *out);
 int svector_distance_to_segment(SVECTOR *p, SVECTOR *a, SVECTOR *b);
 int vector_distance_to_segment(VECTOR *p, VECTOR *a, VECTOR *b);
 void creatures_clear(void);
-void *creature_find_in_cone(VECTOR *pos, short yaw, short pitch, int range, int arg4, int arg5, int *dist,
+struct Creature *creature_find_in_cone(VECTOR *pos, short yaw, short pitch, int range, int arg4, int arg5, int *dist,
                    int arg7);
 void creatures_update(void);
 void objects_clear(void);

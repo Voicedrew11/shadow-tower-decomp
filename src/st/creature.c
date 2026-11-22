@@ -334,7 +334,7 @@ int func_8004b5d8(int a, int b, int c)
  * sight: within range, inside the yaw/pitch cones, scored by angle and
  * distance, with a random term when arg7 > 0. */
 ADDRESS(0x8004b658, 0x294)
-void *creature_find_in_cone(VECTOR *pos, short yaw, short pitch, int range, int arg4, int arg5, int *dist,
+Creature *creature_find_in_cone(VECTOR *pos, short yaw, short pitch, int range, int arg4, int arg5, int *dist,
                     int arg7)
 {
     Creature *e;

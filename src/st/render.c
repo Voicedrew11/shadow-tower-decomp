@@ -4222,28 +4222,28 @@ u16 object_model_slot(u16 id)
 }
 
 ADDRESS(0x80023288, 0x100)
-void creature_model_loaded(void *data)
+void creature_model_loaded(StAnimFile *file)
 {
     DVECTOR a[4] = {{0, 0}, {64, 0}, {128, 0}, {192, 0}};
     DVECTOR b[4] = {{0, 0}, {0, 3}, {0, 6}, {0, 9}};
-    u8 n = heap_get_tag(data);
+    u8 n = heap_get_tag(file);
 
-    model_offset_textures((Model *)((u8 *)data + ((u32 *)data)[2]), &a[n], &b[n], 0);
-    heap_set_state(data, ST_BLOCK_USED);
+    model_offset_textures((Model *)((u8 *)file + file->model), &a[n], &b[n], 0);
+    heap_set_state(file, ST_BLOCK_USED);
 }
 
 ADDRESS(0x80023388, 0xe8)
-void creature_tim_loaded(void *data)
+void creature_tim_loaded(u_long *tim)
 {
     DVECTOR a[4] = {{0, 0}, {64, 0}, {128, 0}, {192, 0}};
     DVECTOR b[4] = {{0, 0}, {0, 3}, {0, 6}, {0, 9}};
-    u8 n = heap_get_tag(data);
+    u8 n = heap_get_tag(tim);
 
-    tim_load_images_at(data, &a[n], &b[n], 0);
+    tim_load_images_at(tim, &a[n], &b[n], 0);
 }
 
 ADDRESS(0x80023470, 0x194)
-void item_model_loaded(void *data)
+void item_model_loaded(StAnimFile *file)
 {
     DVECTOR a[16] = {
         {0, 0},   {0, 32},   {0, 64},   {0, 96},   {0, 128},  {0, 160},  {0, 192},  {0, 224},
@@ -4253,14 +4253,14 @@ void item_model_loaded(void *data)
         {0, 0}, {0, 1}, {0, 2},  {0, 3},  {0, 4},  {0, 5},  {0, 6},  {0, 7},
         {0, 8}, {0, 9}, {0, 10}, {0, 11}, {0, 12}, {0, 13}, {0, 14}, {0, 15},
     };
-    u8 n = heap_get_tag(data);
+    u8 n = heap_get_tag(file);
 
-    model_offset_textures((Model *)((u8 *)data + ((u32 *)data)[2]), &a[n], &b[n], 0);
-    heap_set_state(data, ST_BLOCK_USED);
+    model_offset_textures((Model *)((u8 *)file + file->model), &a[n], &b[n], 0);
+    heap_set_state(file, ST_BLOCK_USED);
 }
 
 ADDRESS(0x80023604, 0x184)
-void item_tim_loaded(void *data)
+void item_tim_loaded(u_long *tim)
 {
     DVECTOR a[16] = {
         {0, 0},   {0, 32},   {0, 64},   {0, 96},   {0, 128},  {0, 160},  {0, 192},  {0, 224},
@@ -4270,15 +4270,15 @@ void item_tim_loaded(void *data)
         {0, 0}, {0, 1}, {0, 2},  {0, 3},  {0, 4},  {0, 5},  {0, 6},  {0, 7},
         {0, 8}, {0, 9}, {0, 10}, {0, 11}, {0, 12}, {0, 13}, {0, 14}, {0, 15},
     };
-    u8 n = heap_get_tag(data);
+    u8 n = heap_get_tag(tim);
 
-    tim_load_images_at(data, &a[n], &b[n], 0);
+    tim_load_images_at(tim, &a[n], &b[n], 0);
 }
 
 ADDRESS(0x80023788, 0x20)
-void object_model_loaded(void *data)
+void object_model_loaded(StAnimFile *file)
 {
-    heap_set_state(data, ST_BLOCK_USED);
+    heap_set_state(file, ST_BLOCK_USED);
 }
 
 /*
