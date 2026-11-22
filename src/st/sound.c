@@ -29,7 +29,7 @@ void play_landing_sound(int damage)
         damage -= 256;
         if (damage > 512)
             damage = 512;
-        sound_play(20, (damage >> 3) + 64);
+        sound_play(SOUND_LANDING, (damage >> 3) + 64);
         pad_vibrate(damage / 4);
     }
 }
@@ -42,20 +42,20 @@ void play_footstep_sound(int volume)
     int id;
 
     if (flags & 0x34)
-        id = 19;
+        id = SOUND_FOOTSTEP_3;
     else if ((flags & 3) == 1)
-        id = 17;
+        id = SOUND_FOOTSTEP;
     else if ((flags & 3) == 2)
-        id = 18;
+        id = SOUND_FOOTSTEP_2;
     else
-        id = 17;
+        id = SOUND_FOOTSTEP;
     sound_play(id, (volume >> 2) + 64);
 }
 
 ADDRESS(0x80057c0c, 0x24)
 void play_death_sound(void)
 {
-    sound_play(3, 128);
+    sound_play(SOUND_DEATH, 128);
 }
 
 ADDRESS(0x80057c30, 0x24)
@@ -67,55 +67,55 @@ void func_80057c30(void)
 ADDRESS(0x80057c54, 0x24)
 void play_warp_sound(void)
 {
-    sound_play(10, 128);
+    sound_play(SOUND_WARP, 128);
 }
 
 ADDRESS(0x80057c78, 0x2c)
 void func_80057c78(void)
 {
-    sound_key_on(10, 128, 128, 50);
+    sound_key_on(SOUND_WARP, 128, 128, 50);
 }
 
 ADDRESS(0x80057ca4, 0x24)
 void func_80057ca4(void)
 {
-    sound_play(21, 128);
+    sound_play(SOUND_DOUBLE_DAMAGE, 128);
 }
 
 ADDRESS(0x80057cc8, 0x24)
 void play_confirm_sound(void)
 {
-    sound_play(12, 128);
+    sound_play(SOUND_CONFIRM, 128);
 }
 
 ADDRESS(0x80057cec, 0x24)
 void play_cancel_sound(void)
 {
-    sound_play(13, 128);
+    sound_play(SOUND_CANCEL, 128);
 }
 
 ADDRESS(0x80057d10, 0x24)
 void play_cursor_sound(void)
 {
-    sound_play(11, 128);
+    sound_play(SOUND_CURSOR, 128);
 }
 
 ADDRESS(0x80057d34, 0x24)
 void play_refuse_sound(void)
 {
-    sound_play(14, 128);
+    sound_play(SOUND_REFUSE, 128);
 }
 
 ADDRESS(0x80057d58, 0x24)
 void play_unlock_sound(void)
 {
-    sound_play(16, 128);
+    sound_play(SOUND_UNLOCK, 128);
 }
 
 ADDRESS(0x80057d7c, 0x24)
 void play_locked_sound(void)
 {
-    sound_play(15, 128);
+    sound_play(SOUND_LOCKED, 128);
 }
 
 /* Starts the sound system and resets the bank slots, voices and buffers. */

@@ -173,7 +173,7 @@ void map_update_events(void)
     AreaObject *d17 = &vis_table_b.entries[17];
 
     if (fdat_801edf54 == 0 && game_progress.talk_counts[r14->talk_id] == 1) {
-        viewer.state = 5;
+        viewer.state = VIEWER_STATE_SCRIPTED;
         map_play_creature_script();
         if (!(vis_table_c.collected_bits[1] & 0x10000))
             map_offer_item_at_player();
@@ -187,7 +187,7 @@ void map_update_events(void)
         player_turn_to_creature(e40);
         creature_force_talk(e40, 0, 0);
         e40->spawn_chance = 100;
-        viewer.state = 0;
+        viewer.state = VIEWER_STATE_NORMAL;
         fdat_801edf54 = 0xff;
         e40->flags &= ~0x2000000;
         game_progress.event_flags2.word |= 0x1000;

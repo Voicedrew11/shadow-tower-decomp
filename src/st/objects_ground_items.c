@@ -1200,7 +1200,7 @@ void objects_update(void)
                     vis_table_a.zone_history[3] = 0xff;
                 vis_table_a.prev_zone = 0xff;
             }
-            viewer.state = 0;
+            viewer.state = VIEWER_STATE_NORMAL;
             viewer.shake_roll = 0;
             viewer.shake_yaw = 0;
             viewer.shake_pitch = 0;
@@ -1307,7 +1307,7 @@ void player_warp(to, keep)
         vis_table_a.zone_history[0] = vis_table_a.zone_history[1] = vis_table_a.zone_history[2] = vis_table_a.zone_history[3] = 0xff;
         vis_table_a.prev_zone = 0xff;
     }
-    viewer.state = 0;
+    viewer.state = VIEWER_STATE_NORMAL;
     viewer.shake_roll = 0;
     viewer.shake_yaw = 0;
     viewer.shake_pitch = 0;
@@ -1369,7 +1369,7 @@ void player_warp_to_save_point(void)
 ADDRESS(0x80052c5c, 0x48)
 void player_warp_back(void)
 {
-    viewer.state = 5;
+    viewer.state = VIEWER_STATE_SCRIPTED;
     player_update_durability_warning();
     player_warp(&viewer.warp_return.warp, 1);
     DAT_801cd0e4 = 0;
@@ -1572,7 +1572,7 @@ void ground_item_pick_up(GroundItem *c, int forced)
 
     info = &vis_table_c.types[c->item];
     save = *c;
-    viewer.state = 3;
+    viewer.state = VIEWER_STATE_PICK_UP;
     gte_SetRotMatrix(&viewer.camera_matrix);
     gte_ldv0((SVECTOR *)&info->unk5[3]);
     gte_rtv0();
@@ -1739,7 +1739,7 @@ void ground_items_update(void)
             break;
         case 3:
             ground_item_pick_up(c, 0);
-            viewer.state = 0;
+            viewer.state = VIEWER_STATE_NORMAL;
             break;
         }
         c++;

@@ -74,7 +74,7 @@ void map_restore_progress(void)
     if (game_progress.talk_counts[r->talk_id] >= 2)
         r->actions &= ~0x180;
     if (game_progress.talk_counts[r->talk_id] == 0) {
-        viewer.state = 5;
+        viewer.state = VIEWER_STATE_SCRIPTED;
         fdat_801edb9c = 0;
     } else {
         fdat_801edb9c = 0xff;
@@ -105,7 +105,7 @@ void map_update_events(void)
         creature_force_talk(e, 1, 0);
         fdat_801edb98 = 1;
         fdat_801edb9c = 0xff;
-        viewer.state = 0;
+        viewer.state = VIEWER_STATE_NORMAL;
     }
     if (fdat_801edb98 == 1 && !(viewer.status_flags & 0x800)) {
         viewer.magic_gauge_delay = 30;
@@ -113,10 +113,10 @@ void map_update_events(void)
     }
     n = game_progress.talk_counts[r->talk_id];
     if (n == 1 && viewer.position.vx > 0x4c000 && viewer.position.vz > 0x55000) {
-        viewer.state = 5;
+        viewer.state = VIEWER_STATE_SCRIPTED;
         creature_force_talk(e, 0, 0);
         e->hit = n;
-        viewer.state = 0;
+        viewer.state = VIEWER_STATE_NORMAL;
         e->flags &= ~0x2000000;
         r->actions &= ~0x180;
     }
@@ -125,12 +125,12 @@ void map_update_events(void)
         game_progress.event_flags.word |= 0x10000000;
     }
     if (fdat_801edb94 == 1 && e->state == 3) {
-        viewer.state = 5;
+        viewer.state = VIEWER_STATE_SCRIPTED;
         e->flags |= 0x2000000;
         creature_force_talk(e, 1, 0);
         fdat_801edb94 = 0xff;
         fdat_801edb98 = 0;
-        viewer.state = 0;
+        viewer.state = VIEWER_STATE_NORMAL;
     }
 }
 

@@ -114,7 +114,7 @@ void map_update_events(void)
         e0->spawn_chance = 100;
         game_progress.event_flags.word |= 0x20;
     }
-    if (viewer.state != 4 && viewer.block == 68)
+    if (viewer.state != VIEWER_STATE_DYING && viewer.block == 68)
         player_kill(0);
 }
 

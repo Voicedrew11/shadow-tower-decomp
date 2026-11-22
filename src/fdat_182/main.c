@@ -77,7 +77,7 @@ void map_update_events(void)
     else if (fdat_801edc50 == 2)
         map_warp_player(1);
     if (!(game_progress.event_flags.word >> 18 & 1) && e->hp == 0) {
-        viewer.state = 5;
+        viewer.state = VIEWER_STATE_SCRIPTED;
         game_progress.event_flags.word |= 0x40000;
         lighting.area_mode[3] = 0x11;
         lighting.area_mode[20] = 0x11;
@@ -89,11 +89,11 @@ void map_update_events(void)
         player_update_hand_action(0);
         player_update_hand_action(1);
         if (fdat_801edc54 == 1 && e->state == 3) {
-            viewer.state = 5;
+            viewer.state = VIEWER_STATE_SCRIPTED;
             e->flags |= 0x2000000;
             creature_force_talk(e, 1, 0);
             fdat_801edc54 = 0xff;
-            viewer.state = 0;
+            viewer.state = VIEWER_STATE_NORMAL;
         }
     }
 }

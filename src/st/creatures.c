@@ -47,11 +47,11 @@ int creature_take_damage(e, kind, power, levels, crit)
     if (dmg == 0)
         return 0;
     t = &vis_table_a.types[e->type];
-    if (viewer.status_flags & 0x200000)
+    if (viewer.status_flags & STATUS_ATTACK_BOOST)
         dmg = dmg * 3 / 2;
     luck = viewer.double_damage_chance;
     if (rand() * 100 / 32768 < luck) {
-        sound_play(21, 128);
+        sound_play(SOUND_DOUBLE_DAMAGE, 128);
         dmg <<= 1;
     }
     i = 24;
@@ -112,7 +112,7 @@ done:
         e->anim_step = script->anim_step;
     }
     e->hurt_timer = 0xfff;
-    if (viewer.state != 4) {
+    if (viewer.state != VIEWER_STATE_DYING) {
         if (viewer.hp_drain_percent)
             player_add_hp(dmg * viewer.hp_drain_percent / 100);
         if (viewer.mp_drain_percent)

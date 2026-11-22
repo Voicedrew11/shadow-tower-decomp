@@ -122,7 +122,7 @@ void map_update_events(void)
             e49->spawn_chance = 0;
         if (fdat_801edaf4 == 0 && e48->state == 1) {
             fdat_801edafc = 1;
-            viewer.state = 5;
+            viewer.state = VIEWER_STATE_SCRIPTED;
         }
     }
     if (fdat_801edafc == 1 && area_state.entry_fade_start == -1 && (short)area_state.load_step >= 2)
@@ -131,7 +131,7 @@ void map_update_events(void)
         creature_force_talk(e48, 0, 0);
         creature_fade_out_despawn(e48);
         fdat_801edafc = 0xff;
-        viewer.state = 0;
+        viewer.state = VIEWER_STATE_NORMAL;
     }
     if (fdat_801edafc == 0xff && !(viewer.status_flags & 0x800)) {
         viewer.magic_gauge_delay = 30;

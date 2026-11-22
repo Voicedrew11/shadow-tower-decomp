@@ -78,11 +78,11 @@ void map_update_events(void)
 
     if (fdat_801ed8cc == 0) {
         if (viewer.block == 0x33 || viewer.block == 0x36) {
-            viewer.state = 5;
+            viewer.state = VIEWER_STATE_SCRIPTED;
             creature_force_talk(e, 0, 0);
             e->hit = 1;
             fdat_801ed8cc = 1;
-            viewer.state = 0;
+            viewer.state = VIEWER_STATE_NORMAL;
             e->flags &= ~0x2000000;
             r->actions &= ~0x180;
         } else {

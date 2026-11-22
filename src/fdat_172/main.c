@@ -156,10 +156,10 @@ void map_update_events(void)
     if (e48->hp == 0)
         game_progress.event_flags.word |= 0x20000000;
     if (game_progress.talk_counts[r14->talk_id] == 0 && viewer.position.vz > 0x4a000) {
-        viewer.state = 5;
+        viewer.state = VIEWER_STATE_SCRIPTED;
         creature_force_talk(e33, 0, 0);
         e33->hit = 1;
-        viewer.state = 0;
+        viewer.state = VIEWER_STATE_NORMAL;
         e33->flags &= ~0x2000000;
         r14->actions &= ~0x180;
     }
@@ -170,12 +170,12 @@ void map_update_events(void)
         game_progress.event_flags.word |= 0x8000000;
     }
     if (fdat_801edfd8 == 1 && e33->state == 3) {
-        viewer.state = 5;
+        viewer.state = VIEWER_STATE_SCRIPTED;
         e33->flags |= 0x2000000;
         creature_force_talk(e33, 1, 0);
         fdat_801edfd8 = 0xff;
         d6->kind = 0xed;
-        viewer.state = 0;
+        viewer.state = VIEWER_STATE_NORMAL;
     }
 }
 

@@ -351,7 +351,7 @@ void map_step_creature(void)
     if (e->type == 4 && fdat_801ef93c == 1) {
         rot.vx = 0;
         rot.vy = -0x400;
-        viewer.state = 5;
+        viewer.state = VIEWER_STATE_SCRIPTED;
         pos.vx = e48->position.vx - 0xa00;
         pos.vz = e48->position.vz;
         player_glide_to_pose(&pos, &rot);
@@ -365,17 +365,17 @@ void map_step_creature(void)
         map_hand_over_item();
         creature_fade_out_despawn(e);
         fdat_801ef93c = 2;
-        viewer.state = 0;
+        viewer.state = VIEWER_STATE_NORMAL;
         game_progress.event_flags.word |= 0x4000;
     }
     if (e->type == 0) {
         switch (game_progress.event_flags.word >> 10 & 7) {
         case 2:
-            viewer.state = 5;
+            viewer.state = VIEWER_STATE_SCRIPTED;
             creature_force_talk(e, 0, 0);
             player_turn_to_creature(e);
             map_walk_creature_off();
-            viewer.state = 0;
+            viewer.state = VIEWER_STATE_NORMAL;
             e->spawn_chance = 100;
             e->facing = 0x400;
             e->home_block = 0x31;
@@ -541,13 +541,13 @@ void map_object_take_equipment(void)
         pos.vz = d->position.vz - 0x600;
         rot.vx = 0;
         rot.vy = 0;
-        viewer.state = 5;
+        viewer.state = VIEWER_STATE_SCRIPTED;
         player_glide_to_pose(&pos, &rot);
         map_take_equipment_raise_object();
         player_turn_to_creature(e51);
         map_play_two_creature_scripts();
         map_talk_then_remove_creatures();
-        viewer.state = 0;
+        viewer.state = VIEWER_STATE_NORMAL;
         fdat_801ef924 = 2;
         fdat_801ef92c = 2;
         game_progress.event_flags.word = (game_progress.event_flags.word & ~0x300) | 0x200;

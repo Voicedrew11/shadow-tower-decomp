@@ -88,10 +88,10 @@ void map_update_events(void)
         fdat_801edad0 = 1;
     }
     if (fdat_801edad0 == 1 && game_progress.talk_counts[r->talk_id] == 3) {
-        viewer.state = 5;
+        viewer.state = VIEWER_STATE_SCRIPTED;
         map_hand_over_item();
         fdat_801edad0 = 0xff;
-        viewer.state = 0;
+        viewer.state = VIEWER_STATE_NORMAL;
     }
 }
 

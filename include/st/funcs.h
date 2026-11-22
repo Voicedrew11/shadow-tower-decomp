@@ -10,6 +10,7 @@
 #include <sys/types.h>
 #include <LIBGTE.H>
 #include <LIBGPU.H>
+#include <st/sound_ids.h>
 
 void effect_update(void); /* runs effects.cur one frame by its kind (a per-kind switch with a step counter) */
 int player_distance_in_reach(void *request);

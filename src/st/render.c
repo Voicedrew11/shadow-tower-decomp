@@ -5223,35 +5223,35 @@ void hud_update(void)
             hud_sprites[1].r.w = v->magic_gauge * 112 / 5120;
             hud_sprites[1].r.x = 307 - hud_sprites[1].r.w;
         }
-        if (v->status_flags & 7) {
+        if (v->status_flags & STATUS_POISON) {
             hud_sprites[4].flags = 1;
-            if (v->status_flags & 4)
+            if (v->status_flags & STATUS_POISON_3)
                 hud_sprites[4].flags = 9;
-            else if (v->status_flags & 2)
+            else if (v->status_flags & STATUS_POISON_2)
                 hud_sprites[4].flags = 5;
         } else {
             hud_sprites[4].flags = 0;
         }
     }
-    if (viewer.status_flags & 0x18) {
+    if (viewer.status_flags & STATUS_PARALYZE) {
         hud_sprites[7].flags = 1;
-        if (viewer.status_flags & 0x10)
+        if (viewer.status_flags & STATUS_PARALYZE_2)
             hud_sprites[7].flags = 9;
     } else {
         hud_sprites[7].flags = 0;
     }
-    if (viewer.status_flags & 0x60) {
+    if (viewer.status_flags & STATUS_DARK) {
         hud_sprites[9].flags = 1;
         if (viewer.status_flags & 0x40)
             hud_sprites[9].flags = 9;
     } else {
         hud_sprites[9].flags = 0;
     }
-    if (viewer.status_flags & 0x80)
+    if (viewer.status_flags & STATUS_SLOW)
         hud_sprites[11].flags |= 1;
     else
         hud_sprites[11].flags = 0;
-    if (viewer.status_flags & 0x100)
+    if (viewer.status_flags & STATUS_CURSED)
         hud_sprites[12].flags |= 1;
     else
         hud_sprites[12].flags = 0;
@@ -5283,7 +5283,7 @@ void hud_update(void)
         hud_sprites[43].flags = 0;
     else
         hud_sprites[43].flags |= 1;
-    if (viewer.status_flags & 0x1000000)
+    if (viewer.status_flags & STATUS_DURABILITY_WARNING)
         hud_sprites[44].flags |= 1;
     else
         hud_sprites[44].flags = 0;
@@ -5350,13 +5350,14 @@ void world_render_frame(VECTOR *pos, SVECTOR *rot)
     pad_update_vibration();
     gfx_set_camera(pos, rot);
     texanim_update();
-    if (viewer.state == 0 || viewer.state == 5 || viewer.state == 6 || viewer.state == 1)
+    if (viewer.state == VIEWER_STATE_NORMAL || viewer.state == VIEWER_STATE_SCRIPTED
+        || viewer.state == VIEWER_STATE_SHOP || viewer.state == VIEWER_STATE_QUICK_ITEM)
         lighting_update();
     gfx_begin_frame();
     anim_slots_retire();
     anim_sets_retire();
     world_state.vertex_face_counts[1] = 0;
-    if (viewer.state == 1) {
+    if (viewer.state == VIEWER_STATE_QUICK_ITEM) {
         frame = &hud_sprites[26 + viewer.quick_item_index];
         hud_selection_blink = (hud_selection_blink + 1) % 32;
         if (hud_selection_blink < 16)
@@ -6328,15 +6329,15 @@ void menu_main_draw(void)
     sp->style[0].cd = 57;
     for (i = 0; i < 11; i++)
         ui_draw_text(MESSAGE(i), 24, i * 16 + 48, &sp->style[0]);
-    if (viewer.status_flags & 7)
+    if (viewer.status_flags & STATUS_POISON)
         ui_draw_text(MESSAGE(MSG_STATUS_POISON), 106, 112, &sp->style[0]);
-    else if (viewer.status_flags & 0x18)
+    else if (viewer.status_flags & STATUS_PARALYZE)
         ui_draw_text(MESSAGE(MSG_STATUS_PARALYZE), 93, 112, &sp->style[0]);
-    else if (viewer.status_flags & 0x60)
+    else if (viewer.status_flags & STATUS_DARK)
         ui_draw_text(MESSAGE(MSG_STATUS_DARK), 119, 112, &sp->style[0]);
-    else if (viewer.status_flags & 0x80)
+    else if (viewer.status_flags & STATUS_SLOW)
         ui_draw_text(MESSAGE(MSG_STATUS_SLOW), 119, 112, &sp->style[0]);
-    else if (viewer.status_flags & 0x100)
+    else if (viewer.status_flags & STATUS_CURSED)
         ui_draw_text(MESSAGE(MSG_STATUS_CURSED), 106, 112, &sp->style[0]);
     else
         ui_draw_text(MESSAGE(MSG_STATUS_NORMAL), 106, 112, &sp->style[0]);
@@ -9093,7 +9094,7 @@ void lighting_update(void)
         lighting.last_area = area_state.area;
         world_state.light_blend = 0;
     }
-    if (lighting.entry_step == 2 && viewer.state == 6) {
+    if (lighting.entry_step == 2 && viewer.state == VIEWER_STATE_SHOP) {
         lighting.column_request = 0;
         lighting.row_request = 0;
     }

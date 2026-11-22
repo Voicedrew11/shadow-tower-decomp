@@ -559,7 +559,7 @@ void player_total_attributes(void)
         else
             id += 1;
     }
-    if (viewer.status_flags & 0x80) {
+    if (viewer.status_flags & STATUS_SLOW) {
         at->attribute_bonuses[1] >>= 1;
         at->base_attributes[1] >>= 1;
     }
@@ -672,7 +672,7 @@ void player_compute_derived_stats(int apply)
                   + at->attributes_clamped[11] + at->attributes_clamped[12] + at->attributes_clamped[13];
     viewer.physical_base = viewer.max_hp / 80;
     viewer.magic_base = viewer.max_mp / 80;
-    if (viewer.status_flags & 0x100) {
+    if (viewer.status_flags & STATUS_CURSED) {
         b6 = viewer.physical_base;
         viewer.physical_base = b6 / 2;
         b8 = viewer.magic_base;

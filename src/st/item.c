@@ -184,7 +184,7 @@ void player_examine(long *pos, SVECTOR *rot)
             break;
         case 226:
             viewer.hp = viewer.max_hp;
-            sound_play(8, 128);
+            sound_play(SOUND_RECOVER, 128);
             break;
         case 14:
             if (area_state.loading != 1 && area_state.entry_fade_start == -1) {

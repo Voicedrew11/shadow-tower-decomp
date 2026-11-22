@@ -108,41 +108,41 @@ void item_use(int id)
         if (viewer.hp < viewer.max_hp) {
             viewer.hp = viewer.max_hp;
             USE_RESULT = 1;
-            sound_play(8, 128);
+            sound_play(SOUND_RECOVER, 128);
         }
         break;
     case 0x11d:
         if (viewer.mp < viewer.max_mp) {
             viewer.mp = viewer.max_mp;
             USE_RESULT = 1;
-            sound_play(8, 128);
+            sound_play(SOUND_RECOVER, 128);
         }
         break;
     case 0x11e:
-        if (viewer.status_flags & 7) {
+        if (viewer.status_flags & STATUS_POISON) {
             viewer.unk190[0][1] = 0;
             viewer.unk190[0][0] = 0;
-            viewer.status_flags &= ~7;
+            viewer.status_flags &= ~STATUS_POISON;
             USE_RESULT = 1;
-            sound_play(8, 128);
+            sound_play(SOUND_RECOVER, 128);
         }
         break;
     case 0x11f:
-        if (viewer.status_flags & 0x18) {
+        if (viewer.status_flags & STATUS_PARALYZE) {
             viewer.unk190[1][1] = 0;
             viewer.unk190[1][0] = 0;
-            viewer.status_flags &= ~0x18;
+            viewer.status_flags &= ~STATUS_PARALYZE;
             USE_RESULT = 1;
-            sound_play(8, 128);
+            sound_play(SOUND_RECOVER, 128);
         }
         break;
     case 0x120:
-        if (viewer.status_flags & 0x100) {
+        if (viewer.status_flags & STATUS_CURSED) {
             viewer.unk190[4][1] = 0;
             viewer.unk190[4][0] = 0;
-            viewer.status_flags &= ~0x100;
+            viewer.status_flags &= ~STATUS_CURSED;
             USE_RESULT = 1;
-            sound_play(8, 128);
+            sound_play(SOUND_RECOVER, 128);
         }
         break;
     case 0x122:
@@ -154,26 +154,26 @@ void item_use(int id)
         }
         break;
     case 0x123:
-        if (!(viewer.status_flags & 0x80000)) {
+        if (!(viewer.status_flags & STATUS_FIRE_WARD)) {
             viewer.unk190[7][1] = 3000;
             viewer.unk190[7][0] = 0;
-            viewer.status_flags |= 0x80000;
+            viewer.status_flags |= STATUS_FIRE_WARD;
             USE_RESULT = 1;
         }
         break;
     case 0x124:
-        if (!(viewer.status_flags & 0x100000)) {
+        if (!(viewer.status_flags & STATUS_POISON_WARD)) {
             viewer.unk190[8][1] = 600;
             viewer.unk190[8][0] = 0;
-            viewer.status_flags |= 0x100000;
+            viewer.status_flags |= STATUS_POISON_WARD;
             USE_RESULT = 1;
         }
         break;
     case 0x125:
-        if (!(viewer.status_flags & 0x200000)) {
+        if (!(viewer.status_flags & STATUS_ATTACK_BOOST)) {
             viewer.unk190[9][1] = 300;
             viewer.unk190[9][0] = 0;
-            viewer.status_flags |= 0x200000;
+            viewer.status_flags |= STATUS_ATTACK_BOOST;
             USE_RESULT = 1;
         }
         break;
@@ -186,10 +186,10 @@ void item_use(int id)
         }
         break;
     case 0x127:
-        if (!(viewer.status_flags & 0x800000)) {
+        if (!(viewer.status_flags & STATUS_ACID_WARD)) {
             viewer.unk190[11][1] = 3000;
             viewer.unk190[11][0] = 0;
-            viewer.status_flags |= 0x800000;
+            viewer.status_flags |= STATUS_ACID_WARD;
             USE_RESULT = 1;
         }
         break;

@@ -183,7 +183,7 @@ void map_update_events(void)
         if (game_progress.talk_counts[r1->talk_id] == 2) {
             map_hand_over_item();
             creature_fade_out_despawn(e48);
-            viewer.state = 0;
+            viewer.state = VIEWER_STATE_NORMAL;
             fdat_801ee370 = 0xff;
         }
         if (e48->hit == 1) {
@@ -217,11 +217,11 @@ void map_update_events(void)
     if (fdat_801ee378 == 0) {
         if (viewer.block == 0x9c || viewer.block == 0xe9 || viewer.block == 0xa0
             || viewer.block == 0xa2 || viewer.block == 0xa4) {
-            viewer.state = 5;
+            viewer.state = VIEWER_STATE_SCRIPTED;
             creature_force_talk(e33, 0, 0);
             e33->hit = 1;
             fdat_801ee378 = 0xff;
-            viewer.state = 0;
+            viewer.state = VIEWER_STATE_NORMAL;
             e33->flags &= ~0x2000000;
             r4->actions &= ~0x180;
         } else {
