@@ -67,19 +67,19 @@ void map_restore_progress(void)
 {
     Vis192 *r = &vis_table_a.unk3500[12];
 
-    if (!(DAT_801cba08.unk1440.word >> 28 & 1))
+    if (!(game_progress.unk1440.word >> 28 & 1))
         fdat_801edb94 = 0;
     else
         fdat_801edb94 = 0xff;
-    if (DAT_801cba08.unk1448[r->unk09] >= 2)
+    if (game_progress.unk1448[r->unk09] >= 2)
         r->unk1C &= ~0x180;
-    if (DAT_801cba08.unk1448[r->unk09] == 0) {
+    if (game_progress.unk1448[r->unk09] == 0) {
         viewer.unk218 = 5;
         fdat_801edb9c = 0;
     } else {
         fdat_801edb9c = 0xff;
     }
-    if (DAT_801cba08.unk1448[r->unk09] != 0 && !(DAT_801cba08.unk1440.word >> 28 & 1))
+    if (game_progress.unk1448[r->unk09] != 0 && !(game_progress.unk1440.word >> 28 & 1))
         fdat_801edb98 = 1;
     else
         fdat_801edb98 = 0;
@@ -111,7 +111,7 @@ void map_update_events(void)
         viewer.unk188 = 30;
         viewer.unk182 = 0;
     }
-    n = DAT_801cba08.unk1448[r->unk09];
+    n = game_progress.unk1448[r->unk09];
     if (n == 1 && viewer.position.vx > 0x4c000 && viewer.position.vz > 0x55000) {
         viewer.unk218 = 5;
         creature_force_talk(e, 0, 0);
@@ -122,7 +122,7 @@ void map_update_events(void)
     }
     if (fdat_801edb94 == 0 && e->unk2C == 0) {
         fdat_801edb94 = 1;
-        DAT_801cba08.unk1440.word |= 0x10000000;
+        game_progress.unk1440.word |= 0x10000000;
     }
     if (fdat_801edb94 == 1 && e->unk05 == 3) {
         viewer.unk218 = 5;
@@ -153,7 +153,7 @@ void map_pick_creature_move(void)
     if (e->unk1A == 0xf0 || e->unk1A == 0)
         return;
     creature_choose_action();
-    if (e->unk02 == 12 && DAT_801cba08.unk1448[r->unk09] < 2)
+    if (e->unk02 == 12 && game_progress.unk1448[r->unk09] < 2)
         e->unk44 = 128;
     creature_pick_weighted_script();
     switch (e->unk44) {
@@ -211,9 +211,9 @@ void map_talk_on_player_death(void)
     e = &vis_table_a.entries[32];
     r = &vis_table_a.unk3500[12];
 
-    if (DAT_801cba08.unk1448[r->unk09] >= 2 && !(DAT_801cba08.unk1440.word >> 28 & 1)
+    if (game_progress.unk1448[r->unk09] >= 2 && !(game_progress.unk1440.word >> 28 & 1)
         && vis_table_a.unk6168 == 3) {
-        DAT_801cba08.unk1448[r->unk09] = 3;
+        game_progress.unk1448[r->unk09] = 3;
         e->unk70 |= 0x2000000;
         creature_force_talk(e, 1, 1);
     }

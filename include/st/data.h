@@ -26,16 +26,16 @@
  * defines them (const there); main addresses each with its own lui pair, as
  * separate scalars.
  */
-extern u8 *DAT_80013980;
-extern u8 *DAT_80013988;
-extern u8 *DAT_8001398c;
+extern u8 *overlay_area_start;
+extern u8 *overlay_area_end;
+extern u8 *heap_base;
 
 /* src/st/loop.c: the game loop runs while it is 0; 2 leaves for TITLE.EXE,
  * 3 for END.EXE. */
-extern s32 DAT_800881a4;
+extern s32 game_exit_request;
 
 /* Block heap arena (0x56400 bytes). */
-extern StBlock DAT_8009c888[];
+extern StBlock model_heap[];
 
 /*
  * The viewer block at 0x80198f28: the vsync seconds clock at +0x33/+0x34,
@@ -144,7 +144,7 @@ typedef struct {
     void *unk108[4];     /* 0x108: its slot animation state: a StAnimSlot (anim_prepare) or
                           * a node set (anim_prepare_any), by the model file's halfword +6 */
     void *unk118[2];     /* 0x118: player_load_magic's effects.defs record per slot */
-    u8 *unk120[2];       /* 0x120: its load buffers (DAT_80190f28) */
+    u8 *unk120[2];       /* 0x120: its load buffers (magic_model_buffers) */
     s32 unk128[2];
     ViewerHandState unk130; /* 0x130..0x137: timers and hit windows */
     s16 unk138[2];       /* 0x138 */
@@ -382,7 +382,7 @@ typedef struct {
     u8 unk156[14];       /* 0x156: their stock (src/st/save.c) */
     u8 unk164[4];
 } Data801c7590;
-extern Data801c7590 DAT_801c7590;
+extern Data801c7590 inventory;
 
 
 typedef struct {
@@ -418,7 +418,7 @@ typedef struct {
     u16 unk22[12];
     u16 unk3A;           /* 0x3a: unk22[8] | unk22[9] | unk22[10] | unk22[11] */
 } Data801cd180;
-extern Data801cd180 DAT_801cd180;
+extern Data801cd180 pad_state;
 
 /*
  * One sound bank slot: the loaded bank's data (its state halfword at +4)
@@ -460,7 +460,7 @@ typedef struct {
  * rotation, the 322 VAB bank slots, the SPU key status bytes and the sound
  * playing on each voice, the 1232-entry sound table (loaded from an area
  * pack, src/st/area_load.c) and the 16 bank buffers. WIP extent up to
- * DAT_801e0ce8 (band Q).
+ * equip_menu_state (band Q).
  */
 typedef struct {
     u8 unk0;
@@ -476,27 +476,27 @@ typedef struct {
     StSoundBuf bufs[16]; /* 0x3aa4 */
     u8 unk3B24[0x3b28 - 0x3b24];
 } Data801dd1c0;
-extern Data801dd1c0 DAT_801dd1c0;
+extern Data801dd1c0 sound_state;
 
 /* The 16 sound bank buffers (StSoundBuf.data): two, one, four, four, one
  * and four 0x1000-byte blocks below the sound state block. */
-extern u8 DAT_801cd1c0[2][0x1000];
-extern u8 DAT_801cf1c0[0x1000];
-extern u8 DAT_801d01c0[4][0x1000];
-extern u8 DAT_801d41c0[4][0x1000];
-extern u8 DAT_801d81c0[0x1000];
-extern u8 DAT_801d91c0[4][0x1000];
+extern u8 sound_buffers_magic[2][0x1000];
+extern u8 sound_buffer_area[0x1000];
+extern u8 sound_buffers_object[4][0x1000];
+extern u8 sound_buffers_creature[4][0x1000];
+extern u8 sound_buffer_common[0x1000];
+extern u8 sound_buffers_equipment[4][0x1000];
 
 /* The CD file buffer cd_read_member loads TIMs and models into (WIP extent:
- * up to DAT_8009ac88). */
-extern u_long DAT_80088c88[];
+ * up to texanim_clut_buffer). */
+extern u_long cd_file_buffer[];
 
 /* Two 0x4000-byte load buffers (viewer.unk120). */
-extern u8 DAT_80190f28[2][0x4000];
+extern u8 magic_model_buffers[2][0x4000];
 /* Four 0x7000-byte model blocks (viewer.unkF8). */
-extern u8 DAT_80199220[4][0x7000];
+extern u8 equipment_model_buffers[4][0x7000];
 /* The 64 equipment model placements viewer.unkE8 points into. */
-extern ViewerModel DAT_801b5220[64];
+extern ViewerModel equipment_model_placements[64];
 
 /* Settings bytes player_init initializes (WIP extent). */
 typedef struct {
@@ -510,6 +510,6 @@ typedef struct {
     u8 unk7;
     u8 unk8;
 } Data801cd120;
-extern Data801cd120 DAT_801cd120;
+extern Data801cd120 game_settings;
 
 #endif

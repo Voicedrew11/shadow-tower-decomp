@@ -50,7 +50,7 @@ void map_restore_progress(void)
 {
     Vis88 *b = &vis_table_b.entries[21];
 
-    if (DAT_801cba08.unk1444.bit.f7)
+    if (game_progress.unk1444.bit.f7)
         b->unk05 = 0xff;
 }
 

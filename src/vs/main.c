@@ -55,7 +55,7 @@ VECTOR light_scale = {ONE, ONE, ONE};
 
 /*
  * An identity matrix nothing references (retail keeps it after the scale).
- * Most likely the counterpart of ST.EXE's DAT_8008040c, the initialized
+ * Most likely the counterpart of ST.EXE's identity_matrix, the initialized
  * identity ST's model draws and anim_set_node_vertex read: VS's
  * anim_set_node_vertex (anim_set_node_vertex) composes from a local identity
  * instead, which leaves this one unused.

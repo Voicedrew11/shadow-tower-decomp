@@ -36,7 +36,7 @@ void map_step_creature(void)
     int offset;
 
     if (e->unk02 == 4) {
-        if (DAT_801cba08.unk1448[r->unk09] == 4 && e->unk1C.bytes[0] == 0)
+        if (game_progress.unk1448[r->unk09] == 4 && e->unk1C.bytes[0] == 0)
             map_start_creature_fall(e);
         if (e->unk0F == 0x80) {
             map_step_falling_creature(e);

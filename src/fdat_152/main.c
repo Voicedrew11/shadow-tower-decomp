@@ -63,7 +63,7 @@ void map_restore_progress(void)
     Vis88 *d = &vis_table_b.entries[5];
     Vis48 *item = &vis_table_c.entries[11];
 
-    if (!DAT_801cba08.unk1440.bit.f15) {
+    if (!game_progress.unk1440.bit.f15) {
         item->unk22 = 4;
         d[0].unk00 = d[1].unk00 = d[2].unk00 = d[3].unk00 = d[4].unk00 = 2;
         fdat_801edb84 = 0;
@@ -85,7 +85,7 @@ void map_update_events(void)
     if (fdat_801edb84 == 1) {
         map_slide_ground_item();
         d[0].unk00 = d[1].unk00 = d[2].unk00 = d[3].unk00 = d[4].unk00 = 0;
-        if (!DAT_801cba08.unk1440.bit.f16) {
+        if (!game_progress.unk1440.bit.f16) {
             lighting.area_mode[11] = 0x24;
             lighting.area_mode[27] = 0x24;
             lighting.area_mode[12] = 0x24;
@@ -94,7 +94,7 @@ void map_update_events(void)
             lighting.area_mode[33] = 0x24;
         }
         fdat_801edb84 = 2;
-        DAT_801cba08.unk1440.bit.f15 = 1;
+        game_progress.unk1440.bit.f15 = 1;
     }
 }
 

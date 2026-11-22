@@ -86,7 +86,7 @@ typedef struct StAnimBlock {
 
 /* The identity transform anim_set_node_vertex composes the nodes from
  * (.data; also used by band E's object code). */
-extern MATRIX DAT_8008040c;
+extern MATRIX identity_matrix;
 
 /* src/st/anim.c */
 void anim_register_pack(u16 id, u8 *pack);

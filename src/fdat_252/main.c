@@ -59,7 +59,7 @@ void map_restore_progress(void)
 {
     Vis192 *r = &vis_table_a.unk3500[8];
 
-    if (DAT_801cba08.unk1448[r->unk09] == 1) {
+    if (game_progress.unk1448[r->unk09] == 1) {
         fdat_801ed8cc = 1;
         r->unk1C &= ~0x180;
     } else {

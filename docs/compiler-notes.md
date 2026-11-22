@@ -465,7 +465,7 @@ differs. Forms that changed the count:
 - `s++; s++;` instead of `s += 2` adds one RTL insn (combine merges them
   later): ST `0x8002732c`.
 - reaching a table through a pointer set before the loop removes two movables:
-  ST `0x8002b84c` (`mask = DAT_801cd180.unk22;`, which let the frame address
+  ST `0x8002b84c` (`mask = pad_state.unk22;`, which let the frame address
   be hoisted), ST `0x800642e8` (`table = &vis_table_c;` lifts the threshold by
   6, so three viewer addresses are hoisted and the fourth stays, as in
   retail).
@@ -481,7 +481,7 @@ differs. Forms that changed the count:
 inside the loop after a conditional branch is moved only if
 `reg_in_basic_block_p`, whose first test is that this insn is the variable's
 first reference in the function. A variable referenced anywhere earlier stays:
-`u8 *names = NULL;` at the declaration and `names = DAT_8008092c;` inside the
+`u8 *names = NULL;` at the declaration and `names = magic_name_messages;` inside the
 `if` keeps the address in the loop, and flow deletes the dead initialiser
 afterwards (ST `0x80065de0`). Likewise an assignment to a variable whose first
 use is earlier keeps a sign extension in the loop (ST `0x8004cc70`).
@@ -1122,7 +1122,7 @@ $3,X`, `la $5,S`) that ASPSX expands with the destination as its own temporary
 (`lui a1; addiu a1,a1,lo`). A separate temporary (`lui v0; lw v1,lo(v0)`)
 means cc1 saw an object larger than 8 bytes, a member of a bigger struct (ST
 `0x80042d74`, where `DAT_801cd0e0` is spelled as the member
-`DAT_801cba08.unk16D8` by a macro in `include/st/menu.h`). An `extern s32
+`game_progress.unk16D8` by a macro in `include/st/menu.h`). An `extern s32
 X[];` has no size: declare `X[1]` or the scalar (VS `0x80029f28`,
 `round_wins[1]`, after its unit moved to the `-G8` profile). In `-G0` units
 both spellings give the same bytes.

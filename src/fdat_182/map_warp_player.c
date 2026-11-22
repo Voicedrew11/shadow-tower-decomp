@@ -85,7 +85,7 @@ void map_warp_player(int gate)
     play_warp_sound();
     fade_run_frames(2, 0x1000, 0, -0x100);
     pad_clear_input();
-    if (gate == 0 && DAT_801cba08.unk1448[r->unk09] == 0) {
+    if (gate == 0 && game_progress.unk1448[r->unk09] == 0) {
         creature_force_talk(e, 0, 0);
         e->unk70 &= ~0x2000000;
     } else {

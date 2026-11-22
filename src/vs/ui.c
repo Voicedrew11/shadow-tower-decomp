@@ -14,7 +14,7 @@
 #include <vs/menu.h>
 #include <vs/card.h>
 
-/* The text clip window (ST.EXE's DAT_800881ba..DAT_800881c8). */
+/* The text clip window (ST.EXE's text_clip_left..text_clip_dropped). */
 DATA(0x80063390, 0x2, ".sbss")
 static s16 text_clip_left;
 DATA(0x80063392, 0x2, ".sbss")

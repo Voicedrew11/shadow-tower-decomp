@@ -92,7 +92,7 @@ void map_restore_progress(void)
     Vis88 *d9 = &vis_table_b.entries[9];
     Vis212 *e4 = &vis_table_a.entries[4];
     Vis212 *e5 = &vis_table_a.entries[5];
-    u32 w = DAT_801cba08.unk1440.word;
+    u32 w = game_progress.unk1440.word;
 
     fdat_801ee46c = 1;
     if (!(w >> 16 & 1)) {
@@ -201,8 +201,8 @@ void map_update_events(void)
         e5->unk70 |= 0x2000000;
         creature_force_talk(e5, 1, 0);
         fdat_801ee480 = 0xff;
-        DAT_800881a4 = 3;
-        DAT_801cba08.unk1444.word |= 0x80;
+        game_exit_request = 3;
+        game_progress.unk1444.word |= 0x80;
     }
     if (fdat_801ee47c == 1 && viewer.position.vz > 0x41000) {
         viewer.unk218 = 5;
@@ -325,7 +325,7 @@ void map_warp_player(void)
     play_warp_sound();
     fade_run_frames(2, 0x1000, 0, -0x100);
     pad_clear_input();
-    if (DAT_801cba08.unk1448[r->unk09] == 0) {
+    if (game_progress.unk1448[r->unk09] == 0) {
         creature_force_talk(e, 0, 0);
         e->unk70 &= ~0x2000000;
     }
@@ -425,7 +425,7 @@ void map_talk_on_player_death(void)
     Vis192 *r3 = &vis_table_a.unk3500[3];
     Vis212 *e5 = &vis_table_a.entries[5];
     Vis192 *r8 = &vis_table_a.unk3500[8];
-    Data801cba08 *story = &DAT_801cba08;
+    Data801cba08 *story = &game_progress;
 
     if (story->unk1448[vis_table_a.unk3500[0].unk09] == 0)
         return;

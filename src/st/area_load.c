@@ -68,7 +68,7 @@ void area_reload_images(void)
     if (area_state.area == 24) {
         u32 marker;
 
-        if (!((DAT_801cba08.unk1440.word >> 17) & 1))
+        if (!((game_progress.unk1440.word >> 17) & 1))
             return;
         marker = (vis_lists.unk47E0 >> 3) & 1;
         if (marker != 1)
@@ -89,7 +89,7 @@ void area_reload_images(void)
             MoveImage(&f, 0, 490);
         }
     } else if (area_state.area == 27) {
-        flag = (DAT_801cba08.unk1440.word >> 13) & 1;
+        flag = (game_progress.unk1440.word >> 13) & 1;
         if (flag != 1)
             return;
         if (((vis_lists.unk47E0 >> 4) & 1) != flag)
@@ -111,7 +111,7 @@ ADDRESS(0x80044674, 0x874)
 void game_load_common_data(void)
 {
     CdlFILE file;
-    u32 *p = (u32 *)DAT_8009c888;
+    u32 *p = (u32 *)model_heap;
 
     area_state.unk5 = area_state.unk6 = area_state.unk7 = 255;
     area_state.unk0 = 0;
@@ -123,8 +123,8 @@ void game_load_common_data(void)
     area_state.area = 0;
     area_state.unk2 = 0;
     vis_table_a.unk6169 = 0;
-    DAT_800881d8 = DAT_80013980 + 4;
-    DAT_800881dc[0] = DAT_80013980;
+    DAT_800881d8 = overlay_area_start + 4;
+    DAT_800881dc[0] = overlay_area_start;
     cd_archive_open(2, "CHR0\\M00.T");
     cd_archive_open(0, "COM\\MO.T");
     cd_archive_open(1, "COM\\FDAT.T");
@@ -135,107 +135,107 @@ void game_load_common_data(void)
     cd_archive_open(7, "COM\\EQUIP.T");
     cd_archive_open(8, "COM\\TALKMSG.T");
     CdSearchFile(&file, "\\ST\\XA0\\HAM.XA;1");
-    DAT_801cba08.unk1618[0] = file.pos;
+    game_progress.unk1618[0] = file.pos;
     CdSearchFile(&file, "\\ST\\XA0\\SHOP0.XA;1");
-    DAT_801cba08.unk1618[1] = file.pos;
+    game_progress.unk1618[1] = file.pos;
     CdSearchFile(&file, "\\ST\\XA0\\SHOP1.XA;1");
-    DAT_801cba08.unk1618[2] = file.pos;
+    game_progress.unk1618[2] = file.pos;
     CdSearchFile(&file, "\\ST\\XA0\\SHOP2.XA;1");
-    DAT_801cba08.unk1618[3] = file.pos;
+    game_progress.unk1618[3] = file.pos;
     CdSearchFile(&file, "\\ST\\XA0\\SHOP3.XA;1");
-    DAT_801cba08.unk1618[4] = file.pos;
+    game_progress.unk1618[4] = file.pos;
     CdSearchFile(&file, "\\ST\\XA0\\03100.XA;1");
-    DAT_801cba08.unk1618[5] = file.pos;
+    game_progress.unk1618[5] = file.pos;
     CdSearchFile(&file, "\\ST\\XA0\\19010.XA;1");
-    DAT_801cba08.unk1618[6] = file.pos;
+    game_progress.unk1618[6] = file.pos;
     CdSearchFile(&file, "\\ST\\XA0\\30200.XA;1");
-    DAT_801cba08.unk1618[7] = file.pos;
+    game_progress.unk1618[7] = file.pos;
     CdSearchFile(&file, "\\ST\\XA0\\07900.XA;1");
-    DAT_801cba08.unk1618[8] = file.pos;
+    game_progress.unk1618[8] = file.pos;
     CdSearchFile(&file, "\\ST\\XA0\\10300.XA;1");
-    DAT_801cba08.unk1618[9] = file.pos;
+    game_progress.unk1618[9] = file.pos;
     CdSearchFile(&file, "\\ST\\XA0\\01300.XA;1");
-    DAT_801cba08.unk1618[10] = file.pos;
+    game_progress.unk1618[10] = file.pos;
     CdSearchFile(&file, "\\ST\\XA0\\04601.XA;1");
-    DAT_801cba08.unk1618[11] = file.pos;
+    game_progress.unk1618[11] = file.pos;
     CdSearchFile(&file, "\\ST\\XA0\\04400.XA;1");
-    DAT_801cba08.unk1618[12] = file.pos;
+    game_progress.unk1618[12] = file.pos;
     CdSearchFile(&file, "\\ST\\XA0\\09502.XA;1");
-    DAT_801cba08.unk1618[13] = file.pos;
+    game_progress.unk1618[13] = file.pos;
     CdSearchFile(&file, "\\ST\\XA0\\22700.XA;1");
-    DAT_801cba08.unk1618[14] = file.pos;
+    game_progress.unk1618[14] = file.pos;
     CdSearchFile(&file, "\\ST\\XA0\\10200.XA;1");
-    DAT_801cba08.unk1618[15] = file.pos;
+    game_progress.unk1618[15] = file.pos;
     CdSearchFile(&file, "\\ST\\XA0\\03000.XA;1");
-    DAT_801cba08.unk1618[16] = file.pos;
+    game_progress.unk1618[16] = file.pos;
     CdSearchFile(&file, "\\ST\\XA0\\09506.XA;1");
-    DAT_801cba08.unk1618[17] = file.pos;
+    game_progress.unk1618[17] = file.pos;
     CdSearchFile(&file, "\\ST\\XA0\\30400.XA;1");
-    DAT_801cba08.unk1618[18] = file.pos;
+    game_progress.unk1618[18] = file.pos;
     CdSearchFile(&file, "\\ST\\XA0\\10100.XA;1");
-    DAT_801cba08.unk1618[19] = file.pos;
+    game_progress.unk1618[19] = file.pos;
     CdSearchFile(&file, "\\ST\\XA0\\02400.XA;1");
-    DAT_801cba08.unk1618[20] = file.pos;
+    game_progress.unk1618[20] = file.pos;
     CdSearchFile(&file, "\\ST\\XA0\\10301.XA;1");
-    DAT_801cba08.unk1618[21] = file.pos;
+    game_progress.unk1618[21] = file.pos;
     CdSearchFile(&file, "\\ST\\XA0\\12300.XA;1");
-    DAT_801cba08.unk1618[22] = file.pos;
+    game_progress.unk1618[22] = file.pos;
     CdSearchFile(&file, "\\ST\\XA0\\22900.XA;1");
-    DAT_801cba08.unk1618[23] = file.pos;
+    game_progress.unk1618[23] = file.pos;
     CdSearchFile(&file, "\\ST\\XA1\\09503.XA;1");
-    DAT_801cba08.unk1618[24] = file.pos;
+    game_progress.unk1618[24] = file.pos;
     CdSearchFile(&file, "\\ST\\XA1\\10800.XA;1");
-    DAT_801cba08.unk1618[25] = file.pos;
+    game_progress.unk1618[25] = file.pos;
     CdSearchFile(&file, "\\ST\\XA1\\09504.XA;1");
-    DAT_801cba08.unk1618[26] = file.pos;
+    game_progress.unk1618[26] = file.pos;
     CdSearchFile(&file, "\\ST\\XA1\\11100.XA;1");
-    DAT_801cba08.unk1618[27] = file.pos;
+    game_progress.unk1618[27] = file.pos;
     CdSearchFile(&file, "\\ST\\XA1\\00100.XA;1");
-    DAT_801cba08.unk1618[28] = file.pos;
+    game_progress.unk1618[28] = file.pos;
     CdSearchFile(&file, "\\ST\\XA1\\02500.XA;1");
-    DAT_801cba08.unk1618[29] = file.pos;
+    game_progress.unk1618[29] = file.pos;
     CdSearchFile(&file, "\\ST\\XA1\\07700.XA;1");
-    DAT_801cba08.unk1618[30] = file.pos;
+    game_progress.unk1618[30] = file.pos;
     CdSearchFile(&file, "\\ST\\XA1\\10900.XA;1");
-    DAT_801cba08.unk1618[31] = file.pos;
+    game_progress.unk1618[31] = file.pos;
     CdSearchFile(&file, "\\ST\\XA1\\08100.XA;1");
-    DAT_801cba08.unk1618[32] = file.pos;
+    game_progress.unk1618[32] = file.pos;
     CdSearchFile(&file, "\\ST\\XA1\\09505.XA;1");
-    DAT_801cba08.unk1618[33] = file.pos;
+    game_progress.unk1618[33] = file.pos;
     CdSearchFile(&file, "\\ST\\XA1\\10302.XA;1");
-    DAT_801cba08.unk1618[34] = file.pos;
+    game_progress.unk1618[34] = file.pos;
     CdSearchFile(&file, "\\ST\\XA1\\20400.XA;1");
-    DAT_801cba08.unk1618[35] = file.pos;
+    game_progress.unk1618[35] = file.pos;
     CdSearchFile(&file, "\\ST\\XA1\\13900.XA;1");
-    DAT_801cba08.unk1618[36] = file.pos;
+    game_progress.unk1618[36] = file.pos;
     CdSearchFile(&file, "\\ST\\XA1\\01100.XA;1");
-    DAT_801cba08.unk1618[37] = file.pos;
+    game_progress.unk1618[37] = file.pos;
     CdSearchFile(&file, "\\ST\\XA1\\29500.XA;1");
-    DAT_801cba08.unk1618[38] = file.pos;
+    game_progress.unk1618[38] = file.pos;
     CdSearchFile(&file, "\\ST\\XA1\\30600.XA;1");
-    DAT_801cba08.unk1618[39] = file.pos;
-    cd_read_member(1, 0x1e0, (u_long *)DAT_8009c888);
+    game_progress.unk1618[39] = file.pos;
+    cd_read_member(1, 0x1e0, (u_long *)model_heap);
     image_stream_queue(1, 0x1e1, image_stream_set_ready);
     sound_bank_load(1, 0x1e2, 0);
     copy_words((u32 *)&vis_table_b, p + 1, *p >> 2);
     p = (u32 *)((u8 *)p + (*p + 4));
-    copy_words((u32 *)DAT_801b5220, p + 1, *p >> 2);
+    copy_words((u32 *)equipment_model_placements, p + 1, *p >> 2);
     p = (u32 *)((u8 *)p + (*p + 4));
-    copy_words((u32 *)DAT_80088c88, p + 1, *p >> 2);
+    copy_words((u32 *)cd_file_buffer, p + 1, *p >> 2);
     p = (u32 *)((u8 *)p + (*p + 4));
     copy_words((u32 *)effects.defs, p + 1, *p >> 2);
     p = (u32 *)((u8 *)p + (*p + 4));
-    copy_words((u32 *)DAT_8007f78c, p + 1, *p >> 2);
+    copy_words((u32 *)lighting_defaults, p + 1, *p >> 2);
     p = (u32 *)((u8 *)p + (*p + 4));
-    copy_words((u32 *)DAT_801dd1c0.sounds, p + 1, *p >> 2);
+    copy_words((u32 *)sound_state.sounds, p + 1, *p >> 2);
     p = (u32 *)((u8 *)p + (*p + 4));
     copy_words((u32 *)&menu_messages, p + 1, *p >> 2);
     p = (u32 *)((u8 *)p + (*p + 4));
     copy_words((u32 *)vis_table_c.unk0118, p + 1, *p >> 2);
     p = (u32 *)((u8 *)p + (*p + 4));
     p = (u32 *)((u8 *)p + (*p + 4));
-    copy_words((u32 *)DAT_8009b088, p + 1, *p >> 2);
-    anim_register_pack(40, DAT_8009b088);
+    copy_words((u32 *)common_anim_pack, p + 1, *p >> 2);
+    anim_register_pack(40, common_anim_pack);
     cd_wait_idle();
     player_init();
     item_model_slots_clear();
@@ -274,8 +274,8 @@ void area_load_current_blocking(void)
             break;
     } while ((s16)area_state.unk2 < 6 || (s16)area_state.unk2 == 240);
     cd_wait_idle();
-    world_state.unk8308[0] = DAT_800fc488;
-    world_state.unk8308[1] = DAT_800f2c88;
+    world_state.unk8308[0] = area_world_buffer;
+    world_state.unk8308[1] = area_collision_buffer;
 }
 
 ADDRESS(0x80045010, 0x34)
@@ -461,8 +461,8 @@ void area_load_images_done(StCdRequest *request)
         request->unk10 = 1;
     } else if (request->unk10 == 2) {
         area_state.unk2 = 6;
-        DAT_801dd1c0.unkC = 0;
-        area_state.unk26 = DAT_801cd120.unk0;
+        sound_state.unkC = 0;
+        area_state.unk26 = game_settings.unk0;
     }
 }
 
@@ -510,7 +510,7 @@ void area_load_update(void)
     Vis88 *b;
     Vis48 *c;
     StVabSlot *slot;
-    u_long *p = DAT_80088c88;
+    u_long *p = cd_file_buffer;
     int i, j;
 
     /* Dead: phase 3 starts the cursor over. What survives is the buffer
@@ -536,7 +536,7 @@ void area_load_update(void)
             b->unk05 = 0xff;
             b++;
         }
-        cd_queue_read_member(1, (area_state.unk10 * 10) | 1, (u8 *)DAT_80088c88, area_load_records_done);
+        cd_queue_read_member(1, (area_state.unk10 * 10) | 1, (u8 *)cd_file_buffer, area_load_records_done);
         break;
     case 1:
         area_state.unk2 = 240;
@@ -544,7 +544,7 @@ void area_load_update(void)
         cd_queue_read_member(1, area_state.unk10 * 10 + 2, DAT_800881dc[0], area_load_overlay_done);
         viewer.unk174 = NULL;
         viewer.unk178 = -1;
-        copy_words((u32 *)vis_records, (u32 *)DAT_80088c88, 0x3e00);
+        copy_words((u32 *)vis_records, (u32 *)cd_file_buffer, 0x3e00);
         if ((s8)area_state.unk20 != 127) {
             area_state.unk1C = 1;
             player_shift_position((s8)area_state.unk20 * 4096 + (s8)area_state.unk23 * 128,
@@ -555,7 +555,7 @@ void area_load_update(void)
         break;
     case 2:
         area_state.unk2 = 240;
-        cd_queue_read_member(1, area_state.unk10 * 10 + 3, (u8 *)DAT_80088c88, area_load_tables_done);
+        cd_queue_read_member(1, area_state.unk10 * 10 + 3, (u8 *)cd_file_buffer, area_load_tables_done);
         break;
     case 3:
     phase3:
@@ -569,10 +569,10 @@ void area_load_update(void)
             name[7] = area_state.unk10 % 10 + '0';
             cd_archive_open(2, name);
             area_state.unk2 = 240;
-            cd_queue_read_member(1, area_state.unk11 * 10 + 4, (u8 *)DAT_800fc488, area_load_world_done);
+            cd_queue_read_member(1, area_state.unk11 * 10 + 4, (u8 *)area_world_buffer, area_load_world_done);
         }
         if (area_state.unk10 != 0xff) {
-            p = DAT_80088c88;
+            p = cd_file_buffer;
             a = vis_table_a.entries;
             for (i = 63; i != -1; i--) {
                 if (a->unkA4) {
@@ -624,7 +624,7 @@ void area_load_update(void)
             p = (u_long *)((u8 *)p + (*p + 4));
             placements_expand((StPlacement *)(p + 1));
             area_restore_snapshot(area_state.unk10);
-            DAT_801cba08.unk1478[area_state.unk10] |= 1;
+            game_progress.unk1478[area_state.unk10] |= 1;
             area_state.hooks = (AreaHooks *)DAT_800881d8;
             texanim_clear_all();
             area_state.hooks->loaded();
@@ -633,7 +633,7 @@ void area_load_update(void)
             vis_table_a.unk6158[2] = 0xff;
             vis_table_a.unk6158[1] = 0xff;
             vis_table_a.unk6158[0] = 0xff;
-            slot = &DAT_801dd1c0.slots[8];
+            slot = &sound_state.slots[8];
             for (j = 15; j != -1; j--) {
                 if (slot->block) {
                     while (slot->block[2] == 3)
@@ -653,7 +653,7 @@ void area_load_update(void)
     case 4:
         if (area_state.unk11 != 0xff) {
             area_state.unk2 = 240;
-            cd_queue_read_member(1, area_state.unk11 * 10 + 5, (u8 *)DAT_800f2c88, area_load_collision_done);
+            cd_queue_read_member(1, area_state.unk11 * 10 + 5, (u8 *)area_collision_buffer, area_load_collision_done);
         }
         break;
     case 5:
@@ -672,7 +672,7 @@ void area_load_update(void)
         area_state.unk2 = 6;
         /* fall through */
     case 6: {
-        StVabSlot *bgm = &DAT_801dd1c0.slots[1];
+        StVabSlot *bgm = &sound_state.slots[1];
 
         if (bgm->vab != -1) {
             SsVabClose(bgm->vab);

@@ -2,7 +2,7 @@
  * ST.EXE: XA voice stream wait and stop, the still images shown with the
  * streams, and the table A entry talk sequence (WIP module,
  * 0x800541f4..0x800549c8; xa_ready_callback/xa_start_stream open the file in
- * src/st/xa.c). -G8: the store to the 2-byte extern DAT_80088190 is the
+ * src/st/xa.c). -G8: the store to the 2-byte extern talk_stream_file is the
  * assembler's lui $at form.
  */
 #include <kf/lib/address.h>
@@ -70,8 +70,8 @@ void talk_load_image(int id, int full)
         clut.vx = 0;
         clut.vy = 511;
     }
-    cd_read_member(8, id, DAT_80088c88);
-    tim_load_images_at(DAT_80088c88, &pix, &clut, 1);
+    cd_read_member(8, id, cd_file_buffer);
+    tim_load_images_at(cd_file_buffer, &pix, &clut, 1);
 }
 
 /* An entry's talk: its 0x70 animation fades unk2A in, the XA stream of its
@@ -127,12 +127,12 @@ void creature_talk(Vis212 *e, int fixed, int arg2)
         e->unk2A = 0;
         e->unkB0 = a->unkC;
     }
-    if (DAT_801cd120.unk4 == 1)
-        talk_load_image(r->unk09 * 6 + DAT_801cba08.unk1448[r->unk09], 0);
-    DAT_80088190 = r->unk09;
+    if (game_settings.unk4 == 1)
+        talk_load_image(r->unk09 * 6 + game_progress.unk1448[r->unk09], 0);
+    talk_stream_file = r->unk09;
     i = 0;
-    xa_start_stream(r->unk09, DAT_801cba08.unk1448[r->unk09]);
-    DAT_801cba08.unk1448[r->unk09]++;
+    xa_start_stream(r->unk09, game_progress.unk1448[r->unk09]);
+    game_progress.unk1448[r->unk09]++;
     SsSetSerialVol(0, 64, 64);
     world_state.unk1EE16 = 2;
     world_state.unk1EE19 = 0;
@@ -204,7 +204,7 @@ void talk_show_message(int id)
     world_state.unk1EE19 = 0;
     pad_clear_input();
     do {
-        if (DAT_801cd180.unk4) {
+        if (pad_state.unk4) {
             if (world_state.unk1EE16 == 3)
                 world_state.unk1EE19 = 0;
             world_state.unk1EE16 = 4;

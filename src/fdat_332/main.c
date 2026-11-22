@@ -70,7 +70,7 @@ void map_update_events(void)
         e33->unk1C.bytes[3] = 1;
         e33->unk34 = -1;
         fdat_801edb3c = 1;
-        DAT_801cba08.unk1440.word |= 0x10000;
+        game_progress.unk1440.word |= 0x10000;
         e33->unk1C.bytes[2] &= 0xea;
         if (e4->unk05 == 1) {
             e4->unk05 = state;
@@ -107,7 +107,7 @@ void map_restore_progress(void)
     Vis88 *b = &vis_table_b.entries[3];
     Vis212 *e = &vis_table_a.entries[33];
 
-    if (DAT_801cba08.unk1440.bit.f16) {
+    if (game_progress.unk1440.bit.f16) {
         if (e->unk05 != 3) {
             e->unk65 = 20;
             e->unk66 = 30;

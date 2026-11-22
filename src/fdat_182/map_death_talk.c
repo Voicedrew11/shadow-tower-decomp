@@ -24,8 +24,8 @@ void map_talk_on_player_death(void)
     e = &vis_table_a.entries[32];
     r = &vis_table_a.unk3500[12];
 
-    if (!(DAT_801cba08.unk1440.word >> 18 & 1) && vis_table_a.unk6168 == 3) {
-        DAT_801cba08.unk1448[r->unk09] = 2;
+    if (!(game_progress.unk1440.word >> 18 & 1) && vis_table_a.unk6168 == 3) {
+        game_progress.unk1448[r->unk09] = 2;
         e->unk70 |= 0x2000000;
         creature_force_talk(e, 1, 1);
     }

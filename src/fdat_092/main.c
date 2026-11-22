@@ -100,7 +100,7 @@ void map_restore_progress(void)
     Vis212 *e39 = &vis_table_a.entries[39];
     Vis212 *e38 = &vis_table_a.entries[38];
 
-    if (DAT_801cba08.unk1444.bit.f12 == 1) {
+    if (game_progress.unk1444.bit.f12 == 1) {
         vis_table_a.entries[40].unk00 = 100;
         c5->unk22 = 4;
         fdat_801edf54 = 0xff;
@@ -109,14 +109,14 @@ void map_restore_progress(void)
         c5->unk22 = 4;
         e48->unk1C.bytes[3] = 1;
     }
-    if (DAT_801cba08.unk1444.bit.f13 == 1) {
+    if (game_progress.unk1444.bit.f13 == 1) {
         d8->unk00 = 2;
         d7->unk00 = 2;
         fdat_801edf5c = 0xff;
     } else {
         fdat_801edf5c = 0;
     }
-    if (DAT_801cba08.unk1444.bit.f14 == 1) {
+    if (game_progress.unk1444.bit.f14 == 1) {
         d6->unk00 = 2;
         d5->unk00 = 2;
         fdat_801edf58 = 0xff;
@@ -128,7 +128,7 @@ void map_restore_progress(void)
     else
         fdat_801edf60 = 0;
     if (e39->unk05 != 3) {
-        if (DAT_801cba08.unk1444.bit.f16 == 1) {
+        if (game_progress.unk1444.bit.f16 == 1) {
             e39->unk00 = 100;
             fdat_801edf64 = 0xff;
         } else {
@@ -138,7 +138,7 @@ void map_restore_progress(void)
         }
     }
     if (e38->unk05 != 3) {
-        if (DAT_801cba08.unk1444.bit.f17 == 1) {
+        if (game_progress.unk1444.bit.f17 == 1) {
             e38->unk00 = 100;
             fdat_801edf68 = 0xff;
         } else {
@@ -172,7 +172,7 @@ void map_update_events(void)
     Vis88 *d14 = &vis_table_b.entries[14];
     Vis88 *d17 = &vis_table_b.entries[17];
 
-    if (fdat_801edf54 == 0 && DAT_801cba08.unk1448[r14->unk09] == 1) {
+    if (fdat_801edf54 == 0 && game_progress.unk1448[r14->unk09] == 1) {
         viewer.unk218 = 5;
         map_play_creature_script();
         if (!(vis_table_c.unk0070[1] & 0x10000))
@@ -190,13 +190,13 @@ void map_update_events(void)
         viewer.unk218 = 0;
         fdat_801edf54 = 0xff;
         e40->unk70 &= ~0x2000000;
-        DAT_801cba08.unk1444.word |= 0x1000;
+        game_progress.unk1444.word |= 0x1000;
     }
     if (fdat_801edf5c == 0 && e32->unk2C == 0) {
         d8->unk00 = 2;
         d7->unk00 = 2;
         fdat_801edf5c = 0xff;
-        DAT_801cba08.unk1444.word |= 0x2000;
+        game_progress.unk1444.word |= 0x2000;
         if (fdat_801edf58 == 0xff)
             fdat_801edf60 = 1;
     }
@@ -204,12 +204,12 @@ void map_update_events(void)
         d6->unk00 = 2;
         d5->unk00 = 2;
         fdat_801edf58 = 0xff;
-        DAT_801cba08.unk1444.word |= 0x4000;
+        game_progress.unk1444.word |= 0x4000;
         if (fdat_801edf5c == 0xff)
             fdat_801edf60 = 1;
     }
     if (fdat_801edf60 == 1) {
-        if (!DAT_801cba08.unk1440.bit.f24)
+        if (!game_progress.unk1440.bit.f24)
             lighting.area_mode[9] = 0x41;
         fdat_801edf60 = 0xff;
     }
@@ -223,7 +223,7 @@ void map_update_events(void)
         e39->unk1C.bytes[3] = 1;
         e39->unk07 = vis_table_a.unk6103;
         fdat_801edf64 = 1;
-        DAT_801cba08.unk1444.word |= 0x10000;
+        game_progress.unk1444.word |= 0x10000;
     }
     if (fdat_801edf68 == 0 && d17->unk0C == 1) {
         creature_spawn_now(e38);
@@ -235,7 +235,7 @@ void map_update_events(void)
         e38->unk1C.bytes[3] = 1;
         e38->unk07 = vis_table_a.unk6103;
         fdat_801edf68 = 1;
-        DAT_801cba08.unk1444.word |= 0x20000;
+        game_progress.unk1444.word |= 0x20000;
     }
     if (fdat_801edf64 == 1 && d14->unk10 > 0xc00)
         fdat_801edf64 = 2;

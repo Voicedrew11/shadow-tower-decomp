@@ -25,6 +25,6 @@ void item_counts_clear(void)
     int i;
 
     for (i = 0; i < 314; i++)
-        *(u8 *)&DAT_801c7590.counts[i] = 0;
+        *(u8 *)&inventory.counts[i] = 0;
     viewer.unk27 = 0;
 }

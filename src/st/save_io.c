@@ -31,15 +31,15 @@ void save_pack_data(StSaveData *save, int fresh)
         save->unk4[0] = save->unk4[1] = save->unk4[2] = save->unk4[3] = save->unk4[4] = 0;
     else
         *(StBytes5 *)save->unk4 = ((StAreaBytes *)&area_state)->unk4;
-    copy_words(save->unkC, DAT_801cba08.unk0[0], 0x60);
-    copy_words(save->unk18C, DAT_801cba08.unk180[0], 0x30);
-    copy_words(save->unk24C, DAT_801cba08.unk240[0], 0x180);
-    copy_words(save->unk84C, DAT_801cba08.unk840[0], 0x180);
-    copy_words(save->unkE4C, DAT_801cba08.unkE40[0], 0x180);
-    copy_words(save->unk144C, &DAT_801cba08.unk1440.word, 2);
-    copy_words(save->unk1454, (u32 *)DAT_801cba08.unk1448, 12);
-    copy_words(save->unk1484, (u32 *)DAT_801cba08.unk1478, 12);
-    copy_words(save->unk14B4, DAT_801cba08.unk14A8, 5);
+    copy_words(save->unkC, game_progress.unk0[0], 0x60);
+    copy_words(save->unk18C, game_progress.unk180[0], 0x30);
+    copy_words(save->unk24C, game_progress.unk240[0], 0x180);
+    copy_words(save->unk84C, game_progress.unk840[0], 0x180);
+    copy_words(save->unkE4C, game_progress.unkE40[0], 0x180);
+    copy_words(save->unk144C, &game_progress.unk1440.word, 2);
+    copy_words(save->unk1454, (u32 *)game_progress.unk1448, 12);
+    copy_words(save->unk1484, (u32 *)game_progress.unk1478, 12);
+    copy_words(save->unk14B4, game_progress.unk14A8, 5);
     save->unk14C8[0] = vis_table_c.unk0000[2];
     save->unk14C8[1] = vis_table_c.unk0000[3];
     save->unk14C8[2] = vis_table_c.unk0000[4];
@@ -129,21 +129,21 @@ void save_pack_data(StSaveData *save, int fresh)
         save->unk1858 = *(VECTOR *)&viewer.position.vx;
         save->unk1868 = viewer.unk278;
     }
-    save->unk18B4[0] = DAT_801cd120.unk0;
-    save->unk18B4[1] = DAT_801cd120.unk1;
-    save->unk18B4[2] = DAT_801cd120.unk2;
-    save->unk18B4[3] = DAT_801cd120.unk3;
-    save->unk18B4[4] = DAT_801cd120.unk4;
-    save->unk18B4[5] = DAT_801cd120.unk5;
-    if (DAT_801cba08.unk16E0 == -1) {
+    save->unk18B4[0] = game_settings.unk0;
+    save->unk18B4[1] = game_settings.unk1;
+    save->unk18B4[2] = game_settings.unk2;
+    save->unk18B4[3] = game_settings.unk3;
+    save->unk18B4[4] = game_settings.unk4;
+    save->unk18B4[5] = game_settings.unk5;
+    if (game_progress.unk16E0 == -1) {
         /* A save id from the vsync counter (low half) and rand() (high). */
-        ((u16 *)&DAT_801cba08.unk16E0)[0] = VSync(-1);
-        ((u16 *)&DAT_801cba08.unk16E0)[1] = rand();
+        ((u16 *)&game_progress.unk16E0)[0] = VSync(-1);
+        ((u16 *)&game_progress.unk16E0)[1] = rand();
     }
-    save->unk0 = DAT_801cba08.unk16E0;
-    copy_words(save->unk18BC, &DAT_801cba08.unk14A8[5], 5);
-    copy_words(save->unk18D0, &DAT_801cba08.unk14A8[10], 0x4f);
-    copy_words(save->unk1A0C, (u32 *)&DAT_801c7590, 0x4f);
+    save->unk0 = game_progress.unk16E0;
+    copy_words(save->unk18BC, &game_progress.unk14A8[5], 5);
+    copy_words(save->unk18D0, &game_progress.unk14A8[10], 0x4f);
+    copy_words(save->unk1A0C, (u32 *)&inventory, 0x4f);
     copy_words(save->unk1B48, vis_table_c.unk0048, 10);
     save->unk1B70[0] = viewer.unk38[0];
     save->unk1B70[1] = viewer.unk38[1];
@@ -166,16 +166,16 @@ void save_pack_data(StSaveData *save, int fresh)
     save->unk1B70[18] = viewer.unk38[18];
     save->unk1B70[19] = viewer.unk38[19];
     save->unk1B70[20] = viewer.unk38[20];
-    save->unk1B9C[0] = DAT_801cba08.unk14A8[89];
-    save->unk1B9C[1] = DAT_801cba08.unk14A8[90];
-    save->unk1B9C[2] = DAT_801cba08.unk14A8[91];
+    save->unk1B9C[0] = game_progress.unk14A8[89];
+    save->unk1B9C[1] = game_progress.unk14A8[90];
+    save->unk1B9C[2] = game_progress.unk14A8[91];
     r = vis_table_c.unk0118;
     for (i = 0; i < 314; i++, r++)
         save->unk1BA8[i] = r->unk28;
     copy_words(save->unk1CE4, (u32 *)lighting.area_mode, 24);
-    copy_halfwords(save->unk1D44, DAT_801c7590.unk13A, 14);
-    *(StHalves7 *)save->unk1D60 = *(StHalves7 *)DAT_801c7590.unk156;
-    copy_halfwords(save->unk1D6E, DAT_801cd180.unk22, 12);
+    copy_halfwords(save->unk1D44, inventory.unk13A, 14);
+    *(StHalves7 *)save->unk1D60 = *(StHalves7 *)inventory.unk156;
+    copy_halfwords(save->unk1D6E, pad_state.unk22, 12);
 }
 
 /* Restores the state save_pack_data saved. */
@@ -189,20 +189,20 @@ void save_unpack_data(StSaveData *save)
     Vis44 *r;
 
     ((StAreaBytes *)&area_state)->unk4 = *(StBytes5 *)save->unk4;
-    copy_words(DAT_801cba08.unk0[0], save->unkC, 0x60);
-    copy_words(DAT_801cba08.unk180[0], save->unk18C, 0x30);
-    copy_words(DAT_801cba08.unk240[0], save->unk24C, 0x180);
-    copy_words(DAT_801cba08.unk840[0], save->unk84C, 0x180);
-    copy_words(DAT_801cba08.unkE40[0], save->unkE4C, 0x180);
-    copy_words(&DAT_801cba08.unk1440.word, save->unk144C, 2);
-    copy_words((u32 *)DAT_801cba08.unk1448, save->unk1454, 12);
-    copy_words((u32 *)DAT_801cba08.unk1478, save->unk1484, 12);
-    copy_words(DAT_801cba08.unk14A8, save->unk14B4, 5);
+    copy_words(game_progress.unk0[0], save->unkC, 0x60);
+    copy_words(game_progress.unk180[0], save->unk18C, 0x30);
+    copy_words(game_progress.unk240[0], save->unk24C, 0x180);
+    copy_words(game_progress.unk840[0], save->unk84C, 0x180);
+    copy_words(game_progress.unkE40[0], save->unkE4C, 0x180);
+    copy_words(&game_progress.unk1440.word, save->unk144C, 2);
+    copy_words((u32 *)game_progress.unk1448, save->unk1454, 12);
+    copy_words((u32 *)game_progress.unk1478, save->unk1484, 12);
+    copy_words(game_progress.unk14A8, save->unk14B4, 5);
     for (area = 0; area < 48; area++) {
-        DAT_801cba08.unk16E4[area] = 0;
+        game_progress.unk16E4[area] = 0;
         for (i = 0; i < 64; i++) {
-            if ((DAT_801cba08.unk0[area][i / 32] & BIT(i)) && i < 48)
-                DAT_801cba08.unk16E4[area]++;
+            if ((game_progress.unk0[area][i / 32] & BIT(i)) && i < 48)
+                game_progress.unk16E4[area]++;
         }
     }
     vis_table_c.unk0000[2] = save->unk14C8[0];
@@ -311,16 +311,16 @@ void save_unpack_data(StSaveData *save)
     viewer.unk21B = save->unk18B0[2];
     viewer.position = save->unk1858;
     viewer.unk278 = save->unk1868;
-    DAT_801cd120.unk0 = save->unk18B4[0];
-    DAT_801cd120.unk1 = save->unk18B4[1];
-    DAT_801cd120.unk2 = save->unk18B4[2];
-    DAT_801cd120.unk3 = save->unk18B4[3];
-    DAT_801cd120.unk4 = save->unk18B4[4];
-    DAT_801cd120.unk5 = save->unk18B4[5];
-    DAT_801cba08.unk16E0 = save->unk0;
-    copy_words(&DAT_801cba08.unk14A8[5], save->unk18BC, 5);
-    copy_words(&DAT_801cba08.unk14A8[10], save->unk18D0, 0x4f);
-    copy_words((u32 *)&DAT_801c7590, save->unk1A0C, 0x4f);
+    game_settings.unk0 = save->unk18B4[0];
+    game_settings.unk1 = save->unk18B4[1];
+    game_settings.unk2 = save->unk18B4[2];
+    game_settings.unk3 = save->unk18B4[3];
+    game_settings.unk4 = save->unk18B4[4];
+    game_settings.unk5 = save->unk18B4[5];
+    game_progress.unk16E0 = save->unk0;
+    copy_words(&game_progress.unk14A8[5], save->unk18BC, 5);
+    copy_words(&game_progress.unk14A8[10], save->unk18D0, 0x4f);
+    copy_words((u32 *)&inventory, save->unk1A0C, 0x4f);
     copy_words(vis_table_c.unk0048, save->unk1B48, 10);
     viewer.unk38[0] = save->unk1B70[0];
     viewer.unk38[1] = save->unk1B70[1];
@@ -343,16 +343,16 @@ void save_unpack_data(StSaveData *save)
     viewer.unk38[18] = save->unk1B70[18];
     viewer.unk38[19] = save->unk1B70[19];
     viewer.unk38[20] = save->unk1B70[20];
-    DAT_801cba08.unk14A8[89] = save->unk1B9C[0];
-    DAT_801cba08.unk14A8[90] = save->unk1B9C[1];
-    DAT_801cba08.unk14A8[91] = save->unk1B9C[2];
+    game_progress.unk14A8[89] = save->unk1B9C[0];
+    game_progress.unk14A8[90] = save->unk1B9C[1];
+    game_progress.unk14A8[91] = save->unk1B9C[2];
     r = vis_table_c.unk0118;
     for (i = 0; i < 314; i++, r++)
         r->unk28 = save->unk1BA8[i];
     copy_words((u32 *)lighting.area_mode, save->unk1CE4, 24);
-    copy_halfwords(DAT_801c7590.unk13A, save->unk1D44, 14);
-    *(StHalves7 *)DAT_801c7590.unk156 = *(StHalves7 *)save->unk1D60;
-    copy_halfwords(DAT_801cd180.unk22, save->unk1D6E, 12);
+    copy_halfwords(inventory.unk13A, save->unk1D44, 14);
+    *(StHalves7 *)inventory.unk156 = *(StHalves7 *)save->unk1D60;
+    copy_halfwords(pad_state.unk22, save->unk1D6E, 12);
 }
 
 ADDRESS(0x8005735c, 0x30)

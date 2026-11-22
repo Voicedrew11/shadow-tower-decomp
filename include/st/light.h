@@ -49,7 +49,7 @@ typedef struct {
 extern StLighting lighting;
 
 /* The 64 default environments in the load image (0x8007f78c). */
-extern StLightInit DAT_8007f78c[64];
+extern StLightInit lighting_defaults[64];
 
 /* Not reconstructed yet (0x80049aac..0x8004a888). */
 void lighting_quarter_turn_matrix(StLight *light, StLightMatrix *out, int index);

@@ -24,7 +24,7 @@ typedef struct {
     s32 unk10;           /* 0x10 */
 } IdGridState;
 
-extern IdGridState DAT_801e0d38;
+extern IdGridState arrange_list_state;
 
 /* Raw controller bits (active low), owner unknown; debug_pan_display polls them,
  * so they change under the code. */

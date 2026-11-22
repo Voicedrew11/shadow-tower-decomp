@@ -66,7 +66,7 @@ void map_spawn_rising_creature(void)
     e->unk36 = -1;
     fdat_801ed970 = 1;
     e->unk1C.bytes[2] &= 0xf2;
-    DAT_801cba08.unk1440.word |= 2;
+    game_progress.unk1440.word |= 2;
     creature_start_script(e, 2);
     e->unk0E = 1;
     e->unk1C.bytes[3] = 1;

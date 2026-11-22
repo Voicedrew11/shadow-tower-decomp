@@ -2,7 +2,7 @@
  * ST.EXE controller (LIBPAD direct connection) state and the functions that
  * read it (src/st/pad.c). Field names stay address-derived until their
  * behaviour is proven; the state, the vibration bytes and the button masks
- * live in DAT_801cd180 (st/data.h).
+ * live in pad_state (st/data.h).
  */
 #ifndef ST_PAD_H
 #define ST_PAD_H
@@ -25,7 +25,7 @@ typedef struct {
     u8 unk48[4];
 } StPadData;
 
-extern volatile StPadData DAT_801cd130;
+extern volatile StPadData pad_buffers;
 
 void pad_update_action_mask(void);
 void pad_set_default_buttons(void);

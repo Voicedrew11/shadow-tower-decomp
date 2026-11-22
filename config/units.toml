@@ -59,6 +59,13 @@ profile = "probe-gcc272cdk-o2-g8"
 link = "first"
 
 [[unit]]
+unit = "st.sbss_ui_flags"
+image = "ST.EXE"
+source = "src/st/sbss_ui_flags.c"
+profile = "probe-gcc272cdk-o2-g8"
+link = "first"
+
+[[unit]]
 unit = "st.sbss_hole_before_render"
 image = "ST.EXE"
 source = "src/st/sbss_hole_before_render.c"
@@ -349,6 +356,18 @@ source = "src/st/bss_cd_file_buffer.c"
 profile = "probe-gcc272cdk-o2-g0"
 
 [[unit]]
+unit = "st.bss_hole_after_clut_buffer"
+image = "ST.EXE"
+source = "src/st/bss_hole_after_clut_buffer.c"
+profile = "probe-gcc272cdk-o2-g0"
+
+[[unit]]
+unit = "st.bss_common_anim_pack"
+image = "ST.EXE"
+source = "src/st/bss_common_anim_pack.c"
+profile = "probe-gcc272cdk-o2-g0"
+
+[[unit]]
 unit = "st.bss_heap_arena"
 image = "ST.EXE"
 source = "src/st/bss_heap_arena.c"
@@ -361,15 +380,33 @@ source = "src/st/bss_packet_buffers.c"
 profile = "probe-gcc272cdk-o2-g0"
 
 [[unit]]
+unit = "st.bss_placement_objects"
+image = "ST.EXE"
+source = "src/st/bss_placement_objects.c"
+profile = "probe-gcc272cdk-o2-g0"
+
+[[unit]]
 unit = "st.bss_world_state"
 image = "ST.EXE"
 source = "src/st/bss_world_state.c"
 profile = "probe-gcc272cdk-o2-g0"
 
 [[unit]]
-unit = "st.bss_vis_sources_lighting"
+unit = "st.bss_file_row_clipped"
 image = "ST.EXE"
-source = "src/st/bss_vis_sources_lighting.c"
+source = "src/st/bss_file_row_clipped.c"
+profile = "probe-gcc272cdk-o2-g0"
+
+[[unit]]
+unit = "st.bss_vis_sources"
+image = "ST.EXE"
+source = "src/st/bss_vis_sources.c"
+profile = "probe-gcc272cdk-o2-g0"
+
+[[unit]]
+unit = "st.bss_lighting"
+image = "ST.EXE"
+source = "src/st/bss_lighting.c"
 profile = "probe-gcc272cdk-o2-g0"
 
 [[unit]]
@@ -391,6 +428,12 @@ source = "src/st/bss_viewer.c"
 profile = "probe-gcc272cdk-o2-g0"
 
 [[unit]]
+unit = "st.bss_equipment_model_placements"
+image = "ST.EXE"
+source = "src/st/bss_equipment_model_placements.c"
+profile = "probe-gcc272cdk-o2-g0"
+
+[[unit]]
 unit = "st.bss_area_state_vis_lists"
 image = "ST.EXE"
 source = "src/st/bss_area_state_vis_lists.c"
@@ -409,9 +452,21 @@ source = "src/st/bss_ground_items_save.c"
 profile = "probe-gcc272cdk-o2-g0"
 
 [[unit]]
-unit = "st.bss_settings_pad"
+unit = "st.bss_game_settings"
 image = "ST.EXE"
-source = "src/st/bss_settings_pad.c"
+source = "src/st/bss_game_settings.c"
+profile = "probe-gcc272cdk-o2-g0"
+
+[[unit]]
+unit = "st.bss_pad"
+image = "ST.EXE"
+source = "src/st/bss_pad.c"
+profile = "probe-gcc272cdk-o2-g0"
+
+[[unit]]
+unit = "st.bss_sound_buffer_area"
+image = "ST.EXE"
+source = "src/st/bss_sound_buffer_area.c"
 profile = "probe-gcc272cdk-o2-g0"
 
 [[unit]]
@@ -421,9 +476,33 @@ source = "src/st/bss_sound.c"
 profile = "probe-gcc272cdk-o2-g0"
 
 [[unit]]
+unit = "st.bss_sound_buffers_equipment"
+image = "ST.EXE"
+source = "src/st/bss_sound_buffers_equipment.c"
+profile = "probe-gcc272cdk-o2-g0"
+
+[[unit]]
+unit = "st.bss_sound_state"
+image = "ST.EXE"
+source = "src/st/bss_sound_state.c"
+profile = "probe-gcc272cdk-o2-g0"
+
+[[unit]]
 unit = "st.bss_equip_sub_list"
 image = "ST.EXE"
 source = "src/st/bss_equip_sub_list.c"
+profile = "probe-gcc272cdk-o2-g0"
+
+[[unit]]
+unit = "st.bss_hole_after_magic_list"
+image = "ST.EXE"
+source = "src/st/bss_hole_after_magic_list.c"
+profile = "probe-gcc272cdk-o2-g0"
+
+[[unit]]
+unit = "st.bss_equip_saved_ids"
+image = "ST.EXE"
+source = "src/st/bss_equip_saved_ids.c"
 profile = "probe-gcc272cdk-o2-g0"
 
 [[unit]]

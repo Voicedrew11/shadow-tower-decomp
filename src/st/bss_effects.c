@@ -17,4 +17,4 @@
 DATA(0x8018d298, 0x3c8c, ".bss")
 StEffects effects;
 DATA(0x80190f28, 0x8000, ".bss")
-u8 DAT_80190f28[2][0x4000];
+u8 magic_model_buffers[2][0x4000];

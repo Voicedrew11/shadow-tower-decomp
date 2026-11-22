@@ -94,7 +94,7 @@ void creature_despawn(Vis212 *e)
         vis_table_a.unk6158[0] = vis_table_a.unk6158[1] = vis_table_a.unk6158[2] =
             vis_table_a.unk6158[3] = 255;
     } else if (e < &vis_table_a.entries[48]) {
-        DAT_801cba08.unk16E4[area_state.area]++;
+        game_progress.unk16E4[area_state.area]++;
         viewer.unk30++;
     }
     e->unk05 = 3;

@@ -298,7 +298,7 @@ void anim_set_node_vertex(StAnimSet *set, int id, int node, int index, VECTOR *o
         return;
     for (rec = n->unk4; rec != NULL; rec = rec->unk48)
         rec->unk0 = 0;
-    *SCRATCH_MATRIX(SCRATCHPAD) = DAT_8008040c;
+    *SCRATCH_MATRIX(SCRATCHPAD) = identity_matrix;
     anim_record_compose(n->unk4);
     gte_ldv0(v);
     gte_rt();

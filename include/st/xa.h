@@ -10,11 +10,11 @@
 #include <st/vis.h>
 
 /*
- * The XA sector counts per stream file (DAT_801cba08.unk1618) and channel:
+ * The XA sector counts per stream file (game_progress.unk1618) and channel:
  * 48 rows of 6 words, the file count of the save block's per-file arrays
  * (load data, owner unknown).
  */
-extern u32 DAT_800804ac[48][6];
+extern u32 xa_stream_lengths[48][6];
 
 void xa_ready_callback(u8 intr, u8 *result);
 /* The channel travels as a word; playback uses its low byte. */

@@ -100,7 +100,7 @@ typedef struct {
     u8 part;             /* 0x00: the model part drawn for this record */
     u8 unk01;            /* 0x01: copied to a table A entry's unk06 (creatures_load) */
     u8 unk02;
-    u8 unk03;            /* 0x03: bits 0-1: the block's quarter turn about y (DAT_8008042c) */
+    u8 unk03;            /* 0x03: bits 0-1: the block's quarter turn about y (quarter_turn_matrices) */
     u8 unk04;            /* bit 1: flagged by vis_cull_by_range */
     s8 unk05;            /* 0x05, 0x06: FDAT: an offset (x, z) its entries' headings bend by */
     s8 unk06;
@@ -162,7 +162,7 @@ typedef struct {
     u8 *vertices;        /* 0x00c */
     VECTOR *world;       /* 0x010: vis_lists.unkC0 cursor */
     VECTOR *rel[3];      /* 0x014: unk11C0..unk33C0 cursors */
-    u16 unk20;           /* 0x020: the record's quarter turn (DAT_8008042c) */
+    u16 unk20;           /* 0x020: the record's quarter turn (quarter_turn_matrices) */
     s16 hit;             /* 0x022: the record hit, -1 none */
     VECTOR e[3][4];      /* 0x024: per point, the face edges' outer products */
     VECTOR pos[3];       /* 0x0e4: the test points */
@@ -196,13 +196,13 @@ typedef struct {
 
 /* 0x8008042c: four yaw matrices, 0, 90, 180 and 270 degrees, that turn a
  * map block a quarter at a time (load data, WIP owner). */
-extern MATRIX DAT_8008042c[4];
+extern MATRIX quarter_turn_matrices[4];
 
 extern VisLists vis_lists;
 extern VisRecord vis_records[];
 extern VisSourceMask vis_source_masks[];
 /* 0x801856d0: per axis (x, y, z) and 4096-unit cell, the sources that cover it. */
-extern VisSourceMask DAT_801856d0[3][128];
+extern VisSourceMask vis_axis_masks[3][128];
 
 /* 0x801ba138: 64 entries of 212 bytes, then the collected index list. */
 /* A flags word whose byte +2 is also updated on its own (world_draw_creatures). */

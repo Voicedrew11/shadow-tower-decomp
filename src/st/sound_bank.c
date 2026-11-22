@@ -37,12 +37,12 @@ void sound_key_off(short voice, int id, int note)
 
     if (id == 255)
         return;
-    if (DAT_801cd120.unk1 == 0)
+    if (game_settings.unk1 == 0)
         return;
-    snd = &DAT_801dd1c0.sounds[id & 0x7ff];
+    snd = &sound_state.sounds[id & 0x7ff];
     if (snd->slot == -1)
         return;
-    slot = &DAT_801dd1c0.slots[snd->slot];
+    slot = &sound_state.slots[snd->slot];
     if (slot->vab == -1)
         return;
     if (slot->vab == 254)
@@ -53,7 +53,7 @@ void sound_key_off(short voice, int id, int note)
     else if (note >= 128)
         note = 127;
     SsUtKeyOff(voice, slot->vab, snd->prog, snd->tone, note);
-    DAT_801dd1c0.voices[voice] = -1;
+    sound_state.voices[voice] = -1;
 }
 
 /*
@@ -72,7 +72,7 @@ void sound_bank_transfer_body(void)
         return;
     if (request->unk11 != 2)
         return;
-    slot = &DAT_801dd1c0.slots[request->unk4.bank.slot];
+    slot = &sound_state.slots[request->unk4.bank.slot];
     for (;;) {
         r = SsVabTransBodyPartly(request->unk20, 0xa000, slot->vab);
         if (r == -1) {
@@ -119,7 +119,7 @@ StSoundBuf *sound_bank_find_buffer(int first, int count, int buf, int bufs, int 
     int n;
 
     i = 0;
-    b = &DAT_801dd1c0.bufs[buf];
+    b = &sound_state.bufs[buf];
     n = bufs;
     while (n--) {
         if (b->state == 0) {
@@ -130,11 +130,11 @@ StSoundBuf *sound_bank_find_buffer(int first, int count, int buf, int bufs, int 
         b++;
     }
     i = 0;
-    b = &DAT_801dd1c0.bufs[buf];
+    b = &sound_state.bufs[buf];
     n = bufs;
     while (n--) {
         if (b->state == 2) {
-            slot = &DAT_801dd1c0.slots[first];
+            slot = &sound_state.slots[first];
             while (count--) {
                 if (slot->vab != -1 && slot->block == (s16 *)b) {
                     SsVabClose(slot->vab);
@@ -165,7 +165,7 @@ void sound_bank_read_done(StCdRequest *request)
 
     switch (request->unk11) {
     case 0:
-        slot = &DAT_801dd1c0.slots[request->unk4.bank.slot];
+        slot = &sound_state.slots[request->unk4.bank.slot];
         if (cd_checksum_mismatch((u32 *)request->unk4.bank.buffer->data, request->unk28)) {
             request->unk1 = 0;
             while (CdControl(CdlSeekL, (u_char *)&request->unk18, NULL) == 0)
@@ -183,7 +183,7 @@ void sound_bank_read_done(StCdRequest *request)
         }
         cd_loc_add_sectors(&request->unk18, request->unk28, &request->unk18);
         request->unk11 = 1;
-        request->unk20 = (u8 *)DAT_80088c88;
+        request->unk20 = (u8 *)cd_file_buffer;
         request->unk1 = 0;
         request->unk28 = 20;
         while (CdControl(CdlSeekL, (u_char *)&request->unk18, NULL) == 0)
@@ -202,7 +202,7 @@ void sound_bank_read_done(StCdRequest *request)
 ADDRESS(0x80058a0c, 0x1f8)
 void sound_bank_load(int archive, int index, int slot)
 {
-    StVabSlot *s = &DAT_801dd1c0.slots[slot];
+    StVabSlot *s = &sound_state.slots[slot];
     StSoundBuf *buf;
     u32 spu;
     StCdRequest *request;
@@ -213,20 +213,20 @@ void sound_bank_load(int archive, int index, int slot)
     case 3:
     case 4:
     case 5:
-        buf = &DAT_801dd1c0.bufs[slot + 8];
+        buf = &sound_state.bufs[slot + 8];
         spu = (slot - 2) * 0x3000 + 0x19800;
         break;
     case 1:
-        buf = &DAT_801dd1c0.bufs[14];
+        buf = &sound_state.bufs[14];
         spu = 0x65400;
         break;
     case 0:
-        buf = &DAT_801dd1c0.bufs[15];
+        buf = &sound_state.bufs[15];
         spu = 0x1000;
         break;
     case 6:
     case 7:
-        buf = &DAT_801dd1c0.bufs[slot - 6];
+        buf = &sound_state.bufs[slot - 6];
         spu = (slot - 6) * 0x3000 + 0x25800;
         break;
     case 8:
@@ -245,7 +245,7 @@ void sound_bank_load(int archive, int index, int slot)
     case 21:
     case 22:
     case 23:
-        buf = &DAT_801dd1c0.bufs[(slot - 8) % 4 + 2];
+        buf = &sound_state.bufs[(slot - 8) % 4 + 2];
         spu = (slot - 8) % 4 * 0x9c00 + 0x3e400;
         break;
     default:

@@ -4,8 +4,8 @@
  * group (.sbss), its end three times, then two bounds of the FDAT overlay
  * area that starts there: past the overlay header's id and handler table,
  * and the end of the largest overlay (twice). main rounds the heap up from
- * DAT_80013980 past DAT_80013988 and stores the base into DAT_8001398c;
- * st.area_load takes the overlay's handler table from DAT_80013980 (st/data.h
+ * overlay_area_start past overlay_area_end and stores the base into heap_base;
+ * st.area_load takes the overlay's handler table from overlay_area_start (st/data.h
  * declares those three writable, so this file does not include it).
  *
  * No Psy-Q kit object holds such a table (NONE3 from 4.5, 2MBYTE, 8MBYTE,
@@ -36,16 +36,16 @@
 #define FDAT_AREA_SIZE 0x43e0
 
 DATA(0x80013974, 0x4, ".rodata")
-u8 *const DAT_80013974 = _bss_org;
+u8 *const bss_start = _bss_org;
 DATA(0x80013978, 0x4, ".rodata")
-u8 *const DAT_80013978 = _bss_orgend;
+u8 *const bss_end = _bss_orgend;
 DATA(0x8001397c, 0x4, ".rodata")
 u8 *const DAT_8001397c = _bss_orgend;
 DATA(0x80013980, 0x4, ".rodata")
-u8 *const DAT_80013980 = _bss_orgend;
+u8 *const overlay_area_start = _bss_orgend;
 DATA(0x80013984, 0x4, ".rodata")
 u8 *const DAT_80013984 = _bss_orgend + FDAT_HANDLERS_END;
 DATA(0x80013988, 0x4, ".rodata")
-u8 *const DAT_80013988 = _bss_orgend + FDAT_AREA_SIZE;
+u8 *const overlay_area_end = _bss_orgend + FDAT_AREA_SIZE;
 DATA(0x8001398c, 0x4, ".rodata")
-u8 *const DAT_8001398c = _bss_orgend + FDAT_AREA_SIZE;
+u8 *const heap_base = _bss_orgend + FDAT_AREA_SIZE;

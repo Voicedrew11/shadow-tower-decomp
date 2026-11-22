@@ -10,7 +10,7 @@
 
 /*
  * Words at the end of the game .rdata, before LIBCD's (as ST.EXE's
- * DAT_80013980..; st/data.h): 0x80011f40 and 0x80011f48 bound the load
+ * overlay_area_start..; st/data.h): 0x80011f40 and 0x80011f48 bound the load
  * image's end, and main stores the heap base at 0x80011f4c. Their owner is
  * unknown; main addresses each with its own lui pair, as separate scalars.
  */

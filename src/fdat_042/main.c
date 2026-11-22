@@ -60,7 +60,7 @@ void map_update_events(void)
 {
     Vis88 *door = &vis_table_b.entries[19];
 
-    if (!DAT_801cba08.unk1440.bit.f1 && door->unk10 > 0xa00 && fdat_801ed96c == -1)
+    if (!game_progress.unk1440.bit.f1 && door->unk10 > 0xa00 && fdat_801ed96c == -1)
         map_spawn_rising_creature();
 }
 
@@ -74,7 +74,7 @@ void map_restore_progress(void)
         fdat_801ed96c = 0;
         return;
     }
-    if (!DAT_801cba08.unk1440.bit.f1) {
+    if (!game_progress.unk1440.bit.f1) {
         e->unk00 = 0;
         fdat_801ed970 = 0;
     } else {

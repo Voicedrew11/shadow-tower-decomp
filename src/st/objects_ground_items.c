@@ -519,7 +519,7 @@ void object_spawn_side_parts_alt(e, arg)
 
 /* The shake (x, z) a kind 224 entry gives the view while its entries rise. */
 DATA(0x800881e0, 0x8, ".sbss")
-static SVECTOR DAT_800881e0;
+static SVECTOR object_sequence_push;
 
 /* The halfwords and bytes other kinds keep from 0x50. */
 #define H50(e) (*(s16 *)&(e)->unk50)
@@ -1071,7 +1071,7 @@ void objects_update(void)
             if (player_in_cell_rect(e->unk24.vx >> 12, e->unk24.vz >> 12, 1, 1, e->unk24.vy) == 0
                 && area_state.unk0 == 0)
                 break;
-            if ((DAT_801cd180.unk2 & DAT_801cd180.unk22[10]) && vis_table_a.unk6169 == 0
+            if ((pad_state.unk2 & pad_state.unk22[10]) && vis_table_a.unk6169 == 0
                 && W50(e) != 0xffffff && W48(e) != 0xffffff) {
                 vis_table_a.unk6169 = 1;
                 player_stop_motion();
@@ -1087,8 +1087,8 @@ void objects_update(void)
                     if (a->unk00 != 255) {
                         sound_play_at(a->unk0B * 10 + 48, &a->unk74, 127, (rand() * 5 >> 15) - 2);
                         a->unkB0 = 128;
-                        DAT_800881e0.vx = rcos((s16)a->unk56 - 1024) / 256;
-                        DAT_800881e0.vz = rsin((s16)a->unk56 - 1024) / 256;
+                        object_sequence_push.vx = rcos((s16)a->unk56 - 1024) / 256;
+                        object_sequence_push.vz = rsin((s16)a->unk56 - 1024) / 256;
                         rising = 1;
                     }
                 }
@@ -1098,8 +1098,8 @@ void objects_update(void)
             if (vis_table_a.unk6169 == 2) {
                 a = &vis_table_a.entries[56];
                 player_stop_motion();
-                vis_table_b.unk71A4 = DAT_800881e0.vx;
-                vis_table_b.unk71A8 = DAT_800881e0.vz;
+                vis_table_b.unk71A4 = object_sequence_push.vx;
+                vis_table_b.unk71A8 = object_sequence_push.vz;
                 for (rising = 7; rising != -1; a++, rising--) {
                     if (a->unk00 != 255 && (s16)a->unk2A + a->unkB0 > 3584) {
                         a->unkB0 = 0;
@@ -1114,16 +1114,16 @@ void objects_update(void)
                 if (W50(e) != 0xffffff)
                     break;
             } else {
-                DAT_800881e0.vx = 0;
-                DAT_800881e0.vz = 0;
+                object_sequence_push.vx = 0;
+                object_sequence_push.vz = 0;
             }
             vis_table_a.unk6169 = 4;
             area_request_load(e->unk4A.snd.unk4D, e->unk4A.snd.unk4D, e->unk4A.snd.unk4D, e->unk4A.snd.unk4D,
                           e->unk4A.snd.unk4D, (s8)B50(e), B52(e), B51(e), (s8)e->unk4A.snd.unk4B,
                           (s8)e->unk4A.door.unk4F, (s8)e->unk4A.snd.unk4C);
             if (W48(e) != 0xffffff) {
-                vis_table_b.unk71A4 = -DAT_800881e0.vx * 2;
-                vis_table_b.unk71A8 = -DAT_800881e0.vz * 2;
+                vis_table_b.unk71A4 = -object_sequence_push.vx * 2;
+                vis_table_b.unk71A8 = -object_sequence_push.vz * 2;
                 viewer.position.vx = e->unk24.vx - 2048;
                 viewer.position.vy = e->unk24.vy - 1600;
                 viewer.position.vz = e->unk24.vz - 2048;
@@ -1156,7 +1156,7 @@ void objects_update(void)
             turn = (viewer.unk26A - e->unk20) & 0xfff;
             if (turn > 2048)
                 turn |= 0xf000;
-            if (!((DAT_801cd180.unk2 & DAT_801cd180.unk22[10]) && turn > -400 && turn < 400)
+            if (!((pad_state.unk2 & pad_state.unk22[10]) && turn > -400 && turn < 400)
                 && e->unk05 != 239)
                 goto away;
             if (B50(e))
@@ -1423,7 +1423,7 @@ int item_is_uncollected(int id)
 ADDRESS(0x80052d98, 0xb8)
 void item_record_pickup(u16 *id)
 {
-    DAT_801c7590.counts[*id].count++;
+    inventory.counts[*id].count++;
     if (*id == 266)
         viewer.unk27++;
     if (*id < 266) {
@@ -1612,7 +1612,7 @@ void ground_item_pick_up(Vis48 *c, int forced)
     i = 16;
     c->unk2D -= 8;
     while (1) {
-        if (forced == 0 && (DAT_801cd180.unk4 & DAT_801cd180.unk22[11])) {
+        if (forced == 0 && (pad_state.unk4 & pad_state.unk22[11])) {
             take = 0;
             a = c->unk08;
             b = save.unk08;
@@ -1621,7 +1621,7 @@ void ground_item_pick_up(Vis48 *c, int forced)
             i = 16 - i;
             break;
         }
-        if ((DAT_801cd180.unk4 & DAT_801cd180.unk22[10]) && !DAT_801cd180.unk12) {
+        if ((pad_state.unk4 & pad_state.unk22[10]) && !pad_state.unk12) {
             take = 1;
             a = c->unk08;
             b = viewer.position;
@@ -1649,7 +1649,7 @@ void ground_item_pick_up(Vis48 *c, int forced)
         if (i > 0)
             i--;
     }
-    DAT_801cd180.unk4 = 0;
+    pad_state.unk4 = 0;
     while (i--) {
         j = 16 - i;
         c->unk08.vx = (i * a.vx + j * b.vx) >> 4;

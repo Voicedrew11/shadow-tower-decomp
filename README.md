@@ -134,7 +134,7 @@ _Derived from ignored outputs made by the native Psy-Q executable chain. `kf bui
 | :---- | --------------------: | -----------------------: | -----------------: | -----------------: |
 | `PSX.EXE` | — | — | — | 1 / 1 |
 | `STR.EXE` | — | — | — | 1 / 1 |
-| `ST.EXE` | — | — | — | 39 / 39 |
+| `ST.EXE` | — | — | — | 52 / 52 |
 | `TITLE.EXE` | — | — | — | 1 / 1 |
 | `OPTXT.EXE` | — | — | — | 2 / 2 |
 | `VS.EXE` | — | — | — | 58 / 58 |

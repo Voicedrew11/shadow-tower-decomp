@@ -328,13 +328,13 @@ extern u8 guard_flash_model[5000];
 extern s32 round_wins[1];
 
 /* VS band 6: the text scroll switch and the two scroll offsets
- * ui_draw_glyph picks between (ST.EXE's DAT_800881ac/a0/a2; bss, unowned). */
+ * ui_draw_glyph picks between (ST.EXE's text_scroll_mode/a0/a2; bss, unowned). */
 extern u16 text_scroll_mode;
 extern u16 DAT_8006333e;
 extern u16 text_scroll;
 
 /* VS band 6: the two 0x20000-byte GPU packet buffers gfx_init hands
- * the graphics state (bss; ST.EXE's DAT_8011c488). */
+ * the graphics state (bss; ST.EXE's packet_buffers). */
 extern u_long packet_buffers[];
 
 /* VS band 6: seven words and seven halfwords card_draw_port_choice clears, and the

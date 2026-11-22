@@ -78,7 +78,7 @@ void map_restore_progress(void)
     a49->unk1C.bytes[3] = 2;
     a50->unk1C.bytes[3] = 2;
     a48->unk1C.bytes[3] = 2;
-    DAT_801cba08.unk1448[r->unk09] = 3;
+    game_progress.unk1448[r->unk09] = 3;
 }
 
 #include "../lib/fdat_creature_pick_move.inc"

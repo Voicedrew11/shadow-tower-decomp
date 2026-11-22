@@ -112,29 +112,29 @@ void map_update_events(void)
     int i;
     u32 flags;
 
-    if (DAT_801cba08.unk1440.field.gate == 0 && d5->unk10 != 0) {
-        DAT_801cba08.unk1440.field.gate = 1;
+    if (game_progress.unk1440.field.gate == 0 && d5->unk10 != 0) {
+        game_progress.unk1440.field.gate = 1;
         creature_spawn_now(e32);
         e32->unk36 = -1;
         e32->unk03 = 1;
         e32->unk1C.bytes[2] &= 0xf2;
-    } else if (DAT_801cba08.unk1440.field.gate == 1 && d5->unk10 > 0x800) {
-        DAT_801cba08.unk1440.field.gate = 2;
+    } else if (game_progress.unk1440.field.gate == 1 && d5->unk10 > 0x800) {
+        game_progress.unk1440.field.gate = 2;
     }
     if (fdat_801ef938 == 0 && area_state.unk0 == 0)
         fdat_801ef938 = 1;
-    if (!DAT_801cba08.unk1440.bit.f13 && fdat_801ef938 == 1) {
-        DAT_801cba08.unk1440.bit.f13 = 1;
+    if (!game_progress.unk1440.bit.f13 && fdat_801ef938 == 1) {
+        game_progress.unk1440.bit.f13 = 1;
         for (i = 0; i < 6; i++) {
             u8 state = vis_table_a.entries[fdat_801ef504[i]].unk05;
 
             if (state != 3 && state != 5) {
-                DAT_801cba08.unk1440.bit.f13 = 0;
+                game_progress.unk1440.bit.f13 = 0;
                 break;
             }
         }
     }
-    if (DAT_801cba08.unk1440.bit.f13 == 1 && fdat_801ef930 >= 0) {
+    if (game_progress.unk1440.bit.f13 == 1 && fdat_801ef930 >= 0) {
         if (fdat_801ef930 == 0) {
             map_fade_palette_row();
             fdat_801ef938 = 0xff;
@@ -176,7 +176,7 @@ void map_restore_progress(void)
     int stage;
     u8 part;
 
-    if (DAT_801cba08.unk1440.bit.f14 == 1) {
+    if (game_progress.unk1440.bit.f14 == 1) {
         c29->unk22 = 5;
         fdat_801ef93c = 2;
         d15->unk05 = 50;
@@ -194,13 +194,13 @@ void map_restore_progress(void)
         e49->unk70 &= ~0x2000000;
     }
     e48->unk1C.bytes[3] = 1;
-    if (DAT_801cba08.unk1440.word >> 29 & 1) {
+    if (game_progress.unk1440.word >> 29 & 1) {
         part = vis_records[38].part;
         vis_records[38].unk03 = 3;
         vis_records[38].part = vis_records[330].part;
         vis_records[330].part = part;
     }
-    if ((int)(DAT_801cba08.unk1440.word >> 10 & 7) >= 3) {
+    if ((int)(game_progress.unk1440.word >> 10 & 7) >= 3) {
         e32->unk8E = 0x400;
         e32->unk28 = 0x31;
         e32->unk6A = 0x800;
@@ -212,9 +212,9 @@ void map_restore_progress(void)
     } else {
         e32->unk00 = 0;
     }
-    if (DAT_801cba08.unk1440.word >> 29 & 1)
+    if (game_progress.unk1440.word >> 29 & 1)
         e32->unk65 = 0;
-    stage = DAT_801cba08.unk1440.word >> 8 & 3;
+    stage = game_progress.unk1440.word >> 8 & 3;
     fdat_801ef928 = 0;
     if (stage == 1) {
         creature_start_script(e50, 1);
@@ -251,7 +251,7 @@ void map_restore_progress(void)
         fdat_801ef920 = 400;
         fdat_801ef92c = 0;
     }
-    if (DAT_801cba08.unk1440.bit.f13 == 1) {
+    if (game_progress.unk1440.bit.f13 == 1) {
         fdat_801ef934 = 1;
         fdat_801ef930 = -1;
         fdat_801ef938 = 0xff;
@@ -366,10 +366,10 @@ void map_step_creature(void)
         creature_fade_out_despawn(e);
         fdat_801ef93c = 2;
         viewer.unk218 = 0;
-        DAT_801cba08.unk1440.word |= 0x4000;
+        game_progress.unk1440.word |= 0x4000;
     }
     if (e->unk02 == 0) {
-        switch (DAT_801cba08.unk1440.word >> 10 & 7) {
+        switch (game_progress.unk1440.word >> 10 & 7) {
         case 2:
             viewer.unk218 = 5;
             creature_force_talk(e, 0, 0);
@@ -387,30 +387,30 @@ void map_step_creature(void)
             e->unk6C = 0;
             e->unk6E = -0x800;
             e->unk06 = part;
-            DAT_801cba08.unk1440.word = (DAT_801cba08.unk1440.word & ~0x1c00) | 0xc00;
+            game_progress.unk1440.word = (game_progress.unk1440.word & ~0x1c00) | 0xc00;
             break;
         case 3:
             if (viewer.unk178 == 0x2f) {
                 creature_force_talk(e, 0, 0);
-                DAT_801cba08.unk1440.word = (DAT_801cba08.unk1440.word & ~0x1c00) | 0x1000;
+                game_progress.unk1440.word = (game_progress.unk1440.word & ~0x1c00) | 0x1000;
             } else if (viewer.unk178 == 0x16) {
-                DAT_801cba08.unk1448[r->unk09]++;
-                DAT_801cba08.unk1440.word = (DAT_801cba08.unk1440.word & ~0x1c00) | 0x1400;
+                game_progress.unk1448[r->unk09]++;
+                game_progress.unk1440.word = (game_progress.unk1440.word & ~0x1c00) | 0x1400;
             }
             break;
         case 4:
             if (viewer.unk178 == 0x16)
-                DAT_801cba08.unk1440.word = (DAT_801cba08.unk1440.word & ~0x1c00) | 0x1400;
+                game_progress.unk1440.word = (game_progress.unk1440.word & ~0x1c00) | 0x1400;
             break;
         case 5:
-            if (DAT_801cba08.unk1440.word >> 29 & 1) {
-                DAT_801cba08.unk1448[r->unk09]++;
-                DAT_801cba08.unk1440.word = (DAT_801cba08.unk1440.word & ~0x1c00) | 0x1800;
+            if (game_progress.unk1440.word >> 29 & 1) {
+                game_progress.unk1448[r->unk09]++;
+                game_progress.unk1440.word = (game_progress.unk1440.word & ~0x1c00) | 0x1800;
             } else {
                 e->unk70 |= 0x2000000;
                 creature_force_talk(e, 0, 0);
                 e->unk1C.bytes[3] = 2;
-                DAT_801cba08.unk1440.word = (DAT_801cba08.unk1440.word & ~0x1c00) | 0x1800;
+                game_progress.unk1440.word = (game_progress.unk1440.word & ~0x1c00) | 0x1800;
                 e->unk70 &= ~0x2000000;
             }
             break;
@@ -424,7 +424,7 @@ void map_step_creature(void)
                 e->unk1C.bytes[2] &= 0xe2;
                 if (e->unk2C == 0)
                     e->unk2C = 1;
-                DAT_801cba08.unk1440.word |= 0x1c00;
+                game_progress.unk1440.word |= 0x1c00;
                 e->unk70 &= ~0x2000000;
             }
             break;
@@ -446,7 +446,7 @@ void map_step_creature(void)
                 creature_force_talk(e, 0, 0);
                 fdat_801ef924 = 1;
                 e->unk70 &= ~0x2000000;
-                DAT_801cba08.unk1440.word = (DAT_801cba08.unk1440.word & ~0x300) | 0x100;
+                game_progress.unk1440.word = (game_progress.unk1440.word & ~0x300) | 0x100;
             }
             break;
         case 1:
@@ -488,7 +488,7 @@ void map_step_creature(void)
             e->unkB0 = 0;
         }
         if (e->unk02 == 0) {
-            if ((DAT_801cba08.unk1440.word >> 10 & 7) == 1) {
+            if ((game_progress.unk1440.word >> 10 & 7) == 1) {
                 creature_start_script(e, 0);
             } else {
                 e->unk1A = 0xff;
@@ -550,7 +550,7 @@ void map_object_take_equipment(void)
         viewer.unk218 = 0;
         fdat_801ef924 = 2;
         fdat_801ef92c = 2;
-        DAT_801cba08.unk1440.word = (DAT_801cba08.unk1440.word & ~0x300) | 0x200;
+        game_progress.unk1440.word = (game_progress.unk1440.word & ~0x300) | 0x200;
     }
 }
 
@@ -592,7 +592,7 @@ void map_take_equipment_raise_object(void)
     Vis88 *d16 = &vis_table_b.entries[16];
     u8 *speed = &d16->unk48;
     Vis48 *c28 = &vis_table_c.entries[28];
-    Data801c7590 *items = &DAT_801c7590;
+    Data801c7590 *items = &inventory;
     Vis44 *kind;
     int step;
 
@@ -686,7 +686,7 @@ void map_talk_then_remove_creatures(void)
     Vis212 *e = &vis_table_a.entries[51];
     Vis192 *r = &vis_table_a.unk3500[10];
 
-    DAT_801cba08.unk1448[r->unk09]++;
+    game_progress.unk1448[r->unk09]++;
     e->unk70 |= 0x2000000;
     r->unk60[0]->unk00 = 0x80;
     r->unk60[1]->unk00 = 0x80;
@@ -720,7 +720,7 @@ void map_start_creature_pair_scene(void)
         r->unk16 = 0x200;
         r->unk18 = 0x800;
         fdat_801ef928 = 1;
-        DAT_801cba08.unk1440.word = (DAT_801cba08.unk1440.word & ~0x300) | 0x100;
+        game_progress.unk1440.word = (game_progress.unk1440.word & ~0x300) | 0x100;
     }
 }
 

@@ -81,7 +81,7 @@ void map_restore_progress(void)
     Vis88 *d2 = &vis_table_b.entries[2];
     int n;
 
-    if (DAT_801cba08.unk1440.word >> 17 & 1) {
+    if (game_progress.unk1440.word >> 17 & 1) {
         fdat_801ee0bc = 2;
         e48->unk05 = 3;
         fdat_801ee0b4 = 4;
@@ -92,11 +92,11 @@ void map_restore_progress(void)
         e48->unk1C.bytes[3] = 2;
         vis_table_a.entries[33].unk00 = 0;
     }
-    n = DAT_801cba08.unk1448[13];
+    n = game_progress.unk1448[13];
     if (n == 0)
         fdat_801ee0b8 = 0;
     else if (n == 1) {
-        if (DAT_801cba08.unk1448[12] == 0)
+        if (game_progress.unk1448[12] == 0)
             fdat_801ee0b8 = n;
         else
             fdat_801ee0b8 = 2;
@@ -106,15 +106,15 @@ void map_restore_progress(void)
         fdat_801ee0b8 = 4;
         d2->unk4A.door.unk4F = 0xff;
     }
-    if (DAT_801cba08.unk1448[13] >= 2)
+    if (game_progress.unk1448[13] >= 2)
         e50->unk70 &= ~0x2000000;
-    if (DAT_801cba08.unk1448[13] == 3)
+    if (game_progress.unk1448[13] == 3)
         e49->unk70 &= ~0x2000000;
-    if (DAT_801cba08.unk1448[12] == 1)
+    if (game_progress.unk1448[12] == 1)
         e48->unk70 &= ~0x2000000;
     if (fdat_801ee0b8 == 2) {
         fdat_801ee0b8 = 3;
-        DAT_801cba08.unk1448[13]++;
+        game_progress.unk1448[13]++;
     }
     switch (fdat_801ee0b8) {
     case 0:
@@ -157,7 +157,7 @@ void map_update_events(void)
     if (fdat_801ee0b4 == 0 && d4->unk0C == 0xff) {
         d3->unk0C = 12;
         fdat_801ee0b4 = 1;
-        DAT_801cba08.unk1440.word |= 0x20000;
+        game_progress.unk1440.word |= 0x20000;
     }
     if (fdat_801ee0b4 == 1 && d3->unk0C == 0xff)
         fdat_801ee0b4 = 2;
@@ -225,7 +225,7 @@ void map_use_item_advance_scene(short id)
         e->unk05 = 3;
         vis_table_a.entries[49].unk00 = 100;
         e->unk70 &= ~0x2000000;
-        DAT_801cba08.unk1448[13]++;
+        game_progress.unk1448[13]++;
     }
 }
 
@@ -244,7 +244,7 @@ void map_step_creature(void)
     if (creature_step_hurt_timer(e) == 1)
         return;
     if (e->unkB0 >= 0 ? (short)e->unk2A >= 4096 : (short)e->unk2A <= 0) {
-        if (e->unk02 == 0 && DAT_801cba08.unk1448[12] == 0) {
+        if (e->unk02 == 0 && game_progress.unk1448[12] == 0) {
             creature_start_script(e, 0);
         } else {
             e->unk1A = 0xff;
@@ -268,9 +268,9 @@ void map_talk_on_player_death(void)
     e = &vis_table_a.entries[48];
     r = &vis_table_a.unk3500[0];
 
-    if (DAT_801cba08.unk1448[r->unk09] != 0 && fdat_801ee0b4 != 4
+    if (game_progress.unk1448[r->unk09] != 0 && fdat_801ee0b4 != 4
         && vis_table_a.unk6168 == 0) {
-        DAT_801cba08.unk1448[r->unk09] = 1;
+        game_progress.unk1448[r->unk09] = 1;
         e->unk70 |= 0x2000000;
         creature_force_talk(e, 1, 1);
     }

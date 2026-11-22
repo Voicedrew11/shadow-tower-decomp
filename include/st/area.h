@@ -16,7 +16,7 @@
  * scheduler only does for an in-struct read. */
 extern u8 *DAT_800881dc[1];
 /* Tables game_load_common_data fills from its pack; WIP extents. */
-extern u8 DAT_8009b088[];
+extern u8 common_anim_pack[];
 
 /* src/st/area_load.c */
 extern u8 *DAT_800881d8;
@@ -29,8 +29,8 @@ void item_model_slots_clear(void);
 
 /* 0x800f2c88 (after the block heap) and 0x800fc488: the buffers
  * area_load_current_blocking puts in world_state.unk8308[1] and [0]; WIP extents. */
-extern u_long DAT_800f2c88[];
-extern u_long DAT_800fc488[];
+extern u_long area_collision_buffer[];
+extern u_long area_world_buffer[];
 
 /* src/st/area_wait.c */
 void area_load_current_blocking(void);

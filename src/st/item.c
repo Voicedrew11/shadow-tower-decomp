@@ -26,15 +26,15 @@
 ADDRESS(0x8005529c, 0x20)
 int item_is_held(int id)
 {
-    return DAT_801c7590.counts[id].count != 0;
+    return inventory.counts[id].count != 0;
 }
 
 /* Takes one of item `id`; nonzero when there was none. */
 ADDRESS(0x800552bc, 0x44)
 int item_take(int id)
 {
-    if (DAT_801c7590.counts[id].count != 0) {
-        DAT_801c7590.counts[id].count--;
+    if (inventory.counts[id].count != 0) {
+        inventory.counts[id].count--;
         return 0;
     }
     return 1;
@@ -44,8 +44,8 @@ int item_take(int id)
 ADDRESS(0x80055300, 0x74)
 int item_add(int id)
 {
-    if (DAT_801c7590.counts[id].count < 99) {
-        DAT_801c7590.counts[id].count++;
+    if (inventory.counts[id].count < 99) {
+        inventory.counts[id].count++;
         area_state.hooks->item_added(id);
         return 0;
     }

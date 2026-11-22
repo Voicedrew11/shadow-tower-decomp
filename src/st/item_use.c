@@ -21,7 +21,7 @@ RODATA(0x8001274c, 0x108)
 
 /* The use result: whether the item was used (1) or not (2), a member of
  * the save-game state block. */
-#define USE_RESULT DAT_801cba08.unk16D8
+#define USE_RESULT game_progress.unk16D8
 
 /* Uses item `id` and leaves the use result. */
 ADDRESS(0x80054a54, 0x848)
@@ -272,7 +272,7 @@ done:
         int slot;
 
         for (slot = 0; slot < 5; slot++) {
-            if (*slots[slot] == id && !DAT_801c7590.counts[*slots[slot]].count)
+            if (*slots[slot] == id && !inventory.counts[*slots[slot]].count)
                 *slots[slot] = 0xffff;
         }
     }

@@ -58,17 +58,17 @@ void map_restore_progress(void)
     Vis212 *e0 = &vis_table_a.entries[0];
     Vis212 *e4 = &vis_table_a.entries[4];
 
-    if (DAT_801cba08.unk1440.bit.f2 == 1) {
+    if (game_progress.unk1440.bit.f2 == 1) {
         if (e3->unk00 != 0xff)
             e3->unk00 = 100;
         if (e4->unk00 != 0xff)
             e4->unk00 = 100;
     }
-    if (DAT_801cba08.unk1440.bit.f3 == 1 && e2->unk00 != 0xff)
+    if (game_progress.unk1440.bit.f3 == 1 && e2->unk00 != 0xff)
         e2->unk00 = 100;
-    if (DAT_801cba08.unk1440.bit.f4 == 1 && e1->unk00 != 0xff)
+    if (game_progress.unk1440.bit.f4 == 1 && e1->unk00 != 0xff)
         e1->unk00 = 100;
-    if (DAT_801cba08.unk1440.bit.f5 == 1 && e0->unk00 != 0xff)
+    if (game_progress.unk1440.bit.f5 == 1 && e0->unk00 != 0xff)
         e0->unk00 = 100;
 }
 
@@ -90,29 +90,29 @@ void map_update_events(void)
     Vis88 *d1 = &vis_table_b.entries[1];
     Vis88 *d12 = &vis_table_b.entries[12];
 
-    if (!DAT_801cba08.unk1440.bit.f2 && d20->unk0C == 1) {
+    if (!game_progress.unk1440.bit.f2 && d20->unk0C == 1) {
         if (e3->unk05 == 0)
             creature_spawn_now(e3);
         if (e4->unk05 == 0)
             creature_spawn_now(e4);
         e3->unk00 = 100;
         e4->unk00 = 100;
-        DAT_801cba08.unk1440.word |= 4;
+        game_progress.unk1440.word |= 4;
     }
-    if (!DAT_801cba08.unk1440.bit.f3 && d1->unk0C == 255 && e2->unk05 == 0) {
+    if (!game_progress.unk1440.bit.f3 && d1->unk0C == 255 && e2->unk05 == 0) {
         creature_spawn_now(e2);
         e2->unk00 = 100;
-        DAT_801cba08.unk1440.word |= 8;
+        game_progress.unk1440.word |= 8;
     }
-    if (!DAT_801cba08.unk1440.bit.f4 && d12->unk4A.door.unk4F == 255 && e1->unk05 == 0) {
+    if (!game_progress.unk1440.bit.f4 && d12->unk4A.door.unk4F == 255 && e1->unk05 == 0) {
         creature_spawn_now(e1);
         e1->unk00 = 100;
-        DAT_801cba08.unk1440.word |= 0x10;
+        game_progress.unk1440.word |= 0x10;
     }
-    if (!DAT_801cba08.unk1440.bit.f5 && viewer.unk178 == 57 && e0->unk05 == 0) {
+    if (!game_progress.unk1440.bit.f5 && viewer.unk178 == 57 && e0->unk05 == 0) {
         creature_spawn_now(e0);
         e0->unk00 = 100;
-        DAT_801cba08.unk1440.word |= 0x20;
+        game_progress.unk1440.word |= 0x20;
     }
     if (viewer.unk218 != 4 && viewer.unk178 == 68)
         player_kill(0);

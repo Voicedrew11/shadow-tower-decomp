@@ -36,10 +36,10 @@ void map_step_creature(void)
     VECTOR v;
 
     if (e->unk02 == 10) {
-        if (!(DAT_801cba08.unk1440.word >> 6 & 1)) {
-            if (DAT_801cba08.unk1448[r->unk09] == 3) {
+        if (!(game_progress.unk1440.word >> 6 & 1)) {
+            if (game_progress.unk1448[r->unk09] == 3) {
                 e->unk70 &= ~0x2000000;
-                DAT_801cba08.unk1440.word |= 0x40;
+                game_progress.unk1440.word |= 0x40;
                 e->unk1C.bytes[0] = 0;
                 e->unk1C.bytes[3] = 1;
                 goto next;
@@ -48,20 +48,20 @@ void map_step_creature(void)
             creature_despawn(e);
             goto next;
         }
-        if (!(DAT_801cba08.unk1440.word >> 7 & 1) && e->unk64 != 0) {
+        if (!(game_progress.unk1440.word >> 7 & 1) && e->unk64 != 0) {
             viewer.unk190[4][1] = 6000;
             viewer.unk190[4][0] = 0;
-            DAT_801cba08.unk1440.word |= 0x80;
+            game_progress.unk1440.word |= 0x80;
             viewer.unk2C |= 0x100;
             e->unk1C.bytes[3] = 0;
             e->unk70 &= ~0x2000000;
         } else if (e->unk05 == 5) {
-            DAT_801cba08.unk1440.word |= 0x20000000;
+            game_progress.unk1440.word |= 0x20000000;
         }
     }
 next:
     if (e->unk02 == 5) {
-        if (e->unk1C.bytes[0] == 0 && DAT_801cba08.unk1448[r->unk09] == 1) {
+        if (e->unk1C.bytes[0] == 0 && game_progress.unk1448[r->unk09] == 1) {
             e->unk1C.bytes[0] = 1;
             creature_start_script(e, 6);
             viewer.unk218 = 5;
@@ -89,9 +89,9 @@ next:
     if (e->unkB0 >= 0 ? (short)e->unk2A >= 4096 : (short)e->unk2A <= 0) {
         e->unk1A = 0xff;
         if (e->unk02 == 10) {
-            if (DAT_801cba08.unk1440.word >> 7 & 1) {
+            if (game_progress.unk1440.word >> 7 & 1) {
                 creature_pick_move();
-            } else if (DAT_801cba08.unk1440.word >> 6 & 1) {
+            } else if (game_progress.unk1440.word >> 6 & 1) {
                 if (e->unk1C.bytes[0] == 0) {
                     creature_start_script(e, 9);
                     e->unk1C.bytes[0] = 1;

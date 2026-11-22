@@ -76,9 +76,9 @@ void map_update_events(void)
         map_warp_player(0);
     else if (fdat_801edc50 == 2)
         map_warp_player(1);
-    if (!(DAT_801cba08.unk1440.word >> 18 & 1) && e->unk2C == 0) {
+    if (!(game_progress.unk1440.word >> 18 & 1) && e->unk2C == 0) {
         viewer.unk218 = 5;
-        DAT_801cba08.unk1440.word |= 0x40000;
+        game_progress.unk1440.word |= 0x40000;
         lighting.area_mode[3] = 0x11;
         lighting.area_mode[20] = 0x11;
         lighting.area_mode[24] = 0x11;

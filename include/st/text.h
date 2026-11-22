@@ -10,13 +10,13 @@
 #include <LIBGPU.H>
 
 /* .sbss words the glyph drawer reads with lui; their owner is unknown. */
-extern u16 DAT_800881a0;
+extern u16 text_scroll_list;
 extern u16 DAT_800881a2;
-extern u16 DAT_800881ac;
-extern u16 DAT_800881ae; /* set by menu_arrange_icons_draw around the grid columns */
+extern u16 text_scroll_mode;
+extern u16 number_narrow; /* set by menu_arrange_icons_draw around the grid columns */
 
 /* Read by the title-card overlay; owners unknown. */
-extern u16 DAT_80088190;
+extern u16 talk_stream_file;
 
 void ui_draw_glyph(u16 c, u16 x, u16 y, CVECTOR *color);
 void ui_draw_text(u16 *s, u16 x, u16 y, CVECTOR *color);

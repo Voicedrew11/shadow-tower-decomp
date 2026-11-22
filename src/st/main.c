@@ -48,8 +48,8 @@ int main(void)
     u8 *heap;
     u_char result[8];
 
-    heap = DAT_80013980 + ((DAT_80013988 - DAT_80013980 + HEAP_ALIGN - 1) & ~(HEAP_ALIGN - 1));
-    DAT_8001398c = heap;
+    heap = overlay_area_start + ((overlay_area_end - overlay_area_start + HEAP_ALIGN - 1) & ~(HEAP_ALIGN - 1));
+    heap_base = heap;
     InitHeap3((unsigned long *)heap, HEAP_TOP - heap);
     while (CdInit() == 0)
         CdSync(0, result);
@@ -154,7 +154,7 @@ void game_load_start_file(void)
             if (value == FN_END)
                 continue;
             equipment[slot] = value;
-            DAT_801c7590.counts[value].count++;
+            inventory.counts[value].count++;
             if (value < 266 && !(vis_table_c.unk0070[value / 32] & (1 << (value % 32))))
                 viewer.unk28++;
             vis_table_c.unk0070[value / 32] |= 1 << (value % 32);
@@ -163,7 +163,7 @@ void game_load_start_file(void)
                 continue;
             if (value <= 0)
                 continue;
-            DAT_801c7590.counts[id].count = value;
+            inventory.counts[id].count = value;
             if (id < 266 && !(vis_table_c.unk0070[id / 32] & (1 << (id % 32))))
                 viewer.unk28++;
             vis_table_c.unk0070[id / 32] |= 1 << (id % 32);
@@ -178,7 +178,7 @@ void game_load_start_file(void)
     if (all_items) {
         for (i = 0; i < 314; i++) {
             if (vis_table_c.unk0118[i].unk4 != 0xff)
-                DAT_801c7590.counts[i].count++;
+                inventory.counts[i].count++;
             if (i < 266 && !(vis_table_c.unk0070[i / 32] & (1 << (i % 32))))
                 viewer.unk28++;
             vis_table_c.unk0070[i / 32] |= 1 << (i % 32);
@@ -264,7 +264,7 @@ StHudSprite hud_sprites[46] = {
  * zero until an area loads its own (copy_words copies them in).
  */
 DATA(0x8007f78c, 0xc00, ".data")
-StLightInit DAT_8007f78c[64] = {
+StLightInit lighting_defaults[64] = {
     {{{0}}},
     {{{0}}},
     {{{0}}},

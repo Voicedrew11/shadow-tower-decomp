@@ -114,7 +114,7 @@ typedef union {
         s32 ids[10];     /* 0x08 */
     } map;
     struct {
-        s16 flags;       /* 0x00: tested against DAT_801cd180.unk22 */
+        s16 flags;       /* 0x00: tested against pad_state.unk22 */
         u8 level[12];    /* 0x02 */
     } levels;            /* menu_button_config_draw */
 } MenuState;
@@ -312,21 +312,21 @@ typedef struct {
     s32 unk16E0;         /* 0x16e0: save id, -1 until the first save (src/st/save.c) */
     u8 unk16E4[48];      /* by area */
 } Data801cba08;
-extern Data801cba08 DAT_801cba08;
+extern Data801cba08 game_progress;
 typedef char Data801cba08Size[sizeof(Data801cba08) == 0x1714 ? 1 : -1];
-/* Members of DAT_801cba08 under the names they had as separate identities:
+/* Members of game_progress under the names they had as separate identities:
  * +0x14a8, two 5-word rows cleared to -1 (src/st/main.c); +0x16d8, the
  * examine/item-use result (0 none, 1 done, 2 nothing to use; src/st/item.c);
  * +0x16dc, nonzero runs the warp player_warp_back after the table A pass
  * (creatures_update; player_warp_back clears it). */
-#define DAT_801cceb0 ((u32 (*)[5])DAT_801cba08.unk14A8)
-#define DAT_801cd0e0 DAT_801cba08.unk16D8
-#define DAT_801cd0e4 DAT_801cba08.unk16DC
+#define DAT_801cceb0 ((u32 (*)[5])game_progress.unk14A8)
+#define DAT_801cd0e0 game_progress.unk16D8
+#define DAT_801cd0e4 game_progress.unk16DC
 
 
 /* .sbss words the map page reads with lui; their owner is unknown. */
 extern s32 DAT_8008818c;
-extern u16 DAT_800881a8;
+extern u16 area_info_list_shown;
 
 /* Option page state bytes; owner unknown. */
 
@@ -338,16 +338,16 @@ extern MenuMessages menu_messages;
 #define MESSAGE_IN(table, i) ((u16 *)((table)->text + (table)->offsets[i]))
 
 /* Item stat figures that menu_arrange_icons_draw_caption formats (whole and tenths). */
-extern u16 DAT_8008819e;
+extern u16 menu_figure_whole;
 extern u16 DAT_80088188;
 
 /* The status pages' toggle between the attribute and the figure page. */
-extern u16 DAT_800881aa;
+extern u16 menu_second_page;
 extern u16 DAT_80088192;
 
 
 /* Seven list slots cleared together by card_draw_port_choice. */
-extern s32 DAT_8017beb0[7];
+extern s32 file_row_clipped[7];
 extern s16 DAT_800881f0[7];
 
 /* src/st/render.c: the pause menu pages */

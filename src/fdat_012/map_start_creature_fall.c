@@ -84,7 +84,7 @@ void map_start_creature_fall(Vis212 *e)
     e->unk16 = 0;
     e->unk70 = range & ~0x2000000;
     e->unk50 = collision & ~0x80;
-    if (DAT_801cba08.unk1448[r->unk09] != 4)
+    if (game_progress.unk1448[r->unk09] != 4)
         return;
     if (vis_table_c.unk0000[3] == 16) {
         c = &vis_table_c.entries[48];

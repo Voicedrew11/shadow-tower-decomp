@@ -19,12 +19,12 @@
 
 /* The unit z vector vector_from_angles_zyx turns (src/st/math.c). */
 DATA(0x8008809c, 0x8, ".sdata")
-SVECTOR DAT_8008809c = {0, 0, 4096, 0};
+SVECTOR unit_vector_z = {0, 0, 4096, 0};
 
 ADDRESS(0x80045f90, 0x28)
 void image_stream_queue(int archive, int member, void (*done)())
 {
-    cd_queue_stream_member(archive, member, (u8 *)DAT_80088c88, done);
+    cd_queue_stream_member(archive, member, (u8 *)cd_file_buffer, done);
 }
 
 /* Takes the next run of at most 16 sectors from the request's count. */

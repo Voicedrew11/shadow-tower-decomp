@@ -624,7 +624,7 @@ void fighter_draw_skeletal(void)
  * The position of vertex `index` of part `node` of fighter `id`'s model,
  * moved by that node's composed matrix in the fighter's skeletal slot; a
  * zero vector when the model or slot is missing (ST.EXE's
- * anim_set_node_vertex composes from DAT_8008040c, VS from a local
+ * anim_set_node_vertex composes from identity_matrix, VS from a local
  * identity).
  */
 ADDRESS(0x800256bc, 0x1bc)

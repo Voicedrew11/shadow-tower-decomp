@@ -23,7 +23,7 @@ typedef struct {
     s16 z;
 } StPlacement;
 
-/* placements_expand fills DAT_8015c488.objects (StObject24, st/gfx.h). */
+/* placements_expand fills placement_objects.objects (StObject24, st/gfx.h). */
 
 /* A TIM file header: its id word and its flags (8: a CLUT block follows). */
 typedef struct {

@@ -29,7 +29,7 @@ void map_step_creature(void)
     u32 flags;
 
     if (e->unk02 == 0 && e->unk05 == 5) {
-        Data801cba08 *story = &DAT_801cba08;
+        Data801cba08 *story = &game_progress;
 
         flags = story->unk1444.word;
         fdat_801ed938 = 1;

@@ -57,7 +57,7 @@ void map_restore_progress(void)
     Vis212 *e = &vis_table_a.entries[48];
     Vis192 *r = &vis_table_a.unk3500[0];
 
-    if (e->unk05 != 3 && DAT_801cba08.unk1448[r->unk09] == 0)
+    if (e->unk05 != 3 && game_progress.unk1448[r->unk09] == 0)
         fdat_801ed87c = 0;
     else
         fdat_801ed87c = 0xff;
@@ -74,7 +74,7 @@ void map_update_events(void)
     if (fdat_801ed87c == 0) {
         if (e->unk2C == 0)
             fdat_801ed87c = 0xff;
-        if (DAT_801cba08.unk1448[r->unk09] == 1) {
+        if (game_progress.unk1448[r->unk09] == 1) {
             creature_drop_item(e, 0x116);
             creature_fade_out_despawn(e);
             fdat_801ed87c = 0xff;

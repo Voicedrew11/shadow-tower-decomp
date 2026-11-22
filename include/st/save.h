@@ -38,10 +38,10 @@ typedef struct {
 
 /* The save-data image save_pack_data fills and save_unpack_data reads. */
 typedef struct {
-    u32 unk0;            /* 0x0000: DAT_801cba08.unk16E0 */
+    u32 unk0;            /* 0x0000: game_progress.unk16E0 */
     u8 unk4[5];          /* 0x0004: area_state.unk4..unk8 */
     u8 unk9[3];
-    u32 unkC[0x60];      /* 0x000c: DAT_801cba08.unk0 */
+    u32 unkC[0x60];      /* 0x000c: game_progress.unk0 */
     u32 unk18C[0x30];
     u32 unk24C[0x180];
     u32 unk84C[0x180];
@@ -72,11 +72,11 @@ typedef struct {
     s16 unk187C[13][2];
     u8 unk18B0[3];
     u8 unk18B3;
-    u8 unk18B4[6];       /* 0x18b4: settings (DAT_801cd120) */
+    u8 unk18B4[6];       /* 0x18b4: settings (game_settings) */
     u8 unk18BA[2];
     u32 unk18BC[5];
     u32 unk18D0[0x4f];
-    u32 unk1A0C[0x4f];   /* 0x1a0c: DAT_801c7590 */
+    u32 unk1A0C[0x4f];   /* 0x1a0c: inventory */
     u32 unk1B48[10];
     u16 unk1B70[21];
     u8 unk1B9A[2];
@@ -86,7 +86,7 @@ typedef struct {
     u32 unk1CE4[24];     /* 0x1ce4: lighting.area_mode */
     u16 unk1D44[14];
     u8 unk1D60[14];
-    u16 unk1D6E[12];     /* 0x1d6e: the button masks (DAT_801cd180.unk22) */
+    u16 unk1D6E[12];     /* 0x1d6e: the button masks (pad_state.unk22) */
 } StSaveData;
 
 void item_counts_clear(void);

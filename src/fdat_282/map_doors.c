@@ -53,9 +53,9 @@ void map_step_creature(void)
     if (e == a19) {
         if (e->unk64 != 0) {
             e->unk1C.bytes[3] = 0;
-            DAT_801cba08.unk1448[r->unk09]++;
+            game_progress.unk1448[r->unk09]++;
         }
-        if (DAT_801cba08.unk1448[r->unk09] == 4)
+        if (game_progress.unk1448[r->unk09] == 4)
             e->unk70 &= ~0x2000000;
     }
     if (e == a49 && viewer.unk178 == 0x61) {
@@ -71,7 +71,7 @@ void map_step_creature(void)
             creature_start_script(e, 0);
         else if (e == a50)
             creature_start_script(e, 4);
-        else if (e == a19 && DAT_801cba08.unk1448[r->unk09] == 3)
+        else if (e == a19 && game_progress.unk1448[r->unk09] == 3)
             creature_start_script(e, 0);
         else {
             e->unk1A = 0xff;
@@ -149,9 +149,9 @@ void map_talk_then_open_door(int id)
     }
     r = &vis_table_a.unk3500[e->unk02];
     if (id == 0x55)
-        DAT_801cba08.unk1448[r->unk09] = 0;
+        game_progress.unk1448[r->unk09] = 0;
     else
-        DAT_801cba08.unk1448[r->unk09] = 1;
+        game_progress.unk1448[r->unk09] = 1;
     step = door->unk48 * 4;
     r->unk60[0]->unk00 = 0x70;
     r->unk60[1]->unk00 = 0x71;
@@ -160,7 +160,7 @@ void map_talk_then_open_door(int id)
     r->unk60[6]->unk00 = 0x80;
     r->unk60[7]->unk00 = 0x80;
     creature_force_talk(e, 0, 0);
-    DAT_801cba08.unk1448[r->unk09] = 3;
+    game_progress.unk1448[r->unk09] = 3;
     creature_start_script(e, 3);
     do {
         e->unk2A += e->unkB0;
@@ -213,7 +213,7 @@ void map_open_door_then_play_script(void)
     r->unk60[5]->unk00 = 0x70;
     r->unk60[6]->unk00 = 0x71;
     r->unk60[7]->unk00 = 0x72;
-    DAT_801cba08.unk1448[r->unk09] = 2;
+    game_progress.unk1448[r->unk09] = 2;
     creature_force_talk(e, 0, 0);
     n = door->unk4A.door.unk4E;
     while (n--) {
@@ -240,5 +240,5 @@ gate_raised:
             e->unk2A = 0xfff;
         world_run_frame(NULL, NULL, 0);
     } while ((short)e->unk2A != 0xfff);
-    DAT_801cba08.unk1448[r->unk09] = 3;
+    game_progress.unk1448[r->unk09] = 3;
 }

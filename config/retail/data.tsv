@@ -84,13 +84,13 @@ STR.EXE	0x80032908	0x22108	0x10	unclassified	coverage-gap			payload-complement	.
 STR.EXE	0x80032918	0x22118	0x38	bss	proven	dec	DECENV	asm;src/str/main.c str.main	str.main fixed .bss
 STR.EXE	0x80032950	0x22150	0x6b0	bss	proven	vlc_buffer	u_long[2][40960]	asm;src/str/main.c str.main	COMMON; continues past the load image
 ST.EXE	0x80011000	0x800	0x2974	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
-ST.EXE	0x80013974	0x3174	0x4	defined	candidate	DAT_80013974	u8 *	retail-word;src/st/rdata_bss_bounds.c st.rdata_bss_bounds	read-only word: the bss group start (_bss_org = .sbss start 0x80088188)
-ST.EXE	0x80013978	0x3178	0x4	defined	candidate	DAT_80013978	u8 *	retail-word;src/st/rdata_bss_bounds.c st.rdata_bss_bounds	read-only word: the bss group end (_bss_orgend 0x801eb560, the FDAT load address)
+ST.EXE	0x80013974	0x3174	0x4	defined	candidate	bss_start	u8 *	retail-word;src/st/rdata_bss_bounds.c st.rdata_bss_bounds	read-only word: the bss group start (_bss_org = .sbss start 0x80088188)
+ST.EXE	0x80013978	0x3178	0x4	defined	candidate	bss_end	u8 *	retail-word;src/st/rdata_bss_bounds.c st.rdata_bss_bounds	read-only word: the bss group end (_bss_orgend 0x801eb560, the FDAT load address)
 ST.EXE	0x8001397c	0x317c	0x4	defined	candidate	DAT_8001397c	u8 *	retail-word;src/st/rdata_bss_bounds.c st.rdata_bss_bounds	read-only word: the bss group end (_bss_orgend 0x801eb560, the FDAT load address)
-ST.EXE	0x80013980	0x3180	0x4	defined	candidate	DAT_80013980	u8 *	retail-word;src/st/rdata_bss_bounds.c st.rdata_bss_bounds	read-only word: the bss group end = the overlay area start; main and st.area_load read it
+ST.EXE	0x80013980	0x3180	0x4	defined	candidate	overlay_area_start	u8 *	retail-word;src/st/rdata_bss_bounds.c st.rdata_bss_bounds	read-only word: the bss group end = the overlay area start; main and st.area_load read it
 ST.EXE	0x80013984	0x3184	0x4	defined	candidate	DAT_80013984	u8 *	retail-word;src/st/rdata_bss_bounds.c st.rdata_bss_bounds	read-only word: the overlay area after the FDAT header (0x801eb560 + 0x84)
-ST.EXE	0x80013988	0x3188	0x4	defined	candidate	DAT_80013988	u8 *	retail-word;src/st/rdata_bss_bounds.c st.rdata_bss_bounds	read-only word: the end of the largest overlay with its bss (FDAT_272); main reads it
-ST.EXE	0x8001398c	0x318c	0x4	defined	candidate	DAT_8001398c	u8 *	retail-word;src/st/rdata_bss_bounds.c st.rdata_bss_bounds	read-only word: the end of the largest overlay; main stores the heap base here
+ST.EXE	0x80013988	0x3188	0x4	defined	candidate	overlay_area_end	u8 *	retail-word;src/st/rdata_bss_bounds.c st.rdata_bss_bounds	read-only word: the end of the largest overlay with its bss (FDAT_272); main reads it
+ST.EXE	0x8001398c	0x318c	0x4	defined	candidate	heap_base	u8 *	retail-word;src/st/rdata_bss_bounds.c st.rdata_bss_bounds	read-only word: the end of the largest overlay; main stores the heap base here
 ST.EXE	0x80013990	0x3190	0x990	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 ST.EXE	0x80068660	0x57e60	0x4	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 ST.EXE	0x80068670	0x57e70	0x4	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
@@ -242,21 +242,21 @@ ST.EXE	0x8007eea0	0x6e6a0	0x4	unclassified	coverage-gap			payload-complement	may
 ST.EXE	0x8007f318	0x6eb18	0xc	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 ST.EXE	0x8007f3e4	0x6ebe4	0x10	defined	proven	DAT_8007f3e4	u32[4]	src/st/main.c st.main	unreferenced zero words at the start of .data, before hud_sprites (a native link puts hud_sprites directly after .text)
 ST.EXE	0x8007f3f4	0x6ebf4	0x398	defined	candidate	hud_sprites	StHudSprite[46]	asm;src/st/hud.c st.hud;src/st/main.c st.main	46 HUD sprite records of 20 bytes in runs ended by flags 0xff
-ST.EXE	0x8007f78c	0x6ef8c	0xc00	defined	candidate	DAT_8007f78c	StLightInit[64]	asm;src/st/light.c st.light;src/st/area_load.c st.area_load;src/st/main.c st.main	64 default lighting environments of 0x30 bytes; 0..47 zero, filled per area by copy_words
+ST.EXE	0x8007f78c	0x6ef8c	0xc00	defined	candidate	lighting_defaults	StLightInit[64]	asm;src/st/light.c st.light;src/st/area_load.c st.area_load;src/st/main.c st.main	64 default lighting environments of 0x30 bytes; 0..47 zero, filled per area by copy_words
 ST.EXE	0x8008038c	0x6fb8c	0x80	defined	candidate	area_hooks_default	AreaHooks	asm;src/st/area_load.c st.area_load;src/st/data_hooks_matrices_xa.c st.data_hooks_matrices_xa	the handler table an area uses until its own is loaded: 32 slots, each area_hook_none
-ST.EXE	0x8008040c	0x6fc0c	0x20	defined	candidate	DAT_8008040c	MATRIX	asm;src/st/objects.c st.objects;src/st/anim_set.c st.anim_set;src/st/data_hooks_matrices_xa.c st.data_hooks_matrices_xa	identity MATRIX handed to model_draw by world_draw_creatures and world_draw_effects_placements and copied to the scratchpad MATRIX by anim_set_node_vertex
-ST.EXE	0x8008042c	0x6fc2c	0x80	defined	candidate	DAT_8008042c	MATRIX[4]	asm;src/st/collision.c st.collision;src/st/data_hooks_matrices_xa.c st.data_hooks_matrices_xa	four quarter-turn yaw matrices for map blocks (the collision test applies them)
-ST.EXE	0x800804ac	0x6fcac	0x480	defined	candidate	DAT_800804ac	u32[48][6]	asm;src/st/xa.c st.xa;src/st/data_hooks_matrices_xa.c st.data_hooks_matrices_xa	XA stream lengths in sectors per stream file and channel (xa_start_stream); 48 files like DAT_801cba08.unk1448/unk1478 (per-file arrays of 48, cleared and saved as 12 words); rows 40..47 zero (game_load_common_data locates files 0..39)
-ST.EXE	0x8008092c	0x7012c	0x12	defined	candidate	DAT_8008092c	u8[18]	asm;src/st/menu_equip_arrange.c st.menu_equip_arrange;src/st/data_magic_list_offsets.c st.data_magic_list_offsets	byte table: message offset from 916 per ring sub-list entry
+ST.EXE	0x8008040c	0x6fc0c	0x20	defined	candidate	identity_matrix	MATRIX	asm;src/st/objects.c st.objects;src/st/anim_set.c st.anim_set;src/st/data_hooks_matrices_xa.c st.data_hooks_matrices_xa	identity MATRIX handed to model_draw by world_draw_creatures and world_draw_effects_placements and copied to the scratchpad MATRIX by anim_set_node_vertex
+ST.EXE	0x8008042c	0x6fc2c	0x80	defined	candidate	quarter_turn_matrices	MATRIX[4]	asm;src/st/collision.c st.collision;src/st/data_hooks_matrices_xa.c st.data_hooks_matrices_xa	four quarter-turn yaw matrices for map blocks (the collision test applies them)
+ST.EXE	0x800804ac	0x6fcac	0x480	defined	candidate	xa_stream_lengths	u32[48][6]	asm;src/st/xa.c st.xa;src/st/data_hooks_matrices_xa.c st.data_hooks_matrices_xa	XA stream lengths in sectors per stream file and channel (xa_start_stream); 48 files like game_progress.unk1448/unk1478 (per-file arrays of 48, cleared and saved as 12 words); rows 40..47 zero (game_load_common_data locates files 0..39)
+ST.EXE	0x8008092c	0x7012c	0x12	defined	candidate	magic_name_messages	u8[18]	asm;src/st/menu_equip_arrange.c st.menu_equip_arrange;src/st/data_magic_list_offsets.c st.data_magic_list_offsets	byte table: message offset from 916 per ring sub-list entry
 ST.EXE	0x8008093e	0x7013e	0x759a	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 ST.EXE	0x80087ed8	0x776d8	0x8	defined	proven	DAT_80087ed8	RECT	retail-layout;src/st/render.c st.render	unreferenced .sdata RECT {320, 0, 320, 240} at the start of st.render's .sdata (an 8-byte constant under -G8)
-ST.EXE	0x80087ee0	0x776e0	0x8	defined	proven	DAT_80087ee0	RECT	retail-layout;src/st/render.c st.render	unreferenced .sdata RECT {960, 256, 64, 240} before the colour word DAT_80087ee8
-ST.EXE	0x80087ee8	0x776e8	0x4	defined	proven	DAT_80087ee8	u_long	asm;src/st/render.c st.render	$gp+0x28; initialized word 0x00808080 (colour 128, 128, 128) player_draw_equipment_model loads; defined by st.render
-ST.EXE	0x80087eec	0x776ec	0x8	defined	proven	DAT_80087eec	u32[2]	retail-layout;src/st/render.c st.render	unreferenced zero .sdata bytes after DAT_80087ee8, before quad's literals
+ST.EXE	0x80087ee0	0x776e0	0x8	defined	proven	DAT_80087ee0	RECT	retail-layout;src/st/render.c st.render	unreferenced .sdata RECT {960, 256, 64, 240} before the colour word equipment_model_rgb
+ST.EXE	0x80087ee8	0x776e8	0x4	defined	proven	equipment_model_rgb	u_long	asm;src/st/render.c st.render	$gp+0x28; initialized word 0x00808080 (colour 128, 128, 128) player_draw_equipment_model loads; defined by st.render
+ST.EXE	0x80087eec	0x776ec	0x8	defined	proven	DAT_80087eec	u32[2]	retail-layout;src/st/render.c st.render	unreferenced zero .sdata bytes after equipment_model_rgb, before quad's literals
 ST.EXE	0x80087ef4	0x776f4	0x24	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
-ST.EXE	0x80087f18	0x77718	0x4	defined	candidate	DAT_80087f18	s32	asm;src/st/hud.c st.hud	$gp+0x58 .sdata word; blink phase of world_render_frame's selection frame
+ST.EXE	0x80087f18	0x77718	0x4	defined	candidate	hud_selection_blink	s32	asm;src/st/hud.c st.hud	$gp+0x58 .sdata word; blink phase of world_render_frame's selection frame
 ST.EXE	0x80087f1c	0x7771c	0x18	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
-ST.EXE	0x80087f34	0x77734	0x4	defined	candidate	DAT_80087f34	s32	asm;src/st/render.c st.render	$gp+0x74 .sdata word; blink phase of the map page arrows (menu_area_info_draw)
+ST.EXE	0x80087f34	0x77734	0x4	defined	candidate	area_info_blink	s32	asm;src/st/render.c st.render	$gp+0x74 .sdata word; blink phase of the map page arrows (menu_area_info_draw)
 ST.EXE	0x80087f38	0x77738	0x30	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 ST.EXE	0x80087f68	0x77768	0x8	defined	proven	DAT_80087f68	s32[2]	src/st/render.c st.render	unreferenced zero words in .sdata between menu_equip_info_draw_attributes and menu_equip_info_draw_item constants
 ST.EXE	0x80087f70	0x77770	0x14	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
@@ -264,19 +264,19 @@ ST.EXE	0x80087f84	0x77784	0x4	defined	proven	DAT_80087f84	s32	src/st/render.c st
 ST.EXE	0x80087f88	0x77788	0x8c	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 ST.EXE	0x80088014	0x77814	0x4	defined	proven	DAT_80088014	u32	retail-layout;src/st/render.c st.render	unreferenced zero .sdata word between st.render's literals (to 0x80088013) and the effect script's (0x80088018)
 ST.EXE	0x80088018	0x77818	0x24	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
-ST.EXE	0x8008803c	0x7783c	0x2	defined	proven	DAT_8008803c	s16	asm;src/st/player.c st.player	$gp+0x17c .sdata halfword player_update_motion halves each frame
+ST.EXE	0x8008803c	0x7783c	0x2	defined	proven	vertical_speed_pitch	s16	asm;src/st/player.c st.player	$gp+0x17c .sdata halfword player_update_motion halves each frame
 ST.EXE	0x8008803e	0x7783e	0x12	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
-ST.EXE	0x80088050	0x77850	0x4	defined	proven	DAT_80088050	s32	asm;band J	small-data word player_enter_hurt_state compares with viewer+0x23c; .sdata after player_swap_hand_items constants
+ST.EXE	0x80088050	0x77850	0x4	defined	proven	guard_sound_frame	s32	asm;band J	small-data word player_enter_hurt_state compares with viewer+0x23c; .sdata after player_swap_hand_items constants
 ST.EXE	0x80088054	0x77854	0x48	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
-ST.EXE	0x8008809c	0x7789c	0x8	defined	candidate	DAT_8008809c	SVECTOR	asm;src/st/math.c st.math;src/st/image_stream.c st.image_stream	unit z vector {0, 0, 4096, 0} vector_from_angles_zyx turns
+ST.EXE	0x8008809c	0x7789c	0x8	defined	candidate	unit_vector_z	SVECTOR	asm;src/st/math.c st.math;src/st/image_stream.c st.image_stream	unit z vector {0, 0, 4096, 0} vector_from_angles_zyx turns
 ST.EXE	0x800880a4	0x778a4	0x114	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 ST.EXE	0x800881b8	0x779b8	0x2	bss	proven	DAT_800881b8	s16	layout;src/st/render.c st.render	.sbss; unreferenced halfword at the start of st.render's .sbss: the clip window statics after it sit at +2, +4 and from +8
-ST.EXE	0x800881ba	0x779ba	0x2	bss	proven	DAT_800881ba	s16	asm;src/st/render.c st.render	.sbss static; text clip window left bound
-ST.EXE	0x800881bc	0x779bc	0x2	bss	proven	DAT_800881bc	s16	asm;src/st/render.c st.render	.sbss static; text clip window right bound
+ST.EXE	0x800881ba	0x779ba	0x2	bss	proven	text_clip_left	s16	asm;src/st/render.c st.render	.sbss static; text clip window left bound
+ST.EXE	0x800881bc	0x779bc	0x2	bss	proven	text_clip_right	s16	asm;src/st/render.c st.render	.sbss static; text clip window right bound
 ST.EXE	0x800881be	0x779be	0x2	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
-ST.EXE	0x800881c0	0x779c0	0x4	bss	proven	DAT_800881c0	s32	asm;src/st/render.c st.render	.sbss static; clip window advance
-ST.EXE	0x800881c4	0x779c4	0x4	bss	proven	DAT_800881c4	s32	asm;src/st/render.c st.render	.sbss static; clip window enable
-ST.EXE	0x800881c8	0x779c8	0x4	bss	proven	DAT_800881c8	s32	asm;src/st/render.c st.render	.sbss static; glyphs dropped past the right bound
+ST.EXE	0x800881c0	0x779c0	0x4	bss	proven	text_clip_advance	s32	asm;src/st/render.c st.render	.sbss static; clip window advance
+ST.EXE	0x800881c4	0x779c4	0x4	bss	proven	text_clip_on	s32	asm;src/st/render.c st.render	.sbss static; clip window enable
+ST.EXE	0x800881c8	0x779c8	0x4	bss	proven	text_clip_dropped	s32	asm;src/st/render.c st.render	.sbss static; glyphs dropped past the right bound
 ST.EXE	0x800881cc	0x779cc	0x634	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 TITLE.EXE	0x80012000	0x800	0xa04	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 TITLE.EXE	0x80014528	0x2d28	0x4	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
@@ -596,7 +596,7 @@ VS.EXE	0x8004a218	0x39a18	0xc	unclassified	coverage-gap			payload-complement	may
 VS.EXE	0x8004a224	0x39a24	0x11082	defined	candidate	fighter_data	VsFighterData[]	asm;src/vs/main.c vs.main	the fighters' data blocks: 151 VsFighterData records (0x1ce bytes each) fighters_load_round indexes by character; src/vs/data_fighters.c
 VS.EXE	0x8005b2a6	0x4aaa6	0x2	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 VS.EXE	0x8005b2a8	0x4aaa8	0x10	defined	candidate	light_scale	VECTOR	asm;src/vs/anim_set.c vs.anim_set	.data VECTOR (4096, 4096, 4096): the scale fighter_draw_skeletal/fighter_draw_vertex_anim/model_draw_part_at apply to their light matrix
-VS.EXE	0x8005b2b8	0x4aab8	0x20	defined	candidate	identity_matrix	MATRIX	retail bytes: identity rotation, zero translation; follows the VECTOR	unreferenced identity MATRIX after the light-scale VECTOR (ST.EXE keeps a referenced identity MATRIX in its .data, DAT_8008040c)
+VS.EXE	0x8005b2b8	0x4aab8	0x20	defined	candidate	identity_matrix	MATRIX	retail bytes: identity rotation, zero translation; follows the VECTOR	unreferenced identity MATRIX after the light-scale VECTOR (ST.EXE keeps a referenced identity MATRIX in its .data, identity_matrix)
 VS.EXE	0x8005b2d8	0x4aad8	0x7f40	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 VS.EXE	0x80063218	0x52a18	0x4	defined	candidate	light_rot_x	s32	asm;src/vs/anim_set.c vs.anim_set	.sdata word (0) read absolutely by the -G8 model renderers: an x angle added to the light rotation
 VS.EXE	0x8006321c	0x52a1c	0x4	defined	candidate	light_rot_y	s32	asm;src/vs/anim_set.c vs.anim_set	.sdata word (0) read absolutely by the -G8 model renderers: a y angle added to the light rotation

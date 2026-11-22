@@ -1,8 +1,8 @@
 /*
- * ST.EXE: a data-only module (WIP) defining game .bss:
- * the visibility records and source masks and the lighting table.
- * PSYLINK allocates each object's tentative definitions (COMMON) after the
- * previous object's, in symbol-hash bucket order (docs/executable-linking.md),
+ * ST.EXE: a data-only module (WIP) defining game .bss: the visibility
+ * records, source masks and axis masks. PSYLINK allocates each object's
+ * tentative definitions (COMMON) after the previous object's, starting
+ * eight-aligned, in symbol-hash bucket order (docs/executable-linking.md),
  * so the definitions here are listed in address order and their spellings
  * ascend in bucket; every user declares them extern.
  */
@@ -20,6 +20,4 @@ VisRecord vis_records[512];
 DATA(0x8017d6d0, 0x8000, ".bss")
 VisSourceMask vis_source_masks[512];
 DATA(0x801856d0, 0x6000, ".bss")
-VisSourceMask DAT_801856d0[3][128];
-DATA(0x8018b6d0, 0x1b6c, ".bss")
-StLighting lighting;
+VisSourceMask vis_axis_masks[3][128];

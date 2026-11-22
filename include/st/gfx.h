@@ -205,7 +205,7 @@ typedef struct {
 extern WorldState world_state;
 
 /* The two 0x20000-byte GPU packet buffers. */
-extern u_long DAT_8011c488[];
+extern u_long packet_buffers[];
 /* 128 animated objects of 24 bytes; id 0xffff marks a free one. */
 typedef struct {
     u16 unk0;            /* 0x00: model id - 40; bit 15 hides it */
@@ -226,9 +226,9 @@ typedef struct {
     s32 frame;
     StObject24 objects[128];
 } StAnimObjects;
-extern StAnimObjects DAT_8015c488;
+extern StAnimObjects placement_objects;
 /* The CLUT a type-49 texture slot cycles (entries 1-14 rotate). */
-extern u16 DAT_8009ac88[16];
+extern u16 texanim_clut_buffer[16];
 
 /* src/st/view.c */
 int view_point_in_near_cone(void);

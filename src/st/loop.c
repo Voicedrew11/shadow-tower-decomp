@@ -30,7 +30,7 @@
 /* Mailbox value of TITLE.EXE's Continue. */
 #define MAILBOX_CONTINUE 2
 
-/* DAT_800881a4 values that end the game loop. */
+/* game_exit_request values that end the game loop. */
 #define EXIT_TITLE 2
 #define EXIT_ENDING 3
 
@@ -42,7 +42,7 @@ SDATA(0x80087ec4, 0x8)
  * the .sbss run st.sbss_glyph_game_exit allocates, and the request merges
  * there.
  */
-s32 DAT_800881a4;
+s32 game_exit_request;
 
 ADDRESS(0x80014a30, 0x2cc)
 void game_loop(void)
@@ -72,13 +72,13 @@ void game_loop(void)
         pad_enable();
         if (card_screen_run(0) == 1) {
             pad_clear_input();
-            DAT_801cd180.unk10 = 1;
+            pad_state.unk10 = 1;
             card_screen_close();
             loading_screen_show();
             player_reload_equipment();
         } else {
             pad_clear_input();
-            DAT_801cd180.unk10 = 1;
+            pad_state.unk10 = 1;
             card_screen_close();
             loading_screen_show();
             game_load_start_file();
@@ -89,11 +89,11 @@ void game_loop(void)
     lighting_start();
     area_load_current_blocking();
     player_reset_motion();
-    heap_init(DAT_8009c888, 0x56400);
+    heap_init(model_heap, 0x56400);
     loading_screen_end();
     pad_enable();
     pad_clear_input();
-    DAT_800881a4 = 0;
+    game_exit_request = 0;
     for (;;) {
         VECTOR a;
         SVECTOR b;
@@ -113,12 +113,12 @@ void game_loop(void)
         image_stream_update();
         sound_bank_transfer_body();
         world_render_frame(&a, &b);
-        if (DAT_800881a4 == 0)
+        if (game_exit_request == 0)
             continue;
         VSync(10);
         fade_run_frames(2, 0, 4096, 128);
         VSync(10);
-        switch (DAT_800881a4) {
+        switch (game_exit_request) {
         case EXIT_TITLE:
             game_shutdown();
             program = PROGRAM_TITLE;

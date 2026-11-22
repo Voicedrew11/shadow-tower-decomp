@@ -49,7 +49,7 @@ void collision_transform_vertices(VECTOR *pos)
     while (i--) {
         rec = &vis_records[vis_lists.sources[i]];
         sp->unk20 = (u8)(rec->unk03 & 3);
-        gte_SetRotMatrix(&DAT_8008042c[sp->unk20]);
+        gte_SetRotMatrix(&quarter_turn_matrices[sp->unk20]);
         gte_SetTransVector(&pos[i]);
         o = sp->world;
         o0 = sp->rel[0];
@@ -129,7 +129,7 @@ void collision_test_triangles(VECTOR *pos, int kind)
         f = (VisHitTri *)((u8 *)f + sp->part->n1c * 28);
         f = (VisHitTri *)((u8 *)f + sp->part->n1a * 24);
         f = (VisHitTri *)((u8 *)f + sp->part->n1e * 32);
-        m = &DAT_8008042c[rec->unk03 & 3];
+        m = &quarter_turn_matrices[rec->unk03 & 3];
         while (n-- > 0) {
             fn = (SVECTOR *)(sp->normals + f->normal);
             gte_SetRotMatrix(m);
@@ -338,7 +338,7 @@ void collision_test_quads(VECTOR *pos, int kind)
         f = (VisHitQuad *)((u8 *)f + sp->part->n1a * 24);
         f = (VisHitQuad *)((u8 *)f + sp->part->n1e * 32);
         f = (VisHitQuad *)((u8 *)f + sp->part->n_tris * 12);
-        m = &DAT_8008042c[rec->unk03 & 3];
+        m = &quarter_turn_matrices[rec->unk03 & 3];
         while (n-- > 0) {
             fn = (SVECTOR *)(sp->normals + f->normal);
             gte_SetRotMatrix(m);

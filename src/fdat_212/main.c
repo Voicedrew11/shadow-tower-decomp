@@ -80,11 +80,11 @@ void map_restore_progress(void)
 
     c28[1].unk22 = 4;
     c28->unk22 = 4;
-    if (DAT_801cba08.unk1444.bit.f8 == 1)
+    if (game_progress.unk1444.bit.f8 == 1)
         fdat_801edcd4 = 0xff;
     else
         fdat_801edcd4 = 0;
-    if (DAT_801cba08.unk1444.bit.f9 == 1) {
+    if (game_progress.unk1444.bit.f9 == 1) {
         b = vis_table_b.entries;
         fdat_801edcd8 = 0xff;
         for (i = 239; i != -1; i--) {
@@ -124,7 +124,7 @@ void map_update_events(void)
         fdat_801edcd4 = 2;
         d46->unk0C = 1;
         d46->unk02 = 0;
-        DAT_801cba08.unk1444.word |= 0x100;
+        game_progress.unk1444.word |= 0x100;
     } else if (fdat_801edcd4 == 2) {
         anim_set_node_vertex(*(StAnimSet **)d46->unk44, object_model_slot(d46->unk0a), 0, 0x23, &v1);
         c28->unk08.vx = d46->unk24.vx + v1.vx;
@@ -138,7 +138,7 @@ void map_update_events(void)
         fdat_801edcd8 = 2;
         d2->unk0C = 1;
         d2->unk02 = 0;
-        DAT_801cba08.unk1444.word |= 0x200;
+        game_progress.unk1444.word |= 0x200;
     } else if (fdat_801edcd8 == 2) {
         anim_set_node_vertex(*(StAnimSet **)d2->unk44, object_model_slot(d2->unk0a), 0, 0x23, &v2);
         c29->unk08.vx = d2->unk24.vx + v2.vx;

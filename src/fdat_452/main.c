@@ -87,7 +87,7 @@ void map_pick_shopkeeper_line(void)
     fdat_801ed8c4 = 1;
     none = 1;
     for (i = 0; i < 266; i++) {
-        if (DAT_801c7590.counts[i].count == 0)
+        if (inventory.counts[i].count == 0)
             continue;
         if (i == viewer.unk38[0] || i == viewer.unk38[1] || i == viewer.unk38[2]
             || i == viewer.unk38[3] || i == viewer.unk38[4] || i == viewer.unk38[5]
@@ -103,10 +103,10 @@ void map_pick_shopkeeper_line(void)
     if (none) {
         fdat_801ed988 = 1;
         creature_start_script(e, 1);
-    } else if ((DAT_801cba08.unk1444.word >> 1 & 3) == 0) {
+    } else if ((game_progress.unk1444.word >> 1 & 3) == 0) {
         fdat_801ed988 = 0;
         creature_start_script(e, 0);
-        DAT_801cba08.unk1444.word = (DAT_801cba08.unk1444.word & ~6) | 2;
+        game_progress.unk1444.word = (game_progress.unk1444.word & ~6) | 2;
     } else if (viewer.unk2 < viewer.unk0 >> 3) {
         fdat_801ed988 = 2;
         creature_start_script(e, 2);
@@ -175,7 +175,7 @@ void map_run_shop_visit(void)
         else
             fdat_801ed8c4 = 4;
     } else if (fdat_801ed8c4 == 4) {
-        DAT_801cd180.unk4 = 0;
+        pad_state.unk4 = 0;
         menu->unk2DC = 2;
         menu->unk2E5 = 0;
         shop_run();

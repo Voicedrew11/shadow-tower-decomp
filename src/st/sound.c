@@ -1,7 +1,7 @@
 /*
  * ST.EXE: the sound module (WIP, 0x80057b48..0x8005850c): the fixed sound
  * effects, the sound system's start and stop, the positional and plain
- * sound players over the sound state block (DAT_801dd1c0). Its key-off and
+ * sound players over the sound state block (sound_state). Its key-off and
  * VAB bank loads continue in src/st/sound_bank.c.
  */
 #include <kf/lib/address.h>
@@ -136,47 +136,47 @@ void sound_init(void)
     SsUtReverbOn();
     SsUtSetReverbDepth(20, 20);
     SsSetSerialAttr(0, 0, 1);
-    DAT_801dd1c0.unk0 = 0;
-    slot = DAT_801dd1c0.slots;
+    sound_state.unk0 = 0;
+    slot = sound_state.slots;
     i = 322;
     while (i--) {
         slot->vab = -1;
         slot->block = NULL;
         slot++;
     }
-    key = DAT_801dd1c0.keys;
-    voice = DAT_801dd1c0.voices;
+    key = sound_state.keys;
+    voice = sound_state.voices;
     i = 24;
     while (i--) {
         *key++ = 0;
         *voice++ = -1;
     }
-    buf = &DAT_801dd1c0.bufs[0];
+    buf = &sound_state.bufs[0];
     for (i = 0; i < 2; i++) {
         buf->state = 0;
-        buf->data = DAT_801cd1c0[i];
+        buf->data = sound_buffers_magic[i];
         buf++;
     }
-    buf = &DAT_801dd1c0.bufs[2];
+    buf = &sound_state.bufs[2];
     for (i = 0; i < 4; i++) {
         buf->state = 0;
-        buf->data = DAT_801d41c0[i];
+        buf->data = sound_buffers_creature[i];
         buf++;
     }
-    buf = &DAT_801dd1c0.bufs[6];
+    buf = &sound_state.bufs[6];
     for (i = 0; i < 4; i++) {
         buf->state = 0;
-        buf->data = DAT_801d01c0[i];
+        buf->data = sound_buffers_object[i];
         buf++;
     }
-    buf = &DAT_801dd1c0.bufs[10];
+    buf = &sound_state.bufs[10];
     for (i = 0; i < 4; i++) {
         buf->state = 0;
-        buf->data = DAT_801d91c0[i];
+        buf->data = sound_buffers_equipment[i];
         buf++;
     }
-    DAT_801dd1c0.bufs[14].data = DAT_801cf1c0;
-    DAT_801dd1c0.bufs[15].data = DAT_801d81c0;
+    sound_state.bufs[14].data = sound_buffer_area;
+    sound_state.bufs[15].data = sound_buffer_common;
 }
 
 /* Closes every open bank and stops the sound system. */
@@ -187,7 +187,7 @@ void sound_shutdown(void)
     int n;
 
     SsSetMVol(0, 0);
-    slot = DAT_801dd1c0.slots;
+    slot = sound_state.slots;
     n = 322;
     while (n--) {
         if (slot->vab != -1) {
@@ -208,9 +208,9 @@ void sound_shutdown(void)
 ADDRESS(0x80057fc4, 0x25c)
 s16 sound_play_positional(int id, VECTOR *pos, int volume, int range, int fade, int note)
 {
-    int dx = (pos->vx - DAT_801dd1c0.listener.vx) >> 3;
-    int dy = (pos->vy - DAT_801dd1c0.listener.vy) >> 3;
-    int dz = (pos->vz - DAT_801dd1c0.listener.vz) >> 3;
+    int dx = (pos->vx - sound_state.listener.vx) >> 3;
+    int dy = (pos->vy - sound_state.listener.vy) >> 3;
+    int dz = (pos->vz - sound_state.listener.vz) >> 3;
     int dist;
     int left; /* the wide flag (bit 15 of id) until the volume is known */
     int vol;
@@ -239,8 +239,8 @@ s16 sound_play_positional(int id, VECTOR *pos, int volume, int range, int fade, 
             capped = left;
         left = capped;
     }
-    angle = angle_from_xz(pos->vx - DAT_801dd1c0.listener.vx, pos->vz - DAT_801dd1c0.listener.vz)
-            - DAT_801dd1c0.listener_rot.vy;
+    angle = angle_from_xz(pos->vx - sound_state.listener.vx, pos->vz - sound_state.listener.vz)
+            - sound_state.listener_rot.vy;
     if (angle < 0)
         angle += 4096;
     right = left;
@@ -268,9 +268,9 @@ ADDRESS(0x80058288, 0x68)
 void sound_set_listener(VECTOR *a, SVECTOR *b)
 {
     if (a != NULL)
-        DAT_801dd1c0.listener = *a;
+        sound_state.listener = *a;
     if (b != NULL)
-        DAT_801dd1c0.listener_rot = *b;
+        sound_state.listener_rot = *b;
 }
 
 ADDRESS(0x800582f0, 0x28)
@@ -294,13 +294,13 @@ s16 sound_key_on(int id, int left, int right, int note)
 
     if (id == 255)
         return -1;
-    opt = &DAT_801cd120;
+    opt = &game_settings;
     if (opt->unk1 == 0)
         return -1;
-    snd = &DAT_801dd1c0.sounds[id & 0x7ff];
+    snd = &sound_state.sounds[id & 0x7ff];
     if (snd->slot == -1)
         return -1;
-    slot = &DAT_801dd1c0.slots[snd->slot];
+    slot = &sound_state.slots[snd->slot];
     if (slot->vab == -1 || slot->vab == 254)
         return -1;
     if (slot->block[2] == 3)
@@ -312,21 +312,21 @@ s16 sound_key_on(int id, int left, int right, int note)
         note = 0;
     else if (note >= 128)
         note = 127;
-    SpuGetAllKeysStatus(DAT_801dd1c0.keys);
+    SpuGetAllKeysStatus(sound_state.keys);
     i = 24;
     while (i--) {
-        if (DAT_801dd1c0.keys[i] == 0) {
+        if (sound_state.keys[i] == 0) {
             voice = SsUtKeyOn(slot->vab, snd->prog, snd->tone, note, 0, left, right);
-            DAT_801dd1c0.voices[voice] = id;
+            sound_state.voices[voice] = id;
             return voice;
         }
     }
     i = 24;
     while (i--) {
-        if (DAT_801dd1c0.keys[i] == 3) {
+        if (sound_state.keys[i] == 3) {
             SsUtKeyOffV(i);
             voice = SsUtKeyOn(slot->vab, snd->prog, snd->tone, note, 0, left, right);
-            DAT_801dd1c0.voices[voice] = id;
+            sound_state.voices[voice] = id;
             return voice;
         }
     }

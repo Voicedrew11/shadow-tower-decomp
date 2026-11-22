@@ -19,4 +19,4 @@ VisTableA vis_table_a;
 DATA(0x801c0310, 0x727c, ".bss")
 VisTableB vis_table_b;
 DATA(0x801c7590, 0x168, ".bss")
-Data801c7590 DAT_801c7590;
+Data801c7590 inventory;

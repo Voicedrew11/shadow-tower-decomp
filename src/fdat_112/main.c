@@ -54,9 +54,9 @@ void map_restore_progress(void)
 
     vis_table_c.entries[7].unk22 = 4;
     e = &vis_table_a.entries[48];
-    if (DAT_801cba08.unk1440.bit.f14 == 1 || DAT_801c7590.counts[303].count == 1)
+    if (game_progress.unk1440.bit.f14 == 1 || inventory.counts[303].count == 1)
         e->unk05 = 3;
-    if (DAT_801cba08.unk1440.bit.f7 == 1) {
+    if (game_progress.unk1440.bit.f7 == 1) {
         e->unk1C.bytes[3] = 0;
         e->unk70 &= ~0x2000000;
     } else {

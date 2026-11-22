@@ -303,7 +303,7 @@ void vector_from_angles_zyx(SVECTOR *rot, SVECTOR *out)
     SVECTOR v;
 
     r = *rot;
-    v = DAT_8008809c;
+    v = unit_vector_z;
     r.vy = -r.vy;
     RotMatrixZYX_gte(&r, &m);
     ApplyMatrixSV(&m, &v, out);

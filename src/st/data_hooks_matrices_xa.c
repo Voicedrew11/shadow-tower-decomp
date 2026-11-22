@@ -45,10 +45,10 @@ AreaHooks area_hooks_default = {
 };
 
 DATA(0x8008040c, 0x20, ".data")
-MATRIX DAT_8008040c = {{{4096, 0, 0}, {0, 4096, 0}, {0, 0, 4096}}, {0, 0, 0}};
+MATRIX identity_matrix = {{{4096, 0, 0}, {0, 4096, 0}, {0, 0, 4096}}, {0, 0, 0}};
 
 DATA(0x8008042c, 0x80, ".data")
-MATRIX DAT_8008042c[4] = {
+MATRIX quarter_turn_matrices[4] = {
     {{{4096, 0, 0}, {0, 4096, 0}, {0, 0, 4096}}, {0, 0, 0}},
     {{{0, 0, -4096}, {0, 4096, 0}, {4096, 0, 0}}, {0, 0, 0}},
     {{{-4096, 0, 0}, {0, 4096, 0}, {0, 0, -4096}}, {0, 0, 0}},
@@ -57,11 +57,11 @@ MATRIX DAT_8008042c[4] = {
 
 /*
  * The XA stream lengths in sectors, per stream file and channel: 48 files,
- * the file count of the save block's per-file arrays (DAT_801cba08.unk1448,
+ * the file count of the save block's per-file arrays (game_progress.unk1448,
  * unk1478); game_load_common_data locates files 0..39, the last eight rows are empty.
  */
 DATA(0x800804ac, 0x480, ".data")
-u32 DAT_800804ac[48][6] = {
+u32 xa_stream_lengths[48][6] = {
     {930, 861, 696, 842, 523, 0},
     {456, 273, 487, 495, 368, 0},
     {491, 357, 412, 377, 0, 0},

@@ -23,23 +23,23 @@ void vis_collect_sources(VECTOR *a, VECTOR *b, VECTOR *c)
     int j;
     s16 id;
 
-    x = DAT_801856d0[0][a->vx / 4096].bits;
-    y = DAT_801856d0[1][a->vy / 4096].bits;
-    z = DAT_801856d0[2][a->vz / 4096].bits;
+    x = vis_axis_masks[0][a->vx / 4096].bits;
+    y = vis_axis_masks[1][a->vy / 4096].bits;
+    z = vis_axis_masks[2][a->vz / 4096].bits;
     for (i = 0; i < 16; i++)
         mask[i] = x[i] & z[i] & y[i];
     if (b) {
-        u_long *x = DAT_801856d0[0][b->vx / 4096].bits;
-        u_long *y = DAT_801856d0[1][b->vy / 4096].bits;
-        u_long *z = DAT_801856d0[2][b->vz / 4096].bits;
+        u_long *x = vis_axis_masks[0][b->vx / 4096].bits;
+        u_long *y = vis_axis_masks[1][b->vy / 4096].bits;
+        u_long *z = vis_axis_masks[2][b->vz / 4096].bits;
 
         for (i = 0; i < 16; i++)
             mask[i] |= x[i] & z[i] & y[i];
     }
     if (c) {
-        u_long *x = DAT_801856d0[0][c->vx / 4096].bits;
-        u_long *y = DAT_801856d0[1][c->vy / 4096].bits;
-        u_long *z = DAT_801856d0[2][c->vz / 4096].bits;
+        u_long *x = vis_axis_masks[0][c->vx / 4096].bits;
+        u_long *y = vis_axis_masks[1][c->vy / 4096].bits;
+        u_long *z = vis_axis_masks[2][c->vz / 4096].bits;
 
         for (i = 0; i < 16; i++)
             mask[i] |= x[i] & z[i] & y[i];

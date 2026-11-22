@@ -67,11 +67,11 @@ void map_restore_progress(void)
 
     if (e->unk05 != 3)
         e->unk1C.bytes[3] = 2;
-    if (DAT_801cba08.unk1448[r->unk09] == 2)
+    if (game_progress.unk1448[r->unk09] == 2)
         fdat_801eda78 = 0xff;
     else
         fdat_801eda78 = 0;
-    if (!DAT_801cba08.unk1440.bit.f19) {
+    if (!game_progress.unk1440.bit.f19) {
         d39->unk0a = d40->unk0a = d41->unk0a = d42->unk0a = 0xffff;
         fdat_801eda7c = 0;
     } else {
@@ -98,7 +98,7 @@ void map_update_events(void)
     Vis88 *d41 = &vis_table_b.entries[41];
     Vis88 *d42 = &vis_table_b.entries[42];
 
-    if (state != 0xff && DAT_801cba08.unk1448[r0->unk09] == 2) {
+    if (state != 0xff && game_progress.unk1448[r0->unk09] == 2) {
         creature_drop_item(e48, 0x127);
         creature_fade_out_despawn(e48);
         fdat_801eda78 = 0xff;
@@ -108,8 +108,8 @@ void map_update_events(void)
         creature_fade_out_despawn(e48);
         fdat_801eda78 = 0xff;
     }
-    if (DAT_801cba08.unk1448[r4->unk09] >= 2)
-        DAT_801cba08.unk1448[r4->unk09] = 1;
+    if (game_progress.unk1448[r4->unk09] >= 2)
+        game_progress.unk1448[r4->unk09] = 1;
     if (fdat_801eda7c == 1) {
         creature_fade_out_despawn(e49);
         d42->unk0a = 250;
@@ -117,7 +117,7 @@ void map_update_events(void)
         d40->unk0a = 250;
         d39->unk0a = 250;
         fdat_801eda7c = 0xff;
-        DAT_801cba08.unk1440.word |= 0x80000;
+        game_progress.unk1440.word |= 0x80000;
     }
 }
 

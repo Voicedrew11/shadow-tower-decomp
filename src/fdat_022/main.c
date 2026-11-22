@@ -60,9 +60,9 @@ void map_restore_progress(void)
     Vis212 *e49 = &vis_table_a.entries[49];
     Vis192 *r = &vis_table_a.unk3500[6];
 
-    if (DAT_801cba08.unk1440.bit.f25 == 1) {
+    if (game_progress.unk1440.bit.f25 == 1) {
         fdat_801edad0 = 0xff;
-    } else if (DAT_801cba08.unk1448[r->unk09] == 2) {
+    } else if (game_progress.unk1448[r->unk09] == 2) {
         fdat_801edad0 = 1;
     } else {
         e49->unk1C.bytes[3] = 1;
@@ -87,7 +87,7 @@ void map_update_events(void)
         e48->unk00 = 100;
         fdat_801edad0 = 1;
     }
-    if (fdat_801edad0 == 1 && DAT_801cba08.unk1448[r->unk09] == 3) {
+    if (fdat_801edad0 == 1 && game_progress.unk1448[r->unk09] == 3) {
         viewer.unk218 = 5;
         map_hand_over_item();
         fdat_801edad0 = 0xff;
@@ -138,5 +138,5 @@ void map_hand_over_item(void)
     RotMatrixZYX(&viewer.unk270, &viewer.unk298);
     creature_fade_out_despawn(e);
     ground_item_pick_up(c, 1);
-    DAT_801cba08.unk1440.word |= 0x2000000;
+    game_progress.unk1440.word |= 0x2000000;
 }

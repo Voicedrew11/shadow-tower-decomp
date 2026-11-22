@@ -61,11 +61,11 @@ void map_restore_progress(void)
 {
     Vis192 *r = &vis_table_a.unk3500[5];
 
-    if (!DAT_801cba08.unk1440.bit.f20)
+    if (!game_progress.unk1440.bit.f20)
         fdat_801eda3c = 0;
     else
         fdat_801eda3c = 0xff;
-    if (DAT_801cba08.unk1448[r->unk09] != 0)
+    if (game_progress.unk1448[r->unk09] != 0)
         r->unk1C &= ~0x180;
 }
 
@@ -78,7 +78,7 @@ void map_update_events(void)
     Vis212 *e = &vis_table_a.entries[32];
     Vis192 *r = &vis_table_a.unk3500[5];
 
-    if (DAT_801cba08.unk1448[r->unk09] == 0 && viewer.position.vz > 0x4c000) {
+    if (game_progress.unk1448[r->unk09] == 0 && viewer.position.vz > 0x4c000) {
         viewer.unk218 = 5;
         creature_force_talk(e, 0, 0);
         e->unk64 = 1;
@@ -92,7 +92,7 @@ void map_update_events(void)
         lighting.area_mode[21] = 0x11;
         lighting.area_mode[32] = 0x11;
         lighting.area_mode[37] = 0x11;
-        DAT_801cba08.unk1440.word |= 0x100000;
+        game_progress.unk1440.word |= 0x100000;
     }
     if (fdat_801eda3c == 1 && e->unk05 == 3) {
         viewer.unk218 = 5;
@@ -122,7 +122,7 @@ void map_pick_creature_move(void)
     if (e->unk1A == 0xf0 || e->unk1A == 0)
         return;
     creature_choose_action();
-    if (e->unk02 == 5 && DAT_801cba08.unk1448[r->unk09] == 0)
+    if (e->unk02 == 5 && game_progress.unk1448[r->unk09] == 0)
         e->unk44 = 128;
     creature_pick_weighted_script();
     switch (e->unk44) {
@@ -180,9 +180,9 @@ void map_talk_on_player_death(void)
     e = &vis_table_a.entries[32];
     r = &vis_table_a.unk3500[5];
 
-    if (DAT_801cba08.unk1448[r->unk09] != 0
-        && !(DAT_801cba08.unk1440.word >> 20 & 1) && vis_table_a.unk6168 == 1) {
-        DAT_801cba08.unk1448[r->unk09] = 2;
+    if (game_progress.unk1448[r->unk09] != 0
+        && !(game_progress.unk1440.word >> 20 & 1) && vis_table_a.unk6168 == 1) {
+        game_progress.unk1448[r->unk09] = 2;
         e->unk70 |= 0x2000000;
         creature_force_talk(e, 1, 1);
     }

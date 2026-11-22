@@ -40,10 +40,10 @@ SDATA(0x8008810c, 0x7c)
 
 /* The list row and column saved while the ring sub-list is open. */
 DATA(0x800881e8, 0x4, ".sbss")
-static s16 DAT_800881e8[2];
+static s16 equip_saved_list_cursor[2];
 
-#define EQ DAT_801e0ce8
-#define PAD DAT_801cd180
+#define EQ equip_menu_state
+#define PAD pad_state
 #define SLOT(k) (&viewer.unk38[k])
 
 /* Runs player_compute_derived_stats(0) with the list state kept, then clamps
@@ -158,10 +158,10 @@ void menu_equip_pick_item(void)
     }
     if (EQ.unk0 != EQ.unk4) {
         if (EQ.unk0 == -1)
-            cd_read_member(6, 801, DAT_80088c88);
+            cd_read_member(6, 801, cd_file_buffer);
         else
-            cd_read_member(6, vis_table_c.unk0118[EQ.unk0].unk5[0] + 600, DAT_80088c88);
-        tim_load_images_at(DAT_80088c88, &pos, NULL, 1);
+            cd_read_member(6, vis_table_c.unk0118[EQ.unk0].unk5[0] + 600, cd_file_buffer);
+        tim_load_images_at(cd_file_buffer, &pos, NULL, 1);
         EQ.unk4 = EQ.unk0;
     }
 }
@@ -320,21 +320,21 @@ int menu_equip_pick_slot(int *sel)
                 u32 *bits;
 
                 if (EQ.unk10 == SLOT(6))
-                    bits = &DAT_801e0d08.bits[viewer.unk38[0] - 196];
+                    bits = &equip_magic_list.bits[viewer.unk38[0] - 196];
                 else
-                    bits = &DAT_801e0d08.bits[viewer.unk38[13] - 196];
-                DAT_801e0d08.count = 0;
+                    bits = &equip_magic_list.bits[viewer.unk38[13] - 196];
+                equip_magic_list.count = 0;
                 for (i = 0; i < 12; i++)
-                    DAT_801e0d08.entries[i] = 255;
+                    equip_magic_list.entries[i] = 255;
                 for (i = 0; i < 12; i++) {
                     if (*bits & (1 << entries[i]))
-                        DAT_801e0d08.entries[DAT_801e0d08.count++] = entries[i];
+                        equip_magic_list.entries[equip_magic_list.count++] = entries[i];
                 }
-                if (DAT_801e0d08.count) {
+                if (equip_magic_list.count) {
                     play_confirm_sound();
                     sp->unk2DC = (sp->unk2DC | 0x2) & ~0x1;
-                    DAT_800881e8[0] = sp->unk2E2;
-                    DAT_800881e8[1] = sp->unk2E0;
+                    equip_saved_list_cursor[0] = sp->unk2E2;
+                    equip_saved_list_cursor[1] = sp->unk2E0;
                     sp->unk2E2 = 0;
                     sp->unk2E0 = 0;
                 } else {
@@ -350,7 +350,7 @@ int menu_equip_pick_slot(int *sel)
         sp->unk0.list.count = 0;
         table = &vis_table_c;
         for (i = 0; i < 266; i++) {
-            if (!DAT_801c7590.counts[i].count || DAT_801c7590.counts[i].flag ||
+            if (!inventory.counts[i].count || inventory.counts[i].flag ||
                 table->unk0118[i].unk26 == 255)
                 continue;
             switch (kind) {
@@ -409,15 +409,15 @@ int menu_equip_pick_slot(int *sel)
             i = -1;
         sp->unk2DC |= 0x8;
         if (cur == 0xffff) {
-            cd_read_member(6, 801, DAT_80088c88);
+            cd_read_member(6, 801, cd_file_buffer);
             EQ.unk0 = -1;
             EQ.unk4 = -1;
         } else {
-            cd_read_member(6, i + 600, DAT_80088c88);
+            cd_read_member(6, i + 600, cd_file_buffer);
             EQ.unk0 = cur;
             EQ.unk4 = cur;
         }
-        tim_load_images_at(DAT_80088c88, &pos, NULL, 1);
+        tim_load_images_at(cd_file_buffer, &pos, NULL, 1);
         *sel = cur;
     }
     return 0;
@@ -436,8 +436,8 @@ void menu_equip_pick_magic(void)
         play_cancel_sound();
         PAD.unk4 = 0;
         sp->unk2DC = (sp->unk2DC & ~0x2) | 0x1;
-        sp->unk2E2 = DAT_800881e8[0];
-        sp->unk2E0 = DAT_800881e8[1];
+        sp->unk2E2 = equip_saved_list_cursor[0];
+        sp->unk2E0 = equip_saved_list_cursor[1];
     } else if (PAD.unkC & 0x10) {
         play_cursor_sound();
         PAD.unkC = 0;
@@ -451,9 +451,9 @@ void menu_equip_pick_magic(void)
         play_cursor_sound();
         PAD.unkC = 0;
         if (sp->unk2E0 == 4) {
-            if (sp->unk2E2 < DAT_801e0d08.count - 5)
+            if (sp->unk2E2 < equip_magic_list.count - 5)
                 sp->unk2E2++;
-        } else if (sp->unk2E2 + sp->unk2E0 < DAT_801e0d08.count - 1) {
+        } else if (sp->unk2E2 + sp->unk2E0 < equip_magic_list.count - 1) {
             sp->unk2E0++;
         }
     } else if (PAD.unkC & 0x800) {
@@ -468,27 +468,27 @@ void menu_equip_pick_magic(void)
     } else if (PAD.unkC & 0x200) {
         play_cursor_sound();
         PAD.unkC = 0;
-        if (sp->unk2E2 + 5 >= DAT_801e0d08.count)
-            sp->unk2E0 = DAT_801e0d08.count - sp->unk2E2 - 1;
-        else if (sp->unk2E2 + 5 < DAT_801e0d08.count - 5)
+        if (sp->unk2E2 + 5 >= equip_magic_list.count)
+            sp->unk2E0 = equip_magic_list.count - sp->unk2E2 - 1;
+        else if (sp->unk2E2 + 5 < equip_magic_list.count - 5)
             sp->unk2E2 += 5;
         else
-            sp->unk2E2 = DAT_801e0d08.count - 5;
+            sp->unk2E2 = equip_magic_list.count - 5;
     } else if (PAD.unk4 & 0x4000) {
         PAD.unk4 = 0;
         if (EQ.unk10 == SLOT(6))
-            bits = &DAT_801e0d08.bits[viewer.unk38[0] - 196];
+            bits = &equip_magic_list.bits[viewer.unk38[0] - 196];
         else
-            bits = &DAT_801e0d08.bits[viewer.unk38[13] - 196];
-        list = &DAT_801e0d08;
+            bits = &equip_magic_list.bits[viewer.unk38[13] - 196];
+        list = &equip_magic_list;
         if (!(*bits & (1 << list->entries[sp->unk2E2 + sp->unk2E0]))) {
             play_refuse_sound();
         } else {
             play_confirm_sound();
             *EQ.unk10 = list->entries[sp->unk2E2 + sp->unk2E0];
             sp->unk2DC = (sp->unk2DC & ~0x2) | 0x1;
-            sp->unk2E2 = DAT_800881e8[0];
-            sp->unk2E0 = DAT_800881e8[1];
+            sp->unk2E2 = equip_saved_list_cursor[0];
+            sp->unk2E0 = equip_saved_list_cursor[1];
             menu_equip_recalc_stats();
         }
     }
@@ -636,12 +636,12 @@ void menu_equip_draw_item_panel(void)
     }
     if (id != -1) {
         if (vis_table_c.unk0118[id].unk24) {
-            DAT_8008819e = vis_table_c.unk0118[id].unk24 * 100 / 454;
+            menu_figure_whole = vis_table_c.unk0118[id].unk24 * 100 / 454;
             DAT_80088188 = vis_table_c.unk0118[id].unk24 * 1000 / 454;
             ui_draw_text(MESSAGE(104), 221, 156, &sp->style[0]);
-            ui_draw_number_fixed(DAT_8008819e | 0x3000000, 249, 156, &sp->style[4]);
+            ui_draw_number_fixed(menu_figure_whole | 0x3000000, 249, 156, &sp->style[4]);
             ui_draw_glyph(78, 269, 156, &sp->style[0]);
-            ui_draw_number_fixed((u16)(DAT_80088188 - DAT_8008819e * 10) | 0x1000000, 275, 156,
+            ui_draw_number_fixed((u16)(DAT_80088188 - menu_figure_whole * 10) | 0x1000000, 275, 156,
                           &sp->style[4]);
             ui_draw_glyph(108, 281, 156, &sp->style[0]);
         }
@@ -682,18 +682,18 @@ void menu_equip_draw_slots(void)
         label = &sp->style[0];
         value = &sp->style[4];
     }
-    DAT_8008819e = viewer.unk22 * 100 / 454;
+    menu_figure_whole = viewer.unk22 * 100 / 454;
     DAT_80088188 = viewer.unk22 * 1000 / 454;
     ui_draw_text(MESSAGE(915), 113, 26, label);
-    ui_draw_number(DAT_8008819e | 0x3000000, 181, 26, value);
+    ui_draw_number(menu_figure_whole | 0x3000000, 181, 26, value);
     ui_draw_glyph(78, 212, 26, label);
-    ui_draw_number((u16)(DAT_80088188 - DAT_8008819e * 10) | 0x1000000, 217, 26, value);
+    ui_draw_number((u16)(DAT_80088188 - menu_figure_whole * 10) | 0x1000000, 217, 26, value);
     ui_draw_glyph(74, 230, 26, label);
-    DAT_8008819e = viewer.unk24 * 100 / 454;
+    menu_figure_whole = viewer.unk24 * 100 / 454;
     DAT_80088188 = viewer.unk24 * 1000 / 454;
-    ui_draw_number(DAT_8008819e | 0x3000000, 243, 26, value);
+    ui_draw_number(menu_figure_whole | 0x3000000, 243, 26, value);
     ui_draw_glyph(78, 274, 26, label);
-    ui_draw_number((u16)(DAT_80088188 - DAT_8008819e * 10) | 0x1000000, 279, 26, value);
+    ui_draw_number((u16)(DAT_80088188 - menu_figure_whole * 10) | 0x1000000, 279, 26, value);
     for (i = 0; i < 5; i++) {
         y = 48 + i * 36;
         y2 = 64 + i * 36;
@@ -792,7 +792,7 @@ void menu_equip_draw_magic_list(void)
 {
     MenuScratch *sp = MENU_SCRATCH;
     int i = 0;
-    EquipSubList *list = &DAT_801e0d08;
+    EquipSubList *list = &equip_magic_list;
     CVECTOR *label = &sp->style[0];
     u16 *offsets = menu_messages.offsets;
     u32 text = (u32)menu_messages.text;
@@ -803,7 +803,7 @@ void menu_equip_draw_magic_list(void)
     y = 48;
     for (; i < 5; i++) {
         if (*(list->entries + (sp->unk2E2 + i)) != 255) {
-            names = DAT_8008092c;
+            names = magic_name_messages;
             ui_draw_text(
                 (u16 *)(offsets[916 + names[*(list->entries + (sp->unk2E2 + i))]] + text), 28, y,
                 label);
@@ -888,7 +888,7 @@ void menu_arrange_list_upload_image(void)
 {
     DVECTOR pos = {640, 0};
 
-    tim_load_images_at(DAT_80088c88, &pos, NULL, 1);
+    tim_load_images_at(cd_file_buffer, &pos, NULL, 1);
     DrawSync(0);
 }
 
@@ -897,7 +897,7 @@ void menu_arrange_list_queue_image(u16 archive, u16 member)
 {
     DVECTOR unused;
 
-    cd_queue_read_member(archive, member, (u8 *)DAT_80088c88, menu_arrange_list_upload_image);
+    cd_queue_read_member(archive, member, (u8 *)cd_file_buffer, menu_arrange_list_upload_image);
 }
 
 /*
@@ -917,27 +917,27 @@ void menu_arrange_list_open(void)
     MenuScratch *sp;
     int i;
 
-    DAT_801e0d38.unk0 = 104;
-    DAT_801e0d38.unk4 = 0;
-    DAT_801e0d38.unk10 = DAT_801e0d38.unkC = DAT_801e0d38.unk8 = -1;
+    arrange_list_state.unk0 = 104;
+    arrange_list_state.unk4 = 0;
+    arrange_list_state.unk10 = arrange_list_state.unkC = arrange_list_state.unk8 = -1;
     menu_show_loading_screen();
     MENU_SCRATCH->unk0.grid.messages = mem_alloc(21504);
-    tim = DAT_80088c88;
+    tim = cd_file_buffer;
     cd_read_member(3, 1, tim);
     copy_words((u32 *)&menu_messages, (u32 *)(tim + 1), 5376);
     tim = (u_long *)((u8 *)tim + (*tim + sizeof(*tim)));
     tim_load_images_at(tim + 1, &MENU_SCRATCH->unk2E6[0], &MENU_SCRATCH->unk2E6[1], 1);
-    tim = DAT_80088c88;
+    tim = cd_file_buffer;
     cd_read_member(3, 4, tim);
     sp = MENU_SCRATCH;
     copy_words((u32 *)sp->unk0.grid.messages, (u32 *)(tim + 1), 5376);
     tim = (u_long *)((u8 *)tim + (*tim + sizeof(*tim)));
     tim_load_images_at(tim + 1, &sp->unk2E6[2], &sp->unk2E6[3], 1);
-    cd_read_member(3, 5, DAT_80088c88);
-    tim_load_images_at(DAT_80088c88, &sp->unk2E6[4], NULL, 1);
+    cd_read_member(3, 5, cd_file_buffer);
+    tim_load_images_at(cd_file_buffer, &sp->unk2E6[4], NULL, 1);
     DrawSync(0);
-    cd_read_member(3, 7, DAT_80088c88);
-    tim_load_images_at(DAT_80088c88, &tex, &clut, 1);
+    cd_read_member(3, 7, cd_file_buffer);
+    tim_load_images_at(cd_file_buffer, &tex, &clut, 1);
     DrawSync(0);
     sp->unk0.grid.count0 = 0;
     sp->unk0.grid.count1 = 0;
@@ -951,14 +951,14 @@ void menu_arrange_list_open(void)
     sp->unk0.grid.count1 = 0;
     for (i = 0; i < 314; i++) {
         if (vis_table_c.unk0118[i].unk5[0] != 255 && i < 314 && i != 266 &&
-            DAT_801c7590.counts[i].count && i != viewer.unk38[0] && i != viewer.unk38[1] &&
+            inventory.counts[i].count && i != viewer.unk38[0] && i != viewer.unk38[1] &&
             i != viewer.unk38[2] && i != viewer.unk38[3] && i != viewer.unk38[4] &&
             i != viewer.unk38[5] && i != viewer.unk38[7] && i != viewer.unk38[8] &&
             i != viewer.unk38[9] && i != viewer.unk38[10] && i != viewer.unk38[11] &&
             i != viewer.unk38[13] && i != viewer.unk38[14] &&
             i != viewer.unk38[15] && i != viewer.unk38[16] && i != viewer.unk38[17] &&
             i != viewer.unk38[18] && i != viewer.unk38[19] && i != viewer.unk38[20]) {
-            if (!DAT_801c7590.counts[i].flag)
+            if (!inventory.counts[i].flag)
                 sp->unk0.grid.ids0[sp->unk0.grid.count0++] = i;
             else
                 sp->unk0.grid.ids1[sp->unk0.grid.count1++] = i;
@@ -968,15 +968,15 @@ void menu_arrange_list_open(void)
     sp->unk2E0 = 0;
     sp->unk0.grid.row0 = 0;
     sp->unk0.grid.row1 = 0;
-    DAT_801e0d38.unk2 = -1;
+    arrange_list_state.unk2 = -1;
     clear_vram();
     DrawSync(0);
     gfx_setup_640x240();
 }
 
 #define GRID (&sp->unk0.grid)
-#define ST DAT_801e0d38
-#define PAD DAT_801cd180
+#define ST arrange_list_state
+#define PAD pad_state
 
 /* Resets the held range. */
 #define RANGE_CLEAR() \
@@ -1296,14 +1296,14 @@ void menu_arrange_list_loop(void)
     }
     for (i = 0, n = GRID->count0; n;) {
         if (GRID->ids0[i] != -1) {
-            DAT_801c7590.counts[GRID->ids0[i]].flag = 0;
+            inventory.counts[GRID->ids0[i]].flag = 0;
             n--;
         }
         i++;
     }
     for (i = 0, n = GRID->count1; n;) {
         if (GRID->ids1[i] != -1) {
-            DAT_801c7590.counts[GRID->ids1[i]].flag = 1;
+            inventory.counts[GRID->ids1[i]].flag = 1;
             n--;
         }
         i++;
@@ -1397,7 +1397,7 @@ void menu_arrange_list_draw_details(void)
         n = 0;
         k = 2;
         count = vis_table_c.unk0118[id].unk10;
-        DAT_800881ae = 1;
+        number_narrow = 1;
         for (i = 0; i < 4; i++) {
             for (j = 0; j < 4; j++) {
                 if (n == 14)
@@ -1415,7 +1415,7 @@ void menu_arrange_list_draw_details(void)
                 break;
         }
     done:
-        DAT_800881ae = 0;
+        number_narrow = 0;
         text_y += 60;
         if (vis_table_c.unk0118[id].unk27) {
             if (vis_table_c.unk0118[id].unk28 < 4) {
@@ -1627,7 +1627,7 @@ void menu_arrange_list_draw(void)
 
 /* The pad's button word (active low) read as one volatile halfword at its
  * own address; retail forms that address directly in each load. */
-#define RAW_BUTTONS (*(volatile s16 *)&DAT_801cd130.unk2)
+#define RAW_BUTTONS (*(volatile s16 *)&pad_buffers.unk2)
 
 /*
  * Unreferenced debug tool: shows the other frame buffer and moves the

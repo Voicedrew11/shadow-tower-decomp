@@ -60,7 +60,7 @@ static const RECT DAT_80087ed8 = {320, 0, 320, 240};
 DATA(0x80087ee0, 0x8, ".sdata")
 static const RECT DAT_80087ee0 = {960, 256, 64, 240};
 DATA(0x80087ee8, 0x4, ".sdata")
-u_long DAT_80087ee8 = 0x00808080;
+u_long equipment_model_rgb = 0x00808080;
 DATA(0x80087eec, 0x8, ".sdata")
 static u32 DAT_80087eec[2] = {0, 0};
 
@@ -124,7 +124,7 @@ int texanim_start(RECT *rect, int period, int step, int type, short area)
             slot->src.w = slot->src.w >> 2;
             break;
         case 49:
-            StoreImage(&slot->src, (u_long *)DAT_8009ac88);
+            StoreImage(&slot->src, (u_long *)texanim_clut_buffer);
             break;
         }
     }
@@ -227,7 +227,7 @@ void texanim_update(void)
                     /* Step through frames stacked below the source. */
                     if (++slot->phase >= slot->step) {
                         slot->phase = 0;
-                        LoadImage(&r, (u_long *)DAT_8009ac88);
+                        LoadImage(&r, (u_long *)texanim_clut_buffer);
                     } else {
                         r.y += slot->phase * slot->src.h;
                         MoveImage(&r, slot->dst.x, slot->dst.y);
@@ -236,7 +236,7 @@ void texanim_update(void)
                 case 49:
                     /* Entry zero is fixed; rotate the fourteen following colours. */
                     {
-                        u16 *colors = &DAT_8009ac88[1];
+                        u16 *colors = &texanim_clut_buffer[1];
 
                         first = colors[0];
                         colors[0] = colors[1];
@@ -297,7 +297,7 @@ void gfx_init(void)
     PutDrawEnv(&world_state.draw[0]);
     gte_SetBackColor(80, 80, 80);
     world_state.frame = 255;
-    world_state.unkE0 = DAT_8011c488;
+    world_state.unkE0 = packet_buffers;
     world_state.packets[0].start = world_state.unkE0;
     world_state.packets[0].end = world_state.packets[0].start + PACKET_WORDS;
     world_state.packets[1].start = world_state.packets[0].end;
@@ -315,7 +315,7 @@ void gfx_init(void)
     world_state.unk1EE15 = 0;
     world_state.unk1EDF0 = 0;
     world_state.unk1EDF4 = 0;
-    DAT_8015c488.frame = 0;
+    placement_objects.frame = 0;
     anim_slots_init();
     anim_sets_init();
     world_state.render_mode = 17;
@@ -3949,7 +3949,7 @@ void player_draw_equipment_model(u8 slot)
     sp->prim_end = world_state.packet->end;
     sp->vertices = world_state.world_vertices;
     sp->clut_base = 0;
-    *(u_long *)&sp->rgb = DAT_80087ee8;
+    *(u_long *)&sp->rgb = equipment_model_rgb;
     if (((ModelFile *)viewer.unkF8[slot])->unk6 == 0) {
         gte_SetRotMatrix(SCRATCH_MATRIX(sp));
         gte_SetTransMatrix(SCRATCH_MATRIX(sp));
@@ -4308,7 +4308,7 @@ u8 tag;
     size = cd_archive_member_size(archive, index);
     if (size < second)
         size = second;
-    data = heap_alloc(DAT_8009c888, size, &world_state.unk834C[slot]);
+    data = heap_alloc(model_heap, size, &world_state.unk834C[slot]);
     if (data == NULL)
         return;
     heap_set_state(data, ST_BLOCK_LOADING);
@@ -4320,8 +4320,8 @@ u8 tag;
     if (cd_archive_member_size(archive, index + 2) == 0)
         return;
     bank = index / 5;
-    self = &DAT_801dd1c0.slots[8 + bank];
-    p = &DAT_801dd1c0.slots[8 + bank % 4];
+    self = &sound_state.slots[8 + bank];
+    p = &sound_state.slots[8 + bank % 4];
     for (i = 4; i--;) {
         if (p == self) {
             p = self + 4;
@@ -4361,7 +4361,7 @@ u8 tag;
     size = cd_archive_member_size(archive, member);
     if (size == 0)
         return;
-    data = heap_alloc(DAT_8009c888, size, &world_state.unk834C[slot - 16]);
+    data = heap_alloc(model_heap, size, &world_state.unk834C[slot - 16]);
     if (data == NULL)
         return;
     heap_set_state(data, ST_BLOCK_LOADING);
@@ -4386,7 +4386,7 @@ u8 tag;
     size = cd_archive_member_size(archive, index);
     if (size < second)
         size = second;
-    data = heap_alloc(DAT_8009c888, size, &world_state.unk834C[slot]);
+    data = heap_alloc(model_heap, size, &world_state.unk834C[slot]);
     if (data == NULL)
         return;
     heap_set_state(data, ST_BLOCK_LOADING);
@@ -4401,7 +4401,7 @@ void object_model_load(int archive, int index, int slot)
 {
     void *data;
 
-    data = heap_alloc(DAT_8009c888, cd_archive_member_size(archive, index), &world_state.unk834C[slot]);
+    data = heap_alloc(model_heap, cd_archive_member_size(archive, index), &world_state.unk834C[slot]);
     if (data != NULL) {
         heap_set_state(data, ST_BLOCK_LOADING);
         heap_set_slot(data, slot);
@@ -4452,7 +4452,7 @@ void creature_models_sync(int archive, int first, int slot, int count)
                 heap_set_state(a, ST_BLOCK_RELEASABLE);
             if (b != NULL && heap_get_state(b) != ST_BLOCK_LOADING)
                 heap_set_state(b, ST_BLOCK_RELEASABLE);
-            vslot = &DAT_801dd1c0.slots[i + 8];
+            vslot = &sound_state.slots[i + 8];
             vab = vslot->block;
             if (vab != NULL && vab[2] == 1)
                 vab[2] = 2;
@@ -4499,7 +4499,7 @@ void object_models_sync(int archive, int first, int slot, int count)
             else if (heap_get_state(p) == ST_BLOCK_RELEASABLE)
                 heap_set_state(p, ST_BLOCK_USED);
             if (cd_archive_member_size(archive, i * 3 + 1)) {
-                vslot = &DAT_801dd1c0.slots[i + 24];
+                vslot = &sound_state.slots[i + 24];
                 if (vslot->block == NULL) {
                     sound_bank_load(archive, i * 3 + 1, i + 24);
                 } else {
@@ -4511,7 +4511,7 @@ void object_models_sync(int archive, int first, int slot, int count)
         } else {
             if (p != NULL && heap_get_state(p) != ST_BLOCK_LOADING)
                 heap_set_state(p, ST_BLOCK_RELEASABLE);
-            vslot = &DAT_801dd1c0.slots[i + 24];
+            vslot = &sound_state.slots[i + 24];
             if (vslot->block != NULL) {
                 vab = vslot->block;
                 if (vab[2] == 1)
@@ -4561,7 +4561,7 @@ void world_draw_creatures(void)
             depth = e->unk36;
         if (t->unk10 != 0xffff) {
             bit = t->unk10;
-            DAT_801cba08.unk14A8[bit >> 5] |= 1 << (bit & 0x1f);
+            game_progress.unk14A8[bit >> 5] |= 1 << (bit & 0x1f);
         }
         if (model != NULL) {
         at = &e->unk74;
@@ -4571,7 +4571,7 @@ void world_draw_creatures(void)
             sp->near_z = 4 - e->unk21;
             sp->far_z = 4096 - e->unk21;
             model_draw(0, e->unk0B + SLOT_A, at, &sp->unkD8, &e->unk94, &e->unkA4,
-                          &DAT_8008040c, e->unk08, e->unk2A, 4096 - depth, e->unk24,
+                          &identity_matrix, e->unk08, e->unk2A, 4096 - depth, e->unk24,
                           e->unk1C.bytes[2], 0);
         } else {
             VECTOR pos;
@@ -4604,8 +4604,8 @@ void world_draw_creatures(void)
             e->unk04 = 2;
         }
         if (e->unk22 != -1) {
-            SpuGetAllKeysStatus(DAT_801dd1c0.keys);
-            if (DAT_801dd1c0.keys[e->unk22] == 0)
+            SpuGetAllKeysStatus(sound_state.keys);
+            if (sound_state.keys[e->unk22] == 0)
                 e->unk22 = -1;
         }
         sp->unkF8[e->unk0B] = 1;
@@ -4941,7 +4941,7 @@ void world_draw_effects_placements(void)
             sp->far_z = 4103;
             sp->ot = world_state.ot_cur - 7;
             model_draw(0, o->unkA + 96, at, &o->unk30, &o->unk38, o->unk48,
-                          &DAT_8008040c, o->unk2, o->unk14, o->unk12, o->unk12, o->unk7, 0);
+                          &identity_matrix, o->unk2, o->unk14, o->unk12, o->unk12, o->unk7, 0);
             break;
         case 8:
             sp->near_z = 11;
@@ -4961,7 +4961,7 @@ void world_draw_effects_placements(void)
     }
     sp->unkD8.vx = sp->unkD8.vy = sp->unkD8.vz = 0;
     sp->clut_base = 0;
-    for (f = DAT_8015c488.objects, i = 127; i != -1; f++, i--) {
+    for (f = placement_objects.objects, i = 127; i != -1; f++, i--) {
         if (f->unk0 == 0xffff)
             continue;
         if (f->unk0 & 0x8000) {
@@ -5004,12 +5004,12 @@ void world_draw_effects_placements(void)
                 }
             }
         }
-        if (f->unk4 != 0 && DAT_8015c488.frame % f->unk4 == 0) {
+        if (f->unk4 != 0 && placement_objects.frame % f->unk4 == 0) {
             if (++f->unk5 >= f->unk3)
                 f->unk5 = 0;
         }
     }
-    DAT_8015c488.frame++;
+    placement_objects.frame++;
 }
 
 #define HUD_END 0xff
@@ -5323,7 +5323,7 @@ void hud_queue_damage_number(short value)
 {
     int i;
 
-    if (value != -1 && DAT_801cd120.unk3 != 0) {
+    if (value != -1 && game_settings.unk3 != 0) {
         for (i = 4; i != -1; i--) {
             if (viewer.unk1EC[i] == 0) {
                 viewer.unk1EC[i] = 60;
@@ -5336,7 +5336,7 @@ void hud_queue_damage_number(short value)
 
 /* Blink phase of world_render_frame's selection frame (0..31). */
 DATA(0x80087f18, 0x4, ".sdata")
-static s32 DAT_80087f18 = 0;
+static s32 hud_selection_blink = 0;
 
 ADDRESS(0x80026afc, 0x2d8)
 void world_render_frame(VECTOR *pos, SVECTOR *rot)
@@ -5358,16 +5358,16 @@ void world_render_frame(VECTOR *pos, SVECTOR *rot)
     world_state.unk831C[1] = 0;
     if (viewer.unk218 == 1) {
         frame = &hud_sprites[26 + viewer.unk15E];
-        DAT_80087f18 = (DAT_80087f18 + 1) % 32;
-        if (DAT_80087f18 < 16)
-            level = 8 - (u16)DAT_80087f18;
+        hud_selection_blink = (hud_selection_blink + 1) % 32;
+        if (hud_selection_blink < 16)
+            level = 8 - (u16)hud_selection_blink;
         else
-            level = (u16)DAT_80087f18 - 24;
+            level = (u16)hud_selection_blink - 24;
         color.b = color.g = color.r = level * 4 + 96;
         ui_draw_rect_outline(&frame->r, &color, 257, 1);
         hud_draw_records(26);
     }
-    if (DAT_801cd120.unk3 != 0 && area_state.area < 44) {
+    if (game_settings.unk3 != 0 && area_state.area < 44) {
         hud_update();
         hud_draw_records(0);
         for (i = 4; i != -1; i--) {
@@ -5443,15 +5443,15 @@ DATA(0x800881b8, 0x2, ".sbss")
 static s16 DAT_800881b8;
 /* The text clip window. */
 DATA(0x800881ba, 0x2, ".sbss")
-static s16 DAT_800881ba;
+static s16 text_clip_left;
 DATA(0x800881bc, 0x2, ".sbss")
-static s16 DAT_800881bc;
+static s16 text_clip_right;
 DATA(0x800881c0, 0x4, ".sbss")
-static s32 DAT_800881c0;
+static s32 text_clip_advance;
 DATA(0x800881c4, 0x4, ".sbss")
-static s32 DAT_800881c4;
+static s32 text_clip_on;
 DATA(0x800881c8, 0x4, ".sbss")
-static s32 DAT_800881c8;
+static s32 text_clip_dropped;
 
 /*
  * Font glyphs, text strings, numbers and 2D menu primitives. Glyphs are
@@ -5525,17 +5525,17 @@ void ui_draw_glyph(u16 c, u16 x, u16 y, CVECTOR *color)
         v = ch * q;
         NEW_PRIM_NEXT(buf, p, next, POLY_FT4);
         setUV4(p, u, v, half + u, v, u, ch + v, half + u, ch + v);
-        if (DAT_800881c4) {
-            if (DAT_800881ac == 1)
-                x -= DAT_800881a0 * (half + 1);
+        if (text_clip_on) {
+            if (text_scroll_mode == 1)
+                x -= text_scroll_list * (half + 1);
             else
                 x -= DAT_800881a2 * (half + 1);
-            DAT_800881c0 += half + 1;
-            if (DAT_800881bc < x) {
-                DAT_800881c8++;
+            text_clip_advance += half + 1;
+            if (text_clip_right < x) {
+                text_clip_dropped++;
                 return;
             }
-            if (x < DAT_800881ba)
+            if (x < text_clip_left)
                 return;
         }
         p->x1 = p->x3 = x + half;
@@ -5554,17 +5554,17 @@ void ui_draw_glyph(u16 c, u16 x, u16 y, CVECTOR *color)
         v = ch * q;
         NEW_PRIM_NEXT(buf, p, next, POLY_FT4);
         setUV4(p, u, v, fw + u, v, u, ch + v, fw + u, ch + v);
-        if (DAT_800881c4) {
-            if (DAT_800881ac == 1)
-                x -= DAT_800881a0 * (half + 1);
+        if (text_clip_on) {
+            if (text_scroll_mode == 1)
+                x -= text_scroll_list * (half + 1);
             else
                 x -= DAT_800881a2 * (half + 1);
-            DAT_800881c0 += fw;
-            if (DAT_800881bc < x) {
-                DAT_800881c8++;
+            text_clip_advance += fw;
+            if (text_clip_right < x) {
+                text_clip_dropped++;
                 return;
             }
-            if (x < DAT_800881ba)
+            if (x < text_clip_left)
                 return;
         }
         p->x1 = p->x3 = x + qw;
@@ -5651,7 +5651,7 @@ void ui_draw_number(u32 num, u16 x, u16 y, CVECTOR *color)
     u32 div;
     int i;
 
-    if (DAT_800881ae)
+    if (number_narrow)
         width -= 4;
     if (MENU_SCRATCH->unk2E5 == 0)
         base = 64;
@@ -5985,7 +5985,7 @@ void talk_draw_overlay(void)
         ui_add_draw_mode(2, 0, 0);
         break;
     case CARD_SHOW_IN:
-        if (DAT_801cd120.unk4 == 1 || world_state.unk1EE17 == 2) {
+        if (game_settings.unk4 == 1 || world_state.unk1EE17 == 2) {
             tint.r = tint.g = tint.b = world_state.unk1EE19 << 3;
             ui_draw_image(&card, &tex, &clut, &tint, 3);
             if (world_state.unk1EE19 >= 16)
@@ -5995,16 +5995,16 @@ void talk_draw_overlay(void)
         }
         break;
     case CARD_SHOW:
-        if (DAT_801cd120.unk4 == 1 || world_state.unk1EE17 == 2) {
+        if (game_settings.unk4 == 1 || world_state.unk1EE17 == 2) {
             tint.r = tint.g = tint.b = 128;
-            if (DAT_80088190 == 25 || DAT_80088190 == 30 || DAT_80088190 == 5)
+            if (talk_stream_file == 25 || talk_stream_file == 30 || talk_stream_file == 5)
                 ui_draw_image(&card, &tex, &clut, &tint, 2);
             else
                 ui_draw_image(&card, &tex, &clut, &tint, 3);
         }
         break;
     case CARD_SHOW_OUT:
-        if (DAT_801cd120.unk4 == 1 || world_state.unk1EE17 == 2) {
+        if (game_settings.unk4 == 1 || world_state.unk1EE17 == 2) {
             tint.r = tint.g = tint.b = (16 - world_state.unk1EE19) << 3;
             ui_draw_image(&card, &tex, &clut, &tint, 3);
             if (world_state.unk1EE19 >= 16)
@@ -6291,7 +6291,7 @@ void ui_draw_window(short x, short y, short w, short h)
 
 /* Blink phase of the map page's arrows (0..31). */
 DATA(0x80087f34, 0x4, ".sdata")
-static s32 DAT_80087f34 = 0;
+static s32 area_info_blink = 0;
 
 /* ui_draw_number/ui_draw_number_fixed take the digit count in the top byte. */
 #define DIGITS(n) ((n) << 24)
@@ -6361,7 +6361,7 @@ void menu_main_draw(void)
     ui_draw_number_fixed(viewer.unk8 | DIGITS(4), 78, 80, &sp->style[0]);
     ui_draw_glyph(15, 106, 80, &sp->style[0]);
     ui_draw_number_fixed(4921 | DIGITS(4), 120, 80, &sp->style[0]);
-    ui_draw_number_fixed(DAT_801c7590.counts[0x10a].count | DIGITS(3), 127, 96, &sp->style[0]);
+    ui_draw_number_fixed(inventory.counts[0x10a].count | DIGITS(3), 127, 96, &sp->style[0]);
     ui_draw_number_fixed(viewer.unk10 | DIGITS(3), 127, 128, &sp->style[0]);
     ui_draw_number_fixed(viewer.unkE | DIGITS(3), 127, 144, &sp->style[0]);
     ui_draw_number_fixed(viewer.unkBA[0] | DIGITS(3), 127, 160, &sp->style[0]);
@@ -6439,7 +6439,7 @@ void menu_use_item_draw(void)
     for (i = 0; i < rows; i++) {
         entry = sp->unk0.page_list.entries[sp->unk2E2 + i];
         ui_draw_text(MESSAGE_IN(sp->unk0.page_list.messages, entry), 54, i * 26 + 76, &sp->style[0]);
-        ui_draw_number(DAT_801c7590.counts[entry].count | DIGITS(2), 274, i * 26 + 76, &sp->style[4]);
+        ui_draw_number(inventory.counts[entry].count | DIGITS(2), 274, i * 26 + 76, &sp->style[4]);
         ui_draw_image(&sp->unk350, &sp->unk0.icons[(sp->unk2E2 + i) % 5 + 1], NULL, NULL, 16);
         sp->unk350.y += 26;
     }
@@ -6563,10 +6563,10 @@ void menu_area_info_draw(void)
     int level;
 
     gfx_begin_frame();
-    if (DAT_80087f34 < 16)
-        sp->unk360 = 8 - DAT_80087f34;
+    if (area_info_blink < 16)
+        sp->unk360 = 8 - area_info_blink;
     else
-        sp->unk360 = DAT_80087f34 - 24;
+        sp->unk360 = area_info_blink - 24;
     sp->style[0].r = sp->style[4].r = 72;
     sp->style[0].g = sp->style[4].g = 72;
     sp->style[0].b = sp->style[4].b = 72;
@@ -6580,7 +6580,7 @@ void menu_area_info_draw(void)
     sp->unk32C.b = 0;
     sp->unk32C.r = (u8)sp->unk360 * 4 + 96;
     sp->unk32C.g = (u8)sp->unk360 * 4 + 48;
-    if (DAT_800881a8 != 0) {
+    if (area_info_list_shown != 0) {
         for (i = 0; i < 10; i++) {
             id = sp->unk0.map.ids[i];
             if (id >= 90) {
@@ -6594,12 +6594,12 @@ void menu_area_info_draw(void)
                 ui_draw_text(MESSAGE(0x26a), 67, i * 16 + 54, &sp->style[0]);
             } else if (id == area_state.area) {
                 ui_draw_text(MESSAGE(0x2bc + id), 67, i * 16 + 54, &sp->style[2]);
-                ui_draw_number(DAT_801cba08.unk16E4[sp->unk0.map.ids[i]] * 100 / total[sp->unk0.map.ids[i]] | DIGITS(3),
+                ui_draw_number(game_progress.unk16E4[sp->unk0.map.ids[i]] * 100 / total[sp->unk0.map.ids[i]] | DIGITS(3),
                               223, i * 16 + 54, &sp->style[6]);
                 ui_draw_glyph(80, 256, i * 16 + 54, &sp->style[2]);
             } else {
                 ui_draw_text(MESSAGE(0x2bc + id), 67, i * 16 + 54, &sp->style[0]);
-                ui_draw_number(DAT_801cba08.unk16E4[sp->unk0.map.ids[i]] * 100 / total[sp->unk0.map.ids[i]] | DIGITS(3),
+                ui_draw_number(game_progress.unk16E4[sp->unk0.map.ids[i]] * 100 / total[sp->unk0.map.ids[i]] | DIGITS(3),
                               223, i * 16 + 54, &sp->style[4]);
                 ui_draw_glyph(80, 256, i * 16 + 54, &sp->style[0]);
             }
@@ -6633,13 +6633,13 @@ void menu_area_info_draw(void)
         ui_draw_number((u16)(minutes / 10) | DIGITS(1), 231, 198, &sp->style[4]);
         ui_draw_number((u16)(minutes % 10) | DIGITS(1), 241, 198, &sp->style[4]);
     }
-    DAT_80087f34 = (DAT_80087f34 + 1) % 32;
-    if (DAT_80087f34 < 16)
-        level = 8 - (u16)DAT_80087f34;
+    area_info_blink = (area_info_blink + 1) % 32;
+    if (area_info_blink < 16)
+        level = 8 - (u16)area_info_blink;
     else
-        level = (u16)DAT_80087f34 - 24;
+        level = (u16)area_info_blink - 24;
     arrow.b = arrow.g = arrow.r = level * 4 + 96;
-    if (DAT_800881a8 != 0) {
+    if (area_info_list_shown != 0) {
         if (DAT_8008818c != 0) {
             sp->unk33C.x = 160;
             sp->unk33C.y = 43;
@@ -6662,7 +6662,7 @@ void menu_area_info_draw(void)
     sp->unk338.r = 80;
     sp->unk338.g = 88;
     sp->unk338.b = 96;
-    if (DAT_800881a8 != 0)
+    if (area_info_list_shown != 0)
         ui_draw_arrow(&prev, &sp->unk32C, 2048);
     else
         ui_draw_arrow(&next, &sp->unk32C, 0);
@@ -6713,7 +6713,7 @@ void menu_options_draw(void)
     sp->unk33C.y = 83;
     sp->unk33C.w = 5;
     sp->unk33C.h = 5;
-    sp->unk33C.x = DAT_801cd120.unk1 * 83 / 63 + 180;
+    sp->unk33C.x = game_settings.unk1 * 83 / 63 + 180;
     ui_draw_image(&sp->unk33C, &sp->unk358, &sp->unk35C, NULL, 0);
     sp->unk358.vx = 576;
     sp->unk33C.x = 176;
@@ -6724,7 +6724,7 @@ void menu_options_draw(void)
     ui_draw_image(&sp->unk33C, &sp->unk358, &sp->unk35C, NULL, 1);
     for (i = 0; i < 6; y += 20, i++)
         ui_draw_text(MESSAGE(0xc9 + i), label_x[i] + 32, y, &sp->style[2]);
-    for (on = &DAT_801cd120.unk2, i = 1; i < 5; on++, i++) {
+    for (on = &game_settings.unk2, i = 1; i < 5; on++, i++) {
         if (*on == 1) {
             ui_draw_text(MESSAGE(0xcf), 193, i * 20 + 80, &sp->style[2]);
             ui_draw_text(MESSAGE(0xd0), 241, i * 20 + 80, &sp->style[3]);
@@ -6733,7 +6733,7 @@ void menu_options_draw(void)
             ui_draw_text(MESSAGE(0xd0), 241, i * 20 + 80, &sp->style[2]);
         }
     }
-    ui_draw_number_fixed(DAT_801cd120.unk1 | DIGITS(2), 280, 80, &sp->style[0]);
+    ui_draw_number_fixed(game_settings.unk1 | DIGITS(2), 280, 80, &sp->style[0]);
     ui_draw_text(MESSAGE(0xe0 + sp->unk2E0), 64, 208, &sp->style[0]);
     sp->unk358.vx = 596;
     sp->unk358.vy = 448;
@@ -6759,7 +6759,7 @@ void menu_options_draw(void)
 }
 
 /*
- * A settings page: two columns of six labels (lit while their DAT_801cd180.unk22
+ * A settings page: two columns of six labels (lit while their pad_state.unk22
  * bit is set in the page flags), twelve level gauges and two buttons
  * below them.
  * The button masks are read through a pointer set before each column's
@@ -6801,14 +6801,14 @@ void menu_button_config_draw(void)
     } else {
         sp->unk32C = sp->style[2];
     }
-    mask = DAT_801cd180.unk22;
+    mask = pad_state.unk22;
     for (i = 0; i < 6; i++) {
         if (mask[i] & sp->unk0.levels.flags)
             ui_draw_text(MESSAGE(209 + i), label_x[i] + 32, i * 18 + 80, &sp->style[3]);
         else
             ui_draw_text(MESSAGE(209 + i), label_x[i] + 32, i * 18 + 80, &sp->style[2]);
     }
-    mask = &DAT_801cd180.unk22[6];
+    mask = &pad_state.unk22[6];
     for (i = 0; i < 6; i++) {
         if (mask[i] & sp->unk0.levels.flags)
             ui_draw_text(MESSAGE(215 + i), label_x[i + 6] + 168, i * 18 + 80, &sp->style[3]);
@@ -6931,7 +6931,7 @@ void card_draw_port_choice(void)
     ui_draw_rect_outline(&sp->unk330, &sp->unk32C, 257, 1);
     ui_add_draw_mode(1, 0, 0);
     for (i = 0; i < 7; i++) {
-        DAT_8017beb0[i] = 0;
+        file_row_clipped[i] = 0;
         DAT_800881f0[i] = 0;
     }
     ui_draw_text(MESSAGE(320), 102, 110, &sp->style[0]);
@@ -6962,7 +6962,7 @@ void card_draw_format_prompt(void)
  * The record list page: a two-choice header while the first state half is
  * 1, scroll arrows, the cursor bar and three rows of record number, title,
  * kind name and figure. Each row's glyph overflow count goes to
- * DAT_8017beb0.
+ * file_row_clipped.
  */
 ADDRESS(0x8002c2b8, 0x604)
 void card_draw_file_list(void)
@@ -7038,10 +7038,10 @@ void card_draw_file_list(void)
             ui_draw_number_fixed((u16)(sp->unk200 + i + 1) | DIGITS(2), 38, sp->unk330.y + 6,
                           &sp->style[0]);
             ui_draw_text(MESSAGE(328), 218, sp->unk330.y + 6, &sp->style[0]);
-            DAT_800881ac = 1;
-            DAT_800881bc = 280;
-            DAT_800881c4 = 0;
-            DAT_800881ba = 0;
+            text_scroll_mode = 1;
+            text_clip_right = 280;
+            text_clip_on = 0;
+            text_clip_left = 0;
             if (titles[sp->unk1F4->files[i + sp->unk200].kind] != -1)
                 ui_draw_text(MESSAGE(610 + titles[sp->unk1F4->files[i + sp->unk200].kind]), 64,
                               sp->unk330.y + 6, &sp->style[0]);
@@ -7054,7 +7054,7 @@ void card_draw_file_list(void)
             ui_draw_number_fixed(sp->unk1F4->files[i + sp->unk200].unk1A | DIGITS(4), 248, sp->unk330.y + 6,
                           &sp->style[0]);
         }
-        DAT_8017beb0[i + sp->unk200] = DAT_800881c8;
+        file_row_clipped[i + sp->unk200] = text_clip_dropped;
         ui_draw_rect_outline(&sp->unk330, &sp->unk338, 257, 1);
         sp->unk330.y += 48;
     }
@@ -7395,11 +7395,11 @@ void shop_draw_buy_list(void)
     rows = LIST_ROWS;
     if (sp->unk0.list.count < LIST_ROWS + 1)
         rows = sp->unk0.list.count;
-    ui_draw_number(DAT_801c7590.counts[266].count | 0x3000000, 244, 27, &sp->style[6]);
+    ui_draw_number(inventory.counts[266].count | 0x3000000, 244, 27, &sp->style[6]);
     ui_draw_text(MESSAGE(100), 160, 27, &sp->style[2]);
     for (i = 0; i < rows; i++) {
-        id = DAT_801c7590.unk13A[sp->unk0.list.ids[sp->unk2E2 + i]];
-        if (DAT_801c7590.counts[266].count >= vis_table_c.unk0118[id].unk2) {
+        id = inventory.unk13A[sp->unk0.list.ids[sp->unk2E2 + i]];
+        if (inventory.counts[266].count >= vis_table_c.unk0118[id].unk2) {
             text = &sp->style[0];
             figure = &sp->style[4];
         } else {
@@ -7513,7 +7513,7 @@ void shop_draw_confirm(void)
     ui_draw_rect_outline(&sp->unk33C, &sp->unk32C, 257, 1);
     ui_add_draw_mode(1, 0, 0);
     if (sp->unk2DC & 0x1) {
-        id = DAT_801c7590.unk13A[sp->unk0.list.ids[sp->unk2E2 + sp->unk2E0]];
+        id = inventory.unk13A[sp->unk0.list.ids[sp->unk2E2 + sp->unk2E0]];
         ui_draw_text(MESSAGE(105), 120, 208, &sp->style[0]);
     } else if (sp->unk2DC & 0x8) {
         id = sp->unk0.list.ids[sp->unk2E2 + sp->unk2E0];
@@ -7551,12 +7551,12 @@ void shop_draw_confirm(void)
         y += 14;
     }
     if (vis_table_c.unk0118[id].unk24) {
-        DAT_8008819e = vis_table_c.unk0118[id].unk24 * 100 / 454;
+        menu_figure_whole = vis_table_c.unk0118[id].unk24 * 100 / 454;
         DAT_80088188 = vis_table_c.unk0118[id].unk24 * 1000 / 454;
         ui_draw_text(MESSAGE(104), 220, 156, &sp->style[0]);
-        ui_draw_number_fixed(DAT_8008819e | 0x3000000, 248, 156, &sp->style[4]);
+        ui_draw_number_fixed(menu_figure_whole | 0x3000000, 248, 156, &sp->style[4]);
         ui_draw_glyph(78, 269, 156, &sp->style[0]);
-        ui_draw_number_fixed((u16)(DAT_80088188 - DAT_8008819e * 10) | 0x1000000, 275, 156,
+        ui_draw_number_fixed((u16)(DAT_80088188 - menu_figure_whole * 10) | 0x1000000, 275, 156,
                       &sp->style[4]);
         ui_draw_glyph(108, 281, 156, &sp->style[0]);
     }
@@ -7837,18 +7837,18 @@ void menu_equip_info_draw_stats(void)
     else
         sp->unk320 = &sp->style[4];
     w = *p++;
-    DAT_8008819e = w * 100 / 454;
+    menu_figure_whole = w * 100 / 454;
     DAT_80088188 = w * 1000 / 454;
-    ui_draw_number(DAT_8008819e | 0x3000000, 494, 211, sp->unk320);
+    ui_draw_number(menu_figure_whole | 0x3000000, 494, 211, sp->unk320);
     ui_draw_glyph(18, 534, 211, sp->unk320);
-    ui_draw_number((u16)(DAT_80088188 - DAT_8008819e * 10) | 0x1000000, 542, 211, sp->unk320);
+    ui_draw_number((u16)(DAT_80088188 - menu_figure_whole * 10) | 0x1000000, 542, 211, sp->unk320);
     ui_draw_glyph(14, 554, 211, sp->unk320);
     w = *p;
-    DAT_8008819e = w * 100 / 454;
+    menu_figure_whole = w * 100 / 454;
     DAT_80088188 = w * 1000 / 454;
-    ui_draw_number(DAT_8008819e | 0x3000000, 566, 211, sp->unk320);
+    ui_draw_number(menu_figure_whole | 0x3000000, 566, 211, sp->unk320);
     ui_draw_glyph(18, 606, 211, sp->unk320);
-    ui_draw_number((u16)(DAT_80088188 - DAT_8008819e * 10) | 0x1000000, 614, 211, sp->unk320);
+    ui_draw_number((u16)(DAT_80088188 - menu_figure_whole * 10) | 0x1000000, 614, 211, sp->unk320);
 }
 
 /*
@@ -7936,12 +7936,12 @@ void menu_equip_info_draw_item(void)
     sp->style[0].cd &= 0x7f;
     ui_draw_cell_grid(&pos, &sp->unk0.vram[0], &sp->unk0.vram[1], &sp->style[0], 0xf0004);
     if (vis_table_c.unk0118[sp->unk2C0].unk24) {
-        DAT_8008819e = vis_table_c.unk0118[sp->unk2C0].unk24 * 100 / 454;
+        menu_figure_whole = vis_table_c.unk0118[sp->unk2C0].unk24 * 100 / 454;
         DAT_80088188 = vis_table_c.unk0118[sp->unk2C0].unk24 * 1000 / 454;
         ui_draw_text(MESSAGE(28), 188, 217, &sp->style[0]);
-        ui_draw_number(DAT_8008819e | 0x3000000, 224, 217, &sp->style[4]);
+        ui_draw_number(menu_figure_whole | 0x3000000, 224, 217, &sp->style[4]);
         ui_draw_glyph(18, 264, 217, &sp->style[0]);
-        ui_draw_number((u16)(DAT_80088188 - DAT_8008819e * 10) | 0x1000000, 272, 217,
+        ui_draw_number((u16)(DAT_80088188 - menu_figure_whole * 10) | 0x1000000, 272, 217,
                       &sp->style[4]);
         ui_draw_glyph(53, 287, 217, &sp->style[0]);
     }
@@ -8030,11 +8030,11 @@ void menu_equip_info_draw(void)
     RECT right = {630, 119, 16, 8};
 
     gfx_begin_frame();
-    if (DAT_801cd180.unk4 & 0x800)
-        DAT_800881aa = 1;
-    else if (DAT_801cd180.unk4 & 0x400)
-        DAT_800881aa = 0;
-    DAT_801cd180.unk4 = 0;
+    if (pad_state.unk4 & 0x800)
+        menu_second_page = 1;
+    else if (pad_state.unk4 & 0x400)
+        menu_second_page = 0;
+    pad_state.unk4 = 0;
     sp->style[0].r = sp->style[4].r = 80;
     sp->style[0].g = sp->style[4].g = 80;
     sp->style[0].b = sp->style[4].b = 80;
@@ -8048,7 +8048,7 @@ void menu_equip_info_draw(void)
     sp->unk32C.r = (u8)sp->unk360 * 4 + 96;
     sp->unk32C.g = (u8)sp->unk360 * 2 + 48;
     if (DAT_80088192) {
-        if (DAT_800881aa == 0)
+        if (menu_second_page == 0)
             ui_draw_arrow(&right, &sp->unk32C, 0);
         else
             ui_draw_arrow(&left, &sp->unk32C, 2048);
@@ -8061,7 +8061,7 @@ void menu_equip_info_draw(void)
     } else {
         menu_equip_info_draw_slots();
     }
-    if (DAT_800881aa == 0)
+    if (menu_second_page == 0)
         menu_equip_info_draw_stats();
     else
         menu_equip_info_draw_attributes();
@@ -8089,7 +8089,7 @@ void menu_creature_book_draw_grid(void)
     int index, kind;
     int row, col, cols;
 
-    DAT_800881aa = 0;
+    menu_second_page = 0;
     sp->unk330.w = 96;
     sp->unk330.h = 48;
     sp->unk330.x = (short)(sp->unk2E0 % STORE_COLUMNS) * 112 + 48;
@@ -8158,12 +8158,12 @@ void menu_creature_book_draw_entry(void)
 
     kind = sp->unk0.store.kinds[sp->unk2E2 * 5 + sp->unk2E0];
     item = &sp->unk0.store.items[kind];
-    if (DAT_801cd180.unk4 & 0x800)
-        DAT_800881aa = 1;
-    if (DAT_801cd180.unk4 & 0x400)
-        DAT_800881aa = 0;
-    DAT_801cd180.unk4 = 0;
-    if (DAT_800881aa == 0)
+    if (pad_state.unk4 & 0x800)
+        menu_second_page = 1;
+    if (pad_state.unk4 & 0x400)
+        menu_second_page = 0;
+    pad_state.unk4 = 0;
+    if (menu_second_page == 0)
         ui_draw_arrow(&right, &sp->unk32C, 0);
     else
         ui_draw_arrow(&left, &sp->unk32C, 2048);
@@ -8172,7 +8172,7 @@ void menu_creature_book_draw_entry(void)
     ui_draw_text(MESSAGE_IN(sp->unk0.store.messages, kind), 32, 16, &sp->style[0]);
     sp->style[0].cd &= 0x7f;
     ui_draw_cell_grid(&pos, &tex, &clut, &sp->style[0], 0xf0005);
-    if (DAT_800881aa) {
+    if (menu_second_page) {
         for (i = 0; i < 14; i++) {
             ui_draw_text(MESSAGE(100 + i), 336, i * 15 + 16, &sp->style[0]);
             ui_draw_number((u16)item->figures[i] | DIGITS(2), 582, i * 15 + 16, &sp->style[4]);
@@ -8185,17 +8185,17 @@ void menu_creature_book_draw_entry(void)
                           &sp->style[0]);
         ui_draw_number(item->unk2 | DIGITS(4), 558, 31, &sp->style[4]);
         ui_draw_number(item->unk1 | DIGITS(2), 582, 46, &sp->style[4]);
-        DAT_8008819e = item->unk4 * 10 / 3048;
-        ui_draw_number(DAT_8008819e | DIGITS(3), 522, 61, &sp->style[4]);
+        menu_figure_whole = item->unk4 * 10 / 3048;
+        ui_draw_number(menu_figure_whole | DIGITS(3), 522, 61, &sp->style[4]);
         ui_draw_glyph(55, 559, 61, &sp->style[4]);
-        ui_draw_number((u16)((u16)(item->unk4 * 10 - DAT_8008819e * 3048) / 254) | DIGITS(2), 570,
+        ui_draw_number((u16)((u16)(item->unk4 * 10 - menu_figure_whole * 3048) / 254) | DIGITS(2), 570,
                       61, &sp->style[4]);
         ui_draw_glyph(54, 595, 61, &sp->style[4]);
-        DAT_8008819e = item->unk6 * 100 / 454;
+        menu_figure_whole = item->unk6 * 100 / 454;
         DAT_80088188 = item->unk6 * 1000 / 454;
-        ui_draw_number(DAT_8008819e | DIGITS(4), 522, 76, &sp->style[4]);
+        ui_draw_number(menu_figure_whole | DIGITS(4), 522, 76, &sp->style[4]);
         ui_draw_glyph(18, 574, 76, &sp->style[4]);
-        ui_draw_number((u16)(DAT_80088188 - DAT_8008819e * 10) | DIGITS(1), 582, 76, &sp->style[4]);
+        ui_draw_number((u16)(DAT_80088188 - menu_figure_whole * 10) | DIGITS(1), 582, 76, &sp->style[4]);
         ui_draw_glyph(53, 594, 76, &sp->style[4]);
         if (item->pairs[0][1]) {
             ui_draw_number((u16)item->pairs[0][1] | DIGITS(3), 522, 91, &sp->style[4]);
@@ -8434,11 +8434,11 @@ void menu_arrange_icons_draw_caption(void)
         }
         if (vis_table_c.unk0118[id].unk24) {
             ui_draw_text(MESSAGE(28), 250, 215, &sp->style[0]);
-            DAT_8008819e = vis_table_c.unk0118[id].unk24 * 100 / 454;
+            menu_figure_whole = vis_table_c.unk0118[id].unk24 * 100 / 454;
             DAT_80088188 = vis_table_c.unk0118[id].unk24 * 1000 / 454;
-            ui_draw_number(DAT_8008819e | 0x3000000, 300, 215, &sp->style[4]);
+            ui_draw_number(menu_figure_whole | 0x3000000, 300, 215, &sp->style[4]);
             ui_draw_glyph(18, 339, 215, &sp->style[0]);
-            ui_draw_number((u16)(DAT_80088188 - DAT_8008819e * 10) | 0x1000000, 346, 215,
+            ui_draw_number((u16)(DAT_80088188 - menu_figure_whole * 10) | 0x1000000, 346, 215,
                           &sp->style[4]);
             ui_draw_glyph(53, 362, 215, &sp->style[0]);
         }
@@ -8592,7 +8592,7 @@ void menu_arrange_icons_draw(void)
     sp->unk32C.g = (u8)sp->unk360 * 2 + 48;
     if (sp->unk2DC & 0x8000)
         menu_draw_button_prompt();
-    DAT_800881ae = 1;
+    number_narrow = 1;
     if (sp->unk2DC & 0x1) {
         menu_arrange_icons_draw_hand();
         menu_arrange_icons_draw_bag();
@@ -8603,7 +8603,7 @@ void menu_arrange_icons_draw(void)
             menu_arrange_icons_draw_bag();
         menu_arrange_icons_draw_details();
     }
-    DAT_800881ae = 0;
+    number_narrow = 0;
     if ((short)(sp->unk2E0 % 8) < 4)
         ui_draw_arrow(&arrow, &color, 0);
     else
@@ -8641,7 +8641,7 @@ void pause_screen_draw(void)
 ADDRESS(0x80031de4, 0x118)
 void placements_expand(StPlacement *src)
 {
-    StObject24 *dst = DAT_8015c488.objects;
+    StObject24 *dst = placement_objects.objects;
     int i = 128;
     u16 id;
 
@@ -8724,7 +8724,7 @@ int tim_load_images(u_long *buf, u_long size)
 ADDRESS(0x80032058, 0x114)
 void lighting_load_defaults(void)
 {
-    StLightInit *init = DAT_8007f78c;
+    StLightInit *init = lighting_defaults;
     StLight *light = lighting.light;
     int i = 64;
 
