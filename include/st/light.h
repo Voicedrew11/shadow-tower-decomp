@@ -15,11 +15,11 @@
 /* One 0x30-byte default environment (lighting_load_defaults expands it to an
  * StLight); lighting_blend blends the parts its flags select. */
 typedef struct {
-    StLightMatrix unk0;
+    StLightMatrix light;
     StLightMatrix color;
     CVECTOR back;
-    s16 unk2C;
-    s16 unk2E;
+    s16 depth_cue_near;
+    s16 depth_cue_far;
 } StLightInit;
 
 /*
@@ -27,20 +27,20 @@ typedef struct {
  * (high nibble: row flags 0x10..0x80, low nibble: column flags 1..4) and
  * the environments. 0..11 are the row/column grid lighting_grid_index indexes,
  * 12..18 the special selections of lighting_select, 43 and 44 the current
- * and blend-start environments, 45..47 func_80017d28's blend targets.
+ * and blend-start environments, 45..47 lighting_load_gte's blend targets.
  */
 typedef struct {
     u8 unk0;
     u8 unk1;
-    u8 unk2;             /* 0x02: set when the light matrices need rebuilding */
-    u8 unk3;
-    u8 unk4;
-    u8 unk5;             /* 0x05: column flags last applied */
-    u8 unk6;             /* 0x06: row flags last applied */
-    u8 unk7;             /* 0x07: area last seen */
-    u8 unk8;
-    u8 unk9;
-    u8 unkA;
+    u8 rebuild_matrices; /* 0x02: set when the light matrices need rebuilding */
+    u8 column_request;
+    u8 row_request;
+    u8 columns;          /* 0x05: column flags last applied */
+    u8 rows;             /* 0x06: row flags last applied */
+    u8 last_area;        /* 0x07: area last seen */
+    u8 entry_step;
+    u8 force_first_column;
+    u8 paused;
     u8 unkB;
     s16 area_mode[48];   /* 0x0c */
     StLight light[64];   /* 0x6c */
@@ -49,12 +49,12 @@ typedef struct {
 extern StLighting lighting;
 
 /* The 64 default environments in the load image (0x8007f78c). */
-extern StLightInit DAT_8007f78c[64];
+extern StLightInit lighting_defaults[64];
 
 /* Not reconstructed yet (0x80049aac..0x8004a888). */
-void func_80049aac(StLight *light, StLightMatrix *out, int index);
-int func_8004a830(int from, int to, int t);
-void func_8004a888(StLightMatrix *a, StLightMatrix *b, StLightMatrix *out, short t);
+void lighting_quarter_turn_matrix(StLight *light, StLightMatrix *out, int index);
+int math_lerp(int from, int to, int t);
+void matrix_lerp(StLightMatrix *a, StLightMatrix *b, StLightMatrix *out, short t);
 
 /* src/st/light.c */
 void lighting_load_defaults(void);

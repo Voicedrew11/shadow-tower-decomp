@@ -14,7 +14,7 @@
 /* Turns `angle` toward `to` the shorter way round by `step`, stopping at
  * `to`. */
 ADDRESS(0x800496c8, 0xc4)
-int func_800496c8(int a, int b, int step)
+int angle_step_toward(int a, int b, int step)
 {
     short angle = a & 0xfff;
     short to = b & 0xfff;
@@ -47,7 +47,7 @@ int func_800496c8(int a, int b, int step)
 
 /* Moves `v` toward `to` by |step|, stopping at `to`. */
 ADDRESS(0x8004978c, 0x68)
-int func_8004978c(int v, int to, int step)
+int math_step_toward(int v, int to, int step)
 {
     if (step > 0) {
         if (v < to) {
@@ -74,13 +74,13 @@ int func_8004978c(int v, int to, int step)
 }
 
 ADDRESS(0x800497f4, 0xd8)
-int func_800497f4(int angle, int heading, int speed, int accel, int decay)
+int angle_turn_speed(int angle, int heading, int speed, int accel, int decay)
 {
-    if (func_8004a148((short)angle, (short)heading, (short)(accel >> 1)) && speed <= accel &&
+    if (angle_within((short)angle, (short)heading, (short)(accel >> 1)) && speed <= accel &&
         speed >= -accel)
         return angle - heading;
     if (heading != angle) {
-        if (func_8004a184((short)heading, (short)angle))
+        if (angle_is_after((short)heading, (short)angle))
             speed -= accel;
         else
             speed += accel;
@@ -94,7 +94,7 @@ int func_800497f4(int angle, int heading, int speed, int accel, int decay)
 
 /* The four quarter turns of `m` about y, into out[0..3]. */
 ADDRESS(0x800498cc, 0x1e0)
-void func_800498cc(MATRIX *m, MATRIX *out)
+void matrix_quarter_turns_y(MATRIX *m, MATRIX *out)
 {
     out->m[0][0] = m->m[0][0];
     out->m[0][1] = m->m[0][1];
@@ -139,7 +139,7 @@ void func_800498cc(MATRIX *m, MATRIX *out)
 
 /* Light matrix 0 of `light` turned by `index` quarter turns about y. */
 ADDRESS(0x80049aac, 0x228)
-void func_80049aac(StLight *light, StLightMatrix *out, int index)
+void lighting_quarter_turn_matrix(StLight *light, StLightMatrix *out, int index)
 {
     StLightMatrix *m = &light->light[0];
 
@@ -193,7 +193,7 @@ void func_80049aac(StLight *light, StLightMatrix *out, int index)
 
 /* Rotation about x. */
 ADDRESS(0x80049cd4, 0x74)
-void func_80049cd4(short angle, MATRIX *m)
+void matrix_rot_x(short angle, MATRIX *m)
 {
     int s = rsin(angle);
     int c = rcos(angle);
@@ -211,7 +211,7 @@ void func_80049cd4(short angle, MATRIX *m)
 
 /* Rotation about y. */
 ADDRESS(0x80049d48, 0x74)
-void func_80049d48(short angle, MATRIX *m)
+void matrix_rot_y(short angle, MATRIX *m)
 {
     int s = rsin(angle);
     int c = rcos(angle);
@@ -229,7 +229,7 @@ void func_80049d48(short angle, MATRIX *m)
 
 /* Rotation about z. */
 ADDRESS(0x80049dbc, 0x74)
-void func_80049dbc(short angle, MATRIX *m)
+void matrix_rot_z(short angle, MATRIX *m)
 {
     int s = rsin(angle);
     int c = rcos(angle);
@@ -247,33 +247,33 @@ void func_80049dbc(short angle, MATRIX *m)
 
 /* m = Ry * Rx * Rz. */
 ADDRESS(0x80049e30, 0x6c)
-void func_80049e30(SVECTOR *rot, MATRIX *m)
+void matrix_rot_yxz(SVECTOR *rot, MATRIX *m)
 {
     MATRIX t;
 
-    func_80049dbc(rot->vz, &t);
-    func_80049cd4(rot->vx, m);
+    matrix_rot_z(rot->vz, &t);
+    matrix_rot_x(rot->vx, m);
     MulMatrix(m, &t);
-    func_80049d48(rot->vy, &t);
+    matrix_rot_y(rot->vy, &t);
     MulMatrix2(&t, m);
 }
 
 /* m = Rx * Rz * Ry. */
 ADDRESS(0x80049e9c, 0x6c)
-void func_80049e9c(SVECTOR *rot, MATRIX *m)
+void matrix_rot_xzy(SVECTOR *rot, MATRIX *m)
 {
     MATRIX t;
 
-    func_80049d48(rot->vy, &t);
-    func_80049dbc(rot->vz, m);
+    matrix_rot_y(rot->vy, &t);
+    matrix_rot_z(rot->vz, m);
     MulMatrix(m, &t);
-    func_80049cd4(rot->vx, &t);
+    matrix_rot_x(rot->vx, &t);
     MulMatrix2(&t, m);
 }
 
 /* The unit z vector turned by pitch rot->vx and yaw rot->vy. */
 ADDRESS(0x80049f08, 0xdc)
-void func_80049f08(SVECTOR *rot, SVECTOR *out)
+void vector_from_angles(SVECTOR *rot, SVECTOR *out)
 {
     MATRIX mx;
     MATRIX my;
@@ -283,12 +283,12 @@ void func_80049f08(SVECTOR *rot, SVECTOR *out)
     v.vx = 0;
     v.vy = 0;
     v.vz = 4096;
-    func_80049cd4(-rot->vx, &mx);
+    matrix_rot_x(-rot->vx, &mx);
     ApplyMatrix(&mx, &v, &r);
     v.vx = r.vx;
     v.vy = r.vy;
     v.vz = r.vz;
-    func_80049d48(rot->vy, &my);
+    matrix_rot_y(rot->vy, &my);
     ApplyMatrix(&my, &v, &r);
     out->vx = r.vx;
     out->vy = r.vy;
@@ -296,31 +296,31 @@ void func_80049f08(SVECTOR *rot, SVECTOR *out)
 }
 
 ADDRESS(0x80049fe4, 0x94)
-void func_80049fe4(SVECTOR *rot, SVECTOR *out)
+void vector_from_angles_zyx(SVECTOR *rot, SVECTOR *out)
 {
     MATRIX m;
     SVECTOR r;
     SVECTOR v;
 
     r = *rot;
-    v = DAT_8008809c;
+    v = unit_vector_z;
     r.vy = -r.vy;
     RotMatrixZYX_gte(&r, &m);
     ApplyMatrixSV(&m, &v, out);
 }
 
-/* v turned by rot (func_80049e30) into out. */
+/* v turned by rot (matrix_rot_yxz) into out. */
 ADDRESS(0x8004a078, 0x48)
-void func_8004a078(SVECTOR *rot, SVECTOR *v, VECTOR *out)
+void vector_rotate(SVECTOR *rot, SVECTOR *v, VECTOR *out)
 {
     MATRIX m;
 
-    func_80049e30(rot, &m);
+    matrix_rot_yxz(rot, &m);
     ApplyMatrix(&m, v, out);
 }
 
 ADDRESS(0x8004a0c0, 0x38)
-void func_8004a0c0(short scale, long *v)
+void vector_scale_xy(short scale, long *v)
 {
     v[0] = v[0] * scale >> 11;
     v[1] = v[1] * scale >> 11;
@@ -328,7 +328,7 @@ void func_8004a0c0(short scale, long *v)
 
 /* Scales v by scale / 4096. */
 ADDRESS(0x8004a0f8, 0x50)
-void func_8004a0f8(scale, v)
+void vector_scale(scale, v)
 short scale;
 SVECTOR *v;
 {
@@ -339,7 +339,7 @@ SVECTOR *v;
 
 /* Whether `angle` is within `range` of `heading`. */
 ADDRESS(0x8004a148, 0x3c)
-int func_8004a148(angle, heading, range)
+int angle_within(angle, heading, range)
 int angle;
 int heading;
 short range;
@@ -353,20 +353,20 @@ short range;
 }
 
 ADDRESS(0x8004a184, 0x10)
-int func_8004a184(int a, int b)
+int angle_is_after(int a, int b)
 {
     return ((a - b) & 0xfff) <= 2048;
 }
 
 ADDRESS(0x8004a194, 0x20)
-int func_8004a194(int a, int b)
+int angle_signed_greater(int a, int b)
 {
     return (short)(((a + 2048) & 0xfff) - ((b + 2048) & 0xfff)) > 0;
 }
 
 /* The heading of (dx, dz). */
 ADDRESS(0x8004a1b4, 0x150)
-int func_8004a1b4(int dx, int dz)
+int angle_from_xz(int dx, int dz)
 {
     int adx = abs(dx);
     int adz = abs(dz);
@@ -386,7 +386,7 @@ int func_8004a1b4(int dx, int dz)
 
 /* The length of (dx, dz). */
 ADDRESS(0x8004a304, 0x3c)
-int func_8004a304(int dx, int dz)
+int vector_length_xz(int dx, int dz)
 {
     dx >>= 3;
     dz >>= 3;
@@ -395,7 +395,7 @@ int func_8004a304(int dx, int dz)
 
 /* The length of (x, y, z). */
 ADDRESS(0x8004a340, 0x50)
-int func_8004a340(int x, int y, int z)
+int vector_length_xyz(int x, int y, int z)
 {
     x >>= 3;
     y >>= 3;
@@ -405,25 +405,25 @@ int func_8004a340(int x, int y, int z)
 
 /* The pitch and yaw of (dx, dy, dz). */
 ADDRESS(0x8004a390, 0x7c)
-void func_8004a390(int dx, int dy, int dz, SVECTOR *out)
+void vector_to_angles(int dx, int dy, int dz, SVECTOR *out)
 {
-    out->vy = func_8004a1b4(dx, dz);
-    out->vx = -func_8004a1b4(dy, func_8004a304(dx, dz)) & 0xfff;
+    out->vy = angle_from_xz(dx, dz);
+    out->vx = -angle_from_xz(dy, vector_length_xz(dx, dz)) & 0xfff;
     out->vz = 0;
 }
 
 ADDRESS(0x8004a40c, 0x78)
-void func_8004a40c(int dx, int dy, int dz, SVECTOR *out)
+void vector_to_angles_ratan2(int dx, int dy, int dz, SVECTOR *out)
 {
     out->vy = -ratan2(dx, dz);
-    out->vx = ratan2(-dy, func_8004a304(dx, dz));
+    out->vx = ratan2(-dy, vector_length_xz(dx, dz));
     out->vz = 0;
 }
 
 /* The horizontal distance from (x, z) to *p when it is within `range`
  * and y (unless 0xffff) is within `below`/`above` of p->vy, else -1. */
 ADDRESS(0x8004a484, 0xfc)
-int func_8004a484(VECTOR *p, int x, int y, int z, int range, int above, int below)
+int vector_distance_xz_within(VECTOR *p, int x, int y, int z, int range, int above, int below)
 {
     int dx, dz;
     int d;
@@ -450,7 +450,7 @@ int func_8004a484(VECTOR *p, int x, int y, int z, int range, int above, int belo
 }
 
 ADDRESS(0x8004a580, 0xfc)
-int func_8004a580(VECTOR *p, int x, int y, int z, int range, int above, int below)
+int vector_distance_xz_within_rev(VECTOR *p, int x, int y, int z, int range, int above, int below)
 {
     int dx, dz;
     int d;
@@ -480,7 +480,7 @@ int func_8004a580(VECTOR *p, int x, int y, int z, int range, int above, int belo
  * `height`): -9999999 when beyond ra + rb, 0 when b's centre is inside
  * rb. */
 ADDRESS(0x8004a67c, 0x11c)
-int func_8004a67c(VECTOR *a, int ra, VECTOR *b, int rb, int height)
+int vector_sphere_distance(VECTOR *a, int ra, VECTOR *b, int rb, int height)
 {
     int r = ra + rb;
     int dx, dy, dz;
@@ -509,28 +509,28 @@ int func_8004a67c(VECTOR *a, int ra, VECTOR *b, int rb, int height)
 
 /* A random value in 0..n. */
 ADDRESS(0x8004a798, 0x48)
-int func_8004a798(int n)
+int math_random(int n)
 {
     return (rand() + rand()) * n >> 15;
 }
 
 /* A random value in -n..n. */
 ADDRESS(0x8004a7e0, 0x50)
-int func_8004a7e0(int n)
+int math_random_signed(int n)
 {
     return (rand() + rand() - 32768) * n >> 15;
 }
 
 /* from + (to - from) * t / 4096. */
 ADDRESS(0x8004a830, 0x18)
-int func_8004a830(int from, int to, int t)
+int math_lerp(int from, int to, int t)
 {
     return ((to - from) * t >> 12) + from;
 }
 
 /* The angle t / 4096 of the shorter way from `from` to `to`. */
 ADDRESS(0x8004a848, 0x40)
-int func_8004a848(int from, short to, int t)
+int angle_lerp(int from, short to, int t)
 {
     int d = (to - (short)from) & 0xfff;
 
@@ -541,7 +541,7 @@ int func_8004a848(int from, short to, int t)
 
 /* out = a + (b - a) * t / 4096 for each element. */
 ADDRESS(0x8004a888, 0x60)
-void func_8004a888(StLightMatrix *a, StLightMatrix *b, StLightMatrix *out, short t)
+void matrix_lerp(StLightMatrix *a, StLightMatrix *b, StLightMatrix *out, short t)
 {
     short *pa = &a->m[0][0];
     short *pb = &b->m[0][0];
@@ -558,7 +558,7 @@ void func_8004a888(StLightMatrix *a, StLightMatrix *b, StLightMatrix *out, short
 
 /* out = p + v * s. */
 ADDRESS(0x8004a8e8, 0x58)
-void func_8004a8e8(VECTOR *p, SVECTOR *v, int s, VECTOR *out)
+void vector_add_scaled(VECTOR *p, SVECTOR *v, int s, VECTOR *out)
 {
     out->vx = p->vx + v->vx * s;
     out->vy = p->vy + v->vy * s;
@@ -567,7 +567,7 @@ void func_8004a8e8(VECTOR *p, SVECTOR *v, int s, VECTOR *out)
 
 /* The distance from p to the segment a..b, or -1 when p is not beside it. */
 ADDRESS(0x8004a940, 0x17c)
-int func_8004a940(SVECTOR *p, SVECTOR *a, SVECTOR *b)
+int svector_distance_to_segment(SVECTOR *p, SVECTOR *a, SVECTOR *b)
 {
     int t;
     int x, y, z;
@@ -589,7 +589,7 @@ int func_8004a940(SVECTOR *p, SVECTOR *a, SVECTOR *b)
 }
 
 ADDRESS(0x8004aabc, 0x17c)
-int func_8004aabc(VECTOR *p, VECTOR *a, VECTOR *b)
+int vector_distance_to_segment(VECTOR *p, VECTOR *a, VECTOR *b)
 {
     int t;
     int x, y, z;

@@ -114,7 +114,7 @@ Example: VS `0x80021140`.
 (`move a0,sN`, a stack argument loaded with `lw` or `lb`) where the prototype
 would mask or extend it. Cause: with no prototype in scope the default
 promotions apply. Source: an old-style declaration in the caller (`void
-func_8002e314();`) or an old-style definition earlier in the file, with
+fighter_apply_attack_hit();`) or an old-style definition earlier in the file, with
 explicit casts where retail does narrow. Examples: VS `0x8002f334`; ST
 `0x80036484` (the effect presets above it are old-style definitions); ST
 `0x80050768` (a stack argument loaded with `lb`).
@@ -152,7 +152,7 @@ reference).
 v1; subu a1,v0,v1` in retail against `lui a1; addiu a1; subu a1,v0,a1`. Cause:
 with `return b;` the copy `v0 = b` lets local-alloc substitute `v0` for `b` in
 earlier insns, which unties a later difference from its dying operand. Source:
-return the pointer (`Vis88 *` in the prototype). Example: ST `0x800549c8`.
+return the pointer (`AreaObject *` in the prototype). Example: ST `0x800549c8`.
 
 **Variadic functions.** Symptom: `addiu s3,sp,112` and reads `lw/lhu/lbu
 N(s3)` of the stacked arguments, the last named one read from its home slot.
@@ -168,11 +168,11 @@ Cause: a member access (`obj.field`, also a constant index) expands as `R =
 &obj; mem(R + 16)`; a dereference of a constant address expression
 (`(&obj.first)[2]`, `*(int *)((char *)&obj + 16)`) expands as `R = obj+16;
 mem(R)`, which loop.c folds back into the load. A struct `VAR_DECL` is
-`BLKmode`, so `viewer.unk38[i]` forces its address into a register, while
-`*(viewer.unk38 + i)` goes through `ADDR_EXPR` and yields the constant
+`BLKmode`, so `viewer.equipment[i]` forces its address into a register, while
+`*(viewer.equipment + i)` goes through `ADDR_EXPR` and yields the constant
 `sym+56`. Outside loops the two spellings usually give the same code.
 Examples: OPTXT `0x80012d04` (`(&pad.trigger)[2]`), ST `0x8005ad00`
-(`*(viewer.unk38 + 2)`), ST `player_update_status` (`0x8003c24c`): `addiu
+(`*(viewer.equipment + 2)`), ST `player_update_status` (`0x8003c24c`): `addiu
 a0,s0,-400; lw v0,400(a0)` (a base re-derived from a pointer into the object)
 is a member access that cse rewrote through a related register, which needed
 the member to exist in the type.
@@ -183,7 +183,7 @@ and `lui/addiu sym+K` formed after it, reusing the dead index register. Cause:
 &sym.arr[i]` expands the `ADDR_EXPR` as `(plus (mult i size) (const sym+K))`,
 which `force_operand` emits multiply first, constant last. Source: give the
 element a pointer local. Examples: ST `0x80040024` (`item =
-&vis_table_c.unk0118[...]`), ST `0x80023c6c`. A member read whose address is
+&vis_table_c.types[...]`), ST `0x80023c6c`. A member read whose address is
 `sym+OFF` with the base loaded before the index is scaled is a cast
 dereference, `*(u16 *)&ARR[i].member` (VS `0x8001c5e0`).
 
@@ -367,8 +367,8 @@ value and give another allocation); a narrowed `HImode` sum is not equated
 with the `SImode` one, so `addu v0,s0,v1 ... addu v0,v1,s0` (one sum formed
 twice) means one operand is a 16-bit variable (ST `0x80050768`); `x >> 2` on a
 `u8` and the same value read back from a `u8` variable differ (ST
-`0x8004e960`); cse never looks inside `zero_extend(mem)`, so `viewer.unkB6 /=
-2` reloads while `b6 = viewer.unkB6; viewer.unkB6 = b6 / 2;` copies the stored
+`0x8004e960`); cse never looks inside `zero_extend(mem)`, so `viewer.physical_base /=
+2` reloads while `b6 = viewer.physical_base; viewer.physical_base = b6 / 2;` copies the stored
 register (ST `0x8005a3a8`).
 
 **cse follows jumps only into single-use labels.** A conditional jump is
@@ -465,12 +465,12 @@ differs. Forms that changed the count:
 - `s++; s++;` instead of `s += 2` adds one RTL insn (combine merges them
   later): ST `0x8002732c`.
 - reaching a table through a pointer set before the loop removes two movables:
-  ST `0x8002b84c` (`mask = DAT_801cd180.unk22;`, which let the frame address
+  ST `0x8002b84c` (`mask = pad_state.buttons;`, which let the frame address
   be hoisted), ST `0x800642e8` (`table = &vis_table_c;` lifts the threshold by
   6, so three viewer addresses are hoisted and the fourth stays, as in
   retail).
 - the reverse: a global expression written at each use (VS `0x800182ec`, VS
-  `0x800140d8`, `DAT_800633b0.fighter[i]`) makes its 6-insn chain the first
+  `0x800140d8`, `shared_buffer.fighter[i]`) makes its 6-insn chain the first
   movable, which uses up the budget before a later constant.
 - the order of two subexpressions: `X[area][i / 32] & BIT(i)` forms the row
   address before the division, lengthens its life, gets it hoisted, and leaves
@@ -481,7 +481,7 @@ differs. Forms that changed the count:
 inside the loop after a conditional branch is moved only if
 `reg_in_basic_block_p`, whose first test is that this insn is the variable's
 first reference in the function. A variable referenced anywhere earlier stays:
-`u8 *names = NULL;` at the declaration and `names = DAT_8008092c;` inside the
+`u8 *names = NULL;` at the declaration and `names = magic_name_messages;` inside the
 `if` keeps the address in the loop, and flow deletes the dead initialiser
 afterwards (ST `0x80065de0`). Likewise an assignment to a variable whose first
 use is earlier keeps a sign extension in the loop (ST `0x8004cc70`).
@@ -491,7 +491,7 @@ literal is not (VS `0x8002ad40`).
 **Loads and aliasing.** loop.c hoists a load only if no store in the loop can
 alias it. Its test (`init_alias_analysis` in `sched.c`) knows a pointer's
 value only when the pseudo has a `REG_EQUAL` constant note and exactly one
-set. `u16 *p = NULL; ... p = viewer.unkC0;` has two sets at loop time, so `*p`
+set. `u16 *p = NULL; ... p = viewer.weapon_element_attack;` has two sets at loop time, so `*p`
 may alias everything and a load retail repeats every pass stays in the loop
 (ST `0x8005a3a8`). A load that retail does before a loop with a call is a
 statement before the loop (VS `0x80020aa4`).
@@ -696,7 +696,7 @@ is live across it when flow runs; sched1 sinks the set to its use, but
 `reg_n_calls_crossed` is not reset for a pseudo that lives in more than one
 block, so global-alloc still gives it a saved register. Retail's `addiu
 s2,s1,48` (not `a1`) means the pointer was initialised at its declaration
-(FDAT_022 `0x801ed8f0`, `Vis48 *c6 = &table.entries[6];`).
+(FDAT_022 `0x801ed8f0`, `GroundItem *c6 = &table.entries[6];`).
 
 **Reading statement order from sched1's output.** sched1 keeps a load early
 and sinks a dependent add and store behind the following independent stores,
@@ -879,7 +879,7 @@ a callee declared `int` in that file (an old-style `int f();`, no prototype,
 or a real `int` result that is ignored). A `return x;` in the function also
 makes `v0` explicit; a valueless `int` return type does not. Check with
 `.greg`: "Spilling reg 64. Register N now in R" with `R` = 2 means `v0` was
-not forbidden. Examples: VS `0x80021140` (`int func_800207d4();`), FDAT_272
+not forbidden. Examples: VS `0x80021140` (`int ui_draw_cell_grid();`), FDAT_272
 `0x801eec74`, ST `0x8005335c`. Changing a callee's type changes only
 reload-register choices, but in every caller.
 
@@ -1122,9 +1122,9 @@ $3,X`, `la $5,S`) that ASPSX expands with the destination as its own temporary
 (`lui a1; addiu a1,a1,lo`). A separate temporary (`lui v0; lw v1,lo(v0)`)
 means cc1 saw an object larger than 8 bytes, a member of a bigger struct (ST
 `0x80042d74`, where `DAT_801cd0e0` is spelled as the member
-`DAT_801cba08.unk16D8` by a macro in `include/st/menu.h`). An `extern s32
+`game_progress.item_use_result` by a macro in `include/st/menu.h`). An `extern s32
 X[];` has no size: declare `X[1]` or the scalar (VS `0x80029f28`,
-`DAT_80063370[1]`, after its unit moved to the `-G8` profile). In `-G0` units
+`round_wins[1]`, after its unit moved to the `-G8` profile). In `-G0` units
 both spellings give the same bytes.
 
 **Small initialised locals.** cc1 puts any constant of at most 8 bytes in

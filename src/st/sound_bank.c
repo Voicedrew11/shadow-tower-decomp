@@ -1,7 +1,7 @@
 /*
  * ST.EXE: sound key-off and the VAB bank loads that run through the CD
  * request ring (WIP module, 0x8005850c..0x80058c04). It continues
- * src/st/sound.c, which ends at the non-exact func_80058318 so that these
+ * src/st/sound.c, which ends at the non-exact sound_key_on so that these
  * functions keep their retail offsets in their own unit.
  */
 #include <kf/lib/address.h>
@@ -23,26 +23,26 @@
 RODATA(0x80012870, 0x60)
 
 ADDRESS(0x8005850c, 0x28)
-void func_8005850c(s16 voice, int sound)
+void sound_stop(s16 voice, int sound)
 {
-    func_80058534(voice, sound, 0);
+    sound_key_off(voice, sound, 0);
 }
 
 /* Keys sound `id` off on `voice`. */
 ADDRESS(0x80058534, 0xec)
-void func_80058534(short voice, int id, int note)
+void sound_key_off(short voice, int id, int note)
 {
     StSound *snd;
     StVabSlot *slot;
 
     if (id == 255)
         return;
-    if (DAT_801cd120.unk1 == 0)
+    if (game_settings.sfx_volume == 0)
         return;
-    snd = &DAT_801dd1c0.sounds[id & 0x7ff];
+    snd = &sound_state.sounds[id & 0x7ff];
     if (snd->slot == -1)
         return;
-    slot = &DAT_801dd1c0.slots[snd->slot];
+    slot = &sound_state.slots[snd->slot];
     if (slot->vab == -1)
         return;
     if (slot->vab == 254)
@@ -53,7 +53,7 @@ void func_80058534(short voice, int id, int note)
     else if (note >= 128)
         note = 127;
     SsUtKeyOff(voice, slot->vab, snd->prog, snd->tone, note);
-    DAT_801dd1c0.voices[voice] = -1;
+    sound_state.voices[voice] = -1;
 }
 
 /*
@@ -62,43 +62,43 @@ void func_80058534(short voice, int id, int note)
  * marks the bank's buffer loaded.
  */
 ADDRESS(0x80058620, 0x150)
-void func_80058620(void)
+void sound_bank_transfer_body(void)
 {
-    StCdRequest *request = cd_state.unk9D8;
+    StCdRequest *request = cd_state.current;
     StVabSlot *slot;
     int r;
 
-    if (request->unk0 != 4)
+    if (request->kind != 4)
         return;
-    if (request->unk11 != 2)
+    if (request->bank_step != 2)
         return;
-    slot = &DAT_801dd1c0.slots[request->unk4.bank.slot];
+    slot = &sound_state.slots[request->payload.bank.slot];
     for (;;) {
-        r = SsVabTransBodyPartly(request->unk20, 0xa000, slot->vab);
+        r = SsVabTransBodyPartly(request->dest, 0xa000, slot->vab);
         if (r == -1) {
             SsVabClose(slot->vab);
             slot->vab = r;
-            func_80015848(request);
+            cd_request_retire(request);
             /* A bank request keeps its archive number in the byte the read
              * requests use for the callbacks' state; retail reads it as a
              * plain byte (one combined load, first of the three). */
-            func_80058a0c(*(u8 *)&request->unk10, request->unk4.bank.member,
-                          request->unk4.bank.slot);
+            sound_bank_load(*(u8 *)&request->status, request->payload.bank.member,
+                          request->payload.bank.slot);
         } else if (r == -2) {
-            request->unk1 = 0;
-            request->unk11 = 1;
-            func_80015a94(&request->unk18, request->unk28, &request->unk18);
+            request->step = 0;
+            request->bank_step = 1;
+            cd_loc_add_sectors(&request->loc, request->sectors, &request->loc);
             SsVabTransCompleted(1);
-            while (CdControl(CdlSeekL, (u_char *)&request->unk18, NULL) == 0)
+            while (CdControl(CdlSeekL, (u_char *)&request->loc, NULL) == 0)
                 ;
             return;
         } else {
             if (r == slot->vab) {
                 SsVabTransCompleted(1);
-                func_80015848(request);
+                cd_request_retire(request);
                 /* The bank payload holds its typed buffer pointer at +8. */
-                request->unk4.bank.buffer->state = 1;
-                request->unk24 = 0;
+                request->payload.bank.buffer->state = 1;
+                request->sectors_left = 0;
             }
             return;
         }
@@ -111,7 +111,7 @@ void func_80058620(void)
  * its index and returns it, or NULL.
  */
 ADDRESS(0x80058770, 0x144)
-StSoundBuf *func_80058770(int first, int count, int buf, int bufs, int *index)
+StSoundBuf *sound_bank_find_buffer(int first, int count, int buf, int bufs, int *index)
 {
     StSoundBuf *b;
     StVabSlot *slot;
@@ -119,7 +119,7 @@ StSoundBuf *func_80058770(int first, int count, int buf, int bufs, int *index)
     int n;
 
     i = 0;
-    b = &DAT_801dd1c0.bufs[buf];
+    b = &sound_state.bufs[buf];
     n = bufs;
     while (n--) {
         if (b->state == 0) {
@@ -130,11 +130,11 @@ StSoundBuf *func_80058770(int first, int count, int buf, int bufs, int *index)
         b++;
     }
     i = 0;
-    b = &DAT_801dd1c0.bufs[buf];
+    b = &sound_state.bufs[buf];
     n = bufs;
     while (n--) {
         if (b->state == 2) {
-            slot = &DAT_801dd1c0.slots[first];
+            slot = &sound_state.slots[first];
             while (count--) {
                 if (slot->vab != -1 && slot->block == (s16 *)b) {
                     SsVabClose(slot->vab);
@@ -156,19 +156,19 @@ StSoundBuf *func_80058770(int first, int count, int buf, int bufs, int *index)
 
 /*
  * CD completion callback of a bank request: opens the bank's header once
- * read, then seeks on for its body (func_80058620 transfers it).
+ * read, then seeks on for its body (sound_bank_transfer_body transfers it).
  */
 ADDRESS(0x800588b4, 0x158)
-void func_800588b4(StCdRequest *request)
+void sound_bank_read_done(StCdRequest *request)
 {
     StVabSlot *slot;
 
-    switch (request->unk11) {
+    switch (request->bank_step) {
     case 0:
-        slot = &DAT_801dd1c0.slots[request->unk4.bank.slot];
-        if (func_80015b78((u32 *)request->unk4.bank.buffer->data, request->unk28)) {
-            request->unk1 = 0;
-            while (CdControl(CdlSeekL, (u_char *)&request->unk18, NULL) == 0)
+        slot = &sound_state.slots[request->payload.bank.slot];
+        if (cd_checksum_mismatch((u32 *)request->payload.bank.buffer->data, request->sectors)) {
+            request->step = 0;
+            while (CdControl(CdlSeekL, (u_char *)&request->loc, NULL) == 0)
                 ;
             return;
         }
@@ -176,21 +176,21 @@ void func_800588b4(StCdRequest *request)
             SsVabClose(slot->vab);
             slot->vab = -1;
         }
-        if ((slot->vab = SsVabOpenHeadSticky(request->unk4.bank.buffer->data, -1,
-                                             *(u32 *)&request->unkC)) == -1) {
-            func_80015848(request);
+        if ((slot->vab = SsVabOpenHeadSticky(request->payload.bank.buffer->data, -1,
+                                             *(u32 *)&request->stream_sectors)) == -1) {
+            cd_request_retire(request);
             return;
         }
-        func_80015a94(&request->unk18, request->unk28, &request->unk18);
-        request->unk11 = 1;
-        request->unk20 = (u8 *)DAT_80088c88;
-        request->unk1 = 0;
-        request->unk28 = 20;
-        while (CdControl(CdlSeekL, (u_char *)&request->unk18, NULL) == 0)
+        cd_loc_add_sectors(&request->loc, request->sectors, &request->loc);
+        request->bank_step = 1;
+        request->dest = (u8 *)cd_file_buffer;
+        request->step = 0;
+        request->sectors = 20;
+        while (CdControl(CdlSeekL, (u_char *)&request->loc, NULL) == 0)
             ;
         break;
     case 1:
-        request->unk11 = 2;
+        request->bank_step = 2;
         break;
     }
 }
@@ -200,9 +200,9 @@ void func_800588b4(StCdRequest *request)
  * 0..23 have fixed buffers and SPU addresses, slots 24..323 share four.
  */
 ADDRESS(0x80058a0c, 0x1f8)
-void func_80058a0c(int archive, int index, int slot)
+void sound_bank_load(int archive, int index, int slot)
 {
-    StVabSlot *s = &DAT_801dd1c0.slots[slot];
+    StVabSlot *s = &sound_state.slots[slot];
     StSoundBuf *buf;
     u32 spu;
     StCdRequest *request;
@@ -213,20 +213,20 @@ void func_80058a0c(int archive, int index, int slot)
     case 3:
     case 4:
     case 5:
-        buf = &DAT_801dd1c0.bufs[slot + 8];
+        buf = &sound_state.bufs[slot + 8];
         spu = (slot - 2) * 0x3000 + 0x19800;
         break;
     case 1:
-        buf = &DAT_801dd1c0.bufs[14];
+        buf = &sound_state.bufs[14];
         spu = 0x65400;
         break;
     case 0:
-        buf = &DAT_801dd1c0.bufs[15];
+        buf = &sound_state.bufs[15];
         spu = 0x1000;
         break;
     case 6:
     case 7:
-        buf = &DAT_801dd1c0.bufs[slot - 6];
+        buf = &sound_state.bufs[slot - 6];
         spu = (slot - 6) * 0x3000 + 0x25800;
         break;
     case 8:
@@ -245,12 +245,12 @@ void func_80058a0c(int archive, int index, int slot)
     case 21:
     case 22:
     case 23:
-        buf = &DAT_801dd1c0.bufs[(slot - 8) % 4 + 2];
+        buf = &sound_state.bufs[(slot - 8) % 4 + 2];
         spu = (slot - 8) % 4 * 0x9c00 + 0x3e400;
         break;
     default:
         if (slot < 324) {
-            buf = func_80058770(24, 300, 6, 4, &n);
+            buf = sound_bank_find_buffer(24, 300, 6, 4, &n);
             spu = n * 0x3c00 + 0x2b800;
         } else {
             buf = NULL;
@@ -263,13 +263,13 @@ void func_80058a0c(int archive, int index, int slot)
     }
     s->block = (s16 *)buf;
     buf->state = 3;
-    request = cd_state.unk9D4;
-    func_80015b2c(request);
-    request->unk11 = 0;
-    request->unk4.bank.buffer = buf;
-    request->unk4.bank.slot = slot;
-    *(u32 *)&request->unkC = spu;
-    request->unk10 = archive;
-    request->unk4.bank.member = index;
-    func_80015da8(archive, index, buf->data, func_800588b4);
+    request = cd_state.next_free;
+    cd_request_wait_free(request);
+    request->bank_step = 0;
+    request->payload.bank.buffer = buf;
+    request->payload.bank.slot = slot;
+    *(u32 *)&request->stream_sectors = spu;
+    request->status = archive;
+    request->payload.bank.member = index;
+    cd_queue_read_member_unchecked(archive, index, buf->data, sound_bank_read_done);
 }

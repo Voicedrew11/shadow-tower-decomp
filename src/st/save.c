@@ -1,6 +1,6 @@
 /*
  * ST.EXE: new-game defaults and the per-area snapshots of the entry tables
- * in DAT_801cba08 (WIP module, 0x800559bc..0x800562d4).
+ * in game_progress (WIP module, 0x800559bc..0x800562d4).
  */
 #include <kf/lib/address.h>
 #include <kf/lib/types.h>
@@ -29,16 +29,16 @@
  * (retail: 0x7fffffff in t4, the others in t3, t2, t1).
  */
 ADDRESS(0x800559bc, 0x338)
-void func_800559bc(void)
+void save_reset_new_game(void)
 {
     u8 unused[128];
 
-    fill_words((u32 *)DAT_801cba08.unk1448, 0, 12);
-    fill_words((u32 *)&DAT_801c7590, 0, 89);
-    fill_words(&DAT_801cba08.unk14A8[10], 0, 79);
-    DAT_801cba08.unk14A8[89] = -1;
-    DAT_801cba08.unk14A8[90] = -1;
-    DAT_801cba08.unk14A8[91] = -1;
+    fill_words((u32 *)game_progress.talk_counts, 0, 12);
+    fill_words((u32 *)&inventory, 0, 89);
+    fill_words(&game_progress.creature_bits_and_vs_data[10], 0, 79);
+    game_progress.creature_bits_and_vs_data[89] = -1;
+    game_progress.creature_bits_and_vs_data[90] = -1;
+    game_progress.creature_bits_and_vs_data[91] = -1;
     lighting.area_mode[0] = 0x11;
     lighting.area_mode[40] = 0x11;
     lighting.area_mode[41] = 0x11;
@@ -75,177 +75,177 @@ void func_800559bc(void)
     lighting.area_mode[45] = 0x11;
     lighting.area_mode[46] = 0x11;
     lighting.area_mode[47] = 0x11;
-    DAT_801cba08.unk16DC = 0;
-    DAT_801c7590.unk13A[0] = 268;
-    DAT_801c7590.unk156[0] = 3;
-    DAT_801c7590.unk13A[1] = 270;
-    DAT_801c7590.unk156[1] = 5;
-    DAT_801c7590.unk13A[2] = 313;
-    DAT_801c7590.unk156[2] = 1;
-    DAT_801c7590.unk13A[3] = 312;
-    DAT_801c7590.unk156[3] = 1;
-    DAT_801c7590.unk13A[4] = 275;
-    DAT_801c7590.unk156[4] = 1;
-    DAT_801c7590.unk13A[5] = 284;
-    DAT_801c7590.unk156[5] = 30;
-    DAT_801c7590.unk13A[6] = 285;
-    DAT_801c7590.unk156[6] = 20;
-    DAT_801c7590.unk13A[7] = 286;
-    DAT_801c7590.unk156[7] = 10;
-    DAT_801c7590.unk13A[8] = 302;
-    DAT_801c7590.unk156[8] = 2;
-    DAT_801c7590.unk13A[9] = 18;
-    DAT_801c7590.unk156[9] = 1;
-    DAT_801cba08.unk1444.word &= ~0x60;
-    DAT_801cba08.unk1444.word &= ~0x18;
-    DAT_801cba08.unk1444.word &= ~0x6;
-    DAT_801cba08.unk1440.word &= ~0x80000000;
-    DAT_801cba08.unk1444.word &= ~0x1;
-    DAT_801cba08.unk1440.word &= 0x80000000;
-    DAT_801cba08.unk1444.word &= ~0x20000;
-    DAT_801cba08.unk1444.word &= ~0x20000;
-    DAT_801cba08.unk1444.word &= ~0x10000;
-    DAT_801cba08.unk1444.word &= ~0x10000;
-    DAT_801cba08.unk1444.word &= ~0x8000;
-    DAT_801cba08.unk1444.word &= ~0x8000;
-    DAT_801cba08.unk1444.word &= ~0x4000;
-    DAT_801cba08.unk1444.word &= ~0x2000;
-    DAT_801cba08.unk1444.word &= ~0x1000;
-    DAT_801cba08.unk1444.word &= ~0x800;
-    DAT_801cba08.unk1444.word &= ~0x400;
-    DAT_801cba08.unk1444.word &= ~0x200;
-    DAT_801cba08.unk1444.word &= ~0x100;
-    DAT_801cba08.unk1444.word &= ~0x80;
-    DAT_801c7590.unk13A[10] = 28;
-    DAT_801c7590.unk13A[11] = 88;
-    DAT_801c7590.unk13A[12] = 243;
-    DAT_801c7590.unk156[10] = 1;
-    DAT_801c7590.unk156[11] = 1;
-    DAT_801c7590.unk156[12] = 1;
-    DAT_801c7590.unk13A[13] = 133;
-    DAT_801c7590.unk156[13] = 1;
-    fill_words(DAT_801cba08.unk180[0], 0, 48);
-    fill_words(DAT_801cba08.unk0[0], 0, 96);
-    fill_words(DAT_801cba08.unk240[0], 0, 384);
-    fill_words(DAT_801cba08.unk840[0], 0, 384);
-    fill_words(DAT_801cba08.unkE40[0], 0, 384);
-    fill_words((u32 *)DAT_801cba08.unk1478, 0, 12);
-    fill_words(DAT_801cba08.unk14A8, 0, 5);
-    fill_words(&DAT_801cba08.unk14A8[5], 0, 5);
-    fill_words((u32 *)DAT_801cba08.unk16E4, 0, 12);
-    DAT_801cba08.unk16E0 = -1;
+    game_progress.warp_back_request = 0;
+    inventory.shop_ids[0] = 268;
+    inventory.shop_stock[0] = 3;
+    inventory.shop_ids[1] = 270;
+    inventory.shop_stock[1] = 5;
+    inventory.shop_ids[2] = 313;
+    inventory.shop_stock[2] = 1;
+    inventory.shop_ids[3] = 312;
+    inventory.shop_stock[3] = 1;
+    inventory.shop_ids[4] = 275;
+    inventory.shop_stock[4] = 1;
+    inventory.shop_ids[5] = 284;
+    inventory.shop_stock[5] = 30;
+    inventory.shop_ids[6] = 285;
+    inventory.shop_stock[6] = 20;
+    inventory.shop_ids[7] = 286;
+    inventory.shop_stock[7] = 10;
+    inventory.shop_ids[8] = 302;
+    inventory.shop_stock[8] = 2;
+    inventory.shop_ids[9] = 18;
+    inventory.shop_stock[9] = 1;
+    game_progress.event_flags2.word &= ~0x60;
+    game_progress.event_flags2.word &= ~0x18;
+    game_progress.event_flags2.word &= ~0x6;
+    game_progress.event_flags.word &= ~0x80000000;
+    game_progress.event_flags2.word &= ~0x1;
+    game_progress.event_flags.word &= 0x80000000;
+    game_progress.event_flags2.word &= ~0x20000;
+    game_progress.event_flags2.word &= ~0x20000;
+    game_progress.event_flags2.word &= ~0x10000;
+    game_progress.event_flags2.word &= ~0x10000;
+    game_progress.event_flags2.word &= ~0x8000;
+    game_progress.event_flags2.word &= ~0x8000;
+    game_progress.event_flags2.word &= ~0x4000;
+    game_progress.event_flags2.word &= ~0x2000;
+    game_progress.event_flags2.word &= ~0x1000;
+    game_progress.event_flags2.word &= ~0x800;
+    game_progress.event_flags2.word &= ~0x400;
+    game_progress.event_flags2.word &= ~0x200;
+    game_progress.event_flags2.word &= ~0x100;
+    game_progress.event_flags2.word &= ~0x80;
+    inventory.shop_ids[10] = 28;
+    inventory.shop_ids[11] = 88;
+    inventory.shop_ids[12] = 243;
+    inventory.shop_stock[10] = 1;
+    inventory.shop_stock[11] = 1;
+    inventory.shop_stock[12] = 1;
+    inventory.shop_ids[13] = 133;
+    inventory.shop_stock[13] = 1;
+    fill_words(game_progress.ground_items_gone[0], 0, 48);
+    fill_words(game_progress.creatures_gone[0], 0, 96);
+    fill_words(game_progress.objects_removed[0], 0, 384);
+    fill_words(game_progress.objects_unlocked[0], 0, 384);
+    fill_words(game_progress.objects_finished[0], 0, 384);
+    fill_words((u32 *)game_progress.areas_visited, 0, 12);
+    fill_words(game_progress.creature_bits_and_vs_data, 0, 5);
+    fill_words(&game_progress.creature_bits_and_vs_data[5], 0, 5);
+    fill_words((u32 *)game_progress.area_kills, 0, 12);
+    game_progress.save_id = -1;
 }
 
 /* Records area `area`'s entry states: live table A entries in state 3 or 5,
- * empty table C slots 32..63, and per table B entry: free, unk4F 0xff,
- * unk0C 0xff. */
+ * placed table C slots 0..31 in state 0, and per table B entry: free, lock
+ * 0xff, state 0xff. */
 ADDRESS(0x80055cf4, 0x2a8)
-void func_80055cf4(int area)
+void area_save_snapshot(int area)
 {
-    Vis212 *a = vis_table_a.entries;
-    Vis48 *c = vis_table_c.entries;
-    Vis88 *b = vis_table_b.entries;
+    Creature *a = vis_table_a.entries;
+    GroundItem *c = vis_table_c.entries;
+    AreaObject *b = vis_table_b.entries;
     int i;
     int n;
 
     n = 2;
     for (i = 0; i < n; i++)
-        DAT_801cba08.unk0[area][i] = 0;
+        game_progress.creatures_gone[area][i] = 0;
     for (i = 0; i < 64; i++, a++) {
-        if (a->unk00 != 0xff && (a->unk05 == 3 || a->unk05 == 5))
-            DAT_801cba08.unk0[area][i / 32] |= BIT(i);
+        if (a->spawn_chance != 0xff && (a->state == 3 || a->state == 5))
+            game_progress.creatures_gone[area][i / 32] |= BIT(i);
     }
     n = 1;
     for (i = 0; i < n; i++)
-        DAT_801cba08.unk180[area][i] = 0;
+        game_progress.ground_items_gone[area][i] = 0;
     for (i = 0; i < 32; i++, c++) {
-        if (c->unk22 == 0)
-            DAT_801cba08.unk180[area][i / 32] |= BIT(i);
+        if (c->state == 0)
+            game_progress.ground_items_gone[area][i / 32] |= BIT(i);
     }
     n = 8;
     for (i = 0; i < n; i++) {
-        DAT_801cba08.unk240[area][i] = 0;
-        DAT_801cba08.unk840[area][i] = 0;
-        DAT_801cba08.unkE40[area][i] = 0;
+        game_progress.objects_removed[area][i] = 0;
+        game_progress.objects_unlocked[area][i] = 0;
+        game_progress.objects_finished[area][i] = 0;
     }
     for (i = 0; i < 240; i++, b++) {
-        if (b->unk0a == 0xffff) {
-            DAT_801cba08.unk240[area][i / 32] |= BIT(i);
+        if (b->type == 0xffff) {
+            game_progress.objects_removed[area][i / 32] |= BIT(i);
         } else {
-            if (b->unk4A.door.unk4F == 0xff)
-                DAT_801cba08.unk840[area][i / 32] |= BIT(i);
-            if (b->unk0C == 0xff)
-                DAT_801cba08.unkE40[area][i / 32] |= BIT(i);
+            if (b->params.door.lock == 0xff)
+                game_progress.objects_unlocked[area][i / 32] |= BIT(i);
+            if (b->state == 0xff)
+                game_progress.objects_finished[area][i / 32] |= BIT(i);
         }
     }
 }
 
-/* Restores what func_80055cf4 recorded for area `area`. */
+/* Restores what area_save_snapshot recorded for area `area`. */
 ADDRESS(0x80055f9c, 0x338)
-void func_80055f9c(int area)
+void area_restore_snapshot(int area)
 {
-    Vis212 *a = vis_table_a.entries;
-    Vis48 *c = vis_table_c.entries;
-    Vis88 *b = vis_table_b.entries;
+    Creature *a = vis_table_a.entries;
+    GroundItem *c = vis_table_c.entries;
+    AreaObject *b = vis_table_b.entries;
     int i;
     u16 n;
     u8 t;
 
     for (i = 0; i < 64; i++, a++) {
-        if (DAT_801cba08.unk0[area][i / 32] & BIT(i))
-            a->unk05 = 3;
+        if (game_progress.creatures_gone[area][i / 32] & BIT(i))
+            a->state = 3;
     }
     for (i = 0; i < 32; i++, c++) {
-        if (DAT_801cba08.unk180[area][i / 32] & BIT(i))
-            c->unk22 = 0;
+        if (game_progress.ground_items_gone[area][i / 32] & BIT(i))
+            c->state = 0;
     }
     for (i = 0; i < 240; b++, i++) {
-        if (DAT_801cba08.unk240[area][i / 32] & BIT(i)) {
-            b->unk0a = 0xffff;
+        if (game_progress.objects_removed[area][i / 32] & BIT(i)) {
+            b->type = 0xffff;
         } else {
-            switch (b->unk05) {
+            switch (b->kind) {
             default:
-                if (DAT_801cba08.unk840[area][i / 32] & BIT(i))
-                    b->unk4A.door.unk4F = 255;
-                if (DAT_801cba08.unkE40[area][i / 32] & BIT(i))
-                    b->unk0C = 255;
+                if (game_progress.objects_unlocked[area][i / 32] & BIT(i))
+                    b->params.door.lock = 255;
+                if (game_progress.objects_finished[area][i / 32] & BIT(i))
+                    b->state = 255;
                 break;
             case 0:
             case 1:
-                if (DAT_801cba08.unk840[area][i / 32] & BIT(i))
-                    b->unk4A.door.unk4F = 255;
-                if (DAT_801cba08.unkE40[area][i / 32] & BIT(i)) {
-                    n = b->unk4A.door.unk4E;
+                if (game_progress.objects_unlocked[area][i / 32] & BIT(i))
+                    b->params.door.lock = 255;
+                if (game_progress.objects_finished[area][i / 32] & BIT(i)) {
+                    n = b->params.door.n_blocks;
                     while (n--) {
-                        t = vis_records[b->unk4A.door.unk4C + n].part;
-                        vis_records[b->unk4A.door.unk4C + n].part =
-                            vis_records[b->unk4A.door.unk4A + n].part;
-                        vis_records[b->unk4A.door.unk4A + n].part = t;
+                        t = vis_records[b->params.door.block_b + n].part;
+                        vis_records[b->params.door.block_b + n].part =
+                            vis_records[b->params.door.block_a + n].part;
+                        vis_records[b->params.door.block_a + n].part = t;
                     }
-                    if (b->unk0a == 58)
-                        b->unk00 = 2;
-                    else if (b->unk05 == 1)
-                        b->unk00 = 1;
-                    b->unk0C = 255;
-                    b->unk10 = 4095;
+                    if (b->type == 58)
+                        b->visibility = 2;
+                    else if (b->kind == 1)
+                        b->visibility = 1;
+                    b->state = 255;
+                    b->anim_frame = 4095;
                 }
                 break;
             case 52:
-                if (DAT_801cba08.unk840[area][i / 32] & BIT(i))
-                    b->unk4A.door.unk4F = 255;
-                if (DAT_801cba08.unkE40[area][i / 32] & BIT(i)) {
-                    b->unk0C = 255;
-                    b->unk10 = 0;
-                    b->unk02 = 1;
+                if (game_progress.objects_unlocked[area][i / 32] & BIT(i))
+                    b->params.door.lock = 255;
+                if (game_progress.objects_finished[area][i / 32] & BIT(i)) {
+                    b->state = 255;
+                    b->anim_frame = 0;
+                    b->anim = 1;
                 }
                 break;
             }
         }
     }
-    vis_lists.unk47E0 &= ~0x20;
-    vis_lists.unk47E0 &= ~0x10;
-    vis_lists.unk47E0 &= ~0x8;
-    vis_lists.unk47E0 &= ~0x4;
-    vis_lists.unk47E0 &= ~0x2;
-    vis_lists.unk47E0 &= ~0x1;
+    vis_lists.floor_kinds_off &= ~0x20;
+    vis_lists.floor_kinds_off &= ~0x10;
+    vis_lists.floor_kinds_off &= ~0x8;
+    vis_lists.floor_kinds_off &= ~0x4;
+    vis_lists.floor_kinds_off &= ~0x2;
+    vis_lists.floor_kinds_off &= ~0x1;
 }

@@ -1,6 +1,6 @@
 /*
  * Shared by ST.EXE and VS.EXE: clip key lookup. The two images link byte-
- * identical copies; src/st/anim.c and src/vs/anim_80027f30.c include this
+ * identical copies; src/st/render.c and src/vs/anim_slots.c include this
  * fragment at their place in each run.
  */
 

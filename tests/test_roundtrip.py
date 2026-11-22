@@ -275,13 +275,13 @@ class OverlayAddressBookTests(unittest.TestCase):
         from scripts.kf.roundtrip import address_book
 
         book = address_book("FDAT_002.BIN")
-        self.assertEqual(book["fdat_801eb7ac"], {0x801EB7AC})
+        self.assertEqual(book["creature_clear_contact_hit"], {0x801EB7AC})
         # LIBGTE rcos is linked in ST.EXE; the overlay calls it there.
         self.assertEqual(book["rcos"], {0x800744C4})
         layout = IMAGE_LAYOUTS["FDAT_002.BIN"]
         host = address_book("ST.EXE")
         for name, addresses in book.items():
-            if name in host and name != "fdat_801eb7ac":
+            if name in host and name != "creature_clear_contact_hit":
                 self.assertFalse(any(layout.contains(va) for va in addresses), name)
 
 

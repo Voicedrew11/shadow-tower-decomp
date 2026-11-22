@@ -1,7 +1,7 @@
 /*
  * ST.EXE: controller setup, state polling, the per-frame button words and
  * vibration (WIP module, 0x8005738c..; the vibration helpers after
- * func_80057b10 open the next band and may share its file).
+ * pad_update_vibration open the next band and may share its file).
  */
 #include <kf/lib/address.h>
 #include <kf/lib/types.h>
@@ -16,39 +16,39 @@
 RODATA(0x80012854, 0x1c)
 
 ADDRESS(0x8005738c, 0x30)
-void func_8005738c(void)
+void pad_update_action_mask(void)
 {
-    DAT_801cd180.unk3A = DAT_801cd180.unk22[8] | DAT_801cd180.unk22[9] | DAT_801cd180.unk22[10] | DAT_801cd180.unk22[11];
+    pad_state.action_mask = pad_state.buttons[8] | pad_state.buttons[9] | pad_state.buttons[10] | pad_state.buttons[11];
 }
 
 ADDRESS(0x800573bc, 0x6c)
-void func_800573bc(void)
+void pad_set_default_buttons(void)
 {
-    DAT_801cd180.unk22[0] = 0x10;
-    DAT_801cd180.unk22[1] = 0x40;
-    DAT_801cd180.unk22[2] = 0x80;
-    DAT_801cd180.unk22[3] = 0x20;
-    DAT_801cd180.unk22[4] = 0x400;
-    DAT_801cd180.unk22[5] = 0x800;
-    DAT_801cd180.unk22[6] = 0x100;
-    DAT_801cd180.unk22[7] = 0x200;
-    DAT_801cd180.unk22[8] = 0x1000;
-    DAT_801cd180.unk22[9] = 0x8000;
-    DAT_801cd180.unk22[10] = 0x4000;
-    DAT_801cd180.unk22[11] = 0x2000;
+    pad_state.buttons[0] = 0x10;
+    pad_state.buttons[1] = 0x40;
+    pad_state.buttons[2] = 0x80;
+    pad_state.buttons[3] = 0x20;
+    pad_state.buttons[4] = 0x400;
+    pad_state.buttons[5] = 0x800;
+    pad_state.buttons[6] = 0x100;
+    pad_state.buttons[7] = 0x200;
+    pad_state.buttons[8] = 0x1000;
+    pad_state.buttons[9] = 0x8000;
+    pad_state.buttons[10] = 0x4000;
+    pad_state.buttons[11] = 0x2000;
 }
 
 /* Waits (up to 60 vsyncs) for the controller in port 1 to settle. */
 ADDRESS(0x80057428, 0x98)
-void func_80057428(void)
+void pad_wait_stable(void)
 {
     int start = VSync(-1);
 
     for (;;) {
-        DAT_801cd180.unk15 = PadGetState(0);
-        if (DAT_801cd180.unk15 == PadStateStable)
+        pad_state.port_state = PadGetState(0);
+        if (pad_state.port_state == PadStateStable)
             break;
-        if (DAT_801cd180.unk15 == PadStateFindCTP1)
+        if (pad_state.port_state == PadStateFindCTP1)
             break;
         if (VSync(-1) - start >= 60)
             break;
@@ -56,57 +56,57 @@ void func_80057428(void)
 }
 
 ADDRESS(0x800574c0, 0x9c)
-void func_800574c0(void)
+void pad_setup_actuators(void)
 {
-    DAT_801cd180.unk18 = PadInfoAct(0, -1, 0);
-    func_80057428();
-    if (DAT_801cd180.unk18) {
-        DAT_801cd180.unk1A[0] = 0;
-        DAT_801cd180.unk1A[1] = 0;
-        if (DAT_801cd180.unk18 == 2) {
-            DAT_801cd180.unk1A[2] = 1;
-            DAT_801cd180.unk1A[3] = 1;
+    pad_state.actuator_count = PadInfoAct(0, -1, 0);
+    pad_wait_stable();
+    if (pad_state.actuator_count) {
+        pad_state.act_align[0] = 0;
+        pad_state.act_align[1] = 0;
+        if (pad_state.actuator_count == 2) {
+            pad_state.act_align[2] = 1;
+            pad_state.act_align[3] = 1;
         } else {
-            DAT_801cd180.unk1A[2] = 0xff;
-            DAT_801cd180.unk1A[3] = 0xff;
+            pad_state.act_align[2] = 0xff;
+            pad_state.act_align[3] = 0xff;
         }
-        DAT_801cd180.unk1A[4] = DAT_801cd180.unk1A[5] = 0xff;
-        while (PadSetActAlign(0, DAT_801cd180.unk1A) == 0)
+        pad_state.act_align[4] = pad_state.act_align[5] = 0xff;
+        while (PadSetActAlign(0, pad_state.act_align) == 0)
             ;
     }
 }
 
 ADDRESS(0x8005755c, 0x44)
-void func_8005755c(void)
+void pad_setup_actuators_if_stable(void)
 {
-    if (DAT_801cd180.unk15 == PadStateStable)
-        func_800574c0();
+    if (pad_state.port_state == PadStateStable)
+        pad_setup_actuators();
     else
-        DAT_801cd180.unk18 = 0;
+        pad_state.actuator_count = 0;
 }
 
 ADDRESS(0x800575a0, 0xe4)
-void func_800575a0(void)
+void pad_update_state(void)
 {
-    DAT_801cd180.unk15 = PadGetState(0);
-    switch (DAT_801cd180.unk15) {
+    pad_state.port_state = PadGetState(0);
+    switch (pad_state.port_state) {
     case PadStateDiscon:
-        DAT_801cd180.unk16 = 1;
-        DAT_801cd180.unkE = 1;
+        pad_state.disconnected = 1;
+        pad_state.no_input = 1;
         break;
     case PadStateFindPad:
-        DAT_801cd180.unk17 = 1;
+        pad_state.align_pending = 1;
         break;
     case PadStateStable:
-        if (DAT_801cd180.unk17 && !DAT_801cd180.unk16) {
-            DAT_801cd180.unk17 = 0;
-            func_800574c0();
+        if (pad_state.align_pending && !pad_state.disconnected) {
+            pad_state.align_pending = 0;
+            pad_setup_actuators();
         }
         /* fall through */
     case PadStateFindCTP1:
-        if (DAT_801cd180.unk16) {
-            DAT_801cd180.unk16 = 0;
-            DAT_801cd180.unkE = 0;
+        if (pad_state.disconnected) {
+            pad_state.disconnected = 0;
+            pad_state.no_input = 0;
         }
         break;
     case PadStateFindCTP2:
@@ -117,154 +117,154 @@ void func_800575a0(void)
 }
 
 ADDRESS(0x80057684, 0xc0)
-void func_80057684(void)
+void pad_init(void)
 {
-    DAT_801cd130.unk44[0] = 0x40;
-    DAT_801cd130.unk48[0] = 0x40;
-    DAT_801cd130.unk44[1] = 0;
-    DAT_801cd130.unk48[1] = 0;
-    DAT_801cd130.unk44[2] = 0x40;
-    DAT_801cd130.unk48[2] = 0x40;
-    DAT_801cd130.unk44[3] = 0;
-    DAT_801cd130.unk48[3] = 0;
-    PadInitDirect((u8 *)&DAT_801cd130.unk0, (u8 *)DAT_801cd130.unk22);
-    PadSetAct(0, (u8 *)DAT_801cd130.unk44, 4);
+    pad_buffers.actuators[0] = 0x40;
+    pad_buffers.unk48[0] = 0x40;
+    pad_buffers.actuators[1] = 0;
+    pad_buffers.unk48[1] = 0;
+    pad_buffers.actuators[2] = 0x40;
+    pad_buffers.unk48[2] = 0x40;
+    pad_buffers.actuators[3] = 0;
+    pad_buffers.unk48[3] = 0;
+    PadInitDirect((u8 *)&pad_buffers.status, (u8 *)pad_buffers.port2);
+    PadSetAct(0, (u8 *)pad_buffers.actuators, 4);
     PadStartCom();
-    func_80057428();
-    func_8005755c();
-    DAT_801cd180.unk10 = 1;
-    DAT_801cd180.unkE = 1;
-    DAT_801cd180.unk13 = 0;
-    DAT_801cd180.unk11 = 0;
-    DAT_801cd180.unk12 = 0;
-    DAT_801cd180.unk14 = 0;
-    DAT_801cd180.unk18 = 0;
+    pad_wait_stable();
+    pad_setup_actuators_if_stable();
+    pad_state.disabled = 1;
+    pad_state.no_input = 1;
+    pad_state.held_changed = 0;
+    pad_state.repeat_timer = 0;
+    pad_state.combo_timer = 0;
+    pad_state.combo = 0;
+    pad_state.actuator_count = 0;
     /* One word store clears each halfword pair. */
-    *(u32 *)&DAT_801cd180.unk0 = 0;
-    *(u32 *)&DAT_801cd180.unk4 = 0;
-    *(u32 *)&DAT_801cd180.unk8 = 0;
-    func_800573bc();
-    func_8005738c();
+    *(u32 *)&pad_state.prev_held = 0;
+    *(u32 *)&pad_state.pressed = 0;
+    *(u32 *)&pad_state.combo_first = 0;
+    pad_set_default_buttons();
+    pad_update_action_mask();
 }
 
 /* Per-frame button words: held, newly pressed, auto-repeat and the two-button
  * combinations of unk36/unk38 with unk32/unk34 (unk14 = 1..5). */
 ADDRESS(0x80057744, 0x2e4)
-void func_80057744(void)
+void pad_read(void)
 {
-    if (DAT_801cd180.unk10)
+    if (pad_state.disabled)
         return;
-    func_800575a0();
-    if (DAT_801cd180.unkE)
+    pad_update_state();
+    if (pad_state.no_input)
         return;
-    if (DAT_801cd130.unk0)
+    if (pad_buffers.status)
         return;
 
-    DAT_801cd180.unk0 = DAT_801cd180.unk2;
-    DAT_801cd180.unk2 = ~DAT_801cd130.unk2;
-    if (DAT_801cd180.unk2 != DAT_801cd180.unk0) {
-        DAT_801cd180.unk13 = 1;
-        DAT_801cd180.unk11 = 0;
-        DAT_801cd180.unkC = 0;
-        if ((DAT_801cd180.unk2 | DAT_801cd180.unk0) != DAT_801cd180.unk0) {
-            DAT_801cd180.unkC = DAT_801cd180.unk2 & ~DAT_801cd180.unk0;
-            DAT_801cd180.unk4 |= DAT_801cd180.unkC;
+    pad_state.prev_held = pad_state.held;
+    pad_state.held = ~pad_buffers.buttons;
+    if (pad_state.held != pad_state.prev_held) {
+        pad_state.held_changed = 1;
+        pad_state.repeat_timer = 0;
+        pad_state.pressed_repeat = 0;
+        if ((pad_state.held | pad_state.prev_held) != pad_state.prev_held) {
+            pad_state.pressed_repeat = pad_state.held & ~pad_state.prev_held;
+            pad_state.pressed |= pad_state.pressed_repeat;
         }
     } else {
-        if (DAT_801cd180.unk11 && --DAT_801cd180.unk11 == 0)
-            DAT_801cd180.unkC = DAT_801cd180.unk6;
-        if (DAT_801cd180.unk2 != DAT_801cd180.unk6) {
-            DAT_801cd180.unk6 = DAT_801cd180.unk2;
-            if (DAT_801cd180.unk11 == 0)
-                DAT_801cd180.unk11 = DAT_801cd120.unk7;
-        } else if (DAT_801cd180.unk11 == 0) {
-            DAT_801cd180.unk11 = DAT_801cd120.unk6;
+        if (pad_state.repeat_timer && --pad_state.repeat_timer == 0)
+            pad_state.pressed_repeat = pad_state.repeat_held;
+        if (pad_state.held != pad_state.repeat_held) {
+            pad_state.repeat_held = pad_state.held;
+            if (pad_state.repeat_timer == 0)
+                pad_state.repeat_timer = game_settings.repeat_delay;
+        } else if (pad_state.repeat_timer == 0) {
+            pad_state.repeat_timer = game_settings.repeat_interval;
         }
     }
 
-    if ((DAT_801cd180.unk3A & (DAT_801cd180.unk2 | DAT_801cd180.unk0)) != (DAT_801cd180.unk0 & DAT_801cd180.unk3A)) {
-        if (DAT_801cd180.unk12 == 0) {
-            DAT_801cd180.unk8 = DAT_801cd180.unk2 & ~DAT_801cd180.unk0;
-            DAT_801cd180.unk12 = DAT_801cd120.unk8;
-        } else if (DAT_801cd180.unkA == 0) {
-            DAT_801cd180.unkA = DAT_801cd180.unk2 & ~DAT_801cd180.unk0;
-            if ((DAT_801cd180.unk8 & DAT_801cd180.unk22[11]) && (DAT_801cd180.unk22[11] & DAT_801cd180.unkA)) {
-                DAT_801cd180.unk14 = 1;
-                DAT_801cd180.unk4 &= ~DAT_801cd180.unk22[11];
-            } else if ((DAT_801cd180.unk8 & DAT_801cd180.unk22[10]) &&
-                       (DAT_801cd180.unkA & DAT_801cd180.unk22[8])) {
-                DAT_801cd180.unk14 = 2;
-                DAT_801cd180.unk4 = DAT_801cd180.unk4 & ~DAT_801cd180.unk22[8] & ~DAT_801cd180.unk22[10];
-            } else if ((DAT_801cd180.unk8 & DAT_801cd180.unk22[10]) &&
-                       (DAT_801cd180.unkA & DAT_801cd180.unk22[9])) {
-                DAT_801cd180.unk14 = 3;
-                DAT_801cd180.unk4 = DAT_801cd180.unk4 & ~DAT_801cd180.unk22[9] & ~DAT_801cd180.unk22[10];
-            } else if ((DAT_801cd180.unk8 & DAT_801cd180.unk22[11]) &&
-                       (DAT_801cd180.unkA & DAT_801cd180.unk22[8])) {
-                DAT_801cd180.unk14 = 4;
-                DAT_801cd180.unk4 = DAT_801cd180.unk4 & ~DAT_801cd180.unk22[8] & ~DAT_801cd180.unk22[11];
-            } else if ((DAT_801cd180.unk8 & DAT_801cd180.unk22[11]) &&
-                       (DAT_801cd180.unkA & DAT_801cd180.unk22[9])) {
-                DAT_801cd180.unk14 = 5;
-                DAT_801cd180.unk4 = DAT_801cd180.unk4 & ~DAT_801cd180.unk22[9] & ~DAT_801cd180.unk22[11];
+    if ((pad_state.action_mask & (pad_state.held | pad_state.prev_held)) != (pad_state.prev_held & pad_state.action_mask)) {
+        if (pad_state.combo_timer == 0) {
+            pad_state.combo_first = pad_state.held & ~pad_state.prev_held;
+            pad_state.combo_timer = game_settings.combo_window;
+        } else if (pad_state.combo_second == 0) {
+            pad_state.combo_second = pad_state.held & ~pad_state.prev_held;
+            if ((pad_state.combo_first & pad_state.buttons[11]) && (pad_state.buttons[11] & pad_state.combo_second)) {
+                pad_state.combo = 1;
+                pad_state.pressed &= ~pad_state.buttons[11];
+            } else if ((pad_state.combo_first & pad_state.buttons[10]) &&
+                       (pad_state.combo_second & pad_state.buttons[8])) {
+                pad_state.combo = 2;
+                pad_state.pressed = pad_state.pressed & ~pad_state.buttons[8] & ~pad_state.buttons[10];
+            } else if ((pad_state.combo_first & pad_state.buttons[10]) &&
+                       (pad_state.combo_second & pad_state.buttons[9])) {
+                pad_state.combo = 3;
+                pad_state.pressed = pad_state.pressed & ~pad_state.buttons[9] & ~pad_state.buttons[10];
+            } else if ((pad_state.combo_first & pad_state.buttons[11]) &&
+                       (pad_state.combo_second & pad_state.buttons[8])) {
+                pad_state.combo = 4;
+                pad_state.pressed = pad_state.pressed & ~pad_state.buttons[8] & ~pad_state.buttons[11];
+            } else if ((pad_state.combo_first & pad_state.buttons[11]) &&
+                       (pad_state.combo_second & pad_state.buttons[9])) {
+                pad_state.combo = 5;
+                pad_state.pressed = pad_state.pressed & ~pad_state.buttons[9] & ~pad_state.buttons[11];
             }
-            DAT_801cd180.unkA = 0;
-            DAT_801cd180.unk8 = 0;
-            DAT_801cd180.unk12 = 0;
+            pad_state.combo_second = 0;
+            pad_state.combo_first = 0;
+            pad_state.combo_timer = 0;
         }
-    } else if (DAT_801cd180.unk12 && DAT_801cd180.unkA == 0 && --DAT_801cd180.unk12 == 0) {
-        DAT_801cd180.unk8 = 0;
+    } else if (pad_state.combo_timer && pad_state.combo_second == 0 && --pad_state.combo_timer == 0) {
+        pad_state.combo_first = 0;
     }
 }
 
 ADDRESS(0x80057a28, 0x14)
-void func_80057a28(void)
+void pad_enable(void)
 {
-    DAT_801cd180.unk10 = 0;
-    DAT_801cd180.unkE = 0;
+    pad_state.disabled = 0;
+    pad_state.no_input = 0;
 }
 
 ADDRESS(0x80057a3c, 0x2c)
-void func_80057a3c(void)
+void pad_clear_input(void)
 {
-    DAT_801cd180.unk10 = 1;
-    DAT_801cd180.unk13 = 0;
-    DAT_801cd180.unk12 = 0;
-    DAT_801cd180.unk14 = 0;
-    *(u32 *)&DAT_801cd180.unk4 = 0;
-    DAT_801cd180.unkC = 0;
-    DAT_801cd180.unk10 = 0;
+    pad_state.disabled = 1;
+    pad_state.held_changed = 0;
+    pad_state.combo_timer = 0;
+    pad_state.combo = 0;
+    *(u32 *)&pad_state.pressed = 0;
+    pad_state.pressed_repeat = 0;
+    pad_state.disabled = 0;
 }
 
 /* Starts the large motor at `strength` + 64 (and the small one on a two-motor
  * controller) for (strength + 64) / 16 + 5 frames; 0 or less stops both. */
 ADDRESS(0x80057a68, 0xa8)
-void func_80057a68(int strength)
+void pad_vibrate(int strength)
 {
-    if (DAT_801cd120.unk5) {
+    if (game_settings.vibration) {
         if (strength > 0) {
             strength += 64;
             if (strength > 255)
                 strength = 255;
-            DAT_801cd180.unk19 = strength / 16 + 5;
-            if (DAT_801cd180.unk18 == 1)
-                DAT_801cd130.unk44[1] = 1;
-            DAT_801cd130.unk44[3] = strength;
+            pad_state.vibration_frames = strength / 16 + 5;
+            if (pad_state.actuator_count == 1)
+                pad_buffers.actuators[1] = 1;
+            pad_buffers.actuators[3] = strength;
         } else {
-            if (DAT_801cd180.unk18 == 1)
-                DAT_801cd130.unk44[1] = 0;
-            DAT_801cd130.unk44[3] = 0;
+            if (pad_state.actuator_count == 1)
+                pad_buffers.actuators[1] = 0;
+            pad_buffers.actuators[3] = 0;
         }
     }
 }
 
 ADDRESS(0x80057b10, 0x38)
-void func_80057b10(void)
+void pad_update_vibration(void)
 {
-    if (DAT_801cd180.unk19)
-        DAT_801cd180.unk19--;
+    if (pad_state.vibration_frames)
+        pad_state.vibration_frames--;
     else {
-        DAT_801cd130.unk44[1] = 0;
-        DAT_801cd130.unk44[3] = 0;
+        pad_buffers.actuators[1] = 0;
+        pad_buffers.actuators[3] = 0;
     }
 }

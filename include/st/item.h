@@ -1,6 +1,6 @@
 /*
  * ST.EXE item counts, the examine action and item use (src/st/item.c,
- * src/st/item_spawn.c). Field names stay address-derived.
+ * src/st/creature_object.c). Field names stay address-derived.
  */
 #ifndef ST_ITEM_H
 #define ST_ITEM_H
@@ -10,13 +10,13 @@
 #include <LIBGTE.H>
 #include <st/vis.h>
 
-Vis88 *func_800549c8(Vis212 *e, int id);
-int func_8005529c(int id);
-int func_800552bc(int id);
-int func_80055300(int id);
-/* func_80055374 is declared in st/player.h. */
-/* Uses item `id`, leaving the result in DAT_801cd0e0 (src/st/item_use.c;
+AreaObject *creature_alloc_object(Creature *e, int id);
+int item_is_held(int id);
+int item_take(int id);
+int item_add(int id);
+/* player_examine is declared in st/player.h. */
+/* Uses item `id`, leaving the result in game_progress.item_use_result (src/st/item_use.c;
  * src/st/menu.c's item page calls it). */
-void func_80054a54(int id);
+void item_use(int id);
 
 #endif

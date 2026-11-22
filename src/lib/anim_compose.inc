@@ -1,32 +1,32 @@
 /*
  * Shared by ST.EXE and VS.EXE: animation record and list composition. The
  * two images link byte-identical copies; src/st/anim_set.c and
- * src/vs/anim_8002429c.c include this fragment at their place in each run.
+ * src/vs/anim_set.c include this fragment at their place in each run.
  */
 
 /*
- * rec->unk24 = the GTE's current matrix (the parent's) times rec->unk4,
+ * rec->composed_matrix = the GTE's current matrix (the parent's) times rec->local_matrix,
  * left loaded as the GTE rotation and translation.
  */
 #define RECORD_COMPOSE(sp, rec)                                   \
     do {                                                          \
-        (sp)->unk9C.vx = (rec)->unk4.t[0];                        \
-        (sp)->unk9C.vy = (rec)->unk4.t[1];                        \
-        (sp)->unk9C.vz = (rec)->unk4.t[2];                        \
-        gte_ldv0(&(sp)->unk9C);                                   \
+        (sp)->node_trans.vx = (rec)->local_matrix.t[0];                        \
+        (sp)->node_trans.vy = (rec)->local_matrix.t[1];                        \
+        (sp)->node_trans.vz = (rec)->local_matrix.t[2];                        \
+        gte_ldv0(&(sp)->node_trans);                                   \
         gte_rt();                                                 \
-        gte_stlvnl((rec)->unk24.t);                               \
-        gte_SetTransMatrix(&(rec)->unk24);                        \
-        gte_ldclmv(&(rec)->unk4);                                 \
+        gte_stlvnl((rec)->composed_matrix.t);                               \
+        gte_SetTransMatrix(&(rec)->composed_matrix);                        \
+        gte_ldclmv(&(rec)->local_matrix);                                 \
         gte_rtir();                                               \
-        gte_stclmv(&(rec)->unk24);                                \
-        gte_ldclmv((char *)&(rec)->unk4 + 2);                     \
+        gte_stclmv(&(rec)->composed_matrix);                                \
+        gte_ldclmv((char *)&(rec)->local_matrix + 2);                     \
         gte_rtir();                                               \
-        gte_stclmv((char *)&(rec)->unk24 + 2);                    \
-        gte_ldclmv((char *)&(rec)->unk4 + 4);                     \
+        gte_stclmv((char *)&(rec)->composed_matrix + 2);                    \
+        gte_ldclmv((char *)&(rec)->local_matrix + 4);                     \
         gte_rtir();                                               \
-        gte_stclmv((char *)&(rec)->unk24 + 4);                    \
-        gte_SetRotMatrix(&(rec)->unk24);                          \
+        gte_stclmv((char *)&(rec)->composed_matrix + 4);                    \
+        gte_SetRotMatrix(&(rec)->composed_matrix);                          \
     } while (0)
 
 /*
@@ -40,19 +40,19 @@ void anim_record_compose(StAnimRecord *rec)
 {
     ScratchPad *sp = SCRATCHPAD;
 
-    if (rec->unk48 == NULL) {
+    if (rec->parent == NULL) {
         gte_SetRotMatrix(SCRATCH_MATRIX(SCRATCHPAD));
         gte_SetTransMatrix(SCRATCH_MATRIX(SCRATCHPAD));
         RECORD_COMPOSE(sp, rec);
-    } else if (rec->unk0) {
-        gte_SetTransMatrix(&rec->unk24);
-        gte_SetRotMatrix(&rec->unk24);
+    } else if (rec->composed) {
+        gte_SetTransMatrix(&rec->composed_matrix);
+        gte_SetRotMatrix(&rec->composed_matrix);
         return;
     } else {
-        anim_record_compose(rec->unk48);
+        anim_record_compose(rec->parent);
         RECORD_COMPOSE(sp, rec);
     }
-    rec->unk0 = 1;
+    rec->composed = 1;
 }
 
 /* Composes the matrices of every node of the scratchpad's node list that
@@ -66,8 +66,8 @@ void anim_list_compose(void)
     StAnimNode *node = list->nodes;
 
     while (i--) {
-        if (node->unkC != -1 && node->unk8 != 0xffff)
-            anim_record_compose(node->unk4);
+        if (node->key != -1 && node->part != 0xffff)
+            anim_record_compose(node->record);
         node++;
     }
 }

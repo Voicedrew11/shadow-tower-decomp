@@ -134,10 +134,10 @@ _Derived from ignored outputs made by the native Psy-Q executable chain. `kf bui
 | :---- | --------------------: | -----------------------: | -----------------: | -----------------: |
 | `PSX.EXE` | 100.00% | 100.00% | 100.00% | 1 / 1 |
 | `STR.EXE` | 100.00% | 100.00% | 100.00% | 1 / 1 |
-| `ST.EXE` | 99.99% | 99.99% | 99.99% | 39 / 39 |
+| `ST.EXE` | 99.99% | 99.99% | 99.99% | 52 / 52 |
 | `TITLE.EXE` | 100.00% | 100.00% | 100.00% | 1 / 1 |
 | `OPTXT.EXE` | 100.00% | 100.00% | 100.00% | 2 / 2 |
-| `VS.EXE` | 99.99% | 99.99% | 99.98% | 42 / 42 |
+| `VS.EXE` | 99.99% | 99.99% | 99.98% | 58 / 58 |
 | `END.EXE` | 100.00% | 100.00% | 100.00% | 1 / 1 |
 
 The three byte columns show similarity, not differences. Island scores allow moved regions and

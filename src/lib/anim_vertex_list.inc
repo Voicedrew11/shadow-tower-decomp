@@ -1,7 +1,7 @@
 /*
  * Shared by ST.EXE and VS.EXE: adding a count-prefixed vertex list (the
  * count halfword, a pad halfword, then SVECTORs). The two images link
- * byte-identical copies; src/st/anim.c and src/vs/anim_80027c64.c include
+ * byte-identical copies; src/st/render.c and src/vs/anim_vertices.c include
  * this fragment at their place in each run.
  */
 

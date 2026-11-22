@@ -1,6 +1,6 @@
 /*
  * ST.EXE: clearing and running the effect pool (WIP module, after the
- * effect spawner, mover and script interpreter unit src/st/effect_spawn.c).
+ * effect spawner, mover and per-kind update unit src/st/effect_spawn.c).
  */
 #include <kf/lib/address.h>
 #include <kf/lib/types.h>
@@ -15,7 +15,7 @@ void effects_clear(void)
     u16 i;
 
     for (i = 0; i < ST_EFFECT_SLOTS; i++) {
-        e->unk0 = ST_EFFECT_FREE;
+        e->flags = ST_EFFECT_FREE;
         e++;
     }
 }
@@ -28,13 +28,13 @@ void effects_run(void)
     StEffect *e = effects.slots;
 
     for (effects.index = 0; effects.index < ST_EFFECT_SLOTS; effects.index++) {
-        if (e->unk0 != ST_EFFECT_FREE) {
+        if (e->flags != ST_EFFECT_FREE) {
             effects.cur = e;
-            effects.def = &effects.defs[e->unk1];
-            if (--e->unk10 == -1)
-                e->unk0 = ST_EFFECT_FREE;
+            effects.def = &effects.defs[e->kind];
+            if (--e->life == -1)
+                e->flags = ST_EFFECT_FREE;
             else
-                func_800385b0();
+                effect_update();
         }
         e++;
     }

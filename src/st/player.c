@@ -43,68 +43,68 @@ SDATA(0x80088054, 0x10)
 ADDRESS(0x8003bd14, 0x9c)
 void player_kill(int unused)
 {
-    if (viewer.unk218 != 4) {
-        viewer.unk218 = 4;
-        viewer.unk2 = 0;
-        func_80057c0c();
-        world_state.unk1EE15 = 1;
-        viewer.unk286 = 0;
+    if (viewer.state != 4) {
+        viewer.state = 4;
+        viewer.hp = 0;
+        play_death_sound();
+        world_state.no_plane_test = 1;
+        viewer.death_timer = 0;
         viewer.unk17C = 170;
-        viewer.unk17A = (-1024 - (viewer.unk268 & 0x7ff)) / 24;
+        viewer.death_pitch_step = (-1024 - (viewer.pitch & 0x7ff)) / 24;
     }
 }
 
 ADDRESS(0x8003bdb0, 0x60)
-void func_8003bdb0(void)
+void player_check_fall_death(void)
 {
-    if (viewer.unk2D4 >= 1152 && vis_lists.unk30 >= 1600) {
+    if (viewer.vertical_speed >= 1152 && vis_lists.floor_dist >= 1600) {
         player_kill(0);
-        viewer.unk238 = 1;
+        viewer.fall_death = 1;
     }
 }
 
 ADDRESS(0x8003be10, 0xa4)
-void func_8003be10(void)
+void player_update_submersion(void)
 {
-    if (vis_lists.unk4C != 0x80000) {
-        if (vis_lists.unk4C < viewer.position.vy) {
-            viewer.unk2EC = 1;
+    if (vis_lists.surface_y != 0x80000) {
+        if (vis_lists.surface_y < viewer.position.vy) {
+            viewer.submerged = 1;
         } else {
-            viewer.unk2EC = 0;
+            viewer.submerged = 0;
         }
     }
-    if (vis_lists.unk58 != 0x80000) {
-        if (vis_lists.unk58 < viewer.position.vy) {
-            viewer.unk2F0 = 1;
+    if (vis_lists.acid_surface_y != 0x80000) {
+        if (vis_lists.acid_surface_y < viewer.position.vy) {
+            viewer.submerged_acid = 1;
         } else {
-            viewer.unk2F0 = 0;
+            viewer.submerged_acid = 0;
         }
     }
-    if (area_state.unk4 == 10 && viewer.unk178 == 327) {
-        viewer.unk2F0 = 0;
+    if (area_state.loaded_area == 10 && viewer.block == 327) {
+        viewer.submerged_acid = 0;
     }
 }
 
 /* The viewer's distance to `t` when it is within t's reach, else -1. */
 ADDRESS(0x8003beb4, 0x14c)
-int func_8003beb4(void *request)
+int player_distance_in_reach(void *request)
 {
     PlayerTarget *t = request;
     int dx;
     int dz;
     int dist;
 
-    dx = viewer.position.vx - t->pos.vx;
+    dx = viewer.position.vx - t->position.vx;
     if (dx >= -10240 && dx <= 10240) {
-        dz = viewer.position.vz - t->pos.vz;
+        dz = viewer.position.vz - t->position.vz;
         if (dz >= -10240 && dz <= 10240) {
             dist = SquareRoot0(dx * dx + dz * dz);
-            if (dist - t->unk22 * rcos(t->unk20 - (short)ratan2(dz, dx)) / 4096 < t->unk1C + 256) {
-                if (viewer.position.vy + 1600 < t->pos.vy) {
-                    if (viewer.position.vy + 1600 < t->pos.vy - t->unk1E) {
+            if (dist - t->speed * rcos(t->heading - (short)ratan2(dz, dx)) / 4096 < t->radius + 256) {
+                if (viewer.position.vy + 1600 < t->position.vy) {
+                    if (viewer.position.vy + 1600 < t->position.vy - t->height) {
                         return -1;
                     }
-                } else if (t->pos.vy < viewer.position.vy) {
+                } else if (t->position.vy < viewer.position.vy) {
                     return -1;
                 }
                 return dist;
@@ -117,48 +117,48 @@ int func_8003beb4(void *request)
 ADDRESS(0x8003c000, 0x54)
 int func_8003c000(int x, int y, int z, int range, int kind)
 {
-    return func_8004a580((VECTOR *)&viewer.position.vx, x, y, z, range + 256, 1000, kind);
+    return vector_distance_xz_within_rev((VECTOR *)&viewer.position.vx, x, y, z, range + 256, 1000, kind);
 }
 
 ADDRESS(0x8003c054, 0x8c)
-void func_8003c054(void)
+void player_reset_state(void)
 {
-    viewer.unk2CE = 0;
-    viewer.unk2D0 = 0;
+    viewer.bob_offset = 0;
+    viewer.bob_phase = 0;
     viewer.unk2D2 = 0;
     viewer.unk239 = 0;
-    viewer.unk2D4 = 0;
-    viewer.unk218 = 0;
+    viewer.vertical_speed = 0;
+    viewer.state = 0;
     viewer.unk294 = 0;
     viewer.unk292 = 0;
-    viewer.unk290 = 0;
-    viewer.unk28C = 0;
-    viewer.unk28A = 0;
-    viewer.unk288 = 0;
-    viewer.unk284 = 0;
-    viewer.unk280.halves[1] = 0;
-    viewer.unk280.halves[0] = 0;
-    *(SVECTOR *)&viewer.unk268 = viewer.unk278;
-    viewer.unk155[0] = 255;
-    viewer.unk155[1] = 255;
-    viewer.unk2F0 = 0;
-    viewer.unk2EC = 0;
-    vis_lists.unk47DC = 0;
-    viewer.unk2F4 = -1;
+    viewer.fall_pitch = 0;
+    viewer.shake_roll = 0;
+    viewer.shake_yaw = 0;
+    viewer.shake_pitch = 0;
+    viewer.roll_offset = 0;
+    viewer.rot_offset.halves[1] = 0;
+    viewer.rot_offset.halves[0] = 0;
+    *(SVECTOR *)&viewer.pitch = viewer.view_rot;
+    viewer.shot_magic[0] = 255;
+    viewer.shot_magic[1] = 255;
+    viewer.submerged_acid = 0;
+    viewer.submerged = 0;
+    vis_lists.floor_kinds = 0;
+    viewer.shake_timer = -1;
 }
 
 ADDRESS(0x8003c0e0, 0x9c)
-void func_8003c0e0(void)
+void player_reload_equipment(void)
 {
-    func_8003f12c(viewer.unk38[3], 0, 0);
-    func_8003f12c(viewer.unk38[16], 1, 0);
-    func_8003f12c(viewer.unk38[4], 2, 0);
-    func_8003f12c(viewer.unk38[17], 3, 0);
-    func_8003ee38(viewer.unk38[6], 0);
-    func_8003ee38(viewer.unk38[12], 1);
-    func_8003c054();
-    func_8003cedc();
-    lighting.unk7 = 255;
+    player_load_equipment_model(viewer.equipment[3], 0, 0);
+    player_load_equipment_model(viewer.equipment[16], 1, 0);
+    player_load_equipment_model(viewer.equipment[4], 2, 0);
+    player_load_equipment_model(viewer.equipment[17], 3, 0);
+    player_load_magic(viewer.equipment[6], 0);
+    player_load_magic(viewer.equipment[12], 1);
+    player_reset_state();
+    player_recalc_stats();
+    lighting.last_area = 255;
 }
 
 /*
@@ -168,7 +168,7 @@ void func_8003c0e0(void)
  * the new values are stored only when `apply` is set.
  */
 ADDRESS(0x8003c17c, 0xd0)
-short func_8003c17c(short *level, short *peak, int ramp, int max, int apply)
+short player_step_status_timer(short *level, short *peak, int ramp, int max, int apply)
 {
     short p;
     short l;
@@ -208,209 +208,209 @@ void player_update_status(int apply)
 {
     short level;
 
-    if (viewer.unk2D6 != 0) {
-        viewer.unk2D6 -= viewer.unk2D8;
-        if (viewer.unk2D6 < 0) {
-            viewer.unk2D6 = 0;
+    if (viewer.red_fade != 0) {
+        viewer.red_fade -= viewer.red_fade_step;
+        if (viewer.red_fade < 0) {
+            viewer.red_fade = 0;
         }
-        if (viewer.unk2D6 >= 4096) {
+        if (viewer.red_fade >= 4096) {
             level = 4096;
         } else {
-            level = viewer.unk2D6;
+            level = viewer.red_fade;
         }
-        func_80021994(60, 0, 0, level, 1);
+        fade_add_color(60, 0, 0, level, 1);
     }
-    if (viewer.unk2DA != 0) {
-        viewer.unk2DA -= viewer.unk2DC;
-        if (viewer.unk2DA < 0) {
-            viewer.unk2DA = 0;
+    if (viewer.yellow_fade != 0) {
+        viewer.yellow_fade -= viewer.yellow_fade_step;
+        if (viewer.yellow_fade < 0) {
+            viewer.yellow_fade = 0;
         }
-        if (viewer.unk2DA >= 4096) {
+        if (viewer.yellow_fade >= 4096) {
             level = 4096;
         } else {
-            level = viewer.unk2DA;
+            level = viewer.yellow_fade;
         }
-        func_80021994(60, 60, 0, level, 1);
+        fade_add_color(60, 60, 0, level, 1);
     }
 
-    level = func_8003c17c(&viewer.unk190[0][0], &viewer.unk190[0][1], 20, 4096, apply);
+    level = player_step_status_timer(&viewer.unk190[0][0], &viewer.unk190[0][1], 20, 4096, apply);
     if (level != -1) {
-        func_80021994(0, 40, 0, level, 1);
+        fade_add_color(0, 40, 0, level, 1);
         if (viewer.timers.words[0] == 0) {
-            viewer.unk2C &= ~7;
+            viewer.status_flags &= ~7;
         }
     }
-    level = func_8003c17c(&viewer.unk190[1][0], &viewer.unk190[1][1], 20, 4096, apply);
+    level = player_step_status_timer(&viewer.unk190[1][0], &viewer.unk190[1][1], 20, 4096, apply);
     if (level != -1) {
         if ((viewer.unk190[1][0] & 3) == 3) {
             level = 4096;
         } else {
             level -= 512;
         }
-        func_80021994(40, 40, 0, level, 1);
-        func_8003ead0();
-        vis_table_b.unk71A4 = vis_table_b.unk71A6 = vis_table_b.unk71A8 = 0;
-        vis_lists.unk47CE = vis_lists.unk47D0 = vis_lists.unk47D2 = 0;
-        viewer.unk1CC = viewer.unk1CE = viewer.unk1D0 = vis_table_a.unk6160 = vis_table_a.unk6162 =
-            vis_table_a.unk6164 = 0;
+        fade_add_color(40, 40, 0, level, 1);
+        player_stop_motion();
+        vis_table_b.push_x = vis_table_b.push_y = vis_table_b.push_z = 0;
+        vis_lists.floor_push_x = vis_lists.floor_push_y = vis_lists.floor_push_z = 0;
+        viewer.push_x = viewer.push_y = viewer.push_z = vis_table_a.push_x = vis_table_a.push_y =
+            vis_table_a.push_z = 0;
         if (viewer.timers.words[1] == 0) {
-            viewer.unk2C &= ~0x18;
+            viewer.status_flags &= ~0x18;
         }
     }
-    level = func_8003c17c(&viewer.unk190[2][0], &viewer.unk190[2][1], 0, 4096, apply);
+    level = player_step_status_timer(&viewer.unk190[2][0], &viewer.unk190[2][1], 0, 4096, apply);
     if (level != -1) {
-        func_80021994(20, 20, 20, level, 2);
+        fade_add_color(20, 20, 20, level, 2);
         if (viewer.timers.words[2] == 0) {
-            viewer.unk2C &= ~0x60;
-            lighting.unk4 |= 4;
+            viewer.status_flags &= ~0x60;
+            lighting.row_request |= 4;
         }
     }
-    level = func_8003c17c(&viewer.unk190[3][0], &viewer.unk190[3][1], 20, 4096, apply);
+    level = player_step_status_timer(&viewer.unk190[3][0], &viewer.unk190[3][1], 20, 4096, apply);
     if (level != -1) {
         if (viewer.timers.words[3] == 0) {
-            viewer.unk2C &= ~0x80;
-            func_8005a3a8(0);
+            viewer.status_flags &= ~0x80;
+            player_compute_derived_stats(0);
             PLAYER_CLAMP_HP();
         }
     }
-    level = func_8003c17c(&viewer.unk190[4][0], &viewer.unk190[4][1], 20, 4096, apply);
+    level = player_step_status_timer(&viewer.unk190[4][0], &viewer.unk190[4][1], 20, 4096, apply);
     if (level != -1) {
-        func_80021994(40, 0, 20, level, 1);
+        fade_add_color(40, 0, 20, level, 1);
         if (viewer.timers.words[4] == 0) {
-            viewer.unk2C &= ~0x100;
-            func_8005a3a8(0);
+            viewer.status_flags &= ~0x100;
+            player_compute_derived_stats(0);
             PLAYER_CLAMP_HP();
         }
     }
-    if (viewer.unk2EC) {
-        func_80021994(0, 0, 40, 4096, 1);
+    if (viewer.submerged) {
+        fade_add_color(0, 0, 40, 4096, 1);
     }
-    if (viewer.unk2F0) {
-        func_80021994(40, 40, 0, 4096, 1);
+    if (viewer.submerged_acid) {
+        fade_add_color(40, 40, 0, 4096, 1);
     }
-    level = func_8003c17c(&viewer.unk190[5][0], &viewer.unk190[5][1], 0, 4096, apply);
+    level = player_step_status_timer(&viewer.unk190[5][0], &viewer.unk190[5][1], 0, 4096, apply);
     if (level != -1) {
-        lighting.unk4 |= 0x10;
-        lighting.unk3 |= 2;
+        lighting.row_request |= 0x10;
+        lighting.column_request |= 2;
         if (viewer.timers.words[5] == 0) {
-            viewer.unk2C &= ~0x20000;
-            viewer.unk2C &= ~0x10000;
+            viewer.status_flags &= ~0x20000;
+            viewer.status_flags &= ~0x10000;
         }
     }
-    level = func_8003c17c(&viewer.unk190[6][0], &viewer.unk190[6][1], 0, 4096, apply);
+    level = player_step_status_timer(&viewer.unk190[6][0], &viewer.unk190[6][1], 0, 4096, apply);
     if (level != -1) {
         if (viewer.timers.words[6] == 0) {
-            viewer.unk2C &= ~0x40000;
+            viewer.status_flags &= ~0x40000;
         }
     }
-    level = func_8003c17c(&viewer.unk190[7][0], &viewer.unk190[7][1], 0, 4096, apply);
+    level = player_step_status_timer(&viewer.unk190[7][0], &viewer.unk190[7][1], 0, 4096, apply);
     if (level != -1) {
         if (viewer.timers.words[7] == 0) {
-            viewer.unk2C &= ~0x80000;
+            viewer.status_flags &= ~0x80000;
         }
     }
-    level = func_8003c17c(&viewer.unk190[8][0], &viewer.unk190[8][1], 0, 4096, apply);
+    level = player_step_status_timer(&viewer.unk190[8][0], &viewer.unk190[8][1], 0, 4096, apply);
     if (level != -1) {
         if (viewer.timers.words[8] == 0) {
-            viewer.unk2C &= ~0x100000;
+            viewer.status_flags &= ~0x100000;
         }
     }
-    level = func_8003c17c(&viewer.unk190[9][0], &viewer.unk190[9][1], 0, 4096, apply);
+    level = player_step_status_timer(&viewer.unk190[9][0], &viewer.unk190[9][1], 0, 4096, apply);
     if (level != -1) {
         if (viewer.timers.words[9] == 0) {
-            viewer.unk2C &= ~0x200000;
+            viewer.status_flags &= ~0x200000;
         }
     }
-    level = func_8003c17c(&viewer.unk190[10][0], &viewer.unk190[10][1], 0, 4096, apply);
+    level = player_step_status_timer(&viewer.unk190[10][0], &viewer.unk190[10][1], 0, 4096, apply);
     if (level != -1) {
-        lighting.unk9 = 1;
-        lighting.unk4 |= 0x20;
-        lighting.unk3 |= 1;
+        lighting.force_first_column = 1;
+        lighting.row_request |= 0x20;
+        lighting.column_request |= 1;
         if (viewer.timers.words[10] == 0) {
-            viewer.unk2C &= ~0x400000;
+            viewer.status_flags &= ~0x400000;
         }
     }
-    level = func_8003c17c(&viewer.unk190[11][0], &viewer.unk190[11][1], 0, 4096, apply);
+    level = player_step_status_timer(&viewer.unk190[11][0], &viewer.unk190[11][1], 0, 4096, apply);
     if (level != -1) {
         if (viewer.timers.words[11] == 0) {
-            viewer.unk2C &= ~0x800000;
+            viewer.status_flags &= ~0x800000;
         }
     }
-    level = func_8003c17c(&viewer.unk190[12][0], &viewer.unk190[12][1], 0, 4096, apply);
+    level = player_step_status_timer(&viewer.unk190[12][0], &viewer.unk190[12][1], 0, 4096, apply);
     if (level != -1) {
         if (viewer.timers.words[12] == 0) {
-            viewer.unk2C &= ~0x800;
+            viewer.status_flags &= ~0x800;
         }
     }
 }
 
 ADDRESS(0x8003c95c, 0x188)
-void func_8003c95c(int r, int g, int b, int arg3, int arg4, int arg5)
+void area_load_set_blocking(int r, int g, int b, int arg3, int arg4, int arg5)
 {
-    func_80015ad4();
+    cd_wait_idle();
     do {
-        func_8001531c();
-        func_800456f8();
-    } while (area_state.unk0 != 0);
-    area_state.unk4 = 99;
-    area_state.unk5 = 99;
-    area_state.unk6 = 99;
-    area_state.unk7 = 99;
+        cd_wait_frame();
+        area_load_update();
+    } while (area_state.loading != 0);
+    area_state.loaded_area = 99;
+    area_state.loaded_world = 99;
+    area_state.loaded_images = 99;
+    area_state.loaded_sound_bank = 99;
     area_state.unk8 = 99;
-    func_80045044(r, g, b, 255, 255, 127, 127, 127, 0, 0, 0);
+    area_request_load(r, g, b, 255, 255, 127, 127, 127, 0, 0, 0);
     do {
-        func_8001531c();
-        func_800456f8();
-    } while (area_state.unk0 != 0);
-    func_80015ad4();
+        cd_wait_frame();
+        area_load_update();
+    } while (area_state.loading != 0);
+    cd_wait_idle();
     VSync(2);
-    func_8003eaf8();
+    player_reset_motion();
     lighting_load_defaults();
-    func_80016508();
+    fade_reset();
     lighting_build_matrices();
-    func_800500ac(130, 4096, 4096, 0);
-    func_80015ad4();
-    area_state.unk18 = cd_state.unk4;
-    func_80045044(255, 255, 255, arg3, arg4, 127, 127, 127, 0, 0, 0);
+    fade_run_frames(130, 4096, 4096, 0);
+    cd_wait_idle();
+    area_state.entry_fade_start = cd_state.vsync_count;
+    area_request_load(255, 255, 255, arg3, arg4, 127, 127, 127, 0, 0, 0);
     lighting_clear_requests();
 }
 
 ADDRESS(0x8003cae4, 0xa4)
-void func_8003cae4(void)
+void player_reset_stats(void)
 {
     int i;
 
-    viewer.unk8 = 0;
+    viewer.sp_total = 0;
     i = 14;
     while (i--) {
-        viewer.unk9A[i] = 50;
-        viewer.unk62[i] = 50;
-        viewer.unk7E[i] = 0;
+        viewer.base_attributes[i] = 50;
+        viewer.attributes[i] = 50;
+        viewer.attribute_bonuses[i] = 0;
     }
     viewer.unk26 = 0;
-    viewer.unk4 = 0;
-    viewer.unk0 = 0;
-    viewer.unk38[20] = 0xffff;
-    viewer.unk38[19] = 0xffff;
-    viewer.unk38[18] = 0xffff;
-    viewer.unk38[4] = 0xffff;
-    viewer.unk38[3] = 0xffff;
-    viewer.unk38[2] = 0xffff;
-    viewer.unk38[1] = 0xffff;
-    viewer.unk38[0] = 0xffff;
-    viewer.unk38[6] = 0xffff;
-    viewer.unk38[11] = 0xffff;
-    viewer.unk38[10] = 0xffff;
-    viewer.unk38[9] = 0xffff;
-    viewer.unk38[8] = 0xffff;
-    viewer.unk38[7] = 0xffff;
-    viewer.unk38[12] = 0xffff;
-    viewer.unk38[5] = 0xffff;
-    viewer.unk38[17] = 0xffff;
-    viewer.unk38[16] = 0xffff;
-    viewer.unk38[15] = 0xffff;
-    viewer.unk38[14] = 0xffff;
-    viewer.unk38[13] = 0xffff;
+    viewer.max_mp = 0;
+    viewer.max_hp = 0;
+    viewer.equipment[20] = 0xffff;
+    viewer.equipment[19] = 0xffff;
+    viewer.equipment[18] = 0xffff;
+    viewer.equipment[4] = 0xffff;
+    viewer.equipment[3] = 0xffff;
+    viewer.equipment[2] = 0xffff;
+    viewer.equipment[1] = 0xffff;
+    viewer.equipment[0] = 0xffff;
+    viewer.equipment[6] = 0xffff;
+    viewer.equipment[11] = 0xffff;
+    viewer.equipment[10] = 0xffff;
+    viewer.equipment[9] = 0xffff;
+    viewer.equipment[8] = 0xffff;
+    viewer.equipment[7] = 0xffff;
+    viewer.equipment[12] = 0xffff;
+    viewer.equipment[5] = 0xffff;
+    viewer.equipment[17] = 0xffff;
+    viewer.equipment[16] = 0xffff;
+    viewer.equipment[15] = 0xffff;
+    viewer.equipment[14] = 0xffff;
+    viewer.equipment[13] = 0xffff;
 }
 
 /*
@@ -418,7 +418,7 @@ void func_8003cae4(void)
  * 11, 12 and 15) into the viewer's derived stats.
  */
 ADDRESS(0x8003cb88, 0x354)
-void player_equipment_bonuses(void)
+void player_sum_equipment_bonuses(void)
 {
     int kind[4];
     int amount[3];
@@ -433,9 +433,9 @@ void player_equipment_bonuses(void)
     int a7;
     int a8;
     u16 *slot;
-    Vis44 *item;
+    ItemType *item;
 
-    slot = viewer.unk38;
+    slot = viewer.equipment;
     a1 = 0;
     a2 = 0;
     a3 = 0;
@@ -460,7 +460,7 @@ void player_equipment_bonuses(void)
         if (*slot == 0xffff) {
             continue;
         }
-        item = &vis_table_c.unk0118[*slot];
+        item = &vis_table_c.types[*slot];
         kind[0] = item->kind0;
         kind[1] = item->kind1;
         kind[2] = item->kind2;
@@ -521,34 +521,34 @@ void player_equipment_bonuses(void)
         }
     }
     if (a1) {
-        viewer.unk1C4 = 100 / a1;
+        viewer.hp_regen_interval = 100 / a1;
     } else {
-        viewer.unk1C4 = 0;
+        viewer.hp_regen_interval = 0;
     }
     if (a2) {
-        viewer.unk1C5 = 100 / a2;
+        viewer.mp_regen_interval = 100 / a2;
     } else {
-        viewer.unk1C5 = 0;
+        viewer.mp_regen_interval = 0;
     }
-    viewer.unk1C6 = a3 * 5;
+    viewer.double_damage_chance = a3 * 5;
     if (a4 < 0) {
-        viewer.unk1C7 = -1;
+        viewer.equipment_light = -1;
     } else if (a4 > 0) {
-        viewer.unk1C7 = 1;
+        viewer.equipment_light = 1;
     } else {
-        viewer.unk1C7 = 0;
+        viewer.equipment_light = 0;
     }
-    viewer.unk1C8 = 100 - a5 * 80 / 100;
-    viewer.unk1C9 = a6;
-    viewer.unk1CA = a7;
-    viewer.unk1CB = a8;
+    viewer.status_time_scale = 100 - a5 * 80 / 100;
+    viewer.hp_drain_percent = a6;
+    viewer.mp_drain_percent = a7;
+    viewer.blocks_magic = a8;
 }
 
 ADDRESS(0x8003cedc, 0x4c)
-void func_8003cedc(void)
+void player_recalc_stats(void)
 {
-    player_equipment_bonuses();
-    func_8005a3a8(0);
+    player_sum_equipment_bonuses();
+    player_compute_derived_stats(0);
     PLAYER_CLAMP_HP();
 }
 
@@ -557,14 +557,14 @@ void player_add_hp(int delta)
 {
     int hp;
 
-    hp = viewer.unk2 + delta;
+    hp = viewer.hp + delta;
     if (hp <= 0) {
         hp = 0;
         player_kill(hp);
-    } else if (viewer.unk0 < hp) {
-        hp = viewer.unk0;
+    } else if (viewer.max_hp < hp) {
+        hp = viewer.max_hp;
     }
-    viewer.unk2 = hp;
+    viewer.hp = hp;
 }
 
 ADDRESS(0x8003cf94, 0x48)
@@ -572,24 +572,24 @@ void player_add_mp(int delta)
 {
     int mp;
 
-    mp = viewer.unk6 + delta;
+    mp = viewer.mp + delta;
     if (mp <= 0) {
         mp = 0;
-    } else if (viewer.unk4 < mp) {
-        mp = viewer.unk4;
+    } else if (viewer.max_mp < mp) {
+        mp = viewer.max_mp;
     }
-    viewer.unk6 = mp;
+    viewer.mp = mp;
 }
 
 ADDRESS(0x8003cfdc, 0x54)
-void func_8003cfdc(int id)
+void player_check_item_durability(int id)
 {
     int v;
 
-    v = vis_table_c.unk0118[id].unk28;
+    v = vis_table_c.types[id].durability;
     if (v != 0) {
         if (v < 4) {
-            viewer.unk2C |= 0x1000000;
+            viewer.status_flags |= 0x1000000;
         }
     }
 }
@@ -597,19 +597,19 @@ void func_8003cfdc(int id)
 /* Clears the durability-warning flag, then sets it again if any worn item
  * (weapons and armour slots) is nearly broken. */
 ADDRESS(0x8003d030, 0xd4)
-void func_8003d030(void)
+void player_update_durability_warning(void)
 {
     u16 *slots[10] = {
-        &viewer.unk38[0], &viewer.unk38[2],  &viewer.unk38[3],  &viewer.unk38[8],
-        &viewer.unk38[9], &viewer.unk38[10], &viewer.unk38[13], &viewer.unk38[16],
+        &viewer.equipment[0], &viewer.equipment[2],  &viewer.equipment[3],  &viewer.equipment[8],
+        &viewer.equipment[9], &viewer.equipment[10], &viewer.equipment[13], &viewer.equipment[16],
     };
     u16 **p;
 
     p = slots;
-    viewer.unk2C &= ~0x1000000;
+    viewer.status_flags &= ~0x1000000;
     for (; *p; p++) {
         if (**p != 0xffff) {
-            func_8003cfdc(**p);
+            player_check_item_durability(**p);
         }
     }
 }
@@ -625,43 +625,43 @@ void player_wear_item(int amount, u16 *slot)
     if (*slot == 0xffff) {
         return;
     }
-    left = vis_table_c.unk0118[*slot].unk28;
+    left = vis_table_c.types[*slot].durability;
     if (left == 0) {
         return;
     }
     left -= amount;
     if (left <= 0) {
-        func_800582f0(4, 128);
-        vis_table_c.unk0118[*slot].unk28 = 0;
-        if (slot != &viewer.unk38[0] && slot != &viewer.unk38[13]) {
+        sound_play(4, 128);
+        vis_table_c.types[*slot].durability = 0;
+        if (slot != &viewer.equipment[0] && slot != &viewer.equipment[13]) {
             *slot = 0xffff;
         }
-        if (slot == &viewer.unk38[3]) {
-            if (viewer.unk148[0] >= 31 && viewer.unk148[0] <= 34) {
-                func_8003f12c(0xffff, 1, 0);
+        if (slot == &viewer.equipment[3]) {
+            if (viewer.slot_model_ids[0] >= 31 && viewer.slot_model_ids[0] <= 34) {
+                player_load_equipment_model(0xffff, 1, 0);
             }
-            func_8003f12c(0xffff, 0, 0);
-        } else if (slot == &viewer.unk38[16]) {
-            func_8003f12c(0xffff, 1, 0);
-        } else if (slot == &viewer.unk38[4]) {
-            func_8003f12c(0xffff, 2, 0);
-        } else if (slot == &viewer.unk38[17]) {
-            func_8003f12c(0xffff, 3, 0);
+            player_load_equipment_model(0xffff, 0, 0);
+        } else if (slot == &viewer.equipment[16]) {
+            player_load_equipment_model(0xffff, 1, 0);
+        } else if (slot == &viewer.equipment[4]) {
+            player_load_equipment_model(0xffff, 2, 0);
+        } else if (slot == &viewer.equipment[17]) {
+            player_load_equipment_model(0xffff, 3, 0);
         }
-        player_equipment_bonuses();
-        func_8005a3a8(0);
+        player_sum_equipment_bonuses();
+        player_compute_derived_stats(0);
         PLAYER_CLAMP_HP();
     } else {
-        vis_table_c.unk0118[*slot].unk28 = left;
+        vis_table_c.types[*slot].durability = left;
     }
-    func_8003d030();
+    player_update_durability_warning();
 }
 
 /* Wears the shield (slot 16) while it is raised, and the armour. */
 ADDRESS(0x8003d288, 0x30c)
 void player_wear_armour(int damage, u16 flags)
 {
-    u16 *armour[4] = {&viewer.unk38[8], &viewer.unk38[9], &viewer.unk38[10], &viewer.unk38[2]};
+    u16 *armour[4] = {&viewer.equipment[8], &viewer.equipment[9], &viewer.equipment[10], &viewer.equipment[2]};
     int wear;
     int n;
     int shield;
@@ -670,24 +670,24 @@ void player_wear_armour(int damage, u16 flags)
     u8 a;
     u8 b;
 
-    if (viewer.unk189 != 0 && viewer.unk38[16] != 0xffff) {
-        if (damage * 20 < viewer.unk0) {
-            viewer.unk219++;
+    if (viewer.shield_raised != 0 && viewer.equipment[16] != 0xffff) {
+        if (damage * 20 < viewer.max_hp) {
+            viewer.shield_wear++;
         } else {
-            n = damage * 10 / viewer.unk0 + 1;
+            n = damage * 10 / viewer.max_hp + 1;
             if (n <= 0) {
                 return;
             }
-            viewer.unk219 += n * 2;
-            viewer.unk21A += n;
+            viewer.shield_wear += n * 2;
+            viewer.armour_wear += n;
         }
-        a = viewer.unk219;
-        b = viewer.unk21A;
+        a = viewer.shield_wear;
+        b = viewer.armour_wear;
         shield = a / 5;
         wear = b / 5;
-        viewer.unk219 = a - shield * 5;
-        viewer.unk21A = b - wear * 5;
-        if ((flags & 0x400) && !(viewer.unk2C & 0x800000)) {
+        viewer.shield_wear = a - shield * 5;
+        viewer.armour_wear = b - wear * 5;
+        if ((flags & 0x400) && !(viewer.status_flags & 0x800000)) {
             shield <<= 1;
             wear <<= 1;
         }
@@ -695,20 +695,20 @@ void player_wear_armour(int damage, u16 flags)
             shield *= 5;
             wear *= 5;
         }
-        player_wear_item(shield, &viewer.unk38[16]);
+        player_wear_item(shield, &viewer.equipment[16]);
         pick = -1;
     } else {
-        if (damage * 20 < viewer.unk0) {
+        if (damage * 20 < viewer.max_hp) {
             return;
         }
-        n = damage * 10 / viewer.unk0 + 1;
+        n = damage * 10 / viewer.max_hp + 1;
         if (n <= 0) {
             return;
         }
-        viewer.unk21A += n * 2;
-        wear = viewer.unk21A / 5;
-        viewer.unk21A -= wear * 5;
-        if ((flags & 0x400) && !(viewer.unk2C & 0x800000)) {
+        viewer.armour_wear += n * 2;
+        wear = viewer.armour_wear / 5;
+        viewer.armour_wear -= wear * 5;
+        if ((flags & 0x400) && !(viewer.status_flags & 0x800000)) {
             wear <<= 1;
         }
         if (flags & 0x1000) {
@@ -735,11 +735,11 @@ DATA(0x800881d0, 0x4, ".sbss")
 static short shake[2];
 
 /*
- * The area module's overlay pointers (st.area_a sets both from
- * DAT_80013980) and the unreferenced word before them: retail allocates
+ * The area module's overlay pointers (st.area_load sets both from
+ * overlay_area_start) and the unreferenced word before them: retail allocates
  * the three as one small COMMON batch right after shake, in hash-bucket
  * order. They are this object's: another object's small data would start
- * eight-aligned, and st.area_a reads DAT_800881dc with lui pairs, so it
+ * eight-aligned, and st.area_load reads DAT_800881dc with lui pairs, so it
  * does not request it (its tentative DAT_800881d8 merges into this one).
  */
 DATA(0x800881d4, 0x4, ".sbss")
@@ -753,35 +753,35 @@ u8 *DAT_800881dc[1];
 ADDRESS(0x8003d594, 0x1f4)
 void player_update_shake(void)
 {
-    if (viewer.unk2F4 < 0) {
+    if (viewer.shake_timer < 0) {
         return;
     }
-    if (viewer.unk2F4 % 3 == 0) {
-        shake[0] = (rand() - 16384) >> ((30 - viewer.unk2F4) / 5 + 5);
-        shake[1] = (rand() - 16384) >> ((30 - viewer.unk2F4) / 5 + 5);
+    if (viewer.shake_timer % 3 == 0) {
+        shake[0] = (rand() - 16384) >> ((30 - viewer.shake_timer) / 5 + 5);
+        shake[1] = (rand() - 16384) >> ((30 - viewer.shake_timer) / 5 + 5);
     } else {
         shake[0] >>= 1;
         shake[1] >>= 1;
     }
     if (shake[0] < -2 || shake[0] > 2) {
-        viewer.unk288 += shake[0];
+        viewer.shake_pitch += shake[0];
     }
     if (shake[1] < -2 || shake[1] > 2) {
-        viewer.unk28C += shake[1];
+        viewer.shake_roll += shake[1];
     }
-    if (viewer.unk288 > 2048 && viewer.unk288 < 4032) {
-        viewer.unk288 = 4032;
+    if (viewer.shake_pitch > 2048 && viewer.shake_pitch < 4032) {
+        viewer.shake_pitch = 4032;
     }
-    if (viewer.unk288 > 64 && viewer.unk288 < 2048) {
-        viewer.unk288 = 64;
+    if (viewer.shake_pitch > 64 && viewer.shake_pitch < 2048) {
+        viewer.shake_pitch = 64;
     }
-    if (viewer.unk28C > 2048 && viewer.unk28C < 4032) {
-        viewer.unk28C = 4032;
+    if (viewer.shake_roll > 2048 && viewer.shake_roll < 4032) {
+        viewer.shake_roll = 4032;
     }
-    if (viewer.unk28C > 64 && viewer.unk28C < 2048) {
-        viewer.unk28C = 64;
+    if (viewer.shake_roll > 64 && viewer.shake_roll < 2048) {
+        viewer.shake_roll = 64;
     }
-    viewer.unk2F4--;
+    viewer.shake_timer--;
 }
 
 /* Takes `damage` hit points, pushes the viewer away from `from` and starts
@@ -799,31 +799,31 @@ void player_take_damage(int damage, int flags, long *from)
     int shake_amount;
     short time;
 
-    if (viewer.unk218 == 4 || damage == 0) {
+    if (viewer.state == 4 || damage == 0) {
         return;
     }
     player_wear_armour(damage, flags);
-    hp = viewer.unk2 - damage;
+    hp = viewer.hp - damage;
     if (hp <= 0) {
         hp = 0;
     }
-    viewer.unk2 = hp;
+    viewer.hp = hp;
     PLAYER_CLAMP_HP();
-    scaled = (damage << 12) / viewer.unk0;
+    scaled = (damage << 12) / viewer.max_hp;
     if (scaled > 950) {
         scaled = 950;
     }
     reach = scaled >> 2;
     if (from) {
-        func_8004a390(viewer.position.vx - from[0], viewer.position.vy - from[1], viewer.position.vz - from[2], &dir);
+        vector_to_angles(viewer.position.vx - from[0], viewer.position.vy - from[1], viewer.position.vz - from[2], &dir);
         if (reach < 80) {
             reach = 80;
         }
         if (reach > 450) {
             reach = 450;
         }
-        func_80049f08(&dir, &push);
-        func_8004a0f8(reach, &push);
+        vector_from_angles(&dir, &push);
+        vector_scale(reach, &push);
         if (push.vy > 200) {
             push.vy = 200;
         } else if (push.vy < -200) {
@@ -836,36 +836,36 @@ void player_take_damage(int damage, int flags, long *from)
     if (time < 71) {
         time = 70;
     }
-    if (viewer.unk1E) {
-        viewer.unk2F4 = (damage * 5000 / viewer.unk0 + 500) / viewer.unk1E;
+    if (viewer.impact_resistance) {
+        viewer.shake_timer = (damage * 5000 / viewer.max_hp + 500) / viewer.impact_resistance;
     } else {
-        viewer.unk2F4 = 30;
+        viewer.shake_timer = 30;
     }
-    if (viewer.unk2F4 < 0) {
-        viewer.unk2F4 = -1;
+    if (viewer.shake_timer < 0) {
+        viewer.shake_timer = -1;
     }
-    if (viewer.unk2F4 > 30) {
-        viewer.unk2F4 = 30;
+    if (viewer.shake_timer > 30) {
+        viewer.shake_timer = 30;
     }
-    func_80057a68(damage * 255 / viewer.unk0);
-    amount = damage * 255 / viewer.unk0 + 32;
+    pad_vibrate(damage * 255 / viewer.max_hp);
+    amount = damage * 255 / viewer.max_hp + 32;
     if (amount > 128) {
         amount = 128;
     }
     random = rand();
     shake_amount = amount - 16384;
     shake_amount += random;
-    viewer.unk2E2 = shake_amount >> 9;
-    viewer.unk2DE += amount + (rand() >> 9);
+    viewer.hand_rot_z = shake_amount >> 9;
+    viewer.hand_rot_x += amount + (rand() >> 9);
     if (hp == 0) {
         player_kill((int)&push);
-        viewer.unk2D6 = 3500;
-        viewer.unk2D8 = time;
+        viewer.red_fade = 3500;
+        viewer.red_fade_step = time;
     } else if (from == NULL) {
-        viewer.unk2D6 = 3500;
-        viewer.unk2D8 = time;
+        viewer.red_fade = 3500;
+        viewer.red_fade_step = time;
     } else {
-        switch ((dir.vy - viewer.unk26A + 256) >> 9 & 7) {
+        switch ((dir.vy - viewer.yaw + 256) >> 9 & 7) {
         case 0:
             dir.vx = -scaled;
             dir.vz = 0;
@@ -900,7 +900,7 @@ void player_take_damage(int damage, int flags, long *from)
             break;
         }
         dir.vy = 0;
-        func_80042c44(&push, &dir, time, damage);
+        player_enter_hurt_state(&push, &dir, time, damage);
     }
 }
 
@@ -925,14 +925,14 @@ void player_hit(u16 *damage, u16 scale, u16 effect, long *from)
     int limit0;
     u16 attack;
     u16 magic;
-    Vis44 *shield;
+    ItemType *shield;
     int k;
     int d;
     int v;
     int i;
 
     elemental = physical = 0;
-    defence = viewer.unkD8;
+    defence = viewer.element_defence;
     memset(bonus, 0, sizeof(bonus));
     extra = bonus;
     if (effect != 0) {
@@ -945,13 +945,13 @@ void player_hit(u16 *damage, u16 scale, u16 effect, long *from)
         case 96:
         case 128:
         case 256:
-            resist = (u16)(viewer.unkB6 / 20) + viewer.unk62[13] * 3 / 80 + viewer.unkD8[5] * 60 / 255;
+            resist = (u16)(viewer.physical_base / 20) + viewer.attributes[13] * 3 / 80 + viewer.element_defence[5] * 60 / 255;
             if (101 - resist < rand() * 100 / 32768) {
                 goto limits;
             }
             break;
         case 7:
-            resist = (u16)(viewer.unkB6 / 20) + viewer.unk62[12] * 3 / 80 + viewer.unkD8[2] * 60 / 255;
+            resist = (u16)(viewer.physical_base / 20) + viewer.attributes[12] * 3 / 80 + viewer.element_defence[2] * 60 / 255;
             if (101 - resist < rand() * 100 / 32768) {
                 goto limits;
             }
@@ -959,11 +959,11 @@ void player_hit(u16 *damage, u16 scale, u16 effect, long *from)
         }
         switch (effect) {
         case 128:
-            if (!(viewer.unk2C & 0x80)) {
+            if (!(viewer.status_flags & 0x80)) {
                 viewer.unk190[3][1] = 300;
                 viewer.unk190[3][0] = 0;
-                viewer.unk2C |= 0x80;
-                func_8005a3a8(0);
+                viewer.status_flags |= 0x80;
+                player_compute_derived_stats(0);
                 PLAYER_CLAMP_HP();
             } else {
                 viewer.unk190[3][0] = 20;
@@ -973,14 +973,14 @@ void player_hit(u16 *damage, u16 scale, u16 effect, long *from)
         case 8:
         case 16:
         case 24:
-            if (!(viewer.unk2C & 0x18)) {
+            if (!(viewer.status_flags & 0x18)) {
                 viewer.unk190[1][1] = 75;
                 viewer.unk190[1][0] = 0;
-                viewer.unk2C |= 8;
-            } else if (viewer.unk2C & 8) {
+                viewer.status_flags |= 8;
+            } else if (viewer.status_flags & 8) {
                 viewer.unk190[1][1] = 75;
                 viewer.unk190[1][0] = 0;
-                viewer.unk2C |= 0x10;
+                viewer.status_flags |= 0x10;
             } else {
                 viewer.unk190[1][0] = 20;
                 viewer.unk190[1][1] = 75;
@@ -989,10 +989,10 @@ void player_hit(u16 *damage, u16 scale, u16 effect, long *from)
         case 32:
         case 64:
         case 96:
-            if (!(viewer.unk2C & 0x60)) {
+            if (!(viewer.status_flags & 0x60)) {
                 viewer.unk190[2][1] = 600;
                 viewer.unk190[2][0] = 0;
-                viewer.unk2C |= 0x60;
+                viewer.status_flags |= 0x60;
             } else {
                 viewer.unk190[2][0] = 20;
                 viewer.unk190[2][1] = 600;
@@ -1000,14 +1000,14 @@ void player_hit(u16 *damage, u16 scale, u16 effect, long *from)
             break;
         case 512:
             player_add_hp(-(rand() / 256));
-            func_800582f0(9, 128);
+            sound_play(9, 128);
             break;
         case 256:
-            if (!(viewer.unk2C & 0x100)) {
+            if (!(viewer.status_flags & 0x100)) {
                 viewer.unk190[4][1] = 6000;
                 viewer.unk190[4][0] = 0;
-                viewer.unk2C |= 0x100;
-                func_8005a3a8(0);
+                viewer.status_flags |= 0x100;
+                player_compute_derived_stats(0);
                 PLAYER_CLAMP_HP();
             } else {
                 viewer.unk190[4][0] = 20;
@@ -1018,49 +1018,49 @@ void player_hit(u16 *damage, u16 scale, u16 effect, long *from)
         case 2:
         case 4:
         case 7:
-            if (!(viewer.unk2C & 0x100000)) {
-                if (viewer.unk2C & 7) {
+            if (!(viewer.status_flags & 0x100000)) {
+                if (viewer.status_flags & 7) {
                     if (viewer.unk190[0][0] >= 220 && viewer.unk190[0][1] != 0) {
                         viewer.unk190[0][0] = 20;
                         viewer.unk190[0][1] = 600;
-                        if (viewer.unk2C & 2) {
-                            viewer.unk2C |= 4;
+                        if (viewer.status_flags & 2) {
+                            viewer.status_flags |= 4;
                         }
-                        if (viewer.unk2C & 1) {
-                            viewer.unk2C |= 2;
+                        if (viewer.status_flags & 1) {
+                            viewer.status_flags |= 2;
                         }
                     }
                 } else {
                     viewer.unk190[0][1] = 600;
                     viewer.unk190[0][0] = 0;
-                    viewer.unk2C |= 1;
+                    viewer.status_flags |= 1;
                 }
             }
             break;
         case 1024:
-            viewer.unk2C |= 0x400;
-            if (viewer.unk23C % 40 == 0) {
-                func_800582f0(7, 128);
+            viewer.status_flags |= 0x400;
+            if (viewer.frame_count % 40 == 0) {
+                sound_play(7, 128);
             }
-            viewer.unk2DA = 3500;
-            viewer.unk2DC = 128;
+            viewer.yellow_fade = 3500;
+            viewer.yellow_fade_step = 128;
             break;
         case 16384:
-            viewer.unk189 = 0;
-            viewer.unk14F = 1;
+            viewer.shield_raised = 0;
+            viewer.shield_lowering = 1;
             break;
         }
     limits:
         limit300 = 300;
         limit75 = 75;
         limit600 = 600;
-        base = (112 - viewer.unk20) * 50 / 59 + 50;
+        base = (112 - viewer.status_recovery) * 50 / 59 + 50;
         limit300 = base * limit300 / 100;
         limit75 = base * limit75 / 100;
         limit600 = base * limit600 / 100;
-        limit300 = limit300 * viewer.unk1C8 / 100;
-        limit75 = limit75 * viewer.unk1C8 / 100;
-        limit600 = limit600 * viewer.unk1C8 / 100;
+        limit300 = limit300 * viewer.status_time_scale / 100;
+        limit75 = limit75 * viewer.status_time_scale / 100;
+        limit600 = limit600 * viewer.status_time_scale / 100;
         limit0 = limit600;
         if (limit300 < viewer.unk190[3][1]) {
             viewer.unk190[3][1] = limit300;
@@ -1075,16 +1075,16 @@ void player_hit(u16 *damage, u16 scale, u16 effect, long *from)
             viewer.unk190[0][1] = limit0;
         }
     }
-    if (viewer.unk189 != 0 && viewer.unk38[16] != 0xffff) {
-        attack = viewer.unk12 + viewer.unk16;
-        shield = &vis_table_c.unk0118[viewer.unk38[16]];
-        magic = viewer.unk14 + viewer.unk18;
+    if (viewer.shield_raised != 0 && viewer.equipment[16] != 0xffff) {
+        attack = viewer.armour_defence + viewer.shield_defence;
+        shield = &vis_table_c.types[viewer.equipment[16]];
+        magic = viewer.magic_defence + viewer.shield_magic_defence;
         if (shield->kind2 >= 9) {
             bonus[shield->kind2 - 9] = shield->amount2 >> 1;
         }
     } else {
-        attack = viewer.unk12;
-        magic = viewer.unk14;
+        attack = viewer.armour_defence;
+        magic = viewer.magic_defence;
     }
     k = attack ? attack : 1;
     for (i = 0; i < 3; i++, damage++) {
@@ -1098,13 +1098,13 @@ void player_hit(u16 *damage, u16 scale, u16 effect, long *from)
             continue;
         }
         d = *damage;
-        if ((viewer.unk2C & 0x80000) && i == 0) {
+        if ((viewer.status_flags & 0x80000) && i == 0) {
             d >>= 2;
         }
-        if ((viewer.unk2C & 0x800000) && i == 3) {
+        if ((viewer.status_flags & 0x800000) && i == 3) {
             d >>= 2;
         }
-        if ((viewer.unk2C & 0x100000) && i == 2) {
+        if ((viewer.status_flags & 0x100000) && i == 2) {
             continue;
         }
         k = magic + *defence + *extra;
@@ -1123,20 +1123,20 @@ void player_hit(u16 *damage, u16 scale, u16 effect, long *from)
 /* Hits the viewer with `damage` when it is within `range` of `pos`, scaled
  * down with the distance. */
 ADDRESS(0x8003e5e8, 0x14c)
-void func_8003e5e8(u16 *damage, u16 effect, long *pos, int min, int range, int kind)
+void player_hit_in_radius(u16 *damage, u16 effect, long *pos, int min, int range, int kind)
 {
     int d;
 
     if (kind == 0x8000) {
-        d = func_8004a67c((VECTOR *)pos, range, (VECTOR *)&viewer.position.vx, 256, 1000);
+        d = vector_sphere_distance((VECTOR *)pos, range, (VECTOR *)&viewer.position.vx, 256, 1000);
     } else if (kind == 0x8001) {
         if (viewer.position.vy > pos[1]) {
             d = -9999999;
         } else {
-            d = func_8004a67c((VECTOR *)pos, range, (VECTOR *)&viewer.position.vx, 256, 1000);
+            d = vector_sphere_distance((VECTOR *)pos, range, (VECTOR *)&viewer.position.vx, 256, 1000);
         }
     } else {
-        d = func_8003ebfc(pos[0], pos[1], pos[2], range, kind);
+        d = player_distance_within(pos[0], pos[1], pos[2], range, kind);
         if (d == -1) {
             d = -9999999;
         }
@@ -1148,19 +1148,19 @@ void func_8003e5e8(u16 *damage, u16 effect, long *pos, int min, int range, int k
 
 /* The camera position and angles. */
 ADDRESS(0x8003e734, 0x60)
-void func_8003e734(VECTOR *pos, SVECTOR *rot)
+void player_get_camera(VECTOR *pos, SVECTOR *rot)
 {
     pos->vx = viewer.position.vx;
     pos->vz = viewer.position.vz;
-    pos->vy = viewer.position.vy + viewer.unk2CE + viewer.unk2D2 - 1600;
-    rot->vx = viewer.unk268;
-    rot->vy = viewer.unk26A;
-    rot->vz = viewer.unk26C;
+    pos->vy = viewer.position.vy + viewer.bob_offset + viewer.unk2D2 - 1600;
+    rot->vx = viewer.pitch;
+    rot->vy = viewer.yaw;
+    rot->vz = viewer.roll;
 }
 
 /* Clears the status timers and restores the hit and magic points. */
 ADDRESS(0x8003e794, 0xac)
-void func_8003e794(void)
+void player_recover_all(void)
 {
     viewer.unk190[0][0] = viewer.unk190[0][1] = viewer.unk190[1][0] = viewer.unk190[1][1] =
         viewer.unk190[2][0] = viewer.unk190[2][1] = viewer.unk190[3][0] = viewer.unk190[3][1] =
@@ -1171,132 +1171,132 @@ void func_8003e794(void)
                             viewer.unk190[10][0] = viewer.unk190[10][1] =
                                 viewer.unk190[11][0] = viewer.unk190[11][1] =
                                     viewer.unk190[12][0] = viewer.unk190[12][1] = 0;
-    viewer.unk238 = 0;
-    viewer.unk2 = viewer.unk18A = viewer.unk0;
-    viewer.unk6 = viewer.unk18C = viewer.unk4;
-    viewer.unk2C = 0;
-    func_8003c054();
+    viewer.fall_death = 0;
+    viewer.hp = viewer.hud_hp = viewer.max_hp;
+    viewer.mp = viewer.hud_mp = viewer.max_mp;
+    viewer.status_flags = 0;
+    player_reset_state();
 }
 
 ADDRESS(0x8003e840, 0x34)
-void func_8003e840(void)
+void hud_clear_damage_numbers(void)
 {
     int i;
 
     for (i = 0; i < 5; i++) {
-        viewer.unk1EC[i] = 0;
-        viewer.unk20C[i] = 0;
+        viewer.damage_number_timers[i] = 0;
+        viewer.damage_numbers[i] = 0;
     }
 }
 
 /* Resets the player for a new game. */
 ADDRESS(0x8003e874, 0x1ac)
-void func_8003e874(void)
+void player_reset_new_game(void)
 {
-    func_8003cae4();
-    viewer.unk244 = 2048;
-    viewer.unk34 = 0;
-    viewer.unk2D6 = viewer.unk2D8 = viewer.unk2DA = viewer.unk2DC = 0;
-    viewer.unk186 = 2;
-    viewer.unk15E = 0;
+    player_reset_stats();
+    viewer.footstep_timer = 2048;
+    viewer.play_seconds = 0;
+    viewer.red_fade = viewer.red_fade_step = viewer.yellow_fade = viewer.yellow_fade_step = 0;
+    viewer.hud_redraw = 2;
+    viewer.quick_item_index = 0;
     viewer.unk1E4 = 0;
-    viewer.unk21E = 0;
-    viewer.unk219 = viewer.unk21A = viewer.unk21B = 0;
-    viewer.unk118[0] = viewer.unk118[1] = 0;
-    func_8003ee38(0xffff, 0);
-    func_8003ee38(0xffff, 1);
-    viewer.unkE8[0] = viewer.unkE8[1] = viewer.unkE8[2] = viewer.unkE8[3] = 0;
-    func_8003f12c(0xffff, 0, 0);
-    func_8003f12c(0xffff, 1, 0);
-    func_8003f12c(0xffff, 2, 0);
-    func_8003f12c(0xffff, 3, 0);
-    viewer.unk1D4[0] = 24;
-    viewer.unk1D4[1] = 25;
-    viewer.unk1D4[2] = 26;
-    viewer.unk1D4[3] = 27;
-    viewer.unk38[3] = 0;
-    func_8003f12c(0, 0, 0);
-    func_80055990();
-    viewer.unk28 = 0;
-    viewer.unk33 = 0;
-    viewer.unk34 = 0;
-    viewer.unk30 = 0;
-    func_8003cedc();
-    viewer.unk278.vx = 0;
-    viewer.unk278.vy = 3072;
-    viewer.unk278.vz = 0;
+    viewer.motion_stopped = 0;
+    viewer.shield_wear = viewer.armour_wear = viewer.weapon_wear = 0;
+    viewer.magic_defs[0] = viewer.magic_defs[1] = 0;
+    player_load_magic(0xffff, 0);
+    player_load_magic(0xffff, 1);
+    viewer.slot_model_info[0] = viewer.slot_model_info[1] = viewer.slot_model_info[2] = viewer.slot_model_info[3] = 0;
+    player_load_equipment_model(0xffff, 0, 0);
+    player_load_equipment_model(0xffff, 1, 0);
+    player_load_equipment_model(0xffff, 2, 0);
+    player_load_equipment_model(0xffff, 3, 0);
+    viewer.slot_sounds[0] = 24;
+    viewer.slot_sounds[1] = 25;
+    viewer.slot_sounds[2] = 26;
+    viewer.slot_sounds[3] = 27;
+    viewer.equipment[3] = 0;
+    player_load_equipment_model(0, 0, 0);
+    item_counts_clear();
+    viewer.items_found = 0;
+    viewer.play_frames = 0;
+    viewer.play_seconds = 0;
+    viewer.creatures_killed = 0;
+    player_recalc_stats();
+    viewer.view_rot.vx = 0;
+    viewer.view_rot.vy = 3072;
+    viewer.view_rot.vz = 0;
     viewer.position.vx = 0x3d000;
     viewer.position.vy = 0x405c0;
     viewer.position.vz = 0x3f000;
-    viewer.unk1CC = viewer.unk1CE = viewer.unk1D0 = 0;
-    func_8003e794();
-    func_800595d4();
-    viewer.unk22D = 61;
-    viewer.unk22E = 64;
-    viewer.unk22F = 63;
-    viewer.unk22C = 0;
-    viewer.unk230 = 0;
-    viewer.unk232 = 1472;
-    viewer.unk234 = 0;
-    viewer.unk236 = 3072;
-    func_8003e840();
+    viewer.push_x = viewer.push_y = viewer.push_z = 0;
+    player_recover_all();
+    equip_load_item_slot_pictures();
+    viewer.save_x = 61;
+    viewer.save_y = 64;
+    viewer.save_z = 63;
+    viewer.save_area = 0;
+    viewer.save_dx = 0;
+    viewer.save_dy = 1472;
+    viewer.save_dz = 0;
+    viewer.save_yaw = 3072;
+    hud_clear_damage_numbers();
 }
 
 ADDRESS(0x8003ea20, 0xb0)
-void func_8003ea20(void)
+void player_init(void)
 {
-    viewer.unk120[0] = DAT_80190f28[0];
-    viewer.unk120[1] = DAT_80190f28[1];
-    viewer.unkF8[0] = DAT_80199220[0];
-    viewer.unkF8[1] = DAT_80199220[1];
-    viewer.unkF8[2] = DAT_80199220[2];
-    viewer.unkF8[3] = DAT_80199220[3];
-    func_8003e874();
-    DAT_801cd120.unk1 = 63;
-    DAT_801cd120.unk0 = 63;
-    DAT_801cd120.unk3 = 1;
-    DAT_801cd120.unk2 = 1;
-    DAT_801cd120.unk4 = 1;
-    DAT_801cd120.unk5 = 1;
-    DAT_801cd120.unk6 = 5;
-    DAT_801cd120.unk7 = 30;
-    DAT_801cd120.unk8 = 20;
-    viewer.unk21C = 0;
+    viewer.magic_buffers[0] = magic_model_buffers[0];
+    viewer.magic_buffers[1] = magic_model_buffers[1];
+    viewer.slot_model_files[0] = equipment_model_buffers[0];
+    viewer.slot_model_files[1] = equipment_model_buffers[1];
+    viewer.slot_model_files[2] = equipment_model_buffers[2];
+    viewer.slot_model_files[3] = equipment_model_buffers[3];
+    player_reset_new_game();
+    game_settings.sfx_volume = 63;
+    game_settings.bgm_volume = 63;
+    game_settings.show_status = 1;
+    game_settings.walk_bob = 1;
+    game_settings.subtitles = 1;
+    game_settings.vibration = 1;
+    game_settings.repeat_interval = 5;
+    game_settings.repeat_delay = 30;
+    game_settings.combo_window = 20;
+    viewer.update_all_spawns = 0;
 }
 
 ADDRESS(0x8003ead0, 0x28)
-void func_8003ead0(void)
+void player_stop_motion(void)
 {
-    viewer.unk2E4 = 0;
-    viewer.unk2E8 = 0;
-    viewer.unk2CA = 0;
-    viewer.unk2CC = 0;
-    viewer.unk2C8 = 0;
-    viewer.unk21E = 1;
+    viewer.walk_speed_max = 0;
+    viewer.yaw_speed_max = 0;
+    viewer.yaw_speed = 0;
+    viewer.pitch_speed = 0;
+    viewer.walk_speed = 0;
+    viewer.motion_stopped = 1;
 }
 
 ADDRESS(0x8003eaf8, 0x3c)
-void func_8003eaf8(void)
+void player_reset_motion(void)
 {
-    viewer.unk23C = 0;
-    viewer.unk21C = 1;
+    viewer.frame_count = 0;
+    viewer.update_all_spawns = 1;
     viewer.unk239 = 0;
-    viewer.unk2D4 = 0;
-    viewer.unk218 = 0;
-    func_8003ead0();
+    viewer.vertical_speed = 0;
+    viewer.state = 0;
+    player_stop_motion();
 }
 
-/* func_8003ebfc's distance to `pos` (height ignored) when the viewer is
+/* player_distance_within's distance to `pos` (height ignored) when the viewer is
  * within `limit` of facing `angle`, else -1. */
 ADDRESS(0x8003eb34, 0xc8)
-int func_8003eb34(VECTOR *pos, int angle, int range, int limit)
+int player_distance_in_arc(VECTOR *pos, int angle, int range, int limit)
 {
     int d;
     short a;
 
-    d = func_8003ebfc(pos->vx, 0xffff, pos->vz, range, 0);
+    d = player_distance_within(pos->vx, 0xffff, pos->vz, range, 0);
     if (d != -1) {
-        a = (func_8004a1b4(viewer.position.vx - pos->vx, viewer.position.vz - pos->vz) - angle) & 0xfff;
+        a = (angle_from_xz(viewer.position.vx - pos->vx, viewer.position.vz - pos->vz) - angle) & 0xfff;
         if (a > 2048) {
             a = 4096 - a;
         }
@@ -1308,9 +1308,9 @@ int func_8003eb34(VECTOR *pos, int angle, int range, int limit)
 }
 
 ADDRESS(0x8003ebfc, 0x50)
-int func_8003ebfc(int x, int y, int z, int range, int kind)
+int player_distance_within(int x, int y, int z, int range, int kind)
 {
-    return func_8004a580((VECTOR *)&viewer.position.vx, x, y, z, range, 1000, kind);
+    return vector_distance_xz_within_rev((VECTOR *)&viewer.position.vx, x, y, z, range, 1000, kind);
 }
 
 ADDRESS(0x8003ec4c, 0x10)
@@ -1325,7 +1325,7 @@ void func_8003ec4c(volatile u8 *p)
  * TIM's own position unless `absolute`.
  */
 ADDRESS(0x8003ec5c, 0x1dc)
-void func_8003ec5c(void *data, DVECTOR *pix, DVECTOR *clut, int absolute)
+void tim_load_images_at(void *data, DVECTOR *pix, DVECTOR *clut, int absolute)
 {
     typedef struct {
         u_long byte_count;
@@ -1413,7 +1413,7 @@ next:
 /* Loads item `id`'s parts and textures into item slot `slot` (0xffff:
  * empty), freeing the slot's old effects. */
 ADDRESS(0x8003ee38, 0x2f4)
-void func_8003ee38(u16 id, u8 slot)
+void player_load_magic(u16 id, u8 slot)
 {
     u8 item = 255;
     DVECTOR pix[2] = {{0, 0}, {64, 0}};
@@ -1428,66 +1428,66 @@ void func_8003ee38(u16 id, u8 slot)
     if (id != 0xffff) {
         item = id;
     }
-    if (viewer.unk14C[slot] != 255) {
+    if (viewer.magic_ids[slot] != 255) {
         rec = effects.slots;
         i = 128;
         while (i--) {
-            int side = rec->unk0;
+            int side = rec->flags;
 
             if (side != 255) {
                 side &= 0x20;
                 if ((side != 0) == slot) {
-                    if (rec->unk1 < 44) {
-                        rec->unk0 = 255;
+                    if (rec->kind < 44) {
+                        rec->flags = 255;
                     }
-                    if (rec->unk1 >= 170 && rec->unk1 < 180) {
-                        rec->unk0 = 255;
+                    if (rec->kind >= 170 && rec->kind < 180) {
+                        rec->flags = 255;
                     }
                 }
             }
             rec++;
         }
     }
-    viewer.unk14C[slot] = item;
+    viewer.magic_ids[slot] = item;
     if (item != 255) {
-        viewer.unk118[slot] = &effects.defs[item];
-        func_80016030(1, item * 4 + 740, (u_long *)viewer.unk120[slot]);
-        p = viewer.unk120[slot];
+        viewer.magic_defs[slot] = &effects.defs[item];
+        cd_read_member(1, item * 4 + 740, (u_long *)viewer.magic_buffers[slot]);
+        p = viewer.magic_buffers[slot];
         n = *(u16 *)p;
         p += 4;
         part = slot * 8 + 96;
         while (n--) {
             size = *(u_long *)p;
             if (size >= 5) {
-                world_state.unk834C[part] = p;
-                func_800177a0((Model *)(p + ((u_long *)p)[2]), &pix[slot], &clut[slot], 0);
+                world_state.model_files[part] = p;
+                model_offset_textures((Model *)(p + ((u_long *)p)[2]), &pix[slot], &clut[slot], 0);
             }
             p += size;
             part++;
         }
-        func_80016030(1, item * 4 + 741, DAT_80088c88);
-        func_8003ec5c(DAT_80088c88, &pix[slot], &clut[slot], 0);
+        cd_read_member(1, item * 4 + 741, cd_file_buffer);
+        tim_load_images_at(cd_file_buffer, &pix[slot], &clut[slot], 0);
         DrawSync(0);
-        func_80058a0c(1, item * 4 + 742, slot + 6);
+        sound_bank_load(1, item * 4 + 742, slot + 6);
     }
-    viewer.unk188 = 30;
-    viewer.unk182 = 0;
-    viewer.unk184 = 0;
-    viewer.unk13C[slot] = -1;
+    viewer.magic_gauge_delay = 30;
+    viewer.magic_gauge = 0;
+    viewer.cast_gauge = 0;
+    viewer.cast_request[slot] = -1;
     viewer.unk128[slot] = 0;
-    viewer.unk155[slot] = 255;
-    func_80015ad4();
+    viewer.shot_magic[slot] = 255;
+    cd_wait_idle();
 }
 
 /* Loads equipment `id`'s model and textures into model slot `slot` (0xffff:
  * empty); a two-handed model (31..34) also fills the paired slot. */
 ADDRESS(0x8003f12c, 0x3c0)
-void func_8003f12c(u16 id, u8 slot, u8 reload)
+void player_load_equipment_model(u16 id, u8 slot, u8 reload)
 {
     DVECTOR pix[4] = {{0, 0}, {64, 0}, {0, 128}, {64, 128}};
     DVECTOR clut[4] = {{0, 0}, {0, 2}, {0, 4}, {0, 6}};
     ScratchPad *sp;
-    Vis44 *item;
+    ItemType *item;
     u8 model;
     u8 cur;
     u8 paired;
@@ -1498,116 +1498,116 @@ void func_8003f12c(u16 id, u8 slot, u8 reload)
     other = 0;
     sp = SCRATCHPAD;
     if (id != 0xffff) {
-        item = &vis_table_c.unk0118[id];
-        model = item->unk4;
+        item = &vis_table_c.types[id];
+        model = item->model;
     } else {
         model = 255;
     }
-    viewer.unk187 = 15;
-    viewer.unk17E = 0;
-    viewer.unk180 = 0;
-    if (model != 255 && (cur = viewer.unk148[slot]) == model && reload) {
-        func_80016030(1, cur * 4 + 485, DAT_80088c88);
-        func_8003ec5c(DAT_80088c88, &pix[slot], &clut[slot], 0);
+    viewer.weapon_gauge_delay = 15;
+    viewer.weapon_gauge = 0;
+    viewer.swing_gauge = 0;
+    if (model != 255 && (cur = viewer.slot_model_ids[slot]) == model && reload) {
+        cd_read_member(1, cur * 4 + 485, cd_file_buffer);
+        tim_load_images_at(cd_file_buffer, &pix[slot], &clut[slot], 0);
         DrawSync(0);
     }
-    viewer.unk148[slot] = model;
+    viewer.slot_model_ids[slot] = model;
     if (model >= 31 && model <= 34) {
         paired = 1;
         other = model + 29;
     }
     if (model != 255) {
-        viewer.unkE8[slot] = &DAT_801b5220[model];
+        viewer.slot_model_info[slot] = &equipment_model_placements[model];
         if (paired) {
             pair = slot ^ 1;
-            viewer.unkE8[pair] = &DAT_801b5220[other];
-            func_80016030(1, model * 4 + 484, viewer.unkF8[slot]);
-            func_80016030(1, other * 4 + 484, viewer.unkF8[pair]);
-            anim_register(slot + 32, viewer.unkF8[slot]);
-            func_800177a0((Model *)sp->model, &pix[slot], &clut[slot], 0);
-            anim_register(pair + 32, viewer.unkF8[pair]);
+            viewer.slot_model_info[pair] = &equipment_model_placements[other];
+            cd_read_member(1, model * 4 + 484, viewer.slot_model_files[slot]);
+            cd_read_member(1, other * 4 + 484, viewer.slot_model_files[pair]);
+            anim_register(slot + 32, viewer.slot_model_files[slot]);
+            model_offset_textures((Model *)sp->model, &pix[slot], &clut[slot], 0);
+            anim_register(pair + 32, viewer.slot_model_files[pair]);
         } else {
-            func_80016030(1, model * 4 + 484, viewer.unkF8[slot]);
-            anim_register(slot + 32, viewer.unkF8[slot]);
-            func_800177a0((Model *)sp->model, &pix[slot], &clut[slot], 1);
+            cd_read_member(1, model * 4 + 484, viewer.slot_model_files[slot]);
+            anim_register(slot + 32, viewer.slot_model_files[slot]);
+            model_offset_textures((Model *)sp->model, &pix[slot], &clut[slot], 1);
         }
-        func_80016030(1, model * 4 + 485, DAT_80088c88);
-        func_8003ec5c(DAT_80088c88, &pix[slot], &clut[slot], 0);
+        cd_read_member(1, model * 4 + 485, cd_file_buffer);
+        tim_load_images_at(cd_file_buffer, &pix[slot], &clut[slot], 0);
         DrawSync(0);
-        func_80058a0c(1, model * 4 + 486, viewer.unk1D4[slot] - 22);
+        sound_bank_load(1, model * 4 + 486, viewer.slot_sounds[slot] - 22);
     }
     if (slot < 2) {
-        viewer.unk130.halves[slot] = -1;
+        viewer.action_timers.halves[slot] = -1;
     }
-    viewer.unk108[slot] = 0;
-    viewer.unk14E = 0;
-    viewer.unk14F = 0;
-    viewer.unk2DE = 0;
-    viewer.unk2E0 = 0;
-    viewer.unk2E2 = 0;
-    viewer.unk189 = 0;
-    func_80015ad4();
+    viewer.slot_anims[slot] = 0;
+    viewer.action_recoil = 0;
+    viewer.shield_lowering = 0;
+    viewer.hand_rot_x = 0;
+    viewer.hand_rot_y = 0;
+    viewer.hand_rot_z = 0;
+    viewer.shield_raised = 0;
+    cd_wait_idle();
 }
 
 /* Starts model slot `slot`'s action animation when it is idle. */
 ADDRESS(0x8003f4ec, 0x184)
-void func_8003f4ec(u8 value, u8 slot)
+void player_start_hand_action(u8 value, u8 slot)
 {
     if (slot == 0) {
-        if (viewer.unk130.halves[0] != -1) {
+        if (viewer.action_timers.halves[0] != -1) {
             return;
         }
-        if (viewer.unk130.halves[1] >= 2048 && !viewer.unk14F) {
+        if (viewer.action_timers.halves[1] >= 2048 && !viewer.shield_lowering) {
             return;
         }
-        if (viewer.unk148[0] == 255) {
+        if (viewer.slot_model_ids[0] == 255) {
             return;
         }
         if (viewer.unk190[1][0] != 0) {
             return;
         }
-        viewer.unk150[0] = value;
-        viewer.unk130.halves[0] = 0;
-        viewer.unk154 = 1;
-        DAT_801cd180.unk4 &= ~DAT_801cd180.unk22[8];
-        viewer.unk130.halves[2] = viewer.unkE8[0]->unk6;
-        viewer.unk138[0] = viewer.unkE8[0]->unk8;
-        viewer.unk187 = 15;
+        viewer.slot_anim_ids[0] = value;
+        viewer.action_timers.halves[0] = 0;
+        viewer.action_started = 1;
+        pad_state.pressed &= ~pad_state.buttons[8];
+        viewer.action_timers.halves[2] = viewer.slot_model_info[0]->hit_time;
+        viewer.action_sound_time[0] = viewer.slot_model_info[0]->sound_time;
+        viewer.weapon_gauge_delay = 15;
     } else {
-        if (viewer.unk130.halves[slot] != -1 || viewer.unk130.halves[0] != -1) {
+        if (viewer.action_timers.halves[slot] != -1 || viewer.action_timers.halves[0] != -1) {
             return;
         }
-        if (viewer.unk13C[slot] != -1 || viewer.unk13C[0] != -1) {
+        if (viewer.cast_request[slot] != -1 || viewer.cast_request[0] != -1) {
             return;
         }
-        if (viewer.unk148[slot] == 255) {
+        if (viewer.slot_model_ids[slot] == 255) {
             return;
         }
         if (viewer.unk190[1][0] != 0) {
             return;
         }
-        DAT_801cd180.unk4 &= ~DAT_801cd180.unk22[9];
-        viewer.unk150[slot] = value;
-        viewer.unk130.halves[slot] = 0;
-        viewer.unk154 = 1;
-        viewer.unk130.halves[slot + 2] = viewer.unkE8[slot]->unk6;
-        viewer.unk138[slot] = viewer.unkE8[slot]->unk8;
+        pad_state.pressed &= ~pad_state.buttons[9];
+        viewer.slot_anim_ids[slot] = value;
+        viewer.action_timers.halves[slot] = 0;
+        viewer.action_started = 1;
+        viewer.action_timers.halves[slot + 2] = viewer.slot_model_info[slot]->hit_time;
+        viewer.action_sound_time[slot] = viewer.slot_model_info[slot]->sound_time;
     }
 }
 
 /* Starts item slot `slot`'s use when both model slots are idle. */
 ADDRESS(0x8003f670, 0x94)
-void func_8003f670(u8 unused, u8 slot)
+void player_start_cast(u8 unused, u8 slot)
 {
     Viewer *v;
 
     v = &viewer;
-    if (*(s32 *)v->unk13C == -1 && v->unk130.word == -1 && v->unk14C[slot] != 255 &&
-        !(v->unk2C & 0x10) && (!v->unk1CB || v->unk190[12][0] != 0)) {
-        v->unk13C[slot] = 0;
-        v->unk184 = v->unk182;
-        v->unk182 = 0;
-        v->unk188 = 30;
+    if (*(s32 *)v->cast_request == -1 && v->action_timers.word == -1 && v->magic_ids[slot] != 255 &&
+        !(v->status_flags & 0x10) && (!v->blocks_magic || v->unk190[12][0] != 0)) {
+        v->cast_request[slot] = 0;
+        v->cast_gauge = v->magic_gauge;
+        v->magic_gauge = 0;
+        v->magic_gauge_delay = 30;
     }
 }
 
@@ -1617,11 +1617,11 @@ void func_8003f670(u8 unused, u8 slot)
  * viewer's facing when `rot` is null).
  */
 ADDRESS(0x8003f704, 0x20c)
-int func_8003f704(int length, VECTOR *pos, SVECTOR *dir, SVECTOR *rot, int slot)
+int player_get_launch_vector(int length, VECTOR *pos, SVECTOR *dir, SVECTOR *rot, int slot)
 {
     if (pos) {
-        gte_SetRotMatrix(&viewer.unk298);
-        gte_ldv0(&viewer.unk160[slot]);
+        gte_SetRotMatrix(&viewer.camera_matrix);
+        gte_ldv0(&viewer.shot_offsets[slot]);
         gte_rtv0();
         gte_stlvnl(pos);
         pos->vx += viewer.position.vx;
@@ -1640,18 +1640,18 @@ int func_8003f704(int length, VECTOR *pos, SVECTOR *dir, SVECTOR *rot, int slot)
             gte_ldv0(&v);
             gte_rtv0();
             gte_stsv(dir);
-            func_8004a0f8(length, dir);
+            vector_scale(length, dir);
         }
     } else if (dir) {
         SVECTOR v;
 
         memset(&v, 0, sizeof(v));
         v.vz = 4096;
-        gte_SetRotMatrix(&viewer.unk298);
+        gte_SetRotMatrix(&viewer.camera_matrix);
         gte_ldv0(&v);
         gte_rtv0();
         gte_stsv(dir);
-        func_8004a0f8(length, dir);
+        vector_scale(length, dir);
     }
     return 0;
 }
@@ -1662,7 +1662,7 @@ int func_8003f704(int length, VECTOR *pos, SVECTOR *dir, SVECTOR *rot, int slot)
  * `kind`, so kind lives in its home slot: retail reads its low byte back
  * (lbu 128(sp)) for each effect request. */
 ADDRESS(0x8003f910, 0x714)
-void func_8003f910(int kind, int slot, ...)
+void player_fire_magic_shot(int kind, int slot, ...)
 {
     VECTOR pos;
     VECTOR pos2;
@@ -1681,7 +1681,7 @@ void func_8003f910(int kind, int slot, ...)
     va_start(ap, kind);
     side = slot << 5;
     sp = SCRATCHPAD;
-    count = viewer.unk157[slot] - 1;
+    count = viewer.shots_left[slot] - 1;
     switch (kind) {
     case 0:
         speed = 4096;
@@ -1689,22 +1689,22 @@ void func_8003f910(int kind, int slot, ...)
     case 10:
         speed = 2048;
     shoot:
-        rot.vx = viewer.unk270.vx;
-        rot.vy = viewer.unk270.vy;
-        rot.vz = viewer.unk270.vz;
-        func_8003f704(700, &pos, &dir, &rot, slot);
-        func_80036484(10, side | 0x42, kind, &pos, &dir, speed, &viewer.unk268);
+        rot.vx = viewer.camera_rot.vx;
+        rot.vy = viewer.camera_rot.vy;
+        rot.vz = viewer.camera_rot.vz;
+        player_get_launch_vector(700, &pos, &dir, &rot, slot);
+        effect_spawn(10, side | 0x42, kind, &pos, &dir, speed, &viewer.pitch);
         break;
     case 7:
         i = 2;
         while (i--) {
             length = i * 32 - 16;
-            aim.vx = viewer.unk270.vx - 512;
-            aim.vy = viewer.unk270.vy + length;
-            aim.vz = viewer.unk270.vz;
-            func_8003f704(700, &pos, &dir, &aim, slot);
-            func_80036484(10, side | 0x42, kind, &pos, &dir, 1024, &viewer.unk268);
-            viewer.unk160[slot].vx += 1024;
+            aim.vx = viewer.camera_rot.vx - 512;
+            aim.vy = viewer.camera_rot.vy + length;
+            aim.vz = viewer.camera_rot.vz;
+            player_get_launch_vector(700, &pos, &dir, &aim, slot);
+            effect_spawn(10, side | 0x42, kind, &pos, &dir, 1024, &viewer.pitch);
+            viewer.shot_offsets[slot].vx += 1024;
         }
         break;
     case 1:
@@ -1752,24 +1752,24 @@ void func_8003f910(int kind, int slot, ...)
         turn = 0;
         speed = 1024;
     spray:
-        rot.vx = viewer.unk270.vx;
-        rot.vy = viewer.unk270.vy + turn;
-        rot.vz = viewer.unk270.vz;
-        func_8003f704(length, &pos, &dir, &rot, slot);
-        rot.vx = viewer.unk270.vx;
-        rot.vy = -viewer.unk270.vy;
-        rot.vz = -viewer.unk270.vz;
-        func_80036484(10, side | 0x42, kind, &pos, &dir, speed, &rot, count);
+        rot.vx = viewer.camera_rot.vx;
+        rot.vy = viewer.camera_rot.vy + turn;
+        rot.vz = viewer.camera_rot.vz;
+        player_get_launch_vector(length, &pos, &dir, &rot, slot);
+        rot.vx = viewer.camera_rot.vx;
+        rot.vy = -viewer.camera_rot.vy;
+        rot.vz = -viewer.camera_rot.vz;
+        effect_spawn(10, side | 0x42, kind, &pos, &dir, speed, &rot, count);
         break;
     case 44:
     case 45:
     case 46:
     case 47:
-        anim_get_vertex(32, viewer.unk150[0], viewer.unkE8[0]->unk6, viewer.unkE8[0]->unk12, &dir);
-        sp->model_t[0] = viewer.unkE8[slot]->unkC;
-        sp->model_t[1] = viewer.unkE8[slot]->unkE;
-        sp->model_t[2] = viewer.unkE8[slot]->unk10;
-        RotMatrix(&viewer.unkE8[slot]->unk14, PLAYER_MATRIX(sp));
+        anim_get_vertex(32, viewer.slot_anim_ids[0], viewer.slot_model_info[0]->hit_time, viewer.slot_model_info[0]->shot_vertex, &dir);
+        sp->model_t[0] = viewer.slot_model_info[slot]->pos_x;
+        sp->model_t[1] = viewer.slot_model_info[slot]->pos_y;
+        sp->model_t[2] = viewer.slot_model_info[slot]->pos_z;
+        RotMatrix(&viewer.slot_model_info[slot]->rotation, PLAYER_MATRIX(sp));
         gte_SetRotMatrix(PLAYER_MATRIX(sp));
         gte_SetTransMatrix(PLAYER_MATRIX(sp));
         gte_ldv0(&dir);
@@ -1778,7 +1778,7 @@ void func_8003f910(int kind, int slot, ...)
         dir.vx = pos.vx;
         dir.vy = pos.vy;
         dir.vz = pos.vz;
-        rot = viewer.unk270;
+        rot = viewer.camera_rot;
         sp->model_t[0] = viewer.position.vx;
         sp->model_t[1] = viewer.position.vy;
         sp->model_t[2] = viewer.position.vz;
@@ -1788,11 +1788,11 @@ void func_8003f910(int kind, int slot, ...)
         gte_ldv0(&dir);
         gte_rt();
         gte_stlvnl(&pos);
-        anim_get_vertex(32, viewer.unk150[0], viewer.unkE8[0]->unk6, viewer.unkE8[0]->unk14.pad, &dir);
-        sp->model_t[0] = viewer.unkE8[slot]->unkC;
-        sp->model_t[1] = viewer.unkE8[slot]->unkE;
-        sp->model_t[2] = viewer.unkE8[slot]->unk10;
-        RotMatrix(&viewer.unkE8[slot]->unk14, PLAYER_MATRIX(sp));
+        anim_get_vertex(32, viewer.slot_anim_ids[0], viewer.slot_model_info[0]->hit_time, viewer.slot_model_info[0]->rotation.pad, &dir);
+        sp->model_t[0] = viewer.slot_model_info[slot]->pos_x;
+        sp->model_t[1] = viewer.slot_model_info[slot]->pos_y;
+        sp->model_t[2] = viewer.slot_model_info[slot]->pos_z;
+        RotMatrix(&viewer.slot_model_info[slot]->rotation, PLAYER_MATRIX(sp));
         gte_SetRotMatrix(PLAYER_MATRIX(sp));
         gte_SetTransMatrix(PLAYER_MATRIX(sp));
         gte_ldv0(&dir);
@@ -1801,7 +1801,7 @@ void func_8003f910(int kind, int slot, ...)
         dir.vx = pos2.vx;
         dir.vy = pos2.vy;
         dir.vz = pos2.vz;
-        rot = viewer.unk270;
+        rot = viewer.camera_rot;
         sp->model_t[0] = viewer.position.vx;
         sp->model_t[1] = viewer.position.vy;
         sp->model_t[2] = viewer.position.vz;
@@ -1811,81 +1811,81 @@ void func_8003f910(int kind, int slot, ...)
         gte_ldv0(&dir);
         gte_rt();
         gte_stlvnl(&pos2);
-        func_8004a40c(pos.vx - pos2.vx, pos.vy - pos2.vy, pos.vz - pos2.vz, &rot);
-        func_80049fe4(&rot, &dir);
+        vector_to_angles_ratan2(pos.vx - pos2.vx, pos.vy - pos2.vy, pos.vz - pos2.vz, &rot);
+        vector_from_angles_zyx(&rot, &dir);
         if (kind == 44) {
-            func_8004a0f8(viewer.unk180 * 768 / 5120, &dir);
+            vector_scale(viewer.swing_gauge * 768 / 5120, &dir);
         } else {
-            func_8004a0f8(viewer.unk180 * 1024 / 5120, &dir);
+            vector_scale(viewer.swing_gauge * 1024 / 5120, &dir);
         }
         pos.vx = pos2.vx;
-        pos.vy = pos2.vy + viewer.unk2CE + viewer.unk2D2;
+        pos.vy = pos2.vy + viewer.bob_offset + viewer.unk2D2;
         pos.vz = pos2.vz;
-        func_80036484(10, side | 0x42, kind, &pos, &dir, &rot, viewer.unk180);
+        effect_spawn(10, side | 0x42, kind, &pos, &dir, &rot, viewer.swing_gauge);
         break;
     }
 }
 
 /* Per hand: starts the queued magic, or recovers the second bar. */
 ADDRESS(0x80040024, 0x288)
-void func_80040024(u8 hand)
+void player_update_cast(u8 hand)
 {
-    Vis44 *item;
+    ItemType *item;
     int active;
     int rate = 36;
 
-    if (viewer.unk13C[hand] != -1) {
+    if (viewer.cast_request[hand] != -1) {
         if (hand) {
-            if (viewer.unk38[13] != 0xffff) {
-                item = &vis_table_c.unk0118[viewer.unk38[13]];
-                if (item->unk28)
-                    func_80040f04(viewer.unk14C[hand], hand);
+            if (viewer.equipment[13] != 0xffff) {
+                item = &vis_table_c.types[viewer.equipment[13]];
+                if (item->durability)
+                    player_cast_magic(viewer.magic_ids[hand], hand);
             }
         } else {
-            if (viewer.unk38[0] != 0xffff) {
-                item = &vis_table_c.unk0118[viewer.unk38[0]];
-                if (item->unk28)
-                    func_80040f04(viewer.unk14C[0], 0);
+            if (viewer.equipment[0] != 0xffff) {
+                item = &vis_table_c.types[viewer.equipment[0]];
+                if (item->durability)
+                    player_cast_magic(viewer.magic_ids[0], 0);
             }
         }
-        viewer.unk13C[hand] = -1;
+        viewer.cast_request[hand] = -1;
         return;
     }
     active = 0;
-    if (viewer.unk38[0] != 0xffff) {
-        item = &vis_table_c.unk0118[viewer.unk38[0]];
-        if (item->unk28)
-            active = viewer.unk38[6] != 0xffff;
+    if (viewer.equipment[0] != 0xffff) {
+        item = &vis_table_c.types[viewer.equipment[0]];
+        if (item->durability)
+            active = viewer.equipment[6] != 0xffff;
     }
-    if (viewer.unk38[13] != 0xffff) {
-        item = &vis_table_c.unk0118[viewer.unk38[13]];
-        if (item->unk28 && viewer.unk38[12] != 0xffff)
+    if (viewer.equipment[13] != 0xffff) {
+        item = &vis_table_c.types[viewer.equipment[13]];
+        if (item->durability && viewer.equipment[12] != 0xffff)
             active = 1;
     }
-    if (!viewer.unk1CB || viewer.unk190[12][0] != 0) {
+    if (!viewer.blocks_magic || viewer.unk190[12][0] != 0) {
         if (!active)
             return;
-        if (viewer.unk188 == 0) {
-            viewer.unk182 += (viewer.unk62[8] / (viewer.unk62[8] + 1000) * rate + 36) << 1;
-            if (viewer.unk182 > 5120)
-                viewer.unk182 = 5120;
+        if (viewer.magic_gauge_delay == 0) {
+            viewer.magic_gauge += (viewer.attributes[8] / (viewer.attributes[8] + 1000) * rate + 36) << 1;
+            if (viewer.magic_gauge > 5120)
+                viewer.magic_gauge = 5120;
         } else {
-            viewer.unk188--;
+            viewer.magic_gauge_delay--;
         }
     } else {
-        if (viewer.unk182 - 128 > 0)
-            viewer.unk182 -= 128;
+        if (viewer.magic_gauge - 128 > 0)
+            viewer.magic_gauge -= 128;
         else
-            viewer.unk182 = 0;
+            viewer.magic_gauge = 0;
     }
 }
 
 /* Steps hand `hand`'s swing or cast for its held item kind: the swing
- * timer viewer.unk130.halves[hand] against its hit window (unk130[hand + 2]) and
- * its end (unk138[hand]), the stamina bar viewer.unk17E, the hit search
+ * timer viewer.action_timers.halves[hand] against its hit window (action_timers.halves[hand + 2]) and
+ * its end (action_sound_time[hand]), the weapon gauge viewer.weapon_gauge, the hit search
  * over vis_table_a's entries and the item wear.
  *
- * The step and the stamina gain are loaded and then scaled in place
+ * The step and the gauge gain are loaded and then scaled in place
  * (`x = base; x += x * skill / n`): retail multiplies by the register
  * that holds 96 instead of shifting, and keeps the raw argument in a0.
  * In case 0..30 retail keeps the step's add ahead of the pad address
@@ -1896,19 +1896,19 @@ void func_80040024(u8 hand)
  * The unused locals stand for stack retail reserves and never touches:
  * 24 bytes after sv, 32 after v and 8 after p. */
 ADDRESS(0x800402ac, 0xc58)
-void func_800402ac(u8 hand)
+void player_update_hand_action(u8 hand)
 {
-    ViewerModel *rec;
+    EquipmentModel *rec;
     SVECTOR sv;
     VECTOR unused1;
     SVECTOR unused2;
     VECTOR v;
     MATRIX unused3;
-    VisRequest req;
+    CollisionRequest req;
     VECTOR p;
     SVECTOR unused4;
-    Vis212 *e;
-    Vis212 *hit;
+    Creature *e;
+    Creature *hit;
     int d;
     int i;
     int r;
@@ -1918,43 +1918,43 @@ void func_800402ac(u8 hand)
     int reach;
     int inc;
     int kind;
-    Vis192 *def;
+    CreatureType *def;
 
-    rec = viewer.unkE8[hand];
-    switch (viewer.unk148[hand]) {
+    rec = viewer.slot_model_info[hand];
+    switch (viewer.slot_model_ids[hand]) {
     case 36 ... 54: {
         int cost;
-        if (viewer.unk2DE != 0) {
-            viewer.unk2DE >>= 1;
+        if (viewer.hand_rot_x != 0) {
+            viewer.hand_rot_x >>= 1;
         }
-        if (viewer.unk2E2 != 0) {
-            viewer.unk2E2 >>= 1;
+        if (viewer.hand_rot_z != 0) {
+            viewer.hand_rot_z >>= 1;
         }
-        if (viewer.unk2E0 != 0) {
-            viewer.unk2E0 -= viewer.unk2E0 / 20;
+        if (viewer.hand_rot_y != 0) {
+            viewer.hand_rot_y -= viewer.hand_rot_y / 20;
         }
-        if (viewer.unk130.halves[hand] == -1) {
+        if (viewer.action_timers.halves[hand] == -1) {
             break;
         }
-        cost = rec->unk4;
-        cost += cost * viewer.unk62[1] / 1600;
-        if (viewer.unk130.halves[hand ^ 1] != -1) {
-            viewer.unk14F = 1;
+        cost = rec->action_step;
+        cost += cost * viewer.attributes[1] / 1600;
+        if (viewer.action_timers.halves[hand ^ 1] != -1) {
+            viewer.shield_lowering = 1;
         }
-        if (viewer.unk14F) {
-            viewer.unk130.halves[hand] -= cost;
-        } else if ((!(DAT_801cd180.unk2 & DAT_801cd180.unk22[8]) && hand == 0) ||
-                   (!(DAT_801cd180.unk2 & DAT_801cd180.unk22[9]) && hand != 0)) {
-            viewer.unk130.halves[hand] -= cost;
-            viewer.unk189 = 0;
-        } else if (viewer.unk130.halves[hand + 2] - cost < viewer.unk130.halves[hand] &&
-                   viewer.unk130.halves[hand] <= viewer.unk130.halves[hand + 2]) {
-            viewer.unk189 = 1;
+        if (viewer.shield_lowering) {
+            viewer.action_timers.halves[hand] -= cost;
+        } else if ((!(pad_state.held & pad_state.buttons[8]) && hand == 0) ||
+                   (!(pad_state.held & pad_state.buttons[9]) && hand != 0)) {
+            viewer.action_timers.halves[hand] -= cost;
+            viewer.shield_raised = 0;
+        } else if (viewer.action_timers.halves[hand + 2] - cost < viewer.action_timers.halves[hand] &&
+                   viewer.action_timers.halves[hand] <= viewer.action_timers.halves[hand + 2]) {
+            viewer.shield_raised = 1;
             sv.vx = 0;
             sv.vy = 0;
-            sv.vz = rec->unk2 << 1;
-            ApplyMatrix(&viewer.unk298, &sv, &v);
-            v.vy = v.vy * (3600 - rec->unk2) / 1800;
+            sv.vz = rec->reach << 1;
+            ApplyMatrix(&viewer.camera_matrix, &sv, &v);
+            v.vy = v.vy * (3600 - rec->reach) / 1800;
             v.vx /= 4;
             v.vy /= 4;
             v.vz /= 4;
@@ -1967,12 +1967,12 @@ void func_800402ac(u8 hand)
                 p.vx += v.vx;
                 p.vy += v.vy;
                 p.vz += v.vz;
-                req.unk4 = p;
-                req.unk1C = 1024;
-                req.unk1E = 1024;
-                r = func_8004bb88((VisLists *)&req, 4);
+                req.position = p;
+                req.radius = 1024;
+                req.height = 1024;
+                r = creature_find_in_reach((CollisionState *)&req, 4);
                 if (r != -1) {
-                    d = viewer.unk26A - (short)vis_table_a.entries[r].unk56;
+                    d = viewer.yaw - (short)vis_table_a.entries[r].player_heading;
                     if (d > 2048) {
                         d -= 4096;
                     }
@@ -1982,176 +1982,176 @@ void func_800402ac(u8 hand)
                 }
             }
             if (d != 0xffff) {
-                viewer.unk2E0 += (d - viewer.unk2E0) / 4;
+                viewer.hand_rot_y += (d - viewer.hand_rot_y) / 4;
             }
-        } else if (viewer.unk154) {
-            viewer.unk154 = 0;
+        } else if (viewer.action_started) {
+            viewer.action_started = 0;
         } else {
-            viewer.unk130.halves[hand] += cost;
+            viewer.action_timers.halves[hand] += cost;
         }
-        if ((u16)viewer.unk130.halves[hand] > 4095) {
-            viewer.unk130.halves[hand] = -1;
-            viewer.unk14F = 0;
-            viewer.unk2DE = 0;
-            viewer.unk2E0 = 0;
-            viewer.unk2E2 = 0;
+        if ((u16)viewer.action_timers.halves[hand] > 4095) {
+            viewer.action_timers.halves[hand] = -1;
+            viewer.shield_lowering = 0;
+            viewer.hand_rot_x = 0;
+            viewer.hand_rot_y = 0;
+            viewer.hand_rot_z = 0;
         }
         break;
     }
     case 31 ... 34: {
         int cost;
-        if (viewer.unk130.halves[hand] != -1) {
-            cost = rec->unk4;
-            cost += cost * viewer.unk62[1] / 1600;
-            if (viewer.unk21F) {
-                if (viewer.unk138[hand] - cost >= viewer.unk130.halves[hand]) {
-                    viewer.unk130.halves[hand] -= cost;
+        if (viewer.action_timers.halves[hand] != -1) {
+            cost = rec->action_step;
+            cost += cost * viewer.attributes[1] / 1600;
+            if (viewer.bow_released) {
+                if (viewer.action_sound_time[hand] - cost >= viewer.action_timers.halves[hand]) {
+                    viewer.action_timers.halves[hand] -= cost;
                 } else {
-                    viewer.unk130.halves[hand] += cost;
-                    if (viewer.unk130.halves[hand] > viewer.unk130.halves[hand + 2] &&
-                        viewer.unk130.halves[hand] <= viewer.unk130.halves[hand + 2] + cost) {
-                        kind = viewer.unk148[hand] + 13;
-                        func_800582f0((viewer.unk1D4[hand] - 24) / 2 + 22, 128);
-                        viewer.unk130.halves[hand] -= cost;
-                        func_80040f04(kind, hand);
-                        viewer.unk130.halves[hand] += cost;
+                    viewer.action_timers.halves[hand] += cost;
+                    if (viewer.action_timers.halves[hand] > viewer.action_timers.halves[hand + 2] &&
+                        viewer.action_timers.halves[hand] <= viewer.action_timers.halves[hand + 2] + cost) {
+                        kind = viewer.slot_model_ids[hand] + 13;
+                        sound_play((viewer.slot_sounds[hand] - 24) / 2 + 22, 128);
+                        viewer.action_timers.halves[hand] -= cost;
+                        player_cast_magic(kind, hand);
+                        viewer.action_timers.halves[hand] += cost;
                     }
                 }
-            } else if ((!(DAT_801cd180.unk2 & DAT_801cd180.unk22[8]) && hand == 0) ||
-                       (!(DAT_801cd180.unk2 & DAT_801cd180.unk22[9]) && hand != 0)) {
-                viewer.unk21F = 1;
-                viewer.unk180 = viewer.unk17E;
-                viewer.unk17E = 0;
-            } else if (viewer.unk130.halves[hand + 2] - cost < viewer.unk130.halves[hand] &&
-                       viewer.unk130.halves[hand] <= viewer.unk130.halves[hand + 2]) {
+            } else if ((!(pad_state.held & pad_state.buttons[8]) && hand == 0) ||
+                       (!(pad_state.held & pad_state.buttons[9]) && hand != 0)) {
+                viewer.bow_released = 1;
+                viewer.swing_gauge = viewer.weapon_gauge;
+                viewer.weapon_gauge = 0;
+            } else if (viewer.action_timers.halves[hand + 2] - cost < viewer.action_timers.halves[hand] &&
+                       viewer.action_timers.halves[hand] <= viewer.action_timers.halves[hand + 2]) {
                 inc = 96;
-                inc += viewer.unk62[1] * inc / 800;
-                viewer.unk17E += inc * 2;
-                if (viewer.unk17E > 5120) {
-                    viewer.unk17E = 5120;
+                inc += viewer.attributes[1] * inc / 800;
+                viewer.weapon_gauge += inc * 2;
+                if (viewer.weapon_gauge > 5120) {
+                    viewer.weapon_gauge = 5120;
                 }
-            } else if (viewer.unk130.halves[hand] == 0 && viewer.unk154) {
-                viewer.unk154 = 0;
-                viewer.unk21F = 0;
+            } else if (viewer.action_timers.halves[hand] == 0 && viewer.action_started) {
+                viewer.action_started = 0;
+                viewer.bow_released = 0;
             } else {
                 {
                 int gain = 96;
-                gain += viewer.unk62[1] * gain / 800;
-                viewer.unk17E += gain;
+                gain += viewer.attributes[1] * gain / 800;
+                viewer.weapon_gauge += gain;
                 }
-                if (viewer.unk17E > 5120) {
-                    viewer.unk17E = 5120;
+                if (viewer.weapon_gauge > 5120) {
+                    viewer.weapon_gauge = 5120;
                 }
-                viewer.unk130.halves[hand] += cost;
-                if (viewer.unk130.halves[hand] > viewer.unk138[hand] - cost &&
-                    viewer.unk130.halves[hand] <= viewer.unk138[hand]) {
-                    func_800582f0(viewer.unk1D4[hand], 128);
-                    player_wear_item(1, &viewer.unk38[3]);
+                viewer.action_timers.halves[hand] += cost;
+                if (viewer.action_timers.halves[hand] > viewer.action_sound_time[hand] - cost &&
+                    viewer.action_timers.halves[hand] <= viewer.action_sound_time[hand]) {
+                    sound_play(viewer.slot_sounds[hand], 128);
+                    player_wear_item(1, &viewer.equipment[3]);
                 }
             }
-            if ((u16)viewer.unk130.halves[hand] > 4095) {
-                viewer.unk130.halves[hand] = -1;
-                viewer.unk14E = 0;
-                viewer.unk21F = 0;
+            if ((u16)viewer.action_timers.halves[hand] > 4095) {
+                viewer.action_timers.halves[hand] = -1;
+                viewer.action_recoil = 0;
+                viewer.bow_released = 0;
             }
-            viewer.unk130.halves[hand ^ 1] = viewer.unk130.halves[hand];
+            viewer.action_timers.halves[hand ^ 1] = viewer.action_timers.halves[hand];
         } else {
-            viewer.unk187 = 0;
+            viewer.weapon_gauge_delay = 0;
         }
         break;
     }
     case 0 ... 30: {
         int cost;
         int max;
-        Data801cd180 *pad;
-        if (viewer.unk130.halves[hand] != -1) {
+        PadState *pad;
+        if (viewer.action_timers.halves[hand] != -1) {
             do {
-                cost = rec->unk4;
-                cost += cost * viewer.unk62[1] / 1600;
+                cost = rec->action_step;
+                cost += cost * viewer.attributes[1] / 1600;
             } while (0);
-            pad = &DAT_801cd180;
-            max = rec->unk8;
-            if (pad->unk4 & pad->unk22[8]) {
-                pad->unk4 &= ~pad->unk22[8];
+            pad = &pad_state;
+            max = rec->sound_time;
+            if (pad->pressed & pad->buttons[8]) {
+                pad->pressed &= ~pad->buttons[8];
             }
-            if (viewer.unk14E && !(viewer.unk130.halves[hand + 2] - cost < viewer.unk130.halves[hand])) {
-                viewer.unk130.halves[hand] -= cost;
-            } else if (viewer.unk154) {
-                viewer.unk180 = viewer.unk17E;
-                viewer.unk17E = 0;
-                viewer.unk154 = 0;
+            if (viewer.action_recoil && !(viewer.action_timers.halves[hand + 2] - cost < viewer.action_timers.halves[hand])) {
+                viewer.action_timers.halves[hand] -= cost;
+            } else if (viewer.action_started) {
+                viewer.swing_gauge = viewer.weapon_gauge;
+                viewer.weapon_gauge = 0;
+                viewer.action_started = 0;
             } else {
-                viewer.unk130.halves[hand] += cost;
+                viewer.action_timers.halves[hand] += cost;
             }
-            if (viewer.unk138[hand] - cost < viewer.unk130.halves[hand] &&
-                viewer.unk130.halves[hand] <= viewer.unk138[hand]) {
-                func_800582f0(viewer.unk1D4[hand], 128);
-                if (viewer.unk138[hand] >= max) {
-                    viewer.unk138[hand] = 5000;
+            if (viewer.action_sound_time[hand] - cost < viewer.action_timers.halves[hand] &&
+                viewer.action_timers.halves[hand] <= viewer.action_sound_time[hand]) {
+                sound_play(viewer.slot_sounds[hand], 128);
+                if (viewer.action_sound_time[hand] >= max) {
+                    viewer.action_sound_time[hand] = 5000;
                 } else {
-                    viewer.unk138[hand] = viewer.unk138[hand];
+                    viewer.action_sound_time[hand] = viewer.action_sound_time[hand];
                 }
             }
-            if (viewer.unk148[hand] < 36 || viewer.unk148[hand] > 254) {
-                if (viewer.unk130.halves[hand + 2] - cost < viewer.unk130.halves[hand] &&
-                    viewer.unk130.halves[hand] <= viewer.unk130.halves[hand + 2]) {
+            if (viewer.slot_model_ids[hand] < 36 || viewer.slot_model_ids[hand] > 254) {
+                if (viewer.action_timers.halves[hand + 2] - cost < viewer.action_timers.halves[hand] &&
+                    viewer.action_timers.halves[hand] <= viewer.action_timers.halves[hand + 2]) {
                     int side;
                     e = vis_table_a.entries;
                     best = -1;
                     hit = NULL;
                     hr = 0;
                     dmg = 0;
-                    reach = viewer.unkE8[hand]->unk2;
-                    for (vis_table_a.unk6144 = 0; vis_table_a.unk6144 < 64; vis_table_a.unk6144++, e++) {
-                        if (e->unk00 != 255) {
-                            func_8004c03c(e);
-                            if (e->unk05 == 1 && e->unk1C.bytes[3] != 1 && e->unk2C != 0 &&
-                                (side = func_8004db9c(e, reach)) != 0 && e->unk3C < best) {
-                                best = e->unk3C;
+                    reach = viewer.slot_model_info[hand]->reach;
+                    for (vis_table_a.current_index = 0; vis_table_a.current_index < 64; vis_table_a.current_index++, e++) {
+                        if (e->spawn_chance != 255) {
+                            creature_set_current(e);
+                            if (e->state == 1 && e->status.bytes[3] != 1 && e->hp != 0 &&
+                                (side = creature_test_player_aim(e, reach)) != 0 && e->player_dist_sq < best) {
+                                best = e->player_dist_sq;
                                 hit = e;
                                 hr = side;
                             }
                         }
                     }
                     if (hit != NULL) {
-                        dmg = func_8004def8(hit, hr, viewer.unk180, viewer.unkBA, 0);
-                        func_80026a88(dmg);
+                        dmg = creature_take_damage(hit, hr, viewer.swing_gauge, viewer.weapon_attack, 0);
+                        hud_queue_damage_number(dmg);
                     }
                     if (hr != 0 && dmg != -1) {
-                        def = &vis_table_a.unk3500[hit->unk02];
-                        if (dmg * 4 < def->unk32) {
-                            viewer.unk21B += 3;
-                        } else if (dmg * 2 < def->unk32) {
-                            viewer.unk21B += 2;
-                        } else if (dmg < def->unk32) {
-                            viewer.unk21B += 1;
+                        def = &vis_table_a.types[hit->type];
+                        if (dmg * 4 < def->max_hp) {
+                            viewer.weapon_wear += 3;
+                        } else if (dmg * 2 < def->max_hp) {
+                            viewer.weapon_wear += 2;
+                        } else if (dmg < def->max_hp) {
+                            viewer.weapon_wear += 1;
                         }
-                        if (viewer.unk21B >= 7) {
-                            viewer.unk21B -= 7;
-                            player_wear_item(1, &viewer.unk38[3]);
+                        if (viewer.weapon_wear >= 7) {
+                            viewer.weapon_wear -= 7;
+                            player_wear_item(1, &viewer.equipment[3]);
                         }
                     }
                 }
-                if ((u16)viewer.unk130.halves[hand] > 4095) {
-                    viewer.unk130.halves[hand] = -1;
-                    viewer.unk14E = 0;
+                if ((u16)viewer.action_timers.halves[hand] > 4095) {
+                    viewer.action_timers.halves[hand] = -1;
+                    viewer.action_recoil = 0;
                 }
             }
         } else {
-            viewer.unk14E = 0;
-            if (!(DAT_801cd180.unk2 & DAT_801cd180.unk22[8])) {
-                if (viewer.unk187 == 0) {
+            viewer.action_recoil = 0;
+            if (!(pad_state.held & pad_state.buttons[8])) {
+                if (viewer.weapon_gauge_delay == 0) {
                     inc = 96;
-                    inc += viewer.unk62[1] / (viewer.unk62[1] + 1000) * inc;
-                    if (viewer.unk38[16] != 0xffff && viewer.unk130.halves[1] >= 0) {
+                    inc += viewer.attributes[1] / (viewer.attributes[1] + 1000) * inc;
+                    if (viewer.equipment[16] != 0xffff && viewer.action_timers.halves[1] >= 0) {
                         inc >>= 1;
                     }
-                    viewer.unk17E += inc * 2;
-                    if (viewer.unk17E > 5120) {
-                        viewer.unk17E = 5120;
+                    viewer.weapon_gauge += inc * 2;
+                    if (viewer.weapon_gauge > 5120) {
+                        viewer.weapon_gauge = 5120;
                     }
                 } else {
-                    viewer.unk187--;
+                    viewer.weapon_gauge_delay--;
                 }
             }
         }
@@ -2167,60 +2167,60 @@ void func_800402ac(u8 hand)
  * points cover the cost: per-magic cast timers and launch offsets, then
  * the hand's item wears unless the magic is 44..47. */
 ADDRESS(0x80040f04, 0x24c)
-void func_80040f04(u8 magic, u8 hand)
+void player_cast_magic(u8 magic, u8 hand)
 {
     StMagic *rec;
     int cost;
     SVECTOR unused;
 
-    if (viewer.unk155[hand] != 255 || magic == 255) {
+    if (viewer.shot_magic[hand] != 255 || magic == 255) {
         return;
     }
     rec = (StMagic *)&effects.defs[magic];
-    cost = rec->unk2;
-    if (viewer.unk6 < cost) {
+    cost = rec->mp_cost;
+    if (viewer.mp < cost) {
         return;
     }
-    viewer.unk6 -= cost;
-    viewer.unk155[hand] = magic;
+    viewer.mp -= cost;
+    viewer.shot_magic[hand] = magic;
     switch (magic) {
     case 0:
     case 10:
-        viewer.unk15B[hand] = 1;
-        viewer.unk157[hand] = 1;
-        viewer.unk159[hand] = 1;
-        viewer.unk160[hand].vx = 0;
-        viewer.unk160[hand].vy = 50;
-        viewer.unk160[hand].vz = 0;
+        viewer.shot_countdown[hand] = 1;
+        viewer.shots_left[hand] = 1;
+        viewer.shot_interval[hand] = 1;
+        viewer.shot_offsets[hand].vx = 0;
+        viewer.shot_offsets[hand].vy = 50;
+        viewer.shot_offsets[hand].vz = 0;
         break;
     case 7:
-        viewer.unk15B[hand] = 1;
-        viewer.unk157[hand] = 1;
-        viewer.unk159[hand] = 1;
-        viewer.unk160[hand].vx = -512;
-        viewer.unk160[hand].vy = -1024;
-        viewer.unk160[hand].vz = 0;
+        viewer.shot_countdown[hand] = 1;
+        viewer.shots_left[hand] = 1;
+        viewer.shot_interval[hand] = 1;
+        viewer.shot_offsets[hand].vx = -512;
+        viewer.shot_offsets[hand].vy = -1024;
+        viewer.shot_offsets[hand].vz = 0;
         break;
     case 3:
-        viewer.unk157[hand] = 4;
-        viewer.unk159[hand] = 8;
-        viewer.unk160[hand].vx = 0;
-        viewer.unk160[hand].vy = 200;
-        viewer.unk160[hand].vz = 0;
+        viewer.shots_left[hand] = 4;
+        viewer.shot_interval[hand] = 8;
+        viewer.shot_offsets[hand].vx = 0;
+        viewer.shot_offsets[hand].vy = 200;
+        viewer.shot_offsets[hand].vz = 0;
         goto fire;
     case 9:
-        viewer.unk157[hand] = 3;
-        viewer.unk159[hand] = 4;
-        viewer.unk160[hand].vx = 0;
-        viewer.unk160[hand].vy = 200;
-        viewer.unk160[hand].vz = 0;
+        viewer.shots_left[hand] = 3;
+        viewer.shot_interval[hand] = 4;
+        viewer.shot_offsets[hand].vx = 0;
+        viewer.shot_offsets[hand].vy = 200;
+        viewer.shot_offsets[hand].vz = 0;
         goto fire;
     case 12:
-        viewer.unk157[hand] = 2;
-        viewer.unk159[hand] = 4;
-        viewer.unk160[hand].vx = 0;
-        viewer.unk160[hand].vy = 200;
-        viewer.unk160[hand].vz = 0;
+        viewer.shots_left[hand] = 2;
+        viewer.shot_interval[hand] = 4;
+        viewer.shot_offsets[hand].vx = 0;
+        viewer.shot_offsets[hand].vy = 200;
+        viewer.shot_offsets[hand].vz = 0;
         goto fire;
     case 1:
     case 4:
@@ -2228,24 +2228,24 @@ void func_80040f04(u8 magic, u8 hand)
     case 13:
     case 15:
     case 16:
-        viewer.unk157[hand] = 1;
-        viewer.unk159[hand] = 1;
-        viewer.unk160[hand].vx = 0;
-        viewer.unk160[hand].vy = 200;
-        viewer.unk160[hand].vz = 0;
+        viewer.shots_left[hand] = 1;
+        viewer.shot_interval[hand] = 1;
+        viewer.shot_offsets[hand].vx = 0;
+        viewer.shot_offsets[hand].vy = 200;
+        viewer.shot_offsets[hand].vz = 0;
     fire:
-        viewer.unk15B[hand] = 1;
+        viewer.shot_countdown[hand] = 1;
         break;
     case 44:
     case 45:
     case 46:
     case 47:
-        viewer.unk15B[hand] = 1;
-        viewer.unk157[hand] = 1;
-        viewer.unk159[hand] = 1;
+        viewer.shot_countdown[hand] = 1;
+        viewer.shots_left[hand] = 1;
+        viewer.shot_interval[hand] = 1;
         break;
     }
-    viewer.unk118[hand] = rec;
+    viewer.magic_defs[hand] = rec;
     switch (magic) {
     case 44:
     case 45:
@@ -2254,19 +2254,19 @@ void func_80040f04(u8 magic, u8 hand)
         break;
     default:
         if (hand) {
-            player_wear_item(1, &viewer.unk38[13]);
+            player_wear_item(1, &viewer.equipment[13]);
         } else {
-            player_wear_item(1, &viewer.unk38[0]);
+            player_wear_item(1, &viewer.equipment[0]);
         }
     }
 }
 
 /* Moves the viewer `speed` units along heading `angle`, sliding along the
- * walls func_80049544 reports (at most three tries), and keeps the motion
- * in viewer.unk260.
+ * walls collision_query reports (at most three tries), and keeps the motion
+ * in viewer.velocity.
  */
 ADDRESS(0x80041150, 0x4dc)
-void func_80041150(int angle, int speed)
+void player_move(int angle, int speed)
 {
     VECTOR vel;
     VECTOR d;
@@ -2288,23 +2288,23 @@ void func_80041150(int angle, int speed)
     vel.vx = rcos(angle) * speed / 4096;
     initial_z = rsin(angle) * speed / 4096;
     source = &viewer;
-    vis_lists.unk4 = source->position;
+    vis_lists.position = source->position;
     vel.vz = initial_z;
-    vis_lists.unk1C = 256;
-    vis_lists.unk1E = 1600;
-    vel.vy = source->unk2D4;
-    vis_lists.unk0 = 1074;
+    vis_lists.radius = 256;
+    vis_lists.height = 1600;
+    vel.vy = source->vertical_speed;
+    vis_lists.tests = 1074;
 loop:
-    viewer.unk260.vz = vel.vz + viewer.unk1D0;
-    viewer.unk260.vx = vel.vx + viewer.unk1CC;
-    viewer.unk260.vy = vel.vy;
-    vis_lists.unk14 = viewer.unk260;
-    vis_lists.unk20 = ratan2(viewer.unk260.vz, viewer.unk260.vx);
-    vis_lists.unk22 = SquareRoot0(vel.vx * vel.vx + vel.vz * vel.vz);
-    vis_lists.unk47CE = 0;
-    vis_lists.unk47D0 = 0;
-    vis_lists.unk47D2 = 0;
-    hits = func_80049544(&vis_lists);
+    viewer.velocity.vz = vel.vz + viewer.push_z;
+    viewer.velocity.vx = vel.vx + viewer.push_x;
+    viewer.velocity.vy = vel.vy;
+    vis_lists.velocity = viewer.velocity;
+    vis_lists.heading = ratan2(viewer.velocity.vz, viewer.velocity.vx);
+    vis_lists.speed = SquareRoot0(vel.vx * vel.vx + vel.vz * vel.vz);
+    vis_lists.floor_push_x = 0;
+    vis_lists.floor_push_y = 0;
+    vis_lists.floor_push_z = 0;
+    hits = collision_query(&vis_lists);
     if (hits == 0) {
     move:
         viewer.position.vx += vel.vx;
@@ -2321,36 +2321,36 @@ loop:
         }
     }
     if (hits & 2) {
-        vel.vx = (1 - (vis_lists.unk3C - 256)) * vis_lists.unk8C / 4096;
-        vel.vz = (1 - (vis_lists.unk3C - 256)) * vis_lists.unk90 / 4096;
+        vel.vx = (1 - (vis_lists.wall_dist - 256)) * vis_lists.wall_normal_x / 4096;
+        vel.vz = (1 - (vis_lists.wall_dist - 256)) * vis_lists.wall_normal_z / 4096;
         if (slid_a) {
             goto move;
         }
         slid_a = 1;
-        ang = ratan2(vis_lists.unk90, vis_lists.unk8C);
-        vis_lists.unk78 = (short)ang;
+        ang = ratan2(vis_lists.wall_normal_z, vis_lists.wall_normal_x);
+        vis_lists.hit_normal_heading = (short)ang;
         hits = speed * rcos(angle - (ang + 1024)) / 4096;
-        vis_lists.unk44C6 = hits;
+        vis_lists.slide_speed = hits;
     } else if (hits & 8) {
-        vel.vx = (1 - (vis_lists.unk44 - 256)) * vis_lists.unk9C / 4096;
-        vel.vz = (1 - (vis_lists.unk44 - 256)) * vis_lists.unkA0 / 4096;
+        vel.vx = (1 - (vis_lists.low_wall_dist - 256)) * vis_lists.low_wall_normal_x / 4096;
+        vel.vz = (1 - (vis_lists.low_wall_dist - 256)) * vis_lists.low_wall_normal_z / 4096;
         if (slid_b) {
             goto move;
         }
         slid_b = 1;
-        ang = ratan2(vis_lists.unkA0, vis_lists.unk9C);
-        vis_lists.unk78 = (short)ang;
+        ang = ratan2(vis_lists.low_wall_normal_z, vis_lists.low_wall_normal_x);
+        vis_lists.hit_normal_heading = (short)ang;
         hits = speed * rcos(angle - (ang + 1024)) / 4096;
-        vis_lists.unk44C6 = hits;
+        vis_lists.slide_speed = hits;
     } else if (hits & 0x50) {
-        func_800492f4((VECTOR *)&viewer.position.vx);
-        d.vx = viewer.position.vx - vis_lists.unkAC.vx;
+        collision_locate_hit_body((VECTOR *)&viewer.position.vx);
+        d.vx = viewer.position.vx - vis_lists.hit_body_position.vx;
         d.vy = 0;
-        d.vz = viewer.position.vz - vis_lists.unkAC.vz;
+        d.vz = viewer.position.vz - vis_lists.hit_body_position.vz;
         VectorNormalS(&d, &n);
-        dy = vis_lists.unkBC - vis_lists.unk44C0 - 256;
+        dy = vis_lists.hit_body_dist - vis_lists.hit_body_radius - 256;
         if (hits & 0x10) {
-            dy = vis_lists.unkBC - vis_lists.unk44C0 - 768;
+            dy = vis_lists.hit_body_dist - vis_lists.hit_body_radius - 768;
         }
         dy = 1 - dy;
         vel.vx = dy * n.vx / 4096;
@@ -2360,9 +2360,9 @@ loop:
         }
         slid = 1;
         ang = ratan2(d.vz, d.vx);
-        vis_lists.unk78 = ang;
+        vis_lists.hit_normal_heading = ang;
         hits = speed * rcos(angle - (ang + 1024)) / 4096;
-        vis_lists.unk44C6 = hits;
+        vis_lists.slide_speed = hits;
     } else {
         goto done;
     }
@@ -2372,24 +2372,24 @@ loop:
     }
     goto loop;
 done:
-    viewer.unk1CC += vis_lists.unk47CE / 4;
-    viewer.unk1D0 += vis_lists.unk47D2 / 4;
-    viewer.unk260.vx = vel.vx;
-    viewer.unk260.vy = vel.vy;
-    viewer.unk260.vz = vel.vz;
+    viewer.push_x += vis_lists.floor_push_x / 4;
+    viewer.push_z += vis_lists.floor_push_z / 4;
+    viewer.velocity.vx = vel.vx;
+    viewer.velocity.vy = vel.vy;
+    viewer.velocity.vz = vel.vz;
 }
 
-/* The coasting vertical offset func_8004162c halves each frame. */
+/* The coasting vertical offset player_update_motion halves each frame. */
 DATA(0x8008803c, 0x2, ".sdata")
-static s16 DAT_8008803c = 0;
+static s16 vertical_speed_pitch = 0;
 
 /* Coasts the viewer on its push offsets while it is not walking (sliding
- * along walls as func_80041150 does), then steps the vertical speed
- * against the floor, the head bob and the stamina, and records the
+ * along walls as player_move does), then steps the vertical speed
+ * against the floor, the head bob and the footsteps, and records the
  * visible record the viewer stands in.
  */
 ADDRESS(0x8004162c, 0x720)
-void func_8004162c(void)
+void player_update_motion(void)
 {
     VECTOR vel;
     int hits;
@@ -2405,28 +2405,28 @@ void func_8004162c(void)
     memset(&vel, 0, sizeof(vel));
     slid_b = 0;
     slid_a = 0;
-    if (viewer.unk2C8 == 0 || viewer.unk21E != 0) {
-        int initial_x = viewer.unk1CC;
-        int initial_z = viewer.unk1D0;
-        vis_lists.unk4 = viewer.position;
-        vis_lists.unk1C = 256;
-        vis_lists.unk1E = 1600;
-        vis_lists.unk0 = 1074;
+    if (viewer.walk_speed == 0 || viewer.motion_stopped != 0) {
+        int initial_x = viewer.push_x;
+        int initial_z = viewer.push_z;
+        vis_lists.position = viewer.position;
+        vis_lists.radius = 256;
+        vis_lists.height = 1600;
+        vis_lists.tests = 1074;
         vel.vx = initial_x;
-        vel.vy = viewer.unk2D4;
+        vel.vy = viewer.vertical_speed;
         vel.vz = initial_z;
         speed = SquareRoot0(initial_x * initial_x + initial_z * initial_z);
         heading = ratan2(vel.vz, vel.vx);
     loop:
-        vis_lists.unk20 = 9999;
-        vis_lists.unk14.vx = vel.vx;
-        vis_lists.unk14.vy = vel.vy;
-        vis_lists.unk14.vz = vel.vz;
-        vis_lists.unk22 = SquareRoot0(vel.vx * vel.vx + vel.vz * vel.vz);
-        vis_lists.unk47CE = 0;
-        vis_lists.unk47D0 = 0;
-        vis_lists.unk47D2 = 0;
-        hits = func_80049544(&vis_lists);
+        vis_lists.heading = 9999;
+        vis_lists.velocity.vx = vel.vx;
+        vis_lists.velocity.vy = vel.vy;
+        vis_lists.velocity.vz = vel.vz;
+        vis_lists.speed = SquareRoot0(vel.vx * vel.vx + vel.vz * vel.vz);
+        vis_lists.floor_push_x = 0;
+        vis_lists.floor_push_y = 0;
+        vis_lists.floor_push_z = 0;
+        hits = collision_query(&vis_lists);
         if (hits == 0) {
         move:
             viewer.position.vx += vel.vx;
@@ -2440,27 +2440,27 @@ void func_8004162c(void)
             viewer.position.vz += vel.vz;
         }
         if (hits & 2) {
-            vel.vx = (1 - (vis_lists.unk3C - 256)) * vis_lists.unk8C / 4096;
-            vel.vz = (1 - (vis_lists.unk3C - 256)) * vis_lists.unk90 / 4096;
+            vel.vx = (1 - (vis_lists.wall_dist - 256)) * vis_lists.wall_normal_x / 4096;
+            vel.vz = (1 - (vis_lists.wall_dist - 256)) * vis_lists.wall_normal_z / 4096;
             if (slid_a) {
                 goto move;
             }
             slid_a = 1;
-            ang = ratan2(vis_lists.unk90, vis_lists.unk8C);
-            vis_lists.unk78 = ang;
+            ang = ratan2(vis_lists.wall_normal_z, vis_lists.wall_normal_x);
+            vis_lists.hit_normal_heading = ang;
             push = speed * rcos(heading - (ang + 1024)) / 4096;
-            vis_lists.unk44C6 = push;
+            vis_lists.slide_speed = push;
         } else if (hits & 8) {
-            vel.vx = (1 - (vis_lists.unk44 - 256)) * vis_lists.unk9C / 4096;
-            vel.vz = (1 - (vis_lists.unk44 - 256)) * vis_lists.unkA0 / 4096;
+            vel.vx = (1 - (vis_lists.low_wall_dist - 256)) * vis_lists.low_wall_normal_x / 4096;
+            vel.vz = (1 - (vis_lists.low_wall_dist - 256)) * vis_lists.low_wall_normal_z / 4096;
             if (slid_b) {
                 goto move;
             }
             slid_b = 1;
-            ang = ratan2(vis_lists.unkA0, vis_lists.unk9C);
-            vis_lists.unk78 = ang;
+            ang = ratan2(vis_lists.low_wall_normal_z, vis_lists.low_wall_normal_x);
+            vis_lists.hit_normal_heading = ang;
             push = speed * rcos(heading - (ang + 1024)) / 4096;
-            vis_lists.unk44C6 = push;
+            vis_lists.slide_speed = push;
         } else {
             goto done;
         }
@@ -2470,177 +2470,177 @@ void func_8004162c(void)
         }
         goto loop;
     done:
-        viewer.unk1CC += vis_lists.unk47CE / 4;
-        viewer.unk1D0 += vis_lists.unk47D2 / 4;
-        viewer.unk260.vx = vel.vx;
-        viewer.unk260.vy = vel.vy;
-        viewer.unk260.vz = vel.vz;
+        viewer.push_x += vis_lists.floor_push_x / 4;
+        viewer.push_z += vis_lists.floor_push_z / 4;
+        viewer.velocity.vx = vel.vx;
+        viewer.velocity.vy = vel.vy;
+        viewer.velocity.vz = vel.vz;
     }
-    func_8003bdb0();
-    d = vis_lists.unk2C - 1600;
+    player_check_fall_death();
+    d = vis_lists.next_floor_dist - 1600;
     if (d < 0) {
-        if (viewer.unk2D4 > 0) {
-            func_80057b48(viewer.unk2D4);
-            viewer.unk2D4 >>= 2;
-        } else if (viewer.unk2D4 < 0) {
+        if (viewer.vertical_speed > 0) {
+            play_landing_sound(viewer.vertical_speed);
+            viewer.vertical_speed >>= 2;
+        } else if (viewer.vertical_speed < 0) {
             if (d >= -1024) {
-                viewer.unk2E4 = 0;
+                viewer.walk_speed_max = 0;
             }
-            viewer.unk2D4 -= 48;
-            if (vis_lists.unk2C - viewer.unk2D4 > 1600) {
-                viewer.unk2D4 = vis_lists.unk2C - 1600;
+            viewer.vertical_speed -= 48;
+            if (vis_lists.next_floor_dist - viewer.vertical_speed > 1600) {
+                viewer.vertical_speed = vis_lists.next_floor_dist - 1600;
             }
         } else if (d >= -31) {
-            viewer.unk2D4 -= d;
+            viewer.vertical_speed -= d;
         } else {
             if (d >= -1024) {
-                viewer.unk2E4 = 0;
+                viewer.walk_speed_max = 0;
             }
-            viewer.unk2D4 -= 16;
+            viewer.vertical_speed -= 16;
         }
     } else if (d > 0) {
-        if (viewer.unk2D4 > 0) {
+        if (viewer.vertical_speed > 0) {
             if (d < 1025) {
-                viewer.unk2E4 = 0;
+                viewer.walk_speed_max = 0;
             }
-            if ((vis_lists.unk74 & ~15) == 0) {
-                viewer.unk2D4 += 48;
+            if ((vis_lists.hits & ~15) == 0) {
+                viewer.vertical_speed += 48;
             }
-        } else if (viewer.unk2D4 < 0) {
-            viewer.unk2D4 /= 2;
+        } else if (viewer.vertical_speed < 0) {
+            viewer.vertical_speed /= 2;
         } else if (d < 32) {
-            viewer.unk2D4 += d;
+            viewer.vertical_speed += d;
         } else {
             if (d < 1025) {
-                viewer.unk2E4 = 0;
+                viewer.walk_speed_max = 0;
             }
-            viewer.unk2D4 += 16;
+            viewer.vertical_speed += 16;
         }
     } else {
         viewer.unk239 = 0;
-        viewer.unk2D4 = 0;
+        viewer.vertical_speed = 0;
     }
-    if (viewer.unk2D4 > 128) {
-        DAT_8008803c = (viewer.unk2D4 - 128) / 2;
-    } else if (viewer.unk2D4 < -128) {
-        DAT_8008803c = (viewer.unk2D4 + 128) / 2;
+    if (viewer.vertical_speed > 128) {
+        vertical_speed_pitch = (viewer.vertical_speed - 128) / 2;
+    } else if (viewer.vertical_speed < -128) {
+        vertical_speed_pitch = (viewer.vertical_speed + 128) / 2;
     } else {
-        DAT_8008803c /= 2;
+        vertical_speed_pitch /= 2;
     }
-    viewer.unk290 = DAT_8008803c;
+    viewer.fall_pitch = vertical_speed_pitch;
     if (viewer.unk239 == 0) {
-        if (DAT_801cd120.unk2) {
-            viewer.unk2D0 = (viewer.unk2D0 + viewer.unk2C8) & 0xfff;
-            s = rsin(viewer.unk2D0) >> 5;
+        if (game_settings.walk_bob) {
+            viewer.bob_phase = (viewer.bob_phase + viewer.walk_speed) & 0xfff;
+            s = rsin(viewer.bob_phase) >> 5;
             if (s < 0) {
                 s = -s;
             }
-            viewer.unk2CE = s - (s >> 2);
+            viewer.bob_offset = s - (s >> 2);
         } else {
-            viewer.unk2CE = 0;
+            viewer.bob_offset = 0;
         }
-        if (viewer.unk239 == 0 && viewer.unk2D4 < 256) {
-            if (viewer.unk2C8 < viewer.unk2E4 >> 2) {
-                viewer.unk244 -= viewer.unk2C8 * 3;
-            } else if (viewer.unk2C8 < viewer.unk2E4 >> 1) {
-                viewer.unk244 -= viewer.unk2C8 * 3 / 2;
+        if (viewer.unk239 == 0 && viewer.vertical_speed < 256) {
+            if (viewer.walk_speed < viewer.walk_speed_max >> 2) {
+                viewer.footstep_timer -= viewer.walk_speed * 3;
+            } else if (viewer.walk_speed < viewer.walk_speed_max >> 1) {
+                viewer.footstep_timer -= viewer.walk_speed * 3 / 2;
             } else {
-                viewer.unk244 -= viewer.unk2C8;
+                viewer.footstep_timer -= viewer.walk_speed;
             }
-            if (viewer.unk244 < 0) {
-                viewer.unk244 = 2048;
-                func_80057bac(viewer.unk2C8);
+            if (viewer.footstep_timer < 0) {
+                viewer.footstep_timer = 2048;
+                play_footstep_sound(viewer.walk_speed);
             }
         }
     }
-    func_8003be10();
-    if (vis_lists.unk44C8 != -1) {
-        viewer.unk170 = viewer.unk174;
-        viewer.unk174 = &vis_records[vis_lists.unk44C8];
-        viewer.unk178 = vis_lists.unk44C8;
+    player_update_submersion();
+    if (vis_lists.hit_block != -1) {
+        viewer.prev_block_record = viewer.block_record;
+        viewer.block_record = &vis_records[vis_lists.hit_block];
+        viewer.block = vis_lists.hit_block;
     }
 }
 
 ADDRESS(0x80041d4c, 0x354)
-void func_80041d4c(void)
+void player_update_look(void)
 {
-    if (DAT_801cd180.unk2 & DAT_801cd180.unk22[2]) {
-        viewer.unk2CA += viewer.unk2E8 >> 2;
-        if (viewer.unk2E8 < viewer.unk2CA)
-            viewer.unk2CA = viewer.unk2E8;
-    } else if (DAT_801cd180.unk2 & DAT_801cd180.unk22[3]) {
-        viewer.unk2CA -= viewer.unk2E8 >> 2;
-        if (viewer.unk2CA < -viewer.unk2E8)
-            viewer.unk2CA = -viewer.unk2E8;
-    } else if (viewer.unk2CA > 0) {
-        viewer.unk2CA -= viewer.unk2E8 >> 2;
-        if (viewer.unk2CA < 0)
-            viewer.unk2CA = 0;
-    } else if (viewer.unk2CA < 0) {
-        viewer.unk2CA += viewer.unk2E8 >> 2;
-        if (viewer.unk2CA > 0)
-            viewer.unk2CA = 0;
+    if (pad_state.held & pad_state.buttons[2]) {
+        viewer.yaw_speed += viewer.yaw_speed_max >> 2;
+        if (viewer.yaw_speed_max < viewer.yaw_speed)
+            viewer.yaw_speed = viewer.yaw_speed_max;
+    } else if (pad_state.held & pad_state.buttons[3]) {
+        viewer.yaw_speed -= viewer.yaw_speed_max >> 2;
+        if (viewer.yaw_speed < -viewer.yaw_speed_max)
+            viewer.yaw_speed = -viewer.yaw_speed_max;
+    } else if (viewer.yaw_speed > 0) {
+        viewer.yaw_speed -= viewer.yaw_speed_max >> 2;
+        if (viewer.yaw_speed < 0)
+            viewer.yaw_speed = 0;
+    } else if (viewer.yaw_speed < 0) {
+        viewer.yaw_speed += viewer.yaw_speed_max >> 2;
+        if (viewer.yaw_speed > 0)
+            viewer.yaw_speed = 0;
     }
-    viewer.unk278.vy = (viewer.unk278.vy + viewer.unk2CA) & 0xfff;
-    if (DAT_801cd180.unk2 & DAT_801cd180.unk22[6]) {
-        if (DAT_801cd180.unk2 & DAT_801cd180.unk22[7]) {
-            if (viewer.unk278.vx > 2048) {
-                int limit = (4224 - viewer.unk278.vx) >> 2;
+    viewer.view_rot.vy = (viewer.view_rot.vy + viewer.yaw_speed) & 0xfff;
+    if (pad_state.held & pad_state.buttons[6]) {
+        if (pad_state.held & pad_state.buttons[7]) {
+            if (viewer.view_rot.vx > 2048) {
+                int limit = (4224 - viewer.view_rot.vx) >> 2;
 
-                viewer.unk2CC += 8;
-                if (limit < viewer.unk2CC) {
-                    viewer.unk2CC = limit;
+                viewer.pitch_speed += 8;
+                if (limit < viewer.pitch_speed) {
+                    viewer.pitch_speed = limit;
                     if (limit == 0)
-                        viewer.unk2CC = 4224 - viewer.unk278.vx;
+                        viewer.pitch_speed = 4224 - viewer.view_rot.vx;
                 }
-            } else if (viewer.unk278.vx < 2048) {
-                int limit = -((viewer.unk278.vx - 128) >> 2);
+            } else if (viewer.view_rot.vx < 2048) {
+                int limit = -((viewer.view_rot.vx - 128) >> 2);
 
-                viewer.unk2CC -= 8;
-                if (viewer.unk2CC < limit) {
-                    viewer.unk2CC = limit;
+                viewer.pitch_speed -= 8;
+                if (viewer.pitch_speed < limit) {
+                    viewer.pitch_speed = limit;
                     if (limit == 0) {
-                        s16 offset = viewer.unk278.vx - 128;
+                        s16 offset = viewer.view_rot.vx - 128;
 
-                        viewer.unk2CC = -offset;
+                        viewer.pitch_speed = -offset;
                     }
                 }
             }
         } else {
-            viewer.unk2CC -= 3;
-            if (viewer.unk2CC < -32)
-                viewer.unk2CC = -32;
+            viewer.pitch_speed -= 3;
+            if (viewer.pitch_speed < -32)
+                viewer.pitch_speed = -32;
         }
-    } else if (DAT_801cd180.unk2 & DAT_801cd180.unk22[7]) {
-        viewer.unk2CC += 3;
-        if (viewer.unk2CC > 32)
-            viewer.unk2CC = 32;
-    } else if (viewer.unk2CC > 0) {
-        viewer.unk2CC -= 3;
-        if (viewer.unk2CC < 0)
-            viewer.unk2CC = 0;
-    } else if (viewer.unk2CC < 0) {
-        viewer.unk2CC += 3;
-        if (viewer.unk2CC > 0)
-            viewer.unk2CC = 0;
+    } else if (pad_state.held & pad_state.buttons[7]) {
+        viewer.pitch_speed += 3;
+        if (viewer.pitch_speed > 32)
+            viewer.pitch_speed = 32;
+    } else if (viewer.pitch_speed > 0) {
+        viewer.pitch_speed -= 3;
+        if (viewer.pitch_speed < 0)
+            viewer.pitch_speed = 0;
+    } else if (viewer.pitch_speed < 0) {
+        viewer.pitch_speed += 3;
+        if (viewer.pitch_speed > 0)
+            viewer.pitch_speed = 0;
     }
-    if (viewer.unk2CC > 0) {
-        viewer.unk278.vx = (viewer.unk278.vx + viewer.unk2CC) & 0xfff;
-        if (func_8004a194(viewer.unk278.vx, 700))
-            viewer.unk278.vx = 700;
-    } else if (viewer.unk2CC < 0) {
-        viewer.unk278.vx = (viewer.unk278.vx + viewer.unk2CC) & 0xfff;
-        if (func_8004a194(3396, viewer.unk278.vx))
-            viewer.unk278.vx = 3396;
+    if (viewer.pitch_speed > 0) {
+        viewer.view_rot.vx = (viewer.view_rot.vx + viewer.pitch_speed) & 0xfff;
+        if (angle_signed_greater(viewer.view_rot.vx, 700))
+            viewer.view_rot.vx = 700;
+    } else if (viewer.pitch_speed < 0) {
+        viewer.view_rot.vx = (viewer.view_rot.vx + viewer.pitch_speed) & 0xfff;
+        if (angle_signed_greater(3396, viewer.view_rot.vx))
+            viewer.view_rot.vx = 3396;
     }
 }
 
 /* Walks the viewer from the held buttons: accelerates the walk velocity
- * (viewer.unk2B8) towards viewer.unk2E4 or lets it decay, turns it by the
- * yaw and moves the viewer along it (func_80041150); eases the push
- * offsets viewer.unk1CC..unk1D0 back and adds the area's drift. */
+ * (viewer.walk_velocity) towards viewer.walk_speed_max or lets it decay, turns it by the
+ * yaw and moves the viewer along it (player_move); eases the push
+ * offsets viewer.push_x..push_z back and adds the area's drift. */
 ADDRESS(0x800420a0, 0x580)
-void func_800420a0(void)
+void player_update_walk(void)
 {
     SVECTOR sv;
     VECTOR v;
@@ -2649,76 +2649,76 @@ void func_800420a0(void)
     SVECTOR rot;
     int ang;
 
-    if (DAT_801cd180.unk2 & DAT_801cd180.unk22[0]) {
-        v.vz = viewer.unk2B8.vz + (viewer.unk2E4 >> 2);
-        if (v.vz <= viewer.unk2E4) {
-            viewer.unk2B8.vz = v.vz;
+    if (pad_state.held & pad_state.buttons[0]) {
+        v.vz = viewer.walk_velocity.vz + (viewer.walk_speed_max >> 2);
+        if (v.vz <= viewer.walk_speed_max) {
+            viewer.walk_velocity.vz = v.vz;
         } else {
-            viewer.unk2B8.vz = viewer.unk2E4;
+            viewer.walk_velocity.vz = viewer.walk_speed_max;
         }
-    } else if (DAT_801cd180.unk2 & DAT_801cd180.unk22[1]) {
-        v.vz = viewer.unk2B8.vz - (viewer.unk2E4 >> 2);
-        if (v.vz >= -viewer.unk2E4) {
-            viewer.unk2B8.vz = v.vz;
+    } else if (pad_state.held & pad_state.buttons[1]) {
+        v.vz = viewer.walk_velocity.vz - (viewer.walk_speed_max >> 2);
+        if (v.vz >= -viewer.walk_speed_max) {
+            viewer.walk_velocity.vz = v.vz;
         } else {
-            viewer.unk2B8.vz = -viewer.unk2E4;
+            viewer.walk_velocity.vz = -viewer.walk_speed_max;
         }
-    } else if (viewer.unk2B8.vz > 0) {
-        viewer.unk2B8.vz -= viewer.unk2E4 >> 3;
-        if (viewer.unk2B8.vz < 0) {
-            viewer.unk2B8.vz = 0;
+    } else if (viewer.walk_velocity.vz > 0) {
+        viewer.walk_velocity.vz -= viewer.walk_speed_max >> 3;
+        if (viewer.walk_velocity.vz < 0) {
+            viewer.walk_velocity.vz = 0;
         }
-    } else if (viewer.unk2B8.vz < 0) {
-        viewer.unk2B8.vz += viewer.unk2E4 >> 3;
-        if (viewer.unk2B8.vz > 0) {
-            viewer.unk2B8.vz = 0;
+    } else if (viewer.walk_velocity.vz < 0) {
+        viewer.walk_velocity.vz += viewer.walk_speed_max >> 3;
+        if (viewer.walk_velocity.vz > 0) {
+            viewer.walk_velocity.vz = 0;
         }
     }
-    if ((DAT_801cd180.unk2 & DAT_801cd180.unk22[5]) && !(DAT_801cd180.unk2 & DAT_801cd180.unk22[4])) {
-        v.vx = viewer.unk2B8.vx + (viewer.unk2E4 >> 2);
-        if (v.vx <= viewer.unk2E4) {
-            viewer.unk2B8.vx = v.vx;
+    if ((pad_state.held & pad_state.buttons[5]) && !(pad_state.held & pad_state.buttons[4])) {
+        v.vx = viewer.walk_velocity.vx + (viewer.walk_speed_max >> 2);
+        if (v.vx <= viewer.walk_speed_max) {
+            viewer.walk_velocity.vx = v.vx;
         } else {
-            viewer.unk2B8.vx = viewer.unk2E4;
+            viewer.walk_velocity.vx = viewer.walk_speed_max;
         }
-    } else if ((DAT_801cd180.unk2 & DAT_801cd180.unk22[4]) && !(DAT_801cd180.unk2 & DAT_801cd180.unk22[5])) {
-        v.vx = viewer.unk2B8.vx - (viewer.unk2E4 >> 2);
-        if (v.vx >= -viewer.unk2E4) {
-            viewer.unk2B8.vx = v.vx;
+    } else if ((pad_state.held & pad_state.buttons[4]) && !(pad_state.held & pad_state.buttons[5])) {
+        v.vx = viewer.walk_velocity.vx - (viewer.walk_speed_max >> 2);
+        if (v.vx >= -viewer.walk_speed_max) {
+            viewer.walk_velocity.vx = v.vx;
         } else {
-            viewer.unk2B8.vx = -viewer.unk2E4;
+            viewer.walk_velocity.vx = -viewer.walk_speed_max;
         }
-    } else if (viewer.unk2B8.vx > 0) {
-        viewer.unk2B8.vx -= viewer.unk2E4 >> 3;
-        if (viewer.unk2B8.vx < 0) {
-            viewer.unk2B8.vx = 0;
+    } else if (viewer.walk_velocity.vx > 0) {
+        viewer.walk_velocity.vx -= viewer.walk_speed_max >> 3;
+        if (viewer.walk_velocity.vx < 0) {
+            viewer.walk_velocity.vx = 0;
         }
-    } else if (viewer.unk2B8.vx < 0) {
-        viewer.unk2B8.vx += viewer.unk2E4 >> 3;
-        if (viewer.unk2B8.vx > 0) {
-            viewer.unk2B8.vx = 0;
+    } else if (viewer.walk_velocity.vx < 0) {
+        viewer.walk_velocity.vx += viewer.walk_speed_max >> 3;
+        if (viewer.walk_velocity.vx > 0) {
+            viewer.walk_velocity.vx = 0;
         }
     }
-    gte_ldlvl(&viewer.unk2B8);
+    gte_ldlvl(&viewer.walk_velocity);
     gte_sqr0();
     gte_stlvnl(&sq);
-    viewer.unk2C8 = SquareRoot0(sq.vx + sq.vz);
-    if (viewer.unk2C8 == 0) {
+    viewer.walk_speed = SquareRoot0(sq.vx + sq.vz);
+    if (viewer.walk_speed == 0) {
         v.vz = 0;
         v.vx = 0;
     } else {
-        if (viewer.unk2B8.vx < 0) {
+        if (viewer.walk_velocity.vx < 0) {
             sq.vx = -sq.vx;
         }
-        if (viewer.unk2B8.vz < 0) {
+        if (viewer.walk_velocity.vz < 0) {
             sq.vz = -sq.vz;
         }
-        v.vx = sq.vx / viewer.unk2C8;
-        v.vz = sq.vz / viewer.unk2C8;
+        v.vx = sq.vx / viewer.walk_speed;
+        v.vz = sq.vz / viewer.walk_speed;
     }
     rot.vx = 0;
     rot.vz = 0;
-    rot.vy = -viewer.unk278.vy;
+    rot.vy = -viewer.view_rot.vy;
     RotMatrix(&rot, &m);
     sv.vx = v.vx;
     sv.vy = v.vy;
@@ -2731,76 +2731,76 @@ void func_800420a0(void)
     gte_ldlvl(&v);
     gte_sqr0();
     gte_stlvnl(&sq);
-    viewer.unk2C8 = SquareRoot0(sq.vx + sq.vz);
-    viewer.unk1CC -= viewer.unk1CC / 4;
-    viewer.unk1CE -= viewer.unk1CE / 4;
-    viewer.unk1D0 -= viewer.unk1D0 / 4;
-    if (viewer.unk1CC > -4 && viewer.unk1CC < 4) {
-        viewer.unk1CC = 0;
+    viewer.walk_speed = SquareRoot0(sq.vx + sq.vz);
+    viewer.push_x -= viewer.push_x / 4;
+    viewer.push_y -= viewer.push_y / 4;
+    viewer.push_z -= viewer.push_z / 4;
+    if (viewer.push_x > -4 && viewer.push_x < 4) {
+        viewer.push_x = 0;
     }
-    if (viewer.unk1CE > -4 && viewer.unk1CE < 4) {
-        viewer.unk1CE = 0;
+    if (viewer.push_y > -4 && viewer.push_y < 4) {
+        viewer.push_y = 0;
     }
-    if (viewer.unk1D0 > -4 && viewer.unk1D0 < 4) {
-        viewer.unk1D0 = 0;
+    if (viewer.push_z > -4 && viewer.push_z < 4) {
+        viewer.push_z = 0;
     }
-    viewer.unk1CC += vis_table_b.unk71A4 / 4;
-    viewer.unk1D0 += vis_table_b.unk71A8 / 4;
-    viewer.unk1CC += vis_table_a.unk6160 / 2;
-    viewer.unk1D0 += vis_table_a.unk6164 / 2;
-    if (viewer.unk2C8 != 0 && viewer.unk21E == 0) {
-        func_80041150(ang, viewer.unk2C8);
+    viewer.push_x += vis_table_b.push_x / 4;
+    viewer.push_z += vis_table_b.push_z / 4;
+    viewer.push_x += vis_table_a.push_x / 2;
+    viewer.push_z += vis_table_a.push_z / 2;
+    if (viewer.walk_speed != 0 && viewer.motion_stopped == 0) {
+        player_move(ang, viewer.walk_speed);
     }
 }
 
 /* Swaps hand `a`'s item with slot `b`, twice for a two-handed item. */
 ADDRESS(0x80042620, 0x2e0)
-void func_80042620(u8 a, u8 b)
+void player_swap_hand_items(u8 a, u8 b)
 {
     int n = 1;
     SVECTOR unused0 = {0, 128, 0, -128};
     SVECTOR unused1 = {0, 4, 0, -4};
     u16 id;
-    ViewerModel *model_a;
+    EquipmentModel *model_a;
     StAnimFile *block_a;
     u8 model_id_a;
     u8 sound_a;
 
-    if ((viewer.unk38[3] != 0xffff && vis_table_c.unk0118[viewer.unk38[3]].unk26 == 9) ||
-        (viewer.unk38[4] != 0xffff && vis_table_c.unk0118[viewer.unk38[4]].unk26 == 9))
+    if ((viewer.equipment[3] != 0xffff && vis_table_c.types[viewer.equipment[3]].category == 9) ||
+        (viewer.equipment[4] != 0xffff && vis_table_c.types[viewer.equipment[4]].category == 9))
         n = 2;
     do {
         if (a == 0) {
-            id = viewer.unk38[3];
-            viewer.unk38[3] = viewer.unk38[4];
-            viewer.unk38[4] = id;
+            id = viewer.equipment[3];
+            viewer.equipment[3] = viewer.equipment[4];
+            viewer.equipment[4] = id;
         } else {
-            id = viewer.unk38[16];
-            viewer.unk38[16] = viewer.unk38[17];
-            viewer.unk38[17] = id;
+            id = viewer.equipment[16];
+            viewer.equipment[16] = viewer.equipment[17];
+            viewer.equipment[17] = id;
         }
-        model_a = viewer.unkE8[a];
-        viewer.unkE8[a] = viewer.unkE8[b];
-        viewer.unkE8[b] = model_a;
-        block_a = viewer.unkF8[a];
-        viewer.unkF8[a] = viewer.unkF8[b];
-        viewer.unkF8[b] = block_a;
-        model_id_a = viewer.unk148[a];
-        viewer.unk148[a] = viewer.unk148[b];
-        viewer.unk148[b] = model_id_a;
-        if (viewer.unk148[a] != 0xff)
-            anim_register(a + 32, viewer.unkF8[a]);
-        if (viewer.unk148[b] != 0xff)
-            anim_register(b + 32, viewer.unkF8[b]);
-        if (viewer.unk108[a])
-            ((StAnimSlot *)viewer.unk108[a])->unk2 = 0xffff;
-        if (viewer.unk108[b])
-            ((StAnimSlot *)viewer.unk108[b])->unk2 = 0xffff;
-        sound_a = viewer.unk1D4[a];
-        viewer.unk1D4[a] = viewer.unk1D4[b];
-        viewer.unk1D4[b] = sound_a;
+        model_a = viewer.slot_model_info[a];
+        viewer.slot_model_info[a] = viewer.slot_model_info[b];
+        viewer.slot_model_info[b] = model_a;
+        block_a = viewer.slot_model_files[a];
+        viewer.slot_model_files[a] = viewer.slot_model_files[b];
+        viewer.slot_model_files[b] = block_a;
+        model_id_a = viewer.slot_model_ids[a];
+        viewer.slot_model_ids[a] = viewer.slot_model_ids[b];
+        viewer.slot_model_ids[b] = model_id_a;
+        if (viewer.slot_model_ids[a] != 0xff)
+            anim_register(a + 32, viewer.slot_model_files[a]);
+        if (viewer.slot_model_ids[b] != 0xff)
+            anim_register(b + 32, viewer.slot_model_files[b]);
+        if (viewer.slot_anims[a])
+            ((StAnimSlot *)viewer.slot_anims[a])->model_id = 0xffff;
+        if (viewer.slot_anims[b])
+            ((StAnimSlot *)viewer.slot_anims[b])->model_id = 0xffff;
+        sound_a = viewer.slot_sounds[a];
+        viewer.slot_sounds[a] = viewer.slot_sounds[b];
+        viewer.slot_sounds[b] = sound_a;
         if (a == 0) {
-            viewer.unk17E = 0;
+            viewer.weapon_gauge = 0;
             a = 1;
             b = 3;
         } else {
@@ -2808,16 +2808,16 @@ void func_80042620(u8 a, u8 b)
             b = 2;
         }
     } while (--n);
-    if (viewer.unk148[0] >= 31 && viewer.unk148[0] < 35)
-        anim_register(33, viewer.unkF8[1]);
-    if (viewer.unk148[2] >= 31 && viewer.unk148[2] < 35)
-        anim_register(35, viewer.unkF8[3]);
-    viewer.unk108[0] = 0;
-    viewer.unk108[1] = 0;
-    viewer.unk108[2] = 0;
-    viewer.unk108[3] = 0;
-    func_8003cedc();
-    viewer.unk18A = 0xffff;
+    if (viewer.slot_model_ids[0] >= 31 && viewer.slot_model_ids[0] < 35)
+        anim_register(33, viewer.slot_model_files[1]);
+    if (viewer.slot_model_ids[2] >= 31 && viewer.slot_model_ids[2] < 35)
+        anim_register(35, viewer.slot_model_files[3]);
+    viewer.slot_anims[0] = 0;
+    viewer.slot_anims[1] = 0;
+    viewer.slot_anims[2] = 0;
+    viewer.slot_anims[3] = 0;
+    player_recalc_stats();
+    viewer.hud_hp = 0xffff;
 }
 
 /*
@@ -2825,108 +2825,108 @@ void func_80042620(u8 a, u8 b)
  * The paired timer word must be -1 before either equipment request runs.
  */
 ADDRESS(0x80042900, 0x29c)
-void func_80042900(void)
+void player_update_hands(void)
 {
-    if (DAT_801cd180.unk14 == 2) {
-        DAT_801cd180.unk14 = 0;
-        if (viewer.unk130.word == -1 && viewer.unk38[4] != 0xffff) {
-            func_80042620(0, 2);
-            func_8003d030();
+    if (pad_state.combo == 2) {
+        pad_state.combo = 0;
+        if (viewer.action_timers.word == -1 && viewer.equipment[4] != 0xffff) {
+            player_swap_hand_items(0, 2);
+            player_update_durability_warning();
         }
     }
-    if (DAT_801cd180.unk14 == 3) {
-        DAT_801cd180.unk14 = 0;
-        if (viewer.unk130.word == -1 && viewer.unk38[17] != 0xffff) {
-            func_80042620(1, 3);
-            func_8003d030();
+    if (pad_state.combo == 3) {
+        pad_state.combo = 0;
+        if (viewer.action_timers.word == -1 && viewer.equipment[17] != 0xffff) {
+            player_swap_hand_items(1, 3);
+            player_update_durability_warning();
         }
     }
-    if (DAT_801cd180.unk14 == 4) {
-        DAT_801cd180.unk14 = 0;
-        if (viewer.unk182 >= 0x1400)
-            func_8003f670(0, 0);
+    if (pad_state.combo == 4) {
+        pad_state.combo = 0;
+        if (viewer.magic_gauge >= 0x1400)
+            player_start_cast(0, 0);
     }
-    if (DAT_801cd180.unk14 == 5) {
-        DAT_801cd180.unk14 = 0;
-        if (viewer.unk182 >= 0x1400)
-            func_8003f670(0, 1);
+    if (pad_state.combo == 5) {
+        pad_state.combo = 0;
+        if (viewer.magic_gauge >= 0x1400)
+            player_start_cast(0, 1);
     }
-    if (viewer.unk155[0] != 0xff && --viewer.unk15B[0] == 0) {
-        func_8003f910(viewer.unk155[0], 0);
-        if (--viewer.unk157[0] == 0)
-            viewer.unk155[0] = 0xff;
+    if (viewer.shot_magic[0] != 0xff && --viewer.shot_countdown[0] == 0) {
+        player_fire_magic_shot(viewer.shot_magic[0], 0);
+        if (--viewer.shots_left[0] == 0)
+            viewer.shot_magic[0] = 0xff;
         else
-            viewer.unk15B[0] = viewer.unk159[0];
+            viewer.shot_countdown[0] = viewer.shot_interval[0];
     }
-    if (viewer.unk155[1] != 0xff && --viewer.unk15B[1] == 0) {
-        func_8003f910(viewer.unk155[1], 1);
-        if (--viewer.unk157[1] == 0)
-            viewer.unk155[1] = 0xff;
+    if (viewer.shot_magic[1] != 0xff && --viewer.shot_countdown[1] == 0) {
+        player_fire_magic_shot(viewer.shot_magic[1], 1);
+        if (--viewer.shots_left[1] == 0)
+            viewer.shot_magic[1] = 0xff;
         else
-            viewer.unk15B[1] = viewer.unk159[1];
+            viewer.shot_countdown[1] = viewer.shot_interval[1];
     }
-    if (viewer.unk218 != 1) {
-        if (viewer.unk187 == 0 && (DAT_801cd180.unk4 & DAT_801cd180.unk22[8]))
-            func_8003f4ec(0, 0);
-        if (DAT_801cd180.unk4 & DAT_801cd180.unk22[9])
-            func_8003f4ec(0, 1);
+    if (viewer.state != 1) {
+        if (viewer.weapon_gauge_delay == 0 && (pad_state.pressed & pad_state.buttons[8]))
+            player_start_hand_action(0, 0);
+        if (pad_state.pressed & pad_state.buttons[9])
+            player_start_hand_action(0, 1);
     }
 }
 
 ADDRESS(0x80042b9c, 0x74)
-void func_80042b9c(void)
+void player_handle_examine(void)
 {
-    u8 mode = viewer.unk218;
+    u8 mode = viewer.state;
 
-    if (mode != 4 && (DAT_801cd180.unk4 & DAT_801cd180.unk22[10]) && !DAT_801cd180.unk12) {
-        DAT_801cd180.unk4 &= ~DAT_801cd180.unk22[10];
+    if (mode != 4 && (pad_state.pressed & pad_state.buttons[10]) && !pad_state.combo_timer) {
+        pad_state.pressed &= ~pad_state.buttons[10];
         if (mode == 0)
-            func_80055374(&viewer.position.vx, &viewer.unk278);
+            player_examine(&viewer.position.vx, &viewer.view_rot);
     }
 }
 
 ADDRESS(0x80042c10, 0x34)
-void func_80042c10(void)
+void player_enter_normal_state(void)
 {
-    viewer.unk218 = 0;
-    viewer.unk280.halves[0] = viewer.unk280.halves[1] = viewer.unk284 = 0;
-    viewer.unk288 = viewer.unk28A = viewer.unk28C = 0;
-    viewer.unk290 = viewer.unk292 = viewer.unk294 = 0;
+    viewer.state = 0;
+    viewer.rot_offset.halves[0] = viewer.rot_offset.halves[1] = viewer.roll_offset = 0;
+    viewer.shake_pitch = viewer.shake_yaw = viewer.shake_roll = 0;
+    viewer.fall_pitch = viewer.unk292 = viewer.unk294 = 0;
 }
 
 DATA(0x80088050, 0x4, ".sdata")
-static s32 DAT_80088050 = 0;
+static s32 guard_sound_frame = 0;
 
 ADDRESS(0x80042c44, 0xa8)
-void func_80042c44(SVECTOR *arg0, SVECTOR *arg1, s16 arg2, int arg3)
+void player_enter_hurt_state(SVECTOR *arg0, SVECTOR *arg1, s16 arg2, int arg3)
 {
-    viewer.unk218 = 16;
-    viewer.unk2D6 = 3500;
-    viewer.unk2D8 = arg2;
-    if (viewer.unk0 < arg3 * 10)
-        viewer.unk14E = 1;
-    if (viewer.unk38[16] != 0xffff && viewer.unk189 && DAT_80088050 != viewer.unk23C) {
-        func_800582f0(viewer.unk1D4[1], 128);
-        DAT_80088050 = viewer.unk23C;
+    viewer.state = 16;
+    viewer.red_fade = 3500;
+    viewer.red_fade_step = arg2;
+    if (viewer.max_hp < arg3 * 10)
+        viewer.action_recoil = 1;
+    if (viewer.equipment[16] != 0xffff && viewer.shield_raised && guard_sound_frame != viewer.frame_count) {
+        sound_play(viewer.slot_sounds[1], 128);
+        guard_sound_frame = viewer.frame_count;
     }
 }
 
 ADDRESS(0x80042cec, 0x10)
-void func_80042cec(void)
+void player_enter_frozen_state(void)
 {
-    viewer.unk218 = 2;
+    viewer.state = 2;
 }
 
 /* Frees the animation slots and objects with two state bytes held. */
 ADDRESS(0x80042cfc, 0x78)
-void func_80042cfc(void)
+void anim_free_all_for_menu(void)
 {
-    u8 *flags = (u8 *)&DAT_801cd120;
+    u8 *flags = (u8 *)&game_settings;
     u8 a = flags[3];
     u8 b = flags[5];
 
     flags[3] = 0;
-    func_80026afc(0, 0);
+    world_render_frame(0, 0);
     anim_slots_free_idle();
     anim_sets_free_idle();
     anim_slots_free_all();
@@ -2937,11 +2937,11 @@ void func_80042cfc(void)
 
 /* The per-frame player update: the status timers, opening the pause menu
  * and the map, the walk and stamina limits, the state machine of
- * viewer.unk218 (walking, using an item, dying, falling into a pit), the
+ * viewer.state (walking, using an item, dying, falling into a pit), the
  * floor damage and the status damage over time, the view angles, the
  * swings and the hit/magic point recovery. */
 ADDRESS(0x80042d74, 0x1678)
-void func_80042d74(void)
+void player_update(void)
 {
     RECT r;
     StAnimFile *file;
@@ -2952,77 +2952,77 @@ void func_80042d74(void)
     int d;
 
     player_update_status(1);
-    if (viewer.unk218 == 0 || viewer.unk218 == 4 || viewer.unk218 == 16 || viewer.unk218 == 1) {
-        if (((DAT_801cd180.unk4 & 1) || DAT_801cd180.unk14 == 1) && viewer.unk130.word == -1 &&
-            viewer.unk218 != 1 && viewer.unk218 != 4 && !(viewer.unk2C & 0x10) &&
-            area_state.unk0 == 0 && vis_table_a.unk6169 == 0 && area_state.unk18 == -1) {
-            Vis88 *entry;
+    if (viewer.state == 0 || viewer.state == 4 || viewer.state == 16 || viewer.state == 1) {
+        if (((pad_state.pressed & 1) || pad_state.combo == 1) && viewer.action_timers.word == -1 &&
+            viewer.state != 1 && viewer.state != 4 && !(viewer.status_flags & 0x10) &&
+            area_state.loading == 0 && vis_table_a.object_sequence_state == 0 && area_state.entry_fade_start == -1) {
+            AreaObject *entry;
             int left;
 
             i = 16;
-            lighting.unkA = 1;
-            func_80057cc8();
-            func_80042cfc();
-            func_80057a3c();
-            func_80057a68(0);
+            lighting.paused = 1;
+            play_confirm_sound();
+            anim_free_all_for_menu();
+            pad_clear_input();
+            pad_vibrate(0);
             entry = vis_table_b.entries;
             left = 240;
             while (left--) {
-                if (entry->unk05 == 236 && entry->unk54 != -1) {
-                    func_8005850c(entry->unk54, entry->unk4A.snd.unk4A + 1108);
+                if (entry->kind == 236 && entry->unk54 != -1) {
+                    sound_stop(entry->unk54, entry->params.snd.sound + 1108);
                     entry->unk54 = -1;
                 }
                 entry++;
             }
-            viewer.unk21D = 0;
-            viewer.unk2B = 0;
-            viewer.unk2A = 0;
-            func_80058ef4();
-            if (DAT_801cd120.unk3 == 0) {
-                func_8003e840();
+            viewer.free_anims_after_menu = 0;
+            viewer.save_warp_request = 0;
+            viewer.card_screen_done = 0;
+            menu_main_run();
+            if (game_settings.show_status == 0) {
+                hud_clear_damage_numbers();
             }
-            if (viewer.unk2A) {
-                func_8003e840();
-                func_80057a3c();
-                DAT_801cd180.unk10 = 1;
-                func_80016508();
-                viewer.unk2D6 = viewer.unk2D8 = viewer.unk2DA = viewer.unk2DC = 0;
-                func_800500ac(2, 4096, 4096, 0);
-                func_800500ac(2, 4096, 4096, 0);
-                func_80015ad4();
-                func_8003c0e0();
-                vis_table_a.unk6168 = 254;
-                vis_table_a.unk6158[0] = vis_table_a.unk6158[1] = vis_table_a.unk6158[2] =
-                    vis_table_a.unk6158[3] = 255;
-                func_80057a68(0);
+            if (viewer.card_screen_done) {
+                hud_clear_damage_numbers();
+                pad_clear_input();
+                pad_state.disabled = 1;
+                fade_reset();
+                viewer.red_fade = viewer.red_fade_step = viewer.yellow_fade = viewer.yellow_fade_step = 0;
+                fade_run_frames(2, 4096, 4096, 0);
+                fade_run_frames(2, 4096, 4096, 0);
+                cd_wait_idle();
+                player_reload_equipment();
+                vis_table_a.zone = 254;
+                vis_table_a.zone_history[0] = vis_table_a.zone_history[1] = vis_table_a.zone_history[2] =
+                    vis_table_a.zone_history[3] = 255;
+                pad_vibrate(0);
                 fx = effects.slots;
                 k = 128;
                 while (k--) {
-                    fx->unk0 = 255;
+                    fx->flags = 255;
                     fx++;
                 }
-                func_8003c95c(area_state.unk4, area_state.unk4, area_state.unk4, area_state.unk7,
+                area_load_set_blocking(area_state.loaded_area, area_state.loaded_area, area_state.loaded_area, area_state.loaded_sound_bank,
                               area_state.unk8, 255);
-                func_80015ad4();
-                func_8003ead0();
+                cd_wait_idle();
+                player_stop_motion();
             } else {
-                if (viewer.unk21D) {
+                if (viewer.free_anims_after_menu) {
                     while (i--) {
                         anim_get_file(i + 128, &file);
                         if (file) {
-                            func_80015230(file);
+                            heap_free(file);
                         }
                     }
                     i = 128;
                     while (i--) {
                         anim_get_file(i + 588, &file);
                         if (file) {
-                            func_80015230(file);
+                            heap_free(file);
                         }
                     }
                 }
-                player_equipment_bonuses();
-                func_8003d030();
+                player_sum_equipment_bonuses();
+                player_update_durability_warning();
                 {
                     world_state.draw[0].clip.w = 0;
                     world_state.draw[0].clip.h = 0;
@@ -3035,170 +3035,170 @@ void func_80042d74(void)
                     MoveImage(&r, 0, world_state.frame * 240);
                     DrawSync(0);
                     player_update_status(0);
-                    func_80026afc(0, 0);
+                    world_render_frame(0, 0);
                     player_update_status(0);
-                    func_80015ad4();
+                    cd_wait_idle();
                     world_state.draw[0].clip.w = 320;
                     world_state.draw[0].clip.h = 240;
                     world_state.draw[1].clip.w = 320;
                     world_state.draw[1].clip.h = 240;
                 }
             }
-            func_80057a3c();
-            lighting.unkA = 2;
+            pad_clear_input();
+            lighting.paused = 2;
         }
-        if (viewer.unk2B) {
-            func_80052c24();
+        if (viewer.save_warp_request) {
+            player_warp_to_save_point();
         }
-        if ((DAT_801cd180.unk4 & 8) && viewer.unk218 != 4 && area_state.unk0 == 0 &&
-            vis_table_a.unk6169 == 0 && area_state.unk18 == -1) {
-            lighting.unkA = 1;
-            func_80057cc8();
-            DAT_801cd180.unk4 &= ~8;
-            func_80057a3c();
-            func_80057a68(0);
-            func_800631ac();
-            func_80057a3c();
-            lighting.unkA = 2;
+        if ((pad_state.pressed & 8) && viewer.state != 4 && area_state.loading == 0 &&
+            vis_table_a.object_sequence_state == 0 && area_state.entry_fade_start == -1) {
+            lighting.paused = 1;
+            play_confirm_sound();
+            pad_state.pressed &= ~8;
+            pad_clear_input();
+            pad_vibrate(0);
+            pause_screen_run();
+            pad_clear_input();
+            lighting.paused = 2;
         }
-        viewer.unk2E4 = 192;
-        viewer.unk2E8 = 32;
-        if (!(DAT_801cd180.unk2 & (DAT_801cd180.unk22[0] | DAT_801cd180.unk22[1]))) {
-            viewer.unk2E8 = 40;
+        viewer.walk_speed_max = 192;
+        viewer.yaw_speed_max = 32;
+        if (!(pad_state.held & (pad_state.buttons[0] | pad_state.buttons[1]))) {
+            viewer.yaw_speed_max = 40;
         }
         if (viewer.unk190[3][0] != 0) {
-            viewer.unk2E4 = 96;
+            viewer.walk_speed_max = 96;
         }
         if (viewer.unk190[1][0] != 0) {
-            viewer.unk2E4 = 0;
-            if (viewer.unk2C & 0x10) {
-                viewer.unk2E8 = 0;
+            viewer.walk_speed_max = 0;
+            if (viewer.status_flags & 0x10) {
+                viewer.yaw_speed_max = 0;
             }
             if (viewer.unk190[1][0] % 20 == 0) {
-                func_800582f0(6, 128);
+                sound_play(6, 128);
             }
         }
-        if (viewer.unk22 > viewer.unk24) {
-            int limit = viewer.unk2E4 - (viewer.unk22 - viewer.unk24) / 5;
+        if (viewer.equip_weight > viewer.equip_weight_limit) {
+            int limit = viewer.walk_speed_max - (viewer.equip_weight - viewer.equip_weight_limit) / 5;
 
             if (limit < 0) {
-                viewer.unk2E4 = 0;
+                viewer.walk_speed_max = 0;
             } else {
-                viewer.unk2E4 = limit;
+                viewer.walk_speed_max = limit;
             }
         }
-        switch (viewer.unk218) {
+        switch (viewer.state) {
         case 0:
-            func_80042900();
-            if (area_state.unk0 != 1 && vis_table_a.unk6169 == 0) {
-                func_80041d4c();
-                func_800420a0();
-                func_8004162c();
-                viewer.unk21E = 0;
-                if ((DAT_801cd180.unk4 & DAT_801cd180.unk22[11]) && DAT_801cd180.unk12 == 0 &&
-                    (viewer.unk38[5] != 0xffff || viewer.unk38[19] != 0xffff ||
-                     viewer.unk38[11] != 0xffff || viewer.unk38[20] != 0xffff ||
-                     viewer.unk38[18] != 0xffff)) {
-                    func_80057cc8();
-                    DAT_801cd180.unk4 &= DAT_801cd180.unk22[11];
-                    viewer.unk218 = 1;
-                    func_80057a3c();
+            player_update_hands();
+            if (area_state.loading != 1 && vis_table_a.object_sequence_state == 0) {
+                player_update_look();
+                player_update_walk();
+                player_update_motion();
+                viewer.motion_stopped = 0;
+                if ((pad_state.pressed & pad_state.buttons[11]) && pad_state.combo_timer == 0 &&
+                    (viewer.equipment[5] != 0xffff || viewer.equipment[19] != 0xffff ||
+                     viewer.equipment[11] != 0xffff || viewer.equipment[20] != 0xffff ||
+                     viewer.equipment[18] != 0xffff)) {
+                    play_confirm_sound();
+                    pad_state.pressed &= pad_state.buttons[11];
+                    viewer.state = 1;
+                    pad_clear_input();
                 }
             }
-            func_80042b9c();
+            player_handle_examine();
             break;
         case 1:
-            func_80042900();
-            if (area_state.unk0 == 1 || vis_table_a.unk6169) {
+            player_update_hands();
+            if (area_state.loading == 1 || vis_table_a.object_sequence_state) {
                 goto status;
             }
-            func_80041d4c();
-            func_800420a0();
-            func_8004162c();
-            viewer.unk21E = 0;
-            if (DAT_801cd180.unk4 & DAT_801cd180.unk22[8]) {
-                func_80057d10();
-                DAT_801cd180.unk4 &= ~DAT_801cd180.unk22[8];
-                if (++viewer.unk15E >= 5) {
-                    viewer.unk15E = 0;
+            player_update_look();
+            player_update_walk();
+            player_update_motion();
+            viewer.motion_stopped = 0;
+            if (pad_state.pressed & pad_state.buttons[8]) {
+                play_cursor_sound();
+                pad_state.pressed &= ~pad_state.buttons[8];
+                if (++viewer.quick_item_index >= 5) {
+                    viewer.quick_item_index = 0;
                 }
-            } else if (DAT_801cd180.unk4 & DAT_801cd180.unk22[9]) {
-                func_80057d10();
-                DAT_801cd180.unk4 &= ~DAT_801cd180.unk22[9];
-                if (--viewer.unk15E < 0) {
-                    viewer.unk15E = 4;
+            } else if (pad_state.pressed & pad_state.buttons[9]) {
+                play_cursor_sound();
+                pad_state.pressed &= ~pad_state.buttons[9];
+                if (--viewer.quick_item_index < 0) {
+                    viewer.quick_item_index = 4;
                 }
             } else {
-                if ((DAT_801cd180.unk4 & DAT_801cd180.unk22[11]) && DAT_801cd180.unk12 == 0) {
-                    func_80057cec();
-                    viewer.unk218 = 0;
-                    DAT_801cd180.unk4 &= ~DAT_801cd180.unk22[11];
-                    DAT_801cd180.unk4 &= ~DAT_801cd180.unk22[10];
-                } else if ((DAT_801cd180.unk4 & DAT_801cd180.unk22[10]) && DAT_801cd180.unk12 == 0) {
-                    int ids[5] = {viewer.unk38[5], viewer.unk38[19], viewer.unk38[11],
-                                  viewer.unk38[20], viewer.unk38[18]};
+                if ((pad_state.pressed & pad_state.buttons[11]) && pad_state.combo_timer == 0) {
+                    play_cancel_sound();
+                    viewer.state = 0;
+                    pad_state.pressed &= ~pad_state.buttons[11];
+                    pad_state.pressed &= ~pad_state.buttons[10];
+                } else if ((pad_state.pressed & pad_state.buttons[10]) && pad_state.combo_timer == 0) {
+                    int ids[5] = {viewer.equipment[5], viewer.equipment[19], viewer.equipment[11],
+                                  viewer.equipment[20], viewer.equipment[18]};
 
-                    viewer.unk218 = 0;
-                    DAT_801cd180.unk4 &= ~DAT_801cd180.unk22[8];
-                    DAT_801cd180.unk4 &= ~DAT_801cd180.unk22[11];
-                    DAT_801cd180.unk4 &= ~DAT_801cd180.unk22[9];
-                    DAT_801cd180.unk4 &= ~DAT_801cd180.unk22[10];
-                    if (ids[viewer.unk15E] != 0xffff) {
-                        viewer.unk2B = 0;
-                        func_80054a54(ids[viewer.unk15E]);
+                    viewer.state = 0;
+                    pad_state.pressed &= ~pad_state.buttons[8];
+                    pad_state.pressed &= ~pad_state.buttons[11];
+                    pad_state.pressed &= ~pad_state.buttons[9];
+                    pad_state.pressed &= ~pad_state.buttons[10];
+                    if (ids[viewer.quick_item_index] != 0xffff) {
+                        viewer.save_warp_request = 0;
+                        item_use(ids[viewer.quick_item_index]);
                         if (DAT_801cd0e0 == 1) {
-                            func_80057cc8();
-                            if (ids[viewer.unk15E] == 288) {
-                                func_8005a3a8(0);
+                            play_confirm_sound();
+                            if (ids[viewer.quick_item_index] == 288) {
+                                player_compute_derived_stats(0);
                             }
-                            if (DAT_801c7590.counts[ids[viewer.unk15E]].count == 0) {
+                            if (inventory.counts[ids[viewer.quick_item_index]].count == 0) {
                                 RECT icon = {896, 256, 24, 24};
 
-                                switch (viewer.unk15E) {
+                                switch (viewer.quick_item_index) {
                                 case 0:
-                                    viewer.unk38[5] = 0xffff;
+                                    viewer.equipment[5] = 0xffff;
                                     break;
                                 case 1:
-                                    viewer.unk38[19] = 0xffff;
+                                    viewer.equipment[19] = 0xffff;
                                     break;
                                 case 2:
-                                    viewer.unk38[11] = 0xffff;
+                                    viewer.equipment[11] = 0xffff;
                                     break;
                                 case 3:
-                                    viewer.unk38[20] = 0xffff;
+                                    viewer.equipment[20] = 0xffff;
                                     break;
                                 case 4:
-                                    viewer.unk38[18] = 0xffff;
+                                    viewer.equipment[18] = 0xffff;
                                     break;
                                 }
-                                icon.y = viewer.unk15E * 24 + 256;
+                                icon.y = viewer.quick_item_index * 24 + 256;
                                 ClearImage(&icon, 0, 0, 0);
                             }
                         } else if (DAT_801cd0e0 == 2) {
-                            func_80057d34();
+                            play_refuse_sound();
                         }
                     } else {
-                        func_80057d34();
+                        play_refuse_sound();
                     }
                 } else {
                     goto status;
                 }
-                func_80057a3c();
+                pad_clear_input();
             }
         status:
-            func_80042b9c();
+            player_handle_examine();
             break;
         case 4:
-            if (viewer.unk286 < 17) {
-                func_80021994(255, 255, 255, viewer.unk286 << 8, 2);
-                viewer.unk280.halves[0] += viewer.unk17A;
-                if (viewer.unk286 == 16) {
+            if (viewer.death_timer < 17) {
+                fade_add_color(255, 255, 255, viewer.death_timer << 8, 2);
+                viewer.rot_offset.halves[0] += viewer.death_pitch_step;
+                if (viewer.death_timer == 16) {
                     area_state.hooks->player_died();
-                    func_80021994(255, 255, 255, viewer.unk286 << 8, 2);
+                    fade_add_color(255, 255, 255, viewer.death_timer << 8, 2);
                 }
             } else {
-                func_80021994(255, 255, 255, 4096, 2);
-                if (viewer.unk286 == 20) {
+                fade_add_color(255, 255, 255, 4096, 2);
+                if (viewer.death_timer == 20) {
                     RECT clear = {0, 0, 320, 480};
 
                     anim_slots_free_idle();
@@ -3208,89 +3208,89 @@ void func_80042d74(void)
                     fx = effects.slots;
                     k = 128;
                     while (k--) {
-                        fx->unk0 = 255;
+                        fx->flags = 255;
                         fx++;
                     }
                     for (;;) {
-                        if (func_80063260() == 0) {
-                            Vis88 *b;
+                        if (menu_game_over_run() == 0) {
+                            AreaObject *b;
 
                             b = vis_table_b.entries;
-                            func_80016508();
-                            viewer.unk2D6 = viewer.unk2D8 = viewer.unk2DA = viewer.unk2DC = 0;
-                            func_800500ac(2, 4096, 4096, 256);
+                            fade_reset();
+                            viewer.red_fade = viewer.red_fade_step = viewer.yellow_fade = viewer.yellow_fade_step = 0;
+                            fade_run_frames(2, 4096, 4096, 256);
                             n = 240;
                             while (n--) {
-                                if (b->unk05 == 236 && b->unk54 != -1) {
-                                    func_8005850c(b->unk54, b->unk4A.snd.unk4A + 1108);
+                                if (b->kind == 236 && b->unk54 != -1) {
+                                    sound_stop(b->unk54, b->params.snd.sound + 1108);
                                     b->unk54 = -1;
                                 }
                                 b++;
                             }
-                            DAT_800881a4 = 2;
-                            world_state.unk1EE15 = 0;
+                            game_exit_request = 2;
+                            world_state.no_plane_test = 0;
                             break;
                         }
-                        func_8003e840();
+                        hud_clear_damage_numbers();
                         ClearImage(&clear, 0, 0, 0);
                         DrawSync(0);
-                        func_80058dc4(0, 1);
-                        if (func_80062c28(1) == 1) {
-                            Vis88 *b;
+                        card_screen_open(0, 1);
+                        if (card_screen_run(1) == 1) {
+                            AreaObject *b;
 
                             b = vis_table_b.entries;
                             n = 240;
                             while (n--) {
-                                if (b->unk05 == 236 && b->unk54 != -1) {
-                                    func_8005850c(b->unk54, b->unk4A.snd.unk4A + 1108);
+                                if (b->kind == 236 && b->unk54 != -1) {
+                                    sound_stop(b->unk54, b->params.snd.sound + 1108);
                                     b->unk54 = -1;
                                 }
                                 b++;
                             }
-                            func_80057a3c();
-                            func_80058ed4();
-                            func_80016508();
-                            viewer.unk2D6 = viewer.unk2D8 = viewer.unk2DA = viewer.unk2DC = 0;
-                            func_800500ac(2, 0, 4096, 256);
-                            func_80015ad4();
-                            func_8003c0e0();
-                            vis_table_a.unk6168 = 254;
-                            vis_table_a.unk6158[0] = vis_table_a.unk6158[1] =
-                                vis_table_a.unk6158[2] = vis_table_a.unk6158[3] = 255;
-                            func_80057a68(0);
-                            func_8003c95c(area_state.unk4, area_state.unk4, area_state.unk4,
-                                          area_state.unk7, area_state.unk8, 255);
-                            func_80015ad4();
-                            func_8003ead0();
+                            pad_clear_input();
+                            card_screen_close();
+                            fade_reset();
+                            viewer.red_fade = viewer.red_fade_step = viewer.yellow_fade = viewer.yellow_fade_step = 0;
+                            fade_run_frames(2, 0, 4096, 256);
+                            cd_wait_idle();
+                            player_reload_equipment();
+                            vis_table_a.zone = 254;
+                            vis_table_a.zone_history[0] = vis_table_a.zone_history[1] =
+                                vis_table_a.zone_history[2] = vis_table_a.zone_history[3] = 255;
+                            pad_vibrate(0);
+                            area_load_set_blocking(area_state.loaded_area, area_state.loaded_area, area_state.loaded_area,
+                                          area_state.loaded_sound_bank, area_state.unk8, 255);
+                            cd_wait_idle();
+                            player_stop_motion();
                             break;
                         }
-                        func_80057a3c();
-                        func_80058ed4();
+                        pad_clear_input();
+                        card_screen_close();
                         ClearImage(&clear, 0, 0, 0);
                         DrawSync(0);
                     }
                 }
             }
-            viewer.unk286++;
+            viewer.death_timer++;
             break;
         case 16:
-            func_80042900();
-            func_80041d4c();
-            func_800420a0();
-            if (viewer.unk280.word == 0 && viewer.unk284 == 0) {
-                func_80042c10();
+            player_update_hands();
+            player_update_look();
+            player_update_walk();
+            if (viewer.rot_offset.word == 0 && viewer.roll_offset == 0) {
+                player_enter_normal_state();
             }
-            func_8004162c();
-            viewer.unk21E = 0;
-            func_80042b9c();
+            player_update_motion();
+            viewer.motion_stopped = 0;
+            player_handle_examine();
             break;
         case 5:
         case 6:
-            func_8003ead0();
-            vis_table_b.unk71A4 = vis_table_b.unk71A6 = vis_table_b.unk71A8 = 0;
-            vis_lists.unk47CE = vis_lists.unk47D0 = vis_lists.unk47D2 = 0;
-            vis_table_a.unk6160 = vis_table_a.unk6162 = vis_table_a.unk6164 = 0;
-            viewer.unk1CC = viewer.unk1CE = viewer.unk1D0 = 0;
+            player_stop_motion();
+            vis_table_b.push_x = vis_table_b.push_y = vis_table_b.push_z = 0;
+            vis_lists.floor_push_x = vis_lists.floor_push_y = vis_lists.floor_push_z = 0;
+            vis_table_a.push_x = vis_table_a.push_y = vis_table_a.push_z = 0;
+            viewer.push_x = viewer.push_y = viewer.push_z = 0;
             break;
         }
         {
@@ -3301,17 +3301,17 @@ void func_80042d74(void)
             u16 hit3[9];
             long from3[4];
 
-            if ((vis_lists.unk47DC & 0x10) && vis_lists.unk30 < 1601) {
+            if ((vis_lists.floor_kinds & 0x10) && vis_lists.floor_dist < 1601) {
                 memset(hit, 0, sizeof(hit));
                 memset(from, 0, sizeof(from));
                 player_hit(hit, 4096, 7, from);
             }
-            if ((vis_lists.unk47DC & 0x20) && vis_lists.unk30 < 1601) {
+            if ((vis_lists.floor_kinds & 0x20) && vis_lists.floor_dist < 1601) {
                 memset(hit2, 0, sizeof(hit2));
                 memset(from2, 0, sizeof(from2));
                 player_hit(hit2, 4096, 1024, from2);
             }
-            if ((vis_lists.unk47DC & 8) && vis_lists.unk30 < 1601) {
+            if ((vis_lists.floor_kinds & 8) && vis_lists.floor_dist < 1601) {
                 memset(hit3, 0, sizeof(hit3));
                 hit3[3] = 150;
                 memset(from3, 0, sizeof(from3));
@@ -3319,44 +3319,44 @@ void func_80042d74(void)
             }
             if (viewer.unk190[0][0] != 0) {
                 d = 0;
-                if (viewer.unk2C & 4) {
+                if (viewer.status_flags & 4) {
                     d = -256;
-                } else if (viewer.unk2C & 2) {
+                } else if (viewer.status_flags & 2) {
                     d = -64;
-                } else if (viewer.unk2C & 1) {
+                } else if (viewer.status_flags & 1) {
                     d = -16;
                 }
                 if (viewer.unk190[0][0] % 20 == 0) {
                     player_add_hp(d);
-                    func_800582f0(5, 128);
+                    sound_play(5, 128);
                 }
             }
             if (viewer.unk190[4][0] != 0 && viewer.unk190[4][0] % 20 == 0) {
                 player_add_hp(-1);
                 player_add_mp(-1);
             }
-            if (viewer.unk22 > viewer.unk24 && viewer.unk23C % 20 == 0) {
-                player_add_hp(viewer.unk24 / 10 - viewer.unk22 / 10);
+            if (viewer.equip_weight > viewer.equip_weight_limit && viewer.frame_count % 20 == 0) {
+                player_add_hp(viewer.equip_weight_limit / 10 - viewer.equip_weight / 10);
             }
-            if ((viewer.unk2C & 0x400) || viewer.unk2F0) {
-                if (viewer.unk23C % 20 == 0) {
-                    int heal = (viewer.unkD8[3] - 256) / 4;
+            if ((viewer.status_flags & 0x400) || viewer.submerged_acid) {
+                if (viewer.frame_count % 20 == 0) {
+                    int heal = (viewer.element_defence[3] - 256) / 4;
 
-                    if (viewer.unk2C & 0x800000) {
+                    if (viewer.status_flags & 0x800000) {
                         player_add_hp(heal / 2);
                     } else {
                         player_add_hp(heal);
                     }
                 }
-                if (viewer.unk23C % 60 == 0) {
-                    u16 *slots[9] = {&viewer.unk38[8], &viewer.unk38[9], &viewer.unk38[10],
-                                     &viewer.unk38[3], &viewer.unk38[16], &viewer.unk38[2],
-                                     &viewer.unk38[0], &viewer.unk38[13], NULL};
+                if (viewer.frame_count % 60 == 0) {
+                    u16 *slots[9] = {&viewer.equipment[8], &viewer.equipment[9], &viewer.equipment[10],
+                                     &viewer.equipment[3], &viewer.equipment[16], &viewer.equipment[2],
+                                     &viewer.equipment[0], &viewer.equipment[13], NULL};
 
-                    if (viewer.unk2F0) {
+                    if (viewer.submerged_acid) {
                         int j;
 
-                        if (viewer.unk2C & 0x800000) {
+                        if (viewer.status_flags & 0x800000) {
                             for (j = 0; j < 8; j++) {
                                 if (*slots[j] != 0xffff) {
                                     player_wear_item(1, slots[j]);
@@ -3369,7 +3369,7 @@ void func_80042d74(void)
                                 }
                             }
                         }
-                    } else if (viewer.unk2C & 0x800000) {
+                    } else if (viewer.status_flags & 0x800000) {
                         if (*slots[2] != 0xffff) {
                             player_wear_item(1, slots[2]);
                         }
@@ -3377,42 +3377,42 @@ void func_80042d74(void)
                         player_wear_item(2, slots[2]);
                     }
                 }
-                viewer.unk2C &= ~0x400;
+                viewer.status_flags &= ~0x400;
             }
             player_update_shake();
-            viewer.unk268 = viewer.unk278.vx + viewer.unk280.halves[0] + viewer.unk288 + viewer.unk290;
-            viewer.unk26A = viewer.unk278.vy + viewer.unk280.halves[1] + viewer.unk28A + viewer.unk292;
-            viewer.unk26C = viewer.unk278.vz + viewer.unk284 + viewer.unk28C + viewer.unk294;
-            viewer.unk288 = viewer.unk28A = viewer.unk28C = 0;
-            viewer.unk270.vx = 4096 - viewer.unk268;
-            viewer.unk270.vy = 4096 - viewer.unk26A;
-            viewer.unk270.vz = 4096 - viewer.unk26C;
-            RotMatrixZYX(&viewer.unk270, &viewer.unk298);
-            vis_lists.unk47CE /= 2;
-            vis_lists.unk47D0 /= 2;
-            vis_lists.unk47D2 /= 2;
-            if (vis_lists.unk47CE >= -4 && vis_lists.unk47CE < 4) {
-                vis_lists.unk47CE = 0;
+            viewer.pitch = viewer.view_rot.vx + viewer.rot_offset.halves[0] + viewer.shake_pitch + viewer.fall_pitch;
+            viewer.yaw = viewer.view_rot.vy + viewer.rot_offset.halves[1] + viewer.shake_yaw + viewer.unk292;
+            viewer.roll = viewer.view_rot.vz + viewer.roll_offset + viewer.shake_roll + viewer.unk294;
+            viewer.shake_pitch = viewer.shake_yaw = viewer.shake_roll = 0;
+            viewer.camera_rot.vx = 4096 - viewer.pitch;
+            viewer.camera_rot.vy = 4096 - viewer.yaw;
+            viewer.camera_rot.vz = 4096 - viewer.roll;
+            RotMatrixZYX(&viewer.camera_rot, &viewer.camera_matrix);
+            vis_lists.floor_push_x /= 2;
+            vis_lists.floor_push_y /= 2;
+            vis_lists.floor_push_z /= 2;
+            if (vis_lists.floor_push_x >= -4 && vis_lists.floor_push_x < 4) {
+                vis_lists.floor_push_x = 0;
             }
-            if (vis_lists.unk47D0 >= -4 && vis_lists.unk47D0 < 4) {
-                vis_lists.unk47D0 = 0;
+            if (vis_lists.floor_push_y >= -4 && vis_lists.floor_push_y < 4) {
+                vis_lists.floor_push_y = 0;
             }
-            if (vis_lists.unk47D2 >= -4 && vis_lists.unk47D2 < 4) {
-                vis_lists.unk47D2 = 0;
+            if (vis_lists.floor_push_z >= -4 && vis_lists.floor_push_z < 4) {
+                vis_lists.floor_push_z = 0;
             }
-            func_800402ac(0);
-            func_800402ac(1);
-            func_80040024(0);
-            func_80040024(1);
-            if (viewer.unk218 != 4) {
-                if (viewer.unk2 * 2 < viewer.unk0 && viewer.unk1C4 && viewer.unk23C % viewer.unk1C4 == 0) {
+            player_update_hand_action(0);
+            player_update_hand_action(1);
+            player_update_cast(0);
+            player_update_cast(1);
+            if (viewer.state != 4) {
+                if (viewer.hp * 2 < viewer.max_hp && viewer.hp_regen_interval && viewer.frame_count % viewer.hp_regen_interval == 0) {
                     player_add_hp(1);
                 }
-                if (viewer.unk6 * 2 < viewer.unk4 && viewer.unk1C5 && viewer.unk23C % viewer.unk1C5 == 0) {
+                if (viewer.mp * 2 < viewer.max_mp && viewer.mp_regen_interval && viewer.frame_count % viewer.mp_regen_interval == 0) {
                     player_add_mp(1);
                 }
             }
-            viewer.unk23C++;
+            viewer.frame_count++;
         }
     }
 }

@@ -3,7 +3,7 @@
  * the 21 functions every overlay starts with (src/lib/fdat_common_a.inc,
  * fdat_common.inc, fdat_common_b.inc), then its map handlers through its
  * own move picker. One object, because the picker's switch table is
- * 8-aligned after fdat_801ebec4's in the same read-only run.
+ * 8-aligned after creature_run_script_command's in the same read-only run.
  */
 #include <kf/lib/address.h>
 #include <kf/lib/types.h>
@@ -24,20 +24,20 @@
 
 RODATA(0x801eb560, 0x24c)
 
-void func_801ed4a0();
-void func_801ed58c();
+void map_restore_progress();
+void map_update_events();
 
 const FdatHeader fdat_header = {
     0xb,
     {
-        fdat_801ed498, func_801ed58c, fdat_801ed498, fdat_801ed498,
-        fdat_801ed498, func_801ed4a0, fdat_801ed498, fdat_801ed498,
-        fdat_801ed498, fdat_801ed498, fdat_801ed498, fdat_801ed498,
-        fdat_801ed498, fdat_801ed498, fdat_801ed498, fdat_801ed498,
-        fdat_801ed4a0, fdat_801ed6e4, fdat_801ed498, fdat_801ed498,
-        fdat_801ed498, fdat_801ed498, fdat_801ed498, fdat_801ed498,
-        fdat_801ed498, fdat_801ed498, fdat_801ed498, fdat_801ed498,
-        fdat_801ed498, fdat_801ed498, fdat_801ed498, fdat_801ed498,
+        map_hook_none, map_update_events, map_hook_none, map_hook_none,
+        map_hook_none, map_restore_progress, map_hook_none, map_hook_none,
+        map_hook_none, map_hook_none, map_hook_none, map_hook_none,
+        map_hook_none, map_hook_none, map_hook_none, map_hook_none,
+        creature_pick_move, creature_step_script, map_hook_none, map_hook_none,
+        map_hook_none, map_hook_none, map_hook_none, map_hook_none,
+        map_hook_none, map_hook_none, map_hook_none, map_hook_none,
+        map_hook_none, map_hook_none, map_hook_none, map_hook_none,
     },
     0x3e,
 };
@@ -50,26 +50,26 @@ const FdatHeader fdat_header = {
  * Arms the live table A entries 0..4 whose flags 2..5 are set.
  */
 ADDRESS(0x801ed4a0, 0xec)
-void func_801ed4a0(void)
+void map_restore_progress(void)
 {
-    Vis212 *e3 = &vis_table_a.entries[3];
-    Vis212 *e2 = &vis_table_a.entries[2];
-    Vis212 *e1 = &vis_table_a.entries[1];
-    Vis212 *e0 = &vis_table_a.entries[0];
-    Vis212 *e4 = &vis_table_a.entries[4];
+    Creature *e3 = &vis_table_a.entries[3];
+    Creature *e2 = &vis_table_a.entries[2];
+    Creature *e1 = &vis_table_a.entries[1];
+    Creature *e0 = &vis_table_a.entries[0];
+    Creature *e4 = &vis_table_a.entries[4];
 
-    if (DAT_801cba08.unk1440.bit.f2 == 1) {
-        if (e3->unk00 != 0xff)
-            e3->unk00 = 100;
-        if (e4->unk00 != 0xff)
-            e4->unk00 = 100;
+    if (game_progress.event_flags.bit.f2 == 1) {
+        if (e3->spawn_chance != 0xff)
+            e3->spawn_chance = 100;
+        if (e4->spawn_chance != 0xff)
+            e4->spawn_chance = 100;
     }
-    if (DAT_801cba08.unk1440.bit.f3 == 1 && e2->unk00 != 0xff)
-        e2->unk00 = 100;
-    if (DAT_801cba08.unk1440.bit.f4 == 1 && e1->unk00 != 0xff)
-        e1->unk00 = 100;
-    if (DAT_801cba08.unk1440.bit.f5 == 1 && e0->unk00 != 0xff)
-        e0->unk00 = 100;
+    if (game_progress.event_flags.bit.f3 == 1 && e2->spawn_chance != 0xff)
+        e2->spawn_chance = 100;
+    if (game_progress.event_flags.bit.f4 == 1 && e1->spawn_chance != 0xff)
+        e1->spawn_chance = 100;
+    if (game_progress.event_flags.bit.f5 == 1 && e0->spawn_chance != 0xff)
+        e0->spawn_chance = 100;
 }
 
 /*
@@ -79,44 +79,44 @@ void func_801ed4a0(void)
  * while the viewer's unk178 is 57. Kills the viewer on unk178 68.
  */
 ADDRESS(0x801ed58c, 0x244)
-void func_801ed58c(void)
+void map_update_events(void)
 {
-    Vis212 *e3 = &vis_table_a.entries[3];
-    Vis212 *e4 = &vis_table_a.entries[4];
-    Vis212 *e2 = &vis_table_a.entries[2];
-    Vis212 *e1 = &vis_table_a.entries[1];
-    Vis212 *e0 = &vis_table_a.entries[0];
-    Vis88 *d20 = &vis_table_b.entries[20];
-    Vis88 *d1 = &vis_table_b.entries[1];
-    Vis88 *d12 = &vis_table_b.entries[12];
+    Creature *e3 = &vis_table_a.entries[3];
+    Creature *e4 = &vis_table_a.entries[4];
+    Creature *e2 = &vis_table_a.entries[2];
+    Creature *e1 = &vis_table_a.entries[1];
+    Creature *e0 = &vis_table_a.entries[0];
+    AreaObject *d20 = &vis_table_b.entries[20];
+    AreaObject *d1 = &vis_table_b.entries[1];
+    AreaObject *d12 = &vis_table_b.entries[12];
 
-    if (!DAT_801cba08.unk1440.bit.f2 && d20->unk0C == 1) {
-        if (e3->unk05 == 0)
-            fdat_801ed410(e3);
-        if (e4->unk05 == 0)
-            fdat_801ed410(e4);
-        e3->unk00 = 100;
-        e4->unk00 = 100;
-        DAT_801cba08.unk1440.word |= 4;
+    if (!game_progress.event_flags.bit.f2 && d20->state == 1) {
+        if (e3->state == 0)
+            creature_spawn_now(e3);
+        if (e4->state == 0)
+            creature_spawn_now(e4);
+        e3->spawn_chance = 100;
+        e4->spawn_chance = 100;
+        game_progress.event_flags.word |= 4;
     }
-    if (!DAT_801cba08.unk1440.bit.f3 && d1->unk0C == 255 && e2->unk05 == 0) {
-        fdat_801ed410(e2);
-        e2->unk00 = 100;
-        DAT_801cba08.unk1440.word |= 8;
+    if (!game_progress.event_flags.bit.f3 && d1->state == 255 && e2->state == 0) {
+        creature_spawn_now(e2);
+        e2->spawn_chance = 100;
+        game_progress.event_flags.word |= 8;
     }
-    if (!DAT_801cba08.unk1440.bit.f4 && d12->unk4A.door.unk4F == 255 && e1->unk05 == 0) {
-        fdat_801ed410(e1);
-        e1->unk00 = 100;
-        DAT_801cba08.unk1440.word |= 0x10;
+    if (!game_progress.event_flags.bit.f4 && d12->params.door.lock == 255 && e1->state == 0) {
+        creature_spawn_now(e1);
+        e1->spawn_chance = 100;
+        game_progress.event_flags.word |= 0x10;
     }
-    if (!DAT_801cba08.unk1440.bit.f5 && viewer.unk178 == 57 && e0->unk05 == 0) {
-        fdat_801ed410(e0);
-        e0->unk00 = 100;
-        DAT_801cba08.unk1440.word |= 0x20;
+    if (!game_progress.event_flags.bit.f5 && viewer.block == 57 && e0->state == 0) {
+        creature_spawn_now(e0);
+        e0->spawn_chance = 100;
+        game_progress.event_flags.word |= 0x20;
     }
-    if (viewer.unk218 != 4 && viewer.unk178 == 68)
+    if (viewer.state != 4 && viewer.block == 68)
         player_kill(0);
 }
 
-#include "../lib/fdat_801ed4a0.inc"
-#include "../lib/fdat_801ed6e4.inc"
+#include "../lib/fdat_creature_pick_move.inc"
+#include "../lib/fdat_creature_step_script.inc"

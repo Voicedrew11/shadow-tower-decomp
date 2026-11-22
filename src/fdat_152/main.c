@@ -2,8 +2,8 @@
  * FDAT_152.BIN as one translation unit (WIP module): its handler table,
  * the 21 functions every overlay starts with (src/lib/fdat_common_a.inc,
  * fdat_common.inc, fdat_common_b.inc), then its map handlers through the
- * shared fdat_801ed4a0. One object, because fdat_801ed4a0's switch table
- * is 8-aligned after fdat_801ebec4's in the same read-only run.
+ * shared creature_pick_move. One object, because creature_pick_move's switch table
+ * is 8-aligned after creature_run_script_command's in the same read-only run.
  */
 #include <kf/lib/address.h>
 #include <kf/lib/types.h>
@@ -24,23 +24,23 @@
 
 RODATA(0x801eb560, 0x24c)
 
-void func_801ed4a0();
-void func_801ed530();
-void func_801ed5e0();
-void func_801ed5e8(short id);
-void func_801ed8f4();
+void map_restore_progress();
+void map_update_events();
+void map_object_hook_none();
+void map_use_item_on_object(short id);
+void map_step_creature();
 
 const FdatHeader fdat_header = {
     0x14,
     {
-        fdat_801ed498, func_801ed530, fdat_801ed498, fdat_801ed498,
-        fdat_801ed498, func_801ed4a0, fdat_801ed498, fdat_801ed498,
-        fdat_801ed498, func_801ed5e0, fdat_801ed498, fdat_801ed498,
-        func_801ed5e8, fdat_801ed498, fdat_801ed498, fdat_801ed498,
-        fdat_801ed4a0, func_801ed8f4, fdat_801ed498, fdat_801ed498,
-        fdat_801ed498, fdat_801ed498, fdat_801ed498, fdat_801ed498,
-        fdat_801ed498, fdat_801ed498, fdat_801ed498, fdat_801ed498,
-        fdat_801ed498, fdat_801ed498, fdat_801ed498, fdat_801ed498,
+        map_hook_none, map_update_events, map_hook_none, map_hook_none,
+        map_hook_none, map_restore_progress, map_hook_none, map_hook_none,
+        map_hook_none, map_object_hook_none, map_hook_none, map_hook_none,
+        map_use_item_on_object, map_hook_none, map_hook_none, map_hook_none,
+        creature_pick_move, map_step_creature, map_hook_none, map_hook_none,
+        map_hook_none, map_hook_none, map_hook_none, map_hook_none,
+        map_hook_none, map_hook_none, map_hook_none, map_hook_none,
+        map_hook_none, map_hook_none, map_hook_none, map_hook_none,
     },
     0x47,
 };
@@ -53,39 +53,39 @@ const FdatHeader fdat_header = {
 DATA(0x801edb84, 0x4, ".bss")
 int fdat_801edb84;
 
-void func_801eda8c(void);
+void map_slide_ground_item(void);
 
 /* Sets up the area by flag 15: table B entries 5..9 shown and item 11 in
  * place, or all hidden and item 11 already moved. */
 ADDRESS(0x801ed4a0, 0x90)
-void func_801ed4a0(void)
+void map_restore_progress(void)
 {
-    Vis88 *d = &vis_table_b.entries[5];
-    Vis48 *item = &vis_table_c.entries[11];
+    AreaObject *d = &vis_table_b.entries[5];
+    GroundItem *item = &vis_table_c.entries[11];
 
-    if (!DAT_801cba08.unk1440.bit.f15) {
-        item->unk22 = 4;
-        d[0].unk00 = d[1].unk00 = d[2].unk00 = d[3].unk00 = d[4].unk00 = 2;
+    if (!game_progress.event_flags.bit.f15) {
+        item->state = 4;
+        d[0].visibility = d[1].visibility = d[2].visibility = d[3].visibility = d[4].visibility = 2;
         fdat_801edb84 = 0;
     } else {
-        item->unk22 = 5;
-        d[0].unk00 = d[1].unk00 = d[2].unk00 = d[3].unk00 = d[4].unk00 = 0;
+        item->state = 5;
+        d[0].visibility = d[1].visibility = d[2].visibility = d[3].visibility = d[4].visibility = 0;
         fdat_801edb84 = 2;
-        item->unk08.vx += 0x1e0;
+        item->position.vx += 0x1e0;
     }
 }
 
 /* Plays the armed scene: moves item 11, hides table B entries 5..9, sets
  * the area lighting unless flag 16 is set, and sets flag 15. */
 ADDRESS(0x801ed530, 0xb0)
-void func_801ed530(void)
+void map_update_events(void)
 {
-    Vis88 *d = &vis_table_b.entries[5];
+    AreaObject *d = &vis_table_b.entries[5];
 
     if (fdat_801edb84 == 1) {
-        func_801eda8c();
-        d[0].unk00 = d[1].unk00 = d[2].unk00 = d[3].unk00 = d[4].unk00 = 0;
-        if (!DAT_801cba08.unk1440.bit.f16) {
+        map_slide_ground_item();
+        d[0].visibility = d[1].visibility = d[2].visibility = d[3].visibility = d[4].visibility = 0;
+        if (!game_progress.event_flags.bit.f16) {
             lighting.area_mode[11] = 0x24;
             lighting.area_mode[27] = 0x24;
             lighting.area_mode[12] = 0x24;
@@ -94,38 +94,38 @@ void func_801ed530(void)
             lighting.area_mode[33] = 0x24;
         }
         fdat_801edb84 = 2;
-        DAT_801cba08.unk1440.bit.f15 = 1;
+        game_progress.event_flags.bit.f15 = 1;
     }
 }
 
 /* An empty handler between the others. */
 ADDRESS(0x801ed5e0, 0x8)
-void func_801ed5e0(void)
+void map_object_hook_none(void)
 {
 }
 
 /* Item 0x130 used in front of table B entry 4 sets fdat_801edb84; the
  * result is 1 then, else 2. */
 ADDRESS(0x801ed5e8, 0xc8)
-void func_801ed5e8(short id)
+void map_use_item_on_object(short id)
 {
     VECTOR p;
-    VisRequest req;
+    CollisionRequest req;
 
     p.vx = viewer.position.vx;
     p.vy = viewer.position.vy + 1600;
     p.vz = viewer.position.vz;
-    req.unk0 = 0;
-    req.unk4 = p;
-    req.unk1C = 1056;
-    req.unk1E = 1600;
-    req.unk14.vx = 0;
-    req.unk14.vy = 0;
-    req.unk14.vz = 0;
-    req.unk22 = 0;
-    req.unk20 = 0;
+    req.tests = 0;
+    req.position = p;
+    req.radius = 1056;
+    req.height = 1600;
+    req.velocity.vx = 0;
+    req.velocity.vy = 0;
+    req.velocity.vz = 0;
+    req.speed = 0;
+    req.heading = 0;
     if (id == 0x130) {
-        if (func_8004f53c((VisLists *)&req) == 4) {
+        if (object_find_in_reach((CollisionState *)&req) == 4) {
             fdat_801edb84 = 1;
             DAT_801cd0e0 = 1;
         } else {
@@ -134,4 +134,4 @@ void func_801ed5e8(short id)
     }
 }
 
-#include "../lib/fdat_801ed4a0.inc"
+#include "../lib/fdat_creature_pick_move.inc"

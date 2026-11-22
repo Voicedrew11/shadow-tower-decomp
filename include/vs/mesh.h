@@ -40,7 +40,7 @@ typedef struct {
     u_short n3, i3;
 } VsFaceG4;
 
-/* VS band 6: a model part's face list as func_8002345c walks it (the
+/* VS band 6: a model part's face list as model_fixup_face_indices walks it (the
  * part headers are 40 bytes, as MeshHeader): the list's offset from the
  * parts and its record count. */
 typedef struct {

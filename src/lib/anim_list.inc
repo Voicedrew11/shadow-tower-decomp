@@ -1,7 +1,7 @@
 /*
  * Shared by ST.EXE and VS.EXE: node list key lookup, insertion, removal, the
  * node command interpreter and the block runner. The two images link byte-
- * identical copies; src/st/anim.c and src/vs/anim_80023764.c include this
+ * identical copies; src/st/render.c and src/vs/anim_set.c include this
  * fragment at their place in each run.
  */
 
@@ -13,7 +13,7 @@ StAnimNode *anim_list_find_key(StAnimList *list, int key)
     int i;
 
     for (i = 0; i < list->count; i++, node++) {
-        if (key == node->unkC)
+        if (key == node->key)
             break;
     }
     if (i == list->count)
@@ -32,7 +32,7 @@ StAnimNode *anim_list_add(StAnimList *list, int key)
     int i;
 
     for (i = 0; i < list->count; i++, node++) {
-        if (node->unkC == -1)
+        if (node->key == -1)
             break;
     }
     if (i >= list->count) {
@@ -40,23 +40,23 @@ StAnimNode *anim_list_add(StAnimList *list, int key)
             return NULL;
         node = &list->nodes[list->count++];
     }
-    node->unkC = key;
-    node->unk0 = 0;
-    node->unk4->unk48 = NULL;
-    node->unk4->unk4.m[0][0] = 4096;
-    node->unk4->unk4.m[0][1] = 0;
-    node->unk4->unk4.m[0][2] = 0;
-    node->unk4->unk4.m[1][0] = 0;
-    node->unk4->unk4.m[1][1] = 4096;
-    node->unk4->unk4.m[1][2] = 0;
-    node->unk4->unk4.m[2][0] = 0;
-    node->unk4->unk4.m[2][1] = 0;
-    node->unk4->unk4.m[2][2] = 4096;
-    node->unk4->unk4.t[0] = 0;
-    node->unk4->unk4.t[1] = 0;
-    node->unk4->unk4.t[2] = 0;
-    node->unk8 = 0xffff;
-    node->unkA = 0;
+    node->key = key;
+    node->flags = 0;
+    node->record->parent = NULL;
+    node->record->local_matrix.m[0][0] = 4096;
+    node->record->local_matrix.m[0][1] = 0;
+    node->record->local_matrix.m[0][2] = 0;
+    node->record->local_matrix.m[1][0] = 0;
+    node->record->local_matrix.m[1][1] = 4096;
+    node->record->local_matrix.m[1][2] = 0;
+    node->record->local_matrix.m[2][0] = 0;
+    node->record->local_matrix.m[2][1] = 0;
+    node->record->local_matrix.m[2][2] = 4096;
+    node->record->local_matrix.t[0] = 0;
+    node->record->local_matrix.t[1] = 0;
+    node->record->local_matrix.t[2] = 0;
+    node->part = 0xffff;
+    node->kind = 0;
     node->unkB = 0;
     return node;
 }
@@ -70,12 +70,12 @@ StAnimNode *anim_list_remove(StAnimList *list, int key)
     int i;
 
     for (i = 0; i < list->count; i++, node++) {
-        if (node->unkC == key)
+        if (node->key == key)
             break;
     }
     if (i < list->count) {
-        node->unk8 = 0xffff;
-        node->unkA = 0;
+        node->part = 0xffff;
+        node->kind = 0;
         node->unkB = 0;
         return node;
     }
@@ -133,14 +133,14 @@ u_long *anim_node_command(u_long *cmd, StAnimList *list, u_long *ids, u8 *table,
         m = &scratch_matrix;
         sub = &scratch_sub;
     } else {
-        rec = node->unk4;
-        sub = rec->unk44;
-        m = &rec->unk4;
-        rec->unk0 = 0;
+        rec = node->record;
+        sub = rec->transform;
+        m = &rec->local_matrix;
+        rec->composed = 0;
     }
     switch (op) {
     case 0:
-        node->unk0 = (node->unk0 & p[0]) | p[1];
+        node->flags = (node->flags & p[0]) | p[1];
         break;
     case 1:
         if (flags & 1) {
@@ -165,7 +165,7 @@ u_long *anim_node_command(u_long *cmd, StAnimList *list, u_long *ids, u8 *table,
             RotMatrix(&sub->rot, m);
             ScaleMatrix(m, &sub->scale);
             TransMatrix(m, &sub->trans);
-            node->unk4->unk2 = 1;
+            node->record->relative_set = 1;
         } else {
             if (flags & 2) {
                 sub->rot.vx = p[0] / 360;
@@ -193,15 +193,15 @@ u_long *anim_node_command(u_long *cmd, StAnimList *list, u_long *ids, u8 *table,
         break;
     case 2:
         if (set != NULL) {
-            node->unk8 = anim_id_index(set, ids, *(u16 *)p);
-            node->unkA = table[node->unk8 * 4];
+            node->part = anim_id_index(set, ids, *(u16 *)p);
+            node->kind = table[node->part * 4];
         }
         break;
     case 3:
         if (p[0] == 0 || p[0] == 0xffff)
-            node->unk4->unk48 = NULL;
+            node->record->parent = NULL;
         else
-            node->unk4->unk48 = anim_list_find_key(list, p[0])->unk4;
+            node->record->parent = anim_list_find_key(list, p[0])->record;
         break;
     case 8:
         if (list != NULL) {

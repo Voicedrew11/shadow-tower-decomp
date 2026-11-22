@@ -2,8 +2,8 @@
  * FDAT_102.BIN as one translation unit (WIP module): its handler table,
  * the 21 functions every overlay starts with (src/lib/fdat_common_a.inc,
  * fdat_common.inc, fdat_common_b.inc), then its map handlers through the
- * shared fdat_801ed4a0. One object, because fdat_801ed4a0's switch table
- * is 8-aligned after fdat_801ebec4's in the same read-only run.
+ * shared creature_pick_move. One object, because creature_pick_move's switch table
+ * is 8-aligned after creature_run_script_command's in the same read-only run.
  */
 #include <kf/lib/address.h>
 #include <kf/lib/types.h>
@@ -30,21 +30,21 @@ static int fdat_801eda78;
 DATA(0x801eda7c, 0x4, ".bss")
 static int fdat_801eda7c;
 
-void func_801ed4a0();
-void func_801ed554();
-void func_801ed6b8(short id);
+void map_restore_progress();
+void map_update_events();
+void map_use_item_on_creature(short id);
 
 const FdatHeader fdat_header = {
     0xf,
     {
-        fdat_801ed498, func_801ed554, fdat_801ed498, fdat_801ed498,
-        fdat_801ed498, func_801ed4a0, fdat_801ed498, fdat_801ed498,
-        fdat_801ed498, fdat_801ed498, fdat_801ed498, fdat_801ed498,
-        func_801ed6b8, fdat_801ed498, fdat_801ed498, fdat_801ed498,
-        fdat_801ed4a0, fdat_801ed6e4, fdat_801ed498, fdat_801ed498,
-        fdat_801ed498, fdat_801ed498, fdat_801ed498, fdat_801ed498,
-        fdat_801ed498, fdat_801ed498, fdat_801ed498, fdat_801ed498,
-        fdat_801ed498, fdat_801ed498, fdat_801ed498, fdat_801ed498,
+        map_hook_none, map_update_events, map_hook_none, map_hook_none,
+        map_hook_none, map_restore_progress, map_hook_none, map_hook_none,
+        map_hook_none, map_hook_none, map_hook_none, map_hook_none,
+        map_use_item_on_creature, map_hook_none, map_hook_none, map_hook_none,
+        creature_pick_move, creature_step_script, map_hook_none, map_hook_none,
+        map_hook_none, map_hook_none, map_hook_none, map_hook_none,
+        map_hook_none, map_hook_none, map_hook_none, map_hook_none,
+        map_hook_none, map_hook_none, map_hook_none, map_hook_none,
     },
     0x42,
 };
@@ -56,23 +56,23 @@ const FdatHeader fdat_header = {
 /* Sets up the area: table A entry 48's range bits unless it is dying, the
  * scene words, and table B entries 39..42 unlinked until flag 19 is set. */
 ADDRESS(0x801ed4a0, 0xb4)
-void func_801ed4a0(void)
+void map_restore_progress(void)
 {
-    Vis212 *e = &vis_table_a.entries[48];
-    Vis192 *r = &vis_table_a.unk3500[0];
-    Vis88 *d39 = &vis_table_b.entries[39];
-    Vis88 *d40 = &vis_table_b.entries[40];
-    Vis88 *d41 = &vis_table_b.entries[41];
-    Vis88 *d42 = &vis_table_b.entries[42];
+    Creature *e = &vis_table_a.entries[48];
+    CreatureType *r = &vis_table_a.types[0];
+    AreaObject *d39 = &vis_table_b.entries[39];
+    AreaObject *d40 = &vis_table_b.entries[40];
+    AreaObject *d41 = &vis_table_b.entries[41];
+    AreaObject *d42 = &vis_table_b.entries[42];
 
-    if (e->unk05 != 3)
-        e->unk1C.bytes[3] = 2;
-    if (DAT_801cba08.unk1448[r->unk09] == 2)
+    if (e->state != 3)
+        e->status.bytes[3] = 2;
+    if (game_progress.talk_counts[r->talk_id] == 2)
         fdat_801eda78 = 0xff;
     else
         fdat_801eda78 = 0;
-    if (!DAT_801cba08.unk1440.bit.f19) {
-        d39->unk0a = d40->unk0a = d41->unk0a = d42->unk0a = 0xffff;
+    if (!game_progress.event_flags.bit.f19) {
+        d39->type = d40->type = d41->type = d42->type = 0xffff;
         fdat_801eda7c = 0;
     } else {
         fdat_801eda7c = 0xff;
@@ -82,67 +82,67 @@ void func_801ed4a0(void)
 /*
  * Runs the area: once record 0's stream counter reaches 2, entry 48 takes
  * item 0x127 and leaves; a hit does the same. Record 4's counter is held at
- * 1 or more. Item 0x12b used on entry 0x31 (func_801ed6b8) sends entry 49
+ * 1 or more. Item 0x12b used on entry 0x31 (map_use_item_on_creature) sends entry 49
  * away, links table B entries 39..42 and sets flag 19.
  */
 ADDRESS(0x801ed554, 0x164)
-void func_801ed554(void)
+void map_update_events(void)
 {
-    Vis212 *e48 = &vis_table_a.entries[48];
-    Vis88 *d39 = &vis_table_b.entries[39];
-    Vis192 *r0 = &vis_table_a.unk3500[0];
-    Vis212 *e49 = &vis_table_a.entries[49];
+    Creature *e48 = &vis_table_a.entries[48];
+    AreaObject *d39 = &vis_table_b.entries[39];
+    CreatureType *r0 = &vis_table_a.types[0];
+    Creature *e49 = &vis_table_a.entries[49];
     int state = fdat_801eda78;
-    Vis192 *r4 = &vis_table_a.unk3500[4];
-    Vis88 *d40 = &vis_table_b.entries[40];
-    Vis88 *d41 = &vis_table_b.entries[41];
-    Vis88 *d42 = &vis_table_b.entries[42];
+    CreatureType *r4 = &vis_table_a.types[4];
+    AreaObject *d40 = &vis_table_b.entries[40];
+    AreaObject *d41 = &vis_table_b.entries[41];
+    AreaObject *d42 = &vis_table_b.entries[42];
 
-    if (state != 0xff && DAT_801cba08.unk1448[r0->unk09] == 2) {
-        func_8004d804(e48, 0x127);
-        fdat_801ecf44(e48);
+    if (state != 0xff && game_progress.talk_counts[r0->talk_id] == 2) {
+        creature_drop_item(e48, 0x127);
+        creature_fade_out_despawn(e48);
         fdat_801eda78 = 0xff;
     }
-    if (e48->unk64 != 0) {
-        e48->unk64 = 0;
-        fdat_801ecf44(e48);
+    if (e48->hit != 0) {
+        e48->hit = 0;
+        creature_fade_out_despawn(e48);
         fdat_801eda78 = 0xff;
     }
-    if (DAT_801cba08.unk1448[r4->unk09] >= 2)
-        DAT_801cba08.unk1448[r4->unk09] = 1;
+    if (game_progress.talk_counts[r4->talk_id] >= 2)
+        game_progress.talk_counts[r4->talk_id] = 1;
     if (fdat_801eda7c == 1) {
-        fdat_801ecf44(e49);
-        d42->unk0a = 250;
-        d41->unk0a = 250;
-        d40->unk0a = 250;
-        d39->unk0a = 250;
+        creature_fade_out_despawn(e49);
+        d42->type = 250;
+        d41->type = 250;
+        d40->type = 250;
+        d39->type = 250;
         fdat_801eda7c = 0xff;
-        DAT_801cba08.unk1440.word |= 0x80000;
+        game_progress.event_flags.word |= 0x80000;
     }
 }
 
 /* Item 0x12b used in front of table A entry 0x31 sets fdat_801eda7c; the
  * result is 1 then, else 2. */
 ADDRESS(0x801ed6b8, 0xcc)
-void func_801ed6b8(short id)
+void map_use_item_on_creature(short id)
 {
     VECTOR p;
-    VisRequest req;
+    CollisionRequest req;
 
     p.vx = viewer.position.vx;
     p.vy = viewer.position.vy + 1600;
     p.vz = viewer.position.vz;
-    req.unk0 = 0;
-    req.unk4 = p;
-    req.unk1C = 1056;
-    req.unk1E = 1600;
-    req.unk14.vx = 0;
-    req.unk14.vy = 0;
-    req.unk14.vz = 0;
-    req.unk22 = 0;
-    req.unk20 = 0;
+    req.tests = 0;
+    req.position = p;
+    req.radius = 1056;
+    req.height = 1600;
+    req.velocity.vx = 0;
+    req.velocity.vy = 0;
+    req.velocity.vz = 0;
+    req.speed = 0;
+    req.heading = 0;
     if (id == 0x12b) {
-        if (func_8004bb88((VisLists *)&req, 1) == 0x31) {
+        if (creature_find_in_reach((CollisionState *)&req, 1) == 0x31) {
             fdat_801eda7c = 1;
             DAT_801cd0e0 = 1;
         } else {
@@ -151,5 +151,5 @@ void func_801ed6b8(short id)
     }
 }
 
-#include "../lib/fdat_801ed4a0.inc"
-#include "../lib/fdat_801ed6e4.inc"
+#include "../lib/fdat_creature_pick_move.inc"
+#include "../lib/fdat_creature_step_script.inc"

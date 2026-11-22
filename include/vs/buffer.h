@@ -16,11 +16,11 @@
 #define VS_BANK_BODY_SIZE 0x4e0e8
 
 typedef union {
-    VsSave save;                      /* func_8001b504's card read */
-    u8 bank[2][VS_BANK_BODY_SIZE];    /* func_80012a70's VAB bodies */
+    VsSave save;                      /* card_load_game's card read */
+    u8 bank[2][VS_BANK_BODY_SIZE];    /* sound_bank_open's VAB bodies */
     VsFighter fighter[2];             /* the two fighters (src/vs/fighter_*.c) */
 } VsBuffer;
 
-extern VsBuffer DAT_800633b0;
+extern VsBuffer shared_buffer;
 
 #endif

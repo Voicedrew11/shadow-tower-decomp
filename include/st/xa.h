@@ -10,19 +10,21 @@
 #include <st/vis.h>
 
 /*
- * The XA sector counts per stream file (DAT_801cba08.unk1618) and channel:
+ * The XA stream lengths in units of two sectors (xa_stream_finished
+ * compares the sectors played with twice the length) per stream file
+ * (game_progress.xa_positions) and channel:
  * 48 rows of 6 words, the file count of the save block's per-file arrays
  * (load data, owner unknown).
  */
-extern u32 DAT_800804ac[48][6];
+extern u32 xa_stream_lengths[48][6];
 
-void func_80054000(u8 intr, u8 *result);
+void xa_ready_callback(u8 intr, u8 *result);
 /* The channel travels as a word; playback uses its low byte. */
-void func_8005408c(u8 file, int channel);
-int func_800541f4(void);
-void func_80054278(void);
-void func_800542d0(int id, int full);
-void func_80054368(Vis212 *e, int fixed, int arg2);
-void func_80054858(int id);
+void xa_start_stream(u8 file, int channel);
+int xa_stream_finished(void);
+void xa_stop_stream(void);
+void talk_load_image(int id, int full);
+void creature_talk(Creature *e, int fixed, int arg2);
+void talk_show_message(int id);
 
 #endif

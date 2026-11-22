@@ -2,8 +2,8 @@
  * FDAT_242.BIN as one translation unit (WIP module): its handler table,
  * the 21 functions every overlay starts with (src/lib/fdat_common_a.inc,
  * fdat_common.inc, fdat_common_b.inc), then its map handlers through the
- * shared fdat_801ed4a0. One object, because fdat_801ed4a0's switch table
- * is 8-aligned after fdat_801ebec4's in the same read-only run.
+ * shared creature_pick_move. One object, because creature_pick_move's switch table
+ * is 8-aligned after creature_run_script_command's in the same read-only run.
  */
 #include <kf/lib/address.h>
 #include <kf/lib/types.h>
@@ -25,7 +25,7 @@
 
 RODATA(0x801eb560, 0x28c)
 
-/* Frames the texture animation has run (func_801edebc). */
+/* Frames the texture animation has run (map_wind_down_texanims). */
 DATA(0x801ee0b0, 0x4, ".bss")
 static int fdat_801ee0b0;
 
@@ -33,7 +33,7 @@ static int fdat_801ee0b0;
 DATA(0x801ee0b4, 0x4, ".bss")
 int fdat_801ee0b4;
 
-/* The gate scene state: 2 armed, 3 opened by event 0x10e. */
+/* The gate scene state: 2 armed, 3 opened by using item 0x10e. */
 DATA(0x801ee0b8, 0x4, ".bss")
 int fdat_801ee0b8;
 
@@ -41,23 +41,23 @@ int fdat_801ee0b8;
 DATA(0x801ee0bc, 0x4, ".bss")
 int fdat_801ee0bc;
 
-void func_801ed4e0();
-void func_801ed71c();
-void func_801edaa4(short id);
-void func_801edd54();
-void func_801ede3c();
+void map_restore_progress();
+void map_update_events();
+void map_use_item_advance_scene(short id);
+void map_step_creature();
+void map_talk_on_player_death();
 
 const FdatHeader fdat_header = {
     0x1d,
     {
-        fdat_801ed498, func_801ed71c, fdat_801ed498, fdat_801ed498,
-        fdat_801ed498, func_801ed4e0, fdat_801ed498, fdat_801ed498,
-        fdat_801ed498, fdat_801ed498, fdat_801ed498, fdat_801ed498,
-        func_801edaa4, func_801ede3c, fdat_801ed498, fdat_801ed498,
-        fdat_801ed4a0, func_801edd54, fdat_801ed498, fdat_801ed498,
-        fdat_801ed498, fdat_801ed498, fdat_801ed498, fdat_801ed498,
-        fdat_801ed498, fdat_801ed498, fdat_801ed498, fdat_801ed498,
-        fdat_801ed498, fdat_801ed498, fdat_801ed498, fdat_801ed498,
+        map_hook_none, map_update_events, map_hook_none, map_hook_none,
+        map_hook_none, map_restore_progress, map_hook_none, map_hook_none,
+        map_hook_none, map_hook_none, map_hook_none, map_hook_none,
+        map_use_item_advance_scene, map_talk_on_player_death, map_hook_none, map_hook_none,
+        creature_pick_move, map_step_creature, map_hook_none, map_hook_none,
+        map_hook_none, map_hook_none, map_hook_none, map_hook_none,
+        map_hook_none, map_hook_none, map_hook_none, map_hook_none,
+        map_hook_none, map_hook_none, map_hook_none, map_hook_none,
     },
     0x50,
 };
@@ -66,37 +66,37 @@ const FdatHeader fdat_header = {
 #include "../lib/fdat_common.inc"
 #include "../lib/fdat_common_b.inc"
 
-void func_801edebc(void);
-void func_801edf2c(void);
+void map_wind_down_texanims(void);
+void map_move_texture_pages(void);
 
 /* Sets up the area by flag 17 and the stream counters of records 12 and
  * 13: entries 48..50, the gate scene stage fdat_801ee0b8 and table B
  * entry 2. */
 ADDRESS(0x801ed4e0, 0x23c)
-void func_801ed4e0(void)
+void map_restore_progress(void)
 {
-    Vis212 *e48 = &vis_table_a.entries[48];
-    Vis212 *e50 = &vis_table_a.entries[50];
-    Vis212 *e49 = &vis_table_a.entries[49];
-    Vis88 *d2 = &vis_table_b.entries[2];
+    Creature *e48 = &vis_table_a.entries[48];
+    Creature *e50 = &vis_table_a.entries[50];
+    Creature *e49 = &vis_table_a.entries[49];
+    AreaObject *d2 = &vis_table_b.entries[2];
     int n;
 
-    if (DAT_801cba08.unk1440.word >> 17 & 1) {
+    if (game_progress.event_flags.word >> 17 & 1) {
         fdat_801ee0bc = 2;
-        e48->unk05 = 3;
+        e48->state = 3;
         fdat_801ee0b4 = 4;
     } else {
         fdat_801ee0bc = 1;
-        func_80016878();
+        texanim_clear_all();
         fdat_801ee0b4 = 0;
-        e48->unk1C.bytes[3] = 2;
-        vis_table_a.entries[33].unk00 = 0;
+        e48->status.bytes[3] = 2;
+        vis_table_a.entries[33].spawn_chance = 0;
     }
-    n = DAT_801cba08.unk1448[13];
+    n = game_progress.talk_counts[13];
     if (n == 0)
         fdat_801ee0b8 = 0;
     else if (n == 1) {
-        if (DAT_801cba08.unk1448[12] == 0)
+        if (game_progress.talk_counts[12] == 0)
             fdat_801ee0b8 = n;
         else
             fdat_801ee0b8 = 2;
@@ -104,182 +104,182 @@ void func_801ed4e0(void)
         fdat_801ee0b8 = 3;
     else {
         fdat_801ee0b8 = 4;
-        d2->unk4A.door.unk4F = 0xff;
+        d2->params.door.lock = 0xff;
     }
-    if (DAT_801cba08.unk1448[13] >= 2)
-        e50->unk70 &= ~0x2000000;
-    if (DAT_801cba08.unk1448[13] == 3)
-        e49->unk70 &= ~0x2000000;
-    if (DAT_801cba08.unk1448[12] == 1)
-        e48->unk70 &= ~0x2000000;
+    if (game_progress.talk_counts[13] >= 2)
+        e50->flags &= ~0x2000000;
+    if (game_progress.talk_counts[13] == 3)
+        e49->flags &= ~0x2000000;
+    if (game_progress.talk_counts[12] == 1)
+        e48->flags &= ~0x2000000;
     if (fdat_801ee0b8 == 2) {
         fdat_801ee0b8 = 3;
-        DAT_801cba08.unk1448[13]++;
+        game_progress.talk_counts[13]++;
     }
     switch (fdat_801ee0b8) {
     case 0:
-        e50->unk00 = 100;
-        e49->unk00 = 0;
+        e50->spawn_chance = 100;
+        e49->spawn_chance = 0;
         break;
     case 3:
-        e50->unk00 = 0;
-        e49->unk00 = 100;
+        e50->spawn_chance = 0;
+        e49->spawn_chance = 100;
         break;
     case 1:
-        e50->unk68 = (e50->unk68 + 0x800) & 0xfff;
+        e50->home_facing = (e50->home_facing + 0x800) & 0xfff;
     case 4:
-        e50->unk00 = 0;
-        e49->unk00 = 0;
+        e50->spawn_chance = 0;
+        e49->spawn_chance = 0;
         break;
     }
-    e49->unk1C.bytes[3] = 1;
-    e50->unk1C.bytes[3] = 1;
+    e49->status.bytes[3] = 1;
+    e50->status.bytes[3] = 1;
 }
 
 /*
  * Runs the area: table B entries 4 then 3 open the exit scene
- * (func_801edebc, flag 17), which ends once the viewer leaves area 3; the
+ * (map_wind_down_texanims, flag 17), which ends once the viewer leaves area 3; the
  * viewer standing on records 0x126, 0xa0, 0x124 and 0x146 steps the gate
  * scene through entries 50, 48, 50 and 49; and the texture animation
  * starts or its pages are moved.
  */
 ADDRESS(0x801ed71c, 0x388)
-void func_801ed71c(void)
+void map_update_events(void)
 {
-    Vis88 *d4 = &vis_table_b.entries[4];
-    Vis212 *e48 = &vis_table_a.entries[48];
-    Vis88 *d3 = &vis_table_b.entries[3];
-    Vis212 *e33 = &vis_table_a.entries[33];
-    Vis212 *e50 = &vis_table_a.entries[50];
-    Vis212 *e49 = &vis_table_a.entries[49];
-    Vis88 *d2 = &vis_table_b.entries[2];
+    AreaObject *d4 = &vis_table_b.entries[4];
+    Creature *e48 = &vis_table_a.entries[48];
+    AreaObject *d3 = &vis_table_b.entries[3];
+    Creature *e33 = &vis_table_a.entries[33];
+    Creature *e50 = &vis_table_a.entries[50];
+    Creature *e49 = &vis_table_a.entries[49];
+    AreaObject *d2 = &vis_table_b.entries[2];
 
-    if (fdat_801ee0b4 == 0 && d4->unk0C == 0xff) {
-        d3->unk0C = 12;
+    if (fdat_801ee0b4 == 0 && d4->state == 0xff) {
+        d3->state = 12;
         fdat_801ee0b4 = 1;
-        DAT_801cba08.unk1440.word |= 0x20000;
+        game_progress.event_flags.word |= 0x20000;
     }
-    if (fdat_801ee0b4 == 1 && d3->unk0C == 0xff)
+    if (fdat_801ee0b4 == 1 && d3->state == 0xff)
         fdat_801ee0b4 = 2;
     if (fdat_801ee0b4 == 2)
-        func_801edebc();
-    if (fdat_801ee0b4 == 3 && ((VisRecord *)viewer.unk174)->unk07 != 3) {
-        func_801edf2c();
-        func_8004ae38(e48);
-        e33->unk00 = 100;
+        map_wind_down_texanims();
+    if (fdat_801ee0b4 == 3 && ((MapBlock *)viewer.block_record)->zone != 3) {
+        map_move_texture_pages();
+        creature_despawn(e48);
+        e33->spawn_chance = 100;
     }
-    if (fdat_801ee0b8 == 0 && viewer.unk178 == 0x126) {
-        fdat_801ed388(e50, 0, 0);
-        fdat_801eb7b4(e50, 0);
-        fdat_801ecf44(e50);
-        e50->unk05 = 0;
-        e50->unk00 = 0;
+    if (fdat_801ee0b8 == 0 && viewer.block == 0x126) {
+        creature_force_talk(e50, 0, 0);
+        creature_start_script(e50, 0);
+        creature_fade_out_despawn(e50);
+        e50->state = 0;
+        e50->spawn_chance = 0;
         fdat_801ee0b8 = 1;
-        e50->unk68 = (e50->unk68 + 0x800) & 0xfff;
+        e50->home_facing = (e50->home_facing + 0x800) & 0xfff;
     }
-    if (fdat_801ee0b8 == 1 && viewer.unk178 == 0xa0) {
-        fdat_801ed388(e48, 0, 0);
+    if (fdat_801ee0b8 == 1 && viewer.block == 0xa0) {
+        creature_force_talk(e48, 0, 0);
         fdat_801ee0b8 = 2;
-        e50->unk00 = 100;
-        e48->unk70 &= ~0x2000000;
+        e50->spawn_chance = 100;
+        e48->flags &= ~0x2000000;
     }
-    if (fdat_801ee0b8 == 2 && viewer.unk178 == 0x124) {
-        fdat_801ed388(e50, 0, 0);
-        fdat_801eb7b4(e50, 0);
-        fdat_801ecf44(e50);
+    if (fdat_801ee0b8 == 2 && viewer.block == 0x124) {
+        creature_force_talk(e50, 0, 0);
+        creature_start_script(e50, 0);
+        creature_fade_out_despawn(e50);
         fdat_801ee0b8 = 3;
-        e49->unk00 = 100;
-        e50->unk70 &= ~0x2000000;
+        e49->spawn_chance = 100;
+        e50->flags &= ~0x2000000;
     }
-    if (fdat_801ee0b8 == 3 && viewer.unk178 == 0x146) {
-        fdat_801ed388(e49, 0, 0);
-        fdat_801eb7b4(e49, 0);
-        func_80057d58();
-        d2->unk4A.door.unk4F = 0xff;
-        fdat_801ecf44(e49);
+    if (fdat_801ee0b8 == 3 && viewer.block == 0x146) {
+        creature_force_talk(e49, 0, 0);
+        creature_start_script(e49, 0);
+        play_unlock_sound();
+        d2->params.door.lock = 0xff;
+        creature_fade_out_despawn(e49);
         fdat_801ee0b8 = 4;
-        e49->unk70 &= ~0x2000000;
+        e49->flags &= ~0x2000000;
     }
     if (fdat_801ee0bc == 1) {
         RECT a = {480, 64, 64, 96};
         RECT b = {512, 483, 16, 1};
 
-        func_800168e0(&a, 0, 4, 2, 24);
-        func_800168e0(&b, 2, 1, 0x31, 24);
+        texanim_start(&a, 0, 4, 2, 24);
+        texanim_start(&b, 2, 1, 0x31, 24);
         fdat_801ee0bc = 0;
-    } else if (fdat_801ee0bc == 2 && area_state.unk0 == 0) {
-        func_801edf2c();
+    } else if (fdat_801ee0bc == 2 && area_state.loading == 0) {
+        map_move_texture_pages();
         fdat_801ee0bc = 0;
     }
 }
 
-/* Event 0x10e opens the armed gate: table A entry 50 dies, 49 wakes, and
+/* Using item 0x10e opens the armed gate: table A entry 50 dies, 49 wakes, and
  * record stream counter 13 advances. */
 ADDRESS(0x801edaa4, 0x6c)
-void func_801edaa4(short id)
+void map_use_item_advance_scene(short id)
 {
-    Vis212 *e = &vis_table_a.entries[50];
+    Creature *e = &vis_table_a.entries[50];
 
     if (id == 0x10e && fdat_801ee0b8 == 2) {
         fdat_801ee0b8 = 3;
-        e->unk05 = 3;
-        vis_table_a.entries[49].unk00 = 100;
-        e->unk70 &= ~0x2000000;
-        DAT_801cba08.unk1448[13]++;
+        e->state = 3;
+        vis_table_a.entries[49].spawn_chance = 100;
+        e->flags &= ~0x2000000;
+        game_progress.talk_counts[13]++;
     }
 }
 
-#include "../lib/fdat_801ed4a0.inc"
+#include "../lib/fdat_creature_pick_move.inc"
 
 /*
- * The step of the overlay's entries, like fdat_801ed6e4: entry record 0
+ * The step of the overlay's entries, like creature_step_script: entry record 0
  * restarts script 0 at the end of a run until stream counter 12 starts.
  */
 ADDRESS(0x801edd54, 0xe8)
-void func_801edd54(void)
+void map_step_creature(void)
 {
-    Vis212 *e = vis_table_a.unk6138;
+    Creature *e = vis_table_a.current;
 
-    e->unk2A += e->unkB0;
-    if (fdat_801ece7c(e) == 1)
+    e->anim_frame += e->anim_step;
+    if (creature_step_hurt_timer(e) == 1)
         return;
-    if (e->unkB0 >= 0 ? (short)e->unk2A >= 4096 : (short)e->unk2A <= 0) {
-        if (e->unk02 == 0 && DAT_801cba08.unk1448[12] == 0) {
-            fdat_801eb7b4(e, 0);
+    if (e->anim_step >= 0 ? (short)e->anim_frame >= 4096 : (short)e->anim_frame <= 0) {
+        if (e->type == 0 && game_progress.talk_counts[12] == 0) {
+            creature_start_script(e, 0);
         } else {
-            e->unk1A = 0xff;
-            fdat_801ed4a0();
+            e->script_state = 0xff;
+            creature_pick_move();
         }
     }
-    if (e->unkA8 != NULL) {
-        fdat_801ebec4(e);
-        e->unk1A = 0xf0;
+    if (e->script != NULL) {
+        creature_run_script_command(e);
+        e->script_state = 0xf0;
     }
 }
 
 /* In area 0, unless the scene was played, hands table A entry 48 to its
  * exit once its record's stream counter has started. */
 ADDRESS(0x801ede3c, 0x80)
-void func_801ede3c(void)
+void map_talk_on_player_death(void)
 {
-    Vis212 *e;
-    Vis192 *r;
+    Creature *e;
+    CreatureType *r;
 
     e = &vis_table_a.entries[48];
-    r = &vis_table_a.unk3500[0];
+    r = &vis_table_a.types[0];
 
-    if (DAT_801cba08.unk1448[r->unk09] != 0 && fdat_801ee0b4 != 4
-        && vis_table_a.unk6168 == 0) {
-        DAT_801cba08.unk1448[r->unk09] = 1;
-        e->unk70 |= 0x2000000;
-        fdat_801ed388(e, 1, 1);
+    if (game_progress.talk_counts[r->talk_id] != 0 && fdat_801ee0b4 != 4
+        && vis_table_a.zone == 0) {
+        game_progress.talk_counts[r->talk_id] = 1;
+        e->flags |= 0x2000000;
+        creature_force_talk(e, 1, 1);
     }
 }
 
 /* Slows texture animations 0 and 1 every 4th frame for 32 frames, then
  * stops them and ends the scene. */
 ADDRESS(0x801edebc, 0x70)
-void func_801edebc(void)
+void map_wind_down_texanims(void)
 {
     StTexAnim *t0 = &world_state.texanim[0];
     StTexAnim *t1 = &world_state.texanim[1];
@@ -300,7 +300,7 @@ void func_801edebc(void)
 /* Moves the finished texture animation's pages and palette rows into
  * place and ends the exit scene. */
 ADDRESS(0x801edf2c, 0x184)
-void func_801edf2c(void)
+void map_move_texture_pages(void)
 {
     RECT a = {496, 0, 16, 64};
     RECT b = {480, 160, 16, 96};
@@ -316,7 +316,7 @@ void func_801edf2c(void)
     MoveImage(&d, 512, 483);
     MoveImage(&e, 512, 484);
     MoveImage(&f, 0, 490);
-    flags = vis_lists.unk47E0;
+    flags = vis_lists.floor_kinds_off;
     fdat_801ee0b4 = 4;
-    vis_lists.unk47E0 = flags | 8;
+    vis_lists.floor_kinds_off = flags | 8;
 }

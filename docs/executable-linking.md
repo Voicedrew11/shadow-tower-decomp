@@ -236,13 +236,14 @@ all inside the one non-exact function `world_project_parts` (`0x8001cee8`-
   that object's own tables (the world renderer's pools at `0x80011000`,
   then its tables from `0x800113b0`; the two player modules' pools, then
   both modules' tables from `0x80011cfc`), which forced the minimal
-  translation units named in the units' header comments (`st.texanim`,
-  `st.effect_spawn`, `st.player`, `st.vis_b`, `st.equip_menu`). A table
-  is eight-aligned relative to its object's read-only start, and PSYLINK
-  aligns an object's `.rdata` to four only, so an object with constants
-  and no tables ends four-aligned: `st.area_a` claims its pool at its raw
+  translation units named in the units' header comments (`st.render`,
+  `st.effect_spawn`, `st.player`, `st.objects_ground_items`,
+  `st.menu_equip_arrange`). A table is eight-aligned relative to its
+  object's read-only start, and PSYLINK aligns an object's `.rdata` to
+  four only, so an object with constants
+  and no tables ends four-aligned: `st.area_load` claims its pool at its raw
   size, `RODATA(0x80011f18, 0x39b)`.
-- The first `.sbss` run `0x80088188`-`0x800881b7` belongs to four
+- The first `.sbss` run `0x80088188`-`0x800881b7` belongs to five
   data-only units linked before the code (`link = "first"`); the `.data`
   tables from `0x8008038c` and every `.bss` object to data-only units
   linked after the code. Unreferenced holes are unused statics (`.data`, `.sdata`)
@@ -252,11 +253,11 @@ all inside the one non-exact function `world_project_parts` (`0x8001cee8`-
   after the same object's statics does not: retail's `0x800881d4`-
   `0x800881df` is one COMMON batch right after `st.player`'s static
   `shake`, so `st.player` allocates all three words (the first is
-  unreferenced), although `st.area_a` is the module that uses the other
+  unreferenced), although `st.area_load` is the module that uses the other
   two.
 - Seven read-only words after the last unit's switch tables
   (`0x80013974`-`0x8001398f`) are defined by a data-only unit linked last
-  (`src/st/rdata_80013974.c`) as `const` pointers: `_bss_org`,
+  (`src/st/rdata_bss_bounds.c`) as `const` pointers: `_bss_org`,
   `_bss_orgend` three times, `_bss_orgend + 0x84` (past the overlay's id
   word and handler table) and `_bss_orgend + 0x43e0` twice (the extent of
   `FDAT_272.BIN` with its bss, the largest overlay). `main` places the heap
@@ -313,7 +314,7 @@ equals retail. The link confirmed the END.EXE rules above and these:
 ## VS.EXE
 
 VS.EXE links natively; 38 bytes differ from retail, all inside the two
-non-exact functions `func_800140d8` and `func_8001c5e0` (frame size
+non-exact functions `fighters_load_round` and `match_award_requested_item` (frame size
 only). The read-only data, `.data`, `.sdata` and every `.sbss`/`.bss`
 placement equal retail. The link established:
 
@@ -321,7 +322,7 @@ placement equal retail. The link established:
   (`read_only = "together"`, as in the FDAT overlays), so a VS unit claims
   one `RODATA()` run; the minimal translation units this forces are in the
   units' header comments.
-- The `.sbss` run `0x80063300`-`0x80063381` and the first `.data`/`.sdata`
+- The `.sbss` run `0x80063300`-`0x8006338f` and the first `.data`/`.sdata`
   belong to data-only units linked before the start-up module
   (`link = "first"`); the `.bss` objects to data-only units after the code,
   with layout-evidenced holes confirmed by the linked `.SYM`.
@@ -333,7 +334,7 @@ placement equal retail. The link established:
 - The bss group starts at `0x80063300`, the next eight-byte boundary after
   at least five more bytes of zero, unreferenced `.sdata` past the last
   literal at `0x800632f3`; a data-only unit linked last holds two zero
-  words there (`src/vs/sdata_800632f4.c`).
+  words there (`src/vs/sdata_zero_words.c`).
 
 ## PS-X EXE header
 
@@ -399,6 +400,17 @@ ASPSX 2.79D and PSYLINK 2.73D chain:
   (so it requests them as COMMON) with words it reads only absolutely
   (`0x80063334`, `0x80063374`, so it does not request them), so an earlier
   object allocated that run and `vs.main`'s requests merge into it.
+- An object's COMMON batch starts eight-aligned even when the object has
+  no statics: a controlled ST.EXE link that gave `0x8008818c` an object of
+  its own placed it at `0x80088190`. A data-only unit can therefore be cut
+  only at an eight-aligned address, and every request inside one
+  eight-byte window belongs to the object that allocates the window's
+  first request. Where the semantic spellings in such a window do not
+  ascend in bucket, the identities keep their address names (their
+  `data_identities.tsv` notes give the reviewed name), as at ST.EXE
+  `0x80088188`, `0x8008818c`, `0x80088192`, `0x800881a2`, `0x800881d8` and
+  `0x800881dc`, and VS.EXE `0x80063304`, `0x80063308`, `0x80063328`,
+  `0x8006333e`, `0x8006335a`, `0x8006335c`, `0x80063364` and `0x8006337a`.
 - `kf verify data` accepts a unit's COMMON placement only when the current
   link's `.SYM` (`scripts/kf/linked_symbols.py`) puts every request at its
   claim, and the link report's input hashes all match the working tree.

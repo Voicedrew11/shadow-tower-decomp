@@ -24,17 +24,17 @@
 #include <st/item.h>
 
 ADDRESS(0x8005529c, 0x20)
-int func_8005529c(int id)
+int item_is_held(int id)
 {
-    return DAT_801c7590.counts[id].count != 0;
+    return inventory.counts[id].count != 0;
 }
 
 /* Takes one of item `id`; nonzero when there was none. */
 ADDRESS(0x800552bc, 0x44)
-int func_800552bc(int id)
+int item_take(int id)
 {
-    if (DAT_801c7590.counts[id].count != 0) {
-        DAT_801c7590.counts[id].count--;
+    if (inventory.counts[id].count != 0) {
+        inventory.counts[id].count--;
         return 0;
     }
     return 1;
@@ -42,10 +42,10 @@ int func_800552bc(int id)
 
 /* Adds one of item `id`; nonzero when 99 are already held. */
 ADDRESS(0x80055300, 0x74)
-int func_80055300(int id)
+int item_add(int id)
 {
-    if (DAT_801c7590.counts[id].count < 99) {
-        DAT_801c7590.counts[id].count++;
+    if (inventory.counts[id].count < 99) {
+        inventory.counts[id].count++;
         area_state.hooks->item_added(id);
         return 0;
     }
@@ -54,10 +54,10 @@ int func_80055300(int id)
 
 /* The examine action at `pos` facing `rot` (vx: yaw, vy: pitch). */
 ADDRESS(0x80055374, 0x61c)
-void func_80055374(long *pos, SVECTOR *rot)
+void player_examine(long *pos, SVECTOR *rot)
 {
     VECTOR p;
-    VisRequest req;
+    CollisionRequest req;
     int i;
     int first_result;
     int up;
@@ -66,38 +66,38 @@ void func_80055374(long *pos, SVECTOR *rot)
     u16 r;
     int n;
     int d;
-    Vis48 *c;
-    Vis212 *a;
-    Vis88 *b;
-    Vis24 *def;
+    GroundItem *c;
+    Creature *a;
+    AreaObject *b;
+    AreaObjectType *def;
 
     p.vx = pos[0];
     p.vy = pos[1] + 1600;
     p.vz = pos[2];
     DAT_801cd0e0 = 0;
-    req.unk0 = 0;
-    req.unk4 = p;
-    req.unk1C = 1056;
-    req.unk14.vx = 0;
-    req.unk14.vy = 0;
-    req.unk14.vz = 0;
-    req.unk22 = 0;
-    req.unk1E = 1600;
-    req.unk20 = 0;
-    i = func_80053174((VisLists *)&req, 1);
+    req.tests = 0;
+    req.position = p;
+    req.radius = 1056;
+    req.velocity.vx = 0;
+    req.velocity.vy = 0;
+    req.velocity.vz = 0;
+    req.speed = 0;
+    req.height = 1600;
+    req.heading = 0;
+    i = ground_item_find_in_reach((CollisionState *)&req, 1);
     first_result = i;
     if (i != -1) {
         c = &vis_table_c.entries[i];
-        c->unk23 = c->unk22;
-        c->unk22 = 3;
+        c->prev_state = c->state;
+        c->state = 3;
         return;
     }
-    /* VisLists starts with the request fields func_8004bb88 reads. */
-    i = func_8004bb88((VisLists *)&req, 1);
+    /* CollisionState starts with the request fields creature_find_in_reach reads. */
+    i = creature_find_in_reach((CollisionState *)&req, 1);
     if (i != first_result) {
         a = &vis_table_a.entries[i];
-        up = ratan2(a->unk74.vy - a->unk30 - viewer.position.vy, a->unk40);
-        down = ratan2(a->unk74.vy - (a->unk30 >> 1) - viewer.position.vy, a->unk40);
+        up = ratan2(a->position.vy - a->height - viewer.position.vy, a->player_dist_xz);
+        down = ratan2(a->position.vy - (a->height >> 1) - viewer.position.vy, a->player_dist_xz);
         if (up > 2048)
             up -= 2048;
         if (down > 2048)
@@ -106,33 +106,33 @@ void func_80055374(long *pos, SVECTOR *rot)
             up = 96;
         if (down < 160)
             down = 160;
-        if (func_8004a184((short)down, rot->vx) && func_8004a184(rot->vx, (short)up)) {
-            if (func_8004a148(rot->vy, a->unk8E, 512))
-                func_80054368(a, 0, 0);
+        if (angle_is_after((short)down, rot->vx) && angle_is_after(rot->vx, (short)up)) {
+            if (angle_within(rot->vy, a->facing, 512))
+                creature_talk(a, 0, 0);
             return;
         }
     }
     i = 0;
-    req.unk1C = 256;
-    vis_lists.unk4 = p;
-    vis_lists.unk1C = 256;
-    vis_lists.unk1E = 1600;
-    vis_lists.unk14.vx = 0;
-    vis_lists.unk14.vy = 0;
-    vis_lists.unk14.vz = 0;
-    vis_lists.unk22 = 0;
-    vis_lists.unk20 = 0;
-    vis_lists.unk0 = 0;
-    for (; (i = func_8004f718(i, &vis_lists)) != -1; i++) {
+    req.radius = 256;
+    vis_lists.position = p;
+    vis_lists.radius = 256;
+    vis_lists.height = 1600;
+    vis_lists.velocity.vx = 0;
+    vis_lists.velocity.vy = 0;
+    vis_lists.velocity.vz = 0;
+    vis_lists.speed = 0;
+    vis_lists.heading = 0;
+    vis_lists.tests = 0;
+    for (; (i = object_find_usable(i, &vis_lists)) != -1; i++) {
         b = &vis_table_b.entries[i];
-        def = &vis_table_b.unk0000[b->unk0a];
+        def = &vis_table_b.types[b->type];
         DAT_801cd0e0 = 1;
-        b->unk0E = 1;
+        b->examined = 1;
         kind = def->unk00[0];
         switch (kind) {
         case 254:
-            if (b->unk0C == 0)
-                b->unk0C = 1;
+            if (b->state == 0)
+                b->state = 1;
             break;
         /* An empty case above 226: retail's compare tree splits its four
          * upper cases at 226, which takes a fifth node on that side. */
@@ -142,73 +142,73 @@ void func_80055374(long *pos, SVECTOR *rot)
         case 1:
         case 50:
         case 51:
-            if (b->unk4A.door.unk4F == 251) {
-                r = (short)b->unk22 > 2048 ? b->unk22 - 4096 : b->unk22;
+            if (b->params.door.lock == 251) {
+                r = (short)b->player_bearing > 2048 ? b->player_bearing - 4096 : b->player_bearing;
                 /* The offset window wraps at the halfword boundary. */
                 if ((u16)(r + 1023) < 2047) {
-                    func_80057d58();
-                    b->unk4A.door.unk4F = 255;
+                    play_unlock_sound();
+                    b->params.door.lock = 255;
                 }
-            } else if (b->unk4A.door.unk4F == 252) {
-                r = (short)b->unk22 > 2048 ? b->unk22 - 4096 : b->unk22;
+            } else if (b->params.door.lock == 252) {
+                r = (short)b->player_bearing > 2048 ? b->player_bearing - 4096 : b->player_bearing;
                 if ((u16)(r + 1024) >= 2049) {
-                    func_80057d58();
-                    b->unk4A.door.unk4F = 255;
+                    play_unlock_sound();
+                    b->params.door.lock = 255;
                 }
             }
-            if (b->unk4A.door.unk4F == 255) {
-                if (b->unk0C == 0)
-                    b->unk0C = 1;
-                if (b->unk0C == 7)
-                    b->unk0C = 8;
-            } else if (b->unk4A.door.unk4F < 0xf0 || b->unk4A.door.unk4F > 0xf3) {
-                func_80057d7c();
+            if (b->params.door.lock == 255) {
+                if (b->state == 0)
+                    b->state = 1;
+                if (b->state == 7)
+                    b->state = 8;
+            } else if (b->params.door.lock < 0xf0 || b->params.door.lock > 0xf3) {
+                play_locked_sound();
             }
             break;
         case 52:
-            if (b->unk4A.door.unk4F == 255) {
-                if (b->unk0C == 0) {
-                    b->unk0C = 1;
-                    b->unk02 = 0;
+            if (b->params.door.lock == 255) {
+                if (b->state == 0) {
+                    b->state = 1;
+                    b->anim = 0;
                 }
-                if (b->unk0C == 255 && b->unk49 != 252) {
-                    b->unk0C = 3;
-                    b->unk02 = 1;
+                if (b->state == 255 && b->unk49 != 252) {
+                    b->state = 3;
+                    b->anim = 1;
                 }
             }
             break;
         case 225:
-            d = (u16)(b->unk36 - b->unk20) & 0xfff;
+            d = (u16)(b->facing - b->player_heading) & 0xfff;
             if (d < 512 || d > 3584)
-                func_80054858(b->unk48);
+                talk_show_message(b->unk48);
             break;
         case 226:
-            viewer.unk2 = viewer.unk0;
-            func_800582f0(8, 128);
+            viewer.hp = viewer.max_hp;
+            sound_play(8, 128);
             break;
         case 14:
-            if (area_state.unk0 != 1 && area_state.unk18 == -1) {
-                lighting.unkA = 1;
-                func_80015ad4();
-                func_80055cf4(area_state.unk4);
-                func_80057cc8();
-                func_80042cfc();
-                func_80057a3c();
-                func_80057a68(0);
+            if (area_state.loading != 1 && area_state.entry_fade_start == -1) {
+                lighting.paused = 1;
+                cd_wait_idle();
+                area_save_snapshot(area_state.loaded_area);
+                play_confirm_sound();
+                anim_free_all_for_menu();
+                pad_clear_input();
+                pad_vibrate(0);
                 b = vis_table_b.entries;
                 n = 240;
                 while (n--) {
-                    if (b->unk05 == 236 && b->unk54 != -1) {
-                        func_8005850c(b->unk54, b->unk4A.snd.unk4A + 1108);
+                    if (b->kind == 236 && b->unk54 != -1) {
+                        sound_stop(b->unk54, b->params.snd.sound + 1108);
                         b->unk54 = -1;
                     }
                     b++;
                 }
-                func_80058dc4(1, 1);
-                func_80062c28(1);
-                lighting.unkA = 2;
-                func_80057a3c();
-                func_80058ed4();
+                card_screen_open(1, 1);
+                card_screen_run(1);
+                lighting.paused = 2;
+                pad_clear_input();
+                card_screen_close();
             }
             break;
         }

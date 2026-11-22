@@ -13,8 +13,8 @@
  */
 typedef struct {
     u8 state; /* ST_BLOCK_* */
-    u8 unk1;
-    u16 unk2;
+    u8 tag;
+    u16 slot;
     s32 size; /* data bytes after this header */
     void **owner; /* pointer to the data, cleared when the block is released */
 } StBlock;
@@ -31,26 +31,26 @@ enum {
     ST_BLOCK_END = 0xff
 };
 
-u32 *func_80014cfc(u32 *dst, u32 *src, int count);
-u16 *func_80014d2c(u16 *dst, u16 *src, int count);
+u32 *copy_words(u32 *dst, u32 *src, int count);
+u16 *copy_halfwords(u16 *dst, u16 *src, int count);
 u32 *fill_words(u32 *dst, u32 value, int count);
-u16 *func_80014d80(u16 *dst, u16 value, int count);
-void func_80014da4(StBlock *block);
-void func_80014e20(StBlock *block);
-StBlock *func_80014e4c(StBlock *heap, u32 size);
-void func_80014f90(StBlock *heap);
-void func_80015024(StBlock *heap);
-void func_80015144(StBlock *heap, int size);
-void *func_80015164(StBlock *heap, int size, void **owner);
-void func_80015230(void *data);
-void func_80015250(void *data, u8 state);
-u8 func_80015258(void *data);
-void func_80015264(void *data, u8 value);
-u8 func_8001526c(void *data);
-void func_80015278(void *data, u16 value);
-u16 func_80015280(void *data);
-void *func_8001528c(u32 size);
-void *func_800152d0(u32 size);
-void func_800152f8(void *p);
+u16 *fill_halfwords(u16 *dst, u16 value, int count);
+void heap_merge_free(StBlock *block);
+void heap_block_release(StBlock *block);
+StBlock *heap_find_free(StBlock *heap, u32 size);
+void heap_wait_loading(StBlock *heap);
+void heap_compact(StBlock *heap);
+void heap_init(StBlock *heap, int size);
+void *heap_alloc(StBlock *heap, int size, void **owner);
+void heap_free(void *data);
+void heap_set_state(void *data, u8 state);
+u8 heap_get_state(void *data);
+void heap_set_tag(void *data, u8 value);
+u8 heap_get_tag(void *data);
+void heap_set_slot(void *data, u16 value);
+u16 heap_get_slot(void *data);
+void *mem_alloc_checked(u32 size);
+void *mem_alloc(u32 size);
+void mem_free(void *p);
 
 #endif

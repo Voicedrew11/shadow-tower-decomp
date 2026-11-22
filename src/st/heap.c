@@ -1,7 +1,7 @@
 /*
  * ST.EXE: block heap functions (wait, compact, initialise, allocate, header
  * accessors) and the malloc3 wrappers (WIP module). Split from
- * src/st/memory.c only because func_80014e4c there is not exact.
+ * src/st/memory.c only because heap_find_free there is not exact.
  */
 #include <kf/lib/address.h>
 #include <kf/lib/null.h>
@@ -14,13 +14,13 @@
 #include <st/anim.h>
 
 ADDRESS(0x80014f90, 0x94)
-void func_80014f90(StBlock *heap)
+void heap_wait_loading(StBlock *heap)
 {
     StBlock *p;
 
     for (p = heap; p->state != ST_BLOCK_END; p = NEXT_BLOCK(p)) {
         while (p->state == ST_BLOCK_LOADING)
-            func_80015ad4();
+            cd_wait_idle();
     }
 }
 
@@ -28,7 +28,7 @@ void func_80014f90(StBlock *heap)
 /* Not exact: the final end-header test loads dst->state into v0 and uses
  * beq v0,v1; retail loads v1 and compares v1,v0. */
 ADDRESS(0x80015024, 0x120)
-void func_80015024(StBlock *heap)
+void heap_compact(StBlock *heap)
 {
     StBlock *dst = heap;
     StBlock *p = heap;
@@ -37,11 +37,11 @@ void func_80015024(StBlock *heap)
     u32 *to;
     u32 words;
 
-    func_80014f90(heap);
+    heap_wait_loading(heap);
     while (p->state != ST_BLOCK_END) {
         next = (StBlock *)((u8 *)p + p->size + sizeof(StBlock));
         if (p->state == ST_BLOCK_RELEASABLE)
-            func_80014e20(p);
+            heap_block_release(p);
         if (p->state == ST_BLOCK_USED) {
             if (p != dst) {
                 from = (u32 *)p;
@@ -65,15 +65,15 @@ void func_80015024(StBlock *heap)
     if (dst->state != ST_BLOCK_END) {
         dst->state = ST_BLOCK_FREE;
         dst->size = (u8 *)p - (u8 *)dst - sizeof(StBlock);
-        dst->unk1 = 0;
-        dst->unk2 = 0;
+        dst->tag = 0;
+        dst->slot = 0;
         dst->owner = NULL;
     }
 }
 
 /* One free block spanning `size` bytes, closed by an end header. */
 ADDRESS(0x80015144, 0x20)
-void func_80015144(StBlock *heap, int size)
+void heap_init(StBlock *heap, int size)
 {
     heap->state = ST_BLOCK_FREE;
     heap->size = size - 2 * sizeof(StBlock);
@@ -84,7 +84,7 @@ void func_80015144(StBlock *heap, int size)
 
 /* Allocates `size` bytes, compacting the heap if needed; NULL when full. */
 ADDRESS(0x80015164, 0xcc)
-void *func_80015164(StBlock *heap, int size, void **owner)
+void *heap_alloc(StBlock *heap, int size, void **owner)
 {
     StBlock *block;
     StBlock *rest;
@@ -92,10 +92,10 @@ void *func_80015164(StBlock *heap, int size, void **owner)
     s32 avail;
     int left;
 
-    block = func_80014e4c(heap, size);
+    block = heap_find_free(heap, size);
     if (block == NULL) {
-        func_80015024(heap);
-        block = func_80014e4c(heap, size);
+        heap_compact(heap);
+        block = heap_find_free(heap, size);
         if (block == NULL)
             return NULL;
     }
@@ -105,16 +105,16 @@ void *func_80015164(StBlock *heap, int size, void **owner)
         rest = (StBlock *)((u8 *)block + size + sizeof(StBlock));
         rest->state = ST_BLOCK_FREE;
         rest->size = left;
-        rest->unk1 = 0;
-        rest->unk2 = 0;
+        rest->tag = 0;
+        rest->slot = 0;
         rest->owner = NULL;
     } else {
         size = block->size;
     }
     block->state = ST_BLOCK_USED;
     block->size = size;
-    block->unk1 = 0;
-    block->unk2 = 0;
+    block->tag = 0;
+    block->slot = 0;
     block->owner = owner;
     data = block + 1;
     if (owner != NULL)
@@ -123,50 +123,50 @@ void *func_80015164(StBlock *heap, int size, void **owner)
 }
 
 ADDRESS(0x80015230, 0x20)
-void func_80015230(void *data)
+void heap_free(void *data)
 {
-    func_80014e20(DATA_BLOCK(data));
+    heap_block_release(DATA_BLOCK(data));
 }
 
 ADDRESS(0x80015250, 0x8)
-void func_80015250(void *data, u8 state)
+void heap_set_state(void *data, u8 state)
 {
     DATA_BLOCK(data)->state = state;
 }
 
 ADDRESS(0x80015258, 0xc)
-u8 func_80015258(void *data)
+u8 heap_get_state(void *data)
 {
     return DATA_BLOCK(data)->state;
 }
 
 ADDRESS(0x80015264, 0x8)
-void func_80015264(void *data, u8 value)
+void heap_set_tag(void *data, u8 value)
 {
-    DATA_BLOCK(data)->unk1 = value;
+    DATA_BLOCK(data)->tag = value;
 }
 
 ADDRESS(0x8001526c, 0xc)
-u8 func_8001526c(void *data)
+u8 heap_get_tag(void *data)
 {
-    return DATA_BLOCK(data)->unk1;
+    return DATA_BLOCK(data)->tag;
 }
 
 ADDRESS(0x80015278, 0x8)
-void func_80015278(void *data, u16 value)
+void heap_set_slot(void *data, u16 value)
 {
-    DATA_BLOCK(data)->unk2 = value;
+    DATA_BLOCK(data)->slot = value;
 }
 
 ADDRESS(0x80015280, 0xc)
-u16 func_80015280(void *data)
+u16 heap_get_slot(void *data)
 {
-    return DATA_BLOCK(data)->unk2;
+    return DATA_BLOCK(data)->slot;
 }
 
 /* malloc3, or NULL when the result is not in main RAM. */
 ADDRESS(0x8001528c, 0x44)
-void *func_8001528c(u32 size)
+void *mem_alloc_checked(u32 size)
 {
     u8 *p = malloc3(size);
 
@@ -176,9 +176,9 @@ void *func_8001528c(u32 size)
 }
 
 ADDRESS(0x800152d0, 0x28)
-void *func_800152d0(u32 size)
+void *mem_alloc(u32 size)
 {
-    return func_8001528c((size + 7) & ~7);
+    return mem_alloc_checked((size + 7) & ~7);
 }
 
 /*
@@ -187,7 +187,7 @@ void *func_800152d0(u32 size)
  * ST.EXE links no LIBSN member, so it is game code.
  */
 ADDRESS(0x800152f8, 0x24)
-void func_800152f8(void *p)
+void mem_free(void *p)
 {
     if (p != NULL)
         free3(p);

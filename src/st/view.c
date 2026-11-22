@@ -16,11 +16,11 @@
  * and closer than 12 units (of 2048).
  */
 ADDRESS(0x80016554, 0x324)
-int func_80016554(void)
+int view_point_in_near_cone(void)
 {
     ScratchPad *sp = SCRATCHPAD;
-    int pitch = viewer.unk268;
-    int yaw = viewer.unk26A + 1024;
+    int pitch = viewer.pitch;
+    int yaw = viewer.yaw + 1024;
     int half;
     int cos0, sin0, cos1, sin1, cos2, sin2, cosp;
     int back, side, front;
@@ -58,13 +58,13 @@ int func_80016554(void)
     a2 = z2 - z0;
     b2 = x2 - x0;
     c2 = -a2 * x0 + b2 * z0;
-    px = (sp->unkE0 - viewer.position.vx) / 2048 + cx;
-    pz = (sp->unkE8 - viewer.position.vz) / 2048 + cz;
+    px = (sp->point_x - viewer.position.vx) / 2048 + cx;
+    pz = (sp->point_z - viewer.position.vz) / 2048 + cz;
     e1 = a1 * px - b1 * pz + c1;
     e2 = a2 * px - b2 * pz + c2;
     if (e1 > 0 || e2 < 0)
         return 0;
     rsin(pitch);
-    py = (sp->unkE4 - viewer.position.vy) / 2048;
+    py = (sp->point_y - viewer.position.vy) / 2048;
     return (px - cx) * (px - cx) + (pz - cz) * (pz - cz) + py * py < 145;
 }

@@ -126,16 +126,22 @@ typedef union {
 void mesh_ft3_tint_a(CVECTOR *rgb);
 void mesh_ft3_tint_b(CVECTOR *rgb);
 
+/* VS.EXE has its own port under this name, with another signature; VS units define VS_EXE. */
+#ifndef VS_EXE
 void mesh_draw_ft3(int count, MeshFaceFT3 *face, u_long *ot, int flags);
 void mesh_draw_ft4(int count, MeshFaceFT4 *face, u_long *ot, int flags);
 void mesh_draw_gt3(int count, MeshFaceGT3 *face, u_long *ot, int flags);
 void mesh_draw_gt4(int count, MeshFaceGT4 *face, u_long *ot, int flags);
+#endif
 void mesh_draw_part(u_short part, u_int flags);
+/* VS.EXE has its own port under this name, with another signature; VS units define VS_EXE. */
+#ifndef VS_EXE
 void mesh_draw_ft3_nccs(int count, MeshFaceFT3 *face, u_long *ot, int flags);
 void mesh_draw_ft4_nccs(int count, MeshFaceFT4 *face, u_long *ot, int flags);
 void mesh_draw_gt3_nccs(int count, MeshFaceGT3 *face, u_long *ot, int flags);
 void mesh_draw_gt4_nccs(int count, MeshFaceGT4 *face, u_long *ot, int flags);
 void mesh_draw_part_nccs(u_short part, u_int flags);
+#endif
 void mesh_div_draw_ft3(int count, MeshFaceFT3 *face, u_long *ot, int flags);
 void mesh_div_draw_ft4(int count, MeshFaceFT4 *face, u_long *ot, int flags);
 void mesh_div_draw_gt3(int count, MeshFaceGT3 *face, u_long *ot, int flags);
@@ -149,26 +155,26 @@ void world_draw(void);
 
 /*
  * The model renderers (src/st/model_draw.c). A model block (a
- * world_state.unk834C slot) holds its part data at the offset in word +8;
+ * world_state.model_files slot) holds its part data at the offset in word +8;
  * halfword +6 selects which of anim_prepare / anim_prepare_any prepares it.
  */
 typedef struct {
     u8 unk0[6];
-    u16 unk6;
-    u32 unk8;
+    u16 node_count;
+    u32 model;
 } ModelFile;
 
 /* One entry of the scratchpad's model list: a part of the current model
  * drawn for an object. */
 typedef struct {
-    u32 unk0;
+    u32 flags;
     StAnimRecord *obj;   /* 0x04: its node record (st/anim.h); model_draw_list clears
-                          * unk0 every frame, scales kinds 1, 3 and 4 by unk44->scale and
-                          * turns kind 2's parent matrix (unk48->unk4) to face the viewer */
+                          * flags every frame, scales kinds 1, 3 and 4 by transform->scale and
+                          * turns kind 2's parent matrix (parent->local_matrix) to face the viewer */
     u16 part;            /* 0x08: 0xffff: none */
     u8 kind;             /* 0x0a: 1, 3, 4: scaled, every 6th, 4th, 8th entry per frame */
     u8 unk0B;
-    s32 unk0C;           /* -1: skipped */
+    s32 key;             /* -1: skipped */
 } ModelEntry;
 
 typedef struct {
@@ -176,8 +182,11 @@ typedef struct {
     s32 count;
 } ModelList;
 
-void func_80021ac4(u8 slot);
+void player_draw_equipment_model(u8 slot);
+/* VS.EXE has its own port under this name, with another signature; VS units define VS_EXE. */
+#ifndef VS_EXE
 void model_draw_list(u8 flags, SVECTOR *rot);
+#endif
 void model_draw(int unused0, u16 model, VECTOR *pos, SVECTOR *rot, SVECTOR *scale, void *anim,
                 MATRIX *view, u16 part, u16 arg8, short light, short unused10, u8 flags,
                 int z);

@@ -2,7 +2,7 @@
  * ST.EXE sound functions (src/st/sound.c, WIP module): the sound system's
  * start and stop, the one-shot and positional sound players, the listener,
  * and the VAB bank loads through the CD request ring. The sound state block
- * itself is st/data.h's Data801dd1c0. The band's functions that other
+ * itself is st/data.h's SoundState. The band's functions that other
  * modules already call keep their st/funcs.h and st/player.h prototypes.
  */
 #ifndef ST_SOUND_H
@@ -15,22 +15,22 @@
 #include <st/cd.h>
 
 /* src/st/sound.c */
-void func_80057b48(int damage);
-void func_80057bac(int volume);
+void play_landing_sound(int damage);
+void play_footstep_sound(int volume);
 void func_80057c30(void);
-void func_80057c54(void);
+void play_warp_sound(void);
 void func_80057c78(void);
 void func_80057ca4(void);
-void func_80057cc8(void);
-void func_80057cec(void);
-void func_80057d10(void);
-void func_80057d34(void);
-void func_80057d58(void);
-void func_80057d7c(void);
-s16 func_80057fc4(int id, VECTOR *pos, int volume, int range, int fade, int note);
-s16 func_80058318(int id, int left, int right, int note);
-void func_80058534(short voice, int id, int note);
-StSoundBuf *func_80058770(int first, int count, int buf, int bufs, int *index);
-void func_800588b4(StCdRequest *request);
+void play_confirm_sound(void);
+void play_cancel_sound(void);
+void play_cursor_sound(void);
+void play_refuse_sound(void);
+void play_unlock_sound(void);
+void play_locked_sound(void);
+s16 sound_play_positional(int id, VECTOR *pos, int volume, int range, int fade, int note);
+s16 sound_key_on(int id, int left, int right, int note);
+void sound_key_off(short voice, int id, int note);
+StSoundBuf *sound_bank_find_buffer(int first, int count, int buf, int bufs, int *index);
+void sound_bank_read_done(StCdRequest *request);
 
 #endif

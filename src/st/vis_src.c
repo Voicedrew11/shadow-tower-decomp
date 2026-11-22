@@ -23,31 +23,31 @@ void vis_collect_sources(VECTOR *a, VECTOR *b, VECTOR *c)
     int j;
     s16 id;
 
-    x = DAT_801856d0[0][a->vx / 4096].bits;
-    y = DAT_801856d0[1][a->vy / 4096].bits;
-    z = DAT_801856d0[2][a->vz / 4096].bits;
+    x = vis_axis_masks[0][a->vx / 4096].bits;
+    y = vis_axis_masks[1][a->vy / 4096].bits;
+    z = vis_axis_masks[2][a->vz / 4096].bits;
     for (i = 0; i < 16; i++)
         mask[i] = x[i] & z[i] & y[i];
     if (b) {
-        u_long *x = DAT_801856d0[0][b->vx / 4096].bits;
-        u_long *y = DAT_801856d0[1][b->vy / 4096].bits;
-        u_long *z = DAT_801856d0[2][b->vz / 4096].bits;
+        u_long *x = vis_axis_masks[0][b->vx / 4096].bits;
+        u_long *y = vis_axis_masks[1][b->vy / 4096].bits;
+        u_long *z = vis_axis_masks[2][b->vz / 4096].bits;
 
         for (i = 0; i < 16; i++)
             mask[i] |= x[i] & z[i] & y[i];
     }
     if (c) {
-        u_long *x = DAT_801856d0[0][c->vx / 4096].bits;
-        u_long *y = DAT_801856d0[1][c->vy / 4096].bits;
-        u_long *z = DAT_801856d0[2][c->vz / 4096].bits;
+        u_long *x = vis_axis_masks[0][c->vx / 4096].bits;
+        u_long *y = vis_axis_masks[1][c->vy / 4096].bits;
+        u_long *z = vis_axis_masks[2][c->vz / 4096].bits;
 
         for (i = 0; i < 16; i++)
             mask[i] |= x[i] & z[i] & y[i];
     }
     for (id = i = 0; i < 16; i++) {
         for (j = 0; j < 32; j++) {
-            if ((mask[i] & 1) && (area_state.unk0 != 1 || !area_state.unk1D ||
-                             vis_records[id].part < ((u_long *)world_state.unk8308[1])[1] >> 1)) {
+            if ((mask[i] & 1) && (area_state.loading != 1 || !area_state.loading_world ||
+                             vis_records[id].part < ((u_long *)world_state.area_geometry[1])[1] >> 1)) {
                 vis_lists.sources[vis_lists.n_sources] = id;
                 vis_lists.n_sources++;
             }
@@ -59,16 +59,16 @@ void vis_collect_sources(VECTOR *a, VECTOR *b, VECTOR *c)
 
 /* The cell position of each collected source. */
 ADDRESS(0x8004656c, 0x98)
-void func_8004656c(VECTOR *out)
+void collision_source_positions(VECTOR *out)
 {
-    VisRecord *rec;
+    MapBlock *rec;
     int i;
 
     i = vis_lists.n_sources;
     while (i--) {
         rec = &vis_records[vis_lists.sources[i]];
-        out[i].vx = rec->unk08 << 12;
-        out[i].vy = rec->unk09 * 4096 + (rec->unk0b - 128) * 128;
-        out[i].vz = rec->unk0a << 12;
+        out[i].vx = rec->cell_x << 12;
+        out[i].vy = rec->cell_y * 4096 + (rec->y_offset - 128) * 128;
+        out[i].vz = rec->cell_z << 12;
     }
 }

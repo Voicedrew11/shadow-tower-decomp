@@ -1,6 +1,6 @@
 /*
  * ST.EXE: CD position offset and the request-ring waits (WIP module). Split
- * from src/st/cdreq.c while func_800159d4 there was not exact.
+ * from src/st/cdreq.c while cd_sector_to_loc there was not exact.
  */
 #include <kf/lib/address.h>
 #include <kf/lib/null.h>
@@ -15,22 +15,22 @@
 #include <st/funcs.h>
 
 ADDRESS(0x80015a94, 0x40)
-void func_80015a94(CdlLOC *pos, int offset, CdlLOC *out)
+void cd_loc_add_sectors(CdlLOC *pos, int offset, CdlLOC *out)
 {
-    func_800159d4(out, func_80015950(pos) + offset);
+    cd_sector_to_loc(out, cd_loc_to_sector(pos) + offset);
 }
 
 /* Waits until the request ring is empty. */
 ADDRESS(0x80015ad4, 0x58)
-void func_80015ad4(void)
+void cd_wait_idle(void)
 {
-    while (cd_state.unk9D8 != cd_state.unk9D4 || cd_state.unk9D8->unk0 != 0)
-        func_8001531c();
+    while (cd_state.current != cd_state.next_free || cd_state.current->kind != 0)
+        cd_wait_frame();
 }
 
 ADDRESS(0x80015b2c, 0x4c)
-void func_80015b2c(StCdRequest *request)
+void cd_request_wait_free(StCdRequest *request)
 {
-    while (request->unk0)
-        func_8001531c();
+    while (request->kind)
+        cd_wait_frame();
 }

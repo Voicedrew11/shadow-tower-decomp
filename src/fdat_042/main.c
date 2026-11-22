@@ -3,7 +3,7 @@
  * the 21 functions every overlay starts with (src/lib/fdat_common_a.inc,
  * fdat_common.inc, fdat_common_b.inc), then its map handlers through its
  * own move picker. One object, because the picker's switch table is
- * 8-aligned after fdat_801ebec4's in the same read-only run.
+ * 8-aligned after creature_run_script_command's in the same read-only run.
  */
 #include <kf/lib/address.h>
 #include <kf/lib/types.h>
@@ -23,22 +23,22 @@
 
 RODATA(0x801eb560, 0x24c)
 
-void func_801ed4a0();
-void func_801ed500();
-void func_801ed568();
-void func_801ed7b4();
+void map_update_events();
+void map_restore_progress();
+void map_pick_creature_move();
+void map_step_creature();
 
 const FdatHeader fdat_header = {
     0x9,
     {
-        fdat_801ed498, func_801ed4a0, fdat_801ed498, fdat_801ed498,
-        fdat_801ed498, func_801ed500, fdat_801ed498, fdat_801ed498,
-        fdat_801ed498, fdat_801ed498, fdat_801ed498, fdat_801ed498,
-        fdat_801ed498, fdat_801ed498, fdat_801ed498, fdat_801ed498,
-        func_801ed568, func_801ed7b4, fdat_801ed498, fdat_801ed498,
-        fdat_801ed498, fdat_801ed498, fdat_801ed498, fdat_801ed498,
-        fdat_801ed498, fdat_801ed498, fdat_801ed498, fdat_801ed498,
-        fdat_801ed498, fdat_801ed498, fdat_801ed498, fdat_801ed498,
+        map_hook_none, map_update_events, map_hook_none, map_hook_none,
+        map_hook_none, map_restore_progress, map_hook_none, map_hook_none,
+        map_hook_none, map_hook_none, map_hook_none, map_hook_none,
+        map_hook_none, map_hook_none, map_hook_none, map_hook_none,
+        map_pick_creature_move, map_step_creature, map_hook_none, map_hook_none,
+        map_hook_none, map_hook_none, map_hook_none, map_hook_none,
+        map_hook_none, map_hook_none, map_hook_none, map_hook_none,
+        map_hook_none, map_hook_none, map_hook_none, map_hook_none,
     },
     0x3c,
 };
@@ -51,47 +51,47 @@ const FdatHeader fdat_header = {
 DATA(0x801ed96c, 0x4, ".bss")
 int fdat_801ed96c;
 
-void func_801ed8d0(void);
+void map_spawn_rising_creature(void);
 
 /* Plays the scene once door 19 of table B is raised past 0xa00, unless
  * flag 1 is set. */
 ADDRESS(0x801ed4a0, 0x60)
-void func_801ed4a0(void)
+void map_update_events(void)
 {
-    Vis88 *door = &vis_table_b.entries[19];
+    AreaObject *door = &vis_table_b.entries[19];
 
-    if (!DAT_801cba08.unk1440.bit.f1 && door->unk10 > 0xa00 && fdat_801ed96c == -1)
-        func_801ed8d0();
+    if (!game_progress.event_flags.bit.f1 && door->anim_frame > 0xa00 && fdat_801ed96c == -1)
+        map_spawn_rising_creature();
 }
 
 /* Sets up the area: table A entry 32 by flag 1, and arms the scene. */
 ADDRESS(0x801ed500, 0x68)
-void func_801ed500(void)
+void map_restore_progress(void)
 {
-    Vis212 *e = &vis_table_a.entries[32];
+    Creature *e = &vis_table_a.entries[32];
 
-    if (e->unk00 == 0xff) {
+    if (e->spawn_chance == 0xff) {
         fdat_801ed96c = 0;
         return;
     }
-    if (!DAT_801cba08.unk1440.bit.f1) {
-        e->unk00 = 0;
+    if (!game_progress.event_flags.bit.f1) {
+        e->spawn_chance = 0;
         fdat_801ed970 = 0;
     } else {
-        e->unk00 = 100;
+        e->spawn_chance = 100;
         fdat_801ed970 = 0xff;
     }
     fdat_801ed96c = -1;
 }
 
 /*
- * The entry's move picker, fdat_801ed4a0 with one difference: the headings
+ * The entry's move picker, creature_pick_move with one difference: the headings
  * stay as they are when no script was picked.
  */
 ADDRESS(0x801ed568, 0x24c)
-void func_801ed568(void)
+void map_pick_creature_move(void)
 {
-    Vis212 *e = vis_table_a.unk6138;
+    Creature *e = vis_table_a.current;
     u16 wall;
     int d;
     short x;
@@ -99,46 +99,46 @@ void func_801ed568(void)
     short dx;
     short dz;
 
-    if (e->unk1A == 0xf0 || e->unk1A == 0)
+    if (e->script_state == 0xf0 || e->script_state == 0)
         return;
-    fdat_801ec6a4();
-    if (!fdat_801ecbcc())
+    creature_choose_action();
+    if (!creature_pick_weighted_script())
         return;
-    switch (e->unk44) {
+    switch (e->action) {
     case 8:
-        wall = e->unk5E;
+        wall = e->wall_heading;
         if ((short)wall == 0x7fff) {
-            e->unk5A = e->unk5C = (e->unk56 + 2048) & 0xfff;
+            e->unk5A = e->target_heading = (e->player_heading + 2048) & 0xfff;
         } else {
-            d = (((e->unk56 + 2048) & 0xfff) - wall + 1024) & 0xfff;
+            d = (((e->player_heading + 2048) & 0xfff) - wall + 1024) & 0xfff;
             if (d < 1024 || d > 3072)
-                e->unk5A = e->unk5C = (wall + 3072) & 0xfff;
+                e->unk5A = e->target_heading = (wall + 3072) & 0xfff;
             else
-                e->unk5A = e->unk5C = (wall + 1024) & 0xfff;
+                e->unk5A = e->target_heading = (wall + 1024) & 0xfff;
         }
         break;
     case 2:
     case 4:
     case 16:
     case 32:
-        e->unk5A = e->unk5C = e->unk56;
+        e->unk5A = e->target_heading = e->player_heading;
         break;
     default:
-        e->unk5A = e->unk5C = e->unk8E;
+        e->unk5A = e->target_heading = e->facing;
         break;
     }
-    if (e->unk44 != 8)
-        e->unk5E = 0x7fff;
-    if (vis_records[e->unk26].unk05 != 0 || vis_records[e->unk26].unk06 != 0) {
-        x = rcos(e->unk5C - 1024) >> 5;
-        z = rsin(e->unk5C - 1024) >> 5;
-        dx = x + vis_records[e->unk26].unk05;
-        dz = z + vis_records[e->unk26].unk06;
-        e->unk5C = (ratan2(dz, dx) + 1024) & 0xfff;
+    if (e->action != 8)
+        e->wall_heading = 0x7fff;
+    if (vis_records[e->block].heading_bias_x != 0 || vis_records[e->block].heading_bias_z != 0) {
+        x = rcos(e->target_heading - 1024) >> 5;
+        z = rsin(e->target_heading - 1024) >> 5;
+        dx = x + vis_records[e->block].heading_bias_x;
+        dz = z + vis_records[e->block].heading_bias_z;
+        e->target_heading = (ratan2(dz, dx) + 1024) & 0xfff;
         x = rcos(e->unk5A) >> 5;
         z = rsin(e->unk5A) >> 5;
-        dx = x + vis_records[e->unk26].unk05;
-        dz = z + vis_records[e->unk26].unk06;
+        dx = x + vis_records[e->block].heading_bias_x;
+        dz = z + vis_records[e->block].heading_bias_z;
         e->unk5A = ratan2(dz, dx);
     }
 }

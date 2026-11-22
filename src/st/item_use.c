@@ -21,11 +21,11 @@ RODATA(0x8001274c, 0x108)
 
 /* The use result: whether the item was used (1) or not (2), a member of
  * the save-game state block. */
-#define USE_RESULT DAT_801cba08.unk16D8
+#define USE_RESULT game_progress.item_use_result
 
 /* Uses item `id` and leaves the use result. */
 ADDRESS(0x80054a54, 0x848)
-void func_80054a54(int id)
+void item_use(int id)
 {
     VECTOR pos;
     int i;
@@ -39,26 +39,26 @@ void func_80054a54(int id)
     case 0x10b:
         break;
     case 0x10c:
-        if (!(viewer.unk2C & 0x30000)) {
+        if (!(viewer.status_flags & 0x30000)) {
             USE_RESULT = 1;
             viewer.unk190[5][1] = 3000;
             viewer.unk190[5][0] = 0;
-            viewer.unk2C |= 0x10000;
+            viewer.status_flags |= 0x10000;
         }
         break;
     case 0x10d:
-        if (!(viewer.unk2C & 0x30000)) {
+        if (!(viewer.status_flags & 0x30000)) {
             USE_RESULT = 1;
             viewer.unk190[5][1] = 18000;
             viewer.unk190[5][0] = 0;
-            viewer.unk2C |= 0x20000;
+            viewer.status_flags |= 0x20000;
         }
         break;
     case 0x10e:
-        if (area_state.area != 30 && viewer.unk22C != 0xff) {
-            viewer.unk2B = 1;
-            viewer.unk2F0 = 0;
-            viewer.unk2EC = 0;
+        if (area_state.area != 30 && viewer.save_area != 0xff) {
+            viewer.save_warp_request = 1;
+            viewer.submerged_acid = 0;
+            viewer.submerged = 0;
             USE_RESULT = 1;
             area_state.hooks->item_used(id);
         }
@@ -73,17 +73,17 @@ void func_80054a54(int id)
     case 0x117:
     case 0x118:
         i = 0;
-        vis_lists.unk4 = pos;
-        vis_lists.unk1C = 1056;
-        vis_lists.unk1E = 1600;
-        vis_lists.unk14.vx = 0;
-        vis_lists.unk14.vy = 0;
-        vis_lists.unk14.vz = 0;
-        vis_lists.unk22 = 0;
-        vis_lists.unk20 = 0;
-        vis_lists.unk0 = 0;
-        while ((i = func_8004f718(i, &vis_lists)) != -1) {
-            switch (func_8004fb88(&vis_table_b.entries[i], id)) {
+        vis_lists.position = pos;
+        vis_lists.radius = 1056;
+        vis_lists.height = 1600;
+        vis_lists.velocity.vx = 0;
+        vis_lists.velocity.vy = 0;
+        vis_lists.velocity.vz = 0;
+        vis_lists.speed = 0;
+        vis_lists.heading = 0;
+        vis_lists.tests = 0;
+        while ((i = object_find_usable(i, &vis_lists)) != -1) {
+            switch (object_try_key(&vis_table_b.entries[i], id)) {
             case 0:
                 USE_RESULT = 2;
                 goto done;
@@ -91,13 +91,13 @@ void func_80054a54(int id)
                 if (id == 0x114)
                     area_state.hooks->item_used(i | 0x4000);
                 else
-                    func_80057d58();
+                    play_unlock_sound();
                 USE_RESULT = 1;
                 if (id == 0x114 || id == 0x116)
                     goto used;
                 goto done;
             case 3:
-                func_80057cec();
+                play_cancel_sound();
                 USE_RESULT = 1;
                 goto done;
             }
@@ -105,130 +105,130 @@ void func_80054a54(int id)
         }
         break;
     case 0x11c:
-        if (viewer.unk2 < viewer.unk0) {
-            viewer.unk2 = viewer.unk0;
+        if (viewer.hp < viewer.max_hp) {
+            viewer.hp = viewer.max_hp;
             USE_RESULT = 1;
-            func_800582f0(8, 128);
+            sound_play(8, 128);
         }
         break;
     case 0x11d:
-        if (viewer.unk6 < viewer.unk4) {
-            viewer.unk6 = viewer.unk4;
+        if (viewer.mp < viewer.max_mp) {
+            viewer.mp = viewer.max_mp;
             USE_RESULT = 1;
-            func_800582f0(8, 128);
+            sound_play(8, 128);
         }
         break;
     case 0x11e:
-        if (viewer.unk2C & 7) {
+        if (viewer.status_flags & 7) {
             viewer.unk190[0][1] = 0;
             viewer.unk190[0][0] = 0;
-            viewer.unk2C &= ~7;
+            viewer.status_flags &= ~7;
             USE_RESULT = 1;
-            func_800582f0(8, 128);
+            sound_play(8, 128);
         }
         break;
     case 0x11f:
-        if (viewer.unk2C & 0x18) {
+        if (viewer.status_flags & 0x18) {
             viewer.unk190[1][1] = 0;
             viewer.unk190[1][0] = 0;
-            viewer.unk2C &= ~0x18;
+            viewer.status_flags &= ~0x18;
             USE_RESULT = 1;
-            func_800582f0(8, 128);
+            sound_play(8, 128);
         }
         break;
     case 0x120:
-        if (viewer.unk2C & 0x100) {
+        if (viewer.status_flags & 0x100) {
             viewer.unk190[4][1] = 0;
             viewer.unk190[4][0] = 0;
-            viewer.unk2C &= ~0x100;
+            viewer.status_flags &= ~0x100;
             USE_RESULT = 1;
-            func_800582f0(8, 128);
+            sound_play(8, 128);
         }
         break;
     case 0x122:
-        if (!(viewer.unk2C & 0x40000)) {
+        if (!(viewer.status_flags & 0x40000)) {
             viewer.unk190[6][1] = 300;
             viewer.unk190[6][0] = 0;
-            viewer.unk2C |= 0x40000;
+            viewer.status_flags |= 0x40000;
             USE_RESULT = 1;
         }
         break;
     case 0x123:
-        if (!(viewer.unk2C & 0x80000)) {
+        if (!(viewer.status_flags & 0x80000)) {
             viewer.unk190[7][1] = 3000;
             viewer.unk190[7][0] = 0;
-            viewer.unk2C |= 0x80000;
+            viewer.status_flags |= 0x80000;
             USE_RESULT = 1;
         }
         break;
     case 0x124:
-        if (!(viewer.unk2C & 0x100000)) {
+        if (!(viewer.status_flags & 0x100000)) {
             viewer.unk190[8][1] = 600;
             viewer.unk190[8][0] = 0;
-            viewer.unk2C |= 0x100000;
+            viewer.status_flags |= 0x100000;
             USE_RESULT = 1;
         }
         break;
     case 0x125:
-        if (!(viewer.unk2C & 0x200000)) {
+        if (!(viewer.status_flags & 0x200000)) {
             viewer.unk190[9][1] = 300;
             viewer.unk190[9][0] = 0;
-            viewer.unk2C |= 0x200000;
+            viewer.status_flags |= 0x200000;
             USE_RESULT = 1;
         }
         break;
     case 0x126:
-        if (!(viewer.unk2C & 0x400000)) {
+        if (!(viewer.status_flags & 0x400000)) {
             viewer.unk190[10][1] = 6000;
             viewer.unk190[10][0] = 0;
-            viewer.unk2C |= 0x400000;
+            viewer.status_flags |= 0x400000;
             USE_RESULT = 1;
         }
         break;
     case 0x127:
-        if (!(viewer.unk2C & 0x800000)) {
+        if (!(viewer.status_flags & 0x800000)) {
             viewer.unk190[11][1] = 3000;
             viewer.unk190[11][0] = 0;
-            viewer.unk2C |= 0x800000;
+            viewer.status_flags |= 0x800000;
             USE_RESULT = 1;
         }
         break;
     case 0x128:
-        if (!(viewer.unk2C & 0x800)) {
+        if (!(viewer.status_flags & 0x800)) {
             viewer.unk190[12][1] = 6000;
             viewer.unk190[12][0] = 0;
-            viewer.unk2C |= 0x800;
+            viewer.status_flags |= 0x800;
             USE_RESULT = 1;
         }
         break;
     case 0x12e: {
         u16 *ids[12] = {
-            &viewer.unk38[0], &viewer.unk38[2], &viewer.unk38[3], &viewer.unk38[4],
-            &viewer.unk38[8], &viewer.unk38[9], &viewer.unk38[10], &viewer.unk38[13],
-            &viewer.unk38[15], &viewer.unk38[16], &viewer.unk38[17], NULL,
+            &viewer.equipment[0], &viewer.equipment[2], &viewer.equipment[3], &viewer.equipment[4],
+            &viewer.equipment[8], &viewer.equipment[9], &viewer.equipment[10], &viewer.equipment[13],
+            &viewer.equipment[15], &viewer.equipment[16], &viewer.equipment[17], NULL,
         };
         u16 **p;
-        Vis44 *c;
+        ItemType *c;
         int n;
         int base;
 
         /* 10 to 30 percent of each item's maximum, by how full both bars are */
-        base = viewer.unk6 * 10 / viewer.unk4 + 10;
-        points = viewer.unk2 * 10 / viewer.unk0 + base;
+        base = viewer.mp * 10 / viewer.max_mp + 10;
+        points = viewer.hp * 10 / viewer.max_hp + base;
         for (p = ids; *p != NULL; p++) {
             if (**p != 0xffff) {
-                c = &vis_table_c.unk0118[**p];
-                n = c->unk27 * points / 100;
+                c = &vis_table_c.types[**p];
+                n = c->max_durability * points / 100;
                 if (n == 0)
                     n = 1;
-                if (c->unk28 + n > c->unk27)
-                    c->unk28 = c->unk27;
+                if (c->durability + n > c->max_durability)
+                    c->durability = c->max_durability;
                 else
-                    c->unk28 += n;
+                    c->durability += n;
                 USE_RESULT = 1;
             }
         }
-        func_8003d030();
+        player_update_durability_warning();
         break;
     }
     case 0x129:
@@ -242,37 +242,37 @@ void func_80054a54(int id)
         area_state.hooks->item_used(id);
         goto done;
     case 0x136:
-        func_80057cc8();
-        USE_RESULT = func_8005e924(5);
+        play_confirm_sound();
+        USE_RESULT = menu_attribute_points_run(5);
         break;
     case 0x137:
-        func_80057cc8();
-        USE_RESULT = func_8005e924(53);
+        play_confirm_sound();
+        USE_RESULT = menu_attribute_points_run(53);
         break;
     case 0x138:
-        func_80057cc8();
-        USE_RESULT = func_8005e924(29);
+        play_confirm_sound();
+        USE_RESULT = menu_attribute_points_run(29);
         break;
     case 0x139:
-        func_80057cc8();
-        USE_RESULT = func_8005e924(14);
+        play_confirm_sound();
+        USE_RESULT = menu_attribute_points_run(14);
         break;
     }
 used:
     if (USE_RESULT == 1)
-        func_800552bc(id);
+        item_take(id);
 done:
-    func_8003ead0();
+    player_stop_motion();
     {
         /* the quick-use slots drop an item used up */
         u16 *slots[5] = {
-            &viewer.unk38[5], &viewer.unk38[19], &viewer.unk38[11], &viewer.unk38[20],
-            &viewer.unk38[18],
+            &viewer.equipment[5], &viewer.equipment[19], &viewer.equipment[11], &viewer.equipment[20],
+            &viewer.equipment[18],
         };
         int slot;
 
         for (slot = 0; slot < 5; slot++) {
-            if (*slots[slot] == id && !DAT_801c7590.counts[*slots[slot]].count)
+            if (*slots[slot] == id && !inventory.counts[*slots[slot]].count)
                 *slots[slot] = 0xffff;
         }
     }

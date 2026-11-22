@@ -4,7 +4,7 @@
  * reader follow (WIP module). The unit is -G8: the "FN." file name is an
  * .sdata literal, and the heap words, defined elsewhere, get the absolute
  * lui pairs ASPSX gives small data it does not own. It ends at
- * func_80014544; the game loop follows in its own unit (src/st/loop.c).
+ * game_load_start_file; the game loop follows in its own unit (src/st/loop.c).
  */
 #include <kf/lib/address.h>
 #include <kf/lib/types.h>
@@ -48,8 +48,8 @@ int main(void)
     u8 *heap;
     u_char result[8];
 
-    heap = DAT_80013980 + ((DAT_80013988 - DAT_80013980 + HEAP_ALIGN - 1) & ~(HEAP_ALIGN - 1));
-    DAT_8001398c = heap;
+    heap = overlay_area_start + ((overlay_area_end - overlay_area_start + HEAP_ALIGN - 1) & ~(HEAP_ALIGN - 1));
+    heap_base = heap;
     InitHeap3((unsigned long *)heap, HEAP_TOP - heap);
     while (CdInit() == 0)
         CdSync(0, result);
@@ -57,16 +57,16 @@ int main(void)
     InitCARD(0);
     StartCARD();
     _bu_init();
-    func_80057684();
+    pad_init();
     ExitCriticalSection();
-    func_80014a30();
+    game_loop();
 }
 
 ADDRESS(0x80014410, 0x40)
-void func_80014410(void)
+void game_shutdown(void)
 {
-    func_80057f3c();
-    func_80016454();
+    sound_shutdown();
+    cd_shutdown();
     PadStopCom();
     ResetGraph(3);
     StopCallback();
@@ -77,7 +77,7 @@ void func_80014410(void)
  * at *cursor, then moves *cursor past the end of the line.
  */
 ADDRESS(0x80014450, 0xf4)
-int func_80014450(u8 **cursor, int digits)
+int text_read_number(u8 **cursor, int digits)
 {
     int value = 0;
     int scale = 1;
@@ -104,10 +104,10 @@ int func_80014450(u8 **cursor, int digits)
 /*
  * Loads the start-up table file FN.: six bytes of area_state, three
  * viewer positions and two optional values, then id/value rows until
- * 999. Rows 970..990 fill viewer.unk38; other ids set an id's count.
+ * 999. Rows 970..990 fill viewer.equipment; other ids set an id's count.
  */
 ADDRESS(0x80014544, 0x4ec)
-void func_80014544(void)
+void game_load_start_file(void)
 {
     u8 *buf;
     u8 *cursor;
@@ -121,20 +121,20 @@ void func_80014544(void)
     int x;
     int y;
 
-    buf = func_800152d0(0x4000);
-    func_8001618c(buf, "FN.", 0x4000);
+    buf = mem_alloc(0x4000);
+    load_st_file(buf, "FN.", 0x4000);
     cursor = buf;
-    area_state.unk4 = area_state.unk5 = area_state.unk6 = area_state.unk7 =
-        area_state.unk8 = area_state.area = func_80014450(&cursor, 3);
-    viewer.position.vx = (func_80014450(&cursor, 7) + 64) << 12;
-    viewer.position.vy = ((func_80014450(&cursor, 7) + 64) << 12) - 1600;
-    viewer.position.vz = (func_80014450(&cursor, 7) + 64) << 12;
-    x = func_80014450(&cursor, 5);
-    y = func_80014450(&cursor, 5);
+    area_state.loaded_area = area_state.loaded_world = area_state.loaded_images = area_state.loaded_sound_bank =
+        area_state.unk8 = area_state.area = text_read_number(&cursor, 3);
+    viewer.position.vx = (text_read_number(&cursor, 7) + 64) << 12;
+    viewer.position.vy = ((text_read_number(&cursor, 7) + 64) << 12) - 1600;
+    viewer.position.vz = (text_read_number(&cursor, 7) + 64) << 12;
+    x = text_read_number(&cursor, 5);
+    y = text_read_number(&cursor, 5);
     for (;;) {
         second = cursor + 4;
-        id = func_80014450(&cursor, 3);
-        value = func_80014450(&second, 3);
+        id = text_read_number(&cursor, 3);
+        value = text_read_number(&second, 3);
         if (id == FN_END)
             break;
         if (id == FN_SKIP && value != FN_END)
@@ -149,39 +149,39 @@ void func_80014544(void)
         }
         slot = id - FN_SLOT_FIRST;
         if (slot < FN_SLOTS) {
-            u16 *equipment = viewer.unk38;
+            u16 *equipment = viewer.equipment;
 
             if (value == FN_END)
                 continue;
             equipment[slot] = value;
-            DAT_801c7590.counts[value].count++;
-            if (value < 266 && !(vis_table_c.unk0070[value / 32] & (1 << (value % 32))))
-                viewer.unk28++;
-            vis_table_c.unk0070[value / 32] |= 1 << (value % 32);
+            inventory.counts[value].count++;
+            if (value < 266 && !(vis_table_c.collected_bits[value / 32] & (1 << (value % 32))))
+                viewer.items_found++;
+            vis_table_c.collected_bits[value / 32] |= 1 << (value % 32);
         } else {
             if (value == FN_END)
                 continue;
             if (value <= 0)
                 continue;
-            DAT_801c7590.counts[id].count = value;
-            if (id < 266 && !(vis_table_c.unk0070[id / 32] & (1 << (id % 32))))
-                viewer.unk28++;
-            vis_table_c.unk0070[id / 32] |= 1 << (id % 32);
+            inventory.counts[id].count = value;
+            if (id < 266 && !(vis_table_c.collected_bits[id / 32] & (1 << (id % 32))))
+                viewer.items_found++;
+            vis_table_c.collected_bits[id / 32] |= 1 << (id % 32);
         }
     }
-    func_8003cedc();
+    player_recalc_stats();
     if (x != 0)
-        viewer.unk0 = viewer.unk2 = x;
+        viewer.max_hp = viewer.hp = x;
     if (y != 0)
-        viewer.unk4 = viewer.unk6 = y;
-    func_800152f8(buf);
+        viewer.max_mp = viewer.mp = y;
+    mem_free(buf);
     if (all_items) {
         for (i = 0; i < 314; i++) {
-            if (vis_table_c.unk0118[i].unk4 != 0xff)
-                DAT_801c7590.counts[i].count++;
-            if (i < 266 && !(vis_table_c.unk0070[i / 32] & (1 << (i % 32))))
-                viewer.unk28++;
-            vis_table_c.unk0070[i / 32] |= 1 << (i % 32);
+            if (vis_table_c.types[i].model != 0xff)
+                inventory.counts[i].count++;
+            if (i < 266 && !(vis_table_c.collected_bits[i / 32] & (1 << (i % 32))))
+                viewer.items_found++;
+            vis_table_c.collected_bits[i / 32] |= 1 << (i % 32);
         }
     }
     if (clear_flags) {
@@ -192,12 +192,12 @@ void func_80014544(void)
         row[0][4] &= ~0x4000;
         row[-1][4] &= ~0x4000;
     }
-    func_8003f12c(viewer.unk38[3], 0, 0);
-    func_8003f12c(viewer.unk38[16], 1, 0);
-    func_8003f12c(viewer.unk38[4], 2, 0);
-    func_8003f12c(viewer.unk38[17], 3, 0);
-    func_8003ee38(viewer.unk38[6], 0);
-    func_8003ee38(viewer.unk38[12], 1);
+    player_load_equipment_model(viewer.equipment[3], 0, 0);
+    player_load_equipment_model(viewer.equipment[16], 1, 0);
+    player_load_equipment_model(viewer.equipment[4], 2, 0);
+    player_load_equipment_model(viewer.equipment[17], 3, 0);
+    player_load_magic(viewer.equipment[6], 0);
+    player_load_magic(viewer.equipment[12], 1);
 }
 
 /*
@@ -261,10 +261,10 @@ StHudSprite hud_sprites[46] = {
 
 /*
  * The default lighting environments (lighting_load_defaults); 0..47 are
- * zero until an area loads its own (func_80014cfc copies them in).
+ * zero until an area loads its own (copy_words copies them in).
  */
 DATA(0x8007f78c, 0xc00, ".data")
-StLightInit DAT_8007f78c[64] = {
+StLightInit lighting_defaults[64] = {
     {{{0}}},
     {{{0}}},
     {{{0}}},

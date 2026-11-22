@@ -15,15 +15,15 @@
 
 typedef struct {
     u_long size;         /* 0x00: bytes, header included */
-    u16 unk4;            /* 0x04: 0 for a model without animation */
-    u16 unk6;
+    u16 animated;        /* 0x04: 0 for a model without animation */
+    u16 node_count;
     u_long model;        /* 0x08: offset of the mesh model */
     u_long frames;       /* 0x0c: offset of the keyframe offset table */
     u_long clips;        /* 0x10: offset of the clip offset table */
-    /* A skeletal file (unk6, its node count, nonzero; src/st/anim_set.c)
+    /* A skeletal file (node_count nonzero; src/st/anim_set.c)
      * has its node id table at `frames`, 4-byte node records at `clips`
      * and this offset of its clip offset table. */
-    u_long unk14;
+    u_long skeletal_clips;
 } StAnimFile;
 
 /* One key: its length in frames and the keyframes it blends between. */
@@ -50,23 +50,23 @@ typedef struct StAnimSubRecord {
 } StAnimSubRecord;
 
 typedef struct StAnimRecord {
-    u16 unk0;            /* 0x00: set once unk24 is composed for this pose */
-    u16 unk2;            /* 0x02: set when a relative transform changed unk4 */
-    MATRIX unk4;         /* 0x04: the node's own transform */
-    MATRIX unk24;        /* 0x24: unk4 composed with the parents' */
-    StAnimSubRecord *unk44;
-    struct StAnimRecord *unk48; /* 0x48: the parent node's record, or NULL */
+    u16 composed;        /* 0x00: set once composed_matrix is composed for this pose */
+    u16 relative_set;    /* 0x02: set when a relative transform changed local_matrix */
+    MATRIX local_matrix; /* 0x04: the node's own transform */
+    MATRIX composed_matrix; /* 0x24: local_matrix composed with the parents' */
+    StAnimSubRecord *transform;
+    struct StAnimRecord *parent; /* 0x48: the parent node's record, or NULL */
     u8 unk4C[4];
 } StAnimRecord;
 
 /* A 16-byte list node and the list of them anim_list_init builds. */
 typedef struct StAnimNode {
-    u_long unk0;
-    StAnimRecord *unk4;  /* 0x04 */
-    u16 unk8;            /* 0x08: id anim_list_find_id searches */
-    u8 unkA;
+    u_long flags;
+    StAnimRecord *record; /* 0x04 */
+    u16 part;            /* 0x08: id anim_list_find_id searches */
+    u8 kind;
     u8 unkB;
-    s32 unkC;            /* 0x0c: key anim_list_find_key searches, -1 when free */
+    s32 key;             /* 0x0c: key anim_list_find_key searches, -1 when free */
 } StAnimNode;
 
 typedef struct StAnimList {
@@ -86,7 +86,7 @@ typedef struct StAnimBlock {
 
 /* The identity transform anim_set_node_vertex composes the nodes from
  * (.data; also used by band E's object code). */
-extern MATRIX DAT_8008040c;
+extern MATRIX identity_matrix;
 
 /* src/st/anim.c */
 void anim_register_pack(u16 id, u8 *pack);
@@ -127,6 +127,9 @@ void anim_record_compose(StAnimRecord *rec);
 void anim_list_compose(void);
 int anim_set_pose(StAnimSet **setp, int id, int clip, u_long frame);
 int anim_prepare_any(void **slotp, int id, int clip, int frame);
+/* VS.EXE has its own port under this name, with another signature; VS units define VS_EXE. */
+#ifndef VS_EXE
 void anim_set_node_vertex(StAnimSet *set, int id, int node, int index, VECTOR *out);
+#endif
 
 #endif

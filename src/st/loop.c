@@ -2,7 +2,7 @@
  * ST.EXE: the game loop, which returns to PSX.EXE with the next program
  * (WIP module). Its unit is -G8: the loop reads its exit word $gp-relative
  * and copies the clear RECT from an .sdata literal. It is split from
- * src/st/main.c only because func_80014544 there is not exact.
+ * src/st/main.c only because game_load_start_file there is not exact.
  */
 #include <kf/lib/address.h>
 #include <kf/lib/types.h>
@@ -30,7 +30,7 @@
 /* Mailbox value of TITLE.EXE's Continue. */
 #define MAILBOX_CONTINUE 2
 
-/* DAT_800881a4 values that end the game loop. */
+/* game_exit_request values that end the game loop. */
 #define EXIT_TITLE 2
 #define EXIT_ENDING 3
 
@@ -39,92 +39,93 @@ SDATA(0x80087ec4, 0x8)
 /*
  * Read by the game loop; other modules set it to end the game. A tentative
  * definition, so that ASPSX reaches it through $gp: the word lies inside
- * the .sbss run st.sbss_800881a0 allocates, and the request merges there.
+ * the .sbss run st.sbss_glyph_game_exit allocates, and the request merges
+ * there.
  */
-s32 DAT_800881a4;
+s32 game_exit_request;
 
 ADDRESS(0x80014a30, 0x2cc)
-void func_80014a30(void)
+void game_loop(void)
 {
     u8 program;
 
-    func_80016374();
-    func_80016fb8();
-    func_800210f4();
-    func_80021158();
-    func_80057da0();
-    func_8004eda8();
-    func_8004afdc();
-    func_80052ca4();
+    cd_init();
+    gfx_init();
+    loading_screen_find_file();
+    loading_screen_show();
+    sound_init();
+    objects_clear();
+    creatures_clear();
+    ground_items_clear();
     effects_clear();
-    func_80044674();
-    func_800559bc();
+    game_load_common_data();
+    save_reset_new_game();
     lighting_load_defaults();
-    func_80016508();
+    fade_reset();
     lighting_build_matrices();
     SsSetMVol(127, 127);
     if (*MAILBOX_BYTE_1 == MAILBOX_CONTINUE) {
         RECT rect = {0, 0, 320, 480};
 
         ClearImage(&rect, 0, 0, 0);
-        func_80058dc4(0, 0);
-        func_80057a28();
-        if (func_80062c28(0) == 1) {
-            func_80057a3c();
-            DAT_801cd180.unk10 = 1;
-            func_80058ed4();
-            func_80021158();
-            func_8003c0e0();
+        card_screen_open(0, 0);
+        pad_enable();
+        if (card_screen_run(0) == 1) {
+            pad_clear_input();
+            pad_state.disabled = 1;
+            card_screen_close();
+            loading_screen_show();
+            player_reload_equipment();
         } else {
-            func_80057a3c();
-            DAT_801cd180.unk10 = 1;
-            func_80058ed4();
-            func_80021158();
-            func_80014544();
+            pad_clear_input();
+            pad_state.disabled = 1;
+            card_screen_close();
+            loading_screen_show();
+            game_load_start_file();
         }
     } else {
-        func_80014544();
+        game_load_start_file();
     }
     lighting_start();
-    func_80044ee8();
-    func_8003eaf8();
-    func_80015144(DAT_8009c888, 0x56400);
-    func_800214a4();
-    func_80057a28();
-    func_80057a3c();
-    DAT_800881a4 = 0;
+    area_load_current_blocking();
+    player_reset_motion();
+    heap_init(model_heap, 0x56400);
+    loading_screen_end();
+    pad_enable();
+    pad_clear_input();
+    game_exit_request = 0;
     for (;;) {
         VECTOR a;
         SVECTOR b;
 
-        func_800164b4();
-        func_80016508();
-        func_80042d74();
-        func_80050768();
-        func_8004e324();
-        func_80053aa4();
+        frame_rate_update();
+        fade_reset();
+        player_update();
+        objects_update();
+        creatures_update();
+        ground_items_update();
         effects_run();
-        viewer.unk21C = 0;
-        func_8005735c();
-        func_800456f8();
-        func_8003e734(&a, &b);
-        func_80058288(&a, &b);
-        func_80045ffc();
-        func_80058620();
-        func_80026afc(&a, &b);
-        if (DAT_800881a4 == 0)
+        viewer.update_all_spawns = 0;
+        area_run_frame_hook();
+        area_load_update();
+        player_get_camera(&a, &b);
+        sound_set_listener(&a, &b);
+        image_stream_update();
+        sound_bank_transfer_body();
+        world_render_frame(&a, &b);
+        if (game_exit_request == 0)
             continue;
         VSync(10);
-        func_800500ac(2, 0, 4096, 128);
+        fade_run_frames(2, 0, 4096, 128);
         VSync(10);
-        switch (DAT_800881a4) {
+        switch (game_exit_request) {
         case EXIT_TITLE:
-            func_80014410();
+            game_shutdown();
             program = PROGRAM_TITLE;
             break;
         case EXIT_ENDING:
-            func_800633d4();
-            func_80014410();
+            menu_save_prompt_run();
+            game_shutdown();
             program = PROGRAM_END;
             break;
         default:

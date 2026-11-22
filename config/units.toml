@@ -38,30 +38,37 @@ source = "src/str/main.c"
 profile = "probe-gcc272cdk-o2-g8"
 
 [[unit]]
-unit = "st.sbss_80088188"
+unit = "st.sbss_figure_tenths"
 image = "ST.EXE"
-source = "src/st/sbss_80088188.c"
+source = "src/st/sbss_figure_tenths.c"
 profile = "probe-gcc272cdk-o2-g8"
 link = "first"
 
 [[unit]]
-unit = "st.sbss_80088190"
+unit = "st.sbss_page_arrows"
 image = "ST.EXE"
-source = "src/st/sbss_80088190.c"
+source = "src/st/sbss_page_arrows.c"
 profile = "probe-gcc272cdk-o2-g8"
 link = "first"
 
 [[unit]]
-unit = "st.sbss_800881a0"
+unit = "st.sbss_glyph_game_exit"
 image = "ST.EXE"
-source = "src/st/sbss_800881a0.c"
+source = "src/st/sbss_glyph_game_exit.c"
 profile = "probe-gcc272cdk-o2-g8"
 link = "first"
 
 [[unit]]
-unit = "st.sbss_800881b0"
+unit = "st.sbss_ui_flags"
 image = "ST.EXE"
-source = "src/st/sbss_800881b0.c"
+source = "src/st/sbss_ui_flags.c"
+profile = "probe-gcc272cdk-o2-g8"
+link = "first"
+
+[[unit]]
+unit = "st.sbss_hole_before_render"
+image = "ST.EXE"
+source = "src/st/sbss_hole_before_render.c"
 profile = "probe-gcc272cdk-o2-g8"
 link = "first"
 
@@ -114,9 +121,9 @@ source = "src/st/view.c"
 profile = "probe-gcc272cdk-o2-g8"
 
 [[unit]]
-unit = "st.texanim"
+unit = "st.render"
 image = "ST.EXE"
-source = "src/st/texanim.c"
+source = "src/st/render.c"
 profile = "probe-gcc272cdk-o2-g8"
 
 [[unit]]
@@ -150,15 +157,15 @@ source = "src/st/player.c"
 profile = "probe-gcc272cdk-o2-g8"
 
 [[unit]]
-unit = "st.area_a"
+unit = "st.area_load"
 image = "ST.EXE"
-source = "src/st/area_a.c"
+source = "src/st/area_load.c"
 profile = "probe-gcc272cdk-o2-g8"
 
 [[unit]]
-unit = "st.area_cd"
+unit = "st.image_stream"
 image = "ST.EXE"
-source = "src/st/area_cd.c"
+source = "src/st/image_stream.c"
 profile = "probe-gcc272cdk-o2-g8"
 
 [[unit]]
@@ -168,15 +175,15 @@ source = "src/st/vis_src.c"
 profile = "probe-gcc272cdk-o2-g0"
 
 [[unit]]
-unit = "st.vis_hit"
+unit = "st.collision"
 image = "ST.EXE"
-source = "src/st/vis_hit.c"
+source = "src/st/collision.c"
 profile = "probe-gcc272cdk-o2-g0"
 
 [[unit]]
-unit = "st.vis_request"
+unit = "st.collision_query"
 image = "ST.EXE"
-source = "src/st/vis_request.c"
+source = "src/st/collision_query.c"
 profile = "probe-gcc272cdk-o2-g0"
 
 [[unit]]
@@ -186,51 +193,51 @@ source = "src/st/math.c"
 profile = "probe-gcc272cdk-o2-g0"
 
 [[unit]]
-unit = "st.vis_entry"
+unit = "st.creature"
 image = "ST.EXE"
-source = "src/st/vis_entry.c"
+source = "src/st/creature.c"
 profile = "probe-gcc272cdk-o2-g0"
 
 [[unit]]
-unit = "st.vis_attack"
+unit = "st.creature_attack"
 image = "ST.EXE"
-source = "src/st/vis_attack.c"
+source = "src/st/creature_attack.c"
 profile = "probe-gcc272cdk-o2-g0"
 
 [[unit]]
-unit = "st.vis_item"
+unit = "st.creature_damage"
 image = "ST.EXE"
-source = "src/st/vis_item.c"
+source = "src/st/creature_damage.c"
 profile = "probe-gcc272cdk-o2-g0"
 
 [[unit]]
-unit = "st.vis_a"
+unit = "st.creatures"
 image = "ST.EXE"
-source = "src/st/vis_a.c"
+source = "src/st/creatures.c"
 profile = "probe-gcc272cdk-o2-g0"
 
 [[unit]]
-unit = "st.vis_b_init"
+unit = "st.object_init"
 image = "ST.EXE"
-source = "src/st/vis_b_init.c"
+source = "src/st/object_init.c"
 profile = "probe-gcc272cdk-o2-g0"
 
 [[unit]]
-unit = "st.vis_b_load"
+unit = "st.object_load"
 image = "ST.EXE"
-source = "src/st/vis_b_load.c"
+source = "src/st/object_load.c"
 profile = "probe-gcc272cdk-o2-g0"
 
 [[unit]]
-unit = "st.vis_b"
+unit = "st.objects_ground_items"
 image = "ST.EXE"
-source = "src/st/vis_b.c"
+source = "src/st/objects_ground_items.c"
 profile = "probe-gcc272cdk-o2-g8"
 
 [[unit]]
-unit = "st.vis_move"
+unit = "st.object_lerp"
 image = "ST.EXE"
-source = "src/st/vis_move.c"
+source = "src/st/object_lerp.c"
 profile = "probe-gcc272cdk-o2-g0"
 
 [[unit]]
@@ -240,15 +247,15 @@ source = "src/st/xa.c"
 profile = "probe-gcc272cdk-o2-g0"
 
 [[unit]]
-unit = "st.xa_play"
+unit = "st.xa_talk"
 image = "ST.EXE"
-source = "src/st/xa_play.c"
+source = "src/st/xa_talk.c"
 profile = "probe-gcc272cdk-o2-g8"
 
 [[unit]]
-unit = "st.item_spawn"
+unit = "st.creature_object"
 image = "ST.EXE"
-source = "src/st/item_spawn.c"
+source = "src/st/creature_object.c"
 profile = "probe-gcc272cdk-o2-g0"
 
 [[unit]]
@@ -264,9 +271,9 @@ source = "src/st/item.c"
 profile = "probe-gcc272cdk-o2-g0"
 
 [[unit]]
-unit = "st.save_counts"
+unit = "st.item_counts"
 image = "ST.EXE"
-source = "src/st/save_counts.c"
+source = "src/st/item_counts.c"
 profile = "probe-gcc272cdk-o2-g0"
 
 [[unit]]
@@ -306,130 +313,202 @@ source = "src/st/menu.c"
 profile = "probe-gcc272cdk-o2-g8"
 
 [[unit]]
-unit = "st.menu_vram"
+unit = "st.menu_equip_open"
 image = "ST.EXE"
-source = "src/st/menu_vram.c"
+source = "src/st/menu_equip_open.c"
 profile = "probe-gcc272cdk-o2-g8"
 
 [[unit]]
-unit = "st.equip_menu"
+unit = "st.menu_equip_arrange"
 image = "ST.EXE"
-source = "src/st/equip_menu.c"
+source = "src/st/menu_equip_arrange.c"
 profile = "probe-gcc272cdk-o2-g8"
 
 [[unit]]
-unit = "st.rdata_80013974"
+unit = "st.rdata_bss_bounds"
 image = "ST.EXE"
-source = "src/st/rdata_80013974.c"
+source = "src/st/rdata_bss_bounds.c"
 profile = "probe-gcc272cdk-o2-g0"
 link = "last"
 
 [[unit]]
-unit = "st.data_8008038c"
+unit = "st.data_hooks_matrices_xa"
 image = "ST.EXE"
-source = "src/st/data_8008038c.c"
+source = "src/st/data_hooks_matrices_xa.c"
 profile = "probe-gcc272cdk-o2-g0"
 
 [[unit]]
-unit = "st.data_8008092c"
+unit = "st.data_magic_list_offsets"
 image = "ST.EXE"
-source = "src/st/data_8008092c.c"
+source = "src/st/data_magic_list_offsets.c"
 profile = "probe-gcc272cdk-o2-g0"
 
 [[unit]]
-unit = "st.bss_800881f0"
+unit = "st.bss_cd_state"
 image = "ST.EXE"
-source = "src/st/bss_800881f0.c"
+source = "src/st/bss_cd_state.c"
 profile = "probe-gcc272cdk-o2-g0"
 
 [[unit]]
-unit = "st.bss_80088c88"
+unit = "st.bss_cd_file_buffer"
 image = "ST.EXE"
-source = "src/st/bss_80088c88.c"
+source = "src/st/bss_cd_file_buffer.c"
 profile = "probe-gcc272cdk-o2-g0"
 
 [[unit]]
-unit = "st.bss_8009b088"
+unit = "st.bss_hole_after_clut_buffer"
 image = "ST.EXE"
-source = "src/st/bss_8009b088.c"
+source = "src/st/bss_hole_after_clut_buffer.c"
 profile = "probe-gcc272cdk-o2-g0"
 
 [[unit]]
-unit = "st.bss_8011c488"
+unit = "st.bss_common_anim_pack"
 image = "ST.EXE"
-source = "src/st/bss_8011c488.c"
+source = "src/st/bss_common_anim_pack.c"
 profile = "probe-gcc272cdk-o2-g0"
 
 [[unit]]
-unit = "st.bss_8015d090"
+unit = "st.bss_heap_arena"
 image = "ST.EXE"
-source = "src/st/bss_8015d090.c"
+source = "src/st/bss_heap_arena.c"
 profile = "probe-gcc272cdk-o2-g0"
 
 [[unit]]
-unit = "st.bss_8017bed0"
+unit = "st.bss_packet_buffers"
 image = "ST.EXE"
-source = "src/st/bss_8017bed0.c"
+source = "src/st/bss_packet_buffers.c"
 profile = "probe-gcc272cdk-o2-g0"
 
 [[unit]]
-unit = "st.bss_8018d240"
+unit = "st.bss_placement_objects"
 image = "ST.EXE"
-source = "src/st/bss_8018d240.c"
+source = "src/st/bss_placement_objects.c"
 profile = "probe-gcc272cdk-o2-g0"
 
 [[unit]]
-unit = "st.bss_8018d298"
+unit = "st.bss_world_state"
 image = "ST.EXE"
-source = "src/st/bss_8018d298.c"
+source = "src/st/bss_world_state.c"
 profile = "probe-gcc272cdk-o2-g0"
 
 [[unit]]
-unit = "st.bss_80198f28"
+unit = "st.bss_file_row_clipped"
 image = "ST.EXE"
-source = "src/st/bss_80198f28.c"
+source = "src/st/bss_file_row_clipped.c"
 profile = "probe-gcc272cdk-o2-g0"
 
 [[unit]]
-unit = "st.bss_801b5920"
+unit = "st.bss_vis_sources"
 image = "ST.EXE"
-source = "src/st/bss_801b5920.c"
+source = "src/st/bss_vis_sources.c"
 profile = "probe-gcc272cdk-o2-g0"
 
 [[unit]]
-unit = "st.bss_801ba138"
+unit = "st.bss_lighting"
 image = "ST.EXE"
-source = "src/st/bss_801ba138.c"
+source = "src/st/bss_lighting.c"
 profile = "probe-gcc272cdk-o2-g0"
 
 [[unit]]
-unit = "st.bss_801c76f8"
+unit = "st.bss_hole_after_lighting"
 image = "ST.EXE"
-source = "src/st/bss_801c76f8.c"
+source = "src/st/bss_hole_after_lighting.c"
 profile = "probe-gcc272cdk-o2-g0"
 
 [[unit]]
-unit = "st.bss_801cd120"
+unit = "st.bss_effects"
 image = "ST.EXE"
-source = "src/st/bss_801cd120.c"
+source = "src/st/bss_effects.c"
 profile = "probe-gcc272cdk-o2-g0"
 
 [[unit]]
-unit = "st.bss_801d01c0"
+unit = "st.bss_viewer"
 image = "ST.EXE"
-source = "src/st/bss_801d01c0.c"
+source = "src/st/bss_viewer.c"
 profile = "probe-gcc272cdk-o2-g0"
 
 [[unit]]
-unit = "st.bss_801e0d08"
+unit = "st.bss_equipment_model_placements"
 image = "ST.EXE"
-source = "src/st/bss_801e0d08.c"
+source = "src/st/bss_equipment_model_placements.c"
 profile = "probe-gcc272cdk-o2-g0"
 
 [[unit]]
-unit = "st.bss_801e0d20"
+unit = "st.bss_area_state_vis_lists"
 image = "ST.EXE"
-source = "src/st/bss_801e0d20.c"
+source = "src/st/bss_area_state_vis_lists.c"
+profile = "probe-gcc272cdk-o2-g0"
+
+[[unit]]
+unit = "st.bss_creatures_objects"
+image = "ST.EXE"
+source = "src/st/bss_creatures_objects.c"
+profile = "probe-gcc272cdk-o2-g0"
+
+[[unit]]
+unit = "st.bss_ground_items_save"
+image = "ST.EXE"
+source = "src/st/bss_ground_items_save.c"
+profile = "probe-gcc272cdk-o2-g0"
+
+[[unit]]
+unit = "st.bss_game_settings"
+image = "ST.EXE"
+source = "src/st/bss_game_settings.c"
+profile = "probe-gcc272cdk-o2-g0"
+
+[[unit]]
+unit = "st.bss_pad"
+image = "ST.EXE"
+source = "src/st/bss_pad.c"
+profile = "probe-gcc272cdk-o2-g0"
+
+[[unit]]
+unit = "st.bss_sound_buffer_area"
+image = "ST.EXE"
+source = "src/st/bss_sound_buffer_area.c"
+profile = "probe-gcc272cdk-o2-g0"
+
+[[unit]]
+unit = "st.bss_sound"
+image = "ST.EXE"
+source = "src/st/bss_sound.c"
+profile = "probe-gcc272cdk-o2-g0"
+
+[[unit]]
+unit = "st.bss_sound_buffers_equipment"
+image = "ST.EXE"
+source = "src/st/bss_sound_buffers_equipment.c"
+profile = "probe-gcc272cdk-o2-g0"
+
+[[unit]]
+unit = "st.bss_sound_state"
+image = "ST.EXE"
+source = "src/st/bss_sound_state.c"
+profile = "probe-gcc272cdk-o2-g0"
+
+[[unit]]
+unit = "st.bss_equip_sub_list"
+image = "ST.EXE"
+source = "src/st/bss_equip_sub_list.c"
+profile = "probe-gcc272cdk-o2-g0"
+
+[[unit]]
+unit = "st.bss_hole_after_magic_list"
+image = "ST.EXE"
+source = "src/st/bss_hole_after_magic_list.c"
+profile = "probe-gcc272cdk-o2-g0"
+
+[[unit]]
+unit = "st.bss_equip_saved_ids"
+image = "ST.EXE"
+source = "src/st/bss_equip_saved_ids.c"
+profile = "probe-gcc272cdk-o2-g0"
+
+[[unit]]
+unit = "st.bss_menu_messages"
+image = "ST.EXE"
+source = "src/st/bss_menu_messages.c"
 profile = "probe-gcc272cdk-o2-g0"
 
 [[unit]]
@@ -451,68 +530,127 @@ source = "src/optxt/state.c"
 profile = "probe-gcc272cdk-o2-g8"
 
 # VS.EXE: VS's own copies of ST.EXE functions (src/vs/); shared fragments in src/lib/.
+# Every VS unit defines VS_EXE: a VS port shares its ST twin's name, and where
+# the port's signature differs, the ST header hides the ST prototype under it.
 
 [[unit]]
-unit = "vs.data_8004a224"
+unit = "vs.data_fighters"
 image = "VS.EXE"
-source = "src/vs/data_8004a224.c"
+source = "src/vs/data_fighters.c"
 profile = "probe-gcc272cdk-o2-g0"
+defines = ["VS_EXE"]
 link = "first"
 
 [[unit]]
-unit = "vs.sbss_80063300"
+unit = "vs.sbss_draw_fighter"
 image = "VS.EXE"
-source = "src/vs/sbss_80063300.c"
+source = "src/vs/sbss_draw_fighter.c"
 profile = "probe-gcc272cdk-o2-g8"
+defines = ["VS_EXE"]
 link = "first"
 
 [[unit]]
-unit = "vs.sbss_80063310"
+unit = "vs.sbss_round_screen"
 image = "VS.EXE"
-source = "src/vs/sbss_80063310.c"
+source = "src/vs/sbss_round_screen.c"
 profile = "probe-gcc272cdk-o2-g8"
+defines = ["VS_EXE"]
 link = "first"
 
 [[unit]]
-unit = "vs.sbss_80063320"
+unit = "vs.sbss_fight_banner"
 image = "VS.EXE"
-source = "src/vs/sbss_80063320.c"
+source = "src/vs/sbss_fight_banner.c"
 profile = "probe-gcc272cdk-o2-g8"
+defines = ["VS_EXE"]
 link = "first"
 
 [[unit]]
-unit = "vs.sbss_80063330"
+unit = "vs.sbss_match_flags"
 image = "VS.EXE"
-source = "src/vs/sbss_80063330.c"
+source = "src/vs/sbss_match_flags.c"
 profile = "probe-gcc272cdk-o2-g8"
+defines = ["VS_EXE"]
 link = "first"
 
 [[unit]]
-unit = "vs.sbss_80063340"
+unit = "vs.sbss_requested_items"
 image = "VS.EXE"
-source = "src/vs/sbss_80063340.c"
+source = "src/vs/sbss_requested_items.c"
 profile = "probe-gcc272cdk-o2-g8"
+defines = ["VS_EXE"]
 link = "first"
 
 [[unit]]
-unit = "vs.sbss_80063350"
+unit = "vs.sbss_round_index"
 image = "VS.EXE"
-source = "src/vs/sbss_80063350.c"
+source = "src/vs/sbss_round_index.c"
 profile = "probe-gcc272cdk-o2-g8"
+defines = ["VS_EXE"]
 link = "first"
 
 [[unit]]
-unit = "vs.sbss_80063360"
+unit = "vs.sbss_text_scroll"
 image = "VS.EXE"
-source = "src/vs/sbss_80063360.c"
+source = "src/vs/sbss_text_scroll.c"
 profile = "probe-gcc272cdk-o2-g8"
+defines = ["VS_EXE"]
 link = "first"
 
 [[unit]]
-unit = "vs.sbss_80063370"
+unit = "vs.sbss_semi_trans_camera"
 image = "VS.EXE"
-source = "src/vs/sbss_80063370.c"
+source = "src/vs/sbss_semi_trans_camera.c"
 profile = "probe-gcc272cdk-o2-g8"
+defines = ["VS_EXE"]
+link = "first"
+
+[[unit]]
+unit = "vs.sbss_menu_vab_page"
+image = "VS.EXE"
+source = "src/vs/sbss_menu_vab_page.c"
+profile = "probe-gcc272cdk-o2-g8"
+defines = ["VS_EXE"]
+link = "first"
+
+[[unit]]
+unit = "vs.sbss_round_clock"
+image = "VS.EXE"
+source = "src/vs/sbss_round_clock.c"
+profile = "probe-gcc272cdk-o2-g8"
+defines = ["VS_EXE"]
+link = "first"
+
+[[unit]]
+unit = "vs.sbss_round_wins"
+image = "VS.EXE"
+source = "src/vs/sbss_round_wins.c"
+profile = "probe-gcc272cdk-o2-g8"
+defines = ["VS_EXE"]
+link = "first"
+
+[[unit]]
+unit = "vs.sbss_text_scroll_mode"
+image = "VS.EXE"
+source = "src/vs/sbss_text_scroll_mode.c"
+profile = "probe-gcc272cdk-o2-g8"
+defines = ["VS_EXE"]
+link = "first"
+
+[[unit]]
+unit = "vs.sbss_save_loaded"
+image = "VS.EXE"
+source = "src/vs/sbss_save_loaded.c"
+profile = "probe-gcc272cdk-o2-g8"
+defines = ["VS_EXE"]
+link = "first"
+
+[[unit]]
+unit = "vs.sbss_hole_after_save_loaded"
+image = "VS.EXE"
+source = "src/vs/sbss_hole_after_save_loaded.c"
+profile = "probe-gcc272cdk-o2-g8"
+defines = ["VS_EXE"]
 link = "first"
 
 [[unit]]
@@ -520,344 +658,471 @@ unit = "vs.main"
 image = "VS.EXE"
 source = "src/vs/main.c"
 profile = "probe-gcc272cdk-o2-g8"
+defines = ["VS_EXE"]
 
 [[unit]]
-unit = "vs.gfx_80016ca8"
+unit = "vs.gfx_setup"
 image = "VS.EXE"
-source = "src/vs/gfx_80016ca8.c"
+source = "src/vs/gfx_setup.c"
 profile = "probe-gcc272cdk-o2-g8"
+defines = ["VS_EXE"]
 
 [[unit]]
-unit = "vs.menu_80016f10"
+unit = "vs.menu"
 image = "VS.EXE"
-source = "src/vs/menu_80016f10.c"
+source = "src/vs/menu.c"
 profile = "probe-gcc272cdk-o2-g8"
+defines = ["VS_EXE"]
 
 [[unit]]
-unit = "vs.card_8001c8b8"
+unit = "vs.menu_sound"
 image = "VS.EXE"
-source = "src/vs/card_8001c8b8.c"
+source = "src/vs/menu_sound.c"
 profile = "probe-gcc272cdk-o2-g8"
+defines = ["VS_EXE"]
 
 [[unit]]
-unit = "vs.stub_8001ca10"
+unit = "vs.tim_load_async"
 image = "VS.EXE"
-source = "src/vs/stub_8001ca10.c"
+source = "src/vs/tim_load_async.c"
 profile = "probe-gcc272cdk-o2-g8"
+defines = ["VS_EXE"]
 
 [[unit]]
-unit = "vs.cd_8001cb34"
+unit = "vs.cd_queue_gfx"
 image = "VS.EXE"
-source = "src/vs/cd_8001cb34.c"
+source = "src/vs/cd_queue_gfx.c"
 profile = "probe-gcc272cdk-o2-g8"
+defines = ["VS_EXE"]
 
 [[unit]]
-unit = "vs.ui_8001d3f0"
+unit = "vs.ui"
 image = "VS.EXE"
-source = "src/vs/ui_8001d3f0.c"
+source = "src/vs/ui.c"
 profile = "probe-gcc272cdk-o2-g8"
+defines = ["VS_EXE"]
 
 [[unit]]
-unit = "vs.ui_80020384"
+unit = "vs.card_screen_draw"
 image = "VS.EXE"
-source = "src/vs/ui_80020384.c"
+source = "src/vs/card_screen_draw.c"
 profile = "probe-gcc272cdk-o2-g8"
+defines = ["VS_EXE"]
 
 [[unit]]
-unit = "vs.ui_800207d4"
+unit = "vs.ui_cell_grid"
 image = "VS.EXE"
-source = "src/vs/ui_800207d4.c"
+source = "src/vs/ui_cell_grid.c"
 profile = "probe-gcc272cdk-o2-g8"
+defines = ["VS_EXE"]
 
 [[unit]]
-unit = "vs.ui_80020aa4"
+unit = "vs.menu_creature_select_grid"
 image = "VS.EXE"
-source = "src/vs/ui_80020aa4.c"
+source = "src/vs/menu_creature_select_grid.c"
 profile = "probe-gcc272cdk-o2-g8"
+defines = ["VS_EXE"]
 
 [[unit]]
-unit = "vs.ui_80021140"
+unit = "vs.menu_creature_book_entry"
 image = "VS.EXE"
-source = "src/vs/ui_80021140.c"
+source = "src/vs/menu_creature_book_entry.c"
 profile = "probe-gcc272cdk-o2-g8"
+defines = ["VS_EXE"]
 
 [[unit]]
-unit = "vs.ui_80021984"
+unit = "vs.lineup_screen_draw"
 image = "VS.EXE"
-source = "src/vs/ui_80021984.c"
+source = "src/vs/lineup_screen_draw.c"
 profile = "probe-gcc272cdk-o2-g8"
+defines = ["VS_EXE"]
 
 [[unit]]
-unit = "vs.ui_80021c14"
+unit = "vs.menu_creature_select_draw"
 image = "VS.EXE"
-source = "src/vs/ui_80021c14.c"
+source = "src/vs/menu_creature_select_draw.c"
 profile = "probe-gcc272cdk-o2-g8"
+defines = ["VS_EXE"]
 
 [[unit]]
-unit = "vs.ui_80021cfc"
+unit = "vs.menu_item_request_list"
 image = "VS.EXE"
-source = "src/vs/ui_80021cfc.c"
+source = "src/vs/menu_item_request_list.c"
 profile = "probe-gcc272cdk-o2-g8"
+defines = ["VS_EXE"]
 
 [[unit]]
-unit = "vs.ui_800228d8"
+unit = "vs.menu_item_request_draw"
 image = "VS.EXE"
-source = "src/vs/ui_800228d8.c"
+source = "src/vs/menu_item_request_draw.c"
 profile = "probe-gcc272cdk-o2-g8"
+defines = ["VS_EXE"]
 
 [[unit]]
-unit = "vs.ui_80022a00"
+unit = "vs.menu_vs_setup_options"
 image = "VS.EXE"
-source = "src/vs/ui_80022a00.c"
+source = "src/vs/menu_vs_setup_options.c"
 profile = "probe-gcc272cdk-o2-g8"
+defines = ["VS_EXE"]
 
 [[unit]]
-unit = "vs.ui_80022f14"
+unit = "vs.menu_vs_setup_draw"
 image = "VS.EXE"
-source = "src/vs/ui_80022f14.c"
+source = "src/vs/menu_vs_setup_draw.c"
 profile = "probe-gcc272cdk-o2-g8"
+defines = ["VS_EXE"]
 
 [[unit]]
-unit = "vs.model_8002345c"
+unit = "vs.anim_set"
 image = "VS.EXE"
-source = "src/vs/model_8002345c.c"
+source = "src/vs/anim_set.c"
 profile = "probe-gcc272cdk-o2-g8"
+defines = ["VS_EXE"]
 
 [[unit]]
-unit = "vs.prim_80025878"
+unit = "vs.prim"
 image = "VS.EXE"
-source = "src/vs/prim_80025878.c"
+source = "src/vs/prim.c"
 profile = "probe-gcc272cdk-o2-g0"
+defines = ["VS_EXE"]
 
 [[unit]]
-unit = "vs.mesh_800258f0"
+unit = "vs.mesh"
 image = "VS.EXE"
-source = "src/vs/mesh_800258f0.c"
+source = "src/vs/mesh.c"
 profile = "probe-gcc272cdk-o2-g8"
+defines = ["VS_EXE"]
 
 [[unit]]
-unit = "vs.anim_80027c64"
+unit = "vs.anim_vertices"
 image = "VS.EXE"
-source = "src/vs/anim_80027c64.c"
+source = "src/vs/anim_vertices.c"
 profile = "probe-gcc272cdk-o2-g0"
+defines = ["VS_EXE"]
 
 [[unit]]
-unit = "vs.anim_80027f30"
+unit = "vs.anim_slots"
 image = "VS.EXE"
-source = "src/vs/anim_80027f30.c"
+source = "src/vs/anim_slots.c"
 profile = "probe-gcc272cdk-o2-g0"
+defines = ["VS_EXE"]
 
 [[unit]]
-unit = "vs.mirror_80028474"
+unit = "vs.model_mirror"
 image = "VS.EXE"
-source = "src/vs/mirror_80028474.c"
+source = "src/vs/model_mirror.c"
 profile = "probe-gcc272cdk-o2-g8"
+defines = ["VS_EXE"]
 
 [[unit]]
-unit = "vs.model_80028914"
+unit = "vs.fighter_vertex_anim"
 image = "VS.EXE"
-source = "src/vs/model_80028914.c"
+source = "src/vs/fighter_vertex_anim.c"
 profile = "probe-gcc272cdk-o2-g8"
+defines = ["VS_EXE"]
 
 [[unit]]
-unit = "vs.anim_80028d94"
+unit = "vs.anim_get_vertex"
 image = "VS.EXE"
-source = "src/vs/anim_80028d94.c"
+source = "src/vs/anim_get_vertex.c"
 profile = "probe-gcc272cdk-o2-g0"
+defines = ["VS_EXE"]
 
 [[unit]]
-unit = "vs.fade_80028fcc"
+unit = "vs.round_hud"
 image = "VS.EXE"
-source = "src/vs/fade_80028fcc.c"
+source = "src/vs/round_hud.c"
 profile = "probe-gcc272cdk-o2-g8"
+defines = ["VS_EXE"]
 
 [[unit]]
-unit = "vs.shadow_8002bfe8"
+unit = "vs.fighter_shadow"
 image = "VS.EXE"
-source = "src/vs/shadow_8002bfe8.c"
+source = "src/vs/fighter_shadow.c"
 profile = "probe-gcc272cdk-o2-g0"
+defines = ["VS_EXE"]
 
 [[unit]]
-unit = "vs.guard_8002c2c4"
+unit = "vs.fighter_guard_flash"
 image = "VS.EXE"
-source = "src/vs/guard_8002c2c4.c"
+source = "src/vs/fighter_guard_flash.c"
 profile = "probe-gcc272cdk-o2-g0"
+defines = ["VS_EXE"]
 
 [[unit]]
-unit = "vs.texanim_8002d710"
+unit = "vs.sparks_clear"
 image = "VS.EXE"
-source = "src/vs/texanim_8002d710.c"
+source = "src/vs/sparks_clear.c"
 profile = "probe-gcc272cdk-o2-g0"
+defines = ["VS_EXE"]
 
 [[unit]]
-unit = "vs.spark_8002d738"
+unit = "vs.sparks_burst"
 image = "VS.EXE"
-source = "src/vs/spark_8002d738.c"
+source = "src/vs/sparks_burst.c"
 profile = "probe-gcc272cdk-o2-g0"
+defines = ["VS_EXE"]
 
 [[unit]]
-unit = "vs.spark_8002d998"
+unit = "vs.sparks_update"
 image = "VS.EXE"
-source = "src/vs/spark_8002d998.c"
+source = "src/vs/sparks_update.c"
 profile = "probe-gcc272cdk-o2-g0"
+defines = ["VS_EXE"]
 
 [[unit]]
-unit = "vs.fighter_8002dcd8"
+unit = "vs.fighter_push"
 image = "VS.EXE"
-source = "src/vs/fighter_8002dcd8.c"
+source = "src/vs/fighter_push.c"
 profile = "probe-gcc272cdk-o2-g0"
+defines = ["VS_EXE"]
 
 [[unit]]
-unit = "vs.fighter_8002dec4"
+unit = "vs.fighter_hit_test"
 image = "VS.EXE"
-source = "src/vs/fighter_8002dec4.c"
+source = "src/vs/fighter_hit_test.c"
 profile = "probe-gcc272cdk-o2-g0"
+defines = ["VS_EXE"]
 
 [[unit]]
-unit = "vs.fighter_8002e114"
+unit = "vs.fighter_damage"
 image = "VS.EXE"
-source = "src/vs/fighter_8002e114.c"
+source = "src/vs/fighter_damage.c"
 profile = "probe-gcc272cdk-o2-g0"
+defines = ["VS_EXE"]
 
 [[unit]]
-unit = "vs.cd_8002e5e4"
+unit = "vs.cd_read"
 image = "VS.EXE"
-source = "src/vs/cd_8002e5e4.c"
+source = "src/vs/cd_read.c"
 profile = "probe-gcc272cdk-o2-g0"
+defines = ["VS_EXE"]
 
 [[unit]]
-unit = "vs.cd_8002efcc"
+unit = "vs.cd_archive"
 image = "VS.EXE"
-source = "src/vs/cd_8002efcc.c"
+source = "src/vs/cd_archive.c"
 profile = "probe-gcc272cdk-o2-g8"
+defines = ["VS_EXE"]
 
 [[unit]]
-unit = "vs.vis_8002f264"
+unit = "vs.effect_jitter"
 image = "VS.EXE"
-source = "src/vs/vis_8002f264.c"
+source = "src/vs/effect_jitter.c"
 profile = "probe-gcc272cdk-o2-g0"
+defines = ["VS_EXE"]
 
 [[unit]]
-unit = "vs.attack_8002f334"
+unit = "vs.fighter_control"
 image = "VS.EXE"
-source = "src/vs/attack_8002f334.c"
+source = "src/vs/fighter_control.c"
 profile = "probe-gcc272cdk-o2-g8"
+defines = ["VS_EXE"]
 
 [[unit]]
-unit = "vs.stub_80032108"
+unit = "vs.effect_hit"
 image = "VS.EXE"
-source = "src/vs/stub_80032108.c"
+source = "src/vs/effect_hit.c"
 profile = "probe-gcc272cdk-o2-g0"
+defines = ["VS_EXE"]
 
 [[unit]]
-unit = "vs.effect_80032200"
+unit = "vs.effect_emit"
 image = "VS.EXE"
-source = "src/vs/effect_80032200.c"
+source = "src/vs/effect_emit.c"
 profile = "probe-gcc272cdk-o2-g0"
+defines = ["VS_EXE"]
 
 [[unit]]
-unit = "vs.effect_80032228"
+unit = "vs.effect"
 image = "VS.EXE"
-source = "src/vs/effect_80032228.c"
+source = "src/vs/effect.c"
 profile = "probe-gcc272cdk-o2-g0"
+defines = ["VS_EXE"]
 
 [[unit]]
-unit = "vs.effect_80032404"
+unit = "vs.effect_spawn_run"
 image = "VS.EXE"
-source = "src/vs/effect_80032404.c"
+source = "src/vs/effect_spawn_run.c"
 profile = "probe-gcc272cdk-o2-g8"
+defines = ["VS_EXE"]
 
 [[unit]]
-unit = "vs.rdata_80011f34"
+unit = "vs.rdata_bss_bounds"
 image = "VS.EXE"
-source = "src/vs/rdata_80011f34.c"
+source = "src/vs/rdata_bss_bounds.c"
 profile = "probe-gcc272cdk-o2-g0"
+defines = ["VS_EXE"]
 link = "last"
 
 [[unit]]
-unit = "vs.sdata_800632f4"
+unit = "vs.sdata_zero_words"
 image = "VS.EXE"
-source = "src/vs/sdata_800632f4.c"
+source = "src/vs/sdata_zero_words.c"
 profile = "probe-gcc272cdk-o2-g8"
+defines = ["VS_EXE"]
 link = "last"
 
 [[unit]]
-unit = "vs.bss_800633b0"
+unit = "vs.bss_vab_bodies"
 image = "VS.EXE"
-source = "src/vs/bss_800633b0.c"
+source = "src/vs/bss_vab_bodies.c"
 profile = "probe-gcc272cdk-o2-g0"
+defines = ["VS_EXE"]
 
 [[unit]]
-unit = "vs.bss_80116580"
+unit = "vs.bss_menu_vab_head"
 image = "VS.EXE"
-source = "src/vs/bss_80116580.c"
+source = "src/vs/bss_menu_vab_head.c"
 profile = "probe-gcc272cdk-o2-g0"
+defines = ["VS_EXE"]
 
 [[unit]]
-unit = "vs.bss_80117708"
+unit = "vs.bss_voice_status"
 image = "VS.EXE"
-source = "src/vs/bss_80117708.c"
+source = "src/vs/bss_voice_status.c"
 profile = "probe-gcc272cdk-o2-g0"
+defines = ["VS_EXE"]
 
 [[unit]]
-unit = "vs.bss_80160408"
+unit = "vs.bss_seq_attr_table"
 image = "VS.EXE"
-source = "src/vs/bss_80160408.c"
+source = "src/vs/bss_seq_attr_table.c"
 profile = "probe-gcc272cdk-o2-g0"
+defines = ["VS_EXE"]
 
 [[unit]]
-unit = "vs.bss_801604b0"
+unit = "vs.bss_file_packet_buffers"
 image = "VS.EXE"
-source = "src/vs/bss_801604b0.c"
+source = "src/vs/bss_file_packet_buffers.c"
 profile = "probe-gcc272cdk-o2-g0"
+defines = ["VS_EXE"]
 
 [[unit]]
-unit = "vs.bss_8018ef60"
+unit = "vs.bss_arena_models"
 image = "VS.EXE"
-source = "src/vs/bss_8018ef60.c"
+source = "src/vs/bss_arena_models.c"
 profile = "probe-gcc272cdk-o2-g0"
+defines = ["VS_EXE"]
 
 [[unit]]
-unit = "vs.bss_80191d00"
+unit = "vs.bss_guard_flash_model"
 image = "VS.EXE"
-source = "src/vs/bss_80191d00.c"
+source = "src/vs/bss_guard_flash_model.c"
 profile = "probe-gcc272cdk-o2-g0"
+defines = ["VS_EXE"]
 
 [[unit]]
-unit = "vs.bss_80196010"
+unit = "vs.bss_save_headers"
 image = "VS.EXE"
-source = "src/vs/bss_80196010.c"
+source = "src/vs/bss_save_headers.c"
 profile = "probe-gcc272cdk-o2-g0"
+defines = ["VS_EXE"]
 
 [[unit]]
-unit = "vs.bss_801961e0"
+unit = "vs.bss_hole_after_pad_state"
 image = "VS.EXE"
-source = "src/vs/bss_801961e0.c"
+source = "src/vs/bss_hole_after_pad_state.c"
 profile = "probe-gcc272cdk-o2-g0"
+defines = ["VS_EXE"]
 
 [[unit]]
-unit = "vs.bss_80196228"
+unit = "vs.bss_sound_banks"
 image = "VS.EXE"
-source = "src/vs/bss_80196228.c"
+source = "src/vs/bss_sound_banks.c"
 profile = "probe-gcc272cdk-o2-g0"
+defines = ["VS_EXE"]
 
 [[unit]]
-unit = "vs.bss_80196230"
+unit = "vs.bss_gfx_state"
 image = "VS.EXE"
-source = "src/vs/bss_80196230.c"
+source = "src/vs/bss_gfx_state.c"
 profile = "probe-gcc272cdk-o2-g0"
+defines = ["VS_EXE"]
 
 [[unit]]
-unit = "vs.bss_801a4590"
+unit = "vs.bss_hole_after_gfx_state"
 image = "VS.EXE"
-source = "src/vs/bss_801a4590.c"
+source = "src/vs/bss_hole_after_gfx_state.c"
 profile = "probe-gcc272cdk-o2-g0"
+defines = ["VS_EXE"]
 
 [[unit]]
-unit = "vs.bss_801d1ba8"
+unit = "vs.bss_items"
 image = "VS.EXE"
-source = "src/vs/bss_801d1ba8.c"
+source = "src/vs/bss_items.c"
 profile = "probe-gcc272cdk-o2-g0"
+defines = ["VS_EXE"]
+
+[[unit]]
+unit = "vs.bss_hole_after_items"
+image = "VS.EXE"
+source = "src/vs/bss_hole_after_items.c"
+profile = "probe-gcc272cdk-o2-g0"
+defines = ["VS_EXE"]
+
+[[unit]]
+unit = "vs.bss_pad_buffers"
+image = "VS.EXE"
+source = "src/vs/bss_pad_buffers.c"
+profile = "probe-gcc272cdk-o2-g0"
+defines = ["VS_EXE"]
+
+[[unit]]
+unit = "vs.bss_hole_after_pad_buffers"
+image = "VS.EXE"
+source = "src/vs/bss_hole_after_pad_buffers.c"
+profile = "probe-gcc272cdk-o2-g0"
+defines = ["VS_EXE"]
+
+[[unit]]
+unit = "vs.bss_menu_messages"
+image = "VS.EXE"
+source = "src/vs/bss_menu_messages.c"
+profile = "probe-gcc272cdk-o2-g0"
+defines = ["VS_EXE"]
+
+[[unit]]
+unit = "vs.bss_save_file_names"
+image = "VS.EXE"
+source = "src/vs/bss_save_file_names.c"
+profile = "probe-gcc272cdk-o2-g0"
+defines = ["VS_EXE"]
+
+[[unit]]
+unit = "vs.bss_saves"
+image = "VS.EXE"
+source = "src/vs/bss_saves.c"
+profile = "probe-gcc272cdk-o2-g0"
+defines = ["VS_EXE"]
+
+[[unit]]
+unit = "vs.bss_cd_state"
+image = "VS.EXE"
+source = "src/vs/bss_cd_state.c"
+profile = "probe-gcc272cdk-o2-g0"
+defines = ["VS_EXE"]
+
+[[unit]]
+unit = "vs.bss_sparks"
+image = "VS.EXE"
+source = "src/vs/bss_sparks.c"
+profile = "probe-gcc272cdk-o2-g0"
+defines = ["VS_EXE"]
+
+[[unit]]
+unit = "vs.bss_effects"
+image = "VS.EXE"
+source = "src/vs/bss_effects.c"
+profile = "probe-gcc272cdk-o2-g0"
+defines = ["VS_EXE"]
+
+[[unit]]
+unit = "vs.bss_hole_before_libcard"
+image = "VS.EXE"
+source = "src/vs/bss_hole_before_libcard.c"
+profile = "probe-gcc272cdk-o2-g0"
+defines = ["VS_EXE"]
 
 [[unit]]
 unit = "end.main"
@@ -879,37 +1144,37 @@ profile = "probe-gcc272cdk-o2-g0"
 bind = "name"
 
 [[unit]]
-unit = "fdat_012.map_801ed76c"
+unit = "fdat_012.map_step_creature"
 image = "FDAT_012.BIN"
-source = "src/fdat_012/map_801ed76c.c"
+source = "src/fdat_012/map_step_creature.c"
 profile = "probe-gcc272cdk-o2-g0"
 bind = "name"
 
 [[unit]]
-unit = "fdat_012.map_801ed9e0"
+unit = "fdat_012.map_use_item"
 image = "FDAT_012.BIN"
-source = "src/fdat_012/map_801ed9e0.c"
+source = "src/fdat_012/map_use_item.c"
 profile = "probe-gcc272cdk-o2-g0"
 bind = "name"
 
 [[unit]]
-unit = "fdat_012.map_801eda38"
+unit = "fdat_012.map_start_creature_fall"
 image = "FDAT_012.BIN"
-source = "src/fdat_012/map_801eda38.c"
+source = "src/fdat_012/map_start_creature_fall.c"
 profile = "probe-gcc272cdk-o2-g0"
 bind = "name"
 
 [[unit]]
-unit = "fdat_012.map_801edbec"
+unit = "fdat_012.map_falling_creature"
 image = "FDAT_012.BIN"
-source = "src/fdat_012/map_801edbec.c"
+source = "src/fdat_012/map_falling_creature.c"
 profile = "probe-gcc272cdk-o2-g0"
 bind = "name"
 
 [[unit]]
-unit = "fdat_012.map_801edf0c"
+unit = "fdat_012.map_approach_trigger"
 image = "FDAT_012.BIN"
-source = "src/fdat_012/map_801edf0c.c"
+source = "src/fdat_012/map_approach_trigger.c"
 profile = "probe-gcc272cdk-o2-g0"
 bind = "name"
 
@@ -935,9 +1200,9 @@ profile = "probe-gcc272cdk-o2-g0"
 bind = "name"
 
 [[unit]]
-unit = "fdat_042.map_801ed7b4"
+unit = "fdat_042.map_rising_creature"
 image = "FDAT_042.BIN"
-source = "src/fdat_042/map_801ed7b4.c"
+source = "src/fdat_042/map_rising_creature.c"
 profile = "probe-gcc272cdk-o2-g0"
 bind = "name"
 
@@ -984,16 +1249,16 @@ profile = "probe-gcc272cdk-o2-g0"
 bind = "name"
 
 [[unit]]
-unit = "fdat_112.map_801ed770"
+unit = "fdat_112.map_step_creature"
 image = "FDAT_112.BIN"
-source = "src/fdat_112/map_801ed770.c"
+source = "src/fdat_112/map_step_creature.c"
 profile = "probe-gcc272cdk-o2-g0"
 bind = "name"
 
 [[unit]]
-unit = "fdat_112.map_801edb90"
+unit = "fdat_112.map_leaving_creature"
 image = "FDAT_112.BIN"
-source = "src/fdat_112/map_801edb90.c"
+source = "src/fdat_112/map_leaving_creature.c"
 profile = "probe-gcc272cdk-o2-g0"
 bind = "name"
 
@@ -1005,16 +1270,16 @@ profile = "probe-gcc272cdk-o2-g0"
 bind = "name"
 
 [[unit]]
-unit = "fdat_122.map_801ed77c"
+unit = "fdat_122.map_step_creature"
 image = "FDAT_122.BIN"
-source = "src/fdat_122/map_801ed77c.c"
+source = "src/fdat_122/map_step_creature.c"
 profile = "probe-gcc272cdk-o2-g0"
 bind = "name"
 
 [[unit]]
-unit = "fdat_122.map_801ed880"
+unit = "fdat_122.map_creature_group"
 image = "FDAT_122.BIN"
-source = "src/fdat_122/map_801ed880.c"
+source = "src/fdat_122/map_creature_group.c"
 profile = "probe-gcc272cdk-o2-g0"
 bind = "name"
 
@@ -1040,16 +1305,16 @@ profile = "probe-gcc272cdk-o2-g0"
 bind = "name"
 
 [[unit]]
-unit = "fdat_152.map_801ed8f4"
+unit = "fdat_152.map_step_creature"
 image = "FDAT_152.BIN"
-source = "src/fdat_152/map_801ed8f4.c"
+source = "src/fdat_152/map_step_creature.c"
 profile = "probe-gcc272cdk-o2-g0"
 bind = "name"
 
 [[unit]]
-unit = "fdat_152.map_801eda8c"
+unit = "fdat_152.map_slide_ground_item"
 image = "FDAT_152.BIN"
-source = "src/fdat_152/map_801eda8c.c"
+source = "src/fdat_152/map_slide_ground_item.c"
 profile = "probe-gcc272cdk-o2-g0"
 bind = "name"
 
@@ -1068,16 +1333,16 @@ profile = "probe-gcc272cdk-o2-g0"
 bind = "name"
 
 [[unit]]
-unit = "fdat_182.map_801ed950"
+unit = "fdat_182.map_death_talk"
 image = "FDAT_182.BIN"
-source = "src/fdat_182/map_801ed950.c"
+source = "src/fdat_182/map_death_talk.c"
 profile = "probe-gcc272cdk-o2-g0"
 bind = "name"
 
 [[unit]]
-unit = "fdat_182.map_801ed9cc"
+unit = "fdat_182.map_warp_player"
 image = "FDAT_182.BIN"
-source = "src/fdat_182/map_801ed9cc.c"
+source = "src/fdat_182/map_warp_player.c"
 profile = "probe-gcc272cdk-o2-g0"
 bind = "name"
 
@@ -1138,9 +1403,9 @@ profile = "probe-gcc272cdk-o2-g0"
 bind = "name"
 
 [[unit]]
-unit = "fdat_282.map_801ed7a4"
+unit = "fdat_282.map_doors"
 image = "FDAT_282.BIN"
-source = "src/fdat_282/map_801ed7a4.c"
+source = "src/fdat_282/map_doors.c"
 profile = "probe-gcc272cdk-o2-g0"
 bind = "name"
 
@@ -1166,16 +1431,16 @@ profile = "probe-gcc272cdk-o2-g0"
 bind = "name"
 
 [[unit]]
-unit = "fdat_332.map_801ed904"
+unit = "fdat_332.map_step_creature"
 image = "FDAT_332.BIN"
-source = "src/fdat_332/map_801ed904.c"
+source = "src/fdat_332/map_step_creature.c"
 profile = "probe-gcc272cdk-o2-g0"
 bind = "name"
 
 [[unit]]
-unit = "fdat_332.map_801ed9e8"
+unit = "fdat_332.map_kill_open_warp"
 image = "FDAT_332.BIN"
-source = "src/fdat_332/map_801ed9e8.c"
+source = "src/fdat_332/map_kill_open_warp.c"
 profile = "probe-gcc272cdk-o2-g0"
 bind = "name"
 

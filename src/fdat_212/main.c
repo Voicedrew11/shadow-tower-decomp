@@ -2,8 +2,8 @@
  * FDAT_212.BIN as one translation unit (WIP module): its handler table,
  * the 21 functions every overlay starts with (src/lib/fdat_common_a.inc,
  * fdat_common.inc, fdat_common_b.inc), then its map handlers through the
- * shared fdat_801ed4a0. One object, because fdat_801ed4a0's switch table
- * is 8-aligned after fdat_801ebec4's in the same read-only run.
+ * shared creature_pick_move. One object, because creature_pick_move's switch table
+ * is 8-aligned after creature_run_script_command's in the same read-only run.
  */
 #include <kf/lib/address.h>
 #include <kf/lib/types.h>
@@ -26,21 +26,21 @@
 
 RODATA(0x801eb560, 0x24c)
 
-void func_801ed4a0();
-void func_801ed594();
-void func_801ed890();
+void map_restore_progress();
+void map_update_events();
+void map_use_key_on_object();
 
 const FdatHeader fdat_header = {
     0x1a,
     {
-        fdat_801ed498, func_801ed594, fdat_801ed498, fdat_801ed498,
-        fdat_801ed498, func_801ed4a0, fdat_801ed498, fdat_801ed498,
-        fdat_801ed498, fdat_801ed498, fdat_801ed498, fdat_801ed498,
-        func_801ed890, fdat_801ed498, fdat_801ed498, fdat_801ed498,
-        fdat_801ed4a0, fdat_801ed6e4, fdat_801ed498, fdat_801ed498,
-        fdat_801ed498, fdat_801ed498, fdat_801ed498, fdat_801ed498,
-        fdat_801ed498, fdat_801ed498, fdat_801ed498, fdat_801ed498,
-        fdat_801ed498, fdat_801ed498, fdat_801ed498, fdat_801ed498,
+        map_hook_none, map_update_events, map_hook_none, map_hook_none,
+        map_hook_none, map_restore_progress, map_hook_none, map_hook_none,
+        map_hook_none, map_hook_none, map_hook_none, map_hook_none,
+        map_use_key_on_object, map_hook_none, map_hook_none, map_hook_none,
+        creature_pick_move, creature_step_script, map_hook_none, map_hook_none,
+        map_hook_none, map_hook_none, map_hook_none, map_hook_none,
+        map_hook_none, map_hook_none, map_hook_none, map_hook_none,
+        map_hook_none, map_hook_none, map_hook_none, map_hook_none,
     },
     0x4d,
 };
@@ -49,11 +49,13 @@ const FdatHeader fdat_header = {
 #include "../lib/fdat_common.inc"
 #include "../lib/fdat_common_b.inc"
 
-/* Set by event 0x2e: table B entry 46 carries table C item 28. */
+/* Set once key item 0x114 unlocks table B entry 46 (0x2e), which carries
+ * table C item 28. */
 DATA(0x801edcd4, 0x4, ".bss")
 static int fdat_801edcd4;
 
-/* Set by event 2: table B entry 2 carries table C item 29. */
+/* Set once key item 0x114 unlocks table B entry 2, which carries table C
+ * item 29. */
 DATA(0x801edcd8, 0x4, ".bss")
 static int fdat_801edcd8;
 
@@ -65,95 +67,95 @@ static int fdat_801edcdc;
 DATA(0x801edce0, 0x4, ".bss")
 static int fdat_801edce0;
 
-void func_801edbd0(int which);
+void map_slide_ground_item(int which);
 
 /* Sets up the area by the second flag word's bits 8 and 9: table C items
  * 28/29, the scene words and the bridge pieces (table B kind 0x97). */
 ADDRESS(0x801ed4a0, 0xf4)
-void func_801ed4a0(void)
+void map_restore_progress(void)
 {
-    Vis48 *c28 = &vis_table_c.entries[28];
-    Vis88 *b;
+    GroundItem *c28 = &vis_table_c.entries[28];
+    AreaObject *b;
     int i;
 
-    c28[1].unk22 = 4;
-    c28->unk22 = 4;
-    if (DAT_801cba08.unk1444.bit.f8 == 1)
+    c28[1].state = 4;
+    c28->state = 4;
+    if (game_progress.event_flags2.bit.f8 == 1)
         fdat_801edcd4 = 0xff;
     else
         fdat_801edcd4 = 0;
-    if (DAT_801cba08.unk1444.bit.f9 == 1) {
+    if (game_progress.event_flags2.bit.f9 == 1) {
         b = vis_table_b.entries;
         fdat_801edcd8 = 0xff;
         for (i = 239; i != -1; i--) {
-            if (b->unk0a == 0x97)
-                b->unk00 = 2;
+            if (b->type == 0x97)
+                b->visibility = 2;
             b++;
         }
         fdat_801edcdc = 0xff;
-        vis_lists.unk47E0 |= 0x20;
+        vis_lists.floor_kinds_off |= 0x20;
     } else {
         fdat_801edcd8 = 0;
         fdat_801edcdc = 0;
-        vis_lists.unk47E0 &= ~0x20;
+        vis_lists.floor_kinds_off &= ~0x20;
     }
 }
 
 /*
- * Runs the area: events 0x2e and 2 start table B entries 46 and 2 (each
+ * Runs the area: unlocking table B entries 46 and 2 starts them (each
  * carrying its table C item on node 0, vertex 0x23); once entry 2 and then
  * entry 3 are done the bridge rises 0x18 a frame for 0x97 frames.
  */
 ADDRESS(0x801ed594, 0x2fc)
-void func_801ed594(void)
+void map_update_events(void)
 {
-    Vis48 *c28 = &vis_table_c.entries[28];
-    Vis48 *c29 = &vis_table_c.entries[29];
-    Vis88 *d46 = &vis_table_b.entries[46];
-    Vis88 *d2 = &vis_table_b.entries[2];
-    Vis88 *d3 = &vis_table_b.entries[3];
-    Vis88 *b;
+    GroundItem *c28 = &vis_table_c.entries[28];
+    GroundItem *c29 = &vis_table_c.entries[29];
+    AreaObject *d46 = &vis_table_b.entries[46];
+    AreaObject *d2 = &vis_table_b.entries[2];
+    AreaObject *d3 = &vis_table_b.entries[3];
+    AreaObject *b;
     VECTOR v1;
     VECTOR v2;
     int i;
 
     if (fdat_801edcd4 == 1) {
-        func_801edbd0(0);
+        map_slide_ground_item(0);
         fdat_801edcd4 = 2;
-        d46->unk0C = 1;
-        d46->unk02 = 0;
-        DAT_801cba08.unk1444.word |= 0x100;
+        d46->state = 1;
+        d46->anim = 0;
+        game_progress.event_flags2.word |= 0x100;
     } else if (fdat_801edcd4 == 2) {
-        anim_set_node_vertex(*(StAnimSet **)d46->unk44, func_80023208(d46->unk0a), 0, 0x23, &v1);
-        c28->unk08.vx = d46->unk24.vx + v1.vx;
-        c28->unk08.vy = d46->unk24.vy + v1.vy;
-        c28->unk08.vz = d46->unk24.vz + v1.vz - 0x12;
-        if (d46->unk0C == 0xff)
+        anim_set_node_vertex(*(StAnimSet **)d46->anim_slot, object_model_slot(d46->type), 0, 0x23, &v1);
+        c28->position.vx = d46->position.vx + v1.vx;
+        c28->position.vy = d46->position.vy + v1.vy;
+        c28->position.vz = d46->position.vz + v1.vz - 0x12;
+        if (d46->state == 0xff)
             fdat_801edcd4 = 0xff;
     }
     if (fdat_801edcd8 == 1) {
-        func_801edbd0(1);
+        map_slide_ground_item(1);
         fdat_801edcd8 = 2;
-        d2->unk0C = 1;
-        d2->unk02 = 0;
-        DAT_801cba08.unk1444.word |= 0x200;
+        d2->state = 1;
+        d2->anim = 0;
+        game_progress.event_flags2.word |= 0x200;
     } else if (fdat_801edcd8 == 2) {
-        anim_set_node_vertex(*(StAnimSet **)d2->unk44, func_80023208(d2->unk0a), 0, 0x23, &v2);
-        c29->unk08.vx = d2->unk24.vx + v2.vx;
-        c29->unk08.vy = d2->unk24.vy + v2.vy;
-        c29->unk08.vz = d2->unk24.vz + v2.vz - 0x12;
-        if (d2->unk0C == 0xff)
+        anim_set_node_vertex(*(StAnimSet **)d2->anim_slot, object_model_slot(d2->type), 0, 0x23, &v2);
+        c29->position.vx = d2->position.vx + v2.vx;
+        c29->position.vy = d2->position.vy + v2.vy;
+        c29->position.vz = d2->position.vz + v2.vz - 0x12;
+        if (d2->state == 0xff)
             fdat_801edcd8 = 0xfe;
-    } else if (fdat_801edcd8 == 0xfe && d3->unk0C == 0xff) {
+    } else if (fdat_801edcd8 == 0xfe && d3->state == 0xff) {
         fdat_801edcdc = 1;
         fdat_801edce0 = 0;
         fdat_801edcd8 = 0xff;
     }
     if (fdat_801edcdc == 1) {
-        Vis88 *rising_bridge = vis_table_b.entries;
+        AreaObject *rising_bridge = vis_table_b.entries;
         for (i = 239; i != -1; i--) {
-            if (rising_bridge->unk0a == 0x97)
-                rising_bridge->unk24.vy += 0x18;
+            if (rising_bridge->type == 0x97)
+                rising_bridge->position.vy += 0x18;
             rising_bridge++;
         }
         if (++fdat_801edce0 >= 0x97)
@@ -161,18 +163,19 @@ void func_801ed594(void)
     } else if (fdat_801edcdc == 2) {
         b = vis_table_b.entries;
         for (i = 239; i != -1; i--) {
-            if (b->unk0a == 0x97)
-                b->unk00 = 2;
+            if (b->type == 0x97)
+                b->visibility = 2;
             b++;
         }
         fdat_801edcdc = 0xff;
-        vis_lists.unk47E0 |= 0x20;
+        vis_lists.floor_kinds_off |= 0x20;
     }
 }
 
-/* Records events 0x2e and 2 when they come with flag 0x4000. */
+/* Records which of table B entries 46 (0x2e) and 2 key item 0x114
+ * unlocked: item_use passes 0x4000 | the object's index. */
 ADDRESS(0x801ed890, 0x4c)
-void func_801ed890(int event)
+void map_use_key_on_object(int event)
 {
     short id = event & ~0x4000;
 
@@ -184,38 +187,38 @@ void func_801ed890(int event)
     }
 }
 
-#include "../lib/fdat_801ed4a0.inc"
-#include "../lib/fdat_801ed6e4.inc"
+#include "../lib/fdat_creature_pick_move.inc"
+#include "../lib/fdat_creature_step_script.inc"
 
-/* Lifts table C item 28 (`which` 0) or 29 by 0x200 along z, 24 a frame
- * while its model is loaded. */
+/* Slides table C item 28 (`which` 0) or 29 0x200 along z (horizontal),
+ * 24 a frame while its model is loaded. */
 ADDRESS(0x801edbd0, 0x104)
-void func_801edbd0(int which)
+void map_slide_ground_item(int which)
 {
     int step = 24;
-    Vis48 *item;
-    Vis44 *kind;
+    GroundItem *item;
+    ItemType *kind;
     int end;
 
     if (which == 0)
         item = &vis_table_c.entries[28];
     else
         item = &vis_table_c.entries[29];
-    item->unk22 = 5;
-    kind = &vis_table_c.unk0118[item->unk00];
-    end = item->unk08.vz + 0x200;
-    item->unk2D -= 12;
+    item->state = 5;
+    kind = &vis_table_c.types[item->item];
+    end = item->position.vz + 0x200;
+    item->depth_bias -= 12;
     for (;;) {
         StAnimFile *file;
 
-        if (item->unk08.vz == end)
+        if (item->position.vz == end)
             break;
-        anim_get_file(kind->unk4 + 588, &file);
+        anim_get_file(kind->model + 588, &file);
         if (file != NULL)
-            item->unk08.vz += step;
-        if (item->unk08.vz > end)
-            item->unk08.vz = end;
-        func_80026dd4(NULL, NULL, 0);
+            item->position.vz += step;
+        if (item->position.vz > end)
+            item->position.vz = end;
+        world_run_frame(NULL, NULL, 0);
     }
-    func_80057d58();
+    play_unlock_sound();
 }

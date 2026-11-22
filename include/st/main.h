@@ -7,9 +7,9 @@
 
 #include <kf/lib/types.h>
 
-void func_80014410(void);
-int func_80014450(u8 **cursor, int digits);
-void func_80014544(void);
-void func_80014a30(void);
+void game_shutdown(void);
+int text_read_number(u8 **cursor, int digits);
+void game_load_start_file(void);
+void game_loop(void);
 
 #endif

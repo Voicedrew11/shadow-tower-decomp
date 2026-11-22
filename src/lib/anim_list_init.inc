@@ -1,6 +1,6 @@
 /*
  * Shared by ST.EXE and VS.EXE: node list initialisation. The two images link
- * byte-identical copies; src/st/anim.c and src/vs/anim_80023764.c include
+ * byte-identical copies; src/st/render.c and src/vs/anim_set.c include
  * this fragment at their place in each run.
  */
 
@@ -10,21 +10,21 @@ ADDRESS_AT("ST", 0x800346dc, 0x84)
 ADDRESS_AT("VS", 0x800239d0, 0x84)
 void anim_list_init(StAnimSet *set, int count)
 {
-    StAnimNode *node = set->unk28;
-    StAnimRecord *rec = set->unk2C;
-    StAnimSubRecord *sub = set->unk30;
+    StAnimNode *node = set->nodes;
+    StAnimRecord *rec = set->records;
+    StAnimSubRecord *sub = set->sub_records;
     int i;
 
-    set->unk34->count = 0;
-    set->unk34->capacity = count;
-    set->unk34->nodes = set->unk28;
+    set->list->count = 0;
+    set->list->capacity = count;
+    set->list->nodes = set->nodes;
     for (i = 0; i < count; i++) {
-        node->unk0 = 0x80000000;
-        node->unkC = -1;
-        node->unk4 = rec;
-        rec->unk44 = sub;
-        node->unk8 = 0xffff;
-        node->unkA = 0;
+        node->flags = 0x80000000;
+        node->key = -1;
+        node->record = rec;
+        rec->transform = sub;
+        node->part = 0xffff;
+        node->kind = 0;
         node->unkB = 0;
         node++;
         rec++;

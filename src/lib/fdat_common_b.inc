@@ -9,16 +9,16 @@
  * by weight and starts it; 0 when none is allowed.
  */
 ADDRESS(0x801ecbcc, 0x2b0)
-int fdat_801ecbcc(void)
+int creature_pick_weighted_script(void)
 {
     int limit = 24;
-    VisScript *list[24];
+    CreatureScript *list[24];
     int index[24];
-    Vis192 *r = vis_table_a.unk6134;
-    Vis212 *e = vis_table_a.unk6138;
-    VisScript **p = r->unk60;
-    VisScript *s;
-    VisScript *prev;
+    CreatureType *r = vis_table_a.current_type;
+    Creature *e = vis_table_a.current;
+    CreatureScript **p = r->scripts;
+    CreatureScript *s;
+    CreatureScript *prev;
     int count = 0;
     int total = 0;
     int pick;
@@ -28,11 +28,11 @@ int fdat_801ecbcc(void)
         s = *p++;
         if (s == NULL)
             break;
-        if (s->unk08 & e->unk44) {
+        if (s->actions & e->action) {
             index[count] = i;
             list[count] = s;
             count++;
-            total += s->unk04;
+            total += s->weight;
         }
     }
     if (count == 0)
@@ -40,87 +40,87 @@ int fdat_801ecbcc(void)
     pick = rand() * total >> 15;
     count--;
     while (count != -1) {
-        pick -= list[count]->unk04;
+        pick -= list[count]->weight;
         if (pick <= 0)
             break;
         count--;
     }
     if (count < 0)
         count = 0;
-    e->unk18 = index[count];
-    prev = e->unkAC;
-    e->unkA8 = list[count];
-    e->unk0F = e->unkA8->unk00;
-    e->unkB0 = e->unkA8->unk0C;
-    if (prev != NULL && e->unkA8 != prev) {
-        if (prev->unk00 == 17 && prev->arg.b[9] != 255)
-            e->unk18 = prev->arg.b[9];
-        else if (e->unkAC->unk00 == 20 && e->unkAC->arg.b[13] != 255)
-            e->unk18 = e->unkAC->arg.b[13];
-        e->unkA8 = r->unk60[e->unk18];
-        e->unkB0 = e->unkA8->unk0C;
-        e->unk0F = e->unkA8->unk00;
-        e->unkAC = NULL;
+    e->script_index = index[count];
+    prev = e->chain_script;
+    e->script = list[count];
+    e->command = e->script->command;
+    e->anim_step = e->script->anim_step;
+    if (prev != NULL && e->script != prev) {
+        if (prev->command == 17 && prev->arg.b[9] != 255)
+            e->script_index = prev->arg.b[9];
+        else if (e->chain_script->command == 20 && e->chain_script->arg.b[13] != 255)
+            e->script_index = e->chain_script->arg.b[13];
+        e->script = r->scripts[e->script_index];
+        e->anim_step = e->script->anim_step;
+        e->command = e->script->command;
+        e->chain_script = NULL;
     }
-    if ((e->unk0F == 17 || e->unk0F == 20) && e->unkAC == NULL) {
-        e->unkAC = e->unkA8;
-        if (e->unk0F == 17 && e->unkA8->arg.b[8] != 255)
-            e->unk18 = e->unkA8->arg.b[8];
-        else if (e->unk0F == 20 && e->unkA8->arg.b[12] != 255)
-            e->unk18 = e->unkA8->arg.b[12];
-        e->unkA8 = r->unk60[e->unk18];
-        e->unkB0 = e->unkA8->unk0C;
-        e->unk0F = e->unkA8->unk00;
+    if ((e->command == 17 || e->command == 20) && e->chain_script == NULL) {
+        e->chain_script = e->script;
+        if (e->command == 17 && e->script->arg.b[8] != 255)
+            e->script_index = e->script->arg.b[8];
+        else if (e->command == 20 && e->script->arg.b[12] != 255)
+            e->script_index = e->script->arg.b[12];
+        e->script = r->scripts[e->script_index];
+        e->anim_step = e->script->anim_step;
+        e->command = e->script->command;
     }
-    e->unk1A = 0;
-    if (e->unkB0 >= 0)
-        e->unk2A = 0;
+    e->script_state = 0;
+    if (e->anim_step >= 0)
+        e->anim_frame = 0;
     else
-        e->unk2A = 4096;
+        e->anim_frame = 4096;
     return 1;
 }
 
 /* Counts the entry's unk34 down by its step; 1 once it runs out. */
 ADDRESS(0x801ece7c, 0xc8)
-int fdat_801ece7c(Vis212 *e)
+int creature_step_hurt_timer(Creature *e)
 {
-    if (e->unk34 < 0)
+    if (e->hurt_timer < 0)
         return 0;
-    e->unk34 -= abs(e->unkB0);
-    if (e->unk34 < 0) {
-        if (e->unk2C == 0) {
-            if ((short)e->unk2A >= 4095)
-                func_8004ae38(e);
+    e->hurt_timer -= abs(e->anim_step);
+    if (e->hurt_timer < 0) {
+        if (e->hp == 0) {
+            if ((short)e->anim_frame >= 4095)
+                creature_despawn(e);
             return 1;
         }
-        e->unk34 = -1;
-        e->unk1C.bytes[2] &= 0xdf;
-    } else if ((short)e->unk2A >= 4096 && e->unk05 == 5) {
-        e->unk2A = 4095;
+        e->hurt_timer = -1;
+        e->status.bytes[2] &= 0xdf;
+    } else if ((short)e->anim_frame >= 4096 && e->state == 5) {
+        e->anim_frame = 4095;
     }
     return 0;
 }
 
-/* Fades the entry in over 32 frames, then removes it. */
+/* Fades the entry out over 32 frames, then removes it. */
 ADDRESS(0x801ecf44, 0x80)
-void fdat_801ecf44(Vis212 *e)
+void creature_fade_out_despawn(Creature *e)
 {
-    e->unk36 = 0;
-    e->unk1C.bytes[2] |= 0xd;
+    e->fade = 0;
+    e->status.bytes[2] |= 0xd;
     while (1) {
-        e->unk36 += 128;
-        if (e->unk36 > 4096)
+        e->fade += 128;
+        if (e->fade > 4096)
             break;
-        func_80026dd4(NULL, (SVECTOR *)&viewer.unk268, 0);
+        world_run_frame(NULL, (SVECTOR *)&viewer.pitch, 0);
     }
-    func_8004ae38(e);
+    creature_despawn(e);
 }
 
 /*
  * Moves the view to `pos`, turned to `rot`, over 16 frames.
  */
 ADDRESS(0x801ecfc4, 0x220)
-void fdat_801ecfc4(VECTOR *pos, SVECTOR *rot)
+void player_glide_to_pose(VECTOR *pos, SVECTOR *rot)
 {
     VECTOR from;
     VECTOR to;
@@ -131,7 +131,7 @@ void fdat_801ecfc4(VECTOR *pos, SVECTOR *rot)
     to = *pos;
     b = *rot;
     from = viewer.position;
-    a = viewer.unk278;
+    a = viewer.view_rot;
     if (a.vx > 2048)
         a.vx -= 4096;
     if (a.vy > 2048)
@@ -144,17 +144,17 @@ void fdat_801ecfc4(VECTOR *pos, SVECTOR *rot)
     while (n--) {
         viewer.position.vx = (from.vx * n + to.vx * (16 - n)) >> 4;
         viewer.position.vz = (from.vz * n + to.vz * (16 - n)) >> 4;
-        viewer.unk278.vx = (a.vx * n + b.vx * (16 - n)) >> 4;
-        viewer.unk278.vy = (a.vy * n + b.vy * (16 - n)) >> 4;
-        viewer.unk268 = viewer.unk278.vx + viewer.unk280.halves[0] + viewer.unk288 + viewer.unk290;
-        viewer.unk26A = viewer.unk278.vy + viewer.unk280.halves[1] + viewer.unk28A + viewer.unk292;
-        func_80026dd4(NULL, (SVECTOR *)&viewer.unk268, 0);
+        viewer.view_rot.vx = (a.vx * n + b.vx * (16 - n)) >> 4;
+        viewer.view_rot.vy = (a.vy * n + b.vy * (16 - n)) >> 4;
+        viewer.pitch = viewer.view_rot.vx + viewer.rot_offset.halves[0] + viewer.shake_pitch + viewer.fall_pitch;
+        viewer.yaw = viewer.view_rot.vy + viewer.rot_offset.halves[1] + viewer.shake_yaw + viewer.unk292;
+        world_run_frame(NULL, (SVECTOR *)&viewer.pitch, 0);
     }
 }
 
 /* Turns the view to face the entry over 16 frames. */
 ADDRESS(0x801ed1e4, 0x10c)
-void fdat_801ed1e4(Vis212 *e)
+void player_turn_to_creature(Creature *e)
 {
     SVECTOR to;
     SVECTOR from;
@@ -167,11 +167,11 @@ void fdat_801ed1e4(Vis212 *e)
     short step;
     int n = 16;
 
-    dx = e->unk74.vx - viewer.position.vx;
-    dz = e->unk74.vz - viewer.position.vz;
+    dx = e->position.vx - viewer.position.vx;
+    dz = e->position.vz - viewer.position.vz;
     angle = ratan2(dz, dx) - 1024;
     to.vy = angle;
-    yaw = viewer.unk278.vy;
+    yaw = viewer.view_rot.vy;
     from.vy = yaw;
     d = (angle - yaw) & 0xfff;
     turn = d;
@@ -179,63 +179,63 @@ void fdat_801ed1e4(Vis212 *e)
         turn = d | 0xf000;
     step = turn / n;
     while (n--) {
-        viewer.unk278.vy += step;
-        viewer.unk26A = viewer.unk278.vy + viewer.unk280.halves[1] + viewer.unk28A + viewer.unk292;
-        func_80026dd4(NULL, (SVECTOR *)&viewer.unk268, 0);
+        viewer.view_rot.vy += step;
+        viewer.yaw = viewer.view_rot.vy + viewer.rot_offset.halves[1] + viewer.shake_yaw + viewer.unk292;
+        world_run_frame(NULL, (SVECTOR *)&viewer.pitch, 0);
     }
 }
 
-/* Waits for the entry's model file, then fades it out. */
+/* Waits for the entry's model file, then runs its fade-in to the end. */
 ADDRESS(0x801ed2f0, 0x98)
-void fdat_801ed2f0(Vis212 *e)
+void creature_finish_fade_in(Creature *e)
 {
     StAnimFile *file;
 
-    if (e->unk36 == -1)
+    if (e->fade == -1)
         return;
     do
-        anim_get_file(e->unk0B + 128, &file);
+        anim_get_file(e->model_slot + 128, &file);
     while (file == NULL);
     while (1) {
-        e->unk36 -= 128;
-        if (e->unk36 < 0)
+        e->fade -= 128;
+        if (e->fade < 0)
             break;
-        func_80026dd4(NULL, NULL, 0);
+        world_run_frame(NULL, NULL, 0);
     }
-    e->unk36 = -1;
-    e->unk1C.bytes[2] &= 0xf2;
+    e->fade = -1;
+    e->status.bytes[2] &= 0xf2;
 }
 
-/* Hands the entry to func_80054368, fading it out first when unk04 is set. */
+/* Hands the entry to creature_talk, finishing its fade-in first when unk04 is set. */
 ADDRESS(0x801ed388, 0x88)
-void fdat_801ed388(Vis212 *e, int fixed, int arg2)
+void creature_force_talk(Creature *e, int fixed, int arg2)
 {
-    func_80026dd4(NULL, NULL, 0);
-    e->unk70 |= 0x2000000;
-    if (e->unk04) {
-        fdat_801ed2f0(e);
-        func_80054368(e, fixed, arg2);
+    world_run_frame(NULL, NULL, 0);
+    e->flags |= 0x2000000;
+    if (e->draw_state) {
+        creature_finish_fade_in(e);
+        creature_talk(e, fixed, arg2);
     } else {
-        func_80054368(e, 1, arg2);
+        creature_talk(e, 1, arg2);
     }
 }
 
 /* Puts the entry's record back into the live sums and resets it. */
 ADDRESS(0x801ed410, 0x88)
-void fdat_801ed410(Vis212 *e)
+void creature_spawn_now(Creature *e)
 {
-    Vis192 *r = &vis_table_a.unk3500[e->unk02];
+    CreatureType *r = &vis_table_a.types[e->type];
 
     vis_table_a.unk612C += r->unk12;
-    vis_table_a.unk6128 += e->unk0D;
-    func_8004af24(e, r);
+    vis_table_a.spawn_cost_total += e->spawn_cost;
+    creature_spawn(e, r);
     e->unk1B = 255;
-    e->unk60 = 0xffff;
-    e->unk54 = 0xffff;
+    e->range_bits = 0xffff;
+    e->aggressive = 0xffff;
 }
 
 /* The default handler: does nothing. */
 ADDRESS(0x801ed498, 0x8)
-void fdat_801ed498(void)
+void map_hook_none(void)
 {
 }

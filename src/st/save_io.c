@@ -20,343 +20,343 @@
 
 /* Fills the save image; `fresh` stores the start position and no area. */
 ADDRESS(0x800562d4, 0x7cc)
-void func_800562d4(StSaveData *save, int fresh)
+void save_pack_data(StSaveData *save, int fresh)
 {
     int i;
-    Vis48 *e32;
-    Vis48 *e48;
-    Vis44 *r;
+    GroundItem *e32;
+    GroundItem *e48;
+    ItemType *r;
 
     if (fresh)
-        save->unk4[0] = save->unk4[1] = save->unk4[2] = save->unk4[3] = save->unk4[4] = 0;
+        save->loaded_ids[0] = save->loaded_ids[1] = save->loaded_ids[2] = save->loaded_ids[3] = save->loaded_ids[4] = 0;
     else
-        *(StBytes5 *)save->unk4 = ((StAreaBytes *)&area_state)->unk4;
-    func_80014cfc(save->unkC, DAT_801cba08.unk0[0], 0x60);
-    func_80014cfc(save->unk18C, DAT_801cba08.unk180[0], 0x30);
-    func_80014cfc(save->unk24C, DAT_801cba08.unk240[0], 0x180);
-    func_80014cfc(save->unk84C, DAT_801cba08.unk840[0], 0x180);
-    func_80014cfc(save->unkE4C, DAT_801cba08.unkE40[0], 0x180);
-    func_80014cfc(save->unk144C, &DAT_801cba08.unk1440.word, 2);
-    func_80014cfc(save->unk1454, (u32 *)DAT_801cba08.unk1448, 12);
-    func_80014cfc(save->unk1484, (u32 *)DAT_801cba08.unk1478, 12);
-    func_80014cfc(save->unk14B4, DAT_801cba08.unk14A8, 5);
-    save->unk14C8[0] = vis_table_c.unk0000[2];
-    save->unk14C8[1] = vis_table_c.unk0000[3];
-    save->unk14C8[2] = vis_table_c.unk0000[4];
-    save->unk14C8[3] = vis_table_c.unk0000[5];
-    func_80014cfc(save->unk14CC, vis_table_c.unk0070, 9);
+        *(StBytes5 *)save->loaded_ids = ((StAreaBytes *)&area_state)->loaded_ids;
+    copy_words(save->creatures_gone, game_progress.creatures_gone[0], 0x60);
+    copy_words(save->ground_items_gone, game_progress.ground_items_gone[0], 0x30);
+    copy_words(save->objects_removed, game_progress.objects_removed[0], 0x180);
+    copy_words(save->objects_unlocked, game_progress.objects_unlocked[0], 0x180);
+    copy_words(save->objects_finished, game_progress.objects_finished[0], 0x180);
+    copy_words(save->event_flags, &game_progress.event_flags.word, 2);
+    copy_words(save->talk_counts, (u32 *)game_progress.talk_counts, 12);
+    copy_words(save->areas_visited, (u32 *)game_progress.areas_visited, 12);
+    copy_words(save->creature_seen_bits, game_progress.creature_bits_and_vs_data, 5);
+    save->ground_item_counts[0] = vis_table_c.ground_item_counts[2];
+    save->ground_item_counts[1] = vis_table_c.ground_item_counts[3];
+    save->ground_item_counts[2] = vis_table_c.ground_item_counts[4];
+    save->ground_item_counts[3] = vis_table_c.ground_item_counts[5];
+    copy_words(save->collected_bits, vis_table_c.collected_bits, 9);
     e32 = &vis_table_c.entries[32];
     for (i = 0; i < 16; i++, e32++) {
-        if (i < vis_table_c.unk0000[2]) {
-            save->unk14F0[i].unk00 = e32->unk00;
-            save->unk14F0[i].unk02 = e32->unk02;
-            save->unk14F0[i].unk04[0] = e32->unk08.vx;
-            save->unk14F0[i].unk04[1] = e32->unk08.vy;
-            save->unk14F0[i].unk04[2] = e32->unk08.vz;
-            save->unk14F0[i].unk10[0] = e32->unk18;
-            save->unk14F0[i].unk10[1] = e32->unk1A;
-            save->unk14F0[i].unk10[2] = e32->unk1C;
-            save->unk14F0[i].unk16 = e32->unk22;
-            save->unk14F0[i].unk17 = e32->unk2c;
+        if (i < vis_table_c.ground_item_counts[2]) {
+            save->ground_items[i].item = e32->item;
+            save->ground_items[i].block = e32->block;
+            save->ground_items[i].position[0] = e32->position.vx;
+            save->ground_items[i].position[1] = e32->position.vy;
+            save->ground_items[i].position[2] = e32->position.vz;
+            save->ground_items[i].rotation[0] = e32->rot_x;
+            save->ground_items[i].rotation[1] = e32->facing;
+            save->ground_items[i].rotation[2] = e32->rot_z;
+            save->ground_items[i].state = e32->state;
+            save->ground_items[i].area = e32->area;
         }
     }
     e48 = &vis_table_c.entries[48];
     for (i = 0; i < 16; i++, e48++) {
-        if (i < vis_table_c.unk0000[3]) {
-            save->unk14F0[16 + i].unk00 = e48->unk00;
-            save->unk14F0[16 + i].unk02 = e48->unk02;
-            save->unk14F0[16 + i].unk04[0] = e48->unk08.vx;
-            save->unk14F0[16 + i].unk04[1] = e48->unk08.vy;
-            save->unk14F0[16 + i].unk04[2] = e48->unk08.vz;
-            save->unk14F0[16 + i].unk10[0] = e48->unk18;
-            save->unk14F0[16 + i].unk10[1] = e48->unk1A;
-            save->unk14F0[16 + i].unk10[2] = e48->unk1C;
-            save->unk14F0[16 + i].unk16 = e48->unk22;
-            save->unk14F0[16 + i].unk17 = e48->unk2c;
+        if (i < vis_table_c.ground_item_counts[3]) {
+            save->ground_items[16 + i].item = e48->item;
+            save->ground_items[16 + i].block = e48->block;
+            save->ground_items[16 + i].position[0] = e48->position.vx;
+            save->ground_items[16 + i].position[1] = e48->position.vy;
+            save->ground_items[16 + i].position[2] = e48->position.vz;
+            save->ground_items[16 + i].rotation[0] = e48->rot_x;
+            save->ground_items[16 + i].rotation[1] = e48->facing;
+            save->ground_items[16 + i].rotation[2] = e48->rot_z;
+            save->ground_items[16 + i].state = e48->state;
+            save->ground_items[16 + i].area = e48->area;
         }
     }
-    save->unk17F0 = viewer.unk2C;
-    save->unk17F4 = viewer.unk34;
-    save->unk17F8 = viewer.unk2;
-    save->unk17FA = viewer.unk6;
-    save->unk17FC = viewer.unk8;
-    save->unk17FE = viewer.unk30;
+    save->status_flags = viewer.status_flags;
+    save->play_seconds = viewer.play_seconds;
+    save->hp = viewer.hp;
+    save->mp = viewer.mp;
+    save->sp_total = viewer.sp_total;
+    save->creatures_killed = viewer.creatures_killed;
     save->unk1800 = viewer.unk26;
-    save->unk1801 = viewer.unk27;
-    save->unk1802 = viewer.unk28;
+    save->cunes_found = viewer.cunes_found;
+    save->items_found = viewer.items_found;
     save->unk1803 = viewer.unk32;
-    func_80014d2c((u16 *)save->unk1804, (u16 *)viewer.unk62, 14);
-    func_80014d2c((u16 *)save->unk1820, (u16 *)viewer.unk7E, 14);
-    func_80014d2c(save->unk183C, viewer.unk9A, 14);
-    func_80014cfc(save->unk1870, (u32 *)&viewer.unk22C, 3);
-    save->unk187C[0][0] = viewer.unk190[0][0];
-    save->unk187C[0][1] = viewer.unk190[0][1];
-    save->unk187C[1][0] = viewer.unk190[1][0];
-    save->unk187C[1][1] = viewer.unk190[1][1];
-    save->unk187C[2][0] = viewer.unk190[2][0];
-    save->unk187C[2][1] = viewer.unk190[2][1];
-    save->unk187C[3][0] = viewer.unk190[3][0];
-    save->unk187C[3][1] = viewer.unk190[3][1];
-    save->unk187C[4][0] = viewer.unk190[4][0];
-    save->unk187C[4][1] = viewer.unk190[4][1];
-    save->unk187C[5][0] = viewer.unk190[5][0];
-    save->unk187C[5][1] = viewer.unk190[5][1];
-    save->unk187C[6][0] = viewer.unk190[6][0];
-    save->unk187C[6][1] = viewer.unk190[6][1];
-    save->unk187C[7][0] = viewer.unk190[7][0];
-    save->unk187C[7][1] = viewer.unk190[7][1];
-    save->unk187C[8][0] = viewer.unk190[8][0];
-    save->unk187C[8][1] = viewer.unk190[8][1];
-    save->unk187C[9][0] = viewer.unk190[9][0];
-    save->unk187C[9][1] = viewer.unk190[9][1];
-    save->unk187C[10][0] = viewer.unk190[10][0];
-    save->unk187C[10][1] = viewer.unk190[10][1];
-    save->unk187C[11][0] = viewer.unk190[11][0];
-    save->unk187C[11][1] = viewer.unk190[11][1];
-    save->unk187C[12][0] = viewer.unk190[12][0];
-    save->unk187C[12][1] = viewer.unk190[12][1];
-    save->unk18B0[0] = viewer.unk219;
-    save->unk18B0[1] = viewer.unk21A;
-    save->unk18B0[2] = viewer.unk21B;
+    copy_halfwords((u16 *)save->attributes, (u16 *)viewer.attributes, 14);
+    copy_halfwords((u16 *)save->attribute_bonuses, (u16 *)viewer.attribute_bonuses, 14);
+    copy_halfwords(save->base_attributes, viewer.base_attributes, 14);
+    copy_words(save->save_point, (u32 *)&viewer.save_area, 3);
+    save->status_timers[0][0] = viewer.unk190[0][0];
+    save->status_timers[0][1] = viewer.unk190[0][1];
+    save->status_timers[1][0] = viewer.unk190[1][0];
+    save->status_timers[1][1] = viewer.unk190[1][1];
+    save->status_timers[2][0] = viewer.unk190[2][0];
+    save->status_timers[2][1] = viewer.unk190[2][1];
+    save->status_timers[3][0] = viewer.unk190[3][0];
+    save->status_timers[3][1] = viewer.unk190[3][1];
+    save->status_timers[4][0] = viewer.unk190[4][0];
+    save->status_timers[4][1] = viewer.unk190[4][1];
+    save->status_timers[5][0] = viewer.unk190[5][0];
+    save->status_timers[5][1] = viewer.unk190[5][1];
+    save->status_timers[6][0] = viewer.unk190[6][0];
+    save->status_timers[6][1] = viewer.unk190[6][1];
+    save->status_timers[7][0] = viewer.unk190[7][0];
+    save->status_timers[7][1] = viewer.unk190[7][1];
+    save->status_timers[8][0] = viewer.unk190[8][0];
+    save->status_timers[8][1] = viewer.unk190[8][1];
+    save->status_timers[9][0] = viewer.unk190[9][0];
+    save->status_timers[9][1] = viewer.unk190[9][1];
+    save->status_timers[10][0] = viewer.unk190[10][0];
+    save->status_timers[10][1] = viewer.unk190[10][1];
+    save->status_timers[11][0] = viewer.unk190[11][0];
+    save->status_timers[11][1] = viewer.unk190[11][1];
+    save->status_timers[12][0] = viewer.unk190[12][0];
+    save->status_timers[12][1] = viewer.unk190[12][1];
+    save->wear[0] = viewer.shield_wear;
+    save->wear[1] = viewer.armour_wear;
+    save->wear[2] = viewer.weapon_wear;
     if (fresh) {
-        save->unk1858.vx = 0x3d000;
-        save->unk1858.vy = 0x405c0;
-        save->unk1858.vz = 0x3f000;
-        save->unk1868.vx = 0;
-        save->unk1868.vy = 3072;
-        save->unk1868.vz = 0;
+        save->position.vx = 0x3d000;
+        save->position.vy = 0x405c0;
+        save->position.vz = 0x3f000;
+        save->view_rot.vx = 0;
+        save->view_rot.vy = 3072;
+        save->view_rot.vz = 0;
     } else {
-        save->unk1858 = *(VECTOR *)&viewer.position.vx;
-        save->unk1868 = viewer.unk278;
+        save->position = *(VECTOR *)&viewer.position.vx;
+        save->view_rot = viewer.view_rot;
     }
-    save->unk18B4[0] = DAT_801cd120.unk0;
-    save->unk18B4[1] = DAT_801cd120.unk1;
-    save->unk18B4[2] = DAT_801cd120.unk2;
-    save->unk18B4[3] = DAT_801cd120.unk3;
-    save->unk18B4[4] = DAT_801cd120.unk4;
-    save->unk18B4[5] = DAT_801cd120.unk5;
-    if (DAT_801cba08.unk16E0 == -1) {
+    save->settings[0] = game_settings.bgm_volume;
+    save->settings[1] = game_settings.sfx_volume;
+    save->settings[2] = game_settings.walk_bob;
+    save->settings[3] = game_settings.show_status;
+    save->settings[4] = game_settings.subtitles;
+    save->settings[5] = game_settings.vibration;
+    if (game_progress.save_id == -1) {
         /* A save id from the vsync counter (low half) and rand() (high). */
-        ((u16 *)&DAT_801cba08.unk16E0)[0] = VSync(-1);
-        ((u16 *)&DAT_801cba08.unk16E0)[1] = rand();
+        ((u16 *)&game_progress.save_id)[0] = VSync(-1);
+        ((u16 *)&game_progress.save_id)[1] = rand();
     }
-    save->unk0 = DAT_801cba08.unk16E0;
-    func_80014cfc(save->unk18BC, &DAT_801cba08.unk14A8[5], 5);
-    func_80014cfc(save->unk18D0, &DAT_801cba08.unk14A8[10], 0x4f);
-    func_80014cfc(save->unk1A0C, (u32 *)&DAT_801c7590, 0x4f);
-    func_80014cfc(save->unk1B48, vis_table_c.unk0048, 10);
-    save->unk1B70[0] = viewer.unk38[0];
-    save->unk1B70[1] = viewer.unk38[1];
-    save->unk1B70[2] = viewer.unk38[2];
-    save->unk1B70[3] = viewer.unk38[3];
-    save->unk1B70[4] = viewer.unk38[4];
-    save->unk1B70[5] = viewer.unk38[5];
-    save->unk1B70[6] = viewer.unk38[6];
-    save->unk1B70[7] = viewer.unk38[7];
-    save->unk1B70[8] = viewer.unk38[8];
-    save->unk1B70[9] = viewer.unk38[9];
-    save->unk1B70[10] = viewer.unk38[10];
-    save->unk1B70[11] = viewer.unk38[11];
-    save->unk1B70[12] = viewer.unk38[12];
-    save->unk1B70[13] = viewer.unk38[13];
-    save->unk1B70[14] = viewer.unk38[14];
-    save->unk1B70[15] = viewer.unk38[15];
-    save->unk1B70[16] = viewer.unk38[16];
-    save->unk1B70[17] = viewer.unk38[17];
-    save->unk1B70[18] = viewer.unk38[18];
-    save->unk1B70[19] = viewer.unk38[19];
-    save->unk1B70[20] = viewer.unk38[20];
-    save->unk1B9C[0] = DAT_801cba08.unk14A8[89];
-    save->unk1B9C[1] = DAT_801cba08.unk14A8[90];
-    save->unk1B9C[2] = DAT_801cba08.unk14A8[91];
-    r = vis_table_c.unk0118;
+    save->save_id = game_progress.save_id;
+    copy_words(save->creature_killed_bits, &game_progress.creature_bits_and_vs_data[5], 5);
+    copy_words(save->vs_items_lost, &game_progress.creature_bits_and_vs_data[10], 0x4f);
+    copy_words(save->inventory_counts, (u32 *)&inventory, 0x4f);
+    copy_words(save->placed_bits, vis_table_c.placed_bits, 10);
+    save->equipment[0] = viewer.equipment[0];
+    save->equipment[1] = viewer.equipment[1];
+    save->equipment[2] = viewer.equipment[2];
+    save->equipment[3] = viewer.equipment[3];
+    save->equipment[4] = viewer.equipment[4];
+    save->equipment[5] = viewer.equipment[5];
+    save->equipment[6] = viewer.equipment[6];
+    save->equipment[7] = viewer.equipment[7];
+    save->equipment[8] = viewer.equipment[8];
+    save->equipment[9] = viewer.equipment[9];
+    save->equipment[10] = viewer.equipment[10];
+    save->equipment[11] = viewer.equipment[11];
+    save->equipment[12] = viewer.equipment[12];
+    save->equipment[13] = viewer.equipment[13];
+    save->equipment[14] = viewer.equipment[14];
+    save->equipment[15] = viewer.equipment[15];
+    save->equipment[16] = viewer.equipment[16];
+    save->equipment[17] = viewer.equipment[17];
+    save->equipment[18] = viewer.equipment[18];
+    save->equipment[19] = viewer.equipment[19];
+    save->equipment[20] = viewer.equipment[20];
+    save->vs_lineup[0] = game_progress.creature_bits_and_vs_data[89];
+    save->vs_lineup[1] = game_progress.creature_bits_and_vs_data[90];
+    save->vs_lineup[2] = game_progress.creature_bits_and_vs_data[91];
+    r = vis_table_c.types;
     for (i = 0; i < 314; i++, r++)
-        save->unk1BA8[i] = r->unk28;
-    func_80014cfc(save->unk1CE4, (u32 *)lighting.area_mode, 24);
-    func_80014d2c(save->unk1D44, DAT_801c7590.unk13A, 14);
-    *(StHalves7 *)save->unk1D60 = *(StHalves7 *)DAT_801c7590.unk156;
-    func_80014d2c(save->unk1D6E, DAT_801cd180.unk22, 12);
+        save->item_durability[i] = r->durability;
+    copy_words(save->area_light_modes, (u32 *)lighting.area_mode, 24);
+    copy_halfwords(save->shop_ids, inventory.shop_ids, 14);
+    *(StHalves7 *)save->shop_stock = *(StHalves7 *)inventory.shop_stock;
+    copy_halfwords(save->buttons, pad_state.buttons, 12);
 }
 
-/* Restores the state func_800562d4 saved. */
+/* Restores the state save_pack_data saved. */
 ADDRESS(0x80056aa0, 0x8bc)
-void func_80056aa0(StSaveData *save)
+void save_unpack_data(StSaveData *save)
 {
     int i;
     int area;
     int bit;
-    Vis48 *entry;
-    Vis44 *r;
+    GroundItem *entry;
+    ItemType *r;
 
-    ((StAreaBytes *)&area_state)->unk4 = *(StBytes5 *)save->unk4;
-    func_80014cfc(DAT_801cba08.unk0[0], save->unkC, 0x60);
-    func_80014cfc(DAT_801cba08.unk180[0], save->unk18C, 0x30);
-    func_80014cfc(DAT_801cba08.unk240[0], save->unk24C, 0x180);
-    func_80014cfc(DAT_801cba08.unk840[0], save->unk84C, 0x180);
-    func_80014cfc(DAT_801cba08.unkE40[0], save->unkE4C, 0x180);
-    func_80014cfc(&DAT_801cba08.unk1440.word, save->unk144C, 2);
-    func_80014cfc((u32 *)DAT_801cba08.unk1448, save->unk1454, 12);
-    func_80014cfc((u32 *)DAT_801cba08.unk1478, save->unk1484, 12);
-    func_80014cfc(DAT_801cba08.unk14A8, save->unk14B4, 5);
+    ((StAreaBytes *)&area_state)->loaded_ids = *(StBytes5 *)save->loaded_ids;
+    copy_words(game_progress.creatures_gone[0], save->creatures_gone, 0x60);
+    copy_words(game_progress.ground_items_gone[0], save->ground_items_gone, 0x30);
+    copy_words(game_progress.objects_removed[0], save->objects_removed, 0x180);
+    copy_words(game_progress.objects_unlocked[0], save->objects_unlocked, 0x180);
+    copy_words(game_progress.objects_finished[0], save->objects_finished, 0x180);
+    copy_words(&game_progress.event_flags.word, save->event_flags, 2);
+    copy_words((u32 *)game_progress.talk_counts, save->talk_counts, 12);
+    copy_words((u32 *)game_progress.areas_visited, save->areas_visited, 12);
+    copy_words(game_progress.creature_bits_and_vs_data, save->creature_seen_bits, 5);
     for (area = 0; area < 48; area++) {
-        DAT_801cba08.unk16E4[area] = 0;
+        game_progress.area_kills[area] = 0;
         for (i = 0; i < 64; i++) {
-            if ((DAT_801cba08.unk0[area][i / 32] & BIT(i)) && i < 48)
-                DAT_801cba08.unk16E4[area]++;
+            if ((game_progress.creatures_gone[area][i / 32] & BIT(i)) && i < 48)
+                game_progress.area_kills[area]++;
         }
     }
-    vis_table_c.unk0000[2] = save->unk14C8[0];
-    vis_table_c.unk0000[3] = save->unk14C8[1];
-    vis_table_c.unk0000[4] = save->unk14C8[2];
-    vis_table_c.unk0000[5] = save->unk14C8[3];
-    func_80014cfc(vis_table_c.unk0070, save->unk14CC, 9);
+    vis_table_c.ground_item_counts[2] = save->ground_item_counts[0];
+    vis_table_c.ground_item_counts[3] = save->ground_item_counts[1];
+    vis_table_c.ground_item_counts[4] = save->ground_item_counts[2];
+    vis_table_c.ground_item_counts[5] = save->ground_item_counts[3];
+    copy_words(vis_table_c.collected_bits, save->collected_bits, 9);
     entry = &vis_table_c.entries[32];
     for (i = 0; i < 16; i++, entry++) {
-        if (i < vis_table_c.unk0000[2]) {
-            entry->unk00 = save->unk14F0[i].unk00;
-            entry->unk02 = save->unk14F0[i].unk02;
-            entry->unk08.vx = save->unk14F0[i].unk04[0];
-            entry->unk08.vy = save->unk14F0[i].unk04[1];
-            entry->unk08.vz = save->unk14F0[i].unk04[2];
-            entry->unk18 = save->unk14F0[i].unk10[0];
-            entry->unk1A = save->unk14F0[i].unk10[1];
-            entry->unk1C = save->unk14F0[i].unk10[2];
-            entry->unk22 = save->unk14F0[i].unk16;
-            entry->unk2c = save->unk14F0[i].unk17;
-            r = &vis_table_c.unk0118[entry->unk00];
-            *(u32 *)entry->unk04 = 0;
-            entry->unk20 = r->unk1E;
-            entry->unk23 = 0;
-            entry->unk24 = 0;
-            entry->unk25 = 0;
-            entry->unk26 = 0;
-            entry->unk2D = r->unk5[1];
+        if (i < vis_table_c.ground_item_counts[2]) {
+            entry->item = save->ground_items[i].item;
+            entry->block = save->ground_items[i].block;
+            entry->position.vx = save->ground_items[i].position[0];
+            entry->position.vy = save->ground_items[i].position[1];
+            entry->position.vz = save->ground_items[i].position[2];
+            entry->rot_x = save->ground_items[i].rotation[0];
+            entry->facing = save->ground_items[i].rotation[1];
+            entry->rot_z = save->ground_items[i].rotation[2];
+            entry->state = save->ground_items[i].state;
+            entry->area = save->ground_items[i].area;
+            r = &vis_table_c.types[entry->item];
+            *(u32 *)entry->anim_slot = 0;
+            entry->unk20 = r->flags;
+            entry->prev_state = 0;
+            entry->draw_flags = 0;
+            entry->bounces = 0;
+            entry->vertical_speed = 0;
+            entry->depth_bias = r->unk5[1];
         } else {
-            entry->unk00 = 0xffff;
-            entry->unk22 = 0;
+            entry->item = 0xffff;
+            entry->state = 0;
         }
     }
     entry = &vis_table_c.entries[48];
     for (i = 0; i < 16; i++, entry++) {
-        if (i < vis_table_c.unk0000[3]) {
-            entry->unk00 = save->unk14F0[16 + i].unk00;
-            entry->unk02 = save->unk14F0[16 + i].unk02;
-            entry->unk08.vx = save->unk14F0[16 + i].unk04[0];
-            entry->unk08.vy = save->unk14F0[16 + i].unk04[1];
-            entry->unk08.vz = save->unk14F0[16 + i].unk04[2];
-            entry->unk18 = save->unk14F0[16 + i].unk10[0];
-            entry->unk1A = save->unk14F0[16 + i].unk10[1];
-            entry->unk1C = save->unk14F0[16 + i].unk10[2];
-            entry->unk22 = save->unk14F0[16 + i].unk16;
-            entry->unk2c = save->unk14F0[16 + i].unk17;
-            r = &vis_table_c.unk0118[entry->unk00];
-            *(u32 *)entry->unk04 = 0;
-            entry->unk20 = r->unk1E;
-            entry->unk23 = 0;
-            entry->unk24 = 0;
-            entry->unk25 = 0;
-            entry->unk26 = 0;
-            entry->unk2D = r->unk5[1];
+        if (i < vis_table_c.ground_item_counts[3]) {
+            entry->item = save->ground_items[16 + i].item;
+            entry->block = save->ground_items[16 + i].block;
+            entry->position.vx = save->ground_items[16 + i].position[0];
+            entry->position.vy = save->ground_items[16 + i].position[1];
+            entry->position.vz = save->ground_items[16 + i].position[2];
+            entry->rot_x = save->ground_items[16 + i].rotation[0];
+            entry->facing = save->ground_items[16 + i].rotation[1];
+            entry->rot_z = save->ground_items[16 + i].rotation[2];
+            entry->state = save->ground_items[16 + i].state;
+            entry->area = save->ground_items[16 + i].area;
+            r = &vis_table_c.types[entry->item];
+            *(u32 *)entry->anim_slot = 0;
+            entry->unk20 = r->flags;
+            entry->prev_state = 0;
+            entry->draw_flags = 0;
+            entry->bounces = 0;
+            entry->vertical_speed = 0;
+            entry->depth_bias = r->unk5[1];
         } else {
-            entry->unk00 = 0xffff;
-            entry->unk22 = 0;
+            entry->item = 0xffff;
+            entry->state = 0;
         }
     }
-    viewer.unk2C = save->unk17F0;
-    viewer.unk34 = save->unk17F4;
-    viewer.unk2 = save->unk17F8;
-    viewer.unk6 = save->unk17FA;
-    viewer.unk8 = save->unk17FC;
-    viewer.unk30 = save->unk17FE;
+    viewer.status_flags = save->status_flags;
+    viewer.play_seconds = save->play_seconds;
+    viewer.hp = save->hp;
+    viewer.mp = save->mp;
+    viewer.sp_total = save->sp_total;
+    viewer.creatures_killed = save->creatures_killed;
     viewer.unk26 = save->unk1800;
-    viewer.unk27 = save->unk1801;
-    viewer.unk28 = 0;
+    viewer.cunes_found = save->cunes_found;
+    viewer.items_found = 0;
     for (bit = 0; bit < 266; bit++) {
-        if (vis_table_c.unk0070[bit / 32] & BIT(bit))
-            viewer.unk28++;
+        if (vis_table_c.collected_bits[bit / 32] & BIT(bit))
+            viewer.items_found++;
     }
     viewer.unk32 = save->unk1803;
-    func_80014d2c((u16 *)viewer.unk62, (u16 *)save->unk1804, 14);
-    func_80014d2c((u16 *)viewer.unk7E, (u16 *)save->unk1820, 14);
-    func_80014d2c(viewer.unk9A, save->unk183C, 14);
-    func_80014cfc((u32 *)&viewer.unk22C, save->unk1870, 3);
-    viewer.unk190[0][0] = save->unk187C[0][0];
-    viewer.unk190[0][1] = save->unk187C[0][1];
-    viewer.unk190[1][0] = save->unk187C[1][0];
-    viewer.unk190[1][1] = save->unk187C[1][1];
-    viewer.unk190[2][0] = save->unk187C[2][0];
-    viewer.unk190[2][1] = save->unk187C[2][1];
-    viewer.unk190[3][0] = save->unk187C[3][0];
-    viewer.unk190[3][1] = save->unk187C[3][1];
-    viewer.unk190[4][0] = save->unk187C[4][0];
-    viewer.unk190[4][1] = save->unk187C[4][1];
-    viewer.unk190[5][0] = save->unk187C[5][0];
-    viewer.unk190[5][1] = save->unk187C[5][1];
-    viewer.unk190[6][0] = save->unk187C[6][0];
-    viewer.unk190[6][1] = save->unk187C[6][1];
-    viewer.unk190[7][0] = save->unk187C[7][0];
-    viewer.unk190[7][1] = save->unk187C[7][1];
-    viewer.unk190[8][0] = save->unk187C[8][0];
-    viewer.unk190[8][1] = save->unk187C[8][1];
-    viewer.unk190[9][0] = save->unk187C[9][0];
-    viewer.unk190[9][1] = save->unk187C[9][1];
-    viewer.unk190[10][0] = save->unk187C[10][0];
-    viewer.unk190[10][1] = save->unk187C[10][1];
-    viewer.unk190[11][0] = save->unk187C[11][0];
-    viewer.unk190[11][1] = save->unk187C[11][1];
-    viewer.unk190[12][0] = save->unk187C[12][0];
-    viewer.unk190[12][1] = save->unk187C[12][1];
-    viewer.unk219 = save->unk18B0[0];
-    viewer.unk21A = save->unk18B0[1];
-    viewer.unk21B = save->unk18B0[2];
-    viewer.position = save->unk1858;
-    viewer.unk278 = save->unk1868;
-    DAT_801cd120.unk0 = save->unk18B4[0];
-    DAT_801cd120.unk1 = save->unk18B4[1];
-    DAT_801cd120.unk2 = save->unk18B4[2];
-    DAT_801cd120.unk3 = save->unk18B4[3];
-    DAT_801cd120.unk4 = save->unk18B4[4];
-    DAT_801cd120.unk5 = save->unk18B4[5];
-    DAT_801cba08.unk16E0 = save->unk0;
-    func_80014cfc(&DAT_801cba08.unk14A8[5], save->unk18BC, 5);
-    func_80014cfc(&DAT_801cba08.unk14A8[10], save->unk18D0, 0x4f);
-    func_80014cfc((u32 *)&DAT_801c7590, save->unk1A0C, 0x4f);
-    func_80014cfc(vis_table_c.unk0048, save->unk1B48, 10);
-    viewer.unk38[0] = save->unk1B70[0];
-    viewer.unk38[1] = save->unk1B70[1];
-    viewer.unk38[2] = save->unk1B70[2];
-    viewer.unk38[3] = save->unk1B70[3];
-    viewer.unk38[4] = save->unk1B70[4];
-    viewer.unk38[5] = save->unk1B70[5];
-    viewer.unk38[6] = save->unk1B70[6];
-    viewer.unk38[7] = save->unk1B70[7];
-    viewer.unk38[8] = save->unk1B70[8];
-    viewer.unk38[9] = save->unk1B70[9];
-    viewer.unk38[10] = save->unk1B70[10];
-    viewer.unk38[11] = save->unk1B70[11];
-    viewer.unk38[12] = save->unk1B70[12];
-    viewer.unk38[13] = save->unk1B70[13];
-    viewer.unk38[14] = save->unk1B70[14];
-    viewer.unk38[15] = save->unk1B70[15];
-    viewer.unk38[16] = save->unk1B70[16];
-    viewer.unk38[17] = save->unk1B70[17];
-    viewer.unk38[18] = save->unk1B70[18];
-    viewer.unk38[19] = save->unk1B70[19];
-    viewer.unk38[20] = save->unk1B70[20];
-    DAT_801cba08.unk14A8[89] = save->unk1B9C[0];
-    DAT_801cba08.unk14A8[90] = save->unk1B9C[1];
-    DAT_801cba08.unk14A8[91] = save->unk1B9C[2];
-    r = vis_table_c.unk0118;
+    copy_halfwords((u16 *)viewer.attributes, (u16 *)save->attributes, 14);
+    copy_halfwords((u16 *)viewer.attribute_bonuses, (u16 *)save->attribute_bonuses, 14);
+    copy_halfwords(viewer.base_attributes, save->base_attributes, 14);
+    copy_words((u32 *)&viewer.save_area, save->save_point, 3);
+    viewer.unk190[0][0] = save->status_timers[0][0];
+    viewer.unk190[0][1] = save->status_timers[0][1];
+    viewer.unk190[1][0] = save->status_timers[1][0];
+    viewer.unk190[1][1] = save->status_timers[1][1];
+    viewer.unk190[2][0] = save->status_timers[2][0];
+    viewer.unk190[2][1] = save->status_timers[2][1];
+    viewer.unk190[3][0] = save->status_timers[3][0];
+    viewer.unk190[3][1] = save->status_timers[3][1];
+    viewer.unk190[4][0] = save->status_timers[4][0];
+    viewer.unk190[4][1] = save->status_timers[4][1];
+    viewer.unk190[5][0] = save->status_timers[5][0];
+    viewer.unk190[5][1] = save->status_timers[5][1];
+    viewer.unk190[6][0] = save->status_timers[6][0];
+    viewer.unk190[6][1] = save->status_timers[6][1];
+    viewer.unk190[7][0] = save->status_timers[7][0];
+    viewer.unk190[7][1] = save->status_timers[7][1];
+    viewer.unk190[8][0] = save->status_timers[8][0];
+    viewer.unk190[8][1] = save->status_timers[8][1];
+    viewer.unk190[9][0] = save->status_timers[9][0];
+    viewer.unk190[9][1] = save->status_timers[9][1];
+    viewer.unk190[10][0] = save->status_timers[10][0];
+    viewer.unk190[10][1] = save->status_timers[10][1];
+    viewer.unk190[11][0] = save->status_timers[11][0];
+    viewer.unk190[11][1] = save->status_timers[11][1];
+    viewer.unk190[12][0] = save->status_timers[12][0];
+    viewer.unk190[12][1] = save->status_timers[12][1];
+    viewer.shield_wear = save->wear[0];
+    viewer.armour_wear = save->wear[1];
+    viewer.weapon_wear = save->wear[2];
+    viewer.position = save->position;
+    viewer.view_rot = save->view_rot;
+    game_settings.bgm_volume = save->settings[0];
+    game_settings.sfx_volume = save->settings[1];
+    game_settings.walk_bob = save->settings[2];
+    game_settings.show_status = save->settings[3];
+    game_settings.subtitles = save->settings[4];
+    game_settings.vibration = save->settings[5];
+    game_progress.save_id = save->save_id;
+    copy_words(&game_progress.creature_bits_and_vs_data[5], save->creature_killed_bits, 5);
+    copy_words(&game_progress.creature_bits_and_vs_data[10], save->vs_items_lost, 0x4f);
+    copy_words((u32 *)&inventory, save->inventory_counts, 0x4f);
+    copy_words(vis_table_c.placed_bits, save->placed_bits, 10);
+    viewer.equipment[0] = save->equipment[0];
+    viewer.equipment[1] = save->equipment[1];
+    viewer.equipment[2] = save->equipment[2];
+    viewer.equipment[3] = save->equipment[3];
+    viewer.equipment[4] = save->equipment[4];
+    viewer.equipment[5] = save->equipment[5];
+    viewer.equipment[6] = save->equipment[6];
+    viewer.equipment[7] = save->equipment[7];
+    viewer.equipment[8] = save->equipment[8];
+    viewer.equipment[9] = save->equipment[9];
+    viewer.equipment[10] = save->equipment[10];
+    viewer.equipment[11] = save->equipment[11];
+    viewer.equipment[12] = save->equipment[12];
+    viewer.equipment[13] = save->equipment[13];
+    viewer.equipment[14] = save->equipment[14];
+    viewer.equipment[15] = save->equipment[15];
+    viewer.equipment[16] = save->equipment[16];
+    viewer.equipment[17] = save->equipment[17];
+    viewer.equipment[18] = save->equipment[18];
+    viewer.equipment[19] = save->equipment[19];
+    viewer.equipment[20] = save->equipment[20];
+    game_progress.creature_bits_and_vs_data[89] = save->vs_lineup[0];
+    game_progress.creature_bits_and_vs_data[90] = save->vs_lineup[1];
+    game_progress.creature_bits_and_vs_data[91] = save->vs_lineup[2];
+    r = vis_table_c.types;
     for (i = 0; i < 314; i++, r++)
-        r->unk28 = save->unk1BA8[i];
-    func_80014cfc((u32 *)lighting.area_mode, save->unk1CE4, 24);
-    func_80014d2c(DAT_801c7590.unk13A, save->unk1D44, 14);
-    *(StHalves7 *)DAT_801c7590.unk156 = *(StHalves7 *)save->unk1D60;
-    func_80014d2c(DAT_801cd180.unk22, save->unk1D6E, 12);
+        r->durability = save->item_durability[i];
+    copy_words((u32 *)lighting.area_mode, save->area_light_modes, 24);
+    copy_halfwords(inventory.shop_ids, save->shop_ids, 14);
+    *(StHalves7 *)inventory.shop_stock = *(StHalves7 *)save->shop_stock;
+    copy_halfwords(pad_state.buttons, save->buttons, 12);
 }
 
 ADDRESS(0x8005735c, 0x30)
-void func_8005735c(void)
+void area_run_frame_hook(void)
 {
     area_state.hooks->frame();
 }

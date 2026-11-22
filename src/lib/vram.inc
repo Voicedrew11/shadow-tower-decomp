@@ -1,7 +1,7 @@
 /*
  * Shared by ST.EXE and VS.EXE: VRAM block move and roll. The two images link
- * byte-identical copies; src/st/effect_move.c and
- * src/vs/effect_move_8003333c.c include this fragment at their place in each
+ * byte-identical copies; src/st/effect_spawn.c and
+ * src/vs/effect_spawn_run.c include this fragment at their place in each
  * run.
  */
 

@@ -2,8 +2,8 @@
  * FDAT_082.BIN as one translation unit (WIP module): its handler table,
  * the 21 functions every overlay starts with (src/lib/fdat_common_a.inc,
  * fdat_common.inc, fdat_common_b.inc), then its map handlers through the
- * shared fdat_801ed4a0. One object, because fdat_801ed4a0's switch table
- * is 8-aligned after fdat_801ebec4's in the same read-only run.
+ * shared creature_pick_move. One object, because creature_pick_move's switch table
+ * is 8-aligned after creature_run_script_command's in the same read-only run.
  */
 #include <kf/lib/address.h>
 #include <kf/lib/types.h>
@@ -23,20 +23,20 @@
 
 RODATA(0x801eb560, 0x24c)
 
-void func_801ed4a0();
-void func_801ed4f8();
+void map_restore_progress();
+void map_update_events();
 
 const FdatHeader fdat_header = {
     0xd,
     {
-        fdat_801ed498, func_801ed4f8, fdat_801ed498, fdat_801ed498,
-        fdat_801ed498, func_801ed4a0, fdat_801ed498, fdat_801ed498,
-        fdat_801ed498, fdat_801ed498, fdat_801ed498, fdat_801ed498,
-        fdat_801ed498, fdat_801ed498, fdat_801ed498, fdat_801ed498,
-        fdat_801ed4a0, fdat_801ed6e4, fdat_801ed498, fdat_801ed498,
-        fdat_801ed498, fdat_801ed498, fdat_801ed498, fdat_801ed498,
-        fdat_801ed498, fdat_801ed498, fdat_801ed498, fdat_801ed498,
-        fdat_801ed498, fdat_801ed498, fdat_801ed498, fdat_801ed498,
+        map_hook_none, map_update_events, map_hook_none, map_hook_none,
+        map_hook_none, map_restore_progress, map_hook_none, map_hook_none,
+        map_hook_none, map_hook_none, map_hook_none, map_hook_none,
+        map_hook_none, map_hook_none, map_hook_none, map_hook_none,
+        creature_pick_move, creature_step_script, map_hook_none, map_hook_none,
+        map_hook_none, map_hook_none, map_hook_none, map_hook_none,
+        map_hook_none, map_hook_none, map_hook_none, map_hook_none,
+        map_hook_none, map_hook_none, map_hook_none, map_hook_none,
     },
     0x40,
 };
@@ -52,12 +52,12 @@ int fdat_801ed87c;
 /* Sets up the area: the scene is pending unless table A entry 48 is dying
  * or record 0's stream counter has started. */
 ADDRESS(0x801ed4a0, 0x58)
-void func_801ed4a0(void)
+void map_restore_progress(void)
 {
-    Vis212 *e = &vis_table_a.entries[48];
-    Vis192 *r = &vis_table_a.unk3500[0];
+    Creature *e = &vis_table_a.entries[48];
+    CreatureType *r = &vis_table_a.types[0];
 
-    if (e->unk05 != 3 && DAT_801cba08.unk1448[r->unk09] == 0)
+    if (e->state != 3 && game_progress.talk_counts[r->talk_id] == 0)
         fdat_801ed87c = 0;
     else
         fdat_801ed87c = 0xff;
@@ -66,21 +66,21 @@ void func_801ed4a0(void)
 /* While pending: ends the scene once entry 48 is beaten, and turns it into
  * item 0x116 once record 0's stream counter reaches 1. */
 ADDRESS(0x801ed4f8, 0x90)
-void func_801ed4f8(void)
+void map_update_events(void)
 {
-    Vis212 *e = &vis_table_a.entries[48];
-    Vis192 *r = &vis_table_a.unk3500[0];
+    Creature *e = &vis_table_a.entries[48];
+    CreatureType *r = &vis_table_a.types[0];
 
     if (fdat_801ed87c == 0) {
-        if (e->unk2C == 0)
+        if (e->hp == 0)
             fdat_801ed87c = 0xff;
-        if (DAT_801cba08.unk1448[r->unk09] == 1) {
-            func_8004d804(e, 0x116);
-            fdat_801ecf44(e);
+        if (game_progress.talk_counts[r->talk_id] == 1) {
+            creature_drop_item(e, 0x116);
+            creature_fade_out_despawn(e);
             fdat_801ed87c = 0xff;
         }
     }
 }
 
-#include "../lib/fdat_801ed4a0.inc"
-#include "../lib/fdat_801ed6e4.inc"
+#include "../lib/fdat_creature_pick_move.inc"
+#include "../lib/fdat_creature_step_script.inc"

@@ -12,30 +12,30 @@
 extern s16 DAT_8006335a;
 
 /* The bank's VAB body and header buffers (bss). */
-extern u_char DAT_800ff580[];
-extern u_char DAT_80116580[];
+extern u_char menu_vab_body[];
+extern u_char menu_vab_head[];
 
 /* A sound bank record: its VAB header, VAB id and body transfer result. */
 typedef struct {
     u_char head[4096];   /* 0x0000: the VAB header */
     s16 vab;             /* 0x1000: SsVabOpenHeadSticky's id, -1 on failure */
-    s16 unk1002;         /* 0x1002: SsVabTransBodyPartly's result */
+    s16 trans_result;    /* 0x1002: SsVabTransBodyPartly's result */
 } VsSoundBank;
 
 typedef char VsSoundBankSize[sizeof(VsSoundBank) == 0x1004 ? 1 : -1];
 
 /* The two sound banks (0x801604b0, bss). */
-extern VsSoundBank DAT_801604b0[2];
+extern VsSoundBank sound_banks[2];
 
 /* libsnd's SEQ attribute table (0x801175a8, bss) and SpuGetAllKeysStatus's
  * 24 voice states (0x80117580, bss). */
-extern char DAT_801175a8[];
-extern char DAT_80117580[24];
+extern char seq_attr_table[];
+extern char voice_status[24];
 
-/* src/vs/card_8001c8b8.c: the menu sound effects (SsUtKeyOn tones 11-14). */
-void func_8001c8b8(void);
-void func_8001c8f8(void);
-void func_8001c938(void);
-void func_8001c978(void);
+/* src/vs/menu_sound.c: the menu sound effects (SsUtKeyOn tones 11-14). */
+void play_cursor_sound(void);
+void play_cancel_sound(void);
+void play_refuse_sound(void);
+void play_confirm_sound(void);
 
 #endif
