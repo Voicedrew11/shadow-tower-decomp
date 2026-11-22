@@ -91,25 +91,26 @@ void map_update_events(void)
     AreaObject *d12 = &vis_table_b.entries[12];
 
     if (!game_progress.event_flags.bit.f2 && d20->state == 1) {
-        if (e3->state == 0)
+        if (e3->state == CREATURE_STATE_WAITING)
             creature_spawn_now(e3);
-        if (e4->state == 0)
+        if (e4->state == CREATURE_STATE_WAITING)
             creature_spawn_now(e4);
         e3->spawn_chance = 100;
         e4->spawn_chance = 100;
         game_progress.event_flags.word |= 4;
     }
-    if (!game_progress.event_flags.bit.f3 && d1->state == 255 && e2->state == 0) {
+    if (!game_progress.event_flags.bit.f3 && d1->state == 255 && e2->state == CREATURE_STATE_WAITING) {
         creature_spawn_now(e2);
         e2->spawn_chance = 100;
         game_progress.event_flags.word |= 8;
     }
-    if (!game_progress.event_flags.bit.f4 && d12->params.door.lock == 255 && e1->state == 0) {
+    if (!game_progress.event_flags.bit.f4 && d12->params.door.lock == DOOR_UNLOCKED
+        && e1->state == CREATURE_STATE_WAITING) {
         creature_spawn_now(e1);
         e1->spawn_chance = 100;
         game_progress.event_flags.word |= 0x10;
     }
-    if (!game_progress.event_flags.bit.f5 && viewer.block == 57 && e0->state == 0) {
+    if (!game_progress.event_flags.bit.f5 && viewer.block == 57 && e0->state == CREATURE_STATE_WAITING) {
         creature_spawn_now(e0);
         e0->spawn_chance = 100;
         game_progress.event_flags.word |= 0x20;

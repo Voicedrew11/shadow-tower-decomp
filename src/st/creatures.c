@@ -62,7 +62,7 @@ int creature_take_damage(e, kind, power, levels, crit)
     index = 0;
     if (dmg >= e->hp) {
         if (e->status.bytes[3] != 3) {
-            e->state = 5;
+            e->state = CREATURE_STATE_DYING;
             creature_roll_drops(e);
             creature_award_kill_bonuses(e);
             game_progress.creature_bits_and_vs_data[5 + (t->kind >> 5)] |= 1 << (t->kind & 0x1f);
@@ -180,7 +180,7 @@ void creatures_update(void)
             e = vis_table_a.entries;
             for (vis_table_a.current_index = 0; vis_table_a.current_index < 64; vis_table_a.current_index++, e++) {
                 t = &vis_table_a.types[e->type];
-                if (e->state == 1) {
+                if (e->state == CREATURE_STATE_ACTIVE) {
                     if (vis_table_a.zone == 0xff)
                         break;
                     if (vis_table_a.zone != e->zone) {
@@ -188,7 +188,7 @@ void creatures_update(void)
                             break;
                         vis_table_a.unk612C -= t->unk12;
                         vis_table_a.spawn_cost_total -= e->spawn_cost;
-                        e->state = 0;
+                        e->state = CREATURE_STATE_WAITING;
                         creature_return_home(e);
                     }
                 }
@@ -222,7 +222,7 @@ void creatures_update(void)
             e->velocity.vx = 0;
             if ((vis_table_a.frame & 3) == (e->zone & 3) || viewer.update_all_spawns)
                 creature_update_spawn();
-            if (e->state == 1) {
+            if (e->state == CREATURE_STATE_ACTIVE) {
                 if ((vis_table_a.frame & 3) == (vis_table_a.active_count & 3))
                     area_state.hooks->creature_pick_move();
                 area_state.hooks->creature_step_script();
@@ -246,7 +246,7 @@ void creatures_update(void)
                     }
                 }
                 vis_table_a.active_count++;
-            } else if (e->state == 5) {
+            } else if (e->state == CREATURE_STATE_DYING) {
                 area_state.hooks->creature_step_script();
             }
         }
@@ -316,7 +316,7 @@ void creatures_load(CreatureFileEntry *src)
     i = 64;
     while (i--) {
         e->spawn_chance = src->spawn_chance;
-        e->state = 0;
+        e->state = CREATURE_STATE_WAITING;
         if (e->spawn_chance == 0xff)
             goto next;
         e->type = src->type;

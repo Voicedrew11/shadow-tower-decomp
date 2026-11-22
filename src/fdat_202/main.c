@@ -70,7 +70,7 @@ void map_restore_progress(void)
         i = 240;
         while (i--) {
             if (b->type == 0x29 || b->type == 0x2b || b->type == 0x94)
-                b->kind = 0xff;
+                b->kind = OBJECT_KIND_NONE;
             b++;
         }
         fdat_801eda08 = 0xff;
@@ -105,14 +105,14 @@ void map_update_switch_objects(void)
         AreaObject *b;
         for (i = 239, b = vis_table_b.entries; i != -1; i--, b++) {
             if (b->type == 0x29 || b->type == 0x2b || b->type == 0x94) {
-                b->kind = 0xff;
+                b->kind = OBJECT_KIND_NONE;
                 if (b->type == 0x94) {
                     b->scale.vx = 0;
                     b->scale.vy = 0;
                     b->scale.vz = 0;
                 }
             } else if (b->type == 0xaf) {
-                b->kind = 0xff;
+                b->kind = OBJECT_KIND_NONE;
                 b->type = 0xffff;
             }
         }

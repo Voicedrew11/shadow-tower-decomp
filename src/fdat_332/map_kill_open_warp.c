@@ -55,12 +55,12 @@ animation_done:
     creature_roll_drops(e);
     creature_award_kill_bonuses(e);
     creature_start_script(e, 12);
-    e->state = 5;
+    e->state = CREATURE_STATE_DYING;
     e->hurt_timer = 0xfff;
     e->script_state = 0xf0;
     e->anim_frame = 0;
     e->hp = 0;
-    d3->kind = 0xed;
+    d3->kind = OBJECT_KIND_WARP;
     viewer.state = VIEWER_STATE_NORMAL;
     fdat_801edb3c = 2;
     vis_table_a.unk612C = 0;

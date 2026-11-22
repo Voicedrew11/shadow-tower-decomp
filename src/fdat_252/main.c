@@ -86,7 +86,7 @@ void map_update_events(void)
             e->flags &= ~0x2000000;
             r->actions &= ~0x180;
         } else {
-            e->action = 0x80;
+            e->action = CREATURE_ACTION_DORMANT;
         }
     }
 }
@@ -110,7 +110,7 @@ void map_pick_creature_move(void)
         return;
     creature_choose_action();
     if (e->type == 8 && fdat_801ed8cc == 0)
-        e->action = 128;
+        e->action = CREATURE_ACTION_DORMANT;
     creature_pick_weighted_script();
     switch (e->action) {
     case 8:
@@ -135,7 +135,7 @@ void map_pick_creature_move(void)
         e->unk5A = e->target_heading = e->facing;
         break;
     }
-    if (e->action != 8)
+    if (e->action != CREATURE_ACTION_TURN_AWAY)
         e->wall_heading = 0x7fff;
     if (vis_records[e->block].heading_bias_x != 0 || vis_records[e->block].heading_bias_z != 0) {
         x = rcos(e->target_heading - 1024) >> 5;

@@ -22,7 +22,7 @@ void map_slide_ground_item(void)
     ItemType *kind;
     int end;
 
-    item->state = 5;
+    item->state = GROUND_ITEM_SCRIPTED;
     kind = &vis_table_c.types[item->item];
     end = item->position.vx + 0x1e0;
     item->depth_bias -= 2;

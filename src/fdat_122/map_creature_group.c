@@ -18,11 +18,11 @@ ADDRESS(0x801ed880, 0x78)
 void map_spawn_creature_group(void)
 {
     vis_table_a.entries[32].spawn_chance = vis_table_a.entries[33].spawn_chance = vis_table_a.entries[34].spawn_chance = 100;
-    if (vis_table_a.entries[32].state == 0)
+    if (vis_table_a.entries[32].state == CREATURE_STATE_WAITING)
         creature_spawn_now(&vis_table_a.entries[32]);
-    if (vis_table_a.entries[33].state == 0)
+    if (vis_table_a.entries[33].state == CREATURE_STATE_WAITING)
         creature_spawn_now(&vis_table_a.entries[33]);
-    if (vis_table_a.entries[34].state == 0)
+    if (vis_table_a.entries[34].state == CREATURE_STATE_WAITING)
         creature_spawn_now(&vis_table_a.entries[34]);
 }
 

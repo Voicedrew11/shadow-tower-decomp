@@ -16,6 +16,6 @@ void map_use_item_remove_fallen(short id)
 {
     Creature *e = &vis_table_a.entries[48];
 
-    if (id == 0x10e && e->status.bytes[0] != 0 && e->state != 3)
+    if (id == 0x10e && e->status.bytes[0] != 0 && e->state != CREATURE_STATE_GONE)
         creature_despawn(e);
 }

@@ -70,7 +70,7 @@ void map_warp_player(int gate)
     viewer.state = VIEWER_STATE_SCRIPTED;
     fade_run_frames(2, 0x1000, 0x1000, 0);
     creatures_update();
-    if (gate == 0 && e->state != 3 && e->state != 1) {
+    if (gate == 0 && e->state != CREATURE_STATE_GONE && e->state != CREATURE_STATE_ACTIVE) {
         index = e->type;
         slot = e->model_slot + 128;
         creature_spawn_now(e);
@@ -89,7 +89,7 @@ void map_warp_player(int gate)
         creature_force_talk(e, 0, 0);
         e->flags &= ~0x2000000;
     } else {
-        e->action = 0x80;
+        e->action = CREATURE_ACTION_DORMANT;
     }
     vis_table_a.current = e;
     vis_table_a.current_type = r;

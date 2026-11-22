@@ -66,13 +66,13 @@ void map_update_events(void)
         lighting.area_mode[28] = 0x11;
         lighting.area_mode[15] = 0x11;
         lighting.area_mode[33] = 0x11;
-        e33->state = 1;
+        e33->state = CREATURE_STATE_ACTIVE;
         e33->status.bytes[3] = 1;
         e33->hurt_timer = -1;
         fdat_801edb3c = 1;
         game_progress.event_flags.word |= 0x10000;
         e33->status.bytes[2] &= 0xea;
-        if (e4->state == 1) {
+        if (e4->state == CREATURE_STATE_ACTIVE) {
             e4->state = state;
             e4->hp = 0;
             e4->status.bytes[2] |= 0x15;
@@ -82,7 +82,7 @@ void map_update_events(void)
             e4->hurt_timer = 0x1000;
             viewer.creatures_killed++;
         }
-        if (e5->state == 1) {
+        if (e5->state == CREATURE_STATE_ACTIVE) {
             e5->state = state;
             e5->hp = 0;
             e5->status.bytes[2] |= 0x15;
@@ -108,10 +108,10 @@ void map_restore_progress(void)
     Creature *e = &vis_table_a.entries[33];
 
     if (game_progress.event_flags.bit.f16) {
-        if (e->state != 3) {
+        if (e->state != CREATURE_STATE_GONE) {
             e->drop_chance0 = 20;
             e->drop_chance1 = 30;
-            e->state = 3;
+            e->state = CREATURE_STATE_GONE;
             e->drop_chance2 = 100;
             creature_roll_drops(e);
             creature_award_kill_bonuses(e);
@@ -119,7 +119,7 @@ void map_restore_progress(void)
         fdat_801edb3c = 2;
     } else {
         fdat_801edb3c = 0;
-        b->kind = 0xff;
+        b->kind = OBJECT_KIND_NONE;
         e->flags &= ~0x2000000;
     }
 }

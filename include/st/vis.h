@@ -12,6 +12,7 @@
 #include <sys/types.h>
 #include <st/data.h>
 #include <st/scratch.h>
+#include <st/world_ids.h>
 
 /* 0x801b5948: the source id list vis_collect_sources fills and the visible id
  * list vis_build_visible builds from it; vis_record_is_visible/vis_id_is_visible search the

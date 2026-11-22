@@ -529,11 +529,11 @@ void area_load_update(void)
         area_state.load_step = 240;
         b = vis_table_b.entries;
         for (i = 239; i != -1; i--) {
-            if (b->kind == 236 && b->unk54 != -1) {
+            if (b->kind == OBJECT_KIND_SOUND && b->unk54 != -1) {
                 sound_stop(b->unk54, b->params.snd.sound + 1108);
                 b->unk54 = -1;
             }
-            b->kind = 0xff;
+            b->kind = OBJECT_KIND_NONE;
             b++;
         }
         cd_queue_read_member(ARCHIVE_FDAT, (area_state.request_area * 10) | 1, (u8 *)cd_file_buffer,

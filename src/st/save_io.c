@@ -233,7 +233,7 @@ void save_unpack_data(StSaveData *save)
             entry->depth_bias = r->unk5[1];
         } else {
             entry->item = 0xffff;
-            entry->state = 0;
+            entry->state = GROUND_ITEM_NONE;
         }
     }
     entry = &vis_table_c.entries[48];
@@ -259,7 +259,7 @@ void save_unpack_data(StSaveData *save)
             entry->depth_bias = r->unk5[1];
         } else {
             entry->item = 0xffff;
-            entry->state = 0;
+            entry->state = GROUND_ITEM_NONE;
         }
     }
     viewer.status_flags = save->status_flags;

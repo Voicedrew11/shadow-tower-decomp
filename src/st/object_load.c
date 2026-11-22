@@ -40,7 +40,7 @@ void objects_load(u8 *src)
             e->type = 0xffff;
         else
             e->type = *(u16 *)(src + 4);
-        e->kind = 0xff;
+        e->kind = OBJECT_KIND_NONE;
         if (e->type != 0xffff) {
             u16 parameter = *(u16 *)(src + 14);
             u16 yaw;
@@ -77,8 +77,8 @@ void objects_load(u8 *src)
             fill_words((u32 *)&e->unk50, 0xff, 2);
             kind = rec->unk00[0];
             switch (kind) {
-            case 0:
-            case 1:
+            case OBJECT_KIND_DOOR:
+            case OBJECT_KIND_MODEL_DOOR:
                 n = e->params.door.n_blocks;
                 while (n--) {
                     u8 t = vis_records[e->params.door.block_b + n].part;
@@ -100,8 +100,8 @@ void objects_load(u8 *src)
                 else
                     e->state = 0;
                 break;
-            case 50:
-            case 51:
+            case OBJECT_KIND_GATE:
+            case OBJECT_KIND_ITEM_GATE:
                 e->kind = kind;
                 if (!(e->unk49 & 0x80))
                     e->anim = e->unk49;
@@ -123,8 +123,8 @@ void objects_load(u8 *src)
                     e->state = 0;
                 *(u16 *)&e->unk50 = 0;
                 break;
-            case 52:
-                e->kind = 52;
+            case OBJECT_KIND_GROUP_GATE:
+                e->kind = OBJECT_KIND_GROUP_GATE;
                 e->state = 0;
                 e->anim_frame = 0;
                 e->anim = 0;
@@ -143,9 +143,9 @@ void objects_load(u8 *src)
                 e->kind = 7;
                 e->visibility = 2;
                 break;
-            case 0xe0:
+            case OBJECT_KIND_SEQUENCE:
                 e->facing = 0;
-                e->kind = 0xe0;
+                e->kind = OBJECT_KIND_SEQUENCE;
                 e->unk01 = 0;
                 if ((*(u32 *)&e->unk48 & 0xffffff) == 0xffffff) {
                     e->position.vx = src[0] * 4096 + *(s16 *)(src + 8) + 0x800;
@@ -164,14 +164,14 @@ void objects_load(u8 *src)
                     e->params.door.lock -= *(s16 *)(src + 10) / 128;
                 }
                 break;
-            case 0xed:
-            case 0xef:
+            case OBJECT_KIND_WARP:
+            case OBJECT_KIND_WALK_IN_WARP:
                 e->kind = kind;
                 ((u8 *)&e->unk50)[0] = 1;
                 break;
-            case 0xec:
+            case OBJECT_KIND_SOUND:
                 secs = e->params.snd.period;
-                e->kind = 0xec;
+                e->kind = OBJECT_KIND_SOUND;
                 e->unk54 = -1;
                 e->unk50 = now + secs * 60;
                 break;
@@ -188,11 +188,11 @@ void objects_load(u8 *src)
                 break;
             case 3:
             case 5:
-            case 14:
-            case 0xe1:
+            case OBJECT_KIND_SAVE_POINT:
+            case OBJECT_KIND_MESSAGE:
                 e->kind = kind;
                 break;
-            case 0xff:
+            case OBJECT_KIND_NONE:
                 break;
             default:
                 area_state.hooks->load_object(e, rec);

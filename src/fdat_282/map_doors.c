@@ -114,10 +114,10 @@ void map_open_object_drop_item(void)
         door->anim_frame += step;
         if (door->anim_frame >= 0x1000)
             door->anim_frame = 0xfff;
-        if (door->anim_frame > 0x400 && item->state == 4)
-            item->state = 2;
-        if (door->anim_frame > 0xf00 && item->state == 2)
-            item->state = 1;
+        if (door->anim_frame > 0x400 && item->state == GROUND_ITEM_HIDDEN)
+            item->state = GROUND_ITEM_RESTING;
+        if (door->anim_frame > 0xf00 && item->state == GROUND_ITEM_RESTING)
+            item->state = GROUND_ITEM_FALLING;
         ground_items_update();
         world_run_frame(NULL, NULL, 0);
     } while (door->anim_frame != 0xfff);

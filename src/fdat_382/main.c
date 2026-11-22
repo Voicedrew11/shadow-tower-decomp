@@ -129,7 +129,7 @@ void map_update_events(void)
         lighting.area_mode[38] = 0x11;
         game_progress.event_flags.word |= 0x1000000;
     }
-    if (fdat_801edb04 == 1 && e32->state == 3) {
+    if (fdat_801edb04 == 1 && e32->state == CREATURE_STATE_GONE) {
         viewer.state = VIEWER_STATE_SCRIPTED;
         e32->flags |= 0x2000000;
         game_progress.talk_counts[r1->talk_id] = 2;
@@ -158,7 +158,7 @@ void map_pick_creature_move(void)
         return;
     creature_choose_action();
     if (e->type == 1 && fdat_801edb00 == 0)
-        e->action = 128;
+        e->action = CREATURE_ACTION_DORMANT;
     creature_pick_weighted_script();
     switch (e->action) {
     case 8:
@@ -183,7 +183,7 @@ void map_pick_creature_move(void)
         e->unk5A = e->target_heading = e->facing;
         break;
     }
-    if (e->action != 8)
+    if (e->action != CREATURE_ACTION_TURN_AWAY)
         e->wall_heading = 0x7fff;
     if (vis_records[e->block].heading_bias_x != 0 || vis_records[e->block].heading_bias_z != 0) {
         x = rcos(e->target_heading - 1024) >> 5;

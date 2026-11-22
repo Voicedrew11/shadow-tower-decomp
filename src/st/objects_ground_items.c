@@ -130,7 +130,7 @@ void object_start_kind(e, kind)
     AreaObject *e;
     u8 kind;
 {
-    if (e->kind == 0xff) {
+    if (e->kind == OBJECT_KIND_NONE) {
         e->kind = kind;
         e->state = 0;
     }
@@ -220,16 +220,16 @@ ADDRESS(0x8004fb88, 0x84)
 int object_try_key(AreaObject *e, int id)
 {
     switch (e->kind) {
-    case 0:
-    case 1:
-    case 50:
-    case 51:
-    case 52:
+    case OBJECT_KIND_DOOR:
+    case OBJECT_KIND_MODEL_DOOR:
+    case OBJECT_KIND_GATE:
+    case OBJECT_KIND_ITEM_GATE:
+    case OBJECT_KIND_GROUP_GATE:
         if (e->state != 0)
             return 0;
         if (((u8 *)&e->params.snd.period)[1] >= 0xfe)
             return 2;
-        if (((u8 *)&e->params.snd.period)[1] == id - 272) {
+        if (((u8 *)&e->params.snd.period)[1] == id - KEY_ITEM_BASE) {
             ((u8 *)&e->params.snd.period)[1] = 0xff;
             return 1;
         }
@@ -486,7 +486,7 @@ void object_spawn_side_parts(e, arg)
     object_spawn_part(e, 175, 4, arg, 3, 0x400, 0, 0x500, 0);
     object_spawn_part(e, 175, 4, arg, 2, 0x400, 0, 0x500, 0);
     object_spawn_part(e, 175, 4, arg, 1, 0x400, 0, 0x500, 0);
-    e->kind = 0xff;
+    e->kind = OBJECT_KIND_NONE;
 }
 
 /* The same with state 6, offset pieces. */
@@ -499,7 +499,7 @@ void object_spawn_forward_parts(e, arg)
     object_spawn_part(e, 175, 6, arg, 3, 0x400, 0x500, 2000, 0x500);
     object_spawn_part(e, 175, 6, arg, 2, 0x400, 0x500, 2000, 0x500);
     object_spawn_part(e, 175, 6, arg, 1, 0x400, 0x500, 2000, 0x500);
-    e->kind = 0xff;
+    e->kind = OBJECT_KIND_NONE;
 }
 
 /* Four kind-171 pieces with state 8. */
@@ -512,7 +512,7 @@ void object_spawn_side_parts_alt(e, arg)
     object_spawn_part(e, 171, 8, arg, 3, 0x400, 0, 0x500, 0);
     object_spawn_part(e, 171, 8, arg, 2, 0x400, 0, 0x500, 0);
     object_spawn_part(e, 171, 8, arg, 1, 0x400, 0, 0x500, 0);
-    e->kind = 0xff;
+    e->kind = OBJECT_KIND_NONE;
 }
 
 /* objects_update's switch table (a door's swing side). */
@@ -584,18 +584,18 @@ void objects_update(void)
         e->player_bearing = off;
         if (off > 2048)
             e->player_bearing = 4096 - off;
-        if (e->kind == 255)
+        if (e->kind == OBJECT_KIND_NONE)
             continue;
         switch (e->kind) {
-        case 0:
-        case 1: {
+        case OBJECT_KIND_DOOR:
+        case OBJECT_KIND_MODEL_DOOR: {
             int step = e->unk48;
             short speed = step;
 
             speed *= 4;
             switch (e->state) {
             case 0:
-                if (e->kind == 1) {
+                if (e->kind == OBJECT_KIND_MODEL_DOOR) {
                     if (world_state.model_files[e->type + 256] == NULL)
                         e->visibility = 0;
                     else
@@ -607,7 +607,7 @@ void objects_update(void)
             case 1:
                 if (e->anim_frame == 0 && e->anim_frame + step * 4 > 0) {
                     SWAP_RECORDS(e);
-                    if (e->kind == 1)
+                    if (e->kind == OBJECT_KIND_MODEL_DOOR)
                         e->visibility = 1;
                     SOUND(e, 208);
                 }
@@ -695,7 +695,7 @@ void objects_update(void)
                 SOUND(e, 209);
                 break;
             case 7:
-                if (e->kind == 1)
+                if (e->kind == OBJECT_KIND_MODEL_DOOR)
                     e->visibility = 2;
                 break;
             case 8:
@@ -726,15 +726,15 @@ void objects_update(void)
             }
             break;
         }
-        case 50:
-        case 51: {
+        case OBJECT_KIND_GATE:
+        case OBJECT_KIND_ITEM_GATE: {
             int step = e->unk48;
             short speed = step;
 
             speed *= 4;
             switch (e->state) {
             case 0:
-                if (e->kind == 51)
+                if (e->kind == OBJECT_KIND_ITEM_GATE)
                     ground_item_set_hidden(e->params.snd.fade_range, 0);
                 if (e->unk49 >= 249 && e->unk49 <= 250 && e->player_dist_xz <= 8192)
                     e->state = 1;
@@ -742,7 +742,7 @@ void objects_update(void)
             case 1:
                 if (e->anim_frame == 0 && e->anim_frame + step * 4 > 0) {
                     SOUND(e, 208);
-                    if (e->kind == 51)
+                    if (e->kind == OBJECT_KIND_ITEM_GATE)
                         ground_item_set_hidden(e->params.snd.fade_range, 1);
                 }
                 if (e->anim_frame < 3072 && speed + e->anim_frame >= 3072)
@@ -854,7 +854,7 @@ void objects_update(void)
             }
             break;
         }
-        case 52: {
+        case OBJECT_KIND_GROUP_GATE: {
             int step = e->unk48;
             short speed = step;
             AreaObject *o;
@@ -880,7 +880,8 @@ void objects_update(void)
                     break;
                 group = e->params.snd.volume;
                 for (o = vis_table_b.entries, j = 0; j < 240; j++, o++) {
-                    if ((o->kind == 0 || o->kind == 50) && o->params.door.lock == group) {
+                    if ((o->kind == OBJECT_KIND_DOOR || o->kind == OBJECT_KIND_GATE)
+                        && o->params.door.lock == group) {
                         if (o->state == 0) {
                             o->unk49 = 252;
                             o->state = 1;
@@ -905,7 +906,7 @@ void objects_update(void)
                         break;
                     group = e->params.snd.volume;
                     for (o = vis_table_b.entries, j = 0; j < 240; j++, o++) {
-                        if (o->kind == 0 && o->params.door.lock == group) {
+                        if (o->kind == OBJECT_KIND_DOOR && o->params.door.lock == group) {
                             if (o->state == 0) {
                                 o->unk49 = 252;
                                 o->state = 1;
@@ -1065,7 +1066,7 @@ void objects_update(void)
         case 7:
             object_spawn_side_parts_alt(e, (u16)(240 - i));
             break;
-        case 224: {
+        case OBJECT_KIND_SEQUENCE: {
             Creature *a;
             int j;
             int rising;
@@ -1140,10 +1141,10 @@ void objects_update(void)
             }
             break;
         }
-        case 225:
+        case OBJECT_KIND_MESSAGE:
             break;
-        case 237:
-        case 239: {
+        case OBJECT_KIND_WARP:
+        case OBJECT_KIND_WALK_IN_WARP: {
             AreaObject *o;
             int j;
             short turn;
@@ -1160,7 +1161,7 @@ void objects_update(void)
             if (turn > 2048)
                 turn |= 0xf000;
             if (!((pad_state.held & pad_state.buttons[PAD_ACTION_EVENT]) && turn > -400 && turn < 400)
-                && e->kind != 239)
+                && e->kind != OBJECT_KIND_WALK_IN_WARP)
                 goto away;
             if (B50(e))
                 break;
@@ -1282,7 +1283,7 @@ void player_warp(to, keep)
     int j;
 
     for (i = 240; i != 0; i--) {
-        if (e->kind == 237)
+        if (e->kind == OBJECT_KIND_WARP)
             *(u8 *)&e->unk50 = 1;
         e++;
     }
@@ -1389,7 +1390,7 @@ void ground_items_clear(void)
     i = 64;
     while (i--) {
         c->item = 0xffff;
-        c->state = 0;
+        c->state = GROUND_ITEM_NONE;
         c++;
     }
     /* Ten words each; the tenth of unk0070 is the first of unk0094. */
@@ -1457,7 +1458,7 @@ void ground_item_remove(GroundItem *c)
             c++;
         }
     }
-    c->state = 0;
+    c->state = GROUND_ITEM_NONE;
 }
 
 /* Loads the first 32 entries from an area file, then drops the collected
@@ -1482,7 +1483,7 @@ void ground_items_load(GroundItemFileEntry *src)
         c->unk20 = src->unk02;
         c->vertical_speed = 0;
         if (c->item == 0xffff) {
-            c->state = 0;
+            c->state = GROUND_ITEM_NONE;
             continue;
         }
         rec = &vis_table_c.types[c->item];
@@ -1494,9 +1495,9 @@ void ground_items_load(GroundItemFileEntry *src)
         if (vis_table_c.model_slots[rec->model] == 0xff)
             vis_table_c.model_slots[rec->model] = vis_table_c.next_model_slot++;
         if (i >= 28 || item_is_uncollected(c->item))
-            c->state = 2;
+            c->state = GROUND_ITEM_RESTING;
         else
-            c->state = 0;
+            c->state = GROUND_ITEM_NONE;
     }
     c = &vis_table_c.entries[32];
     for (i = 0; i < 16; i++) {
@@ -1523,7 +1524,7 @@ int ground_item_find_in_reach(CollisionState *req, int unused)
 
     c = vis_table_c.entries;
     for (i = 0; i < 64; i++, c++) {
-        if (c->state != 1 && c->state != 2)
+        if (c->state != GROUND_ITEM_FALLING && c->state != GROUND_ITEM_RESTING)
             continue;
         if (c->area != area_state.area)
             continue;
@@ -1700,11 +1701,11 @@ void ground_items_update(void)
         c->player_dist_xz = SquareRoot0((c->position.vx - viewer.position.vx) * (c->position.vx - viewer.position.vx)
                                + (c->position.vz - viewer.position.vz) * (c->position.vz - viewer.position.vz));
         switch (c->state) {
-        case 0:
-        case 2:
-        case 4:
+        case GROUND_ITEM_NONE:
+        case GROUND_ITEM_RESTING:
+        case GROUND_ITEM_HIDDEN:
             break;
-        case 1:
+        case GROUND_ITEM_FALLING:
             if (c->bounces < 4) {
                 req.position = c->position;
                 req.radius = *(u16 *)&rec->unk5[9];
@@ -1733,11 +1734,11 @@ void ground_items_update(void)
                 if (c->item < 71)
                     c->rot_x = h;
             } else if (c->bounces == 4) {
-                c->state = 2;
+                c->state = GROUND_ITEM_RESTING;
                 c->rot_x = 0;
             }
             break;
-        case 3:
+        case GROUND_ITEM_PICKED_UP:
             ground_item_pick_up(c, 0);
             viewer.state = VIEWER_STATE_NORMAL;
             break;

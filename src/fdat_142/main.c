@@ -120,7 +120,7 @@ void map_update_events(void)
     if (fdat_801edaf4 == 0) {
         if (fdat_801edaf8 == 1)
             e49->spawn_chance = 0;
-        if (fdat_801edaf4 == 0 && e48->state == 1) {
+        if (fdat_801edaf4 == 0 && e48->state == CREATURE_STATE_ACTIVE) {
             fdat_801edafc = 1;
             viewer.state = VIEWER_STATE_SCRIPTED;
         }
@@ -168,9 +168,9 @@ void map_pick_creature_move(void)
         return;
     creature_choose_action();
     if (e->type == 0 && fdat_801edafc == 0xff)
-        e->action = 128;
+        e->action = CREATURE_ACTION_DORMANT;
     if (e->type == 4 && fdat_801edb00 == 0xff)
-        e->action = 128;
+        e->action = CREATURE_ACTION_DORMANT;
     creature_pick_weighted_script();
     switch (e->action) {
     case 8:
@@ -195,7 +195,7 @@ void map_pick_creature_move(void)
         e->unk5A = e->target_heading = e->facing;
         break;
     }
-    if (e->action != 8)
+    if (e->action != CREATURE_ACTION_TURN_AWAY)
         e->wall_heading = 0x7fff;
     if (vis_records[e->block].heading_bias_x != 0 || vis_records[e->block].heading_bias_z != 0) {
         x = rcos(e->target_heading - 1024) >> 5;

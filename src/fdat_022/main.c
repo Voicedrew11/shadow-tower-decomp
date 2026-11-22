@@ -128,7 +128,7 @@ void map_hand_over_item(void)
         c->position.vz = e->position.vz + v.vx;
         world_run_frame(NULL, &viewer.view_rot, 0);
     } while ((s16)e->anim_frame != 0xfff);
-    c->state = 2;
+    c->state = GROUND_ITEM_RESTING;
     viewer.pitch = viewer.view_rot.vx + viewer.rot_offset.halves[0] + viewer.shake_pitch + viewer.fall_pitch;
     viewer.yaw = viewer.view_rot.vy + viewer.rot_offset.halves[1] + viewer.shake_yaw + viewer.unk292;
     viewer.roll = viewer.view_rot.vz + viewer.roll_offset + viewer.shake_roll + viewer.unk294;

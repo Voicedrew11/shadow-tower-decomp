@@ -120,7 +120,7 @@ void map_restore_progress(void)
         fdat_801ee46c = 0;
     }
     if (fdat_801ee46c)
-        d9->kind = 0xff;
+        d9->kind = OBJECT_KIND_NONE;
     e4->zone = 1;
     e5->zone = 2;
     fdat_801ee474 = 0;
@@ -170,8 +170,8 @@ void map_update_events(void)
         e5->visibility = 0;
     if (fdat_801ee478 != 0xff && fdat_801ee470 >= 2)
         fdat_801ee470 = 1;
-    if (e0->state == 5) {
-        e0->state = 1;
+    if (e0->state == CREATURE_STATE_DYING) {
+        e0->state = CREATURE_STATE_ACTIVE;
         e0->status.bytes[3] = 1;
         e0->hurt_timer = -1;
         e0->status.bytes[2] &= 0xea;
@@ -182,7 +182,7 @@ void map_update_events(void)
         map_transform_creature();
     if (fdat_801ee478 == 0 && e3->hp == 0)
         fdat_801ee478 = 1;
-    if (fdat_801ee478 == 1 && e3->state == 3) {
+    if (fdat_801ee478 == 1 && e3->state == CREATURE_STATE_GONE) {
         e3->flags |= 0x2000000;
         creature_force_talk(e3, 1, 0);
         fdat_801ee478 = 0xff;
@@ -197,7 +197,7 @@ void map_update_events(void)
         fdat_801ee480 = 2;
         e5->flags &= ~0x2000000;
     }
-    if (fdat_801ee480 == 3 && e5->state == 3) {
+    if (fdat_801ee480 == 3 && e5->state == CREATURE_STATE_GONE) {
         e5->flags |= 0x2000000;
         creature_force_talk(e5, 1, 0);
         fdat_801ee480 = 0xff;

@@ -2109,7 +2109,7 @@ void player_update_hand_action(u8 hand)
                     for (vis_table_a.current_index = 0; vis_table_a.current_index < 64; vis_table_a.current_index++, e++) {
                         if (e->spawn_chance != 255) {
                             creature_set_current(e);
-                            if (e->state == 1 && e->status.bytes[3] != 1 && e->hp != 0 &&
+                            if (e->state == CREATURE_STATE_ACTIVE && e->status.bytes[3] != 1 && e->hp != 0 &&
                                 (side = creature_test_player_aim(e, reach)) != 0 && e->player_dist_sq < best) {
                                 best = e->player_dist_sq;
                                 hit = e;
@@ -2982,7 +2982,7 @@ void player_update(void)
             entry = vis_table_b.entries;
             left = 240;
             while (left--) {
-                if (entry->kind == 236 && entry->unk54 != -1) {
+                if (entry->kind == OBJECT_KIND_SOUND && entry->unk54 != -1) {
                     sound_stop(entry->unk54, entry->params.snd.sound + 1108);
                     entry->unk54 = -1;
                 }
@@ -3242,7 +3242,7 @@ void player_update(void)
                             fade_run_frames(2, 4096, 4096, 256);
                             n = 240;
                             while (n--) {
-                                if (b->kind == 236 && b->unk54 != -1) {
+                                if (b->kind == OBJECT_KIND_SOUND && b->unk54 != -1) {
                                     sound_stop(b->unk54, b->params.snd.sound + 1108);
                                     b->unk54 = -1;
                                 }
@@ -3262,7 +3262,7 @@ void player_update(void)
                             b = vis_table_b.entries;
                             n = 240;
                             while (n--) {
-                                if (b->kind == 236 && b->unk54 != -1) {
+                                if (b->kind == OBJECT_KIND_SOUND && b->unk54 != -1) {
                                     sound_stop(b->unk54, b->params.snd.sound + 1108);
                                     b->unk54 = -1;
                                 }

@@ -55,7 +55,7 @@ void map_step_creature(void)
             viewer.status_flags |= STATUS_CURSED;
             e->status.bytes[3] = 0;
             e->flags &= ~0x2000000;
-        } else if (e->state == 5) {
+        } else if (e->state == CREATURE_STATE_DYING) {
             game_progress.event_flags.word |= 0x20000000;
         }
     }
@@ -65,7 +65,7 @@ next:
             e->status.bytes[0] = 1;
             creature_start_script(e, 6);
             viewer.state = VIEWER_STATE_SCRIPTED;
-            c7->state = 2;
+            c7->state = GROUND_ITEM_RESTING;
         }
         if (e->status.bytes[0] == 1) {
             if ((short)e->anim_frame > 0xa00) {
@@ -79,7 +79,7 @@ next:
             map_step_leaving_creature(e);
             return;
         } else if (e->hit != 0) {
-            c7->state = 2;
+            c7->state = GROUND_ITEM_RESTING;
             c7->depth_bias += 0x20;
         }
     }

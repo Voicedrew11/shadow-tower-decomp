@@ -95,7 +95,7 @@ int creature_step_hurt_timer(Creature *e)
         }
         e->hurt_timer = -1;
         e->status.bytes[2] &= 0xdf;
-    } else if ((short)e->anim_frame >= 4096 && e->state == 5) {
+    } else if ((short)e->anim_frame >= 4096 && e->state == CREATURE_STATE_DYING) {
         e->anim_frame = 4095;
     }
     return 0;

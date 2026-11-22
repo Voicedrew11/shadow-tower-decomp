@@ -2108,7 +2108,7 @@ void vis_collect_creatures(void)
     e = vis_table_a.entries;
     i = 64;
     while (i--) {
-        if (e->visibility != 2 && (e->state == 1 || e->state == 5)
+        if (e->visibility != 2 && (e->state == CREATURE_STATE_ACTIVE || e->state == CREATURE_STATE_DYING)
             && (e->visibility == 1 || vis_id_is_visible(e->block))) {
             if (vis_table_a.count >= 12) {
                 return;
@@ -2134,7 +2134,7 @@ void vis_collect_objects(void)
     while (i--) {
         if (e->type < 280) {
             e->flags &= 0x7f;
-            if (vis_id_is_visible(e->block) || e->kind == 236) {
+            if (vis_id_is_visible(e->block) || e->kind == OBJECT_KIND_SOUND) {
                 if (vis_table_b.count >= 96) {
                     return;
                 }
@@ -4652,7 +4652,7 @@ void world_draw_objects(void)
             e->draw_flags = flags | 0x80;
         switch (e->kind) {
         case 37:
-        case 226:
+        case OBJECT_KIND_HEALING:
         case 229:
         case 233:
             continue;
@@ -4710,7 +4710,7 @@ void world_draw_objects(void)
                 e->unk54 = -1;
             }
             break;
-        case 236:
+        case OBJECT_KIND_SOUND:
             /* A sound around a point. */
             if (player_in_centred_rect(e->position.vx, e->position.vz, e->unk48 << 8, e->unk49 << 8, 0x8000)) {
                 if ((s32)(e->unk50 - now) >= 0)
@@ -4849,13 +4849,13 @@ void world_draw_ground_items(void)
         if (e->player_dist_xz >= (s32)world_state.range_near)
             e->draw_flags |= 0x80;
         switch (e->state) {
-        case 0:
-        case 4:
+        case GROUND_ITEM_NONE:
+        case GROUND_ITEM_HIDDEN:
             continue;
-        case 1:
-        case 2:
-        case 3:
-        case 5:
+        case GROUND_ITEM_FALLING:
+        case GROUND_ITEM_RESTING:
+        case GROUND_ITEM_PICKED_UP:
+        case GROUND_ITEM_SCRIPTED:
             break;
         }
         {
@@ -4881,7 +4881,7 @@ void world_draw_ground_items(void)
                 sp->near_z = 4 - e->depth_bias;
                 sp->far_z = 4096 - e->depth_bias;
                 m = world_state.pitch_matrix;
-                if (e->state != 2)
+                if (e->state != GROUND_ITEM_RESTING)
                     RotMatrixX(e->rot_x, &m);
                 model_draw(0, r->model + SLOT_C, &e->position, &sp->model_rot, &scale, e->anim_slot, &m, 129,
                               0, 0, 4096, e->draw_flags, 0);

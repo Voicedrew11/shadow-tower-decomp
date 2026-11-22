@@ -88,7 +88,7 @@ void map_update_events(void)
     if (fdat_801edc54 == 1) {
         player_update_hand_action(0);
         player_update_hand_action(1);
-        if (fdat_801edc54 == 1 && e->state == 3) {
+        if (fdat_801edc54 == 1 && e->state == CREATURE_STATE_GONE) {
             viewer.state = VIEWER_STATE_SCRIPTED;
             e->flags |= 0x2000000;
             creature_force_talk(e, 1, 0);

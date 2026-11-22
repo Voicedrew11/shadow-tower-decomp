@@ -99,7 +99,7 @@ void map_restore_progress(void)
     GroundItem *c10 = &vis_table_c.entries[10];
     AreaObject *d0 = &vis_table_b.entries[0];
 
-    if (e48->state == 3 || game_progress.event_flags.bit.f29 == 1) {
+    if (e48->state == CREATURE_STATE_GONE || game_progress.event_flags.bit.f29 == 1) {
         e48->spawn_chance = 0;
         fdat_801ee370 = 0xff;
     } else if (game_progress.event_flags.bit.f14) {
@@ -116,13 +116,13 @@ void map_restore_progress(void)
         e48->spawn_chance = 0;
         fdat_801ee370 = 0xff;
     }
-    if (e50->state != 3)
+    if (e50->state != CREATURE_STATE_GONE)
         e50->status.bytes[3] = 2;
     if (game_progress.talk_counts[r13->talk_id] == 1)
         fdat_801ee374 = 0xff;
     else
         fdat_801ee374 = 0;
-    if (e33->state != 3) {
+    if (e33->state != CREATURE_STATE_GONE) {
         e33->status.bytes[3] = 3;
         d0->state = 11;
     }
@@ -133,28 +133,28 @@ void map_restore_progress(void)
     } else {
         fdat_801ee378 = 0;
     }
-    if (e49->state == 3)
+    if (e49->state == CREATURE_STATE_GONE)
         fdat_801ee37c = 0xff;
     else
         fdat_801ee37c = 0;
     if (!(game_progress.event_flags2.word >> 10 & 1)) {
-        c9->state = 4;
-        c7->state = 4;
-        c28->state = 4;
+        c9->state = GROUND_ITEM_HIDDEN;
+        c7->state = GROUND_ITEM_HIDDEN;
+        c28->state = GROUND_ITEM_HIDDEN;
         fdat_801ee380 = 0;
     } else {
-        c28->state = 5;
+        c28->state = GROUND_ITEM_SCRIPTED;
         fdat_801ee380 = 0xff;
         c28->position.vx -= 0x200;
         c28->depth_bias -= 1;
     }
     if (!(game_progress.event_flags2.word >> 11 & 1)) {
-        c10->state = 4;
-        c8->state = 4;
-        c29->state = 4;
+        c10->state = GROUND_ITEM_HIDDEN;
+        c8->state = GROUND_ITEM_HIDDEN;
+        c29->state = GROUND_ITEM_HIDDEN;
         fdat_801ee384 = 0;
     } else {
-        c29->state = 5;
+        c29->state = GROUND_ITEM_SCRIPTED;
         fdat_801ee384 = 0xff;
         c29->position.vx += 0x200;
         c29->depth_bias -= 1;
@@ -225,7 +225,7 @@ void map_update_events(void)
             e33->flags &= ~0x2000000;
             r4->actions &= ~0x180;
         } else {
-            e33->action = 0x80;
+            e33->action = CREATURE_ACTION_DORMANT;
         }
     }
     if (fdat_801ee37c == 0 && e49->hp == 0) {
@@ -306,7 +306,7 @@ void map_pick_creature_move(void)
         return;
     creature_choose_action();
     if (e->type == 4 && fdat_801ee378 == 0)
-        e->action = 128;
+        e->action = CREATURE_ACTION_DORMANT;
     if (e->type == 1 && (fdat_801ee370 == 0 || fdat_801ee370 == 253)) {
         creature_start_script(e, 10);
         return;
@@ -335,7 +335,7 @@ void map_pick_creature_move(void)
         e->unk5A = e->target_heading = e->facing;
         break;
     }
-    if (e->action != 8)
+    if (e->action != CREATURE_ACTION_TURN_AWAY)
         e->wall_heading = 0x7fff;
     if (vis_records[e->block].heading_bias_x != 0 || vis_records[e->block].heading_bias_z != 0) {
         x = rcos(e->target_heading - 1024) >> 5;
@@ -401,7 +401,7 @@ void map_hand_over_item(void)
         c->position.vz = e->position.vz + v.vx;
         world_run_frame(NULL, &viewer.view_rot, 0);
     } while ((s16)e->anim_frame != 0xfff);
-    c->state = 2;
+    c->state = GROUND_ITEM_RESTING;
     viewer.pitch = viewer.view_rot.vx + viewer.rot_offset.halves[0] + viewer.shake_pitch + viewer.fall_pitch;
     viewer.yaw = viewer.view_rot.vy + viewer.rot_offset.halves[1] + viewer.shake_yaw + viewer.unk292;
     viewer.roll = viewer.view_rot.vz + viewer.roll_offset + viewer.shake_roll + viewer.unk294;
@@ -431,7 +431,7 @@ void map_slide_ground_item(int which)
         step = 24;
         end = item->position.vx + 0x200;
     }
-    item->state = 5;
+    item->state = GROUND_ITEM_SCRIPTED;
     kind = &vis_table_c.types[item->item];
     item->depth_bias -= 1;
     for (;;) {
@@ -484,6 +484,6 @@ void map_redrop_ground_item(int which)
     *(SVECTOR *)&e.rot_x = *(SVECTOR *)&a->rot_x;
     e.player_dist_xz = a->player_dist_xz;
     creature_drop_item(&e, a->item);
-    b->state = 0;
-    a->state = 0;
+    b->state = GROUND_ITEM_NONE;
+    a->state = GROUND_ITEM_NONE;
 }

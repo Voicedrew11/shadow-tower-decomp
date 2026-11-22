@@ -65,7 +65,7 @@ void map_restore_progress(void)
     AreaObject *d41 = &vis_table_b.entries[41];
     AreaObject *d42 = &vis_table_b.entries[42];
 
-    if (e->state != 3)
+    if (e->state != CREATURE_STATE_GONE)
         e->status.bytes[3] = 2;
     if (game_progress.talk_counts[r->talk_id] == 2)
         fdat_801eda78 = 0xff;
