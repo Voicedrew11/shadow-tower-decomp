@@ -17,6 +17,7 @@
 #include <LIBCD.H>
 #include <st/cd.h>
 #include <vs/archives.h>
+#include <vs/fighter_ids.h>
 #include <st/gfx.h>
 #include <st/vis.h>
 

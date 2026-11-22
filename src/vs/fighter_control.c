@@ -325,30 +325,30 @@ void fighter_walk_reversible(VsFighter *f, s16 from, s16 to)
 
     f->anim_frame &= 0xfff;
     if (fighter_pad_held & PAD_BUTTON_UP) {
-        f->state = 1;
-        if (f->anim == d->anims[0].anim) {
-            f->anim = d->anims[1].anim;
+        f->state = FIGHTER_STATE_WALK;
+        if (f->anim == d->anims[FIGHTER_ANIM_STAND].anim) {
+            f->anim = d->anims[FIGHTER_ANIM_WALK].anim;
             f->anim_frame = 0;
         }
-        f->anim_step = d->anims[1].anim_step;
+        f->anim_step = d->anims[FIGHTER_ANIM_WALK].anim_step;
         if (from != 0 && (f->anim_frame < from || to < f->anim_frame))
             return;
         VS_WALK(f, d, +=);
     } else if (fighter_pad_held & PAD_BUTTON_DOWN) {
-        f->state = 1;
-        if (f->anim == d->anims[0].anim) {
-            f->anim = d->anims[1].anim;
+        f->state = FIGHTER_STATE_WALK;
+        if (f->anim == d->anims[FIGHTER_ANIM_STAND].anim) {
+            f->anim = d->anims[FIGHTER_ANIM_WALK].anim;
             f->anim_frame = 4095;
         }
-        f->anim_step = -d->anims[1].anim_step;
+        f->anim_step = -d->anims[FIGHTER_ANIM_WALK].anim_step;
         if (from != 0 && (f->anim_frame < from || to < f->anim_frame))
             return;
         VS_WALK(f, d, -=);
     } else {
-        f->state = 0;
-        if (f->anim == d->anims[1].anim) {
-            f->anim = d->anims[0].anim;
-            f->anim_step = d->anims[0].anim_step;
+        f->state = FIGHTER_STATE_STAND;
+        if (f->anim == d->anims[FIGHTER_ANIM_WALK].anim) {
+            f->anim = d->anims[FIGHTER_ANIM_STAND].anim;
+            f->anim_step = d->anims[FIGHTER_ANIM_STAND].anim_step;
             f->anim_frame = 0;
         }
     }
@@ -362,30 +362,30 @@ void fighter_walk_back_anim(VsFighter *f, s16 from, s16 to)
 
     f->anim_frame &= 0xfff;
     if (fighter_pad_held & PAD_BUTTON_UP) {
-        f->state = 1;
-        if (f->anim != d->anims[1].anim) {
-            f->anim = d->anims[1].anim;
-            f->anim_step = d->anims[1].anim_step;
+        f->state = FIGHTER_STATE_WALK;
+        if (f->anim != d->anims[FIGHTER_ANIM_WALK].anim) {
+            f->anim = d->anims[FIGHTER_ANIM_WALK].anim;
+            f->anim_step = d->anims[FIGHTER_ANIM_WALK].anim_step;
             f->anim_frame = 0;
         }
         if (from != 0 && (f->anim_frame < from || to < f->anim_frame))
             return;
         VS_WALK(f, d, +=);
     } else if (fighter_pad_held & PAD_BUTTON_DOWN) {
-        f->state = 1;
-        if (f->anim != d->anims[12].anim) {
-            f->anim = d->anims[12].anim;
-            f->anim_step = d->anims[12].anim_step;
+        f->state = FIGHTER_STATE_WALK;
+        if (f->anim != d->anims[FIGHTER_ANIM_WALK_BACK].anim) {
+            f->anim = d->anims[FIGHTER_ANIM_WALK_BACK].anim;
+            f->anim_step = d->anims[FIGHTER_ANIM_WALK_BACK].anim_step;
             f->anim_frame = 0;
         }
         if (from != 0 && (f->anim_frame < from || to < f->anim_frame))
             return;
         VS_WALK(f, d, -=);
     } else {
-        f->state = 0;
-        if (f->anim != d->anims[0].anim) {
-            f->anim = d->anims[0].anim;
-            f->anim_step = d->anims[0].anim_step;
+        f->state = FIGHTER_STATE_STAND;
+        if (f->anim != d->anims[FIGHTER_ANIM_STAND].anim) {
+            f->anim = d->anims[FIGHTER_ANIM_STAND].anim;
+            f->anim_step = d->anims[FIGHTER_ANIM_STAND].anim_step;
             f->anim_frame = 0;
         }
     }
@@ -401,15 +401,15 @@ void fighter_slide(VsFighter *f)
     if (fighter_pad_held & PAD_BUTTON_UP) {
         int angle = f->facing;
 
-        f->state = 1;
+        f->state = FIGHTER_STATE_WALK;
         VS_WALK_ANGLE(f, d, +=, angle);
     } else if (fighter_pad_held & PAD_BUTTON_DOWN) {
         int angle = f->facing;
 
-        f->state = 1;
+        f->state = FIGHTER_STATE_WALK;
         VS_WALK_ANGLE(f, d, -=, angle);
     } else {
-        f->state = 0;
+        f->state = FIGHTER_STATE_STAND;
     }
 }
 
@@ -422,72 +422,72 @@ void fighter_walk_with_start(VsFighter *f, s16 from, s16 to)
     s16 kind;
 
     if (fighter_pad_held & PAD_BUTTON_UP) {
-        f->state = 1;
-        if (f->anim == d->anims[1].anim) {
-            f->anim_step = d->anims[1].anim_step;
+        f->state = FIGHTER_STATE_WALK;
+        if (f->anim == d->anims[FIGHTER_ANIM_WALK].anim) {
+            f->anim_step = d->anims[FIGHTER_ANIM_WALK].anim_step;
             if (VS_IN_FRAMES(f, from, to))
                 VS_WALK(f, d, +=);
-        } else if (f->anim == d->anims[10].anim) {
-            f->anim_step = d->anims[10].anim_step;
+        } else if (f->anim == d->anims[FIGHTER_ANIM_WALK_START].anim) {
+            f->anim_step = d->anims[FIGHTER_ANIM_WALK_START].anim_step;
             if (f->anim_frame >= 4096) {
-                f->anim = d->anims[1].anim;
-                f->anim_step = d->anims[1].anim_step;
+                f->anim = d->anims[FIGHTER_ANIM_WALK].anim;
+                f->anim_step = d->anims[FIGHTER_ANIM_WALK].anim_step;
                 f->anim_frame = 0;
             }
             if (d->move_kind == 5 || d->move_kind == 6 || d->move_kind == 13)
                 VS_WALK(f, d, +=);
         } else {
-            f->anim = d->anims[10].anim;
-            f->anim_step = d->anims[10].anim_step;
+            f->anim = d->anims[FIGHTER_ANIM_WALK_START].anim;
+            f->anim_step = d->anims[FIGHTER_ANIM_WALK_START].anim_step;
             f->anim_frame = 0;
         }
     } else if (fighter_pad_held & PAD_BUTTON_DOWN) {
-        f->state = 1;
+        f->state = FIGHTER_STATE_WALK;
         kind = d->move_kind;
         if (kind == 3 || kind == 5 || kind == 13) {
-            if (f->anim == d->anims[1].anim) {
-                f->anim_step = -d->anims[1].anim_step;
+            if (f->anim == d->anims[FIGHTER_ANIM_WALK].anim) {
+                f->anim_step = -d->anims[FIGHTER_ANIM_WALK].anim_step;
                 if (VS_IN_FRAMES(f, from, to))
                     VS_WALK(f, d, -=);
-            } else if (f->anim == d->anims[11].anim) {
-                f->anim_step = -d->anims[11].anim_step;
+            } else if (f->anim == d->anims[FIGHTER_ANIM_WALK_START_BACK].anim) {
+                f->anim_step = -d->anims[FIGHTER_ANIM_WALK_START_BACK].anim_step;
                 if (f->anim_frame <= 0) {
-                    f->anim = d->anims[1].anim;
-                    f->anim_step = -d->anims[1].anim_step;
+                    f->anim = d->anims[FIGHTER_ANIM_WALK].anim;
+                    f->anim_step = -d->anims[FIGHTER_ANIM_WALK].anim_step;
                     f->anim_frame = 4095;
                 }
                 if (d->move_kind == 5 || d->move_kind == 13)
                     VS_WALK(f, d, -=);
             } else {
-                f->anim = d->anims[11].anim;
-                f->anim_step = -d->anims[11].anim_step;
+                f->anim = d->anims[FIGHTER_ANIM_WALK_START_BACK].anim;
+                f->anim_step = -d->anims[FIGHTER_ANIM_WALK_START_BACK].anim_step;
                 f->anim_frame = 4095;
             }
         } else {
-            if (f->anim == d->anims[1].anim) {
-                f->anim_step = -d->anims[1].anim_step;
+            if (f->anim == d->anims[FIGHTER_ANIM_WALK].anim) {
+                f->anim_step = -d->anims[FIGHTER_ANIM_WALK].anim_step;
                 if (VS_IN_FRAMES(f, from, to))
                     VS_WALK(f, d, -=);
-            } else if (f->anim == d->anims[10].anim) {
-                f->anim_step = d->anims[10].anim_step;
+            } else if (f->anim == d->anims[FIGHTER_ANIM_WALK_START].anim) {
+                f->anim_step = d->anims[FIGHTER_ANIM_WALK_START].anim_step;
                 if (f->anim_frame >= 4096) {
-                    f->anim = d->anims[1].anim;
-                    f->anim_step = -d->anims[1].anim_step;
+                    f->anim = d->anims[FIGHTER_ANIM_WALK].anim;
+                    f->anim_step = -d->anims[FIGHTER_ANIM_WALK].anim_step;
                     f->anim_frame = 4095;
                 }
                 if (d->move_kind == 6)
                     VS_WALK(f, d, -=);
             } else {
-                f->anim = d->anims[10].anim;
-                f->anim_step = d->anims[10].anim_step;
+                f->anim = d->anims[FIGHTER_ANIM_WALK_START].anim;
+                f->anim_step = d->anims[FIGHTER_ANIM_WALK_START].anim_step;
                 f->anim_frame = 0;
             }
         }
     } else {
-        f->state = 0;
-        if (f->anim != d->anims[0].anim) {
-            f->anim = d->anims[0].anim;
-            f->anim_step = d->anims[0].anim_step;
+        f->state = FIGHTER_STATE_STAND;
+        if (f->anim != d->anims[FIGHTER_ANIM_STAND].anim) {
+            f->anim = d->anims[FIGHTER_ANIM_STAND].anim;
+            f->anim_step = d->anims[FIGHTER_ANIM_STAND].anim_step;
             f->anim_frame = 0;
         }
     }
@@ -502,38 +502,38 @@ void fighter_walk_start_back_anim(VsFighter *f, s16 from, s16 to)
     VsFighterData *d = &f->data;
 
     if (fighter_pad_held & PAD_BUTTON_UP) {
-        f->state = 1;
-        if (f->anim == d->anims[1].anim) {
+        f->state = FIGHTER_STATE_WALK;
+        if (f->anim == d->anims[FIGHTER_ANIM_WALK].anim) {
             if (VS_IN_FRAMES(f, from, to))
                 VS_WALK(f, d, +=);
-        } else if (f->anim == d->anims[10].anim) {
+        } else if (f->anim == d->anims[FIGHTER_ANIM_WALK_START].anim) {
             if (f->anim_frame >= 4096) {
-                f->anim = d->anims[1].anim;
-                f->anim_step = d->anims[1].anim_step;
+                f->anim = d->anims[FIGHTER_ANIM_WALK].anim;
+                f->anim_step = d->anims[FIGHTER_ANIM_WALK].anim_step;
                 f->anim_frame = 0;
             }
             if (d->move_kind == 5 || d->move_kind == 6)
                 VS_WALK(f, d, +=);
         } else {
-            f->anim = d->anims[10].anim;
-            f->anim_step = d->anims[10].anim_step;
+            f->anim = d->anims[FIGHTER_ANIM_WALK_START].anim;
+            f->anim_step = d->anims[FIGHTER_ANIM_WALK_START].anim_step;
             f->anim_frame = 0;
         }
     } else if (fighter_pad_held & PAD_BUTTON_DOWN) {
-        f->state = 1;
-        if (f->anim == d->anims[12].anim) {
+        f->state = FIGHTER_STATE_WALK;
+        if (f->anim == d->anims[FIGHTER_ANIM_WALK_BACK].anim) {
             if (VS_IN_FRAMES(f, from, to))
                 VS_WALK(f, d, -=);
         } else {
-            f->anim = d->anims[12].anim;
-            f->anim_step = d->anims[12].anim_step;
+            f->anim = d->anims[FIGHTER_ANIM_WALK_BACK].anim;
+            f->anim_step = d->anims[FIGHTER_ANIM_WALK_BACK].anim_step;
             f->anim_frame = 0;
         }
     } else {
-        f->state = 0;
-        if (f->anim != d->anims[0].anim) {
-            f->anim = d->anims[0].anim;
-            f->anim_step = d->anims[0].anim_step;
+        f->state = FIGHTER_STATE_STAND;
+        if (f->anim != d->anims[FIGHTER_ANIM_STAND].anim) {
+            f->anim = d->anims[FIGHTER_ANIM_STAND].anim;
+            f->anim_step = d->anims[FIGHTER_ANIM_STAND].anim_step;
             f->anim_frame = 0;
         }
     }
@@ -570,7 +570,7 @@ void fighter_update(int n)
         if (d->max_gauge < f->gauge)
             f->gauge = d->max_gauge;
     }
-    if (f->state != 5 && (fighter_pad_held & PAD_BUTTON_R1)) {
+    if (f->state != FIGHTER_STATE_GUARD && (fighter_pad_held & PAD_BUTTON_R1)) {
         VsFighter *base = shared_buffer.fighter;
         VsFighter *o = base + (1 - n);
         s16 target;
@@ -596,29 +596,31 @@ void fighter_update(int n)
         f->facing &= 0xfff;
     }
     switch (f->state) {
-    case 2:
+    case FIGHTER_STATE_COMBO:
         if (f->anim_frame < 4096) {
-        if (f->anim == d->anims[2].anim) {
+        if (f->anim == d->anims[FIGHTER_ANIM_COMBO].anim) {
             h = &d->combo_hits[0];
             if (f->anim_frame / f->anim_step < 20) {
-                if (d->anims[3].anim != 255 && (fighter_pad_pressed & PAD_BUTTON_CIRCLE)) {
-                    f->anim = d->anims[3].anim;
-                    f->anim_step = d->anims[3].anim_step;
+                if (d->anims[FIGHTER_ANIM_COMBO_CIRCLE].anim != 255
+                    && (fighter_pad_pressed & PAD_BUTTON_CIRCLE)) {
+                    f->anim = d->anims[FIGHTER_ANIM_COMBO_CIRCLE].anim;
+                    f->anim_step = d->anims[FIGHTER_ANIM_COMBO_CIRCLE].anim_step;
                     f->anim_frame = 0;
                     f->hits_left = 1;
                     break;
                 }
-                if (d->anims[4].anim != 255 && (fighter_pad_pressed & PAD_BUTTON_CROSS)) {
-                    f->anim = d->anims[4].anim;
-                    f->anim_step = d->anims[4].anim_step;
+                if (d->anims[FIGHTER_ANIM_COMBO_CROSS].anim != 255
+                    && (fighter_pad_pressed & PAD_BUTTON_CROSS)) {
+                    f->anim = d->anims[FIGHTER_ANIM_COMBO_CROSS].anim;
+                    f->anim_step = d->anims[FIGHTER_ANIM_COMBO_CROSS].anim_step;
                     f->anim_frame = 0;
                     f->hits_left = 1;
                     break;
                 }
             }
-        } else if (f->anim == d->anims[3].anim) {
+        } else if (f->anim == d->anims[FIGHTER_ANIM_COMBO_CIRCLE].anim) {
             h = &d->combo_hits[1];
-        } else if (f->anim == d->anims[4].anim) {
+        } else if (f->anim == d->anims[FIGHTER_ANIM_COMBO_CROSS].anim) {
             h = &d->combo_hits[2];
         }
         i = h->hit_count;
@@ -645,33 +647,35 @@ void fighter_update(int n)
             }
         }
         } else {
-            f->state = 0;
-            f->anim = d->anims[0].anim;
-            f->anim_step = d->anims[0].anim_step;
+            f->state = FIGHTER_STATE_STAND;
+            f->anim = d->anims[FIGHTER_ANIM_STAND].anim;
+            f->anim_step = d->anims[FIGHTER_ANIM_STAND].anim_step;
             f->anim_frame = 0;
         }
         break;
-    case 6:
+    case FIGHTER_STATE_GAUGE_ATTACK:
         if (f->anim_frame < 4096) {
-        if (f->anim == d->anims[5].anim) {
+        if (f->anim == d->anims[FIGHTER_ANIM_GAUGE_ATTACK].anim) {
             a = &d->attacks[0];
             if (f->anim_frame / f->anim_step < 20) {
-                if (d->anims[6].anim != 255 && (fighter_pad_pressed & PAD_BUTTON_CIRCLE)) {
-                    f->anim = d->anims[6].anim;
-                    f->anim_step = d->anims[6].anim_step;
+                if (d->anims[FIGHTER_ANIM_GAUGE_CIRCLE].anim != 255
+                    && (fighter_pad_pressed & PAD_BUTTON_CIRCLE)) {
+                    f->anim = d->anims[FIGHTER_ANIM_GAUGE_CIRCLE].anim;
+                    f->anim_step = d->anims[FIGHTER_ANIM_GAUGE_CIRCLE].anim_step;
                     f->anim_frame = 0;
                     break;
                 }
-                if (d->anims[7].anim != 255 && (fighter_pad_pressed & PAD_BUTTON_CROSS)) {
-                    f->anim = d->anims[7].anim;
-                    f->anim_step = d->anims[7].anim_step;
+                if (d->anims[FIGHTER_ANIM_GAUGE_CROSS].anim != 255
+                    && (fighter_pad_pressed & PAD_BUTTON_CROSS)) {
+                    f->anim = d->anims[FIGHTER_ANIM_GAUGE_CROSS].anim;
+                    f->anim_step = d->anims[FIGHTER_ANIM_GAUGE_CROSS].anim_step;
                     f->anim_frame = 0;
                     break;
                 }
             }
-        } else if (f->anim == d->anims[6].anim) {
+        } else if (f->anim == d->anims[FIGHTER_ANIM_GAUGE_CIRCLE].anim) {
             a = &d->attacks[1];
-        } else if (f->anim == d->anims[7].anim) {
+        } else if (f->anim == d->anims[FIGHTER_ANIM_GAUGE_CROSS].anim) {
             a = &d->attacks[2];
         }
         if (f->anim_frame - f->anim_step * frames_per_draw < a->strike_frame && f->anim_frame >= a->strike_frame) {
@@ -679,31 +683,31 @@ void fighter_update(int n)
             f->gauge = d->max_gauge - a->gauge_cost;
         }
         } else {
-            f->state = 0;
-            f->anim = d->anims[0].anim;
-            f->anim_step = d->anims[0].anim_step;
+            f->state = FIGHTER_STATE_STAND;
+            f->anim = d->anims[FIGHTER_ANIM_STAND].anim;
+            f->anim_step = d->anims[FIGHTER_ANIM_STAND].anim_step;
             f->anim_frame = 0;
         }
         break;
-    case 3:
+    case FIGHTER_STATE_HURT:
         if (f->anim_frame < 4096) {
-            f->anim = d->anims[8].anim;
-            f->anim_step = d->anims[8].anim_step;
+            f->anim = d->anims[FIGHTER_ANIM_HURT].anim;
+            f->anim_step = d->anims[FIGHTER_ANIM_HURT].anim_step;
             f->hp -= d->max_hp >> 4;
             if (f->hp < f->hp_target)
                 f->hp = f->hp_target;
         } else {
             f->hp = f->hp_target;
-            f->state = 0;
-            f->anim = d->anims[0].anim;
-            f->anim_step = d->anims[0].anim_step;
+            f->state = FIGHTER_STATE_STAND;
+            f->anim = d->anims[FIGHTER_ANIM_STAND].anim;
+            f->anim_step = d->anims[FIGHTER_ANIM_STAND].anim_step;
             f->anim_frame = 0;
         }
         break;
-    case 4:
+    case FIGHTER_STATE_DOWN:
         if (f->anim_frame < 4096) {
-            f->anim = d->anims[9].anim;
-            f->anim_step = d->anims[9].anim_step;
+            f->anim = d->anims[FIGHTER_ANIM_DOWN].anim;
+            f->anim_step = d->anims[FIGHTER_ANIM_DOWN].anim_step;
             f->hp -= d->max_hp >> 4;
             if (f->hp < 0)
                 f->hp = 0;
@@ -712,16 +716,16 @@ void fighter_update(int n)
             f->anim_frame = 4095;
         }
         break;
-    case 0:
-    case 1:
-    case 5:
+    case FIGHTER_STATE_STAND:
+    case FIGHTER_STATE_WALK:
+    case FIGHTER_STATE_GUARD:
         if (fighter_pad_held & PAD_BUTTON_CIRCLE) {
-            f->state = 5;
+            f->state = FIGHTER_STATE_GUARD;
             f->anim_frame &= 0xfff;
-            if (f->anim != d->anims[0].anim) {
-                f->anim = d->anims[0].anim;
+            if (f->anim != d->anims[FIGHTER_ANIM_STAND].anim) {
+                f->anim = d->anims[FIGHTER_ANIM_STAND].anim;
                 /* retail sets the step from the animation id */
-                f->anim_step = d->anims[0].anim;
+                f->anim_step = d->anims[FIGHTER_ANIM_STAND].anim;
                 f->anim_frame = 0;
             }
             break;
@@ -767,18 +771,18 @@ void fighter_update(int n)
             if (fighter_pad_held & PAD_BUTTON_RIGHT)
                 f->facing = (f->facing + d->turn_speed * frames_per_draw) & 0xfff;
         }
-        if ((fighter_pad_pressed & PAD_BUTTON_TRIANGLE) && d->anims[2].anim != 255) {
-            f->state = 2;
-            f->anim = d->anims[2].anim;
-            f->anim_step = d->anims[2].anim_step;
+        if ((fighter_pad_pressed & PAD_BUTTON_TRIANGLE) && d->anims[FIGHTER_ANIM_COMBO].anim != 255) {
+            f->state = FIGHTER_STATE_COMBO;
+            f->anim = d->anims[FIGHTER_ANIM_COMBO].anim;
+            f->anim_step = d->anims[FIGHTER_ANIM_COMBO].anim_step;
             f->anim_frame = 0;
             f->hits_left = 1;
         }
-        if ((fighter_pad_pressed & PAD_BUTTON_SQUARE) && d->anims[5].anim != 255
+        if ((fighter_pad_pressed & PAD_BUTTON_SQUARE) && d->anims[FIGHTER_ANIM_GAUGE_ATTACK].anim != 255
             && f->gauge == d->max_gauge) {
-            f->state = 6;
-            f->anim = d->anims[5].anim;
-            f->anim_step = d->anims[5].anim_step;
+            f->state = FIGHTER_STATE_GAUGE_ATTACK;
+            f->anim = d->anims[FIGHTER_ANIM_GAUGE_ATTACK].anim;
+            f->anim_step = d->anims[FIGHTER_ANIM_GAUGE_ATTACK].anim_step;
             f->anim_frame = 0;
         }
         break;

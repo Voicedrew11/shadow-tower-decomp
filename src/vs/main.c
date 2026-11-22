@@ -501,34 +501,34 @@ void fighters_play_anim_sounds(void)
         f = &shared_buffer.fighter[i];
         d = &f->data;
         switch (f->state) {
-        case 0:
-        case 5:
-            entry = 0;
+        case FIGHTER_STATE_STAND:
+        case FIGHTER_STATE_GUARD:
+            entry = FIGHTER_ANIM_STAND;
             break;
-        case 1:
-            entry = 1;
+        case FIGHTER_STATE_WALK:
+            entry = FIGHTER_ANIM_WALK;
             break;
-        case 2:
-            if (f->anim == d->anims[2].anim)
-                entry = 2;
-            else if (f->anim == d->anims[3].anim)
-                entry = 3;
-            else if (f->anim == d->anims[4].anim)
-                entry = 4;
+        case FIGHTER_STATE_COMBO:
+            if (f->anim == d->anims[FIGHTER_ANIM_COMBO].anim)
+                entry = FIGHTER_ANIM_COMBO;
+            else if (f->anim == d->anims[FIGHTER_ANIM_COMBO_CIRCLE].anim)
+                entry = FIGHTER_ANIM_COMBO_CIRCLE;
+            else if (f->anim == d->anims[FIGHTER_ANIM_COMBO_CROSS].anim)
+                entry = FIGHTER_ANIM_COMBO_CROSS;
             break;
-        case 6:
-            if (f->anim == d->anims[5].anim)
-                entry = 5;
-            else if (f->anim == d->anims[6].anim)
-                entry = 6;
-            else if (f->anim == d->anims[7].anim)
-                entry = 7;
+        case FIGHTER_STATE_GAUGE_ATTACK:
+            if (f->anim == d->anims[FIGHTER_ANIM_GAUGE_ATTACK].anim)
+                entry = FIGHTER_ANIM_GAUGE_ATTACK;
+            else if (f->anim == d->anims[FIGHTER_ANIM_GAUGE_CIRCLE].anim)
+                entry = FIGHTER_ANIM_GAUGE_CIRCLE;
+            else if (f->anim == d->anims[FIGHTER_ANIM_GAUGE_CROSS].anim)
+                entry = FIGHTER_ANIM_GAUGE_CROSS;
             break;
-        case 3:
-            entry = 8;
+        case FIGHTER_STATE_HURT:
+            entry = FIGHTER_ANIM_HURT;
             break;
-        case 4:
-            entry = 9;
+        case FIGHTER_STATE_DOWN:
+            entry = FIGHTER_ANIM_DOWN;
             break;
         }
         trigger = d->sounds[entry].trigger;
@@ -648,12 +648,12 @@ void fighters_load_round(void)
         }
         fighter_offset_textures(i);
         FIGHTER.data = fighter_data[lineups[i].slot[round_index]];
-        FIGHTER.state = 0;
+        FIGHTER.state = FIGHTER_STATE_STAND;
         FIGHTER.anim_frame = 0;
         FIGHTER.position.vz = 0;
         FIGHTER.rot_x = 0;
-        FIGHTER.anim = FIGHTER.data.anims[0].anim;
-        FIGHTER.anim_step = FIGHTER.data.anims[0].anim_step;
+        FIGHTER.anim = FIGHTER.data.anims[FIGHTER_ANIM_STAND].anim;
+        FIGHTER.anim_step = FIGHTER.data.anims[FIGHTER_ANIM_STAND].anim_step;
         FIGHTER.hp = FIGHTER.data.max_hp;
         FIGHTER.gauge = FIGHTER.data.max_gauge;
         FIGHTER.position.vy = -FIGHTER.data.origin_height;
