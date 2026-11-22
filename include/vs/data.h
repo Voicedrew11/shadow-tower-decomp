@@ -27,8 +27,10 @@
 
 /* The CD request ring holds 4 entries in VS (ST.EXE: 48). */
 #define VS_CD_REQUESTS 4
-/* VS.EXE's archive tables (WIP count; ST.EXE has nine, ST_ARCHIVES). */
-#define VS_ARCHIVES 3
+/* VS.EXE's archive tables: cd_open_vs_archives opens numbers up to 11
+ * (vs/archives.h) and the twelfth 80-byte record ends at the load cursor.
+ * ST.EXE opens nine, ST_ARCHIVES. */
+#define VS_ARCHIVES 12
 
 /* An archive table: its start-sector table and file extent like ST.EXE's
  * StArchive, in an 80-byte record (the rest is unmodeled). */
@@ -48,8 +50,7 @@ typedef struct {
     StCdRequest requests[VS_CD_REQUESTS];
     StCdRequest *next_free; /* 0xd8: the next free entry (ST: unk9D4) */
     StCdRequest *current; /* 0xdc: the entry being read (ST: unk9D8) */
-    VsArchive archives[VS_ARCHIVES]; /* 0xe0 */
-    u8 unk1D0[0x4a0 - 0x1d0];
+    VsArchive archives[VS_ARCHIVES]; /* 0xe0: by archive number (cd_archive_open) */
     u_long *load_cursor; /* 0x4a0: load cursor in load_buffer (lineup_screen_show); the menu file buffer (card_screen_run) */
     u_long load_buffer[0x8000]; /* 0x4a4: the 0x20000-byte load buffer */
 } VsCdState;
@@ -63,6 +64,8 @@ typedef char VsCdCurrentAt0xdc[(offsetof(VsCdState, current) == 0xdc) ? 1 : -1];
 
 /* Layout check: the offset the code proves. */
 typedef char VsCdStateArchivesAt0xE0[offsetof(VsCdState, archives) == 0xe0 ? 1 : -1];
+typedef char VsArchiveSize[sizeof(VsArchive) == 0x50 ? 1 : -1];
+typedef char VsCdStateLoadCursorAt0x4A0[offsetof(VsCdState, load_cursor) == 0x4a0 ? 1 : -1];
 typedef char VsCdStateUnk4A4At0x4A4[offsetof(VsCdState, load_buffer) == 0x4a4 ? 1 : -1];
 
 extern VsCdState vs_cd_state;
