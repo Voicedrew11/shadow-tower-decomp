@@ -100,7 +100,7 @@ typedef struct {
     u16 unk4;
     u16 unk6;
     u16 unk8;            /* 0x8: shown by the status menu */
-    u16 unkA;            /* 0xa: least of unkBA[0..2] (func_8005a3a8) */
+    u16 unkA;            /* 0xa: least of unkBA[0..2] (player_compute_derived_stats) */
     u16 unkC;            /* 0xc: greatest of unkBA[0..2] */
     u16 unkE;            /* 0xe: shown by the stats menu */
     u16 unk10;           /* 0x10 */
@@ -108,11 +108,11 @@ typedef struct {
     u16 unk14;
     u16 unk16;
     u16 unk18;
-    u16 unk1A;           /* 0x1a: func_8005a3a8 */
+    u16 unk1A;           /* 0x1a: player_compute_derived_stats */
     u16 unk1C;
     u16 unk1E;           /* 0x1e: divides player_take_damage's shake time */
     u16 unk20;           /* 0x20: scales player_hit's status-time limits */
-    u16 unk22;           /* 0x22: compared with unk24 by the equipment screen; func_8005a3a8 */
+    u16 unk22;           /* 0x22: compared with unk24 by the equipment screen; player_compute_derived_stats */
     u16 unk24;           /* 0x24 */
     u8 unk26;
     u8 unk27;            /* 0x27: shown by the map menu */
@@ -126,7 +126,7 @@ typedef struct {
     s32 unk34; /* incremented when unk33 wraps */
     u16 unk38[21]; /* set from FN. ids 970..990 */
     /* Three parallel 14-entry figure arrays (func_8003cae4 sets unk62 and
-     * unk9A to 50 and clears unk7E). func_8002e94c lists unk62; effect_play
+     * unk9A to 50 and clears unk7E). menu_equip_info_draw_attributes lists unk62; effect_play
      * reads six u16s from 0x78 (unk62[11]..unk7E[2]) by its level. */
     s16 unk62[14];       /* 0x62 */
     s16 unk7E[14];       /* 0x7e */
@@ -134,10 +134,10 @@ typedef struct {
     u16 unkB6;           /* 0xb6: player_hit's resistance terms */
     u16 unkB8;           /* 0xb8 */
     u16 unkBA[3];        /* 0xba: shown by the stats menu; effect_play reads them as a row */
-    u16 unkC0[6];        /* 0xc0: func_8005a3a8 writes [0] only */
-    u16 unkCC[6];        /* 0xcc: func_8005a3a8 */
+    u16 unkC0[6];        /* 0xc0: player_compute_derived_stats writes [0] only */
+    u16 unkCC[6];        /* 0xcc: player_compute_derived_stats */
     u16 unkD8[6];        /* 0xd8: player_hit's per-kind defence */
-    u16 unkE4;           /* 0xe4: func_8005a3a8 */
+    u16 unkE4;           /* 0xe4: player_compute_derived_stats */
     u8 unkE6[2];
     ViewerModel *unkE8[4]; /* 0xe8: player_draw_equipment_model's slot positions and rotations */
     void *unkF8[4];      /* 0xf8: its slot model blocks (ModelFile, st/mesh.h) */
@@ -387,11 +387,11 @@ extern Data801c7590 DAT_801c7590;
 typedef struct {
     u16 unk0;            /* 0x00: unk2 of the previous frame (src/st/pad.c) */
     u16 unk2;            /* 0x02: held bits */
-    u16 unk4;            /* 0x04: page bits func_8002fc4c consumes; request bits func_8003f4ec clears */
+    u16 unk4;            /* 0x04: page bits menu_equip_info_draw consumes; request bits func_8003f4ec clears */
     u16 unk6;            /* 0x06..0x0c: src/st/pad.c's repeat and combination words */
     u16 unk8;
     u16 unkA;
-    u16 unkC;            /* 0x0c: bits the menu loop func_80058ef4 consumes; the memory card
+    u16 unkC;            /* 0x0c: bits the menu loop menu_main_run consumes; the memory card
                           * screens' port-select bits (src/st/menu.c); the id grid screen's
                           * pressed bits (src/st/idgrid.c) */
     u8 unkE;             /* 0x0e: 1 while the controller is disconnected */
@@ -411,7 +411,7 @@ typedef struct {
     u8 unk20[2];
     /* 0x22: twelve button masks tested against unk2 (held) / unk4 (pressed),
      * set by func_800573bc: the settings page lists them in two columns of
-     * six (func_8002b84c). [2]/[3] and [6]/[7] turn the view (func_80041d4c);
+     * six (menu_button_config_draw). [2]/[3] and [6]/[7] turn the view (func_80041d4c);
      * [8] is slot 0's request bit, [9] the other slots' (func_8003f4ec);
      * [10] the hand swap (src/st/player.c). */
     u16 unk22[12];

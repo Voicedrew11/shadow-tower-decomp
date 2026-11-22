@@ -67,18 +67,18 @@ void game_loop(void)
         RECT rect = {0, 0, 320, 480};
 
         ClearImage(&rect, 0, 0, 0);
-        func_80058dc4(0, 0);
+        card_screen_open(0, 0);
         func_80057a28();
-        if (func_80062c28(0) == 1) {
+        if (card_screen_run(0) == 1) {
             func_80057a3c();
             DAT_801cd180.unk10 = 1;
-            func_80058ed4();
+            card_screen_close();
             loading_screen_show();
             func_8003c0e0();
         } else {
             func_80057a3c();
             DAT_801cd180.unk10 = 1;
-            func_80058ed4();
+            card_screen_close();
             loading_screen_show();
             game_load_start_file();
         }
@@ -123,7 +123,7 @@ void game_loop(void)
             program = PROGRAM_TITLE;
             break;
         case EXIT_ENDING:
-            func_800633d4();
+            menu_save_prompt_run();
             game_shutdown();
             program = PROGRAM_END;
             break;

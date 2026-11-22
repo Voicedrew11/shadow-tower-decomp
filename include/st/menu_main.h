@@ -9,29 +9,29 @@
 #include <kf/lib/types.h>
 #include <sys/types.h>
 
-/* The menu pages func_80058ef4 runs (not reconstructed yet). */
-void func_80060018(void);
-int func_8005ec10(void);
+/* The menu pages menu_main_run runs (not reconstructed yet). */
+void menu_area_info_run(void);
+int menu_use_item_run(void);
 void func_80064ff0(void);
-void func_8005d25c(void);
+void menu_arrange_icons_run(void);
 void func_800675f4(void);
-void func_8005c7fc(void);
-void func_8005ad00(void);
-void func_80060334(void);
-int func_80063078(void);
+void menu_creature_book_run(void);
+void menu_equip_info_run(void);
+void menu_options_run(void);
+int menu_end_game_run(void);
 
 /* src/st/menu.c */
-void func_80058c04(void);
-void func_80058c24(void);
-void func_80058c4c(void);
-void func_80058cc8(void);
-void func_80058d30(void);
-void func_80058ef4(void);
+void menu_store_screen(void);
+void menu_restore_screen(void);
+void menu_load_main_messages(void);
+void menu_show_loading_screen(void);
+void menu_reload_assets(void);
+void menu_main_run(void);
 
 /* src/st/menu.c */
-void func_80059204(int slot);
-void func_8005975c(int redraw);
-void func_80059cec(void);
-void func_80059dc0(void);
+void equip_load_slot_picture(int slot);
+void equip_apply_slot_change(int redraw);
+void equip_restore_slots(void);
+void player_total_attributes(void);
 
 #endif

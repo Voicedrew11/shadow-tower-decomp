@@ -243,19 +243,19 @@ void func_80054a54(int id)
         goto done;
     case 0x136:
         func_80057cc8();
-        USE_RESULT = func_8005e924(5);
+        USE_RESULT = menu_attribute_points_run(5);
         break;
     case 0x137:
         func_80057cc8();
-        USE_RESULT = func_8005e924(53);
+        USE_RESULT = menu_attribute_points_run(53);
         break;
     case 0x138:
         func_80057cc8();
-        USE_RESULT = func_8005e924(29);
+        USE_RESULT = menu_attribute_points_run(29);
         break;
     case 0x139:
         func_80057cc8();
-        USE_RESULT = func_8005e924(14);
+        USE_RESULT = menu_attribute_points_run(14);
         break;
     }
 used:

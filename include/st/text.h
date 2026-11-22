@@ -13,27 +13,27 @@
 extern u16 DAT_800881a0;
 extern u16 DAT_800881a2;
 extern u16 DAT_800881ac;
-extern u16 DAT_800881ae; /* set by func_80031aec around the grid columns */
+extern u16 DAT_800881ae; /* set by menu_arrange_icons_draw around the grid columns */
 
 /* Read by the title-card overlay; owners unknown. */
 extern u16 DAT_80088190;
 
-void func_80026ecc(u16 c, u16 x, u16 y, CVECTOR *color);
-void func_8002732c(u16 *s, u16 x, u16 y, CVECTOR *color);
-void func_80027440(u32 num, u16 x, u16 y, CVECTOR *color);
-void func_800276bc(u32 num, u16 x, u16 y, CVECTOR *color);
-void func_80027900(DVECTOR *pos, CVECTOR *color, u16 dir);
-void func_80027d18(RECT *r, CVECTOR *color, u16 border, u16 semi);
-void func_80028220(RECT *r, CVECTOR *color, u16 semi);
-void func_80028364(RECT *r, DVECTOR *tex, DVECTOR *clut, CVECTOR *color, int mode);
-void func_800286a8(int abr, int x, int y);
-void func_80028784(void);
+void ui_draw_glyph(u16 c, u16 x, u16 y, CVECTOR *color);
+void ui_draw_text(u16 *s, u16 x, u16 y, CVECTOR *color);
+void ui_draw_number(u32 num, u16 x, u16 y, CVECTOR *color);
+void ui_draw_number_fixed(u32 num, u16 x, u16 y, CVECTOR *color);
+void ui_draw_small_arrow(DVECTOR *pos, CVECTOR *color, u16 dir);
+void ui_draw_rect_outline(RECT *r, CVECTOR *color, u16 border, u16 semi);
+void ui_fill_rect(RECT *r, CVECTOR *color, u16 semi);
+void ui_draw_image(RECT *r, DVECTOR *tex, DVECTOR *clut, CVECTOR *color, int mode);
+void ui_add_draw_mode(int abr, int x, int y);
+void talk_draw_overlay(void);
 
-void func_80028c2c(DVECTOR *xy, CVECTOR *rgb, int semi);
-void func_80028db8(RECT *r, CVECTOR *mid, CVECTOR *edge, int semi);
-void func_8002916c(RECT *r, CVECTOR *color, u16 dir);
-void func_8002948c(void);
-void func_80029548(int x, int y, int w, int h);
-void func_80029618(short x, short y, short w, short h);
+void ui_draw_gouraud_quad(DVECTOR *xy, CVECTOR *rgb, int semi);
+void ui_fill_rect_gradient(RECT *r, CVECTOR *mid, CVECTOR *edge, int semi);
+void ui_draw_arrow(RECT *r, CVECTOR *color, u16 dir);
+void menu_draw_backdrop(void);
+void ui_draw_panel(int x, int y, int w, int h);
+void ui_draw_window(short x, short y, short w, short h);
 
 #endif

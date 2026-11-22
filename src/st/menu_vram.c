@@ -26,7 +26,7 @@ SDATA(0x800880e4, 0x28)
  * the second one.
  */
 ADDRESS(0x80063638, 0xc0)
-void func_80063638(void)
+void menu_equip_save_vram(void)
 {
     RECT page = {896, 256, 64, 256};
     RECT area = {448, 256, 128, 128};
@@ -40,7 +40,7 @@ void func_80063638(void)
 
 /* Loads the two areas back and restores the packet buffers. */
 ADDRESS(0x800636f8, 0xc8)
-void func_800636f8(void)
+void menu_equip_restore_vram(void)
 {
     RECT page = {896, 256, 64, 256};
     RECT area = {448, 256, 128, 128};
@@ -58,13 +58,13 @@ void func_800636f8(void)
  * image, and a 144-byte block (member 1), and records the equipment ids.
  */
 ADDRESS(0x800637c0, 0x194)
-void func_800637c0(void)
+void menu_equip_open(void)
 {
     MenuScratch *sp = MENU_SCRATCH;
     RECT page = {896, 256, 64, 256};
     u8 *p;
 
-    func_80063638();
+    menu_equip_save_vram();
     sp->unk2DC = 1;
     sp->unk2E6[0].vx = 960;
     sp->unk2E6[0].vy = 256;
@@ -100,14 +100,14 @@ void func_800637c0(void)
  * equipment models whose ids changed.
  */
 ADDRESS(0x80063954, 0x288)
-void func_80063954(void)
+void menu_equip_close(void)
 {
     RECT a = {896, 0, 64, 256};
     RECT b;
     RECT c = {159, 130, 16, 8};
     RECT d = {296, 130, 16, 8};
 
-    func_800636f8();
+    menu_equip_restore_vram();
     mem_free(MENU_SCRATCH->unk0.block);
     mem_free(DAT_801e0d08.bits);
     if ((DAT_801e0d28[0] != viewer.unk38[3] && viewer.unk38[3] != 0xffff)

@@ -378,7 +378,7 @@ void func_8001e3d8(RECT *r, CVECTOR *color, u16 semi)
 
 /*
  * Draws the texture rectangle `tex` over `r` with CLUT `clut`, tinted by
- * `color` (grey when NULL); `mode` as ST.EXE's func_80028364, plus bit 8: twice the
+ * `color` (grey when NULL); `mode` as ST.EXE's ui_draw_image, plus bit 8: twice the
  * texture width.
  */
 ADDRESS(0x8001e530, 0x360)
@@ -804,7 +804,7 @@ void func_8001fb98(void)
  * goes to DAT_801c4a38.
  *
  * The three RECT locals are never used. The first is the one ST.EXE's copy
- * (func_8002c2b8, src/st/ui.c) also keeps right after its table; VS added
+ * (card_draw_file_list, src/st/ui.c) also keeps right after its table; VS added
  * the two arrow rectangles behind it.
  */
 ADDRESS(0x8001fcac, 0x6d8)

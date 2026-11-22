@@ -65,7 +65,7 @@ const FdatHeader fdat_header = {
 
 void SsSetSerialVol(short s_num, short voll, short volr);
 void func_80042cec(void);
-void func_8005f54c(void);
+void shop_run(void);
 
 /*
  * Once: picks the ending. Every item the viewer holds outside its slots
@@ -178,7 +178,7 @@ void func_801ed740(void)
         DAT_801cd180.unk4 = 0;
         menu->unk2DC = 2;
         menu->unk2E5 = 0;
-        func_8005f54c();
+        shop_run();
         fdat_801ed8c4 = 5;
     } else if (fdat_801ed8c4 == 5) {
         DAT_801cd0e4 = 1;

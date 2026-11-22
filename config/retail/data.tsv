@@ -256,11 +256,11 @@ ST.EXE	0x80087eec	0x776ec	0x8	defined	proven	DAT_80087eec	u32[2]	retail-layout;s
 ST.EXE	0x80087ef4	0x776f4	0x24	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 ST.EXE	0x80087f18	0x77718	0x4	defined	candidate	DAT_80087f18	s32	asm;src/st/hud.c st.hud	$gp+0x58 .sdata word; blink phase of world_render_frame's selection frame
 ST.EXE	0x80087f1c	0x7771c	0x18	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
-ST.EXE	0x80087f34	0x77734	0x4	defined	candidate	DAT_80087f34	s32	asm;src/st/ui.c st.ui	$gp+0x74 .sdata word; blink phase of the map page arrows (func_8002a954)
+ST.EXE	0x80087f34	0x77734	0x4	defined	candidate	DAT_80087f34	s32	asm;src/st/ui.c st.ui	$gp+0x74 .sdata word; blink phase of the map page arrows (menu_area_info_draw)
 ST.EXE	0x80087f38	0x77738	0x30	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
-ST.EXE	0x80087f68	0x77768	0x8	defined	proven	DAT_80087f68	s32[2]	src/st/ui.c st.ui	unreferenced zero words in .sdata between func_8002e94c and func_8002f498 constants
+ST.EXE	0x80087f68	0x77768	0x8	defined	proven	DAT_80087f68	s32[2]	src/st/ui.c st.ui	unreferenced zero words in .sdata between menu_equip_info_draw_attributes and menu_equip_info_draw_item constants
 ST.EXE	0x80087f70	0x77770	0x14	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
-ST.EXE	0x80087f84	0x77784	0x4	defined	proven	DAT_80087f84	s32	src/st/ui.c st.ui	unreferenced zero word in .sdata between func_8002f97c and func_8002fc4c constants
+ST.EXE	0x80087f84	0x77784	0x4	defined	proven	DAT_80087f84	s32	src/st/ui.c st.ui	unreferenced zero word in .sdata between menu_equip_info_draw_magic and menu_equip_info_draw constants
 ST.EXE	0x80087f88	0x77788	0x8c	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 ST.EXE	0x80088014	0x77814	0x4	defined	proven	DAT_80088014	u32	retail-layout;src/st/texanim.c st.texanim	unreferenced zero .sdata word between st.texanim's literals (to 0x80088013) and the effect script's (0x80088018)
 ST.EXE	0x80088018	0x77818	0x24	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data

@@ -7,8 +7,8 @@
  * screens. One translation unit (-G8): its constant pool (.rodata
  * 0x800128d0..0x80013738) has no 8-byte break between functions, its
  * switch tables (0x80013738..0x80013880) follow, and GCC merged the screen
- * RECT {0, 0, 320, 480} (.sdata 0x800880ac) between func_8005aa80 and
- * func_800633d4. The pool starts after st.sound_bank's switch table, so
+ * RECT {0, 0, 320, 480} (.sdata 0x800880ac) between fade_screen_to_black and
+ * menu_save_prompt_run. The pool starts after st.sound_bank's switch table, so
  * the unit starts at 0x80058c04; src/st/menu_vram.c is a unit of its own
  * (its RECT literals repeat this unit's instead of merging with them).
  */
@@ -50,21 +50,21 @@ SDATA(0x800880a4, 0x3f)
 #define CD_BUFFER ((u_long *)(&cd_state + 1))
 
 ADDRESS(0x80058c04, 0x20)
-void func_80058c04(void)
+void menu_store_screen(void)
 {
     gfx_store_screen();
 }
 
 ADDRESS(0x80058c24, 0x28)
-void func_80058c24(void)
+void menu_restore_screen(void)
 {
-    func_800595d4();
+    equip_load_item_slot_pictures();
     gfx_restore_buffers();
 }
 
 /* Loads member 0 of archive 3: the menu messages, then the menu image. */
 ADDRESS(0x80058c4c, 0x7c)
-void func_80058c4c(void)
+void menu_load_main_messages(void)
 {
     u_long *image;
 
@@ -76,7 +76,7 @@ void func_80058c4c(void)
 }
 
 ADDRESS(0x80058cc8, 0x68)
-void func_80058cc8(void)
+void menu_show_loading_screen(void)
 {
     RECT rect = {576, 384, 64, 16};
     DVECTOR size = {576, 480};
@@ -88,10 +88,10 @@ void func_80058cc8(void)
 
 /* Reloads the menu and the viewer's equipment models after the menu. */
 ADDRESS(0x80058d30, 0x94)
-void func_80058d30(void)
+void menu_reload_assets(void)
 {
     loading_screen_show();
-    func_80058c4c();
+    menu_load_main_messages();
     func_80044404();
     func_8003f12c(viewer.unk38[3], 0, 1);
     func_8003f12c(viewer.unk38[16], 1, 1);
@@ -104,7 +104,7 @@ void func_80058d30(void)
 
 /* Opens a menu screen: the VRAM positions, the menu loads and the HUD. */
 ADDRESS(0x80058dc4, 0x110)
-void func_80058dc4(int arg0, int arg1)
+void card_screen_open(int arg0, int arg1)
 {
     MenuScratch *sp = MENU_SCRATCH;
     u_long *image;
@@ -125,7 +125,7 @@ void func_80058dc4(int arg0, int arg1)
     copy_words((u32 *)&menu_messages, (u32 *)(image + 1), 5376);
     image = (u_long *)((u8 *)image + (DAT_80088c88[0] + 4));
     func_8003ec5c(image + 1, &sp->unk2E6[0], &sp->unk2E6[1], 1);
-    func_80058c04();
+    menu_store_screen();
     sp->unk2E5 = 0;
     SCRATCHPAD->unk208 = 0;
     if (arg0)
@@ -136,14 +136,14 @@ void func_80058dc4(int arg0, int arg1)
 }
 
 ADDRESS(0x80058ed4, 0x20)
-void func_80058ed4(void)
+void card_screen_close(void)
 {
-    func_80058c24();
+    menu_restore_screen();
 }
 
 /* The pause menu: runs the selected page until one closes the menu. */
 ADDRESS(0x80058ef4, 0x310)
-void func_80058ef4(void)
+void menu_main_run(void)
 {
     MenuScratch *sp = MENU_SCRATCH;
     u_long *image;
@@ -164,7 +164,7 @@ void func_80058ef4(void)
     copy_words((u32 *)&menu_messages, (u32 *)(image + 1), 5376);
     image = (u_long *)((u8 *)image + (DAT_80088c88[0] + 4));
     func_8003ec5c(image + 1, &sp->unk2E6[0], &sp->unk2E6[1], 1);
-    func_80058c04();
+    menu_store_screen();
     sp->unk2DE = 0;
     func_80057a3c();
     DrawSync(0);
@@ -178,14 +178,14 @@ void func_80058ef4(void)
             func_80057cc8();
             DAT_801cd180.unk4 = 0;
             sp->unk2E5 = 0;
-            func_80060018();
+            menu_area_info_run();
         }
         if (DAT_801cd180.unk4 & 0x4000) {
             func_80057cc8();
             DAT_801cd180.unk4 = 0;
             if ((s16)sp->unk2DE == 0) {
                 sp->unk2E5 = 0;
-                if (func_8005ec10() == 1)
+                if (menu_use_item_run() == 1)
                     break;
             } else if ((s16)sp->unk2DE == 1) {
                 sp->unk2E5 = 0;
@@ -194,29 +194,29 @@ void func_80058ef4(void)
                 viewer.unk21D = 1;
                 sp->unk2E5 = 1;
                 if (DAT_801cd180.unk2 & 0x800)
-                    func_8005d25c();
+                    menu_arrange_icons_run();
                 else
                     func_800675f4();
             } else if ((s16)sp->unk2DE == 3) {
                 viewer.unk21D = 1;
                 sp->unk2E5 = 1;
-                func_8005c7fc();
+                menu_creature_book_run();
             } else if ((s16)sp->unk2DE == 4) {
                 viewer.unk21D = 1;
                 sp->unk2E5 = 1;
-                func_8005ad00();
+                menu_equip_info_run();
             } else if ((s16)sp->unk2DE == 5) {
                 sp->unk2E5 = 0;
-                func_80060334();
+                menu_options_run();
             } else if ((s16)sp->unk2DE == 6) {
                 sp->unk2DC = 1;
                 sp->unk2E5 = 0;
                 sp->unk206 = 1;
-                if (func_80062c28(1) == 1)
+                if (card_screen_run(1) == 1)
                     break;
             } else if ((s16)sp->unk2DE == 7) {
                 sp->unk2E5 = 0;
-                if (func_80063078() == 1)
+                if (menu_end_game_run() == 1)
                     break;
             }
         }
@@ -236,10 +236,10 @@ void func_80058ef4(void)
         }
         sp->unk2E5 = 0;
         frame_rate_update();
-        func_80029b74();
+        menu_main_draw();
     }
     func_80057a3c();
-    func_80058c24();
+    menu_restore_screen();
 }
 
 /*
@@ -247,7 +247,7 @@ void func_80058ef4(void)
  * picture); a two-handed weapon also copies its second half.
  */
 ADDRESS(0x80059204, 0x3d0)
-void func_80059204(int slot)
+void equip_load_slot_picture(int slot)
 {
     DVECTOR pos[21] = {
         {740, 152}, {796, 152}, {852, 152}, {932, 0},   {908, 152}, {964, 152}, {740, 124},
@@ -372,7 +372,7 @@ void func_80059204(int slot)
 
 /* Uploads the pictures of the five quick item slots, 24 lines apart. */
 ADDRESS(0x800595d4, 0x188)
-void func_800595d4(void)
+void equip_load_item_slot_pictures(void)
 {
     u32 ids[5];
     DVECTOR pos = {896, 256};
@@ -417,7 +417,7 @@ void func_800595d4(void)
  * reloaded.
  */
 ADDRESS(0x8005975c, 0x590)
-void func_8005975c(int redraw)
+void equip_apply_slot_change(int redraw)
 {
     MenuScratch *sp = MENU_SCRATCH;
 
@@ -430,9 +430,9 @@ void func_8005975c(int redraw)
             viewer.unk38[9] = 0xffff;
             viewer.unk38[10] = 0xffff;
             if (redraw == 1) {
-                func_80059204(2);
-                func_80059204(9);
-                func_80059204(10);
+                equip_load_slot_picture(2);
+                equip_load_slot_picture(9);
+                equip_load_slot_picture(10);
             }
         }
     }
@@ -441,8 +441,8 @@ void func_8005975c(int redraw)
             viewer.unk38[3] = 0xffff;
             viewer.unk38[16] = 0xffff;
             if (redraw == 1) {
-                func_80059204(3);
-                func_80059204(16);
+                equip_load_slot_picture(3);
+                equip_load_slot_picture(16);
             }
         }
     }
@@ -451,8 +451,8 @@ void func_8005975c(int redraw)
             viewer.unk38[4] = 0xffff;
             viewer.unk38[17] = 0xffff;
             if (redraw == 1) {
-                func_80059204(4);
-                func_80059204(17);
+                equip_load_slot_picture(4);
+                equip_load_slot_picture(17);
             }
         }
     }
@@ -461,19 +461,19 @@ void func_8005975c(int redraw)
             viewer.unk38[2] = 0xffff;
             viewer.unk38[10] = 0xffff;
             if (redraw == 1) {
-                func_80059204(2);
-                func_80059204(10);
+                equip_load_slot_picture(2);
+                equip_load_slot_picture(10);
             }
         }
         if (vis_table_c.unk0118[sp->unk2C0].unk26 == 9) {
             if (sp->unk2E0 == 3) {
                 viewer.unk38[16] = 0xffff;
                 if (redraw == 1)
-                    func_80059204(16);
+                    equip_load_slot_picture(16);
             } else if (sp->unk2E0 == 4) {
                 viewer.unk38[17] = 0xffff;
                 if (redraw == 1)
-                    func_80059204(17);
+                    equip_load_slot_picture(17);
             }
         }
     }
@@ -487,21 +487,21 @@ void func_8005975c(int redraw)
             viewer.unk38[2] = sp->unk2C0;
         }
         if (redraw == 1)
-            func_80059204(2);
+            equip_load_slot_picture(2);
     } else if (sp->unk2E0 < 10) {
         if (sp->unk2C0 == -1)
             MENU_SLOTS->ids[sp->unk2E0] = 0xffff;
         else
             MENU_SLOTS->ids[sp->unk2E0] = sp->unk2C0;
         if (redraw == 1)
-            func_80059204(sp->unk2E0);
+            equip_load_slot_picture(sp->unk2E0);
     } else {
         if (sp->unk2C0 == -1)
             *(MENU_SLOTS->ids - 1 + sp->unk2E0) = 0xffff;
         else
             *(MENU_SLOTS->ids - 1 + sp->unk2E0) = sp->unk2C0;
         if (redraw == 1)
-            func_80059204(sp->unk2E0 - 1);
+            equip_load_slot_picture(sp->unk2E0 - 1);
     }
     if (sp->unk2E0 != 0 && sp->unk2E0 != 14)
         return;
@@ -511,13 +511,13 @@ void func_8005975c(int redraw)
         viewer.unk38[12] = 0xffff;
     if (redraw == 1) {
         DrawSync(0);
-        func_80059204(sp->unk2E0 == 0 ? 6 : 12);
+        equip_load_slot_picture(sp->unk2E0 == 0 ? 6 : 12);
     }
 }
 
 /* Restores the equipment slots from the scratch copy. */
 ADDRESS(0x80059cec, 0xd4)
-void func_80059cec(void)
+void equip_restore_slots(void)
 {
     *MENU_SLOTS = *(MenuSlots *)MENU_SCRATCH->unk292;
 }
@@ -527,7 +527,7 @@ void func_80059cec(void)
  * fills one record per shown equipment slot with its figures and kind.
  */
 ADDRESS(0x80059dc0, 0x5ac)
-void func_80059dc0(void)
+void player_total_attributes(void)
 {
     MenuAttrScratch *at = MENU_ATTR;
     u16 *id;
@@ -632,7 +632,7 @@ void func_80059dc0(void)
 
 /* Copies the two recomputed figure rows into the viewer. */
 ADDRESS(0x8005a36c, 0x3c)
-void func_8005a36c(void)
+void player_store_attributes(void)
 {
     StatsScratch *sp = STATS_SCRATCH;
     int i;
@@ -645,12 +645,12 @@ void func_8005a36c(void)
 
 /*
  * Recomputes the viewer's derived figures from the attribute rows
- * func_80059dc0 totals (after func_8005975c applies a slot change when
+ * player_total_attributes totals (after equip_apply_slot_change applies a slot change when
  * `apply` is set), then restores the slots (`apply`) or copies the rows
  * into the viewer.
  */
 ADDRESS(0x8005a3a8, 0x6d8)
-void func_8005a3a8(int apply)
+void player_compute_derived_stats(int apply)
 {
     MenuAttrScratch *at = MENU_ATTR;
     u16 b6;
@@ -661,8 +661,8 @@ void func_8005a3a8(int apply)
     int i;
 
     if (apply)
-        func_8005975c(0);
-    func_80059dc0();
+        equip_apply_slot_change(0);
+    player_total_attributes();
     viewer.unk0 = at->unk1B4[0] * 5 + at->unk1B4[1] + at->unk1B4[2] + at->unk1B4[3]
                   + at->unk1B4[4] + at->unk1B4[5] + at->unk1B4[6];
     viewer.unk4 = at->unk1B4[7] * 5 + at->unk1B4[8] + at->unk1B4[9] + at->unk1B4[10]
@@ -754,9 +754,9 @@ void func_8005a3a8(int apply)
     viewer.unk22 = at->unk2BC;
     viewer.unk24 = viewer.unk0 / 12 + 120;
     if (apply)
-        func_80059cec();
+        equip_restore_slots();
     else
-        func_8005a36c();
+        player_store_attributes();
 }
 
 /*
@@ -764,7 +764,7 @@ void func_8005a3a8(int apply)
  * 16 from the display through a translucent quad without clearing.
  */
 ADDRESS(0x8005aa80, 0x280)
-void func_8005aa80(void)
+void fade_screen_to_black(void)
 {
     POLY_F4 poly;
     DR_MODE mode;
@@ -827,7 +827,7 @@ void func_8005aa80(void)
  * against 1, as retail does.
  */
 ADDRESS(0x8005ad00, 0x1afc)
-void func_8005ad00(void)
+void menu_equip_info_run(void)
 {
     MenuScratch *sp = MENU_SCRATCH;
     DVECTOR picture = {640, 0};
@@ -857,7 +857,7 @@ void func_8005ad00(void)
     cd_loc_add_sectors(&arc->file.pos, arc->sectors[1], &loc);
     CdControl(CdlSetloc, (u_char *)&loc, NULL);
     ResetGraph(1);
-    func_8005aa80();
+    fade_screen_to_black();
     sp->unk2CC = mem_alloc(21504);
     sp->unk2D0 = mem_alloc(144);
     p = CD_BUFFER;
@@ -916,7 +916,7 @@ void func_8005ad00(void)
             }
         }
     }
-    func_80031cfc();
+    clear_vram();
     DrawSync(0);
     gfx_setup_640x240();
     sp->unk2C4 = -1;
@@ -931,7 +931,7 @@ void func_8005ad00(void)
     debounce = 0;
     sp->unk2D8 = viewer.unk2;
     sp->unk2DA = viewer.unk6;
-    func_8005a3a8(0);
+    player_compute_derived_stats(0);
     func_80057a3c();
     DAT_800881aa = 0;
     {
@@ -942,10 +942,10 @@ void func_8005ad00(void)
         ClearImage(&clear, 0, 0, 0);
         DrawSync(0);
         DAT_80088192 = 0;
-        func_8002fc4c();
-        func_8002fc4c();
-        func_80059204(slots[0]);
-        func_8002fc4c();
+        menu_equip_info_draw();
+        menu_equip_info_draw();
+        equip_load_slot_picture(slots[0]);
+        menu_equip_info_draw();
         for (j = 1; j < 20; j++) {
             if ((viewer.unk38[3] == 0xffff || vis_table_c.unk0118[viewer.unk38[3]].unk26 != 9
                  || slots[j] != 16)
@@ -953,13 +953,13 @@ void func_8005ad00(void)
                     || slots[j] != 17)
                 && (viewer.unk38[9] == 0xffff || vis_table_c.unk0118[viewer.unk38[9]].unk26 != 10
                     || (slots[j] != 2 && slots[j] != 10 && slots[j] != 15))) {
-                func_80059204(slots[j]);
-                func_8002fc4c();
+                equip_load_slot_picture(slots[j]);
+                menu_equip_info_draw();
                 func_80057d10();
             }
         }
     }
-    func_8002fc4c();
+    menu_equip_info_draw();
     func_80057d10();
     func_80057a3c();
     for (;;) {
@@ -1136,7 +1136,7 @@ void func_8005ad00(void)
                     offset = 977;
                     base = 976;
                     sp->unk2C0 = sp->unk2BE;
-                    func_8005a3a8(1);
+                    player_compute_derived_stats(1);
                     break;
                 default:
                     offset = 0;
@@ -1178,7 +1178,7 @@ void func_8005ad00(void)
                     DrawSync(0);
                     cd_read_member(7, file * 3 + 1, CD_BUFFER);
                     func_8003ec5c(CD_BUFFER, &picture, NULL, 1);
-                    func_8005a3a8(0);
+                    player_compute_derived_stats(0);
                 }
                 DAT_801cd180.unk4 = 0;
                 goto moved;
@@ -1304,8 +1304,8 @@ void func_8005ad00(void)
                         DAT_801cd180.unk4 = 0;
                     } else {
                         func_80057cc8();
-                        func_8005975c(1);
-                        func_8005a3a8(0);
+                        equip_apply_slot_change(1);
+                        player_compute_derived_stats(0);
                         if (viewer.unk0 < sp->unk2D8)
                             viewer.unk2 = viewer.unk0;
                         if (viewer.unk4 < sp->unk2DA)
@@ -1347,7 +1347,7 @@ void func_8005ad00(void)
                     func_8003ec5c(CD_BUFFER, &sp->unk0.vram[0], &sp->unk0.vram[1], 1);
                     cd_read_member(7, file * 3 + 1, CD_BUFFER);
                     func_8003ec5c(CD_BUFFER, &picture, NULL, 1);
-                    func_8005a3a8(1);
+                    player_compute_derived_stats(1);
                     DAT_801cd180.unkC = 0;
                 }
             } else {
@@ -1392,7 +1392,7 @@ void func_8005ad00(void)
                             MoveImage(&sp->unk33C, 788, 124);
                         }
                         sp->unk2DC = 1;
-                        func_8005a3a8(0);
+                        player_compute_derived_stats(0);
                     } else {
                         func_80057d34();
                     }
@@ -1401,13 +1401,13 @@ void func_8005ad00(void)
                     cd_read_member(7, sp->unk2BE + 995, CD_BUFFER);
                     func_8003ec5c(CD_BUFFER, &sp->unk0.vram[0], &sp->unk0.vram[1], 1);
                     sp->unk2C0 = sp->unk2BE;
-                    func_8005a3a8(1);
+                    player_compute_derived_stats(1);
                 }
             }
             if (DAT_801cd180.unk4 & 0x2000) {
                 func_80057cec();
                 DAT_801cd180.unk4 = 0;
-                func_8005a3a8(0);
+                player_compute_derived_stats(0);
                 sp->unk2DC = 1;
             } else if (sp->unk2C7 != 10) {
                 if (DAT_801cd180.unk2 & 0x1000) {
@@ -1422,7 +1422,7 @@ void func_8005ad00(void)
     next:
         DAT_80088192 = 1;
         frame_rate_update();
-        func_8002fc4c();
+        menu_equip_info_draw();
         sp->unk2E4 = (sp->unk2E4 + 1) % 32;
     }
     mem_free(sp->unk174[0]);
@@ -1438,22 +1438,22 @@ void func_8005ad00(void)
     mem_free(sp->unk2CC);
     mem_free(sp->unk2D0);
     mem_free(sp->unk1B0);
-    func_80058d30();
+    menu_reload_assets();
     func_80057a3c();
 }
 
 /*
  * The stored-item page: lists the ids set in DAT_801cceb0 five to a row,
  * three rows shown with their pictures, and shows the detail page of the
- * confirmed one (func_80030ab8 draws the page).
+ * confirmed one (menu_creature_book_draw draws the page).
  *
  * The detail load is skipped for the id in `shown`, which starts as -1
- * and is never updated here (func_8005f54c's shop screens keep theirs
+ * and is never updated here (shop_run's shop screens keep theirs
  * current): a call-crossing variable with no saved register left, so
  * retail rematerialises the -1 in the reload register at the test.
  */
 ADDRESS(0x8005c7fc, 0xa60)
-void func_8005c7fc(void)
+void menu_creature_book_run(void)
 {
     MenuScratch *sp = MENU_SCRATCH;
     DVECTOR image = {896, 448};
@@ -1473,7 +1473,7 @@ void func_8005c7fc(void)
     int n;
     int i;
 
-    func_80058cc8();
+    menu_show_loading_screen();
     sp->unk0.store.messages = mem_alloc(21504);
     sp->unk0.store.items = mem_alloc(6644);
     sp->unk0.store.tex[0].vx = 640;
@@ -1570,7 +1570,7 @@ void func_8005c7fc(void)
             }
         }
     }
-    func_80031cfc();
+    clear_vram();
     DrawSync(0);
     gfx_setup_640x240();
     sp->unk2DC = 1;
@@ -1699,14 +1699,14 @@ void func_8005c7fc(void)
             sp->unk2DC = 1;
         }
         frame_rate_update();
-        func_80030ab8();
+        menu_creature_book_draw();
         sp->unk2E4 = (sp->unk2E4 + 1) % 32;
     }
     mem_free(sp->unk0.store.messages);
     mem_free(sp->unk0.store.kinds);
     mem_free(sp->unk0.store.items);
-    func_80058c4c();
-    func_80058d30();
+    menu_load_main_messages();
+    menu_reload_assets();
     func_80057a3c();
 }
 
@@ -1721,7 +1721,7 @@ void func_8005c7fc(void)
  * writes the flag bits back.
  */
 ADDRESS(0x8005d25c, 0x16c8)
-void func_8005d25c(void)
+void menu_arrange_icons_run(void)
 {
     MenuScratch *sp = MENU_SCRATCH;
     RECT clear;
@@ -1745,7 +1745,7 @@ void func_8005d25c(void)
     int hole;
     int empty;
 
-    func_80058cc8();
+    menu_show_loading_screen();
     sp->unk0.grid.messages = mem_alloc(21504);
     p = DAT_80088c88;
     cd_read_member(3, 1, p);
@@ -1841,7 +1841,7 @@ void func_8005d25c(void)
     sp->unk0.grid.row0 = 0;
     sp->unk0.grid.row1 = 0;
     sp->unk2DC = 1;
-    func_80031cfc();
+    clear_vram();
     DrawSync(0);
     gfx_setup_640x240();
     func_80057a3c();
@@ -2101,7 +2101,7 @@ void func_8005d25c(void)
             }
         }
         frame_rate_update();
-        func_80031aec();
+        menu_arrange_icons_draw();
         sp->unk2E4 = (sp->unk2E4 + 1) % 32;
     }
     for (i = 0, n = sp->unk0.grid.count0; n;) {
@@ -2118,12 +2118,12 @@ void func_8005d25c(void)
         }
         i++;
     }
-    func_80058c4c();
+    menu_load_main_messages();
     mem_free(sp->unk0.grid.ids0);
     mem_free(sp->unk0.grid.ids1);
     mem_free(sp->unk0.grid.tex);
     mem_free(sp->unk0.grid.messages);
-    func_80058d30();
+    menu_reload_assets();
     func_80057a3c();
 }
 
@@ -2136,7 +2136,7 @@ void func_8005d25c(void)
  * viewer.unk8. Returns 0 when cancelled, else 1.
  */
 ADDRESS(0x8005e924, 0x2ec)
-int func_8005e924(int points)
+int menu_attribute_points_run(int points)
 {
     MenuScratch *sp = MENU_SCRATCH;
     int result;
@@ -2196,9 +2196,9 @@ int func_8005e924(int points)
             }
         }
         frame_rate_update();
-        func_8002a5a4();
+        menu_attribute_points_draw();
     } while (sp->unk0.stats.value > 0);
-    func_8002a5a4();
+    menu_attribute_points_draw();
     for (i = 0; i < 14; i++) {
         viewer.unk9A[i] += sp->unk0.stats.bonus[0][i];
         viewer.unk8 += sp->unk0.stats.bonus[0][i];
@@ -2216,7 +2216,7 @@ done:
  * cancelled; items from 310 and item 288 recompute the viewer's figures.
  */
 ADDRESS(0x8005ec10, 0x77c)
-int func_8005ec10(void)
+int menu_use_item_run(void)
 {
     MenuScratch *sp = MENU_SCRATCH;
     int result = 0;
@@ -2372,14 +2372,14 @@ int func_8005ec10(void)
             }
         }
         frame_rate_update();
-        func_8002a1d0();
+        menu_use_item_draw();
         sp->unk2E4 = (sp->unk2E4 + 1) % 32;
     }
     func_80057a3c();
     mem_free(sp->unk0.block);
     mem_free(sp->unk0.page_list.entries);
     if (reload)
-        func_8005a3a8(0);
+        player_compute_derived_stats(0);
     {
         u8 *restore = (u8 *)CD_BUFFER;
         cd_read_member(3, 9, (u_long *)restore);
@@ -2396,7 +2396,7 @@ int func_8005ec10(void)
  * copy and image of member 3.
  */
 ADDRESS(0x8005f38c, 0x170)
-void func_8005f38c(void)
+void shop_open(void)
 {
     MenuScratch *sp = MENU_SCRATCH;
     RECT page = {896, 256, 64, 256};
@@ -2423,13 +2423,13 @@ void func_8005f38c(void)
     copy_words(sp->unk0.block, (u32 *)(p + 4), 5376);
     p += *(u32 *)p + 4;
     func_8003ec5c(p + 4, &sp->unk2E6[2], &sp->unk2E6[3], 1);
-    func_80058c04();
+    menu_store_screen();
     func_80057a3c();
 }
 
 /* Copies the saved page back to 896,256. */
 ADDRESS(0x8005f4fc, 0x50)
-void func_8005f4fc(void)
+void shop_restore_texture_page(void)
 {
     RECT saved = {896, 0, 64, 256};
 
@@ -2437,7 +2437,7 @@ void func_8005f4fc(void)
 }
 
 /*
- * The shop screens over the game (func_8005f38c opens them): unk2DC bit 0
+ * The shop screens over the game (shop_open opens them): unk2DC bit 0
  * lists the shop's stock (DAT_801c7590.unk13A ids with stock left and
  * func_80052d40 set), bits 1/2 the items held but not equipped to trade
  * for items 284/285, otherwise the damaged items held to repair for
@@ -2450,7 +2450,7 @@ void func_8005f4fc(void)
  * indexed through vis_table_c each time, never through a pointer.
  */
 ADDRESS(0x8005f54c, 0xacc)
-void func_8005f54c(void)
+void shop_run(void)
 {
     MenuScratch *sp = MENU_SCRATCH;
     DVECTOR pos = {448, 256};
@@ -2460,7 +2460,7 @@ void func_8005f54c(void)
     int kind;
     int i;
 
-    func_8005f38c();
+    shop_open();
     sp->unk2E2 = 0;
     sp->unk2E0 = 0;
     if (sp->unk2DC & 1) {
@@ -2627,14 +2627,14 @@ void func_8005f54c(void)
             }
         }
         frame_rate_update();
-        func_8002e310();
+        shop_draw();
         sp->unk2E4 = (sp->unk2E4 + 1) % 32;
     }
-    func_8005f4fc();
+    shop_restore_texture_page();
     func_80057a3c();
     mem_free(sp->unk0.list.ids);
     mem_free(sp->unk0.block);
-    func_80058c24();
+    menu_restore_screen();
 }
 
 /*
@@ -2643,7 +2643,7 @@ void func_8005f54c(void)
  * them while the list is shown (DAT_800881a8).
  */
 ADDRESS(0x80060018, 0x31c)
-void func_80060018(void)
+void menu_area_info_run(void)
 {
     MenuScratch *sp = MENU_SCRATCH;
     s32 areas[35] = {
@@ -2721,7 +2721,7 @@ void func_80060018(void)
             DAT_800881a8 = 1;
         }
         frame_rate_update();
-        func_8002a954();
+        menu_area_info_draw();
     }
     func_80057a3c();
 }
@@ -2735,7 +2735,7 @@ void func_80060018(void)
  * levels.flags.
  */
 ADDRESS(0x80060334, 0x878)
-void func_80060334(void)
+void menu_options_run(void)
 {
     MenuScratch *sp = MENU_SCRATCH;
 
@@ -2993,9 +2993,9 @@ void func_80060334(void)
         }
         frame_rate_update();
         if (sp->unk2DC == 2)
-            func_8002b84c();
+            menu_button_config_draw();
         else
-            func_8002b2e8();
+            menu_options_draw();
         sp->unk2E4 = (sp->unk2E4 + 1) % 32;
     }
     func_80057a3c();
@@ -3003,7 +3003,7 @@ void func_80060334(void)
 
 /* Clears any pending SwCARD event. */
 ADDRESS(0x80060bac, 0x54)
-void func_80060bac(void)
+void card_clear_sw_events(void)
 {
     MenuCardScratch *sp = MENU_CARD_SCRATCH;
 
@@ -3015,7 +3015,7 @@ void func_80060bac(void)
 
 /* Clears any pending HwCARD event. */
 ADDRESS(0x80060c00, 0x54)
-void func_80060c00(void)
+void card_clear_hw_events(void)
 {
     MenuCardScratch *sp = MENU_CARD_SCRATCH;
 
@@ -3026,7 +3026,7 @@ void func_80060c00(void)
 }
 
 ADDRESS(0x80060c54, 0x190)
-void func_80060c54(void)
+void card_open_events(void)
 {
     MenuCardScratch *sp;
 
@@ -3052,7 +3052,7 @@ void func_80060c54(void)
 }
 
 ADDRESS(0x80060de4, 0xf0)
-void func_80060de4(void)
+void card_close_events(void)
 {
     MenuCardScratch *sp = MENU_CARD_SCRATCH;
 
@@ -3078,7 +3078,7 @@ void func_80060de4(void)
 
 /* Waits for a SwCARD event: 0 done, 1 error, 2 timeout, 3 new card. */
 ADDRESS(0x80060ed4, 0xb4)
-int func_80060ed4(void)
+int card_wait_sw_event(void)
 {
     MenuCardScratch *sp = MENU_CARD_SCRATCH;
     long ioe, error, timeout, new;
@@ -3101,7 +3101,7 @@ int func_80060ed4(void)
 
 /* The same wait on the HwCARD events. */
 ADDRESS(0x80060f88, 0xb4)
-int func_80060f88(void)
+int card_wait_hw_event(void)
 {
     MenuCardScratch *sp = MENU_CARD_SCRATCH;
     long ioe, error, timeout, new;
@@ -3128,7 +3128,7 @@ int func_80060f88(void)
  * and records the lowest unused file number in unk204.
  */
 ADDRESS(0x8006103c, 0x3ac)
-void func_8006103c(int port)
+void card_read_directory(int port)
 {
     MenuScratch *sp = MENU_SCRATCH;
     MenuCardScratch *cs = (MenuCardScratch *)sp;
@@ -3201,18 +3201,18 @@ void func_8006103c(int port)
  * in the port's MenuCard status.
  */
 ADDRESS(0x800613e8, 0x190)
-void func_800613e8(int port, int mode)
+void card_probe(int port, int mode)
 {
     MenuCardScratch *sp = MENU_CARD_SCRATCH;
     int retry;
     int result;
 
-    func_80060c54();
+    card_open_events();
     retry = 9;
     do {
-        func_80060bac();
+        card_clear_sw_events();
         _card_info(port << 4);
-        result = func_80060ed4();
+        result = card_wait_sw_event();
         if (result == 0) {
             sp->cards[port].status = 0;
         } else if (result == 1) {
@@ -3231,15 +3231,15 @@ void func_800613e8(int port, int mode)
             sp->cards[port].status = 1;
         }
         if (mode == 1) {
-            func_80060c00();
+            card_clear_hw_events();
             _card_clear(port << 4);
-            if (func_80060f88() != 0) {
+            if (card_wait_hw_event() != 0) {
                 sp->cards[port].status = 2;
                 continue;
             }
-            func_80060bac();
+            card_clear_sw_events();
             _card_load(port << 4);
-            result = func_80060ed4();
+            result = card_wait_sw_event();
             if (result == 1 || result == 2) {
                 if (retry == 0) {
                     sp->cards[port].status = 2;
@@ -3255,16 +3255,16 @@ void func_800613e8(int port, int mode)
             break;
         }
     } while (retry--);
-    func_80060de4();
+    card_close_events();
 }
 
 /* Probes port; 0 with a message id in unk0 when it has no usable card. */
 ADDRESS(0x80061578, 0x60)
-int func_80061578(int port)
+int card_check_inserted(int port)
 {
     MenuScratch *sp = MENU_SCRATCH;
 
-    func_800613e8(port, 0);
+    card_probe(port, 0);
     if (sp->unk1F4->status == 1) {
         sp->unk0.half[0] = 351;
     } else if (sp->unk1F4->status == 2) {
@@ -3280,7 +3280,7 @@ int func_80061578(int port)
  * when the card in the selected port goes away (probed every third frame).
  */
 ADDRESS(0x800615d8, 0x120)
-int func_800615d8(void)
+int card_ask_yes_no(void)
 {
     MenuScratch *sp = MENU_SCRATCH;
     int n = 0;
@@ -3290,7 +3290,7 @@ int func_800615d8(void)
     func_80057a3c();
     while (1) {
         if (n == 0) {
-            if (func_80061578(sp->unk1F8) == 0)
+            if (card_check_inserted(sp->unk1F8) == 0)
                 return -1;
             n = 3;
         }
@@ -3316,7 +3316,7 @@ int func_800615d8(void)
             sp->unk202 = 0;
         }
         n--;
-        func_8002ca84();
+        card_screen_draw();
     }
     func_80057a3c();
     return sp->unk202;
@@ -3324,7 +3324,7 @@ int func_800615d8(void)
 
 /* The port choice: 1 with unk1F4 set to the chosen port, 0 when cancelled. */
 ADDRESS(0x800616f8, 0x154)
-int func_800616f8(void)
+int card_choose_port(void)
 {
     MenuScratch *sp = MENU_SCRATCH;
 
@@ -3356,7 +3356,7 @@ int func_800616f8(void)
             sp->unk1F8 = 1;
             sp->unk2E4 = 0;
         }
-        func_8002ca84();
+        card_screen_draw();
         sp->unk2E4 = (sp->unk2E4 + 1) % 32;
     }
     func_80057a3c();
@@ -3367,7 +3367,7 @@ int func_800616f8(void)
  * Reads each listed file's header bytes into its MenuRecord.
  */
 ADDRESS(0x8006184c, 0x1bc)
-int func_8006184c(void)
+int card_read_file_headers(void)
 {
     MenuScratch *sp = MENU_SCRATCH;
     int retry;
@@ -3378,7 +3378,7 @@ int func_8006184c(void)
     retry = 3;
     i = sp->unk1F4->count;
     while (i--) {
-        if (func_80061578(sp->unk1F8) == 0)
+        if (card_check_inserted(sp->unk1F8) == 0)
             return -1;
         strcpy(path, "bu");
         strcat(path, itoa(sp->unk1F8));
@@ -3415,7 +3415,7 @@ int func_8006184c(void)
  * chosen row in unk1FE, 0 when cancelled, -1 when the card goes away.
  */
 ADDRESS(0x80061a08, 0x32c)
-int func_80061a08(void)
+int card_choose_file(void)
 {
     MenuScratch *sp = MENU_SCRATCH;
     int n = 0;
@@ -3434,7 +3434,7 @@ int func_80061a08(void)
     func_80057a3c();
     while (1) {
         if (n == 0) {
-            if (func_80061578(sp->unk1F8) == 0)
+            if (card_check_inserted(sp->unk1F8) == 0)
                 return -1;
             n = 20;
         }
@@ -3466,7 +3466,7 @@ int func_80061a08(void)
                     DAT_801cd180.unk4 = 0;
                     sp->unk202 = 0;
                 }
-                func_8002ca84();
+                card_screen_draw();
             }
             if (sp->unk202)
                 break;
@@ -3501,7 +3501,7 @@ int func_80061a08(void)
             }
             sp->unk2E4 = 0;
         }
-        func_8002ca84();
+        card_screen_draw();
         sp->unk2E4 = (sp->unk2E4 + 1) % 32;
         n--;
     }
@@ -3519,7 +3519,7 @@ int func_80061a08(void)
  * or -1.
  */
 ADDRESS(0x80061d34, 0x1b4)
-int func_80061d34(int fd, int offset, u8 *data, int size)
+int card_write_blocks(int fd, int offset, u8 *data, int size)
 {
     MenuScratch *sp = MENU_SCRATCH;
     u8 frame[128];
@@ -3543,7 +3543,7 @@ int func_80061d34(int fd, int offset, u8 *data, int size)
             frame[127] = ~frame[127];
         again:
             if (n == 0) {
-                if (func_80061578(sp->unk1F8) == 0)
+                if (card_check_inserted(sp->unk1F8) == 0)
                     return -1;
                 n = 3;
             }
@@ -3576,7 +3576,7 @@ int func_80061d34(int fd, int offset, u8 *data, int size)
 
 /* Reads size bytes back the same way, verifying each frame's sum. */
 ADDRESS(0x80061ee8, 0x174)
-int func_80061ee8(int fd, int offset, u8 *data, int size)
+int card_read_blocks(int fd, int offset, u8 *data, int size)
 {
     MenuScratch *sp = MENU_SCRATCH;
     u8 frame[128];
@@ -3593,7 +3593,7 @@ int func_80061ee8(int fd, int offset, u8 *data, int size)
         do {
         again:
             if (n == 0) {
-                if (func_80061578(sp->unk1F8) == 0)
+                if (card_check_inserted(sp->unk1F8) == 0)
                     return -1;
                 n = 3;
             }
@@ -3629,7 +3629,7 @@ int func_80061ee8(int fd, int offset, u8 *data, int size)
  * header and reads 7560 bytes, checking the sum against the record's.
  */
 ADDRESS(0x8006205c, 0x1cc)
-int func_8006205c(u8 *data)
+int card_load_game(u8 *data)
 {
     MenuScratch *sp = MENU_SCRATCH;
     char path[32];
@@ -3663,7 +3663,7 @@ read:
         close(fd);
         return 0;
     }
-    sum = func_80061ee8(fd, sizeof(header), data, 7560);
+    sum = card_read_blocks(fd, sizeof(header), data, 7560);
     if (sum == -1 || sum != sp->unk1F4->files[sp->unk1FE].unk1E) {
         if (sum != sp->unk1F4->files[sp->unk1FE].unk1E)
             sp->unk0.half[0] = 349;
@@ -3693,7 +3693,7 @@ read:
  * is what leaves the unk1FE load ahead of the icon store.
  */
 ADDRESS(0x80062228, 0x998)
-int func_80062228(u8 *data)
+int card_save_game(u8 *data)
 {
     MenuScratch *sp = MENU_SCRATCH;
     int retry = 3;
@@ -4111,7 +4111,7 @@ write:
         lseek(fd, 0, SEEK_SET);
         goto write;
     }
-    sum = func_80061d34(fd, sizeof(header), data, 7560);
+    sum = card_write_blocks(fd, sizeof(header), data, 7560);
     if (sum == -1) {
         if (retry == 0) {
             func_80057a3c();
@@ -4149,7 +4149,7 @@ write:
 
 /* Formats the memory card in port. */
 ADDRESS(0x80062bc0, 0x68)
-long func_80062bc0(int port)
+long card_format(int port)
 {
     char path[32];
 
@@ -4170,7 +4170,7 @@ long func_80062bc0(int port)
  * 0 when the port choice is cancelled, else 1 after the result message.
  */
 ADDRESS(0x80062c28, 0x450)
-int func_80062c28(int arg)
+int card_screen_run(int arg)
 {
     MenuScratch *sp = MENU_SCRATCH;
     int result;
@@ -4180,20 +4180,20 @@ int func_80062c28(int arg)
     sp->unk0.half[1] = 0;
     sp->unk206 = arg;
     func_80057a3c();
-    func_8002ca84();
-    func_8002ca84();
+    card_screen_draw();
+    card_screen_draw();
     sp->unk2DC <<= 1;
 select:
-    if (func_800616f8() == 0)
+    if (card_choose_port() == 0)
         return 0;
     sp->unk2DC <<= 1;
-    func_8002ca84();
-    func_8002ca84();
-    func_800613e8(sp->unk1F8, 1);
+    card_screen_draw();
+    card_screen_draw();
+    card_probe(sp->unk1F8, 1);
     if ((sp->unk2DC & 0xff00) && sp->unk1F4->status == 3) {
         sp->unk2DC <<= 1;
         sp->unk0.half[1] = 0;
-        result = func_800615d8();
+        result = card_ask_yes_no();
         if (result == 0) {
             sp->unk2DC >>= 2;
             goto select;
@@ -4203,9 +4203,9 @@ select:
             goto done;
         }
         sp->unk0.half[1] = 1;
-        func_8002ca84();
-        func_8002ca84();
-        if (func_80062bc0(sp->unk1F8) == 0) {
+        card_screen_draw();
+        card_screen_draw();
+        if (card_format(sp->unk1F8) == 0) {
             sp->unk0.half[0] = 356;
             sp->unk2DC <<= 4;
             goto done;
@@ -4219,7 +4219,7 @@ select:
         }
         sp->unk2DC <<= 2;
     }
-    func_8006103c(sp->unk1F8);
+    card_read_directory(sp->unk1F8);
     if (sp->unk1F4->status != 0) {
         if (sp->unk1F4->status == 4)
             sp->unk0.half[0] = 352;
@@ -4228,7 +4228,7 @@ select:
         sp->unk2DC <<= 3;
         goto done;
     }
-    result = func_8006184c();
+    result = card_read_file_headers();
     if (result == 0) {
         sp->unk0.half[0] = 352;
         sp->unk2DC <<= 3;
@@ -4238,7 +4238,7 @@ select:
         sp->unk2DC <<= 3;
         goto done;
     }
-    result = func_80061a08();
+    result = card_choose_file();
     if (result == 0) {
         sp->unk2DC >>= 3;
         goto select;
@@ -4249,9 +4249,9 @@ select:
     }
     sp->unk0.half[0] = 0;
     sp->unk2DC <<= 1;
-    func_8002ca84();
-    func_8002ca84();
-    func_800613e8(sp->unk1F8, 0);
+    card_screen_draw();
+    card_screen_draw();
+    card_probe(sp->unk1F8, 0);
     if (sp->unk1F4->status == 1) {
         sp->unk0.half[0] = 351;
         sp->unk2DC <<= 2;
@@ -4269,9 +4269,9 @@ select:
     }
     if (sp->unk2DC & 0xff00) {
         func_800562d4((StSaveData *)buf, sp->unk208);
-        result = func_80062228(buf);
+        result = card_save_game(buf);
     } else {
-        result = func_8006205c(buf);
+        result = card_load_game(buf);
         if (result)
             func_80056aa0((StSaveData *)buf);
     }
@@ -4287,8 +4287,8 @@ select:
     }
     sp->unk2DC <<= 1;
 done:
-    func_8002ca84();
-    func_8002ca84();
+    card_screen_draw();
+    card_screen_draw();
     if (sp->unk2DC & 0x80) {
         while (PRESSED_NOW == 0)
             ;
@@ -4321,7 +4321,7 @@ done:
  * TITLE.EXE) when the first choice is confirmed, else 0.
  */
 ADDRESS(0x80063078, 0x134)
-int func_80063078(void)
+int menu_end_game_run(void)
 {
     MenuScratch *sp = MENU_SCRATCH;
 
@@ -4352,7 +4352,7 @@ int func_80063078(void)
             return 1;
         }
         frame_rate_update();
-        func_8002ce84();
+        menu_end_game_draw();
         sp->unk2E4 = (sp->unk2E4 + 1) % 32;
     }
     func_80057a3c();
@@ -4360,20 +4360,20 @@ int func_80063078(void)
 }
 
 /*
- * The pause screen: runs func_80031d50 until button 8, keeping the play
+ * The pause screen: runs pause_screen_draw until button 8, keeping the play
  * clock (viewer.unk33/unk34) still.
  * The controller owner becomes live after the draw setup. The explicit
  * top-tested wait keeps the button read before each pair of frame calls.
  */
 ADDRESS(0x800631ac, 0xb4)
-void func_800631ac(void)
+void pause_screen_run(void)
 {
     s32 seconds = viewer.unk34;
     u8 frames = viewer.unk33;
     Data801cd180 *pad;
 
     cd_wait_idle();
-    func_80058c04();
+    menu_store_screen();
     func_80057a3c();
     DrawSync(0);
     pad = &DAT_801cd180;
@@ -4381,11 +4381,11 @@ pause_wait:
     if (pad->unk4 & 8)
         goto pause_done;
     frame_rate_update();
-    func_80031d50();
+    pause_screen_draw();
     goto pause_wait;
 pause_done:
     func_80057a3c();
-    func_80058c24();
+    menu_restore_screen();
     viewer.unk34 = seconds;
     viewer.unk33 = frames;
 }
@@ -4395,7 +4395,7 @@ pause_done:
  * the choice.
  */
 ADDRESS(0x80063260, 0x174)
-int func_80063260(void)
+int menu_game_over_run(void)
 {
     MenuScratch *sp = MENU_SCRATCH;
     u8 *p;
@@ -4431,7 +4431,7 @@ int func_80063260(void)
         }
         sp->unk2E5 = 0;
         frame_rate_update();
-        func_8002cef8();
+        menu_game_over_draw();
         sp->unk2E4 = (sp->unk2E4 + 1) % 32;
     }
     func_80057a3c();
@@ -4441,10 +4441,10 @@ int func_80063260(void)
 /*
  * The memory card choice screen: loads the menu messages and image, then
  * runs the two-row choice until a row is confirmed; row 0 runs the save
- * screen (func_80062c28) and returns once it reports 1.
+ * screen (card_screen_run) and returns once it reports 1.
  */
 ADDRESS(0x800633d4, 0x264)
-void func_800633d4(void)
+void menu_save_prompt_run(void)
 {
     MenuScratch *sp = MENU_SCRATCH;
     RECT clear = {0, 0, 320, 480};
@@ -4481,11 +4481,11 @@ void func_800633d4(void)
             func_80042cfc();
             func_80057a3c();
             func_80057a68(0);
-            func_80058dc4(1, 0);
+            card_screen_open(1, 0);
             sp->unk208 = 1;
-            result = func_80062c28(0);
+            result = card_screen_run(0);
             func_80057a3c();
-            func_80058ed4();
+            card_screen_close();
             if (result == 1)
                 break;
         }
@@ -4501,7 +4501,7 @@ void func_800633d4(void)
         }
         sp->unk2E5 = 0;
         frame_rate_update();
-        func_8002d0b0();
+        menu_save_prompt_draw();
         sp->unk2E4 = (sp->unk2E4 + 1) % 32;
     }
     func_80057a3c();

@@ -1,6 +1,6 @@
 /*
  * VS.EXE: a two-page screen frame (WIP module), shaped as ST.EXE's
- * func_80030ab8 (src/st/ui.c).
+ * menu_creature_book_draw (src/st/ui.c).
  */
 #include <kf/lib/address.h>
 #include <kf/lib/null.h>

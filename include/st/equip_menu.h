@@ -33,12 +33,12 @@ typedef struct {
     u8 unk14[0xc];
 } Data801e0ce8;
 
-/* 0x801e0d08: the slot sub-list. func_800637c0 allocates its 144-byte bit
- * table (src/st/menu_vram.c) and func_80063954 frees it. */
+/* 0x801e0d08: the slot sub-list. menu_equip_open allocates its 144-byte bit
+ * table (src/st/menu_vram.c) and menu_equip_close frees it. */
 extern EquipSubList DAT_801e0d08;
 
-/* The equipment ids func_800637c0 records (viewer.unk38[3], [4], [16],
- * [17], [6], [12]) for func_80063954 to compare. */
+/* The equipment ids menu_equip_open records (viewer.unk38[3], [4], [16],
+ * [17], [6], [12]) for menu_equip_close to compare. */
 extern u16 DAT_801e0d28[6];
 
 extern Data801e0ce8 DAT_801e0ce8;

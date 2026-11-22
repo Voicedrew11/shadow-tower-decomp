@@ -109,32 +109,32 @@ extern VsMessages DAT_80196230[2];
 
 /* VS's copies of ST.EXE's text and primitive helpers (src/st/ui.c,
  * src/st/text.c), not reconstructed yet. */
-void func_8001d8b8(u16 *s, u16 x, u16 y, CVECTOR *color); /* ST func_8002732c */
+void func_8001d8b8(u16 *s, u16 x, u16 y, CVECTOR *color); /* ST ui_draw_text */
 void func_800204b0(void);                                /* the menu screens' frame: draws and flips */
-void func_8001e3d8(RECT *r, CVECTOR *color, u16 semi);   /* ST func_80028220 */
-void func_8001e530(RECT *r, DVECTOR *tex, DVECTOR *clut, CVECTOR *color, int mode); /* ST func_80028364 */
-void func_8001e890(int abr, int x, int y);               /* ST func_800286a8 */
-void func_8001f23c(int x, int y, int w, int h);          /* ST func_80029548 */
-void func_8001de8c(RECT *r, CVECTOR *color, u16 border, u16 semi); /* ST func_80027d18 */
-void func_8001eef4(RECT *r, CVECTOR *color, u16 dir);    /* ST func_8002916c */
-void func_8001d3f0(u16 c, u16 x, u16 y, CVECTOR *color);  /* ST func_80026ecc */
-void func_8001d9cc(u32 num, u16 x, u16 y, CVECTOR *color); /* ST func_80027440 */
-void func_8001f30c(short x, short y, short w, short h); /* ST func_80029618 */
-void func_8001f828(void);                                /* ST func_8002c9e8 */
+void func_8001e3d8(RECT *r, CVECTOR *color, u16 semi);   /* ST ui_fill_rect */
+void func_8001e530(RECT *r, DVECTOR *tex, DVECTOR *clut, CVECTOR *color, int mode); /* ST ui_draw_image */
+void func_8001e890(int abr, int x, int y);               /* ST ui_add_draw_mode */
+void func_8001f23c(int x, int y, int w, int h);          /* ST ui_draw_panel */
+void func_8001de8c(RECT *r, CVECTOR *color, u16 border, u16 semi); /* ST ui_draw_rect_outline */
+void func_8001eef4(RECT *r, CVECTOR *color, u16 dir);    /* ST ui_draw_arrow */
+void func_8001d3f0(u16 c, u16 x, u16 y, CVECTOR *color);  /* ST ui_draw_glyph */
+void func_8001d9cc(u32 num, u16 x, u16 y, CVECTOR *color); /* ST ui_draw_number */
+void func_8001f30c(short x, short y, short w, short h); /* ST ui_draw_window */
+void func_8001f828(void);                                /* ST menu_draw_background */
 void func_8001f8c4(void);
-void func_8001f960(void);                                /* ST func_8002c050 */
+void func_8001f960(void);                                /* ST card_draw_checking */
 void func_8001f9a0(void);
-void func_8001fb98(void);                                /* ST func_8002c1a4 */
+void func_8001fb98(void);                                /* ST card_draw_format_prompt */
 void func_8001fcac(void);
-void func_80020384(void);                                /* ST func_8002c8bc */
-void func_80020420(void);                                /* ST func_8002c958 */
-void func_80020460(void);                                /* ST func_8002c998 */
+void func_80020384(void);                                /* ST card_draw_transfer */
+void func_80020420(void);                                /* ST card_draw_finished */
+void func_80020460(void);                                /* ST card_draw_message */
 void func_80020aa4(int page);
-void func_80021140(int page);                            /* ST func_8003025c */
+void func_80021140(int page);                            /* ST menu_creature_book_draw_entry */
 void func_80021cfc(void);
 void func_80022228(void);
 void func_800222d8(int page);
-void func_80022794(void);                                /* ST func_800319a8 */
+void func_80022794(void);                                /* ST menu_draw_button_prompt */
 void func_80022a00(void);
 void func_80022f14(int page);
 void func_80023114(int page);

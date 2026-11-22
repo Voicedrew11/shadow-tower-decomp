@@ -119,7 +119,7 @@ typedef struct {
     StCdRequest *unk9D4;
     StCdRequest *unk9D8;
     StArchive archives[ST_ARCHIVES];
-    StArchive unkA00;    /* 0xa00: a fourth archive table (func_8005ad00 seeks to member 1) */
+    StArchive unkA00;    /* 0xa00: a fourth archive table (menu_equip_info_run seeks to member 1) */
     u8 unkA0C[0xa6c - 0xa0c];
     CdlFILE unkA6C; /* \LOAD02.TIM;1, searched by loading_screen_find_file, read by loading_screen_show */
     u_long *unkA84;      /* 0xa84: load cursor into DAT_80088c88, which follows this block (src/st/menu.c) */

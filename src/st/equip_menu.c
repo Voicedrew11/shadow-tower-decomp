@@ -46,7 +46,7 @@ static s16 DAT_800881e8[2];
 #define PAD DAT_801cd180
 #define SLOT(k) (&viewer.unk38[k])
 
-/* Runs func_8005a3a8(0) with the list state kept, then clamps
+/* Runs player_compute_derived_stats(0) with the list state kept, then clamps
  * the two viewer figures it may have raised. */
 ADDRESS(0x80063bdc, 0xd4)
 void func_80063bdc(void)
@@ -58,7 +58,7 @@ void func_80063bdc(void)
 
     MENU_SCRATCH->unk2D8 = viewer.unk2;
     MENU_SCRATCH->unk2DA = viewer.unk6;
-    func_8005a3a8(0);
+    player_compute_derived_stats(0);
     if (viewer.unk0 < MENU_SCRATCH->unk2D8)
         viewer.unk2 = viewer.unk0;
     if (viewer.unk4 < MENU_SCRATCH->unk2DA)
@@ -529,9 +529,9 @@ void func_80064ee4(void)
 ADDRESS(0x80064ff0, 0x30)
 void func_80064ff0(void)
 {
-    func_800637c0();
+    menu_equip_open();
     func_80064ee4();
-    func_80063954();
+    menu_equip_close();
 }
 
 /* Unreferenced: copies the packet area to the current frame's clip and
@@ -543,8 +543,8 @@ void func_80065020(void)
     CVECTOR c = {32, 32, 32};
 
     LoadImage(&world_state.draw[world_state.frame].clip, world_state.packets[1].end);
-    func_80028220(&r, &c, 1);
-    func_800286a8(2, 0, 0);
+    ui_fill_rect(&r, &c, 1);
+    ui_add_draw_mode(2, 0, 0);
 }
 
 /* The title image and frame; the screen is dimmed while the slot list
@@ -560,14 +560,14 @@ void func_800650dc(void)
     MENU_SCRATCH->unk33C.w = 50;
     MENU_SCRATCH->unk358.vx = 576;
     MENU_SCRATCH->unk358.vy = 464;
-    func_80028364(&MENU_SCRATCH->unk33C, &MENU_SCRATCH->unk358, &MENU_SCRATCH->unk35C, NULL, 3);
-    func_80029618(16, 16, 288, 208);
+    ui_draw_image(&MENU_SCRATCH->unk33C, &MENU_SCRATCH->unk358, &MENU_SCRATCH->unk35C, NULL, 3);
+    ui_draw_window(16, 16, 288, 208);
     if (MENU_SCRATCH->unk2DC & 0x1) {
         RECT r = {0, 0, 320, 240};
         CVECTOR c = {32, 32, 32, 0};
 
-        func_80028220(&r, &c, 1);
-        func_800286a8(2, 0, 0);
+        ui_fill_rect(&r, &c, 1);
+        ui_add_draw_mode(2, 0, 0);
     }
 }
 
@@ -579,8 +579,8 @@ void func_800651f0(void)
     MENU_SCRATCH->unk330.x = 24;
     MENU_SCRATCH->unk330.h = 34;
     MENU_SCRATCH->unk330.y = MENU_SCRATCH->unk2E0 * 36 + 44;
-    func_80027d18(&MENU_SCRATCH->unk330, &MENU_SCRATCH->unk32C, 257, 1);
-    func_800286a8(1, 0, 0);
+    ui_draw_rect_outline(&MENU_SCRATCH->unk330, &MENU_SCRATCH->unk32C, 257, 1);
+    ui_add_draw_mode(1, 0, 0);
 }
 
 /* The candidate list's panel: the arrows, the shown id's name, figures and
@@ -598,14 +598,14 @@ void func_80065270(void)
         RECT left = {24, 100, 16, 8};
         RECT right = {160, 100, 16, 8};
 
-        func_8002916c(&right, &sp->unk32C, 0);
-        func_8002916c(&left, &sp->unk32C, 2048);
-        func_800286a8(1, 0, 0);
+        ui_draw_arrow(&right, &sp->unk32C, 0);
+        ui_draw_arrow(&left, &sp->unk32C, 2048);
+        ui_add_draw_mode(1, 0, 0);
     }
     id = EQ.unk0;
     if (id != -1) {
         sp->style[0].cd |= 0x80;
-        func_8002732c(MESSAGE_IN(sp->unk0.list.messages, id), 24, 176, &sp->style[0]);
+        ui_draw_text(MESSAGE_IN(sp->unk0.list.messages, id), 24, 176, &sp->style[0]);
         sp->style[0].cd &= 0x7f;
         if (vis_table_c.unk0118[id].unk27) {
             if (vis_table_c.unk0118[id].unk28 < 4) {
@@ -615,22 +615,22 @@ void func_80065270(void)
                 label = &sp->style[0];
                 value = &sp->style[4];
             }
-            func_8002732c(MESSAGE(109), 48, 190, label);
-            func_80027440(vis_table_c.unk0118[id].unk28 | 0x3000000, 104, 190, value);
-            func_80026ecc(74, 136, 190, label);
-            func_80027440(vis_table_c.unk0118[id].unk27 | 0x3000000, 148, 190, value);
+            ui_draw_text(MESSAGE(109), 48, 190, label);
+            ui_draw_number(vis_table_c.unk0118[id].unk28 | 0x3000000, 104, 190, value);
+            ui_draw_glyph(74, 136, 190, label);
+            ui_draw_number(vis_table_c.unk0118[id].unk27 | 0x3000000, 148, 190, value);
         }
     }
-    func_8002732c(MESSAGE(103), 165, 46, &sp->style[0]);
+    ui_draw_text(MESSAGE(103), 165, 46, &sp->style[0]);
     y = 46;
-    func_8002732c(MESSAGE(103), 165, y, &sp->style[0]);
+    ui_draw_text(MESSAGE(103), 165, y, &sp->style[0]);
     for (i = 0; i < 7; i++) {
         if (id == -1) {
-            func_800276bc(0x13000000, 207, y, &sp->style[4]);
-            func_800276bc(0x13000000, 273, y, &sp->style[4]);
+            ui_draw_number_fixed(0x13000000, 207, y, &sp->style[4]);
+            ui_draw_number_fixed(0x13000000, 273, y, &sp->style[4]);
         } else {
-            func_800276bc(vis_table_c.unk0118[id].unk10[i] | 0x13000000, 207, y, &sp->style[4]);
-            func_800276bc(vis_table_c.unk0118[id].unk10[i + 7] | 0x13000000, 273, y, &sp->style[4]);
+            ui_draw_number_fixed(vis_table_c.unk0118[id].unk10[i] | 0x13000000, 207, y, &sp->style[4]);
+            ui_draw_number_fixed(vis_table_c.unk0118[id].unk10[i + 7] | 0x13000000, 273, y, &sp->style[4]);
         }
         y += 14;
     }
@@ -638,12 +638,12 @@ void func_80065270(void)
         if (vis_table_c.unk0118[id].unk24) {
             DAT_8008819e = vis_table_c.unk0118[id].unk24 * 100 / 454;
             DAT_80088188 = vis_table_c.unk0118[id].unk24 * 1000 / 454;
-            func_8002732c(MESSAGE(104), 221, 156, &sp->style[0]);
-            func_800276bc(DAT_8008819e | 0x3000000, 249, 156, &sp->style[4]);
-            func_80026ecc(78, 269, 156, &sp->style[0]);
-            func_800276bc((u16)(DAT_80088188 - DAT_8008819e * 10) | 0x1000000, 275, 156,
+            ui_draw_text(MESSAGE(104), 221, 156, &sp->style[0]);
+            ui_draw_number_fixed(DAT_8008819e | 0x3000000, 249, 156, &sp->style[4]);
+            ui_draw_glyph(78, 269, 156, &sp->style[0]);
+            ui_draw_number_fixed((u16)(DAT_80088188 - DAT_8008819e * 10) | 0x1000000, 275, 156,
                           &sp->style[4]);
-            func_80026ecc(108, 281, 156, &sp->style[0]);
+            ui_draw_glyph(108, 281, 156, &sp->style[0]);
         }
         sp->unk350.x = 20;
         sp->unk350.y = 40;
@@ -651,7 +651,7 @@ void func_80065270(void)
         sp->unk350.h = 128;
         sp->unk358.vx = 448;
         sp->unk358.vy = 256;
-        func_80028364(&sp->unk350, &sp->unk358, NULL, NULL, 16);
+        ui_draw_image(&sp->unk350, &sp->unk358, NULL, NULL, 16);
     } else {
         sp->unk350.x = 28;
         sp->unk350.y = 40;
@@ -659,7 +659,7 @@ void func_80065270(void)
         sp->unk350.h = 128;
         sp->unk358.vx = 448;
         sp->unk358.vy = 256;
-        func_80028364(&sp->unk350, &sp->unk358, NULL, NULL, 16);
+        ui_draw_image(&sp->unk350, &sp->unk358, NULL, NULL, 16);
     }
 }
 
@@ -684,20 +684,20 @@ void func_80065770(void)
     }
     DAT_8008819e = viewer.unk22 * 100 / 454;
     DAT_80088188 = viewer.unk22 * 1000 / 454;
-    func_8002732c(MESSAGE(915), 113, 26, label);
-    func_80027440(DAT_8008819e | 0x3000000, 181, 26, value);
-    func_80026ecc(78, 212, 26, label);
-    func_80027440((u16)(DAT_80088188 - DAT_8008819e * 10) | 0x1000000, 217, 26, value);
-    func_80026ecc(74, 230, 26, label);
+    ui_draw_text(MESSAGE(915), 113, 26, label);
+    ui_draw_number(DAT_8008819e | 0x3000000, 181, 26, value);
+    ui_draw_glyph(78, 212, 26, label);
+    ui_draw_number((u16)(DAT_80088188 - DAT_8008819e * 10) | 0x1000000, 217, 26, value);
+    ui_draw_glyph(74, 230, 26, label);
     DAT_8008819e = viewer.unk24 * 100 / 454;
     DAT_80088188 = viewer.unk24 * 1000 / 454;
-    func_80027440(DAT_8008819e | 0x3000000, 243, 26, value);
-    func_80026ecc(78, 274, 26, label);
-    func_80027440((u16)(DAT_80088188 - DAT_8008819e * 10) | 0x1000000, 279, 26, value);
+    ui_draw_number(DAT_8008819e | 0x3000000, 243, 26, value);
+    ui_draw_glyph(78, 274, 26, label);
+    ui_draw_number((u16)(DAT_80088188 - DAT_8008819e * 10) | 0x1000000, 279, 26, value);
     for (i = 0; i < 5; i++) {
         y = 48 + i * 36;
         y2 = 64 + i * 36;
-        func_8002732c(MESSAGE(sp->unk2E2 + i + 900), 28, y, &sp->style[0]);
+        ui_draw_text(MESSAGE(sp->unk2E2 + i + 900), 28, y, &sp->style[0]);
         switch (sp->unk2E2 + i) {
         case 0:
             cur = viewer.unk38[8];
@@ -753,18 +753,18 @@ void func_80065770(void)
             if (cur != 0xffff) {
                 u8 entries[] = {0, 1, 255, 2, 3, 255, 4, 5, 255, 6, 7, 255, 8, 9, 255, 10, 11, 255};
 
-                func_8002732c(MESSAGE(916 + entries[cur]), 92, y, &sp->style[0]);
+                ui_draw_text(MESSAGE(916 + entries[cur]), 92, y, &sp->style[0]);
             } else {
-                func_8002732c(MESSAGE(935), 92, y, &sp->style[0]);
+                ui_draw_text(MESSAGE(935), 92, y, &sp->style[0]);
             }
         } else if (cur != 0xffff) {
             sp->style[0].cd |= 0x80;
             sp->style[3].cd |= 0x80;
-            func_8002732c(MESSAGE_IN(sp->unk0.list.messages, cur), 92, y, &sp->style[0]);
+            ui_draw_text(MESSAGE_IN(sp->unk0.list.messages, cur), 92, y, &sp->style[0]);
             sp->style[0].cd &= 0x7f;
             sp->style[3].cd &= 0x7f;
         } else {
-            func_8002732c(MESSAGE(934), 92, y, &sp->style[0]);
+            ui_draw_text(MESSAGE(934), 92, y, &sp->style[0]);
         }
         row = sp->unk2E2 + i;
         if (row != 12 && row != 14 && cur != 0xffff && vis_table_c.unk0118[cur].unk27) {
@@ -775,10 +775,10 @@ void func_80065770(void)
                 label2 = &sp->style[0];
                 value2 = &sp->style[4];
             }
-            func_8002732c(MESSAGE(109), 92, y2, label2);
-            func_80027440(vis_table_c.unk0118[cur].unk28 | 0x3000000, 172, y2, value2);
-            func_80026ecc(74, 204, y2, label2);
-            func_80027440(vis_table_c.unk0118[cur].unk27 | 0x3000000, 220, y2, value2);
+            ui_draw_text(MESSAGE(109), 92, y2, label2);
+            ui_draw_number(vis_table_c.unk0118[cur].unk28 | 0x3000000, 172, y2, value2);
+            ui_draw_glyph(74, 204, y2, label2);
+            ui_draw_number(vis_table_c.unk0118[cur].unk27 | 0x3000000, 220, y2, value2);
         }
     }
 }
@@ -804,11 +804,11 @@ void func_80065de0(void)
     for (; i < 5; i++) {
         if (*(list->entries + (sp->unk2E2 + i)) != 255) {
             names = DAT_8008092c;
-            func_8002732c(
+            ui_draw_text(
                 (u16 *)(offsets[916 + names[*(list->entries + (sp->unk2E2 + i))]] + text), 28, y,
                 label);
-            func_8002732c((u16 *)(offsets[936] + text), 140, y2, label);
-            func_80027440(effects.defs[*(list->entries + (sp->unk2E2 + i))].unk2 | 0x3000000,
+            ui_draw_text((u16 *)(offsets[936] + text), 140, y2, label);
+            ui_draw_number(effects.defs[*(list->entries + (sp->unk2E2 + i))].unk2 | 0x3000000,
                           204, y2, &sp->style[4]);
             y2 += 36;
             y += 36;
@@ -825,8 +825,8 @@ void func_80065f40(void)
 
     LoadImage(&world_state.draw[world_state.frame].clip,
               (u_long *)((u8 *)world_state.packets[1].end + 0x10000));
-    func_80028220(&r, &c, 1);
-    func_800286a8(2, 0, 0);
+    ui_fill_rect(&r, &c, 1);
+    ui_add_draw_mode(2, 0, 0);
 }
 
 /* Draws the screen: the text colours, the cursor blink and the active
@@ -920,7 +920,7 @@ void func_80066240(void)
     DAT_801e0d38.unk0 = 104;
     DAT_801e0d38.unk4 = 0;
     DAT_801e0d38.unk10 = DAT_801e0d38.unkC = DAT_801e0d38.unk8 = -1;
-    func_80058cc8();
+    menu_show_loading_screen();
     MENU_SCRATCH->unk0.grid.messages = mem_alloc(21504);
     tim = DAT_80088c88;
     cd_read_member(3, 1, tim);
@@ -969,7 +969,7 @@ void func_80066240(void)
     sp->unk0.grid.row0 = 0;
     sp->unk0.grid.row1 = 0;
     DAT_801e0d38.unk2 = -1;
-    func_80031cfc();
+    clear_vram();
     DrawSync(0);
     gfx_setup_640x240();
 }
@@ -1318,11 +1318,11 @@ void func_80067580(void)
 
     while (func_8006616c())
         ;
-    func_80058c4c();
+    menu_load_main_messages();
     mem_free(sp->unk0.grid.ids0);
     mem_free(sp->unk0.grid.ids1);
     mem_free(sp->unk0.grid.messages);
-    func_80058d30();
+    menu_reload_assets();
     func_80057a3c();
 }
 
@@ -1388,11 +1388,11 @@ void func_80067624(void)
         if (!func_8006616c()) {
             sp->unk358.vx = 640;
             sp->unk358.vy = 0;
-            func_80028364(&sp->unk350, &sp->unk358, NULL, NULL, 16);
+            ui_draw_image(&sp->unk350, &sp->unk358, NULL, NULL, 16);
             sp->unk350.w = 100;
             sp->unk358.vx = 832;
             sp->unk350.x += 192;
-            func_80028364(&sp->unk350, &sp->unk358, NULL, NULL, 16);
+            ui_draw_image(&sp->unk350, &sp->unk358, NULL, NULL, 16);
         }
         n = 0;
         k = 2;
@@ -1404,8 +1404,8 @@ void func_80067624(void)
                     goto done;
                 n++;
                 if (*count) {
-                    func_8002732c(MESSAGE(200 + k), text_x - 4 + i * 72, text_y + j * 15, &sp->style[0]);
-                    func_80027440(*count | 0x13000000, text_x + i * 72 + 40, text_y + j * 15,
+                    ui_draw_text(MESSAGE(200 + k), text_x - 4 + i * 72, text_y + j * 15, &sp->style[0]);
+                    ui_draw_number(*count | 0x13000000, text_x + i * 72 + 40, text_y + j * 15,
                                   &sp->style[4]);
                 }
                 count++;
@@ -1425,23 +1425,23 @@ void func_80067624(void)
                 label = &sp->style[0];
                 value = &sp->style[4];
             }
-            func_8002732c(MESSAGE(29), text_x, text_y, label);
-            func_80027440(vis_table_c.unk0118[id].unk28 | 0x3000000, text_x + 70, text_y, value);
-            func_80026ecc(14, text_x + 106, text_y, label);
-            func_80027440(vis_table_c.unk0118[id].unk27 | 0x3000000, text_x + 122, text_y, value);
+            ui_draw_text(MESSAGE(29), text_x, text_y, label);
+            ui_draw_number(vis_table_c.unk0118[id].unk28 | 0x3000000, text_x + 70, text_y, value);
+            ui_draw_glyph(14, text_x + 106, text_y, label);
+            ui_draw_number(vis_table_c.unk0118[id].unk27 | 0x3000000, text_x + 122, text_y, value);
         }
         text_y += 15;
         if (vis_table_c.unk0118[id].unk24) {
             whole = vis_table_c.unk0118[id].unk24 * 100 / 454;
             tenths = vis_table_c.unk0118[id].unk24 * 1000 / 454 - whole * 10;
-            func_8002732c(MESSAGE(28), text_x, text_y, &sp->style[0]);
-            func_80027440(whole | 0x3000000, text_x + 70, text_y, &sp->style[4]);
-            func_80026ecc(18, text_x + 109, text_y, &sp->style[0]);
-            func_80027440(tenths | 0x1000000, text_x + 116, text_y, &sp->style[4]);
-            func_80026ecc(53, text_x + 132, text_y, &sp->style[0]);
+            ui_draw_text(MESSAGE(28), text_x, text_y, &sp->style[0]);
+            ui_draw_number(whole | 0x3000000, text_x + 70, text_y, &sp->style[4]);
+            ui_draw_glyph(18, text_x + 109, text_y, &sp->style[0]);
+            ui_draw_number(tenths | 0x1000000, text_x + 116, text_y, &sp->style[4]);
+            ui_draw_glyph(53, text_x + 132, text_y, &sp->style[0]);
         }
     }
-    func_80029548(x, y, 296, 222);
+    ui_draw_panel(x, y, 296, 222);
 }
 
 /*
@@ -1482,37 +1482,37 @@ void func_80067bec(u8 grid)
     }
     sp->unk330.w = 270;
     sp->unk330.h = 15;
-    func_80027d18(&sp->unk330, &sp->unk32C, 513, 1);
+    ui_draw_rect_outline(&sp->unk330, &sp->unk32C, 513, 1);
     if (grid == 104) {
         if (sp->unk0.grid.row0 > 0)
-            func_8002916c(&up0, &sp->unk32C, 3072);
+            ui_draw_arrow(&up0, &sp->unk32C, 3072);
         if (sp->unk0.grid.row0 < 303)
-            func_8002916c(&down0, &sp->unk32C, 1024);
+            ui_draw_arrow(&down0, &sp->unk32C, 1024);
     } else {
         if (sp->unk0.grid.row1 > 0)
-            func_8002916c(&up1, &sp->unk32C, 3072);
+            ui_draw_arrow(&up1, &sp->unk32C, 3072);
         if (sp->unk0.grid.row1 < 303)
-            func_8002916c(&down1, &sp->unk32C, 1024);
+            ui_draw_arrow(&down1, &sp->unk32C, 1024);
     }
     if (grid == 104) {
         knob0.y = sp->unk0.grid.row0 * 173 / 303 + 35;
-        func_80028220(&knob0, &knob, 1);
-        func_800286a8(1, 0, 0);
+        ui_fill_rect(&knob0, &knob, 1);
+        ui_add_draw_mode(1, 0, 0);
         bar.x = knob0.x - 2;
         bar.y = knob0.y - 1;
         bar.w = knob0.w;
         bar.h = knob0.h;
     } else {
         knob1.y = sp->unk0.grid.row1 * 173 / 303 + 35;
-        func_80028220(&knob1, &knob, 1);
-        func_800286a8(1, 0, 0);
+        ui_fill_rect(&knob1, &knob, 1);
+        ui_add_draw_mode(1, 0, 0);
         bar.x = knob1.x - 2;
         bar.y = knob1.y - 1;
         bar.w = knob1.w;
         bar.h = knob1.h;
     }
-    func_80028220(&bar, &knob, 1);
-    func_800286a8(2, 0, 0);
+    ui_fill_rect(&bar, &knob, 1);
+    ui_add_draw_mode(2, 0, 0);
     if (grid == 104) {
         sp->unk33C.x = 60;
         sp->unk33C.y = 12;
@@ -1532,7 +1532,7 @@ void func_80067bec(u8 grid)
         sp->unk35C.vx = 544;
         sp->unk35C.vy = 502;
     }
-    func_80028364(&sp->unk33C, &sp->unk358, &sp->unk35C, NULL, 3);
+    ui_draw_image(&sp->unk33C, &sp->unk358, &sp->unk35C, NULL, 3);
     {
         CVECTOR held = {0, 128, 128, 201};
         CVECTOR empty = {0, 96, 96, 201};
@@ -1564,20 +1564,20 @@ void func_80067bec(u8 grid)
                     box.y = y + i * 16;
                     box.w = 266;
                     box.h = 12;
-                    func_80028220(&box, &empty, 0);
+                    ui_fill_rect(&box, &empty, 0);
                 }
             } else {
                 color = &sp->style[0];
             }
             if (id != -1)
-                func_8002732c(MESSAGE_IN(sp->unk0.grid.messages, id), x, y + i * 16, color);
+                ui_draw_text(MESSAGE_IN(sp->unk0.grid.messages, id), x, y + i * 16, color);
         }
         sp->style[0].cd &= 0x7f;
     }
     if (grid == 104)
-        func_80029548(10, 9, 296, 222);
+        ui_draw_panel(10, 9, 296, 222);
     else
-        func_80029548(334, 9, 296, 222);
+        ui_draw_panel(334, 9, 296, 222);
 }
 
 /* Draws the screen: the text colours, the cursor blink, one grid with its
@@ -1608,7 +1608,7 @@ void func_80068258(void)
     sp->unk32C.r = (u8)sp->unk360 * 4 + 96;
     sp->unk32C.g = (u8)sp->unk360 * 2 + 48;
     if (sp->unk2DC & 0x8000)
-        func_800319a8();
+        menu_draw_button_prompt();
     if (sp->unk2DC & 0x1) {
         func_80067bec(104);
         func_80067bec(98);
@@ -1617,11 +1617,11 @@ void func_80068258(void)
         func_80067624();
     }
     if (ST.unk0 == 104)
-        func_8002916c(&arrow, &color, 0);
+        ui_draw_arrow(&arrow, &color, 0);
     else
-        func_8002916c(&arrow, &color, 2048);
-    func_800286a8(1, 0, 0);
-    func_8002c9e8();
+        ui_draw_arrow(&arrow, &color, 2048);
+    ui_add_draw_mode(1, 0, 0);
+    menu_draw_background();
     gfx_end_frame();
 }
 

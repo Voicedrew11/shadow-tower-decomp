@@ -599,7 +599,7 @@ void func_801ee610(void)
     kind = &vis_table_c.unk0118[c28->unk00];
     *(u8 *)&items->counts[viewer.unk38[3]] = 0;
     viewer.unk38[3] = 0xffff;
-    func_8005a3a8(0);
+    player_compute_derived_stats(0);
     func_8003d030();
     func_8003f12c(viewer.unk38[3], 0, 0);
     func_8003f12c(viewer.unk38[16], 1, 0);

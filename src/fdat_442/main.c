@@ -65,7 +65,7 @@ const FdatHeader fdat_header = {
 
 void SsSetSerialVol(short s_num, short voll, short volr);
 void func_80042cec(void);
-void func_8005f54c(void);
+void shop_run(void);
 
 /*
  * Once: picks the ending: item 266 not held makes ending 1; flags 31 and
@@ -176,7 +176,7 @@ void func_801ed63c(void)
         DAT_801cd180.unk4 = 0;
         menu->unk2DC = 1;
         menu->unk2E5 = 0;
-        func_8005f54c();
+        shop_run();
         fdat_801ed8c4 = 5;
     } else if (fdat_801ed8c4 == 5) {
         if (fdat_801ed8c8 == 2) {

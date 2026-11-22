@@ -1,7 +1,7 @@
 /*
  * VS.EXE: the 640- and 320-wide display setups and the graphics reset (WIP
  * module). VS's copies of ST.EXE's gfx_setup_640x240, gfx_setup_320x240
- * (src/st/gfx.c) and func_80058cc8 (src/st/menu_main.c).
+ * (src/st/gfx.c) and menu_show_loading_screen (src/st/menu_main.c).
  */
 #include <kf/lib/address.h>
 #include <kf/lib/types.h>

@@ -28,7 +28,7 @@ typedef struct {
 typedef char MenuMessagesSize[sizeof(MenuMessages) == 0x5400 ? 1 : -1];
 
 /*
- * The id grid two screens share (func_80031378, func_80031674): two tables
+ * The id grid two screens share (menu_arrange_icons_draw_caption, menu_arrange_icons_draw_details): two tables
  * of four ids per row, the first row each one shows, and the message table
  * the ids index.
  */
@@ -37,9 +37,9 @@ typedef struct {
     s16 row1;            /* 0x02: first row shown of ids1 */
     s16 *ids0;           /* 0x04 */
     s16 *ids1;           /* 0x08 */
-    s16 count0;          /* 0x0c: ids in ids0 (src/st/idgrid.c, func_8005d25c) */
+    s16 count0;          /* 0x0c: ids in ids0 (src/st/idgrid.c, menu_arrange_icons_run) */
     s16 count1;          /* 0x0e: ids in ids1 */
-    DVECTOR *tex;        /* 0x10: cell images, twenty per block (func_80030be4) */
+    DVECTOR *tex;        /* 0x10: cell images, twenty per block (menu_arrange_icons_draw_hand) */
     MenuMessages *messages; /* 0x14 */
 } MenuGrid;
 
@@ -54,7 +54,7 @@ typedef struct {
     u16 unkA;            /* 0x0a */
 } MenuList;
 
-/* A 44-byte stored-item kind record func_8003025c details. */
+/* A 44-byte stored-item kind record menu_creature_book_draw_entry details. */
 typedef struct {
     u8 kind;             /* 0x00: indexes its name table */
     u8 unk1;             /* 0x01 */
@@ -68,7 +68,7 @@ typedef struct {
 } MenuStoredItem;
 
 /*
- * The stored-item grid (func_8002fe4c): the kind records, the message
+ * The stored-item grid (menu_creature_book_draw_grid): the kind records, the message
  * table, one kind per entry, the entry count, the last row and its length,
  * the VRAM image of each of the fifteen visible cells and the detail page's.
  */
@@ -81,17 +81,17 @@ typedef struct {
     s16 last;            /* 0x10: cells on the last row */
     u8 unk12[2];
     DVECTOR tex[15];     /* 0x14 */
-    DVECTOR image;       /* 0x50: func_8003025c's image */
+    DVECTOR image;       /* 0x50: menu_creature_book_draw_entry's image */
 } MenuStore;
 
 /* The screen state at the start of the scratchpad, per screen. */
 typedef union {
     s32 word;
-    u32 *block;          /* func_800637c0's 21504-byte message copy */
+    u32 *block;          /* menu_equip_open's 21504-byte message copy */
     s16 half[2];
     MenuGrid grid;
     MenuList list;
-    DVECTOR vram[2];     /* func_8002f1f8's texture and CLUT positions */
+    DVECTOR vram[2];     /* ui_draw_cell_grid's texture and CLUT positions */
     MenuStore store;
     DVECTOR icons[6];    /* the pause list page's icon texture positions, used from [1] */
     struct {
@@ -100,7 +100,7 @@ typedef union {
         s16 count;       /* 0x18: entries in the list */
         u8 unk1A[2];
         s16 *entries;    /* 0x1c: entry ids */
-    } page_list;         /* the pause menu list page (func_8002a1d0) */
+    } page_list;         /* the pause menu list page (menu_use_item_draw) */
     struct {
         u8 unk00[0x20];
         s16 value;       /* 0x20 */
@@ -116,11 +116,11 @@ typedef union {
     struct {
         s16 flags;       /* 0x00: tested against DAT_801cd180.unk22 */
         u8 level[12];    /* 0x02 */
-    } levels;            /* func_8002b84c */
+    } levels;            /* menu_button_config_draw */
 } MenuState;
 
 /*
- * A 32-byte list record func_8002c2b8 lists: one memory card save file
+ * A 32-byte list record card_draw_file_list lists: one memory card save file
  * (src/st/menu.c): its directory name, the number in its name and bytes
  * from its header.
  */
@@ -139,7 +139,7 @@ typedef struct {
 typedef struct {
     MenuRecord files[7]; /* 0x00 */
     u16 status;          /* 0xe0: 0 ready, 1 new card, 2 error, 3 unformatted;
-                          * 4/5 are set by func_8006103c */
+                          * 4/5 are set by card_read_directory */
     s16 count;           /* 0xe2: files found */
     s16 unkE4;           /* 0xe4: 1 when at least two blocks are free */
     u8 unkE6[2];
@@ -164,7 +164,7 @@ typedef struct {
 typedef struct {
     MenuState unk0;      /* 0x000 */
     u8 unk5C[0x174 - 0x5c]; /* 0x05c */
-    s16 *unk174[10];     /* 0x174: the equipment page's id lists, by kind (func_8005ad00) */
+    s16 *unk174[10];     /* 0x174: the equipment page's id lists, by kind (menu_equip_info_run) */
     s16 unk19C[10];      /* 0x19c: and their lengths */
     s16 *unk1B0;         /* 0x1b0: the ids the open list shows */
     s16 unk1B4[14];      /* 0x1b4: attribute values */
@@ -175,14 +175,14 @@ typedef struct {
     s16 unk1FC;          /* 0x1fc */
     s16 unk1FE;          /* 0x1fe: cursor row */
     s16 unk200;          /* 0x200: first visible list entry */
-    s16 unk202;          /* 0x202: dialog choice (func_800615d8 returns it) */
-    s16 unk204;          /* 0x204: lowest unused save file number (func_8006103c) */
+    s16 unk202;          /* 0x202: dialog choice (card_ask_yes_no returns it) */
+    s16 unk204;          /* 0x204: lowest unused save file number (card_read_directory) */
     s16 unk206;          /* 0x206 */
-    s32 unk208;          /* 0x208: func_80062c28 hands it to func_800562d4 */
+    s32 unk208;          /* 0x208: card_screen_run hands it to func_800562d4 */
     u8 unk20C[0x50];     /* 0x20c */
     s16 unk25C[14];      /* 0x25c: attribute changes */
     u8 unk278[0x292 - 0x278]; /* 0x278 */
-    u16 unk292[21];      /* 0x292: copy of viewer.unk38 (func_8005975c, func_80059cec) */
+    u16 unk292[21];      /* 0x292: copy of viewer.unk38 (equip_apply_slot_change, equip_restore_slots) */
     s16 unk2BC;          /* 0x2bc */
     s16 unk2BE;          /* 0x2be */
     s16 unk2C0;          /* 0x2c0 */
@@ -192,7 +192,7 @@ typedef struct {
     u8 unk2C7;           /* 0x2c7 */
     u8 unk2C8[4];        /* 0x2c8 */
     MenuMessages *unk2CC; /* 0x2cc */
-    u32 *unk2D0;         /* 0x2d0: 36 words of grid cell bits (func_8005ad00) */
+    u32 *unk2D0;         /* 0x2d0: 36 words of grid cell bits (menu_equip_info_run) */
     u32 *unk2D4;         /* 0x2d4: one bit per grid cell */
     s16 unk2D8;          /* 0x2d8: viewer.unk2 when the equipment page opened (src/st/equip_menu.c, src/st/menu.c) */
     s16 unk2DA;          /* 0x2da: viewer.unk6 */
@@ -202,8 +202,8 @@ typedef struct {
     s16 unk2E2;          /* 0x2e2 */
     u8 unk2E4;           /* 0x2e4: cursor blink phase */
     u8 unk2E5;           /* 0x2e5: text font mode (0: 6x12 half-width cells) */
-    DVECTOR unk2E6[5];   /* 0x2e6: VRAM positions func_80058dc4 sets (image, CLUT pairs);
-                          * [0]/[1] func_80063260's texture and CLUT, [2]/[3] func_800637c0's;
+    DVECTOR unk2E6[5];   /* 0x2e6: VRAM positions card_screen_open sets (image, CLUT pairs);
+                          * [0]/[1] menu_game_over_run's texture and CLUT, [2]/[3] menu_equip_open's;
                           * src/st/idgrid.c uploads its images to all five */
     u8 unk2FA[6];        /* 0x2fa */
     CVECTOR style[8];    /* 0x300: text colours; .cd carries the glyph size */
@@ -222,7 +222,7 @@ typedef struct {
     u16 unk360;          /* 0x360: blink offset */
 } MenuScratch;
 
-/* One 32-byte record func_80059dc0 writes from scratch +0x8 per shown
+/* One 32-byte record player_total_attributes writes from scratch +0x8 per shown
  * equipment slot (MenuAttrScratch.recs). */
 typedef struct {
     u8 unk0;
@@ -234,12 +234,12 @@ typedef struct {
 /*
  * The status screens' phase of the same block: seven attribute rows of 14
  * from +0x1b4 (MenuScratch's unk1B4 and unk25C are the first and last),
- * over the list fields the other screens keep there (func_80059dc0).
+ * over the list fields the other screens keep there (player_total_attributes).
  */
 typedef struct {
     u8 unk0[8];
     MenuAttrRecord recs[11]; /* 0x008: one per shown equipment slot */
-    MenuAttrRecord *unk168; /* 0x168: next record func_80059dc0 fills */
+    MenuAttrRecord *unk168; /* 0x168: next record player_total_attributes fills */
     u16 unk16C;          /* 0x16c: viewer.unk38[6] / 3, 0xffff: none */
     u16 unk16E;          /* 0x16e */
     u16 unk170;          /* 0x170: viewer.unk38[12] / 3, 0xffff: none */
@@ -337,7 +337,7 @@ extern MenuMessages menu_messages;
 /* A message of another table (a list's own). */
 #define MESSAGE_IN(table, i) ((u16 *)((table)->text + (table)->offsets[i]))
 
-/* Item stat figures that func_80031378 formats (whole and tenths). */
+/* Item stat figures that menu_arrange_icons_draw_caption formats (whole and tenths). */
 extern u16 DAT_8008819e;
 extern u16 DAT_80088188;
 
@@ -346,70 +346,70 @@ extern u16 DAT_800881aa;
 extern u16 DAT_80088192;
 
 
-/* Seven list slots cleared together by func_8002c090. */
+/* Seven list slots cleared together by card_draw_port_choice. */
 extern s32 DAT_8017beb0[7];
 extern s16 DAT_800881f0[7];
 
 /* src/st/ui.c: the pause menu pages */
-void func_80029b74(void);
-void func_8002a1d0(void);
-void func_8002a5a4(void);
-void func_8002a954(void);
-void func_8002b2e8(void);
-void func_8002b84c(void);
+void menu_main_draw(void);
+void menu_use_item_draw(void);
+void menu_attribute_points_draw(void);
+void menu_area_info_draw(void);
+void menu_options_draw(void);
+void menu_button_config_draw(void);
 
 /* the first menu page bodies */
-void func_8002c050(void);
-void func_8002c090(void);
-void func_8002c1a4(void);
-void func_8002c2b8(void);
+void card_draw_checking(void);
+void card_draw_port_choice(void);
+void card_draw_format_prompt(void);
+void card_draw_file_list(void);
 
 /* the page frame and dialogs */
-void func_8002c8bc(void);
-void func_8002c958(void);
-void func_8002c998(void);
-void func_8002c9e8(void);
-void func_8002ca84(void);
-void func_8002cd98(void);
-void func_8002ce84(void);
-void func_8002cef8(void);
-void func_8002d0b0(void);
-void func_8002d1dc(void);
+void card_draw_transfer(void);
+void card_draw_finished(void);
+void card_draw_message(void);
+void menu_draw_background(void);
+void card_screen_draw(void);
+void menu_end_game_draw_dialog(void);
+void menu_end_game_draw(void);
+void menu_game_over_draw(void);
+void menu_save_prompt_draw(void);
+void shop_draw_header(void);
 
 /* the item list screens */
-void func_8002d574(void);
-void func_8002d60c(void);
-void func_8002d8e8(void);
-void func_8002daa0(void);
-void func_8002dd70(void);
-void func_8002e310(void);
+void shop_draw_cursor(void);
+void shop_draw_buy_list(void);
+void shop_draw_trade_list(void);
+void shop_draw_repair_list(void);
+void shop_draw_confirm(void);
+void shop_draw(void);
 
 /* the status screens */
-void func_8002e490(void);
-void func_8002e4d0(void);
-void func_8002e94c(void);
+void menu_equip_info_draw_panels(void);
+void menu_equip_info_draw_slots(void);
+void menu_equip_info_draw_attributes(void);
 
-void func_8002ed98(void);
-void func_8002f1f8(DVECTOR *pos, DVECTOR *tex, DVECTOR *clut, CVECTOR *color, int arg4);
-void func_8002f498(void);
-void func_8002f97c(void);
+void menu_equip_info_draw_stats(void);
+void ui_draw_cell_grid(DVECTOR *pos, DVECTOR *tex, DVECTOR *clut, CVECTOR *color, int arg4);
+void menu_equip_info_draw_item(void);
+void menu_equip_info_draw_magic(void);
 
-void func_8002fc4c(void);
+void menu_equip_info_draw(void);
 
 /* the stored-item screens */
-void func_8002fe4c(void);
-void func_8003025c(void);
+void menu_creature_book_draw_grid(void);
+void menu_creature_book_draw_entry(void);
 
-void func_80030ab8(void);
-void func_80030be4(void);
-void func_80030fa0(void);
+void menu_creature_book_draw(void);
+void menu_arrange_icons_draw_hand(void);
+void menu_arrange_icons_draw_bag(void);
 /* the id grid screens */
-void func_80031378(void);
-void func_80031674(void);
-void func_800319a8(void);
-void func_80031aec(void);
-void func_80031cfc(void);
-void func_80031d50(void);
+void menu_arrange_icons_draw_caption(void);
+void menu_arrange_icons_draw_details(void);
+void menu_draw_button_prompt(void);
+void menu_arrange_icons_draw(void);
+void clear_vram(void);
+void pause_screen_draw(void);
 
 
 #endif

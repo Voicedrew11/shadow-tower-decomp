@@ -1,5 +1,5 @@
 /*
- * ST.EXE player figure recomputation (func_80059dc0 .. func_8005a3a8; the
+ * ST.EXE player figure recomputation (player_total_attributes .. player_compute_derived_stats; the
  * band P side is src/st/menu.c). It works in the scratchpad block at
  * 0x1f800000 in a layout of its own: rows of fourteen figures. Only the
  * rows the reconstructed code reads are named. WIP.
@@ -17,6 +17,6 @@ typedef struct {
 
 #define STATS_SCRATCH ((StatsScratch *)0x1f800000)
 
-void func_8005a36c(void);
+void player_store_attributes(void);
 
 #endif

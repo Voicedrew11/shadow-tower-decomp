@@ -5364,7 +5364,7 @@ void world_render_frame(VECTOR *pos, SVECTOR *rot)
         else
             level = (u16)DAT_80087f18 - 24;
         color.b = color.g = color.r = level * 4 + 96;
-        func_80027d18(&frame->r, &color, 257, 1);
+        ui_draw_rect_outline(&frame->r, &color, 257, 1);
         hud_draw_records(26);
     }
     if (DAT_801cd120.unk3 != 0 && area_state.area < 44) {
@@ -5397,7 +5397,7 @@ void world_render_frame(VECTOR *pos, SVECTOR *rot)
     world_draw_ground_items();
     world_draw_effects_placements();
     if (world_state.unk1EE16 != 0)
-        func_80028784();
+        talk_draw_overlay();
     gfx_end_frame();
     vsync_wait_tick();
     world_state.unk1ECC0++;
@@ -5489,7 +5489,7 @@ static s32 DAT_800881c8;
 /* Draws glyph `c` at (x, y): half-width codes below the split, full-width
  * codes after it. */
 ADDRESS(0x80026ecc, 0x460)
-void func_80026ecc(u16 c, u16 x, u16 y, CVECTOR *color)
+void ui_draw_glyph(u16 c, u16 x, u16 y, CVECTOR *color)
 {
     StPacketBuffer *buf;
     POLY_FT4 *p;
@@ -5591,7 +5591,7 @@ void func_80026ecc(u16 c, u16 x, u16 y, CVECTOR *color)
 
 /* Draws a 0xffff-terminated glyph string; code 0 starts a new line. */
 ADDRESS(0x8002732c, 0x114)
-void func_8002732c(u16 *s, u16 x, u16 y, CVECTOR *color)
+void ui_draw_text(u16 *s, u16 x, u16 y, CVECTOR *color)
 {
     u16 left = x;
     u_int space = (color->cd & 0x7c) >> 2;
@@ -5615,7 +5615,7 @@ void func_8002732c(u16 *s, u16 x, u16 y, CVECTOR *color)
             s++;
             s++;
         } else {
-            func_80026ecc(*s, x, y, color);
+            ui_draw_glyph(*s, x, y, color);
             if (*s < split)
                 x += half;
             else
@@ -5636,7 +5636,7 @@ void func_8002732c(u16 *s, u16 x, u16 y, CVECTOR *color)
 /* Draws a number with the proportional font: digit glyphs follow the
  * half-width codes. */
 ADDRESS(0x80027440, 0x27c)
-void func_80027440(u32 num, u16 x, u16 y, CVECTOR *color)
+void ui_draw_number(u32 num, u16 x, u16 y, CVECTOR *color)
 {
     u16 digit[8];
     int end;
@@ -5666,7 +5666,7 @@ void func_80027440(u32 num, u16 x, u16 y, CVECTOR *color)
         neg = 1;
     }
     if (value == 0) {
-        func_80026ecc(base, x + width * (n - 1), y, color);
+        ui_draw_glyph(base, x + width * (n - 1), y, color);
         return;
     }
     pow = 1;
@@ -5690,21 +5690,21 @@ void func_80027440(u32 num, u16 x, u16 y, CVECTOR *color)
             digit[i] = 9;
     }
     if (neg)
-        func_80026ecc(base + 13, x - width, y, color);
+        ui_draw_glyph(base + 13, x - width, y, color);
     else if (sign)
-        func_80026ecc(base + 12, x - width, y, color);
+        ui_draw_glyph(base + 12, x - width, y, color);
     i = n;
     while (i--) {
         if (digit[i] != 0)
             leading = 0;
         if (!leading)
-            func_80026ecc(base + digit[i], x + width * (n - i - 1), y, color);
+            ui_draw_glyph(base + digit[i], x + width * (n - i - 1), y, color);
     }
 }
 
 /* Draws a number with the fixed 7-pixel digit glyphs (codes 2-11). */
 ADDRESS(0x800276bc, 0x244)
-void func_800276bc(u32 num, u16 x, u16 y, CVECTOR *color)
+void ui_draw_number_fixed(u32 num, u16 x, u16 y, CVECTOR *color)
 {
     u16 digit[8];
     u8 leading = 1;
@@ -5726,7 +5726,7 @@ void func_800276bc(u32 num, u16 x, u16 y, CVECTOR *color)
         neg = 1;
     }
     if (value == 0) {
-        func_80026ecc(2, x + width * (n - 1), y, color);
+        ui_draw_glyph(2, x + width * (n - 1), y, color);
         return;
     }
     pow = 1;
@@ -5750,22 +5750,22 @@ void func_800276bc(u32 num, u16 x, u16 y, CVECTOR *color)
             digit[i] = 9;
     }
     if (neg)
-        func_80026ecc(13, x - width, y, color);
+        ui_draw_glyph(13, x - width, y, color);
     else if (sign)
-        func_80026ecc(12, x - width, y, color);
+        ui_draw_glyph(12, x - width, y, color);
     i = n;
     while (i--) {
         if (digit[i] != 0)
             leading = 0;
         if (!leading)
-            func_80026ecc(digit[i] + 2, x + width * (n - i - 1), y, color);
+            ui_draw_glyph(digit[i] + 2, x + width * (n - i - 1), y, color);
     }
 }
 
 /* Draws a small arrow pointing along `dir` (0, 1024, 2048 or 3072) at
  * `pos`, over a copy offset by one pixel. Nothing calls it. */
 ADDRESS(0x80027900, 0x418)
-void func_80027900(DVECTOR *pos, CVECTOR *color, u16 dir)
+void ui_draw_small_arrow(DVECTOR *pos, CVECTOR *color, u16 dir)
 {
     POLY_F3 *p;
     StPacketBuffer *buf;
@@ -5843,7 +5843,7 @@ void func_80027900(DVECTOR *pos, CVECTOR *color, u16 dir)
 /* Draws a rectangle outline: bars `border & 0xff` high at the top and
  * bottom and `border >> 8` wide at the sides. */
 ADDRESS(0x80027d18, 0x508)
-void func_80027d18(RECT *r, CVECTOR *color, u16 border, u16 semi)
+void ui_draw_rect_outline(RECT *r, CVECTOR *color, u16 border, u16 semi)
 {
     POLY_F4 *p;
     StPacketBuffer *buf;
@@ -5862,7 +5862,7 @@ void func_80027d18(RECT *r, CVECTOR *color, u16 border, u16 semi)
 
 /* Fills a rectangle (semi-transparent when `semi` is 1). */
 ADDRESS(0x80028220, 0x144)
-void func_80028220(RECT *r, CVECTOR *color, u16 semi)
+void ui_fill_rect(RECT *r, CVECTOR *color, u16 semi)
 {
     POLY_F4 *p;
     StPacketBuffer *buf;
@@ -5879,7 +5879,7 @@ void func_80028220(RECT *r, CVECTOR *color, u16 semi)
  * depth, bits 5-6 flip (1 horizontal, 2 vertical).
  */
 ADDRESS(0x80028364, 0x344)
-void func_80028364(RECT *r, DVECTOR *tex, DVECTOR *clut, CVECTOR *color, int mode)
+void ui_draw_image(RECT *r, DVECTOR *tex, DVECTOR *clut, CVECTOR *color, int mode)
 {
     POLY_FT4 *p;
     StPacketBuffer *buf;
@@ -5934,7 +5934,7 @@ void func_80028364(RECT *r, DVECTOR *tex, DVECTOR *clut, CVECTOR *color, int mod
 /* Adds a draw-mode primitive selecting the texture page at (x, y) with
  * blend rate `abr`. */
 ADDRESS(0x800286a8, 0xdc)
-void func_800286a8(int abr, int x, int y)
+void ui_add_draw_mode(int abr, int x, int y)
 {
     DR_MODE *p;
     StPacketBuffer *buf;
@@ -5958,7 +5958,7 @@ void func_800286a8(int abr, int x, int y)
  * (unk1EE17 is the card mode, unk1EE18 the fade length).
  */
 ADDRESS(0x80028784, 0x4a8)
-void func_80028784(void)
+void talk_draw_overlay(void)
 {
     RECT screen = {0, 0, 320, 240};
     RECT card = {32, 132, 255, 255};
@@ -5980,13 +5980,13 @@ void func_80028784(void)
             fill.r = fill.g = fill.b = (world_state.unk1EE19 << 4) / world_state.unk1EE18;
         else
             fill.r = fill.g = fill.b = 255;
-        func_80028220(&screen, &fill, 1);
-        func_800286a8(2, 0, 0);
+        ui_fill_rect(&screen, &fill, 1);
+        ui_add_draw_mode(2, 0, 0);
         break;
     case CARD_SHOW_IN:
         if (DAT_801cd120.unk4 == 1 || world_state.unk1EE17 == 2) {
             tint.r = tint.g = tint.b = world_state.unk1EE19 << 3;
-            func_80028364(&card, &tex, &clut, &tint, 3);
+            ui_draw_image(&card, &tex, &clut, &tint, 3);
             if (world_state.unk1EE19 >= 16)
                 world_state.unk1EE16 = CARD_SHOW;
         } else {
@@ -5997,15 +5997,15 @@ void func_80028784(void)
         if (DAT_801cd120.unk4 == 1 || world_state.unk1EE17 == 2) {
             tint.r = tint.g = tint.b = 128;
             if (DAT_80088190 == 25 || DAT_80088190 == 30 || DAT_80088190 == 5)
-                func_80028364(&card, &tex, &clut, &tint, 2);
+                ui_draw_image(&card, &tex, &clut, &tint, 2);
             else
-                func_80028364(&card, &tex, &clut, &tint, 3);
+                ui_draw_image(&card, &tex, &clut, &tint, 3);
         }
         break;
     case CARD_SHOW_OUT:
         if (DAT_801cd120.unk4 == 1 || world_state.unk1EE17 == 2) {
             tint.r = tint.g = tint.b = (16 - world_state.unk1EE19) << 3;
-            func_80028364(&card, &tex, &clut, &tint, 3);
+            ui_draw_image(&card, &tex, &clut, &tint, 3);
             if (world_state.unk1EE19 >= 16)
                 world_state.unk1EE16 = CARD_DONE;
         } else {
@@ -6018,8 +6018,8 @@ void func_80028784(void)
                 ((world_state.unk1EE18 - world_state.unk1EE19) << 4) / world_state.unk1EE18;
         else
             fill.r = fill.g = fill.b = 255;
-        func_80028220(&screen, &fill, 1);
-        func_800286a8(2, 0, 0);
+        ui_fill_rect(&screen, &fill, 1);
+        ui_add_draw_mode(2, 0, 0);
         break;
     default:
         return;
@@ -6027,20 +6027,20 @@ void func_80028784(void)
     if (world_state.unk1EE17 == 0 && world_state.unk1EE16 >= CARD_SHOW_IN &&
         world_state.unk1EE16 < CARD_FADE_OUT) {
         fill.r = fill.g = fill.b = 16;
-        func_80028220(&screen, &fill, 1);
-        func_800286a8(2, 0, 0);
+        ui_fill_rect(&screen, &fill, 1);
+        ui_add_draw_mode(2, 0, 0);
     }
     if (world_state.unk1EE17 == 3) {
         fill.r = fill.g = fill.b = 255;
-        func_80028220(&screen, &fill, 1);
-        func_800286a8(2, 0, 0);
+        ui_fill_rect(&screen, &fill, 1);
+        ui_add_draw_mode(2, 0, 0);
     }
     world_state.unk1EE19++;
 }
 
 /* Draws a Gouraud quad: corner positions and colours in setXY4 order. */
 ADDRESS(0x80028c2c, 0x18c)
-void func_80028c2c(DVECTOR *xy, CVECTOR *rgb, int semi)
+void ui_draw_gouraud_quad(DVECTOR *xy, CVECTOR *rgb, int semi)
 {
     StPacketBuffer *buf;
     POLY_G4 *p;
@@ -6059,7 +6059,7 @@ void func_80028c2c(DVECTOR *xy, CVECTOR *rgb, int semi)
 /* Fills `r` with a vertical gradient from `edge` at the top and bottom to
  * `mid` across the middle. */
 ADDRESS(0x80028db8, 0x3b4)
-void func_80028db8(RECT *r, CVECTOR *mid, CVECTOR *edge, int semi)
+void ui_fill_rect_gradient(RECT *r, CVECTOR *mid, CVECTOR *edge, int semi)
 {
     StPacketBuffer *buf;
     StPacketBuffer *lower;
@@ -6094,7 +6094,7 @@ void func_80028db8(RECT *r, CVECTOR *mid, CVECTOR *edge, int semi)
 /* Draws a triangle filling `r` that points along `dir` (0, 1024, 2048 or
  * 3072), over a copy offset by one pixel. */
 ADDRESS(0x8002916c, 0x320)
-void func_8002916c(RECT *r, CVECTOR *color, u16 dir)
+void ui_draw_arrow(RECT *r, CVECTOR *color, u16 dir)
 {
     short x0 = 0, x1 = 0, x2 = 0, y0 = 0, y1 = 0, y2 = 0;
     StPacketBuffer *buf;
@@ -6150,19 +6150,19 @@ void func_8002916c(RECT *r, CVECTOR *color, u16 dir)
 
 /* Copies the screen into the spare buffer's image and darkens it. */
 ADDRESS(0x8002948c, 0xbc)
-void func_8002948c(void)
+void menu_draw_backdrop(void)
 {
     RECT screen = {0, 0, 320, 240};
     CVECTOR shade = {32, 32, 32};
 
     LoadImage(&world_state.draw[world_state.frame].clip, world_state.packets[1].end);
-    func_80028220(&screen, &shade, 1);
-    func_800286a8(2, 0, 0);
+    ui_fill_rect(&screen, &shade, 1);
+    ui_add_draw_mode(2, 0, 0);
 }
 
 /* Draws a menu panel: a dark fill over a lighter border, both blended. */
 ADDRESS(0x80029548, 0xd0)
-void func_80029548(int x, int y, int w, int h)
+void ui_draw_panel(int x, int y, int w, int h)
 {
     MENU_SCRATCH->unk338.g = 80;
     MENU_SCRATCH->unk338.r = 80;
@@ -6178,13 +6178,13 @@ void func_80029548(int x, int y, int w, int h)
     MENU_SCRATCH->unk348.y = y + 1;
     MENU_SCRATCH->unk348.w = w - 4;
     MENU_SCRATCH->unk348.h = h - 2;
-    func_80028220(&MENU_SCRATCH->unk348, &MENU_SCRATCH->unk344, 1);
-    func_800286a8(2, 0, 0);
-    func_80028220(&MENU_SCRATCH->unk33C, &MENU_SCRATCH->unk338, 1);
-    func_800286a8(0, 0, 0);
+    ui_fill_rect(&MENU_SCRATCH->unk348, &MENU_SCRATCH->unk344, 1);
+    ui_add_draw_mode(2, 0, 0);
+    ui_fill_rect(&MENU_SCRATCH->unk33C, &MENU_SCRATCH->unk338, 1);
+    ui_add_draw_mode(0, 0, 0);
 }
 
-/* Tile modes for func_80028364: semi-transparent, optionally flipped. */
+/* Tile modes for ui_draw_image: semi-transparent, optionally flipped. */
 #define TILE (1)
 #define TILE_HFLIP (1 | 1 << 5)
 #define TILE_VFLIP (1 | 2 << 5)
@@ -6194,7 +6194,7 @@ void func_80029548(int x, int y, int w, int h)
  * edges, an inner bevel and the filled middle, then a grey blended wash.
  */
 ADDRESS(0x80029618, 0x55c)
-void func_80029618(short x, short y, short w, short h)
+void ui_draw_window(short x, short y, short w, short h)
 {
     MenuScratch *sp = MENU_SCRATCH;
     RECT r;
@@ -6209,27 +6209,27 @@ void func_80029618(short x, short y, short w, short h)
     sp->unk33C.x = x;
     sp->unk33C.y = y;
     sp->unk358.vy = 400;
-    func_80028364(&sp->unk33C, &sp->unk358, &sp->unk35C, NULL, TILE);
+    ui_draw_image(&sp->unk33C, &sp->unk358, &sp->unk35C, NULL, TILE);
     sp->unk33C.y = y + h - 16;
-    func_80028364(&sp->unk33C, &sp->unk358, &sp->unk35C, NULL, TILE_VFLIP);
+    ui_draw_image(&sp->unk33C, &sp->unk358, &sp->unk35C, NULL, TILE_VFLIP);
     sp->unk33C.x = x + w - 16;
     sp->unk33C.y = y;
     sp->unk358.vx = 620;
-    func_80028364(&sp->unk33C, &sp->unk358, &sp->unk35C, NULL, TILE);
+    ui_draw_image(&sp->unk33C, &sp->unk358, &sp->unk35C, NULL, TILE);
     sp->unk33C.y = y + h - 16;
-    func_80028364(&sp->unk33C, &sp->unk358, &sp->unk35C, NULL, TILE_VFLIP);
+    ui_draw_image(&sp->unk33C, &sp->unk358, &sp->unk35C, NULL, TILE_VFLIP);
     sp->unk33C.x = x;
     sp->unk33C.y = y + 16;
     sp->unk358.vx = 604;
-    func_80028364(&sp->unk33C, &sp->unk358, &sp->unk35C, NULL, TILE);
+    ui_draw_image(&sp->unk33C, &sp->unk358, &sp->unk35C, NULL, TILE);
     sp->unk33C.y = y + h - 32;
-    func_80028364(&sp->unk33C, &sp->unk358, &sp->unk35C, NULL, TILE_VFLIP);
+    ui_draw_image(&sp->unk33C, &sp->unk358, &sp->unk35C, NULL, TILE_VFLIP);
     sp->unk33C.x = x + w - 16;
     sp->unk33C.y = y + 16;
     sp->unk358.vx = 596;
-    func_80028364(&sp->unk33C, &sp->unk358, &sp->unk35C, NULL, TILE);
+    ui_draw_image(&sp->unk33C, &sp->unk358, &sp->unk35C, NULL, TILE);
     sp->unk33C.y = y + h - 32;
-    func_80028364(&sp->unk33C, &sp->unk358, &sp->unk35C, NULL, TILE_VFLIP);
+    ui_draw_image(&sp->unk33C, &sp->unk358, &sp->unk35C, NULL, TILE_VFLIP);
 
     sp->unk33C.y = y + 32;
     sp->unk33C.x = x;
@@ -6237,9 +6237,9 @@ void func_80029618(short x, short y, short w, short h)
     rows = h / 16 - 4;
     while (rows--) {
         sp->unk33C.x = x;
-        func_80028364(&sp->unk33C, &sp->unk358, &sp->unk35C, NULL, TILE_HFLIP);
+        ui_draw_image(&sp->unk33C, &sp->unk358, &sp->unk35C, NULL, TILE_HFLIP);
         sp->unk33C.x = x + w - 16;
-        func_80028364(&sp->unk33C, &sp->unk358, &sp->unk35C, NULL, TILE);
+        ui_draw_image(&sp->unk33C, &sp->unk358, &sp->unk35C, NULL, TILE);
         sp->unk33C.y += 16;
     }
     sp->unk33C.x = x + 16;
@@ -6247,9 +6247,9 @@ void func_80029618(short x, short y, short w, short h)
     columns = w / 16 - 2;
     while (columns--) {
         sp->unk33C.y = y;
-        func_80028364(&sp->unk33C, &sp->unk358, &sp->unk35C, NULL, TILE);
+        ui_draw_image(&sp->unk33C, &sp->unk358, &sp->unk35C, NULL, TILE);
         sp->unk33C.y = y + h - 16;
-        func_80028364(&sp->unk33C, &sp->unk358, &sp->unk35C, NULL, TILE_VFLIP);
+        ui_draw_image(&sp->unk33C, &sp->unk358, &sp->unk35C, NULL, TILE_VFLIP);
         sp->unk33C.x += 16;
     }
     sp->unk33C.x = x + 16;
@@ -6257,9 +6257,9 @@ void func_80029618(short x, short y, short w, short h)
     columns = w / 16 - 2;
     while (columns--) {
         sp->unk33C.y = y + 16;
-        func_80028364(&sp->unk33C, &sp->unk358, &sp->unk35C, NULL, TILE);
+        ui_draw_image(&sp->unk33C, &sp->unk358, &sp->unk35C, NULL, TILE);
         sp->unk33C.y = y + h - 32;
-        func_80028364(&sp->unk33C, &sp->unk358, &sp->unk35C, NULL, TILE_VFLIP);
+        ui_draw_image(&sp->unk33C, &sp->unk358, &sp->unk35C, NULL, TILE_VFLIP);
         sp->unk33C.x += 16;
     }
     sp->unk33C.y = y + 32;
@@ -6269,7 +6269,7 @@ void func_80029618(short x, short y, short w, short h)
         sp->unk33C.x = x + 16;
         columns = w / 16 - 2;
         while (columns--) {
-            func_80028364(&sp->unk33C, &sp->unk358, &sp->unk35C, NULL, TILE);
+            ui_draw_image(&sp->unk33C, &sp->unk358, &sp->unk35C, NULL, TILE);
             sp->unk33C.x += 16;
         }
         sp->unk33C.y += 16;
@@ -6278,33 +6278,33 @@ void func_80029618(short x, short y, short w, short h)
     r.y = y;
     r.w = w;
     r.h = h;
-    func_80028220(&r, &wash, 1);
-    func_800286a8(2, 0, 0);
+    ui_fill_rect(&r, &wash, 1);
+    ui_add_draw_mode(2, 0, 0);
 }
 
 /*
  * The pause menu pages. Each page restarts the frame,
  * draws its text, numbers and icons with the text primitives above,
- * frames itself with func_80029618 and darkens the world behind it.
+ * frames itself with ui_draw_window and darkens the world behind it.
  */
 
 /* Blink phase of the map page's arrows (0..31). */
 DATA(0x80087f34, 0x4, ".sdata")
 static s32 DAT_80087f34 = 0;
 
-/* func_80027440/func_800276bc take the digit count in the top byte. */
+/* ui_draw_number/ui_draw_number_fixed take the digit count in the top byte. */
 #define DIGITS(n) ((n) << 24)
 
 /* Closes a page: its frame, the end of the frame and the darkened world. */
 #define PAGE_END()                     \
-    func_80029618(16, 36, 288, 192);   \
+    ui_draw_window(16, 36, 288, 192);   \
     gfx_flip();                   \
-    func_8002948c();                   \
+    menu_draw_backdrop();                   \
     gfx_draw_ot()
 
 /* The status page. */
 ADDRESS(0x80029b74, 0x65c)
-void func_80029b74(void)
+void menu_main_draw(void)
 {
     u16 label_x[8] = {37, 47, 20, 20, 30, 41, 34, 37};
     DVECTOR row[4] = {{196, 94}, {274, 94}, {172, 104}, {298, 104}};
@@ -6326,46 +6326,46 @@ void func_80029b74(void)
     sp->style[2].cd = 57;
     sp->style[0].cd = 57;
     for (i = 0; i < 11; i++)
-        func_8002732c(MESSAGE(i), 24, i * 16 + 48, &sp->style[0]);
+        ui_draw_text(MESSAGE(i), 24, i * 16 + 48, &sp->style[0]);
     if (viewer.unk2C & 7)
-        func_8002732c(MESSAGE(20), 106, 112, &sp->style[0]);
+        ui_draw_text(MESSAGE(20), 106, 112, &sp->style[0]);
     else if (viewer.unk2C & 0x18)
-        func_8002732c(MESSAGE(21), 93, 112, &sp->style[0]);
+        ui_draw_text(MESSAGE(21), 93, 112, &sp->style[0]);
     else if (viewer.unk2C & 0x60)
-        func_8002732c(MESSAGE(22), 119, 112, &sp->style[0]);
+        ui_draw_text(MESSAGE(22), 119, 112, &sp->style[0]);
     else if (viewer.unk2C & 0x80)
-        func_8002732c(MESSAGE(23), 119, 112, &sp->style[0]);
+        ui_draw_text(MESSAGE(23), 119, 112, &sp->style[0]);
     else if (viewer.unk2C & 0x100)
-        func_8002732c(MESSAGE(24), 106, 112, &sp->style[0]);
+        ui_draw_text(MESSAGE(24), 106, 112, &sp->style[0]);
     else
-        func_8002732c(MESSAGE(19), 106, 112, &sp->style[0]);
+        ui_draw_text(MESSAGE(19), 106, 112, &sp->style[0]);
     if (viewer.unk38[16] != 0xffff && vis_table_c.unk0118[viewer.unk38[16]].unk5[0x1d] >= 9) {
         kind = vis_table_c.unk0118[viewer.unk38[16]].unk5[0x1d];
         n = 0;
         if (kind - 9 == 2)
             n = 14;
-        func_8002732c(MESSAGE(17 + kind), 119 - n, 208, &sp->style[0]);
+        ui_draw_text(MESSAGE(17 + kind), 119 - n, 208, &sp->style[0]);
     } else {
-        func_8002732c(MESSAGE(25), 119, 208, &sp->style[0]);
+        ui_draw_text(MESSAGE(25), 119, 208, &sp->style[0]);
     }
     for (i = 0; i < 8; i++)
-        func_8002732c(MESSAGE(11 + i), label_x[i] + 172, i * 16 + 90, &sp->style[2]);
-    func_800276bc(viewer.unk2 | DIGITS(4), 78, 48, &sp->style[0]);
+        ui_draw_text(MESSAGE(11 + i), label_x[i] + 172, i * 16 + 90, &sp->style[2]);
+    ui_draw_number_fixed(viewer.unk2 | DIGITS(4), 78, 48, &sp->style[0]);
     i = 0;
-    func_80026ecc(15, 106, 48, &sp->style[0]);
-    func_800276bc(viewer.unk0 | DIGITS(4), 120, 48, &sp->style[0]);
-    func_800276bc(viewer.unk6 | DIGITS(4), 78, 64, &sp->style[0]);
-    func_80026ecc(15, 106, 64, &sp->style[0]);
-    func_800276bc(viewer.unk4 | DIGITS(4), 120, 64, &sp->style[0]);
-    func_800276bc(viewer.unk8 | DIGITS(4), 78, 80, &sp->style[0]);
-    func_80026ecc(15, 106, 80, &sp->style[0]);
-    func_800276bc(4921 | DIGITS(4), 120, 80, &sp->style[0]);
-    func_800276bc(DAT_801c7590.counts[0x10a].count | DIGITS(3), 127, 96, &sp->style[0]);
-    func_800276bc(viewer.unk10 | DIGITS(3), 127, 128, &sp->style[0]);
-    func_800276bc(viewer.unkE | DIGITS(3), 127, 144, &sp->style[0]);
-    func_800276bc(viewer.unkBA[0] | DIGITS(3), 127, 160, &sp->style[0]);
-    func_800276bc(viewer.unkBA[1] | DIGITS(3), 127, 176, &sp->style[0]);
-    func_800276bc(viewer.unkBA[2] | DIGITS(3), 127, 192, &sp->style[0]);
+    ui_draw_glyph(15, 106, 48, &sp->style[0]);
+    ui_draw_number_fixed(viewer.unk0 | DIGITS(4), 120, 48, &sp->style[0]);
+    ui_draw_number_fixed(viewer.unk6 | DIGITS(4), 78, 64, &sp->style[0]);
+    ui_draw_glyph(15, 106, 64, &sp->style[0]);
+    ui_draw_number_fixed(viewer.unk4 | DIGITS(4), 120, 64, &sp->style[0]);
+    ui_draw_number_fixed(viewer.unk8 | DIGITS(4), 78, 80, &sp->style[0]);
+    ui_draw_glyph(15, 106, 80, &sp->style[0]);
+    ui_draw_number_fixed(4921 | DIGITS(4), 120, 80, &sp->style[0]);
+    ui_draw_number_fixed(DAT_801c7590.counts[0x10a].count | DIGITS(3), 127, 96, &sp->style[0]);
+    ui_draw_number_fixed(viewer.unk10 | DIGITS(3), 127, 128, &sp->style[0]);
+    ui_draw_number_fixed(viewer.unkE | DIGITS(3), 127, 144, &sp->style[0]);
+    ui_draw_number_fixed(viewer.unkBA[0] | DIGITS(3), 127, 160, &sp->style[0]);
+    ui_draw_number_fixed(viewer.unkBA[1] | DIGITS(3), 127, 176, &sp->style[0]);
+    ui_draw_number_fixed(viewer.unkBA[2] | DIGITS(3), 127, 192, &sp->style[0]);
     sp->unk358.vx = 622;
     sp->unk358.vy = 416;
     sp->unk35C.vx = 544;
@@ -6374,24 +6374,24 @@ void func_80029b74(void)
     sp->unk33C.y = 54;
     sp->unk33C.w = 72;
     sp->unk33C.h = 24;
-    func_80028364(&sp->unk33C, &sp->unk358, &sp->unk35C, NULL, 1);
+    ui_draw_image(&sp->unk33C, &sp->unk358, &sp->unk35C, NULL, 1);
     for (; i < 8; i++) {
         if (i == (s16)sp->unk2DE)
-            func_80028c2c(row, lit, 1);
+            ui_draw_gouraud_quad(row, lit, 1);
         else
-            func_80028c2c(row, dim, 1);
+            ui_draw_gouraud_quad(row, dim, 1);
         row[0].vy += 16;
         row[1].vy += 16;
         row[2].vy += 16;
         row[3].vy += 16;
     }
-    func_800286a8(0, 0, 0);
+    ui_add_draw_mode(0, 0, 0);
     PAGE_END();
 }
 
 /* A scrolling list page (five rows of icon, name and count). */
 ADDRESS(0x8002a1d0, 0x3d4)
-void func_8002a1d0(void)
+void menu_use_item_draw(void)
 {
     MenuScratch *sp = MENU_SCRATCH;
     int id = sp->unk0.page_list.entries[sp->unk2E2 + sp->unk2E0];
@@ -6423,8 +6423,8 @@ void func_8002a1d0(void)
     sp->unk32C.r = red;
     sp->unk32C.g = green;
     sp->unk330.y = sp->unk2E0 * 26 + 69;
-    func_80027d18(&sp->unk330, &sp->unk32C, 257, 1);
-    func_800286a8(1, 0, 0);
+    ui_draw_rect_outline(&sp->unk330, &sp->unk32C, 257, 1);
+    ui_add_draw_mode(1, 0, 0);
     sp->unk350.x = 24;
     sp->unk350.y = 70;
     sp->unk350.w = 24;
@@ -6434,12 +6434,12 @@ void func_8002a1d0(void)
         rows = sp->unk0.page_list.count;
     sp->style[0].cd |= 0x80;
     if (sp->unk2E0 < rows)
-        func_8002732c(MESSAGE_IN(sp->unk0.page_list.messages, 0x176 + id), 32, 208, &sp->style[0]);
+        ui_draw_text(MESSAGE_IN(sp->unk0.page_list.messages, 0x176 + id), 32, 208, &sp->style[0]);
     for (i = 0; i < rows; i++) {
         entry = sp->unk0.page_list.entries[sp->unk2E2 + i];
-        func_8002732c(MESSAGE_IN(sp->unk0.page_list.messages, entry), 54, i * 26 + 76, &sp->style[0]);
-        func_80027440(DAT_801c7590.counts[entry].count | DIGITS(2), 274, i * 26 + 76, &sp->style[4]);
-        func_80028364(&sp->unk350, &sp->unk0.icons[(sp->unk2E2 + i) % 5 + 1], NULL, NULL, 16);
+        ui_draw_text(MESSAGE_IN(sp->unk0.page_list.messages, entry), 54, i * 26 + 76, &sp->style[0]);
+        ui_draw_number(DAT_801c7590.counts[entry].count | DIGITS(2), 274, i * 26 + 76, &sp->style[4]);
+        ui_draw_image(&sp->unk350, &sp->unk0.icons[(sp->unk2E2 + i) % 5 + 1], NULL, NULL, 16);
         sp->unk350.y += 26;
     }
     sp->unk35C.vx = 544;
@@ -6451,18 +6451,18 @@ void func_8002a1d0(void)
     sp->unk358.vx = 624;
     sp->unk358.vy = 448;
     sp->style[0].cd &= 0x7f;
-    func_80028364(&sp->unk33C, &sp->unk358, &sp->unk35C, NULL, 3);
+    ui_draw_image(&sp->unk33C, &sp->unk358, &sp->unk35C, NULL, 3);
     sp->unk358.vx = 633;
     sp->unk33C.x = 32;
     sp->unk358.vy = 448;
     sp->unk33C.w = 30;
-    func_80028364(&sp->unk33C, &sp->unk358, &sp->unk35C, NULL, 3);
+    ui_draw_image(&sp->unk33C, &sp->unk358, &sp->unk35C, NULL, 3);
     PAGE_END();
 }
 
 /* The attribute page: seven rows of two columns. */
 ADDRESS(0x8002a5a4, 0x3b0)
-void func_8002a5a4(void)
+void menu_attribute_points_draw(void)
 {
     MenuScratch *sp;
     CVECTOR *left, *left_num, *right, *right_num;
@@ -6502,21 +6502,21 @@ void func_8002a5a4(void)
             right = &sp->style[0];
             right_num = &sp->style[4];
         }
-        func_8002732c(MESSAGE(0x212 + i), 46, i * 20 + 68, left);
-        func_8002732c(MESSAGE(0x219 + i), 170, i * 20 + 68, right);
-        func_80027440((sp->unk0.stats.base[0][i] + sp->unk0.stats.bonus[0][i]) | DIGITS(3), 108, i * 20 + 68, left_num);
-        func_80027440((sp->unk0.stats.base[1][i] + sp->unk0.stats.bonus[1][i]) | DIGITS(3), 232, i * 20 + 68, right_num);
+        ui_draw_text(MESSAGE(0x212 + i), 46, i * 20 + 68, left);
+        ui_draw_text(MESSAGE(0x219 + i), 170, i * 20 + 68, right);
+        ui_draw_number((sp->unk0.stats.base[0][i] + sp->unk0.stats.bonus[0][i]) | DIGITS(3), 108, i * 20 + 68, left_num);
+        ui_draw_number((sp->unk0.stats.base[1][i] + sp->unk0.stats.bonus[1][i]) | DIGITS(3), 232, i * 20 + 68, right_num);
         sp->unk33C.x = 141;
-        func_80028364(&sp->unk33C, &sp->unk358, &sp->unk35C, left, 3);
+        ui_draw_image(&sp->unk33C, &sp->unk358, &sp->unk35C, left, 3);
         sp->unk33C.x = 265;
-        func_80028364(&sp->unk33C, &sp->unk358, &sp->unk35C, right, 3);
+        ui_draw_image(&sp->unk33C, &sp->unk358, &sp->unk35C, right, 3);
         sp->unk33C.y += 20;
     }
     sp->style[0].r = sp->style[4].r = 72;
     sp->style[0].g = sp->style[4].g = 72;
     sp->style[0].b = sp->style[4].b = 72;
-    func_8002732c(MESSAGE(0x220), 56, 208, &sp->style[0]);
-    func_80027440(sp->unk0.stats.value | DIGITS(2), 242, 208, &sp->style[4]);
+    ui_draw_text(MESSAGE(0x220), 56, 208, &sp->style[0]);
+    ui_draw_number(sp->unk0.stats.value | DIGITS(2), 242, 208, &sp->style[4]);
     sp->unk35C.vx = 544;
     sp->unk35C.vy = 511;
     sp->unk33C.x = 70;
@@ -6525,18 +6525,18 @@ void func_8002a5a4(void)
     sp->unk33C.h = 16;
     sp->unk358.vx = 621;
     sp->unk358.vy = 480;
-    func_80028364(&sp->unk33C, &sp->unk358, &sp->unk35C, NULL, 3);
+    ui_draw_image(&sp->unk33C, &sp->unk358, &sp->unk35C, NULL, 3);
     sp->unk358.vx = 633;
     sp->unk358.vy = 448;
     sp->unk33C.x = 32;
     sp->unk33C.w = 30;
-    func_80028364(&sp->unk33C, &sp->unk358, &sp->unk35C, NULL, 3);
+    ui_draw_image(&sp->unk33C, &sp->unk358, &sp->unk35C, NULL, 3);
     PAGE_END();
 }
 
 /* The map page: visited areas and their completion, or the area summary. */
 ADDRESS(0x8002a954, 0x994)
-void func_8002a954(void)
+void menu_area_info_draw(void)
 {
     MenuScratch *sp = MENU_SCRATCH;
     u8 total[48] = {
@@ -6584,53 +6584,53 @@ void func_8002a954(void)
             id = sp->unk0.map.ids[i];
             if (id >= 90) {
                 if (id == 99)
-                    func_8002732c(MESSAGE(0x269), 53, i * 16 + 54, &sp->style[0]);
+                    ui_draw_text(MESSAGE(0x269), 53, i * 16 + 54, &sp->style[0]);
                 else if (id == sp->unk0.map.current)
-                    func_8002732c(MESSAGE(0x208 + id), 53, i * 16 + 54, &sp->style[2]);
+                    ui_draw_text(MESSAGE(0x208 + id), 53, i * 16 + 54, &sp->style[2]);
                 else
-                    func_8002732c(MESSAGE(0x208 + id), 53, i * 16 + 54, &sp->style[0]);
+                    ui_draw_text(MESSAGE(0x208 + id), 53, i * 16 + 54, &sp->style[0]);
             } else if (id == 89) {
-                func_8002732c(MESSAGE(0x26a), 67, i * 16 + 54, &sp->style[0]);
+                ui_draw_text(MESSAGE(0x26a), 67, i * 16 + 54, &sp->style[0]);
             } else if (id == area_state.area) {
-                func_8002732c(MESSAGE(0x2bc + id), 67, i * 16 + 54, &sp->style[2]);
-                func_80027440(DAT_801cba08.unk16E4[sp->unk0.map.ids[i]] * 100 / total[sp->unk0.map.ids[i]] | DIGITS(3),
+                ui_draw_text(MESSAGE(0x2bc + id), 67, i * 16 + 54, &sp->style[2]);
+                ui_draw_number(DAT_801cba08.unk16E4[sp->unk0.map.ids[i]] * 100 / total[sp->unk0.map.ids[i]] | DIGITS(3),
                               223, i * 16 + 54, &sp->style[6]);
-                func_80026ecc(80, 256, i * 16 + 54, &sp->style[2]);
+                ui_draw_glyph(80, 256, i * 16 + 54, &sp->style[2]);
             } else {
-                func_8002732c(MESSAGE(0x2bc + id), 67, i * 16 + 54, &sp->style[0]);
-                func_80027440(DAT_801cba08.unk16E4[sp->unk0.map.ids[i]] * 100 / total[sp->unk0.map.ids[i]] | DIGITS(3),
+                ui_draw_text(MESSAGE(0x2bc + id), 67, i * 16 + 54, &sp->style[0]);
+                ui_draw_number(DAT_801cba08.unk16E4[sp->unk0.map.ids[i]] * 100 / total[sp->unk0.map.ids[i]] | DIGITS(3),
                               223, i * 16 + 54, &sp->style[4]);
-                func_80026ecc(80, 256, i * 16 + 54, &sp->style[0]);
+                ui_draw_glyph(80, 256, i * 16 + 54, &sp->style[0]);
             }
         }
     } else {
-        func_8002732c(MESSAGE(0x258), 72, 53, &sp->style[2]);
+        ui_draw_text(MESSAGE(0x258), 72, 53, &sp->style[2]);
         for (i = 1; i < 5; i++)
-            func_8002732c(MESSAGE(0x258 + i), 72, i * 30 + 63, &sp->style[2]);
+            ui_draw_text(MESSAGE(0x258 + i), 72, i * 30 + 63, &sp->style[2]);
         if (sp->unk0.map.current != -1) {
-            func_8002732c(MESSAGE(0x208 + sp->unk0.map.current), 86, 66, &sp->style[0]);
-            func_8002732c(MESSAGE(0x2bc + area_state.area), name_x[area_state.area] + 100, 79,
+            ui_draw_text(MESSAGE(0x208 + sp->unk0.map.current), 86, 66, &sp->style[0]);
+            ui_draw_text(MESSAGE(0x2bc + area_state.area), name_x[area_state.area] + 100, 79,
                           &sp->style[0]);
         } else {
-            func_8002732c(MESSAGE(0x2bc + area_state.area), 100, 73, &sp->style[0]);
+            ui_draw_text(MESSAGE(0x2bc + area_state.area), 100, 73, &sp->style[0]);
         }
-        func_80027440(viewer.unk27 | DIGITS(3), 179, 107, &sp->style[4]);
-        func_80026ecc(15, 213, 107, &sp->style[0]);
-        func_80027440(99 | DIGITS(3), 221, 107, &sp->style[4]);
-        func_80027440(viewer.unk28 | DIGITS(3), 179, 138, &sp->style[4]);
-        func_80026ecc(15, 213, 138, &sp->style[0]);
-        func_80027440(265 | DIGITS(3), 221, 138, &sp->style[4]);
-        func_80027440(viewer.unk30 | DIGITS(3), 179, 168, &sp->style[4]);
-        func_80026ecc(15, 213, 168, &sp->style[0]);
-        func_80027440(630 | DIGITS(3), 221, 168, &sp->style[4]);
+        ui_draw_number(viewer.unk27 | DIGITS(3), 179, 107, &sp->style[4]);
+        ui_draw_glyph(15, 213, 107, &sp->style[0]);
+        ui_draw_number(99 | DIGITS(3), 221, 107, &sp->style[4]);
+        ui_draw_number(viewer.unk28 | DIGITS(3), 179, 138, &sp->style[4]);
+        ui_draw_glyph(15, 213, 138, &sp->style[0]);
+        ui_draw_number(265 | DIGITS(3), 221, 138, &sp->style[4]);
+        ui_draw_number(viewer.unk30 | DIGITS(3), 179, 168, &sp->style[4]);
+        ui_draw_glyph(15, 213, 168, &sp->style[0]);
+        ui_draw_number(630 | DIGITS(3), 221, 168, &sp->style[4]);
         time = (u32)viewer.unk34 / 60;
         minutes = time / 60;
         hours = minutes;
         minutes = time - hours * 60;
-        func_80027440((u16)hours | DIGITS(2), 199, 198, &sp->style[4]);
-        func_80026ecc(27, 224, 198, &sp->style[0]);
-        func_80027440((u16)(minutes / 10) | DIGITS(1), 231, 198, &sp->style[4]);
-        func_80027440((u16)(minutes % 10) | DIGITS(1), 241, 198, &sp->style[4]);
+        ui_draw_number((u16)hours | DIGITS(2), 199, 198, &sp->style[4]);
+        ui_draw_glyph(27, 224, 198, &sp->style[0]);
+        ui_draw_number((u16)(minutes / 10) | DIGITS(1), 231, 198, &sp->style[4]);
+        ui_draw_number((u16)(minutes % 10) | DIGITS(1), 241, 198, &sp->style[4]);
     }
     DAT_80087f34 = (DAT_80087f34 + 1) % 32;
     if (DAT_80087f34 < 16)
@@ -6644,14 +6644,14 @@ void func_8002a954(void)
             sp->unk33C.y = 43;
             sp->unk33C.w = 16;
             sp->unk33C.h = 8;
-            func_8002916c(&sp->unk33C, &sp->unk32C, 3072);
+            ui_draw_arrow(&sp->unk33C, &sp->unk32C, 3072);
         }
         if (DAT_8008818c != 25) {
             sp->unk33C.x = 160;
             sp->unk33C.y = 220;
             sp->unk33C.w = 16;
             sp->unk33C.h = 8;
-            func_8002916c(&sp->unk33C, &sp->unk32C, 1024);
+            ui_draw_arrow(&sp->unk33C, &sp->unk32C, 1024);
         }
     }
     sp->unk33C.x = 28;
@@ -6662,20 +6662,20 @@ void func_8002a954(void)
     sp->unk338.g = 88;
     sp->unk338.b = 96;
     if (DAT_800881a8 != 0)
-        func_8002916c(&prev, &sp->unk32C, 2048);
+        ui_draw_arrow(&prev, &sp->unk32C, 2048);
     else
-        func_8002916c(&next, &sp->unk32C, 0);
-    func_800286a8(1, 0, 0);
-    func_80027d18(&sp->unk33C, &sp->unk338, 257, 1);
+        ui_draw_arrow(&next, &sp->unk32C, 0);
+    ui_add_draw_mode(1, 0, 0);
+    ui_draw_rect_outline(&sp->unk33C, &sp->unk338, 257, 1);
     PAGE_END();
 }
 
 /*
- * The option page. `wash` is func_8002948c's {32, 32, 32}: GCC merged the
+ * The option page. `wash` is menu_draw_backdrop's {32, 32, 32}: GCC merged the
  * two constants.
  */
 ADDRESS(0x8002b2e8, 0x564)
-void func_8002b2e8(void)
+void menu_options_draw(void)
 {
     CVECTOR black = {0};
     CVECTOR shadow = {24, 24, 24};
@@ -6713,27 +6713,27 @@ void func_8002b2e8(void)
     sp->unk33C.w = 5;
     sp->unk33C.h = 5;
     sp->unk33C.x = DAT_801cd120.unk1 * 83 / 63 + 180;
-    func_80028364(&sp->unk33C, &sp->unk358, &sp->unk35C, NULL, 0);
+    ui_draw_image(&sp->unk33C, &sp->unk358, &sp->unk35C, NULL, 0);
     sp->unk358.vx = 576;
     sp->unk33C.x = 176;
     sp->unk33C.y = 78;
     sp->unk33C.w = 96;
     sp->unk33C.h = 14;
     sp->unk358.vy = 416;
-    func_80028364(&sp->unk33C, &sp->unk358, &sp->unk35C, NULL, 1);
+    ui_draw_image(&sp->unk33C, &sp->unk358, &sp->unk35C, NULL, 1);
     for (i = 0; i < 6; y += 20, i++)
-        func_8002732c(MESSAGE(0xc9 + i), label_x[i] + 32, y, &sp->style[2]);
+        ui_draw_text(MESSAGE(0xc9 + i), label_x[i] + 32, y, &sp->style[2]);
     for (on = &DAT_801cd120.unk2, i = 1; i < 5; on++, i++) {
         if (*on == 1) {
-            func_8002732c(MESSAGE(0xcf), 193, i * 20 + 80, &sp->style[2]);
-            func_8002732c(MESSAGE(0xd0), 241, i * 20 + 80, &sp->style[3]);
+            ui_draw_text(MESSAGE(0xcf), 193, i * 20 + 80, &sp->style[2]);
+            ui_draw_text(MESSAGE(0xd0), 241, i * 20 + 80, &sp->style[3]);
         } else {
-            func_8002732c(MESSAGE(0xcf), 193, i * 20 + 80, &sp->style[3]);
-            func_8002732c(MESSAGE(0xd0), 241, i * 20 + 80, &sp->style[2]);
+            ui_draw_text(MESSAGE(0xcf), 193, i * 20 + 80, &sp->style[3]);
+            ui_draw_text(MESSAGE(0xd0), 241, i * 20 + 80, &sp->style[2]);
         }
     }
-    func_800276bc(DAT_801cd120.unk1 | DIGITS(2), 280, 80, &sp->style[0]);
-    func_8002732c(MESSAGE(0xe0 + sp->unk2E0), 64, 208, &sp->style[0]);
+    ui_draw_number_fixed(DAT_801cd120.unk1 | DIGITS(2), 280, 80, &sp->style[0]);
+    ui_draw_text(MESSAGE(0xe0 + sp->unk2E0), 64, 208, &sp->style[0]);
     sp->unk358.vx = 596;
     sp->unk358.vy = 448;
     sp->unk35C.vx = 544;
@@ -6742,18 +6742,18 @@ void func_8002b2e8(void)
     sp->unk33C.y = 44;
     sp->unk33C.w = 70;
     sp->unk33C.h = 16;
-    func_80028364(&sp->unk33C, &sp->unk358, &sp->unk35C, NULL, 3);
+    ui_draw_image(&sp->unk33C, &sp->unk358, &sp->unk35C, NULL, 3);
     for (i = 0; i < 6; i++) {
         if (i == sp->unk2E0)
-            func_80028c2c(row, lit, 1);
+            ui_draw_gouraud_quad(row, lit, 1);
         else
-            func_80028c2c(row, dim, 1);
+            ui_draw_gouraud_quad(row, dim, 1);
         row[0].vy += 20;
         row[1].vy += 20;
         row[2].vy += 20;
         row[3].vy += 20;
     }
-    func_800286a8(0, 0, 0);
+    ui_add_draw_mode(0, 0, 0);
     PAGE_END();
 }
 
@@ -6766,7 +6766,7 @@ void func_8002b2e8(void)
  * positions from being strength-reduced).
  */
 ADDRESS(0x8002b84c, 0x804)
-void func_8002b84c(void)
+void menu_button_config_draw(void)
 {
     DVECTOR row[4] = {{48, 84}, {114, 84}, {32, 94}, {130, 94}};
     CVECTOR lit[4] = {{0, 0, 0, 0}, {0, 0, 0, 0}, {128, 64, 0, 0}, {128, 64, 0, 0}};
@@ -6803,16 +6803,16 @@ void func_8002b84c(void)
     mask = DAT_801cd180.unk22;
     for (i = 0; i < 6; i++) {
         if (mask[i] & sp->unk0.levels.flags)
-            func_8002732c(MESSAGE(209 + i), label_x[i] + 32, i * 18 + 80, &sp->style[3]);
+            ui_draw_text(MESSAGE(209 + i), label_x[i] + 32, i * 18 + 80, &sp->style[3]);
         else
-            func_8002732c(MESSAGE(209 + i), label_x[i] + 32, i * 18 + 80, &sp->style[2]);
+            ui_draw_text(MESSAGE(209 + i), label_x[i] + 32, i * 18 + 80, &sp->style[2]);
     }
     mask = &DAT_801cd180.unk22[6];
     for (i = 0; i < 6; i++) {
         if (mask[i] & sp->unk0.levels.flags)
-            func_8002732c(MESSAGE(215 + i), label_x[i + 6] + 168, i * 18 + 80, &sp->style[3]);
+            ui_draw_text(MESSAGE(215 + i), label_x[i + 6] + 168, i * 18 + 80, &sp->style[3]);
         else
-            func_8002732c(MESSAGE(215 + i), label_x[i + 6] + 168, i * 18 + 80, &sp->style[2]);
+            ui_draw_text(MESSAGE(215 + i), label_x[i + 6] + 168, i * 18 + 80, &sp->style[2]);
     }
     sp->unk358.vy = 384;
     sp->unk35C.vx = 544;
@@ -6834,9 +6834,9 @@ void func_8002b84c(void)
         }
         sp->unk338.r = sp->unk338.g = sp->unk338.b = (u8)sp->unk360 * 4 - 128;
         if (i == sp->unk2E0 && sp->unk2E2 == 1)
-            func_80028364(&sp->unk33C, &sp->unk358, &sp->unk35C, &sp->unk338, 0);
+            ui_draw_image(&sp->unk33C, &sp->unk358, &sp->unk35C, &sp->unk338, 0);
         else
-            func_80028364(&sp->unk33C, &sp->unk358, &sp->unk35C, NULL, 0);
+            ui_draw_image(&sp->unk33C, &sp->unk358, &sp->unk35C, NULL, 0);
     }
     sp->unk358.vx = 576;
     sp->unk358.vy = 432;
@@ -6846,7 +6846,7 @@ void func_8002b84c(void)
     sp->unk33C.y = 44;
     sp->unk33C.w = 60;
     sp->unk33C.h = 16;
-    func_80028364(&sp->unk33C, &sp->unk358, &sp->unk35C, NULL, 3);
+    ui_draw_image(&sp->unk33C, &sp->unk358, &sp->unk35C, NULL, 3);
     sp->unk358.vx = 590;
     sp->unk358.vy = 480;
     sp->unk35C.vx = 544;
@@ -6855,9 +6855,9 @@ void func_8002b84c(void)
     sp->unk33C.y = 44;
     sp->unk33C.w = 120;
     sp->unk33C.h = 16;
-    func_80028364(&sp->unk33C, &sp->unk358, &sp->unk35C, NULL, 3);
-    func_8002732c(MESSAGE(221), label_x[12] + 48, 204, &sp->style[2]);
-    func_8002732c(MESSAGE(222), label_x[13] + 152, 204, &sp->style[2]);
+    ui_draw_image(&sp->unk33C, &sp->unk358, &sp->unk35C, NULL, 3);
+    ui_draw_text(MESSAGE(221), label_x[12] + 48, 204, &sp->style[2]);
+    ui_draw_text(MESSAGE(222), label_x[13] + 152, 204, &sp->style[2]);
     for (i = 0; i < 12; i++) {
         if (i == 6) {
             row[0].vx = 184;
@@ -6868,9 +6868,9 @@ void func_8002b84c(void)
             row[2].vy = row[3].vy = 94;
         }
         if (i == sp->unk2E0)
-            func_80028c2c(row, lit, 1);
+            ui_draw_gouraud_quad(row, lit, 1);
         else
-            func_80028c2c(row, dim, 1);
+            ui_draw_gouraud_quad(row, dim, 1);
         row[0].vy += 18;
         row[1].vy += 18;
         row[2].vy += 18;
@@ -6883,10 +6883,10 @@ void func_8002b84c(void)
     row[3].vx = 146;
     row[2].vy = row[3].vy = 218;
     if (sp->unk2E0 == 12)
-        func_80028c2c(row, lit, 1);
+        ui_draw_gouraud_quad(row, lit, 1);
     else
-        func_80028c2c(row, dim, 1);
-    func_800286a8(0, 0, 0);
+        ui_draw_gouraud_quad(row, dim, 1);
+    ui_add_draw_mode(0, 0, 0);
     row[0].vx = 168;
     row[1].vx = 234;
     row[0].vy = row[1].vy = 208;
@@ -6894,28 +6894,28 @@ void func_8002b84c(void)
     row[3].vx = 250;
     row[2].vy = row[3].vy = 218;
     if (sp->unk2E0 == 13)
-        func_80028c2c(row, lit, 1);
+        ui_draw_gouraud_quad(row, lit, 1);
     else
-        func_80028c2c(row, dim, 1);
-    func_800286a8(0, 0, 0);
+        ui_draw_gouraud_quad(row, dim, 1);
+    ui_add_draw_mode(0, 0, 0);
     PAGE_END();
 }
 
 /*
- * The first menu page bodies; func_8002ca84 calls one
+ * The first menu page bodies; card_screen_draw calls one
  * per page bit.
  */
 
 ADDRESS(0x8002c050, 0x40)
-void func_8002c050(void)
+void card_draw_checking(void)
 {
     MenuScratch *sp = MENU_SCRATCH;
 
-    func_8002732c(MESSAGE(310), 32, 74, &sp->style[0]);
+    ui_draw_text(MESSAGE(310), 32, 74, &sp->style[0]);
 }
 
 ADDRESS(0x8002c090, 0x114)
-void func_8002c090(void)
+void card_draw_port_choice(void)
 {
     MenuScratch *sp = MENU_SCRATCH;
     short i;
@@ -6927,33 +6927,33 @@ void func_8002c090(void)
         sp->unk330.y = 108;
     else
         sp->unk330.y = 132;
-    func_80027d18(&sp->unk330, &sp->unk32C, 257, 1);
-    func_800286a8(1, 0, 0);
+    ui_draw_rect_outline(&sp->unk330, &sp->unk32C, 257, 1);
+    ui_add_draw_mode(1, 0, 0);
     for (i = 0; i < 7; i++) {
         DAT_8017beb0[i] = 0;
         DAT_800881f0[i] = 0;
     }
-    func_8002732c(MESSAGE(320), 102, 110, &sp->style[0]);
-    func_8002732c(MESSAGE(321), 102, 134, &sp->style[0]);
+    ui_draw_text(MESSAGE(320), 102, 110, &sp->style[0]);
+    ui_draw_text(MESSAGE(321), 102, 134, &sp->style[0]);
 }
 
 ADDRESS(0x8002c1a4, 0x114)
-void func_8002c1a4(void)
+void card_draw_format_prompt(void)
 {
     MenuScratch *sp = MENU_SCRATCH;
 
     if (sp->unk0.half[1] == 0) {
-        func_8002732c(MESSAGE(311), 32, 74, &sp->style[0]);
+        ui_draw_text(MESSAGE(311), 32, 74, &sp->style[0]);
         if (sp->unk202) {
-            func_8002732c(MESSAGE(325), 121, 160, &sp->style[2]);
-            func_8002732c(MESSAGE(326), 191, 160, &sp->style[0]);
+            ui_draw_text(MESSAGE(325), 121, 160, &sp->style[2]);
+            ui_draw_text(MESSAGE(326), 191, 160, &sp->style[0]);
         } else {
-            func_8002732c(MESSAGE(325), 121, 160, &sp->style[0]);
-            func_8002732c(MESSAGE(326), 191, 160, &sp->style[2]);
+            ui_draw_text(MESSAGE(325), 121, 160, &sp->style[0]);
+            ui_draw_text(MESSAGE(326), 191, 160, &sp->style[2]);
         }
     } else {
-        func_8002732c(MESSAGE(312), 32, 74, &sp->style[0]);
-        func_8002732c(MESSAGE(332), 40, 100, &sp->style[0]);
+        ui_draw_text(MESSAGE(312), 32, 74, &sp->style[0]);
+        ui_draw_text(MESSAGE(332), 40, 100, &sp->style[0]);
     }
 }
 
@@ -6964,7 +6964,7 @@ void func_8002c1a4(void)
  * DAT_8017beb0.
  */
 ADDRESS(0x8002c2b8, 0x604)
-void func_8002c2b8(void)
+void card_draw_file_list(void)
 {
     MenuScratch *sp = MENU_SCRATCH;
     int titles[48] = {
@@ -6979,14 +6979,14 @@ void func_8002c2b8(void)
     sp->unk338.r = sp->unk338.g = sp->unk338.b = 64;
     if (sp->unk0.half[1] == 1) {
         id = (sp->unk2DC & 0xff) ? 323 : 324;
-        func_8002732c(MESSAGE(id), 68, 128, &sp->style[0]);
+        ui_draw_text(MESSAGE(id), 68, 128, &sp->style[0]);
         sp->style[0].b = sp->style[0].g = sp->style[0].r = 24;
         if (sp->unk202) {
-            func_8002732c(MESSAGE(325), 120, 150, &sp->style[2]);
-            func_8002732c(MESSAGE(326), 190, 150, &sp->style[0]);
+            ui_draw_text(MESSAGE(325), 120, 150, &sp->style[2]);
+            ui_draw_text(MESSAGE(326), 190, 150, &sp->style[0]);
         } else {
-            func_8002732c(MESSAGE(325), 120, 150, &sp->style[0]);
-            func_8002732c(MESSAGE(326), 190, 150, &sp->style[2]);
+            ui_draw_text(MESSAGE(325), 120, 150, &sp->style[0]);
+            ui_draw_text(MESSAGE(326), 190, 150, &sp->style[2]);
         }
         sp->style[0].b = sp->style[0].g = sp->style[0].r = 72;
         sp->unk33C.x = 60;
@@ -6998,9 +6998,9 @@ void func_8002c2b8(void)
         sp->unk348.w = 198;
         sp->unk348.h = 48;
         sp->unk344.r = sp->unk344.g = sp->unk344.b = 32;
-        func_80028220(&sp->unk348, &sp->unk344, 1);
-        func_800286a8(2, 0, 0);
-        func_80028220(&sp->unk33C, &sp->unk338, 0);
+        ui_fill_rect(&sp->unk348, &sp->unk344, 1);
+        ui_add_draw_mode(2, 0, 0);
+        ui_fill_rect(&sp->unk33C, &sp->unk338, 0);
     }
     if (sp->unk1FA >= 4) {
         if (sp->unk200 > 0) {
@@ -7008,56 +7008,56 @@ void func_8002c2b8(void)
             sp->unk33C.y = 68;
             sp->unk33C.w = 16;
             sp->unk33C.h = 8;
-            func_8002916c(&sp->unk33C, &sp->unk32C, 3072);
-            func_800286a8(1, 0, 0);
+            ui_draw_arrow(&sp->unk33C, &sp->unk32C, 3072);
+            ui_add_draw_mode(1, 0, 0);
         }
         if (sp->unk200 < sp->unk1FA - 3) {
             sp->unk33C.x = 156;
             sp->unk33C.y = 215;
             sp->unk33C.w = 16;
             sp->unk33C.h = 8;
-            func_8002916c(&sp->unk33C, &sp->unk32C, 1024);
-            func_800286a8(1, 0, 0);
+            ui_draw_arrow(&sp->unk33C, &sp->unk32C, 1024);
+            ui_add_draw_mode(1, 0, 0);
         }
     }
     sp->unk330.x = 32;
     sp->unk330.w = 256;
     sp->unk330.h = 40;
     sp->unk330.y = sp->unk1FE * 48 + 74;
-    func_80027d18(&sp->unk330, &sp->unk32C, 257, 1);
+    ui_draw_rect_outline(&sp->unk330, &sp->unk32C, 257, 1);
     n = 3;
-    func_800286a8(1, 0, 0);
+    ui_add_draw_mode(1, 0, 0);
     sp->unk330.y = 74;
     if (sp->unk1FA < 3)
         n = sp->unk1FA;
     for (i = 0; i < n; i++) {
         if (sp->unk1FC == 1 && i + sp->unk200 == sp->unk1FA - 1) {
-            func_8002732c(MESSAGE(322), 64, sp->unk330.y + 6, &sp->style[0]);
+            ui_draw_text(MESSAGE(322), 64, sp->unk330.y + 6, &sp->style[0]);
         } else {
-            func_800276bc((u16)(sp->unk200 + i + 1) | DIGITS(2), 38, sp->unk330.y + 6,
+            ui_draw_number_fixed((u16)(sp->unk200 + i + 1) | DIGITS(2), 38, sp->unk330.y + 6,
                           &sp->style[0]);
-            func_8002732c(MESSAGE(328), 218, sp->unk330.y + 6, &sp->style[0]);
+            ui_draw_text(MESSAGE(328), 218, sp->unk330.y + 6, &sp->style[0]);
             DAT_800881ac = 1;
             DAT_800881bc = 280;
             DAT_800881c4 = 0;
             DAT_800881ba = 0;
             if (titles[sp->unk1F4->files[i + sp->unk200].kind] != -1)
-                func_8002732c(MESSAGE(610 + titles[sp->unk1F4->files[i + sp->unk200].kind]), 64,
+                ui_draw_text(MESSAGE(610 + titles[sp->unk1F4->files[i + sp->unk200].kind]), 64,
                               sp->unk330.y + 6, &sp->style[0]);
             if (titles[sp->unk1F4->files[i + sp->unk200].kind] != -1)
-                func_8002732c(MESSAGE(700 + sp->unk1F4->files[i + sp->unk200].kind), 64,
+                ui_draw_text(MESSAGE(700 + sp->unk1F4->files[i + sp->unk200].kind), 64,
                               sp->unk330.y + 22, &sp->style[0]);
             else
-                func_8002732c(MESSAGE(700 + sp->unk1F4->files[i + sp->unk200].kind), 64,
+                ui_draw_text(MESSAGE(700 + sp->unk1F4->files[i + sp->unk200].kind), 64,
                               sp->unk330.y + 6, &sp->style[0]);
-            func_800276bc(sp->unk1F4->files[i + sp->unk200].unk1A | DIGITS(4), 248, sp->unk330.y + 6,
+            ui_draw_number_fixed(sp->unk1F4->files[i + sp->unk200].unk1A | DIGITS(4), 248, sp->unk330.y + 6,
                           &sp->style[0]);
         }
         DAT_8017beb0[i + sp->unk200] = DAT_800881c8;
-        func_80027d18(&sp->unk330, &sp->unk338, 257, 1);
+        ui_draw_rect_outline(&sp->unk330, &sp->unk338, 257, 1);
         sp->unk330.y += 48;
     }
-    func_800286a8(1, 0, 0);
+    ui_add_draw_mode(1, 0, 0);
 }
 
 /*
@@ -7066,35 +7066,35 @@ void func_8002c2b8(void)
  */
 
 ADDRESS(0x8002c8bc, 0x9c)
-void func_8002c8bc(void)
+void card_draw_transfer(void)
 {
     MenuScratch *sp = MENU_SCRATCH;
 
     if (sp->unk2DC & 0xff)
-        func_8002732c(MESSAGE(330), 32, 74, &sp->style[0]);
+        ui_draw_text(MESSAGE(330), 32, 74, &sp->style[0]);
     else
-        func_8002732c(MESSAGE(331), 32, 74, &sp->style[0]);
-    func_8002732c(MESSAGE(332), 40, 100, &sp->style[0]);
+        ui_draw_text(MESSAGE(331), 32, 74, &sp->style[0]);
+    ui_draw_text(MESSAGE(332), 40, 100, &sp->style[0]);
 }
 
 ADDRESS(0x8002c958, 0x40)
-void func_8002c958(void)
+void card_draw_finished(void)
 {
     MenuScratch *sp = MENU_SCRATCH;
 
-    func_8002732c(MESSAGE(340), 32, 74, &sp->style[0]);
+    ui_draw_text(MESSAGE(340), 32, 74, &sp->style[0]);
 }
 
 ADDRESS(0x8002c998, 0x50)
-void func_8002c998(void)
+void card_draw_message(void)
 {
     MenuScratch *sp = MENU_SCRATCH;
 
-    func_8002732c(MESSAGE(sp->unk0.half[0]), 60, 114, &sp->style[0]);
+    ui_draw_text(MESSAGE(sp->unk0.half[0]), 60, 114, &sp->style[0]);
 }
 
 ADDRESS(0x8002c9e8, 0x9c)
-void func_8002c9e8(void)
+void menu_draw_background(void)
 {
     MenuScratch *sp = MENU_SCRATCH;
     int n;
@@ -7107,13 +7107,13 @@ void func_8002c9e8(void)
     sp->unk358.vy = 256;
     n = 5;
     while (n--) {
-        func_80028364(&sp->unk350, &sp->unk358, 0, 0, 16);
+        ui_draw_image(&sp->unk350, &sp->unk358, 0, 0, 16);
         sp->unk350.x += 128;
     }
 }
 
 ADDRESS(0x8002ca84, 0x314)
-void func_8002ca84(void)
+void card_screen_draw(void)
 {
     MenuScratch *sp = MENU_SCRATCH;
 
@@ -7140,7 +7140,7 @@ void func_8002ca84(void)
     sp->unk32C.b = 0;
     sp->unk32C.r = (u8)sp->unk360 * 4 + 96;
     sp->unk32C.g = (u8)sp->unk360 * 2 + 48;
-    func_80028364(&sp->unk33C, &sp->unk358, &sp->unk35C, 0, 3);
+    ui_draw_image(&sp->unk33C, &sp->unk358, &sp->unk35C, 0, 3);
     sp->unk33C.y = 44;
     if (sp->unk2DC & 0xff)
         sp->unk358.vx = 586;
@@ -7148,63 +7148,63 @@ void func_8002ca84(void)
         sp->unk358.vx = 613;
     sp->unk33C.x = 32;
     sp->unk33C.w = 40;
-    func_80028364(&sp->unk33C, &sp->unk358, &sp->unk35C, 0, 3);
+    ui_draw_image(&sp->unk33C, &sp->unk358, &sp->unk35C, 0, 3);
     switch (sp->unk2DC) {
     case 0x2:
     case 0x200:
-        func_8002c090();
+        card_draw_port_choice();
         break;
     case 0x4:
     case 0x400:
-        func_8002c050();
+        card_draw_checking();
         break;
     case 0x8:
     case 0x800:
-        func_8002c1a4();
+        card_draw_format_prompt();
         break;
     case 0x10:
     case 0x1000:
-        func_8002c2b8();
+        card_draw_file_list();
         break;
     case 0x20:
     case 0x2000:
-        func_8002c8bc();
+        card_draw_transfer();
         break;
     case 0x40:
     case 0x4000:
-        func_8002c958();
+        card_draw_finished();
         break;
     case 0x80:
     case 0x8000:
-        func_8002c998();
+        card_draw_message();
         break;
     }
-    func_80029548(16, 36, 288, 192);
+    ui_draw_panel(16, 36, 288, 192);
     gfx_flip();
     if (sp->unk206 == 1)
-        func_8002948c();
+        menu_draw_backdrop();
     gfx_draw_ot();
 }
 
 ADDRESS(0x8002cd98, 0xec)
-void func_8002cd98(void)
+void menu_end_game_draw_dialog(void)
 {
     MenuScratch *sp = MENU_SCRATCH;
 
-    func_8002732c(MESSAGE(400), 76, 92, &sp->style[0]);
+    ui_draw_text(MESSAGE(400), 76, 92, &sp->style[0]);
     sp->style[0].b = sp->style[0].g = sp->style[0].r = 24;
     if (sp->unk2E0 == 0) {
-        func_8002732c(MESSAGE(401), 121, 136, &sp->style[2]);
-        func_8002732c(MESSAGE(402), 189, 136, &sp->style[0]);
+        ui_draw_text(MESSAGE(401), 121, 136, &sp->style[2]);
+        ui_draw_text(MESSAGE(402), 189, 136, &sp->style[0]);
     } else {
-        func_8002732c(MESSAGE(401), 121, 136, &sp->style[0]);
-        func_8002732c(MESSAGE(402), 189, 136, &sp->style[2]);
+        ui_draw_text(MESSAGE(401), 121, 136, &sp->style[0]);
+        ui_draw_text(MESSAGE(402), 189, 136, &sp->style[2]);
     }
-    func_80029618(40, 80, 240, 80);
+    ui_draw_window(40, 80, 240, 80);
 }
 
 ADDRESS(0x8002ce84, 0x74)
-void func_8002ce84(void)
+void menu_end_game_draw(void)
 {
     MenuScratch *sp = MENU_SCRATCH;
 
@@ -7214,14 +7214,14 @@ void func_8002ce84(void)
     sp->style[2].g = 66;
     sp->style[2].b = 48;
     sp->style[0].cd = sp->style[2].cd = 57;
-    func_8002cd98();
+    menu_end_game_draw_dialog();
     gfx_flip();
-    func_8002948c();
+    menu_draw_backdrop();
     gfx_draw_ot();
 }
 
 ADDRESS(0x8002cef8, 0x1b8)
-void func_8002cef8(void)
+void menu_game_over_draw(void)
 {
     MenuScratch *sp = MENU_SCRATCH;
     short x[2] = {16, 10};
@@ -7240,18 +7240,18 @@ void func_8002cef8(void)
     sp->unk330.y = sp->unk0.word * 24 + 118;
     sp->unk330.w = 134;
     sp->unk330.h = 16;
-    func_80027d18(&sp->unk330, &sp->unk32C, 257, 1);
-    func_800286a8(1, 0, 0);
-    func_8002732c(MESSAGE(800), x[0] + 97, 120, &sp->style[0]);
-    func_8002732c(MESSAGE(801), x[1] + 97, 144, &sp->style[0]);
-    func_80029618(72, 100, 176, 80);
+    ui_draw_rect_outline(&sp->unk330, &sp->unk32C, 257, 1);
+    ui_add_draw_mode(1, 0, 0);
+    ui_draw_text(MESSAGE(800), x[0] + 97, 120, &sp->style[0]);
+    ui_draw_text(MESSAGE(801), x[1] + 97, 144, &sp->style[0]);
+    ui_draw_window(72, 100, 176, 80);
     gfx_flip();
     ClearImage(&world_state.draw[world_state.frame].clip, 0, 0, 0);
     gfx_draw_ot();
 }
 
 ADDRESS(0x8002d0b0, 0x12c)
-void func_8002d0b0(void)
+void menu_save_prompt_draw(void)
 {
     MenuScratch *sp = MENU_SCRATCH;
 
@@ -7261,15 +7261,15 @@ void func_8002d0b0(void)
     sp->style[2].g = 66;
     sp->style[2].b = 48;
     sp->style[0].cd = sp->style[2].cd = 57;
-    func_8002732c(MESSAGE(850), 92, 120, &sp->style[0]);
+    ui_draw_text(MESSAGE(850), 92, 120, &sp->style[0]);
     if (sp->unk2DE == 0) {
-        func_8002732c(MESSAGE(851), 127, 152, &sp->style[2]);
-        func_8002732c(MESSAGE(852), 183, 152, &sp->style[0]);
+        ui_draw_text(MESSAGE(851), 127, 152, &sp->style[2]);
+        ui_draw_text(MESSAGE(852), 183, 152, &sp->style[0]);
     } else {
-        func_8002732c(MESSAGE(851), 127, 152, &sp->style[0]);
-        func_8002732c(MESSAGE(852), 183, 152, &sp->style[2]);
+        ui_draw_text(MESSAGE(851), 127, 152, &sp->style[0]);
+        ui_draw_text(MESSAGE(852), 183, 152, &sp->style[2]);
     }
-    func_80029618(72, 100, 176, 80);
+    ui_draw_window(72, 100, 176, 80);
     gfx_flip();
     gfx_draw_ot();
 }
@@ -7279,7 +7279,7 @@ void func_8002d0b0(void)
  * 0x8, the window, and the darkened screen while bit 0x1 is set.
  */
 ADDRESS(0x8002d1dc, 0x398)
-void func_8002d1dc(void)
+void shop_draw_header(void)
 {
     MenuScratch *sp = MENU_SCRATCH;
 
@@ -7292,61 +7292,61 @@ void func_8002d1dc(void)
         sp->unk33C.w = 30;
         sp->unk358.vx = 631;
         sp->unk358.vy = 464;
-        func_80028364(&sp->unk33C, &sp->unk358, &sp->unk35C, NULL, 3);
+        ui_draw_image(&sp->unk33C, &sp->unk358, &sp->unk35C, NULL, 3);
         sp->unk33C.w = 35;
         sp->unk358.vx = 624;
         sp->unk358.vy = 448;
         sp->unk33C.x += 37;
-        func_80028364(&sp->unk33C, &sp->unk358, &sp->unk35C, NULL, 3);
+        ui_draw_image(&sp->unk33C, &sp->unk358, &sp->unk35C, NULL, 3);
     } else if (sp->unk2DC & 0x2) {
         sp->unk33C.w = 90;
         sp->unk358.vx = 588;
         sp->unk358.vy = 464;
-        func_80028364(&sp->unk33C, &sp->unk358, &sp->unk35C, NULL, 3);
+        ui_draw_image(&sp->unk33C, &sp->unk358, &sp->unk35C, NULL, 3);
         sp->unk33C.x = 153;
         sp->unk33C.w = 54;
         sp->unk358.vx = 617;
         sp->unk358.vy = 464;
-        func_80028364(&sp->unk33C, &sp->unk358, &sp->unk35C, NULL, 3);
+        ui_draw_image(&sp->unk33C, &sp->unk358, &sp->unk35C, NULL, 3);
         sp->unk33C.x = 131;
         sp->unk33C.w = 20;
         sp->unk358.vx = 612;
         sp->unk358.vy = 464;
-        func_80028364(&sp->unk33C, &sp->unk358, &sp->unk35C, NULL, 3);
+        ui_draw_image(&sp->unk33C, &sp->unk358, &sp->unk35C, NULL, 3);
     } else if (sp->unk2DC & 0x4) {
         sp->unk33C.w = 90;
         sp->unk358.vx = 588;
         sp->unk358.vy = 464;
-        func_80028364(&sp->unk33C, &sp->unk358, &sp->unk35C, NULL, 3);
+        ui_draw_image(&sp->unk33C, &sp->unk358, &sp->unk35C, NULL, 3);
         sp->unk33C.x = 153;
         sp->unk33C.w = 54;
         sp->unk358.vx = 617;
         sp->unk358.vy = 464;
-        func_80028364(&sp->unk33C, &sp->unk358, &sp->unk35C, NULL, 3);
+        ui_draw_image(&sp->unk33C, &sp->unk358, &sp->unk35C, NULL, 3);
         sp->unk33C.x = 130;
         sp->unk33C.w = 20;
         sp->unk358.vx = 591;
         sp->unk358.vy = 432;
-        func_80028364(&sp->unk33C, &sp->unk358, &sp->unk35C, NULL, 3);
+        ui_draw_image(&sp->unk33C, &sp->unk358, &sp->unk35C, NULL, 3);
     } else if (sp->unk2DC & 0x8) {
         sp->unk33C.w = 60;
         sp->unk358.vx = 576;
         sp->unk358.vy = 480;
-        func_80028364(&sp->unk33C, &sp->unk358, &sp->unk35C, NULL, 3);
+        ui_draw_image(&sp->unk33C, &sp->unk358, &sp->unk35C, NULL, 3);
         sp->unk33C.w = 36;
         sp->unk358.vx = 624;
         sp->unk358.vy = 448;
         sp->unk33C.x += 63;
-        func_80028364(&sp->unk33C, &sp->unk358, &sp->unk35C, NULL, 3);
+        ui_draw_image(&sp->unk33C, &sp->unk358, &sp->unk35C, NULL, 3);
     }
-    func_80029618(16, 16, 288, 208);
+    ui_draw_window(16, 16, 288, 208);
     if (sp->unk2DC & 0x1) {
         RECT screen = {0, 0, 320, 240};
-        /* Four initializers: GCC keeps it apart from func_8002948c's {32, 32, 32}. */
+        /* Four initializers: GCC keeps it apart from menu_draw_backdrop's {32, 32, 32}. */
         CVECTOR shade = {32, 32, 32, 0};
 
-        func_80028220(&screen, &shade, 1);
-        func_800286a8(2, 0, 0);
+        ui_fill_rect(&screen, &shade, 1);
+        ui_add_draw_mode(2, 0, 0);
     }
 }
 
@@ -7363,7 +7363,7 @@ void func_8002d1dc(void)
     ((u16 *)((sp)->unk0.list.messages->text + (sp)->unk0.list.messages->offsets[id]))
 
 ADDRESS(0x8002d574, 0x98)
-void func_8002d574(void)
+void shop_draw_cursor(void)
 {
     MenuScratch *sp = MENU_SCRATCH;
     int x, w;
@@ -7378,12 +7378,12 @@ void func_8002d574(void)
     sp->unk330.x = x - 4;
     sp->unk330.h = 34;
     sp->unk330.y = sp->unk2E0 * 36 + 44;
-    func_80027d18(&sp->unk330, &sp->unk32C, 257, 1);
-    func_800286a8(1, 0, 0);
+    ui_draw_rect_outline(&sp->unk330, &sp->unk32C, 257, 1);
+    ui_add_draw_mode(1, 0, 0);
 }
 
 ADDRESS(0x8002d60c, 0x2dc)
-void func_8002d60c(void)
+void shop_draw_buy_list(void)
 {
     MenuScratch *sp = MENU_SCRATCH;
     int rows;
@@ -7394,8 +7394,8 @@ void func_8002d60c(void)
     rows = LIST_ROWS;
     if (sp->unk0.list.count < LIST_ROWS + 1)
         rows = sp->unk0.list.count;
-    func_80027440(DAT_801c7590.counts[266].count | 0x3000000, 244, 27, &sp->style[6]);
-    func_8002732c(MESSAGE(100), 160, 27, &sp->style[2]);
+    ui_draw_number(DAT_801c7590.counts[266].count | 0x3000000, 244, 27, &sp->style[6]);
+    ui_draw_text(MESSAGE(100), 160, 27, &sp->style[2]);
     for (i = 0; i < rows; i++) {
         id = DAT_801c7590.unk13A[sp->unk0.list.ids[sp->unk2E2 + i]];
         if (DAT_801c7590.counts[266].count >= vis_table_c.unk0118[id].unk2) {
@@ -7407,22 +7407,22 @@ void func_8002d60c(void)
         }
         sp->style[0].cd |= 0x80;
         sp->style[3].cd |= 0x80;
-        func_8002732c(LIST_TEXT(sp, id), 28, i * 36 + 48, text);
+        ui_draw_text(LIST_TEXT(sp, id), 28, i * 36 + 48, text);
         sp->style[0].cd &= 0x7f;
         sp->style[3].cd &= 0x7f;
         if (vis_table_c.unk0118[id].unk27) {
-            func_8002732c(MESSAGE(109), 72, i * 36 + 62, text);
-            func_80027440(vis_table_c.unk0118[id].unk28 | 0x3000000, 128, i * 36 + 62, figure);
-            func_80026ecc(74, 160, i * 36 + 62, text);
-            func_80027440(vis_table_c.unk0118[id].unk27 | 0x3000000, 172, i * 36 + 62, figure);
+            ui_draw_text(MESSAGE(109), 72, i * 36 + 62, text);
+            ui_draw_number(vis_table_c.unk0118[id].unk28 | 0x3000000, 128, i * 36 + 62, figure);
+            ui_draw_glyph(74, 160, i * 36 + 62, text);
+            ui_draw_number(vis_table_c.unk0118[id].unk27 | 0x3000000, 172, i * 36 + 62, figure);
         }
-        func_80027440(vis_table_c.unk0118[id].unk2 | 0x3000000, 244, i * 36 + 62, figure);
-        func_8002732c(MESSAGE(102), 216, i * 36 + 62, text);
+        ui_draw_number(vis_table_c.unk0118[id].unk2 | 0x3000000, 244, i * 36 + 62, figure);
+        ui_draw_text(MESSAGE(102), 216, i * 36 + 62, text);
     }
 }
 
 ADDRESS(0x8002d8e8, 0x1b8)
-void func_8002d8e8(void)
+void shop_draw_trade_list(void)
 {
     MenuScratch *sp = MENU_SCRATCH;
     int rows;
@@ -7435,21 +7435,21 @@ void func_8002d8e8(void)
     for (i = 0; i < rows; i++) {
         id = sp->unk0.list.ids[sp->unk2E2 + i];
         sp->style[0].cd |= 0x80;
-        func_8002732c(LIST_TEXT(sp, id), 54, i * 36 + 48, &sp->style[0]);
+        ui_draw_text(LIST_TEXT(sp, id), 54, i * 36 + 48, &sp->style[0]);
         sp->style[0].cd &= 0x7f;
         if (vis_table_c.unk0118[id].unk27) {
-            func_8002732c(MESSAGE(109), 131, i * 36 + 62, &sp->style[0]);
-            func_80027440(vis_table_c.unk0118[id].unk28 | 0x3000000, 187, i * 36 + 62,
+            ui_draw_text(MESSAGE(109), 131, i * 36 + 62, &sp->style[0]);
+            ui_draw_number(vis_table_c.unk0118[id].unk28 | 0x3000000, 187, i * 36 + 62,
                           &sp->style[4]);
-            func_80026ecc(74, 219, i * 36 + 62, &sp->style[0]);
-            func_80027440(vis_table_c.unk0118[id].unk27 | 0x3000000, 231, i * 36 + 62,
+            ui_draw_glyph(74, 219, i * 36 + 62, &sp->style[0]);
+            ui_draw_number(vis_table_c.unk0118[id].unk27 | 0x3000000, 231, i * 36 + 62,
                           &sp->style[4]);
         }
     }
 }
 
 ADDRESS(0x8002daa0, 0x2d0)
-void func_8002daa0(void)
+void shop_draw_repair_list(void)
 {
     MenuScratch *sp = MENU_SCRATCH;
     int rows;
@@ -7458,8 +7458,8 @@ void func_8002daa0(void)
     int price;
     CVECTOR *text, *figure;
 
-    func_80027440(viewer.unk2 | 0x4000000, 244, 27, &sp->style[6]);
-    func_8002732c(MESSAGE(101), 176, 27, &sp->style[2]);
+    ui_draw_number(viewer.unk2 | 0x4000000, 244, 27, &sp->style[6]);
+    ui_draw_text(MESSAGE(101), 176, 27, &sp->style[2]);
     rows = LIST_ROWS;
     if (sp->unk0.list.count < LIST_ROWS + 1)
         rows = sp->unk0.list.count;
@@ -7478,21 +7478,21 @@ void func_8002daa0(void)
         }
         sp->style[0].cd |= 0x80;
         sp->style[3].cd |= 0x80;
-        func_8002732c(LIST_TEXT(sp, id), 28, i * 36 + 48, text);
+        ui_draw_text(LIST_TEXT(sp, id), 28, i * 36 + 48, text);
         sp->style[0].cd &= 0x7f;
         sp->style[3].cd &= 0x7f;
         if (vis_table_c.unk0118[id].unk27) {
-            func_8002732c(MESSAGE(109), 77, i * 36 + 62, text);
-            func_80027440(vis_table_c.unk0118[id].unk28 | 0x3000000, 133, i * 36 + 62, figure);
-            func_80026ecc(74, 165, i * 36 + 62, text);
-            func_80027440(vis_table_c.unk0118[id].unk27 | 0x3000000, 177, i * 36 + 62, figure);
+            ui_draw_text(MESSAGE(109), 77, i * 36 + 62, text);
+            ui_draw_number(vis_table_c.unk0118[id].unk28 | 0x3000000, 133, i * 36 + 62, figure);
+            ui_draw_glyph(74, 165, i * 36 + 62, text);
+            ui_draw_number(vis_table_c.unk0118[id].unk27 | 0x3000000, 177, i * 36 + 62, figure);
         }
-        func_80027440((u16)price | 0x4000000, 244, i * 36 + 62, figure);
+        ui_draw_number((u16)price | 0x4000000, 244, i * 36 + 62, figure);
     }
 }
 
 ADDRESS(0x8002dd70, 0x5a0)
-void func_8002dd70(void)
+void shop_draw_confirm(void)
 {
     MenuScratch *sp = MENU_SCRATCH;
     short id;
@@ -7509,55 +7509,55 @@ void func_8002dd70(void)
     sp->unk33C.y = 206;
     sp->unk33C.w = 50;
     sp->unk33C.h = 16;
-    func_80027d18(&sp->unk33C, &sp->unk32C, 257, 1);
-    func_800286a8(1, 0, 0);
+    ui_draw_rect_outline(&sp->unk33C, &sp->unk32C, 257, 1);
+    ui_add_draw_mode(1, 0, 0);
     if (sp->unk2DC & 0x1) {
         id = DAT_801c7590.unk13A[sp->unk0.list.ids[sp->unk2E2 + sp->unk2E0]];
-        func_8002732c(MESSAGE(105), 120, 208, &sp->style[0]);
+        ui_draw_text(MESSAGE(105), 120, 208, &sp->style[0]);
     } else if (sp->unk2DC & 0x8) {
         id = sp->unk0.list.ids[sp->unk2E2 + sp->unk2E0];
-        func_8002732c(MESSAGE(106), 110, 208, &sp->style[0]);
+        ui_draw_text(MESSAGE(106), 110, 208, &sp->style[0]);
     } else {
         id = sp->unk0.list.ids[sp->unk2E2 + sp->unk2E0];
-        func_8002732c(MESSAGE(107), 113, 208, &sp->style[0]);
+        ui_draw_text(MESSAGE(107), 113, 208, &sp->style[0]);
     }
-    func_8002732c(MESSAGE(108), 172, 208, &sp->style[0]);
+    ui_draw_text(MESSAGE(108), 172, 208, &sp->style[0]);
     sp->style[0].cd |= 0x80;
-    func_8002732c(LIST_TEXT(sp, id), 24, 176, &sp->style[0]);
+    ui_draw_text(LIST_TEXT(sp, id), 24, 176, &sp->style[0]);
     sp->style[0].cd &= 0x7f;
     if (vis_table_c.unk0118[id].unk27) {
-        func_8002732c(MESSAGE(109), 48, 190, &sp->style[0]);
-        func_80027440(vis_table_c.unk0118[id].unk28 | 0x3000000, 104, 190, &sp->style[4]);
-        func_80026ecc(74, 136, 190, &sp->style[0]);
-        func_80027440(vis_table_c.unk0118[id].unk27 | 0x3000000, 148, 190, &sp->style[4]);
+        ui_draw_text(MESSAGE(109), 48, 190, &sp->style[0]);
+        ui_draw_number(vis_table_c.unk0118[id].unk28 | 0x3000000, 104, 190, &sp->style[4]);
+        ui_draw_glyph(74, 136, 190, &sp->style[0]);
+        ui_draw_number(vis_table_c.unk0118[id].unk27 | 0x3000000, 148, 190, &sp->style[4]);
     }
     if (sp->unk2DC & 0x1) {
-        func_80027440(vis_table_c.unk0118[id].unk2 | 0x3000000, 244, 190, &sp->style[4]);
-        func_8002732c(MESSAGE(102), 216, 190, &sp->style[0]);
+        ui_draw_number(vis_table_c.unk0118[id].unk2 | 0x3000000, 244, 190, &sp->style[4]);
+        ui_draw_text(MESSAGE(102), 216, 190, &sp->style[0]);
     } else if (sp->unk2DC & 0x8) {
         price = vis_table_c.unk0118[id].unk3 * 2 / 3 *
                 (vis_table_c.unk0118[id].unk27 - vis_table_c.unk0118[id].unk28);
         if (vis_table_c.unk0118[id].unk28 == 0)
             price *= 2;
-        func_80027440((u16)price | 0x4000000, 244, 190, &sp->style[4]);
+        ui_draw_number((u16)price | 0x4000000, 244, 190, &sp->style[4]);
     }
-    func_8002732c(MESSAGE(103), 165, 46, &sp->style[0]);
+    ui_draw_text(MESSAGE(103), 165, 46, &sp->style[0]);
     y = 46;
-    func_8002732c(MESSAGE(103), 165, y, &sp->style[0]);
+    ui_draw_text(MESSAGE(103), 165, y, &sp->style[0]);
     for (i = 0; i < 7; i++) {
-        func_800276bc(vis_table_c.unk0118[id].unk10[i] | 0x13000000, 207, y, &sp->style[4]);
-        func_800276bc(vis_table_c.unk0118[id].unk10[i + 7] | 0x13000000, 273, y, &sp->style[4]);
+        ui_draw_number_fixed(vis_table_c.unk0118[id].unk10[i] | 0x13000000, 207, y, &sp->style[4]);
+        ui_draw_number_fixed(vis_table_c.unk0118[id].unk10[i + 7] | 0x13000000, 273, y, &sp->style[4]);
         y += 14;
     }
     if (vis_table_c.unk0118[id].unk24) {
         DAT_8008819e = vis_table_c.unk0118[id].unk24 * 100 / 454;
         DAT_80088188 = vis_table_c.unk0118[id].unk24 * 1000 / 454;
-        func_8002732c(MESSAGE(104), 220, 156, &sp->style[0]);
-        func_800276bc(DAT_8008819e | 0x3000000, 248, 156, &sp->style[4]);
-        func_80026ecc(78, 269, 156, &sp->style[0]);
-        func_800276bc((u16)(DAT_80088188 - DAT_8008819e * 10) | 0x1000000, 275, 156,
+        ui_draw_text(MESSAGE(104), 220, 156, &sp->style[0]);
+        ui_draw_number_fixed(DAT_8008819e | 0x3000000, 248, 156, &sp->style[4]);
+        ui_draw_glyph(78, 269, 156, &sp->style[0]);
+        ui_draw_number_fixed((u16)(DAT_80088188 - DAT_8008819e * 10) | 0x1000000, 275, 156,
                       &sp->style[4]);
-        func_80026ecc(108, 281, 156, &sp->style[0]);
+        ui_draw_glyph(108, 281, 156, &sp->style[0]);
     }
     sp->unk350.x = 20;
     sp->unk350.y = 40;
@@ -7565,11 +7565,11 @@ void func_8002dd70(void)
     sp->unk350.h = 128;
     sp->unk358.vx = 448;
     sp->unk358.vy = 256;
-    func_80028364(&sp->unk350, &sp->unk358, 0, 0, 16);
+    ui_draw_image(&sp->unk350, &sp->unk358, 0, 0, 16);
 }
 
 ADDRESS(0x8002e310, 0x180)
-void func_8002e310(void)
+void shop_draw(void)
 {
     MenuScratch *sp = MENU_SCRATCH;
 
@@ -7591,18 +7591,18 @@ void func_8002e310(void)
     sp->unk32C.r = (u8)sp->unk360 * 4 + 96;
     sp->unk32C.g = (u8)sp->unk360 * 2 + 48;
     if (!(sp->unk2DC & 0x8000))
-        func_8002d574();
+        shop_draw_cursor();
     if (sp->unk2DC & 0x8000)
-        func_8002dd70();
+        shop_draw_confirm();
     else if (sp->unk2DC & 0x1)
-        func_8002d60c();
+        shop_draw_buy_list();
     else if (sp->unk2DC & 0x8)
-        func_8002daa0();
+        shop_draw_repair_list();
     else
-        func_8002d8e8();
-    func_8002d1dc();
+        shop_draw_trade_list();
+    shop_draw_header();
     gfx_flip();
-    func_8002948c();
+    menu_draw_backdrop();
     gfx_draw_ot();
 }
 
@@ -7617,10 +7617,10 @@ void func_8002e310(void)
 #define STATUS_ROWS 14
 
 ADDRESS(0x8002e490, 0x40)
-void func_8002e490(void)
+void menu_equip_info_draw_panels(void)
 {
-    func_80029548(8, 8, 300, 224);
-    func_80029548(308, 8, 324, 224);
+    ui_draw_panel(8, 8, 300, 224);
+    ui_draw_panel(308, 8, 324, 224);
 }
 
 /*
@@ -7629,7 +7629,7 @@ void func_8002e490(void)
  * +0x28 figure with a shadow.
  */
 ADDRESS(0x8002e4d0, 0x47c)
-void func_8002e4d0(void)
+void menu_equip_info_draw_slots(void)
 {
     MenuScratch *sp;
     RECT rects[EQUIP_SLOTS] = {
@@ -7660,8 +7660,8 @@ void func_8002e4d0(void)
     sp->unk330.y = rects[slot].y - 1;
     sp->unk330.w = rects[slot].w + 4;
     sp->unk330.h = rects[slot].h + 2;
-    func_80027d18(&sp->unk330, &sp->unk32C, 513, 1);
-    func_800286a8(1, 0, 0);
+    ui_draw_rect_outline(&sp->unk330, &sp->unk32C, 513, 1);
+    ui_add_draw_mode(1, 0, 0);
     sp->style[7].r = 192;
     sp->style[7].g = 158;
     sp->style[7].b = 96;
@@ -7680,14 +7680,14 @@ void func_8002e4d0(void)
             sp->style[7].r = 200;
             sp->style[7].g = 164;
             sp->style[7].b = 96;
-            func_80027440(vis_table_c.unk0118[*equip].unk28 | 0x2000000, rects[i].x + 8,
+            ui_draw_number(vis_table_c.unk0118[*equip].unk28 | 0x2000000, rects[i].x + 8,
                           rects[i].y + 4, &sp->style[7]);
             sp->style[7].g = sp->style[7].r = 8;
             sp->style[7].b = 0;
-            func_80027440(vis_table_c.unk0118[*equip].unk28 | 0x2000000, rects[i].x + 9,
+            ui_draw_number(vis_table_c.unk0118[*equip].unk28 | 0x2000000, rects[i].x + 9,
                           rects[i].y + 5, &sp->style[7]);
         }
-        func_80028364(&rects[i], &tex[i], &clut, 0, mode);
+        ui_draw_image(&rects[i], &tex[i], &clut, 0, mode);
     }
 }
 
@@ -7696,7 +7696,7 @@ void func_8002e4d0(void)
  * item would make on page 2) and bars scaled to +0x2c4.
  */
 ADDRESS(0x8002e94c, 0x44c)
-void func_8002e94c(void)
+void menu_equip_info_draw_attributes(void)
 {
     MenuScratch *sp = MENU_SCRATCH;
     CVECTOR bright = {128, 128, 32, 0};
@@ -7732,7 +7732,7 @@ void func_8002e94c(void)
         sp->unk328 = &sp->style[3];
     }
     for (i = 0; i < STATUS_ROWS; i++)
-        func_8002732c(MESSAGE(14 + i), xoff[i] + 316, i * 15 + 16, sp->unk320);
+        ui_draw_text(MESSAGE(14 + i), xoff[i] + 316, i * 15 + 16, sp->unk320);
     if (sp->unk2DC == 1) {
         sp->unk320 = sp->unk324 = sp->unk328 = &sp->style[4];
     } else {
@@ -7744,7 +7744,7 @@ void func_8002e94c(void)
         if (sp->unk2BE != -1) {
             count = vis_table_c.unk0118[sp->unk2C0].unk10;
             for (i = 0; i < STATUS_ROWS; count++, i++)
-                func_80027440(*count | 0x13000000, 590, i * 15 + 16, sp->unk320);
+                ui_draw_number(*count | 0x13000000, 590, i * 15 + 16, sp->unk320);
         }
         return;
     }
@@ -7752,20 +7752,20 @@ void func_8002e94c(void)
     for (i = 0; i < STATUS_ROWS; figure++, i++) {
         if (sp->unk2DC == 2) {
             if (sp->unk25C[i] > 0) {
-                func_80027440(sp->unk1B4[i] | 0x3000000, 590, i * 15 + 16, sp->unk320);
-                func_80026ecc(19, 544, i * 15 + 16, sp->unk324);
-                func_80027440(sp->unk25C[i] | 0x3000000, 508, i * 15 + 16, sp->unk324);
+                ui_draw_number(sp->unk1B4[i] | 0x3000000, 590, i * 15 + 16, sp->unk320);
+                ui_draw_glyph(19, 544, i * 15 + 16, sp->unk324);
+                ui_draw_number(sp->unk25C[i] | 0x3000000, 508, i * 15 + 16, sp->unk324);
             } else if (sp->unk25C[i] < 0) {
-                func_80027440(sp->unk1B4[i] | 0x3000000, 590, i * 15 + 16, sp->unk320);
-                func_80026ecc(20, 544, i * 15 + 16, sp->unk328);
-                func_80027440(-sp->unk25C[i] | 0x3000000, 508, i * 15 + 16, sp->unk328);
+                ui_draw_number(sp->unk1B4[i] | 0x3000000, 590, i * 15 + 16, sp->unk320);
+                ui_draw_glyph(20, 544, i * 15 + 16, sp->unk328);
+                ui_draw_number(-sp->unk25C[i] | 0x3000000, 508, i * 15 + 16, sp->unk328);
             } else {
-                func_80027440(sp->unk1B4[i] | 0x3000000, 590, i * 15 + 16, sp->unk320);
+                ui_draw_number(sp->unk1B4[i] | 0x3000000, 590, i * 15 + 16, sp->unk320);
             }
         } else if (*figure < 0) {
-            func_80027440(0x3000000, 590, i * 15 + 16, sp->unk320);
+            ui_draw_number(0x3000000, 590, i * 15 + 16, sp->unk320);
         } else {
-            func_80027440((u16)*figure | 0x3000000, 590, i * 15 + 16, sp->unk320);
+            ui_draw_number((u16)*figure | 0x3000000, 590, i * 15 + 16, sp->unk320);
         }
     }
     bar.h = 4;
@@ -7775,9 +7775,9 @@ void func_8002e94c(void)
             bar.w = 100;
         bar.y = i * 15 + 27;
         bar.x = 626 - bar.w;
-        func_80028db8(&bar, &bright, &dark, 1);
+        ui_fill_rect_gradient(&bar, &bright, &dark, 1);
     }
-    func_800286a8(1, 832, 256);
+    ui_add_draw_mode(1, 832, 256);
 }
 
 /*
@@ -7796,7 +7796,7 @@ static s32 DAT_80087f68[2] = {0, 0};
  * current value is, the other figures and two weights in tenths.
  */
 ADDRESS(0x8002ed98, 0x460)
-void func_8002ed98(void)
+void menu_equip_info_draw_stats(void)
 {
     MenuScratch *sp = MENU_SCRATCH;
     s16 *p;
@@ -7812,7 +7812,7 @@ void func_8002ed98(void)
     sp->style[7].cd = 49;
     sp->style[6].cd = 49;
     for (i = 0; i < STATUS_ROWS; i++)
-        func_8002732c(MESSAGE(i), 316, i * 15 + 16, &sp->style[0]);
+        ui_draw_text(MESSAGE(i), 316, i * 15 + 16, &sp->style[0]);
     p = (s16 *)&viewer;
     for (i = 0; i < 2; i++) {
         if (p[1] < p[0] / 2)
@@ -7821,16 +7821,16 @@ void func_8002ed98(void)
             sp->unk320 = &sp->style[6];
         else
             sp->unk320 = &sp->style[4];
-        func_80027440((u16)*p++ | 0x5000000, 566, i * 15 + 16, sp->unk320);
-        func_80026ecc(14, 554, i * 15 + 16, sp->unk320);
-        func_80027440((u16)*p++ | 0x5000000, 494, i * 15 + 16, sp->unk320);
+        ui_draw_number((u16)*p++ | 0x5000000, 566, i * 15 + 16, sp->unk320);
+        ui_draw_glyph(14, 554, i * 15 + 16, sp->unk320);
+        ui_draw_number((u16)*p++ | 0x5000000, 494, i * 15 + 16, sp->unk320);
     }
     p++;
-    func_80027440((u16)*p++ | 0x3000000, 542, 46, &sp->style[4]);
-    func_80026ecc(15, 578, 46, &sp->style[4]);
-    func_80027440((u16)*p++ | 0x3000000, 590, 46, &sp->style[4]);
+    ui_draw_number((u16)*p++ | 0x3000000, 542, 46, &sp->style[4]);
+    ui_draw_glyph(15, 578, 46, &sp->style[4]);
+    ui_draw_number((u16)*p++ | 0x3000000, 590, 46, &sp->style[4]);
     for (i = 3; i < 13; i++)
-        func_80027440((u16)*p++ | 0x3000000, 590, i * 15 + 16, &sp->style[4]);
+        ui_draw_number((u16)*p++ | 0x3000000, 590, i * 15 + 16, &sp->style[4]);
     if ((short)(p[0] / 10) > (short)(p[1] / 10))
         sp->unk320 = &sp->style[6];
     else
@@ -7838,16 +7838,16 @@ void func_8002ed98(void)
     w = *p++;
     DAT_8008819e = w * 100 / 454;
     DAT_80088188 = w * 1000 / 454;
-    func_80027440(DAT_8008819e | 0x3000000, 494, 211, sp->unk320);
-    func_80026ecc(18, 534, 211, sp->unk320);
-    func_80027440((u16)(DAT_80088188 - DAT_8008819e * 10) | 0x1000000, 542, 211, sp->unk320);
-    func_80026ecc(14, 554, 211, sp->unk320);
+    ui_draw_number(DAT_8008819e | 0x3000000, 494, 211, sp->unk320);
+    ui_draw_glyph(18, 534, 211, sp->unk320);
+    ui_draw_number((u16)(DAT_80088188 - DAT_8008819e * 10) | 0x1000000, 542, 211, sp->unk320);
+    ui_draw_glyph(14, 554, 211, sp->unk320);
     w = *p;
     DAT_8008819e = w * 100 / 454;
     DAT_80088188 = w * 1000 / 454;
-    func_80027440(DAT_8008819e | 0x3000000, 566, 211, sp->unk320);
-    func_80026ecc(18, 606, 211, sp->unk320);
-    func_80027440((u16)(DAT_80088188 - DAT_8008819e * 10) | 0x1000000, 614, 211, sp->unk320);
+    ui_draw_number(DAT_8008819e | 0x3000000, 566, 211, sp->unk320);
+    ui_draw_glyph(18, 606, 211, sp->unk320);
+    ui_draw_number((u16)(DAT_80088188 - DAT_8008819e * 10) | 0x1000000, 614, 211, sp->unk320);
 }
 
 /*
@@ -7855,7 +7855,7 @@ void func_8002ed98(void)
  * apart horizontally and 12 vertically, semi-transparent in color.
  */
 ADDRESS(0x8002f1f8, 0x2a0)
-void func_8002f1f8(DVECTOR *pos, DVECTOR *tex, DVECTOR *clut, CVECTOR *color, int arg4)
+void ui_draw_cell_grid(DVECTOR *pos, DVECTOR *tex, DVECTOR *clut, CVECTOR *color, int arg4)
 {
     int row, col;
     int cols, rows; /* cells across and down */
@@ -7901,7 +7901,7 @@ void func_8002f1f8(DVECTOR *pos, DVECTOR *tex, DVECTOR *clut, CVECTOR *color, in
 
 /* The item page: its arrows, panels, name, cell grid, weight and figures. */
 ADDRESS(0x8002f498, 0x4e4)
-void func_8002f498(void)
+void menu_equip_info_draw_item(void)
 {
     MenuScratch *sp = MENU_SCRATCH;
     DVECTOR pos = {20, 152};
@@ -7913,50 +7913,50 @@ void func_8002f498(void)
     sp->style[2].g = sp->style[6].g = 48;
     sp->style[2].cd = 73;
     sp->style[6].cd = 49;
-    func_8002916c(&down, &sp->unk32C, 0);
-    func_8002916c(&up, &sp->unk32C, 2048);
-    func_800286a8(1, 0, 0);
+    ui_draw_arrow(&down, &sp->unk32C, 0);
+    ui_draw_arrow(&up, &sp->unk32C, 2048);
+    ui_add_draw_mode(1, 0, 0);
     sp->unk350.x = 12;
     sp->unk350.y = 10;
     sp->unk350.w = 192;
     sp->unk350.h = 124;
     sp->unk358.vx = 640;
     sp->unk358.vy = 0;
-    func_80028364(&sp->unk350, &sp->unk358, 0, 0, 16);
+    ui_draw_image(&sp->unk350, &sp->unk358, 0, 0, 16);
     sp->unk350.x = 204;
     sp->unk350.w = 100;
     sp->unk358.vx = 832;
-    func_80028364(&sp->unk350, &sp->unk358, 0, 0, 16);
+    ui_draw_image(&sp->unk350, &sp->unk358, 0, 0, 16);
     if (sp->unk2BE == -1)
         return;
     sp->style[0].cd |= 0x80;
-    func_8002732c((u16 *)(sp->unk2CC->text + sp->unk2CC->offsets[sp->unk2C0]), 14, 136,
+    ui_draw_text((u16 *)(sp->unk2CC->text + sp->unk2CC->offsets[sp->unk2C0]), 14, 136,
                   &sp->style[0]);
     sp->style[0].cd &= 0x7f;
-    func_8002f1f8(&pos, &sp->unk0.vram[0], &sp->unk0.vram[1], &sp->style[0], 0xf0004);
+    ui_draw_cell_grid(&pos, &sp->unk0.vram[0], &sp->unk0.vram[1], &sp->style[0], 0xf0004);
     if (vis_table_c.unk0118[sp->unk2C0].unk24) {
         DAT_8008819e = vis_table_c.unk0118[sp->unk2C0].unk24 * 100 / 454;
         DAT_80088188 = vis_table_c.unk0118[sp->unk2C0].unk24 * 1000 / 454;
-        func_8002732c(MESSAGE(28), 188, 217, &sp->style[0]);
-        func_80027440(DAT_8008819e | 0x3000000, 224, 217, &sp->style[4]);
-        func_80026ecc(18, 264, 217, &sp->style[0]);
-        func_80027440((u16)(DAT_80088188 - DAT_8008819e * 10) | 0x1000000, 272, 217,
+        ui_draw_text(MESSAGE(28), 188, 217, &sp->style[0]);
+        ui_draw_number(DAT_8008819e | 0x3000000, 224, 217, &sp->style[4]);
+        ui_draw_glyph(18, 264, 217, &sp->style[0]);
+        ui_draw_number((u16)(DAT_80088188 - DAT_8008819e * 10) | 0x1000000, 272, 217,
                       &sp->style[4]);
-        func_80026ecc(53, 287, 217, &sp->style[0]);
+        ui_draw_glyph(53, 287, 217, &sp->style[0]);
     }
     if (vis_table_c.unk0118[sp->unk2C0].unk27) {
-        func_8002732c(MESSAGE(29), 16, 216, &sp->style[0]);
+        ui_draw_text(MESSAGE(29), 16, 216, &sp->style[0]);
         if (vis_table_c.unk0118[sp->unk2C0].unk28 < 4) {
-            func_80027440(vis_table_c.unk0118[sp->unk2C0].unk28 | 0x3000000, 80, 217,
+            ui_draw_number(vis_table_c.unk0118[sp->unk2C0].unk28 | 0x3000000, 80, 217,
                           &sp->style[6]);
-            func_80026ecc(14, 120, 217, &sp->style[2]);
-            func_80027440(vis_table_c.unk0118[sp->unk2C0].unk27 | 0x3000000, 136, 217,
+            ui_draw_glyph(14, 120, 217, &sp->style[2]);
+            ui_draw_number(vis_table_c.unk0118[sp->unk2C0].unk27 | 0x3000000, 136, 217,
                           &sp->style[6]);
         } else {
-            func_80027440(vis_table_c.unk0118[sp->unk2C0].unk28 | 0x3000000, 80, 217,
+            ui_draw_number(vis_table_c.unk0118[sp->unk2C0].unk28 | 0x3000000, 80, 217,
                           &sp->style[4]);
-            func_80026ecc(14, 120, 217, &sp->style[0]);
-            func_80027440(vis_table_c.unk0118[sp->unk2C0].unk27 | 0x3000000, 136, 217,
+            ui_draw_glyph(14, 120, 217, &sp->style[0]);
+            ui_draw_number(vis_table_c.unk0118[sp->unk2C0].unk27 | 0x3000000, 136, 217,
                           &sp->style[4]);
         }
     }
@@ -7964,7 +7964,7 @@ void func_8002f498(void)
 
 /* The cell page: its name and grid, the cursor and the cells not yet set. */
 ADDRESS(0x8002f97c, 0x2d0)
-void func_8002f97c(void)
+void menu_equip_info_draw_magic(void)
 {
     MenuScratch *sp = MENU_SCRATCH;
     CVECTOR grey = {64, 64, 64, 0};
@@ -7972,21 +7972,21 @@ void func_8002f97c(void)
     int row, col, bit;
 
     sp->style[0].cd |= 0x80;
-    func_8002732c((u16 *)(sp->unk2CC->text + sp->unk2CC->offsets[512 + sp->unk2BE]), 14, 136,
+    ui_draw_text((u16 *)(sp->unk2CC->text + sp->unk2CC->offsets[512 + sp->unk2BE]), 14, 136,
                   &sp->style[0]);
     sp->style[0].cd &= 0x7f;
-    func_8002f1f8(&pos, &sp->unk0.vram[0], &sp->unk0.vram[1], &sp->style[0], 0xf0004);
+    ui_draw_cell_grid(&pos, &sp->unk0.vram[0], &sp->unk0.vram[1], &sp->style[0], 0xf0004);
     sp->unk330.w = 48;
     sp->unk330.h = 24;
     sp->unk330.x = (short)(sp->unk2BE / 3) * 49 + 11;
     sp->unk330.y = (short)(sp->unk2BE % 3) * 25 + 12;
-    func_80027d18(&sp->unk330, &grey, 513, 0);
+    ui_draw_rect_outline(&sp->unk330, &grey, 513, 0);
     sp->unk330.x += 2;
     sp->unk330.y += 1;
     sp->unk330.w -= 4;
     sp->unk330.h -= 2;
-    func_80028220(&sp->unk330, &grey, 1);
-    func_800286a8(1, 0, 0);
+    ui_fill_rect(&sp->unk330, &grey, 1);
+    ui_add_draw_mode(1, 0, 0);
     sp->unk350.w = 48;
     sp->unk350.h = 24;
     sp->unk350.y = 12;
@@ -7998,17 +7998,17 @@ void func_8002f97c(void)
         sp->unk358.vx = 640;
         for (col = 0, bit = row; col < 6; bit += 3, col++) {
             if (!(*sp->unk2D4 & (1 << bit))) {
-                func_80028220(&sp->unk350, &dim, 1);
-                func_800286a8(2, 0, 0);
+                ui_fill_rect(&sp->unk350, &dim, 1);
+                ui_add_draw_mode(2, 0, 0);
             }
-            func_80028364(&sp->unk350, &sp->unk358, 0, 0, 16);
+            ui_draw_image(&sp->unk350, &sp->unk358, 0, 0, 16);
             sp->unk350.x += 49;
             sp->unk358.vx += 48;
         }
         sp->unk350.y += 25;
         sp->unk358.vy += 24;
     }
-    func_800286a8(1, 0, 0);
+    ui_add_draw_mode(1, 0, 0);
 }
 
 /*
@@ -8021,7 +8021,7 @@ static s32 DAT_80087f84 = 0;
 
 /* The status screen frame: page toggles, colours, arrows and pages. */
 ADDRESS(0x8002fc4c, 0x200)
-void func_8002fc4c(void)
+void menu_equip_info_draw(void)
 {
     MenuScratch *sp = MENU_SCRATCH;
     RECT unused[2];
@@ -8048,24 +8048,24 @@ void func_8002fc4c(void)
     sp->unk32C.g = (u8)sp->unk360 * 2 + 48;
     if (DAT_80088192) {
         if (DAT_800881aa == 0)
-            func_8002916c(&right, &sp->unk32C, 0);
+            ui_draw_arrow(&right, &sp->unk32C, 0);
         else
-            func_8002916c(&left, &sp->unk32C, 2048);
+            ui_draw_arrow(&left, &sp->unk32C, 2048);
     }
     if (sp->unk2DC == 2) {
         if (sp->unk2C7 != 10)
-            func_8002f498();
+            menu_equip_info_draw_item();
         else
-            func_8002f97c();
+            menu_equip_info_draw_magic();
     } else {
-        func_8002e4d0();
+        menu_equip_info_draw_slots();
     }
     if (DAT_800881aa == 0)
-        func_8002ed98();
+        menu_equip_info_draw_stats();
     else
-        func_8002e94c();
-    func_8002e490();
-    func_8002c9e8();
+        menu_equip_info_draw_attributes();
+    menu_equip_info_draw_panels();
+    menu_draw_background();
     gfx_end_frame();
 }
 
@@ -8080,7 +8080,7 @@ void func_8002fc4c(void)
 #define STORE_ROWS 3
 
 ADDRESS(0x8002fe4c, 0x410)
-void func_8002fe4c(void)
+void menu_creature_book_draw_grid(void)
 {
     MenuScratch *sp = MENU_SCRATCH;
     RECT up = {320, 16, 32, 12};
@@ -8093,26 +8093,26 @@ void func_8002fe4c(void)
     sp->unk330.h = 48;
     sp->unk330.x = (short)(sp->unk2E0 % STORE_COLUMNS) * 112 + 48;
     sp->unk330.y = (short)(sp->unk2E0 / STORE_COLUMNS) * 56 + 32;
-    func_80027d18(&sp->unk330, &sp->unk32C, 513, 1);
-    func_800286a8(1, 0, 0);
+    ui_draw_rect_outline(&sp->unk330, &sp->unk32C, 513, 1);
+    ui_add_draw_mode(1, 0, 0);
     if (sp->unk2E2 > 0)
-        func_8002916c(&up, &sp->unk32C, 3072);
+        ui_draw_arrow(&up, &sp->unk32C, 3072);
     if (sp->unk2E2 <= sp->unk0.store.rows - 3)
-        func_8002916c(&down, &sp->unk32C, 1024);
-    func_800286a8(1, 0, 0);
+        ui_draw_arrow(&down, &sp->unk32C, 1024);
+    ui_add_draw_mode(1, 0, 0);
     index = sp->unk2E2 * STORE_COLUMNS + sp->unk2E0;
     kind = sp->unk0.store.kinds[index];
-    func_80027440((u16)(index + 1) | 0x3000000, 486, 214, &sp->style[4]);
-    func_80026ecc(14, 531, 214, &sp->style[0]);
-    func_80027440(150 | 0x3000000, 551, 214, &sp->style[4]);
+    ui_draw_number((u16)(index + 1) | 0x3000000, 486, 214, &sp->style[4]);
+    ui_draw_glyph(14, 531, 214, &sp->style[0]);
+    ui_draw_number(150 | 0x3000000, 551, 214, &sp->style[4]);
     if (index < sp->unk0.store.count) {
         sp->style[0].cd |= 0x80;
-        func_8002732c((u16 *)(sp->unk0.store.messages->text +
+        ui_draw_text((u16 *)(sp->unk0.store.messages->text +
                               sp->unk0.store.messages->offsets[kind]),
                       40, 214, &sp->style[0]);
         sp->style[0].cd &= 0x7f;
     }
-    func_80029548(32, 210, 576, 22);
+    ui_draw_panel(32, 210, 576, 22);
     sp->unk350.w = 96;
     sp->unk350.h = 48;
     sp->unk350.y = 32;
@@ -8125,15 +8125,15 @@ void func_8002fe4c(void)
         sp->unk350.x = 48;
         for (col = 0; col < cols; index++, col++) {
             if (index < sp->unk0.store.count) {
-                func_80027d18(&sp->unk350, &sp->style[0], 513, 1);
-                func_80028364(&sp->unk350, &sp->unk0.store.tex[index % 15], 0, 0, 16);
+                ui_draw_rect_outline(&sp->unk350, &sp->style[0], 513, 1);
+                ui_draw_image(&sp->unk350, &sp->unk0.store.tex[index % 15], 0, 0, 16);
             }
             sp->unk350.x += 112;
         }
         sp->unk350.y += 56;
     }
-    func_800286a8(0, 0, 0);
-    func_80029548(32, 24, 576, 176);
+    ui_add_draw_mode(0, 0, 0);
+    ui_draw_panel(32, 24, 576, 176);
 }
 
 /*
@@ -8142,7 +8142,7 @@ void func_8002fe4c(void)
  * paired figures and up to three trait names.
  */
 ADDRESS(0x8003025c, 0x85c)
-void func_8003025c(void)
+void menu_creature_book_draw_entry(void)
 {
     DVECTOR tex = {960, 446};
     DVECTOR clut = {560, 498};
@@ -8163,84 +8163,84 @@ void func_8003025c(void)
         DAT_800881aa = 0;
     DAT_801cd180.unk4 = 0;
     if (DAT_800881aa == 0)
-        func_8002916c(&right, &sp->unk32C, 0);
+        ui_draw_arrow(&right, &sp->unk32C, 0);
     else
-        func_8002916c(&left, &sp->unk32C, 2048);
-    func_800286a8(1, 0, 0);
+        ui_draw_arrow(&left, &sp->unk32C, 2048);
+    ui_add_draw_mode(1, 0, 0);
     sp->style[0].cd |= 0x80;
-    func_8002732c(MESSAGE_IN(sp->unk0.store.messages, kind), 32, 16, &sp->style[0]);
+    ui_draw_text(MESSAGE_IN(sp->unk0.store.messages, kind), 32, 16, &sp->style[0]);
     sp->style[0].cd &= 0x7f;
-    func_8002f1f8(&pos, &tex, &clut, &sp->style[0], 0xf0005);
+    ui_draw_cell_grid(&pos, &tex, &clut, &sp->style[0], 0xf0005);
     if (DAT_800881aa) {
         for (i = 0; i < 14; i++) {
-            func_8002732c(MESSAGE(100 + i), 336, i * 15 + 16, &sp->style[0]);
-            func_80027440((u16)item->figures[i] | DIGITS(2), 582, i * 15 + 16, &sp->style[4]);
+            ui_draw_text(MESSAGE(100 + i), 336, i * 15 + 16, &sp->style[0]);
+            ui_draw_number((u16)item->figures[i] | DIGITS(2), 582, i * 15 + 16, &sp->style[4]);
         }
     } else {
         for (i = 0; i < 10; i++)
-            func_8002732c(MESSAGE(117 + i), 336, i * 15 + 16, &sp->style[0]);
+            ui_draw_text(MESSAGE(117 + i), 336, i * 15 + 16, &sp->style[0]);
         if (item->kind < 17)
-            func_8002732c(MESSAGE(150 + item->kind), 606 - kind_w[item->kind], 16,
+            ui_draw_text(MESSAGE(150 + item->kind), 606 - kind_w[item->kind], 16,
                           &sp->style[0]);
-        func_80027440(item->unk2 | DIGITS(4), 558, 31, &sp->style[4]);
-        func_80027440(item->unk1 | DIGITS(2), 582, 46, &sp->style[4]);
+        ui_draw_number(item->unk2 | DIGITS(4), 558, 31, &sp->style[4]);
+        ui_draw_number(item->unk1 | DIGITS(2), 582, 46, &sp->style[4]);
         DAT_8008819e = item->unk4 * 10 / 3048;
-        func_80027440(DAT_8008819e | DIGITS(3), 522, 61, &sp->style[4]);
-        func_80026ecc(55, 559, 61, &sp->style[4]);
-        func_80027440((u16)((u16)(item->unk4 * 10 - DAT_8008819e * 3048) / 254) | DIGITS(2), 570,
+        ui_draw_number(DAT_8008819e | DIGITS(3), 522, 61, &sp->style[4]);
+        ui_draw_glyph(55, 559, 61, &sp->style[4]);
+        ui_draw_number((u16)((u16)(item->unk4 * 10 - DAT_8008819e * 3048) / 254) | DIGITS(2), 570,
                       61, &sp->style[4]);
-        func_80026ecc(54, 595, 61, &sp->style[4]);
+        ui_draw_glyph(54, 595, 61, &sp->style[4]);
         DAT_8008819e = item->unk6 * 100 / 454;
         DAT_80088188 = item->unk6 * 1000 / 454;
-        func_80027440(DAT_8008819e | DIGITS(4), 522, 76, &sp->style[4]);
-        func_80026ecc(18, 574, 76, &sp->style[4]);
-        func_80027440((u16)(DAT_80088188 - DAT_8008819e * 10) | DIGITS(1), 582, 76, &sp->style[4]);
-        func_80026ecc(53, 594, 76, &sp->style[4]);
+        ui_draw_number(DAT_8008819e | DIGITS(4), 522, 76, &sp->style[4]);
+        ui_draw_glyph(18, 574, 76, &sp->style[4]);
+        ui_draw_number((u16)(DAT_80088188 - DAT_8008819e * 10) | DIGITS(1), 582, 76, &sp->style[4]);
+        ui_draw_glyph(53, 594, 76, &sp->style[4]);
         if (item->pairs[0][1]) {
-            func_80027440((u16)item->pairs[0][1] | DIGITS(3), 522, 91, &sp->style[4]);
-            func_80026ecc(15, 558, 91, &sp->style[4]);
+            ui_draw_number((u16)item->pairs[0][1] | DIGITS(3), 522, 91, &sp->style[4]);
+            ui_draw_glyph(15, 558, 91, &sp->style[4]);
         }
-        func_80027440((u16)item->pairs[0][0] | DIGITS(3), 570, 91, &sp->style[4]);
+        ui_draw_number((u16)item->pairs[0][0] | DIGITS(3), 570, 91, &sp->style[4]);
         if (item->pairs[1][1]) {
-            func_80027440((u16)item->pairs[1][1] | DIGITS(3), 522, 106, &sp->style[4]);
-            func_80026ecc(15, 558, 106, &sp->style[4]);
+            ui_draw_number((u16)item->pairs[1][1] | DIGITS(3), 522, 106, &sp->style[4]);
+            ui_draw_glyph(15, 558, 106, &sp->style[4]);
         }
-        func_80027440((u16)item->pairs[1][0] | DIGITS(3), 570, 106, &sp->style[4]);
+        ui_draw_number((u16)item->pairs[1][0] | DIGITS(3), 570, 106, &sp->style[4]);
         if (item->pairs[2][1]) {
-            func_80027440((u16)item->pairs[2][1] | DIGITS(3), 522, 121, &sp->style[4]);
-            func_80026ecc(15, 558, 121, &sp->style[4]);
+            ui_draw_number((u16)item->pairs[2][1] | DIGITS(3), 522, 121, &sp->style[4]);
+            ui_draw_glyph(15, 558, 121, &sp->style[4]);
         }
-        func_80027440((u16)item->pairs[2][0] | DIGITS(3), 570, 121, &sp->style[4]);
+        ui_draw_number((u16)item->pairs[2][0] | DIGITS(3), 570, 121, &sp->style[4]);
         if (item->pairs[3][1]) {
-            func_80027440((u16)item->pairs[3][1] | DIGITS(3), 522, 136, &sp->style[4]);
-            func_80026ecc(15, 558, 136, &sp->style[4]);
+            ui_draw_number((u16)item->pairs[3][1] | DIGITS(3), 522, 136, &sp->style[4]);
+            ui_draw_glyph(15, 558, 136, &sp->style[4]);
         }
-        func_80027440((u16)item->pairs[3][0] | DIGITS(3), 570, 136, &sp->style[4]);
+        ui_draw_number((u16)item->pairs[3][0] | DIGITS(3), 570, 136, &sp->style[4]);
         if (item->traits & 0xf)
-            func_8002732c(MESSAGE(129 + (item->traits & 0xf)), 336, 181, &sp->style[0]);
+            ui_draw_text(MESSAGE(129 + (item->traits & 0xf)), 336, 181, &sp->style[0]);
         if (item->traits >> 8 & 0xf)
-            func_8002732c(MESSAGE(129 + (item->traits >> 8 & 0xf)), 336, 196, &sp->style[0]);
+            ui_draw_text(MESSAGE(129 + (item->traits >> 8 & 0xf)), 336, 196, &sp->style[0]);
         if (item->traits >> 16 & 0xf)
-            func_8002732c(MESSAGE(129 + (item->traits >> 16 & 0xf)), 336, 211, &sp->style[0]);
+            ui_draw_text(MESSAGE(129 + (item->traits >> 16 & 0xf)), 336, 211, &sp->style[0]);
     }
     sp->unk350.x = 55;
     sp->unk350.y = 32;
     sp->unk350.w = 230;
     sp->unk350.h = 115;
-    func_80027d18(&sp->unk350, &sp->style[0], 513, 1);
-    func_800286a8(0, 0, 0);
-    func_80028364(&sp->unk350, &sp->unk0.store.image, NULL, NULL, 16);
-    func_80029548(24, 12, 292, 216);
-    func_80029548(324, 12, 292, 216);
+    ui_draw_rect_outline(&sp->unk350, &sp->style[0], 513, 1);
+    ui_add_draw_mode(0, 0, 0);
+    ui_draw_image(&sp->unk350, &sp->unk0.store.image, NULL, NULL, 16);
+    ui_draw_panel(24, 12, 292, 216);
+    ui_draw_panel(324, 12, 292, 216);
 }
 
 /*
  * The stored-item screen frame: colours, cursor blink,
- * then the grid page or the page func_8003025c draws.
+ * then the grid page or the page menu_creature_book_draw_entry draws.
  */
 
 ADDRESS(0x80030ab8, 0x12c)
-void func_80030ab8(void)
+void menu_creature_book_draw(void)
 {
     MenuScratch *sp = MENU_SCRATCH;
     RECT unused;
@@ -8261,10 +8261,10 @@ void func_80030ab8(void)
     sp->unk32C.r = (u8)sp->unk360 * 4 + 96;
     sp->unk32C.g = (u8)sp->unk360 * 2 + 48;
     if (sp->unk2DC == 2)
-        func_8003025c();
+        menu_creature_book_draw_entry();
     else
-        func_8002fe4c();
-    func_8002c9e8();
+        menu_creature_book_draw_grid();
+    menu_draw_background();
     gfx_end_frame();
 }
 
@@ -8274,7 +8274,7 @@ void func_80030ab8(void)
  * shown, wrapping after twenty.
  */
 ADDRESS(0x80030be4, 0x3bc)
-void func_80030be4(void)
+void menu_arrange_icons_draw_hand(void)
 {
     RECT unused;
     CVECTOR light = {96, 96, 96};
@@ -8297,21 +8297,21 @@ void func_80030be4(void)
         sp->unk330.y = sp->unk2E0 / 8 * 32 + 35;
         sp->unk330.w = 56;
         sp->unk330.h = 28;
-        func_80027d18(&sp->unk330, &sp->unk32C, 513, 1);
+        ui_draw_rect_outline(&sp->unk330, &sp->unk32C, 513, 1);
     }
     if (sp->unk0.grid.row0 > 0)
-        func_8002916c(&up, &sp->unk32C, 3072);
+        ui_draw_arrow(&up, &sp->unk32C, 3072);
     if (sp->unk0.grid.row0 < 73)
-        func_8002916c(&down, &sp->unk32C, 1024);
+        ui_draw_arrow(&down, &sp->unk32C, 1024);
     bar.y = sp->unk0.grid.row0 * 136 / 74 + 47;
-    func_80028220(&bar, &shade, 1);
-    func_800286a8(1, 0, 0);
+    ui_fill_rect(&bar, &shade, 1);
+    ui_add_draw_mode(1, 0, 0);
     edge.x = bar.x - 2;
     edge.y = bar.y - 1;
     edge.w = bar.w;
     edge.h = bar.h;
-    func_80028220(&edge, &shade, 1);
-    func_800286a8(2, 0, 0);
+    ui_fill_rect(&edge, &shade, 1);
+    ui_add_draw_mode(2, 0, 0);
     sp->unk33C.x = 60;
     sp->unk33C.y = 12;
     sp->unk33C.w = 196;
@@ -8320,7 +8320,7 @@ void func_80030be4(void)
     sp->unk358.vy = 448;
     sp->unk35C.vx = 544;
     sp->unk35C.vy = 502;
-    func_80028364(&sp->unk33C, &sp->unk358, &sp->unk35C, NULL, 3);
+    ui_draw_image(&sp->unk33C, &sp->unk358, &sp->unk35C, NULL, 3);
     cell = sp->unk0.grid.row0 * 4 % 20;
     sp->unk350.y = 35;
     sp->unk350.w = 56;
@@ -8328,18 +8328,18 @@ void func_80030be4(void)
     for (row = 0; row < 5; row++) {
         sp->unk350.x = 50;
         for (col = 0; col < 4; col++) {
-            func_80028364(&sp->unk350, &sp->unk0.grid.tex[cell], NULL, NULL, 16);
+            ui_draw_image(&sp->unk350, &sp->unk0.grid.tex[cell], NULL, NULL, 16);
             cell = (cell + 1) % 20;
             sp->unk350.x += step_x;
         }
         sp->unk350.y += step_y;
     }
-    func_80029548(10, 9, 296, 188);
+    ui_draw_panel(10, 9, 296, 188);
 }
 
-/* The id grid's right block, as func_80030be4 for the second id table. */
+/* The id grid's right block, as menu_arrange_icons_draw_hand for the second id table. */
 ADDRESS(0x80030fa0, 0x3d8)
-void func_80030fa0(void)
+void menu_arrange_icons_draw_bag(void)
 {
     RECT unused;
     CVECTOR light = {96, 96, 96};
@@ -8362,21 +8362,21 @@ void func_80030fa0(void)
         sp->unk330.y = sp->unk2E0 / 8 * 32 + 35;
         sp->unk330.w = 56;
         sp->unk330.h = 28;
-        func_80027d18(&sp->unk330, &sp->unk32C, 513, 1);
+        ui_draw_rect_outline(&sp->unk330, &sp->unk32C, 513, 1);
     }
     if (sp->unk0.grid.row1 > 0)
-        func_8002916c(&up, &sp->unk32C, 3072);
+        ui_draw_arrow(&up, &sp->unk32C, 3072);
     if (sp->unk0.grid.row1 < 73)
-        func_8002916c(&down, &sp->unk32C, 1024);
+        ui_draw_arrow(&down, &sp->unk32C, 1024);
     bar.y = sp->unk0.grid.row1 * 136 / 74 + 47;
-    func_80028220(&bar, &shade, 1);
-    func_800286a8(1, 0, 0);
+    ui_fill_rect(&bar, &shade, 1);
+    ui_add_draw_mode(1, 0, 0);
     edge.x = bar.x - 2;
     edge.y = bar.y - 1;
     edge.w = bar.w;
     edge.h = bar.h;
-    func_80028220(&edge, &shade, 1);
-    func_800286a8(2, 0, 0);
+    ui_fill_rect(&edge, &shade, 1);
+    ui_add_draw_mode(2, 0, 0);
     sp->unk33C.x = 384;
     sp->unk33C.y = 12;
     sp->unk33C.w = 196;
@@ -8385,7 +8385,7 @@ void func_80030fa0(void)
     sp->unk358.vy = 464;
     sp->unk35C.vx = 544;
     sp->unk35C.vy = 502;
-    func_80028364(&sp->unk33C, &sp->unk358, &sp->unk35C, NULL, 3);
+    ui_draw_image(&sp->unk33C, &sp->unk358, &sp->unk35C, NULL, 3);
     cell = sp->unk0.grid.row1 * 4 % 20;
     sp->unk350.y = 35;
     sp->unk350.w = 56;
@@ -8393,13 +8393,13 @@ void func_80030fa0(void)
     for (row = 0; row < 5; row++) {
         sp->unk350.x = 338;
         for (col = 0; col < 4; col++) {
-            func_80028364(&sp->unk350, &sp->unk0.grid.tex[cell + 20], NULL, NULL, 16);
+            ui_draw_image(&sp->unk350, &sp->unk0.grid.tex[cell + 20], NULL, NULL, 16);
             cell = (cell + 1) % 20;
             sp->unk350.x += step_x;
         }
         sp->unk350.y += step_y;
     }
-    func_80029548(334, 9, 296, 188);
+    ui_draw_panel(334, 9, 296, 188);
 }
 
 /*
@@ -8408,7 +8408,7 @@ void func_80030fa0(void)
  */
 
 ADDRESS(0x80031378, 0x2fc)
-void func_80031378(void)
+void menu_arrange_icons_draw_caption(void)
 {
     MenuScratch *sp = MENU_SCRATCH;
     int id;
@@ -8421,28 +8421,28 @@ void func_80031378(void)
         id = sp->unk0.grid.ids1[(sp->unk0.grid.row1 + sp->unk2E0 / 8) * 4 + column - 4];
     sp->style[0].cd |= 0x80;
     if (id != -1)
-        func_8002732c((u16 *)(sp->unk0.grid.messages->text + sp->unk0.grid.messages->offsets[id]),
+        ui_draw_text((u16 *)(sp->unk0.grid.messages->text + sp->unk0.grid.messages->offsets[id]),
                       18, 202, &sp->style[0]);
     sp->style[0].cd &= 0x7f;
     if (id != -1) {
         if (vis_table_c.unk0118[id].unk27) {
-            func_8002732c(MESSAGE(29), 74, 215, &sp->style[0]);
-            func_80027440(vis_table_c.unk0118[id].unk28 | 0x3000000, 138, 215, &sp->style[4]);
-            func_80026ecc(14, 174, 215, &sp->style[0]);
-            func_80027440(vis_table_c.unk0118[id].unk27 | 0x3000000, 190, 215, &sp->style[4]);
+            ui_draw_text(MESSAGE(29), 74, 215, &sp->style[0]);
+            ui_draw_number(vis_table_c.unk0118[id].unk28 | 0x3000000, 138, 215, &sp->style[4]);
+            ui_draw_glyph(14, 174, 215, &sp->style[0]);
+            ui_draw_number(vis_table_c.unk0118[id].unk27 | 0x3000000, 190, 215, &sp->style[4]);
         }
         if (vis_table_c.unk0118[id].unk24) {
-            func_8002732c(MESSAGE(28), 250, 215, &sp->style[0]);
+            ui_draw_text(MESSAGE(28), 250, 215, &sp->style[0]);
             DAT_8008819e = vis_table_c.unk0118[id].unk24 * 100 / 454;
             DAT_80088188 = vis_table_c.unk0118[id].unk24 * 1000 / 454;
-            func_80027440(DAT_8008819e | 0x3000000, 300, 215, &sp->style[4]);
-            func_80026ecc(18, 339, 215, &sp->style[0]);
-            func_80027440((u16)(DAT_80088188 - DAT_8008819e * 10) | 0x1000000, 346, 215,
+            ui_draw_number(DAT_8008819e | 0x3000000, 300, 215, &sp->style[4]);
+            ui_draw_glyph(18, 339, 215, &sp->style[0]);
+            ui_draw_number((u16)(DAT_80088188 - DAT_8008819e * 10) | 0x1000000, 346, 215,
                           &sp->style[4]);
-            func_80026ecc(53, 362, 215, &sp->style[0]);
+            ui_draw_glyph(53, 362, 215, &sp->style[0]);
         }
     }
-    func_80029548(10, 198, 620, 34);
+    ui_draw_panel(10, 198, 620, 34);
 }
 
 /*
@@ -8451,7 +8451,7 @@ void func_80031378(void)
  * of four.
  */
 ADDRESS(0x80031674, 0x334)
-void func_80031674(void)
+void menu_arrange_icons_draw_details(void)
 {
     MenuScratch *sp = MENU_SCRATCH;
     int text_y;
@@ -8504,11 +8504,11 @@ void func_80031674(void)
     if (!(short)none) {
         sp->unk358.vx = 640;
         sp->unk358.vy = 0;
-        func_80028364(&sp->unk350, &sp->unk358, 0, 0, 16);
+        ui_draw_image(&sp->unk350, &sp->unk358, 0, 0, 16);
         sp->unk350.w = 100;
         sp->unk358.vx = 832;
         sp->unk350.x += 192;
-        func_80028364(&sp->unk350, &sp->unk358, 0, 0, 16);
+        ui_draw_image(&sp->unk350, &sp->unk358, 0, 0, 16);
         n = 0;
         k = 2;
         count = vis_table_c.unk0118[id].unk10;
@@ -8520,8 +8520,8 @@ void func_80031674(void)
                     goto done;
                 n++;
                 if (*count) {
-                    func_8002732c(MESSAGE(200 + k), label_x, text_y + j * 15, &sp->style[0]);
-                    func_80027440(*count | 0x13000000, value_x, text_y + j * 15, &sp->style[4]);
+                    ui_draw_text(MESSAGE(200 + k), label_x, text_y + j * 15, &sp->style[0]);
+                    ui_draw_number(*count | 0x13000000, value_x, text_y + j * 15, &sp->style[4]);
                 }
                 count++;
                 k++;
@@ -8532,12 +8532,12 @@ void func_80031674(void)
         }
     }
 done:
-    func_80029548(x, y, 296, 188);
+    ui_draw_panel(x, y, 296, 188);
 }
 
 /* A two-tile emblem with its caption in a framed panel. */
 ADDRESS(0x800319a8, 0x144)
-void func_800319a8(void)
+void menu_draw_button_prompt(void)
 {
     CVECTOR light = {96, 96, 96};
     CVECTOR grey = {80, 80, 80};
@@ -8551,14 +8551,14 @@ void func_800319a8(void)
     sp->unk350.h = 16;
     sp->unk350.x = 353;
     sp->unk350.y = 168;
-    func_80028364(&sp->unk350, &sp->unk358, &sp->unk35C, NULL, 0);
+    ui_draw_image(&sp->unk350, &sp->unk358, &sp->unk35C, NULL, 0);
     sp->unk358.vx = 904;
     sp->unk35C.vy = 504;
     sp->unk350.x = 232;
     sp->unk350.y = 168;
-    func_80028364(&sp->unk350, &sp->unk358, &sp->unk35C, NULL, 0);
-    func_8002732c(MESSAGE(216), 188, 150, &sp->style[0]);
-    func_80029548(168, 144, 319, 44);
+    ui_draw_image(&sp->unk350, &sp->unk358, &sp->unk35C, NULL, 0);
+    ui_draw_text(MESSAGE(216), 188, 150, &sp->style[0]);
+    ui_draw_panel(168, 144, 319, 44);
 }
 
 /*
@@ -8570,7 +8570,7 @@ void func_800319a8(void)
  * otherwise the block under the cursor with its detail panel.
  */
 ADDRESS(0x80031aec, 0x210)
-void func_80031aec(void)
+void menu_arrange_icons_draw(void)
 {
     MenuScratch *sp = MENU_SCRATCH;
     RECT arrow = {319, 110, 24, 16};
@@ -8590,32 +8590,32 @@ void func_80031aec(void)
     sp->unk32C.r = (u8)sp->unk360 * 4 + 96;
     sp->unk32C.g = (u8)sp->unk360 * 2 + 48;
     if (sp->unk2DC & 0x8000)
-        func_800319a8();
+        menu_draw_button_prompt();
     DAT_800881ae = 1;
     if (sp->unk2DC & 0x1) {
-        func_80030be4();
-        func_80030fa0();
+        menu_arrange_icons_draw_hand();
+        menu_arrange_icons_draw_bag();
     } else {
         if ((short)(sp->unk2E0 % 8) < 4)
-            func_80030be4();
+            menu_arrange_icons_draw_hand();
         else
-            func_80030fa0();
-        func_80031674();
+            menu_arrange_icons_draw_bag();
+        menu_arrange_icons_draw_details();
     }
     DAT_800881ae = 0;
     if ((short)(sp->unk2E0 % 8) < 4)
-        func_8002916c(&arrow, &color, 0);
+        ui_draw_arrow(&arrow, &color, 0);
     else
-        func_8002916c(&arrow, &color, 2048);
-    func_800286a8(1, 0, 0);
-    func_80031378();
-    func_8002c9e8();
+        ui_draw_arrow(&arrow, &color, 2048);
+    ui_add_draw_mode(1, 0, 0);
+    menu_arrange_icons_draw_caption();
+    menu_draw_background();
     gfx_end_frame();
 }
 
 /* Clears the 640x480 VRAM area from the origin to black. */
 ADDRESS(0x80031cfc, 0x54)
-void func_80031cfc(void)
+void clear_vram(void)
 {
     RECT r = {0, 0, 640, 480};
 
@@ -8623,11 +8623,11 @@ void func_80031cfc(void)
 }
 
 ADDRESS(0x80031d50, 0x94)
-void func_80031d50(void)
+void pause_screen_draw(void)
 {
     gfx_begin_frame();
     gfx_flip();
-    func_8002948c();
+    menu_draw_backdrop();
     quad_add_at_depth(120, 120, 200, 136, 0, 144, 80, 16, 255, 25, 32738, 96, 96, 96, 0);
     gfx_draw_ot();
 }

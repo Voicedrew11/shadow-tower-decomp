@@ -269,7 +269,7 @@ void player_update_status(int apply)
     if (level != -1) {
         if (viewer.timers.words[3] == 0) {
             viewer.unk2C &= ~0x80;
-            func_8005a3a8(0);
+            player_compute_derived_stats(0);
             PLAYER_CLAMP_HP();
         }
     }
@@ -278,7 +278,7 @@ void player_update_status(int apply)
         fade_add_color(40, 0, 20, level, 1);
         if (viewer.timers.words[4] == 0) {
             viewer.unk2C &= ~0x100;
-            func_8005a3a8(0);
+            player_compute_derived_stats(0);
             PLAYER_CLAMP_HP();
         }
     }
@@ -548,7 +548,7 @@ ADDRESS(0x8003cedc, 0x4c)
 void func_8003cedc(void)
 {
     player_equipment_bonuses();
-    func_8005a3a8(0);
+    player_compute_derived_stats(0);
     PLAYER_CLAMP_HP();
 }
 
@@ -649,7 +649,7 @@ void player_wear_item(int amount, u16 *slot)
             func_8003f12c(0xffff, 3, 0);
         }
         player_equipment_bonuses();
-        func_8005a3a8(0);
+        player_compute_derived_stats(0);
         PLAYER_CLAMP_HP();
     } else {
         vis_table_c.unk0118[*slot].unk28 = left;
@@ -963,7 +963,7 @@ void player_hit(u16 *damage, u16 scale, u16 effect, long *from)
                 viewer.unk190[3][1] = 300;
                 viewer.unk190[3][0] = 0;
                 viewer.unk2C |= 0x80;
-                func_8005a3a8(0);
+                player_compute_derived_stats(0);
                 PLAYER_CLAMP_HP();
             } else {
                 viewer.unk190[3][0] = 20;
@@ -1007,7 +1007,7 @@ void player_hit(u16 *damage, u16 scale, u16 effect, long *from)
                 viewer.unk190[4][1] = 6000;
                 viewer.unk190[4][0] = 0;
                 viewer.unk2C |= 0x100;
-                func_8005a3a8(0);
+                player_compute_derived_stats(0);
                 PLAYER_CLAMP_HP();
             } else {
                 viewer.unk190[4][0] = 20;
@@ -1230,7 +1230,7 @@ void func_8003e874(void)
     viewer.position.vz = 0x3f000;
     viewer.unk1CC = viewer.unk1CE = viewer.unk1D0 = 0;
     func_8003e794();
-    func_800595d4();
+    equip_load_item_slot_pictures();
     viewer.unk22D = 61;
     viewer.unk22E = 64;
     viewer.unk22F = 63;
@@ -2977,7 +2977,7 @@ void func_80042d74(void)
             viewer.unk21D = 0;
             viewer.unk2B = 0;
             viewer.unk2A = 0;
-            func_80058ef4();
+            menu_main_run();
             if (DAT_801cd120.unk3 == 0) {
                 func_8003e840();
             }
@@ -3057,7 +3057,7 @@ void func_80042d74(void)
             DAT_801cd180.unk4 &= ~8;
             func_80057a3c();
             func_80057a68(0);
-            func_800631ac();
+            pause_screen_run();
             func_80057a3c();
             lighting.unkA = 2;
         }
@@ -3149,7 +3149,7 @@ void func_80042d74(void)
                         if (DAT_801cd0e0 == 1) {
                             func_80057cc8();
                             if (ids[viewer.unk15E] == 288) {
-                                func_8005a3a8(0);
+                                player_compute_derived_stats(0);
                             }
                             if (DAT_801c7590.counts[ids[viewer.unk15E]].count == 0) {
                                 RECT icon = {896, 256, 24, 24};
@@ -3212,7 +3212,7 @@ void func_80042d74(void)
                         fx++;
                     }
                     for (;;) {
-                        if (func_80063260() == 0) {
+                        if (menu_game_over_run() == 0) {
                             Vis88 *b;
 
                             b = vis_table_b.entries;
@@ -3234,8 +3234,8 @@ void func_80042d74(void)
                         func_8003e840();
                         ClearImage(&clear, 0, 0, 0);
                         DrawSync(0);
-                        func_80058dc4(0, 1);
-                        if (func_80062c28(1) == 1) {
+                        card_screen_open(0, 1);
+                        if (card_screen_run(1) == 1) {
                             Vis88 *b;
 
                             b = vis_table_b.entries;
@@ -3248,7 +3248,7 @@ void func_80042d74(void)
                                 b++;
                             }
                             func_80057a3c();
-                            func_80058ed4();
+                            card_screen_close();
                             fade_reset();
                             viewer.unk2D6 = viewer.unk2D8 = viewer.unk2DA = viewer.unk2DC = 0;
                             func_800500ac(2, 0, 4096, 256);
@@ -3265,7 +3265,7 @@ void func_80042d74(void)
                             break;
                         }
                         func_80057a3c();
-                        func_80058ed4();
+                        card_screen_close();
                         ClearImage(&clear, 0, 0, 0);
                         DrawSync(0);
                     }

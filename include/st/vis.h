@@ -496,7 +496,7 @@ typedef struct {
     u8 unk3;             /* 0x03 */
     u8 unk4;             /* 0xff: none (game_load_start_file); func_8003f12c's model */
     u8 unk5[0xb];
-    u8 unk10[14];        /* 0x10: counts func_80031674 lists */
+    u8 unk10[14];        /* 0x10: counts menu_arrange_icons_draw_details lists */
     u16 unk1E;           /* 0x1e */
     /* 0x20: three bonuses (kind, amount) player_equipment_bonuses sums */
     u32 kind0 : 4;
@@ -505,7 +505,7 @@ typedef struct {
     u32 amount1 : 4;
     u32 kind2 : 8;
     u32 amount2 : 8;
-    u16 unk24;           /* 0x24: func_80031378 shows it / 4.54 */
+    u16 unk24;           /* 0x24: menu_arrange_icons_draw_caption shows it / 4.54 */
     u8 unk26;
     u8 unk27;            /* 0x27 */
     u8 unk28;            /* 0x28: durability, 0 when broken (player_wear_item) */

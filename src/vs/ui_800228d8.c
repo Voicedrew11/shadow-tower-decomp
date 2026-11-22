@@ -1,6 +1,6 @@
 /*
  * VS.EXE: a screen frame with the emblem panel (WIP module), shaped as
- * ST.EXE's func_80030ab8 (src/st/ui.c).
+ * ST.EXE's menu_creature_book_draw (src/st/ui.c).
  */
 #include <kf/lib/address.h>
 #include <kf/lib/null.h>

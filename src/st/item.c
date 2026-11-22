@@ -204,11 +204,11 @@ void func_80055374(long *pos, SVECTOR *rot)
                     }
                     b++;
                 }
-                func_80058dc4(1, 1);
-                func_80062c28(1);
+                card_screen_open(1, 1);
+                card_screen_run(1);
                 lighting.unkA = 2;
                 func_80057a3c();
-                func_80058ed4();
+                card_screen_close();
             }
             break;
         }

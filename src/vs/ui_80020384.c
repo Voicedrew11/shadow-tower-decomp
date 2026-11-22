@@ -1,7 +1,7 @@
 /*
  * VS.EXE: three menu captions and the menu page frame (WIP module). VS's
- * copies of ST.EXE's func_8002c8bc, func_8002c050, func_8002c998 and
- * func_8002ca84 (src/st/ui.c).
+ * copies of ST.EXE's card_draw_transfer, card_draw_checking, card_draw_message and
+ * card_screen_draw (src/st/ui.c).
  */
 #include <kf/lib/address.h>
 #include <kf/lib/null.h>

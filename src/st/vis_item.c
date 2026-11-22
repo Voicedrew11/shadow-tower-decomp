@@ -114,7 +114,7 @@ void func_8004db0c(Vis212 *e)
         viewer.unk9A[i] += r->unk24[i];
         viewer.unk8 += r->unk24[i];
     }
-    func_8005a3a8(0);
+    player_compute_derived_stats(0);
 }
 
 /* Whether the viewer looks at the entry within reach: 0 no, 1 yes, 2 dead

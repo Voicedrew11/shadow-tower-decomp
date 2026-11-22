@@ -1,7 +1,7 @@
 /*
  * VS.EXE: the item list page, its caption bar and detail panel, and the
  * two-tile emblem panel (WIP module). func_80022794 is VS's copy of
- * ST.EXE's func_800319a8 (src/st/ui.c).
+ * ST.EXE's menu_draw_button_prompt (src/st/ui.c).
  */
 #include <kf/lib/address.h>
 #include <kf/lib/null.h>

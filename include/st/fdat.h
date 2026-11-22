@@ -28,7 +28,7 @@ void func_8004ed54(Vis88 *e, int sound);
 void func_80053aa4(void);
 void func_800402ac(u8 hand);
 void func_8003f12c(u16 id, u8 slot, u8 reload);
-void func_8005a3a8(int arg);
+void player_compute_derived_stats(int arg);
 void func_8003d030(void);
 
 /*
