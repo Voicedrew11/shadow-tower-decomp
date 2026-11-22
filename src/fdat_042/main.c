@@ -105,7 +105,7 @@ void map_pick_creature_move(void)
     if (!creature_pick_weighted_script())
         return;
     switch (e->action) {
-    case 8:
+    case CREATURE_ACTION_TURN_AWAY:
         wall = e->wall_heading;
         if ((short)wall == 0x7fff) {
             e->unk5A = e->target_heading = (e->player_heading + 2048) & 0xfff;

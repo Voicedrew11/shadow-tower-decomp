@@ -11,7 +11,7 @@
 #define CREATURE_STATE_WAITING 0     /* not spawned: spawns by chance in its zone */
 #define CREATURE_STATE_ACTIVE 1      /* despawns when its zone is left */
 #define CREATURE_STATE_ACTIVE_NEAR 2 /* also despawns 28672 units away */
-#define CREATURE_STATE_GONE 3        /* killed for good (game_progress.creatures_gone) */
+#define CREATURE_STATE_GONE 3        /* retired by creature_despawn; kept in game_progress.creatures_gone */
 #define CREATURE_STATE_DYING 5
 
 /*
