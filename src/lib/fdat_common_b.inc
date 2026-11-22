@@ -9,7 +9,7 @@
  * by weight and starts it; 0 when none is allowed.
  */
 ADDRESS(0x801ecbcc, 0x2b0)
-int fdat_801ecbcc(void)
+int creature_pick_weighted_script(void)
 {
     int limit = 24;
     VisScript *list[24];
@@ -82,7 +82,7 @@ int fdat_801ecbcc(void)
 
 /* Counts the entry's unk34 down by its step; 1 once it runs out. */
 ADDRESS(0x801ece7c, 0xc8)
-int fdat_801ece7c(Vis212 *e)
+int creature_step_hurt_timer(Vis212 *e)
 {
     if (e->unk34 < 0)
         return 0;
@@ -103,7 +103,7 @@ int fdat_801ece7c(Vis212 *e)
 
 /* Fades the entry in over 32 frames, then removes it. */
 ADDRESS(0x801ecf44, 0x80)
-void fdat_801ecf44(Vis212 *e)
+void creature_fade_out_despawn(Vis212 *e)
 {
     e->unk36 = 0;
     e->unk1C.bytes[2] |= 0xd;
@@ -120,7 +120,7 @@ void fdat_801ecf44(Vis212 *e)
  * Moves the view to `pos`, turned to `rot`, over 16 frames.
  */
 ADDRESS(0x801ecfc4, 0x220)
-void fdat_801ecfc4(VECTOR *pos, SVECTOR *rot)
+void player_glide_to_pose(VECTOR *pos, SVECTOR *rot)
 {
     VECTOR from;
     VECTOR to;
@@ -154,7 +154,7 @@ void fdat_801ecfc4(VECTOR *pos, SVECTOR *rot)
 
 /* Turns the view to face the entry over 16 frames. */
 ADDRESS(0x801ed1e4, 0x10c)
-void fdat_801ed1e4(Vis212 *e)
+void player_turn_to_creature(Vis212 *e)
 {
     SVECTOR to;
     SVECTOR from;
@@ -187,7 +187,7 @@ void fdat_801ed1e4(Vis212 *e)
 
 /* Waits for the entry's model file, then fades it out. */
 ADDRESS(0x801ed2f0, 0x98)
-void fdat_801ed2f0(Vis212 *e)
+void creature_finish_fade_in(Vis212 *e)
 {
     StAnimFile *file;
 
@@ -208,12 +208,12 @@ void fdat_801ed2f0(Vis212 *e)
 
 /* Hands the entry to creature_talk, fading it out first when unk04 is set. */
 ADDRESS(0x801ed388, 0x88)
-void fdat_801ed388(Vis212 *e, int fixed, int arg2)
+void creature_force_talk(Vis212 *e, int fixed, int arg2)
 {
     world_run_frame(NULL, NULL, 0);
     e->unk70 |= 0x2000000;
     if (e->unk04) {
-        fdat_801ed2f0(e);
+        creature_finish_fade_in(e);
         creature_talk(e, fixed, arg2);
     } else {
         creature_talk(e, 1, arg2);
@@ -222,7 +222,7 @@ void fdat_801ed388(Vis212 *e, int fixed, int arg2)
 
 /* Puts the entry's record back into the live sums and resets it. */
 ADDRESS(0x801ed410, 0x88)
-void fdat_801ed410(Vis212 *e)
+void creature_spawn_now(Vis212 *e)
 {
     Vis192 *r = &vis_table_a.unk3500[e->unk02];
 
@@ -236,6 +236,6 @@ void fdat_801ed410(Vis212 *e)
 
 /* The default handler: does nothing. */
 ADDRESS(0x801ed498, 0x8)
-void fdat_801ed498(void)
+void map_hook_none(void)
 {
 }

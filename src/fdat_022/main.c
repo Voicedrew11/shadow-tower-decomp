@@ -2,8 +2,8 @@
  * FDAT_022.BIN as one translation unit (WIP module): its handler table,
  * the 21 functions every overlay starts with (src/lib/fdat_common_a.inc,
  * fdat_common.inc, fdat_common_b.inc), then its map handlers through the
- * shared fdat_801ed4a0. One object, because fdat_801ed4a0's switch table
- * is 8-aligned after fdat_801ebec4's in the same read-only run.
+ * shared creature_pick_move. One object, because creature_pick_move's switch table
+ * is 8-aligned after creature_run_script_command's in the same read-only run.
  */
 #include <kf/lib/address.h>
 #include <kf/lib/types.h>
@@ -23,20 +23,20 @@
 
 RODATA(0x801eb560, 0x24c)
 
-void func_801ed4a0();
-void func_801ed514();
+void map_restore_progress();
+void map_update_events();
 
 const FdatHeader fdat_header = {
     0x7,
     {
-        fdat_801ed498, func_801ed514, fdat_801ed498, fdat_801ed498,
-        fdat_801ed498, func_801ed4a0, fdat_801ed498, fdat_801ed498,
-        fdat_801ed498, fdat_801ed498, fdat_801ed498, fdat_801ed498,
-        fdat_801ed498, fdat_801ed498, fdat_801ed498, fdat_801ed498,
-        fdat_801ed4a0, fdat_801ed6e4, fdat_801ed498, fdat_801ed498,
-        fdat_801ed498, fdat_801ed498, fdat_801ed498, fdat_801ed498,
-        fdat_801ed498, fdat_801ed498, fdat_801ed498, fdat_801ed498,
-        fdat_801ed498, fdat_801ed498, fdat_801ed498, fdat_801ed498,
+        map_hook_none, map_update_events, map_hook_none, map_hook_none,
+        map_hook_none, map_restore_progress, map_hook_none, map_hook_none,
+        map_hook_none, map_hook_none, map_hook_none, map_hook_none,
+        map_hook_none, map_hook_none, map_hook_none, map_hook_none,
+        creature_pick_move, creature_step_script, map_hook_none, map_hook_none,
+        map_hook_none, map_hook_none, map_hook_none, map_hook_none,
+        map_hook_none, map_hook_none, map_hook_none, map_hook_none,
+        map_hook_none, map_hook_none, map_hook_none, map_hook_none,
     },
     0x3a,
 };
@@ -49,12 +49,12 @@ const FdatHeader fdat_header = {
 DATA(0x801edad0, 0x4, ".bss")
 int fdat_801edad0;
 
-void func_801ed8f0(void);
+void map_hand_over_item(void);
 
 /* Sets up the area: done when flag 25 is set, ready once record 6's stream
  * counter reached 2, else table A entries 48 and 49 set up for the scene. */
 ADDRESS(0x801ed4a0, 0x74)
-void func_801ed4a0(void)
+void map_restore_progress(void)
 {
     Vis212 *e48 = &vis_table_a.entries[48];
     Vis212 *e49 = &vis_table_a.entries[49];
@@ -74,22 +74,22 @@ void func_801ed4a0(void)
 /* Once the viewer stands on record 0x27, entry 49 leaves and entry 48 is
  * marked; when record 2's stream counter reaches 3 the scene plays. */
 ADDRESS(0x801ed514, 0xe8)
-void func_801ed514(void)
+void map_update_events(void)
 {
     Vis212 *e48 = &vis_table_a.entries[48];
     Vis192 *r = &vis_table_a.unk3500[2];
     Vis212 *e49 = &vis_table_a.entries[49];
 
     if (fdat_801edad0 == 0 && viewer.unk178 == 0x27) {
-        fdat_801ed388(e49, 0, 0);
-        fdat_801ed388(e49, 0, 0);
-        fdat_801ecf44(e49);
+        creature_force_talk(e49, 0, 0);
+        creature_force_talk(e49, 0, 0);
+        creature_fade_out_despawn(e49);
         e48->unk00 = 100;
         fdat_801edad0 = 1;
     }
     if (fdat_801edad0 == 1 && DAT_801cba08.unk1448[r->unk09] == 3) {
         viewer.unk218 = 5;
-        func_801ed8f0();
+        map_hand_over_item();
         fdat_801edad0 = 0xff;
         viewer.unk218 = 0;
     }
@@ -105,7 +105,7 @@ void func_801ed514(void)
  * set.
  */
 ADDRESS(0x801ed8f0, 0x1e0)
-void func_801ed8f0(void)
+void map_hand_over_item(void)
 {
     Vis212 *e = &vis_table_a.entries[48];
     Vis48 *c5 = &vis_table_c.entries[5];
@@ -114,7 +114,7 @@ void func_801ed8f0(void)
     SVECTOR v;
     SVECTOR unused;
 
-    fdat_801eb7b4(e, 6);
+    creature_start_script(e, 6);
     c = c5;
     if (vis_table_c.unk0070[c5->unk00 / 32] & (1 << (c5->unk00 % 32)))
         c = c6;
@@ -136,7 +136,7 @@ void func_801ed8f0(void)
     viewer.unk270.vy = 4096 - viewer.unk26A;
     viewer.unk270.vz = 4096 - viewer.unk26C;
     RotMatrixZYX(&viewer.unk270, &viewer.unk298);
-    fdat_801ecf44(e);
+    creature_fade_out_despawn(e);
     ground_item_pick_up(c, 1);
     DAT_801cba08.unk1440.word |= 0x2000000;
 }

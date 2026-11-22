@@ -1,5 +1,5 @@
 /*
- * FDAT_282.BIN: its handlers after fdat_801ed4a0 (WIP module): the step of
+ * FDAT_282.BIN: its handlers after creature_pick_move (WIP module): the step of
  * table A entries 19 and 48..50, and the two door scenes.
  */
 #include <kf/lib/address.h>
@@ -20,7 +20,7 @@ void func_801ede88(void);
 /*
  * Steps table A entries 19 and 48..50: 48 and 49 open their doors when the
  * viewer stands on the trigger records, 50 opens the gate, 19 counts its
- * hits; then runs the script like fdat_801ed6e4.
+ * hits; then runs the script like creature_step_script.
  */
 ADDRESS(0x801ed7a4, 0x274)
 void func_801ed7a4(void)
@@ -64,22 +64,22 @@ void func_801ed7a4(void)
         return;
     }
     e->unk2A += e->unkB0;
-    if (fdat_801ece7c(e) == 1)
+    if (creature_step_hurt_timer(e) == 1)
         return;
     if (e->unkB0 >= 0 ? (short)e->unk2A >= 4096 : (short)e->unk2A <= 0) {
         if (e == a48 || e == a49)
-            fdat_801eb7b4(e, 0);
+            creature_start_script(e, 0);
         else if (e == a50)
-            fdat_801eb7b4(e, 4);
+            creature_start_script(e, 4);
         else if (e == a19 && DAT_801cba08.unk1448[r->unk09] == 3)
-            fdat_801eb7b4(e, 0);
+            creature_start_script(e, 0);
         else {
             e->unk1A = 0xff;
-            fdat_801ed4a0();
+            creature_pick_move();
         }
     }
     if (e->unkA8 != NULL) {
-        fdat_801ebec4(e);
+        creature_run_script_command(e);
         e->unk1A = 0xf0;
     }
 }
@@ -106,7 +106,7 @@ void func_801eda20(void)
     rot.vx = 0;
     pos.vx = door->unk24.vx - 3072;
     pos.vz = door->unk24.vz;
-    fdat_801ecfc4(&pos, &rot);
+    player_glide_to_pose(&pos, &rot);
     step = 28;
     do {
         if (door->unk10 < 0xf00 && door->unk10 + step >= 0xf00)
@@ -159,9 +159,9 @@ void func_801edba4(int id)
     r->unk60[5]->unk00 = 0x80;
     r->unk60[6]->unk00 = 0x80;
     r->unk60[7]->unk00 = 0x80;
-    fdat_801ed388(e, 0, 0);
+    creature_force_talk(e, 0, 0);
     DAT_801cba08.unk1448[r->unk09] = 3;
-    fdat_801eb7b4(e, 3);
+    creature_start_script(e, 3);
     do {
         e->unk2A += e->unkB0;
         if ((short)e->unk2A >= 0x1000)
@@ -214,7 +214,7 @@ void func_801ede88(void)
     r->unk60[6]->unk00 = 0x71;
     r->unk60[7]->unk00 = 0x72;
     DAT_801cba08.unk1448[r->unk09] = 2;
-    fdat_801ed388(e, 0, 0);
+    creature_force_talk(e, 0, 0);
     n = door->unk4A.door.unk4E;
     while (n--) {
         t = vis_records[door->unk4A.door.unk4C + n].part;
@@ -233,7 +233,7 @@ gate_raised:
     door->unk10 = 0xfff;
     door->unk00 = 0;
     door->unk0C = 0xff;
-    fdat_801eb7b4(e, 8);
+    creature_start_script(e, 8);
     do {
         e->unk2A += e->unkB0;
         if ((short)e->unk2A >= 0x1000)

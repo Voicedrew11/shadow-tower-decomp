@@ -20,15 +20,15 @@
 DATA(0x801ed970, 0x4, ".bss")
 int fdat_801ed970;
 
-void func_801ed568(void);
+void map_pick_creature_move(void);
 
 /*
  * The current entry's handler: while the scene runs (fdat_801ed970 is 1),
  * table A entry 32 sinks 0x180 a frame down to y 0x40000 and then wakes;
- * then the animation steps as fdat_801ed6e4 does.
+ * then the animation steps as creature_step_script does.
  */
 ADDRESS(0x801ed7b4, 0x11c)
-void func_801ed7b4(void)
+void map_step_creature(void)
 {
     Vis212 *e = vis_table_a.unk6138;
 
@@ -43,14 +43,14 @@ void func_801ed7b4(void)
         fdat_801ed970 = 0xff;
     }
     e->unk2A += e->unkB0;
-    if (fdat_801ece7c(e) == 1)
+    if (creature_step_hurt_timer(e) == 1)
         return;
     if (e->unkB0 >= 0 ? (short)e->unk2A >= 4096 : (short)e->unk2A <= 0) {
         e->unk1A = 0xff;
-        func_801ed568();
+        map_pick_creature_move();
     }
     if (e->unkA8 != NULL) {
-        fdat_801ebec4(e);
+        creature_run_script_command(e);
         e->unk1A = 0xf0;
     }
 }
@@ -58,16 +58,16 @@ void func_801ed7b4(void)
 /* The scene: table A entry 32 wakes (animation 2), rises 0xc00 into the
  * current area, and flag 1 is set. */
 ADDRESS(0x801ed8d0, 0x9c)
-void func_801ed8d0(void)
+void map_spawn_rising_creature(void)
 {
     Vis212 *e = &vis_table_a.entries[32];
 
-    fdat_801ed410(e);
+    creature_spawn_now(e);
     e->unk36 = -1;
     fdat_801ed970 = 1;
     e->unk1C.bytes[2] &= 0xf2;
     DAT_801cba08.unk1440.word |= 2;
-    fdat_801eb7b4(e, 2);
+    creature_start_script(e, 2);
     e->unk0E = 1;
     e->unk1C.bytes[3] = 1;
     fdat_801ed96c = 0;

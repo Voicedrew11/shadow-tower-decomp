@@ -4,7 +4,7 @@
  * fdat_common.inc, fdat_common_b.inc), its area handlers, the shared move
  * picker and entry handler (src/lib/fdat_801ed4a0.inc, fdat_801ed6e4.inc)
  * and the gate scene's two parts. One object, because the picker's switch
- * table is 8-aligned after fdat_801ebec4's in the same read-only run and
+ * table is 8-aligned after creature_run_script_command's in the same read-only run and
  * the eight scene words are consecutive statics.
  */
 #include <kf/lib/address.h>
@@ -59,20 +59,20 @@ static int fdat_801edf6c;
 DATA(0x801edf70, 0x4, ".bss")
 static int fdat_801edf70;
 
-void func_801ed4a0();
-void func_801ed680();
+void map_restore_progress();
+void map_update_events();
 
 const FdatHeader fdat_header = {
     0xe,
     {
-        fdat_801ed498, func_801ed680, fdat_801ed498, fdat_801ed498,
-        fdat_801ed498, func_801ed4a0, fdat_801ed498, fdat_801ed498,
-        fdat_801ed498, fdat_801ed498, fdat_801ed498, fdat_801ed498,
-        fdat_801ed498, fdat_801ed498, fdat_801ed498, fdat_801ed498,
-        fdat_801ed4a0, fdat_801ed6e4, fdat_801ed498, fdat_801ed498,
-        fdat_801ed498, fdat_801ed498, fdat_801ed498, fdat_801ed498,
-        fdat_801ed498, fdat_801ed498, fdat_801ed498, fdat_801ed498,
-        fdat_801ed498, fdat_801ed498, fdat_801ed498, fdat_801ed498,
+        map_hook_none, map_update_events, map_hook_none, map_hook_none,
+        map_hook_none, map_restore_progress, map_hook_none, map_hook_none,
+        map_hook_none, map_hook_none, map_hook_none, map_hook_none,
+        map_hook_none, map_hook_none, map_hook_none, map_hook_none,
+        creature_pick_move, creature_step_script, map_hook_none, map_hook_none,
+        map_hook_none, map_hook_none, map_hook_none, map_hook_none,
+        map_hook_none, map_hook_none, map_hook_none, map_hook_none,
+        map_hook_none, map_hook_none, map_hook_none, map_hook_none,
     },
     0x41,
 };
@@ -81,14 +81,14 @@ const FdatHeader fdat_header = {
 #include "../lib/fdat_common.inc"
 #include "../lib/fdat_common_b.inc"
 
-void func_801ede14(void);
-void func_801edea4(void);
+void map_play_creature_script(void);
+void map_offer_item_at_player(void);
 
 /* Sets up the area by the second flag word's bits 12..17: the gate scene,
  * table B entry pairs 5/6 and 7/8, and table A entries 38 and 39 (raised
  * out of reach until their flags are set). */
 ADDRESS(0x801ed4a0, 0x1e0)
-void func_801ed4a0(void)
+void map_restore_progress(void)
 {
     Vis212 *e48 = &vis_table_a.entries[48];
     Vis88 *d5 = &vis_table_b.entries[5];
@@ -155,7 +155,7 @@ void func_801ed4a0(void)
  * table B entries 14 and 17 are triggered and lowers them back.
  */
 ADDRESS(0x801ed680, 0x4a0)
-void func_801ed680(void)
+void map_update_events(void)
 {
     Vis212 *e48 = &vis_table_a.entries[48];
     Vis88 *d5 = &vis_table_b.entries[5];
@@ -173,18 +173,18 @@ void func_801ed680(void)
 
     if (fdat_801edf54 == 0 && DAT_801cba08.unk1448[r14->unk09] == 1) {
         viewer.unk218 = 5;
-        func_801ede14();
+        map_play_creature_script();
         if (!(vis_table_c.unk0070[1] & 0x10000))
-            func_801edea4();
-        fdat_801ecf44(e48);
-        fdat_801ed410(e40);
+            map_offer_item_at_player();
+        creature_fade_out_despawn(e48);
+        creature_spawn_now(e40);
         e40->unk36 = -1;
         e40->unk03 = 1;
         e40->unk1C.bytes[2] &= 0xf2;
         e40->unk70 |= 0x2000000;
-        fdat_801ed388(e40, 1, 0);
-        fdat_801ed1e4(e40);
-        fdat_801ed388(e40, 0, 0);
+        creature_force_talk(e40, 1, 0);
+        player_turn_to_creature(e40);
+        creature_force_talk(e40, 0, 0);
         e40->unk00 = 100;
         viewer.unk218 = 0;
         fdat_801edf54 = 0xff;
@@ -213,10 +213,10 @@ void func_801ed680(void)
         fdat_801edf60 = 0xff;
     }
     if (fdat_801edf64 == 0 && d14->unk0C == 1) {
-        fdat_801ed410(e39);
+        creature_spawn_now(e39);
         e39->unk36 = -1;
         e39->unk1C.bytes[2] &= 0xf2;
-        fdat_801eb7b4(e39, 0);
+        creature_start_script(e39, 0);
         e39->unk00 = 100;
         e39->unk74.vy += 0xa00;
         e39->unk1C.bytes[3] = 1;
@@ -225,10 +225,10 @@ void func_801ed680(void)
         DAT_801cba08.unk1444.word |= 0x10000;
     }
     if (fdat_801edf68 == 0 && d17->unk0C == 1) {
-        fdat_801ed410(e38);
+        creature_spawn_now(e38);
         e38->unk36 = -1;
         e38->unk1C.bytes[2] &= 0xf2;
-        fdat_801eb7b4(e38, 0);
+        creature_start_script(e38, 0);
         e38->unk00 = 100;
         e38->unk74.vy += 0xa00;
         e38->unk1C.bytes[3] = 1;
@@ -263,13 +263,13 @@ void func_801ed680(void)
 
 /* Plays script 1 of table A entry 48 to its end. */
 ADDRESS(0x801ede14, 0x90)
-void func_801ede14(void)
+void map_play_creature_script(void)
 {
     Vis212 *e = &vis_table_a.entries[48];
 
-    fdat_801eb7b4(e, 1);
+    creature_start_script(e, 1);
     do {
-        fdat_801eba4c(e);
+        creature_update_script_sound(e);
         e->unk2A += e->unkB0;
         if ((short)e->unk2A >= 0x1000)
             e->unk2A = 0xfff;
@@ -281,7 +281,7 @@ void func_801ede14(void)
  * Drops table C item 5 (kind 48) at the viewer once its model is loaded.
  */
 ADDRESS(0x801edea4, 0xb0)
-void func_801edea4(void)
+void map_offer_item_at_player(void)
 {
     StAnimFile *file;
     Vis48 *item = &vis_table_c.entries[5];

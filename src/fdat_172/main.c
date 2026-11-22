@@ -3,7 +3,7 @@
  * the 21 functions every overlay starts with (src/lib/fdat_common_a.inc,
  * fdat_common.inc, fdat_common_b.inc), then its map handlers through its
  * own move picker. One object, because the picker's switch table is
- * 8-aligned after fdat_801ebec4's in the same read-only run.
+ * 8-aligned after creature_run_script_command's in the same read-only run.
  */
 #include <kf/lib/address.h>
 #include <kf/lib/types.h>
@@ -37,24 +37,24 @@ static int fdat_801edfd4;
 DATA(0x801edfd8, 0x4, ".bss")
 static int fdat_801edfd8;
 
-void func_801ed4a0();
-void func_801ed614();
-void func_801ed93c();
-void func_801edbf8();
-void func_801edd38(short id);
-void func_801edf48();
+void map_restore_progress();
+void map_update_events();
+void map_pick_creature_move();
+void map_step_creature();
+void map_use_item_on_object(short id);
+void map_talk_on_player_death();
 
 const FdatHeader fdat_header = {
     0x16,
     {
-        fdat_801ed498, func_801ed614, fdat_801ed498, fdat_801ed498,
-        fdat_801ed498, func_801ed4a0, fdat_801ed498, fdat_801ed498,
-        fdat_801ed498, fdat_801ed498, fdat_801ed498, fdat_801ed498,
-        func_801edd38, func_801edf48, fdat_801ed498, fdat_801ed498,
-        func_801ed93c, func_801edbf8, fdat_801ed498, fdat_801ed498,
-        fdat_801ed498, fdat_801ed498, fdat_801ed498, fdat_801ed498,
-        fdat_801ed498, fdat_801ed498, fdat_801ed498, fdat_801ed498,
-        fdat_801ed498, fdat_801ed498, fdat_801ed498, fdat_801ed498,
+        map_hook_none, map_update_events, map_hook_none, map_hook_none,
+        map_hook_none, map_restore_progress, map_hook_none, map_hook_none,
+        map_hook_none, map_hook_none, map_hook_none, map_hook_none,
+        map_use_item_on_object, map_talk_on_player_death, map_hook_none, map_hook_none,
+        map_pick_creature_move, map_step_creature, map_hook_none, map_hook_none,
+        map_hook_none, map_hook_none, map_hook_none, map_hook_none,
+        map_hook_none, map_hook_none, map_hook_none, map_hook_none,
+        map_hook_none, map_hook_none, map_hook_none, map_hook_none,
     },
     0x49,
 };
@@ -63,13 +63,13 @@ const FdatHeader fdat_header = {
 #include "../lib/fdat_common.inc"
 #include "../lib/fdat_common_b.inc"
 
-void func_801ede00(void);
-void func_801edef8(void);
+void map_slide_ground_item(void);
+void creatures_restart_fade_in(void);
 
 /* Sets up the area by flags 14, 26, 27, 29 and 30: table C item 28,
  * entry 48 (asleep, awake or gone), table B entry 6 and record 14. */
 ADDRESS(0x801ed4a0, 0x174)
-void func_801ed4a0(void)
+void map_restore_progress(void)
 {
     Vis212 *e48 = &vis_table_a.entries[48];
     Vis192 *r1 = &vis_table_a.unk3500[1];
@@ -110,14 +110,14 @@ void func_801ed4a0(void)
 }
 
 /*
- * Runs the area: item 0x12a's scene (func_801edd38) lifts table C item 28;
+ * Runs the area: item 0x12a's scene (map_use_item_on_object) lifts table C item 28;
  * entry 48 wakes when hit or once record 1's stream counter is 2, and
  * changes its scripts once its flash is over; entry 33 is sent by the
  * viewer passing z 0x4a000 and, once beaten, changes the lighting and
  * leaves (flag 27).
  */
 ADDRESS(0x801ed614, 0x328)
-void func_801ed614(void)
+void map_update_events(void)
 {
     Vis212 *e48 = &vis_table_a.entries[48];
     Vis88 *d6 = &vis_table_b.entries[6];
@@ -126,14 +126,14 @@ void func_801ed614(void)
     Vis192 *r14 = &vis_table_a.unk3500[14];
 
     if (fdat_801edfd0 == 1) {
-        func_801ede00();
-        func_801edef8();
+        map_slide_ground_item();
+        creatures_restart_fade_in();
         fdat_801edfd0 = 0xff;
         DAT_801cba08.unk1440.word |= 0x4000000;
     }
     if (fdat_801edfd4 == 0) {
         if (DAT_801cba08.unk1448[r1->unk09] == 2) {
-            fdat_801ecf44(e48);
+            creature_fade_out_despawn(e48);
             fdat_801edfd4 = 0xff;
         }
         if (e48->unk64 == 1) {
@@ -148,7 +148,7 @@ void func_801ed614(void)
         r1->unk60[12]->unk00 = 0x80;
         r1->unk60[13]->unk00 = 0x72;
         e48->unk70 |= 0x2000000;
-        fdat_801ed388(e48, 0, 0);
+        creature_force_talk(e48, 0, 0);
         fdat_801edfd4 = 0xfe;
         e48->unk1C.bytes[3] = 0;
         e48->unk70 &= ~0x2000000;
@@ -157,7 +157,7 @@ void func_801ed614(void)
         DAT_801cba08.unk1440.word |= 0x20000000;
     if (DAT_801cba08.unk1448[r14->unk09] == 0 && viewer.position.vz > 0x4a000) {
         viewer.unk218 = 5;
-        fdat_801ed388(e33, 0, 0);
+        creature_force_talk(e33, 0, 0);
         e33->unk64 = 1;
         viewer.unk218 = 0;
         e33->unk70 &= ~0x2000000;
@@ -172,7 +172,7 @@ void func_801ed614(void)
     if (fdat_801edfd8 == 1 && e33->unk05 == 3) {
         viewer.unk218 = 5;
         e33->unk70 |= 0x2000000;
-        fdat_801ed388(e33, 1, 0);
+        creature_force_talk(e33, 1, 0);
         fdat_801edfd8 = 0xff;
         d6->unk05 = 0xed;
         viewer.unk218 = 0;
@@ -180,12 +180,12 @@ void func_801ed614(void)
 }
 
 /*
- * The entry's move picker, fdat_801ed4a0 with two additions: kind 14 waits
+ * The entry's move picker, creature_pick_move with two additions: kind 14 waits
  * (action 128) while its record's stream counter is 0, and kind 1 only
  * plays animation 9 while fdat_801edfd4 is 0 or 253.
  */
 ADDRESS(0x801ed93c, 0x2bc)
-void func_801ed93c(void)
+void map_pick_creature_move(void)
 {
     Vis212 *e = vis_table_a.unk6138;
     Vis192 *r = vis_table_a.unk6134;
@@ -198,14 +198,14 @@ void func_801ed93c(void)
 
     if (e->unk1A == 0xf0 || e->unk1A == 0)
         return;
-    fdat_801ec6a4();
+    creature_choose_action();
     if (e->unk02 == 14 && DAT_801cba08.unk1448[r->unk09] == 0)
         e->unk44 = 128;
     if (e->unk02 == 1 && (fdat_801edfd4 == 0 || fdat_801edfd4 == 253)) {
-        fdat_801eb7b4(e, 9);
+        creature_start_script(e, 9);
         return;
     }
-    fdat_801ecbcc();
+    creature_pick_weighted_script();
     switch (e->unk44) {
     case 8:
         wall = e->unk5E;
@@ -245,13 +245,13 @@ void func_801ed93c(void)
     }
 }
 
-void func_801ed93c(void);
+void map_pick_creature_move(void);
 
 /* The current entry's handler: entries below 56 other than kind 1 are kept
  * in range (unk03 3) until the item scene ran; then the animation steps as
- * fdat_801ed6e4 does, kind 1 replaying animation 9 while entry 48 sleeps. */
+ * creature_step_script does, kind 1 replaying animation 9 while entry 48 sleeps. */
 ADDRESS(0x801edbf8, 0x140)
-void func_801edbf8(void)
+void map_step_creature(void)
 {
     Vis212 *e = vis_table_a.unk6138;
 
@@ -260,18 +260,18 @@ void func_801edbf8(void)
     else
         e->unk03 = 0;
     e->unk2A += e->unkB0;
-    if (fdat_801ece7c(e) == 1)
+    if (creature_step_hurt_timer(e) == 1)
         return;
     if (e->unkB0 >= 0 ? (short)e->unk2A >= 4096 : (short)e->unk2A <= 0) {
         if (e->unk02 == 1 && (fdat_801edfd4 == 0 || fdat_801edfd4 == 0xfd)) {
-            fdat_801eb7b4(e, 9);
+            creature_start_script(e, 9);
         } else {
             e->unk1A = 0xff;
-            func_801ed93c();
+            map_pick_creature_move();
         }
     }
     if (e->unkA8 != NULL) {
-        fdat_801ebec4(e);
+        creature_run_script_command(e);
         e->unk1A = 0xf0;
     }
 }
@@ -279,7 +279,7 @@ void func_801edbf8(void)
 /* Item 0x12a used in front of table B entry 12 sets fdat_801edfd0; the
  * result is 1 then, else 2. */
 ADDRESS(0x801edd38, 0xc8)
-void func_801edd38(short id)
+void map_use_item_on_object(short id)
 {
     VECTOR p;
     VisRequest req;
@@ -308,7 +308,7 @@ void func_801edd38(short id)
 
 /* Lifts table C item 28 by 0x200, 24 a frame while its model is loaded. */
 ADDRESS(0x801ede00, 0xf8)
-void func_801ede00(void)
+void map_slide_ground_item(void)
 {
     int step = 24;
     Vis48 *item = &vis_table_c.entries[28];
@@ -336,7 +336,7 @@ void func_801ede00(void)
 
 /* Marks every active table A entry: unk36 0xfff and range bits 0xd. */
 ADDRESS(0x801edef8, 0x50)
-void func_801edef8(void)
+void creatures_restart_fade_in(void)
 {
     Vis212 *e = vis_table_a.entries;
     int i = 64;
@@ -353,7 +353,7 @@ void func_801edef8(void)
 /* In area 3, while flag 27 is clear, hands table A entry 33 to its exit once
  * its record's stream counter has started. */
 ADDRESS(0x801edf48, 0x88)
-void func_801edf48(void)
+void map_talk_on_player_death(void)
 {
     Vis212 *e;
     Vis192 *r;
@@ -365,6 +365,6 @@ void func_801edf48(void)
         && !(DAT_801cba08.unk1440.word >> 27 & 1) && vis_table_a.unk6168 == 3) {
         DAT_801cba08.unk1448[r->unk09] = 2;
         e->unk70 |= 0x2000000;
-        fdat_801ed388(e, 1, 1);
+        creature_force_talk(e, 1, 1);
     }
 }

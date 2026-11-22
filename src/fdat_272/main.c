@@ -80,14 +80,14 @@ void func_801ee544(short id);
 const FdatHeader fdat_header = {
     0x20,
     {
-        fdat_801ed498, func_801ed4d0, fdat_801ed498, fdat_801ed498,
-        fdat_801ed498, func_801ed760, fdat_801ed498, fdat_801ed498,
-        fdat_801ed498, func_801ee43c, fdat_801ed498, fdat_801ed498,
-        func_801ee544, fdat_801ed498, fdat_801ed498, fdat_801ed498,
-        func_801edad8, func_801edd24, fdat_801ed498, fdat_801ed498,
-        fdat_801ed498, fdat_801ed498, fdat_801ed498, fdat_801ed498,
-        fdat_801ed498, fdat_801ed498, fdat_801ed498, fdat_801ed498,
-        fdat_801ed498, fdat_801ed498, fdat_801ed498, fdat_801ed498,
+        map_hook_none, func_801ed4d0, map_hook_none, map_hook_none,
+        map_hook_none, func_801ed760, map_hook_none, map_hook_none,
+        map_hook_none, func_801ee43c, map_hook_none, map_hook_none,
+        func_801ee544, map_hook_none, map_hook_none, map_hook_none,
+        func_801edad8, func_801edd24, map_hook_none, map_hook_none,
+        map_hook_none, map_hook_none, map_hook_none, map_hook_none,
+        map_hook_none, map_hook_none, map_hook_none, map_hook_none,
+        map_hook_none, map_hook_none, map_hook_none, map_hook_none,
     },
     0x53,
 };
@@ -114,7 +114,7 @@ void func_801ed4d0(void)
 
     if (DAT_801cba08.unk1440.field.gate == 0 && d5->unk10 != 0) {
         DAT_801cba08.unk1440.field.gate = 1;
-        fdat_801ed410(e32);
+        creature_spawn_now(e32);
         e32->unk36 = -1;
         e32->unk03 = 1;
         e32->unk1C.bytes[2] &= 0xf2;
@@ -217,7 +217,7 @@ void func_801ed760(void)
     stage = DAT_801cba08.unk1440.word >> 8 & 3;
     fdat_801ef928 = 0;
     if (stage == 1) {
-        fdat_801eb7b4(e50, 1);
+        creature_start_script(e50, 1);
         e50->unk1C.bytes[3] = 2;
         r11->unk16 = 0x200;
         r11->unk18 = 0x800;
@@ -242,10 +242,10 @@ void func_801ed760(void)
         vis_table_a.unk3500[10].unk60[1]->unk00 = 0x71;
         vis_table_a.unk3500[10].unk60[2]->unk00 = 0x72;
         e51->unk1C.bytes[3] = 2;
-        fdat_801eb7b4(e50, 1);
+        creature_start_script(e50, 1);
         e50->unkB0 = 0;
         e50->unk1C.bytes[3] = 2;
-        fdat_801eb7b4(e51, 0);
+        creature_start_script(e51, 0);
         c28->unk22 = 4;
         fdat_801ef924 = 0;
         fdat_801ef920 = 400;
@@ -263,7 +263,7 @@ void func_801ed760(void)
 }
 
 /*
- * The entry's move picker, fdat_801ed4a0 with one difference: the headings
+ * The entry's move picker, creature_pick_move with one difference: the headings
  * stay as they are when no script was picked.
  */
 ADDRESS(0x801edad8, 0x24c)
@@ -279,8 +279,8 @@ void func_801edad8(void)
 
     if (e->unk1A == 0xf0 || e->unk1A == 0)
         return;
-    fdat_801ec6a4();
-    if (!fdat_801ecbcc())
+    creature_choose_action();
+    if (!creature_pick_weighted_script())
         return;
     switch (e->unk44) {
     case 8:
@@ -334,7 +334,7 @@ void func_801ef07c(void);
  * The current entry's handler: kind 4 runs the item 0x12f scene once,
  * kind 0 steps the gate stages (story flag bits 10-12), kind 10 the scene
  * stages in fdat_801ef924, kind 11 holds its pose; then the animation
- * steps as fdat_801ed6e4 does.
+ * steps as creature_step_script does.
  */
 ADDRESS(0x801edd24, 0x718)
 void func_801edd24(void)
@@ -354,16 +354,16 @@ void func_801edd24(void)
         viewer.unk218 = 5;
         pos.vx = e48->unk74.vx - 0xa00;
         pos.vz = e48->unk74.vz;
-        fdat_801ecfc4(&pos, &rot);
+        player_glide_to_pose(&pos, &rot);
         func_801eead8();
         rot.vx = 0xc0;
         rot.vy = -0x500;
-        fdat_801ecfc4(&pos, &rot);
+        player_glide_to_pose(&pos, &rot);
         func_801eebb4();
         func_801eec74();
         creature_talk(e, 0, 0);
         func_801eeeb4();
-        fdat_801ecf44(e);
+        creature_fade_out_despawn(e);
         fdat_801ef93c = 2;
         viewer.unk218 = 0;
         DAT_801cba08.unk1440.word |= 0x4000;
@@ -372,8 +372,8 @@ void func_801edd24(void)
         switch (DAT_801cba08.unk1440.word >> 10 & 7) {
         case 2:
             viewer.unk218 = 5;
-            fdat_801ed388(e, 0, 0);
-            fdat_801ed1e4(e);
+            creature_force_talk(e, 0, 0);
+            player_turn_to_creature(e);
             func_801ef07c();
             viewer.unk218 = 0;
             e->unk00 = 100;
@@ -391,7 +391,7 @@ void func_801edd24(void)
             break;
         case 3:
             if (viewer.unk178 == 0x2f) {
-                fdat_801ed388(e, 0, 0);
+                creature_force_talk(e, 0, 0);
                 DAT_801cba08.unk1440.word = (DAT_801cba08.unk1440.word & ~0x1c00) | 0x1000;
             } else if (viewer.unk178 == 0x16) {
                 DAT_801cba08.unk1448[r->unk09]++;
@@ -408,7 +408,7 @@ void func_801edd24(void)
                 DAT_801cba08.unk1440.word = (DAT_801cba08.unk1440.word & ~0x1c00) | 0x1800;
             } else {
                 e->unk70 |= 0x2000000;
-                fdat_801ed388(e, 0, 0);
+                creature_force_talk(e, 0, 0);
                 e->unk1C.bytes[3] = 2;
                 DAT_801cba08.unk1440.word = (DAT_801cba08.unk1440.word & ~0x1c00) | 0x1800;
                 e->unk70 &= ~0x2000000;
@@ -443,7 +443,7 @@ void func_801edd24(void)
             if (viewer.unk178 == 0xa4) {
                 e50->unk36 = -1;
                 e50->unk1C.bytes[2] &= 0xf2;
-                fdat_801ed388(e, 0, 0);
+                creature_force_talk(e, 0, 0);
                 fdat_801ef924 = 1;
                 e->unk70 &= ~0x2000000;
                 DAT_801cba08.unk1440.word = (DAT_801cba08.unk1440.word & ~0x300) | 0x100;
@@ -472,24 +472,24 @@ void func_801edd24(void)
         }
         if (fdat_801ef924 == 4) {
             if (fdat_801ef92c == 2)
-                fdat_801eb7b4(e, 0);
+                creature_start_script(e, 0);
             else
-                fdat_801eb7b4(e, 1);
+                creature_start_script(e, 1);
             e->unk2A = 0xfff;
             e->unkB0 = 0;
         }
     }
     e->unk2A += e->unkB0;
-    if (fdat_801ece7c(e) == 1)
+    if (creature_step_hurt_timer(e) == 1)
         return;
     if (e->unkB0 >= 0 ? (short)e->unk2A >= 4096 : (short)e->unk2A <= 0) {
         if (e->unk02 == 4 && fdat_801ef93c == 0) {
-            fdat_801eb7b4(e, 0);
+            creature_start_script(e, 0);
             e->unkB0 = 0;
         }
         if (e->unk02 == 0) {
             if ((DAT_801cba08.unk1440.word >> 10 & 7) == 1) {
-                fdat_801eb7b4(e, 0);
+                creature_start_script(e, 0);
             } else {
                 e->unk1A = 0xff;
                 func_801edad8();
@@ -498,17 +498,17 @@ void func_801edd24(void)
             if (fdat_801ef924 < 2) {
                 if (fdat_801ef924 < 0)
                     goto repeat_current_script;
-                fdat_801eb7b4(e, 0);
+                creature_start_script(e, 0);
             } else {
 repeat_current_script:
-                fdat_801eb7b4(e, e->unk18);
+                creature_start_script(e, e->unk18);
                 return;
             }
         } else if (e->unk02 == 11) {
             if (fdat_801ef92c == 2)
-                fdat_801eb7b4(e, 0);
+                creature_start_script(e, 0);
             else
-                fdat_801eb7b4(e, 1);
+                creature_start_script(e, 1);
             e->unkB0 = 0;
         } else {
             e->unk1A = 0xff;
@@ -516,7 +516,7 @@ repeat_current_script:
         }
     }
     if (e->unkA8 != NULL) {
-        fdat_801ebec4(e);
+        creature_run_script_command(e);
         e->unk1A = 0xf0;
     }
 }
@@ -542,9 +542,9 @@ void func_801ee43c(void)
         rot.vx = 0;
         rot.vy = 0;
         viewer.unk218 = 5;
-        fdat_801ecfc4(&pos, &rot);
+        player_glide_to_pose(&pos, &rot);
         func_801ee610();
-        fdat_801ed1e4(e51);
+        player_turn_to_creature(e51);
         func_801ee7d4();
         func_801ee948();
         viewer.unk218 = 0;
@@ -651,14 +651,14 @@ void func_801ee7d4(void)
     Vis212 *e50;
     int n;
 
-    fdat_801eb7b4(e51, 3);
+    creature_start_script(e51, 3);
     e50 = e51 - 1;
-    fdat_801eb7b4(e50, 0);
+    creature_start_script(e50, 0);
     e51->unk2A = 0;
     e50->unk2A = 0;
     do {
-        fdat_801eba4c(e50);
-        fdat_801eba4c(e51);
+        creature_update_script_sound(e50);
+        creature_update_script_sound(e51);
         e50->unk2A += e50->unkB0;
         if ((short)e50->unk2A > 0x800)
             e51->unk2A += e51->unkB0;
@@ -695,9 +695,9 @@ void func_801ee948(void)
     r->unk60[6]->unk00 = 0x71;
     r->unk60[7]->unk00 = 0x72;
     creature_talk(e, 0, 0);
-    fdat_801ecf44(e);
+    creature_fade_out_despawn(e);
     e--;
-    fdat_801eb7b4(e, 0);
+    creature_start_script(e, 0);
     creature_despawn(e);
 }
 
@@ -714,8 +714,8 @@ void func_801eea14(void)
         e51->unk1C.bytes[3] = 1;
         fdat_801ef920 = -1;
         e51->unk70 &= ~0x2000000;
-        fdat_801eb7b4(e51, 8);
-        fdat_801eb7b4(e50, 1);
+        creature_start_script(e51, 8);
+        creature_start_script(e50, 1);
         fdat_801ef92c = 1;
         r->unk16 = 0x200;
         r->unk18 = 0x800;
@@ -792,11 +792,11 @@ void func_801eec74(void)
         from.vx -= 4096;
     if (from.vy > 2048)
         from.vy -= 4096;
-    fdat_801eb7b4(e, 0);
+    creature_start_script(e, 0);
     n = 0x1000 / e->unkB0;
     total = n;
     do {
-        fdat_801eba4c(e);
+        creature_update_script_sound(e);
         e->unk2A += e->unkB0;
         if ((short)e->unk2A >= 0x1000)
             e->unk2A = 0xfff;
@@ -825,12 +825,12 @@ void func_801eeeb4(void)
     SVECTOR v;
     SVECTOR unused;
 
-    fdat_801eb7b4(e, 4);
+    creature_start_script(e, 4);
     c = c10;
     if (vis_table_c.unk0070[c10->unk00 / 32] & (1 << (c10->unk00 % 32)))
         c = c11;
     do {
-        fdat_801eba4c(e);
+        creature_update_script_sound(e);
         e->unk2A += e->unkB0;
         if ((s16)e->unk2A >= 0x1000)
             e->unk2A = 0xfff;
@@ -858,21 +858,21 @@ void func_801ef07c(void)
 {
     Vis212 *e = &vis_table_a.entries[32];
 
-    fdat_801eb7b4(e, 9);
+    creature_start_script(e, 9);
     do {
-        fdat_801eba4c(e);
+        creature_update_script_sound(e);
         e->unk2A += e->unkB0;
         if ((short)e->unk2A >= 0x1000)
             e->unk2A = 0xfff;
         if (e->unk2A > 0xa00 && e->unk2A < 0xdfc)
-            fdat_801eb814(0x400, 0x80);
+            creature_turn_toward(0x400, 0x80);
         if ((short)e->unk2A > 0xdfc)
             e->unk74.vx += 0x40;
         world_run_frame(NULL, NULL, 0);
     } while ((short)e->unk2A != 0xfff);
-    fdat_801eb7b4(e, 1);
+    creature_start_script(e, 1);
     do {
-        fdat_801eba4c(e);
+        creature_update_script_sound(e);
         e->unk2A += e->unkB0;
         if ((short)e->unk2A > 0x1000)
             e->unk2A = 0;

@@ -2,8 +2,8 @@
  * FDAT_012.BIN as one translation unit (WIP module): its handler table,
  * the 21 functions every overlay starts with (src/lib/fdat_common_a.inc,
  * fdat_common.inc, fdat_common_b.inc), then its map handlers through the
- * shared fdat_801ed4a0. One object, because fdat_801ed4a0's switch table
- * is 8-aligned after fdat_801ebec4's in the same read-only run.
+ * shared creature_pick_move. One object, because creature_pick_move's switch table
+ * is 8-aligned after creature_run_script_command's in the same read-only run.
  */
 #include <kf/lib/address.h>
 #include <kf/lib/types.h>
@@ -23,22 +23,22 @@
 
 RODATA(0x801eb560, 0x24c)
 
-void func_801ed4a0();
-void func_801ed4e8();
-void func_801ed76c();
-void func_801ed9e0();
+void map_remove_fallen_creature();
+void map_restore_progress();
+void map_step_creature();
+void map_use_item_remove_fallen();
 
 const FdatHeader fdat_header = {
     0x6,
     {
-        fdat_801ed498, func_801ed4a0, fdat_801ed498, fdat_801ed498,
-        fdat_801ed498, func_801ed4e8, fdat_801ed498, fdat_801ed498,
-        fdat_801ed498, fdat_801ed498, fdat_801ed498, fdat_801ed498,
-        func_801ed9e0, fdat_801ed498, fdat_801ed498, fdat_801ed498,
-        fdat_801ed4a0, func_801ed76c, fdat_801ed498, fdat_801ed498,
-        fdat_801ed498, fdat_801ed498, fdat_801ed498, fdat_801ed498,
-        fdat_801ed498, fdat_801ed498, fdat_801ed498, fdat_801ed498,
-        fdat_801ed498, fdat_801ed498, fdat_801ed498, fdat_801ed498,
+        map_hook_none, map_remove_fallen_creature, map_hook_none, map_hook_none,
+        map_hook_none, map_restore_progress, map_hook_none, map_hook_none,
+        map_hook_none, map_hook_none, map_hook_none, map_hook_none,
+        map_use_item_remove_fallen, map_hook_none, map_hook_none, map_hook_none,
+        creature_pick_move, map_step_creature, map_hook_none, map_hook_none,
+        map_hook_none, map_hook_none, map_hook_none, map_hook_none,
+        map_hook_none, map_hook_none, map_hook_none, map_hook_none,
+        map_hook_none, map_hook_none, map_hook_none, map_hook_none,
     },
     0x39,
 };
@@ -53,7 +53,7 @@ int fdat_801edfac;
 
 /* Places table A entry 48 again when it is in use but not active. */
 ADDRESS(0x801ed4a0, 0x48)
-void func_801ed4a0(void)
+void map_remove_fallen_creature(void)
 {
     Vis212 *e = &vis_table_a.entries[48];
 
@@ -63,7 +63,7 @@ void func_801ed4a0(void)
 
 /* Sets up the area: the scene state from flag 0, entry 48's range bits. */
 ADDRESS(0x801ed4e8, 0x40)
-void func_801ed4e8(void)
+void map_restore_progress(void)
 {
     Vis212 *e = &vis_table_a.entries[48];
 

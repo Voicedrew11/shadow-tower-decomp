@@ -2,8 +2,8 @@
  * FDAT_332.BIN as one translation unit (WIP module): its handler table,
  * the 21 functions every overlay starts with (src/lib/fdat_common_a.inc,
  * fdat_common.inc, fdat_common_b.inc), then its map handlers through the
- * shared fdat_801ed4a0. One object, because fdat_801ed4a0's switch table
- * is 8-aligned after fdat_801ebec4's in the same read-only run.
+ * shared creature_pick_move. One object, because creature_pick_move's switch table
+ * is 8-aligned after creature_run_script_command's in the same read-only run.
  */
 #include <kf/lib/address.h>
 #include <kf/lib/types.h>
@@ -25,21 +25,21 @@
 
 RODATA(0x801eb560, 0x24c)
 
-void func_801ed4a0();
-void func_801ed614();
+void map_update_events();
+void map_restore_progress();
 void func_801ed904();
 
 const FdatHeader fdat_header = {
     0x26,
     {
-        fdat_801ed498, func_801ed4a0, fdat_801ed498, fdat_801ed498,
-        fdat_801ed498, func_801ed614, fdat_801ed498, fdat_801ed498,
-        fdat_801ed498, fdat_801ed498, fdat_801ed498, fdat_801ed498,
-        fdat_801ed498, fdat_801ed498, fdat_801ed498, fdat_801ed498,
-        fdat_801ed4a0, func_801ed904, fdat_801ed498, fdat_801ed498,
-        fdat_801ed498, fdat_801ed498, fdat_801ed498, fdat_801ed498,
-        fdat_801ed498, fdat_801ed498, fdat_801ed498, fdat_801ed498,
-        fdat_801ed498, fdat_801ed498, fdat_801ed498, fdat_801ed498,
+        map_hook_none, map_update_events, map_hook_none, map_hook_none,
+        map_hook_none, map_restore_progress, map_hook_none, map_hook_none,
+        map_hook_none, map_hook_none, map_hook_none, map_hook_none,
+        map_hook_none, map_hook_none, map_hook_none, map_hook_none,
+        creature_pick_move, func_801ed904, map_hook_none, map_hook_none,
+        map_hook_none, map_hook_none, map_hook_none, map_hook_none,
+        map_hook_none, map_hook_none, map_hook_none, map_hook_none,
+        map_hook_none, map_hook_none, map_hook_none, map_hook_none,
     },
     0x59,
 };
@@ -52,7 +52,7 @@ const FdatHeader fdat_header = {
  * changes, the entry comes back (flag 16) and entries 4 and 5, if active,
  * die with it. */
 ADDRESS(0x801ed4a0, 0x174)
-void func_801ed4a0(void)
+void map_update_events(void)
 {
     Vis212 *e33 = &vis_table_a.entries[33];
     Vis212 *e4 = &vis_table_a.entries[4];
@@ -76,7 +76,7 @@ void func_801ed4a0(void)
             e4->unk05 = state;
             e4->unk2C = 0;
             e4->unk1C.bytes[2] |= 0x15;
-            fdat_801eb7b4(e4, 5);
+            creature_start_script(e4, 5);
             creature_roll_drops(e4);
             creature_award_kill_bonuses(e4);
             e4->unk34 = 0x1000;
@@ -86,7 +86,7 @@ void func_801ed4a0(void)
             e5->unk05 = state;
             e5->unk2C = 0;
             e5->unk1C.bytes[2] |= 0x15;
-            fdat_801eb7b4(e5, 5);
+            creature_start_script(e5, 5);
             creature_roll_drops(e5);
             creature_award_kill_bonuses(e5);
             e5->unk34 = 0x1000;
@@ -102,7 +102,7 @@ int fdat_801edb3c;
 /* Sets up the area by flag 48: table A entry 33 dead with its drop chances,
  * or table B entry 3 retired and entry 33 shown. */
 ADDRESS(0x801ed614, 0xac)
-void func_801ed614(void)
+void map_restore_progress(void)
 {
     Vis88 *b = &vis_table_b.entries[3];
     Vis212 *e = &vis_table_a.entries[33];

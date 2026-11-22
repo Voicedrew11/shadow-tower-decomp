@@ -2,8 +2,8 @@
  * FDAT_242.BIN as one translation unit (WIP module): its handler table,
  * the 21 functions every overlay starts with (src/lib/fdat_common_a.inc,
  * fdat_common.inc, fdat_common_b.inc), then its map handlers through the
- * shared fdat_801ed4a0. One object, because fdat_801ed4a0's switch table
- * is 8-aligned after fdat_801ebec4's in the same read-only run.
+ * shared creature_pick_move. One object, because creature_pick_move's switch table
+ * is 8-aligned after creature_run_script_command's in the same read-only run.
  */
 #include <kf/lib/address.h>
 #include <kf/lib/types.h>
@@ -50,14 +50,14 @@ void func_801ede3c();
 const FdatHeader fdat_header = {
     0x1d,
     {
-        fdat_801ed498, func_801ed71c, fdat_801ed498, fdat_801ed498,
-        fdat_801ed498, func_801ed4e0, fdat_801ed498, fdat_801ed498,
-        fdat_801ed498, fdat_801ed498, fdat_801ed498, fdat_801ed498,
-        func_801edaa4, func_801ede3c, fdat_801ed498, fdat_801ed498,
-        fdat_801ed4a0, func_801edd54, fdat_801ed498, fdat_801ed498,
-        fdat_801ed498, fdat_801ed498, fdat_801ed498, fdat_801ed498,
-        fdat_801ed498, fdat_801ed498, fdat_801ed498, fdat_801ed498,
-        fdat_801ed498, fdat_801ed498, fdat_801ed498, fdat_801ed498,
+        map_hook_none, func_801ed71c, map_hook_none, map_hook_none,
+        map_hook_none, func_801ed4e0, map_hook_none, map_hook_none,
+        map_hook_none, map_hook_none, map_hook_none, map_hook_none,
+        func_801edaa4, func_801ede3c, map_hook_none, map_hook_none,
+        creature_pick_move, func_801edd54, map_hook_none, map_hook_none,
+        map_hook_none, map_hook_none, map_hook_none, map_hook_none,
+        map_hook_none, map_hook_none, map_hook_none, map_hook_none,
+        map_hook_none, map_hook_none, map_hook_none, map_hook_none,
     },
     0x50,
 };
@@ -169,34 +169,34 @@ void func_801ed71c(void)
         e33->unk00 = 100;
     }
     if (fdat_801ee0b8 == 0 && viewer.unk178 == 0x126) {
-        fdat_801ed388(e50, 0, 0);
-        fdat_801eb7b4(e50, 0);
-        fdat_801ecf44(e50);
+        creature_force_talk(e50, 0, 0);
+        creature_start_script(e50, 0);
+        creature_fade_out_despawn(e50);
         e50->unk05 = 0;
         e50->unk00 = 0;
         fdat_801ee0b8 = 1;
         e50->unk68 = (e50->unk68 + 0x800) & 0xfff;
     }
     if (fdat_801ee0b8 == 1 && viewer.unk178 == 0xa0) {
-        fdat_801ed388(e48, 0, 0);
+        creature_force_talk(e48, 0, 0);
         fdat_801ee0b8 = 2;
         e50->unk00 = 100;
         e48->unk70 &= ~0x2000000;
     }
     if (fdat_801ee0b8 == 2 && viewer.unk178 == 0x124) {
-        fdat_801ed388(e50, 0, 0);
-        fdat_801eb7b4(e50, 0);
-        fdat_801ecf44(e50);
+        creature_force_talk(e50, 0, 0);
+        creature_start_script(e50, 0);
+        creature_fade_out_despawn(e50);
         fdat_801ee0b8 = 3;
         e49->unk00 = 100;
         e50->unk70 &= ~0x2000000;
     }
     if (fdat_801ee0b8 == 3 && viewer.unk178 == 0x146) {
-        fdat_801ed388(e49, 0, 0);
-        fdat_801eb7b4(e49, 0);
+        creature_force_talk(e49, 0, 0);
+        creature_start_script(e49, 0);
         play_unlock_sound();
         d2->unk4A.door.unk4F = 0xff;
-        fdat_801ecf44(e49);
+        creature_fade_out_despawn(e49);
         fdat_801ee0b8 = 4;
         e49->unk70 &= ~0x2000000;
     }
@@ -232,7 +232,7 @@ void func_801edaa4(short id)
 #include "../lib/fdat_801ed4a0.inc"
 
 /*
- * The step of the overlay's entries, like fdat_801ed6e4: entry record 0
+ * The step of the overlay's entries, like creature_step_script: entry record 0
  * restarts script 0 at the end of a run until stream counter 12 starts.
  */
 ADDRESS(0x801edd54, 0xe8)
@@ -241,18 +241,18 @@ void func_801edd54(void)
     Vis212 *e = vis_table_a.unk6138;
 
     e->unk2A += e->unkB0;
-    if (fdat_801ece7c(e) == 1)
+    if (creature_step_hurt_timer(e) == 1)
         return;
     if (e->unkB0 >= 0 ? (short)e->unk2A >= 4096 : (short)e->unk2A <= 0) {
         if (e->unk02 == 0 && DAT_801cba08.unk1448[12] == 0) {
-            fdat_801eb7b4(e, 0);
+            creature_start_script(e, 0);
         } else {
             e->unk1A = 0xff;
-            fdat_801ed4a0();
+            creature_pick_move();
         }
     }
     if (e->unkA8 != NULL) {
-        fdat_801ebec4(e);
+        creature_run_script_command(e);
         e->unk1A = 0xf0;
     }
 }
@@ -272,7 +272,7 @@ void func_801ede3c(void)
         && vis_table_a.unk6168 == 0) {
         DAT_801cba08.unk1448[r->unk09] = 1;
         e->unk70 |= 0x2000000;
-        fdat_801ed388(e, 1, 1);
+        creature_force_talk(e, 1, 1);
     }
 }
 

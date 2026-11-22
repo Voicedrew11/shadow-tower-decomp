@@ -183,12 +183,12 @@ aspsx_version = "2.79"
 cc1_flags = []
 """
 
-    # FDAT_322.BIN's shared handler fdat_801ed6e4, claimed by its name, with
+    # FDAT_322.BIN's shared handler creature_step_script, claimed by its name, with
     # the overlay's handler-table range.
     SOURCE = ('#include <kf/lib/address.h>\n'
               'RODATA(0x801eb560, 0x88)\n'
               'ADDRESS(0x801ed6e4, 0xb0)\n'
-              'void fdat_801ed6e4(void)\n{\n}\n')
+              'void creature_step_script(void)\n{\n}\n')
 
     def load(self, *units: tuple[str, str]):
         import tempfile

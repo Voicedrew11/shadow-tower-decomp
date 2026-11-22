@@ -1,5 +1,5 @@
 /*
- * fdat_801ed4a0, the map handler 23 FDAT overlays share (WIP; shared
+ * creature_pick_move, the map handler 23 FDAT overlays share (WIP; shared
  * fragment, named by its FDAT_002.BIN address like the common functions).
  * Each of those overlays' map unit includes it at its place in the run; the
  * claim is FDAT_002.BIN's address and the other overlays bind by name. Its
@@ -14,7 +14,7 @@
  * The first heading uses a -1024 phase; the second passes unk5A directly.
  */
 ADDRESS(0x801ed4a0, 0x244)
-void fdat_801ed4a0(void)
+void creature_pick_move(void)
 {
     Vis212 *e = vis_table_a.unk6138;
     u16 wall;
@@ -26,8 +26,8 @@ void fdat_801ed4a0(void)
 
     if (e->unk1A == 0xf0 || e->unk1A == 0)
         return;
-    fdat_801ec6a4();
-    fdat_801ecbcc();
+    creature_choose_action();
+    creature_pick_weighted_script();
     switch (e->unk44) {
     case 8:
         wall = e->unk5E;

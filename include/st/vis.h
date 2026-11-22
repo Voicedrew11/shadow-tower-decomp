@@ -228,7 +228,7 @@ typedef struct {
         u16 u[16];
         u8 b[32];
         s32 w[8];
-        struct {             /* FDAT attack commands (fdat_801ebc88) */
+        struct {             /* FDAT attack commands (creature_spawn_attack_hits) */
             u16 unk10[2];
             u16 frame[3];    /* 0x14: frame of each hit, 0xffff none */
             s16 unk1A;       /* 0x1a: passed to effect_spawn_attack */

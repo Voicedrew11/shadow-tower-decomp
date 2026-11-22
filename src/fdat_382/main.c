@@ -3,7 +3,7 @@
  * the 21 functions every overlay starts with (src/lib/fdat_common_a.inc,
  * fdat_common.inc, fdat_common_b.inc), then its map handlers through its
  * own move picker. One object, because the picker's switch table is
- * 8-aligned after fdat_801ebec4's in the same read-only run.
+ * 8-aligned after creature_run_script_command's in the same read-only run.
  */
 #include <kf/lib/address.h>
 #include <kf/lib/types.h>
@@ -37,7 +37,7 @@ static int fdat_801edb00;
 DATA(0x801edb04, 0x4, ".bss")
 static int fdat_801edb04;
 
-void func_801ed4a0();
+void map_restore_progress();
 void func_801ed588();
 void func_801ed74c();
 void func_801ed9b4();
@@ -46,14 +46,14 @@ void func_801eda74();
 const FdatHeader fdat_header = {
     0x2b,
     {
-        fdat_801ed498, func_801ed588, fdat_801ed498, fdat_801ed498,
-        fdat_801ed498, func_801ed4a0, fdat_801ed498, fdat_801ed498,
-        fdat_801ed498, fdat_801ed498, fdat_801ed498, fdat_801ed498,
-        fdat_801ed498, func_801eda74, fdat_801ed498, fdat_801ed498,
-        func_801ed74c, func_801ed9b4, fdat_801ed498, fdat_801ed498,
-        fdat_801ed498, fdat_801ed498, fdat_801ed498, fdat_801ed498,
-        fdat_801ed498, fdat_801ed498, fdat_801ed498, fdat_801ed498,
-        fdat_801ed498, fdat_801ed498, fdat_801ed498, fdat_801ed498,
+        map_hook_none, func_801ed588, map_hook_none, map_hook_none,
+        map_hook_none, map_restore_progress, map_hook_none, map_hook_none,
+        map_hook_none, map_hook_none, map_hook_none, map_hook_none,
+        map_hook_none, func_801eda74, map_hook_none, map_hook_none,
+        func_801ed74c, func_801ed9b4, map_hook_none, map_hook_none,
+        map_hook_none, map_hook_none, map_hook_none, map_hook_none,
+        map_hook_none, map_hook_none, map_hook_none, map_hook_none,
+        map_hook_none, map_hook_none, map_hook_none, map_hook_none,
     },
     0x5e,
 };
@@ -66,7 +66,7 @@ const FdatHeader fdat_header = {
  * (scene word 1), else they wait; flag 24 and record 1's stream counter
  * set the other words. */
 ADDRESS(0x801ed4a0, 0xe8)
-void func_801ed4a0(void)
+void map_restore_progress(void)
 {
     VisTableA *a = &vis_table_a;
     Vis212 *e32 = &a->entries[32];
@@ -110,11 +110,11 @@ void func_801ed588(void)
     if (fdat_801edb00 == 0 && viewer.position.vz < 0x3a800) {
         if (fdat_801edafc == 0) {
             DAT_801cba08.unk1448[r1->unk09] = 0;
-            fdat_801ed388(e32, 1, 0);
+            creature_force_talk(e32, 1, 0);
             e32->unk70 &= ~0x2000000;
         } else {
             DAT_801cba08.unk1448[r1->unk09] = 1;
-            fdat_801ed388(e32, 0, 0);
+            creature_force_talk(e32, 0, 0);
             e32->unk70 &= ~0x2000000;
             e32->unk1C.bytes[3] = 0;
             e0->unk1C.bytes[3] = 0;
@@ -133,14 +133,14 @@ void func_801ed588(void)
         viewer.unk218 = 5;
         e32->unk70 |= 0x2000000;
         DAT_801cba08.unk1448[r1->unk09] = 2;
-        fdat_801ed388(e32, 1, 0);
+        creature_force_talk(e32, 1, 0);
         fdat_801edb04 = 0xff;
         viewer.unk218 = 0;
     }
 }
 
 /*
- * The entry's move picker, fdat_801ed4a0 with one addition: kind 1 waits
+ * The entry's move picker, creature_pick_move with one addition: kind 1 waits
  * (action 128) while fdat_801edb00 is 0.
  */
 ADDRESS(0x801ed74c, 0x268)
@@ -156,10 +156,10 @@ void func_801ed74c(void)
 
     if (e->unk1A == 0xf0 || e->unk1A == 0)
         return;
-    fdat_801ec6a4();
+    creature_choose_action();
     if (e->unk02 == 1 && fdat_801edb00 == 0)
         e->unk44 = 128;
-    fdat_801ecbcc();
+    creature_pick_weighted_script();
     switch (e->unk44) {
     case 8:
         wall = e->unk5E;
@@ -201,7 +201,7 @@ void func_801ed74c(void)
 
 void func_801ed74c(void);
 
-/* The current entry's handler: the animation steps as fdat_801ed6e4 does;
+/* The current entry's handler: the animation steps as creature_step_script does;
  * the next move is picked only once the scene ran. */
 ADDRESS(0x801ed9b4, 0xc0)
 void func_801ed9b4(void)
@@ -209,14 +209,14 @@ void func_801ed9b4(void)
     Vis212 *e = vis_table_a.unk6138;
 
     e->unk2A += e->unkB0;
-    if (fdat_801ece7c(e) == 1)
+    if (creature_step_hurt_timer(e) == 1)
         return;
     if ((e->unkB0 >= 0 ? (short)e->unk2A >= 4096 : (short)e->unk2A <= 0) && fdat_801edb00 == 0xff) {
         e->unk1A = 0xff;
         func_801ed74c();
     }
     if (e->unkA8 != NULL) {
-        fdat_801ebec4(e);
+        creature_run_script_command(e);
         e->unk1A = 0xf0;
     }
 }
@@ -236,6 +236,6 @@ void func_801eda74(void)
         && vis_table_a.unk6168 == 0) {
         DAT_801cba08.unk1448[r->unk09] = 3;
         e->unk70 |= 0x2000000;
-        fdat_801ed388(e, 1, 1);
+        creature_force_talk(e, 1, 1);
     }
 }

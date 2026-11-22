@@ -17,18 +17,18 @@
 #include <st/xa.h>
 #include <st/fdat.h>
 
-void func_801eda38(Vis212 *e);
-void func_801edbec(Vis212 *e);
-void func_801edf0c(Vis212 *e);
+void map_start_creature_fall(Vis212 *e);
+void map_step_falling_creature(Vis212 *e);
+void map_trigger_on_approach(Vis212 *e);
 
 /*
  * The current entry's handler: kind 4 drops once record's stream counter
- * reaches 4 (or when hit) and then runs func_801edbec; kind 10 plays the
+ * reaches 4 (or when hit) and then runs map_step_falling_creature; kind 10 plays the
  * scene word fdat_801edfac's stages; kinds 1 and 9 bob by their frame;
- * then the animation steps as fdat_801ed6e4 does.
+ * then the animation steps as creature_step_script does.
  */
 ADDRESS(0x801ed76c, 0x274)
-void func_801ed76c(void)
+void map_step_creature(void)
 {
     Vis212 *e = vis_table_a.unk6138;
     Vis192 *r = vis_table_a.unk6134;
@@ -37,24 +37,24 @@ void func_801ed76c(void)
 
     if (e->unk02 == 4) {
         if (DAT_801cba08.unk1448[r->unk09] == 4 && e->unk1C.bytes[0] == 0)
-            func_801eda38(e);
+            map_start_creature_fall(e);
         if (e->unk0F == 0x80) {
-            func_801edbec(e);
+            map_step_falling_creature(e);
             return;
         }
         if (e->unk64 != 0)
-            func_801eda38(e);
+            map_start_creature_fall(e);
     } else if (e->unk02 == 10) {
         if ((unsigned)fdat_801edfac < 2) {
-            fdat_801eb7b4(e, 8);
+            creature_start_script(e, 8);
             e->unkB0 = 0;
             e->unk1C.bytes[3] = 1;
-            func_801edf0c(e);
+            map_trigger_on_approach(e);
             return;
         }
         if (fdat_801edfac == 2) {
             e->unk2A += e->unkB0;
-            fdat_801eba4c(e);
+            creature_update_script_sound(e);
             if (0xfff - e->unkB0 < (short)e->unk2A) {
                 fdat_801edfac = 3;
                 e->unk1C.bytes[3] = 0;
@@ -85,14 +85,14 @@ void func_801ed76c(void)
         }
     }
     e->unk2A += e->unkB0;
-    if (fdat_801ece7c(e) == 1)
+    if (creature_step_hurt_timer(e) == 1)
         return;
     if (e->unkB0 >= 0 ? (short)e->unk2A >= 4096 : (short)e->unk2A <= 0) {
         e->unk1A = 0xff;
-        fdat_801ed4a0();
+        creature_pick_move();
     }
     if (e->unkA8 != NULL) {
-        fdat_801ebec4(e);
+        creature_run_script_command(e);
         e->unk1A = 0xf0;
     }
 }

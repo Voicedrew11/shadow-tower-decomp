@@ -11,7 +11,7 @@
 
 /* On event 0x10e, places table A entry 48 again unless it is in state 3. */
 ADDRESS(0x801ed9e0, 0x58)
-void func_801ed9e0(short id)
+void map_use_item_remove_fallen(short id)
 {
     Vis212 *e = &vis_table_a.entries[48];
 

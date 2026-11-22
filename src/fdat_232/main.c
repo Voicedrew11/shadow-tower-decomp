@@ -3,7 +3,7 @@
  * the 21 functions every overlay starts with (src/lib/fdat_common_a.inc,
  * fdat_common.inc, fdat_common_b.inc), then its map handlers through its
  * own move picker. One object, because the picker's switch table is
- * 8-aligned after fdat_801ebec4's in the same read-only run.
+ * 8-aligned after creature_run_script_command's in the same read-only run.
  */
 #include <kf/lib/address.h>
 #include <kf/lib/types.h>
@@ -25,7 +25,7 @@
 
 RODATA(0x801eb560, 0x24c)
 
-void func_801ed4a0();
+void map_restore_progress();
 void func_801ed59c();
 void func_801ed7d8();
 void func_801edb08();
@@ -33,14 +33,14 @@ void func_801edb08();
 const FdatHeader fdat_header = {
     0x1c,
     {
-        fdat_801ed498, func_801ed59c, fdat_801ed498, fdat_801ed498,
-        fdat_801ed498, func_801ed4a0, fdat_801ed498, fdat_801ed498,
-        fdat_801ed498, fdat_801ed498, fdat_801ed498, fdat_801ed498,
-        fdat_801ed498, func_801edb08, fdat_801ed498, fdat_801ed498,
-        func_801ed7d8, fdat_801ed6e4, fdat_801ed498, fdat_801ed498,
-        fdat_801ed498, fdat_801ed498, fdat_801ed498, fdat_801ed498,
-        fdat_801ed498, fdat_801ed498, fdat_801ed498, fdat_801ed498,
-        fdat_801ed498, fdat_801ed498, fdat_801ed498, fdat_801ed498,
+        map_hook_none, func_801ed59c, map_hook_none, map_hook_none,
+        map_hook_none, map_restore_progress, map_hook_none, map_hook_none,
+        map_hook_none, map_hook_none, map_hook_none, map_hook_none,
+        map_hook_none, func_801edb08, map_hook_none, map_hook_none,
+        func_801ed7d8, creature_step_script, map_hook_none, map_hook_none,
+        map_hook_none, map_hook_none, map_hook_none, map_hook_none,
+        map_hook_none, map_hook_none, map_hook_none, map_hook_none,
+        map_hook_none, map_hook_none, map_hook_none, map_hook_none,
     },
     0x4f,
 };
@@ -63,7 +63,7 @@ static int fdat_801edb9c;
 
 /* Sets up the area by flag 28 and record 12's stream counter. */
 ADDRESS(0x801ed4a0, 0xfc)
-void func_801ed4a0(void)
+void map_restore_progress(void)
 {
     Vis192 *r = &vis_table_a.unk3500[12];
 
@@ -102,7 +102,7 @@ void func_801ed59c(void)
         fdat_801edb9c = 1;
     if (fdat_801edb9c == 1) {
         e->unk70 |= 0x2000000;
-        fdat_801ed388(e, 1, 0);
+        creature_force_talk(e, 1, 0);
         fdat_801edb98 = 1;
         fdat_801edb9c = 0xff;
         viewer.unk218 = 0;
@@ -114,7 +114,7 @@ void func_801ed59c(void)
     n = DAT_801cba08.unk1448[r->unk09];
     if (n == 1 && viewer.position.vx > 0x4c000 && viewer.position.vz > 0x55000) {
         viewer.unk218 = 5;
-        fdat_801ed388(e, 0, 0);
+        creature_force_talk(e, 0, 0);
         e->unk64 = n;
         viewer.unk218 = 0;
         e->unk70 &= ~0x2000000;
@@ -127,7 +127,7 @@ void func_801ed59c(void)
     if (fdat_801edb94 == 1 && e->unk05 == 3) {
         viewer.unk218 = 5;
         e->unk70 |= 0x2000000;
-        fdat_801ed388(e, 1, 0);
+        creature_force_talk(e, 1, 0);
         fdat_801edb94 = 0xff;
         fdat_801edb98 = 0;
         viewer.unk218 = 0;
@@ -135,7 +135,7 @@ void func_801ed59c(void)
 }
 
 /*
- * The entry's move picker, fdat_801ed4a0 with one addition: kind 12 waits
+ * The entry's move picker, creature_pick_move with one addition: kind 12 waits
  * (action 128) until its record's stream counter reaches 2.
  */
 ADDRESS(0x801ed7d8, 0x280)
@@ -152,10 +152,10 @@ void func_801ed7d8(void)
 
     if (e->unk1A == 0xf0 || e->unk1A == 0)
         return;
-    fdat_801ec6a4();
+    creature_choose_action();
     if (e->unk02 == 12 && DAT_801cba08.unk1448[r->unk09] < 2)
         e->unk44 = 128;
-    fdat_801ecbcc();
+    creature_pick_weighted_script();
     switch (e->unk44) {
     case 8:
         wall = e->unk5E;
@@ -215,6 +215,6 @@ void func_801edb08(void)
         && vis_table_a.unk6168 == 3) {
         DAT_801cba08.unk1448[r->unk09] = 3;
         e->unk70 |= 0x2000000;
-        fdat_801ed388(e, 1, 1);
+        creature_force_talk(e, 1, 1);
     }
 }

@@ -2,8 +2,8 @@
  * FDAT_302.BIN as one translation unit (WIP module): its handler table,
  * the 21 functions every overlay starts with (src/lib/fdat_common_a.inc,
  * fdat_common.inc, fdat_common_b.inc), then its map handlers through the
- * shared fdat_801ed4a0. One object, because fdat_801ed4a0's switch table
- * is 8-aligned after fdat_801ebec4's in the same read-only run.
+ * shared creature_pick_move. One object, because creature_pick_move's switch table
+ * is 8-aligned after creature_run_script_command's in the same read-only run.
  */
 #include <kf/lib/address.h>
 #include <kf/lib/types.h>
@@ -53,7 +53,7 @@ static int fdat_801ee47c;
 DATA(0x801ee480, 0x4, ".bss")
 static int fdat_801ee480;
 
-void func_801ed4a0();
+void map_restore_progress();
 void func_801ed5b0();
 void func_801edc60();
 void func_801ee37c();
@@ -61,14 +61,14 @@ void func_801ee37c();
 const FdatHeader fdat_header = {
     0x23,
     {
-        fdat_801ed498, func_801ed5b0, fdat_801ed498, fdat_801ed498,
-        fdat_801ed498, func_801ed4a0, fdat_801ed498, fdat_801ed498,
-        fdat_801ed498, fdat_801ed498, fdat_801ed498, fdat_801ed498,
-        fdat_801ed498, func_801ee37c, fdat_801ed498, fdat_801ed498,
-        fdat_801ed4a0, func_801edc60, fdat_801ed498, fdat_801ed498,
-        fdat_801ed498, fdat_801ed498, fdat_801ed498, fdat_801ed498,
-        fdat_801ed498, fdat_801ed498, fdat_801ed498, fdat_801ed498,
-        fdat_801ed498, fdat_801ed498, fdat_801ed498, fdat_801ed498,
+        map_hook_none, func_801ed5b0, map_hook_none, map_hook_none,
+        map_hook_none, map_restore_progress, map_hook_none, map_hook_none,
+        map_hook_none, map_hook_none, map_hook_none, map_hook_none,
+        map_hook_none, func_801ee37c, map_hook_none, map_hook_none,
+        creature_pick_move, func_801edc60, map_hook_none, map_hook_none,
+        map_hook_none, map_hook_none, map_hook_none, map_hook_none,
+        map_hook_none, map_hook_none, map_hook_none, map_hook_none,
+        map_hook_none, map_hook_none, map_hook_none, map_hook_none,
     },
     0x56,
 };
@@ -86,7 +86,7 @@ void func_801ee0b8(void);
  * set (entry 9 off when all are open), entries 4 and 5 placed, the scene
  * words cleared. */
 ADDRESS(0x801ed4a0, 0x110)
-void func_801ed4a0(void)
+void map_restore_progress(void)
 {
     Vis88 *d1 = &vis_table_b.entries[1];
     Vis88 *d9 = &vis_table_b.entries[9];
@@ -175,7 +175,7 @@ void func_801ed5b0(void)
         e0->unk1C.bytes[3] = 1;
         e0->unk34 = -1;
         e0->unk1C.bytes[2] &= 0xea;
-        fdat_801eb7b4(e0, 6);
+        creature_start_script(e0, 6);
         fdat_801ee474 = 1;
     }
     if (fdat_801ee474 == 2)
@@ -184,7 +184,7 @@ void func_801ed5b0(void)
         fdat_801ee478 = 1;
     if (fdat_801ee478 == 1 && e3->unk05 == 3) {
         e3->unk70 |= 0x2000000;
-        fdat_801ed388(e3, 1, 0);
+        creature_force_talk(e3, 1, 0);
         fdat_801ee478 = 0xff;
     }
     if (fdat_801ee480 == 0 && e5->unk2C != (e5->unk02 + vis_table_a.unk3500)->unk32)
@@ -193,20 +193,20 @@ void func_801ed5b0(void)
         fdat_801ee480 = 3;
     if (fdat_801ee480 == 1) {
         e5->unk70 |= 0x2000000;
-        fdat_801ed388(e5, 1, 0);
+        creature_force_talk(e5, 1, 0);
         fdat_801ee480 = 2;
         e5->unk70 &= ~0x2000000;
     }
     if (fdat_801ee480 == 3 && e5->unk05 == 3) {
         e5->unk70 |= 0x2000000;
-        fdat_801ed388(e5, 1, 0);
+        creature_force_talk(e5, 1, 0);
         fdat_801ee480 = 0xff;
         DAT_800881a4 = 3;
         DAT_801cba08.unk1444.word |= 0x80;
     }
     if (fdat_801ee47c == 1 && viewer.position.vz > 0x41000) {
         viewer.unk218 = 5;
-        fdat_801ed388(e5, 0, 0);
+        creature_force_talk(e5, 0, 0);
         e5->unk1C.bytes[3] = 0;
         fdat_801ee47c = 0xff;
         viewer.unk218 = 0;
@@ -223,7 +223,7 @@ void func_801ed5b0(void)
 
 #include "../lib/fdat_801ed4a0.inc"
 
-/* The current entry's handler: the animation steps as fdat_801ed6e4 does;
+/* The current entry's handler: the animation steps as creature_step_script does;
  * kind 0 at the end of entry 0's dying stage turns to its scripts 7 and 9
  * and leaves (scene word 2). */
 ADDRESS(0x801edc60, 0x13c)
@@ -233,7 +233,7 @@ void func_801edc60(void)
     Vis192 *r = vis_table_a.unk6134;
 
     e->unk2A += e->unkB0;
-    if (fdat_801ece7c(e) == 1)
+    if (creature_step_hurt_timer(e) == 1)
         return;
     if (e->unkB0 >= 0 ? (short)e->unk2A >= 4096 : (short)e->unk2A <= 0) {
         if (e->unk02 == 0 && fdat_801ee474 == 1) {
@@ -241,15 +241,15 @@ void func_801edc60(void)
             r->unk60[7]->unk00 = 0x72;
             r->unk60[9]->unk00 = 0x70;
             *(s16 *)&r->unk60[9]->unk0C = -0xc0;
-            fdat_801ed388(e, 0, 0);
+            creature_force_talk(e, 0, 0);
             fdat_801ee474 = 2;
         } else {
             e->unk1A = 0xff;
-            fdat_801ed4a0();
+            creature_pick_move();
         }
     }
     if (e->unkA8 != NULL) {
-        fdat_801ebec4(e);
+        creature_run_script_command(e);
         e->unk1A = 0xf0;
     }
 }
@@ -314,24 +314,24 @@ void func_801edea0(void)
     viewer.unk218 = 5;
     fade_run_frames(2, 0x1000, 0x1000, 0);
     creatures_update();
-    fdat_801ed410(e);
+    creature_spawn_now(e);
     if (world_state.unk834C[slot] == NULL)
         creature_model_load(2, index * 5, slot, e->unk0C & 0xf);
     e->unk36 = -1;
     e->unk1C.bytes[2] &= 0xf2;
-    fdat_801eb7b4(e, 7);
+    creature_start_script(e, 7);
     vis_table_a.unk6168 = 0;
     cd_wait_idle();
     play_warp_sound();
     fade_run_frames(2, 0x1000, 0, -0x100);
     pad_clear_input();
     if (DAT_801cba08.unk1448[r->unk09] == 0) {
-        fdat_801ed388(e, 0, 0);
+        creature_force_talk(e, 0, 0);
         e->unk70 &= ~0x2000000;
     }
     vis_table_a.unk6138 = e;
     vis_table_a.unk6134 = r;
-    fdat_801ed4a0();
+    creature_pick_move();
     player_enter_normal_state();
 }
 
@@ -366,7 +366,7 @@ void func_801ee0b8(void)
     e49 = &vis_table_a.entries[49];
     e3 = &vis_table_a.entries[3];
     r2 = &vis_table_a.unk3500[2];
-    fdat_801eb7b4(e0, 10);
+    creature_start_script(e0, 10);
     for (;;) {
         e0->unk2A += e0->unkB0;
         if ((short)e0->unk2A >= 0x1000)
@@ -379,14 +379,14 @@ first_animation_done:
     e48->unk26 = e0->unk26;
     creature_despawn(e0);
     viewer.unk30--;
-    fdat_801ed410(e3);
+    creature_spawn_now(e3);
     e3->unk74 = e48->unk74;
     *(SVECTOR *)&e3->unk8C = *(SVECTOR *)&e48->unk8C;
     e3->unk36 = -1;
     e3->unk26 = e48->unk26;
     e3->unk1C.bytes[2] &= 0xf2;
     e3->unk70 &= ~0x2000000;
-    fdat_801eb7b4(e3, 10);
+    creature_start_script(e3, 10);
     do {
         e3->unk2A = 0;
         world_run_frame(NULL, NULL, 0);
@@ -396,7 +396,7 @@ first_animation_done:
     *(SVECTOR *)&e49->unk8C = *(SVECTOR *)&e3->unk8C;
     e49->unk26 = e3->unk26;
     r2->unk60[0]->unk0C = 0x90;
-    fdat_801eb7b4(e49, 0);
+    creature_start_script(e49, 0);
     creature_despawn(e48);
     for (;;) {
         e49->unk2A += e49->unkB0;
@@ -405,8 +405,8 @@ first_animation_done:
             e49->unk2A = 0xfff;
         if ((short)e3->unk2A >= 0x1000)
             break;
-        fdat_801eba4c(e49);
-        fdat_801eba4c(e3);
+        creature_update_script_sound(e49);
+        creature_update_script_sound(e3);
         world_run_frame(NULL, NULL, 0);
     }
     creature_despawn(e49);
@@ -432,15 +432,15 @@ void func_801ee37c(void)
     if (fdat_801ee474 != 0xff) {
         story->unk1448[vis_table_a.unk3500[0].unk09] = 2;
         e0->unk70 |= 0x2000000;
-        fdat_801ed388(e0, 1, 1);
+        creature_force_talk(e0, 1, 1);
     } else if (fdat_801ee478 != 0xff) {
         story->unk1448[r3->unk09] = 1;
         e3->unk70 |= 0x2000000;
-        fdat_801ed388(e3, 1, 1);
+        creature_force_talk(e3, 1, 1);
     } else if (story->unk1448[r8->unk09] != 0 && fdat_801ee480 != 0xff) {
         story->unk1448[r8->unk09] = 3;
         e5->unk70 |= 0x2000000;
-        fdat_801ed388(e5, 1, 1);
+        creature_force_talk(e5, 1, 1);
     } else {
         return;
     }

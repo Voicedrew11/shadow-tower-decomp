@@ -23,7 +23,7 @@
  * 7) until x 0x3c800. Its hit flash (unk34) runs down meanwhile.
  */
 ADDRESS(0x801edbec, 0x320)
-void func_801edbec(Vis212 *e)
+void map_step_falling_creature(Vis212 *e)
 {
     Vis192 *r = &vis_table_a.unk3500[e->unk02];
     VECTOR pos;
@@ -47,7 +47,7 @@ void func_801edbec(Vis212 *e)
             e->unk2A += e->unkB0;
             if ((short)e->unk2A >= 0x1000)
                 e->unk2A = 0xfff;
-            fdat_801eb880(0xc00, 0x80);
+            creature_set_velocity(0xc00, 0x80);
         }
         pos.vx = e->unk74.vx + e->unk9C.vx;
         pos.vz = e->unk74.vz + e->unk9C.vz;
@@ -78,8 +78,8 @@ void func_801edbec(Vis212 *e)
             creature_despawn(e);
             break;
         }
-        fdat_801eb814(ratan2(e->unk74.vz - target_z, e->unk74.vx - target_x) + 0xc00, 0x20);
-        fdat_801eb880(e->unk8E - 0x400, 0x40);
+        creature_turn_toward(ratan2(e->unk74.vz - target_z, e->unk74.vx - target_x) + 0xc00, 0x20);
+        creature_set_velocity(e->unk8E - 0x400, 0x40);
         e->unk2A += e->unkB0;
         if ((short)e->unk2A >= 0x1000)
             e->unk2A = 0;

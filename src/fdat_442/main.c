@@ -45,14 +45,14 @@ void func_801ed63c();
 const FdatHeader fdat_header = {
     0x31,
     {
-        fdat_801ed498, fdat_801ed498, fdat_801ed498, fdat_801ed498,
-        fdat_801ed498, func_801ed420, fdat_801ed498, fdat_801ed498,
-        fdat_801ed498, fdat_801ed498, fdat_801ed498, fdat_801ed498,
-        fdat_801ed498, fdat_801ed498, fdat_801ed498, fdat_801ed498,
-        func_801ed454, func_801ed63c, fdat_801ed498, fdat_801ed498,
-        fdat_801ed498, fdat_801ed498, fdat_801ed498, fdat_801ed498,
-        fdat_801ed498, fdat_801ed498, fdat_801ed498, fdat_801ed498,
-        fdat_801ed498, fdat_801ed498, fdat_801ed498, fdat_801ed498,
+        map_hook_none, map_hook_none, map_hook_none, map_hook_none,
+        map_hook_none, func_801ed420, map_hook_none, map_hook_none,
+        map_hook_none, map_hook_none, map_hook_none, map_hook_none,
+        map_hook_none, map_hook_none, map_hook_none, map_hook_none,
+        func_801ed454, func_801ed63c, map_hook_none, map_hook_none,
+        map_hook_none, map_hook_none, map_hook_none, map_hook_none,
+        map_hook_none, map_hook_none, map_hook_none, map_hook_none,
+        map_hook_none, map_hook_none, map_hook_none, map_hook_none,
     },
     0x64,
 };
@@ -88,12 +88,12 @@ void func_801ed454(void)
     items = &DAT_801c7590;
     if (!(*(u16 *)&items->counts[266] & 0x7f)) {
         fdat_801ed8c8 = 1;
-        fdat_801eb7b4(e, 1);
+        creature_start_script(e, 1);
     } else {
         flag31 = DAT_801cba08.unk1440.word >> 31;
         if (((DAT_801cba08.unk1444.word & 1) << 1 | flag31) == 0) {
             fdat_801ed8c8 = 0;
-            fdat_801eb7b4(e, 0);
+            creature_start_script(e, 0);
             DAT_801cba08.unk1440.word |= 0x80000000;
             DAT_801cba08.unk1444.word &= ~1;
         } else {
@@ -102,16 +102,16 @@ void func_801ed454(void)
                 sum += DAT_801c7590.unk156[i];
             if (sum == 0) {
                 fdat_801ed8c8 = 2;
-                fdat_801eb7b4(e, 2);
+                creature_start_script(e, 2);
             } else if (viewer.unk2 < viewer.unk0 >> 3) {
                 fdat_801ed8c8 = 3;
-                fdat_801eb7b4(e, 3);
+                creature_start_script(e, 3);
             } else if (rand() < 0x2000) {
                 fdat_801ed8c8 = 4;
-                fdat_801eb7b4(e, 1);
+                creature_start_script(e, 1);
             } else {
                 fdat_801ed8c8 = 5;
-                fdat_801eb7b4(e, 1);
+                creature_start_script(e, 1);
                 fdat_801ed8c4 = 4;
             }
         }
@@ -153,7 +153,7 @@ void func_801ed63c(void)
     if ((short)e->unk2A >= 0x1000) {
         e->unk2A = 0;
         if (fdat_801ed8c4 == 2 && fdat_801ed8c8 == 0)
-            fdat_801eb7b4(e, 1);
+            creature_start_script(e, 1);
     }
     if (fdat_801ed8c4 == 1) {
         int ending = fdat_801ed8c8;

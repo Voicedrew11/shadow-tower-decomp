@@ -2,8 +2,8 @@
  * FDAT_212.BIN as one translation unit (WIP module): its handler table,
  * the 21 functions every overlay starts with (src/lib/fdat_common_a.inc,
  * fdat_common.inc, fdat_common_b.inc), then its map handlers through the
- * shared fdat_801ed4a0. One object, because fdat_801ed4a0's switch table
- * is 8-aligned after fdat_801ebec4's in the same read-only run.
+ * shared creature_pick_move. One object, because creature_pick_move's switch table
+ * is 8-aligned after creature_run_script_command's in the same read-only run.
  */
 #include <kf/lib/address.h>
 #include <kf/lib/types.h>
@@ -26,21 +26,21 @@
 
 RODATA(0x801eb560, 0x24c)
 
-void func_801ed4a0();
+void map_restore_progress();
 void func_801ed594();
 void func_801ed890();
 
 const FdatHeader fdat_header = {
     0x1a,
     {
-        fdat_801ed498, func_801ed594, fdat_801ed498, fdat_801ed498,
-        fdat_801ed498, func_801ed4a0, fdat_801ed498, fdat_801ed498,
-        fdat_801ed498, fdat_801ed498, fdat_801ed498, fdat_801ed498,
-        func_801ed890, fdat_801ed498, fdat_801ed498, fdat_801ed498,
-        fdat_801ed4a0, fdat_801ed6e4, fdat_801ed498, fdat_801ed498,
-        fdat_801ed498, fdat_801ed498, fdat_801ed498, fdat_801ed498,
-        fdat_801ed498, fdat_801ed498, fdat_801ed498, fdat_801ed498,
-        fdat_801ed498, fdat_801ed498, fdat_801ed498, fdat_801ed498,
+        map_hook_none, func_801ed594, map_hook_none, map_hook_none,
+        map_hook_none, map_restore_progress, map_hook_none, map_hook_none,
+        map_hook_none, map_hook_none, map_hook_none, map_hook_none,
+        func_801ed890, map_hook_none, map_hook_none, map_hook_none,
+        creature_pick_move, creature_step_script, map_hook_none, map_hook_none,
+        map_hook_none, map_hook_none, map_hook_none, map_hook_none,
+        map_hook_none, map_hook_none, map_hook_none, map_hook_none,
+        map_hook_none, map_hook_none, map_hook_none, map_hook_none,
     },
     0x4d,
 };
@@ -70,7 +70,7 @@ void func_801edbd0(int which);
 /* Sets up the area by the second flag word's bits 8 and 9: table C items
  * 28/29, the scene words and the bridge pieces (table B kind 0x97). */
 ADDRESS(0x801ed4a0, 0xf4)
-void func_801ed4a0(void)
+void map_restore_progress(void)
 {
     Vis48 *c28 = &vis_table_c.entries[28];
     Vis88 *b;

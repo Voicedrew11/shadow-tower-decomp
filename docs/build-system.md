@@ -327,22 +327,24 @@ lists, may bind by name and still claim its image's `RODATA()`,
 while the fragment's functions resolve through the image's identities. The
 FDAT overlays use this: the 21 functions every overlay starts with sit at
 different addresses in seven of the 36 overlays and carry one shared
-identity name (`fdat_<FDAT_002.BIN address>`) in all of them. Each overlay
-has three units: the shared source `src/lib/fdat_common_a.c` (the first ten
-functions), its own `src/fdat_nnn/main.c` (the handler table and
-`fdat_801ebec4`'s switch table as one `RODATA()` run, and the fragment
-`src/lib/fdat_common.inc` with `fdat_801ebec4` and `fdat_801ec6a4`), and the
-shared `src/lib/fdat_common_b.c` (the last nine). The boundaries are WIP:
-they keep the two not-yet-exact functions `fdat_801eba4c` and
-`fdat_801ec6a4` from moving the switch-table and handler-table pointers
-(a non-exact function ends its unit).
+identity name in all of them. Each overlay has three units: the shared
+source `src/lib/fdat_common_a.c` (the first ten functions), its own
+`src/fdat_nnn/main.c` (the handler table and
+`creature_run_script_command`'s switch table as one `RODATA()` run, and
+the fragment `src/lib/fdat_common.inc` with `creature_run_script_command`
+and `creature_choose_action`), and the shared `src/lib/fdat_common_b.c`
+(the last nine). The boundaries are WIP: they keep the two not-yet-exact
+functions `creature_update_script_sound` and `creature_choose_action` from
+moving the switch-table and handler-table pointers (a non-exact function
+ends its unit).
 
 The overlays' own handlers after those 21 functions are units named by
 their first function, `fdat_nnn.map_<address>` in
 `src/fdat_nnn/map_<address>.c`, each a contiguous run of exact handlers.
-Handlers that several overlays share are fragments named like the common
-functions: `src/lib/fdat_801ed6e4.inc` (19 overlays) calls the overlay's
-move picker, which is the shared `fdat_801ed4a0` in 14 of them and an
+Handlers that several overlays share are fragments named by the function's
+FDAT_002.BIN address: `src/lib/fdat_801ed6e4.inc` (`creature_step_script`,
+19 overlays) calls the overlay's move picker, which is the shared
+`creature_pick_move` in 14 of them and an
 overlay's own variant in five; a source names the variant by defining
 `FDAT_PICK_MOVE` before the include. `src/lib/fdat_801ed4a0.inc` (21
 overlays) is not yet exact, and no unit includes it until it is, because

@@ -2,8 +2,8 @@
  * FDAT_282.BIN as one translation unit (WIP module): its handler table,
  * the 21 functions every overlay starts with (src/lib/fdat_common_a.inc,
  * fdat_common.inc, fdat_common_b.inc), then its map handlers through the
- * shared fdat_801ed4a0. One object, because fdat_801ed4a0's switch table
- * is 8-aligned after fdat_801ebec4's in the same read-only run.
+ * shared creature_pick_move. One object, because creature_pick_move's switch table
+ * is 8-aligned after creature_run_script_command's in the same read-only run.
  */
 #include <kf/lib/address.h>
 #include <kf/lib/types.h>
@@ -23,22 +23,22 @@
 
 RODATA(0x801eb560, 0x24c)
 
-void func_801ed4a0();
-void func_801ed4e8();
+void map_update_events();
+void map_restore_progress();
 void func_801ed7a4();
 void func_801eda18();
 
 const FdatHeader fdat_header = {
     0x21,
     {
-        fdat_801ed498, func_801ed4a0, fdat_801ed498, fdat_801ed498,
-        fdat_801ed498, func_801ed4e8, fdat_801ed498, fdat_801ed498,
-        fdat_801ed498, func_801eda18, fdat_801ed498, fdat_801ed498,
-        fdat_801ed498, fdat_801ed498, fdat_801ed498, fdat_801ed498,
-        fdat_801ed4a0, func_801ed7a4, fdat_801ed498, fdat_801ed498,
-        fdat_801ed498, fdat_801ed498, fdat_801ed498, fdat_801ed498,
-        fdat_801ed498, fdat_801ed498, fdat_801ed498, fdat_801ed498,
-        fdat_801ed498, fdat_801ed498, fdat_801ed498, fdat_801ed498,
+        map_hook_none, map_update_events, map_hook_none, map_hook_none,
+        map_hook_none, map_restore_progress, map_hook_none, map_hook_none,
+        map_hook_none, func_801eda18, map_hook_none, map_hook_none,
+        map_hook_none, map_hook_none, map_hook_none, map_hook_none,
+        creature_pick_move, func_801ed7a4, map_hook_none, map_hook_none,
+        map_hook_none, map_hook_none, map_hook_none, map_hook_none,
+        map_hook_none, map_hook_none, map_hook_none, map_hook_none,
+        map_hook_none, map_hook_none, map_hook_none, map_hook_none,
     },
     0x54,
 };
@@ -51,7 +51,7 @@ void func_801eda20(void);
 
 /* Opens door 26 of table B unless it is already open. */
 ADDRESS(0x801ed4a0, 0x48)
-void func_801ed4a0(void)
+void map_update_events(void)
 {
     Vis88 *door = &vis_table_b.entries[26];
 
@@ -61,7 +61,7 @@ void func_801ed4a0(void)
 
 /* Sets up the area: table C item 2 and table A entries 48..50. */
 ADDRESS(0x801ed4e8, 0x78)
-void func_801ed4e8(void)
+void map_restore_progress(void)
 {
     Vis212 *a48 = &vis_table_a.entries[48];
     Vis212 *a50 = &vis_table_a.entries[50];

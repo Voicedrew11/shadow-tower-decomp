@@ -3,7 +3,7 @@
  * the 21 functions every overlay starts with (src/lib/fdat_common_a.inc,
  * fdat_common.inc, fdat_common_b.inc), then its map handlers through its
  * own move picker. One object, because the picker's switch table is
- * 8-aligned after fdat_801ebec4's in the same read-only run.
+ * 8-aligned after creature_run_script_command's in the same read-only run.
  */
 #include <kf/lib/address.h>
 #include <kf/lib/types.h>
@@ -49,7 +49,7 @@ static int fdat_801ee380;
 DATA(0x801ee384, 0x4, ".bss")
 static int fdat_801ee384;
 
-void func_801ed4a0();
+void map_restore_progress();
 void func_801ed740();
 void func_801edb0c(short id);
 void func_801edc18();
@@ -58,14 +58,14 @@ void func_801edec4();
 const FdatHeader fdat_header = {
     0x1f,
     {
-        fdat_801ed498, func_801ed740, fdat_801ed498, fdat_801ed498,
-        fdat_801ed498, func_801ed4a0, fdat_801ed498, fdat_801ed498,
-        fdat_801ed498, fdat_801ed498, fdat_801ed498, fdat_801ed498,
-        func_801edb0c, fdat_801ed498, fdat_801ed498, fdat_801ed498,
-        func_801edc18, func_801edec4, fdat_801ed498, fdat_801ed498,
-        fdat_801ed498, fdat_801ed498, fdat_801ed498, fdat_801ed498,
-        fdat_801ed498, fdat_801ed498, fdat_801ed498, fdat_801ed498,
-        fdat_801ed498, fdat_801ed498, fdat_801ed498, fdat_801ed498,
+        map_hook_none, func_801ed740, map_hook_none, map_hook_none,
+        map_hook_none, map_restore_progress, map_hook_none, map_hook_none,
+        map_hook_none, map_hook_none, map_hook_none, map_hook_none,
+        func_801edb0c, map_hook_none, map_hook_none, map_hook_none,
+        func_801edc18, func_801edec4, map_hook_none, map_hook_none,
+        map_hook_none, map_hook_none, map_hook_none, map_hook_none,
+        map_hook_none, map_hook_none, map_hook_none, map_hook_none,
+        map_hook_none, map_hook_none, map_hook_none, map_hook_none,
     },
     0x52,
 };
@@ -82,7 +82,7 @@ void func_801ee278(int which);
  * entry 48 (asleep, awake or gone), entries 50, 33 and 49, table B entry
  * 0 and table C items 7..10, 28 and 29. */
 ADDRESS(0x801ed4a0, 0x2a0)
-void func_801ed4a0(void)
+void map_restore_progress(void)
 {
     Vis212 *e48 = &vis_table_a.entries[48];
     Vis192 *r1 = &vis_table_a.unk3500[1];
@@ -182,7 +182,7 @@ void func_801ed740(void)
     if (fdat_801ee370 == 0) {
         if (DAT_801cba08.unk1448[r1->unk09] == 2) {
             func_801edfb4();
-            fdat_801ecf44(e48);
+            creature_fade_out_despawn(e48);
             viewer.unk218 = 0;
             fdat_801ee370 = 0xff;
         }
@@ -198,7 +198,7 @@ void func_801ed740(void)
         r1->unk60[13]->unk00 = 0x80;
         r1->unk60[14]->unk00 = 0x72;
         e48->unk70 |= 0x2000000;
-        fdat_801ed388(e48, 0, 0);
+        creature_force_talk(e48, 0, 0);
         fdat_801ee370 = 0xfe;
         e48->unk1C.bytes[3] = 0;
         e48->unk70 &= ~0x2000000;
@@ -206,19 +206,19 @@ void func_801ed740(void)
     if (e48->unk2C == 0)
         DAT_801cba08.unk1440.word |= 0x20000000;
     if (fdat_801ee374 != 0xff && DAT_801cba08.unk1448[r13->unk09] == 1) {
-        fdat_801ecf44(e50);
+        creature_fade_out_despawn(e50);
         fdat_801ee374 = 0xff;
     }
     if (e50->unk64 != 0) {
         e50->unk64 = 0;
-        fdat_801ecf44(e50);
+        creature_fade_out_despawn(e50);
         fdat_801ee374 = 0xff;
     }
     if (fdat_801ee378 == 0) {
         if (viewer.unk178 == 0x9c || viewer.unk178 == 0xe9 || viewer.unk178 == 0xa0
             || viewer.unk178 == 0xa2 || viewer.unk178 == 0xa4) {
             viewer.unk218 = 5;
-            fdat_801ed388(e33, 0, 0);
+            creature_force_talk(e33, 0, 0);
             e33->unk64 = 1;
             fdat_801ee378 = 0xff;
             viewer.unk218 = 0;
@@ -287,7 +287,7 @@ void func_801edb0c(short id)
 }
 
 /*
- * The entry's move picker, fdat_801ed4a0 with two additions: kind 4 waits
+ * The entry's move picker, creature_pick_move with two additions: kind 4 waits
  * (action 128) while fdat_801ee378 is 0, and kind 1 only plays animation
  * 10 while fdat_801ee370 is 0 or 253.
  */
@@ -304,14 +304,14 @@ void func_801edc18(void)
 
     if (e->unk1A == 0xf0 || e->unk1A == 0)
         return;
-    fdat_801ec6a4();
+    creature_choose_action();
     if (e->unk02 == 4 && fdat_801ee378 == 0)
         e->unk44 = 128;
     if (e->unk02 == 1 && (fdat_801ee370 == 0 || fdat_801ee370 == 253)) {
-        fdat_801eb7b4(e, 10);
+        creature_start_script(e, 10);
         return;
     }
-    fdat_801ecbcc();
+    creature_pick_weighted_script();
     switch (e->unk44) {
     case 8:
         wall = e->unk5E;
@@ -353,7 +353,7 @@ void func_801edc18(void)
 
 void func_801edc18(void);
 
-/* The current entry's handler: the animation steps as fdat_801ed6e4 does,
+/* The current entry's handler: the animation steps as creature_step_script does,
  * kind 1 replaying animation 10 while entry 48 sleeps. */
 ADDRESS(0x801edec4, 0xf0)
 void func_801edec4(void)
@@ -361,18 +361,18 @@ void func_801edec4(void)
     Vis212 *e = vis_table_a.unk6138;
 
     e->unk2A += e->unkB0;
-    if (fdat_801ece7c(e) == 1)
+    if (creature_step_hurt_timer(e) == 1)
         return;
     if (e->unkB0 >= 0 ? (short)e->unk2A >= 4096 : (short)e->unk2A <= 0) {
         if (e->unk02 == 1 && (fdat_801ee370 == 0 || fdat_801ee370 == 0xfd)) {
-            fdat_801eb7b4(e, 10);
+            creature_start_script(e, 10);
         } else {
             e->unk1A = 0xff;
             func_801edc18();
         }
     }
     if (e->unkA8 != NULL) {
-        fdat_801ebec4(e);
+        creature_run_script_command(e);
         e->unk1A = 0xf0;
     }
 }
@@ -390,7 +390,7 @@ void func_801edfb4(void)
     SVECTOR v;
     SVECTOR unused;
 
-    fdat_801eb7b4(e, 15);
+    creature_start_script(e, 15);
     do {
         e->unk2A += e->unkB0;
         if ((s16)e->unk2A >= 0x1000)

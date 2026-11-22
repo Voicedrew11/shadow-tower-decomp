@@ -35,7 +35,7 @@ void func_801ed9e8(void)
     viewer.unk218 = 5;
     e = &vis_table_a.entries[33];
     d3 = &vis_table_b.entries[3];
-    fdat_801ed1e4(e);
+    player_turn_to_creature(e);
     for (;;) {
         e->unk2A += e->unkB0;
         if ((short)e->unk2A >= 0x1000)
@@ -43,8 +43,8 @@ void func_801ed9e8(void)
         world_run_frame(NULL, NULL, 0);
     }
 animation_done:
-    fdat_801ed388(e, 0, 0);
-    fdat_801ed388(e, 0, 0);
+    creature_force_talk(e, 0, 0);
+    creature_force_talk(e, 0, 0);
     vis_table_a.unk6158[3] = 0xff;
     vis_table_a.unk6158[2] = 0xff;
     vis_table_a.unk6158[1] = 0xff;
@@ -54,7 +54,7 @@ animation_done:
     e->unk67 = 100;
     creature_roll_drops(e);
     creature_award_kill_bonuses(e);
-    fdat_801eb7b4(e, 12);
+    creature_start_script(e, 12);
     e->unk05 = 5;
     e->unk34 = 0xfff;
     e->unk1A = 0xf0;

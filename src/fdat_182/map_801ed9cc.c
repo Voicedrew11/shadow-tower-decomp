@@ -34,13 +34,13 @@ void creatures_update(void);
 void player_enter_normal_state(void);
 
 /*
- * The gate scene of func_801ed604's event: fades out, puts the viewer at
+ * The gate scene of map_use_item_request_warp's event: fades out, puts the viewer at
  * gate 0 or 1 facing in, fades in; at gate 0 table A entry 32 wakes
  * (loading its model if needed) and, unless record 12's stream counter has
  * started, is handed to its exit; otherwise it is set to run.
  */
 ADDRESS(0x801ed9cc, 0x284)
-void func_801ed9cc(int gate)
+void map_warp_player(int gate)
 {
     Vis212 *e = &vis_table_a.entries[32];
     Vis192 *r = &vis_table_a.unk3500[12];
@@ -73,12 +73,12 @@ void func_801ed9cc(int gate)
     if (gate == 0 && e->unk05 != 3 && e->unk05 != 1) {
         index = e->unk02;
         slot = e->unk0B + 128;
-        fdat_801ed410(e);
+        creature_spawn_now(e);
         if (world_state.unk834C[slot] == NULL)
             creature_model_load(2, index * 5, slot, e->unk0C & 0xf);
         e->unk36 = -1;
         e->unk1C.bytes[2] &= 0xf2;
-        fdat_801eb7b4(e, 9);
+        creature_start_script(e, 9);
         vis_table_a.unk6168 = 3;
     }
     cd_wait_idle();
@@ -86,14 +86,14 @@ void func_801ed9cc(int gate)
     fade_run_frames(2, 0x1000, 0, -0x100);
     pad_clear_input();
     if (gate == 0 && DAT_801cba08.unk1448[r->unk09] == 0) {
-        fdat_801ed388(e, 0, 0);
+        creature_force_talk(e, 0, 0);
         e->unk70 &= ~0x2000000;
     } else {
         e->unk44 = 0x80;
     }
     vis_table_a.unk6138 = e;
     vis_table_a.unk6134 = r;
-    fdat_801ed4a0();
+    creature_pick_move();
     player_enter_normal_state();
     fdat_801edc50 = 0;
 }

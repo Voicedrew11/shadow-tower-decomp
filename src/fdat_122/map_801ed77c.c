@@ -17,13 +17,13 @@
 #include <st/xa.h>
 #include <st/fdat.h>
 
-void func_801ed8f8(Vis212 *e);
+void map_restart_script_on_block(Vis212 *e);
 
 /* The current entry's handler: kind 0 dying sets fdat_801ed938 and the
- * second flag word's bit 15; then the animation steps as fdat_801ed6e4
- * does, kind 2 running func_801ed8f8 after its next move. */
+ * second flag word's bit 15; then the animation steps as creature_step_script
+ * does, kind 2 running map_restart_script_on_block after its next move. */
 ADDRESS(0x801ed77c, 0x104)
-void func_801ed77c(void)
+void map_step_creature(void)
 {
     Vis212 *e = vis_table_a.unk6138;
     u32 flags;
@@ -36,16 +36,16 @@ void func_801ed77c(void)
         story->unk1444.word = flags | 0x8000;
     }
     e->unk2A += e->unkB0;
-    if (fdat_801ece7c(e) == 1)
+    if (creature_step_hurt_timer(e) == 1)
         return;
     if (e->unkB0 >= 0 ? (short)e->unk2A >= 4096 : (short)e->unk2A <= 0) {
         e->unk1A = 0xff;
-        fdat_801ed4a0();
+        creature_pick_move();
         if (e->unk02 == 2)
-            func_801ed8f8(e);
+            map_restart_script_on_block(e);
     }
     if (e->unkA8 != NULL) {
-        fdat_801ebec4(e);
+        creature_run_script_command(e);
         e->unk1A = 0xf0;
     }
 }

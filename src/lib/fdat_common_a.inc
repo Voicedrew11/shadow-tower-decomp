@@ -6,14 +6,14 @@
 
 /* Clears the entry's unkBC. */
 ADDRESS(0x801eb7ac, 0x8)
-void fdat_801eb7ac(Vis212 *e)
+void creature_clear_contact_hit(Vis212 *e)
 {
     e->unkBC = 0;
 }
 
 /* Starts script `id` of the entry's record. */
 ADDRESS(0x801eb7b4, 0x60)
-void fdat_801eb7b4(Vis212 *e, int id)
+void creature_start_script(Vis212 *e, int id)
 {
     Vis192 *r = &vis_table_a.unk3500[e->unk02];
 
@@ -28,7 +28,7 @@ void fdat_801eb7b4(Vis212 *e, int id)
 
 /* Turns the current entry towards `angle` by at most `step`. */
 ADDRESS(0x801eb814, 0x6c)
-void fdat_801eb814(short angle, int step)
+void creature_turn_toward(short angle, int step)
 {
     Vis212 *e = vis_table_a.unk6138;
     int d = (angle - e->unk8E) & 0xfff;
@@ -49,7 +49,7 @@ void fdat_801eb814(short angle, int step)
 
 /* Sets the current entry's horizontal velocity: `speed` along `angle`. */
 ADDRESS(0x801eb880, 0x74)
-void fdat_801eb880(short angle, int speed)
+void creature_set_velocity(short angle, int speed)
 {
     Vis212 *e = vis_table_a.unk6138;
 
@@ -59,7 +59,7 @@ void fdat_801eb880(short angle, int speed)
 
 /* Steers the current entry's vertical speed towards height `y`. */
 ADDRESS(0x801eb8f4, 0x4c)
-void fdat_801eb8f4(int y, int step)
+void creature_steer_height(int y, int step)
 {
     Vis212 *e = vis_table_a.unk6138;
 
@@ -72,28 +72,28 @@ void fdat_801eb8f4(int y, int step)
 
 /* A random note offset, -2..2. */
 ADDRESS(0x801eb940, 0x2c)
-int fdat_801eb940(Vis212 *e)
+int creature_random_note(Vis212 *e)
 {
     return (rand() * 5 >> 15) - 2;
 }
 
 /* Plays the entry's script sound. */
 ADDRESS(0x801eb96c, 0xe0)
-void fdat_801eb96c(Vis212 *e)
+void creature_emit_script_sound(Vis212 *e)
 {
     int sound = e->unkA8->unk05;
 
     e->unk3A = e->unk0B * 10 + 48 + sound;
     if (e->unk70 & 0x800000)
         e->unk22 = sound_play_at_range(e->unk0B * 10 + 48 + sound, &e->unk74, 127, 0x6000, 0x7800,
-                                 fdat_801eb940(e));
+                                 creature_random_note(e));
     else
-        e->unk22 = sound_play_at(e->unk0B * 10 + 48 + sound, &e->unk74, 127, fdat_801eb940(e));
+        e->unk22 = sound_play_at(e->unk0B * 10 + 48 + sound, &e->unk74, 127, creature_random_note(e));
 }
 
 /* Plays the script sound when its trigger fires this frame. */
 ADDRESS(0x801eba4c, 0x17c)
-void fdat_801eba4c(Vis212 *e)
+void creature_update_script_sound(Vis212 *e)
 {
     VisScript *s = e->unkA8;
     int sound = s->unk05;
@@ -109,30 +109,30 @@ void fdat_801eba4c(Vis212 *e)
     switch (trigger & 0xf000) {
     case 0x1000:
         if (at >= (short)frame - (short)step && at < (short)frame)
-            fdat_801eb96c(e);
+            creature_emit_script_sound(e);
         break;
     case 0x2000:
         at = trigger & 0x7ff;
         if (at >= (frame & 0x7ff) - (short)step && at < (frame & 0x7ff))
-            fdat_801eb96c(e);
+            creature_emit_script_sound(e);
         break;
     case 0x8000:
         chance = at;
         at = 0;
         if (chance >= (short)frame - (short)step && chance < (short)frame
             && rand() >> 3 < chance)
-            fdat_801eb96c(e);
+            creature_emit_script_sound(e);
         break;
     case 0x4000:
         if (cd_state.unk8 / 20 % at == 0)
-            fdat_801eb96c(e);
+            creature_emit_script_sound(e);
         break;
     }
 }
 
 /* Hits the player with the script's damage. */
 ADDRESS(0x801ebbc8, 0xc0)
-void fdat_801ebbc8(Vis212 *e, VisScript *s)
+void creature_hit_player(Vis212 *e, VisScript *s)
 {
     u16 damage[9];
     u16 effect;
@@ -157,7 +157,7 @@ void fdat_801ebbc8(Vis212 *e, VisScript *s)
 
 /* Spawns the hits of attack script `s` whose frames the animation passes. */
 ADDRESS(0x801ebc88, 0x23c)
-void fdat_801ebc88(Vis212 *e, VisScript *s)
+void creature_spawn_attack_hits(Vis212 *e, VisScript *s)
 {
     VECTOR pos;
     SVECTOR v;

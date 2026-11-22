@@ -18,24 +18,24 @@
 #include <st/fdat.h>
 
 /*
- * The current entry's handler: the animation steps as fdat_801ed6e4 does,
+ * The current entry's handler: the animation steps as creature_step_script does,
  * except that a script of kind 0x17 flies the entry: it keeps 0x640 under
  * the viewer and turns, moves and climbs by its arguments scaled by the
  * animation speed.
  */
 ADDRESS(0x801ed8f4, 0x198)
-void func_801ed8f4(void)
+void map_step_creature(void)
 {
     Vis212 *e = vis_table_a.unk6138;
     VisScript *s;
     int speed;
 
     e->unk2A += e->unkB0;
-    if (fdat_801ece7c(e) == 1)
+    if (creature_step_hurt_timer(e) == 1)
         return;
     if (e->unkB0 >= 0 ? (short)e->unk2A >= 4096 : (short)e->unk2A <= 0) {
         e->unk1A = 0xff;
-        fdat_801ed4a0();
+        creature_pick_move();
     }
     s = e->unkA8;
     if (s == NULL)
@@ -48,12 +48,12 @@ void func_801ed8f4(void)
     }
     if (e->unk0F == 0x17) {
         e->unk08 = s->unk01;
-        fdat_801eb814(e->unk5C, s->arg.s[1] * speed >> 12);
-        fdat_801eb880(e->unk8E + s->arg.u[2] - 0x400, s->arg.s[0] * speed >> 12);
-        fdat_801eb8f4(viewer.position.vy + s->arg.s[4], s->arg.s[3] * speed >> 12);
+        creature_turn_toward(e->unk5C, s->arg.s[1] * speed >> 12);
+        creature_set_velocity(e->unk8E + s->arg.u[2] - 0x400, s->arg.s[0] * speed >> 12);
+        creature_steer_height(viewer.position.vy + s->arg.s[4], s->arg.s[3] * speed >> 12);
         e->unk1A = 0xf0;
     } else {
-        fdat_801ebec4(e);
+        creature_run_script_command(e);
         e->unk1A = 0xf0;
     }
 }

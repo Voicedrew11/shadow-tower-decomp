@@ -3,7 +3,7 @@
  * the 21 functions every overlay starts with (src/lib/fdat_common_a.inc,
  * fdat_common.inc, fdat_common_b.inc), then its map handlers through its
  * own move picker. One object, because the picker's switch table is
- * 8-aligned after fdat_801ebec4's in the same read-only run.
+ * 8-aligned after creature_run_script_command's in the same read-only run.
  */
 #include <kf/lib/address.h>
 #include <kf/lib/types.h>
@@ -24,20 +24,20 @@
 
 RODATA(0x801eb560, 0x24c)
 
-void func_801ed4a0();
-void func_801ed58c();
+void map_restore_progress();
+void map_update_events();
 
 const FdatHeader fdat_header = {
     0xb,
     {
-        fdat_801ed498, func_801ed58c, fdat_801ed498, fdat_801ed498,
-        fdat_801ed498, func_801ed4a0, fdat_801ed498, fdat_801ed498,
-        fdat_801ed498, fdat_801ed498, fdat_801ed498, fdat_801ed498,
-        fdat_801ed498, fdat_801ed498, fdat_801ed498, fdat_801ed498,
-        fdat_801ed4a0, fdat_801ed6e4, fdat_801ed498, fdat_801ed498,
-        fdat_801ed498, fdat_801ed498, fdat_801ed498, fdat_801ed498,
-        fdat_801ed498, fdat_801ed498, fdat_801ed498, fdat_801ed498,
-        fdat_801ed498, fdat_801ed498, fdat_801ed498, fdat_801ed498,
+        map_hook_none, map_update_events, map_hook_none, map_hook_none,
+        map_hook_none, map_restore_progress, map_hook_none, map_hook_none,
+        map_hook_none, map_hook_none, map_hook_none, map_hook_none,
+        map_hook_none, map_hook_none, map_hook_none, map_hook_none,
+        creature_pick_move, creature_step_script, map_hook_none, map_hook_none,
+        map_hook_none, map_hook_none, map_hook_none, map_hook_none,
+        map_hook_none, map_hook_none, map_hook_none, map_hook_none,
+        map_hook_none, map_hook_none, map_hook_none, map_hook_none,
     },
     0x3e,
 };
@@ -50,7 +50,7 @@ const FdatHeader fdat_header = {
  * Arms the live table A entries 0..4 whose flags 2..5 are set.
  */
 ADDRESS(0x801ed4a0, 0xec)
-void func_801ed4a0(void)
+void map_restore_progress(void)
 {
     Vis212 *e3 = &vis_table_a.entries[3];
     Vis212 *e2 = &vis_table_a.entries[2];
@@ -79,7 +79,7 @@ void func_801ed4a0(void)
  * while the viewer's unk178 is 57. Kills the viewer on unk178 68.
  */
 ADDRESS(0x801ed58c, 0x244)
-void func_801ed58c(void)
+void map_update_events(void)
 {
     Vis212 *e3 = &vis_table_a.entries[3];
     Vis212 *e4 = &vis_table_a.entries[4];
@@ -92,25 +92,25 @@ void func_801ed58c(void)
 
     if (!DAT_801cba08.unk1440.bit.f2 && d20->unk0C == 1) {
         if (e3->unk05 == 0)
-            fdat_801ed410(e3);
+            creature_spawn_now(e3);
         if (e4->unk05 == 0)
-            fdat_801ed410(e4);
+            creature_spawn_now(e4);
         e3->unk00 = 100;
         e4->unk00 = 100;
         DAT_801cba08.unk1440.word |= 4;
     }
     if (!DAT_801cba08.unk1440.bit.f3 && d1->unk0C == 255 && e2->unk05 == 0) {
-        fdat_801ed410(e2);
+        creature_spawn_now(e2);
         e2->unk00 = 100;
         DAT_801cba08.unk1440.word |= 8;
     }
     if (!DAT_801cba08.unk1440.bit.f4 && d12->unk4A.door.unk4F == 255 && e1->unk05 == 0) {
-        fdat_801ed410(e1);
+        creature_spawn_now(e1);
         e1->unk00 = 100;
         DAT_801cba08.unk1440.word |= 0x10;
     }
     if (!DAT_801cba08.unk1440.bit.f5 && viewer.unk178 == 57 && e0->unk05 == 0) {
-        fdat_801ed410(e0);
+        creature_spawn_now(e0);
         e0->unk00 = 100;
         DAT_801cba08.unk1440.word |= 0x20;
     }

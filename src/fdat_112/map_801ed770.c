@@ -17,17 +17,17 @@
 #include <st/xa.h>
 #include <st/fdat.h>
 
-void func_801edb90(Vis212 *e);
+void map_step_leaving_creature(Vis212 *e);
 
 /*
  * The current entry's handler: kind 10 wakes once its record's stream
  * counter is 3 (flag 6) and, when hit, gives the viewer status timer 4 and
  * flag 7; kind 5 carries table C item 7 on its hand (node 7, vertex 13) and
- * then walks off (func_801edb90); then the animation steps as
- * fdat_801ed6e4 does, with each kind's own next move.
+ * then walks off (map_step_leaving_creature); then the animation steps as
+ * creature_step_script does, with each kind's own next move.
  */
 ADDRESS(0x801ed770, 0x420)
-void func_801ed770(void)
+void map_step_creature(void)
 {
     VisTableA *a = &vis_table_a;
     Vis48 *c7 = &vis_table_c.entries[7];
@@ -63,7 +63,7 @@ next:
     if (e->unk02 == 5) {
         if (e->unk1C.bytes[0] == 0 && DAT_801cba08.unk1448[r->unk09] == 1) {
             e->unk1C.bytes[0] = 1;
-            fdat_801eb7b4(e, 6);
+            creature_start_script(e, 6);
             viewer.unk218 = 5;
             c7->unk22 = 2;
         }
@@ -76,7 +76,7 @@ next:
             }
         } else if (e->unk1C.bytes[0] == 2) {
             viewer.unk218 = 5;
-            func_801edb90(e);
+            map_step_leaving_creature(e);
             return;
         } else if (e->unk64 != 0) {
             c7->unk22 = 2;
@@ -84,44 +84,44 @@ next:
         }
     }
     e->unk2A += e->unkB0;
-    if (fdat_801ece7c(e) == 1)
+    if (creature_step_hurt_timer(e) == 1)
         return;
     if (e->unkB0 >= 0 ? (short)e->unk2A >= 4096 : (short)e->unk2A <= 0) {
         e->unk1A = 0xff;
         if (e->unk02 == 10) {
             if (DAT_801cba08.unk1440.word >> 7 & 1) {
-                fdat_801ed4a0();
+                creature_pick_move();
             } else if (DAT_801cba08.unk1440.word >> 6 & 1) {
                 if (e->unk1C.bytes[0] == 0) {
-                    fdat_801eb7b4(e, 9);
+                    creature_start_script(e, 9);
                     e->unk1C.bytes[0] = 1;
                 } else if (e->unk1C.bytes[0] == 1) {
                     e->unk2A = 0xfff;
                     e->unkB0 = 0;
                 }
             } else {
-                fdat_801eb7b4(e, 0);
+                creature_start_script(e, 0);
                 e->unk1C.bytes[3] = 3;
             }
         } else if (e->unk02 == 5) {
             switch (e->unk1C.bytes[0]) {
             case 0:
-                fdat_801eb7b4(e, 0);
+                creature_start_script(e, 0);
                 break;
             case 1:
-                fdat_801eb7b4(e, 6);
+                creature_start_script(e, 6);
                 e->unk2A = 0xfff;
                 ground_item_pick_up(c7, 1);
-                fdat_801eb7b4(e, 7);
+                creature_start_script(e, 7);
                 e->unk1C.bytes[0] = 2;
                 break;
             }
         } else {
-            fdat_801ed4a0();
+            creature_pick_move();
         }
     }
     if (e->unkA8 != NULL) {
-        fdat_801ebec4(e);
+        creature_run_script_command(e);
         e->unk1A = 0xf0;
     }
 }

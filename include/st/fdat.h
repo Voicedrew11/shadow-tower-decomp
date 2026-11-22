@@ -43,32 +43,32 @@ int sound_play_at(int id, VECTOR *pos, short volume, int note);
 void player_hit(u16 *damage, u16 scale, u16 effect, long *from);
 
 /* src/lib/fdat_common.inc */
-void fdat_801eb7ac(Vis212 *e);
-void fdat_801eb7b4(Vis212 *e, int id);
-void fdat_801eb814(short angle, int step);
-void fdat_801eb880(short angle, int speed);
-void fdat_801eb8f4(int y, int step);
-int fdat_801eb940(Vis212 *e);
-void fdat_801eb96c(Vis212 *e);
-void fdat_801eba4c(Vis212 *e);
-void fdat_801ebbc8(Vis212 *e, VisScript *s);
-void fdat_801ebc88(Vis212 *e, VisScript *s);
-void fdat_801ebec4(Vis212 *e);
-void fdat_801ec6a4(void);
-int fdat_801ecbcc(void);
-int fdat_801ece7c(Vis212 *e);
-void fdat_801ecf44(Vis212 *e);
-void fdat_801ecfc4(VECTOR *pos, SVECTOR *rot);
-void fdat_801ed1e4(Vis212 *e);
-void fdat_801ed2f0(Vis212 *e);
-void fdat_801ed388(Vis212 *e, int fixed, int arg2);
-void fdat_801ed410(Vis212 *e);
-void fdat_801ed498(void);
+void creature_clear_contact_hit(Vis212 *e);
+void creature_start_script(Vis212 *e, int id);
+void creature_turn_toward(short angle, int step);
+void creature_set_velocity(short angle, int speed);
+void creature_steer_height(int y, int step);
+int creature_random_note(Vis212 *e);
+void creature_emit_script_sound(Vis212 *e);
+void creature_update_script_sound(Vis212 *e);
+void creature_hit_player(Vis212 *e, VisScript *s);
+void creature_spawn_attack_hits(Vis212 *e, VisScript *s);
+void creature_run_script_command(Vis212 *e);
+void creature_choose_action(void);
+int creature_pick_weighted_script(void);
+int creature_step_hurt_timer(Vis212 *e);
+void creature_fade_out_despawn(Vis212 *e);
+void player_glide_to_pose(VECTOR *pos, SVECTOR *rot);
+void player_turn_to_creature(Vis212 *e);
+void creature_finish_fade_in(Vis212 *e);
+void creature_force_talk(Vis212 *e, int fixed, int arg2);
+void creature_spawn_now(Vis212 *e);
+void map_hook_none(void);
 
 /* The map handlers several overlays share (src/lib/fdat_801ed4a0.inc,
  * src/lib/fdat_801ed6e4.inc), spelled with their FDAT_002.BIN addresses. */
-void fdat_801ed4a0(void);
-void fdat_801ed6e4(void);
+void creature_pick_move(void);
+void creature_step_script(void);
 
 /*
  * Overlay words one map unit defines and a later unit of the same overlay

@@ -45,14 +45,14 @@ void func_801ed760();
 const FdatHeader fdat_header = {
     0x33,
     {
-        fdat_801ed498, fdat_801ed498, fdat_801ed498, fdat_801ed498,
-        fdat_801ed498, func_801ed420, fdat_801ed498, fdat_801ed498,
-        fdat_801ed498, fdat_801ed498, fdat_801ed498, fdat_801ed498,
-        fdat_801ed498, fdat_801ed498, fdat_801ed498, fdat_801ed498,
-        func_801ed454, func_801ed760, fdat_801ed498, fdat_801ed498,
-        fdat_801ed498, fdat_801ed498, fdat_801ed498, fdat_801ed498,
-        fdat_801ed498, fdat_801ed498, fdat_801ed498, fdat_801ed498,
-        fdat_801ed498, fdat_801ed498, fdat_801ed498, fdat_801ed498,
+        map_hook_none, map_hook_none, map_hook_none, map_hook_none,
+        map_hook_none, func_801ed420, map_hook_none, map_hook_none,
+        map_hook_none, map_hook_none, map_hook_none, map_hook_none,
+        map_hook_none, map_hook_none, map_hook_none, map_hook_none,
+        func_801ed454, func_801ed760, map_hook_none, map_hook_none,
+        map_hook_none, map_hook_none, map_hook_none, map_hook_none,
+        map_hook_none, map_hook_none, map_hook_none, map_hook_none,
+        map_hook_none, map_hook_none, map_hook_none, map_hook_none,
     },
     0x66,
 };
@@ -102,23 +102,23 @@ void func_801ed454(void)
     }
     if (none) {
         fdat_801ed9a8 = 1;
-        fdat_801eb7b4(e, 0);
+        creature_start_script(e, 0);
     } else if ((DAT_801cba08.unk1444.word >> 3 & 3) == 0) {
         fdat_801ed9a8 = 0;
-        fdat_801eb7b4(e, 0);
+        creature_start_script(e, 0);
         DAT_801cba08.unk1444.word = (DAT_801cba08.unk1444.word & ~0x18) | 8;
     } else {
         short n = rand();
 
         if (n < 0x1000) {
             fdat_801ed9a8 = 2;
-            fdat_801eb7b4(e, 1);
+            creature_start_script(e, 1);
         } else if (n < 0x2000) {
             fdat_801ed9a8 = 3;
-            fdat_801eb7b4(e, 2);
+            creature_start_script(e, 2);
         } else {
             fdat_801ed9a8 = 4;
-            fdat_801eb7b4(e, 3);
+            creature_start_script(e, 3);
             fdat_801ed8c4 = 4;
         }
     }
@@ -159,7 +159,7 @@ void func_801ed760(void)
     if ((short)e->unk2A >= 0x1000) {
         e->unk2A = 0;
         if (fdat_801ed8c4 == 2 && (unsigned)fdat_801ed9a8 < 2)
-            fdat_801eb7b4(e, 3);
+            creature_start_script(e, 3);
     }
     if (fdat_801ed8c4 == 1) {
         int ending = fdat_801ed9a8;

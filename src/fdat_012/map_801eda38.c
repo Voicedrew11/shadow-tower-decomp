@@ -58,7 +58,7 @@
  * 48..63 (the oldest drops out when all 16 are used).
  */
 ADDRESS(0x801eda38, 0x1b4)
-void func_801eda38(Vis212 *e)
+void map_start_creature_fall(Vis212 *e)
 {
     Vis48 *c;
     Vis192 *r;

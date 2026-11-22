@@ -2,8 +2,8 @@
  * FDAT_102.BIN as one translation unit (WIP module): its handler table,
  * the 21 functions every overlay starts with (src/lib/fdat_common_a.inc,
  * fdat_common.inc, fdat_common_b.inc), then its map handlers through the
- * shared fdat_801ed4a0. One object, because fdat_801ed4a0's switch table
- * is 8-aligned after fdat_801ebec4's in the same read-only run.
+ * shared creature_pick_move. One object, because creature_pick_move's switch table
+ * is 8-aligned after creature_run_script_command's in the same read-only run.
  */
 #include <kf/lib/address.h>
 #include <kf/lib/types.h>
@@ -30,21 +30,21 @@ static int fdat_801eda78;
 DATA(0x801eda7c, 0x4, ".bss")
 static int fdat_801eda7c;
 
-void func_801ed4a0();
-void func_801ed554();
-void func_801ed6b8(short id);
+void map_restore_progress();
+void map_update_events();
+void map_use_item_on_creature(short id);
 
 const FdatHeader fdat_header = {
     0xf,
     {
-        fdat_801ed498, func_801ed554, fdat_801ed498, fdat_801ed498,
-        fdat_801ed498, func_801ed4a0, fdat_801ed498, fdat_801ed498,
-        fdat_801ed498, fdat_801ed498, fdat_801ed498, fdat_801ed498,
-        func_801ed6b8, fdat_801ed498, fdat_801ed498, fdat_801ed498,
-        fdat_801ed4a0, fdat_801ed6e4, fdat_801ed498, fdat_801ed498,
-        fdat_801ed498, fdat_801ed498, fdat_801ed498, fdat_801ed498,
-        fdat_801ed498, fdat_801ed498, fdat_801ed498, fdat_801ed498,
-        fdat_801ed498, fdat_801ed498, fdat_801ed498, fdat_801ed498,
+        map_hook_none, map_update_events, map_hook_none, map_hook_none,
+        map_hook_none, map_restore_progress, map_hook_none, map_hook_none,
+        map_hook_none, map_hook_none, map_hook_none, map_hook_none,
+        map_use_item_on_creature, map_hook_none, map_hook_none, map_hook_none,
+        creature_pick_move, creature_step_script, map_hook_none, map_hook_none,
+        map_hook_none, map_hook_none, map_hook_none, map_hook_none,
+        map_hook_none, map_hook_none, map_hook_none, map_hook_none,
+        map_hook_none, map_hook_none, map_hook_none, map_hook_none,
     },
     0x42,
 };
@@ -56,7 +56,7 @@ const FdatHeader fdat_header = {
 /* Sets up the area: table A entry 48's range bits unless it is dying, the
  * scene words, and table B entries 39..42 unlinked until flag 19 is set. */
 ADDRESS(0x801ed4a0, 0xb4)
-void func_801ed4a0(void)
+void map_restore_progress(void)
 {
     Vis212 *e = &vis_table_a.entries[48];
     Vis192 *r = &vis_table_a.unk3500[0];
@@ -82,11 +82,11 @@ void func_801ed4a0(void)
 /*
  * Runs the area: once record 0's stream counter reaches 2, entry 48 takes
  * item 0x127 and leaves; a hit does the same. Record 4's counter is held at
- * 1 or more. Item 0x12b used on entry 0x31 (func_801ed6b8) sends entry 49
+ * 1 or more. Item 0x12b used on entry 0x31 (map_use_item_on_creature) sends entry 49
  * away, links table B entries 39..42 and sets flag 19.
  */
 ADDRESS(0x801ed554, 0x164)
-void func_801ed554(void)
+void map_update_events(void)
 {
     Vis212 *e48 = &vis_table_a.entries[48];
     Vis88 *d39 = &vis_table_b.entries[39];
@@ -100,18 +100,18 @@ void func_801ed554(void)
 
     if (state != 0xff && DAT_801cba08.unk1448[r0->unk09] == 2) {
         creature_drop_item(e48, 0x127);
-        fdat_801ecf44(e48);
+        creature_fade_out_despawn(e48);
         fdat_801eda78 = 0xff;
     }
     if (e48->unk64 != 0) {
         e48->unk64 = 0;
-        fdat_801ecf44(e48);
+        creature_fade_out_despawn(e48);
         fdat_801eda78 = 0xff;
     }
     if (DAT_801cba08.unk1448[r4->unk09] >= 2)
         DAT_801cba08.unk1448[r4->unk09] = 1;
     if (fdat_801eda7c == 1) {
-        fdat_801ecf44(e49);
+        creature_fade_out_despawn(e49);
         d42->unk0a = 250;
         d41->unk0a = 250;
         d40->unk0a = 250;
@@ -124,7 +124,7 @@ void func_801ed554(void)
 /* Item 0x12b used in front of table A entry 0x31 sets fdat_801eda7c; the
  * result is 1 then, else 2. */
 ADDRESS(0x801ed6b8, 0xcc)
-void func_801ed6b8(short id)
+void map_use_item_on_creature(short id)
 {
     VECTOR p;
     VisRequest req;

@@ -2,8 +2,8 @@
  * FDAT_132.BIN as one translation unit (WIP module): its handler table,
  * the 21 functions every overlay starts with (src/lib/fdat_common_a.inc,
  * fdat_common.inc, fdat_common_b.inc), then its map handlers through the
- * shared fdat_801ed4a0. One object, because fdat_801ed4a0's switch table
- * is 8-aligned after fdat_801ebec4's in the same read-only run.
+ * shared creature_pick_move. One object, because creature_pick_move's switch table
+ * is 8-aligned after creature_run_script_command's in the same read-only run.
  */
 #include <kf/lib/address.h>
 #include <kf/lib/types.h>
@@ -25,20 +25,20 @@
 
 RODATA(0x801eb560, 0x24c)
 
-void func_801ed4a0();
-void func_801ed5bc();
+void map_restore_progress();
+void map_update_events();
 
 const FdatHeader fdat_header = {
     0x12,
     {
-        fdat_801ed498, func_801ed5bc, fdat_801ed498, fdat_801ed498,
-        fdat_801ed498, func_801ed4a0, fdat_801ed498, fdat_801ed498,
-        fdat_801ed498, fdat_801ed498, fdat_801ed498, fdat_801ed498,
-        fdat_801ed498, fdat_801ed498, fdat_801ed498, fdat_801ed498,
-        fdat_801ed4a0, fdat_801ed6e4, fdat_801ed498, fdat_801ed498,
-        fdat_801ed498, fdat_801ed498, fdat_801ed498, fdat_801ed498,
-        fdat_801ed498, fdat_801ed498, fdat_801ed498, fdat_801ed498,
-        fdat_801ed498, fdat_801ed498, fdat_801ed498, fdat_801ed498,
+        map_hook_none, map_update_events, map_hook_none, map_hook_none,
+        map_hook_none, map_restore_progress, map_hook_none, map_hook_none,
+        map_hook_none, map_hook_none, map_hook_none, map_hook_none,
+        map_hook_none, map_hook_none, map_hook_none, map_hook_none,
+        creature_pick_move, creature_step_script, map_hook_none, map_hook_none,
+        map_hook_none, map_hook_none, map_hook_none, map_hook_none,
+        map_hook_none, map_hook_none, map_hook_none, map_hook_none,
+        map_hook_none, map_hook_none, map_hook_none, map_hook_none,
     },
     0x45,
 };
@@ -66,7 +66,7 @@ static int fdat_801eda3c;
  * words by record 2's stream counter and flags 21..23, and records 1, 4
  * and 8 with their bits 7-8 clear. */
 ADDRESS(0x801ed4a0, 0x11c)
-void func_801ed4a0(void)
+void map_restore_progress(void)
 {
     Vis212 *e48 = &vis_table_a.entries[48];
     Vis192 *r2 = &vis_table_a.unk3500[2];
@@ -100,7 +100,7 @@ void func_801ed4a0(void)
 /* Runs the area: entry 48 leaves once record 2's stream counter is 1 or
  * when hit; entries 34, 33 and 35 beaten set flags 21, 22 and 23. */
 ADDRESS(0x801ed5bc, 0x180)
-void func_801ed5bc(void)
+void map_update_events(void)
 {
     Vis212 *e48 = &vis_table_a.entries[48];
     Vis192 *r2 = &vis_table_a.unk3500[2];
@@ -109,12 +109,12 @@ void func_801ed5bc(void)
     Vis212 *e35 = &vis_table_a.entries[35];
 
     if (fdat_801eda30 != 0xff && DAT_801cba08.unk1448[r2->unk09] == 1) {
-        fdat_801ecf44(e48);
+        creature_fade_out_despawn(e48);
         fdat_801eda30 = 0xff;
     }
     if (e48->unk64 != 0) {
         e48->unk64 = 0;
-        fdat_801ecf44(e48);
+        creature_fade_out_despawn(e48);
         fdat_801eda30 = 0xff;
     }
     if (fdat_801eda34 == 0 && e34->unk2C == 0) {

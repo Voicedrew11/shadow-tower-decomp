@@ -15,7 +15,7 @@
 /* Slides table C item 11 by 0x1e0 along x, 24 a frame while its model is
  * loaded. */
 ADDRESS(0x801eda8c, 0xf8)
-void func_801eda8c(void)
+void map_slide_ground_item(void)
 {
     int step = 24;
     Vis48 *item = &vis_table_c.entries[11];
