@@ -4659,14 +4659,14 @@ void world_draw_objects(void)
         case 31:
             /* A sound over a rectangle of the floor. */
             if (player_in_cell_rect(e->position.vx >> 12, e->position.vz >> 12, e->unk48, e->unk49, 0x8000)) {
-                if ((s32)(e->unk50 - now) >= 0)
+                if ((s32)(e->kind_data.snd.next_tick - now) >= 0)
                     continue;
                 if (e->params.snd.sound_flags & 2)
-                    e->unk50 = now + (e->params.snd.period * 6 + (rand() >> 8));
+                    e->kind_data.snd.next_tick = now + (e->params.snd.period * 6 + (rand() >> 8));
                 if (e->params.snd.sound_flags & 4)
-                    e->unk50 = now + (e->params.snd.period * 6 + (rand() >> 6));
+                    e->kind_data.snd.next_tick = now + (e->params.snd.period * 6 + (rand() >> 6));
                 else
-                    e->unk50 = now + e->params.snd.period * 6;
+                    e->kind_data.snd.next_tick = now + e->params.snd.period * 6;
                 range = e->unk48 << 11;
                 d = viewer.position.vx - (e->position.vx + range);
                 if (d < 0)
@@ -4697,30 +4697,30 @@ void world_draw_objects(void)
                 }
                 if (volume < 20)
                     continue;
-                if (e->unk54 != -1) {
-                    sound_stop(e->unk54, e->params.snd.sound + 208);
-                    e->unk54 = -1;
+                if (e->kind_data.snd.voice != -1) {
+                    sound_stop(e->kind_data.snd.voice, e->params.snd.sound + 208);
+                    e->kind_data.snd.voice = -1;
                 }
-                e->unk54 = sound_play(e->params.snd.sound + 208, volume);
+                e->kind_data.snd.voice = sound_play(e->params.snd.sound + 208, volume);
             } else {
-                e->unk50 = now + e->params.snd.period * 6;
-                if (e->unk54 == -1)
+                e->kind_data.snd.next_tick = now + e->params.snd.period * 6;
+                if (e->kind_data.snd.voice == -1)
                     continue;
-                sound_stop(e->unk54, e->params.snd.sound + 208);
-                e->unk54 = -1;
+                sound_stop(e->kind_data.snd.voice, e->params.snd.sound + 208);
+                e->kind_data.snd.voice = -1;
             }
             break;
         case 236:
             /* A sound around a point. */
             if (player_in_centred_rect(e->position.vx, e->position.vz, e->unk48 << 8, e->unk49 << 8, 0x8000)) {
-                if ((s32)(e->unk50 - now) >= 0)
+                if ((s32)(e->kind_data.snd.next_tick - now) >= 0)
                     continue;
                 if (e->params.snd.sound_flags & 2)
-                    e->unk50 = now + (e->params.snd.period * 60 + (rand() >> 11));
+                    e->kind_data.snd.next_tick = now + (e->params.snd.period * 60 + (rand() >> 11));
                 if (e->params.snd.sound_flags & 4)
-                    e->unk50 = now + (e->params.snd.period * 60 + (rand() >> 9));
+                    e->kind_data.snd.next_tick = now + (e->params.snd.period * 60 + (rand() >> 9));
                 else
-                    e->unk50 = now + e->params.snd.period * 60;
+                    e->kind_data.snd.next_tick = now + e->params.snd.period * 60;
                 {
                     int inner = (e->unk48 << 7) - (e->params.snd.fade_range << 7);
 
@@ -4740,17 +4740,17 @@ void world_draw_objects(void)
                 }
                 if (volume < 20)
                     continue;
-                if (e->unk54 != -1) {
-                    sound_stop(e->unk54, e->params.snd.sound + 1108);
-                    e->unk54 = -1;
+                if (e->kind_data.snd.voice != -1) {
+                    sound_stop(e->kind_data.snd.voice, e->params.snd.sound + 1108);
+                    e->kind_data.snd.voice = -1;
                 }
-                e->unk54 = sound_play(e->params.snd.sound + 1108, volume);
+                e->kind_data.snd.voice = sound_play(e->params.snd.sound + 1108, volume);
             } else {
-                e->unk50 = now + e->params.snd.period * 60;
-                if (e->unk54 == -1)
+                e->kind_data.snd.next_tick = now + e->params.snd.period * 60;
+                if (e->kind_data.snd.voice == -1)
                     continue;
-                sound_stop(e->unk54, e->params.snd.sound + 1108);
-                e->unk54 = -1;
+                sound_stop(e->kind_data.snd.voice, e->params.snd.sound + 1108);
+                e->kind_data.snd.voice = -1;
             }
             break;
         case 38:

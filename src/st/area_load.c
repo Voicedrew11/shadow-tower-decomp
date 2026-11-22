@@ -529,9 +529,9 @@ void area_load_update(void)
         area_state.load_step = 240;
         b = vis_table_b.entries;
         for (i = 239; i != -1; i--) {
-            if (b->kind == 236 && b->unk54 != -1) {
-                sound_stop(b->unk54, b->params.snd.sound + 1108);
-                b->unk54 = -1;
+            if (b->kind == 236 && b->kind_data.snd.voice != -1) {
+                sound_stop(b->kind_data.snd.voice, b->params.snd.sound + 1108);
+                b->kind_data.snd.voice = -1;
             }
             b->kind = 0xff;
             b++;

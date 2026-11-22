@@ -74,7 +74,7 @@ void objects_load(u8 *src)
             e->position.vy = src[1] * 4096 + *(s16 *)(src + 10);
             e->position.vz = src[2] * 4096 + *(s16 *)(src + 12);
             copy_words((u32 *)&e->unk48, (u32 *)(src + 16), 2);
-            fill_words((u32 *)&e->unk50, 0xff, 2);
+            fill_words(e->kind_data.words, 0xff, 2);
             kind = rec->kind;
             switch (kind) {
             case 0:
@@ -121,7 +121,7 @@ void objects_load(u8 *src)
                     e->state = 11;
                 else
                     e->state = 0;
-                *(u16 *)&e->unk50 = 0;
+                e->kind_data.part.h50 = 0;
                 break;
             case 52:
                 e->kind = 52;
@@ -136,7 +136,7 @@ void objects_load(u8 *src)
                 e->scale.vy = 0;
                 e->scale.vz = 0;
                 e->draw_flags = 5;
-                ((u8 *)&e->unk50)[0] = 0;
+                e->kind_data.b[0] = 0;
                 e->flags |= 0x40;
                 break;
             case 7:
@@ -151,36 +151,36 @@ void objects_load(u8 *src)
                     e->position.vx = src[0] * 4096 + *(s16 *)(src + 8) + 0x800;
                     e->position.vy = src[1] * 4096 + *(s16 *)(src + 10);
                     e->position.vz = src[2] * 4096 + *(s16 *)(src + 12) + 0x800;
-                    ((u8 *)&e->unk50)[2] = 127;
-                    ((u8 *)&e->unk50)[1] = 127;
-                    ((u8 *)&e->unk50)[0] = 127;
+                    e->kind_data.b[2] = 127;
+                    e->kind_data.b[1] = 127;
+                    e->kind_data.b[0] = 127;
                 } else {
                     e->position.vx = src[0] * 4096 + *(s16 *)(src + 8) + 0x800;
                     e->position.vy = src[1] * 4096 + *(s16 *)(src + 10);
                     e->position.vz = src[2] * 4096 + *(s16 *)(src + 12) + 0x800;
-                    ((u8 *)&e->unk50)[0] = e->unk48 - (u8)(src[0] - 64);
-                    ((u8 *)&e->unk50)[1] = e->unk49 - (u8)(src[1] - 64);
-                    ((u8 *)&e->unk50)[2] = e->params.snd.sound - (u8)(src[2] - 64);
+                    e->kind_data.b[0] = e->unk48 - (u8)(src[0] - 64);
+                    e->kind_data.b[1] = e->unk49 - (u8)(src[1] - 64);
+                    e->kind_data.b[2] = e->params.snd.sound - (u8)(src[2] - 64);
                     e->params.door.lock -= *(s16 *)(src + 10) / 128;
                 }
                 break;
             case 0xed:
             case 0xef:
                 e->kind = kind;
-                ((u8 *)&e->unk50)[0] = 1;
+                e->kind_data.b[0] = 1;
                 break;
             case 0xec:
                 secs = e->params.snd.period;
                 e->kind = 0xec;
-                e->unk54 = -1;
-                e->unk50 = now + secs * 60;
+                e->kind_data.snd.voice = -1;
+                e->kind_data.snd.next_tick = now + secs * 60;
                 break;
             case 31:
                 secs = e->params.snd.period;
                 e->unk01 = 0;
-                e->unk54 = -1;
+                e->kind_data.snd.voice = -1;
                 e->kind = 31;
-                e->unk50 = now + secs * 60;
+                e->kind_data.snd.next_tick = now + secs * 60;
                 break;
             case 0xfe:
                 e->kind = 0xfe;

@@ -135,7 +135,7 @@ void map_update_switch_objects(void)
                 b->kind = 2;
                 b->draw_flags = 5;
                 b->flags |= 0x40;
-                *(u8 *)&b->unk50 = 0;
+                b->kind_data.b[0] = 0;
             }
         }
         fdat_801eda08 = 0;

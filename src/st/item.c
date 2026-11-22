@@ -198,9 +198,9 @@ void player_examine(long *pos, SVECTOR *rot)
                 b = vis_table_b.entries;
                 n = 240;
                 while (n--) {
-                    if (b->kind == 236 && b->unk54 != -1) {
-                        sound_stop(b->unk54, b->params.snd.sound + 1108);
-                        b->unk54 = -1;
+                    if (b->kind == 236 && b->kind_data.snd.voice != -1) {
+                        sound_stop(b->kind_data.snd.voice, b->params.snd.sound + 1108);
+                        b->kind_data.snd.voice = -1;
                     }
                     b++;
                 }

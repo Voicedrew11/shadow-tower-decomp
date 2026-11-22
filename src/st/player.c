@@ -2967,9 +2967,9 @@ void player_update(void)
             entry = vis_table_b.entries;
             left = 240;
             while (left--) {
-                if (entry->kind == 236 && entry->unk54 != -1) {
-                    sound_stop(entry->unk54, entry->params.snd.sound + 1108);
-                    entry->unk54 = -1;
+                if (entry->kind == 236 && entry->kind_data.snd.voice != -1) {
+                    sound_stop(entry->kind_data.snd.voice, entry->params.snd.sound + 1108);
+                    entry->kind_data.snd.voice = -1;
                 }
                 entry++;
             }
@@ -3220,9 +3220,9 @@ void player_update(void)
                             fade_run_frames(2, 4096, 4096, 256);
                             n = 240;
                             while (n--) {
-                                if (b->kind == 236 && b->unk54 != -1) {
-                                    sound_stop(b->unk54, b->params.snd.sound + 1108);
-                                    b->unk54 = -1;
+                                if (b->kind == 236 && b->kind_data.snd.voice != -1) {
+                                    sound_stop(b->kind_data.snd.voice, b->params.snd.sound + 1108);
+                                    b->kind_data.snd.voice = -1;
                                 }
                                 b++;
                             }
@@ -3240,9 +3240,9 @@ void player_update(void)
                             b = vis_table_b.entries;
                             n = 240;
                             while (n--) {
-                                if (b->kind == 236 && b->unk54 != -1) {
-                                    sound_stop(b->unk54, b->params.snd.sound + 1108);
-                                    b->unk54 = -1;
+                                if (b->kind == 236 && b->kind_data.snd.voice != -1) {
+                                    sound_stop(b->kind_data.snd.voice, b->params.snd.sound + 1108);
+                                    b->kind_data.snd.voice = -1;
                                 }
                                 b++;
                             }

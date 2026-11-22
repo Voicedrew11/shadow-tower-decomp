@@ -433,9 +433,22 @@ typedef struct {
             u8 lock;     /* 0x4f: key item - 272; 255 unlocked, 251/252 open from one side */
         } door;
     } params;
-    s32 unk50;           /* 0x50: next tick to play; other kinds keep halfwords here */
-    s16 unk54;           /* 0x54: playing voice, -1 none */
-    s16 unk56;
+    /* 0x50: by kind: a sound source's timer and voice, a spawned part's
+     * entry index and motion, or the bytes other kinds keep */
+    union {
+        struct {
+            s32 next_tick; /* 0x50: next tick to play */
+            s16 voice;   /* 0x54: playing voice, -1 none */
+            s16 unk56;
+        } snd;
+        struct {
+            s16 h50;     /* 0x50: an entry index or a counter, by kind */
+            s16 motion[3]; /* 0x52: spawned parts' per-frame motion (x, y, z) */
+        } part;
+        u32 words[2];
+        u8 b[8];
+        s8 sb[8];
+    } kind_data;
 } AreaObject;
 
 /* AreaObjectTable+0: 24-byte records. */
@@ -559,6 +572,9 @@ typedef char AreaObjectRotationAt0x34[offsetof(AreaObject, rotation) == 0x34 ? 1
 typedef char AreaObjectScaleAt0x3C[offsetof(AreaObject, scale) == 0x3c ? 1 : -1];
 typedef char AreaObjectAnimSlotAt0x44[offsetof(AreaObject, anim_slot) == 0x44 ? 1 : -1];
 typedef char AreaObjectUnk48At0x48[offsetof(AreaObject, unk48) == 0x48 ? 1 : -1];
+typedef char AreaObjectKindDataAt0x50[offsetof(AreaObject, kind_data) == 0x50 ? 1 : -1];
+typedef char AreaObjectVoiceAt0x54[offsetof(AreaObject, kind_data.snd.voice) == 0x54 ? 1 : -1];
+typedef char AreaObjectMotionAt0x52[offsetof(AreaObject, kind_data.part.motion) == 0x52 ? 1 : -1];
 typedef char AreaObjectSize[sizeof(AreaObject) == 88 ? 1 : -1];
 typedef char AreaObjectTypeFlagsAt0x3[offsetof(AreaObjectType, flags) == 0x3 ? 1 : -1];
 typedef char AreaObjectTypeSize[sizeof(AreaObjectType) == 24 ? 1 : -1];

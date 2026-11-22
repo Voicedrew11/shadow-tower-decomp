@@ -315,9 +315,9 @@ int object_move_child(AreaObject *src, AreaObject *e, SVECTOR *from, SVECTOR *to
         if (src->unk48 == 0xff)
             return 0;
         if (e->unk48 == 0)
-            *(u8 *)&src->unk50 = 0;
+            src->kind_data.b[0] = 0;
         else
-            *(u8 *)&src->unk50 = steps - 1;
+            src->kind_data.b[0] = steps - 1;
         src->state = 1;
         object_reset(e);
         e->kind = 112;
@@ -340,7 +340,7 @@ int object_move_child(AreaObject *src, AreaObject *e, SVECTOR *from, SVECTOR *to
         e->position.vy += src->position.vy;
         e->position.vz += src->position.vz;
         e->rotation.vy = src->rotation.vy;
-        *(s16 *)&e->unk50 = src - vis_table_b.entries;
+        e->kind_data.part.h50 = src - vis_table_b.entries;
     case 1:
         break;
     default:
@@ -353,12 +353,12 @@ int object_move_child(AreaObject *src, AreaObject *e, SVECTOR *from, SVECTOR *to
     }
     vector_rotate(&src->rotation, from, &a);
     vector_rotate(&src->rotation, to, &b);
-    (*(u8 *)&src->unk50)++;
-    t = (*(u8 *)&src->unk50 << 12) / steps;
+    (src->kind_data.b[0])++;
+    t = (src->kind_data.b[0] << 12) / steps;
     e->position.vx = src->position.vx + math_lerp(a.vx, b.vx, t);
     e->position.vy = src->position.vy + math_lerp(a.vy, b.vy, t);
     e->position.vz = src->position.vz + math_lerp(a.vz, b.vz, t);
-    if (*(u8 *)&src->unk50 >= steps) {
+    if (src->kind_data.b[0] >= steps) {
         if (fade)
             e->anim_frame = 4095;
         if (area_state.loading == 0)
@@ -452,13 +452,13 @@ AreaObject *object_spawn_part(src, kind, state, arg3, size, angle, ox, oy, oz)
     e->unk48 = 0;
     e->block = src->block;
     e->kind = state;
-    *(s16 *)&e->unk50 = arg3;
+    e->kind_data.part.h50 = arg3;
     e->state = size;
     c = rcos(src->rotation.vy - angle) / 16;
-    e->unk56 = rsin(src->rotation.vy - angle) / 16;
+    e->kind_data.part.motion[2] = rsin(src->rotation.vy - angle) / 16;
     e->flags = 0x40;
-    ((s16 *)&e->unk50)[1] = c;
-    e->unk54 = 0;
+    e->kind_data.part.motion[0] = c;
+    e->kind_data.part.motion[1] = 0;
     e->visibility = 0;
     e->anim = 0x80;
     e->rotation.vx = 0;
@@ -523,16 +523,16 @@ void object_spawn_side_parts_alt(e, arg)
 DATA(0x800881e0, 0x8, ".sbss")
 static SVECTOR object_sequence_push;
 
-/* The halfwords and bytes other kinds keep from 0x50. */
-#define H50(e) (*(s16 *)&(e)->unk50)
-#define H52(e) (((s16 *)&(e)->unk50)[1])
-#define B50(e) (*(u8 *)&(e)->unk50)
-#define B51(e) (((s8 *)&(e)->unk50)[1])
-#define B52(e) (((s8 *)&(e)->unk50)[2])
+/* The halfwords and bytes other kinds keep from 0x50 (AreaObject.kind_data). */
+#define H50(e) ((e)->kind_data.part.h50)
+#define H52(e) ((e)->kind_data.part.motion[0])
+#define B50(e) ((e)->kind_data.b[0])
+#define B51(e) ((e)->kind_data.sb[1])
+#define B52(e) ((e)->kind_data.sb[2])
 
 /* The three bytes from 0x48 and from 0x50, 0xffffff when unset. */
 #define W48(e) (*(u_long *)&(e)->unk48 & 0xffffff)
-#define W50(e) (*(u_long *)&(e)->unk50 & 0xffffff)
+#define W50(e) ((e)->kind_data.words[0] & 0xffffff)
 
 /* Starts the entry's sound n (its record's sounds start at 208). */
 #define SOUND(e, n) object_play_sound(e, (e)->type * 3 + (n))
@@ -985,29 +985,29 @@ void objects_update(void)
                 e->position.vy -= 1280;
                 e->scale.vx = e->scale.vy = e->scale.vz = 0;
                 H52(e) = rcos(e->rotation.vy - 1024) * 384 / 4096;
-                e->unk54 = 0;
-                e->unk56 = rsin(e->rotation.vy - 1024) * 384 / 4096;
+                e->kind_data.part.motion[1] = 0;
+                e->kind_data.part.motion[2] = rsin(e->rotation.vy - 1024) * 384 / 4096;
                 e->position.vx += H52(e);
-                e->position.vz += e->unk56;
+                e->position.vz += e->kind_data.part.motion[2];
                 e->state = 0;
             } else if (e->state >= 3) {
                 H52(e) = e->state * (rcos(e->rotation.vy - 1024) << 7) / 4096;
-                e->unk54 = e->state << 5;
-                e->unk56 = e->state * (rsin(e->rotation.vy - 1024) << 7) / 4096;
+                e->kind_data.part.motion[1] = e->state << 5;
+                e->kind_data.part.motion[2] = e->state * (rsin(e->rotation.vy - 1024) << 7) / 4096;
                 e->position.vx += H52(e) - rand() / 256;
-                e->position.vy += e->unk54 + rand() / 2048;
-                e->position.vz += e->unk56 - rand() / 256;
+                e->position.vy += e->kind_data.part.motion[1] + rand() / 2048;
+                e->position.vz += e->kind_data.part.motion[2] - rand() / 256;
                 e->scale.vx += 1024;
                 e->scale.vy += 1024;
                 e->scale.vz += 1024;
                 e->state++;
             } else {
                 H52(e) = e->state * (rcos(e->rotation.vy - 1024) << 7) / 4096;
-                e->unk54 = e->state << 6;
-                e->unk56 = e->state * (rsin(e->rotation.vy - 1024) << 7) / 4096;
+                e->kind_data.part.motion[1] = e->state << 6;
+                e->kind_data.part.motion[2] = e->state * (rsin(e->rotation.vy - 1024) << 7) / 4096;
                 e->position.vx += H52(e) + rand() / 256;
-                e->position.vy += e->unk54 + rand() / 2048;
-                e->position.vz += e->unk56 + rand() / 256;
+                e->position.vy += e->kind_data.part.motion[1] + rand() / 2048;
+                e->position.vz += e->kind_data.part.motion[2] + rand() / 256;
                 e->scale.vx += 1024;
                 e->scale.vy += 1024;
                 e->scale.vz += 1024;
@@ -1033,29 +1033,29 @@ void objects_update(void)
                 e->position.vz -= rsin(e->rotation.vy) * 1280 / 4096;
                 e->scale.vx = e->scale.vy = e->scale.vz = 0;
                 H52(e) = rcos(e->rotation.vy) * 384 / 4096;
-                e->unk54 = 128;
-                e->unk56 = rsin(e->rotation.vy) * 384 / 4096;
+                e->kind_data.part.motion[1] = 128;
+                e->kind_data.part.motion[2] = rsin(e->rotation.vy) * 384 / 4096;
                 e->position.vx += H52(e);
-                e->position.vz += e->unk56;
+                e->position.vz += e->kind_data.part.motion[2];
                 e->state = 0;
             } else if (e->state >= 3) {
                 H52(e) = e->state * (rcos(e->rotation.vy) << 7) / 4096;
-                e->unk54 = e->state << 6;
-                e->unk56 = e->state * (rsin(e->rotation.vy) << 7) / 4096;
+                e->kind_data.part.motion[1] = e->state << 6;
+                e->kind_data.part.motion[2] = e->state * (rsin(e->rotation.vy) << 7) / 4096;
                 e->position.vx += H52(e) - rand() / 256;
-                e->position.vy += e->unk54 + rand() / 2048;
-                e->position.vz += e->unk56 - rand() / 256;
+                e->position.vy += e->kind_data.part.motion[1] + rand() / 2048;
+                e->position.vz += e->kind_data.part.motion[2] - rand() / 256;
                 e->scale.vx += 1024;
                 e->scale.vy += 1024;
                 e->scale.vz += 1024;
                 e->state++;
             } else {
                 H52(e) = e->state * (rcos(e->rotation.vy) << 7) / 4096;
-                e->unk54 = e->state << 7;
-                e->unk56 = e->state * (rsin(e->rotation.vy) << 7) / 4096;
+                e->kind_data.part.motion[1] = e->state << 7;
+                e->kind_data.part.motion[2] = e->state * (rsin(e->rotation.vy) << 7) / 4096;
                 e->position.vx += H52(e) + rand() / 256;
-                e->position.vy += e->unk54 + rand() / 2048;
-                e->position.vz += e->unk56 + rand() / 256;
+                e->position.vy += e->kind_data.part.motion[1] + rand() / 2048;
+                e->position.vz += e->kind_data.part.motion[2] + rand() / 256;
                 e->scale.vx += 1024;
                 e->scale.vy += 1024;
                 e->scale.vz += 1024;
@@ -1282,7 +1282,7 @@ void player_warp(to, keep)
 
     for (i = 240; i != 0; i--) {
         if (e->kind == 237)
-            *(u8 *)&e->unk50 = 1;
+            e->kind_data.b[0] = 1;
         e++;
     }
     x = to->x;
