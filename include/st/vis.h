@@ -17,7 +17,7 @@
  * list vis_build_visible builds from it; vis_record_is_visible/vis_id_is_visible search the
  * visible list. */
 /* The request fields VisLists starts with, as a stack request (src/st/item.c,
- * ground_items_update in src/st/vis_c_run.c). */
+ * ground_items_update in src/st/vis_b.c). */
 typedef struct {
     s32 unk0;
     VECTOR unk4;
@@ -100,7 +100,7 @@ typedef struct {
     u8 part;             /* 0x00: the model part drawn for this record */
     u8 unk01;            /* 0x01: copied to a table A entry's unk06 (creatures_load) */
     u8 unk02;
-    u8 unk03;            /* 0x03: bits 0-1 select the light set */
+    u8 unk03;            /* 0x03: bits 0-1: the block's quarter turn about y (DAT_8008042c) */
     u8 unk04;            /* bit 1: flagged by vis_cull_by_range */
     s8 unk05;            /* 0x05, 0x06: FDAT: an offset (x, z) its entries' headings bend by */
     s8 unk06;
@@ -162,7 +162,7 @@ typedef struct {
     u8 *vertices;        /* 0x00c */
     VECTOR *world;       /* 0x010: vis_lists.unkC0 cursor */
     VECTOR *rel[3];      /* 0x014: unk11C0..unk33C0 cursors */
-    u16 unk20;           /* 0x020: the record's light set */
+    u16 unk20;           /* 0x020: the record's quarter turn (DAT_8008042c) */
     s16 hit;             /* 0x022: the record hit, -1 none */
     VECTOR e[3][4];      /* 0x024: per point, the face edges' outer products */
     VECTOR pos[3];       /* 0x0e4: the test points */
@@ -194,7 +194,8 @@ typedef struct {
 
 #define VIS_HIT_SCRATCH ((VisHitScratch *)0x1f800000)
 
-/* 0x8008042c: the four light-set rotations (load data, WIP owner). */
+/* 0x8008042c: four yaw matrices, 0, 90, 180 and 270 degrees, that turn a
+ * map block a quarter at a time (load data, WIP owner). */
 extern MATRIX DAT_8008042c[4];
 
 extern VisLists vis_lists;
@@ -683,7 +684,7 @@ typedef struct {
     u16 unk16;
 } VisCFileEntry;
 
-/* src/st/vis_c.c (ground_items_clear: st/funcs.h; item_model_slots_clear: st/area.h) */
+/* src/st/vis_b.c (ground_items_clear: st/funcs.h; item_model_slots_clear: st/area.h) */
 void ground_items_load(VisCFileEntry *src);
 void player_warp(StWarp *to, int keep);
 void player_warp_to_save_point(void);

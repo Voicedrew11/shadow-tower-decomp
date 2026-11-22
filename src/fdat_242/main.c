@@ -33,7 +33,7 @@ static int fdat_801ee0b0;
 DATA(0x801ee0b4, 0x4, ".bss")
 int fdat_801ee0b4;
 
-/* The gate scene state: 2 armed, 3 opened by event 0x10e. */
+/* The gate scene state: 2 armed, 3 opened by using item 0x10e. */
 DATA(0x801ee0b8, 0x4, ".bss")
 int fdat_801ee0b8;
 
@@ -213,7 +213,7 @@ void map_update_events(void)
     }
 }
 
-/* Event 0x10e opens the armed gate: table A entry 50 dies, 49 wakes, and
+/* Using item 0x10e opens the armed gate: table A entry 50 dies, 49 wakes, and
  * record stream counter 13 advances. */
 ADDRESS(0x801edaa4, 0x6c)
 void map_use_item_advance_scene(short id)

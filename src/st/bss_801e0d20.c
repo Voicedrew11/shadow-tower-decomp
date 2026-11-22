@@ -1,6 +1,6 @@
 /*
  * ST.EXE: a data-only module (WIP) defining game .bss:
- * an unreferenced block, the option screens' equipment ids, the id grid
+ * an unreferenced block, the equip screen's equipment ids, the id grid
  * state and the message table.
  * PSYLINK allocates each object's tentative definitions (COMMON) after the
  * previous object's, in symbol-hash bucket order (docs/executable-linking.md),

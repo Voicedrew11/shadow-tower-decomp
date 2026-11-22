@@ -324,7 +324,8 @@ typedef struct {
     void (*unk24)(void); /* 0x24: a table B entry kind objects_update does not handle */
     void (*unk28)();
     void (*unk2C)();
-    void (*item_used)(); /* 0x30: item use (item id, or 0x4000 | slot) (item_use) */
+    void (*item_used)(); /* 0x30: item use (item id, or 0x4000 | the table B index when key
+                          * item 0x114 unlocks that object) (item_use) */
     void (*player_died)(void); /* 0x34: the player died (player_update) */
     void (*unk38)();
     void (*unk3C)();
@@ -413,7 +414,7 @@ typedef struct {
      * set by pad_set_default_buttons: the settings page lists them in two columns of
      * six (menu_button_config_draw). [2]/[3] and [6]/[7] turn the view (player_update_look);
      * [8] is slot 0's request bit, [9] the other slots' (player_start_hand_action);
-     * [10] the hand swap (src/st/player.c). */
+     * [10] the examine and quick-item use button (player_handle_examine). */
     u16 unk22[12];
     u16 unk3A;           /* 0x3a: unk22[8] | unk22[9] | unk22[10] | unk22[11] */
 } Data801cd180;
@@ -503,7 +504,7 @@ typedef struct {
     u8 unk1;             /* option page level, shown as a slider and a number (menu.c) */
     u8 unk2;             /* 0x02..0x05: option page on/off bytes */
     u8 unk3;             /* nonzero while the HUD is drawn (hud_queue_damage_number, world_render_frame) */
-    u8 unk4;             /* 1: the title-card image is drawn whatever the card mode (text.c) */
+    u8 unk4;             /* 1: the talk picture (TALKMSG.T) is drawn whatever the picture mode (text.c) */
     u8 unk5;
     u8 unk6;
     u8 unk7;

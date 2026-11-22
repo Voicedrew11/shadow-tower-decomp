@@ -9,7 +9,8 @@
 #include <st/vis.h>
 #include <st/fdat.h>
 
-/* On event 0x10e, places table A entry 48 again unless it is in state 3. */
+/* When item 0x10e is used, removes table A entry 48 (creature_despawn)
+ * unless it is in state 3. */
 ADDRESS(0x801ed9e0, 0x58)
 void map_use_item_remove_fallen(short id)
 {

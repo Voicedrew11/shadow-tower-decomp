@@ -1,6 +1,6 @@
 /*
  * ST.EXE: clearing and running the effect pool (WIP module, after the
- * effect spawner, mover and script interpreter unit src/st/effect_spawn.c).
+ * effect spawner, mover and per-kind update unit src/st/effect_spawn.c).
  */
 #include <kf/lib/address.h>
 #include <kf/lib/types.h>

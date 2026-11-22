@@ -110,7 +110,7 @@ void map_restore_progress(void)
 }
 
 /*
- * Runs the area: item 0x12a's scene (map_use_item_on_object) lifts table C item 28;
+ * Runs the area: item 0x12a's scene (map_use_item_on_object) lowers table C item 28;
  * entry 48 wakes when hit or once record 1's stream counter is 2, and
  * changes its scripts once its flash is over; entry 33 is sent by the
  * viewer passing z 0x4a000 and, once beaten, changes the lighting and
@@ -306,7 +306,8 @@ void map_use_item_on_object(short id)
     }
 }
 
-/* Lifts table C item 28 by 0x200, 24 a frame while its model is loaded. */
+/* Moves table C item 28 0x200 down (y grows downwards), 24 a frame while
+ * its model is loaded. */
 ADDRESS(0x801ede00, 0xf8)
 void map_slide_ground_item(void)
 {

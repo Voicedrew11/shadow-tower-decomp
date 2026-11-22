@@ -54,7 +54,7 @@ typedef struct {
     u16 unkA;            /* 0x0a */
 } MenuList;
 
-/* A 44-byte stored-item kind record menu_creature_book_draw_entry details. */
+/* A 44-byte creature kind record menu_creature_book_draw_entry details. */
 typedef struct {
     u8 kind;             /* 0x00: indexes its name table */
     u8 unk1;             /* 0x01 */
@@ -68,7 +68,7 @@ typedef struct {
 } MenuStoredItem;
 
 /*
- * The stored-item grid (menu_creature_book_draw_grid): the kind records, the message
+ * The creature book grid (menu_creature_book_draw_grid): the kind records, the message
  * table, one kind per entry, the entry count, the last row and its length,
  * the VRAM image of each of the fifteen visible cells and the detail page's.
  */
@@ -164,7 +164,7 @@ typedef struct {
 typedef struct {
     MenuState unk0;      /* 0x000 */
     u8 unk5C[0x174 - 0x5c]; /* 0x05c */
-    s16 *unk174[10];     /* 0x174: the equipment page's id lists, by kind (menu_equip_info_run) */
+    s16 *unk174[10];     /* 0x174: the equip info page's id lists, by kind (menu_equip_info_run) */
     s16 unk19C[10];      /* 0x19c: and their lengths */
     s16 *unk1B0;         /* 0x1b0: the ids the open list shows */
     s16 unk1B4[14];      /* 0x1b4: attribute values */
@@ -194,7 +194,7 @@ typedef struct {
     MenuMessages *unk2CC; /* 0x2cc */
     u32 *unk2D0;         /* 0x2d0: 36 words of grid cell bits (menu_equip_info_run) */
     u32 *unk2D4;         /* 0x2d4: one bit per grid cell */
-    s16 unk2D8;          /* 0x2d8: viewer.unk2 when the equipment page opened (src/st/equip_menu.c, src/st/menu.c) */
+    s16 unk2D8;          /* 0x2d8: viewer.unk2 when the equip info page opened (src/st/equip_menu.c, src/st/menu.c) */
     s16 unk2DA;          /* 0x2da: viewer.unk6 */
     u16 unk2DC;          /* 0x2dc */
     u16 unk2DE;          /* 0x2de: selected row of the item and stats menus */
@@ -399,7 +399,7 @@ void menu_equip_info_draw_magic(void);
 
 void menu_equip_info_draw(void);
 
-/* the stored-item screens */
+/* the creature book screens */
 void menu_creature_book_draw_grid(void);
 /* VS.EXE has its own port under this name, with another signature; VS units define VS_EXE. */
 #ifndef VS_EXE

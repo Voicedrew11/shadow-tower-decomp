@@ -338,10 +338,10 @@ extern u16 DAT_80063340;
 extern u_long DAT_8011c528[];
 
 /* VS band 6: seven words and seven halfwords card_draw_port_choice clears, and the
- * two players' picked fighters, -1 for none (bss, unowned). */
+ * two players' requested item ids, -1 for none (bss, unowned). */
 extern s32 DAT_801c4a38[7];
 extern u16 DAT_80117598[7];
-/* The two players' picked fighters, -1 for none. Retail's translation units
+/* The two players' requested item ids (0..265), -1 for none. Retail's translation units
  * see two sizes: the team, pick and setup screens read both words
  * $gp-relative through an 8-byte array (define VS_PICKED_PAIR before
  * including this header), while the main module and the card screen see

@@ -1,9 +1,9 @@
 /*
  * VS.EXE: the versus setup screens (WIP module): the setup page's loop,
- * the team screen (pictures, slots and input), the fighter pick list,
- * the save item test and the memory card screen with the match banking.
+ * the team screen (pictures, slots and input), the item request list,
+ * the requestable-item test and the memory card screen with the match banking.
  * One translation unit: retail lays out its constants (0x80011110, the
- * pick list's picture paths and the card screen's file name prefix)
+ * request list's picture paths and the card screen's file name prefix)
  * before its one switch table (0x80011160, menu_vs_setup_run's), the order
  * cc1 writes one object's read-only data in.
  */
@@ -25,7 +25,7 @@ u8 DAT_80063381;
 DATA(0x80063388, 0x8, ".sbss")
 u8 DAT_80063388[8];
 
-/* The setup, team and pick screens index both picked fighters. */
+/* The setup, team and pick screens index both requested items. */
 #define VS_PICKED_PAIR
 
 #include <LIBGTE.H>
@@ -1120,9 +1120,9 @@ int item_request_any_available(int player)
 }
 
 /*
- * The fighter pick list: lists the ids `player` may
- * pick from both memory card saves, lets the player scroll it (showing the
- * picture of the id under the cursor) and stores the pick in
+ * The item request list (ITEM SELECT): lists the item ids `player` may
+ * request from the opponent's save, lets the player scroll it (showing the
+ * icon of the item under the cursor) and stores the requested item in
  * DAT_80063330[player].
  */
 
@@ -2432,10 +2432,11 @@ int card_check_saves_changed(void)
 }
 
 /*
- * Banks a won match: unless `again`, marks the winner's fighter (side
- * `side`, picked DAT_80063330[side]) as won in its save record (bumping
- * the header's three-digit count the first time) and hands the loser's
- * count of it over; then writes both records back. Returns a bit per
+ * Banks a won match: unless `again`, gives the winner (side `side`) the
+ * item it requested (DAT_80063330[side]): marks it held in its save
+ * record (and collected, bumping the header's three-digit count the
+ * first time), moves the loser's durability of it over and takes it
+ * from the loser; then writes both records back. Returns a bit per
  * player whose write failed.
  *
  * Not exact (frame size only, every instruction agrees): retail's frame is

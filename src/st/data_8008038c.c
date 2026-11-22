@@ -1,6 +1,6 @@
 /*
  * ST.EXE: a data-only module (WIP) defining game .data: the default area
- * handlers, the identity matrix, the four light-set rotations and the XA
+ * handlers, the identity matrix, the four quarter-turn yaw matrices and the XA
  * stream lengths.
  * No code unit but st.main contributes .data, and retail keeps these after
  * st.main's run, so a module linked after the code defines them; every user

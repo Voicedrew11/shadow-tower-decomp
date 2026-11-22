@@ -1,8 +1,8 @@
 /*
  * ST.EXE: the pause menu and the screens it runs (WIP module,
  * 0x80058c04..0x80063638): the menu entry and page loop, the equipment
- * pictures and attribute totals, the figure recomputation, the equipment,
- * stored-item, item storage and item use pages, the attribute point
+ * pictures and attribute totals, the figure recomputation, the equip info,
+ * creature book, arrange items (icon view) and item use pages, the attribute point
  * screen, the shops, the area list, the options and the memory card
  * screens. One translation unit (-G8): its constant pool (.rodata
  * 0x800128d0..0x80013738) has no 8-byte break between functions, its
@@ -809,7 +809,7 @@ void fade_screen_to_black(void)
 }
 
 /*
- * The equipment page: sorts the table C ids held into one list per kind,
+ * The equip info page: sorts the table C ids held into one list per kind,
  * draws the slot pictures, then lets the player pick a slot (unk2DC 1)
  * and an item for it from its list (unk2C7: the list kind; 10 is the
  * magic grid), recomputing the figures as the choice changes.
@@ -1443,7 +1443,7 @@ void menu_equip_info_run(void)
 }
 
 /*
- * The stored-item page: lists the ids set in DAT_801cceb0 five to a row,
+ * The creature book: lists the ids set in DAT_801cceb0 five to a row,
  * three rows shown with their pictures, and shows the detail page of the
  * confirmed one (menu_creature_book_draw draws the page).
  *
@@ -1715,7 +1715,7 @@ void menu_creature_book_run(void)
 #define CURSOR_ROW (sp->unk2E0 / 8)
 
 /*
- * The item storage page: the items carried (ids0) and stored (ids1, the
+ * The arrange items icon view: the items carried (ids0) and stored (ids1, the
  * count flag bit) as two four-column grids of five rows; confirming a cell
  * twice moves its item to the first free entry of the other list. Leaving
  * writes the flag bits back.

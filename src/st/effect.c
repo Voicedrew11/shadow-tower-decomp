@@ -1,6 +1,6 @@
 /*
  * ST.EXE: effect helpers (WIP module): the sound and attack requests the
- * effect script interpreter makes for the current effect, an effect's
+ * per-kind effect update makes for the current effect, an effect's
  * part vertices, allocating a slot and three slot presets.
  */
 #include <kf/lib/address.h>

@@ -12,7 +12,7 @@
 #include <kf/lib/types.h>
 #include <sys/types.h>
 
-/* The first side's picked fighter and rounds won: one-word tentative
+/* The first side's requested item and rounds won: one-word tentative
  * definitions ahead of vs/data.h, whose shared declarations leave the
  * extent open (lineup_screen_draw and hud_draw_round_wins index both sides from
  * them), so that ASPSX addresses them $gp-relative. */
@@ -386,8 +386,8 @@ void vsync_handler(void)
 #define VS_PAD0_BUTTONS (((volatile s16 *)DAT_801961e0)[1])
 
 /*
- * A debug display adjust: flips to the other frame, then while START is
- * held lets controller 1's d-pad move the display area 4 pixels a frame
+ * A debug display adjust: flips to the other frame, then until START is
+ * pressed lets controller 1's d-pad move the display area 4 pixels a frame
  * (polling the host debugger each frame); restores the area afterwards.
  */
 ADDRESS(0x800138a0, 0x24c)
@@ -1406,9 +1406,10 @@ void round_play(void)
     }
 }
 
-/* Loads the menu screens' resources: the item names (archive 8 member 2)
- * with the picture behind them, the font pages (archive 5 member 10) and
- * the four files model_fixup_face_indices sets up, then clears the round state. */
+/* Loads the match's resources: the creature names (archive 8 member 2)
+ * with the picture behind them, the HUD font pages (archive 5 member 10)
+ * and the four arena models model_fixup_face_indices sets up, then clears
+ * the round state. */
 ADDRESS(0x80016488, 0x16c)
 void match_load_resources(void)
 {

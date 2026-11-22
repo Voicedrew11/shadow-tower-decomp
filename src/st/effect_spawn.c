@@ -1,9 +1,9 @@
 /*
- * ST.EXE: the effect spawner, mover and script interpreter as one
- * translation unit (WIP module, -G8: the script's three small initialisers
+ * ST.EXE: the effect spawner, mover and per-kind update as one
+ * translation unit (WIP module, -G8: the update's three small initialisers
  * are .sdata), 0x80036484..0x8003bc10. effect_spawn's switch tables start at
  * 0x800114cc, 4 mod 8 relative to the world renderer's read-only data, so
- * they open a new object; the script interpreter's tables at 0x800118a4
+ * they open a new object; effect_update's switch tables at 0x800118a4
  * are 8-aligned relative to that start: one object's read-only data.
  */
 #include <kf/lib/address.h>

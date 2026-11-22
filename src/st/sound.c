@@ -20,7 +20,8 @@
 #include <st/player.h>
 #include <st/sound.h>
 
-/* Plays the hit sound for damage above 256 and shakes the pad by it. */
+/* On a landing speed (`damage`; its only caller passes viewer.unk2D4) of
+ * 256 or more, plays the hit sound and shakes the pad by it. */
 ADDRESS(0x80057b48, 0x64)
 void play_landing_sound(int damage)
 {

@@ -29,7 +29,7 @@
     ((long *)&(dst))[1] = ((long *)(src))[1]
 
 /* Each collected source's part vertices in world space (rotated by the
- * record's light set and moved to the source's cell), and relative to the
+ * record's quarter turn and moved to the source's cell), and relative to the
  * three test points. */
 ADDRESS(0x80046604, 0x2bc)
 void collision_transform_vertices(VECTOR *pos)

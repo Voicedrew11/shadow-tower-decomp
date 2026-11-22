@@ -2,7 +2,7 @@
  * FDAT_442.BIN as one translation unit (WIP module): its handler table,
  * the 21 functions every overlay starts with (src/lib/fdat_common_a.inc,
  * fdat_common.inc, fdat_common_b.inc), the scene reset it shares with the
- * other three ending overlays (src/lib/fdat_801ed420.inc) and its ending
+ * other three shop overlays (src/lib/fdat_801ed420.inc) and its shopkeeper
  * handlers. One object, so that its two scene words are consecutive
  * statics after the code.
  */
@@ -30,11 +30,11 @@ RODATA(0x801eb560, 0x1cc)
 DATA(0x801ed8c0, 0x4, ".bss")
 static int fdat_801ed8c0;
 
-/* The scene state: 0 until the ending is picked (map_enter_shop clears it). */
+/* The visit state: 0 until the shopkeeper's line is picked (map_enter_shop clears it). */
 DATA(0x801ed8c4, 0x4, ".bss")
 static int fdat_801ed8c4;
 
-/* Which ending plays: 0..3 by the viewer's state (see map_pick_shopkeeper_line). */
+/* Which line the shopkeeper says, by the viewer's state (see map_pick_shopkeeper_line). */
 DATA(0x801ed8c8, 0x4, ".bss")
 static int fdat_801ed8c8;
 
@@ -68,7 +68,7 @@ void player_enter_frozen_state(void);
 void shop_run(void);
 
 /*
- * Once: picks the ending: item 266 not held makes ending 1; flags 31 and
+ * Once: picks the shopkeeper's line: item 266 not held makes line 1; flags 31 and
  * the second word's bit 0 clear make 0; then no stock, the viewer's
  * figures and a random draw choose 2, 3, 4 or 5 (no stream).
  */
@@ -123,7 +123,7 @@ void map_pick_shopkeeper_line(void)
 }
 
 /*
- * The ending entry's handler: steps the ending stages in fdat_801ed8c4
+ * The shopkeeper entry's handler: steps the visit stages in fdat_801ed8c4
  * (1 waiting for half the animation, 2 streaming, 3 stream done, 4 menu,
  * 5 done) by the XA stream state in the world block.
  */

@@ -101,7 +101,7 @@ int creature_step_hurt_timer(Vis212 *e)
     return 0;
 }
 
-/* Fades the entry in over 32 frames, then removes it. */
+/* Fades the entry out over 32 frames, then removes it. */
 ADDRESS(0x801ecf44, 0x80)
 void creature_fade_out_despawn(Vis212 *e)
 {
@@ -185,7 +185,7 @@ void player_turn_to_creature(Vis212 *e)
     }
 }
 
-/* Waits for the entry's model file, then fades it out. */
+/* Waits for the entry's model file, then runs its fade-in to the end. */
 ADDRESS(0x801ed2f0, 0x98)
 void creature_finish_fade_in(Vis212 *e)
 {
@@ -206,7 +206,7 @@ void creature_finish_fade_in(Vis212 *e)
     e->unk1C.bytes[2] &= 0xf2;
 }
 
-/* Hands the entry to creature_talk, fading it out first when unk04 is set. */
+/* Hands the entry to creature_talk, finishing its fade-in first when unk04 is set. */
 ADDRESS(0x801ed388, 0x88)
 void creature_force_talk(Vis212 *e, int fixed, int arg2)
 {

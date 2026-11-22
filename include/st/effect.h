@@ -1,7 +1,7 @@
 /*
  * ST.EXE effects (src/st/effect.c, WIP): a pool of 128 timed objects at
  * effects.slots, each spawned with a kind, a definition index, a position
- * and a velocity, and run once per frame by the effect script interpreter
+ * and a velocity, and run once per frame by the per-kind effect update
  * (0x800385b0) through effects.cur and effects.def. Address-derived names
  * stay until behaviour is proven.
  */

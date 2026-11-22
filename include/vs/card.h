@@ -64,7 +64,7 @@ typedef struct {
     u16 unk2B4[21];      /* 0x2b4: listed item ids */
     u8 unk2DE[0x2e0 - 0x2de];
     s32 unk2E0[3];       /* 0x2e0: the player's team (VsTeam.slot, card_screen_run) */
-    u8 unk2EC[314];      /* 0x2ec: per-item counts, shared with ST's save format */
+    u8 unk2EC[314];      /* 0x2ec: per-item durability, shared with ST's save format */
 } VsSaveSub;
 
 typedef char VsSaveSubSize[sizeof(VsSaveSub) == 0x428 ? 1 : -1];

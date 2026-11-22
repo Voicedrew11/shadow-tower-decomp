@@ -547,8 +547,8 @@ void func_80065020(void)
     ui_add_draw_mode(2, 0, 0);
 }
 
-/* The title image and frame; the screen is dimmed while the slot list
- * is not active. */
+/* The title image and frame; the screen is dimmed while unk2DC bit 0x1
+ * is set (the slot list, and the item list over it). */
 ADDRESS(0x800650dc, 0x114)
 void menu_equip_draw_frame(void)
 {
@@ -816,7 +816,7 @@ void menu_equip_draw_magic_list(void)
     }
 }
 
-/* Unreferenced: as func_80065020 from 64 KiB into the packet area. */
+/* As func_80065020, from 64 KiB into the packet area; menu_equip_draw calls it. */
 ADDRESS(0x80065f40, 0xc4)
 void menu_equip_draw_backdrop(void)
 {
@@ -1631,7 +1631,8 @@ void menu_arrange_list_draw(void)
 
 /*
  * Unreferenced debug tool: shows the other frame buffer and moves the
- * display area with the D-pad (raw pad bits, active low) until START,
+ * display area with the face buttons (triangle, cross, square, circle as
+ * up, down, left, right; raw pad bits, active low) until START is pressed,
  * polling the host debugger each frame; then restores it.
  */
 ADDRESS(0x80068440, 0x214)

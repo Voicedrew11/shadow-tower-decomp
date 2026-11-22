@@ -1,6 +1,6 @@
 /*
  * The effects: spawning an effect, moving it, the
- * VRAM block move and roll, the effect script interpreter, the effect
+ * VRAM block move and roll, the per-kind effect update, the effect
  * pool and the effects' model draw. One translation unit: retail lays out
  * its constants (0x800118c4, the model draw's initializers) before its
  * switch tables (0x80011934, effect_spawn's and effect_update's), the
@@ -626,9 +626,9 @@ void effect_step_back_half(void)
 #include "../lib/vram.inc"
 
 /*
- * The effect script interpreter: one frame of the
+ * The per-kind effect update: one frame of the
  * current effect, by kind. VS's form of ST.EXE's effect_update
- * (src/st/effect_script.c): the same kinds from 0x30 up, hitting the
+ * (src/st/effect_spawn.c): the same kinds from 0x30 up, hitting the
  * owner's opponent instead of making ST's attack requests.
  */
 /* Fades the effect in over its last 32 frames. */

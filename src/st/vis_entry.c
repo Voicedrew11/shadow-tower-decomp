@@ -870,10 +870,12 @@ void effect_jitter_offset(SVECTOR *off, VECTOR *out, VECTOR *base)
     out->vz = base->vz + off->vz;
 }
 
-/* Aims dir (at `speed`) from pos at target, turning from the entry's facing
- * by at most `turn` per step; with pitch -1 the pitch turns too. n > 1
- * steps lead the target by its motion. Stores the final rotation (facing
- * the other way) in out and returns its yaw. */
+/* Aims dir (at `speed`) from `target` at `pos`: the names are swapped,
+ * `pos` is the aim point (raised 800; its callers pass the player) and
+ * `target` the shot's origin. Turns from the entry's facing by at most
+ * `turn` per step; with pitch -1 the pitch turns too. n > 1 steps lead
+ * the aim point by the player's motion (viewer.unk260). Stores the final
+ * rotation (facing the other way) in out and returns its yaw. */
 ADDRESS(0x8004cc70, 0x278)
 int creature_aim_shot(e, pos, speed, target, dir, out, pitch, turn, n)
 Vis212 *e;

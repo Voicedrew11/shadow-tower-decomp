@@ -176,7 +176,7 @@ typedef struct {
     u8 unk1ECE6[2];
     MATRIX unk1ECE8;
     u8 unk1ED08[0x20];
-    MATRIX unk1ED28[4];  /* 0x1ed28: one per light set (ScratchPad.light_index) */
+    MATRIX unk1ED28[4];  /* 0x1ed28: the view matrix turned 0..3 quarter turns (ScratchPad.light_index) */
     MATRIX unk1EDA8;
     VECTOR unk1EDC8;
     SVECTOR unk1EDD8;

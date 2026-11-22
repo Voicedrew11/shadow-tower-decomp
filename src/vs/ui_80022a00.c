@@ -1,6 +1,6 @@
 /*
  * VS.EXE: the versus setup page (WIP module): its seven option lines with
- * the cursor bar, then both players' picked fighters in framed boxes.
+ * the cursor bar, then both players' requested items in framed boxes.
  */
 #include <kf/lib/address.h>
 #include <kf/lib/null.h>

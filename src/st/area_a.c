@@ -292,7 +292,10 @@ void player_shift_position(int dx, int dy, int dz)
  */
 
 /* Starts loading areas a0..a4 unless they are already loaded or being
- * loaded; f0..f2 is the fade colour and f3..f5 the next fade's (WIP). */
+ * loaded. f0..f5 shift the viewer once the new set is in: x by
+ * f0 * 4096 + f3 * 128, y by f2 * 4096 + f4 * 128 and z by
+ * f1 * 4096 + f5 * 128 (player_shift_position); f0 = 127 shifts nothing,
+ * and such a request while a shift is in force negates f0..f2. */
 /* All nine direct callers discard the word result; the return edges keep
  * v0 live. */
 ADDRESS(0x80045044, 0x524)

@@ -5953,9 +5953,10 @@ void ui_add_draw_mode(int abr, int x, int y)
 #define CARD_FADE_OUT 6
 
 /*
- * Steps the title-card overlay one frame: fades the screen, fades the
- * card image in and out, and counts the frames in unk1EE19
- * (unk1EE17 is the card mode, unk1EE18 the fade length).
+ * Steps the talk picture overlay one frame: fades the screen, fades the
+ * TALKMSG.T picture talk_load_image uploads in and out, and counts the
+ * frames in unk1EE19 (unk1EE17 is the picture mode, unk1EE18 the fade
+ * length).
  */
 ADDRESS(0x80028784, 0x4a8)
 void talk_draw_overlay(void)
@@ -6302,7 +6303,7 @@ static s32 DAT_80087f34 = 0;
     menu_draw_backdrop();                   \
     gfx_draw_ot()
 
-/* The status page. */
+/* The pause menu's main page. */
 ADDRESS(0x80029b74, 0x65c)
 void menu_main_draw(void)
 {
@@ -6460,7 +6461,7 @@ void menu_use_item_draw(void)
     PAGE_END();
 }
 
-/* The attribute page: seven rows of two columns. */
+/* The attribute point screen: seven rows of two columns. */
 ADDRESS(0x8002a5a4, 0x3b0)
 void menu_attribute_points_draw(void)
 {
@@ -8070,7 +8071,7 @@ void menu_equip_info_draw(void)
 }
 
 /*
- * The stored-item grid page: five cells per row,
+ * The creature book's grid page: five cells per row,
  * three rows shown, the selected entry's number and name, and the cell
  * images.
  */
@@ -8137,7 +8138,7 @@ void menu_creature_book_draw_grid(void)
 }
 
 /*
- * The stored-item detail page: the kind's name and image, then either its
+ * The creature book's detail page: the kind's name and image, then either its
  * fourteen attribute figures (page toggle on) or its labels, weight, size,
  * paired figures and up to three trait names.
  */
@@ -8235,7 +8236,7 @@ void menu_creature_book_draw_entry(void)
 }
 
 /*
- * The stored-item screen frame: colours, cursor blink,
+ * The creature book's frame: colours, cursor blink,
  * then the grid page or the page menu_creature_book_draw_entry draws.
  */
 

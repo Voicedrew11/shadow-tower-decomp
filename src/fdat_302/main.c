@@ -335,7 +335,7 @@ void map_warp_player(void)
     player_enter_normal_state();
 }
 
-/* Sets the area id of every visible record. */
+/* Sets the area id of all 512 map-block records (vis_records). */
 ADDRESS(0x801ee090, 0x28)
 void map_set_block_areas(u8 area)
 {

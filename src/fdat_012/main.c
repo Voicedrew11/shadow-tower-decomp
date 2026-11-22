@@ -51,7 +51,7 @@ const FdatHeader fdat_header = {
 DATA(0x801edfac, 0x4, ".bss")
 int fdat_801edfac;
 
-/* Places table A entry 48 again when it is in use but not active. */
+/* Removes table A entry 48 (creature_despawn) when it is in use but not active. */
 ADDRESS(0x801ed4a0, 0x48)
 void map_remove_fallen_creature(void)
 {

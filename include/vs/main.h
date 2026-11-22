@@ -31,7 +31,7 @@ extern u8 DAT_8015d8b0[5000];
  * reads most of it $gp-relative through tentative definitions, the words
  * below absolutely).
  */
-extern s32 DAT_80063334;  /* the second player's picked fighter, -1 for none */
+extern s32 DAT_80063334;  /* the second player's requested item id, -1 for none */
 extern s32 DAT_80063374;  /* the second fighter's rounds won */
 extern u8 DAT_80063380;
 extern u8 DAT_80063381;

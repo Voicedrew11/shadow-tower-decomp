@@ -1,6 +1,6 @@
 /*
  * VS.EXE: the team screen's item detail page (WIP module), VS's copy of
- * ST.EXE's stored-item detail page menu_creature_book_draw_entry (src/st/ui.c): the item
+ * ST.EXE's creature book detail page menu_creature_book_draw_entry (src/st/ui.c): the item
  * comes from the team slot or the item grid under the cursor, and the
  * page toggle is DAT_8006335c.
  */

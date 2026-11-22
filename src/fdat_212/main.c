@@ -49,11 +49,13 @@ const FdatHeader fdat_header = {
 #include "../lib/fdat_common.inc"
 #include "../lib/fdat_common_b.inc"
 
-/* Set by event 0x2e: table B entry 46 carries table C item 28. */
+/* Set once key item 0x114 unlocks table B entry 46 (0x2e), which carries
+ * table C item 28. */
 DATA(0x801edcd4, 0x4, ".bss")
 static int fdat_801edcd4;
 
-/* Set by event 2: table B entry 2 carries table C item 29. */
+/* Set once key item 0x114 unlocks table B entry 2, which carries table C
+ * item 29. */
 DATA(0x801edcd8, 0x4, ".bss")
 static int fdat_801edcd8;
 
@@ -100,7 +102,7 @@ void map_restore_progress(void)
 }
 
 /*
- * Runs the area: events 0x2e and 2 start table B entries 46 and 2 (each
+ * Runs the area: unlocking table B entries 46 and 2 starts them (each
  * carrying its table C item on node 0, vertex 0x23); once entry 2 and then
  * entry 3 are done the bridge rises 0x18 a frame for 0x97 frames.
  */
@@ -170,7 +172,8 @@ void map_update_events(void)
     }
 }
 
-/* Records events 0x2e and 2 when they come with flag 0x4000. */
+/* Records which of table B entries 46 (0x2e) and 2 key item 0x114
+ * unlocked: item_use passes 0x4000 | the object's index. */
 ADDRESS(0x801ed890, 0x4c)
 void map_use_key_on_object(int event)
 {
@@ -187,8 +190,8 @@ void map_use_key_on_object(int event)
 #include "../lib/fdat_801ed4a0.inc"
 #include "../lib/fdat_801ed6e4.inc"
 
-/* Lifts table C item 28 (`which` 0) or 29 by 0x200 along z, 24 a frame
- * while its model is loaded. */
+/* Slides table C item 28 (`which` 0) or 29 0x200 along z (horizontal),
+ * 24 a frame while its model is loaded. */
 ADDRESS(0x801edbd0, 0x104)
 void map_slide_ground_item(int which)
 {

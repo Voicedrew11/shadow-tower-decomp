@@ -11,7 +11,7 @@
 #include <LIBGTE.H>
 #include <LIBGPU.H>
 
-void effect_update(void); /* the effect script interpreter: runs effects.cur for one frame */
+void effect_update(void); /* runs effects.cur one frame by its kind (a per-kind switch with a step counter) */
 int player_distance_in_reach(void *request);
 void player_reload_equipment(void);
 void player_update_status(int apply);

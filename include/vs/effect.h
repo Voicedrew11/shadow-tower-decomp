@@ -34,7 +34,7 @@ int effect_reaches_opponent(int arg0, u_long height);
 /* src/vs/effect_spawn_80032404.c: spawns an effect for fighter n's attack
  * (ST.EXE's effect_spawn); the StEffect or NULL */
 StEffect *effect_spawn(int n, u8 attack, u8 flags, u8 kind, VECTOR *pos, SVECTOR *dir, ...);
-/* src/vs/effect_80032404.c: the effect script interpreter (ST effect_update's place) */
+/* src/vs/effect_80032404.c: the per-kind effect update (ST effect_update's place) */
 void effect_update(void);
 
 #endif

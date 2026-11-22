@@ -109,7 +109,7 @@ typedef struct {
     s32 unk1D8;          /* 0x1d8 */
     s32 unk1DC;          /* 0x1dc */
     s32 unk1E0;          /* 0x1e0 */
-    s32 light_index;     /* 0x1e4: the current part's light set */
+    s32 light_index;     /* 0x1e4: the current block's quarter turn (VisRecord.unk03 bits 0-1) */
     u8 no_plane_test;    /* 0x1e8 */
     u8 unk1E9;           /* 0x1e9 */
     short offset_x;      /* 0x1ea */

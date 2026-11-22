@@ -1,6 +1,6 @@
 /*
- * ST.EXE: saving and restoring the VRAM the memory card and option screens
- * draw over (WIP module). Its own translation unit: its RECT literals
+ * ST.EXE: saving and restoring the VRAM the equip screen draws over (WIP
+ * module). Its own translation unit: its RECT literals
  * (.sdata 0x800880e4..0x8008810c) repeat src/st/menu.c's {896, 256, 64, 256}
  * and {896, 0, 64, 256} instead of merging with them.
  */
@@ -53,7 +53,7 @@ void menu_equip_restore_vram(void)
 }
 
 /*
- * Opens the option screens: saves the VRAM they use, loads the menu
+ * Opens the equip screen (the pause menu's "equip" row): saves the VRAM it uses, loads the menu
  * messages (CD archive 3 member 3) into a buffer of their own, its font
  * image, and a 144-byte block (member 1), and records the equipment ids.
  */
