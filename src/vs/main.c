@@ -1586,7 +1586,7 @@ int main(void)
     cd_read_member(5, 4, menu_vab_head);
     cd_read_member(5, 5, menu_vab_body);
     load_menu_sound_bank();
-    cd_read_member(5, 20, (u_long *)vis_table_c.unk0118);
+    cd_read_member(5, 20, (u_long *)vis_table_c.types);
     teams[0].slot[0] = -1;
     teams[0].slot[1] = -1;
     teams[0].slot[2] = -1;

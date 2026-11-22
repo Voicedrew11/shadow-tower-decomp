@@ -30,7 +30,7 @@ ADDRESS(0x801ed770, 0x420)
 void map_step_creature(void)
 {
     CreatureTable *a = &vis_table_a;
-    Vis48 *c7 = &vis_table_c.entries[7];
+    GroundItem *c7 = &vis_table_c.entries[7];
     Creature *e = a->current;
     CreatureType *r = a->current_type;
     VECTOR v;
@@ -65,22 +65,22 @@ next:
             e->status.bytes[0] = 1;
             creature_start_script(e, 6);
             viewer.unk218 = 5;
-            c7->unk22 = 2;
+            c7->state = 2;
         }
         if (e->status.bytes[0] == 1) {
             if ((short)e->anim_frame > 0xa00) {
                 anim_set_node_vertex((StAnimSet *)e->anim_slot, e->model_slot + 128, 7, 13, &v);
-                c7->unk08.vx = e->position.vx + v.vx;
-                c7->unk08.vy = e->position.vy + v.vy - 0x80;
-                c7->unk08.vz = e->position.vz + v.vz;
+                c7->position.vx = e->position.vx + v.vx;
+                c7->position.vy = e->position.vy + v.vy - 0x80;
+                c7->position.vz = e->position.vz + v.vz;
             }
         } else if (e->status.bytes[0] == 2) {
             viewer.unk218 = 5;
             map_step_leaving_creature(e);
             return;
         } else if (e->hit != 0) {
-            c7->unk22 = 2;
-            c7->unk2D += 0x20;
+            c7->state = 2;
+            c7->depth_bias += 0x20;
         }
     }
     e->anim_frame += e->anim_step;

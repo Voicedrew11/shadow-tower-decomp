@@ -16,8 +16,8 @@
 #include <st/vis.h>
 
 DATA(0x8017bed0, 0x1800, ".bss")
-VisRecord vis_records[512];
+MapBlock vis_records[512];
 DATA(0x8017d6d0, 0x8000, ".bss")
-VisSourceMask vis_source_masks[512];
+MapBlockMask vis_source_masks[512];
 DATA(0x801856d0, 0x6000, ".bss")
-VisSourceMask vis_axis_masks[3][128];
+MapBlockMask vis_axis_masks[3][128];

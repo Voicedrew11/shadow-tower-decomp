@@ -2036,7 +2036,7 @@ ADDRESS(0x8001c60c, 0x1f4)
 void vis_cull_by_range(void)
 {
     ScratchPad *sp = SCRATCHPAD;
-    VisRecord *rec;
+    MapBlock *rec;
     int range_near;
     int range_mid;
     int range_far;
@@ -2051,11 +2051,11 @@ void vis_cull_by_range(void)
                 (world_state.light->unk6A / 2048 + 2);
     while (i--) {
         rec = &vis_records[vis_lists.visible[i]];
-        sp->x = rec->unk08 << 12;
-        sp->y = (rec->unk09 << 12) + ((rec->unk0b - 128) << 7);
-        sp->z = rec->unk0a << 12;
+        sp->x = rec->cell_x << 12;
+        sp->y = (rec->cell_y << 12) + ((rec->y_offset - 128) << 7);
+        sp->z = rec->cell_z << 12;
         sp->no_plane_test = world_state.unk1EE15;
-        rec->unk04 &= 1;
+        rec->draw_flags &= 1;
         d = vis_measure_position();
         if (d > range_far) {
             vis_lists.n_visible--;
@@ -2063,7 +2063,7 @@ void vis_cull_by_range(void)
                 vis_lists.visible[k] = vis_lists.visible[k + 1];
             }
         } else if (d >= range_near || d <= range_mid) {
-            rec->unk04 |= 2;
+            rec->draw_flags |= 2;
         }
     }
 }
@@ -2071,13 +2071,13 @@ void vis_cull_by_range(void)
 ADDRESS(0x8001c800, 0x8c)
 int vis_record_is_visible(int a, int b, int c)
 {
-    VisRecord *rec;
+    MapBlock *rec;
     int i;
 
     i = vis_lists.n_visible;
     while (i--) {
         rec = &vis_records[vis_lists.visible[i]];
-        if (rec->unk08 == a && rec->unk09 == b && rec->unk0a == c) {
+        if (rec->cell_x == a && rec->cell_y == b && rec->cell_z == c) {
             return 1;
         }
     }
@@ -2125,25 +2125,25 @@ void vis_collect_creatures(void)
 ADDRESS(0x8001c9c8, 0xf0)
 void vis_collect_objects(void)
 {
-    Vis88 *e;
+    AreaObject *e;
     int i;
 
     e = vis_table_b.entries;
     vis_table_b.count = 0;
     i = 240;
     while (i--) {
-        if (e->unk0a < 280) {
-            e->unk04 &= 0x7f;
-            if (vis_id_is_visible(e->unk08) || e->unk05 == 236) {
+        if (e->type < 280) {
+            e->flags &= 0x7f;
+            if (vis_id_is_visible(e->block) || e->kind == 236) {
                 if (vis_table_b.count >= 96) {
                     return;
                 }
-                e->unk04 |= 0x80;
+                e->flags |= 0x80;
                 vis_table_b.list[vis_table_b.count] = 239 - i;
                 vis_table_b.count++;
             }
         } else {
-            e->unk07 = 0;
+            e->drawn = 0;
         }
         e++;
     }
@@ -2152,14 +2152,14 @@ void vis_collect_objects(void)
 ADDRESS(0x8001cab8, 0xd0)
 void vis_collect_ground_items(void)
 {
-    Vis48 *e;
+    GroundItem *e;
     int i;
 
     e = vis_table_c.entries;
     vis_table_c.count = 0;
     i = 64;
     while (i--) {
-        if (e->unk00 != 0xffff && e->unk2c == area_state.area && vis_id_is_visible(e->unk02)) {
+        if (e->item != 0xffff && e->area == area_state.area && vis_id_is_visible(e->block)) {
             vis_table_c.list[vis_table_c.count] = 63 - i;
             vis_table_c.count++;
         }
@@ -2176,15 +2176,15 @@ ADDRESS(0x8001cb88, 0x270)
 void world_transform_parts(VECTOR *trans)
 {
     ScratchPad *sp = SCRATCHPAD;
-    VisRecord *rec;
+    MapBlock *rec;
     int i;
 
     i = vis_lists.n_visible;
     while (i--) {
         rec = &vis_records[vis_lists.visible[i]];
-        sp->x = rec->unk08 << 12;
-        sp->y = (rec->unk09 << 12) + ((rec->unk0b - 128) << 7);
-        sp->z = rec->unk0a << 12;
+        sp->x = rec->cell_x << 12;
+        sp->y = (rec->cell_y << 12) + ((rec->y_offset - 128) << 7);
+        sp->z = rec->cell_z << 12;
         sp->x = sp->x - viewer.position.vx;
         sp->y = sp->y - (viewer.position.vy + viewer.unk2CE + viewer.unk2D2);
         sp->z = sp->z - viewer.position.vz;
@@ -2257,7 +2257,7 @@ ADDRESS(0x8001cdf8, 0x42c)
 void world_project_parts(VECTOR *trans)
 {
     ScratchPad *sp = SCRATCHPAD;
-    VisRecord *rec;
+    MapBlock *rec;
     MeshVertex *out;
     SVECTOR *in;
     int i;
@@ -2266,7 +2266,7 @@ void world_project_parts(VECTOR *trans)
     i = vis_lists.n_visible;
     while (i--) {
         rec = &vis_records[vis_lists.visible[i]];
-        sp->light_index = rec->unk03 & 3;
+        sp->light_index = rec->turn & 3;
         gte_SetRotMatrix(&world_state.unk1ED28[sp->light_index]);
         gte_SetTransVector(&trans[i]);
         sp->header = (MeshHeader *)(sp->model + 12) + rec->part;
@@ -2352,7 +2352,7 @@ void world_draw_ft3_near(VECTOR *trans)
     ScratchPad *sp = SCRATCHPAD;
     DIVPOLYGON3 div;
     void (*tint)(CVECTOR *);
-    VisRecord *rec;
+    MapBlock *rec;
     MeshFaceFT3 *face;
     MeshVertex *v0;
     MeshVertex *v1;
@@ -2371,11 +2371,11 @@ void world_draw_ft3_near(VECTOR *trans)
     }
     while (i--) {
         rec = &vis_records[vis_lists.visible[i]];
-        if (!(rec->unk04 & 3)) {
+        if (!(rec->draw_flags & 3)) {
             sp->header = (MeshHeader *)(sp->model + 12) + rec->part;
             sp->unk34 = (u_long *)((u8 *)sp->unk34 + sp->header->n_vertices * 8);
         } else {
-            sp->light_index = rec->unk03 & 3;
+            sp->light_index = rec->turn & 3;
             gte_SetLightMatrix(&sp->light->light[sp->light_index]);
             sp->header = (MeshHeader *)(sp->model + 12) + rec->part;
             sp->part_vertices = sp->model + 12 + sp->header->vertices;
@@ -2532,7 +2532,7 @@ void world_draw_ft4_near(VECTOR *trans)
     ScratchPad *sp = SCRATCHPAD;
     DIVPOLYGON4 div;
     void (*tint)(CVECTOR *);
-    VisRecord *rec;
+    MapBlock *rec;
     MeshFaceFT4 *face;
     MeshVertex *v0;
     MeshVertex *v1;
@@ -2552,11 +2552,11 @@ void world_draw_ft4_near(VECTOR *trans)
     }
     while (i--) {
         rec = &vis_records[vis_lists.visible[i]];
-        if (!(rec->unk04 & 3)) {
+        if (!(rec->draw_flags & 3)) {
             sp->header = (MeshHeader *)(sp->model + 12) + rec->part;
             sp->unk34 = (u_long *)((u8 *)sp->unk34 + sp->header->n_vertices * 8);
         } else {
-            sp->light_index = rec->unk03 & 3;
+            sp->light_index = rec->turn & 3;
             gte_SetLightMatrix(&sp->light->light[sp->light_index]);
             sp->header = (MeshHeader *)(sp->model + 12) + rec->part;
             sp->part_vertices = sp->model + 12 + sp->header->vertices;
@@ -2736,7 +2736,7 @@ void world_draw_gt3_near(VECTOR *trans)
     ScratchPad *sp = SCRATCHPAD;
     DIVPOLYGON3 div;
     void (*tint)(CVECTOR *);
-    VisRecord *rec;
+    MapBlock *rec;
     MeshFaceGT3 *face;
     MeshVertex *v0;
     MeshVertex *v1;
@@ -2754,11 +2754,11 @@ void world_draw_gt3_near(VECTOR *trans)
     }
     while (i--) {
         rec = &vis_records[vis_lists.visible[i]];
-        if (!(rec->unk04 & 3)) {
+        if (!(rec->draw_flags & 3)) {
             sp->header = (MeshHeader *)(sp->model + 12) + rec->part;
             sp->unk34 = (u_long *)((u8 *)sp->unk34 + sp->header->n_vertices * 8);
         } else {
-            sp->light_index = rec->unk03 & 3;
+            sp->light_index = rec->turn & 3;
             gte_SetLightMatrix(&sp->light->light[sp->light_index]);
             sp->header = (MeshHeader *)(sp->model + 12) + rec->part;
             sp->part_vertices = sp->model + 12 + sp->header->vertices;
@@ -2915,7 +2915,7 @@ void world_draw_gt4_near(VECTOR *trans)
 {
     ScratchPad *sp = SCRATCHPAD;
     DIVPOLYGON4 div;
-    VisRecord *rec;
+    MapBlock *rec;
     MeshFaceGT4 *face;
     MeshVertex *v0;
     MeshVertex *v1;
@@ -2935,11 +2935,11 @@ void world_draw_gt4_near(VECTOR *trans)
     }
     while (i--) {
         rec = &vis_records[vis_lists.visible[i]];
-        if (!(rec->unk04 & 3)) {
+        if (!(rec->draw_flags & 3)) {
             sp->header = (MeshHeader *)(sp->model + 12) + rec->part;
             sp->unk34 = (u_long *)((u8 *)sp->unk34 + sp->header->n_vertices * 8);
         } else {
-            sp->light_index = rec->unk03 & 3;
+            sp->light_index = rec->turn & 3;
             gte_SetLightMatrix(&sp->light->light[sp->light_index]);
             sp->header = (MeshHeader *)(sp->model + 12) + rec->part;
             sp->part_vertices = sp->model + 12 + sp->header->vertices;
@@ -3103,7 +3103,7 @@ ADDRESS(0x8001f954, 0x3ac)
 void world_draw_ft3_far(VECTOR *trans)
 {
     ScratchPad *sp = SCRATCHPAD;
-    VisRecord *rec;
+    MapBlock *rec;
     MeshFaceFT3 *face;
     MeshVertex *v0;
     MeshVertex *v1;
@@ -3116,11 +3116,11 @@ void world_draw_ft3_far(VECTOR *trans)
     i = vis_lists.n_visible;
     while (i--) {
         rec = &vis_records[vis_lists.visible[i]];
-        if (rec->unk04 & 3) {
+        if (rec->draw_flags & 3) {
             sp->header = (MeshHeader *)(sp->model + 12) + rec->part;
             sp->unk34 = (u_long *)((u8 *)sp->unk34 + sp->header->n_vertices * 8);
         } else {
-            sp->light_index = rec->unk03 & 3;
+            sp->light_index = rec->turn & 3;
             gte_SetLightMatrix(&sp->light->light[sp->light_index]);
             sp->header = (MeshHeader *)(sp->model + 12) + rec->part;
             sp->part_vertices = sp->model + 12 + sp->header->vertices;
@@ -3185,7 +3185,7 @@ ADDRESS(0x8001fd00, 0x464)
 void world_draw_ft4_far(VECTOR *trans)
 {
     ScratchPad *sp = SCRATCHPAD;
-    VisRecord *rec;
+    MapBlock *rec;
     MeshFaceFT4 *face;
     MeshVertex *v0;
     MeshVertex *v1;
@@ -3199,11 +3199,11 @@ void world_draw_ft4_far(VECTOR *trans)
     i = vis_lists.n_visible;
     while (i--) {
         rec = &vis_records[vis_lists.visible[i]];
-        if (rec->unk04 & 3) {
+        if (rec->draw_flags & 3) {
             sp->header = (MeshHeader *)(sp->model + 12) + rec->part;
             sp->unk34 = (u_long *)((u8 *)sp->unk34 + sp->header->n_vertices * 8);
         } else {
-            sp->light_index = rec->unk03 & 3;
+            sp->light_index = rec->turn & 3;
             gte_SetLightMatrix(&sp->light->light[sp->light_index]);
             sp->header = (MeshHeader *)(sp->model + 12) + rec->part;
             sp->part_vertices = sp->model + 12 + sp->header->vertices;
@@ -3282,7 +3282,7 @@ ADDRESS(0x80020164, 0x424)
 void world_draw_gt3_far(VECTOR *trans)
 {
     ScratchPad *sp = SCRATCHPAD;
-    VisRecord *rec;
+    MapBlock *rec;
     MeshFaceGT3 *face;
     MeshVertex *v0;
     MeshVertex *v1;
@@ -3294,11 +3294,11 @@ void world_draw_gt3_far(VECTOR *trans)
     i = vis_lists.n_visible;
     while (i--) {
         rec = &vis_records[vis_lists.visible[i]];
-        if (rec->unk04 & 3) {
+        if (rec->draw_flags & 3) {
             sp->header = (MeshHeader *)(sp->model + 12) + rec->part;
             sp->unk34 = (u_long *)((u8 *)sp->unk34 + sp->header->n_vertices * 8);
         } else {
-            sp->light_index = rec->unk03 & 3;
+            sp->light_index = rec->turn & 3;
             gte_SetLightMatrix(&sp->light->light[sp->light_index]);
             sp->header = (MeshHeader *)(sp->model + 12) + rec->part;
             sp->part_vertices = sp->model + 12 + sp->header->vertices;
@@ -3367,7 +3367,7 @@ ADDRESS(0x80020588, 0x4f8)
 void world_draw_gt4_far(VECTOR *trans)
 {
     ScratchPad *sp = SCRATCHPAD;
-    VisRecord *rec;
+    MapBlock *rec;
     MeshFaceGT4 *face;
     MeshVertex *v0;
     MeshVertex *v1;
@@ -3380,11 +3380,11 @@ void world_draw_gt4_far(VECTOR *trans)
     i = vis_lists.n_visible;
     while (i--) {
         rec = &vis_records[vis_lists.visible[i]];
-        if (rec->unk04 & 3) {
+        if (rec->draw_flags & 3) {
             sp->header = (MeshHeader *)(sp->model + 12) + rec->part;
             sp->unk34 = (u_long *)((u8 *)sp->unk34 + sp->header->n_vertices * 8);
         } else {
-            sp->light_index = rec->unk03 & 3;
+            sp->light_index = rec->turn & 3;
             gte_SetLightMatrix(&sp->light->light[sp->light_index]);
             sp->header = (MeshHeader *)(sp->model + 12) + rec->part;
             sp->part_vertices = sp->model + 12 + sp->header->vertices;
@@ -4472,7 +4472,7 @@ void item_models_sync(int archive, int first, int slot, int count)
         p = world_state.unk834C[slot];
         if (*flags++) {
             if (p == NULL)
-                item_model_load(archive, i * 2, (u16)slot, vis_table_c.unk0000[slot - 440]);
+                item_model_load(archive, i * 2, (u16)slot, vis_table_c.ground_item_counts[slot - 440]);
             else if (heap_get_state(p) == ST_BLOCK_RELEASABLE)
                 heap_set_state(p, ST_BLOCK_USED);
         } else if (p != NULL && heap_get_state(p) != ST_BLOCK_LOADING) {
@@ -4621,8 +4621,8 @@ ADDRESS(0x800246e4, 0xae4)
 void world_draw_objects(void)
 {
     ScratchPad *sp = SCRATCHPAD;
-    Vis88 *e;
-    Vis24 *r;
+    AreaObject *e;
+    AreaObjectType *r;
     VECTOR unused;
     StAnimFile *model;
     SVECTOR *size;
@@ -4641,16 +4641,16 @@ void world_draw_objects(void)
     now = cd_state.unk4;
     while (--i != -1) {
         e = &vis_table_b.entries[vis_table_b.list[i]];
-        e->unk07 = 0;
-        if (e->unk00 == 2)
+        e->drawn = 0;
+        if (e->visibility == 2)
             continue;
-        flags = e->unk03 & 0x3f;
-        e->unk03 = flags;
-        if (e->unk18 <= world_state.unk1EE04 * world_state.unk1EE04)
-            e->unk03 = flags | 0x40;
-        else if (e->unk18 >= world_state.unk1EE00 * world_state.unk1EE00)
-            e->unk03 = flags | 0x80;
-        switch (e->unk05) {
+        flags = e->draw_flags & 0x3f;
+        e->draw_flags = flags;
+        if (e->player_dist_sq <= world_state.unk1EE04 * world_state.unk1EE04)
+            e->draw_flags = flags | 0x40;
+        else if (e->player_dist_sq >= world_state.unk1EE00 * world_state.unk1EE00)
+            e->draw_flags = flags | 0x80;
+        switch (e->kind) {
         case 37:
         case 226:
         case 229:
@@ -4658,165 +4658,165 @@ void world_draw_objects(void)
             continue;
         case 31:
             /* A sound over a rectangle of the floor. */
-            if (player_in_cell_rect(e->unk24.vx >> 12, e->unk24.vz >> 12, e->unk48, e->unk49, 0x8000)) {
+            if (player_in_cell_rect(e->position.vx >> 12, e->position.vz >> 12, e->unk48, e->unk49, 0x8000)) {
                 if ((s32)(e->unk50 - now) >= 0)
                     continue;
-                if (e->unk4A.snd.unk4D & 2)
-                    e->unk50 = now + (e->unk4A.snd.unk4E * 6 + (rand() >> 8));
-                if (e->unk4A.snd.unk4D & 4)
-                    e->unk50 = now + (e->unk4A.snd.unk4E * 6 + (rand() >> 6));
+                if (e->params.snd.sound_flags & 2)
+                    e->unk50 = now + (e->params.snd.period * 6 + (rand() >> 8));
+                if (e->params.snd.sound_flags & 4)
+                    e->unk50 = now + (e->params.snd.period * 6 + (rand() >> 6));
                 else
-                    e->unk50 = now + e->unk4A.snd.unk4E * 6;
+                    e->unk50 = now + e->params.snd.period * 6;
                 range = e->unk48 << 11;
-                d = viewer.position.vx - (e->unk24.vx + range);
+                d = viewer.position.vx - (e->position.vx + range);
                 if (d < 0)
                     d = -d;
                 d = range - d;
                 range = e->unk49 << 11;
-                dz = viewer.position.vz - (e->unk24.vz + range);
+                dz = viewer.position.vz - (e->position.vz + range);
                 if (dz < 0)
                     dz = -dz;
                 dz = range - dz;
                 if (dz < d)
                     d = dz;
-                volume = e->unk4A.snd.unk4C << 12;
+                volume = e->params.snd.fade_range << 12;
                 if (d >= volume) {
-                    volume = e->unk4A.snd.unk4B;
+                    volume = e->params.snd.volume;
                 } else {
                     if (volume == 0)
                         continue;
-                    volume = e->unk4A.snd.unk4B * d / volume;
+                    volume = e->params.snd.volume * d / volume;
                 }
-                if (e->unk4A.snd.unk4D & 1) {
-                    int dy = viewer.position.vy - e->unk24.vy;
+                if (e->params.snd.sound_flags & 1) {
+                    int dy = viewer.position.vy - e->position.vy;
 
                     if (dy < 0)
                         dy = -dy;
-                    dy = e->unk4A.snd.unk4B * dy >> 13;
+                    dy = e->params.snd.volume * dy >> 13;
                     volume -= dy;
                 }
                 if (volume < 20)
                     continue;
                 if (e->unk54 != -1) {
-                    sound_stop(e->unk54, e->unk4A.snd.unk4A + 208);
+                    sound_stop(e->unk54, e->params.snd.sound + 208);
                     e->unk54 = -1;
                 }
-                e->unk54 = sound_play(e->unk4A.snd.unk4A + 208, volume);
+                e->unk54 = sound_play(e->params.snd.sound + 208, volume);
             } else {
-                e->unk50 = now + e->unk4A.snd.unk4E * 6;
+                e->unk50 = now + e->params.snd.period * 6;
                 if (e->unk54 == -1)
                     continue;
-                sound_stop(e->unk54, e->unk4A.snd.unk4A + 208);
+                sound_stop(e->unk54, e->params.snd.sound + 208);
                 e->unk54 = -1;
             }
             break;
         case 236:
             /* A sound around a point. */
-            if (player_in_centred_rect(e->unk24.vx, e->unk24.vz, e->unk48 << 8, e->unk49 << 8, 0x8000)) {
+            if (player_in_centred_rect(e->position.vx, e->position.vz, e->unk48 << 8, e->unk49 << 8, 0x8000)) {
                 if ((s32)(e->unk50 - now) >= 0)
                     continue;
-                if (e->unk4A.snd.unk4D & 2)
-                    e->unk50 = now + (e->unk4A.snd.unk4E * 60 + (rand() >> 11));
-                if (e->unk4A.snd.unk4D & 4)
-                    e->unk50 = now + (e->unk4A.snd.unk4E * 60 + (rand() >> 9));
+                if (e->params.snd.sound_flags & 2)
+                    e->unk50 = now + (e->params.snd.period * 60 + (rand() >> 11));
+                if (e->params.snd.sound_flags & 4)
+                    e->unk50 = now + (e->params.snd.period * 60 + (rand() >> 9));
                 else
-                    e->unk50 = now + e->unk4A.snd.unk4E * 60;
+                    e->unk50 = now + e->params.snd.period * 60;
                 {
-                    int inner = (e->unk48 << 7) - (e->unk4A.snd.unk4C << 7);
+                    int inner = (e->unk48 << 7) - (e->params.snd.fade_range << 7);
 
                     range = e->unk48 << 7;
-                    if (e->unk1C >= inner && range != inner)
-                        volume = e->unk4A.snd.unk4B * (range - e->unk1C) / (range - inner);
+                    if (e->player_dist_xz >= inner && range != inner)
+                        volume = e->params.snd.volume * (range - e->player_dist_xz) / (range - inner);
                     else
-                        volume = e->unk4A.snd.unk4B;
+                        volume = e->params.snd.volume;
                 }
-                if (e->unk4A.snd.unk4D & 1) {
-                    int dy = viewer.position.vy - e->unk24.vy;
+                if (e->params.snd.sound_flags & 1) {
+                    int dy = viewer.position.vy - e->position.vy;
 
                     if (dy < 0)
                         dy = -dy;
-                    dy = e->unk4A.snd.unk4B * dy >> 13;
+                    dy = e->params.snd.volume * dy >> 13;
                     volume -= dy;
                 }
                 if (volume < 20)
                     continue;
                 if (e->unk54 != -1) {
-                    sound_stop(e->unk54, e->unk4A.snd.unk4A + 1108);
+                    sound_stop(e->unk54, e->params.snd.sound + 1108);
                     e->unk54 = -1;
                 }
-                e->unk54 = sound_play(e->unk4A.snd.unk4A + 1108, volume);
+                e->unk54 = sound_play(e->params.snd.sound + 1108, volume);
             } else {
-                e->unk50 = now + e->unk4A.snd.unk4E * 60;
+                e->unk50 = now + e->params.snd.period * 60;
                 if (e->unk54 == -1)
                     continue;
-                sound_stop(e->unk54, e->unk4A.snd.unk4A + 1108);
+                sound_stop(e->unk54, e->params.snd.sound + 1108);
                 e->unk54 = -1;
             }
             break;
         case 38:
-            sp->unkF8[e->unk0a] = 1;
-            size = &e->unk3C;
-            id = object_model_slot(e->unk0a);
+            sp->unkF8[e->type] = 1;
+            size = &e->scale;
+            id = object_model_slot(e->type);
             anim_get_file(id, &model);
             if (model == NULL)
                 continue;
-            sp->unkD8.vx = e->unk34;
-            sp->unkD8.vy = e->unk36;
-            sp->unkD8.vz = e->unk38;
-            sp->ot = world_state.ot_cur + e->unk14;
-            sp->near_z = 4 - e->unk14;
-            sp->far_z = 4096 - e->unk14;
-            model_draw(0, id, &e->unk24, &sp->unkD8, size, e->unk44,
-                          &world_state.unk1ECE8, e->unk02, e->unk10, 0, e->unk16, e->unk03, 0);
+            sp->unkD8.vx = e->rot_x;
+            sp->unkD8.vy = e->facing;
+            sp->unkD8.vz = e->rot_z;
+            sp->ot = world_state.ot_cur + e->depth_bias;
+            sp->near_z = 4 - e->depth_bias;
+            sp->far_z = 4096 - e->depth_bias;
+            model_draw(0, id, &e->position, &sp->unkD8, size, e->anim_slot,
+                          &world_state.unk1ECE8, e->anim, e->anim_frame, 0, e->light, e->draw_flags, 0);
             break;
         default:
-            r = &vis_table_b.unk0000[e->unk0a];
-            sp->unkF8[e->unk0a] = 1;
-            id = object_model_slot(e->unk0a);
+            r = &vis_table_b.types[e->type];
+            sp->unkF8[e->type] = 1;
+            id = object_model_slot(e->type);
             anim_get_file(id, &model);
-            size = &e->unk3C;
+            size = &e->scale;
             if (model == NULL)
                 continue;
-            sp->unkD8.vx = e->unk34;
-            sp->unkD8.vy = e->unk36;
-            sp->unkD8.vz = e->unk38;
-            if (e->unk04 & 0x40) {
-                sp->unkD8.vx = e->unk34;
+            sp->unkD8.vx = e->rot_x;
+            sp->unkD8.vy = e->facing;
+            sp->unkD8.vz = e->rot_z;
+            if (e->flags & 0x40) {
+                sp->unkD8.vx = e->rot_x;
                 sp->unkD8.vy = 0;
-                sp->unkD8.vz = e->unk38;
-                sp->ot = world_state.ot_cur + e->unk14;
-                sp->near_z = 4 - e->unk14;
-                sp->far_z = 4096 - e->unk14;
-                model_draw(0, id, &e->unk24, &sp->unkD8, size, e->unk44,
-                              &world_state.unk1EDA8, e->unk02, e->unk10, e->unk16, e->unk16,
-                              e->unk03, 0);
+                sp->unkD8.vz = e->rot_z;
+                sp->ot = world_state.ot_cur + e->depth_bias;
+                sp->near_z = 4 - e->depth_bias;
+                sp->far_z = 4096 - e->depth_bias;
+                model_draw(0, id, &e->position, &sp->unkD8, size, e->anim_slot,
+                              &world_state.unk1EDA8, e->anim, e->anim_frame, e->light, e->light,
+                              e->draw_flags, 0);
                 break;
             }
             {
                 VECTOR pos;
                 SVECTOR scale = {4096, 4096, 4096, 0};
 
-                e->unk07 = 1;
-                sp->ot = world_state.ot_cur + e->unk14;
-                sp->near_z = 4 - e->unk14;
-                sp->far_z = 4096 - e->unk14;
-                model_draw(0, id, &e->unk24, &sp->unkD8, size, e->unk44,
-                              &world_state.unk1ECE8, e->unk02, e->unk10, e->unk16, e->unk16, e->unk03, 0);
-                if (e->unk04 & 1)
+                e->drawn = 1;
+                sp->ot = world_state.ot_cur + e->depth_bias;
+                sp->near_z = 4 - e->depth_bias;
+                sp->far_z = 4096 - e->depth_bias;
+                model_draw(0, id, &e->position, &sp->unkD8, size, e->anim_slot,
+                              &world_state.unk1ECE8, e->anim, e->anim_frame, e->light, e->light, e->draw_flags, 0);
+                if (e->flags & 1)
                     continue;
-                pos = e->unk24;
-                if (e->unk04 & 4) {
-                    scale.vx = r->unk0C * 2 + (r->unk0C >> 1);
-                    scale.vz = r->unk0E * 2 + (r->unk0E >> 1);
+                pos = e->position;
+                if (e->flags & 4) {
+                    scale.vx = r->shadow_x * 2 + (r->shadow_x >> 1);
+                    scale.vz = r->shadow_z * 2 + (r->shadow_z >> 1);
                 } else {
-                    scale.vx = r->unk04 * 2 + (r->unk04 >> 1);
-                    scale.vz = r->unk04 * 2 + (r->unk04 >> 1);
+                    scale.vx = r->radius * 2 + (r->radius >> 1);
+                    scale.vz = r->radius * 2 + (r->radius >> 1);
                 }
-                sp->ot = world_state.ot_cur + e->unk14 - 5;
-                sp->near_z = 9 - e->unk14;
-                sp->far_z = 4101 - e->unk14;
-                model_draw(0, (r->unk03 >> 2 & 1) | 44, &pos, &sp->unkD8, &scale, e->unk44,
-                              &world_state.unk1ECE8, 128, 0, e->unk16, 4096, 4, 0);
+                sp->ot = world_state.ot_cur + e->depth_bias - 5;
+                sp->near_z = 9 - e->depth_bias;
+                sp->far_z = 4101 - e->depth_bias;
+                model_draw(0, (r->flags >> 2 & 1) | 44, &pos, &sp->unkD8, &scale, e->anim_slot,
+                              &world_state.unk1ECE8, 128, 0, e->light, 4096, 4, 0);
             }
             break;
         }
@@ -4832,8 +4832,8 @@ ADDRESS(0x800251c8, 0x428)
 void world_draw_ground_items(void)
 {
     ScratchPad *sp = SCRATCHPAD;
-    Vis48 *e;
-    Vis44 *r;
+    GroundItem *e;
+    ItemType *r;
     VECTOR unused;
     StAnimFile *model;
     int i;
@@ -4845,10 +4845,10 @@ void world_draw_ground_items(void)
     sp->clut_base = 0;
     while (--i != -1) {
         e = &vis_table_c.entries[vis_table_c.list[i]];
-        r = &vis_table_c.unk0118[e->unk00];
-        if (e->unk28 >= (s32)world_state.unk1EE00)
-            e->unk24 |= 0x80;
-        switch (e->unk22) {
+        r = &vis_table_c.types[e->item];
+        if (e->player_dist_xz >= (s32)world_state.unk1EE00)
+            e->draw_flags |= 0x80;
+        switch (e->state) {
         case 0:
         case 4:
             continue;
@@ -4861,36 +4861,36 @@ void world_draw_ground_items(void)
         {
             SVECTOR scale = {4096, 4096, 4096};
 
-            sp->unkF8[r->unk4] = 1;
-            anim_get_file(r->unk4 + SLOT_C, &model);
+            sp->unkF8[r->model] = 1;
+            anim_get_file(r->model + SLOT_C, &model);
             if (model == NULL)
                 continue;
-            sp->unkD8.vx = e->unk18;
-            sp->unkD8.vy = e->unk1A;
-            sp->unkD8.vz = e->unk1C;
-            if (r->unk1E & 0x40) {
+            sp->unkD8.vx = e->rot_x;
+            sp->unkD8.vy = e->facing;
+            sp->unkD8.vz = e->rot_z;
+            if (r->flags & 0x40) {
                 MATRIX m;
 
-                sp->ot = world_state.ot_cur + e->unk2D;
-                sp->near_z = 4 - e->unk2D;
-                sp->far_z = 4096 - e->unk2D;
-                model_draw(0, r->unk4 + SLOT_C, &e->unk08, &sp->unkD8, &scale, e->unk04,
-                              &world_state.unk1ECE8, 128, 0, 0, 4096, e->unk24, 0);
+                sp->ot = world_state.ot_cur + e->depth_bias;
+                sp->near_z = 4 - e->depth_bias;
+                sp->far_z = 4096 - e->depth_bias;
+                model_draw(0, r->model + SLOT_C, &e->position, &sp->unkD8, &scale, e->anim_slot,
+                              &world_state.unk1ECE8, 128, 0, 0, 4096, e->draw_flags, 0);
                 sp->unkD8.vx = sp->unkD8.vy = sp->unkD8.vz = 0;
-                sp->ot = world_state.ot_cur + e->unk2D;
-                sp->near_z = 4 - e->unk2D;
-                sp->far_z = 4096 - e->unk2D;
+                sp->ot = world_state.ot_cur + e->depth_bias;
+                sp->near_z = 4 - e->depth_bias;
+                sp->far_z = 4096 - e->depth_bias;
                 m = world_state.unk1EDA8;
-                if (e->unk22 != 2)
-                    RotMatrixX(e->unk18, &m);
-                model_draw(0, r->unk4 + SLOT_C, &e->unk08, &sp->unkD8, &scale, e->unk04, &m, 129,
-                              0, 0, 4096, e->unk24, 0);
+                if (e->state != 2)
+                    RotMatrixX(e->rot_x, &m);
+                model_draw(0, r->model + SLOT_C, &e->position, &sp->unkD8, &scale, e->anim_slot, &m, 129,
+                              0, 0, 4096, e->draw_flags, 0);
             } else {
-                sp->ot = world_state.ot_cur + e->unk2D;
-                sp->near_z = 4 - e->unk2D;
-                sp->far_z = 4096 - e->unk2D;
-                model_draw(0, r->unk4 + SLOT_C, &e->unk08, &sp->unkD8, &scale, e->unk04,
-                              &world_state.unk1ECE8, 128, 0, 0, 4096, e->unk24, 0);
+                sp->ot = world_state.ot_cur + e->depth_bias;
+                sp->near_z = 4 - e->depth_bias;
+                sp->far_z = 4096 - e->depth_bias;
+                model_draw(0, r->model + SLOT_C, &e->position, &sp->unkD8, &scale, e->anim_slot,
+                              &world_state.unk1ECE8, 128, 0, 0, 4096, e->draw_flags, 0);
             }
         }
     }
@@ -6340,8 +6340,8 @@ void menu_main_draw(void)
         ui_draw_text(MESSAGE(24), 106, 112, &sp->style[0]);
     else
         ui_draw_text(MESSAGE(19), 106, 112, &sp->style[0]);
-    if (viewer.unk38[16] != 0xffff && vis_table_c.unk0118[viewer.unk38[16]].unk5[0x1d] >= 9) {
-        kind = vis_table_c.unk0118[viewer.unk38[16]].unk5[0x1d];
+    if (viewer.unk38[16] != 0xffff && vis_table_c.types[viewer.unk38[16]].unk5[0x1d] >= 9) {
+        kind = vis_table_c.types[viewer.unk38[16]].unk5[0x1d];
         n = 0;
         if (kind - 9 == 2)
             n = 14;
@@ -7399,7 +7399,7 @@ void shop_draw_buy_list(void)
     ui_draw_text(MESSAGE(100), 160, 27, &sp->style[2]);
     for (i = 0; i < rows; i++) {
         id = inventory.unk13A[sp->unk0.list.ids[sp->unk2E2 + i]];
-        if (inventory.counts[266].count >= vis_table_c.unk0118[id].unk2) {
+        if (inventory.counts[266].count >= vis_table_c.types[id].price) {
             text = &sp->style[0];
             figure = &sp->style[4];
         } else {
@@ -7411,13 +7411,13 @@ void shop_draw_buy_list(void)
         ui_draw_text(LIST_TEXT(sp, id), 28, i * 36 + 48, text);
         sp->style[0].cd &= 0x7f;
         sp->style[3].cd &= 0x7f;
-        if (vis_table_c.unk0118[id].unk27) {
+        if (vis_table_c.types[id].max_durability) {
             ui_draw_text(MESSAGE(109), 72, i * 36 + 62, text);
-            ui_draw_number(vis_table_c.unk0118[id].unk28 | 0x3000000, 128, i * 36 + 62, figure);
+            ui_draw_number(vis_table_c.types[id].durability | 0x3000000, 128, i * 36 + 62, figure);
             ui_draw_glyph(74, 160, i * 36 + 62, text);
-            ui_draw_number(vis_table_c.unk0118[id].unk27 | 0x3000000, 172, i * 36 + 62, figure);
+            ui_draw_number(vis_table_c.types[id].max_durability | 0x3000000, 172, i * 36 + 62, figure);
         }
-        ui_draw_number(vis_table_c.unk0118[id].unk2 | 0x3000000, 244, i * 36 + 62, figure);
+        ui_draw_number(vis_table_c.types[id].price | 0x3000000, 244, i * 36 + 62, figure);
         ui_draw_text(MESSAGE(102), 216, i * 36 + 62, text);
     }
 }
@@ -7438,12 +7438,12 @@ void shop_draw_trade_list(void)
         sp->style[0].cd |= 0x80;
         ui_draw_text(LIST_TEXT(sp, id), 54, i * 36 + 48, &sp->style[0]);
         sp->style[0].cd &= 0x7f;
-        if (vis_table_c.unk0118[id].unk27) {
+        if (vis_table_c.types[id].max_durability) {
             ui_draw_text(MESSAGE(109), 131, i * 36 + 62, &sp->style[0]);
-            ui_draw_number(vis_table_c.unk0118[id].unk28 | 0x3000000, 187, i * 36 + 62,
+            ui_draw_number(vis_table_c.types[id].durability | 0x3000000, 187, i * 36 + 62,
                           &sp->style[4]);
             ui_draw_glyph(74, 219, i * 36 + 62, &sp->style[0]);
-            ui_draw_number(vis_table_c.unk0118[id].unk27 | 0x3000000, 231, i * 36 + 62,
+            ui_draw_number(vis_table_c.types[id].max_durability | 0x3000000, 231, i * 36 + 62,
                           &sp->style[4]);
         }
     }
@@ -7466,9 +7466,9 @@ void shop_draw_repair_list(void)
         rows = sp->unk0.list.count;
     for (i = 0; i < rows; i++) {
         id = sp->unk0.list.ids[sp->unk2E2 + i];
-        price = vis_table_c.unk0118[id].unk3 * 2 / 3 *
-                (vis_table_c.unk0118[id].unk27 - vis_table_c.unk0118[id].unk28);
-        if (vis_table_c.unk0118[id].unk28 == 0)
+        price = vis_table_c.types[id].repair_price * 2 / 3 *
+                (vis_table_c.types[id].max_durability - vis_table_c.types[id].durability);
+        if (vis_table_c.types[id].durability == 0)
             price *= 2;
         if (price < viewer.unk2) {
             text = &sp->style[0];
@@ -7482,11 +7482,11 @@ void shop_draw_repair_list(void)
         ui_draw_text(LIST_TEXT(sp, id), 28, i * 36 + 48, text);
         sp->style[0].cd &= 0x7f;
         sp->style[3].cd &= 0x7f;
-        if (vis_table_c.unk0118[id].unk27) {
+        if (vis_table_c.types[id].max_durability) {
             ui_draw_text(MESSAGE(109), 77, i * 36 + 62, text);
-            ui_draw_number(vis_table_c.unk0118[id].unk28 | 0x3000000, 133, i * 36 + 62, figure);
+            ui_draw_number(vis_table_c.types[id].durability | 0x3000000, 133, i * 36 + 62, figure);
             ui_draw_glyph(74, 165, i * 36 + 62, text);
-            ui_draw_number(vis_table_c.unk0118[id].unk27 | 0x3000000, 177, i * 36 + 62, figure);
+            ui_draw_number(vis_table_c.types[id].max_durability | 0x3000000, 177, i * 36 + 62, figure);
         }
         ui_draw_number((u16)price | 0x4000000, 244, i * 36 + 62, figure);
     }
@@ -7526,19 +7526,19 @@ void shop_draw_confirm(void)
     sp->style[0].cd |= 0x80;
     ui_draw_text(LIST_TEXT(sp, id), 24, 176, &sp->style[0]);
     sp->style[0].cd &= 0x7f;
-    if (vis_table_c.unk0118[id].unk27) {
+    if (vis_table_c.types[id].max_durability) {
         ui_draw_text(MESSAGE(109), 48, 190, &sp->style[0]);
-        ui_draw_number(vis_table_c.unk0118[id].unk28 | 0x3000000, 104, 190, &sp->style[4]);
+        ui_draw_number(vis_table_c.types[id].durability | 0x3000000, 104, 190, &sp->style[4]);
         ui_draw_glyph(74, 136, 190, &sp->style[0]);
-        ui_draw_number(vis_table_c.unk0118[id].unk27 | 0x3000000, 148, 190, &sp->style[4]);
+        ui_draw_number(vis_table_c.types[id].max_durability | 0x3000000, 148, 190, &sp->style[4]);
     }
     if (sp->unk2DC & 0x1) {
-        ui_draw_number(vis_table_c.unk0118[id].unk2 | 0x3000000, 244, 190, &sp->style[4]);
+        ui_draw_number(vis_table_c.types[id].price | 0x3000000, 244, 190, &sp->style[4]);
         ui_draw_text(MESSAGE(102), 216, 190, &sp->style[0]);
     } else if (sp->unk2DC & 0x8) {
-        price = vis_table_c.unk0118[id].unk3 * 2 / 3 *
-                (vis_table_c.unk0118[id].unk27 - vis_table_c.unk0118[id].unk28);
-        if (vis_table_c.unk0118[id].unk28 == 0)
+        price = vis_table_c.types[id].repair_price * 2 / 3 *
+                (vis_table_c.types[id].max_durability - vis_table_c.types[id].durability);
+        if (vis_table_c.types[id].durability == 0)
             price *= 2;
         ui_draw_number((u16)price | 0x4000000, 244, 190, &sp->style[4]);
     }
@@ -7546,13 +7546,13 @@ void shop_draw_confirm(void)
     y = 46;
     ui_draw_text(MESSAGE(103), 165, y, &sp->style[0]);
     for (i = 0; i < 7; i++) {
-        ui_draw_number_fixed(vis_table_c.unk0118[id].unk10[i] | 0x13000000, 207, y, &sp->style[4]);
-        ui_draw_number_fixed(vis_table_c.unk0118[id].unk10[i + 7] | 0x13000000, 273, y, &sp->style[4]);
+        ui_draw_number_fixed(vis_table_c.types[id].attributes[i] | 0x13000000, 207, y, &sp->style[4]);
+        ui_draw_number_fixed(vis_table_c.types[id].attributes[i + 7] | 0x13000000, 273, y, &sp->style[4]);
         y += 14;
     }
-    if (vis_table_c.unk0118[id].unk24) {
-        menu_figure_whole = vis_table_c.unk0118[id].unk24 * 100 / 454;
-        DAT_80088188 = vis_table_c.unk0118[id].unk24 * 1000 / 454;
+    if (vis_table_c.types[id].weight) {
+        menu_figure_whole = vis_table_c.types[id].weight * 100 / 454;
+        DAT_80088188 = vis_table_c.types[id].weight * 1000 / 454;
         ui_draw_text(MESSAGE(104), 220, 156, &sp->style[0]);
         ui_draw_number_fixed(menu_figure_whole | 0x3000000, 248, 156, &sp->style[4]);
         ui_draw_glyph(78, 269, 156, &sp->style[0]);
@@ -7671,21 +7671,21 @@ void menu_equip_info_draw_slots(void)
     for (i = 0; i < EQUIP_SLOTS; equip++, i++) {
         if (i == 2)
             mode = 48;
-        else if ((i == 3 && vis_table_c.unk0118[viewer.unk38[16]].unk26 == 9) ||
-                 (i == 4 && vis_table_c.unk0118[viewer.unk38[17]].unk26 == 9))
+        else if ((i == 3 && vis_table_c.types[viewer.unk38[16]].category == 9) ||
+                 (i == 4 && vis_table_c.types[viewer.unk38[17]].category == 9))
             mode = 48;
         else
             mode = 16;
         if (i != 6 && i != 12 && sp->unk2C6 == 1 && *equip != 0xffff &&
-            vis_table_c.unk0118[*equip].unk27) {
+            vis_table_c.types[*equip].max_durability) {
             sp->style[7].r = 200;
             sp->style[7].g = 164;
             sp->style[7].b = 96;
-            ui_draw_number(vis_table_c.unk0118[*equip].unk28 | 0x2000000, rects[i].x + 8,
+            ui_draw_number(vis_table_c.types[*equip].durability | 0x2000000, rects[i].x + 8,
                           rects[i].y + 4, &sp->style[7]);
             sp->style[7].g = sp->style[7].r = 8;
             sp->style[7].b = 0;
-            ui_draw_number(vis_table_c.unk0118[*equip].unk28 | 0x2000000, rects[i].x + 9,
+            ui_draw_number(vis_table_c.types[*equip].durability | 0x2000000, rects[i].x + 9,
                           rects[i].y + 5, &sp->style[7]);
         }
         ui_draw_image(&rects[i], &tex[i], &clut, 0, mode);
@@ -7743,7 +7743,7 @@ void menu_equip_info_draw_attributes(void)
     }
     if (sp->unk2DC == 2 && sp->unk2C6) {
         if (sp->unk2BE != -1) {
-            count = vis_table_c.unk0118[sp->unk2C0].unk10;
+            count = vis_table_c.types[sp->unk2C0].attributes;
             for (i = 0; i < STATUS_ROWS; count++, i++)
                 ui_draw_number(*count | 0x13000000, 590, i * 15 + 16, sp->unk320);
         }
@@ -7935,9 +7935,9 @@ void menu_equip_info_draw_item(void)
                   &sp->style[0]);
     sp->style[0].cd &= 0x7f;
     ui_draw_cell_grid(&pos, &sp->unk0.vram[0], &sp->unk0.vram[1], &sp->style[0], 0xf0004);
-    if (vis_table_c.unk0118[sp->unk2C0].unk24) {
-        menu_figure_whole = vis_table_c.unk0118[sp->unk2C0].unk24 * 100 / 454;
-        DAT_80088188 = vis_table_c.unk0118[sp->unk2C0].unk24 * 1000 / 454;
+    if (vis_table_c.types[sp->unk2C0].weight) {
+        menu_figure_whole = vis_table_c.types[sp->unk2C0].weight * 100 / 454;
+        DAT_80088188 = vis_table_c.types[sp->unk2C0].weight * 1000 / 454;
         ui_draw_text(MESSAGE(28), 188, 217, &sp->style[0]);
         ui_draw_number(menu_figure_whole | 0x3000000, 224, 217, &sp->style[4]);
         ui_draw_glyph(18, 264, 217, &sp->style[0]);
@@ -7945,19 +7945,19 @@ void menu_equip_info_draw_item(void)
                       &sp->style[4]);
         ui_draw_glyph(53, 287, 217, &sp->style[0]);
     }
-    if (vis_table_c.unk0118[sp->unk2C0].unk27) {
+    if (vis_table_c.types[sp->unk2C0].max_durability) {
         ui_draw_text(MESSAGE(29), 16, 216, &sp->style[0]);
-        if (vis_table_c.unk0118[sp->unk2C0].unk28 < 4) {
-            ui_draw_number(vis_table_c.unk0118[sp->unk2C0].unk28 | 0x3000000, 80, 217,
+        if (vis_table_c.types[sp->unk2C0].durability < 4) {
+            ui_draw_number(vis_table_c.types[sp->unk2C0].durability | 0x3000000, 80, 217,
                           &sp->style[6]);
             ui_draw_glyph(14, 120, 217, &sp->style[2]);
-            ui_draw_number(vis_table_c.unk0118[sp->unk2C0].unk27 | 0x3000000, 136, 217,
+            ui_draw_number(vis_table_c.types[sp->unk2C0].max_durability | 0x3000000, 136, 217,
                           &sp->style[6]);
         } else {
-            ui_draw_number(vis_table_c.unk0118[sp->unk2C0].unk28 | 0x3000000, 80, 217,
+            ui_draw_number(vis_table_c.types[sp->unk2C0].durability | 0x3000000, 80, 217,
                           &sp->style[4]);
             ui_draw_glyph(14, 120, 217, &sp->style[0]);
-            ui_draw_number(vis_table_c.unk0118[sp->unk2C0].unk27 | 0x3000000, 136, 217,
+            ui_draw_number(vis_table_c.types[sp->unk2C0].max_durability | 0x3000000, 136, 217,
                           &sp->style[4]);
         }
     }
@@ -8426,16 +8426,16 @@ void menu_arrange_icons_draw_caption(void)
                       18, 202, &sp->style[0]);
     sp->style[0].cd &= 0x7f;
     if (id != -1) {
-        if (vis_table_c.unk0118[id].unk27) {
+        if (vis_table_c.types[id].max_durability) {
             ui_draw_text(MESSAGE(29), 74, 215, &sp->style[0]);
-            ui_draw_number(vis_table_c.unk0118[id].unk28 | 0x3000000, 138, 215, &sp->style[4]);
+            ui_draw_number(vis_table_c.types[id].durability | 0x3000000, 138, 215, &sp->style[4]);
             ui_draw_glyph(14, 174, 215, &sp->style[0]);
-            ui_draw_number(vis_table_c.unk0118[id].unk27 | 0x3000000, 190, 215, &sp->style[4]);
+            ui_draw_number(vis_table_c.types[id].max_durability | 0x3000000, 190, 215, &sp->style[4]);
         }
-        if (vis_table_c.unk0118[id].unk24) {
+        if (vis_table_c.types[id].weight) {
             ui_draw_text(MESSAGE(28), 250, 215, &sp->style[0]);
-            menu_figure_whole = vis_table_c.unk0118[id].unk24 * 100 / 454;
-            DAT_80088188 = vis_table_c.unk0118[id].unk24 * 1000 / 454;
+            menu_figure_whole = vis_table_c.types[id].weight * 100 / 454;
+            DAT_80088188 = vis_table_c.types[id].weight * 1000 / 454;
             ui_draw_number(menu_figure_whole | 0x3000000, 300, 215, &sp->style[4]);
             ui_draw_glyph(18, 339, 215, &sp->style[0]);
             ui_draw_number((u16)(DAT_80088188 - menu_figure_whole * 10) | 0x1000000, 346, 215,
@@ -8512,7 +8512,7 @@ void menu_arrange_icons_draw_details(void)
         ui_draw_image(&sp->unk350, &sp->unk358, 0, 0, 16);
         n = 0;
         k = 2;
-        count = vis_table_c.unk0118[id].unk10;
+        count = vis_table_c.types[id].attributes;
         for (i = 0, name_x = count_x; i < 4; i++) {
             int label_x;
             int value_x;

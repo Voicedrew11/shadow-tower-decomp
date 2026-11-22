@@ -30,7 +30,7 @@ ADDRESS(0x801ed9e8, 0x154)
 void map_kill_creature_open_warp(void)
 {
     Creature *e;
-    Vis88 *d3;
+    AreaObject *d3;
 
     viewer.unk218 = 5;
     e = &vis_table_a.entries[33];
@@ -60,7 +60,7 @@ animation_done:
     e->script_state = 0xf0;
     e->anim_frame = 0;
     e->hp = 0;
-    d3->unk05 = 0xed;
+    d3->kind = 0xed;
     viewer.unk218 = 0;
     fdat_801edb3c = 2;
     vis_table_a.unk612C = 0;

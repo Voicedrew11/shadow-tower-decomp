@@ -78,7 +78,7 @@ void map_restore_progress(void)
     Creature *e48 = &vis_table_a.entries[48];
     Creature *e50 = &vis_table_a.entries[50];
     Creature *e49 = &vis_table_a.entries[49];
-    Vis88 *d2 = &vis_table_b.entries[2];
+    AreaObject *d2 = &vis_table_b.entries[2];
     int n;
 
     if (game_progress.unk1440.word >> 17 & 1) {
@@ -104,7 +104,7 @@ void map_restore_progress(void)
         fdat_801ee0b8 = 3;
     else {
         fdat_801ee0b8 = 4;
-        d2->unk4A.door.unk4F = 0xff;
+        d2->params.door.lock = 0xff;
     }
     if (game_progress.unk1448[13] >= 2)
         e50->flags &= ~0x2000000;
@@ -146,24 +146,24 @@ void map_restore_progress(void)
 ADDRESS(0x801ed71c, 0x388)
 void map_update_events(void)
 {
-    Vis88 *d4 = &vis_table_b.entries[4];
+    AreaObject *d4 = &vis_table_b.entries[4];
     Creature *e48 = &vis_table_a.entries[48];
-    Vis88 *d3 = &vis_table_b.entries[3];
+    AreaObject *d3 = &vis_table_b.entries[3];
     Creature *e33 = &vis_table_a.entries[33];
     Creature *e50 = &vis_table_a.entries[50];
     Creature *e49 = &vis_table_a.entries[49];
-    Vis88 *d2 = &vis_table_b.entries[2];
+    AreaObject *d2 = &vis_table_b.entries[2];
 
-    if (fdat_801ee0b4 == 0 && d4->unk0C == 0xff) {
-        d3->unk0C = 12;
+    if (fdat_801ee0b4 == 0 && d4->state == 0xff) {
+        d3->state = 12;
         fdat_801ee0b4 = 1;
         game_progress.unk1440.word |= 0x20000;
     }
-    if (fdat_801ee0b4 == 1 && d3->unk0C == 0xff)
+    if (fdat_801ee0b4 == 1 && d3->state == 0xff)
         fdat_801ee0b4 = 2;
     if (fdat_801ee0b4 == 2)
         map_wind_down_texanims();
-    if (fdat_801ee0b4 == 3 && ((VisRecord *)viewer.unk174)->unk07 != 3) {
+    if (fdat_801ee0b4 == 3 && ((MapBlock *)viewer.unk174)->zone != 3) {
         map_move_texture_pages();
         creature_despawn(e48);
         e33->spawn_chance = 100;
@@ -195,7 +195,7 @@ void map_update_events(void)
         creature_force_talk(e49, 0, 0);
         creature_start_script(e49, 0);
         play_unlock_sound();
-        d2->unk4A.door.unk4F = 0xff;
+        d2->params.door.lock = 0xff;
         creature_fade_out_despawn(e49);
         fdat_801ee0b8 = 4;
         e49->flags &= ~0x2000000;
@@ -316,7 +316,7 @@ void map_move_texture_pages(void)
     MoveImage(&d, 512, 483);
     MoveImage(&e, 512, 484);
     MoveImage(&f, 0, 490);
-    flags = vis_lists.unk47E0;
+    flags = vis_lists.floor_kinds_off;
     fdat_801ee0b4 = 4;
-    vis_lists.unk47E0 = flags | 8;
+    vis_lists.floor_kinds_off = flags | 8;
 }

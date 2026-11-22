@@ -60,18 +60,18 @@ void map_slide_ground_item(void);
 ADDRESS(0x801ed4a0, 0x90)
 void map_restore_progress(void)
 {
-    Vis88 *d = &vis_table_b.entries[5];
-    Vis48 *item = &vis_table_c.entries[11];
+    AreaObject *d = &vis_table_b.entries[5];
+    GroundItem *item = &vis_table_c.entries[11];
 
     if (!game_progress.unk1440.bit.f15) {
-        item->unk22 = 4;
-        d[0].unk00 = d[1].unk00 = d[2].unk00 = d[3].unk00 = d[4].unk00 = 2;
+        item->state = 4;
+        d[0].visibility = d[1].visibility = d[2].visibility = d[3].visibility = d[4].visibility = 2;
         fdat_801edb84 = 0;
     } else {
-        item->unk22 = 5;
-        d[0].unk00 = d[1].unk00 = d[2].unk00 = d[3].unk00 = d[4].unk00 = 0;
+        item->state = 5;
+        d[0].visibility = d[1].visibility = d[2].visibility = d[3].visibility = d[4].visibility = 0;
         fdat_801edb84 = 2;
-        item->unk08.vx += 0x1e0;
+        item->position.vx += 0x1e0;
     }
 }
 
@@ -80,11 +80,11 @@ void map_restore_progress(void)
 ADDRESS(0x801ed530, 0xb0)
 void map_update_events(void)
 {
-    Vis88 *d = &vis_table_b.entries[5];
+    AreaObject *d = &vis_table_b.entries[5];
 
     if (fdat_801edb84 == 1) {
         map_slide_ground_item();
-        d[0].unk00 = d[1].unk00 = d[2].unk00 = d[3].unk00 = d[4].unk00 = 0;
+        d[0].visibility = d[1].visibility = d[2].visibility = d[3].visibility = d[4].visibility = 0;
         if (!game_progress.unk1440.bit.f16) {
             lighting.area_mode[11] = 0x24;
             lighting.area_mode[27] = 0x24;
@@ -125,7 +125,7 @@ void map_use_item_on_object(short id)
     req.speed = 0;
     req.heading = 0;
     if (id == 0x130) {
-        if (object_find_in_reach((VisLists *)&req) == 4) {
+        if (object_find_in_reach((CollisionState *)&req) == 4) {
             fdat_801edb84 = 1;
             DAT_801cd0e0 = 1;
         } else {

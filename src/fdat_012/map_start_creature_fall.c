@@ -60,7 +60,7 @@
 ADDRESS(0x801eda38, 0x1b4)
 void map_start_creature_fall(Creature *e)
 {
-    Vis48 *c;
+    GroundItem *c;
     CreatureType *r;
     u16 info;
     u32 range;
@@ -86,7 +86,7 @@ void map_start_creature_fall(Creature *e)
     e->collision_tests = collision & ~0x80;
     if (game_progress.unk1448[r->talk_id] != 4)
         return;
-    if (vis_table_c.unk0000[3] == 16) {
+    if (vis_table_c.ground_item_counts[3] == 16) {
         c = &vis_table_c.entries[48];
         i = 15;
         while (i--) {
@@ -94,22 +94,22 @@ void map_start_creature_fall(Creature *e)
             c++;
         }
     } else {
-        c = &vis_table_c.entries[48 + vis_table_c.unk0000[3]];
-        vis_table_c.unk0000[3]++;
+        c = &vis_table_c.entries[48 + vis_table_c.ground_item_counts[3]];
+        vis_table_c.ground_item_counts[3]++;
     }
-    c->unk00 = 0x10a;
-    c->unk02 = e->block;
-    *(u32 *)c->unk04 = 0;
-    c->unk08 = e->position;
-    *(SVECTOR *)&c->unk18 = *(SVECTOR *)&e->rot_x;
-    info = vis_table_c.unk0118[266].unk1E;
-    c->unk22 = 2;
-    c->unk23 = 2;
-    c->unk2c = 1;
-    c->unk24 = 0;
+    c->item = 0x10a;
+    c->block = e->block;
+    *(u32 *)c->anim_slot = 0;
+    c->position = e->position;
+    *(SVECTOR *)&c->rot_x = *(SVECTOR *)&e->rot_x;
+    info = vis_table_c.types[266].flags;
+    c->state = 2;
+    c->prev_state = 2;
+    c->area = 1;
+    c->draw_flags = 0;
     c->unk20 = info;
     distance = e->player_dist_xz;
-    c->unk26 = 0;
-    c->unk25 = 0;
-    c->unk28 = distance;
+    c->vertical_speed = 0;
+    c->bounces = 0;
+    c->player_dist_xz = distance;
 }

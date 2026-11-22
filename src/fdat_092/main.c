@@ -92,33 +92,33 @@ ADDRESS(0x801ed4a0, 0x1e0)
 void map_restore_progress(void)
 {
     Creature *e48 = &vis_table_a.entries[48];
-    Vis88 *d5 = &vis_table_b.entries[5];
-    Vis88 *d6 = &vis_table_b.entries[6];
-    Vis88 *d7 = &vis_table_b.entries[7];
-    Vis88 *d8 = &vis_table_b.entries[8];
-    Vis48 *c5 = &vis_table_c.entries[5];
+    AreaObject *d5 = &vis_table_b.entries[5];
+    AreaObject *d6 = &vis_table_b.entries[6];
+    AreaObject *d7 = &vis_table_b.entries[7];
+    AreaObject *d8 = &vis_table_b.entries[8];
+    GroundItem *c5 = &vis_table_c.entries[5];
     Creature *e39 = &vis_table_a.entries[39];
     Creature *e38 = &vis_table_a.entries[38];
 
     if (game_progress.unk1444.bit.f12 == 1) {
         vis_table_a.entries[40].spawn_chance = 100;
-        c5->unk22 = 4;
+        c5->state = 4;
         fdat_801edf54 = 0xff;
     } else {
         fdat_801edf54 = 0;
-        c5->unk22 = 4;
+        c5->state = 4;
         e48->status.bytes[3] = 1;
     }
     if (game_progress.unk1444.bit.f13 == 1) {
-        d8->unk00 = 2;
-        d7->unk00 = 2;
+        d8->visibility = 2;
+        d7->visibility = 2;
         fdat_801edf5c = 0xff;
     } else {
         fdat_801edf5c = 0;
     }
     if (game_progress.unk1444.bit.f14 == 1) {
-        d6->unk00 = 2;
-        d5->unk00 = 2;
+        d6->visibility = 2;
+        d5->visibility = 2;
         fdat_801edf58 = 0xff;
     } else {
         fdat_801edf58 = 0;
@@ -159,23 +159,23 @@ ADDRESS(0x801ed680, 0x4a0)
 void map_update_events(void)
 {
     Creature *e48 = &vis_table_a.entries[48];
-    Vis88 *d5 = &vis_table_b.entries[5];
+    AreaObject *d5 = &vis_table_b.entries[5];
     CreatureType *r14 = &vis_table_a.types[14];
     Creature *e40 = &vis_table_a.entries[40];
     Creature *e39 = &vis_table_a.entries[39];
     Creature *e38 = &vis_table_a.entries[38];
     Creature *e32 = &vis_table_a.entries[32];
     Creature *e35 = &vis_table_a.entries[35];
-    Vis88 *d6 = &vis_table_b.entries[6];
-    Vis88 *d7 = &vis_table_b.entries[7];
-    Vis88 *d8 = &vis_table_b.entries[8];
-    Vis88 *d14 = &vis_table_b.entries[14];
-    Vis88 *d17 = &vis_table_b.entries[17];
+    AreaObject *d6 = &vis_table_b.entries[6];
+    AreaObject *d7 = &vis_table_b.entries[7];
+    AreaObject *d8 = &vis_table_b.entries[8];
+    AreaObject *d14 = &vis_table_b.entries[14];
+    AreaObject *d17 = &vis_table_b.entries[17];
 
     if (fdat_801edf54 == 0 && game_progress.unk1448[r14->talk_id] == 1) {
         viewer.unk218 = 5;
         map_play_creature_script();
-        if (!(vis_table_c.unk0070[1] & 0x10000))
+        if (!(vis_table_c.collected_bits[1] & 0x10000))
             map_offer_item_at_player();
         creature_fade_out_despawn(e48);
         creature_spawn_now(e40);
@@ -193,16 +193,16 @@ void map_update_events(void)
         game_progress.unk1444.word |= 0x1000;
     }
     if (fdat_801edf5c == 0 && e32->hp == 0) {
-        d8->unk00 = 2;
-        d7->unk00 = 2;
+        d8->visibility = 2;
+        d7->visibility = 2;
         fdat_801edf5c = 0xff;
         game_progress.unk1444.word |= 0x2000;
         if (fdat_801edf58 == 0xff)
             fdat_801edf60 = 1;
     }
     if (fdat_801edf58 == 0 && e35->hp == 0) {
-        d6->unk00 = 2;
-        d5->unk00 = 2;
+        d6->visibility = 2;
+        d5->visibility = 2;
         fdat_801edf58 = 0xff;
         game_progress.unk1444.word |= 0x4000;
         if (fdat_801edf5c == 0xff)
@@ -213,7 +213,7 @@ void map_update_events(void)
             lighting.area_mode[9] = 0x41;
         fdat_801edf60 = 0xff;
     }
-    if (fdat_801edf64 == 0 && d14->unk0C == 1) {
+    if (fdat_801edf64 == 0 && d14->state == 1) {
         creature_spawn_now(e39);
         e39->fade = -1;
         e39->status.bytes[2] &= 0xf2;
@@ -225,7 +225,7 @@ void map_update_events(void)
         fdat_801edf64 = 1;
         game_progress.unk1444.word |= 0x10000;
     }
-    if (fdat_801edf68 == 0 && d17->unk0C == 1) {
+    if (fdat_801edf68 == 0 && d17->state == 1) {
         creature_spawn_now(e38);
         e38->fade = -1;
         e38->status.bytes[2] &= 0xf2;
@@ -237,9 +237,9 @@ void map_update_events(void)
         fdat_801edf68 = 1;
         game_progress.unk1444.word |= 0x20000;
     }
-    if (fdat_801edf64 == 1 && d14->unk10 > 0xc00)
+    if (fdat_801edf64 == 1 && d14->anim_frame > 0xc00)
         fdat_801edf64 = 2;
-    if (fdat_801edf68 == 1 && d17->unk10 > 0xc00)
+    if (fdat_801edf68 == 1 && d17->anim_frame > 0xc00)
         fdat_801edf68 = 2;
     if (fdat_801edf64 == 2) {
         if (e39->position.vy <= fdat_801edf6c) {
@@ -285,14 +285,14 @@ ADDRESS(0x801edea4, 0xb0)
 void map_offer_item_at_player(void)
 {
     StAnimFile *file;
-    Vis48 *item = &vis_table_c.entries[5];
-    Vis44 *kind = &vis_table_c.unk0118[48];
+    GroundItem *item = &vis_table_c.entries[5];
+    ItemType *kind = &vis_table_c.types[48];
 
-    item->unk08 = viewer.position;
-    item->unk22 = 2;
-    item->unk2D -= 3;
+    item->position = viewer.position;
+    item->state = 2;
+    item->depth_bias -= 3;
     for (;;) {
-        anim_get_file(kind->unk4 + 588, &file);
+        anim_get_file(kind->model + 588, &file);
         if (file != NULL)
             break;
         world_run_frame(NULL, NULL, 0);

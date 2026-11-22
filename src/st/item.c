@@ -66,10 +66,10 @@ void player_examine(long *pos, SVECTOR *rot)
     u16 r;
     int n;
     int d;
-    Vis48 *c;
+    GroundItem *c;
     Creature *a;
-    Vis88 *b;
-    Vis24 *def;
+    AreaObject *b;
+    AreaObjectType *def;
 
     p.vx = pos[0];
     p.vy = pos[1] + 1600;
@@ -84,16 +84,16 @@ void player_examine(long *pos, SVECTOR *rot)
     req.speed = 0;
     req.height = 1600;
     req.heading = 0;
-    i = ground_item_find_in_reach((VisLists *)&req, 1);
+    i = ground_item_find_in_reach((CollisionState *)&req, 1);
     first_result = i;
     if (i != -1) {
         c = &vis_table_c.entries[i];
-        c->unk23 = c->unk22;
-        c->unk22 = 3;
+        c->prev_state = c->state;
+        c->state = 3;
         return;
     }
-    /* VisLists starts with the request fields creature_find_in_reach reads. */
-    i = creature_find_in_reach((VisLists *)&req, 1);
+    /* CollisionState starts with the request fields creature_find_in_reach reads. */
+    i = creature_find_in_reach((CollisionState *)&req, 1);
     if (i != first_result) {
         a = &vis_table_a.entries[i];
         up = ratan2(a->position.vy - a->height - viewer.position.vy, a->player_dist_xz);
@@ -114,25 +114,25 @@ void player_examine(long *pos, SVECTOR *rot)
     }
     i = 0;
     req.radius = 256;
-    vis_lists.unk4 = p;
-    vis_lists.unk1C = 256;
-    vis_lists.unk1E = 1600;
-    vis_lists.unk14.vx = 0;
-    vis_lists.unk14.vy = 0;
-    vis_lists.unk14.vz = 0;
-    vis_lists.unk22 = 0;
-    vis_lists.unk20 = 0;
-    vis_lists.unk0 = 0;
+    vis_lists.position = p;
+    vis_lists.radius = 256;
+    vis_lists.height = 1600;
+    vis_lists.velocity.vx = 0;
+    vis_lists.velocity.vy = 0;
+    vis_lists.velocity.vz = 0;
+    vis_lists.speed = 0;
+    vis_lists.heading = 0;
+    vis_lists.tests = 0;
     for (; (i = object_find_usable(i, &vis_lists)) != -1; i++) {
         b = &vis_table_b.entries[i];
-        def = &vis_table_b.unk0000[b->unk0a];
+        def = &vis_table_b.types[b->type];
         DAT_801cd0e0 = 1;
-        b->unk0E = 1;
+        b->examined = 1;
         kind = def->unk00[0];
         switch (kind) {
         case 254:
-            if (b->unk0C == 0)
-                b->unk0C = 1;
+            if (b->state == 0)
+                b->state = 1;
             break;
         /* An empty case above 226: retail's compare tree splits its four
          * upper cases at 226, which takes a fifth node on that side. */
@@ -142,43 +142,43 @@ void player_examine(long *pos, SVECTOR *rot)
         case 1:
         case 50:
         case 51:
-            if (b->unk4A.door.unk4F == 251) {
-                r = (short)b->unk22 > 2048 ? b->unk22 - 4096 : b->unk22;
+            if (b->params.door.lock == 251) {
+                r = (short)b->player_bearing > 2048 ? b->player_bearing - 4096 : b->player_bearing;
                 /* The offset window wraps at the halfword boundary. */
                 if ((u16)(r + 1023) < 2047) {
                     play_unlock_sound();
-                    b->unk4A.door.unk4F = 255;
+                    b->params.door.lock = 255;
                 }
-            } else if (b->unk4A.door.unk4F == 252) {
-                r = (short)b->unk22 > 2048 ? b->unk22 - 4096 : b->unk22;
+            } else if (b->params.door.lock == 252) {
+                r = (short)b->player_bearing > 2048 ? b->player_bearing - 4096 : b->player_bearing;
                 if ((u16)(r + 1024) >= 2049) {
                     play_unlock_sound();
-                    b->unk4A.door.unk4F = 255;
+                    b->params.door.lock = 255;
                 }
             }
-            if (b->unk4A.door.unk4F == 255) {
-                if (b->unk0C == 0)
-                    b->unk0C = 1;
-                if (b->unk0C == 7)
-                    b->unk0C = 8;
-            } else if (b->unk4A.door.unk4F < 0xf0 || b->unk4A.door.unk4F > 0xf3) {
+            if (b->params.door.lock == 255) {
+                if (b->state == 0)
+                    b->state = 1;
+                if (b->state == 7)
+                    b->state = 8;
+            } else if (b->params.door.lock < 0xf0 || b->params.door.lock > 0xf3) {
                 play_locked_sound();
             }
             break;
         case 52:
-            if (b->unk4A.door.unk4F == 255) {
-                if (b->unk0C == 0) {
-                    b->unk0C = 1;
-                    b->unk02 = 0;
+            if (b->params.door.lock == 255) {
+                if (b->state == 0) {
+                    b->state = 1;
+                    b->anim = 0;
                 }
-                if (b->unk0C == 255 && b->unk49 != 252) {
-                    b->unk0C = 3;
-                    b->unk02 = 1;
+                if (b->state == 255 && b->unk49 != 252) {
+                    b->state = 3;
+                    b->anim = 1;
                 }
             }
             break;
         case 225:
-            d = (u16)(b->unk36 - b->unk20) & 0xfff;
+            d = (u16)(b->facing - b->player_heading) & 0xfff;
             if (d < 512 || d > 3584)
                 talk_show_message(b->unk48);
             break;
@@ -198,8 +198,8 @@ void player_examine(long *pos, SVECTOR *rot)
                 b = vis_table_b.entries;
                 n = 240;
                 while (n--) {
-                    if (b->unk05 == 236 && b->unk54 != -1) {
-                        sound_stop(b->unk54, b->unk4A.snd.unk4A + 1108);
+                    if (b->kind == 236 && b->unk54 != -1) {
+                        sound_stop(b->unk54, b->params.snd.sound + 1108);
                         b->unk54 = -1;
                     }
                     b++;

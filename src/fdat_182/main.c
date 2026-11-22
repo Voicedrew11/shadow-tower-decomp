@@ -103,7 +103,7 @@ ADDRESS(0x801ed604, 0x58)
 void map_use_item_request_warp(short id)
 {
     if (id == 0x131 && fdat_801edc50 == 0) {
-        if (((VisRecord *)viewer.unk174)->unk07 == 3)
+        if (((MapBlock *)viewer.unk174)->zone == 3)
             fdat_801edc50 = 2;
         else
             fdat_801edc50 = 1;

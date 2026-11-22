@@ -104,7 +104,7 @@ int fdat_801edb3c;
 ADDRESS(0x801ed614, 0xac)
 void map_restore_progress(void)
 {
-    Vis88 *b = &vis_table_b.entries[3];
+    AreaObject *b = &vis_table_b.entries[3];
     Creature *e = &vis_table_a.entries[33];
 
     if (game_progress.unk1440.bit.f16) {
@@ -119,7 +119,7 @@ void map_restore_progress(void)
         fdat_801edb3c = 2;
     } else {
         fdat_801edb3c = 0;
-        b->unk05 = 0xff;
+        b->kind = 0xff;
         e->flags &= ~0x2000000;
     }
 }

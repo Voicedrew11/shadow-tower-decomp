@@ -155,18 +155,18 @@ void game_load_start_file(void)
                 continue;
             equipment[slot] = value;
             inventory.counts[value].count++;
-            if (value < 266 && !(vis_table_c.unk0070[value / 32] & (1 << (value % 32))))
+            if (value < 266 && !(vis_table_c.collected_bits[value / 32] & (1 << (value % 32))))
                 viewer.unk28++;
-            vis_table_c.unk0070[value / 32] |= 1 << (value % 32);
+            vis_table_c.collected_bits[value / 32] |= 1 << (value % 32);
         } else {
             if (value == FN_END)
                 continue;
             if (value <= 0)
                 continue;
             inventory.counts[id].count = value;
-            if (id < 266 && !(vis_table_c.unk0070[id / 32] & (1 << (id % 32))))
+            if (id < 266 && !(vis_table_c.collected_bits[id / 32] & (1 << (id % 32))))
                 viewer.unk28++;
-            vis_table_c.unk0070[id / 32] |= 1 << (id % 32);
+            vis_table_c.collected_bits[id / 32] |= 1 << (id % 32);
         }
     }
     player_recalc_stats();
@@ -177,11 +177,11 @@ void game_load_start_file(void)
     mem_free(buf);
     if (all_items) {
         for (i = 0; i < 314; i++) {
-            if (vis_table_c.unk0118[i].unk4 != 0xff)
+            if (vis_table_c.types[i].model != 0xff)
                 inventory.counts[i].count++;
-            if (i < 266 && !(vis_table_c.unk0070[i / 32] & (1 << (i % 32))))
+            if (i < 266 && !(vis_table_c.collected_bits[i / 32] & (1 << (i % 32))))
                 viewer.unk28++;
-            vis_table_c.unk0070[i / 32] |= 1 << (i % 32);
+            vis_table_c.collected_bits[i / 32] |= 1 << (i % 32);
         }
     }
     if (clear_flags) {

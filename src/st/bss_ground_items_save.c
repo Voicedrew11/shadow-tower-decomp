@@ -16,6 +16,6 @@
 #include <st/vis.h>
 
 DATA(0x801c76f8, 0x4310, ".bss")
-VisTableC vis_table_c;
+ItemTable vis_table_c;
 DATA(0x801cba08, 0x1714, ".bss")
 Data801cba08 game_progress;

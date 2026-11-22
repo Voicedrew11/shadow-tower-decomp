@@ -107,8 +107,8 @@ void menu_equip_pick_item(void)
         mem_free(sp->unk0.list.ids);
     } else if (PAD.unk4 & 0x4000) {
         if (EQ.unk0 != -1) {
-            if (EQ.unk10 != SLOT(0) && EQ.unk10 != SLOT(13) && vis_table_c.unk0118[EQ.unk0].unk27 &&
-                !vis_table_c.unk0118[EQ.unk0].unk28) {
+            if (EQ.unk10 != SLOT(0) && EQ.unk10 != SLOT(13) && vis_table_c.types[EQ.unk0].max_durability &&
+                !vis_table_c.types[EQ.unk0].durability) {
                 play_refuse_sound();
             } else {
                 play_confirm_sound();
@@ -123,24 +123,24 @@ void menu_equip_pick_item(void)
                 if (EQ.unk10 == SLOT(2))
                     viewer.unk38[15] = EQ.unk0;
                 if (EQ.unk10 == SLOT(9) && viewer.unk38[9] != 0xffff &&
-                    vis_table_c.unk0118[viewer.unk38[9]].unk26 == 10) {
+                    vis_table_c.types[viewer.unk38[9]].category == 10) {
                     viewer.unk38[2] = 0xffff;
                     viewer.unk38[10] = 0xffff;
                 }
                 if ((EQ.unk10 == SLOT(10) || EQ.unk10 == SLOT(2)) && viewer.unk38[9] != 0xffff &&
-                    *EQ.unk10 != 0xffff && vis_table_c.unk0118[viewer.unk38[9]].unk26 == 10)
+                    *EQ.unk10 != 0xffff && vis_table_c.types[viewer.unk38[9]].category == 10)
                     viewer.unk38[9] = 0xffff;
                 if (EQ.unk10 == SLOT(3) && viewer.unk38[3] != 0xffff &&
-                    vis_table_c.unk0118[viewer.unk38[3]].unk26 == 9)
+                    vis_table_c.types[viewer.unk38[3]].category == 9)
                     viewer.unk38[16] = 0xffff;
                 if (EQ.unk10 == SLOT(4) && viewer.unk38[4] != 0xffff &&
-                    vis_table_c.unk0118[viewer.unk38[4]].unk26 == 9)
+                    vis_table_c.types[viewer.unk38[4]].category == 9)
                     viewer.unk38[17] = 0xffff;
                 if (EQ.unk10 == SLOT(16) && viewer.unk38[3] != 0xffff && viewer.unk38[16] != 0xffff &&
-                    vis_table_c.unk0118[viewer.unk38[3]].unk26 == 9)
+                    vis_table_c.types[viewer.unk38[3]].category == 9)
                     viewer.unk38[3] = 0xffff;
                 if (EQ.unk10 == SLOT(17) && viewer.unk38[4] != 0xffff && viewer.unk38[17] != 0xffff &&
-                    vis_table_c.unk0118[viewer.unk38[4]].unk26 == 9)
+                    vis_table_c.types[viewer.unk38[4]].category == 9)
                     viewer.unk38[4] = 0xffff;
             }
         } else {
@@ -161,7 +161,7 @@ void menu_equip_pick_item(void)
         if (EQ.unk0 == -1)
             cd_read_member(6, 801, cd_file_buffer);
         else
-            cd_read_member(6, vis_table_c.unk0118[EQ.unk0].unk5[0] + 600, cd_file_buffer);
+            cd_read_member(6, vis_table_c.types[EQ.unk0].unk5[0] + 600, cd_file_buffer);
         tim_load_images_at(cd_file_buffer, &pos, NULL, 1);
         EQ.unk4 = EQ.unk0;
     }
@@ -187,7 +187,7 @@ int menu_equip_pick_slot(int *sel)
     int kind;
     int cur;
     int i;
-    VisTableC *table;
+    ItemTable *table;
 
     if (PAD.unk4 & 0x2000) {
         play_cancel_sound();
@@ -352,19 +352,19 @@ int menu_equip_pick_slot(int *sel)
         table = &vis_table_c;
         for (i = 0; i < 266; i++) {
             if (!inventory.counts[i].count || inventory.counts[i].flag ||
-                table->unk0118[i].unk26 == 255)
+                table->types[i].category == 255)
                 continue;
             switch (kind) {
             case 8:
                 if (i == (EQ.unk10 == SLOT(1) ? viewer.unk38[14] : viewer.unk38[1]))
                     continue;
-                if (table->unk0118[i].unk26 == kind)
+                if (table->types[i].category == kind)
                     sp->unk0.list.ids[sp->unk0.list.count++] = i;
                 break;
             case 4:
                 if (i == (EQ.unk10 == SLOT(0) ? viewer.unk38[13] : viewer.unk38[0]))
                     continue;
-                if (table->unk0118[i].unk26 == kind)
+                if (table->types[i].category == kind)
                     sp->unk0.list.ids[sp->unk0.list.count++] = i;
                 break;
             case 6:
@@ -372,11 +372,11 @@ int menu_equip_pick_slot(int *sel)
                     continue;
                 if (EQ.unk10 == SLOT(4) && i == viewer.unk38[3])
                     continue;
-                if (table->unk0118[i].unk26 == 6 || table->unk0118[i].unk26 == 9)
+                if (table->types[i].category == 6 || table->types[i].category == 9)
                     sp->unk0.list.ids[sp->unk0.list.count++] = i;
                 break;
             case 1:
-                if (table->unk0118[i].unk26 == 1 || table->unk0118[i].unk26 == 10)
+                if (table->types[i].category == 1 || table->types[i].category == 10)
                     sp->unk0.list.ids[sp->unk0.list.count++] = i;
                 break;
             case 7:
@@ -384,11 +384,11 @@ int menu_equip_pick_slot(int *sel)
                     continue;
                 if (EQ.unk10 == SLOT(17) && i == viewer.unk38[16])
                     continue;
-                if (table->unk0118[i].unk26 == kind)
+                if (table->types[i].category == kind)
                     sp->unk0.list.ids[sp->unk0.list.count++] = i;
                 break;
             default:
-                if (table->unk0118[i].unk26 == kind)
+                if (table->types[i].category == kind)
                     sp->unk0.list.ids[sp->unk0.list.count++] = i;
                 break;
             }
@@ -405,7 +405,7 @@ int menu_equip_pick_slot(int *sel)
             EQ.unk8 = i;
         }
         if (cur != 0xffff)
-            i = vis_table_c.unk0118[cur].unk5[0];
+            i = vis_table_c.types[cur].unk5[0];
         else
             i = -1;
         sp->unk2DC |= 0x8;
@@ -608,8 +608,8 @@ void menu_equip_draw_item_panel(void)
         sp->style[0].cd |= 0x80;
         ui_draw_text(MESSAGE_IN(sp->unk0.list.messages, id), 24, 176, &sp->style[0]);
         sp->style[0].cd &= 0x7f;
-        if (vis_table_c.unk0118[id].unk27) {
-            if (vis_table_c.unk0118[id].unk28 < 4) {
+        if (vis_table_c.types[id].max_durability) {
+            if (vis_table_c.types[id].durability < 4) {
                 label = &sp->style[2];
                 value = &sp->style[6];
             } else {
@@ -617,9 +617,9 @@ void menu_equip_draw_item_panel(void)
                 value = &sp->style[4];
             }
             ui_draw_text(MESSAGE(109), 48, 190, label);
-            ui_draw_number(vis_table_c.unk0118[id].unk28 | 0x3000000, 104, 190, value);
+            ui_draw_number(vis_table_c.types[id].durability | 0x3000000, 104, 190, value);
             ui_draw_glyph(74, 136, 190, label);
-            ui_draw_number(vis_table_c.unk0118[id].unk27 | 0x3000000, 148, 190, value);
+            ui_draw_number(vis_table_c.types[id].max_durability | 0x3000000, 148, 190, value);
         }
     }
     ui_draw_text(MESSAGE(103), 165, 46, &sp->style[0]);
@@ -630,15 +630,15 @@ void menu_equip_draw_item_panel(void)
             ui_draw_number_fixed(0x13000000, 207, y, &sp->style[4]);
             ui_draw_number_fixed(0x13000000, 273, y, &sp->style[4]);
         } else {
-            ui_draw_number_fixed(vis_table_c.unk0118[id].unk10[i] | 0x13000000, 207, y, &sp->style[4]);
-            ui_draw_number_fixed(vis_table_c.unk0118[id].unk10[i + 7] | 0x13000000, 273, y, &sp->style[4]);
+            ui_draw_number_fixed(vis_table_c.types[id].attributes[i] | 0x13000000, 207, y, &sp->style[4]);
+            ui_draw_number_fixed(vis_table_c.types[id].attributes[i + 7] | 0x13000000, 273, y, &sp->style[4]);
         }
         y += 14;
     }
     if (id != -1) {
-        if (vis_table_c.unk0118[id].unk24) {
-            menu_figure_whole = vis_table_c.unk0118[id].unk24 * 100 / 454;
-            DAT_80088188 = vis_table_c.unk0118[id].unk24 * 1000 / 454;
+        if (vis_table_c.types[id].weight) {
+            menu_figure_whole = vis_table_c.types[id].weight * 100 / 454;
+            DAT_80088188 = vis_table_c.types[id].weight * 1000 / 454;
             ui_draw_text(MESSAGE(104), 221, 156, &sp->style[0]);
             ui_draw_number_fixed(menu_figure_whole | 0x3000000, 249, 156, &sp->style[4]);
             ui_draw_glyph(78, 269, 156, &sp->style[0]);
@@ -768,8 +768,8 @@ void menu_equip_draw_slots(void)
             ui_draw_text(MESSAGE(934), 92, y, &sp->style[0]);
         }
         row = sp->unk2E2 + i;
-        if (row != 12 && row != 14 && cur != 0xffff && vis_table_c.unk0118[cur].unk27) {
-            if (vis_table_c.unk0118[cur].unk28 < 4) {
+        if (row != 12 && row != 14 && cur != 0xffff && vis_table_c.types[cur].max_durability) {
+            if (vis_table_c.types[cur].durability < 4) {
                 label2 = &sp->style[2];
                 value2 = &sp->style[6];
             } else {
@@ -777,9 +777,9 @@ void menu_equip_draw_slots(void)
                 value2 = &sp->style[4];
             }
             ui_draw_text(MESSAGE(109), 92, y2, label2);
-            ui_draw_number(vis_table_c.unk0118[cur].unk28 | 0x3000000, 172, y2, value2);
+            ui_draw_number(vis_table_c.types[cur].durability | 0x3000000, 172, y2, value2);
             ui_draw_glyph(74, 204, y2, label2);
-            ui_draw_number(vis_table_c.unk0118[cur].unk27 | 0x3000000, 220, y2, value2);
+            ui_draw_number(vis_table_c.types[cur].max_durability | 0x3000000, 220, y2, value2);
         }
     }
 }
@@ -951,7 +951,7 @@ void menu_arrange_list_open(void)
     sp->unk0.grid.count0 = 0;
     sp->unk0.grid.count1 = 0;
     for (i = 0; i < 314; i++) {
-        if (vis_table_c.unk0118[i].unk5[0] != 255 && i < 314 && i != 266 &&
+        if (vis_table_c.types[i].unk5[0] != 255 && i < 314 && i != 266 &&
             inventory.counts[i].count && i != viewer.unk38[0] && i != viewer.unk38[1] &&
             i != viewer.unk38[2] && i != viewer.unk38[3] && i != viewer.unk38[4] &&
             i != viewer.unk38[5] && i != viewer.unk38[7] && i != viewer.unk38[8] &&
@@ -1286,7 +1286,7 @@ void menu_arrange_list_loop(void)
                 else
                     id = GRID->ids1[GRID->row1 + sp->unk2E0];
                 if (ST.unk2 != id && id != -1) {
-                    menu_arrange_list_queue_image(6, vis_table_c.unk0118[id].unk5[0] + 200);
+                    menu_arrange_list_queue_image(6, vis_table_c.types[id].unk5[0] + 200);
                     ST.unk2 = id;
                 }
             }
@@ -1397,7 +1397,7 @@ void menu_arrange_list_draw_details(void)
         }
         n = 0;
         k = 2;
-        count = vis_table_c.unk0118[id].unk10;
+        count = vis_table_c.types[id].attributes;
         number_narrow = 1;
         for (i = 0; i < 4; i++) {
             for (j = 0; j < 4; j++) {
@@ -1418,8 +1418,8 @@ void menu_arrange_list_draw_details(void)
     done:
         number_narrow = 0;
         text_y += 60;
-        if (vis_table_c.unk0118[id].unk27) {
-            if (vis_table_c.unk0118[id].unk28 < 4) {
+        if (vis_table_c.types[id].max_durability) {
+            if (vis_table_c.types[id].durability < 4) {
                 label = &sp->style[2];
                 value = &sp->style[6];
             } else {
@@ -1427,14 +1427,14 @@ void menu_arrange_list_draw_details(void)
                 value = &sp->style[4];
             }
             ui_draw_text(MESSAGE(29), text_x, text_y, label);
-            ui_draw_number(vis_table_c.unk0118[id].unk28 | 0x3000000, text_x + 70, text_y, value);
+            ui_draw_number(vis_table_c.types[id].durability | 0x3000000, text_x + 70, text_y, value);
             ui_draw_glyph(14, text_x + 106, text_y, label);
-            ui_draw_number(vis_table_c.unk0118[id].unk27 | 0x3000000, text_x + 122, text_y, value);
+            ui_draw_number(vis_table_c.types[id].max_durability | 0x3000000, text_x + 122, text_y, value);
         }
         text_y += 15;
-        if (vis_table_c.unk0118[id].unk24) {
-            whole = vis_table_c.unk0118[id].unk24 * 100 / 454;
-            tenths = vis_table_c.unk0118[id].unk24 * 1000 / 454 - whole * 10;
+        if (vis_table_c.types[id].weight) {
+            whole = vis_table_c.types[id].weight * 100 / 454;
+            tenths = vis_table_c.types[id].weight * 1000 / 454 - whole * 10;
             ui_draw_text(MESSAGE(28), text_x, text_y, &sp->style[0]);
             ui_draw_number(whole | 0x3000000, text_x + 70, text_y, &sp->style[4]);
             ui_draw_glyph(18, text_x + 109, text_y, &sp->style[0]);

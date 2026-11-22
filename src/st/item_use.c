@@ -73,15 +73,15 @@ void item_use(int id)
     case 0x117:
     case 0x118:
         i = 0;
-        vis_lists.unk4 = pos;
-        vis_lists.unk1C = 1056;
-        vis_lists.unk1E = 1600;
-        vis_lists.unk14.vx = 0;
-        vis_lists.unk14.vy = 0;
-        vis_lists.unk14.vz = 0;
-        vis_lists.unk22 = 0;
-        vis_lists.unk20 = 0;
-        vis_lists.unk0 = 0;
+        vis_lists.position = pos;
+        vis_lists.radius = 1056;
+        vis_lists.height = 1600;
+        vis_lists.velocity.vx = 0;
+        vis_lists.velocity.vy = 0;
+        vis_lists.velocity.vz = 0;
+        vis_lists.speed = 0;
+        vis_lists.heading = 0;
+        vis_lists.tests = 0;
         while ((i = object_find_usable(i, &vis_lists)) != -1) {
             switch (object_try_key(&vis_table_b.entries[i], id)) {
             case 0:
@@ -208,7 +208,7 @@ void item_use(int id)
             &viewer.unk38[15], &viewer.unk38[16], &viewer.unk38[17], NULL,
         };
         u16 **p;
-        Vis44 *c;
+        ItemType *c;
         int n;
         int base;
 
@@ -217,14 +217,14 @@ void item_use(int id)
         points = viewer.unk2 * 10 / viewer.unk0 + base;
         for (p = ids; *p != NULL; p++) {
             if (**p != 0xffff) {
-                c = &vis_table_c.unk0118[**p];
-                n = c->unk27 * points / 100;
+                c = &vis_table_c.types[**p];
+                n = c->max_durability * points / 100;
                 if (n == 0)
                     n = 1;
-                if (c->unk28 + n > c->unk27)
-                    c->unk28 = c->unk27;
+                if (c->durability + n > c->max_durability)
+                    c->durability = c->max_durability;
                 else
-                    c->unk28 += n;
+                    c->durability += n;
                 USE_RESULT = 1;
             }
         }

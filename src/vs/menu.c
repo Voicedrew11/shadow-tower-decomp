@@ -131,13 +131,13 @@ int menu_vs_setup_run(void)
     tim_load_images_at(buf, &tex, &clut);
     DrawSync(0);
     if (requested_items[0] != -1) {
-        cd_read_member(11, vis_table_c.unk0118[requested_items[0]].unk5[0], buf);
+        cd_read_member(11, vis_table_c.types[requested_items[0]].unk5[0], buf);
         tim_load_images_at(buf, &pos, NULL);
         DrawSync(0);
     }
     pos.vy += 28;
     if (requested_item_2p != -1) {
-        cd_read_member(11, vis_table_c.unk0118[requested_item_2p].unk5[0], buf);
+        cd_read_member(11, vis_table_c.types[requested_item_2p].unk5[0], buf);
         tim_load_images_at(buf, &pos, NULL);
         DrawSync(1);
     }
@@ -394,7 +394,7 @@ void lineup_screen_show(void)
             r.h = 28;
             ClearImage(&r, 0, 0, 0);
         } else {
-            int size = cd_read_member(11, vis_table_c.unk0118[requested_items[i]].unk5[0],
+            int size = cd_read_member(11, vis_table_c.types[requested_items[i]].unk5[0],
                                      vs_cd_state.unk4A0) * 2048;
 
             tim_load_images_at(vs_cd_state.unk4A0, &sp->unk0.team.pos[6 + i], NULL);
@@ -1057,13 +1057,13 @@ void menu_creature_select_run(int player)
     tim_load_images_at(buf, &tex, &clut);
     DrawSync(0);
     if (requested_items[0] != -1) {
-        cd_read_member(11, vis_table_c.unk0118[requested_items[0]].unk5[0], buf);
+        cd_read_member(11, vis_table_c.types[requested_items[0]].unk5[0], buf);
         tim_load_images_at(buf, &pos, NULL);
         DrawSync(0);
     }
     pos.vy += 28;
     if (requested_item_2p != -1) {
-        cd_read_member(11, vis_table_c.unk0118[requested_item_2p].unk5[0], buf);
+        cd_read_member(11, vis_table_c.types[requested_item_2p].unk5[0], buf);
         tim_load_images_at(buf, &pos, NULL);
         DrawSync(1);
     }
@@ -1317,7 +1317,7 @@ void menu_item_request_run(int player)
             if (sp->unk1CC == 2 && (s16)cd_queue_busy() == 0) {
                 id = IDS[TOP + sp->unk1D0];
                 if (shown != id && id != -1 && id != -2) {
-                    tim_load_member_async(11, vis_table_c.unk0118[id].unk5[0] + 200, 640, 0);
+                    tim_load_member_async(11, vis_table_c.types[id].unk5[0] + 200, 640, 0);
                     shown = id;
                 }
             }
@@ -1333,13 +1333,13 @@ void menu_item_request_run(int player)
     pos.vx = 640;
     pos.vy = 124;
     if (requested_items[0] != -1) {
-        cd_read_member(11, vis_table_c.unk0118[requested_items[0]].unk5[0], vs_cd_state.unk4A4);
+        cd_read_member(11, vis_table_c.types[requested_items[0]].unk5[0], vs_cd_state.unk4A4);
         tim_load_images_at(vs_cd_state.unk4A4, &pos, NULL);
         DrawSync(0);
     }
     pos.vy += 28;
     if (requested_item_2p != -1) {
-        cd_read_member(11, vis_table_c.unk0118[requested_item_2p].unk5[0], vs_cd_state.unk4A4);
+        cd_read_member(11, vis_table_c.types[requested_item_2p].unk5[0], vs_cd_state.unk4A4);
         tim_load_images_at(vs_cd_state.unk4A4, &pos, NULL);
         DrawSync(1);
     }
@@ -2318,13 +2318,13 @@ done:
         tim_load_images_at(menu_buf, &pos, &clut);
         DrawSync(0);
         if (requested_items[0] != -1) {
-            cd_read_member(11, vis_table_c.unk0118[requested_items[0]].unk5[0], menu_buf);
+            cd_read_member(11, vis_table_c.types[requested_items[0]].unk5[0], menu_buf);
             tim_load_images_at(menu_buf, &face, NULL);
             DrawSync(0);
         }
         face.vy += 28;
         if (requested_item_2p != -1) {
-            cd_read_member(11, vis_table_c.unk0118[requested_item_2p].unk5[0], menu_buf);
+            cd_read_member(11, vis_table_c.types[requested_item_2p].unk5[0], menu_buf);
             tim_load_images_at(menu_buf, &face, NULL);
             DrawSync(1);
         }

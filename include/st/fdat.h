@@ -21,7 +21,7 @@ typedef struct {
 
 /* ST.EXE, no source yet. */
 void effect_spawn_attack(Creature *e, int arg, VECTOR *pos);
-void object_play_sound(Vis88 *e, int sound);
+void object_play_sound(AreaObject *e, int sound);
 
 /* ST.EXE functions declared in st/funcs.h, which the overlay units do not
  * include (see below). */

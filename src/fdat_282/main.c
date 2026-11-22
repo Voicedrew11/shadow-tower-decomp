@@ -53,9 +53,9 @@ void map_open_object_drop_item(void);
 ADDRESS(0x801ed4a0, 0x48)
 void map_update_events(void)
 {
-    Vis88 *door = &vis_table_b.entries[26];
+    AreaObject *door = &vis_table_b.entries[26];
 
-    if (door->unk0E != 0 && door->unk0C != 0xff)
+    if (door->examined != 0 && door->state != 0xff)
         map_open_object_drop_item();
 }
 
@@ -65,7 +65,7 @@ void map_restore_progress(void)
 {
     Creature *a48 = &vis_table_a.entries[48];
     Creature *a50 = &vis_table_a.entries[50];
-    Vis48 *item;
+    GroundItem *item;
     CreatureType *r;
     Creature *a49;
 
@@ -73,8 +73,8 @@ void map_restore_progress(void)
     item = &vis_table_c.entries[2];
     a49 = &vis_table_a.entries[49];
 
-    if (vis_table_b.entries[26].unk0C != 0xff)
-        item->unk22 = 4;
+    if (vis_table_b.entries[26].state != 0xff)
+        item->state = 4;
     a49->status.bytes[3] = 2;
     a50->status.bytes[3] = 2;
     a48->status.bytes[3] = 2;

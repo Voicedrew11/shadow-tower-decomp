@@ -39,11 +39,11 @@ void func_8004d7fc(void)
 ADDRESS(0x8004d804, 0x228)
 void creature_drop_item(Creature *e, int id)
 {
-    Vis44 *rec = &vis_table_c.unk0118[id];
-    Vis48 *slot;
+    ItemType *rec = &vis_table_c.types[id];
+    GroundItem *slot;
 
-    if (rec->unk26 == 30) {
-        if (vis_table_c.unk0000[3] == 16) {
+    if (rec->category == 30) {
+        if (vis_table_c.ground_item_counts[3] == 16) {
             int n;
 
             slot = &vis_table_c.entries[48];
@@ -53,10 +53,10 @@ void creature_drop_item(Creature *e, int id)
                 slot++;
             }
         } else {
-            slot = &vis_table_c.entries[48 + vis_table_c.unk0000[3]];
-            vis_table_c.unk0000[3]++;
+            slot = &vis_table_c.entries[48 + vis_table_c.ground_item_counts[3]];
+            vis_table_c.ground_item_counts[3]++;
         }
-    } else if (vis_table_c.unk0000[2] == 16) {
+    } else if (vis_table_c.ground_item_counts[2] == 16) {
         int n;
 
         slot = &vis_table_c.entries[32];
@@ -66,26 +66,26 @@ void creature_drop_item(Creature *e, int id)
             slot++;
         }
     } else {
-        slot = &vis_table_c.entries[32 + vis_table_c.unk0000[2]];
-        vis_table_c.unk0000[2]++;
+        slot = &vis_table_c.entries[32 + vis_table_c.ground_item_counts[2]];
+        vis_table_c.ground_item_counts[2]++;
     }
-    slot->unk00 = id;
-    slot->unk02 = e->block;
-    *(u32 *)slot->unk04 = 0;
-    slot->unk08 = e->position;
-    slot->unk08.vy -= e->height >> 1;
+    slot->item = id;
+    slot->block = e->block;
+    *(u32 *)slot->anim_slot = 0;
+    slot->position = e->position;
+    slot->position.vy -= e->height >> 1;
     /* One 8-byte copy of the rotation (unk8C..unk92) over unk18..unk1E. */
-    *(SVECTOR *)&slot->unk18 = *(SVECTOR *)&e->rot_x;
-    slot->unk20 = rec->unk1E;
-    slot->unk22 = 1;
-    slot->unk23 = 1;
-    slot->unk24 = 0;
-    slot->unk28 = e->player_dist_xz;
-    slot->unk26 = 0;
-    slot->unk25 = 0;
-    slot->unk2c = area_state.area;
-    vis_table_c.unk0000[0]++;
-    vis_table_c.unk0048[id / 32] |= 1 << (id % 32);
+    *(SVECTOR *)&slot->rot_x = *(SVECTOR *)&e->rot_x;
+    slot->unk20 = rec->flags;
+    slot->state = 1;
+    slot->prev_state = 1;
+    slot->draw_flags = 0;
+    slot->player_dist_xz = e->player_dist_xz;
+    slot->vertical_speed = 0;
+    slot->bounces = 0;
+    slot->area = area_state.area;
+    vis_table_c.ground_item_counts[0]++;
+    vis_table_c.placed_bits[id / 32] |= 1 << (id % 32);
 }
 
 /* Drops one of the entry's three items, each by its percent chance when

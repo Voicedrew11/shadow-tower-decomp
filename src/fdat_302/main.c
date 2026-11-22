@@ -88,39 +88,39 @@ void map_transform_creature(void);
 ADDRESS(0x801ed4a0, 0x110)
 void map_restore_progress(void)
 {
-    Vis88 *d1 = &vis_table_b.entries[1];
-    Vis88 *d9 = &vis_table_b.entries[9];
+    AreaObject *d1 = &vis_table_b.entries[1];
+    AreaObject *d9 = &vis_table_b.entries[9];
     Creature *e4 = &vis_table_a.entries[4];
     Creature *e5 = &vis_table_a.entries[5];
     u32 w = game_progress.unk1440.word;
 
     fdat_801ee46c = 1;
     if (!(w >> 16 & 1)) {
-        d1[0].unk00 = 2;
+        d1[0].visibility = 2;
         fdat_801ee46c = 0;
     }
     if (!(w >> 18 & 1)) {
-        d1[1].unk00 = 2;
+        d1[1].visibility = 2;
         fdat_801ee46c = 0;
     }
     if (!(w >> 20 & 1)) {
-        d1[2].unk00 = 2;
+        d1[2].visibility = 2;
         fdat_801ee46c = 0;
     }
     if (!(w >> 24 & 1)) {
-        d1[3].unk00 = 2;
+        d1[3].visibility = 2;
         fdat_801ee46c = 0;
     }
     if (!(w >> 27 & 1)) {
-        d1[4].unk00 = 2;
+        d1[4].visibility = 2;
         fdat_801ee46c = 0;
     }
     if (!(w >> 28 & 1)) {
-        d1[5].unk00 = 2;
+        d1[5].visibility = 2;
         fdat_801ee46c = 0;
     }
     if (fdat_801ee46c)
-        d9->unk05 = 0xff;
+        d9->kind = 0xff;
     e4->zone = 1;
     e5->zone = 2;
     fdat_801ee474 = 0;
@@ -138,13 +138,13 @@ void map_restore_progress(void)
 ADDRESS(0x801ed5b0, 0x46c)
 void map_update_events(void)
 {
-    Vis88 *d9 = &vis_table_b.entries[9];
+    AreaObject *d9 = &vis_table_b.entries[9];
     Creature *e0 = &vis_table_a.entries[0];
     Creature *e3 = &vis_table_a.entries[3];
     Creature *e5 = &vis_table_a.entries[5];
 
     if (fdat_801ee46c != 0
-        && player_in_centred_rect(d9->unk24.vx, d9->unk24.vz, 0xc00, 0xc00, d9->unk24.vy)) {
+        && player_in_centred_rect(d9->position.vx, d9->position.vz, 0xc00, 0xc00, d9->position.vy)) {
         map_warp_player();
         fdat_801ee470 = 1;
     }
@@ -339,11 +339,11 @@ void map_warp_player(void)
 ADDRESS(0x801ee090, 0x28)
 void map_set_block_areas(u8 area)
 {
-    VisRecord *r = vis_records;
+    MapBlock *r = vis_records;
     int i = 512;
 
     while (i--) {
-        r->unk07 = area;
+        r->zone = area;
         r++;
     }
 }

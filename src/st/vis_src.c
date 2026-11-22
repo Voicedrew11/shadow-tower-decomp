@@ -61,14 +61,14 @@ void vis_collect_sources(VECTOR *a, VECTOR *b, VECTOR *c)
 ADDRESS(0x8004656c, 0x98)
 void collision_source_positions(VECTOR *out)
 {
-    VisRecord *rec;
+    MapBlock *rec;
     int i;
 
     i = vis_lists.n_sources;
     while (i--) {
         rec = &vis_records[vis_lists.sources[i]];
-        out[i].vx = rec->unk08 << 12;
-        out[i].vy = rec->unk09 * 4096 + (rec->unk0b - 128) * 128;
-        out[i].vz = rec->unk0a << 12;
+        out[i].vx = rec->cell_x << 12;
+        out[i].vy = rec->cell_y * 4096 + (rec->y_offset - 128) * 128;
+        out[i].vz = rec->cell_z << 12;
     }
 }

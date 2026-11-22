@@ -73,16 +73,16 @@ void map_restore_progress(void)
 {
     Creature *e48 = &vis_table_a.entries[48];
     CreatureType *r1 = &vis_table_a.types[1];
-    Vis48 *c28 = &vis_table_c.entries[28];
+    GroundItem *c28 = &vis_table_c.entries[28];
     CreatureType *r14 = &vis_table_a.types[14];
-    Vis88 *d6 = &vis_table_b.entries[6];
+    AreaObject *d6 = &vis_table_b.entries[6];
 
     if (game_progress.unk1440.bit.f26 == 1) {
-        c28->unk22 = 5;
+        c28->state = 5;
         fdat_801edfd0 = 0xff;
-        c28->unk08.vy += 0x200;
+        c28->position.vy += 0x200;
     } else {
-        c28->unk22 = 4;
+        c28->state = 4;
         fdat_801edfd0 = 0;
     }
     if (e48->state != 3 && game_progress.unk1440.bit.f29 != 1 && game_progress.unk1440.bit.f14) {
@@ -101,7 +101,7 @@ void map_restore_progress(void)
     }
     if (!game_progress.unk1440.bit.f27) {
         fdat_801edfd8 = 0;
-        d6->unk05 = 0xff;
+        d6->kind = 0xff;
     } else {
         fdat_801edfd8 = 0xff;
     }
@@ -120,7 +120,7 @@ ADDRESS(0x801ed614, 0x328)
 void map_update_events(void)
 {
     Creature *e48 = &vis_table_a.entries[48];
-    Vis88 *d6 = &vis_table_b.entries[6];
+    AreaObject *d6 = &vis_table_b.entries[6];
     CreatureType *r1 = &vis_table_a.types[1];
     Creature *e33 = &vis_table_a.entries[33];
     CreatureType *r14 = &vis_table_a.types[14];
@@ -174,7 +174,7 @@ void map_update_events(void)
         e33->flags |= 0x2000000;
         creature_force_talk(e33, 1, 0);
         fdat_801edfd8 = 0xff;
-        d6->unk05 = 0xed;
+        d6->kind = 0xed;
         viewer.unk218 = 0;
     }
 }
@@ -231,16 +231,16 @@ void map_pick_creature_move(void)
     }
     if (e->action != 8)
         e->wall_heading = 0x7fff;
-    if (vis_records[e->block].unk05 != 0 || vis_records[e->block].unk06 != 0) {
+    if (vis_records[e->block].heading_bias_x != 0 || vis_records[e->block].heading_bias_z != 0) {
         x = rcos(e->target_heading - 1024) >> 5;
         z = rsin(e->target_heading - 1024) >> 5;
-        dx = x + vis_records[e->block].unk05;
-        dz = z + vis_records[e->block].unk06;
+        dx = x + vis_records[e->block].heading_bias_x;
+        dz = z + vis_records[e->block].heading_bias_z;
         e->target_heading = (ratan2(dz, dx) + 1024) & 0xfff;
         x = rcos(e->unk5A) >> 5;
         z = rsin(e->unk5A) >> 5;
-        dx = x + vis_records[e->block].unk05;
-        dz = z + vis_records[e->block].unk06;
+        dx = x + vis_records[e->block].heading_bias_x;
+        dz = z + vis_records[e->block].heading_bias_z;
         e->unk5A = ratan2(dz, dx);
     }
 }
@@ -297,7 +297,7 @@ void map_use_item_on_object(short id)
         req.speed = 0;
         req.height = 1600;
         req.heading = 0;
-        if (object_find_in_reach((VisLists *)&req) == 12) {
+        if (object_find_in_reach((CollisionState *)&req) == 12) {
             DAT_801cd0e0 = 1;
             fdat_801edfd0 = 1;
         } else {
@@ -312,27 +312,27 @@ ADDRESS(0x801ede00, 0xf8)
 void map_slide_ground_item(void)
 {
     int step = 24;
-    Vis48 *item = &vis_table_c.entries[28];
-    Vis44 *kind;
+    GroundItem *item = &vis_table_c.entries[28];
+    ItemType *kind;
     int top;
 
-    item->unk22 = 5;
-    kind = &vis_table_c.unk0118[item->unk00];
-    top = item->unk08.vy + 0x200;
-    item->unk2D -= 2;
+    item->state = 5;
+    kind = &vis_table_c.types[item->item];
+    top = item->position.vy + 0x200;
+    item->depth_bias -= 2;
     for (;;) {
         StAnimFile *file;
 
-        if (item->unk08.vy == top)
+        if (item->position.vy == top)
             break;
-        anim_get_file(kind->unk4 + 588, &file);
+        anim_get_file(kind->model + 588, &file);
         if (file != NULL)
-            item->unk08.vy += step;
-        if (item->unk08.vy > top)
-            item->unk08.vy = top;
+            item->position.vy += step;
+        if (item->position.vy > top)
+            item->position.vy = top;
         world_run_frame(NULL, NULL, 0);
     }
-    item->unk2D += 2;
+    item->depth_bias += 2;
 }
 
 /* Marks every active table A entry: unk36 0xfff and range bits 0xd. */

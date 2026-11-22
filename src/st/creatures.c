@@ -142,7 +142,7 @@ void creatures_bind_previous_area(void)
 ADDRESS(0x8004e324, 0x5c8)
 void creatures_update(void)
 {
-    VisRecord *r = viewer.unk174;
+    MapBlock *r = viewer.unk174;
     Creature *e;
     CreatureType *t;
     StAnimFile *file;
@@ -154,11 +154,11 @@ void creatures_update(void)
     int d;
     u16 h;
 
-    if (r != NULL && r->unk07 != 0xff) {
+    if (r != NULL && r->zone != 0xff) {
         u8 prev = vis_table_a.zone;
 
         vis_table_a.prev_zone = prev;
-        vis_table_a.zone = r->unk07;
+        vis_table_a.zone = r->zone;
         if (prev != vis_table_a.zone) {
             anim_slots_free_idle();
             anim_sets_free_idle();
@@ -302,7 +302,7 @@ void creatures_load(CreatureFileEntry *src)
     u32 ids[3];
     Creature *e;
     CreatureType *t;
-    Vis44 *c;
+    ItemType *c;
     u16 i;
     u8 k;
     int j;
@@ -330,8 +330,8 @@ void creatures_load(CreatureFileEntry *src)
             e->vram_tag = map[k];
         }
         e->home_block = src->home_block;
-        e->region = vis_records[e->home_block].unk01;
-        e->zone = vis_records[e->home_block].unk07;
+        e->region = vis_records[e->home_block].region;
+        e->zone = vis_records[e->home_block].zone;
         e->unk09 = t->vram_tag_count;
         e->model_slot = e->type;
         e->visibility = 0;
@@ -372,9 +372,9 @@ void creatures_load(CreatureFileEntry *src)
         e->spawn_y = e->position.vy;
         for (j = 0; j < 3; j++) {
             if (ids[j] != 0xffff) {
-                c = &vis_table_c.unk0118[ids[j]];
-                if (vis_table_c.unk0094[c->unk4] == 0xff)
-                    vis_table_c.unk0094[c->unk4] = vis_table_c.unk0114++;
+                c = &vis_table_c.types[ids[j]];
+                if (vis_table_c.model_slots[c->model] == 0xff)
+                    vis_table_c.model_slots[c->model] = vis_table_c.next_model_slot++;
             }
         }
         if (e->flags & 0x10) {

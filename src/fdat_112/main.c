@@ -52,7 +52,7 @@ void map_restore_progress(void)
 {
     Creature *e;
 
-    vis_table_c.entries[7].unk22 = 4;
+    vis_table_c.entries[7].state = 4;
     e = &vis_table_a.entries[48];
     if (game_progress.unk1440.bit.f14 == 1 || inventory.counts[303].count == 1)
         e->state = 3;

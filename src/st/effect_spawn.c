@@ -852,18 +852,18 @@ ADDRESS(0x800381a8, 0x158)
 int effect_fire(int arg0, int height, int spin)
 {
     StEffect *e = effects.cur;
-    VisLists *req;
+    CollisionState *req;
     int fired = 0;
 
     if (e->unk8 == 0) {
         req = &vis_lists;
-        req->unk4 = e->unk20;
-        req->unk1C = arg0;
-        req->unk1E = height;
-        req->unk14 = e->unk40;
-        req->unk22 = SquareRoot0(e->unk40.vx * e->unk40.vx + e->unk40.vz * e->unk40.vz);
-        req->unk20 = ratan2(e->unk40.vz, e->unk40.vx);
-        vis_lists.unk0 = 128;
+        req->position = e->unk20;
+        req->radius = arg0;
+        req->height = height;
+        req->velocity = e->unk40;
+        req->speed = SquareRoot0(e->unk40.vx * e->unk40.vx + e->unk40.vz * e->unk40.vz);
+        req->heading = ratan2(e->unk40.vz, e->unk40.vx);
+        vis_lists.tests = 128;
         fired = (player_distance_in_reach(req) != -1) << 7;
         e->unk20.vx += e->unk40.vx;
         e->unk20.vy += e->unk40.vy;
@@ -921,7 +921,7 @@ void effect_step_back_half(void)
         (e)->unk12 = (e)->unk10 * 128
 
 /* The table A entry the last attack request hit. */
-#define HIT_ENTRY() (&vis_table_a.entries[vis_lists.unk5C])
+#define HIT_ENTRY() (&vis_table_a.entries[vis_lists.creature_in_reach])
 
 /* Emits for a hit `r`, unless it hit an entry that is dead or in state 1. */
 #define EMIT_LIVE(r)                                                           \
@@ -1036,7 +1036,7 @@ void effect_update(void)
             rot.vy = 0;
             rot.vz = 0;
         } else if (r & 2) {
-            r = ratan2(vis_lists.unk90, vis_lists.unk8C) + 1024;
+            r = ratan2(vis_lists.wall_normal_z, vis_lists.wall_normal_x) + 1024;
             c = rcos(ratan2(dir.vz, dir.vx) - r) * 300 / 4096;
             dir.vx = c * rcos(r) / 4096;
             dir.vz = c * rsin(r) / 4096;
@@ -1168,10 +1168,10 @@ void effect_update(void)
                     e->unk40.vz = 0;
                 }
             }
-            depth = 2048 - vis_lists.unk30;
+            depth = 2048 - vis_lists.floor_dist;
             if (depth > 0) {
                 pos.vx = e->unk20.vx;
-                pos.vy = e->unk20.vy + vis_lists.unk30;
+                pos.vy = e->unk20.vy + vis_lists.floor_dist;
                 pos.vz = e->unk20.vz;
                 dir.vx = e->unk40.vx >> 1;
                 dir.vy = e->unk40.vy >> 1;

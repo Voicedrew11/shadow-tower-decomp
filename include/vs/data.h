@@ -285,7 +285,7 @@ extern s32 mesh_mirror;
 
 /* VS's copy of ST.EXE's vis_table_c (bss, 0x80191d00): the 44-byte item
  * records from +0x118; only those are used so far. */
-extern VisTableC vis_table_c;
+extern ItemTable vis_table_c;
 
 /* A switch menu_item_request_draw_details sets around its count list and ui_draw_number
  * reads (bss). */

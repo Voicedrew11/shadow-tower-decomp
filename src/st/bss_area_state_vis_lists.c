@@ -17,4 +17,4 @@
 DATA(0x801b5920, 0x28, ".bss")
 AreaState area_state;
 DATA(0x801b5948, 0x47f0, ".bss")
-VisLists vis_lists;
+CollisionState vis_lists;

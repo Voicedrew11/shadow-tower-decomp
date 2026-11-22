@@ -152,7 +152,7 @@ reference).
 v1; subu a1,v0,v1` in retail against `lui a1; addiu a1; subu a1,v0,a1`. Cause:
 with `return b;` the copy `v0 = b` lets local-alloc substitute `v0` for `b` in
 earlier insns, which unties a later difference from its dying operand. Source:
-return the pointer (`Vis88 *` in the prototype). Example: ST `0x800549c8`.
+return the pointer (`AreaObject *` in the prototype). Example: ST `0x800549c8`.
 
 **Variadic functions.** Symptom: `addiu s3,sp,112` and reads `lw/lhu/lbu
 N(s3)` of the stacked arguments, the last named one read from its home slot.
@@ -183,7 +183,7 @@ and `lui/addiu sym+K` formed after it, reusing the dead index register. Cause:
 &sym.arr[i]` expands the `ADDR_EXPR` as `(plus (mult i size) (const sym+K))`,
 which `force_operand` emits multiply first, constant last. Source: give the
 element a pointer local. Examples: ST `0x80040024` (`item =
-&vis_table_c.unk0118[...]`), ST `0x80023c6c`. A member read whose address is
+&vis_table_c.types[...]`), ST `0x80023c6c`. A member read whose address is
 `sym+OFF` with the base loaded before the index is scaled is a cast
 dereference, `*(u16 *)&ARR[i].member` (VS `0x8001c5e0`).
 
@@ -696,7 +696,7 @@ is live across it when flow runs; sched1 sinks the set to its use, but
 `reg_n_calls_crossed` is not reset for a pseudo that lives in more than one
 block, so global-alloc still gives it a saved register. Retail's `addiu
 s2,s1,48` (not `a1`) means the pointer was initialised at its declaration
-(FDAT_022 `0x801ed8f0`, `Vis48 *c6 = &table.entries[6];`).
+(FDAT_022 `0x801ed8f0`, `GroundItem *c6 = &table.entries[6];`).
 
 **Reading statement order from sched1's output.** sched1 keeps a load early
 and sinks a dependent add and store behind the following independent stores,

@@ -33,7 +33,7 @@ ADDRESS(0x80035d04, 0x194)
 int effect_attack(int arg0, u_long height, int drop)
 {
     StEffect *e = effects.cur;
-    VisLists *req;
+    CollisionState *req;
     VECTOR pos;
 
     if (e->unk8 == 0) {
@@ -41,24 +41,24 @@ int effect_attack(int arg0, u_long height, int drop)
         pos.vy = e->unk20.vy - (height & 0x0fffffff) + drop;
         pos.vz = e->unk20.vz;
         req = &vis_lists;
-        req->unk4 = pos;
-        req->unk1C = arg0;
-        req->unk1E = height;
-        req->unk14 = e->unk40;
-        req->unk22 = SquareRoot0(e->unk40.vx * e->unk40.vx + e->unk40.vz * e->unk40.vz);
-        req->unk20 = ratan2(e->unk40.vz, e->unk40.vx);
+        req->position = pos;
+        req->radius = arg0;
+        req->height = height;
+        req->velocity = e->unk40;
+        req->speed = SquareRoot0(e->unk40.vx * e->unk40.vx + e->unk40.vz * e->unk40.vz);
+        req->heading = ratan2(e->unk40.vz, e->unk40.vx);
         switch (e->unk0 & 7) {
         case 2:
-            vis_lists.unk0 = 50;
+            vis_lists.tests = 50;
             break;
         case 1:
-            vis_lists.unk0 = 162;
+            vis_lists.tests = 162;
             break;
         case 3:
-            vis_lists.unk0 = 178;
+            vis_lists.tests = 178;
             break;
         case 4:
-            vis_lists.unk0 = 2;
+            vis_lists.tests = 2;
             break;
         default:
             return 0;
@@ -99,7 +99,7 @@ void effect_emit(u_long flags, int kind, StEffectDef *def, int arg, VECTOR *pos)
         player_hit(def->unk4, 4096, def->unk16, (long *)pos);
     if (!(flags & 0x10))
         return;
-    target = &vis_table_a.entries[vis_lists.unk5C];
+    target = &vis_table_a.entries[vis_lists.creature_in_reach];
     if (pos != NULL) {
         if (!angle_within(target->facing,
                            angle_from_xz(target->position.vx - pos->vx, target->position.vz - pos->vz) + 2048,

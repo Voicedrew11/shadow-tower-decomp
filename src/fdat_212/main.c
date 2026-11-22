@@ -74,12 +74,12 @@ void map_slide_ground_item(int which);
 ADDRESS(0x801ed4a0, 0xf4)
 void map_restore_progress(void)
 {
-    Vis48 *c28 = &vis_table_c.entries[28];
-    Vis88 *b;
+    GroundItem *c28 = &vis_table_c.entries[28];
+    AreaObject *b;
     int i;
 
-    c28[1].unk22 = 4;
-    c28->unk22 = 4;
+    c28[1].state = 4;
+    c28->state = 4;
     if (game_progress.unk1444.bit.f8 == 1)
         fdat_801edcd4 = 0xff;
     else
@@ -88,16 +88,16 @@ void map_restore_progress(void)
         b = vis_table_b.entries;
         fdat_801edcd8 = 0xff;
         for (i = 239; i != -1; i--) {
-            if (b->unk0a == 0x97)
-                b->unk00 = 2;
+            if (b->type == 0x97)
+                b->visibility = 2;
             b++;
         }
         fdat_801edcdc = 0xff;
-        vis_lists.unk47E0 |= 0x20;
+        vis_lists.floor_kinds_off |= 0x20;
     } else {
         fdat_801edcd8 = 0;
         fdat_801edcdc = 0;
-        vis_lists.unk47E0 &= ~0x20;
+        vis_lists.floor_kinds_off &= ~0x20;
     }
 }
 
@@ -109,12 +109,12 @@ void map_restore_progress(void)
 ADDRESS(0x801ed594, 0x2fc)
 void map_update_events(void)
 {
-    Vis48 *c28 = &vis_table_c.entries[28];
-    Vis48 *c29 = &vis_table_c.entries[29];
-    Vis88 *d46 = &vis_table_b.entries[46];
-    Vis88 *d2 = &vis_table_b.entries[2];
-    Vis88 *d3 = &vis_table_b.entries[3];
-    Vis88 *b;
+    GroundItem *c28 = &vis_table_c.entries[28];
+    GroundItem *c29 = &vis_table_c.entries[29];
+    AreaObject *d46 = &vis_table_b.entries[46];
+    AreaObject *d2 = &vis_table_b.entries[2];
+    AreaObject *d3 = &vis_table_b.entries[3];
+    AreaObject *b;
     VECTOR v1;
     VECTOR v2;
     int i;
@@ -122,40 +122,40 @@ void map_update_events(void)
     if (fdat_801edcd4 == 1) {
         map_slide_ground_item(0);
         fdat_801edcd4 = 2;
-        d46->unk0C = 1;
-        d46->unk02 = 0;
+        d46->state = 1;
+        d46->anim = 0;
         game_progress.unk1444.word |= 0x100;
     } else if (fdat_801edcd4 == 2) {
-        anim_set_node_vertex(*(StAnimSet **)d46->unk44, object_model_slot(d46->unk0a), 0, 0x23, &v1);
-        c28->unk08.vx = d46->unk24.vx + v1.vx;
-        c28->unk08.vy = d46->unk24.vy + v1.vy;
-        c28->unk08.vz = d46->unk24.vz + v1.vz - 0x12;
-        if (d46->unk0C == 0xff)
+        anim_set_node_vertex(*(StAnimSet **)d46->anim_slot, object_model_slot(d46->type), 0, 0x23, &v1);
+        c28->position.vx = d46->position.vx + v1.vx;
+        c28->position.vy = d46->position.vy + v1.vy;
+        c28->position.vz = d46->position.vz + v1.vz - 0x12;
+        if (d46->state == 0xff)
             fdat_801edcd4 = 0xff;
     }
     if (fdat_801edcd8 == 1) {
         map_slide_ground_item(1);
         fdat_801edcd8 = 2;
-        d2->unk0C = 1;
-        d2->unk02 = 0;
+        d2->state = 1;
+        d2->anim = 0;
         game_progress.unk1444.word |= 0x200;
     } else if (fdat_801edcd8 == 2) {
-        anim_set_node_vertex(*(StAnimSet **)d2->unk44, object_model_slot(d2->unk0a), 0, 0x23, &v2);
-        c29->unk08.vx = d2->unk24.vx + v2.vx;
-        c29->unk08.vy = d2->unk24.vy + v2.vy;
-        c29->unk08.vz = d2->unk24.vz + v2.vz - 0x12;
-        if (d2->unk0C == 0xff)
+        anim_set_node_vertex(*(StAnimSet **)d2->anim_slot, object_model_slot(d2->type), 0, 0x23, &v2);
+        c29->position.vx = d2->position.vx + v2.vx;
+        c29->position.vy = d2->position.vy + v2.vy;
+        c29->position.vz = d2->position.vz + v2.vz - 0x12;
+        if (d2->state == 0xff)
             fdat_801edcd8 = 0xfe;
-    } else if (fdat_801edcd8 == 0xfe && d3->unk0C == 0xff) {
+    } else if (fdat_801edcd8 == 0xfe && d3->state == 0xff) {
         fdat_801edcdc = 1;
         fdat_801edce0 = 0;
         fdat_801edcd8 = 0xff;
     }
     if (fdat_801edcdc == 1) {
-        Vis88 *rising_bridge = vis_table_b.entries;
+        AreaObject *rising_bridge = vis_table_b.entries;
         for (i = 239; i != -1; i--) {
-            if (rising_bridge->unk0a == 0x97)
-                rising_bridge->unk24.vy += 0x18;
+            if (rising_bridge->type == 0x97)
+                rising_bridge->position.vy += 0x18;
             rising_bridge++;
         }
         if (++fdat_801edce0 >= 0x97)
@@ -163,12 +163,12 @@ void map_update_events(void)
     } else if (fdat_801edcdc == 2) {
         b = vis_table_b.entries;
         for (i = 239; i != -1; i--) {
-            if (b->unk0a == 0x97)
-                b->unk00 = 2;
+            if (b->type == 0x97)
+                b->visibility = 2;
             b++;
         }
         fdat_801edcdc = 0xff;
-        vis_lists.unk47E0 |= 0x20;
+        vis_lists.floor_kinds_off |= 0x20;
     }
 }
 
@@ -196,28 +196,28 @@ ADDRESS(0x801edbd0, 0x104)
 void map_slide_ground_item(int which)
 {
     int step = 24;
-    Vis48 *item;
-    Vis44 *kind;
+    GroundItem *item;
+    ItemType *kind;
     int end;
 
     if (which == 0)
         item = &vis_table_c.entries[28];
     else
         item = &vis_table_c.entries[29];
-    item->unk22 = 5;
-    kind = &vis_table_c.unk0118[item->unk00];
-    end = item->unk08.vz + 0x200;
-    item->unk2D -= 12;
+    item->state = 5;
+    kind = &vis_table_c.types[item->item];
+    end = item->position.vz + 0x200;
+    item->depth_bias -= 12;
     for (;;) {
         StAnimFile *file;
 
-        if (item->unk08.vz == end)
+        if (item->position.vz == end)
             break;
-        anim_get_file(kind->unk4 + 588, &file);
+        anim_get_file(kind->model + 588, &file);
         if (file != NULL)
-            item->unk08.vz += step;
-        if (item->unk08.vz > end)
-            item->unk08.vz = end;
+            item->position.vz += step;
+        if (item->position.vz > end)
+            item->position.vz = end;
         world_run_frame(NULL, NULL, 0);
     }
     play_unlock_sound();

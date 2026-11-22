@@ -165,7 +165,7 @@ typedef struct {
     u8 unk15F;
     SVECTOR unk160[2];   /* 0x160: player_get_launch_vector's offsets per slot */
     void *unk170;        /* 0x170: unk174 before the last move (player_update_motion) */
-    void *unk174;        /* 0x174: the VisRecord the viewer stands in (st/vis.h) */
+    void *unk174;        /* 0x174: the MapBlock the viewer stands in (st/vis.h) */
     s16 unk178;
     s16 unk17A;
     s16 unk17C;

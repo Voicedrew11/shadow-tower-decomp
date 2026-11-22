@@ -12,4 +12,4 @@
 #include <vs/data.h>
 
 DATA(0x80191d00, 0x4310, ".bss")
-VisTableC vis_table_c;
+ItemTable vis_table_c;

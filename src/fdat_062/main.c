@@ -86,11 +86,11 @@ void map_update_events(void)
     Creature *e2 = &vis_table_a.entries[2];
     Creature *e1 = &vis_table_a.entries[1];
     Creature *e0 = &vis_table_a.entries[0];
-    Vis88 *d20 = &vis_table_b.entries[20];
-    Vis88 *d1 = &vis_table_b.entries[1];
-    Vis88 *d12 = &vis_table_b.entries[12];
+    AreaObject *d20 = &vis_table_b.entries[20];
+    AreaObject *d1 = &vis_table_b.entries[1];
+    AreaObject *d12 = &vis_table_b.entries[12];
 
-    if (!game_progress.unk1440.bit.f2 && d20->unk0C == 1) {
+    if (!game_progress.unk1440.bit.f2 && d20->state == 1) {
         if (e3->state == 0)
             creature_spawn_now(e3);
         if (e4->state == 0)
@@ -99,12 +99,12 @@ void map_update_events(void)
         e4->spawn_chance = 100;
         game_progress.unk1440.word |= 4;
     }
-    if (!game_progress.unk1440.bit.f3 && d1->unk0C == 255 && e2->state == 0) {
+    if (!game_progress.unk1440.bit.f3 && d1->state == 255 && e2->state == 0) {
         creature_spawn_now(e2);
         e2->spawn_chance = 100;
         game_progress.unk1440.word |= 8;
     }
-    if (!game_progress.unk1440.bit.f4 && d12->unk4A.door.unk4F == 255 && e1->state == 0) {
+    if (!game_progress.unk1440.bit.f4 && d12->params.door.lock == 255 && e1->state == 0) {
         creature_spawn_now(e1);
         e1->spawn_chance = 100;
         game_progress.unk1440.word |= 0x10;

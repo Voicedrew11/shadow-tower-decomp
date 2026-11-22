@@ -18,25 +18,25 @@ ADDRESS(0x801eda8c, 0xf8)
 void map_slide_ground_item(void)
 {
     int step = 24;
-    Vis48 *item = &vis_table_c.entries[11];
-    Vis44 *kind;
+    GroundItem *item = &vis_table_c.entries[11];
+    ItemType *kind;
     int end;
 
-    item->unk22 = 5;
-    kind = &vis_table_c.unk0118[item->unk00];
-    end = item->unk08.vx + 0x1e0;
-    item->unk2D -= 2;
+    item->state = 5;
+    kind = &vis_table_c.types[item->item];
+    end = item->position.vx + 0x1e0;
+    item->depth_bias -= 2;
     for (;;) {
         StAnimFile *file;
 
-        if (item->unk08.vx == end)
+        if (item->position.vx == end)
             break;
-        anim_get_file(kind->unk4 + 588, &file);
+        anim_get_file(kind->model + 588, &file);
         if (file != NULL)
-            item->unk08.vx += step;
-        if (item->unk08.vx > end)
-            item->unk08.vx = end;
+            item->position.vx += step;
+        if (item->position.vx > end)
+            item->position.vx = end;
         world_run_frame(NULL, NULL, 0);
     }
-    item->unk2D += 2;
+    item->depth_bias += 2;
 }

@@ -14,12 +14,12 @@
 /* Spawns table B kind 150 for entry e and returns it; e->unk49 remembers it
  * as 106 + its index. */
 ADDRESS(0x800549c8, 0x8c)
-Vis88 *creature_alloc_object(Creature *e, int id)
+AreaObject *creature_alloc_object(Creature *e, int id)
 {
-    Vis88 *b = object_alloc(150, 10, -1);
+    AreaObject *b = object_alloc(150, 10, -1);
 
     e->spawned_object = b - vis_table_b.entries + 106;
-    b->unk0a = id;
+    b->type = id;
     b->unk48 = 0;
     return b;
 }

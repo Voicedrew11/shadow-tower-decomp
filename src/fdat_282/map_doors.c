@@ -98,30 +98,30 @@ void map_open_object_drop_item(void)
     int step;
     VECTOR pos;
     SVECTOR rot;
-    Vis88 *door = &vis_table_b.entries[26];
-    Vis48 *item = &vis_table_c.entries[2];
+    AreaObject *door = &vis_table_b.entries[26];
+    GroundItem *item = &vis_table_c.entries[2];
 
     viewer.unk218 = 5;
     rot.vy = -1024;
     rot.vx = 0;
-    pos.vx = door->unk24.vx - 3072;
-    pos.vz = door->unk24.vz;
+    pos.vx = door->position.vx - 3072;
+    pos.vz = door->position.vz;
     player_glide_to_pose(&pos, &rot);
     step = 28;
     do {
-        if (door->unk10 < 0xf00 && door->unk10 + step >= 0xf00)
-            object_play_sound(door, door->unk0a * 3 + 208);
-        door->unk10 += step;
-        if (door->unk10 >= 0x1000)
-            door->unk10 = 0xfff;
-        if (door->unk10 > 0x400 && item->unk22 == 4)
-            item->unk22 = 2;
-        if (door->unk10 > 0xf00 && item->unk22 == 2)
-            item->unk22 = 1;
+        if (door->anim_frame < 0xf00 && door->anim_frame + step >= 0xf00)
+            object_play_sound(door, door->type * 3 + 208);
+        door->anim_frame += step;
+        if (door->anim_frame >= 0x1000)
+            door->anim_frame = 0xfff;
+        if (door->anim_frame > 0x400 && item->state == 4)
+            item->state = 2;
+        if (door->anim_frame > 0xf00 && item->state == 2)
+            item->state = 1;
         ground_items_update();
         world_run_frame(NULL, NULL, 0);
-    } while (door->unk10 != 0xfff);
-    door->unk0C = 0xff;
+    } while (door->anim_frame != 0xfff);
+    door->state = 0xff;
     viewer.unk218 = 0;
 }
 
@@ -134,7 +134,7 @@ ADDRESS(0x801edba4, 0x2e4)
 void map_talk_then_open_door(int id)
 {
     Creature *e;
-    Vis88 *door;
+    AreaObject *door;
     CreatureType *r;
     u16 step;
     u16 n;
@@ -174,21 +174,21 @@ void map_talk_then_open_door(int id)
         world_run_frame(NULL, NULL, 0);
     } while ((short)e->anim_frame != 0xfff);
     for (;;) {
-        if (door->unk10 < 1 && door->unk10 + step >= 1)
-            object_play_sound(door, door->unk0a * 3 + 208);
-        door->unk10 += step;
-        if (door->unk10 + step >= 0x1000)
+        if (door->anim_frame < 1 && door->anim_frame + step >= 1)
+            object_play_sound(door, door->type * 3 + 208);
+        door->anim_frame += step;
+        if (door->anim_frame + step >= 0x1000)
             break;
         world_run_frame(NULL, NULL, 0);
     }
-    door->unk10 = 0xfff;
-    door->unk00 = 0;
-    door->unk0C = 0xff;
-    n = door->unk4A.door.unk4E;
+    door->anim_frame = 0xfff;
+    door->visibility = 0;
+    door->state = 0xff;
+    n = door->params.door.n_blocks;
     while (n--) {
-        t = vis_records[door->unk4A.door.unk4C + n].part;
-        vis_records[door->unk4A.door.unk4C + n].part = vis_records[door->unk4A.door.unk4A + n].part;
-        vis_records[door->unk4A.door.unk4A + n].part = t;
+        t = vis_records[door->params.door.block_b + n].part;
+        vis_records[door->params.door.block_b + n].part = vis_records[door->params.door.block_a + n].part;
+        vis_records[door->params.door.block_a + n].part = t;
     }
 }
 
@@ -202,7 +202,7 @@ void map_open_door_then_play_script(void)
     int raising_step;
     Creature *e = &vis_table_a.entries[50];
     CreatureType *r = &vis_table_a.types[e->type];
-    Vis88 *door = &vis_table_b.entries[3];
+    AreaObject *door = &vis_table_b.entries[3];
     u16 step = door->unk48 * 4;
     u16 n;
     u8 t;
@@ -215,24 +215,24 @@ void map_open_door_then_play_script(void)
     r->scripts[7]->command = 0x72;
     game_progress.unk1448[r->talk_id] = 2;
     creature_force_talk(e, 0, 0);
-    n = door->unk4A.door.unk4E;
+    n = door->params.door.n_blocks;
     while (n--) {
-        t = vis_records[door->unk4A.door.unk4C + n].part;
-        vis_records[door->unk4A.door.unk4C + n].part = vis_records[door->unk4A.door.unk4A + n].part;
-        vis_records[door->unk4A.door.unk4A + n].part = t;
+        t = vis_records[door->params.door.block_b + n].part;
+        vis_records[door->params.door.block_b + n].part = vis_records[door->params.door.block_a + n].part;
+        vis_records[door->params.door.block_a + n].part = t;
     }
     /* The look-ahead test uses the promoted halfword step. */
     raising_step = step;
     for (;;) {
-        door->unk10 += step;
-        if (door->unk10 + raising_step >= 0x1000)
+        door->anim_frame += step;
+        if (door->anim_frame + raising_step >= 0x1000)
             goto gate_raised;
         world_run_frame(NULL, NULL, 0);
     }
 gate_raised:
-    door->unk10 = 0xfff;
-    door->unk00 = 0;
-    door->unk0C = 0xff;
+    door->anim_frame = 0xfff;
+    door->visibility = 0;
+    door->state = 0xff;
     creature_start_script(e, 8);
     do {
         e->anim_frame += e->anim_step;

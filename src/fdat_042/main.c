@@ -58,9 +58,9 @@ void map_spawn_rising_creature(void);
 ADDRESS(0x801ed4a0, 0x60)
 void map_update_events(void)
 {
-    Vis88 *door = &vis_table_b.entries[19];
+    AreaObject *door = &vis_table_b.entries[19];
 
-    if (!game_progress.unk1440.bit.f1 && door->unk10 > 0xa00 && fdat_801ed96c == -1)
+    if (!game_progress.unk1440.bit.f1 && door->anim_frame > 0xa00 && fdat_801ed96c == -1)
         map_spawn_rising_creature();
 }
 
@@ -129,16 +129,16 @@ void map_pick_creature_move(void)
     }
     if (e->action != 8)
         e->wall_heading = 0x7fff;
-    if (vis_records[e->block].unk05 != 0 || vis_records[e->block].unk06 != 0) {
+    if (vis_records[e->block].heading_bias_x != 0 || vis_records[e->block].heading_bias_z != 0) {
         x = rcos(e->target_heading - 1024) >> 5;
         z = rsin(e->target_heading - 1024) >> 5;
-        dx = x + vis_records[e->block].unk05;
-        dz = z + vis_records[e->block].unk06;
+        dx = x + vis_records[e->block].heading_bias_x;
+        dz = z + vis_records[e->block].heading_bias_z;
         e->target_heading = (ratan2(dz, dx) + 1024) & 0xfff;
         x = rcos(e->unk5A) >> 5;
         z = rsin(e->unk5A) >> 5;
-        dx = x + vis_records[e->block].unk05;
-        dz = z + vis_records[e->block].unk06;
+        dx = x + vis_records[e->block].heading_bias_x;
+        dz = z + vis_records[e->block].heading_bias_z;
         e->unk5A = ratan2(dz, dx);
     }
 }

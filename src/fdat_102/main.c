@@ -60,10 +60,10 @@ void map_restore_progress(void)
 {
     Creature *e = &vis_table_a.entries[48];
     CreatureType *r = &vis_table_a.types[0];
-    Vis88 *d39 = &vis_table_b.entries[39];
-    Vis88 *d40 = &vis_table_b.entries[40];
-    Vis88 *d41 = &vis_table_b.entries[41];
-    Vis88 *d42 = &vis_table_b.entries[42];
+    AreaObject *d39 = &vis_table_b.entries[39];
+    AreaObject *d40 = &vis_table_b.entries[40];
+    AreaObject *d41 = &vis_table_b.entries[41];
+    AreaObject *d42 = &vis_table_b.entries[42];
 
     if (e->state != 3)
         e->status.bytes[3] = 2;
@@ -72,7 +72,7 @@ void map_restore_progress(void)
     else
         fdat_801eda78 = 0;
     if (!game_progress.unk1440.bit.f19) {
-        d39->unk0a = d40->unk0a = d41->unk0a = d42->unk0a = 0xffff;
+        d39->type = d40->type = d41->type = d42->type = 0xffff;
         fdat_801eda7c = 0;
     } else {
         fdat_801eda7c = 0xff;
@@ -89,14 +89,14 @@ ADDRESS(0x801ed554, 0x164)
 void map_update_events(void)
 {
     Creature *e48 = &vis_table_a.entries[48];
-    Vis88 *d39 = &vis_table_b.entries[39];
+    AreaObject *d39 = &vis_table_b.entries[39];
     CreatureType *r0 = &vis_table_a.types[0];
     Creature *e49 = &vis_table_a.entries[49];
     int state = fdat_801eda78;
     CreatureType *r4 = &vis_table_a.types[4];
-    Vis88 *d40 = &vis_table_b.entries[40];
-    Vis88 *d41 = &vis_table_b.entries[41];
-    Vis88 *d42 = &vis_table_b.entries[42];
+    AreaObject *d40 = &vis_table_b.entries[40];
+    AreaObject *d41 = &vis_table_b.entries[41];
+    AreaObject *d42 = &vis_table_b.entries[42];
 
     if (state != 0xff && game_progress.unk1448[r0->talk_id] == 2) {
         creature_drop_item(e48, 0x127);
@@ -112,10 +112,10 @@ void map_update_events(void)
         game_progress.unk1448[r4->talk_id] = 1;
     if (fdat_801eda7c == 1) {
         creature_fade_out_despawn(e49);
-        d42->unk0a = 250;
-        d41->unk0a = 250;
-        d40->unk0a = 250;
-        d39->unk0a = 250;
+        d42->type = 250;
+        d41->type = 250;
+        d40->type = 250;
+        d39->type = 250;
         fdat_801eda7c = 0xff;
         game_progress.unk1440.word |= 0x80000;
     }
@@ -142,7 +142,7 @@ void map_use_item_on_creature(short id)
     req.speed = 0;
     req.heading = 0;
     if (id == 0x12b) {
-        if (creature_find_in_reach((VisLists *)&req, 1) == 0x31) {
+        if (creature_find_in_reach((CollisionState *)&req, 1) == 0x31) {
             fdat_801eda7c = 1;
             DAT_801cd0e0 = 1;
         } else {

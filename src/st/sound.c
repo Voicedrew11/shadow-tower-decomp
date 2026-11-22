@@ -38,7 +38,7 @@ void play_landing_sound(int damage)
 ADDRESS(0x80057bac, 0x60)
 void play_footstep_sound(int volume)
 {
-    int flags = vis_lists.unk47DC;
+    int flags = vis_lists.floor_kinds;
     int id;
 
     if (flags & 0x34)

@@ -108,27 +108,27 @@ ADDRESS(0x801ed8f0, 0x1e0)
 void map_hand_over_item(void)
 {
     Creature *e = &vis_table_a.entries[48];
-    Vis48 *c5 = &vis_table_c.entries[5];
-    Vis48 *c6 = &vis_table_c.entries[6];
-    Vis48 *c;
+    GroundItem *c5 = &vis_table_c.entries[5];
+    GroundItem *c6 = &vis_table_c.entries[6];
+    GroundItem *c;
     SVECTOR v;
     SVECTOR unused;
 
     creature_start_script(e, 6);
     c = c5;
-    if (vis_table_c.unk0070[c5->unk00 / 32] & (1 << (c5->unk00 % 32)))
+    if (vis_table_c.collected_bits[c5->item / 32] & (1 << (c5->item % 32)))
         c = c6;
     do {
         e->anim_frame += e->anim_step;
         if ((s16)e->anim_frame >= 0x1000)
             e->anim_frame = 0xfff;
         anim_get_vertex(e->model_slot + 128, e->anim, (s16)e->anim_frame, 0x15a, &v);
-        c->unk08.vx = e->position.vx - v.vz;
-        c->unk08.vy = e->position.vy + v.vy;
-        c->unk08.vz = e->position.vz + v.vx;
+        c->position.vx = e->position.vx - v.vz;
+        c->position.vy = e->position.vy + v.vy;
+        c->position.vz = e->position.vz + v.vx;
         world_run_frame(NULL, &viewer.unk278, 0);
     } while ((s16)e->anim_frame != 0xfff);
-    c->unk22 = 2;
+    c->state = 2;
     viewer.unk268 = viewer.unk278.vx + viewer.unk280.halves[0] + viewer.unk288 + viewer.unk290;
     viewer.unk26A = viewer.unk278.vy + viewer.unk280.halves[1] + viewer.unk28A + viewer.unk292;
     viewer.unk26C = viewer.unk278.vz + viewer.unk284 + viewer.unk28C + viewer.unk294;

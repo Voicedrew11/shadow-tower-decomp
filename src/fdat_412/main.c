@@ -48,10 +48,10 @@ const FdatHeader fdat_header = {
 ADDRESS(0x801ed4a0, 0x2c)
 void map_restore_progress(void)
 {
-    Vis88 *b = &vis_table_b.entries[21];
+    AreaObject *b = &vis_table_b.entries[21];
 
     if (game_progress.unk1444.bit.f7)
-        b->unk05 = 0xff;
+        b->kind = 0xff;
 }
 
 #include "../lib/fdat_creature_pick_move.inc"

@@ -70,7 +70,7 @@ void area_reload_images(void)
 
         if (!((game_progress.unk1440.word >> 17) & 1))
             return;
-        marker = (vis_lists.unk47E0 >> 3) & 1;
+        marker = (vis_lists.floor_kinds_off >> 3) & 1;
         if (marker != 1)
             return;
         {
@@ -92,7 +92,7 @@ void area_reload_images(void)
         flag = (game_progress.unk1440.word >> 13) & 1;
         if (flag != 1)
             return;
-        if (((vis_lists.unk47E0 >> 4) & 1) != flag)
+        if (((vis_lists.floor_kinds_off >> 4) & 1) != flag)
             return;
         {
             RECT g = {0, 487, 256, 1};
@@ -231,7 +231,7 @@ void game_load_common_data(void)
     p = (u32 *)((u8 *)p + (*p + 4));
     copy_words((u32 *)&menu_messages, p + 1, *p >> 2);
     p = (u32 *)((u8 *)p + (*p + 4));
-    copy_words((u32 *)vis_table_c.unk0118, p + 1, *p >> 2);
+    copy_words((u32 *)vis_table_c.types, p + 1, *p >> 2);
     p = (u32 *)((u8 *)p + (*p + 4));
     p = (u32 *)((u8 *)p + (*p + 4));
     copy_words((u32 *)common_anim_pack, p + 1, *p >> 2);
@@ -507,8 +507,8 @@ ADDRESS(0x800456f8, 0x898)
 void area_load_update(void)
 {
     Creature *a;
-    Vis88 *b;
-    Vis48 *c;
+    AreaObject *b;
+    GroundItem *c;
     StVabSlot *slot;
     u_long *p = cd_file_buffer;
     int i, j;
@@ -529,11 +529,11 @@ void area_load_update(void)
         area_state.unk2 = 240;
         b = vis_table_b.entries;
         for (i = 239; i != -1; i--) {
-            if (b->unk05 == 236 && b->unk54 != -1) {
-                sound_stop(b->unk54, b->unk4A.snd.unk4A + 1108);
+            if (b->kind == 236 && b->unk54 != -1) {
+                sound_stop(b->unk54, b->params.snd.sound + 1108);
                 b->unk54 = -1;
             }
-            b->unk05 = 0xff;
+            b->kind = 0xff;
             b++;
         }
         cd_queue_read_member(1, (area_state.unk10 * 10) | 1, (u8 *)cd_file_buffer, area_load_records_done);
@@ -585,20 +585,20 @@ void area_load_update(void)
             }
             b = vis_table_b.entries;
             for (i = 239; i != -1; i--) {
-                if (*(StAnimSlot **)b->unk44) {
-                    anim_slot_free(*(StAnimSlot **)b->unk44);
-                    if (*(StAnimSlot **)b->unk44)
-                        anim_set_free(*(StAnimSet **)b->unk44);
+                if (*(StAnimSlot **)b->anim_slot) {
+                    anim_slot_free(*(StAnimSlot **)b->anim_slot);
+                    if (*(StAnimSlot **)b->anim_slot)
+                        anim_set_free(*(StAnimSet **)b->anim_slot);
                 }
-                b->unk0a = 0xffff;
+                b->type = 0xffff;
                 b++;
             }
             c = vis_table_c.entries;
             for (i = 63; i != -1; i--) {
-                if (*(StAnimSlot **)c->unk04) {
-                    anim_slot_free(*(StAnimSlot **)c->unk04);
-                    if (*(StAnimSlot **)c->unk04)
-                        anim_set_free(*(StAnimSet **)c->unk04);
+                if (*(StAnimSlot **)c->anim_slot) {
+                    anim_slot_free(*(StAnimSlot **)c->anim_slot);
+                    if (*(StAnimSlot **)c->anim_slot)
+                        anim_set_free(*(StAnimSet **)c->anim_slot);
                 }
                 c++;
             }
@@ -616,11 +616,11 @@ void area_load_update(void)
             p = (u_long *)((u8 *)p + (*p + 4));
             creatures_load((CreatureFileEntry *)(p + 1));
             p = (u_long *)((u8 *)p + (*p + 4));
-            copy_words((u32 *)&vis_table_b.unk0000[300], (u32 *)(p + 1), 192);
+            copy_words((u32 *)&vis_table_b.types[300], (u32 *)(p + 1), 192);
             p = (u_long *)((u8 *)p + (*p + 4));
             objects_load((u8 *)(p + 1));
             p = (u_long *)((u8 *)p + (*p + 4));
-            ground_items_load((VisCFileEntry *)(p + 1));
+            ground_items_load((GroundItemFileEntry *)(p + 1));
             p = (u_long *)((u8 *)p + (*p + 4));
             placements_expand((StPlacement *)(p + 1));
             area_restore_snapshot(area_state.unk10);

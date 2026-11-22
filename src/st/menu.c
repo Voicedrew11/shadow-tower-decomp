@@ -311,7 +311,7 @@ void equip_load_slot_picture(int slot)
     case 9:
         first = 3;
         none = 93;
-        if (*id != 0xffff && vis_table_c.unk0118[*id].unk26 == 10)
+        if (*id != 0xffff && vis_table_c.types[*id].category == 10)
             part = 0;
         break;
     case 10:
@@ -348,7 +348,7 @@ void equip_load_slot_picture(int slot)
         data = image;
     }
     tim_load_images_at(data, &pos[slot], NULL, 1);
-    if (*id != 0xffff && vis_table_c.unk0118[*id].unk26 == 9) {
+    if (*id != 0xffff && vis_table_c.types[*id].category == 9) {
         if (slot == 3) {
             rect.x = pos[3].vx;
             rect.y = pos[3].vy;
@@ -364,7 +364,7 @@ void equip_load_slot_picture(int slot)
             DrawSync(0);
             MoveImage(&rect, pos[17].vx, pos[17].vy);
         }
-    } else if (*id != 0xffff && vis_table_c.unk0118[*id].unk26 == 10) {
+    } else if (*id != 0xffff && vis_table_c.types[*id].category == 10) {
         image = (u_long *)((u8 *)image + (image[0] + 4));
         tim_load_images_at(image + 1, &pos[2], NULL, 1);
     }
@@ -395,7 +395,7 @@ void equip_load_item_slot_pictures(void)
             used = 0;
         }
         if (ids[i] != 0xffff) {
-            size = cd_read_member(6, vis_table_c.unk0118[ids[i]].unk5[0] + 400, cd_state.unkA84)
+            size = cd_read_member(6, vis_table_c.types[ids[i]].unk5[0] + 400, cd_state.unkA84)
                    << 11;
             tim_load_images_at(cd_state.unkA84, &pos, NULL, 1);
             used += size;
@@ -423,7 +423,7 @@ void equip_apply_slot_change(int redraw)
 
     if (redraw == 0)
         *(MenuSlots *)sp->unk292 = *MENU_SLOTS;
-    if (viewer.unk38[9] != 0xffff && vis_table_c.unk0118[viewer.unk38[9]].unk26 == 10) {
+    if (viewer.unk38[9] != 0xffff && vis_table_c.types[viewer.unk38[9]].category == 10) {
         if (sp->unk2E0 == 2 || sp->unk2E0 == 16 || sp->unk2E0 == 9 || sp->unk2E0 == 10
             || sp->unk2E0 == 11) {
             viewer.unk38[2] = 0xffff;
@@ -436,7 +436,7 @@ void equip_apply_slot_change(int redraw)
             }
         }
     }
-    if (viewer.unk38[3] != 0xffff && vis_table_c.unk0118[viewer.unk38[3]].unk26 == 9) {
+    if (viewer.unk38[3] != 0xffff && vis_table_c.types[viewer.unk38[3]].category == 9) {
         if (sp->unk2E0 == 3 || sp->unk2E0 == 17) {
             viewer.unk38[3] = 0xffff;
             viewer.unk38[16] = 0xffff;
@@ -446,7 +446,7 @@ void equip_apply_slot_change(int redraw)
             }
         }
     }
-    if (viewer.unk38[4] != 0xffff && vis_table_c.unk0118[viewer.unk38[4]].unk26 == 9) {
+    if (viewer.unk38[4] != 0xffff && vis_table_c.types[viewer.unk38[4]].category == 9) {
         if (sp->unk2E0 == 4 || sp->unk2E0 == 18) {
             viewer.unk38[4] = 0xffff;
             viewer.unk38[17] = 0xffff;
@@ -457,7 +457,7 @@ void equip_apply_slot_change(int redraw)
         }
     }
     if (sp->unk2C0 != -1) {
-        if (vis_table_c.unk0118[sp->unk2C0].unk26 == 10) {
+        if (vis_table_c.types[sp->unk2C0].category == 10) {
             viewer.unk38[2] = 0xffff;
             viewer.unk38[10] = 0xffff;
             if (redraw == 1) {
@@ -465,7 +465,7 @@ void equip_apply_slot_change(int redraw)
                 equip_load_slot_picture(10);
             }
         }
-        if (vis_table_c.unk0118[sp->unk2C0].unk26 == 9) {
+        if (vis_table_c.types[sp->unk2C0].category == 9) {
             if (sp->unk2E0 == 3) {
                 viewer.unk38[16] = 0xffff;
                 if (redraw == 1)
@@ -531,7 +531,7 @@ void player_total_attributes(void)
 {
     MenuAttrScratch *at = MENU_ATTR;
     u16 *id;
-    Vis44 *rec;
+    ItemType *rec;
     int i;
     int j;
 
@@ -545,7 +545,7 @@ void player_total_attributes(void)
     for (i = 0; i < 11; i++) {
         if (*id != 0xffff) {
             for (j = 0; j < 14; j++)
-                at->unk208[j] += vis_table_c.unk0118[*id].unk10[j];
+                at->unk208[j] += vis_table_c.types[*id].attributes[j];
         }
         if (i == 3)
             id += 4;
@@ -584,10 +584,10 @@ void player_total_attributes(void)
         if (*id == 0xffff) {
             fill_words((u32 *)at->unk168, 0, 8);
         } else {
-            rec = &vis_table_c.unk0118[*id];
-            at->unk168->unk0 = rec->unk24;
+            rec = &vis_table_c.types[*id];
+            at->unk168->unk0 = rec->weight;
             for (j = 0; j < 14; j++)
-                at->unk168->unk4[j] = rec->unk10[j];
+                at->unk168->unk4[j] = rec->attributes[j];
             at->unk168->unk2 = 0;
             at->unk168->unk1 = 0;
             if (rec->kind2 >= 9) {
@@ -595,7 +595,7 @@ void player_total_attributes(void)
                 at->unk168->unk2 = rec->amount2;
             }
             if (i != 4 && i != 17)
-                at->unk2BC += rec->unk24;
+                at->unk2BC += rec->weight;
         }
         at->unk168++;
     }
@@ -898,20 +898,20 @@ void menu_equip_info_run(void)
     for (i = 0; i < 314; i++) {
         if (inventory.counts[i].count == 0 || inventory.counts[i].flag)
             continue;
-        if (vis_table_c.unk0118[i].unk26 == 0xff)
+        if (vis_table_c.types[i].category == 0xff)
             continue;
-        if (vis_table_c.unk0118[i].unk26 == 9) {
+        if (vis_table_c.types[i].category == 9) {
             sp->unk174[6][sp->unk19C[6]++] = i;
-        } else if (vis_table_c.unk0118[i].unk26 == 10) {
+        } else if (vis_table_c.types[i].category == 10) {
             sp->unk174[1][sp->unk19C[1]++] = i;
-        } else if (vis_table_c.unk0118[i].unk26 == 20 || vis_table_c.unk0118[i].unk26 == 30) {
+        } else if (vis_table_c.types[i].category == 20 || vis_table_c.types[i].category == 30) {
             if (i == 266 || i == 310 || i == 311 || i == 312 || i == 313)
                 continue;
             sp->unk174[9][sp->unk19C[9]++] = i;
         } else {
             {
-            s16 *list = sp->unk174[vis_table_c.unk0118[i].unk26];
-            s16 *len = &sp->unk19C[vis_table_c.unk0118[i].unk26];
+            s16 *list = sp->unk174[vis_table_c.types[i].category];
+            s16 *len = &sp->unk19C[vis_table_c.types[i].category];
             list[(*len)++] = i;
             }
         }
@@ -947,11 +947,11 @@ void menu_equip_info_run(void)
         equip_load_slot_picture(slots[0]);
         menu_equip_info_draw();
         for (j = 1; j < 20; j++) {
-            if ((viewer.unk38[3] == 0xffff || vis_table_c.unk0118[viewer.unk38[3]].unk26 != 9
+            if ((viewer.unk38[3] == 0xffff || vis_table_c.types[viewer.unk38[3]].category != 9
                  || slots[j] != 16)
-                && (viewer.unk38[4] == 0xffff || vis_table_c.unk0118[viewer.unk38[4]].unk26 != 9
+                && (viewer.unk38[4] == 0xffff || vis_table_c.types[viewer.unk38[4]].category != 9
                     || slots[j] != 17)
-                && (viewer.unk38[9] == 0xffff || vis_table_c.unk0118[viewer.unk38[9]].unk26 != 10
+                && (viewer.unk38[9] == 0xffff || vis_table_c.types[viewer.unk38[9]].category != 10
                     || (slots[j] != 2 && slots[j] != 10 && slots[j] != 15))) {
                 equip_load_slot_picture(slots[j]);
                 menu_equip_info_draw();
@@ -1297,9 +1297,9 @@ void menu_equip_info_run(void)
             if (sp->unk2C7 != 10) {
                 if (pad_state.unk4 & 0x4000) {
                     sel = sp->unk2C0;
-                    if (sel != -1 && vis_table_c.unk0118[sel].unk27 != 0
-                        && vis_table_c.unk0118[sel].unk28 == 0
-                        && vis_table_c.unk0118[sel].unk26 != 4) {
+                    if (sel != -1 && vis_table_c.types[sel].max_durability != 0
+                        && vis_table_c.types[sel].durability == 0
+                        && vis_table_c.types[sel].category != 4) {
                         play_refuse_sound();
                         pad_state.unk4 = 0;
                     } else {
@@ -1774,7 +1774,7 @@ void menu_arrange_icons_run(void)
     sp->unk0.grid.count0 = 0;
     sp->unk0.grid.count1 = 0;
     for (i = 0; i < 314; i++) {
-        if (vis_table_c.unk0118[i].unk5[0] != 0xff && i < 314 && i != 266
+        if (vis_table_c.types[i].unk5[0] != 0xff && i < 314 && i != 266
             && inventory.counts[i].count != 0 && i != viewer.unk38[0] && i != viewer.unk38[1]
             && i != viewer.unk38[2] && i != viewer.unk38[3] && i != viewer.unk38[4]
             && i != viewer.unk38[5] && i != viewer.unk38[7] && i != viewer.unk38[8]
@@ -1817,14 +1817,14 @@ void menu_arrange_icons_run(void)
             total = 0;
         }
         if (i < 20 && i < sp->unk0.grid.count0) {
-            size = cd_read_member(6, vis_table_c.unk0118[sp->unk0.grid.ids0[i]].unk5[0],
+            size = cd_read_member(6, vis_table_c.types[sp->unk0.grid.ids0[i]].unk5[0],
                                  cd_state.unkA84) << 11;
 
             tim_load_images_at(cd_state.unkA84, &sp->unk0.grid.tex[i], NULL, 1);
             total += size;
             cd_state.unkA84 = (u_long *)((u8 *)cd_state.unkA84 + size);
         } else if (i >= 20 && i - 20 < sp->unk0.grid.count1) {
-            size = cd_read_member(6, vis_table_c.unk0118[sp->unk0.grid.ids1[i - 20]].unk5[0],
+            size = cd_read_member(6, vis_table_c.types[sp->unk0.grid.ids1[i - 20]].unk5[0],
                                  cd_state.unkA84) << 11;
 
             tim_load_images_at(cd_state.unkA84, &sp->unk0.grid.tex[i], NULL, 1);
@@ -2028,7 +2028,7 @@ void menu_arrange_icons_run(void)
                 else
                     id = sp->unk0.grid.ids1[sp->unk0.grid.row1 * 4 + (CURSOR_ROW * 4 + CURSOR_COL) - 4];
                 if (shown != id && id != -1) {
-                    cd_read_member(6, vis_table_c.unk0118[id].unk5[0] + 200, cd_file_buffer);
+                    cd_read_member(6, vis_table_c.types[id].unk5[0] + 200, cd_file_buffer);
                     tim_load_images_at(cd_file_buffer, &picture, NULL, 1);
                     shown = id;
                 }
@@ -2053,7 +2053,7 @@ void menu_arrange_icons_run(void)
                     }
                     if (sp->unk0.grid.ids0[i] != -1) {
                         int size = cd_read_member(
-                            6, vis_table_c.unk0118[sp->unk0.grid.ids0[i]].unk5[0], cd_state.unkA84) << 11;
+                            6, vis_table_c.types[sp->unk0.grid.ids0[i]].unk5[0], cd_state.unkA84) << 11;
 
                         tim_load_images_at(cd_state.unkA84, &sp->unk0.grid.tex[i % 20], NULL, 1);
                         used += size;
@@ -2086,7 +2086,7 @@ void menu_arrange_icons_run(void)
                     }
                     if (sp->unk0.grid.ids1[i] != -1) {
                         int size = cd_read_member(
-                            6, vis_table_c.unk0118[sp->unk0.grid.ids1[i]].unk5[0], cd_state.unkA84) << 11;
+                            6, vis_table_c.types[sp->unk0.grid.ids1[i]].unk5[0], cd_state.unkA84) << 11;
 
                         tim_load_images_at(cd_state.unkA84, &sp->unk0.grid.tex[i % 20 + 20], NULL, 1);
                         used += size;
@@ -2260,7 +2260,7 @@ int menu_use_item_run(void)
     sp->unk0.page_list.entries = mem_alloc(92);
     sp->unk0.page_list.count = 0;
     for (i = 268; i < 314; i++) {
-        if ((vis_table_c.unk0118[i].unk26 == 20 || vis_table_c.unk0118[i].unk26 == 30)
+        if ((vis_table_c.types[i].category == 20 || vis_table_c.types[i].category == 30)
             && inventory.counts[i].count != 0 && inventory.counts[i].flag == 0)
             sp->unk0.page_list.entries[sp->unk0.page_list.count++] = i;
     }
@@ -2488,7 +2488,7 @@ void shop_run(void)
         sp->unk0.list.count = 0;
         for (i = 0; i < 266; i++) {
             if (inventory.counts[i].count != 0
-                && vis_table_c.unk0118[i].unk27 != vis_table_c.unk0118[i].unk28)
+                && vis_table_c.types[i].max_durability != vis_table_c.types[i].durability)
                 sp->unk0.list.ids[sp->unk0.list.count++] = i;
         }
     }
@@ -2507,11 +2507,11 @@ void shop_run(void)
                     if (sp->unk2DC & 1) {
                         int id = inventory.unk13A[sp->unk0.list.ids[sp->unk2E2 + sp->unk2E0]];
 
-                        if (inventory.counts[266].count < vis_table_c.unk0118[id].unk2) {
+                        if (inventory.counts[266].count < vis_table_c.types[id].price) {
                             done = 0;
                             play_refuse_sound();
                         } else {
-                            inventory.counts[266].count -= vis_table_c.unk0118[id].unk2;
+                            inventory.counts[266].count -= vis_table_c.types[id].price;
                             inventory.counts[id].count++;
                             inventory.unk156[sp->unk0.list.ids[sp->unk2E2 + sp->unk2E0]]--;
                             if (inventory.unk156[sp->unk0.list.ids[sp->unk2E2 + sp->unk2E0]] == 0) {
@@ -2539,13 +2539,13 @@ void shop_run(void)
                         int id = sp->unk0.list.ids[sp->unk2E2 + sp->unk2E0];
                         int j;
 
-                        cost = vis_table_c.unk0118[id].unk3 * 2 / 3
-                            * (vis_table_c.unk0118[id].unk27 - vis_table_c.unk0118[id].unk28);
-                        if (vis_table_c.unk0118[id].unk28 == 0)
+                        cost = vis_table_c.types[id].repair_price * 2 / 3
+                            * (vis_table_c.types[id].max_durability - vis_table_c.types[id].durability);
+                        if (vis_table_c.types[id].durability == 0)
                             cost *= 2;
                         if (cost < viewer.unk2) {
                             viewer.unk2 -= cost;
-                            vis_table_c.unk0118[id].unk28 = vis_table_c.unk0118[id].unk27;
+                            vis_table_c.types[id].durability = vis_table_c.types[id].max_durability;
                             for (j = sp->unk2E2 + sp->unk2E0; j < sp->unk0.list.count - 1; j++)
                                 sp->unk0.list.ids[j] = sp->unk0.list.ids[j + 1];
                             sp->unk0.list.count--;
@@ -2612,9 +2612,9 @@ void shop_run(void)
                     play_refuse_sound();
                 } else {
                     if (sp->unk2DC & 1)
-                        kind = vis_table_c.unk0118[inventory.unk13A[sp->unk0.list.ids[sp->unk2E2 + sp->unk2E0]]].unk5[0];
+                        kind = vis_table_c.types[inventory.unk13A[sp->unk0.list.ids[sp->unk2E2 + sp->unk2E0]]].unk5[0];
                     else
-                        kind = vis_table_c.unk0118[sp->unk0.list.ids[sp->unk2E2 + sp->unk2E0]].unk5[0];
+                        kind = vis_table_c.types[sp->unk0.list.ids[sp->unk2E2 + sp->unk2E0]].unk5[0];
                     play_confirm_sound();
                     sp->unk0.list.unkA = 1;
                     sp->unk2DC |= 0x8000;

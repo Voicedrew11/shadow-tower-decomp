@@ -61,16 +61,16 @@ const FdatHeader fdat_header = {
 ADDRESS(0x801ed4a0, 0xc0)
 void map_restore_progress(void)
 {
-    Vis88 *door = &vis_table_b.entries[33];
-    Vis88 *b;
+    AreaObject *door = &vis_table_b.entries[33];
+    AreaObject *b;
     int i;
 
-    if (door->unk0C == 0xff) {
+    if (door->state == 0xff) {
         b = vis_table_b.entries;
         i = 240;
         while (i--) {
-            if (b->unk0a == 0x29 || b->unk0a == 0x2b || b->unk0a == 0x94)
-                b->unk05 = 0xff;
+            if (b->type == 0x29 || b->type == 0x2b || b->type == 0x94)
+                b->kind = 0xff;
             b++;
         }
         fdat_801eda08 = 0xff;
@@ -98,43 +98,43 @@ void map_restore_progress(void)
 ADDRESS(0x801ed560, 0x1b0)
 void map_update_switch_objects(void)
 {
-    Vis88 *sw = &vis_table_b.entries[33];
+    AreaObject *sw = &vis_table_b.entries[33];
     int i;
 
-    if (fdat_801eda08 == 0 && sw->unk0C == 0xff) {
-        Vis88 *b;
+    if (fdat_801eda08 == 0 && sw->state == 0xff) {
+        AreaObject *b;
         for (i = 239, b = vis_table_b.entries; i != -1; i--, b++) {
-            if (b->unk0a == 0x29 || b->unk0a == 0x2b || b->unk0a == 0x94) {
-                b->unk05 = 0xff;
-                if (b->unk0a == 0x94) {
-                    b->unk3C.vx = 0;
-                    b->unk3C.vy = 0;
-                    b->unk3C.vz = 0;
+            if (b->type == 0x29 || b->type == 0x2b || b->type == 0x94) {
+                b->kind = 0xff;
+                if (b->type == 0x94) {
+                    b->scale.vx = 0;
+                    b->scale.vy = 0;
+                    b->scale.vz = 0;
                 }
-            } else if (b->unk0a == 0xaf) {
-                b->unk05 = 0xff;
-                b->unk0a = 0xffff;
+            } else if (b->type == 0xaf) {
+                b->kind = 0xff;
+                b->type = 0xffff;
             }
         }
         fdat_801eda08 = 0xff;
         if (!(game_progress.unk1440.word >> 18 & 1))
             lighting.area_mode[20] = 0x41;
-    } else if (fdat_801eda08 == 0xff && sw->unk0C == 0) {
-        Vis88 *b;
+    } else if (fdat_801eda08 == 0xff && sw->state == 0) {
+        AreaObject *b;
         for (i = 239, b = vis_table_b.entries; i != -1; i--, b++) {
-            if (b->unk0a == 0x29)
-                b->unk05 = 3;
-            if (b->unk0a == 0x2b)
-                b->unk05 = 5;
-            if (b->unk0a == 0x94) {
-                b->unk05 = 2;
-                b->unk0C = 0;
-                b->unk3C.vx = 0;
-                b->unk3C.vy = 0;
-                b->unk3C.vz = 0;
-                b->unk05 = 2;
-                b->unk03 = 5;
-                b->unk04 |= 0x40;
+            if (b->type == 0x29)
+                b->kind = 3;
+            if (b->type == 0x2b)
+                b->kind = 5;
+            if (b->type == 0x94) {
+                b->kind = 2;
+                b->state = 0;
+                b->scale.vx = 0;
+                b->scale.vy = 0;
+                b->scale.vz = 0;
+                b->kind = 2;
+                b->draw_flags = 5;
+                b->flags |= 0x40;
                 *(u8 *)&b->unk50 = 0;
             }
         }

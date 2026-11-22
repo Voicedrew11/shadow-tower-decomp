@@ -90,12 +90,12 @@ void map_pick_shopkeeper_line(void)
     none = 1;
     for (i = 0; i < 266; i++) {
         if (inventory.counts[i].count != 0
-            && vis_table_c.unk0118[i].unk27 != vis_table_c.unk0118[i].unk28) {
-            n = vis_table_c.unk0118[i].unk3 * 2 / 3
-                * (vis_table_c.unk0118[i].unk27 - vis_table_c.unk0118[i].unk28);
+            && vis_table_c.types[i].max_durability != vis_table_c.types[i].durability) {
+            n = vis_table_c.types[i].repair_price * 2 / 3
+                * (vis_table_c.types[i].max_durability - vis_table_c.types[i].durability);
             if (n < least)
                 least = n;
-            if (vis_table_c.unk0118[i].unk27 != vis_table_c.unk0118[i].unk28)
+            if (vis_table_c.types[i].max_durability != vis_table_c.types[i].durability)
                 none = 0;
         }
     }

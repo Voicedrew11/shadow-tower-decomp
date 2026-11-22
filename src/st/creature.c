@@ -17,14 +17,14 @@
 ADDRESS(0x8004ac38, 0x64)
 void creature_return_home(Creature *e)
 {
-    VisRecord *r;
+    MapBlock *r;
     u16 i = e->home_block;
 
     e->block = i;
     r = &vis_records[i];
-    e->position.vx = (r->unk08 << 12) + e->home_offset_x;
-    e->position.vy = (r->unk09 << 12) + e->home_offset_y;
-    e->position.vz = (r->unk0a << 12) + e->home_offset_z;
+    e->position.vx = (r->cell_x << 12) + e->home_offset_x;
+    e->position.vy = (r->cell_y << 12) + e->home_offset_y;
+    e->position.vz = (r->cell_z << 12) + e->home_offset_z;
 }
 
 /* Clears the rotation and sets the facing to unk68, or a random one when
@@ -445,7 +445,7 @@ int vector_point_segment_distance(int x, int y, int z, int r, VECTOR *a, VECTOR 
  * 1 and 4 also require it inside the viewer's view cone; mode 0 returns the
  * first hit, otherwise the nearest. */
 ADDRESS(0x8004bb88, 0x2f8)
-int creature_find_in_reach(VisLists *req, int arg1)
+int creature_find_in_reach(CollisionState *req, int arg1)
 {
     Creature *e;
     CreatureType *r;
@@ -483,27 +483,27 @@ int creature_find_in_reach(VisLists *req, int arg1)
             continue;
         if (r->radius == 0)
             continue;
-        dx = e->position.vx - req->unk4.vx;
+        dx = e->position.vx - req->position.vx;
         if (dx < -10240 || dx > 10240)
             continue;
-        dz = e->position.vz - req->unk4.vz;
+        dz = e->position.vz - req->position.vz;
         if (dz < -10240 || dz > 10240)
             continue;
         dist = SquareRoot0(dx * dx + dz * dz);
-        fwd = req->unk22 * rcos(req->unk20 - (short)ratan2(dz, dx)) / 4096;
+        fwd = req->speed * rcos(req->heading - (short)ratan2(dz, dx)) / 4096;
         if (arg1 & 2)
-            lim = e->radius + req->unk1C + 512;
+            lim = e->radius + req->radius + 512;
         else
-            lim = e->radius + req->unk1C;
+            lim = e->radius + req->radius;
         if (dist - fwd >= lim)
             continue;
-        if (e->position.vy < req->unk4.vy) {
-            if (e->position.vy < req->unk4.vy - req->unk1E) {
+        if (e->position.vy < req->position.vy) {
+            if (e->position.vy < req->position.vy - req->height) {
                 if (mode == 0)
                     return -1;
                 continue;
             }
-        } else if (req->unk4.vy < e->position.vy - e->height) {
+        } else if (req->position.vy < e->position.vy - e->height) {
             if (mode == 0)
                 return -1;
             continue;
@@ -522,7 +522,7 @@ int creature_find_in_reach(VisLists *req, int arg1)
 
 /* Finds the first live entry whose body req touches. */
 ADDRESS(0x8004be80, 0x1bc)
-int creature_find_touching(VisLists *req)
+int creature_find_touching(CollisionState *req)
 {
     Creature *e;
     VECTOR v;
@@ -542,23 +542,23 @@ int creature_find_touching(VisLists *req)
             v.vx = e->position.vx;
             v.vz = e->position.vz;
             v.vy = e->position.vy - e->height + e->home_offset_z;
-            if (vector_distance_xz_within(&v, req->unk4.vx, req->unk4.vy, req->unk4.vz, e->radius + req->unk1C,
-                              e->height, req->unk1E) != -1)
+            if (vector_distance_xz_within(&v, req->position.vx, req->position.vy, req->position.vz, e->radius + req->radius,
+                              e->height, req->height) != -1)
                 return i;
         } else if (e->flags & 0x400000) {
             creature_vertex_offset(e, 0, &v);
             v.vx += e->position.vx;
             v.vz += e->position.vz;
             v.vy += e->position.vy;
-            if (vector_distance_xz_within(&v, req->unk4.vx, req->unk4.vy, req->unk4.vz, e->radius + req->unk1C,
-                              e->height, req->unk1E) != -1)
+            if (vector_distance_xz_within(&v, req->position.vx, req->position.vy, req->position.vz, e->radius + req->radius,
+                              e->height, req->height) != -1)
                 return i;
         } else {
             v.vx = e->position.vx;
             v.vz = e->position.vz;
             v.vy = e->position.vy;
-            if (vector_distance_xz_within(&v, req->unk4.vx, req->unk4.vy, req->unk4.vz, e->radius + req->unk1C,
-                              e->height, req->unk1E) != -1)
+            if (vector_distance_xz_within(&v, req->position.vx, req->position.vy, req->position.vz, e->radius + req->radius,
+                              e->height, req->height) != -1)
                 return i;
         }
     }
@@ -650,28 +650,28 @@ void creature_move(Creature *e)
     vel = e->velocity;
     if (e->move_mode != 2)
         vel.vy = e->vertical_speed;
-    vis_lists.unk4 = e->position;
-    vis_lists.unk4.vy -= e->height;
-    vis_lists.unk1C = e->radius;
-    vis_lists.unk1E = e->height;
-    vis_lists.unk0 = e->collision_tests | 0x800;
+    vis_lists.position = e->position;
+    vis_lists.position.vy -= e->height;
+    vis_lists.radius = e->radius;
+    vis_lists.height = e->height;
+    vis_lists.tests = e->collision_tests | 0x800;
 loop:
     e->velocity.vx = vel.vx;
     e->velocity.vy = vel.vy;
     e->velocity.vz = vel.vz;
-    vis_lists.unk14 = e->velocity;
-    vis_lists.unk20 = ratan2(e->velocity.vz, e->velocity.vx);
-    vis_lists.unk22 = SquareRoot0(vel.vx * vel.vx + vel.vz * vel.vz);
+    vis_lists.velocity = e->velocity;
+    vis_lists.heading = ratan2(e->velocity.vz, e->velocity.vx);
+    vis_lists.speed = SquareRoot0(vel.vx * vel.vx + vel.vz * vel.vz);
     hits = collision_query(&vis_lists);
     if (tries == 0) {
         if (vis_lists.n_sources != 0) {
             if (e->visibility == 1)
                 e->visibility = 0;
-            e->block = vis_lists.unk47D8;
+            e->block = vis_lists.next_floor_block;
         } else if (e->visibility == 0) {
             e->visibility = 1;
         }
-        if (vis_records[e->block].unk01 != e->region) {
+        if (vis_records[e->block].region != e->region) {
             vel.vx = vel.vz = 0;
             goto done;
         }
@@ -679,46 +679,46 @@ loop:
     if (hits == 0 || tries++ >= 3)
         goto done;
     if (hits & 2) {
-        depth = 1 - (vis_lists.unk3C - e->radius);
-        vel.vx = depth * vis_lists.unk8C / 4096;
-        vel.vz = depth * vis_lists.unk90 / 4096;
+        depth = 1 - (vis_lists.wall_dist - e->radius);
+        vel.vx = depth * vis_lists.wall_normal_x / 4096;
+        vel.vz = depth * vis_lists.wall_normal_z / 4096;
         if (wall0)
             goto done;
         wall0 = 1;
-        vis_lists.unk78 = ratan2(vis_lists.unk90, vis_lists.unk8C);
-        ang = vis_lists.unk78 + 1024;
+        vis_lists.hit_normal_heading = ratan2(vis_lists.wall_normal_z, vis_lists.wall_normal_x);
+        ang = vis_lists.hit_normal_heading + 1024;
         e->wall_heading = ang & 0xfff;
         push = speed * rcos(heading - (ang & 0xfff)) / 4096;
-        vis_lists.unk44C6 = push;
+        vis_lists.slide_speed = push;
     } else if (hits & 8) {
-        depth = 1 - (vis_lists.unk44 - e->radius);
-        vel.vx = depth * vis_lists.unk9C / 4096;
-        vel.vz = depth * vis_lists.unkA0 / 4096;
+        depth = 1 - (vis_lists.low_wall_dist - e->radius);
+        vel.vx = depth * vis_lists.low_wall_normal_x / 4096;
+        vel.vz = depth * vis_lists.low_wall_normal_z / 4096;
         if (wall1)
             goto done;
         wall1 = 1;
-        vis_lists.unk78 = ratan2(vis_lists.unkA0, vis_lists.unk9C);
-        ang = vis_lists.unk78 + 1024;
+        vis_lists.hit_normal_heading = ratan2(vis_lists.low_wall_normal_z, vis_lists.low_wall_normal_x);
+        ang = vis_lists.hit_normal_heading + 1024;
         e->wall_heading = ang & 0xfff;
         push = speed * rcos(heading - (ang & 0xfff)) / 4096;
-        vis_lists.unk44C6 = push;
+        vis_lists.slide_speed = push;
     } else if (hits & 0xd0) {
         if (hits & 0x80)
             e->touched_player = 1;
         collision_locate_hit_body(&e->position);
-        d.vx = e->position.vx - vis_lists.unkAC.vx;
+        d.vx = e->position.vx - vis_lists.hit_body_position.vx;
         d.vy = 0;
-        d.vz = e->position.vz - vis_lists.unkAC.vz;
+        d.vz = e->position.vz - vis_lists.hit_body_position.vz;
         VectorNormalS(&d, &n);
         vel.vx = 0;
         vel.vz = 0;
         if (slid)
             goto done;
         slid = 1;
-        vis_lists.unk78 = ratan2(d.vz, d.vx);
-        ang = vis_lists.unk78 + 1024;
+        vis_lists.hit_normal_heading = ratan2(d.vz, d.vx);
+        ang = vis_lists.hit_normal_heading + 1024;
         push = speed * rcos(heading - (ang & 0xfff)) / 4096;
-        vis_lists.unk44C6 = push;
+        vis_lists.slide_speed = push;
     } else {
         goto done;
     }
@@ -729,10 +729,10 @@ loop:
     goto loop;
 done:
     if (hits & 4) {
-        dy = vis_lists.unk2C;
+        dy = vis_lists.next_floor_dist;
         vel.vy += dy - e->height;
     }
-    dy = vis_lists.unk2C - e->height;
+    dy = vis_lists.next_floor_dist - e->height;
     e->height_above_floor = dy;
     if (e->move_mode == 1 || e->move_mode == 2) {
         vel.vy = 0;
@@ -782,19 +782,19 @@ void creature_move_vertical(void)
 {
     Creature *e = vis_table_a.current;
 
-    vis_lists.unk4 = e->position;
-    vis_lists.unk4.vy += e->velocity.vy - e->height;
-    vis_lists.unk1C = e->radius;
-    vis_lists.unk1E = e->height;
-    vis_lists.unk14 = e->velocity;
-    vis_lists.unk20 = ratan2(e->velocity.vz, e->velocity.vx);
-    vis_lists.unk0 = 2;
+    vis_lists.position = e->position;
+    vis_lists.position.vy += e->velocity.vy - e->height;
+    vis_lists.radius = e->radius;
+    vis_lists.height = e->height;
+    vis_lists.velocity = e->velocity;
+    vis_lists.heading = ratan2(e->velocity.vz, e->velocity.vx);
+    vis_lists.tests = 2;
     collision_test_map(&vis_lists);
-    if (vis_lists.unk47E4 < e->position.vy) {
-        e->position.vy = vis_lists.unk47E4;
+    if (vis_lists.floor_y < e->position.vy) {
+        e->position.vy = vis_lists.floor_y;
         e->velocity.vy = 0;
-    } else if (e->position.vy - e->height < vis_lists.unk47E8) {
-        e->position.vy = vis_lists.unk47E8 + e->height;
+    } else if (e->position.vy - e->height < vis_lists.ceiling_y) {
+        e->position.vy = vis_lists.ceiling_y + e->height;
         e->velocity.vy = 0;
     } else {
         e->position.vy += e->velocity.vy;

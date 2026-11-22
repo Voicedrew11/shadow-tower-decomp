@@ -143,8 +143,8 @@ ADDRESS(0x80055cf4, 0x2a8)
 void area_save_snapshot(int area)
 {
     Creature *a = vis_table_a.entries;
-    Vis48 *c = vis_table_c.entries;
-    Vis88 *b = vis_table_b.entries;
+    GroundItem *c = vis_table_c.entries;
+    AreaObject *b = vis_table_b.entries;
     int i;
     int n;
 
@@ -159,7 +159,7 @@ void area_save_snapshot(int area)
     for (i = 0; i < n; i++)
         game_progress.unk180[area][i] = 0;
     for (i = 0; i < 32; i++, c++) {
-        if (c->unk22 == 0)
+        if (c->state == 0)
             game_progress.unk180[area][i / 32] |= BIT(i);
     }
     n = 8;
@@ -169,12 +169,12 @@ void area_save_snapshot(int area)
         game_progress.unkE40[area][i] = 0;
     }
     for (i = 0; i < 240; i++, b++) {
-        if (b->unk0a == 0xffff) {
+        if (b->type == 0xffff) {
             game_progress.unk240[area][i / 32] |= BIT(i);
         } else {
-            if (b->unk4A.door.unk4F == 0xff)
+            if (b->params.door.lock == 0xff)
                 game_progress.unk840[area][i / 32] |= BIT(i);
-            if (b->unk0C == 0xff)
+            if (b->state == 0xff)
                 game_progress.unkE40[area][i / 32] |= BIT(i);
         }
     }
@@ -185,8 +185,8 @@ ADDRESS(0x80055f9c, 0x338)
 void area_restore_snapshot(int area)
 {
     Creature *a = vis_table_a.entries;
-    Vis48 *c = vis_table_c.entries;
-    Vis88 *b = vis_table_b.entries;
+    GroundItem *c = vis_table_c.entries;
+    AreaObject *b = vis_table_b.entries;
     int i;
     u16 n;
     u8 t;
@@ -197,55 +197,55 @@ void area_restore_snapshot(int area)
     }
     for (i = 0; i < 32; i++, c++) {
         if (game_progress.unk180[area][i / 32] & BIT(i))
-            c->unk22 = 0;
+            c->state = 0;
     }
     for (i = 0; i < 240; b++, i++) {
         if (game_progress.unk240[area][i / 32] & BIT(i)) {
-            b->unk0a = 0xffff;
+            b->type = 0xffff;
         } else {
-            switch (b->unk05) {
+            switch (b->kind) {
             default:
                 if (game_progress.unk840[area][i / 32] & BIT(i))
-                    b->unk4A.door.unk4F = 255;
+                    b->params.door.lock = 255;
                 if (game_progress.unkE40[area][i / 32] & BIT(i))
-                    b->unk0C = 255;
+                    b->state = 255;
                 break;
             case 0:
             case 1:
                 if (game_progress.unk840[area][i / 32] & BIT(i))
-                    b->unk4A.door.unk4F = 255;
+                    b->params.door.lock = 255;
                 if (game_progress.unkE40[area][i / 32] & BIT(i)) {
-                    n = b->unk4A.door.unk4E;
+                    n = b->params.door.n_blocks;
                     while (n--) {
-                        t = vis_records[b->unk4A.door.unk4C + n].part;
-                        vis_records[b->unk4A.door.unk4C + n].part =
-                            vis_records[b->unk4A.door.unk4A + n].part;
-                        vis_records[b->unk4A.door.unk4A + n].part = t;
+                        t = vis_records[b->params.door.block_b + n].part;
+                        vis_records[b->params.door.block_b + n].part =
+                            vis_records[b->params.door.block_a + n].part;
+                        vis_records[b->params.door.block_a + n].part = t;
                     }
-                    if (b->unk0a == 58)
-                        b->unk00 = 2;
-                    else if (b->unk05 == 1)
-                        b->unk00 = 1;
-                    b->unk0C = 255;
-                    b->unk10 = 4095;
+                    if (b->type == 58)
+                        b->visibility = 2;
+                    else if (b->kind == 1)
+                        b->visibility = 1;
+                    b->state = 255;
+                    b->anim_frame = 4095;
                 }
                 break;
             case 52:
                 if (game_progress.unk840[area][i / 32] & BIT(i))
-                    b->unk4A.door.unk4F = 255;
+                    b->params.door.lock = 255;
                 if (game_progress.unkE40[area][i / 32] & BIT(i)) {
-                    b->unk0C = 255;
-                    b->unk10 = 0;
-                    b->unk02 = 1;
+                    b->state = 255;
+                    b->anim_frame = 0;
+                    b->anim = 1;
                 }
                 break;
             }
         }
     }
-    vis_lists.unk47E0 &= ~0x20;
-    vis_lists.unk47E0 &= ~0x10;
-    vis_lists.unk47E0 &= ~0x8;
-    vis_lists.unk47E0 &= ~0x4;
-    vis_lists.unk47E0 &= ~0x2;
-    vis_lists.unk47E0 &= ~0x1;
+    vis_lists.floor_kinds_off &= ~0x20;
+    vis_lists.floor_kinds_off &= ~0x10;
+    vis_lists.floor_kinds_off &= ~0x8;
+    vis_lists.floor_kinds_off &= ~0x4;
+    vis_lists.floor_kinds_off &= ~0x2;
+    vis_lists.floor_kinds_off &= ~0x1;
 }

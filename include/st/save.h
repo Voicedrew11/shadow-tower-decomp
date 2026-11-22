@@ -50,8 +50,8 @@ typedef struct {
     u32 unk1454[12];
     u32 unk1484[12];
     u32 unk14B4[5];
-    u8 unk14C8[4];       /* 0x14c8: vis_table_c.unk0000[2..5] */
-    u32 unk14CC[9];      /* 0x14cc: vis_table_c.unk0070 */
+    u8 unk14C8[4];       /* 0x14c8: vis_table_c.ground_item_counts[2..5] */
+    u32 unk14CC[9];      /* 0x14cc: vis_table_c.collected_bits */
     StSaveSlot unk14F0[32]; /* 0x14f0: table C entries 32..63 */
     u32 unk17F0;         /* 0x17f0: viewer fields */
     s32 unk17F4;
@@ -81,7 +81,7 @@ typedef struct {
     u16 unk1B70[21];
     u8 unk1B9A[2];
     u32 unk1B9C[3];
-    u8 unk1BA8[314];     /* 0x1ba8: each Vis44's unk28 */
+    u8 unk1BA8[314];     /* 0x1ba8: each ItemType's durability */
     u8 unk1CE2[2];
     u32 unk1CE4[24];     /* 0x1ce4: lighting.area_mode */
     u16 unk1D44[14];
