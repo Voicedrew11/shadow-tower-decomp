@@ -321,9 +321,9 @@ typedef struct {
     void (*unk0C)();
     void (*unk10)();
     void (*loaded)(void); /* 0x14: called once the area is loaded (area_load_update) */
-    void (*item_added)(int); /* 0x18: item id rose by one (item_add) */
+    void (*item_added)(); /* 0x18: item id rose by one, (id) (item_add) */
     void (*unk1C)();
-    void (*load_object)(void *entry, void *record); /* 0x20: a table B entry kind objects_load does not know */
+    void (*load_object)(); /* 0x20: a table B entry kind objects_load does not know, (entry, record) */
     void (*update_object)(void); /* 0x24: a table B entry kind objects_update does not handle */
     void (*unk28)();
     void (*unk2C)();

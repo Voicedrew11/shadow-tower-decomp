@@ -35,10 +35,10 @@ void save_reset_new_game(void)
 
     fill_words((u32 *)game_progress.talk_counts, 0, 12);
     fill_words((u32 *)&inventory, 0, 89);
-    fill_words(&game_progress.creature_bits_and_vs_data[10], 0, 79);
-    game_progress.creature_bits_and_vs_data[89] = -1;
-    game_progress.creature_bits_and_vs_data[90] = -1;
-    game_progress.creature_bits_and_vs_data[91] = -1;
+    fill_words(game_progress.vs_items_lost, 0, 79);
+    game_progress.vs_lineup[0] = -1;
+    game_progress.vs_lineup[1] = -1;
+    game_progress.vs_lineup[2] = -1;
     lighting.area_mode[0] = 0x11;
     lighting.area_mode[40] = 0x11;
     lighting.area_mode[41] = 0x11;
@@ -130,8 +130,8 @@ void save_reset_new_game(void)
     fill_words(game_progress.objects_unlocked[0], 0, 384);
     fill_words(game_progress.objects_finished[0], 0, 384);
     fill_words((u32 *)game_progress.areas_visited, 0, 12);
-    fill_words(game_progress.creature_bits_and_vs_data, 0, 5);
-    fill_words(&game_progress.creature_bits_and_vs_data[5], 0, 5);
+    fill_words(game_progress.creature_kind_bits[0], 0, 5);
+    fill_words(game_progress.creature_kind_bits[1], 0, 5);
     fill_words((u32 *)game_progress.area_kills, 0, 12);
     game_progress.save_id = -1;
 }

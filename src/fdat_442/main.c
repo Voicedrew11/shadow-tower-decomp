@@ -183,6 +183,6 @@ void map_run_shop_visit(void)
             game_progress.event_flags.word &= 0x7fffffff;
             game_progress.event_flags2.word |= 1;
         }
-        DAT_801cd0e4 = 1;
+        game_progress.warp_back_request = 1;
     }
 }

@@ -3145,7 +3145,7 @@ void player_update(void)
                     if (ids[viewer.quick_item_index] != 0xffff) {
                         viewer.save_warp_request = 0;
                         item_use(ids[viewer.quick_item_index]);
-                        if (DAT_801cd0e0 == 1) {
+                        if (game_progress.item_use_result == 1) {
                             play_confirm_sound();
                             if (ids[viewer.quick_item_index] == 288) {
                                 player_compute_derived_stats(0);
@@ -3173,7 +3173,7 @@ void player_update(void)
                                 icon.y = viewer.quick_item_index * 24 + 256;
                                 ClearImage(&icon, 0, 0, 0);
                             }
-                        } else if (DAT_801cd0e0 == 2) {
+                        } else if (game_progress.item_use_result == 2) {
                             play_refuse_sound();
                         }
                     } else {

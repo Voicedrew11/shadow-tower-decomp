@@ -4561,7 +4561,7 @@ void world_draw_creatures(void)
             depth = e->fade;
         if (t->kind != 0xffff) {
             bit = t->kind;
-            game_progress.creature_bits_and_vs_data[bit >> 5] |= 1 << (bit & 0x1f);
+            game_progress.creature_kind_bits[0][bit >> 5] |= 1 << (bit & 0x1f);
         }
         if (model != NULL) {
         at = &e->position;

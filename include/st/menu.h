@@ -10,6 +10,7 @@
 #define ST_MENU_H
 
 #include <kf/lib/types.h>
+#include <kf/lib/offsetof.h>
 #include <sys/types.h>
 #include <LIBCD.H>
 #include <LIBGTE.H>
@@ -302,26 +303,29 @@ typedef struct {
     EventFlags event_flags2;
     u8 talk_counts[48];  /* 0x1448: per XA stream file, the next channel to play */
     u8 areas_visited[48];
-    u32 creature_bits_and_vs_data[0x5c]; /* 0x14a8: kind bits seen [0..4] (world_draw_creatures) and killed [5..9]; VS: items lost [10..88], lineups [89..91] */
+    /* 0x14a8: one bit per creature kind (CreatureType.kind): [0] seen
+     * (world_draw_creatures; the creature book lists them), [1] killed
+     * (creature_take_damage); game_load_start_file's flag reset sets both but bit 14 of word 4 */
+    u32 creature_kind_bits[2][5];
+    u32 vs_items_lost[0x4f]; /* 0x14d0: VS.EXE: the items lost in versus */
+    u32 vs_lineup[3];    /* 0x160c: VS.EXE: the lineups */
     /* 0x1618: per XA stream file, its position (xa_start_stream); game_load_common_data
      * searches the first 40 */
     CdlLOC xa_positions[48];
-    s32 item_use_result; /* 0x16d8: the examine/item-use result */
-    u8 warp_back_request; /* 0x16dc: the warp request byte */
+    s32 item_use_result; /* 0x16d8: the examine/item-use result: 0 none, 1 done, 2 nothing to use (src/st/item.c) */
+    u8 warp_back_request; /* 0x16dc: nonzero runs player_warp_back after the table A pass (creatures_update); player_warp_back clears it */
     u8 unk16DD[3];
     s32 save_id;         /* 0x16e0: save id, -1 until the first save (src/st/save.c) */
     u8 area_kills[48];   /* by area */
 } GameProgress;
 extern GameProgress game_progress;
 typedef char GameProgressSize[sizeof(GameProgress) == 0x1714 ? 1 : -1];
-/* Members of game_progress under the names they had as separate identities:
- * +0x14a8, two 5-word rows cleared to -1 (src/st/main.c); +0x16d8, the
- * examine/item-use result (0 none, 1 done, 2 nothing to use; src/st/item.c);
- * +0x16dc, nonzero runs the warp player_warp_back after the table A pass
- * (creatures_update; player_warp_back clears it). */
-#define DAT_801cceb0 ((u32 (*)[5])game_progress.creature_bits_and_vs_data)
-#define DAT_801cd0e0 game_progress.item_use_result
-#define DAT_801cd0e4 game_progress.warp_back_request
+typedef char GameProgressEventFlagsAt0x1440[offsetof(GameProgress, event_flags) == 0x1440 ? 1 : -1];
+typedef char GameProgressKindBitsAt0x14A8[offsetof(GameProgress, creature_kind_bits) == 0x14a8 ? 1 : -1];
+typedef char GameProgressVsItemsLostAt0x14D0[offsetof(GameProgress, vs_items_lost) == 0x14d0 ? 1 : -1];
+typedef char GameProgressVsLineupAt0x160C[offsetof(GameProgress, vs_lineup) == 0x160c ? 1 : -1];
+typedef char GameProgressXaPositionsAt0x1618[offsetof(GameProgress, xa_positions) == 0x1618 ? 1 : -1];
+typedef char GameProgressItemUseResultAt0x16D8[offsetof(GameProgress, item_use_result) == 0x16d8 ? 1 : -1];
 
 
 /* .sbss words the area list page (menu_area_info_*) reads with lui; their

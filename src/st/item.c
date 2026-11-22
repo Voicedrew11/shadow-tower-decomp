@@ -74,7 +74,7 @@ void player_examine(long *pos, SVECTOR *rot)
     p.vx = pos[0];
     p.vy = pos[1] + 1600;
     p.vz = pos[2];
-    DAT_801cd0e0 = 0;
+    game_progress.item_use_result = 0;
     req.tests = 0;
     req.position = p;
     req.radius = 1056;
@@ -126,7 +126,7 @@ void player_examine(long *pos, SVECTOR *rot)
     for (; (i = object_find_usable(i, &vis_lists)) != -1; i++) {
         b = &vis_table_b.entries[i];
         def = &vis_table_b.types[b->type];
-        DAT_801cd0e0 = 1;
+        game_progress.item_use_result = 1;
         b->examined = 1;
         kind = def->kind;
         switch (kind) {

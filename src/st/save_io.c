@@ -36,10 +36,10 @@ void save_pack_data(StSaveData *save, int fresh)
     copy_words(save->objects_removed, game_progress.objects_removed[0], 0x180);
     copy_words(save->objects_unlocked, game_progress.objects_unlocked[0], 0x180);
     copy_words(save->objects_finished, game_progress.objects_finished[0], 0x180);
-    copy_words(save->event_flags, &game_progress.event_flags.word, 2);
+    copy_words(&save->event_flags[0].word, &game_progress.event_flags.word, 2);
     copy_words(save->talk_counts, (u32 *)game_progress.talk_counts, 12);
     copy_words(save->areas_visited, (u32 *)game_progress.areas_visited, 12);
-    copy_words(save->creature_seen_bits, game_progress.creature_bits_and_vs_data, 5);
+    copy_words(save->creature_seen_bits, game_progress.creature_kind_bits[0], 5);
     save->ground_item_counts[0] = vis_table_c.ground_item_counts[2];
     save->ground_item_counts[1] = vis_table_c.ground_item_counts[3];
     save->ground_item_counts[2] = vis_table_c.ground_item_counts[4];
@@ -141,8 +141,8 @@ void save_pack_data(StSaveData *save, int fresh)
         ((u16 *)&game_progress.save_id)[1] = rand();
     }
     save->save_id = game_progress.save_id;
-    copy_words(save->creature_killed_bits, &game_progress.creature_bits_and_vs_data[5], 5);
-    copy_words(save->vs_items_lost, &game_progress.creature_bits_and_vs_data[10], 0x4f);
+    copy_words(save->creature_killed_bits, game_progress.creature_kind_bits[1], 5);
+    copy_words(save->vs_items_lost, game_progress.vs_items_lost, 0x4f);
     copy_words(save->inventory_counts, (u32 *)&inventory, 0x4f);
     copy_words(save->placed_bits, vis_table_c.placed_bits, 10);
     save->equipment[0] = viewer.equipment[0];
@@ -166,9 +166,9 @@ void save_pack_data(StSaveData *save, int fresh)
     save->equipment[18] = viewer.equipment[18];
     save->equipment[19] = viewer.equipment[19];
     save->equipment[20] = viewer.equipment[20];
-    save->vs_lineup[0] = game_progress.creature_bits_and_vs_data[89];
-    save->vs_lineup[1] = game_progress.creature_bits_and_vs_data[90];
-    save->vs_lineup[2] = game_progress.creature_bits_and_vs_data[91];
+    save->vs_lineup[0] = game_progress.vs_lineup[0];
+    save->vs_lineup[1] = game_progress.vs_lineup[1];
+    save->vs_lineup[2] = game_progress.vs_lineup[2];
     r = vis_table_c.types;
     for (i = 0; i < 314; i++, r++)
         save->item_durability[i] = r->durability;
@@ -194,10 +194,10 @@ void save_unpack_data(StSaveData *save)
     copy_words(game_progress.objects_removed[0], save->objects_removed, 0x180);
     copy_words(game_progress.objects_unlocked[0], save->objects_unlocked, 0x180);
     copy_words(game_progress.objects_finished[0], save->objects_finished, 0x180);
-    copy_words(&game_progress.event_flags.word, save->event_flags, 2);
+    copy_words(&game_progress.event_flags.word, &save->event_flags[0].word, 2);
     copy_words((u32 *)game_progress.talk_counts, save->talk_counts, 12);
     copy_words((u32 *)game_progress.areas_visited, save->areas_visited, 12);
-    copy_words(game_progress.creature_bits_and_vs_data, save->creature_seen_bits, 5);
+    copy_words(game_progress.creature_kind_bits[0], save->creature_seen_bits, 5);
     for (area = 0; area < 48; area++) {
         game_progress.area_kills[area] = 0;
         for (i = 0; i < 64; i++) {
@@ -318,8 +318,8 @@ void save_unpack_data(StSaveData *save)
     game_settings.subtitles = save->settings[4];
     game_settings.vibration = save->settings[5];
     game_progress.save_id = save->save_id;
-    copy_words(&game_progress.creature_bits_and_vs_data[5], save->creature_killed_bits, 5);
-    copy_words(&game_progress.creature_bits_and_vs_data[10], save->vs_items_lost, 0x4f);
+    copy_words(game_progress.creature_kind_bits[1], save->creature_killed_bits, 5);
+    copy_words(game_progress.vs_items_lost, save->vs_items_lost, 0x4f);
     copy_words((u32 *)&inventory, save->inventory_counts, 0x4f);
     copy_words(vis_table_c.placed_bits, save->placed_bits, 10);
     viewer.equipment[0] = save->equipment[0];
@@ -343,9 +343,9 @@ void save_unpack_data(StSaveData *save)
     viewer.equipment[18] = save->equipment[18];
     viewer.equipment[19] = save->equipment[19];
     viewer.equipment[20] = save->equipment[20];
-    game_progress.creature_bits_and_vs_data[89] = save->vs_lineup[0];
-    game_progress.creature_bits_and_vs_data[90] = save->vs_lineup[1];
-    game_progress.creature_bits_and_vs_data[91] = save->vs_lineup[2];
+    game_progress.vs_lineup[0] = save->vs_lineup[0];
+    game_progress.vs_lineup[1] = save->vs_lineup[1];
+    game_progress.vs_lineup[2] = save->vs_lineup[2];
     r = vis_table_c.types;
     for (i = 0; i < 314; i++, r++)
         r->durability = save->item_durability[i];

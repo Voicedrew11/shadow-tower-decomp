@@ -180,6 +180,6 @@ void map_run_shop_visit(void)
         shop_run();
         fdat_801ed8c4 = 5;
     } else if (fdat_801ed8c4 == 5) {
-        DAT_801cd0e4 = 1;
+        game_progress.warp_back_request = 1;
     }
 }

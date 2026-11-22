@@ -9,6 +9,7 @@
 #include <kf/lib/types.h>
 #include <sys/types.h>
 #include <LIBGTE.H>
+#include <st/menu.h>
 
 /* One table C slot (entries[32..63]) as saved. */
 typedef struct {
@@ -46,7 +47,7 @@ typedef struct {
     u32 objects_removed[0x180];
     u32 objects_unlocked[0x180];
     u32 objects_finished[0x180];
-    u32 event_flags[2];
+    EventFlags event_flags[2]; /* 0x144c: game_progress.event_flags, event_flags2 */
     u32 talk_counts[12];
     u32 areas_visited[12];
     u32 creature_seen_bits[5];
@@ -88,6 +89,12 @@ typedef struct {
     u8 shop_stock[14];
     u16 buttons[12];     /* 0x1d6e: the button masks (pad_state.buttons) */
 } StSaveData;
+
+typedef char StSaveDataEventFlagsAt0x144C[offsetof(StSaveData, event_flags) == 0x144c ? 1 : -1];
+typedef char StSaveDataSeenBitsAt0x14B4[offsetof(StSaveData, creature_seen_bits) == 0x14b4 ? 1 : -1];
+typedef char StSaveDataGroundItemCountsAt0x14C8[offsetof(StSaveData, ground_item_counts) == 0x14c8 ? 1 : -1];
+typedef char StSaveDataKilledBitsAt0x18BC[offsetof(StSaveData, creature_killed_bits) == 0x18bc ? 1 : -1];
+typedef char StSaveDataSize[sizeof(StSaveData) == 0x1d88 ? 1 : -1];
 
 void item_counts_clear(void);
 void save_reset_new_game(void);

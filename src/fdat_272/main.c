@@ -577,9 +577,9 @@ void map_use_item_on_creature(short id)
     if (id == 0x12f) {
         if (creature_find_in_reach((CollisionState *)&req, 1) == 0x30) {
             fdat_801ef93c = 1;
-            DAT_801cd0e0 = 1;
+            game_progress.item_use_result = 1;
         } else {
-            DAT_801cd0e0 = 2;
+            game_progress.item_use_result = 2;
         }
     }
 }

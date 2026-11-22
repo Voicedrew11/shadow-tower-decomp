@@ -1443,7 +1443,7 @@ void menu_equip_info_run(void)
 }
 
 /*
- * The creature book: lists the ids set in DAT_801cceb0 five to a row,
+ * The creature book: lists the kinds set in game_progress.creature_kind_bits[0] five to a row,
  * three rows shown with their pictures, and shows the detail page of the
  * confirmed one (menu_creature_book_draw draws the page).
  *
@@ -1511,7 +1511,7 @@ void menu_creature_book_run(void)
     sp->state.book.kinds = mem_alloc(151);
     sp->state.book.count = 0;
     n = 0;
-    bits = DAT_801cceb0[0];
+    bits = game_progress.creature_kind_bits[0];
     bit = 1;
     for (i = 0; i < 151; i++) {
         if (n == 32) {

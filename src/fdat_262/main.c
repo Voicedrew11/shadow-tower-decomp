@@ -276,12 +276,12 @@ void map_use_item_on_object(short id)
         n = object_find_usable(0, (CollisionState *)&req);
         if (fdat_801ee380 == 0 && n == 0x16) {
             fdat_801ee380 = 1;
-            DAT_801cd0e0 = 1;
+            game_progress.item_use_result = 1;
         } else if (fdat_801ee384 == 0 && n == 0x17) {
             fdat_801ee384 = 1;
-            DAT_801cd0e0 = 1;
+            game_progress.item_use_result = 1;
         } else {
-            DAT_801cd0e0 = 2;
+            game_progress.item_use_result = 2;
         }
     }
 }

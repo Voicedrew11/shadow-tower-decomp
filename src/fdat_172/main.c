@@ -298,10 +298,10 @@ void map_use_item_on_object(short id)
         req.height = 1600;
         req.heading = 0;
         if (object_find_in_reach((CollisionState *)&req) == 12) {
-            DAT_801cd0e0 = 1;
+            game_progress.item_use_result = 1;
             fdat_801edfd0 = 1;
         } else {
-            DAT_801cd0e0 = 2;
+            game_progress.item_use_result = 2;
         }
     }
 }

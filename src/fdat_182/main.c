@@ -107,7 +107,7 @@ void map_use_item_request_warp(short id)
             fdat_801edc50 = 2;
         else
             fdat_801edc50 = 1;
-        DAT_801cd0e0 = 1;
+        game_progress.item_use_result = 1;
     }
 }
 

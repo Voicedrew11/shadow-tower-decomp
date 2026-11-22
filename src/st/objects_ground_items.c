@@ -1371,7 +1371,7 @@ void player_warp_back(void)
     viewer.state = 5;
     player_update_durability_warning();
     player_warp(&viewer.warp_return, 1);
-    DAT_801cd0e4 = 0;
+    game_progress.warp_back_request = 0;
 }
 
 /* Frees every table C entry and clears the group counts and id bits. */

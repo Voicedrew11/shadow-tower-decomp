@@ -185,7 +185,7 @@ void game_load_start_file(void)
         }
     }
     if (clear_flags) {
-        u32 (*row)[5] = &DAT_801cceb0[1];
+        u32 (*row)[5] = &game_progress.creature_kind_bits[1];
 
         fill_words(row[0], -1, 5);
         fill_words(row[-1], -1, 5);

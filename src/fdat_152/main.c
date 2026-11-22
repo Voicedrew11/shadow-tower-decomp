@@ -127,9 +127,9 @@ void map_use_item_on_object(short id)
     if (id == 0x130) {
         if (object_find_in_reach((CollisionState *)&req) == 4) {
             fdat_801edb84 = 1;
-            DAT_801cd0e0 = 1;
+            game_progress.item_use_result = 1;
         } else {
-            DAT_801cd0e0 = 2;
+            game_progress.item_use_result = 2;
         }
     }
 }
