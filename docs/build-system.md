@@ -301,7 +301,10 @@ defines = ["ST_FDAT_012"]
   cannot be name-bound.
 - `defines` adds `-DNAME` (or `-DNAME=value`) to the preprocessor run for
   that unit only. Use it for constants that provably differ between the
-  images, not to fork whole bodies silently.
+  images, not to fork whole bodies silently. Every `VS.EXE` unit defines
+  `VS_EXE`: VS reads the `include/st/` headers for their types, and a VS port
+  of an ST function shares its name, so where the port's signature differs
+  the ST header hides the ST prototype with `#ifndef VS_EXE`.
 
 When the shared functions are only part of each image's unit, or sit in a
 different order around image-specific code, the shared run goes into a

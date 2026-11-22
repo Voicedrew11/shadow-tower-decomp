@@ -451,12 +451,15 @@ source = "src/optxt/state.c"
 profile = "probe-gcc272cdk-o2-g8"
 
 # VS.EXE: VS's own copies of ST.EXE functions (src/vs/); shared fragments in src/lib/.
+# Every VS unit defines VS_EXE: a VS port shares its ST twin's name, and where
+# the port's signature differs, the ST header hides the ST prototype under it.
 
 [[unit]]
 unit = "vs.data_8004a224"
 image = "VS.EXE"
 source = "src/vs/data_8004a224.c"
 profile = "probe-gcc272cdk-o2-g0"
+defines = ["VS_EXE"]
 link = "first"
 
 [[unit]]
@@ -464,6 +467,7 @@ unit = "vs.sbss_80063300"
 image = "VS.EXE"
 source = "src/vs/sbss_80063300.c"
 profile = "probe-gcc272cdk-o2-g8"
+defines = ["VS_EXE"]
 link = "first"
 
 [[unit]]
@@ -471,6 +475,7 @@ unit = "vs.sbss_80063310"
 image = "VS.EXE"
 source = "src/vs/sbss_80063310.c"
 profile = "probe-gcc272cdk-o2-g8"
+defines = ["VS_EXE"]
 link = "first"
 
 [[unit]]
@@ -478,6 +483,7 @@ unit = "vs.sbss_80063320"
 image = "VS.EXE"
 source = "src/vs/sbss_80063320.c"
 profile = "probe-gcc272cdk-o2-g8"
+defines = ["VS_EXE"]
 link = "first"
 
 [[unit]]
@@ -485,6 +491,7 @@ unit = "vs.sbss_80063330"
 image = "VS.EXE"
 source = "src/vs/sbss_80063330.c"
 profile = "probe-gcc272cdk-o2-g8"
+defines = ["VS_EXE"]
 link = "first"
 
 [[unit]]
@@ -492,6 +499,7 @@ unit = "vs.sbss_80063340"
 image = "VS.EXE"
 source = "src/vs/sbss_80063340.c"
 profile = "probe-gcc272cdk-o2-g8"
+defines = ["VS_EXE"]
 link = "first"
 
 [[unit]]
@@ -499,6 +507,7 @@ unit = "vs.sbss_80063350"
 image = "VS.EXE"
 source = "src/vs/sbss_80063350.c"
 profile = "probe-gcc272cdk-o2-g8"
+defines = ["VS_EXE"]
 link = "first"
 
 [[unit]]
@@ -506,6 +515,7 @@ unit = "vs.sbss_80063360"
 image = "VS.EXE"
 source = "src/vs/sbss_80063360.c"
 profile = "probe-gcc272cdk-o2-g8"
+defines = ["VS_EXE"]
 link = "first"
 
 [[unit]]
@@ -513,6 +523,7 @@ unit = "vs.sbss_80063370"
 image = "VS.EXE"
 source = "src/vs/sbss_80063370.c"
 profile = "probe-gcc272cdk-o2-g8"
+defines = ["VS_EXE"]
 link = "first"
 
 [[unit]]
@@ -520,258 +531,301 @@ unit = "vs.main"
 image = "VS.EXE"
 source = "src/vs/main.c"
 profile = "probe-gcc272cdk-o2-g8"
+defines = ["VS_EXE"]
 
 [[unit]]
 unit = "vs.gfx_80016ca8"
 image = "VS.EXE"
 source = "src/vs/gfx_80016ca8.c"
 profile = "probe-gcc272cdk-o2-g8"
+defines = ["VS_EXE"]
 
 [[unit]]
 unit = "vs.menu_80016f10"
 image = "VS.EXE"
 source = "src/vs/menu_80016f10.c"
 profile = "probe-gcc272cdk-o2-g8"
+defines = ["VS_EXE"]
 
 [[unit]]
 unit = "vs.card_8001c8b8"
 image = "VS.EXE"
 source = "src/vs/card_8001c8b8.c"
 profile = "probe-gcc272cdk-o2-g8"
+defines = ["VS_EXE"]
 
 [[unit]]
 unit = "vs.stub_8001ca10"
 image = "VS.EXE"
 source = "src/vs/stub_8001ca10.c"
 profile = "probe-gcc272cdk-o2-g8"
+defines = ["VS_EXE"]
 
 [[unit]]
 unit = "vs.cd_8001cb34"
 image = "VS.EXE"
 source = "src/vs/cd_8001cb34.c"
 profile = "probe-gcc272cdk-o2-g8"
+defines = ["VS_EXE"]
 
 [[unit]]
 unit = "vs.ui_8001d3f0"
 image = "VS.EXE"
 source = "src/vs/ui_8001d3f0.c"
 profile = "probe-gcc272cdk-o2-g8"
+defines = ["VS_EXE"]
 
 [[unit]]
 unit = "vs.ui_80020384"
 image = "VS.EXE"
 source = "src/vs/ui_80020384.c"
 profile = "probe-gcc272cdk-o2-g8"
+defines = ["VS_EXE"]
 
 [[unit]]
 unit = "vs.ui_800207d4"
 image = "VS.EXE"
 source = "src/vs/ui_800207d4.c"
 profile = "probe-gcc272cdk-o2-g8"
+defines = ["VS_EXE"]
 
 [[unit]]
 unit = "vs.ui_80020aa4"
 image = "VS.EXE"
 source = "src/vs/ui_80020aa4.c"
 profile = "probe-gcc272cdk-o2-g8"
+defines = ["VS_EXE"]
 
 [[unit]]
 unit = "vs.ui_80021140"
 image = "VS.EXE"
 source = "src/vs/ui_80021140.c"
 profile = "probe-gcc272cdk-o2-g8"
+defines = ["VS_EXE"]
 
 [[unit]]
 unit = "vs.ui_80021984"
 image = "VS.EXE"
 source = "src/vs/ui_80021984.c"
 profile = "probe-gcc272cdk-o2-g8"
+defines = ["VS_EXE"]
 
 [[unit]]
 unit = "vs.ui_80021c14"
 image = "VS.EXE"
 source = "src/vs/ui_80021c14.c"
 profile = "probe-gcc272cdk-o2-g8"
+defines = ["VS_EXE"]
 
 [[unit]]
 unit = "vs.ui_80021cfc"
 image = "VS.EXE"
 source = "src/vs/ui_80021cfc.c"
 profile = "probe-gcc272cdk-o2-g8"
+defines = ["VS_EXE"]
 
 [[unit]]
 unit = "vs.ui_800228d8"
 image = "VS.EXE"
 source = "src/vs/ui_800228d8.c"
 profile = "probe-gcc272cdk-o2-g8"
+defines = ["VS_EXE"]
 
 [[unit]]
 unit = "vs.ui_80022a00"
 image = "VS.EXE"
 source = "src/vs/ui_80022a00.c"
 profile = "probe-gcc272cdk-o2-g8"
+defines = ["VS_EXE"]
 
 [[unit]]
 unit = "vs.ui_80022f14"
 image = "VS.EXE"
 source = "src/vs/ui_80022f14.c"
 profile = "probe-gcc272cdk-o2-g8"
+defines = ["VS_EXE"]
 
 [[unit]]
 unit = "vs.model_8002345c"
 image = "VS.EXE"
 source = "src/vs/model_8002345c.c"
 profile = "probe-gcc272cdk-o2-g8"
+defines = ["VS_EXE"]
 
 [[unit]]
 unit = "vs.prim_80025878"
 image = "VS.EXE"
 source = "src/vs/prim_80025878.c"
 profile = "probe-gcc272cdk-o2-g0"
+defines = ["VS_EXE"]
 
 [[unit]]
 unit = "vs.mesh_800258f0"
 image = "VS.EXE"
 source = "src/vs/mesh_800258f0.c"
 profile = "probe-gcc272cdk-o2-g8"
+defines = ["VS_EXE"]
 
 [[unit]]
 unit = "vs.anim_80027c64"
 image = "VS.EXE"
 source = "src/vs/anim_80027c64.c"
 profile = "probe-gcc272cdk-o2-g0"
+defines = ["VS_EXE"]
 
 [[unit]]
 unit = "vs.anim_80027f30"
 image = "VS.EXE"
 source = "src/vs/anim_80027f30.c"
 profile = "probe-gcc272cdk-o2-g0"
+defines = ["VS_EXE"]
 
 [[unit]]
 unit = "vs.mirror_80028474"
 image = "VS.EXE"
 source = "src/vs/mirror_80028474.c"
 profile = "probe-gcc272cdk-o2-g8"
+defines = ["VS_EXE"]
 
 [[unit]]
 unit = "vs.model_80028914"
 image = "VS.EXE"
 source = "src/vs/model_80028914.c"
 profile = "probe-gcc272cdk-o2-g8"
+defines = ["VS_EXE"]
 
 [[unit]]
 unit = "vs.anim_80028d94"
 image = "VS.EXE"
 source = "src/vs/anim_80028d94.c"
 profile = "probe-gcc272cdk-o2-g0"
+defines = ["VS_EXE"]
 
 [[unit]]
 unit = "vs.fade_80028fcc"
 image = "VS.EXE"
 source = "src/vs/fade_80028fcc.c"
 profile = "probe-gcc272cdk-o2-g8"
+defines = ["VS_EXE"]
 
 [[unit]]
 unit = "vs.shadow_8002bfe8"
 image = "VS.EXE"
 source = "src/vs/shadow_8002bfe8.c"
 profile = "probe-gcc272cdk-o2-g0"
+defines = ["VS_EXE"]
 
 [[unit]]
 unit = "vs.guard_8002c2c4"
 image = "VS.EXE"
 source = "src/vs/guard_8002c2c4.c"
 profile = "probe-gcc272cdk-o2-g0"
+defines = ["VS_EXE"]
 
 [[unit]]
 unit = "vs.texanim_8002d710"
 image = "VS.EXE"
 source = "src/vs/texanim_8002d710.c"
 profile = "probe-gcc272cdk-o2-g0"
+defines = ["VS_EXE"]
 
 [[unit]]
 unit = "vs.spark_8002d738"
 image = "VS.EXE"
 source = "src/vs/spark_8002d738.c"
 profile = "probe-gcc272cdk-o2-g0"
+defines = ["VS_EXE"]
 
 [[unit]]
 unit = "vs.spark_8002d998"
 image = "VS.EXE"
 source = "src/vs/spark_8002d998.c"
 profile = "probe-gcc272cdk-o2-g0"
+defines = ["VS_EXE"]
 
 [[unit]]
 unit = "vs.fighter_8002dcd8"
 image = "VS.EXE"
 source = "src/vs/fighter_8002dcd8.c"
 profile = "probe-gcc272cdk-o2-g0"
+defines = ["VS_EXE"]
 
 [[unit]]
 unit = "vs.fighter_8002dec4"
 image = "VS.EXE"
 source = "src/vs/fighter_8002dec4.c"
 profile = "probe-gcc272cdk-o2-g0"
+defines = ["VS_EXE"]
 
 [[unit]]
 unit = "vs.fighter_8002e114"
 image = "VS.EXE"
 source = "src/vs/fighter_8002e114.c"
 profile = "probe-gcc272cdk-o2-g0"
+defines = ["VS_EXE"]
 
 [[unit]]
 unit = "vs.cd_8002e5e4"
 image = "VS.EXE"
 source = "src/vs/cd_8002e5e4.c"
 profile = "probe-gcc272cdk-o2-g0"
+defines = ["VS_EXE"]
 
 [[unit]]
 unit = "vs.cd_8002efcc"
 image = "VS.EXE"
 source = "src/vs/cd_8002efcc.c"
 profile = "probe-gcc272cdk-o2-g8"
+defines = ["VS_EXE"]
 
 [[unit]]
 unit = "vs.vis_8002f264"
 image = "VS.EXE"
 source = "src/vs/vis_8002f264.c"
 profile = "probe-gcc272cdk-o2-g0"
+defines = ["VS_EXE"]
 
 [[unit]]
 unit = "vs.attack_8002f334"
 image = "VS.EXE"
 source = "src/vs/attack_8002f334.c"
 profile = "probe-gcc272cdk-o2-g8"
+defines = ["VS_EXE"]
 
 [[unit]]
 unit = "vs.stub_80032108"
 image = "VS.EXE"
 source = "src/vs/stub_80032108.c"
 profile = "probe-gcc272cdk-o2-g0"
+defines = ["VS_EXE"]
 
 [[unit]]
 unit = "vs.effect_80032200"
 image = "VS.EXE"
 source = "src/vs/effect_80032200.c"
 profile = "probe-gcc272cdk-o2-g0"
+defines = ["VS_EXE"]
 
 [[unit]]
 unit = "vs.effect_80032228"
 image = "VS.EXE"
 source = "src/vs/effect_80032228.c"
 profile = "probe-gcc272cdk-o2-g0"
+defines = ["VS_EXE"]
 
 [[unit]]
 unit = "vs.effect_80032404"
 image = "VS.EXE"
 source = "src/vs/effect_80032404.c"
 profile = "probe-gcc272cdk-o2-g8"
+defines = ["VS_EXE"]
 
 [[unit]]
 unit = "vs.rdata_80011f34"
 image = "VS.EXE"
 source = "src/vs/rdata_80011f34.c"
 profile = "probe-gcc272cdk-o2-g0"
+defines = ["VS_EXE"]
 link = "last"
 
 [[unit]]
@@ -779,6 +833,7 @@ unit = "vs.sdata_800632f4"
 image = "VS.EXE"
 source = "src/vs/sdata_800632f4.c"
 profile = "probe-gcc272cdk-o2-g8"
+defines = ["VS_EXE"]
 link = "last"
 
 [[unit]]
@@ -786,78 +841,91 @@ unit = "vs.bss_800633b0"
 image = "VS.EXE"
 source = "src/vs/bss_800633b0.c"
 profile = "probe-gcc272cdk-o2-g0"
+defines = ["VS_EXE"]
 
 [[unit]]
 unit = "vs.bss_80116580"
 image = "VS.EXE"
 source = "src/vs/bss_80116580.c"
 profile = "probe-gcc272cdk-o2-g0"
+defines = ["VS_EXE"]
 
 [[unit]]
 unit = "vs.bss_80117708"
 image = "VS.EXE"
 source = "src/vs/bss_80117708.c"
 profile = "probe-gcc272cdk-o2-g0"
+defines = ["VS_EXE"]
 
 [[unit]]
 unit = "vs.bss_80160408"
 image = "VS.EXE"
 source = "src/vs/bss_80160408.c"
 profile = "probe-gcc272cdk-o2-g0"
+defines = ["VS_EXE"]
 
 [[unit]]
 unit = "vs.bss_801604b0"
 image = "VS.EXE"
 source = "src/vs/bss_801604b0.c"
 profile = "probe-gcc272cdk-o2-g0"
+defines = ["VS_EXE"]
 
 [[unit]]
 unit = "vs.bss_8018ef60"
 image = "VS.EXE"
 source = "src/vs/bss_8018ef60.c"
 profile = "probe-gcc272cdk-o2-g0"
+defines = ["VS_EXE"]
 
 [[unit]]
 unit = "vs.bss_80191d00"
 image = "VS.EXE"
 source = "src/vs/bss_80191d00.c"
 profile = "probe-gcc272cdk-o2-g0"
+defines = ["VS_EXE"]
 
 [[unit]]
 unit = "vs.bss_80196010"
 image = "VS.EXE"
 source = "src/vs/bss_80196010.c"
 profile = "probe-gcc272cdk-o2-g0"
+defines = ["VS_EXE"]
 
 [[unit]]
 unit = "vs.bss_801961e0"
 image = "VS.EXE"
 source = "src/vs/bss_801961e0.c"
 profile = "probe-gcc272cdk-o2-g0"
+defines = ["VS_EXE"]
 
 [[unit]]
 unit = "vs.bss_80196228"
 image = "VS.EXE"
 source = "src/vs/bss_80196228.c"
 profile = "probe-gcc272cdk-o2-g0"
+defines = ["VS_EXE"]
 
 [[unit]]
 unit = "vs.bss_80196230"
 image = "VS.EXE"
 source = "src/vs/bss_80196230.c"
 profile = "probe-gcc272cdk-o2-g0"
+defines = ["VS_EXE"]
 
 [[unit]]
 unit = "vs.bss_801a4590"
 image = "VS.EXE"
 source = "src/vs/bss_801a4590.c"
 profile = "probe-gcc272cdk-o2-g0"
+defines = ["VS_EXE"]
 
 [[unit]]
 unit = "vs.bss_801d1ba8"
 image = "VS.EXE"
 source = "src/vs/bss_801d1ba8.c"
 profile = "probe-gcc272cdk-o2-g0"
+defines = ["VS_EXE"]
 
 [[unit]]
 unit = "end.main"
