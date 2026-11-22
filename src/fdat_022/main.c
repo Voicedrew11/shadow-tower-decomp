@@ -95,8 +95,8 @@ void map_update_events(void)
     }
 }
 
-#include "../lib/fdat_801ed4a0.inc"
-#include "../lib/fdat_801ed6e4.inc"
+#include "../lib/fdat_creature_pick_move.inc"
+#include "../lib/fdat_creature_step_script.inc"
 
 /*
  * Entry 48 plays animation 6 and turns its arm up a frame at a time; table

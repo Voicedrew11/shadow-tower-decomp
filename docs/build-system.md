@@ -338,15 +338,16 @@ functions `creature_update_script_sound` and `creature_choose_action` from
 moving the switch-table and handler-table pointers (a non-exact function
 ends its unit).
 
-The overlays' own handlers after those 21 functions are units named by
-their first function, `fdat_nnn.map_<address>` in
-`src/fdat_nnn/map_<address>.c`, each a contiguous run of exact handlers.
-Handlers that several overlays share are fragments named by the function's
-FDAT_002.BIN address: `src/lib/fdat_801ed6e4.inc` (`creature_step_script`,
-19 overlays) calls the overlay's move picker, which is the shared
-`creature_pick_move` in 14 of them and an
+The overlays' own handlers after those 21 functions are units named for
+the handlers they hold, `fdat_nnn.map_<what>` in `src/fdat_nnn/map_<what>.c`
+(for example `fdat_012.map_step_creature`), each a contiguous run of exact
+handlers. Handlers that several overlays share are fragments named after
+the function: `src/lib/fdat_creature_step_script.inc`
+(`creature_step_script`, 19 overlays) calls the overlay's move picker,
+which is the shared `creature_pick_move` in 14 of them and an
 overlay's own variant in five; a source names the variant by defining
-`FDAT_PICK_MOVE` before the include. `src/lib/fdat_801ed4a0.inc` (21
+`FDAT_PICK_MOVE` before the include.
+`src/lib/fdat_creature_pick_move.inc` (21
 overlays) is not yet exact, and no unit includes it until it is, because
 its switch table sits in the overlay's read-only run and its entries would
 move with the code.

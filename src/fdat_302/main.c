@@ -221,7 +221,7 @@ void map_update_events(void)
     }
 }
 
-#include "../lib/fdat_801ed4a0.inc"
+#include "../lib/fdat_creature_pick_move.inc"
 
 /* The current entry's handler: the animation steps as creature_step_script does;
  * kind 0 at the end of entry 0's dying stage turns to its scripts 7 and 9

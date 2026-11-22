@@ -41,5 +41,5 @@ const FdatHeader fdat_header = {
 #include "../lib/fdat_common.inc"
 #include "../lib/fdat_common_b.inc"
 
-#include "../lib/fdat_801ed4a0.inc"
-#include "../lib/fdat_801ed6e4.inc"
+#include "../lib/fdat_creature_pick_move.inc"
+#include "../lib/fdat_creature_step_script.inc"

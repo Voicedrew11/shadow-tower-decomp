@@ -81,4 +81,4 @@ void map_restore_progress(void)
     DAT_801cba08.unk1448[r->unk09] = 3;
 }
 
-#include "../lib/fdat_801ed4a0.inc"
+#include "../lib/fdat_creature_pick_move.inc"

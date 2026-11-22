@@ -198,7 +198,7 @@ void map_pick_creature_move(void)
 void map_pick_creature_move(void);
 #define FDAT_PICK_MOVE map_pick_creature_move
 
-#include "../lib/fdat_801ed6e4.inc"
+#include "../lib/fdat_creature_step_script.inc"
 
 /* In area 3, while flag 28 is clear, hands table A entry 32 to its exit once
  * its record's stream counter has reached 2. */

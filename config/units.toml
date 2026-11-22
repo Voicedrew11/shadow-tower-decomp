@@ -947,37 +947,37 @@ profile = "probe-gcc272cdk-o2-g0"
 bind = "name"
 
 [[unit]]
-unit = "fdat_012.map_801ed76c"
+unit = "fdat_012.map_step_creature"
 image = "FDAT_012.BIN"
-source = "src/fdat_012/map_801ed76c.c"
+source = "src/fdat_012/map_step_creature.c"
 profile = "probe-gcc272cdk-o2-g0"
 bind = "name"
 
 [[unit]]
-unit = "fdat_012.map_801ed9e0"
+unit = "fdat_012.map_use_item"
 image = "FDAT_012.BIN"
-source = "src/fdat_012/map_801ed9e0.c"
+source = "src/fdat_012/map_use_item.c"
 profile = "probe-gcc272cdk-o2-g0"
 bind = "name"
 
 [[unit]]
-unit = "fdat_012.map_801eda38"
+unit = "fdat_012.map_start_creature_fall"
 image = "FDAT_012.BIN"
-source = "src/fdat_012/map_801eda38.c"
+source = "src/fdat_012/map_start_creature_fall.c"
 profile = "probe-gcc272cdk-o2-g0"
 bind = "name"
 
 [[unit]]
-unit = "fdat_012.map_801edbec"
+unit = "fdat_012.map_falling_creature"
 image = "FDAT_012.BIN"
-source = "src/fdat_012/map_801edbec.c"
+source = "src/fdat_012/map_falling_creature.c"
 profile = "probe-gcc272cdk-o2-g0"
 bind = "name"
 
 [[unit]]
-unit = "fdat_012.map_801edf0c"
+unit = "fdat_012.map_approach_trigger"
 image = "FDAT_012.BIN"
-source = "src/fdat_012/map_801edf0c.c"
+source = "src/fdat_012/map_approach_trigger.c"
 profile = "probe-gcc272cdk-o2-g0"
 bind = "name"
 
@@ -1003,9 +1003,9 @@ profile = "probe-gcc272cdk-o2-g0"
 bind = "name"
 
 [[unit]]
-unit = "fdat_042.map_801ed7b4"
+unit = "fdat_042.map_rising_creature"
 image = "FDAT_042.BIN"
-source = "src/fdat_042/map_801ed7b4.c"
+source = "src/fdat_042/map_rising_creature.c"
 profile = "probe-gcc272cdk-o2-g0"
 bind = "name"
 
@@ -1052,16 +1052,16 @@ profile = "probe-gcc272cdk-o2-g0"
 bind = "name"
 
 [[unit]]
-unit = "fdat_112.map_801ed770"
+unit = "fdat_112.map_step_creature"
 image = "FDAT_112.BIN"
-source = "src/fdat_112/map_801ed770.c"
+source = "src/fdat_112/map_step_creature.c"
 profile = "probe-gcc272cdk-o2-g0"
 bind = "name"
 
 [[unit]]
-unit = "fdat_112.map_801edb90"
+unit = "fdat_112.map_leaving_creature"
 image = "FDAT_112.BIN"
-source = "src/fdat_112/map_801edb90.c"
+source = "src/fdat_112/map_leaving_creature.c"
 profile = "probe-gcc272cdk-o2-g0"
 bind = "name"
 
@@ -1073,16 +1073,16 @@ profile = "probe-gcc272cdk-o2-g0"
 bind = "name"
 
 [[unit]]
-unit = "fdat_122.map_801ed77c"
+unit = "fdat_122.map_step_creature"
 image = "FDAT_122.BIN"
-source = "src/fdat_122/map_801ed77c.c"
+source = "src/fdat_122/map_step_creature.c"
 profile = "probe-gcc272cdk-o2-g0"
 bind = "name"
 
 [[unit]]
-unit = "fdat_122.map_801ed880"
+unit = "fdat_122.map_creature_group"
 image = "FDAT_122.BIN"
-source = "src/fdat_122/map_801ed880.c"
+source = "src/fdat_122/map_creature_group.c"
 profile = "probe-gcc272cdk-o2-g0"
 bind = "name"
 
@@ -1108,16 +1108,16 @@ profile = "probe-gcc272cdk-o2-g0"
 bind = "name"
 
 [[unit]]
-unit = "fdat_152.map_801ed8f4"
+unit = "fdat_152.map_step_creature"
 image = "FDAT_152.BIN"
-source = "src/fdat_152/map_801ed8f4.c"
+source = "src/fdat_152/map_step_creature.c"
 profile = "probe-gcc272cdk-o2-g0"
 bind = "name"
 
 [[unit]]
-unit = "fdat_152.map_801eda8c"
+unit = "fdat_152.map_slide_ground_item"
 image = "FDAT_152.BIN"
-source = "src/fdat_152/map_801eda8c.c"
+source = "src/fdat_152/map_slide_ground_item.c"
 profile = "probe-gcc272cdk-o2-g0"
 bind = "name"
 
@@ -1136,16 +1136,16 @@ profile = "probe-gcc272cdk-o2-g0"
 bind = "name"
 
 [[unit]]
-unit = "fdat_182.map_801ed950"
+unit = "fdat_182.map_death_talk"
 image = "FDAT_182.BIN"
-source = "src/fdat_182/map_801ed950.c"
+source = "src/fdat_182/map_death_talk.c"
 profile = "probe-gcc272cdk-o2-g0"
 bind = "name"
 
 [[unit]]
-unit = "fdat_182.map_801ed9cc"
+unit = "fdat_182.map_warp_player"
 image = "FDAT_182.BIN"
-source = "src/fdat_182/map_801ed9cc.c"
+source = "src/fdat_182/map_warp_player.c"
 profile = "probe-gcc272cdk-o2-g0"
 bind = "name"
 
@@ -1206,9 +1206,9 @@ profile = "probe-gcc272cdk-o2-g0"
 bind = "name"
 
 [[unit]]
-unit = "fdat_282.map_801ed7a4"
+unit = "fdat_282.map_doors"
 image = "FDAT_282.BIN"
-source = "src/fdat_282/map_801ed7a4.c"
+source = "src/fdat_282/map_doors.c"
 profile = "probe-gcc272cdk-o2-g0"
 bind = "name"
 
@@ -1234,16 +1234,16 @@ profile = "probe-gcc272cdk-o2-g0"
 bind = "name"
 
 [[unit]]
-unit = "fdat_332.map_801ed904"
+unit = "fdat_332.map_step_creature"
 image = "FDAT_332.BIN"
-source = "src/fdat_332/map_801ed904.c"
+source = "src/fdat_332/map_step_creature.c"
 profile = "probe-gcc272cdk-o2-g0"
 bind = "name"
 
 [[unit]]
-unit = "fdat_332.map_801ed9e8"
+unit = "fdat_332.map_kill_open_warp"
 image = "FDAT_332.BIN"
-source = "src/fdat_332/map_801ed9e8.c"
+source = "src/fdat_332/map_kill_open_warp.c"
 profile = "probe-gcc272cdk-o2-g0"
 bind = "name"
 

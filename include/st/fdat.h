@@ -65,8 +65,8 @@ void creature_force_talk(Vis212 *e, int fixed, int arg2);
 void creature_spawn_now(Vis212 *e);
 void map_hook_none(void);
 
-/* The map handlers several overlays share (src/lib/fdat_801ed4a0.inc,
- * src/lib/fdat_801ed6e4.inc), spelled with their FDAT_002.BIN addresses. */
+/* The map handlers several overlays share (src/lib/fdat_creature_pick_move.inc
+ * and fdat_creature_step_script.inc), claimed at FDAT_002.BIN's addresses. */
 void creature_pick_move(void);
 void creature_step_script(void);
 
@@ -78,10 +78,10 @@ void creature_step_script(void);
 extern int fdat_801edfac; /* FDAT_012.BIN: src/fdat_012/main.c */
 extern int fdat_801edb3c; /* FDAT_332.BIN: src/fdat_332/main.c */
 extern int fdat_801ed96c; /* FDAT_042.BIN: src/fdat_042/main.c */
-extern int fdat_801ed970; /* FDAT_042.BIN: src/fdat_042/map_801ed7b4.c */
+extern int fdat_801ed970; /* FDAT_042.BIN: src/fdat_042/map_rising_creature.c */
 extern int fdat_801ed938; /* FDAT_122.BIN: src/fdat_122/main.c */
 extern int fdat_801edc50; /* FDAT_182.BIN: src/fdat_182/main.c */
-extern int fdat_801edc54; /* FDAT_182.BIN: src/fdat_182/map_801ed9cc.c */
+extern int fdat_801edc54; /* FDAT_182.BIN: src/fdat_182/map_warp_player.c */
 extern int fdat_801ee0b4; /* FDAT_242.BIN: src/fdat_242/main.c */
 extern int fdat_801ee0b8; /* FDAT_242.BIN: src/fdat_242/main.c */
 extern int fdat_801ee0bc; /* FDAT_242.BIN: src/fdat_242/main.c */

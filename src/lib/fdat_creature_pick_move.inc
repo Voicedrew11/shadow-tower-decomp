@@ -1,6 +1,6 @@
 /*
  * creature_pick_move, the map handler 23 FDAT overlays share (WIP; shared
- * fragment, named by its FDAT_002.BIN address like the common functions).
+ * fragment).
  * Each of those overlays' map unit includes it at its place in the run; the
  * claim is FDAT_002.BIN's address and the other overlays bind by name. Its
  * switch table is the last entry of the overlay's read-only run, so the

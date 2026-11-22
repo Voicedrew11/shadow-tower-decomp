@@ -2,7 +2,8 @@
  * FDAT_092.BIN as one translation unit (WIP module): its handler table,
  * the 21 functions every overlay starts with (src/lib/fdat_common_a.inc,
  * fdat_common.inc, fdat_common_b.inc), its area handlers, the shared move
- * picker and entry handler (src/lib/fdat_801ed4a0.inc, fdat_801ed6e4.inc)
+ * picker and entry handler (src/lib/fdat_creature_pick_move.inc,
+ * fdat_creature_step_script.inc)
  * and the gate scene's two parts. One object, because the picker's switch
  * table is 8-aligned after creature_run_script_command's in the same read-only run and
  * the eight scene words are consecutive statics.
@@ -258,8 +259,8 @@ void map_update_events(void)
     }
 }
 
-#include "../lib/fdat_801ed4a0.inc"
-#include "../lib/fdat_801ed6e4.inc"
+#include "../lib/fdat_creature_pick_move.inc"
+#include "../lib/fdat_creature_step_script.inc"
 
 /* Plays script 1 of table A entry 48 to its end. */
 ADDRESS(0x801ede14, 0x90)

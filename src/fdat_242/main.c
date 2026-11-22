@@ -229,7 +229,7 @@ void map_use_item_advance_scene(short id)
     }
 }
 
-#include "../lib/fdat_801ed4a0.inc"
+#include "../lib/fdat_creature_pick_move.inc"
 
 /*
  * The step of the overlay's entries, like creature_step_script: entry record 0

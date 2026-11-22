@@ -54,5 +54,5 @@ void map_start_texanim(void)
     texanim_start(&rect, 0, 4, 2, 3);
 }
 
-#include "../lib/fdat_801ed4a0.inc"
-#include "../lib/fdat_801ed6e4.inc"
+#include "../lib/fdat_creature_pick_move.inc"
+#include "../lib/fdat_creature_step_script.inc"

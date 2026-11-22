@@ -187,8 +187,8 @@ void map_use_key_on_object(int event)
     }
 }
 
-#include "../lib/fdat_801ed4a0.inc"
-#include "../lib/fdat_801ed6e4.inc"
+#include "../lib/fdat_creature_pick_move.inc"
+#include "../lib/fdat_creature_step_script.inc"
 
 /* Slides table C item 28 (`which` 0) or 29 0x200 along z (horizontal),
  * 24 a frame while its model is loaded. */

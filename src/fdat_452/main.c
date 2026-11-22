@@ -2,8 +2,8 @@
  * FDAT_452.BIN as one translation unit (WIP module): its handler table,
  * the 21 functions every overlay starts with (src/lib/fdat_common_a.inc,
  * fdat_common.inc, fdat_common_b.inc), the scene reset it shares with the
- * other three shop overlays (src/lib/fdat_801ed420.inc) and its shopkeeper
- * handlers. One object, so that its two scene words are consecutive
+ * other three shop overlays (src/lib/fdat_map_enter_shop.inc) and its
+ * shopkeeper handlers. One object, so that its two scene words are consecutive
  * statics after the code.
  */
 #include <kf/lib/address.h>
@@ -61,7 +61,7 @@ const FdatHeader fdat_header = {
 #include "../lib/fdat_common.inc"
 #include "../lib/fdat_common_b.inc"
 
-#include "../lib/fdat_801ed420.inc"
+#include "../lib/fdat_map_enter_shop.inc"
 
 void SsSetSerialVol(short s_num, short voll, short volr);
 void player_enter_frozen_state(void);

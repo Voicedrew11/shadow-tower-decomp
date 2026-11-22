@@ -74,4 +74,4 @@ void map_restore_progress(void)
     e->unk1C.bytes[3] = 2;
 }
 
-#include "../lib/fdat_801ed4a0.inc"
+#include "../lib/fdat_creature_pick_move.inc"

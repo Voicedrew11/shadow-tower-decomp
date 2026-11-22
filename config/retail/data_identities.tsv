@@ -282,7 +282,7 @@ END.EXE	0x801ba584	0x4	StCdIntrFlag	global	bss	int		supported	asm;PSYLINK map of
 FDAT_012.BIN	0x801edfac	0x4	fdat_801edfac	global	bss	int	map_trigger_on_approach	candidate	asm;src/fdat_012/main.c	FDAT overlay word after the code: the scene state
 FDAT_022.BIN	0x801edad0	0x4	fdat_801edad0	global	bss	int	map_restore_progress	candidate	asm;src/fdat_022/main.c	FDAT overlay word after the code: the scene state
 FDAT_042.BIN	0x801ed96c	0x4	fdat_801ed96c	global	bss	int	map_restore_progress	candidate	asm;src/fdat_042/main.c	FDAT overlay word after the code: the scene state
-FDAT_042.BIN	0x801ed970	0x4	fdat_801ed970	global	bss	int	map_step_creature	candidate	asm;src/fdat_042/map_801ed7b4.c	FDAT overlay word after the code: table A entry 32's setup
+FDAT_042.BIN	0x801ed970	0x4	fdat_801ed970	global	bss	int	map_step_creature	candidate	asm;src/fdat_042/map_rising_creature.c	FDAT overlay word after the code: table A entry 32's setup
 FDAT_082.BIN	0x801ed87c	0x4	fdat_801ed87c	global	bss	int	map_update_events	candidate	asm;src/fdat_082/main.c	FDAT overlay word after the code: the scene state
 FDAT_092.BIN	0x801edf54	0x4	fdat_801edf54	static	bss	int	map_restore_progress	candidate	asm;src/fdat_092/main.c	FDAT overlay word after the code: scene state
 FDAT_092.BIN	0x801edf58	0x4	fdat_801edf58	static	bss	int	map_restore_progress	candidate	asm;src/fdat_092/main.c	FDAT overlay word after the code: scene state
@@ -308,7 +308,7 @@ FDAT_172.BIN	0x801edfd0	0x4	fdat_801edfd0	static	bss	int	map_use_item_on_object	
 FDAT_172.BIN	0x801edfd4	0x4	fdat_801edfd4	static	bss	int	map_update_events	candidate	asm;src/fdat_172/main.c	FDAT overlay word after the code: entry 48 state
 FDAT_172.BIN	0x801edfd8	0x4	fdat_801edfd8	static	bss	int	map_update_events	candidate	asm;src/fdat_172/main.c	FDAT overlay word after the code: scene state
 FDAT_182.BIN	0x801edc50	0x4	fdat_801edc50	global	bss	int	map_use_item_request_warp	candidate	asm;src/fdat_182/main.c	FDAT overlay static after the code: the gate event 0x131 opened
-FDAT_182.BIN	0x801edc54	0x4	fdat_801edc54	global	bss	int	map_warp_player	candidate	asm;src/fdat_182/map_801ed9cc.c	FDAT overlay static after the code: the exit scene state
+FDAT_182.BIN	0x801edc54	0x4	fdat_801edc54	global	bss	int	map_warp_player	candidate	asm;src/fdat_182/map_warp_player.c	FDAT overlay static after the code: the exit scene state
 FDAT_202.BIN	0x801eda04	0x4	fdat_801eda04	static	bss	int		candidate	asm;src/fdat_202/main.c	FDAT overlay static after the code that no handler references: four bytes between the code and the scene state, inside the unit's packed .lcomm run
 FDAT_202.BIN	0x801eda08	0x4	fdat_801eda08	static	bss	int	map_restore_progress	candidate	asm;src/fdat_202/main.c	FDAT overlay static after the code: scene state
 FDAT_212.BIN	0x801edcd4	0x4	fdat_801edcd4	static	bss	int	map_use_key_on_object	candidate	asm;src/fdat_212/main.c	FDAT overlay word after the code: set by event 0x2e

@@ -154,4 +154,4 @@ void map_pick_creature_move(void)
 void map_pick_creature_move(void);
 #define FDAT_PICK_MOVE map_pick_creature_move
 
-#include "../lib/fdat_801ed6e4.inc"
+#include "../lib/fdat_creature_step_script.inc"
