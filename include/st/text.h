@@ -8,6 +8,7 @@
 #include <sys/types.h>
 #include <LIBGTE.H>
 #include <LIBGPU.H>
+#include <st/ui_number.h>
 
 /* .sbss words the glyph drawer reads with lui; their owner is unknown. */
 extern u16 text_scroll_list;

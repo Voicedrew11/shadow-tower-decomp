@@ -187,14 +187,6 @@ void ui_draw_text(u16 *s, u16 x, u16 y, CVECTOR *color)
     }
 }
 
-/*
- * Number words: the value in the low halfword (signed), the digit count in
- * bits 24-27 and, in bits 28-31, flags that ask for a plus sign. Leading
- * zeros are blank; a value too wide for the digit count shows as nines.
- */
-#define NUMBER_DIGITS(num) (((num) >> 24) & 0xf)
-#define NUMBER_SIGNED 0xf0000000
-
 /* Draws a number with the proportional font: digit glyphs follow the
  * half-width codes. */
 ADDRESS(0x8001d9cc, 0x27c)

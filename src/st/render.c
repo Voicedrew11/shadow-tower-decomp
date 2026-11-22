@@ -5623,14 +5623,6 @@ void ui_draw_text(u16 *s, u16 x, u16 y, CVECTOR *color)
     }
 }
 
-/*
- * Number words: the value in the low halfword (signed), the digit count in
- * bits 24-27 and, in bits 28-31, flags that ask for a plus sign. Leading
- * zeros are blank; a value too wide for the digit count shows as nines.
- */
-#define NUMBER_DIGITS(num) (((num) >> 24) & 0xf)
-#define NUMBER_SIGNED 0xf0000000
-
 /* Draws a number with the proportional font: digit glyphs follow the
  * half-width codes. */
 ADDRESS(0x80027440, 0x27c)
@@ -6290,9 +6282,6 @@ void ui_draw_window(short x, short y, short w, short h)
 /* Blink phase of the area list page's arrows (0..31). */
 DATA(0x80087f34, 0x4, ".sdata")
 static s32 area_info_blink = 0;
-
-/* ui_draw_number/ui_draw_number_fixed take the digit count in the top byte. */
-#define DIGITS(n) ((n) << 24)
 
 /* Closes a page: its frame, the end of the frame and the darkened world. */
 #define PAGE_END()                     \
@@ -7394,7 +7383,7 @@ void shop_draw_buy_list(void)
     rows = LIST_ROWS;
     if (sp->state.list.count < LIST_ROWS + 1)
         rows = sp->state.list.count;
-    ui_draw_number(inventory.counts[ITEM_CUNES].count | 0x3000000, 244, 27, &sp->style[6]);
+    ui_draw_number(inventory.counts[ITEM_CUNES].count | DIGITS(3), 244, 27, &sp->style[6]);
     ui_draw_text(MESSAGE(MSG_SHOP_CUNES), 160, 27, &sp->style[2]);
     for (i = 0; i < rows; i++) {
         id = inventory.shop_ids[sp->state.list.ids[sp->scroll + i]];
@@ -7412,11 +7401,11 @@ void shop_draw_buy_list(void)
         sp->style[3].cd &= 0x7f;
         if (vis_table_c.types[id].max_durability) {
             ui_draw_text(MESSAGE(MSG_DURABILITY), 72, i * 36 + 62, text);
-            ui_draw_number(vis_table_c.types[id].durability | 0x3000000, 128, i * 36 + 62, figure);
+            ui_draw_number(vis_table_c.types[id].durability | DIGITS(3), 128, i * 36 + 62, figure);
             ui_draw_glyph(74, 160, i * 36 + 62, text);
-            ui_draw_number(vis_table_c.types[id].max_durability | 0x3000000, 172, i * 36 + 62, figure);
+            ui_draw_number(vis_table_c.types[id].max_durability | DIGITS(3), 172, i * 36 + 62, figure);
         }
-        ui_draw_number(vis_table_c.types[id].price | 0x3000000, 244, i * 36 + 62, figure);
+        ui_draw_number(vis_table_c.types[id].price | DIGITS(3), 244, i * 36 + 62, figure);
         ui_draw_text(MESSAGE(MSG_CUNES_SIGN), 216, i * 36 + 62, text);
     }
 }
@@ -7439,10 +7428,10 @@ void shop_draw_trade_list(void)
         sp->style[0].cd &= 0x7f;
         if (vis_table_c.types[id].max_durability) {
             ui_draw_text(MESSAGE(MSG_DURABILITY), 131, i * 36 + 62, &sp->style[0]);
-            ui_draw_number(vis_table_c.types[id].durability | 0x3000000, 187, i * 36 + 62,
+            ui_draw_number(vis_table_c.types[id].durability | DIGITS(3), 187, i * 36 + 62,
                           &sp->style[4]);
             ui_draw_glyph(74, 219, i * 36 + 62, &sp->style[0]);
-            ui_draw_number(vis_table_c.types[id].max_durability | 0x3000000, 231, i * 36 + 62,
+            ui_draw_number(vis_table_c.types[id].max_durability | DIGITS(3), 231, i * 36 + 62,
                           &sp->style[4]);
         }
     }
@@ -7458,7 +7447,7 @@ void shop_draw_repair_list(void)
     int price;
     CVECTOR *text, *figure;
 
-    ui_draw_number(viewer.hp | 0x4000000, 244, 27, &sp->style[6]);
+    ui_draw_number(viewer.hp | DIGITS(4), 244, 27, &sp->style[6]);
     ui_draw_text(MESSAGE(MSG_SHOP_HP_LEFT), 176, 27, &sp->style[2]);
     rows = LIST_ROWS;
     if (sp->state.list.count < LIST_ROWS + 1)
@@ -7483,11 +7472,11 @@ void shop_draw_repair_list(void)
         sp->style[3].cd &= 0x7f;
         if (vis_table_c.types[id].max_durability) {
             ui_draw_text(MESSAGE(MSG_DURABILITY), 77, i * 36 + 62, text);
-            ui_draw_number(vis_table_c.types[id].durability | 0x3000000, 133, i * 36 + 62, figure);
+            ui_draw_number(vis_table_c.types[id].durability | DIGITS(3), 133, i * 36 + 62, figure);
             ui_draw_glyph(74, 165, i * 36 + 62, text);
-            ui_draw_number(vis_table_c.types[id].max_durability | 0x3000000, 177, i * 36 + 62, figure);
+            ui_draw_number(vis_table_c.types[id].max_durability | DIGITS(3), 177, i * 36 + 62, figure);
         }
-        ui_draw_number((u16)price | 0x4000000, 244, i * 36 + 62, figure);
+        ui_draw_number((u16)price | DIGITS(4), 244, i * 36 + 62, figure);
     }
 }
 
@@ -7527,35 +7516,37 @@ void shop_draw_confirm(void)
     sp->style[0].cd &= 0x7f;
     if (vis_table_c.types[id].max_durability) {
         ui_draw_text(MESSAGE(MSG_DURABILITY), 48, 190, &sp->style[0]);
-        ui_draw_number(vis_table_c.types[id].durability | 0x3000000, 104, 190, &sp->style[4]);
+        ui_draw_number(vis_table_c.types[id].durability | DIGITS(3), 104, 190, &sp->style[4]);
         ui_draw_glyph(74, 136, 190, &sp->style[0]);
-        ui_draw_number(vis_table_c.types[id].max_durability | 0x3000000, 148, 190, &sp->style[4]);
+        ui_draw_number(vis_table_c.types[id].max_durability | DIGITS(3), 148, 190, &sp->style[4]);
     }
     if (sp->mode & 0x1) {
-        ui_draw_number(vis_table_c.types[id].price | 0x3000000, 244, 190, &sp->style[4]);
+        ui_draw_number(vis_table_c.types[id].price | DIGITS(3), 244, 190, &sp->style[4]);
         ui_draw_text(MESSAGE(MSG_CUNES_SIGN), 216, 190, &sp->style[0]);
     } else if (sp->mode & 0x8) {
         price = vis_table_c.types[id].repair_price * 2 / 3 *
                 (vis_table_c.types[id].max_durability - vis_table_c.types[id].durability);
         if (vis_table_c.types[id].durability == 0)
             price *= 2;
-        ui_draw_number((u16)price | 0x4000000, 244, 190, &sp->style[4]);
+        ui_draw_number((u16)price | DIGITS(4), 244, 190, &sp->style[4]);
     }
     ui_draw_text(MESSAGE(MSG_ATTRIBUTE_COLUMNS), 165, 46, &sp->style[0]);
     y = 46;
     ui_draw_text(MESSAGE(MSG_ATTRIBUTE_COLUMNS), 165, y, &sp->style[0]);
     for (i = 0; i < 7; i++) {
-        ui_draw_number_fixed(vis_table_c.types[id].attributes[i] | 0x13000000, 207, y, &sp->style[4]);
-        ui_draw_number_fixed(vis_table_c.types[id].attributes[i + 7] | 0x13000000, 273, y, &sp->style[4]);
+        ui_draw_number_fixed(vis_table_c.types[id].attributes[i] | NUMBER_PLUS | DIGITS(3), 207, y,
+            &sp->style[4]);
+        ui_draw_number_fixed(vis_table_c.types[id].attributes[i + 7] | NUMBER_PLUS | DIGITS(3), 273, y,
+            &sp->style[4]);
         y += 14;
     }
     if (vis_table_c.types[id].weight) {
         menu_figure_whole = vis_table_c.types[id].weight * 100 / 454;
         DAT_80088188 = vis_table_c.types[id].weight * 1000 / 454;
         ui_draw_text(MESSAGE(MSG_WEIGHT), 220, 156, &sp->style[0]);
-        ui_draw_number_fixed(menu_figure_whole | 0x3000000, 248, 156, &sp->style[4]);
+        ui_draw_number_fixed(menu_figure_whole | DIGITS(3), 248, 156, &sp->style[4]);
         ui_draw_glyph(78, 269, 156, &sp->style[0]);
-        ui_draw_number_fixed((u16)(DAT_80088188 - menu_figure_whole * 10) | 0x1000000, 275, 156,
+        ui_draw_number_fixed((u16)(DAT_80088188 - menu_figure_whole * 10) | DIGITS(1), 275, 156,
                       &sp->style[4]);
         ui_draw_glyph(108, 281, 156, &sp->style[0]);
     }
@@ -7678,11 +7669,11 @@ void menu_equip_info_draw_slots(void)
             sp->style[7].r = 200;
             sp->style[7].g = 164;
             sp->style[7].b = 96;
-            ui_draw_number(vis_table_c.types[*equip].durability | 0x2000000, rects[i].x + 8,
+            ui_draw_number(vis_table_c.types[*equip].durability | DIGITS(2), rects[i].x + 8,
                           rects[i].y + 4, &sp->style[7]);
             sp->style[7].g = sp->style[7].r = 8;
             sp->style[7].b = 0;
-            ui_draw_number(vis_table_c.types[*equip].durability | 0x2000000, rects[i].x + 9,
+            ui_draw_number(vis_table_c.types[*equip].durability | DIGITS(2), rects[i].x + 9,
                           rects[i].y + 5, &sp->style[7]);
         }
         ui_draw_image(&rects[i], &tex[i], &clut, 0, mode);
@@ -7742,7 +7733,7 @@ void menu_equip_info_draw_attributes(void)
         if (sp->choice_index != -1) {
             count = vis_table_c.types[sp->choice_id].attributes;
             for (i = 0; i < STATUS_ROWS; count++, i++)
-                ui_draw_number(*count | 0x13000000, 590, i * 15 + 16, sp->value_style);
+                ui_draw_number(*count | NUMBER_PLUS | DIGITS(3), 590, i * 15 + 16, sp->value_style);
         }
         return;
     }
@@ -7750,20 +7741,20 @@ void menu_equip_info_draw_attributes(void)
     for (i = 0; i < STATUS_ROWS; figure++, i++) {
         if (sp->mode == 2) {
             if (sp->bonus_changes[i] > 0) {
-                ui_draw_number(sp->attributes_clamped[i] | 0x3000000, 590, i * 15 + 16, sp->value_style);
+                ui_draw_number(sp->attributes_clamped[i] | DIGITS(3), 590, i * 15 + 16, sp->value_style);
                 ui_draw_glyph(19, 544, i * 15 + 16, sp->increase_style);
-                ui_draw_number(sp->bonus_changes[i] | 0x3000000, 508, i * 15 + 16, sp->increase_style);
+                ui_draw_number(sp->bonus_changes[i] | DIGITS(3), 508, i * 15 + 16, sp->increase_style);
             } else if (sp->bonus_changes[i] < 0) {
-                ui_draw_number(sp->attributes_clamped[i] | 0x3000000, 590, i * 15 + 16, sp->value_style);
+                ui_draw_number(sp->attributes_clamped[i] | DIGITS(3), 590, i * 15 + 16, sp->value_style);
                 ui_draw_glyph(20, 544, i * 15 + 16, sp->decrease_style);
-                ui_draw_number(-sp->bonus_changes[i] | 0x3000000, 508, i * 15 + 16, sp->decrease_style);
+                ui_draw_number(-sp->bonus_changes[i] | DIGITS(3), 508, i * 15 + 16, sp->decrease_style);
             } else {
-                ui_draw_number(sp->attributes_clamped[i] | 0x3000000, 590, i * 15 + 16, sp->value_style);
+                ui_draw_number(sp->attributes_clamped[i] | DIGITS(3), 590, i * 15 + 16, sp->value_style);
             }
         } else if (*figure < 0) {
-            ui_draw_number(0x3000000, 590, i * 15 + 16, sp->value_style);
+            ui_draw_number(DIGITS(3), 590, i * 15 + 16, sp->value_style);
         } else {
-            ui_draw_number((u16)*figure | 0x3000000, 590, i * 15 + 16, sp->value_style);
+            ui_draw_number((u16)*figure | DIGITS(3), 590, i * 15 + 16, sp->value_style);
         }
     }
     bar.h = 4;
@@ -7819,16 +7810,16 @@ void menu_equip_info_draw_stats(void)
             sp->value_style = &sp->style[6];
         else
             sp->value_style = &sp->style[4];
-        ui_draw_number((u16)*p++ | 0x5000000, 566, i * 15 + 16, sp->value_style);
+        ui_draw_number((u16)*p++ | DIGITS(5), 566, i * 15 + 16, sp->value_style);
         ui_draw_glyph(14, 554, i * 15 + 16, sp->value_style);
-        ui_draw_number((u16)*p++ | 0x5000000, 494, i * 15 + 16, sp->value_style);
+        ui_draw_number((u16)*p++ | DIGITS(5), 494, i * 15 + 16, sp->value_style);
     }
     p++;
-    ui_draw_number((u16)*p++ | 0x3000000, 542, 46, &sp->style[4]);
+    ui_draw_number((u16)*p++ | DIGITS(3), 542, 46, &sp->style[4]);
     ui_draw_glyph(15, 578, 46, &sp->style[4]);
-    ui_draw_number((u16)*p++ | 0x3000000, 590, 46, &sp->style[4]);
+    ui_draw_number((u16)*p++ | DIGITS(3), 590, 46, &sp->style[4]);
     for (i = 3; i < 13; i++)
-        ui_draw_number((u16)*p++ | 0x3000000, 590, i * 15 + 16, &sp->style[4]);
+        ui_draw_number((u16)*p++ | DIGITS(3), 590, i * 15 + 16, &sp->style[4]);
     if ((short)(p[0] / 10) > (short)(p[1] / 10))
         sp->value_style = &sp->style[6];
     else
@@ -7836,16 +7827,16 @@ void menu_equip_info_draw_stats(void)
     w = *p++;
     menu_figure_whole = w * 100 / 454;
     DAT_80088188 = w * 1000 / 454;
-    ui_draw_number(menu_figure_whole | 0x3000000, 494, 211, sp->value_style);
+    ui_draw_number(menu_figure_whole | DIGITS(3), 494, 211, sp->value_style);
     ui_draw_glyph(18, 534, 211, sp->value_style);
-    ui_draw_number((u16)(DAT_80088188 - menu_figure_whole * 10) | 0x1000000, 542, 211, sp->value_style);
+    ui_draw_number((u16)(DAT_80088188 - menu_figure_whole * 10) | DIGITS(1), 542, 211, sp->value_style);
     ui_draw_glyph(14, 554, 211, sp->value_style);
     w = *p;
     menu_figure_whole = w * 100 / 454;
     DAT_80088188 = w * 1000 / 454;
-    ui_draw_number(menu_figure_whole | 0x3000000, 566, 211, sp->value_style);
+    ui_draw_number(menu_figure_whole | DIGITS(3), 566, 211, sp->value_style);
     ui_draw_glyph(18, 606, 211, sp->value_style);
-    ui_draw_number((u16)(DAT_80088188 - menu_figure_whole * 10) | 0x1000000, 614, 211, sp->value_style);
+    ui_draw_number((u16)(DAT_80088188 - menu_figure_whole * 10) | DIGITS(1), 614, 211, sp->value_style);
 }
 
 /*
@@ -7936,25 +7927,25 @@ void menu_equip_info_draw_item(void)
         menu_figure_whole = vis_table_c.types[sp->choice_id].weight * 100 / 454;
         DAT_80088188 = vis_table_c.types[sp->choice_id].weight * 1000 / 454;
         ui_draw_text(MESSAGE(MSG_HI_WEIGHT), 188, 217, &sp->style[0]);
-        ui_draw_number(menu_figure_whole | 0x3000000, 224, 217, &sp->style[4]);
+        ui_draw_number(menu_figure_whole | DIGITS(3), 224, 217, &sp->style[4]);
         ui_draw_glyph(18, 264, 217, &sp->style[0]);
-        ui_draw_number((u16)(DAT_80088188 - menu_figure_whole * 10) | 0x1000000, 272, 217,
+        ui_draw_number((u16)(DAT_80088188 - menu_figure_whole * 10) | DIGITS(1), 272, 217,
                       &sp->style[4]);
         ui_draw_glyph(53, 287, 217, &sp->style[0]);
     }
     if (vis_table_c.types[sp->choice_id].max_durability) {
         ui_draw_text(MESSAGE(MSG_HI_DURABILITY), 16, 216, &sp->style[0]);
         if (vis_table_c.types[sp->choice_id].durability < 4) {
-            ui_draw_number(vis_table_c.types[sp->choice_id].durability | 0x3000000, 80, 217,
+            ui_draw_number(vis_table_c.types[sp->choice_id].durability | DIGITS(3), 80, 217,
                           &sp->style[6]);
             ui_draw_glyph(14, 120, 217, &sp->style[2]);
-            ui_draw_number(vis_table_c.types[sp->choice_id].max_durability | 0x3000000, 136, 217,
+            ui_draw_number(vis_table_c.types[sp->choice_id].max_durability | DIGITS(3), 136, 217,
                           &sp->style[6]);
         } else {
-            ui_draw_number(vis_table_c.types[sp->choice_id].durability | 0x3000000, 80, 217,
+            ui_draw_number(vis_table_c.types[sp->choice_id].durability | DIGITS(3), 80, 217,
                           &sp->style[4]);
             ui_draw_glyph(14, 120, 217, &sp->style[0]);
-            ui_draw_number(vis_table_c.types[sp->choice_id].max_durability | 0x3000000, 136, 217,
+            ui_draw_number(vis_table_c.types[sp->choice_id].max_durability | DIGITS(3), 136, 217,
                           &sp->style[4]);
         }
     }
@@ -8100,9 +8091,9 @@ void menu_creature_book_draw_grid(void)
     ui_add_draw_mode(1, 0, 0);
     index = sp->scroll * STORE_COLUMNS + sp->cursor;
     kind = sp->state.book.kinds[index];
-    ui_draw_number((u16)(index + 1) | 0x3000000, 486, 214, &sp->style[4]);
+    ui_draw_number((u16)(index + 1) | DIGITS(3), 486, 214, &sp->style[4]);
     ui_draw_glyph(14, 531, 214, &sp->style[0]);
-    ui_draw_number(150 | 0x3000000, 551, 214, &sp->style[4]);
+    ui_draw_number(150 | DIGITS(3), 551, 214, &sp->style[4]);
     if (index < sp->state.book.count) {
         sp->style[0].cd |= 0x80;
         ui_draw_text((u16 *)(sp->state.book.names->text +
@@ -8425,17 +8416,17 @@ void menu_arrange_icons_draw_caption(void)
     if (id != -1) {
         if (vis_table_c.types[id].max_durability) {
             ui_draw_text(MESSAGE(MSG_HI_DURABILITY), 74, 215, &sp->style[0]);
-            ui_draw_number(vis_table_c.types[id].durability | 0x3000000, 138, 215, &sp->style[4]);
+            ui_draw_number(vis_table_c.types[id].durability | DIGITS(3), 138, 215, &sp->style[4]);
             ui_draw_glyph(14, 174, 215, &sp->style[0]);
-            ui_draw_number(vis_table_c.types[id].max_durability | 0x3000000, 190, 215, &sp->style[4]);
+            ui_draw_number(vis_table_c.types[id].max_durability | DIGITS(3), 190, 215, &sp->style[4]);
         }
         if (vis_table_c.types[id].weight) {
             ui_draw_text(MESSAGE(MSG_HI_WEIGHT), 250, 215, &sp->style[0]);
             menu_figure_whole = vis_table_c.types[id].weight * 100 / 454;
             DAT_80088188 = vis_table_c.types[id].weight * 1000 / 454;
-            ui_draw_number(menu_figure_whole | 0x3000000, 300, 215, &sp->style[4]);
+            ui_draw_number(menu_figure_whole | DIGITS(3), 300, 215, &sp->style[4]);
             ui_draw_glyph(18, 339, 215, &sp->style[0]);
-            ui_draw_number((u16)(DAT_80088188 - menu_figure_whole * 10) | 0x1000000, 346, 215,
+            ui_draw_number((u16)(DAT_80088188 - menu_figure_whole * 10) | DIGITS(1), 346, 215,
                           &sp->style[4]);
             ui_draw_glyph(53, 362, 215, &sp->style[0]);
         }
@@ -8519,7 +8510,7 @@ void menu_arrange_icons_draw_details(void)
                 n++;
                 if (*count) {
                     ui_draw_text(MESSAGE(MSG_HI_HAND + k), label_x, text_y + j * 15, &sp->style[0]);
-                    ui_draw_number(*count | 0x13000000, value_x, text_y + j * 15, &sp->style[4]);
+                    ui_draw_number(*count | NUMBER_PLUS | DIGITS(3), value_x, text_y + j * 15, &sp->style[4]);
                 }
                 count++;
                 k++;
