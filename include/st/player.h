@@ -5,9 +5,9 @@
  * slots, and the equipment effects. The viewer block itself is st/data.h's
  * Viewer. Address-derived names stay until behaviour is proven; the band's
  * functions that other modules already call keep their st/funcs.h
- * prototypes (player_distance_in_reach, player_update_status, player_hit,
- * player_distance_in_arc, player_load_magic, player_load_equipment_model),
- * as do st.math's (st/funcs.h), st.light's (st/light.h) and st.anim's
+ * prototypes (player_update_status, player_hit, player_distance_in_arc,
+ * player_load_magic, player_load_equipment_model; player_distance_in_reach,
+ * which takes a CollisionState, is declared in st/vis.h), as do st.math's (st/funcs.h), st.light's (st/light.h) and st.anim's
  * (st/anim.h). The held items and magic follow in the same unit.
  */
 #ifndef ST_PLAYER_H

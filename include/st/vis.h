@@ -28,7 +28,7 @@ typedef struct {
     s16 speed;
 } CollisionRequest;
 
-typedef struct CollisionState {
+typedef struct {
     s32 tests;           /* 0x00: the kind of the request collision_query takes */
     VECTOR position;     /* 0x04: its position */
     SVECTOR velocity;    /* 0x14: its velocity */
@@ -622,6 +622,8 @@ int collision_test_map(CollisionState *req);
 int creature_find_in_reach(CollisionState *req, int arg1);
 int creature_find_touching(CollisionState *req);
 int object_find_in_reach(CollisionState *req);
+/* src/st/player.c */
+int player_distance_in_reach(CollisionState *t);
 
 /* src/st/creature.c */
 void creature_return_home(Creature *e);

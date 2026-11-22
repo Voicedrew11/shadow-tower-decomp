@@ -1,10 +1,29 @@
 # MANUALLY MANAGED - exact target offsets/extents for every field in structures.tsv.
 # opaque means the byte range is modeled for layout but has no supported semantic meaning yet.
 structure	offset	size	name	datatype	meaning_confidence	evidence	note
+MapBlock	0	1	part	u8	candidate	asm;include/st/vis.h	the model part drawn for this record
+MapBlock	1	1	region	u8	candidate	asm;src/st/creatures.c st.creatures	copied to a table A entry's region (creatures_load)
+MapBlock	2	1	unk02	u8	opaque	include/st/vis.h	no supported meaning yet
+MapBlock	3	1	turn	u8	candidate	asm;include/st/vis.h	bits 0-1: the block's quarter turn about y
+MapBlock	4	1	draw_flags	u8	candidate	asm;src/st/vis.c st.vis	bit 1 flagged by vis_cull_by_range
+MapBlock	5	1	heading_bias_x	s8	candidate	asm;FDAT overlays	x of the offset its entries' headings bend by
+MapBlock	6	1	heading_bias_z	s8	candidate	asm;FDAT overlays	z of the offset its entries' headings bend by
+MapBlock	7	1	zone	u8	candidate	asm;src/st/creatures.c st.creatures	spawn zone; 0xff none (creatures_update, map_set_block_zones)
+MapBlock	8	1	cell_x	u8	candidate	asm;include/st/vis.h	cell x
+MapBlock	9	1	cell_y	u8	candidate	asm;include/st/vis.h	cell y
+MapBlock	10	1	cell_z	u8	candidate	asm;include/st/vis.h	cell z
+MapBlock	11	1	y_offset	u8	candidate	asm;include/st/vis.h	height offset in the cell
 StAnimBlock	0	2	length	u16	candidate	asm;src/st/anim.c st.anim	block length in words (anim_set_pose walks the blocks by it)
 StAnimBlock	2	2	count	u16	candidate	asm;src/st/anim.c st.anim	node commands anim_block_run runs
 StAnimBlock	4	4	frame	u_long	candidate	asm;src/st/anim.c st.anim;src/st/anim_set.c st.anim_set	frame from which the block applies
 StAnimBlock	8	4	cmds	u_long[1]	candidate	asm;src/st/anim.c st.anim	the node commands (anim_node_command)
+StAnimFile	0	4	size	u_long	candidate	asm;src/st/anim.c st.anim	bytes, header included
+StAnimFile	4	2	animated	u16	candidate	asm;src/st/anim_set.c st.anim_set	0 for a model without animation (anim_prepare_any)
+StAnimFile	6	2	node_count	u16	candidate	asm;src/st/anim_set.c st.anim_set;src/st/render.c st.render	skeletal node count; 0 selects anim_prepare (model_draw)
+StAnimFile	8	4	model	u_long	candidate	asm;src/st/anim.c st.anim;src/st/render.c st.render	offset of the mesh model
+StAnimFile	12	4	frames	u_long	candidate	asm;src/st/anim.c st.anim	offset of the keyframe offset table (skeletal: the node id table)
+StAnimFile	16	4	clips	u_long	candidate	asm;src/st/anim.c st.anim	offset of the clip offset table (skeletal: the node records)
+StAnimFile	20	4	skeletal_clips	u_long	candidate	asm;src/st/anim_set.c st.anim_set	skeletal files: offset of the clip offset table
 StAnimList	0	4	nodes	StAnimNode *	candidate	asm;src/st/anim.c st.anim;src/st/anim_set.c st.anim_set	node array
 StAnimList	4	4	count	s32	candidate	asm;src/st/anim.c st.anim;src/st/anim_set.c st.anim_set	nodes in use (searched and appended to)
 StAnimList	8	4	capacity	s32	candidate	asm;src/st/anim.c st.anim;src/st/anim_set.c st.anim_set	node array length
@@ -54,6 +73,12 @@ StCdBankPayload	2	2	member	s16	candidate	asm;ST.EXE 0x80058bcc/0x800586bc	Archiv
 StCdBankPayload	4	4	buffer	StSoundBuf *	candidate	asm;ST.EXE 0x80058bbc/0x8005873c/0x800588f8	Buffer pointer stored/loaded as one word at request +8; its data/state fields are consumed.
 StCdPayload	0	8	image	RECT	candidate	asm;ST.EXE 0x800460c0/0x800460e4/0x800461e0/0x80046208	Image stream interpretation passed to SDK LoadImage; x/y/w/h occupy request +4/+6/+8/+0xa.
 StCdPayload	0	8	bank	StCdBankPayload	candidate	asm;ST.EXE 0x80058bbc/0x80058bc0/0x80058bcc	Bank interpretation of the same eight bytes; signed slot/member then buffer pointer.
+StEffectDef	0	1	unk0	u8	opaque	include/st/effect.h	no supported meaning yet
+StEffectDef	1	1	unk1	u8	opaque	include/st/effect.h	no supported meaning yet
+StEffectDef	2	2	mp_cost	u16	candidate	asm;src/st/menu_equip_arrange.c st.menu_equip_arrange;src/st/player.c st.player	magic point cost, shown by the equipment screen and taken by the cast
+StEffectDef	4	6	physical_damage	u16[3]	candidate	asm;include/st/effect.h	physical damage terms
+StEffectDef	10	12	element_damage	u16[6]	candidate	asm;include/st/effect.h	element damage terms
+StEffectDef	22	2	hit_effect	u16	candidate	asm;include/st/effect.h	effect on hit
 StSoundBuf	0	4	data	u8 *	candidate	asm;ST.EXE 0x80058bd0/0x800588f8;src/st/sound_bank.c st.sound_bank	Bank buffer data pointer at +0, passed to the CD/bank transfer paths.
 StSoundBuf	4	2	state	s16	candidate	asm;ST.EXE 0x80058744;src/st/sound_bank.c st.sound_bank	Buffer state halfword written by the load/transfer paths.
 StSoundBuf	6	2	unk6	s16	opaque	include/st/data.h;src/st/sound_bank.c st.sound_bank;target size/offset guards	Unmodeled trailing halfword retained from the existing record; no semantic interpretation.
