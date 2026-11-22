@@ -623,7 +623,7 @@ void func_800456f8(void)
             func_80055f9c(area_state.unk10);
             DAT_801cba08.unk1478[area_state.unk10] |= 1;
             area_state.hooks = (AreaHooks *)DAT_800881d8;
-            func_80016878();
+            texanim_clear_all();
             area_state.hooks->loaded();
             vis_table_a.unk6168 = 254;
             vis_table_a.unk6158[3] = 0xff;

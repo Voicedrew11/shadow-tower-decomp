@@ -49,9 +49,9 @@ void game_loop(void)
     u8 program;
 
     cd_init();
-    func_80016fb8();
-    func_800210f4();
-    func_80021158();
+    gfx_init();
+    loading_screen_find_file();
+    loading_screen_show();
     func_80057da0();
     func_8004eda8();
     func_8004afdc();
@@ -73,13 +73,13 @@ void game_loop(void)
             func_80057a3c();
             DAT_801cd180.unk10 = 1;
             func_80058ed4();
-            func_80021158();
+            loading_screen_show();
             func_8003c0e0();
         } else {
             func_80057a3c();
             DAT_801cd180.unk10 = 1;
             func_80058ed4();
-            func_80021158();
+            loading_screen_show();
             game_load_start_file();
         }
     } else {
@@ -89,7 +89,7 @@ void game_loop(void)
     func_80044ee8();
     func_8003eaf8();
     heap_init(DAT_8009c888, 0x56400);
-    func_800214a4();
+    loading_screen_end();
     func_80057a28();
     func_80057a3c();
     DAT_800881a4 = 0;
@@ -111,7 +111,7 @@ void game_loop(void)
         func_80058288(&a, &b);
         func_80045ffc();
         func_80058620();
-        func_80026afc(&a, &b);
+        world_render_frame(&a, &b);
         if (DAT_800881a4 == 0)
             continue;
         VSync(10);

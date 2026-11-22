@@ -57,8 +57,8 @@ RODATA(0x80011110, 0x6c)
 int cd_read_member(int archive, int member, u_long *buf);
 u32 *copy_words(u32 *dst, u32 *src, int count);
 void clear_vram(void);
-void func_80016ca8(void);
-void func_80016d94(void);
+void gfx_setup_640x240(void);
+void gfx_setup_320x240(void);
 void func_8001789c(void);
 void func_80018c84(int player);
 void func_8001960c(int player);
@@ -101,7 +101,7 @@ int func_80016f10(void)
 
     clear_vram();
     DrawSync(0);
-    func_80016ca8();
+    gfx_setup_640x240();
     sp->unk1D8.vx = 960;
     sp->unk1D8.vy = 256;
     sp->unk1DC.vx = 560;
@@ -278,7 +278,7 @@ int func_80016f10(void)
                     if (sp->unk1CC == 1) {
                         clear_vram();
                         DrawSync(0);
-                        func_80016d94();
+                        gfx_setup_320x240();
                         func_8001789c();
                         return 1;
                     }
@@ -978,7 +978,7 @@ void func_80018c84(int player)
     sp->unk0.team.pos[14].vy = 448;
     sp->unk0.team.pos[15].vx = 640;
     sp->unk0.team.pos[15].vy = 0;
-    sp->unk0.team.kinds = func_8002398c(151);
+    sp->unk0.team.kinds = mem_alloc_main_ram(151);
     sp->unk0.team.count = 0;
     for (i = 0; i < 151; i++)
         sp->unk0.team.kinds[i] = 0xff;
@@ -1002,7 +1002,7 @@ void func_80018c84(int player)
         sp->unk0.team.last = 4;
         sp->unk0.team.rows--;
     }
-    sp->unk0.team.items = func_8002398c(0x2000);
+    sp->unk0.team.items = mem_alloc_main_ram(0x2000);
     cd_read_member(10, 400, (u_long *)sp->unk0.team.items);
     buf = DAT_801a4590.unk4A4;
     cd_read_member(8, 2, buf);
@@ -1155,13 +1155,13 @@ void func_8001960c(int player)
     int i;
     int j;
 
-    buf = func_8002398c(0x1000);
+    buf = mem_alloc_main_ram(0x1000);
     cd_read_member(5, 6, buf);
     func_80012b50(buf, 0, 0);
     DrawSync(0);
     free(buf);
     COUNT = 0;
-    IDS = func_8002398c(0x276);
+    IDS = mem_alloc_main_ram(0x276);
     if (IDS == NULL)
         exit(1);
     memset((u8 *)IDS, 0xff, 0x276);
@@ -1957,7 +1957,7 @@ open:
         tries--;
         goto open;
     }
-    header = func_8002398c(512);
+    header = mem_alloc_main_ram(512);
 read:
     lseek(fd, 0, SEEK_SET);
     if (read(fd, header, 512) == -1) {
@@ -2145,7 +2145,7 @@ int func_8001bb48(int mode, int port)
 
     clear_vram();
     DrawSync(0);
-    func_80016d94();
+    gfx_setup_320x240();
     buf = DAT_801a4590.unk4A4;
     cd_read_member(8, 0, buf);
     copy_words((u32 *)DAT_80196230[0].offsets, (u32 *)(buf + 1), 0x1500);
@@ -2306,7 +2306,7 @@ done:
 
         clear_vram();
         DrawSync(0);
-        func_80016ca8();
+        gfx_setup_640x240();
         face.vx = 640;
         face.vy = 124;
         DAT_801a4590.unk4A0 = menu_buf = DAT_801a4590.unk4A4;

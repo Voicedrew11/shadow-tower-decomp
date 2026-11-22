@@ -111,7 +111,7 @@ void fdat_801ecf44(Vis212 *e)
         e->unk36 += 128;
         if (e->unk36 > 4096)
             break;
-        func_80026dd4(NULL, (SVECTOR *)&viewer.unk268, 0);
+        world_run_frame(NULL, (SVECTOR *)&viewer.unk268, 0);
     }
     func_8004ae38(e);
 }
@@ -148,7 +148,7 @@ void fdat_801ecfc4(VECTOR *pos, SVECTOR *rot)
         viewer.unk278.vy = (a.vy * n + b.vy * (16 - n)) >> 4;
         viewer.unk268 = viewer.unk278.vx + viewer.unk280.halves[0] + viewer.unk288 + viewer.unk290;
         viewer.unk26A = viewer.unk278.vy + viewer.unk280.halves[1] + viewer.unk28A + viewer.unk292;
-        func_80026dd4(NULL, (SVECTOR *)&viewer.unk268, 0);
+        world_run_frame(NULL, (SVECTOR *)&viewer.unk268, 0);
     }
 }
 
@@ -181,7 +181,7 @@ void fdat_801ed1e4(Vis212 *e)
     while (n--) {
         viewer.unk278.vy += step;
         viewer.unk26A = viewer.unk278.vy + viewer.unk280.halves[1] + viewer.unk28A + viewer.unk292;
-        func_80026dd4(NULL, (SVECTOR *)&viewer.unk268, 0);
+        world_run_frame(NULL, (SVECTOR *)&viewer.unk268, 0);
     }
 }
 
@@ -200,7 +200,7 @@ void fdat_801ed2f0(Vis212 *e)
         e->unk36 -= 128;
         if (e->unk36 < 0)
             break;
-        func_80026dd4(NULL, NULL, 0);
+        world_run_frame(NULL, NULL, 0);
     }
     e->unk36 = -1;
     e->unk1C.bytes[2] &= 0xf2;
@@ -210,7 +210,7 @@ void fdat_801ed2f0(Vis212 *e)
 ADDRESS(0x801ed388, 0x88)
 void fdat_801ed388(Vis212 *e, int fixed, int arg2)
 {
-    func_80026dd4(NULL, NULL, 0);
+    world_run_frame(NULL, NULL, 0);
     e->unk70 |= 0x2000000;
     if (e->unk04) {
         fdat_801ed2f0(e);

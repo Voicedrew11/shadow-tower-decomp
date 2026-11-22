@@ -92,7 +92,7 @@ typedef struct {
     StAnimSlot anim_slots[12]; /* 0xa3fc: 12 vertex-animation slots (ST: 16 at 0xa5fc) */
     StAnimSet anim_sets[12]; /* 0xa51c: 12 skeletal-animation slots (ST: 16 at 0xa77c) */
     u8 unkA7EC[0xc7f0 - 0xa7ec];
-    SVECTOR unkC7F0[0x2000]; /* 0xc7f0: the vertices func_800281d4 interpolates (ST: unkEB40) */
+    SVECTOR unkC7F0[0x2000]; /* 0xc7f0: the vertices anim_pose interpolates (ST: unkEB40) */
     u8 unk1C7F0[0x2c970 - 0x1c7f0];
     u8 unk2C970;         /* 0x2c970: frames drawn since the last rate update (func_80015e50) */
     u8 unk2C971;         /* 0x2c971: the frame rate func_80015e50 shows */
@@ -103,7 +103,7 @@ typedef struct {
     MATRIX unk2C998;     /* 0x2c998: the camera matrix */
     u8 unk2C9B8[0x2ca78 - 0x2c9b8];
     VECTOR unk2CA78;     /* 0x2ca78: the camera position */
-    SVECTOR unk2CA88;    /* 0x2ca88: the camera angles (func_80024b5c) */
+    SVECTOR unk2CA88;    /* 0x2ca88: the camera angles (model_draw_list) */
 } VsWorldState;
 
 /* Layout checks: the offsets the code proves. */
@@ -114,7 +114,7 @@ typedef char VsWorldStateCameraAt0x2CA78[offsetof(VsWorldState, unk2CA78) == 0x2
 extern VsWorldState vs_gfx_state;
 
 /* 2000 20-byte particle records at 0x801c4a58 (bss): func_8002d738
- * starts them, func_8002d710 clears their lives. */
+ * starts them, sparks_clear_all clears their lives. */
 typedef struct {
     SVECTOR unk0;            /* 0x00: position */
     SVECTOR unk8;            /* 0x08: velocity */
@@ -235,7 +235,7 @@ typedef struct {
     u8 file[0x4b000];        /* 0x00000: the model file, then unmodeled */
     u_long unk4B000[(0x4dee0 - 0x4b000) / 4]; /* 0x4b000: a second mesh model, absent when its first word is 0 */
     StAnimSet *unk4DEE0;     /* 0x4dee0: the fighter's skeletal-animation slot */
-    StAnimSlot *unk4DEE4;    /* 0x4dee4: the fighter's vertex-animation slot (func_80028914) */
+    StAnimSlot *unk4DEE4;    /* 0x4dee4: the fighter's vertex-animation slot (fighter_draw_vertex_anim) */
     u8 unk4DEE8;             /* 0x4dee8: animation playing (VsAnimRef.unk0); func_80013c5c matches it against the sound keys */
     u8 unk4DEE9;
     s16 unk4DEEA;            /* 0x4deea: animation frame */
@@ -251,7 +251,7 @@ typedef struct {
     s16 unk4DF0C;            /* 0x4df0c: hit points left by the last hit */
     s16 unk4DF0E;            /* 0x4df0e: state; 3 hit, 4 down; 3 and 4 cannot be hit */
     s16 unk4DF10;            /* 0x4df10: model kind: 1 several parts, 2 one part */
-    s16 unk4DF12;            /* 0x4df12: model brightness; 128 and up: the default colour (func_80025204) */
+    s16 unk4DF12;            /* 0x4df12: model brightness; 128 and up: the default colour (fighter_draw_skeletal) */
     s16 unk4DF14;            /* 0x4df14: state when an attack was blocked */
     s16 unk4DF16;            /* 0x4df16: hits left in the current attack (func_80031478) */
     VsFighterData unk4DF18;  /* 0x4df18: the fighter's data block */
@@ -289,7 +289,7 @@ extern VisTableC DAT_80191d00;
 extern u16 DAT_8006337a;
 
 /* A light matrix, a light colour matrix, a back colour and the depth-cue
- * near and far depths, as the model renderers load them (func_80025204,
+ * near and far depths, as the model renderers load them (fighter_draw_skeletal,
  * func_800353d0). Halfword-aligned: retail copies its initializers with
  * an alignment test. */
 typedef struct {

@@ -5,7 +5,7 @@
  * composition, the fighter's model draw and the node list lookup. One
  * translation unit: retail lays out its constants (0x800112a8, the matrix
  * print strings, the draw's and the lookup's initializers) before its
- * switch tables (0x80011340, func_8002345c's and anim_node_command's), the
+ * switch tables (0x80011340, model_fixup_face_indices's and anim_node_command's), the
  * order cc1 writes one object's read-only data in.
  */
 #include <kf/lib/address.h>
@@ -48,7 +48,7 @@ RODATA(0x800112a8, 0x134)
  * semi-transparency bit is ignored for the switch.
  */
 ADDRESS(0x8002345c, 0x308)
-void func_8002345c(ModelFile *file)
+void model_fixup_face_indices(ModelFile *file)
 {
     VsModelPart *part = (VsModelPart *)((u8 *)file + 12);
     int n = file->unk8;
@@ -168,17 +168,17 @@ void func_8002345c(ModelFile *file)
  * (src/vs/anim_80025670.c).
  */
 
-/* VS's first copy of anim_register; the second is func_80027fec
+/* VS's first copy of anim_register; the second is anim_register
  * (src/vs/anim_80027f30.c). */
 ADDRESS(0x80023764, 0x3c)
-void func_80023764(u16 id, StAnimFile *file)
+void anim_set_register(u16 id, StAnimFile *file)
 {
     vs_gfx_state.unk834C[id] = file;
     SCRATCHPAD->model = ANIM_MODEL(file);
 }
 
 ADDRESS(0x800237a0, 0x44)
-void func_800237a0(void)
+void anim_sets_init(void)
 {
     StAnimSet *set = vs_gfx_state.anim_sets;
     u16 i;
@@ -196,7 +196,7 @@ void func_800237a0(void)
 
 /* Puts every used slot in state 1. */
 ADDRESS(0x800237e4, 0x3c)
-void func_800237e4(void)
+void anim_sets_retire(void)
 {
     StAnimSet *set = vs_gfx_state.anim_sets;
     u16 i;
@@ -212,7 +212,7 @@ void func_800237e4(void)
 /* Frees a slot: clears its state and its owner's pointer and frees its four
  * buffers (ST.EXE's anim_set_free frees one node buffer). */
 ADDRESS(0x80023820, 0xa0)
-void func_80023820(StAnimSet *set)
+void anim_set_free(StAnimSet *set)
 {
     set->unk0 = 0;
     *set->unk38 = NULL;
@@ -236,7 +236,7 @@ void func_80023820(StAnimSet *set)
 
 /* Frees every slot in state 1. */
 ADDRESS(0x800238c0, 0x6c)
-void func_800238c0(void)
+void anim_sets_free_idle(void)
 {
     StAnimSet *set = vs_gfx_state.anim_sets;
     u16 i;
@@ -244,14 +244,14 @@ void func_800238c0(void)
     i = 12;
     do {
         if (set->unk0 == 1)
-            func_80023820(set);
+            anim_set_free(set);
         set++;
     } while (--i);
 }
 
 /* Frees every slot in use. */
 ADDRESS(0x8002392c, 0x60)
-void func_8002392c(void)
+void anim_sets_free_all(void)
 {
     StAnimSet *set = vs_gfx_state.anim_sets;
     s16 i;
@@ -259,7 +259,7 @@ void func_8002392c(void)
     i = 12;
     do {
         if (set->unk0)
-            func_80023820(set);
+            anim_set_free(set);
         set++;
     } while (--i);
 }
@@ -267,7 +267,7 @@ void func_8002392c(void)
 /* The C library's malloc, or NULL when the result is not in main RAM: a
  * second copy of mem_alloc_checked (src/vs/cd_8002e5e4.c). */
 ADDRESS(0x8002398c, 0x44)
-void *func_8002398c(u32 size)
+void *mem_alloc_main_ram(u32 size)
 {
     u8 *p = malloc(size);
 
@@ -283,7 +283,7 @@ void *func_8002398c(u32 size)
 /* Finds a free slot, or NULL (ST.EXE's anim_set_alloc frees the state-1
  * slots and searches again; VS gives up). */
 ADDRESS(0x800241b4, 0x58)
-void func_800241b4(StAnimSet **out)
+void anim_set_alloc(StAnimSet **out)
 {
     u16 i;
 
@@ -301,7 +301,7 @@ void func_800241b4(StAnimSet **out)
 
 /* Debug print of a matrix (unused). */
 ADDRESS(0x8002420c, 0x90)
-void func_8002420c(MATRIX *m)
+void debug_print_matrix(MATRIX *m)
 {
     FntPrint("==== Matrixprint ====\n");
     FntPrint("%5d %5d %5d\n", m->m[0][0], m->m[0][1], m->m[0][2]);
@@ -326,7 +326,7 @@ void func_8002420c(MATRIX *m)
  * slot, or 0 when none is free.
  */
 ADDRESS(0x800246d8, 0x484)
-int func_800246d8(StAnimSet **setp, int id, int clip, u_long frame)
+int anim_set_pose(StAnimSet **setp, int id, int clip, u_long frame)
 {
     StAnimFile *file = vs_gfx_state.unk834C[id];
     StAnimSet *set = *setp;
@@ -338,7 +338,7 @@ int func_800246d8(StAnimSet **setp, int id, int clip, u_long frame)
 
     if (file->unk4 == 0) {
         if (set != NULL)
-            func_80023820(set);
+            anim_set_free(set);
         still = vs_gfx_state.unk834C[id];
         model = ANIM_MODEL(still);
         sp->model = model;
@@ -347,20 +347,20 @@ int func_800246d8(StAnimSet **setp, int id, int clip, u_long frame)
         return 1;
     }
     if (set == NULL) {
-        func_800241b4(&set);
+        anim_set_alloc(&set);
         if (set == NULL)
             return 0;
     claim:
         set->unk2 = id;
         set->unk38 = setp;
     retry:
-        set->unk28 = func_8002398c(file->unk6 * sizeof(StAnimNode));
-        set->unk2C = func_8002398c(file->unk6 * sizeof(StAnimRecord));
-        set->unk30 = func_8002398c(file->unk6 * sizeof(StAnimSubRecord));
-        set->unk34 = func_8002398c(file->unk6 * sizeof(StAnimList));
+        set->unk28 = mem_alloc_main_ram(file->unk6 * sizeof(StAnimNode));
+        set->unk2C = mem_alloc_main_ram(file->unk6 * sizeof(StAnimRecord));
+        set->unk30 = mem_alloc_main_ram(file->unk6 * sizeof(StAnimSubRecord));
+        set->unk34 = mem_alloc_main_ram(file->unk6 * sizeof(StAnimList));
         if (set->unk28 == NULL || set->unk2C == NULL || set->unk30 == NULL ||
             set->unk34 == NULL) {
-            func_8002392c();
+            anim_sets_free_all();
             goto retry;
         }
         *setp = set;
@@ -368,7 +368,7 @@ int func_800246d8(StAnimSet **setp, int id, int clip, u_long frame)
         set->unk8 = (u_long *)((u8 *)file + file->frames);
         set->unkC = (u8 *)file + file->clips;
     } else if (set->unk2 != id) {
-        func_80023820(set);
+        anim_set_free(set);
         set->unk4 = 255;
         goto claim;
     }
@@ -464,7 +464,7 @@ static s32 DAT_800632d4 = 0;
  * 8th), stepping it.
  */
 ADDRESS(0x80024b5c, 0x6a8)
-void func_80024b5c(void)
+void model_draw_list(void)
 {
     VsScratchPad *sp = VS_SCRATCHPAD;
     ModelEntry *e = ((ModelList *)sp->anims)->entries;
@@ -535,7 +535,7 @@ void func_80024b5c(void)
             sp->local_vertices = sp->model + 12 + sp->header->vertices;
             PROJECT(sp, out, in, n);
             DAT_80063360 = 0;
-            func_80027ba4(e->part);
+            mesh_draw_part_nccs(e->part);
         }
         e++;
     }
@@ -548,7 +548,7 @@ void func_80024b5c(void)
  * below 128) with its object parts.
  */
 ADDRESS(0x80025204, 0x46c)
-void func_80025204(void)
+void fighter_draw_skeletal(void)
 {
     if (DAT_80063300->unk4DEEA != -1) {
     VsScratchPad *sp = VS_SCRATCHPAD;
@@ -581,7 +581,7 @@ void func_80025204(void)
     CompMatrix(&vs_gfx_state.unk2C998, &sp->matrix, &sp->matrix);
     n = DAT_80063300 - DAT_800633b0.fighter;
     sp->model = (u8 *)vs_gfx_state.unk834C[n] + ((ModelFile *)vs_gfx_state.unk834C[n])->unk8;
-    if (func_800246d8(&DAT_80063300->unk4DEE0, n, DAT_80063300->unk4DEE8,
+    if (anim_set_pose(&DAT_80063300->unk4DEE0, n, DAT_80063300->unk4DEE8,
                       DAT_80063300->unk4DEEA) == 0)
         return;
     sp->ot = vs_gfx_state.ot_cur;
@@ -604,7 +604,7 @@ void func_80025204(void)
     sp->vertices = vs_gfx_state.unkA7EC;
     sp->clut_base = 0;
     if (DAT_80063300->unk4DEEA != -1)
-        func_80024b5c();
+        model_draw_list();
     vs_gfx_state.packet->cur = sp->prim;
     vs_gfx_state.packet->end = sp->prim_end;
     vs_gfx_state.unk831C[1] = sp->face_count;
@@ -628,7 +628,7 @@ void func_80025204(void)
  * identity).
  */
 ADDRESS(0x800256bc, 0x1bc)
-void func_800256bc(int id, int node, int index, VECTOR *out)
+void anim_set_node_vertex(int id, int node, int index, VECTOR *out)
 {
     MATRIX unused;
     StAnimSet *set = DAT_800633b0.fighter[id].unk4DEE0;

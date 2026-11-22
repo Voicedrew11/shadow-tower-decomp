@@ -1,6 +1,6 @@
 /*
  * VS.EXE: the 640- and 320-wide display setups and the graphics reset (WIP
- * module). VS's copies of ST.EXE's func_800172bc, func_800173a8
+ * module). VS's copies of ST.EXE's gfx_setup_640x240, gfx_setup_320x240
  * (src/st/gfx.c) and func_80058cc8 (src/st/menu_main.c).
  */
 #include <kf/lib/address.h>
@@ -18,7 +18,7 @@ SDATA(0x80063234, 0x8)
 
 /* Reads `size` bytes of host file `name` into `buf` (PC file server). */
 ADDRESS(0x80016c48, 0x60)
-void func_80016c48(char *name, void *buf, int size)
+void pc_read_file(char *name, void *buf, int size)
 {
     int fd = PCopen(name, 0, 0);
 
@@ -27,7 +27,7 @@ void func_80016c48(char *name, void *buf, int size)
 }
 
 ADDRESS(0x80016ca8, 0xec)
-void func_80016ca8(void)
+void gfx_setup_640x240(void)
 {
     int h = 240;
 
@@ -47,7 +47,7 @@ void func_80016ca8(void)
 
 /* The 320-wide setup; unlike ST.EXE's copy it also clears the background. */
 ADDRESS(0x80016d94, 0x124)
-void func_80016d94(void)
+void gfx_setup_320x240(void)
 {
     int h = 240;
 

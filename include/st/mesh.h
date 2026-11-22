@@ -126,16 +126,22 @@ typedef union {
 void mesh_ft3_tint_a(CVECTOR *rgb);
 void mesh_ft3_tint_b(CVECTOR *rgb);
 
+/* VS.EXE has its own port under this name, with another signature; VS units define VS_EXE. */
+#ifndef VS_EXE
 void mesh_draw_ft3(int count, MeshFaceFT3 *face, u_long *ot, int flags);
 void mesh_draw_ft4(int count, MeshFaceFT4 *face, u_long *ot, int flags);
 void mesh_draw_gt3(int count, MeshFaceGT3 *face, u_long *ot, int flags);
 void mesh_draw_gt4(int count, MeshFaceGT4 *face, u_long *ot, int flags);
+#endif
 void mesh_draw_part(u_short part, u_int flags);
+/* VS.EXE has its own port under this name, with another signature; VS units define VS_EXE. */
+#ifndef VS_EXE
 void mesh_draw_ft3_nccs(int count, MeshFaceFT3 *face, u_long *ot, int flags);
 void mesh_draw_ft4_nccs(int count, MeshFaceFT4 *face, u_long *ot, int flags);
 void mesh_draw_gt3_nccs(int count, MeshFaceGT3 *face, u_long *ot, int flags);
 void mesh_draw_gt4_nccs(int count, MeshFaceGT4 *face, u_long *ot, int flags);
 void mesh_draw_part_nccs(u_short part, u_int flags);
+#endif
 void mesh_div_draw_ft3(int count, MeshFaceFT3 *face, u_long *ot, int flags);
 void mesh_div_draw_ft4(int count, MeshFaceFT4 *face, u_long *ot, int flags);
 void mesh_div_draw_gt3(int count, MeshFaceGT3 *face, u_long *ot, int flags);
@@ -176,8 +182,11 @@ typedef struct {
     s32 count;
 } ModelList;
 
-void func_80021ac4(u8 slot);
+void player_draw_equipment_model(u8 slot);
+/* VS.EXE has its own port under this name, with another signature; VS units define VS_EXE. */
+#ifndef VS_EXE
 void model_draw_list(u8 flags, SVECTOR *rot);
+#endif
 void model_draw(int unused0, u16 model, VECTOR *pos, SVECTOR *rot, SVECTOR *scale, void *anim,
                 MATRIX *view, u16 part, u16 arg8, short light, short unused10, u8 flags,
                 int z);

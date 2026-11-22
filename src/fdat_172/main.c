@@ -329,7 +329,7 @@ void func_801ede00(void)
             item->unk08.vy += step;
         if (item->unk08.vy > top)
             item->unk08.vy = top;
-        func_80026dd4(NULL, NULL, 0);
+        world_run_frame(NULL, NULL, 0);
     }
     item->unk2D += 2;
 }

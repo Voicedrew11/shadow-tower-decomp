@@ -36,7 +36,7 @@ void func_801eda8c(void)
             item->unk08.vx += step;
         if (item->unk08.vx > end)
             item->unk08.vx = end;
-        func_80026dd4(NULL, NULL, 0);
+        world_run_frame(NULL, NULL, 0);
     }
     item->unk2D += 2;
 }

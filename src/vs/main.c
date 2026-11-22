@@ -48,7 +48,7 @@ s32 DAT_80063370[1];
  * (func_80013c5c's and func_80015020's phase table). */
 RODATA(0x80011000, 0x110)
 
-/* The model renderers' light scale (func_80025204, func_80028914 and
+/* The model renderers' light scale (fighter_draw_skeletal, fighter_draw_vertex_anim and
  * func_800291d4 scale their light matrix by it). */
 DATA(0x8005b2a8, 0x10, ".data")
 VECTOR DAT_8005b2a8 = {ONE, ONE, ONE};
@@ -57,7 +57,7 @@ VECTOR DAT_8005b2a8 = {ONE, ONE, ONE};
  * An identity matrix nothing references (retail keeps it after the scale).
  * Most likely the counterpart of ST.EXE's DAT_8008040c, the initialized
  * identity ST's model draws and anim_set_node_vertex read: VS's
- * anim_set_node_vertex (func_800256bc) composes from a local identity
+ * anim_set_node_vertex (anim_set_node_vertex) composes from a local identity
  * instead, which leaves this one unused.
  */
 DATA(0x8005b2b8, 0x20, ".data")
@@ -635,16 +635,16 @@ void func_800140d8(void)
         cd_read_member(0, member + 3, (u_long *)&FIGHTER);
         func_80012a70(i);
         if (cd_read_member(0, member + 4, FIGHTER.unk4B000))
-            func_8002345c((ModelFile *)FIGHTER.unk4B000);
+            model_fixup_face_indices((ModelFile *)FIGHTER.unk4B000);
         else
             FIGHTER.unk4B000[0] = 0;
         cd_read_member(0, member, (u_long *)&FIGHTER);
         if (((StAnimFile *)FIGHTER.file)->unk6) {
             FIGHTER.unk4DF10 = 1;
-            func_80023764(i, (StAnimFile *)FIGHTER.file);
+            anim_set_register(i, (StAnimFile *)FIGHTER.file);
         } else {
             FIGHTER.unk4DF10 = 2;
-            func_80027fec(i, (StAnimFile *)FIGHTER.file);
+            anim_register(i, (StAnimFile *)FIGHTER.file);
         }
         func_80012d10(i);
         FIGHTER.unk4DF18 = DAT_8004a224[DAT_801624b8[i].slot[DAT_80063338]];
@@ -681,7 +681,7 @@ void func_800140d8(void)
 #define CAMERA_NEAR_TALL 1700
 #define CAMERA_FAR 8000
 
-/* The graphics start-up, VS's version of ST.EXE's func_80016fb8
+/* The graphics start-up, VS's version of ST.EXE's gfx_init
  * (src/st/gfx.c): the 320x240 double buffer, the GTE offset, screen, back
  * and far colours, and the two packet buffers. */
 ADDRESS(0x80014480, 0x1b4)
@@ -883,17 +883,17 @@ void func_800297fc(int time);
 void func_80029b10(int level);
 void func_80029f28(int phase, int scale);
 void func_80028fcc(int hold);
-void func_8002bfe8(int n, int scale);
+void fighter_draw_shadow(int n, int scale);
 void func_8002d998(void);
-void func_800237e4(void);
-void func_800238c0(void);
-void func_80028074(void);
-void func_800280e0(void);
+void anim_sets_retire(void);
+void anim_sets_free_idle(void);
+void anim_slots_free_idle(void);
+void anim_slots_retire(void);
 void func_800129bc(short volume);
 int func_8002b078(int frame);
 void func_8002ad40(int level);
-void func_80025204(void);
-void func_80028914(void);
+void fighter_draw_skeletal(void);
+void fighter_draw_vertex_anim(void);
 void func_8002c2c4(int n);
 void func_80035b68(void);
 void func_800291d4(u_long *model, int flags, SVECTOR *a, SVECTOR *b, SVECTOR *c);
@@ -941,8 +941,8 @@ void func_80015020(void)
     vs_gfx_state.unk8338[2] = 0;
     vs_gfx_state.unk8338[3] = 0;
     vs_gfx_state.unk8338[4] = 0;
-    func_800237e4();
-    func_800280e0();
+    anim_sets_retire();
+    anim_slots_retire();
     if (DAT_80063324 == 0 && func_8002b078(DAT_80063364++)) {
         DAT_8006331c = 3;
         DAT_80063324 = 1;
@@ -1143,18 +1143,18 @@ void func_80015020(void)
             DAT_80063300 = &DAT_800633b0.fighter[i];
             switch (DAT_80063300->unk4DF10) {
             case 1:
-                func_80025204();
+                fighter_draw_skeletal();
                 break;
             case 2:
                 DAT_80063360 = 0;
-                func_80028914();
+                fighter_draw_vertex_anim();
                 break;
             }
             if (DAT_80063300->unk4DF14) {
                 func_8002c2c4(i);
                 DAT_80063300->unk4DF14--;
             }
-            func_8002bfe8(i, 4096);
+            fighter_draw_shadow(i, 4096);
         }
         func_80029b10(32);
         func_80029f28((u32)pad_state.unk3C % 96, 32);
@@ -1199,8 +1199,8 @@ void func_80015020(void)
     PutDispEnv(&vs_gfx_state.disp[vs_gfx_state.frame]);
     PutDrawEnv(&vs_gfx_state.draw[vs_gfx_state.frame]);
     DrawOTag(vs_gfx_state.ot_cur + VS_OT_LENGTH - 1);
-    func_800238c0();
-    func_80028074();
+    anim_sets_free_idle();
+    anim_slots_free_idle();
     vs_gfx_state.unk2C970++;
 }
 
@@ -1258,7 +1258,7 @@ void func_80015e50(void)
     DAT_80063310 = 0;
     func_800140d8();
     func_800352cc();
-    func_8002d710();
+    sparks_clear_all();
     vs_gfx_state.unk2CA78.vy = -14000;
     vs_gfx_state.unk2CA78.vx = 0;
     vs_gfx_state.unk2CA78.vz = -15000;
@@ -1266,7 +1266,7 @@ void func_80015e50(void)
     vs_gfx_state.unk2CA88.vy = 0;
     vs_gfx_state.unk2CA88.vz = 0;
     if (DAT_80063338 == 0) {
-        func_80016d94();
+        gfx_setup_320x240();
         DrawSync(0);
     }
     func_800129e8(DAT_80063338);
@@ -1408,7 +1408,7 @@ void func_80015e50(void)
 
 /* Loads the menu screens' resources: the item names (archive 8 member 2)
  * with the picture behind them, the font pages (archive 5 member 10) and
- * the four files func_8002345c sets up, then clears the round state. */
+ * the four files model_fixup_face_indices sets up, then clears the round state. */
 ADDRESS(0x80016488, 0x16c)
 void func_80016488(void)
 {
@@ -1431,13 +1431,13 @@ void func_80016488(void)
     func_80012b50(DAT_80117708, 0, 0);
     DrawSync(0);
     cd_read_member(5, 0, DAT_80117708);
-    func_8002345c((ModelFile *)DAT_80117708);
+    model_fixup_face_indices((ModelFile *)DAT_80117708);
     cd_read_member(5, 1, (u_long *)DAT_8015c528);
-    func_8002345c((ModelFile *)DAT_8015c528);
+    model_fixup_face_indices((ModelFile *)DAT_8015c528);
     cd_read_member(5, 2, (u_long *)DAT_8015d8b0);
-    func_8002345c((ModelFile *)DAT_8015d8b0);
+    model_fixup_face_indices((ModelFile *)DAT_8015d8b0);
     cd_read_member(5, 3, (u_long *)DAT_8015ec38);
-    func_8002345c((ModelFile *)DAT_8015ec38);
+    model_fixup_face_indices((ModelFile *)DAT_8015ec38);
     DAT_80063370[0] = 0;
     DAT_80063374 = 0;
     DAT_80063338 = 0;
@@ -1617,7 +1617,7 @@ int main(void)
     pos2.vx = 0;
     pos2.vy = 60;
     memset(&clut2, 0, sizeof(clut2));
-    func_80016d94();
+    gfx_setup_320x240();
     load_file(picture, "\\LOAD02.TIM;1", 0);
     func_80012c2c(picture, &pos2, &clut2);
     DrawSync(0);

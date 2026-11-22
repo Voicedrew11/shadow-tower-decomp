@@ -26,7 +26,7 @@
 #include "../lib/anim_find_key.inc"
 
 ADDRESS(0x80027fec, 0x3c)
-void func_80027fec(u16 id, StAnimFile *file)
+void anim_register(u16 id, StAnimFile *file)
 {
     vs_gfx_state.unk834C[id] = file;
     SCRATCHPAD->model = ANIM_MODEL(file);
@@ -36,7 +36,7 @@ void func_80027fec(u16 id, StAnimFile *file)
  * delta buffer (ST.EXE's anim_slot_free checks the slot first and uses
  * mem_free). */
 ADDRESS(0x80028028, 0x4c)
-void func_80028028(StAnimSlot *slot)
+void anim_slot_free(StAnimSlot *slot)
 {
     slot->unk0 = 0;
     *slot->unk14 = NULL;
@@ -48,7 +48,7 @@ void func_80028028(StAnimSlot *slot)
 
 /* Frees every slot in state 1. */
 ADDRESS(0x80028074, 0x6c)
-void func_80028074(void)
+void anim_slots_free_idle(void)
 {
     StAnimSlot *slot = vs_gfx_state.anim_slots;
     u16 i;
@@ -56,14 +56,14 @@ void func_80028074(void)
     i = 12;
     do {
         if (slot->unk0 == 1)
-            func_80028028(slot);
+            anim_slot_free(slot);
         slot++;
     } while (--i);
 }
 
 /* Puts every used slot in state 1. */
 ADDRESS(0x800280e0, 0x3c)
-void func_800280e0(void)
+void anim_slots_retire(void)
 {
     StAnimSlot *slot = vs_gfx_state.anim_slots;
     u16 i;
@@ -78,7 +78,7 @@ void func_800280e0(void)
 
 /* Frees every slot in use. */
 ADDRESS(0x8002811c, 0x60)
-void func_8002811c(void)
+void anim_slots_free_all(void)
 {
     StAnimSlot *slot = vs_gfx_state.anim_slots;
     s16 i;
@@ -86,7 +86,7 @@ void func_8002811c(void)
     i = 12;
     do {
         if (slot->unk0)
-            func_80028028(slot);
+            anim_slot_free(slot);
         slot++;
     } while (--i);
 }
@@ -94,7 +94,7 @@ void func_8002811c(void)
 /* Finds a free slot, or NULL (ST.EXE's anim_slot_alloc frees the state-1
  * slots and searches again; VS gives up). */
 ADDRESS(0x8002817c, 0x58)
-void func_8002817c(StAnimSlot **out)
+void anim_slot_alloc(StAnimSlot **out)
 {
     u16 i;
 
@@ -120,7 +120,7 @@ void func_8002817c(StAnimSlot **out)
  * Returns the slot, or 0 when none is free.
  */
 ADDRESS(0x800281d4, 0x2a0)
-int func_800281d4(StAnimSlot **slotp, int id, int clip, int frame)
+int anim_pose(StAnimSlot **slotp, int id, int clip, int frame)
 {
     StAnimFile *file = vs_gfx_state.unk834C[id];
     StAnimSlot *slot = *slotp;
@@ -135,7 +135,7 @@ int func_800281d4(StAnimSlot **slotp, int id, int clip, int frame)
         u8 *model;
 
         if (slot != NULL)
-            func_80028028(slot);
+            anim_slot_free(slot);
         still = vs_gfx_state.unk834C[id];
         model = ANIM_MODEL(still);
         sp->model = model;
@@ -144,7 +144,7 @@ int func_800281d4(StAnimSlot **slotp, int id, int clip, int frame)
         return 1;
     }
     if (slot == NULL) {
-        func_8002817c(&slot);
+        anim_slot_alloc(&slot);
         if (slot == NULL)
             return 0;
     claim:
@@ -153,12 +153,12 @@ int func_800281d4(StAnimSlot **slotp, int id, int clip, int frame)
     retry:
         slot->unk10 = mem_alloc_checked(sp->header->n_vertices * sizeof(SVECTOR));
         if (slot->unk10 == NULL) {
-            func_8002811c();
+            anim_slots_free_all();
             goto retry;
         }
         *slotp = slot;
     } else if (slot->unk2 != id) {
-        func_80028028(slot);
+        anim_slot_free(slot);
         slot->unk4 = 255;
         goto claim;
     }
@@ -171,7 +171,7 @@ int func_800281d4(StAnimSlot **slotp, int id, int clip, int frame)
         frames = (u_long *)((u8 *)file + file->frames);
         slot->unk8 = (SVECTOR *)((u8 *)file + frames[k->from]);
         slot->unkC = (SVECTOR *)((u8 *)file + frames[k->to]);
-        func_80027c64(slot->unk10, slot->unk8, slot->unkC, sp->header->n_vertices);
+        vertices_sub(slot->unk10, slot->unk8, slot->unkC, sp->header->n_vertices);
         slot->unk4 = clip;
         slot->unk6 = key;
     }

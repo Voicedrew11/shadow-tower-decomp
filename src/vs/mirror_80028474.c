@@ -65,7 +65,7 @@
  * and semi-transparent, leaving the vertices flipped and the switches on.
  */
 ADDRESS(0x80028474, 0x4a0)
-void func_80028474(void)
+void model_draw_mirrored(void)
 {
     VsScratchPad *sp = VS_SCRATCHPAD;
 
@@ -73,13 +73,13 @@ void func_80028474(void)
         MIRROR_PROJECT(sp, 0);
         DAT_80063360 = 0;
         DAT_80063350 = 0;
-        func_80027ba4(0);
+        mesh_draw_part_nccs(0);
         MIRROR_PROJECT(sp, 1);
         DAT_80063360 = 1;
         DAT_80063350 = 1;
-        func_80027ba4(0);
+        mesh_draw_part_nccs(0);
     } else {
         MIRROR_PROJECT(sp, 0);
-        func_80027ba4(0);
+        mesh_draw_part_nccs(0);
     }
 }

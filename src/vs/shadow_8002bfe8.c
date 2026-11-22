@@ -16,7 +16,7 @@
  * matrix.
  */
 ADDRESS(0x8002bfe8, 0x2dc)
-void func_8002bfe8(int n, int scale)
+void fighter_draw_shadow(int n, int scale)
 {
     VsFighter *base = DAT_800633b0.fighter;
     VsFighter *f = base + n;

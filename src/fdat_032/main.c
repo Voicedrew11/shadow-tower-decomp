@@ -50,8 +50,8 @@ void func_801ed4a8(void)
 {
     RECT rect = {768, 0, 64, 64};
 
-    func_80016878();
-    func_800168e0(&rect, 0, 4, 2, 3);
+    texanim_clear_all();
+    texanim_start(&rect, 0, 4, 2, 3);
 }
 
 #include "../lib/fdat_801ed4a0.inc"

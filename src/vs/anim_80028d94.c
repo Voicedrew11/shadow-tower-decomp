@@ -25,7 +25,7 @@
  * 1 (and a zero vector) when the model is missing.
  */
 ADDRESS(0x80028d94, 0x238)
-int func_80028d94(int id, int part, int frame, int index, SVECTOR *out)
+int anim_get_vertex(int id, int part, int frame, int index, SVECTOR *out)
 {
     StAnimFile *file = (StAnimFile *)DAT_800633b0.fighter[id].file;
     u8 *model;

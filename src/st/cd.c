@@ -142,7 +142,7 @@ void cd_read_sectors(CdlLOC *loc, u_long *buf, int sectors)
             continue;
         }
         while ((n = CdReadSync(1, result)) > 0)
-            func_800214cc();
+            loading_screen_step();
         CdControl(CdlPause, 0, 0);
         if (n == 0)
             break;

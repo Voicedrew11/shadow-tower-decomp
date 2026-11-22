@@ -120,7 +120,7 @@ void func_80054368(Vis212 *e, int fixed, int arg2)
         } else if (++i == world_state.unk1EE18) {
             break;
         }
-        func_80026dd4(NULL, NULL, 0);
+        world_run_frame(NULL, NULL, 0);
     }
     if (!fixed && (a = (VisAnim *)func_8004b1e8(r, 0x71)) != NULL) {
         e->unk08 = a->unk1;
@@ -148,7 +148,7 @@ void func_80054368(Vis212 *e, int fixed, int arg2)
             if ((short)e->unk2A >= 4096)
                 e->unk2A = 0;
         }
-        func_80026dd4(NULL, NULL, 0);
+        world_run_frame(NULL, NULL, 0);
     } while (world_state.unk1EE16 != 5);
     if (!fixed) {
         a = (VisAnim *)func_8004b1e8(r, 0x72);
@@ -180,7 +180,7 @@ void func_80054368(Vis212 *e, int fixed, int arg2)
         } else if (++i == world_state.unk1EE18) {
             break;
         }
-        func_80026dd4(NULL, NULL, 0);
+        world_run_frame(NULL, NULL, 0);
     }
     world_state.unk1EE16 = 0;
     func_80057a3c();
@@ -198,7 +198,7 @@ void func_80054858(int id)
     world_state.unk1EE19 = 0;
     n = 16;
     while (n--)
-        func_80026dd4(NULL, NULL, 0);
+        world_run_frame(NULL, NULL, 0);
     func_800542d0(id + 300, 0);
     world_state.unk1EE16 = 2;
     world_state.unk1EE19 = 0;
@@ -209,14 +209,14 @@ void func_80054858(int id)
                 world_state.unk1EE19 = 0;
             world_state.unk1EE16 = 4;
         }
-        func_80026dd4(NULL, NULL, 0);
+        world_run_frame(NULL, NULL, 0);
     } while (world_state.unk1EE16 != 5);
     world_state.unk1EE18 = 16;
     world_state.unk1EE16 = 6;
     world_state.unk1EE19 = 0;
     n = 16;
     while (n--)
-        func_80026dd4(NULL, NULL, 0);
+        world_run_frame(NULL, NULL, 0);
     world_state.unk1EE16 = 0;
     world_state.unk1EE17 = 0;
     func_80057a3c();

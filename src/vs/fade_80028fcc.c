@@ -31,7 +31,7 @@ RODATA(0x8001142c, 0x148)
  */
 /* src/vs/mesh_800258f0.c's part renderer, called here without a
  * prototype: retail passes the int part number unconverted. */
-void func_80027ba4();
+void mesh_draw_part_nccs();
 
 /* func_800291d4's default NCCS colour (128, 128, 128). */
 SDATA(0x800632dc, 0x4)
@@ -183,7 +183,7 @@ void func_800291d4(u8 *model, int part, SVECTOR *pos, SVECTOR *rot, SVECTOR *sca
     DAT_80063360 = 0;
     if (DAT_80063224 != 3)
         DAT_80063350 = 0;
-    func_80027ba4(part);
+    mesh_draw_part_nccs(part);
     vs_gfx_state.packet->cur = sp->prim;
     vs_gfx_state.packet->end = sp->prim_end;
     vs_gfx_state.unk831C[1] = sp->face_count;
@@ -709,9 +709,9 @@ void func_8002a9c0(int kind, int level, int size);
 void func_80029b10(int level);                           /* src/vs/gauge_80029b10.c */
 void func_80029f28(int phase, int scale);
 void func_8002ad40(int level);                           /* src/vs/name_8002ad40.c */
-void func_80025204(void);                                /* src/vs/model_80024b5c.c */
-void func_80028914(void);                                /* src/vs/model_80028914.c */
-void func_8002bfe8(int n, int scale);                    /* src/vs/shadow_8002bfe8.c */
+void fighter_draw_skeletal(void);                                /* src/vs/model_80024b5c.c */
+void fighter_draw_vertex_anim(void);                                /* src/vs/model_80028914.c */
+void fighter_draw_shadow(int n, int scale);                    /* src/vs/shadow_8002bfe8.c */
 
 /* x, or 0 when it is negative. */
 #define FLOOR0(x) ((x) < 0 ? 0 : (x))
@@ -942,16 +942,16 @@ int func_8002b078(int frame)
             DAT_80063300 = &DAT_800633b0.fighter[i];
             switch (DAT_800633b0.fighter[i].unk4DF10) {
             case 1:
-                func_80025204();
+                fighter_draw_skeletal();
                 break;
             case 2:
                 DAT_80063360 = 0;
-                func_80028914();
+                fighter_draw_vertex_anim();
                 break;
             }
             DAT_80063300->unk4DEEA =
                 (DAT_80063300->unk4DEEA + DAT_80063300->unk4DEEC * DAT_80063220) & 0xfff;
-            func_8002bfe8(i, 4096);
+            fighter_draw_shadow(i, 4096);
         }
     }
     return 0;

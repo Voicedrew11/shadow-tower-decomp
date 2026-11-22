@@ -273,7 +273,7 @@ void func_801ede14(void)
         e->unk2A += e->unkB0;
         if ((short)e->unk2A >= 0x1000)
             e->unk2A = 0xfff;
-        func_80026dd4(NULL, NULL, 0);
+        world_run_frame(NULL, NULL, 0);
     } while ((short)e->unk2A != 0xfff);
 }
 
@@ -294,7 +294,7 @@ void func_801edea4(void)
         anim_get_file(kind->unk4 + 588, &file);
         if (file != NULL)
             break;
-        func_80026dd4(NULL, NULL, 0);
+        world_run_frame(NULL, NULL, 0);
     }
     func_8005335c(item, 1);
 }

@@ -52,7 +52,7 @@ SDATA(0x80087f88, 0x8c)
 /*
  * The module's first .sdata (retail 0x80087ed8..0x80087ef3, before quad's
  * literals): two RECTs and eight zero bytes nothing references, and the
- * NCDS input colour func_80021ac4 draws with (128, 128, 128), which it
+ * NCDS input colour player_draw_equipment_model draws with (128, 128, 128), which it
  * loads $gp-relative.
  */
 DATA(0x80087ed8, 0x8, ".sdata")
@@ -69,7 +69,7 @@ static u32 DAT_80087eec[2] = {0, 0};
 #define TEXANIM_ANY_AREA 255
 
 ADDRESS(0x80016878, 0x2c)
-void func_80016878(void)
+void texanim_clear_all(void)
 {
     StTexAnim *slot = world_state.texanim;
     int i = ST_TEXANIM_SLOTS;
@@ -81,7 +81,7 @@ void func_80016878(void)
 }
 
 ADDRESS(0x800168a4, 0x3c)
-StTexAnim *func_800168a4(void)
+StTexAnim *texanim_find_free(void)
 {
     StTexAnim *slot = world_state.texanim;
     int i;
@@ -100,9 +100,9 @@ found:
  * exit, which decides the delay slot of the switch's range branch.
  */
 ADDRESS(0x800168e0, 0x134)
-int func_800168e0(RECT *rect, int period, int step, int type, short area)
+int texanim_start(RECT *rect, int period, int step, int type, short area)
 {
-    StTexAnim *slot = func_800168a4();
+    StTexAnim *slot = texanim_find_free();
     RECT unused;
 
     if (slot != 0) {
@@ -131,7 +131,7 @@ int func_800168e0(RECT *rect, int period, int step, int type, short area)
 }
 
 ADDRESS(0x80016a14, 0x5a4)
-void func_80016a14(void)
+void texanim_update(void)
 {
     StTexAnim *slot;
     RECT r;
@@ -272,7 +272,7 @@ void func_80016a14(void)
 #define PACKET_WORDS (0x20000 / 4)
 
 ADDRESS(0x80016fb8, 0x210)
-void func_80016fb8(void)
+void gfx_init(void)
 {
     int h = 240;
     int i;
@@ -309,7 +309,7 @@ void func_80016fb8(void)
     i = 8;
     while (i--)
         *p++ = 255;
-    func_80016878();
+    texanim_clear_all();
     world_state.unk1ECD2 = 255;
     world_state.unk1ECC3 = 13;
     world_state.unk1EE15 = 0;
@@ -325,7 +325,7 @@ void func_80016fb8(void)
 }
 
 ADDRESS(0x800171c8, 0xf4)
-void func_800171c8(void)
+void gfx_setup_640x480(void)
 {
     int h = 480;
 
@@ -346,7 +346,7 @@ void func_800171c8(void)
 }
 
 ADDRESS(0x800172bc, 0xec)
-void func_800172bc(void)
+void gfx_setup_640x240(void)
 {
     int h = 240;
 
@@ -365,7 +365,7 @@ void func_800172bc(void)
 }
 
 ADDRESS(0x800173a8, 0x11c)
-void func_800173a8(void)
+void gfx_setup_320x240(void)
 {
     int h = 240;
 
@@ -386,7 +386,7 @@ void func_800173a8(void)
 }
 
 ADDRESS(0x800174c4, 0xe0)
-void func_800174c4(void)
+void gfx_begin_frame(void)
 {
     world_state.frame = !world_state.frame;
     world_state.packet = &world_state.packets[world_state.frame];
@@ -407,7 +407,7 @@ void func_800174c4(void)
 }
 
 ADDRESS(0x800175a4, 0x90)
-void func_800175a4(void)
+void gfx_flip(void)
 {
     DrawSync(0);
     VSync(3);
@@ -416,7 +416,7 @@ void func_800175a4(void)
 }
 
 ADDRESS(0x80017634, 0x4c)
-void func_80017634(void)
+void gfx_draw_ot(void)
 {
     AddPrims(world_state.ot_cur, &world_state.ot2_cur[OT2_LENGTH - 1],
              world_state.ot2_cur);
@@ -424,14 +424,14 @@ void func_80017634(void)
 }
 
 ADDRESS(0x80017680, 0x28)
-void func_80017680(void)
+void gfx_end_frame(void)
 {
-    func_800175a4();
-    func_80017634();
+    gfx_flip();
+    gfx_draw_ot();
 }
 
 ADDRESS(0x800176a8, 0xf8)
-void func_800176a8(VECTOR *pos, SVECTOR *rot)
+void gfx_set_camera(VECTOR *pos, SVECTOR *rot)
 {
     SVECTOR angle;
 
@@ -463,7 +463,7 @@ typedef struct {
  * when zero) by a texture-page offset and a CLUT offset.
  */
 ADDRESS(0x800177a0, 0x4bc)
-void func_800177a0(Model *model, DVECTOR *uv, DVECTOR *clut, u8 count)
+void model_offset_textures(Model *model, DVECTOR *uv, DVECTOR *clut, u8 count)
 {
     ModelPart *part;
     u8 *p;
@@ -556,7 +556,7 @@ u_char *func_80017cb0(u16 offset)
 
 /* Loads three screen points from the scratchpad buffer and stores NCLIP. */
 ADDRESS(0x80017cc4, 0x64)
-void func_80017cc4(u16 i0, u16 i1, u16 i2)
+void mesh_nclip_triangle(u16 i0, u16 i1, u16 i2)
 {
     ScratchPad *sp = SCRATCHPAD;
     u_char *base = sp->vertices;
@@ -571,7 +571,7 @@ void func_80017cc4(u16 i0, u16 i1, u16 i2)
 
 /* Blends the current lighting with one of three targets by t / 4096. */
 ADDRESS(0x80017d28, 0x718)
-void func_80017d28(u32 t, int flags)
+void lighting_load_gte(u32 t, int flags)
 {
     ScratchPad *sp = SCRATCHPAD;
     StLight *cur = world_state.light;
@@ -3572,7 +3572,7 @@ void world_draw(void)
 
 /* Builds a textured quad in the current frame's work area and draws it at once. */
 ADDRESS(0x80020ea8, 0x124)
-void func_80020ea8(int x0, int y0, int x1, int y1, u8 u, u8 v, u8 w, u8 h,
+void quad_draw_now(int x0, int y0, int x1, int y1, u8 u, u8 v, u8 w, u8 h,
                    u8 semi, u16 tpage, u16 clut, u8 r, u8 g, u8 b)
 {
     POLY_FT4 *p;
@@ -3597,7 +3597,7 @@ void func_80020ea8(int x0, int y0, int x1, int y1, u8 u, u8 v, u8 w, u8 h,
 
 /* Allocates a textured quad from the primitive buffer and links it to the OT. */
 ADDRESS(0x80020fcc, 0x128)
-void func_80020fcc(int x0, int y0, int x1, int y1, int u, int v, int w, int h,
+void quad_add(int x0, int y0, int x1, int y1, int u, int v, int w, int h,
                    u8 semi, int tpage, int clut, int r, int g, int b)
 {
     POLY_FT4 *p;
@@ -3619,7 +3619,7 @@ void func_80020fcc(int x0, int y0, int x1, int y1, int u, int v, int w, int h,
 }
 
 ADDRESS(0x800210f4, 0x64)
-void func_800210f4(void)
+void loading_screen_find_file(void)
 {
     char name[64];
 
@@ -3634,7 +3634,7 @@ void func_800210f4(void)
  * tim_load_images and copies the lower half of VRAM to the upper.
  */
 ADDRESS(0x80021158, 0x34c)
-void func_80021158(void)
+void loading_screen_show(void)
 {
     u_char result[8];
     POLY_F4 poly;
@@ -3685,7 +3685,7 @@ void func_80021158(void)
         }
         ClearImage(&clear, 0, 0, 0);
         DrawSync(0);
-        func_800173a8();
+        gfx_setup_320x240();
         tim_load_images(world_state.unkE0, cd_state.unkA6C.size);
         {
             RECT lower = {0, 240, 320, 240};
@@ -3699,7 +3699,7 @@ void func_80021158(void)
 }
 
 ADDRESS(0x800214a4, 0x28)
-void func_800214a4(void)
+void loading_screen_end(void)
 {
     world_state.draw[0].isbg = 1;
     world_state.draw[1].isbg = 1;
@@ -3707,11 +3707,11 @@ void func_800214a4(void)
 }
 
 ADDRESS(0x800214cc, 0x4c)
-void func_800214cc(void)
+void loading_screen_step(void)
 {
     if (world_state.unk1ECC4) {
-        func_800174c4();
-        func_80017680();
+        gfx_begin_frame();
+        gfx_end_frame();
     }
 }
 
@@ -3722,7 +3722,7 @@ void func_800214cc(void)
  * not produce; callers outside this module need the promoted prototype.
  */
 ADDRESS(0x80021518, 0x13c)
-void func_80021518(x0, y0, x1, y1, u, v, w, h, semi, tpage, clut, r, g, b, depth)
+void quad_add_at_depth(x0, y0, x1, y1, u, v, w, h, semi, tpage, clut, r, g, b, depth)
 int x0, y0, x1, y1;
 u8 u, v, w, h;
 u8 semi;
@@ -3757,7 +3757,7 @@ int depth;
  * set, then out.
  */
 ADDRESS(0x80021654, 0x1c8)
-void func_80021654(void)
+void area_draw_entry_fade(void)
 {
     int elapsed = cd_state.unk4 - area_state.unk18;
     int early;
@@ -3771,7 +3771,7 @@ void func_80021654(void)
     if (elapsed < 120) {
         u8 level = elapsed * 2;
 
-        func_80021518(0, 0, 320, 240, 0, 224, 15, 15, 1, getTPage(0, 2, 896, 256),
+        quad_add_at_depth(0, 0, 320, 240, 0, 224, 15, 15, 1, getTPage(0, 2, 896, 256),
                       getClut(560, 496), level, level, level, 0);
         return;
     }
@@ -3779,14 +3779,14 @@ void func_80021654(void)
     if (early || area_state.unk0 != 0) {
         u8 level = (elapsed - 120) * 2;
 
-        func_80021518(32, 0, 288, 256, 0, 0, 255, 255, 1, getTPage(0, 1, 960, 256),
+        quad_add_at_depth(32, 0, 288, 256, 0, 0, 255, 255, 1, getTPage(0, 1, 960, 256),
                       getClut(560, 495), level, level, level, 0);
         if (!early)
             area_state.unk18 = cd_state.unk4 - 240;
     } else if (elapsed < 360) {
         u8 level = (360 - elapsed) * 2;
 
-        func_80021518(32, 0, 288, 256, 0, 0, 255, 255, 1, getTPage(0, 1, 960, 256),
+        quad_add_at_depth(32, 0, 288, 256, 0, 0, 255, 255, 1, getTPage(0, 1, 960, 256),
                       getClut(560, 495), level, level, level, 0);
     } else {
         area_state.unk18 = -1;
@@ -3795,10 +3795,10 @@ void func_80021654(void)
 
 /* Draws and clears fade channel 0. */
 ADDRESS(0x8002181c, 0xbc)
-void func_8002181c(void)
+void fade_draw_additive(void)
 {
     if (world_state.fade.active[0]) {
-        func_80021518(0, 0, 320, 240, 0, 224, 15, 15, 1,
+        quad_add_at_depth(0, 0, 320, 240, 0, 224, 15, 15, 1,
                       getTPage(0, world_state.fade.mode[0], 896, 256), getClut(560, 496),
                       (u8)world_state.fade.r[0], (u8)world_state.fade.g[0],
                       (u8)world_state.fade.b[0], 0);
@@ -3811,10 +3811,10 @@ void func_8002181c(void)
 
 /* Draws and clears fade channel 1. */
 ADDRESS(0x800218d8, 0xbc)
-void func_800218d8(void)
+void fade_draw_subtractive(void)
 {
     if (world_state.fade.active[1]) {
-        func_80021518(0, 0, 320, 240, 0, 224, 15, 15, 1,
+        quad_add_at_depth(0, 0, 320, 240, 0, 224, 15, 15, 1,
                       getTPage(0, world_state.fade.mode[1], 896, 256), getClut(560, 496),
                       (u8)world_state.fade.r[1], (u8)world_state.fade.g[1],
                       (u8)world_state.fade.b[1], 0);
@@ -3827,7 +3827,7 @@ void func_800218d8(void)
 
 /* Adds a colour scaled by scale/4096 to the fade channel of `mode`. */
 ADDRESS(0x80021994, 0x130)
-void func_80021994(int r, int g, int b, int scale, int mode)
+void fade_add_color(int r, int g, int b, int scale, int mode)
 {
     switch (mode) {
     case 1:
@@ -3911,7 +3911,7 @@ void func_80021994(int r, int g, int b, int scale, int mode)
 
 /* Draws viewer model slot `slot` (skipped while its unk130 is -1). */
 ADDRESS(0x80021ac4, 0x54c)
-void func_80021ac4(u8 slot)
+void player_draw_equipment_model(u8 slot)
 {
     ScratchPad *sp;
     MATRIX light;
@@ -3923,7 +3923,7 @@ void func_80021ac4(u8 slot)
     if (viewer.unk130.halves[slot] == -1) {
         return;
     }
-    func_80017d28(0, 0);
+    lighting_load_gte(0, 0);
     sp = SCRATCHPAD;
     gte_MulMatrix0((MATRIX *)&sp->unk394->light[3], &world_state.unk1ECE8, &light);
     gte_SetLightMatrix(&light);
@@ -4123,7 +4123,7 @@ void model_draw(int unused0, u16 model, VECTOR *pos, SVECTOR *rot, SVECTOR *scal
         sp->model_t[2] = pos->vz;
     }
     func_80049e30(rot, SCRATCH_MATRIX(sp));
-    func_80017d28(light, flags);
+    lighting_load_gte(light, flags);
     gte_MulMatrix0((MATRIX *)sp->unk394, SCRATCH_MATRIX(sp), &lm);
     gte_SetLightMatrix(&lm);
     if (scale) {
@@ -4212,7 +4212,7 @@ done:
 }
 
 ADDRESS(0x80023208, 0x80)
-u16 func_80023208(u16 id)
+u16 object_model_slot(u16 id)
 {
     if (id < 300)
         return id + 256;
@@ -4222,18 +4222,18 @@ u16 func_80023208(u16 id)
 }
 
 ADDRESS(0x80023288, 0x100)
-void func_80023288(void *data)
+void creature_model_loaded(void *data)
 {
     DVECTOR a[4] = {{0, 0}, {64, 0}, {128, 0}, {192, 0}};
     DVECTOR b[4] = {{0, 0}, {0, 3}, {0, 6}, {0, 9}};
     u8 n = heap_get_tag(data);
 
-    func_800177a0((Model *)((u8 *)data + ((u32 *)data)[2]), &a[n], &b[n], 0);
+    model_offset_textures((Model *)((u8 *)data + ((u32 *)data)[2]), &a[n], &b[n], 0);
     heap_set_state(data, ST_BLOCK_USED);
 }
 
 ADDRESS(0x80023388, 0xe8)
-void func_80023388(void *data)
+void creature_tim_loaded(void *data)
 {
     DVECTOR a[4] = {{0, 0}, {64, 0}, {128, 0}, {192, 0}};
     DVECTOR b[4] = {{0, 0}, {0, 3}, {0, 6}, {0, 9}};
@@ -4243,7 +4243,7 @@ void func_80023388(void *data)
 }
 
 ADDRESS(0x80023470, 0x194)
-void func_80023470(void *data)
+void item_model_loaded(void *data)
 {
     DVECTOR a[16] = {
         {0, 0},   {0, 32},   {0, 64},   {0, 96},   {0, 128},  {0, 160},  {0, 192},  {0, 224},
@@ -4255,12 +4255,12 @@ void func_80023470(void *data)
     };
     u8 n = heap_get_tag(data);
 
-    func_800177a0((Model *)((u8 *)data + ((u32 *)data)[2]), &a[n], &b[n], 0);
+    model_offset_textures((Model *)((u8 *)data + ((u32 *)data)[2]), &a[n], &b[n], 0);
     heap_set_state(data, ST_BLOCK_USED);
 }
 
 ADDRESS(0x80023604, 0x184)
-void func_80023604(void *data)
+void item_tim_loaded(void *data)
 {
     DVECTOR a[16] = {
         {0, 0},   {0, 32},   {0, 64},   {0, 96},   {0, 128},  {0, 160},  {0, 192},  {0, 224},
@@ -4276,7 +4276,7 @@ void func_80023604(void *data)
 }
 
 ADDRESS(0x80023788, 0x20)
-void func_80023788(void *data)
+void object_model_loaded(void *data)
 {
     heap_set_state(data, ST_BLOCK_USED);
 }
@@ -4290,7 +4290,7 @@ void func_80023788(void *data)
  * Keep these as distinct paths so no second VAB-field cursor spans the loop.
  */
 ADDRESS(0x800237a8, 0x244)
-void func_800237a8(archive, index, slot, tag)
+void creature_model_load(archive, index, slot, tag)
 int archive;
 int index;
 u16 slot;
@@ -4315,8 +4315,8 @@ u8 tag;
     heap_set_slot(data, slot);
     heap_set_tag(data, tag);
     if (second != 0)
-        cd_queue_read_member(archive, index + 1, data, func_80023388);
-    cd_queue_read_member(archive, index, data, func_80023288);
+        cd_queue_read_member(archive, index + 1, data, creature_tim_loaded);
+    cd_queue_read_member(archive, index, data, creature_model_loaded);
     if (cd_archive_member_size(archive, index + 2) == 0)
         return;
     bank = index / 5;
@@ -4347,7 +4347,7 @@ u8 tag;
  * world_state.unk834C[slot - 16].
  */
 ADDRESS(0x800239ec, 0xd0)
-void func_800239ec(archive, index, slot, tag)
+void creature_second_model_load(archive, index, slot, tag)
 int archive;
 int index;
 u16 slot;
@@ -4367,12 +4367,12 @@ u8 tag;
     heap_set_state(data, ST_BLOCK_LOADING);
     heap_set_slot(data, slot - 16);
     heap_set_tag(data, tag);
-    cd_queue_read_member(archive, member, data, func_80023288);
+    cd_queue_read_member(archive, member, data, creature_model_loaded);
 }
 
 /* Loads members `index` and `index + 1` of `archive` into one heap block (the larger size). */
 ADDRESS(0x80023abc, 0x108)
-void func_80023abc(archive, index, slot, tag)
+void item_model_load(archive, index, slot, tag)
 int archive;
 int index;
 u16 slot;
@@ -4392,12 +4392,12 @@ u8 tag;
     heap_set_state(data, ST_BLOCK_LOADING);
     heap_set_slot(data, slot);
     heap_set_tag(data, tag);
-    cd_queue_read_member(archive, index + 1, data, func_80023604);
-    cd_queue_read_member(archive, index, data, func_80023470);
+    cd_queue_read_member(archive, index + 1, data, item_tim_loaded);
+    cd_queue_read_member(archive, index, data, item_model_loaded);
 }
 
 ADDRESS(0x80023bc4, 0xa8)
-void func_80023bc4(int archive, int index, int slot)
+void object_model_load(int archive, int index, int slot)
 {
     void *data;
 
@@ -4405,12 +4405,12 @@ void func_80023bc4(int archive, int index, int slot)
     if (data != NULL) {
         heap_set_state(data, ST_BLOCK_LOADING);
         heap_set_slot(data, slot);
-        cd_queue_read_member(archive, index, data, func_80023788);
+        cd_queue_read_member(archive, index, data, object_model_loaded);
     }
 }
 
 ADDRESS(0x80023c6c, 0x26c)
-void func_80023c6c(int archive, int first, int slot, int count)
+void creature_models_sync(int archive, int first, int slot, int count)
 {
     ScratchPad *sp = SCRATCHPAD;
     u8 *flags = sp->unkF0;
@@ -4428,21 +4428,21 @@ void func_80023c6c(int archive, int first, int slot, int count)
         b = world_state.unk834C[id - 16];
         if (*flags++) {
             if (a == NULL) {
-                func_800237a8(archive, i * 5, id, sp->unkC8[slot & 0xf]);
+                creature_model_load(archive, i * 5, id, sp->unkC8[slot & 0xf]);
             } else if (heap_get_state(a) == ST_BLOCK_RELEASABLE) {
                 if (heap_get_tag(a) != sp->unkC8[slot & 0xf]) {
                     heap_free(a);
-                    func_800237a8(archive, i * 5, id, sp->unkC8[slot & 0xf]);
+                    creature_model_load(archive, i * 5, id, sp->unkC8[slot & 0xf]);
                 } else {
                     heap_set_state(a, ST_BLOCK_USED);
                 }
             }
             if (b == NULL) {
-                func_800239ec(archive, i * 5, (u16)slot, sp->unkC8[slot & 0xf]);
+                creature_second_model_load(archive, i * 5, (u16)slot, sp->unkC8[slot & 0xf]);
             } else if (heap_get_state(b) == ST_BLOCK_RELEASABLE) {
                 if (heap_get_tag(b) != sp->unkC8[slot & 0xf]) {
                     heap_free(b);
-                    func_800239ec(archive, i * 5, (u16)slot, sp->unkC8[slot & 0xf]);
+                    creature_second_model_load(archive, i * 5, (u16)slot, sp->unkC8[slot & 0xf]);
                 } else {
                     heap_set_state(b, ST_BLOCK_USED);
                 }
@@ -4461,7 +4461,7 @@ void func_80023c6c(int archive, int first, int slot, int count)
 }
 
 ADDRESS(0x80023ed8, 0x12c)
-void func_80023ed8(int archive, int first, int slot, int count)
+void item_models_sync(int archive, int first, int slot, int count)
 {
     u8 *flags = SCRATCHPAD->unkF0;
     int end = count + first;
@@ -4472,7 +4472,7 @@ void func_80023ed8(int archive, int first, int slot, int count)
         p = world_state.unk834C[slot];
         if (*flags++) {
             if (p == NULL)
-                func_80023abc(archive, i * 2, (u16)slot, vis_table_c.unk0000[slot - 440]);
+                item_model_load(archive, i * 2, (u16)slot, vis_table_c.unk0000[slot - 440]);
             else if (heap_get_state(p) == ST_BLOCK_RELEASABLE)
                 heap_set_state(p, ST_BLOCK_USED);
         } else if (p != NULL && heap_get_state(p) != ST_BLOCK_LOADING) {
@@ -4482,7 +4482,7 @@ void func_80023ed8(int archive, int first, int slot, int count)
 }
 
 ADDRESS(0x80024004, 0x1cc)
-void func_80024004(int archive, int first, int slot, int count)
+void object_models_sync(int archive, int first, int slot, int count)
 {
     u8 *flags = SCRATCHPAD->unkF0;
     int end = count + first;
@@ -4495,7 +4495,7 @@ void func_80024004(int archive, int first, int slot, int count)
         p = world_state.unk834C[slot];
         if (*flags++) {
             if (p == NULL)
-                func_80023bc4(archive, i * 3, slot);
+                object_model_load(archive, i * 3, slot);
             else if (heap_get_state(p) == ST_BLOCK_RELEASABLE)
                 heap_set_state(p, ST_BLOCK_USED);
             if (cd_archive_member_size(archive, i * 3 + 1)) {
@@ -4525,7 +4525,7 @@ void func_80024004(int archive, int first, int slot, int count)
 #define SLOT_A 128
 
 ADDRESS(0x800241d0, 0x514)
-void func_800241d0(void)
+void world_draw_creatures(void)
 {
     ScratchPad *sp = SCRATCHPAD;
     Vis212 *e;
@@ -4612,13 +4612,13 @@ void func_800241d0(void)
         sp->unkC8[e->unk0B] = e->unk0C;
     }
     if (area_state.unk1F == 0)
-        func_80023c6c(2, 0, 128, 16);
+        creature_models_sync(2, 0, 128, 16);
 }
 
 /* Steps the visible table B entries: the two kinds of area sound (over a
  * floor rectangle, around a point) and the models with their shadows. */
 ADDRESS(0x800246e4, 0xae4)
-void func_800246e4(void)
+void world_draw_objects(void)
 {
     ScratchPad *sp = SCRATCHPAD;
     Vis88 *e;
@@ -4756,7 +4756,7 @@ void func_800246e4(void)
         case 38:
             sp->unkF8[e->unk0a] = 1;
             size = &e->unk3C;
-            id = func_80023208(e->unk0a);
+            id = object_model_slot(e->unk0a);
             anim_get_file(id, &model);
             if (model == NULL)
                 continue;
@@ -4772,7 +4772,7 @@ void func_800246e4(void)
         default:
             r = &vis_table_b.unk0000[e->unk0a];
             sp->unkF8[e->unk0a] = 1;
-            id = func_80023208(e->unk0a);
+            id = object_model_slot(e->unk0a);
             anim_get_file(id, &model);
             size = &e->unk3C;
             if (model == NULL)
@@ -4822,14 +4822,14 @@ void func_800246e4(void)
         }
     }
     if (area_state.unk1F == 0)
-        func_80024004(0, 0, 256, 249);
+        object_models_sync(0, 0, 256, 249);
     sp->unkF0 = &sp->unkF8[300];
 }
 
 #define SLOT_C 588
 
 ADDRESS(0x800251c8, 0x428)
-void func_800251c8(void)
+void world_draw_ground_items(void)
 {
     ScratchPad *sp = SCRATCHPAD;
     Vis48 *e;
@@ -4895,12 +4895,12 @@ void func_800251c8(void)
         }
     }
     if (area_state.unk1F == 0)
-        func_80023ed8(5, 0, SLOT_C, 128);
+        item_models_sync(5, 0, SLOT_C, 128);
     sp->unkF0 = &sp->unkF8[128];
 }
 
 ADDRESS(0x800255f0, 0x634)
-void func_800255f0(void)
+void world_draw_effects_placements(void)
 {
     ScratchPad *sp = SCRATCHPAD;
     StEffect *o;
@@ -5031,7 +5031,7 @@ void func_800255f0(void)
 
 /* A sprite at its texture size, behind its draw mode. */
 ADDRESS(0x80025c24, 0x1dc)
-void func_80025c24(rec, abr, color)
+void hud_draw_sprite(rec, abr, color)
 StHudSprite *rec;
 u16 abr;
 u8 *color;
@@ -5067,7 +5067,7 @@ u8 *color;
 
 /* A sprite scaled to its rectangle. */
 ADDRESS(0x80025e00, 0x220)
-void func_80025e00(rec, abr, color)
+void hud_draw_sprite_scaled(rec, abr, color)
 StHudSprite *rec;
 u16 abr;
 u8 *color;
@@ -5110,7 +5110,7 @@ u8 *color;
 
 /* An untextured rectangle, behind its draw mode. */
 ADDRESS(0x80026020, 0x208)
-void func_80026020(rec, abr, color)
+void hud_draw_rect(rec, abr, color)
 StHudSprite *rec;
 u16 abr;
 u8 *color;
@@ -5151,7 +5151,7 @@ u8 *color;
  * apart from u = 96.
  */
 ADDRESS(0x80026228, 0x2e0)
-void func_80026228(int value, int first, u8 width)
+void hud_set_number(int value, int first, u8 width)
 {
     short n;
     short d;
@@ -5195,7 +5195,7 @@ void func_80026228(int value, int first, u8 width)
 }
 
 ADDRESS(0x80026508, 0x45c)
-void func_80026508(void)
+void hud_update(void)
 {
     if (viewer.unk2 != viewer.unk18A || viewer.unk6 != viewer.unk18C) {
         viewer.unk186 = 2;
@@ -5210,8 +5210,8 @@ void func_80026508(void)
             hud_sprites[2].flags |= 2;
             hud_sprites[3].flags |= 2;
             hud_sprites[13].flags |= 1;
-            func_80026228(viewer.unk2, 14, 16);
-            func_80026228(viewer.unk6, 19, 16);
+            hud_set_number(viewer.unk2, 14, 16);
+            hud_set_number(viewer.unk6, 19, 16);
             viewer.unk186 = 0;
         }
     }
@@ -5291,7 +5291,7 @@ void func_80026508(void)
 
 /* Draws the HUD records from `first` up to the next end marker. */
 ADDRESS(0x80026964, 0x124)
-void func_80026964(u8 first)
+void hud_draw_records(u8 first)
 {
     CVECTOR color = {96, 96, 96, 0};
     StHudSprite *rec;
@@ -5308,18 +5308,18 @@ void func_80026964(u8 first)
                 color.b = 96;
             }
             if ((u16)rec->r.w != HUD_SPRITE_SIZE)
-                func_80025e00(rec, rec->abr, &color);
+                hud_draw_sprite_scaled(rec, rec->abr, &color);
             else
-                func_80025c24(rec, rec->abr, &color);
+                hud_draw_sprite(rec, rec->abr, &color);
         } else if (rec->flags & 2) {
-            func_80026020(rec, rec->abr, &color);
+            hud_draw_rect(rec, rec->abr, &color);
         }
     }
 }
 
 /* Queues `value` in a free one of the five HUD number slots for 60 frames. */
 ADDRESS(0x80026a88, 0x74)
-void func_80026a88(short value)
+void hud_queue_damage_number(short value)
 {
     int i;
 
@@ -5334,12 +5334,12 @@ void func_80026a88(short value)
     }
 }
 
-/* Blink phase of func_80026afc's selection frame (0..31). */
+/* Blink phase of world_render_frame's selection frame (0..31). */
 DATA(0x80087f18, 0x4, ".sdata")
 static s32 DAT_80087f18 = 0;
 
 ADDRESS(0x80026afc, 0x2d8)
-void func_80026afc(VECTOR *pos, SVECTOR *rot)
+void world_render_frame(VECTOR *pos, SVECTOR *rot)
 {
     RECT unused;
     CVECTOR color;
@@ -5348,11 +5348,11 @@ void func_80026afc(VECTOR *pos, SVECTOR *rot)
     int i;
 
     func_80057b10();
-    func_800176a8(pos, rot);
-    func_80016a14();
+    gfx_set_camera(pos, rot);
+    texanim_update();
     if (viewer.unk218 == 0 || viewer.unk218 == 5 || viewer.unk218 == 6 || viewer.unk218 == 1)
         lighting_update();
-    func_800174c4();
+    gfx_begin_frame();
     anim_slots_retire();
     anim_sets_retire();
     world_state.unk831C[1] = 0;
@@ -5365,40 +5365,40 @@ void func_80026afc(VECTOR *pos, SVECTOR *rot)
             level = (u16)DAT_80087f18 - 24;
         color.b = color.g = color.r = level * 4 + 96;
         func_80027d18(&frame->r, &color, 257, 1);
-        func_80026964(26);
+        hud_draw_records(26);
     }
     if (DAT_801cd120.unk3 != 0 && area_state.area < 44) {
-        func_80026508();
-        func_80026964(0);
+        hud_update();
+        hud_draw_records(0);
         for (i = 4; i != -1; i--) {
             if (viewer.unk1EC[i] != 0) {
                 hud_sprites[35].r.y = i * 16 + 144;
                 hud_sprites[34].r.y = i * 16 + 144;
                 hud_sprites[33].r.y = i * 16 + 144;
                 hud_sprites[32].r.y = i * 16 + 144;
-                func_80026228(viewer.unk20C[i], 32, 8);
-                func_80026964(32);
+                hud_set_number(viewer.unk20C[i], 32, 8);
+                hud_draw_records(32);
                 viewer.unk1EC[i]--;
             }
         }
-        func_80026964(37);
+        hud_draw_records(37);
     }
-    func_8002181c();
-    func_800218d8();
-    func_80021654();
-    func_80021ac4(0);
-    func_80021ac4(1);
+    fade_draw_additive();
+    fade_draw_subtractive();
+    area_draw_entry_fade();
+    player_draw_equipment_model(0);
+    player_draw_equipment_model(1);
     world_draw();
     vis_collect_table_a();
     vis_collect_table_b();
     vis_collect_table_c();
-    func_800241d0();
-    func_800246e4();
-    func_800251c8();
-    func_800255f0();
+    world_draw_creatures();
+    world_draw_objects();
+    world_draw_ground_items();
+    world_draw_effects_placements();
     if (world_state.unk1EE16 != 0)
         func_80028784();
-    func_80017680();
+    gfx_end_frame();
     vsync_wait_tick();
     world_state.unk1ECC0++;
 }
@@ -5406,9 +5406,9 @@ void func_80026afc(VECTOR *pos, SVECTOR *rot)
 /* One frame of the world and the player's status; no value is returned
  * (see the prototype). */
 ADDRESS(0x80026dd4, 0x30)
-int func_80026dd4(VECTOR *pos, SVECTOR *rot, int arg)
+int world_run_frame(VECTOR *pos, SVECTOR *rot, int arg)
 {
-    func_80026afc(pos, rot);
+    world_render_frame(pos, rot);
     player_update_status(arg);
 }
 
@@ -5418,7 +5418,7 @@ int func_80026dd4(VECTOR *pos, SVECTOR *rot, int arg)
  * environments then clear their background.
  */
 ADDRESS(0x80026e04, 0x8c)
-void func_80026e04(void)
+void gfx_store_screen(void)
 {
     DrawSync(0);
     world_state.packets[1].start = world_state.packets[0].end = world_state.packets[0].start + 0x3500;
@@ -5430,7 +5430,7 @@ void func_80026e04(void)
 
 /* Restores the two packet buffers to their full size. */
 ADDRESS(0x80026e90, 0x3c)
-void func_80026e90(void)
+void gfx_restore_buffers(void)
 {
     world_state.draw[0].isbg = 1;
     world_state.draw[1].isbg = 1;
@@ -6298,9 +6298,9 @@ static s32 DAT_80087f34 = 0;
 /* Closes a page: its frame, the end of the frame and the darkened world. */
 #define PAGE_END()                     \
     func_80029618(16, 36, 288, 192);   \
-    func_800175a4();                   \
+    gfx_flip();                   \
     func_8002948c();                   \
-    func_80017634()
+    gfx_draw_ot()
 
 /* The status page. */
 ADDRESS(0x80029b74, 0x65c)
@@ -6315,7 +6315,7 @@ void func_80029b74(void)
     int kind;
     int n;
 
-    func_800174c4();
+    gfx_begin_frame();
     sp = MENU_SCRATCH;
     sp->style[0].r = 72;
     sp->style[0].g = 72;
@@ -6400,7 +6400,7 @@ void func_8002a1d0(void)
     int i;
     int red, green;
 
-    func_800174c4();
+    gfx_begin_frame();
     sp->style[0].r = sp->style[4].r = 72;
     sp->style[0].g = sp->style[4].g = 72;
     sp->style[0].b = sp->style[4].b = 72;
@@ -6468,7 +6468,7 @@ void func_8002a5a4(void)
     CVECTOR *left, *left_num, *right, *right_num;
     int i;
 
-    func_800174c4();
+    gfx_begin_frame();
     sp = MENU_SCRATCH;
     sp->style[0].r = sp->style[4].r = 42;
     sp->style[0].g = sp->style[4].g = 42;
@@ -6561,7 +6561,7 @@ void func_8002a954(void)
     int id;
     int level;
 
-    func_800174c4();
+    gfx_begin_frame();
     if (DAT_80087f34 < 16)
         sp->unk360 = 8 - DAT_80087f34;
     else
@@ -6690,7 +6690,7 @@ void func_8002b2e8(void)
     int i;
     int y;
 
-    func_800174c4();
+    gfx_begin_frame();
     y = 80;
     sp = MENU_SCRATCH;
     sp->style[0].r = 72;
@@ -6776,7 +6776,7 @@ void func_8002b84c(void)
     int i;
     u16 *mask;
 
-    func_800174c4();
+    gfx_begin_frame();
     sp = MENU_SCRATCH;
     sp->style[0].b = sp->style[0].g = sp->style[0].r = 72;
     sp->style[2].r = 98;
@@ -7117,7 +7117,7 @@ void func_8002ca84(void)
 {
     MenuScratch *sp = MENU_SCRATCH;
 
-    func_800174c4();
+    gfx_begin_frame();
     sp->style[0].b = sp->style[0].g = sp->style[0].r = 72;
     sp->style[2].r = 98;
     sp->style[2].g = 66;
@@ -7180,10 +7180,10 @@ void func_8002ca84(void)
         break;
     }
     func_80029548(16, 36, 288, 192);
-    func_800175a4();
+    gfx_flip();
     if (sp->unk206 == 1)
         func_8002948c();
-    func_80017634();
+    gfx_draw_ot();
 }
 
 ADDRESS(0x8002cd98, 0xec)
@@ -7208,16 +7208,16 @@ void func_8002ce84(void)
 {
     MenuScratch *sp = MENU_SCRATCH;
 
-    func_800174c4();
+    gfx_begin_frame();
     sp->style[0].b = sp->style[0].g = sp->style[0].r = 96;
     sp->style[2].r = 98;
     sp->style[2].g = 66;
     sp->style[2].b = 48;
     sp->style[0].cd = sp->style[2].cd = 57;
     func_8002cd98();
-    func_800175a4();
+    gfx_flip();
     func_8002948c();
-    func_80017634();
+    gfx_draw_ot();
 }
 
 ADDRESS(0x8002cef8, 0x1b8)
@@ -7226,7 +7226,7 @@ void func_8002cef8(void)
     MenuScratch *sp = MENU_SCRATCH;
     short x[2] = {16, 10};
 
-    func_800174c4();
+    gfx_begin_frame();
     sp->style[0].b = sp->style[0].g = sp->style[0].r = 96;
     sp->style[0].cd = 49;
     if (sp->unk2E4 < 16)
@@ -7245,9 +7245,9 @@ void func_8002cef8(void)
     func_8002732c(MESSAGE(800), x[0] + 97, 120, &sp->style[0]);
     func_8002732c(MESSAGE(801), x[1] + 97, 144, &sp->style[0]);
     func_80029618(72, 100, 176, 80);
-    func_800175a4();
+    gfx_flip();
     ClearImage(&world_state.draw[world_state.frame].clip, 0, 0, 0);
-    func_80017634();
+    gfx_draw_ot();
 }
 
 ADDRESS(0x8002d0b0, 0x12c)
@@ -7255,7 +7255,7 @@ void func_8002d0b0(void)
 {
     MenuScratch *sp = MENU_SCRATCH;
 
-    func_800174c4();
+    gfx_begin_frame();
     sp->style[0].b = sp->style[0].g = sp->style[0].r = 96;
     sp->style[2].r = 98;
     sp->style[2].g = 66;
@@ -7270,8 +7270,8 @@ void func_8002d0b0(void)
         func_8002732c(MESSAGE(852), 183, 152, &sp->style[2]);
     }
     func_80029618(72, 100, 176, 80);
-    func_800175a4();
-    func_80017634();
+    gfx_flip();
+    gfx_draw_ot();
 }
 
 /*
@@ -7573,7 +7573,7 @@ void func_8002e310(void)
 {
     MenuScratch *sp = MENU_SCRATCH;
 
-    func_800174c4();
+    gfx_begin_frame();
     sp->style[3].r = sp->style[7].r = 96;
     sp->style[3].g = sp->style[7].g = sp->style[3].b = sp->style[7].b = 48;
     sp->style[0].b = sp->style[4].b = sp->style[0].g = sp->style[4].g = sp->style[0].r =
@@ -7601,9 +7601,9 @@ void func_8002e310(void)
     else
         func_8002d8e8();
     func_8002d1dc();
-    func_800175a4();
+    gfx_flip();
     func_8002948c();
-    func_80017634();
+    gfx_draw_ot();
 }
 
 /*
@@ -8028,7 +8028,7 @@ void func_8002fc4c(void)
     RECT left = {310, 119, 16, 8};
     RECT right = {630, 119, 16, 8};
 
-    func_800174c4();
+    gfx_begin_frame();
     if (DAT_801cd180.unk4 & 0x800)
         DAT_800881aa = 1;
     else if (DAT_801cd180.unk4 & 0x400)
@@ -8066,7 +8066,7 @@ void func_8002fc4c(void)
         func_8002e94c();
     func_8002e490();
     func_8002c9e8();
-    func_80017680();
+    gfx_end_frame();
 }
 
 /*
@@ -8247,7 +8247,7 @@ void func_80030ab8(void)
     RECT left = {314, 119, 16, 8};
     RECT right = {625, 119, 16, 8};
 
-    func_800174c4();
+    gfx_begin_frame();
     sp->style[0].r = sp->style[4].r = 80;
     sp->style[0].g = sp->style[4].g = 80;
     sp->style[0].b = sp->style[4].b = 80;
@@ -8265,7 +8265,7 @@ void func_80030ab8(void)
     else
         func_8002fe4c();
     func_8002c9e8();
-    func_80017680();
+    gfx_end_frame();
 }
 
 /*
@@ -8576,7 +8576,7 @@ void func_80031aec(void)
     RECT arrow = {319, 110, 24, 16};
     CVECTOR color = {16, 48, 16, 0};
 
-    func_800174c4();
+    gfx_begin_frame();
     sp->style[0].r = sp->style[4].r = 96;
     sp->style[0].g = sp->style[4].g = 96;
     sp->style[0].b = sp->style[4].b = 96;
@@ -8610,7 +8610,7 @@ void func_80031aec(void)
     func_800286a8(1, 0, 0);
     func_80031378();
     func_8002c9e8();
-    func_80017680();
+    gfx_end_frame();
 }
 
 /* Clears the 640x480 VRAM area from the origin to black. */
@@ -8625,11 +8625,11 @@ void func_80031cfc(void)
 ADDRESS(0x80031d50, 0x94)
 void func_80031d50(void)
 {
-    func_800174c4();
-    func_800175a4();
+    gfx_begin_frame();
+    gfx_flip();
     func_8002948c();
-    func_80021518(120, 120, 200, 136, 0, 144, 80, 16, 255, 25, 32738, 96, 96, 96, 0);
-    func_80017634();
+    quad_add_at_depth(120, 120, 200, 136, 0, 144, 80, 16, 255, 25, 32738, 96, 96, 96, 0);
+    gfx_draw_ot();
 }
 
 /*

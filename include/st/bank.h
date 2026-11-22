@@ -7,15 +7,15 @@
 
 #include <kf/lib/types.h>
 
-u16 func_80023208(u16 id);
-void func_80023288(void *data);
-void func_80023388(void *data);
-void func_80023470(void *data);
-void func_80023604(void *data);
-void func_80023788(void *data);
+u16 object_model_slot(u16 id);
+void creature_model_loaded(void *data);
+void creature_tim_loaded(void *data);
+void item_model_loaded(void *data);
+void item_tim_loaded(void *data);
+void object_model_loaded(void *data);
 /* Old-style definitions; these are their promoted prototypes. */
-void func_800237a8(int archive, int index, int slot, int tag);
-void func_800239ec(int archive, int index, int slot, int tag);
-void func_80023abc(int archive, int index, int slot, int tag);
+void creature_model_load(int archive, int index, int slot, int tag);
+void creature_second_model_load(int archive, int index, int slot, int tag);
+void item_model_load(int archive, int index, int slot, int tag);
 
 #endif

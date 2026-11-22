@@ -52,14 +52,14 @@ SDATA(0x800880a4, 0x3f)
 ADDRESS(0x80058c04, 0x20)
 void func_80058c04(void)
 {
-    func_80026e04();
+    gfx_store_screen();
 }
 
 ADDRESS(0x80058c24, 0x28)
 void func_80058c24(void)
 {
     func_800595d4();
-    func_80026e90();
+    gfx_restore_buffers();
 }
 
 /* Loads member 0 of archive 3: the menu messages, then the menu image. */
@@ -82,15 +82,15 @@ void func_80058cc8(void)
     DVECTOR size = {576, 480};
 
     ResetGraph(1);
-    func_80021158();
-    func_800214a4();
+    loading_screen_show();
+    loading_screen_end();
 }
 
 /* Reloads the menu and the viewer's equipment models after the menu. */
 ADDRESS(0x80058d30, 0x94)
 void func_80058d30(void)
 {
-    func_80021158();
+    loading_screen_show();
     func_80058c4c();
     func_80044404();
     func_8003f12c(viewer.unk38[3], 0, 1);
@@ -99,7 +99,7 @@ void func_80058d30(void)
     func_8003f12c(viewer.unk38[17], 3, 1);
     func_8003ee38(viewer.unk38[6], 0);
     func_8003ee38(viewer.unk38[12], 1);
-    func_800214a4();
+    loading_screen_end();
 }
 
 /* Opens a menu screen: the VRAM positions, the menu loads and the HUD. */
@@ -918,7 +918,7 @@ void func_8005ad00(void)
     }
     func_80031cfc();
     DrawSync(0);
-    func_800172bc();
+    gfx_setup_640x240();
     sp->unk2C4 = -1;
     for (i = 0; i < 14; i++) {
         if (sp->unk2C4 < viewer.unk62[i])
@@ -1572,7 +1572,7 @@ void func_8005c7fc(void)
     }
     func_80031cfc();
     DrawSync(0);
-    func_800172bc();
+    gfx_setup_640x240();
     sp->unk2DC = 1;
     sp->unk2E0 = 0;
     func_80057a3c();
@@ -1843,7 +1843,7 @@ void func_8005d25c(void)
     sp->unk2DC = 1;
     func_80031cfc();
     DrawSync(0);
-    func_800172bc();
+    gfx_setup_640x240();
     func_80057a3c();
     for (;;) {
         r0 = sp->unk0.grid.row0;

@@ -316,7 +316,7 @@ void func_801edea0(void)
     func_8004e324();
     fdat_801ed410(e);
     if (world_state.unk834C[slot] == NULL)
-        func_800237a8(2, index * 5, slot, e->unk0C & 0xf);
+        creature_model_load(2, index * 5, slot, e->unk0C & 0xf);
     e->unk36 = -1;
     e->unk1C.bytes[2] &= 0xf2;
     fdat_801eb7b4(e, 7);
@@ -371,7 +371,7 @@ void func_801ee0b8(void)
         e0->unk2A += e0->unkB0;
         if ((short)e0->unk2A >= 0x1000)
             goto first_animation_done;
-        func_80026dd4(NULL, NULL, 0);
+        world_run_frame(NULL, NULL, 0);
     }
 first_animation_done:
     e48->unk74 = e0->unk74;
@@ -389,7 +389,7 @@ first_animation_done:
     fdat_801eb7b4(e3, 10);
     do {
         e3->unk2A = 0;
-        func_80026dd4(NULL, NULL, 0);
+        world_run_frame(NULL, NULL, 0);
         anim_get_file(e3->unk0B + 128, &file);
     } while (file == NULL);
     e49->unk74 = e3->unk74;
@@ -407,7 +407,7 @@ first_animation_done:
             break;
         fdat_801eba4c(e49);
         fdat_801eba4c(e3);
-        func_80026dd4(NULL, NULL, 0);
+        world_run_frame(NULL, NULL, 0);
     }
     func_8004ae38(e49);
     viewer.unk218 = 0;

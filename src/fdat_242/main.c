@@ -87,7 +87,7 @@ void func_801ed4e0(void)
         fdat_801ee0b4 = 4;
     } else {
         fdat_801ee0bc = 1;
-        func_80016878();
+        texanim_clear_all();
         fdat_801ee0b4 = 0;
         e48->unk1C.bytes[3] = 2;
         vis_table_a.entries[33].unk00 = 0;
@@ -204,8 +204,8 @@ void func_801ed71c(void)
         RECT a = {480, 64, 64, 96};
         RECT b = {512, 483, 16, 1};
 
-        func_800168e0(&a, 0, 4, 2, 24);
-        func_800168e0(&b, 2, 1, 0x31, 24);
+        texanim_start(&a, 0, 4, 2, 24);
+        texanim_start(&b, 2, 1, 0x31, 24);
         fdat_801ee0bc = 0;
     } else if (fdat_801ee0bc == 2 && area_state.unk0 == 0) {
         func_801edf2c();

@@ -399,7 +399,7 @@ void func_801edfb4(void)
         c->unk08.vx = e->unk74.vx - v.vz;
         c->unk08.vy = e->unk74.vy + v.vy;
         c->unk08.vz = e->unk74.vz + v.vx;
-        func_80026dd4(NULL, &viewer.unk278, 0);
+        world_run_frame(NULL, &viewer.unk278, 0);
     } while ((s16)e->unk2A != 0xfff);
     c->unk22 = 2;
     viewer.unk268 = viewer.unk278.vx + viewer.unk280.halves[0] + viewer.unk288 + viewer.unk290;
@@ -444,7 +444,7 @@ void func_801ee140(int which)
             item->unk08.vx += step;
         if ((step > 0 && item->unk08.vx > end) || (step < 0 && item->unk08.vx < end))
             item->unk08.vx = end;
-        func_80026dd4(NULL, NULL, 0);
+        world_run_frame(NULL, NULL, 0);
     }
     func_80057d58();
 }

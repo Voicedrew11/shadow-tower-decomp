@@ -119,7 +119,7 @@ void func_801eda20(void)
         if (door->unk10 > 0xf00 && item->unk22 == 2)
             item->unk22 = 1;
         func_80053aa4();
-        func_80026dd4(NULL, NULL, 0);
+        world_run_frame(NULL, NULL, 0);
     } while (door->unk10 != 0xfff);
     door->unk0C = 0xff;
     viewer.unk218 = 0;
@@ -171,7 +171,7 @@ void func_801edba4(int id)
             viewer.unk190[4][1] = 6000;
             viewer.unk2C |= 0x100;
         }
-        func_80026dd4(NULL, NULL, 0);
+        world_run_frame(NULL, NULL, 0);
     } while ((short)e->unk2A != 0xfff);
     for (;;) {
         if (door->unk10 < 1 && door->unk10 + step >= 1)
@@ -179,7 +179,7 @@ void func_801edba4(int id)
         door->unk10 += step;
         if (door->unk10 + step >= 0x1000)
             break;
-        func_80026dd4(NULL, NULL, 0);
+        world_run_frame(NULL, NULL, 0);
     }
     door->unk10 = 0xfff;
     door->unk00 = 0;
@@ -227,7 +227,7 @@ void func_801ede88(void)
         door->unk10 += step;
         if (door->unk10 + raising_step >= 0x1000)
             goto gate_raised;
-        func_80026dd4(NULL, NULL, 0);
+        world_run_frame(NULL, NULL, 0);
     }
 gate_raised:
     door->unk10 = 0xfff;
@@ -238,7 +238,7 @@ gate_raised:
         e->unk2A += e->unkB0;
         if ((short)e->unk2A >= 0x1000)
             e->unk2A = 0xfff;
-        func_80026dd4(NULL, NULL, 0);
+        world_run_frame(NULL, NULL, 0);
     } while ((short)e->unk2A != 0xfff);
     DAT_801cba08.unk1448[r->unk09] = 3;
 }

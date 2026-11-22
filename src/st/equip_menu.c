@@ -836,7 +836,7 @@ void func_80066004(void)
 {
     MenuScratch *sp;
 
-    func_800174c4();
+    gfx_begin_frame();
     sp = MENU_SCRATCH;
     sp->style[3].r = sp->style[7].r = 96;
     sp->style[3].g = sp->style[7].g = sp->style[3].b = sp->style[7].b = 48;
@@ -863,9 +863,9 @@ void func_80066004(void)
     else
         func_80065de0();
     func_800650dc();
-    func_800175a4();
+    gfx_flip();
     func_80065f40();
-    func_80017634();
+    gfx_draw_ot();
 }
 
 /* Nonzero while the CD request ring still holds a request. */
@@ -971,7 +971,7 @@ void func_80066240(void)
     DAT_801e0d38.unk2 = -1;
     func_80031cfc();
     DrawSync(0);
-    func_800172bc();
+    gfx_setup_640x240();
 }
 
 #define GRID (&sp->unk0.grid)
@@ -1589,7 +1589,7 @@ void func_80068258(void)
     CVECTOR color = {16, 48, 16, 0};
     MenuScratch *sp;
 
-    func_800174c4();
+    gfx_begin_frame();
     sp = MENU_SCRATCH;
     sp->style[3].r = sp->style[7].r = 96;
     sp->style[3].g = sp->style[7].g = sp->style[3].b = sp->style[7].b = 48;
@@ -1622,7 +1622,7 @@ void func_80068258(void)
         func_8002916c(&arrow, &color, 2048);
     func_800286a8(1, 0, 0);
     func_8002c9e8();
-    func_80017680();
+    gfx_end_frame();
 }
 
 /* The pad's button word (active low) read as one volatile halfword at its

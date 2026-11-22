@@ -20,7 +20,7 @@
 
 /* dst = to - from, per vertex. */
 ADDRESS(0x80027c64, 0x7c)
-void func_80027c64(SVECTOR *dst, SVECTOR *from, SVECTOR *to, int count)
+void vertices_sub(SVECTOR *dst, SVECTOR *from, SVECTOR *to, int count)
 {
     while (count--) {
         dst->vx = to->vx - from->vx;

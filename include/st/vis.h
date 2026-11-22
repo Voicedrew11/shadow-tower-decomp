@@ -204,7 +204,7 @@ extern VisSourceMask vis_source_masks[];
 extern VisSourceMask DAT_801856d0[3][128];
 
 /* 0x801ba138: 64 entries of 212 bytes, then the collected index list. */
-/* A flags word whose byte +2 is also updated on its own (func_800241d0). */
+/* A flags word whose byte +2 is also updated on its own (world_draw_creatures). */
 typedef union {
     u32 word;
     u8 bytes[4];
@@ -400,7 +400,7 @@ typedef struct {
 
 /* 0x801c0310: 240 entries of 88 bytes at +0x1f20, then the index list. */
 typedef struct {
-    u8 unk00;            /* 0x00: 2 skips the entry (func_800246e4) */
+    u8 unk00;            /* 0x00: 2 skips the entry (world_draw_objects) */
     u8 unk01;
     u8 unk02;            /* 0x02 */
     u8 unk03;            /* 0x03: bits 6/7 near and far range */

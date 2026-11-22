@@ -119,7 +119,7 @@ typedef struct {
     u16 unk28;
     u8 unk2A;
     u8 unk2B;            /* 0x2b: cleared after the warp func_80052c24 runs */
-    u32 unk2C;           /* 0x2c: flag bits the HUD shows (func_80026508); status flags (src/st/player.c) */
+    u32 unk2C;           /* 0x2c: flag bits the HUD shows (hud_update); status flags (src/st/player.c) */
     u16 unk30;           /* 0x30 */
     u8 unk32;
     u8 unk33; /* incremented every vsync, wraps at 60 */
@@ -139,7 +139,7 @@ typedef struct {
     u16 unkD8[6];        /* 0xd8: player_hit's per-kind defence */
     u16 unkE4;           /* 0xe4: func_8005a3a8 */
     u8 unkE6[2];
-    ViewerModel *unkE8[4]; /* 0xe8: func_80021ac4's slot positions and rotations */
+    ViewerModel *unkE8[4]; /* 0xe8: player_draw_equipment_model's slot positions and rotations */
     void *unkF8[4];      /* 0xf8: its slot model blocks (ModelFile, st/mesh.h) */
     void *unk108[4];     /* 0x108: its slot animation state: a StAnimSlot (anim_prepare) or
                           * a node set (anim_prepare_any), by the model file's halfword +6 */
@@ -161,7 +161,7 @@ typedef struct {
     u8 unk159[2];        /* 0x159: per hand: reload for unk15B */
     u8 unk15B[2];        /* 0x15b: per hand: countdown to the next func_8003f910 */
     u8 unk15D;
-    s8 unk15E;           /* 0x15e: HUD frame offset (func_80026afc) */
+    s8 unk15E;           /* 0x15e: HUD frame offset (world_render_frame) */
     u8 unk15F;
     SVECTOR unk160[2];   /* 0x160: func_8003f704's offsets per slot */
     void *unk170;        /* 0x170: unk174 before the last move (func_8004162c) */
@@ -211,7 +211,7 @@ typedef struct {
     u32 unk1E8;          /* 0x1e8: cd_state.unk4 when the stream started */
     s32 unk1EC[5];       /* 0x1ec: frames left to show unk20C[i] */
     u8 unk200[0x20c - 0x200];
-    s16 unk20C[5];       /* 0x20c: numbers func_80026a88 queues */
+    s16 unk20C[5];       /* 0x20c: numbers hud_queue_damage_number queues */
     u8 unk216[2];
     u8 unk218;           /* 0x218 */
     u8 unk219;
@@ -273,7 +273,7 @@ typedef struct {
     s16 unk2D8;
     s16 unk2DA;          /* 0x2da: yellow fade level, falls by unk2DC */
     s16 unk2DC;
-    short unk2DE;        /* 0x2de..0x2e2: added to func_80021ac4's slot rotations */
+    short unk2DE;        /* 0x2de..0x2e2: added to player_draw_equipment_model's slot rotations */
     short unk2E0;
     short unk2E2;
     s32 unk2E4;
@@ -300,7 +300,7 @@ extern Viewer viewer;
 
 /*
  * The state block at 0x801b5920: game_load_start_file sets bytes 4..9 from FN.;
- * func_80021654 times the screen fade from the tick word at +0x18;
+ * area_draw_entry_fade times the screen fade from the tick word at +0x18;
  * byte 9 is the current area the texture slots and table C entries are
  * compared with.
  */
@@ -337,7 +337,7 @@ typedef char AreaHooksSize[sizeof(AreaHooks) == 0x80 ? 1 : -1];
 
 typedef struct {
     s16 unk0;
-    volatile u16 unk2; /* func_80021654 reads it zero-extended, then as a short */
+    volatile u16 unk2; /* area_draw_entry_fade reads it zero-extended, then as a short */
     u8 unk4;
     u8 unk5;
     u8 unk6;
@@ -352,7 +352,7 @@ typedef struct {
     u8 unk13;            /* 0x13 */
     u8 unk14;            /* 0x14 */
     u8 unk15[3];
-    s32 unk18;           /* 0x18: tick func_80021654 times its fade from, -1 when idle */
+    s32 unk18;           /* 0x18: tick area_draw_entry_fade times its fade from, -1 when idle */
     u8 unk1C;
     u8 unk1D;
     u8 unk1E;
@@ -421,8 +421,8 @@ extern Data801cd180 DAT_801cd180;
 
 /*
  * One sound bank slot: the loaded bank's data (its state halfword at +4)
- * and the VAB id SsVabClose takes. func_800237a8 uses slots 8..23 as four
- * rows of four; func_80023c6c addresses slots 8.. and func_80024004 slots
+ * and the VAB id SsVabClose takes. creature_model_load uses slots 8..23 as four
+ * rows of four; creature_models_sync addresses slots 8.. and object_models_sync slots
  * 24.. (src/st/slots.c). WIP extent.
  */
 typedef struct {
@@ -502,7 +502,7 @@ typedef struct {
     u8 unk0;
     u8 unk1;             /* option page level, shown as a slider and a number (menu.c) */
     u8 unk2;             /* 0x02..0x05: option page on/off bytes */
-    u8 unk3;             /* nonzero while the HUD is drawn (func_80026a88, func_80026afc) */
+    u8 unk3;             /* nonzero while the HUD is drawn (hud_queue_damage_number, world_render_frame) */
     u8 unk4;             /* 1: the title-card image is drawn whatever the card mode (text.c) */
     u8 unk5;
     u8 unk6;

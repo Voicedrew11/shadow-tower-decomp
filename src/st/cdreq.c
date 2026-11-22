@@ -26,7 +26,7 @@ void cd_wait_frame(void)
 {
     func_80058620();
     func_80045ffc();
-    func_800214cc();
+    loading_screen_step();
     DrawSync(0);
     VSync(0);
 }

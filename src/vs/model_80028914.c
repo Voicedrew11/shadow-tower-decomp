@@ -24,11 +24,11 @@ u_long DAT_800632d8 = 0x808080;
 
 /*
  * Draws the current fighter (DAT_80063300) unless it has no animation
- * frame, as func_80025204 does, but as one vertex-animated part with its
- * floor reflection (func_80028474).
+ * frame, as fighter_draw_skeletal does, but as one vertex-animated part with its
+ * floor reflection (model_draw_mirrored).
  */
 ADDRESS(0x80028914, 0x480)
-void func_80028914(void)
+void fighter_draw_vertex_anim(void)
 {
     if (DAT_80063300->unk4DEEA != -1) {
     VsScratchPad *sp = VS_SCRATCHPAD;
@@ -60,7 +60,7 @@ void func_80028914(void)
     n = DAT_80063300 - DAT_800633b0.fighter;
     sp->model = (u8 *)vs_gfx_state.unk834C[n] + ((ModelFile *)vs_gfx_state.unk834C[n])->unk8;
     sp->header = (MeshHeader *)(sp->model + 12);
-    if (func_800281d4(&DAT_80063300->unk4DEE4, n, DAT_80063300->unk4DEE8,
+    if (anim_pose(&DAT_80063300->unk4DEE4, n, DAT_80063300->unk4DEE8,
                       DAT_80063300->unk4DEEA) == 0)
         return;
     sp->ot = vs_gfx_state.ot_cur;
@@ -83,7 +83,7 @@ void func_80028914(void)
     sp->vertices = vs_gfx_state.unkA7EC;
     sp->clut_base = 0;
     if (DAT_80063300->unk4DEEA != -1)
-        func_80028474();
+        model_draw_mirrored();
     vs_gfx_state.packet->cur = sp->prim;
     vs_gfx_state.packet->end = sp->prim_end;
     vs_gfx_state.unk831C[1] = sp->face_count;

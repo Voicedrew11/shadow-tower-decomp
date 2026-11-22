@@ -138,7 +138,7 @@ void effect_emit(u_long flags, int kind, StEffectDef *def, int arg, VECTOR *pos)
     else
         result = func_8004def8(target, 1, arg, levels, 0);
     if (kind & 0x40)
-        func_80026a88(result);
+        hud_queue_damage_number(result);
     if (options & 0x10000)
         target->unk70 |= 0x800;
 }

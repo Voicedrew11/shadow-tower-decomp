@@ -30,13 +30,13 @@ typedef struct StEffect {
     u8 unk3;
     u8 unk4;             /* 0x04: ST.EXE: the spawner's first argument */
     u8 unk5;             /* 0x05: script step */
-    u8 unk6;             /* 0x06: bits 0-1 cull mode, bits 2-3 kind (func_800255f0) */
+    u8 unk6;             /* 0x06: bits 0-1 cull mode, bits 2-3 kind (world_draw_effects_placements) */
     u8 unk7;
     u8 unk8;             /* 0x08: frames left before the next attack */
     u8 unk9;
-    s16 unkA;            /* 0x0a: model id - 96 (func_800255f0) */
+    s16 unkA;            /* 0x0a: model id - 96 (world_draw_effects_placements) */
     u16 unkC;            /* 0x0c: attack reach */
-    u16 unkE;            /* 0x0e: CLUT base (func_800255f0) */
+    u16 unkE;            /* 0x0e: CLUT base (world_draw_effects_placements) */
     s16 unk10;           /* 0x10: frames left to live, -1 frees the slot */
     u16 unk12;           /* 0x12 */
     u16 unk14;           /* 0x14 */

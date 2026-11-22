@@ -62,8 +62,8 @@ typedef struct {
  * lighting environment.
  */
 /*
- * The screen fade channels func_80021994 accumulates and func_8002181c /
- * func_800218d8 draw and clear once per frame: index 0 for modes 1 and 3,
+ * The screen fade channels fade_add_color accumulates and fade_draw_additive /
+ * fade_draw_subtractive draw and clear once per frame: index 0 for modes 1 and 3,
  * index 1 for mode 2. `mode` selects the semi-transparency rate.
  */
 typedef struct {
@@ -140,15 +140,15 @@ typedef struct {
     void *unk8308[4];    /* 0x8308: primitive-pointer slots (func_80017c5c) */
     void *unk8318;
     s32 unk831C[2];
-    s32 unk8324;         /* 0x8324: primitives added by func_80021518 */
-    s32 unk8328;         /* 0x8328: primitives allocated by func_80021518 */
+    s32 unk8324;         /* 0x8324: primitives added by quad_add_at_depth */
+    s32 unk8328;         /* 0x8328: primitives allocated by quad_add_at_depth */
     s32 unk832C;
     s32 unk8330;
     s32 unk8334;
     s32 unk8338[5];
-    /* 0x834c: heap block owners and model files by id: func_800237a8's bank
-     * slots (by slot), func_800239ec and src/st/slots.c (by slot - 16), the
-     * viewer models at 32.. (func_80021ac4), model_draw's model blocks, the
+    /* 0x834c: heap block owners and model files by id: creature_model_load's bank
+     * slots (by slot), creature_second_model_load and src/st/slots.c (by slot - 16), the
+     * viewer models at 32.. (player_draw_equipment_model), model_draw's model blocks, the
      * animation model files (src/st/anim.c); func_800456f8 frees 128..143,
      * the highest index evidenced (WIP extent). */
     void *unk834C[144];
@@ -218,7 +218,7 @@ typedef struct {
 } StObject24;
 
 /*
- * The frame counter func_80016fb8 clears and func_800255f0 advances, then
+ * The frame counter gfx_init clears and world_draw_effects_placements advances, then
  * the animated objects it steps. -G8 code reads the counter with lui, so it
  * is not a small object of its own.
  */
@@ -234,48 +234,48 @@ extern u16 DAT_8009ac88[16];
 int view_point_in_near_cone(void);
 
 /* src/st/texanim.c */
-void func_80016878(void);
-StTexAnim *func_800168a4(void);
-int func_800168e0(RECT *rect, int period, int step, int type, short area);
-void func_80016a14(void);
+void texanim_clear_all(void);
+StTexAnim *texanim_find_free(void);
+int texanim_start(RECT *rect, int period, int step, int type, short area);
+void texanim_update(void);
 
 /* src/st/gfx.c */
-void func_80016fb8(void);
-void func_800171c8(void);
-void func_800172bc(void);
-void func_800173a8(void);
-void func_800174c4(void);
-void func_800175a4(void);
-void func_80017634(void);
-void func_80017680(void);
-void func_800176a8(VECTOR *pos, SVECTOR *rot);
+void gfx_init(void);
+void gfx_setup_640x480(void);
+void gfx_setup_640x240(void);
+void gfx_setup_320x240(void);
+void gfx_begin_frame(void);
+void gfx_flip(void);
+void gfx_draw_ot(void);
+void gfx_end_frame(void);
+void gfx_set_camera(VECTOR *pos, SVECTOR *rot);
 
 /* src/st/prim.c (the FT3 tint pair is declared with the other renderers'
  * in st/mesh.h) */
-void func_800177a0(Model *model, DVECTOR *uv, DVECTOR *clut, u8 count);
+void model_offset_textures(Model *model, DVECTOR *uv, DVECTOR *clut, u8 count);
 void func_80017c5c(u16 index, void *p);
 void func_80017c8c(u16 index, void *p);
 u_char *func_80017cb0(u16 offset);
-void func_80017cc4(u16 i0, u16 i1, u16 i2);
-void func_80017d28(u32 t, int flags);
+void mesh_nclip_triangle(u16 i0, u16 i1, u16 i2);
+void lighting_load_gte(u32 t, int flags);
 
 /* src/st/quad.c */
-void func_80020ea8(int x0, int y0, int x1, int y1, u8 u, u8 v, u8 w, u8 h, u8 semi,
+void quad_draw_now(int x0, int y0, int x1, int y1, u8 u, u8 v, u8 w, u8 h, u8 semi,
                    u16 tpage, u16 clut, u8 r, u8 g, u8 b);
-void func_80020fcc(int x0, int y0, int x1, int y1, int u, int v, int w, int h, u8 semi,
+void quad_add(int x0, int y0, int x1, int y1, int u, int v, int w, int h, u8 semi,
                    int tpage, int clut, int r, int g, int b);
-void func_800210f4(void);
-void func_80021158(void);
-void func_800214a4(void);
-void func_800214cc(void);
+void loading_screen_find_file(void);
+void loading_screen_show(void);
+void loading_screen_end(void);
+void loading_screen_step(void);
 /* An old-style definition; this is its promoted prototype. */
-void func_80021518(int x0, int y0, int x1, int y1, int u, int v, int w, int h, int semi,
+void quad_add_at_depth(int x0, int y0, int x1, int y1, int u, int v, int w, int h, int semi,
                    int tpage, int clut, int r, int g, int b, int depth);
-void func_80021654(void);
+void area_draw_entry_fade(void);
 
 /* src/st/fade.c */
-void func_8002181c(void);
-void func_800218d8(void);
-void func_80021994(int r, int g, int b, int scale, int mode);
+void fade_draw_additive(void);
+void fade_draw_subtractive(void);
+void fade_add_color(int r, int g, int b, int scale, int mode);
 
 #endif

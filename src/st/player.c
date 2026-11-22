@@ -218,7 +218,7 @@ void player_update_status(int apply)
         } else {
             level = viewer.unk2D6;
         }
-        func_80021994(60, 0, 0, level, 1);
+        fade_add_color(60, 0, 0, level, 1);
     }
     if (viewer.unk2DA != 0) {
         viewer.unk2DA -= viewer.unk2DC;
@@ -230,12 +230,12 @@ void player_update_status(int apply)
         } else {
             level = viewer.unk2DA;
         }
-        func_80021994(60, 60, 0, level, 1);
+        fade_add_color(60, 60, 0, level, 1);
     }
 
     level = func_8003c17c(&viewer.unk190[0][0], &viewer.unk190[0][1], 20, 4096, apply);
     if (level != -1) {
-        func_80021994(0, 40, 0, level, 1);
+        fade_add_color(0, 40, 0, level, 1);
         if (viewer.timers.words[0] == 0) {
             viewer.unk2C &= ~7;
         }
@@ -247,7 +247,7 @@ void player_update_status(int apply)
         } else {
             level -= 512;
         }
-        func_80021994(40, 40, 0, level, 1);
+        fade_add_color(40, 40, 0, level, 1);
         func_8003ead0();
         vis_table_b.unk71A4 = vis_table_b.unk71A6 = vis_table_b.unk71A8 = 0;
         vis_lists.unk47CE = vis_lists.unk47D0 = vis_lists.unk47D2 = 0;
@@ -259,7 +259,7 @@ void player_update_status(int apply)
     }
     level = func_8003c17c(&viewer.unk190[2][0], &viewer.unk190[2][1], 0, 4096, apply);
     if (level != -1) {
-        func_80021994(20, 20, 20, level, 2);
+        fade_add_color(20, 20, 20, level, 2);
         if (viewer.timers.words[2] == 0) {
             viewer.unk2C &= ~0x60;
             lighting.unk4 |= 4;
@@ -275,7 +275,7 @@ void player_update_status(int apply)
     }
     level = func_8003c17c(&viewer.unk190[4][0], &viewer.unk190[4][1], 20, 4096, apply);
     if (level != -1) {
-        func_80021994(40, 0, 20, level, 1);
+        fade_add_color(40, 0, 20, level, 1);
         if (viewer.timers.words[4] == 0) {
             viewer.unk2C &= ~0x100;
             func_8005a3a8(0);
@@ -283,10 +283,10 @@ void player_update_status(int apply)
         }
     }
     if (viewer.unk2EC) {
-        func_80021994(0, 0, 40, 4096, 1);
+        fade_add_color(0, 0, 40, 4096, 1);
     }
     if (viewer.unk2F0) {
-        func_80021994(40, 40, 0, 4096, 1);
+        fade_add_color(40, 40, 0, 4096, 1);
     }
     level = func_8003c17c(&viewer.unk190[5][0], &viewer.unk190[5][1], 0, 4096, apply);
     if (level != -1) {
@@ -1460,7 +1460,7 @@ void func_8003ee38(u16 id, u8 slot)
             size = *(u_long *)p;
             if (size >= 5) {
                 world_state.unk834C[part] = p;
-                func_800177a0((Model *)(p + ((u_long *)p)[2]), &pix[slot], &clut[slot], 0);
+                model_offset_textures((Model *)(p + ((u_long *)p)[2]), &pix[slot], &clut[slot], 0);
             }
             p += size;
             part++;
@@ -1524,12 +1524,12 @@ void func_8003f12c(u16 id, u8 slot, u8 reload)
             cd_read_member(1, model * 4 + 484, viewer.unkF8[slot]);
             cd_read_member(1, other * 4 + 484, viewer.unkF8[pair]);
             anim_register(slot + 32, viewer.unkF8[slot]);
-            func_800177a0((Model *)sp->model, &pix[slot], &clut[slot], 0);
+            model_offset_textures((Model *)sp->model, &pix[slot], &clut[slot], 0);
             anim_register(pair + 32, viewer.unkF8[pair]);
         } else {
             cd_read_member(1, model * 4 + 484, viewer.unkF8[slot]);
             anim_register(slot + 32, viewer.unkF8[slot]);
-            func_800177a0((Model *)sp->model, &pix[slot], &clut[slot], 1);
+            model_offset_textures((Model *)sp->model, &pix[slot], &clut[slot], 1);
         }
         cd_read_member(1, model * 4 + 485, DAT_80088c88);
         func_8003ec5c(DAT_80088c88, &pix[slot], &clut[slot], 0);
@@ -2115,7 +2115,7 @@ void func_800402ac(u8 hand)
                     }
                     if (hit != NULL) {
                         dmg = func_8004def8(hit, hr, viewer.unk180, viewer.unkBA, 0);
-                        func_80026a88(dmg);
+                        hud_queue_damage_number(dmg);
                     }
                     if (hr != 0 && dmg != -1) {
                         def = &vis_table_a.unk3500[hit->unk02];
@@ -2926,7 +2926,7 @@ void func_80042cfc(void)
     u8 b = flags[5];
 
     flags[3] = 0;
-    func_80026afc(0, 0);
+    world_render_frame(0, 0);
     anim_slots_free_idle();
     anim_sets_free_idle();
     anim_slots_free_all();
@@ -3035,7 +3035,7 @@ void func_80042d74(void)
                     MoveImage(&r, 0, world_state.frame * 240);
                     DrawSync(0);
                     player_update_status(0);
-                    func_80026afc(0, 0);
+                    world_render_frame(0, 0);
                     player_update_status(0);
                     cd_wait_idle();
                     world_state.draw[0].clip.w = 320;
@@ -3190,14 +3190,14 @@ void func_80042d74(void)
             break;
         case 4:
             if (viewer.unk286 < 17) {
-                func_80021994(255, 255, 255, viewer.unk286 << 8, 2);
+                fade_add_color(255, 255, 255, viewer.unk286 << 8, 2);
                 viewer.unk280.halves[0] += viewer.unk17A;
                 if (viewer.unk286 == 16) {
                     area_state.hooks->player_died();
-                    func_80021994(255, 255, 255, viewer.unk286 << 8, 2);
+                    fade_add_color(255, 255, 255, viewer.unk286 << 8, 2);
                 }
             } else {
-                func_80021994(255, 255, 255, 4096, 2);
+                fade_add_color(255, 255, 255, 4096, 2);
                 if (viewer.unk286 == 20) {
                     RECT clear = {0, 0, 320, 480};
 

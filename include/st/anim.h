@@ -127,6 +127,9 @@ void anim_record_compose(StAnimRecord *rec);
 void anim_list_compose(void);
 int anim_set_pose(StAnimSet **setp, int id, int clip, u_long frame);
 int anim_prepare_any(void **slotp, int id, int clip, int frame);
+/* VS.EXE has its own port under this name, with another signature; VS units define VS_EXE. */
+#ifndef VS_EXE
 void anim_set_node_vertex(StAnimSet *set, int id, int node, int index, VECTOR *out);
+#endif
 
 #endif

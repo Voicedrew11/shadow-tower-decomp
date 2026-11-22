@@ -124,7 +124,7 @@ void func_801ed594(void)
         d46->unk02 = 0;
         DAT_801cba08.unk1444.word |= 0x100;
     } else if (fdat_801edcd4 == 2) {
-        anim_set_node_vertex(*(StAnimSet **)d46->unk44, func_80023208(d46->unk0a), 0, 0x23, &v1);
+        anim_set_node_vertex(*(StAnimSet **)d46->unk44, object_model_slot(d46->unk0a), 0, 0x23, &v1);
         c28->unk08.vx = d46->unk24.vx + v1.vx;
         c28->unk08.vy = d46->unk24.vy + v1.vy;
         c28->unk08.vz = d46->unk24.vz + v1.vz - 0x12;
@@ -138,7 +138,7 @@ void func_801ed594(void)
         d2->unk02 = 0;
         DAT_801cba08.unk1444.word |= 0x200;
     } else if (fdat_801edcd8 == 2) {
-        anim_set_node_vertex(*(StAnimSet **)d2->unk44, func_80023208(d2->unk0a), 0, 0x23, &v2);
+        anim_set_node_vertex(*(StAnimSet **)d2->unk44, object_model_slot(d2->unk0a), 0, 0x23, &v2);
         c29->unk08.vx = d2->unk24.vx + v2.vx;
         c29->unk08.vy = d2->unk24.vy + v2.vy;
         c29->unk08.vz = d2->unk24.vz + v2.vz - 0x12;
@@ -215,7 +215,7 @@ void func_801edbd0(int which)
             item->unk08.vz += step;
         if (item->unk08.vz > end)
             item->unk08.vz = end;
-        func_80026dd4(NULL, NULL, 0);
+        world_run_frame(NULL, NULL, 0);
     }
     func_80057d58();
 }

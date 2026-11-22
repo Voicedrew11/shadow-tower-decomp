@@ -75,7 +75,7 @@ void func_801ed9cc(int gate)
         slot = e->unk0B + 128;
         fdat_801ed410(e);
         if (world_state.unk834C[slot] == NULL)
-            func_800237a8(2, index * 5, slot, e->unk0C & 0xf);
+            creature_model_load(2, index * 5, slot, e->unk0C & 0xf);
         e->unk36 = -1;
         e->unk1C.bytes[2] &= 0xf2;
         fdat_801eb7b4(e, 9);

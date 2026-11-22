@@ -27,7 +27,7 @@ typedef struct {
  * (high nibble: row flags 0x10..0x80, low nibble: column flags 1..4) and
  * the environments. 0..11 are the row/column grid lighting_grid_index indexes,
  * 12..18 the special selections of lighting_select, 43 and 44 the current
- * and blend-start environments, 45..47 func_80017d28's blend targets.
+ * and blend-start environments, 45..47 lighting_load_gte's blend targets.
  */
 typedef struct {
     u8 unk0;

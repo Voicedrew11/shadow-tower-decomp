@@ -41,7 +41,7 @@ typedef struct {
     MeshHeader *header;  /* 0x20 */
     u8 *normals;         /* 0x24 */
     u8 unk28[4];         /* 0x28 */
-    u_long *unk2C;       /* 0x2c: func_80017cc4's three screen-point words */
+    u_long *unk2C;       /* 0x2c: mesh_nclip_triangle's three screen-point words */
     u_long *unk30;       /* 0x30 */
     u_long *unk34;       /* 0x34 */
     u_long *unk38;       /* 0x38: world_project_parts' output start for the current part */
@@ -80,7 +80,7 @@ typedef struct {
     u8 unkB8[4];         /* 0xb8 */
     long model_t[3];     /* 0xbc: st.model_draw's model translation (the MATRIX's t) */
     u8 unkC8[16];        /* 0xc8: block tag per slot (low four bits) */
-    SVECTOR unkD8;       /* 0xd8: rotation func_800241d0 hands model_draw */
+    SVECTOR unkD8;       /* 0xd8: rotation world_draw_creatures hands model_draw */
     s32 unkE0;           /* 0xe0: a position view_point_in_near_cone tests (x, y, z) */
     s32 unkE4;           /* 0xe4 */
     s32 unkE8;           /* 0xe8 */
@@ -121,7 +121,7 @@ typedef struct {
     u8 unk210[0x34];     /* 0x210 */
     u32 unk244[0x26];    /* 0x244: object passes clear 4..75 words (another phase) */
     u8 unk2DC[0xb8];     /* 0x2dc: the menu screens' fields in their phase (MenuScratch, st/menu.h) */
-    StLight *unk394;     /* 0x394: lighting environment func_80017d28 blends toward */
+    StLight *unk394;     /* 0x394: lighting environment lighting_load_gte blends toward */
     u8 unk398[0x2c];     /* 0x398 */
     StLight *light;      /* 0x3c4: the world renderers' lighting environment */
 } ScratchPad;

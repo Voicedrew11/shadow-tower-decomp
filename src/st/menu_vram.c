@@ -116,7 +116,7 @@ void func_80063954(void)
         || (DAT_801e0d28[3] != viewer.unk38[17] && viewer.unk38[17] != 0xffff)
         || (DAT_801e0d28[4] != viewer.unk38[6] && viewer.unk38[6] != 0xffff)
         || (DAT_801e0d28[5] != viewer.unk38[12] && viewer.unk38[12] != 0xffff))
-        func_80021158();
+        loading_screen_show();
     if (DAT_801e0d28[0] != viewer.unk38[3] || DAT_801e0d28[1] != viewer.unk38[4]) {
         func_8003f12c(viewer.unk38[3], 0, 1);
         func_8003f12c(viewer.unk38[4], 2, 1);
@@ -129,6 +129,6 @@ void func_80063954(void)
         func_8003ee38(viewer.unk38[6], 0);
     if (DAT_801e0d28[5] != viewer.unk38[12])
         func_8003ee38(viewer.unk38[12], 1);
-    func_800214a4();
+    loading_screen_end();
     viewer.unk38[15] = 0xffff;
 }

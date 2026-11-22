@@ -35,19 +35,19 @@ extern StHudSprite hud_sprites[];
 /* Nonzero while the HUD is shown. */
 
 /* src/st/hud.c */
-void func_80025c24();
-void func_80025e00();
-void func_80026020();
-void func_80026228(int value, int first, u8 width);
-void func_80026508(void);
-void func_80026964(u8 first);
-void func_80026a88(short value);
-void func_80026afc(VECTOR *pos, SVECTOR *rot);
+void hud_draw_sprite();
+void hud_draw_sprite_scaled();
+void hud_draw_rect();
+void hud_set_number(int value, int first, u8 width);
+void hud_update(void);
+void hud_draw_records(u8 first);
+void hud_queue_damage_number(short value);
+void world_render_frame(VECTOR *pos, SVECTOR *rot);
 /* Returns int as far as its callers can tell: FDAT_272's func_801eec74 only
  * matches when this call has a value (reload then keeps v0 free). Nothing
  * uses the result. */
-int func_80026dd4(VECTOR *pos, SVECTOR *rot, int arg);
-void func_80026e04(void);
-void func_80026e90(void);
+int world_run_frame(VECTOR *pos, SVECTOR *rot, int arg);
+void gfx_store_screen(void);
+void gfx_restore_buffers(void);
 
 #endif

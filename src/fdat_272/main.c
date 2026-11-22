@@ -616,7 +616,7 @@ void func_801ee610(void)
         anim_get_file(kind->unk4 + 588, &file);
         if (file != NULL)
             c28->unk08.vz += 36;
-        func_80026dd4(NULL, NULL, 0);
+        world_run_frame(NULL, NULL, 0);
     }
 item_placed:
     step = *speed * 4;
@@ -636,7 +636,7 @@ item_placed:
         else
             d16->unk10 = next;
         c28->unk08.vz += 12;
-        func_80026dd4(NULL, NULL, 0);
+        world_run_frame(NULL, NULL, 0);
     }
 }
 
@@ -666,7 +666,7 @@ void func_801ee7d4(void)
             e51->unk2A = 0xfff;
         if ((short)e50->unk2A >= 0x1000)
             e50->unk2A = 0xfff;
-        func_80026dd4(NULL, NULL, 0);
+        world_run_frame(NULL, NULL, 0);
     } while ((short)e51->unk2A != 0xfff);
     if (d19->unk0C == 11)
         d19->unk0C = 12;
@@ -674,7 +674,7 @@ void func_801ee7d4(void)
     while (n--) {
         viewer.unk278.vx += 16;
         viewer.unk268 = viewer.unk278.vx + viewer.unk280.halves[0] + viewer.unk288 + viewer.unk290;
-        func_80026dd4(NULL, (SVECTOR *)&viewer.unk268, 0);
+        world_run_frame(NULL, (SVECTOR *)&viewer.unk268, 0);
     }
 }
 
@@ -746,7 +746,7 @@ void func_801eead8(void)
             item->unk08.vx += step;
         if (item->unk08.vx > top)
             item->unk08.vx = top;
-        func_80026dd4(NULL, NULL, 0);
+        world_run_frame(NULL, NULL, 0);
     }
     item->unk2D += 2;
 }
@@ -768,7 +768,7 @@ void func_801eebb4(void)
         d->unk10 += step;
         if (d->unk10 >= 0x1000)
             d->unk10 = 0xfff;
-        func_80026dd4(NULL, NULL, 0);
+        world_run_frame(NULL, NULL, 0);
     } while (d->unk10 != 0xfff);
     d->unk0C = 0xff;
 }
@@ -804,7 +804,7 @@ void func_801eec74(void)
         viewer.unk268 = viewer.unk278.vx + viewer.unk280.halves[0] + viewer.unk288 + viewer.unk290;
         viewer.unk278.vy = (from.vy * n + to.vy * (total - n)) / total;
         viewer.unk26A = viewer.unk278.vy + viewer.unk280.halves[1] + viewer.unk28A + viewer.unk292;
-        func_80026dd4(NULL, (SVECTOR *)&viewer.unk268, 0);
+        world_run_frame(NULL, (SVECTOR *)&viewer.unk268, 0);
         n--;
     } while ((short)e->unk2A != 0xfff);
     e->unk70 |= 0x2000000;
@@ -838,7 +838,7 @@ void func_801eeeb4(void)
         c->unk08.vx = e->unk74.vx - v.vx;
         c->unk08.vy = e->unk74.vy + v.vy;
         c->unk08.vz = e->unk74.vz - v.vz;
-        func_80026dd4(NULL, &viewer.unk278, 0);
+        world_run_frame(NULL, &viewer.unk278, 0);
     } while ((s16)e->unk2A != 0xfff);
     c->unk22 = 2;
     viewer.unk268 = viewer.unk278.vx + viewer.unk280.halves[0] + viewer.unk288 + viewer.unk290;
@@ -868,7 +868,7 @@ void func_801ef07c(void)
             fdat_801eb814(0x400, 0x80);
         if ((short)e->unk2A > 0xdfc)
             e->unk74.vx += 0x40;
-        func_80026dd4(NULL, NULL, 0);
+        world_run_frame(NULL, NULL, 0);
     } while ((short)e->unk2A != 0xfff);
     fdat_801eb7b4(e, 1);
     do {
@@ -877,7 +877,7 @@ void func_801ef07c(void)
         if ((short)e->unk2A > 0x1000)
             e->unk2A = 0;
         e->unk74.vx += 0x40;
-        func_80026dd4(NULL, NULL, 0);
+        world_run_frame(NULL, NULL, 0);
     } while (e->unk74.vx <= 0x3f000);
 }
 

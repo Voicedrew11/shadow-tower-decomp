@@ -40,7 +40,7 @@ void func_801ed9e8(void)
         e->unk2A += e->unkB0;
         if ((short)e->unk2A >= 0x1000)
             goto animation_done;
-        func_80026dd4(NULL, NULL, 0);
+        world_run_frame(NULL, NULL, 0);
     }
 animation_done:
     fdat_801ed388(e, 0, 0);

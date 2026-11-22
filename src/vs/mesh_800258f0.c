@@ -19,7 +19,7 @@
 #include <vs/funcs.h>
 
 ADDRESS(0x800258f0, 0x1f0)
-void func_800258f0(int count, VsFaceF3 *face, u_long *ot)
+void mesh_draw_f3(int count, VsFaceF3 *face, u_long *ot)
 {
     VsScratchPad *sp = VS_SCRATCHPAD;
     u_long *start;
@@ -63,7 +63,7 @@ void func_800258f0(int count, VsFaceF3 *face, u_long *ot)
 }
 
 ADDRESS(0x80025ae0, 0x1ec)
-void func_80025ae0(int count, VsFaceF4 *face, u_long *ot)
+void mesh_draw_f4(int count, VsFaceF4 *face, u_long *ot)
 {
     VsScratchPad *sp = VS_SCRATCHPAD;
     u_long *start;
@@ -110,7 +110,7 @@ void func_80025ae0(int count, VsFaceF4 *face, u_long *ot)
 }
 
 ADDRESS(0x80025ccc, 0x1f4)
-void func_80025ccc(int count, VsFaceG3 *face, u_long *ot)
+void mesh_draw_g3(int count, VsFaceG3 *face, u_long *ot)
 {
     VsScratchPad *sp = VS_SCRATCHPAD;
     u_long *start;
@@ -154,7 +154,7 @@ void func_80025ccc(int count, VsFaceG3 *face, u_long *ot)
 }
 
 ADDRESS(0x80025ec0, 0x238)
-void func_80025ec0(int count, VsFaceG4 *face, u_long *ot)
+void mesh_draw_g4(int count, VsFaceG4 *face, u_long *ot)
 {
     VsScratchPad *sp = VS_SCRATCHPAD;
     u_long *start;
@@ -206,7 +206,7 @@ void func_80025ec0(int count, VsFaceG4 *face, u_long *ot)
 }
 
 ADDRESS(0x800260f8, 0x22c)
-void func_800260f8(int count, MeshFaceFT3 *face, u_long *ot)
+void mesh_draw_ft3(int count, MeshFaceFT3 *face, u_long *ot)
 {
     VsScratchPad *sp = VS_SCRATCHPAD;
     u_long *start;
@@ -253,7 +253,7 @@ void func_800260f8(int count, MeshFaceFT3 *face, u_long *ot)
 }
 
 ADDRESS(0x80026324, 0x248)
-void func_80026324(int count, MeshFaceFT4 *face, u_long *ot)
+void mesh_draw_ft4(int count, MeshFaceFT4 *face, u_long *ot)
 {
     VsScratchPad *sp = VS_SCRATCHPAD;
     u_long *start;
@@ -304,7 +304,7 @@ void func_80026324(int count, MeshFaceFT4 *face, u_long *ot)
 }
 
 ADDRESS(0x8002656c, 0x25c)
-void func_8002656c(int count, MeshFaceGT3 *face, u_long *ot)
+void mesh_draw_gt3(int count, MeshFaceGT3 *face, u_long *ot)
 {
     VsScratchPad *sp = VS_SCRATCHPAD;
     u_long *start;
@@ -351,7 +351,7 @@ void func_8002656c(int count, MeshFaceGT3 *face, u_long *ot)
 }
 
 ADDRESS(0x800267c8, 0x2c0)
-void func_800267c8(int count, MeshFaceGT4 *face, u_long *ot)
+void mesh_draw_gt4(int count, MeshFaceGT4 *face, u_long *ot)
 {
     VsScratchPad *sp = VS_SCRATCHPAD;
     u_long *start;
@@ -407,7 +407,7 @@ void func_800267c8(int count, MeshFaceGT4 *face, u_long *ot)
 }
 
 ADDRESS(0x80026a88, 0x184)
-void func_80026a88(int count, VsFaceF3 *face, u_long *ot)
+void mesh_draw_f3_nccs(int count, VsFaceF3 *face, u_long *ot)
 {
     VsScratchPad *sp = VS_SCRATCHPAD;
     u_long *start;
@@ -450,7 +450,7 @@ void func_80026a88(int count, VsFaceF3 *face, u_long *ot)
 }
 
 ADDRESS(0x80026c0c, 0x1b4)
-void func_80026c0c(int count, VsFaceF4 *face, u_long *ot)
+void mesh_draw_f4_nccs(int count, VsFaceF4 *face, u_long *ot)
 {
     VsScratchPad *sp = VS_SCRATCHPAD;
     u_long *start;
@@ -496,7 +496,7 @@ void func_80026c0c(int count, VsFaceF4 *face, u_long *ot)
 }
 
 ADDRESS(0x80026dc0, 0x1bc)
-void func_80026dc0(int count, VsFaceG3 *face, u_long *ot)
+void mesh_draw_g3_nccs(int count, VsFaceG3 *face, u_long *ot)
 {
     VsScratchPad *sp = VS_SCRATCHPAD;
     u_long *start;
@@ -539,7 +539,7 @@ void func_80026dc0(int count, VsFaceG3 *face, u_long *ot)
 }
 
 ADDRESS(0x80026f7c, 0x21c)
-void func_80026f7c(int count, VsFaceG4 *face, u_long *ot)
+void mesh_draw_g4_nccs(int count, VsFaceG4 *face, u_long *ot)
 {
     VsScratchPad *sp = VS_SCRATCHPAD;
     u_long *start;
@@ -589,7 +589,7 @@ void func_80026f7c(int count, VsFaceG4 *face, u_long *ot)
 }
 
 ADDRESS(0x80027198, 0x268)
-void func_80027198(int count, MeshFaceFT3 *face, u_long *ot)
+void mesh_draw_ft3_nccs(int count, MeshFaceFT3 *face, u_long *ot)
 {
     VsScratchPad *sp = VS_SCRATCHPAD;
     u_long *start;
@@ -644,7 +644,7 @@ void func_80027198(int count, MeshFaceFT3 *face, u_long *ot)
 }
 
 ADDRESS(0x80027400, 0x298)
-void func_80027400(int count, MeshFaceFT4 *face, u_long *ot)
+void mesh_draw_ft4_nccs(int count, MeshFaceFT4 *face, u_long *ot)
 {
     VsScratchPad *sp = VS_SCRATCHPAD;
     u_long *start;
@@ -703,7 +703,7 @@ void func_80027400(int count, MeshFaceFT4 *face, u_long *ot)
 }
 
 ADDRESS(0x80027698, 0x260)
-void func_80027698(int count, MeshFaceGT3 *face, u_long *ot)
+void mesh_draw_gt3_nccs(int count, MeshFaceGT3 *face, u_long *ot)
 {
     VsScratchPad *sp = VS_SCRATCHPAD;
     u_long *start;
@@ -756,7 +756,7 @@ void func_80027698(int count, MeshFaceGT3 *face, u_long *ot)
 }
 
 ADDRESS(0x800278f8, 0x2ac)
-void func_800278f8(int count, MeshFaceGT4 *face, u_long *ot)
+void mesh_draw_gt4_nccs(int count, MeshFaceGT4 *face, u_long *ot)
 {
     VsScratchPad *sp = VS_SCRATCHPAD;
     u_long *start;
@@ -821,15 +821,15 @@ void func_800278f8(int count, MeshFaceGT4 *face, u_long *ot)
 /* Draws part `part` of the scratchpad model with the four renderers above
  * (ST.EXE's mesh_draw_part_nccs without its tint and far-colour setup). */
 ADDRESS(0x80027ba4, 0xc0)
-void func_80027ba4(u_short part)
+void mesh_draw_part_nccs(u_short part)
 {
     VsScratchPad *sp = VS_SCRATCHPAD;
 
     sp->header = (MeshHeader *)(sp->model + 12) + part;
     sp->normals = sp->model + 12 + sp->header->normals;
     sp->faces = sp->model + 12 + sp->header->faces;
-    func_80027198(sp->header->n_ft3, (MeshFaceFT3 *)sp->faces, sp->ot);
-    func_80027400(sp->header->n_ft4, (MeshFaceFT4 *)sp->faces, sp->ot);
-    func_80027698(sp->header->n_gt3, (MeshFaceGT3 *)sp->faces, sp->ot);
-    func_800278f8(sp->header->n_gt4, (MeshFaceGT4 *)sp->faces, sp->ot);
+    mesh_draw_ft3_nccs(sp->header->n_ft3, (MeshFaceFT3 *)sp->faces, sp->ot);
+    mesh_draw_ft4_nccs(sp->header->n_ft4, (MeshFaceFT4 *)sp->faces, sp->ot);
+    mesh_draw_gt3_nccs(sp->header->n_gt3, (MeshFaceGT3 *)sp->faces, sp->ot);
+    mesh_draw_gt4_nccs(sp->header->n_gt4, (MeshFaceGT4 *)sp->faces, sp->ot);
 }

@@ -873,10 +873,10 @@ void func_800335e8(void)
 
             if (f->unk4DF18.unk14A[e->unk4D].unk2 == -32768) {
                 if (f->unk4DF10 == 2) {
-                    func_80028d94(e->unk4C, f->unk4DEE8, f->unk4DEEA,
+                    anim_get_vertex(e->unk4C, f->unk4DEE8, f->unk4DEEA,
                                   f->unk4DF18.unk14A[e->unk4D].unk6, &v);
                 } else {
-                    func_800256bc(e->unk4C, f->unk4DF18.unk14A[e->unk4D].unk4,
+                    anim_set_node_vertex(e->unk4C, f->unk4DF18.unk14A[e->unk4D].unk4,
                                   f->unk4DF18.unk14A[e->unk4D].unk6, &vec);
                     v.vx = vec.vx;
                     v.vy = vec.vy;
@@ -1363,7 +1363,7 @@ void func_800353d0(u8 *model, VECTOR *pos, SVECTOR *rot, SVECTOR *scale, MATRIX 
     sp->rgb.g = light / 32;
     sp->rgb.b = light / 32;
     sp->rgb.cd = 0;
-    func_80027ba4(part);
+    mesh_draw_part_nccs(part);
     vs_gfx_state.packet->cur = sp->prim;
     vs_gfx_state.packet->end = sp->prim_end;
     vs_gfx_state.unk831C[0] = sp->z_ot;
@@ -1373,7 +1373,7 @@ void func_800353d0(u8 *model, VECTOR *pos, SVECTOR *rot, SVECTOR *scale, MATRIX 
 }
 
 /* Draws every live effect with a model (VS's copy of ST.EXE's
- * func_800255f0, src/st/objects2.c): kind 0 through the camera, kind 4
+ * world_draw_effects_placements, src/st/objects2.c): kind 0 through the camera, kind 4
  * without a view. */
 ADDRESS(0x80035b68, 0x204)
 void func_80035b68(void)

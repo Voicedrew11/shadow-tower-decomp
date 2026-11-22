@@ -26,7 +26,7 @@ typedef struct {
     MeshHeader *header;  /* 0x24 (ST 0x20) */
     u8 *normals;         /* 0x28 (ST 0x24) */
     u8 unk2C[0x30 - 0x2c];
-    u_long *unk30;       /* 0x30: func_8002588c's three screen-point words (ST 0x2c) */
+    u_long *unk30;       /* 0x30: mesh_nclip_triangle's three screen-point words (ST 0x2c) */
     u_long *unk34;
     u_long *unk38;
     u8 unk3C[8];
@@ -35,7 +35,7 @@ typedef struct {
     u8 *local_vertices;  /* 0x4c: SVECTOR model-space vertices (ST 0x48) */
     u8 unk50[0x64 - 0x50];
     CVECTOR rgb;         /* 0x64: the renderers' NCCS input colour; .cd carries the GPU code (ST 0x60) */
-    s32 unk68;           /* 0x68: the depth-cue near depth (func_80025204) */
+    s32 unk68;           /* 0x68: the depth-cue near depth (fighter_draw_skeletal) */
     s32 unk6C;           /* 0x6c: and far depth */
     long opz;            /* 0x70: NCLIP result */
     long nclip;          /* 0x74: the renderers' NCLIP result */

@@ -13,7 +13,7 @@
  * calls in func_80050768 pass its last three arguments as sign-extended
  * bytes, as calls through an implicit declaration do (the headers leave it
  * out under this define; it is declared below, before func_80052894).
- * Likewise the HUD drawer func_80026afc (st/hud.h is not included): every
+ * Likewise the HUD drawer world_render_frame (st/hud.h is not included): every
  * call here sees it as a function returning int, implicitly at first and
  * then through the declaration before func_8005335c. */
 #define ST_FUNC_80045044_OLD_STYLE
@@ -384,12 +384,12 @@ void func_800500ac(int mode, int start, int end, int delta)
         c = v * v >> 16;
         if (c > 255)
             c = 255;
-        func_80021994(c, c, c, 4096, mode);
+        fade_add_color(c, c, c, 4096, mode);
         cd_wait_idle();
         func_80058620();
         func_80045ffc();
         func_8003e734(&pos, &rot);
-        func_80026afc(&pos, &rot);
+        world_render_frame(&pos, &rot);
         player_update_status(0);
         if (v == end)
             break;
@@ -1550,7 +1550,7 @@ int func_80053174(VisLists *req, int unused)
 /* Draws the HUD (src/st/hud.c). Retail's caller saw it without a
  * declaration, as a function returning a word: nothing reads the result,
  * but v0 counts as used, which keeps it out of reach of reload. */
-int func_80026afc();
+int world_render_frame();
 
 /* Shows entry c in front of the viewer until a button takes it (bit 10)
  * or puts it back (bit 11, unless forced). */
@@ -1644,7 +1644,7 @@ void func_8005335c(Vis48 *c, int forced)
             c->unk1A = r.vy;
             c->unk1C = (i * save.unk1C + (8 - i) * r.vz) >> 3;
         }
-        func_80026afc(0, 0);
+        world_render_frame(0, 0);
         player_update_status(0);
         if (i > 0)
             i--;
@@ -1664,7 +1664,7 @@ void func_8005335c(Vis48 *c, int forced)
             c->unk1A = (i * r.vy + (8 - i) * r2.vy) >> 3;
             c->unk1C = r2.vz;
         }
-        func_80026afc(0, 0);
+        world_render_frame(0, 0);
         player_update_status(0);
     }
     c->unk2D += 8;
