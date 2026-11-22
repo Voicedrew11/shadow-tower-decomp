@@ -3,19 +3,19 @@
  * fixed things of an area) and table C (items lying in the areas) as one
  * translation unit (WIP module, -G8: the two shake amounts are
  * $gp-relative statics): loading and running table B, the per-frame pass
- * func_80050768, warps, table C and its pick-ups, 0x8004f53c..0x80053d38.
- * Retail's switch tables of vis_b (0x800125d0), func_80050768 and
- * func_80053aa4 follow one another, each 8-aligned relative to
+ * objects_update, warps, table C and its pick-ups, 0x8004f53c..0x80053d38.
+ * Retail's switch tables of vis_b (0x800125d0), objects_update and
+ * ground_items_update follow one another, each 8-aligned relative to
  * 0x800125d0, which is 4 mod 8 relative to vis_attack's tables before
  * them: one object's read-only data.
  */
 /* The area request's prototype is not in scope before vis_c's code: the
- * calls in func_80050768 pass its last three arguments as sign-extended
+ * calls in objects_update pass its last three arguments as sign-extended
  * bytes, as calls through an implicit declaration do (the headers leave it
- * out under this define; it is declared below, before func_80052894).
+ * out under this define; it is declared below, before player_warp).
  * Likewise the HUD drawer world_render_frame (st/hud.h is not included): every
  * call here sees it as a function returning int, implicitly at first and
- * then through the declaration before func_8005335c. */
+ * then through the declaration before ground_item_pick_up. */
 #define ST_AREA_REQUEST_LOAD_OLD_STYLE
 #include <kf/lib/address.h>
 #include <kf/lib/types.h>
@@ -41,7 +41,7 @@ RODATA(0x800125d0, 0x17c)
  * request's and shortened along its heading, reaches the request at a
  * matching height; -1 when none. */
 ADDRESS(0x8004f53c, 0x1dc)
-int func_8004f53c(VisLists *req)
+int object_find_in_reach(VisLists *req)
 {
     Vis88 *e = vis_table_b.entries;
     Vis24 *r;
@@ -81,7 +81,7 @@ int func_8004f53c(VisLists *req)
  * the request at its height and, for a facing record, faces the viewer;
  * -1 when none. */
 ADDRESS(0x8004f718, 0x25c)
-int func_8004f718(int start, VisLists *req)
+int object_find_usable(int start, VisLists *req)
 {
     Vis88 *e = &vis_table_b.entries[start];
     Vis24 *r;
@@ -126,7 +126,7 @@ int func_8004f718(int start, VisLists *req)
 
 /* Starts kind `kind` on an idle entry. */
 ADDRESS(0x8004f974, 0x20)
-void func_8004f974(e, kind)
+void object_start_kind(e, kind)
     Vis88 *e;
     u8 kind;
 {
@@ -138,7 +138,7 @@ void func_8004f974(e, kind)
 
 /* A free entry among `n` from `start`; exits when there is none. */
 ADDRESS(0x8004f994, 0xa4)
-Vis88 *func_8004f994(int start, int n, int now)
+Vis88 *object_alloc(int start, int n, int now)
 {
     Vis88 *e = &vis_table_b.entries[start];
     int oldest = 0;
@@ -162,7 +162,7 @@ Vis88 *func_8004f994(int start, int n, int now)
 
 /* Flips the switches keyed `key`. */
 ADDRESS(0x8004fa38, 0x150)
-void func_8004fa38(key)
+void objects_toggle_by_link_id(key)
     u8 key;
 {
     Vis88 *e = vis_table_b.entries;
@@ -217,7 +217,7 @@ void func_8004fa38(key)
 /* For a switch-like entry at rest: 2 when it has no key, 1 (and the key is
  * used up) when `id` is its key item, 3 otherwise; 0 for other entries. */
 ADDRESS(0x8004fb88, 0x84)
-int func_8004fb88(Vis88 *e, int id)
+int object_try_key(Vis88 *e, int id)
 {
     switch (e->unk05) {
     case 0:
@@ -240,7 +240,7 @@ int func_8004fb88(Vis88 *e, int id)
 
 /* Offers item `key` to every entry. */
 ADDRESS(0x8004fc0c, 0x78)
-void func_8004fc0c(key)
+void objects_try_key(key)
     u8 key;
 {
     Vis88 *e = vis_table_b.entries;
@@ -250,7 +250,7 @@ void func_8004fc0c(key)
         return;
     i = 240;
     while (i--) {
-        func_8004fb88(e, key);
+        object_try_key(e, key);
         e++;
     }
 }
@@ -264,7 +264,7 @@ void func_8004fc84(void)
 /* Whether the viewer's cell lies in the w x d cells at (x, z) and, unless
  * y is 0x8000, within 4096 below height y. */
 ADDRESS(0x8004fc94, 0x94)
-int func_8004fc94(int x, int z, int w, int d, int y)
+int player_in_cell_rect(int x, int z, int w, int d, int y)
 {
     int cx = (viewer.position.vx + 0x800) >> 12;
     int cz = (viewer.position.vz + 0x800) >> 12;
@@ -282,7 +282,7 @@ int func_8004fc94(int x, int z, int w, int d, int y)
 
 /* The same test for the point half a w x d box past the viewer. */
 ADDRESS(0x8004fd28, 0xa8)
-int func_8004fd28(int x, int z, int w, int d, int y)
+int player_in_centred_rect(int x, int z, int w, int d, int y)
 {
     int px = viewer.position.vx + w / 2;
     int pz = viewer.position.vz + d / 2;
@@ -304,7 +304,7 @@ int func_8004fd28(int x, int z, int w, int d, int y)
  * src) over `steps` calls, fading it in when `fade`; returns 1 when done.
  */
 ADDRESS(0x8004fdd0, 0x2dc)
-int func_8004fdd0(Vis88 *src, Vis88 *e, SVECTOR *from, SVECTOR *to, int fade, int steps)
+int object_move_child(Vis88 *src, Vis88 *e, SVECTOR *from, SVECTOR *to, int fade, int steps)
 {
     VECTOR a;
     VECTOR b;
@@ -319,7 +319,7 @@ int func_8004fdd0(Vis88 *src, Vis88 *e, SVECTOR *from, SVECTOR *to, int fade, in
         else
             *(u8 *)&src->unk50 = steps - 1;
         src->unk0C = 1;
-        func_8004ee00(e);
+        object_reset(e);
         e->unk05 = 112;
         e->unk01 = src->unk01;
         switch (e->unk0a) {
@@ -372,7 +372,7 @@ int func_8004fdd0(Vis88 *src, Vis88 *e, SVECTOR *from, SVECTOR *to, int fade, in
 /* Runs frames while the screen fades from level `start` to `end` by
  * `delta`. */
 ADDRESS(0x800500ac, 0xc4)
-void func_800500ac(int mode, int start, int end, int delta)
+void fade_run_frames(int mode, int start, int end, int delta)
 {
     VECTOR pos;
     SVECTOR rot;
@@ -399,7 +399,7 @@ void func_800500ac(int mode, int start, int end, int delta)
 
 /* Shifts the viewer, the effects and the table A entries by (dx, dy, dz). */
 ADDRESS(0x80050170, 0x118)
-void func_80050170(int dx, int dy, int dz)
+void world_shift_position(int dx, int dy, int dz)
 {
     StEffect *f = effects.slots;
     Vis212 *e;
@@ -433,7 +433,7 @@ void func_80050170(int dx, int dy, int dz)
 /* Spawns a debris entry of `kind` beside src, `size` units out along its
  * yaw turned by `angle`. */
 ADDRESS(0x80050288, 0x1e0)
-Vis88 *func_80050288(src, kind, state, arg3, size, angle, ox, oy, oz)
+Vis88 *object_spawn_part(src, kind, state, arg3, size, angle, ox, oy, oz)
     Vis88 *src;
     u8 kind;
     u16 state;
@@ -444,7 +444,7 @@ Vis88 *func_80050288(src, kind, state, arg3, size, angle, ox, oy, oz)
     int oy;
     int oz;
 {
-    Vis88 *e = func_8004f994(0, 300, -1);
+    Vis88 *e = object_alloc(0, 300, -1);
     int c;
     int n;
 
@@ -478,44 +478,44 @@ Vis88 *func_80050288(src, kind, state, arg3, size, angle, ox, oy, oz)
 
 /* Breaks src into four kind-175 pieces. */
 ADDRESS(0x80050468, 0xfc)
-void func_80050468(e, arg)
+void object_spawn_side_parts(e, arg)
     Vis88 *e;
     u16 arg;
 {
-    func_80050288(e, 175, 4, arg, 4, 0x400, 0, 0x500, 0);
-    func_80050288(e, 175, 4, arg, 3, 0x400, 0, 0x500, 0);
-    func_80050288(e, 175, 4, arg, 2, 0x400, 0, 0x500, 0);
-    func_80050288(e, 175, 4, arg, 1, 0x400, 0, 0x500, 0);
+    object_spawn_part(e, 175, 4, arg, 4, 0x400, 0, 0x500, 0);
+    object_spawn_part(e, 175, 4, arg, 3, 0x400, 0, 0x500, 0);
+    object_spawn_part(e, 175, 4, arg, 2, 0x400, 0, 0x500, 0);
+    object_spawn_part(e, 175, 4, arg, 1, 0x400, 0, 0x500, 0);
     e->unk05 = 0xff;
 }
 
 /* The same with state 6, offset pieces. */
 ADDRESS(0x80050564, 0x108)
-void func_80050564(e, arg)
+void object_spawn_forward_parts(e, arg)
     Vis88 *e;
     u16 arg;
 {
-    func_80050288(e, 175, 6, arg, 4, 0x400, 0x500, 2000, 0x500);
-    func_80050288(e, 175, 6, arg, 3, 0x400, 0x500, 2000, 0x500);
-    func_80050288(e, 175, 6, arg, 2, 0x400, 0x500, 2000, 0x500);
-    func_80050288(e, 175, 6, arg, 1, 0x400, 0x500, 2000, 0x500);
+    object_spawn_part(e, 175, 6, arg, 4, 0x400, 0x500, 2000, 0x500);
+    object_spawn_part(e, 175, 6, arg, 3, 0x400, 0x500, 2000, 0x500);
+    object_spawn_part(e, 175, 6, arg, 2, 0x400, 0x500, 2000, 0x500);
+    object_spawn_part(e, 175, 6, arg, 1, 0x400, 0x500, 2000, 0x500);
     e->unk05 = 0xff;
 }
 
 /* Four kind-171 pieces with state 8. */
 ADDRESS(0x8005066c, 0xfc)
-void func_8005066c(e, arg)
+void object_spawn_side_parts_alt(e, arg)
     Vis88 *e;
     u16 arg;
 {
-    func_80050288(e, 171, 8, arg, 4, 0x400, 0, 0x500, 0);
-    func_80050288(e, 171, 8, arg, 3, 0x400, 0, 0x500, 0);
-    func_80050288(e, 171, 8, arg, 2, 0x400, 0, 0x500, 0);
-    func_80050288(e, 171, 8, arg, 1, 0x400, 0, 0x500, 0);
+    object_spawn_part(e, 171, 8, arg, 4, 0x400, 0, 0x500, 0);
+    object_spawn_part(e, 171, 8, arg, 3, 0x400, 0, 0x500, 0);
+    object_spawn_part(e, 171, 8, arg, 2, 0x400, 0, 0x500, 0);
+    object_spawn_part(e, 171, 8, arg, 1, 0x400, 0, 0x500, 0);
     e->unk05 = 0xff;
 }
 
-/* func_80050768's switch table (a door's swing side). */
+/* objects_update's switch table (a door's swing side). */
 
 /* The shake (x, z) a kind 224 entry gives the view while its entries rise. */
 DATA(0x800881e0, 0x8, ".sbss")
@@ -533,7 +533,7 @@ static SVECTOR DAT_800881e0;
 #define W50(e) (*(u_long *)&(e)->unk50 & 0xffffff)
 
 /* Starts the entry's sound n (its record's sounds start at 208). */
-#define SOUND(e, n) func_8004ed54(e, (e)->unk0a * 3 + (n))
+#define SOUND(e, n) object_play_sound(e, (e)->unk0a * 3 + (n))
 
 /* The moving sound as the entry leaves its rest position. */
 #define START(e, step)                                                         \
@@ -547,7 +547,7 @@ static SVECTOR DAT_800881e0;
  * Updates every table B entry by its kind.
  */
 ADDRESS(0x80050768, 0x212c)
-void func_80050768(void)
+void objects_update(void)
 {
     u16 dmg[9];
     u16 dmg2[9];
@@ -733,7 +733,7 @@ void func_80050768(void)
             switch (e->unk0C) {
             case 0:
                 if (e->unk05 == 51)
-                    func_8004ee48(e->unk4A.snd.unk4C, 0);
+                    ground_item_set_hidden(e->unk4A.snd.unk4C, 0);
                 if (e->unk49 >= 249 && e->unk49 <= 250 && e->unk1C <= 8192)
                     e->unk0C = 1;
                 break;
@@ -741,7 +741,7 @@ void func_80050768(void)
                 if (e->unk10 == 0 && e->unk10 + step * 4 > 0) {
                     SOUND(e, 208);
                     if (e->unk05 == 51)
-                        func_8004ee48(e->unk4A.snd.unk4C, 1);
+                        ground_item_set_hidden(e->unk4A.snd.unk4C, 1);
                 }
                 if (e->unk10 < 3072 && speed + e->unk10 >= 3072)
                     SOUND(e, 210);
@@ -959,7 +959,7 @@ void func_80050768(void)
             break;
         }
         case 3:
-            func_80050468(e, (u16)(240 - i));
+            object_spawn_side_parts(e, (u16)(240 - i));
             break;
         case 4:
         case 8:
@@ -1013,7 +1013,7 @@ void func_80050768(void)
             }
             break;
         case 5:
-            func_80050564(e, (u16)(240 - i));
+            object_spawn_forward_parts(e, (u16)(240 - i));
             break;
         case 6:
             if (e->unk48)
@@ -1061,14 +1061,14 @@ void func_80050768(void)
             }
             break;
         case 7:
-            func_8005066c(e, (u16)(240 - i));
+            object_spawn_side_parts_alt(e, (u16)(240 - i));
             break;
         case 224: {
             Vis212 *a;
             int j;
             int rising;
 
-            if (func_8004fc94(e->unk24.vx >> 12, e->unk24.vz >> 12, 1, 1, e->unk24.vy) == 0
+            if (player_in_cell_rect(e->unk24.vx >> 12, e->unk24.vz >> 12, 1, 1, e->unk24.vy) == 0
                 && area_state.unk0 == 0)
                 break;
             if ((DAT_801cd180.unk2 & DAT_801cd180.unk22[10]) && vis_table_a.unk6169 == 0
@@ -1151,7 +1151,7 @@ void func_80050768(void)
             u8 lit;
             u8 lit2;
 
-            if (func_8004fd28(e->unk24.vx, e->unk24.vz, 3072, 3072, e->unk24.vy) == 0)
+            if (player_in_centred_rect(e->unk24.vx, e->unk24.vz, 3072, 3072, e->unk24.vy) == 0)
                 goto away;
             turn = (viewer.unk26A - e->unk20) & 0xfff;
             if (turn > 2048)
@@ -1177,7 +1177,7 @@ void func_80050768(void)
             y = e->unk4A.snd.unk4A + 64;
             z = e->unk4A.snd.unk4B + 64;
             func_80057c54();
-            func_800500ac(2, 0, 0x1000, 0x100);
+            fade_run_frames(2, 0, 0x1000, 0x100);
             area = e->unk48;
             lit = area;
             lit2 = area;
@@ -1192,7 +1192,7 @@ void func_80050768(void)
             } else {
                 area_request_load(0xff, 0xff, area, 0xff, 0xff, 127, 127, 127, 0, 0, 0);
                 viewer.unk21C = 1;
-                func_8004e2d8();
+                creatures_bind_previous_area();
                 vis_table_a.unk6158[0] = vis_table_a.unk6158[1] = vis_table_a.unk6158[2] =
                     vis_table_a.unk6158[3] = 0xff;
                 vis_table_a.unk6103 = 0xff;
@@ -1228,11 +1228,11 @@ void func_80050768(void)
             vis_collect_sources((VECTOR *)&viewer.position.vx, NULL, NULL);
             if (vis_lists.n_sources)
                 viewer.unk174 = &vis_records[vis_lists.sources[0]];
-            func_8004e324();
-            func_800500ac(2, 0x1000, 0x1000, 0);
+            creatures_update();
+            fade_run_frames(2, 0x1000, 0x1000, 0);
             cd_wait_idle();
             func_80057c54();
-            func_800500ac(2, 0x1000, 0, -0x100);
+            fade_run_frames(2, 0x1000, 0, -0x100);
             if (area < 44)
                 area_request_load(0xff, 0xff, 0xff, lit2, lit, 127, 127, 127, 0, 0, 0);
             lighting_clear_requests();
@@ -1265,7 +1265,7 @@ KF_VALUELESS_S32 area_request_load(u8 a0, u8 a1, u8 a2, u8 a3, u8 a4, s8 f0, s8 
 /* Fades out, loads `to`'s area and places the viewer there, then fades in;
  * `keep` skips re-collecting the visible sources and the light reset. */
 ADDRESS(0x80052894, 0x390)
-void func_80052894(to, keep)
+void player_warp(to, keep)
     StWarp *to;
     u8 keep;
 {
@@ -1287,7 +1287,7 @@ void func_80052894(to, keep)
     y = to->y;
     z = to->z;
     func_80057c54();
-    func_800500ac(2, 0, 0x1000, 0x100);
+    fade_run_frames(2, 0, 0x1000, 0x100);
     area = to->area;
     do {
         cd_wait_frame();
@@ -1300,7 +1300,7 @@ void func_80052894(to, keep)
     } else {
         area_request_load(0xff, 0xff, area, 0xff, 0xff, 127, 127, 127, 0, 0, 0);
         viewer.unk21C = 1;
-        func_8004e2d8();
+        creatures_bind_previous_area();
         vis_table_a.unk6158[0] = vis_table_a.unk6158[1] = vis_table_a.unk6158[2] = vis_table_a.unk6158[3] = 0xff;
         vis_table_a.unk6103 = 0xff;
     }
@@ -1340,12 +1340,12 @@ void func_80052894(to, keep)
         vis_collect_sources((VECTOR *)&viewer.position.vx, NULL, NULL);
         if (vis_lists.n_sources)
             viewer.unk174 = &vis_records[vis_lists.sources[0]];
-        func_8004e324();
+        creatures_update();
     }
-    func_800500ac(2, 0x1000, 0x1000, 0);
+    fade_run_frames(2, 0x1000, 0x1000, 0);
     cd_wait_idle();
     func_80057c54();
-    func_800500ac(2, 0x1000, 0, -0x100);
+    fade_run_frames(2, 0x1000, 0, -0x100);
     if (!keep) {
         area_request_load(0xff, 0xff, 0xff, area, area, 127, 127, 127, 0, 0, 0);
         lighting_clear_requests();
@@ -1356,25 +1356,25 @@ void func_80052894(to, keep)
 
 /* Warps to viewer.unk22C. */
 ADDRESS(0x80052c24, 0x38)
-void func_80052c24(void)
+void player_warp_to_save_point(void)
 {
-    func_80052894((StWarp *)&viewer.unk22C, 0);
+    player_warp((StWarp *)&viewer.unk22C, 0);
     viewer.unk2B = 0;
 }
 
 /* Warps to viewer.unk220 keeping the current sources. */
 ADDRESS(0x80052c5c, 0x48)
-void func_80052c5c(void)
+void player_warp_back(void)
 {
     viewer.unk218 = 5;
     player_update_durability_warning();
-    func_80052894(&viewer.unk220.warp, 1);
+    player_warp(&viewer.unk220.warp, 1);
     DAT_801cd0e4 = 0;
 }
 
 /* Frees every table C entry and clears the group counts and id bits. */
 ADDRESS(0x80052ca4, 0x6c)
-void func_80052ca4(void)
+void ground_items_clear(void)
 {
     Vis48 *c = vis_table_c.entries;
     int i;
@@ -1399,7 +1399,7 @@ void func_80052ca4(void)
 
 /* Unassigns every Vis44 slot. */
 ADDRESS(0x80052d10, 0x30)
-void func_80052d10(void)
+void item_model_slots_clear(void)
 {
     int i = 128;
 
@@ -1410,7 +1410,7 @@ void func_80052d10(void)
 
 /* 0 when id has been collected (ids below 266 keep a bit), else 1. */
 ADDRESS(0x80052d40, 0x58)
-int func_80052d40(int id)
+int item_is_uncollected(int id)
 {
     if (id < 266) {
         if (vis_table_c.unk0070[id / 32] & (1 << (id % 32)))
@@ -1421,7 +1421,7 @@ int func_80052d40(int id)
 
 /* Counts the pick-up of item *id and marks it collected. */
 ADDRESS(0x80052d98, 0xb8)
-void func_80052d98(u16 *id)
+void item_record_pickup(u16 *id)
 {
     DAT_801c7590.counts[*id].count++;
     if (*id == 266)
@@ -1434,7 +1434,7 @@ void func_80052d98(u16 *id)
 
 /* Removes an entry, closing up the rest of its group (32..47 or 48..63). */
 ADDRESS(0x80052e50, 0xe0)
-void func_80052e50(Vis48 *c)
+void ground_item_remove(Vis48 *c)
 {
     int i = ((u8 *)c - (u8 *)vis_table_c.entries) / sizeof(Vis48);
     int n;
@@ -1460,7 +1460,7 @@ void func_80052e50(Vis48 *c)
 /* Loads the first 32 entries from an area file, then drops the collected
  * ones of the 16 from entry 32. */
 ADDRESS(0x80052f30, 0x244)
-void func_80052f30(VisCFileEntry *src)
+void ground_items_load(VisCFileEntry *src)
 {
     Vis48 *c = vis_table_c.entries;
     Vis44 *rec;
@@ -1490,15 +1490,15 @@ void func_80052f30(VisCFileEntry *src)
         vis_table_c.unk0000[0]++;
         if (vis_table_c.unk0094[rec->unk4] == 0xff)
             vis_table_c.unk0094[rec->unk4] = vis_table_c.unk0114++;
-        if (i >= 28 || func_80052d40(c->unk00))
+        if (i >= 28 || item_is_uncollected(c->unk00))
             c->unk22 = 2;
         else
             c->unk22 = 0;
     }
     c = &vis_table_c.entries[32];
     for (i = 0; i < 16; i++) {
-        if (func_80052d40(c->unk00) == 0)
-            func_80052e50(c);
+        if (item_is_uncollected(c->unk00) == 0)
+            ground_item_remove(c);
         else
             c++;
     }
@@ -1507,7 +1507,7 @@ void func_80052f30(VisCFileEntry *src)
 /* The nearest lying item in view of the viewer within the request's reach
  * (its record's radius plus req->unk1C); -1 when none. */
 ADDRESS(0x80053174, 0x1e8)
-int func_80053174(VisLists *req, int unused)
+int ground_item_find_in_reach(VisLists *req, int unused)
 {
     Vis48 *c;
     Vis44 *rec;
@@ -1555,7 +1555,7 @@ int world_render_frame();
 /* Shows entry c in front of the viewer until a button takes it (bit 10)
  * or puts it back (bit 11, unless forced). */
 ADDRESS(0x8005335c, 0x748)
-void func_8005335c(Vis48 *c, int forced)
+void ground_item_pick_up(Vis48 *c, int forced)
 {
     Vis48 save;
     VECTOR a;
@@ -1672,14 +1672,14 @@ void func_8005335c(Vis48 *c, int forced)
         *c = save;
         c->unk22 = c->unk23;
     } else {
-        func_80052d98(c);
-        func_80052e50(c);
+        item_record_pickup(c);
+        ground_item_remove(c);
     }
 }
 
 /* The per-frame table C pass: drops fall and bounce, a pick-up runs. */
 ADDRESS(0x80053aa4, 0x294)
-void func_80053aa4(void)
+void ground_items_update(void)
 {
     VisRequest req;
     Vis48 *c = vis_table_c.entries;
@@ -1713,7 +1713,7 @@ void func_80053aa4(void)
                 req.unk14.vy = c->unk26;
                 req.unk22 = 0;
                 req.unk20 = 0;
-                func_80048ad0((VisLists *)&req);
+                collision_test_map((VisLists *)&req);
                 h = vis_lists.unk2C - 0x200;
                 if (h > 0) {
                     c->unk08.vy += c->unk26;
@@ -1726,7 +1726,7 @@ void func_80053aa4(void)
                     c->unk26 = -(c->unk26 >> 1);
                 }
                 if (viewer.position.vy + 0x8000 < c->unk08.vy)
-                    func_80052e50(c);
+                    ground_item_remove(c);
                 if (c->unk00 < 71)
                     c->unk18 = h;
             } else if (c->unk25 == 4) {
@@ -1735,7 +1735,7 @@ void func_80053aa4(void)
             }
             break;
         case 3:
-            func_8005335c(c, 0);
+            ground_item_pick_up(c, 0);
             viewer.unk218 = 0;
             break;
         }

@@ -2212,7 +2212,7 @@ done:
 /*
  * The item use page: lists the usable items held (table C ids 268..313
  * of kind 20 or 30), five rows with their icons, and uses the confirmed
- * one (func_80054a54). Returns the use result (DAT_801cba08.unk16D8), 0 when
+ * one (item_use). Returns the use result (DAT_801cba08.unk16D8), 0 when
  * cancelled; items from 310 and item 288 recompute the viewer's figures.
  */
 ADDRESS(0x8005ec10, 0x77c)
@@ -2286,7 +2286,7 @@ int menu_use_item_run(void)
         if (DAT_801cd180.unk4 & 0x4000) {
             DAT_801cd180.unk4 = 0;
             if (sp->unk2E2 + sp->unk2E0 < sp->unk0.page_list.count)
-                func_80054a54(sp->unk0.page_list.entries[sp->unk2E2 + sp->unk2E0]);
+                item_use(sp->unk0.page_list.entries[sp->unk2E2 + sp->unk2E0]);
             else
                 DAT_801cba08.unk16D8 = 2;
             if (DAT_801cba08.unk16D8 == 1)
@@ -2439,7 +2439,7 @@ void shop_restore_texture_page(void)
 /*
  * The shop screens over the game (shop_open opens them): unk2DC bit 0
  * lists the shop's stock (DAT_801c7590.unk13A ids with stock left and
- * func_80052d40 set), bits 1/2 the items held but not equipped to trade
+ * item_is_uncollected set), bits 1/2 the items held but not equipped to trade
  * for items 284/285, otherwise the damaged items held to repair for
  * viewer.unk2. Bit 15 is the confirmation step.
  *
@@ -2467,7 +2467,7 @@ void shop_run(void)
         sp->unk0.list.ids = mem_alloc(28);
         sp->unk0.list.count = 0;
         for (i = 0; i < 14; i++) {
-            if (DAT_801c7590.unk156[i] != 0 && func_80052d40(DAT_801c7590.unk13A[i]) != 0)
+            if (DAT_801c7590.unk156[i] != 0 && item_is_uncollected(DAT_801c7590.unk13A[i]) != 0)
                 sp->unk0.list.ids[sp->unk0.list.count++] = i;
         }
     } else if ((sp->unk2DC & 2) || (sp->unk2DC & 4)) {

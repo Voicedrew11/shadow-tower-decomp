@@ -89,7 +89,7 @@ void func_80054368(Vis212 *e, int fixed, int arg2)
     if (!fixed) {
         if (e->unk36 != -1)
             return;
-        a = (VisAnim *)func_8004b1e8(r, 0x70);
+        a = (VisAnim *)creature_type_find_script(r, 0x70);
         if (a == NULL)
             return;
         e->unk08 = a->unk1;
@@ -122,7 +122,7 @@ void func_80054368(Vis212 *e, int fixed, int arg2)
         }
         world_run_frame(NULL, NULL, 0);
     }
-    if (!fixed && (a = (VisAnim *)func_8004b1e8(r, 0x71)) != NULL) {
+    if (!fixed && (a = (VisAnim *)creature_type_find_script(r, 0x71)) != NULL) {
         e->unk08 = a->unk1;
         e->unk2A = 0;
         e->unkB0 = a->unkC;
@@ -151,7 +151,7 @@ void func_80054368(Vis212 *e, int fixed, int arg2)
         world_run_frame(NULL, NULL, 0);
     } while (world_state.unk1EE16 != 5);
     if (!fixed) {
-        a = (VisAnim *)func_8004b1e8(r, 0x72);
+        a = (VisAnim *)creature_type_find_script(r, 0x72);
         if (a != NULL) {
             e->unk08 = a->unk1;
             e->unkB0 = a->unkC;

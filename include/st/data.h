@@ -76,7 +76,7 @@ typedef union {
 } ViewerAnglePair;
 
 /* A warp destination (viewer.unk220, viewer.unk22C): area, cell and offset,
- * yaw (func_80052894). */
+ * yaw (player_warp). */
 typedef struct {
     u8 area;
     u8 x;
@@ -118,7 +118,7 @@ typedef struct {
     u8 unk27;            /* 0x27: shown by the map menu */
     u16 unk28;
     u8 unk2A;
-    u8 unk2B;            /* 0x2b: cleared after the warp func_80052c24 runs */
+    u8 unk2B;            /* 0x2b: cleared after the warp player_warp_to_save_point runs */
     u32 unk2C;           /* 0x2c: flag bits the HUD shows (hud_update); status flags (src/st/player.c) */
     u16 unk30;           /* 0x30 */
     u8 unk32;
@@ -130,7 +130,7 @@ typedef struct {
      * reads six u16s from 0x78 (unk62[11]..unk7E[2]) by its level. */
     s16 unk62[14];       /* 0x62 */
     s16 unk7E[14];       /* 0x7e */
-    u16 unk9A[14];       /* 0x9a: figures func_8004db0c adds bonuses to */
+    u16 unk9A[14];       /* 0x9a: figures creature_award_kill_bonuses adds bonuses to */
     u16 unkB6;           /* 0xb6: player_hit's resistance terms */
     u16 unkB8;           /* 0xb8 */
     u16 unkBA[3];        /* 0xba: shown by the stats menu; effect_play reads them as a row */
@@ -224,7 +224,7 @@ typedef struct {
     union {
         u8 bytes[0xc];
         StWarp warp;
-    } unk220;            /* 0x220: the place a warp was entered from (func_80052c5c) */
+    } unk220;            /* 0x220: the place a warp was entered from (player_warp_back) */
     u8 unk22C;
     u8 unk22D;
     u8 unk22E;
@@ -241,7 +241,7 @@ typedef struct {
     s32 unk244;
     VECTOR position;     /* 0x248..0x257: includes the copied pad word */
     u8 unk258[8];
-    SVECTOR unk260;      /* 0x260: motion (func_8004cc70 leads targets by it) */
+    SVECTOR unk260;      /* 0x260: motion (creature_aim_shot leads targets by it) */
     short unk268;        /* 0x268: pitch in view_point_in_near_cone */
     short unk26A;        /* 0x26a: yaw in view_point_in_near_cone */
     short unk26C;        /* 0x26c: roll; model_draw_list turns kind-2 parts by all three */
@@ -312,23 +312,23 @@ extern Viewer viewer;
  * (DAT_800881d8). The value sources of each called slot are listed in
  * config/retail/indirect_pointers.tsv. */
 typedef struct {
-    void (*examine)();   /* 0x00: the examine action, (position, facing) (func_80055374) */
+    void (*examine)();   /* 0x00: the examine action, (position, facing) (player_examine) */
     void (*frame)(void); /* 0x04: per frame (func_8005735c) */
     void (*unk08)();
     void (*unk0C)();
     void (*unk10)();
     void (*loaded)(void); /* 0x14: called once the area is loaded (area_load_update) */
-    void (*item_added)(int); /* 0x18: item id rose by one (func_80055300) */
+    void (*item_added)(int); /* 0x18: item id rose by one (item_add) */
     void (*unk1C)();
-    void (*unk20)(void *entry, void *record); /* 0x20: a table B entry kind func_8004eebc does not know */
-    void (*unk24)(void); /* 0x24: a table B entry kind func_80050768 does not handle */
+    void (*unk20)(void *entry, void *record); /* 0x20: a table B entry kind objects_load does not know */
+    void (*unk24)(void); /* 0x24: a table B entry kind objects_update does not handle */
     void (*unk28)();
     void (*unk2C)();
-    void (*item_used)(); /* 0x30: item use (item id, or 0x4000 | slot) (func_80054a54) */
+    void (*item_used)(); /* 0x30: item use (item id, or 0x4000 | slot) (item_use) */
     void (*player_died)(void); /* 0x34: the player died (player_update) */
     void (*unk38)();
     void (*unk3C)();
-    void (*unk40)(void); /* 0x40: per table A entry, every fourth frame (func_8004e324) */
+    void (*unk40)(void); /* 0x40: per table A entry, every fourth frame (creatures_update) */
     void (*unk44)(void); /* 0x44: per table A entry, every frame */
     void (*unk48[14])();
 } AreaHooks;

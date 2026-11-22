@@ -208,7 +208,7 @@ void fdat_801ebc88(Vis212 *e, VisScript *s)
         pos.vx += off.vx;
         pos.vy += off.vy;
         pos.vz += off.vz;
-        func_8004cee8(e, s->arg.hit.unk1A, &pos);
+        effect_spawn_attack(e, s->arg.hit.unk1A, &pos);
         e->unk62 = 0;
     }
 }

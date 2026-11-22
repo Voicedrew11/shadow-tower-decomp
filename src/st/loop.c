@@ -53,9 +53,9 @@ void game_loop(void)
     loading_screen_find_file();
     loading_screen_show();
     func_80057da0();
-    func_8004eda8();
-    func_8004afdc();
-    func_80052ca4();
+    objects_clear();
+    creatures_clear();
+    ground_items_clear();
     effects_clear();
     game_load_common_data();
     func_800559bc();
@@ -100,9 +100,9 @@ void game_loop(void)
         frame_rate_update();
         fade_reset();
         player_update();
-        func_80050768();
-        func_8004e324();
-        func_80053aa4();
+        objects_update();
+        creatures_update();
+        ground_items_update();
         effects_run();
         viewer.unk21C = 0;
         func_8005735c();
@@ -115,7 +115,7 @@ void game_loop(void)
         if (DAT_800881a4 == 0)
             continue;
         VSync(10);
-        func_800500ac(2, 0, 4096, 128);
+        fade_run_frames(2, 0, 4096, 128);
         VSync(10);
         switch (DAT_800881a4) {
         case EXIT_TITLE:

@@ -75,7 +75,7 @@ void func_801ed4f8(void)
         if (e->unk2C == 0)
             fdat_801ed87c = 0xff;
         if (DAT_801cba08.unk1448[r->unk09] == 1) {
-            func_8004d804(e, 0x116);
+            creature_drop_item(e, 0x116);
             fdat_801ecf44(e);
             fdat_801ed87c = 0xff;
         }

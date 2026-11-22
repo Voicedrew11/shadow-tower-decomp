@@ -238,7 +238,7 @@ void game_load_common_data(void)
     anim_register_pack(40, DAT_8009b088);
     cd_wait_idle();
     player_init();
-    func_80052d10();
+    item_model_slots_clear();
 }
 
 /*
@@ -599,7 +599,7 @@ void area_load_update(void)
                 }
                 c++;
             }
-            func_80052d10();
+            item_model_slots_clear();
             for (i = 15; i != -1; i--) {
                 if (world_state.unk834C[128 + i])
                     heap_free(world_state.unk834C[128 + i]);
@@ -609,15 +609,15 @@ void area_load_update(void)
                     heap_free(world_state.unk8C7C[i]);
             }
             copy_words((u32 *)vis_table_a.unk3500, (u32 *)(p + 1), 2816);
-            func_8004e8ec();
+            creature_types_link_scripts();
             p = (u_long *)((u8 *)p + (*p + 4));
-            func_8004e960((VisAFileEntry *)(p + 1));
+            creatures_load((VisAFileEntry *)(p + 1));
             p = (u_long *)((u8 *)p + (*p + 4));
             copy_words((u32 *)&vis_table_b.unk0000[300], (u32 *)(p + 1), 192);
             p = (u_long *)((u8 *)p + (*p + 4));
-            func_8004eebc((u8 *)(p + 1));
+            objects_load((u8 *)(p + 1));
             p = (u_long *)((u8 *)p + (*p + 4));
-            func_80052f30((VisCFileEntry *)(p + 1));
+            ground_items_load((VisCFileEntry *)(p + 1));
             p = (u_long *)((u8 *)p + (*p + 4));
             placements_expand((StPlacement *)(p + 1));
             func_80055f9c(area_state.unk10);

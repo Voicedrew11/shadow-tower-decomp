@@ -59,7 +59,7 @@ void vis_collect_sources(VECTOR *a, VECTOR *b, VECTOR *c)
 
 /* The cell position of each collected source. */
 ADDRESS(0x8004656c, 0x98)
-void func_8004656c(VECTOR *out)
+void collision_source_positions(VECTOR *out)
 {
     VisRecord *rec;
     int i;

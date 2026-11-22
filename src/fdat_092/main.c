@@ -296,5 +296,5 @@ void func_801edea4(void)
             break;
         world_run_frame(NULL, NULL, 0);
     }
-    func_8005335c(item, 1);
+    ground_item_pick_up(item, 1);
 }

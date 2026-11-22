@@ -75,7 +75,7 @@ void func_801edbec(Vis212 *e)
         int target_z = 0x47000;
 
         if (e->unk74.vx < target_x) {
-            func_8004ae38(e);
+            creature_despawn(e);
             break;
         }
         fdat_801eb814(ratan2(e->unk74.vz - target_z, e->unk74.vx - target_x) + 0xc00, 0x20);

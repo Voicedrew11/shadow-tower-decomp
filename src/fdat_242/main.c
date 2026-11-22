@@ -165,7 +165,7 @@ void func_801ed71c(void)
         func_801edebc();
     if (fdat_801ee0b4 == 3 && ((VisRecord *)viewer.unk174)->unk07 != 3) {
         func_801edf2c();
-        func_8004ae38(e48);
+        creature_despawn(e48);
         e33->unk00 = 100;
     }
     if (fdat_801ee0b8 == 0 && viewer.unk178 == 0x126) {

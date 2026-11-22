@@ -317,8 +317,8 @@ typedef char Data801cba08Size[sizeof(Data801cba08) == 0x1714 ? 1 : -1];
 /* Members of DAT_801cba08 under the names they had as separate identities:
  * +0x14a8, two 5-word rows cleared to -1 (src/st/main.c); +0x16d8, the
  * examine/item-use result (0 none, 1 done, 2 nothing to use; src/st/item.c);
- * +0x16dc, nonzero runs the warp func_80052c5c after the table A pass
- * (func_8004e324; func_80052c5c clears it). */
+ * +0x16dc, nonzero runs the warp player_warp_back after the table A pass
+ * (creatures_update; player_warp_back clears it). */
 #define DAT_801cceb0 ((u32 (*)[5])DAT_801cba08.unk14A8)
 #define DAT_801cd0e0 DAT_801cba08.unk16D8
 #define DAT_801cd0e4 DAT_801cba08.unk16DC

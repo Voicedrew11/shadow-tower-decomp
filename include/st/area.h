@@ -25,7 +25,7 @@ void image_stream_set_ready(StCdRequest *request);
 void area_reload_images(void);
 void game_load_common_data(void);
 void player_init(void);
-void func_80052d10(void);
+void item_model_slots_clear(void);
 
 /* 0x800f2c88 (after the block heap) and 0x800fc488: the buffers
  * area_load_current_blocking puts in world_state.unk8308[1] and [0]; WIP extents. */

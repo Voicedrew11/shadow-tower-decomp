@@ -15,7 +15,7 @@
 
 /* Moves the entry to the cell of record unk28, offset by unk6A..unk6E. */
 ADDRESS(0x8004ac38, 0x64)
-void func_8004ac38(Vis212 *e)
+void creature_return_home(Vis212 *e)
 {
     VisRecord *r;
     u16 i = e->unk28;
@@ -30,7 +30,7 @@ void func_8004ac38(Vis212 *e)
 /* Clears the rotation and sets the facing to unk68, or a random one when
  * unk68 is 0xffff. */
 ADDRESS(0x8004ac9c, 0x50)
-void func_8004ac9c(Vis212 *e)
+void creature_reset_facing(Vis212 *e)
 {
     e->unk90 = 0;
     e->unk8C = 0;
@@ -42,7 +42,7 @@ void func_8004ac9c(Vis212 *e)
 
 /* Copies the entry's settings from its record and resets its scale. */
 ADDRESS(0x8004acec, 0x84)
-void func_8004acec(Vis212 *e)
+void creature_copy_type_stats(Vis212 *e)
 {
     Vis192 *r = &vis_table_a.unk3500[e->unk02];
 
@@ -59,7 +59,7 @@ void func_8004acec(Vis212 *e)
 
 /* Resets the entry's state for a fresh start. */
 ADDRESS(0x8004ad70, 0xc8)
-void func_8004ad70(Vis212 *e)
+void creature_reset_for_spawn(Vis212 *e)
 {
     Vis192 *r = &vis_table_a.unk3500[e->unk02];
 
@@ -86,7 +86,7 @@ void func_8004ad70(Vis212 *e)
 /* Retires the entry: counts a kill unless it is state 5, then frees its
  * share of the totals and puts it back in its cell. */
 ADDRESS(0x8004ae38, 0xec)
-void func_8004ae38(Vis212 *e)
+void creature_despawn(Vis212 *e)
 {
     Vis192 *r = &vis_table_a.unk3500[e->unk02];
 
@@ -100,30 +100,30 @@ void func_8004ae38(Vis212 *e)
     e->unk05 = 3;
     vis_table_a.unk612C -= r->unk12;
     vis_table_a.unk6128 -= e->unk0D;
-    func_8004ac38(e);
+    creature_return_home(e);
 }
 
 ADDRESS(0x8004af24, 0x58)
-void func_8004af24(Vis212 *e, Vis192 *r)
+void creature_spawn(Vis212 *e, Vis192 *r)
 {
-    func_8004ac38(e);
-    func_8004ac9c(e);
-    func_8004ad70(e);
+    creature_return_home(e);
+    creature_reset_facing(e);
+    creature_reset_for_spawn(e);
     if (r->unk00 == 2)
         e->unk03 = 2;
 }
 
 ADDRESS(0x8004af7c, 0x60)
-void func_8004af7c(u16 i)
+void creature_spawn_by_index(u16 i)
 {
     Vis212 *e = &vis_table_a.entries[i];
 
-    func_8004af24(e, &vis_table_a.unk3500[e->unk02]);
+    creature_spawn(e, &vis_table_a.unk3500[e->unk02]);
 }
 
 /* Frees every entry and clears the totals. */
 ADDRESS(0x8004afdc, 0x7c)
-void func_8004afdc(void)
+void creatures_clear(void)
 {
     Vis212 *e;
     u16 i;
@@ -146,7 +146,7 @@ void func_8004afdc(void)
 }
 
 ADDRESS(0x8004b058, 0x38)
-void func_8004b058(Vis212 *e, u8 *p)
+void creature_set_script(Vis212 *e, u8 *p)
 {
     e->unk19 = e->unk0F;
     if (p != NULL) {
@@ -161,7 +161,7 @@ void func_8004b058(Vis212 *e, u8 *p)
 }
 
 ADDRESS(0x8004b090, 0x8)
-int func_8004b090(u8 *p, int arg)
+int creature_score_script(u8 *p, int arg)
 {
     return 0;
 }
@@ -169,7 +169,7 @@ int func_8004b090(u8 *p, int arg)
 /* Picks the best-scoring entry of the current record's list for the current
  * entry. */
 ADDRESS(0x8004b098, 0x104)
-void func_8004b098(int arg)
+void creature_pick_script(int arg)
 {
     Vis212 *e = vis_table_a.unk6138;
     Vis192 *r = vis_table_a.unk6134;
@@ -190,26 +190,26 @@ void func_8004b098(int arg)
         p = *list++;
         if (p == NULL)
             break;
-        score = func_8004b090(p, arg);
+        score = creature_score_script(p, arg);
         if (max < score) {
             max = score;
             best = p;
         }
     }
     if (best != NULL && (best != (u8 *)e->unkA8 || e->unk1A == 255))
-        func_8004b058(e, best);
+        creature_set_script(e, best);
 }
 
 ADDRESS(0x8004b19c, 0x4c)
-void func_8004b19c(void)
+void creature_pick_script_by_distance(void)
 {
-    func_8004b098(func_8004a304(vis_table_a.unk6138->unk74.vx - viewer.position.vx,
+    creature_pick_script(func_8004a304(vis_table_a.unk6138->unk74.vx - viewer.position.vx,
                                 vis_table_a.unk6138->unk74.vz - viewer.position.vz));
 }
 
 /* Finds the entry of r's list whose first byte is id. */
 ADDRESS(0x8004b1e8, 0x48)
-u8 *func_8004b1e8(Vis192 *r, u8 id)
+u8 *creature_type_find_script(Vis192 *r, u8 id)
 {
     u8 **list = (u8 **)r->unk60;
     u8 *p;
@@ -226,20 +226,20 @@ u8 *func_8004b1e8(Vis192 *r, u8 id)
 }
 
 ADDRESS(0x8004b230, 0x40)
-void func_8004b230(Vis212 *e, u8 id)
+void creature_set_script_by_id(Vis212 *e, u8 id)
 {
-    func_8004b058(e, func_8004b1e8(vis_table_a.unk3500, id));
+    creature_set_script(e, creature_type_find_script(vis_table_a.unk3500, id));
 }
 
 ADDRESS(0x8004b270, 0x44)
-void func_8004b270(void)
+void creature_end_script(void)
 {
     vis_table_a.unk6138->unk1A = 255;
     area_state.hooks->unk40();
 }
 
 ADDRESS(0x8004b2b4, 0x28)
-void func_8004b2b4(u8 v)
+void creature_set_anim(u8 v)
 {
     Vis212 *e;
 
@@ -252,7 +252,7 @@ void func_8004b2b4(u8 v)
 
 /* Steps the current entry's state: 0 waits to spawn, 1 and 2 despawn. */
 ADDRESS(0x8004b2dc, 0x2fc)
-void func_8004b2dc(void)
+void creature_update_spawn(void)
 {
     Vis212 *e = vis_table_a.unk6138;
     Vis192 *r = vis_table_a.unk6134;
@@ -275,7 +275,7 @@ void func_8004b2dc(void)
         if (e->unk00 != 0 && e->unk00 >= rand() / 327) {
             vis_table_a.unk612C += r->unk12;
             vis_table_a.unk6128 += e->unk0D;
-            func_8004af24(vis_table_a.unk6138, vis_table_a.unk6134);
+            creature_spawn(vis_table_a.unk6138, vis_table_a.unk6134);
             e->unk1B = 255;
             e->unk54 = e->unk60 = 0xffff;
             e->unk44 = 0;
@@ -295,7 +295,7 @@ void func_8004b2dc(void)
         vis_table_a.unk612C -= r->unk12;
         vis_table_a.unk6128 -= e->unk0D;
         e->unk05 = 0;
-        func_8004ac38(e);
+        creature_return_home(e);
         return;
     case 2:
         if (e->unk40 < 28672) {
@@ -306,7 +306,7 @@ void func_8004b2dc(void)
         vis_table_a.unk612C -= r->unk12;
         vis_table_a.unk6128 -= e->unk0D;
         e->unk05 = 0;
-        func_8004ac38(e);
+        creature_return_home(e);
         return;
     }
 }
@@ -334,7 +334,7 @@ int func_8004b5d8(int a, int b, int c)
  * sight: within range, inside the yaw/pitch cones, scored by angle and
  * distance, with a random term when arg7 > 0. */
 ADDRESS(0x8004b658, 0x294)
-void *func_8004b658(VECTOR *pos, short yaw, short pitch, int range, int arg4, int arg5, int *dist,
+void *creature_find_in_cone(VECTOR *pos, short yaw, short pitch, int range, int arg4, int arg5, int *dist,
                     int arg7)
 {
     Vis212 *e;
@@ -398,7 +398,7 @@ void *func_8004b658(VECTOR *pos, short yaw, short pitch, int range, int arg4, in
 /* Distance from (x, y, z) to the segment a..b, or -1 beyond r (r + extra
  * from its interior). */
 ADDRESS(0x8004b8ec, 0x29c)
-int func_8004b8ec(int x, int y, int z, int r, VECTOR *a, VECTOR *b, int extra)
+int vector_point_segment_distance(int x, int y, int z, int r, VECTOR *a, VECTOR *b, int extra)
 {
     int dx;
     int dy;
@@ -445,7 +445,7 @@ int func_8004b8ec(int x, int y, int z, int r, VECTOR *a, VECTOR *b, int extra)
  * 1 and 4 also require it inside the viewer's view cone; mode 0 returns the
  * first hit, otherwise the nearest. */
 ADDRESS(0x8004bb88, 0x2f8)
-int func_8004bb88(VisLists *req, int arg1)
+int creature_find_in_reach(VisLists *req, int arg1)
 {
     Vis212 *e;
     Vis192 *r;
@@ -522,7 +522,7 @@ int func_8004bb88(VisLists *req, int arg1)
 
 /* Finds the first live entry whose body req touches. */
 ADDRESS(0x8004be80, 0x1bc)
-int func_8004be80(VisLists *req)
+int creature_find_touching(VisLists *req)
 {
     Vis212 *e;
     VECTOR v;
@@ -546,7 +546,7 @@ int func_8004be80(VisLists *req)
                               e->unk30, req->unk1E) != -1)
                 return i;
         } else if (e->unk70 & 0x400000) {
-            func_8004c934(e, 0, &v);
+            creature_vertex_offset(e, 0, &v);
             v.vx += e->unk74.vx;
             v.vz += e->unk74.vz;
             v.vy += e->unk74.vy;
@@ -568,7 +568,7 @@ int func_8004be80(VisLists *req)
 /* Makes e the current entry (unk6138) and caches its record, and for a
  * follower the entry it follows. */
 ADDRESS(0x8004c03c, 0xb8)
-void func_8004c03c(Vis212 *e)
+void creature_set_current(Vis212 *e)
 {
     Vis192 *r;
     Vis212 *t;
@@ -591,7 +591,7 @@ void func_8004c03c(Vis212 *e)
 }
 
 ADDRESS(0x8004c0f4, 0x34)
-void func_8004c0f4(Vis212 *e, short step)
+void creature_anim_step_wrap(Vis212 *e, short step)
 {
     if (step < 0)
         e->unkB0 = -step;
@@ -601,7 +601,7 @@ void func_8004c0f4(Vis212 *e, short step)
 }
 
 ADDRESS(0x8004c128, 0x5c)
-void func_8004c128(Vis212 *e, short step)
+void creature_anim_step_clamp(Vis212 *e, short step)
 {
     if (step < 0)
         e->unkB0 = -step;
@@ -615,7 +615,7 @@ void func_8004c128(Vis212 *e, short step)
 }
 
 ADDRESS(0x8004c184, 0x30)
-int func_8004c184(Vis212 *e, u16 v)
+int creature_anim_passed_frame(Vis212 *e, u16 v)
 {
     return v < (short)e->unk2A && v >= (short)e->unk2A - e->unkB0;
 }
@@ -623,7 +623,7 @@ int func_8004c184(Vis212 *e, u16 v)
 /* Moves the entry by its velocity, sliding along up to three walls the
  * request hits, then settles it on the floor. */
 ADDRESS(0x8004c1b4, 0x654)
-void func_8004c1b4(Vis212 *e)
+void creature_move(Vis212 *e)
 {
     Vis192 *r;
     SVECTOR vel;
@@ -662,7 +662,7 @@ loop:
     vis_lists.unk14 = e->unk9C;
     vis_lists.unk20 = ratan2(e->unk9C.vz, e->unk9C.vx);
     vis_lists.unk22 = SquareRoot0(vel.vx * vel.vx + vel.vz * vel.vz);
-    hits = func_80049544(&vis_lists);
+    hits = collision_query(&vis_lists);
     if (tries == 0) {
         if (vis_lists.n_sources != 0) {
             if (e->unk03 == 1)
@@ -705,7 +705,7 @@ loop:
     } else if (hits & 0xd0) {
         if (hits & 0x80)
             e->unk39 = 1;
-        func_800492f4(&e->unk74);
+        collision_locate_hit_body(&e->unk74);
         d.vx = e->unk74.vx - vis_lists.unkAC.vx;
         d.vy = 0;
         d.vz = e->unk74.vz - vis_lists.unkAC.vz;
@@ -778,7 +778,7 @@ done:
 /* Moves the current entry vertically, clamped between the floor and the
  * ceiling the height probe finds. */
 ADDRESS(0x8004c808, 0x12c)
-void func_8004c808(void)
+void creature_move_vertical(void)
 {
     Vis212 *e = vis_table_a.unk6138;
 
@@ -789,7 +789,7 @@ void func_8004c808(void)
     vis_lists.unk14 = e->unk9C;
     vis_lists.unk20 = ratan2(e->unk9C.vz, e->unk9C.vx);
     vis_lists.unk0 = 2;
-    func_80048ad0(&vis_lists);
+    collision_test_map(&vis_lists);
     if (vis_lists.unk47E4 < e->unk74.vy) {
         e->unk74.vy = vis_lists.unk47E4;
         e->unk9C.vy = 0;
@@ -804,7 +804,7 @@ void func_8004c808(void)
 /* The world position of vertex `index` of the entry's model, or of its
  * centre when the model has none. */
 ADDRESS(0x8004c934, 0x100)
-int func_8004c934(Vis212 *e, int index, VECTOR *out)
+int creature_vertex_offset(Vis212 *e, int index, VECTOR *out)
 {
     SVECTOR rot;
     SVECTOR v;
@@ -826,7 +826,7 @@ int func_8004c934(Vis212 *e, int index, VECTOR *out)
 }
 
 ADDRESS(0x8004ca34, 0x5c)
-VECTOR *func_8004ca34(Vis212 *e, VECTOR *out)
+VECTOR *creature_get_position(Vis212 *e, VECTOR *out)
 {
     switch (e->unk70 & 3) {
     case 0:
@@ -848,7 +848,7 @@ VECTOR *func_8004ca34(Vis212 *e, VECTOR *out)
 /* A random offset around base: +-8 across, up to 31 below `up`; out is base
  * less the offset, raised by `height`. */
 ADDRESS(0x8004ca90, 0x110)
-void func_8004ca90(SVECTOR *off, VECTOR *out, VECTOR *base, int arg3, short height, short up)
+void effect_random_offset(SVECTOR *off, VECTOR *out, VECTOR *base, int arg3, short height, short up)
 {
     off->vx = 8 - rand() / 2024;
     off->vy = up - rand() / 1024;
@@ -860,7 +860,7 @@ void func_8004ca90(SVECTOR *off, VECTOR *out, VECTOR *base, int arg3, short heig
 
 /* Jitters off and places out at base plus it. */
 ADDRESS(0x8004cba0, 0xd0)
-void func_8004cba0(SVECTOR *off, VECTOR *out, VECTOR *base)
+void effect_jitter_offset(SVECTOR *off, VECTOR *out, VECTOR *base)
 {
     off->vx += 8 - rand() / 2048;
     off->vy += -16 - rand() / 1024;
@@ -875,7 +875,7 @@ void func_8004cba0(SVECTOR *off, VECTOR *out, VECTOR *base)
  * steps lead the target by its motion. Stores the final rotation (facing
  * the other way) in out and returns its yaw. */
 ADDRESS(0x8004cc70, 0x278)
-int func_8004cc70(e, pos, speed, target, dir, out, pitch, turn, n)
+int creature_aim_shot(e, pos, speed, target, dir, out, pitch, turn, n)
 Vis212 *e;
 VECTOR *pos;
 int speed;

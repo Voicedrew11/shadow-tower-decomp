@@ -25,7 +25,7 @@ RODATA(0x8001274c, 0x108)
 
 /* Uses item `id` and leaves the use result. */
 ADDRESS(0x80054a54, 0x848)
-void func_80054a54(int id)
+void item_use(int id)
 {
     VECTOR pos;
     int i;
@@ -82,8 +82,8 @@ void func_80054a54(int id)
         vis_lists.unk22 = 0;
         vis_lists.unk20 = 0;
         vis_lists.unk0 = 0;
-        while ((i = func_8004f718(i, &vis_lists)) != -1) {
-            switch (func_8004fb88(&vis_table_b.entries[i], id)) {
+        while ((i = object_find_usable(i, &vis_lists)) != -1) {
+            switch (object_try_key(&vis_table_b.entries[i], id)) {
             case 0:
                 USE_RESULT = 2;
                 goto done;
@@ -260,7 +260,7 @@ void func_80054a54(int id)
     }
 used:
     if (USE_RESULT == 1)
-        func_800552bc(id);
+        item_take(id);
 done:
     player_stop_motion();
     {

@@ -17,7 +17,7 @@
  * list vis_build_visible builds from it; vis_record_is_visible/vis_id_is_visible search the
  * visible list. */
 /* The request fields VisLists starts with, as a stack request (src/st/item.c,
- * func_80053aa4 in src/st/vis_c_run.c). */
+ * ground_items_update in src/st/vis_c_run.c). */
 typedef struct {
     s32 unk0;
     VECTOR unk4;
@@ -29,17 +29,17 @@ typedef struct {
 } VisRequest;
 
 typedef struct {
-    s32 unk0;            /* 0x00: the kind of the request func_80049544 takes */
+    s32 unk0;            /* 0x00: the kind of the request collision_query takes */
     VECTOR unk4;         /* 0x04: its position */
     SVECTOR unk14;       /* 0x14: its velocity */
-    u16 unk1C;           /* 0x1c: reach; added to a table B record radius (func_8004f53c) */
+    u16 unk1C;           /* 0x1c: reach; added to a table B record radius (object_find_in_reach) */
     u16 unk1E;           /* 0x1e: height added while resolving */
     s16 unk20;           /* 0x20: the velocity's heading */
     s16 unk22;           /* 0x22: its horizontal length */
     u8 unk24[0x2c - 0x24];
-    s32 unk2C;           /* 0x2c: floor height found; func_80048ad0 resolves it (func_80053aa4) */
+    s32 unk2C;           /* 0x2c: floor height found; collision_test_map resolves it (ground_items_update) */
     s32 unk30;           /* 0x30: a height player_check_fall_death tests */
-    s32 unk34;           /* 0x34: func_80048ad0's heights (unk2C..unk58) */
+    s32 unk34;           /* 0x34: collision_test_map's heights (unk2C..unk58) */
     s32 unk38;
     s32 unk3C;
     s32 unk40;
@@ -50,12 +50,12 @@ typedef struct {
     s32 unk54;
     s32 unk58;           /* 0x58: 0x80000 when unset */
     s32 unk5C;           /* 0x5c: an index into vis_table_a.entries */
-    s32 unk60;           /* 0x60: func_8004be80's result */
+    s32 unk60;           /* 0x60: creature_find_touching's result */
     s32 unk64;           /* 0x64: an index into vis_table_b.entries */
     u8 unk68[0xc];
-    s32 unk74;           /* 0x74: the kind bits func_80049544 resolved */
+    s32 unk74;           /* 0x74: the kind bits collision_query resolved */
     s32 unk78;           /* 0x78: heading of the wall slid along */
-    SVECTOR unk7C;       /* 0x7c: func_80048ad0's normals (unk7C..unkA4) */
+    SVECTOR unk7C;       /* 0x7c: collision_test_map's normals (unk7C..unkA4) */
     SVECTOR unk84;
     s16 unk8C;           /* 0x8c..0x90: wall normal (bit 1 hits) */
     u8 unk8E[2];
@@ -90,7 +90,7 @@ typedef struct {
     u32 unk47D8;         /* 0x47d8: record index of the floor found */
     s32 unk47DC;         /* 0x47dc: cleared by player_reset_state */
     u32 unk47E0;         /* 0x47e0: flag bits area_reload_images tests */
-    s32 unk47E4;         /* 0x47e4: floor height (func_80048ad0) */
+    s32 unk47E4;         /* 0x47e4: floor height (collision_test_map) */
     s32 unk47E8;         /* 0x47e8: ceiling height */
     u8 unk47EC[4];
 } VisLists;
@@ -98,13 +98,13 @@ typedef struct {
 /* 0x8017bed0: 12-byte records indexed by visible id. */
 typedef struct {
     u8 part;             /* 0x00: the model part drawn for this record */
-    u8 unk01;            /* 0x01: copied to a table A entry's unk06 (func_8004e960) */
+    u8 unk01;            /* 0x01: copied to a table A entry's unk06 (creatures_load) */
     u8 unk02;
     u8 unk03;            /* 0x03: bits 0-1 select the light set */
     u8 unk04;            /* bit 1: flagged by vis_cull_by_range */
     s8 unk05;            /* 0x05, 0x06: FDAT: an offset (x, z) its entries' headings bend by */
     s8 unk06;
-    u8 unk07;            /* 0x07: area id; 0xff none (func_8004e324) */
+    u8 unk07;            /* 0x07: area id; 0xff none (creatures_update) */
     u8 unk08;
     u8 unk09;
     u8 unk0a;
@@ -212,7 +212,7 @@ typedef union {
 
 /* A table A record's script: a command stream (WIP). */
 typedef struct {
-    u8 unk00;            /* 0x00: kind; 'P' and '@' are picked by func_8004def8 */
+    u8 unk00;            /* 0x00: kind; 'P' and '@' are picked by creature_take_damage */
     u8 unk01;            /* 0x01: the FDAT overlays copy it to Vis212.unk08 */
     u8 unk02;
     u8 unk03;            /* 0x03: an FDAT overlay squares it into a range */
@@ -231,7 +231,7 @@ typedef struct {
         struct {             /* FDAT attack commands (fdat_801ebc88) */
             u16 unk10[2];
             u16 frame[3];    /* 0x14: frame of each hit, 0xffff none */
-            s16 unk1A;       /* 0x1a: passed to func_8004cee8 */
+            s16 unk1A;       /* 0x1a: passed to effect_spawn_attack */
             u16 vertex[3];   /* 0x1c: model vertex of each hit, 0xffff the origin */
             u16 node[3];     /* 0x22: skeleton node of each hit */
             s16 offset[3];   /* 0x28: offset added after the turn */
@@ -240,14 +240,14 @@ typedef struct {
 } VisScript;
 
 typedef struct {
-    u8 unk00;            /* 0x00: 0xff when free (func_8004afdc) */
+    u8 unk00;            /* 0x00: 0xff when free (creatures_clear) */
     u8 unk01;
     u8 unk02;            /* 0x02: index of its 192-byte VisTableA record */
     u8 unk03;
     u8 unk04;
-    u8 unk05;            /* 0x05: state (func_8004b2dc); 1 active, 5 dying (func_8004def8) */
+    u8 unk05;            /* 0x05: state (creature_update_spawn); 1 active, 5 dying (creature_take_damage) */
     u8 unk06;
-    u8 unk07;            /* 0x07: area id, 0xfd: the previous area (func_8004e2d8) */
+    u8 unk07;            /* 0x07: area id, 0xfd: the previous area (creatures_bind_previous_area) */
     u8 unk08;            /* 0x08 */
     u8 unk09;
     u8 unk0A;
@@ -256,7 +256,7 @@ typedef struct {
     u8 unk0D;            /* 0x0d: added to vis_table_a.unk6128 while live */
     u8 unk0E;
     u8 unk0F;
-    u16 unk10;           /* 0x10..0x14: the three items it drops: table C ids (func_8004e960) */
+    u16 unk10;           /* 0x10..0x14: the three items it drops: table C ids (creatures_load) */
     u16 unk12;
     u16 unk14;
     s16 unk16;           /* 0x16: vertical speed */
@@ -271,9 +271,9 @@ typedef struct {
     u8 unk23;
     s16 unk24;           /* 0x24 */
     u16 unk26;
-    u16 unk28;           /* 0x28: record index (func_8004ac38) */
+    u16 unk28;           /* 0x28: record index (creature_return_home) */
     u16 unk2A;           /* 0x2a */
-    u16 unk2C;           /* 0x2c: hit points (func_8004def8) */
+    u16 unk2C;           /* 0x2c: hit points (creature_take_damage) */
     u16 unk2E;           /* 0x2e */
     u16 unk30;           /* 0x30: height */
     u16 unk32;           /* 0x32: shadow size */
@@ -286,7 +286,7 @@ typedef struct {
     s32 unk40;           /* 0x40: horizontal distance */
     s32 unk44;
     u8 unk48;
-    u8 unk49;            /* 0x49: 106 + the table B entry func_800549c8 spawned */
+    u8 unk49;            /* 0x49: 106 + the table B entry creature_alloc_object spawned */
     u8 unk4A[2];
     s32 unk4C;           /* 0x4c: height above the floor */
     s32 unk50;           /* 0x50: request kind bits */
@@ -302,8 +302,8 @@ typedef struct {
     u8 unk65;            /* 0x65..0x67: percent chances of unk10..unk14 */
     u8 unk66;
     u8 unk67;
-    u16 unk68;           /* 0x68: facing, 0xffff random (func_8004ac9c) */
-    s16 unk6A;           /* 0x6a..0x6e: offset in its cell (func_8004ac38) */
+    u16 unk68;           /* 0x68: facing, 0xffff random (creature_reset_facing) */
+    s16 unk6A;           /* 0x6a..0x6e: offset in its cell (creature_return_home) */
     s16 unk6C;
     s16 unk6E;
     u32 unk70;           /* 0x70: bit 11 set by effect_emit */
@@ -327,7 +327,7 @@ typedef struct {
     u8 unkC0[0x14];
 } Vis212;
 
-/* An entry of a Vis192 record's unk60 list (func_8004b1e8). */
+/* An entry of a Vis192 record's unk60 list (creature_type_find_script). */
 typedef struct {
     u8 unk0;             /* 0x0: id */
     u8 unk1;             /* 0x1: animation (Vis212.unk08) */
@@ -339,7 +339,7 @@ typedef struct {
 
 /* 0x3500 of VisTableA: 192-byte records. */
 typedef struct {
-    u8 unk00;            /* 0x00: 0xff ends the records (func_8004e8ec) */
+    u8 unk00;            /* 0x00: 0xff ends the records (creature_types_link_scripts) */
     u8 unk01;
     u8 unk02;
     u8 unk03;
@@ -361,9 +361,9 @@ typedef struct {
     s8 unk24[14];        /* 0x24: bonuses to the viewer's figures */
     u16 unk32;
     u8 unk34[0x16];
-    u16 unk4A[9];        /* 0x4a: level weights (func_8004de24) */
+    u16 unk4A[9];        /* 0x4a: level weights (creature_calc_damage) */
     u8 unk5C[4];
-    VisScript *unk60[24]; /* 0x60: null-terminated (func_8004b1e8); offsets from unk3500[16] until func_8004e8ec */
+    VisScript *unk60[24]; /* 0x60: null-terminated (creature_type_find_script); offsets from unk3500[16] until creature_types_link_scripts */
 } Vis192;
 
 typedef struct {
@@ -410,7 +410,7 @@ typedef struct {
     u8 unk07;
     u16 unk08;
     u16 unk0a;           /* 0x0a: index of its 24-byte VisTableB record */
-    u16 unk0C;           /* 0x0c: state of a moving entry (func_8004fdd0); 0xff once opened (src/st/save.c) */
+    u16 unk0C;           /* 0x0c: state of a moving entry (object_move_child); 0xff once opened (src/st/save.c) */
     u16 unk0E;
     u16 unk10;           /* 0x10 */
     u16 unk12;           /* 0x12: height */
@@ -456,13 +456,13 @@ typedef struct {
     u8 unk00[3];
     u8 unk03;            /* 0x03 */
     u16 unk04;           /* 0x04 */
-    u16 unk06;           /* 0x06: trigger radius (func_8004f718) */
+    u16 unk06;           /* 0x06: trigger radius (object_find_usable) */
     u16 unk08;           /* 0x08 */
-    u16 unk0A;           /* 0x0a: the entry's OT depth bias (func_8004eebc) */
+    u16 unk0A;           /* 0x0a: the entry's OT depth bias (objects_load) */
     u16 unk0C;           /* 0x0c */
     u16 unk0E;           /* 0x0e */
     u8 unk10[2];
-    u16 unk12;           /* 0x12: which side a door swings the viewer from (func_80050768) */
+    u16 unk12;           /* 0x12: which side a door swings the viewer from (objects_update) */
     u8 unk14[4];
 } Vis24;
 
@@ -475,12 +475,12 @@ typedef struct {
     s16 unk71A6;
     s16 unk71A8;
     u8 unk71AA[2];
-    Vis24 *unk71AC;      /* 0x71ac: the record of the entry func_80050768 is updating */
-    Vis88 *unk71B0;      /* 0x71b0: an entry func_8004f53c skips */
+    Vis24 *unk71AC;      /* 0x71ac: the record of the entry objects_update is updating */
+    Vis88 *unk71B0;      /* 0x71b0: an entry object_find_in_reach skips */
     u16 list[96];        /* 0x71b4 */
     u8 count;            /* 0x7274 */
     u8 unk7275;
-    s16 unk7276;         /* 0x7276..0x727a: cleared by func_8004eda8 */
+    s16 unk7276;         /* 0x7276..0x727a: cleared by objects_clear */
     s16 unk7278;
     s16 unk727A;
 } VisTableB;
@@ -525,7 +525,7 @@ typedef struct {
     u8 unk22;            /* 0x22: kind; 0 and 4 are not drawn */
     u8 unk23;
     u8 unk24;            /* 0x24 */
-    s8 unk25;            /* 0x25: bounces (func_80053aa4) */
+    s8 unk25;            /* 0x25: bounces (ground_items_update) */
     s16 unk26;           /* 0x26: fall speed */
     s32 unk28;           /* 0x28: distance */
     u8 unk2c;
@@ -538,9 +538,9 @@ typedef struct {
     u8 count;            /* 0x0006 */
     u8 list[64];         /* 0x0007 */
     u8 unk0047;
-    u32 unk0048[10];     /* 0x0048: one bit per loaded id (func_80052f30) */
+    u32 unk0048[10];     /* 0x0048: one bit per loaded id (ground_items_load) */
     u32 unk0070[9];      /* 0x0070: one bit per id (266 ids) */
-    u8 unk0094[0x80];    /* 0x0094: a slot per Vis44 unk04, 0xff unassigned (func_80052d10) */
+    u8 unk0094[0x80];    /* 0x0094: a slot per Vis44 unk04, 0xff unassigned (item_model_slots_clear) */
     s32 unk0114;         /* 0x0114: the next slot to assign */
     Vis44 unk0118[314];  /* 0x0118 */
     Vis48 entries[64];   /* 0x3710 */
@@ -551,7 +551,7 @@ extern VisTableB vis_table_b;
 extern VisTableC vis_table_c;
 
 void vis_collect_sources(VECTOR *a, VECTOR *b, VECTOR *c);
-void func_8004656c(VECTOR *out);
+void collision_source_positions(VECTOR *out);
 void vis_build_visible(u8 *arg);
 void vis_build_planes(void);
 int vis_measure_position(void);
@@ -563,60 +563,63 @@ void vis_collect_table_b(void);
 void vis_collect_table_c(void);
 
 /* src/st/vis_request.c */
-void func_800492f4(VECTOR *pos);
-int func_80049544(VisLists *req);
+void collision_locate_hit_body(VECTOR *pos);
+int collision_query(VisLists *req);
 /* src/st/vis_hit.c */
-void func_80046604(VECTOR *pos);
-void func_800468c0(VECTOR *pos, int kind);
-void func_80047884(VECTOR *pos, int kind);
-int func_80048ad0(VisLists *req);
-int func_8004bb88(VisLists *req, int arg1);
-int func_8004be80(VisLists *req);
-int func_8004f53c(VisLists *req);
+void collision_transform_vertices(VECTOR *pos);
+void collision_test_triangles(VECTOR *pos, int kind);
+void collision_test_quads(VECTOR *pos, int kind);
+int collision_test_map(VisLists *req);
+int creature_find_in_reach(VisLists *req, int arg1);
+int creature_find_touching(VisLists *req);
+int object_find_in_reach(VisLists *req);
 
 /* src/st/vis_entry.c */
-void func_8004ac38(Vis212 *e);
-void func_8004ac9c(Vis212 *e);
-int func_8004c934(Vis212 *e, int index, VECTOR *out);
-int func_8004cc70(Vis212 *e, VECTOR *pos, int speed, VECTOR *target, SVECTOR *dir, SVECTOR *out,
+void creature_return_home(Vis212 *e);
+void creature_reset_facing(Vis212 *e);
+int creature_vertex_offset(Vis212 *e, int index, VECTOR *out);
+int creature_aim_shot(Vis212 *e, VECTOR *pos, int speed, VECTOR *target, SVECTOR *dir, SVECTOR *out,
                   int pitch, int turn, int n);
-void func_8004acec(Vis212 *e);
-void func_8004ad70(Vis212 *e);
-void func_8004ae38(Vis212 *e);
-void func_8004af24(Vis212 *e, Vis192 *r);
-void func_8004af7c(u16 i);
-void func_8004b058(Vis212 *e, u8 *p);
-int func_8004b090(u8 *p, int arg);
-void func_8004b098(int arg);
-void func_8004b19c(void);
-u8 *func_8004b1e8(Vis192 *r, u8 id);
-void func_8004b230(Vis212 *e, u8 id);
-void func_8004b270(void);
-void func_8004b2b4(u8 v);
-void func_8004b2dc(void);
+void creature_copy_type_stats(Vis212 *e);
+void creature_reset_for_spawn(Vis212 *e);
+void creature_despawn(Vis212 *e);
+void creature_spawn(Vis212 *e, Vis192 *r);
+void creature_spawn_by_index(u16 i);
+void creature_set_script(Vis212 *e, u8 *p);
+int creature_score_script(u8 *p, int arg);
+void creature_pick_script(int arg);
+void creature_pick_script_by_distance(void);
+u8 *creature_type_find_script(Vis192 *r, u8 id);
+void creature_set_script_by_id(Vis212 *e, u8 id);
+void creature_end_script(void);
+void creature_set_anim(u8 v);
+void creature_update_spawn(void);
 int func_8004b5d8(int a, int b, int c);
-int func_8004b8ec(int x, int y, int z, int r, VECTOR *a, VECTOR *b, int extra);
-void func_8004c03c(Vis212 *e);
-void func_8004c0f4(Vis212 *e, short step);
-void func_8004c128(Vis212 *e, short step);
-int func_8004c184(Vis212 *e, u16 v);
-void func_8004c1b4(Vis212 *e);
-void func_8004c808(void);
-VECTOR *func_8004ca34(Vis212 *e, VECTOR *out);
-void func_8004ca90(SVECTOR *off, VECTOR *out, VECTOR *base, int arg3, short height, short up);
-void func_8004cba0(SVECTOR *off, VECTOR *out, VECTOR *base);
+int vector_point_segment_distance(int x, int y, int z, int r, VECTOR *a, VECTOR *b, int extra);
+void creature_set_current(Vis212 *e);
+void creature_anim_step_wrap(Vis212 *e, short step);
+void creature_anim_step_clamp(Vis212 *e, short step);
+int creature_anim_passed_frame(Vis212 *e, u16 v);
+void creature_move(Vis212 *e);
+void creature_move_vertical(void);
+VECTOR *creature_get_position(Vis212 *e, VECTOR *out);
+/* VS.EXE has its own port under this name, with another signature; VS units define VS_EXE. */
+#ifndef VS_EXE
+void effect_random_offset(SVECTOR *off, VECTOR *out, VECTOR *base, int arg3, short height, short up);
+#endif
+void effect_jitter_offset(SVECTOR *off, VECTOR *out, VECTOR *base);
 
 /* src/st/vis_item.c */
-int func_8004d75c(Vis212 *e);
-void func_8004d764(Vis212 *e);
+int creature_sound_note(Vis212 *e);
+void creature_play_script_sound(Vis212 *e);
 void func_8004d7fc(void);
-void func_8004d804(Vis212 *e, int id);
-void func_8004da2c(Vis212 *e);
-void func_8004db0c(Vis212 *e);
-int func_8004db9c(Vis212 *e, short reach);
-int func_8004de24(Vis212 *e, int arg, u16 *levels);
+void creature_drop_item(Vis212 *e, int id);
+void creature_roll_drops(Vis212 *e);
+void creature_award_kill_bonuses(Vis212 *e);
+int creature_test_player_aim(Vis212 *e, short reach);
+int creature_calc_damage(Vis212 *e, int arg, u16 *levels);
 
-/* One 24-byte table A entry of an area file (func_8004e960). */
+/* One 24-byte table A entry of an area file (creatures_load). */
 typedef struct {
     u8 unk00;            /* 0x00: 0xff: unused */
     u8 unk01;            /* 0x01: record index */
@@ -634,33 +637,33 @@ typedef struct {
 } VisAFileEntry;
 
 /* src/st/vis_a.c */
-int func_8004def8(Vis212 *e, int kind, int power, u16 *levels, int crit);
-void func_8004e2d8(void);
-void func_8004e8ec(void);
-void func_8004e960(VisAFileEntry *src);
+int creature_take_damage(Vis212 *e, int kind, int power, u16 *levels, int crit);
+void creatures_bind_previous_area(void);
+void creature_types_link_scripts(void);
+void creatures_load(VisAFileEntry *src);
 
-/* src/st/vis_b_init.c (func_8004eda8: st/funcs.h) */
-void func_8004ee00(Vis88 *e);
-void func_8004ee48(int index, int mode);
+/* src/st/vis_b_init.c (objects_clear: st/funcs.h) */
+void object_reset(Vis88 *e);
+void ground_item_set_hidden(int index, int mode);
 
 /* src/st/vis_b_load.c */
-void func_8004eebc(u8 *src);
+void objects_load(u8 *src);
 
-/* src/st/vis_b.c (func_8004fc94, func_8004fd28, func_800500ac: st/funcs.h) */
-int func_8004f718(int i, VisLists *req);
-void func_8004f974(Vis88 *e, int kind);
-Vis88 *func_8004f994(int start, int n, int now);
-void func_8004fa38(int key);
-int func_8004fb88(Vis88 *e, int id);
-void func_8004fc0c(int key);
+/* src/st/vis_b.c (player_in_cell_rect, player_in_centred_rect, fade_run_frames: st/funcs.h) */
+int object_find_usable(int i, VisLists *req);
+void object_start_kind(Vis88 *e, int kind);
+Vis88 *object_alloc(int start, int n, int now);
+void objects_toggle_by_link_id(int key);
+int object_try_key(Vis88 *e, int id);
+void objects_try_key(int key);
 void func_8004fc84(void);
-int func_8004fdd0(Vis88 *src, Vis88 *e, SVECTOR *from, SVECTOR *to, int fade, int steps);
-void func_80050170(int dx, int dy, int dz);
-Vis88 *func_80050288(Vis88 *src, int kind, int state, int arg3, int size, int angle, int ox,
+int object_move_child(Vis88 *src, Vis88 *e, SVECTOR *from, SVECTOR *to, int fade, int steps);
+void world_shift_position(int dx, int dy, int dz);
+Vis88 *object_spawn_part(Vis88 *src, int kind, int state, int arg3, int size, int angle, int ox,
                      int oy, int oz);
-void func_80050468(Vis88 *e, int arg);
-void func_80050564(Vis88 *e, int arg);
-void func_8005066c(Vis88 *e, int arg);
+void object_spawn_side_parts(Vis88 *e, int arg);
+void object_spawn_forward_parts(Vis88 *e, int arg);
+void object_spawn_side_parts_alt(Vis88 *e, int arg);
 
 /* One 24-byte table C entry of an area file. */
 typedef struct {
@@ -680,18 +683,18 @@ typedef struct {
     u16 unk16;
 } VisCFileEntry;
 
-/* src/st/vis_c.c (func_80052ca4: st/funcs.h; func_80052d10: st/area.h) */
-void func_80052f30(VisCFileEntry *src);
-void func_80052894(StWarp *to, int keep);
-void func_80052c24(void);
-void func_80052c5c(void);
-int func_80052d40(int id);
-void func_80052d98(u16 *id);
-void func_80052e50(Vis48 *c);
-int func_80053174(VisLists *req, int unused);
+/* src/st/vis_c.c (ground_items_clear: st/funcs.h; item_model_slots_clear: st/area.h) */
+void ground_items_load(VisCFileEntry *src);
+void player_warp(StWarp *to, int keep);
+void player_warp_to_save_point(void);
+void player_warp_back(void);
+int item_is_uncollected(int id);
+void item_record_pickup(u16 *id);
+void ground_item_remove(Vis48 *c);
+int ground_item_find_in_reach(VisLists *req, int unused);
 
 /* 0x8005335c: no source yet. */
-void func_8005335c(Vis48 *c, int arg1);
+void ground_item_pick_up(Vis48 *c, int arg1);
 
 
 #endif

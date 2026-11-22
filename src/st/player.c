@@ -368,7 +368,7 @@ void area_load_set_blocking(int r, int g, int b, int arg3, int arg4, int arg5)
     lighting_load_defaults();
     fade_reset();
     lighting_build_matrices();
-    func_800500ac(130, 4096, 4096, 0);
+    fade_run_frames(130, 4096, 4096, 0);
     cd_wait_idle();
     area_state.unk18 = cd_state.unk4;
     area_request_load(255, 255, 255, arg3, arg4, 127, 127, 127, 0, 0, 0);
@@ -1970,7 +1970,7 @@ void player_update_hand_action(u8 hand)
                 req.unk4 = p;
                 req.unk1C = 1024;
                 req.unk1E = 1024;
-                r = func_8004bb88((VisLists *)&req, 4);
+                r = creature_find_in_reach((VisLists *)&req, 4);
                 if (r != -1) {
                     d = viewer.unk26A - (short)vis_table_a.entries[r].unk56;
                     if (d > 2048) {
@@ -2104,9 +2104,9 @@ void player_update_hand_action(u8 hand)
                     reach = viewer.unkE8[hand]->unk2;
                     for (vis_table_a.unk6144 = 0; vis_table_a.unk6144 < 64; vis_table_a.unk6144++, e++) {
                         if (e->unk00 != 255) {
-                            func_8004c03c(e);
+                            creature_set_current(e);
                             if (e->unk05 == 1 && e->unk1C.bytes[3] != 1 && e->unk2C != 0 &&
-                                (side = func_8004db9c(e, reach)) != 0 && e->unk3C < best) {
+                                (side = creature_test_player_aim(e, reach)) != 0 && e->unk3C < best) {
                                 best = e->unk3C;
                                 hit = e;
                                 hr = side;
@@ -2114,7 +2114,7 @@ void player_update_hand_action(u8 hand)
                         }
                     }
                     if (hit != NULL) {
-                        dmg = func_8004def8(hit, hr, viewer.unk180, viewer.unkBA, 0);
+                        dmg = creature_take_damage(hit, hr, viewer.unk180, viewer.unkBA, 0);
                         hud_queue_damage_number(dmg);
                     }
                     if (hr != 0 && dmg != -1) {
@@ -2262,7 +2262,7 @@ void player_cast_magic(u8 magic, u8 hand)
 }
 
 /* Moves the viewer `speed` units along heading `angle`, sliding along the
- * walls func_80049544 reports (at most three tries), and keeps the motion
+ * walls collision_query reports (at most three tries), and keeps the motion
  * in viewer.unk260.
  */
 ADDRESS(0x80041150, 0x4dc)
@@ -2304,7 +2304,7 @@ loop:
     vis_lists.unk47CE = 0;
     vis_lists.unk47D0 = 0;
     vis_lists.unk47D2 = 0;
-    hits = func_80049544(&vis_lists);
+    hits = collision_query(&vis_lists);
     if (hits == 0) {
     move:
         viewer.position.vx += vel.vx;
@@ -2343,7 +2343,7 @@ loop:
         hits = speed * rcos(angle - (ang + 1024)) / 4096;
         vis_lists.unk44C6 = hits;
     } else if (hits & 0x50) {
-        func_800492f4((VECTOR *)&viewer.position.vx);
+        collision_locate_hit_body((VECTOR *)&viewer.position.vx);
         d.vx = viewer.position.vx - vis_lists.unkAC.vx;
         d.vy = 0;
         d.vz = viewer.position.vz - vis_lists.unkAC.vz;
@@ -2426,7 +2426,7 @@ void player_update_motion(void)
         vis_lists.unk47CE = 0;
         vis_lists.unk47D0 = 0;
         vis_lists.unk47D2 = 0;
-        hits = func_80049544(&vis_lists);
+        hits = collision_query(&vis_lists);
         if (hits == 0) {
         move:
             viewer.position.vx += vel.vx;
@@ -2881,7 +2881,7 @@ void player_handle_examine(void)
     if (mode != 4 && (DAT_801cd180.unk4 & DAT_801cd180.unk22[10]) && !DAT_801cd180.unk12) {
         DAT_801cd180.unk4 &= ~DAT_801cd180.unk22[10];
         if (mode == 0)
-            func_80055374(&viewer.position.vx, &viewer.unk278);
+            player_examine(&viewer.position.vx, &viewer.unk278);
     }
 }
 
@@ -2987,8 +2987,8 @@ void player_update(void)
                 DAT_801cd180.unk10 = 1;
                 fade_reset();
                 viewer.unk2D6 = viewer.unk2D8 = viewer.unk2DA = viewer.unk2DC = 0;
-                func_800500ac(2, 4096, 4096, 0);
-                func_800500ac(2, 4096, 4096, 0);
+                fade_run_frames(2, 4096, 4096, 0);
+                fade_run_frames(2, 4096, 4096, 0);
                 cd_wait_idle();
                 player_reload_equipment();
                 vis_table_a.unk6168 = 254;
@@ -3048,7 +3048,7 @@ void player_update(void)
             lighting.unkA = 2;
         }
         if (viewer.unk2B) {
-            func_80052c24();
+            player_warp_to_save_point();
         }
         if ((DAT_801cd180.unk4 & 8) && viewer.unk218 != 4 && area_state.unk0 == 0 &&
             vis_table_a.unk6169 == 0 && area_state.unk18 == -1) {
@@ -3145,7 +3145,7 @@ void player_update(void)
                     DAT_801cd180.unk4 &= ~DAT_801cd180.unk22[10];
                     if (ids[viewer.unk15E] != 0xffff) {
                         viewer.unk2B = 0;
-                        func_80054a54(ids[viewer.unk15E]);
+                        item_use(ids[viewer.unk15E]);
                         if (DAT_801cd0e0 == 1) {
                             func_80057cc8();
                             if (ids[viewer.unk15E] == 288) {
@@ -3218,7 +3218,7 @@ void player_update(void)
                             b = vis_table_b.entries;
                             fade_reset();
                             viewer.unk2D6 = viewer.unk2D8 = viewer.unk2DA = viewer.unk2DC = 0;
-                            func_800500ac(2, 4096, 4096, 256);
+                            fade_run_frames(2, 4096, 4096, 256);
                             n = 240;
                             while (n--) {
                                 if (b->unk05 == 236 && b->unk54 != -1) {
@@ -3251,7 +3251,7 @@ void player_update(void)
                             card_screen_close();
                             fade_reset();
                             viewer.unk2D6 = viewer.unk2D8 = viewer.unk2DA = viewer.unk2DC = 0;
-                            func_800500ac(2, 0, 4096, 256);
+                            fade_run_frames(2, 0, 4096, 256);
                             cd_wait_idle();
                             player_reload_equipment();
                             vis_table_a.unk6168 = 254;

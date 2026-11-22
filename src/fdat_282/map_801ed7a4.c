@@ -35,7 +35,7 @@ void func_801ed7a4(void)
     if (e == a48) {
         if (viewer.unk178 == 0x55 || viewer.unk178 == 0x29) {
             func_801edba4(0x55);
-            func_8004ae38(e);
+            creature_despawn(e);
             return;
         }
         if (viewer.unk178 == 0x3b)
@@ -45,9 +45,9 @@ void func_801ed7a4(void)
     }
     if (e == a50 && viewer.unk178 == 0x65) {
         func_801ede88();
-        func_8004ae38(e);
-        func_8004ae38(a48);
-        func_8004ae38(a49);
+        creature_despawn(e);
+        creature_despawn(a48);
+        creature_despawn(a49);
         return;
     }
     if (e == a19) {
@@ -60,7 +60,7 @@ void func_801ed7a4(void)
     }
     if (e == a49 && viewer.unk178 == 0x61) {
         func_801edba4(0x61);
-        func_8004ae38(e);
+        creature_despawn(e);
         return;
     }
     e->unk2A += e->unkB0;
@@ -110,7 +110,7 @@ void func_801eda20(void)
     step = 28;
     do {
         if (door->unk10 < 0xf00 && door->unk10 + step >= 0xf00)
-            func_8004ed54(door, door->unk0a * 3 + 208);
+            object_play_sound(door, door->unk0a * 3 + 208);
         door->unk10 += step;
         if (door->unk10 >= 0x1000)
             door->unk10 = 0xfff;
@@ -118,7 +118,7 @@ void func_801eda20(void)
             item->unk22 = 2;
         if (door->unk10 > 0xf00 && item->unk22 == 2)
             item->unk22 = 1;
-        func_80053aa4();
+        ground_items_update();
         world_run_frame(NULL, NULL, 0);
     } while (door->unk10 != 0xfff);
     door->unk0C = 0xff;
@@ -175,7 +175,7 @@ void func_801edba4(int id)
     } while ((short)e->unk2A != 0xfff);
     for (;;) {
         if (door->unk10 < 1 && door->unk10 + step >= 1)
-            func_8004ed54(door, door->unk0a * 3 + 208);
+            object_play_sound(door, door->unk0a * 3 + 208);
         door->unk10 += step;
         if (door->unk10 + step >= 0x1000)
             break;

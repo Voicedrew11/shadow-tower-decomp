@@ -77,8 +77,8 @@ void func_801ed4a0(void)
             e4->unk2C = 0;
             e4->unk1C.bytes[2] |= 0x15;
             fdat_801eb7b4(e4, 5);
-            func_8004da2c(e4);
-            func_8004db0c(e4);
+            creature_roll_drops(e4);
+            creature_award_kill_bonuses(e4);
             e4->unk34 = 0x1000;
             viewer.unk30++;
         }
@@ -87,8 +87,8 @@ void func_801ed4a0(void)
             e5->unk2C = 0;
             e5->unk1C.bytes[2] |= 0x15;
             fdat_801eb7b4(e5, 5);
-            func_8004da2c(e5);
-            func_8004db0c(e5);
+            creature_roll_drops(e5);
+            creature_award_kill_bonuses(e5);
             e5->unk34 = 0x1000;
             viewer.unk30++;
         }
@@ -113,8 +113,8 @@ void func_801ed614(void)
             e->unk66 = 30;
             e->unk05 = 3;
             e->unk67 = 100;
-            func_8004da2c(e);
-            func_8004db0c(e);
+            creature_roll_drops(e);
+            creature_award_kill_bonuses(e);
         }
         fdat_801edb3c = 2;
     } else {

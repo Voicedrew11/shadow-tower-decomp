@@ -29,8 +29,8 @@
 DATA(0x801edc54, 0x4, ".bss")
 int fdat_801edc54;
 
-void func_800500ac(int arg0, int arg1, int arg2, int arg3);
-void func_8004e324(void);
+void fade_run_frames(int arg0, int arg1, int arg2, int arg3);
+void creatures_update(void);
 void player_enter_normal_state(void);
 
 /*
@@ -48,8 +48,8 @@ void func_801ed9cc(int gate)
     int slot;
 
     func_80057c54();
-    func_800500ac(2, 0, 0x1000, 0x100);
-    func_8004e2d8();
+    fade_run_frames(2, 0, 0x1000, 0x100);
+    creatures_bind_previous_area();
     if (gate == 0) {
         viewer.position.vx = 0x50800;
         viewer.position.vy = 0x425c0;
@@ -68,8 +68,8 @@ void func_801ed9cc(int gate)
     viewer.unk278.vx = 0;
     *(SVECTOR *)&viewer.unk268 = viewer.unk278;
     viewer.unk218 = 5;
-    func_800500ac(2, 0x1000, 0x1000, 0);
-    func_8004e324();
+    fade_run_frames(2, 0x1000, 0x1000, 0);
+    creatures_update();
     if (gate == 0 && e->unk05 != 3 && e->unk05 != 1) {
         index = e->unk02;
         slot = e->unk0B + 128;
@@ -83,7 +83,7 @@ void func_801ed9cc(int gate)
     }
     cd_wait_idle();
     func_80057c54();
-    func_800500ac(2, 0x1000, 0, -0x100);
+    fade_run_frames(2, 0x1000, 0, -0x100);
     func_80057a3c();
     if (gate == 0 && DAT_801cba08.unk1448[r->unk09] == 0) {
         fdat_801ed388(e, 0, 0);

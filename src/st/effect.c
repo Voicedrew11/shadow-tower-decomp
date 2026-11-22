@@ -63,7 +63,7 @@ int effect_attack(int arg0, u_long height, int drop)
         default:
             return 0;
         }
-        return func_80049544(req);
+        return collision_query(req);
     }
     e->unk8--;
     return 0;
@@ -72,7 +72,7 @@ int effect_attack(int arg0, u_long height, int drop)
 /*
  * Emits effect output for an effect of kind `kind` with definition `def`:
  * player_hit when `flags` has 0x80, and when it has 0x10 (and the
- * target entry faces `pos`, when given) func_8004def8 on the target entry
+ * target entry faces `pos`, when given) creature_take_damage on the target entry
  * with channel levels from `def` and the viewer. Bits 16-19 of `flags`
  * are options: 0x10000 marks the target, 0x20000 picks the second channel.
  */
@@ -134,9 +134,9 @@ void effect_emit(u_long flags, int kind, StEffectDef *def, int arg, VECTOR *pos)
             levels[3 + i] = *src + base + bias[i] / 6;
     }
     if (level < 6)
-        result = func_8004def8(target, 1, arg, levels, 1);
+        result = creature_take_damage(target, 1, arg, levels, 1);
     else
-        result = func_8004def8(target, 1, arg, levels, 0);
+        result = creature_take_damage(target, 1, arg, levels, 0);
     if (kind & 0x40)
         hud_queue_damage_number(result);
     if (options & 0x10000)

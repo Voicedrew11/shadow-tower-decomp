@@ -90,7 +90,7 @@ int fdat_801ece7c(Vis212 *e)
     if (e->unk34 < 0) {
         if (e->unk2C == 0) {
             if ((short)e->unk2A >= 4095)
-                func_8004ae38(e);
+                creature_despawn(e);
             return 1;
         }
         e->unk34 = -1;
@@ -113,7 +113,7 @@ void fdat_801ecf44(Vis212 *e)
             break;
         world_run_frame(NULL, (SVECTOR *)&viewer.unk268, 0);
     }
-    func_8004ae38(e);
+    creature_despawn(e);
 }
 
 /*
@@ -228,7 +228,7 @@ void fdat_801ed410(Vis212 *e)
 
     vis_table_a.unk612C += r->unk12;
     vis_table_a.unk6128 += e->unk0D;
-    func_8004af24(e, r);
+    creature_spawn(e, r);
     e->unk1B = 255;
     e->unk60 = 0xffff;
     e->unk54 = 0xffff;

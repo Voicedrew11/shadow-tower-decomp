@@ -20,12 +20,12 @@ typedef struct {
 } FdatHeader;
 
 /* ST.EXE, no source yet. */
-void func_8004cee8(Vis212 *e, int arg, VECTOR *pos);
-void func_8004ed54(Vis88 *e, int sound);
+void effect_spawn_attack(Vis212 *e, int arg, VECTOR *pos);
+void object_play_sound(Vis88 *e, int sound);
 
 /* ST.EXE functions declared in st/funcs.h, which the overlay units do not
  * include (see below). */
-void func_80053aa4(void);
+void ground_items_update(void);
 void player_update_hand_action(u8 hand);
 void player_load_equipment_model(u16 id, u8 slot, u8 reload);
 void player_compute_derived_stats(int arg);

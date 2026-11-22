@@ -1,6 +1,6 @@
 /*
  * ST.EXE: spawning the table B object an entry carries (WIP module,
- * 0x800549c8..0x80054a54; func_80054a54 after it, a 48-case item-use
+ * 0x800549c8..0x80054a54; item_use after it, a 48-case item-use
  * switch, is not claimed).
  */
 #include <kf/lib/address.h>
@@ -14,9 +14,9 @@
 /* Spawns table B kind 150 for entry e and returns it; e->unk49 remembers it
  * as 106 + its index. */
 ADDRESS(0x800549c8, 0x8c)
-Vis88 *func_800549c8(Vis212 *e, int id)
+Vis88 *creature_alloc_object(Vis212 *e, int id)
 {
-    Vis88 *b = func_8004f994(150, 10, -1);
+    Vis88 *b = object_alloc(150, 10, -1);
 
     e->unk49 = b - vis_table_b.entries + 106;
     b->unk0a = id;

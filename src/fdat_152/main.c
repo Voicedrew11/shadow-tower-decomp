@@ -125,7 +125,7 @@ void func_801ed5e8(short id)
     req.unk22 = 0;
     req.unk20 = 0;
     if (id == 0x130) {
-        if (func_8004f53c((VisLists *)&req) == 4) {
+        if (object_find_in_reach((VisLists *)&req) == 4) {
             fdat_801edb84 = 1;
             DAT_801cd0e0 = 1;
         } else {

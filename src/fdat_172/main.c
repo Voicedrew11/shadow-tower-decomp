@@ -297,7 +297,7 @@ void func_801edd38(short id)
         req.unk22 = 0;
         req.unk1E = 1600;
         req.unk20 = 0;
-        if (func_8004f53c((VisLists *)&req) == 12) {
+        if (object_find_in_reach((VisLists *)&req) == 12) {
             DAT_801cd0e0 = 1;
             fdat_801edfd0 = 1;
         } else {

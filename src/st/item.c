@@ -24,14 +24,14 @@
 #include <st/item.h>
 
 ADDRESS(0x8005529c, 0x20)
-int func_8005529c(int id)
+int item_is_held(int id)
 {
     return DAT_801c7590.counts[id].count != 0;
 }
 
 /* Takes one of item `id`; nonzero when there was none. */
 ADDRESS(0x800552bc, 0x44)
-int func_800552bc(int id)
+int item_take(int id)
 {
     if (DAT_801c7590.counts[id].count != 0) {
         DAT_801c7590.counts[id].count--;
@@ -42,7 +42,7 @@ int func_800552bc(int id)
 
 /* Adds one of item `id`; nonzero when 99 are already held. */
 ADDRESS(0x80055300, 0x74)
-int func_80055300(int id)
+int item_add(int id)
 {
     if (DAT_801c7590.counts[id].count < 99) {
         DAT_801c7590.counts[id].count++;
@@ -54,7 +54,7 @@ int func_80055300(int id)
 
 /* The examine action at `pos` facing `rot` (vx: yaw, vy: pitch). */
 ADDRESS(0x80055374, 0x61c)
-void func_80055374(long *pos, SVECTOR *rot)
+void player_examine(long *pos, SVECTOR *rot)
 {
     VECTOR p;
     VisRequest req;
@@ -84,7 +84,7 @@ void func_80055374(long *pos, SVECTOR *rot)
     req.unk22 = 0;
     req.unk1E = 1600;
     req.unk20 = 0;
-    i = func_80053174((VisLists *)&req, 1);
+    i = ground_item_find_in_reach((VisLists *)&req, 1);
     first_result = i;
     if (i != -1) {
         c = &vis_table_c.entries[i];
@@ -92,8 +92,8 @@ void func_80055374(long *pos, SVECTOR *rot)
         c->unk22 = 3;
         return;
     }
-    /* VisLists starts with the request fields func_8004bb88 reads. */
-    i = func_8004bb88((VisLists *)&req, 1);
+    /* VisLists starts with the request fields creature_find_in_reach reads. */
+    i = creature_find_in_reach((VisLists *)&req, 1);
     if (i != first_result) {
         a = &vis_table_a.entries[i];
         up = ratan2(a->unk74.vy - a->unk30 - viewer.position.vy, a->unk40);
@@ -123,7 +123,7 @@ void func_80055374(long *pos, SVECTOR *rot)
     vis_lists.unk22 = 0;
     vis_lists.unk20 = 0;
     vis_lists.unk0 = 0;
-    for (; (i = func_8004f718(i, &vis_lists)) != -1; i++) {
+    for (; (i = object_find_usable(i, &vis_lists)) != -1; i++) {
         b = &vis_table_b.entries[i];
         def = &vis_table_b.unk0000[b->unk0a];
         DAT_801cd0e0 = 1;

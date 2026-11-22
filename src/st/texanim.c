@@ -4658,7 +4658,7 @@ void world_draw_objects(void)
             continue;
         case 31:
             /* A sound over a rectangle of the floor. */
-            if (func_8004fc94(e->unk24.vx >> 12, e->unk24.vz >> 12, e->unk48, e->unk49, 0x8000)) {
+            if (player_in_cell_rect(e->unk24.vx >> 12, e->unk24.vz >> 12, e->unk48, e->unk49, 0x8000)) {
                 if ((s32)(e->unk50 - now) >= 0)
                     continue;
                 if (e->unk4A.snd.unk4D & 2)
@@ -4712,7 +4712,7 @@ void world_draw_objects(void)
             break;
         case 236:
             /* A sound around a point. */
-            if (func_8004fd28(e->unk24.vx, e->unk24.vz, e->unk48 << 8, e->unk49 << 8, 0x8000)) {
+            if (player_in_centred_rect(e->unk24.vx, e->unk24.vz, e->unk48 << 8, e->unk49 << 8, 0x8000)) {
                 if ((s32)(e->unk50 - now) >= 0)
                     continue;
                 if (e->unk4A.snd.unk4D & 2)

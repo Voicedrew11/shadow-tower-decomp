@@ -16,5 +16,5 @@ void func_801ed9e0(short id)
     Vis212 *e = &vis_table_a.entries[48];
 
     if (id == 0x10e && e->unk1C.bytes[0] != 0 && e->unk05 != 3)
-        func_8004ae38(e);
+        creature_despawn(e);
 }

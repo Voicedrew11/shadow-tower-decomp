@@ -17,7 +17,7 @@ RODATA(0x800122b4, 0x31c)
 
 /* Entry e attacks with effect kind `kind` from pos. */
 ADDRESS(0x8004cee8, 0x874)
-void func_8004cee8(Vis212 *e, int kind, VECTOR *pos)
+void effect_spawn_attack(Vis212 *e, int kind, VECTOR *pos)
 {
     VECTOR p;
     SVECTOR dir;
@@ -44,7 +44,7 @@ void func_8004cee8(Vis212 *e, int kind, VECTOR *pos)
     case 0x7d:
     case 0xa1:
         for (i = 0; i < 3; i++) {
-            func_8004cc70(e, target, 256 + i * 64, &p, &dir, &rot, -1, 16, 1);
+            creature_aim_shot(e, target, 256 + i * 64, &p, &dir, &rot, -1, 16, 1);
             rot.vx = 0;
             rot.vz = 0;
             fx = effect_spawn(r->unk08, 0x81, kind, &p, &dir, 256, &rot, e->unk0B);
@@ -54,8 +54,8 @@ void func_8004cee8(Vis212 *e, int kind, VECTOR *pos)
         break;
     case 0x3a:
         for (i = 0; i < 3; i++) {
-            func_8004cc70(e, target, 512 + i * 128, &p, &dir, &rot, -1, 16, 1);
-            func_8004cba0(&dir, &p, pos);
+            creature_aim_shot(e, target, 512 + i * 128, &p, &dir, &rot, -1, 16, 1);
+            effect_jitter_offset(&dir, &p, pos);
             fx = effect_spawn(r->unk08, 0x81, kind, &p, &dir, 0x1000, &rot, e->unk0B);
             if (fx)
                 fx->unk8 = 0;
@@ -70,8 +70,8 @@ void func_8004cee8(Vis212 *e, int kind, VECTOR *pos)
     case 0x89:
     case 0x93:
         for (i = 0; i < 1; i++) {
-            func_8004cc70(e, target, 256, &p, &dir, &rot, -1, 16, 1);
-            func_8004cba0(&dir, &p, pos);
+            creature_aim_shot(e, target, 256, &p, &dir, &rot, -1, 16, 1);
+            effect_jitter_offset(&dir, &p, pos);
             fx = effect_spawn(r->unk08, 0x81, kind, &p, &dir, 0x200, &rot, e->unk0B);
             if (fx)
                 fx->unk8 = 3;
@@ -81,7 +81,7 @@ void func_8004cee8(Vis212 *e, int kind, VECTOR *pos)
     case 0x61:
     case 0x68:
     case 0x74:
-        func_8004cc70(e, target, 384, &p, &dir, &rot, -1, 16, 1);
+        creature_aim_shot(e, target, 384, &p, &dir, &rot, -1, 16, 1);
         fx = effect_spawn(r->unk08, 0x81, kind, &p, &dir, 0x400, e->unk0B);
         if (fx)
             fx->unk8 = 0;
@@ -102,7 +102,7 @@ void func_8004cee8(Vis212 *e, int kind, VECTOR *pos)
     case 0xa4:
     case 0xa6:
     case 0xa8:
-        func_8004cc70(e, target, 384, &p, &dir, &rot, -1, 16, 1);
+        creature_aim_shot(e, target, 384, &p, &dir, &rot, -1, 16, 1);
         fx = effect_spawn(r->unk08, 0x81, kind, &p, &dir, 0x1000, &rot, e->unk0B);
         if (fx)
             fx->unk8 = 0;
@@ -116,13 +116,13 @@ void func_8004cee8(Vis212 *e, int kind, VECTOR *pos)
     case 0x95:
     case 0x9c:
     case 0x9e:
-        func_8004cc70(e, target, 512, &p, &dir, &rot, -1, 16, 1);
+        creature_aim_shot(e, target, 512, &p, &dir, &rot, -1, 16, 1);
         fx = effect_spawn(r->unk08, 0x81, kind, &p, &dir, 0x200, e->unk0B);
         if (fx)
             fx->unk8 = 0;
         break;
     case 0x41:
-        func_8004ca90(&dir, &p, pos, (int)e, 0, 48);
+        effect_random_offset(&dir, &p, pos, (int)e, 0, 48);
         rot.vx = 0;
         rot.vy = 0;
         rot.vz = 0;
@@ -134,8 +134,8 @@ void func_8004cee8(Vis212 *e, int kind, VECTOR *pos)
     case 0x5f:
     case 0x70:
         for (i = 0; i < 4; i++) {
-            func_8004cc70(e, target, 512, &p, &dir, &rot, -1, 16, 1);
-            func_8004cba0(&dir, &p, pos);
+            creature_aim_shot(e, target, 512, &p, &dir, &rot, -1, 16, 1);
+            effect_jitter_offset(&dir, &p, pos);
             fx = effect_spawn(r->unk08, 0x81, kind, &p, &dir, 0x400, e->unk0B);
             if (fx)
                 fx->unk8 = 0;
@@ -144,7 +144,7 @@ void func_8004cee8(Vis212 *e, int kind, VECTOR *pos)
     case 0x55:
     case 0x59:
     case 0x97:
-        func_8004cc70(e, target, 256, &p, &dir, &rot, -1, 16, 1);
+        creature_aim_shot(e, target, 256, &p, &dir, &rot, -1, 16, 1);
         fx = effect_spawn(r->unk08, 0x81, kind, &p, &dir, 0x200, e->unk0B);
         if (fx)
             fx->unk40.vy = 0;
@@ -153,7 +153,7 @@ void func_8004cee8(Vis212 *e, int kind, VECTOR *pos)
     case 0x32:
     case 0x6a:
         for (i = 0; i < 4; i++) {
-            func_8004ca90(&dir, &p, pos, (int)e, -e->unk30, -48);
+            effect_random_offset(&dir, &p, pos, (int)e, -e->unk30, -48);
             fx = effect_spawn(r->unk08, 0x81, kind, &p, &dir, 0x600, e->unk0B);
             if (fx)
                 fx->unk8 = 3;
@@ -164,7 +164,7 @@ void func_8004cee8(Vis212 *e, int kind, VECTOR *pos)
     case 0x9b:
     case 0xa3:
         for (i = 0; i < 4; i++) {
-            func_8004ca90(&dir, &p, pos, (int)e, 0, -48);
+            effect_random_offset(&dir, &p, pos, (int)e, 0, -48);
             fx = effect_spawn(r->unk08, 0x81, kind, &p, &dir, 0x600, e->unk0B);
             if (fx)
                 fx->unk8 = 3;
@@ -199,8 +199,8 @@ void func_8004cee8(Vis212 *e, int kind, VECTOR *pos)
     case 0x9f:
     case 0xa5:
         for (i = 0; i < 4; i++) {
-            func_8004cc70(e, target, 32, &p, &dir, &rot, -1, 16, 1);
-            func_8004cba0(&dir, &p, pos);
+            creature_aim_shot(e, target, 32, &p, &dir, &rot, -1, 16, 1);
+            effect_jitter_offset(&dir, &p, pos);
             fx = effect_spawn(r->unk08, 0x81, kind, &p, &dir, 0x400, e->unk0B);
             if (fx)
                 fx->unk8 = 3;
@@ -219,7 +219,7 @@ void func_8004cee8(Vis212 *e, int kind, VECTOR *pos)
     case 0xe6:
     case 0xeb:
     case 0xee:
-        func_8004cc70(e, target, 768, &p, &dir, &rot, -1, 16, 1);
+        creature_aim_shot(e, target, 768, &p, &dir, &rot, -1, 16, 1);
         fx = effect_spawn(r->unk08, 0x81, kind, &p, &dir, 0x800, &rot, e->unk0B, e);
         if (fx)
             fx->unk8 = 3;
@@ -259,7 +259,7 @@ void func_8004cee8(Vis212 *e, int kind, VECTOR *pos)
     case 0xa0:
     case 0xa7:
     case 0xa9:
-        func_8004cc70(e, target, 384, &p, &dir, &rot, -1, 16, 1);
+        creature_aim_shot(e, target, 384, &p, &dir, &rot, -1, 16, 1);
         fx = effect_spawn(r->unk08, 0x81, kind, &p, &dir, 0x200, &rot, e->unk0B);
         if (fx)
             fx->unk8 = 0;

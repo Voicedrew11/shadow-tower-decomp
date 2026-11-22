@@ -798,7 +798,7 @@ int effect_accelerate(int scale, int limit, int attack, int height, SVECTOR *acc
 }
 
 /*
- * Turns the current effect toward its target (the entry func_8004b658
+ * Turns the current effect toward its target (the entry creature_find_in_cone
  * finds for an effect with flag 0x40, else the viewer when player_distance_in_arc
  * allows) by at most `turn`, and accelerates it along its heading; with
  * `scale_near` instead of `scale` while the target is within `near`.
@@ -815,7 +815,7 @@ int effect_home(int limit, int scale, int turn, int attack, int height, int near
     Vis212 *t;
 
     if (e->unk0 & 0x40) {
-        t = func_8004b658(&e->unk20, e->unk30.vy, e->unk30.vx, 24000, range, range, &dist, 0);
+        t = creature_find_in_cone(&e->unk20, e->unk30.vy, e->unk30.vx, 24000, range, range, &dist, 0);
         if (t == NULL)
             goto move;
         target.vx = t->unk74.vx;

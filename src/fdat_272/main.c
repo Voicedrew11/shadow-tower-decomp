@@ -459,7 +459,7 @@ void func_801edd24(void)
             break;
         case 3:
             if ((short)e->unk2A + e->unkB0 >= 0x1000) {
-                func_8004ae38(e);
+                creature_despawn(e);
                 fdat_801ef924 = 4;
             }
             break;
@@ -575,7 +575,7 @@ void func_801ee544(short id)
     req.unk22 = 0;
     req.unk20 = 0;
     if (id == 0x12f) {
-        if (func_8004bb88((VisLists *)&req, 1) == 0x30) {
+        if (creature_find_in_reach((VisLists *)&req, 1) == 0x30) {
             fdat_801ef93c = 1;
             DAT_801cd0e0 = 1;
         } else {
@@ -624,7 +624,7 @@ item_placed:
         int v;
         int next;
 
-        func_8004ed54(d16, d16->unk0a * 3 + 0xd0);
+        object_play_sound(d16, d16->unk0a * 3 + 0xd0);
         v = d16->unk10;
         next = v + step;
         if (v == 0xfff) {
@@ -698,7 +698,7 @@ void func_801ee948(void)
     fdat_801ecf44(e);
     e--;
     fdat_801eb7b4(e, 0);
-    func_8004ae38(e);
+    creature_despawn(e);
 }
 
 /* Once: entry 51 plays animation 8 and entry 50 animation 1, record 11's
@@ -764,7 +764,7 @@ void func_801eebb4(void)
     step = d->unk48 * 4;
     do {
         if (d->unk10 == 0)
-            func_8004ed54(d, d->unk0a * 3 + 0xd0);
+            object_play_sound(d, d->unk0a * 3 + 0xd0);
         d->unk10 += step;
         if (d->unk10 >= 0x1000)
             d->unk10 = 0xfff;
@@ -848,7 +848,7 @@ void func_801eeeb4(void)
     viewer.unk270.vy = 4096 - viewer.unk26A;
     viewer.unk270.vz = 4096 - viewer.unk26C;
     RotMatrixZYX(&viewer.unk270, &viewer.unk298);
-    func_8005335c(c, 1);
+    ground_item_pick_up(c, 1);
 }
 
 /* Entry 32 plays animation 9 (the ground shakes through its middle part

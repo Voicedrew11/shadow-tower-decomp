@@ -1,6 +1,6 @@
 /*
  * VS.EXE: jittered placement (WIP module). VS's copy of ST.EXE's
- * func_8004cba0 (src/st/vis_entry.c).
+ * effect_jitter_offset (src/st/vis_entry.c).
  */
 #include <kf/lib/address.h>
 #include <kf/lib/types.h>

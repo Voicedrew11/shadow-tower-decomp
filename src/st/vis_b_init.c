@@ -1,7 +1,7 @@
 /*
  * ST.EXE: playing a sound at a table B entry, clearing table B
  * (vis_table_b.entries) and resetting one entry, and a table C entry's
- * state switch (WIP module; the area-file loader func_8004eebc after it is
+ * state switch (WIP module; the area-file loader objects_load after it is
  * not reconstructed).
  */
 #include <kf/lib/address.h>
@@ -13,7 +13,7 @@
 
 /* Plays sound `sound` at the entry's position when the area has it. */
 ADDRESS(0x8004ed54, 0x54)
-void func_8004ed54(Vis88 *e, int sound)
+void object_play_sound(Vis88 *e, int sound)
 {
     if (DAT_801dd1c0.sounds[sound].slot != -1)
         func_80058220(sound, &e->unk24, 127, 0);
@@ -21,7 +21,7 @@ void func_8004ed54(Vis88 *e, int sound)
 
 /* Frees every table B entry. */
 ADDRESS(0x8004eda8, 0x58)
-void func_8004eda8(void)
+void objects_clear(void)
 {
     Vis88 *e = vis_table_b.entries;
     u16 i = 240;
@@ -41,7 +41,7 @@ void func_8004eda8(void)
 
 /* Resets an entry to the neutral state: unit scale, no rotation, no kind. */
 ADDRESS(0x8004ee00, 0x48)
-void func_8004ee00(Vis88 *e)
+void object_reset(Vis88 *e)
 {
     e->unk02 = 0x80;
     e->unk3C.vz = 0x1000;
@@ -62,7 +62,7 @@ void func_8004ee00(Vis88 *e)
 /* Mode 0 parks table C entry `index` (state 4) unless it is free; mode 1
  * wakes a parked one (state 2). */
 ADDRESS(0x8004ee48, 0x74)
-void func_8004ee48(index, mode)
+void ground_item_set_hidden(index, mode)
     u8 index;
     u8 mode;
 {

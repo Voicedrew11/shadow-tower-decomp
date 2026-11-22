@@ -58,7 +58,7 @@ void func_801ed4a0(void)
     Vis212 *e = &vis_table_a.entries[48];
 
     if (e->unk1C.bytes[0] != 0 && e->unk05 == 0)
-        func_8004ae38(e);
+        creature_despawn(e);
 }
 
 /* Sets up the area: the scene state from flag 0, entry 48's range bits. */

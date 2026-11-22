@@ -144,7 +144,7 @@ void func_801ed5b0(void)
     Vis212 *e5 = &vis_table_a.entries[5];
 
     if (fdat_801ee46c != 0
-        && func_8004fd28(d9->unk24.vx, d9->unk24.vz, 0xc00, 0xc00, d9->unk24.vy)) {
+        && player_in_centred_rect(d9->unk24.vx, d9->unk24.vz, 0xc00, 0xc00, d9->unk24.vy)) {
         func_801edea0();
         fdat_801ee470 = 1;
     }
@@ -271,7 +271,7 @@ void func_801edd9c(int up)
     while (i--) {
         if (e->unk00 != 0xff) {
             e->unk74.vz += dz;
-            func_8004c1b4(e);
+            creature_move(e);
         }
         e++;
     }
@@ -283,8 +283,8 @@ void func_801edd9c(int up)
     }
 }
 
-void func_800500ac(int arg0, int arg1, int arg2, int arg3);
-void func_8004e324(void);
+void fade_run_frames(int arg0, int arg1, int arg2, int arg3);
+void creatures_update(void);
 void player_enter_normal_state(void);
 
 /* The hall scene: fades out, puts the viewer at the hall's start, fades
@@ -299,8 +299,8 @@ void func_801edea0(void)
     int slot = e->unk0B + 128;
 
     func_80057c54();
-    func_800500ac(2, 0, 0x1000, 0x100);
-    func_8004e2d8();
+    fade_run_frames(2, 0, 0x1000, 0x100);
+    creatures_bind_previous_area();
     viewer.position.vx = 0x45800;
     viewer.position.vy = 0x3f9c0;
     viewer.position.vz = 0x40000;
@@ -312,8 +312,8 @@ void func_801edea0(void)
     viewer.unk288 = 0;
     *(SVECTOR *)&viewer.unk268 = viewer.unk278;
     viewer.unk218 = 5;
-    func_800500ac(2, 0x1000, 0x1000, 0);
-    func_8004e324();
+    fade_run_frames(2, 0x1000, 0x1000, 0);
+    creatures_update();
     fdat_801ed410(e);
     if (world_state.unk834C[slot] == NULL)
         creature_model_load(2, index * 5, slot, e->unk0C & 0xf);
@@ -323,7 +323,7 @@ void func_801edea0(void)
     vis_table_a.unk6168 = 0;
     cd_wait_idle();
     func_80057c54();
-    func_800500ac(2, 0x1000, 0, -0x100);
+    fade_run_frames(2, 0x1000, 0, -0x100);
     func_80057a3c();
     if (DAT_801cba08.unk1448[r->unk09] == 0) {
         fdat_801ed388(e, 0, 0);
@@ -377,7 +377,7 @@ first_animation_done:
     e48->unk74 = e0->unk74;
     *(SVECTOR *)&e48->unk8C = *(SVECTOR *)&e0->unk8C;
     e48->unk26 = e0->unk26;
-    func_8004ae38(e0);
+    creature_despawn(e0);
     viewer.unk30--;
     fdat_801ed410(e3);
     e3->unk74 = e48->unk74;
@@ -397,7 +397,7 @@ first_animation_done:
     e49->unk26 = e3->unk26;
     r2->unk60[0]->unk0C = 0x90;
     fdat_801eb7b4(e49, 0);
-    func_8004ae38(e48);
+    creature_despawn(e48);
     for (;;) {
         e49->unk2A += e49->unkB0;
         e3->unk2A += e3->unkB0;
@@ -409,7 +409,7 @@ first_animation_done:
         fdat_801eba4c(e3);
         world_run_frame(NULL, NULL, 0);
     }
-    func_8004ae38(e49);
+    creature_despawn(e49);
     viewer.unk218 = 0;
     fdat_801ee474 = 0xff;
 }

@@ -21,7 +21,7 @@
  * kind 2; on death starts the record's 'P' script, on a heavy hit its '@'
  * script. Returns the damage dealt, or -1 for an entry in state 2. */
 ADDRESS(0x8004def8, 0x3e0)
-int func_8004def8(e, kind, power, levels, crit)
+int creature_take_damage(e, kind, power, levels, crit)
     Vis212 *e;
     int kind;
     short power;
@@ -40,7 +40,7 @@ int func_8004def8(e, kind, power, levels, crit)
     e->unk64 = 1;
     if (e->unk1C.bytes[3] == 2)
         return -1;
-    dmg = func_8004de24(e, 0, levels);
+    dmg = creature_calc_damage(e, 0, levels);
     if (crit)
         dmg *= 3;
     dmg = dmg * power / 5120;
@@ -63,8 +63,8 @@ int func_8004def8(e, kind, power, levels, crit)
     if (dmg >= e->unk2C) {
         if (e->unk1C.bytes[3] != 3) {
             e->unk05 = 5;
-            func_8004da2c(e);
-            func_8004db0c(e);
+            creature_roll_drops(e);
+            creature_award_kill_bonuses(e);
             DAT_801cba08.unk14A8[5 + (t->unk10 >> 5)] |= 1 << (t->unk10 & 0x1f);
             if (e < &vis_table_a.entries[48]) {
                 DAT_801cba08.unk16E4[area_state.area]++;
@@ -124,7 +124,7 @@ done:
 /* Gives every entry of the first 32 left in the previous area (0xfd) that
  * area's id. */
 ADDRESS(0x8004e2d8, 0x4c)
-void func_8004e2d8(void)
+void creatures_bind_previous_area(void)
 {
     Vis212 *e = vis_table_a.entries;
     int i = 32;
@@ -140,7 +140,7 @@ void func_8004e2d8(void)
  * and parks the entries of other areas, then measures each entry against
  * the viewer, runs it and moves it. */
 ADDRESS(0x8004e324, 0x5c8)
-void func_8004e324(void)
+void creatures_update(void)
 {
     VisRecord *r = viewer.unk174;
     Vis212 *e;
@@ -170,7 +170,7 @@ void func_8004e324(void)
                 if (file)
                     heap_free(file);
             }
-            func_8004e2d8();
+            creatures_bind_previous_area();
             n = 16;
             while (n--) {
                 anim_get_file(n + 112, &file);
@@ -189,7 +189,7 @@ void func_8004e324(void)
                         vis_table_a.unk612C -= t->unk12;
                         vis_table_a.unk6128 -= e->unk0D;
                         e->unk05 = 0;
-                        func_8004ac38(e);
+                        creature_return_home(e);
                     }
                 }
             }
@@ -199,7 +199,7 @@ void func_8004e324(void)
     for (e = vis_table_a.entries, vis_table_a.unk6144 = 0; vis_table_a.unk6144 < 64;
          e++, vis_table_a.unk6144++) {
         if (e->unk00 != 0xff) {
-            func_8004c03c(e);
+            creature_set_current(e);
             dx = e->unk74.vx - viewer.position.vx;
             dy = e->unk74.vy - viewer.position.vy;
             dz = e->unk74.vz - viewer.position.vz;
@@ -221,7 +221,7 @@ void func_8004e324(void)
             e->unk9C.vy = 0;
             e->unk9C.vx = 0;
             if ((vis_table_a.unk6150 & 3) == (e->unk07 & 3) || viewer.unk21C)
-                func_8004b2dc();
+                creature_update_spawn();
             if (e->unk05 == 1) {
                 if ((vis_table_a.unk6150 & 3) == (vis_table_a.unk614C & 3))
                     area_state.hooks->unk40();
@@ -238,7 +238,7 @@ void func_8004e324(void)
                 }
                 e->unk39 = 0;
                 if (*(s32 *)&e->unk9C != 0 || e->unk9C.vz != 0 || e->unk16 != 0) {
-                    func_8004c1b4(e);
+                    creature_move(e);
                     if (!(viewer.unk2C & 0x40000)) {
                         e->unk74.vx += e->unk9C.vx;
                         e->unk74.vy += e->unk9C.vy;
@@ -266,14 +266,14 @@ void func_8004e324(void)
         vis_table_a.unk6162 = 0;
     if (abs(vis_table_a.unk6164) < 4)
         vis_table_a.unk6164 = 0;
-    func_8004c03c(NULL);
+    creature_set_current(NULL);
     if (DAT_801cd0e4)
-        func_80052c5c();
+        player_warp_back();
 }
 
 /* Turns the script offsets of the loaded records into pointers. */
 ADDRESS(0x8004e8ec, 0x74)
-void func_8004e8ec(void)
+void creature_types_link_scripts(void)
 {
     Vis192 *t = vis_table_a.unk3500;
     VisScript **p;
@@ -295,7 +295,7 @@ void func_8004e8ec(void)
 
 /* Loads the 64 table A entries from an area file. */
 ADDRESS(0x8004e960, 0x3f4)
-void func_8004e960(VisAFileEntry *src)
+void creatures_load(VisAFileEntry *src)
 {
     u8 cnt[4];
     u8 map[16];
@@ -345,7 +345,7 @@ void func_8004e960(VisAFileEntry *src)
         e->unk6A = src->unk12;
         e->unk6C = src->unk14;
         e->unk6E = src->unk16;
-        func_8004acec(e);
+        creature_copy_type_stats(e);
         e->unk08 = 0;
         e->unk2A = 0;
         e->unk1B = 0;
@@ -368,7 +368,7 @@ void func_8004e960(VisAFileEntry *src)
             e->unk1C.bytes[3] = 0;
         e->unk1C.bytes[0] = 0;
         e->unk64 = 0;
-        func_8004ac38(e);
+        creature_return_home(e);
         e->unk84 = e->unk74.vy;
         for (j = 0; j < 3; j++) {
             if (ids[j] != 0xffff) {

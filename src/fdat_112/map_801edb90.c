@@ -37,7 +37,7 @@ void func_801edb90(Vis212 *e)
         fdat_801eb814(0x800, 0x40);
         fdat_801eb880(e->unk8E - 0x400, 0x40);
         if (e->unk74.vz > 0x4f000) {
-            func_8004ae38(e);
+            creature_despawn(e);
             viewer.unk218 = 0;
         }
     }

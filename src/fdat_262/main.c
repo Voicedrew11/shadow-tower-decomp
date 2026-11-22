@@ -229,7 +229,7 @@ void func_801ed740(void)
         }
     }
     if (fdat_801ee37c == 0 && e49->unk2C == 0) {
-        func_8004ae38(e33);
+        creature_despawn(e33);
         fdat_801ee37c = 0xff;
         DAT_801cba08.unk1448[r4->unk09] = 1;
         fdat_801ee378 = 0xff;
@@ -273,7 +273,7 @@ void func_801edb0c(short id)
         req.unk22 = 0;
         req.unk1E = 1600;
         req.unk20 = 0;
-        n = func_8004f718(0, (VisLists *)&req);
+        n = object_find_usable(0, (VisLists *)&req);
         if (fdat_801ee380 == 0 && n == 0x16) {
             fdat_801ee380 = 1;
             DAT_801cd0e0 = 1;
@@ -409,7 +409,7 @@ void func_801edfb4(void)
     viewer.unk270.vy = 4096 - viewer.unk26A;
     viewer.unk270.vz = 4096 - viewer.unk26C;
     RotMatrixZYX(&viewer.unk270, &viewer.unk298);
-    func_8005335c(c, 1);
+    ground_item_pick_up(c, 1);
 }
 
 /* Slides table C item 28 (`which` 0, by -0x200) or 29 (by 0x200) along x,
@@ -483,7 +483,7 @@ void func_801ee278(int which)
     e.unk30 = 0;
     *(SVECTOR *)&e.unk8C = *(SVECTOR *)&a->unk18;
     e.unk40 = a->unk28;
-    func_8004d804(&e, a->unk00);
+    creature_drop_item(&e, a->unk00);
     b->unk22 = 0;
     a->unk22 = 0;
 }

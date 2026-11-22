@@ -32,7 +32,7 @@
  * record's light set and moved to the source's cell), and relative to the
  * three test points. */
 ADDRESS(0x80046604, 0x2bc)
-void func_80046604(VECTOR *pos)
+void collision_transform_vertices(VECTOR *pos)
 {
     VisHitScratch *sp = VIS_HIT_SCRATCH;
     VisRecord *rec;
@@ -91,7 +91,7 @@ void func_80046604(VECTOR *pos)
  * ceilings (flag 1), walls (flag 2) and flag 4 faces; the nearest heights
  * and their normals go to the scratchpad. */
 ADDRESS(0x800468c0, 0xfc4)
-void func_800468c0(VECTOR *pos, int kind)
+void collision_test_triangles(VECTOR *pos, int kind)
 {
     VisHitScratch *sp = VIS_HIT_SCRATCH;
     SVECTOR nrm;
@@ -293,10 +293,10 @@ void func_800468c0(VECTOR *pos, int kind)
     }
 }
 
-/* func_800468c0 for the parts' quads (vertex order 0, 1, 3, 2); its
+/* collision_test_triangles for the parts' quads (vertex order 0, 1, 3, 2); its
  * floor-kind bit 0x800 is gated by bit 6 of unk47E0, not bit 0. */
 ADDRESS(0x80047884, 0x124c)
-void func_80047884(VECTOR *pos, int kind)
+void collision_test_quads(VECTOR *pos, int kind)
 {
     VisHitScratch *sp = VIS_HIT_SCRATCH;
     SVECTOR nrm;
@@ -527,7 +527,7 @@ void func_80047884(VECTOR *pos, int kind)
  * bit 1 wall, bit 2 ceiling, bit 3 the second wall. The heights and wall
  * normals go to vis_lists. */
 ADDRESS(0x80048ad0, 0x824)
-int func_80048ad0(VisLists *req)
+int collision_test_map(VisLists *req)
 {
     VisHitScratch *sp = VIS_HIT_SCRATCH;
     VECTOR pos[384];
@@ -556,12 +556,12 @@ int func_80048ad0(VisLists *req)
         vis_lists.unk30 = 0x80000;
         return hits;
     }
-    func_8004656c(pos);
+    collision_source_positions(pos);
     sp->world = vis_lists.unkC0;
     sp->rel[0] = vis_lists.unk11C0;
     sp->rel[1] = vis_lists.unk22C0;
     sp->rel[2] = vis_lists.unk33C0;
-    func_80046604(pos);
+    collision_transform_vertices(pos);
     if (req->unk20 == 9999) {
         if (req->unk14.vx == 0 && req->unk14.vz == 0) {
             sp->dir.vx = 0;
@@ -597,12 +597,12 @@ heights:
     sp->rel[1] = lists->unk22C0;
     sp->rel[2] = lists->unk33C0;
     lists->unk47D8 = lists->sources[0];
-    func_800468c0(pos, req->unk0);
+    collision_test_triangles(pos, req->unk0);
     sp->world = vis_lists.unkC0;
     sp->rel[0] = vis_lists.unk11C0;
     sp->rel[1] = vis_lists.unk22C0;
     sp->rel[2] = vis_lists.unk33C0;
-    func_80047884(pos, req->unk0);
+    collision_test_quads(pos, req->unk0);
     if (sp->h128 == 0x80000) {
         sp->n170 = sp->n178;
         sp->h128 = sp->h12c;

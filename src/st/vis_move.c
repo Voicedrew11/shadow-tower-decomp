@@ -36,7 +36,7 @@ void func_80053d50(void)
 /* World position of the point (x, y + dy, z + dz) turned by (-pitch, yaw, 0),
  * relative to the viewer (1600 units below its eye height). */
 ADDRESS(0x80053d58, 0xb4)
-void func_80053d58(int x, int y, int z, int pitch, int yaw, int dy, int dz, VECTOR *out)
+void player_point_to_world(int x, int y, int z, int pitch, int yaw, int dy, int dz, VECTOR *out)
 {
     SVECTOR v;
     SVECTOR rot;
@@ -56,7 +56,7 @@ void func_80053d58(int x, int y, int z, int pitch, int yaw, int dy, int dz, VECT
 /* Moves the entry's position and rotation a fraction t / 4096 of the way
  * from one pose to another; a null pose keeps that part. */
 ADDRESS(0x80053e0c, 0xe4)
-void func_80053e0c(Vis88 *e, VECTOR *from, VECTOR *to, SVECTOR *rfrom, SVECTOR *rto, int t)
+void object_lerp_pose(Vis88 *e, VECTOR *from, VECTOR *to, SVECTOR *rfrom, SVECTOR *rto, int t)
 {
     if (from) {
         e->unk24.vx = func_8004a830(from->vx, to->vx, t);
@@ -71,7 +71,7 @@ void func_80053e0c(Vis88 *e, VECTOR *from, VECTOR *to, SVECTOR *rfrom, SVECTOR *
 }
 
 ADDRESS(0x80053ef0, 0x88)
-void func_80053ef0(Vis88 *e, VECTOR *from, VECTOR *to, int t)
+void object_lerp_position(Vis88 *e, VECTOR *from, VECTOR *to, int t)
 {
     if (from) {
         e->unk24.vx = func_8004a830(from->vx, to->vx, t);
@@ -81,7 +81,7 @@ void func_80053ef0(Vis88 *e, VECTOR *from, VECTOR *to, int t)
 }
 
 ADDRESS(0x80053f78, 0x88)
-void func_80053f78(Vis88 *e, SVECTOR *rfrom, SVECTOR *rto, int t)
+void object_lerp_rotation(Vis88 *e, SVECTOR *rfrom, SVECTOR *rto, int t)
 {
     if (rfrom) {
         e->unk34 = func_8004a848(rfrom->vx, rto->vx, t);

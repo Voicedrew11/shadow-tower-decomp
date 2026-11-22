@@ -100,6 +100,6 @@ void player_swap_hand_items(u8 a, u8 b);
 void player_enter_hurt_state(SVECTOR *a, SVECTOR *b, s16 c, int d);
 
 /* Not reconstructed yet. */
-void func_80055374(long *pos, SVECTOR *rot);
+void player_examine(long *pos, SVECTOR *rot);
 
 #endif

@@ -137,6 +137,6 @@ void func_801ed8f0(void)
     viewer.unk270.vz = 4096 - viewer.unk26C;
     RotMatrixZYX(&viewer.unk270, &viewer.unk298);
     fdat_801ecf44(e);
-    func_8005335c(c, 1);
+    ground_item_pick_up(c, 1);
     DAT_801cba08.unk1440.word |= 0x2000000;
 }

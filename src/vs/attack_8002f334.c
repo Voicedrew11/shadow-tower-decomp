@@ -23,7 +23,7 @@ RODATA(0x80011588, 0x33c)
 /*
  * A fighter's attack: the effects each attack kind spawns from
  * the fighter's facing, or the direct hit. VS's form of
- * ST.EXE's func_8004cee8 (src/st/vis_attack.c).
+ * ST.EXE's effect_spawn_attack (src/st/vis_attack.c).
  */
 void effect_random_offset(SVECTOR *offset, VECTOR *out, VECTOR *pos, short dy, short height);
 void effect_jitter_offset(SVECTOR *off, VECTOR *out, VECTOR *base);

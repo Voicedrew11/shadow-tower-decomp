@@ -16,7 +16,7 @@
  * from `pos` and its two levels at unk44C0/unk44C2.
  */
 ADDRESS(0x800492f4, 0x250)
-void func_800492f4(VECTOR *pos)
+void collision_locate_hit_body(VECTOR *pos)
 {
     VisLists *v = &vis_lists;
     Vis212 *a;
@@ -57,31 +57,31 @@ void func_800492f4(VECTOR *pos)
 }
 
 /*
- * Resolves the request by its kind bits (2: func_80048ad0, 0x10: a table A
- * target, 0x40: func_8004be80, 0x20: a table B entry, 0x80: a projectile)
+ * Resolves the request by its kind bits (2: collision_test_map, 0x10: a table A
+ * target, 0x40: creature_find_touching, 0x20: a table B entry, 0x80: a projectile)
  * with its height unk1E added for the duration; returns and records the
  * bits that hit.
  */
 ADDRESS(0x80049544, 0x184)
-int func_80049544(VisLists *req)
+int collision_query(VisLists *req)
 {
     int hits = 0;
 
     if (req->unk0 & 2)
-        hits = func_80048ad0(req);
+        hits = collision_test_map(req);
     req->unk4.vy += req->unk1E;
     if (req->unk0 & 0x10) {
-        if ((vis_lists.unk5C = func_8004bb88(req, (req->unk0 & 0x400) ? 2 : 0)) != -1)
+        if ((vis_lists.unk5C = creature_find_in_reach(req, (req->unk0 & 0x400) ? 2 : 0)) != -1)
             hits |= 0x10;
     } else
         vis_lists.unk5C = -1;
     if (req->unk0 & 0x40) {
-        if ((vis_lists.unk60 = func_8004be80(req)) != -1)
+        if ((vis_lists.unk60 = creature_find_touching(req)) != -1)
             hits |= 0x10;
     } else
         vis_lists.unk60 = -1;
     if (req->unk0 & 0x20) {
-        if ((vis_lists.unk64 = func_8004f53c(req)) != -1)
+        if ((vis_lists.unk64 = object_find_in_reach(req)) != -1)
             hits |= 0x40;
     } else
         vis_lists.unk64 = -1;

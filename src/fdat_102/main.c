@@ -99,7 +99,7 @@ void func_801ed554(void)
     Vis88 *d42 = &vis_table_b.entries[42];
 
     if (state != 0xff && DAT_801cba08.unk1448[r0->unk09] == 2) {
-        func_8004d804(e48, 0x127);
+        creature_drop_item(e48, 0x127);
         fdat_801ecf44(e48);
         fdat_801eda78 = 0xff;
     }
@@ -142,7 +142,7 @@ void func_801ed6b8(short id)
     req.unk22 = 0;
     req.unk20 = 0;
     if (id == 0x12b) {
-        if (func_8004bb88((VisLists *)&req, 1) == 0x31) {
+        if (creature_find_in_reach((VisLists *)&req, 1) == 0x31) {
             fdat_801eda7c = 1;
             DAT_801cd0e0 = 1;
         } else {

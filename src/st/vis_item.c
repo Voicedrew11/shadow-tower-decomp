@@ -1,6 +1,6 @@
 /*
  * ST.EXE: table A entry drops and checks (WIP module, 0x8004d75c..0x8004def8;
- * its caller func_8004def8 opens the next band and may share its file).
+ * its caller creature_take_damage opens the next band and may share its file).
  */
 #include <kf/lib/address.h>
 #include <kf/lib/types.h>
@@ -12,21 +12,21 @@
 #include <st/data.h>
 
 ADDRESS(0x8004d75c, 0x8)
-int func_8004d75c(Vis212 *e)
+int creature_sound_note(Vis212 *e)
 {
     return 0;
 }
 
 /* Plays the entry's sound from its current list entry at its position. */
 ADDRESS(0x8004d764, 0x98)
-void func_8004d764(Vis212 *e)
+void creature_play_script_sound(Vis212 *e)
 {
     u8 *p = (u8 *)e->unkA8;
 
     if (e->unk70 & 0x800000)
-        func_80058254(p[5] + 48, &e->unk74, 127, 24576, 30720, func_8004d75c(e));
+        func_80058254(p[5] + 48, &e->unk74, 127, 24576, 30720, creature_sound_note(e));
     else
-        func_80058220(p[5] + 48, &e->unk74, 127, func_8004d75c(e));
+        func_80058220(p[5] + 48, &e->unk74, 127, creature_sound_note(e));
 }
 
 ADDRESS(0x8004d7fc, 0x8)
@@ -37,7 +37,7 @@ void func_8004d7fc(void)
 /* Drops item `id` where the entry stands: a slot of table C's group 48
  * (kind 30) or group 32, the oldest slot giving way when the group is full. */
 ADDRESS(0x8004d804, 0x228)
-void func_8004d804(Vis212 *e, int id)
+void creature_drop_item(Vis212 *e, int id)
 {
     Vis44 *rec = &vis_table_c.unk0118[id];
     Vis48 *slot;
@@ -89,23 +89,23 @@ void func_8004d804(Vis212 *e, int id)
 }
 
 /* Drops one of the entry's three items, each by its percent chance when
- * func_80052d40 allows it. */
+ * item_is_uncollected allows it. */
 ADDRESS(0x8004da2c, 0xe0)
-void func_8004da2c(Vis212 *e)
+void creature_roll_drops(Vis212 *e)
 {
     int r = rand() * 100 >> 15;
 
-    if (func_80052d40(e->unk10) && r < e->unk65)
-        func_8004d804(e, e->unk10);
-    else if (func_80052d40(e->unk12) && r < e->unk66)
-        func_8004d804(e, e->unk12);
-    else if (func_80052d40(e->unk14) && r < e->unk67)
-        func_8004d804(e, e->unk14);
+    if (item_is_uncollected(e->unk10) && r < e->unk65)
+        creature_drop_item(e, e->unk10);
+    else if (item_is_uncollected(e->unk12) && r < e->unk66)
+        creature_drop_item(e, e->unk12);
+    else if (item_is_uncollected(e->unk14) && r < e->unk67)
+        creature_drop_item(e, e->unk14);
 }
 
 /* Adds the entry's record bonuses to the viewer's 14 figures and total. */
 ADDRESS(0x8004db0c, 0x90)
-void func_8004db0c(Vis212 *e)
+void creature_award_kill_bonuses(Vis212 *e)
 {
     Vis192 *r = &vis_table_a.unk3500[e->unk02];
     int i;
@@ -120,7 +120,7 @@ void func_8004db0c(Vis212 *e)
 /* Whether the viewer looks at the entry within reach: 0 no, 1 yes, 2 dead
  * centre and close. */
 ADDRESS(0x8004db9c, 0x288)
-int func_8004db9c(Vis212 *e, short reach)
+int creature_test_player_aim(Vis212 *e, short reach)
 {
     short yaw;
     short pitch;
@@ -171,7 +171,7 @@ int func_8004db9c(Vis212 *e, short reach)
 
 /* Sums the record's weights over the 9 levels (arg 0 only). */
 ADDRESS(0x8004de24, 0xd4)
-int func_8004de24(Vis212 *e, int arg, u16 *levels)
+int creature_calc_damage(Vis212 *e, int arg, u16 *levels)
 {
     Vis192 *r = &vis_table_a.unk3500[e->unk02];
     u16 *w;

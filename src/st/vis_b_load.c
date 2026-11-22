@@ -15,7 +15,7 @@
  * record's kind (byte 0) sets its state, unknown kinds go to the area's
  * handler. */
 ADDRESS(0x8004eebc, 0x680)
-void func_8004eebc(u8 *src)
+void objects_load(u8 *src)
 {
     Vis88 *e;
     Vis24 *rec;

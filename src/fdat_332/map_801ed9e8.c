@@ -52,8 +52,8 @@ animation_done:
     e->unk65 = 20;
     e->unk66 = 30;
     e->unk67 = 100;
-    func_8004da2c(e);
-    func_8004db0c(e);
+    creature_roll_drops(e);
+    creature_award_kill_bonuses(e);
     fdat_801eb7b4(e, 12);
     e->unk05 = 5;
     e->unk34 = 0xfff;

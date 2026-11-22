@@ -45,7 +45,7 @@ void func_801ed770(void)
                 goto next;
             }
         } else if (e->unk04 == 0) {
-            func_8004ae38(e);
+            creature_despawn(e);
             goto next;
         }
         if (!(DAT_801cba08.unk1440.word >> 7 & 1) && e->unk64 != 0) {
@@ -111,7 +111,7 @@ next:
             case 1:
                 fdat_801eb7b4(e, 6);
                 e->unk2A = 0xfff;
-                func_8005335c(c7, 1);
+                ground_item_pick_up(c7, 1);
                 fdat_801eb7b4(e, 7);
                 e->unk1C.bytes[0] = 2;
                 break;
