@@ -57,7 +57,7 @@ void area_reload_images(void)
 {
     u32 flag;
 
-    image_stream_queue(1, 481, image_stream_set_ready);
+    image_stream_queue(ARCHIVE_FDAT, 481, image_stream_set_ready);
     area_state.loading = 1;
     area_state.load_step = 5;
     area_state.request_sound_bank = 0xff;
@@ -125,15 +125,15 @@ void game_load_common_data(void)
     vis_table_a.object_sequence_state = 0;
     DAT_800881d8 = overlay_area_start + 4;
     DAT_800881dc[0] = overlay_area_start;
-    cd_archive_open(2, "CHR0\\M00.T");
-    cd_archive_open(0, "COM\\MO.T");
-    cd_archive_open(1, "COM\\FDAT.T");
-    cd_archive_open(3, "COM\\STAT.T");
-    cd_archive_open(4, "COM\\CRT.T");
-    cd_archive_open(6, "COM\\ICON.T");
-    cd_archive_open(5, "COM\\ITEM.T");
-    cd_archive_open(7, "COM\\EQUIP.T");
-    cd_archive_open(8, "COM\\TALKMSG.T");
+    cd_archive_open(ARCHIVE_CHR, "CHR0\\M00.T");
+    cd_archive_open(ARCHIVE_MO, "COM\\MO.T");
+    cd_archive_open(ARCHIVE_FDAT, "COM\\FDAT.T");
+    cd_archive_open(ARCHIVE_STAT, "COM\\STAT.T");
+    cd_archive_open(ARCHIVE_CRT, "COM\\CRT.T");
+    cd_archive_open(ARCHIVE_ICON, "COM\\ICON.T");
+    cd_archive_open(ARCHIVE_ITEM, "COM\\ITEM.T");
+    cd_archive_open(ARCHIVE_EQUIP, "COM\\EQUIP.T");
+    cd_archive_open(ARCHIVE_TALKMSG, "COM\\TALKMSG.T");
     CdSearchFile(&file, "\\ST\\XA0\\HAM.XA;1");
     game_progress.xa_positions[0] = file.pos;
     CdSearchFile(&file, "\\ST\\XA0\\SHOP0.XA;1");
@@ -214,9 +214,9 @@ void game_load_common_data(void)
     game_progress.xa_positions[38] = file.pos;
     CdSearchFile(&file, "\\ST\\XA1\\30600.XA;1");
     game_progress.xa_positions[39] = file.pos;
-    cd_read_member(1, 0x1e0, (u_long *)model_heap);
-    image_stream_queue(1, 0x1e1, image_stream_set_ready);
-    sound_bank_load(1, 0x1e2, 0);
+    cd_read_member(ARCHIVE_FDAT, 0x1e0, (u_long *)model_heap);
+    image_stream_queue(ARCHIVE_FDAT, 0x1e1, image_stream_set_ready);
+    sound_bank_load(ARCHIVE_FDAT, 0x1e2, 0);
     copy_words((u32 *)&vis_table_b, p + 1, *p >> 2);
     p = (u32 *)((u8 *)p + (*p + 4));
     copy_words((u32 *)equipment_model_placements, p + 1, *p >> 2);
@@ -524,24 +524,26 @@ void area_load_update(void)
     case 0:
         if (area_state.request_area == 0xff)
             goto phase3;
-        if (cd_archive_member_size(1, area_state.request_area * 10))
-            image_stream_queue(1, area_state.request_area * 10, area_stream_set_ready);
+        if (cd_archive_member_size(ARCHIVE_FDAT, area_state.request_area * 10))
+            image_stream_queue(ARCHIVE_FDAT, area_state.request_area * 10, area_stream_set_ready);
         area_state.load_step = 240;
         b = vis_table_b.entries;
         for (i = 239; i != -1; i--) {
-            if (b->kind == 236 && b->kind_data.snd.voice != -1) {
+            if (b->kind == OBJECT_KIND_SOUND && b->kind_data.snd.voice != -1) {
                 sound_stop(b->kind_data.snd.voice, b->params.snd.sound + 1108);
                 b->kind_data.snd.voice = -1;
             }
-            b->kind = 0xff;
+            b->kind = OBJECT_KIND_NONE;
             b++;
         }
-        cd_queue_read_member(1, (area_state.request_area * 10) | 1, (u8 *)cd_file_buffer, area_load_records_done);
+        cd_queue_read_member(ARCHIVE_FDAT, (area_state.request_area * 10) | 1, (u8 *)cd_file_buffer,
+            area_load_records_done);
         break;
     case 1:
         area_state.load_step = 240;
         area_state.hooks = &area_hooks_default;
-        cd_queue_read_member(1, area_state.request_area * 10 + 2, DAT_800881dc[0], area_load_overlay_done);
+        cd_queue_read_member(ARCHIVE_FDAT, area_state.request_area * 10 + 2, DAT_800881dc[0],
+            area_load_overlay_done);
         viewer.block_record = NULL;
         viewer.block = -1;
         copy_words((u32 *)vis_records, (u32 *)cd_file_buffer, 0x3e00);
@@ -555,7 +557,8 @@ void area_load_update(void)
         break;
     case 2:
         area_state.load_step = 240;
-        cd_queue_read_member(1, area_state.request_area * 10 + 3, (u8 *)cd_file_buffer, area_load_tables_done);
+        cd_queue_read_member(ARCHIVE_FDAT, area_state.request_area * 10 + 3, (u8 *)cd_file_buffer,
+            area_load_tables_done);
         break;
     case 3:
     phase3:
@@ -567,9 +570,10 @@ void area_load_update(void)
             name[3] = area_state.request_area / 10 + '0';
             name[6] = area_state.request_area / 10 + '0';
             name[7] = area_state.request_area % 10 + '0';
-            cd_archive_open(2, name);
+            cd_archive_open(ARCHIVE_CHR, name);
             area_state.load_step = 240;
-            cd_queue_read_member(1, area_state.request_world * 10 + 4, (u8 *)area_world_buffer, area_load_world_done);
+            cd_queue_read_member(ARCHIVE_FDAT, area_state.request_world * 10 + 4, (u8 *)area_world_buffer,
+                area_load_world_done);
         }
         if (area_state.request_area != 0xff) {
             p = cd_file_buffer;
@@ -653,14 +657,15 @@ void area_load_update(void)
     case 4:
         if (area_state.request_world != 0xff) {
             area_state.load_step = 240;
-            cd_queue_read_member(1, area_state.request_world * 10 + 5, (u8 *)area_collision_buffer, area_load_collision_done);
+            cd_queue_read_member(ARCHIVE_FDAT, area_state.request_world * 10 + 5,
+                (u8 *)area_collision_buffer, area_load_collision_done);
         }
         break;
     case 5:
     phase5:
         if (area_state.request_images != 0xff) {
             area_state.load_step = 240;
-            image_stream_queue(1, area_state.request_images * 10 + 6, area_load_images_done);
+            image_stream_queue(ARCHIVE_FDAT, area_state.request_images * 10 + 6, area_load_images_done);
         }
         cd_wait_idle();
         area_state.loading_world = 0;
@@ -682,7 +687,7 @@ void area_load_update(void)
     }
         if (area_state.request_sound_bank != 0xff) {
             area_state.load_step = 240;
-            sound_bank_load(1, area_state.request_sound_bank * 10 + 7, 1);
+            sound_bank_load(ARCHIVE_FDAT, area_state.request_sound_bank * 10 + 7, 1);
         }
         if (area_state.unk14 == 0xff)
             goto done;

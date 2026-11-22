@@ -28,7 +28,7 @@ void map_step_creature(void)
     Creature *e = vis_table_a.current;
     u32 flags;
 
-    if (e->type == 0 && e->state == 5) {
+    if (e->type == 0 && e->state == CREATURE_STATE_DYING) {
         GameProgress *story = &game_progress;
 
         flags = story->event_flags2.word;

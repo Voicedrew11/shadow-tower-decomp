@@ -70,7 +70,7 @@ void talk_load_image(int id, int full)
         clut.vx = 0;
         clut.vy = 511;
     }
-    cd_read_member(8, id, cd_file_buffer);
+    cd_read_member(ARCHIVE_TALKMSG, id, cd_file_buffer);
     tim_load_images_at(cd_file_buffer, &pix, &clut, 1);
 }
 

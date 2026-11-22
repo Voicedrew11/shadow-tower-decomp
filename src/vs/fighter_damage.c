@@ -41,10 +41,10 @@ void fighter_apply_hit(int id, VsHit *hit)
     }
     if (total < f->hp) {
         f->hp_target = f->hp - total;
-        f->state = 3;
+        f->state = FIGHTER_STATE_HURT;
     } else {
         f->hp_target = 0;
-        f->state = 4;
+        f->state = FIGHTER_STATE_DOWN;
     }
     f->anim_step = 0;
     f->anim_frame = 0;
@@ -74,10 +74,10 @@ void fighter_apply_attack_hit(u8 id, u8 attack)
     }
     if (total < f->hp) {
         f->hp_target = f->hp - total;
-        f->state = 3;
+        f->state = FIGHTER_STATE_HURT;
     } else {
         f->hp_target = 0;
-        f->state = 4;
+        f->state = FIGHTER_STATE_DOWN;
     }
     f->anim_step = 0;
     f->anim_frame = 0;

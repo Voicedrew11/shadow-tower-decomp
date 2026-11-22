@@ -28,7 +28,7 @@ void objects_clear(void)
 
     while (i--) {
         e->type = 0xffff;
-        e->kind = 0xff;
+        e->kind = OBJECT_KIND_NONE;
         ((u32 *)&e->anim_slot)[2] = 0;
         ((u32 *)&e->anim_slot)[1] = 0;
         ((u32 *)&e->anim_slot)[0] = 0;
@@ -53,7 +53,7 @@ void object_reset(AreaObject *e)
     e->rotation.vz = 0;
     e->rotation.vx = 0;
     e->rotation.vy = 0;
-    e->kind = 0xff;
+    e->kind = OBJECT_KIND_NONE;
     e->depth_bias = 0;
     e->unk06 = 0xff;
     e->light = 0;
@@ -74,11 +74,11 @@ void ground_item_set_hidden(index, mode)
     switch (mode) {
     case 0:
         if (c->state)
-            c->state = 4;
+            c->state = GROUND_ITEM_HIDDEN;
         break;
     case 1:
-        if (c->state == 4)
-            c->state = 2;
+        if (c->state == GROUND_ITEM_HIDDEN)
+            c->state = GROUND_ITEM_RESTING;
         break;
     }
 }

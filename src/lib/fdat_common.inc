@@ -146,17 +146,17 @@ void creature_choose_action(void)
     u16 state;
 
     creature_clear_contact_hit(e);
-    if (e->action == 128) {
+    if (e->action == CREATURE_ACTION_DORMANT) {
         int reach = e->script->wake_range * e->script->wake_range;
 
         e->status.bytes[3] = 2;
         if (e->player_dist_sq < reach << 16 || e->hit != 0)
-            e->action = 256;
+            e->action = CREATURE_ACTION_WAKING;
         e->hit = 0;
         return;
     }
     e->hit = 0;
-    if (e->action == 256)
+    if (e->action == CREATURE_ACTION_WAKING)
         e->status.bytes[3] = 0;
     range = (r->alert_range * r->alert_range) << 16;
     if (e->status.bytes[1] == 0) {
@@ -210,7 +210,7 @@ void creature_choose_action(void)
         state &= 0xfffb;
     e->attack_miss = 0;
     if (!(state & 1)) {
-        e->action = 1;
+        e->action = CREATURE_ACTION_DEFAULT;
     } else if (state & 2) {
         if (state & 4) {
             if (r->actions & 0x10) {
@@ -218,36 +218,36 @@ void creature_choose_action(void)
                     if (rand() < 24576)
                         e->action = 16;
                     else
-                        e->action = 1;
-                } else if (!(r->actions & 8)) {
+                        e->action = CREATURE_ACTION_DEFAULT;
+                } else if (!(r->actions & CREATURE_ACTION_TURN_AWAY)) {
                     e->action = 16;
                 } else if (rand() < 4096) {
                     e->action = 16;
                 } else {
-                    e->action = 8;
+                    e->action = CREATURE_ACTION_TURN_AWAY;
                 }
-            } else if (r->actions & 8) {
-                e->action = 8;
+            } else if (r->actions & CREATURE_ACTION_TURN_AWAY) {
+                e->action = CREATURE_ACTION_TURN_AWAY;
             } else {
-                e->action = 1;
+                e->action = CREATURE_ACTION_DEFAULT;
             }
         } else if (r->actions & 2) {
-            if (!(r->actions & 8)) {
+            if (!(r->actions & CREATURE_ACTION_TURN_AWAY)) {
                 e->action = 2;
             } else if (e->aggressive) {
                 if (rand() < 4096)
-                    e->action = 8;
+                    e->action = CREATURE_ACTION_TURN_AWAY;
                 else
                     e->action = 2;
             } else if (rand() < 4096) {
                 e->action = 2;
             } else {
-                e->action = 8;
+                e->action = CREATURE_ACTION_TURN_AWAY;
             }
-        } else if (r->actions & 8) {
-            e->action = 8;
+        } else if (r->actions & CREATURE_ACTION_TURN_AWAY) {
+            e->action = CREATURE_ACTION_TURN_AWAY;
         } else {
-            e->action = 1;
+            e->action = CREATURE_ACTION_DEFAULT;
         }
     } else if (state & 4) {
         if (e->aggressive) {
@@ -261,26 +261,26 @@ void creature_choose_action(void)
             } else if (r->actions & 4) {
                 e->action = 4;
             } else {
-                e->action = 1;
+                e->action = CREATURE_ACTION_DEFAULT;
             }
-        } else if (r->actions & 8) {
-            e->action = 8;
+        } else if (r->actions & CREATURE_ACTION_TURN_AWAY) {
+            e->action = CREATURE_ACTION_TURN_AWAY;
         } else {
-            e->action = 1;
+            e->action = CREATURE_ACTION_DEFAULT;
         }
     } else if (r->actions & 2) {
-        if (!(r->actions & 8))
+        if (!(r->actions & CREATURE_ACTION_TURN_AWAY))
             e->action = 2;
         else if (e->aggressive)
             e->action = 2;
         else if (rand() < 16384)
             e->action = 2;
         else
-            e->action = 8;
-    } else if (r->actions & 8) {
-        e->action = 8;
+            e->action = CREATURE_ACTION_TURN_AWAY;
+    } else if (r->actions & CREATURE_ACTION_TURN_AWAY) {
+        e->action = CREATURE_ACTION_TURN_AWAY;
     } else {
-        e->action = 1;
+        e->action = CREATURE_ACTION_DEFAULT;
     }
     e->range_bits = state;
 }

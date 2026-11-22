@@ -13,6 +13,9 @@
 #include <LIBCD.H>
 #include <st/memory.h>
 #include <st/gfx.h>
+#include <st/equip_slots.h>
+#include <st/pad_buttons.h>
+#include <st/player_ids.h>
 
 /* Tags of objects other headers define (st/vis.h, st/anim.h, st/effect.h). */
 struct MapBlock;

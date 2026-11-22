@@ -10,6 +10,7 @@
 #include <sys/types.h>
 #include <LIBGTE.H>
 #include <LIBGPU.H>
+#include <st/sound_ids.h>
 
 struct Creature; /* st/vis.h */
 

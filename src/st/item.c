@@ -89,7 +89,7 @@ void player_examine(long *pos, SVECTOR *rot)
     if (i != -1) {
         c = &vis_table_c.entries[i];
         c->prev_state = c->state;
-        c->state = 3;
+        c->state = GROUND_ITEM_PICKED_UP;
         return;
     }
     /* CollisionState starts with the request fields creature_find_in_reach reads. */
@@ -136,27 +136,27 @@ void player_examine(long *pos, SVECTOR *rot)
             break;
         /* An empty case above 226: retail's compare tree splits its four
          * upper cases at 226, which takes a fifth node on that side. */
-        case 255:
+        case OBJECT_KIND_NONE:
             break;
-        case 0:
-        case 1:
-        case 50:
-        case 51:
-            if (b->params.door.lock == 251) {
+        case OBJECT_KIND_DOOR:
+        case OBJECT_KIND_MODEL_DOOR:
+        case OBJECT_KIND_GATE:
+        case OBJECT_KIND_ITEM_GATE:
+            if (b->params.door.lock == DOOR_LOCK_OPENS_FROM_FRONT) {
                 r = (short)b->player_bearing > 2048 ? b->player_bearing - 4096 : b->player_bearing;
                 /* The offset window wraps at the halfword boundary. */
                 if ((u16)(r + 1023) < 2047) {
                     play_unlock_sound();
-                    b->params.door.lock = 255;
+                    b->params.door.lock = DOOR_UNLOCKED;
                 }
-            } else if (b->params.door.lock == 252) {
+            } else if (b->params.door.lock == DOOR_LOCK_OPENS_FROM_BACK) {
                 r = (short)b->player_bearing > 2048 ? b->player_bearing - 4096 : b->player_bearing;
                 if ((u16)(r + 1024) >= 2049) {
                     play_unlock_sound();
-                    b->params.door.lock = 255;
+                    b->params.door.lock = DOOR_UNLOCKED;
                 }
             }
-            if (b->params.door.lock == 255) {
+            if (b->params.door.lock == DOOR_UNLOCKED) {
                 if (b->state == 0)
                     b->state = 1;
                 if (b->state == 7)
@@ -165,8 +165,8 @@ void player_examine(long *pos, SVECTOR *rot)
                 play_locked_sound();
             }
             break;
-        case 52:
-            if (b->params.door.lock == 255) {
+        case OBJECT_KIND_GROUP_GATE:
+            if (b->params.door.lock == DOOR_UNLOCKED) {
                 if (b->state == 0) {
                     b->state = 1;
                     b->anim = 0;
@@ -177,16 +177,16 @@ void player_examine(long *pos, SVECTOR *rot)
                 }
             }
             break;
-        case 225:
+        case OBJECT_KIND_MESSAGE:
             d = (u16)(b->rotation.vy - b->player_heading) & 0xfff;
             if (d < 512 || d > 3584)
                 talk_show_message(b->unk48);
             break;
-        case 226:
+        case OBJECT_KIND_HEALING:
             viewer.hp = viewer.max_hp;
-            sound_play(8, 128);
+            sound_play(SOUND_RECOVER, 128);
             break;
-        case 14:
+        case OBJECT_KIND_SAVE_POINT:
             if (area_state.loading != 1 && area_state.entry_fade_start == -1) {
                 lighting.paused = 1;
                 cd_wait_idle();
@@ -198,7 +198,7 @@ void player_examine(long *pos, SVECTOR *rot)
                 b = vis_table_b.entries;
                 n = 240;
                 while (n--) {
-                    if (b->kind == 236 && b->kind_data.snd.voice != -1) {
+                    if (b->kind == OBJECT_KIND_SOUND && b->kind_data.snd.voice != -1) {
                         sound_stop(b->kind_data.snd.voice, b->params.snd.sound + 1108);
                         b->kind_data.snd.voice = -1;
                     }

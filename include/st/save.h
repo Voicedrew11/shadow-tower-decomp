@@ -10,6 +10,7 @@
 #include <sys/types.h>
 #include <LIBGTE.H>
 #include <st/menu.h>
+#include <st/equip_slots.h>
 
 /* One table C slot (entries[32..63]) as saved. */
 typedef struct {

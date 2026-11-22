@@ -16,6 +16,7 @@
 #include <LIBGTE.H>
 #include <LIBGPU.H>
 #include <st/text.h>
+#include <st/menu_ids.h>
 
 /*
  * The message table: byte offsets of each message from text, then the

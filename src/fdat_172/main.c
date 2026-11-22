@@ -78,14 +78,15 @@ void map_restore_progress(void)
     AreaObject *d6 = &vis_table_b.entries[6];
 
     if (game_progress.event_flags.bit.f26 == 1) {
-        c28->state = 5;
+        c28->state = GROUND_ITEM_SCRIPTED;
         fdat_801edfd0 = 0xff;
         c28->position.vy += 0x200;
     } else {
-        c28->state = 4;
+        c28->state = GROUND_ITEM_HIDDEN;
         fdat_801edfd0 = 0;
     }
-    if (e48->state != 3 && game_progress.event_flags.bit.f29 != 1 && game_progress.event_flags.bit.f14) {
+    if (e48->state != CREATURE_STATE_GONE && game_progress.event_flags.bit.f29 != 1
+        && game_progress.event_flags.bit.f14) {
         if (game_progress.event_flags.bit.f30 == 1) {
             fdat_801edfd4 = 0xfe;
             e48->flags &= ~0x2000000;
@@ -101,7 +102,7 @@ void map_restore_progress(void)
     }
     if (!game_progress.event_flags.bit.f27) {
         fdat_801edfd8 = 0;
-        d6->kind = 0xff;
+        d6->kind = OBJECT_KIND_NONE;
     } else {
         fdat_801edfd8 = 0xff;
     }
@@ -156,10 +157,10 @@ void map_update_events(void)
     if (e48->hp == 0)
         game_progress.event_flags.word |= 0x20000000;
     if (game_progress.talk_counts[r14->talk_id] == 0 && viewer.position.vz > 0x4a000) {
-        viewer.state = 5;
+        viewer.state = VIEWER_STATE_SCRIPTED;
         creature_force_talk(e33, 0, 0);
         e33->hit = 1;
-        viewer.state = 0;
+        viewer.state = VIEWER_STATE_NORMAL;
         e33->flags &= ~0x2000000;
         r14->actions &= ~0x180;
     }
@@ -169,13 +170,13 @@ void map_update_events(void)
         lighting.area_mode[17] = 0x11;
         game_progress.event_flags.word |= 0x8000000;
     }
-    if (fdat_801edfd8 == 1 && e33->state == 3) {
-        viewer.state = 5;
+    if (fdat_801edfd8 == 1 && e33->state == CREATURE_STATE_GONE) {
+        viewer.state = VIEWER_STATE_SCRIPTED;
         e33->flags |= 0x2000000;
         creature_force_talk(e33, 1, 0);
         fdat_801edfd8 = 0xff;
-        d6->kind = 0xed;
-        viewer.state = 0;
+        d6->kind = OBJECT_KIND_WARP;
+        viewer.state = VIEWER_STATE_NORMAL;
     }
 }
 
@@ -200,14 +201,14 @@ void map_pick_creature_move(void)
         return;
     creature_choose_action();
     if (e->type == 14 && game_progress.talk_counts[r->talk_id] == 0)
-        e->action = 128;
+        e->action = CREATURE_ACTION_DORMANT;
     if (e->type == 1 && (fdat_801edfd4 == 0 || fdat_801edfd4 == 253)) {
         creature_start_script(e, 9);
         return;
     }
     creature_pick_weighted_script();
     switch (e->action) {
-    case 8:
+    case CREATURE_ACTION_TURN_AWAY:
         wall = e->wall_heading;
         if ((short)wall == 0x7fff) {
             e->unk5A = e->target_heading = (e->player_heading + 2048) & 0xfff;
@@ -229,7 +230,7 @@ void map_pick_creature_move(void)
         e->unk5A = e->target_heading = e->rotation.vy;
         break;
     }
-    if (e->action != 8)
+    if (e->action != CREATURE_ACTION_TURN_AWAY)
         e->wall_heading = 0x7fff;
     if (vis_records[e->block].heading_bias_x != 0 || vis_records[e->block].heading_bias_z != 0) {
         x = rcos(e->target_heading - 1024) >> 5;
@@ -255,7 +256,8 @@ void map_step_creature(void)
 {
     Creature *e = vis_table_a.current;
 
-    if (fdat_801edfd0 != 0xff && e->type != 1 && e < &vis_table_a.entries[56] && e->state != 5)
+    if (fdat_801edfd0 != 0xff && e->type != 1 && e < &vis_table_a.entries[56]
+        && e->state != CREATURE_STATE_DYING)
         e->visibility = 3;
     else
         e->visibility = 0;
@@ -316,7 +318,7 @@ void map_slide_ground_item(void)
     ItemType *kind;
     int top;
 
-    item->state = 5;
+    item->state = GROUND_ITEM_SCRIPTED;
     kind = &vis_table_c.types[item->item];
     top = item->position.vy + 0x200;
     item->depth_bias -= 2;
@@ -325,7 +327,7 @@ void map_slide_ground_item(void)
 
         if (item->position.vy == top)
             break;
-        anim_get_file(kind->model + 588, &file);
+        anim_get_file(kind->model + MODEL_SLOT_ITEMS, &file);
         if (file != NULL)
             item->position.vy += step;
         if (item->position.vy > top)
@@ -343,7 +345,7 @@ void creatures_restart_fade_in(void)
     int i = 64;
 
     while (i--) {
-        if (e->state == 1) {
+        if (e->state == CREATURE_STATE_ACTIVE) {
             e->fade = 0xfff;
             e->status.bytes[2] |= 0xd;
         }

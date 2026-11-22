@@ -69,7 +69,7 @@ void menu_load_main_messages(void)
     u_long *image;
 
     image = cd_file_buffer;
-    cd_read_member(3, 0, image);
+    cd_read_member(ARCHIVE_STAT, STAT_MESSAGES, image);
     copy_words((u32 *)&menu_messages, (u32 *)(image + 1), 5376);
     image = (u_long *)((u8 *)image + (cd_file_buffer[0] + 4));
     tim_load_images_at(image + 1, &MENU_SCRATCH->image_vram[0], &MENU_SCRATCH->image_vram[1], 1);
@@ -93,12 +93,12 @@ void menu_reload_assets(void)
     loading_screen_show();
     menu_load_main_messages();
     area_reload_images();
-    player_load_equipment_model(viewer.equipment[3], 0, 1);
-    player_load_equipment_model(viewer.equipment[16], 1, 1);
-    player_load_equipment_model(viewer.equipment[4], 2, 1);
-    player_load_equipment_model(viewer.equipment[17], 3, 1);
-    player_load_magic(viewer.equipment[6], 0);
-    player_load_magic(viewer.equipment[12], 1);
+    player_load_equipment_model(viewer.equipment[EQUIP_SLOT_RIGHT_HAND], 0, 1);
+    player_load_equipment_model(viewer.equipment[EQUIP_SLOT_LEFT_HAND], 1, 1);
+    player_load_equipment_model(viewer.equipment[EQUIP_SLOT_RIGHT_RESERVE], 2, 1);
+    player_load_equipment_model(viewer.equipment[EQUIP_SLOT_LEFT_RESERVE], 3, 1);
+    player_load_magic(viewer.equipment[EQUIP_SLOT_RIGHT_MAGIC], 0);
+    player_load_magic(viewer.equipment[EQUIP_SLOT_LEFT_MAGIC], 1);
     loading_screen_end();
 }
 
@@ -121,12 +121,12 @@ void card_screen_open(int arg0, int arg1)
     sp->image_vram[4].vy = 256;
     cd_wait_idle();
     image = cd_file_buffer;
-    cd_read_member(3, 0, image);
+    cd_read_member(ARCHIVE_STAT, STAT_MESSAGES, image);
     copy_words((u32 *)&menu_messages, (u32 *)(image + 1), 5376);
     image = (u_long *)((u8 *)image + (cd_file_buffer[0] + 4));
     tim_load_images_at(image + 1, &sp->image_vram[0], &sp->image_vram[1], 1);
     menu_store_screen();
-    sp->font_mode = 0;
+    sp->font_mode = MENU_FONT_LOW_RES;
     SCRATCHPAD->pitch_sin = 0;
     if (arg0)
         sp->mode = 256;
@@ -160,81 +160,81 @@ void menu_main_run(void)
     sp->image_vram[4].vy = 256;
     cd_wait_idle();
     image = cd_file_buffer;
-    cd_read_member(3, 0, image);
+    cd_read_member(ARCHIVE_STAT, STAT_MESSAGES, image);
     copy_words((u32 *)&menu_messages, (u32 *)(image + 1), 5376);
     image = (u_long *)((u8 *)image + (cd_file_buffer[0] + 4));
     tim_load_images_at(image + 1, &sp->image_vram[0], &sp->image_vram[1], 1);
     menu_store_screen();
-    sp->main_row = 0;
+    sp->main_row = MENU_ROW_USE_ITEM;
     pad_clear_input();
     DrawSync(0);
     for (;;) {
-        if (pad_state.pressed & 0x2000) {
+        if (pad_state.pressed & PAD_BUTTON_CIRCLE) {
             play_cancel_sound();
             pad_state.pressed = 0;
             break;
         }
-        if (pad_state.pressed & 0x1000) {
+        if (pad_state.pressed & PAD_BUTTON_TRIANGLE) {
             play_confirm_sound();
             pad_state.pressed = 0;
-            sp->font_mode = 0;
+            sp->font_mode = MENU_FONT_LOW_RES;
             menu_area_info_run();
         }
-        if (pad_state.pressed & 0x4000) {
+        if (pad_state.pressed & PAD_BUTTON_CROSS) {
             play_confirm_sound();
             pad_state.pressed = 0;
-            if ((s16)sp->main_row == 0) {
-                sp->font_mode = 0;
+            if ((s16)sp->main_row == MENU_ROW_USE_ITEM) {
+                sp->font_mode = MENU_FONT_LOW_RES;
                 if (menu_use_item_run() == 1)
                     break;
-            } else if ((s16)sp->main_row == 1) {
-                sp->font_mode = 0;
+            } else if ((s16)sp->main_row == MENU_ROW_EQUIP) {
+                sp->font_mode = MENU_FONT_LOW_RES;
                 menu_equip_run();
-            } else if ((s16)sp->main_row == 2) {
+            } else if ((s16)sp->main_row == MENU_ROW_ARRANGE_ITEMS) {
                 viewer.free_anims_after_menu = 1;
-                sp->font_mode = 1;
-                if (pad_state.held & 0x800)
+                sp->font_mode = MENU_FONT_HIGH_RES;
+                if (pad_state.held & PAD_BUTTON_R1)
                     menu_arrange_icons_run();
                 else
                     menu_arrange_list_run();
-            } else if ((s16)sp->main_row == 3) {
+            } else if ((s16)sp->main_row == MENU_ROW_CREATURE_BOOK) {
                 viewer.free_anims_after_menu = 1;
-                sp->font_mode = 1;
+                sp->font_mode = MENU_FONT_HIGH_RES;
                 menu_creature_book_run();
-            } else if ((s16)sp->main_row == 4) {
+            } else if ((s16)sp->main_row == MENU_ROW_EQUIP_INFO) {
                 viewer.free_anims_after_menu = 1;
-                sp->font_mode = 1;
+                sp->font_mode = MENU_FONT_HIGH_RES;
                 menu_equip_info_run();
-            } else if ((s16)sp->main_row == 5) {
-                sp->font_mode = 0;
+            } else if ((s16)sp->main_row == MENU_ROW_OPTIONS) {
+                sp->font_mode = MENU_FONT_LOW_RES;
                 menu_options_run();
-            } else if ((s16)sp->main_row == 6) {
+            } else if ((s16)sp->main_row == MENU_ROW_LOAD_DATA) {
                 sp->mode = 1;
-                sp->font_mode = 0;
+                sp->font_mode = MENU_FONT_LOW_RES;
                 sp->show_backdrop = 1;
                 if (card_screen_run(1) == 1)
                     break;
-            } else if ((s16)sp->main_row == 7) {
-                sp->font_mode = 0;
+            } else if ((s16)sp->main_row == MENU_ROW_END_GAME) {
+                sp->font_mode = MENU_FONT_LOW_RES;
                 if (menu_end_game_run() == 1)
                     break;
             }
         }
-        if (pad_state.pressed_repeat & 0x40) {
+        if (pad_state.pressed_repeat & PAD_BUTTON_DOWN) {
             play_cursor_sound();
             pad_state.pressed_repeat = 0;
             sp->main_row++;
-            if ((s16)sp->main_row >= 8)
-                sp->main_row = 0;
+            if ((s16)sp->main_row >= MENU_ROWS)
+                sp->main_row = MENU_ROW_USE_ITEM;
         }
-        if (pad_state.pressed_repeat & 0x10) {
+        if (pad_state.pressed_repeat & PAD_BUTTON_UP) {
             play_cursor_sound();
             pad_state.pressed_repeat = 0;
             sp->main_row--;
             if ((s16)sp->main_row < 0)
-                sp->main_row = 7;
+                sp->main_row = MENU_ROW_END_GAME;
         }
-        sp->font_mode = 0;
+        sp->font_mode = MENU_FONT_LOW_RES;
         frame_rate_update();
         menu_main_draw();
     }
@@ -338,7 +338,7 @@ void equip_load_slot_picture(int slot)
         file = *id != 0xffff ? *id + first : none;
     else
         file = (*id != 0xffff ? *id + first : none) * 3 + 2;
-    cd_read_member(7, file, cd_state.load_cursor);
+    cd_read_member(ARCHIVE_EQUIP, file, cd_state.load_cursor);
     image = cd_state.load_cursor;
     if (part != -1) {
         if (part == 1)
@@ -382,11 +382,11 @@ void equip_load_item_slot_pictures(void)
     int size;
 
     i = used = 0;
-    ids[0] = viewer.equipment[5];
-    ids[1] = viewer.equipment[19];
-    ids[2] = viewer.equipment[11];
-    ids[3] = viewer.equipment[20];
-    ids[4] = viewer.equipment[18];
+    ids[0] = viewer.equipment[EQUIP_SLOT_QUICK_1];
+    ids[1] = viewer.equipment[EQUIP_SLOT_QUICK_2];
+    ids[2] = viewer.equipment[EQUIP_SLOT_QUICK_3];
+    ids[3] = viewer.equipment[EQUIP_SLOT_QUICK_4];
+    ids[4] = viewer.equipment[EQUIP_SLOT_QUICK_5];
     cd_state.load_cursor = (u_long *)(&cd_state + 1);
     for (i = 0; i < 5; i++) {
         if (used + 2048 > 0x12000) {
@@ -395,7 +395,7 @@ void equip_load_item_slot_pictures(void)
             used = 0;
         }
         if (ids[i] != 0xffff) {
-            size = cd_read_member(6, vis_table_c.types[ids[i]].icon + 400, cd_state.load_cursor)
+            size = cd_read_member(ARCHIVE_ICON, vis_table_c.types[ids[i]].icon + 400, cd_state.load_cursor)
                    << 11;
             tim_load_images_at(cd_state.load_cursor, &pos, NULL, 1);
             used += size;
@@ -423,12 +423,13 @@ void equip_apply_slot_change(int redraw)
 
     if (redraw == 0)
         *(EquipmentSlots *)sp->saved_equipment = *MENU_SLOTS;
-    if (viewer.equipment[9] != 0xffff && vis_table_c.types[viewer.equipment[9]].category == 10) {
+    if (viewer.equipment[EQUIP_SLOT_ARMOR] != EQUIP_NONE
+        && vis_table_c.types[viewer.equipment[EQUIP_SLOT_ARMOR]].category == 10) {
         if (sp->cursor == 2 || sp->cursor == 16 || sp->cursor == 9 || sp->cursor == 10
             || sp->cursor == 11) {
-            viewer.equipment[2] = 0xffff;
-            viewer.equipment[9] = 0xffff;
-            viewer.equipment[10] = 0xffff;
+            viewer.equipment[EQUIP_SLOT_GLOVES] = EQUIP_NONE;
+            viewer.equipment[EQUIP_SLOT_ARMOR] = EQUIP_NONE;
+            viewer.equipment[EQUIP_SLOT_BOOTS] = EQUIP_NONE;
             if (redraw == 1) {
                 equip_load_slot_picture(2);
                 equip_load_slot_picture(9);
@@ -436,20 +437,22 @@ void equip_apply_slot_change(int redraw)
             }
         }
     }
-    if (viewer.equipment[3] != 0xffff && vis_table_c.types[viewer.equipment[3]].category == 9) {
+    if (viewer.equipment[EQUIP_SLOT_RIGHT_HAND] != EQUIP_NONE
+        && vis_table_c.types[viewer.equipment[EQUIP_SLOT_RIGHT_HAND]].category == 9) {
         if (sp->cursor == 3 || sp->cursor == 17) {
-            viewer.equipment[3] = 0xffff;
-            viewer.equipment[16] = 0xffff;
+            viewer.equipment[EQUIP_SLOT_RIGHT_HAND] = EQUIP_NONE;
+            viewer.equipment[EQUIP_SLOT_LEFT_HAND] = EQUIP_NONE;
             if (redraw == 1) {
                 equip_load_slot_picture(3);
                 equip_load_slot_picture(16);
             }
         }
     }
-    if (viewer.equipment[4] != 0xffff && vis_table_c.types[viewer.equipment[4]].category == 9) {
+    if (viewer.equipment[EQUIP_SLOT_RIGHT_RESERVE] != EQUIP_NONE
+        && vis_table_c.types[viewer.equipment[EQUIP_SLOT_RIGHT_RESERVE]].category == 9) {
         if (sp->cursor == 4 || sp->cursor == 18) {
-            viewer.equipment[4] = 0xffff;
-            viewer.equipment[17] = 0xffff;
+            viewer.equipment[EQUIP_SLOT_RIGHT_RESERVE] = EQUIP_NONE;
+            viewer.equipment[EQUIP_SLOT_LEFT_RESERVE] = EQUIP_NONE;
             if (redraw == 1) {
                 equip_load_slot_picture(4);
                 equip_load_slot_picture(17);
@@ -458,8 +461,8 @@ void equip_apply_slot_change(int redraw)
     }
     if (sp->choice_id != -1) {
         if (vis_table_c.types[sp->choice_id].category == 10) {
-            viewer.equipment[2] = 0xffff;
-            viewer.equipment[10] = 0xffff;
+            viewer.equipment[EQUIP_SLOT_GLOVES] = EQUIP_NONE;
+            viewer.equipment[EQUIP_SLOT_BOOTS] = EQUIP_NONE;
             if (redraw == 1) {
                 equip_load_slot_picture(2);
                 equip_load_slot_picture(10);
@@ -467,11 +470,11 @@ void equip_apply_slot_change(int redraw)
         }
         if (vis_table_c.types[sp->choice_id].category == 9) {
             if (sp->cursor == 3) {
-                viewer.equipment[16] = 0xffff;
+                viewer.equipment[EQUIP_SLOT_LEFT_HAND] = EQUIP_NONE;
                 if (redraw == 1)
                     equip_load_slot_picture(16);
             } else if (sp->cursor == 4) {
-                viewer.equipment[17] = 0xffff;
+                viewer.equipment[EQUIP_SLOT_LEFT_RESERVE] = EQUIP_NONE;
                 if (redraw == 1)
                     equip_load_slot_picture(17);
             }
@@ -479,12 +482,12 @@ void equip_apply_slot_change(int redraw)
     }
     if (sp->cursor == 2 || sp->cursor == 16) {
         if (sp->choice_id == -1) {
-            u16 *hand = &viewer.equipment[2];
+            u16 *hand = &viewer.equipment[EQUIP_SLOT_GLOVES];
 
             *hand = 0xffff;
             hand[13] = 0xffff;
         } else {
-            viewer.equipment[2] = sp->choice_id;
+            viewer.equipment[EQUIP_SLOT_GLOVES] = sp->choice_id;
         }
         if (redraw == 1)
             equip_load_slot_picture(2);
@@ -506,9 +509,9 @@ void equip_apply_slot_change(int redraw)
     if (sp->cursor != 0 && sp->cursor != 14)
         return;
     if (sp->cursor == 0)
-        viewer.equipment[6] = 0xffff;
+        viewer.equipment[EQUIP_SLOT_RIGHT_MAGIC] = EQUIP_NONE;
     else
-        viewer.equipment[12] = 0xffff;
+        viewer.equipment[EQUIP_SLOT_LEFT_MAGIC] = EQUIP_NONE;
     if (redraw == 1) {
         DrawSync(0);
         equip_load_slot_picture(sp->cursor == 0 ? 6 : 12);
@@ -556,7 +559,7 @@ void player_total_attributes(void)
         else
             id += 1;
     }
-    if (viewer.status_flags & 0x80) {
+    if (viewer.status_flags & STATUS_SLOW) {
         at->attribute_bonuses[1] >>= 1;
         at->base_attributes[1] >>= 1;
     }
@@ -599,16 +602,16 @@ void player_total_attributes(void)
         }
         at->next_rec++;
     }
-    if (viewer.equipment[6] != 0xffff) {
-        at->right_magic_attr = viewer.equipment[6] / 3;
-        at->right_magic_bonus = *(at->right_magic_attr + effects.defs[viewer.equipment[6]].element_damage);
+    if (viewer.equipment[EQUIP_SLOT_RIGHT_MAGIC] != EQUIP_NONE) {
+        at->right_magic_attr = viewer.equipment[EQUIP_SLOT_RIGHT_MAGIC] / 3;
+        at->right_magic_bonus = *(at->right_magic_attr + effects.defs[viewer.equipment[EQUIP_SLOT_RIGHT_MAGIC]].element_damage);
     } else {
         at->right_magic_attr = 0xffff;
         at->right_magic_bonus = 0;
     }
-    if (viewer.equipment[12] != 0xffff) {
-        at->left_magic_attr = viewer.equipment[12] / 3;
-        at->left_magic_bonus = *(at->left_magic_attr + effects.defs[viewer.equipment[12]].element_damage);
+    if (viewer.equipment[EQUIP_SLOT_LEFT_MAGIC] != EQUIP_NONE) {
+        at->left_magic_attr = viewer.equipment[EQUIP_SLOT_LEFT_MAGIC] / 3;
+        at->left_magic_bonus = *(at->left_magic_attr + effects.defs[viewer.equipment[EQUIP_SLOT_LEFT_MAGIC]].element_damage);
     } else {
         at->left_magic_attr = 0xffff;
         at->left_magic_bonus = 0;
@@ -669,7 +672,7 @@ void player_compute_derived_stats(int apply)
                   + at->attributes_clamped[11] + at->attributes_clamped[12] + at->attributes_clamped[13];
     viewer.physical_base = viewer.max_hp / 80;
     viewer.magic_base = viewer.max_mp / 80;
-    if (viewer.status_flags & 0x100) {
+    if (viewer.status_flags & STATUS_CURSED) {
         b6 = viewer.physical_base;
         viewer.physical_base = b6 / 2;
         b8 = viewer.magic_base;
@@ -683,7 +686,7 @@ void player_compute_derived_stats(int apply)
         viewer.physical_base = 1;
     if (viewer.magic_base == 0)
         viewer.magic_base = 1;
-    if (viewer.equipment[3] != 0xffff) {
+    if (viewer.equipment[EQUIP_SLOT_RIGHT_HAND] != EQUIP_NONE) {
         viewer.weapon_attack[0] = viewer.physical_base + (at->attribute_bonuses_clamped[4] >> 1);
         viewer.weapon_attack[1] = viewer.physical_base + (at->attribute_bonuses_clamped[5] >> 1);
         viewer.weapon_attack[2] = viewer.physical_base + (at->attribute_bonuses_clamped[6] >> 1);
@@ -861,21 +864,21 @@ void menu_equip_info_run(void)
     sp->item_messages = mem_alloc(21504);
     sp->ring_magic_bits = mem_alloc(144);
     p = CD_BUFFER;
-    cd_read_member(3, 1, p);
+    cd_read_member(ARCHIVE_STAT, STAT_SCREEN_MESSAGES, p);
     copy_words((u32 *)&menu_messages, (u32 *)(p + 1), 5376);
     p = (u_long *)((u8 *)p + (*p + 4));
     tim_load_images_at(p + 1, &sp->image_vram[0], &sp->image_vram[1], 1);
     p = (u_long *)((u8 *)p + (*p + 4));
     copy_words(sp->ring_magic_bits, (u32 *)(p + 1), 36);
     p = CD_BUFFER;
-    cd_read_member(3, 4, p);
+    cd_read_member(ARCHIVE_STAT, STAT_ITEM_NAMES_HIGH_RES, p);
     copy_words((u32 *)sp->item_messages, (u32 *)(p + 1), 5376);
     p = (u_long *)((u8 *)p + (*p + 4));
     tim_load_images_at(p + 1, &sp->image_vram[2], &sp->image_vram[3], 1);
-    cd_read_member(3, 5, CD_BUFFER);
+    cd_read_member(ARCHIVE_STAT, STAT_BACKGROUND, CD_BUFFER);
     tim_load_images_at(CD_BUFFER, &sp->image_vram[4], NULL, 1);
     DrawSync(0);
-    cd_read_member(3, 7, CD_BUFFER);
+    cd_read_member(ARCHIVE_STAT, STAT_SCREEN_IMAGES, CD_BUFFER);
     tim_load_images_at(CD_BUFFER, &image, &clut, 1);
     DrawSync(0);
     sp->state.vram[0].vx = 640;
@@ -905,7 +908,7 @@ void menu_equip_info_run(void)
         } else if (vis_table_c.types[i].category == 10) {
             sp->category_lists[1][sp->category_counts[1]++] = i;
         } else if (vis_table_c.types[i].category == 20 || vis_table_c.types[i].category == 30) {
-            if (i == 266 || i == 310 || i == 311 || i == 312 || i == 313)
+            if (i == ITEM_CUNES || i == 310 || i == 311 || i == 312 || i == 313)
                 continue;
             sp->category_lists[9][sp->category_counts[9]++] = i;
         } else {
@@ -947,11 +950,14 @@ void menu_equip_info_run(void)
         equip_load_slot_picture(slots[0]);
         menu_equip_info_draw();
         for (j = 1; j < 20; j++) {
-            if ((viewer.equipment[3] == 0xffff || vis_table_c.types[viewer.equipment[3]].category != 9
+            if ((viewer.equipment[EQUIP_SLOT_RIGHT_HAND] == EQUIP_NONE
+                || vis_table_c.types[viewer.equipment[EQUIP_SLOT_RIGHT_HAND]].category != 9
                  || slots[j] != 16)
-                && (viewer.equipment[4] == 0xffff || vis_table_c.types[viewer.equipment[4]].category != 9
+                && (viewer.equipment[EQUIP_SLOT_RIGHT_RESERVE] == EQUIP_NONE
+                || vis_table_c.types[viewer.equipment[EQUIP_SLOT_RIGHT_RESERVE]].category != 9
                     || slots[j] != 17)
-                && (viewer.equipment[9] == 0xffff || vis_table_c.types[viewer.equipment[9]].category != 10
+                && (viewer.equipment[EQUIP_SLOT_ARMOR] == EQUIP_NONE
+                || vis_table_c.types[viewer.equipment[EQUIP_SLOT_ARMOR]].category != 10
                     || (slots[j] != 2 && slots[j] != 10 && slots[j] != 15))) {
                 equip_load_slot_picture(slots[j]);
                 menu_equip_info_draw();
@@ -968,23 +974,23 @@ void menu_equip_info_run(void)
             debounce--;
         }
         if (sp->mode == 1) {
-            if (pad_state.pressed & 0x800)
+            if (pad_state.pressed & PAD_BUTTON_R1)
                 menu_second_page = 1;
-            else if (pad_state.pressed & 0x400)
+            else if (pad_state.pressed & PAD_BUTTON_L1)
                 menu_second_page = 0;
-            if (pad_state.held & 0x1000) {
+            if (pad_state.held & PAD_BUTTON_TRIANGLE) {
                 if (sp->show_item_values == 0)
                     play_confirm_sound();
                 sp->show_item_values = 1;
             } else {
                 sp->show_item_values = 0;
             }
-            if (pad_state.pressed & 0x2000) {
+            if (pad_state.pressed & PAD_BUTTON_CIRCLE) {
                 play_cancel_sound();
                 pad_state.pressed = 0;
                 break;
             }
-            if (pad_state.pressed & 0x4000) {
+            if (pad_state.pressed & PAD_BUTTON_CROSS) {
                 pad_state.pressed = 0;
                 sp->mode = 2;
                 held = sp->cursor;
@@ -1000,8 +1006,10 @@ void menu_equip_info_run(void)
                 case 4:
                     n = sp->category_counts[6];
                     for (k = 0; k < n; k++) {
-                        if ((sp->cursor == 3 && sp->category_lists[6][k] != viewer.equipment[4])
-                            || (sp->cursor == 4 && sp->category_lists[6][k] != viewer.equipment[3]))
+                        if ((sp->cursor == 3
+                            && sp->category_lists[6][k] != viewer.equipment[EQUIP_SLOT_RIGHT_RESERVE])
+                            || (sp->cursor == 4
+                            && sp->category_lists[6][k] != viewer.equipment[EQUIP_SLOT_RIGHT_HAND]))
                             sp->choices[sp->choice_count++] = sp->category_lists[6][k];
                     }
                     play_confirm_sound();
@@ -1013,8 +1021,10 @@ void menu_equip_info_run(void)
                 case 18:
                     n = sp->category_counts[7];
                     for (k = 0; k < n; k++) {
-                        if ((sp->cursor == 17 && sp->category_lists[7][k] != viewer.equipment[17])
-                            || (sp->cursor == 18 && sp->category_lists[7][k] != viewer.equipment[16]))
+                        if ((sp->cursor == 17
+                            && sp->category_lists[7][k] != viewer.equipment[EQUIP_SLOT_LEFT_RESERVE])
+                            || (sp->cursor == 18
+                            && sp->category_lists[7][k] != viewer.equipment[EQUIP_SLOT_LEFT_HAND]))
                             sp->choices[sp->choice_count++] = sp->category_lists[7][k];
                     }
                     play_confirm_sound();
@@ -1064,8 +1074,10 @@ void menu_equip_info_run(void)
                 case 14:
                     n = sp->category_counts[4];
                     for (k = 0; k < n; k++) {
-                        if ((sp->cursor == 0 && sp->category_lists[4][k] != viewer.equipment[13])
-                            || (sp->cursor == 14 && sp->category_lists[4][k] != viewer.equipment[0]))
+                        if ((sp->cursor == 0
+                            && sp->category_lists[4][k] != viewer.equipment[EQUIP_SLOT_LEFT_RING])
+                            || (sp->cursor == 14
+                            && sp->category_lists[4][k] != viewer.equipment[EQUIP_SLOT_RIGHT_RING]))
                             sp->choices[sp->choice_count++] = sp->category_lists[4][k];
                     }
                     play_confirm_sound();
@@ -1077,8 +1089,10 @@ void menu_equip_info_run(void)
                 case 15:
                     n = sp->category_counts[8];
                     for (k = 0; k < n; k++) {
-                        if ((sp->cursor == 1 && sp->category_lists[8][k] != viewer.equipment[14])
-                            || (sp->cursor == 15 && sp->category_lists[8][k] != viewer.equipment[1]))
+                        if ((sp->cursor == 1
+                            && sp->category_lists[8][k] != viewer.equipment[EQUIP_SLOT_LEFT_BRACELET])
+                            || (sp->cursor == 15
+                            && sp->category_lists[8][k] != viewer.equipment[EQUIP_SLOT_RIGHT_BRACELET]))
                             sp->choices[sp->choice_count++] = sp->category_lists[8][k];
                     }
                     play_confirm_sound();
@@ -1102,15 +1116,21 @@ void menu_equip_info_run(void)
                 case 21:
                     n = sp->category_counts[9];
                     for (k = 0; k < n; k++) {
-                        if ((sp->category_lists[9][k] != viewer.equipment[5] && sp->category_lists[9][k] != viewer.equipment[19]
-                             && sp->category_lists[9][k] != viewer.equipment[11]
-                             && sp->category_lists[9][k] != viewer.equipment[20]
-                             && sp->category_lists[9][k] != viewer.equipment[18])
-                            || (sp->cursor == 5 && sp->category_lists[9][k] == viewer.equipment[5])
-                            || (sp->cursor == 20 && sp->category_lists[9][k] == viewer.equipment[19])
-                            || (sp->cursor == 12 && sp->category_lists[9][k] == viewer.equipment[11])
-                            || (sp->cursor == 21 && sp->category_lists[9][k] == viewer.equipment[20])
-                            || (sp->cursor == 19 && sp->category_lists[9][k] == viewer.equipment[18]))
+                        if ((sp->category_lists[9][k] != viewer.equipment[EQUIP_SLOT_QUICK_1]
+                            && sp->category_lists[9][k] != viewer.equipment[EQUIP_SLOT_QUICK_2]
+                             && sp->category_lists[9][k] != viewer.equipment[EQUIP_SLOT_QUICK_3]
+                             && sp->category_lists[9][k] != viewer.equipment[EQUIP_SLOT_QUICK_4]
+                             && sp->category_lists[9][k] != viewer.equipment[EQUIP_SLOT_QUICK_5])
+                            || (sp->cursor == 5
+                            && sp->category_lists[9][k] == viewer.equipment[EQUIP_SLOT_QUICK_1])
+                            || (sp->cursor == 20
+                            && sp->category_lists[9][k] == viewer.equipment[EQUIP_SLOT_QUICK_2])
+                            || (sp->cursor == 12
+                            && sp->category_lists[9][k] == viewer.equipment[EQUIP_SLOT_QUICK_3])
+                            || (sp->cursor == 21
+                            && sp->category_lists[9][k] == viewer.equipment[EQUIP_SLOT_QUICK_4])
+                            || (sp->cursor == 19
+                            && sp->category_lists[9][k] == viewer.equipment[EQUIP_SLOT_QUICK_5]))
                             sp->choices[sp->choice_count++] = sp->category_lists[9][k];
                     }
                     play_confirm_sound();
@@ -1120,8 +1140,8 @@ void menu_equip_info_run(void)
                     break;
                 case 6:
                 case 13:
-                    if ((sp->cursor == 6 && viewer.equipment[0] != 0xffff)
-                        || (sp->cursor == 13 && viewer.equipment[13] != 0xffff)) {
+                    if ((sp->cursor == 6 && viewer.equipment[EQUIP_SLOT_RIGHT_RING] != EQUIP_NONE)
+                        || (sp->cursor == 13 && viewer.equipment[EQUIP_SLOT_LEFT_RING] != EQUIP_NONE)) {
                         play_confirm_sound();
                     } else {
                         play_refuse_sound();
@@ -1147,12 +1167,12 @@ void menu_equip_info_run(void)
                     sp->tex_pos.vx = 640;
                     sp->tex_pos.vy = 0;
                     if (sp->cursor == 6)
-                        sp->ring_magic = sp->ring_magic_bits + (viewer.equipment[0] - 196);
+                        sp->ring_magic = sp->ring_magic_bits + (viewer.equipment[EQUIP_SLOT_RIGHT_RING] - 196);
                     else
-                        sp->ring_magic = sp->ring_magic_bits + (viewer.equipment[13] - 196);
-                    cd_read_member(7, 975, CD_BUFFER);
+                        sp->ring_magic = sp->ring_magic_bits + (viewer.equipment[EQUIP_SLOT_LEFT_RING] - 196);
+                    cd_read_member(ARCHIVE_EQUIP, 975, CD_BUFFER);
                     tim_load_images_at(CD_BUFFER, &sp->tex_pos, NULL, 1);
-                    cd_read_member(7, sp->choice_index + 995, CD_BUFFER);
+                    cd_read_member(ARCHIVE_EQUIP, sp->choice_index + 995, CD_BUFFER);
                     tim_load_images_at(CD_BUFFER, &sp->state.vram[0], &sp->state.vram[1], 1);
                 } else {
                     if (cur == 0xffff) {
@@ -1173,17 +1193,17 @@ void menu_equip_info_run(void)
                         sp->choice_id = sp->choices[sel];
                         file = sp->choice_id + offset;
                     }
-                    cd_read_member(7, file * 3, CD_BUFFER);
+                    cd_read_member(ARCHIVE_EQUIP, file * 3, CD_BUFFER);
                     tim_load_images_at(CD_BUFFER, &sp->state.vram[0], &sp->state.vram[1], 1);
                     DrawSync(0);
-                    cd_read_member(7, file * 3 + 1, CD_BUFFER);
+                    cd_read_member(ARCHIVE_EQUIP, file * 3 + 1, CD_BUFFER);
                     tim_load_images_at(CD_BUFFER, &picture, NULL, 1);
                     player_compute_derived_stats(0);
                 }
                 pad_state.pressed = 0;
                 goto moved;
             }
-            if (pad_state.pressed_repeat & 0x20) {
+            if (pad_state.pressed_repeat & PAD_BUTTON_RIGHT) {
                 debounce = 1;
                 switch (sp->cursor) {
                 case 0:
@@ -1215,7 +1235,7 @@ void menu_equip_info_run(void)
                         sp->cursor += 7;
                     break;
                 }
-            } else if (pad_state.pressed_repeat & 0x80) {
+            } else if (pad_state.pressed_repeat & PAD_BUTTON_LEFT) {
                 debounce = 1;
                 switch (sp->cursor) {
                 case 14:
@@ -1247,7 +1267,7 @@ void menu_equip_info_run(void)
                         sp->cursor -= 7;
                     break;
                 }
-            } else if (pad_state.pressed_repeat & 0x40) {
+            } else if (pad_state.pressed_repeat & PAD_BUTTON_DOWN) {
                 debounce = 1;
                 switch (sp->cursor) {
                 case 9:
@@ -1265,7 +1285,7 @@ void menu_equip_info_run(void)
                         sp->cursor++;
                     break;
                 }
-            } else if (pad_state.pressed_repeat & 0x10) {
+            } else if (pad_state.pressed_repeat & PAD_BUTTON_UP) {
                 debounce = 1;
                 switch (sp->cursor) {
                 case 10:
@@ -1295,7 +1315,7 @@ void menu_equip_info_run(void)
             }
         } else {
             if (sp->list_kind != 10) {
-                if (pad_state.pressed & 0x4000) {
+                if (pad_state.pressed & PAD_BUTTON_CROSS) {
                     sel = sp->choice_id;
                     if (sel != -1 && vis_table_c.types[sel].max_durability != 0
                         && vis_table_c.types[sel].durability == 0
@@ -1313,7 +1333,7 @@ void menu_equip_info_run(void)
                         sp->mode = 1;
                         pad_state.pressed = 0;
                     }
-                } else if (pad_state.pressed_repeat & 0x20) {
+                } else if (pad_state.pressed_repeat & PAD_BUTTON_RIGHT) {
                     play_cursor_sound();
                     if (sp->choice_index < sp->choice_count - 1) {
                         sp->choice_index++;
@@ -1322,7 +1342,7 @@ void menu_equip_info_run(void)
                         sp->choice_index = -1;
                         sp->choice_id = -1;
                     }
-                } else if (pad_state.pressed_repeat & 0x80) {
+                } else if (pad_state.pressed_repeat & PAD_BUTTON_LEFT) {
                     play_cursor_sound();
                     if (sp->choice_index >= 0)
                         sp->choice_index--;
@@ -1337,46 +1357,46 @@ void menu_equip_info_run(void)
                             sp->choice_id = sp->choices[at];
                     }
                 }
-                if (pad_state.pressed_repeat & 0xa0) {
+                if (pad_state.pressed_repeat & (PAD_BUTTON_RIGHT | PAD_BUTTON_LEFT)) {
                     debounce = 3;
                     if (sp->choice_index == -1)
                         file = base;
                     else
                         file = sp->choice_id + offset;
-                    cd_read_member(7, file * 3, CD_BUFFER);
+                    cd_read_member(ARCHIVE_EQUIP, file * 3, CD_BUFFER);
                     tim_load_images_at(CD_BUFFER, &sp->state.vram[0], &sp->state.vram[1], 1);
-                    cd_read_member(7, file * 3 + 1, CD_BUFFER);
+                    cd_read_member(ARCHIVE_EQUIP, file * 3 + 1, CD_BUFFER);
                     tim_load_images_at(CD_BUFFER, &picture, NULL, 1);
                     player_compute_derived_stats(1);
                     pad_state.pressed_repeat = 0;
                 }
             } else {
                 row = sp->choice_index;
-                if (pad_state.pressed_repeat & 0x20) {
+                if (pad_state.pressed_repeat & PAD_BUTTON_RIGHT) {
                     debounce = 1;
                     play_cursor_sound();
                     pad_state.pressed_repeat = 0;
                     if (sp->choice_index < 15)
                         sp->choice_index += 3;
-                } else if (pad_state.pressed_repeat & 0x80) {
+                } else if (pad_state.pressed_repeat & PAD_BUTTON_LEFT) {
                     debounce = 1;
                     play_cursor_sound();
                     pad_state.pressed_repeat = 0;
                     if (sp->choice_index > 1)
                         sp->choice_index -= 3;
-                } else if (pad_state.pressed_repeat & 0x10) {
+                } else if (pad_state.pressed_repeat & PAD_BUTTON_UP) {
                     debounce = 1;
                     play_cursor_sound();
                     pad_state.pressed_repeat = 0;
                     if (sp->choice_index % 3 != 0)
                         sp->choice_index--;
-                } else if (pad_state.pressed_repeat & 0x40) {
+                } else if (pad_state.pressed_repeat & PAD_BUTTON_DOWN) {
                     debounce = 1;
                     play_cursor_sound();
                     pad_state.pressed_repeat = 0;
                     if (sp->choice_index % 3 != 1)
                         sp->choice_index++;
-                } else if (pad_state.pressed & 0x4000) {
+                } else if (pad_state.pressed & PAD_BUTTON_CROSS) {
                     pad_state.pressed = 0;
                     if (*sp->ring_magic & (1 << sp->choice_index)) {
                         play_confirm_sound();
@@ -1385,10 +1405,10 @@ void menu_equip_info_run(void)
                         sp->rect.w = 48;
                         sp->rect.h = 24;
                         if (sp->cursor == 6) {
-                            viewer.equipment[6] = sp->choice_index;
+                            viewer.equipment[EQUIP_SLOT_RIGHT_MAGIC] = sp->choice_index;
                             MoveImage(&sp->rect, 740, 124);
                         } else {
-                            viewer.equipment[12] = sp->choice_index;
+                            viewer.equipment[EQUIP_SLOT_LEFT_MAGIC] = sp->choice_index;
                             MoveImage(&sp->rect, 788, 124);
                         }
                         sp->mode = 1;
@@ -1398,19 +1418,19 @@ void menu_equip_info_run(void)
                     }
                 }
                 if (row != sp->choice_index) {
-                    cd_read_member(7, sp->choice_index + 995, CD_BUFFER);
+                    cd_read_member(ARCHIVE_EQUIP, sp->choice_index + 995, CD_BUFFER);
                     tim_load_images_at(CD_BUFFER, &sp->state.vram[0], &sp->state.vram[1], 1);
                     sp->choice_id = sp->choice_index;
                     player_compute_derived_stats(1);
                 }
             }
-            if (pad_state.pressed & 0x2000) {
+            if (pad_state.pressed & PAD_BUTTON_CIRCLE) {
                 play_cancel_sound();
                 pad_state.pressed = 0;
                 player_compute_derived_stats(0);
                 sp->mode = 1;
             } else if (sp->list_kind != 10) {
-                if (pad_state.held & 0x1000) {
+                if (pad_state.held & PAD_BUTTON_TRIANGLE) {
                     if (sp->show_item_values == 0)
                         play_confirm_sound();
                     sp->show_item_values = 1;
@@ -1530,22 +1550,22 @@ void menu_creature_book_run(void)
     if (sp->scroll < 0)
         sp->scroll = 0;
     p = CD_BUFFER;
-    cd_read_member(3, 1, p);
+    cd_read_member(ARCHIVE_STAT, STAT_SCREEN_MESSAGES, p);
     copy_words((u32 *)&menu_messages, (u32 *)(p + 1), 5376);
     p = (u_long *)((u8 *)p + (*p + 4));
     tim_load_images_at(p + 1, &sp->image_vram[0], &sp->image_vram[1], 1);
     p = CD_BUFFER;
-    cd_read_member(3, 2, p);
+    cd_read_member(ARCHIVE_STAT, STAT_CREATURE_NAMES, p);
     copy_words((u32 *)sp->state.book.names, (u32 *)(p + 1), 5376);
     p = (u_long *)((u8 *)p + (*p + 4));
     tim_load_images_at(p + 1, &sp->image_vram[2], &sp->image_vram[3], 1);
-    cd_read_member(3, 5, CD_BUFFER);
+    cd_read_member(ARCHIVE_STAT, STAT_BACKGROUND, CD_BUFFER);
     tim_load_images_at(CD_BUFFER, &sp->image_vram[4], NULL, 1);
     DrawSync(0);
-    cd_read_member(3, 7, CD_BUFFER);
+    cd_read_member(ARCHIVE_STAT, STAT_SCREEN_IMAGES, CD_BUFFER);
     tim_load_images_at(CD_BUFFER, &image, &clut, 1);
     DrawSync(0);
-    cd_read_member(4, 400, CD_BUFFER);
+    cd_read_member(ARCHIVE_CRT, 400, CD_BUFFER);
     copy_words((u32 *)sp->state.book.entries, (u32 *)CD_BUFFER, 1661);
     cd_state.load_cursor = CD_BUFFER;
     n = 15;
@@ -1562,7 +1582,7 @@ void menu_creature_book_run(void)
                 used = 0;
             }
             {
-                int size = cd_read_member(4, sp->state.book.kinds[k], cd_state.load_cursor) << 11;
+                int size = cd_read_member(ARCHIVE_CRT, sp->state.book.kinds[k], cd_state.load_cursor) << 11;
 
                 tim_load_images_at(cd_state.load_cursor, &sp->state.book.cell_tex[k % 15], NULL, 1);
                 used += size;
@@ -1581,26 +1601,26 @@ void menu_creature_book_run(void)
         if (sp->mode == 1) {
             col = (s16)(sp->cursor % 5);
             row = (s16)(sp->cursor / 5);
-            if (pad_state.pressed & 0x2000) {
+            if (pad_state.pressed & PAD_BUTTON_CIRCLE) {
                 play_cancel_sound();
                 pad_state.pressed = 0;
                 break;
             }
-            if (pad_state.pressed_repeat & 0x20) {
+            if (pad_state.pressed_repeat & PAD_BUTTON_RIGHT) {
                 play_cursor_sound();
                 pad_state.pressed_repeat = 0;
                 if (col < 4)
                     sp->cursor++;
             }
-            if (pad_state.pressed_repeat & 0x80) {
+            if (pad_state.pressed_repeat & PAD_BUTTON_LEFT) {
                 play_cursor_sound();
                 pad_state.pressed_repeat = 0;
                 if (col != 0)
                     sp->cursor--;
             }
-            if (pad_state.pressed_repeat & 0x10) {
+            if (pad_state.pressed_repeat & PAD_BUTTON_UP) {
                 play_cursor_sound();
-                if (pad_state.held & 0x8000) {
+                if (pad_state.held & PAD_BUTTON_SQUARE) {
                     sp->scroll -= 3;
                     if (sp->scroll < 0)
                         sp->scroll = 0;
@@ -1611,9 +1631,9 @@ void menu_creature_book_run(void)
                 }
                 pad_state.pressed_repeat = 0;
             }
-            if (pad_state.pressed_repeat & 0x40) {
+            if (pad_state.pressed_repeat & PAD_BUTTON_DOWN) {
                 play_cursor_sound();
-                if (pad_state.held & 0x8000) {
+                if (pad_state.held & PAD_BUTTON_SQUARE) {
                     if (sp->state.book.rows > 2) {
                         sp->scroll += 3;
                         if (sp->scroll > sp->state.book.rows - 2)
@@ -1627,14 +1647,14 @@ void menu_creature_book_run(void)
                 }
                 pad_state.pressed_repeat = 0;
             }
-            if (pad_state.pressed_repeat & 0x800) {
+            if (pad_state.pressed_repeat & PAD_BUTTON_R1) {
                 play_cursor_sound();
                 pad_state.pressed_repeat = 0;
                 sp->scroll -= 3;
                 if (sp->scroll < 0)
                     sp->scroll = 0;
             }
-            if (pad_state.pressed_repeat & 0x200) {
+            if (pad_state.pressed_repeat & PAD_BUTTON_R2) {
                 play_cursor_sound();
                 pad_state.pressed_repeat = 0;
                 if (sp->state.book.rows > 2) {
@@ -1643,7 +1663,7 @@ void menu_creature_book_run(void)
                         sp->scroll = sp->state.book.rows - 2;
                 }
             }
-            if (pad_state.pressed & 0x5000) {
+            if (pad_state.pressed & (PAD_BUTTON_TRIANGLE | PAD_BUTTON_CROSS)) {
                 int k;
 
                 play_confirm_sound();
@@ -1654,7 +1674,7 @@ void menu_creature_book_run(void)
                         u_long *p = CD_BUFFER;
 
 
-                        cd_read_member(4, sp->state.book.kinds[k] + 200, p);
+                        cd_read_member(ARCHIVE_CRT, sp->state.book.kinds[k] + 200, p);
                         tim_load_images_at(p + 1, &sp->state.book.image, NULL, 1);
                         p = (u_long *)((u8 *)p + (*p + 4));
                         tim_load_images_at(p + 1, &detail, &detail_clut, 1);
@@ -1684,7 +1704,8 @@ void menu_creature_book_run(void)
                         }
                         {
                             int size =
-                                cd_read_member(4, sp->state.book.kinds[k], cd_state.load_cursor) << 11;
+                                cd_read_member(ARCHIVE_CRT, sp->state.book.kinds[k],
+                                    cd_state.load_cursor) << 11;
 
                             tim_load_images_at(cd_state.load_cursor, &sp->state.book.cell_tex[k % 15], NULL, 1);
                             used += size;
@@ -1693,7 +1714,7 @@ void menu_creature_book_run(void)
                     }
                 }
             }
-        } else if (pad_state.pressed & 0x2000) {
+        } else if (pad_state.pressed & PAD_BUTTON_CIRCLE) {
             play_cancel_sound();
             pad_state.pressed = 0;
             sp->mode = 1;
@@ -1748,19 +1769,19 @@ void menu_arrange_icons_run(void)
     menu_show_loading_screen();
     sp->state.grid.messages = mem_alloc(21504);
     p = cd_file_buffer;
-    cd_read_member(3, 1, p);
+    cd_read_member(ARCHIVE_STAT, STAT_SCREEN_MESSAGES, p);
     copy_words((u32 *)&menu_messages, (u32 *)(p + 1), 5376);
     p = (u_long *)((u8 *)p + (*p + 4));
     tim_load_images_at(p + 1, &sp->image_vram[0], &sp->image_vram[1], 1);
     p = cd_file_buffer;
-    cd_read_member(3, 4, p);
+    cd_read_member(ARCHIVE_STAT, STAT_ITEM_NAMES_HIGH_RES, p);
     copy_words((u32 *)sp->state.grid.messages, (u32 *)(p + 1), 5376);
     p = (u_long *)((u8 *)p + (*p + 4));
     tim_load_images_at(p + 1, &sp->image_vram[2], &sp->image_vram[3], 1);
-    cd_read_member(3, 5, cd_file_buffer);
+    cd_read_member(ARCHIVE_STAT, STAT_BACKGROUND, cd_file_buffer);
     tim_load_images_at(cd_file_buffer, &sp->image_vram[4], NULL, 1);
     DrawSync(0);
-    cd_read_member(3, 7, cd_file_buffer);
+    cd_read_member(ARCHIVE_STAT, STAT_SCREEN_IMAGES, cd_file_buffer);
     tim_load_images_at(cd_file_buffer, &image, &clut, 1);
     DrawSync(0);
     sp->state.grid.hand_count = 0;
@@ -1775,13 +1796,20 @@ void menu_arrange_icons_run(void)
     sp->state.grid.bag_count = 0;
     for (i = 0; i < 314; i++) {
         if (vis_table_c.types[i].icon != 0xff && i < 314 && i != 266
-            && inventory.counts[i].count != 0 && i != viewer.equipment[0] && i != viewer.equipment[1]
-            && i != viewer.equipment[2] && i != viewer.equipment[3] && i != viewer.equipment[4]
-            && i != viewer.equipment[5] && i != viewer.equipment[7] && i != viewer.equipment[8]
-            && i != viewer.equipment[9] && i != viewer.equipment[10] && i != viewer.equipment[11]
-            && i != viewer.equipment[13] && i != viewer.equipment[14] && i != viewer.equipment[15]
-            && i != viewer.equipment[16] && i != viewer.equipment[17] && i != viewer.equipment[18]
-            && i != viewer.equipment[19] && i != viewer.equipment[20]) {
+            && inventory.counts[i].count != 0 && i != viewer.equipment[EQUIP_SLOT_RIGHT_RING]
+            && i != viewer.equipment[EQUIP_SLOT_RIGHT_BRACELET]
+            && i != viewer.equipment[EQUIP_SLOT_GLOVES] && i != viewer.equipment[EQUIP_SLOT_RIGHT_HAND]
+            && i != viewer.equipment[EQUIP_SLOT_RIGHT_RESERVE]
+            && i != viewer.equipment[EQUIP_SLOT_QUICK_1] && i != viewer.equipment[EQUIP_SLOT_AMULET]
+            && i != viewer.equipment[EQUIP_SLOT_HELMET]
+            && i != viewer.equipment[EQUIP_SLOT_ARMOR] && i != viewer.equipment[EQUIP_SLOT_BOOTS]
+            && i != viewer.equipment[EQUIP_SLOT_QUICK_3]
+            && i != viewer.equipment[EQUIP_SLOT_LEFT_RING]
+            && i != viewer.equipment[EQUIP_SLOT_LEFT_BRACELET]
+            && i != viewer.equipment[EQUIP_SLOT_GLOVES_MIRROR]
+            && i != viewer.equipment[EQUIP_SLOT_LEFT_HAND] && i != viewer.equipment[EQUIP_SLOT_LEFT_RESERVE]
+            && i != viewer.equipment[EQUIP_SLOT_QUICK_5]
+            && i != viewer.equipment[EQUIP_SLOT_QUICK_2] && i != viewer.equipment[EQUIP_SLOT_QUICK_4]) {
             if (!inventory.counts[i].in_bag)
                 sp->state.grid.hand_ids[sp->state.grid.hand_count++] = i;
             else
@@ -1817,14 +1845,14 @@ void menu_arrange_icons_run(void)
             total = 0;
         }
         if (i < 20 && i < sp->state.grid.hand_count) {
-            size = cd_read_member(6, vis_table_c.types[sp->state.grid.hand_ids[i]].icon,
+            size = cd_read_member(ARCHIVE_ICON, vis_table_c.types[sp->state.grid.hand_ids[i]].icon,
                                  cd_state.load_cursor) << 11;
 
             tim_load_images_at(cd_state.load_cursor, &sp->state.grid.cell_tex[i], NULL, 1);
             total += size;
             cd_state.load_cursor = (u_long *)((u8 *)cd_state.load_cursor + size);
         } else if (i >= 20 && i - 20 < sp->state.grid.bag_count) {
-            size = cd_read_member(6, vis_table_c.types[sp->state.grid.bag_ids[i - 20]].icon,
+            size = cd_read_member(ARCHIVE_ICON, vis_table_c.types[sp->state.grid.bag_ids[i - 20]].icon,
                                  cd_state.load_cursor) << 11;
 
             tim_load_images_at(cd_state.load_cursor, &sp->state.grid.cell_tex[i], NULL, 1);
@@ -1848,7 +1876,7 @@ void menu_arrange_icons_run(void)
     for (;;) {
         r0 = sp->state.grid.hand_row;
         r1 = sp->state.grid.bag_row;
-        if (pad_state.pressed & 0x2000) {
+        if (pad_state.pressed & PAD_BUTTON_CIRCLE) {
             play_cancel_sound();
             pad_state.pressed = 0;
             if (sp->mode & 0x8000) {
@@ -1859,7 +1887,7 @@ void menu_arrange_icons_run(void)
                 break;
             }
         }
-        if (pad_state.pressed & 0x4000) {
+        if (pad_state.pressed & PAD_BUTTON_CROSS) {
             play_confirm_sound();
             pad_state.pressed = 0;
             if (sp->mode & 0x8000) {
@@ -1930,7 +1958,7 @@ void menu_arrange_icons_run(void)
             }
         }
         if (!(sp->mode & 0x8000)) {
-            if (pad_state.pressed & 0x1000) {
+            if (pad_state.pressed & PAD_BUTTON_TRIANGLE) {
                 play_confirm_sound();
                 pad_state.pressed = 0;
                 if (sp->mode == 1)
@@ -1938,21 +1966,21 @@ void menu_arrange_icons_run(void)
                 else if (sp->mode == 2)
                     sp->mode = 1;
             }
-            if (pad_state.pressed_repeat & 0x20) {
+            if (pad_state.pressed_repeat & PAD_BUTTON_RIGHT) {
                 play_cursor_sound();
                 pad_state.pressed_repeat = 0;
                 if (sp->cursor % 8 != 7)
                     sp->cursor++;
             }
-            if (pad_state.pressed_repeat & 0x80) {
+            if (pad_state.pressed_repeat & PAD_BUTTON_LEFT) {
                 play_cursor_sound();
                 pad_state.pressed_repeat = 0;
                 if (sp->cursor & 7)
                     sp->cursor--;
             }
-            if (pad_state.pressed_repeat & 0x10) {
+            if (pad_state.pressed_repeat & PAD_BUTTON_UP) {
                 play_cursor_sound();
-                if (pad_state.held & 0x8000) {
+                if (pad_state.held & PAD_BUTTON_SQUARE) {
                     if (CURSOR_COL < 4) {
                         sp->state.grid.hand_row -= 5;
                         if (sp->state.grid.hand_row < 0)
@@ -1972,9 +2000,9 @@ void menu_arrange_icons_run(void)
                 }
                 pad_state.pressed_repeat = 0;
             }
-            if (pad_state.pressed_repeat & 0x40) {
+            if (pad_state.pressed_repeat & PAD_BUTTON_DOWN) {
                 play_cursor_sound();
-                if (pad_state.held & 0x8000) {
+                if (pad_state.held & PAD_BUTTON_SQUARE) {
                     if (CURSOR_COL < 4) {
                         sp->state.grid.hand_row += 5;
                         if (sp->state.grid.hand_row > 73)
@@ -1994,28 +2022,28 @@ void menu_arrange_icons_run(void)
                 }
                 pad_state.pressed_repeat = 0;
             }
-            if (pad_state.pressed_repeat & 0x400) {
+            if (pad_state.pressed_repeat & PAD_BUTTON_L1) {
                 play_cursor_sound();
                 pad_state.pressed_repeat = 0;
                 sp->state.grid.hand_row -= 5;
                 if (sp->state.grid.hand_row < 0)
                     sp->state.grid.hand_row = 0;
             }
-            if (pad_state.pressed_repeat & 0x100) {
+            if (pad_state.pressed_repeat & PAD_BUTTON_L2) {
                 play_cursor_sound();
                 pad_state.pressed_repeat = 0;
                 sp->state.grid.hand_row += 5;
                 if (sp->state.grid.hand_row > 73)
                     sp->state.grid.hand_row = 73;
             }
-            if (pad_state.pressed_repeat & 0x800) {
+            if (pad_state.pressed_repeat & PAD_BUTTON_R1) {
                 play_cursor_sound();
                 pad_state.pressed_repeat = 0;
                 sp->state.grid.bag_row -= 5;
                 if (sp->state.grid.bag_row < 0)
                     sp->state.grid.bag_row = 0;
             }
-            if (pad_state.pressed_repeat & 0x200) {
+            if (pad_state.pressed_repeat & PAD_BUTTON_R2) {
                 play_cursor_sound();
                 pad_state.pressed_repeat = 0;
                 sp->state.grid.bag_row += 5;
@@ -2028,7 +2056,7 @@ void menu_arrange_icons_run(void)
                 else
                     id = sp->state.grid.bag_ids[sp->state.grid.bag_row * 4 + (CURSOR_ROW * 4 + CURSOR_COL) - 4];
                 if (shown != id && id != -1) {
-                    cd_read_member(6, vis_table_c.types[id].icon + 200, cd_file_buffer);
+                    cd_read_member(ARCHIVE_ICON, vis_table_c.types[id].icon + 200, cd_file_buffer);
                     tim_load_images_at(cd_file_buffer, &picture, NULL, 1);
                     shown = id;
                 }
@@ -2150,13 +2178,13 @@ int menu_attribute_points_run(int points)
     }
     pad_clear_input();
     do {
-        if (pad_state.pressed & 0x2000) {
+        if (pad_state.pressed & PAD_BUTTON_CIRCLE) {
             pad_state.pressed = 0;
             play_cancel_sound();
             result = 0;
             goto done;
         }
-        if (pad_state.pressed_repeat & 0x10) {
+        if (pad_state.pressed_repeat & PAD_BUTTON_UP) {
             pad_state.pressed_repeat = 0;
             play_cursor_sound();
             if (sp->state.stats.selected % 7 == 0)
@@ -2164,7 +2192,7 @@ int menu_attribute_points_run(int points)
             else
                 sp->state.stats.selected--;
         }
-        if (pad_state.pressed_repeat & 0x40) {
+        if (pad_state.pressed_repeat & PAD_BUTTON_DOWN) {
             pad_state.pressed_repeat = 0;
             play_cursor_sound();
             if (sp->state.stats.selected % 7 == 6)
@@ -2172,7 +2200,7 @@ int menu_attribute_points_run(int points)
             else
                 sp->state.stats.selected++;
         }
-        if (pad_state.pressed_repeat & 0xa0) {
+        if (pad_state.pressed_repeat & (PAD_BUTTON_RIGHT | PAD_BUTTON_LEFT)) {
             pad_state.pressed_repeat = 0;
             play_cursor_sound();
             if (sp->state.stats.selected < 7)
@@ -2180,7 +2208,7 @@ int menu_attribute_points_run(int points)
             else
                 sp->state.stats.selected -= 7;
         }
-        if (pad_state.pressed_repeat & 0x4000) {
+        if (pad_state.pressed_repeat & PAD_BUTTON_CROSS) {
             pad_state.pressed_repeat = 0;
             if (sp->state.stats.value > 0) {
                 if (sp->state.stats.base[0][sp->state.stats.selected]
@@ -2251,12 +2279,12 @@ int menu_use_item_run(void)
     sp->state.page_list.icons[4].vy = 488;
     sp->state.block = mem_alloc(21504);
     image = (u8 *)CD_BUFFER;
-    cd_read_member(3, 3, (u_long *)image);
+    cd_read_member(ARCHIVE_STAT, STAT_ITEM_NAMES, (u_long *)image);
     copy_words(sp->state.block, (u32 *)(image + 4), 5376);
     image += *(u32 *)image + 4;
     tim_load_images_at(image + 4, &sp->image_vram[2], &sp->image_vram[3], 1);
     cd_state.load_cursor = CD_BUFFER;
-    cd_read_member(6, 800, cd_state.load_cursor);
+    cd_read_member(ARCHIVE_ICON, 800, cd_state.load_cursor);
     sp->state.page_list.entries = mem_alloc(92);
     sp->state.page_list.count = 0;
     for (i = 268; i < 314; i++) {
@@ -2283,7 +2311,7 @@ int menu_use_item_run(void)
     reload = 0;
     for (;;) {
         first = sp->scroll;
-        if (pad_state.pressed & 0x4000) {
+        if (pad_state.pressed & PAD_BUTTON_CROSS) {
             pad_state.pressed = 0;
             if (sp->scroll + sp->cursor < sp->state.page_list.count)
                 item_use(sp->state.page_list.entries[sp->scroll + sp->cursor]);
@@ -2299,18 +2327,18 @@ int menu_use_item_run(void)
                 result = game_progress.item_use_result;
                 if (game_progress.item_use_result == 1) {
                     id = sp->state.page_list.entries[sp->scroll + sp->cursor];
-                    if (id >= 310 || id == 288)
+                    if (id >= 310 || id == ITEM_DIVINE_SYMBOL)
                         reload = 1;
                 }
                 break;
             }
         }
-        if (pad_state.pressed & 0x2000) {
+        if (pad_state.pressed & PAD_BUTTON_CIRCLE) {
             play_cancel_sound();
             pad_state.pressed = 0;
             break;
         }
-        if (pad_state.pressed_repeat & 0x10) {
+        if (pad_state.pressed_repeat & PAD_BUTTON_UP) {
             play_cursor_sound();
             pad_state.pressed_repeat = 0;
             if (sp->cursor == 0) {
@@ -2321,7 +2349,7 @@ int menu_use_item_run(void)
             }
             sp->blink_phase = 0;
         }
-        if (pad_state.pressed_repeat & 0x40) {
+        if (pad_state.pressed_repeat & PAD_BUTTON_DOWN) {
             play_cursor_sound();
             pad_state.pressed_repeat = 0;
             if (sp->cursor == 4) {
@@ -2332,7 +2360,7 @@ int menu_use_item_run(void)
             }
             sp->blink_phase = 0;
         }
-        if (pad_state.pressed_repeat & 0x20) {
+        if (pad_state.pressed_repeat & PAD_BUTTON_RIGHT) {
             play_cursor_sound();
             pad_state.pressed_repeat = 0;
             sp->scroll += 5;
@@ -2344,7 +2372,7 @@ int menu_use_item_run(void)
             }
             sp->blink_phase = 0;
         }
-        if (pad_state.pressed_repeat & 0x80) {
+        if (pad_state.pressed_repeat & PAD_BUTTON_LEFT) {
             play_cursor_sound();
             pad_state.pressed_repeat = 0;
             sp->scroll -= 5;
@@ -2382,7 +2410,7 @@ int menu_use_item_run(void)
         player_compute_derived_stats(0);
     {
         u8 *restore = (u8 *)CD_BUFFER;
-        cd_read_member(3, 9, (u_long *)restore);
+        cd_read_member(ARCHIVE_STAT, 9, (u_long *)restore);
         tim_load_images_at(restore + 4, NULL, NULL, 0);
         restore += *(u32 *)restore + 4;
         tim_load_images_at(restore + 4, NULL, NULL, 0);
@@ -2414,12 +2442,12 @@ void shop_open(void)
     MoveImage(&page, 896, 0);
     cd_wait_idle();
     p = (u8 *)cd_file_buffer;
-    cd_read_member(3, 0, (u_long *)p);
+    cd_read_member(ARCHIVE_STAT, STAT_MESSAGES, (u_long *)p);
     copy_words((u32 *)&menu_messages, (u32 *)(p + 4), 5376);
     p += *(u32 *)p + 4;
     tim_load_images_at(p + 4, &sp->image_vram[0], &sp->image_vram[1], 1);
     p = (u8 *)cd_file_buffer;
-    cd_read_member(3, 3, (u_long *)p);
+    cd_read_member(ARCHIVE_STAT, STAT_ITEM_NAMES, (u_long *)p);
     copy_words(sp->state.block, (u32 *)(p + 4), 5376);
     p += *(u32 *)p + 4;
     tim_load_images_at(p + 4, &sp->image_vram[2], &sp->image_vram[3], 1);
@@ -2474,13 +2502,20 @@ void shop_run(void)
         sp->state.list.ids = mem_alloc(530);
         sp->state.list.count = 0;
         for (i = 0; i < 266; i++) {
-            if (inventory.counts[i].count != 0 && i != viewer.equipment[0] && i != viewer.equipment[1]
-                && i != viewer.equipment[2] && i != viewer.equipment[3] && i != viewer.equipment[4]
-                && i != viewer.equipment[5] && i != viewer.equipment[7] && i != viewer.equipment[8]
-                && i != viewer.equipment[9] && i != viewer.equipment[10] && i != viewer.equipment[11]
-                && i != viewer.equipment[13] && i != viewer.equipment[14] && i != viewer.equipment[15]
-                && i != viewer.equipment[16] && i != viewer.equipment[17] && i != viewer.equipment[18]
-                && i != viewer.equipment[19] && i != viewer.equipment[20])
+            if (inventory.counts[i].count != 0 && i != viewer.equipment[EQUIP_SLOT_RIGHT_RING]
+                && i != viewer.equipment[EQUIP_SLOT_RIGHT_BRACELET]
+                && i != viewer.equipment[EQUIP_SLOT_GLOVES] && i != viewer.equipment[EQUIP_SLOT_RIGHT_HAND]
+                && i != viewer.equipment[EQUIP_SLOT_RIGHT_RESERVE]
+                && i != viewer.equipment[EQUIP_SLOT_QUICK_1] && i != viewer.equipment[EQUIP_SLOT_AMULET]
+                && i != viewer.equipment[EQUIP_SLOT_HELMET]
+                && i != viewer.equipment[EQUIP_SLOT_ARMOR] && i != viewer.equipment[EQUIP_SLOT_BOOTS]
+                && i != viewer.equipment[EQUIP_SLOT_QUICK_3]
+                && i != viewer.equipment[EQUIP_SLOT_LEFT_RING]
+                && i != viewer.equipment[EQUIP_SLOT_LEFT_BRACELET]
+                && i != viewer.equipment[EQUIP_SLOT_GLOVES_MIRROR]
+                && i != viewer.equipment[EQUIP_SLOT_LEFT_HAND]
+                && i != viewer.equipment[EQUIP_SLOT_LEFT_RESERVE] && i != viewer.equipment[EQUIP_SLOT_QUICK_5]
+                && i != viewer.equipment[EQUIP_SLOT_QUICK_2] && i != viewer.equipment[EQUIP_SLOT_QUICK_4])
                 sp->state.list.ids[sp->state.list.count++] = i;
         }
     } else {
@@ -2495,23 +2530,23 @@ void shop_run(void)
     shown = -1;
     for (;;) {
         if (sp->mode & 0x8000) {
-            if (pad_state.pressed & 0x2000) {
+            if (pad_state.pressed & PAD_BUTTON_CIRCLE) {
                 play_cancel_sound();
                 pad_state.pressed = 0;
                 sp->mode &= ~0x8000;
             }
-            if (pad_state.pressed & 0x4000) {
+            if (pad_state.pressed & PAD_BUTTON_CROSS) {
                 pad_state.pressed = 0;
                 if ((s16)sp->state.list.confirm_choice == 1) {
                     done = 1;
                     if (sp->mode & 1) {
                         int id = inventory.shop_ids[sp->state.list.ids[sp->scroll + sp->cursor]];
 
-                        if (inventory.counts[266].count < vis_table_c.types[id].price) {
+                        if (inventory.counts[ITEM_CUNES].count < vis_table_c.types[id].price) {
                             done = 0;
                             play_refuse_sound();
                         } else {
-                            inventory.counts[266].count -= vis_table_c.types[id].price;
+                            inventory.counts[ITEM_CUNES].count -= vis_table_c.types[id].price;
                             inventory.counts[id].count++;
                             inventory.shop_stock[sp->state.list.ids[sp->scroll + sp->cursor]]--;
                             if (inventory.shop_stock[sp->state.list.ids[sp->scroll + sp->cursor]] == 0) {
@@ -2568,25 +2603,25 @@ void shop_run(void)
                     sp->mode &= ~0x8000;
                 }
             }
-            if (pad_state.pressed_repeat & 0x80) {
+            if (pad_state.pressed_repeat & PAD_BUTTON_LEFT) {
                 play_cursor_sound();
                 pad_state.pressed_repeat = 0;
                 sp->blink_phase = 0;
                 sp->state.list.confirm_choice = 1;
             }
-            if (pad_state.pressed_repeat & 0x20) {
+            if (pad_state.pressed_repeat & PAD_BUTTON_RIGHT) {
                 play_cursor_sound();
                 pad_state.pressed_repeat = 0;
                 sp->blink_phase = 0;
                 sp->state.list.confirm_choice = 0;
             }
         } else {
-            if (pad_state.pressed & 0x2000) {
+            if (pad_state.pressed & PAD_BUTTON_CIRCLE) {
                 play_cancel_sound();
                 pad_state.pressed = 0;
                 break;
             }
-            if (pad_state.pressed_repeat & 0x10) {
+            if (pad_state.pressed_repeat & PAD_BUTTON_UP) {
                 play_cursor_sound();
                 pad_state.pressed_repeat = 0;
                 if (sp->cursor == 0) {
@@ -2596,7 +2631,7 @@ void shop_run(void)
                     sp->cursor--;
                 }
             }
-            if (pad_state.pressed_repeat & 0x40) {
+            if (pad_state.pressed_repeat & PAD_BUTTON_DOWN) {
                 play_cursor_sound();
                 pad_state.pressed_repeat = 0;
                 if (sp->cursor == 4) {
@@ -2606,7 +2641,7 @@ void shop_run(void)
                     sp->cursor++;
                 }
             }
-            if (pad_state.pressed & 0x4000) {
+            if (pad_state.pressed & PAD_BUTTON_CROSS) {
                 pad_state.pressed = 0;
                 if (sp->scroll + sp->cursor >= sp->state.list.count) {
                     play_refuse_sound();
@@ -2619,7 +2654,7 @@ void shop_run(void)
                     sp->state.list.confirm_choice = 1;
                     sp->mode |= 0x8000;
                     if (kind != shown) {
-                        cd_read_member(6, kind + 600, cd_file_buffer);
+                        cd_read_member(ARCHIVE_ICON, kind + 600, cd_file_buffer);
                         tim_load_images_at(cd_file_buffer, &pos, NULL, 1);
                         shown = kind;
                     }
@@ -2681,14 +2716,14 @@ void menu_area_info_run(void)
         sp->state.map.ids[i] = areas[i];
     for (;;) {
         moved = 0;
-        if (pad_state.pressed & 0x2000) {
+        if (pad_state.pressed & PAD_BUTTON_CIRCLE) {
             area_info_list_shown = 0;
             pad_state.pressed = 0;
             play_cancel_sound();
             break;
         }
         if (area_info_list_shown == 1) {
-            if (pad_state.pressed_repeat & 0x10) {
+            if (pad_state.pressed_repeat & PAD_BUTTON_UP) {
                 pad_state.pressed_repeat = 0;
                 if (sp->state.map.scroll > 0) {
                     play_cursor_sound();
@@ -2696,7 +2731,7 @@ void menu_area_info_run(void)
                     sp->state.map.scroll--;
                 }
             }
-            if (pad_state.pressed_repeat & 0x40) {
+            if (pad_state.pressed_repeat & PAD_BUTTON_DOWN) {
                 pad_state.pressed_repeat = 0;
                 if (sp->state.map.scroll < 25) {
                     play_cursor_sound();
@@ -2712,11 +2747,11 @@ void menu_area_info_run(void)
             for (i = 0; i < 10; i++)
                 sp->state.map.ids[i] = areas[sp->state.map.scroll + i];
         }
-        if (pad_state.pressed_repeat & 0x400) {
+        if (pad_state.pressed_repeat & PAD_BUTTON_L1) {
             pad_state.pressed_repeat = 0;
             area_info_list_shown = 0;
         }
-        if (pad_state.pressed_repeat & 0x800) {
+        if (pad_state.pressed_repeat & PAD_BUTTON_R1) {
             pad_state.pressed_repeat = 0;
             area_info_list_shown = 1;
         }
@@ -2747,12 +2782,12 @@ void menu_options_run(void)
     pad_clear_input();
     while (1) {
         if (sp->mode == 1) {
-            if (pad_state.pressed & 0x2000) {
+            if (pad_state.pressed & PAD_BUTTON_CIRCLE) {
                 play_cancel_sound();
                 pad_state.pressed = 0;
                 break;
             }
-            if (pad_state.pressed_repeat & 0x10) {
+            if (pad_state.pressed_repeat & PAD_BUTTON_UP) {
                 play_cursor_sound();
                 pad_state.pressed_repeat = 0;
                 if (sp->cursor == 0)
@@ -2760,7 +2795,7 @@ void menu_options_run(void)
                 else
                     sp->cursor--;
             }
-            if (pad_state.pressed_repeat & 0x40) {
+            if (pad_state.pressed_repeat & PAD_BUTTON_DOWN) {
                 play_cursor_sound();
                 pad_state.pressed_repeat = 0;
                 if (sp->cursor == 5)
@@ -2768,7 +2803,7 @@ void menu_options_run(void)
                 else
                     sp->cursor++;
             }
-            if (pad_state.pressed & 0x4000) {
+            if (pad_state.pressed & PAD_BUTTON_CROSS) {
                 pad_state.pressed = 0;
                 if (sp->cursor == 5) {
                     const u16 *decode = pad_state.buttons;
@@ -2807,7 +2842,7 @@ void menu_options_run(void)
                     sp->state.levels.flags = 0;
                 }
             }
-            if (pad_state.pressed_repeat & 0x20) {
+            if (pad_state.pressed_repeat & PAD_BUTTON_RIGHT) {
                 u8 *option = &game_settings.sfx_volume;
 
                 play_cursor_sound();
@@ -2819,7 +2854,7 @@ void menu_options_run(void)
                     option[sp->cursor] = 0;
                 }
             }
-            if (pad_state.pressed_repeat & 0x80) {
+            if (pad_state.pressed_repeat & PAD_BUTTON_LEFT) {
                 u8 *option = &game_settings.sfx_volume;
 
                 play_cursor_sound();
@@ -2832,7 +2867,7 @@ void menu_options_run(void)
                 }
             }
         } else if (sp->scroll == 0) {
-            if (pad_state.pressed & 0x2000) {
+            if (pad_state.pressed & PAD_BUTTON_CIRCLE) {
                 if (sp->state.levels.flags == 0) {
                     pad_update_action_mask();
                     play_confirm_sound();
@@ -2844,7 +2879,7 @@ void menu_options_run(void)
                     pad_state.pressed = 0;
                 }
             }
-            if (pad_state.pressed & 0x4000) {
+            if (pad_state.pressed & PAD_BUTTON_CROSS) {
                 pad_state.pressed = 0;
                 if (sp->cursor < 12) {
                     play_confirm_sound();
@@ -2878,12 +2913,12 @@ void menu_options_run(void)
                     pad_state.pressed = 0;
                 }
             }
-            if (pad_state.pressed & 8) {
+            if (pad_state.pressed & PAD_BUTTON_START) {
                 play_cursor_sound();
                 pad_state.pressed = 0;
                 sp->cursor = 13;
             }
-            if (pad_state.pressed_repeat & 0x10) {
+            if (pad_state.pressed_repeat & PAD_BUTTON_UP) {
                 play_cursor_sound();
                 pad_state.pressed_repeat = 0;
                 if (sp->cursor == 0)
@@ -2897,7 +2932,7 @@ void menu_options_run(void)
                 else
                     sp->cursor--;
             }
-            if (pad_state.pressed_repeat & 0x40) {
+            if (pad_state.pressed_repeat & PAD_BUTTON_DOWN) {
                 play_cursor_sound();
                 pad_state.pressed_repeat = 0;
                 if (sp->cursor == 12)
@@ -2911,7 +2946,7 @@ void menu_options_run(void)
                 else
                     sp->cursor++;
             }
-            if (pad_state.pressed_repeat & 0x20) {
+            if (pad_state.pressed_repeat & PAD_BUTTON_RIGHT) {
                 play_cursor_sound();
                 pad_state.pressed_repeat = 0;
                 if (sp->cursor < 6)
@@ -2923,7 +2958,7 @@ void menu_options_run(void)
                 else
                     sp->cursor -= 6;
             }
-            if (pad_state.pressed_repeat & 0x80) {
+            if (pad_state.pressed_repeat & PAD_BUTTON_LEFT) {
                 play_cursor_sound();
                 pad_state.pressed_repeat = 0;
                 if (sp->cursor < 7)
@@ -2937,40 +2972,40 @@ void menu_options_run(void)
             }
         } else if (pad_state.pressed) {
             key = &pad_state.buttons[sp->cursor];
-            if (pad_state.pressed & 0x1000) {
+            if (pad_state.pressed & PAD_BUTTON_TRIANGLE) {
                 sp->state.levels.level[sp->cursor] = 0;
                 *key = 0x1000;
-            } else if (pad_state.pressed & 0x2000) {
+            } else if (pad_state.pressed & PAD_BUTTON_CIRCLE) {
                 sp->state.levels.level[sp->cursor] = 1;
                 *key = 0x2000;
-            } else if (pad_state.pressed & 0x8000) {
+            } else if (pad_state.pressed & PAD_BUTTON_SQUARE) {
                 sp->state.levels.level[sp->cursor] = 2;
                 *key = 0x8000;
-            } else if (pad_state.pressed & 0x4000) {
+            } else if (pad_state.pressed & PAD_BUTTON_CROSS) {
                 sp->state.levels.level[sp->cursor] = 3;
                 *key = 0x4000;
-            } else if (pad_state.pressed & 0x80) {
+            } else if (pad_state.pressed & PAD_BUTTON_LEFT) {
                 sp->state.levels.level[sp->cursor] = 4;
                 *key = 0x80;
-            } else if (pad_state.pressed & 0x10) {
+            } else if (pad_state.pressed & PAD_BUTTON_UP) {
                 sp->state.levels.level[sp->cursor] = 5;
                 *key = 0x10;
-            } else if (pad_state.pressed & 0x20) {
+            } else if (pad_state.pressed & PAD_BUTTON_RIGHT) {
                 sp->state.levels.level[sp->cursor] = 6;
                 *key = 0x20;
-            } else if (pad_state.pressed & 0x40) {
+            } else if (pad_state.pressed & PAD_BUTTON_DOWN) {
                 sp->state.levels.level[sp->cursor] = 7;
                 *key = 0x40;
-            } else if (pad_state.pressed & 0x400) {
+            } else if (pad_state.pressed & PAD_BUTTON_L1) {
                 sp->state.levels.level[sp->cursor] = 8;
                 *key = 0x400;
-            } else if (pad_state.pressed & 0x100) {
+            } else if (pad_state.pressed & PAD_BUTTON_L2) {
                 sp->state.levels.level[sp->cursor] = 9;
                 *key = 0x100;
-            } else if (pad_state.pressed & 0x800) {
+            } else if (pad_state.pressed & PAD_BUTTON_R1) {
                 sp->state.levels.level[sp->cursor] = 10;
                 *key = 0x800;
-            } else if (pad_state.pressed & 0x200) {
+            } else if (pad_state.pressed & PAD_BUTTON_R2) {
                 sp->state.levels.level[sp->cursor] = 11;
                 *key = 0x200;
             }
@@ -3266,9 +3301,9 @@ int card_check_inserted(int port)
 
     card_probe(port, 0);
     if (sp->card->status == 1) {
-        sp->state.half[0] = 351;
+        sp->state.half[0] = MSG_CARD_SWITCHED;
     } else if (sp->card->status == 2) {
-        sp->state.half[0] = 350;
+        sp->state.half[0] = MSG_CARD_NOT_INSERTED;
     } else {
         return 1;
     }
@@ -3294,23 +3329,23 @@ int card_ask_yes_no(void)
                 return -1;
             n = 3;
         }
-        if (pad_state.pressed & 0x4000) {
+        if (pad_state.pressed & PAD_BUTTON_CROSS) {
             play_confirm_sound();
             pad_state.pressed = 0;
             break;
         }
-        if (pad_state.pressed & 0x2000) {
+        if (pad_state.pressed & PAD_BUTTON_CIRCLE) {
             play_cancel_sound();
             pad_state.pressed = 0;
             sp->dialog_choice = 0;
             break;
         }
-        if (pad_state.pressed & 0x80) {
+        if (pad_state.pressed & PAD_BUTTON_LEFT) {
             play_cursor_sound();
             pad_state.pressed = 0;
             sp->dialog_choice = 1;
         }
-        if (pad_state.pressed & 0x20) {
+        if (pad_state.pressed & PAD_BUTTON_RIGHT) {
             play_cursor_sound();
             pad_state.pressed = 0;
             sp->dialog_choice = 0;
@@ -3332,25 +3367,25 @@ int card_choose_port(void)
     sp->blink_phase = 0;
     pad_clear_input();
     while (1) {
-        if (pad_state.pressed & 0x4000) {
+        if (pad_state.pressed & PAD_BUTTON_CROSS) {
             play_confirm_sound();
             pad_state.pressed = 0;
             sp->card = &((MenuCardScratch *)sp)->cards[sp->port];
             break;
         }
-        if (pad_state.pressed & 0x2000) {
+        if (pad_state.pressed & PAD_BUTTON_CIRCLE) {
             play_cancel_sound();
             pad_state.pressed = 0;
             sp->port = -1;
             break;
         }
-        if (pad_state.pressed_repeat & 0x10) {
+        if (pad_state.pressed_repeat & PAD_BUTTON_UP) {
             play_cursor_sound();
             pad_state.pressed_repeat = 0;
             sp->port = 0;
             sp->blink_phase = 0;
         }
-        if (pad_state.pressed_repeat & 0x40) {
+        if (pad_state.pressed_repeat & PAD_BUTTON_DOWN) {
             play_cursor_sound();
             pad_state.pressed_repeat = 0;
             sp->port = 1;
@@ -3386,7 +3421,7 @@ int card_read_file_headers(void)
         strcat(path, sp->card->files[i].name);
         fd = open(path, O_RDONLY);
         if (fd == -1) {
-            sp->state.half[0] = 354;
+            sp->state.half[0] = MSG_CARD_LOAD_FAILED;
             return 0;
         }
     read:
@@ -3438,30 +3473,30 @@ int card_choose_file(void)
                 return -1;
             n = 20;
         }
-        if (pad_state.pressed & 0x4000) {
+        if (pad_state.pressed & PAD_BUTTON_CROSS) {
             play_confirm_sound();
             pad_state.pressed = 0;
             sp->state.half[1] = 1;
             sp->blink_phase = 32;
             sp->dialog_choice = 1;
             while (1) {
-                if (pad_state.pressed & 0x4000) {
+                if (pad_state.pressed & PAD_BUTTON_CROSS) {
                     play_confirm_sound();
                     pad_state.pressed = 0;
                     break;
                 }
-                if (pad_state.pressed & 0x2000) {
+                if (pad_state.pressed & PAD_BUTTON_CIRCLE) {
                     play_cancel_sound();
                     pad_state.pressed = 0;
                     sp->dialog_choice = 0;
                     break;
                 }
-                if (pad_state.pressed & 0x80) {
+                if (pad_state.pressed & PAD_BUTTON_LEFT) {
                     play_cursor_sound();
                     pad_state.pressed = 0;
                     sp->dialog_choice = 1;
                 }
-                if (pad_state.pressed & 0x20) {
+                if (pad_state.pressed & PAD_BUTTON_RIGHT) {
                     play_cursor_sound();
                     pad_state.pressed = 0;
                     sp->dialog_choice = 0;
@@ -3473,13 +3508,13 @@ int card_choose_file(void)
             sp->state.half[1] = 0;
             continue;
         }
-        if (pad_state.pressed & 0x2000) {
+        if (pad_state.pressed & PAD_BUTTON_CIRCLE) {
             play_cancel_sound();
             pad_state.pressed = 0;
             sp->file_row = -1;
             break;
         }
-        if (pad_state.pressed_repeat & 0x10) {
+        if (pad_state.pressed_repeat & PAD_BUTTON_UP) {
             play_cursor_sound();
             pad_state.pressed_repeat = 0;
             if (sp->file_row == 0) {
@@ -3490,7 +3525,7 @@ int card_choose_file(void)
             }
             sp->blink_phase = 0;
         }
-        if (pad_state.pressed_repeat & 0x40) {
+        if (pad_state.pressed_repeat & PAD_BUTTON_DOWN) {
             play_cursor_sound();
             pad_state.pressed_repeat = 0;
             if (sp->file_row == 2) {
@@ -3548,7 +3583,7 @@ int card_write_blocks(int fd, int offset, u8 *data, int size)
                 n = 3;
             }
             if (retry >= 3) {
-                sp->state.half[0] = 355;
+                sp->state.half[0] = MSG_CARD_SAVE_FAILED;
                 return -1;
             }
             retry++;
@@ -3602,14 +3637,14 @@ int card_read_blocks(int fd, int offset, u8 *data, int size)
             retry++;
             lseek(fd, offset + block * 128, SEEK_SET);
             if (read(fd, frame, 128) == -1) {
-                sp->state.half[0] = 354;
+                sp->state.half[0] = MSG_CARD_LOAD_FAILED;
                 goto again;
             }
             for (i = 0, sum = 0; i < 127; i++)
                 sum += frame[i];
             sum = ~sum;
             if (sum != frame[127]) {
-                sp->state.half[0] = 349;
+                sp->state.half[0] = MSG_CARD_CORRUPTED;
                 goto again;
             }
             for (i = 0; i < 127; i++)
@@ -3648,7 +3683,7 @@ open:
             retry--;
             goto open;
         }
-        sp->state.half[0] = 354;
+        sp->state.half[0] = MSG_CARD_LOAD_FAILED;
         return 0;
     }
 read:
@@ -3659,14 +3694,14 @@ read:
             lseek(fd, 0, SEEK_SET);
             goto read;
         }
-        sp->state.half[0] = 354;
+        sp->state.half[0] = MSG_CARD_LOAD_FAILED;
         close(fd);
         return 0;
     }
     sum = card_read_blocks(fd, sizeof(header), data, 7560);
     if (sum == -1 || sum != sp->card->files[sp->file_row].data_sum) {
         if (sum != sp->card->files[sp->file_row].data_sum)
-            sp->state.half[0] = 349;
+            sp->state.half[0] = MSG_CARD_CORRUPTED;
         if (retry == 0) {
             pad_clear_input();
             close(fd);
@@ -4080,7 +4115,7 @@ open:
         fd = open(path, O_CREAT | (2 << 16));
         if (fd == -1) {
             if (retry == 0) {
-                sp->state.half[0] = 355;
+                sp->state.half[0] = MSG_CARD_SAVE_FAILED;
                 return 0;
             }
             retry--;
@@ -4093,7 +4128,7 @@ open:
     fd = open(path, O_RDWR);
     if (fd == -1) {
         if (retry == 0) {
-            sp->state.half[0] = 355;
+            sp->state.half[0] = MSG_CARD_SAVE_FAILED;
             return 0;
         }
         retry--;
@@ -4103,7 +4138,7 @@ write:
     lseek(fd, 0, SEEK_SET);
     if (write(fd, &header, sizeof(header)) == -1) {
         if (retry == 0) {
-            sp->state.half[0] = 355;
+            sp->state.half[0] = MSG_CARD_SAVE_FAILED;
             close(fd);
             return 0;
         }
@@ -4126,7 +4161,7 @@ write:
     lseek(fd, 0, SEEK_SET);
     if (write(fd, &header, sizeof(header)) == -1) {
         if (retry == 0) {
-            sp->state.half[0] = 355;
+            sp->state.half[0] = MSG_CARD_SAVE_FAILED;
             close(fd);
             return 0;
         }
@@ -4206,14 +4241,14 @@ select:
         card_screen_draw();
         card_screen_draw();
         if (card_format(sp->port) == 0) {
-            sp->state.half[0] = 356;
+            sp->state.half[0] = MSG_CARD_FORMAT_FAILED;
             sp->mode <<= 4;
             goto done;
         }
         sp->mode <<= 1;
     } else {
         if (sp->card->status == 2) {
-            sp->state.half[0] = 350;
+            sp->state.half[0] = MSG_CARD_NOT_INSERTED;
             sp->mode <<= 5;
             goto done;
         }
@@ -4222,15 +4257,15 @@ select:
     card_read_directory(sp->port);
     if (sp->card->status != 0) {
         if (sp->card->status == 4)
-            sp->state.half[0] = 352;
+            sp->state.half[0] = MSG_CARD_NO_DATA;
         else if (sp->card->status == 5)
-            sp->state.half[0] = 353;
+            sp->state.half[0] = MSG_CARD_NO_ROOM;
         sp->mode <<= 3;
         goto done;
     }
     result = card_read_file_headers();
     if (result == 0) {
-        sp->state.half[0] = 352;
+        sp->state.half[0] = MSG_CARD_NO_DATA;
         sp->mode <<= 3;
         goto done;
     }
@@ -4253,12 +4288,12 @@ select:
     card_screen_draw();
     card_probe(sp->port, 0);
     if (sp->card->status == 1) {
-        sp->state.half[0] = 351;
+        sp->state.half[0] = MSG_CARD_SWITCHED;
         sp->mode <<= 2;
         goto done;
     }
     if (sp->card->status == 2) {
-        sp->state.half[0] = 350;
+        sp->state.half[0] = MSG_CARD_NOT_INSERTED;
         sp->mode <<= 2;
         goto done;
     }
@@ -4279,9 +4314,9 @@ select:
     if (result == 0) {
         if (sp->state.half[0] == 0)
             if (sp->mode & 0xff00)
-                sp->state.half[0] = 355;
+                sp->state.half[0] = MSG_CARD_SAVE_FAILED;
             else
-                sp->state.half[0] = 354;
+                sp->state.half[0] = MSG_CARD_LOAD_FAILED;
         sp->mode <<= 2;
         goto done;
     }
@@ -4328,22 +4363,22 @@ int menu_end_game_run(void)
     sp->cursor = 1;
     pad_clear_input();
     while (1) {
-        if (pad_state.pressed & 0x2000) {
+        if (pad_state.pressed & PAD_BUTTON_CIRCLE) {
             play_cancel_sound();
             pad_state.pressed = 0;
             break;
         }
-        if (pad_state.pressed_repeat & 0x80) {
+        if (pad_state.pressed_repeat & PAD_BUTTON_LEFT) {
             play_cursor_sound();
             pad_state.pressed_repeat = 0;
             sp->cursor = 0;
         }
-        if (pad_state.pressed_repeat & 0x20) {
+        if (pad_state.pressed_repeat & PAD_BUTTON_RIGHT) {
             play_cursor_sound();
             pad_state.pressed_repeat = 0;
             sp->cursor = 1;
         }
-        if (pad_state.pressed & 0x4000) {
+        if (pad_state.pressed & PAD_BUTTON_CROSS) {
             play_confirm_sound();
             pad_state.pressed = 0;
             if (sp->cursor != 0)
@@ -4378,7 +4413,7 @@ void pause_screen_run(void)
     DrawSync(0);
     pad = &pad_state;
 pause_wait:
-    if (pad->pressed & 8)
+    if (pad->pressed & PAD_BUTTON_START)
         goto pause_done;
     frame_rate_update();
     pause_screen_draw();
@@ -4406,7 +4441,7 @@ int menu_game_over_run(void)
     sp->image_vram[1].vy = 495;
     cd_wait_idle();
     p = (u8 *)cd_file_buffer;
-    cd_read_member(3, 0, (u_long *)p);
+    cd_read_member(ARCHIVE_STAT, STAT_MESSAGES, (u_long *)p);
     copy_words((u32 *)&menu_messages, (u32 *)(p + 4), 5376);
     p += *(u32 *)p + 4;
     tim_load_images_at(p + 4, &sp->image_vram[0], &sp->image_vram[1], 1);
@@ -4414,22 +4449,22 @@ int menu_game_over_run(void)
     sp->blink_phase = 0;
     pad_clear_input();
     while (1) {
-        if (pad_state.pressed & 0x4000) {
+        if (pad_state.pressed & PAD_BUTTON_CROSS) {
             play_confirm_sound();
             pad_state.pressed = 0;
             break;
         }
-        if (pad_state.pressed_repeat & 0x40) {
+        if (pad_state.pressed_repeat & PAD_BUTTON_DOWN) {
             play_cursor_sound();
             pad_state.pressed_repeat = 0;
             sp->state.word = 1;
         }
-        if (pad_state.pressed_repeat & 0x10) {
+        if (pad_state.pressed_repeat & PAD_BUTTON_UP) {
             play_cursor_sound();
             pad_state.pressed_repeat = 0;
             sp->state.word = 0;
         }
-        sp->font_mode = 0;
+        sp->font_mode = MENU_FONT_LOW_RES;
         frame_rate_update();
         menu_game_over_draw();
         sp->blink_phase = (sp->blink_phase + 1) % 32;
@@ -4457,7 +4492,7 @@ void menu_save_prompt_run(void)
     sp->image_vram[1].vy = 495;
     cd_wait_idle();
     image = cd_file_buffer;
-    cd_read_member(3, 0, image);
+    cd_read_member(ARCHIVE_STAT, STAT_MESSAGES, image);
     copy_words((u32 *)&menu_messages, (u32 *)(image + 1), 5376);
     image = (u_long *)((u8 *)image + (cd_file_buffer[0] + 4));
     tim_load_images_at(image + 1, &sp->image_vram[0], &sp->image_vram[1], 1);
@@ -4470,7 +4505,7 @@ void menu_save_prompt_run(void)
     sp->rect.w = 320;
     sp->rect.h = 240;
     for (;;) {
-        if (pad_state.pressed & 0x4000) {
+        if (pad_state.pressed & PAD_BUTTON_CROSS) {
             pad_state.pressed = 0;
             play_confirm_sound();
             if (sp->main_row != 0)
@@ -4489,17 +4524,17 @@ void menu_save_prompt_run(void)
             if (result == 1)
                 break;
         }
-        if (pad_state.pressed_repeat & 0x80) {
+        if (pad_state.pressed_repeat & PAD_BUTTON_LEFT) {
             play_cursor_sound();
             pad_state.pressed_repeat = 0;
             sp->main_row = 0;
         }
-        if (pad_state.pressed_repeat & 0x20) {
+        if (pad_state.pressed_repeat & PAD_BUTTON_RIGHT) {
             play_cursor_sound();
             pad_state.pressed_repeat = 0;
             sp->main_row = 1;
         }
-        sp->font_mode = 0;
+        sp->font_mode = MENU_FONT_LOW_RES;
         frame_rate_update();
         menu_save_prompt_draw();
         sp->blink_phase = (sp->blink_phase + 1) % 32;

@@ -86,7 +86,7 @@ void map_pick_shopkeeper_line(void)
         return;
     fdat_801ed8c4 = 1;
     items = &inventory;
-    if (!(*(u16 *)&items->counts[266] & 0x7f)) {
+    if (!(*(u16 *)&items->counts[ITEM_CUNES] & 0x7f)) {
         fdat_801ed8c8 = 1;
         creature_start_script(e, 1);
     } else {
@@ -175,7 +175,7 @@ void map_run_shop_visit(void)
     } else if (fdat_801ed8c4 == 4) {
         pad_state.pressed = 0;
         menu->mode = 1;
-        menu->font_mode = 0;
+        menu->font_mode = MENU_FONT_LOW_RES;
         shop_run();
         fdat_801ed8c4 = 5;
     } else if (fdat_801ed8c4 == 5) {

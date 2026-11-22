@@ -11,6 +11,7 @@
 #include <sys/types.h>
 #include <LIBGTE.H>
 #include <LIBGPU.H>
+#include <st/model_slots.h>
 
 /* A transformed vertex: its screen XY, then the depth and depth-cue values
  * the face loops average. Faces index vertices by byte offset. */

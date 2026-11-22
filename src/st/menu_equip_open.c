@@ -65,7 +65,7 @@ void menu_equip_open(void)
     u8 *p;
 
     menu_equip_save_vram();
-    sp->mode = 1;
+    sp->mode = EQUIP_MENU_SLOT_LIST;
     sp->image_vram[0].vx = 960;
     sp->image_vram[0].vy = 256;
     sp->image_vram[1].vx = 560;
@@ -77,21 +77,21 @@ void menu_equip_open(void)
     sp->state.block = mem_alloc(21504);
     equip_magic_list.bits = mem_alloc(144);
     p = (u8 *)cd_file_buffer;
-    cd_read_member(3, 1, (u_long *)p);
+    cd_read_member(ARCHIVE_STAT, STAT_SCREEN_MESSAGES, (u_long *)p);
     p += *(u32 *)p + 4;
     p += *(u32 *)p + 4;
     copy_words(equip_magic_list.bits, (u32 *)(p + 4), 36);
     p = (u8 *)cd_file_buffer;
-    cd_read_member(3, 3, (u_long *)p);
+    cd_read_member(ARCHIVE_STAT, STAT_ITEM_NAMES, (u_long *)p);
     copy_words(sp->state.block, (u32 *)(p + 4), 5376);
     p += *(u32 *)p + 4;
     tim_load_images_at(p + 4, &sp->image_vram[2], &sp->image_vram[3], 1);
-    equip_menu_saved_ids[0] = viewer.equipment[3];
-    equip_menu_saved_ids[1] = viewer.equipment[4];
-    equip_menu_saved_ids[2] = viewer.equipment[16];
-    equip_menu_saved_ids[3] = viewer.equipment[17];
-    equip_menu_saved_ids[4] = viewer.equipment[6];
-    equip_menu_saved_ids[5] = viewer.equipment[12];
+    equip_menu_saved_ids[0] = viewer.equipment[EQUIP_SLOT_RIGHT_HAND];
+    equip_menu_saved_ids[1] = viewer.equipment[EQUIP_SLOT_RIGHT_RESERVE];
+    equip_menu_saved_ids[2] = viewer.equipment[EQUIP_SLOT_LEFT_HAND];
+    equip_menu_saved_ids[3] = viewer.equipment[EQUIP_SLOT_LEFT_RESERVE];
+    equip_menu_saved_ids[4] = viewer.equipment[EQUIP_SLOT_RIGHT_MAGIC];
+    equip_menu_saved_ids[5] = viewer.equipment[EQUIP_SLOT_LEFT_MAGIC];
     pad_clear_input();
 }
 
@@ -110,25 +110,33 @@ void menu_equip_close(void)
     menu_equip_restore_vram();
     mem_free(MENU_SCRATCH->state.block);
     mem_free(equip_magic_list.bits);
-    if ((equip_menu_saved_ids[0] != viewer.equipment[3] && viewer.equipment[3] != 0xffff)
-        || (equip_menu_saved_ids[2] != viewer.equipment[16] && viewer.equipment[16] != 0xffff)
-        || (equip_menu_saved_ids[1] != viewer.equipment[4] && viewer.equipment[4] != 0xffff)
-        || (equip_menu_saved_ids[3] != viewer.equipment[17] && viewer.equipment[17] != 0xffff)
-        || (equip_menu_saved_ids[4] != viewer.equipment[6] && viewer.equipment[6] != 0xffff)
-        || (equip_menu_saved_ids[5] != viewer.equipment[12] && viewer.equipment[12] != 0xffff))
+    if ((equip_menu_saved_ids[0] != viewer.equipment[EQUIP_SLOT_RIGHT_HAND]
+        && viewer.equipment[EQUIP_SLOT_RIGHT_HAND] != EQUIP_NONE)
+        || (equip_menu_saved_ids[2] != viewer.equipment[EQUIP_SLOT_LEFT_HAND]
+        && viewer.equipment[EQUIP_SLOT_LEFT_HAND] != EQUIP_NONE)
+        || (equip_menu_saved_ids[1] != viewer.equipment[EQUIP_SLOT_RIGHT_RESERVE]
+        && viewer.equipment[EQUIP_SLOT_RIGHT_RESERVE] != EQUIP_NONE)
+        || (equip_menu_saved_ids[3] != viewer.equipment[EQUIP_SLOT_LEFT_RESERVE]
+        && viewer.equipment[EQUIP_SLOT_LEFT_RESERVE] != EQUIP_NONE)
+        || (equip_menu_saved_ids[4] != viewer.equipment[EQUIP_SLOT_RIGHT_MAGIC]
+        && viewer.equipment[EQUIP_SLOT_RIGHT_MAGIC] != EQUIP_NONE)
+        || (equip_menu_saved_ids[5] != viewer.equipment[EQUIP_SLOT_LEFT_MAGIC]
+        && viewer.equipment[EQUIP_SLOT_LEFT_MAGIC] != EQUIP_NONE))
         loading_screen_show();
-    if (equip_menu_saved_ids[0] != viewer.equipment[3] || equip_menu_saved_ids[1] != viewer.equipment[4]) {
-        player_load_equipment_model(viewer.equipment[3], 0, 1);
-        player_load_equipment_model(viewer.equipment[4], 2, 1);
+    if (equip_menu_saved_ids[0] != viewer.equipment[EQUIP_SLOT_RIGHT_HAND]
+        || equip_menu_saved_ids[1] != viewer.equipment[EQUIP_SLOT_RIGHT_RESERVE]) {
+        player_load_equipment_model(viewer.equipment[EQUIP_SLOT_RIGHT_HAND], 0, 1);
+        player_load_equipment_model(viewer.equipment[EQUIP_SLOT_RIGHT_RESERVE], 2, 1);
     }
-    if (equip_menu_saved_ids[2] != viewer.equipment[16] || equip_menu_saved_ids[3] != viewer.equipment[17]) {
-        player_load_equipment_model(viewer.equipment[16], 1, 1);
-        player_load_equipment_model(viewer.equipment[17], 3, 1);
+    if (equip_menu_saved_ids[2] != viewer.equipment[EQUIP_SLOT_LEFT_HAND]
+        || equip_menu_saved_ids[3] != viewer.equipment[EQUIP_SLOT_LEFT_RESERVE]) {
+        player_load_equipment_model(viewer.equipment[EQUIP_SLOT_LEFT_HAND], 1, 1);
+        player_load_equipment_model(viewer.equipment[EQUIP_SLOT_LEFT_RESERVE], 3, 1);
     }
-    if (equip_menu_saved_ids[4] != viewer.equipment[6])
-        player_load_magic(viewer.equipment[6], 0);
-    if (equip_menu_saved_ids[5] != viewer.equipment[12])
-        player_load_magic(viewer.equipment[12], 1);
+    if (equip_menu_saved_ids[4] != viewer.equipment[EQUIP_SLOT_RIGHT_MAGIC])
+        player_load_magic(viewer.equipment[EQUIP_SLOT_RIGHT_MAGIC], 0);
+    if (equip_menu_saved_ids[5] != viewer.equipment[EQUIP_SLOT_LEFT_MAGIC])
+        player_load_magic(viewer.equipment[EQUIP_SLOT_LEFT_MAGIC], 1);
     loading_screen_end();
-    viewer.equipment[15] = 0xffff;
+    viewer.equipment[EQUIP_SLOT_GLOVES_MIRROR] = EQUIP_NONE;
 }

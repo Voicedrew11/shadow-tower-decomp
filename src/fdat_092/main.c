@@ -102,11 +102,11 @@ void map_restore_progress(void)
 
     if (game_progress.event_flags2.bit.f12 == 1) {
         vis_table_a.entries[40].spawn_chance = 100;
-        c5->state = 4;
+        c5->state = GROUND_ITEM_HIDDEN;
         fdat_801edf54 = 0xff;
     } else {
         fdat_801edf54 = 0;
-        c5->state = 4;
+        c5->state = GROUND_ITEM_HIDDEN;
         e48->status.bytes[3] = 1;
     }
     if (game_progress.event_flags2.bit.f13 == 1) {
@@ -127,7 +127,7 @@ void map_restore_progress(void)
         fdat_801edf60 = 0xff;
     else
         fdat_801edf60 = 0;
-    if (e39->state != 3) {
+    if (e39->state != CREATURE_STATE_GONE) {
         if (game_progress.event_flags2.bit.f16 == 1) {
             e39->spawn_chance = 100;
             fdat_801edf64 = 0xff;
@@ -137,7 +137,7 @@ void map_restore_progress(void)
             e39->position.vy += 0xc00;
         }
     }
-    if (e38->state != 3) {
+    if (e38->state != CREATURE_STATE_GONE) {
         if (game_progress.event_flags2.bit.f17 == 1) {
             e38->spawn_chance = 100;
             fdat_801edf68 = 0xff;
@@ -173,7 +173,7 @@ void map_update_events(void)
     AreaObject *d17 = &vis_table_b.entries[17];
 
     if (fdat_801edf54 == 0 && game_progress.talk_counts[r14->talk_id] == 1) {
-        viewer.state = 5;
+        viewer.state = VIEWER_STATE_SCRIPTED;
         map_play_creature_script();
         if (!(vis_table_c.collected_bits[1] & 0x10000))
             map_offer_item_at_player();
@@ -187,7 +187,7 @@ void map_update_events(void)
         player_turn_to_creature(e40);
         creature_force_talk(e40, 0, 0);
         e40->spawn_chance = 100;
-        viewer.state = 0;
+        viewer.state = VIEWER_STATE_NORMAL;
         fdat_801edf54 = 0xff;
         e40->flags &= ~0x2000000;
         game_progress.event_flags2.word |= 0x1000;
@@ -289,10 +289,10 @@ void map_offer_item_at_player(void)
     ItemType *kind = &vis_table_c.types[48];
 
     item->position = viewer.position;
-    item->state = 2;
+    item->state = GROUND_ITEM_RESTING;
     item->depth_bias -= 3;
     for (;;) {
-        anim_get_file(kind->model + 588, &file);
+        anim_get_file(kind->model + MODEL_SLOT_ITEMS, &file);
         if (file != NULL)
             break;
         world_run_frame(NULL, NULL, 0);

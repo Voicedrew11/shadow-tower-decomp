@@ -10,6 +10,7 @@
 #include <kf/lib/types.h>
 #include <kf/lib/offsetof.h>
 #include <sys/types.h>
+#include <st/pad_buttons.h>
 
 typedef struct {
     u32 held;            /* 0x00: buttons held (inverted pad bits) */

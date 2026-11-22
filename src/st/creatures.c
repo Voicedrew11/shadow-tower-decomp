@@ -47,11 +47,11 @@ int creature_take_damage(e, kind, power, levels, crit)
     if (dmg == 0)
         return 0;
     t = &vis_table_a.types[e->type];
-    if (viewer.status_flags & 0x200000)
+    if (viewer.status_flags & STATUS_ATTACK_BOOST)
         dmg = dmg * 3 / 2;
     luck = viewer.double_damage_chance;
     if (rand() * 100 / 32768 < luck) {
-        sound_play(21, 128);
+        sound_play(SOUND_DOUBLE_DAMAGE, 128);
         dmg <<= 1;
     }
     i = 24;
@@ -62,7 +62,7 @@ int creature_take_damage(e, kind, power, levels, crit)
     index = 0;
     if (dmg >= e->hp) {
         if (e->status.bytes[3] != 3) {
-            e->state = 5;
+            e->state = CREATURE_STATE_DYING;
             creature_roll_drops(e);
             creature_award_kill_bonuses(e);
             game_progress.creature_kind_bits[1][t->kind >> 5] |= 1 << (t->kind & 0x1f);
@@ -112,7 +112,7 @@ done:
         e->anim_step = script->anim_step;
     }
     e->hurt_timer = 0xfff;
-    if (viewer.state != 4) {
+    if (viewer.state != VIEWER_STATE_DYING) {
         if (viewer.hp_drain_percent)
             player_add_hp(dmg * viewer.hp_drain_percent / 100);
         if (viewer.mp_drain_percent)
@@ -166,7 +166,7 @@ void creatures_update(void)
             anim_sets_free_all();
             n = 16;
             while (n--) {
-                anim_get_file(n + 128, &file);
+                anim_get_file(n + MODEL_SLOT_CREATURES, &file);
                 if (file)
                     heap_free(file);
             }
@@ -180,7 +180,7 @@ void creatures_update(void)
             e = vis_table_a.entries;
             for (vis_table_a.current_index = 0; vis_table_a.current_index < 64; vis_table_a.current_index++, e++) {
                 t = &vis_table_a.types[e->type];
-                if (e->state == 1) {
+                if (e->state == CREATURE_STATE_ACTIVE) {
                     if (vis_table_a.zone == 0xff)
                         break;
                     if (vis_table_a.zone != e->zone) {
@@ -188,7 +188,7 @@ void creatures_update(void)
                             break;
                         vis_table_a.unk612C -= t->unk12;
                         vis_table_a.spawn_cost_total -= e->spawn_cost;
-                        e->state = 0;
+                        e->state = CREATURE_STATE_WAITING;
                         creature_return_home(e);
                     }
                 }
@@ -222,12 +222,12 @@ void creatures_update(void)
             e->velocity.vx = 0;
             if ((vis_table_a.frame & 3) == (e->zone & 3) || viewer.update_all_spawns)
                 creature_update_spawn();
-            if (e->state == 1) {
+            if (e->state == CREATURE_STATE_ACTIVE) {
                 if ((vis_table_a.frame & 3) == (vis_table_a.active_count & 3))
                     area_state.hooks->creature_pick_move();
                 area_state.hooks->creature_step_script();
                 if (e->fade != -1) {
-                    anim_get_file(e->model_slot + 128, &anim);
+                    anim_get_file(e->model_slot + MODEL_SLOT_CREATURES, &anim);
                     if (anim) {
                         e->fade -= 128;
                         if (e->fade < 0) {
@@ -246,7 +246,7 @@ void creatures_update(void)
                     }
                 }
                 vis_table_a.active_count++;
-            } else if (e->state == 5) {
+            } else if (e->state == CREATURE_STATE_DYING) {
                 area_state.hooks->creature_step_script();
             }
         }
@@ -316,7 +316,7 @@ void creatures_load(CreatureFileEntry *src)
     i = 64;
     while (i--) {
         e->spawn_chance = src->spawn_chance;
-        e->state = 0;
+        e->state = CREATURE_STATE_WAITING;
         if (e->spawn_chance == 0xff)
             goto next;
         e->type = src->type;

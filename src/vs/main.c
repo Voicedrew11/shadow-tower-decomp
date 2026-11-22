@@ -501,34 +501,34 @@ void fighters_play_anim_sounds(void)
         f = &shared_buffer.fighter[i];
         d = &f->data;
         switch (f->state) {
-        case 0:
-        case 5:
-            entry = 0;
+        case FIGHTER_STATE_STAND:
+        case FIGHTER_STATE_GUARD:
+            entry = FIGHTER_ANIM_STAND;
             break;
-        case 1:
-            entry = 1;
+        case FIGHTER_STATE_WALK:
+            entry = FIGHTER_ANIM_WALK;
             break;
-        case 2:
-            if (f->anim == d->anims[2].anim)
-                entry = 2;
-            else if (f->anim == d->anims[3].anim)
-                entry = 3;
-            else if (f->anim == d->anims[4].anim)
-                entry = 4;
+        case FIGHTER_STATE_COMBO:
+            if (f->anim == d->anims[FIGHTER_ANIM_COMBO].anim)
+                entry = FIGHTER_ANIM_COMBO;
+            else if (f->anim == d->anims[FIGHTER_ANIM_COMBO_CIRCLE].anim)
+                entry = FIGHTER_ANIM_COMBO_CIRCLE;
+            else if (f->anim == d->anims[FIGHTER_ANIM_COMBO_CROSS].anim)
+                entry = FIGHTER_ANIM_COMBO_CROSS;
             break;
-        case 6:
-            if (f->anim == d->anims[5].anim)
-                entry = 5;
-            else if (f->anim == d->anims[6].anim)
-                entry = 6;
-            else if (f->anim == d->anims[7].anim)
-                entry = 7;
+        case FIGHTER_STATE_GAUGE_ATTACK:
+            if (f->anim == d->anims[FIGHTER_ANIM_GAUGE_ATTACK].anim)
+                entry = FIGHTER_ANIM_GAUGE_ATTACK;
+            else if (f->anim == d->anims[FIGHTER_ANIM_GAUGE_CIRCLE].anim)
+                entry = FIGHTER_ANIM_GAUGE_CIRCLE;
+            else if (f->anim == d->anims[FIGHTER_ANIM_GAUGE_CROSS].anim)
+                entry = FIGHTER_ANIM_GAUGE_CROSS;
             break;
-        case 3:
-            entry = 8;
+        case FIGHTER_STATE_HURT:
+            entry = FIGHTER_ANIM_HURT;
             break;
-        case 4:
-            entry = 9;
+        case FIGHTER_STATE_DOWN:
+            entry = FIGHTER_ANIM_DOWN;
             break;
         }
         trigger = d->sounds[entry].trigger;
@@ -596,11 +596,11 @@ void fighters_play_anim_sounds(void)
 ADDRESS(0x80014070, 0x68)
 void cd_open_vs_archives(void)
 {
-    cd_archive_open(0, "VS\\VS_CRT.T");
-    cd_archive_open(5, "VS\\VS_ETC.T");
-    cd_archive_open(8, "COM\\STAT.T");
-    cd_archive_open(10, "COM\\CRT.T");
-    cd_archive_open(11, "COM\\ICON.T");
+    cd_archive_open(VS_ARCHIVE_VS_CRT, "VS\\VS_CRT.T");
+    cd_archive_open(VS_ARCHIVE_VS_ETC, "VS\\VS_ETC.T");
+    cd_archive_open(VS_ARCHIVE_STAT, "COM\\STAT.T");
+    cd_archive_open(VS_ARCHIVE_CRT, "COM\\CRT.T");
+    cd_archive_open(VS_ARCHIVE_ICON, "COM\\ICON.T");
 }
 
 /* The fighter being loaded. */
@@ -628,17 +628,17 @@ void fighters_load_round(void)
 
     for (i = 0; i < 2; i++) {
         member = lineups[i].slot[round_index] * 5;
-        cd_read_member(0, member + 1, (u_long *)&FIGHTER);
+        cd_read_member(VS_ARCHIVE_VS_CRT, member + 1, (u_long *)&FIGHTER);
         tim_load_images_shifted((u_long *)&FIGHTER, i * 4, i * 12);
         DrawSync(0);
-        cd_read_member(0, member + 2, (u_long *)sound_banks[i].head);
-        cd_read_member(0, member + 3, (u_long *)&FIGHTER);
+        cd_read_member(VS_ARCHIVE_VS_CRT, member + 2, (u_long *)sound_banks[i].head);
+        cd_read_member(VS_ARCHIVE_VS_CRT, member + 3, (u_long *)&FIGHTER);
         sound_bank_open(i);
-        if (cd_read_member(0, member + 4, FIGHTER.effect_model))
+        if (cd_read_member(VS_ARCHIVE_VS_CRT, member + 4, FIGHTER.effect_model))
             model_fixup_face_indices((Model *)FIGHTER.effect_model);
         else
             FIGHTER.effect_model[0] = 0;
-        cd_read_member(0, member, (u_long *)&FIGHTER);
+        cd_read_member(VS_ARCHIVE_VS_CRT, member, (u_long *)&FIGHTER);
         if (((StAnimFile *)FIGHTER.file)->node_count) {
             FIGHTER.model_kind = 1;
             anim_set_register(i, (StAnimFile *)FIGHTER.file);
@@ -648,12 +648,12 @@ void fighters_load_round(void)
         }
         fighter_offset_textures(i);
         FIGHTER.data = fighter_data[lineups[i].slot[round_index]];
-        FIGHTER.state = 0;
+        FIGHTER.state = FIGHTER_STATE_STAND;
         FIGHTER.anim_frame = 0;
         FIGHTER.position.vz = 0;
         FIGHTER.rot_x = 0;
-        FIGHTER.anim = FIGHTER.data.anims[0].anim;
-        FIGHTER.anim_step = FIGHTER.data.anims[0].anim_step;
+        FIGHTER.anim = FIGHTER.data.anims[FIGHTER_ANIM_STAND].anim;
+        FIGHTER.anim_step = FIGHTER.data.anims[FIGHTER_ANIM_STAND].anim_step;
         FIGHTER.hp = FIGHTER.data.max_hp;
         FIGHTER.gauge = FIGHTER.data.max_gauge;
         FIGHTER.position.vy = -FIGHTER.data.origin_height;
@@ -1276,11 +1276,11 @@ void round_play(void)
             choice = 0;
             choice_slider = 0;
             for (;;) {
-                if ((vs_pad_state.pads[0].pressed | vs_pad_state.pads[1].pressed) & 0x10)
+                if ((vs_pad_state.pads[0].pressed | vs_pad_state.pads[1].pressed) & PAD_BUTTON_UP)
                     choice = 0;
-                if ((vs_pad_state.pads[0].pressed | vs_pad_state.pads[1].pressed) & 0x40)
+                if ((vs_pad_state.pads[0].pressed | vs_pad_state.pads[1].pressed) & PAD_BUTTON_DOWN)
                     choice = 1;
-                if ((vs_pad_state.pads[0].pressed | vs_pad_state.pads[1].pressed) & 9) {
+                if ((vs_pad_state.pads[0].pressed | vs_pad_state.pads[1].pressed) & (PAD_BUTTON_SELECT | PAD_BUTTON_START)) {
                     DAT_80063364 += vs_pad_state.vsync_count;
                     round_phase = PHASE_FIGHT;
                     screen_start_frame = vs_pad_state.vsync_count;
@@ -1288,7 +1288,7 @@ void round_play(void)
                         ;
                     break;
                 }
-                if ((vs_pad_state.pads[0].pressed | vs_pad_state.pads[1].pressed) & 0x4000) {
+                if ((vs_pad_state.pads[0].pressed | vs_pad_state.pads[1].pressed) & PAD_BUTTON_CROSS) {
                     if (choice == 0) {
                         DAT_80063364 += vs_pad_state.vsync_count;
                         round_phase = PHASE_FIGHT;
@@ -1314,7 +1314,7 @@ void round_play(void)
                 round_draw_frame();
             }
         } else if (round_phase == PHASE_FIGHT
-                   && ((vs_pad_state.pads[0].pressed | vs_pad_state.pads[1].pressed) & 9)) {
+                   && ((vs_pad_state.pads[0].pressed | vs_pad_state.pads[1].pressed) & (PAD_BUTTON_SELECT | PAD_BUTTON_START))) {
             while (!CdControl(CdlPause, 0, 0))
                 ;
             fight_banner = 12;
@@ -1322,9 +1322,10 @@ void round_play(void)
             DAT_80063364 -= vs_pad_state.vsync_count;
             screen_start_frame = vs_pad_state.vsync_count;
         }
-        if ((vs_pad_state.pads[0].pressed & 1) && (vs_pad_state.pads[0].held & 8))
+        if ((vs_pad_state.pads[0].pressed & PAD_BUTTON_SELECT)
+            && (vs_pad_state.pads[0].held & PAD_BUTTON_START))
             vs_pad_state.show_frame_stats = 1 - vs_pad_state.show_frame_stats;
-        if (vs_pad_state.pads[0].held & 1) {
+        if (vs_pad_state.pads[0].held & PAD_BUTTON_SELECT) {
             if (++vs_pad_state.pan_hold_frames >= 60)
                 debug_pan_display();
         } else {
@@ -1423,21 +1424,21 @@ void match_load_resources(void)
     clut.x = 640;
     clut.y = 480;
     p = arena_model_0;
-    cd_read_member(8, 2, p);
+    cd_read_member(VS_ARCHIVE_STAT, STAT_CREATURE_NAMES, p);
     copy_words((u32 *)vs_menu_messages[1].offsets, (u32 *)(p + 1), 0x1500);
     p = (u_long *)((u8 *)p + (p[0] + 4));
     tim_load_images_at(p + 1, (DVECTOR *)&pos, (DVECTOR *)&clut);
     DrawSync(0);
-    cd_read_member(5, 10, arena_model_0);
+    cd_read_member(VS_ARCHIVE_VS_ETC, 10, arena_model_0);
     tim_load_images_shifted(arena_model_0, 0, 0);
     DrawSync(0);
-    cd_read_member(5, 0, arena_model_0);
+    cd_read_member(VS_ARCHIVE_VS_ETC, 0, arena_model_0);
     model_fixup_face_indices((Model *)arena_model_0);
-    cd_read_member(5, 1, (u_long *)arena_model_1);
+    cd_read_member(VS_ARCHIVE_VS_ETC, 1, (u_long *)arena_model_1);
     model_fixup_face_indices((Model *)arena_model_1);
-    cd_read_member(5, 2, (u_long *)arena_model_2);
+    cd_read_member(VS_ARCHIVE_VS_ETC, 2, (u_long *)arena_model_2);
     model_fixup_face_indices((Model *)arena_model_2);
-    cd_read_member(5, 3, (u_long *)guard_flash_model);
+    cd_read_member(VS_ARCHIVE_VS_ETC, 3, (u_long *)guard_flash_model);
     model_fixup_face_indices((Model *)guard_flash_model);
     round_wins[0] = 0;
     round_wins_2p = 0;
@@ -1583,10 +1584,10 @@ int main(void)
     DrawSync(0);
     sound_init();
     cd_open_vs_archives();
-    cd_read_member(5, 4, menu_vab_head);
-    cd_read_member(5, 5, menu_vab_body);
+    cd_read_member(VS_ARCHIVE_VS_ETC, 4, menu_vab_head);
+    cd_read_member(VS_ARCHIVE_VS_ETC, 5, menu_vab_body);
     load_menu_sound_bank();
-    cd_read_member(5, 20, (u_long *)vis_table_c.types);
+    cd_read_member(VS_ARCHIVE_VS_ETC, 20, (u_long *)vis_table_c.types);
     lineups[0].slot[0] = -1;
     lineups[0].slot[1] = -1;
     lineups[0].slot[2] = -1;

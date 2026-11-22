@@ -63,7 +63,7 @@ void creature_reset_for_spawn(Creature *e)
 {
     CreatureType *r = &vis_table_a.types[e->type];
 
-    e->state = 1;
+    e->state = CREATURE_STATE_ACTIVE;
     e->anim = 0;
     e->anim_frame = 0;
     e->unk1B = 0;
@@ -90,14 +90,14 @@ void creature_despawn(Creature *e)
 {
     CreatureType *r = &vis_table_a.types[e->type];
 
-    if (e->state == 5) {
+    if (e->state == CREATURE_STATE_DYING) {
         vis_table_a.zone_history[0] = vis_table_a.zone_history[1] = vis_table_a.zone_history[2] =
             vis_table_a.zone_history[3] = 255;
     } else if (e < &vis_table_a.entries[48]) {
         game_progress.area_kills[area_state.area]++;
         viewer.creatures_killed++;
     }
-    e->state = 3;
+    e->state = CREATURE_STATE_GONE;
     vis_table_a.unk612C -= r->unk12;
     vis_table_a.spawn_cost_total -= e->spawn_cost;
     creature_return_home(e);
@@ -132,7 +132,7 @@ void creatures_clear(void)
     e = vis_table_a.entries;
     for (i = 0; i < 64; i++, e++) {
         e->spawn_chance = 255;
-        e->state = 0;
+        e->state = CREATURE_STATE_WAITING;
         e->anim_slot.slot = NULL;
     }
     vis_table_a.zone = 254;
@@ -259,7 +259,7 @@ void creature_update_spawn(void)
     u8 cur;
 
     switch (e->state) {
-    case 0:
+    case CREATURE_STATE_WAITING:
         if (e->zone != 255 || e->player_dist_xz >= 28672) {
             cur = vis_table_a.zone;
             if (cur == vis_table_a.zone_history[0] && cur == vis_table_a.zone_history[1] &&
@@ -279,14 +279,14 @@ void creature_update_spawn(void)
             e->unk1B = 255;
             e->aggressive = e->range_bits = 0xffff;
             e->action = 0;
-            if (r->actions & 0x80)
-                e->action = 128;
+            if (r->actions & CREATURE_ACTION_DORMANT)
+                e->action = CREATURE_ACTION_DORMANT;
             area_state.hooks->creature_pick_move();
         } else if (e->spawn_chance != 0 && vis_table_a.current_index < 32) {
             e->zone = 253;
         }
         return;
-    case 1:
+    case CREATURE_STATE_ACTIVE:
         cur = vis_table_a.zone;
         if (cur == 255 || cur == e->zone)
             return;
@@ -294,10 +294,10 @@ void creature_update_spawn(void)
             return;
         vis_table_a.unk612C -= r->unk12;
         vis_table_a.spawn_cost_total -= e->spawn_cost;
-        e->state = 0;
+        e->state = CREATURE_STATE_WAITING;
         creature_return_home(e);
         return;
-    case 2:
+    case CREATURE_STATE_ACTIVE_NEAR:
         if (e->player_dist_xz < 28672) {
             cur = vis_table_a.zone;
             if (cur == 255 || cur == e->zone)
@@ -305,7 +305,7 @@ void creature_update_spawn(void)
         }
         vis_table_a.unk612C -= r->unk12;
         vis_table_a.spawn_cost_total -= e->spawn_cost;
-        e->state = 0;
+        e->state = CREATURE_STATE_WAITING;
         creature_return_home(e);
         return;
     }
@@ -354,7 +354,7 @@ Creature *creature_find_in_cone(VECTOR *pos, short yaw, short pitch, int range, 
     e = vis_table_a.entries;
     n = 64;
     while (n--) {
-        if (e->state == 1 && e != vis_table_a.current) {
+        if (e->state == CREATURE_STATE_ACTIVE && e != vis_table_a.current) {
             r = range;
             if (e->flags & 0x20000)
                 r <<= 1;
@@ -464,7 +464,7 @@ int creature_find_in_reach(CollisionState *req, int arg1)
     best = -1;
     mode = arg1 & 5;
     for (e = vis_table_a.entries, i = 0; i < 64; i++, e++) {
-        if (e->state != 1)
+        if (e->state != CREATURE_STATE_ACTIVE)
             continue;
         if (e->flags & vis_table_a.skip_flags)
             continue;
@@ -530,7 +530,7 @@ int creature_find_touching(CollisionState *req)
 
     e = vis_table_a.entries;
     for (i = 0; i < 64; i++, e++) {
-        if (e->state != 1)
+        if (e->state != CREATURE_STATE_ACTIVE)
             continue;
         if (e->flags & vis_table_a.skip_flags)
             continue;

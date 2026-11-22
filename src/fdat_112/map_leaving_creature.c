@@ -38,7 +38,7 @@ void map_step_leaving_creature(Creature *e)
         creature_set_velocity(e->rotation.vy - 0x400, 0x40);
         if (e->position.vz > 0x4f000) {
             creature_despawn(e);
-            viewer.state = 0;
+            viewer.state = VIEWER_STATE_NORMAL;
         }
     }
 }

@@ -105,7 +105,7 @@ void map_pick_creature_move(void)
     if (!creature_pick_weighted_script())
         return;
     switch (e->action) {
-    case 8:
+    case CREATURE_ACTION_TURN_AWAY:
         wall = e->wall_heading;
         if ((short)wall == 0x7fff) {
             e->unk5A = e->target_heading = (e->player_heading + 2048) & 0xfff;
@@ -127,7 +127,7 @@ void map_pick_creature_move(void)
         e->unk5A = e->target_heading = e->rotation.vy;
         break;
     }
-    if (e->action != 8)
+    if (e->action != CREATURE_ACTION_TURN_AWAY)
         e->wall_heading = 0x7fff;
     if (vis_records[e->block].heading_bias_x != 0 || vis_records[e->block].heading_bias_z != 0) {
         x = rcos(e->target_heading - 1024) >> 5;

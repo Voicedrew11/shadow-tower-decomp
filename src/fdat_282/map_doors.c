@@ -101,7 +101,7 @@ void map_open_object_drop_item(void)
     AreaObject *door = &vis_table_b.entries[26];
     GroundItem *item = &vis_table_c.entries[2];
 
-    viewer.state = 5;
+    viewer.state = VIEWER_STATE_SCRIPTED;
     rot.vy = -1024;
     rot.vx = 0;
     pos.vx = door->position.vx - 3072;
@@ -114,15 +114,15 @@ void map_open_object_drop_item(void)
         door->anim_frame += step;
         if (door->anim_frame >= 0x1000)
             door->anim_frame = 0xfff;
-        if (door->anim_frame > 0x400 && item->state == 4)
-            item->state = 2;
-        if (door->anim_frame > 0xf00 && item->state == 2)
-            item->state = 1;
+        if (door->anim_frame > 0x400 && item->state == GROUND_ITEM_HIDDEN)
+            item->state = GROUND_ITEM_RESTING;
+        if (door->anim_frame > 0xf00 && item->state == GROUND_ITEM_RESTING)
+            item->state = GROUND_ITEM_FALLING;
         ground_items_update();
         world_run_frame(NULL, NULL, 0);
     } while (door->anim_frame != 0xfff);
     door->state = 0xff;
-    viewer.state = 0;
+    viewer.state = VIEWER_STATE_NORMAL;
 }
 
 /*
@@ -169,7 +169,7 @@ void map_talk_then_open_door(int id)
         if ((short)e->anim_frame + e->anim_step >= 0x800 && (short)e->anim_frame < 0x800) {
             viewer.timers.halves[4][0] = 0;
             viewer.timers.halves[4][1] = 6000;
-            viewer.status_flags |= 0x100;
+            viewer.status_flags |= STATUS_CURSED;
         }
         world_run_frame(NULL, NULL, 0);
     } while ((short)e->anim_frame != 0xfff);

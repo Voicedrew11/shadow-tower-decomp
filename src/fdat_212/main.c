@@ -78,8 +78,8 @@ void map_restore_progress(void)
     AreaObject *b;
     int i;
 
-    c28[1].state = 4;
-    c28->state = 4;
+    c28[1].state = GROUND_ITEM_HIDDEN;
+    c28->state = GROUND_ITEM_HIDDEN;
     if (game_progress.event_flags2.bit.f8 == 1)
         fdat_801edcd4 = 0xff;
     else
@@ -204,7 +204,7 @@ void map_slide_ground_item(int which)
         item = &vis_table_c.entries[28];
     else
         item = &vis_table_c.entries[29];
-    item->state = 5;
+    item->state = GROUND_ITEM_SCRIPTED;
     kind = &vis_table_c.types[item->item];
     end = item->position.vz + 0x200;
     item->depth_bias -= 12;
@@ -213,7 +213,7 @@ void map_slide_ground_item(int which)
 
         if (item->position.vz == end)
             break;
-        anim_get_file(kind->model + 588, &file);
+        anim_get_file(kind->model + MODEL_SLOT_ITEMS, &file);
         if (file != NULL)
             item->position.vz += step;
         if (item->position.vz > end)

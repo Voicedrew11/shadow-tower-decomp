@@ -152,14 +152,14 @@ void area_save_snapshot(int area)
     for (i = 0; i < n; i++)
         game_progress.creatures_gone[area][i] = 0;
     for (i = 0; i < 64; i++, a++) {
-        if (a->spawn_chance != 0xff && (a->state == 3 || a->state == 5))
+        if (a->spawn_chance != 0xff && (a->state == CREATURE_STATE_GONE || a->state == CREATURE_STATE_DYING))
             game_progress.creatures_gone[area][i / 32] |= BIT(i);
     }
     n = 1;
     for (i = 0; i < n; i++)
         game_progress.ground_items_gone[area][i] = 0;
     for (i = 0; i < 32; i++, c++) {
-        if (c->state == 0)
+        if (c->state == GROUND_ITEM_NONE)
             game_progress.ground_items_gone[area][i / 32] |= BIT(i);
     }
     n = 8;
@@ -172,7 +172,7 @@ void area_save_snapshot(int area)
         if (b->type == 0xffff) {
             game_progress.objects_removed[area][i / 32] |= BIT(i);
         } else {
-            if (b->params.door.lock == 0xff)
+            if (b->params.door.lock == DOOR_UNLOCKED)
                 game_progress.objects_unlocked[area][i / 32] |= BIT(i);
             if (b->state == 0xff)
                 game_progress.objects_finished[area][i / 32] |= BIT(i);
@@ -193,11 +193,11 @@ void area_restore_snapshot(int area)
 
     for (i = 0; i < 64; i++, a++) {
         if (game_progress.creatures_gone[area][i / 32] & BIT(i))
-            a->state = 3;
+            a->state = CREATURE_STATE_GONE;
     }
     for (i = 0; i < 32; i++, c++) {
         if (game_progress.ground_items_gone[area][i / 32] & BIT(i))
-            c->state = 0;
+            c->state = GROUND_ITEM_NONE;
     }
     for (i = 0; i < 240; b++, i++) {
         if (game_progress.objects_removed[area][i / 32] & BIT(i)) {
@@ -206,14 +206,14 @@ void area_restore_snapshot(int area)
             switch (b->kind) {
             default:
                 if (game_progress.objects_unlocked[area][i / 32] & BIT(i))
-                    b->params.door.lock = 255;
+                    b->params.door.lock = DOOR_UNLOCKED;
                 if (game_progress.objects_finished[area][i / 32] & BIT(i))
                     b->state = 255;
                 break;
-            case 0:
-            case 1:
+            case OBJECT_KIND_DOOR:
+            case OBJECT_KIND_MODEL_DOOR:
                 if (game_progress.objects_unlocked[area][i / 32] & BIT(i))
-                    b->params.door.lock = 255;
+                    b->params.door.lock = DOOR_UNLOCKED;
                 if (game_progress.objects_finished[area][i / 32] & BIT(i)) {
                     n = b->params.door.n_blocks;
                     while (n--) {
@@ -224,15 +224,15 @@ void area_restore_snapshot(int area)
                     }
                     if (b->type == 58)
                         b->visibility = 2;
-                    else if (b->kind == 1)
+                    else if (b->kind == OBJECT_KIND_MODEL_DOOR)
                         b->visibility = 1;
                     b->state = 255;
                     b->anim_frame = 4095;
                 }
                 break;
-            case 52:
+            case OBJECT_KIND_GROUP_GATE:
                 if (game_progress.objects_unlocked[area][i / 32] & BIT(i))
-                    b->params.door.lock = 255;
+                    b->params.door.lock = DOOR_UNLOCKED;
                 if (game_progress.objects_finished[area][i / 32] & BIT(i)) {
                     b->state = 255;
                     b->anim_frame = 0;

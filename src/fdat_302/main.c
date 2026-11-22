@@ -120,7 +120,7 @@ void map_restore_progress(void)
         fdat_801ee46c = 0;
     }
     if (fdat_801ee46c)
-        d9->kind = 0xff;
+        d9->kind = OBJECT_KIND_NONE;
     e4->zone = 1;
     e5->zone = 2;
     fdat_801ee474 = 0;
@@ -170,8 +170,8 @@ void map_update_events(void)
         e5->visibility = 0;
     if (fdat_801ee478 != 0xff && fdat_801ee470 >= 2)
         fdat_801ee470 = 1;
-    if (e0->state == 5) {
-        e0->state = 1;
+    if (e0->state == CREATURE_STATE_DYING) {
+        e0->state = CREATURE_STATE_ACTIVE;
         e0->status.bytes[3] = 1;
         e0->hurt_timer = -1;
         e0->status.bytes[2] &= 0xea;
@@ -182,7 +182,7 @@ void map_update_events(void)
         map_transform_creature();
     if (fdat_801ee478 == 0 && e3->hp == 0)
         fdat_801ee478 = 1;
-    if (fdat_801ee478 == 1 && e3->state == 3) {
+    if (fdat_801ee478 == 1 && e3->state == CREATURE_STATE_GONE) {
         e3->flags |= 0x2000000;
         creature_force_talk(e3, 1, 0);
         fdat_801ee478 = 0xff;
@@ -197,7 +197,7 @@ void map_update_events(void)
         fdat_801ee480 = 2;
         e5->flags &= ~0x2000000;
     }
-    if (fdat_801ee480 == 3 && e5->state == 3) {
+    if (fdat_801ee480 == 3 && e5->state == CREATURE_STATE_GONE) {
         e5->flags |= 0x2000000;
         creature_force_talk(e5, 1, 0);
         fdat_801ee480 = 0xff;
@@ -205,11 +205,11 @@ void map_update_events(void)
         game_progress.event_flags2.word |= 0x80;
     }
     if (fdat_801ee47c == 1 && viewer.position.vz > 0x41000) {
-        viewer.state = 5;
+        viewer.state = VIEWER_STATE_SCRIPTED;
         creature_force_talk(e5, 0, 0);
         e5->status.bytes[3] = 0;
         fdat_801ee47c = 0xff;
-        viewer.state = 0;
+        viewer.state = VIEWER_STATE_NORMAL;
         e5->flags &= ~0x2000000;
     }
     if (fdat_801ee47c == 0 && fdat_801ee470 == 3) {
@@ -306,17 +306,17 @@ void map_warp_player(void)
     viewer.position.vz = 0x40000;
     viewer.view_rot.vy = 0;
     viewer.view_rot.vx = 0;
-    viewer.state = 0;
+    viewer.state = VIEWER_STATE_NORMAL;
     viewer.shake_roll = 0;
     viewer.shake_yaw = 0;
     viewer.shake_pitch = 0;
     viewer.rotation = viewer.view_rot;
-    viewer.state = 5;
+    viewer.state = VIEWER_STATE_SCRIPTED;
     fade_run_frames(2, 0x1000, 0x1000, 0);
     creatures_update();
     creature_spawn_now(e);
     if (world_state.model_files[slot] == NULL)
-        creature_model_load(2, index * 5, slot, e->vram_tag & 0xf);
+        creature_model_load(ARCHIVE_CHR, index * 5, slot, e->vram_tag & 0xf);
     e->fade = -1;
     e->status.bytes[2] &= 0xf2;
     creature_start_script(e, 7);
@@ -360,7 +360,7 @@ void map_transform_creature(void)
     CreatureType *r2;
     StAnimFile *file;
 
-    viewer.state = 5;
+    viewer.state = VIEWER_STATE_SCRIPTED;
     e0 = vis_table_a.entries;
     e48 = &vis_table_a.entries[48];
     e49 = &vis_table_a.entries[49];
@@ -390,7 +390,7 @@ first_animation_done:
     do {
         e3->anim_frame = 0;
         world_run_frame(NULL, NULL, 0);
-        anim_get_file(e3->model_slot + 128, &file);
+        anim_get_file(e3->model_slot + MODEL_SLOT_CREATURES, &file);
     } while (file == NULL);
     e49->position = e3->position;
     e49->rotation = e3->rotation;
@@ -410,7 +410,7 @@ first_animation_done:
         world_run_frame(NULL, NULL, 0);
     }
     creature_despawn(e49);
-    viewer.state = 0;
+    viewer.state = VIEWER_STATE_NORMAL;
     fdat_801ee474 = 0xff;
 }
 

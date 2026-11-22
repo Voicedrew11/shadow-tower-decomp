@@ -177,9 +177,9 @@ void map_restore_progress(void)
     u8 part;
 
     if (game_progress.event_flags.bit.f14 == 1) {
-        c29->state = 5;
+        c29->state = GROUND_ITEM_SCRIPTED;
         fdat_801ef93c = 2;
-        d15->kind = 50;
+        d15->kind = OBJECT_KIND_GATE;
         d15->anim = 0;
         d15->anim_frame = 0xfff;
         d15->state = 0xff;
@@ -187,9 +187,9 @@ void map_restore_progress(void)
     } else {
         fdat_801ef93c = 0;
         e49->status.bytes[3] = 1;
-        c29->state = 4;
-        c11->state = 5;
-        c10->state = 5;
+        c29->state = GROUND_ITEM_HIDDEN;
+        c11->state = GROUND_ITEM_SCRIPTED;
+        c10->state = GROUND_ITEM_SCRIPTED;
         fdat_801ef93c = 0;
         e49->flags &= ~0x2000000;
     }
@@ -221,17 +221,17 @@ void map_restore_progress(void)
         e50->status.bytes[3] = 2;
         r11->radius = 0x200;
         r11->height = 0x800;
-        e51->state = 3;
+        e51->state = CREATURE_STATE_GONE;
         fdat_801ef92c = stage;
-        c28->state = 4;
+        c28->state = GROUND_ITEM_HIDDEN;
         fdat_801ef924 = 4;
     } else if (stage == 2) {
-        e50->state = 3;
-        e51->state = 3;
+        e50->state = CREATURE_STATE_GONE;
+        e51->state = CREATURE_STATE_GONE;
         fdat_801ef92c = 2;
-        c28->state = 5;
+        c28->state = GROUND_ITEM_SCRIPTED;
         c28->position.vz = 0x41b88;
-        d16->kind = 50;
+        d16->kind = OBJECT_KIND_GATE;
         d16->anim_frame = 0xfff;
         d16->anim = 0;
         d16->state = 0xff;
@@ -246,7 +246,7 @@ void map_restore_progress(void)
         e50->anim_step = 0;
         e50->status.bytes[3] = 2;
         creature_start_script(e51, 0);
-        c28->state = 4;
+        c28->state = GROUND_ITEM_HIDDEN;
         fdat_801ef924 = 0;
         fdat_801ef920 = 400;
         fdat_801ef92c = 0;
@@ -283,7 +283,7 @@ void map_pick_creature_move(void)
     if (!creature_pick_weighted_script())
         return;
     switch (e->action) {
-    case 8:
+    case CREATURE_ACTION_TURN_AWAY:
         wall = e->wall_heading;
         if ((short)wall == 0x7fff) {
             e->unk5A = e->target_heading = (e->player_heading + 2048) & 0xfff;
@@ -305,7 +305,7 @@ void map_pick_creature_move(void)
         e->unk5A = e->target_heading = e->rotation.vy;
         break;
     }
-    if (e->action != 8)
+    if (e->action != CREATURE_ACTION_TURN_AWAY)
         e->wall_heading = 0x7fff;
     if (vis_records[e->block].heading_bias_x != 0 || vis_records[e->block].heading_bias_z != 0) {
         x = rcos(e->target_heading - 1024) >> 5;
@@ -351,7 +351,7 @@ void map_step_creature(void)
     if (e->type == 4 && fdat_801ef93c == 1) {
         rot.vx = 0;
         rot.vy = -0x400;
-        viewer.state = 5;
+        viewer.state = VIEWER_STATE_SCRIPTED;
         pos.vx = e48->position.vx - 0xa00;
         pos.vz = e48->position.vz;
         player_glide_to_pose(&pos, &rot);
@@ -365,17 +365,17 @@ void map_step_creature(void)
         map_hand_over_item();
         creature_fade_out_despawn(e);
         fdat_801ef93c = 2;
-        viewer.state = 0;
+        viewer.state = VIEWER_STATE_NORMAL;
         game_progress.event_flags.word |= 0x4000;
     }
     if (e->type == 0) {
         switch (game_progress.event_flags.word >> 10 & 7) {
         case 2:
-            viewer.state = 5;
+            viewer.state = VIEWER_STATE_SCRIPTED;
             creature_force_talk(e, 0, 0);
             player_turn_to_creature(e);
             map_walk_creature_off();
-            viewer.state = 0;
+            viewer.state = VIEWER_STATE_NORMAL;
             e->spawn_chance = 100;
             e->rotation.vy = 0x400;
             e->home_block = 0x31;
@@ -535,19 +535,19 @@ void map_object_take_equipment(void)
     VECTOR pos;
     SVECTOR rot;
 
-    if (d == &vis_table_b.entries[16] && viewer.equipment[3] < 50 && d->state == 1
+    if (d == &vis_table_b.entries[16] && viewer.equipment[EQUIP_SLOT_RIGHT_HAND] < 50 && d->state == 1
         && fdat_801ef92c == 0) {
         pos.vx = d->position.vx;
         pos.vz = d->position.vz - 0x600;
         rot.vx = 0;
         rot.vy = 0;
-        viewer.state = 5;
+        viewer.state = VIEWER_STATE_SCRIPTED;
         player_glide_to_pose(&pos, &rot);
         map_take_equipment_raise_object();
         player_turn_to_creature(e51);
         map_play_two_creature_scripts();
         map_talk_then_remove_creatures();
-        viewer.state = 0;
+        viewer.state = VIEWER_STATE_NORMAL;
         fdat_801ef924 = 2;
         fdat_801ef92c = 2;
         game_progress.event_flags.word = (game_progress.event_flags.word & ~0x300) | 0x200;
@@ -597,23 +597,23 @@ void map_take_equipment_raise_object(void)
     int step;
 
     kind = &vis_table_c.types[c28->item];
-    *(u8 *)&items->counts[viewer.equipment[3]] = 0;
-    viewer.equipment[3] = 0xffff;
+    *(u8 *)&items->counts[viewer.equipment[EQUIP_SLOT_RIGHT_HAND]] = 0;
+    viewer.equipment[EQUIP_SLOT_RIGHT_HAND] = EQUIP_NONE;
     player_compute_derived_stats(0);
     player_update_durability_warning();
-    player_load_equipment_model(viewer.equipment[3], 0, 0);
-    player_load_equipment_model(viewer.equipment[16], 1, 0);
-    d16->kind = 50;
+    player_load_equipment_model(viewer.equipment[EQUIP_SLOT_RIGHT_HAND], 0, 0);
+    player_load_equipment_model(viewer.equipment[EQUIP_SLOT_LEFT_HAND], 1, 0);
+    d16->kind = OBJECT_KIND_GATE;
     d16->anim = 0;
     d16->anim_frame = 0;
-    c28->state = 5;
+    c28->state = GROUND_ITEM_SCRIPTED;
     c28->depth_bias += 3;
     for (;;) {
         StAnimFile *file;
 
         if (c28->position.vz > d16->position.vz - 0x300)
             goto item_placed;
-        anim_get_file(kind->model + 588, &file);
+        anim_get_file(kind->model + MODEL_SLOT_ITEMS, &file);
         if (file != NULL)
             c28->position.vz += 36;
         world_run_frame(NULL, NULL, 0);
@@ -733,7 +733,7 @@ void map_slide_ground_item(void)
     int step = 24;
     int top;
 
-    item->state = 5;
+    item->state = GROUND_ITEM_SCRIPTED;
     top = item->position.vx + 0x1ea;
     item->depth_bias -= 2;
     for (;;) {
@@ -741,7 +741,7 @@ void map_slide_ground_item(void)
 
         if (item->position.vx == top)
             break;
-        anim_get_file(kind->model + 588, &file);
+        anim_get_file(kind->model + MODEL_SLOT_ITEMS, &file);
         if (file != NULL)
             item->position.vx += step;
         if (item->position.vx > top)
@@ -758,7 +758,7 @@ void map_open_object(void)
     AreaObject *d = &vis_table_b.entries[15];
     int step;
 
-    d->kind = 50;
+    d->kind = OBJECT_KIND_GATE;
     d->anim = 0;
     d->anim_frame = 0;
     step = d->unk48 * 4;
@@ -840,7 +840,7 @@ void map_hand_over_item(void)
         c->position.vz = e->position.vz - v.vz;
         world_run_frame(NULL, &viewer.view_rot, 0);
     } while ((s16)e->anim_frame != 0xfff);
-    c->state = 2;
+    c->state = GROUND_ITEM_RESTING;
     viewer.rotation.vx = viewer.view_rot.vx + viewer.rot_offset.halves[0] + viewer.shake_pitch + viewer.fall_pitch;
     viewer.rotation.vy = viewer.view_rot.vy + viewer.rot_offset.halves[1] + viewer.shake_yaw + viewer.unk292;
     viewer.rotation.vz = viewer.view_rot.vz + viewer.roll_offset + viewer.shake_roll + viewer.unk294;

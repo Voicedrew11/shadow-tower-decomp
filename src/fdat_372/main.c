@@ -79,10 +79,10 @@ void map_update_events(void)
     CreatureType *r = &vis_table_a.types[5];
 
     if (game_progress.talk_counts[r->talk_id] == 0 && viewer.position.vz > 0x4c000) {
-        viewer.state = 5;
+        viewer.state = VIEWER_STATE_SCRIPTED;
         creature_force_talk(e, 0, 0);
         e->hit = 1;
-        viewer.state = 0;
+        viewer.state = VIEWER_STATE_NORMAL;
         e->flags &= ~0x2000000;
         r->actions &= ~0x180;
     }
@@ -94,12 +94,12 @@ void map_update_events(void)
         lighting.area_mode[37] = 0x11;
         game_progress.event_flags.word |= 0x100000;
     }
-    if (fdat_801eda3c == 1 && e->state == 3) {
-        viewer.state = 5;
+    if (fdat_801eda3c == 1 && e->state == CREATURE_STATE_GONE) {
+        viewer.state = VIEWER_STATE_SCRIPTED;
         e->flags |= 0x2000000;
         creature_force_talk(e, 1, 0);
         fdat_801eda3c = 0xff;
-        viewer.state = 0;
+        viewer.state = VIEWER_STATE_NORMAL;
     }
 }
 
@@ -123,10 +123,10 @@ void map_pick_creature_move(void)
         return;
     creature_choose_action();
     if (e->type == 5 && game_progress.talk_counts[r->talk_id] == 0)
-        e->action = 128;
+        e->action = CREATURE_ACTION_DORMANT;
     creature_pick_weighted_script();
     switch (e->action) {
-    case 8:
+    case CREATURE_ACTION_TURN_AWAY:
         wall = e->wall_heading;
         if ((short)wall == 0x7fff) {
             e->unk5A = e->target_heading = (e->player_heading + 2048) & 0xfff;
@@ -148,7 +148,7 @@ void map_pick_creature_move(void)
         e->unk5A = e->target_heading = e->rotation.vy;
         break;
     }
-    if (e->action != 8)
+    if (e->action != CREATURE_ACTION_TURN_AWAY)
         e->wall_heading = 0x7fff;
     if (vis_records[e->block].heading_bias_x != 0 || vis_records[e->block].heading_bias_z != 0) {
         x = rcos(e->target_heading - 1024) >> 5;

@@ -112,9 +112,9 @@ void effect_emit(u_long flags, int kind, StEffectDef *def, int arg, VECTOR *pos)
     else
         kind |= 0x20;
     if (second)
-        value = viewer.equipment[12];
+        value = viewer.equipment[EQUIP_SLOT_LEFT_MAGIC];
     else
-        value = viewer.equipment[6];
+        value = viewer.equipment[EQUIP_SLOT_RIGHT_MAGIC];
     level = value / 6;
     if (level < 6) {
         /* As retail: levels 3-5 write past the six bias entries. */

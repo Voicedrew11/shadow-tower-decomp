@@ -13,6 +13,7 @@
 #include <sys/types.h>
 #include <LIBGTE.H>
 #include <st/gfx.h>
+#include <st/effect_kinds.h>
 
 struct Creature; /* st/vis.h */
 
