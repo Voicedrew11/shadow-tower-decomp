@@ -34,7 +34,7 @@ void effects_run(void)
             if (--e->unk10 == -1)
                 e->unk0 = ST_EFFECT_FREE;
             else
-                func_800385b0();
+                effect_update();
         }
         e++;
     }

@@ -31,7 +31,7 @@ typedef struct {
     u_long *unk38;
     u8 unk3C[8];
     u8 *vertices;        /* 0x44: transformed vertices, by byte offset (ST 0x40) */
-    u8 *unk48;           /* 0x48: a second vertex cursor (func_800353d0) */
+    u8 *unk48;           /* 0x48: a second vertex cursor (effect_draw_model_part) */
     u8 *local_vertices;  /* 0x4c: SVECTOR model-space vertices (ST 0x48) */
     u8 unk50[0x64 - 0x50];
     CVECTOR rgb;         /* 0x64: the renderers' NCCS input colour; .cd carries the GPU code (ST 0x60) */
@@ -46,12 +46,12 @@ typedef struct {
     int face_count;      /* 0x8c: faces submitted */
     int prim_count;      /* 0x90: primitives emitted */
     s32 unk94;           /* 0x94: their fourth per-frame counter */
-    u_short clut_base;   /* 0x98 (func_80035b68) */
+    u_short clut_base;   /* 0x98 (effects_draw) */
     u8 unk9A[0xa4 - 0x9a];
     struct StAnimList *anims; /* 0xa4: the node list anim_list_compose composes */
-    MATRIX matrix;       /* 0xa8: the model matrix func_800353d0 draws with */
+    MATRIX matrix;       /* 0xa8: the model matrix effect_draw_model_part draws with */
     u8 unkC8[0x13c - 0xc8];
-    VECTOR unk13C;       /* 0x13c: an effect's position (func_80035b68) */
+    VECTOR unk13C;       /* 0x13c: an effect's position (effects_draw) */
 } VsScratchPad;
 
 /* Layout check: the offset the code proves. */

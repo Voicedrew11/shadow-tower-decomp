@@ -4104,8 +4104,8 @@ void model_draw(int unused0, u16 model, VECTOR *pos, SVECTOR *rot, SVECTOR *scal
         flags &= ~0x40;
     }
     if (sp->prim_end < sp->prim) {
-        func_8003f12c(0xffff, 0, 0);
-        func_8003f12c(0xffff, 1, 0);
+        player_load_equipment_model(0xffff, 0, 0);
+        player_load_equipment_model(0xffff, 1, 0);
     }
     gte_SetRotMatrix(&world_state.unk1ECE8);
     gte_SetTransMatrix(&world_state.unk1ECE8);
@@ -4239,7 +4239,7 @@ void creature_tim_loaded(void *data)
     DVECTOR b[4] = {{0, 0}, {0, 3}, {0, 6}, {0, 9}};
     u8 n = heap_get_tag(data);
 
-    func_8003ec5c(data, &a[n], &b[n], 0);
+    tim_load_images_at(data, &a[n], &b[n], 0);
 }
 
 ADDRESS(0x80023470, 0x194)
@@ -4272,7 +4272,7 @@ void item_tim_loaded(void *data)
     };
     u8 n = heap_get_tag(data);
 
-    func_8003ec5c(data, &a[n], &b[n], 0);
+    tim_load_images_at(data, &a[n], &b[n], 0);
 }
 
 ADDRESS(0x80023788, 0x20)

@@ -149,11 +149,11 @@ typedef struct {
     /* 0x834c: heap block owners and model files by id: creature_model_load's bank
      * slots (by slot), creature_second_model_load and src/st/slots.c (by slot - 16), the
      * viewer models at 32.. (player_draw_equipment_model), model_draw's model blocks, the
-     * animation model files (src/st/anim.c); func_800456f8 frees 128..143,
+     * animation model files (src/st/anim.c); area_load_update frees 128..143,
      * the highest index evidenced (WIP extent). */
     void *unk834C[144];
     u8 unk858C[0x8c7c - 0x858c];
-    void *unk8C7C[128];  /* 0x8c7c: heap blocks func_800456f8 frees on an area change */
+    void *unk8C7C[128];  /* 0x8c7c: heap blocks area_load_update frees on an area change */
     u8 unk8E7C[0xa5fc - 0x8e7c];
     StAnimSlot anim_slots[16]; /* 0xa5fc */
     StAnimSet anim_sets[16]; /* 0xa77c */

@@ -16,7 +16,7 @@
  * fight.
  */
 ADDRESS(0x8002e114, 0x200)
-void func_8002e114(int id, VsHit *hit)
+void fighter_apply_hit(int id, VsHit *hit)
 {
     u16 damage[9];
     VsFighter *base = DAT_800633b0.fighter;
@@ -51,9 +51,9 @@ void func_8002e114(int id, VsHit *hit)
 }
 
 /* Damages the opponent of fighter `id` with that fighter's attack
- * `attack`, as func_8002e114. */
+ * `attack`, as fighter_apply_hit. */
 ADDRESS(0x8002e314, 0x1fc)
-void func_8002e314(u8 id, u8 attack)
+void fighter_apply_attack_hit(u8 id, u8 attack)
 {
     VsFighter *self = &DAT_800633b0.fighter[id];
     u16 *damage = self->unk4DF18.unk14A[attack].damage;
@@ -86,7 +86,7 @@ void func_8002e314(u8 id, u8 attack)
 /* 1 when fighter `id` is outside the central 20000-unit square and its
  * distance measure passes 15500 squared. */
 ADDRESS(0x8002e510, 0xd4)
-int func_8002e510(int id)
+int fighter_is_out_of_bounds(int id)
 {
     VsFighter *f = &DAT_800633b0.fighter[id];
 

@@ -13,7 +13,7 @@
 #include <vs/buffer.h>
 #include <vs/scratch.h>
 
-/* func_8002c2c4's switch table. */
+/* fighter_draw_guard_flash's switch table. */
 RODATA(0x80011574, 0x14)
 
 /* Projects the current part's vertices: RTPT in threes, the first group
@@ -133,7 +133,7 @@ RODATA(0x80011574, 0x14)
  * of it, scaled by its hit radius and height.
  */
 ADDRESS(0x8002c2c4, 0x144c)
-void func_8002c2c4(int id)
+void fighter_draw_guard_flash(int id)
 {
     VsScratchPad *sp = VS_SCRATCHPAD;
     VsFighter *f = &DAT_800633b0.fighter[id];

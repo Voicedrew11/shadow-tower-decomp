@@ -47,7 +47,7 @@ void func_8004cee8(Vis212 *e, int kind, VECTOR *pos)
             func_8004cc70(e, target, 256 + i * 64, &p, &dir, &rot, -1, 16, 1);
             rot.vx = 0;
             rot.vz = 0;
-            fx = func_80036484(r->unk08, 0x81, kind, &p, &dir, 256, &rot, e->unk0B);
+            fx = effect_spawn(r->unk08, 0x81, kind, &p, &dir, 256, &rot, e->unk0B);
             if (fx)
                 fx->unk8 = 3;
         }
@@ -56,7 +56,7 @@ void func_8004cee8(Vis212 *e, int kind, VECTOR *pos)
         for (i = 0; i < 3; i++) {
             func_8004cc70(e, target, 512 + i * 128, &p, &dir, &rot, -1, 16, 1);
             func_8004cba0(&dir, &p, pos);
-            fx = func_80036484(r->unk08, 0x81, kind, &p, &dir, 0x1000, &rot, e->unk0B);
+            fx = effect_spawn(r->unk08, 0x81, kind, &p, &dir, 0x1000, &rot, e->unk0B);
             if (fx)
                 fx->unk8 = 0;
         }
@@ -72,7 +72,7 @@ void func_8004cee8(Vis212 *e, int kind, VECTOR *pos)
         for (i = 0; i < 1; i++) {
             func_8004cc70(e, target, 256, &p, &dir, &rot, -1, 16, 1);
             func_8004cba0(&dir, &p, pos);
-            fx = func_80036484(r->unk08, 0x81, kind, &p, &dir, 0x200, &rot, e->unk0B);
+            fx = effect_spawn(r->unk08, 0x81, kind, &p, &dir, 0x200, &rot, e->unk0B);
             if (fx)
                 fx->unk8 = 3;
         }
@@ -82,7 +82,7 @@ void func_8004cee8(Vis212 *e, int kind, VECTOR *pos)
     case 0x68:
     case 0x74:
         func_8004cc70(e, target, 384, &p, &dir, &rot, -1, 16, 1);
-        fx = func_80036484(r->unk08, 0x81, kind, &p, &dir, 0x400, e->unk0B);
+        fx = effect_spawn(r->unk08, 0x81, kind, &p, &dir, 0x400, e->unk0B);
         if (fx)
             fx->unk8 = 0;
         break;
@@ -103,7 +103,7 @@ void func_8004cee8(Vis212 *e, int kind, VECTOR *pos)
     case 0xa6:
     case 0xa8:
         func_8004cc70(e, target, 384, &p, &dir, &rot, -1, 16, 1);
-        fx = func_80036484(r->unk08, 0x81, kind, &p, &dir, 0x1000, &rot, e->unk0B);
+        fx = effect_spawn(r->unk08, 0x81, kind, &p, &dir, 0x1000, &rot, e->unk0B);
         if (fx)
             fx->unk8 = 0;
         break;
@@ -117,7 +117,7 @@ void func_8004cee8(Vis212 *e, int kind, VECTOR *pos)
     case 0x9c:
     case 0x9e:
         func_8004cc70(e, target, 512, &p, &dir, &rot, -1, 16, 1);
-        fx = func_80036484(r->unk08, 0x81, kind, &p, &dir, 0x200, e->unk0B);
+        fx = effect_spawn(r->unk08, 0x81, kind, &p, &dir, 0x200, e->unk0B);
         if (fx)
             fx->unk8 = 0;
         break;
@@ -126,7 +126,7 @@ void func_8004cee8(Vis212 *e, int kind, VECTOR *pos)
         rot.vx = 0;
         rot.vy = 0;
         rot.vz = 0;
-        fx = func_80036484(r->unk08, 0x81, kind, &p, &dir, 0x600, &rot, e->unk0B);
+        fx = effect_spawn(r->unk08, 0x81, kind, &p, &dir, 0x600, &rot, e->unk0B);
         if (fx)
             fx->unk8 = 3;
         break;
@@ -136,7 +136,7 @@ void func_8004cee8(Vis212 *e, int kind, VECTOR *pos)
         for (i = 0; i < 4; i++) {
             func_8004cc70(e, target, 512, &p, &dir, &rot, -1, 16, 1);
             func_8004cba0(&dir, &p, pos);
-            fx = func_80036484(r->unk08, 0x81, kind, &p, &dir, 0x400, e->unk0B);
+            fx = effect_spawn(r->unk08, 0x81, kind, &p, &dir, 0x400, e->unk0B);
             if (fx)
                 fx->unk8 = 0;
         }
@@ -145,7 +145,7 @@ void func_8004cee8(Vis212 *e, int kind, VECTOR *pos)
     case 0x59:
     case 0x97:
         func_8004cc70(e, target, 256, &p, &dir, &rot, -1, 16, 1);
-        fx = func_80036484(r->unk08, 0x81, kind, &p, &dir, 0x200, e->unk0B);
+        fx = effect_spawn(r->unk08, 0x81, kind, &p, &dir, 0x200, e->unk0B);
         if (fx)
             fx->unk40.vy = 0;
         break;
@@ -154,7 +154,7 @@ void func_8004cee8(Vis212 *e, int kind, VECTOR *pos)
     case 0x6a:
         for (i = 0; i < 4; i++) {
             func_8004ca90(&dir, &p, pos, (int)e, -e->unk30, -48);
-            fx = func_80036484(r->unk08, 0x81, kind, &p, &dir, 0x600, e->unk0B);
+            fx = effect_spawn(r->unk08, 0x81, kind, &p, &dir, 0x600, e->unk0B);
             if (fx)
                 fx->unk8 = 3;
         }
@@ -165,7 +165,7 @@ void func_8004cee8(Vis212 *e, int kind, VECTOR *pos)
     case 0xa3:
         for (i = 0; i < 4; i++) {
             func_8004ca90(&dir, &p, pos, (int)e, 0, -48);
-            fx = func_80036484(r->unk08, 0x81, kind, &p, &dir, 0x600, e->unk0B);
+            fx = effect_spawn(r->unk08, 0x81, kind, &p, &dir, 0x600, e->unk0B);
             if (fx)
                 fx->unk8 = 3;
         }
@@ -201,7 +201,7 @@ void func_8004cee8(Vis212 *e, int kind, VECTOR *pos)
         for (i = 0; i < 4; i++) {
             func_8004cc70(e, target, 32, &p, &dir, &rot, -1, 16, 1);
             func_8004cba0(&dir, &p, pos);
-            fx = func_80036484(r->unk08, 0x81, kind, &p, &dir, 0x400, e->unk0B);
+            fx = effect_spawn(r->unk08, 0x81, kind, &p, &dir, 0x400, e->unk0B);
             if (fx)
                 fx->unk8 = 3;
         }
@@ -220,7 +220,7 @@ void func_8004cee8(Vis212 *e, int kind, VECTOR *pos)
     case 0xeb:
     case 0xee:
         func_8004cc70(e, target, 768, &p, &dir, &rot, -1, 16, 1);
-        fx = func_80036484(r->unk08, 0x81, kind, &p, &dir, 0x800, &rot, e->unk0B, e);
+        fx = effect_spawn(r->unk08, 0x81, kind, &p, &dir, 0x800, &rot, e->unk0B, e);
         if (fx)
             fx->unk8 = 3;
         break;
@@ -248,7 +248,7 @@ void func_8004cee8(Vis212 *e, int kind, VECTOR *pos)
     case 0xf3:
     case 0xf4:
     case 0xf5:
-        func_80036484(r->unk08, 0x81, kind, &p, &dir, e);
+        effect_spawn(r->unk08, 0x81, kind, &p, &dir, e);
         break;
     case 0x7c:
     case 0x83:
@@ -260,7 +260,7 @@ void func_8004cee8(Vis212 *e, int kind, VECTOR *pos)
     case 0xa7:
     case 0xa9:
         func_8004cc70(e, target, 384, &p, &dir, &rot, -1, 16, 1);
-        fx = func_80036484(r->unk08, 0x81, kind, &p, &dir, 0x200, &rot, e->unk0B);
+        fx = effect_spawn(r->unk08, 0x81, kind, &p, &dir, 0x200, &rot, e->unk0B);
         if (fx)
             fx->unk8 = 0;
         break;

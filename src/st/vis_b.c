@@ -16,7 +16,7 @@
  * Likewise the HUD drawer world_render_frame (st/hud.h is not included): every
  * call here sees it as a function returning int, implicitly at first and
  * then through the declaration before func_8005335c. */
-#define ST_FUNC_80045044_OLD_STYLE
+#define ST_AREA_REQUEST_LOAD_OLD_STYLE
 #include <kf/lib/address.h>
 #include <kf/lib/types.h>
 #include <sys/types.h>
@@ -387,8 +387,8 @@ void func_800500ac(int mode, int start, int end, int delta)
         fade_add_color(c, c, c, 4096, mode);
         cd_wait_idle();
         func_80058620();
-        func_80045ffc();
-        func_8003e734(&pos, &rot);
+        image_stream_update();
+        player_get_camera(&pos, &rot);
         world_render_frame(&pos, &rot);
         player_update_status(0);
         if (v == end)
@@ -618,7 +618,7 @@ void func_80050768(void)
                 if (e->unk10 < 3072 && speed + e->unk10 >= 3072)
                     SOUND(e, 210);
                 if (speed != 0 && e->unk10 <= 2048 && e->unk18 <= 2048)
-                    func_8003ead0();
+                    player_stop_motion();
                 if (e->unk1C <= 2048 && e->unk10 <= 2048) {
                     int push = 0;
 
@@ -651,7 +651,7 @@ void func_80050768(void)
                     if (speed != 0 && push) {
                         short away = e->unk20;
 
-                        func_8003ead0();
+                        player_stop_motion();
                         away -= 1024;
                         vis_table_b.unk71A4 += rcos(away) / 32;
                         vis_table_b.unk71A8 += rsin(away) / 32;
@@ -1074,7 +1074,7 @@ void func_80050768(void)
             if ((DAT_801cd180.unk2 & DAT_801cd180.unk22[10]) && vis_table_a.unk6169 == 0
                 && W50(e) != 0xffffff && W48(e) != 0xffffff) {
                 vis_table_a.unk6169 = 1;
-                func_8003ead0();
+                player_stop_motion();
                 func_80057a3c();
             }
             if (vis_table_a.unk6169 == 1) {
@@ -1097,7 +1097,7 @@ void func_80050768(void)
             }
             if (vis_table_a.unk6169 == 2) {
                 a = &vis_table_a.entries[56];
-                func_8003ead0();
+                player_stop_motion();
                 vis_table_b.unk71A4 = DAT_800881e0.vx;
                 vis_table_b.unk71A8 = DAT_800881e0.vz;
                 for (rising = 7; rising != -1; a++, rising--) {
@@ -1118,7 +1118,7 @@ void func_80050768(void)
                 DAT_800881e0.vz = 0;
             }
             vis_table_a.unk6169 = 4;
-            func_80045044(e->unk4A.snd.unk4D, e->unk4A.snd.unk4D, e->unk4A.snd.unk4D, e->unk4A.snd.unk4D,
+            area_request_load(e->unk4A.snd.unk4D, e->unk4A.snd.unk4D, e->unk4A.snd.unk4D, e->unk4A.snd.unk4D,
                           e->unk4A.snd.unk4D, (s8)B50(e), B52(e), B51(e), (s8)e->unk4A.snd.unk4B,
                           (s8)e->unk4A.door.unk4F, (s8)e->unk4A.snd.unk4C);
             if (W48(e) != 0xffffff) {
@@ -1183,14 +1183,14 @@ void func_80050768(void)
             lit2 = area;
             do {
                 cd_wait_frame();
-                func_800456f8();
+                area_load_update();
             } while (area_state.unk0 != 0);
             viewer.unk278.vy = e->unk4A.door.unk4F << 10;
             viewer.unk278.vx = 0;
             if (area != area_state.unk4) {
-                func_80045044(area, area, area, 0xff, 0xff, 127, 127, 127, 0, 0, 0);
+                area_request_load(area, area, area, 0xff, 0xff, 127, 127, 127, 0, 0, 0);
             } else {
-                func_80045044(0xff, 0xff, area, 0xff, 0xff, 127, 127, 127, 0, 0, 0);
+                area_request_load(0xff, 0xff, area, 0xff, 0xff, 127, 127, 127, 0, 0, 0);
                 viewer.unk21C = 1;
                 func_8004e2d8();
                 vis_table_a.unk6158[0] = vis_table_a.unk6158[1] = vis_table_a.unk6158[2] =
@@ -1207,7 +1207,7 @@ void func_80050768(void)
             viewer.position.vy = (y << 12) + ((s8)e->unk4A.snd.unk4D << 7) - 1600;
             viewer.unk2F0 = 0;
             viewer.unk2EC = 0;
-            func_8003ead0();
+            player_stop_motion();
             vis_table_b.unk71A8 = 0;
             vis_table_b.unk71A6 = 0;
             vis_table_b.unk71A4 = 0;
@@ -1222,7 +1222,7 @@ void func_80050768(void)
             viewer.unk1CC = 0;
             do {
                 cd_wait_frame();
-                func_800456f8();
+                area_load_update();
             } while (area_state.unk0 != 0);
             vis_lists.n_sources = 0;
             vis_collect_sources((VECTOR *)&viewer.position.vx, NULL, NULL);
@@ -1234,7 +1234,7 @@ void func_80050768(void)
             func_80057c54();
             func_800500ac(2, 0x1000, 0, -0x100);
             if (area < 44)
-                func_80045044(0xff, 0xff, 0xff, lit2, lit, 127, 127, 127, 0, 0, 0);
+                area_request_load(0xff, 0xff, 0xff, lit2, lit, 127, 127, 127, 0, 0, 0);
             lighting_clear_requests();
             break;
         away:
@@ -1259,7 +1259,7 @@ void func_80050768(void)
 }
 
 /* src/st/area_a.c: from here on its calls see the prototype. */
-KF_VALUELESS_S32 func_80045044(u8 a0, u8 a1, u8 a2, u8 a3, u8 a4, s8 f0, s8 f1, s8 f2, u8 f3, u8 f4,
+KF_VALUELESS_S32 area_request_load(u8 a0, u8 a1, u8 a2, u8 a3, u8 a4, s8 f0, s8 f1, s8 f2, u8 f3, u8 f4,
                    u8 f5);
 
 /* Fades out, loads `to`'s area and places the viewer there, then fades in;
@@ -1291,14 +1291,14 @@ void func_80052894(to, keep)
     area = to->area;
     do {
         cd_wait_frame();
-        func_800456f8();
+        area_load_update();
     } while (area_state.unk0 != 0);
     viewer.unk278.vy = to->yaw;
     viewer.unk278.vx = 0;
     if (area != area_state.unk4) {
-        func_80045044(area, area, area, 0xff, 0xff, 127, 127, 127, 0, 0, 0);
+        area_request_load(area, area, area, 0xff, 0xff, 127, 127, 127, 0, 0, 0);
     } else {
-        func_80045044(0xff, 0xff, area, 0xff, 0xff, 127, 127, 127, 0, 0, 0);
+        area_request_load(0xff, 0xff, area, 0xff, 0xff, 127, 127, 127, 0, 0, 0);
         viewer.unk21C = 1;
         func_8004e2d8();
         vis_table_a.unk6158[0] = vis_table_a.unk6158[1] = vis_table_a.unk6158[2] = vis_table_a.unk6158[3] = 0xff;
@@ -1312,7 +1312,7 @@ void func_80052894(to, keep)
     viewer.position.vx = (x << 12) + to->dx;
     viewer.position.vz = (z << 12) + to->dz;
     viewer.position.vy = (y << 12) + to->dy;
-    func_8003ead0();
+    player_stop_motion();
     f = effects.slots;
     vis_table_b.unk71A8 = 0;
     vis_table_b.unk71A6 = 0;
@@ -1333,7 +1333,7 @@ void func_80052894(to, keep)
     }
     do {
         cd_wait_frame();
-        func_800456f8();
+        area_load_update();
     } while (area_state.unk0 != 0);
     if (!keep) {
         vis_lists.n_sources = 0;
@@ -1347,11 +1347,11 @@ void func_80052894(to, keep)
     func_80057c54();
     func_800500ac(2, 0x1000, 0, -0x100);
     if (!keep) {
-        func_80045044(0xff, 0xff, 0xff, area, area, 127, 127, 127, 0, 0, 0);
+        area_request_load(0xff, 0xff, 0xff, area, area, 127, 127, 127, 0, 0, 0);
         lighting_clear_requests();
     }
     func_80057a3c();
-    func_80042c10();
+    player_enter_normal_state();
 }
 
 /* Warps to viewer.unk22C. */
@@ -1367,7 +1367,7 @@ ADDRESS(0x80052c5c, 0x48)
 void func_80052c5c(void)
 {
     viewer.unk218 = 5;
-    func_8003d030();
+    player_update_durability_warning();
     func_80052894(&viewer.unk220.warp, 1);
     DAT_801cd0e4 = 0;
 }

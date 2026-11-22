@@ -16,7 +16,7 @@
  * single pixels.
  */
 ADDRESS(0x8002d998, 0x340)
-void func_8002d998(void)
+void sparks_update(void)
 {
     VsRecord20 *rec = DAT_801c4a58;
     int count = 0;

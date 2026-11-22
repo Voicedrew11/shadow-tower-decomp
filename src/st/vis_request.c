@@ -88,9 +88,9 @@ int func_80049544(VisLists *req)
     if (req->unk0 & 0x80) {
         if (req->unk0 & 0x800) {
             req->unk1C += 512;
-            if (func_8003beb4(req) != -1)
+            if (player_distance_in_reach(req) != -1)
                 hits |= 0x80;
-        } else if (func_8003beb4(req) != -1)
+        } else if (player_distance_in_reach(req) != -1)
             hits |= 0x80;
     }
     req->unk4.vy -= req->unk1E;

@@ -3,7 +3,7 @@
  * VRAM block move and roll, the effect script interpreter, the effect
  * pool and the effects' model draw. One translation unit: retail lays out
  * its constants (0x800118c4, the model draw's initializers) before its
- * switch tables (0x80011934, func_80032404's and func_800335e8's), the
+ * switch tables (0x80011934, effect_spawn's and effect_update's), the
  * order cc1 writes one object's read-only data in.
  */
 #include <kf/lib/address.h>
@@ -28,7 +28,7 @@ RODATA(0x800118c4, 0x670)
 
 /*
  * Spawning an effect. VS's form of ST.EXE's
- * func_80036484 (src/st/effect_spawn.c): the same kinds from 0x30 up,
+ * effect_spawn (src/st/effect_spawn.c): the same kinds from 0x30 up,
  * owned by a fighter and one of its attacks.
  */
 /* The same scale on the three axes. */
@@ -53,7 +53,7 @@ RODATA(0x800118c4, 0x670)
  * the pool is full.
  */
 ADDRESS(0x80032404, 0xf38)
-StEffect *func_80032404(int n, u8 attack, u8 flags, u8 kind, VECTOR *pos, SVECTOR *dir, ...)
+StEffect *effect_spawn(int n, u8 attack, u8 flags, u8 kind, VECTOR *pos, SVECTOR *dir, ...)
 {
     int *args = (int *)&dir;
     StEffect *e;
@@ -61,7 +61,7 @@ StEffect *func_80032404(int n, u8 attack, u8 flags, u8 kind, VECTOR *pos, SVECTO
     VECTOR b;
     u8 frame;
 
-    e = func_800322f0();
+    e = effect_alloc();
     if (e != NULL) {
         e->unk0 = flags;
         e->unk1 = kind;
@@ -398,7 +398,7 @@ StEffect *func_80032404(int n, u8 attack, u8 flags, u8 kind, VECTOR *pos, SVECTO
             e->unk12 = 4096;
             SCALE(e, args[1]);
             REACH(e, e->unk38.vx * 1536 / 4096);
-            func_80032404(e->unk4C, e->unk4D, e->unk0, 0xd6, &e->unk20, &e->unk40, e->unk38.vx, e);
+            effect_spawn(e->unk4C, e->unk4D, e->unk0, 0xd6, &e->unk20, &e->unk40, e->unk38.vx, e);
             e->unk8 = 1;
             break;
         case 0xd6:
@@ -559,8 +559,8 @@ StEffect *func_80032404(int n, u8 attack, u8 flags, u8 kind, VECTOR *pos, SVECTO
             a.vy = e->unk20.vy + e->unk38.vx * rsin(e->unk30.vz) / 4096;
             b.vx = e->unk20.vx + e->unk38.vx * rcos(e->unk30.vz + 2048) / 4096;
             b.vy = e->unk20.vy + e->unk38.vx * rsin(e->unk30.vz + 2048) / 4096;
-            func_80032404(e->unk4C, e->unk4D, e->unk0, 0xe9, &e->unk20, &e->unk40, e->unk38.vx, e);
-            func_80032404(e->unk4C, e->unk4D, e->unk0, 0xea, &e->unk20, &e->unk40, e->unk38.vx, e);
+            effect_spawn(e->unk4C, e->unk4D, e->unk0, 0xe9, &e->unk20, &e->unk40, e->unk38.vx, e);
+            effect_spawn(e->unk4C, e->unk4D, e->unk0, 0xea, &e->unk20, &e->unk40, e->unk38.vx, e);
             e->unk8 = 1;
             break;
         case 0xe9:
@@ -589,7 +589,7 @@ StEffect *func_80032404(int n, u8 attack, u8 flags, u8 kind, VECTOR *pos, SVECTO
 /* The effect attack, then moves the current effect and turns its roll by
  * `spin`; returns the attack's result. */
 ADDRESS(0x8003333c, 0x78)
-int func_8003333c(int arg0, u_long height, int spin)
+int effect_attack_move(int arg0, u_long height, int spin)
 {
     StEffect *e = DAT_801ce698.cur;
     int result = effect_reaches_opponent(arg0, height);
@@ -603,7 +603,7 @@ int func_8003333c(int arg0, u_long height, int spin)
 
 /* Moves the current effect back by its velocity. */
 ADDRESS(0x800333b4, 0x40)
-void func_800333b4(void)
+void effect_step_back(void)
 {
     StEffect *e = DAT_801ce698.cur;
 
@@ -614,7 +614,7 @@ void func_800333b4(void)
 
 /* Moves the current effect back by half its velocity. */
 ADDRESS(0x800333f4, 0x7c)
-void func_800333f4(void)
+void effect_step_back_half(void)
 {
     StEffect *e = DAT_801ce698.cur;
 
@@ -627,7 +627,7 @@ void func_800333f4(void)
 
 /*
  * The effect script interpreter: one frame of the
- * current effect, by kind. VS's form of ST.EXE's func_800385b0
+ * current effect, by kind. VS's form of ST.EXE's effect_update
  * (src/st/effect_script.c): the same kinds from 0x30 up, hitting the
  * owner's opponent instead of making ST's attack requests.
  */
@@ -637,7 +637,7 @@ void func_800333f4(void)
         (e)->unk12 = (e)->unk10 * 128
 
 /* The owner's attack hits its opponent. */
-#define HIT(e) func_8002e314((e)->unk4C, (e)->unk4D)
+#define HIT(e) fighter_apply_attack_hit((e)->unk4C, (e)->unk4D)
 
 /* A hit, while the effect has hits left. */
 #define HIT_COUNTED(e, reached)                                                \
@@ -654,7 +654,7 @@ void func_800333f4(void)
     }
 
 /* Spawns an effect of kind `kind` for the current effect's owner. */
-#define SPAWN(e, kind) func_80032404((e)->unk4C, (e)->unk4D, (e)->unk0, kind
+#define SPAWN(e, kind) effect_spawn((e)->unk4C, (e)->unk4D, (e)->unk0, kind
 
 /* The two effects a kind turns into, at its place. */
 #define SPAWN_PAIR(e, first, second)                                           \
@@ -666,13 +666,13 @@ void func_800333f4(void)
  *
  * `unused` stands for 32 bytes of locals that retail's frame has ahead of
  * the first block's and that nothing reads or writes (ST.EXE's
- * func_800385b0 has the same 32); their real declarations are not known.
+ * effect_update has the same 32); their real declarations are not known.
  * The block locals whose addresses are passed on keep their stack slots
  * for the rest of the function (their kinds' pairs sit side by side);
  * only the ring kinds' block gives its slots back.
  */
 ADDRESS(0x800335e8, 0x1ce4)
-void func_800335e8(void)
+void effect_update(void)
 {
     StEffect *e = DAT_801ce698.cur;
     int kind = e->unk1;
@@ -691,14 +691,14 @@ void func_800335e8(void)
         e->unk38.vx += 96;
         e->unk38.vy += 96;
         REACH(e, e->unk38.vx * 896 / 4096);
-        HIT_COUNTED(e, func_8003333c(e->unkC, e->unk18, 32));
+        HIT_COUNTED(e, effect_attack_move(e->unkC, e->unk18, 32));
         break;
     case 0x66:
         e->unk2 = (e->unk10 % 3) | 0x80;
         e->unk38.vx += 96;
         e->unk38.vy += 96;
         REACH(e, e->unk38.vx * 896 / 4096);
-        HIT_COUNTED(e, func_8003333c(e->unkC, e->unk18, 32));
+        HIT_COUNTED(e, effect_attack_move(e->unkC, e->unk18, 32));
         break;
     case 0x7d:
     case 0xa1:
@@ -706,7 +706,7 @@ void func_800335e8(void)
         e->unk38.vx += 96;
         e->unk38.vy += 96;
         REACH(e, e->unk38.vx * 896 / 4096);
-        HIT_COUNTED(e, func_8003333c(e->unkC, e->unk18, 32));
+        HIT_COUNTED(e, effect_attack_move(e->unkC, e->unk18, 32));
         break;
     case 0x31:
     case 0x32:
@@ -751,7 +751,7 @@ void func_800335e8(void)
         e->unk38.vx += 96;
         e->unk38.vy += 96;
         REACH(e, e->unk38.vx * 896 / 4096);
-        HIT_COUNTED(e, func_8003333c(e->unkC, e->unk18, 32));
+        HIT_COUNTED(e, effect_attack_move(e->unkC, e->unk18, 32));
         if (e->unk20.vy > 0)
             e->unk0 = ST_EFFECT_FREE;
         FADE_IN(e);
@@ -792,7 +792,7 @@ void func_800335e8(void)
     case 0xd4:
     case 0xe5:
     case 0xef:
-        func_8003333c(e->unkC, e->unk18, 128);
+        effect_attack_move(e->unkC, e->unk18, 128);
         FADE_IN(e);
         if (e->unk1C->unk0 == ST_EFFECT_FREE)
             e->unk0 = ST_EFFECT_FREE;
@@ -802,14 +802,14 @@ void func_800335e8(void)
     case 0x82:
     case 0x8d:
         e->unk38.vz += 224;
-        HIT_COUNTED(e, func_8003333c(e->unkC, e->unk18, 32));
+        HIT_COUNTED(e, effect_attack_move(e->unkC, e->unk18, 32));
         if (e->unk20.vx < -30000 || e->unk20.vx > 30000 || e->unk20.vz > 30000
             || e->unk20.vz < -30000)
             e->unk0 = ST_EFFECT_FREE;
         FADE_IN(e);
         break;
     case 0x3a:
-        HIT_COUNTED(e, func_8003333c(e->unkC, e->unk18, 128));
+        HIT_COUNTED(e, effect_attack_move(e->unkC, e->unk18, 128));
         if (e->unk10 < 32) {
             e->unk7 = 13;
             e->unk12 = e->unk10 * 128;
@@ -822,7 +822,7 @@ void func_800335e8(void)
     case 0x71:
     case 0x7a:
     case 0x93:
-        if (func_8003333c(e->unkC, e->unk18, 128) || e->unk20.vy >= 0) {
+        if (effect_attack_move(e->unkC, e->unk18, 128) || e->unk20.vy >= 0) {
             for (i = 0; i < 4; i++) {
                 SVECTOR dir;
                 VECTOR pos;
@@ -1039,7 +1039,7 @@ void func_800335e8(void)
         e->unk38.vx += 128;
         e->unk38.vy += 128;
         REACH(e, e->unk38.vx * 896 / 4096);
-        func_8003333c(e->unkC, e->unk18, e->unk50.b[0]);
+        effect_attack_move(e->unkC, e->unk18, e->unk50.b[0]);
         FADE_IN(e);
         e->unk40.vy += 2;
         if (e->unk8 == 0) {
@@ -1069,7 +1069,7 @@ void func_800335e8(void)
         e->unk38.vy += 96;
         e->unk38.vz += 96;
         REACH(e, e->unk38.vx / 4);
-        HIT_ONCE(e, func_8003333c(e->unkC, e->unk18, 256));
+        HIT_ONCE(e, effect_attack_move(e->unkC, e->unk18, 256));
         if (e->unk10 % 5 == 0) {
             SVECTOR dir;
             VECTOR pos;
@@ -1101,7 +1101,7 @@ void func_800335e8(void)
     case 0xd7:
         e->unk38.vx += 96;
         e->unk38.vy += 96;
-        func_8003333c(e->unkC, e->unk18, e->unk50.b[0]);
+        effect_attack_move(e->unkC, e->unk18, e->unk50.b[0]);
         e->unk12 = e->unk10 * 256;
         e->unk40.vy += 2;
         break;
@@ -1111,7 +1111,7 @@ void func_800335e8(void)
         e->unk38.vx += 96;
         e->unk38.vy += 96;
         REACH(e, e->unk38.vx * 896 / 4096);
-        HIT_COUNTED(e, func_8003333c(e->unkC, e->unk18, e->unk50.b[0]));
+        HIT_COUNTED(e, effect_attack_move(e->unkC, e->unk18, e->unk50.b[0]));
         if (e->unk10 % 5 == 0) {
             SVECTOR dir;
             VECTOR pos;
@@ -1130,7 +1130,7 @@ void func_800335e8(void)
     case 0xd5:
         e->unk38.vx += 96;
         e->unk38.vy += 96;
-        func_8003333c(e->unkC, e->unk18, e->unk50.b[0]);
+        effect_attack_move(e->unkC, e->unk18, e->unk50.b[0]);
         e->unk12 = e->unk10 * 256;
         e->unk40.vy -= 16;
         break;
@@ -1142,7 +1142,7 @@ void func_800335e8(void)
         e->unk38.vz += 192;
         REACH(e, e->unk38.vx * 1536 / 4096);
         e->unk30.vy += 128;
-        HIT_COUNTED(e, func_8003333c(e->unkC, e->unk18, 0));
+        HIT_COUNTED(e, effect_attack_move(e->unkC, e->unk18, 0));
         FADE_IN(e);
         break;
     case 0x5d:
@@ -1153,7 +1153,7 @@ void func_800335e8(void)
     case 0x79:
     case 0x80:
     case 0xa6:
-        HIT_ONCE(e, func_8003333c(e->unkC, e->unk18, -256));
+        HIT_ONCE(e, effect_attack_move(e->unkC, e->unk18, -256));
         FADE_IN(e);
         if (e->unk20.vy > 0)
             e->unk0 = ST_EFFECT_FREE;
@@ -1168,7 +1168,7 @@ void func_800335e8(void)
     case 0xa7:
     case 0xa9:
         e->unk2 = (e->unk10 % 3) | 0x80;
-        HIT_ONCE(e, func_8003333c(e->unkC, e->unk18, -256));
+        HIT_ONCE(e, effect_attack_move(e->unkC, e->unk18, -256));
         FADE_IN(e);
         break;
     case 0xe9:
@@ -1229,7 +1229,7 @@ void func_800335e8(void)
  * ST.EXE's src/st/effect_run.c functions.
  */
 ADDRESS(0x800352cc, 0x30)
-void func_800352cc(void)
+void effects_clear(void)
 {
     StEffect *e = DAT_801ce698.slots;
     u16 i;
@@ -1243,7 +1243,7 @@ void func_800352cc(void)
 /* Runs every live effect for one frame through the interpreter, freeing
  * those whose time is up. */
 ADDRESS(0x800352fc, 0xd4)
-void func_800352fc(void)
+void effects_run(void)
 {
     StEffect *e = DAT_801ce698.slots;
 
@@ -1254,7 +1254,7 @@ void func_800352fc(void)
             if (--e->unk10 == -1)
                 e->unk0 = ST_EFFECT_FREE;
             else
-                func_800335e8();
+                effect_update();
         }
         e++;
     }
@@ -1299,7 +1299,7 @@ void func_800352fc(void)
     }
 
 ADDRESS(0x800353d0, 0x798)
-void func_800353d0(u8 *model, VECTOR *pos, SVECTOR *rot, SVECTOR *scale, MATRIX *view,
+void effect_draw_model_part(u8 *model, VECTOR *pos, SVECTOR *rot, SVECTOR *scale, MATRIX *view,
                    u8 part, short light, u8 flags, int z)
 {
     VsScratchPad *sp = VS_SCRATCHPAD;
@@ -1376,7 +1376,7 @@ void func_800353d0(u8 *model, VECTOR *pos, SVECTOR *rot, SVECTOR *scale, MATRIX 
  * world_draw_effects_placements, src/st/objects2.c): kind 0 through the camera, kind 4
  * without a view. */
 ADDRESS(0x80035b68, 0x204)
-void func_80035b68(void)
+void effects_draw(void)
 {
     VsScratchPad *sp = VS_SCRATCHPAD;
     StEffect *o = DAT_801ce698.slots;
@@ -1395,14 +1395,14 @@ void func_80035b68(void)
             sp->near_z = 11;
             sp->far_z = 4103;
             sp->ot = vs_gfx_state.ot_cur - 7;
-            func_800353d0((u8 *)DAT_800633b0.fighter[o->unk4C].unk4B000, &o->unk20, &o->unk30,
+            effect_draw_model_part((u8 *)DAT_800633b0.fighter[o->unk4C].unk4B000, &o->unk20, &o->unk30,
                           &o->unk38, &vs_gfx_state.unk2C998, o->unk2 & 0x7f, o->unk12, o->unk7, 0);
             break;
         case 4:
             sp->near_z = 11;
             sp->far_z = 4103;
             sp->ot = vs_gfx_state.ot_cur - 7;
-            func_800353d0((u8 *)DAT_800633b0.fighter[o->unk4C].unk4B000, &o->unk20, &o->unk30,
+            effect_draw_model_part((u8 *)DAT_800633b0.fighter[o->unk4C].unk4B000, &o->unk20, &o->unk30,
                           &o->unk38, &unit, o->unk2 & 0x7f, o->unk12, o->unk7, 0);
             break;
         case 8:

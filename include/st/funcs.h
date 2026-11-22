@@ -11,24 +11,24 @@
 #include <LIBGTE.H>
 #include <LIBGPU.H>
 
-void func_800385b0(void); /* the effect script interpreter: runs effects.cur for one frame */
-int func_8003beb4(void *request);
-void func_8003c0e0(void);
+void effect_update(void); /* the effect script interpreter: runs effects.cur for one frame */
+int player_distance_in_reach(void *request);
+void player_reload_equipment(void);
 void player_update_status(int apply);
-void func_8003cedc(void);
+void player_recalc_stats(void);
 void player_hit(u16 *damage, u16 scale, u16 effect, long *from);
-void func_8003e734(VECTOR *a, SVECTOR *b);
-void func_8003eaf8(void);
-int func_8003eb34(VECTOR *pos, int yaw, int range, int arg3);
-void func_8003ec5c(void *data, DVECTOR *a, DVECTOR *b, int arg3);
-void func_8003ee38(u16 id, u8 slot);
-void func_8003f12c(u16 id, u8 slot, u8 reload);
-void func_80042c10(void); /* src/st/player.c */
-void func_80042d74(void);
-void func_80044674(void);
-void func_80044ee8(void);
-void func_800456f8(void);
-void func_80045ffc(void);
+void player_get_camera(VECTOR *a, SVECTOR *b);
+void player_reset_motion(void);
+int player_distance_in_arc(VECTOR *pos, int yaw, int range, int arg3);
+void tim_load_images_at(void *data, DVECTOR *a, DVECTOR *b, int arg3);
+void player_load_magic(u16 id, u8 slot);
+void player_load_equipment_model(u16 id, u8 slot, u8 reload);
+void player_enter_normal_state(void); /* src/st/player.c */
+void player_update(void);
+void game_load_common_data(void);
+void area_load_current_blocking(void);
+void area_load_update(void);
+void image_stream_update(void);
 int func_800496c8(int angle, int to, int step);
 void func_800498cc(MATRIX *m, MATRIX *out);
 void func_80049cd4(short angle, MATRIX *out);
@@ -94,7 +94,7 @@ void card_screen_open(int arg0, int arg1);
 void card_screen_close(void);
 int card_screen_run(int arg0);
 void menu_save_prompt_run(void);
-void func_80042cfc(void);
+void anim_free_all_for_menu(void);
 void func_80057cc8(void);
 void func_80057d58(void);
 void func_80057d7c(void);

@@ -48,7 +48,7 @@ void mesh_draw_gt3_nccs(int count, MeshFaceGT3 *face, u_long *ot);
 void mesh_draw_gt4_nccs(int count, MeshFaceGT4 *face, u_long *ot);
 
 /* src/vs/spark_8002d738.c */
-void func_8002d738(int n);
+void sparks_start_burst(int n);
 
 /* src/vs/cd_8002e5e4.c */
 void loading_screen_step(void);                 /* ST loading_screen_step */
@@ -119,13 +119,13 @@ void fighter_set_semi_trans(int id, int mode);                    /* src/vs/main
 void debug_pan_display(void);                                /* src/vs/main.c */
 void fighters_play_anim_sounds(void);                                /* src/vs/main.c */
 void sparks_clear_all(void);                                /* src/vs/texanim_8002d710.c */
-int func_8002dcd8(void);                                 /* src/vs/fighter_8002dcd8.c */
-int func_8002e510(int id);                               /* src/vs/fighter_8002e114.c */
-void func_800352cc(void);                                /* src/vs/effect_80032404.c */
-void func_800352fc(void);                                /* src/vs/effect_80032404.c */
-void func_80031478(int id);                              /* not reconstructed */
-int func_8003333c(int arg0, u_long height, int spin);    /* src/vs/effect_80032404.c */
-void func_8002e314(u8 id, u8 attack);                    /* src/vs/fighter_8002e114.c */
+int fighters_push_apart(void);                                 /* src/vs/fighter_8002dcd8.c */
+int fighter_is_out_of_bounds(int id);                               /* src/vs/fighter_8002e114.c */
+void effects_clear(void);                                /* src/vs/effect_80032404.c */
+void effects_run(void);                                /* src/vs/effect_80032404.c */
+void fighter_update(int id);                              /* not reconstructed */
+int effect_attack_move(int arg0, u_long height, int spin);    /* src/vs/effect_80032404.c */
+void fighter_apply_attack_hit(u8 id, u8 attack);                    /* src/vs/fighter_8002e114.c */
 void anim_set_node_vertex(int id, int node, int index, VECTOR *out); /* src/vs/model_8002345c.c */
 int anim_get_vertex(int id, int part, int frame, int index, SVECTOR *out); /* src/vs/anim_80028d94.c */
 

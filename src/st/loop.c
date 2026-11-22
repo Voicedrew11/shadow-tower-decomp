@@ -57,7 +57,7 @@ void game_loop(void)
     func_8004afdc();
     func_80052ca4();
     effects_clear();
-    func_80044674();
+    game_load_common_data();
     func_800559bc();
     lighting_load_defaults();
     fade_reset();
@@ -74,7 +74,7 @@ void game_loop(void)
             DAT_801cd180.unk10 = 1;
             card_screen_close();
             loading_screen_show();
-            func_8003c0e0();
+            player_reload_equipment();
         } else {
             func_80057a3c();
             DAT_801cd180.unk10 = 1;
@@ -86,8 +86,8 @@ void game_loop(void)
         game_load_start_file();
     }
     lighting_start();
-    func_80044ee8();
-    func_8003eaf8();
+    area_load_current_blocking();
+    player_reset_motion();
     heap_init(DAT_8009c888, 0x56400);
     loading_screen_end();
     func_80057a28();
@@ -99,17 +99,17 @@ void game_loop(void)
 
         frame_rate_update();
         fade_reset();
-        func_80042d74();
+        player_update();
         func_80050768();
         func_8004e324();
         func_80053aa4();
         effects_run();
         viewer.unk21C = 0;
         func_8005735c();
-        func_800456f8();
-        func_8003e734(&a, &b);
+        area_load_update();
+        player_get_camera(&a, &b);
         func_80058288(&a, &b);
-        func_80045ffc();
+        image_stream_update();
         func_80058620();
         world_render_frame(&a, &b);
         if (DAT_800881a4 == 0)

@@ -31,7 +31,7 @@ int fdat_801edc54;
 
 void func_800500ac(int arg0, int arg1, int arg2, int arg3);
 void func_8004e324(void);
-void func_80042c10(void);
+void player_enter_normal_state(void);
 
 /*
  * The gate scene of func_801ed604's event: fades out, puts the viewer at
@@ -94,6 +94,6 @@ void func_801ed9cc(int gate)
     vis_table_a.unk6138 = e;
     vis_table_a.unk6134 = r;
     fdat_801ed4a0();
-    func_80042c10();
+    player_enter_normal_state();
     fdat_801edc50 = 0;
 }

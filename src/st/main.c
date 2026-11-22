@@ -169,7 +169,7 @@ void game_load_start_file(void)
             vis_table_c.unk0070[id / 32] |= 1 << (id % 32);
         }
     }
-    func_8003cedc();
+    player_recalc_stats();
     if (x != 0)
         viewer.unk0 = viewer.unk2 = x;
     if (y != 0)
@@ -192,12 +192,12 @@ void game_load_start_file(void)
         row[0][4] &= ~0x4000;
         row[-1][4] &= ~0x4000;
     }
-    func_8003f12c(viewer.unk38[3], 0, 0);
-    func_8003f12c(viewer.unk38[16], 1, 0);
-    func_8003f12c(viewer.unk38[4], 2, 0);
-    func_8003f12c(viewer.unk38[17], 3, 0);
-    func_8003ee38(viewer.unk38[6], 0);
-    func_8003ee38(viewer.unk38[12], 1);
+    player_load_equipment_model(viewer.unk38[3], 0, 0);
+    player_load_equipment_model(viewer.unk38[16], 1, 0);
+    player_load_equipment_model(viewer.unk38[4], 2, 0);
+    player_load_equipment_model(viewer.unk38[17], 3, 0);
+    player_load_magic(viewer.unk38[6], 0);
+    player_load_magic(viewer.unk38[12], 1);
 }
 
 /*

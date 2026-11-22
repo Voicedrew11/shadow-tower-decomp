@@ -11,7 +11,7 @@
 /* Moves the two fighters apart along the line between them until their hit
  * radii no longer overlap; returns 1 when they did. */
 ADDRESS(0x8002dcd8, 0x1ec)
-int func_8002dcd8(void)
+int fighters_push_apart(void)
 {
     VsFighter *a = &DAT_800633b0.fighter[0];
     VsFighter *b = &DAT_800633b0.fighter[1];

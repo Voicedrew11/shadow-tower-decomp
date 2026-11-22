@@ -298,12 +298,12 @@ typedef struct {
     u32 unk240[48][8];
     u32 unk840[48][8];
     u32 unkE40[48][8];
-    Flags801cba08 unk1440; /* 0x1440: flag bits; 13 and 17 gate func_80044404's images */
+    Flags801cba08 unk1440; /* 0x1440: flag bits; 13 and 17 gate area_reload_images's images */
     Flags801cba08 unk1444;
     u8 unk1448[48];      /* 0x1448: per XA stream file, the next channel to play */
     u8 unk1478[48];
     u32 unk14A8[0x5c];   /* 0x14a8: one bit per map id (world_draw_creatures) */
-    /* 0x1618: per XA stream file, its position (func_8005408c); func_80044674
+    /* 0x1618: per XA stream file, its position (func_8005408c); game_load_common_data
      * searches the first 40 */
     CdlLOC unk1618[48];
     s32 unk16D8;         /* 0x16d8: the examine/item-use result */

@@ -55,7 +55,7 @@ void player_kill(int unused)
 }
 
 ADDRESS(0x8003bdb0, 0x60)
-void func_8003bdb0(void)
+void player_check_fall_death(void)
 {
     if (viewer.unk2D4 >= 1152 && vis_lists.unk30 >= 1600) {
         player_kill(0);
@@ -64,7 +64,7 @@ void func_8003bdb0(void)
 }
 
 ADDRESS(0x8003be10, 0xa4)
-void func_8003be10(void)
+void player_update_submersion(void)
 {
     if (vis_lists.unk4C != 0x80000) {
         if (vis_lists.unk4C < viewer.position.vy) {
@@ -87,7 +87,7 @@ void func_8003be10(void)
 
 /* The viewer's distance to `t` when it is within t's reach, else -1. */
 ADDRESS(0x8003beb4, 0x14c)
-int func_8003beb4(void *request)
+int player_distance_in_reach(void *request)
 {
     PlayerTarget *t = request;
     int dx;
@@ -121,7 +121,7 @@ int func_8003c000(int x, int y, int z, int range, int kind)
 }
 
 ADDRESS(0x8003c054, 0x8c)
-void func_8003c054(void)
+void player_reset_state(void)
 {
     viewer.unk2CE = 0;
     viewer.unk2D0 = 0;
@@ -148,16 +148,16 @@ void func_8003c054(void)
 }
 
 ADDRESS(0x8003c0e0, 0x9c)
-void func_8003c0e0(void)
+void player_reload_equipment(void)
 {
-    func_8003f12c(viewer.unk38[3], 0, 0);
-    func_8003f12c(viewer.unk38[16], 1, 0);
-    func_8003f12c(viewer.unk38[4], 2, 0);
-    func_8003f12c(viewer.unk38[17], 3, 0);
-    func_8003ee38(viewer.unk38[6], 0);
-    func_8003ee38(viewer.unk38[12], 1);
-    func_8003c054();
-    func_8003cedc();
+    player_load_equipment_model(viewer.unk38[3], 0, 0);
+    player_load_equipment_model(viewer.unk38[16], 1, 0);
+    player_load_equipment_model(viewer.unk38[4], 2, 0);
+    player_load_equipment_model(viewer.unk38[17], 3, 0);
+    player_load_magic(viewer.unk38[6], 0);
+    player_load_magic(viewer.unk38[12], 1);
+    player_reset_state();
+    player_recalc_stats();
     lighting.unk7 = 255;
 }
 
@@ -168,7 +168,7 @@ void func_8003c0e0(void)
  * the new values are stored only when `apply` is set.
  */
 ADDRESS(0x8003c17c, 0xd0)
-short func_8003c17c(short *level, short *peak, int ramp, int max, int apply)
+short player_step_status_timer(short *level, short *peak, int ramp, int max, int apply)
 {
     short p;
     short l;
@@ -233,14 +233,14 @@ void player_update_status(int apply)
         fade_add_color(60, 60, 0, level, 1);
     }
 
-    level = func_8003c17c(&viewer.unk190[0][0], &viewer.unk190[0][1], 20, 4096, apply);
+    level = player_step_status_timer(&viewer.unk190[0][0], &viewer.unk190[0][1], 20, 4096, apply);
     if (level != -1) {
         fade_add_color(0, 40, 0, level, 1);
         if (viewer.timers.words[0] == 0) {
             viewer.unk2C &= ~7;
         }
     }
-    level = func_8003c17c(&viewer.unk190[1][0], &viewer.unk190[1][1], 20, 4096, apply);
+    level = player_step_status_timer(&viewer.unk190[1][0], &viewer.unk190[1][1], 20, 4096, apply);
     if (level != -1) {
         if ((viewer.unk190[1][0] & 3) == 3) {
             level = 4096;
@@ -248,7 +248,7 @@ void player_update_status(int apply)
             level -= 512;
         }
         fade_add_color(40, 40, 0, level, 1);
-        func_8003ead0();
+        player_stop_motion();
         vis_table_b.unk71A4 = vis_table_b.unk71A6 = vis_table_b.unk71A8 = 0;
         vis_lists.unk47CE = vis_lists.unk47D0 = vis_lists.unk47D2 = 0;
         viewer.unk1CC = viewer.unk1CE = viewer.unk1D0 = vis_table_a.unk6160 = vis_table_a.unk6162 =
@@ -257,7 +257,7 @@ void player_update_status(int apply)
             viewer.unk2C &= ~0x18;
         }
     }
-    level = func_8003c17c(&viewer.unk190[2][0], &viewer.unk190[2][1], 0, 4096, apply);
+    level = player_step_status_timer(&viewer.unk190[2][0], &viewer.unk190[2][1], 0, 4096, apply);
     if (level != -1) {
         fade_add_color(20, 20, 20, level, 2);
         if (viewer.timers.words[2] == 0) {
@@ -265,7 +265,7 @@ void player_update_status(int apply)
             lighting.unk4 |= 4;
         }
     }
-    level = func_8003c17c(&viewer.unk190[3][0], &viewer.unk190[3][1], 20, 4096, apply);
+    level = player_step_status_timer(&viewer.unk190[3][0], &viewer.unk190[3][1], 20, 4096, apply);
     if (level != -1) {
         if (viewer.timers.words[3] == 0) {
             viewer.unk2C &= ~0x80;
@@ -273,7 +273,7 @@ void player_update_status(int apply)
             PLAYER_CLAMP_HP();
         }
     }
-    level = func_8003c17c(&viewer.unk190[4][0], &viewer.unk190[4][1], 20, 4096, apply);
+    level = player_step_status_timer(&viewer.unk190[4][0], &viewer.unk190[4][1], 20, 4096, apply);
     if (level != -1) {
         fade_add_color(40, 0, 20, level, 1);
         if (viewer.timers.words[4] == 0) {
@@ -288,7 +288,7 @@ void player_update_status(int apply)
     if (viewer.unk2F0) {
         fade_add_color(40, 40, 0, 4096, 1);
     }
-    level = func_8003c17c(&viewer.unk190[5][0], &viewer.unk190[5][1], 0, 4096, apply);
+    level = player_step_status_timer(&viewer.unk190[5][0], &viewer.unk190[5][1], 0, 4096, apply);
     if (level != -1) {
         lighting.unk4 |= 0x10;
         lighting.unk3 |= 2;
@@ -297,31 +297,31 @@ void player_update_status(int apply)
             viewer.unk2C &= ~0x10000;
         }
     }
-    level = func_8003c17c(&viewer.unk190[6][0], &viewer.unk190[6][1], 0, 4096, apply);
+    level = player_step_status_timer(&viewer.unk190[6][0], &viewer.unk190[6][1], 0, 4096, apply);
     if (level != -1) {
         if (viewer.timers.words[6] == 0) {
             viewer.unk2C &= ~0x40000;
         }
     }
-    level = func_8003c17c(&viewer.unk190[7][0], &viewer.unk190[7][1], 0, 4096, apply);
+    level = player_step_status_timer(&viewer.unk190[7][0], &viewer.unk190[7][1], 0, 4096, apply);
     if (level != -1) {
         if (viewer.timers.words[7] == 0) {
             viewer.unk2C &= ~0x80000;
         }
     }
-    level = func_8003c17c(&viewer.unk190[8][0], &viewer.unk190[8][1], 0, 4096, apply);
+    level = player_step_status_timer(&viewer.unk190[8][0], &viewer.unk190[8][1], 0, 4096, apply);
     if (level != -1) {
         if (viewer.timers.words[8] == 0) {
             viewer.unk2C &= ~0x100000;
         }
     }
-    level = func_8003c17c(&viewer.unk190[9][0], &viewer.unk190[9][1], 0, 4096, apply);
+    level = player_step_status_timer(&viewer.unk190[9][0], &viewer.unk190[9][1], 0, 4096, apply);
     if (level != -1) {
         if (viewer.timers.words[9] == 0) {
             viewer.unk2C &= ~0x200000;
         }
     }
-    level = func_8003c17c(&viewer.unk190[10][0], &viewer.unk190[10][1], 0, 4096, apply);
+    level = player_step_status_timer(&viewer.unk190[10][0], &viewer.unk190[10][1], 0, 4096, apply);
     if (level != -1) {
         lighting.unk9 = 1;
         lighting.unk4 |= 0x20;
@@ -330,13 +330,13 @@ void player_update_status(int apply)
             viewer.unk2C &= ~0x400000;
         }
     }
-    level = func_8003c17c(&viewer.unk190[11][0], &viewer.unk190[11][1], 0, 4096, apply);
+    level = player_step_status_timer(&viewer.unk190[11][0], &viewer.unk190[11][1], 0, 4096, apply);
     if (level != -1) {
         if (viewer.timers.words[11] == 0) {
             viewer.unk2C &= ~0x800000;
         }
     }
-    level = func_8003c17c(&viewer.unk190[12][0], &viewer.unk190[12][1], 0, 4096, apply);
+    level = player_step_status_timer(&viewer.unk190[12][0], &viewer.unk190[12][1], 0, 4096, apply);
     if (level != -1) {
         if (viewer.timers.words[12] == 0) {
             viewer.unk2C &= ~0x800;
@@ -345,38 +345,38 @@ void player_update_status(int apply)
 }
 
 ADDRESS(0x8003c95c, 0x188)
-void func_8003c95c(int r, int g, int b, int arg3, int arg4, int arg5)
+void area_load_set_blocking(int r, int g, int b, int arg3, int arg4, int arg5)
 {
     cd_wait_idle();
     do {
         cd_wait_frame();
-        func_800456f8();
+        area_load_update();
     } while (area_state.unk0 != 0);
     area_state.unk4 = 99;
     area_state.unk5 = 99;
     area_state.unk6 = 99;
     area_state.unk7 = 99;
     area_state.unk8 = 99;
-    func_80045044(r, g, b, 255, 255, 127, 127, 127, 0, 0, 0);
+    area_request_load(r, g, b, 255, 255, 127, 127, 127, 0, 0, 0);
     do {
         cd_wait_frame();
-        func_800456f8();
+        area_load_update();
     } while (area_state.unk0 != 0);
     cd_wait_idle();
     VSync(2);
-    func_8003eaf8();
+    player_reset_motion();
     lighting_load_defaults();
     fade_reset();
     lighting_build_matrices();
     func_800500ac(130, 4096, 4096, 0);
     cd_wait_idle();
     area_state.unk18 = cd_state.unk4;
-    func_80045044(255, 255, 255, arg3, arg4, 127, 127, 127, 0, 0, 0);
+    area_request_load(255, 255, 255, arg3, arg4, 127, 127, 127, 0, 0, 0);
     lighting_clear_requests();
 }
 
 ADDRESS(0x8003cae4, 0xa4)
-void func_8003cae4(void)
+void player_reset_stats(void)
 {
     int i;
 
@@ -545,7 +545,7 @@ void player_equipment_bonuses(void)
 }
 
 ADDRESS(0x8003cedc, 0x4c)
-void func_8003cedc(void)
+void player_recalc_stats(void)
 {
     player_equipment_bonuses();
     player_compute_derived_stats(0);
@@ -582,7 +582,7 @@ void player_add_mp(int delta)
 }
 
 ADDRESS(0x8003cfdc, 0x54)
-void func_8003cfdc(int id)
+void player_check_item_durability(int id)
 {
     int v;
 
@@ -597,7 +597,7 @@ void func_8003cfdc(int id)
 /* Clears the durability-warning flag, then sets it again if any worn item
  * (weapons and armour slots) is nearly broken. */
 ADDRESS(0x8003d030, 0xd4)
-void func_8003d030(void)
+void player_update_durability_warning(void)
 {
     u16 *slots[10] = {
         &viewer.unk38[0], &viewer.unk38[2],  &viewer.unk38[3],  &viewer.unk38[8],
@@ -609,7 +609,7 @@ void func_8003d030(void)
     viewer.unk2C &= ~0x1000000;
     for (; *p; p++) {
         if (**p != 0xffff) {
-            func_8003cfdc(**p);
+            player_check_item_durability(**p);
         }
     }
 }
@@ -638,15 +638,15 @@ void player_wear_item(int amount, u16 *slot)
         }
         if (slot == &viewer.unk38[3]) {
             if (viewer.unk148[0] >= 31 && viewer.unk148[0] <= 34) {
-                func_8003f12c(0xffff, 1, 0);
+                player_load_equipment_model(0xffff, 1, 0);
             }
-            func_8003f12c(0xffff, 0, 0);
+            player_load_equipment_model(0xffff, 0, 0);
         } else if (slot == &viewer.unk38[16]) {
-            func_8003f12c(0xffff, 1, 0);
+            player_load_equipment_model(0xffff, 1, 0);
         } else if (slot == &viewer.unk38[4]) {
-            func_8003f12c(0xffff, 2, 0);
+            player_load_equipment_model(0xffff, 2, 0);
         } else if (slot == &viewer.unk38[17]) {
-            func_8003f12c(0xffff, 3, 0);
+            player_load_equipment_model(0xffff, 3, 0);
         }
         player_equipment_bonuses();
         player_compute_derived_stats(0);
@@ -654,7 +654,7 @@ void player_wear_item(int amount, u16 *slot)
     } else {
         vis_table_c.unk0118[*slot].unk28 = left;
     }
-    func_8003d030();
+    player_update_durability_warning();
 }
 
 /* Wears the shield (slot 16) while it is raised, and the armour. */
@@ -900,7 +900,7 @@ void player_take_damage(int damage, int flags, long *from)
             break;
         }
         dir.vy = 0;
-        func_80042c44(&push, &dir, time, damage);
+        player_enter_hurt_state(&push, &dir, time, damage);
     }
 }
 
@@ -1123,7 +1123,7 @@ void player_hit(u16 *damage, u16 scale, u16 effect, long *from)
 /* Hits the viewer with `damage` when it is within `range` of `pos`, scaled
  * down with the distance. */
 ADDRESS(0x8003e5e8, 0x14c)
-void func_8003e5e8(u16 *damage, u16 effect, long *pos, int min, int range, int kind)
+void player_hit_in_radius(u16 *damage, u16 effect, long *pos, int min, int range, int kind)
 {
     int d;
 
@@ -1136,7 +1136,7 @@ void func_8003e5e8(u16 *damage, u16 effect, long *pos, int min, int range, int k
             d = func_8004a67c((VECTOR *)pos, range, (VECTOR *)&viewer.position.vx, 256, 1000);
         }
     } else {
-        d = func_8003ebfc(pos[0], pos[1], pos[2], range, kind);
+        d = player_distance_within(pos[0], pos[1], pos[2], range, kind);
         if (d == -1) {
             d = -9999999;
         }
@@ -1148,7 +1148,7 @@ void func_8003e5e8(u16 *damage, u16 effect, long *pos, int min, int range, int k
 
 /* The camera position and angles. */
 ADDRESS(0x8003e734, 0x60)
-void func_8003e734(VECTOR *pos, SVECTOR *rot)
+void player_get_camera(VECTOR *pos, SVECTOR *rot)
 {
     pos->vx = viewer.position.vx;
     pos->vz = viewer.position.vz;
@@ -1160,7 +1160,7 @@ void func_8003e734(VECTOR *pos, SVECTOR *rot)
 
 /* Clears the status timers and restores the hit and magic points. */
 ADDRESS(0x8003e794, 0xac)
-void func_8003e794(void)
+void player_recover_all(void)
 {
     viewer.unk190[0][0] = viewer.unk190[0][1] = viewer.unk190[1][0] = viewer.unk190[1][1] =
         viewer.unk190[2][0] = viewer.unk190[2][1] = viewer.unk190[3][0] = viewer.unk190[3][1] =
@@ -1175,11 +1175,11 @@ void func_8003e794(void)
     viewer.unk2 = viewer.unk18A = viewer.unk0;
     viewer.unk6 = viewer.unk18C = viewer.unk4;
     viewer.unk2C = 0;
-    func_8003c054();
+    player_reset_state();
 }
 
 ADDRESS(0x8003e840, 0x34)
-void func_8003e840(void)
+void hud_clear_damage_numbers(void)
 {
     int i;
 
@@ -1191,9 +1191,9 @@ void func_8003e840(void)
 
 /* Resets the player for a new game. */
 ADDRESS(0x8003e874, 0x1ac)
-void func_8003e874(void)
+void player_reset_new_game(void)
 {
-    func_8003cae4();
+    player_reset_stats();
     viewer.unk244 = 2048;
     viewer.unk34 = 0;
     viewer.unk2D6 = viewer.unk2D8 = viewer.unk2DA = viewer.unk2DC = 0;
@@ -1203,25 +1203,25 @@ void func_8003e874(void)
     viewer.unk21E = 0;
     viewer.unk219 = viewer.unk21A = viewer.unk21B = 0;
     viewer.unk118[0] = viewer.unk118[1] = 0;
-    func_8003ee38(0xffff, 0);
-    func_8003ee38(0xffff, 1);
+    player_load_magic(0xffff, 0);
+    player_load_magic(0xffff, 1);
     viewer.unkE8[0] = viewer.unkE8[1] = viewer.unkE8[2] = viewer.unkE8[3] = 0;
-    func_8003f12c(0xffff, 0, 0);
-    func_8003f12c(0xffff, 1, 0);
-    func_8003f12c(0xffff, 2, 0);
-    func_8003f12c(0xffff, 3, 0);
+    player_load_equipment_model(0xffff, 0, 0);
+    player_load_equipment_model(0xffff, 1, 0);
+    player_load_equipment_model(0xffff, 2, 0);
+    player_load_equipment_model(0xffff, 3, 0);
     viewer.unk1D4[0] = 24;
     viewer.unk1D4[1] = 25;
     viewer.unk1D4[2] = 26;
     viewer.unk1D4[3] = 27;
     viewer.unk38[3] = 0;
-    func_8003f12c(0, 0, 0);
+    player_load_equipment_model(0, 0, 0);
     func_80055990();
     viewer.unk28 = 0;
     viewer.unk33 = 0;
     viewer.unk34 = 0;
     viewer.unk30 = 0;
-    func_8003cedc();
+    player_recalc_stats();
     viewer.unk278.vx = 0;
     viewer.unk278.vy = 3072;
     viewer.unk278.vz = 0;
@@ -1229,7 +1229,7 @@ void func_8003e874(void)
     viewer.position.vy = 0x405c0;
     viewer.position.vz = 0x3f000;
     viewer.unk1CC = viewer.unk1CE = viewer.unk1D0 = 0;
-    func_8003e794();
+    player_recover_all();
     equip_load_item_slot_pictures();
     viewer.unk22D = 61;
     viewer.unk22E = 64;
@@ -1239,11 +1239,11 @@ void func_8003e874(void)
     viewer.unk232 = 1472;
     viewer.unk234 = 0;
     viewer.unk236 = 3072;
-    func_8003e840();
+    hud_clear_damage_numbers();
 }
 
 ADDRESS(0x8003ea20, 0xb0)
-void func_8003ea20(void)
+void player_init(void)
 {
     viewer.unk120[0] = DAT_80190f28[0];
     viewer.unk120[1] = DAT_80190f28[1];
@@ -1251,7 +1251,7 @@ void func_8003ea20(void)
     viewer.unkF8[1] = DAT_80199220[1];
     viewer.unkF8[2] = DAT_80199220[2];
     viewer.unkF8[3] = DAT_80199220[3];
-    func_8003e874();
+    player_reset_new_game();
     DAT_801cd120.unk1 = 63;
     DAT_801cd120.unk0 = 63;
     DAT_801cd120.unk3 = 1;
@@ -1265,7 +1265,7 @@ void func_8003ea20(void)
 }
 
 ADDRESS(0x8003ead0, 0x28)
-void func_8003ead0(void)
+void player_stop_motion(void)
 {
     viewer.unk2E4 = 0;
     viewer.unk2E8 = 0;
@@ -1276,25 +1276,25 @@ void func_8003ead0(void)
 }
 
 ADDRESS(0x8003eaf8, 0x3c)
-void func_8003eaf8(void)
+void player_reset_motion(void)
 {
     viewer.unk23C = 0;
     viewer.unk21C = 1;
     viewer.unk239 = 0;
     viewer.unk2D4 = 0;
     viewer.unk218 = 0;
-    func_8003ead0();
+    player_stop_motion();
 }
 
-/* func_8003ebfc's distance to `pos` (height ignored) when the viewer is
+/* player_distance_within's distance to `pos` (height ignored) when the viewer is
  * within `limit` of facing `angle`, else -1. */
 ADDRESS(0x8003eb34, 0xc8)
-int func_8003eb34(VECTOR *pos, int angle, int range, int limit)
+int player_distance_in_arc(VECTOR *pos, int angle, int range, int limit)
 {
     int d;
     short a;
 
-    d = func_8003ebfc(pos->vx, 0xffff, pos->vz, range, 0);
+    d = player_distance_within(pos->vx, 0xffff, pos->vz, range, 0);
     if (d != -1) {
         a = (func_8004a1b4(viewer.position.vx - pos->vx, viewer.position.vz - pos->vz) - angle) & 0xfff;
         if (a > 2048) {
@@ -1308,7 +1308,7 @@ int func_8003eb34(VECTOR *pos, int angle, int range, int limit)
 }
 
 ADDRESS(0x8003ebfc, 0x50)
-int func_8003ebfc(int x, int y, int z, int range, int kind)
+int player_distance_within(int x, int y, int z, int range, int kind)
 {
     return func_8004a580((VECTOR *)&viewer.position.vx, x, y, z, range, 1000, kind);
 }
@@ -1325,7 +1325,7 @@ void func_8003ec4c(volatile u8 *p)
  * TIM's own position unless `absolute`.
  */
 ADDRESS(0x8003ec5c, 0x1dc)
-void func_8003ec5c(void *data, DVECTOR *pix, DVECTOR *clut, int absolute)
+void tim_load_images_at(void *data, DVECTOR *pix, DVECTOR *clut, int absolute)
 {
     typedef struct {
         u_long byte_count;
@@ -1413,7 +1413,7 @@ next:
 /* Loads item `id`'s parts and textures into item slot `slot` (0xffff:
  * empty), freeing the slot's old effects. */
 ADDRESS(0x8003ee38, 0x2f4)
-void func_8003ee38(u16 id, u8 slot)
+void player_load_magic(u16 id, u8 slot)
 {
     u8 item = 255;
     DVECTOR pix[2] = {{0, 0}, {64, 0}};
@@ -1466,7 +1466,7 @@ void func_8003ee38(u16 id, u8 slot)
             part++;
         }
         cd_read_member(1, item * 4 + 741, DAT_80088c88);
-        func_8003ec5c(DAT_80088c88, &pix[slot], &clut[slot], 0);
+        tim_load_images_at(DAT_80088c88, &pix[slot], &clut[slot], 0);
         DrawSync(0);
         func_80058a0c(1, item * 4 + 742, slot + 6);
     }
@@ -1482,7 +1482,7 @@ void func_8003ee38(u16 id, u8 slot)
 /* Loads equipment `id`'s model and textures into model slot `slot` (0xffff:
  * empty); a two-handed model (31..34) also fills the paired slot. */
 ADDRESS(0x8003f12c, 0x3c0)
-void func_8003f12c(u16 id, u8 slot, u8 reload)
+void player_load_equipment_model(u16 id, u8 slot, u8 reload)
 {
     DVECTOR pix[4] = {{0, 0}, {64, 0}, {0, 128}, {64, 128}};
     DVECTOR clut[4] = {{0, 0}, {0, 2}, {0, 4}, {0, 6}};
@@ -1508,7 +1508,7 @@ void func_8003f12c(u16 id, u8 slot, u8 reload)
     viewer.unk180 = 0;
     if (model != 255 && (cur = viewer.unk148[slot]) == model && reload) {
         cd_read_member(1, cur * 4 + 485, DAT_80088c88);
-        func_8003ec5c(DAT_80088c88, &pix[slot], &clut[slot], 0);
+        tim_load_images_at(DAT_80088c88, &pix[slot], &clut[slot], 0);
         DrawSync(0);
     }
     viewer.unk148[slot] = model;
@@ -1532,7 +1532,7 @@ void func_8003f12c(u16 id, u8 slot, u8 reload)
             model_offset_textures((Model *)sp->model, &pix[slot], &clut[slot], 1);
         }
         cd_read_member(1, model * 4 + 485, DAT_80088c88);
-        func_8003ec5c(DAT_80088c88, &pix[slot], &clut[slot], 0);
+        tim_load_images_at(DAT_80088c88, &pix[slot], &clut[slot], 0);
         DrawSync(0);
         func_80058a0c(1, model * 4 + 486, viewer.unk1D4[slot] - 22);
     }
@@ -1551,7 +1551,7 @@ void func_8003f12c(u16 id, u8 slot, u8 reload)
 
 /* Starts model slot `slot`'s action animation when it is idle. */
 ADDRESS(0x8003f4ec, 0x184)
-void func_8003f4ec(u8 value, u8 slot)
+void player_start_hand_action(u8 value, u8 slot)
 {
     if (slot == 0) {
         if (viewer.unk130.halves[0] != -1) {
@@ -1597,7 +1597,7 @@ void func_8003f4ec(u8 value, u8 slot)
 
 /* Starts item slot `slot`'s use when both model slots are idle. */
 ADDRESS(0x8003f670, 0x94)
-void func_8003f670(u8 unused, u8 slot)
+void player_start_cast(u8 unused, u8 slot)
 {
     Viewer *v;
 
@@ -1617,7 +1617,7 @@ void func_8003f670(u8 unused, u8 slot)
  * viewer's facing when `rot` is null).
  */
 ADDRESS(0x8003f704, 0x20c)
-int func_8003f704(int length, VECTOR *pos, SVECTOR *dir, SVECTOR *rot, int slot)
+int player_get_launch_vector(int length, VECTOR *pos, SVECTOR *dir, SVECTOR *rot, int slot)
 {
     if (pos) {
         gte_SetRotMatrix(&viewer.unk298);
@@ -1662,7 +1662,7 @@ int func_8003f704(int length, VECTOR *pos, SVECTOR *dir, SVECTOR *rot, int slot)
  * `kind`, so kind lives in its home slot: retail reads its low byte back
  * (lbu 128(sp)) for each effect request. */
 ADDRESS(0x8003f910, 0x714)
-void func_8003f910(int kind, int slot, ...)
+void player_fire_magic_shot(int kind, int slot, ...)
 {
     VECTOR pos;
     VECTOR pos2;
@@ -1692,8 +1692,8 @@ void func_8003f910(int kind, int slot, ...)
         rot.vx = viewer.unk270.vx;
         rot.vy = viewer.unk270.vy;
         rot.vz = viewer.unk270.vz;
-        func_8003f704(700, &pos, &dir, &rot, slot);
-        func_80036484(10, side | 0x42, kind, &pos, &dir, speed, &viewer.unk268);
+        player_get_launch_vector(700, &pos, &dir, &rot, slot);
+        effect_spawn(10, side | 0x42, kind, &pos, &dir, speed, &viewer.unk268);
         break;
     case 7:
         i = 2;
@@ -1702,8 +1702,8 @@ void func_8003f910(int kind, int slot, ...)
             aim.vx = viewer.unk270.vx - 512;
             aim.vy = viewer.unk270.vy + length;
             aim.vz = viewer.unk270.vz;
-            func_8003f704(700, &pos, &dir, &aim, slot);
-            func_80036484(10, side | 0x42, kind, &pos, &dir, 1024, &viewer.unk268);
+            player_get_launch_vector(700, &pos, &dir, &aim, slot);
+            effect_spawn(10, side | 0x42, kind, &pos, &dir, 1024, &viewer.unk268);
             viewer.unk160[slot].vx += 1024;
         }
         break;
@@ -1755,11 +1755,11 @@ void func_8003f910(int kind, int slot, ...)
         rot.vx = viewer.unk270.vx;
         rot.vy = viewer.unk270.vy + turn;
         rot.vz = viewer.unk270.vz;
-        func_8003f704(length, &pos, &dir, &rot, slot);
+        player_get_launch_vector(length, &pos, &dir, &rot, slot);
         rot.vx = viewer.unk270.vx;
         rot.vy = -viewer.unk270.vy;
         rot.vz = -viewer.unk270.vz;
-        func_80036484(10, side | 0x42, kind, &pos, &dir, speed, &rot, count);
+        effect_spawn(10, side | 0x42, kind, &pos, &dir, speed, &rot, count);
         break;
     case 44:
     case 45:
@@ -1821,14 +1821,14 @@ void func_8003f910(int kind, int slot, ...)
         pos.vx = pos2.vx;
         pos.vy = pos2.vy + viewer.unk2CE + viewer.unk2D2;
         pos.vz = pos2.vz;
-        func_80036484(10, side | 0x42, kind, &pos, &dir, &rot, viewer.unk180);
+        effect_spawn(10, side | 0x42, kind, &pos, &dir, &rot, viewer.unk180);
         break;
     }
 }
 
 /* Per hand: starts the queued magic, or recovers the second bar. */
 ADDRESS(0x80040024, 0x288)
-void func_80040024(u8 hand)
+void player_update_cast(u8 hand)
 {
     Vis44 *item;
     int active;
@@ -1839,13 +1839,13 @@ void func_80040024(u8 hand)
             if (viewer.unk38[13] != 0xffff) {
                 item = &vis_table_c.unk0118[viewer.unk38[13]];
                 if (item->unk28)
-                    func_80040f04(viewer.unk14C[hand], hand);
+                    player_cast_magic(viewer.unk14C[hand], hand);
             }
         } else {
             if (viewer.unk38[0] != 0xffff) {
                 item = &vis_table_c.unk0118[viewer.unk38[0]];
                 if (item->unk28)
-                    func_80040f04(viewer.unk14C[0], 0);
+                    player_cast_magic(viewer.unk14C[0], 0);
             }
         }
         viewer.unk13C[hand] = -1;
@@ -1896,7 +1896,7 @@ void func_80040024(u8 hand)
  * The unused locals stand for stack retail reserves and never touches:
  * 24 bytes after sv, 32 after v and 8 after p. */
 ADDRESS(0x800402ac, 0xc58)
-void func_800402ac(u8 hand)
+void player_update_hand_action(u8 hand)
 {
     ViewerModel *rec;
     SVECTOR sv;
@@ -2013,7 +2013,7 @@ void func_800402ac(u8 hand)
                         kind = viewer.unk148[hand] + 13;
                         func_800582f0((viewer.unk1D4[hand] - 24) / 2 + 22, 128);
                         viewer.unk130.halves[hand] -= cost;
-                        func_80040f04(kind, hand);
+                        player_cast_magic(kind, hand);
                         viewer.unk130.halves[hand] += cost;
                     }
                 }
@@ -2167,7 +2167,7 @@ void func_800402ac(u8 hand)
  * points cover the cost: per-magic cast timers and launch offsets, then
  * the hand's item wears unless the magic is 44..47. */
 ADDRESS(0x80040f04, 0x24c)
-void func_80040f04(u8 magic, u8 hand)
+void player_cast_magic(u8 magic, u8 hand)
 {
     StMagic *rec;
     int cost;
@@ -2266,7 +2266,7 @@ void func_80040f04(u8 magic, u8 hand)
  * in viewer.unk260.
  */
 ADDRESS(0x80041150, 0x4dc)
-void func_80041150(int angle, int speed)
+void player_move(int angle, int speed)
 {
     VECTOR vel;
     VECTOR d;
@@ -2379,17 +2379,17 @@ done:
     viewer.unk260.vz = vel.vz;
 }
 
-/* The coasting vertical offset func_8004162c halves each frame. */
+/* The coasting vertical offset player_update_motion halves each frame. */
 DATA(0x8008803c, 0x2, ".sdata")
 static s16 DAT_8008803c = 0;
 
 /* Coasts the viewer on its push offsets while it is not walking (sliding
- * along walls as func_80041150 does), then steps the vertical speed
+ * along walls as player_move does), then steps the vertical speed
  * against the floor, the head bob and the stamina, and records the
  * visible record the viewer stands in.
  */
 ADDRESS(0x8004162c, 0x720)
-void func_8004162c(void)
+void player_update_motion(void)
 {
     VECTOR vel;
     int hits;
@@ -2476,7 +2476,7 @@ void func_8004162c(void)
         viewer.unk260.vy = vel.vy;
         viewer.unk260.vz = vel.vz;
     }
-    func_8003bdb0();
+    player_check_fall_death();
     d = vis_lists.unk2C - 1600;
     if (d < 0) {
         if (viewer.unk2D4 > 0) {
@@ -2553,7 +2553,7 @@ void func_8004162c(void)
             }
         }
     }
-    func_8003be10();
+    player_update_submersion();
     if (vis_lists.unk44C8 != -1) {
         viewer.unk170 = viewer.unk174;
         viewer.unk174 = &vis_records[vis_lists.unk44C8];
@@ -2562,7 +2562,7 @@ void func_8004162c(void)
 }
 
 ADDRESS(0x80041d4c, 0x354)
-void func_80041d4c(void)
+void player_update_look(void)
 {
     if (DAT_801cd180.unk2 & DAT_801cd180.unk22[2]) {
         viewer.unk2CA += viewer.unk2E8 >> 2;
@@ -2637,10 +2637,10 @@ void func_80041d4c(void)
 
 /* Walks the viewer from the held buttons: accelerates the walk velocity
  * (viewer.unk2B8) towards viewer.unk2E4 or lets it decay, turns it by the
- * yaw and moves the viewer along it (func_80041150); eases the push
+ * yaw and moves the viewer along it (player_move); eases the push
  * offsets viewer.unk1CC..unk1D0 back and adds the area's drift. */
 ADDRESS(0x800420a0, 0x580)
-void func_800420a0(void)
+void player_update_walk(void)
 {
     SVECTOR sv;
     VECTOR v;
@@ -2749,13 +2749,13 @@ void func_800420a0(void)
     viewer.unk1CC += vis_table_a.unk6160 / 2;
     viewer.unk1D0 += vis_table_a.unk6164 / 2;
     if (viewer.unk2C8 != 0 && viewer.unk21E == 0) {
-        func_80041150(ang, viewer.unk2C8);
+        player_move(ang, viewer.unk2C8);
     }
 }
 
 /* Swaps hand `a`'s item with slot `b`, twice for a two-handed item. */
 ADDRESS(0x80042620, 0x2e0)
-void func_80042620(u8 a, u8 b)
+void player_swap_hand_items(u8 a, u8 b)
 {
     int n = 1;
     SVECTOR unused0 = {0, 128, 0, -128};
@@ -2816,7 +2816,7 @@ void func_80042620(u8 a, u8 b)
     viewer.unk108[1] = 0;
     viewer.unk108[2] = 0;
     viewer.unk108[3] = 0;
-    func_8003cedc();
+    player_recalc_stats();
     viewer.unk18A = 0xffff;
 }
 
@@ -2825,41 +2825,41 @@ void func_80042620(u8 a, u8 b)
  * The paired timer word must be -1 before either equipment request runs.
  */
 ADDRESS(0x80042900, 0x29c)
-void func_80042900(void)
+void player_update_hands(void)
 {
     if (DAT_801cd180.unk14 == 2) {
         DAT_801cd180.unk14 = 0;
         if (viewer.unk130.word == -1 && viewer.unk38[4] != 0xffff) {
-            func_80042620(0, 2);
-            func_8003d030();
+            player_swap_hand_items(0, 2);
+            player_update_durability_warning();
         }
     }
     if (DAT_801cd180.unk14 == 3) {
         DAT_801cd180.unk14 = 0;
         if (viewer.unk130.word == -1 && viewer.unk38[17] != 0xffff) {
-            func_80042620(1, 3);
-            func_8003d030();
+            player_swap_hand_items(1, 3);
+            player_update_durability_warning();
         }
     }
     if (DAT_801cd180.unk14 == 4) {
         DAT_801cd180.unk14 = 0;
         if (viewer.unk182 >= 0x1400)
-            func_8003f670(0, 0);
+            player_start_cast(0, 0);
     }
     if (DAT_801cd180.unk14 == 5) {
         DAT_801cd180.unk14 = 0;
         if (viewer.unk182 >= 0x1400)
-            func_8003f670(0, 1);
+            player_start_cast(0, 1);
     }
     if (viewer.unk155[0] != 0xff && --viewer.unk15B[0] == 0) {
-        func_8003f910(viewer.unk155[0], 0);
+        player_fire_magic_shot(viewer.unk155[0], 0);
         if (--viewer.unk157[0] == 0)
             viewer.unk155[0] = 0xff;
         else
             viewer.unk15B[0] = viewer.unk159[0];
     }
     if (viewer.unk155[1] != 0xff && --viewer.unk15B[1] == 0) {
-        func_8003f910(viewer.unk155[1], 1);
+        player_fire_magic_shot(viewer.unk155[1], 1);
         if (--viewer.unk157[1] == 0)
             viewer.unk155[1] = 0xff;
         else
@@ -2867,14 +2867,14 @@ void func_80042900(void)
     }
     if (viewer.unk218 != 1) {
         if (viewer.unk187 == 0 && (DAT_801cd180.unk4 & DAT_801cd180.unk22[8]))
-            func_8003f4ec(0, 0);
+            player_start_hand_action(0, 0);
         if (DAT_801cd180.unk4 & DAT_801cd180.unk22[9])
-            func_8003f4ec(0, 1);
+            player_start_hand_action(0, 1);
     }
 }
 
 ADDRESS(0x80042b9c, 0x74)
-void func_80042b9c(void)
+void player_handle_examine(void)
 {
     u8 mode = viewer.unk218;
 
@@ -2886,7 +2886,7 @@ void func_80042b9c(void)
 }
 
 ADDRESS(0x80042c10, 0x34)
-void func_80042c10(void)
+void player_enter_normal_state(void)
 {
     viewer.unk218 = 0;
     viewer.unk280.halves[0] = viewer.unk280.halves[1] = viewer.unk284 = 0;
@@ -2898,7 +2898,7 @@ DATA(0x80088050, 0x4, ".sdata")
 static s32 DAT_80088050 = 0;
 
 ADDRESS(0x80042c44, 0xa8)
-void func_80042c44(SVECTOR *arg0, SVECTOR *arg1, s16 arg2, int arg3)
+void player_enter_hurt_state(SVECTOR *arg0, SVECTOR *arg1, s16 arg2, int arg3)
 {
     viewer.unk218 = 16;
     viewer.unk2D6 = 3500;
@@ -2912,14 +2912,14 @@ void func_80042c44(SVECTOR *arg0, SVECTOR *arg1, s16 arg2, int arg3)
 }
 
 ADDRESS(0x80042cec, 0x10)
-void func_80042cec(void)
+void player_enter_frozen_state(void)
 {
     viewer.unk218 = 2;
 }
 
 /* Frees the animation slots and objects with two state bytes held. */
 ADDRESS(0x80042cfc, 0x78)
-void func_80042cfc(void)
+void anim_free_all_for_menu(void)
 {
     u8 *flags = (u8 *)&DAT_801cd120;
     u8 a = flags[3];
@@ -2941,7 +2941,7 @@ void func_80042cfc(void)
  * floor damage and the status damage over time, the view angles, the
  * swings and the hit/magic point recovery. */
 ADDRESS(0x80042d74, 0x1678)
-void func_80042d74(void)
+void player_update(void)
 {
     RECT r;
     StAnimFile *file;
@@ -2962,7 +2962,7 @@ void func_80042d74(void)
             i = 16;
             lighting.unkA = 1;
             func_80057cc8();
-            func_80042cfc();
+            anim_free_all_for_menu();
             func_80057a3c();
             func_80057a68(0);
             entry = vis_table_b.entries;
@@ -2979,10 +2979,10 @@ void func_80042d74(void)
             viewer.unk2A = 0;
             menu_main_run();
             if (DAT_801cd120.unk3 == 0) {
-                func_8003e840();
+                hud_clear_damage_numbers();
             }
             if (viewer.unk2A) {
-                func_8003e840();
+                hud_clear_damage_numbers();
                 func_80057a3c();
                 DAT_801cd180.unk10 = 1;
                 fade_reset();
@@ -2990,7 +2990,7 @@ void func_80042d74(void)
                 func_800500ac(2, 4096, 4096, 0);
                 func_800500ac(2, 4096, 4096, 0);
                 cd_wait_idle();
-                func_8003c0e0();
+                player_reload_equipment();
                 vis_table_a.unk6168 = 254;
                 vis_table_a.unk6158[0] = vis_table_a.unk6158[1] = vis_table_a.unk6158[2] =
                     vis_table_a.unk6158[3] = 255;
@@ -3001,10 +3001,10 @@ void func_80042d74(void)
                     fx->unk0 = 255;
                     fx++;
                 }
-                func_8003c95c(area_state.unk4, area_state.unk4, area_state.unk4, area_state.unk7,
+                area_load_set_blocking(area_state.unk4, area_state.unk4, area_state.unk4, area_state.unk7,
                               area_state.unk8, 255);
                 cd_wait_idle();
-                func_8003ead0();
+                player_stop_motion();
             } else {
                 if (viewer.unk21D) {
                     while (i--) {
@@ -3022,7 +3022,7 @@ void func_80042d74(void)
                     }
                 }
                 player_equipment_bonuses();
-                func_8003d030();
+                player_update_durability_warning();
                 {
                     world_state.draw[0].clip.w = 0;
                     world_state.draw[0].clip.h = 0;
@@ -3089,11 +3089,11 @@ void func_80042d74(void)
         }
         switch (viewer.unk218) {
         case 0:
-            func_80042900();
+            player_update_hands();
             if (area_state.unk0 != 1 && vis_table_a.unk6169 == 0) {
-                func_80041d4c();
-                func_800420a0();
-                func_8004162c();
+                player_update_look();
+                player_update_walk();
+                player_update_motion();
                 viewer.unk21E = 0;
                 if ((DAT_801cd180.unk4 & DAT_801cd180.unk22[11]) && DAT_801cd180.unk12 == 0 &&
                     (viewer.unk38[5] != 0xffff || viewer.unk38[19] != 0xffff ||
@@ -3105,16 +3105,16 @@ void func_80042d74(void)
                     func_80057a3c();
                 }
             }
-            func_80042b9c();
+            player_handle_examine();
             break;
         case 1:
-            func_80042900();
+            player_update_hands();
             if (area_state.unk0 == 1 || vis_table_a.unk6169) {
                 goto status;
             }
-            func_80041d4c();
-            func_800420a0();
-            func_8004162c();
+            player_update_look();
+            player_update_walk();
+            player_update_motion();
             viewer.unk21E = 0;
             if (DAT_801cd180.unk4 & DAT_801cd180.unk22[8]) {
                 func_80057d10();
@@ -3186,7 +3186,7 @@ void func_80042d74(void)
                 func_80057a3c();
             }
         status:
-            func_80042b9c();
+            player_handle_examine();
             break;
         case 4:
             if (viewer.unk286 < 17) {
@@ -3231,7 +3231,7 @@ void func_80042d74(void)
                             world_state.unk1EE15 = 0;
                             break;
                         }
-                        func_8003e840();
+                        hud_clear_damage_numbers();
                         ClearImage(&clear, 0, 0, 0);
                         DrawSync(0);
                         card_screen_open(0, 1);
@@ -3253,15 +3253,15 @@ void func_80042d74(void)
                             viewer.unk2D6 = viewer.unk2D8 = viewer.unk2DA = viewer.unk2DC = 0;
                             func_800500ac(2, 0, 4096, 256);
                             cd_wait_idle();
-                            func_8003c0e0();
+                            player_reload_equipment();
                             vis_table_a.unk6168 = 254;
                             vis_table_a.unk6158[0] = vis_table_a.unk6158[1] =
                                 vis_table_a.unk6158[2] = vis_table_a.unk6158[3] = 255;
                             func_80057a68(0);
-                            func_8003c95c(area_state.unk4, area_state.unk4, area_state.unk4,
+                            area_load_set_blocking(area_state.unk4, area_state.unk4, area_state.unk4,
                                           area_state.unk7, area_state.unk8, 255);
                             cd_wait_idle();
-                            func_8003ead0();
+                            player_stop_motion();
                             break;
                         }
                         func_80057a3c();
@@ -3274,19 +3274,19 @@ void func_80042d74(void)
             viewer.unk286++;
             break;
         case 16:
-            func_80042900();
-            func_80041d4c();
-            func_800420a0();
+            player_update_hands();
+            player_update_look();
+            player_update_walk();
             if (viewer.unk280.word == 0 && viewer.unk284 == 0) {
-                func_80042c10();
+                player_enter_normal_state();
             }
-            func_8004162c();
+            player_update_motion();
             viewer.unk21E = 0;
-            func_80042b9c();
+            player_handle_examine();
             break;
         case 5:
         case 6:
-            func_8003ead0();
+            player_stop_motion();
             vis_table_b.unk71A4 = vis_table_b.unk71A6 = vis_table_b.unk71A8 = 0;
             vis_lists.unk47CE = vis_lists.unk47D0 = vis_lists.unk47D2 = 0;
             vis_table_a.unk6160 = vis_table_a.unk6162 = vis_table_a.unk6164 = 0;
@@ -3400,10 +3400,10 @@ void func_80042d74(void)
             if (vis_lists.unk47D2 >= -4 && vis_lists.unk47D2 < 4) {
                 vis_lists.unk47D2 = 0;
             }
-            func_800402ac(0);
-            func_800402ac(1);
-            func_80040024(0);
-            func_80040024(1);
+            player_update_hand_action(0);
+            player_update_hand_action(1);
+            player_update_cast(0);
+            player_update_cast(1);
             if (viewer.unk218 != 4) {
                 if (viewer.unk2 * 2 < viewer.unk0 && viewer.unk1C4 && viewer.unk23C % viewer.unk1C4 == 0) {
                     player_add_hp(1);

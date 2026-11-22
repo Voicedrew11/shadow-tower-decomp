@@ -22,14 +22,14 @@ DATA(0x8008809c, 0x8, ".sdata")
 SVECTOR DAT_8008809c = {0, 0, 4096, 0};
 
 ADDRESS(0x80045f90, 0x28)
-void func_80045f90(int archive, int member, void (*done)())
+void image_stream_queue(int archive, int member, void (*done)())
 {
     cd_queue_stream_member(archive, member, (u8 *)DAT_80088c88, done);
 }
 
 /* Takes the next run of at most 16 sectors from the request's count. */
 ADDRESS(0x80045fb8, 0x44)
-void func_80045fb8(StCdRequest *request)
+void image_stream_next_run(StCdRequest *request)
 {
     int n = request->unkE;
 
@@ -51,7 +51,7 @@ void func_80045fb8(StCdRequest *request)
  * the next run.
  */
 ADDRESS(0x80045ffc, 0x274)
-void func_80045ffc(void)
+void image_stream_update(void)
 {
     StCdRequest *request = cd_state.unk9D8;
     u16 *p;
@@ -95,7 +95,7 @@ void func_80045ffc(void)
             request->unk4.image.h = 0;
             request->unk10 = 0;
             request->unkE = request->unkC;
-            func_80045fb8(request);
+            image_stream_next_run(request);
             request->unk1 = 0;
             while (!CdControl(CdlSeekL, (u_char *)&request->unk18, 0))
                 ;
@@ -117,7 +117,7 @@ void func_80045ffc(void)
         p += 8;
     }
     cd_loc_add_sectors(&request->unk18, request->unk28, &request->unk18);
-    func_80045fb8(request);
+    image_stream_next_run(request);
     request->unk1 = 0;
     DrawSync(0);
     while (!CdControl(CdlSeekL, (u_char *)&request->unk18, 0))

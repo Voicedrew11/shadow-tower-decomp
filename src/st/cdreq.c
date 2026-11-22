@@ -25,7 +25,7 @@ ADDRESS(0x8001531c, 0x40)
 void cd_wait_frame(void)
 {
     func_80058620();
-    func_80045ffc();
+    image_stream_update();
     loading_screen_step();
     DrawSync(0);
     VSync(0);

@@ -64,7 +64,7 @@ const FdatHeader fdat_header = {
 #include "../lib/fdat_801ed420.inc"
 
 void SsSetSerialVol(short s_num, short voll, short volr);
-void func_80042cec(void);
+void player_enter_frozen_state(void);
 void shop_run(void);
 
 /*
@@ -165,7 +165,7 @@ void func_801ed63c(void)
             world_state.unk1EE17 = 1;
             world_state.unk1EE19 = 0;
             fdat_801ed8c4 = 2;
-            func_80042cec();
+            player_enter_frozen_state();
         }
     } else if (fdat_801ed8c4 == 3) {
         if (fdat_801ed8c8 == 1 || fdat_801ed8c8 == 2)

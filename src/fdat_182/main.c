@@ -86,8 +86,8 @@ void func_801ed4b4(void)
         fdat_801edc54 = 1;
     }
     if (fdat_801edc54 == 1) {
-        func_800402ac(0);
-        func_800402ac(1);
+        player_update_hand_action(0);
+        player_update_hand_action(1);
         if (fdat_801edc54 == 1 && e->unk05 == 3) {
             viewer.unk218 = 5;
             e->unk70 |= 0x2000000;

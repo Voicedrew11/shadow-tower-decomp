@@ -72,7 +72,7 @@ void menu_load_main_messages(void)
     cd_read_member(3, 0, image);
     copy_words((u32 *)&menu_messages, (u32 *)(image + 1), 5376);
     image = (u_long *)((u8 *)image + (DAT_80088c88[0] + 4));
-    func_8003ec5c(image + 1, &MENU_SCRATCH->unk2E6[0], &MENU_SCRATCH->unk2E6[1], 1);
+    tim_load_images_at(image + 1, &MENU_SCRATCH->unk2E6[0], &MENU_SCRATCH->unk2E6[1], 1);
 }
 
 ADDRESS(0x80058cc8, 0x68)
@@ -92,13 +92,13 @@ void menu_reload_assets(void)
 {
     loading_screen_show();
     menu_load_main_messages();
-    func_80044404();
-    func_8003f12c(viewer.unk38[3], 0, 1);
-    func_8003f12c(viewer.unk38[16], 1, 1);
-    func_8003f12c(viewer.unk38[4], 2, 1);
-    func_8003f12c(viewer.unk38[17], 3, 1);
-    func_8003ee38(viewer.unk38[6], 0);
-    func_8003ee38(viewer.unk38[12], 1);
+    area_reload_images();
+    player_load_equipment_model(viewer.unk38[3], 0, 1);
+    player_load_equipment_model(viewer.unk38[16], 1, 1);
+    player_load_equipment_model(viewer.unk38[4], 2, 1);
+    player_load_equipment_model(viewer.unk38[17], 3, 1);
+    player_load_magic(viewer.unk38[6], 0);
+    player_load_magic(viewer.unk38[12], 1);
     loading_screen_end();
 }
 
@@ -124,7 +124,7 @@ void card_screen_open(int arg0, int arg1)
     cd_read_member(3, 0, image);
     copy_words((u32 *)&menu_messages, (u32 *)(image + 1), 5376);
     image = (u_long *)((u8 *)image + (DAT_80088c88[0] + 4));
-    func_8003ec5c(image + 1, &sp->unk2E6[0], &sp->unk2E6[1], 1);
+    tim_load_images_at(image + 1, &sp->unk2E6[0], &sp->unk2E6[1], 1);
     menu_store_screen();
     sp->unk2E5 = 0;
     SCRATCHPAD->unk208 = 0;
@@ -163,7 +163,7 @@ void menu_main_run(void)
     cd_read_member(3, 0, image);
     copy_words((u32 *)&menu_messages, (u32 *)(image + 1), 5376);
     image = (u_long *)((u8 *)image + (DAT_80088c88[0] + 4));
-    func_8003ec5c(image + 1, &sp->unk2E6[0], &sp->unk2E6[1], 1);
+    tim_load_images_at(image + 1, &sp->unk2E6[0], &sp->unk2E6[1], 1);
     menu_store_screen();
     sp->unk2DE = 0;
     func_80057a3c();
@@ -347,7 +347,7 @@ void equip_load_slot_picture(int slot)
     } else {
         data = image;
     }
-    func_8003ec5c(data, &pos[slot], NULL, 1);
+    tim_load_images_at(data, &pos[slot], NULL, 1);
     if (*id != 0xffff && vis_table_c.unk0118[*id].unk26 == 9) {
         if (slot == 3) {
             rect.x = pos[3].vx;
@@ -366,7 +366,7 @@ void equip_load_slot_picture(int slot)
         }
     } else if (*id != 0xffff && vis_table_c.unk0118[*id].unk26 == 10) {
         image = (u_long *)((u8 *)image + (image[0] + 4));
-        func_8003ec5c(image + 1, &pos[2], NULL, 1);
+        tim_load_images_at(image + 1, &pos[2], NULL, 1);
     }
 }
 
@@ -397,7 +397,7 @@ void equip_load_item_slot_pictures(void)
         if (ids[i] != 0xffff) {
             size = cd_read_member(6, vis_table_c.unk0118[ids[i]].unk5[0] + 400, cd_state.unkA84)
                    << 11;
-            func_8003ec5c(cd_state.unkA84, &pos, NULL, 1);
+            tim_load_images_at(cd_state.unkA84, &pos, NULL, 1);
             used += size;
             cd_state.unkA84 = (u_long *)((u8 *)cd_state.unkA84 + size);
         } else {
@@ -864,19 +864,19 @@ void menu_equip_info_run(void)
     cd_read_member(3, 1, p);
     copy_words((u32 *)&menu_messages, (u32 *)(p + 1), 5376);
     p = (u_long *)((u8 *)p + (*p + 4));
-    func_8003ec5c(p + 1, &sp->unk2E6[0], &sp->unk2E6[1], 1);
+    tim_load_images_at(p + 1, &sp->unk2E6[0], &sp->unk2E6[1], 1);
     p = (u_long *)((u8 *)p + (*p + 4));
     copy_words(sp->unk2D0, (u32 *)(p + 1), 36);
     p = CD_BUFFER;
     cd_read_member(3, 4, p);
     copy_words((u32 *)sp->unk2CC, (u32 *)(p + 1), 5376);
     p = (u_long *)((u8 *)p + (*p + 4));
-    func_8003ec5c(p + 1, &sp->unk2E6[2], &sp->unk2E6[3], 1);
+    tim_load_images_at(p + 1, &sp->unk2E6[2], &sp->unk2E6[3], 1);
     cd_read_member(3, 5, CD_BUFFER);
-    func_8003ec5c(CD_BUFFER, &sp->unk2E6[4], NULL, 1);
+    tim_load_images_at(CD_BUFFER, &sp->unk2E6[4], NULL, 1);
     DrawSync(0);
     cd_read_member(3, 7, CD_BUFFER);
-    func_8003ec5c(CD_BUFFER, &image, &clut, 1);
+    tim_load_images_at(CD_BUFFER, &image, &clut, 1);
     DrawSync(0);
     sp->unk0.vram[0].vx = 640;
     sp->unk0.vram[0].vy = 256;
@@ -1151,9 +1151,9 @@ void menu_equip_info_run(void)
                     else
                         sp->unk2D4 = sp->unk2D0 + (viewer.unk38[13] - 196);
                     cd_read_member(7, 975, CD_BUFFER);
-                    func_8003ec5c(CD_BUFFER, &sp->unk358, NULL, 1);
+                    tim_load_images_at(CD_BUFFER, &sp->unk358, NULL, 1);
                     cd_read_member(7, sp->unk2BE + 995, CD_BUFFER);
-                    func_8003ec5c(CD_BUFFER, &sp->unk0.vram[0], &sp->unk0.vram[1], 1);
+                    tim_load_images_at(CD_BUFFER, &sp->unk0.vram[0], &sp->unk0.vram[1], 1);
                 } else {
                     if (cur == 0xffff) {
                         sp->unk2BE = -1;
@@ -1174,10 +1174,10 @@ void menu_equip_info_run(void)
                         file = sp->unk2C0 + offset;
                     }
                     cd_read_member(7, file * 3, CD_BUFFER);
-                    func_8003ec5c(CD_BUFFER, &sp->unk0.vram[0], &sp->unk0.vram[1], 1);
+                    tim_load_images_at(CD_BUFFER, &sp->unk0.vram[0], &sp->unk0.vram[1], 1);
                     DrawSync(0);
                     cd_read_member(7, file * 3 + 1, CD_BUFFER);
-                    func_8003ec5c(CD_BUFFER, &picture, NULL, 1);
+                    tim_load_images_at(CD_BUFFER, &picture, NULL, 1);
                     player_compute_derived_stats(0);
                 }
                 DAT_801cd180.unk4 = 0;
@@ -1344,9 +1344,9 @@ void menu_equip_info_run(void)
                     else
                         file = sp->unk2C0 + offset;
                     cd_read_member(7, file * 3, CD_BUFFER);
-                    func_8003ec5c(CD_BUFFER, &sp->unk0.vram[0], &sp->unk0.vram[1], 1);
+                    tim_load_images_at(CD_BUFFER, &sp->unk0.vram[0], &sp->unk0.vram[1], 1);
                     cd_read_member(7, file * 3 + 1, CD_BUFFER);
-                    func_8003ec5c(CD_BUFFER, &picture, NULL, 1);
+                    tim_load_images_at(CD_BUFFER, &picture, NULL, 1);
                     player_compute_derived_stats(1);
                     DAT_801cd180.unkC = 0;
                 }
@@ -1399,7 +1399,7 @@ void menu_equip_info_run(void)
                 }
                 if (row != sp->unk2BE) {
                     cd_read_member(7, sp->unk2BE + 995, CD_BUFFER);
-                    func_8003ec5c(CD_BUFFER, &sp->unk0.vram[0], &sp->unk0.vram[1], 1);
+                    tim_load_images_at(CD_BUFFER, &sp->unk0.vram[0], &sp->unk0.vram[1], 1);
                     sp->unk2C0 = sp->unk2BE;
                     player_compute_derived_stats(1);
                 }
@@ -1533,17 +1533,17 @@ void menu_creature_book_run(void)
     cd_read_member(3, 1, p);
     copy_words((u32 *)&menu_messages, (u32 *)(p + 1), 5376);
     p = (u_long *)((u8 *)p + (*p + 4));
-    func_8003ec5c(p + 1, &sp->unk2E6[0], &sp->unk2E6[1], 1);
+    tim_load_images_at(p + 1, &sp->unk2E6[0], &sp->unk2E6[1], 1);
     p = CD_BUFFER;
     cd_read_member(3, 2, p);
     copy_words((u32 *)sp->unk0.store.messages, (u32 *)(p + 1), 5376);
     p = (u_long *)((u8 *)p + (*p + 4));
-    func_8003ec5c(p + 1, &sp->unk2E6[2], &sp->unk2E6[3], 1);
+    tim_load_images_at(p + 1, &sp->unk2E6[2], &sp->unk2E6[3], 1);
     cd_read_member(3, 5, CD_BUFFER);
-    func_8003ec5c(CD_BUFFER, &sp->unk2E6[4], NULL, 1);
+    tim_load_images_at(CD_BUFFER, &sp->unk2E6[4], NULL, 1);
     DrawSync(0);
     cd_read_member(3, 7, CD_BUFFER);
-    func_8003ec5c(CD_BUFFER, &image, &clut, 1);
+    tim_load_images_at(CD_BUFFER, &image, &clut, 1);
     DrawSync(0);
     cd_read_member(4, 400, CD_BUFFER);
     copy_words((u32 *)sp->unk0.store.items, (u32 *)CD_BUFFER, 1661);
@@ -1564,7 +1564,7 @@ void menu_creature_book_run(void)
             {
                 int size = cd_read_member(4, sp->unk0.store.kinds[k], cd_state.unkA84) << 11;
 
-                func_8003ec5c(cd_state.unkA84, &sp->unk0.store.tex[k % 15], NULL, 1);
+                tim_load_images_at(cd_state.unkA84, &sp->unk0.store.tex[k % 15], NULL, 1);
                 used += size;
                 cd_state.unkA84 = (u_long *)((u8 *)cd_state.unkA84 + size);
             }
@@ -1655,9 +1655,9 @@ void menu_creature_book_run(void)
 
 
                         cd_read_member(4, sp->unk0.store.kinds[k] + 200, p);
-                        func_8003ec5c(p + 1, &sp->unk0.store.image, NULL, 1);
+                        tim_load_images_at(p + 1, &sp->unk0.store.image, NULL, 1);
                         p = (u_long *)((u8 *)p + (*p + 4));
-                        func_8003ec5c(p + 1, &detail, &detail_clut, 1);
+                        tim_load_images_at(p + 1, &detail, &detail_clut, 1);
                     }
                     sp->unk2DC = 2;
                 }
@@ -1686,7 +1686,7 @@ void menu_creature_book_run(void)
                             int size =
                                 cd_read_member(4, sp->unk0.store.kinds[k], cd_state.unkA84) << 11;
 
-                            func_8003ec5c(cd_state.unkA84, &sp->unk0.store.tex[k % 15], NULL, 1);
+                            tim_load_images_at(cd_state.unkA84, &sp->unk0.store.tex[k % 15], NULL, 1);
                             used += size;
                             cd_state.unkA84 = (u_long *)((u8 *)cd_state.unkA84 + size);
                         }
@@ -1751,17 +1751,17 @@ void menu_arrange_icons_run(void)
     cd_read_member(3, 1, p);
     copy_words((u32 *)&menu_messages, (u32 *)(p + 1), 5376);
     p = (u_long *)((u8 *)p + (*p + 4));
-    func_8003ec5c(p + 1, &sp->unk2E6[0], &sp->unk2E6[1], 1);
+    tim_load_images_at(p + 1, &sp->unk2E6[0], &sp->unk2E6[1], 1);
     p = DAT_80088c88;
     cd_read_member(3, 4, p);
     copy_words((u32 *)sp->unk0.grid.messages, (u32 *)(p + 1), 5376);
     p = (u_long *)((u8 *)p + (*p + 4));
-    func_8003ec5c(p + 1, &sp->unk2E6[2], &sp->unk2E6[3], 1);
+    tim_load_images_at(p + 1, &sp->unk2E6[2], &sp->unk2E6[3], 1);
     cd_read_member(3, 5, DAT_80088c88);
-    func_8003ec5c(DAT_80088c88, &sp->unk2E6[4], NULL, 1);
+    tim_load_images_at(DAT_80088c88, &sp->unk2E6[4], NULL, 1);
     DrawSync(0);
     cd_read_member(3, 7, DAT_80088c88);
-    func_8003ec5c(DAT_80088c88, &image, &clut, 1);
+    tim_load_images_at(DAT_80088c88, &image, &clut, 1);
     DrawSync(0);
     sp->unk0.grid.count0 = 0;
     sp->unk0.grid.count1 = 0;
@@ -1820,14 +1820,14 @@ void menu_arrange_icons_run(void)
             size = cd_read_member(6, vis_table_c.unk0118[sp->unk0.grid.ids0[i]].unk5[0],
                                  cd_state.unkA84) << 11;
 
-            func_8003ec5c(cd_state.unkA84, &sp->unk0.grid.tex[i], NULL, 1);
+            tim_load_images_at(cd_state.unkA84, &sp->unk0.grid.tex[i], NULL, 1);
             total += size;
             cd_state.unkA84 = (u_long *)((u8 *)cd_state.unkA84 + size);
         } else if (i >= 20 && i - 20 < sp->unk0.grid.count1) {
             size = cd_read_member(6, vis_table_c.unk0118[sp->unk0.grid.ids1[i - 20]].unk5[0],
                                  cd_state.unkA84) << 11;
 
-            func_8003ec5c(cd_state.unkA84, &sp->unk0.grid.tex[i], NULL, 1);
+            tim_load_images_at(cd_state.unkA84, &sp->unk0.grid.tex[i], NULL, 1);
             total += size;
             cd_state.unkA84 = (u_long *)((u8 *)cd_state.unkA84 + size);
         } else {
@@ -2029,7 +2029,7 @@ void menu_arrange_icons_run(void)
                     id = sp->unk0.grid.ids1[sp->unk0.grid.row1 * 4 + (CURSOR_ROW * 4 + CURSOR_COL) - 4];
                 if (shown != id && id != -1) {
                     cd_read_member(6, vis_table_c.unk0118[id].unk5[0] + 200, DAT_80088c88);
-                    func_8003ec5c(DAT_80088c88, &picture, NULL, 1);
+                    tim_load_images_at(DAT_80088c88, &picture, NULL, 1);
                     shown = id;
                 }
             }
@@ -2055,7 +2055,7 @@ void menu_arrange_icons_run(void)
                         int size = cd_read_member(
                             6, vis_table_c.unk0118[sp->unk0.grid.ids0[i]].unk5[0], cd_state.unkA84) << 11;
 
-                        func_8003ec5c(cd_state.unkA84, &sp->unk0.grid.tex[i % 20], NULL, 1);
+                        tim_load_images_at(cd_state.unkA84, &sp->unk0.grid.tex[i % 20], NULL, 1);
                         used += size;
                         cd_state.unkA84 = (u_long *)((u8 *)cd_state.unkA84 + size);
                     } else {
@@ -2088,7 +2088,7 @@ void menu_arrange_icons_run(void)
                         int size = cd_read_member(
                             6, vis_table_c.unk0118[sp->unk0.grid.ids1[i]].unk5[0], cd_state.unkA84) << 11;
 
-                        func_8003ec5c(cd_state.unkA84, &sp->unk0.grid.tex[i % 20 + 20], NULL, 1);
+                        tim_load_images_at(cd_state.unkA84, &sp->unk0.grid.tex[i % 20 + 20], NULL, 1);
                         used += size;
                         cd_state.unkA84 = (u_long *)((u8 *)cd_state.unkA84 + size);
                     } else {
@@ -2254,7 +2254,7 @@ int menu_use_item_run(void)
     cd_read_member(3, 3, (u_long *)image);
     copy_words(sp->unk0.block, (u32 *)(image + 4), 5376);
     image += *(u32 *)image + 4;
-    func_8003ec5c(image + 4, &sp->unk2E6[2], &sp->unk2E6[3], 1);
+    tim_load_images_at(image + 4, &sp->unk2E6[2], &sp->unk2E6[3], 1);
     cd_state.unkA84 = CD_BUFFER;
     cd_read_member(6, 800, cd_state.unkA84);
     sp->unk0.page_list.entries = mem_alloc(92);
@@ -2383,9 +2383,9 @@ int menu_use_item_run(void)
     {
         u8 *restore = (u8 *)CD_BUFFER;
         cd_read_member(3, 9, (u_long *)restore);
-        func_8003ec5c(restore + 4, NULL, NULL, 0);
+        tim_load_images_at(restore + 4, NULL, NULL, 0);
         restore += *(u32 *)restore + 4;
-        func_8003ec5c(restore + 4, NULL, NULL, 0);
+        tim_load_images_at(restore + 4, NULL, NULL, 0);
     }
     return result;
 }
@@ -2417,12 +2417,12 @@ void shop_open(void)
     cd_read_member(3, 0, (u_long *)p);
     copy_words((u32 *)&menu_messages, (u32 *)(p + 4), 5376);
     p += *(u32 *)p + 4;
-    func_8003ec5c(p + 4, &sp->unk2E6[0], &sp->unk2E6[1], 1);
+    tim_load_images_at(p + 4, &sp->unk2E6[0], &sp->unk2E6[1], 1);
     p = (u8 *)DAT_80088c88;
     cd_read_member(3, 3, (u_long *)p);
     copy_words(sp->unk0.block, (u32 *)(p + 4), 5376);
     p += *(u32 *)p + 4;
-    func_8003ec5c(p + 4, &sp->unk2E6[2], &sp->unk2E6[3], 1);
+    tim_load_images_at(p + 4, &sp->unk2E6[2], &sp->unk2E6[3], 1);
     menu_store_screen();
     func_80057a3c();
 }
@@ -2620,7 +2620,7 @@ void shop_run(void)
                     sp->unk2DC |= 0x8000;
                     if (kind != shown) {
                         cd_read_member(6, kind + 600, DAT_80088c88);
-                        func_8003ec5c(DAT_80088c88, &pos, NULL, 1);
+                        tim_load_images_at(DAT_80088c88, &pos, NULL, 1);
                         shown = kind;
                     }
                 }
@@ -4409,7 +4409,7 @@ int menu_game_over_run(void)
     cd_read_member(3, 0, (u_long *)p);
     copy_words((u32 *)&menu_messages, (u32 *)(p + 4), 5376);
     p += *(u32 *)p + 4;
-    func_8003ec5c(p + 4, &sp->unk2E6[0], &sp->unk2E6[1], 1);
+    tim_load_images_at(p + 4, &sp->unk2E6[0], &sp->unk2E6[1], 1);
     sp->unk0.word = 0;
     sp->unk2E4 = 0;
     func_80057a3c();
@@ -4460,7 +4460,7 @@ void menu_save_prompt_run(void)
     cd_read_member(3, 0, image);
     copy_words((u32 *)&menu_messages, (u32 *)(image + 1), 5376);
     image = (u_long *)((u8 *)image + (DAT_80088c88[0] + 4));
-    func_8003ec5c(image + 1, &sp->unk2E6[0], &sp->unk2E6[1], 1);
+    tim_load_images_at(image + 1, &sp->unk2E6[0], &sp->unk2E6[1], 1);
     ClearImage(&clear, 0, 0, 0);
     sp->unk2DE = 0;
     sp->unk2E4 = 0;
@@ -4478,7 +4478,7 @@ void menu_save_prompt_run(void)
             ClearImage(&clear, 0, 0, 0);
             cd_wait_idle();
             func_80055cf4(area_state.unk4);
-            func_80042cfc();
+            anim_free_all_for_menu();
             func_80057a3c();
             func_80057a68(0);
             card_screen_open(1, 0);

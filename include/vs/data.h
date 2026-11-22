@@ -113,7 +113,7 @@ typedef char VsWorldStateCameraAt0x2CA78[offsetof(VsWorldState, unk2CA78) == 0x2
 
 extern VsWorldState vs_gfx_state;
 
-/* 2000 20-byte particle records at 0x801c4a58 (bss): func_8002d738
+/* 2000 20-byte particle records at 0x801c4a58 (bss): sparks_start_burst
  * starts them, sparks_clear_all clears their lives. */
 typedef struct {
     SVECTOR unk0;            /* 0x00: position */
@@ -134,19 +134,19 @@ extern s32 DAT_80063304;
 extern s32 DAT_80063308;
 
 /* A fighter's attack record: its damage per kind (32 bytes, the stride
- * func_8002e314 indexes). */
+ * fighter_apply_attack_hit indexes). */
 typedef struct {
-    u16 unk0;                /* 0x00: effect kind (func_8002f334) */
+    u16 unk0;                /* 0x00: effect kind (effect_spawn_attack) */
     s16 unk2;                /* 0x02..0x06: the effect's offset from the fighter, turned by its facing */
     s16 unk4;
     s16 unk6;
     u8 unk8[2];
-    s16 unkA;                /* 0x0a: the frame it strikes on (func_80031478) */
+    s16 unkA;                /* 0x0a: the frame it strikes on (fighter_update) */
     u16 unkC;                /* 0x0c: its cost to the second gauge */
     u16 damage[9];           /* 0x0e */
 } VsAttack;
 
-/* A hit func_8002e114 applies: three base damage amounts and an amount of
+/* A hit fighter_apply_hit applies: three base damage amounts and an amount of
  * one further kind (3 + kind). */
 typedef struct {
     u16 damage[3];
@@ -155,7 +155,7 @@ typedef struct {
 } VsHit;
 
 /* A fighter's 70-byte hit record for one attack animation
- * (func_80031478): up to three hits, each landing on its frame within its
+ * (fighter_update): up to three hits, each landing on its frame within its
  * reach and arc, and up to three lunges that move the fighter between two
  * frames. */
 typedef struct {
@@ -204,7 +204,7 @@ typedef struct {
 typedef struct {
     VsAnimRef unk0[15];      /* 0x000: animations (13 and 14: id 255 in every record) */
     VsFighterSound sounds[15]; /* 0x03c: the sound of each animation (fighters_play_anim_sounds plays 0-9; 2-7 go with unk0[2..7]) */
-    VsHitRecord unk78[3];    /* 0x078: hit records of the three combo animations (func_80031478) */
+    VsHitRecord unk78[3];    /* 0x078: hit records of the three combo animations (fighter_update) */
     VsAttack unk14A[3];      /* 0x14a: attacks (count WIP) */
     s16 unk1AA;              /* 0x1aa: movement kind */
     s16 unk1AC;              /* 0x1ac: walking speed */
@@ -253,7 +253,7 @@ typedef struct {
     s16 unk4DF10;            /* 0x4df10: model kind: 1 several parts, 2 one part */
     s16 unk4DF12;            /* 0x4df12: model brightness; 128 and up: the default colour (fighter_draw_skeletal) */
     s16 unk4DF14;            /* 0x4df14: state when an attack was blocked */
-    s16 unk4DF16;            /* 0x4df16: hits left in the current attack (func_80031478) */
+    s16 unk4DF16;            /* 0x4df16: hits left in the current attack (fighter_update) */
     VsFighterData unk4DF18;  /* 0x4df18: the fighter's data block */
 } VsFighter;
 
@@ -290,7 +290,7 @@ extern u16 DAT_8006337a;
 
 /* A light matrix, a light colour matrix, a back colour and the depth-cue
  * near and far depths, as the model renderers load them (fighter_draw_skeletal,
- * func_800353d0). Halfword-aligned: retail copies its initializers with
+ * effect_draw_model_part). Halfword-aligned: retail copies its initializers with
  * an alignment test. */
 typedef struct {
     short l[3][3];

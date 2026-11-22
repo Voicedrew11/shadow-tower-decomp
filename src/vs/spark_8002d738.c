@@ -15,7 +15,7 @@
  * whose x and z speeds are both 48 or more is dropped again.
  */
 ADDRESS(0x8002d738, 0x260)
-void func_8002d738(int n)
+void sparks_start_burst(int n)
 {
     VsFighter *f = &DAT_800633b0.fighter[n];
     VsFighter *o = &DAT_800633b0.fighter[1 - n];

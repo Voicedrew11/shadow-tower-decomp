@@ -285,7 +285,7 @@ void func_801edd9c(int up)
 
 void func_800500ac(int arg0, int arg1, int arg2, int arg3);
 void func_8004e324(void);
-void func_80042c10(void);
+void player_enter_normal_state(void);
 
 /* The hall scene: fades out, puts the viewer at the hall's start, fades
  * in with table A entry 0 awake (loading its model if needed); unless
@@ -332,7 +332,7 @@ void func_801edea0(void)
     vis_table_a.unk6138 = e;
     vis_table_a.unk6134 = r;
     fdat_801ed4a0();
-    func_80042c10();
+    player_enter_normal_state();
 }
 
 /* Sets the area id of every visible record. */

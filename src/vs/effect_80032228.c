@@ -11,16 +11,16 @@
 #include <st/effect.h>
 #include <vs/effect.h>
 
-/* func_80032200 for the current effect. */
+/* effect_emit for the current effect. */
 ADDRESS(0x80032228, 0x3c)
-void func_80032228(u_long flags, int arg, VECTOR *pos)
+void effect_emit_current(u_long flags, int arg, VECTOR *pos)
 {
-    func_80032200(flags, DAT_801ce698.cur->unk0, DAT_801ce698.def, arg, pos);
+    effect_emit(flags, DAT_801ce698.cur->unk0, DAT_801ce698.def, arg, pos);
 }
 
-/* func_80032228 from a point behind the current effect along its velocity. */
+/* effect_emit_current from a point behind the current effect along its velocity. */
 ADDRESS(0x80032264, 0x8c)
-void func_80032264(u_long flags)
+void effect_emit_behind(u_long flags)
 {
     StEffect *e = DAT_801ce698.cur;
     VECTOR pos;
@@ -28,12 +28,12 @@ void func_80032264(u_long flags)
     pos.vx = e->unk20.vx - e->unk40.vx * 8;
     pos.vy = e->unk20.vy - e->unk40.vy * 8;
     pos.vz = e->unk20.vz - e->unk40.vz * 8;
-    func_80032228(flags, (u8)(e->unk1 - 44) < 4 ? e->unk52.h : 5120, &pos);
+    effect_emit_current(flags, (u8)(e->unk1 - 44) < 4 ? e->unk52.h : 5120, &pos);
 }
 
 /* A free effect slot, or NULL. */
 ADDRESS(0x800322f0, 0x44)
-StEffect *func_800322f0(void)
+StEffect *effect_alloc(void)
 {
     StEffect *e = DAT_801ce698.slots;
     u16 i;
@@ -49,7 +49,7 @@ StEffect *func_800322f0(void)
 
 /* Slot presets. */
 ADDRESS(0x80032334, 0x38)
-void func_80032334(StEffect *e, s16 a, s16 scale, u8 b)
+void effect_preset_1(StEffect *e, s16 a, s16 scale, u8 b)
 {
     e->unk6 = 1;
     e->unk2 = 128;
@@ -61,7 +61,7 @@ void func_80032334(StEffect *e, s16 a, s16 scale, u8 b)
 }
 
 ADDRESS(0x8003236c, 0x38)
-void func_8003236c(StEffect *e, s16 a, s16 scale, u8 b)
+void effect_preset_5(StEffect *e, s16 a, s16 scale, u8 b)
 {
     e->unk6 = 5;
     e->unk2 = 128;
@@ -73,7 +73,7 @@ void func_8003236c(StEffect *e, s16 a, s16 scale, u8 b)
 }
 
 ADDRESS(0x800323a4, 0x60)
-void func_800323a4(StEffect *e, s16 a, s16 yaw, int height)
+void effect_preset_14(StEffect *e, s16 a, s16 yaw, int height)
 {
     e->unk6 = 14;
     e->unk2 = 128;

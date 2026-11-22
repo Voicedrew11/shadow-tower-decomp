@@ -26,10 +26,10 @@ void func_8004ed54(Vis88 *e, int sound);
 /* ST.EXE functions declared in st/funcs.h, which the overlay units do not
  * include (see below). */
 void func_80053aa4(void);
-void func_800402ac(u8 hand);
-void func_8003f12c(u16 id, u8 slot, u8 reload);
+void player_update_hand_action(u8 hand);
+void player_load_equipment_model(u16 id, u8 slot, u8 reload);
 void player_compute_derived_stats(int arg);
-void func_8003d030(void);
+void player_update_durability_warning(void);
 
 /*
  * ST.EXE's positional sound starters and player_hit (src/st/sound.c,

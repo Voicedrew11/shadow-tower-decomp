@@ -161,7 +161,7 @@ void func_80063cb0(void)
             cd_read_member(6, 801, DAT_80088c88);
         else
             cd_read_member(6, vis_table_c.unk0118[EQ.unk0].unk5[0] + 600, DAT_80088c88);
-        func_8003ec5c(DAT_80088c88, &pos, NULL, 1);
+        tim_load_images_at(DAT_80088c88, &pos, NULL, 1);
         EQ.unk4 = EQ.unk0;
     }
 }
@@ -417,7 +417,7 @@ int func_800642e8(int *sel)
             EQ.unk0 = cur;
             EQ.unk4 = cur;
         }
-        func_8003ec5c(DAT_80088c88, &pos, NULL, 1);
+        tim_load_images_at(DAT_80088c88, &pos, NULL, 1);
         *sel = cur;
     }
     return 0;
@@ -888,7 +888,7 @@ void func_800661c8(void)
 {
     DVECTOR pos = {640, 0};
 
-    func_8003ec5c(DAT_80088c88, &pos, NULL, 1);
+    tim_load_images_at(DAT_80088c88, &pos, NULL, 1);
     DrawSync(0);
 }
 
@@ -926,18 +926,18 @@ void func_80066240(void)
     cd_read_member(3, 1, tim);
     copy_words((u32 *)&menu_messages, (u32 *)(tim + 1), 5376);
     tim = (u_long *)((u8 *)tim + (*tim + sizeof(*tim)));
-    func_8003ec5c(tim + 1, &MENU_SCRATCH->unk2E6[0], &MENU_SCRATCH->unk2E6[1], 1);
+    tim_load_images_at(tim + 1, &MENU_SCRATCH->unk2E6[0], &MENU_SCRATCH->unk2E6[1], 1);
     tim = DAT_80088c88;
     cd_read_member(3, 4, tim);
     sp = MENU_SCRATCH;
     copy_words((u32 *)sp->unk0.grid.messages, (u32 *)(tim + 1), 5376);
     tim = (u_long *)((u8 *)tim + (*tim + sizeof(*tim)));
-    func_8003ec5c(tim + 1, &sp->unk2E6[2], &sp->unk2E6[3], 1);
+    tim_load_images_at(tim + 1, &sp->unk2E6[2], &sp->unk2E6[3], 1);
     cd_read_member(3, 5, DAT_80088c88);
-    func_8003ec5c(DAT_80088c88, &sp->unk2E6[4], NULL, 1);
+    tim_load_images_at(DAT_80088c88, &sp->unk2E6[4], NULL, 1);
     DrawSync(0);
     cd_read_member(3, 7, DAT_80088c88);
-    func_8003ec5c(DAT_80088c88, &tex, &clut, 1);
+    tim_load_images_at(DAT_80088c88, &tex, &clut, 1);
     DrawSync(0);
     sp->unk0.grid.count0 = 0;
     sp->unk0.grid.count1 = 0;

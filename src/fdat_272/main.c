@@ -600,9 +600,9 @@ void func_801ee610(void)
     *(u8 *)&items->counts[viewer.unk38[3]] = 0;
     viewer.unk38[3] = 0xffff;
     player_compute_derived_stats(0);
-    func_8003d030();
-    func_8003f12c(viewer.unk38[3], 0, 0);
-    func_8003f12c(viewer.unk38[16], 1, 0);
+    player_update_durability_warning();
+    player_load_equipment_model(viewer.unk38[3], 0, 0);
+    player_load_equipment_model(viewer.unk38[16], 1, 0);
     d16->unk05 = 50;
     d16->unk02 = 0;
     d16->unk10 = 0;

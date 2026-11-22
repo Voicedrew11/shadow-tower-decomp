@@ -13,7 +13,7 @@
 #include <vs/effect.h>
 
 ADDRESS(0x80032200, 0x8)
-void func_80032200(u_long flags, int kind, StEffectDef *def, int arg, VECTOR *pos)
+void effect_emit(u_long flags, int kind, StEffectDef *def, int arg, VECTOR *pos)
 {
 }
 

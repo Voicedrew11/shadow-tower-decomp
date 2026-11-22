@@ -50,7 +50,7 @@ SDATA(0x80088018, 0x14)
  * without one, or NULL when the pool is full.
  */
 ADDRESS(0x80036484, 0x198c)
-StEffect *func_80036484(u8 type, u8 flags, u8 kind, VECTOR *pos, SVECTOR *dir, ...)
+StEffect *effect_spawn(u8 type, u8 flags, u8 kind, VECTOR *pos, SVECTOR *dir, ...)
 {
     int *args = (int *)&dir;
     u8 second = (flags & 0x20) >> 5;
@@ -95,8 +95,8 @@ StEffect *func_80036484(u8 type, u8 flags, u8 kind, VECTOR *pos, SVECTOR *dir, .
             e->unk6 = 0;
             e->unkC = 64;
             e->unk18 = 0x80000040;
-            func_80036484(10, e->unk0, 0xab, &e->unk20, &e->unk40, args[1], e);
-            func_80036484(10, e->unk0, 0xaa, &e->unk20, &e->unk40, args[1], e);
+            effect_spawn(10, e->unk0, 0xab, &e->unk20, &e->unk40, args[1], e);
+            effect_spawn(10, e->unk0, 0xaa, &e->unk20, &e->unk40, args[1], e);
             break;
         case 0xab:
             effect_preset_5(e, (second << 3) | 4, args[1], 13);
@@ -128,8 +128,8 @@ StEffect *func_80036484(u8 type, u8 flags, u8 kind, VECTOR *pos, SVECTOR *dir, .
             e->unkC = 64;
             e->unk18 = 0x80000040;
             e->unk30.vy += 2048;
-            func_80036484(10, e->unk0, 0xaf, &e->unk20, &e->unk40, args[1], e);
-            func_80036484(10, e->unk0, 0xb0, &e->unk20, &e->unk40, args[1], e);
+            effect_spawn(10, e->unk0, 0xaf, &e->unk20, &e->unk40, args[1], e);
+            effect_spawn(10, e->unk0, 0xb0, &e->unk20, &e->unk40, args[1], e);
             break;
         case 0xaf:
             effect_preset_1(e, second << 3, args[1], 15);
@@ -204,7 +204,7 @@ StEffect *func_80036484(u8 type, u8 flags, u8 kind, VECTOR *pos, SVECTOR *dir, .
             e->unk12 = 4096;
             SCALE(e, args[1]);
             e->unk30 = *(SVECTOR *)args[2];
-            func_80036484(10, e->unk0, 0x2b, &e->unk20, &e->unk40, args[1], e);
+            effect_spawn(10, e->unk0, 0x2b, &e->unk20, &e->unk40, args[1], e);
             break;
         case 0x2b:
             effect_preset_5(e, (second << 3) | 1, args[1], 15);
@@ -583,7 +583,7 @@ StEffect *func_80036484(u8 type, u8 flags, u8 kind, VECTOR *pos, SVECTOR *dir, .
             e->unk12 = 4096;
             SCALE(e, args[1]);
             REACH(e, e->unk38.vx * 1536 / 4096);
-            func_80036484(10, e->unk0, 0xd6, &e->unk20, &e->unk40, e->unk38.vx, e->unkA - 16, e);
+            effect_spawn(10, e->unk0, 0xd6, &e->unk20, &e->unk40, e->unk38.vx, e->unkA - 16, e);
             break;
         case 0xd6:
             e->unk6 = 5;
@@ -745,8 +745,8 @@ StEffect *func_80036484(u8 type, u8 flags, u8 kind, VECTOR *pos, SVECTOR *dir, .
             a.vy = e->unk20.vy + e->unk38.vx * rsin(e->unk30.vz) / 4096;
             b.vx = e->unk20.vx + e->unk38.vx * rcos(e->unk30.vz + 2048) / 4096;
             b.vy = e->unk20.vy + e->unk38.vx * rsin(e->unk30.vz + 2048) / 4096;
-            func_80036484(10, e->unk0, 0xe9, &a, &e->unk40, 1024, e->unkA - 16, e);
-            func_80036484(10, e->unk0, 0xea, &b, &e->unk40, 1024, e->unkA - 16, e);
+            effect_spawn(10, e->unk0, 0xe9, &a, &e->unk40, 1024, e->unkA - 16, e);
+            effect_spawn(10, e->unk0, 0xea, &b, &e->unk40, 1024, e->unkA - 16, e);
             break;
         case 0xe9:
         case 0xea:
@@ -799,7 +799,7 @@ int effect_accelerate(int scale, int limit, int attack, int height, SVECTOR *acc
 
 /*
  * Turns the current effect toward its target (the entry func_8004b658
- * finds for an effect with flag 0x40, else the viewer when func_8003eb34
+ * finds for an effect with flag 0x40, else the viewer when player_distance_in_arc
  * allows) by at most `turn`, and accelerates it along its heading; with
  * `scale_near` instead of `scale` while the target is within `near`.
  */
@@ -827,7 +827,7 @@ int effect_home(int limit, int scale, int turn, int attack, int height, int near
         e->unk30.vx = func_800496c8(e->unk30.vx, dir.vx, turn);
         e->unk30.vy = func_800496c8(e->unk30.vy, dir.vy, turn);
     } else {
-        dist = func_8003eb34(&e->unk20, e->unk30.vy, 24000, 4096);
+        dist = player_distance_in_arc(&e->unk20, e->unk30.vy, 24000, 4096);
         if (dist == -1)
             goto move;
         target.vx = viewer.position.vx;
@@ -843,7 +843,7 @@ move:
 }
 
 /*
- * Fires a kind-128 projectile request (func_8003beb4) from the current
+ * Fires a kind-128 projectile request (player_distance_in_reach) from the current
  * effect along its velocity once its countdown has run out, then moves
  * it and turns its roll by `spin`. Returns 128 when the request was
  * taken, else 0.
@@ -864,7 +864,7 @@ int effect_fire(int arg0, int height, int spin)
         req->unk22 = SquareRoot0(e->unk40.vx * e->unk40.vx + e->unk40.vz * e->unk40.vz);
         req->unk20 = ratan2(e->unk40.vz, e->unk40.vx);
         vis_lists.unk0 = 128;
-        fired = (func_8003beb4(req) != -1) << 7;
+        fired = (player_distance_in_reach(req) != -1) << 7;
         e->unk20.vx += e->unk40.vx;
         e->unk20.vy += e->unk40.vy;
         e->unk20.vz += e->unk40.vz;
@@ -946,7 +946,7 @@ void effect_step_back_half(void)
 #define SPELL_SOUND(e) effect_play_sound(e, (((e)->unk0 & 0x20) >> 2) + 29)
 
 /* Spawns an effect of kind `kind` with the current effect's flags. */
-#define SPAWN(e, kind) func_80036484(10, (e)->unk0, kind
+#define SPAWN(e, kind) effect_spawn(10, (e)->unk0, kind
 
 /* The two effects a kind turns into, at its place. */
 #define SPAWN_PAIR(e, first, second)                                           \
@@ -992,13 +992,13 @@ void effect_step_back_half(void)
  * Three sets of locals are here only because retail's frame has their
  * bytes and nothing reads or writes them; their real declarations are not
  * known: `unused` (32 bytes ahead of the first block's locals, as in
- * VS.EXE's func_800335e8), `spare` in the ring kinds' block (8 bytes: the
+ * VS.EXE's effect_update), `spare` in the ring kinds' block (8 bytes: the
  * debris pair of kinds 0x57... only fits behind it) and `spare_dir` /
  * `spare_pos` (24 bytes behind the last pair; put in the last block, their
  * place among the later kinds is a guess).
  */
 ADDRESS(0x800385b0, 0x3660)
-void func_800385b0(void)
+void effect_update(void)
 {
     StEffect *e = effects.cur;
     int r = 0;

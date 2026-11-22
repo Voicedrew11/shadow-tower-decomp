@@ -58,7 +58,7 @@ MATRIX DAT_8008042c[4] = {
 /*
  * The XA stream lengths in sectors, per stream file and channel: 48 files,
  * the file count of the save block's per-file arrays (DAT_801cba08.unk1448,
- * unk1478); func_80044674 locates files 0..39, the last eight rows are empty.
+ * unk1478); game_load_common_data locates files 0..39, the last eight rows are empty.
  */
 DATA(0x800804ac, 0x480, ".data")
 u32 DAT_800804ac[48][6] = {

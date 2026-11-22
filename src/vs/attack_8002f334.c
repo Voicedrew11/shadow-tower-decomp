@@ -1,7 +1,7 @@
 /*
  * A fighter's attacks and walking moves. One
- * translation unit: retail keeps func_80031478's switch table (0x800118a8)
- * eight-byte aligned after func_8002f334's (0x80011588, 0x31c bytes), as
+ * translation unit: retail keeps fighter_update's switch table (0x800118a8)
+ * eight-byte aligned after effect_spawn_attack's (0x80011588, 0x31c bytes), as
  * cc1 aligns each table within one object's read-only data, while the
  * next object's constants (0x800118c4) need no such alignment. -G8: the
  * walking moves' pad words are $gp-relative statics.
@@ -26,10 +26,10 @@ RODATA(0x80011588, 0x33c)
  * ST.EXE's func_8004cee8 (src/st/vis_attack.c).
  */
 void effect_random_offset(SVECTOR *offset, VECTOR *out, VECTOR *pos, short dy, short height);
-void func_8002f264(SVECTOR *off, VECTOR *out, VECTOR *base);
+void effect_jitter_offset(SVECTOR *off, VECTOR *out, VECTOR *base);
 /* src/vs/fighter_8002e114.c's hit, called without a prototype (retail
  * passes the fighter number unconverted). */
-void func_8002e314();
+void fighter_apply_attack_hit();
 
 /* The attack's origin: its offset turned by the fighter's facing. */
 #define ORIGIN(o)                                                              \
@@ -44,7 +44,7 @@ void func_8002e314();
 
 /* Fighter n attacks with attack record a. */
 ADDRESS(0x8002f334, 0x12ec)
-void func_8002f334(int n, VsAttack *a)
+void effect_spawn_attack(int n, VsAttack *a)
 {
     VECTOR p;
     SVECTOR dir;
@@ -71,7 +71,7 @@ void func_8002f334(int n, VsAttack *a)
             dir.vx = step.vx * (256 + i * 64) / 256;
             dir.vy = 0;
             dir.vz = step.vz * (256 + i * 64) / 256;
-            func_80032404(n, INDEX(), 0x81, a->unk0, &p, &dir, 256, (SVECTOR *)&f->unk4DF00, i == 2);
+            effect_spawn(n, INDEX(), 0x81, a->unk0, &p, &dir, 256, (SVECTOR *)&f->unk4DF00, i == 2);
         }
         break;
     case 0x3a:
@@ -82,8 +82,8 @@ void func_8002f334(int n, VsAttack *a)
             dir.vx = step.vx * (512 + i * 128) / 512;
             dir.vy = 0;
             dir.vz = step.vz * (512 + i * 128) / 512;
-            func_8002f264(&dir, &p, &q);
-            func_80032404(n, INDEX(), 0x81, a->unk0, &p, &dir, 0x1000, (SVECTOR *)&f->unk4DF00);
+            effect_jitter_offset(&dir, &p, &q);
+            effect_spawn(n, INDEX(), 0x81, a->unk0, &p, &dir, 0x1000, (SVECTOR *)&f->unk4DF00);
         }
         break;
     case 0x3e:
@@ -98,8 +98,8 @@ void func_8002f334(int n, VsAttack *a)
         dir.vx = rsin(f->unk4DF02 - 0x800) / 16;
         dir.vy = 0;
         dir.vz = rcos(f->unk4DF02 - 0x800) / 16;
-        func_8002f264(&dir, &p, &q);
-        func_80032404(n, INDEX(), 0x81, a->unk0, &p, &dir, 0x200, (SVECTOR *)&f->unk4DF00);
+        effect_jitter_offset(&dir, &p, &q);
+        effect_spawn(n, INDEX(), 0x81, a->unk0, &p, &dir, 0x200, (SVECTOR *)&f->unk4DF00);
         break;
     case 0x57:
     case 0x61:
@@ -112,7 +112,7 @@ void func_8002f334(int n, VsAttack *a)
         else
             dir.vy = 0;
         dir.vz = rcos(f->unk4DF02 - 0x800) * 0x180 / 4096;
-        func_80032404(n, INDEX(), 0x81, a->unk0, &p, &dir, 0x400);
+        effect_spawn(n, INDEX(), 0x81, a->unk0, &p, &dir, 0x400);
         break;
     case 0x40:
     case 0x5d:
@@ -137,7 +137,7 @@ void func_8002f334(int n, VsAttack *a)
         else
             dir.vy = 0;
         dir.vz = rcos(f->unk4DF02 - 0x800) * 0x180 / 4096;
-        func_80032404(n, INDEX(), 0x81, a->unk0, &p, &dir, 0x1000, (SVECTOR *)&f->unk4DF00);
+        effect_spawn(n, INDEX(), 0x81, a->unk0, &p, &dir, 0x1000, (SVECTOR *)&f->unk4DF00);
         break;
     case 0x7c:
     case 0x83:
@@ -152,7 +152,7 @@ void func_8002f334(int n, VsAttack *a)
         dir.vx = rsin(f->unk4DF02 - 0x800) * 0x180 / 4096;
         dir.vy = 0;
         dir.vz = rcos(f->unk4DF02 - 0x800) * 0x180 / 4096;
-        func_80032404(n, INDEX(), 0x81, a->unk0, &p, &dir, 0x200, 1);
+        effect_spawn(n, INDEX(), 0x81, a->unk0, &p, &dir, 0x200, 1);
         break;
     case 0x58:
     case 0x5c:
@@ -167,7 +167,7 @@ void func_8002f334(int n, VsAttack *a)
         dir.vx = rsin(f->unk4DF02 - 0x800) / 8;
         dir.vy = 0;
         dir.vz = rcos(f->unk4DF02 - 0x800) / 8;
-        func_80032404(n, INDEX(), 0x81, a->unk0, &p, &dir, 0x200);
+        effect_spawn(n, INDEX(), 0x81, a->unk0, &p, &dir, 0x200);
         break;
     case 0x56:
     case 0x5f:
@@ -177,8 +177,8 @@ void func_8002f334(int n, VsAttack *a)
         dir.vy = 0;
         dir.vz = rcos(f->unk4DF02 - 0x800) / 8;
         for (i = 0; i < 4; i++) {
-            func_8002f264(&dir, &p, &q);
-            func_80032404(n, INDEX(), 0x81, a->unk0, &q, &dir, 0x400, 1);
+            effect_jitter_offset(&dir, &p, &q);
+            effect_spawn(n, INDEX(), 0x81, a->unk0, &q, &dir, 0x400, 1);
         }
         break;
     case 0x55:
@@ -188,7 +188,7 @@ void func_8002f334(int n, VsAttack *a)
         dir.vx = rsin(f->unk4DF02 - 0x800) / 16;
         dir.vy = 0;
         dir.vz = rcos(f->unk4DF02 - 0x800) / 16;
-        func_80032404(n, INDEX(), 0x81, a->unk0, &p, &dir, 0x200);
+        effect_spawn(n, INDEX(), 0x81, a->unk0, &p, &dir, 0x200);
         break;
     case 0x31:
     case 0x32:
@@ -196,7 +196,7 @@ void func_8002f334(int n, VsAttack *a)
         ORIGIN(q);
         for (i = 0; i < 4; i++) {
             effect_random_offset(&dir, &p, &q, -data->unk1B6, -48);
-            func_80032404(n, INDEX(), 0x81, a->unk0, &p, &dir, 0x600, i & 1);
+            effect_spawn(n, INDEX(), 0x81, a->unk0, &p, &dir, 0x600, i & 1);
         }
         break;
     case 0x47:
@@ -206,7 +206,7 @@ void func_8002f334(int n, VsAttack *a)
         ORIGIN(q);
         for (i = 0; i < 4; i++) {
             effect_random_offset(&dir, &p, &q, 0, -48);
-            func_80032404(n, INDEX(), 0x81, a->unk0, &p, &dir, 0x600, i & 1);
+            effect_spawn(n, INDEX(), 0x81, a->unk0, &p, &dir, 0x600, i & 1);
         }
         break;
     case 0x33:
@@ -242,8 +242,8 @@ void func_8002f334(int n, VsAttack *a)
         dir.vy = 0;
         dir.vz = rcos(f->unk4DF02 - 0x800) / 64;
         for (i = 0; i < 4; i++) {
-            func_8002f264(&dir, &p, &q);
-            func_80032404(n, INDEX(), 0x81, a->unk0, &p, &dir, 0x400, i & 1);
+            effect_jitter_offset(&dir, &p, &q);
+            effect_spawn(n, INDEX(), 0x81, a->unk0, &p, &dir, 0x400, i & 1);
         }
         break;
     case 0xc8:
@@ -263,7 +263,7 @@ void func_8002f334(int n, VsAttack *a)
         dir.vx = rsin(f->unk4DF02 - 0x800) * 0x300 / 4096;
         dir.vy = 0;
         dir.vz = rcos(f->unk4DF02 - 0x800) * 0x300 / 4096;
-        func_80032404(n, INDEX(), 0x81, a->unk0, &p, &dir, 0x800, (SVECTOR *)&f->unk4DF00);
+        effect_spawn(n, INDEX(), 0x81, a->unk0, &p, &dir, 0x800, (SVECTOR *)&f->unk4DF00);
         break;
     case 0x3b:
     case 0x44:
@@ -280,7 +280,7 @@ void func_8002f334(int n, VsAttack *a)
     case 0xf4:
     case 0xf5:
     case 0xf6:
-        func_8002e314(n, INDEX());
+        fighter_apply_attack_hit(n, INDEX());
         break;
     }
 }
@@ -293,17 +293,17 @@ void func_8002f334(int n, VsAttack *a)
 DATA(0x800633a8, 0x4, ".sbss")
 static s32 DAT_800633a8;
 
-/* The buttons newly pressed this frame (func_80031478: 0x1000 and 0x8000
+/* The buttons newly pressed this frame (fighter_update: 0x1000 and 0x8000
  * start attacks, 0x2000 and 0x4000 chain them). */
 DATA(0x800633ac, 0x4, ".sbss")
 static s32 DAT_800633ac;
 
 /* Called without prototypes (retail passes int arguments unconverted):
  * src/vs/fighter_8002dec4.c's reach test, src/vs/fighter_8002e114.c's hit
- * and the attack effect func_8002f334 (not reconstructed). */
-int func_8002dec4();
-void func_8002e114();
-void func_8002f334();
+ * and the attack effect effect_spawn_attack (not reconstructed). */
+int fighter_hit_test();
+void fighter_apply_hit();
+void effect_spawn_attack();
 
 /* Moves the fighter a step along its facing, forward or back. */
 #define VS_WALK_ANGLE(f, d, op, angle)                                         \
@@ -319,7 +319,7 @@ void func_8002f334();
 /* Walks with the start/loop animation pair 0/1; the step only moves the
  * fighter inside frames [from, to] when from is nonzero. */
 ADDRESS(0x80030620, 0x29c)
-void func_80030620(VsFighter *f, s16 from, s16 to)
+void fighter_walk_reversible(VsFighter *f, s16 from, s16 to)
 {
     VsFighterData *d = &f->unk4DF18;
 
@@ -356,7 +356,7 @@ void func_80030620(VsFighter *f, s16 from, s16 to)
 
 /* Walks forward with animation 1 and back with animation 12. */
 ADDRESS(0x800308bc, 0x280)
-void func_800308bc(VsFighter *f, s16 from, s16 to)
+void fighter_walk_back_anim(VsFighter *f, s16 from, s16 to)
 {
     VsFighterData *d = &f->unk4DF18;
 
@@ -393,7 +393,7 @@ void func_800308bc(VsFighter *f, s16 from, s16 to)
 
 /* Slides along the facing without changing the animation. */
 ADDRESS(0x80030b3c, 0x1ac)
-void func_80030b3c(VsFighter *f)
+void fighter_slide(VsFighter *f)
 {
     VsFighterData *d = &f->unk4DF18;
 
@@ -416,7 +416,7 @@ void func_80030b3c(VsFighter *f)
 /* Walks with animation 1 entered through the start animation 10 and
  * backs off with animations 11/12 by movement kind. */
 ADDRESS(0x80030ce8, 0x490)
-void func_80030ce8(VsFighter *f, s16 from, s16 to)
+void fighter_walk_with_start(VsFighter *f, s16 from, s16 to)
 {
     VsFighterData *d = &f->unk4DF18;
     s16 kind;
@@ -497,7 +497,7 @@ void func_80030ce8(VsFighter *f, s16 from, s16 to)
 /* Walks forward through the start animation 10 (moving only for movement
  * kinds 5 and 6 while it plays) and back with animation 12. */
 ADDRESS(0x80031178, 0x300)
-void func_80031178(VsFighter *f, s16 from, s16 to)
+void fighter_walk_start_back_anim(VsFighter *f, s16 from, s16 to)
 {
     VsFighterData *d = &f->unk4DF18;
 
@@ -548,7 +548,7 @@ void func_80031178(VsFighter *f, s16 from, s16 to)
  * frames and lunges); 3 and 4 drain hit points while hit or down.
  */
 ADDRESS(0x80031478, 0xc90)
-void func_80031478(int n)
+void fighter_update(int n)
 {
     VsFighter *f = &DAT_800633b0.fighter[n];
     VsFighterData *d = &f->unk4DF18;
@@ -623,16 +623,16 @@ void func_80031478(int n)
         }
         i = h->count;
         if (i == 3 && h->hits[0].frame == 0 && h->hits[1].frame == 0 && h->hits[2].frame == 0) {
-            if (f->unk4DF16 != 0 && func_8002dec4(n, d->unk1B4, 2048)) {
-                func_8002e114(n, &h->hits[0].hit);
+            if (f->unk4DF16 != 0 && fighter_hit_test(n, d->unk1B4, 2048)) {
+                fighter_apply_hit(n, &h->hits[0].hit);
                 f->unk4DF16--;
             }
         } else {
             for (i--; i != -1; i--) {
                 if (f->unk4DEEA - f->unk4DEEC * DAT_80063220 < h->hits[i].frame &&
                     f->unk4DEEA >= h->hits[i].frame &&
-                    func_8002dec4(n, h->hits[i].range + d->unk1B4, h->hits[i].arc))
-                    func_8002e114(n, &h->hits[i].hit);
+                    fighter_hit_test(n, h->hits[i].range + d->unk1B4, h->hits[i].arc))
+                    fighter_apply_hit(n, &h->hits[i].hit);
             }
         }
         i = h->count2;
@@ -675,7 +675,7 @@ void func_80031478(int n)
             a = &d->unk14A[2];
         }
         if (f->unk4DEEA - f->unk4DEEC * DAT_80063220 < a->unkA && f->unk4DEEA >= a->unkA) {
-            func_8002f334(n, a);
+            effect_spawn_attack(n, a);
             f->unk4DF0A = d->unk1BA - a->unkC;
         }
         } else {
@@ -729,33 +729,33 @@ void func_80031478(int n)
         switch (d->unk1AA) {
         case 1:
             if (f->unk4DF10 == 1)
-                func_800308bc(f, 0, 0);
+                fighter_walk_back_anim(f, 0, 0);
             else if (f->unk4DF10 == 2)
-                func_80030620(f, 0, 0);
+                fighter_walk_reversible(f, 0, 0);
             break;
         case 2:
-            func_80030b3c(f);
+            fighter_slide(f);
             break;
         case 3:
         case 4:
         case 5:
         case 6:
             if (f->unk4DF10 == 1)
-                func_80031178(f, 0, 0);
+                fighter_walk_start_back_anim(f, 0, 0);
             else if (f->unk4DF10 == 2)
-                func_80030ce8(f, 0, 0);
+                fighter_walk_with_start(f, 0, 0);
             break;
         case 10:
-            func_80030620(f, 1400, 3469);
+            fighter_walk_reversible(f, 1400, 3469);
             break;
         case 11:
-            func_80030620(f, 1536, 2816);
+            fighter_walk_reversible(f, 1536, 2816);
             break;
         case 12:
-            func_800308bc(f, 2048, 3072);
+            fighter_walk_back_anim(f, 2048, 3072);
             break;
         case 13:
-            func_80030ce8(f, 2048, 4096);
+            fighter_walk_with_start(f, 2048, 4096);
             break;
         case 99:
             f->unk4DEEA &= 0xfff;

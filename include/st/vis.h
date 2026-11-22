@@ -38,14 +38,14 @@ typedef struct {
     s16 unk22;           /* 0x22: its horizontal length */
     u8 unk24[0x2c - 0x24];
     s32 unk2C;           /* 0x2c: floor height found; func_80048ad0 resolves it (func_80053aa4) */
-    s32 unk30;           /* 0x30: a height func_8003bdb0 tests */
+    s32 unk30;           /* 0x30: a height player_check_fall_death tests */
     s32 unk34;           /* 0x34: func_80048ad0's heights (unk2C..unk58) */
     s32 unk38;
     s32 unk3C;
     s32 unk40;
     s32 unk44;
     s32 unk48;
-    s32 unk4C;           /* 0x4c: 0x80000 when unset (func_8003be10) */
+    s32 unk4C;           /* 0x4c: 0x80000 when unset (player_update_submersion) */
     s32 unk50;
     s32 unk54;
     s32 unk58;           /* 0x58: 0x80000 when unset */
@@ -77,7 +77,7 @@ typedef struct {
     u16 unk44C2;         /* 0x44c2 */
     u8 unk44C4[2];
     s16 unk44C6;         /* 0x44c6: push along the wall */
-    s16 unk44C8;         /* 0x44c8: the visible record the viewer stands in, -1: none (func_8004162c) */
+    s16 unk44C8;         /* 0x44c8: the visible record the viewer stands in, -1: none (player_update_motion) */
     u16 n_sources;       /* 0x44ca */
     u16 n_visible;       /* 0x44cc */
     u16 sources[0x80];   /* 0x44ce */
@@ -88,8 +88,8 @@ typedef struct {
     s16 unk47D2;
     u8 unk47D4[0x47d8 - 0x47d4];
     u32 unk47D8;         /* 0x47d8: record index of the floor found */
-    s32 unk47DC;         /* 0x47dc: cleared by func_8003c054 */
-    u32 unk47E0;         /* 0x47e0: flag bits func_80044404 tests */
+    s32 unk47DC;         /* 0x47dc: cleared by player_reset_state */
+    u32 unk47E0;         /* 0x47e0: flag bits area_reload_images tests */
     s32 unk47E4;         /* 0x47e4: floor height (func_80048ad0) */
     s32 unk47E8;         /* 0x47e8: ceiling height */
     u8 unk47EC[4];
@@ -383,7 +383,7 @@ typedef struct {
     Vis212 *unk6138;     /* 0x6138: the current entry */
     Vis192 *unk613C;     /* 0x613c: the record of unk6140 */
     Vis212 *unk6140;     /* 0x6140: the entry the current one follows */
-    s32 unk6144;         /* 0x6144: loop index func_800402ac keeps in memory */
+    s32 unk6144;         /* 0x6144: loop index player_update_hand_action keeps in memory */
     s32 unk6148;         /* 0x6148: the current entry's record index */
     s32 unk614C;         /* 0x614c: active entries counted this frame */
     s32 unk6150;         /* 0x6150: frame counter */
@@ -394,7 +394,7 @@ typedef struct {
     s16 unk6164;
     u8 unk6166[2];
     u8 unk6168;          /* 0x6168: the current area id */
-    u8 unk6169;          /* 0x6169: cleared by func_8004567c */
+    u8 unk6169;          /* 0x6169: cleared by area_request_commit */
     u8 unk616A[0x61d8 - 0x616a];
 } VisTableA;
 
@@ -494,7 +494,7 @@ typedef struct {
     u8 unk0[2];
     u8 unk2;             /* 0x02: carry limit or price base (src/st/menu_shop.c) */
     u8 unk3;             /* 0x03 */
-    u8 unk4;             /* 0xff: none (game_load_start_file); func_8003f12c's model */
+    u8 unk4;             /* 0xff: none (game_load_start_file); player_load_equipment_model's model */
     u8 unk5[0xb];
     u8 unk10[14];        /* 0x10: counts menu_arrange_icons_draw_details lists */
     u16 unk1E;           /* 0x1e */

@@ -85,7 +85,7 @@ void menu_equip_open(void)
     cd_read_member(3, 3, (u_long *)p);
     copy_words(sp->unk0.block, (u32 *)(p + 4), 5376);
     p += *(u32 *)p + 4;
-    func_8003ec5c(p + 4, &sp->unk2E6[2], &sp->unk2E6[3], 1);
+    tim_load_images_at(p + 4, &sp->unk2E6[2], &sp->unk2E6[3], 1);
     DAT_801e0d28[0] = viewer.unk38[3];
     DAT_801e0d28[1] = viewer.unk38[4];
     DAT_801e0d28[2] = viewer.unk38[16];
@@ -118,17 +118,17 @@ void menu_equip_close(void)
         || (DAT_801e0d28[5] != viewer.unk38[12] && viewer.unk38[12] != 0xffff))
         loading_screen_show();
     if (DAT_801e0d28[0] != viewer.unk38[3] || DAT_801e0d28[1] != viewer.unk38[4]) {
-        func_8003f12c(viewer.unk38[3], 0, 1);
-        func_8003f12c(viewer.unk38[4], 2, 1);
+        player_load_equipment_model(viewer.unk38[3], 0, 1);
+        player_load_equipment_model(viewer.unk38[4], 2, 1);
     }
     if (DAT_801e0d28[2] != viewer.unk38[16] || DAT_801e0d28[3] != viewer.unk38[17]) {
-        func_8003f12c(viewer.unk38[16], 1, 1);
-        func_8003f12c(viewer.unk38[17], 3, 1);
+        player_load_equipment_model(viewer.unk38[16], 1, 1);
+        player_load_equipment_model(viewer.unk38[17], 3, 1);
     }
     if (DAT_801e0d28[4] != viewer.unk38[6])
-        func_8003ee38(viewer.unk38[6], 0);
+        player_load_magic(viewer.unk38[6], 0);
     if (DAT_801e0d28[5] != viewer.unk38[12])
-        func_8003ee38(viewer.unk38[12], 1);
+        player_load_magic(viewer.unk38[12], 1);
     loading_screen_end();
     viewer.unk38[15] = 0xffff;
 }

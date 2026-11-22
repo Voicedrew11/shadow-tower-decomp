@@ -10,7 +10,7 @@
 
 /* Jitters off and places out at base plus it. */
 ADDRESS(0x8002f264, 0xd0)
-void func_8002f264(SVECTOR *off, VECTOR *out, VECTOR *base)
+void effect_jitter_offset(SVECTOR *off, VECTOR *out, VECTOR *base)
 {
     off->vx += 8 - rand() / 2048;
     off->vy += -16 - rand() / 1024;

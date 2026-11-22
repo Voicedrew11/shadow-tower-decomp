@@ -16,7 +16,7 @@
  * returns 0); otherwise the opponent's sparks start and it returns 1.
  */
 ADDRESS(0x8002dec4, 0x250)
-int func_8002dec4(int n, s16 reach, s16 arc)
+int fighter_hit_test(int n, s16 reach, s16 arc)
 {
     VsFighter *f = &DAT_800633b0.fighter[n];
     VsFighter *o = &DAT_800633b0.fighter[1 - n];
@@ -70,6 +70,6 @@ blocked:
     o->unk4DF14 = state;
     return 0;
 hit:
-    func_8002d738(1 - n);
+    sparks_start_burst(1 - n);
     return 1;
 }

@@ -44,7 +44,7 @@ void area_hook_none(void)
 
 /* CD completion: marks the request done. */
 ADDRESS(0x800443f4, 0x10)
-void func_800443f4(StCdRequest *request)
+void image_stream_set_ready(StCdRequest *request)
 {
     request->unk10 = 1;
 }
@@ -53,17 +53,17 @@ void func_800443f4(StCdRequest *request)
  * Reloads the area, then copies the images two areas patch in VRAM.
  */
 ADDRESS(0x80044404, 0x270)
-void func_80044404(void)
+void area_reload_images(void)
 {
     u32 flag;
 
-    func_80045f90(1, 481, func_800443f4);
+    image_stream_queue(1, 481, image_stream_set_ready);
     area_state.unk0 = 1;
     area_state.unk2 = 5;
     area_state.unk13 = 0xff;
     area_state.unk14 = 0xff;
     area_state.unk12 = area_state.unk4;
-    func_800456f8();
+    area_load_update();
     cd_wait_idle();
     if (area_state.area == 24) {
         u32 marker;
@@ -108,7 +108,7 @@ void func_80044404(void)
  * to their tables.
  */
 ADDRESS(0x80044674, 0x874)
-void func_80044674(void)
+void game_load_common_data(void)
 {
     CdlFILE file;
     u32 *p = (u32 *)DAT_8009c888;
@@ -215,7 +215,7 @@ void func_80044674(void)
     CdSearchFile(&file, "\\ST\\XA1\\30600.XA;1");
     DAT_801cba08.unk1618[39] = file.pos;
     cd_read_member(1, 0x1e0, (u_long *)DAT_8009c888);
-    func_80045f90(1, 0x1e1, func_800443f4);
+    image_stream_queue(1, 0x1e1, image_stream_set_ready);
     func_80058a0c(1, 0x1e2, 0);
     copy_words((u32 *)&vis_table_b, p + 1, *p >> 2);
     p = (u32 *)((u8 *)p + (*p + 4));
@@ -237,7 +237,7 @@ void func_80044674(void)
     copy_words((u32 *)DAT_8009b088, p + 1, *p >> 2);
     anim_register_pack(40, DAT_8009b088);
     cd_wait_idle();
-    func_8003ea20();
+    player_init();
     func_80052d10();
 }
 
@@ -249,7 +249,7 @@ void func_80044674(void)
 /* Requests the current areas again (99 marks each unloaded) and runs the
  * loader until the request is done, then resets the primitive buffers. */
 ADDRESS(0x80044ee8, 0x128)
-void func_80044ee8(void)
+void area_load_current_blocking(void)
 {
     area_state.unk10 = area_state.unk4;
     area_state.unk11 = area_state.unk5;
@@ -269,7 +269,7 @@ void func_80044ee8(void)
     area_state.unk1F = 0;
     do {
         cd_wait_frame();
-        func_800456f8();
+        area_load_update();
         if (area_state.unk0 == 0)
             break;
     } while ((s16)area_state.unk2 < 6 || (s16)area_state.unk2 == 240);
@@ -279,7 +279,7 @@ void func_80044ee8(void)
 }
 
 ADDRESS(0x80045010, 0x34)
-void func_80045010(int dx, int dy, int dz)
+void player_shift_position(int dx, int dy, int dz)
 {
     viewer.position.vx += dx;
     viewer.position.vz += dz;
@@ -296,7 +296,7 @@ void func_80045010(int dx, int dy, int dz)
 /* All nine direct callers discard the word result; the return edges keep
  * v0 live. */
 ADDRESS(0x80045044, 0x524)
-KF_VALUELESS_S32 func_80045044(u8 a0, u8 a1, u8 a2, u8 a3, u8 a4, s8 f0, s8 f1, s8 f2, u8 f3, u8 f4,
+KF_VALUELESS_S32 area_request_load(u8 a0, u8 a1, u8 a2, u8 a3, u8 a4, s8 f0, s8 f1, s8 f2, u8 f3, u8 f4,
                    u8 f5)
 {
     u8 n0, n1, n2, n3, n4;
@@ -394,7 +394,7 @@ busy:
         cd_wait_idle();
         while (area_state.unk0) {
             cd_wait_frame();
-            func_800456f8();
+            area_load_update();
         }
     } else {
         while ((s16)area_state.unk2 == 240)
@@ -422,37 +422,37 @@ void func_80045568(void)
 }
 
 ADDRESS(0x8004557c, 0x18)
-void func_8004557c(void)
+void area_load_records_done(void)
 {
     area_state.unk2 = 1;
 }
 
 ADDRESS(0x80045594, 0x18)
-void func_80045594(void)
+void area_load_overlay_done(void)
 {
     area_state.unk2 = 2;
 }
 
 ADDRESS(0x800455ac, 0x18)
-void func_800455ac(void)
+void area_load_tables_done(void)
 {
     area_state.unk2 = 3;
 }
 
 ADDRESS(0x800455c4, 0x18)
-void func_800455c4(void)
+void area_load_world_done(void)
 {
     area_state.unk2 = 4;
 }
 
 ADDRESS(0x800455dc, 0x18)
-void func_800455dc(void)
+void area_load_collision_done(void)
 {
     area_state.unk2 = 5;
 }
 
 ADDRESS(0x800455f4, 0x54)
-void func_800455f4(StCdRequest *request)
+void area_load_images_done(StCdRequest *request)
 {
     if (request->unk10 == 0) {
         request->unk10 = 1;
@@ -464,7 +464,7 @@ void func_800455f4(StCdRequest *request)
 }
 
 ADDRESS(0x80045648, 0x1c)
-void func_80045648(StCdRequest *request)
+void area_stream_set_ready(StCdRequest *request)
 {
     if (request->unk10 == 0)
         request->unk10 = 1;
@@ -478,7 +478,7 @@ void func_80045664(void)
 
 /* Commits the requested area numbers that are set (0xff keeps one). */
 ADDRESS(0x8004567c, 0x7c)
-void func_8004567c(void)
+void area_request_commit(void)
 {
     vis_table_a.unk6169 = 0;
     area_state.unk1E = 0;
@@ -501,7 +501,7 @@ void func_8004567c(void)
  */
 
 ADDRESS(0x800456f8, 0x898)
-void func_800456f8(void)
+void area_load_update(void)
 {
     Vis212 *a;
     Vis88 *b;
@@ -522,7 +522,7 @@ void func_800456f8(void)
         if (area_state.unk10 == 0xff)
             goto phase3;
         if (cd_archive_member_size(1, area_state.unk10 * 10))
-            func_80045f90(1, area_state.unk10 * 10, func_80045648);
+            image_stream_queue(1, area_state.unk10 * 10, area_stream_set_ready);
         area_state.unk2 = 240;
         b = vis_table_b.entries;
         for (i = 239; i != -1; i--) {
@@ -533,18 +533,18 @@ void func_800456f8(void)
             b->unk05 = 0xff;
             b++;
         }
-        cd_queue_read_member(1, (area_state.unk10 * 10) | 1, (u8 *)DAT_80088c88, func_8004557c);
+        cd_queue_read_member(1, (area_state.unk10 * 10) | 1, (u8 *)DAT_80088c88, area_load_records_done);
         break;
     case 1:
         area_state.unk2 = 240;
         area_state.hooks = &area_hooks_default;
-        cd_queue_read_member(1, area_state.unk10 * 10 + 2, DAT_800881dc[0], func_80045594);
+        cd_queue_read_member(1, area_state.unk10 * 10 + 2, DAT_800881dc[0], area_load_overlay_done);
         viewer.unk174 = NULL;
         viewer.unk178 = -1;
         copy_words((u32 *)vis_records, (u32 *)DAT_80088c88, 0x3e00);
         if ((s8)area_state.unk20 != 127) {
             area_state.unk1C = 1;
-            func_80045010((s8)area_state.unk20 * 4096 + (s8)area_state.unk23 * 128,
+            player_shift_position((s8)area_state.unk20 * 4096 + (s8)area_state.unk23 * 128,
                           (s8)area_state.unk22 * 4096 + (s8)area_state.unk24 * 128,
                           (s8)area_state.unk21 * 4096 + (s8)area_state.unk25 * 128);
         }
@@ -552,7 +552,7 @@ void func_800456f8(void)
         break;
     case 2:
         area_state.unk2 = 240;
-        cd_queue_read_member(1, area_state.unk10 * 10 + 3, (u8 *)DAT_80088c88, func_800455ac);
+        cd_queue_read_member(1, area_state.unk10 * 10 + 3, (u8 *)DAT_80088c88, area_load_tables_done);
         break;
     case 3:
     phase3:
@@ -566,7 +566,7 @@ void func_800456f8(void)
             name[7] = area_state.unk10 % 10 + '0';
             cd_archive_open(2, name);
             area_state.unk2 = 240;
-            cd_queue_read_member(1, area_state.unk11 * 10 + 4, (u8 *)DAT_800fc488, func_800455c4);
+            cd_queue_read_member(1, area_state.unk11 * 10 + 4, (u8 *)DAT_800fc488, area_load_world_done);
         }
         if (area_state.unk10 != 0xff) {
             p = DAT_80088c88;
@@ -650,14 +650,14 @@ void func_800456f8(void)
     case 4:
         if (area_state.unk11 != 0xff) {
             area_state.unk2 = 240;
-            cd_queue_read_member(1, area_state.unk11 * 10 + 5, (u8 *)DAT_800f2c88, func_800455dc);
+            cd_queue_read_member(1, area_state.unk11 * 10 + 5, (u8 *)DAT_800f2c88, area_load_collision_done);
         }
         break;
     case 5:
     phase5:
         if (area_state.unk12 != 0xff) {
             area_state.unk2 = 240;
-            func_80045f90(1, area_state.unk12 * 10 + 6, func_800455f4);
+            image_stream_queue(1, area_state.unk12 * 10 + 6, area_load_images_done);
         }
         cd_wait_idle();
         area_state.unk1D = 0;
@@ -687,10 +687,10 @@ void func_800456f8(void)
         break;
     case 7:
     done:
-        func_8004567c();
+        area_request_commit();
         break;
     case 8:
-        func_8004567c();
+        area_request_commit();
         break;
     case 240:
         /* a CD read is pending */

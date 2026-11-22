@@ -93,9 +93,12 @@ void effect_vertex_world(StEffect *e, int index, VECTOR *out, SVECTOR *scale);
 StEffect *effect_alloc(void);
 /* The presets are old-style definitions: the spawner (src/st/effect_spawn.c)
  * passes their arguments unconverted. */
+/* VS.EXE has its own port under this name, with another signature; VS units define VS_EXE. */
+#ifndef VS_EXE
 void effect_preset_1();
 void effect_preset_5();
 void effect_preset_14();
+#endif
 
 /* src/st/effect_move.c */
 int effect_accelerate(int scale, int limit, int attack, int height, SVECTOR *accel);

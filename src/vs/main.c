@@ -884,7 +884,7 @@ void hud_draw_gauges(int level);
 void hud_draw_round_wins(int phase, int scale);
 void round_draw_backdrop(int hold);
 void fighter_draw_shadow(int n, int scale);
-void func_8002d998(void);
+void sparks_update(void);
 void anim_sets_retire(void);
 void anim_sets_free_idle(void);
 void anim_slots_free_idle(void);
@@ -894,8 +894,8 @@ int round_draw_opening(int frame);
 void hud_draw_fighter_names(int level);
 void fighter_draw_skeletal(void);
 void fighter_draw_vertex_anim(void);
-void func_8002c2c4(int n);
-void func_80035b68(void);
+void fighter_draw_guard_flash(int n);
+void effects_draw(void);
 void model_draw_part_at(u_long *model, int flags, SVECTOR *a, SVECTOR *b, SVECTOR *c);
 
 /* The callback's frame clock and the current screen's starting frame. */
@@ -1151,7 +1151,7 @@ void round_draw_frame(void)
                 break;
             }
             if (DAT_80063300->unk4DF14) {
-                func_8002c2c4(i);
+                fighter_draw_guard_flash(i);
                 DAT_80063300->unk4DF14--;
             }
             fighter_draw_shadow(i, 4096);
@@ -1169,8 +1169,8 @@ void round_draw_frame(void)
     scale.vz = 4;
     scale.vy = 4;
     scale.vx = 4;
-    func_80035b68();
-    func_8002d998();
+    effects_draw();
+    sparks_update();
     DAT_80063224 = 2;
     model_draw_part_at(DAT_80117708, 0, &rot, &rot, &scale);
     DAT_80063224 = 4;
@@ -1257,7 +1257,7 @@ void round_play(void)
         DAT_80063320 = 0;
     DAT_80063310 = 0;
     fighters_load_round();
-    func_800352cc();
+    effects_clear();
     sparks_clear_all();
     vs_gfx_state.unk2CA78.vy = -14000;
     vs_gfx_state.unk2CA78.vx = 0;
@@ -1356,12 +1356,12 @@ void round_play(void)
                     DAT_80063314 = pad_state.unk3C;
                     fighter_set_semi_trans(ko, side);
                 }
-                if (func_8002e510(0)) {
+                if (fighter_is_out_of_bounds(0)) {
                     DAT_80063324 = PHASE_KO_FIRST;
                     DAT_80063364 -= pad_state.unk3C;
                     DAT_80063314 = pad_state.unk3C;
                 }
-                if (func_8002e510(1)) {
+                if (fighter_is_out_of_bounds(1)) {
                     DAT_80063324 = PHASE_KO_SECOND;
                     DAT_80063364 -= pad_state.unk3C;
                     DAT_80063314 = pad_state.unk3C;
@@ -1379,11 +1379,11 @@ void round_play(void)
                 return;
             }
         }
-        func_800352fc();
+        effects_run();
         if (DAT_80063324 != PHASE_START && DAT_80063324 != PHASE_PAUSE) {
-            func_80031478(DAT_80063364 & 1);
-            func_80031478(1 - (DAT_80063364 & 1));
-            func_8002dcd8();
+            fighter_update(DAT_80063364 & 1);
+            fighter_update(1 - (DAT_80063364 & 1));
+            fighters_push_apart();
         }
         pad_state.pads[0].unk8 = 0;
         pad_state.pads[1].unk8 = 0;

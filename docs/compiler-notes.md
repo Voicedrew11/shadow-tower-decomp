@@ -114,7 +114,7 @@ Example: VS `0x80021140`.
 (`move a0,sN`, a stack argument loaded with `lw` or `lb`) where the prototype
 would mask or extend it. Cause: with no prototype in scope the default
 promotions apply. Source: an old-style declaration in the caller (`void
-func_8002e314();`) or an old-style definition earlier in the file, with
+fighter_apply_attack_hit();`) or an old-style definition earlier in the file, with
 explicit casts where retail does narrow. Examples: VS `0x8002f334`; ST
 `0x80036484` (the effect presets above it are old-style definitions); ST
 `0x80050768` (a stack argument loaded with `lb`).

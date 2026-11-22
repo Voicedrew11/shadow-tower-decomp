@@ -71,7 +71,7 @@ void func_800542d0(int id, int full)
         clut.vy = 511;
     }
     cd_read_member(8, id, DAT_80088c88);
-    func_8003ec5c(DAT_80088c88, &pix, &clut, 1);
+    tim_load_images_at(DAT_80088c88, &pix, &clut, 1);
 }
 
 /* An entry's talk: its 0x70 animation fades unk2A in, the XA stream of its

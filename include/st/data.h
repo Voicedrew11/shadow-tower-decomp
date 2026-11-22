@@ -45,9 +45,9 @@ extern StBlock DAT_8009c888[];
 /* A viewer model slot's position (+0xc) and rotation (+0x14). */
 typedef struct {
     u8 unk0[2];
-    u16 unk2;            /* 0x02: reach (func_800402ac) */
-    u16 unk4;            /* 0x04: swing cost, scaled by viewer.unk62[1] (func_800402ac) */
-    u16 unk6;            /* 0x06: func_8003f4ec copies it to viewer.unk134 */
+    u16 unk2;            /* 0x02: reach (player_update_hand_action) */
+    u16 unk4;            /* 0x04: swing cost, scaled by viewer.unk62[1] (player_update_hand_action) */
+    u16 unk6;            /* 0x06: player_start_hand_action copies it to viewer.unk134 */
     u16 unk8;            /* 0x08: and this one to viewer.unk138 */
     u8 unkA[2];
     short unkC;
@@ -125,7 +125,7 @@ typedef struct {
     u8 unk33; /* incremented every vsync, wraps at 60 */
     s32 unk34; /* incremented when unk33 wraps */
     u16 unk38[21]; /* set from FN. ids 970..990 */
-    /* Three parallel 14-entry figure arrays (func_8003cae4 sets unk62 and
+    /* Three parallel 14-entry figure arrays (player_reset_stats sets unk62 and
      * unk9A to 50 and clears unk7E). menu_equip_info_draw_attributes lists unk62; effect_play
      * reads six u16s from 0x78 (unk62[11]..unk7E[2]) by its level. */
     s16 unk62[14];       /* 0x62 */
@@ -143,28 +143,28 @@ typedef struct {
     void *unkF8[4];      /* 0xf8: its slot model blocks (ModelFile, st/mesh.h) */
     void *unk108[4];     /* 0x108: its slot animation state: a StAnimSlot (anim_prepare) or
                           * a node set (anim_prepare_any), by the model file's halfword +6 */
-    void *unk118[2];     /* 0x118: func_8003ee38's effects.defs record per slot */
+    void *unk118[2];     /* 0x118: player_load_magic's effects.defs record per slot */
     u8 *unk120[2];       /* 0x120: its load buffers (DAT_80190f28) */
     s32 unk128[2];
     ViewerHandState unk130; /* 0x130..0x137: timers and hit windows */
     s16 unk138[2];       /* 0x138 */
     s16 unk13C[2];       /* 0x13c: per hand, -1 when idle */
     u8 unk140[0x148 - 0x140];
-    u8 unk148[4];        /* 0x148: func_8003f12c's item model per slot (255: none); per hand: held item kind */
-    u8 unk14C[2];        /* 0x14c: func_8003ee38's item per slot (255: none); per hand: magic id */
+    u8 unk148[4];        /* 0x148: player_load_equipment_model's item model per slot (255: none); per hand: held item kind */
+    u8 unk14C[2];        /* 0x14c: player_load_magic's item per slot (255: none); per hand: magic id */
     u8 unk14E;
     u8 unk14F;
     u8 unk150[4];        /* 0x150 */
     u8 unk154;
-    u8 unk155[2];        /* 0x155: func_8003f910's kind per slot (255: none): the magic cast */
+    u8 unk155[2];        /* 0x155: player_fire_magic_shot's kind per slot (255: none): the magic cast */
     u8 unk157[2];
     u8 unk159[2];        /* 0x159: per hand: reload for unk15B */
-    u8 unk15B[2];        /* 0x15b: per hand: countdown to the next func_8003f910 */
+    u8 unk15B[2];        /* 0x15b: per hand: countdown to the next player_fire_magic_shot */
     u8 unk15D;
     s8 unk15E;           /* 0x15e: HUD frame offset (world_render_frame) */
     u8 unk15F;
-    SVECTOR unk160[2];   /* 0x160: func_8003f704's offsets per slot */
-    void *unk170;        /* 0x170: unk174 before the last move (func_8004162c) */
+    SVECTOR unk160[2];   /* 0x160: player_get_launch_vector's offsets per slot */
+    void *unk170;        /* 0x170: unk174 before the last move (player_update_motion) */
     void *unk174;        /* 0x174: the VisRecord the viewer stands in (st/vis.h) */
     s16 unk178;
     s16 unk17A;
@@ -181,7 +181,7 @@ typedef struct {
     u16 unk18C;          /* 0x18c: unk6 as last shown */
     u8 unk18E[2];
     union {
-        s16 halves[13][2]; /* level, peak (func_8003c17c) */
+        s16 halves[13][2]; /* level, peak (player_step_status_timer) */
         s32 words[13];     /* both at once: zero when the status is over; the HUD
                             * shows an icon while timer 5.. is nonzero */
     } timers;            /* 0x190: status timers */
@@ -247,7 +247,7 @@ typedef struct {
     short unk26C;        /* 0x26c: roll; model_draw_list turns kind-2 parts by all three */
     short unk26E;
     SVECTOR unk270;      /* 0x270 */
-    SVECTOR unk278;      /* 0x278: func_8003c054 copies it to 0x268; view pitch (vx) and yaw (vy) func_80041d4c turns
+    SVECTOR unk278;      /* 0x278: player_reset_state copies it to 0x268; view pitch (vx) and yaw (vy) player_update_look turns
                           * (band L reads the yaw, unk278.vy) */
     ViewerAnglePair unk280; /* 0x280: view pitch/yaw offsets */
     s16 unk284;
@@ -260,8 +260,8 @@ typedef struct {
     s16 unk292;
     s16 unk294;
     u8 unk296[2];
-    MATRIX unk298;       /* 0x298: func_8003f704's rotation */
-    VECTOR unk2B8;       /* 0x2b8: walk velocity: vx strafes, vz moves ahead (func_800420a0) */
+    MATRIX unk298;       /* 0x298: player_get_launch_vector's rotation */
+    VECTOR unk2B8;       /* 0x2b8: walk velocity: vx strafes, vz moves ahead (player_update_walk) */
     s16 unk2C8;
     s16 unk2CA;          /* 0x2ca: yaw speed */
     s16 unk2CC;          /* 0x2cc: pitch speed */
@@ -307,7 +307,7 @@ extern Viewer viewer;
 /* The current area's handlers (area_state.hooks): 32 slots, the handler
  * table an overlay starts with after its id (FdatHeader.unk04, st/fdat.h);
  * called without arguments unless noted. area_state.hooks is set only by
- * the area loader func_800456f8: to area_hooks_default (every slot
+ * the area loader area_load_update: to area_hooks_default (every slot
  * area_hook_none) while an area loads, then to the loaded overlay's table
  * (DAT_800881d8). The value sources of each called slot are listed in
  * config/retail/indirect_pointers.tsv. */
@@ -317,7 +317,7 @@ typedef struct {
     void (*unk08)();
     void (*unk0C)();
     void (*unk10)();
-    void (*loaded)(void); /* 0x14: called once the area is loaded (func_800456f8) */
+    void (*loaded)(void); /* 0x14: called once the area is loaded (area_load_update) */
     void (*item_added)(int); /* 0x18: item id rose by one (func_80055300) */
     void (*unk1C)();
     void (*unk20)(void *entry, void *record); /* 0x20: a table B entry kind func_8004eebc does not know */
@@ -325,7 +325,7 @@ typedef struct {
     void (*unk28)();
     void (*unk2C)();
     void (*item_used)(); /* 0x30: item use (item id, or 0x4000 | slot) (func_80054a54) */
-    void (*player_died)(void); /* 0x34: the player died (func_80042d74) */
+    void (*player_died)(void); /* 0x34: the player died (player_update) */
     void (*unk38)();
     void (*unk3C)();
     void (*unk40)(void); /* 0x40: per table A entry, every fourth frame (func_8004e324) */
@@ -387,7 +387,7 @@ extern Data801c7590 DAT_801c7590;
 typedef struct {
     u16 unk0;            /* 0x00: unk2 of the previous frame (src/st/pad.c) */
     u16 unk2;            /* 0x02: held bits */
-    u16 unk4;            /* 0x04: page bits menu_equip_info_draw consumes; request bits func_8003f4ec clears */
+    u16 unk4;            /* 0x04: page bits menu_equip_info_draw consumes; request bits player_start_hand_action clears */
     u16 unk6;            /* 0x06..0x0c: src/st/pad.c's repeat and combination words */
     u16 unk8;
     u16 unkA;
@@ -400,7 +400,7 @@ typedef struct {
     u8 unk11;
     u8 unk12;            /* 0x12 */
     u8 unk13;
-    u8 unk14;            /* 0x14: request func_80042900 consumes */
+    u8 unk14;            /* 0x14: request player_update_hands consumes */
     /* 0x15..0x17: written by the vsync-time pad update; every access reloads them */
     volatile u8 unk15;   /* 0x15: last PadGetState(0) */
     volatile u8 unk16;   /* 0x16: disconnected since the last stable state */
@@ -411,8 +411,8 @@ typedef struct {
     u8 unk20[2];
     /* 0x22: twelve button masks tested against unk2 (held) / unk4 (pressed),
      * set by func_800573bc: the settings page lists them in two columns of
-     * six (menu_button_config_draw). [2]/[3] and [6]/[7] turn the view (func_80041d4c);
-     * [8] is slot 0's request bit, [9] the other slots' (func_8003f4ec);
+     * six (menu_button_config_draw). [2]/[3] and [6]/[7] turn the view (player_update_look);
+     * [8] is slot 0's request bit, [9] the other slots' (player_start_hand_action);
      * [10] the hand swap (src/st/player.c). */
     u16 unk22[12];
     u16 unk3A;           /* 0x3a: unk22[8] | unk22[9] | unk22[10] | unk22[11] */
@@ -497,7 +497,7 @@ extern u8 DAT_80199220[4][0x7000];
 /* The 64 equipment model placements viewer.unkE8 points into. */
 extern ViewerModel DAT_801b5220[64];
 
-/* Settings bytes func_8003ea20 initializes (WIP extent). */
+/* Settings bytes player_init initializes (WIP extent). */
 typedef struct {
     u8 unk0;
     u8 unk1;             /* option page level, shown as a slider and a number (menu.c) */

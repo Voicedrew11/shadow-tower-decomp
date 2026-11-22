@@ -228,7 +228,7 @@ void func_80054a54(int id)
                 USE_RESULT = 1;
             }
         }
-        func_8003d030();
+        player_update_durability_warning();
         break;
     }
     case 0x129:
@@ -262,7 +262,7 @@ used:
     if (USE_RESULT == 1)
         func_800552bc(id);
 done:
-    func_8003ead0();
+    player_stop_motion();
     {
         /* the quick-use slots drop an item used up */
         u16 *slots[5] = {

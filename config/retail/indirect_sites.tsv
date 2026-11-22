@@ -5,8 +5,8 @@ VS.EXE	0x8001ced8	0x8001cd60	cd_queue_sync_callback	StCdRequest.done	0x2c	reques
 VS.EXE	0x8001cf00	0x8001cd60	cd_queue_sync_callback	StCdRequest.done	0x2c	request->done(request): other kinds complete
 VS.EXE	0x8002e9e0	0x8002e868	cd_request_sync_callback	StCdRequest.done	0x2c	twin of cd_queue_sync_callback (installed by cd_request_retire); request->done(request->unk20)
 VS.EXE	0x8002ea08	0x8002e868	cd_request_sync_callback	StCdRequest.done	0x2c	twin of cd_queue_sync_callback; request->done(request)
-ST.EXE	0x800438b4	0x80042d74	func_80042d74	AreaHooks.player_died	0x34	area_state.hooks->player_died()
-ST.EXE	0x80045d48	0x800456f8	func_800456f8	AreaHooks.loaded	0x14	area_state.hooks->loaded() after the overlay table is installed
+ST.EXE	0x800438b4	0x80042d74	player_update	AreaHooks.player_died	0x34	area_state.hooks->player_died()
+ST.EXE	0x80045d48	0x800456f8	area_load_update	AreaHooks.loaded	0x14	area_state.hooks->loaded() after the overlay table is installed
 ST.EXE	0x8004b29c	0x8004b270	func_8004b270	AreaHooks.unk40	0x40	area_state.hooks->unk40()
 ST.EXE	0x8004b4d4	0x8004b2dc	func_8004b2dc	AreaHooks.unk40	0x40	area_state.hooks->unk40()
 ST.EXE	0x8004e698	0x8004e324	func_8004e324	AreaHooks.unk40	0x40	area_state.hooks->unk40(), every fourth frame
@@ -22,4 +22,4 @@ ST.EXE	0x80055954	0x80055374	func_80055374	AreaHooks.examine	0x0	area_state.hook
 ST.EXE	0x80057374	0x8005735c	func_8005735c	AreaHooks.frame	0x4	area_state.hooks->frame()
 ST.EXE	0x80015794	0x8001561c	cd_request_sync_callback	StCdRequest.done	0x2c	request->done(request->unk20): checked read (kind 2) complete
 ST.EXE	0x800157bc	0x8001561c	cd_request_sync_callback	StCdRequest.done	0x2c	request->done(request): other kinds complete
-ST.EXE	0x800461c8	0x80045ffc	func_80045ffc	StCdRequest.done	0x2c	request->done(request): image stream (kind 3) reached its end marker
+ST.EXE	0x800461c8	0x80045ffc	image_stream_update	StCdRequest.done	0x2c	request->done(request): image stream (kind 3) reached its end marker

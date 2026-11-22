@@ -192,7 +192,7 @@ void func_80055374(long *pos, SVECTOR *rot)
                 cd_wait_idle();
                 func_80055cf4(area_state.unk4);
                 func_80057cc8();
-                func_80042cfc();
+                anim_free_all_for_menu();
                 func_80057a3c();
                 func_80057a68(0);
                 b = vis_table_b.entries;
