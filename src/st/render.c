@@ -3947,7 +3947,7 @@ void player_draw_equipment_model(u8 slot)
     sp->prim_alloc_count = world_state.prim_alloc_count;
     sp->prim = world_state.packet->cur;
     sp->prim_end = world_state.packet->end;
-    sp->vertices = world_state.world_vertices;
+    sp->vertices = (u8 *)world_state.world_vertices;
     sp->clut_base = 0;
     *(u_long *)&sp->rgb = equipment_model_rgb;
     if (viewer.slot_model_files[slot]->node_count == 0) {
@@ -3988,8 +3988,8 @@ ADDRESS(0x80022010, 0x668)
 void model_draw_list(u8 flags, SVECTOR *rot)
 {
     ScratchPad *sp = SCRATCHPAD;
-    ModelEntry *e = sp->list.models->entries;
-    int i = sp->list.models->count;
+    StAnimNode *e = sp->anims->nodes;
+    int i = sp->anims->count;
     MATRIX work;         /* unused: retail reserves its frame slot */
     MATRIX scale = {{{ONE, 0, 0}, {0, ONE, 0}, {0, 0, ONE}}, {0, 0, 0}};
     MeshVertex *out;
@@ -3997,13 +3997,13 @@ void model_draw_list(u8 flags, SVECTOR *rot)
     int n;
 
     while (i--) {
-        e->obj->composed = 0;
+        e->record->composed = 0;
         e++;
     }
-    e = sp->list.models->entries;
-    i = sp->list.models->count;
+    e = sp->anims->nodes;
+    i = sp->anims->count;
     while (i--) {
-        e->obj->composed = 0;
+        e->record->composed = 0;
         if (e->key == -1 || e->part == 0xffff) {
             e++;
             continue;
@@ -4018,33 +4018,33 @@ void model_draw_list(u8 flags, SVECTOR *rot)
             RotMatrixX(angle.vx, &face);
             RotMatrixY(angle.vy + rot->vy, &face);
             RotMatrixZ(angle.vz, &face);
-            if (e->obj->parent->relative_set == 0) {
-                RotMatrix(&e->obj->parent->transform->rot, &e->obj->parent->local_matrix);
+            if (e->record->parent->relative_set == 0) {
+                RotMatrix(&e->record->parent->transform->rot, &e->record->parent->local_matrix);
             }
-            gte_MulMatrix0(&e->obj->parent->local_matrix, &face, &e->obj->parent->local_matrix);
-            e->obj->parent->relative_set = 0;
+            gte_MulMatrix0(&e->record->parent->local_matrix, &face, &e->record->parent->local_matrix);
+            e->record->parent->relative_set = 0;
         }
-        anim_record_compose(e->obj);
+        anim_record_compose(e->record);
         if (e->kind == 1) {
             if (i % 6 != world_state.drawn_frames % 6) {
                 e++;
                 continue;
             }
-            ScaleMatrix(&scale, &e->obj->transform->scale);
+            ScaleMatrix(&scale, &e->record->transform->scale);
             gte_SetRotMatrix(&scale);
         } else if (e->kind == 3) {
             if (i % 4 != world_state.drawn_frames % 4) {
                 e++;
                 continue;
             }
-            ScaleMatrix(&scale, &e->obj->transform->scale);
+            ScaleMatrix(&scale, &e->record->transform->scale);
             gte_SetRotMatrix(&scale);
         } else if (e->kind == 4) {
             if (i % 8 != world_state.drawn_frames % 8) {
                 e++;
                 continue;
             }
-            ScaleMatrix(&scale, &e->obj->transform->scale);
+            ScaleMatrix(&scale, &e->record->transform->scale);
             gte_SetRotMatrix(&scale);
         }
         sp->header = (MeshHeader *)(sp->model + 12) + e->part;
@@ -4091,9 +4091,9 @@ void model_draw(int unused0, u16 model, VECTOR *pos, SVECTOR *rot, SVECTOR *scal
     u_int i;
     int n;
 
-    sp->vertices = world_state.world_vertices;
+    sp->vertices = (u8 *)world_state.world_vertices;
     /* 0x44 holds a second vertex cursor in this phase. */
-    (&sp->vertices)[1] = world_state.world_vertices;
+    (&sp->vertices)[1] = (u8 *)world_state.world_vertices;
     sp->z_ot = world_state.vertex_face_counts[0];
     sp->face_count = world_state.vertex_face_counts[1];
     sp->prim_count.count = world_state.prim_count;

@@ -30,6 +30,7 @@
 #include <st/scratch.h>
 #include <st/sound.h>
 #include <st/vis.h>
+#include <st/tim.h>
 #include <st/card.h>
 #include <st/item.h>
 #include <st/menu_main.h>
@@ -1337,9 +1338,8 @@ void tim_load_images_at(void *data, DVECTOR *pix, DVECTOR *clut, int absolute)
     } block;
     typedef char HeaderWordSize[sizeof(u_long) == 4 ? 1 : -1];
     typedef char HeaderSize[sizeof(TimBlock) == 12 ? 1 : -1];
-    typedef char HeaderLengthAt0[offsetof(TimBlock, len) == 0 ? 1 : -1];
-    typedef char HeaderRectAt4[offsetof(TimBlock, rect) == 4 ? 1 : -1];
-    typedef char HeaderRectSize[sizeof(RECT) == 8 ? 1 : -1];
+    typedef char HeaderLengthAt0[offsetof(TimBlock, bnum) == 0 ? 1 : -1];
+    typedef char HeaderRectAt4[offsetof(TimBlock, x) == 4 ? 1 : -1];
     typedef char HeaderWordsSize[sizeof(TimBlockWords) == 12 ? 1 : -1];
     typedef char HeaderPositionAt4[offsetof(TimBlockWords, position) == 4 ? 1 : -1];
     typedef char HeaderDimensionsAt8[offsetof(TimBlockWords, dimensions) == 8 ? 1 : -1];
@@ -1376,16 +1376,16 @@ next:
             block.words.byte_count = length_word;
             block.words.dimensions = dimensions_word;
             if (!absolute) {
-                rect.x = block.header.rect.x + cp->vx;
-                rect.y = block.header.rect.y + cp->vy;
+                rect.x = block.header.x + cp->vx;
+                rect.y = block.header.y + cp->vy;
             } else {
                 rect.x = cp->vx;
                 rect.y = cp->vy;
             }
-            rect.w = block.header.rect.w;
-            rect.h = block.header.rect.h;
+            rect.w = block.header.w;
+            rect.h = block.header.h;
             LoadImage(&rect, p);
-            p = (u_long *)((u8 *)p + (block.header.len - 12));
+            p = (u_long *)((u8 *)p + (block.header.bnum - 12));
         }
         position_word = p[1];
         length_word = p[0];
@@ -1395,16 +1395,16 @@ next:
         block.words.byte_count = length_word;
         block.words.dimensions = dimensions_word;
         if (!absolute) {
-            rect.x = block.header.rect.x + pp->vx;
-            rect.y = block.header.rect.y + pp->vy;
+            rect.x = block.header.x + pp->vx;
+            rect.y = block.header.y + pp->vy;
         } else {
             rect.x = pp->vx;
             rect.y = pp->vy;
         }
-        rect.w = block.header.rect.w;
-        rect.h = block.header.rect.h;
+        rect.w = block.header.w;
+        rect.h = block.header.h;
         LoadImage(&rect, p);
-        p = (u_long *)((u8 *)p + (block.header.len - 12));
+        p = (u_long *)((u8 *)p + (block.header.bnum - 12));
         goto next;
     }
 }

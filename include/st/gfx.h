@@ -12,6 +12,14 @@
 #include <LIBGTE.H>
 #include <LIBGPU.H>
 
+/* A transformed vertex: its screen XY, then the depth and depth-cue values
+ * the face loops average. Faces index vertices by byte offset. */
+typedef struct {
+    DVECTOR sxy;
+    short z;
+    short p;
+} MeshVertex;
+
 /* One animated-texture slot (see src/st/render.c). */
 typedef struct {
     u8 type;
@@ -168,7 +176,8 @@ typedef struct {
     u8 unk8E7C[0xa5fc - 0x8e7c];
     StAnimSlot anim_slots[16]; /* 0xa5fc */
     StAnimSet anim_sets[16]; /* 0xa77c */
-    u8 world_vertices[0xeb40 - 0xab3c]; /* 0xab3c: the world parts' transformed vertices (MeshVertex); WIP extent */
+    MeshVertex world_vertices[2048]; /* 0xab3c: the renderers' transformed vertices (ScratchPad.vertices) */
+    u8 unkEB3C[4];
     SVECTOR posed_vertices[0x2000]; /* 0xeb40: the vertices anim_pose interpolates */
     StTexAnim texanim[ST_TEXANIM_SLOTS];
     u8 drawn_frames;
@@ -216,6 +225,9 @@ typedef struct {
 typedef char WorldStateModelFilesAt0x834C[offsetof(WorldState, model_files) == 0x834c ? 1 : -1];
 typedef char WorldStateUnk8E7CAt0x8E7C[offsetof(WorldState, unk8E7C) == 0x8e7c ? 1 : -1];
 typedef char WorldStateAnimSlotsAt0xA5FC[offsetof(WorldState, anim_slots) == 0xa5fc ? 1 : -1];
+typedef char WorldStateWorldVerticesAt0xAB3C[offsetof(WorldState, world_vertices) == 0xab3c ? 1 : -1];
+typedef char WorldStatePosedVerticesAt0xEB40[offsetof(WorldState, posed_vertices) == 0xeb40 ? 1 : -1];
+typedef char MeshVertexSize[sizeof(MeshVertex) == 8 ? 1 : -1];
 
 extern WorldState world_state;
 

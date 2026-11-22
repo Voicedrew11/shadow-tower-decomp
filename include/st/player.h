@@ -24,12 +24,6 @@
         viewer.hp = viewer.max_hp;                                             \
     }
 
-/* One TIM block header (the bytes after the flags word). */
-typedef struct {
-    u_long len;
-    RECT rect;
-} TimBlock;
-
 /* Not reconstructed yet. */
 void play_death_sound(void);
 void pad_vibrate(int arg0);

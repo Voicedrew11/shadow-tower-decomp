@@ -93,7 +93,8 @@ typedef struct {
     u8 unk858C[0xa3fc - 0x858c];
     StAnimSlot anim_slots[12]; /* 0xa3fc: 12 vertex-animation slots (ST: 16 at 0xa5fc) */
     StAnimSet anim_sets[12]; /* 0xa51c: 12 skeletal-animation slots (ST: 16 at 0xa77c) */
-    u8 projected_vertices[0xc7f0 - 0xa7ec];
+    MeshVertex projected_vertices[1024]; /* 0xa7ec: the renderers' transformed vertices (VsScratchPad.vertices) */
+    u8 unkC7EC[4];
     SVECTOR posed_vertices[0x2000]; /* 0xc7f0: the vertices anim_pose interpolates (ST: unkEB40) */
     u8 unk1C7F0[0x2c970 - 0x1c7f0];
     u8 drawn_frames;     /* 0x2c970: frames drawn since the last rate update (round_play) */
@@ -110,6 +111,8 @@ typedef struct {
 
 /* Layout checks: the offsets the code proves. */
 typedef char VsWorldStateAnimSlotsAt0xA3FC[offsetof(VsWorldState, anim_slots) == 0xa3fc ? 1 : -1];
+typedef char VsWorldStateVerticesAt0xA7EC[offsetof(VsWorldState, projected_vertices) == 0xa7ec ? 1 : -1];
+typedef char VsWorldStatePosedAt0xC7F0[offsetof(VsWorldState, posed_vertices) == 0xc7f0 ? 1 : -1];
 typedef char VsWorldStateFrameAt0x2C972[offsetof(VsWorldState, frame) == 0x2c972 ? 1 : -1];
 typedef char VsWorldStateCameraAt0x2CA78[offsetof(VsWorldState, camera_pos) == 0x2ca78 ? 1 : -1];
 

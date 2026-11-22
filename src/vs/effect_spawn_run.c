@@ -1317,8 +1317,8 @@ void effect_draw_model_part(u8 *model, VECTOR *pos, SVECTOR *rot, SVECTOR *scale
     SVECTOR *in;
     int n;
 
-    sp->vertices = vs_gfx_state.projected_vertices;
-    sp->unk48 = vs_gfx_state.projected_vertices;
+    sp->vertices = (u8 *)vs_gfx_state.projected_vertices;
+    sp->unk48 = (u8 *)vs_gfx_state.projected_vertices;
     sp->vertex_count = vs_gfx_state.vertex_face_counts[0];
     sp->face_count = vs_gfx_state.vertex_face_counts[1];
     sp->prim_count = vs_gfx_state.prim_count;

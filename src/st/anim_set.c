@@ -230,7 +230,7 @@ int anim_set_pose(StAnimSet **setp, int id, int clip, u_long frame)
         set->blocks_run = 0;
         set->next_block = set->first_block;
     }
-    SCRATCHPAD->list.anims = set->list;
+    SCRATCHPAD->anims = set->list;
     while (t >= set->next_block->frame) {
         set->next_block = anim_block_run(t, set->next_block, set->list, set->node_ids, set->node_table,
                                     (u_long *)(ANIM_MODEL(file) + 4));

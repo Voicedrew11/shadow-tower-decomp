@@ -80,7 +80,7 @@ void fighter_draw_vertex_anim(void)
     sp->prim_count = vs_gfx_state.prim_count;
     sp->prim = vs_gfx_state.packet->cur;
     sp->prim_end = vs_gfx_state.packet->end;
-    sp->vertices = vs_gfx_state.projected_vertices;
+    sp->vertices = (u8 *)vs_gfx_state.projected_vertices;
     sp->clut_base = 0;
     if (current_fighter->anim_frame != -1)
         model_draw_mirrored();

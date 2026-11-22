@@ -59,15 +59,20 @@ typedef struct StAnimRecord {
     u8 unk4C[4];
 } StAnimRecord;
 
-/* A 16-byte list node and the list of them anim_list_init builds. */
+/* A 16-byte list node and the list of them anim_list_init builds; a node
+ * is a part of the current model model_draw_list draws. */
 typedef struct StAnimNode {
     u_long flags;
-    StAnimRecord *record; /* 0x04 */
-    u16 part;            /* 0x08: id anim_list_find_id searches */
-    u8 kind;
+    StAnimRecord *record; /* 0x04: its node record; model_draw_list clears its composed
+                          * flag every frame, scales kinds 1, 3 and 4 by transform->scale and
+                          * turns kind 2's parent matrix (parent->local_matrix) to face the viewer */
+    u16 part;            /* 0x08: id anim_list_find_id searches; 0xffff: none */
+    u8 kind;             /* 0x0a: 1, 3, 4: scaled, every 6th, 4th, 8th node per frame */
     u8 unkB;
-    s32 key;             /* 0x0c: key anim_list_find_key searches, -1 when free */
+    s32 key;             /* 0x0c: key anim_list_find_key searches, -1 when free (not drawn) */
 } StAnimNode;
+
+typedef char StAnimNodeSize[sizeof(StAnimNode) == 16 ? 1 : -1];
 
 typedef struct StAnimList {
     StAnimNode *nodes;
