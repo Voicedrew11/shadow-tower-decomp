@@ -69,7 +69,7 @@ next:
         }
         if (e->status.bytes[0] == 1) {
             if ((short)e->anim_frame > 0xa00) {
-                anim_set_node_vertex((StAnimSet *)e->anim_slot, e->model_slot + 128, 7, 13, &v);
+                anim_set_node_vertex(e->anim_slot.set, e->model_slot + 128, 7, 13, &v);
                 c7->position.vx = e->position.vx + v.vx;
                 c7->position.vy = e->position.vy + v.vy - 0x80;
                 c7->position.vz = e->position.vz + v.vz;

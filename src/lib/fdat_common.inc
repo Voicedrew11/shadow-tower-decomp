@@ -41,14 +41,14 @@ void creature_run_script_command(Creature *e)
     case 22:
         e->anim = s->anim;
         creature_turn_toward(e->target_heading, s->arg.s[1] * speed >> 12);
-        creature_set_velocity(e->facing + s->arg.u[2] - 1024, s->arg.s[0] * speed >> 12);
+        creature_set_velocity(e->rotation.vy + s->arg.u[2] - 1024, s->arg.s[0] * speed >> 12);
         break;
     case 16:
     case 17:
     case 18:
         e->anim = s->anim;
         if ((((short)e->anim_frame - s->arg.s[3] + 4096) & 0x7ff) < 1024)
-            creature_set_velocity(e->facing + s->arg.u[2] - 1024, s->arg.s[0] * speed >> 11);
+            creature_set_velocity(e->rotation.vy + s->arg.u[2] - 1024, s->arg.s[0] * speed >> 11);
         else
             creature_turn_toward(e->target_heading, s->arg.s[1] * speed >> 11);
         break;
@@ -60,7 +60,7 @@ void creature_run_script_command(Creature *e)
             turn = s->arg.s[1] * speed / s->arg.s[5];
             move = s->arg.s[0] * speed / s->arg.s[5];
             creature_turn_toward(e->target_heading, turn);
-            creature_set_velocity(e->facing + s->arg.u[3] - 1024, move);
+            creature_set_velocity(e->rotation.vy + s->arg.u[3] - 1024, move);
         } else {
             creature_turn_toward(e->target_heading, s->arg.s[2] * speed / (4096 - s->arg.s[5]));
         }
@@ -73,12 +73,12 @@ void creature_run_script_command(Creature *e)
         if (s->arg.u[11] != 0xffff && (frame = (short)e->anim_frame) >= (outer = s->arg.u[11])
             && (inner = s->arg.u[12]) >= frame) {
             push = s->arg.s[10] * speed / (inner - outer);
-            creature_set_velocity(e->facing - 1024, push);
+            creature_set_velocity(e->rotation.vy - 1024, push);
         }
         if (s->arg.u[14] != 0xffff && (frame = (short)e->anim_frame) >= (inner = s->arg.u[14])
             && frame <= (outer = s->arg.u[15])) {
             push = s->arg.s[13] * speed / (outer - inner);
-            creature_set_velocity(e->facing + 1024, push);
+            creature_set_velocity(e->rotation.vy + 1024, push);
         }
         if (s->arg.w[1] == -1 && s->arg.u[4] == 0xffff) {
             if (e->contact_hit == 0 && e->touched_player == 1 && push != 0

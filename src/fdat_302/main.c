@@ -240,7 +240,7 @@ void map_step_creature(void)
             e->flags |= 0x2000000;
             r->scripts[7]->command = 0x72;
             r->scripts[9]->command = 0x70;
-            *(s16 *)&r->scripts[9]->anim_step = -0xc0;
+            r->scripts[9]->anim_step = -0xc0;
             creature_force_talk(e, 0, 0);
             fdat_801ee474 = 2;
         } else {
@@ -375,13 +375,13 @@ void map_transform_creature(void)
     }
 first_animation_done:
     e48->position = e0->position;
-    *(SVECTOR *)&e48->rot_x = *(SVECTOR *)&e0->rot_x;
+    e48->rotation = e0->rotation;
     e48->block = e0->block;
     creature_despawn(e0);
     viewer.creatures_killed--;
     creature_spawn_now(e3);
     e3->position = e48->position;
-    *(SVECTOR *)&e3->rot_x = *(SVECTOR *)&e48->rot_x;
+    e3->rotation = e48->rotation;
     e3->fade = -1;
     e3->block = e48->block;
     e3->status.bytes[2] &= 0xf2;
@@ -393,7 +393,7 @@ first_animation_done:
         anim_get_file(e3->model_slot + 128, &file);
     } while (file == NULL);
     e49->position = e3->position;
-    *(SVECTOR *)&e49->rot_x = *(SVECTOR *)&e3->rot_x;
+    e49->rotation = e3->rotation;
     e49->block = e3->block;
     r2->scripts[0]->anim_step = 0x90;
     creature_start_script(e49, 0);

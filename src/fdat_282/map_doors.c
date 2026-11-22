@@ -39,9 +39,9 @@ void map_step_creature(void)
             return;
         }
         if (viewer.block == 0x3b)
-            e->facing = 0x800;
+            e->rotation.vy = 0x800;
         else if (viewer.block == 0x13d)
-            e->facing = 0;
+            e->rotation.vy = 0;
     }
     if (e == a50 && viewer.block == 0x65) {
         map_open_door_then_play_script();

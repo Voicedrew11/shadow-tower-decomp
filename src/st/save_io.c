@@ -53,9 +53,9 @@ void save_pack_data(StSaveData *save, int fresh)
             save->ground_items[i].position[0] = e32->position.vx;
             save->ground_items[i].position[1] = e32->position.vy;
             save->ground_items[i].position[2] = e32->position.vz;
-            save->ground_items[i].rotation[0] = e32->rot_x;
-            save->ground_items[i].rotation[1] = e32->facing;
-            save->ground_items[i].rotation[2] = e32->rot_z;
+            save->ground_items[i].rotation[0] = e32->rotation.vx;
+            save->ground_items[i].rotation[1] = e32->rotation.vy;
+            save->ground_items[i].rotation[2] = e32->rotation.vz;
             save->ground_items[i].state = e32->state;
             save->ground_items[i].area = e32->area;
         }
@@ -68,9 +68,9 @@ void save_pack_data(StSaveData *save, int fresh)
             save->ground_items[16 + i].position[0] = e48->position.vx;
             save->ground_items[16 + i].position[1] = e48->position.vy;
             save->ground_items[16 + i].position[2] = e48->position.vz;
-            save->ground_items[16 + i].rotation[0] = e48->rot_x;
-            save->ground_items[16 + i].rotation[1] = e48->facing;
-            save->ground_items[16 + i].rotation[2] = e48->rot_z;
+            save->ground_items[16 + i].rotation[0] = e48->rotation.vx;
+            save->ground_items[16 + i].rotation[1] = e48->rotation.vy;
+            save->ground_items[16 + i].rotation[2] = e48->rotation.vz;
             save->ground_items[16 + i].state = e48->state;
             save->ground_items[16 + i].area = e48->area;
         }
@@ -218,19 +218,19 @@ void save_unpack_data(StSaveData *save)
             entry->position.vx = save->ground_items[i].position[0];
             entry->position.vy = save->ground_items[i].position[1];
             entry->position.vz = save->ground_items[i].position[2];
-            entry->rot_x = save->ground_items[i].rotation[0];
-            entry->facing = save->ground_items[i].rotation[1];
-            entry->rot_z = save->ground_items[i].rotation[2];
+            entry->rotation.vx = save->ground_items[i].rotation[0];
+            entry->rotation.vy = save->ground_items[i].rotation[1];
+            entry->rotation.vz = save->ground_items[i].rotation[2];
             entry->state = save->ground_items[i].state;
             entry->area = save->ground_items[i].area;
             r = &vis_table_c.types[entry->item];
-            *(u32 *)entry->anim_slot = 0;
+            entry->anim_slot.slot = NULL;
             entry->unk20 = r->flags;
             entry->prev_state = 0;
             entry->draw_flags = 0;
             entry->bounces = 0;
             entry->vertical_speed = 0;
-            entry->depth_bias = r->unk5[1];
+            entry->depth_bias = r->ground_depth_bias;
         } else {
             entry->item = 0xffff;
             entry->state = 0;
@@ -244,19 +244,19 @@ void save_unpack_data(StSaveData *save)
             entry->position.vx = save->ground_items[16 + i].position[0];
             entry->position.vy = save->ground_items[16 + i].position[1];
             entry->position.vz = save->ground_items[16 + i].position[2];
-            entry->rot_x = save->ground_items[16 + i].rotation[0];
-            entry->facing = save->ground_items[16 + i].rotation[1];
-            entry->rot_z = save->ground_items[16 + i].rotation[2];
+            entry->rotation.vx = save->ground_items[16 + i].rotation[0];
+            entry->rotation.vy = save->ground_items[16 + i].rotation[1];
+            entry->rotation.vz = save->ground_items[16 + i].rotation[2];
             entry->state = save->ground_items[16 + i].state;
             entry->area = save->ground_items[16 + i].area;
             r = &vis_table_c.types[entry->item];
-            *(u32 *)entry->anim_slot = 0;
+            entry->anim_slot.slot = NULL;
             entry->unk20 = r->flags;
             entry->prev_state = 0;
             entry->draw_flags = 0;
             entry->bounces = 0;
             entry->vertical_speed = 0;
-            entry->depth_bias = r->unk5[1];
+            entry->depth_bias = r->ground_depth_bias;
         } else {
             entry->item = 0xffff;
             entry->state = 0;

@@ -213,7 +213,7 @@ void creatures_update(void)
             }
             h = (ratan2(dz, dx) - 0x400) & 0xfff;
             e->player_heading = h;
-            d = ((u16)e->facing - h) & 0xfff;
+            d = ((u16)e->rotation.vy - h) & 0xfff;
             e->player_bearing = d;
             if (d > 0x800)
                 e->player_bearing = 0x1000 - d;
@@ -288,7 +288,7 @@ void creature_types_link_scripts(void)
             if ((s32)*p == -1)
                 *p = NULL;
             else
-                *p = (CreatureScript *)((u8 *)&vis_table_a.types[16] + (s32)*p);
+                *p = (CreatureScript *)(vis_table_a.script_data + (s32)*p);
         }
     }
 }

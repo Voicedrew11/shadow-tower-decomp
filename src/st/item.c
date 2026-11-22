@@ -107,7 +107,7 @@ void player_examine(long *pos, SVECTOR *rot)
         if (down < 160)
             down = 160;
         if (angle_is_after((short)down, rot->vx) && angle_is_after(rot->vx, (short)up)) {
-            if (angle_within(rot->vy, a->facing, 512))
+            if (angle_within(rot->vy, a->rotation.vy, 512))
                 creature_talk(a, 0, 0);
             return;
         }
@@ -128,7 +128,7 @@ void player_examine(long *pos, SVECTOR *rot)
         def = &vis_table_b.types[b->type];
         DAT_801cd0e0 = 1;
         b->examined = 1;
-        kind = def->unk00[0];
+        kind = def->kind;
         switch (kind) {
         case 254:
             if (b->state == 0)
@@ -178,7 +178,7 @@ void player_examine(long *pos, SVECTOR *rot)
             }
             break;
         case 225:
-            d = (u16)(b->facing - b->player_heading) & 0xfff;
+            d = (u16)(b->rotation.vy - b->player_heading) & 0xfff;
             if (d < 512 || d > 3584)
                 talk_show_message(b->unk48);
             break;

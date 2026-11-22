@@ -138,7 +138,7 @@ void map_run_shop_visit(void)
 
     e->status.bytes[2] &= 0xf2;
     e->fade = -1;
-    if (e->anim_slot == 0)
+    if (e->anim_slot.slot == NULL)
         return;
     if (fdat_801ed8c4 == 2 && xa_stream_finished()) {
         if (world_state.talk_overlay_state == 3) {

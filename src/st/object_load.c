@@ -50,14 +50,14 @@ void objects_load(u8 *src)
             e->anim = 0x80;
             e->anim_frame = 0;
             e->draw_flags = 0;
-            e->rot_z = 0;
-            e->rot_x = 0;
+            e->rotation.vz = 0;
+            e->rotation.vx = 0;
             e->block = parameter;
             yaw = *(u16 *)(src + 6);
             e->scale.vz = 0x1000;
             e->scale.vy = 0x1000;
             e->scale.vx = 0x1000;
-            e->facing = yaw & 0xfff;
+            e->rotation.vy = yaw & 0xfff;
             rec = &vis_table_b.types[e->type];
             e->visibility = 0;
             e->flags = rec->flags;
@@ -75,7 +75,7 @@ void objects_load(u8 *src)
             e->position.vz = src[2] * 4096 + *(s16 *)(src + 12);
             copy_words((u32 *)&e->unk48, (u32 *)(src + 16), 2);
             fill_words((u32 *)&e->unk50, 0xff, 2);
-            kind = rec->unk00[0];
+            kind = rec->kind;
             switch (kind) {
             case 0:
             case 1:
@@ -87,7 +87,7 @@ void objects_load(u8 *src)
                         vis_records[e->params.door.block_a + n].part;
                     vis_records[e->params.door.block_a + n].part = t;
                 }
-                e->kind = rec->unk00[0];
+                e->kind = rec->kind;
                 if (!(e->unk49 & 0x80))
                     e->anim = e->unk49;
                 else
@@ -144,7 +144,7 @@ void objects_load(u8 *src)
                 e->visibility = 2;
                 break;
             case 0xe0:
-                e->facing = 0;
+                e->rotation.vy = 0;
                 e->kind = 0xe0;
                 e->unk01 = 0;
                 if ((*(u32 *)&e->unk48 & 0xffffff) == 0xffffff) {

@@ -575,30 +575,30 @@ void area_load_update(void)
             p = cd_file_buffer;
             a = vis_table_a.entries;
             for (i = 63; i != -1; i--) {
-                if (a->anim_slot) {
-                    anim_slot_free((StAnimSlot *)a->anim_slot);
-                    if (a->anim_slot)
-                        anim_set_free((StAnimSet *)a->anim_slot);
+                if (a->anim_slot.slot) {
+                    anim_slot_free(a->anim_slot.slot);
+                    if (a->anim_slot.slot)
+                        anim_set_free(a->anim_slot.set);
                 }
                 a->spawn_chance = 0xff;
                 a++;
             }
             b = vis_table_b.entries;
             for (i = 239; i != -1; i--) {
-                if (*(StAnimSlot **)b->anim_slot) {
-                    anim_slot_free(*(StAnimSlot **)b->anim_slot);
-                    if (*(StAnimSlot **)b->anim_slot)
-                        anim_set_free(*(StAnimSet **)b->anim_slot);
+                if (b->anim_slot.slot) {
+                    anim_slot_free(b->anim_slot.slot);
+                    if (b->anim_slot.slot)
+                        anim_set_free(b->anim_slot.set);
                 }
                 b->type = 0xffff;
                 b++;
             }
             c = vis_table_c.entries;
             for (i = 63; i != -1; i--) {
-                if (*(StAnimSlot **)c->anim_slot) {
-                    anim_slot_free(*(StAnimSlot **)c->anim_slot);
-                    if (*(StAnimSlot **)c->anim_slot)
-                        anim_set_free(*(StAnimSet **)c->anim_slot);
+                if (c->anim_slot.slot) {
+                    anim_slot_free(c->anim_slot.slot);
+                    if (c->anim_slot.slot)
+                        anim_set_free(c->anim_slot.set);
                 }
                 c++;
             }

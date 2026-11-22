@@ -1539,7 +1539,7 @@ void player_load_equipment_model(u16 id, u8 slot, u8 reload)
     if (slot < 2) {
         viewer.action_timers.halves[slot] = -1;
     }
-    viewer.slot_anims[slot] = 0;
+    viewer.slot_anims[slot].slot = NULL;
     viewer.action_recoil = 0;
     viewer.shield_lowering = 0;
     viewer.hand_rot_x = 0;
@@ -2321,24 +2321,24 @@ loop:
         }
     }
     if (hits & 2) {
-        vel.vx = (1 - (vis_lists.wall_dist - 256)) * vis_lists.wall_normal_x / 4096;
-        vel.vz = (1 - (vis_lists.wall_dist - 256)) * vis_lists.wall_normal_z / 4096;
+        vel.vx = (1 - (vis_lists.wall_dist - 256)) * vis_lists.wall_normal.vx / 4096;
+        vel.vz = (1 - (vis_lists.wall_dist - 256)) * vis_lists.wall_normal.vz / 4096;
         if (slid_a) {
             goto move;
         }
         slid_a = 1;
-        ang = ratan2(vis_lists.wall_normal_z, vis_lists.wall_normal_x);
+        ang = ratan2(vis_lists.wall_normal.vz, vis_lists.wall_normal.vx);
         vis_lists.hit_normal_heading = (short)ang;
         hits = speed * rcos(angle - (ang + 1024)) / 4096;
         vis_lists.slide_speed = hits;
     } else if (hits & 8) {
-        vel.vx = (1 - (vis_lists.low_wall_dist - 256)) * vis_lists.low_wall_normal_x / 4096;
-        vel.vz = (1 - (vis_lists.low_wall_dist - 256)) * vis_lists.low_wall_normal_z / 4096;
+        vel.vx = (1 - (vis_lists.low_wall_dist - 256)) * vis_lists.low_wall_normal.vx / 4096;
+        vel.vz = (1 - (vis_lists.low_wall_dist - 256)) * vis_lists.low_wall_normal.vz / 4096;
         if (slid_b) {
             goto move;
         }
         slid_b = 1;
-        ang = ratan2(vis_lists.low_wall_normal_z, vis_lists.low_wall_normal_x);
+        ang = ratan2(vis_lists.low_wall_normal.vz, vis_lists.low_wall_normal.vx);
         vis_lists.hit_normal_heading = (short)ang;
         hits = speed * rcos(angle - (ang + 1024)) / 4096;
         vis_lists.slide_speed = hits;
@@ -2440,24 +2440,24 @@ void player_update_motion(void)
             viewer.position.vz += vel.vz;
         }
         if (hits & 2) {
-            vel.vx = (1 - (vis_lists.wall_dist - 256)) * vis_lists.wall_normal_x / 4096;
-            vel.vz = (1 - (vis_lists.wall_dist - 256)) * vis_lists.wall_normal_z / 4096;
+            vel.vx = (1 - (vis_lists.wall_dist - 256)) * vis_lists.wall_normal.vx / 4096;
+            vel.vz = (1 - (vis_lists.wall_dist - 256)) * vis_lists.wall_normal.vz / 4096;
             if (slid_a) {
                 goto move;
             }
             slid_a = 1;
-            ang = ratan2(vis_lists.wall_normal_z, vis_lists.wall_normal_x);
+            ang = ratan2(vis_lists.wall_normal.vz, vis_lists.wall_normal.vx);
             vis_lists.hit_normal_heading = ang;
             push = speed * rcos(heading - (ang + 1024)) / 4096;
             vis_lists.slide_speed = push;
         } else if (hits & 8) {
-            vel.vx = (1 - (vis_lists.low_wall_dist - 256)) * vis_lists.low_wall_normal_x / 4096;
-            vel.vz = (1 - (vis_lists.low_wall_dist - 256)) * vis_lists.low_wall_normal_z / 4096;
+            vel.vx = (1 - (vis_lists.low_wall_dist - 256)) * vis_lists.low_wall_normal.vx / 4096;
+            vel.vz = (1 - (vis_lists.low_wall_dist - 256)) * vis_lists.low_wall_normal.vz / 4096;
             if (slid_b) {
                 goto move;
             }
             slid_b = 1;
-            ang = ratan2(vis_lists.low_wall_normal_z, vis_lists.low_wall_normal_x);
+            ang = ratan2(vis_lists.low_wall_normal.vz, vis_lists.low_wall_normal.vx);
             vis_lists.hit_normal_heading = ang;
             push = speed * rcos(heading - (ang + 1024)) / 4096;
             vis_lists.slide_speed = push;
@@ -2792,10 +2792,10 @@ void player_swap_hand_items(u8 a, u8 b)
             anim_register(a + 32, viewer.slot_model_files[a]);
         if (viewer.slot_model_ids[b] != 0xff)
             anim_register(b + 32, viewer.slot_model_files[b]);
-        if (viewer.slot_anims[a])
-            ((StAnimSlot *)viewer.slot_anims[a])->model_id = 0xffff;
-        if (viewer.slot_anims[b])
-            ((StAnimSlot *)viewer.slot_anims[b])->model_id = 0xffff;
+        if (viewer.slot_anims[a].slot)
+            viewer.slot_anims[a].slot->model_id = 0xffff;
+        if (viewer.slot_anims[b].slot)
+            viewer.slot_anims[b].slot->model_id = 0xffff;
         sound_a = viewer.slot_sounds[a];
         viewer.slot_sounds[a] = viewer.slot_sounds[b];
         viewer.slot_sounds[b] = sound_a;
@@ -2812,10 +2812,10 @@ void player_swap_hand_items(u8 a, u8 b)
         anim_register(33, viewer.slot_model_files[1]);
     if (viewer.slot_model_ids[2] >= 31 && viewer.slot_model_ids[2] < 35)
         anim_register(35, viewer.slot_model_files[3]);
-    viewer.slot_anims[0] = 0;
-    viewer.slot_anims[1] = 0;
-    viewer.slot_anims[2] = 0;
-    viewer.slot_anims[3] = 0;
+    viewer.slot_anims[0].slot = NULL;
+    viewer.slot_anims[1].slot = NULL;
+    viewer.slot_anims[2].slot = NULL;
+    viewer.slot_anims[3].slot = NULL;
     player_recalc_stats();
     viewer.hud_hp = 0xffff;
 }

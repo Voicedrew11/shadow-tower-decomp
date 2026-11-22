@@ -116,7 +116,7 @@ int object_find_usable(int start, CollisionState *req)
             d |= 0xf000;
         if ((r->flags & 8) && (u16)(d + 400) > 800)
             continue;
-        k = r->unk00[0];
+        k = r->kind;
         if ((k >= 50 && k <= 52) || k == 1 || k == 0 || k == 254 || k == 225 || k == 226
             || k == 14)
             return i;
@@ -324,7 +324,7 @@ int object_move_child(AreaObject *src, AreaObject *e, SVECTOR *from, SVECTOR *to
         e->unk01 = src->unk01;
         switch (e->type) {
         case 136:
-            e->rot_x = 0x400;
+            e->rotation.vx = 0x400;
             e->depth_bias = 100;
             break;
         case 133:
@@ -335,11 +335,11 @@ int object_move_child(AreaObject *src, AreaObject *e, SVECTOR *from, SVECTOR *to
             e->anim = 0;
         else
             e->anim = 0x80;
-        vector_rotate((SVECTOR *)&src->rot_x, from, &e->position);
+        vector_rotate(&src->rotation, from, &e->position);
         e->position.vx += src->position.vx;
         e->position.vy += src->position.vy;
         e->position.vz += src->position.vz;
-        e->facing = src->facing;
+        e->rotation.vy = src->rotation.vy;
         *(s16 *)&e->unk50 = src - vis_table_b.entries;
     case 1:
         break;
@@ -351,8 +351,8 @@ int object_move_child(AreaObject *src, AreaObject *e, SVECTOR *from, SVECTOR *to
         if (e->anim_frame >= 4096)
             e->anim_frame = 4095;
     }
-    vector_rotate((SVECTOR *)&src->rot_x, from, &a);
-    vector_rotate((SVECTOR *)&src->rot_x, to, &b);
+    vector_rotate(&src->rotation, from, &a);
+    vector_rotate(&src->rotation, to, &b);
     (*(u8 *)&src->unk50)++;
     t = (*(u8 *)&src->unk50 << 12) / steps;
     e->position.vx = src->position.vx + math_lerp(a.vx, b.vx, t);
@@ -454,25 +454,25 @@ AreaObject *object_spawn_part(src, kind, state, arg3, size, angle, ox, oy, oz)
     e->kind = state;
     *(s16 *)&e->unk50 = arg3;
     e->state = size;
-    c = rcos(src->facing - angle) / 16;
-    e->unk56 = rsin(src->facing - angle) / 16;
+    c = rcos(src->rotation.vy - angle) / 16;
+    e->unk56 = rsin(src->rotation.vy - angle) / 16;
     e->flags = 0x40;
     ((s16 *)&e->unk50)[1] = c;
     e->unk54 = 0;
     e->visibility = 0;
     e->anim = 0x80;
-    e->rot_x = 0;
-    e->rot_z = rand() / 8;
-    e->facing = src->facing;
+    e->rotation.vx = 0;
+    e->rotation.vz = rand() / 8;
+    e->rotation.vy = src->rotation.vy;
     e->depth_bias = src->depth_bias;
     e->draw_flags = 15;
     e->unk06 = 0xff;
     e->light = 0x800;
     n = size;
     e->scale.vx = e->scale.vy = e->scale.vz = n << 10;
-    e->position.vx = src->position.vx + (n * 256 - ox) * rcos(src->facing) / 4096;
+    e->position.vx = src->position.vx + (n * 256 - ox) * rcos(src->rotation.vy) / 4096;
     e->position.vy = src->position.vy - oy;
-    e->position.vz = src->position.vz + (n * 256 - oz) * rsin(src->facing) / 4096;
+    e->position.vz = src->position.vz + (n * 256 - oz) * rsin(src->rotation.vy) / 4096;
     return e;
 }
 
@@ -580,7 +580,7 @@ void objects_update(void)
         }
         angle = (ratan2(dz, dx) - 1024) & 0xfff;
         e->player_heading = angle;
-        off = ((u16)e->facing - angle) & 0xfff;
+        off = ((u16)e->rotation.vy - angle) & 0xfff;
         e->player_bearing = off;
         if (off > 2048)
             e->player_bearing = 4096 - off;
@@ -984,16 +984,16 @@ void objects_update(void)
                 e->position = vis_table_b.entries[H50(e)].position;
                 e->position.vy -= 1280;
                 e->scale.vx = e->scale.vy = e->scale.vz = 0;
-                H52(e) = rcos(e->facing - 1024) * 384 / 4096;
+                H52(e) = rcos(e->rotation.vy - 1024) * 384 / 4096;
                 e->unk54 = 0;
-                e->unk56 = rsin(e->facing - 1024) * 384 / 4096;
+                e->unk56 = rsin(e->rotation.vy - 1024) * 384 / 4096;
                 e->position.vx += H52(e);
                 e->position.vz += e->unk56;
                 e->state = 0;
             } else if (e->state >= 3) {
-                H52(e) = e->state * (rcos(e->facing - 1024) << 7) / 4096;
+                H52(e) = e->state * (rcos(e->rotation.vy - 1024) << 7) / 4096;
                 e->unk54 = e->state << 5;
-                e->unk56 = e->state * (rsin(e->facing - 1024) << 7) / 4096;
+                e->unk56 = e->state * (rsin(e->rotation.vy - 1024) << 7) / 4096;
                 e->position.vx += H52(e) - rand() / 256;
                 e->position.vy += e->unk54 + rand() / 2048;
                 e->position.vz += e->unk56 - rand() / 256;
@@ -1002,9 +1002,9 @@ void objects_update(void)
                 e->scale.vz += 1024;
                 e->state++;
             } else {
-                H52(e) = e->state * (rcos(e->facing - 1024) << 7) / 4096;
+                H52(e) = e->state * (rcos(e->rotation.vy - 1024) << 7) / 4096;
                 e->unk54 = e->state << 6;
-                e->unk56 = e->state * (rsin(e->facing - 1024) << 7) / 4096;
+                e->unk56 = e->state * (rsin(e->rotation.vy - 1024) << 7) / 4096;
                 e->position.vx += H52(e) + rand() / 256;
                 e->position.vy += e->unk54 + rand() / 2048;
                 e->position.vz += e->unk56 + rand() / 256;
@@ -1028,20 +1028,20 @@ void objects_update(void)
             }
             if (e->state >= 5) {
                 e->position = vis_table_b.entries[H50(e)].position;
-                e->position.vx -= rcos(e->facing) * 1280 / 4096;
+                e->position.vx -= rcos(e->rotation.vy) * 1280 / 4096;
                 e->position.vy -= 2000;
-                e->position.vz -= rsin(e->facing) * 1280 / 4096;
+                e->position.vz -= rsin(e->rotation.vy) * 1280 / 4096;
                 e->scale.vx = e->scale.vy = e->scale.vz = 0;
-                H52(e) = rcos(e->facing) * 384 / 4096;
+                H52(e) = rcos(e->rotation.vy) * 384 / 4096;
                 e->unk54 = 128;
-                e->unk56 = rsin(e->facing) * 384 / 4096;
+                e->unk56 = rsin(e->rotation.vy) * 384 / 4096;
                 e->position.vx += H52(e);
                 e->position.vz += e->unk56;
                 e->state = 0;
             } else if (e->state >= 3) {
-                H52(e) = e->state * (rcos(e->facing) << 7) / 4096;
+                H52(e) = e->state * (rcos(e->rotation.vy) << 7) / 4096;
                 e->unk54 = e->state << 6;
-                e->unk56 = e->state * (rsin(e->facing) << 7) / 4096;
+                e->unk56 = e->state * (rsin(e->rotation.vy) << 7) / 4096;
                 e->position.vx += H52(e) - rand() / 256;
                 e->position.vy += e->unk54 + rand() / 2048;
                 e->position.vz += e->unk56 - rand() / 256;
@@ -1050,9 +1050,9 @@ void objects_update(void)
                 e->scale.vz += 1024;
                 e->state++;
             } else {
-                H52(e) = e->state * (rcos(e->facing) << 7) / 4096;
+                H52(e) = e->state * (rcos(e->rotation.vy) << 7) / 4096;
                 e->unk54 = e->state << 7;
-                e->unk56 = e->state * (rsin(e->facing) << 7) / 4096;
+                e->unk56 = e->state * (rsin(e->rotation.vy) << 7) / 4096;
                 e->position.vx += H52(e) + rand() / 256;
                 e->position.vy += e->unk54 + rand() / 2048;
                 e->position.vz += e->unk56 + rand() / 256;
@@ -1170,7 +1170,7 @@ void objects_update(void)
             viewer.warp_return.warp.dx = viewer.position.vx - (viewer.warp_return.warp.x << 12);
             viewer.warp_return.warp.dy = viewer.position.vy - (viewer.warp_return.warp.y << 12);
             viewer.warp_return.warp.dz = viewer.position.vz - (viewer.warp_return.warp.z << 12);
-            viewer.warp_return.warp.yaw = e->facing + 2048;
+            viewer.warp_return.warp.yaw = e->rotation.vy + 2048;
             for (j = 240, o = vis_table_b.entries; j != 0; j--, o++) {
                 if (o->kind == e->kind)
                     B50(o) = 1;
@@ -1475,9 +1475,9 @@ void ground_items_load(GroundItemFileEntry *src)
         c->position.vx = (src->cell_x << 12) + src->offset_x;
         c->position.vy = (src->cell_y << 12) + src->offset_y;
         c->position.vz = (src->cell_z << 12) + src->offset_z;
-        c->rot_x = src->rot_x & 0xfff;
-        c->facing = src->facing & 0xfff;
-        c->rot_z = src->rot_z & 0xfff;
+        c->rotation.vx = src->rot_x & 0xfff;
+        c->rotation.vy = src->facing & 0xfff;
+        c->rotation.vz = src->rot_z & 0xfff;
         c->unk20 = src->unk02;
         c->vertical_speed = 0;
         if (c->item == 0xffff) {
@@ -1486,7 +1486,7 @@ void ground_items_load(GroundItemFileEntry *src)
         }
         rec = &vis_table_c.types[c->item];
         c->area = area_state.area;
-        c->depth_bias = rec->unk5[1];
+        c->depth_bias = rec->ground_depth_bias;
         vis_table_c.placed_bits[c->item >> 5] |= 1 << (c->item & 0x1f);
         vis_table_c.ground_item_counts[1]++;
         vis_table_c.ground_item_counts[0]++;
@@ -1527,7 +1527,7 @@ int ground_item_find_in_reach(CollisionState *req, int unused)
         if (c->area != area_state.area)
             continue;
         rec = &vis_table_c.types[c->item];
-        if (rec->unk0[1] == 0)
+        if (rec->pickup_radius == 0)
             continue;
         if (c->position.vy < viewer.position.vy - 0x400 || c->position.vy > viewer.position.vy + 0xa40)
             continue;
@@ -1541,7 +1541,7 @@ int ground_item_find_in_reach(CollisionState *req, int unused)
         if (dz < -0x2800 || dz > 0x2800)
             continue;
         dist = SquareRoot0(dx * dx + dz * dz);
-        if (dist < rec->unk0[1] * 256 + req->radius && dist < nearest) {
+        if (dist < rec->pickup_radius * 256 + req->radius && dist < nearest) {
             nearest = dist;
             best = i;
         }
@@ -1573,7 +1573,7 @@ void ground_item_pick_up(GroundItem *c, int forced)
     save = *c;
     viewer.state = 3;
     gte_SetRotMatrix(&viewer.camera_matrix);
-    gte_ldv0((SVECTOR *)&info->unk5[3]);
+    gte_ldv0((SVECTOR *)info->hold_offset);
     gte_rtv0();
     gte_stlvnl(&a);
     {
@@ -1583,7 +1583,7 @@ void ground_item_pick_up(GroundItem *c, int forced)
         a.vy += position->vy;
         a.vz += position->vz;
     }
-    switch (info->unk5[2]) {
+    switch (info->pickup_pose) {
     case 0:
         r.vx = -viewer.pitch;
         r.vy = r.vz = 0;
@@ -1603,13 +1603,13 @@ void ground_item_pick_up(GroundItem *c, int forced)
         break;
     }
     r.vy += viewer.yaw;
-    if (r.vx - c->rot_x > 2048)
+    if (r.vx - c->rotation.vx > 2048)
         r.vx -= 4096;
-    if (r.vx - c->rot_x < -2048)
+    if (r.vx - c->rotation.vx < -2048)
         r.vx += 4096;
-    if (r.vy - c->facing > 2048)
+    if (r.vy - c->rotation.vy > 2048)
         r.vy -= 4096;
-    if (r.vy - c->facing < -2048)
+    if (r.vy - c->rotation.vy < -2048)
         r.vy += 4096;
     i = 16;
     c->depth_bias -= 8;
@@ -1618,8 +1618,8 @@ void ground_item_pick_up(GroundItem *c, int forced)
             take = 0;
             a = c->position;
             b = save.position;
-            r = *(SVECTOR *)&c->rot_x;
-            r2 = *(SVECTOR *)&save.rot_x;
+            r = c->rotation;
+            r2 = save.rotation;
             i = 16 - i;
             break;
         }
@@ -1628,7 +1628,7 @@ void ground_item_pick_up(GroundItem *c, int forced)
             a = c->position;
             b = viewer.position;
             b.vy += 800;
-            r = *(SVECTOR *)&c->rot_x;
+            r = c->rotation;
             r2 = r;
             i = 16;
             break;
@@ -1638,13 +1638,13 @@ void ground_item_pick_up(GroundItem *c, int forced)
         c->position.vy = (i * save.position.vy + j * a.vy) >> 4;
         c->position.vz = (i * save.position.vz + j * a.vz) >> 4;
         if (i >= 9) {
-            c->rot_x = save.rot_x;
-            c->facing = ((i - 8) * save.facing + j * r.vy) >> 3;
-            c->rot_z = save.rot_z;
+            c->rotation.vx = save.rotation.vx;
+            c->rotation.vy = ((i - 8) * save.rotation.vy + j * r.vy) >> 3;
+            c->rotation.vz = save.rotation.vz;
         } else {
-            c->rot_x = (i * save.rot_x + (8 - i) * r.vx) >> 3;
-            c->facing = r.vy;
-            c->rot_z = (i * save.rot_z + (8 - i) * r.vz) >> 3;
+            c->rotation.vx = (i * save.rotation.vx + (8 - i) * r.vx) >> 3;
+            c->rotation.vy = r.vy;
+            c->rotation.vz = (i * save.rotation.vz + (8 - i) * r.vz) >> 3;
         }
         world_render_frame(0, 0);
         player_update_status(0);
@@ -1658,13 +1658,13 @@ void ground_item_pick_up(GroundItem *c, int forced)
         c->position.vy = (i * a.vy + j * b.vy) >> 4;
         c->position.vz = (i * a.vz + j * b.vz) >> 4;
         if (i >= 9) {
-            c->rot_x = ((i - 8) * r.vx + j * r2.vx) >> 3;
-            c->facing = r.vy;
-            c->rot_z = ((i - 8) * r.vz + j * r2.vz) >> 3;
+            c->rotation.vx = ((i - 8) * r.vx + j * r2.vx) >> 3;
+            c->rotation.vy = r.vy;
+            c->rotation.vz = ((i - 8) * r.vz + j * r2.vz) >> 3;
         } else {
-            c->rot_x = r2.vx;
-            c->facing = (i * r.vy + (8 - i) * r2.vy) >> 3;
-            c->rot_z = r2.vz;
+            c->rotation.vx = r2.vx;
+            c->rotation.vy = (i * r.vy + (8 - i) * r2.vy) >> 3;
+            c->rotation.vz = r2.vz;
         }
         world_render_frame(0, 0);
         player_update_status(0);
@@ -1706,7 +1706,7 @@ void ground_items_update(void)
         case 1:
             if (c->bounces < 4) {
                 req.position = c->position;
-                req.radius = *(u16 *)&rec->unk5[9];
+                req.radius = rec->fall_radius;
                 req.height = 0x200;
                 req.tests = 2;
                 req.velocity.vz = 0;
@@ -1730,10 +1730,10 @@ void ground_items_update(void)
                 if (viewer.position.vy + 0x8000 < c->position.vy)
                     ground_item_remove(c);
                 if (c->item < 71)
-                    c->rot_x = h;
+                    c->rotation.vx = h;
             } else if (c->bounces == 4) {
                 c->state = 2;
-                c->rot_x = 0;
+                c->rotation.vx = 0;
             }
             break;
         case 3:

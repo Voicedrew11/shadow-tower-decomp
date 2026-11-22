@@ -1036,7 +1036,7 @@ void effect_update(void)
             rot.vy = 0;
             rot.vz = 0;
         } else if (r & 2) {
-            r = ratan2(vis_lists.wall_normal_z, vis_lists.wall_normal_x) + 1024;
+            r = ratan2(vis_lists.wall_normal.vz, vis_lists.wall_normal.vx) + 1024;
             c = rcos(ratan2(dir.vz, dir.vx) - r) * 300 / 4096;
             dir.vx = c * rcos(r) / 4096;
             dir.vz = c * rsin(r) / 4096;
@@ -1636,14 +1636,14 @@ void effect_update(void)
                     anim_get_vertex(owner->model_slot + 128, owner->anim, (s16)owner->anim_frame, e->state.h,
                                     &v);
                 } else if (kind == 0xcd || kind == 0xeb || kind == 0xd8) {
-                    anim_set_node_vertex((StAnimSet *)owner->anim_slot, owner->model_slot + 128,
+                    anim_set_node_vertex(owner->anim_slot.set, owner->model_slot + 128,
                                          e->state2.h, e->state.h, &vec);
                     v.vx = vec.vx;
                     v.vy = vec.vy;
                     v.vz = vec.vz;
                 }
                 rot.vx = 0;
-                rot.vy = -owner->facing;
+                rot.vy = -owner->rotation.vy;
                 rot.vz = 0;
                 RotMatrix(&rot, &m);
                 ApplyMatrixSV(&m, &v, &v);

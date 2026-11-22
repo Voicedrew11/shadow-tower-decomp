@@ -57,15 +57,9 @@ typedef struct {
     s32 hit_normal_heading; /* 0x78: heading of the wall slid along */
     SVECTOR ceiling_normal; /* 0x7c: collision_test_map's normals (ceiling_normal..low_reach_wall_normal) */
     SVECTOR floor_normal;
-    s16 wall_normal_x;   /* 0x8c..0x90: wall normal (bit 1 hits) */
-    u8 unk8E[2];
-    s16 wall_normal_z;
-    u8 unk92[2];
+    SVECTOR wall_normal; /* 0x8c: wall normal (bit 1 hits); x and z are read */
     SVECTOR reach_wall_normal;
-    s16 low_wall_normal_x; /* 0x9c..0xa0: wall normal (bit 3 hits) */
-    u8 unk9E[2];
-    s16 low_wall_normal_z;
-    u8 unkA2[2];
+    SVECTOR low_wall_normal; /* 0x9c: wall normal (bit 3 hits); x and z are read */
     SVECTOR low_reach_wall_normal;
     VECTOR hit_body_position; /* 0xac: the resolved source's position */
     s32 hit_body_dist;   /* 0xbc: its horizontal distance */
@@ -221,7 +215,7 @@ typedef struct {
     u8 sound;            /* 0x05: FDAT sound bank offset; 0xff none */
     u8 unk06[2];
     u32 actions;         /* 0x08: FDAT: the Creature.action states it may run in */
-    u16 anim_step;       /* 0x0c */
+    s16 anim_step;       /* 0x0c: step of Creature.anim_frame per frame; negative plays backwards */
     u16 sound_trigger;   /* 0x0e: FDAT sound trigger: kind (0xf000) and frame/period */
     /* 0x10: FDAT command arguments; signed or unsigned by command (WIP) */
     union {
@@ -230,7 +224,8 @@ typedef struct {
         u8 b[32];
         s32 w[8];
         struct {             /* FDAT attack commands (creature_spawn_attack_hits) */
-            u16 unk10[2];
+            u16 reach;       /* 0x10: reach added to the radius (arg.u[0]) */
+            u16 bearing_limit; /* 0x12: largest player_bearing that hits (arg.u[1]) */
             u16 frame[3];    /* 0x14: frame of each hit, 0xffff none */
             s16 effect;      /* 0x1a: passed to effect_spawn_attack */
             u16 vertex[3];   /* 0x1c: model vertex of each hit, 0xffff the origin */
@@ -286,9 +281,14 @@ typedef struct {
     u32 player_dist_sq;  /* 0x3c: squared distance */
     s32 player_dist_xz;  /* 0x40: horizontal distance */
     s32 action;
-    u8 unk48;
-    u8 spawned_object;   /* 0x49: 106 + the table B entry creature_alloc_object spawned */
-    u8 unk4A[2];
+    union {
+        s32 fly_height;  /* 0x48: FDAT_152: a flying entry's height, the viewer's y - 0x640 */
+        struct {
+            u8 unk48;
+            u8 spawned_object; /* 0x49: 106 + the table B entry creature_alloc_object spawned */
+            u8 unk4A[2];
+        } b;
+    } unk48;
     s32 height_above_floor; /* 0x4c: height above the floor */
     s32 collision_tests; /* 0x50: request kind bits */
     u16 aggressive;
@@ -311,13 +311,10 @@ typedef struct {
     VECTOR position;     /* 0x74: position */
     s32 spawn_y;
     u8 unk88[4];
-    u16 rot_x;           /* 0x8c: rotation */
-    s16 facing;          /* 0x8e: facing */
-    u16 rot_z;
-    u8 unk92[2];
+    SVECTOR rotation;    /* 0x8c: rotation; vy is the facing */
     SVECTOR scale;       /* 0x94: scale */
     SVECTOR velocity;    /* 0x9c: velocity: this frame's movement */
-    u32 anim_slot;       /* 0xa4: from here the anim block objects.c hands model_draw (&anim_slot) */
+    StAnimState anim_slot; /* 0xa4: its animation state; model_draw takes &anim_slot */
     CreatureScript *script; /* 0xa8: the running script, an entry of its record's scripts list */
     CreatureScript *chain_script; /* 0xac: FDAT: the script a 17/20 command returns to */
     s16 anim_step;       /* 0xb0: magnitude of the last anim_frame step; set from the script's anim_step */
@@ -327,16 +324,6 @@ typedef struct {
     s16 unkBE;
     u8 unkC0[0x14];
 } Creature;
-
-/* An entry of a CreatureType record's scripts list (creature_type_find_script). */
-typedef struct {
-    u8 command;          /* 0x0: id */
-    u8 anim;             /* 0x1: animation (Creature.anim) */
-    u8 unk2[3];
-    u8 sound;            /* 0x5: sound */
-    u8 unk6[6];
-    s16 anim_step;       /* 0xc: step of Creature.anim_frame per frame */
-} CreatureTalkScript;
 
 /* 0x3500 of CreatureTable: 192-byte records. */
 typedef struct {
@@ -364,13 +351,15 @@ typedef struct {
     u8 unk34[0x16];
     u16 resistances[9];  /* 0x4a: level weights (creature_calc_damage) */
     u8 unk5C[4];
-    CreatureScript *scripts[24]; /* 0x60: null-terminated (creature_type_find_script); offsets from vis_table_a.types[16] until creature_types_link_scripts */
+    CreatureScript *scripts[24]; /* 0x60: null-terminated (creature_type_find_script); offsets into vis_table_a.script_data until creature_types_link_scripts */
 } CreatureType;
 
 typedef struct {
     Creature entries[64];
-    CreatureType types[58];
-    u8 unk6080[0x80];
+    /* 0x3500: one 0x2c00-byte area file block (area_load_update): 16 type
+     * records, then the script data their scripts lists point into */
+    CreatureType types[16];
+    u8 script_data[0x2000]; /* 0x4100: CreatureScript records (creature_types_link_scripts) */
     u8 count;            /* 0x6100 */
     u8 skip_flags;
     u8 unk6102;
@@ -422,12 +411,9 @@ typedef struct {
     u16 player_heading;  /* 0x20: heading between it and the player */
     u16 player_bearing;  /* 0x22: |facing - player_heading| (door push side, one-sided locks; src/st/item.c) */
     VECTOR position;     /* 0x24: position */
-    u16 rot_x;           /* 0x34: rotation */
-    s16 facing;          /* 0x36: yaw */
-    u16 rot_z;
-    u8 unk3A[2];
+    SVECTOR rotation;    /* 0x34: rotation; vy is the yaw */
     SVECTOR scale;       /* 0x3c: scale */
-    u8 anim_slot[4];     /* 0x44 */
+    StAnimState anim_slot; /* 0x44: its animation state */
     u8 unk48;            /* 0x48: sound kinds: area width (2048 units) */
     u8 unk49;            /* 0x49: sound kinds: area depth */
     /* 0x4a: by kind: a sound source's sound (src/st/objects.c) or the record
@@ -454,7 +440,8 @@ typedef struct {
 
 /* AreaObjectTable+0: 24-byte records. */
 typedef struct {
-    u8 unk00[3];
+    u8 kind;             /* 0x00: the entry's kind (objects_load) */
+    u8 unk01[2];
     u8 flags;            /* 0x03 */
     u16 radius;          /* 0x04 */
     u16 use_radius;      /* 0x06: trigger radius (object_find_usable) */
@@ -468,8 +455,7 @@ typedef struct {
 } AreaObjectType;
 
 typedef struct {
-    AreaObjectType types[330];
-    u8 unk1EF0[0x30];
+    AreaObjectType types[332]; /* records 300.. come from the area file (area_load_update) */
     AreaObject entries[240];
     u8 unk71a0[4];
     s16 push_x;          /* 0x71a4..0x71a8: cleared by player_update_status */
@@ -492,11 +478,16 @@ typedef struct {
  * of 48 bytes at +0x3710.
  */
 typedef struct {
-    u8 unk0[2];
+    u8 unk0;
+    u8 pickup_radius;    /* 0x01: pick-up reach (256 units) (ground_item_find_in_reach) */
     u8 price;            /* 0x02: buying price (src/st/menu_shop.c) */
     u8 repair_price;     /* 0x03 */
     u8 model;            /* 0xff: none (game_load_start_file); player_load_equipment_model's model */
-    u8 unk5[0xb];
+    u8 icon;             /* 0x05: its picture, ICON archive member (+200/+400/+600 by screen) */
+    u8 ground_depth_bias; /* 0x06: a ground entry's OT depth bias */
+    u8 pickup_pose;      /* 0x07: the held pose (ground_item_pick_up) */
+    s16 hold_offset[3];  /* 0x08: offset while held (ground_item_pick_up, gte_ldv0) */
+    u16 fall_radius;     /* 0x0e: radius while falling (ground_items_update) */
     u8 attributes[14];   /* 0x10: counts menu_arrange_icons_draw_details lists */
     u16 flags;           /* 0x1e */
     /* 0x20: three bonuses (kind, amount) player_sum_equipment_bonuses sums */
@@ -504,8 +495,8 @@ typedef struct {
     u32 amount0 : 4;
     u32 kind1 : 4;
     u32 amount1 : 4;
-    u32 kind2 : 8;
-    u32 amount2 : 8;
+    u8 kind2;            /* 0x22 */
+    u8 amount2;
     u16 weight;          /* 0x24: menu_arrange_icons_draw_caption shows it / 4.54 */
     u8 category;
     u8 max_durability;   /* 0x27 */
@@ -516,12 +507,9 @@ typedef struct {
 typedef struct {
     u16 item;
     u16 block;
-    u8 anim_slot[4];     /* 0x04 */
+    StAnimState anim_slot; /* 0x04: its animation state */
     VECTOR position;     /* 0x08: position */
-    s16 rot_x;           /* 0x18: rotation */
-    s16 facing;
-    s16 rot_z;
-    u8 unk1E[2];
+    SVECTOR rotation;    /* 0x18: rotation; vy is the facing */
     u16 unk20;           /* 0x20 */
     u8 state;            /* 0x22: state; 0 and 4 are not drawn */
     u8 prev_state;
@@ -546,6 +534,50 @@ typedef struct {
     ItemType types[314]; /* 0x0118 */
     GroundItem entries[64]; /* 0x3710 */
 } ItemTable;
+
+typedef char CollisionStateWallNormalAt0x8C[offsetof(CollisionState, wall_normal) == 0x8c ? 1 : -1];
+typedef char CollisionStateLowWallNormalAt0x9C[offsetof(CollisionState, low_wall_normal) == 0x9c ? 1 : -1];
+typedef char CollisionStateHitBodyAt0xAC[offsetof(CollisionState, hit_body_position) == 0xac ? 1 : -1];
+typedef char CollisionStateSize[sizeof(CollisionState) == 0x47f0 ? 1 : -1];
+typedef char CreatureScriptAnimStepAt0xC[offsetof(CreatureScript, anim_step) == 0xc ? 1 : -1];
+typedef char CreatureScriptHitReachAt0x10[offsetof(CreatureScript, arg.hit.reach) == 0x10 ? 1 : -1];
+typedef char CreatureScriptHitBearingAt0x12[offsetof(CreatureScript, arg.hit.bearing_limit) == 0x12 ? 1 : -1];
+typedef char CreatureScriptHitFrameAt0x14[offsetof(CreatureScript, arg.hit.frame) == 0x14 ? 1 : -1];
+typedef char CreatureUnk48At0x48[offsetof(Creature, unk48) == 0x48 ? 1 : -1];
+typedef char CreatureSpawnedObjectAt0x49[offsetof(Creature, unk48.b.spawned_object) == 0x49 ? 1 : -1];
+typedef char CreatureRotationAt0x8C[offsetof(Creature, rotation) == 0x8c ? 1 : -1];
+typedef char CreatureScaleAt0x94[offsetof(Creature, scale) == 0x94 ? 1 : -1];
+typedef char CreatureAnimSlotAt0xA4[offsetof(Creature, anim_slot) == 0xa4 ? 1 : -1];
+typedef char CreatureScriptPtrAt0xA8[offsetof(Creature, script) == 0xa8 ? 1 : -1];
+typedef char CreatureSize[sizeof(Creature) == 212 ? 1 : -1];
+typedef char CreatureTypeSize[sizeof(CreatureType) == 192 ? 1 : -1];
+typedef char CreatureTableTypesAt0x3500[offsetof(CreatureTable, types) == 0x3500 ? 1 : -1];
+typedef char CreatureTableScriptDataAt0x4100[offsetof(CreatureTable, script_data) == 0x4100 ? 1 : -1];
+typedef char CreatureTableCountAt0x6100[offsetof(CreatureTable, count) == 0x6100 ? 1 : -1];
+typedef char CreatureTableSize[sizeof(CreatureTable) == 0x61d8 ? 1 : -1];
+typedef char AreaObjectRotationAt0x34[offsetof(AreaObject, rotation) == 0x34 ? 1 : -1];
+typedef char AreaObjectScaleAt0x3C[offsetof(AreaObject, scale) == 0x3c ? 1 : -1];
+typedef char AreaObjectAnimSlotAt0x44[offsetof(AreaObject, anim_slot) == 0x44 ? 1 : -1];
+typedef char AreaObjectUnk48At0x48[offsetof(AreaObject, unk48) == 0x48 ? 1 : -1];
+typedef char AreaObjectSize[sizeof(AreaObject) == 88 ? 1 : -1];
+typedef char AreaObjectTypeFlagsAt0x3[offsetof(AreaObjectType, flags) == 0x3 ? 1 : -1];
+typedef char AreaObjectTypeSize[sizeof(AreaObjectType) == 24 ? 1 : -1];
+typedef char AreaObjectTableEntriesAt0x1F20[offsetof(AreaObjectTable, entries) == 0x1f20 ? 1 : -1];
+typedef char AreaObjectTableListAt0x71B4[offsetof(AreaObjectTable, list) == 0x71b4 ? 1 : -1];
+typedef char ItemTypePickupRadiusAt0x1[offsetof(ItemType, pickup_radius) == 0x1 ? 1 : -1];
+typedef char ItemTypeIconAt0x5[offsetof(ItemType, icon) == 0x5 ? 1 : -1];
+typedef char ItemTypeHoldOffsetAt0x8[offsetof(ItemType, hold_offset) == 0x8 ? 1 : -1];
+typedef char ItemTypeFallRadiusAt0xE[offsetof(ItemType, fall_radius) == 0xe ? 1 : -1];
+typedef char ItemTypeAttributesAt0x10[offsetof(ItemType, attributes) == 0x10 ? 1 : -1];
+typedef char ItemTypeKind2At0x22[offsetof(ItemType, kind2) == 0x22 ? 1 : -1];
+typedef char ItemTypeWeightAt0x24[offsetof(ItemType, weight) == 0x24 ? 1 : -1];
+typedef char ItemTypeSize[sizeof(ItemType) == 44 ? 1 : -1];
+typedef char GroundItemAnimSlotAt0x4[offsetof(GroundItem, anim_slot) == 0x4 ? 1 : -1];
+typedef char GroundItemRotationAt0x18[offsetof(GroundItem, rotation) == 0x18 ? 1 : -1];
+typedef char GroundItemUnk20At0x20[offsetof(GroundItem, unk20) == 0x20 ? 1 : -1];
+typedef char GroundItemSize[sizeof(GroundItem) == 48 ? 1 : -1];
+typedef char ItemTableTypesAt0x118[offsetof(ItemTable, types) == 0x118 ? 1 : -1];
+typedef char ItemTableEntriesAt0x3710[offsetof(ItemTable, entries) == 0x3710 ? 1 : -1];
 
 extern CreatureTable vis_table_a;
 extern AreaObjectTable vis_table_b;
@@ -586,11 +618,11 @@ void creature_reset_for_spawn(Creature *e);
 void creature_despawn(Creature *e);
 void creature_spawn(Creature *e, CreatureType *r);
 void creature_spawn_by_index(u16 i);
-void creature_set_script(Creature *e, u8 *p);
-int creature_score_script(u8 *p, int arg);
+void creature_set_script(Creature *e, CreatureScript *p);
+int creature_score_script(CreatureScript *p, int arg);
 void creature_pick_script(int arg);
 void creature_pick_script_by_distance(void);
-u8 *creature_type_find_script(CreatureType *r, u8 id);
+CreatureScript *creature_type_find_script(CreatureType *r, u8 id);
 void creature_set_script_by_id(Creature *e, u8 id);
 void creature_end_script(void);
 void creature_set_anim(u8 v);

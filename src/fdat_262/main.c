@@ -332,7 +332,7 @@ void map_pick_creature_move(void)
         e->unk5A = e->target_heading = e->player_heading;
         break;
     default:
-        e->unk5A = e->target_heading = e->facing;
+        e->unk5A = e->target_heading = e->rotation.vy;
         break;
     }
     if (e->action != 8)
@@ -481,7 +481,7 @@ void map_redrop_ground_item(int which)
     e.block = a->block;
     e.position = a->position;
     e.height = 0;
-    *(SVECTOR *)&e.rot_x = *(SVECTOR *)&a->rot_x;
+    e.rotation = a->rotation;
     e.player_dist_xz = a->player_dist_xz;
     creature_drop_item(&e, a->item);
     b->state = 0;

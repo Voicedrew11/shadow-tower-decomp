@@ -187,7 +187,7 @@ void player_draw_equipment_model(u8 slot);
 #ifndef VS_EXE
 void model_draw_list(u8 flags, SVECTOR *rot);
 #endif
-void model_draw(int unused0, u16 model, VECTOR *pos, SVECTOR *rot, SVECTOR *scale, void *anim,
+void model_draw(int unused0, u16 model, VECTOR *pos, SVECTOR *rot, SVECTOR *scale, StAnimState *anim,
                 MATRIX *view, u16 part, u16 arg8, short light, short unused10, u8 flags,
                 int z);
 

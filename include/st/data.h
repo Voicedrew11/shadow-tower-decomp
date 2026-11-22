@@ -141,7 +141,7 @@ typedef struct {
     u8 unkE6[2];
     EquipmentModel *slot_model_info[4]; /* 0xe8: player_draw_equipment_model's slot positions and rotations */
     void *slot_model_files[4]; /* 0xf8: its slot model blocks (ModelFile, st/mesh.h) */
-    void *slot_anims[4]; /* 0x108: its slot animation state: a StAnimSlot (anim_prepare) or
+    StAnimState slot_anims[4]; /* 0x108: its slot animation state: a StAnimSlot (anim_prepare) or
                           * a node set (anim_prepare_any), by the model file's halfword +6 */
     void *magic_defs[2]; /* 0x118: player_load_magic's effects.defs record per slot */
     u8 *magic_buffers[2]; /* 0x120: its load buffers (magic_model_buffers) */

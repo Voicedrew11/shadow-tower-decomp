@@ -201,7 +201,7 @@ void map_restore_progress(void)
         vis_records[330].part = part;
     }
     if ((int)(game_progress.event_flags.word >> 10 & 7) >= 3) {
-        e32->facing = 0x400;
+        e32->rotation.vy = 0x400;
         e32->home_block = 0x31;
         e32->home_offset_x = 0x800;
         e32->home_offset_z = -0x800;
@@ -302,7 +302,7 @@ void map_pick_creature_move(void)
         e->unk5A = e->target_heading = e->player_heading;
         break;
     default:
-        e->unk5A = e->target_heading = e->facing;
+        e->unk5A = e->target_heading = e->rotation.vy;
         break;
     }
     if (e->action != 8)
@@ -377,7 +377,7 @@ void map_step_creature(void)
             map_walk_creature_off();
             viewer.state = 0;
             e->spawn_chance = 100;
-            e->facing = 0x400;
+            e->rotation.vy = 0x400;
             e->home_block = 0x31;
             e->position.vx = 0x40800;
             e->position.vy = 0x41000;

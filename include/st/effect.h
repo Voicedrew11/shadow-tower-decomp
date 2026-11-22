@@ -11,6 +11,7 @@
 #include <kf/lib/types.h>
 #include <sys/types.h>
 #include <LIBGTE.H>
+#include <st/gfx.h>
 
 /* One 24-byte effect definition. */
 typedef struct {
@@ -47,7 +48,7 @@ typedef struct StEffect {
     SVECTOR rotation;    /* 0x30: rotation */
     SVECTOR scale;       /* 0x38: scale */
     SVECTOR velocity;    /* 0x40: velocity */
-    u8 anim_slot[4];
+    StAnimState anim_slot; /* 0x48: its animation state (model_draw) */
     u8 owner;            /* 0x4c: VS.EXE: the owner fighter's number; ST.EXE: a word, ST_EFFECT_ENTRY */
     u8 attack_index;     /* 0x4d: VS.EXE: the attack's index among the fighter's */
     u8 unk4E[2];

@@ -31,7 +31,7 @@ ADDRESS(0x801eb814, 0x6c)
 void creature_turn_toward(short angle, int step)
 {
     Creature *e = vis_table_a.current;
-    int d = (angle - e->facing) & 0xfff;
+    int d = (angle - e->rotation.vy) & 0xfff;
     int a;
 
     if (d > 2048)
@@ -41,9 +41,9 @@ void creature_turn_toward(short angle, int step)
         step = a;
     if (d != 0) {
         if (d > 0)
-            e->facing += step;
+            e->rotation.vy += step;
         else
-            e->facing -= step;
+            e->rotation.vy -= step;
     }
 }
 
@@ -183,14 +183,14 @@ void creature_spawn_attack_hits(Creature *e, CreatureScript *s)
             continue;
         pos = e->position;
         rot.vx = 0;
-        rot.vy = -e->facing;
+        rot.vy = -e->rotation.vy;
         rot.vz = 0;
         RotMatrix(&rot, &m);
         if (s->arg.hit.vertex[i] != 0xffff) {
             if (plain) {
                 anim_get_vertex(id, e->anim, (short)e->anim_frame, s->arg.hit.vertex[i], &v);
             } else {
-                anim_set_node_vertex((StAnimSet *)e->anim_slot, id, s->arg.hit.node[i],
+                anim_set_node_vertex(e->anim_slot.set, id, s->arg.hit.node[i],
                                      s->arg.hit.vertex[i], &node);
                 v.vx = node.vx;
                 v.vy = node.vy;

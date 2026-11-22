@@ -29,9 +29,9 @@ void objects_clear(void)
     while (i--) {
         e->type = 0xffff;
         e->kind = 0xff;
-        ((u32 *)e->anim_slot)[2] = 0;
-        ((u32 *)e->anim_slot)[1] = 0;
-        ((u32 *)e->anim_slot)[0] = 0;
+        ((u32 *)&e->anim_slot)[2] = 0;
+        ((u32 *)&e->anim_slot)[1] = 0;
+        ((u32 *)&e->anim_slot)[0] = 0;
         e++;
     }
     vis_table_b.unk727A = 0;
@@ -50,9 +50,9 @@ void object_reset(AreaObject *e)
     e->anim_frame = 0;
     e->draw_flags = 0;
     e->unk01 = 0;
-    e->rot_z = 0;
-    e->rot_x = 0;
-    e->facing = 0;
+    e->rotation.vz = 0;
+    e->rotation.vx = 0;
+    e->rotation.vy = 0;
     e->kind = 0xff;
     e->depth_bias = 0;
     e->unk06 = 0xff;

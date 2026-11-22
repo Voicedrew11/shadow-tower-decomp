@@ -161,7 +161,7 @@ void menu_equip_pick_item(void)
         if (EQ.shown_id == -1)
             cd_read_member(6, 801, cd_file_buffer);
         else
-            cd_read_member(6, vis_table_c.types[EQ.shown_id].unk5[0] + 600, cd_file_buffer);
+            cd_read_member(6, vis_table_c.types[EQ.shown_id].icon + 600, cd_file_buffer);
         tim_load_images_at(cd_file_buffer, &pos, NULL, 1);
         EQ.loaded_id = EQ.shown_id;
     }
@@ -405,7 +405,7 @@ int menu_equip_pick_slot(int *sel)
             EQ.list_index = i;
         }
         if (cur != 0xffff)
-            i = vis_table_c.types[cur].unk5[0];
+            i = vis_table_c.types[cur].icon;
         else
             i = -1;
         sp->mode |= 0x8;
@@ -951,7 +951,7 @@ void menu_arrange_list_open(void)
     sp->state.grid.hand_count = 0;
     sp->state.grid.bag_count = 0;
     for (i = 0; i < 314; i++) {
-        if (vis_table_c.types[i].unk5[0] != 255 && i < 314 && i != 266 &&
+        if (vis_table_c.types[i].icon != 255 && i < 314 && i != 266 &&
             inventory.counts[i].count && i != viewer.equipment[0] && i != viewer.equipment[1] &&
             i != viewer.equipment[2] && i != viewer.equipment[3] && i != viewer.equipment[4] &&
             i != viewer.equipment[5] && i != viewer.equipment[7] && i != viewer.equipment[8] &&
@@ -1286,7 +1286,7 @@ void menu_arrange_list_loop(void)
                 else
                     id = GRID->bag_ids[GRID->bag_row + sp->cursor];
                 if (ST.shown_id != id && id != -1) {
-                    menu_arrange_list_queue_image(6, vis_table_c.types[id].unk5[0] + 200);
+                    menu_arrange_list_queue_image(6, vis_table_c.types[id].icon + 200);
                     ST.shown_id = id;
                 }
             }

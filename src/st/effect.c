@@ -101,7 +101,7 @@ void effect_emit(u_long flags, int kind, StEffectDef *def, int arg, VECTOR *pos)
         return;
     target = &vis_table_a.entries[vis_lists.creature_in_reach];
     if (pos != NULL) {
-        if (!angle_within(target->facing,
+        if (!angle_within(target->rotation.vy,
                            angle_from_xz(target->position.vx - pos->vx, target->position.vz - pos->vz) + 2048,
                            2048))
             return;

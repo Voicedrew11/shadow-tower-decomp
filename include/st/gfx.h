@@ -127,6 +127,17 @@ typedef struct StAnimSet {
     struct StAnimSet **owner; /* 0x38: the owner's slot pointer */
 } StAnimSet;
 
+/* An owner's animation state (Creature, AreaObject, GroundItem, StEffect,
+ * the viewer's slots): a vertex-animation slot or a skeletal node set, by
+ * the model file (anim_prepare / anim_prepare_any). The slot's owner field
+ * points back at it; model_draw takes its address. */
+typedef union {
+    StAnimSlot *slot;
+    StAnimSet *set;
+} StAnimState;
+
+typedef char StAnimStateSize[sizeof(StAnimState) == 4 ? 1 : -1];
+
 typedef struct {
     DRAWENV draw[2];
     DISPENV disp[2];

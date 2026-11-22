@@ -99,9 +99,9 @@ void map_start_creature_fall(Creature *e)
     }
     c->item = 0x10a;
     c->block = e->block;
-    *(u32 *)c->anim_slot = 0;
+    c->anim_slot.slot = NULL;
     c->position = e->position;
-    *(SVECTOR *)&c->rot_x = *(SVECTOR *)&e->rot_x;
+    c->rotation = e->rotation;
     info = vis_table_c.types[266].flags;
     c->state = 2;
     c->prev_state = 2;

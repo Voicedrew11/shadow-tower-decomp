@@ -248,17 +248,17 @@ int anim_set_pose(StAnimSet **setp, int id, int clip, u_long frame)
  * models through anim_set_pose.
  */
 ADDRESS(0x80035aa8, 0xd8)
-int anim_prepare_any(void **slotp, int id, int clip, int frame)
+int anim_prepare_any(StAnimState *slotp, int id, int clip, int frame)
 {
     ScratchPad *sp = SCRATCHPAD;
-    void *slot = *slotp;
+    StAnimState slot = *slotp;
     StAnimFile *file;
     u8 *model;
 
     if (((StAnimFile *)world_state.model_files[id])->animated == 0) {
-        if (slot != NULL) {
-            anim_set_free(slot);
-            anim_slot_free(slot);
+        if (slot.slot != NULL) {
+            anim_set_free(slot.set);
+            anim_slot_free(slot.slot);
         }
         file = world_state.model_files[id];
         model = ANIM_MODEL(file);
@@ -268,8 +268,8 @@ int anim_prepare_any(void **slotp, int id, int clip, int frame)
         return 1;
     }
     if (((StAnimFile *)world_state.model_files[id])->node_count == 0)
-        return anim_pose((StAnimSlot **)slotp, id, clip, frame);
-    return anim_set_pose((StAnimSet **)slotp, id, clip, frame);
+        return anim_pose(&slotp->slot, id, clip, frame);
+    return anim_set_pose(&slotp->set, id, clip, frame);
 }
 
 /*

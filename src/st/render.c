@@ -3955,7 +3955,7 @@ void player_draw_equipment_model(u8 slot)
         gte_SetTransMatrix(SCRATCH_MATRIX(sp));
         sp->model = MODEL_DATA(world_state.model_files[slot + 32]);
         sp->header = (MeshHeader *)(sp->model + 12);
-        if (anim_prepare((StAnimSlot **)&viewer.slot_anims[slot], slot + 32, viewer.slot_anim_ids[slot],
+        if (anim_prepare(&viewer.slot_anims[slot].slot, slot + 32, viewer.slot_anim_ids[slot],
                           viewer.action_timers.halves[slot])) {
             sp->z_ot += sp->header->n_vertices;
             out = (MeshVertex *)sp->vertices;
@@ -4074,7 +4074,7 @@ void model_draw_list(u8 flags, SVECTOR *rot)
  * the depth-cued ones; part numbers from 128 select a part directly.
  */
 ADDRESS(0x80022678, 0xb90)
-void model_draw(int unused0, u16 model, VECTOR *pos, SVECTOR *rot, SVECTOR *scale, void *anim,
+void model_draw(int unused0, u16 model, VECTOR *pos, SVECTOR *rot, SVECTOR *scale, StAnimState *anim,
                 MATRIX *view, u16 part, u16 arg8, short light, short unused10, u8 flags,
                 int z)
 {
@@ -4142,7 +4142,7 @@ void model_draw(int unused0, u16 model, VECTOR *pos, SVECTOR *rot, SVECTOR *scal
         if (part < 128) {
             i = 0;
             sp->header = (MeshHeader *)(sp->model + 12);
-            if (anim_prepare(anim, model, part, arg8) == 0) {
+            if (anim_prepare(&anim->slot, model, part, arg8) == 0) {
                 sp->header = (MeshHeader *)(sp->model + 12);
                 sp->local_vertices = sp->model + 12 + sp->header->vertices;
             }
@@ -4472,7 +4472,7 @@ void item_models_sync(int archive, int first, int slot, int count)
         p = world_state.model_files[slot];
         if (*flags++) {
             if (p == NULL)
-                item_model_load(archive, i * 2, (u16)slot, vis_table_c.ground_item_counts[slot - 440]);
+                item_model_load(archive, i * 2, (u16)slot, vis_table_c.model_slots[slot - 588]);
             else if (heap_get_state(p) == ST_BLOCK_RELEASABLE)
                 heap_set_state(p, ST_BLOCK_USED);
         } else if (p != NULL && heap_get_state(p) != ST_BLOCK_LOADING) {
@@ -4578,9 +4578,9 @@ void world_draw_creatures(void)
             SVECTOR scale = {4096, 4096, 4096, 0};
 
             e->draw_state = 1;
-            sp->model_rot.vx = e->rot_x;
-            sp->model_rot.vy = e->facing;
-            sp->model_rot.vz = e->rot_z;
+            sp->model_rot.vx = e->rotation.vx;
+            sp->model_rot.vy = e->rotation.vy;
+            sp->model_rot.vz = e->rotation.vz;
             if (e->visibility != 3) {
                 sp->ot = world_state.ot_cur + e->depth_bias;
                 sp->near_z = 4 - e->depth_bias;
@@ -4760,13 +4760,13 @@ void world_draw_objects(void)
             anim_get_file(id, &model);
             if (model == NULL)
                 continue;
-            sp->model_rot.vx = e->rot_x;
-            sp->model_rot.vy = e->facing;
-            sp->model_rot.vz = e->rot_z;
+            sp->model_rot.vx = e->rotation.vx;
+            sp->model_rot.vy = e->rotation.vy;
+            sp->model_rot.vz = e->rotation.vz;
             sp->ot = world_state.ot_cur + e->depth_bias;
             sp->near_z = 4 - e->depth_bias;
             sp->far_z = 4096 - e->depth_bias;
-            model_draw(0, id, &e->position, &sp->model_rot, size, e->anim_slot,
+            model_draw(0, id, &e->position, &sp->model_rot, size, &e->anim_slot,
                           &world_state.view_matrix, e->anim, e->anim_frame, 0, e->light, e->draw_flags, 0);
             break;
         default:
@@ -4777,17 +4777,17 @@ void world_draw_objects(void)
             size = &e->scale;
             if (model == NULL)
                 continue;
-            sp->model_rot.vx = e->rot_x;
-            sp->model_rot.vy = e->facing;
-            sp->model_rot.vz = e->rot_z;
+            sp->model_rot.vx = e->rotation.vx;
+            sp->model_rot.vy = e->rotation.vy;
+            sp->model_rot.vz = e->rotation.vz;
             if (e->flags & 0x40) {
-                sp->model_rot.vx = e->rot_x;
+                sp->model_rot.vx = e->rotation.vx;
                 sp->model_rot.vy = 0;
-                sp->model_rot.vz = e->rot_z;
+                sp->model_rot.vz = e->rotation.vz;
                 sp->ot = world_state.ot_cur + e->depth_bias;
                 sp->near_z = 4 - e->depth_bias;
                 sp->far_z = 4096 - e->depth_bias;
-                model_draw(0, id, &e->position, &sp->model_rot, size, e->anim_slot,
+                model_draw(0, id, &e->position, &sp->model_rot, size, &e->anim_slot,
                               &world_state.pitch_matrix, e->anim, e->anim_frame, e->light, e->light,
                               e->draw_flags, 0);
                 break;
@@ -4800,7 +4800,7 @@ void world_draw_objects(void)
                 sp->ot = world_state.ot_cur + e->depth_bias;
                 sp->near_z = 4 - e->depth_bias;
                 sp->far_z = 4096 - e->depth_bias;
-                model_draw(0, id, &e->position, &sp->model_rot, size, e->anim_slot,
+                model_draw(0, id, &e->position, &sp->model_rot, size, &e->anim_slot,
                               &world_state.view_matrix, e->anim, e->anim_frame, e->light, e->light, e->draw_flags, 0);
                 if (e->flags & 1)
                     continue;
@@ -4815,7 +4815,7 @@ void world_draw_objects(void)
                 sp->ot = world_state.ot_cur + e->depth_bias - 5;
                 sp->near_z = 9 - e->depth_bias;
                 sp->far_z = 4101 - e->depth_bias;
-                model_draw(0, (r->flags >> 2 & 1) | 44, &pos, &sp->model_rot, &scale, e->anim_slot,
+                model_draw(0, (r->flags >> 2 & 1) | 44, &pos, &sp->model_rot, &scale, &e->anim_slot,
                               &world_state.view_matrix, 128, 0, e->light, 4096, 4, 0);
             }
             break;
@@ -4865,16 +4865,16 @@ void world_draw_ground_items(void)
             anim_get_file(r->model + SLOT_C, &model);
             if (model == NULL)
                 continue;
-            sp->model_rot.vx = e->rot_x;
-            sp->model_rot.vy = e->facing;
-            sp->model_rot.vz = e->rot_z;
+            sp->model_rot.vx = e->rotation.vx;
+            sp->model_rot.vy = e->rotation.vy;
+            sp->model_rot.vz = e->rotation.vz;
             if (r->flags & 0x40) {
                 MATRIX m;
 
                 sp->ot = world_state.ot_cur + e->depth_bias;
                 sp->near_z = 4 - e->depth_bias;
                 sp->far_z = 4096 - e->depth_bias;
-                model_draw(0, r->model + SLOT_C, &e->position, &sp->model_rot, &scale, e->anim_slot,
+                model_draw(0, r->model + SLOT_C, &e->position, &sp->model_rot, &scale, &e->anim_slot,
                               &world_state.view_matrix, 128, 0, 0, 4096, e->draw_flags, 0);
                 sp->model_rot.vx = sp->model_rot.vy = sp->model_rot.vz = 0;
                 sp->ot = world_state.ot_cur + e->depth_bias;
@@ -4882,14 +4882,14 @@ void world_draw_ground_items(void)
                 sp->far_z = 4096 - e->depth_bias;
                 m = world_state.pitch_matrix;
                 if (e->state != 2)
-                    RotMatrixX(e->rot_x, &m);
-                model_draw(0, r->model + SLOT_C, &e->position, &sp->model_rot, &scale, e->anim_slot, &m, 129,
+                    RotMatrixX(e->rotation.vx, &m);
+                model_draw(0, r->model + SLOT_C, &e->position, &sp->model_rot, &scale, &e->anim_slot, &m, 129,
                               0, 0, 4096, e->draw_flags, 0);
             } else {
                 sp->ot = world_state.ot_cur + e->depth_bias;
                 sp->near_z = 4 - e->depth_bias;
                 sp->far_z = 4096 - e->depth_bias;
-                model_draw(0, r->model + SLOT_C, &e->position, &sp->model_rot, &scale, e->anim_slot,
+                model_draw(0, r->model + SLOT_C, &e->position, &sp->model_rot, &scale, &e->anim_slot,
                               &world_state.view_matrix, 128, 0, 0, 4096, e->draw_flags, 0);
             }
         }
@@ -4933,28 +4933,28 @@ void world_draw_effects_placements(void)
             sp->ot = world_state.ot_cur - 7;
             sp->near_z = 11;
             sp->far_z = 4103;
-            model_draw(0, o->model + 96, at, &sp->model_rot, &o->scale, o->anim_slot,
+            model_draw(0, o->model + 96, at, &sp->model_rot, &o->scale, &o->anim_slot,
                           &world_state.view_matrix, o->part, o->anim_frame, o->light, o->light, o->draw_flags, 0);
             break;
         case 4:
             sp->near_z = 11;
             sp->far_z = 4103;
             sp->ot = world_state.ot_cur - 7;
-            model_draw(0, o->model + 96, at, &o->rotation, &o->scale, o->anim_slot,
+            model_draw(0, o->model + 96, at, &o->rotation, &o->scale, &o->anim_slot,
                           &identity_matrix, o->part, o->anim_frame, o->light, o->light, o->draw_flags, 0);
             break;
         case 8:
             sp->near_z = 11;
             sp->far_z = 4103;
             sp->ot = world_state.ot_cur - 7;
-            model_draw(0, o->model + 96, at, &o->rotation, &o->scale, o->anim_slot,
+            model_draw(0, o->model + 96, at, &o->rotation, &o->scale, &o->anim_slot,
                           &world_state.pitch_matrix, o->part, o->anim_frame, o->light, o->light, o->draw_flags, 0);
             break;
         case 12:
             sp->near_z = -16;
             sp->far_z = 4076;
             sp->ot = world_state.ot_cur + 20;
-            model_draw(0, o->model + 96, at, &o->rotation, &o->scale, o->anim_slot,
+            model_draw(0, o->model + 96, at, &o->rotation, &o->scale, &o->anim_slot,
                           NULL, o->part, o->anim_frame, o->light, o->light, o->draw_flags, 0);
             break;
         }
@@ -6340,8 +6340,8 @@ void menu_main_draw(void)
         ui_draw_text(MESSAGE(24), 106, 112, &sp->style[0]);
     else
         ui_draw_text(MESSAGE(19), 106, 112, &sp->style[0]);
-    if (viewer.equipment[16] != 0xffff && vis_table_c.types[viewer.equipment[16]].unk5[0x1d] >= 9) {
-        kind = vis_table_c.types[viewer.equipment[16]].unk5[0x1d];
+    if (viewer.equipment[16] != 0xffff && vis_table_c.types[viewer.equipment[16]].kind2 >= 9) {
+        kind = vis_table_c.types[viewer.equipment[16]].kind2;
         n = 0;
         if (kind - 9 == 2)
             n = 14;

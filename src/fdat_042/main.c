@@ -124,7 +124,7 @@ void map_pick_creature_move(void)
         e->unk5A = e->target_heading = e->player_heading;
         break;
     default:
-        e->unk5A = e->target_heading = e->facing;
+        e->unk5A = e->target_heading = e->rotation.vy;
         break;
     }
     if (e->action != 8)

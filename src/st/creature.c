@@ -32,12 +32,12 @@ void creature_return_home(Creature *e)
 ADDRESS(0x8004ac9c, 0x50)
 void creature_reset_facing(Creature *e)
 {
-    e->rot_z = 0;
-    e->rot_x = 0;
+    e->rotation.vz = 0;
+    e->rotation.vx = 0;
     if (e->home_facing == 0xffff)
-        e->facing = rand() >> 3;
+        e->rotation.vy = rand() >> 3;
     else
-        e->facing = e->home_facing;
+        e->rotation.vy = e->home_facing;
 }
 
 /* Copies the entry's settings from its record and resets its scale. */
@@ -76,7 +76,7 @@ void creature_reset_for_spawn(Creature *e)
     e->script = NULL;
     e->unk23 = 1;
     if (e->home_facing == 0xffff)
-        e->facing = rand() >> 3;
+        e->rotation.vy = rand() >> 3;
     e->unk20 = 55;
     e->velocity.vx = e->velocity.vy = e->velocity.vz = 0;
     e->unkB2 = 0;
@@ -133,7 +133,7 @@ void creatures_clear(void)
     for (i = 0; i < 64; i++, e++) {
         e->spawn_chance = 255;
         e->state = 0;
-        e->anim_slot = 0;
+        e->anim_slot.slot = NULL;
     }
     vis_table_a.zone = 254;
     vis_table_a.skip_flags = 0;
@@ -146,12 +146,12 @@ void creatures_clear(void)
 }
 
 ADDRESS(0x8004b058, 0x38)
-void creature_set_script(Creature *e, u8 *p)
+void creature_set_script(Creature *e, CreatureScript *p)
 {
     e->prev_command = e->command;
     if (p != NULL) {
-        e->script = (CreatureScript *)p;
-        e->command = *p;
+        e->script = p;
+        e->command = p->command;
         e->script_state = 0;
     } else {
         e->script = NULL;
@@ -161,7 +161,7 @@ void creature_set_script(Creature *e, u8 *p)
 }
 
 ADDRESS(0x8004b090, 0x8)
-int creature_score_script(u8 *p, int arg)
+int creature_score_script(CreatureScript *p, int arg)
 {
     return 0;
 }
@@ -173,16 +173,16 @@ void creature_pick_script(int arg)
 {
     Creature *e = vis_table_a.current;
     CreatureType *r = vis_table_a.current_type;
-    u8 **list;
-    u8 *p;
-    u8 *best;
+    CreatureScript **list;
+    CreatureScript *p;
+    CreatureScript *best;
     int score;
     int max;
     int n;
 
     if (e->script_state == 240 || e->script_state == 0)
         return;
-    list = (u8 **)r->scripts;
+    list = r->scripts;
     max = -2;
     best = NULL;
     n = 24;
@@ -196,7 +196,7 @@ void creature_pick_script(int arg)
             best = p;
         }
     }
-    if (best != NULL && (best != (u8 *)e->script || e->script_state == 255))
+    if (best != NULL && (best != e->script || e->script_state == 255))
         creature_set_script(e, best);
 }
 
@@ -207,19 +207,19 @@ void creature_pick_script_by_distance(void)
                                 vis_table_a.current->position.vz - viewer.position.vz));
 }
 
-/* Finds the entry of r's list whose first byte is id. */
+/* Finds the entry of r's list whose command is id. */
 ADDRESS(0x8004b1e8, 0x48)
-u8 *creature_type_find_script(CreatureType *r, u8 id)
+CreatureScript *creature_type_find_script(CreatureType *r, u8 id)
 {
-    u8 **list = (u8 **)r->scripts;
-    u8 *p;
+    CreatureScript **list = r->scripts;
+    CreatureScript *p;
     int n = 24;
 
     while (n--) {
         p = *list++;
         if (p == NULL)
             break;
-        if (*p == id)
+        if (p->command == id)
             return p;
     }
     return NULL;
@@ -680,24 +680,24 @@ loop:
         goto done;
     if (hits & 2) {
         depth = 1 - (vis_lists.wall_dist - e->radius);
-        vel.vx = depth * vis_lists.wall_normal_x / 4096;
-        vel.vz = depth * vis_lists.wall_normal_z / 4096;
+        vel.vx = depth * vis_lists.wall_normal.vx / 4096;
+        vel.vz = depth * vis_lists.wall_normal.vz / 4096;
         if (wall0)
             goto done;
         wall0 = 1;
-        vis_lists.hit_normal_heading = ratan2(vis_lists.wall_normal_z, vis_lists.wall_normal_x);
+        vis_lists.hit_normal_heading = ratan2(vis_lists.wall_normal.vz, vis_lists.wall_normal.vx);
         ang = vis_lists.hit_normal_heading + 1024;
         e->wall_heading = ang & 0xfff;
         push = speed * rcos(heading - (ang & 0xfff)) / 4096;
         vis_lists.slide_speed = push;
     } else if (hits & 8) {
         depth = 1 - (vis_lists.low_wall_dist - e->radius);
-        vel.vx = depth * vis_lists.low_wall_normal_x / 4096;
-        vel.vz = depth * vis_lists.low_wall_normal_z / 4096;
+        vel.vx = depth * vis_lists.low_wall_normal.vx / 4096;
+        vel.vz = depth * vis_lists.low_wall_normal.vz / 4096;
         if (wall1)
             goto done;
         wall1 = 1;
-        vis_lists.hit_normal_heading = ratan2(vis_lists.low_wall_normal_z, vis_lists.low_wall_normal_x);
+        vis_lists.hit_normal_heading = ratan2(vis_lists.low_wall_normal.vz, vis_lists.low_wall_normal.vx);
         ang = vis_lists.hit_normal_heading + 1024;
         e->wall_heading = ang & 0xfff;
         push = speed * rcos(heading - (ang & 0xfff)) / 4096;
@@ -818,9 +818,9 @@ int creature_vertex_offset(Creature *e, int index, VECTOR *out)
         v.vy = v.vy * e->scale.vy >> 12;
         v.vz = v.vz * e->scale.vz >> 12;
     }
-    rot.vx = e->rot_x;
-    rot.vy = e->facing + 2048;
-    rot.vz = e->rot_z;
+    rot.vx = e->rotation.vx;
+    rot.vy = e->rotation.vy + 2048;
+    rot.vz = e->rotation.vz;
     vector_rotate(&rot, &v, out);
     return 1;
 }
@@ -899,21 +899,21 @@ int n;
     p.vy += 800;
     for (;;) {
         vector_to_angles(p.vx - target->vx, p.vy - target->vy, p.vz - target->vz, &rot);
-        d = (rot.vy - e->facing + 2048) & 0xfff;
+        d = (rot.vy - e->rotation.vy + 2048) & 0xfff;
         if (d >= 2048)
             d = 4096 - d;
         if (d != 0)
             d = k / d;
         if (d > 4096)
             d = 4096;
-        t = angle_lerp(rot.vy, e->facing + 2048, d);
+        t = angle_lerp(rot.vy, e->rotation.vy + 2048, d);
         rot.vy = t;
         t = pitch;
         if (t == -1) {
-            d = (rot.vx - (short)e->rot_x) & 0xfff;
+            d = (rot.vx - e->rotation.vx) & 0xfff;
             if (d >= 2048)
                 d = 4096 - d;
-            rot.vx = angle_lerp(rot.vx, (short)e->rot_x, d);
+            rot.vx = angle_lerp(rot.vx, e->rotation.vx, d);
         } else {
             rot.vx = pitch;
         }

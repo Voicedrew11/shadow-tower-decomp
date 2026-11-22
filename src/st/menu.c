@@ -395,7 +395,7 @@ void equip_load_item_slot_pictures(void)
             used = 0;
         }
         if (ids[i] != 0xffff) {
-            size = cd_read_member(6, vis_table_c.types[ids[i]].unk5[0] + 400, cd_state.load_cursor)
+            size = cd_read_member(6, vis_table_c.types[ids[i]].icon + 400, cd_state.load_cursor)
                    << 11;
             tim_load_images_at(cd_state.load_cursor, &pos, NULL, 1);
             used += size;
@@ -1774,7 +1774,7 @@ void menu_arrange_icons_run(void)
     sp->state.grid.hand_count = 0;
     sp->state.grid.bag_count = 0;
     for (i = 0; i < 314; i++) {
-        if (vis_table_c.types[i].unk5[0] != 0xff && i < 314 && i != 266
+        if (vis_table_c.types[i].icon != 0xff && i < 314 && i != 266
             && inventory.counts[i].count != 0 && i != viewer.equipment[0] && i != viewer.equipment[1]
             && i != viewer.equipment[2] && i != viewer.equipment[3] && i != viewer.equipment[4]
             && i != viewer.equipment[5] && i != viewer.equipment[7] && i != viewer.equipment[8]
@@ -1817,14 +1817,14 @@ void menu_arrange_icons_run(void)
             total = 0;
         }
         if (i < 20 && i < sp->state.grid.hand_count) {
-            size = cd_read_member(6, vis_table_c.types[sp->state.grid.hand_ids[i]].unk5[0],
+            size = cd_read_member(6, vis_table_c.types[sp->state.grid.hand_ids[i]].icon,
                                  cd_state.load_cursor) << 11;
 
             tim_load_images_at(cd_state.load_cursor, &sp->state.grid.cell_tex[i], NULL, 1);
             total += size;
             cd_state.load_cursor = (u_long *)((u8 *)cd_state.load_cursor + size);
         } else if (i >= 20 && i - 20 < sp->state.grid.bag_count) {
-            size = cd_read_member(6, vis_table_c.types[sp->state.grid.bag_ids[i - 20]].unk5[0],
+            size = cd_read_member(6, vis_table_c.types[sp->state.grid.bag_ids[i - 20]].icon,
                                  cd_state.load_cursor) << 11;
 
             tim_load_images_at(cd_state.load_cursor, &sp->state.grid.cell_tex[i], NULL, 1);
@@ -2028,7 +2028,7 @@ void menu_arrange_icons_run(void)
                 else
                     id = sp->state.grid.bag_ids[sp->state.grid.bag_row * 4 + (CURSOR_ROW * 4 + CURSOR_COL) - 4];
                 if (shown != id && id != -1) {
-                    cd_read_member(6, vis_table_c.types[id].unk5[0] + 200, cd_file_buffer);
+                    cd_read_member(6, vis_table_c.types[id].icon + 200, cd_file_buffer);
                     tim_load_images_at(cd_file_buffer, &picture, NULL, 1);
                     shown = id;
                 }
@@ -2053,7 +2053,7 @@ void menu_arrange_icons_run(void)
                     }
                     if (sp->state.grid.hand_ids[i] != -1) {
                         int size = cd_read_member(
-                            6, vis_table_c.types[sp->state.grid.hand_ids[i]].unk5[0], cd_state.load_cursor) << 11;
+                            6, vis_table_c.types[sp->state.grid.hand_ids[i]].icon, cd_state.load_cursor) << 11;
 
                         tim_load_images_at(cd_state.load_cursor, &sp->state.grid.cell_tex[i % 20], NULL, 1);
                         used += size;
@@ -2086,7 +2086,7 @@ void menu_arrange_icons_run(void)
                     }
                     if (sp->state.grid.bag_ids[i] != -1) {
                         int size = cd_read_member(
-                            6, vis_table_c.types[sp->state.grid.bag_ids[i]].unk5[0], cd_state.load_cursor) << 11;
+                            6, vis_table_c.types[sp->state.grid.bag_ids[i]].icon, cd_state.load_cursor) << 11;
 
                         tim_load_images_at(cd_state.load_cursor, &sp->state.grid.cell_tex[i % 20 + 20], NULL, 1);
                         used += size;
@@ -2612,9 +2612,9 @@ void shop_run(void)
                     play_refuse_sound();
                 } else {
                     if (sp->mode & 1)
-                        kind = vis_table_c.types[inventory.shop_ids[sp->state.list.ids[sp->scroll + sp->cursor]]].unk5[0];
+                        kind = vis_table_c.types[inventory.shop_ids[sp->state.list.ids[sp->scroll + sp->cursor]]].icon;
                     else
-                        kind = vis_table_c.types[sp->state.list.ids[sp->scroll + sp->cursor]].unk5[0];
+                        kind = vis_table_c.types[sp->state.list.ids[sp->scroll + sp->cursor]].icon;
                     play_confirm_sound();
                     sp->state.list.confirm_choice = 1;
                     sp->mode |= 0x8000;
