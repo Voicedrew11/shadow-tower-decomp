@@ -596,11 +596,11 @@ void fighters_play_anim_sounds(void)
 ADDRESS(0x80014070, 0x68)
 void cd_open_vs_archives(void)
 {
-    cd_archive_open(0, "VS\\VS_CRT.T");
-    cd_archive_open(5, "VS\\VS_ETC.T");
-    cd_archive_open(8, "COM\\STAT.T");
-    cd_archive_open(10, "COM\\CRT.T");
-    cd_archive_open(11, "COM\\ICON.T");
+    cd_archive_open(VS_ARCHIVE_VS_CRT, "VS\\VS_CRT.T");
+    cd_archive_open(VS_ARCHIVE_VS_ETC, "VS\\VS_ETC.T");
+    cd_archive_open(VS_ARCHIVE_STAT, "COM\\STAT.T");
+    cd_archive_open(VS_ARCHIVE_CRT, "COM\\CRT.T");
+    cd_archive_open(VS_ARCHIVE_ICON, "COM\\ICON.T");
 }
 
 /* The fighter being loaded. */
@@ -628,17 +628,17 @@ void fighters_load_round(void)
 
     for (i = 0; i < 2; i++) {
         member = lineups[i].slot[round_index] * 5;
-        cd_read_member(0, member + 1, (u_long *)&FIGHTER);
+        cd_read_member(VS_ARCHIVE_VS_CRT, member + 1, (u_long *)&FIGHTER);
         tim_load_images_shifted((u_long *)&FIGHTER, i * 4, i * 12);
         DrawSync(0);
-        cd_read_member(0, member + 2, (u_long *)sound_banks[i].head);
-        cd_read_member(0, member + 3, (u_long *)&FIGHTER);
+        cd_read_member(VS_ARCHIVE_VS_CRT, member + 2, (u_long *)sound_banks[i].head);
+        cd_read_member(VS_ARCHIVE_VS_CRT, member + 3, (u_long *)&FIGHTER);
         sound_bank_open(i);
-        if (cd_read_member(0, member + 4, FIGHTER.effect_model))
+        if (cd_read_member(VS_ARCHIVE_VS_CRT, member + 4, FIGHTER.effect_model))
             model_fixup_face_indices((ModelFile *)FIGHTER.effect_model);
         else
             FIGHTER.effect_model[0] = 0;
-        cd_read_member(0, member, (u_long *)&FIGHTER);
+        cd_read_member(VS_ARCHIVE_VS_CRT, member, (u_long *)&FIGHTER);
         if (((StAnimFile *)FIGHTER.file)->node_count) {
             FIGHTER.model_kind = 1;
             anim_set_register(i, (StAnimFile *)FIGHTER.file);
@@ -1424,21 +1424,21 @@ void match_load_resources(void)
     clut.x = 640;
     clut.y = 480;
     p = arena_model_0;
-    cd_read_member(8, 2, p);
+    cd_read_member(VS_ARCHIVE_STAT, STAT_CREATURE_NAMES, p);
     copy_words((u32 *)vs_menu_messages[1].offsets, (u32 *)(p + 1), 0x1500);
     p = (u_long *)((u8 *)p + (p[0] + 4));
     tim_load_images_at(p + 1, (DVECTOR *)&pos, (DVECTOR *)&clut);
     DrawSync(0);
-    cd_read_member(5, 10, arena_model_0);
+    cd_read_member(VS_ARCHIVE_VS_ETC, 10, arena_model_0);
     tim_load_images_shifted(arena_model_0, 0, 0);
     DrawSync(0);
-    cd_read_member(5, 0, arena_model_0);
+    cd_read_member(VS_ARCHIVE_VS_ETC, 0, arena_model_0);
     model_fixup_face_indices((ModelFile *)arena_model_0);
-    cd_read_member(5, 1, (u_long *)arena_model_1);
+    cd_read_member(VS_ARCHIVE_VS_ETC, 1, (u_long *)arena_model_1);
     model_fixup_face_indices((ModelFile *)arena_model_1);
-    cd_read_member(5, 2, (u_long *)arena_model_2);
+    cd_read_member(VS_ARCHIVE_VS_ETC, 2, (u_long *)arena_model_2);
     model_fixup_face_indices((ModelFile *)arena_model_2);
-    cd_read_member(5, 3, (u_long *)guard_flash_model);
+    cd_read_member(VS_ARCHIVE_VS_ETC, 3, (u_long *)guard_flash_model);
     model_fixup_face_indices((ModelFile *)guard_flash_model);
     round_wins[0] = 0;
     round_wins_2p = 0;
@@ -1584,10 +1584,10 @@ int main(void)
     DrawSync(0);
     sound_init();
     cd_open_vs_archives();
-    cd_read_member(5, 4, menu_vab_head);
-    cd_read_member(5, 5, menu_vab_body);
+    cd_read_member(VS_ARCHIVE_VS_ETC, 4, menu_vab_head);
+    cd_read_member(VS_ARCHIVE_VS_ETC, 5, menu_vab_body);
     load_menu_sound_bank();
-    cd_read_member(5, 20, (u_long *)vis_table_c.types);
+    cd_read_member(VS_ARCHIVE_VS_ETC, 20, (u_long *)vis_table_c.types);
     lineups[0].slot[0] = -1;
     lineups[0].slot[1] = -1;
     lineups[0].slot[2] = -1;

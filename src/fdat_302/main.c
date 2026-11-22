@@ -316,7 +316,7 @@ void map_warp_player(void)
     creatures_update();
     creature_spawn_now(e);
     if (world_state.model_files[slot] == NULL)
-        creature_model_load(2, index * 5, slot, e->vram_tag & 0xf);
+        creature_model_load(ARCHIVE_CHR, index * 5, slot, e->vram_tag & 0xf);
     e->fade = -1;
     e->status.bytes[2] &= 0xf2;
     creature_start_script(e, 7);

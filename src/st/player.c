@@ -1455,7 +1455,7 @@ void player_load_magic(u16 id, u8 slot)
     viewer.magic_ids[slot] = item;
     if (item != 255) {
         viewer.magic_defs[slot] = &effects.defs[item];
-        cd_read_member(1, item * 4 + 740, (u_long *)viewer.magic_buffers[slot]);
+        cd_read_member(ARCHIVE_FDAT, item * 4 + 740, (u_long *)viewer.magic_buffers[slot]);
         p = viewer.magic_buffers[slot];
         n = *(u16 *)p;
         p += 4;
@@ -1469,10 +1469,10 @@ void player_load_magic(u16 id, u8 slot)
             p += size;
             part++;
         }
-        cd_read_member(1, item * 4 + 741, cd_file_buffer);
+        cd_read_member(ARCHIVE_FDAT, item * 4 + 741, cd_file_buffer);
         tim_load_images_at(cd_file_buffer, &pix[slot], &clut[slot], 0);
         DrawSync(0);
-        sound_bank_load(1, item * 4 + 742, slot + 6);
+        sound_bank_load(ARCHIVE_FDAT, item * 4 + 742, slot + 6);
     }
     viewer.magic_gauge_delay = 30;
     viewer.magic_gauge = 0;
@@ -1511,7 +1511,7 @@ void player_load_equipment_model(u16 id, u8 slot, u8 reload)
     viewer.weapon_gauge = 0;
     viewer.swing_gauge = 0;
     if (model != 255 && (cur = viewer.slot_model_ids[slot]) == model && reload) {
-        cd_read_member(1, cur * 4 + 485, cd_file_buffer);
+        cd_read_member(ARCHIVE_FDAT, cur * 4 + 485, cd_file_buffer);
         tim_load_images_at(cd_file_buffer, &pix[slot], &clut[slot], 0);
         DrawSync(0);
     }
@@ -1525,20 +1525,20 @@ void player_load_equipment_model(u16 id, u8 slot, u8 reload)
         if (paired) {
             pair = slot ^ 1;
             viewer.slot_model_info[pair] = &equipment_model_placements[other];
-            cd_read_member(1, model * 4 + 484, viewer.slot_model_files[slot]);
-            cd_read_member(1, other * 4 + 484, viewer.slot_model_files[pair]);
+            cd_read_member(ARCHIVE_FDAT, model * 4 + 484, viewer.slot_model_files[slot]);
+            cd_read_member(ARCHIVE_FDAT, other * 4 + 484, viewer.slot_model_files[pair]);
             anim_register(slot + 32, viewer.slot_model_files[slot]);
             model_offset_textures((Model *)sp->model, &pix[slot], &clut[slot], 0);
             anim_register(pair + 32, viewer.slot_model_files[pair]);
         } else {
-            cd_read_member(1, model * 4 + 484, viewer.slot_model_files[slot]);
+            cd_read_member(ARCHIVE_FDAT, model * 4 + 484, viewer.slot_model_files[slot]);
             anim_register(slot + 32, viewer.slot_model_files[slot]);
             model_offset_textures((Model *)sp->model, &pix[slot], &clut[slot], 1);
         }
-        cd_read_member(1, model * 4 + 485, cd_file_buffer);
+        cd_read_member(ARCHIVE_FDAT, model * 4 + 485, cd_file_buffer);
         tim_load_images_at(cd_file_buffer, &pix[slot], &clut[slot], 0);
         DrawSync(0);
-        sound_bank_load(1, model * 4 + 486, viewer.slot_sounds[slot] - 22);
+        sound_bank_load(ARCHIVE_FDAT, model * 4 + 486, viewer.slot_sounds[slot] - 22);
     }
     if (slot < 2) {
         viewer.action_timers.halves[slot] = -1;

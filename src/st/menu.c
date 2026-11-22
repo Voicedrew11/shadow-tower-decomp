@@ -69,7 +69,7 @@ void menu_load_main_messages(void)
     u_long *image;
 
     image = cd_file_buffer;
-    cd_read_member(3, 0, image);
+    cd_read_member(ARCHIVE_STAT, STAT_MESSAGES, image);
     copy_words((u32 *)&menu_messages, (u32 *)(image + 1), 5376);
     image = (u_long *)((u8 *)image + (cd_file_buffer[0] + 4));
     tim_load_images_at(image + 1, &MENU_SCRATCH->image_vram[0], &MENU_SCRATCH->image_vram[1], 1);
@@ -121,7 +121,7 @@ void card_screen_open(int arg0, int arg1)
     sp->image_vram[4].vy = 256;
     cd_wait_idle();
     image = cd_file_buffer;
-    cd_read_member(3, 0, image);
+    cd_read_member(ARCHIVE_STAT, STAT_MESSAGES, image);
     copy_words((u32 *)&menu_messages, (u32 *)(image + 1), 5376);
     image = (u_long *)((u8 *)image + (cd_file_buffer[0] + 4));
     tim_load_images_at(image + 1, &sp->image_vram[0], &sp->image_vram[1], 1);
@@ -160,7 +160,7 @@ void menu_main_run(void)
     sp->image_vram[4].vy = 256;
     cd_wait_idle();
     image = cd_file_buffer;
-    cd_read_member(3, 0, image);
+    cd_read_member(ARCHIVE_STAT, STAT_MESSAGES, image);
     copy_words((u32 *)&menu_messages, (u32 *)(image + 1), 5376);
     image = (u_long *)((u8 *)image + (cd_file_buffer[0] + 4));
     tim_load_images_at(image + 1, &sp->image_vram[0], &sp->image_vram[1], 1);
@@ -338,7 +338,7 @@ void equip_load_slot_picture(int slot)
         file = *id != 0xffff ? *id + first : none;
     else
         file = (*id != 0xffff ? *id + first : none) * 3 + 2;
-    cd_read_member(7, file, cd_state.load_cursor);
+    cd_read_member(ARCHIVE_EQUIP, file, cd_state.load_cursor);
     image = cd_state.load_cursor;
     if (part != -1) {
         if (part == 1)
@@ -395,7 +395,7 @@ void equip_load_item_slot_pictures(void)
             used = 0;
         }
         if (ids[i] != 0xffff) {
-            size = cd_read_member(6, vis_table_c.types[ids[i]].unk5[0] + 400, cd_state.load_cursor)
+            size = cd_read_member(ARCHIVE_ICON, vis_table_c.types[ids[i]].unk5[0] + 400, cd_state.load_cursor)
                    << 11;
             tim_load_images_at(cd_state.load_cursor, &pos, NULL, 1);
             used += size;
@@ -864,21 +864,21 @@ void menu_equip_info_run(void)
     sp->item_messages = mem_alloc(21504);
     sp->ring_magic_bits = mem_alloc(144);
     p = CD_BUFFER;
-    cd_read_member(3, 1, p);
+    cd_read_member(ARCHIVE_STAT, STAT_SCREEN_MESSAGES, p);
     copy_words((u32 *)&menu_messages, (u32 *)(p + 1), 5376);
     p = (u_long *)((u8 *)p + (*p + 4));
     tim_load_images_at(p + 1, &sp->image_vram[0], &sp->image_vram[1], 1);
     p = (u_long *)((u8 *)p + (*p + 4));
     copy_words(sp->ring_magic_bits, (u32 *)(p + 1), 36);
     p = CD_BUFFER;
-    cd_read_member(3, 4, p);
+    cd_read_member(ARCHIVE_STAT, STAT_ITEM_NAMES_HIGH_RES, p);
     copy_words((u32 *)sp->item_messages, (u32 *)(p + 1), 5376);
     p = (u_long *)((u8 *)p + (*p + 4));
     tim_load_images_at(p + 1, &sp->image_vram[2], &sp->image_vram[3], 1);
-    cd_read_member(3, 5, CD_BUFFER);
+    cd_read_member(ARCHIVE_STAT, STAT_BACKGROUND, CD_BUFFER);
     tim_load_images_at(CD_BUFFER, &sp->image_vram[4], NULL, 1);
     DrawSync(0);
-    cd_read_member(3, 7, CD_BUFFER);
+    cd_read_member(ARCHIVE_STAT, STAT_HEADER_IMAGES, CD_BUFFER);
     tim_load_images_at(CD_BUFFER, &image, &clut, 1);
     DrawSync(0);
     sp->state.vram[0].vx = 640;
@@ -1170,9 +1170,9 @@ void menu_equip_info_run(void)
                         sp->ring_magic = sp->ring_magic_bits + (viewer.equipment[EQUIP_SLOT_RIGHT_RING] - 196);
                     else
                         sp->ring_magic = sp->ring_magic_bits + (viewer.equipment[EQUIP_SLOT_LEFT_RING] - 196);
-                    cd_read_member(7, 975, CD_BUFFER);
+                    cd_read_member(ARCHIVE_EQUIP, 975, CD_BUFFER);
                     tim_load_images_at(CD_BUFFER, &sp->tex_pos, NULL, 1);
-                    cd_read_member(7, sp->choice_index + 995, CD_BUFFER);
+                    cd_read_member(ARCHIVE_EQUIP, sp->choice_index + 995, CD_BUFFER);
                     tim_load_images_at(CD_BUFFER, &sp->state.vram[0], &sp->state.vram[1], 1);
                 } else {
                     if (cur == 0xffff) {
@@ -1193,10 +1193,10 @@ void menu_equip_info_run(void)
                         sp->choice_id = sp->choices[sel];
                         file = sp->choice_id + offset;
                     }
-                    cd_read_member(7, file * 3, CD_BUFFER);
+                    cd_read_member(ARCHIVE_EQUIP, file * 3, CD_BUFFER);
                     tim_load_images_at(CD_BUFFER, &sp->state.vram[0], &sp->state.vram[1], 1);
                     DrawSync(0);
-                    cd_read_member(7, file * 3 + 1, CD_BUFFER);
+                    cd_read_member(ARCHIVE_EQUIP, file * 3 + 1, CD_BUFFER);
                     tim_load_images_at(CD_BUFFER, &picture, NULL, 1);
                     player_compute_derived_stats(0);
                 }
@@ -1363,9 +1363,9 @@ void menu_equip_info_run(void)
                         file = base;
                     else
                         file = sp->choice_id + offset;
-                    cd_read_member(7, file * 3, CD_BUFFER);
+                    cd_read_member(ARCHIVE_EQUIP, file * 3, CD_BUFFER);
                     tim_load_images_at(CD_BUFFER, &sp->state.vram[0], &sp->state.vram[1], 1);
-                    cd_read_member(7, file * 3 + 1, CD_BUFFER);
+                    cd_read_member(ARCHIVE_EQUIP, file * 3 + 1, CD_BUFFER);
                     tim_load_images_at(CD_BUFFER, &picture, NULL, 1);
                     player_compute_derived_stats(1);
                     pad_state.pressed_repeat = 0;
@@ -1418,7 +1418,7 @@ void menu_equip_info_run(void)
                     }
                 }
                 if (row != sp->choice_index) {
-                    cd_read_member(7, sp->choice_index + 995, CD_BUFFER);
+                    cd_read_member(ARCHIVE_EQUIP, sp->choice_index + 995, CD_BUFFER);
                     tim_load_images_at(CD_BUFFER, &sp->state.vram[0], &sp->state.vram[1], 1);
                     sp->choice_id = sp->choice_index;
                     player_compute_derived_stats(1);
@@ -1550,22 +1550,22 @@ void menu_creature_book_run(void)
     if (sp->scroll < 0)
         sp->scroll = 0;
     p = CD_BUFFER;
-    cd_read_member(3, 1, p);
+    cd_read_member(ARCHIVE_STAT, STAT_SCREEN_MESSAGES, p);
     copy_words((u32 *)&menu_messages, (u32 *)(p + 1), 5376);
     p = (u_long *)((u8 *)p + (*p + 4));
     tim_load_images_at(p + 1, &sp->image_vram[0], &sp->image_vram[1], 1);
     p = CD_BUFFER;
-    cd_read_member(3, 2, p);
+    cd_read_member(ARCHIVE_STAT, STAT_CREATURE_NAMES, p);
     copy_words((u32 *)sp->state.book.names, (u32 *)(p + 1), 5376);
     p = (u_long *)((u8 *)p + (*p + 4));
     tim_load_images_at(p + 1, &sp->image_vram[2], &sp->image_vram[3], 1);
-    cd_read_member(3, 5, CD_BUFFER);
+    cd_read_member(ARCHIVE_STAT, STAT_BACKGROUND, CD_BUFFER);
     tim_load_images_at(CD_BUFFER, &sp->image_vram[4], NULL, 1);
     DrawSync(0);
-    cd_read_member(3, 7, CD_BUFFER);
+    cd_read_member(ARCHIVE_STAT, STAT_HEADER_IMAGES, CD_BUFFER);
     tim_load_images_at(CD_BUFFER, &image, &clut, 1);
     DrawSync(0);
-    cd_read_member(4, 400, CD_BUFFER);
+    cd_read_member(ARCHIVE_CRT, 400, CD_BUFFER);
     copy_words((u32 *)sp->state.book.entries, (u32 *)CD_BUFFER, 1661);
     cd_state.load_cursor = CD_BUFFER;
     n = 15;
@@ -1582,7 +1582,7 @@ void menu_creature_book_run(void)
                 used = 0;
             }
             {
-                int size = cd_read_member(4, sp->state.book.kinds[k], cd_state.load_cursor) << 11;
+                int size = cd_read_member(ARCHIVE_CRT, sp->state.book.kinds[k], cd_state.load_cursor) << 11;
 
                 tim_load_images_at(cd_state.load_cursor, &sp->state.book.cell_tex[k % 15], NULL, 1);
                 used += size;
@@ -1674,7 +1674,7 @@ void menu_creature_book_run(void)
                         u_long *p = CD_BUFFER;
 
 
-                        cd_read_member(4, sp->state.book.kinds[k] + 200, p);
+                        cd_read_member(ARCHIVE_CRT, sp->state.book.kinds[k] + 200, p);
                         tim_load_images_at(p + 1, &sp->state.book.image, NULL, 1);
                         p = (u_long *)((u8 *)p + (*p + 4));
                         tim_load_images_at(p + 1, &detail, &detail_clut, 1);
@@ -1704,7 +1704,8 @@ void menu_creature_book_run(void)
                         }
                         {
                             int size =
-                                cd_read_member(4, sp->state.book.kinds[k], cd_state.load_cursor) << 11;
+                                cd_read_member(ARCHIVE_CRT, sp->state.book.kinds[k],
+                                    cd_state.load_cursor) << 11;
 
                             tim_load_images_at(cd_state.load_cursor, &sp->state.book.cell_tex[k % 15], NULL, 1);
                             used += size;
@@ -1768,19 +1769,19 @@ void menu_arrange_icons_run(void)
     menu_show_loading_screen();
     sp->state.grid.messages = mem_alloc(21504);
     p = cd_file_buffer;
-    cd_read_member(3, 1, p);
+    cd_read_member(ARCHIVE_STAT, STAT_SCREEN_MESSAGES, p);
     copy_words((u32 *)&menu_messages, (u32 *)(p + 1), 5376);
     p = (u_long *)((u8 *)p + (*p + 4));
     tim_load_images_at(p + 1, &sp->image_vram[0], &sp->image_vram[1], 1);
     p = cd_file_buffer;
-    cd_read_member(3, 4, p);
+    cd_read_member(ARCHIVE_STAT, STAT_ITEM_NAMES_HIGH_RES, p);
     copy_words((u32 *)sp->state.grid.messages, (u32 *)(p + 1), 5376);
     p = (u_long *)((u8 *)p + (*p + 4));
     tim_load_images_at(p + 1, &sp->image_vram[2], &sp->image_vram[3], 1);
-    cd_read_member(3, 5, cd_file_buffer);
+    cd_read_member(ARCHIVE_STAT, STAT_BACKGROUND, cd_file_buffer);
     tim_load_images_at(cd_file_buffer, &sp->image_vram[4], NULL, 1);
     DrawSync(0);
-    cd_read_member(3, 7, cd_file_buffer);
+    cd_read_member(ARCHIVE_STAT, STAT_HEADER_IMAGES, cd_file_buffer);
     tim_load_images_at(cd_file_buffer, &image, &clut, 1);
     DrawSync(0);
     sp->state.grid.hand_count = 0;
@@ -1844,14 +1845,14 @@ void menu_arrange_icons_run(void)
             total = 0;
         }
         if (i < 20 && i < sp->state.grid.hand_count) {
-            size = cd_read_member(6, vis_table_c.types[sp->state.grid.hand_ids[i]].unk5[0],
+            size = cd_read_member(ARCHIVE_ICON, vis_table_c.types[sp->state.grid.hand_ids[i]].unk5[0],
                                  cd_state.load_cursor) << 11;
 
             tim_load_images_at(cd_state.load_cursor, &sp->state.grid.cell_tex[i], NULL, 1);
             total += size;
             cd_state.load_cursor = (u_long *)((u8 *)cd_state.load_cursor + size);
         } else if (i >= 20 && i - 20 < sp->state.grid.bag_count) {
-            size = cd_read_member(6, vis_table_c.types[sp->state.grid.bag_ids[i - 20]].unk5[0],
+            size = cd_read_member(ARCHIVE_ICON, vis_table_c.types[sp->state.grid.bag_ids[i - 20]].unk5[0],
                                  cd_state.load_cursor) << 11;
 
             tim_load_images_at(cd_state.load_cursor, &sp->state.grid.cell_tex[i], NULL, 1);
@@ -2055,7 +2056,7 @@ void menu_arrange_icons_run(void)
                 else
                     id = sp->state.grid.bag_ids[sp->state.grid.bag_row * 4 + (CURSOR_ROW * 4 + CURSOR_COL) - 4];
                 if (shown != id && id != -1) {
-                    cd_read_member(6, vis_table_c.types[id].unk5[0] + 200, cd_file_buffer);
+                    cd_read_member(ARCHIVE_ICON, vis_table_c.types[id].unk5[0] + 200, cd_file_buffer);
                     tim_load_images_at(cd_file_buffer, &picture, NULL, 1);
                     shown = id;
                 }
@@ -2278,12 +2279,12 @@ int menu_use_item_run(void)
     sp->state.page_list.icons[4].vy = 488;
     sp->state.block = mem_alloc(21504);
     image = (u8 *)CD_BUFFER;
-    cd_read_member(3, 3, (u_long *)image);
+    cd_read_member(ARCHIVE_STAT, STAT_ITEM_NAMES, (u_long *)image);
     copy_words(sp->state.block, (u32 *)(image + 4), 5376);
     image += *(u32 *)image + 4;
     tim_load_images_at(image + 4, &sp->image_vram[2], &sp->image_vram[3], 1);
     cd_state.load_cursor = CD_BUFFER;
-    cd_read_member(6, 800, cd_state.load_cursor);
+    cd_read_member(ARCHIVE_ICON, 800, cd_state.load_cursor);
     sp->state.page_list.entries = mem_alloc(92);
     sp->state.page_list.count = 0;
     for (i = 268; i < 314; i++) {
@@ -2409,7 +2410,7 @@ int menu_use_item_run(void)
         player_compute_derived_stats(0);
     {
         u8 *restore = (u8 *)CD_BUFFER;
-        cd_read_member(3, 9, (u_long *)restore);
+        cd_read_member(ARCHIVE_STAT, 9, (u_long *)restore);
         tim_load_images_at(restore + 4, NULL, NULL, 0);
         restore += *(u32 *)restore + 4;
         tim_load_images_at(restore + 4, NULL, NULL, 0);
@@ -2441,12 +2442,12 @@ void shop_open(void)
     MoveImage(&page, 896, 0);
     cd_wait_idle();
     p = (u8 *)cd_file_buffer;
-    cd_read_member(3, 0, (u_long *)p);
+    cd_read_member(ARCHIVE_STAT, STAT_MESSAGES, (u_long *)p);
     copy_words((u32 *)&menu_messages, (u32 *)(p + 4), 5376);
     p += *(u32 *)p + 4;
     tim_load_images_at(p + 4, &sp->image_vram[0], &sp->image_vram[1], 1);
     p = (u8 *)cd_file_buffer;
-    cd_read_member(3, 3, (u_long *)p);
+    cd_read_member(ARCHIVE_STAT, STAT_ITEM_NAMES, (u_long *)p);
     copy_words(sp->state.block, (u32 *)(p + 4), 5376);
     p += *(u32 *)p + 4;
     tim_load_images_at(p + 4, &sp->image_vram[2], &sp->image_vram[3], 1);
@@ -2653,7 +2654,7 @@ void shop_run(void)
                     sp->state.list.confirm_choice = 1;
                     sp->mode |= 0x8000;
                     if (kind != shown) {
-                        cd_read_member(6, kind + 600, cd_file_buffer);
+                        cd_read_member(ARCHIVE_ICON, kind + 600, cd_file_buffer);
                         tim_load_images_at(cd_file_buffer, &pos, NULL, 1);
                         shown = kind;
                     }
@@ -4440,7 +4441,7 @@ int menu_game_over_run(void)
     sp->image_vram[1].vy = 495;
     cd_wait_idle();
     p = (u8 *)cd_file_buffer;
-    cd_read_member(3, 0, (u_long *)p);
+    cd_read_member(ARCHIVE_STAT, STAT_MESSAGES, (u_long *)p);
     copy_words((u32 *)&menu_messages, (u32 *)(p + 4), 5376);
     p += *(u32 *)p + 4;
     tim_load_images_at(p + 4, &sp->image_vram[0], &sp->image_vram[1], 1);
@@ -4491,7 +4492,7 @@ void menu_save_prompt_run(void)
     sp->image_vram[1].vy = 495;
     cd_wait_idle();
     image = cd_file_buffer;
-    cd_read_member(3, 0, image);
+    cd_read_member(ARCHIVE_STAT, STAT_MESSAGES, image);
     copy_words((u32 *)&menu_messages, (u32 *)(image + 1), 5376);
     image = (u_long *)((u8 *)image + (cd_file_buffer[0] + 4));
     tim_load_images_at(image + 1, &sp->image_vram[0], &sp->image_vram[1], 1);

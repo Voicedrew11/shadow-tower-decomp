@@ -4612,7 +4612,7 @@ void world_draw_creatures(void)
         sp->vram_tags[e->model_slot] = e->vram_tag;
     }
     if (area_state.skip_model_sync == 0)
-        creature_models_sync(2, 0, 128, 16);
+        creature_models_sync(ARCHIVE_CHR, 0, 128, 16);
 }
 
 /* Steps the visible table B entries: the two kinds of area sound (over a
@@ -4822,7 +4822,7 @@ void world_draw_objects(void)
         }
     }
     if (area_state.skip_model_sync == 0)
-        object_models_sync(0, 0, 256, 249);
+        object_models_sync(ARCHIVE_MO, 0, 256, 249);
     sp->model_needed_cur = &sp->model_needed[300];
 }
 
@@ -4895,7 +4895,7 @@ void world_draw_ground_items(void)
         }
     }
     if (area_state.skip_model_sync == 0)
-        item_models_sync(5, 0, SLOT_C, 128);
+        item_models_sync(ARCHIVE_ITEM, 0, SLOT_C, 128);
     sp->model_needed_cur = &sp->model_needed[128];
 }
 

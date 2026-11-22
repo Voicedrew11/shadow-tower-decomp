@@ -169,9 +169,9 @@ void menu_equip_pick_item(void)
     }
     if (EQ.shown_id != EQ.loaded_id) {
         if (EQ.shown_id == -1)
-            cd_read_member(6, 801, cd_file_buffer);
+            cd_read_member(ARCHIVE_ICON, 801, cd_file_buffer);
         else
-            cd_read_member(6, vis_table_c.types[EQ.shown_id].unk5[0] + 600, cd_file_buffer);
+            cd_read_member(ARCHIVE_ICON, vis_table_c.types[EQ.shown_id].unk5[0] + 600, cd_file_buffer);
         tim_load_images_at(cd_file_buffer, &pos, NULL, 1);
         EQ.loaded_id = EQ.shown_id;
     }
@@ -422,11 +422,11 @@ int menu_equip_pick_slot(int *sel)
             i = -1;
         sp->mode |= 0x8;
         if (cur == 0xffff) {
-            cd_read_member(6, 801, cd_file_buffer);
+            cd_read_member(ARCHIVE_ICON, 801, cd_file_buffer);
             EQ.shown_id = -1;
             EQ.loaded_id = -1;
         } else {
-            cd_read_member(6, i + 600, cd_file_buffer);
+            cd_read_member(ARCHIVE_ICON, i + 600, cd_file_buffer);
             EQ.shown_id = cur;
             EQ.loaded_id = cur;
         }
@@ -936,20 +936,20 @@ void menu_arrange_list_open(void)
     menu_show_loading_screen();
     MENU_SCRATCH->state.grid.messages = mem_alloc(21504);
     tim = cd_file_buffer;
-    cd_read_member(3, 1, tim);
+    cd_read_member(ARCHIVE_STAT, STAT_SCREEN_MESSAGES, tim);
     copy_words((u32 *)&menu_messages, (u32 *)(tim + 1), 5376);
     tim = (u_long *)((u8 *)tim + (*tim + sizeof(*tim)));
     tim_load_images_at(tim + 1, &MENU_SCRATCH->image_vram[0], &MENU_SCRATCH->image_vram[1], 1);
     tim = cd_file_buffer;
-    cd_read_member(3, 4, tim);
+    cd_read_member(ARCHIVE_STAT, STAT_ITEM_NAMES_HIGH_RES, tim);
     sp = MENU_SCRATCH;
     copy_words((u32 *)sp->state.grid.messages, (u32 *)(tim + 1), 5376);
     tim = (u_long *)((u8 *)tim + (*tim + sizeof(*tim)));
     tim_load_images_at(tim + 1, &sp->image_vram[2], &sp->image_vram[3], 1);
-    cd_read_member(3, 5, cd_file_buffer);
+    cd_read_member(ARCHIVE_STAT, STAT_BACKGROUND, cd_file_buffer);
     tim_load_images_at(cd_file_buffer, &sp->image_vram[4], NULL, 1);
     DrawSync(0);
-    cd_read_member(3, 7, cd_file_buffer);
+    cd_read_member(ARCHIVE_STAT, STAT_HEADER_IMAGES, cd_file_buffer);
     tim_load_images_at(cd_file_buffer, &tex, &clut, 1);
     DrawSync(0);
     sp->state.grid.hand_count = 0;
@@ -1304,7 +1304,7 @@ void menu_arrange_list_loop(void)
                 else
                     id = GRID->bag_ids[GRID->bag_row + sp->cursor];
                 if (ST.shown_id != id && id != -1) {
-                    menu_arrange_list_queue_image(6, vis_table_c.types[id].unk5[0] + 200);
+                    menu_arrange_list_queue_image(ARCHIVE_ICON, vis_table_c.types[id].unk5[0] + 200);
                     ST.shown_id = id;
                 }
             }

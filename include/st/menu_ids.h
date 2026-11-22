@@ -5,8 +5,10 @@
  * Message ids index the table loaded into menu_messages: STAT.T (archive 3)
  * member 0 for the low-resolution pages (MSG_*), member 1 for the
  * 640x240 screens: equip info, creature book and both arrange-items views
- * (MSG_HI_*). Names follow each message's text in the game's own table; a
- * base marks the first of a run the code indexes (MSG_AREA_NAMES + area).
+ * (MSG_HI_*). VS.EXE's card screen loads member 0 too (card_screen_run)
+ * and shares the card ids. Names follow each message's text in the game's
+ * own table; a base marks the first of a run the code indexes
+ * (MSG_AREA_NAMES + area).
  */
 #ifndef ST_MENU_IDS_H
 #define ST_MENU_IDS_H
@@ -80,6 +82,7 @@
 #define MSG_CARD_FORMAT_FAILED 356
 #define MSG_CARD_CHANGED 357
 #define MSG_CARD_NOT_LOADED 358
+#define MSG_CARD_INSERT_1P 370   /* "insert 1p memory card ..."; 371 for 2p (VS.EXE) */
 #define MSG_END_GAME_PROMPT 400
 #define MSG_END_GAME_YES 401
 #define MSG_END_GAME_NO 402

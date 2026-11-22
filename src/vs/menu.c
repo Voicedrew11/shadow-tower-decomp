@@ -111,33 +111,33 @@ int menu_vs_setup_run(void)
     {
         u_long *message = LOAD_BUFFER;
 
-        cd_read_member(8, 4, message);
+        cd_read_member(VS_ARCHIVE_STAT, STAT_ITEM_NAMES_HIGH_RES, message);
         copy_words((u32 *)&vs_menu_messages[1], (u32 *)&message[1], 0x1500);
         message = (u_long *)((message[0] + sizeof(*message)) + (u8 *)message);
         tim_load_images_at(message + 1, &sp->item_font_vram, &sp->item_font_clut);
         DrawSync(0);
         message = LOAD_BUFFER;
-        cd_read_member(8, 8, message);
+        cd_read_member(VS_ARCHIVE_STAT, 8, message);
         copy_words((u32 *)&vs_menu_messages[0], (u32 *)&message[1], 0x1500);
         message = (u_long *)((message[0] + sizeof(*message)) + (u8 *)message);
         tim_load_images_at(message + 1, &sp->message_font_vram, &sp->message_font_clut);
         DrawSync(0);
     }
     buf = LOAD_BUFFER;
-    cd_read_member(8, 5, buf);
+    cd_read_member(VS_ARCHIVE_STAT, STAT_BACKGROUND, buf);
     tim_load_images_at(buf, &sp->picture_vram, NULL);
     DrawSync(0);
-    cd_read_member(8, 7, buf);
+    cd_read_member(VS_ARCHIVE_STAT, STAT_HEADER_IMAGES, buf);
     tim_load_images_at(buf, &tex, &clut);
     DrawSync(0);
     if (requested_items[0] != -1) {
-        cd_read_member(11, vis_table_c.types[requested_items[0]].unk5[0], buf);
+        cd_read_member(VS_ARCHIVE_ICON, vis_table_c.types[requested_items[0]].unk5[0], buf);
         tim_load_images_at(buf, &pos, NULL);
         DrawSync(0);
     }
     pos.vy += 28;
     if (requested_item_2p != -1) {
-        cd_read_member(11, vis_table_c.types[requested_item_2p].unk5[0], buf);
+        cd_read_member(VS_ARCHIVE_ICON, vis_table_c.types[requested_item_2p].unk5[0], buf);
         tim_load_images_at(buf, &pos, NULL);
         DrawSync(1);
     }
@@ -366,7 +366,7 @@ void lineup_screen_show(void)
     buf = vs_cd_state.load_cursor;
 
     for (n = 0, x = 320; n < 5; n++, x += 64) {
-        cd_read_member(5, n + 31, buf);
+        cd_read_member(VS_ARCHIVE_VS_ETC, n + 31, buf);
         pos.vx = base.x + x;
         pos.vy = base.y;
         tim_load_images_at(buf, &pos, NULL);
@@ -382,7 +382,7 @@ void lineup_screen_show(void)
             r2.h = 48;
             ClearImage(&r2, 0, 0, 0);
         } else {
-            int size = cd_read_member(10, slot, vs_cd_state.load_cursor) * 2048;
+            int size = cd_read_member(VS_ARCHIVE_CRT, slot, vs_cd_state.load_cursor) * 2048;
 
             tim_load_images_at(vs_cd_state.load_cursor, &sp->state.creature_select.pos[i], NULL);
             vs_cd_state.load_cursor = (u_long *)((u8 *)vs_cd_state.load_cursor + size);
@@ -396,7 +396,7 @@ void lineup_screen_show(void)
             r.h = 28;
             ClearImage(&r, 0, 0, 0);
         } else {
-            int size = cd_read_member(11, vis_table_c.types[requested_items[i]].unk5[0],
+            int size = cd_read_member(VS_ARCHIVE_ICON, vis_table_c.types[requested_items[i]].unk5[0],
                                      vs_cd_state.load_cursor) * 2048;
 
             tim_load_images_at(vs_cd_state.load_cursor, &sp->state.creature_select.pos[6 + i], NULL);
@@ -861,7 +861,7 @@ void menu_creature_select_loop(VsMenuScratch *sp, int player)
                 if (idx < sp->state.creature_select.count && idx != -1) {
                     if (idx != shown) {
                         buf = vs_cd_state.load_buffer;
-                        cd_read_member(10, sp->state.creature_select.kinds[idx] + 200, buf);
+                        cd_read_member(VS_ARCHIVE_CRT, sp->state.creature_select.kinds[idx] + 200, buf);
                         shown = idx;
                         tim_load_images_at(&buf[1], &sp->state.creature_select.pos[15], NULL);
                         {
@@ -887,7 +887,7 @@ void menu_creature_select_loop(VsMenuScratch *sp, int player)
                 vs_cd_state.load_cursor = vs_cd_state.load_buffer;
                 for (j = 0; j < n; j++, slot++) {
                     if (slot < sp->state.creature_select.count) {
-                        size = cd_read_member(10, sp->state.creature_select.kinds[slot],
+                        size = cd_read_member(VS_ARCHIVE_CRT, sp->state.creature_select.kinds[slot],
                                              vs_cd_state.load_cursor) * 2048;
                         tim_load_images_at(vs_cd_state.load_cursor, &sp->state.creature_select.pos[slot % 12], NULL);
                         vs_cd_state.load_cursor = (u_long *)((u8 *)vs_cd_state.load_cursor + size);
@@ -999,20 +999,20 @@ void menu_creature_select_run(int player)
         sp->state.creature_select.rows--;
     }
     sp->state.creature_select.entries = mem_alloc_main_ram(0x2000);
-    cd_read_member(10, 400, (u_long *)sp->state.creature_select.entries);
+    cd_read_member(VS_ARCHIVE_CRT, 400, (u_long *)sp->state.creature_select.entries);
     buf = vs_cd_state.load_buffer;
-    cd_read_member(8, 2, buf);
+    cd_read_member(VS_ARCHIVE_STAT, STAT_CREATURE_NAMES, buf);
     copy_words((u32 *)&vs_menu_messages[1], (u32 *)&buf[1], 0x1500);
     buf = (u_long *)((buf[0] + sizeof(*buf)) + (u8 *)buf);
     tim_load_images_at(buf + 1, &sp->item_font_vram, &sp->item_font_clut);
     DrawSync(0);
     buf = vs_cd_state.load_buffer;
-    cd_read_member(8, 1, buf);
+    cd_read_member(VS_ARCHIVE_STAT, STAT_SCREEN_MESSAGES, buf);
     copy_words((u32 *)&vs_menu_messages[0], (u32 *)&buf[1], 0x1500);
     buf = (u_long *)((buf[0] + sizeof(*buf)) + (u8 *)buf);
     tim_load_images_at(buf + 1, &sp->message_font_vram, &sp->message_font_clut);
     DrawSync(0);
-    cd_read_member(8, 7, vs_cd_state.load_buffer);
+    cd_read_member(VS_ARCHIVE_STAT, STAT_HEADER_IMAGES, vs_cd_state.load_buffer);
     tim_load_images_at(vs_cd_state.load_buffer, &tex, &clut);
     DrawSync(0);
     vs_cd_state.load_cursor = vs_cd_state.load_buffer;
@@ -1020,7 +1020,8 @@ void menu_creature_select_run(int player)
     if (sp->state.creature_select.count < 13)
         n = sp->state.creature_select.count;
     for (i = 0; i < n; i++) {
-        size = cd_read_member(10, sp->state.creature_select.kinds[i], vs_cd_state.load_cursor) * 2048;
+        size = cd_read_member(VS_ARCHIVE_CRT, sp->state.creature_select.kinds[i],
+            vs_cd_state.load_cursor) * 2048;
         tim_load_images_at(vs_cd_state.load_cursor, &sp->state.creature_select.pos[i], NULL);
         vs_cd_state.load_cursor = (u_long *)((u8 *)vs_cd_state.load_cursor + size);
     }
@@ -1029,7 +1030,7 @@ void menu_creature_select_run(int player)
     vs_cd_state.load_cursor = vs_cd_state.load_buffer;
     for (i = 0; i < 3; i++) {
         if (lineups[player].slot[i] != -1) {
-            size = cd_read_member(10, lineups[player].slot[i], vs_cd_state.load_cursor) * 2048;
+            size = cd_read_member(VS_ARCHIVE_CRT, lineups[player].slot[i], vs_cd_state.load_cursor) * 2048;
             tim_load_images_at(vs_cd_state.load_cursor, &sp->state.creature_select.pos[12 + i], NULL);
             vs_cd_state.load_cursor = (u_long *)((u8 *)vs_cd_state.load_cursor + size);
         }
@@ -1045,27 +1046,27 @@ void menu_creature_select_run(int player)
     pos.vx = 640;
     pos.vy = 124;
     vs_cd_state.load_cursor = buf = vs_cd_state.load_buffer;
-    cd_read_member(8, 4, buf);
+    cd_read_member(VS_ARCHIVE_STAT, STAT_ITEM_NAMES_HIGH_RES, buf);
     copy_words((u32 *)&vs_menu_messages[1], (u32 *)&buf[1], 0x1500);
     tim = (u_long *)((u8 *)buf + vs_cd_state.load_buffer[0]);
     tim_load_images_at(tim + 2, &sp->item_font_vram, &sp->item_font_clut);
     DrawSync(0);
-    cd_read_member(8, 8, buf);
+    cd_read_member(VS_ARCHIVE_STAT, 8, buf);
     copy_words((u32 *)&vs_menu_messages[0], (u32 *)&buf[1], 0x1500);
     tim = (u_long *)((u8 *)buf + vs_cd_state.load_buffer[0]);
     tim_load_images_at(tim + 2, &sp->message_font_vram, &sp->message_font_clut);
     DrawSync(0);
-    cd_read_member(8, 7, buf);
+    cd_read_member(VS_ARCHIVE_STAT, STAT_HEADER_IMAGES, buf);
     tim_load_images_at(buf, &tex, &clut);
     DrawSync(0);
     if (requested_items[0] != -1) {
-        cd_read_member(11, vis_table_c.types[requested_items[0]].unk5[0], buf);
+        cd_read_member(VS_ARCHIVE_ICON, vis_table_c.types[requested_items[0]].unk5[0], buf);
         tim_load_images_at(buf, &pos, NULL);
         DrawSync(0);
     }
     pos.vy += 28;
     if (requested_item_2p != -1) {
-        cd_read_member(11, vis_table_c.types[requested_item_2p].unk5[0], buf);
+        cd_read_member(VS_ARCHIVE_ICON, vis_table_c.types[requested_item_2p].unk5[0], buf);
         tim_load_images_at(buf, &pos, NULL);
         DrawSync(1);
     }
@@ -1159,7 +1160,7 @@ void menu_item_request_run(int player)
     int j;
 
     buf = mem_alloc_main_ram(0x1000);
-    cd_read_member(5, 6, buf);
+    cd_read_member(VS_ARCHIVE_VS_ETC, 6, buf);
     tim_load_images_shifted(buf, 0, 0);
     DrawSync(0);
     free(buf);
@@ -1349,13 +1350,15 @@ void menu_item_request_run(int player)
     pos.vx = 640;
     pos.vy = 124;
     if (requested_items[0] != -1) {
-        cd_read_member(11, vis_table_c.types[requested_items[0]].unk5[0], vs_cd_state.load_buffer);
+        cd_read_member(VS_ARCHIVE_ICON, vis_table_c.types[requested_items[0]].unk5[0],
+            vs_cd_state.load_buffer);
         tim_load_images_at(vs_cd_state.load_buffer, &pos, NULL);
         DrawSync(0);
     }
     pos.vy += 28;
     if (requested_item_2p != -1) {
-        cd_read_member(11, vis_table_c.types[requested_item_2p].unk5[0], vs_cd_state.load_buffer);
+        cd_read_member(VS_ARCHIVE_ICON, vis_table_c.types[requested_item_2p].unk5[0],
+            vs_cd_state.load_buffer);
         tim_load_images_at(vs_cd_state.load_buffer, &pos, NULL);
         DrawSync(1);
     }
@@ -1993,7 +1996,7 @@ read:
     if (sum != header->data_sum) {
         if (!tries) {
             close(fd);
-            sp->state.menu.half[0] = 349;
+            sp->state.menu.half[0] = MSG_CARD_CORRUPTED;
             return 0;
         }
         tries--;
@@ -2120,16 +2123,6 @@ void card_format(int port)
         (pad).pressed = 0;                                         \
     } while (0)
 
-/* Messages card_screen_run shows. */
-#define MSG_CARD_ERROR 350
-#define MSG_NEW_CARD 351
-#define MSG_NO_FILE 352
-#define MSG_CARD_FULL 353
-#define MSG_LOAD_FAILED 354
-#define MSG_SAVE_FAILED 355
-#define MSG_NO_SAVE 357
-#define MSG_NOT_LOADED 358
-
 int card_overwrite_player_save(VsSave *save);
 
 /*
@@ -2158,12 +2151,12 @@ int card_screen_run(int mode, int port)
     DrawSync(0);
     gfx_setup_320x240();
     buf = vs_cd_state.load_buffer;
-    cd_read_member(8, 0, buf);
+    cd_read_member(VS_ARCHIVE_STAT, STAT_MESSAGES, buf);
     copy_words((u32 *)vs_menu_messages[0].offsets, (u32 *)(buf + 1), 0x1500);
     buf = (u_long *)((u8 *)buf + (buf[0] + 4));
     tim_load_images_at(buf + 1, &sp->message_font_vram, &sp->message_font_clut);
     DrawSync(0);
-    cd_read_member(8, 6, vs_cd_state.load_buffer);
+    cd_read_member(VS_ARCHIVE_STAT, 6, vs_cd_state.load_buffer);
     tim_load_images_at(vs_cd_state.load_buffer, &pos, &clut);
     DrawSync(0);
     sp->state.menu.half[0] = 0;
@@ -2184,13 +2177,13 @@ again:
     if (sp->mode & 0xff00) {
         if (port == 0) {
             if (!save_loaded_1p) {
-                sp->state.menu.half[0] = MSG_NOT_LOADED;
+                sp->state.menu.half[0] = MSG_CARD_NOT_LOADED;
                 sp->mode <<= 5;
                 goto wait;
             }
         } else {
             if (!save_loaded_2p) {
-                sp->state.menu.half[0] = MSG_NOT_LOADED;
+                sp->state.menu.half[0] = MSG_CARD_NOT_LOADED;
                 sp->mode <<= 5;
                 goto wait;
             }
@@ -2205,7 +2198,7 @@ again:
     }
     card_probe(sp->port, 1);
     if (sp->card->status == 2) {
-        sp->state.menu.half[0] = MSG_CARD_ERROR;
+        sp->state.menu.half[0] = MSG_CARD_NOT_INSERTED;
         sp->mode <<= 5;
         goto wait;
     }
@@ -2221,7 +2214,7 @@ again:
             sp->card->count = 1;
             sp->card->has_room = 0;
         } else {
-            sp->state.menu.half[0] = MSG_NO_SAVE;
+            sp->state.menu.half[0] = MSG_CARD_CHANGED;
             sp->mode <<= 3;
             goto wait;
         }
@@ -2230,15 +2223,15 @@ again:
         status = sp->card->status;
         if (status != 0) {
             if (status == 4)
-                sp->state.menu.half[0] = MSG_NO_FILE;
+                sp->state.menu.half[0] = MSG_CARD_NO_DATA;
             else if (status == 5)
-                sp->state.menu.half[0] = MSG_CARD_FULL;
+                sp->state.menu.half[0] = MSG_CARD_NO_ROOM;
             sp->mode <<= 3;
             goto wait;
         }
     }
     if (card_read_file_headers() == -1) {
-        sp->state.menu.half[0] = MSG_CARD_ERROR;
+        sp->state.menu.half[0] = MSG_CARD_NOT_INSERTED;
         sp->mode <<= 3;
         goto wait;
     }
@@ -2252,12 +2245,12 @@ again:
     card_probe(sp->port, 0);
     status = sp->card->status;
     if (status == 1) {
-        sp->state.menu.half[0] = MSG_NEW_CARD;
+        sp->state.menu.half[0] = MSG_CARD_SWITCHED;
         sp->mode <<= 2;
         goto wait;
     }
     if (status == 2) {
-        sp->state.menu.half[0] = MSG_CARD_ERROR;
+        sp->state.menu.half[0] = MSG_CARD_NOT_INSERTED;
         sp->mode <<= 2;
         goto wait;
     }
@@ -2272,9 +2265,9 @@ again:
     if (!result) {
         if (sp->state.menu.half[0] == 0) {
             if (sp->mode & 0xff00)
-                sp->state.menu.half[0] = MSG_SAVE_FAILED;
+                sp->state.menu.half[0] = MSG_CARD_SAVE_FAILED;
             else
-                sp->state.menu.half[0] = MSG_LOAD_FAILED;
+                sp->state.menu.half[0] = MSG_CARD_LOAD_FAILED;
         }
         sp->mode <<= 2;
         goto wait;
@@ -2321,27 +2314,27 @@ done:
         face.vx = 640;
         face.vy = 124;
         vs_cd_state.load_cursor = menu_buf = vs_cd_state.load_buffer;
-        cd_read_member(8, 4, menu_buf);
+        cd_read_member(VS_ARCHIVE_STAT, STAT_ITEM_NAMES_HIGH_RES, menu_buf);
         copy_words((u32 *)vs_menu_messages[1].offsets, (u32 *)&menu_buf[1], 0x1500);
         tim = (u_long *)((u8 *)menu_buf + vs_cd_state.load_buffer[0]);
         tim_load_images_at(tim + 2, &sp->item_font_vram, &sp->item_font_clut);
         DrawSync(0);
-        cd_read_member(8, 8, menu_buf);
+        cd_read_member(VS_ARCHIVE_STAT, 8, menu_buf);
         copy_words((u32 *)vs_menu_messages[0].offsets, (u32 *)&menu_buf[1], 0x1500);
         tim = (u_long *)((u8 *)menu_buf + vs_cd_state.load_buffer[0]);
         tim_load_images_at(tim + 2, &sp->message_font_vram, &sp->message_font_clut);
         DrawSync(0);
-        cd_read_member(8, 7, menu_buf);
+        cd_read_member(VS_ARCHIVE_STAT, STAT_HEADER_IMAGES, menu_buf);
         tim_load_images_at(menu_buf, &pos, &clut);
         DrawSync(0);
         if (requested_items[0] != -1) {
-            cd_read_member(11, vis_table_c.types[requested_items[0]].unk5[0], menu_buf);
+            cd_read_member(VS_ARCHIVE_ICON, vis_table_c.types[requested_items[0]].unk5[0], menu_buf);
             tim_load_images_at(menu_buf, &face, NULL);
             DrawSync(0);
         }
         face.vy += 28;
         if (requested_item_2p != -1) {
-            cd_read_member(11, vis_table_c.types[requested_item_2p].unk5[0], menu_buf);
+            cd_read_member(VS_ARCHIVE_ICON, vis_table_c.types[requested_item_2p].unk5[0], menu_buf);
             tim_load_images_at(menu_buf, &face, NULL);
             DrawSync(1);
         }

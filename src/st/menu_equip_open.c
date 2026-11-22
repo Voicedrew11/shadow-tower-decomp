@@ -77,12 +77,12 @@ void menu_equip_open(void)
     sp->state.block = mem_alloc(21504);
     equip_magic_list.bits = mem_alloc(144);
     p = (u8 *)cd_file_buffer;
-    cd_read_member(3, 1, (u_long *)p);
+    cd_read_member(ARCHIVE_STAT, STAT_SCREEN_MESSAGES, (u_long *)p);
     p += *(u32 *)p + 4;
     p += *(u32 *)p + 4;
     copy_words(equip_magic_list.bits, (u32 *)(p + 4), 36);
     p = (u8 *)cd_file_buffer;
-    cd_read_member(3, 3, (u_long *)p);
+    cd_read_member(ARCHIVE_STAT, STAT_ITEM_NAMES, (u_long *)p);
     copy_words(sp->state.block, (u32 *)(p + 4), 5376);
     p += *(u32 *)p + 4;
     tim_load_images_at(p + 4, &sp->image_vram[2], &sp->image_vram[3], 1);
