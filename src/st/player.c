@@ -3169,7 +3169,7 @@ void player_update(void)
                         item_use(ids[viewer.quick_item_index]);
                         if (DAT_801cd0e0 == 1) {
                             play_confirm_sound();
-                            if (ids[viewer.quick_item_index] == 288) {
+                            if (ids[viewer.quick_item_index] == ITEM_DIVINE_SYMBOL) {
                                 player_compute_derived_stats(0);
                             }
                             if (inventory.counts[ids[viewer.quick_item_index]].count == 0) {

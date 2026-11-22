@@ -7394,11 +7394,11 @@ void shop_draw_buy_list(void)
     rows = LIST_ROWS;
     if (sp->state.list.count < LIST_ROWS + 1)
         rows = sp->state.list.count;
-    ui_draw_number(inventory.counts[266].count | 0x3000000, 244, 27, &sp->style[6]);
+    ui_draw_number(inventory.counts[ITEM_CUNES].count | 0x3000000, 244, 27, &sp->style[6]);
     ui_draw_text(MESSAGE(MSG_SHOP_CUNES), 160, 27, &sp->style[2]);
     for (i = 0; i < rows; i++) {
         id = inventory.shop_ids[sp->state.list.ids[sp->scroll + i]];
-        if (inventory.counts[266].count >= vis_table_c.types[id].price) {
+        if (inventory.counts[ITEM_CUNES].count >= vis_table_c.types[id].price) {
             text = &sp->style[0];
             figure = &sp->style[4];
         } else {

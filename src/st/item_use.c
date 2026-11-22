@@ -35,7 +35,7 @@ void item_use(int id)
     USE_RESULT = 2;
     pos.vy += 1600;
     switch (id) {
-    case 0x10a:
+    case ITEM_CUNES:
     case 0x10b:
         break;
     case 0x10c:
@@ -54,7 +54,7 @@ void item_use(int id)
             viewer.status_flags |= 0x20000;
         }
         break;
-    case 0x10e:
+    case ITEM_SACRED_FEATHER:
         if (area_state.area != 30 && viewer.save_area != 0xff) {
             viewer.save_warp_request = 1;
             viewer.submerged_acid = 0;

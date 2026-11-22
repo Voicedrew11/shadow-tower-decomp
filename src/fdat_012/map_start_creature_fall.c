@@ -97,7 +97,7 @@ void map_start_creature_fall(Creature *e)
         c = &vis_table_c.entries[48 + vis_table_c.ground_item_counts[3]];
         vis_table_c.ground_item_counts[3]++;
     }
-    c->item = 0x10a;
+    c->item = ITEM_CUNES;
     c->block = e->block;
     *(u32 *)c->anim_slot = 0;
     c->position = e->position;

@@ -908,7 +908,7 @@ void menu_equip_info_run(void)
         } else if (vis_table_c.types[i].category == 10) {
             sp->category_lists[1][sp->category_counts[1]++] = i;
         } else if (vis_table_c.types[i].category == 20 || vis_table_c.types[i].category == 30) {
-            if (i == 266 || i == 310 || i == 311 || i == 312 || i == 313)
+            if (i == ITEM_CUNES || i == 310 || i == 311 || i == 312 || i == 313)
                 continue;
             sp->category_lists[9][sp->category_counts[9]++] = i;
         } else {
@@ -2327,7 +2327,7 @@ int menu_use_item_run(void)
                 result = game_progress.item_use_result;
                 if (game_progress.item_use_result == 1) {
                     id = sp->state.page_list.entries[sp->scroll + sp->cursor];
-                    if (id >= 310 || id == 288)
+                    if (id >= 310 || id == ITEM_DIVINE_SYMBOL)
                         reload = 1;
                 }
                 break;
@@ -2542,11 +2542,11 @@ void shop_run(void)
                     if (sp->mode & 1) {
                         int id = inventory.shop_ids[sp->state.list.ids[sp->scroll + sp->cursor]];
 
-                        if (inventory.counts[266].count < vis_table_c.types[id].price) {
+                        if (inventory.counts[ITEM_CUNES].count < vis_table_c.types[id].price) {
                             done = 0;
                             play_refuse_sound();
                         } else {
-                            inventory.counts[266].count -= vis_table_c.types[id].price;
+                            inventory.counts[ITEM_CUNES].count -= vis_table_c.types[id].price;
                             inventory.counts[id].count++;
                             inventory.shop_stock[sp->state.list.ids[sp->scroll + sp->cursor]]--;
                             if (inventory.shop_stock[sp->state.list.ids[sp->scroll + sp->cursor]] == 0) {

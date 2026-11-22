@@ -86,7 +86,7 @@ void map_pick_shopkeeper_line(void)
         return;
     fdat_801ed8c4 = 1;
     items = &inventory;
-    if (!(*(u16 *)&items->counts[266] & 0x7f)) {
+    if (!(*(u16 *)&items->counts[ITEM_CUNES] & 0x7f)) {
         fdat_801ed8c8 = 1;
         creature_start_script(e, 1);
     } else {

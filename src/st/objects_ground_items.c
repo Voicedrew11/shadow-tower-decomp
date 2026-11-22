@@ -1428,7 +1428,7 @@ ADDRESS(0x80052d98, 0xb8)
 void item_record_pickup(u16 *id)
 {
     inventory.counts[*id].count++;
-    if (*id == 266)
+    if (*id == ITEM_CUNES)
         viewer.cunes_found++;
     if (*id < 266) {
         viewer.items_found++;

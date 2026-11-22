@@ -220,7 +220,7 @@ void map_use_item_advance_scene(short id)
 {
     Creature *e = &vis_table_a.entries[50];
 
-    if (id == 0x10e && fdat_801ee0b8 == 2) {
+    if (id == ITEM_SACRED_FEATHER && fdat_801ee0b8 == 2) {
         fdat_801ee0b8 = 3;
         e->state = CREATURE_STATE_GONE;
         vis_table_a.entries[49].spawn_chance = 100;
